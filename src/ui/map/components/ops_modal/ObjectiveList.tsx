@@ -45,12 +45,36 @@ export function ObjectiveList({ plan, onUpdate, osidDisplayNames, onAdvance }: O
         });
     };
 
+    const selectedAxisObjectiveCount = activeAxis.objectives.length;
+    const selectedAxisBrigadeCount = activeAxis.brigadeIds.length;
+    const selectedStaging = activeAxis.stagingOsid ?? plan.defaultStagingOsid;
+
     return (
-        <div className="absolute top-16 right-4 bottom-20 z-20 w-[280px] pointer-events-auto
+        <div className="absolute top-16 right-4 bottom-24 z-20 w-[360px] pointer-events-auto
                         bg-[rgba(20,18,15,0.92)] backdrop-blur-xl rounded-lg
                         border border-[rgba(180,160,130,0.15)] p-3 flex flex-col">
-            <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-accent-gold mb-2">
-                Objectives
+            <div className="flex items-center justify-between mb-2">
+                <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-accent-gold">
+                    Objectives
+                </div>
+                <div className="text-[8px] uppercase tracking-[0.16em] text-text-secondary/70">
+                    Planning
+                </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 mb-3">
+                <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
+                    <div className="text-[7px] uppercase tracking-[0.18em] text-text-secondary/70">Axis</div>
+                    <div className="text-[10px] font-bold text-white truncate">{activeAxis.name}</div>
+                </div>
+                <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
+                    <div className="text-[7px] uppercase tracking-[0.18em] text-text-secondary/70">Objectives</div>
+                    <div className="text-[10px] font-bold text-white">{selectedAxisObjectiveCount}</div>
+                </div>
+                <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
+                    <div className="text-[7px] uppercase tracking-[0.18em] text-text-secondary/70">Brigades</div>
+                    <div className="text-[10px] font-bold text-white">{selectedAxisBrigadeCount}</div>
+                </div>
             </div>
 
             {objectives.length === 0 ? (
@@ -118,6 +142,13 @@ export function ObjectiveList({ plan, onUpdate, osidDisplayNames, onAdvance }: O
                     })}
                 </div>
             )}
+
+            <div className="mt-2 rounded border border-[rgba(180,160,130,0.12)] bg-[rgba(180,160,130,0.05)] px-2 py-1.5">
+                <div className="text-[7px] uppercase tracking-[0.18em] text-text-secondary/70">Staging OSID</div>
+                <div className="text-[10px] text-white truncate">
+                    {selectedStaging ? getOsidDisplayName(selectedStaging, osidDisplayNames) : 'Not set'}
+                </div>
+            </div>
 
             {/* Axis tabs (if multiple axes) */}
             {plan.axes.length > 1 && (

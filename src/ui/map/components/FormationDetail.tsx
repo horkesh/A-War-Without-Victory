@@ -43,6 +43,11 @@ const ZERO_BRIGADE_COMBAT_SUMMARY: NonNullable<FormationView['combatSummary']> =
 
 type DetailTab = 'overview' | 'record' | 'orders';
 
+function formatHistoryMomentDate(turn: number): string {
+  if (!Number.isFinite(turn) || turn <= 0) return 'Undated';
+  return turnToDateString(turn);
+}
+
 /**
  * Right panel when a formation marker is clicked: name, kind, faction, strength, fatigue, orders.
  */
@@ -639,7 +644,9 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   <div className="pt-2">
                     <div className="text-xs text-text-secondary mb-1">Recent engagements</div>
                     <div className="space-y-1">
-                      {formation.recent_engagements.map((engagement, idx) => (
+                      {[...formation.recent_engagements]
+                        .sort((a, b) => a.turn - b.turn)
+                        .map((engagement, idx) => (
                         <div key={`${engagement.turn}-${engagement.osid}-${engagement.role}-${idx}`} className="text-[11px] leading-4 border-l-2 pl-1.5 border-panel-border/30">
                           <span className="text-text-secondary">{turnToDateString(engagement.turn)} </span>
                           <span className="text-text-primary">{formatCombatOutcome(engagement.outcome)}</span>
@@ -679,9 +686,15 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                 )}
                 {formation.notableMoments && formation.notableMoments.length > 0 && (
                   <div className="space-y-0.5 pt-1 min-w-0">
-                    {formation.notableMoments.map((m, i) => (
+                    {[...formation.notableMoments]
+                      .sort((a, b) => {
+                        const aTurn = Number.isFinite(a.turn) && a.turn > 0 ? a.turn : Number.POSITIVE_INFINITY;
+                        const bTurn = Number.isFinite(b.turn) && b.turn > 0 ? b.turn : Number.POSITIVE_INFINITY;
+                        return aTurn - bTurn;
+                      })
+                      .map((m, i) => (
                       <div key={i} className="text-[11px] text-text-secondary break-words">
-                        <span className="text-text-primary">{turnToDateString(m.turn)}:</span>{' '}
+                        <span className="text-text-primary">{formatHistoryMomentDate(m.turn)}:</span>{' '}
                         {m.description.replace(/op:[a-z0-9_]+:[a-z0-9_]+/gi, (match) => getOsidDisplayName(match, osidDisplayNames))}
                       </div>
                     ))}

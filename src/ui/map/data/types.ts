@@ -149,6 +149,7 @@ export interface FormationView {
         in_cooldown: boolean;
         permanently_degraded: boolean;
         current_episode_id: number | null;
+        base_osid?: string | null;
     };
     /** Turn of first battle (brigades only). Null if never fought. */
     firstBattleTurn?: number | null;
@@ -616,9 +617,13 @@ export interface LoadedGameState {
     brigadeSectorOverride?: Record<string, string>;
     /** Pending army reserve loan requests awaiting player decision. */
     pendingReserveRequests?: Array<{
+        request_id: string;
         corps_id: string;
         faction: string;
         reason: string;
+        purpose?: 'offensive' | 'defensive';
+        why_needed?: string;
+        how_to_use?: string;
         priority: number;
         travel_hops: number;
         description: string;

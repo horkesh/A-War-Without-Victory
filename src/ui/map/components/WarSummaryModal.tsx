@@ -120,8 +120,7 @@ export function WarSummaryModal({ isOpen, focusSection = 'overview', onClose }: 
                     border: '1px solid rgba(180, 160, 130, 0.22)',
                     borderRadius: 8,
                     padding: '24px 28px',
-                    minWidth: 420,
-                    maxWidth: 520,
+                    width: 'min(1100px, 92vw)',
                     boxShadow: '0 8px 32px rgba(0,0,0,0.7)',
                     backdropFilter: 'blur(8px)',
                     color: '#d5c9bc',
@@ -175,6 +174,7 @@ export function WarSummaryModal({ isOpen, focusSection = 'overview', onClose }: 
 
                 {activeSection === 'overview' ? (
                     <>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
                         <Section title="Territory">
                             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                 <thead>
@@ -287,9 +287,10 @@ export function WarSummaryModal({ isOpen, focusSection = 'overview', onClose }: 
                                 </Section>
                             );
                         })()}
+                        </div>
                     </>
                 ) : (
-                    <div style={{ maxHeight: '24rem', overflow: 'auto', marginBottom: 16, paddingRight: 4 }}>
+                    <div style={{ maxHeight: '28rem', overflow: 'auto', marginBottom: 16, paddingRight: 4, border: '1px solid rgba(180, 160, 130, 0.18)', borderRadius: 6, padding: 8, background: 'rgba(42, 39, 35, 0.6)' }}>
                         <SituationTab state={loadedGameState} focusSection={activeSection} />
                     </div>
                 )}

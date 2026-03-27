@@ -266,6 +266,8 @@ export function OperationsPanel() {
                   id === getOperationId(selectedOperation);
                 const phaseBadgeClass = getOperationPhaseBadgeClass(op.phase);
                 const health = getOperationHealthSummary(op);
+                const opSupplyPct = op.supply_readiness != null ? Math.round(op.supply_readiness * 100) : null;
+                const opPhaseTurn = Math.max(1, loadedGameState.turn - (op.phase_started_turn ?? op.started_turn) + 1);
                 return (
                   <button
                     key={id}
@@ -293,6 +295,19 @@ export function OperationsPanel() {
                       </span>
                       <span className={`text-[10px] uppercase tracking-wide ${health.className}`}>
                         {health.label}
+                      </span>
+                    </div>
+                    <div className="mt-1 flex flex-wrap items-center gap-1 text-[9px]">
+                      <span className="px-1 py-0.5 rounded border border-panel-border bg-panel-bg/70 text-text-secondary tabular-nums">
+                        Turn {opPhaseTurn}
+                      </span>
+                      <span className="px-1 py-0.5 rounded border border-panel-border bg-panel-bg/70 text-text-secondary tabular-nums">
+                        {op.participating_brigade_count} bde
+                      </span>
+                      <span className={`px-1 py-0.5 rounded border border-panel-border bg-panel-bg/70 tabular-nums ${
+                        opSupplyPct == null ? 'text-text-secondary' : opSupplyPct < 30 ? 'text-red-300' : opSupplyPct < 70 ? 'text-amber-300' : 'text-green-300'
+                      }`}>
+                        {opSupplyPct == null ? 'Supply N/A' : `Supply ${opSupplyPct}%`}
                       </span>
                     </div>
                   </button>

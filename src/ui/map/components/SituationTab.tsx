@@ -147,16 +147,18 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
   const activeOpsecSectors = [...(state.corpsFrontSectors ?? [])]
     .filter((sector) => sector.faction === playerFaction && sector.opsec_active)
     .sort((a, b) => b.threat_ratio - a.threat_ratio || a.display_name.localeCompare(b.display_name));
+  const focusedMode = !!focusSection && focusSection !== 'overview';
+  const showSection = (section: SummaryFocusSection): boolean => !focusedMode || focusSection === section;
 
   if (supply.cut > 0) alerts.push(`${supply.cut} supply channel(s) cut`);
   if (alliance < -0.25) alerts.push('RBiH-HRHB alliance under strain');
   if (ivpScore >= 60) alerts.push('International visibility pressure elevated');
 
   useEffect(() => {
-    if (!focusSection || focusSection === 'overview') return;
+    if (!focusedMode || !focusSection) return;
     const section = document.querySelector<HTMLElement>(`[data-summary-section="${focusSection}"]`);
     section?.scrollIntoView({ block: 'start', behavior: 'smooth' });
-  }, [focusSection]);
+  }, [focusedMode, focusSection]);
 
   const handleConvoyDecision = async (convoyId: string, decision: 'allow' | 'block' | 'divert') => {
     const result = await ipc.stageConvoyDecision(convoyId, decision);
@@ -165,6 +167,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
 
   return (
     <div className="p-3 space-y-3 text-xs">
+      {!focusedMode && (
       <section data-summary-section="overview" className="rounded border border-panel-border bg-panel-card p-2 space-y-2">
         <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Territory</div>
         {FACTIONS.map((faction) => (
@@ -174,14 +177,18 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
           </div>
         ))}
       </section>
+      )}
 
+      {!focusedMode && (
       <section className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
         <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">War Snapshot</div>
         <div className="text-text-secondary">Fronts: {front.static} static, {front.fluid} fluid, {front.oscillating} oscillating</div>
         <div className="text-text-secondary">Supply: {supply.open} open, {supply.strained} strained, {supply.cut} cut</div>
         <div className="text-text-secondary">IVP: {ivpScore.toFixed(0)}</div>
       </section>
+      )}
 
+      {showSection('casualties') && (
       <section data-summary-section="casualties" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
         <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Casualties</div>
         {FACTIONS.map((faction) => {
@@ -195,7 +202,9 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
           );
         })}
       </section>
+      )}
 
+      {!focusedMode && (
       <section data-summary-section="alliance" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
         <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Alliance Gauge (RBiH-HRHB)</div>
         <div className="h-2 rounded bg-panel-bg overflow-hidden">
@@ -203,7 +212,9 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
         </div>
         <div className="text-text-secondary tabular-nums">{alliance.toFixed(2)}</div>
       </section>
+      )}
 
+      {showSection('ivp') && (
       <section data-summary-section="ivp" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
         <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">International Pressure (IVP)</div>
         <div className="h-2 rounded bg-panel-bg overflow-hidden">
@@ -233,8 +244,9 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
           <div className="text-text-secondary">Sarajevo tunnel operational.</div>
         )}
       </section>
+      )}
 
-      {(state.pendingConvoyDecisions && state.pendingConvoyDecisions.length > 0) && (
+      {showSection('convoys') && (state.pendingConvoyDecisions && state.pendingConvoyDecisions.length > 0) && (
         <section data-summary-section="convoys" className="rounded border border-panel-border bg-panel-card p-2 space-y-2">
           <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Humanitarian Convoys</div>
           {state.pendingConvoyDecisions.map((convoy) => (
@@ -271,7 +283,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
         </section>
       )}
 
-      {activeMunicipalitySupport && activeMunicipalitySupport.staged_turn === state.turn && (
+      {showSection('support') && activeMunicipalitySupport && activeMunicipalitySupport.staged_turn === state.turn && (
         <section data-summary-section="support" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
           <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Phase E Local Support</div>
           <div className="text-text-secondary">{activeMunicipalitySupport.label}</div>
@@ -279,6 +291,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
         </section>
       )}
 
+      {showSection('opsec') && (
       <section data-summary-section="opsec" className="rounded border border-panel-border bg-panel-card p-2 space-y-2">
         <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Operational Posture</div>
         {activeOpsecSectors.length > 0 ? (
@@ -313,9 +326,10 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
           </div>
         )}
       </section>
+      )}
 
       {/* Negotiation Capital & Patron Pressure (v0.5.0) */}
-      {(state.negotiationCapital || state.patronOverrideAuthority) && (
+      {showSection('capital') && (state.negotiationCapital || state.patronOverrideAuthority) && (
         <section data-summary-section="capital" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
           <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Diplomacy</div>
           <DiplomacyOverview
@@ -326,6 +340,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
         </section>
       )}
 
+      {!focusedMode && (
       <section className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
         <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Alerts</div>
         {alerts.length === 0 ? (
@@ -336,6 +351,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
           ))
         )}
       </section>
+      )}
     </div>
   );
 }

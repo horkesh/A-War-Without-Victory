@@ -296,14 +296,14 @@ export function ChiefOfStaffBriefing({ briefingItems, gameState, faction, onCorp
     if (!profile || paragraphs.length === 0) return null;
 
     return (
-        <div className="bg-[#f5f0e8] border border-neutral-300 rounded-lg overflow-hidden flex flex-col h-full shadow-md relative">
+        <div className="bg-[#f5f0e8] border border-neutral-300 rounded-lg overflow-hidden flex flex-col min-h-[220px] max-h-[320px] shadow-md relative">
             {/* Stamp */}
             <div className="absolute top-2 right-3 opacity-[0.08] font-black text-xl -rotate-12 select-none uppercase text-neutral-800 pointer-events-none">
                 BRIEFING
             </div>
 
             {/* Header */}
-            <div className="px-3 py-2 border-b border-neutral-300/60 bg-[#ebe5d8]">
+            <div className="px-3 py-1.5 border-b border-neutral-300/60 bg-[#ebe5d8]">
                 <div className="text-[8px] uppercase font-bold text-neutral-500 tracking-[0.2em]">Daily Briefing — {turnToDateString(turn)}</div>
                 <div className="text-[11px] font-bold text-neutral-800 mt-0.5">
                     {profile.rank} {profile.name}
@@ -312,7 +312,7 @@ export function ChiefOfStaffBriefing({ briefingItems, gameState, faction, onCorp
             </div>
 
             {/* Body — missive text with inline links */}
-            <div className="px-3 py-2 flex-1 overflow-y-auto">
+            <div className="px-3 py-1.5 flex-1 overflow-y-auto">
                 {paragraphs.map((segments, i) => (
                     <p key={i} className="text-[10px] text-neutral-700 leading-relaxed mb-2 last:mb-0" style={{ fontFamily: 'Georgia, serif' }}>
                         {i === 0 && <>&ldquo;</>}
@@ -349,7 +349,7 @@ export function ChiefOfStaffBriefing({ briefingItems, gameState, faction, onCorp
             </div>
 
             {/* Footer — signature line */}
-            <div className="px-3 py-1.5 border-t border-neutral-300/60 bg-[#ebe5d8]">
+            <div className="px-3 py-1 border-t border-neutral-300/60 bg-[#ebe5d8]">
                 <div className="text-[8px] text-neutral-400 italic text-right">
                     — {profile.rank} {profile.name.split(' ').pop()}, {profile.title}
                 </div>

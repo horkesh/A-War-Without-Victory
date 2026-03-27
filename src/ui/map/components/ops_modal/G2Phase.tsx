@@ -42,11 +42,51 @@ export function G2Phase({ plan, prediction, loading, error, corpsId, onAdvance }
 
     const hasObjectives = plan.axes.some((a) => a.objectives.length > 0);
     const isLowIntel = prediction && prediction.overall.intelConfidence < 0.4;
+    const totalObjectives = plan.axes.reduce((sum, axis) => sum + axis.objectives.length, 0);
+    const totalAssignedBrigades = plan.axes.reduce((sum, axis) => sum + axis.brigadeIds.length, 0);
 
     return (
         <div className="absolute inset-0 z-10 pointer-events-none">
+            {/* Assessment snapshot — left side */}
+            <div className="absolute top-16 left-4 w-[380px] pointer-events-auto
+                            rounded-lg border border-[rgba(180,160,130,0.16)]
+                            bg-[rgba(20,18,15,0.9)] backdrop-blur-xl p-3">
+                <div className="flex items-center justify-between mb-2">
+                    <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-accent-gold">
+                        G2 Snapshot
+                    </div>
+                    <div className="text-[8px] uppercase tracking-[0.14em] text-text-secondary/70">
+                        Pre-Authorization
+                    </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                    <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
+                        <div className="text-[7px] uppercase tracking-[0.18em] text-text-secondary/70">Corps</div>
+                        <div className="text-[10px] font-bold text-white truncate">{corpsName || corpsId}</div>
+                    </div>
+                    <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
+                        <div className="text-[7px] uppercase tracking-[0.18em] text-text-secondary/70">Date</div>
+                        <div className="text-[10px] font-bold text-white">{date || 'N/A'}</div>
+                    </div>
+                    <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
+                        <div className="text-[7px] uppercase tracking-[0.18em] text-text-secondary/70">Objectives</div>
+                        <div className="text-[10px] font-bold text-white">{totalObjectives}</div>
+                    </div>
+                    <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
+                        <div className="text-[7px] uppercase tracking-[0.18em] text-text-secondary/70">Brigades</div>
+                        <div className="text-[10px] font-bold text-white">{totalAssignedBrigades}</div>
+                    </div>
+                </div>
+                {prediction && (
+                    <div className="mt-2 rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
+                        <div className="text-[7px] uppercase tracking-[0.18em] text-text-secondary/70">Predicted Outcome</div>
+                        <div className="text-[10px] font-bold text-white">{prediction.overall.predictedOutcome}</div>
+                    </div>
+                )}
+            </div>
+
             {/* Clipboard — right side (WP3a: widened from 360px to 480px) */}
-            <div className="absolute top-16 right-4 bottom-4 w-[480px] pointer-events-auto
+            <div className="absolute top-16 right-4 bottom-4 w-[620px] pointer-events-auto
                             flex flex-col overflow-hidden">
                 {/* Binder clip */}
                 <div className="h-8 bg-[#4a4238] rounded-t-lg flex items-center justify-center relative">

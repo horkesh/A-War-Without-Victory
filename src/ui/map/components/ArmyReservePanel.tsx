@@ -10,7 +10,6 @@ import { useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { useIPC } from '../desktop/useIPC';
 import { getPanelRailStyle } from './panelRail';
-import { turnToDateString } from '../utils/formatters';
 
 const REASON_LABELS: Record<string, string> = {
     offensive_support: 'Offensive Support',
@@ -38,7 +37,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
     const selectedFormationId = useGameStore((s) => s.selectedFormationId);
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const setLoadError = useGameStore((s) => s.setLoadError);
-    const [historyOpen, setHistoryOpen] = useState(false);
+    const [historyOpen, setHistoryOpen] = useState(true);
 
     const hqId = selectedArmyHqId ?? selectedFormationId;
     if (!hqId || !loadedGameState) return null;
@@ -60,6 +59,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
 
     // Tracker data
     const tracker = loadedGameState.eliteBrigadeTracker ?? {};
+    const activeLoans = elites.filter((brigade) => brigade.eliteLoanState?.on_loan);
 
     function getCorpsName(corpsId: string): string {
         return loadedGameState!.formations.find(f => f.id === corpsId)?.name ?? corpsId;
@@ -67,12 +67,27 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
 
     async function handleApprove(corpsId: string, brigadeId: string | null) {
         if (!brigadeId) return;
-        const result = await ipc.approveReserveRequest(corpsId, brigadeId);
+        const result = await ipc.approveReserveRequest(
+            corpsId,
+            brigadeId,
+            'Army CO accepts this request: mission rationale and employment plan are credible.'
+        );
         if (!result.ok) setLoadError(result.error ?? 'Approval failed');
     }
 
+    async function handleDecline(requestId: string) {
+        const result = await ipc.declineReserveRequest(
+            requestId,
+            'Army CO declines at this time: reserve commitment risk outweighs expected gain.'
+        );
+        if (!result.ok) setLoadError(result.error ?? 'Decline failed');
+    }
+
     async function handleRecall(brigadeId: string) {
-        const result = await ipc.recallEliteBrigade(brigadeId);
+        const result = await ipc.recallEliteBrigade(
+            brigadeId,
+            'Loan terminated by player; brigade ordered back to base reserve.'
+        );
         if (!result.ok) setLoadError(result.error ?? 'Recall failed');
     }
 
@@ -158,11 +173,48 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                                     onClick={(e) => { e.stopPropagation(); void handleRecall(brigade.id); }}
                                                     className="px-2 py-0.5 bg-[#d45555]/20 border border-[#d45555]/40 rounded text-[10px] text-[#d45555] font-bold hover:bg-[#d45555]/30 transition-colors"
                                                 >
-                                                    Recall
+                                                    Terminate
                                                 </button>
                                             </div>
                                         )}
+                                        {!ls.on_loan && ls.base_osid && (
+                                            <div className="text-[10px] text-text-secondary">
+                                                Base: {ls.base_osid}
+                                            </div>
+                                        )}
                                     </button>
+                                );
+                            })}
+                        </div>
+                    )}
+                </section>
+
+                {/* ── Active Loans Snapshot ─────────────────────────────── */}
+                <section>
+                    <div className="text-[10px] text-accent-gold uppercase tracking-widest font-bold opacity-70 mb-2">
+                        Active Loans ({activeLoans.length})
+                    </div>
+                    {activeLoans.length === 0 ? (
+                        <div className="text-text-secondary italic">No active deployments this turn.</div>
+                    ) : (
+                        <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                            {activeLoans.map((brigade) => {
+                                const ls = brigade.eliteLoanState!;
+                                return (
+                                    <div
+                                        key={brigade.id}
+                                        className="bg-black/15 border border-panel-border/30 rounded px-2 py-1.5"
+                                    >
+                                        <div className="flex items-center justify-between gap-2">
+                                            <span className="text-text-primary truncate">{brigade.name}</span>
+                                            <span className="text-[10px] text-text-secondary shrink-0">
+                                                {ls.turns_deployed}w
+                                            </span>
+                                        </div>
+                                        <div className="text-[10px] text-text-secondary truncate">
+                                            {getCorpsName(ls.loaned_to_corps ?? 'unknown')}
+                                        </div>
+                                    </div>
                                 );
                             })}
                         </div>
@@ -207,6 +259,16 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                             }</span>
                                         </div>
                                     )}
+                                    {req.why_needed && (
+                                        <div className="text-[10px] text-text-secondary">
+                                            <span className="text-text-primary font-semibold">Corps CO (WHY):</span> {req.why_needed}
+                                        </div>
+                                    )}
+                                    {req.how_to_use && (
+                                        <div className="text-[10px] text-text-secondary">
+                                            <span className="text-text-primary font-semibold">Corps CO (HOW):</span> {req.how_to_use}
+                                        </div>
+                                    )}
 
                                     {/* Priority bar */}
                                     <div className="h-1 bg-black/30 rounded-full overflow-hidden">
@@ -228,12 +290,11 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                         <button
                                             type="button"
                                             onClick={() => {
-                                                // Dismiss by removing from the list (no IPC — handled client-side)
-                                                // In practice the list refreshes next turn automatically
+                                                void handleDecline(req.request_id);
                                             }}
                                             className="px-2 py-1 bg-black/30 border border-panel-border/40 rounded text-[10px] text-text-secondary hover:text-text-primary hover:bg-white/5 transition-colors"
                                         >
-                                            Dismiss
+                                            DECLINE
                                         </button>
                                     </div>
                                 </div>
@@ -254,7 +315,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                             Campaign History
                         </button>
                         {historyOpen && (
-                            <div className="space-y-3">
+                            <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
                                 {elites.filter(b => (tracker[b.id]?.total_loans ?? 0) > 0).map(brigade => {
                                     const t = tracker[brigade.id]!;
                                     return (

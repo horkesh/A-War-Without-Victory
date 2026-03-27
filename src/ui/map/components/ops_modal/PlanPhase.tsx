@@ -85,9 +85,48 @@ export function PlanPhase({ plan, onUpdate, corpsId, onAdvance, centroidLookup }
     }, [stagingOsid, corpsBrigades, centroidLookup]);
 
     const allObjectives = plan.axes.flatMap((a) => a.objectives);
+    const selectedAxis = activeAxis;
+    const selectedStaging = selectedAxis?.stagingOsid ?? plan.defaultStagingOsid;
+    const selectedAxisName = selectedAxis?.name ?? 'Main Axis';
+    const selectedAxisObjectives = selectedAxis?.objectives.length ?? 0;
+    const selectedAxisBrigades = selectedAxis?.brigadeIds.length ?? 0;
 
     return (
         <div className="absolute inset-0 z-10 pointer-events-none">
+            {/* Planning status panel — top left */}
+            <div className="absolute top-16 left-4 w-[340px] pointer-events-auto">
+                <div className="rounded-lg border border-[rgba(180,160,130,0.16)] bg-[rgba(20,18,15,0.9)] backdrop-blur-xl p-3">
+                    <div className="flex items-center justify-between mb-2">
+                        <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-accent-gold">
+                            Plan Status
+                        </div>
+                        <div className="text-[8px] uppercase tracking-[0.14em] text-text-secondary/70">
+                            Phase 2 / Plan
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                        <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
+                            <div className="text-[7px] uppercase tracking-[0.18em] text-text-secondary/70">Axis</div>
+                            <div className="text-[10px] font-bold text-white truncate">{selectedAxisName}</div>
+                        </div>
+                        <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
+                            <div className="text-[7px] uppercase tracking-[0.18em] text-text-secondary/70">Staging</div>
+                            <div className="text-[10px] font-bold text-white truncate">
+                                {selectedStaging ? selectedStaging : 'Select on map'}
+                            </div>
+                        </div>
+                        <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
+                            <div className="text-[7px] uppercase tracking-[0.18em] text-text-secondary/70">Objectives</div>
+                            <div className="text-[10px] font-bold text-white">{selectedAxisObjectives}</div>
+                        </div>
+                        <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
+                            <div className="text-[7px] uppercase tracking-[0.18em] text-text-secondary/70">Brigades</div>
+                            <div className="text-[10px] font-bold text-white">{selectedAxisBrigades}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {/* Objective list — top right */}
             <ObjectiveList plan={plan} onUpdate={onUpdate} osidDisplayNames={osidDisplayNames} onAdvance={onAdvance} />
 

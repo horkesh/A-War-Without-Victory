@@ -573,6 +573,13 @@ export function parseGameState(json: unknown): LoadedGameState {
 
     // Home-distance cache: pre-computed BFS hop counts from buildHomeDistanceCache() in war_phases.ts.
     const homeDistanceCache = state.military.home_distance_cache as Record<string, number> | undefined;
+    // Current frontline OSIDs from front-edge snapshot (used to keep engagement feed plausible).
+    const frontEdgeSnapshots = (state.military.war_front_edges_osid ?? state.military.front_edges ?? []) as Array<{ a?: string; b?: string }>;
+    const frontlineOsids = new Set<string>();
+    for (const edge of frontEdgeSnapshots) {
+        if (typeof edge.a === 'string' && edge.a) frontlineOsids.add(edge.a);
+        if (typeof edge.b === 'string' && edge.b) frontlineOsids.add(edge.b);
+    }
     // Player-issued permanent sector assignments.
     const brigadeSectorOverrideRaw = state.military.brigade_sector_override as Record<string, string> | undefined;
     const brigadeSectorOverride: Record<string, string> | undefined =
@@ -701,8 +708,24 @@ export function parseGameState(json: unknown): LoadedGameState {
             if (f.kind === 'brigade' || f.kind === 'operational_group') {
                 const bh = (f.brigade_history as any | undefined) ?? brigadeHistoryRecord?.[id];
                 if (bh && typeof bh === 'object') {
-                    fv.firstBattleTurn = typeof bh.first_battle_turn === 'number' ? bh.first_battle_turn : null;
-                    fv.firstBattleOsid = typeof bh.first_battle_osid === 'string' ? bh.first_battle_osid : null;
+                    const engs = Array.isArray(bh.engagements) ? (bh.engagements as Array<Record<string, unknown>>) : [];
+                    const normalizedEngagements = engs.map((e) => ({
+                        turn: typeof e.turn === 'number' ? e.turn : 0,
+                        osid: typeof e.osid === 'string' ? e.osid : '',
+                        role: (e.role === 'attacker' || e.role === 'defender')
+                            ? e.role as 'attacker' | 'defender'
+                            : 'defender' as 'attacker' | 'defender',
+                        outcome: typeof e.outcome === 'string' ? e.outcome : '',
+                        casualties_taken: typeof e.casualties_taken === 'number' ? e.casualties_taken : 0,
+                        territory_flipped: e.territory_flipped === true,
+                    })).sort((a, b) => a.turn - b.turn);
+                    if (normalizedEngagements.length > 0) {
+                        fv.firstBattleTurn = normalizedEngagements[0].turn;
+                        fv.firstBattleOsid = normalizedEngagements[0].osid || null;
+                    } else {
+                        fv.firstBattleTurn = typeof bh.first_battle_turn === 'number' ? bh.first_battle_turn : null;
+                        fv.firstBattleOsid = typeof bh.first_battle_osid === 'string' ? bh.first_battle_osid : null;
+                    }
 
                     fv.brigade_history = {
                         longest_victory_streak: finiteNumber(bh.longest_victory_streak, 0),
@@ -711,17 +734,12 @@ export function parseGameState(json: unknown): LoadedGameState {
                         total_equipment_captured: typeof bh.total_equipment_captured === 'object' ? bh.total_equipment_captured as any : undefined,
                     };
 
-                    const engs = bh.engagements;
-                    if (Array.isArray(engs) && engs.length > 0) {
-                        const last8 = (engs as Array<Record<string, unknown>>).slice(-8);
-                        fv.recent_engagements = last8.map((e) => ({
-                            turn: typeof e.turn === 'number' ? e.turn : 0,
-                            osid: typeof e.osid === 'string' ? e.osid : '',
-                            role: (e.role === 'attacker' || e.role === 'defender') ? e.role : 'defender',
-                            outcome: typeof e.outcome === 'string' ? e.outcome : '',
-                            casualties_taken: typeof e.casualties_taken === 'number' ? e.casualties_taken : 0,
-                            territory_flipped: e.territory_flipped === true,
-                        }));
+                    if (normalizedEngagements.length > 0) {
+                        const plausible = normalizedEngagements.filter((e) =>
+                            e.territory_flipped || e.role === 'attacker' || frontlineOsids.has(e.osid)
+                        );
+                        const source = plausible.length > 0 ? plausible : normalizedEngagements;
+                        fv.recent_engagements = source.slice(-8);
                     }
                 }
             }
@@ -753,6 +771,7 @@ export function parseGameState(json: unknown): LoadedGameState {
                     in_cooldown: inCooldown,
                     permanently_degraded: els.permanently_degraded,
                     current_episode_id: els.current_episode_id,
+                    base_osid: typeof (f as any).base_osid === 'string' ? (f as any).base_osid : null,
                 };
             }
 
@@ -1834,9 +1853,13 @@ export function parseGameState(json: unknown): LoadedGameState {
         brigadeSectorOverride: brigadeSectorOverride && Object.keys(brigadeSectorOverride).length > 0 ? brigadeSectorOverride : undefined,
         pendingReserveRequests: Array.isArray(state.military?.pending_reserve_requests) && state.military.pending_reserve_requests.length > 0
             ? (state.military.pending_reserve_requests as any[]).map(r => ({
+                request_id: String(r.request_id ?? `req:${Number(r.turn_requested ?? 0)}:${String(r.corps_id ?? '')}:${String(r.reason ?? '')}`),
                 corps_id: String(r.corps_id ?? ''),
                 faction: String(r.faction ?? ''),
                 reason: String(r.reason ?? ''),
+                purpose: (r.purpose === 'offensive' || r.purpose === 'defensive') ? r.purpose : undefined,
+                why_needed: typeof r.why_needed === 'string' ? r.why_needed : undefined,
+                how_to_use: typeof r.how_to_use === 'string' ? r.how_to_use : undefined,
                 priority: Number(r.priority ?? 0),
                 travel_hops: Number(r.travel_hops ?? 0),
                 description: String(r.description ?? ''),

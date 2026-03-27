@@ -86,8 +86,9 @@ interface WindowAwwv {
     saveGame: (payload?: { filename?: string }) => Promise<{ ok: boolean; filePath?: string; error?: string }>;
     quickSave: () => Promise<{ ok: boolean; filePath?: string; error?: string }>;
     openTacticalMapWindow: (payload?: { mode?: string }) => Promise<void>;
-    approveReserveRequest: (corpsId: string, brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
-    recallEliteBrigade: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
+    approveReserveRequest: (corpsId: string, brigadeId: string, reason?: string) => Promise<{ ok: boolean; error?: string }>;
+    declineReserveRequest: (requestId: string, reason?: string) => Promise<{ ok: boolean; error?: string }>;
+    recallEliteBrigade: (brigadeId: string, reason?: string) => Promise<{ ok: boolean; error?: string }>;
     redirectReserveLoan: (brigadeId: string, newCorpsId: string) => Promise<{ ok: boolean; error?: string }>;
     acknowledgeOfficerEvent: (eventId: string) => Promise<{ ok: boolean; error?: string }>;
     acceptOfficerReplacement: (payload: { eventId: string; corpsId: string; newOfficerId: string; currentOfficerId?: string }) => Promise<{ ok: boolean; error?: string }>;
@@ -324,11 +325,15 @@ export function useIPC() {
                 : makeNoop<{ ok: boolean; data?: Record<string, unknown>; error?: string }>(),
 
             approveReserveRequest: awwv
-                ? (corpsId: string, brigadeId: string) => awwv.approveReserveRequest(corpsId, brigadeId)
+                ? (corpsId: string, brigadeId: string, reason?: string) => awwv.approveReserveRequest(corpsId, brigadeId, reason)
+                : makeNoop<{ ok: boolean; error?: string }>(),
+
+            declineReserveRequest: awwv
+                ? (requestId: string, reason?: string) => awwv.declineReserveRequest(requestId, reason)
                 : makeNoop<{ ok: boolean; error?: string }>(),
 
             recallEliteBrigade: awwv
-                ? (brigadeId: string) => awwv.recallEliteBrigade(brigadeId)
+                ? (brigadeId: string, reason?: string) => awwv.recallEliteBrigade(brigadeId, reason)
                 : makeNoop<{ ok: boolean; error?: string }>(),
 
             redirectReserveLoan: awwv

@@ -3,7 +3,6 @@ import { useGameStore } from '../../store/gameStore.js';
 import { generateChronicleEntries } from './generateChronicleEntries.js';
 import { ChronicleCard } from './ChronicleCard.js';
 import { ChronicleRibbon, ChronicleRibbonScrubber } from './ChronicleSpine.js';
-import { FACTION_HEX_COLORS } from '../../utils/theme.js';
 import { turnToDateString } from '../../utils/formatters.js';
 import type { ChronicleEntry, ChronicleCardType } from './generateChronicleEntries.js';
 
@@ -51,6 +50,7 @@ export function ChronicleOverlay() {
     const [viewportFraction, setViewportFraction] = useState(1);
     const [viewportOffset, setViewportOffset] = useState(0);
     const [expandedWeeks, setExpandedWeeks] = useState<Set<number>>(new Set());
+    const [selectedTurn, setSelectedTurn] = useState<number | null>(null);
 
     const turnSummaries = state?.turnSummaries ?? [];
 
@@ -80,6 +80,17 @@ export function ChronicleOverlay() {
         if (turnSummaries.length === 0) return 0;
         return Math.max(...turnSummaries.map(s => s.turn));
     }, [turnSummaries]);
+
+    useEffect(() => {
+        if (!open) return;
+        if (selectedTurn == null) {
+            setSelectedTurn(maxTurn);
+            return;
+        }
+        if (selectedTurn < minTurn || selectedTurn > maxTurn) {
+            setSelectedTurn(maxTurn);
+        }
+    }, [open, selectedTurn, minTurn, maxTurn]);
 
     // Compute column widths: hybrid (empty=narrow, events=wide)
     const turnWidths = useMemo(() => {
@@ -244,7 +255,10 @@ export function ChronicleOverlay() {
                             /* Multiple entries — expandable group */
                             <div className="flex flex-col items-center w-full" style={{ gap: `${CARD_STACK_GAP}px` }}>
                                 <button
-                                    onClick={() => toggleWeekExpanded(t)}
+                                    onClick={() => {
+                                        setSelectedTurn(t);
+                                        toggleWeekExpanded(t);
+                                    }}
                                     className="flex items-center gap-1.5 px-2.5 py-1 rounded-sm text-[9px] font-mono text-stone-300 hover:text-amber-300 transition-colors cursor-pointer select-none"
                                     style={{
                                         background: 'linear-gradient(135deg, #2a2520 0%, #1e1b18 100%)',
@@ -308,35 +322,81 @@ export function ChronicleOverlay() {
             </div>
 
             {/* Main scrollable area: ribbon + stems + cards */}
-            <div
-                ref={scrollRef}
-                className="flex-1 overflow-x-auto overflow-y-auto"
-                style={{ scrollbarWidth: 'thin', scrollbarColor: '#555 #1a1a1a' }}
-            >
-                {entries.length === 0 ? (
-                    <div className="flex items-center justify-center h-full">
-                        <p className="text-stone-600 text-xs font-mono">
-                            No events recorded yet. Advance turns to build your chronicle.
-                        </p>
-                    </div>
-                ) : (
-                    <div style={{ width: `${totalWidth}px`, minHeight: '100%' }}>
-                        {/* Territory ribbon */}
-                        <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-sm border-b border-white/5">
-                            <ChronicleRibbon
-                                turnSummaries={turnSummaries}
-                                turnWidths={turnWidths}
-                                minTurn={minTurn}
-                                maxTurn={maxTurn}
-                            />
+            <div className="flex-1 flex min-h-0">
+                <div
+                    ref={scrollRef}
+                    className="flex-1 overflow-x-auto overflow-y-auto border-r border-white/8"
+                    style={{ scrollbarWidth: 'thin', scrollbarColor: '#555 #1a1a1a' }}
+                >
+                    {entries.length === 0 ? (
+                        <div className="flex items-center justify-center h-full">
+                            <p className="text-stone-600 text-xs font-mono">
+                                No events recorded yet. Advance turns to build your chronicle.
+                            </p>
                         </div>
+                    ) : (
+                        <div style={{ width: `${totalWidth}px`, minHeight: '100%' }}>
+                            {/* Territory ribbon */}
+                            <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-sm border-b border-white/5">
+                                <ChronicleRibbon
+                                    turnSummaries={turnSummaries}
+                                    turnWidths={turnWidths}
+                                    minTurn={minTurn}
+                                    maxTurn={maxTurn}
+                                />
+                            </div>
 
-                        {/* Turn columns with stems and cards */}
-                        <div className="flex">
-                            {columns}
+                            {/* Turn columns with stems and cards */}
+                            <div className="flex">
+                                {columns}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <aside className="w-[360px] shrink-0 bg-black/35 backdrop-blur-sm flex flex-col min-h-0">
+                    <div className="px-4 py-3 border-b border-white/8">
+                        <div className="text-[10px] uppercase tracking-[0.18em] text-amber-400/80 font-bold">
+                            Chronicle Dossier
+                        </div>
+                        <div className="mt-1 text-[11px] text-text-primary font-semibold">
+                            {selectedTurn != null ? turnToFullDate(selectedTurn) : 'No turn selected'}
                         </div>
                     </div>
-                )}
+                    <div className="px-4 py-3 grid grid-cols-2 gap-2 border-b border-white/8 text-[10px]">
+                        <div className="bg-black/20 border border-panel-border/40 rounded p-2">
+                            <div className="text-text-secondary uppercase tracking-wide">Events</div>
+                            <div className="text-text-primary font-bold">
+                                {selectedTurn != null ? (turnGroups.get(selectedTurn)?.length ?? 0) : 0}
+                            </div>
+                        </div>
+                        <div className="bg-black/20 border border-panel-border/40 rounded p-2">
+                            <div className="text-text-secondary uppercase tracking-wide">Headline</div>
+                            <div className="text-text-primary font-bold">
+                                {selectedTurn != null
+                                    ? (turnGroups.get(selectedTurn)?.some((e) => e.headline) ? 'Yes' : 'No')
+                                    : 'No'}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
+                        {selectedTurn == null || (turnGroups.get(selectedTurn)?.length ?? 0) === 0 ? (
+                            <div className="text-[11px] text-text-secondary italic">
+                                Select a turn on the timeline to inspect its event dossier.
+                            </div>
+                        ) : (
+                            (turnGroups.get(selectedTurn) ?? []).map((entry, i) => (
+                                <div
+                                    key={`${selectedTurn}-${entry.type}-${i}`}
+                                    className="border border-panel-border/30 rounded p-2 bg-black/15"
+                                >
+                                    <ChronicleCard entry={entry} />
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </aside>
             </div>
 
             {/* Scrubber strip */}

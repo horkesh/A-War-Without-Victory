@@ -78,7 +78,7 @@ export function WarSummaryContent() {
     const { areaPct, personnelByFaction, totalDisplaced, displacedByFaction } = data;
 
     return (
-        <div className="max-w-[560px]">
+        <div className="w-full max-w-[1100px]">
             {/* Header */}
             <div className="mb-4">
                 <div className="text-[13px] font-bold text-amber-400 tracking-[0.08em] uppercase">
@@ -108,7 +108,7 @@ export function WarSummaryContent() {
             </div>
 
             {activeSection === 'overview' ? (
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                     <SummarySection title="Territory">
                         <table className="w-full border-collapse">
                             <thead>
@@ -214,7 +214,7 @@ export function WarSummaryContent() {
                     })()}
                 </div>
             ) : (
-                <div className="max-h-[24rem] overflow-auto pr-1">
+                <div className="rounded border border-panel-border bg-panel-card p-3 max-h-[28rem] overflow-auto pr-1">
                     <SituationTab state={loadedGameState} focusSection={activeSection} />
                 </div>
             )}
@@ -224,7 +224,7 @@ export function WarSummaryContent() {
 
 function SummarySection({ title, children }: { title: string; children: React.ReactNode }) {
     return (
-        <div>
+        <div className="rounded border border-panel-border bg-panel-card p-3">
             <div className="text-[9px] text-text-secondary uppercase tracking-[0.1em] mb-1.5 pb-1 border-b border-panel-border">
                 {title}
             </div>

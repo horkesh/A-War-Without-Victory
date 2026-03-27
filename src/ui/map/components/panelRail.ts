@@ -33,7 +33,8 @@ export interface PanelRailState {
 export const DETAIL_PANEL_STYLE: CSSProperties = {
   position: 'absolute',
   right: '1rem',
-  top: '3.5rem',
+  // Toolbar-safe clearance is injected by App via CSS variable.
+  top: 'var(--awwv-toolbar-clearance, 7.5rem)',
   bottom: '2.5rem',
   zIndex: 100,
   overflow: 'hidden',
@@ -46,7 +47,7 @@ export const DETAIL_PANEL_STYLE: CSSProperties = {
 export const LEFT_DETAIL_PANEL_STYLE: CSSProperties = {
   position: 'absolute',
   left: '18rem', // Width of OOBSidebar (w-72 = 18rem)
-  top: '3.5rem',
+  top: 'var(--awwv-toolbar-clearance, 7.5rem)',
   bottom: '2.5rem',
   zIndex: 100,
   overflow: 'hidden',
@@ -58,7 +59,7 @@ export const LEFT_DETAIL_PANEL_STYLE: CSSProperties = {
 export const SECONDARY_PANEL_STYLE: CSSProperties = {
   position: 'absolute',
   right: '25.5rem', // Offset by primary panel width (24rem + 1rem padding + 0.5rem gap)
-  top: '3.5rem',
+  top: 'var(--awwv-toolbar-clearance, 7.5rem)',
   bottom: '2.5rem',
   zIndex: 90, // Slightly behind primary
   overflow: 'hidden',
@@ -71,7 +72,7 @@ export const SECONDARY_PANEL_STYLE: CSSProperties = {
 export const LEFT_SECONDARY_PANEL_STYLE: CSSProperties = {
   position: 'absolute',
   left: '42.5rem', // 18rem (sidebar) + 24rem (primary) + 0.5rem (gap)
-  top: '3.5rem',
+  top: 'var(--awwv-toolbar-clearance, 7.5rem)',
   bottom: '2.5rem',
   zIndex: 90,
   overflow: 'hidden',
@@ -83,7 +84,7 @@ export const LEFT_SECONDARY_PANEL_STYLE: CSSProperties = {
 export const RIGHT_PANEL_STYLE: CSSProperties = {
   position: 'absolute',
   right: 0,
-  top: '3.5rem',
+  top: 'var(--awwv-toolbar-clearance, 7.5rem)',
   bottom: '2.5rem',
   zIndex: 50,
   overflow: 'hidden',

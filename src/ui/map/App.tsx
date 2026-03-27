@@ -153,6 +153,7 @@ function App() {
   useKeyboardShortcuts();
   useDesktopSession();
   const ipc = useIPC();
+  const devMode = useGameStore((s) => s.devMode);
 
   const pendingAttackConfirmation = useGameStore((s) => s.pendingAttackConfirmation);
   const setPendingAttackConfirmation = useGameStore((s) => s.setPendingAttackConfirmation);
@@ -602,7 +603,10 @@ function App() {
   };
 
   return (
-    <div className="h-screen w-screen relative">
+    <div
+      className="h-screen w-screen relative"
+      style={{ ['--awwv-toolbar-clearance' as string]: devMode ? '8.5rem' : '7.5rem' }}
+    >
       <MapContainer />
       <PresidentialToolbar
         pendingDecisions={loadedGameState?.pendingEventDecisions?.length ?? 0}

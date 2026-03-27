@@ -47,7 +47,7 @@ export function ExhaustionClock({ exhaustion, faction }: ExhaustionClockProps) {
 
   return (
     <div
-      className="bg-panel-card border border-panel-border rounded-lg p-3 flex flex-col items-center justify-between h-full min-h-[160px]"
+      className="bg-panel-card border border-panel-border rounded-lg p-2.5 flex flex-col items-center justify-between min-h-[140px]"
       title={tooltip}
     >
       {/* Title */}
