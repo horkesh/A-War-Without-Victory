@@ -719,7 +719,8 @@ export function renameTheatre(
 export function approveReserveRequest(
     state: GameState,
     corpsId: string,
-    brigadeId: string
+    brigadeId: string,
+    decisionReason?: string
 ): { ok: true } | { ok: false; error: string } {
     const f = state.military.formations?.[brigadeId];
     if (!f) return { ok: false, error: `Brigade not found: ${brigadeId}` };
@@ -730,7 +731,38 @@ export function approveReserveRequest(
     const req = state.military.pending_reserve_requests?.find(r => r.corps_id === corpsId);
     const reason = req?.reason ?? 'offensive_support';
     const hops = req?.travel_hops ?? 0;
-    deployEliteLoan(state, brigadeId, corpsId, reason, hops, state.meta.turn);
+    const purpose = req?.purpose ?? 'defensive';
+    const whyNeeded = req?.why_needed ?? req?.description ?? 'Corps requires immediate reinforcement.';
+    const howToUse = req?.how_to_use ?? 'Stabilize front pressure and reinforce key sub-segments.';
+    const requestId = req?.request_id ?? `req:${state.meta.turn}:${corpsId}:${reason}`;
+    const armyReason = (decisionReason && decisionReason.trim().length > 0)
+        ? decisionReason.trim()
+        : 'Army CO accepted: request is actionable and priority justifies elite commitment.';
+    deployEliteLoan(
+        state,
+        brigadeId,
+        corpsId,
+        reason,
+        hops,
+        state.meta.turn,
+        { purpose, why_needed: whyNeeded, how_to_use: howToUse },
+        armyReason,
+        'player'
+    );
+    if (!state.military.reserve_request_history) state.military.reserve_request_history = [];
+    state.military.reserve_request_history.push({
+        request_id: requestId,
+        turn: state.meta.turn,
+        faction: req?.faction ?? f.faction,
+        corps_id: corpsId,
+        brigade_id: brigadeId,
+        outcome: 'accepted',
+        reason: armyReason,
+        decided_by: 'player',
+        purpose,
+        why_needed: whyNeeded,
+        how_to_use: howToUse,
+    });
     // Remove the fulfilled request from pending list
     if (state.military.pending_reserve_requests) {
         state.military.pending_reserve_requests = state.military.pending_reserve_requests.filter(r => r.corps_id !== corpsId);
@@ -738,15 +770,70 @@ export function approveReserveRequest(
     return { ok: true };
 }
 
+/** Player declines a pending reserve request and records Army CO rationale. */
+export function declineReserveRequest(
+    state: GameState,
+    requestId: string,
+    reason?: string
+): { ok: true } | { ok: false; error: string } {
+    const pending = state.military.pending_reserve_requests ?? [];
+    const req = pending.find((r) => (r.request_id ?? '') === requestId);
+    if (!req) return { ok: false, error: `Reserve request not found: ${requestId}` };
+    const declineReason = (reason && reason.trim().length > 0)
+        ? reason.trim()
+        : 'Army CO declined: insufficient reserve margin for current strategic commitments.';
+    const purpose = req.purpose ?? 'defensive';
+    const whyNeeded = req.why_needed ?? req.description;
+    const howToUse = req.how_to_use ?? 'Reinforce key front positions.';
+    if (!state.military.reserve_request_history) state.military.reserve_request_history = [];
+    state.military.reserve_request_history.push({
+        request_id: req.request_id ?? requestId,
+        turn: state.meta.turn,
+        faction: req.faction,
+        corps_id: req.corps_id,
+        brigade_id: null,
+        outcome: 'declined',
+        reason: declineReason,
+        decided_by: 'player',
+        purpose,
+        why_needed: whyNeeded,
+        how_to_use: howToUse,
+    });
+    state.military.pending_reserve_requests = pending.filter((r) => (r.request_id ?? '') !== requestId);
+    return { ok: true };
+}
+
 /** Player manually recalls an elite brigade from its current loan. */
 export function recallEliteBrigade(
     state: GameState,
-    brigadeId: string
+    brigadeId: string,
+    reasonOverride?: string
 ): { ok: true } | { ok: false; error: string } {
     const f = state.military.formations?.[brigadeId];
     if (!f) return { ok: false, error: `Brigade not found: ${brigadeId}` };
     if (!f.elite_loan_state?.on_loan) return { ok: false, error: `${brigadeId} is not currently on loan` };
+    const loanedCorps = f.elite_loan_state.loaned_to_corps;
+    const faction = f.faction;
+    const purpose: 'offensive' | 'defensive' = 'defensive';
+    const whyNeeded = `Loan for ${loanedCorps ?? 'unknown corps'} terminated by Army CO/player order.`;
+    const howToUse = 'Terminate deployment and return brigade to reserve base.';
     recallEliteLoan(state, brigadeId, 'player_recall', state.meta.turn);
+    if (!state.military.reserve_request_history) state.military.reserve_request_history = [];
+    state.military.reserve_request_history.push({
+        request_id: `terminate:${state.meta.turn}:${brigadeId}`,
+        turn: state.meta.turn,
+        faction,
+        corps_id: loanedCorps ?? 'unknown',
+        brigade_id: brigadeId,
+        outcome: 'terminated',
+        reason: (reasonOverride && reasonOverride.trim().length > 0)
+            ? reasonOverride.trim()
+            : 'Army CO terminated loan and returned brigade to base reserve.',
+        decided_by: 'player',
+        purpose,
+        why_needed: whyNeeded,
+        how_to_use: howToUse,
+    });
     return { ok: true };
 }
 

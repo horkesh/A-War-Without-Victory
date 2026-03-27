@@ -1772,14 +1772,14 @@ app.whenReady().then(() => {
 
   // --- Army Reserve IPC handlers ---
   ipcMain.handle('approve-reserve-request', async (_event, payload) => {
-    const { corpsId, brigadeId } = payload || {};
+    const { corpsId, brigadeId, reason } = payload || {};
     if (!currentGameStateJson || typeof corpsId !== 'string' || typeof brigadeId !== 'string') {
       return { ok: false, error: 'No game loaded or invalid payload' };
     }
     try {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
-      const result = sim.approveReserveRequest(state, corpsId, brigadeId);
+      const result = sim.approveReserveRequest(state, corpsId, brigadeId, typeof reason === 'string' ? reason : undefined);
       if (!result.ok) return result;
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);
@@ -1790,14 +1790,32 @@ app.whenReady().then(() => {
   });
 
   ipcMain.handle('recall-elite-brigade', async (_event, payload) => {
-    const { brigadeId } = payload || {};
+    const { brigadeId, reason } = payload || {};
     if (!currentGameStateJson || typeof brigadeId !== 'string') {
       return { ok: false, error: 'No game loaded or invalid payload' };
     }
     try {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
-      const result = sim.recallEliteBrigade(state, brigadeId);
+      const result = sim.recallEliteBrigade(state, brigadeId, typeof reason === 'string' ? reason : undefined);
+      if (!result.ok) return result;
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('decline-reserve-request', async (_event, payload) => {
+    const { requestId, reason } = payload || {};
+    if (!currentGameStateJson || typeof requestId !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const result = sim.declineReserveRequest(state, requestId, typeof reason === 'string' ? reason : undefined);
       if (!result.ok) return result;
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);
