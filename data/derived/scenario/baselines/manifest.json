@@ -21,12 +21,12 @@
       ],
       "hashes": {
         "activity_summary.json": "8beb1152ca450a3db31f43fe6f3be0ad2cd8fb0ea5647c22039f3043c1c0ebc3",
-        "control_delta.json": "34dc09184ce861f05c870a0a7a5e27bea39b6f9e1e97b679f2193a0b3c4d0ab0",
-        "end_report.md": "32726869edc3d310216796343b12da4745051e5f68012abbecadf138ced16350",
-        "final_save.json": "6ac0f6d0fd796578391f52bcb2cf2be29ba6cf6ce98f59e35bc9d1cd095e88a3",
-        "formation_delta.json": "7dee1576e678e8bd6fd0ac699e10c9ac1f2b333e9ad1836e611f1d98b49cc3a6",
-        "run_summary.json": "c014b2b24f161b8e3069c98479f86d677eed91bd4a0a878151bdb1f882033da1",
-        "weekly_report.jsonl": "bba239bbc70c3c1c1d4594b4e31f72518c72138198cc6f28064633234f7b2999"
+        "control_delta.json": "2b351884c413705bd6276f7019d28a9dda74b95a3c867dc1544d4359ef4e7e27",
+        "end_report.md": "5449d62b320ea3d413aa0852b1d515bdecccc791b93b209bf18c2537fba51f13",
+        "final_save.json": "b3bc37829c681c8d46f0d15d1885405f6ce3073ac2127fc3740e01ecffb3cbcd",
+        "formation_delta.json": "d8218bd93c96f21df42424380815db278c4a0d7db8f96e4a1526bec86ab670a9",
+        "run_summary.json": "d53b892c8bae9fe0b804b9945b21381e280e4629e0a39bbbac2dd84a423f6a42",
+        "weekly_report.jsonl": "81e3696207fd588a9c2ad374787b334831a9691941979f6d94b6bdc1d7cffb0e"
       },
       "id": "apr1992_52w",
       "scenario_path": "data/scenarios/apr1992_definitive_52w.json",
@@ -45,10 +45,10 @@
       "hashes": {
         "activity_summary.json": "114ede7d618254baf4becba83e8812386106ffc52d413784756db36d06ea731d",
         "control_delta.json": "364a8a76c43b857bce167bf963111746ce8e768ff0a64f08e1b18622f734935e",
-        "end_report.md": "6a4b4cf97fd8627fbca02cb648db29409b02bc3162adb8344c0f6aa7679ae309",
-        "final_save.json": "04e81c88110b41964d1416a7d1b846dfdc2ecd51c7a62ecbc63d03bb9e24d578",
+        "end_report.md": "9cae5b1596b8386d6db88500a4f780e827e7ede240caee6733c49d02885be5e1",
+        "final_save.json": "136b972dfcd62270ec0a4cc072b593510276574ebac44423561dc72e51d90243",
         "formation_delta.json": "806b605d706e897b598b9c215a03f8ee52de5b3d8f0f6477112c6f744dc65ea6",
-        "run_summary.json": "a82dc4142c7d1b7d7131907dd292c809c794d633090a6ab049123821a048accf",
+        "run_summary.json": "4c2bd83ba75364f0d7844916a7acf88b03d22fcfbc8dd391df3f8fbfd7b4694d",
         "weekly_report.jsonl": "fe4950a1470b8bde99c0bbd6ea027a5ac055b3fa2cb5e4a7b5ec75037e7723ec"
       },
       "id": "baseline_ops_4w",
@@ -68,7 +68,7 @@
       "hashes": {
         "activity_summary.json": "114ede7d618254baf4becba83e8812386106ffc52d413784756db36d06ea731d",
         "control_delta.json": "364a8a76c43b857bce167bf963111746ce8e768ff0a64f08e1b18622f734935e",
-        "end_report.md": "7b8c8506d3ee12b6a3306e3a1994474cf5040660a77b4f32d525faf0884606c4",
+        "end_report.md": "5e6b12958fd0488701f1b411cac35f83c02c5d2a8d83c043fd471a5005a51cd3",
         "final_save.json": "33341aa5841e38c2c1fd45f7e47a6d8977ad7262706b022c61c21435f557b72a",
         "formation_delta.json": "806b605d706e897b598b9c215a03f8ee52de5b3d8f0f6477112c6f744dc65ea6",
         "run_summary.json": "a2c4694287337efc72f1ff6bd0308f47750b331e775a733ebfc55bb8fdceddaa",

@@ -1518,11 +1518,35 @@ export function resolveAttackOrdersOsid(
         }
 
         if (flip && defenderFormation) {
-            const retreatDests = surrenderCascade ? [] : getFriendlyRetreatDestinations(state, defenderFormation, adjacency, reverseMap);
-            const dest = retreatDests[0];
-            if (dest != null) {
-                // Adjacent friendly OSID — standard retreat
-                (defenderFormation as { location_osid?: string }).location_osid = dest;
+            // Sector-coverage defenders are physically at a DIFFERENT OSID than the
+            // target — they project defense across the front line. When the target
+            // flips, only physically present defenders should be displaced. Moving a
+            // sector-coverage defender would vacate their actual OSID, creating a
+            // walk-in opportunity for the enemy (the Gradačac bug).
+            const isPhysicalDefender = defenderFormation.location_osid === targetOsid;
+
+            if (isPhysicalDefender) {
+                const retreatDests = surrenderCascade ? [] : getFriendlyRetreatDestinations(state, defenderFormation, adjacency, reverseMap);
+                const dest = retreatDests[0];
+                if (dest != null) {
+                    // Adjacent friendly OSID — standard retreat
+                    (defenderFormation as { location_osid?: string }).location_osid = dest;
+                    (defenderFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
+                    (defenderFormation as { defense_streak?: number }).defense_streak = 0;
+                    (defenderFormation as { last_retreat_from?: { osid: string; turn: number } }).last_retreat_from = {
+                        osid: targetOsid, turn: state.meta?.turn ?? 0
+                    };
+                    if (outcome === 'decisive_victory') (defenderFormation as { disrupted_turns?: number }).disrupted_turns = 2;
+                    else if (outcome === 'victory') (defenderFormation as { disrupted_turns?: number }).disrupted_turns = 1;
+                } else {
+                    // Direct defender with no adjacent retreat — emergency retreat with penalties
+                    forceRetreatWithPenalties(state, defenderFormation, reverseMap, targetOsid, { adjacency });
+                }
+            } else {
+                // Sector-coverage defender: DO NOT change location_osid.
+                // Apply morale/disruption penalties at their current position —
+                // losing a covered OSID is demoralizing and disrupts the formation,
+                // but the brigade stays where it physically is.
                 (defenderFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
                 (defenderFormation as { defense_streak?: number }).defense_streak = 0;
                 (defenderFormation as { last_retreat_from?: { osid: string; turn: number } }).last_retreat_from = {
@@ -1530,17 +1554,6 @@ export function resolveAttackOrdersOsid(
                 };
                 if (outcome === 'decisive_victory') (defenderFormation as { disrupted_turns?: number }).disrupted_turns = 2;
                 else if (outcome === 'victory') (defenderFormation as { disrupted_turns?: number }).disrupted_turns = 1;
-            } else if (isSectorCoverageDefense) {
-                // Sector-coverage defenders with no adjacent retreat — rout with heavy penalties
-                forceRetreatWithPenalties(state, defenderFormation, reverseMap, targetOsid, {
-                    personnelRetain: SECTOR_ROUT_PERSONNEL_RETAIN,
-                    cohesionLoss: SECTOR_ROUT_COHESION_LOSS,
-                    disruptedTurns: SECTOR_ROUT_DISRUPTED_TURNS,
-                    adjacency,
-                });
-            } else {
-                // Direct defender with no adjacent retreat — emergency retreat with penalties
-                forceRetreatWithPenalties(state, defenderFormation, reverseMap, targetOsid, { adjacency });
             }
         }
 

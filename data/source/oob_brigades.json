@@ -3638,7 +3638,8 @@
     "available_from": 4,
     "initial_personnel": 800,
     "initial_cohesion": 45,
-    "recruit_pool_faction": "HRHB"
+    "recruit_pool_faction": "HRHB",
+    "mandatory": true
   },
   {
     "id": "hvo_1st_guard_abb",

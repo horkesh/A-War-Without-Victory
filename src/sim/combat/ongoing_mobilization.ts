@@ -170,6 +170,24 @@ const EXHAUSTION_HARD_CAP = 0.50;
  */
 const POCKET_MOBILIZATION_MULT = 2.0;
 
+/** Cross-faction pool mobilization multiplier. Croat minorities in RBiH-controlled
+ * municipalities are too small for standard mobilization rates to sustain cross-faction
+ * brigades (e.g. HVO-designation ARBiH units in NE Bosnia). Historical basis: these
+ * communities mobilized at higher rates due to ethnic solidarity pressure. */
+const CROSS_FACTION_POOL_MOBILIZATION_MULT = 5.0;
+
+/** Hardcoded cross-faction pool municipality pairs. These brigades may not be active yet
+ * (chicken-and-egg: pool needed before brigade spawns, but loop only scans active formations).
+ * Ensures pools are seeded from turn 1 so cross-faction mandatory brigades can spawn on time. */
+const CROSS_FACTION_POOL_MUNICIPALITIES: Array<{ munId: MunicipalityId; poolFaction: FactionId }> = [
+    { munId: 'gradacac' as MunicipalityId, poolFaction: 'HRHB' as FactionId },
+    { munId: 'brcko' as MunicipalityId, poolFaction: 'HRHB' as FactionId },
+    { munId: 'bihac' as MunicipalityId, poolFaction: 'HRHB' as FactionId },
+    { munId: 'tesanj' as MunicipalityId, poolFaction: 'HRHB' as FactionId },
+    { munId: 'tuzla' as MunicipalityId, poolFaction: 'HRHB' as FactionId },
+    { munId: 'centar_sarajevo' as MunicipalityId, poolFaction: 'HRHB' as FactionId },
+];
+
 export interface OngoingMobilizationReport {
     total_mobilized: number;
     by_faction: Record<string, number>;
@@ -286,6 +304,67 @@ export function runOngoingMobilization(
         report.by_faction[controller] = (report.by_faction[controller] ?? 0) + mobilized + shipmentBonus;
         report.municipalities_contributing += 1;
         if (isPocket) report.pocket_municipalities = (report.pocket_municipalities ?? 0) + 1;
+    }
+
+    // ── Cross-faction pool seeding ──────────────────────────────────────
+    // Brigades with recruit_pool_faction (e.g. HVO-designation ARBiH brigades in
+    // NE Bosnia) need a militia pool keyed to the *cross* faction in their home
+    // municipality. The main loop above only creates/grows pools for the
+    // controlling faction, so these cross-faction pools never get seeded.
+    // Collect unique (home_mun, recruit_pool_faction) pairs from active formations
+    // and run the same mobilization formula to ensure those pools exist and grow.
+    const crossFactionPairs = new Map<string, { munId: MunicipalityId; poolFaction: FactionId }>();
+
+    // Seed from hardcoded OOB pairs first (ensures pools exist before brigades spawn)
+    for (const entry of CROSS_FACTION_POOL_MUNICIPALITIES) {
+        const pairKey = `${entry.munId}::${entry.poolFaction}`;
+        if (!crossFactionPairs.has(pairKey)) {
+            crossFactionPairs.set(pairKey, { munId: entry.munId, poolFaction: entry.poolFaction });
+        }
+    }
+
+    // Also scan active formations for any additional cross-faction pairs
+    const formations = state.military.formations ?? {};
+    for (const fId of Object.keys(formations).sort(strictCompare)) {
+        const f = formations[fId as keyof typeof formations];
+        if (!f || f.status !== 'active') continue;
+        if (!f.recruit_pool_faction || f.recruit_pool_faction === f.faction) continue;
+        const homeMun = (f.origin_mun ?? f.home_osid?.split(':')[1] ?? '') as MunicipalityId;
+        if (!homeMun) continue;
+        const pairKey = `${homeMun}::${f.recruit_pool_faction}`;
+        if (!crossFactionPairs.has(pairKey)) {
+            crossFactionPairs.set(pairKey, { munId: homeMun, poolFaction: f.recruit_pool_faction });
+        }
+    }
+
+    const sortedCrossPairs = [...crossFactionPairs.keys()].sort(strictCompare);
+    for (const pairKey of sortedCrossPairs) {
+        const { munId, poolFaction } = crossFactionPairs.get(pairKey)!;
+        const censusEligible = getEligiblePopulationCount(population1991ByMun, munId, poolFaction);
+        if (censusEligible <= 0) continue;
+
+        const key = militiaPoolKey(munId, poolFaction);
+        if (!pools[key]) {
+            pools[key] = { mun_id: munId, faction: poolFaction, available: 0, committed: 0, exhausted: 0, updated_turn: currentTurn };
+        }
+        const pool = pools[key];
+
+        const milAgeMales = Math.max(1, Math.floor(censusEligible * MILITARY_AGE_MALE_FRACTION));
+        const cumulative = (pool.available ?? 0) + (pool.committed ?? 0) + (pool.exhausted ?? 0);
+        const exhaustionRatio = cumulative / milAgeMales;
+        if (exhaustionRatio >= EXHAUSTION_HARD_CAP) continue;
+        const exhaustionMult = exhaustionRatio >= EXHAUSTION_THRESHOLD ? 0.5 : 1.0;
+
+        const factionScale = FACTION_MOBILIZATION_SCALE[poolFaction] ?? DEFAULT_MOBILIZATION_SCALE;
+        const surge = getMobilizationSurgeFactor(currentTurn, poolFaction);
+        const raw = censusEligible * BASE_MOBILIZATION_RATE * factionScale * surge * exhaustionMult * CROSS_FACTION_POOL_MOBILIZATION_MULT;
+        const mobilized = Math.min(Math.floor(raw), MAX_MOBILIZATION_PER_MUN_PER_TURN);
+        if (mobilized <= 0) continue;
+
+        pool.available += mobilized;
+        pool.updated_turn = currentTurn;
+        report.total_mobilized += mobilized;
+        report.by_faction[poolFaction] = (report.by_faction[poolFaction] ?? 0) + mobilized;
     }
 
     const displacedReport = runDisplacedAndCrossEthnicContributions(

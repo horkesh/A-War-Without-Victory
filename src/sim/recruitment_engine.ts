@@ -597,6 +597,7 @@ export function runBotRecruitment(
                 .filter(b => {
                     if (b.available_from > currentTurn) return false;
                     if (b.available_from === 0) return true; // seed formation
+                    if (b.recruit_pool_faction && b.recruit_pool_faction !== faction) return true; // cross-faction mandatory: force-create handles pool
                     const munBrigades = getMunBrigadesForFaction(state, b.home_mun, faction);
                     const pool = pools?.[militiaPoolKey(b.home_mun, b.recruit_pool_faction ?? faction)];
                     const threshold = ENCLAVE_MUNICIPALITY_IDS.has(b.home_mun) ? ENCLAVE_FORMATION_CAPACITY_THRESHOLD : FORMATION_CAPACITY_THRESHOLD;
