@@ -188,6 +188,27 @@ const CROSS_FACTION_POOL_MUNICIPALITIES: Array<{ munId: MunicipalityId; poolFact
     { munId: 'centar_sarajevo' as MunicipalityId, poolFaction: 'HRHB' as FactionId },
 ];
 
+/**
+ * East Herzegovina Bosniak displacement reroute.
+ * Bosniaks expelled from RS/HRHB-controlled east Herzegovina fled to
+ * ARBiH-held municipalities (Mostar, Konjic, Jablanica). Route a fraction
+ * of their census population as additional mobilization input. Historically
+ * these refugees were absorbed into 4th Corps units.
+ */
+const HERZEGOVINA_BOSNIAK_REROUTE: Array<{ source: MunicipalityId; targets: MunicipalityId[] }> = [
+    { source: 'stolac' as MunicipalityId, targets: ['mostar' as MunicipalityId] },
+    { source: 'capljina' as MunicipalityId, targets: ['mostar' as MunicipalityId] },
+    { source: 'nevesinje' as MunicipalityId, targets: ['konjic' as MunicipalityId, 'mostar' as MunicipalityId] },
+    { source: 'gacko' as MunicipalityId, targets: ['konjic' as MunicipalityId] },
+    { source: 'bileca' as MunicipalityId, targets: ['mostar' as MunicipalityId] },
+    { source: 'trebinje' as MunicipalityId, targets: ['mostar' as MunicipalityId] },
+    { source: 'ljubinje' as MunicipalityId, targets: ['mostar' as MunicipalityId] },
+    { source: 'ravno' as MunicipalityId, targets: ['mostar' as MunicipalityId] },
+];
+
+/** Fraction of source Bosniak census routed as displaced mobilization. */
+const DISPLACEMENT_REROUTE_FRACTION = 0.15;
+
 export interface OngoingMobilizationReport {
     total_mobilized: number;
     by_faction: Record<string, number>;
@@ -368,37 +389,19 @@ export function runOngoingMobilization(
     }
 
     // ── East Herzegovina Bosniak displacement reroute ─────────────────
-    // Bosniaks expelled from RS/HRHB-controlled east Herzegovina fled to
-    // ARBiH-held municipalities (Mostar, Konjic, Jablanica). Route a fraction
-    // of their census population as additional mobilization input. Historically
-    // these refugees were absorbed into 4th Corps units.
-    const HERZEGOVINA_BOSNIAK_REROUTE: Array<{ source: MunicipalityId; targets: MunicipalityId[] }> = [
-        { source: 'stolac' as MunicipalityId, targets: ['mostar' as MunicipalityId] },
-        { source: 'capljina' as MunicipalityId, targets: ['mostar' as MunicipalityId] },
-        { source: 'nevesinje' as MunicipalityId, targets: ['konjic' as MunicipalityId, 'mostar' as MunicipalityId] },
-        { source: 'gacko' as MunicipalityId, targets: ['konjic' as MunicipalityId] },
-        { source: 'bileca' as MunicipalityId, targets: ['mostar' as MunicipalityId] },
-        { source: 'trebinje' as MunicipalityId, targets: ['mostar' as MunicipalityId] },
-        { source: 'ljubinje' as MunicipalityId, targets: ['mostar' as MunicipalityId] },
-        { source: 'ravno' as MunicipalityId, targets: ['mostar' as MunicipalityId] },
-    ];
-    /** Fraction of source Bosniak census routed as displaced mobilization. */
-    const DISPLACEMENT_REROUTE_FRACTION = 0.15;
-
     if (population1991ByMun) {
         for (const route of HERZEGOVINA_BOSNIAK_REROUTE) {
             const sourceEntry = population1991ByMun[route.source];
             if (!sourceEntry) continue;
-            // Check source is NOT RBiH-controlled (only reroute if expelled)
-            const pc = state.political?.political_controllers ?? {};
+            // Only reroute if source municipality is no longer RBiH-controlled (expelled)
             let sourceIsRBiH = false;
-            for (const osid of Object.keys(pc)) {
+            for (const osid of Object.keys(pc).sort(strictCompare)) {
                 if (osid.startsWith(`op:${route.source}:`) && pc[osid] === 'RBiH') {
                     sourceIsRBiH = true;
                     break;
                 }
             }
-            if (sourceIsRBiH) continue; // still RBiH-controlled, no displacement
+            if (sourceIsRBiH) continue;
             const bosniakPop = sourceEntry.bosniak ?? 0;
             if (bosniakPop <= 0) continue;
             const perTarget = Math.floor((bosniakPop * DISPLACEMENT_REROUTE_FRACTION * BASE_MOBILIZATION_RATE) / route.targets.length);

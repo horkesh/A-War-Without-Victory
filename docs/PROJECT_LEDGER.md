@@ -1,3 +1,21 @@
+## [2026-03-27] Diagnostic fix session — probe gate, overflow threshold, orphan pools, Herzegovina reroute
+
+### Change
+- **Probe type gate**: `bot_corps_directives.ts` attack-type gate now includes `probe` alongside `sector_attack`. Previously probes were silently excluded from the attack pipeline, disabling all probe operations.
+- **Overflow threshold**: Strategic reserve overflow check changed from `<=` to `<` in threshold boundary comparison. Off-by-one allowed reserves to sit at exactly the threshold without triggering redistribution.
+- **Orphan pool drainage**: Minority faction pools stranded in enemy-controlled municipalities now drain to strategic reserve (displaced population mechanic). Fixes 3 stranded pools (0 remaining).
+- **East Herzegovina Bosniak reroute**: Displaced Bosniak populations from east Herzegovina now contribute to ARBiH-held municipality pools instead of accumulating uselessly in RS territory. Fixes 4th Corps starvation (11.5/turn supply vs 3000/turn demand). 4th Corps health: 2/10 -> 9/10 brigades healthy.
+
+### Results
+- **92.2% area-weighted (40w), 22/22 anchors, 4/4 enclaves.**
+- 62 battles (was 44). HRHB 8 attacks (was 0). 0 stranded pools (was 3). 2 empty sectors (was 6). 0 diagnostic errors (was 2).
+- 4th Corps: 9/10 healthy brigades (was 2/10).
+
+### Verification
+- `npx tsc --noEmit` (clean).
+- `npm run test:vitest` (pass).
+- Fresh 40w calibration run with `tools/diagnose_run.cjs` validation.
+
 ## [2026-03-27] Brigade front-lock root fix + frontline-only friction attribution
 
 ### Change
@@ -22,7 +40,7 @@
 # AWWV Project Ledger
 
 **Last Updated:** 2026-03-27
-**Status:** **v0.7.0 COMPLETE. 16 mechanical fixes across deployment, operations, intel, data, combat layers. 91.4% area-weighted calibration.** 1487 tests, 123 suites. 96 essays (all standalone). Ghost Map + Exhaustion Clock. Letter Home engine. Ops Modal UX overhaul. Canon audit Phases A-C (phase0 removed). v0.8.0 types scaffolded. 5 integration test suites. Anomaly detector (10 checks). **Next: v0.7.1 version bump, visual verification, canon audit Phase D/E.**
+**Status:** **v0.7.0 COMPLETE. 24 mechanical fixes across deployment, operations, intel, data, combat layers. 92.2% area-weighted calibration.** 1487 tests, 123 suites. 96 essays (all standalone). Ghost Map + Exhaustion Clock. Letter Home engine. Ops Modal UX overhaul. Canon audit Phases A-C (phase0 removed). v0.8.0 types scaffolded. 5 integration test suites. Anomaly detector (10 checks). **Next: v0.7.1 version bump, visual verification, canon audit Phase D/E.**
 
 ## [2026-03-27] Documentation — Command sidebar layout knowledge (no code)
 

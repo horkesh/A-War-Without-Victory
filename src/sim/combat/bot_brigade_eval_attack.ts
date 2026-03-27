@@ -95,12 +95,11 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
         return true;
     }
 
-    const activeOp15 = activeOp;
-    if (isActiveSectorOperationParticipant && (activeOp15?.type === 'sector_attack' || activeOp15?.type === 'probe')) {
-        if (activeOp15.phase === 'planning') {
+    if (isActiveSectorOperationParticipant && (activeOp?.type === 'sector_attack' || activeOp?.type === 'probe')) {
+        if (activeOp.phase === 'planning') {
             const planningApproachOsids = getSectorOffensiveApproachOsids(
                 state,
-                activeOp15,
+                activeOp,
                 faction,
                 adjacency,
                 reverseMap,
@@ -121,7 +120,7 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 }
             } else if (planningApproachOsids.size === 0) {
                 // No approach OSIDs found — fall back to staging area
-                const axisStaging = getBrigadeAxis(activeOp15, brigade.id)?.staging_osid ?? activeOp15.staging_osid;
+                const axisStaging = getBrigadeAxis(activeOp, brigade.id)?.staging_osid ?? activeOp.staging_osid;
                 if (axisStaging && loc !== axisStaging) {
                     const nearestStaging = findNearestFriendlyOsidInSet(
                         state,
@@ -141,13 +140,13 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
             return true;
         }
 
-        if (activeOp15.phase === 'recovery') {
+        if (activeOp.phase === 'recovery') {
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
             return true;
         }
 
-        if (activeOp15.phase === 'execution') {
-            const currentObjective = getSectorOffensiveCurrentObjective(activeOp15, brigade.id);
+        if (activeOp.phase === 'execution') {
+            const currentObjective = getSectorOffensiveCurrentObjective(activeOp, brigade.id);
             // Skip objective if controlled by own faction OR by an allied faction.
             // Allied capture counts as mission success — advance to next objective.
             const objController = currentObjective ? getPoliticalControllerOSID(state, currentObjective, reverseMap) : null;
@@ -184,10 +183,10 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 : targets.find((t) => t.osid === currentObjective);
             const alreadyAssigned = chosenTargets.get(currentObjective) ?? 0;
             if (directObjectiveAttack) {
-                const probeThreshold = getSectorOffensiveProbeThreshold(activeOp15, brigade.id);
+                const probeThreshold = getSectorOffensiveProbeThreshold(activeOp, brigade.id);
                 const predictedOutcome = directObjectiveAttack.prediction.predicted_outcome;
-                const axisBrigades = getBrigadeAxis(activeOp15, brigade.id)?.assigned_brigades
-                    ?? activeOp15.participating_brigades ?? [];
+                const axisBrigades = getBrigadeAxis(activeOp, brigade.id)?.assigned_brigades
+                    ?? activeOp.participating_brigades ?? [];
                 const adjacentOperationParticipants = axisBrigades.filter((brigadeId) => {
                     const participant = state.military.formations?.[brigadeId];
                     if (!participant?.location_osid || participant.status !== 'active') return false;
@@ -226,7 +225,7 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
             // premature axis stall before brigades reach attack position (#34 root cause).
             const objectiveApproachOsids = getSectorOffensiveApproachOsids(
                 state,
-                activeOp15,
+                activeOp,
                 faction,
                 adjacency,
                 reverseMap,
@@ -266,7 +265,7 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 ? targets.filter(t => getPoliticalControllerOSID(state, t.osid, reverseMap) === objectiveController)
                 : targets).filter(t => !_avoidedOsids?.includes(t.osid));
             if (intermediateTargets.length > 0) {
-                const intermediateThreshold = getSectorOffensiveProbeThreshold(activeOp15, brigade.id);
+                const intermediateThreshold = getSectorOffensiveProbeThreshold(activeOp, brigade.id);
                 const bestIntermediate = intermediateTargets.find((t) => {
                     const alreadyAt = chosenTargets.get(t.osid) ?? 0;
                     if (alreadyAt >= MAX_ATTACKERS_PER_TARGET) return false;

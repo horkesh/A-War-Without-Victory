@@ -179,6 +179,18 @@
 - **Right approach**: Garrison prevents sector march only. If a brigade must hold a position, also remove it from any operation's brigade list. The garrison tag and operation assignment are independent systems — both must be checked.
 - **Do instead**: When a brigade must hold a fixed position, verify it is (1) tagged `garrison:true` AND (2) not listed in any operation's brigade array. Grep for the brigade ID in `pre_planned_operations.ts` and `triggered_operations.ts`. A garrisoned brigade in an op will march to staging when the op fires.
 
+### [Calibration] Probe operations must match sector_attack in all type gates — missing gate silently disables probes (2026-03-27) — NEW
+- **Context**: `bot_corps_directives.ts` attack-type gate checked for `sector_attack` but not `probe`. All probe operations were silently excluded from the attack pipeline for the entire war. Battle count was 44; after fix, 62. HRHB attacks went from 0 to 8.
+- **Wrong approach**: Adding a new operation type (probe) and only wiring it into the execution path, not the eligibility gates upstream.
+- **Right approach**: When adding any new operation type, grep for ALL existing type checks (gates, filters, switch statements) and ensure the new type is included where appropriate.
+- **Do instead**: After adding a new op type, run `grep -r "sector_attack" src/` and verify every gate that checks for `sector_attack` also handles the new type. A missing gate is silent — no error, no warning, just zero operations of that type.
+
+### [Calibration] Displaced minority populations should flow to friendly territory pools, not sit stranded in enemy municipalities (2026-03-27) — NEW
+- **Context**: Bosniak populations expelled from east Herzegovina accumulated in RS-held municipality pools where no ARBiH brigade could recruit them. 4th Corps had 11.5 personnel/turn supply vs ~3000/turn demand — 2/10 brigades healthy. Rerouting displaced Bosniaks to ARBiH-held municipalities (Mostar, Jablanica, Konjic) fixed the supply-demand mismatch: 9/10 healthy.
+- **Wrong approach**: Leaving displaced minority pools in enemy territory. The mobilization system correctly reads per-municipality pools, but if the municipality is enemy-held, those pools are unreachable — a silent resource leak.
+- **Right approach**: Displaced minority populations should drain to the nearest friendly-held municipality pool of their faction, modeling refugee flows to safe territory.
+- **Do instead**: When reviewing pool diagnostics, check for "stranded pools" — minority faction pools in enemy-held municipalities with no local brigade to recruit them. These are displaced populations that should be rerouted. Use `tools/diagnose_run.cjs` stranded pool check.
+
 ### [Bot AI] Stale-count reads cause oscillation — always track planned movements (2026-03-16) — NEW
 - **Evidence**: `evaluateSectorMarch` in `bot_brigade_eval_front.ts` used `countCorpsBrigadesAtOsid()` to check overstacking. Since all brigades evaluate against the same static state in one pass, 7 brigades at OSID X all see count=7 and all march to OSID Y. Next turn: all 7 at Y, march back to X. Perpetual oscillation.
 - **Root cause**: Per-entity evaluation loop reads shared static state without tracking the effects of earlier entities' decisions in the same loop.

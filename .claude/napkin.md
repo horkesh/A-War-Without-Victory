@@ -8,9 +8,10 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-27, v0.7.0 + Combat Audit + Gradačac/Teočak Session)
-**v0.7.0 + 20 mechanical fixes.** 1525 tests, 128 suites. tsc clean. Electron 41. **92.1% area-weighted (40w), 22/22 anchors, 4/4 enclaves. New ATH.** Golden rule: calibration % means nothing if reached via broken mechanics.
-**Session 2026-03-27:** Sector-coverage displacement guard, cross-faction HRHB pool seeding (5x mult, 4 missing brigades), 255th Slavna enclave at Teočak, 246th at vitinica_2, Op Teočak second axis, Black Swans elite loan via deployment_osid. Pre-commit hook: tsc-only (~15s).
+## Current State (2026-03-27, v0.7.0 + Combat Audit + Diagnostic Fix Session)
+**v0.7.0 + 24 mechanical fixes.** 1525 tests, 128 suites. tsc clean. Electron 41. **92.2% area-weighted (40w), 22/22 anchors, 4/4 enclaves. New ATH.** Golden rule: calibration % means nothing if reached via broken mechanics.
+**Session 2026-03-27 (diagnostic fixes):** Probe type gate (probes re-enabled), overflow threshold `<` not `<=`, orphan pool drainage to strategic reserve, east Herzegovina Bosniak displacement reroute. Results: 62 battles (was 44), HRHB 8 attacks (was 0), 4th Corps 9/10 healthy (was 2/10), 0 stranded pools (was 3), 2 empty sectors (was 6), 0 diagnostic errors (was 2).
+**Earlier 2026-03-27:** Sector-coverage displacement guard, cross-faction HRHB pool seeding (5x mult, 4 missing brigades), 255th Slavna enclave at Teočak, 246th at vitinica_2, Op Teočak second axis, Black Swans elite loan via deployment_osid. Pre-commit hook: tsc-only (~15s).
 **Combat audit (2026-03-26, 11 sequential fixes verified):**
 - **P1-P4:** OOB corps correction (2nd Romanija→SRK), BFS component guards, redistribution distance 8→20 (+ bfsDistance cap 10→20), silent drop fallback. Net -0.3pp (correct mechanics exposed artificial inflation).
 - **P5 Posavina pockets:** 103rd/104th dissolution via `pocket_destroyable` tag — brigades no longer teleport to Mostar.
