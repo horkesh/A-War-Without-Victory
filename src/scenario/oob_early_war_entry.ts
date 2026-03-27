@@ -210,7 +210,10 @@ export function createOobFormations(
         // RS brigades are created at turn 0 (VRS JNA exception).
         if (isBottomUp && b.faction !== 'RS') continue;
         if (state.military.formations[b.id]) continue;
-        if (!factionHasPresenceInMun(state, b.faction, b.home_mun, sidToMun)) continue;
+        // Enclave brigades bypass municipality presence check — they spawn in enemy-surrounded
+        // territory at their home_osid (e.g. 255th at Teočak in RS-controlled Ugljevik).
+        const isEnclave = b.tags?.includes('enclave') === true;
+        if (!isEnclave && !factionHasPresenceInMun(state, b.faction, b.home_mun, sidToMun)) continue;
         const hq_sid = municipalityHqSettlement[b.home_mun];
         const tags = [`mun:${b.home_mun}`];
         if (b.corps) tags.push(`corps:${b.corps}`);

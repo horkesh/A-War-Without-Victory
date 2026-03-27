@@ -417,8 +417,9 @@ export function recruitBrigade(
         return { success: false, reason: 'already_recruited' };
     }
 
-    // Control check
-    if (!factionHasPresenceInMun(state, faction, home_mun, sidToMun)) {
+    // Control check — enclave brigades bypass (they exist in enemy-surrounded territory)
+    const isEnclave = brigade.tags?.includes('enclave') === true;
+    if (!isEnclave && !factionHasPresenceInMun(state, faction, home_mun, sidToMun)) {
         return { success: false, reason: 'no_control' };
     }
 
@@ -619,7 +620,9 @@ export function runBotRecruitment(
             // Elite brigades are national-level professional units — bypass municipality presence check.
             // Their home_mun may use different slug formatting than the operational layer
             // (e.g. "han_pijesak" vs "hanpijesak"), and they spawn unconditionally from a national pool.
-            if (!brigade.is_elite && !factionHasPresenceInMun(state, faction, brigade.home_mun, sidToMun)) {
+            // Enclave brigades bypass — they exist in enemy-surrounded territory at their home_osid.
+            const isBrigadeEnclave = brigade.tags?.includes('enclave') === true;
+            if (!brigade.is_elite && !isBrigadeEnclave && !factionHasPresenceInMun(state, faction, brigade.home_mun, sidToMun)) {
                 report.brigades_skipped_no_control++;
                 continue;
             }

@@ -680,6 +680,7 @@
     "home_mun": "ugljevik",
     "home_settlement": "Teočak",
     "home_osid": "op:ugljevik:teocak_krstac_2",
+    "fallback_osid": "op:zvornik:rastosnica_2",
     "kind": "brigade",
     "default_equipment_class": "mountain",
     "available_from": 0,
@@ -687,8 +688,10 @@
     "initial_personnel": 2500,
     "initial_cohesion": 75,
     "defense_terrain_bonus": 0.7,
+    "garrison": true,
     "distinction_potential": "tier_1",
-    "initial_officer_quality": 0.25
+    "initial_officer_quality": 0.25,
+    "tags": ["enclave"]
   },
   {
     "id": "arbih_7th_vitezka_muslim_liberation",
@@ -1552,10 +1555,10 @@
     "corps": "arbih_2nd_corps",
     "home_mun": "zvornik",
     "home_settlement": "Sapna",
-    "home_osid": "op:zvornik:djulici",
+    "home_osid": "op:zvornik:vitinica_2",
     "kind": "brigade",
     "default_equipment_class": "light_infantry",
-    "available_from": 4,
+    "available_from": 0,
     "mandatory": true,
     "initial_personnel": 600,
     "initial_cohesion": 48,

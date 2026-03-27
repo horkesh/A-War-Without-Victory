@@ -566,6 +566,16 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
                 objectives: ['op:zvornik:rastosnica_2'],
                 staging_osid: 'op:kalesija:kalesija_grad_2',
             },
+            {
+                axis_id: 'vitinica_recovery',
+                name: 'Vitinica Recovery',
+                brigades: [
+                    'arbih_246th_vitezka_mountain',
+                    'arbih_254th_mountain',
+                ],
+                objectives: ['op:zvornik:vitinica_2'],
+                staging_osid: 'op:zvornik:djulici',
+            },
         ],
     },
 ];
