@@ -355,7 +355,7 @@ function executeFactionDirectives(
         const cmd = corpsId ? state.military.corps_command?.[corpsId] : null;
         const activeOp = cmd?.active_operation ?? null;
         const isActiveSectorOperationParticipant =
-            activeOp?.type === 'sector_attack' &&
+            (activeOp?.type === 'sector_attack' || activeOp?.type === 'probe') &&
             isOperationParticipant(activeOp, brigade.id);
             
         const directive = cmd?.directive ?? null;

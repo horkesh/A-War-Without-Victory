@@ -367,6 +367,55 @@ export function runOngoingMobilization(
         report.by_faction[poolFaction] = (report.by_faction[poolFaction] ?? 0) + mobilized;
     }
 
+    // ── East Herzegovina Bosniak displacement reroute ─────────────────
+    // Bosniaks expelled from RS/HRHB-controlled east Herzegovina fled to
+    // ARBiH-held municipalities (Mostar, Konjic, Jablanica). Route a fraction
+    // of their census population as additional mobilization input. Historically
+    // these refugees were absorbed into 4th Corps units.
+    const HERZEGOVINA_BOSNIAK_REROUTE: Array<{ source: MunicipalityId; targets: MunicipalityId[] }> = [
+        { source: 'stolac' as MunicipalityId, targets: ['mostar' as MunicipalityId] },
+        { source: 'capljina' as MunicipalityId, targets: ['mostar' as MunicipalityId] },
+        { source: 'nevesinje' as MunicipalityId, targets: ['konjic' as MunicipalityId, 'mostar' as MunicipalityId] },
+        { source: 'gacko' as MunicipalityId, targets: ['konjic' as MunicipalityId] },
+        { source: 'bileca' as MunicipalityId, targets: ['mostar' as MunicipalityId] },
+        { source: 'trebinje' as MunicipalityId, targets: ['mostar' as MunicipalityId] },
+        { source: 'ljubinje' as MunicipalityId, targets: ['mostar' as MunicipalityId] },
+        { source: 'ravno' as MunicipalityId, targets: ['mostar' as MunicipalityId] },
+    ];
+    /** Fraction of source Bosniak census routed as displaced mobilization. */
+    const DISPLACEMENT_REROUTE_FRACTION = 0.15;
+
+    if (population1991ByMun) {
+        for (const route of HERZEGOVINA_BOSNIAK_REROUTE) {
+            const sourceEntry = population1991ByMun[route.source];
+            if (!sourceEntry) continue;
+            // Check source is NOT RBiH-controlled (only reroute if expelled)
+            const pc = state.political?.political_controllers ?? {};
+            let sourceIsRBiH = false;
+            for (const osid of Object.keys(pc)) {
+                if (osid.startsWith(`op:${route.source}:`) && pc[osid] === 'RBiH') {
+                    sourceIsRBiH = true;
+                    break;
+                }
+            }
+            if (sourceIsRBiH) continue; // still RBiH-controlled, no displacement
+            const bosniakPop = sourceEntry.bosniak ?? 0;
+            if (bosniakPop <= 0) continue;
+            const perTarget = Math.floor((bosniakPop * DISPLACEMENT_REROUTE_FRACTION * BASE_MOBILIZATION_RATE) / route.targets.length);
+            if (perTarget <= 0) continue;
+            for (const target of route.targets) {
+                const key = militiaPoolKey(target, 'RBiH');
+                if (!pools[key]) {
+                    pools[key] = { mun_id: target, faction: 'RBiH' as FactionId, available: 0, committed: 0, exhausted: 0, updated_turn: currentTurn };
+                }
+                pools[key].available += perTarget;
+                pools[key].updated_turn = currentTurn;
+                report.total_mobilized += perTarget;
+                report.by_faction['RBiH'] = (report.by_faction['RBiH'] ?? 0) + perTarget;
+            }
+        }
+    }
+
     const displacedReport = runDisplacedAndCrossEthnicContributions(
         state,
         settlements,

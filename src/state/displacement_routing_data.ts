@@ -92,7 +92,7 @@ const BOSNIAK_ROUTES: Record<string, readonly MunicipalityId[]> = {
     SARAJEVO_RS_HELD:   ['centar_sarajevo', 'stari_grad_sarajevo', 'novi_grad_sarajevo', 'novo_sarajevo', 'hadzici', 'visoko', 'zenica'],
     CENTRAL_BOSNIA:     ['travnik', 'zenica', 'kakanj', 'visoko'],
     HERZEGOVINA:        ['jablanica', 'konjic', 'mostar', 'zenica', 'travnik'],
-    HERCEG_EAST:        ['gorazde', 'centar_sarajevo'],
+    HERCEG_EAST:        ['mostar', 'konjic', 'jablanica', 'gorazde', 'centar_sarajevo'],
     BIHAC_EDGE:         ['bihac', 'cazin', 'velika_kladusa'],
 };
 

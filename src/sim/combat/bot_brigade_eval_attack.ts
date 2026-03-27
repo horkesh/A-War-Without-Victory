@@ -96,7 +96,7 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
     }
 
     const activeOp15 = activeOp;
-    if (isActiveSectorOperationParticipant && activeOp15?.type === 'sector_attack') {
+    if (isActiveSectorOperationParticipant && (activeOp15?.type === 'sector_attack' || activeOp15?.type === 'probe')) {
         if (activeOp15.phase === 'planning') {
             const planningApproachOsids = getSectorOffensiveApproachOsids(
                 state,

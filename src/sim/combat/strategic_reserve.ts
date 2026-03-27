@@ -62,6 +62,9 @@ export interface StrategicReserveCollectionReport {
     pools_overflowed: number;
     manpower_collected: number;
     by_faction: Record<string, number>;
+    orphan_pools_drained: number;
+    orphan_manpower_collected: number;
+    orphan_by_faction: Record<string, number>;
 }
 
 /**
@@ -73,7 +76,10 @@ export function collectStrategicReserves(state: GameState): StrategicReserveColl
     const report: StrategicReserveCollectionReport = {
         pools_overflowed: 0,
         manpower_collected: 0,
-        by_faction: {}
+        by_faction: {},
+        orphan_pools_drained: 0,
+        orphan_manpower_collected: 0,
+        orphan_by_faction: {}
     };
 
     if (!state.military.militia_pools) return report;
@@ -84,7 +90,7 @@ export function collectStrategicReserves(state: GameState): StrategicReserveColl
     const poolKeys = Object.keys(pools).sort(strictCompare);
     for (const key of poolKeys) {
         const pool = pools[key];
-        if (!pool || pool.available <= OVERFLOW_THRESHOLD) continue;
+        if (!pool || pool.available < OVERFLOW_THRESHOLD) continue;
         const faction = pool.faction;
         if (!faction) continue;
 
@@ -96,6 +102,37 @@ export function collectStrategicReserves(state: GameState): StrategicReserveColl
         report.pools_overflowed += 1;
         report.manpower_collected += excess;
         report.by_faction[faction] = (report.by_faction[faction] ?? 0) + excess;
+    }
+
+    // Orphan pool collection: minority pools in enemy-controlled municipalities.
+    // These represent displaced populations that fled to friendly territory.
+    // Drain to strategic reserve rather than leaving stranded.
+    const pc = state.political?.political_controllers ?? {};
+    for (const key of poolKeys) {
+        const pool = pools[key];
+        if (!pool || pool.available <= 0 || pool.committed > 0) continue;
+        const faction = pool.faction;
+        if (!faction) continue;
+        const munId = pool.mun_id;
+
+        // Check if faction controls any OSID in this municipality
+        let factionHasPresence = false;
+        for (const osid of Object.keys(pc).sort(strictCompare)) {
+            if (osid.startsWith('op:' + munId + ':') && pc[osid] === faction) {
+                factionHasPresence = true;
+                break;
+            }
+        }
+        if (factionHasPresence) continue;
+
+        // Drain to strategic reserve
+        const excess = pool.available;
+        pool.available = 0;
+        reserves[faction] = (reserves[faction] ?? 0) + excess;
+
+        report.orphan_pools_drained += 1;
+        report.orphan_manpower_collected += excess;
+        report.orphan_by_faction[faction] = (report.orphan_by_faction[faction] ?? 0) + excess;
     }
 
     return report;

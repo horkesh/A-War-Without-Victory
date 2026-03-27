@@ -34,6 +34,14 @@ const POCKET_BRIGADE_FORCE_DISSOLUTION_IDS = new Set<string>([
 const REAR_GUARD_CORPS = new Set<string>(['vrs_1st_krajina', 'vrs_2nd_krajina']);
 const VRS_1K_LINE_DISTANCE_MAX_HOPS = 6;
 
+/**
+ * Brigades more than this many hops from home_osid are skipped for sector
+ * assignment so that existing recall mechanisms (evaluateHomeReturn,
+ * recall-drifted-brigades) can pull them back instead of locking them
+ * into a distant sector.
+ */
+export const DRIFT_RECALL_SECTOR_SKIP_HOPS = 6;
+
 function friendlyDistanceToAny(
     startOsid: string,
     targets: Set<string>,
@@ -222,6 +230,20 @@ export function classifyBrigadesByTerritory(
 
         const fCorpsId = getFormationCorpsId(f);
         if (fCorpsId && EXEMPT_CORPS_IDS.has(fCorpsId) && !loanedCorpsMap.has(fid)) continue;
+
+        // ── Drift guard: skip sector assignment for brigades far from home ──
+        // Uses the previous turn's home_distance_cache (not yet rebuilt this turn).
+        // Unassigned brigades are available for evaluateHomeReturn / recall-drifted-brigades.
+        if (state) {
+            const distCache = state.military.home_distance_cache;
+            if (distCache) {
+                const homeDist = distCache[fid];
+                if (homeDist !== undefined && homeDist > DRIFT_RECALL_SECTOR_SKIP_HOPS) {
+                    // Brigade is drifted — don't lock it into a distant sector
+                    continue;
+                }
+            }
+        }
 
         const effectiveCorpsId = loanedCorpsMap.get(fid) ?? fCorpsId;
         const loc = f.location_osid;
