@@ -13,6 +13,7 @@
 
 import type {
     CorpsOperation,
+    FactionId,
     FormationId,
     GameState,
     OperationAxis,
@@ -23,8 +24,9 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 import { assignOperationCommander } from './officer_system.js';
 import { isEligibleOperationFormation } from '../../state/formation_constants.js';
-import { validateOpAtInjection, logOpInjectionWarnings } from './operation_validation.js';
+import { validateOpAtInjection, collectOpInjectionWarnings } from './operation_validation.js';
 import type { ValidatableOpDef } from './operation_validation.js';
+
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
@@ -41,6 +43,8 @@ interface TriggeredAxisDef {
 
 interface TriggeredOpDef {
     name: string;
+    /** Faction that owns this operation. Used for objective filtering and validation. */
+    faction: FactionId;
     /** Primary corps that "owns" the operation. For joint ops, axes may have different corps. */
     primary_corps: string;
     axes: TriggeredAxisDef[];
@@ -95,6 +99,7 @@ const TRIGGERED_OPS: TriggeredOpDef[] = [
         //   Only two valid HRHB objectives exist: donja_mahala, orasje.
         //   planning_duration=9: rs_27th (7 hops) + 2-turn buffer.
         name: 'Operation Posavina Corridor',
+        faction: 'RS',
         primary_corps: 'vrs_1st_krajina',
         staging_osid: 'op:bosanski_samac:domaljevac_2',
         planning_duration: 9,
@@ -130,6 +135,7 @@ const TRIGGERED_OPS: TriggeredOpDef[] = [
         // (BB1 p.193 Mostar hills, BB2 p.514 Glavatičevo). Two separate axes
         // with dedicated brigades (no sharing with Op Foča brigades).
         name: 'Operation Herzegovina Consolidation',
+        faction: 'RS',
         primary_corps: 'vrs_herzegovina',
         staging_osid: 'op:nevesinje:sopilja',
         // planning_duration=3: rs_nevesinje_brigade (home krekovi_2, 1 hop from sopilja) needs
@@ -176,6 +182,7 @@ const TRIGGERED_OPS: TriggeredOpDef[] = [
     },
     {
         name: 'Operation Kotor Varos',
+        faction: 'RS',
         primary_corps: 'vrs_1st_krajina',
         staging_osid: 'op:kotor_varos:kotor_varos_2',
         planning_duration: 2,
@@ -201,6 +208,7 @@ const TRIGGERED_OPS: TriggeredOpDef[] = [
     },
     {
         name: 'Operation Cerska-Kamenica',
+        faction: 'RS',
         primary_corps: 'vrs_drina',
         staging_osid: 'op:srebrenica:brezovice_2',
         planning_duration: 2,
@@ -274,7 +282,7 @@ function buildOperation(
 
         const axisObjectives = axisDef.objectives.filter((osid) => {
             const controller = getPoliticalControllerOSID(state, osid, undefined);
-            return controller !== null && controller !== 'RS';
+            return controller !== null && controller !== def.faction;
         });
 
         if (axisObjectives.length === 0) continue;
@@ -364,16 +372,12 @@ export function checkTriggeredOperations(state: GameState): string[] {
         // Validate before building
         const validatable: ValidatableOpDef = {
             name: def.name,
-            faction: 'RS', // all triggered ops are RS
+            faction: def.faction,
             axes: def.axes.map(a => ({ axis_id: a.axis_id, brigades: a.brigades, objectives: a.objectives, staging_osid: a.staging_osid })),
             staging_osid: def.staging_osid,
         };
         const trigWarnings = validateOpAtInjection(validatable, state);
-        if (trigWarnings.length > 0) {
-            logOpInjectionWarnings(trigWarnings);
-            if (!state.military.op_injection_warnings) state.military.op_injection_warnings = [];
-            state.military.op_injection_warnings.push(...trigWarnings);
-        }
+        collectOpInjectionWarnings(state, trigWarnings);
 
         // Bot auto-accept: build and inject the operation
         const result = buildOperation(def, state, turn);

@@ -25,7 +25,7 @@ import { isEligibleOperationFormation } from '../../state/formation_constants.js
 import { EXEMPT_CORPS_IDS } from './corps_front_sectors_constants.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 import { deployEliteLoan } from './army_reserve_system.js';
-import { validateOpAtInjection, logOpInjectionWarnings } from './operation_validation.js';
+import { validateOpAtInjection, collectOpInjectionWarnings } from './operation_validation.js';
 import type { OpInjectionWarning } from './operation_validation.js';
 // Graz truce imports removed: east Herzegovina truce is handled by sector_offensive
 // on operation completion (graz_east_herzegovina_active_turn), not by injection.
@@ -763,11 +763,7 @@ export function injectPrePlannedOperations(state: GameState): void {
         const warnings = validateOpAtInjection(def, state);
         allWarnings.push(...warnings);
     }
-    if (allWarnings.length > 0) {
-        logOpInjectionWarnings(allWarnings);
-        if (!state.military.op_injection_warnings) state.military.op_injection_warnings = [];
-        state.military.op_injection_warnings.push(...allWarnings);
-    }
+    collectOpInjectionWarnings(state, allWarnings);
 
     // Track which corps already got an op this injection pass
     const injectedCorps = new Set<string>();
@@ -876,11 +872,7 @@ export function injectQueuedOperation(state: GameState, corpsId: string): boolea
 
     // Validate before building
     const queueWarnings = validateOpAtInjection(def, state);
-    if (queueWarnings.length > 0) {
-        logOpInjectionWarnings(queueWarnings);
-        if (!state.military.op_injection_warnings) state.military.op_injection_warnings = [];
-        state.military.op_injection_warnings.push(...queueWarnings);
-    }
+    collectOpInjectionWarnings(state, queueWarnings);
 
     // Build axes — brigades may not exist yet; keep queue entry for retry
     const result = buildAxesFromDef(def, state);

@@ -207,3 +207,15 @@ export function logOpInjectionWarnings(warnings: OpInjectionWarning[]): void {
         console.log(`  [${prefix}] ${w.op_name}${axis}: ${w.check} — ${w.detail}`);
     }
 }
+
+/** Log + append warnings to state, deduplicating by op_name + axis_id + check. */
+export function collectOpInjectionWarnings(state: GameState, warnings: OpInjectionWarning[]): void {
+    if (warnings.length === 0) return;
+    logOpInjectionWarnings(warnings);
+    if (!state.military.op_injection_warnings) state.military.op_injection_warnings = [];
+    const existing = state.military.op_injection_warnings;
+    for (const w of warnings) {
+        const isDupe = existing.some(e => e.op_name === w.op_name && e.axis_id === w.axis_id && e.check === w.check);
+        if (!isDupe) existing.push(w);
+    }
+}
