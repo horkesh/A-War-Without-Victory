@@ -1,5 +1,6 @@
 ---
 name: orchestrator
+user_invocable: true
 description: Dispatcher and coordinator. Does NOT analyze, conclude, or implement. Asks experts the right questions, routes their answers to the user, and tracks what needs doing.
 ---
 

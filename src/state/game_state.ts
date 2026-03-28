@@ -29,6 +29,7 @@
  */
 import type { BrigadeHistory } from './brigade_history.js';
 import type { OperationWeeklyEntry, PendingOperationCasualties, OperationAAR } from '../sim/combat/operation_aar.js';
+import type { OpInjectionWarning } from '../sim/combat/operation_validation.js';
 import type { CasualtyLedger } from './casualty_ledger.js';
 import type { CombatSummary } from './combat_summary.js';
 import type { BrigadeDecoration } from './decoration_types.js';
@@ -1676,6 +1677,8 @@ corps_attack_axis_orders?: Record<FormationId, { edge_ids: string[]; created_tur
 corps_command?: Record<FormationId, CorpsCommandState>;
 /** Equipment reserve per corps: excess from JNA phantom withdrawals. Drawn during brigade reinforcement. */
 corps_equipment_reserve?: Record<FormationId, { tanks: number; artillery: number; apcs: number }>;
+/** Operation injection validation warnings (collected at injection time, surfaced in run_summary). */
+op_injection_warnings?: OpInjectionWarning[];
 /** Triggered operations that have been offered and accepted (operation name → turn accepted). */
 triggered_operations_accepted?: Record<string, number>;
 /** Triggered operations that have been declined (operation name → { declined_turn, decline_count }). */

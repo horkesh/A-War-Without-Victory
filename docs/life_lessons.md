@@ -70,6 +70,8 @@
 
 ## New Lessons (always read these)
 
+### [Process] Verify agent edits landed on disk — agent "success" claims are not proof (2026-03-28) — NEW → see `process.md`
+
 ### [Calibration] Calibration % means nothing if reached through broken mechanics — GOLDEN RULE (2026-03-26) — NEW → see `calibration.md`
 
 ### [Architecture] Hidden BFS depth caps silently disable constant changes — always trace the full call chain (2026-03-26) — NEW → see `architecture.md`

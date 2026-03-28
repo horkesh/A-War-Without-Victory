@@ -1,3 +1,29 @@
+## [2026-03-28] Operations Validation Engine Gate + Ghost Sector Sanitizer + Staging Fixes
+
+### Change
+- **`validateOpAtInjection` engine gate**: New `src/sim/combat/operation_validation.ts` with 5 checks (staging adjacency, brigade missing/ineligible, all objectives owned, axis empty, op empty). Wired at 3 injection points: `injectPrePlannedOperations`, `injectQueuedOperation`, `checkTriggeredOperations`. Warnings logged to console + stored in `state.military.op_injection_warnings` + surfaced in `run_summary.json` under `op_injection_validation`.
+- **Ghost sector sanitizer**: New `sanitize-ghost-sector-power` pipeline step in `war_phases.ts`. Runs after all brigade mutations; zeroes `defensive_power`, `density`, `threat_ratio`, and `sector_combat_ratings` on sectors with 0 assigned/reserve brigades. Prevents phantom force display.
+- **Check #12 false positive fix**: `operation_zero_eligible_execution` now excludes consolidation-only successes (outcome=success + captures>0 + attacks=0). Op Drina/Visegrad no longer falsely flagged.
+- **Check C validation logic**: Staging adjacency now checks against first objective in **definition order** (march route), not alphabetically sorted. Eliminates 5 false positives from 9 staging errors.
+- **Op Teočak vitinica_recovery axis removed**: Dead axis targeting `op:zvornik:sapna` (RBiH, same faction as attacker). Only kalesija_assault remains.
+- **3 staging adjacency fixes**: Koridor/brcko dvorovi_2→crnjelovo_donje, Drina/bratunac ljubovija_2→slapasnica (phantom OSID in Serbia), Prsten/northern srednje→podlugovi.
+- **Investigation report**: `docs/40_reports/20260328_OPS_VALIDATION_INVESTIGATION.md` — 9 staging errors analyzed (5 false positives identified), 4 root cause patterns documented, reviewer corrections captured (Op Corridor NOT a config error — Posavina exempt from Graz).
+
+### Results
+- **n1150: 92.2% area-weighted, 22/22 anchors, 6/6 benchmarks. 0 critical anomalies. 0 phantom sectors.**
+- Op injection validation: 13 warnings, 0 errors (down from 9 errors + 12 warnings before fixes).
+- Check #12: only Op Foca flagged (legitimate failure).
+- Pipeline: 148 war-phase steps (was 147).
+
+### Verification
+- `npx tsc --noEmit` (clean). `npm run test:vitest` (1510/1525, 2 pre-existing). `npm run desktop:map:build` (clean).
+- Fresh 40w run with `tools/compare_painted_vs_sim.cjs` validation.
+
+### Remaining (deferred to next session)
+- Empty sector edge-count triage (5 empty sectors, structural — brigade_assignment.ts)
+- Operation-aware pre-flight recruitment (spawn timing mismatch)
+- Corps exhaustion cooldown + counter-attack broadening (passive brigade fix)
+
 ## [2026-03-27] Electron IPC Connectivity Restoration & v0.7.0 Cleanup
 
 ### Change

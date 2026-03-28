@@ -3,6 +3,14 @@
 
 ---
 
+### [Process] Verify agent edits landed on disk — agent "success" claims are not proof (2026-03-28) — NEW
+- **Context**: Dispatched 3 parallel agents to implement fixes (Check C logic, vitinica axis removal, ghost sector sanitizer, validateOpAtInjection wiring). All 3 reported success with detailed summaries. Audit agents dispatched later found 4 of 7 deliverables were NOT on disk — only anomaly_detector.ts and staging OSID changes survived. The agents' edits to war_phases.ts, game_state.ts, scenario_runner.ts, and operation_validation.ts were lost.
+- **Wrong approach**: Trusting agent "Done" summaries without verifying `git diff --stat` against expected file list. The agents ran tsc and claimed clean, but their edits evaporated.
+- **Right approach**: After any parallel agent implementation session, immediately run `git diff --stat HEAD` and verify EVERY expected file appears in the diff. If a file is missing, the agent's edit was lost — re-apply manually or re-dispatch.
+- **Do instead**: After dispatching implementation agents, always verify with `git diff --stat`. Count changed files against expected deliverables. Agent claims ≠ reality. Trust `git diff`, not agent output.
+
+---
+
 ### [QA] First-pass fixes can introduce new errors — always run a verification pass on corrected content (2026-03-25) — NEW
 - **Context**: 3-pass Codex essay QA. Pass 1 removed "Apostoli" unit from Stupni Do essay because BB didn't mention it. Pass 2 found ICTY and Wikipedia confirm BOTH Apostoli AND Maturice participated — the removal was wrong. Similarly, Sharp Guard predecessor operations were "corrected" to wrong names twice before the third pass got them right.
 - **Wrong approach**: Applying fixes from one source (BB) without cross-referencing others (ICTY, web). Assuming a fix is correct because it came from a QA agent.

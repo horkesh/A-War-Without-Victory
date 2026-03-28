@@ -76,6 +76,6 @@ describe('war-phase step ordering', () => {
         // +1 from recall-drifted-brigades (prevent brigade drift far from home)
         // +1 from reroute-pool-surplus (transfer manpower from exhausted to deficit municipalities)
         // +1 from pool-war-weariness-decay (desertion/draft evasion/emigration drain on pool.available)
-        expect(stepNames.length).toBe(147);
+        expect(stepNames.length).toBe(148);
     });
 });

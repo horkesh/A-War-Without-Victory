@@ -2200,7 +2200,15 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 warning: anomalyReports.filter((r) => r.severity === 'warning').length,
                 info: anomalyReports.filter((r) => r.severity === 'info').length,
                 reports: anomalyReports
-            }
+            },
+            ...(state.military.op_injection_warnings?.length ? {
+                op_injection_validation: {
+                    count: state.military.op_injection_warnings.length,
+                    errors: state.military.op_injection_warnings.filter(w => w.severity === 'error').length,
+                    warnings: state.military.op_injection_warnings.filter(w => w.severity === 'warning').length,
+                    issues: state.military.op_injection_warnings,
+                }
+            } : {})
         };
         const runSummaryPath = join(outDir, 'run_summary.json');
         const runSummaryForWrite = integerizeRunSummaryCounts(runSummary);

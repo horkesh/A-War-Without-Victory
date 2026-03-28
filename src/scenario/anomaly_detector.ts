@@ -454,6 +454,9 @@ function detectOperationZeroEligibleExecution(state: GameState): AnomalyReport[]
 
     for (const aar of opHistory.slice().sort((a, b) => strictCompare(a.operation_id, b.operation_id))) {
         if (aar.outcome === 'orphaned') continue;
+        // Consolidation-only successes: ops that captured objectives via rear_pocket_consolidation
+        // without combat are intentional — not a staging failure.
+        if (aar.outcome === 'success' && aar.objectives_captured.length > 0 && aar.total_attacks === 0) continue;
         if (aar.total_attacks > 0) continue;
 
         // Only flag operations that actually entered execution (duration > planning phase).

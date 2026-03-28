@@ -23,6 +23,8 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 import { assignOperationCommander } from './officer_system.js';
 import { isEligibleOperationFormation } from '../../state/formation_constants.js';
+import { validateOpAtInjection, logOpInjectionWarnings } from './operation_validation.js';
+import type { ValidatableOpDef } from './operation_validation.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
@@ -358,6 +360,20 @@ export function checkTriggeredOperations(state: GameState): string[] {
             }
         }
         if (secondaryBlocked) continue;
+
+        // Validate before building
+        const validatable: ValidatableOpDef = {
+            name: def.name,
+            faction: 'RS', // all triggered ops are RS
+            axes: def.axes.map(a => ({ axis_id: a.axis_id, brigades: a.brigades, objectives: a.objectives, staging_osid: a.staging_osid })),
+            staging_osid: def.staging_osid,
+        };
+        const trigWarnings = validateOpAtInjection(validatable, state);
+        if (trigWarnings.length > 0) {
+            logOpInjectionWarnings(trigWarnings);
+            if (!state.military.op_injection_warnings) state.military.op_injection_warnings = [];
+            state.military.op_injection_warnings.push(...trigWarnings);
+        }
 
         // Bot auto-accept: build and inject the operation
         const result = buildOperation(def, state, turn);

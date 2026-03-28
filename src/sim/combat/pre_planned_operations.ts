@@ -25,6 +25,8 @@ import { isEligibleOperationFormation } from '../../state/formation_constants.js
 import { EXEMPT_CORPS_IDS } from './corps_front_sectors_constants.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 import { deployEliteLoan } from './army_reserve_system.js';
+import { validateOpAtInjection, logOpInjectionWarnings } from './operation_validation.js';
+import type { OpInjectionWarning } from './operation_validation.js';
 // Graz truce imports removed: east Herzegovina truce is handled by sector_offensive
 // on operation completion (graz_east_herzegovina_active_turn), not by injection.
 
@@ -78,7 +80,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'op:brcko:potocari_2',
                     'op:brcko:skakava_donja',
                 ],
-                staging_osid: 'op:bijeljina:dvorovi_2',
+                staging_osid: 'op:bijeljina:crnjelovo_donje',
             },
             {
                 axis_id: 'posavina_flank',
@@ -135,7 +137,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'op:vlasenica:vlasenica_2',
                     'op:vlasenica:cerska_2',
                 ],
-                staging_osid: 'op:bratunac:ljubovija_2',
+                staging_osid: 'op:bratunac:slapasnica',
             },
         ],
     },
@@ -249,7 +251,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'op:ilijas:medojevici',
                     'op:ilijas:sirovine',
                 ],
-                staging_osid: 'op:ilijas:srednje',
+                staging_osid: 'op:ilijas:podlugovi',
             },
         ],
     },
@@ -623,16 +625,6 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
                 objectives: ['op:zvornik:rastosnica_2'],
                 staging_osid: 'op:kalesija:kalesija_grad_2',
             },
-            {
-                axis_id: 'vitinica_recovery',
-                name: 'Vitinica Recovery',
-                brigades: [
-                    'arbih_246th_vitezka_mountain',
-                    'arbih_254th_mountain',
-                ],
-                objectives: ['op:zvornik:sapna'],
-                staging_osid: 'op:zvornik:djulici',
-            },
         ],
     },
 ];
@@ -765,6 +757,18 @@ export function injectPrePlannedOperations(state: GameState): void {
     const formations = state.military.formations ?? {};
     const turn = state.meta?.turn ?? 0;
 
+    // Validate all definitions and collect warnings
+    const allWarnings: OpInjectionWarning[] = [];
+    for (const def of ALL_PRE_PLANNED) {
+        const warnings = validateOpAtInjection(def, state);
+        allWarnings.push(...warnings);
+    }
+    if (allWarnings.length > 0) {
+        logOpInjectionWarnings(allWarnings);
+        if (!state.military.op_injection_warnings) state.military.op_injection_warnings = [];
+        state.military.op_injection_warnings.push(...allWarnings);
+    }
+
     // Track which corps already got an op this injection pass
     const injectedCorps = new Set<string>();
 
@@ -868,6 +872,14 @@ export function injectQueuedOperation(state: GameState, corpsId: string): boolea
         cmd.queued_operations.shift();
         if (cmd.queued_operations.length === 0) delete cmd.queued_operations;
         return false;
+    }
+
+    // Validate before building
+    const queueWarnings = validateOpAtInjection(def, state);
+    if (queueWarnings.length > 0) {
+        logOpInjectionWarnings(queueWarnings);
+        if (!state.military.op_injection_warnings) state.military.op_injection_warnings = [];
+        state.military.op_injection_warnings.push(...queueWarnings);
     }
 
     // Build axes — brigades may not exist yet; keep queue entry for retry

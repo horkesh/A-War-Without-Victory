@@ -1659,6 +1659,33 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'sanitize-ghost-sector-power',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const sectors = context.state.military.corps_front_sectors ?? {};
+            const ratings = context.state.military.sector_combat_ratings ?? {};
+            for (const sid of Object.keys(sectors).sort(strictCompare)) {
+                const s = sectors[sid];
+                if (s.assigned_brigade_ids.length === 0 && s.reserve_brigade_ids.length === 0) {
+                    s.defensive_power = 0;
+                    s.density = 0;
+                    s.threat_ratio = 0;
+                    if (ratings[sid]) {
+                        ratings[sid].offensive_power = 0;
+                        ratings[sid].defensive_power = 0;
+                        ratings[sid].defense_per_edge = 0;
+                        ratings[sid].personnel = 0;
+                        ratings[sid].morale_avg = 0;
+                        ratings[sid].cohesion_avg = 0;
+                        ratings[sid].fatigue_avg = 0;
+                        ratings[sid].brigade_count = 0;
+                        ratings[sid].strength_class = 'critical';
+                    }
+                }
+            }
+        },
+    },
+    {
         name: 'apply-vrs-equipment-decay',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
