@@ -10,6 +10,7 @@ import type { WeeklyActivityCounts, WeeklyReportRow } from './scenario_reporting
 import type { CorpsAiReportEntry } from '../sim/combat/bot_corps_ai.js';
 import type { OperationAAR } from '../sim/combat/operation_aar.js';
 import type { VictoryEvaluation } from './victory_conditions.js';
+import type { AnomalyReport } from './anomaly_types.js';
 
 /** Snapshot of corps AI directives at a specific turn, for end report. */
 export interface CorpsAiSnapshot {
@@ -594,6 +595,8 @@ export interface FormatEndReportParams {
     operationHistory?: OperationAAR[] | null;
     /** Active (not-yet-completed) operations at run end. */
     activeOperations?: ActiveOperationSummary[] | null;
+    /** Post-run anomaly detection results. */
+    anomalyReports?: AnomalyReport[] | null;
 }
 
 /** Phase H1.7: Run-level activity diagnostics (machine-readable). */
@@ -1053,6 +1056,33 @@ export function formatEndReportMarkdown(params: FormatEndReportParams): string {
         }
         lines.push('');
     }
+    lines.push('## Anomaly Detection');
+    lines.push('');
+    if (!params.anomalyReports || params.anomalyReports.length === 0) {
+        lines.push('No anomalies detected.');
+    } else {
+        const criticals = params.anomalyReports.filter((r) => r.severity === 'critical');
+        const warnings = params.anomalyReports.filter((r) => r.severity === 'warning');
+        const infos = params.anomalyReports.filter((r) => r.severity === 'info');
+        lines.push(
+            `${params.anomalyReports.length} anomaly(ies) detected (${criticals.length} critical, ${warnings.length} warning, ${infos.length} info).`
+        );
+        if (criticals.length > 0) {
+            lines.push('');
+            lines.push('### Critical');
+            for (const r of criticals) {
+                lines.push(`- [${r.type}] ${r.description}`);
+            }
+        }
+        if (warnings.length > 0) {
+            lines.push('');
+            lines.push('### Warning');
+            for (const r of warnings) {
+                lines.push(`- [${r.type}] ${r.description}`);
+            }
+        }
+    }
+    lines.push('');
     lines.push('## Notes on interpretation');
     lines.push('');
     lines.push(

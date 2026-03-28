@@ -112,6 +112,8 @@ import {
     type CorpsAiSnapshot,
     type ActiveOperationSummary
 } from './scenario_end_report.js';
+import { runAnomalyDetection } from './anomaly_detector.js';
+import type { AnomalyReport } from './anomaly_types.js';
 import type { OperationAAR } from '../sim/combat/operation_aar.js';
 import { computeRunId, loadScenario, normalizeActions, resolveInitControlPath, resolveInitFormationsPath } from './scenario_loader.js';
 import {
@@ -2025,6 +2027,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         const finalSavePath = join(outDir, 'final_save.json');
         await writeFile(finalSavePath, serializeState(state), 'utf8');
 
+        const anomalyReports: AnomalyReport[] = runAnomalyDetection(state);
+
         let breachDiagnostic: { max_abs_pressure: number; breach_count_last_turn: number } | undefined;
         if (postureAllPushAndApplyBreaches && state.military.front_pressure && typeof state.military.front_pressure === 'object') {
             let maxAbs = 0;
@@ -2189,7 +2193,14 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                           required_streak: 4
                       }
                   }
-                : {})
+                : {}),
+            anomaly_detection: {
+                count: anomalyReports.length,
+                critical: anomalyReports.filter((r) => r.severity === 'critical').length,
+                warning: anomalyReports.filter((r) => r.severity === 'warning').length,
+                info: anomalyReports.filter((r) => r.severity === 'info').length,
+                reports: anomalyReports
+            }
         };
         const runSummaryPath = join(outDir, 'run_summary.json');
         const runSummaryForWrite = integerizeRunSummaryCounts(runSummary);
@@ -2299,7 +2310,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             historicalAlignmentDiagnostics,
             corpsAiSnapshots: corpsAiSnapshots.length > 0 ? corpsAiSnapshots : null,
             operationHistory: operationAars.length > 0 ? operationAars : null,
-            activeOperations: collectActiveOperations(state)
+            activeOperations: collectActiveOperations(state),
+            anomalyReports: anomalyReports.length > 0 ? anomalyReports : null
         });
         const endReportPath = join(outDir, 'end_report.md');
         await writeFile(endReportPath, endReportMd, 'utf8');

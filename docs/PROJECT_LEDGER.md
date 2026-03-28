@@ -16524,3 +16524,56 @@ No impact. Event trigger changes are deterministic (same `fired_event_ids` state
 
 ### Calibration
 - **91.4% → 92.1% area-weighted (new ATH)**. All 22 anchors pass. 4/4 enclaves. 6/6 benchmarks.
+
+## [2026-03-28] Anomaly detector wiring + ops fixes + IPC wiring + calibration n1146
+
+### Change
+
+**1. Anomaly Detector wired into scenario harness**
+- `src/scenario/anomaly_detector.ts` — already had 10 checks but was never called from the harness
+- `src/scenario/scenario_runner.ts` — now calls `runAnomalyDetection(finalState)` after final save
+- `src/scenario/scenario_end_report.ts` — Anomaly Detection section added to `end_report.md`
+- `run_summary.json` gains `anomaly_detection: { count, critical, warning, info, reports }`
+- Two new checks added: **#11 `phantom_sector_advantage`** (empty sectors with front edges inflating sector-advantage metric) and **#12 `operation_zero_eligible_execution`** (ops with 0 captures and 0 attacks across all turns)
+- Check #12 known false positive: Op Drina + Op Visegrad flagged (consolidation sweeps, not failures — no eligible enemy OSIDs in range). Fix: exclude ops where `success=true AND captures>0 AND attacks=0`.
+
+**2. Three operation fixes + one new operation**
+- **Op Foča** (`pre_planned_operations.ts`): staging fixed (`prevrac_2`); `planning_duration` 1→4; documented that foca_valley axis is always organically captured before op fires (no VRS effort needed there)
+- **Op Posavina Corridor**: 6 root causes fixed — non-existent OSID `op:orasje:domaljevac_2` removed, RS-painted objectives corrected, cross-corps axis removed, staging corrected, `planning_duration` 4→9
+- **Op Donji Vakuf** (NEW, `vrs_1st_krajina`): `rs_19th` + `rs_31st` organic brigades, staging `pribeljci_2`, queued 4th in 1KK chain; `triggered_operations.ts` — removed duplicate Donji Vakuf axis from Op Jajce (1KK handles DV, not 2KK)
+- **Herzegovina Consolidation**: `planning_duration` 1→3
+- **1KK queue** restored: [Corridor, Jajce, Donji Vakuf, Bosanski Novi] — reverts broken n1145 queue that placed DV first
+
+**3. IPC wiring (useIPC.ts + electron-main.cjs)**
+- New IPC methods wired: replay controls, settings, AI commander, advisor recommendation
+- `sep_1991` scenario key removed from all IPC paths (decommissioned)
+- `bridge.ts` + `types.ts` stubs restored for incomplete IPC refactor
+
+**4. Calibration result: n1146 = 92.2% ATH, 22/22 anchors, 6/6 benchmarks**
+
+### Ops investigations (knowledge captured, not yet implemented)
+- **Op Foča**: `rs_kalinovik_brigade` has wrong `home_osid` (`zavait_3` → should be `kalinovik_2`); Kalinovik staging not adjacent to `varos_2` — brigade stranded
+- **Op Herzegovina Consolidation**: `rs_2nd_herzegovina` spawns w20 but op fires w12 → axis always dropped (brigade not yet formed at injection)
+- **Op Donji Vakuf**: `rs_19th` dissolved before injection; 2 dead objectives (`torlakovac_2`, `babin_potok_2` always pre-captured by the time op fires)
+- **Op Kotor Varos**: 1KK never has a free slot w10-w40 due to queue depth
+- **Consolidation mechanic**: two parallel mechanisms — `rear_pocket_consolidation.ts` + `evaluateUncontestedOccupation` in `bot_brigade_ai_osid.ts`
+- **Ghost sectors**: 5 empty sectors with front edges; `phantom_sector_advantage` check #11 may be reading wrong fields
+
+### User direction
+- Stop fixing ops individually; design engine-level `validateOpAtInjection()` to catch all 5 failure modes: (1) non-existent OSID objectives, (2) staging not adjacent to first-objective path, (3) brigade doesn't exist at injection turn, (4) all objectives already friendly-controlled, (5) cross-corps axis assignment
+
+### Determinism
+- No new non-determinism introduced. Anomaly detector is post-run read-only analysis.
+
+### Verification
+- `npx tsc --noEmit` — clean
+- `npm run test:vitest` — full suite pass
+- `npm run sim:scenario:run:40w` → n1146: 92.2% area-weighted (22/22 anchors, 6/6 benchmarks)
+
+### Files (high level)
+- `src/scenario/anomaly_detector.ts` (+2 checks, wired)
+- `src/scenario/scenario_runner.ts` (anomaly detection call)
+- `src/scenario/scenario_end_report.ts` (anomaly section)
+- `data/scenarios/pre_planned_operations.ts` (Foča, Posavina, Herc Consolidation fixes)
+- `data/scenarios/triggered_operations.ts` (Jajce DV axis removed, Op Donji Vakuf added)
+- `src/desktop/useIPC.ts`, `electron-main.cjs` (IPC wiring)

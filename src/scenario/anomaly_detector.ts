@@ -1,7 +1,7 @@
 /**
  * Post-run anomaly detection: pure functions that analyze final GameState.
  *
- * 10 detections covering combat tempo, formation health, territorial stability,
+ * 12 detections covering combat tempo, formation health, territorial stability,
  * operational stagnation, and deployment coherence.
  *
  * Deterministic: sorted iteration via strictCompare, no Math.random, no timestamps.
@@ -383,6 +383,95 @@ function detectCasualtyRatio(state: GameState): AnomalyReport[] {
     return reports;
 }
 
+/**
+ * 11. phantom_sector_advantage (critical)
+ * Sector has front edges and 0 brigades but positive combat power —
+ * any displayed force superiority is phantom / stale derived state.
+ *
+ * Checks both sector.defensive_power (on CorpsFrontSector directly) and
+ * sector_combat_ratings[sectorId].defensive_power / offensive_power (if present).
+ * An empty sector with positive power in either source is flagged.
+ */
+function detectPhantomSectorAdvantage(state: GameState): AnomalyReport[] {
+    const reports: AnomalyReport[] = [];
+    const sectors = state.military.corps_front_sectors ?? {};
+    const combatRatings = state.military.sector_combat_ratings ?? {};
+
+    const phantom: Array<{ sectorId: string; corpsId: string; edgeCount: number; defensivePower: number; offensivePower: number }> = [];
+
+    for (const sectorId of sortedKeys(sectors as Record<string, unknown>)) {
+        const sector = sectors[sectorId];
+        if (sector.edge_ids.length === 0) continue;
+
+        const totalBrigades = sector.assigned_brigade_ids.length + sector.reserve_brigade_ids.length;
+        if (totalBrigades > 0) continue;
+
+        // Check power on the sector itself
+        const sectorDefPow = sector.defensive_power ?? 0;
+
+        // Check sector_combat_ratings entry if available
+        const rating = combatRatings[sectorId];
+        const ratingDefPow = rating?.defensive_power ?? 0;
+        const ratingOffPow = rating?.offensive_power ?? 0;
+
+        const maxPower = Math.max(sectorDefPow, ratingDefPow, ratingOffPow);
+
+        if (maxPower > 0) {
+            phantom.push({
+                sectorId,
+                corpsId: sector.corps_id,
+                edgeCount: sector.edge_ids.length,
+                defensivePower: Math.max(sectorDefPow, ratingDefPow),
+                offensivePower: ratingOffPow,
+            });
+        }
+    }
+
+    for (const p of phantom.sort((a, b) => strictCompare(a.sectorId, b.sectorId))) {
+        reports.push({
+            category: 'deployment',
+            severity: 'critical',
+            type: 'phantom_sector_advantage',
+            description: `Sector ${p.sectorId} (corps ${p.corpsId}) has ${p.edgeCount} front edges and 0 brigades — any displayed force superiority is phantom (def_power=${p.defensivePower.toFixed(1)}, off_power=${p.offensivePower.toFixed(1)}).`,
+            entities: [p.sectorId, p.corpsId],
+        });
+    }
+    return reports;
+}
+
+/**
+ * 12. operation_zero_eligible_execution (warning)
+ * A completed operation in operation_history (total_attacks === 0 and outcome !== 'orphaned')
+ * means brigades never reached staging during any execution turn — the "eligible=0 stall" pattern.
+ *
+ * Uses OperationAAR.total_attacks (aggregated from weekly_log) which persists in
+ * state.operation_history after an operation ends. Orphaned ops are excluded because
+ * their sector was dissolved, not because brigades failed to stage.
+ */
+function detectOperationZeroEligibleExecution(state: GameState): AnomalyReport[] {
+    const reports: AnomalyReport[] = [];
+    const opHistory = state.operation_history ?? [];
+
+    for (const aar of opHistory.slice().sort((a, b) => strictCompare(a.operation_id, b.operation_id))) {
+        if (aar.outcome === 'orphaned') continue;
+        if (aar.total_attacks > 0) continue;
+
+        // Only flag operations that actually entered execution (duration > planning phase).
+        // If duration_turns is 0 or 1 it may have been aborted in planning — skip those.
+        if (aar.duration_turns < 2) continue;
+
+        reports.push({
+            category: 'operational',
+            severity: 'warning',
+            type: 'operation_zero_eligible_execution',
+            description: `Operation "${aar.operation_name}" (corps ${aar.corps_id}, turns ${aar.started_turn}–${aar.ended_turn}, outcome: ${aar.outcome}) completed with 0 total attacks — brigades never reached staging during any execution turn.`,
+            turn: aar.started_turn,
+            entities: [aar.corps_id, aar.operation_name],
+        });
+    }
+    return reports;
+}
+
 // ── Public entry point ─────────────────────────────────────────────────
 
 /**
@@ -401,6 +490,8 @@ export function runAnomalyDetection(state: GameState): AnomalyReport[] {
         detectEmptyContestedSector,
         detectCorpsOutOfArea,
         detectCasualtyRatio,
+        detectPhantomSectorAdvantage,
+        detectOperationZeroEligibleExecution,
     ];
 
     const results: AnomalyReport[] = [];

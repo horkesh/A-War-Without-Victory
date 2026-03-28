@@ -8,8 +8,9 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-27, v0.7.0 + Combat Audit + Diagnostic Fix Session)
-**v0.7.0 + 24 mechanical fixes.** 1525 tests, 128 suites. tsc clean. Electron 41. **92.2% area-weighted (40w), 22/22 anchors, 4/4 enclaves. New ATH.** Golden rule: calibration % means nothing if reached via broken mechanics.
+## Current State (2026-03-28, v0.7.0 + Combat Audit + Ops Fixes)
+**v0.7.0 + 24 mechanical fixes.** 1525 tests, 128 suites. tsc clean. Electron 41. **n1146: 92.2% area-weighted (40w), 22/22 anchors, 4/4 enclaves, 6/6 benchmarks. ATH.** Golden rule: calibration % means nothing if reached via broken mechanics.
+**Session 2026-03-28 (Anomaly detector + ops fixes + IPC):** Anomaly detector wired into scenario harness (12 checks, +`phantom_sector_advantage` #11, +`operation_zero_eligible_execution` #12). Op Foča staging fixed (prevrac, pd 1→4). Op Posavina Corridor: 6 root causes fixed (dead OSID, RS-painted objectives, cross-corps axis, staging, pd 4→9). Op Donji Vakuf NEW (1KK, rs_19th+rs_31st, pribeljci_2 staging). Herzegovina Consolidation pd 1→3. 1KK queue restored [Corridor, Jajce, DV, Bosanski Novi]. IPC: replays/settings/AI/advisor wired. sep_1991 removed. User direction: stop individual op patches — design `validateOpAtInjection()` engine gate.
 **Session 2026-03-27 (IPC + 1991 Cleanup):** Restored 10+ IPC handlers in `useIPC.ts` (Settings, AI, Replays); synchronized with `preload.cjs`. Decommissioned `sep_1991` scenario across Electron/UI. Deleted legacy `bridge.ts`. Propagated to master docs.
 **Earlier 2026-03-27 (diagnostic fixes):** Probe type gate (probes re-enabled), overflow threshold `<` not `<=`, orphan pool drainage to strategic reserve, east Herzegovina Bosniak displacement reroute. Results: 62 battles (was 44), HRHB 8 attacks (was 0), 4th Corps 9/10 healthy (was 2/10), 0 stranded pools (was 3), 2 empty sectors (was 6), 0 diagnostic errors (was 2).
 **Earlier 2026-03-27:** Sector-coverage displacement guard, cross-faction HRHB pool seeding (5x mult, 4 missing brigades), 255th Slavna enclave at Teočak, 246th at vitinica_2, Op Teočak second axis, Black Swans elite loan via deployment_osid. Pre-commit hook: tsc-only (~15s).
@@ -23,9 +24,9 @@
 - **P10/P11 Intel:** Passive buildup raised (RBiH 0.06→0.12, RS/HRHB→0.08). OPSEC now writes `opsec_sectors[]`. Concentration detection +0.10 on 2+ reserve brigades.
 - **P14 Data silos:** Deterministic `battle_id` join key (`{turn}:{osid}:{attacker}:{defender|null}`) propagates to battles, ops, territory flips, brigade history. Friction: `{turn}:{osid}:friction:{brigadeId}`.
 - **P15 Friction:** `frontline_attrition.ts` records skirmish BrigadeEngagements when casualties ≥15 (35% deterministic chance).
-- **Anomaly detector:** `src/scenario/anomaly_detector.ts` — 10 post-run checks wired.
-**Open:** P16 (strategic reserve 0 manpower all factions), P17 (4th Corps 80% ineffective, downstream).
-**Battle tempo:** 54 battles/40w pre-fix (historical target 150-250). Assembly gate + intel fixes expected to improve — verify next run.
+- **Anomaly detector:** `src/scenario/anomaly_detector.ts` — 12 post-run checks, wired into harness.
+**Open:** P16 (strategic reserve 0 manpower all factions), P17 (4th Corps 80% ineffective, downstream), check #12 false positive, ghost sector investigation, validateOpAtInjection engine gate.
+**Battle tempo:** 62 battles/40w (historical target 150-250). Assembly gate + intel fixes expected to improve further.
 **Roadmap:** v0.7.1 version bump, visual verification, canon audit Phase D/E, then v0.8=Command Chain.
 **Army HQ restoration (2026-03-25):** Known-good baseline c80d5767. Rule: never rewrite ArmyHQModal.tsx or SituationBriefing.tsx — targeted edits only.
 **HRHB-RBiH conflict:** P1 ALL RESOLVED (n963). Master: `docs/40_reports/BOSNIAK_CROAT_CONFLICT_MASTER.md`.
@@ -137,6 +138,15 @@
 ## Known Backlog
 **All P3 items RESOLVED (2026-03-25).** Gorazde: Operation Circle event flips 3 OSIDs. Hrasnica: 102nd relocated to Hadzici (refugee brigade). Remaining: `op:gorazde:kolovarice` mismatch (needs /historian research).
 
+**Ops engine backlog (2026-03-28):**
+- **[P1] `validateOpAtInjection()`** — engine-level validation firing at op injection. Five failure modes to catch: (1) non-existent OSID objectives, (2) staging not adjacent to first-objective path, (3) brigade doesn't exist at injection turn, (4) all objectives already friendly-controlled, (5) cross-corps axis assignment. Stop patching individual ops; fix the engine.
+- **[P2] Check #12 false positive** — `operation_zero_eligible_execution` flags Op Drina + Op Visegrad (consolidation sweeps). Fix: one-line exclusion `if (op.success && op.captures > 0 && op.attacks === 0) skip`. Files: `anomaly_detector.ts`.
+- **[P2] Ghost sector investigation** — 5 empty sectors with front edges. `phantom_sector_advantage` check #11 may be reading the wrong fields to detect these. Verify which field represents "sector has no brigades" in the anomaly detector vs the sector data structure.
+- **[P2] Op Foča `rs_kalinovik_brigade`** — `home_osid` is `zavait_3`, should be `kalinovik_2`; Kalinovik staging OSID not adjacent to `varos_2`. Brigade stranded at injection.
+- **[P2] Op Herzegovina Consolidation** — `rs_2nd_herzegovina` spawns w20 but op fires w12 → axis always dropped. Either delay op to w22+ or find a w12-eligible replacement brigade.
+- **[P2] Op Donji Vakuf** — `rs_19th` dissolves before injection; 2 objectives (`torlakovac_2`, `babin_potok_2`) always pre-captured. Need dissolution-resistant brigade assignment + conditional objective guard.
+- **[P3] Op Kotor Varos** — 1KK queue always full w10-w40; Kotor Varos never gets its op. Design queue priority mechanism or dedicated 2KK handoff.
+
 **Deferred to roadmap:**
 - Front Line Terrain Tinting (P4) → v0.9.4 (Map That Scars milestone)
 - Elevation Profile on Ops Axes (P4) → v0.9.4 (visual polish)
@@ -239,6 +249,10 @@
    Do instead: `sector_stance_orders` → `applySectorStanceOrders()` → `brigade_posture_orders`. OPSEC in `state.opsec_sectors`.
 7. **[2026-03-19] Corps-level operation creation — no catalog ops, no sector-scoped launch**
    Do instead: Operations launch from `generateCorpsDirectives` via `evaluateCorpsOffensiveLaunch`. Corps-wide brigade pool (all active subordinates). Contiguity from ALL corps sectors. `MAX_PARTICIPATING_BRIGADES=12`. Force-scaled objective cap: `maxObjectives = min(6, floor(brigades * 0.5))`. Probes remain sector-scoped.
+8. **[2026-03-28] Op axis drops silently when assigned brigade spawns after op injection**
+   Do instead: Check `available_from` turn for every axis brigade against the op's injection turn. If brigade spawns after injection, axis is silently dropped — no error, no fallback. Either delay the op past `available_from` or assign an earlier-spawning brigade. Affected: Op Herzegovina Consolidation (`rs_2nd_herzegovina` spawns w20, op fires w12).
+8. **[2026-03-28] foca_valley axis is always organically captured — don't add it to Op Foča**
+   Do instead: VRS brigades naturally occupy foca_valley before Op Foča fires. Adding it as an op objective creates phantom work. Only include axes where VRS needs explicit operation-level force to capture territory.
 8. **[2026-03-06] Proof lane + eligible-attacker boundary**
    Do instead: Run `tests/scenario_vrs_operation_proof.test.ts` before wide calibration work.
 9. **[2026-03-05] Opening operations: explicit rosters + named ops own brigades**
