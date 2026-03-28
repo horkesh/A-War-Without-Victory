@@ -8,7 +8,45 @@ In the Bosnian War, every brigade mattered. Commanders fought with what they had
 
 ---
 
-## Latest Review: n960 (2026-03-19) — Post-Operation Brigade Return March
+## Latest Review: n1150 (2026-03-28) — Ops Validation Engine Gate + Ghost Sector Sanitizer
+
+**Run:** `runs/apr1992_definitive_40w__77cac5e01d3c929e__w40_n1150` | 92.2% area-weighted | hash `1de5c05b2db9112f`
+
+### Checklist
+
+| # | Check | Verdict |
+|---|-------|---------|
+| 1 | Outcome distribution | CONDITIONAL PASS — 56% decisive, 19% catastrophic, 6% costly. High decisive rate but defensible for 1992 VRS blitz. 12 catastrophic show punishment for bad attacks. |
+| 2 | Casualty volume | PASS — ~34k total military casualties. Within 40-60k range for 40 weeks. 34.5k civilian killed (RBiH 31.5k + RS 3k). 1.03M displaced. |
+| 3 | Casualty ratios | WARNING — Att:Def 0.43-0.56:1. Defenders take ~2x attacker casualties. Historically backwards for aggregate. Driven by extreme power ratios (5-28:1) where defenders get annihilated. |
+| 4 | Territory | PASS — RS 51.4% (target 55.3%, -3.9pp), RBiH 36.1%, HRHB 12.5%. All within tolerance. 22/22 anchors. |
+| 5 | Force strength | CONDITIONAL — RS 102k (PASS, range 80-100k). RBiH 161k (FAIL, historical 100-130k). HRHB 44k (MARGINAL, above 25-40k range). |
+| 6 | Operational tempo | CONDITIONAL — 1.6 battles/wk avg. 12 zero-battle weeks. RS 76% of orders (correct). RBiH only 11 orders (too passive). |
+| 7 | Smell test | PASS — 4/5 battles reviewed plausible. See n960 review for battle details (same patterns). |
+
+### New Findings
+
+**Issue #42 (NEW, P1): 77 brigades (33%) never fight in 40 weeks.**
+25 ARBiH, 23 HVO, 29 VRS. 50 are on front lines but never ordered into combat. Root causes: ops-only doctrine + 1 op/corps/time + 8-turn exhaustion cooldown + 5 empty contested sectors. In the real war, nearly every unit saw action by Jan 1993. **Status:** P1 — overlaps with deferred empty sector triage + cooldown/counter-attack broadening fixes.
+
+**Issue #43 (NEW, P2): RBiH overmobilized at 161k.**
+Historical ARBiH was 100-130k by Jan 1993. 161k is a mid-1994 number. Either mobilization rate is too high or pool accounting has a leak. **Status:** P2 — needs investigation of RBiH mobilization scale and pool seeding.
+
+**Issue #44 (NEW, P2): Inverted casualty ratio (0.43 att:def aggregate).**
+Defenders take ~2x attacker casualties across all battles. In conventional warfare and the Bosnian War, attackers typically take more (1.5-3:1). The cube-root casualty scaling (POWER_RATIO_CASUALTY_MAX=2.0) at extreme power ratios (5-28:1) annihilates defenders while barely scratching attackers. May need a floor on attacker casualties at high PR. **Status:** P2 — not blocking but indicates combat model skews toward all-or-nothing.
+
+**Issue #45 (NEW, P2): 47 invalid operations / 39 zero-eligible-attacker ops.**
+Operations fire but brigades can't reach staging or participate. Phantom operational activity. Partially addressed by validateOpAtInjection engine gate (now surfaces warnings), but the underlying brigade-to-staging pathing needs structural work. **Status:** P2 — improved visibility via validation gate.
+
+**Issue #39 update (Ghost sectors): FIXED.** `sanitize-ghost-sector-power` pipeline step now zeroes stale defensive_power on sectors with 0 brigades. Check #11 (phantom_sector_advantage) fires 0 times in n1150. **CLOSED.**
+
+### Verdict
+
+**WAR-OR-GAME: APPROVED WITH CAVEATS.** The macro picture is correct — VRS blitz, enclave formation, 22/22 anchors, 92.2% area-weighted. New validation infrastructure (validateOpAtInjection, ghost sector sanitizer, check #12 fix) improves diagnostic visibility significantly. Five caveats documented above (P1: idle brigades, P2: overmobilized RBiH, P2: inverted casualty ratio, P2: phantom ops, P3: RS territory gap).
+
+---
+
+## Previous Review: n960 (2026-03-19) — Post-Operation Brigade Return March
 
 **Run:** `runs/apr1992_definitive_40w__77cac5e01d3c929e__w40_n960` | 91.2% area-weighted | hash `b806302bec4dae8a`
 

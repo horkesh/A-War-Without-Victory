@@ -39,3 +39,15 @@
 - 50 are on front lines but never ordered into combat
 - Fix: reduce cooldown (8→5), rotate idle brigades, broaden counter-attacks
 - Files: `src/sim/combat/sector_offensive.ts`, `src/sim/combat/bot_corps_directives.ts`
+
+### P4: RBiH overmobilized at 161k (War-or-Game #43)
+- Historical ARBiH 100-130k by Jan 1993. Sim produces 161k (mid-1994 number)
+- Needs investigation: mobilization rate too high? Pool accounting leak?
+- Files: `src/sim/recruitment_engine.ts`, `ongoing_mobilization.ts`
+
+### P5: Inverted casualty ratio 0.43 att:def (War-or-Game #44)
+- Defenders take ~2x attacker casualties across all battles
+- Historical: attackers lose more (1.5-3:1)
+- Root cause: cube-root scaling at extreme power ratios (5-28:1) annihilates defenders
+- May need attacker casualty floor at high PR
+- Files: `src/sim/combat/combat_math.ts`, `attack_resolution_osid.ts`
