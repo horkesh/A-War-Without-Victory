@@ -650,8 +650,8 @@ app.whenReady().then(() => {
     if (playerFaction !== 'RBiH' && playerFaction !== 'RS' && playerFaction !== 'HRHB') {
       return { ok: false, error: 'Invalid playerFaction. Use RBiH, RS, or HRHB.' };
     }
-    if (scenarioKey !== undefined && scenarioKey !== 'apr_1992' && scenarioKey !== 'sep_1991') {
-      return { ok: false, error: 'Invalid scenarioKey. Use apr_1992 or sep_1991.' };
+    if (scenarioKey !== undefined && scenarioKey !== 'apr_1992') {
+      return { ok: false, error: 'Invalid scenarioKey. Use apr_1992.' };
     }
     try {
       const sim = getDesktopSim();

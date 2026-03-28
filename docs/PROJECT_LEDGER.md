@@ -1,3 +1,16 @@
+## [2026-03-27] Electron IPC Connectivity Restoration & v0.7.0 Cleanup
+
+### Change
+- **IPC Synchronization**: Fully synchronized `src/ui/map/desktop/useIPC.ts` with `preload.cjs` and `electron-main.cjs`. Restored 10+ missing handlers (Settings, AI Commander, Replays) and typed them correctly.
+- **Scenario Decommissioning**: Removed the legacy "September 1991" (`sep_1991`) scenario from `electron-main.cjs` validation, `warroom.ts` logic, and `index.html` UI selection.
+- **Dead Code Removal**: Deleted `src/ui/map/desktop/bridge.ts` and `types.ts`, ensuring `useIPC.ts` is the sole source of truth for desktop IPC.
+- **Documentation Propagation**: Synchronized `DESKTOP_GUI_IPC_CONTRACT.md`, `Systems_Manual_v0_7_0.md`, and `GUI_DESIGN_BLUEPRINT.md` to reflect the April 1992 baseline and synchronized IPC contract.
+
+### Verification
+- Manual verification of IPC method presence in `WindowAwwv` interface.
+- Broad grep for `sep_1991` confirmed absence in active source files (only remains in `_archived` directories).
+- Documentation cross-referenced against implementation.
+
 ## [2026-03-27] Diagnostic fix session — probe gate, overflow threshold, orphan pools, Herzegovina reroute
 
 ### Change

@@ -75,46 +75,50 @@ function corpsCompletedOp(state: GameState, corpsId: string, opName: string): bo
 
 const TRIGGERED_OPS: TriggeredOpDef[] = [
     {
+        // Operation Posavina Corridor — 1KK reduces the HRHB Orašje pocket (~w31+).
+        // Historically VRS isolated then squeezed the Croatian Orašje enclave (BB1 p.182).
+        //
+        // Root causes of 0 attacks (history):
+        //   1. Cross-corps eastern axis (vrs_east_bosnian): EBK brigades invisible to
+        //      brigade AI when op lives on 1KK. Sacred Rule: never share brigades across corps.
+        //   2. Western_corridor staging (derventa_2): starts HRHB — invalid staging.
+        //   3. Western_corridor objectives (misinci_2, zivinice, novo_selo_2, brod): all RS
+        //      by trigger time → 0 valid objectives.
+        //   4. op:orasje:domaljevac_2 does NOT EXIST in the graph — only
+        //      op:bosanski_samac:domaljevac_2 exists (RS-painted, not a valid objective).
+        //   5. op:orasje:ostra_luka is RS-painted at Jan 1993 → filtered by buildOperation.
+        //   6. planning_duration=4 insufficient: rs_27th_derventa is 7 hops from new staging.
+        //
+        // Fix: staging = domaljevac_2 (RS, adjacent to donja_mahala HRHB).
+        //   Only two valid HRHB objectives exist: donja_mahala, orasje.
+        //   planning_duration=9: rs_27th (7 hops) + 2-turn buffer.
         name: 'Operation Posavina Corridor',
         primary_corps: 'vrs_1st_krajina',
-        staging_osid: 'op:derventa:derventa_2',
-        planning_duration: 2,
+        staging_osid: 'op:bosanski_samac:domaljevac_2',
+        planning_duration: 9,
         trigger: (state, _turn) => {
-            // 1KK must have completed Op Corridor (not wait for entire queue to drain)
-            // EBK must be idle (no active/queued ops)
-            return corpsCompletedOp(state, 'vrs_1st_krajina', 'Operation Corridor')
-                && corpsOpFinished(state, 'vrs_east_bosnian');
+            // 1KK must have completed Op Corridor
+            return corpsCompletedOp(state, 'vrs_1st_krajina', 'Operation Corridor');
         },
         axes: [
             {
-                axis_id: 'western_corridor',
-                name: 'Western Corridor',
+                axis_id: 'orasje_pocket',
+                name: 'Orašje Pocket',
                 corps: 'vrs_1st_krajina',
                 brigades: [
                     'rs_27th_derventa_motorized' as FormationId,
                     'rs_1st_trebava_infantry' as FormationId,
+                    'rs_1st_vujak_light_infantry' as FormationId,
                 ],
+                // domaljevac_2 (RS, adjacent to donja_mahala) is the staging.
+                // ostra_luka is RS-painted (filtered out by buildOperation).
+                // Valid HRHB objectives from staging: donja_mahala → orasje.
+                // planning_duration=9: rs_27th_derventa is 7 hops from staging + 2 buffer.
                 objectives: [
-                    'op:derventa:misinci_2',
-                    'op:derventa:zivinice',
-                    'op:bosanski_brod:novo_selo_2',
-                    'op:bosanski_brod:brod',
+                    'op:orasje:donja_mahala',
+                    'op:orasje:orasje',
                 ],
-                staging_osid: 'op:derventa:derventa_2',
-            },
-            {
-                axis_id: 'eastern_corridor',
-                name: 'Eastern Corridor',
-                corps: 'vrs_east_bosnian',
-                brigades: [
-                    'rs_3rd_posavina_light_infantry' as FormationId,
-                    'rs_2nd_posavina_light_infantry' as FormationId,
-                ],
-                objectives: [
-                    'op:orasje:ostra_luka',
-                    'op:doboj:makljenovac',
-                ],
-                staging_osid: 'op:bosanski_samac:samac_2',
+                staging_osid: 'op:bosanski_samac:domaljevac_2',
             },
         ],
     },
@@ -126,7 +130,11 @@ const TRIGGERED_OPS: TriggeredOpDef[] = [
         name: 'Operation Herzegovina Consolidation',
         primary_corps: 'vrs_herzegovina',
         staging_osid: 'op:nevesinje:sopilja',
-        planning_duration: 1,
+        // planning_duration=3: rs_nevesinje_brigade (home krekovi_2, 1 hop from sopilja) needs
+        // time to disengage from sector duties and march to staging. Previous value of 1 was
+        // too tight — the brigade was often still at the front when execution began.
+        // rs_2nd_herzegovina_light_infantry (home korita/bileca) needs 3+ hops to reach sopilja.
+        planning_duration: 3,
         min_attack_outcome: 'repulsed' as const,
         trigger: (state, _turn) => {
             return corpsOpFinished(state, 'vrs_herzegovina');
@@ -136,6 +144,10 @@ const TRIGGERED_OPS: TriggeredOpDef[] = [
                 axis_id: 'mostar_heights',
                 name: 'Mostar Heights',
                 corps: 'vrs_herzegovina',
+                // nevesinje (home krekovi_2, 1 hop to sopilja staging) attacks vranjevici_2 then
+                // kruzanj_2. sopilja is directly adjacent to vranjevici_2 (confirmed in graph).
+                // Objectives start HRHB, painted RS — valid VRS targets.
+                // vranjevici_2 must be first (sopilja adjacent); kruzanj_2 follows in chain.
                 brigades: [
                     'rs_nevesinje_brigade' as FormationId,
                 ],
@@ -182,48 +194,6 @@ const TRIGGERED_OPS: TriggeredOpDef[] = [
                     'op:kotor_varos:prisocka_2',
                 ],
                 staging_osid: 'op:kotor_varos:kotor_varos_2',
-            },
-        ],
-    },
-    {
-        name: 'Operation Jajce',
-        primary_corps: 'vrs_2nd_krajina',
-        staging_osid: 'op:jajce:jajce_3',
-        planning_duration: 3,
-        trigger: (_state, turn) => turn >= 24,
-        axes: [
-            {
-                axis_id: 'jajce_assault',
-                name: 'Jajce Assault',
-                corps: 'vrs_2nd_krajina',
-                brigades: [
-                    'rs_7th_krajina_motorized' as FormationId,
-                    'rs_1st_drvar_light_infantry' as FormationId,
-                    'rs_17th_klju_light_infantry' as FormationId,
-                ],
-                objectives: [
-                    'op:jajce:jajce_3',
-                    'op:jajce:jezero_2',
-                    'op:jajce:kruscica',
-                    'op:jajce:vinac_2',
-                ],
-                staging_osid: 'op:jajce:jajce_3',
-            },
-            {
-                axis_id: 'donji_vakuf',
-                name: 'Donji Vakuf',
-                corps: 'vrs_2nd_krajina',
-                brigades: [
-                    'rs_5th_glamo_light_infantry' as FormationId,
-                    'rs_3rd_petrovac_light_infantry' as FormationId,
-                ],
-                objectives: [
-                    'op:donji_vakuf:donji_vakuf_2',
-                    'op:donji_vakuf:oborci_2',
-                    'op:donji_vakuf:prusac_2',
-                    'op:donji_vakuf:torlakovac_2',
-                ],
-                staging_osid: 'op:donji_vakuf:donji_vakuf_2',
             },
         ],
     },

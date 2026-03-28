@@ -42,6 +42,16 @@ interface WindowAwwv {
     setTurnReportUpdatedCallback: (cb: ((report: unknown) => void) | null) => void;
     getRecruitmentCatalog: () => Promise<{ brigades?: unknown[]; error?: string }>;
     applyRecruitment: (brigadeId: string, equipmentClass: string) => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
+    loadReplayDialog: () => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
+    getLastReplayContent: () => Promise<string | null>;
+    renameFrontSegment: (frontId: string, name: string | null) => Promise<{ ok: boolean; error?: string }>;
+    renameTheatre: (theatreId: string, name: string | null) => Promise<{ ok: boolean; error?: string }>;
+    setBrigadeDesiredAoRCap: (brigadeId: string, cap: number) => Promise<{ ok: boolean; error?: string }>;
+    getSettings: () => Promise<{ ok: boolean; settings?: unknown; error?: string }>;
+    saveSettings: (settings: unknown) => Promise<{ ok: boolean; error?: string }>;
+    getAiCommanderConfig: () => Promise<{ mode: string; session_cost_estimate: number }>;
+    setAiCommanderConfig: (payload: { mode: string; anthropic_api_key?: string }) => Promise<{ ok: boolean; error?: string }>;
+    getAdvisorRecommendation: (payload: { faction?: string; context_type?: string }) => Promise<unknown>;
     stageAttackOrder: (brigadeId: string, targetSettlementId: string) => Promise<{ ok: boolean; error?: string }>;
     stagePostureOrder: (brigadeId: string, posture: string) => Promise<{ ok: boolean; error?: string }>;
     stageMoveOrder: (brigadeId: string, targetMunicipalityId: string) => Promise<{ ok: boolean; error?: string }>;
@@ -146,6 +156,46 @@ export function useIPC() {
             applyRecruitment: awwv
                 ? (brigadeId: string, equipmentClass: string) => awwv.applyRecruitment(brigadeId, equipmentClass)
                 : makeNoop<{ ok: boolean; stateJson?: string; error?: string }>(),
+
+            loadReplayDialog: awwv
+                ? () => awwv.loadReplayDialog()
+                : makeNoop<{ ok: boolean; stateJson?: string; error?: string }>(),
+
+            getLastReplayContent: awwv
+                ? () => awwv.getLastReplayContent()
+                : () => Promise.resolve(null),
+
+            renameFrontSegment: awwv
+                ? (frontId: string, name: string | null) => awwv.renameFrontSegment(frontId, name)
+                : makeNoop<{ ok: boolean; error?: string }>(),
+
+            renameTheatre: awwv
+                ? (theatreId: string, name: string | null) => awwv.renameTheatre(theatreId, name)
+                : makeNoop<{ ok: boolean; error?: string }>(),
+
+            setBrigadeDesiredAoRCap: awwv
+                ? (brigadeId: string, cap: number) => awwv.setBrigadeDesiredAoRCap(brigadeId, cap)
+                : makeNoop<{ ok: boolean; error?: string }>(),
+
+            getSettings: awwv
+                ? () => awwv.getSettings()
+                : makeNoop<{ ok: boolean; settings?: unknown; error?: string }>(),
+
+            saveSettings: awwv
+                ? (settings: unknown) => awwv.saveSettings(settings)
+                : makeNoop<{ ok: boolean; error?: string }>(),
+
+            getAiCommanderConfig: awwv
+                ? () => awwv.getAiCommanderConfig()
+                : () => Promise.resolve({ mode: 'cadet', session_cost_estimate: 0 }),
+
+            setAiCommanderConfig: awwv
+                ? (payload: { mode: string; anthropic_api_key?: string }) => awwv.setAiCommanderConfig(payload)
+                : makeNoop<{ ok: boolean; error?: string }>(),
+
+            getAdvisorRecommendation: awwv
+                ? (payload: { faction?: string; context_type?: string }) => awwv.getAdvisorRecommendation(payload)
+                : (payload: { faction?: string; context_type?: string }) => Promise.resolve({ error: 'Desktop IPC not available' }),
 
             stageAttackOrder: awwv
                 ? (brigadeId: string, targetSettlementId: string) => awwv.stageAttackOrder(brigadeId, targetSettlementId)

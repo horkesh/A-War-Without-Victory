@@ -298,6 +298,21 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         ],
     },
     {
+        // Operation Foča — VRS Herzegovina Corps consolidates Foča municipality and
+        // the Kalinovik salient. Fires after Op Višegrad completes (~w12).
+        // Historically VRS seized all of Foča and the Kalinovik highlands (BB1 p.193, BB2 p.514).
+        //
+        // IMPORTANT: Foča-municipality OSIDs (foca_3, brusna_2, etc.) start RBiH but get
+        // captured organically by VRS sector AI before the queue fires. Those objectives
+        // are filtered out at injection time (controller !== RS check). Op still fires
+        // because the kalinovik axis objectives (varos_2, golubici_2, sela_2, konjic:ljuta,
+        // konjic:glavaticevo_2) are in SEPARATE municipalities — not captured by normal
+        // Herzegovina Corps sector offense which stays in Foča/Nevesinje area.
+        //
+        // Foca Valley axis: staging foca_3 (RS by w12). foca_3 is adjacent to brusna_2,
+        // patkovina, prevrac, zavait_3 — all valid first objectives.
+        // Kalinovik axis: staging kalinovik_2 (initial RBiH). Chain:
+        //   varos_2 → golubici_2 → sela_2 → konjic:ljuta → konjic:glavaticevo_2
         corps: 'vrs_herzegovina',
         faction: 'RS',
         name: 'Operation Foca',
@@ -479,6 +494,46 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'op:jajce:vinac_2',
                 ],
                 staging_osid: 'op:sipovo:brdjani',
+            },
+        ],
+    },
+    {
+        // Operation Donji Vakuf — 1KK secures the Vrbas valley south of Jajce.
+        // Historically the 19th and 31st Krajina brigades were organic to Donji Vakuf
+        // municipality (both homed at babin_potok_2 / komar_2) and participated in the
+        // VRS push that seized Donji Vakuf in late 1992 (BB1 p.177).
+        //
+        // Fires after Op Jajce completes (queued 4th in 1KK chain).
+        // Staging pribeljci_2: Sipovo municipality (RS initial + RS painted), adjacent to
+        // torlakovac_2 — first objective in the sweep. grdovo (Jajce) would also be
+        // adjacent but starts HRHB; pribeljci_2 is always RS and safe.
+        //
+        // Objectives: all 5 painted RS, all start RBiH.
+        // Removed from triggered Op Jajce (vrs_2nd_krajina) — 1KK handles DV.
+        corps: 'vrs_1st_krajina',
+        faction: 'RS',
+        name: 'Operation Donji Vakuf',
+        staging_osid: 'op:sipovo:pribeljci_2',
+        min_attack_outcome: 'repulsed',
+        planning_duration: 4,
+        axes: [
+            {
+                axis_id: 'donji_vakuf_sweep',
+                name: 'Donji Vakuf Sweep',
+                brigades: [
+                    'rs_19th_krajina_light_infantry' as FormationId,
+                    'rs_31st_light_infantry' as FormationId,
+                ],
+                // pribeljci_2 (RS) is adjacent to torlakovac_2 — valid staging → first obj chain.
+                // torlakovac_2 → babin_potok_2 → oborci_2 → donji_vakuf_2 → prusac_2
+                objectives: [
+                    'op:donji_vakuf:torlakovac_2',
+                    'op:donji_vakuf:babin_potok_2',
+                    'op:donji_vakuf:oborci_2',
+                    'op:donji_vakuf:donji_vakuf_2',
+                    'op:donji_vakuf:prusac_2',
+                ],
+                staging_osid: 'op:sipovo:pribeljci_2',
             },
         ],
     },
@@ -755,11 +810,14 @@ export function injectPrePlannedOperations(state: GameState): void {
         }
     }
 
-    // Queue 1KK ops: Prijedor → Corridor → Bosanski Novi
+    // Queue 1KK ops: Prijedor → Corridor → Jajce → Donji Vakuf → Bosanski Novi
+    // Corridor fires 2nd (historically June-July 1992 ~w10-16), Jajce 3rd (~w20-25),
+    // Donji Vakuf 4th (after Jajce completes). Previous n1145 regression: DV was moved
+    // to 2nd position, stalled 23 turns, blocked Corridor → cascaded everywhere. Reverted.
     if (injectedCorps.has('vrs_1st_krajina')) {
         const cmd = corpsCommand['vrs_1st_krajina'];
         if (cmd && !cmd.queued_operations) {
-            cmd.queued_operations = ['Operation Corridor', 'Operation Jajce', 'Operation Bosanski Novi'];
+            cmd.queued_operations = ['Operation Corridor', 'Operation Jajce', 'Operation Donji Vakuf', 'Operation Bosanski Novi'];
         }
     }
 

@@ -22,7 +22,7 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 - `start-new-campaign` (invoke)
   - Payload: `{ playerFaction: 'RBiH' | 'RS' | 'HRHB', scenarioKey?: 'apr_1992' }`
   - Returns: `{ ok: boolean, error?: string, stateJson?: string }`
-  - Behavior: loads April 1992 scenario (`data/scenarios/apr1992_definitive_52w.json`), sets `meta.player_faction`, and serializes + pushes state via `game-state-updated`. Recruitment_state is initialized for recruitment UI. Called by warroom launcher and tactical-map side picker.
+  - Behavior: loads April 1992 scenario (`data/scenarios/apr1992_definitive_52w.json`), sets `meta.player_faction`, and serializes + pushes state via `game-state-updated`. Recruitment_state is initialized for recruitment UI. Called by warroom launcher and tactical-map side picker. (Note: legacy `sep_1991` scenario decommissioned in v0.7.0).
 
 - `load-state-dialog` (invoke)
   - Returns: `{ ok: boolean, error?: string, stateJson?: string }`
@@ -102,6 +102,11 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
   - Payload: `{ corpsId: string, stance: string }`
   - Returns: `{ ok: boolean, error?: string }`
   - Behavior: sets or updates corps stance (e.g. defensive/balanced/offensive/reorganize) in state (corps_command), reserializes, sends state via `game-state-updated`.
+
+- `set-brigade-desired-aor-cap` (invoke)
+  - Payload: `{ brigadeId: string, cap: number | null }`
+  - Returns: `{ ok: boolean, error?: string }`
+  - Behavior: sets `state.brigade_desired_aor_cap[brigadeId]` to a value between 1 and 4. Reserializes and broadcasts. `null` clears the cap.
 
 - `stage-sector-stance-order` (invoke)
   - Payload: `{ corpsId: string, sectorId: string, stance: 'hold' | 'defend' | 'defend_at_all_costs' | 'elastic_defense' | 'counterattack' | 'dig_in' }`
@@ -260,8 +265,22 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
   - Returns: `{ ok: boolean, error?: string, stateJson?: string, newFormationId?: string }`
   - Behavior: applies one player recruitment (recruitBrigade + applyRecruitment); on success main updates current state and sends via `game-state-updated`; returns updated stateJson and newFormationId for placement feedback.
 
-- `load-replay-dialog` / `get-last-replay` / `replay-loaded`
-  - Existing replay ingestion channels unchanged; renderer treats replay as read-only timeline data.
+- `load-replay-dialog` (invoke)
+  - Returns: `ReplayData | null`
+  - Behavior: opens file picker for `replay_timeline.json`, reads and returns content.
+
+- `get-last-replay` (invoke)
+  - Returns: `ReplayData | null`
+  - Behavior: reads the last opened replay file from `userData`.
+
+- `get-settings` (invoke)
+  - Returns: `ProjectSettings`
+  - Behavior: returns current application settings (window state, audio, etc.).
+
+- `save-settings` (invoke)
+  - Payload: `Partial<ProjectSettings>`
+  - Returns: `{ ok: boolean }`
+  - Behavior: persists updated settings.
 
 ## Protocol Routes (awwv:// scheme)
 

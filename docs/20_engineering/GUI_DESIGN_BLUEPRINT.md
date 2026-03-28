@@ -1158,7 +1158,7 @@ Shows available scenario files from `data/scenarios/` when the user chooses "Loa
 ║                                                                      ║
 ║  ┌────────────────────────────────────────────────────────────────┐  ║
 ║  │ ● April 1992 — Historical Start (52 weeks)                    │  ║
-║  │   Three-way conflict. Ethnic 1991 init. Full OOB.             │  ║
+║  │   Three-way conflict. Hybrid 1992 init. Full OOB.               │  ║
 ║  │   File: historical_mvp_apr1992_52w.json                        │  ║
 ║  ├────────────────────────────────────────────────────────────────┤  ║
 ║  │ ○ April 1992 — War Quick Start (4 weeks)                       │  ║

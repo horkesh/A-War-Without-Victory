@@ -10,7 +10,8 @@
 
 ## Current State (2026-03-27, v0.7.0 + Combat Audit + Diagnostic Fix Session)
 **v0.7.0 + 24 mechanical fixes.** 1525 tests, 128 suites. tsc clean. Electron 41. **92.2% area-weighted (40w), 22/22 anchors, 4/4 enclaves. New ATH.** Golden rule: calibration % means nothing if reached via broken mechanics.
-**Session 2026-03-27 (diagnostic fixes):** Probe type gate (probes re-enabled), overflow threshold `<` not `<=`, orphan pool drainage to strategic reserve, east Herzegovina Bosniak displacement reroute. Results: 62 battles (was 44), HRHB 8 attacks (was 0), 4th Corps 9/10 healthy (was 2/10), 0 stranded pools (was 3), 2 empty sectors (was 6), 0 diagnostic errors (was 2).
+**Session 2026-03-27 (IPC + 1991 Cleanup):** Restored 10+ IPC handlers in `useIPC.ts` (Settings, AI, Replays); synchronized with `preload.cjs`. Decommissioned `sep_1991` scenario across Electron/UI. Deleted legacy `bridge.ts`. Propagated to master docs.
+**Earlier 2026-03-27 (diagnostic fixes):** Probe type gate (probes re-enabled), overflow threshold `<` not `<=`, orphan pool drainage to strategic reserve, east Herzegovina Bosniak displacement reroute. Results: 62 battles (was 44), HRHB 8 attacks (was 0), 4th Corps 9/10 healthy (was 2/10), 0 stranded pools (was 3), 2 empty sectors (was 6), 0 diagnostic errors (was 2).
 **Earlier 2026-03-27:** Sector-coverage displacement guard, cross-faction HRHB pool seeding (5x mult, 4 missing brigades), 255th Slavna enclave at Teočak, 246th at vitinica_2, Op Teočak second axis, Black Swans elite loan via deployment_osid. Pre-commit hook: tsc-only (~15s).
 **Combat audit (2026-03-26, 11 sequential fixes verified):**
 - **P1-P4:** OOB corps correction (2nd Romanija→SRK), BFS component guards, redistribution distance 8→20 (+ bfsDistance cap 10→20), silent drop fallback. Net -0.3pp (correct mechanics exposed artificial inflation).
@@ -107,12 +108,16 @@
 4. **[2026-03-26] Fullscreen overlays must use two live information regions**
    Do instead: For overlay density fixes (Chronicle, Reserve, Ops), avoid single narrow strips; keep one primary timeline/list region plus a concurrent detail/dossier region to consume width without changing mechanics.
 5. **[2026-03-25] OSID display names: human-readable, no duplicates**
-   Do instead: `osidDisplayName.ts` handles both GeoJSON-sourced and fallback paths. `humanizeOsid()` strips `op:` prefix, `_2` cluster suffix, title-cases, appends municipality only when different from name. `formatSettlementDisplayName()` strips `(+N)`, same dedup rule. "Simin Han (Tuzla)" not "simin_han_2". "Tuzla" not "Tuzla (Tuzla)".
-6. **[2026-03-20] G-2 prediction — DONE (WS5)**
+    Do instead: `osidDisplayName.ts` handles both GeoJSON-sourced and fallback paths. `humanizeOsid()` strips `op:` prefix, `_2` cluster suffix, title-cases, appends municipality only when different from name. `formatSettlementDisplayName()` strips `(+N)`, same dedup rule. "Simin Han (Tuzla)" not "simin_han_2". "Tuzla" not "Tuzla (Tuzla)".
+6. **[2026-03-27] Electron IPC Contract: `useIPC.ts` is the single source of truth**
+    Do instead: When adding Electron handlers to `electron-main.cjs` and `preload.cjs`, you MUST update the `WindowAwwv` interface and hook in `src/ui/map/desktop/useIPC.ts` immediately. Do not use legacy `bridge.ts` or standalone IPC calls.
+7. **[2026-03-27] Decommissioned 1991: April 1992 is the sole entry baseline**
+    Do instead: Use April 1992 (`apr_1992`) as the starting scenario for all campaign work. `sep_1991` is decommissioned and should not be referenced in new code or scenarios.
+8. **[2026-03-20] G-2 prediction — DONE (WS5)**
    Do instead: Engine returns `OperationPredictionResponse` (`axes`, `totalEstimatedCasualties`, commander `sections` as `{enemy, ownForces, assessment}`). UI expects `PredictionResult` — normalize in `usePrediction` (`normalizeOperationPredictionResponse`). G-2 phase fully wired in ops modal flow.
-7. **[2026-03-26] Browser-driven UI walkthrough: ESC can open Pause overlay**
+9. **[2026-03-26] Browser-driven UI walkthrough: ESC can open Pause overlay**
    Do instead: When auditing `src/ui/map` via browser automation, avoid `Escape` for closing overlays unless the overlay explicitly advertises `[ESC]`; otherwise it may open the Pause menu and pollute screenshots/findings.
-8. **[2026-03-26] War Summary/Summary focused tabs should render only focused section**
+10. **[2026-03-26] War Summary/Summary focused tabs should render only focused section**
    Do instead: When `SituationTab` is used with `focusSection` (Army HQ `SUMMARY` and War Summary modal), render only that section card and suppress overview/snapshot/alliance/alerts blocks to avoid duplicate-content dead space.
 9. **[2026-03-26] Toolbar-clearance verification must include live + dev contexts**
    Do instead: For top-toolbar clearance checks, always capture one no-dev-strip (`?live=1`) shot and one dev-strip shot with side panels visible, then state overlap verdict explicitly in the report.

@@ -12,17 +12,14 @@ import { OsidThumbnailRenderer } from './components/OsidThumbnailRenderer.js';
 import { WarPlanningMap } from './components/WarPlanningMap.js';
 import { setScenarioStartDate, turnToCalendarMonthYear, turnToDateString, turnToShortLabel } from './components/warroom_utils.js';
 // Asset URLs via Vite so dev server serves them from the module graph
-import hqRbih1991Url from './assets/hq_rbih_1991.webp?url';
 import hqRbih1992Url from './assets/hq_rbih_1992.webp?url';
 import hqRbih1993Url from './assets/hq_rbih_1993.webp?url';
 import hqRbih1994Url from './assets/hq_rbih_1994.webp?url';
 import hqRbih1995Url from './assets/hq_rbih_1995.webp?url';
-import hqRs1991Url from './assets/hq_rs_1991.webp?url';
 import hqRs1992Url from './assets/hq_rs_1992.webp?url';
 import hqRs1993Url from './assets/hq_rs_1993.webp?url';
 import hqRs1994Url from './assets/hq_rs_1994.webp?url';
 import hqRs1995Url from './assets/hq_rs_1995.webp?url';
-import hqHrhb1991Url from './assets/hq_hrhb_1991.webp?url';
 import hqHrhb1992Url from './assets/hq_hrhb_1992.webp?url';
 import hqHrhb1993Url from './assets/hq_hrhb_1993.webp?url';
 import hqHrhb1994Url from './assets/hq_hrhb_1994.webp?url';
@@ -33,11 +30,10 @@ import flagRbihUrl from './assets/flag_RBiH.webp?url';
 import flagRsUrl from './assets/flag_RS.webp?url';
 // Scenario briefing images
 import scnApr1992Url from './assets/scenarios/apr1992_briefing.webp?url';
-import scnSep1991Url from './assets/scenarios/sep1991_briefing.webp?url';
 // Main menu background (game start screen)
 import gameStartBgUrl from './assets/game start.webp?url';
 
-type CampaignScenarioKey = 'sep_1991' | 'apr_1992';
+type CampaignScenarioKey = 'apr_1992';
 
 /** Display resolution for runtime: half of authoring (2752×1536) to reduce decode and canvas memory. Region JSON stays 2752×1536; hit-test scales automatically. */
 const WARROOM_SCENE_WIDTH = 1376;
@@ -63,15 +59,15 @@ function getInitialRegionCandidates(): string[] {
 }
 /** Year-keyed plate URLs per faction. Plates switch each April. */
 const WARROOM_YEAR_PLATE_URLS: Record<FactionId, Record<number, string>> = {
-    RBiH: { 1991: hqRbih1991Url, 1992: hqRbih1992Url, 1993: hqRbih1993Url, 1994: hqRbih1994Url, 1995: hqRbih1995Url },
-    RS: { 1991: hqRs1991Url, 1992: hqRs1992Url, 1993: hqRs1993Url, 1994: hqRs1994Url, 1995: hqRs1995Url },
-    HRHB: { 1991: hqHrhb1991Url, 1992: hqHrhb1992Url, 1993: hqHrhb1993Url, 1994: hqHrhb1994Url, 1995: hqHrhb1995Url }
+    RBiH: { 1992: hqRbih1992Url, 1993: hqRbih1993Url, 1994: hqRbih1994Url, 1995: hqRbih1995Url },
+    RS: { 1992: hqRs1992Url, 1993: hqRs1993Url, 1994: hqRs1994Url, 1995: hqRs1995Url },
+    HRHB: { 1992: hqHrhb1992Url, 1993: hqHrhb1993Url, 1994: hqHrhb1994Url, 1995: hqHrhb1995Url }
 };
 
 /** Given a calendar year from the current turn, return the plate year (latest available <= calendarYear). */
 function getPlateYear(faction: FactionId, calendarYear: number): number {
     const years = Object.keys(WARROOM_YEAR_PLATE_URLS[faction] ?? {}).map(Number).sort((a, b) => a - b);
-    let best = years[0] ?? 1991;
+    let best = years[0] ?? 1992;
     for (const y of years) {
         if (y <= calendarYear) best = y;
     }
@@ -437,7 +433,7 @@ class WarroomApp {
         this.showScreen('scenario-picker');
 
         // Defer scenario image loads
-        const scenarioImages: Record<string, string> = { apr1992: scnApr1992Url, sep1991: scnSep1991Url };
+        const scenarioImages: Record<string, string> = { apr1992: scnApr1992Url };
         setTimeout(() => {
             for (const [key, src] of Object.entries(scenarioImages)) {
                 const img = document.getElementById(`scn-img-${key}`) as HTMLImageElement | null;
@@ -691,7 +687,6 @@ class WarroomApp {
         const plateYear = getPlateYear(playerFaction, calYear);
         const scenePlate = this.scenePlateImages.get(`${playerFaction}:${plateYear}`)
             ?? this.scenePlateImages.get(`RBiH:${plateYear}`)
-            ?? this.scenePlateImages.get('RBiH:1991')
             ?? null;
 
         this.ctx.clearRect(0, 0, W, H);

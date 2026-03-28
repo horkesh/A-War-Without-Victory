@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AWWV - Warroom</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect fill='%231a1a2e' width='32' height='32'/><text x='16' y='22' font-size='16' text-anchor='middle' fill='%23eee'>W</text></svg>">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect fill='%231a1a2e' width='32' height='32'/><text x='16' y='22' font-size='16' text-anchor='middle' fill='%23eee'>W</text></svg>">
     <link rel="stylesheet" href="./styles/modals.css">
     <link rel="stylesheet" href="./styles/ticker.css">
     <link rel="stylesheet" href="./styles/war-planning-map.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap');
-        body, html {
+
+        body,
+        html {
             margin: 0;
             padding: 0;
             width: 100%;
@@ -18,16 +22,23 @@
             overflow: hidden;
             background: #000;
         }
+
         /* ─── Warroom Toolbar (matches tactical map ops center) ─── */
         .wr-toolbar {
-            position: fixed; top: 0; left: 0; right: 0;
-            display: flex; align-items: center; gap: 6px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
             padding: 5px 12px;
             background: #111122;
             border-bottom: 1px solid #252540;
             z-index: 1000;
             font-family: 'IBM Plex Mono', 'Consolas', 'Courier New', monospace;
         }
+
         .wr-toolbar-btn {
             padding: 4px 10px;
             background: rgba(255, 255, 255, 0.04);
@@ -42,26 +53,31 @@
             text-transform: uppercase;
             transition: all 120ms ease;
         }
+
         .wr-toolbar-btn:hover {
             background: #1e1e35;
             color: #d8d8e0;
             border-color: #303050;
         }
+
         .wr-toolbar-btn:active {
             background: rgba(0, 232, 120, 0.1);
             color: #00e878;
             border-color: rgba(0, 232, 120, 0.3);
         }
+
         .wr-map-btn {
             background: rgba(0, 232, 120, 0.08);
             color: #00e878;
             border-color: rgba(0, 232, 120, 0.25);
         }
+
         .wr-map-btn:hover {
             background: rgba(0, 232, 120, 0.18);
             color: #00ff88;
             border-color: rgba(0, 232, 120, 0.45);
         }
+
         .wr-turn-display {
             margin-left: auto;
             font-size: 12px;
@@ -69,6 +85,7 @@
             color: #00e878;
             letter-spacing: 0.5px;
         }
+
         #warroom-container {
             width: 100vw;
             height: calc(100vh - 32px);
@@ -77,35 +94,45 @@
             justify-content: center;
             align-items: center;
         }
+
         #warroom-canvas {
             max-width: 100%;
             max-height: 100%;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
         }
+
         /* Scene swap: warroom-scene stays visible when showing map/tactical; only the desk is hidden. */
-        #warroom-scene, #map-scene, #tactical-map-scene {
+        #warroom-scene,
+        #map-scene,
+        #tactical-map-scene {
             position: fixed;
             inset: 0;
             width: 100vw;
             height: 100vh;
         }
+
         #warroom-scene.warroom-scene-hidden {
             display: none;
         }
+
         #warroom-desk.warroom-desk-hidden {
             display: none;
         }
+
         #map-scene.map-scene-hidden {
             display: none;
         }
+
         #tactical-map-scene.tactical-map-scene-hidden {
             display: none;
         }
+
         #tactical-map-scene iframe {
             width: 100%;
             height: 100%;
             border: none;
         }
+
         /* Full-screen overlay used by main menu, side picker, scenario picker */
         .mm-overlay {
             position: fixed;
@@ -119,11 +146,13 @@
             color: #e0e6ef;
             font-family: Arial, sans-serif;
         }
+
         .mm-overlay.mm-hidden {
             display: none;
         }
     </style>
 </head>
+
 <body>
     <!-- Warroom scene: canvas, desk, modals. Only one of warroom-scene / map-scene visible at a time.
          Hidden by default so the main menu (central image) is the first paint; shown when overlays are dismissed. -->
@@ -132,12 +161,16 @@
         <div id="warroom-desk">
             <div class="wr-toolbar" id="wr-toolbar">
                 <button type="button" class="wr-toolbar-btn" id="wr-btn-menu" aria-label="Open main menu">Menu</button>
-                <button type="button" class="wr-toolbar-btn wr-map-btn" id="wr-btn-map" aria-label="Open tactical map">&#9654; War Map</button>
-                <button type="button" class="wr-toolbar-btn wr-map-btn" id="wr-btn-sandbox" aria-label="Open tactical sandbox">Sandbox</button>
-                <button type="button" class="wr-toolbar-btn wr-map-btn" id="wr-btn-invest" aria-label="Open pre-war investment map" style="display:none">Allocate Capital</button>
-                <button type="button" class="wr-toolbar-btn" id="wr-btn-settings" aria-label="Open settings">Settings</button>
+                <button type="button" class="wr-toolbar-btn wr-map-btn" id="wr-btn-map"
+                    aria-label="Open tactical map">&#9654; War Map</button>
+                <button type="button" class="wr-toolbar-btn wr-map-btn" id="wr-btn-sandbox"
+                    aria-label="Open tactical sandbox">Sandbox</button>
+                <button type="button" class="wr-toolbar-btn wr-map-btn" id="wr-btn-invest"
+                    aria-label="Open pre-war investment map" style="display:none">Allocate Capital</button>
+                <button type="button" class="wr-toolbar-btn" id="wr-btn-settings"
+                    aria-label="Open settings">Settings</button>
                 <button type="button" class="wr-toolbar-btn" id="wr-btn-help" aria-label="Help">Help</button>
-                <span class="wr-turn-display" id="wr-turn-display">Turn 0 &mdash; Sep 1991</span>
+                <span class="wr-turn-display" id="wr-turn-display">Turn 0</span>
             </div>
             <div id="warroom-container">
                 <canvas id="warroom-canvas"></canvas>
@@ -182,23 +215,29 @@
                 <p class="sp-muted">Choose your side. Other factions are controlled by AI.</p>
                 <div id="sp-error" class="sp-error hidden" role="alert"></div>
                 <div class="sp-faction-options" role="group" aria-label="Faction selection">
-                    <button type="button" class="sp-faction-option" id="sp-faction-RBiH" data-faction="RBiH" aria-label="Play as RBiH (ARBiH)">
+                    <button type="button" class="sp-faction-option" id="sp-faction-RBiH" data-faction="RBiH"
+                        aria-label="Play as RBiH (ARBiH)">
                         <img class="sp-faction-flag" id="sp-flag-RBiH" src="" alt="" width="80" height="53">
                         <span class="sp-faction-label">RBiH (ARBiH)</span>
                         <span class="sp-difficulty-badge sp-difficulty-hard">HARD</span>
-                        <span class="sp-faction-desc">Surrounded and outgunned. Defend the cities. Survive the embargo. Hold until the world notices.</span>
+                        <span class="sp-faction-desc">Surrounded and outgunned. Defend the cities. Survive the embargo.
+                            Hold until the world notices.</span>
                     </button>
-                    <button type="button" class="sp-faction-option" id="sp-faction-RS" data-faction="RS" aria-label="Play as RS (VRS)">
+                    <button type="button" class="sp-faction-option" id="sp-faction-RS" data-faction="RS"
+                        aria-label="Play as RS (VRS)">
                         <img class="sp-faction-flag" id="sp-flag-RS" src="" alt="" width="80" height="53">
                         <span class="sp-faction-label">RS (VRS)</span>
                         <span class="sp-difficulty-badge sp-difficulty-standard">STANDARD</span>
-                        <span class="sp-faction-desc">Inherit the JNA arsenal. Seize the corridors. The clock is ticking&mdash;use your advantage before it fades.</span>
+                        <span class="sp-faction-desc">Inherit the JNA arsenal. Seize the corridors. The clock is
+                            ticking&mdash;use your advantage before it fades.</span>
                     </button>
-                    <button type="button" class="sp-faction-option" id="sp-faction-HRHB" data-faction="HRHB" aria-label="Play as HRHB (HVO)">
+                    <button type="button" class="sp-faction-option" id="sp-faction-HRHB" data-faction="HRHB"
+                        aria-label="Play as HRHB (HVO)">
                         <img class="sp-faction-flag" id="sp-flag-HRHB" src="" alt="" width="80" height="53">
                         <span class="sp-faction-label">HRHB (HVO)</span>
                         <span class="sp-difficulty-badge sp-difficulty-moderate">MODERATE</span>
-                        <span class="sp-faction-desc">Backed by Zagreb but squeezed between two wars. Will the alliance hold, or will you fight alone?</span>
+                        <span class="sp-faction-desc">Backed by Zagreb but squeezed between two wars. Will the alliance
+                            hold, or will you fight alone?</span>
                     </button>
                 </div>
             </div>
@@ -216,22 +255,16 @@
                 <p class="sp-muted">Choose a starting scenario for your campaign.</p>
                 <div id="scn-error" class="sp-error hidden" role="alert"></div>
                 <div class="scn-options" role="group" aria-label="Scenario selection">
-                    <button type="button" class="scn-option" id="scn-sep1991" data-scenario="sep_1991">
-                        <div class="scn-image-wrap">
-                            <img class="scn-image" id="scn-img-sep1991" src="" alt="September 1991 scenario">
-                        </div>
-                        <div class="scn-info">
-                            <span class="scn-title">Pre-War (Sep 1991) &mdash; The Unravelling</span>
-                            <span class="scn-desc">Yugoslavia is dying. Croatia is already at war. In Bosnia, the factions manoeuvre &mdash; rallying paramilitaries, stacking police loyalties, spending political capital &mdash; before the first shot is fired. Shape the board, then live with the consequences.</span>
-                        </div>
-                    </button>
+                    <!-- Sep 1991 scenario removed (legacy) -->
                     <button type="button" class="scn-option" id="scn-apr1992" data-scenario="apr_1992">
                         <div class="scn-image-wrap">
                             <img class="scn-image" id="scn-img-apr1992" src="" alt="April 1992 scenario">
                         </div>
                         <div class="scn-info">
                             <span class="scn-title">War Start (Apr 1992) &mdash; Independence</span>
-                            <span class="scn-desc">The referendum has passed. JNA columns withdraw through burning suburbs, leaving arsenals behind. Three factions scramble to arm, organise, and seize ground before the frontlines harden. There will be no clean ending.</span>
+                            <span class="scn-desc">The referendum has passed. JNA columns withdraw through burning
+                                suburbs, leaving arsenals behind. Three factions scramble to arm, organise, and seize
+                                ground before the frontlines harden. There will be no clean ending.</span>
                         </div>
                     </button>
                 </div>
@@ -241,4 +274,5 @@
 
     <script type="module" src="./warroom.ts"></script>
 </body>
+
 </html>
