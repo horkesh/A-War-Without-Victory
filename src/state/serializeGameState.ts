@@ -2,7 +2,8 @@
  * Phase A1.3: Deterministic canonical GameState serialization.
  *
  * Output is stable byte-for-byte across runs for identical input state.
- * No derived/transient fields (Engine Invariants §13.1); no timestamps; no Map/Set in state.
+ * No derived/transient fields (Engine Invariants §13.1); no timestamps.
+ * Maps are serialized as sorted plain objects; Sets as sorted arrays.
  *
  * Serialization does NOT depend on JS object insertion order: uses deterministic deep key ordering.
  */
@@ -40,13 +41,19 @@ function toDeterministicJsonValue(value: unknown): unknown {
     }
     if (typeof value === 'object') {
         if (value instanceof Map) {
-            throw new Error(
-                'serializeGameState: GameState must not contain Map; derived state must be recomputed each turn (Engine Invariants §13.1)'
-            );
+            // Serialize Map as a plain object with deterministically sorted keys.
+            // Commander state (v0.8) uses Maps for garrison_budget, intel_picture, etc.
+            const mapObj: Record<string, unknown> = {};
+            const mapKeys = [...value.keys()].map(String).sort(strictCompare);
+            for (const k of mapKeys) {
+                mapObj[k] = toDeterministicJsonValue(value.get(k));
+            }
+            return mapObj;
         }
         if (value instanceof Set) {
-            throw new Error(
-                'serializeGameState: GameState must not contain Set; derived state must be recomputed each turn (Engine Invariants §13.1)'
+            // Serialize Set as a deterministically sorted array.
+            return [...value].map(v => toDeterministicJsonValue(v)).sort((a, b) =>
+                strictCompare(String(a), String(b))
             );
         }
         if (Array.isArray(value)) {
@@ -87,8 +94,9 @@ function assertNoWrapper(state: unknown): asserts state is Record<string, unknow
 }
 
 /**
- * Convert GameState to a plain structure with deterministically ordered keys (no undefined, no Map/Set).
- * Optional helper for callers that need the serializable object without the string.
+ * Convert GameState to a plain structure with deterministically ordered keys (no undefined).
+ * Maps → sorted plain objects, Sets → sorted arrays. Optional helper for callers that need
+ * the serializable object without the string.
  */
 export function toSerializableGameState(state: GameState): unknown {
     assertNoWrapper(state);
@@ -103,7 +111,7 @@ export function toSerializableGameState(state: GameState): unknown {
  * Serialize GameState to canonical JSON string (stable byte-for-byte for identical state).
  * - Rejects wrappers (e.g. { state, phasesExecuted }).
  * - Rejects denylisted derived-state keys (validateGameStateShape).
- * - Rejects Map/Set in state (fail fast).
+ * - Serializes Map as sorted plain objects, Set as sorted arrays.
  * - Object keys are sorted with strictCompare; array order preserved.
  * @param state GameState to serialize
  * @param space Optional: 2 for pretty-printed (deterministic); omit for compact
