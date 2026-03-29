@@ -12,6 +12,9 @@ export const MAX_SECTOR_EDGES = 25;
 /** Maximum brigades per sector before forced split. */
 export const MAX_SECTOR_BRIGADES = 8;
 
+/** Minimum brigades per sector — corps with fewer brigades/sector get sectors merged. */
+export const MIN_SECTOR_BRIGADES = 2;
+
 /** Maximum reserve brigades per sector. One reserve, 1 hop behind the front. */
 export const MAX_RESERVES_PER_SECTOR = 1;
 

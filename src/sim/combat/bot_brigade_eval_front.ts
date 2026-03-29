@@ -36,8 +36,33 @@ export function assignedBrigadeNotOnSectorFrontOsids(
 }
 
 export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, state, faction, loc, adjacency, reverseMap, isActiveSectorOperationParticipant, result, graphAnalysis, columnAssignments } = ctx;
+    const { brigade, state, faction, loc, adjacency, reverseMap, isActiveSectorOperationParticipant, result, graphAnalysis, columnAssignments, directive } = ctx;
     const offAssignedFront = assignedBrigadeNotOnSectorFrontOsids(state, brigade, loc);
+
+    // --- Sector reassignment: corps AI issued explicit reassignment order ---
+    // Must be checked BEFORE "stay on sector" logic, otherwise a brigade already
+    // on its current sector's front returns true and evaluateFrontCoverage (which
+    // also processes sector_reassignment_orders) never runs.
+    if (directive?.sector_reassignment_orders && state.military.corps_front_sectors) {
+        const reassign = directive.sector_reassignment_orders.find(r => r.brigade_id === brigade.id);
+        if (reassign) {
+            const targetSec = state.military.corps_front_sectors[reassign.to_sector_id];
+            if (targetSec) {
+                const targetOsids = new Set<string>();
+                for (const ss of targetSec.sub_segments) {
+                    for (const o of ss.friendly_osids) targetOsids.add(o);
+                }
+                if (targetOsids.size > 0 && !targetOsids.has(loc)) {
+                    const dest = findNearestFriendlyOsidDestination(state, faction, loc, adjacency, reverseMap, targetOsids);
+                    if (dest) {
+                        result.column_march_orders[brigade.id] = dest;
+                        result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                        return true;
+                    }
+                }
+            }
+        }
+    }
 
     // --- Sector march: brigade assigned/reserve in a sector but not on its front → column march ---
     // This overrides home defense: the corps needs this brigade at the front.

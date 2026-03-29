@@ -193,7 +193,7 @@ export function computeReturnMarches(
         if ((f.kind ?? 'brigade') !== 'brigade') continue;
         // Line-assigned brigades are expected to stay with their sector front,
         // not get periodic home-return pulls — UNLESS they're in a tiny pocket
-        // sector (< 3 territory OSIDs) that isn't strategically valuable.
+        // sector (< 3 territory OSIDs).
         if (lineAssigned.has(id) && !tinyPocketLineAssigned.has(id)) continue;
 
         // Skip if no location or no home
@@ -221,6 +221,7 @@ export function computeReturnMarches(
         // Skip if no corps (unattached)
         const corpsId = f.corps_id;
         if (!corpsId) continue;
+        // If the brigade can reach its corps front, it's not truly orphaned — skip.
         const corpsFrontSet = corpsFrontTargets.get(corpsId);
         if (corpsFrontSet && corpsFrontSet.size > 0) {
             const distToCorpsFront = bfsDistanceToAny(loc, corpsFrontSet, adjacency, friendlyOsids);

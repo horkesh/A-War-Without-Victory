@@ -37,6 +37,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { FRONT_EDGE_MAX_GAP } from '../../map/front_edges.js';
 import {
     EXEMPT_CORPS_IDS,
+    MIN_SECTOR_BRIGADES,
 } from './corps_front_sectors_constants.js';
 import { getCorpsArmyPriorities } from './bot_strategy.js';
 
@@ -326,6 +327,83 @@ function buildFactionSectors(
     // cascading into different brigade distribution and combat outcomes globally.
     // The ghost sector sanitizer (sanitize-ghost-sector-power pipeline step)
     // already zeros stats for empty sectors — that's sufficient.
+
+    // Step 4d: Merge undersized corps sectors when brigade/sector ratio < MIN_SECTOR_BRIGADES.
+    // Herzegovina Corps with 8 brigades and 5 sectors (1.6 brig/sector) creates empty sectors.
+    // Merge the smallest adjacent pair until the ratio is met or no adjacent merges remain.
+    {
+        const corpsIdSet = new Set(sectors.map(s => s.corps_id));
+        for (const cid of [...corpsIdSet].sort(strictCompare)) {
+            // Count active brigades for this corps
+            let corpsBrigadeCount = 0;
+            for (const fid of Object.keys(formations).sort(strictCompare)) {
+                const f = formations[fid];
+                if (!f || f.faction !== faction || f.status !== 'active') continue;
+                if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+                if (getFormationCorpsId(f) !== cid) continue;
+                corpsBrigadeCount++;
+            }
+
+            // Iteratively merge the smallest adjacent sector pair until ratio is met
+            let changed = true;
+            while (changed) {
+                changed = false;
+                const corpsSectors = sectors.filter(s => s.corps_id === cid);
+                if (corpsSectors.length <= 1) break;
+                if (corpsBrigadeCount / corpsSectors.length >= MIN_SECTOR_BRIGADES) break;
+
+                // Find the smallest sector (by edge count, ties broken by ID)
+                let smallestIdx = -1;
+                let smallestSize = Infinity;
+                for (let i = 0; i < corpsSectors.length; i++) {
+                    const s = corpsSectors[i]!;
+                    if (s.length_edges < smallestSize ||
+                        (s.length_edges === smallestSize && smallestIdx >= 0 &&
+                            strictCompare(s.sector_id, corpsSectors[smallestIdx]!.sector_id) < 0)) {
+                        smallestSize = s.length_edges;
+                        smallestIdx = i;
+                    }
+                }
+                if (smallestIdx === -1) break;
+
+                const target = corpsSectors[smallestIdx]!;
+                // Find the smallest adjacent neighbor
+                let bestNeighborIdx = -1;
+                let bestNeighborSize = Infinity;
+                for (let i = 0; i < corpsSectors.length; i++) {
+                    if (i === smallestIdx) continue;
+                    const candidate = corpsSectors[i]!;
+                    if (!areSectorsTerritoryAdjacent(target, candidate, adjacency)) continue;
+                    if (candidate.length_edges < bestNeighborSize ||
+                        (candidate.length_edges === bestNeighborSize && bestNeighborIdx >= 0 &&
+                            strictCompare(candidate.sector_id, corpsSectors[bestNeighborIdx]!.sector_id) < 0)) {
+                        bestNeighborSize = candidate.length_edges;
+                        bestNeighborIdx = i;
+                    }
+                }
+                if (bestNeighborIdx === -1) break; // No adjacent neighbor — can't merge further
+
+                // Merge target into neighbor (in the main sectors array)
+                const neighbor = corpsSectors[bestNeighborIdx]!;
+                const mergedIdx = sectors.indexOf(neighbor);
+                const targetMainIdx = sectors.indexOf(target);
+                if (mergedIdx === -1 || targetMainIdx === -1) break;
+
+                // Merge in-place (following mergeSmallAdjacentSectors pattern)
+                neighbor.edge_ids = [...new Set([...neighbor.edge_ids, ...target.edge_ids])].sort(strictCompare);
+                neighbor.territory_osids = [...new Set([...neighbor.territory_osids, ...target.territory_osids])].sort(strictCompare);
+                neighbor.assigned_brigade_ids = [...new Set([...neighbor.assigned_brigade_ids, ...target.assigned_brigade_ids])].sort(strictCompare);
+                neighbor.reserve_brigade_ids = [...new Set([...neighbor.reserve_brigade_ids, ...target.reserve_brigade_ids])].sort(strictCompare);
+                neighbor.opposing_factions = [...new Set([...neighbor.opposing_factions, ...target.opposing_factions])].sort(strictCompare);
+                neighbor.length_edges = neighbor.edge_ids.length;
+                neighbor.sub_segments = [...neighbor.sub_segments, ...target.sub_segments];
+
+                // Remove the target sector
+                sectors.splice(targetMainIdx, 1);
+                changed = true;
+            }
+        }
+    }
 
     // Step 5: Territory Voronoi — BFS from Front Edges into Depth
     assignTerritoryVoronoi(sectors, adjacency, friendlyOsids, osidToCorps);

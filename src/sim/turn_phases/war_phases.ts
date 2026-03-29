@@ -2009,10 +2009,9 @@ export const warPhases: NamedPhase[] = [
     },
     {
         name: 'update-sarajevo-exception',
-        run: async (context) => {
+        run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            const graph = await loadSettlementGraph();
-            const sarajevo = updateSarajevoState(context.state, graph, context.report.supply_resolution?.supply_state);
+            const sarajevo = updateSarajevoState(context.state, context.report.supply_resolution?.supply_state_by_osid);
             maybeActivateSarajevoTunnel(context.state);
             context.report.sarajevo_exception = {
                 siege_status: sarajevo.siege_status,

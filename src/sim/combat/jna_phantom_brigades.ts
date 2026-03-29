@@ -122,6 +122,7 @@ const JNA_PHANTOM_DEFS: PhantomDef[] = [
         location_osid: 'op:visegrad:okrugla',
         withdrawal_turn: 8,
         tanks: 0, artillery: 0, apcs: 0,
+        no_equipment_handoff: true,
     },
     {
         id: 'jna_rudo_to_tg' as FormationId,
@@ -130,6 +131,7 @@ const JNA_PHANTOM_DEFS: PhantomDef[] = [
         location_osid: 'op:visegrad:donji_dobrun_2',
         withdrawal_turn: 8,
         tanks: 0, artillery: 0, apcs: 0,
+        no_equipment_handoff: true,
     },
     {
         id: 'jna_rajlovac_barracks_tg' as FormationId,
@@ -138,6 +140,29 @@ const JNA_PHANTOM_DEFS: PhantomDef[] = [
         location_osid: 'op:ilijas:srednje',
         withdrawal_turn: 5,
         tanks: 0, artillery: 0, apcs: 0,
+        no_equipment_handoff: true,
+    },
+    {
+        // Vogošća Serb TO — local territorial defense mobilized by JNA/SDS
+        // to seize Vogošća suburbs north of Sarajevo (April-May 1992).
+        id: 'jna_vogosca_to_tg' as FormationId,
+        name: 'Vogošća TO Tactical Group',
+        corps_id: 'vrs_sarajevo_romanija' as FormationId,
+        location_osid: 'op:vogosca:vogosca_3',
+        withdrawal_turn: 8,
+        tanks: 0, artillery: 0, apcs: 0,
+        no_equipment_handoff: true,
+    },
+    {
+        // Ilijaš Serb TO — local territorial defense securing Ilijaš municipality
+        // alongside JNA Rajlovac barracks elements (April-May 1992).
+        id: 'jna_ilijas_to_tg' as FormationId,
+        name: 'Ilijaš TO Tactical Group',
+        corps_id: 'vrs_sarajevo_romanija' as FormationId,
+        location_osid: 'op:ilijas:podlugovi',
+        withdrawal_turn: 8,
+        tanks: 0, artillery: 0, apcs: 0,
+        no_equipment_handoff: true,
     },
     {
         // JNA 37th Corps forward elements at Nevesinje (BB1 p.480).
@@ -168,6 +193,18 @@ const JNA_PHANTOM_DEFS: PhantomDef[] = [
         corps_id: 'jna_herzegovina_command' as FormationId,
         location_osid: 'op:konjic:bijela_2',
         withdrawal_turn: 6,
+        tanks: 0, artillery: 0, apcs: 0,
+        no_equipment_handoff: true,
+    },
+    {
+        // Kalinovik Serb TO — local territorial defense securing Kalinovik
+        // highlands for VRS Herzegovina Corps (April-June 1992).
+        // Historically VRS held Kalinovik throughout (BB2 p.514).
+        id: 'jna_kalinovik_to_tg' as FormationId,
+        name: 'Kalinovik TO Tactical Group',
+        corps_id: 'vrs_herzegovina' as FormationId,
+        location_osid: 'op:kalinovik:kalinovik_2',
+        withdrawal_turn: 10,
         tanks: 0, artillery: 0, apcs: 0,
         no_equipment_handoff: true,
     },

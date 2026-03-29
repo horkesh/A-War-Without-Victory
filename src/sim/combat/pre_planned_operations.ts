@@ -242,13 +242,15 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'rs_3rd_sarajevo_infantry',
                     'rs_4th_sarajevo_light_infantry',
                     'jna_rajlovac_barracks_tg',
+                    'jna_vogosca_to_tg',
+                    'jna_ilijas_to_tg',
                 ],
                 objectives: [
                     'op:vogosca:svrake',
                     'op:vogosca:hotonj',
+                    'op:ilijas:medojevici',
                     'op:ilijas:dragoradi',
                     'op:ilijas:krivajevici',
-                    'op:ilijas:medojevici',
                     'op:ilijas:sirovine',
                 ],
                 staging_osid: 'op:ilijas:podlugovi',
@@ -345,6 +347,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 brigades: [
                     'rs_gacko_brigade',
                     'rs_kalinovik_brigade',
+                    'jna_kalinovik_to_tg',
                 ],
                 // Kalinovik → Konjic chain: after Kalinovik cleared, push into
                 // southern Konjic (ljuta, glavaticevo_2 — both adjacent to sela_2).

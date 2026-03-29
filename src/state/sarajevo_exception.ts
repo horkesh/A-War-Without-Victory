@@ -1,8 +1,7 @@
-import type { LoadedSettlementGraph } from '../map/settlements.js';
 import { clamp01 } from '../utils/math.js';
 import { SARAJEVO_MUN_IDS, SARAJEVO_PRESSURE_MULTIPLIER } from './enclave_integrity.js';
-import type { GameState, SarajevoState, SettlementId } from './game_state.js';
-import type { SupplyStateDerivationReport, SupplyStateLevel } from './supply_state_derivation.js';
+import type { GameState, SarajevoState } from './game_state.js';
+import type { SupplyStateByOsidReport, SupplyStateLevel } from './supply_state_derivation.js';
 
 const BASE_IMPORTANCE = 1.0;
 
@@ -12,32 +11,42 @@ function supplyStateToScore(state: SupplyStateLevel): number {
     return 0;
 }
 
-function getSettlementSupplyState(
-    supplyReport: SupplyStateDerivationReport | undefined,
+/** Extract municipality from an OSID (format: `op:<mun>:<slug>`). */
+function getMunFromOsid(osid: string): string | null {
+    const parts = osid.split(':');
+    return parts.length >= 2 ? parts[1] : null;
+}
+
+/** Get all Sarajevo OSIDs from political_controllers. */
+function getSarajevoOsids(state: GameState): string[] {
+    const controllers = state.political.political_controllers;
+    if (!controllers) return [];
+    const sarajevoMunSet = new Set(SARAJEVO_MUN_IDS as string[]);
+    const osids: string[] = [];
+    for (const osid of Object.keys(controllers)) {
+        const mun = getMunFromOsid(osid);
+        if (mun && sarajevoMunSet.has(mun)) osids.push(osid);
+    }
+    osids.sort((a, b) => a.localeCompare(b));
+    return osids;
+}
+
+function getOsidSupplyState(
+    supplyByOsid: SupplyStateByOsidReport | undefined,
     factionId: string,
-    sid: SettlementId
+    osid: string
 ): SupplyStateLevel | null {
-    if (!supplyReport) return null;
-    const entry = supplyReport.factions.find((f) => f.faction_id === factionId);
+    if (!supplyByOsid) return null;
+    const entry = supplyByOsid.factions.find((f) => f.faction_id === factionId);
     if (!entry) return null;
-    const found = entry.by_settlement.find((s) => s.sid === sid);
+    const found = entry.by_osid.find((e) => e.osid === osid);
     return found?.state ?? null;
 }
 
-function getSarajevoSettlementIds(graph: LoadedSettlementGraph): SettlementId[] {
-    const ids: SettlementId[] = [];
-    for (const [sid, rec] of graph.settlements.entries()) {
-        const munId = (rec.mun1990_id ?? rec.mun_code) as string;
-        if (SARAJEVO_MUN_IDS.includes(munId)) ids.push(sid);
-    }
-    ids.sort((a, b) => a.localeCompare(b));
-    return ids;
-}
-
-function getMajorityController(state: GameState, settlementIds: SettlementId[]): string | null {
+function getMajorityController(state: GameState, osids: string[]): string | null {
     const counts: Record<string, number> = {};
-    for (const sid of settlementIds) {
-        const controller = state.political.political_controllers?.[sid];
+    for (const osid of osids) {
+        const controller = state.political.political_controllers?.[osid];
         const key = controller ?? '_null_';
         counts[key] = (counts[key] ?? 0) + 1;
     }
@@ -54,19 +63,18 @@ function getMajorityController(state: GameState, settlementIds: SettlementId[]):
 
 export function updateSarajevoState(
     state: GameState,
-    graph: LoadedSettlementGraph,
-    supplyReport: SupplyStateDerivationReport | undefined
+    supplyByOsid: SupplyStateByOsidReport | undefined
 ): SarajevoState {
-    const settlementIds = getSarajevoSettlementIds(graph);
-    const controller = getMajorityController(state, settlementIds);
+    const sarajevoOsids = getSarajevoOsids(state);
+    const controller = getMajorityController(state, sarajevoOsids);
     const prev = state.political.sarajevo_state;
     const turn = state.meta.turn;
 
     let supplyScoreSum = 0;
     let count = 0;
     if (controller) {
-        for (const sid of settlementIds) {
-            const supplyState = getSettlementSupplyState(supplyReport, controller, sid);
+        for (const osid of sarajevoOsids) {
+            const supplyState = getOsidSupplyState(supplyByOsid, controller, osid);
             if (!supplyState) continue;
             supplyScoreSum += supplyStateToScore(supplyState);
             count += 1;
@@ -88,7 +96,7 @@ export function updateSarajevoState(
     const sarajevo: SarajevoState = {
         mun_id: 'sarajevo_cluster_1990',
         mun_ids: SARAJEVO_MUN_IDS.slice(),
-        settlement_ids: settlementIds,
+        settlement_ids: sarajevoOsids,
         siege_status: siegeStatus,
         siege_duration: siegeDuration,
         external_supply: externalSupply,
