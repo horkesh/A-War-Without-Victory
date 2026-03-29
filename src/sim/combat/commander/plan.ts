@@ -119,7 +119,7 @@ function advanceExistingPlan(
     const abandonReason = checkAbandonConditions(plan, zones, surplusPool, turn);
     if (abandonReason) {
         return {
-            plan: { ...plan, status: 'abandoned' as CommanderPlanStatus },
+            plan: { ...plan, status: 'abandoned' },
             action: 'abandoned',
             reason: abandonReason,
             concentration_orders: [],
@@ -134,7 +134,7 @@ function advanceExistingPlan(
             const suspendedTurns = turn - (plan.created_turn + estimateTurnsActive(plan, turn));
             if (suspendedTurns >= MAX_SUSPENSION_TURNS) {
                 return {
-                    plan: { ...plan, status: 'abandoned' as CommanderPlanStatus },
+                    plan: { ...plan, status: 'abandoned' },
                     action: 'abandoned',
                     reason: `suspended for ${suspendedTurns} turns: ${suspendReason}`,
                     concentration_orders: [],
@@ -142,7 +142,7 @@ function advanceExistingPlan(
             }
         }
         return {
-            plan: { ...plan, status: 'suspended' as CommanderPlanStatus, suspension_reason: suspendReason },
+            plan: { ...plan, status: 'suspended', suspension_reason: suspendReason },
             action: 'suspended',
             reason: suspendReason,
             concentration_orders: [],
@@ -163,7 +163,7 @@ function advanceExistingPlan(
 
     if (viability < VIABILITY_ABANDON_THRESHOLD) {
         return {
-            plan: { ...plan, status: 'abandoned' as CommanderPlanStatus, viability_score: viability },
+            plan: { ...plan, status: 'abandoned', viability_score: viability },
             action: 'abandoned',
             reason: `viability dropped to ${viability.toFixed(2)}`,
             concentration_orders: [],

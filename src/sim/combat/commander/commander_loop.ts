@@ -105,8 +105,8 @@ export function runCommanderForCorps(
         state, corpsId, faction, spatial, edges,
         reverseMap, graphAnalysis, supplyByOsid, ethnicMap,
     );
-    // Will read from state.military.corps_command[corpsId].commander_state once Step 9 lands
-    const previousState: CommanderState | null = null;
+    const previousState: CommanderState | null =
+        state.military.corps_command?.[corpsId]?.commander_state ?? null;
     const commander = new BotCorpsCommander();
     return commander.decide(briefing, previousState);
 }
@@ -154,4 +154,7 @@ export function applyCommanderOutput(
             }
         }
     }
+
+    // 5. Persist commander state for next turn's continuity
+    corps.commander_state = output.updated_state;
 }

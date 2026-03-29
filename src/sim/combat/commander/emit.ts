@@ -187,8 +187,8 @@ function buildDirective(
     // reinforce_sector_ids: sectors with deficit zones
     const reinforceSectorIds = buildReinforceSectorIds(allocation.zones, briefing);
 
-    // priority_sector_id: sector containing plan staging zone
-    const prioritySectorId = findPrioritySector(planDecision, briefing);
+    // priority_sector_id: sector with most plan target overlap
+    const prioritySectorId = findSectorWithMostTargetOverlap(planDecision, briefing);
 
     // sector_reassignment_orders: from decide.reserve_shifts mapped to sectors
     const sectorReassignmentOrders = buildSectorReassignmentOrders(decisions, briefing);
@@ -233,7 +233,7 @@ function buildOffensiveTargets(planDecision: PlanDecision): string[] {
         planDecision.plan &&
         ACTIVE_PLAN_STATUSES.has(planDecision.plan.status)
     ) {
-        return [...(planDecision.plan?.target_osids ?? [])].sort(strictCompare);
+        return [...planDecision.plan.target_osids].sort(strictCompare);
     }
     return [];
 }
@@ -326,7 +326,7 @@ function buildSectorTargets(
         return result;
     }
 
-    const targetSet = new Set((planDecision.plan?.target_osids ?? []));
+    const targetSet = new Set(planDecision.plan.target_osids);
     if (targetSet.size === 0) return result;
 
     const corpsSectors = briefing.sectors
@@ -378,22 +378,22 @@ function buildReinforceSectorIds(
     return [...sectorIds].sort(strictCompare);
 }
 
-/** Find the sector containing the plan's staging zone. */
-function findPrioritySector(
+/**
+ * Find the sector with the most target OSID overlap in its enemy OSIDs.
+ * Shared by both priority_sector_id and operation sector_id logic.
+ * Falls back to the first corps sector when no targets match.
+ */
+function findSectorWithMostTargetOverlap(
     planDecision: PlanDecision,
     briefing: CommanderBriefing,
 ): string | null {
-    if (!(planDecision.plan?.staging_zone ?? null) || !planDecision.plan) return null;
+    if (!planDecision.plan) return null;
 
-    // Find which sector's territory overlaps with the staging zone's OSIDs
-    // The staging zone is a ZoneId — find the zone assessment's OSIDs
-    // We look for a sector that contains OSIDs from the staging zone
     const corpsSectors = briefing.sectors
         .filter(s => s.corps_id === briefing.corps_id)
         .sort((a, b) => strictCompare(a.sector_id, b.sector_id));
 
-    // Plan targets indicate the direction of attack — find sector with most targets
-    const targetSet = new Set((planDecision.plan?.target_osids ?? []));
+    const targetSet = new Set(planDecision.plan.target_osids);
     if (targetSet.size === 0 && corpsSectors.length > 0) {
         return corpsSectors[0]!.sector_id;
     }
@@ -411,6 +411,11 @@ function findPrioritySector(
             bestCount = count;
             bestSector = sector.sector_id;
         }
+    }
+
+    // Fallback to first sector
+    if (!bestSector && corpsSectors.length > 0) {
+        bestSector = corpsSectors[0]!.sector_id;
     }
 
     return bestSector;
@@ -493,20 +498,20 @@ function buildOperations(
     if (
         planDecision.plan &&
         ACTIVE_PLAN_STATUSES.has(planDecision.plan.status) &&
-        (planDecision.plan?.target_osids ?? []).length > 0
+        planDecision.plan.target_osids.length > 0
     ) {
         const surplusSet = new Set(
             allocation.surplus_pool.map(ev => ev.brigade_id),
         );
 
         // Intersect plan's assigned brigades with surplus pool
-        const participatingBrigades = [...(planDecision.plan?.assigned_brigades ?? [])]
+        const participatingBrigades = [...planDecision.plan.assigned_brigades]
             .filter(id => surplusSet.has(id))
             .sort(strictCompare);
 
         if (participatingBrigades.length > 0) {
-            const sectorId = findOperationSectorId(planDecision, briefing);
-            const objectives = [...(planDecision.plan?.target_osids ?? [])].sort(strictCompare);
+            const sectorId = findSectorWithMostTargetOverlap(planDecision, briefing);
+            const objectives = [...planDecision.plan.target_osids].sort(strictCompare);
 
             const op: CorpsOperation = {
                 name: `cmd_${briefing.corps_id}_t${briefing.turn}`,
@@ -575,40 +580,6 @@ function buildOperations(
     return ops;
 }
 
-/** Find the sector containing plan staging zone for the operation. */
-function findOperationSectorId(
-    planDecision: PlanDecision,
-    briefing: CommanderBriefing,
-): string | null {
-    // Prefer sector with most plan targets in its enemy OSIDs
-    const targetSet = new Set((planDecision.plan?.target_osids ?? []));
-    const corpsSectors = briefing.sectors
-        .filter(s => s.corps_id === briefing.corps_id)
-        .sort((a, b) => strictCompare(a.sector_id, b.sector_id));
-
-    let bestSector: string | null = null;
-    let bestCount = 0;
-
-    for (const sector of corpsSectors) {
-        let count = 0;
-        for (const subSeg of sector.sub_segments) {
-            for (const eo of subSeg.enemy_osids) {
-                if (targetSet.has(eo)) count++;
-            }
-        }
-        if (count > bestCount) {
-            bestCount = count;
-            bestSector = sector.sector_id;
-        }
-    }
-
-    // Fallback to first sector
-    if (!bestSector && corpsSectors.length > 0) {
-        bestSector = corpsSectors[0]!.sector_id;
-    }
-
-    return bestSector;
-}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // buildSectorStances — from decisions

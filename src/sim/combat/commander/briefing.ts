@@ -19,7 +19,6 @@ import type { OperationalToCanonicalReverseMap } from '../../../data/operational
 import type { OsidEthnicComposition } from '../ethnic_defense.js';
 import type { FactionGraphAnalysis } from '../osid_graph_analysis.js';
 import type { SpatialContext } from '../../spatial_context.js';
-import type { FrontGeometryAssessment } from '../front_geometry_analysis.js';
 
 import type {
     CommanderBriefing,
@@ -30,8 +29,7 @@ import type {
 import { getActiveDoctrinePhase } from '../bot_strategy.js';
 import { getCorpsSubordinates } from '../bot_corps_helpers.js';
 import { getCorpsCommander } from '../officer_system.js';
-import { analyzeFrontGeometry } from '../front_geometry_analysis.js';
-import { getPoliticalControllerOSID } from '../../../state/settlement_control.js';
+import { analyzeFrontGeometry, type FrontGeometryAssessment } from '../front_geometry_analysis.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 
 // ---------------------------------------------------------------------------

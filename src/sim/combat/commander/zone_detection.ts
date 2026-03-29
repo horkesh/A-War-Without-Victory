@@ -14,15 +14,7 @@ import type { OsidEthnicComposition } from '../ethnic_defense.js';
 import { getCoEthnicShare } from '../ethnic_defense.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import type { ZoneAssessment, ZoneId, ZonePosture } from './commander_state.js';
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Constants — edges-per-brigade by posture for garrison budget
-// ═══════════════════════════════════════════════════════════════════════════
-
-const EDGES_PER_BRIGADE_BESIEGED = 8;
-const EDGES_PER_BRIGADE_DEFENDING = 12;
-const EDGES_PER_BRIGADE_BALANCED = 15;
-const EDGES_PER_BRIGADE_PROJECTING = 20;
+import { GARRISON_EDGES_PER_BRIGADE } from './allocate.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // detectZones — partition corps territory into connected zones
@@ -73,21 +65,7 @@ export function detectZones(
         }
     }
 
-    // 4. Collect front edge counts from sectors that overlap each zone
-    //    Build a set of front-edge-adjacent friendly OSIDs per sector for zone overlap detection
-    const sectorFrontOsids = new Map<string, Set<string>>();
-    for (const sector of sectors) {
-        if (sector.corps_id !== corpsId) continue;
-        const frontOsids = new Set<string>();
-        for (const subSeg of sector.sub_segments) {
-            for (const osid of subSeg.friendly_osids) {
-                frontOsids.add(osid);
-            }
-        }
-        sectorFrontOsids.set(sector.sector_id, frontOsids);
-    }
-
-    // 5. Build zone assessments
+    // 4. Build zone assessments
     const zones: ZoneAssessment[] = [];
 
     for (const compIdx of sortedCompIndices) {
@@ -223,7 +201,7 @@ export function measureCorridorWidth(
         // Main body with no external friendly connections: could be the entire faction territory
         // (which is normal, not besieged) — only return 0 if zone is small subset
         // Since main body IS the largest component, return Infinity
-        return exitCount > 0 ? Infinity : Infinity;
+        return Infinity;
     }
 
     // Non-main-body zone: count boundary OSIDs connecting to friendly-but-not-in-zone territory
@@ -337,7 +315,7 @@ function derivePosture(
 
     // Compute garrison budget for 'balanced' to determine surplus/deficit
     const balancedBudget = frontEdgeCount > 0
-        ? Math.ceil(frontEdgeCount / EDGES_PER_BRIGADE_BALANCED)
+        ? Math.ceil(frontEdgeCount / GARRISON_EDGES_PER_BRIGADE.balanced)
         : 0;
     const surplus = brigadeCount - balancedBudget;
 
@@ -350,10 +328,5 @@ function derivePosture(
  * Get edges-per-brigade constant for a given posture.
  */
 function getEdgesPerBrigade(posture: ZonePosture): number {
-    switch (posture) {
-        case 'besieged': return EDGES_PER_BRIGADE_BESIEGED;
-        case 'defending': return EDGES_PER_BRIGADE_DEFENDING;
-        case 'balanced': return EDGES_PER_BRIGADE_BALANCED;
-        case 'projecting': return EDGES_PER_BRIGADE_PROJECTING;
-    }
+    return GARRISON_EDGES_PER_BRIGADE[posture];
 }
