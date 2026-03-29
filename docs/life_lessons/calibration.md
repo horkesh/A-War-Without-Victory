@@ -220,3 +220,21 @@
 - **Wrong approach**: Layering faction-specific doctrine gates, stance restrictions, and attack share caps to artificially suppress attacks. These mask the real problem: the combat predictor allows attacks at ratio 0.7 (predicted stalemate), fog of war gives a flat 15% discount on defender power regardless of intel quality, and counter-attacks bypass the normal decision chain.
 - **Right approach**: Fix the evaluation so the bot makes correct decisions emergently. Raise attack threshold to costly_victory (1.0) — faction-neutral. Scale fog with intel confidence — makes probing meaningful. Gate counter-attacks through the predictor. ARBiH in 1992 stops attacking because VRS is stronger, not because a flag says "defensive."
 - **Do instead**: When a faction is doing something ahistorical, ask "why does the bot THINK this is a good idea?" before adding gates. If the predictor is wrong, fix the predictor. If the threshold is too lenient, raise it for everyone. Faction-specific overrides are a last resort, not a first response.
+
+### [Process] JNA ghosts for early ops must be topology-verified — adjacent to objectives, not just nearby (2026-03-29) — NEW
+- **Context**: Added JNA ghosts to Op Prsten at srednje/podlugovi. They were near Ilijas objectives but NOT adjacent to hotonj (objective 2). Op processes objectives sequentially, got stuck on hotonj (only rs_3rd_sarajevo with 1200 pers, predicts repulsed). 6000 ghost personnel sat idle.
+- **Wrong approach**: Placing ghosts at "nearby" RS OSIDs without checking adjacency to EACH sequential objective.
+- **Right approach**: For each ghost, verify it is adjacent to at least one early objective in the axis sequence. If the axis processes objectives 1->2->3 and the ghost is only adjacent to objective 5, it will never fight.
+- **Do instead**: Before adding a JNA ghost to an op axis, check adjacency via `operational_contact_graph.json`. The ghost's location OSID must share an edge with at least one of the first 3 objectives in the sequence.
+
+### [Calibration] Home recall for line-assigned brigades is catastrophically wrong — BiH brigades routinely deployed far from home (2026-03-29) — NEW
+- **Context**: Added FAR_FROM_HOME_LINE_THRESHOLD=5 to allow line-assigned brigades >5 hops from home to be recalled. 59% of RS brigades and 67% of RBiH brigades abandoned their positions simultaneously. n1207 dropped to 85.7%.
+- **Wrong approach**: Treating distance-from-home as a signal for misdeployment. In the Bosnian War, territorial brigades were routinely deployed across their corps zone (1KK Banja Luka brigades at Donji Vakuf = normal). The recall conflated "operational deployment" with "drift."
+- **Right approach**: The previous behavior (only recalling unassigned/orphaned brigades) was correct. Drift is a problem only for brigades that are NOT assigned to any sector and NOT in any operation. Line-assigned brigades are where the sector system put them — that IS their assignment.
+- **Do instead**: Never recall line-assigned brigades based on distance from home. Fix drift through better sector assignment (home-municipality affinity at assignment time), not post-hoc recall.
+
+### [Calibration] JNA ghosts that accelerate early ops cascade through operation queues — verify downstream timing (2026-03-29) — NEW
+- **Context**: Added 2 JNA ghosts to Op Prijedor's Sanski Most/Kljuc axes. Prijedor succeeded fully (10/10) and ended 3 turns early. This caused Op Corridor to start early, which injected Op Jajce into the chain, which stalled for 9 turns, which prevented bot AI from organically capturing Jajce. Net: -10pp in Central Bosnia.
+- **Wrong approach**: Adding ghosts to an op without checking the downstream queue. 1KK's chain is Prijedor->Corridor->Jajce->Donji Vakuf. Making Prijedor faster cascades through the entire chain.
+- **Right approach**: Before adding ghosts to any queued op, check (a) what ops follow in the queue, (b) whether the bot AI was already handling those objectives organically, (c) whether earlier completion shifts timing harmfully.
+- **Do instead**: After adding ghosts, run the scenario and diff not just the target region but ALL downstream op regions. Jajce was fine without Prijedor ghosts because bot AI captured it via uncontested occupation at t6-9.

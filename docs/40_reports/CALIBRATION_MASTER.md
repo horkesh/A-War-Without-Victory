@@ -1,7 +1,20 @@
 # AWWV Calibration Master Reference
 
 **Purpose:** Persistent lessons-learned record for war-phase calibration (April 1992 onward). 40w primary, 104w force trajectory.
-**Updated:** 2026-03-29 (n1205 — power-neutral support model recovers 92.1%)
+**Updated:** 2026-03-29 (n1210 — 5 fixes: Visegrad OOB + siege calc + JNA ghosts + sector reassignment + MIN_SECTOR_BRIGADES)
+
+## n1210 (2026-03-29) — 5 fixes: Visegrad OOB + siege calc + JNA ghosts + sector reassignment + MIN_SECTOR_BRIGADES
+
+**Run:** `apr1992_definitive_40w__77cac5e01d3c929e__w40_n1210`
+**Hash:** `bbe19ee145f749f1`
+**Area-weighted:** 87.7%
+**Regional breakdown:** Krajina: 93.8%, Posavina: 83.3%, Drina: 74.1%, Central Corridor: 89.3%, Central Bosnia: 84.9%, Sarajevo: 87.6%, Herzegovina: 93.2%
+**RS delta:** -54
+**Consistency:** FAIL (1 unassigned brigade)
+**Changes:** (1) Visegrad Brigade OOB moved to vrs_drina (was misassigned). (2) Sarajevo siege calc SID→OSID fix — now returns PARTIAL not phantom BESIEGED. (3) JNA ghost brigades — 3 infantry-only phantoms for Op Prsten + Op Foca; Op Prsten objectives reordered. (4) Sector reassignment dead code — evaluateSectorMarch now processes reassignment orders. (5) MIN_SECTOR_BRIGADES=2 — small corps get fewer sectors.
+**Reverted:** Brigade drift home recall (59% abandonment), Op Prijedor JNA ghosts (broke 1KK chain → lost Jajce), 2nd Herzegovina home→konjic (enemy territory).
+**Key observation:** -4.4pp from n1205. Regression is from removing phantom BESIEGED siege status that artificially inflated calibration. Both OOB and siege fixes are mechanically correct and must not be reverted. Recovery path: concurrent corps ops (lets 1KK run Corridor + Jajce simultaneously). Plan: `docs/plans/2026-03-29-concurrent-corps-operations.md` (15 tasks, 28 files).
+**Open issues:** Derventa anchor FAILED (HRHB holds derventa_2, 1KK timing cascade). Herzegovina structural gap (8 brigades, 81 front edges). Ilijas 4 OSIDs need early-war seizure event. 68+ brigade drifts (structural feedback loop, fix approach wrong).
 
 ## n1205 (2026-03-29) — Power-neutral casualty-asymmetric support model
 

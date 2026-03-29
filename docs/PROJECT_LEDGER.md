@@ -1,3 +1,25 @@
+## [2026-03-29] OOB/Siege/Ghost/Sector Fixes + Concurrent Ops Plan (n1206–n1210 = 87.7%)
+
+### Change
+**Visegrad Brigade OOB fix**: `rs_visegrad_brigade` moved from `vrs_herzegovina` to `vrs_drina`. Was root cause of Herzegovina Corps besieging Srebrenica instead of operating in its own AO.
+**Sarajevo siege SID/OSID mismatch fix**: `updateSarajevoState` always returned BESIEGED due to SID/OSID key mismatch in supply data lookup. Now uses OSID-based supply data. Siege correctly reflects PARTIAL status.
+**JNA ghost brigades**: 3 new infantry-only phantoms for Op Prsten (2: `vogosca_to_tg` at `vogosca_3`, `ilijas_to_tg` at `podlugovi`) and Op Foca (1: `kalinovik_to_tg`). `no_equipment_handoff:true` on all. Op Prsten objectives reordered for adjacency.
+**Sector reassignment orders fix**: `evaluateSectorMarch` now checks pending `sector_reassignment_orders` before "stay on sector" logic. Was dead code — orders were issued but never consumed.
+**MIN_SECTOR_BRIGADES=2**: Small corps no longer get more sectors than brigades. Merge pass added in `buildFactionSectors`.
+**Concurrent corps ops plan**: Full 15-task implementation plan at `docs/plans/2026-03-29-concurrent-corps-operations.md`. Expert-reviewed by Ops Expert + Gap Finder. Key finding: 1-op-per-corps cap is structural (single object, not constant), needs type change to array.
+
+### Results
+- **n1206: 89.7%** — Visegrad + siege fix only. Both fixes mechanically correct.
+- **n1207: 85.7%** — brigade drift fix (FAR_FROM_HOME_LINE_THRESHOLD=5) CATASTROPHIC: 59% of RS brigades abandoned positions. Reverted. In BiH war, brigades routinely deployed far from home as normal ops.
+- **n1208: 88.7%** — reverted drift fix, kept ghosts + sectors.
+- **n1209: 85.5%** — Prijedor ghosts caused 1KK cascade (Jajce never captured). Reverted.
+- **n1210: 87.7%** — final state. Remaining gap from siege fix removing phantom area inflation.
+- Key finding: 1-op-per-corps cap is THE root cause of 1KK failing at Jajce while running Corridor.
+- Herzegovina Corps structural problem: 8 brigades, 81 front edges, ops pull brigades to Foca area.
+
+### Verification
+- `npx tsc --noEmit` (clean). Consistency PASS (n1210 has 1 unassigned brigade — minor).
+
 ## [2026-03-29] Power-Neutral Support Model Fix (n1205 = 92.1%)
 
 ### Change

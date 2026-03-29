@@ -8,46 +8,41 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-29, v0.7.0 + SpatialContext + 7 Architectural Fixes)
-**n1205: 92.1% area-weighted (40w). Consistency PASS.** 13 commits this session.
+## Current State (2026-03-29, v0.7.0 + SpatialContext + OOB/Siege Fixes)
+**n1210: 87.7% area-weighted (40w). Consistency FAIL (1 unassigned brigade).** Down from n1205's 92.1% — mechanically correct fixes removed phantom siege inflation. Recovery path: concurrent corps ops.
 
-**[RESOLVED] SpatialContext shared spatial layer.** Phase 0-4 complete. 22→1 buildOsidAdjacency calls/turn. All systems read from cached spatial snapshot. Design spec: `docs/30_planning/SPATIAL_CONTEXT_DESIGN_SPEC.md`. Remaining: Phases 5-7 (paramilitaries, supply, events) — low priority, backward-compatible.
-**[RESOLVED] Corps launch feasibility.** `checkLaunchFeasibility` gates op creation. No more zombie ops from hopeless launches.
-**[RESOLVED] Ops reevaluation.** `reevaluateWeakenedOperations` pipeline step aborts degenerate ops. 0 zombie ops at n1204.
-**[RESOLVED] Emergency retreat teleportation.** Component-based reachability, friendly-only BFS, 7-step fallback.
-**[RESOLVED] Phantom defender.** Proportional casualty distribution for co-located defenders.
-**[RESOLVED] bfsDistance raw adjacency.** Friendly-only BFS in brigade distribution and subsegment assignment.
-**[RESOLVED] Multi-brigade main/support.** Power-neutral model: SUPPORT_POWER_MULT=1.0, MAIN_CASUALTY_MULT=1.40, SUPPORT_CASUALTY_MULT=0.55. Renormalized casualty distribution. BB1 p.182: supporting attacks were full ground attacks. Roles assigned at op creation by basePower ranking.
+**[RESOLVED] Visegrad Brigade OOB.** Moved to vrs_drina. Correct.
+**[RESOLVED] Sarajevo siege SID/OSID.** Fixed, now returns PARTIAL not phantom BESIEGED.
+**[RESOLVED] Sector reassignment dead code.** evaluateSectorMarch now processes reassignment orders.
+**[RESOLVED] MIN_SECTOR_BRIGADES=2.** Small corps get fewer sectors.
+**[RESOLVED] SpatialContext shared spatial layer.** Phase 0-4 complete. 22→1 buildOsidAdjacency calls/turn.
+**[RESOLVED] Corps launch feasibility + ops reevaluation + emergency retreat + phantom defender + bfsDistance + multi-brigade main/support.** All n1204/n1205 fixes retained.
 
-**[OPEN] Gap finder identified remaining design gaps:**
-- P2: Attack-through increments stall counter (`movement_only_execution_turns`) — multi-objective ops fighting through intermediate resistance can false-stall. Spec fix needed.
-- P2: Multi-Brigade broad-front fails in corridor terrain (6% of OSIDs with ≤3 neighbors). Narrow-front case should skip repositioning.
-- P2: Reinforcement paths skip corridor safety check. Spec gap.
-- P2: Sectors stale after combat (once/turn, before combat). Post-combat SpatialContext enables detection but full sector rebuild is separate work.
+**[NEW] JNA ghost brigades.** 3 infantry-only phantoms for Op Prsten + Op Foca. Op Prsten objectives reordered.
 
-**Session 2026-03-29 findings (deep investigation):**
-- **Paramilitary dissolution**: personnel not zeroed on inactive → ghost troops. FIXED.
-- **Intel/Probe overhaul (5 items)**: probe freshness per-sector-pair, attack threshold→costly_victory, OPSEC offensive_signs threshold lowered, fog scaled by intel confidence, forced commitment removed. ALL IMPLEMENTED.
-- **Brigade assignment**: 23 unassigned brigades → 0. Drift skip removed, catch-all guard, formation.assignment sync, component gate relaxation, unstaffable sector prevention. ALL IMPLEMENTED.
-- **Pocket evacuation**: post-op return march component check, home return for tiny pockets, pocket evacuation evaluator. ALL IMPLEMENTED.
-- **Drift recall**: friendly BFS instead of raw adjacency. IMPLEMENTED.
-- **Corridor safety**: staging OSID rejected if approach through 1-OSID chokepoint. IMPLEMENTED.
-- **Recording fixes**: casualty attribution rounding, friction/siege recording, peak_personnel updated at 7 reinforcement sites. ALL IMPLEMENTED.
-- **Anomaly detector**: 3 new checks (#24-#26), unassigned_frontline_brigades→critical. IMPLEMENTED.
-- **Diagnostics**: `tools/validate_run_consistency.cjs` — 6 internal consistency checks. CREATED.
+**[FAILED+REVERTED] Brigade drift home recall.** FAR_FROM_HOME_LINE_THRESHOLD=5 caused 59% of brigades to abandon positions. Approach fundamentally wrong for BiH war.
+**[FAILED+REVERTED] Op Prijedor JNA ghosts.** Made Prijedor succeed too fast, broke 1KK chain → lost Jajce.
+**[FAILED+REVERTED] 2nd Herzegovina home→konjic.** Konjic is enemy territory.
 
-**Deep audit findings (investigations, not yet fixed):**
-- **33 pathfinding functions**: 19 friendly-only, 6 raw adjacency (2 bugs), 5 teleports (3 dangerous). Systems Programmer audit.
-- **`findEmergencyRetreatOsid`**: direction-blind, 3 teleports, picked sela_2 over trnovo. Sent brigades INTO pocket.
-- **Phantom defender**: co-located brigades aggregate power but only primary takes casualties. Secondary = free power.
-- **Corps launch is blind**: `evaluateCorpsOffensiveLaunch` has NO combat prediction → creates ops brigades refuse to execute → zombie ops block corps slot.
-- **Zero-brigade ops**: 4 systems can remove brigades from ops with no check → ops persist forever with 0 brigades.
-- **Attack resolution spatially blind**: no flanking, no multi-directional bonus, no encirclement. Single staging OSID.
-- **`bfsDistance` in `sector_utils.ts`**: raw adjacency for brigade distribution — sees brigades as "close" through enemy territory.
+**[OPEN] Concurrent corps ops plan.** `docs/plans/2026-03-29-concurrent-corps-operations.md`. 15 tasks, 28 files, expert-reviewed. Root cause of 1KK Jajce failure — corps can only run one op at a time.
+**[OPEN] Ilijas 4 OSIDs census-derived RBiH.** Need early-war seizure event, not OSID override.
+**[OPEN] Derventa anchor FAILED.** HRHB holds derventa_2. 1KK op chain timing cascade.
+**[OPEN] Herzegovina structural gap.** 8 brigades, 81 front edges, ops pull to Foca.
+**[OPEN] 68+ brigade drifts.** Structural feedback loop identified but fix approach wrong.
+**[OPEN] Gap finder remaining design gaps:**
+- P2: Attack-through stall counter, corridor terrain broad-front, reinforcement corridor safety, sectors stale after combat.
+
+**Session 2026-03-29 (Session 2 — OOB + Siege + Sector fixes, n1205→n1210):**
+- Visegrad Brigade OOB moved to vrs_drina. Sarajevo siege SID→OSID fix (PARTIAL not phantom BESIEGED). Sector reassignment dead code fixed. MIN_SECTOR_BRIGADES=2. JNA ghost brigades for Op Prsten + Op Foca.
+- Brigade drift home recall REVERTED (59% abandonment). Op Prijedor JNA ghosts REVERTED (broke 1KK chain). 2nd Herzegovina home→konjic REVERTED (enemy territory).
+- Concurrent corps ops plan written (15 tasks, 28 files). Net: -4.4pp, mechanically correct.
+
+**Session 2026-03-29 (Session 1 — SpatialContext + architectural fixes, n1194→n1205):**
+- SpatialContext Phases 0-4, corps launch feasibility, ops reevaluation, emergency retreat reachability, phantom defender fix, bfsDistance friendly-only, multi-brigade main/support. Intel/probe overhaul (5 items). Brigade assignment (23→0 unassigned). Pocket evacuation. Anomaly detector + diagnostics.
 
 **Design specs delivered:**
-- `docs/30_planning/MULTI_BRIGADE_OPERATION_DESIGN_SPEC.md` — main/support roles, repositioning between objectives.
-- Ops reevaluation on losses — in progress (Game Designer).
+- `docs/30_planning/MULTI_BRIGADE_OPERATION_DESIGN_SPEC.md` — main/support roles.
+- `docs/plans/2026-03-29-concurrent-corps-operations.md` — concurrent corps ops (15 tasks, 28 files).
 **Session 2026-03-28 (Session 2 — Empty Sectors + Passive Brigades):**
 - **Territory-based brigade reconciliation (Phase 1.5)**: `classifyBrigadesByTerritory` now matches pooled brigades by `location_osid` vs `territory_osids` before Phase 2 BFS. Fixed SRK sector:1 (14 edges, 0 brigades). **0 empty contested sectors (was 5).**
 - **Cold-front sector suppression REVERTED**: Removing sectors from Voronoi cascades globally. Ghost sanitizer sufficient.

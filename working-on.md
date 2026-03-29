@@ -1,34 +1,24 @@
-# Working On — Session 2026-03-29 (Nightshift) — COMPLETE
+# Working On — Session 2026-03-29 (Session 2) — INCOMPLETE
 
-## All Items Done — 13 Commits
+## Completed This Session
+1. Visegrad Brigade OOB fix (vrs_herzegovina → vrs_drina)
+2. Sarajevo siege SID/OSID mismatch fix
+3. JNA ghost brigades for Op Prsten + Op Foca (topology-fixed)
+4. Sector reassignment order fix (dead code activated)
+5. MIN_SECTOR_BRIGADES=2 (small corps sector merge)
+6. Concurrent corps ops implementation plan (15 tasks, expert-reviewed)
 
-### Commits (oldest to newest)
-1. `7dacbc2e` — 22 deep-investigation fixes (from previous session, committed)
-2. `73f5b05e` — SpatialContext Phase 0+1 — foundation + pipeline migration
-3. `3179c69b` — Corps launch feasibility — predictor gate before op creation
-4. `59746a65` — Retreat reachability + phantom defender — no teleportation, shared casualties
-5. `197db709` — SpatialContext Phases 2-4 — sector, bot AI, combat migration
-6. `568987f0` — Ops reevaluation — abort degenerate ops on brigade loss
-7. `3be55bcf` — bfsDistance friendly-only — no paths through enemy territory
-8. `72baf09e` — Multi-brigade main/support roles (initial: 70% power)
-9. `dd2c2205` — Docs: ledger + napkin
-10. `00d9914a` — Docs: calibration master + life lessons
-11. `3a3ef9cf` — Docs: expert panel findings
-12. `128d4eb8` — Power-neutral support model (1.0 power, 1.40/0.55 casualties)
-13. `f08fa6c4` — Docs: n1205 calibration entry
+## Reverted (failed approaches)
+- Brigade drift home recall (FAR_FROM_HOME_LINE_THRESHOLD=5) — caused general retreat
+- 2nd Herzegovina home_mun → konjic — home in enemy territory
+- Op Prijedor JNA ghosts — cascaded through 1KK op chain
 
-### Final Calibration
-**n1205: 92.1% area-weighted (40w), 22/22 anchors, 5/6 benchmarks, consistency PASS.**
-War-or-Game: APPROVED WITH CAVEATS.
+## Current Calibration
+n1210: 87.7% area-weighted (was 92.1% at n1205). Gap from siege fix + Visegrad fix removing artificial inflation.
 
-### Expert Panel Priorities for Next Session
-1. **P0: HRHB post-w13 passivity** — 0 orders w21-40, two corps zero battles. Biggest realism gap.
-2. **P0: RBiH late-war futility** — 0% objective completion w21+, entrenchment too punitive.
-3. **P1: RS w40 benchmark** — fails by 0.2pp, tied to HRHB passivity.
-
-### Remaining Open Items (gap finder)
-- P2: Attack-through stall counter false positive on multi-objective ops
-- P2: Narrow-front case (<=1 friendly adjacent) should skip repositioning
-- P2: Reinforcement paths skip corridor safety check
-- P2: Sectors stale after combat (once/turn rebuild)
-- SpatialContext Phases 5-7 (paramilitaries, supply, events) — low priority
+## Next Session Priorities
+1. **P0: Concurrent corps operations** — implement plan at docs/plans/2026-03-29-concurrent-corps-operations.md. This is the structural fix for 1KK Jajce failure and the 1-op-per-corps bottleneck.
+2. **P1: Ilijas early-war seizure event** — 4 OSIDs are RBiH from census. Need event to model VRS seizure of Ilijas in April 1992.
+3. **P1: Derventa anchor recovery** — derventa_2 is HRHB. Tied to 1KK op chain timing. Concurrent ops should help.
+4. **P2: Herzegovina structural gap** — 8 brigades, 81 edges. Need investigation of why ops pull brigades to Foca.
+5. **P2: rs_kalinovik_brigade home_osid** — currently op:foca:zavait_3 (Foca), should be in Kalinovik municipality.

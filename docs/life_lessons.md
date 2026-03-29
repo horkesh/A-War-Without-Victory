@@ -1,6 +1,6 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-03-28. 153 lessons across 8 topic files.
+> Last restructured: 2026-03-29. 156 lessons across 8 topic files.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
@@ -69,6 +69,12 @@
 - **Cost**: Extra investigation cycle. The systematic trace approach in the second pass was correct — should have been applied from the start.
 
 ## New Lessons (always read these)
+
+### [Process] JNA ghosts for early ops must be topology-verified — adjacent to objectives, not just nearby (2026-03-29) — NEW → see `calibration.md`
+
+### [Calibration] Home recall for line-assigned brigades is catastrophically wrong — BiH brigades routinely deployed far from home (2026-03-29) — NEW → see `calibration.md`
+
+### [Calibration] JNA ghosts that accelerate early ops cascade through operation queues — verify downstream timing (2026-03-29) — NEW → see `calibration.md`
 
 ### [Process] Gap finder asks the questions nobody else thinks to ask — use before architectural work (2026-03-29) — NEW → see `process.md`
 
@@ -170,7 +176,7 @@
 
 | File | Topics | Lessons | Load when... |
 |------|--------|---------|-------------|
-| [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Combat, Bot AI | 32 | Running calibration scenarios, tuning parameters, OOB changes |
+| [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Combat, Bot AI | 35 | Running calibration scenarios, tuning parameters, OOB changes |
 | [architecture.md](life_lessons/architecture.md) | Architecture, Engine, Scaling, Defaults, Data Integrity | 46 | Changing engine structure, state, pipeline, adding systems |
 | [data_pipeline.md](life_lessons/data_pipeline.md) | Data, Pipeline, Geometry | 10 | Modifying derived data, running data scripts, geometry work |
 | [ui_map.md](life_lessons/ui_map.md) | UI, GUI, MapLibre, Rendering, React | 12 | Frontend, map, tactical overlay, modal work |
