@@ -28,3 +28,28 @@ These mechanical changes need to be reflected in canon docs. Use `/propagate-to-
 
 ## 7. Territory reconciliation Phase 1.5 (Systems_Manual_v0_7_0.md §6.3 or sector section)
 - **New**: classifyBrigadesByTerritory has Phase 1.5 between front-line (Phase 1) and BFS pool (Phase 2). Matches pooled brigades by location_osid vs territory_osids.
+
+## 8. SpatialContext shared spatial layer (Systems_Manual_v0_7_0.md — new section needed)
+- **New**: `SpatialContext` interface computed at 2 pipeline points (pre-combat after supply-osid, post-combat after resolve-attack-orders). Contains adjacency, sharedBoundaryAdjacency, friendlyOsidsByFaction, componentsByFaction, frontEdgesOsid. All pipeline consumers read from cache instead of rebuilding. 22→1 buildOsidAdjacency calls per turn.
+- **File**: `src/sim/spatial_context.ts`
+
+## 9. Corps launch feasibility (Systems_Manual_v0_7_0.md §6.4 operations section)
+- **New**: `checkLaunchFeasibility` gates operation creation. Samples basePower ratio for each proposed objective. If no objective achievable at costly_victory (ratio >= 1.0), operation rejected.
+
+## 10. Ops reevaluation on brigade loss (Systems_Manual_v0_7_0.md §6.4 operations section)
+- **New**: `reevaluate-weakened-operations` pipeline step. After brigade mutations, checks each active op: 0 active brigades → abort, below type minimum (probe=1, sector_attack=2) → abort, personnel <50% of initial → abort. Recovery reason: `brigade_attrition` (1 turn).
+
+## 11. Emergency retreat reachability (Systems_Manual_v0_7_0.md §6.9 retreat section)
+- **Old**: findEmergencyRetreatOsid checks home_osid control only, BFS through raw adjacency.
+- **New**: Connected component reachability check before home_osid/fallback_osid/corps_HQ. Friendly-only BFS (no traversing enemy territory). 7-step fallback: home → fallback → BFS friendly → corps HQ → same component → largest component → any.
+
+## 12. Multi-brigade main/support (Systems_Manual_v0_7_0.md §6.4 operations section)
+- **New**: Operations assign main_brigade (highest basePower) and support_brigades per axis. Power-neutral model: SUPPORT_POWER_MULT=1.0 (concentration bonus already handles multi-unit synergy). MAIN_CASUALTY_MULT=1.40, SUPPORT_CASUALTY_MULT=0.55. Renormalized casualty distribution preserves total. BB1 p.182 sourced.
+
+## 13. Phantom defender fix (Systems_Manual_v0_7_0.md §5 combat section)
+- **Old**: Non-sector defense paths: only primary defender takes casualties.
+- **New**: Co-located defenders share casualties proportionally by personnel in all defense paths.
+
+## 14. bfsDistance friendly-only (Systems_Manual_v0_7_0.md §6.3 sector/assignment section)
+- **Old**: bfsDistance in sector_utils.ts uses raw adjacency (no faction filter).
+- **New**: Accepts friendlyOsids parameter. brigade_front_distribution and subsegment_assignment pass faction's friendly set.

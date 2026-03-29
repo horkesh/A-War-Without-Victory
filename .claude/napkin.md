@@ -9,7 +9,7 @@
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
 ## Current State (2026-03-29, v0.7.0 + SpatialContext + 7 Architectural Fixes)
-**n1204: 90.9% area-weighted (40w). Consistency PASS.** All committed (8 commits this session).
+**n1205: 92.1% area-weighted (40w). Consistency PASS.** 13 commits this session.
 
 **[RESOLVED] SpatialContext shared spatial layer.** Phase 0-4 complete. 22→1 buildOsidAdjacency calls/turn. All systems read from cached spatial snapshot. Design spec: `docs/30_planning/SPATIAL_CONTEXT_DESIGN_SPEC.md`. Remaining: Phases 5-7 (paramilitaries, supply, events) — low priority, backward-compatible.
 **[RESOLVED] Corps launch feasibility.** `checkLaunchFeasibility` gates op creation. No more zombie ops from hopeless launches.
@@ -17,7 +17,7 @@
 **[RESOLVED] Emergency retreat teleportation.** Component-based reachability, friendly-only BFS, 7-step fallback.
 **[RESOLVED] Phantom defender.** Proportional casualty distribution for co-located defenders.
 **[RESOLVED] bfsDistance raw adjacency.** Friendly-only BFS in brigade distribution and subsegment assignment.
-**[RESOLVED] Multi-brigade main/support.** MAIN=full power/casualties, SUPPORT=70%/40%. Roles assigned at op creation by basePower ranking.
+**[RESOLVED] Multi-brigade main/support.** Power-neutral model: SUPPORT_POWER_MULT=1.0, MAIN_CASUALTY_MULT=1.40, SUPPORT_CASUALTY_MULT=0.55. Renormalized casualty distribution. BB1 p.182: supporting attacks were full ground attacks. Roles assigned at op creation by basePower ranking.
 
 **[OPEN] Gap finder identified remaining design gaps:**
 - P2: Attack-through increments stall counter (`movement_only_execution_turns`) — multi-objective ops fighting through intermediate resistance can false-stall. Spec fix needed.

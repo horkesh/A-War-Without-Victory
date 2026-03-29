@@ -1,3 +1,17 @@
+## [2026-03-29] Power-Neutral Support Model Fix (n1205 = 92.1%)
+
+### Change
+**SUPPORT_POWER_MULT 0.70→1.0**: Expert consensus (Game Designer + War-or-Game + Historian) confirmed support brigades should contribute full combat power. BB1 p.182: supporting attacks were full ground attacks from different axes. 70% was a double penalty on top of concentration bonus.
+**MAIN_CASUALTY_MULT=1.40** (new): Main brigade absorbs ~56% of casualties in 3-brigade op.
+**SUPPORT_CASUALTY_MULT 0.40→0.55**: Renormalized casualty distribution preserves total.
+
+### Results
+- **n1205: 92.1% area-weighted** — fully recovered from n1204's 90.9%. Identical to n1203 (pre-multi-brigade).
+- Consistency: PASS.
+
+### Verification
+- `npx tsc --noEmit` (clean). `validate_run_consistency.cjs` PASS. Fresh 40w run verified.
+
 ## [2026-03-29] SpatialContext + 7 Architectural Fixes + Multi-Brigade Operations
 
 ### Change (SpatialContext shared spatial layer)
