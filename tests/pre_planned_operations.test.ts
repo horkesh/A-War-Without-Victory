@@ -23,6 +23,7 @@ function makeMinimalState(): GameState {
             subordinate_count: 10,
             og_slots: 0,
             active_ogs: [],
+            active_operations: [],
             corps_exhaustion: 0,
             stance: 'balanced',
         };
@@ -91,12 +92,12 @@ describe('pre-planned operations', () => {
         injectPrePlannedOperations(state);
 
         // Herzegovina gets Visegrad (listed first), not Foca
-        const herzOp = state.military.corps_command?.vrs_herzegovina?.active_operation;
+        const herzOp = state.military.corps_command?.vrs_herzegovina?.active_operations[0];
         assert.ok(herzOp);
         assert.equal(herzOp?.name, 'Operation Visegrad');
 
         // 1KK gets Prijedor (listed first), not Bosanski Novi
-        const kkOp = state.military.corps_command?.vrs_1st_krajina?.active_operation;
+        const kkOp = state.military.corps_command?.vrs_1st_krajina?.active_operations[0];
         assert.ok(kkOp);
         assert.equal(kkOp?.name, 'Operation Prijedor');
     });
@@ -120,7 +121,7 @@ describe('pre-planned operations', () => {
         const state = makeMinimalState();
         injectPrePlannedOperations(state);
 
-        const koridor = state.military.corps_command?.vrs_east_bosnian?.active_operation;
+        const koridor = state.military.corps_command?.vrs_east_bosnian?.active_operations[0];
         assert.ok(koridor);
         assert.ok(koridor?.axes);
         assert.equal(koridor!.axes!.length, 2);
@@ -132,10 +133,10 @@ describe('pre-planned operations', () => {
         const state = makeMinimalState();
         injectPrePlannedOperations(state);
 
-        const koridor = state.military.corps_command?.vrs_east_bosnian?.active_operation;
+        const koridor = state.military.corps_command?.vrs_east_bosnian?.active_operations[0];
         assert.ok(koridor?.participating_brigades.includes('jna_17th_corps_tg'));
 
-        const prsten = state.military.corps_command?.vrs_sarajevo_romanija?.active_operation;
+        const prsten = state.military.corps_command?.vrs_sarajevo_romanija?.active_operations[0];
         assert.ok(prsten?.participating_brigades.includes('jna_4th_corps_tg'));
     });
 
@@ -146,7 +147,7 @@ describe('pre-planned operations', () => {
 
         injectPrePlannedOperations(state);
 
-        const drina = state.military.corps_command?.vrs_drina?.active_operation;
+        const drina = state.military.corps_command?.vrs_drina?.active_operations[0];
         assert.ok(drina);
         // Zvornik sweep axis should still exist with remaining objectives
         const zvornikAxis = drina!.axes!.find(a => a.axis_id === 'zvornik_sweep');

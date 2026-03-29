@@ -54,7 +54,7 @@ function makeState(): GameState {
                 active_ogs: [],
                 corps_exhaustion: 0,
                 stance: 'offensive',
-                active_operation: {
+                active_operations: [{
                     name: 'Test',
                     type: 'sector_attack',
                     phase: 'planning',
@@ -69,7 +69,7 @@ function makeState(): GameState {
                     tempo: 'all_out',
                     artillery_preparation: true,
                     sector_id: 'sector:rs-corps-1',
-                }
+                }]
             }
         }
   } as any,
@@ -85,7 +85,7 @@ describe('advanceSectorOffensives', () => {
 
         advanceSectorOffensives(state, null);
 
-        const op = state.military.corps_command?.['rs-corps-1']?.active_operation;
+        const op = state.military.corps_command?.['rs-corps-1']?.active_operations[0];
         expect(op?.phase).toBe('execution');
         expect(state.military.formations['rs-brig-1'].cohesion).toBe(55);
         expect(state.military.formations['rbih-brig-1'].dig_in_progress).toBe(0);

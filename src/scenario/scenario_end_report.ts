@@ -1009,7 +1009,7 @@ export function formatEndReportMarkdown(params: FormatEndReportParams): string {
                     : 'none';
                 lines.push(
                     `- **${e.corps_id}** (${e.faction}): stance=${e.stance}, ` +
-                    `op=${e.active_operation ?? 'none'}, ` +
+                    `op=${e.active_operations?.join(';') ?? 'none'}, ` +
                     `targets=${e.offensive_target_count} [${munStr}], ` +
                     `hold=${e.hold_osid_count}, aggr=${e.aggression_modifier}, ` +
                     `subs=${e.subordinate_count}`

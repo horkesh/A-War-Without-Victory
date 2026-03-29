@@ -89,7 +89,7 @@ test('execution-phase operation attacks current objective even without a corps d
     corps_command: {
             vrs_drina: {
                 stance: 'offensive',
-                active_operation: {
+                active_operations: [{
                     name: 'Operation Drina',
                     type: 'sector_attack',
                     phase: 'execution',
@@ -101,7 +101,7 @@ test('execution-phase operation attacks current objective even without a corps d
                     momentum: 0,
                     failure_count: 0,
                     consecutive_failures_on_current: 0,
-                },
+                }],
             },
         },
     brigade_posture_orders: []
@@ -153,7 +153,7 @@ test('execution-phase operation moves brigade toward an approach OSID for the cu
     corps_command: {
             vrs_east_bosnian: {
                 stance: 'offensive',
-                active_operation: {
+                active_operations: [{
                     name: 'Operation Koridor',
                     type: 'sector_attack',
                     phase: 'execution',
@@ -165,7 +165,7 @@ test('execution-phase operation moves brigade toward an approach OSID for the cu
                     momentum: 0,
                     failure_count: 0,
                     consecutive_failures_on_current: 0,
-                },
+                }],
             },
         },
     brigade_posture_orders: []
@@ -223,7 +223,7 @@ test('execution-phase operation falls back to maneuver toward a later reachable 
     corps_command: {
             vrs_east_bosnian: {
                 stance: 'offensive',
-                active_operation: {
+                active_operations: [{
                     name: 'Operation Koridor',
                     type: 'sector_attack',
                     phase: 'execution',
@@ -235,7 +235,7 @@ test('execution-phase operation falls back to maneuver toward a later reachable 
                     momentum: 0,
                     failure_count: 0,
                     consecutive_failures_on_current: 0,
-                },
+                }],
             },
         },
     brigade_posture_orders: []
@@ -330,7 +330,7 @@ test('execution-phase operation concentrates adjacent brigades on the current ob
                     min_attack_outcome: 'costly_victory',
                     aggression_modifier: 0,
                 },
-                active_operation: {
+                active_operations: [{
                     name: 'Operacija Lukavac',
                     type: 'sector_attack',
                     phase: 'execution',
@@ -342,7 +342,7 @@ test('execution-phase operation concentrates adjacent brigades on the current ob
                     momentum: 0,
                     failure_count: 0,
                     consecutive_failures_on_current: 0,
-                },
+                }],
             },
         },
     brigade_posture_orders: []
@@ -409,7 +409,7 @@ test('execution-phase operation with momentum can probe the next objective from 
     corps_command: {
             vrs_1st_krajina: {
                 stance: 'offensive',
-                active_operation: {
+                active_operations: [{
                     name: 'Operacija Lukavac',
                     type: 'sector_attack',
                     phase: 'execution',
@@ -421,7 +421,7 @@ test('execution-phase operation with momentum can probe the next objective from 
                     momentum: 2,
                     failure_count: 0,
                     consecutive_failures_on_current: 0,
-                },
+                }],
             },
         },
     brigade_posture_orders: []
@@ -470,7 +470,7 @@ test('execution-phase operation still moves assigned brigades when their current
     corps_command: {
             vrs_1st_krajina: {
                 stance: 'offensive',
-                active_operation: {
+                active_operations: [{
                     name: 'Operacija Lukavac',
                     type: 'sector_attack',
                     phase: 'execution',
@@ -482,7 +482,7 @@ test('execution-phase operation still moves assigned brigades when their current
                     momentum: 0,
                     failure_count: 0,
                     consecutive_failures_on_current: 0,
-                },
+                }],
             },
         },
     brigade_posture_orders: []
@@ -561,7 +561,7 @@ test('execution-phase operation still moves toward a risky approach OSID when th
     corps_command: {
             vrs_1st_krajina: {
                 stance: 'offensive',
-                active_operation: {
+                active_operations: [{
                     name: 'Operacija Lukavac',
                     type: 'sector_attack',
                     phase: 'execution',
@@ -573,7 +573,7 @@ test('execution-phase operation still moves toward a risky approach OSID when th
                     momentum: 0,
                     failure_count: 0,
                     consecutive_failures_on_current: 0,
-                },
+                }],
             },
         },
     brigade_posture_orders: []
@@ -638,7 +638,7 @@ test('planning-phase operation emits the first hop toward a distant staging OSID
     corps_command: {
             vrs_1st_krajina: {
                 stance: 'offensive',
-                active_operation: {
+                active_operations: [{
                     name: 'Operacija Lukavac',
                     type: 'sector_attack',
                     phase: 'planning',
@@ -652,7 +652,7 @@ test('planning-phase operation emits the first hop toward a distant staging OSID
                     consecutive_failures_on_current: 0,
                     planning_duration: 5,
                     staging_osid: 'op:test:staging',
-                },
+                }],
             },
         },
     brigade_posture_orders: []
@@ -708,7 +708,7 @@ test('planning-phase operation keeps moving from staging into first-objective ap
     corps_command: {
             vrs_1st_krajina: {
                 stance: 'offensive',
-                active_operation: {
+                active_operations: [{
                     name: 'Operacija Lukavac',
                     type: 'sector_attack',
                     phase: 'planning',
@@ -722,7 +722,7 @@ test('planning-phase operation keeps moving from staging into first-objective ap
                     consecutive_failures_on_current: 0,
                     planning_duration: 5,
                     staging_osid: 'op:test:staging',
-                },
+                }],
             },
         },
     brigade_posture_orders: []

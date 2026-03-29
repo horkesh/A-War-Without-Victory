@@ -291,7 +291,7 @@ test('parseGameState derives operation readiness and offensive metadata', () => 
         },
     corps_command: {
             rbih_corps: {
-                active_operation: {
+                active_operations: [{
                     name: 'Operation Drina',
                     type: 'sector_attack',
                     phase: 'planning',
@@ -307,7 +307,7 @@ test('parseGameState derives operation readiness and offensive metadata', () => 
                     schwerpunkt_osid: 'op:drina:1',
                     artillery_preparation: true,
                     consecutive_failures_on_current: 1,
-                },
+                }],
             },
         }
   } as any,
@@ -398,7 +398,7 @@ test('parseGameState derives command briefing items in deterministic priority or
         },
     corps_command: {
             rbih_corps: {
-                active_operation: {
+                active_operations: [{
                     name: 'Operation Drina',
                     type: 'sector_attack',
                     phase: 'execution',
@@ -410,7 +410,7 @@ test('parseGameState derives command briefing items in deterministic priority or
                     failure_count: 2,
                     started_turn: 22,
                     phase_started_turn: 23,
-                },
+                }],
             },
         },
     pending_convoy_decisions: [

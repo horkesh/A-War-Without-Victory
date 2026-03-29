@@ -296,8 +296,8 @@ export function recordOperationWeeklyEntries(
 
     for (const corpsId of corpsIds) {
         const cmd = cc[corpsId];
-        const op = cmd?.active_operation;
-        if (!op || op.type !== 'sector_attack') continue;
+        for (const op of cmd?.active_operations ?? []) {
+        if (op.type !== 'sector_attack') continue;
 
         // Init weekly_log if missing
         if (!op.weekly_log) op.weekly_log = [];
@@ -442,6 +442,7 @@ export function recordOperationWeeklyEntries(
 
         // Clean up pending_casualties
         delete op.pending_casualties;
+        } // end for-of active_operations
     }
 }
 
@@ -449,7 +450,7 @@ export function recordOperationWeeklyEntries(
 
 /**
  * Build and persist a complete OperationAAR when a sector_attack operation ends.
- * Must be called BEFORE `cmd.active_operation = null`.
+ * Must be called BEFORE the op is removed from active_operations.
  */
 export function finalizeOperationAAR(
     state: GameState,

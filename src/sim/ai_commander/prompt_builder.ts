@@ -47,7 +47,7 @@ export function buildCorpsPrompt(
     const aggressiveness = commander?.data.aggressiveness ?? 3;
     const defensiveSkill = commander?.data.defensive_skill ?? 3;
 
-    const hasActiveOp = !!state.military.corps_command?.[corpsId]?.active_operation;
+    const hasActiveOp = (state.military.corps_command?.[corpsId]?.active_operations?.length ?? 0) > 0;
     const modelKey = hasActiveOp ? 'corps_ops' : 'corps_routine';
     const model = MODEL_ROUTING[getMode(state)][modelKey];
 
@@ -113,8 +113,10 @@ function buildArmyUserPrompt(state: GameState, faction: FactionId): string {
         const corpsFormation = state.military.formations?.[corpsId];
         if (!corpsFormation || corpsFormation.faction !== faction) continue;
         const stance = cc.stance ?? 'balanced';
-        const op = cc.active_operation;
-        const opStatus = op ? `operation "${op.name}" (${op.phase})` : 'no active operation';
+        const ops = cc.active_operations ?? [];
+        const opStatus = ops.length > 0
+            ? ops.map(op => `"${op.name}" (${op.phase})`).join(', ')
+            : 'no active operation';
         lines.push(`  ${corpsId}: stance=${stance}, ${opStatus}`);
     }
 
@@ -133,8 +135,8 @@ function buildArmyUserPrompt(state: GameState, faction: FactionId): string {
 
     // Pending decisions
     const pendingOps = Object.values(corpsCommand)
-        .filter((cc) => cc?.active_operation?.commander_assessment === 'postpone' || cc?.active_operation?.preparation_sub_phase === 'assessment')
-        .map((cc) => cc?.active_operation?.name)
+        .flatMap((cc) => (cc?.active_operations ?? []).filter(op => op.commander_assessment === 'postpone' || op.preparation_sub_phase === 'assessment'))
+        .map((op) => op.name)
         .filter(Boolean);
     if (pendingOps.length > 0) {
         lines.push('');

@@ -23,6 +23,7 @@ import { buildSettlementsByMun } from '../sim/early_war/control_strain.js';
 import { updateMilitiaEmergence } from '../sim/early_war/militia_emergence.js';
 import { applyRsJnaInheritanceBonus, runPoolPopulation } from '../sim/early_war/pool_population.js';
 import { initializeCorpsCommand } from '../sim/combat/corps_command.js';
+import { findBrigadeOperation } from '../sim/combat/corps_operation_helpers.js';
 import { injectPrePlannedOperations } from '../sim/combat/pre_planned_operations.js';
 import { spawnJnaPhantomBrigades } from '../sim/combat/jna_phantom_brigades.js';
 import {
@@ -750,8 +751,8 @@ function collectActiveOperations(state: GameState): ActiveOperationSummary[] {
     const corpsIds = Object.keys(cc).sort(strictCompare);
     for (const corpsId of corpsIds) {
         const cmd = cc[corpsId];
-        const op = cmd?.active_operation;
-        if (!op) continue;
+        if (!cmd?.active_operations?.length) continue;
+        for (const op of cmd.active_operations) {
         // Collect objectives
         const objectives: string[] = [];
         if (op.axes) {
@@ -780,6 +781,7 @@ function collectActiveOperations(state: GameState): ActiveOperationSummary[] {
             objectives_targeted: objectives.length,
             objectives_captured: objsCaptured,
         });
+        } // end for-of active_operations
     }
     return results;
 }
@@ -1927,7 +1929,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     const attackerCorpsId = attackerFmt?.corps_id;
                     if (attackerCorpsId && state.military.corps_command) {
                         const cmd = state.military.corps_command[attackerCorpsId];
-                        const op = cmd?.active_operation;
+                        const op = findBrigadeOperation(cmd, b.attacker_brigade);
                         if (op && op.phase === 'execution') {
                             operation_id = `${attackerCorpsId}:${op.name}:t${op.started_turn}`;
                             operation_name = op.name;

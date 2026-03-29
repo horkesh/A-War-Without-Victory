@@ -45,7 +45,7 @@ export function generateArmyHQOverrides(
     for (const corpsId of factionCorps) {
         const cc = corpsCommand[corpsId];
         // Skip if corps has an active operation
-        if (cc?.active_operation) continue;
+        if (cc?.active_operations?.length) continue;
 
         const priorities = getCorpsArmyPriorities(faction, corpsId, turn);
 

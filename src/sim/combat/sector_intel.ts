@@ -200,7 +200,7 @@ function computeStrengthCategory(sector: CorpsFrontSector, confidence: number): 
 function computePosture(sector: CorpsFrontSector, state: GameState, confidence: number): SectorPostureObserved {
     if (confidence < CONFIDENCE_FULL_STRENGTH) return 'unknown';
     const corpsCommand = state.military.corps_command?.[sector.corps_id];
-    if (corpsCommand?.active_operation?.type === 'sector_attack' || corpsCommand?.active_operation?.type === 'feint' || corpsCommand?.active_operation?.type === 'probe') {
+    if (corpsCommand?.active_operations?.some(op => op.type === 'sector_attack' || op.type === 'feint' || op.type === 'probe')) {
         return 'offensive_prep';
     }
     if (sector.density >= 1.5) return 'entrenched';
@@ -214,9 +214,7 @@ function computeOffensiveSigns(sector: CorpsFrontSector, state: GameState, confi
     // false (0/109 records), leaving the defensive reaction (2× threat boost) dead.
     if (confidence < CONFIDENCE_FULL_STRENGTH) return false;
     const corpsCommand = state.military.corps_command?.[sector.corps_id];
-    return corpsCommand?.active_operation?.type === 'sector_attack' ||
-        corpsCommand?.active_operation?.type === 'feint' ||
-        corpsCommand?.active_operation?.type === 'probe';
+    return corpsCommand?.active_operations?.some(op => op.type === 'sector_attack' || op.type === 'feint' || op.type === 'probe') ?? false;
 }
 
 function computeVisibleBrigades(sector: CorpsFrontSector, confidence: number, reconRange: number): FormationId[] {

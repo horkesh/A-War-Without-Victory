@@ -27,6 +27,7 @@ import { getFormationCorpsId } from './corps_sector_partition.js';
 import { deployEliteLoan } from './army_reserve_system.js';
 import { validateOpAtInjection, collectOpInjectionWarnings } from './operation_validation.js';
 import type { OpInjectionWarning } from './operation_validation.js';
+import { hasActiveOperation, isSlot0AvailableForQueue } from './corps_operation_helpers.js';
 // Graz truce imports removed: east Herzegovina truce is handled by sector_offensive
 // on operation completion (graz_east_herzegovina_active_turn), not by injection.
 
@@ -764,7 +765,8 @@ export function injectPrePlannedOperations(state: GameState): void {
     // Validate all definitions and collect warnings
     const allWarnings: OpInjectionWarning[] = [];
     for (const def of ALL_PRE_PLANNED) {
-        const warnings = validateOpAtInjection(def, state);
+        const cmd = corpsCommand[def.corps];
+        const warnings = validateOpAtInjection(def, state, undefined, cmd ?? undefined);
         allWarnings.push(...warnings);
     }
     collectOpInjectionWarnings(state, allWarnings);
@@ -780,7 +782,7 @@ export function injectPrePlannedOperations(state: GameState): void {
         if (def.available_from != null && turn < def.available_from) continue;
 
         // Skip if corps already has an active operation (including from this pass)
-        if (cmd.active_operation) continue;
+        if (hasActiveOperation(cmd)) continue;
         if (injectedCorps.has(def.corps)) continue;
 
         // Build axes with validated brigades and objectives
@@ -790,7 +792,7 @@ export function injectPrePlannedOperations(state: GameState): void {
         deployPrePlannedEliteLoans(state, result.eliteLoans, def, turn);
 
         const op = buildCorpsOperation(def, result.axes, result.participating, turn);
-        cmd.active_operation = op;
+        cmd.active_operations.push(op);
         assignOperationCommander(state, op, def.corps, def.faction);
         cmd.stance = 'offensive';
         injectedCorps.add(def.corps);
@@ -844,7 +846,9 @@ export function injectPrePlannedOperations(state: GameState): void {
  */
 export function injectQueuedOperation(state: GameState, corpsId: string): boolean {
     const cmd = state.military.corps_command?.[corpsId];
-    if (!cmd || cmd.active_operation) return false;
+    // Queued pre-planned ops are sequential in slot 0.
+    // Bot AI ops in other slots do NOT block queue injection.
+    if (!cmd || !isSlot0AvailableForQueue(cmd)) return false;
     if (!cmd.queued_operations?.length) return false;
 
     const turn = state.meta?.turn ?? 0;
@@ -875,7 +879,7 @@ export function injectQueuedOperation(state: GameState, corpsId: string): boolea
     }
 
     // Validate before building
-    const queueWarnings = validateOpAtInjection(def, state);
+    const queueWarnings = validateOpAtInjection(def, state, undefined, cmd);
     collectOpInjectionWarnings(state, queueWarnings);
 
     // Build axes — brigades may not exist yet; keep queue entry for retry
@@ -889,7 +893,7 @@ export function injectQueuedOperation(state: GameState, corpsId: string): boolea
     if (cmd.queued_operations.length === 0) delete cmd.queued_operations;
 
     const op = buildCorpsOperation(def, result.axes, result.participating, turn);
-    cmd.active_operation = op;
+    cmd.active_operations.push(op);
     assignOperationCommander(state, op, corpsId, def.faction);
     cmd.stance = 'offensive';
     return true;

@@ -63,6 +63,7 @@ import {
 import type { CampaignPlan } from './army_hq_gathering_types.js';
 import { PRIORITY_AGGRESSION, PRIORITY_RESERVE } from './army_hq_gathering_constants.js';
 import { isOperationBlocked, filterByScope } from '../events/event_constraints.js';
+import { getAvailableBrigades, hasActiveOperation, hasAvailableSlot, findBrigadeOperation, getPrimaryOperation } from './corps_operation_helpers.js';
 
 /**
  * Sum active (non-expired) event aggression modifiers for a faction.
@@ -518,13 +519,15 @@ export function evaluateSectorStances(state: GameState, faction: FactionId): voi
 
 /** Check if the corps has an active operation staging in this sector. */
 function hasStagingOperation(
-    corpsCommand: Record<string, { active_operation?: { sector_id?: string; phase?: string } | null }>,
+    corpsCommand: Record<string, { active_operations: { sector_id?: string; phase?: string }[] }>,
     sector: CorpsFrontSector
 ): boolean {
     const cmd = corpsCommand[sector.corps_id];
-    const op = cmd?.active_operation;
-    if (!op) return false;
-    return op.sector_id === sector.sector_id && (op.phase === 'planning' || op.phase === 'execution');
+    if (!cmd) return false;
+    for (const op of cmd.active_operations) {
+        if (op.sector_id === sector.sector_id && (op.phase === 'planning' || op.phase === 'execution')) return true;
+    }
+    return false;
 }
 
 /** Check if this sector's corps has offensive targets that overlap this sector. */
@@ -740,12 +743,14 @@ export function generateCorpsDirectives(
             }
         }
 
-        // Add targets from active named operation
-        if (cmd.active_operation?.phase === 'execution' && cmd.active_operation.target_settlements) {
-            for (const sid of cmd.active_operation.target_settlements) {
-                const pc = state.political.political_controllers ?? {};
-                if (pc[sid] !== faction && !offensiveTargetSet.has(sid)) {
-                    offensiveTargetSet.add(sid);
+        // Add targets from active named operations
+        for (const activeOp of cmd.active_operations) {
+            if (activeOp.phase === 'execution' && activeOp.target_settlements) {
+                for (const sid of activeOp.target_settlements) {
+                    const pc = state.political.political_controllers ?? {};
+                    if (pc[sid] !== faction && !offensiveTargetSet.has(sid)) {
+                        offensiveTargetSet.add(sid);
+                    }
                 }
             }
         }
@@ -1138,10 +1143,13 @@ export function generateCorpsDirectives(
         // Op Jackal exemption: active operation objectives are not filtered.
         if (isGrazAccordsActive(state)) {
             const pc = state.political.political_controllers ?? {};
-            const activeOp = state.military.corps_command?.[corps.id]?.active_operation;
-            const opObjectives = activeOp
-                ? new Set(activeOp.axes?.flatMap(a => a.objectives ?? []) ?? activeOp.objectives ?? [])
-                : new Set<string>();
+            const activeOps = state.military.corps_command?.[corps.id]?.active_operations ?? [];
+            const opObjectives = new Set<string>();
+            for (const activeOp of activeOps) {
+                for (const obj of activeOp.axes?.flatMap(a => a.objectives ?? []) ?? activeOp.objectives ?? []) {
+                    opObjectives.add(obj);
+                }
+            }
             const hasOpExemption = isEastHerzegovinaPair(corps.id)
                 && state.political.graz_east_herzegovina_active_turn == null
                 && opObjectives.size > 0;
@@ -1620,7 +1628,7 @@ export function generateCorpsDirectives(
         cmd.directive = directive;
 
         // ── Set corps status reason (diagnostic + UI) ────────────────────
-        const existingOp = cmd.active_operation;
+        const existingOp = getPrimaryOperation(cmd);
         const hasQueuedOps = cmd.queued_operations && cmd.queued_operations.length > 0;
         if (existingOp) {
             cmd.status_reason = 'executing_operation';
@@ -1641,7 +1649,7 @@ export function generateCorpsDirectives(
         // Sector offensives replace general_offensive/strategic_defense with targeted multi-OSID push.
         const isCorpsExhaustedForOffensive = cmd.corps_exhaustion > MAX_EXHAUSTION_FOR_OPERATION;
         const isCorpsExhaustedForProbe = cmd.corps_exhaustion > MAX_EXHAUSTION_FOR_OPERATION + PROBE_EXHAUSTION_MARGIN;
-        const canLaunchSectorOp = !hasQueuedOps && !existingOp && !isDefenseStrained && !isCorpsExhaustedForOffensive;
+        const canLaunchSectorOp = hasAvailableSlot(cmd, subordinates.length) && !isDefenseStrained && !isCorpsExhaustedForOffensive;
         // Army HQ override allows defensive corps to launch probe operations
         const hasHqProbeOverride = armyHqOverrides.some(o => o.type === 'probe' || o.type === 'feint');
         const stanceAllowsOps = cmd.stance === 'offensive' || cmd.stance === 'balanced' || hasHqProbeOverride;
@@ -1649,7 +1657,7 @@ export function generateCorpsDirectives(
         // Gate audit trace (diagnostic — consumed by AI commander QA)
         const trace: string[] = [];
         if (existingOp) trace.push(`blocked:existing_op(${existingOp.name}:${existingOp.phase})`);
-        if (hasQueuedOps) trace.push('blocked:queued_ops');
+        if (hasQueuedOps && !hasAvailableSlot(cmd, subordinates.length)) trace.push('blocked:queued_ops_no_slot');
         if (isDefenseStrained) trace.push(`blocked:density_strained(${corpsDensity.toFixed(3)}<${STRAINED_DENSITY_THRESHOLD})`);
         if (isCorpsExhaustedForOffensive) trace.push(`blocked:corps_exhaustion(${cmd.corps_exhaustion}>${MAX_EXHAUSTION_FOR_OPERATION})`);
         if (!stanceAllowsOps) trace.push(`blocked:stance(${cmd.stance})`);
@@ -1709,8 +1717,9 @@ export function generateCorpsDirectives(
                 if (worstSector && shouldLaunchProbeInstead(faction, worstConf, consecutiveProbes, turn)) {
                     const secEnemyOsids = collectSectorEnemyOsids(worstSector).sort(strictCompare);
                     const secFriendlyOsids = new Set(collectSectorFriendlyOsids(worstSector));
+                    const probeAvailable = new Set(getAvailableBrigades(cmd, subordinates.map(b => b.id)));
                     const probeBrigadeIds = subordinates
-                        .filter(b => b.location_osid && secFriendlyOsids.has(b.location_osid)
+                        .filter(b => probeAvailable.has(b.id) && b.location_osid && secFriendlyOsids.has(b.location_osid)
                             && b.status === 'active' && (b.personnel ?? 0) >= 400)
                         .map(b => b.id)
                         .sort(strictCompare)
@@ -1729,7 +1738,7 @@ export function generateCorpsDirectives(
                             if (probeOp) {
                                 probeOp.type = 'probe';
                                 probeOp.planning_duration = 1;
-                                cmd.active_operation = probeOp;
+                                cmd.active_operations.push(probeOp);
                                 cmd.consecutive_probes = consecutiveProbes + 1;
                                 assignOperationCommander(state, probeOp, corps.id, faction);
                                 continue; // Skip to next corps — this one is probing
@@ -1754,8 +1763,11 @@ export function generateCorpsDirectives(
 
                 // Corps-wide brigade pool: all active subordinates eligible for operations.
                 // Supply-critical brigades excluded — no fuel, no ammunition for offensives.
+                // Brigades already committed to active operations are excluded.
+                const availableBrigadeIds = new Set(getAvailableBrigades(cmd, subordinates.map(b => b.id)));
                 let corpsBrigadeIds = subordinates
                     .filter(b => {
+                        if (!availableBrigadeIds.has(b.id)) return false;
                         if (b.status !== 'active' || (b.personnel ?? 0) < 400) return false;
                         if (b.disrupted_turns && b.disrupted_turns > 0) return false;
                         // Supply gate: critical supply = defense only (isolated, no ammunition).
@@ -1837,8 +1849,9 @@ export function generateCorpsDirectives(
                     if (probeSector) {
                         const secEnemyOsids = collectSectorEnemyOsids(probeSector).sort(strictCompare);
                         const secFriendlyOsids = new Set(collectSectorFriendlyOsids(probeSector));
+                        const probeAvailable2 = new Set(getAvailableBrigades(cmd, subordinates.map(b => b.id)));
                         const probeBrigades = subordinates
-                            .filter(b => b.location_osid && secFriendlyOsids.has(b.location_osid)
+                            .filter(b => probeAvailable2.has(b.id) && b.location_osid && secFriendlyOsids.has(b.location_osid)
                                 && b.status === 'active' && (b.personnel ?? 0) >= 400)
                             .map(b => b.id)
                             .sort(strictCompare)
@@ -1854,7 +1867,7 @@ export function generateCorpsDirectives(
                                 if (probeOp) {
                                     probeOp.type = 'probe';
                                     probeOp.planning_duration = 1;
-                                    cmd.active_operation = probeOp;
+                                    cmd.active_operations.push(probeOp);
                                     cmd.consecutive_probes = consecutiveProbes + 1;
                                     assignOperationCommander(state, probeOp, corps.id, faction);
                                 }
@@ -1866,7 +1879,7 @@ export function generateCorpsDirectives(
                 // Full corps-level operation (only if no probe was launched above)
                 // Event constraint: check operation blocks (e.g. NATO ultimatum)
                 const opBlocked = isOperationBlocked(state.military.event_constraints, faction, state.meta?.turn ?? 0);
-                if (!cmd.active_operation && !opBlocked && corpsBrigadeIds.length >= MIN_BRIGADES_FOR_SECTOR_ATTACK
+                if (hasAvailableSlot(cmd, subordinates.length) && !opBlocked && corpsBrigadeIds.length >= MIN_BRIGADES_FOR_SECTOR_ATTACK
                     && reachableTargets.length >= 1) {
 
                     // Primary sector: the one with most offensive target overlap (for UI display)
@@ -1905,7 +1918,7 @@ export function generateCorpsDirectives(
                                 op.postponement_count = 0;
                             }
                         }
-                        cmd.active_operation = op;
+                        cmd.active_operations.push(op);
                         cmd.consecutive_probes = 0; // Reset probe counter on full attack
                         assignOperationCommander(state, op, corps.id, faction);
                     }
@@ -1914,7 +1927,7 @@ export function generateCorpsDirectives(
         }
 
         // Update status_reason if all gates passed but no op was created (cooldown or no viable sector)
-        if (!cmd.active_operation && cmd.status_reason === 'ready') {
+        if (!hasActiveOperation(cmd) && cmd.status_reason === 'ready') {
             const lastCompletedTurn2 = cmd.last_completed_operation_turn ?? -999;
             const currentTurn2 = state.meta?.turn ?? 0;
             const effectiveCooldown2 = cmd.stance === 'offensive'

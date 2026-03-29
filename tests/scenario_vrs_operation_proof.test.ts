@@ -33,7 +33,7 @@ type ProofOperationState = {
 };
 
 type ProofFinalState = {
-    corps_command?: Record<string, { active_operation?: ProofOperationState }>;
+    corps_command?: Record<string, { active_operations?: ProofOperationState[] }>;
 };
 
 function getProgressedOperationIds(state: ProofFinalState): string[] {
@@ -41,7 +41,7 @@ function getProgressedOperationIds(state: ProofFinalState): string[] {
     return Object.keys(corpsCommand)
         .sort((a, b) => a.localeCompare(b))
         .filter((corpsId) => {
-            const op = corpsCommand[corpsId]?.active_operation;
+            const op = corpsCommand[corpsId]?.active_operations?.[0];
             if (!op) return false;
             return (op.attack_attempt_count ?? 0) > 0
                 && (op.objective_capture_count ?? 0) > 0

@@ -133,38 +133,38 @@ describe('corps command - advanceOperations', () => {
         initializeCorpsCommand(state);
 
         // Start an operation in planning phase at turn 20
-        state.military.corps_command!['rs-corps-1'].active_operation = {
+        state.military.corps_command!['rs-corps-1'].active_operations = [{
             name: 'Test Op',
             type: 'general_offensive',
             phase: 'planning',
             started_turn: 20,
             phase_started_turn: 20,
             participating_brigades: ['rs-brig-1', 'rs-brig-2']
-        };
+        }];
 
         // Advance 3 turns (planning duration = 3) -> should transition to execution
         state.meta.turn = 23;
         advanceOperations(state);
-        expect(state.military.corps_command!['rs-corps-1'].active_operation!.phase).toBe('execution');
-        expect(state.military.corps_command!['rs-corps-1'].active_operation!.phase_started_turn).toBe(23);
+        expect(state.military.corps_command!['rs-corps-1'].active_operations[0].phase).toBe('execution');
+        expect(state.military.corps_command!['rs-corps-1'].active_operations[0].phase_started_turn).toBe(23);
 
         // Advance 4 turns (execution duration = 4) -> should transition to recovery
         state.meta.turn = 27;
         advanceOperations(state);
-        expect(state.military.corps_command!['rs-corps-1'].active_operation!.phase).toBe('recovery');
-        expect(state.military.corps_command!['rs-corps-1'].active_operation!.phase_started_turn).toBe(27);
+        expect(state.military.corps_command!['rs-corps-1'].active_operations[0].phase).toBe('recovery');
+        expect(state.military.corps_command!['rs-corps-1'].active_operations[0].phase_started_turn).toBe(27);
 
         // Advance 3 turns (recovery duration = 3) -> should complete (null)
         state.meta.turn = 30;
         advanceOperations(state);
-        expect(state.military.corps_command!['rs-corps-1'].active_operation).toBeNull();
+        expect(state.military.corps_command!['rs-corps-1'].active_operations).toHaveLength(0);
     });
 
     it('does not auto-advance sector_attack operations', () => {
         const state = makeCorpsState();
         initializeCorpsCommand(state);
 
-        state.military.corps_command!['rs-corps-1'].active_operation = {
+        state.military.corps_command!['rs-corps-1'].active_operations = [{
             name: 'Test Sector Op',
             type: 'sector_attack',
             phase: 'planning',
@@ -174,19 +174,19 @@ describe('corps command - advanceOperations', () => {
             objectives: ['op:test:objective_a', 'op:test:objective_b'],
             current_objective_index: 0,
             planning_duration: 5,
-        };
+        }];
 
         state.meta.turn = 23;
         advanceOperations(state);
-        expect(state.military.corps_command!['rs-corps-1'].active_operation!.phase).toBe('planning');
-        expect(state.military.corps_command!['rs-corps-1'].active_operation!.phase_started_turn).toBe(20);
+        expect(state.military.corps_command!['rs-corps-1'].active_operations[0].phase).toBe('planning');
+        expect(state.military.corps_command!['rs-corps-1'].active_operations[0].phase_started_turn).toBe(20);
 
-        state.military.corps_command!['rs-corps-1'].active_operation!.phase = 'execution';
-        state.military.corps_command!['rs-corps-1'].active_operation!.phase_started_turn = 23;
+        state.military.corps_command!['rs-corps-1'].active_operations[0].phase = 'execution';
+        state.military.corps_command!['rs-corps-1'].active_operations[0].phase_started_turn = 23;
         state.meta.turn = 40;
         advanceOperations(state);
-        expect(state.military.corps_command!['rs-corps-1'].active_operation!.phase).toBe('execution');
-        expect(state.military.corps_command!['rs-corps-1'].active_operation!.phase_started_turn).toBe(23);
+        expect(state.military.corps_command!['rs-corps-1'].active_operations[0].phase).toBe('execution');
+        expect(state.military.corps_command!['rs-corps-1'].active_operations[0].phase_started_turn).toBe(23);
     });
 });
 

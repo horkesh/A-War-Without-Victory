@@ -128,6 +128,7 @@ import { applyFrontlineAttrition } from '../combat/frontline_attrition.js';
 import { advanceSectorOffensives, updateSectorOffensiveResults, reevaluateWeakenedOperations } from '../combat/sector_offensive.js';
 import { processJnaWithdrawals } from '../combat/jna_phantom_brigades.js';
 import { injectQueuedOperation } from '../combat/pre_planned_operations.js';
+import { isSlot0AvailableForQueue } from '../combat/corps_operation_helpers.js';
 import { checkTriggeredOperations } from '../combat/triggered_operations.js';
 import { computeMilitiaGarrisons } from '../combat/militia_garrison.js';
 import { activateOGs, updateOGLifecycle } from '../combat/operational_groups.js';
@@ -842,7 +843,9 @@ export const warPhases: NamedPhase[] = [
             if (!cc) return;
             for (const corpsId of Object.keys(cc).sort()) {
                 const cmd = cc[corpsId];
-                if (!cmd?.active_operation && cmd?.queued_operations?.length) {
+                // Queued pre-planned ops are sequential and occupy slot 0.
+                // Bot AI ops in other slots do NOT block queue injection.
+                if (cmd?.queued_operations?.length && isSlot0AvailableForQueue(cmd)) {
                     injectQueuedOperation(context.state, corpsId);
                 }
             }
@@ -2530,8 +2533,7 @@ function recallDriftedBrigades(state: GameState, adjacency?: Map<string, string[
     const inOp = new Set<string>();
     const corpsCmd = state.military.corps_command ?? {};
     for (const cmd of Object.values(corpsCmd)) {
-        const op = cmd.active_operation;
-        if (op) {
+        for (const op of cmd.active_operations) {
             for (const bid of op.participating_brigades ?? []) inOp.add(bid);
             if (op.axes) {
                 for (const axis of op.axes) {

@@ -531,8 +531,8 @@ describe('generateArmyHQOverrides', () => {
     it('returns empty array when all corps have active operations', () => {
         const state = makeHQState({
             corps_command: {
-                vrs_drina: { active_operation: { name: 'Op Drina', phase: 'execution' } },
-                vrs_1st_krajina: { active_operation: { name: 'Op Krajina', phase: 'execution' } },
+                vrs_drina: { active_operations: [{ name: 'Op Drina', phase: 'execution' }] },
+                vrs_1st_krajina: { active_operations: [{ name: 'Op Krajina', phase: 'execution' }] },
             },
         });
         const result = generateArmyHQOverrides(state, 'RS');

@@ -55,6 +55,7 @@ import { seedDisplacementTimerOnFlip } from '../../state/displacement_takeover.j
 import type { PreparationEvent } from '../turn_pipeline_types.js';
 import { checkLoanedArrivals, areLoanedBrigadesReady, cleanupDissolvedLoans } from './operation_reinforcement.js';
 import { MAX_OP_LOAN_DISTANCE, LOAN_STAGING_BUFFER_TURNS } from './operation_reinforcement_constants.js';
+import { hasActiveOperation, removeOperation } from './corps_operation_helpers.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Equipment priority
@@ -538,11 +539,13 @@ export function isSupportBrigadeOnActiveOp(
 ): boolean {
     if (!corpsId) return false;
     const cmd = state.military.corps_command?.[corpsId];
-    const op = cmd?.active_operation;
-    if (!op || op.phase !== 'execution') return false;
-    if (!op.axes) return false;
-    for (const axis of op.axes) {
-        if (axis.support_brigades?.includes(brigadeId)) return true;
+    if (!cmd) return false;
+    for (const op of cmd.active_operations) {
+        if (op.phase !== 'execution') continue;
+        if (!op.axes) continue;
+        for (const axis of op.axes) {
+            if (axis.support_brigades?.includes(brigadeId)) return true;
+        }
     }
     return false;
 }
@@ -879,15 +882,16 @@ export function advanceSectorOffensives(
         const cmd = corpsCommand[cid];
         if (!cmd || cmd.corps_exhaustion <= 0) continue;
         // Faster recovery when idle (no active op), slower when operating
-        const decayRate = cmd.active_operation ? EXHAUSTION_DECAY_ACTIVE : EXHAUSTION_DECAY_IDLE;
+        const decayRate = cmd.active_operations.length > 0 ? EXHAUSTION_DECAY_ACTIVE : EXHAUSTION_DECAY_IDLE;
         cmd.corps_exhaustion = Math.max(0, Math.round((cmd.corps_exhaustion - decayRate) * 10) / 10);
     }
 
     const corpsIds = Object.keys(corpsCommand).sort(strictCompare);
     for (const corpsId of corpsIds) {
         const cmd = corpsCommand[corpsId];
-        if (!cmd?.active_operation) continue;
-        const op = cmd.active_operation;
+        if (!cmd || cmd.active_operations.length === 0) continue;
+
+        for (const op of [...cmd.active_operations]) {
         if (op.type !== 'sector_attack' && op.type !== 'feint' && op.type !== 'probe') continue;
 
         // Reset per-turn combat feedback counters
@@ -1160,11 +1164,12 @@ export function advanceSectorOffensives(
                 // that blocks follow-up operations. The whole point of a probe is to
                 // gather intel for an immediate follow-up operation.
                 if (op.type !== 'probe') {
-                    cmd.last_completed_operation = cmd.active_operation;
+                    cmd.last_completed_operation = op;
                     cmd.last_completed_operation_turn = turn;
                 }
-                cmd.active_operation = null;
+                removeOperation(cmd, op);
             }
+        }
         }
     }
     return prepEvents;
@@ -1192,18 +1197,20 @@ export function updateSectorOffensiveResults(
     const corpsIds = Object.keys(corpsCommand).sort(strictCompare);
     for (const corpsId of corpsIds) {
         const cmd = corpsCommand[corpsId];
-        if (!cmd?.active_operation) continue;
-        const op = cmd.active_operation;
-        if ((op.type !== 'sector_attack' && op.type !== 'probe') || op.phase !== 'execution') continue;
+        if (!cmd || cmd.active_operations.length === 0) continue;
 
-        const corps = state.military.formations?.[corpsId];
-        const faction = (corps?.faction ?? 'RS') as FactionId;
-        const turn = state.meta?.turn ?? 0;
+        for (const op of cmd.active_operations) {
+            if ((op.type !== 'sector_attack' && op.type !== 'probe') || op.phase !== 'execution') continue;
 
-        if (isMultiAxis(op)) {
-            updateMultiAxisResults(state, op, corpsId, faction, turn, reverseMap);
-        } else {
-            updateLegacyFlatResults(state, op, corpsId, faction, turn, reverseMap);
+            const corps = state.military.formations?.[corpsId];
+            const faction = (corps?.faction ?? 'RS') as FactionId;
+            const turn = state.meta?.turn ?? 0;
+
+            if (isMultiAxis(op)) {
+                updateMultiAxisResults(state, op, corpsId, faction, turn, reverseMap);
+            } else {
+                updateLegacyFlatResults(state, op, corpsId, faction, turn, reverseMap);
+            }
         }
     }
 }
@@ -1934,8 +1941,9 @@ export function reevaluateWeakenedOperations(state: GameState): void {
     const corpsIds = Object.keys(corpsCommand).sort(strictCompare);
     for (const corpsId of corpsIds) {
         const cmd = corpsCommand[corpsId];
-        if (!cmd?.active_operation) continue;
-        const op = cmd.active_operation;
+        if (!cmd || cmd.active_operations.length === 0) continue;
+
+        for (const op of [...cmd.active_operations]) {
 
         // Only reevaluate operations in planning or execution phase.
         // Recovery-phase operations are already winding down.
@@ -2015,6 +2023,7 @@ export function reevaluateWeakenedOperations(state: GameState): void {
                 const f = formations[bid];
                 return f && f.status === 'active';
             });
+        }
         }
     }
 }

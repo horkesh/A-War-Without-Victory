@@ -218,7 +218,7 @@ describe('Sector Offensive — Lifecycle', () => {
         state.military.corps_command = {
             'corps_1': {
                 stance: 'offensive' as any,
-                active_operation: {
+                active_operations: [{
                     name: 'Operacija Test',
                     type: 'sector_attack',
                     phase: 'planning',
@@ -233,7 +233,7 @@ describe('Sector Offensive — Lifecycle', () => {
                     momentum: 0,
                     failure_count: 0,
                     consecutive_failures_on_current: 0,
-                },
+                }],
             } as any,
         };
         state.military.corps_front_sectors = {
@@ -241,7 +241,7 @@ describe('Sector Offensive — Lifecycle', () => {
         };
 
         advanceSectorOffensives(state, null);
-        const op = state.military.corps_command!['corps_1']!.active_operation!;
+        const op = state.military.corps_command!['corps_1']!.active_operations[0];
         assert.equal(op.phase, 'planning', 'Should remain in planning on the first eligible turn');
     });
 
@@ -253,7 +253,7 @@ describe('Sector Offensive — Lifecycle', () => {
         state.military.corps_command = {
             'corps_1': {
                 stance: 'offensive' as any,
-                active_operation: {
+                active_operations: [{
                     name: 'Operacija Test',
                     type: 'sector_attack',
                     phase: 'planning',
@@ -268,7 +268,7 @@ describe('Sector Offensive — Lifecycle', () => {
                     momentum: 0,
                     failure_count: 0,
                     consecutive_failures_on_current: 0,
-                },
+                }],
             } as any,
         };
         state.military.corps_front_sectors = {
@@ -276,7 +276,7 @@ describe('Sector Offensive — Lifecycle', () => {
         };
 
         advanceSectorOffensives(state, null);
-        const op = state.military.corps_command!['corps_1']!.active_operation!;
+        const op = state.military.corps_command!['corps_1']!.active_operations[0];
         assert.equal(op.phase, 'execution', 'Should transition to execution after planning_duration');
         assert.equal(op.current_objective_index, 0);
         assert.equal(op.momentum, 0);
@@ -290,7 +290,7 @@ describe('Sector Offensive — Lifecycle', () => {
         state.military.corps_command = {
             'corps_1': {
                 stance: 'offensive' as any,
-                active_operation: {
+                active_operations: [{
                     name: 'Operacija Test',
                     type: 'sector_attack',
                     phase: 'execution',
@@ -305,7 +305,7 @@ describe('Sector Offensive — Lifecycle', () => {
                     momentum: 0,
                     failure_count: 0,
                     consecutive_failures_on_current: 0,
-                },
+                }],
             } as any,
         };
         state.military.corps_front_sectors = {
@@ -322,7 +322,7 @@ describe('Sector Offensive — Lifecycle', () => {
         };
 
         advanceSectorOffensives(state, null);
-        const op = state.military.corps_command!['corps_1']!.active_operation!;
+        const op = state.military.corps_command!['corps_1']!.active_operations[0];
         assert.equal(op.phase, 'execution', 'operation should remain active after sector remap');
         assert.equal(op.sector_id, 'sector:corps_1:0', 'operation should bind to the current best-matching sector');
     });
@@ -335,7 +335,7 @@ describe('Sector Offensive — Lifecycle', () => {
         state.military.corps_command = {
             'corps_1': {
                 stance: 'offensive' as any,
-                active_operation: {
+                active_operations: [{
                     name: 'Operacija Test',
                     type: 'sector_attack',
                     phase: 'planning',
@@ -351,7 +351,7 @@ describe('Sector Offensive — Lifecycle', () => {
                     momentum: 0,
                     failure_count: 0,
                     consecutive_failures_on_current: 0,
-                },
+                }],
             } as any,
         };
         state.military.corps_front_sectors = {
@@ -359,7 +359,7 @@ describe('Sector Offensive — Lifecycle', () => {
         };
 
         advanceSectorOffensives(state, null);
-        const op = state.military.corps_command!['corps_1']!.active_operation!;
+        const op = state.military.corps_command!['corps_1']!.active_operations[0];
         assert.equal(op.phase, 'execution', 'Should not keep waiting once the assigned brigades are staged');
     });
 
@@ -371,7 +371,7 @@ describe('Sector Offensive — Lifecycle', () => {
         state.military.corps_command = {
             'corps_1': {
                 stance: 'offensive' as any,
-                active_operation: {
+                active_operations: [{
                     name: 'Operacija Test',
                     type: 'sector_attack',
                     phase: 'planning',
@@ -387,7 +387,7 @@ describe('Sector Offensive — Lifecycle', () => {
                     momentum: 0,
                     failure_count: 0,
                     consecutive_failures_on_current: 0,
-                },
+                }],
             } as any,
         };
         state.military.corps_front_sectors = {
@@ -405,7 +405,7 @@ describe('Sector Offensive — Lifecycle', () => {
         };
 
         advanceSectorOffensives(state, null);
-        const op = state.military.corps_command!['corps_1']!.active_operation!;
+        const op = state.military.corps_command!['corps_1']!.active_operations[0];
         assert.equal(op.phase, 'execution', 'Should not keep waiting once the assigned brigades are already on approach positions');
     });
 
@@ -414,7 +414,7 @@ describe('Sector Offensive — Lifecycle', () => {
         state.military.corps_command = {
             'corps_1': {
                 stance: 'offensive' as any,
-                active_operation: {
+                active_operations: [{
                     name: 'Operacija Test',
                     type: 'sector_attack',
                     phase: 'recovery',
@@ -422,12 +422,12 @@ describe('Sector Offensive — Lifecycle', () => {
                     phase_started_turn: 12,
                     participating_brigades: [],
                     objectives: ['op:e:1', 'op:e:2'],
-                },
+                }],
             } as any,
         };
 
         advanceSectorOffensives(state, null);
-        const op = state.military.corps_command!['corps_1']!.active_operation;
+        const op = state.military.corps_command!['corps_1']!.active_operations[0];
         // Recovery duration = max(2, objectives.length) = max(2, 2) = 2
         // Elapsed = 15 - 12 = 3 >= 2 → removed
         assert.equal(op, null, 'Operation should be removed after recovery');
@@ -438,7 +438,7 @@ describe('Sector Offensive — Lifecycle', () => {
         state.military.corps_command = {
             'corps_1': {
                 stance: 'offensive' as any,
-                active_operation: {
+                active_operations: [{
                     name: 'Operacija Test',
                     type: 'sector_attack',
                     phase: 'recovery',
@@ -447,12 +447,12 @@ describe('Sector Offensive — Lifecycle', () => {
                     participating_brigades: [],
                     objectives: ['op:e:1', 'op:e:2', 'op:e:3', 'op:e:4'],
                     recovery_reason: 'no_logged_attempt',
-                },
+                }],
             } as any,
         };
 
         advanceSectorOffensives(state, null);
-        const op = state.military.corps_command!['corps_1']!.active_operation;
+        const op = state.military.corps_command!['corps_1']!.active_operations[0];
         assert.equal(op, null, 'No-attempt recovery should clear after one turn');
     });
 
@@ -461,7 +461,7 @@ describe('Sector Offensive — Lifecycle', () => {
         state.military.corps_command = {
             'corps_1': {
                 stance: 'offensive' as any,
-                active_operation: {
+                active_operations: [{
                     name: 'Operacija Test',
                     type: 'sector_attack',
                     phase: 'execution',
@@ -470,13 +470,13 @@ describe('Sector Offensive — Lifecycle', () => {
                     participating_brigades: [],
                     sector_id: 'sector:corps_1:0',
                     objectives: ['op:e:1'],
-                },
+                }],
             } as any,
         };
         state.military.corps_front_sectors = {}; // Sector doesn't exist!
 
         advanceSectorOffensives(state, null);
-        const op = state.military.corps_command!['corps_1']!.active_operation!;
+        const op = state.military.corps_command!['corps_1']!.active_operations[0];
         assert.equal(op.phase, 'recovery', 'Should abort to recovery on orphaned sector');
     });
 
@@ -486,7 +486,7 @@ describe('Sector Offensive — Lifecycle', () => {
             'corps_1': {
                 stance: 'offensive' as any,
                 corps_exhaustion: 0,
-                active_operation: {
+                active_operations: [{
                     name: 'Operacija Test',
                     type: 'sector_attack',
                     phase: 'recovery',
@@ -496,7 +496,7 @@ describe('Sector Offensive — Lifecycle', () => {
                     sector_id: 'sector:corps_1:missing',
                     objectives: ['op:e:1', 'op:e:2'],
                     recovery_reason: 'no_logged_attempt',
-                },
+                }],
             } as any,
         };
         state.military.corps_front_sectors = {};
@@ -504,7 +504,7 @@ describe('Sector Offensive — Lifecycle', () => {
         advanceSectorOffensives(state, null);
 
         assert.equal(
-            state.military.corps_command!['corps_1']!.active_operation,
+            state.military.corps_command!['corps_1']!.active_operations[0],
             null,
             'Recovery-phase orphan should be allowed to complete recovery and clear'
         );
@@ -519,7 +519,7 @@ describe('Sector Offensive — Lifecycle', () => {
         state.military.corps_command = {
             'corps_1': {
                 stance: 'offensive' as any,
-                active_operation: {
+                active_operations: [{
                     name: 'Operacija Test',
                     type: 'sector_attack',
                     phase: 'execution',
@@ -533,7 +533,7 @@ describe('Sector Offensive — Lifecycle', () => {
                     momentum: 0,
                     failure_count: 0,
                     consecutive_failures_on_current: 0,
-                },
+                }],
             } as any,
         };
         state.military.corps_front_sectors = {
@@ -550,7 +550,7 @@ describe('Sector Offensive — Lifecycle', () => {
         };
 
         updateSectorOffensiveResults(state);
-        let op = state.military.corps_command!['corps_1']!.active_operation!;
+        let op = state.military.corps_command!['corps_1']!.active_operations[0];
         assert.equal(op.phase, 'execution');
         assert.equal(op.last_result, 'stalemate');
         assert.equal(op.failure_count, 1);
@@ -558,7 +558,7 @@ describe('Sector Offensive — Lifecycle', () => {
 
         state.meta.turn = 16;
         updateSectorOffensiveResults(state);
-        op = state.military.corps_command!['corps_1']!.active_operation!;
+        op = state.military.corps_command!['corps_1']!.active_operations[0];
         assert.equal(op.phase, 'recovery');
         assert.equal(op.failure_count, 2);
         assert.equal(op.current_objective_index, 1);
@@ -574,7 +574,7 @@ describe('Sector Offensive — Lifecycle', () => {
         state.military.corps_command = {
             'corps_1': {
                 stance: 'offensive' as any,
-                active_operation: {
+                active_operations: [{
                     name: 'Operacija Test',
                     type: 'sector_attack',
                     phase: 'execution',
@@ -592,7 +592,7 @@ describe('Sector Offensive — Lifecycle', () => {
                     momentum: 0,
                     failure_count: 0,
                     consecutive_failures_on_current: 0,
-                },
+                }],
             } as any,
         };
         state.military.corps_front_sectors = {
@@ -613,7 +613,7 @@ describe('Sector Offensive — Lifecycle', () => {
         } as any;
 
         updateSectorOffensiveResults(state);
-        const op = state.military.corps_command!['corps_1']!.active_operation!;
+        const op = state.military.corps_command!['corps_1']!.active_operations[0];
         assert.equal(op.movement_only_execution_turns, 1);
         assert.equal(op.idle_execution_turn_streak, 0);
     });
@@ -628,7 +628,7 @@ describe('Sector Offensive — Lifecycle', () => {
         state.military.corps_command = {
             'corps_1': {
                 stance: 'offensive' as any,
-                active_operation: {
+                active_operations: [{
                     name: 'Operacija Test',
                     type: 'sector_attack',
                     phase: 'execution',
@@ -646,7 +646,7 @@ describe('Sector Offensive — Lifecycle', () => {
                     momentum: 0,
                     failure_count: 2,
                     consecutive_failures_on_current: 1,
-                },
+                }],
             } as any,
         };
         state.military.corps_front_sectors = {
@@ -663,7 +663,7 @@ describe('Sector Offensive — Lifecycle', () => {
         };
 
         updateSectorOffensiveResults(state);
-        const op = state.military.corps_command!['corps_1']!.active_operation!;
+        const op = state.military.corps_command!['corps_1']!.active_operations[0];
         assert.equal(op.phase, 'recovery');
         assert.equal(op.recovery_reason, 'no_logged_attempt');
         assert.equal(op.idle_execution_turn_streak, 2);

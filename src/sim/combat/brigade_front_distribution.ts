@@ -41,9 +41,11 @@ function buildOperationParticipantSet(state: GameState): Set<string> {
     for (const fid of Object.keys(formations)) {
         const f = formations[fid]!;
         if (f.kind !== 'corps_asset') continue;
-        const op = (f as unknown as Partial<CorpsCommandState>).active_operation;
-        if (!op) continue;
-        if (op.participating_brigades) for (const bid of op.participating_brigades) participants.add(bid);
+        const ops = (f as unknown as Partial<CorpsCommandState>).active_operations;
+        if (!ops) continue;
+        for (const op of ops) {
+            if (op.participating_brigades) for (const bid of op.participating_brigades) participants.add(bid);
+        }
     }
     return participants;
 }

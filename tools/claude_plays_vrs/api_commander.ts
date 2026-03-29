@@ -141,7 +141,8 @@ function buildStatePrompt(state: GameState, faction: FactionId, prevTerritory: R
         }
         const avgCoh = brigCount > 0 ? (totalCoh / brigCount).toFixed(0) : '?';
         const avgMor = brigCount > 0 ? (totalMor / brigCount).toFixed(0) : '?';
-        const op = cc.active_operation;
+        const ops = cc.active_operations ?? [];
+        const op = ops[0] ?? null;
         const opStr = op ? `op: ${op.name} (${op.phase})` : 'no operation';
         const statusReason = (cc as any).status_reason ?? 'unknown';
         const trace = ((cc as any).op_launch_trace ?? []).join(', ');

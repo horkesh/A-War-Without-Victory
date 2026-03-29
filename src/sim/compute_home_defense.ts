@@ -10,9 +10,12 @@
 
 import type { FormationId, GameState } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
+import { findBrigadeOperation } from './combat/corps_operation_helpers.js';
 
 function isOperationParticipant(state: GameState, corpsId: string, brigadeId: FormationId): boolean {
-    const op = state.military.corps_command?.[corpsId]?.active_operation;
+    const cmd = state.military.corps_command?.[corpsId];
+    if (!cmd) return false;
+    const op = findBrigadeOperation(cmd, brigadeId);
     if (!op) return false;
     if (op.axes) {
         return op.axes.some(a => a.assigned_brigades.includes(brigadeId));
@@ -35,9 +38,9 @@ export function computeHomeDefenseActive(state: GameState): void {
         // corps ordered them to attack, so they must be free to adopt offensive posture.
         const originMun = brigade.origin_mun;
         const locationOsid = brigade.location_osid ?? '';
-        const inActiveOp = brigade.corps_id
-            && state.military.corps_command?.[brigade.corps_id]?.active_operation?.phase === 'execution'
-            && isOperationParticipant(state, brigade.corps_id, id as FormationId);
+        const brigadeCorpsCmd = brigade.corps_id ? state.military.corps_command?.[brigade.corps_id] : null;
+        const brigadeActiveOp = brigadeCorpsCmd ? findBrigadeOperation(brigadeCorpsCmd, id as FormationId) : null;
+        const inActiveOp = brigadeActiveOp?.phase === 'execution';
         if (inActiveOp) {
             brigade.home_defense_active = false;
         } else if (originMun && locationOsid) {

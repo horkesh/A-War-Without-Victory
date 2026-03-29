@@ -99,8 +99,7 @@ export function buildCorpsCommanderProfiles(
 
         // Build pre-op staging weights from the active operation's preparation phase.
         const preStagingSectorWeights = new Map<string, number>();
-        if (corpsCmd?.active_operation) {
-            const op = corpsCmd.active_operation;
+        for (const op of corpsCmd?.active_operations ?? []) {
             const subPhase = op.preparation_sub_phase;
             const opSectorId = op.sector_id;
             if (subPhase && opSectorId) {

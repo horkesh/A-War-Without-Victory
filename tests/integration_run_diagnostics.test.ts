@@ -110,7 +110,7 @@ describe('run diagnostics (40w)', () => {
             // Collect brigade IDs participating in active operations
             const opParticipants = new Set<string>();
             for (const [_corpsId, cs] of Object.entries(corpsStates) as Array<[string, any]>) {
-                const op = cs.active_operation;
+                const op = cs.active_operations[0];
                 if (!op) continue;
                 for (const axis of op.axes ?? []) {
                     for (const bid of axis.brigade_ids ?? []) opParticipants.add(bid);

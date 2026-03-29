@@ -449,7 +449,7 @@ describe('n696: Pre-op staging weight', () => {
                     active_ogs: [],
                     corps_exhaustion: 0,
                     stance: 'offensive',
-                    active_operation: {
+                    active_operations: [{
                         name: 'test_staging_op',
                         type: 'sector_attack',
                         phase: 'planning',
@@ -461,7 +461,7 @@ describe('n696: Pre-op staging weight', () => {
                         // but directive?.priority_sector_id might be set later.
                         // This test just verifies the brigade is still assigned (staging
                         // weight only increases score, can't decrease it).
-                    },
+                    }],
                 },
             },
         });

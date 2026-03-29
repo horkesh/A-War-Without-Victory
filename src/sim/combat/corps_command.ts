@@ -16,6 +16,7 @@ import type {
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { releaseOperationCommander } from './officer_system.js';
+import { hasActiveOperation, findBrigadeOperation, removeOperation } from './corps_operation_helpers.js';
 
 // ---------------------------------------------------------------------------
 // Stance modifiers
@@ -157,7 +158,7 @@ export function initializeCorpsCommand(state: GameState): void {
             active_ogs: [],
             corps_exhaustion: 0,
             stance: 'balanced',
-            active_operation: null,
+            active_operations: [],
         };
     }
 }
@@ -216,9 +217,8 @@ export function getOperationModifiers(state: GameState, brigadeId: FormationId):
     const corpsIds = Object.keys(state.military.corps_command).sort(strictCompare);
     for (const cid of corpsIds) {
         const cmd = state.military.corps_command[cid];
-        const op = cmd.active_operation;
+        const op = findBrigadeOperation(cmd, brigadeId);
         if (!op) continue;
-        if (!op.participating_brigades.includes(brigadeId)) continue;
 
         // Found: brigade is in this operation
         switch (op.phase) {
@@ -250,22 +250,24 @@ export function advanceOperations(state: GameState): void {
     const corpsIds = Object.keys(state.military.corps_command).sort(strictCompare);
     for (const cid of corpsIds) {
         const cmd = state.military.corps_command[cid];
-        const op = cmd.active_operation;
-        if (!op) continue;
-        if (op.type === 'sector_attack') continue;
+        if (!hasActiveOperation(cmd)) continue;
 
-        const turnsInPhase = state.meta.turn - op.phase_started_turn;
+        for (const op of [...cmd.active_operations]) {
+            if (op.type === 'sector_attack') continue;
 
-        if (op.phase === 'planning' && turnsInPhase >= OP_PHASE_DURATION.planning) {
-            op.phase = 'execution';
-            op.phase_started_turn = state.meta.turn;
-        } else if (op.phase === 'execution' && turnsInPhase >= OP_PHASE_DURATION.execution) {
-            op.phase = 'recovery';
-            op.phase_started_turn = state.meta.turn;
-        } else if (op.phase === 'recovery' && turnsInPhase >= OP_PHASE_DURATION.recovery) {
-            // Operation complete
-            releaseOperationCommander(state, op);
-            cmd.active_operation = null;
+            const turnsInPhase = state.meta.turn - op.phase_started_turn;
+
+            if (op.phase === 'planning' && turnsInPhase >= OP_PHASE_DURATION.planning) {
+                op.phase = 'execution';
+                op.phase_started_turn = state.meta.turn;
+            } else if (op.phase === 'execution' && turnsInPhase >= OP_PHASE_DURATION.execution) {
+                op.phase = 'recovery';
+                op.phase_started_turn = state.meta.turn;
+            } else if (op.phase === 'recovery' && turnsInPhase >= OP_PHASE_DURATION.recovery) {
+                // Operation complete
+                releaseOperationCommander(state, op);
+                removeOperation(cmd, op);
+            }
         }
     }
 }

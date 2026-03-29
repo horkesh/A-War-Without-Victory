@@ -225,7 +225,7 @@ test.skip('generateCorpsDirectives can synthesize a launchable offensive sector 
 
     generateCorpsDirectives(state, 'RS', edges, reverseMap, null, null);
 
-    const activeOperation = state.military.corps_command?.[corpsId]?.active_operation;
+    const activeOperation = state.military.corps_command?.[corpsId]?.active_operations[0];
     assert.ok(activeOperation, 'adjacent thin sectors with overlapping targets should still launch a sector operation');
     assert.equal(activeOperation?.type, 'sector_attack');
 });
@@ -312,7 +312,7 @@ test.skip('generateCorpsDirectives concentrates based on live brigade positions,
 
     generateCorpsDirectives(state, 'RS', edges, reverseMap, null, null);
 
-    const activeOperation = state.military.corps_command?.[corpsId]?.active_operation;
+    const activeOperation = state.military.corps_command?.[corpsId]?.active_operations[0];
     assert.ok(activeOperation, 'launch concentration must use live brigade locations when sector assigned lists are stale');
     assert.equal(activeOperation?.type, 'sector_attack');
 });
@@ -399,7 +399,7 @@ test.skip('generateCorpsDirectives can launch an operation from adjacent sectors
 
     generateCorpsDirectives(state, 'RS', edges, reverseMap, null, null);
 
-    const activeOperation = state.military.corps_command?.[corpsId]?.active_operation;
+    const activeOperation = state.military.corps_command?.[corpsId]?.active_operations[0];
     assert.ok(activeOperation, 'operation launch should cluster adjacent sectors temporarily even when permanent sector merge exceeds edge cap');
     assert.equal(activeOperation?.type, 'sector_attack');
 });

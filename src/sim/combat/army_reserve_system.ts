@@ -35,6 +35,7 @@ import {
 import { EXEMPT_CORPS_IDS } from './corps_front_sectors_constants.js';
 import { computeOsidGraphDistance } from './home_distance.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { getPrimaryOperation } from './corps_operation_helpers.js';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -193,7 +194,7 @@ export function generateArmyReserveRequests(
 
         const cmd = corpsCommand[corpsId];
         const sector = Object.keys(corpsSectors).sort(strictCompare).map(k => corpsSectors[k]).find(s => s.corps_id === corpsId);
-        const op = cmd?.active_operation;
+        const op = getPrimaryOperation(cmd);
 
         let bestReason: ReserveRequestReason | null = null;
         let bestRawPriority = 0;
@@ -367,7 +368,7 @@ export function deployEliteLoan(
     // add the elite to participating_brigades so march-first logic moves it to the front.
     if (reason === 'offensive_support' || reason === 'exploitation') {
         const cmd = state.military.corps_command?.[corpsId];
-        const activeOp = cmd?.active_operation;
+        const activeOp = cmd?.active_operations?.find(op => op.phase === 'execution') ?? null;
         if (activeOp && !activeOp.participating_brigades.includes(brigadeId)) {
             activeOp.participating_brigades.push(brigadeId);
             activeOp.participating_brigades.sort(strictCompare);
@@ -581,18 +582,22 @@ export function tickEliteLoans(state: GameState, turn: number): void {
         // If the target corps launched a NEW operation since deployment, join it.
         // This handles operation transitions: old op ends, new op launches, elite joins.
         const targetCmd = corpsCommand[ls.loaned_to_corps];
-        const activeOp = targetCmd?.active_operation;
-        if (activeOp && !activeOp.participating_brigades.includes(bid)) {
-            if (activeOp.axes) {
-                // Multi-axis: check axes too
-                const inAxis = activeOp.axes.some(a => a.assigned_brigades.includes(bid));
-                if (!inAxis) {
+        // Auto-join any execution-phase operation the target corps is running
+        if (targetCmd) {
+            for (const activeOp of targetCmd.active_operations ?? []) {
+                if (activeOp.phase !== 'execution') continue;
+                if (activeOp.participating_brigades.includes(bid)) continue;
+                if (activeOp.axes) {
+                    const inAxis = activeOp.axes.some(a => a.assigned_brigades.includes(bid));
+                    if (!inAxis) {
+                        activeOp.participating_brigades.push(bid);
+                        activeOp.participating_brigades.sort(strictCompare);
+                    }
+                } else {
                     activeOp.participating_brigades.push(bid);
                     activeOp.participating_brigades.sort(strictCompare);
                 }
-            } else {
-                activeOp.participating_brigades.push(bid);
-                activeOp.participating_brigades.sort(strictCompare);
+                break; // Join the first execution-phase op found
             }
         }
 
@@ -632,7 +637,7 @@ export function tickEliteLoans(state: GameState, turn: number): void {
 
         const corpsId = ls.loaned_to_corps;
         const cmd = corpsCommand[corpsId];
-        const hasActiveOp = !!(cmd?.active_operation && cmd.active_operation.phase === 'execution');
+        const hasActiveOp = !!(cmd?.active_operations?.some(op => op.phase === 'execution'));
         const cfs = state.military.corps_front_sectors ?? {};
         const sector = Object.keys(cfs).sort(strictCompare).map(k => cfs[k]).find(s => s.corps_id === corpsId);
         const threatHigh = sector ? sector.threat_ratio >= 1.5 : false;

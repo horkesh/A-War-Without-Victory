@@ -55,8 +55,7 @@ if (fs.existsSync(finalSavePath)) {
         const state = JSON.parse(fs.readFileSync(finalSavePath, 'utf8'));
         const cc = state.military?.corps_command ?? state.corps_command ?? {};
         for (const [corpsId, cmd] of Object.entries(cc)) {
-            if (cmd.active_operation) {
-                const op = cmd.active_operation;
+            for (const op of (cmd.active_operations ?? [])) {
                 activeOps.push({
                     corps_id: corpsId,
                     operation_name: op.operation_name ?? op.name ?? '?',

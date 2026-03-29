@@ -99,7 +99,7 @@ export interface CorpsAiReportEntry {
     corps_id: string;
     faction: string;
     stance: string;
-    active_operation: string | null;
+    active_operations: string[];
     offensive_target_count: number;
     offensive_target_municipalities: string[];
     hold_osid_count: number;
@@ -133,15 +133,13 @@ export function extractCorpsAiReport(state: GameState, faction: FactionId): Corp
         }
         const municipalities = [...munSet].sort(strictCompare);
 
-        const opName = cmd.active_operation
-            ? `${cmd.active_operation.type}:${cmd.active_operation.phase}`
-            : null;
+        const opNames = cmd.active_operations.map(op => `${op.type}:${op.phase}`);
 
         entries.push({
             corps_id: corps.id,
             faction,
             stance: cmd.stance ?? 'balanced',
-            active_operation: opName,
+            active_operations: opNames,
             offensive_target_count: offensiveTargets.length,
             offensive_target_municipalities: municipalities,
             hold_osid_count: directive?.hold_osids?.length ?? 0,

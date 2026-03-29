@@ -91,7 +91,7 @@ describe('Elite cohesion recall (#37)', () => {
         const state = makeMinimalState({
             military: {
                 formations: { rs_1st_guards: f },
-                corps_command: { vrs_drina: { active_operation: { phase: 'execution', name: 'Op Test', participating_brigades: ['rs_1st_guards'], axes: [] } } },
+                corps_command: { vrs_drina: { active_operations: [{ phase: 'execution', name: 'Op Test', participating_brigades: ['rs_1st_guards'], axes: [] }] } },
                 corps_front_sectors: {},
                 elite_brigade_tracker: {
                     rs_1st_guards: {

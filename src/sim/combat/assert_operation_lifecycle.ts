@@ -23,8 +23,7 @@ export function assertOperationLifecycle(state: GameState): void {
 
     for (const cid of Object.keys(corpsCmd).sort(strictCompare)) {
         const cmd = corpsCmd[cid]!;
-        const op = cmd.active_operation;
-        if (!op) continue;
+        for (const op of cmd.active_operations) {
 
         const participants = op.participating_brigades ?? [];
         let activeCount = 0;
@@ -50,6 +49,7 @@ export function assertOperationLifecycle(state: GameState): void {
                 `${cid} op '${op.name}': execution phase with 0/${participants.length} active participants`
             );
         }
+        } // end for-of active_operations
     }
 
     if (violations.length > 0) {

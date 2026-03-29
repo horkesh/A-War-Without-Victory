@@ -30,13 +30,17 @@ import { strictCompare } from '../../state/validateGameState.js';
  */
 export function removeFromActiveOperation(state: GameState, brigadeId: FormationId, corpsId: string | undefined | null): void {
     if (!corpsId) return;
-    const op = state.military.corps_command?.[corpsId]?.active_operation;
-    if (!op) return;
-    op.participating_brigades = op.participating_brigades.filter(id => id !== brigadeId);
-    if (Array.isArray(op.axes)) {
-        for (const axis of op.axes) {
-            axis.assigned_brigades = axis.assigned_brigades.filter(id => id !== brigadeId);
+    const cmd = state.military.corps_command?.[corpsId];
+    if (!cmd) return;
+    for (const op of cmd.active_operations) {
+        if (!op.participating_brigades.includes(brigadeId)) continue;
+        op.participating_brigades = op.participating_brigades.filter(id => id !== brigadeId);
+        if (Array.isArray(op.axes)) {
+            for (const axis of op.axes) {
+                axis.assigned_brigades = axis.assigned_brigades.filter(id => id !== brigadeId);
+            }
         }
+        break; // A brigade can only be in one operation
     }
 }
 

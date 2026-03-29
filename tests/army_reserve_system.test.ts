@@ -235,7 +235,7 @@ describe('tickEliteLoans', () => {
         const brigade = makeOnLoanBrigade('rs_1st_guards', { loanStartTurn: 8 });
         const state = makeState({
             formations: { rs_1st_guards: brigade },
-            corps_command: { vrs_drina: { active_operation: null } },
+            corps_command: { vrs_drina: { active_operations: [] } },
             corps_front_sectors: {},
             turn: 10, // only 2 turns — below ELITE_LOAN_MIN_DURATION=6
         });
@@ -256,7 +256,7 @@ describe('tickEliteLoans', () => {
         const brigade = makeOnLoanBrigade('rs_1st_guards', { loanStartTurn: loanStart });
         const state = makeState({
             formations: { rs_1st_guards: brigade },
-            corps_command: { vrs_drina: { active_operation: null } },
+            corps_command: { vrs_drina: { active_operations: [] } },
             corps_front_sectors: {
                 sector_a: { corps_id: 'vrs_drina', threat_ratio: 0.8, assigned_brigade_ids: ['rs_1st_guards'] },
             },

@@ -47,9 +47,20 @@ function makeState(): GameState {
                     location_osid: 'op:beta:hq',
                     personnel: 50,
                 }),
+                brig_alpha: makeFormation('brig_alpha', {
+                    corps_id: 'corps_alpha',
+                    location_osid: 'op:alpha:front',
+                    home_osid: 'op:alpha:front',
+                }),
                 brig_beta: makeFormation('brig_beta', {
                     corps_id: 'corps_beta',
                     location_osid: 'op:alpha:front',
+                    home_osid: 'op:beta:front',
+                }),
+                brig_beta2: makeFormation('brig_beta2', {
+                    corps_id: 'corps_beta',
+                    location_osid: 'op:beta:front',
+                    home_osid: 'op:beta:front',
                 }),
             },
             war_front_edges_osid: [

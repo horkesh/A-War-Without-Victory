@@ -441,9 +441,11 @@ function buildFactionSectors(
             // Build op participants set — never reassign brigades mid-operation
             const opParticipants = new Set<string>();
             const cmd = state.military.corps_command?.[cid];
-            if (cmd?.active_operation?.participating_brigades) {
-                for (const bid of cmd.active_operation.participating_brigades) {
-                    opParticipants.add(bid);
+            if (cmd?.active_operations) {
+                for (const op of cmd.active_operations) {
+                    for (const bid of op.participating_brigades) {
+                        opParticipants.add(bid);
+                    }
                 }
             }
             commanderReviewAssignment(

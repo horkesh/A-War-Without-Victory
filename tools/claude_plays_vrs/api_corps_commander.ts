@@ -70,9 +70,11 @@ function buildCorpsStatePrompt(
     lines.push(`Status: ${statusReason} | Trace: ${trace}`);
 
     // Active operation
-    const op = cc?.active_operation;
-    if (op) {
-        lines.push(`Active operation: ${op.name} (${op.phase})`);
+    const ops = cc?.active_operations ?? [];
+    if (ops.length > 0) {
+        for (const op of ops) {
+            lines.push(`Active operation: ${op.name} (${op.phase})`);
+        }
     }
 
     // Brigades

@@ -6,17 +6,18 @@
  * graceful degradation in buildAxesFromDef/buildOperation handles actual
  * behavior. This makes silent failures VISIBLE.
  *
- * Five checks:
+ * Six checks:
  *   A. all_objectives_owned  — every objective on an axis is already faction-controlled
  *   B. brigade_missing / brigade_ineligible — formation absent or ineligible
  *   C. staging_adjacency — staging OSID not adjacent to first enemy objective
  *   D. axis_empty — axis has 0 valid brigades or 0 valid objectives
  *   E. op_empty — all axes would be dropped
+ *   F. objective_overlap — objective already targeted by another active corps operation
  *
  * Determinism: no Math.random(), no Date.now(). Sorted iteration via strictCompare.
  */
 
-import type { FactionId, FormationId, GameState } from '../../state/game_state.js';
+import type { CorpsCommandState, FactionId, FormationId, GameState } from '../../state/game_state.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { isEligibleOperationFormation } from '../../state/formation_constants.js';
 import { strictCompare } from '../../state/validateGameState.js';
@@ -32,7 +33,8 @@ export type OpInjectionCheck =
     | 'brigade_ineligible'
     | 'all_objectives_owned'
     | 'axis_empty'
-    | 'op_empty';
+    | 'op_empty'
+    | 'objective_overlap';
 
 export interface OpInjectionWarning {
     op_name: string;
@@ -71,16 +73,49 @@ export interface ValidatableOpDef {
  * @param adjacency Optional OSID adjacency map. When provided, enables
  *                  staging-adjacency checks (Check C). When omitted, Check C
  *                  is silently skipped.
+ * @param cmd       Optional CorpsCommandState. When provided, enables
+ *                  cross-operation objective overlap checks (Check F).
  * @returns Array of warnings (empty = clean injection).
  */
 export function validateOpAtInjection(
     def: ValidatableOpDef,
     state: GameState,
     adjacency?: Map<Osid, Osid[]>,
+    cmd?: CorpsCommandState,
 ): OpInjectionWarning[] {
     const warnings: OpInjectionWarning[] = [];
     const formations = state.military.formations ?? {};
     const turn = state.meta?.turn ?? 0;
+
+    // ── Check F: cross-operation objective overlap ─────────────────────
+    // Two concurrent operations from the same corps must NOT target the
+    // same objective OSID. Only checked when cmd is provided.
+    if (cmd) {
+        // Collect all objectives from existing active operations
+        const existingObjectives = new Map<string, string>(); // osid → op name
+        for (const existingOp of cmd.active_operations) {
+            const opObjectives = existingOp.axes?.flatMap(a => a.objectives) ?? existingOp.objectives ?? [];
+            for (const osid of opObjectives) {
+                existingObjectives.set(osid, existingOp.name);
+            }
+        }
+
+        // Check new operation's objectives against existing
+        const newObjectives = def.axes.flatMap(a => a.objectives);
+        const sortedNewObjectives = [...newObjectives].sort(strictCompare);
+        for (const osid of sortedNewObjectives) {
+            const conflictingOp = existingObjectives.get(osid);
+            if (conflictingOp) {
+                warnings.push({
+                    op_name: def.name,
+                    check: 'objective_overlap',
+                    detail: `Objective "${osid}" already targeted by active operation "${conflictingOp}"`,
+                    severity: 'error',
+                    turn,
+                });
+            }
+        }
+    }
 
     let validAxisCount = 0;
 

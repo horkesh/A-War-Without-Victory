@@ -514,7 +514,7 @@ describe('resolveActiveProbe', () => {
             vrs_1kk: {
                 command_span: 5, subordinate_count: 10, og_slots: 2,
                 active_ogs: [], corps_exhaustion: 10, stance: 'offensive' as const,
-                active_operation: op,
+                active_operations: [op],
             },
         };
 
@@ -547,7 +547,7 @@ describe('resolveActiveProbe', () => {
             vrs_1kk: {
                 command_span: 5, subordinate_count: 10, og_slots: 2,
                 active_ogs: [], corps_exhaustion: 10, stance: 'offensive' as const,
-                active_operation: op,
+                active_operations: [op],
             },
         };
 
@@ -574,7 +574,7 @@ describe('resolveActiveProbe', () => {
             vrs_1kk: {
                 command_span: 5, subordinate_count: 10, og_slots: 2,
                 active_ogs: [], corps_exhaustion: 10, stance: 'offensive' as const,
-                active_operation: op,
+                active_operations: [op],
             },
         };
 

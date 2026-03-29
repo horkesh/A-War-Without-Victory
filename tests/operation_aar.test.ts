@@ -304,7 +304,7 @@ function makeState(ops: Record<string, CorpsOperation>, formations: Record<strin
             active_ogs: [],
             corps_exhaustion: 0,
             stance: 'offensive',
-            active_operation: op,
+            active_operations: [op],
         };
     }
     return { military: { formations, corps_command } } as any;
@@ -617,7 +617,7 @@ function makeWeeklyState(
             active_ogs: [],
             corps_exhaustion: 0,
             stance: 'offensive',
-            active_operation: op,
+            active_operations: [op],
         };
     }
     return {
@@ -882,7 +882,7 @@ function makeFinalizeState(
             active_ogs: [],
             corps_exhaustion: 0,
             stance: 'offensive',
-            active_operation: op,
+            active_operations: [op],
         };
     }
     const state: any = {

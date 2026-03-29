@@ -136,8 +136,7 @@ export function buildOperationCombatDiagnostics(
     const diagnostics: OperationCombatDiagnostic[] = [];
     for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
         const corpsState = corpsCommand[corpsId];
-        const operation = corpsState?.active_operation;
-        if (!operation) continue;
+        for (const operation of corpsState?.active_operations ?? []) {
         const corpsFormation = state.military.formations?.[corpsId];
         const factionId = (corpsFormation?.faction ?? 'unknown') as FactionId;
         const brigades = sortedFormationIds(operation.participating_brigades ?? []);
@@ -231,6 +230,7 @@ export function buildOperationCombatDiagnostics(
             invalid_for_combat_calibration: invalidationReasons.length > 0,
             invalidation_reasons: invalidationReasons
         });
+        } // end for-of active_operations
     }
     return diagnostics;
 }

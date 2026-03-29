@@ -244,8 +244,8 @@ export async function generateCorpsDialogues(
 
             const cc = corpsCommand[corpsId];
             const stance = cc?.stance ?? 'balanced';
-            const hasActiveOp = !!(cc?.active_operation);
-            const opName = cc?.active_operation?.name;
+            const hasActiveOp = cc?.active_operations?.length > 0;
+            const opName = cc?.active_operations?.[0]?.name;
             const exhaustion = cc?.corps_exhaustion ?? 0;
             const personnel = getCorpsPersonnel(state, corpsId);
             const recentBattles = buildRecentBattleSummary(state, corpsId);

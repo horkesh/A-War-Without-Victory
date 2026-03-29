@@ -265,8 +265,7 @@ function detectOperationStagnation(state: GameState): AnomalyReport[] {
 
     for (const corpsId of sortedKeys(corpsCommand as Record<string, unknown>)) {
         const cc = corpsCommand[corpsId];
-        const op = cc.active_operation;
-        if (!op) continue;
+        for (const op of cc.active_operations) {
         if (op.phase !== 'execution') continue;
 
         const turnsInExecution = state.meta.turn - op.phase_started_turn;
@@ -292,6 +291,7 @@ function detectOperationStagnation(state: GameState): AnomalyReport[] {
                 entities: [corpsId, op.name],
             });
         }
+        } // end for-of active_operations
     }
     return reports;
 }
@@ -590,9 +590,9 @@ function detectUnassignedFrontlineBrigades(state: GameState): AnomalyReport[] {
     const opParticipants = new Set<string>();
     for (const corpsId of sortedKeys(corpsCommand as Record<string, unknown>)) {
         const cc = corpsCommand[corpsId];
-        const op = cc.active_operation;
-        if (!op) continue;
-        for (const bid of op.participating_brigades) opParticipants.add(bid);
+        for (const op of cc.active_operations) {
+            for (const bid of op.participating_brigades) opParticipants.add(bid);
+        }
     }
 
     const unassigned: Array<{ id: string; corps: string; location: string }> = [];
@@ -638,9 +638,9 @@ function detectRearBrigadesInSector(state: GameState): AnomalyReport[] {
     const opParticipants = new Set<string>();
     for (const corpsId of sortedKeys(corpsCommand as Record<string, unknown>)) {
         const cc = corpsCommand[corpsId];
-        const op = cc.active_operation;
-        if (!op) continue;
-        for (const bid of op.participating_brigades) opParticipants.add(bid);
+        for (const op of cc.active_operations) {
+            for (const bid of op.participating_brigades) opParticipants.add(bid);
+        }
     }
 
     let totalAssigned = 0;
@@ -718,13 +718,13 @@ function detectBrigadeStacking(state: GameState): AnomalyReport[] {
     const stagingOsids = new Set<string>();
     for (const corpsId of sortedKeys(corpsCommand as Record<string, unknown>)) {
         const cc = corpsCommand[corpsId];
-        const op = cc.active_operation;
-        if (!op) continue;
-        for (const bid of op.participating_brigades) opBrigades.add(bid);
-        if (op.staging_osid) stagingOsids.add(op.staging_osid);
-        if (op.axes) {
-            for (const axis of op.axes) {
-                if (axis.staging_osid) stagingOsids.add(axis.staging_osid);
+        for (const op of cc.active_operations) {
+            for (const bid of op.participating_brigades) opBrigades.add(bid);
+            if (op.staging_osid) stagingOsids.add(op.staging_osid);
+            if (op.axes) {
+                for (const axis of op.axes) {
+                    if (axis.staging_osid) stagingOsids.add(axis.staging_osid);
+                }
             }
         }
     }
@@ -778,9 +778,9 @@ function detectBrigadeFarFromHome(state: GameState, adjacency: Map<string, strin
     const opParticipants = new Set<string>();
     for (const corpsId of sortedKeys(corpsCommand as Record<string, unknown>)) {
         const cc = corpsCommand[corpsId];
-        const op = cc.active_operation;
-        if (!op) continue;
-        for (const bid of op.participating_brigades) opParticipants.add(bid);
+        for (const op of cc.active_operations) {
+            for (const bid of op.participating_brigades) opParticipants.add(bid);
+        }
     }
 
     const MAX_BFS_HOPS = 20;

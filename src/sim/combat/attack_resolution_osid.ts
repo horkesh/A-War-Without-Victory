@@ -48,6 +48,7 @@ import {
 } from './ethnic_defense.js';
 import { removeFromActiveOperation } from './brigade_dissolution.js';
 import { isRbihHrhbCombatEnabled } from '../early_war/alliance_update.js';
+import { findBrigadeOperation } from './corps_operation_helpers.js';
 
 // ── Shared combat math ──────────────────────────────────────────────────
 import {
@@ -1651,7 +1652,7 @@ export function resolveAttackOrdersOsid(
         const attackerCorpsId = firstAttacker.corps_id;
         if (attackerCorpsId && state.military.corps_command) {
             const attackerCmd = state.military.corps_command[attackerCorpsId];
-            const activeOp = attackerCmd?.active_operation;
+            const activeOp = attackerCmd ? findBrigadeOperation(attackerCmd, firstAttacker.id) : null;
             if (activeOp && activeOp.phase === 'execution') {
                 activeOp.battles_this_turn = (activeOp.battles_this_turn ?? 0) + 1;
                 activeOp.total_battles = (activeOp.total_battles ?? 0) + 1;

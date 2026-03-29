@@ -243,7 +243,7 @@ function assessCorps(state: GameState, faction: FactionId, corpsId: string): Cor
     const attendance = canCorpsAttendGathering(corpsId, faction, state);
     const cc = state.military.corps_command?.[corpsId];
     const exhaustion = cc?.corps_exhaustion ?? 0;
-    const hasActiveOp = cc?.active_operation != null;
+    const hasActiveOp = (cc?.active_operations?.length ?? 0) > 0;
 
     // Count active brigades and sum personnel
     let availableBrigades = 0;

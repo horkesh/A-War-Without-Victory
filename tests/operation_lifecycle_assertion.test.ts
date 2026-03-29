@@ -33,7 +33,7 @@ describe('assertOperationLifecycle', () => {
         const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
         const state = makeState({
             corps_command: {
-                corps_1: { active_operation: makeOp({ participating_brigades: ['ghost_brig'] }) } as any,
+                corps_1: { active_operations: [makeOp({ participating_brigades: ['ghost_brig'] })] } as any,
             },
             formations: {},
         });
@@ -50,7 +50,7 @@ describe('assertOperationLifecycle', () => {
         const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
         const state = makeState({
             corps_command: {
-                corps_1: { active_operation: makeOp({ participating_brigades: ['brig_1'] }) } as any,
+                corps_1: { active_operations: [makeOp({ participating_brigades: ['brig_1'] })] } as any,
             },
             formations: {
                 brig_1: { id: 'brig_1', status: 'inactive', faction: 'RS' } as any,
@@ -69,10 +69,10 @@ describe('assertOperationLifecycle', () => {
         const state = makeState({
             corps_command: {
                 corps_1: {
-                    active_operation: makeOp({
+                    active_operations: [makeOp({
                         phase: 'execution',
                         participating_brigades: ['brig_1'],
-                    }),
+                    })],
                 } as any,
             },
             formations: {
@@ -93,7 +93,7 @@ describe('assertOperationLifecycle', () => {
         const state = makeState({
             corps_command: {
                 corps_1: {
-                    active_operation: makeOp({ participating_brigades: ['brig_1', 'brig_2'] }),
+                    active_operations: [makeOp({ participating_brigades: ['brig_1', 'brig_2'] })],
                 } as any,
             },
             formations: {
@@ -112,7 +112,7 @@ describe('assertOperationLifecycle', () => {
         const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
         const state = makeState({
             corps_command: {
-                corps_1: { active_operation: null } as any,
+                corps_1: { active_operations: [] } as any,
             },
         });
 

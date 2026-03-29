@@ -56,7 +56,30 @@ function makeState(
             war_front_edges_osid: frontEdges,
         } as any,
         political: {
-            political_controllers: {},
+            political_controllers: (() => {
+                const pc: Record<string, string> = {};
+                // Friendly OSIDs from formations
+                for (const f of Object.values(fmts)) {
+                    if (f.location_osid) pc[f.location_osid] = 'RS';
+                }
+                // Friendly OSIDs from sector territory/sub_segments
+                for (const sec of Object.values(sectorMap)) {
+                    for (const ss of sec.sub_segments) {
+                        for (const fo of ss.friendly_osids) pc[fo] = 'RS';
+                    }
+                }
+                // Enemy OSIDs from front edges and sub_segments
+                for (const e of frontEdges) {
+                    if (!pc[e.a]) pc[e.a] = 'RBiH';
+                    if (!pc[e.b]) pc[e.b] = 'RBiH';
+                }
+                for (const sec of Object.values(sectorMap)) {
+                    for (const ss of sec.sub_segments) {
+                        for (const eo of ss.enemy_osids) pc[eo] = 'RBiH';
+                    }
+                }
+                return pc;
+            })(),
         } as any,
     } as GameState;
 }

@@ -516,7 +516,7 @@ function extractCorpsOps(state: GameState, pf: FactionId): CorpsOperationSnapsho
             corpsId,
             corpsName: f.name ?? corpsId,
             stance: corps.stance,
-            operation: corps.active_operation ?? null,
+            operation: corps.active_operations?.[0] ?? null,
         });
     }
     return results;

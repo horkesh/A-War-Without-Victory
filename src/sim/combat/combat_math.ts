@@ -23,6 +23,7 @@ import {
     RESERVE_ADEQUATE_THRESHOLD,
     RESERVE_STRAINED_THRESHOLD,
 } from '../../state/supply_reserve_constants.js';
+import { findBrigadeOperation } from './corps_operation_helpers.js';
 import { getEnclaveDefenseBonus } from './enclave_resilience.js';
 import { getLocalFrontDensityModifier } from './local_front_defense.js';
 import { ensureBrigadeComposition } from './equipment_effects.js';
@@ -481,8 +482,8 @@ export function getThreeTierOfficerMod(
 
         // C.4: VRS pre-planned/general_offensive ops use army commander (Mladić) modifier
         if (formation.faction === 'RS' && role === 'attack') {
-            const corps = state.military.corps_command?.[corpsId];
-            if (corps?.active_operation?.type === 'general_offensive' && corps.active_operation.phase === 'execution') {
+            const brigadeOp = findBrigadeOperation(state.military.corps_command![corpsId]!, formation.id);
+            if (brigadeOp?.type === 'general_offensive' && brigadeOp.phase === 'execution') {
                 // Find army commander instead of corps commander
                 const officerIds = Object.keys(state.military.named_officers).sort(strictCompare);
                 for (const id of officerIds) {
@@ -500,9 +501,8 @@ export function getThreeTierOfficerMod(
 
         // Operation commander: brigades in named ops answer to ops commander
         const corpsCmd = state.military.corps_command?.[corpsId];
-        const activeOp = corpsCmd?.active_operation;
-        if (activeOp?.commander_officer_id && activeOp.phase === 'execution' &&
-            activeOp.participating_brigades.includes(formation.id)) {
+        const activeOp = corpsCmd ? findBrigadeOperation(corpsCmd, formation.id) : null;
+        if (activeOp?.commander_officer_id && activeOp.phase === 'execution') {
             const opsOs = state.military.named_officers[activeOp.commander_officer_id];
             const opsData = opsOs ? state.military.named_officer_data.find(o => o.id === activeOp.commander_officer_id) : null;
             if (opsOs && opsData && opsOs.status === 'active') {
@@ -734,8 +734,10 @@ export function getCorpsStance(state: GameState, formation: FormationState): Cor
 
 export function getOperationsMult(state: GameState, formation: FormationState): number {
     if (!formation.corps_id || !state.military.corps_command) return 1.0;
-    const op = state.military.corps_command[formation.corps_id]?.active_operation;
-    if (!op || !op.participating_brigades.includes(formation.id)) return 1.0;
+    const cmd = state.military.corps_command[formation.corps_id];
+    if (!cmd) return 1.0;
+    const op = findBrigadeOperation(cmd, formation.id);
+    if (!op) return 1.0;
     if (op.phase === 'execution') return 1.3;
     if (op.phase === 'planning') return 1.0;
     if (op.phase === 'recovery') return 0.6;

@@ -170,7 +170,7 @@ describe('canCorpsAttendGathering', () => {
 function makeTheaterState(overrides: {
     turn?: number;
     formations?: Record<string, Partial<FormationState>>;
-    corpsCommand?: Record<string, { corps_exhaustion?: number; active_operation?: unknown }>;
+    corpsCommand?: Record<string, { corps_exhaustion?: number; active_operations?: unknown }>;
     generalSupplyReserve?: Record<string, number>;
 } = {}): GameState {
     const formations: Record<string, FormationState> = {};

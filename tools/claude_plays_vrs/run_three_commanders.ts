@@ -186,8 +186,8 @@ function generateReactiveDecision(
             personnel: totalPers,
             avgCohesion: brigCount > 0 ? totalCoh / brigCount : 50,
             avgMorale: brigCount > 0 ? totalMor / brigCount : 50,
-            hasOp: !!cc.active_operation,
-            opPhase: cc.active_operation?.phase ?? '',
+            hasOp: (cc.active_operations?.length ?? 0) > 0,
+            opPhase: cc.active_operations?.[0]?.phase ?? '',
         });
     }
 

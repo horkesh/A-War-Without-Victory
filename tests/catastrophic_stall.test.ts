@@ -126,7 +126,7 @@ function makeState(overrides: {
                 arbih_corps: {
                     command_span: 5, subordinate_count: 2, og_slots: 1, active_ogs: [],
                     corps_exhaustion: 0, stance: 'offensive',
-                    active_operation: {
+                    active_operations: [{
                         name: 'Doomed Assault',
                         type: 'sector_attack',
                         phase: 'execution',
@@ -137,7 +137,7 @@ function makeState(overrides: {
                         axes: overrides.axes,
                         attack_attempt_count: 0,
                         objective_capture_count: 0,
-                    },
+                    }],
                 },
             },
         } as any,
@@ -172,7 +172,7 @@ describe('catastrophic outcome stall (#39)', () => {
 
         updateSectorOffensiveResults(state);
 
-        const axis = (state.military.corps_command as any).arbih_corps.active_operation.axes[0];
+        const axis = (state.military.corps_command as any).arbih_corps.active_operations[0].axes[0];
         expect(axis.status).toBe('executing'); // NOT stalled after first catastrophic
         expect(axis.consecutive_catastrophic_on_current).toBe(1);
         expect(axis.failure_count).toBe(1);
@@ -199,7 +199,7 @@ describe('catastrophic outcome stall (#39)', () => {
 
         updateSectorOffensiveResults(state);
 
-        const axis = (state.military.corps_command as any).arbih_corps.active_operation.axes[0];
+        const axis = (state.military.corps_command as any).arbih_corps.active_operations[0].axes[0];
         expect(axis.status).toBe('stalled');
         expect(axis.consecutive_catastrophic_on_current).toBe(2);
     });
@@ -225,7 +225,7 @@ describe('catastrophic outcome stall (#39)', () => {
 
         updateSectorOffensiveResults(state);
 
-        const axis = (state.military.corps_command as any).arbih_corps.active_operation.axes[0];
+        const axis = (state.military.corps_command as any).arbih_corps.active_operations[0].axes[0];
         expect(axis.status).toBe('executing'); // NOT stalled
         expect(axis.consecutive_catastrophic_on_current).toBe(0); // reset
     });
@@ -251,7 +251,7 @@ describe('catastrophic outcome stall (#39)', () => {
 
         updateSectorOffensiveResults(state);
 
-        const axis = (state.military.corps_command as any).arbih_corps.active_operation.axes[0];
+        const axis = (state.military.corps_command as any).arbih_corps.active_operations[0].axes[0];
         expect(axis.consecutive_catastrophic_on_current).toBe(0); // reset
         expect(axis.objective_capture_count).toBe(1);
     });

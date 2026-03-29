@@ -57,6 +57,7 @@ import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
 import { isMultiAxis, getAllAxisBrigades } from './sector_offensive.js';
 import { getCorpsStance } from './combat_math.js';
+import { findBrigadeOperation } from './corps_operation_helpers.js';
 
 import { evaluateGarrisonAndDetachments, evaluateReserve, evaluateHold } from './bot_brigade_eval_hold.js';
 import { evaluateSectorMarch, evaluateReturnToCorps, evaluatePocketEvacuation, evaluateFrontCoverage } from './bot_brigade_eval_front.js';
@@ -283,7 +284,9 @@ export function getSectorOffensiveProbeThreshold(
 
 function isPartOfNamedOperation(state: GameState, formation: FormationState): boolean {
     if (!formation.corps_id || !state.military.corps_command) return false;
-    const op = state.military.corps_command[formation.corps_id]?.active_operation;
+    const cmd = state.military.corps_command[formation.corps_id];
+    if (!cmd) return false;
+    const op = findBrigadeOperation(cmd, formation.id);
     if (!op) return false;
     return op.phase === 'execution' && isOperationParticipant(op, formation.id);
 }
@@ -380,7 +383,7 @@ function executeFactionDirectives(
         const loanedTo = brigade.elite_loan_state?.on_loan ? brigade.elite_loan_state.loaned_to_corps : null;
         const corpsId = loanedTo ?? brigade.corps_id;
         const cmd = corpsId ? state.military.corps_command?.[corpsId] : null;
-        const activeOp = cmd?.active_operation ?? null;
+        const activeOp = cmd ? findBrigadeOperation(cmd, brigade.id) : null;
         const isActiveSectorOperationParticipant =
             (activeOp?.type === 'sector_attack' || activeOp?.type === 'probe') &&
             isOperationParticipant(activeOp, brigade.id);
@@ -613,14 +616,19 @@ export function generateAllBotOrdersOsid(
             const faction = f.faction as FactionId;
             const targetController = pc[target] ?? '';
             // Skip Graz block for brigades attacking Op Jackal objectives only
-            if (corpsCmd[corpsId]?.active_operation != null
+            const grazCmd = corpsCmd[corpsId];
+            if (grazCmd && grazCmd.active_operations.length > 0
                 && isEastHerzegovinaPair(corpsId)
                 && state.political.graz_east_herzegovina_active_turn == null) {
-                const op = corpsCmd[corpsId]!.active_operation!;
-                const opObjectives = new Set(
-                    op.axes?.flatMap(a => a.objectives ?? []) ?? op.objectives ?? []
-                );
-                if (opObjectives.has(target)) continue; // Target is an op objective — allow
+                // Check if target is an objective of any active operation
+                let isOpObjective = false;
+                for (const op of grazCmd.active_operations) {
+                    const opObjectives = new Set(
+                        op.axes?.flatMap(a => a.objectives ?? []) ?? op.objectives ?? []
+                    );
+                    if (opObjectives.has(target)) { isOpObjective = true; break; }
+                }
+                if (isOpObjective) continue; // Target is an op objective — allow
                 // Non-objective RS targets still blocked by Graz
             }
             if (shouldGrazBlockAttack(state, corpsId, faction, target, targetController)) {

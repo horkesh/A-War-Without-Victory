@@ -423,13 +423,16 @@ export function processJnaWithdrawals(state: GameState): JnaWithdrawalEvent[] {
             });
 
             // Remove from any active operations
-            if (corpsId && state.military.corps_command?.[corpsId]?.active_operation) {
-                const op = state.military.corps_command[corpsId].active_operation!;
-                op.participating_brigades = op.participating_brigades.filter(id => id !== phantomId);
-                if (Array.isArray(op.axes)) {
-                    for (const axis of op.axes) {
-                        axis.assigned_brigades = axis.assigned_brigades.filter(id => id !== phantomId);
+            if (corpsId && state.military.corps_command?.[corpsId]) {
+                for (const op of state.military.corps_command[corpsId].active_operations) {
+                    if (!op.participating_brigades.includes(phantomId)) continue;
+                    op.participating_brigades = op.participating_brigades.filter(id => id !== phantomId);
+                    if (Array.isArray(op.axes)) {
+                        for (const axis of op.axes) {
+                            axis.assigned_brigades = axis.assigned_brigades.filter(id => id !== phantomId);
+                        }
                     }
+                    break;
                 }
             }
 
@@ -572,15 +575,18 @@ export function processJnaWithdrawals(state: GameState): JnaWithdrawalEvent[] {
         });
 
         // Remove phantom from any active operations
-        if (corpsId && state.military.corps_command?.[corpsId]?.active_operation) {
-            const op = state.military.corps_command[corpsId].active_operation!;
-            // Remove from flat participating_brigades
-            op.participating_brigades = op.participating_brigades.filter(id => id !== phantomId);
-            // Remove from axes
-            if (Array.isArray(op.axes)) {
-                for (const axis of op.axes) {
-                    axis.assigned_brigades = axis.assigned_brigades.filter(id => id !== phantomId);
+        if (corpsId && state.military.corps_command?.[corpsId]) {
+            for (const op of state.military.corps_command[corpsId].active_operations) {
+                if (!op.participating_brigades.includes(phantomId)) continue;
+                // Remove from flat participating_brigades
+                op.participating_brigades = op.participating_brigades.filter(id => id !== phantomId);
+                // Remove from axes
+                if (Array.isArray(op.axes)) {
+                    for (const axis of op.axes) {
+                        axis.assigned_brigades = axis.assigned_brigades.filter(id => id !== phantomId);
+                    }
                 }
+                break;
             }
         }
 

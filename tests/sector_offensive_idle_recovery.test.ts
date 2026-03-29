@@ -99,7 +99,7 @@ describe('sector offensive idle recovery', () => {
                     active_ogs: [],
                     corps_exhaustion: 0,
                     stance: 'offensive',
-                    active_operation: {
+                    active_operations: [{
                         name: 'Stalled Attack',
                         type: 'sector_attack',
                         phase: 'execution',
@@ -115,7 +115,7 @@ describe('sector offensive idle recovery', () => {
                         failure_count: 0,
                         consecutive_failures_on_current: 0,
                         sector_id: 'rs_sector',
-                    },
+                    }],
                 },
             }
   } as any,
@@ -129,7 +129,7 @@ describe('sector offensive idle recovery', () => {
 
         updateSectorOffensiveResults(state);
 
-        const op = state.military.corps_command?.rs_corps?.active_operation;
+        const op = state.military.corps_command?.rs_corps?.active_operations[0];
         expect(op?.phase).toBe('recovery');
         expect(op?.recovery_reason).toBe('no_logged_attempt');
         expect(op?.movement_only_execution_turns).toBe(1);

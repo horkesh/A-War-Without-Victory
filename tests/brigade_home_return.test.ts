@@ -152,10 +152,10 @@ describe('computeReturnMarches', () => {
                     brigade_movement_orders: {},
                     corps_command: {
                         arbih_3rd_corps: {
-                            active_operation: {
+                            active_operations: [{
                                 phase: 'execution',
                                 participating_brigades: ['brig_1'],
-                            },
+                            }],
                         },
                     },
                 },

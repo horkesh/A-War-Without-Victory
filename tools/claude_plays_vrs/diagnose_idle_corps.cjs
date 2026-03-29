@@ -27,7 +27,8 @@ for (const corpsId of targetCorps) {
     const stance = cmd.stance ?? '?';
     const statusReason = cmd.status_reason ?? 'not set';
     const trace = (cmd.op_launch_trace ?? []).join(', ') || 'not set';
-    const op = cmd.active_operation;
+    const ops = cmd.active_operations ?? [];
+    const op = ops[0] ?? null;
     const opStr = op ? `${op.name} (${op.phase})` : 'none';
     const lastOpTurn = cmd.last_completed_operation_turn ?? -1;
     const exhaustion = cmd.corps_exhaustion ?? 0;

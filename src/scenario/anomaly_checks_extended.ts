@@ -215,9 +215,7 @@ export function checkOrphanOperationBrigades(state: GameState): AnomalyReport[] 
     // Process each active operation in execution phase
     for (const corpsId of sortedKeys(corpsCommand as Record<string, unknown>)) {
         const cc = corpsCommand[corpsId];
-        const op = cc.active_operation;
-        if (!op) continue;
-        // Only check operations in execution (skip planning and recovery)
+        for (const op of cc.active_operations) {
         if (op.phase !== 'execution') continue;
 
         // Collect all relevant OSIDs: staging + objectives from axes and legacy flat fields
@@ -276,6 +274,7 @@ export function checkOrphanOperationBrigades(state: GameState): AnomalyReport[] 
                 entities: [op.name, o.brigadeId, o.locationOsid],
             });
         }
+        } // end for-of active_operations
     }
 
     return reports;

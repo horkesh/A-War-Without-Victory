@@ -123,25 +123,28 @@ function isOperationParticipant(state: GameState, brigadeId: FormationId): boole
     for (const fid of Object.keys(formations)) {
         const f = formations[fid as FormationId]!;
         if (f.kind !== 'corps_asset') continue;
-        const op = (f as unknown as Partial<CorpsCommandState>).active_operation;
-        if (!op) continue;
-        if (op.axes) {
-            if (op.axes.some((a: OperationAxis) => a.assigned_brigades?.includes(brigadeId))) return true;
+        const ops = (f as unknown as Partial<CorpsCommandState>).active_operations;
+        if (!ops) continue;
+        for (const op of ops) {
+            if (op.axes) {
+                if (op.axes.some((a: OperationAxis) => a.assigned_brigades?.includes(brigadeId))) return true;
+            }
+            // Check flat participating_brigades
+            if (op.participating_brigades?.includes(brigadeId)) return true;
         }
-        // Check flat participating_brigades
-        if (op.participating_brigades?.includes(brigadeId)) return true;
     }
     // Also check corps_command active operations
     const corpsCmd = state.military.corps_command;
     if (corpsCmd) {
         for (const cid of Object.keys(corpsCmd)) {
             const cmd = corpsCmd[cid];
-            const op = cmd?.active_operation;
-            if (!op || op.phase !== 'execution') continue;
-            if (op.axes) {
-                if (op.axes.some((a: OperationAxis) => a.assigned_brigades?.includes(brigadeId))) return true;
+            for (const op of cmd?.active_operations ?? []) {
+                if (op.phase !== 'execution') continue;
+                if (op.axes) {
+                    if (op.axes.some((a: OperationAxis) => a.assigned_brigades?.includes(brigadeId))) return true;
+                }
+                if (op.participating_brigades?.includes(brigadeId)) return true;
             }
-            if (op.participating_brigades?.includes(brigadeId)) return true;
         }
     }
     return false;

@@ -447,7 +447,7 @@ export interface CorpsCommandState {
     active_ogs: FormationId[];
     corps_exhaustion: number;
     stance: CorpsStance;
-    active_operation?: CorpsOperation | null;
+    active_operations: CorpsOperation[];
     reserves_committed_until_turn?: number;
     /** Corps directive for subordinate brigades (generated each turn by corps AI). */
     directive?: CorpsDirective | null;

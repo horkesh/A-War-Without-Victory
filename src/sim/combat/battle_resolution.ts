@@ -40,6 +40,7 @@ import { areRbihHrhbAllied, isRbihHrhbCombatEnabled } from '../early_war/allianc
 import { captureEquipment, computeEquipmentMultiplier, ensureBrigadeComposition } from './equipment_effects.js';
 import { computeResilienceModifier } from './faction_resilience.js';
 import { isBrigadeAssignedToFront } from './front_assignment.js';
+import { findBrigadeOperation } from './corps_operation_helpers.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -314,8 +315,9 @@ function getCorpsStance(state: GameState, formation: FormationState): CorpsStanc
 function getOperationMult(state: GameState, formation: FormationState, mode: 'pressure' | 'defense'): number {
     if (!formation.corps_id || !state.military.corps_command) return 1.0;
     const corps = state.military.corps_command[formation.corps_id];
-    if (!corps?.active_operation) return 1.0;
-    const op = corps.active_operation;
+    if (!corps) return 1.0;
+    const op = findBrigadeOperation(corps, formation.id);
+    if (!op) return 1.0;
 
     // Check if this formation participates
     if (!op.participating_brigades.includes(formation.id)) return 1.0;

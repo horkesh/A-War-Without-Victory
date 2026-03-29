@@ -892,7 +892,8 @@ export function parseGameState(json: unknown): LoadedGameState {
         for (const fv of formations) {
             if (fv.kind !== 'corps' && fv.kind !== 'corps_asset') continue;
             const cc = rawCorpsCommand[fv.id];
-            const op = cc?.active_operation as any | undefined;
+            const activeOps = (Array.isArray(cc?.active_operations) ? cc.active_operations : cc?.active_operation ? [cc.active_operation] : []) as any[];
+            for (const op of activeOps) {
             if (op && typeof op === 'object' && op.name) {
                 const participatingBrigadeIds = Array.isArray(op.participating_brigades)
                     ? (op.participating_brigades as string[]).filter((id): id is string => typeof id === 'string').sort(strictCompare)
@@ -976,6 +977,7 @@ export function parseGameState(json: unknown): LoadedGameState {
                     has_active_probe: op.active_probe != null && typeof op.active_probe === 'object' ? true : undefined,
                 });
             }
+            } // end for-of activeOps
         }
         operations.sort((a, b) => a.faction.localeCompare(b.faction) || a.corps_id.localeCompare(b.corps_id));
     }
@@ -2069,7 +2071,8 @@ function deriveActiveOperations(state: any): LoadedGameState['activeOperations']
 
     for (const corpsId of Object.keys(cc).sort()) {
         const cmd = cc[corpsId];
-        const op = cmd?.active_operation as any | undefined;
+        const opsArray = (Array.isArray(cmd?.active_operations) ? cmd.active_operations : cmd?.active_operation ? [cmd.active_operation] : []) as any[];
+        for (const op of opsArray) {
         if (!op) continue;
 
         // Collect objectives
@@ -2119,6 +2122,7 @@ function deriveActiveOperations(state: any): LoadedGameState['activeOperations']
             attacks: totalAttacks,
             weekly_log_length: ((op.weekly_log as unknown[])?.length ?? 0),
         });
+        } // end for-of opsArray
     }
 
     return activeOps.length > 0 ? activeOps : undefined;

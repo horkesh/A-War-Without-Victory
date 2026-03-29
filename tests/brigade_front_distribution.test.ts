@@ -153,11 +153,11 @@ describe('distributeBrigadesToFront', () => {
                 kind: 'corps_asset',
                 status: 'active',
                 faction: 'RS',
-                active_operation: {
+                active_operations: [{
                     name: 'Op Storm',
                     phase: 'execution',
                     participating_brigades: ['brig_op'],
-                },
+                }],
             },
         });
 

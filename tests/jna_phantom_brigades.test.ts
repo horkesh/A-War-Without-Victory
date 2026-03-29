@@ -204,7 +204,7 @@ describe('JNA Phantom — Equipment Handoff', () => {
         state.military.corps_command = {
             'vrs_herzegovina': {
                 stance: 'offensive' as any,
-                active_operation: {
+                active_operations: [{
                     name: 'Op Visegrad',
                     type: 'sector_attack',
                     phase: 'execution',
@@ -231,12 +231,12 @@ describe('JNA Phantom — Equipment Handoff', () => {
                         movement_only_execution_turns: 0,
                         idle_execution_turn_streak: 0,
                     }],
-                } as any,
+                }] as any,
             } as any,
         };
 
         processJnaWithdrawals(state);
-        const op = state.military.corps_command['vrs_herzegovina']!.active_operation!;
+        const op = state.military.corps_command['vrs_herzegovina']!.active_operations[0];
         assert.ok(!op.participating_brigades.includes('jna_uzice_corps_tg' as any));
         assert.ok(op.participating_brigades.includes('rs_foa_brigade' as any));
         assert.ok(!op.axes![0]!.assigned_brigades.includes('jna_uzice_corps_tg' as any));

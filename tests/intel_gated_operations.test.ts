@@ -49,8 +49,11 @@ describe('shouldLaunchProbeInstead', () => {
         expect(shouldLaunchProbeInstead('RS', 0.30, 0)).toBe(true);
     });
 
-    it('returns false when intel is below threshold but max probes reached', () => {
-        expect(shouldLaunchProbeInstead('RS', 0.10, 2)).toBe(false);
+    it('returns true even when consecutive probes are high (no forced commitment)', () => {
+        // n1194: MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT removed — if intel says
+        // enemy is stronger, correct response is "defend," not "attack because
+        // you probed twice." consecutiveProbes no longer forces commitment.
+        expect(shouldLaunchProbeInstead('RS', 0.10, 2)).toBe(true);
     });
 
     it('returns true for RBiH at 0.35 (below 0.40 threshold)', () => {

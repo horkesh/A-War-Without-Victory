@@ -29,6 +29,7 @@ import {
     getFactionCorps,
     sortByPersonnelDesc,
 } from './bot_corps_helpers.js';
+import { getAvailableBrigades, hasAvailableSlot } from './corps_operation_helpers.js';
 
 export interface CorridorTarget {
     breachSettlements: SettlementId[];
@@ -124,7 +125,9 @@ export function attemptCorridorBreach(
         // Find a corps without active operation that can reach the breach
         for (const corps of corpsList) {
             const cmd = corpsCommand[corps.id];
-            if (!cmd || cmd.active_operation) continue;
+            if (!cmd) continue;
+            const corridorSubordinates = getCorpsSubordinates(state, corps.id);
+            if (!hasAvailableSlot(cmd, corridorSubordinates.length)) continue;
             if (cmd.stance === 'reorganize') continue;
             if (cmd.corps_exhaustion > MAX_EXHAUSTION_FOR_OPERATION) continue;
 
@@ -132,9 +135,12 @@ export function attemptCorridorBreach(
             const healthyCount = countHealthyBrigades(subordinates);
             if (healthyCount < 2) continue; // Lower threshold for corridor ops
 
+            // Filter out brigades already committed to active operations
+            const availableIds = new Set(getAvailableBrigades(cmd, subordinates.map(b => b.id)));
+
             // Select participating brigades
             const participants = sortByPersonnelDesc(
-                subordinates.filter(b => (b.personnel ?? 0) / MAX_BRIGADE_PERSONNEL >= 0.6 && (b.cohesion ?? 60) >= 40)
+                subordinates.filter(b => availableIds.has(b.id) && (b.personnel ?? 0) / MAX_BRIGADE_PERSONNEL >= 0.6 && (b.cohesion ?? 60) >= 40)
             ).slice(0, 4);
 
             if (participants.length < 2) continue;
@@ -149,7 +155,7 @@ export function attemptCorridorBreach(
                 participating_brigades: participants.map(b => b.id)
             };
 
-            cmd.active_operation = operation;
+            cmd.active_operations.push(operation);
             assignOperationCommander(state, operation, corps.id, faction);
             // Force offensive stance for this corps during breach
             cmd.stance = 'offensive';

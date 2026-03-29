@@ -68,7 +68,7 @@ function ensureCorpsCommandEntry(state, corpsId, stance = 'balanced') {
       active_ogs: [],
       corps_exhaustion: 0,
       stance,
-      active_operation: null,
+      active_operations: [],
     };
   }
   return state.corps_command[corpsId];
@@ -1131,7 +1131,8 @@ app.whenReady().then(() => {
       const state = sim.deserializeState(currentGameStateJson);
       const corpsCommand = ensureCorpsCommandEntry(state, corpsId);
       const turn = state.meta?.turn ?? 0;
-      corpsCommand.active_operation = {
+      if (!corpsCommand.active_operations) corpsCommand.active_operations = [];
+      corpsCommand.active_operations.push({
         name,
         type,
         phase: 'planning',
@@ -1150,7 +1151,7 @@ app.whenReady().then(() => {
         schwerpunkt_osid: typeof schwerpunktOsid === 'string' ? schwerpunktOsid : undefined,
         artillery_preparation: artilleryPreparation === true,
         axes: Array.isArray(axes) ? axes : undefined,
-      };
+      });
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);
       return { ok: true };
@@ -1260,8 +1261,8 @@ app.whenReady().then(() => {
     try {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
-      const op = state.corps_command?.[corpsId]?.active_operation;
-      if (!op || op.name !== operationName) {
+      const op = (state.corps_command?.[corpsId]?.active_operations ?? []).find(o => o.name === operationName);
+      if (!op) {
         return { ok: false, error: 'Operation not found' };
       }
       op.recovery_reason = 'manual_termination';
@@ -1282,8 +1283,8 @@ app.whenReady().then(() => {
     try {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
-      const op = state.corps_command?.[corpsId]?.active_operation;
-      if (!op || op.name !== operationName) {
+      const op = (state.corps_command?.[corpsId]?.active_operations ?? []).find(o => o.name === operationName);
+      if (!op) {
         return { ok: false, error: 'Operation not found' };
       }
       op.force_launch = true;
@@ -1307,8 +1308,8 @@ app.whenReady().then(() => {
     try {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
-      const op = state.corps_command?.[corpsId]?.active_operation;
-      if (!op || op.name !== operationName) {
+      const op = (state.corps_command?.[corpsId]?.active_operations ?? []).find(o => o.name === operationName);
+      if (!op) {
         return { ok: false, error: 'Operation not found' };
       }
       switch (decision) {
@@ -1460,8 +1461,8 @@ app.whenReady().then(() => {
     try {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
-      const op = state.corps_command?.[corpsId]?.active_operation;
-      if (!op || op.name !== operationName) {
+      const op = (state.corps_command?.[corpsId]?.active_operations ?? []).find(o => o.name === operationName);
+      if (!op) {
         return { ok: false, error: 'Operation not found' };
       }
 

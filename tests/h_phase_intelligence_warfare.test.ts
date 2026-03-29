@@ -76,7 +76,7 @@ describe('H phase intelligence warfare', () => {
                     active_ogs: [],
                     corps_exhaustion: 0,
                     stance: 'offensive',
-                    active_operation: {
+                    active_operations: [{
                         name: 'Maskirovka',
                         type: 'feint',
                         phase: 'planning',
@@ -85,7 +85,7 @@ describe('H phase intelligence warfare', () => {
                         participating_brigades: [],
                         objectives: ['op:rbih:a'],
                         current_objective_index: 0,
-                    },
+                    }],
                 },
             },
     sector_intel: {
@@ -144,7 +144,7 @@ describe('H phase intelligence warfare', () => {
                     active_ogs: [],
                     corps_exhaustion: 0,
                     stance: 'offensive',
-                    active_operation: {
+                    active_operations: [{
                         name: 'Probe',
                         type: 'probe',
                         phase: 'planning',
@@ -156,7 +156,7 @@ describe('H phase intelligence warfare', () => {
                         planning_duration: 4,
                         staging_osid: 'op:test:staging',
                         sector_id: 'rs_sector',
-                    },
+                    }],
                 },
             }
   } as any,
@@ -167,7 +167,7 @@ describe('H phase intelligence warfare', () => {
 
         advanceSectorOffensives(state, null);
 
-        const op = state.military.corps_command?.rs_corps?.active_operation;
+        const op = state.military.corps_command?.rs_corps?.active_operations[0];
         expect(op?.participating_brigades).toEqual(['b1', 'b2']);
         expect(op?.planning_duration).toBe(1);
         expect(op?.phase).toBe('execution');

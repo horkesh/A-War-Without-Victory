@@ -44,6 +44,7 @@ function makeCorpsCommand(stance: string = 'balanced'): CorpsCommandState {
         subordinate_count: 3,
         og_slots: 1,
         active_ogs: [],
+        active_operations: [],
         corps_exhaustion: 0,
         stance: stance as any,
     } as CorpsCommandState;

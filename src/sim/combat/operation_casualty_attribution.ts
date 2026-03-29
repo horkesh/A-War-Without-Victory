@@ -14,6 +14,7 @@
 import type { GameState, FormationId, CorpsOperation } from '../../state/game_state.js';
 import type { AttackResolutionOsidReport } from './attack_resolution_osid.js';
 import { emptyPendingCasualties, type PendingOperationCasualties } from './operation_aar.js';
+import { findBrigadeOperation } from './corps_operation_helpers.js';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -41,10 +42,10 @@ function getBrigadeOpContext(state: GameState, brigadeId: FormationId): BrigadeO
     const corpsId = formation.corps_id;
     if (!corpsId) return null;
     const corps = state.military.corps_command?.[corpsId];
-    if (!corps?.active_operation) return null;
-    const op = corps.active_operation;
+    if (!corps) return null;
+    const op = findBrigadeOperation(corps, brigadeId);
+    if (!op) return null;
     if (op.type !== 'sector_attack') return null;
-    if (!op.participating_brigades.includes(brigadeId)) return null;
 
     const axisId = getBrigadeAxisId(op, brigadeId);
     return { op, corpsId, axisId };

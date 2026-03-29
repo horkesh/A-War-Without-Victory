@@ -57,7 +57,7 @@ function makeState(): GameState {
                 active_ogs: [],
                 corps_exhaustion: 0,
                 stance: 'offensive' as any,
-                active_operation: {
+                active_operations: [{
                     name: 'Operacija Test',
                     type: 'sector_attack',
                     phase: 'execution',
@@ -68,7 +68,7 @@ function makeState(): GameState {
                     current_objective_index: 0,
                     failure_count: 0,
                     consecutive_failures_on_current: 0,
-                }
+                }]
             } as any
         }
   } as any,
@@ -238,14 +238,14 @@ describe('combat causality diagnostics', () => {
 
     it('does not flag execution stall when the operation already resolved a capture this turn', () => {
         const state = makeState();
-        state.military.corps_command!['corps_1']!.active_operation = {
-            ...state.military.corps_command!['corps_1']!.active_operation!,
+        state.military.corps_command!['corps_1']!.active_operations = [{
+            ...state.military.corps_command!['corps_1']!.active_operations[0],
             current_objective_index: 1,
             objectives: ['op:enemy:obj0', 'op:enemy:obj1'],
             objective_capture_count: 1,
             attack_attempt_count: 1,
             last_result: 'captured',
-        } as any;
+        }] as any;
 
         const diagnostics = buildOperationCombatDiagnostics(
             state,
@@ -276,10 +276,10 @@ describe('combat causality diagnostics', () => {
 
     it('does not invalidate a quiet week with no attacks and no invalid operations', () => {
         const state = makeState();
-        state.military.corps_command!['corps_1']!.active_operation = {
-            ...state.military.corps_command!['corps_1']!.active_operation!,
+        state.military.corps_command!['corps_1']!.active_operations = [{
+            ...state.military.corps_command!['corps_1']!.active_operations[0],
             phase: 'planning',
-        } as any;
+        }] as any;
 
         const diagnostics = buildOperationCombatDiagnostics(
             state,
@@ -299,8 +299,8 @@ describe('combat causality diagnostics', () => {
     it('flags recovery-phase operation that never logged an objective attempt', () => {
         const state = makeState();
         state.meta.turn = 5 as any;
-        state.military.corps_command!['corps_1']!.active_operation = {
-            ...state.military.corps_command!['corps_1']!.active_operation!,
+        state.military.corps_command!['corps_1']!.active_operations = [{
+            ...state.military.corps_command!['corps_1']!.active_operations[0],
             phase: 'recovery',
             phase_started_turn: 5,
             attack_attempt_count: 0,
@@ -308,7 +308,7 @@ describe('combat causality diagnostics', () => {
             movement_only_execution_turns: 0,
             idle_execution_turn_streak: 0,
             recovery_reason: 'no_logged_attempt',
-        } as any;
+        }] as any;
 
         const diagnostics = buildOperationCombatDiagnostics(
             state,
@@ -332,8 +332,8 @@ describe('combat causality diagnostics', () => {
     it('does not keep re-flagging recovery without logged attempt after the recovery entry turn', () => {
         const state = makeState();
         state.meta.turn = 8 as any;
-        state.military.corps_command!['corps_1']!.active_operation = {
-            ...state.military.corps_command!['corps_1']!.active_operation!,
+        state.military.corps_command!['corps_1']!.active_operations = [{
+            ...state.military.corps_command!['corps_1']!.active_operations[0],
             phase: 'recovery',
             phase_started_turn: 5,
             attack_attempt_count: 0,
@@ -341,7 +341,7 @@ describe('combat causality diagnostics', () => {
             movement_only_execution_turns: 0,
             idle_execution_turn_streak: 0,
             recovery_reason: 'no_logged_attempt',
-        } as any;
+        }] as any;
 
         const diagnostics = buildOperationCombatDiagnostics(
             state,
@@ -356,8 +356,8 @@ describe('combat causality diagnostics', () => {
     it('does not flag recovery without logged attempt when the operation recorded maneuver progress', () => {
         const state = makeState();
         state.meta.turn = 5 as any;
-        state.military.corps_command!['corps_1']!.active_operation = {
-            ...state.military.corps_command!['corps_1']!.active_operation!,
+        state.military.corps_command!['corps_1']!.active_operations = [{
+            ...state.military.corps_command!['corps_1']!.active_operations[0],
             phase: 'recovery',
             phase_started_turn: 5,
             attack_attempt_count: 0,
@@ -365,7 +365,7 @@ describe('combat causality diagnostics', () => {
             movement_only_execution_turns: 2,
             idle_execution_turn_streak: 0,
             recovery_reason: 'no_logged_attempt',
-        } as any;
+        }] as any;
 
         const diagnostics = buildOperationCombatDiagnostics(
             state,
@@ -380,8 +380,8 @@ describe('combat causality diagnostics', () => {
     it('does not flag recovery without logged attempt when attacks and battles happened', () => {
         const state = makeState();
         state.meta.turn = 5 as any;
-        state.military.corps_command!['corps_1']!.active_operation = {
-            ...state.military.corps_command!['corps_1']!.active_operation!,
+        state.military.corps_command!['corps_1']!.active_operations = [{
+            ...state.military.corps_command!['corps_1']!.active_operations[0],
             phase: 'recovery',
             phase_started_turn: 5,
             attack_attempt_count: 0,
@@ -389,7 +389,7 @@ describe('combat causality diagnostics', () => {
             movement_only_execution_turns: 0,
             idle_execution_turn_streak: 0,
             recovery_reason: 'no_logged_attempt',
-        } as any;
+        }] as any;
 
         const diagnostics = buildOperationCombatDiagnostics(
             state,
@@ -415,13 +415,13 @@ describe('combat causality diagnostics', () => {
 
     it('surfaces persisted operation counters in diagnostics and summary', () => {
         const state = makeState();
-        state.military.corps_command!['corps_1']!.active_operation = {
-            ...state.military.corps_command!['corps_1']!.active_operation!,
+        state.military.corps_command!['corps_1']!.active_operations = [{
+            ...state.military.corps_command!['corps_1']!.active_operations[0],
             attack_attempt_count: 2,
             objective_capture_count: 1,
             movement_only_execution_turns: 3,
             idle_execution_turn_streak: 0,
-        } as any;
+        }] as any;
 
         const diagnostics = buildOperationCombatDiagnostics(
             state,

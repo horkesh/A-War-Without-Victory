@@ -165,7 +165,8 @@ function extractTurnSummary(
             }
         }
 
-        const activeOp = cc.active_operation;
+        const activeOps = cc.active_operations ?? [];
+        const activeOp = activeOps[0] ?? null;
         rsCorps.push({
             id: corpsId,
             stance: cc.stance ?? 'balanced',

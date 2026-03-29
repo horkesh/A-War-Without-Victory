@@ -26,6 +26,7 @@ import { assignOperationCommander } from './officer_system.js';
 import { isEligibleOperationFormation } from '../../state/formation_constants.js';
 import { validateOpAtInjection, collectOpInjectionWarnings } from './operation_validation.js';
 import type { ValidatableOpDef } from './operation_validation.js';
+import { hasActiveOperation, hasAvailableSlot } from './corps_operation_helpers.js';
 
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -65,7 +66,7 @@ function corpsOpFinished(state: GameState, corpsId: string): boolean {
     const cmd = state.military.corps_command?.[corpsId];
     if (!cmd) return false;
     // Finished = no active op AND no queued ops remaining
-    return !cmd.active_operation && (!cmd.queued_operations || cmd.queued_operations.length === 0);
+    return !hasActiveOperation(cmd) && (!cmd.queued_operations || cmd.queued_operations.length === 0);
 }
 
 /** Check whether a corps has completed a specific operation (by name) in the AAR history. */
@@ -356,14 +357,14 @@ export function checkTriggeredOperations(state: GameState): string[] {
 
         // Primary corps must not have an active operation
         const primaryCmd = cc[def.primary_corps];
-        if (!primaryCmd || primaryCmd.active_operation) continue;
+        if (!primaryCmd || hasActiveOperation(primaryCmd)) continue;
 
         // For joint ops, check secondary corps too
         const secondaryCorps = new Set(def.axes.map(a => a.corps).filter(c => c !== def.primary_corps));
         let secondaryBlocked = false;
         for (const secCorpsId of secondaryCorps) {
             const secCmd = cc[secCorpsId];
-            if (secCmd?.active_operation) {
+            if (secCmd && hasActiveOperation(secCmd)) {
                 secondaryBlocked = true;
                 break;
             }
@@ -377,7 +378,7 @@ export function checkTriggeredOperations(state: GameState): string[] {
             axes: def.axes.map(a => ({ axis_id: a.axis_id, brigades: a.brigades, objectives: a.objectives, staging_osid: a.staging_osid })),
             staging_osid: def.staging_osid,
         };
-        const trigWarnings = validateOpAtInjection(validatable, state);
+        const trigWarnings = validateOpAtInjection(validatable, state, undefined, primaryCmd);
         collectOpInjectionWarnings(state, trigWarnings);
 
         // Bot auto-accept: build and inject the operation
@@ -386,7 +387,7 @@ export function checkTriggeredOperations(state: GameState): string[] {
 
         // For single-corps ops: inject directly
         // For joint ops: inject into primary corps (all axes), set participating brigades
-        primaryCmd.active_operation = result.op;
+        primaryCmd.active_operations.push(result.op);
         assignOperationCommander(state, result.op, def.primary_corps, 'RS');
         primaryCmd.stance = 'offensive';
 
