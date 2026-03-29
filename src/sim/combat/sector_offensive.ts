@@ -654,6 +654,7 @@ function getRecoveryDuration(op: CorpsOperation): number {
         case 'no_logged_attempt':
         case 'manual_termination':
         case 'probe_complete':
+        case 'brigade_attrition':
             return 1;
         case 'completed':
             return Math.max(1, Math.ceil(objectiveCount / 2));
@@ -1814,4 +1815,170 @@ export function getMomentumMinOutcome(momentum: number, base: string): string {
     if (momentum >= 2 && baseRank > 3) return 'costly_victory';
     if (momentum >= 1 && baseRank > 4) return 'victory';
     return base;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Operation reevaluation — detect and abort weakened operations
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Minimum active brigades required to sustain an operation by type.
+ * Below this threshold the operation is aborted as infeasible.
+ * probe/feint need only 1; sector_attack needs 2 for combined-arms.
+ */
+const MIN_BRIGADES_BY_TYPE: Record<string, number> = {
+    probe: 1,
+    feint: 1,
+    sector_attack: 2,
+    general_offensive: 2,
+    strategic_defense: 1,
+    reorganization: 0,
+};
+
+/**
+ * Fraction of initial_strength below which the operation is aborted.
+ * 50% = if the force has lost half its starting personnel, the op is no
+ * longer viable regardless of how many brigades remain nominally assigned.
+ */
+const POWER_ATTRITION_ABORT_THRESHOLD = 0.50;
+
+/** Reevaluation log entry (diagnostic — attached to operation for traceability). */
+export interface ReevaluationLogEntry {
+    turn: number;
+    reason: string;
+    decision: 'continue' | 'abort';
+    active_brigades: number;
+    total_personnel: number;
+}
+
+/**
+ * Reevaluate all active operations for viability after brigade mutations.
+ *
+ * Called after brigade dissolution, lifecycle events, and combat resolution
+ * but BEFORE bot order generation. Detects operations that have lost too
+ * many brigades (through dissolution, emergency retreat, or combat death)
+ * and cannot feasibly continue. Such operations are aborted into recovery
+ * to free the corps slot.
+ *
+ * Decision tree per operation:
+ *   1. Count active participating brigades (alive + active status).
+ *   2. If 0 active brigades → abort (empty operation, slot blocked).
+ *   3. If below type minimum → abort (cannot achieve objectives).
+ *   4. If remaining personnel < 50% of initial_strength → abort (spent force).
+ *   5. For multi-axis: stall any axis with 0 active brigades.
+ *   6. Otherwise → continue (operation still viable).
+ *
+ * Deterministic: sorted corps iteration via strictCompare.
+ */
+export function reevaluateWeakenedOperations(state: GameState): void {
+    const corpsCommand = state.military.corps_command;
+    if (!corpsCommand) return;
+    const formations = state.military.formations ?? {};
+    const turn = state.meta?.turn ?? 0;
+
+    const corpsIds = Object.keys(corpsCommand).sort(strictCompare);
+    for (const corpsId of corpsIds) {
+        const cmd = corpsCommand[corpsId];
+        if (!cmd?.active_operation) continue;
+        const op = cmd.active_operation;
+
+        // Only reevaluate operations in planning or execution phase.
+        // Recovery-phase operations are already winding down.
+        if (op.phase === 'recovery') continue;
+
+        // Count active participating brigades and total personnel
+        const multiAxis = isMultiAxis(op);
+        const allBrigadeIds = multiAxis ? getAllAxisBrigades(op) : op.participating_brigades;
+        let activeBrigadeCount = 0;
+        let totalPersonnel = 0;
+        for (const bid of allBrigadeIds) {
+            const f = formations[bid];
+            if (!f || f.status !== 'active') continue;
+            activeBrigadeCount++;
+            totalPersonnel += f.personnel ?? 0;
+        }
+
+        // --- Decision: should this operation be aborted? ---
+        const minRequired = MIN_BRIGADES_BY_TYPE[op.type] ?? 2;
+        let abortReason: string | null = null;
+
+        if (activeBrigadeCount === 0) {
+            abortReason = 'zero_active_brigades';
+        } else if (activeBrigadeCount < minRequired) {
+            abortReason = `below_minimum_brigades (${activeBrigadeCount}/${minRequired})`;
+        } else if (op.initial_strength && op.initial_strength > 0
+            && totalPersonnel < op.initial_strength * POWER_ATTRITION_ABORT_THRESHOLD) {
+            abortReason = `power_attrition (${totalPersonnel}/${op.initial_strength}, threshold ${POWER_ATTRITION_ABORT_THRESHOLD})`;
+        }
+
+        // For multi-axis operations: stall any axis with 0 active brigades,
+        // even if the operation as a whole continues.
+        if (multiAxis && op.axes && !abortReason) {
+            for (const axis of op.axes) {
+                if (axis.status !== 'executing') continue;
+                let axisActive = 0;
+                for (const bid of axis.assigned_brigades) {
+                    const f = formations[bid];
+                    if (f && f.status === 'active') axisActive++;
+                }
+                if (axisActive === 0) {
+                    axis.status = 'stalled';
+                }
+            }
+            // After stalling empty axes, if ALL axes are now terminal, abort the operation
+            if (allAxesTerminal(op.axes)) {
+                const anyComplete = op.axes.some(a => a.status === 'complete');
+                abortReason = anyComplete ? null : 'all_axes_stalled';
+                if (anyComplete) {
+                    // Some axes completed, treat as partial success — enter recovery normally
+                    beginRecovery(op, turn, 'completed');
+                    appendReevaluationLog(op, turn, 'abort', activeBrigadeCount, totalPersonnel,
+                        'all_axes_terminal_partial_success');
+                    continue;
+                }
+            }
+        }
+
+        // Append diagnostic log
+        if (abortReason) {
+            // Abort: enter recovery with brigade_attrition reason
+            beginRecovery(op, turn, 'brigade_attrition');
+            appendReevaluationLog(op, turn, 'abort', activeBrigadeCount, totalPersonnel, abortReason);
+
+            // Clean up participating_brigades: remove inactive brigade IDs
+            // so recovery/finalization doesn't reference dead formations
+            if (multiAxis && op.axes) {
+                for (const axis of op.axes) {
+                    axis.assigned_brigades = axis.assigned_brigades.filter(bid => {
+                        const f = formations[bid];
+                        return f && f.status === 'active';
+                    });
+                    if (axis.status === 'executing') axis.status = 'stalled';
+                }
+            }
+            op.participating_brigades = op.participating_brigades.filter(bid => {
+                const f = formations[bid];
+                return f && f.status === 'active';
+            });
+        }
+    }
+}
+
+/** Append a reevaluation log entry to the operation. */
+function appendReevaluationLog(
+    op: CorpsOperation,
+    turn: number,
+    decision: 'continue' | 'abort',
+    activeBrigades: number,
+    totalPersonnel: number,
+    reason: string,
+): void {
+    if (!op.reevaluation_log) op.reevaluation_log = [];
+    op.reevaluation_log.push({
+        turn,
+        reason,
+        decision,
+        active_brigades: activeBrigades,
+        total_personnel: totalPersonnel,
+    });
 }

@@ -303,7 +303,7 @@ export interface CorpsOperation {
     /** Dig in participating brigades when manually halted. */
     dig_in_on_halt?: boolean;
     /** Reason the operation entered recovery. */
-    recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination' | 'probe_complete';
+    recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination' | 'probe_complete' | 'brigade_attrition';
     /** Named officer commanding this operation (if any). */
     commander_officer_id?: string;
     /** True when this operation was launched from the pre-planned operations catalog
@@ -364,6 +364,16 @@ export interface CorpsOperation {
     total_battles?: number;
     /** Total OSIDs captured since operation started. */
     total_territory_gained?: number;
+
+    // --- Reevaluation diagnostics ---
+    /** Log of reevaluation checks (when brigades are lost mid-operation). */
+    reevaluation_log?: Array<{
+        turn: number;
+        reason: string;
+        decision: 'continue' | 'abort';
+        active_brigades: number;
+        total_personnel: number;
+    }>;
 }
 
 /** Independent sector stances — each sector can differ from its corps stance. */

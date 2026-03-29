@@ -84,6 +84,7 @@ describe('war-phase step ordering', () => {
         // +1 from pool-war-weariness-decay (desertion/draft evasion/emigration drain on pool.available)
         // +1 from compute-spatial-context-pre-combat (SpatialContext Phase 0: cached spatial snapshot)
         // +1 from compute-spatial-context-post-combat (SpatialContext Phase 0: post-combat refresh)
-        expect(stepNames.length).toBe(150);
+        // +1 from reevaluate-weakened-operations (abort degenerate ops after brigade losses)
+        expect(stepNames.length).toBe(151);
     });
 });

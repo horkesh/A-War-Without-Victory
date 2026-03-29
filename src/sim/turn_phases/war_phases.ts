@@ -125,7 +125,7 @@ import { buildCorpsFrontSectors, assignBrigadesToSubSegments, REASSIGNMENT_ENTRE
 import { distributeBrigadesToFront } from '../combat/brigade_front_distribution.js';
 import { evaluateHomeReturn } from '../combat/brigade_home_return.js';
 import { applyFrontlineAttrition } from '../combat/frontline_attrition.js';
-import { advanceSectorOffensives, updateSectorOffensiveResults } from '../combat/sector_offensive.js';
+import { advanceSectorOffensives, updateSectorOffensiveResults, reevaluateWeakenedOperations } from '../combat/sector_offensive.js';
 import { processJnaWithdrawals } from '../combat/jna_phantom_brigades.js';
 import { injectQueuedOperation } from '../combat/pre_planned_operations.js';
 import { checkTriggeredOperations } from '../combat/triggered_operations.js';
@@ -818,6 +818,13 @@ export const warPhases: NamedPhase[] = [
             if (prepEvents.length > 0) {
                 context.report.preparation_events = prepEvents;
             }
+        }
+    },
+    {
+        name: 'reevaluate-weakened-operations',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            reevaluateWeakenedOperations(context.state);
         }
     },
     {
