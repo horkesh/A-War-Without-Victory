@@ -38,6 +38,12 @@ describe('war-phase step ordering', () => {
         // Warlord friction and officer maturity run after officer succession
         assertBefore('officer-succession', 'check-warlord-friction');
         assertBefore('officer-succession', 'update-faction-officer-maturity');
+
+        // SpatialContext: pre-combat after data load, post-combat after attack resolution
+        assertBefore('supply-osid', 'compute-spatial-context-pre-combat');
+        assertBefore('compute-spatial-context-pre-combat', 'update-siege-counters');
+        assertBefore('resolve-attack-orders', 'compute-spatial-context-post-combat');
+        assertBefore('compute-spatial-context-post-combat', 'attribute-operation-casualties');
     });
 
     it('has no duplicate step names', () => {
@@ -76,6 +82,8 @@ describe('war-phase step ordering', () => {
         // +1 from recall-drifted-brigades (prevent brigade drift far from home)
         // +1 from reroute-pool-surplus (transfer manpower from exhausted to deficit municipalities)
         // +1 from pool-war-weariness-decay (desertion/draft evasion/emigration drain on pool.available)
-        expect(stepNames.length).toBe(148);
+        // +1 from compute-spatial-context-pre-combat (SpatialContext Phase 0: cached spatial snapshot)
+        // +1 from compute-spatial-context-post-combat (SpatialContext Phase 0: post-combat refresh)
+        expect(stepNames.length).toBe(150);
     });
 });

@@ -300,6 +300,33 @@ export function setOperationalData(context: TurnContext, data: OperationalDataCa
 export interface SiegeStateCache { siegeRatios: SiegeRatioByMunFaction; }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// SpatialContext cache (transient — never written to GameState)
+// ═══════════════════════════════════════════════════════════════════════════
+
+import type { SpatialContext } from './spatial_context.js';
+
+/**
+ * SpatialContext cache on TurnContext.
+ * Pre-combat is computed after load-operational-data + supply-osid.
+ * Post-combat is computed after resolve-attack-orders (political_controllers change).
+ * Turn-local only — never serialized.
+ */
+export interface SpatialContextCache {
+    preCombat: SpatialContext;
+    postCombat?: SpatialContext;
+}
+
+/** Type-safe accessor for SpatialContext cache attached to context. */
+export function getSpatialContextCache(context: TurnContext): SpatialContextCache | undefined {
+    return (context as TurnContext & { spatialContextCache?: SpatialContextCache }).spatialContextCache;
+}
+
+/** Type-safe setter for SpatialContext cache on context. */
+export function setSpatialContextCache(context: TurnContext, cache: SpatialContextCache): void {
+    (context as TurnContext & { spatialContextCache?: SpatialContextCache }).spatialContextCache = cache;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // AAR snapshot cache (transient — never written to GameState)
 // ═══════════════════════════════════════════════════════════════════════════
 

@@ -12,7 +12,6 @@ import { buildAdjacencyMap } from '../../map/adjacency_map.js';
 import { computeFrontEdges, computeFrontEdgesOsid } from '../../map/front_edges.js';
 import { computeFrontRegions } from '../../map/front_regions.js';
 import { loadSettlementGraph } from '../../map/settlements.js';
-import type { EdgeRecord } from '../../map/settlements.js';
 import { loadTerrainScalars } from '../../map/terrain_scalars.js';
 import { backfillFormationLocationOsid, computeOsidPopulation, loadOperationalCentroids, loadOperationalData, loadOperationalEdges } from '../../data/operational_data.js';
 import { loadSettlementEthnicityData } from '../../data/settlement_ethnicity.js';
@@ -148,7 +147,7 @@ import {
     updateSiegeTurnCounters,
     updateSupplyReserves
 } from '../../state/supply_reserves.js';
-import { buildOsidAdjacency } from '../combat/osid_adjacency.js';
+import type { Osid } from '../combat/osid_adjacency.js';
 import { generateArmyReserveRequests, evaluateArmyReserveAssignments, tickEliteLoans } from '../combat/army_reserve_system.js';
 import { buildHomeDistanceCache } from '../combat/home_distance.js';
 import { computeSectorCombatRatings } from '../combat/sector_combat_rating.js';
@@ -174,8 +173,11 @@ import {
     getGraphAndEdges,
     getSiegeStateCache,
     setSiegeStateCache,
+    getSpatialContextCache,
+    setSpatialContextCache,
     loadRecruitmentCatalog
 } from '../turn_pipeline_types.js';
+import { computeSpatialContext } from '../spatial_context.js';
 import type { EffectivePostureState } from '../../state/front_posture_commitment.js';
 import type { EffectivePressureEdge } from '../pressure/phase3a_pressure_eligibility.js';
 
@@ -496,13 +498,30 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'compute-spatial-context-pre-combat',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const od = getOperationalData(context);
+            if (!od?.edges?.length) return;
+            const pc = context.state.political.political_controllers ?? {};
+            const spatial = computeSpatialContext(
+                od.edges,
+                pc,
+                ['RBiH', 'RS', 'HRHB'],
+                context.state.meta.turn ?? 0,
+                'pre-combat',
+            );
+            setSpatialContextCache(context, { preCombat: spatial });
+        }
+    },
+    {
         name: 'update-siege-counters',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             if (!context.state.meta.supply_reserves_enabled) return;
             const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
-            const od = getOperationalData(context);
-            const adjacency = od ? buildOsidAdjacency(od.edges) : undefined;
+            const spatial = getSpatialContextCache(context);
+            const adjacency = spatial ? spatial.preCombat.adjacency as Map<string, string[]> : undefined;
             context.report.siege_turn_counters = updateSiegeTurnCounters(context.state, supplyByOsid, adjacency);
         }
     },
@@ -620,9 +639,9 @@ export const warPhases: NamedPhase[] = [
             if (!sectorMap) return;
             const sectorList = Object.values(sectorMap);
             if (sectorList.length === 0) return;
-            const od = getOperationalData(context);
-            if (!od?.edges?.length) return;
-            const adjacency = buildOsidAdjacency(od.edges);
+            const spatial = getSpatialContextCache(context);
+            if (!spatial) return;
+            const adjacency = spatial.preCombat.adjacency as Map<Osid, Osid[]>;
 
             // D3: Save previous sub-segment assignments for entrenchment reset
             const formations = context.state.military.formations ?? {};
@@ -657,9 +676,9 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             const sectorMap = context.state.military.corps_front_sectors;
             if (!sectorMap) return;
-            const od = getOperationalData(context);
-            if (!od?.edges?.length) return;
-            const adjacency = buildOsidAdjacency(od.edges);
+            const spatial = getSpatialContextCache(context);
+            if (!spatial) return;
+            const adjacency = spatial.preCombat.adjacency as Map<Osid, Osid[]>;
             distributeBrigadesToFront(context.state, Object.values(sectorMap), adjacency);
         }
     },
@@ -668,9 +687,9 @@ export const warPhases: NamedPhase[] = [
         name: 'return-displaced-brigades',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            const od = getOperationalData(context);
-            if (!od?.edges?.length) return;
-            const adjacency = buildOsidAdjacency(od.edges);
+            const spatial = getSpatialContextCache(context);
+            if (!spatial) return;
+            const adjacency = spatial.preCombat.adjacency as Map<Osid, Osid[]>;
             evaluateHomeReturn(context.state, adjacency);
         }
     },
@@ -829,9 +848,9 @@ export const warPhases: NamedPhase[] = [
         name: 'compute-home-distance-cache',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            const od = getOperationalData(context);
-            if (!od?.edges?.length) return;
-            const adjacency = buildOsidAdjacency(od.edges);
+            const spatial = getSpatialContextCache(context);
+            if (!spatial) return;
+            const adjacency = spatial.preCombat.adjacency as Map<Osid, Osid[]>;
             const sortedIds = Object.keys(context.state.military.formations ?? {}).sort(strictCompare);
             context.state.military.home_distance_cache = buildHomeDistanceCache(context.state.military.formations ?? {}, adjacency, sortedIds);
         }
@@ -1008,9 +1027,9 @@ export const warPhases: NamedPhase[] = [
         name: 'generate-army-reserve-requests',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            const od = getOperationalData(context);
-            if (!od?.edges?.length) return;
-            const adjacency = buildOsidAdjacency(od.edges);
+            const spatial = getSpatialContextCache(context);
+            if (!spatial) return;
+            const adjacency = spatial.preCombat.adjacency as Map<Osid, Osid[]>;
             generateArmyReserveRequests(context.state, adjacency);
             evaluateArmyReserveAssignments(context.state, adjacency);
         }
@@ -1260,6 +1279,31 @@ export const warPhases: NamedPhase[] = [
             context.report.resolve_attack_orders = resolveAttackOrders(
                 context.state, edges, terrainData, settlementToMun
             );
+        }
+    },
+    {
+        name: 'compute-spatial-context-post-combat',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const od = getOperationalData(context);
+            if (!od?.edges?.length) return;
+            const existing = getSpatialContextCache(context);
+            if (!existing) return; // pre-combat must have run
+            const pc = context.state.political.political_controllers ?? {};
+            const postCombat = computeSpatialContext(
+                od.edges,
+                pc,
+                ['RBiH', 'RS', 'HRHB'],
+                context.state.meta.turn ?? 0,
+                'post-combat',
+                undefined,
+                existing.preCombat.adjacency,
+                existing.preCombat.sharedBoundaryAdjacency,
+            );
+            setSpatialContextCache(context, {
+                preCombat: existing.preCombat,
+                postCombat,
+            });
         }
     },
     {
@@ -1641,7 +1685,9 @@ export const warPhases: NamedPhase[] = [
         name: 'recall-drifted-brigades',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            recallDriftedBrigades(context.state, context.input.settlementEdges);
+            const spatial = getSpatialContextCache(context);
+            const postCombatAdj = spatial?.postCombat?.adjacency ?? spatial?.preCombat?.adjacency;
+            recallDriftedBrigades(context.state, postCombatAdj as Map<string, string[]> | undefined);
         }
     },
     {
@@ -2458,8 +2504,8 @@ export const warPhases: NamedPhase[] = [
  */
 const DRIFT_RECALL_MAX_HOPS = 4;
 
-function recallDriftedBrigades(state: GameState, edges?: EdgeRecord[]): void {
-    if (!edges || edges.length === 0) return;
+function recallDriftedBrigades(state: GameState, adjacency?: Map<string, string[]>): void {
+    if (!adjacency || adjacency.size === 0) return;
     const formations = state.military.formations ?? {};
 
     // Build set of brigades in active operations
@@ -2477,15 +2523,7 @@ function recallDriftedBrigades(state: GameState, edges?: EdgeRecord[]): void {
         }
     }
 
-    // Build raw adjacency (no faction filter)
-    const adj = new Map<string, string[]>();
-    for (const e of edges) {
-        if (!adj.has(e.a)) adj.set(e.a, []);
-        if (!adj.has(e.b)) adj.set(e.b, []);
-        adj.get(e.a)!.push(e.b);
-        adj.get(e.b)!.push(e.a);
-    }
-
+    const adj = adjacency;
     const moveOrders = state.military.brigade_movement_orders ??= {};
 
     for (const [fid, f] of Object.entries(formations)) {
