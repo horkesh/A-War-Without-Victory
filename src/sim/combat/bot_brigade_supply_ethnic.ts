@@ -33,6 +33,8 @@ export type SupplyConnectivityByFaction = Map<FactionId, Set<Osid>>;
 export interface OsidBotContext {
     edges: EdgeRecord[];
     reverseMap: OperationalToCanonicalReverseMap;
+    /** Pre-computed OSID adjacency from SpatialContext. If absent, built from edges. */
+    adjacency?: ReadonlyMap<Osid, readonly Osid[]>;
     supplyStateByOsid?: SupplyStateByOsidReport | null;
     supplyConnectivityByFaction?: SupplyConnectivityByFaction;
     ethnicCompositionByOsid?: OsidEthnicComposition;

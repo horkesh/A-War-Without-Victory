@@ -25,7 +25,7 @@ import type {
 } from '../../state/game_state.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
-import { buildOsidAdjacency } from './osid_adjacency.js';
+import { buildOsidAdjacency, type Osid } from './osid_adjacency.js';
 import { analyzeFactionGraph, type FactionGraphAnalysis } from './osid_graph_analysis.js';
 
 // ── Submodule imports for orchestrator ──────────────────────────────────
@@ -180,7 +180,8 @@ export function generateAllCorpsOrders(
     reverseMap?: OperationalToCanonicalReverseMap | null,
     osidEdges?: EdgeRecord[],
     supplyByOsid?: SupplyStateByOsidReport | null,
-    ethnicMap?: OsidEthnicComposition | null
+    ethnicMap?: OsidEthnicComposition | null,
+    preComputedAdjacency?: ReadonlyMap<string, readonly string[]>,
 ): void {
     // 0. Generate army HQ overrides for this turn (merge with any existing from gathering)
     const armyOverrides = generateArmyHQOverrides(state, faction);
@@ -205,7 +206,7 @@ export function generateAllCorpsOrders(
     // from the entire corps pool without sector assignment, creating bloated non-sector ops.
 
     // 3b. Emergency defensive operations for high-threat defensive corps
-    generateEmergencyDefensiveOperations(state, faction, edges, sidToMun);
+    generateEmergencyDefensiveOperations(state, faction, edges, sidToMun, preComputedAdjacency);
 
     // 4. Attempt corridor breach
     attemptCorridorBreach(state, faction, edges, sidToMun);
@@ -216,15 +217,15 @@ export function generateAllCorpsOrders(
     // 6. Generate corps directives (new: HoI-style command hierarchy)
     // Use OSID edges for adjacency (not canonical SID edges)
     const effectiveOsidEdges = osidEdges ?? edges;
+    const adjacency = (preComputedAdjacency as Map<Osid, Osid[]>) ?? buildOsidAdjacency(effectiveOsidEdges);
     let graphAnalysis: FactionGraphAnalysis | null = null;
     if (reverseMap) {
-        const adjacency = buildOsidAdjacency(effectiveOsidEdges);
         graphAnalysis = analyzeFactionGraph(state, faction, adjacency, reverseMap);
     }
     // 6b. Evaluate sector stances (Layer B: independent sector stances)
     evaluateSectorStances(state, faction);
 
-    generateCorpsDirectives(state, faction, effectiveOsidEdges, reverseMap ?? null, graphAnalysis, supplyByOsid, ethnicMap);
+    generateCorpsDirectives(state, faction, effectiveOsidEdges, reverseMap ?? null, graphAnalysis, supplyByOsid, ethnicMap, adjacency);
 
     // Final cleanup: prune any 0-edge ghost sectors (pocket containment artifacts)
     if (state.military.corps_front_sectors) {

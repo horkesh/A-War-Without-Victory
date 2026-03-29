@@ -548,9 +548,10 @@ function forceRetreatWithPenalties(
 export function displaceFormationsInEnemyTerritory(
     state: GameState,
     edges: EdgeRecord[],
-    reverseMap: OperationalToCanonicalReverseMap
+    reverseMap: OperationalToCanonicalReverseMap,
+    preComputedAdjacency?: ReadonlyMap<string, readonly string[]>,
 ): void {
-    const adjacency = buildOsidAdjacency(edges);
+    const adjacency = (preComputedAdjacency as Map<Osid, Osid[]>) ?? buildOsidAdjacency(edges);
     const pc = state.political?.political_controllers ?? {};
     // Lazy per-faction friendly sets
     const friendlyCache = new Map<string, Set<string>>();
@@ -687,7 +688,8 @@ export function resolveAttackOrdersOsid(
     terrainData?: TerrainScalarsData | null,
     supplyStateByOsid?: SupplyStateByOsidReport | null,
     osidPopulationMap?: OsidPopulationMap | null,
-    ethnicComposition?: OsidEthnicComposition | null
+    ethnicComposition?: OsidEthnicComposition | null,
+    preComputedAdjacency?: ReadonlyMap<string, readonly string[]>,
 ): AttackResolutionOsidReport {
     const report: AttackResolutionOsidReport = {
         orders_processed: 0,
@@ -712,7 +714,7 @@ export function resolveAttackOrdersOsid(
     const startDate = state.meta?.scenario_start_date;
 
     const orders = state.military.brigade_attack_orders;
-    const adjacency = buildOsidAdjacency(edges);
+    const adjacency = (preComputedAdjacency as Map<Osid, Osid[]>) ?? buildOsidAdjacency(edges);
     const fmts = state.military.formations ?? {};
     const allFormations = Object.keys(fmts).sort(strictCompare).map(k => fmts[k]!);
 

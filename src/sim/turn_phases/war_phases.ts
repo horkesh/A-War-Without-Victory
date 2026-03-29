@@ -583,11 +583,13 @@ export const warPhases: NamedPhase[] = [
             } catch {
                 terrainData = { by_sid: {} };
             }
+            const colSpatial = getSpatialContextCache(context);
             const report = processOsidColumnMovement(
                 context.state,
                 od.edges,
                 od.opData.operationalToCanonical,
-                terrainData
+                terrainData,
+                colSpatial?.preCombat.adjacency,
             );
             (context.report as TurnReport & { column_movement?: OsidColumnMovementReport }).column_movement = report;
         }
@@ -598,7 +600,8 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             const od = getOperationalData(context);
             if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
-            const report = applyBrigadeMovementOrders(context.state, od.edges, od.opData.operationalToCanonical);
+            const moveSpatial = getSpatialContextCache(context);
+            const report = applyBrigadeMovementOrders(context.state, od.edges, od.opData.operationalToCanonical, moveSpatial?.preCombat.adjacency);
             (context.report as TurnReport & { movement_report?: typeof report }).movement_report = report;
         }
     },
@@ -621,8 +624,9 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             const od = getOperationalData(context);
             if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
+            const spatial = getSpatialContextCache(context);
             context.state.military.corps_front_sectors = buildCorpsFrontSectors(
-                context.state, od.edges, od.opData.operationalToCanonical, od.centroids
+                context.state, od.edges, od.opData.operationalToCanonical, od.centroids, spatial?.preCombat
             );
         }
     },
@@ -1000,9 +1004,11 @@ export const warPhases: NamedPhase[] = [
                 }
             }
             const corpsReport: CorpsAiReportEntry[] = [];
+            const corpsSpatial = getSpatialContextCache(context);
+            const corpsAdjacency = corpsSpatial?.preCombat.adjacency;
             for (const faction of factions) {
                 const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
-                generateAllCorpsOrders(context.state, faction, edges, sidToMun, reverseMap, osidEdges, supplyByOsid, corpsEthnicMap);
+                generateAllCorpsOrders(context.state, faction, edges, sidToMun, reverseMap, osidEdges, supplyByOsid, corpsEthnicMap, corpsAdjacency);
                 corpsReport.push(...extractCorpsAiReport(context.state, faction as FactionId));
             }
             if (corpsReport.length > 0) {
@@ -1067,9 +1073,11 @@ export const warPhases: NamedPhase[] = [
                 const osidPopulationMap = context.input.municipalityPopulation1991
                     ? computeOsidPopulation(od.opData.operationalToCanonical, context.input.municipalityPopulation1991)
                     : undefined;
+                const spatialCache = getSpatialContextCache(context);
                 const osidCtx: OsidBotContext = {
                     edges: od.edges,
                     reverseMap: od.opData.operationalToCanonical,
+                    adjacency: spatialCache?.preCombat.adjacency,
                     supplyStateByOsid: supplyByOsid,
                     supplyConnectivityByFaction: supplyConnectivityByFaction.size > 0 ? supplyConnectivityByFaction : undefined,
                     ethnicCompositionByOsid,
@@ -1239,6 +1247,7 @@ export const warPhases: NamedPhase[] = [
                 }
                 // Control events are persisted for the full game — no trimming.
                 // They feed the settlement timeline ("The Story of This Place").
+                const attackSpatial = getSpatialContextCache(context);
                 context.report.attack_resolution_osid = resolveAttackOrdersOsid(
                     context.state,
                     od.edges,
@@ -1246,7 +1255,8 @@ export const warPhases: NamedPhase[] = [
                     terrainData,
                     context.report.supply_resolution?.supply_state_by_osid,
                     osidPopMap,
-                    ethnicComp
+                    ethnicComp,
+                    attackSpatial?.preCombat.adjacency,
                 );
                 // Sort control_events deterministically after resolution.
                 if (context.state.political.control_events?.length) {
@@ -1339,7 +1349,9 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             const od = getOperationalData(context);
             if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
-            displaceFormationsInEnemyTerritory(context.state, od.edges, od.opData.operationalToCanonical);
+            const displaceSpatial = getSpatialContextCache(context);
+            const displaceAdj = displaceSpatial?.postCombat?.adjacency ?? displaceSpatial?.preCombat.adjacency;
+            displaceFormationsInEnemyTerritory(context.state, od.edges, od.opData.operationalToCanonical, displaceAdj);
         }
     },
     {

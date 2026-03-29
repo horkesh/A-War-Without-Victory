@@ -31,10 +31,11 @@ export function applyBrigadeMovementOrders(
     state: GameState,
     edges: EdgeRecord[],
     reverseMap: OperationalToCanonicalReverseMap,
+    preComputedAdjacency?: ReadonlyMap<string, readonly string[]>,
 ): BrigadeMovementReport {
     const report: BrigadeMovementReport = { moves_applied: 0, entrenchment_incremented: 0, disrupted_decremented: 0 };
     const formations = state.military.formations ?? {};
-    const adjacency = buildOsidAdjacency(edges);
+    const adjacency = (preComputedAdjacency as Map<Osid, Osid[]>) ?? buildOsidAdjacency(edges);
     const movementOrders = state.military.brigade_movement_orders ?? {};
 
     // Build brigade→sector_stance lookup for entrenchment rate modifier (Layer B)

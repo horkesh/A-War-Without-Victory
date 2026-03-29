@@ -29,6 +29,7 @@ import type {
 } from '../../state/game_state.js';
 import type { EdgeRecord } from '../../map/settlements.js';
 import type { OsidCentroidMap } from '../../data/operational_data_types.js';
+import type { SpatialContext } from '../spatial_context.js';
 import { buildOsidAdjacency, buildSharedBoundaryAdjacency, type Osid } from './osid_adjacency.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
@@ -74,23 +75,27 @@ import {
  * Requires operational edges and OSID front edges to be available.
  *
  * @param state - Current game state (must have war_front_edges_osid populated)
- * @param edges - Operational contact graph edges (for OSID adjacency)
+ * @param edges - Operational contact graph edges (for threshold-filtered adjacency maps not in SpatialContext)
  * @param reverseMap - operationalToCanonical map for getPoliticalControllerOSID
+ * @param centroids - Optional OSID centroid map
+ * @param spatial - SpatialContext providing adjacency, sharedBoundaryAdj, friendlyOsids, components
  */
 export function buildCorpsFrontSectors(
     state: GameState,
     edges: EdgeRecord[],
     reverseMap: Map<string, string[]> | null,
     centroids?: OsidCentroidMap,
+    spatial?: SpatialContext,
 ): Record<string, CorpsFrontSector> {
     const osidFrontEdges = state.military.war_front_edges_osid;
     if (!osidFrontEdges || osidFrontEdges.length === 0) return {};
     if (!edges || edges.length === 0) return {};
 
-    const adjacency = buildOsidAdjacency(edges);
+    // Use SpatialContext adjacency if available, otherwise build from edges (backward compat)
+    const adjacency = (spatial?.adjacency as Map<Osid, Osid[]>) ?? buildOsidAdjacency(edges);
     // Shared-boundary-only adjacency for territory contiguity checks.
     // Territory must be connected through direct polygon contact — no distance-contact bridging.
-    const sharedBoundaryAdj = buildSharedBoundaryAdjacency(edges);
+    const sharedBoundaryAdj = (spatial?.sharedBoundaryAdjacency as Map<Osid, Osid[]>) ?? buildSharedBoundaryAdjacency(edges);
     // Front-edge-compatible adjacency: same threshold as FRONT_EDGE_MAX_GAP.
     const frontEdgeAdj = new Map<Osid, Osid[]>();
     for (const e of edges) {
@@ -105,7 +110,8 @@ export function buildCorpsFrontSectors(
     }
     for (const list of frontEdgeAdj.values()) list.sort(strictCompare);
     // Strict shared-boundary adjacency (5.5m) for friendly-territory reachability.
-    const strictAdj = buildSharedBoundaryAdjacency(edges);
+    // Same as sharedBoundaryAdj — reuse the already-computed map.
+    const strictAdj = sharedBoundaryAdj;
     // Intermediate adjacency (~16.6m) for Case B split threshold.
     const CASE_B_SPLIT_THRESHOLD = 0.00015; // ~16.6m
     const caseBSplitAdj = new Map<Osid, Osid[]>();
@@ -126,7 +132,7 @@ export function buildCorpsFrontSectors(
 
     for (const faction of factions) {
         const factionSectors = buildFactionSectors(
-            state, faction, osidFrontEdges, adjacency, sharedBoundaryAdj, strictAdj, caseBSplitAdj, formations, reverseMap, centroids
+            state, faction, osidFrontEdges, adjacency, sharedBoundaryAdj, strictAdj, caseBSplitAdj, formations, reverseMap, centroids, spatial
         );
         for (const sector of factionSectors) {
             result[sector.sector_id] = sector;
@@ -240,6 +246,7 @@ function buildFactionSectors(
     formations: Record<FormationId, FormationState>,
     reverseMap: Map<string, string[]> | null,
     centroids?: OsidCentroidMap,
+    spatial?: SpatialContext,
 ): CorpsFrontSector[] {
     // Step 1: Find corps for this faction
     const corpsIds = getCorpsForFaction(formations, faction);
@@ -260,20 +267,28 @@ function buildFactionSectors(
     consolidateIsolatedCorpsPockets(corpsEdges, osidFrontEdges, faction, adjacency, formations, centroids, sharedBoundaryAdj);
 
     // Pre-compute friendly OSIDs once for territory, brigade assignment, and contiguity checks.
-    const friendlyOsids = new Set<string>();
-    for (const osid of adjacency.keys()) {
-        const ctrl = getPoliticalControllerOSID(state, osid, reverseMap ?? undefined);
-        if (ctrl === faction) friendlyOsids.add(osid);
-    }
-    const pc = state.political.political_controllers ?? {};
-    for (const [osid, ctrl] of Object.entries(pc)) {
-        if (ctrl === faction) friendlyOsids.add(osid);
+    // Use SpatialContext if available; otherwise build from political_controllers (backward compat).
+    let friendlyOsids: Set<string>;
+    if (spatial) {
+        const spatialFriendly = spatial.friendlyOsidsByFaction.get(faction);
+        friendlyOsids = spatialFriendly ? new Set(spatialFriendly) : new Set<string>();
+    } else {
+        friendlyOsids = new Set<string>();
+        for (const osid of adjacency.keys()) {
+            const ctrl = getPoliticalControllerOSID(state, osid, reverseMap ?? undefined);
+            if (ctrl === faction) friendlyOsids.add(osid);
+        }
+        const pc = state.political.political_controllers ?? {};
+        for (const [osid, ctrl] of Object.entries(pc)) {
+            if (ctrl === faction) friendlyOsids.add(osid);
+        }
     }
 
     // Pre-compute friendly connected components for staffability check (FIX 1).
     // A sector is "unstaffable" if no brigade from its corps exists in the same
     // friendly connected component — meaning no unit can physically reach it.
-    const preComponentOf = buildFriendlyComponents(adjacency, friendlyOsids);
+    // Use SpatialContext if available; otherwise build from adjacency + friendlyOsids.
+    const preComponentOf = ((spatial?.componentsByFaction.get(faction)) ?? buildFriendlyComponents(adjacency, friendlyOsids)) as Map<string, number>;
 
     // Step 4: Build multi-sectors (sub-segments promoted to independent sectors)
     const sectors: CorpsFrontSector[] = [];
@@ -321,7 +336,8 @@ function buildFactionSectors(
     repairDisconnectedTerritory(sectors, sharedBoundaryAdj, friendlyOsids);
 
     // Pre-compute friendly territory connected components (used by steps 6 and 7).
-    const componentOf = buildFriendlyComponents(adjacency, friendlyOsids);
+    // Use SpatialContext if available; otherwise build from adjacency + friendlyOsids.
+    const componentOf = ((spatial?.componentsByFaction.get(faction)) ?? buildFriendlyComponents(adjacency, friendlyOsids)) as Map<string, number>;
 
     // Step 6: Classify brigades — corps-driven assignment.
     const commanderProfiles = buildCorpsCommanderProfiles(state, sectors);

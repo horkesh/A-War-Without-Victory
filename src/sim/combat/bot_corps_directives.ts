@@ -561,7 +561,8 @@ export function generateCorpsDirectives(
     reverseMap: OperationalToCanonicalReverseMap | null,
     graphAnalysis: FactionGraphAnalysis | null,
     supplyByOsid?: SupplyStateByOsidReport | null,
-    ethnicMap?: OsidEthnicComposition | null
+    ethnicMap?: OsidEthnicComposition | null,
+    preComputedAdjacency?: Map<Osid, Osid[]>,
 ): void {
     const corpsCommand = state.military.corps_command;
     if (!corpsCommand) return;
@@ -571,7 +572,7 @@ export function generateCorpsDirectives(
     const turn = state.meta?.turn ?? 0;
     const corpsFrontMapping = deriveCorpsFrontMapping(state, faction);
     const sectorLookup = state.military.corps_front_sectors ?? {};
-    const adjacency = buildOsidAdjacency(edges);
+    const adjacency = preComputedAdjacency ?? buildOsidAdjacency(edges);
     const strategy = FACTION_STRATEGIES[faction];
     const doctrinePhase = getActiveDoctrinePhase(faction, turn, state.military.war_timeline);
 

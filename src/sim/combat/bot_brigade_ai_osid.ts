@@ -480,7 +480,7 @@ export function generateAllBotOrdersOsid(
     botFactions: FactionId[],
     ctx: OsidBotContext
 ): BotOrderGenerationDiagnostics {
-    const adjacency = buildOsidAdjacency(ctx.edges);
+    const adjacency = (ctx.adjacency as Map<Osid, Osid[]>) ?? buildOsidAdjacency(ctx.edges);
     const terrainCache = buildTerrainCache(ctx.reverseMap);
     const sortedFactions = [...botFactions].sort(strictCompare);
 

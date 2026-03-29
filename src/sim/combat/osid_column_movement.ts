@@ -261,7 +261,8 @@ export function processOsidColumnMovement(
     state: GameState,
     edges: EdgeRecord[],
     reverseMap: OperationalToCanonicalReverseMap,
-    terrainData: TerrainScalarsData
+    terrainData: TerrainScalarsData,
+    preComputedAdjacency?: ReadonlyMap<string, readonly string[]>,
 ): OsidColumnMovementReport {
     const report: OsidColumnMovementReport = {
         column_starts: 0,
@@ -270,7 +271,7 @@ export function processOsidColumnMovement(
         column_blocked: 0
     };
     const formations = state.military.formations ?? {};
-    const adjacency = buildOsidAdjacency(edges);
+    const adjacency = (preComputedAdjacency as Map<Osid, Osid[]>) ?? buildOsidAdjacency(edges);
     const movementOrders = state.military.brigade_movement_orders ?? {};
     if (!state.military.brigade_movement_state) state.military.brigade_movement_state = {};
     const movementState = state.military.brigade_movement_state;

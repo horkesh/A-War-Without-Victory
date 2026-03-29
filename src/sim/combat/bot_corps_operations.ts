@@ -369,7 +369,8 @@ export function generateEmergencyDefensiveOperations(
     state: GameState,
     faction: FactionId,
     edges: EdgeRecord[],
-    sidToMun: Map<SettlementId, string>
+    sidToMun: Map<SettlementId, string>,
+    preComputedAdjacency?: ReadonlyMap<string, readonly string[]>,
 ): void {
     const corpsCommand = state.military.corps_command;
     if (!corpsCommand) return;
@@ -399,7 +400,7 @@ export function generateEmergencyDefensiveOperations(
         // Build target: enemy OSIDs adjacent to corps brigades' locations
         const targetSettlements: SettlementId[] = [];
         const brigadeOsids = new Set(subordinates.map(b => b.location_osid).filter(Boolean) as string[]);
-        const osidAdj = buildOsidAdjacency(edges);
+        const osidAdj = (preComputedAdjacency as Map<string, string[]>) ?? buildOsidAdjacency(edges);
         for (const osid of brigadeOsids) {
             const neighbors = osidAdj.get(osid) ?? [];
             for (const n of neighbors) {
