@@ -70,6 +70,8 @@
 
 ## New Lessons (always read these)
 
+### [Process] Gap finder asks the questions nobody else thinks to ask — use before architectural work (2026-03-29) — NEW → see `process.md`
+
 ### [Data] Point-only polygon contacts (shared vertex, 0 segments) are not real adjacency — filter on shared_segments >= 1 (2026-03-28) — NEW → see `data_pipeline.md`
 
 ### [Architecture] Supply filters are double penalties when combat multipliers already model the constraint (2026-03-28) — NEW → see `architecture.md`

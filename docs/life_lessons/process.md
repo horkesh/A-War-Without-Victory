@@ -3,6 +3,12 @@
 
 ---
 
+### [Process] Gap finder asks the questions nobody else thinks to ask — use before architectural work (2026-03-29) — NEW
+- **Context**: Before implementing SpatialContext, dispatched a gap-finder agent that reads canon/specs and formulates expert questions. It produced 13 precise questions. Expert answers confirmed 3 bugs (retreat teleportation, threshold mismatch, raw adjacency BFS), resolved 5 non-issues (paramilitary timing, stranded brigades, corridor safety fallback), and exposed 3 design gaps in unimplemented specs (stall counter, narrow-front, reinforcement safety).
+- **Wrong approach**: Jumping straight into implementation. The retreat teleportation bug would have been discovered eventually, but the threshold mismatch (5.5m vs 33m vs no threshold across 3 systems) and the spec interaction gaps (repositioning + stall counter) would have been invisible until they caused cascading bugs weeks later.
+- **Right approach**: Before any architectural work, dispatch the gap finder with the relevant canon. Have it formulate expert questions. Route those questions to domain experts. The gap finder's value is asking questions the user and orchestrator don't know to ask — it holds the design model and compares against reported reality.
+- **Do instead**: For any P0 work touching 3+ systems, dispatch `/gap-finder` first. It costs one agent round but saves multiple debugging rounds later.
+
 ### [Process] Verify agent edits landed on disk — agent "success" claims are not proof (2026-03-28) — NEW
 - **Context**: Dispatched 3 parallel agents to implement fixes (Check C logic, vitinica axis removal, ghost sector sanitizer, validateOpAtInjection wiring). All 3 reported success with detailed summaries. Audit agents dispatched later found 4 of 7 deliverables were NOT on disk — only anomaly_detector.ts and staging OSID changes survived. The agents' edits to war_phases.ts, game_state.ts, scenario_runner.ts, and operation_validation.ts were lost.
 - **Wrong approach**: Trusting agent "Done" summaries without verifying `git diff --stat` against expected file list. The agents ran tsc and claimed clean, but their edits evaporated.

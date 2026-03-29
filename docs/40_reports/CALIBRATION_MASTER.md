@@ -1,7 +1,26 @@
 # AWWV Calibration Master Reference
 
 **Purpose:** Persistent lessons-learned record for war-phase calibration (April 1992 onward). 40w primary, 104w force trajectory.
-**Updated:** 2026-03-29 (n1194 — fresh 40w baseline + paramilitary dissolution fix)
+**Updated:** 2026-03-29 (n1204 — SpatialContext + 7 architectural fixes + multi-brigade)
+
+## n1204 (2026-03-29) — SpatialContext + 7 architectural fixes + multi-brigade ops
+
+**Run:** `apr1992_definitive_40w__77cac5e01d3c929e__w40_n1204`
+**Hash:** `604e712d424dcedb`
+**Area-weighted:** 90.9% (down from n1203 92.1% due to multi-brigade support modifier)
+**OSID match:** 633/712 (88.9%)
+**Consistency:** PASS (0 peak violations, 0 unassigned, 0 ghosts, intel live)
+**Faction deltas:** RS=-30, RBiH=+18, HRHB=+12
+**Casualties:** RS taken=23,751 inflicted=30,086. RBiH taken=72,510 inflicted=10,109. HRHB taken=6,419 inflicted=4,015.
+**Changes:** SpatialContext (Phases 0-4), corps launch feasibility, ops reevaluation, emergency retreat reachability, phantom defender fix, bfsDistance friendly-only, multi-brigade main/support (70%/40%).
+**Key observations:** Multi-brigade support modifier reduced RS offensive power (~1.2pp). n1203 (pre-multi-brigade) was 92.1%. The -1.2pp from support modifier is mechanically correct — support brigades contributing 70% vs 100% power makes operations slightly weaker.
+
+## n1203 (2026-03-29) — SpatialContext + 6 fixes (pre-multi-brigade)
+
+**Run:** `apr1992_definitive_40w__77cac5e01d3c929e__w40_n1203`
+**Hash:** `a9e025117a6afe80`
+**Area-weighted:** 92.1% (+2pp from n1198, matching n1150 ATH)
+**Changes:** Same as n1204 minus multi-brigade. +2pp from retreat fix (no more teleportation), phantom defender fix (shared casualties), corps feasibility (fewer zombie ops), bfsDistance fix.
 
 ## n1194 (2026-03-29) — Fresh 40w baseline + paramilitary dissolution fix
 
