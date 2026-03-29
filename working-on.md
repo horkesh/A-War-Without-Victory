@@ -1,56 +1,59 @@
-# Working On — Session 2026-03-29 (Session 3) — COMPLETE
+# Working On — Session 2026-03-30 (Night Shift)
 
-## Completed This Session
-1. Concurrent corps operations — `active_operations[]` replaces `active_operation` (84 files, +1459/-525)
-2. Emergency defense overflow slot (is_emergency flag)
-3. Bot secondary op type guard (probe/sector_attack only in slot 1+)
-4. Save migration v1→v2
-5. Krajina paramilitary scope (6 municipalities added)
-6. MAX_POCKET_CLUSTER 3→6
-7. 2 new anomaly checks (#27 undefended_painted_mismatch, #28 adjacent_uncontested_territory)
-8. Merged to main. n1211 = 90.9% area-weighted.
+## v0.8 Corps Commander Intelligence
 
-## Next Session Priorities
+Implementing the most important architectural change in the project — replacing 15 separate brigade movement systems and a 1400-line generateCorpsDirectives with ONE intelligent commander decision loop.
 
-### P0: Equipment Asymmetry in Combat Resolution
-ARBiH should not have the offensive potential it currently shows. Two missing factors:
-1. **Equipment gap** — most ARBiH brigades in 1992 had only rifles. Attacking a VRS brigade with artillery and tanks using 2500 men armed with rifles = catastrophic losses. Combat resolution must weight equipment heavily.
-2. **Officer cadre** — ARBiH had very few trained officers in 1992. Limits coordination, combined arms, operational planning.
-3. **Combat predictor** must factor equipment asymmetry so corps AI rejects suicidal ops before committing brigades.
-This naturally gates ARBiH offensive capability without artificial slot caps.
+Design doc: docs/plans/2026-03-30-corps-commander-intelligence.md
 
-### P0: Intelligent Corps/Army Commanders
-Replace hardcoded rules with per-turn CO decision-making:
-- Corps CO looks at his front each turn — which sectors are under pressure, which are quiet
-- Ensures ALL sectors properly defended FIRST
-- Only surplus brigades (2-3) allocated for ops
-- Picks objectives based on opportunity
-- Would NEVER strip garrison from Sanski Most to send to Derventa
-- Fewer magic numbers (MIN_SECTOR_BRIGADES, slot caps, exhaustion thresholds), more situational awareness
-- Connects to v0.8 Command Chain roadmap and existing AI commander infrastructure
+### Why This Is Urgent
 
-### P1: RS w40 Benchmark Gap
-RS ends at 49.7% vs 55.3% target (-5.6pp). RS stalls mid-war. Only 33 orders, 32 ops with zero eligible attackers. Need investigation: is RS not launching enough ops, or are ops launching but failing to execute?
+Concurrent ops (n1211) exposed a critical flaw: Sarajevo's garrison marched to Breza because the sector system treated the whole 1st Corps territory as one zone. 13 brigades column-marched out through the Ilidza corridor before Op Prsten closed it. By turn 11 the city was empty and fell to paramilitary sweep. This never happened in 1200+ prior runs — concurrent ops caused more aggressive redistribution that stripped the garrison.
 
-### P1: Sarajevo Regression
--3.5pp from prior run. Needs investigation.
+### Root Cause (from day session investigation)
 
-### P2: Invalid Operations
-41 invalid operations (32 zero-eligible-attacker). Ops launching but nobody can fight. Staging/reachability issue.
+1. Column march teleportation: paths computed pre-combat, not revalidated at arrival
+2. No zone awareness: sector system sees one big blob, not besieged/open zones
+3. No garrison lock: no system prevents stripping a critical position
+4. 15 separate brigade movement systems fighting each other
+5. Information silently dropped between 114 pipeline steps
 
-### P2: HRHB Passivity
-8 total orders, 2 dead corps (HVO Central Bosnia at morale 0, HVO Tomislavgrad). Structural problem.
+### Architecture: PERCEIVE → DECIDE → EXECUTE
 
-### P2: Column March Occupation Skip
-`bot_brigade_ai_osid.ts:441-444` skips column-marching brigades — they can't capture adjacent undefended territory even at zero cost.
+- PERCEIVE: world state derivation (SpatialContext, supply, sectors)
+- DECIDE: ONE commander loop per corps (assess→allocate→plan→decide→emit)
+- EXECUTE: combat resolution, effects (unchanged)
 
-### P2: Garrison Cannibalization
-No holdback at op launch. Corps strips sectors bare for ops. Post-op drift lock prevents return. Three-gap fix needed (see corps-overcommit investigation report).
+### 10 Implementation Steps
 
-## Key Investigation Reports (this session)
-- War-or-Game: NOT APPROVED on concurrent ops alone (RBiH overshoot). CONDITIONAL after Krajina fixes.
-- Gap Finder: 3 gaps found, all fixed (emergency defense, secondary op guard, save migration).
-- Krajina investigation: garrison cannibalization root cause (6th Sanske to Derventa, 17th Ključ to Glamoč).
-- Paramilitary investigation: scope exclusion + MAX_POCKET_CLUSTER=3 prevented Krajina capture.
-- Anomaly audit: 2 missing checks identified and implemented.
-- Corps overcommit: 3 compounding gaps (no holdback, drift lock, large op scatter).
+1. Type definitions (commander_state.ts)
+2. buildBriefing() (briefing.ts)
+3. ASSESS phase (assess.ts) — zones, threats, force eval
+4. ALLOCATE phase (allocate.ts) — garrison lock, surplus — FIXES SARAJEVO
+5. PLAN phase (plan.ts) — multi-turn intentions
+6. DECIDE phase (decide.ts) — intel reactive
+7. EMIT phase (emit.ts) — produce existing interface
+8. Wire commander loop (commander_loop.ts)
+9. CommanderState on game_state.ts + save migration
+10. Delete old code (phased)
+
+### Baseline
+
+- n1211 with enriched contact graph: 90.2% area-weighted
+- 21/22 anchors (Sarajevo Centar FAILED — this is what we're fixing)
+- 44% zero-attack operations
+- 95 battles, 107 orders
+
+### Key Decisions Already Made
+
+- Corridor-width for besieged detection (not encirclement ratio)
+- Commitment ratio for SRK-type corps
+- Garrison budget posture-dependent (8/12/15/20 edges per brigade)
+- Equipment class matters for force evaluation
+- Population protection via co-ethnic garrison boost
+- Commander personality as deterministic parameters
+- Same output interface (CorpsDirective) — downstream unchanged
+
+### Contact Graph
+
+The enriched contact graph (shared_segments) is committed and correct. 48 point-only contacts filtered. This is the true baseline.
