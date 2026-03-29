@@ -8,11 +8,22 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-29, v0.7.0 + Deep Investigation Session)
-**v0.7.0 + 22 fixes in working tree (not yet committed).** **n1198: 90.1% area-weighted (40w), 21/22 anchors, 6/6 benchmarks.** RS 80 orders, RBiH 29 (down from 81), HRHB 7. 101 battles. Consistency: PASS (0 peak violations, 0 unassigned, 0 ghosts, intel live).
+## Current State (2026-03-29, v0.7.0 + SpatialContext + 7 Architectural Fixes)
+**n1204: 90.9% area-weighted (40w). Consistency PASS.** All committed (8 commits this session).
 
-**[P0] GAME-WIDE INVESTIGATION: Autonomous pipeline steps that don't communicate.**
-Every system (ops, sectors, brigade assignment, retreat, movement, intel) independently rebuilds spatial state from raw primitives. No shared spatial/predictive layer. Upstream decisions (corps launch, staging, retreat direction) are made without downstream information (predictor, reachability, corridor safety). This produces: zombie ops (0 brigades blocking corps slot), trapped brigades (sela_2 pocket), empty sectors, phantom defenders, blind retreat into dead ends. **Technical Architect proposed `SpatialContext` object at pipeline boundaries. Game Designer speccing ops reevaluation + multi-brigade main/support. Fix this first before individual bug fixes.**
+**[RESOLVED] SpatialContext shared spatial layer.** Phase 0-4 complete. 22→1 buildOsidAdjacency calls/turn. All systems read from cached spatial snapshot. Design spec: `docs/30_planning/SPATIAL_CONTEXT_DESIGN_SPEC.md`. Remaining: Phases 5-7 (paramilitaries, supply, events) — low priority, backward-compatible.
+**[RESOLVED] Corps launch feasibility.** `checkLaunchFeasibility` gates op creation. No more zombie ops from hopeless launches.
+**[RESOLVED] Ops reevaluation.** `reevaluateWeakenedOperations` pipeline step aborts degenerate ops. 0 zombie ops at n1204.
+**[RESOLVED] Emergency retreat teleportation.** Component-based reachability, friendly-only BFS, 7-step fallback.
+**[RESOLVED] Phantom defender.** Proportional casualty distribution for co-located defenders.
+**[RESOLVED] bfsDistance raw adjacency.** Friendly-only BFS in brigade distribution and subsegment assignment.
+**[RESOLVED] Multi-brigade main/support.** MAIN=full power/casualties, SUPPORT=70%/40%. Roles assigned at op creation by basePower ranking.
+
+**[OPEN] Gap finder identified remaining design gaps:**
+- P2: Attack-through increments stall counter (`movement_only_execution_turns`) — multi-objective ops fighting through intermediate resistance can false-stall. Spec fix needed.
+- P2: Multi-Brigade broad-front fails in corridor terrain (6% of OSIDs with ≤3 neighbors). Narrow-front case should skip repositioning.
+- P2: Reinforcement paths skip corridor safety check. Spec gap.
+- P2: Sectors stale after combat (once/turn, before combat). Post-combat SpatialContext enables detection but full sector rebuild is separate work.
 
 **Session 2026-03-29 findings (deep investigation):**
 - **Paramilitary dissolution**: personnel not zeroed on inactive → ghost troops. FIXED.

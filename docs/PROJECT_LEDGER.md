@@ -1,3 +1,30 @@
+## [2026-03-29] SpatialContext + 7 Architectural Fixes + Multi-Brigade Operations
+
+### Change (SpatialContext shared spatial layer)
+**Phase 0-4 complete.** New `src/sim/spatial_context.ts`: `SpatialContext` interface computed at 2 pipeline points (pre-combat, post-combat). 22 `buildOsidAdjacency` calls reduced to 1. All pipeline steps, sector system, bot AI chain, attack resolution, and movement now read from shared cache. Zero behavior change for Phases 0-4 — same adjacency data, just cached.
+
+### Change (7 architectural fixes)
+**P0 Corps launch feasibility:** `checkLaunchFeasibility` in `sector_offensive.ts` gates op creation with predictor sample. Rejects ops where no objective achievable at costly_victory.
+**P0 Ops reevaluation:** `reevaluateWeakenedOperations` pipeline step aborts degenerate ops (0 brigades, below type minimum, personnel <50% of initial). Eliminates zombie ops blocking corps slots.
+**P1 Emergency retreat:** `findEmergencyRetreatOsid` now checks connected component reachability. No teleportation through enemy salients. Friendly-only BFS. 7-step fallback chain with largest-component preference. 4 new tests.
+**P1 Phantom defender:** Co-located defenders in non-sector paths share casualties proportionally by personnel. Eliminates free combat power from secondary brigades.
+**P1 bfsDistance:** `sector_utils.ts:bfsDistance` accepts `friendlyOsids` filter. `brigade_front_distribution.ts` and `subsegment_assignment.ts` now pass faction's friendly set.
+**P2 Multi-brigade main/support:** `assignBrigadeRoles` (highest basePower = MAIN). Support brigades: 70% power, 40% casualties. `isSupportBrigadeOnActiveOp` checked during combat resolution. Pre-planned and triggered ops also assign roles.
+
+### Change (gap-finder agent created)
+New `.claude/skills/gap-finder/SKILL.md` — design intent oracle. Knows how the game SHOULD work from canon/specs, compares against expert reports, asks the questions nobody else thinks to ask. 13 expert questions generated for SpatialContext audit, 5 answered by experts, 3 confirmed bugs found.
+
+### Results
+- **n1203 (pre-multi-brigade): 92.1% area-weighted, consistency PASS.** +2pp from n1198 (90.1%).
+- **n1204 (all changes): 90.9% area-weighted, consistency PASS.** Multi-brigade support modifier reduced RS offensive power by ~1.2pp (expected — support brigades contribute less power now).
+- **0 zombie ops** (reevaluation confirmed).
+- **0 teleportation retreats** (component check confirmed).
+- **0 phantom defenders** (proportional casualties confirmed).
+
+### Verification
+- `npx tsc --noEmit` (clean). `validate_run_consistency.cjs` PASS. Fresh 40w runs verified.
+- 8 commits: SpatialContext Phase 0+1, corps feasibility, retreat+phantom, SpatialContext Phase 2-4, ops reevaluation, bfsDistance fix, multi-brigade ops.
+
 ## [2026-03-29] Deep Investigation Session — 22 Fixes + Architectural Root Cause
 
 ### Change (22 fixes implemented in working tree)
