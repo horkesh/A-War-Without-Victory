@@ -70,6 +70,12 @@
 
 ## New Lessons (always read these)
 
+### [Process] READ mandatory startup files BEFORE any action — reverted deliberate work due to ignorance (2026-03-30) — NEW → see `process.md`
+
+### [Process] Worktree merges lose uncommitted working tree state — commit enrichment data before branching (2026-03-30) — NEW → see `process.md`
+
+### [Architecture] Concurrent ops exposed that single-op cap was accidentally preventing garrison stripping (2026-03-30) — NEW → see `architecture.md`
+
 ### [Process] Parallel agent dispatch needs exclusive file ownership — overlapping edits corrupt files (2026-03-29) — NEW → see `process.md`
 
 ### [Calibration] Paramilitary scope exclusions silently prevent entire regions from being modeled (2026-03-29) — NEW → see `calibration.md`

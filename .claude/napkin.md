@@ -8,8 +8,9 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-29, v0.7.0 + Concurrent Ops + Krajina Fixes)
-**n1211: 90.9% area-weighted (40w). 22/22 anchors. 5/6 benchmarks (RS w40 FAIL). Consistency PASS.**
+## Current State (2026-03-30, v0.7.0 + Concurrent Ops + Contact Graph Enrichment)
+**n1211: 90.2% area-weighted (40w) — TRUE BASELINE with enriched contact graph. 21/22 anchors (Sarajevo Centar FAILED). 5/6 benchmarks (RS w40 FAIL).**
+**v0.8 Corps Commander Intelligence: design complete, nightshift handoff ready. PERCEIVE→DECIDE→EXECUTE architecture.**
 
 **[MERGED] Concurrent corps operations.** `active_operations[]` replaces `active_operation`. Slot cap floor(brigades/12). 7 helpers. Emergency defense overflow. Bot secondary op guard. Save migration v1→v2. 84 files, +1459/-525.
 **[MERGED] Krajina paramilitary scope.** 6 municipalities added to RS offensive sweep. MAX_POCKET_CLUSTER 3→6. +3.0pp.

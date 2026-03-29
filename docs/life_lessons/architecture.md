@@ -3,6 +3,12 @@
 
 ---
 
+### [Architecture] Concurrent ops exposed that single-op cap was accidentally preventing garrison stripping (2026-03-30) — NEW
+- **Context**: For 1200+ runs, Sarajevo never fell. Concurrent ops (n1211) changed `active_operation` (single nullable) to `active_operations[]`. With multiple op slots, more brigades get committed → sector system redistributes more aggressively → Sarajevo garrison shipped to Breza → city falls to paramilitary sweep at turn 11. The old single-op cap accidentally prevented this by limiting how many brigades could be pulled from garrison.
+- **Wrong approach**: Assuming that a feature change (concurrent ops) only affects what it explicitly changes (op slots). The cascade through brigade redistribution was invisible because the single-op cap was an accidental safety net, not a deliberate design choice.
+- **Right approach**: When removing a constraint (single op → multiple ops), investigate what the constraint was accidentally protecting. The constraint may have been load-bearing for behaviors it wasn't designed to control. Run the full diagnostic suite, not just calibration %.
+- **Do instead**: Before removing any cap, gate, or limit, ask: "What behaviors does this accidentally prevent?" Run `tools/diagnose_run.cjs` after the change and check brigade positions, empty sectors, and garrison health — not just area-weighted match.
+
 ### [Architecture] Hidden BFS depth caps silently disable constant changes — always trace the full call chain (2026-03-26) — NEW
 - **Context**: `MAX_REDISTRIBUTION_DISTANCE=8` was raised to 20 in `brigade_front_distribution.ts`. Calibration: unchanged. Root cause: `bfsDistance()` in `sector_utils.ts` had an internal `maxDepth=10` local variable that silently capped BFS depth regardless of the external constant. The constant was read and passed in correctly — the cap was invisible in the caller.
 - **Wrong approach**: Changing a named constant and assuming the behavior changed. The constant was correctly used in the calling code; the override was deep inside the helper function.

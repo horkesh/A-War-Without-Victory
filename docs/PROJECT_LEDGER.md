@@ -1,3 +1,28 @@
+## [2026-03-30] Contact Graph Enrichment + Corps Commander Intelligence Design (n1211 = 90.2% true baseline)
+
+### Change
+**Contact graph shared_segments enrichment committed.** 48 point-only contacts (shared_segments=0) now filtered by osid_adjacency.ts, front_edges.ts, anomaly_detector.ts. 12 analysis tools + triple_junctions.json committed. Previous 90.9% was measured in worktree without enrichment; 90.2% is the true baseline with correct adjacency.
+**Worktree unified.** `.worktrees/concurrent-ops` removed, `feature/concurrent-corps-operations` branch deleted. All work on main.
+**Corps-army-commander expert created.** New Pyrrhic team role for corps/army CO decision-making.
+**v0.8 Corps Commander Intelligence design doc.** 5-expert panel synthesis. Architecture: PERCEIVE→DECIDE→EXECUTE. ICorpsCommander interface.
+
+### Investigation Findings
+- **Sarajevo falling (P0):** Concurrent ops caused aggressive redistribution. 13 brigades column-marched out through 1-OSID Ilidza corridor before Op Prsten closed it. Paramilitary sweep captured empty city at turns 9-11.
+- **Kalinovik trapped brigades:** 7 brigades in Kalinovik/Gorazde pockets. evaluateUncontestedOccupation lacks connectivity check. Sector assignment traps brigades in micro-sectors.
+- **1KK Jajce:** Early ops 7-8 brigades (succeeded), late ops 2-3 (failed). Exhaustion 57, locked out. Sector 4: 0 brigades, 15 front edges.
+- **Column march teleportation:** Validates destination only, not intermediate path. SpatialContext has tools but column march doesn't revalidate.
+- **Contact graph 0.7pp drop:** Enriched graph removes 48 phantom adjacencies. Real cost of correct data.
+
+### Design Decisions (v0.8)
+- Corridor-width ≤ 1 = besieged, = 2 = pressured, ≥ 3 = open
+- Garrison budget posture-dependent (8/12/15/20 edges/brigade)
+- Pre-planned ops owned by commander — can modify/defer/abandon
+- Officer personality from existing 4 attributes
+- Replace not shadow mode
+
+### Verification
+- `npx tsc --noEmit` (clean). 40w: 90.2%, 21/22 anchors (Sarajevo Centar FAILED — v0.8 target).
+
 ## [2026-03-29] Concurrent Corps Operations + Krajina Fixes (n1211 = 90.9%)
 
 ### Change

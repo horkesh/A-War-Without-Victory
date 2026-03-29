@@ -3,6 +3,18 @@
 
 ---
 
+### [Process] READ mandatory startup files BEFORE any action — reverted deliberate work due to ignorance (2026-03-30) — NEW
+- **Context**: Session started with a 40w run. Contact graph had been enriched with shared_segments (deliberate work from 2026-03-28, documented in napkin item #10). Without reading the napkin or ledger properly, reverted the contact graph to the committed version, destroying deliberate work. Had to re-run the enrichment script. Multiple agents dispatched without SpatialContext awareness — the biggest architectural change of the day.
+- **Wrong approach**: Skimming startup files, then acting on incomplete understanding. Declaring "the 90.9% is correct" without knowing the enrichment history. Reverting files without understanding why they were modified.
+- **Right approach**: READ napkin, ledger, and life lessons THOROUGHLY before touching anything. If a file is modified in the working tree, investigate WHY before reverting. The startup protocol exists because context is too large to reconstruct from code alone.
+- **Do instead**: Never revert a modified file without first checking napkin + ledger for why it was modified. Never dispatch agents without briefing them on the session's major architectural changes. The 5 minutes spent reading saves hours of confusion.
+
+### [Process] Worktree merges lose uncommitted working tree state — commit enrichment data before branching (2026-03-30) — NEW
+- **Context**: Contact graph enrichment (shared_segments) was run on main's working tree but never committed. A worktree was created for concurrent ops work. The worktree got the committed version (without enrichment). The worktree achieved 90.9%. When merged back to main, the enriched contact graph was still only in main's working tree. Running 40w on main gave 90.2% — the 0.7pp difference was the enrichment filtering 48 phantom adjacencies.
+- **Wrong approach**: Running data enrichment scripts without committing the results. Creating worktrees from a dirty working tree assuming the worktree inherits uncommitted changes (it doesn't — git worktrees get their own working directory from the committed state).
+- **Right approach**: Commit all data pipeline outputs before creating worktrees. If enrichment is deliberate work, it must be committed immediately. Worktrees branch from committed state only.
+- **Do instead**: Before `git worktree add`, run `git status` and commit any modified derived data files. Uncommitted working tree changes are invisible to worktrees.
+
 ### [Process] Gap finder asks the questions nobody else thinks to ask — use before architectural work (2026-03-29) — NEW
 - **Context**: Before implementing SpatialContext, dispatched a gap-finder agent that reads canon/specs and formulates expert questions. It produced 13 precise questions. Expert answers confirmed 3 bugs (retreat teleportation, threshold mismatch, raw adjacency BFS), resolved 5 non-issues (paramilitary timing, stranded brigades, corridor safety fallback), and exposed 3 design gaps in unimplemented specs (stall counter, narrow-front, reinforcement safety).
 - **Wrong approach**: Jumping straight into implementation. The retreat teleportation bug would have been discovered eventually, but the threshold mismatch (5.5m vs 33m vs no threshold across 3 systems) and the spec interaction gaps (repositioning + stall counter) would have been invisible until they caused cascading bugs weeks later.

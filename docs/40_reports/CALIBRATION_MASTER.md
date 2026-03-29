@@ -3,8 +3,16 @@
 **Purpose:** Persistent lessons-learned record for war-phase calibration (April 1992 onward). 40w primary, 104w force trajectory.
 **Updated:** 2026-03-29 (n1210 — 5 fixes: Visegrad OOB + siege calc + JNA ghosts + sector reassignment + MIN_SECTOR_BRIGADES)
 
+## n1211 TRUE BASELINE (2026-03-30) — With Enriched Contact Graph
+- **90.2% area-weighted (40w)**. 21/22 anchors (Sarajevo Centar FAILED). 5/6 benchmarks.
+- Previous 90.9% was measured in worktree without shared_segments enrichment.
+- 48 point-only contacts now filtered — 0.7pp drop is real cost of correct adjacency.
+- Sarajevo fell: 13 brigades column-marched out, paramilitary sweep captured empty city turns 9-11.
+- Root cause: concurrent ops → aggressive redistribution → garrison stripped.
+- v0.8 Corps Commander Intelligence designed to fix this structurally.
+
 ## n1211 (2026-03-29) — Concurrent Corps Operations + Krajina Fixes
-- **90.9% area-weighted (40w)**. 22/22 anchors. 5/6 benchmarks.
+- **90.9% area-weighted (40w)** (worktree, without contact graph enrichment). 22/22 anchors. 5/6 benchmarks.
 - Concurrent ops: `active_operations[]` replaces `active_operation`. Slot cap = floor(brigades/12).
 - Krajina paramilitary scope expanded (+6 municipalities). MAX_POCKET_CLUSTER 3→6.
 - +3.0pp from paramilitary fixes. Krajina 99.0%, Posavina NE 93.9%.
