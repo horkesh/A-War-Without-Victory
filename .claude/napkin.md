@@ -8,8 +8,12 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-29, v0.7.0 + SpatialContext + OOB/Siege Fixes)
-**n1210: 87.7% area-weighted (40w). Consistency FAIL (1 unassigned brigade).** Down from n1205's 92.1% — mechanically correct fixes removed phantom siege inflation. Recovery path: concurrent corps ops.
+## Current State (2026-03-29, v0.7.0 + Concurrent Ops + Krajina Fixes)
+**n1211: 90.9% area-weighted (40w). 22/22 anchors. 5/6 benchmarks (RS w40 FAIL). Consistency PASS.**
+
+**[MERGED] Concurrent corps operations.** `active_operations[]` replaces `active_operation`. Slot cap floor(brigades/12). 7 helpers. Emergency defense overflow. Bot secondary op guard. Save migration v1→v2. 84 files, +1459/-525.
+**[MERGED] Krajina paramilitary scope.** 6 municipalities added to RS offensive sweep. MAX_POCKET_CLUSTER 3→6. +3.0pp.
+**[MERGED] 2 new anomaly checks.** #27 undefended_painted_mismatch, #28 adjacent_uncontested_territory.
 
 **[RESOLVED] Visegrad Brigade OOB.** Moved to vrs_drina. Correct.
 **[RESOLVED] Sarajevo siege SID/OSID.** Fixed, now returns PARTIAL not phantom BESIEGED.
@@ -17,20 +21,30 @@
 **[RESOLVED] MIN_SECTOR_BRIGADES=2.** Small corps get fewer sectors.
 **[RESOLVED] SpatialContext shared spatial layer.** Phase 0-4 complete. 22→1 buildOsidAdjacency calls/turn.
 **[RESOLVED] Corps launch feasibility + ops reevaluation + emergency retreat + phantom defender + bfsDistance + multi-brigade main/support.** All n1204/n1205 fixes retained.
-
-**[NEW] JNA ghost brigades.** 3 infantry-only phantoms for Op Prsten + Op Foca. Op Prsten objectives reordered.
+**[RESOLVED] JNA ghost brigades.** 3 infantry-only phantoms for Op Prsten + Op Foca. Op Prsten objectives reordered.
+**[RESOLVED] Concurrent corps ops plan.** Implemented and merged. 84 files, +1459/-525.
 
 **[FAILED+REVERTED] Brigade drift home recall.** FAR_FROM_HOME_LINE_THRESHOLD=5 caused 59% of brigades to abandon positions. Approach fundamentally wrong for BiH war.
 **[FAILED+REVERTED] Op Prijedor JNA ghosts.** Made Prijedor succeed too fast, broke 1KK chain → lost Jajce.
 **[FAILED+REVERTED] 2nd Herzegovina home→konjic.** Konjic is enemy territory.
 
-**[OPEN] Concurrent corps ops plan.** `docs/plans/2026-03-29-concurrent-corps-operations.md`. 15 tasks, 28 files, expert-reviewed. Root cause of 1KK Jajce failure — corps can only run one op at a time.
+**[OPEN] RS w40 benchmark.** 49.7% vs 55.3% target. RS stalls mid-war. 33 total orders, 32 ops with zero eligible attackers.
+**[OPEN] Sarajevo regression.** -3.5pp from prior run. Needs investigation.
+**[OPEN] Equipment asymmetry in combat resolution.** ARBiH rifle-only brigades attacking VRS artillery+tanks should face massive power disadvantage. Combat predictor should reflect this so corps AI rejects suicidal ops.
+**[OPEN] Intelligent corps/army commanders.** Replace hardcoded rules (MIN_SECTOR_BRIGADES, slot caps, exhaustion thresholds) with per-turn CO decision-making: defend sectors first, allocate surplus for ops, adjust to conditions.
+**[OPEN] 41 invalid operations (32 zero-eligible-attacker).** Ops launching but nobody can fight.
+**[OPEN] HRHB passivity.** 8 total orders, 2 dead corps (HVO Central Bosnia, HVO Tomislavgrad).
+**[OPEN] Column march skip.** Brigades in column transit can't capture adjacent undefended territory.
+**[OPEN] Garrison cannibalization.** No holdback at op launch — corps strips sectors bare for ops.
 **[OPEN] Ilijas 4 OSIDs census-derived RBiH.** Need early-war seizure event, not OSID override.
 **[OPEN] Derventa anchor FAILED.** HRHB holds derventa_2. 1KK op chain timing cascade.
 **[OPEN] Herzegovina structural gap.** 8 brigades, 81 front edges, ops pull to Foca.
 **[OPEN] 68+ brigade drifts.** Structural feedback loop identified but fix approach wrong.
 **[OPEN] Gap finder remaining design gaps:**
 - P2: Attack-through stall counter, corridor terrain broad-front, reinforcement corridor safety, sectors stale after combat.
+
+**Session 2026-03-29 (Session 3 — Concurrent Ops + Krajina, n1210→n1211):**
+- Concurrent corps operations merged (84 files, +1459/-525). Save migration v1→v2. Krajina paramilitary scope (+6 muns, MAX_POCKET_CLUSTER 3→6). 2 new anomaly checks (#27, #28). Net: +3.2pp from n1210.
 
 **Session 2026-03-29 (Session 2 — OOB + Siege + Sector fixes, n1205→n1210):**
 - Visegrad Brigade OOB moved to vrs_drina. Sarajevo siege SID→OSID fix (PARTIAL not phantom BESIEGED). Sector reassignment dead code fixed. MIN_SECTOR_BRIGADES=2. JNA ghost brigades for Op Prsten + Op Foca.

@@ -1,3 +1,37 @@
+## [2026-03-29] Concurrent Corps Operations + Krajina Fixes (n1211 = 90.9%)
+
+### Change
+**Concurrent corps operations**: `CorpsCommandState.active_operation` (single nullable) replaced with `active_operations: CorpsOperation[]`. Corps can run multiple simultaneous operations (1 slot per 12 brigades). 7 helper functions centralize migration. 84 files changed, +1459/-525 lines.
+**Brigade exclusion**: `getAvailableBrigades` filter at all launch sites prevents double-booking.
+**Cross-op objective overlap**: Check F in `validateOpAtInjection` rejects duplicate objectives across ops.
+**Queue interaction**: `isSlot0AvailableForQueue` — pre-planned ops sequential in slot 0, bot AI uses slot 1+.
+**Emergency defense overflow**: `is_emergency` flag bypasses slot limit (max 1 emergency per corps).
+**Bot secondary op guard**: Slot 1+ restricted to probe/sector_attack only.
+**Save migration**: Schema version 1→2. `active_operation` → `active_operations` for old saves.
+**Krajina paramilitary scope**: 6 municipalities added to RS offensive sweep (sanski_most, kljuc, prijedor, bosanski_novi, bosanski_petrovac, kotor_varos).
+**MAX_POCKET_CLUSTER 3→6**: Fully surrounded undefended pockets now flip correctly.
+**2 new anomaly checks**: #27 undefended_painted_mismatch, #28 adjacent_uncontested_territory.
+
+### Results
+- **n0 (concurrent ops only): 87.9%** area-weighted. 22/22 anchors failed (vozuca_2, derventa_2). 4/6 benchmarks.
+- **n1 (+ Krajina fixes): 90.9%** area-weighted. 22/22 anchors PASS. 5/6 benchmarks (RS w40 still fails at 49.7% vs 55.3%).
+- +3.0pp from paramilitary scope expansion. Krajina 99.0%, Posavina NE 93.9%.
+- 59 consolidation flips (paramilitary sweep), 22 combat flips.
+- Consistency: PASS. 0 unassigned brigades, 0 ghosts.
+
+### Verification
+- `npx tsc --noEmit` (clean). `npm run test:vitest` 1614 pass / 16 fail (3 pre-existing, 13 behavioral baseline updates needed).
+- 43 new tests (23 helper + 20 integration).
+- Expert panel: War-or-Game conditional approval, Gap Finder found 3 gaps (all fixed), Scenario Analysis confirmed +3pp historically plausible.
+
+### Open
+- RS w40 benchmark (-5.6pp). RS stalls mid-war.
+- Sarajevo regressed -3.5pp.
+- 41 invalid operations (32 zero-eligible-attacker). Ops launching but nobody can fight.
+- HRHB passivity (8 total orders, 2 dead corps).
+- Equipment asymmetry needed in combat resolution (ARBiH rifle-only vs VRS artillery+tanks).
+- Intelligent corps/army commanders to replace hardcoded rules.
+
 ## [2026-03-29] OOB/Siege/Ghost/Sector Fixes + Concurrent Ops Plan (n1206–n1210 = 87.7%)
 
 ### Change

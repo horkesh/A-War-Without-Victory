@@ -1154,3 +1154,17 @@ Probes and feints are lifecycle-managed by `advanceSectorOffensives` in `sector_
 
 ### Point-only polygon contacts are not real adjacency (2026-03-28)
 The `operational_contact_graph.json` has 46 edges with `min_dist=0` that are **point-only contacts** — two OSID polygons share a single snapped vertex but NO actual boundary segment (0 consecutive shared vertices). These are data artifacts from polygon derivation, NOT real geographic adjacency. 12 of them are cross-faction, creating phantom front edges between OSIDs that don't actually touch. Key example: `op:kalinovik:sela_2` and `op:kalinovik:golubici_2` share exactly 1 vertex at `[18.293588, 43.472983]` but 0 boundary segments. The contact graph says `min_dist=0` (adjacent), but RS territory (Obalj, Ljuta) lies between them. This caused sector `arbih_1st_corps:7` to bridge Trnovo and Kalinovik into one sector. **Fix**: enrich the contact graph with `shared_segments` count per edge. Use `shared_segments >= 1` (not `min_dist === 0`) for all adjacency — sector edges, territory contiguity, front edge generation. Stats: 46 point-only contacts, 1,979 real segment contacts. Related to n1029 (min_dist enrichment) — this is the next layer of contact graph integrity.
+
+## [2026-03-29] Concurrent Corps Operations — Architectural Lessons
+
+### Garrison Cannibalization Pattern
+Corps AI overcommits brigades to operations, stripping sector garrisons. Three compounding gaps: (1) no garrison holdback at op launch — all available brigades enter op pool, (2) post-op drift lock — brigades left at op endpoint, sector-assigned by current location, then exempt from home recall, (3) large early-war ops scatter units across the map. The 6th Sanske Infantry (home: Sanski Most) was transferred to 1KK and sent to Derventa, leaving Sanski Most undefended for 40 weeks.
+
+### Paramilitary Scope Matters
+RS offensive paramilitary scope was hardcoded to Drina valley only, excluding the entire Krajina region. Expanding scope to include Prijedor/Sanski Most/Ključ immediately fixed a 6-OSID undefended pocket and added +3pp to calibration. The Krajina ethnic cleansing was one of the most documented campaigns of the war — the simulation simply wasn't modeling it.
+
+### Anomaly Detector Blind Spots
+26 anomaly checks existed but none compared sim results against painted targets. Undefended territory held by inertia (no defender, no attacker walking in) was invisible to all checks. Two new checks (#27 undefended_painted_mismatch, #28 adjacent_uncontested_territory) now catch this class of failure.
+
+### Column March Skip Prevents Trivial Captures
+`bot_brigade_ai_osid.ts:441-444` skips column-marching brigades entirely — they never evaluate uncontested occupation. A brigade marching past undefended enemy territory cannot capture it, even at zero cost. This is a systemic issue for any turn where brigades are reassigned between sectors.

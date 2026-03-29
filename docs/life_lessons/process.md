@@ -284,3 +284,9 @@
 - **Wrong approach**: Running `compare_painted_vs_sim.cjs` and `diagnose_run.cjs` and calling it done. These check territorial outcomes and deployment health, not internal accounting consistency.
 - **Right approach**: Run `tools/validate_run_consistency.cjs` after every scenario run. Checks: peak >= current, taken/inflicted accounting, assignment completeness, ghost paramilitaries, intel system liveness, formation.assignment sync.
 - **Do instead**: Add consistency validation to the post-run checklist alongside calibration comparison and diagnostics. Numbers that don't add up = bugs hiding in plain sight.
+
+### [Process] Parallel agent dispatch needs exclusive file ownership — overlapping edits corrupt files (2026-03-29) — NEW
+- **Context**: 4 agents dispatched for active_operation migration. Two agents both edited army_reserve_system.ts. One agent mangled h_phase_intelligence_warfare.test.ts badly (deleted test bodies, parse errors).
+- **Wrong approach**: Assigning files to agents without checking for overlaps. Trusting agents to do bulk find-replace without reading context.
+- **Right approach**: Create a file ownership table before dispatch. No two agents touch the same file. Each agent runs tsc after edits.
+- **Do instead**: Before parallel dispatch: (1) list all files, (2) assign each to exactly one agent, (3) verify no overlaps, (4) add "run tsc after edits" to every prompt.

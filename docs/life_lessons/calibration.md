@@ -238,3 +238,9 @@
 - **Wrong approach**: Adding ghosts to an op without checking the downstream queue. 1KK's chain is Prijedor->Corridor->Jajce->Donji Vakuf. Making Prijedor faster cascades through the entire chain.
 - **Right approach**: Before adding ghosts to any queued op, check (a) what ops follow in the queue, (b) whether the bot AI was already handling those objectives organically, (c) whether earlier completion shifts timing harmfully.
 - **Do instead**: After adding ghosts, run the scenario and diff not just the target region but ALL downstream op regions. Jajce was fine without Prijedor ghosts because bot AI captured it via uncontested occupation at t6-9.
+
+### [Calibration] Paramilitary scope exclusions silently prevent entire regions from being modeled (2026-03-29) — NEW
+- **Context**: RS offensive paramilitary scope was hardcoded to Drina valley only. The entire Krajina (Prijedor, Sanski Most, Kljuc) — site of some of the war's most documented ethnic cleansing — was excluded. 6 OSIDs stayed RBiH for 40 weeks with zero defenders because no paramilitary could target them.
+- **Wrong approach**: Not checking scope constants when investigating territorial mismatches. The anomaly detector had 26 checks but none compared against painted targets.
+- **Right approach**: When territory mismatches persist with zero defenders, check the paramilitary scope constants and the rear pocket cluster size threshold.
+- **Do instead**: After adding paramilitaries for a region, verify the scope includes all relevant municipalities. Run the anomaly detector's new undefended_painted_mismatch check (#27) to catch any remaining gaps.

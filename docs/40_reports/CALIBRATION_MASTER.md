@@ -3,6 +3,15 @@
 **Purpose:** Persistent lessons-learned record for war-phase calibration (April 1992 onward). 40w primary, 104w force trajectory.
 **Updated:** 2026-03-29 (n1210 — 5 fixes: Visegrad OOB + siege calc + JNA ghosts + sector reassignment + MIN_SECTOR_BRIGADES)
 
+## n1211 (2026-03-29) — Concurrent Corps Operations + Krajina Fixes
+- **90.9% area-weighted (40w)**. 22/22 anchors. 5/6 benchmarks.
+- Concurrent ops: `active_operations[]` replaces `active_operation`. Slot cap = floor(brigades/12).
+- Krajina paramilitary scope expanded (+6 municipalities). MAX_POCKET_CLUSTER 3→6.
+- +3.0pp from paramilitary fixes. Krajina 99.0%, Posavina NE 93.9%.
+- RS w40 benchmark FAILS (49.7% vs 55.3%). Sarajevo -3.5pp regression.
+- 59 consolidation flips, 22 combat flips, 63 total orders.
+- Previous: n1210=87.7%, n1205=92.1%.
+
 ## n1210 (2026-03-29) — 5 fixes: Visegrad OOB + siege calc + JNA ghosts + sector reassignment + MIN_SECTOR_BRIGADES
 
 **Run:** `apr1992_definitive_40w__77cac5e01d3c929e__w40_n1210`
