@@ -25,6 +25,7 @@ import type {
 } from '../../state/game_state.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
+import type { SpatialContext } from '../spatial_context.js';
 import { buildOsidAdjacency, type Osid } from './osid_adjacency.js';
 import { analyzeFactionGraph, type FactionGraphAnalysis } from './osid_graph_analysis.js';
 
@@ -36,6 +37,12 @@ import { generateCorpsDirectives, evaluateSectorStances } from './bot_corps_dire
 import { generateArmyHQOverrides } from './army_hq_overrides.js';
 import { getFactionCorps, getCorpsSubordinates } from './bot_corps_helpers.js';
 import { strictCompare } from '../../state/validateGameState.js';
+
+// ── v0.8 Commander Loop ────────────────────────────────────────────────
+import { runCommanderForCorps, applyCommanderOutput } from './commander/commander_loop.js';
+
+/** When true, use new commander loop instead of generateCorpsDirectives. */
+export const USE_COMMANDER_LOOP = true;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Re-exports for backward compatibility
@@ -180,6 +187,7 @@ export function generateAllCorpsOrders(
     supplyByOsid?: SupplyStateByOsidReport | null,
     ethnicMap?: OsidEthnicComposition | null,
     preComputedAdjacency?: ReadonlyMap<string, readonly string[]>,
+    spatial?: SpatialContext | null,
 ): void {
     // 0. Generate army HQ overrides for this turn (merge with any existing from gathering)
     const armyOverrides = generateArmyHQOverrides(state, faction);
@@ -223,7 +231,27 @@ export function generateAllCorpsOrders(
     // 6b. Evaluate sector stances (Layer B: independent sector stances)
     evaluateSectorStances(state, faction);
 
-    generateCorpsDirectives(state, faction, effectiveOsidEdges, reverseMap ?? null, graphAnalysis, supplyByOsid, ethnicMap, adjacency);
+    if (USE_COMMANDER_LOOP && spatial) {
+        // v0.8 Commander Loop: per-corps decision loop replaces generateCorpsDirectives
+        const corpsList = getFactionCorps(state, faction);
+        for (const corps of corpsList) {
+            const output = runCommanderForCorps(
+                state,
+                corps.id,
+                faction,
+                spatial,
+                effectiveOsidEdges,
+                reverseMap ?? null,
+                graphAnalysis,
+                supplyByOsid,
+                ethnicMap ?? null,
+            );
+            applyCommanderOutput(state, corps.id, output);
+        }
+    } else {
+        // Old path: generateCorpsDirectives (per-faction)
+        generateCorpsDirectives(state, faction, effectiveOsidEdges, reverseMap ?? null, graphAnalysis, supplyByOsid, ethnicMap, adjacency);
+    }
 
     // Final cleanup: prune any 0-edge ghost sectors (pocket containment artifacts)
     if (state.military.corps_front_sectors) {

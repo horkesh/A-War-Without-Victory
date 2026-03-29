@@ -37,6 +37,7 @@ import type { EliteLoanState, ArmyReserveRequest, EliteBrigadeTracker, ArmyReser
 import type { BrigadeWarStory } from '../sim/war_stories.js';
 import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
+import type { CommanderState } from '../sim/combat/commander/commander_state.js';
 
 export const CURRENT_SCHEMA_VERSION = 2 as const;
 
@@ -478,6 +479,8 @@ export interface CorpsCommandState {
     status_reason?: string;
     /** Diagnostic: gate audit trace for operation launch evaluation. */
     op_launch_trace?: string[];
+    /** Persistent commander state for v0.8 intelligent corps AI. */
+    commander_state?: CommanderState;
 }
 
 /** Operational group activation order. */

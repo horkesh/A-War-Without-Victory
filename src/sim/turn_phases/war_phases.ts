@@ -1018,7 +1018,7 @@ export const warPhases: NamedPhase[] = [
             const corpsAdjacency = corpsSpatial?.preCombat.adjacency;
             for (const faction of factions) {
                 const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
-                generateAllCorpsOrders(context.state, faction, edges, sidToMun, reverseMap, osidEdges, supplyByOsid, corpsEthnicMap, corpsAdjacency);
+                generateAllCorpsOrders(context.state, faction, edges, sidToMun, reverseMap, osidEdges, supplyByOsid, corpsEthnicMap, corpsAdjacency, corpsSpatial?.preCombat);
                 corpsReport.push(...extractCorpsAiReport(context.state, faction as FactionId));
             }
             if (corpsReport.length > 0) {
