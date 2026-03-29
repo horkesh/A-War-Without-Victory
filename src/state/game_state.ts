@@ -228,6 +228,10 @@ export interface OperationAxis {
     axis_id: string;
     name: string;
     assigned_brigades: FormationId[];
+    /** Designated main effort brigade — highest basePower at launch. Full combat power. */
+    main_brigade?: FormationId;
+    /** All other brigades on this axis. Reduced combat power, reduced casualties. */
+    support_brigades?: FormationId[];
     objectives: string[];
     current_objective_index: number;
     status: 'executing' | 'stalled' | 'complete';

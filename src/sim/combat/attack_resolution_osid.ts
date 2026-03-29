@@ -91,6 +91,8 @@ import {
     SECTOR_STANCE_REACTIVE_BONUS,
 } from './combat_math.js';
 import { OFFICER_CASUALTY_MULT, OFFICER_QUALITY_FLOOR } from './officer_quality_update.js';
+import { isSupportBrigadeOnActiveOp } from './sector_offensive.js';
+import { SUPPORT_POWER_MULT, SUPPORT_CASUALTY_MULT } from './bot_constants.js';
 import { findSectorForEnemyOsid, findSubSegmentForOsid, getCorpsHqOsid } from './corps_front_sectors.js';
 import { getEnclaveGarrisonPower, getEnclaveCapitalOsid, isEnclaveCapital, isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
 // frontDensityModifier import removed — no longer used in sector defense
@@ -973,7 +975,10 @@ export function resolveAttackOrdersOsid(
             const posture = a.posture ?? 'defend';
             const atkMult = POSTURE_ATTACK[posture] ?? 0;
             const effectivePosture = atkMult > 0 ? posture : 'attack';
-            return s + computeAttackerPower(state, a, supplyStateByOsid, effectivePosture, targetTerrainMult, targetOsid);
+            const rawPower = computeAttackerPower(state, a, supplyStateByOsid, effectivePosture, targetTerrainMult, targetOsid);
+            // Support brigades contribute reduced power — main brigade carries the assault
+            const supportMult = isSupportBrigadeOnActiveOp(state, a.id, a.corps_id) ? SUPPORT_POWER_MULT : 1.0;
+            return s + rawPower * supportMult;
         }, 0) * coordPenalty * seasonal.attack_mult * concentrationBonus;
         defenderPower *= seasonal.defense_mult;
 
@@ -1072,7 +1077,9 @@ export function resolveAttackOrdersOsid(
 
         for (const a of attackerFormations) {
             const frac = (a.personnel ?? 0) / Math.max(1, personnelAttacker);
-            const cas = Math.round(finalAttackerCas * frac);
+            // Support brigades take reduced casualties — overwatch/fire support, not leading the assault
+            const isSupport = isSupportBrigadeOnActiveOp(state, a.id, a.corps_id);
+            const cas = Math.round(finalAttackerCas * frac * (isSupport ? SUPPORT_CASUALTY_MULT : 1.0));
             applyPersonnelLoss(a, cas);
             a.cohesion = Math.max(0, Math.min(100, (a.cohesion ?? 60) + (COHESION_ATTACKER[outcome] ?? 0)));
 

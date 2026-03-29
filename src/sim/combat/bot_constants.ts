@@ -90,6 +90,16 @@ export const OG_MAX_CONTRIBUTION_PER_DONOR = 500;
 export const OG_DEFAULT_DURATION = 5;
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Multi-brigade operation role modifiers
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Support brigades contribute reduced combat power (main brigade = 1.0×). */
+export const SUPPORT_POWER_MULT = 0.70;
+
+/** Support brigades take reduced casualties (main brigade = 1.0×). */
+export const SUPPORT_CASUALTY_MULT = 0.40;
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Corridor breach parameters (from bot_corps_ai.ts)
 // ═══════════════════════════════════════════════════════════════════════════
 

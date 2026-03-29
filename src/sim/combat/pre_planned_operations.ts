@@ -680,6 +680,7 @@ function buildAxesFromDef(
             axisBrigades,
             axisObjectives,
             axisDef.staging_osid ?? def.staging_osid,
+            formations,
         ));
         const lastAxis = builtAxes[builtAxes.length - 1]!;
         lastAxis.axis_id = axisDef.axis_id;

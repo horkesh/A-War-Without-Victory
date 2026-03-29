@@ -291,6 +291,7 @@ function buildOperation(
             axisBrigades,
             axisObjectives,
             axisDef.staging_osid ?? def.staging_osid,
+            formations,
         );
         axis.axis_id = axisDef.axis_id;
         axis.name = axisDef.name;

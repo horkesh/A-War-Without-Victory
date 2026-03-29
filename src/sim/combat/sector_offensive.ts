@@ -29,6 +29,7 @@ import type {
     CorpsOperation,
     FactionId,
     FormationId,
+    FormationState,
     GameState,
     OperationAxis,
     SettlementId,
@@ -473,11 +474,16 @@ export function createSingleAxis(
     brigades: FormationId[],
     objectives: string[],
     stagingOsid?: string,
+    formations?: Record<string, FormationState>,
 ): OperationAxis {
+    const sorted = brigades.sort(strictCompare);
+    const { main, support } = assignBrigadeRoles(sorted, formations);
     return {
         axis_id: 'main',
         name: 'Main Advance',
-        assigned_brigades: brigades.sort(strictCompare),
+        assigned_brigades: sorted,
+        ...(main && { main_brigade: main }),
+        ...(support.length > 0 && { support_brigades: support }),
         objectives,
         current_objective_index: 0,
         status: 'executing',
@@ -490,6 +496,55 @@ export function createSingleAxis(
         idle_execution_turn_streak: 0,
         ...(stagingOsid && { staging_osid: stagingOsid }),
     };
+}
+
+/**
+ * Assign main/support roles to brigades on an axis.
+ * Main brigade = highest basePower (deterministic tiebreak by ID).
+ * All others = support.
+ */
+export function assignBrigadeRoles(
+    brigadeIds: FormationId[],
+    formations?: Record<string, FormationState>,
+): { main: FormationId | undefined; support: FormationId[] } {
+    if (!formations || brigadeIds.length === 0) {
+        return { main: undefined, support: [] };
+    }
+    if (brigadeIds.length === 1) {
+        return { main: brigadeIds[0], support: [] };
+    }
+    const ranked = [...brigadeIds].sort((a, b) => {
+        const fa = formations[a];
+        const fb = formations[b];
+        const pa = fa ? basePower(fa) : 0;
+        const pb = fb ? basePower(fb) : 0;
+        if (pb !== pa) return pb - pa;
+        return strictCompare(a, b);
+    });
+    return {
+        main: ranked[0],
+        support: ranked.slice(1).sort(strictCompare),
+    };
+}
+
+/**
+ * Check whether a brigade is a SUPPORT brigade on its corps' active operation.
+ * Main brigades and non-participants return false.
+ */
+export function isSupportBrigadeOnActiveOp(
+    state: GameState,
+    brigadeId: FormationId,
+    corpsId: FormationId | null | undefined,
+): boolean {
+    if (!corpsId) return false;
+    const cmd = state.military.corps_command?.[corpsId];
+    const op = cmd?.active_operation;
+    if (!op || op.phase !== 'execution') return false;
+    if (!op.axes) return false;
+    for (const axis of op.axes) {
+        if (axis.support_brigades?.includes(brigadeId)) return true;
+    }
+    return false;
 }
 
 /** Compute planning duration for multi-axis ops: based on longest axis. */
@@ -1758,7 +1813,7 @@ export function evaluateCorpsOffensiveLaunch(
         phase_started_turn: turn,
         participating_brigades: sortedParticipating,
         sector_id: primarySectorId,
-        axes: [createSingleAxis(sortedParticipating, objectives, stagingOsid)],
+        axes: [createSingleAxis(sortedParticipating, objectives, stagingOsid, formations)],
         objectives,
         current_objective_index: 0,
         planning_duration: planningDuration,
