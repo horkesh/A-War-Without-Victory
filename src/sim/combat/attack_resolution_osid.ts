@@ -92,7 +92,7 @@ import {
 } from './combat_math.js';
 import { OFFICER_CASUALTY_MULT, OFFICER_QUALITY_FLOOR } from './officer_quality_update.js';
 import { isSupportBrigadeOnActiveOp } from './sector_offensive.js';
-import { SUPPORT_POWER_MULT, SUPPORT_CASUALTY_MULT } from './bot_constants.js';
+import { SUPPORT_POWER_MULT, MAIN_CASUALTY_MULT, SUPPORT_CASUALTY_MULT } from './bot_constants.js';
 import { findSectorForEnemyOsid, findSubSegmentForOsid, getCorpsHqOsid } from './corps_front_sectors.js';
 import { getEnclaveGarrisonPower, getEnclaveCapitalOsid, isEnclaveCapital, isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
 // frontDensityModifier import removed — no longer used in sector defense
@@ -1075,11 +1075,21 @@ export function resolveAttackOrdersOsid(
         let totalDTanksLost = 0;
         let totalDArtLost = 0;
 
+        // Compute renormalized casualty weights: main takes MAIN_CASUALTY_MULT, support takes SUPPORT_CASUALTY_MULT.
+        // Total casualties are preserved — weights are renormalized so sum matches finalAttackerCas.
+        const rawWeights: { f: typeof attackerFormations[0]; w: number }[] = [];
+        let weightSum = 0;
         for (const a of attackerFormations) {
             const frac = (a.personnel ?? 0) / Math.max(1, personnelAttacker);
-            // Support brigades take reduced casualties — overwatch/fire support, not leading the assault
             const isSupport = isSupportBrigadeOnActiveOp(state, a.id, a.corps_id);
-            const cas = Math.round(finalAttackerCas * frac * (isSupport ? SUPPORT_CASUALTY_MULT : 1.0));
+            const isMain = !isSupport && attackerFormations.some(b => isSupportBrigadeOnActiveOp(state, b.id, b.corps_id));
+            const mult = isSupport ? SUPPORT_CASUALTY_MULT : isMain ? MAIN_CASUALTY_MULT : 1.0;
+            const w = frac * mult;
+            rawWeights.push({ f: a, w });
+            weightSum += w;
+        }
+        for (const { f: a, w } of rawWeights) {
+            const cas = Math.round(finalAttackerCas * (weightSum > 0 ? w / weightSum : 0));
             applyPersonnelLoss(a, cas);
             a.cohesion = Math.max(0, Math.min(100, (a.cohesion ?? 60) + (COHESION_ATTACKER[outcome] ?? 0)));
 

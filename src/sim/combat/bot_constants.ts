@@ -93,11 +93,18 @@ export const OG_DEFAULT_DURATION = 5;
 // Multi-brigade operation role modifiers
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Support brigades contribute reduced combat power (main brigade = 1.0×). */
-export const SUPPORT_POWER_MULT = 0.70;
+/** Support brigades contribute full combat power — concentration bonus already
+ *  models multi-unit effectiveness. BB1 p.182: supporting attacks were full
+ *  ground attacks from different axes, not reduced-power fire support. */
+export const SUPPORT_POWER_MULT = 1.0;
 
-/** Support brigades take reduced casualties (main brigade = 1.0×). */
-export const SUPPORT_CASUALTY_MULT = 0.40;
+/** Main brigade absorbs disproportionate casualties — leads the assault,
+ *  crosses the killing ground first. Produces ~56% share in a 3-bde op. */
+export const MAIN_CASUALTY_MULT = 1.40;
+
+/** Support brigades take reduced casualties — suppressive/fixing role,
+ *  in defilade, not leading the assault. Still takes mortar/counter-battery. */
+export const SUPPORT_CASUALTY_MULT = 0.55;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Corridor breach parameters (from bot_corps_ai.ts)
