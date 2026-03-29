@@ -1,7 +1,18 @@
 # AWWV Calibration Master Reference
 
 **Purpose:** Persistent lessons-learned record for war-phase calibration (April 1992 onward). 40w primary, 104w force trajectory.
-**Updated:** 2026-03-29 (n1204 — SpatialContext + 7 architectural fixes + multi-brigade)
+**Updated:** 2026-03-29 (n1205 — power-neutral support model recovers 92.1%)
+
+## n1205 (2026-03-29) — Power-neutral casualty-asymmetric support model
+
+**Run:** `apr1992_definitive_40w__77cac5e01d3c929e__w40_n1205`
+**Hash:** `3e3456f5d3d68969`
+**Area-weighted:** 92.1% (fully recovered from n1204's 90.9%)
+**OSID match:** 640/712 (89.9%) — identical to n1203
+**Consistency:** PASS
+**Change:** SUPPORT_POWER_MULT 0.70→1.0, MAIN_CASUALTY_MULT=1.40 (new), SUPPORT_CASUALTY_MULT 0.40→0.55. Renormalized casualty distribution preserves total. Expert consensus: BB1 p.182 confirms supporting attacks were full ground attacks from different axes, not reduced-power fire support. Power-neutral is correct.
+**Key observation:** Identical to n1203 because SUPPORT_POWER_MULT=1.0 means power calculation unchanged. Casualty redistribution toward main effort doesn't affect territory.
+**War-or-Game:** Pending (n1204 was APPROVED WITH CAVEATS — same underlying dynamics apply).
 
 ## n1204 (2026-03-29) — SpatialContext + 7 architectural fixes + multi-brigade ops
 
