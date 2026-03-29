@@ -170,8 +170,18 @@ export function bfsToNearestSector(
     return null; // Unreachable (enclave with no front edges)
 }
 
-/** Simple BFS distance between two OSIDs through adjacency graph. */
-export function bfsDistance(from: string, to: string, adjacency: Map<string, string[]>): number {
+/**
+ * Simple BFS distance between two OSIDs through adjacency graph.
+ * When `friendlyOsids` is provided, BFS only expands through OSIDs in that set
+ * (the `from` and `to` nodes are always allowed regardless).
+ * This prevents pathing through enemy territory.
+ */
+export function bfsDistance(
+    from: string,
+    to: string,
+    adjacency: Map<string, string[]>,
+    friendlyOsids?: Set<string>,
+): number {
     if (from === to) return 0;
     if (!from || !to) return Infinity;
     const visited = new Set<string>([from]);
@@ -186,6 +196,8 @@ export function bfsDistance(from: string, to: string, adjacency: Map<string, str
         for (const n of neighbors) {
             if (n === to) return depth + 1;
             if (visited.has(n)) continue;
+            // When faction-filtering, only expand through friendly territory
+            if (friendlyOsids && !friendlyOsids.has(n)) continue;
             visited.add(n);
             queue.push({ osid: n, depth: depth + 1 });
         }

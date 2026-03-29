@@ -13,7 +13,7 @@
  * Deterministic: sorted iteration via strictCompare, no Math.random(), no timestamps.
  */
 
-import type { CorpsFrontSector, CorpsCommandState, FormationState, GameState, SettlementId } from '../../state/game_state.js';
+import type { CorpsFrontSector, CorpsCommandState, FactionId, FormationState, GameState, SettlementId } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { bfsDistance } from './sector_utils.js';
 
@@ -114,6 +114,16 @@ export function distributeBrigadesToFront(
 ): void {
     const formations = state.military.formations ?? {};
     const opParticipants = buildOperationParticipantSet(state);
+
+    // Build friendly OSID sets per faction (BFS should not path through enemy territory)
+    const friendlyByFaction = new Map<FactionId, Set<string>>();
+    const pc = state.political?.political_controllers ?? {};
+    for (const [osid, controller] of Object.entries(pc)) {
+        if (!controller) continue;
+        let s = friendlyByFaction.get(controller as FactionId);
+        if (!s) { s = new Set<string>(); friendlyByFaction.set(controller as FactionId, s); }
+        s.add(osid);
+    }
 
     for (const sector of sectors) {
         // Skip sectors with no sub-segments
@@ -228,7 +238,7 @@ export function distributeBrigadesToFront(
                 const target = pickLeastStackedTarget(sortedFrontOsids, osidCount, f.home_osid);
 
                 // Compute distance
-                const dist = bfsDistance(loc, target, adjacency);
+                const dist = bfsDistance(loc, target, adjacency, friendlyByFaction.get(sector.faction));
 
                 if (dist === 1) {
                     // Adjacent: move directly

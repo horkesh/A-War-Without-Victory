@@ -6,6 +6,7 @@
 import type {
     CorpsFrontSector,
     CorpsFrontSubSegment,
+    FactionId,
     FormationState,
     GameState,
 } from '../../state/game_state.js';
@@ -41,6 +42,16 @@ export function assignBrigadesToSubSegments(
     adjacency: Map<string, string[]>
 ): void {
     const formations = state.military.formations ?? {};
+
+    // Build friendly OSID sets per faction (BFS should not path through enemy territory)
+    const friendlyByFaction = new Map<FactionId, Set<string>>();
+    const pc = state.political?.political_controllers ?? {};
+    for (const [osid, controller] of Object.entries(pc)) {
+        if (!controller) continue;
+        let s = friendlyByFaction.get(controller as FactionId);
+        if (!s) { s = new Set<string>(); friendlyByFaction.set(controller as FactionId, s); }
+        s.add(osid);
+    }
 
     for (const sector of sectors) {
         if (sector.sub_segments.length === 0) continue;
@@ -133,7 +144,7 @@ export function assignBrigadesToSubSegments(
                 let minDist = Infinity;
                 for (const fOsid of ss.friendly_osids) {
                     if (fOsid === brigLoc) { minDist = 0; break; }
-                    const d = bfsDistance(brigLoc, fOsid, adjacency);
+                    const d = bfsDistance(brigLoc, fOsid, adjacency, friendlyByFaction.get(sector.faction));
                     if (d < minDist) minDist = d;
                 }
                 let score = 1.0 / (1 + (minDist === Infinity ? 20 : minDist));
