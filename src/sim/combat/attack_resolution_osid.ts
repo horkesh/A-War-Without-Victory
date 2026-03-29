@@ -336,32 +336,46 @@ function allocateIntegerByWeights(
     return out;
 }
 
-function findEmergencyRetreatOsid(
+export function findEmergencyRetreatOsid(
     state: GameState,
     formation: FormationState,
     reverseMap: OperationalToCanonicalReverseMap,
     adjacency?: Map<Osid, Osid[]>,
-    sourceOsid?: string
+    sourceOsid?: string,
+    friendlyOsids?: Set<string>
 ): string | null {
     const factionId = formation.faction as FactionId;
     const pc = state.political?.political_controllers ?? {};
 
-    // 1. Try home_osid
+    // Build friendly set and connected components for reachability checks
+    const friendly = friendlyOsids ?? buildFriendlySet(pc, factionId);
+    const componentOf = adjacency ? buildFriendlyComponentsLocal(adjacency, friendly) : new Map<string, number>();
+
+    const origin = sourceOsid ?? (formation as { location_osid?: string }).location_osid;
+    const originComponent = origin ? componentOf.get(origin) : undefined;
+
+    /** Check if a candidate OSID is reachable from origin through friendly territory. */
+    const isReachable = (osid: string): boolean => {
+        if (originComponent === undefined) return true; // no adjacency → can't verify, allow
+        const comp = componentOf.get(osid);
+        return comp !== undefined && comp === originComponent;
+    };
+
+    // 1. Try home_osid (must be friendly AND reachable)
     const homeOsid = (formation as { home_osid?: string }).home_osid;
-    if (homeOsid && getPoliticalControllerOSID(state, homeOsid, reverseMap) === factionId) {
+    if (homeOsid && friendly.has(homeOsid) && isReachable(homeOsid)) {
         return homeOsid;
     }
 
-    // 2. Try fallback_osid
+    // 2. Try fallback_osid (must be friendly AND reachable)
     const fallbackOsid = (formation as { fallback_osid?: string }).fallback_osid;
-    if (fallbackOsid && getPoliticalControllerOSID(state, fallbackOsid, reverseMap) === factionId) {
+    if (fallbackOsid && friendly.has(fallbackOsid) && isReachable(fallbackOsid)) {
         return fallbackOsid;
     }
 
-    // 3. BFS from current location: find nearest friendly OSID within limited radius.
+    // 3. BFS from current location through friendly territory only.
     //    Keeps enclave brigades inside their pocket instead of teleporting to corps HQ.
     //    BB2 p.479: beaten units fell back concentrically toward Goražde town.
-    const origin = sourceOsid ?? (formation as { location_osid?: string }).location_osid;
     if (adjacency && origin) {
         const visited = new Set<string>([origin]);
         let frontier = [origin as Osid];
@@ -371,29 +385,111 @@ function findEmergencyRetreatOsid(
                 for (const n of (adjacency.get(curr) ?? [])) {
                     if (visited.has(n)) continue;
                     visited.add(n);
-                    if (getPoliticalControllerOSID(state, n, reverseMap) === factionId) {
+                    if (friendly.has(n)) {
                         return n;
                     }
-                    next.push(n);
+                    // Do NOT expand through enemy territory
                 }
             }
             frontier = next;
         }
     }
 
-    // 4. Try corps HQ
+    // 4. Try corps HQ (must be reachable)
     const hqOsid = getCorpsHqOsid(state, formation);
-    if (hqOsid && getPoliticalControllerOSID(state, hqOsid, reverseMap) === factionId) {
+    if (hqOsid && friendly.has(hqOsid) && isReachable(hqOsid)) {
         return hqOsid;
     }
 
-    // 5. Any friendly OSID (sorted for determinism)
+    // 5. Same connected component fallback (sorted for determinism)
+    if (originComponent !== undefined) {
+        const compOsids = Array.from(componentOf.entries())
+            .filter(([, comp]) => comp === originComponent)
+            .map(([osid]) => osid)
+            .sort(strictCompare);
+        for (const osid of compOsids) {
+            if (friendly.has(osid)) return osid;
+        }
+    }
+
+    // 6. Largest friendly component fallback
+    const largestComp = findLargestComponent(componentOf);
+    if (largestComp !== -1) {
+        const compOsids = Array.from(componentOf.entries())
+            .filter(([, comp]) => comp === largestComp)
+            .map(([osid]) => osid)
+            .sort(strictCompare);
+        for (const osid of compOsids) {
+            if (friendly.has(osid)) return osid;
+        }
+    }
+
+    // 7. Any friendly OSID (sorted for determinism) — absolute last resort
     const osids = Object.keys(pc).sort(strictCompare);
     for (const osid of osids) {
         if (pc[osid] === factionId) return osid;
     }
 
     return null;
+}
+
+/** Build a Set of OSIDs controlled by a faction from political_controllers. */
+function buildFriendlySet(
+    pc: Record<string, string | null>,
+    factionId: string
+): Set<string> {
+    const result = new Set<string>();
+    for (const osid of Object.keys(pc)) {
+        if (pc[osid] === factionId) result.add(osid);
+    }
+    return result;
+}
+
+/**
+ * BFS connected components through friendly-only territory.
+ * Returns Map<osid, componentIndex>. Deterministic via strictCompare sort.
+ */
+function buildFriendlyComponentsLocal(
+    adjacency: Map<Osid, Osid[]>,
+    friendlyOsids: Set<string>
+): Map<string, number> {
+    const componentOf = new Map<string, number>();
+    let nextComponent = 0;
+    const sorted = Array.from(friendlyOsids).sort(strictCompare);
+    for (const seed of sorted) {
+        if (componentOf.has(seed)) continue;
+        const comp = nextComponent++;
+        const queue = [seed];
+        componentOf.set(seed, comp);
+        while (queue.length > 0) {
+            const curr = queue.shift()!;
+            for (const n of (adjacency.get(curr as Osid) ?? [])) {
+                if (componentOf.has(n)) continue;
+                if (!friendlyOsids.has(n)) continue;
+                componentOf.set(n, comp);
+                queue.push(n);
+            }
+        }
+    }
+    return componentOf;
+}
+
+/** Find the component index with the most OSIDs. Returns -1 if empty. */
+function findLargestComponent(componentOf: Map<string, number>): number {
+    if (componentOf.size === 0) return -1;
+    const counts = new Map<number, number>();
+    for (const comp of componentOf.values()) {
+        counts.set(comp, (counts.get(comp) ?? 0) + 1);
+    }
+    let best = -1;
+    let bestCount = 0;
+    // Deterministic: iterate sorted component indices
+    const compIndices = Array.from(counts.keys()).sort((a, b) => a - b);
+    for (const comp of compIndices) {
+        const c = counts.get(comp) ?? 0;
+        if (c > bestCount) { bestCount = c; best = comp; }
+    }
+    return best;
 }
 
 /** Personnel retain fraction for emergency long-distance retreat (e.g. displaced from behind enemy lines). */
@@ -409,6 +505,7 @@ interface ForceRetreatOptions {
     cohesionLoss?: number;
     disruptedTurns?: number;
     adjacency?: Map<Osid, Osid[]>;
+    friendlyOsids?: Set<string>;
 }
 
 /**
@@ -425,7 +522,7 @@ function forceRetreatWithPenalties(
     const personnelRetain = opts?.personnelRetain ?? EMERGENCY_RETREAT_PERSONNEL_RETAIN;
     const cohesionLoss = opts?.cohesionLoss ?? EMERGENCY_RETREAT_COHESION_LOSS;
     const disruptedTurns = opts?.disruptedTurns ?? EMERGENCY_RETREAT_DISRUPTED_TURNS;
-    const dest = findEmergencyRetreatOsid(state, formation, reverseMap, opts?.adjacency, sourceOsid);
+    const dest = findEmergencyRetreatOsid(state, formation, reverseMap, opts?.adjacency, sourceOsid, opts?.friendlyOsids);
     const f = formation as FormationState & { location_osid?: string; disrupted_turns?: number; last_retreat_from?: { osid: string; turn: number } };
     resetFormationEntrenchment(formation);
     f.disrupted_turns = disruptedTurns;
@@ -454,6 +551,14 @@ export function displaceFormationsInEnemyTerritory(
     reverseMap: OperationalToCanonicalReverseMap
 ): void {
     const adjacency = buildOsidAdjacency(edges);
+    const pc = state.political?.political_controllers ?? {};
+    // Lazy per-faction friendly sets
+    const friendlyCache = new Map<string, Set<string>>();
+    const getFriendly = (fac: string): Set<string> => {
+        let s = friendlyCache.get(fac);
+        if (!s) { s = buildFriendlySet(pc, fac); friendlyCache.set(fac, s); }
+        return s;
+    };
     const formations = state.military.formations ?? {};
     for (const fid of Object.keys(formations).sort(strictCompare)) {
         const f = formations[fid];
@@ -471,7 +576,7 @@ export function displaceFormationsInEnemyTerritory(
             resetFormationEntrenchment(otherFormation);
         } else {
             // No adjacent friendly — emergency retreat with penalties
-            forceRetreatWithPenalties(state, otherFormation, reverseMap, loc, { adjacency });
+            forceRetreatWithPenalties(state, otherFormation, reverseMap, loc, { adjacency, friendlyOsids: getFriendly(factionId) });
         }
     }
 }
@@ -610,6 +715,18 @@ export function resolveAttackOrdersOsid(
     const adjacency = buildOsidAdjacency(edges);
     const fmts = state.military.formations ?? {};
     const allFormations = Object.keys(fmts).sort(strictCompare).map(k => fmts[k]!);
+
+    // Lazy per-faction friendly sets for direction-aware retreat
+    const friendlyCache = new Map<string, Set<string>>();
+    const getFriendlyForFaction = (fac: string): Set<string> => {
+        let s = friendlyCache.get(fac);
+        if (!s) {
+            const pc = state.political?.political_controllers ?? {};
+            s = buildFriendlySet(pc, fac);
+            friendlyCache.set(fac, s);
+        }
+        return s;
+    };
     if (!orders || typeof orders !== 'object') {
         // No orders this turn — still run displacement pass so formations left in enemy territory from a previous turn are fixed
         for (const f of allFormations) {
@@ -625,7 +742,7 @@ export function resolveAttackOrdersOsid(
                 otherFormation.location_osid = dest;
                 resetFormationEntrenchment(otherFormation);
             } else {
-                forceRetreatWithPenalties(state, otherFormation, reverseMap, loc, { adjacency });
+                forceRetreatWithPenalties(state, otherFormation, reverseMap, loc, { adjacency, friendlyOsids: getFriendlyForFaction(factionId) });
             }
         }
         return report;
@@ -773,6 +890,18 @@ export function resolveAttackOrdersOsid(
                 const { primary, totalPower } = rankDefendersByPower(defenderFormations, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
                 defenderPower = totalPower;
                 defenderFormation = primary;
+                // Populate sector defense data for proportional casualty distribution
+                if (defenderFormations.length > 1) {
+                    sectorDefenseBrigades = defenderFormations;
+                    const totalPers = defenderFormations.reduce((s, b) => s + (b.personnel ?? 0), 0);
+                    sectorBrigadeWeights = new Map<FormationId, number>();
+                    sectorBrigadeMeta = new Map<FormationId, { hops: number; isHome: boolean }>();
+                    for (const b of defenderFormations) {
+                        const pers = b.personnel ?? 0;
+                        sectorBrigadeWeights.set(b.id, totalPers > 0 ? pers / totalPers : 1 / defenderFormations.length);
+                        sectorBrigadeMeta.set(b.id, { hops: 0, isHome: false });
+                    }
+                }
             } else {
                 // Truly undefended: no sector, no brigade — militia ghost only
                 defenderPower = (osidPopulationMap?.get(targetOsid) ?? 5000) * MILITIA_DEFENSE_RATIO * 0.25;
@@ -782,6 +911,18 @@ export function resolveAttackOrdersOsid(
             const { primary, totalPower } = rankDefendersByPower(defenderFormations, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
             defenderPower = totalPower;
             defenderFormation = primary;
+            // Populate sector defense data for proportional casualty distribution
+            if (defenderFormations.length > 1) {
+                sectorDefenseBrigades = defenderFormations;
+                const totalPers = defenderFormations.reduce((s, b) => s + (b.personnel ?? 0), 0);
+                sectorBrigadeWeights = new Map<FormationId, number>();
+                sectorBrigadeMeta = new Map<FormationId, { hops: number; isHome: boolean }>();
+                for (const b of defenderFormations) {
+                    const pers = b.personnel ?? 0;
+                    sectorBrigadeWeights.set(b.id, totalPers > 0 ? pers / totalPers : 1 / defenderFormations.length);
+                    sectorBrigadeMeta.set(b.id, { hops: 0, isHome: false });
+                }
+            }
         } else {
             continue;
         }
@@ -1548,7 +1689,7 @@ export function resolveAttackOrdersOsid(
                     (defenderFormation as { location_osid?: string }).location_osid = dest;
                     applyDefeatPenalties(defenderFormation, targetOsid, state.meta?.turn ?? 0, outcome);
                 } else {
-                    forceRetreatWithPenalties(state, defenderFormation, reverseMap, targetOsid, { adjacency });
+                    forceRetreatWithPenalties(state, defenderFormation, reverseMap, targetOsid, { adjacency, friendlyOsids: getFriendlyForFaction(defenderFormation.faction as string) });
                 }
             } else {
                 // Sector-coverage defender: DO NOT change location_osid.
@@ -1598,7 +1739,7 @@ export function resolveAttackOrdersOsid(
                     otherFormation.location_osid = dest;
                     resetFormationEntrenchment(otherFormation);
                 } else {
-                    forceRetreatWithPenalties(state, otherFormation, reverseMap, targetOsid, { adjacency });
+                    forceRetreatWithPenalties(state, otherFormation, reverseMap, targetOsid, { adjacency, friendlyOsids: getFriendlyForFaction(f.faction as string) });
                 }
             }
         }
@@ -1679,6 +1820,17 @@ export function resolveAttackOrdersOsid(
     }
 
     // Final pass: displace any formation still in enemy territory (e.g. moved to an OSID that flipped in a later battle this turn)
+    // Rebuild fresh friendly sets — political_controllers changed during combat
+    const finalFriendlyCache = new Map<string, Set<string>>();
+    const getFinalFriendly = (fac: string): Set<string> => {
+        let s = finalFriendlyCache.get(fac);
+        if (!s) {
+            const pcFinal = state.political?.political_controllers ?? {};
+            s = buildFriendlySet(pcFinal, fac);
+            finalFriendlyCache.set(fac, s);
+        }
+        return s;
+    };
     const formations = state.military.formations ?? {};
     for (const fid of Object.keys(formations).sort(strictCompare)) {
         const f = formations[fid];
@@ -1695,7 +1847,7 @@ export function resolveAttackOrdersOsid(
             otherFormation.location_osid = dest;
             resetFormationEntrenchment(otherFormation);
         } else {
-            forceRetreatWithPenalties(state, otherFormation, reverseMap, loc, { adjacency });
+            forceRetreatWithPenalties(state, otherFormation, reverseMap, loc, { adjacency, friendlyOsids: getFinalFriendly(factionId) });
         }
     }
 
