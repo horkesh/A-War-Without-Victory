@@ -214,8 +214,10 @@ export function evaluateOperationProgress(
         if (!cmd?.active_operation) continue;
         const op = cmd.active_operation;
 
-        // sector_attack ops have their own lifecycle in advanceSectorOffensives()
-        if (op.type === 'sector_attack') continue;
+        // sector_attack, probe, and feint ops have their own lifecycle in
+        // advanceSectorOffensives(). Processing them here would cause double
+        // phase transitions and double exhaustion costs.
+        if (op.type === 'sector_attack' || op.type === 'probe' || op.type === 'feint') continue;
 
         const turnsInPhase = turn - op.phase_started_turn;
 

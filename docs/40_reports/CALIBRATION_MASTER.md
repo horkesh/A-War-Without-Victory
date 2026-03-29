@@ -1,7 +1,50 @@
 # AWWV Calibration Master Reference
 
 **Purpose:** Persistent lessons-learned record for war-phase calibration (April 1992 onward). 40w primary, 104w force trajectory.
-**Updated:** 2026-03-25 (P3 backlog cleared → 40w **91.7%**, 95 events)
+**Updated:** 2026-03-29 (n1194 — fresh 40w baseline + paramilitary dissolution fix)
+
+## n1194 (2026-03-29) — Fresh 40w baseline + paramilitary dissolution fix
+
+**Run:** `apr1992_definitive_40w__77cac5e01d3c929e__w40_n1194`
+**Hash:** `d3542bbae8c59c9d`
+**Area-weighted:** 88.4% (regression from n1170 90.0% — dirty working tree)
+**Anchors:** 20/22 (failed: brka_2 Brčko, zepa_2 Žepa)
+**Benchmarks:** 5/6
+**Battles:** 136 (up from 103)
+**Orders:** 149 (RS:62, RBiH:81, HRHB:6)
+
+### Findings
+- **Paramilitary dissolution bug FIXED**: `dissolveParamilitary()` in `paramilitary_sweep.ts` set `status: 'inactive'` but never zeroed `personnel`. 52 RS paramilitaries carried 21,300 ghost troops. Real RS strength: 99,030 (90 active brigades), not 120,330/142 reported. Fix: `f.personnel = 0` on dissolution.
+- **ARBiH 81 orders in 1992 — emergent decision failure**: Root cause is NOT missing doctrine gates. The combat predictor uses `stalemate` (ratio >= 0.7) as default attack threshold — bots attack even when they predict they're weaker than the defender. Combined with supply filter relaxation (strained brigades now attack), counter-attack broadening (2/sector/turn), and fog of war flat 15% discount on defender power, ARBiH bots don't emergently know not to attack VRS in 1992.
+- **OPSEC system 70% dead code**: `offensive_signs` requires confidence >= 0.8 AND recon_range >= 2. Only 2/109 intel records reach 0.8, only RBiH has range 2. Defensive reaction (2× threat boost) never fires. Defenders are blind to enemy staging.
+- **Probe pipeline flaw**: `getSectorIntelConfidence` returns mean across all enemy sectors. Probe refreshes ONE sector but mean stays below threshold → triggers another probe. `MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT=2` forces full attack after 2 probes regardless of predicted outcome.
+
+### Planned fixes (5 items)
+1. Probe freshness per-sector-pair, remove forced commitment
+2. Attack threshold stalemate→costly_victory (1.0)
+3. OPSEC offensive_signs threshold lowered, defensive reaction enabled
+4. Fog of war scaled by intel confidence
+5. Counter-attacks gated through combat predictor
+
+### Real troop strengths (excluding paramilitaries)
+- RS: 90 active, 99,030 personnel
+- RBiH: 126 active (+1 dissolved), 149,964 personnel
+- HRHB: 38 active (+3 dissolved), 41,359 personnel
+
+### Casualties (from brigade_history)
+- RS: 18,940 taken, 24,450 inflicted
+- RBiH: 29,796 taken, 16,992 inflicted
+- HRHB: 3,440 taken, 3,249 inflicted
+
+**n1170 (2026-03-28) — Territory reconciliation + probe pipeline + casualty ratio fix:**
+- Territory Phase 1.5: brigades matched to sectors by location_osid vs territory_osids. 0 empty contested sectors (was 5).
+- Probe pipeline: evaluateOperationProgress skips probe/feint (double processing). Probes don't trigger cooldown. Supply filter: only critical excluded (strained allowed with 0.75× penalty).
+- Casualty ratio fix: attCasMult was computed but never applied. Now applied in attack_resolution_osid.ts and combat_predictor.ts.
+- **90.0% area-weighted, 22/22 anchors, 5/6 benchmarks** (consolidate_gains failed: 0.493 vs 0.553 expected).
+- 103 battles (was 68), 113 orders (was 76), RBiH 47 orders (was 12). Att casualties 19786 (was 10808), Def 28114 (was 19649). Att:Def ratio 0.70 (was 0.55).
+- Passive brigades: 72/238 (30.3%, was 92/236 = 39%).
+- -2.2pp from n1150 baseline: mechanically correct corrections exposed artificial inflation.
+**UPCOMING: Point-only polygon contact fix (2026-03-28, post-n1170):** Contact graph has 46 edges with `min_dist=0` that are point-only contacts (shared vertex, 0 boundary segments) — artifacts from polygon derivation. 12 are cross-faction, creating phantom front edges. Key case: sela_2-golubici_2 bridges Trnovo-Kalinovik into one sector (arbih_1st_corps:7). Fix: enrich contact graph with `shared_segments`, filter to `shared_segments >= 1`. Expected impact: sela_2 becomes isolated enclave, sector 7 splits. Calibration may shift from changed sector topology (similar to n1029 min_dist fix which dropped 93.1% to 92.0%).
 **n1103 (2026-03-25) — Gorazde Consolidation + Hrasnica Fix:** Operation Circle event flips 3 Gorazde periphery OSIDs (glamoc, kamen, sopotnica) from RS to RBiH via `control_change`. 102nd Motorized relocated from Ilidza to Hadzici (refugee brigade, `displaced_from: "ilidza"`). **91.7% area-weighted** (+0.1pp from Gorazde). Remaining: `op:gorazde:kolovarice` mismatch (painted RS, sim RBiH, census inconclusive).
 **n1096 (2026-03-25) — Pool War Weariness Decay:** Per-turn decay on pool.available (HRHB 2.5%, RS 2.0%, RBiH 1.2%). Enclave municipalities exempt. Combined with exhaustion accounting overhaul (A1+A2+A3): RS w104 149k→124k (target 110-120k, 4k over), HRHB 68k→58k (target 50-55k, 3k over), ARBiH 194k→199k (target 165-180k). **40w: 91.2%** (-0.1pp, within noise). Pipeline step `pool-war-weariness-decay` after `ongoing-mobilization`. New file: `src/sim/combat/pool_decay.ts`. Diagnostic: `tools/diagnose_pool_exhaustion.cjs`.
 **n1090-1095 (2026-03-25) — Exhaustion Accounting Overhaul:** Three pool accounting bugs fixed: (A1) pool.available added to exhaustion numerator, (A2) initial OOB personnel counted as committed (38k RS invisible), (A3) strategic reserve sweeps tracked as committed. Casualty feedback unified to 75% (frontline/siege attrition were 25%, handling 95% of losses). RS/HRHB surge curves lowered post-w52 (RS 0.9/0.8/0.5→0.4/0.2/0.1, HRHB 0.8/0.5/0.35→0.3/0.15/0.1). A-series alone: RS w104 149k→139k (-10k). Key finding: accounting fixes alone insufficient — pool surplus from w1-52 sustains growth even with zero new mobilization. Pool decay (above) needed as secondary mechanism. **40w: 91.3%** (zero regression from accounting fixes alone).

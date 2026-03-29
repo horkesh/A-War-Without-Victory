@@ -52,10 +52,13 @@ const SHARED_BOUNDARY_THRESHOLD = 0.00005;
 
 export function buildSharedBoundaryAdjacency(edges: EdgeRecord[]): Map<Osid, Osid[]> {
     const adj = new Map<Osid, Osid[]>();
+    let skippedSegments = 0;
     for (const e of edges) {
         if (!e?.a || !e?.b) continue;
         // Only include edges with true shared boundaries
         if (e.min_dist !== undefined && e.min_dist > SHARED_BOUNDARY_THRESHOLD) continue;
+        // Skip point-only contacts (single shared vertex, no boundary segment)
+        if (e.shared_segments !== undefined && e.shared_segments === 0) { skippedSegments++; continue; }
         const listA = adj.get(e.a) ?? [];
         if (!listA.includes(e.b)) listA.push(e.b);
         adj.set(e.a, listA);

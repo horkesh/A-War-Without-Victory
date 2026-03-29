@@ -288,3 +288,9 @@
 - **Right approach**: For non-enclave brigades, `home_mun` MUST be the municipality embedded in `home_osid` (i.e., `home_osid.split(':')[1]`). For enclave brigades in enemy territory, use the `enclave` tag to bypass the municipality control check entirely.
 - **Do instead**: When adding a brigade to the OOB, verify `home_mun === home_osid.split(':')[1]`. If the brigade is behind enemy lines, tag it as `enclave` and set both fields consistently. Add a preflight check that flags any brigade where `home_mun` doesn't match the OSID's municipality.
 
+### [Architecture] Supply filters are double penalties when combat multipliers already model the constraint (2026-03-28) — NEW
+- **Context**: Supply filter in `bot_corps_directives.ts` excluded both `critical` AND `strained` brigades from operation pools. 94% of RBiH territory was `strained` (arms embargo). After filtering, 0-1 brigades per corps — below minimum 3 for sector attack. Meanwhile, `getSupplyMult()` in `combat_math.ts` already applied 0.75x combat penalty for strained brigades.
+- **Wrong approach**: Binary exclusion filter that prevented ALL RBiH operations for 40 weeks while probes (which used a different code path without the filter) worked fine.
+- **Right approach**: Only exclude `critical` supply from operations. Strained gets the combat penalty (0.75x), which correctly models degraded capability without preventing operations entirely.
+- **Do instead**: When adding a gate/filter that prevents an action, check if there's already a penalty/multiplier that models the same constraint more granularly. Binary filters + continuous penalties = double penalty.
+

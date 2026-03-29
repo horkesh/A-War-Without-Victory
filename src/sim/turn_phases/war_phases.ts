@@ -2497,8 +2497,13 @@ function recallDriftedBrigades(state: GameState, edges?: EdgeRecord[]): void {
         if ((f.disrupted_turns ?? 0) > 0) continue;
         if (moveOrders[fid]) continue; // already has movement orders
 
-        // BFS raw distance from home to current location
-        const dist = bfsRawDistance(f.home_osid, f.location_osid, adj, DRIFT_RECALL_MAX_HOPS + 1);
+        // n1198: BFS through FRIENDLY territory only, not raw adjacency.
+        // Raw adjacency sees sela_2→mostar as 3 hops (through RS territory),
+        // but the friendly path is 8-10 hops. Using raw distance let brigades
+        // trapped in enemy pockets appear "close to home" and skip recall.
+        const pc = (state.political.political_controllers ?? {}) as Record<string, string>;
+        const faction = f.faction;
+        const dist = bfsFriendlyDistance(f.home_osid, f.location_osid, adj, pc, faction ?? '', DRIFT_RECALL_MAX_HOPS + 1);
         if (dist <= DRIFT_RECALL_MAX_HOPS) continue;
 
         // Brigade is too far from home — recall
@@ -2519,6 +2524,33 @@ function bfsRawDistance(from: string, to: string, adj: Map<string, string[]>, ma
             for (const nb of adj.get(n) ?? []) {
                 if (visited.has(nb)) continue;
                 if (nb === to) return h;
+                visited.add(nb);
+                next.push(nb);
+            }
+        }
+        frontier = next;
+        if (frontier.length === 0) break;
+    }
+    return maxHops + 1;
+}
+
+/** BFS through friendly-controlled territory only. Returns maxHops+1 if unreachable. */
+function bfsFriendlyDistance(
+    from: string, to: string, adj: Map<string, string[]>,
+    politicalControllers: Record<string, string>, faction: string,
+    maxHops: number,
+): number {
+    if (from === to) return 0;
+    const visited = new Set<string>([from]);
+    let frontier = [from];
+    for (let h = 1; h <= maxHops; h++) {
+        const next: string[] = [];
+        for (const n of frontier) {
+            for (const nb of adj.get(n) ?? []) {
+                if (visited.has(nb)) continue;
+                if (nb === to) return h;
+                // Only traverse friendly territory
+                if (politicalControllers[nb] !== faction) continue;
                 visited.add(nb);
                 next.push(nb);
             }

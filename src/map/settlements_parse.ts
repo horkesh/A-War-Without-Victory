@@ -27,6 +27,9 @@ export interface EdgeRecord {
     type?: string;
     /** Minimum distance between polygon boundaries (0 = shared boundary, >0 = distance contact). */
     min_dist?: number;
+    /** Count of consecutive shared vertex pairs (boundary segments) between OSID polygons.
+     *  0 = point-only contact (artifact). >=1 = real boundary. */
+    shared_segments?: number;
 }
 
 export interface LoadedSettlementGraph {
@@ -114,6 +117,7 @@ export function parseEdges(json: unknown): EdgeRecord[] {
         if (typeof item.allow_self_loop === 'boolean') edge.allow_self_loop = item.allow_self_loop;
         if (typeof item.type === 'string') edge.type = item.type;
         if (typeof item.min_dist === 'number') edge.min_dist = item.min_dist;
+        if (typeof item.shared_segments === 'number') edge.shared_segments = item.shared_segments;
         return edge;
     });
 }

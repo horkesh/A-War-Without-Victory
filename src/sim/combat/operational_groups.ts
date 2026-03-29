@@ -13,6 +13,7 @@ import type {
     OGActivationOrder,
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { ensureBrigadeHistory } from './brigade_history_recorder.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -251,6 +252,10 @@ function returnOGPersonnel(state: GameState, og: FormationState): void {
 
     for (let i = 0; i < donors.length; i++) {
         donors[i].personnel = (donors[i].personnel ?? 0) + perDonor + (i < remainder ? 1 : 0);
+        // Track peak personnel after OG dissolution return
+        const donorPers = donors[i].personnel!;
+        const donorHist = ensureBrigadeHistory(donors[i]);
+        if (donorPers > donorHist.peak_personnel) donorHist.peak_personnel = donorPers;
     }
     og.personnel = 0;
 }

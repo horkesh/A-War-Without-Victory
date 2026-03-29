@@ -33,6 +33,7 @@ import {
 } from '../../state/formation_constants.js';
 import type { FormationState, GameState, MilitiaPoolState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { ensureBrigadeHistory } from './brigade_history_recorder.js';
 
 /**
  * Pool.available above this flows to faction reserve after reinforcement.
@@ -199,6 +200,11 @@ export function reinforceFromStrategicReserves(state: GameState): StrategicReser
         if (transfer <= 0) continue;
 
         (f as FormationState & { personnel: number }).personnel = current + transfer;
+        // Track peak personnel after strategic reserve draw
+        const newPers = current + transfer;
+        const hist = ensureBrigadeHistory(f);
+        if (newPers > hist.peak_personnel) hist.peak_personnel = newPers;
+
         reserves[poolFaction] -= transfer;
 
         report.formations_reinforced += 1;

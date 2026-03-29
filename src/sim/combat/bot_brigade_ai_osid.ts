@@ -59,12 +59,13 @@ import { isMultiAxis, getAllAxisBrigades } from './sector_offensive.js';
 import { getCorpsStance } from './combat_math.js';
 
 import { evaluateGarrisonAndDetachments, evaluateReserve, evaluateHold } from './bot_brigade_eval_hold.js';
-import { evaluateSectorMarch, evaluateReturnToCorps, evaluateFrontCoverage } from './bot_brigade_eval_front.js';
+import { evaluateSectorMarch, evaluateReturnToCorps, evaluatePocketEvacuation, evaluateFrontCoverage } from './bot_brigade_eval_front.js';
 import { evaluateHomeDefense, evaluateSupplyGate, evaluateSectorAttack, evaluateReorganize, evaluateDefensive, evaluateOffensive, evaluateUncontestedOccupation } from './bot_brigade_eval_attack.js';
 import { evaluateInteriorMovement } from './bot_brigade_eval_movement.js';
 import type { BrigadeEvaluationContext } from './bot_brigade_eval_types.js';
 
 import type { OsidEthnicComposition } from './ethnic_defense.js';
+import { COUNTER_ATTACK_RETREAT_WINDOW } from './bot_constants.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Submodule imports
@@ -275,9 +276,9 @@ export function getSectorOffensiveProbeThreshold(
     const momentum = axis ? (axis.momentum ?? 0) : (activeOp.momentum ?? 0);
     // If the operation has an explicit min_attack_outcome, respect it.
     if (activeOp.min_attack_outcome) return activeOp.min_attack_outcome;
-    // Default: stalemate (ratio ≥ 0.7) — brigades probe at reasonable odds.
-    // With momentum ≥ 2: repulsed (≥ 0.5) — successful operations press the advantage.
-    return momentum >= 2 ? 'repulsed' : 'stalemate';
+    // Default: costly_victory (ratio ≥ 1.0) — no bot should attack expecting to lose.
+    // With momentum ≥ 2: stalemate (≥ 0.7) — pressing advantage, already proven you can win.
+    return momentum >= 2 ? 'stalemate' : 'costly_victory';
 }
 
 function isPartOfNamedOperation(state: GameState, formation: FormationState): boolean {
@@ -337,6 +338,32 @@ function executeFactionDirectives(
 
     const isAlliedWithRBiH = areRbihHrhbAllied(state);
 
+    // ── Build sector retreat map for broadened counter-attacks ───────────
+    // Scan all brigades for recent retreats; group by sector ID.
+    // Determinism: iterate sorted brigades, sort retreat entries by OSID.
+    const currentTurn = state.meta?.turn ?? 0;
+    const sectorRecentRetreats = new Map<string, Array<{ osid: string; turn: number }>>();
+    for (const b of brigades) {
+        const retreatInfo = (b as { last_retreat_from?: { osid: string; turn: number } }).last_retreat_from;
+        if (!retreatInfo || retreatInfo.turn < currentTurn - COUNTER_ATTACK_RETREAT_WINDOW) continue;
+        const sectorId = findBrigadeSectorId(state, b);
+        if (!sectorId) continue;
+        let arr = sectorRecentRetreats.get(sectorId);
+        if (!arr) {
+            arr = [];
+            sectorRecentRetreats.set(sectorId, arr);
+        }
+        // Avoid duplicate OSIDs within the same sector
+        if (!arr.some(e => e.osid === retreatInfo.osid && e.turn === retreatInfo.turn)) {
+            arr.push({ osid: retreatInfo.osid, turn: retreatInfo.turn });
+        }
+    }
+    // Sort each sector's retreat entries by OSID for determinism
+    for (const [, arr] of sectorRecentRetreats) {
+        arr.sort((a, b) => strictCompare(a.osid, b.osid));
+    }
+    const sectorCounterAttackCount = new Map<string, number>();
+
     const targetAdjacentCount = new Map<Osid, number>();
     for (const b of brigades) {
         if (!b.location_osid) continue;
@@ -395,6 +422,8 @@ function executeFactionDirectives(
             counterAttackTarget,
             brigadeSupplyState,
             isHoldBrigade: false,
+            sectorRecentRetreats,
+            sectorCounterAttackCount,
             adjacency,
             reverseMap,
             terrainCache,
@@ -414,6 +443,7 @@ function executeFactionDirectives(
         if (evaluateGarrisonAndDetachments(ctx)) continue;
         if (evaluateSectorMarch(ctx)) continue;
         if (evaluateReturnToCorps(ctx)) continue; // Before hold/defense — orphans march home first
+        if (evaluatePocketEvacuation(ctx)) continue; // Evacuate tiny non-enclave pockets
         if (evaluateHomeDefense(ctx)) continue;
         if (evaluateReserve(ctx)) continue;
         if (evaluateSupplyGate(ctx)) continue;

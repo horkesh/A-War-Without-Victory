@@ -35,8 +35,8 @@ import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../state/supp
 import { getSeasonalModifiers } from './seasonal_effects.js';
 import { evaluateCorpsOffensiveLaunch, evaluateSectorOffensiveLaunch, getEquipmentOffensivePriority, resolveEquipmentClass } from './sector_offensive.js';
 import { CONFIDENCE_ROUGH_STRENGTH, INTEL_GATE_LAUNCH_THRESHOLD, MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT } from './sector_intel_constants.js';
-import { getSectorIntelConfidence } from './sector_intel.js';
-import { RS_BLITZ_PHASE_END_WEEK } from './bot_constants.js';
+import { getSectorIntelConfidence, getStalestSectorIntelConfidence } from './sector_intel.js';
+import { RS_BLITZ_PHASE_END_WEEK, MAX_EXHAUSTION_FOR_OPERATION } from './bot_constants.js';
 import {
     getTruceBreakAggressionBonus,
     shouldGrazBlockAttack,
@@ -150,9 +150,13 @@ export const AGGRESSION_FLOOR: Record<string, number> = {
  * opportunistic secondary theater the turn after its primary operation ends. Same-theater
  * follow-on ops are always allowed regardless of cooldown (they share theater with the last op).
  */
-export const SECONDARY_OP_COOLDOWN_TURNS = 8;
+export const SECONDARY_OP_COOLDOWN_TURNS = 5;
 /** Offensive corps use shorter cooldown — sustained pressure is the point of offensive stance. */
 export const SECONDARY_OP_COOLDOWN_TURNS_OFFENSIVE = 3;
+
+/** Probes are cheaper than full offensives — allow at higher exhaustion.
+ *  Threshold = MAX_EXHAUSTION_FOR_OPERATION + PROBE_EXHAUSTION_MARGIN. */
+export const PROBE_EXHAUSTION_MARGIN = 10;
 
 /**
  * Collect all objective OSIDs from an operation (from both the flat objectives list and
@@ -218,8 +222,9 @@ export function shouldLaunchProbeInstead(
     // RS blitz phase exemption: JNA-trained forces attack without probing
     if (faction === 'RS' && (turn ?? 999) <= RS_BLITZ_PHASE_END_WEEK) return false;
 
-    // Already probed enough — commit regardless
-    if (consecutiveProbes >= MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT) return false;
+    // n1194: Removed forced commitment after MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT.
+    // If intel says enemy is stronger, correct response is "defend," not "attack
+    // because you probed twice." Callers now pass stalest per-sector-pair confidence.
 
     const threshold = INTEL_GATE_LAUNCH_THRESHOLD[faction as NonNullable<FactionId>] ?? 0.30;
     return sectorIntelConfidence < threshold;
@@ -661,7 +666,7 @@ export function generateCorpsDirectives(
 
         // Collect offensive targets from army priorities
         const offensiveTargetSet = new Set<Osid>();
-        let bestMinOutcome: CorpsDirective['min_attack_outcome'] = 'stalemate';
+        let bestMinOutcome: CorpsDirective['min_attack_outcome'] = 'costly_victory';
         const avoidOsids: Osid[] = [...(state.meta.avoided_osids_by_faction?.[faction] ?? [])];
 
         for (const priority of armyPriorities) {
@@ -1107,7 +1112,7 @@ export function generateCorpsDirectives(
         // counterattacks while conserving ammunition.
         if (supplyHealth.adequate_fraction < 0.3) {
             const rankVal = OUTCOME_RANK[bestMinOutcome as PredictedOutcome] ?? 2;
-            if (rankVal < 3) bestMinOutcome = 'stalemate';
+            if (rankVal < 4) bestMinOutcome = 'costly_victory';
         }
 
         // Save the pre-supply-adjustment threshold for operation launch.
@@ -1633,7 +1638,9 @@ export function generateCorpsDirectives(
         // Sector offensive launch evaluation:
         // Launch if offensive/balanced, no active SECTOR operation, and multi-sector corps.
         // Sector offensives replace general_offensive/strategic_defense with targeted multi-OSID push.
-        const canLaunchSectorOp = !hasQueuedOps && !existingOp && !isDefenseStrained;
+        const isCorpsExhaustedForOffensive = cmd.corps_exhaustion > MAX_EXHAUSTION_FOR_OPERATION;
+        const isCorpsExhaustedForProbe = cmd.corps_exhaustion > MAX_EXHAUSTION_FOR_OPERATION + PROBE_EXHAUSTION_MARGIN;
+        const canLaunchSectorOp = !hasQueuedOps && !existingOp && !isDefenseStrained && !isCorpsExhaustedForOffensive;
         // Army HQ override allows defensive corps to launch probe operations
         const hasHqProbeOverride = armyHqOverrides.some(o => o.type === 'probe' || o.type === 'feint');
         const stanceAllowsOps = cmd.stance === 'offensive' || cmd.stance === 'balanced' || hasHqProbeOverride;
@@ -1643,6 +1650,7 @@ export function generateCorpsDirectives(
         if (existingOp) trace.push(`blocked:existing_op(${existingOp.name}:${existingOp.phase})`);
         if (hasQueuedOps) trace.push('blocked:queued_ops');
         if (isDefenseStrained) trace.push(`blocked:density_strained(${corpsDensity.toFixed(3)}<${STRAINED_DENSITY_THRESHOLD})`);
+        if (isCorpsExhaustedForOffensive) trace.push(`blocked:corps_exhaustion(${cmd.corps_exhaustion}>${MAX_EXHAUSTION_FOR_OPERATION})`);
         if (!stanceAllowsOps) trace.push(`blocked:stance(${cmd.stance})`);
         if (directiveEligibleSectors.length === 0) trace.push('blocked:no_eligible_sectors');
         if (offensiveTargets.length === 0) trace.push('blocked:no_targets');
@@ -1685,11 +1693,13 @@ export function generateCorpsDirectives(
             {
                 const consecutiveProbes = cmd.consecutive_probes ?? 0;
                 const turn = state.meta?.turn ?? 0;
-                // Find lowest-intel sector that faces enemies
+                // n1194: Use stalest per-sector-pair confidence, not mean.
+                // A probe refreshes ONE enemy sector pair — checking the mean causes
+                // redundant probes when other sector-pairs drag the average down.
                 let worstSector: typeof directiveEligibleSectors[0] | undefined;
                 let worstConf = Infinity;
                 for (const sec of directiveEligibleSectors) {
-                    const conf = getSectorIntelConfidence(state, sec.sector_id);
+                    const conf = getStalestSectorIntelConfidence(state, sec.sector_id);
                     if (conf < worstConf) {
                         worstConf = conf;
                         worstSector = sec;
@@ -1747,10 +1757,13 @@ export function generateCorpsDirectives(
                     .filter(b => {
                         if (b.status !== 'active' || (b.personnel ?? 0) < 400) return false;
                         if (b.disrupted_turns && b.disrupted_turns > 0) return false;
-                        // Supply gate: critical/strained supply = defense only.
-                        // No fuel, minimal ammunition — can't sustain offensive operations.
+                        // Supply gate: critical supply = defense only (isolated, no ammunition).
+                        // Strained brigades CAN participate — the 0.75× combat power penalty
+                        // in getSupplyMult() models their degraded effectiveness. ARBiH fought
+                        // the entire war under arms embargo (strained); excluding them here
+                        // prevented all RBiH operations, which is ahistorical.
                         const supplyLevel = b.location_osid ? osidSupplyState.get(b.location_osid) : undefined;
-                        if (supplyLevel === 'critical' || supplyLevel === 'strained') return false;
+                        if (supplyLevel === 'critical') return false;
                         return true;
                     })
                     .map(b => b.id)
@@ -1804,10 +1817,11 @@ export function generateCorpsDirectives(
 
                 // ── Intel gate: check worst-sector confidence before committing ──
                 // If any sector has low intel, prefer probing first.
+                // n1194: Use stalest per-sector-pair confidence, not mean
                 let worstLaunchSectorConf = 1.0;
                 let worstLaunchSectorId: string | undefined;
                 for (const sec of sortedLaunchSectors) {
-                    const conf = getSectorIntelConfidence(state, sec.sector_id);
+                    const conf = getStalestSectorIntelConfidence(state, sec.sector_id);
                     if (conf < worstLaunchSectorConf) {
                         worstLaunchSectorConf = conf;
                         worstLaunchSectorId = sec.sector_id;

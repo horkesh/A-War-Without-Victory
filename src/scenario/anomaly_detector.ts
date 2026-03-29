@@ -1,15 +1,18 @@
 /**
  * Post-run anomaly detection: pure functions that analyze final GameState.
  *
- * 12 detections covering combat tempo, formation health, territorial stability,
+ * 26 detections covering combat tempo, formation health, territorial stability,
  * operational stagnation, and deployment coherence.
  *
  * Deterministic: sorted iteration via strictCompare, no Math.random, no timestamps.
  */
 
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import type { GameState, FormationId } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
 import type { AnomalyReport } from './anomaly_types.js';
+import { checkMoraleCollapseCluster, checkZeroCombatCorps, checkOrphanOperationBrigades, checkGhostParamilitaryPersonnel, checkOffensiveIntelBlindness, checkWeakerFactionAttackImbalance } from './anomaly_checks_extended.js';
 
 // ── Helpers ────────────────────────────────────────────────────────────
 
@@ -26,6 +29,33 @@ function munFromOsid(osid: string): string {
 /** True when a formation kind represents a brigade-level combat unit. */
 function isBrigadeKind(kind: string | undefined): boolean {
     return kind === undefined || kind === 'brigade' || kind === 'operational_group';
+}
+
+/** Load OSID adjacency graph from operational_contact_graph.json. Returns null on failure. */
+function loadOsidAdjacency(): Map<string, string[]> | null {
+    const graphPath = resolve(process.cwd(), 'data/derived/operational/operational_contact_graph.json');
+    try {
+        const raw = JSON.parse(readFileSync(graphPath, 'utf8'));
+        const edges: Array<{ a: string; b: string; min_dist?: number; shared_segments?: number }> = Array.isArray(raw) ? raw : (raw.edges ?? []);
+        const adjacency = new Map<string, string[]>();
+        for (const e of edges) {
+            if (!e?.a || !e?.b) continue;
+            // Only use shared-boundary edges (min_dist === 0 or absent).
+            // Distance-contact edges (min_dist > 0) can bridge across enemy territory.
+            if (e.min_dist != null && e.min_dist > 0) continue;
+            // Skip point-only contacts (single shared vertex, no boundary segment).
+            if (e.shared_segments != null && e.shared_segments === 0) continue;
+            const listA = adjacency.get(e.a) ?? [];
+            if (!listA.includes(e.b)) listA.push(e.b);
+            adjacency.set(e.a, listA);
+            const listB = adjacency.get(e.b) ?? [];
+            if (!listB.includes(e.a)) listB.push(e.a);
+            adjacency.set(e.b, listB);
+        }
+        return adjacency;
+    } catch {
+        return null;
+    }
 }
 
 // ── Detection functions ────────────────────────────────────────────────
@@ -475,6 +505,528 @@ function detectOperationZeroEligibleExecution(state: GameState): AnomalyReport[]
     return reports;
 }
 
+/**
+ * 13. disconnected_sector_territory (critical)
+ * Sector whose territory_osids form 2+ connected components via OSID adjacency.
+ * A disconnected sector means the territory partition is broken — brigades cannot
+ * reach parts of their own sector without crossing foreign territory.
+ */
+function detectDisconnectedSectorTerritory(state: GameState, adjacency: Map<string, string[]>): AnomalyReport[] {
+    const reports: AnomalyReport[] = [];
+    const sectors = state.military.corps_front_sectors ?? {};
+
+    for (const sectorId of sortedKeys(sectors as Record<string, unknown>)) {
+        const sector = sectors[sectorId];
+        const osids = sector.territory_osids;
+        if (!osids || osids.length <= 1) continue;
+
+        // BFS to find connected components within this sector's territory
+        const osidSet = new Set(osids);
+        const visited = new Set<string>();
+        const componentSizes: number[] = [];
+
+        for (const startOsid of osids.slice().sort(strictCompare)) {
+            if (visited.has(startOsid)) continue;
+
+            // BFS from startOsid within the sector's territory
+            let size = 0;
+            const queue: string[] = [startOsid];
+            visited.add(startOsid);
+            while (queue.length > 0) {
+                const current = queue.shift()!;
+                size++;
+                const neighbors = adjacency.get(current) ?? [];
+                for (const n of neighbors) {
+                    if (osidSet.has(n) && !visited.has(n)) {
+                        visited.add(n);
+                        queue.push(n);
+                    }
+                }
+            }
+            componentSizes.push(size);
+        }
+
+        if (componentSizes.length >= 2) {
+            const sortedSizes = componentSizes.slice().sort((a, b) => b - a);
+            reports.push({
+                category: 'territorial',
+                severity: 'critical',
+                type: 'disconnected_sector_territory',
+                description: `Sector ${sectorId} (corps ${sector.corps_id}, faction ${sector.faction}) has ${componentSizes.length} disconnected components (sizes: ${sortedSizes.join(', ')}). Territory OSIDs: ${osids.length}.`,
+                entities: [sectorId, sector.corps_id, sector.faction],
+            });
+        }
+    }
+    return reports;
+}
+
+/**
+ * 14. unassigned_frontline_brigades (critical)
+ * Active brigades that SHOULD be in a sector but aren't assigned to any.
+ * n1195: Raised to critical — full-strength brigades sitting idle while
+ * sectors have unmanned front edges is a brigade_assignment.ts pipeline failure.
+ */
+function detectUnassignedFrontlineBrigades(state: GameState): AnomalyReport[] {
+    const reports: AnomalyReport[] = [];
+    const formations = state.military.formations;
+    const sectors = state.military.corps_front_sectors ?? {};
+    const corpsCommand = state.military.corps_command ?? {};
+
+    // Collect all brigade IDs assigned to ANY sector
+    const assignedSet = new Set<string>();
+    for (const sectorId of sortedKeys(sectors as Record<string, unknown>)) {
+        const sector = sectors[sectorId];
+        for (const bid of sector.assigned_brigade_ids) assignedSet.add(bid);
+        for (const bid of sector.reserve_brigade_ids) assignedSet.add(bid);
+    }
+
+    // Identify corps that HAVE sectors
+    const corpsWithSectors = new Set<string>();
+    for (const sectorId of sortedKeys(sectors as Record<string, unknown>)) {
+        corpsWithSectors.add(sectors[sectorId].corps_id);
+    }
+
+    // Collect brigades participating in active operations
+    const opParticipants = new Set<string>();
+    for (const corpsId of sortedKeys(corpsCommand as Record<string, unknown>)) {
+        const cc = corpsCommand[corpsId];
+        const op = cc.active_operation;
+        if (!op) continue;
+        for (const bid of op.participating_brigades) opParticipants.add(bid);
+    }
+
+    const unassigned: Array<{ id: string; corps: string; location: string }> = [];
+    for (const fid of sortedKeys(formations as Record<string, unknown>)) {
+        const f = formations[fid];
+        if (f.status !== 'active') continue;
+        if (!isBrigadeKind(f.kind)) continue;
+        if (!f.corps_id) continue;
+        if (!corpsWithSectors.has(f.corps_id)) continue;
+        if (assignedSet.has(fid)) continue;
+        if (opParticipants.has(fid)) continue;
+        if ((f.disrupted_turns ?? 0) > 0) continue;
+        unassigned.push({ id: fid, corps: f.corps_id, location: f.location_osid ?? 'none' });
+    }
+
+    if (unassigned.length > 0) {
+        unassigned.sort((a, b) => strictCompare(a.id, b.id));
+        const detail = unassigned.slice(0, 10).map(u => `${u.id} (corps ${u.corps}, at ${u.location})`).join(', ');
+        const suffix = unassigned.length > 10 ? `, ... +${unassigned.length - 10} more` : '';
+        reports.push({
+            category: 'deployment',
+            severity: 'critical',
+            type: 'unassigned_frontline_brigades',
+            description: `${unassigned.length} active brigade(s) in corps with sectors are not assigned to any sector: ${detail}${suffix}.`,
+            entities: unassigned.map(u => u.id),
+        });
+    }
+    return reports;
+}
+
+/**
+ * 15. rear_brigades_in_sector (warning)
+ * Brigades assigned to a sector but physically NOT at any of the sector's frontline OSIDs.
+ */
+function detectRearBrigadesInSector(state: GameState): AnomalyReport[] {
+    const reports: AnomalyReport[] = [];
+    const formations = state.military.formations;
+    const sectors = state.military.corps_front_sectors ?? {};
+    const corpsCommand = state.military.corps_command ?? {};
+    const movementState = state.military.brigade_movement_state ?? {};
+
+    // Collect brigades participating in active operations
+    const opParticipants = new Set<string>();
+    for (const corpsId of sortedKeys(corpsCommand as Record<string, unknown>)) {
+        const cc = corpsCommand[corpsId];
+        const op = cc.active_operation;
+        if (!op) continue;
+        for (const bid of op.participating_brigades) opParticipants.add(bid);
+    }
+
+    let totalAssigned = 0;
+    const rearBrigades: Array<{ id: string; sector: string; location: string }> = [];
+
+    for (const sectorId of sortedKeys(sectors as Record<string, unknown>)) {
+        const sector = sectors[sectorId];
+
+        // Flatten all frontline OSIDs from sub_segments
+        const frontlineOsids = new Set<string>();
+        for (const sub of sector.sub_segments) {
+            for (const osid of sub.friendly_osids) frontlineOsids.add(osid);
+        }
+
+        for (const bid of sector.assigned_brigade_ids) {
+            totalAssigned++;
+            const f = formations[bid];
+            if (!f) continue;
+            // Exclusions
+            if (opParticipants.has(bid)) continue;
+            if ((f.disrupted_turns ?? 0) > 0) continue;
+            // Check for active movement (brigade_movement_state)
+            const ms = movementState[bid];
+            if (ms && ms.status !== 'unpacking') continue; // packing or in_transit = marching
+
+            const loc = f.location_osid;
+            if (!loc) continue;
+            if (!frontlineOsids.has(loc)) {
+                rearBrigades.push({ id: bid, sector: sectorId, location: loc });
+            }
+        }
+    }
+
+    if (rearBrigades.length > 0 && totalAssigned > 0) {
+        const pct = (rearBrigades.length / totalAssigned * 100).toFixed(1);
+        if (rearBrigades.length / totalAssigned > 0.15) {
+            rearBrigades.sort((a, b) => strictCompare(a.id, b.id));
+            const detail = rearBrigades.slice(0, 10).map(r => `${r.id} at ${r.location} (sector ${r.sector})`).join(', ');
+            const suffix = rearBrigades.length > 10 ? `, ... +${rearBrigades.length - 10} more` : '';
+            reports.push({
+                category: 'deployment',
+                severity: 'warning',
+                type: 'rear_brigades_in_sector',
+                description: `${rearBrigades.length}/${totalAssigned} (${pct}%) assigned brigades are not at their sector's frontline OSIDs: ${detail}${suffix}.`,
+                entities: rearBrigades.map(r => r.id),
+            });
+        }
+    }
+    return reports;
+}
+
+/**
+ * 16. brigade_stacking (warning/info)
+ * Multiple brigades at the same OSID, which should only happen in specific cases.
+ */
+function detectBrigadeStacking(state: GameState): AnomalyReport[] {
+    const reports: AnomalyReport[] = [];
+    const formations = state.military.formations;
+    const corpsCommand = state.military.corps_command ?? {};
+
+    // Build OSID → brigade ID list
+    const osidBrigades = new Map<string, string[]>();
+    for (const fid of sortedKeys(formations as Record<string, unknown>)) {
+        const f = formations[fid];
+        if (f.status !== 'active') continue;
+        if (!isBrigadeKind(f.kind)) continue;
+        if (!f.location_osid) continue;
+        const list = osidBrigades.get(f.location_osid) ?? [];
+        list.push(fid);
+        osidBrigades.set(f.location_osid, list);
+    }
+
+    // Collect operation participants and staging OSIDs
+    const opBrigades = new Set<string>();
+    const stagingOsids = new Set<string>();
+    for (const corpsId of sortedKeys(corpsCommand as Record<string, unknown>)) {
+        const cc = corpsCommand[corpsId];
+        const op = cc.active_operation;
+        if (!op) continue;
+        for (const bid of op.participating_brigades) opBrigades.add(bid);
+        if (op.staging_osid) stagingOsids.add(op.staging_osid);
+        if (op.axes) {
+            for (const axis of op.axes) {
+                if (axis.staging_osid) stagingOsids.add(axis.staging_osid);
+            }
+        }
+    }
+
+    const stacked: Array<{ osid: string; brigades: string[] }> = [];
+    const sortedOsids = [...osidBrigades.keys()].sort(strictCompare);
+    for (const osid of sortedOsids) {
+        const brigades = osidBrigades.get(osid)!;
+        if (brigades.length < 2) continue;
+
+        // Exempt: Sarajevo OSIDs
+        if (osid.includes('sarajevo')) continue;
+
+        // Exempt: staging OSIDs of active operations
+        if (stagingOsids.has(osid)) continue;
+
+        // Exempt: all brigades at this OSID are in the same active operation
+        const allInSameOp = brigades.every(bid => opBrigades.has(bid));
+        if (allInSameOp && brigades.length > 0) continue;
+
+        stacked.push({ osid, brigades: brigades.slice().sort(strictCompare) });
+    }
+
+    if (stacked.length > 0) {
+        const severity = stacked.length > 5 ? 'warning' : 'info';
+        const detail = stacked.slice(0, 10).map(s => `${s.osid}(${s.brigades.length}: ${s.brigades.join(',')})`).join('; ');
+        const suffix = stacked.length > 10 ? `; ... +${stacked.length - 10} more` : '';
+        reports.push({
+            category: 'deployment',
+            severity,
+            type: 'brigade_stacking',
+            description: `${stacked.length} OSID(s) have 2+ brigades stacked (non-exempt): ${detail}${suffix}.`,
+            entities: stacked.map(s => s.osid),
+        });
+    }
+    return reports;
+}
+
+/**
+ * 17. brigade_far_from_home (warning)
+ * Active brigades far from their home_osid via friendly-territory BFS.
+ * The drift problem that killed the Sarajevo siege.
+ */
+function detectBrigadeFarFromHome(state: GameState, adjacency: Map<string, string[]>): AnomalyReport[] {
+    const reports: AnomalyReport[] = [];
+    const formations = state.military.formations;
+    const controllers = state.political?.political_controllers ?? {};
+    const corpsCommand = state.military.corps_command ?? {};
+
+    // Collect brigades participating in active operations
+    const opParticipants = new Set<string>();
+    for (const corpsId of sortedKeys(corpsCommand as Record<string, unknown>)) {
+        const cc = corpsCommand[corpsId];
+        const op = cc.active_operation;
+        if (!op) continue;
+        for (const bid of op.participating_brigades) opParticipants.add(bid);
+    }
+
+    const MAX_BFS_HOPS = 20;
+    const DRIFT_THRESHOLD = 6;
+
+    let eligible = 0;
+    const drifted: Array<{ id: string; home: string; location: string; distance: number }> = [];
+
+    for (const fid of sortedKeys(formations as Record<string, unknown>)) {
+        const f = formations[fid];
+        if (f.status !== 'active') continue;
+        if (!isBrigadeKind(f.kind)) continue;
+        if (!f.home_osid || !f.location_osid) continue;
+        if (opParticipants.has(fid)) continue;
+        if ((f.disrupted_turns ?? 0) > 0) continue;
+
+        eligible++;
+
+        if (f.home_osid === f.location_osid) continue;
+
+        // BFS from location_osid to home_osid through friendly territory
+        const faction = f.faction;
+        const target = f.home_osid;
+        const start = f.location_osid;
+
+        let found = false;
+        let distance = -1;
+        const visited = new Set<string>();
+        const queue: Array<{ osid: string; dist: number }> = [{ osid: start, dist: 0 }];
+        visited.add(start);
+
+        while (queue.length > 0) {
+            const cur = queue.shift()!;
+            if (cur.osid === target) {
+                found = true;
+                distance = cur.dist;
+                break;
+            }
+            if (cur.dist >= MAX_BFS_HOPS) continue;
+
+            const neighbors = adjacency.get(cur.osid) ?? [];
+            for (const n of neighbors) {
+                if (visited.has(n)) continue;
+                // Only walk through friendly territory
+                if (controllers[n] !== faction) continue;
+                visited.add(n);
+                queue.push({ osid: n, dist: cur.dist + 1 });
+            }
+        }
+
+        const effectiveDistance = found ? distance : MAX_BFS_HOPS + 1;
+        if (effectiveDistance > DRIFT_THRESHOLD) {
+            drifted.push({ id: fid, home: target, location: start, distance: effectiveDistance });
+        }
+    }
+
+    if (eligible > 0 && drifted.length / eligible > 0.10) {
+        drifted.sort((a, b) => strictCompare(a.id, b.id));
+        const pct = (drifted.length / eligible * 100).toFixed(1);
+        const detail = drifted.slice(0, 10).map(d =>
+            `${d.id} (home=${d.home}, loc=${d.location}, dist=${d.distance > MAX_BFS_HOPS ? 'unreachable' : d.distance})`
+        ).join(', ');
+        const suffix = drifted.length > 10 ? `, ... +${drifted.length - 10} more` : '';
+        reports.push({
+            category: 'deployment',
+            severity: 'warning',
+            type: 'brigade_far_from_home',
+            description: `${drifted.length}/${eligible} (${pct}%) eligible brigades are >6 hops from home_osid: ${detail}${suffix}.`,
+            entities: drifted.map(d => d.id),
+        });
+    }
+    return reports;
+}
+
+/**
+ * 18. frontline_density_imbalance (warning)
+ * Sectors with wildly different brigade density compared to their faction's median.
+ */
+function detectFrontlineDensityImbalance(state: GameState): AnomalyReport[] {
+    const reports: AnomalyReport[] = [];
+    const sectors = state.military.corps_front_sectors ?? {};
+
+    // Group sectors by faction, only those with >0 edges
+    const factionSectors: Record<string, Array<{ sectorId: string; corpsId: string; density: number }>> = {};
+    for (const sectorId of sortedKeys(sectors as Record<string, unknown>)) {
+        const sector = sectors[sectorId];
+        if (sector.edge_ids.length === 0) continue;
+        const faction = sector.faction;
+        if (!factionSectors[faction]) factionSectors[faction] = [];
+        factionSectors[faction].push({
+            sectorId,
+            corpsId: sector.corps_id,
+            density: sector.density,
+        });
+    }
+
+    const flagged: Array<{ sectorId: string; corpsId: string; density: number; median: number; ratio: number; faction: string }> = [];
+
+    for (const faction of sortedKeys(factionSectors as Record<string, unknown>)) {
+        const sectorList = factionSectors[faction];
+        if (sectorList.length < 2) continue;
+
+        // Compute median density
+        const densities = sectorList.map(s => s.density).sort((a, b) => a - b);
+        const mid = Math.floor(densities.length / 2);
+        const median = densities.length % 2 === 0
+            ? (densities[mid - 1] + densities[mid]) / 2
+            : densities[mid];
+
+        if (median <= 0) continue;
+
+        for (const s of sectorList) {
+            const ratio = s.density / median;
+            if (ratio > 3 || ratio < 1 / 3) {
+                flagged.push({
+                    sectorId: s.sectorId,
+                    corpsId: s.corpsId,
+                    density: s.density,
+                    median,
+                    ratio,
+                    faction,
+                });
+            }
+        }
+    }
+
+    if (flagged.length > 0) {
+        flagged.sort((a, b) => strictCompare(a.sectorId, b.sectorId));
+        const detail = flagged.slice(0, 10).map(f =>
+            `${f.sectorId} (corps ${f.corpsId}, density=${f.density.toFixed(3)}, ${f.faction} median=${f.median.toFixed(3)}, ratio=${f.ratio.toFixed(1)}x)`
+        ).join(', ');
+        const suffix = flagged.length > 10 ? `, ... +${flagged.length - 10} more` : '';
+        reports.push({
+            category: 'deployment',
+            severity: 'warning',
+            type: 'frontline_density_imbalance',
+            description: `${flagged.length} sector(s) have density >3x or <1/3 of faction median: ${detail}${suffix}.`,
+            entities: flagged.map(f => f.sectorId),
+        });
+    }
+    return reports;
+}
+
+/**
+ * 19. undefended_front_subsegments (warning)
+ * Sub-segments with gap=true that have many edges — large unmanned front sections.
+ */
+function detectUndefendedFrontSubsegments(state: GameState): AnomalyReport[] {
+    const reports: AnomalyReport[] = [];
+    const sectors = state.military.corps_front_sectors ?? {};
+
+    const flagged: Array<{ subSegId: string; sectorId: string; corpsId: string; edgeCount: number }> = [];
+
+    for (const sectorId of sortedKeys(sectors as Record<string, unknown>)) {
+        const sector = sectors[sectorId];
+        for (let i = 0; i < sector.sub_segments.length; i++) {
+            const sub = sector.sub_segments[i];
+            if (sub.gap === true && sub.edge_ids.length > 2) {
+                flagged.push({
+                    subSegId: sub.sub_segment_id ?? `${sectorId}:${i}`,
+                    sectorId,
+                    corpsId: sector.corps_id,
+                    edgeCount: sub.edge_ids.length,
+                });
+            }
+        }
+    }
+
+    if (flagged.length > 0) {
+        flagged.sort((a, b) => strictCompare(a.subSegId, b.subSegId));
+        const detail = flagged.slice(0, 10).map(f =>
+            `${f.subSegId} (sector ${f.sectorId}, corps ${f.corpsId}, ${f.edgeCount} edges)`
+        ).join(', ');
+        const suffix = flagged.length > 10 ? `, ... +${flagged.length - 10} more` : '';
+        reports.push({
+            category: 'deployment',
+            severity: 'warning',
+            type: 'undefended_front_subsegments',
+            description: `${flagged.length} sub-segment(s) are gap=true with >2 edges (unmanned front sections): ${detail}${suffix}.`,
+            entities: flagged.map(f => f.subSegId),
+        });
+    }
+    return reports;
+}
+
+/**
+ * 20. combat_ineffective_concentration (critical)
+ * Corps where too many brigades are below combat effectiveness threshold (personnel < 400).
+ */
+function detectCombatIneffectiveConcentration(state: GameState): AnomalyReport[] {
+    const reports: AnomalyReport[] = [];
+    const formations = state.military.formations;
+    const sectors = state.military.corps_front_sectors ?? {};
+
+    // Identify corps that HAVE sectors (skip exempt/logistics corps)
+    const corpsWithSectors = new Set<string>();
+    for (const sectorId of sortedKeys(sectors as Record<string, unknown>)) {
+        corpsWithSectors.add(sectors[sectorId].corps_id);
+    }
+
+    // Group active brigades by corps_id
+    const corpsBrigades: Record<string, { total: number; ineffective: number; faction: string }> = {};
+    for (const fid of sortedKeys(formations as Record<string, unknown>)) {
+        const f = formations[fid];
+        if (f.status !== 'active') continue;
+        if (!isBrigadeKind(f.kind)) continue;
+        if (!f.corps_id) continue;
+        if (!corpsWithSectors.has(f.corps_id)) continue;
+
+        if (!corpsBrigades[f.corps_id]) {
+            corpsBrigades[f.corps_id] = { total: 0, ineffective: 0, faction: f.faction };
+        }
+        corpsBrigades[f.corps_id].total++;
+        if ((f.personnel ?? 0) < 400) {
+            corpsBrigades[f.corps_id].ineffective++;
+        }
+    }
+
+    const flagged: Array<{ corpsId: string; faction: string; total: number; ineffective: number; pct: number }> = [];
+    for (const corpsId of sortedKeys(corpsBrigades as Record<string, unknown>)) {
+        const c = corpsBrigades[corpsId];
+        if (c.total === 0) continue;
+        const pct = c.ineffective / c.total;
+        if (pct > 0.40) {
+            flagged.push({
+                corpsId,
+                faction: c.faction,
+                total: c.total,
+                ineffective: c.ineffective,
+                pct,
+            });
+        }
+    }
+
+    for (const f of flagged.sort((a, b) => strictCompare(a.corpsId, b.corpsId))) {
+        reports.push({
+            category: 'combat',
+            severity: 'critical',
+            type: 'combat_ineffective_concentration',
+            description: `Corps ${f.corpsId} (${f.faction}): ${f.ineffective}/${f.total} brigades (${(f.pct * 100).toFixed(0)}%) are below combat effectiveness (personnel < 400).`,
+            entities: [f.corpsId],
+        });
+    }
+    return reports;
+}
+
 // ── Public entry point ─────────────────────────────────────────────────
 
 /**
@@ -482,7 +1034,10 @@ function detectOperationZeroEligibleExecution(state: GameState): AnomalyReport[]
  * Returns a deterministically-ordered array of AnomalyReport.
  */
 export function runAnomalyDetection(state: GameState): AnomalyReport[] {
-    const detectors = [
+    // Load OSID adjacency graph once for checks that need it (#13, #17).
+    const adjacency = loadOsidAdjacency();
+
+    const detectors: Array<(s: GameState) => AnomalyReport[]> = [
         detectBattleTempoFloor,
         detectOutcomeDistributionSkew,
         detectZeroPersonnelActive,
@@ -495,6 +1050,22 @@ export function runAnomalyDetection(state: GameState): AnomalyReport[] {
         detectCasualtyRatio,
         detectPhantomSectorAdvantage,
         detectOperationZeroEligibleExecution,
+        // #13 and #17 need adjacency — handled separately below
+        detectUnassignedFrontlineBrigades,
+        detectRearBrigadesInSector,
+        detectBrigadeStacking,
+        // #18, #19, #20 — standard signature
+        detectFrontlineDensityImbalance,
+        detectUndefendedFrontSubsegments,
+        detectCombatIneffectiveConcentration,
+        // #21, #22, #23 — extended checks (anomaly_checks_extended.ts)
+        checkMoraleCollapseCluster,
+        checkZeroCombatCorps,
+        checkOrphanOperationBrigades,
+        // #24, #25, #26 — n1194 investigation checks
+        checkGhostParamilitaryPersonnel,
+        checkOffensiveIntelBlindness,
+        checkWeakerFactionAttackImbalance,
     ];
 
     const results: AnomalyReport[] = [];
@@ -504,5 +1075,12 @@ export function runAnomalyDetection(state: GameState): AnomalyReport[] {
             results.push(a);
         }
     }
+
+    // Adjacency-dependent checks (#13, #17) — skip if graph failed to load
+    if (adjacency) {
+        for (const a of detectDisconnectedSectorTerritory(state, adjacency)) results.push(a);
+        for (const a of detectBrigadeFarFromHome(state, adjacency)) results.push(a);
+    }
+
     return results;
 }

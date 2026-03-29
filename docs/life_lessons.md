@@ -1,6 +1,6 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-03-27. 149 lessons across 8 topic files.
+> Last restructured: 2026-03-28. 153 lessons across 8 topic files.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
@@ -70,6 +70,14 @@
 
 ## New Lessons (always read these)
 
+### [Data] Point-only polygon contacts (shared vertex, 0 segments) are not real adjacency — filter on shared_segments >= 1 (2026-03-28) — NEW → see `data_pipeline.md`
+
+### [Architecture] Supply filters are double penalties when combat multipliers already model the constraint (2026-03-28) — NEW → see `architecture.md`
+
+### [Calibration] Probes are recon, not campaigns — they should not trigger operation cooldown or double exhaustion (2026-03-28) — NEW → see `calibration.md`
+
+### [Calibration] Half-implemented bilateral scaling silently inverts ratios — verify both sides of any paired multiplier (2026-03-28) — NEW → see `calibration.md`
+
 ### [Process] Verify agent edits landed on disk — agent "success" claims are not proof (2026-03-28) — NEW → see `process.md`
 
 ### [Calibration] Calibration % means nothing if reached through broken mechanics — GOLDEN RULE (2026-03-26) — NEW → see `calibration.md`
@@ -93,6 +101,14 @@
 ### [QA] First-pass fixes can introduce new errors — always verify corrected content (2026-03-25) — NEW → see `process.md`
 
 ### [QA] Primary sources in local language override English Wikipedia (2026-03-25) — NEW → see `process.md`
+
+### [Process] Experts must know their domain's data schema — one read of game_state.ts beats four greps (2026-03-29) — NEW → see `process.md`
+
+### [Process] Dispatch experts by file ownership, not by gut feel (2026-03-29) — NEW → see `process.md`
+
+### [Process] Orchestrator must not analyze scenario results — dispatch experts (2026-03-29) — NEW → see `process.md`
+
+### [Process] Validate internal consistency after every run, not just calibration % (2026-03-29) — NEW → see `process.md`
 
 ### [Process] NEVER fabricate historical claims — dispatch /historian, don't speculate (2026-03-24) — NEW
 - **Context**: When analyzing 4th Corps weakness, I stated "Significant reinforcement from 3rd Corps (Central Bosnia) units redeploying south" as if it were sourced fact. User called it out. I had no source — it was speculation presented as history.
@@ -152,9 +168,9 @@
 
 | File | Topics | Lessons | Load when... |
 |------|--------|---------|-------------|
-| [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Combat, Bot AI | 30 | Running calibration scenarios, tuning parameters, OOB changes |
-| [architecture.md](life_lessons/architecture.md) | Architecture, Engine, Scaling, Defaults, Data Integrity | 45 | Changing engine structure, state, pipeline, adding systems |
-| [data_pipeline.md](life_lessons/data_pipeline.md) | Data, Pipeline, Geometry | 9 | Modifying derived data, running data scripts, geometry work |
+| [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Combat, Bot AI | 32 | Running calibration scenarios, tuning parameters, OOB changes |
+| [architecture.md](life_lessons/architecture.md) | Architecture, Engine, Scaling, Defaults, Data Integrity | 46 | Changing engine structure, state, pipeline, adding systems |
+| [data_pipeline.md](life_lessons/data_pipeline.md) | Data, Pipeline, Geometry | 10 | Modifying derived data, running data scripts, geometry work |
 | [ui_map.md](life_lessons/ui_map.md) | UI, GUI, MapLibre, Rendering, React | 12 | Frontend, map, tactical overlay, modal work |
 | [process.md](life_lessons/process.md) | Process, Planning, QA, Quality, Night Shift, Debugging | 40 | General development process (skim at session start) |
 | [sectors.md](life_lessons/sectors.md) | Sectors, Design | 5 | Sector system, front lines, territory assignment |

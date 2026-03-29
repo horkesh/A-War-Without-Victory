@@ -207,8 +207,12 @@ function computePosture(sector: CorpsFrontSector, state: GameState, confidence: 
     return 'defensive';
 }
 
-function computeOffensiveSigns(sector: CorpsFrontSector, state: GameState, confidence: number, reconRange: number): boolean {
-    if (confidence < CONFIDENCE_DEEP_INTEL || reconRange < 2) return false;
+function computeOffensiveSigns(sector: CorpsFrontSector, state: GameState, confidence: number, _reconRange: number): boolean {
+    // n1194: lowered from CONFIDENCE_DEEP_INTEL (0.8) to CONFIDENCE_FULL_STRENGTH (0.5)
+    // and removed reconRange >= 2 gate. All factions should detect enemy staging when
+    // they have accurate strength intel. Previous thresholds made offensive_signs always
+    // false (0/109 records), leaving the defensive reaction (2× threat boost) dead.
+    if (confidence < CONFIDENCE_FULL_STRENGTH) return false;
     const corpsCommand = state.military.corps_command?.[sector.corps_id];
     return corpsCommand?.active_operation?.type === 'sector_attack' ||
         corpsCommand?.active_operation?.type === 'feint' ||
@@ -277,19 +281,57 @@ function findSectorByFriendlyOsid(sectors: Record<string, CorpsFrontSector>, osi
 // ===============================================================
 
 /**
- * Get the best (maximum) intel confidence for a friendly sector
+ * Get the mean intel confidence for a friendly sector
  * across all its facing enemy sector records.
  * Returns 0 if no intel data exists.
  */
 export function getSectorIntelConfidence(state: GameState, sectorId: string): number {
     const records = state.military.sector_intel?.[sectorId];
     if (!records || records.length === 0) return 0;
-    // Mean confidence across all enemy sectors — the commander's overall
-    // situational awareness. One high-confidence record (from combat) shouldn't
-    // mask ignorance about other enemy sectors on the same front.
     let sum = 0;
     for (const rec of records) {
         sum += rec.confidence;
     }
     return sum / records.length;
+}
+
+/**
+ * Get the LOWEST (stalest) intel confidence across all enemy sector records
+ * for a friendly sector. This is the blind spot — the sector pair where
+ * intelligence is most outdated.
+ *
+ * n1194: Used for probe decisions instead of the mean. A probe refreshes ONE
+ * enemy sector pair. If we check the mean, probing one pair doesn't raise
+ * the mean above threshold → triggers redundant probes.
+ */
+export function getStalestSectorIntelConfidence(state: GameState, sectorId: string): number {
+    const records = state.military.sector_intel?.[sectorId];
+    if (!records || records.length === 0) return 0;
+    let min = Infinity;
+    for (const rec of records) {
+        if (rec.confidence < min) min = rec.confidence;
+    }
+    return min === Infinity ? 0 : min;
+}
+
+/**
+ * Get intel confidence for a specific attacker OSID vs a specific defender sector.
+ *
+ * Finds which friendly sector the attackerOsid belongs to, then looks up the
+ * SectorIntelRecord for the given enemy sector ID.
+ * Returns 0 if no intel data exists (blind — no sector match or no record).
+ */
+export function getSectorPairIntelConfidence(
+    state: GameState,
+    attackerOsid: string,
+    defenderSectorId: string,
+): number {
+    const sectors = state.military.corps_front_sectors;
+    if (!sectors) return 0;
+    const friendlySectorId = findSectorByFriendlyOsid(sectors, attackerOsid);
+    if (!friendlySectorId) return 0;
+    const records = state.military.sector_intel?.[friendlySectorId];
+    if (!records) return 0;
+    const rec = records.find(r => r.enemy_sector_id === defenderSectorId);
+    return rec?.confidence ?? 0;
 }

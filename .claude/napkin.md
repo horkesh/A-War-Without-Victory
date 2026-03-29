@@ -8,9 +8,42 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-28, v0.7.0 + Combat Audit + Ops Fixes)
-**v0.7.0 + 24 mechanical fixes.** 1525 tests, 128 suites. tsc clean. Electron 41. **n1146: 92.2% area-weighted (40w), 22/22 anchors, 4/4 enclaves, 6/6 benchmarks. ATH.** Golden rule: calibration % means nothing if reached via broken mechanics.
-**Session 2026-03-28 (Ops Validation Engine Gate + Ghost Sector Sanitizer):** `validateOpAtInjection` engine gate implemented (operation_validation.ts, 5 checks, wired at 3 injection points, output in run_summary.json). Ghost sector sanitizer (`sanitize-ghost-sector-power` step, 148 total). Check #12 FP fix (consolidation exclusion). Check C fix (definition order not sorted — eliminated 5/9 false positives). Op Teočak vitinica_recovery removed (RBiH attacking own territory). 3 staging fixes (Koridor/crnjelovo_donje, Drina/slapasnica, Prsten/podlugovi). Investigation: docs/40_reports/20260328_OPS_VALIDATION_INVESTIGATION.md. **n1150: 92.2%, 22/22, 6/6, 0 critical, 0 phantom sectors, 13 op warnings (0 errors).** Earlier: anomaly detector 12 checks wired, Op Foča/Posavina Corridor/Donji Vakuf/Herzegovina Consolidation per-op fixes, IPC restoration, sep_1991 removed.
+## Current State (2026-03-29, v0.7.0 + Deep Investigation Session)
+**v0.7.0 + 22 fixes in working tree (not yet committed).** **n1198: 90.1% area-weighted (40w), 21/22 anchors, 6/6 benchmarks.** RS 80 orders, RBiH 29 (down from 81), HRHB 7. 101 battles. Consistency: PASS (0 peak violations, 0 unassigned, 0 ghosts, intel live).
+
+**[P0] GAME-WIDE INVESTIGATION: Autonomous pipeline steps that don't communicate.**
+Every system (ops, sectors, brigade assignment, retreat, movement, intel) independently rebuilds spatial state from raw primitives. No shared spatial/predictive layer. Upstream decisions (corps launch, staging, retreat direction) are made without downstream information (predictor, reachability, corridor safety). This produces: zombie ops (0 brigades blocking corps slot), trapped brigades (sela_2 pocket), empty sectors, phantom defenders, blind retreat into dead ends. **Technical Architect proposed `SpatialContext` object at pipeline boundaries. Game Designer speccing ops reevaluation + multi-brigade main/support. Fix this first before individual bug fixes.**
+
+**Session 2026-03-29 findings (deep investigation):**
+- **Paramilitary dissolution**: personnel not zeroed on inactive → ghost troops. FIXED.
+- **Intel/Probe overhaul (5 items)**: probe freshness per-sector-pair, attack threshold→costly_victory, OPSEC offensive_signs threshold lowered, fog scaled by intel confidence, forced commitment removed. ALL IMPLEMENTED.
+- **Brigade assignment**: 23 unassigned brigades → 0. Drift skip removed, catch-all guard, formation.assignment sync, component gate relaxation, unstaffable sector prevention. ALL IMPLEMENTED.
+- **Pocket evacuation**: post-op return march component check, home return for tiny pockets, pocket evacuation evaluator. ALL IMPLEMENTED.
+- **Drift recall**: friendly BFS instead of raw adjacency. IMPLEMENTED.
+- **Corridor safety**: staging OSID rejected if approach through 1-OSID chokepoint. IMPLEMENTED.
+- **Recording fixes**: casualty attribution rounding, friction/siege recording, peak_personnel updated at 7 reinforcement sites. ALL IMPLEMENTED.
+- **Anomaly detector**: 3 new checks (#24-#26), unassigned_frontline_brigades→critical. IMPLEMENTED.
+- **Diagnostics**: `tools/validate_run_consistency.cjs` — 6 internal consistency checks. CREATED.
+
+**Deep audit findings (investigations, not yet fixed):**
+- **33 pathfinding functions**: 19 friendly-only, 6 raw adjacency (2 bugs), 5 teleports (3 dangerous). Systems Programmer audit.
+- **`findEmergencyRetreatOsid`**: direction-blind, 3 teleports, picked sela_2 over trnovo. Sent brigades INTO pocket.
+- **Phantom defender**: co-located brigades aggregate power but only primary takes casualties. Secondary = free power.
+- **Corps launch is blind**: `evaluateCorpsOffensiveLaunch` has NO combat prediction → creates ops brigades refuse to execute → zombie ops block corps slot.
+- **Zero-brigade ops**: 4 systems can remove brigades from ops with no check → ops persist forever with 0 brigades.
+- **Attack resolution spatially blind**: no flanking, no multi-directional bonus, no encirclement. Single staging OSID.
+- **`bfsDistance` in `sector_utils.ts`**: raw adjacency for brigade distribution — sees brigades as "close" through enemy territory.
+
+**Design specs delivered:**
+- `docs/30_planning/MULTI_BRIGADE_OPERATION_DESIGN_SPEC.md` — main/support roles, repositioning between objectives.
+- Ops reevaluation on losses — in progress (Game Designer).
+**Session 2026-03-28 (Session 2 — Empty Sectors + Passive Brigades):**
+- **Territory-based brigade reconciliation (Phase 1.5)**: `classifyBrigadesByTerritory` now matches pooled brigades by `location_osid` vs `territory_osids` before Phase 2 BFS. Fixed SRK sector:1 (14 edges, 0 brigades). **0 empty contested sectors (was 5).**
+- **Cold-front sector suppression REVERTED**: Removing sectors from Voronoi cascades globally. Ghost sanitizer sufficient.
+- **Probe pipeline triple fix**: (1) `evaluateOperationProgress` now skips probe/feint (double processing bug). (2) Probes don't trigger `last_completed_operation` cooldown. (3) Supply filter relaxed: `strained` brigades CAN attack (0.75× penalty via getSupplyMult), only `critical` excluded. Root cause: 94% of RBiH territory is `strained` — the old filter killed ALL RBiH operations.
+- **n1169: 103 battles (was 68, +51%), RBiH 47 orders (was 12, +292%), 72 passive brigades 30.3% (was 92/39%).** -0.9pp from RBiH overcapture.
+- **Also added**: exhaustion gate (MAX_EXHAUSTION=30/probe=40), cooldown 8→5, counter-attack broadening (sector-wide, 2-turn window), planning cap 4. These had zero immediate effect but are correct architecturally.
+**Session 2026-03-28 (Session 1):** `validateOpAtInjection` engine gate, ghost sector sanitizer, anomaly detector wiring, Op fixes. **n1150: 92.2%, 22/22, 6/6.**
 **Session 2026-03-27 (IPC + 1991 Cleanup):** Restored 10+ IPC handlers in `useIPC.ts` (Settings, AI, Replays); synchronized with `preload.cjs`. Decommissioned `sep_1991` scenario across Electron/UI. Deleted legacy `bridge.ts`. Propagated to master docs.
 **Earlier 2026-03-27 (diagnostic fixes):** Probe type gate (probes re-enabled), overflow threshold `<` not `<=`, orphan pool drainage to strategic reserve, east Herzegovina Bosniak displacement reroute. Results: 62 battles (was 44), HRHB 8 attacks (was 0), 4th Corps 9/10 healthy (was 2/10), 0 stranded pools (was 3), 2 empty sectors (was 6), 0 diagnostic errors (was 2).
 **Earlier 2026-03-27:** Sector-coverage displacement guard, cross-faction HRHB pool seeding (5x mult, 4 missing brigades), 255th Slavna enclave at Teočak, 246th at vitinica_2, Op Teočak second axis, Black Swans elite loan via deployment_osid. Pre-commit hook: tsc-only (~15s).
@@ -25,8 +58,8 @@
 - **P14 Data silos:** Deterministic `battle_id` join key (`{turn}:{osid}:{attacker}:{defender|null}`) propagates to battles, ops, territory flips, brigade history. Friction: `{turn}:{osid}:friction:{brigadeId}`.
 - **P15 Friction:** `frontline_attrition.ts` records skirmish BrigadeEngagements when casualties ≥15 (35% deterministic chance).
 - **Anomaly detector:** `src/scenario/anomaly_detector.ts` — 12 post-run checks, wired into harness.
-**Open:** P16 (strategic reserve 0 manpower all factions), P17 (4th Corps 80% ineffective, downstream), empty sector edge-count triage (5 sectors, SRK has 14-edge sector with 0 brigades), operation-aware pre-flight recruitment (spawn timing mismatch), corps exhaustion cooldown + counter-attack broadening (77 passive brigades = 33%, target 20-25%).
-**Battle tempo:** 62 battles/40w (historical target 150-250). Assembly gate + intel fixes expected to improve further.
+**Open:** **[P1] Intel/Probe overhaul (5 items)**: (1) Probe freshness per-sector-pair + remove forced commitment, (2) attack threshold stalemate→costly_victory, (3) OPSEC offensive_signs threshold lowered + defensive reaction enabled, (4) fog scaled by intel confidence, (5) counter-attacks gated through predictor. Root cause: ARBiH 81 orders in 1992 — bots don't emergently know not to attack. Also open: RBiH overmobilized 161k (P4), inverted casualty ratio 0.43 att:def (P5), P16 (strategic reserve 0 manpower).
+**Battle tempo:** 103 battles/40w (was 62). Historical target 150-250. Major improvement from supply filter fix.
 **Roadmap:** v0.7.1 version bump, visual verification, canon audit Phase D/E, then v0.8=Command Chain.
 **Army HQ restoration (2026-03-25):** Known-good baseline c80d5767. Rule: never rewrite ArmyHQModal.tsx or SituationBriefing.tsx — targeted edits only.
 **HRHB-RBiH conflict:** P1 ALL RESOLVED (n963). Master: `docs/40_reports/BOSNIAK_CROAT_CONFLICT_MASTER.md`.
@@ -51,6 +84,18 @@
    Do instead: Run `CronList` at session start. Crons are session-only and auto-expire after 3 days. **Re-schedule every session.** Two required crons:
    **(A) Daily Pyrrhic Standup** — cron `27 6 * * *`. Invokes /orchestrator to convene Pyrrhic team. Three phases: (1) Yesterday's retrospective (good/bad/ugly from `git log --since=24h`, ledger, life lessons), (2) Fresh game analysis (CALIBRATION_MASTER, REAL_WAR_MASTER, War-or-Game assessment), (3) Today's priorities — plan big and ambitious (3-5 items a team of AI agents can accomplish). Present everything via /visual-explainer as a war room briefing board. Full prompt stored in `memory/cron_daily_standup.md`.
    **(B) Life-lessons review** — cron `3 6 * * *`. Gather 24h git activity, detect life-lesson violations, synthesize new lessons, promote/demote, generate visual report via `/visual-explainer`.
+
+## Post-Run Analysis Protocol (MANDATORY — orchestrator must not analyze directly)
+After EVERY scenario run, the orchestrator:
+1. **Collect raw data**: Run `compare_painted_vs_sim.cjs`, `diagnose_run.cjs`, `validate_run_consistency.cjs`. Present raw numbers ONLY.
+2. **Dispatch expert panel (in parallel)**:
+   - `/scenario-creator-runner-tester` — full run report: calibration, anchors, benchmarks, events, troop strengths, per-region breakdown, flags
+   - `/war-or-game` — realism assessment: would a real commander find this absurd? P1/P2/P3 triage
+   - `/operations-expert` — operation health: Op failures, staging issues, idle corps, order counts
+   - `/sector-expert` — sector health: empty sectors, density imbalance, assignment gaps
+3. **Cross-review**: Have experts review each other's findings. Formation expert checks elite loan claims. Historian verifies historical claims.
+4. **Synthesize**: Orchestrator collates expert reports, attributes all findings ("War-or-Game found X"), recommends course of action. Does NOT add own analysis.
+5. **Record**: Update CALIBRATION_MASTER with the run entry.
 
 ## Execution & Validation
 1. **[2026-03-27] Brigade front-lock investigations need both placement and history validation**
@@ -171,8 +216,8 @@
    Do instead: When operational data unavailable, log and skip OSID steps safely rather than crashing.
 9. **[2026-03-08] Paramilitary rear pocket cleanup: `paramilitary_sweep.ts`**
    Do instead: Autonomous paramilitary units for rear enemy pocket clusters (1-3 OSIDs, ALL external neighbors faction-controlled). Active w0-20. Faction rates: RS=0.85, HRHB=0.55, RBiH=0.30.
-10. **[2026-03-16] Historical event system LIVE — 94 events from JSON, loaded via `event_loader.ts`**
-    Do instead: Events loaded from `data/scenarios/events/war_*.json` via `loadEventDefinitions(startWeek)` in scenario runner. Passed as `eventDefinitions` on `TurnInput`. `evaluateEvents()` accepts optional `registry` param. Events fire mechanical effects (morale, supply, alliance, war crimes, decisions). `events_fired` serialized to `weekly_report.jsonl`. Decision events queue for player, auto-respond for bots. **6 HRHB-RBiH events now condition-triggered** (alliance_below, faction_controls_municipality).
+10. **[2026-03-28] Point-only polygon contacts are not real adjacency — shared_segments >= 1 required**
+    Do instead: Contact graph edges with `shared_segments=0` are artifacts (single snapped vertex, no boundary segment). 46 total, 12 cross-faction (e.g. sela_2-golubici_2 bridging Trnovo-Kalinovik). Sector system, territory contiguity, and front edges must filter to `shared_segments >= 1`. 1,979 real segment contacts vs 46 point-only artifacts.
 
 ## Bosniak-Croat Conflict (HRHB-RBiH War)
 1. **[2026-03-19] Mobilization phase — 4-turn buildup (IMPLEMENTED)**

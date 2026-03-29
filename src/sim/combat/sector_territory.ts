@@ -395,6 +395,133 @@ export function assignTerritoryVoronoi(
 }
 
 /**
+ * Verify and repair territory contiguity for all sectors.
+ *
+ * After territory assignment (Voronoi BFS or merge), a sector's territory_osids
+ * can become disconnected — e.g. when front edges are separated and BFS claims
+ * OSIDs on both sides, or when mergeSmallAdjacentSectors unions non-contiguous
+ * territory sets.
+ *
+ * For each sector:
+ *   1. BFS through territory_osids using the OSID adjacency graph (filtered to
+ *      friendly OSIDs) to find connected components.
+ *   2. Keep the largest component in the original sector.
+ *   3. Orphaned components are reassigned to the nearest adjacent sector (by
+ *      OSID adjacency between the orphan and another sector's territory).
+ *   4. If no adjacent sector exists, orphaned OSIDs are dropped (picked up by
+ *      ensureMinimumSectorCoverage or post-Voronoi sweep on subsequent turns).
+ *
+ * Deterministic: sorted iteration via strictCompare, no Math.random().
+ */
+export function repairDisconnectedTerritory(
+    sectors: CorpsFrontSector[],
+    adjacency: Map<Osid, Osid[]>,
+    friendlyOsids: Set<string>,
+): void {
+    if (sectors.length === 0) return;
+
+    // Build a reverse index: OSID → sector indices that claim it as territory.
+    // (Needed to find adjacent sectors for orphan reassignment.)
+    const rebuildTerritoryIndex = (): Map<string, number[]> => {
+        const idx = new Map<string, number[]>();
+        for (let si = 0; si < sectors.length; si++) {
+            for (const osid of sectors[si]!.territory_osids) {
+                let list = idx.get(osid);
+                if (!list) { list = []; idx.set(osid, list); }
+                list.push(si);
+            }
+        }
+        return idx;
+    };
+
+    let territoryIndex = rebuildTerritoryIndex();
+    let anyRepair = false;
+
+    for (let si = 0; si < sectors.length; si++) {
+        const sector = sectors[si]!;
+        if (sector.territory_osids.length <= 1) continue;
+
+        // BFS connected components through this sector's territory using OSID adjacency,
+        // restricted to OSIDs that are both in this sector's territory AND friendly.
+        const territorySet = new Set(sector.territory_osids);
+        const components = findConnectedComponents(
+            territorySet,
+            (osid) => (adjacency.get(osid as Osid) ?? []).filter(
+                n => territorySet.has(n) && friendlyOsids.has(n)
+            ),
+        );
+
+        if (components.length <= 1) continue;
+
+        // Find the largest component (ties broken by first OSID in sort order for determinism).
+        let largestIdx = 0;
+        for (let ci = 1; ci < components.length; ci++) {
+            if (components[ci]!.size > components[largestIdx]!.size) {
+                largestIdx = ci;
+            } else if (components[ci]!.size === components[largestIdx]!.size) {
+                const minA = [...components[largestIdx]!].sort(strictCompare)[0]!;
+                const minB = [...components[ci]!].sort(strictCompare)[0]!;
+                if (strictCompare(minB, minA) < 0) largestIdx = ci;
+            }
+        }
+
+        // Keep the largest component in this sector.
+        const kept = components[largestIdx]!;
+        sector.territory_osids = [...kept].sort(strictCompare);
+        anyRepair = true;
+
+        // Reassign orphaned components to adjacent sectors.
+        for (let ci = 0; ci < components.length; ci++) {
+            if (ci === largestIdx) continue;
+            const orphan = components[ci]!;
+            const orphanOsids = [...orphan].sort(strictCompare);
+
+            // Find the best adjacent sector for this orphan component.
+            // "Adjacent" = any OSID in the orphan has an adjacency neighbor that
+            // belongs to another sector's territory.
+            let bestSectorIdx = -1;
+            let bestSectorSize = -1;
+            for (const osid of orphanOsids) {
+                const neighbors = adjacency.get(osid as Osid) ?? [];
+                for (const n of neighbors) {
+                    if (orphan.has(n)) continue; // same orphan component
+                    const claimingSectors = territoryIndex.get(n);
+                    if (!claimingSectors) continue;
+                    for (const candidateSi of claimingSectors) {
+                        if (candidateSi === si) continue; // skip the sector we just split from
+                        // Prefer the sector with the most territory (stable reassignment).
+                        const candidateSize = sectors[candidateSi]!.territory_osids.length;
+                        if (candidateSize > bestSectorSize ||
+                            (candidateSize === bestSectorSize && bestSectorIdx >= 0 &&
+                                strictCompare(sectors[candidateSi]!.sector_id, sectors[bestSectorIdx]!.sector_id) < 0)) {
+                            bestSectorSize = candidateSize;
+                            bestSectorIdx = candidateSi;
+                        }
+                    }
+                }
+            }
+
+            if (bestSectorIdx >= 0) {
+                // Add orphan OSIDs to the best adjacent sector.
+                const target = sectors[bestSectorIdx]!;
+                const targetSet = new Set(target.territory_osids);
+                for (const osid of orphanOsids) targetSet.add(osid);
+                target.territory_osids = [...targetSet].sort(strictCompare);
+            }
+            // If no adjacent sector found, orphan OSIDs are simply dropped.
+            // They'll be picked up by ensureMinimumSectorCoverage or re-claimed
+            // on subsequent turns.
+        }
+
+        // Rebuild the index after modifications.
+        territoryIndex = rebuildTerritoryIndex();
+    }
+
+    // No explicit logging — callers can compare territory counts before/after
+    // if diagnostics are needed.
+}
+
+/**
  * Assign each hostile-boundary front edge to the corps that owns its friendly-side OSID.
  * When an edge is on an OSID not reachable by the main BFS (disconnected pockets/islands),
  * BFS outward through OSID adjacency to find the nearest already-claimed OSID and inherit
@@ -502,6 +629,7 @@ export function consolidateCrossCorpsFronts(
     formations: Record<FormationId, FormationState>,
     osidToCorps: Map<Osid, FormationId>,
     centroids?: OsidCentroidMap,
+    sharedBoundaryAdj?: Map<Osid, Osid[]>,
 ): void {
     // Collect all edge_ids across all corps for this faction
     const allEdgeIds: string[] = [];
@@ -528,7 +656,7 @@ export function consolidateCrossCorpsFronts(
     // Includes friendly-OSID, OSID-neighbor, same-hostile-OSID, and hostile-
     // OSID-neighbor adjacency — so connected components faithfully represent
     // contiguous front segments.
-    const edgeAdj = buildEdgeAdjacency(allEdgeIds, edgeMeta, faction, adjacency, undefined, centroids);
+    const edgeAdj = buildEdgeAdjacency(allEdgeIds, edgeMeta, faction, adjacency, sharedBoundaryAdj, centroids);
 
     // Build brigade-presence lookup once: OSID → set of corps with brigades
     // stationed there. Edges where a brigade of the current corps is stationed
@@ -715,6 +843,7 @@ export function consolidateIsolatedCorpsPockets(
     adjacency: Map<Osid, Osid[]>,
     formations: Record<FormationId, FormationState>,
     centroids?: OsidCentroidMap,
+    sharedBoundaryAdj?: Map<Osid, Osid[]>,
 ): void {
     const edgeMeta = new Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>();
     // Reverse index: friendly OSID → front edge IDs touching it
@@ -741,7 +870,7 @@ export function consolidateIsolatedCorpsPockets(
         if (!edges || edges.length <= 1) continue;
 
         // Build edge adjacency for this corps's edges only (friendly-side)
-        const edgeAdj = buildEdgeAdjacency(edges, edgeMeta, faction, adjacency, undefined, centroids);
+        const edgeAdj = buildEdgeAdjacency(edges, edgeMeta, faction, adjacency, sharedBoundaryAdj, centroids);
 
         // Find connected components
         const components = findConnectedComponents(

@@ -19,6 +19,7 @@
 import type { FactionId, FormationId, FormationState, GameState, MunicipalityId } from '../../state/game_state.js';
 import { militiaPoolKey } from '../../state/militia_pool_key.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { ensureBrigadeHistory } from './brigade_history_recorder.js';
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
@@ -257,6 +258,10 @@ export function reconstituteBrigades(state: GameState): ReconstitutionReport {
         f.status = 'active';
         f.lifecycle_status = undefined;
         f.personnel = poolDraw;
+        // Track peak personnel after reconstitution
+        const reconHist = ensureBrigadeHistory(f);
+        if (poolDraw > reconHist.peak_personnel) reconHist.peak_personnel = poolDraw;
+
         f.cohesion = RECONSTITUTION_COHESION;
         // Refugee brigades get a morale bonus — displaced population fights with purpose
         f.morale = RECONSTITUTION_MORALE[faction] + (isRefugee ? REFUGEE_MORALE_BONUS : 0);

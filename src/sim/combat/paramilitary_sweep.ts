@@ -551,6 +551,7 @@ function dissolveParamilitary(state: GameState, fid: FormationId, report: Parami
     if (f) {
         f.status = 'inactive';
         f.lifecycle_status = 'disbanded';
+        f.personnel = 0;
     }
     report.dissolved.push(fid);
 }

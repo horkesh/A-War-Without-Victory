@@ -14,6 +14,7 @@ import { initializeCasualtyLedger, recordBattleCasualties } from '../../state/ca
 import { strictCompare } from '../../state/validateGameState.js';
 import { militiaPoolKey } from '../../state/militia_pool_key.js';
 import { ensureBrigadeComposition } from './equipment_effects.js';
+import { ensureBrigadeHistory } from './brigade_history_recorder.js';
 
 // --- Constants ---
 
@@ -148,6 +149,10 @@ export function applySiegeBombardmentAttrition(state: GameState): SiegeAttrition
             recordBattleCasualties(state.military.casualty_ledger!, besiegedFaction, fid, {
                 killed, wounded, missing_captured: missing
             });
+
+            // Update brigade history casualty tally for siege bombardment
+            const siegeHistory = ensureBrigadeHistory(f);
+            siegeHistory.total_casualties_taken += casualties;
 
             // Feed into pool.exhausted for demographic gating (75% rate — matches applyCasualtyPoolExhaustion)
             const originMun = f.origin_mun;

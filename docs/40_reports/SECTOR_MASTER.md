@@ -180,6 +180,8 @@ Combat integration: reactive bonus multiplies Layer A effective reserves; entren
 
 Files: `game_state.ts` (types), `combat_math.ts` (constants), `bot_corps_directives.ts` (bot AI), `sector_stance_orders.ts` (player orders rework), `attack_resolution_osid.ts` + `combat_predictor.ts` (reactive bonus), `brigade_movement_orders.ts` (entrenchment rate).
 
+**Intel-Defense Integration (KNOWN ISSUE n1194):** Sector stances interact with OPSEC — when OPSEC is active on a sector during operation planning, enemy intel buildup is halved. However, the `offensive_signs` field on SectorIntelRecord (designed to trigger 2x threat weight boost for defensive reinforcement) never fires due to confidence >= 0.8 AND recon_range >= 2 gate. Defenders receive zero warning about staging operations. Planned fix: lower detection threshold to 0.5, enable range-1 detection.
+
 **Layer C (PENDING):** Player visibility — defense heat map, enhanced battle reports, sector stance controls, home defense indicators.
 
 **Calibration:** n668 — 89.0% area-weighted, 6/6 benchmarks, RS w40 0.519, RS delta −22. Zero regression from Layer B.
@@ -311,6 +313,18 @@ Density range improved from 100:1 (n623) to 33:1 (n624) after Herzegovina/SRK fi
 **Fix:** (1) `tools/enrich_contact_graph_min_dist.cjs` computes `min_dist` from polygon geometry (vertex-to-vertex minimum). (2) `merge_micro_osids.cjs` preserves `type` and `min_dist` fields. Result: 2025/2047 shared boundary (<5.5m), 22 distant (>33m). Trnovo-Kalinovik sector correctly split.
 **Calibration:** 93.1% → 92.0%. Previous number was inflated by broken defense of unreachable territory.
 **Diagnostic:** `tools/enrich_contact_graph_min_dist.cjs` — run after any contact graph regeneration.
+
+### Point-Only Polygon Contacts — Phantom Front Edge Discovery (2026-03-28)
+
+**Discovery:** The `operational_contact_graph.json` contains 46 edges with `min_dist=0` that are **point-only contacts** — two OSID polygons share a single snapped vertex but NO actual boundary segment (0 consecutive shared vertices). These are data artifacts from polygon derivation, NOT real geographic adjacency. 12 of them are cross-faction, creating phantom front edges between OSIDs that don't actually touch.
+
+**Stats:** 46 point-only contacts (`shared_segments=0`), 1,979 real segment contacts (`shared_segments >= 1`). 12 of the 46 are cross-faction edges creating phantom front edges.
+
+**Case study — sela_2 and golubici_2:** `op:kalinovik:sela_2` and `op:kalinovik:golubici_2` share exactly 1 vertex at `[18.293588, 43.472983]` but 0 boundary segments. The contact graph says `min_dist=0` (adjacent), but the map shows RS territory (Obalj, Ljuta) between them. This caused sector `arbih_1st_corps:7` to bridge Trnovo and Kalinovik — two geographically separated fronts — into one sector. The sector defense system then treated the combined sector as a single defensive unit, counting reserves from Trnovo as available at Kalinovik (and vice versa).
+
+**The fix:** Enrich the contact graph with `shared_segments` count per edge (consecutive shared vertex pairs). Use `shared_segments >= 1` (not `min_dist === 0`) for all adjacency that matters — sector edge connectivity, territory contiguity, front edge generation. Point-only contacts (`shared_segments === 0`) must be filtered as artifacts.
+
+**Impact:** sela_2 becomes an isolated enclave (no real segment contacts to other RBiH territory). Sector arbih_1st_corps:7 splits into separate Trnovo and Kalinovik components. Expected calibration impact from fixing phantom sector bridging.
 
 ---
 

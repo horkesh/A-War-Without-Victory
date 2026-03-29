@@ -31,6 +31,7 @@ import type { EdgeRecord } from '../../map/settlements.js';
 import type { OsidCentroidMap } from '../../data/operational_data_types.js';
 import { buildOsidAdjacency, buildSharedBoundaryAdjacency, type Osid } from './osid_adjacency.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
+import { getFormationCorpsId } from './corps_sector_partition.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { FRONT_EDGE_MAX_GAP } from '../../map/front_edges.js';
 import {
@@ -39,11 +40,12 @@ import {
 import { getCorpsArmyPriorities } from './bot_strategy.js';
 
 // ── Imported from extracted modules ──────────────────────────────────────
-import { buildFriendlyComponents, getCorpsForFaction, getFactions } from './sector_utils.js';
+import { buildFriendlyComponents, getSectorComponent, getCorpsForFaction, getFactions, isSectorColdFront } from './sector_utils.js';
 import { assertBrigadeReachability, assertSectorBrigadesActive } from './sector_assertions.js';
 import {
     mapOsidsToCorps,
     assignTerritoryVoronoi,
+    repairDisconnectedTerritory,
     partitionFrontEdges,
     consolidateCrossCorpsFronts,
     consolidateIsolatedCorpsPockets,
@@ -56,6 +58,7 @@ import {
     reclassifyRearBrigades,
     deduplicateBrigadesAcrossSectors,
     recomputeSectorPowerAndThreat,
+    syncSectorAssignmentsToFormations,
 } from './brigade_assignment.js';
 import {
     buildCorpsCommanderProfiles,
@@ -85,6 +88,9 @@ export function buildCorpsFrontSectors(
     if (!edges || edges.length === 0) return {};
 
     const adjacency = buildOsidAdjacency(edges);
+    // Shared-boundary-only adjacency for territory contiguity checks.
+    // Territory must be connected through direct polygon contact — no distance-contact bridging.
+    const sharedBoundaryAdj = buildSharedBoundaryAdjacency(edges);
     // Front-edge-compatible adjacency: same threshold as FRONT_EDGE_MAX_GAP.
     const frontEdgeAdj = new Map<Osid, Osid[]>();
     for (const e of edges) {
@@ -120,7 +126,7 @@ export function buildCorpsFrontSectors(
 
     for (const faction of factions) {
         const factionSectors = buildFactionSectors(
-            state, faction, osidFrontEdges, adjacency, frontEdgeAdj, strictAdj, caseBSplitAdj, formations, reverseMap, centroids
+            state, faction, osidFrontEdges, adjacency, sharedBoundaryAdj, strictAdj, caseBSplitAdj, formations, reverseMap, centroids
         );
         for (const sector of factionSectors) {
             result[sector.sector_id] = sector;
@@ -132,6 +138,20 @@ export function buildCorpsFrontSectors(
     // area into separate sectors (Brcko fix: 215th and 108th were in different
     // sectors, so reactive defense couldn't concentrate them).
     mergeSmallAdjacentSectors(result, adjacency);
+
+    // Post-merge contiguity repair: mergeSmallAdjacentSectors unions territory sets
+    // without verifying contiguity. Repair any disconnected territory that resulted.
+    {
+        const allSectors = Object.values(result);
+        const allFriendly = new Set<string>();
+        for (const s of allSectors) {
+            for (const osid of s.territory_osids) allFriendly.add(osid);
+        }
+        repairDisconnectedTerritory(allSectors, sharedBoundaryAdj, allFriendly);
+    }
+
+    // Sync sector assignments back to formation.assignment
+    syncSectorAssignmentsToFormations(result, formations);
 
     return result;
 }
@@ -235,9 +255,9 @@ function buildFactionSectors(
         osidFrontEdges, faction, osidToCorps, state, reverseMap, corpsIds, adjacency
     );
     // Step 3b: Consolidate cross-corps front splits.
-    consolidateCrossCorpsFronts(corpsEdges, osidFrontEdges, faction, adjacency, formations, osidToCorps, centroids);
+    consolidateCrossCorpsFronts(corpsEdges, osidFrontEdges, faction, adjacency, formations, osidToCorps, centroids, sharedBoundaryAdj);
     // Step 3c: Consolidate isolated corps pockets.
-    consolidateIsolatedCorpsPockets(corpsEdges, osidFrontEdges, faction, adjacency, formations, centroids);
+    consolidateIsolatedCorpsPockets(corpsEdges, osidFrontEdges, faction, adjacency, formations, centroids, sharedBoundaryAdj);
 
     // Pre-compute friendly OSIDs once for territory, brigade assignment, and contiguity checks.
     const friendlyOsids = new Set<string>();
@@ -250,6 +270,11 @@ function buildFactionSectors(
         if (ctrl === faction) friendlyOsids.add(osid);
     }
 
+    // Pre-compute friendly connected components for staffability check (FIX 1).
+    // A sector is "unstaffable" if no brigade from its corps exists in the same
+    // friendly connected component — meaning no unit can physically reach it.
+    const preComponentOf = buildFriendlyComponents(adjacency, friendlyOsids);
+
     // Step 4: Build multi-sectors (sub-segments promoted to independent sectors)
     const sectors: CorpsFrontSector[] = [];
     for (const corpsId of corpsIds) {
@@ -257,17 +282,43 @@ function buildFactionSectors(
         const edgeIds = corpsEdges.get(corpsId);
         if (!edgeIds || edgeIds.length === 0) continue;
 
+        // Collect component IDs where this corps has at least one brigade.
+        const corpsBrigadeComponents = new Set<number>();
+        for (const fid of Object.keys(formations).sort(strictCompare)) {
+            const f = formations[fid];
+            if (!f || f.faction !== faction || f.status !== 'active') continue;
+            if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+            if (getFormationCorpsId(f) !== corpsId) continue;
+            if (!f.location_osid) continue;
+            const comp = preComponentOf.get(f.location_osid);
+            if (comp !== undefined) corpsBrigadeComponents.add(comp);
+        }
+
         const corpsMultiSectors = buildMultiSectorsForCorps(
             state, corpsId, faction, edgeIds, osidFrontEdges,
             adjacency, sharedBoundaryAdj, strictAdj, caseBSplitAdj, formations, reverseMap, centroids, friendlyOsids
         );
         for (const sector of corpsMultiSectors) {
+            // FIX 1: Skip unstaffable sectors — no corps brigade in same component.
+            const sectorComp = getSectorComponent(sector, preComponentOf);
+            if (sectorComp !== -1 && !corpsBrigadeComponents.has(sectorComp)) continue;
             sectors.push(sector);
         }
     }
 
+    // NOTE: Cold-front sector suppression was attempted here but reverted.
+    // Removing even tiny cold-front sectors changes Territory Voronoi (Step 5),
+    // cascading into different brigade distribution and combat outcomes globally.
+    // The ghost sector sanitizer (sanitize-ghost-sector-power pipeline step)
+    // already zeros stats for empty sectors — that's sufficient.
+
     // Step 5: Territory Voronoi — BFS from Front Edges into Depth
     assignTerritoryVoronoi(sectors, adjacency, friendlyOsids, osidToCorps);
+
+    // Step 5b: Repair disconnected territory — Voronoi BFS can assign non-contiguous
+    // OSIDs to a sector when front edges are separated. BFS through each sector's
+    // territory, keep the largest connected component, reassign orphans to adjacent sectors.
+    repairDisconnectedTerritory(sectors, sharedBoundaryAdj, friendlyOsids);
 
     // Pre-compute friendly territory connected components (used by steps 6 and 7).
     const componentOf = buildFriendlyComponents(adjacency, friendlyOsids);
@@ -348,6 +399,7 @@ export {
     getCorpsForFaction,
     getFactions,
     REASSIGNMENT_ENTRENCHMENT_RETAIN,
+    isSectorColdFront,
 } from './sector_utils.js';
 
 // sector_edge_adjacency.ts
@@ -369,6 +421,7 @@ export {
 export {
     mapOsidsToCorps,
     assignTerritoryVoronoi,
+    repairDisconnectedTerritory,
     partitionFrontEdges,
     bfsNearestClaimedCorps,
     findSubordinateOsid,
@@ -407,6 +460,7 @@ export {
     ensureMinimumSectorCoverage,
     deduplicateBrigadesAcrossSectors,
     recomputeSectorPowerAndThreat,
+    syncSectorAssignmentsToFormations,
 } from './brigade_assignment.js';
 
 // commander_override.ts

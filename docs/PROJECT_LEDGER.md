@@ -1,3 +1,38 @@
+## [2026-03-29] Deep Investigation Session — 22 Fixes + Architectural Root Cause
+
+### Change (22 fixes implemented in working tree)
+**Intel/Probe overhaul (5 items):** Probe freshness per-sector-pair (not mean), attack threshold stalemate→costly_victory, OPSEC offensive_signs threshold lowered to 0.5, fog scaled by intel confidence (0.70-0.95), forced probe commitment removed.
+**Brigade assignment (5 items):** Drift skip removed, catch-all guard (0 unassigned), formation.assignment sync from sectors, unstaffable sector prevention (component check), component gate relaxation in ensureMinimumSectorCoverage.
+**Pocket evacuation (4 items):** Post-op return march component check, home return for tiny pocket brigades, pocket evacuation evaluator, drift recall friendly BFS.
+**Recording fixes (4 items):** Casualty attribution rounding, friction casualty recording, siege casualty recording, peak_personnel updated at 7 reinforcement sites.
+**Paramilitary dissolution:** Personnel zeroed on inactive.
+**Anomaly detector:** 3 new checks (#24-#26: ghost paramilitaries, intel blindness, attack imbalance), unassigned_frontline_brigades→critical.
+**Corridor safety:** Staging OSID rejected if approach through 1-OSID chokepoint (articulation point check).
+**Diagnostics:** `tools/validate_run_consistency.cjs` — 6 internal consistency checks.
+
+### Deep Investigation Findings (not yet fixed — architectural)
+- **P0: No shared spatial reasoning layer.** 33 pathfinding functions, 15+ redundant adjacency rebuilds/turn, systems disagree on "friendly" definition. Technical Architect proposed `SpatialContext` at pipeline boundaries.
+- **P0: Corps launches ops blind.** `evaluateCorpsOffensiveLaunch` has NO combat prediction — creates ops brigades refuse to execute → zombie ops block corps slot permanently.
+- **P0: Pipeline steps don't communicate.** Brigade removal from ops (dissolution, withdrawal, recall) has no reevaluation — ops persist with 0 brigades forever. Design spec in progress: ops commander reevaluates on losses, corps CO decides reinforce/reduce/abort.
+- **P1: Emergency retreat direction-blind.** `findEmergencyRetreatOsid` picked sela_2 (dead end) over trnovo (main body). 3 teleports in cascade. Sent 3 brigades into pocket that got permanently trapped.
+- **P1: Phantom defender.** Co-located brigades aggregate power but only primary takes casualties. Secondary = free power, zero cost.
+- **P1: Attack resolution spatially blind.** No flanking, no multi-directional bonus. Single staging OSID. Design spec delivered: main/support brigade roles, repositioning between objectives.
+
+### Results
+- **n1198: 90.1% area-weighted, 21/22 anchors, 6/6 benchmarks.** RS 80 orders, RBiH 29 (was 81), HRHB 7. 101 battles. Consistency PASS.
+- **Design specs:** Multi-brigade ops (`docs/30_planning/MULTI_BRIGADE_OPERATION_DESIGN_SPEC.md`), ops reevaluation on losses (in progress).
+
+### Verification
+- `npx tsc --noEmit` (clean). `validate_run_consistency.cjs` PASS. Fresh 40w run verified.
+
+### Results
+- **n1194: 88.4% area-weighted, 20/22 anchors, 5/6 benchmarks.** 136 battles, 149 orders.
+- Real RS troop strength: 99,030 (90 active brigades), not 120,330 reported previously.
+
+### Verification
+- `npx tsc --noEmit` (clean).
+- Fresh 40w run.
+
 ## [2026-03-28] Operations Validation Engine Gate + Ghost Sector Sanitizer + Staging Fixes
 
 ### Change
@@ -16603,3 +16638,65 @@ No impact. Event trigger changes are deterministic (same `fired_event_ids` state
 - `data/scenarios/pre_planned_operations.ts` (Foča, Posavina, Herc Consolidation fixes)
 - `data/scenarios/triggered_operations.ts` (Jajce DV axis removed, Op Donji Vakuf added)
 - `src/desktop/useIPC.ts`, `electron-main.cjs` (IPC wiring)
+
+## [2026-03-28] Territory reconciliation + probe pipeline fixes + supply filter fix
+
+### Change
+
+**1. Territory-based brigade reconciliation (Phase 1.5)**
+- `brigade_assignment.ts`: Added Phase 1.5 between Phase 1 (front-line) and Phase 2 (BFS pool). Matches pooled brigades to sectors by `location_osid` vs `territory_osids` before need-based distribution. Fixes SRK sector:1 (14 edges, 0 brigades) and ARBiH 3rd:4.
+- **0 empty contested sectors** (was 5).
+- Tests: `tests/brigade_territory_reconciliation.test.ts` (5 tests)
+
+**2. Cold-front sector suppression — REVERTED**
+- `sector_utils.ts`: Extracted `isSectorColdFront` from `bot_corps_directives.ts` (refactor kept).
+- Sector removal from `corps_front_sectors.ts` Step 4b reverted — removing sectors cascades through Territory Voronoi, causing -0.5pp regression and brka_2 anchor failure. Ghost sector sanitizer sufficient.
+
+**3. Probe pipeline triple fix**
+- `bot_corps_operations.ts` line 218: `evaluateOperationProgress` now skips `probe` and `feint` types (double processing bug — +15 extra exhaustion per probe).
+- `sector_offensive.ts` line 948: Probes don't set `last_completed_operation` (don't trigger 5-turn cooldown — probes are recon, not campaigns).
+- `bot_corps_directives.ts` line 1760: Supply filter relaxed — only `critical` excluded, not `strained`. 94% of RBiH territory was `strained` (arms embargo), killing ALL RBiH operations. The 0.75× combat penalty in `getSupplyMult()` correctly models strained supply.
+
+**4. Supporting changes (zero immediate effect, architecturally correct)**
+- Exhaustion gate: `bot_corps_directives.ts` — `MAX_EXHAUSTION_FOR_OPERATION=30` blocks sector offensives, probe threshold at 40.
+- Cooldown: `SECONDARY_OP_COOLDOWN_TURNS` 8→5.
+- Counter-attack broadening: `bot_brigade_eval_attack.ts` — sector-wide counter-attacks (2-turn window, 2-hop range, max 2/sector/turn). Constants in `bot_constants.ts`.
+- Planning cap: `sector_offensive.ts` — `MAX_PLANNING_DURATION=4`.
+- Tests: `tests/exhaustion_gate_sector_offensive.test.ts` (16), `tests/cold_front_sector_suppression.test.ts` (9), `tests/sector_counter_attack.test.ts` (26).
+
+### Calibration
+- **n1169: 91.2% area-weighted, 22/22 anchors, 6/6 benchmarks.**
+- 103 battles (was 68, +51%). RBiH 47 orders (was 12, +292%).
+- 72 passive brigades 30.3% (was 92/39%, -8.7pp).
+- -0.9pp from RBiH overcapture (RBiH now attacks, capturing OSIDs beyond painted targets).
+
+### Determinism
+- No new randomness. Sorted iteration via strictCompare in all new code.
+
+### Verification
+- `npx tsc --noEmit` — clean
+- `npm run test:vitest` — 1581 tests, 132 suites. Pre-existing failures: event_timing (empty baseline), integration_deployment_health (stale save data).
+- `npm run desktop:map:build` — clean
+
+## [2026-03-28] Casualty ratio fix — attCasMult applied
+
+### Change
+- `attack_resolution_osid.ts` line 880: `const [, defCasMult]` → `const [attCasMult, defCasMult]`. Applied `attCasMult` to `baseAttackerCas` calculation.
+- `combat_predictor.ts` line 330: Same pattern — capture and apply `attCasMult` to predicted attacker casualties.
+- Root cause: `getPowerRatioCasualtyMult()` returns bilateral `[attackerMult, defenderMult]`. The attacker multiplier was computed correctly but discarded via empty destructuring slot. Defenders got power-ratio-scaled casualties; attackers did not. At 2:1 power ratio, defenders took 26% more casualties while attackers got zero adjustment.
+
+### Calibration
+- **n1170: 90.0% area-weighted, 22/22 anchors, 5/6 benchmarks.**
+- Att casualties 19,786 (was 10,808, +83%). Def casualties 28,114 (was 19,649, +43%). Att:Def ratio 0.70 (was 0.55).
+- Benchmark regression: consolidate_gains 0.493 vs 0.553 (RS slower to consolidate with higher attacker losses).
+
+### Determinism
+- No new non-determinism. Pure arithmetic change.
+
+### Verification
+- `npx tsc --noEmit` — clean
+- `npm run sim:scenario:run:40w` — n1170
+
+### Files
+- `src/sim/combat/attack_resolution_osid.ts` (2 lines)
+- `src/sim/combat/combat_predictor.ts` (2 lines)

@@ -163,9 +163,16 @@ export function computeReturnMarches(
     const formations = state.military.formations ?? {};
     const existingOrders = state.military.brigade_movement_orders ?? {};
     const lineAssigned = new Set<string>();
+    /** Brigades assigned to tiny pocket sectors (< 3 territory OSIDs) should NOT be exempt
+     *  from home return — they're stuck in ad-hoc pockets, not real front assignments. */
+    const tinyPocketLineAssigned = new Set<string>();
     const corpsFrontTargets = new Map<string, Set<string>>();
     for (const sector of Object.values(state.military.corps_front_sectors ?? {})) {
-        for (const bid of sector.assigned_brigade_ids ?? []) lineAssigned.add(bid);
+        const isTinyPocket = (sector.territory_osids?.length ?? 0) < 3;
+        for (const bid of sector.assigned_brigade_ids ?? []) {
+            lineAssigned.add(bid);
+            if (isTinyPocket) tinyPocketLineAssigned.add(bid);
+        }
         const set = corpsFrontTargets.get(sector.corps_id) ?? new Set<string>();
         for (const ss of sector.sub_segments ?? []) {
             for (const osid of ss.friendly_osids ?? []) set.add(osid);
@@ -185,8 +192,9 @@ export function computeReturnMarches(
         if (f.status !== 'active') continue;
         if ((f.kind ?? 'brigade') !== 'brigade') continue;
         // Line-assigned brigades are expected to stay with their sector front,
-        // not get periodic home-return pulls.
-        if (lineAssigned.has(id)) continue;
+        // not get periodic home-return pulls — UNLESS they're in a tiny pocket
+        // sector (< 3 territory OSIDs) that isn't strategically valuable.
+        if (lineAssigned.has(id) && !tinyPocketLineAssigned.has(id)) continue;
 
         // Skip if no location or no home
         const loc = f.location_osid;

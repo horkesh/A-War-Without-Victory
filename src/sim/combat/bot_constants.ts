@@ -95,3 +95,22 @@ export const OG_DEFAULT_DURATION = 5;
 
 /** Corridor breach: max enemy settlements in a narrow strip to attempt breach. */
 export const CORRIDOR_BREACH_MAX_STRIP_WIDTH = 8;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Sector counter-attack parameters
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Max number of sector-level counter-attacks per sector per turn. */
+export const MAX_SECTOR_COUNTER_ATTACKS_PER_TURN = 2;
+
+/** Minimum personnel for a brigade to be eligible for sector counter-attack. */
+export const COUNTER_ATTACK_MIN_PERSONNEL = 600;
+
+/** Minimum cohesion for a brigade to be eligible for sector counter-attack. */
+export const COUNTER_ATTACK_MIN_COHESION = 30;
+
+/** How many turns back to look for retreat events in the sector. */
+export const COUNTER_ATTACK_RETREAT_WINDOW = 2;
+
+/** Max BFS hops from a retreated-from OSID to find counter-attack targets. */
+export const COUNTER_ATTACK_MAX_HOPS = 2;

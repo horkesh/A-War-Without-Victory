@@ -5,9 +5,9 @@ import { findAdjacentFrontGap, computeHopsToFront, COLUMN_MARCH_MIN_HOPS, findNe
 import { countFactionBrigadesAtOsid, countCorpsBrigadesAtOsid, MAX_CORPS_BRIGADES_PER_OSID } from './bot_brigade_context.js';
 import { issueInteriorMovement } from './bot_brigade_movement_ai.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
-import { isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
+import { isEnclaveBrigade, isOsidInSameEnclave, ENCLAVE_DEFINITIONS, osidBelongsToEnclave } from './enclave_resilience.js';
 import type { Osid } from './osid_adjacency.js';
-import type { FormationState, GameState } from '../../state/game_state.js';
+import type { FormationState, GameState, SettlementId } from '../../state/game_state.js';
 
 /**
  * True if this brigade is in a corps sector's **assigned** line (not reserve) roster but its
@@ -265,6 +265,65 @@ export function evaluateReturnToCorps(ctx: BrigadeEvaluationContext): boolean {
         return true;
     }
     return false;
+}
+
+/** Maximum territory OSIDs for a sector to be considered a "tiny pocket" worth evacuating. */
+const POCKET_EVACUATION_MAX_TERRITORY = 2;
+
+/**
+ * Pocket evacuation: brigades in tiny ad-hoc pockets (<=2 territory OSIDs) that are
+ * NOT named enclaves (Gorazde, Srebrenica, Sarajevo, etc.) should column-march toward
+ * home rather than defending a strategically worthless pocket indefinitely.
+ *
+ * Placed after evaluateReturnToCorps and before hold/defense evaluations.
+ */
+export function evaluatePocketEvacuation(ctx: BrigadeEvaluationContext): boolean {
+    const { brigade, state, loc, result } = ctx;
+
+    if (!state.military.corps_front_sectors) return false;
+
+    // Find the sector this brigade is assigned to
+    const sectors = state.military.corps_front_sectors;
+    let assignedSector: (typeof sectors)[string] | null = null;
+    for (const sid of Object.keys(sectors).sort(strictCompare)) {
+        const sec = sectors[sid]!;
+        if (sec.assigned_brigade_ids.includes(brigade.id)) {
+            assignedSector = sec;
+            break;
+        }
+    }
+    if (!assignedSector) return false;
+
+    // Only fire for tiny pockets
+    if ((assignedSector.territory_osids?.length ?? 0) > POCKET_EVACUATION_MAX_TERRITORY) return false;
+
+    // Don't evacuate named enclaves — they are strategically valuable and historically held
+    const isNamedEnclave = ENCLAVE_DEFINITIONS.some(enc =>
+        assignedSector!.territory_osids?.some(osid => osidBelongsToEnclave(osid, enc)) === true
+    );
+    if (isNamedEnclave) return false;
+
+    // Don't evacuate disrupted brigades — they can't march
+    if ((brigade.disrupted_turns ?? 0) > 0) return false;
+
+    // Issue column march toward home_osid
+    const homeOsid = brigade.home_osid;
+    if (!homeOsid) return false;
+
+    // Don't override existing movement orders
+    const existingOrders = state.military.brigade_movement_orders ?? {};
+    if (existingOrders[brigade.id]) return false;
+
+    if (!state.military.brigade_movement_orders) {
+        state.military.brigade_movement_orders = {};
+    }
+    state.military.brigade_movement_orders![brigade.id] = {
+        destination_sids: [homeOsid as SettlementId],
+        stance: 'column',
+    } as { destination_sids: SettlementId[] };
+
+    result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+    return true;
 }
 
 export function evaluateFrontCoverage(ctx: BrigadeEvaluationContext): boolean {

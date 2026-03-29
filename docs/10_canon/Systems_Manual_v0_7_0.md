@@ -345,7 +345,9 @@ Before launching any new operation, the corps AI checks intel confidence across 
 
 **RS blitz exemption:** During the RS blitz phase (w0–12), JNA pre-planned operations bypass the intel gate entirely — they attack blind, reflecting inherited JNA operational plans.
 
-**Probe commitment limit:** `MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT = 2`. After two consecutive probe operations on the same sector, the corps commits to a full attack regardless of intel confidence. The counter (`CorpsCommandState.consecutive_probes`) resets when a full attack launches or the operation completes.
+**Probe commitment limit:** `MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT = 2`. After two consecutive probe operations on the same sector, the corps commits to a full attack regardless of intel confidence. The counter (`CorpsCommandState.consecutive_probes`) resets when a full attack launches or the operation completes. **KNOWN ISSUE (n1194):** `getSectorIntelConfidence()` returns the mean confidence across all enemy sectors rather than per-sector-pair freshness, causing redundant probes against already-scouted sectors. The forced commitment after 2 probes contradicts the purpose of reconnaissance — if intel reveals the enemy is stronger, the correct response is to defend, not attack. Planned fix: per-sector-pair probe freshness tracking; remove forced commitment or gate it on predicted outcome.
+
+**Attack threshold:** `getSectorOffensiveProbeThreshold()` returns `'stalemate'` (power ratio >= 0.7) as the default minimum predicted outcome for launching a sector offensive. **KNOWN ISSUE (n1194):** A 0.7 ratio threshold allows attacks into predicted losses (stalemate outcomes produce net attacker casualties with no territorial gain). Planned change: raise to `'costly_victory'` (ratio >= 1.0) so corps only commit when the predictor estimates at least a marginal win.
 
 **Decision flow:** `getSectorIntelConfidence()` (in `sector_intel.ts`) reads the maximum confidence from sector intel records. `shouldLaunchProbeInstead()` (in `bot_corps_directives.ts`) checks faction threshold, RS blitz exemption, and the probe counter. If true, the operation downgrades to a probe; otherwise, normal sector_attack proceeds.
 
@@ -667,7 +669,7 @@ A **supply source** is a settlement (or operational node) from which supply may 
 The live player-agency implementation added these persistent war-phase fields to the canonical runtime surface:
 
 - `sector_stance_orders`
-- `opsec_sectors`
+- `opsec_sectors` — sectors marked during operation planning; passive intel buildup halved for OPSEC sectors (see §8a OPSEC integration below)
 - `airdrop_allocation`
 - `pending_convoy_decisions`
 - `smuggling_allocation`
@@ -881,6 +883,10 @@ The following systems are canonical at v0.4. This manual provides the authoritat
 - **Battle outcomes:** Engagements reveal enemy strength and composition.
 
 **Bot target weighting:** `getSectorIntelConfidence()` feeds into bot targeting decisions. Low-confidence sectors are deprioritized for full attacks; the intel gate (§7.6.1) may downgrade operations to probes when confidence is below faction-specific thresholds (RS 0.25, RBiH 0.40, HRHB 0.30).
+
+**OPSEC integration:** When a player marks sectors via `opsec_sectors`, passive intel buildup by the opposing faction is halved for those sectors during operation planning. The `offensive_signs` field on `SectorIntelRecord` is written when OPSEC is not active, and the defensive reaction in `bot_corps_directives.ts` applies a 2x threat weight boost for sectors with detected offensive signs. **KNOWN ISSUE (n1194):** `offensive_signs` detection is gated behind `confidence >= 0.8 AND recon_range >= 2`, thresholds that almost never trigger in practice. The defensive reaction (2x threat weight boost) is therefore effectively inert. Planned fix: lower confidence threshold to `CONFIDENCE_FULL_STRENGTH` (0.5) and enable range-1 detection, so that front-line observation can detect enemy buildup.
+
+**Combat predictor fog-of-war:** `combat_predictor.ts` applies a flat `FOG_DIRECT_VISIBILITY = 0.85` discount to estimated enemy strength, regardless of intel confidence level. **KNOWN ISSUE (n1194):** The fog discount should scale with intel confidence (e.g., high confidence -> near-perfect visibility, low confidence -> heavier fog) to make probing and intel-gathering mechanically meaningful. Currently, a corps with 0.1 confidence sees the enemy at the same 85% accuracy as one with 0.9 confidence.
 
 **GUI fog-of-war:** `GameStateAdapter` derives `fogOfWar` from `sector_intel` + `corps_front_sectors`. `buildFogOfWarGeoJSON` renders opacity-graded fog. Toggled via `fogVisible` in `MapContainer`.
 

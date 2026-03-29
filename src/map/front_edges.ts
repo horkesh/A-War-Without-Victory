@@ -116,6 +116,8 @@ export function computeFrontEdgesOsid(
     for (const edge of osidEdges) {
         // Skip distance-contact edges where polygons don't share a physical boundary
         if (edge.min_dist !== undefined && edge.min_dist > FRONT_EDGE_MAX_GAP) continue;
+        // Skip point-only contacts (single shared vertex, no boundary segment)
+        if (edge.shared_segments !== undefined && edge.shared_segments === 0) continue;
         const sideA = getPoliticalControllerOSID(state, edge.a, reverseMap);
         const sideB = getPoliticalControllerOSID(state, edge.b, reverseMap);
         if (sideA === null || sideB === null || sideA === sideB) continue;

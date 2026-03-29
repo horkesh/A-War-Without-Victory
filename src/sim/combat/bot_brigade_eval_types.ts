@@ -37,6 +37,11 @@ export interface BrigadeEvaluationContext {
     brigadeSupplyState: 'adequate' | 'strained' | 'critical';
     isHoldBrigade: boolean;
 
+    /** Recent retreats grouped by sector ID — for broadened counter-attacks. */
+    sectorRecentRetreats: Map<string, Array<{ osid: string; turn: number }>>;
+    /** Mutable counter: how many sector-level counter-attacks have been issued per sector this turn. */
+    sectorCounterAttackCount: Map<string, number>;
+
     
     // Global context dependencies:
     adjacency: Map<Osid, Osid[]>;

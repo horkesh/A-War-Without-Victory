@@ -254,3 +254,27 @@
 
 ### [Process] Smoke-test triad after every change (2026-02-21)
 - `tsc --noEmit` + `vitest run` + `desktop:map:build`. Consistently run. No recent failures from skipping.
+
+### [Process] Experts must know their domain's data schema — one read of game_state.ts beats four greps (2026-03-29) — NEW
+- **Context**: Scenario Tester checked `save.events.events_fired` (doesn't exist), declared "CRITICAL — zero events fired." Events are at `state.military.fired_event_ids`. Orchestrator checked `state.military.operation_history` (wrong interface). Both wasted investigation cycles on false alarms.
+- **Wrong approach**: Grepping for field names across the codebase. Four sequential searches to find where a field lives.
+- **Right approach**: Read `src/state/game_state.ts` ONCE before writing any data access code. Know: events at `military.fired_event_ids`, operations at `state.operation_history` (GameState root), formations at `military.formations`, intel at `military.sector_intel`, sectors at `military.corps_front_sectors`, control at `political.political_controllers`.
+- **Do instead**: Before any expert accesses save file data, verify the field path against GameState interface. One targeted read beats four greps.
+
+### [Process] Dispatch experts by file ownership, not by gut feel (2026-03-29) — NEW
+- **Context**: Bug in `brigade_assignment.ts` affected both sector assignment (sector expert) AND `formation.assignment` sync (formation expert). Only sector expert was dispatched initially — user had to prompt for formation expert.
+- **Wrong approach**: Dispatching the expert whose name matches the symptom ("unassigned sectors" → sector expert). Missing that the fix spans two ownership domains.
+- **Right approach**: List ALL files that need changes, check skill authority tables for ownership, dispatch ALL owners with clear scope boundaries.
+- **Do instead**: Before dispatching, ask: "which files are affected and who owns each?" Not "who sounds right for this symptom?"
+
+### [Process] Orchestrator must not analyze scenario results — dispatch experts (2026-03-29) — NEW
+- **Context**: After n1196 run, orchestrator interpreted calibration numbers, declared "historically correct," assessed order counts — all without dispatching any expert. User called it out.
+- **Wrong approach**: Reading scenario output directly and presenting analysis. Faster but violates the orchestrator role (switchboard, not analyst).
+- **Right approach**: Dispatch `/scenario-creator-runner-tester` for the report, then `/war-or-game` for realism assessment. Present raw numbers. Attribute all interpretation: "War-or-Game found X" not "I found X."
+- **Do instead**: Hook now enforces this. After any Bash output containing scenario results, dispatch experts before responding.
+
+### [Process] Validate internal consistency after every run, not just calibration % (2026-03-29) — NEW
+- **Context**: RBiH peak_personnel was below current personnel for nearly every brigade — nobody noticed because we only check calibration %. Casualty taken/inflicted gap of 8,327 went unnoticed. 23 unassigned brigades went unnoticed.
+- **Wrong approach**: Running `compare_painted_vs_sim.cjs` and `diagnose_run.cjs` and calling it done. These check territorial outcomes and deployment health, not internal accounting consistency.
+- **Right approach**: Run `tools/validate_run_consistency.cjs` after every scenario run. Checks: peak >= current, taken/inflicted accounting, assignment completeness, ghost paramilitaries, intel system liveness, formation.assignment sync.
+- **Do instead**: Add consistency validation to the post-run checklist alongside calibration comparison and diagnostics. Numbers that don't add up = bugs hiding in plain sight.

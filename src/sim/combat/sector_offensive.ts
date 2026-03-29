@@ -116,6 +116,79 @@ function buildOsidAdjacencyFromFrontEdges(state: GameState): Map<string, string[
     return adj;
 }
 
+/**
+ * FIX 3: Check if a staging OSID is reachable from the corps' main territory
+ * without passing through a single-OSID chokepoint (corridor width = 1).
+ *
+ * Algorithm: find a shortest path from `staging` to any OSID in `mainBody`
+ * through `friendlySet`. For each intermediate OSID on that path, temporarily
+ * block it and re-BFS. If the staging becomes unreachable, that OSID is a
+ * chokepoint — reject this staging OSID.
+ *
+ * Returns true if the corridor is safe (no single chokepoint), false if risky.
+ */
+function isStagingCorridorSafe(
+    staging: string,
+    mainBody: Set<string>,
+    friendlySet: Set<string>,
+    adj: Map<string, readonly string[]>,
+): boolean {
+    if (mainBody.has(staging)) return true; // staging IS in main body
+
+    // BFS to find shortest path from staging to mainBody
+    const parent = new Map<string, string | null>();
+    parent.set(staging, null);
+    const queue: string[] = [staging];
+    let head = 0;
+    let target: string | null = null;
+    while (head < queue.length) {
+        const curr = queue[head++]!;
+        if (mainBody.has(curr) && curr !== staging) {
+            target = curr;
+            break;
+        }
+        for (const nb of adj.get(curr) ?? []) {
+            if (parent.has(nb)) continue;
+            if (!friendlySet.has(nb)) continue;
+            parent.set(nb, curr);
+            queue.push(nb);
+        }
+    }
+    if (!target) return false; // unreachable — definitely not safe
+
+    // Reconstruct path (excluding endpoints)
+    const path: string[] = [];
+    let node: string | null = target;
+    while (node !== null) {
+        path.push(node);
+        node = parent.get(node) ?? null;
+    }
+    path.reverse(); // staging → ... → target
+    // Intermediate nodes: exclude staging (index 0) and target (last)
+    const intermediates = path.slice(1, path.length - 1);
+    if (intermediates.length === 0) return true; // directly adjacent, no chokepoint possible
+
+    // For each intermediate, check if blocking it disconnects staging from mainBody
+    for (const blocked of intermediates) {
+        const visited = new Set<string>([staging, blocked]);
+        const q: string[] = [staging];
+        let h = 0;
+        let found = false;
+        while (h < q.length) {
+            const c = q[h++]!;
+            if (mainBody.has(c) && c !== staging) { found = true; break; }
+            for (const nb of adj.get(c) ?? []) {
+                if (visited.has(nb)) continue;
+                if (!friendlySet.has(nb)) continue;
+                visited.add(nb);
+                q.push(nb);
+            }
+        }
+        if (!found) return false; // blocking this node disconnects — chokepoint
+    }
+    return true;
+}
+
 /** Maximum brigades participating in a single sector offensive. */
 const MAX_PARTICIPATING_BRIGADES = 20;
 
@@ -217,9 +290,14 @@ function issuePostOperationReturnMarches(state: GameState, op: CorpsOperation): 
         const loc = f.location_osid;
         const homeOsid = f.home_osid;
         if (!loc || !homeOsid) continue;
-        const hasOwnCorpsFront = Object.values(state.military.corps_front_sectors ?? {})
-            .some((s) => s.corps_id === f.corps_id && (s.sub_segments?.length ?? 0) > 0);
-        if (hasOwnCorpsFront) continue;
+        // Check whether the brigade is actually IN one of its corps' sector territories.
+        // Previously this checked whether the corps has ANY front at all, which blocked
+        // return marches for brigades stranded in disconnected pockets far from the main front.
+        const isInCorpsSectorTerritory = Object.values(state.military.corps_front_sectors ?? {})
+            .some((s) => s.corps_id === f.corps_id
+                && (s.sub_segments?.length ?? 0) > 0
+                && s.territory_osids?.includes(loc) === true);
+        if (isInCorpsSectorTerritory) continue;
 
         // Already home — no march needed
         const homeMun = homeOsid.split(':')[1] ?? '';
@@ -396,13 +474,15 @@ export function validateAxisContiguity(
 export const PLANNING_MARCH_BUFFER = 2;
 
 /** Compute planning duration from number of objectives.
- *  Adds PLANNING_MARCH_BUFFER turns so brigades can march to staging before execution. */
+ *  Adds PLANNING_MARCH_BUFFER turns so brigades can march to staging before execution.
+ *  Capped at MAX_PLANNING_DURATION to prevent long idle periods for large operations. */
+export const MAX_PLANNING_DURATION = 4;
 export function computePlanningDuration(objectiveCount: number): number {
     let base: number;
     if (objectiveCount <= 2) base = 1;
     else if (objectiveCount <= 5) base = Math.ceil(objectiveCount * 0.6);
     else base = Math.min(5, Math.ceil(objectiveCount * 0.8));
-    return base + PLANNING_MARCH_BUFFER;
+    return Math.min(MAX_PLANNING_DURATION, base + PLANNING_MARCH_BUFFER);
 }
 
 function collectObjectiveApproachOsids(
@@ -944,8 +1024,13 @@ export function advanceSectorOffensives(
                     cmd.consecutive_probes = 0;
                 }
                 // Save completed op for theater-aware follow-on suppression.
-                cmd.last_completed_operation = cmd.active_operation;
-                cmd.last_completed_operation_turn = turn;
+                // Probes are reconnaissance — they should NOT trigger the cooldown
+                // that blocks follow-up operations. The whole point of a probe is to
+                // gather intel for an immediate follow-up operation.
+                if (op.type !== 'probe') {
+                    cmd.last_completed_operation = cmd.active_operation;
+                    cmd.last_completed_operation_turn = turn;
+                }
                 cmd.active_operation = null;
             }
         }
@@ -1529,6 +1614,22 @@ export function evaluateCorpsOffensiveLaunch(
 
     // Pick staging OSID: nearest corps friendly OSID to first objective.
     // Falls back to first friendly OSID in corps territory (deterministic, sorted).
+    // FIX 3: Reject staging OSIDs behind a single-OSID chokepoint (corridor width = 1).
+    //
+    // Build friendly set and main body for corridor width check.
+    // Main body = OSIDs where participating brigades are located (the force's center of mass).
+    // Friendly set = all territory OSIDs from the corps' sectors.
+    const corpsMainBody = new Set<string>();
+    for (const bid of participating) {
+        const b = formations[bid];
+        if (b?.location_osid) corpsMainBody.add(b.location_osid);
+    }
+    const corpsFriendlySet = new Set<string>(reachable);
+    for (const sec of Object.values(allSectors)) {
+        if (sec.corps_id !== corpsId) continue;
+        for (const osid of sec.territory_osids) corpsFriendlySet.add(osid);
+    }
+
     let stagingOsid: string | undefined;
     const firstObj = objectives[0];
     if (firstObj) {
@@ -1538,14 +1639,26 @@ export function evaluateCorpsOffensiveLaunch(
             // Sort for determinism, pick first reachable neighbor
             const sortedNeighbors = [...neighbors].sort(strictCompare);
             for (const n of sortedNeighbors) {
-                if (reachable.has(n)) { stagingOsid = n; break; }
+                if (!reachable.has(n)) continue;
+                // FIX 3: corridor width check — reject if single chokepoint
+                if (!isStagingCorridorSafe(n, corpsMainBody, corpsFriendlySet, osidAdj)) continue;
+                stagingOsid = n;
+                break;
             }
         }
     }
     if (!stagingOsid) {
         // Fallback: first friendly OSID in corps territory (deterministic)
         const sorted = [...reachable].sort(strictCompare);
-        stagingOsid = sorted[0];
+        for (const candidate of sorted) {
+            if (isStagingCorridorSafe(candidate, corpsMainBody, corpsFriendlySet, osidAdj)) {
+                stagingOsid = candidate;
+                break;
+            }
+        }
+        // Ultimate fallback: if all candidates have chokepoints, use first anyway
+        // (better to stage somewhere than to cancel the entire operation)
+        if (!stagingOsid) stagingOsid = sorted[0];
     }
 
     const sortedParticipating = participating.sort(strictCompare);

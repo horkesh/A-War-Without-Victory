@@ -877,8 +877,8 @@ export function resolveAttackOrdersOsid(
         // "Undefended" Bosniak villages had Patriotic League, police, armed residents.
         // n536: raised 0.15→0.30 — sweeping a village costs more than 5 men.
         const militiaOnlyMult = defenderFormation ? 1.0 : 0.30;
-        const [, defCasMult] = getPowerRatioCasualtyMult(powerRatio);
-        const baseAttackerCas = personnelAttacker * BASE_ATTACKER_LOSS_RATE * (OUTCOME_ATTACKER_MOD[outcome] ?? 1) * lastStandCasMult * militiaOnlyMult;
+        const [attCasMult, defCasMult] = getPowerRatioCasualtyMult(powerRatio);
+        const baseAttackerCas = personnelAttacker * BASE_ATTACKER_LOSS_RATE * (OUTCOME_ATTACKER_MOD[outcome] ?? 1) * lastStandCasMult * militiaOnlyMult * attCasMult;
         const baseDefenderCas = personnelDefender * BASE_DEFENDER_LOSS_RATE * (OUTCOME_DEFENDER_MOD[outcome] ?? 1) * lastStandCasMult * bombardmentMult * defCasMult;
         const finalAttackerCas = Math.min(personnelAttacker - MIN_COMBAT_PERSONNEL, Math.max(0, Math.round(baseAttackerCas)));
         const finalDefenderCas = Math.min(personnelDefender, Math.max(0, Math.round(baseDefenderCas)));

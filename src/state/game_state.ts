@@ -491,9 +491,13 @@ export interface SettlementHoldoutState {
 export type PhaseName = 'peace' | 'war';
 
 export interface FormationAssignment {
-    kind: 'region' | 'edge';
+    kind: 'region' | 'edge' | 'sector';
     region_id?: string;
     edge_id?: string;
+    /** Sector ID when kind === 'sector'. Set by brigade-to-sector sync. */
+    sector_id?: string;
+    /** Role within sector: 'front' (assigned) or 'reserve'. */
+    role?: 'front' | 'reserve';
 }
 
 export interface FormationOpsState {

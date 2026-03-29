@@ -38,6 +38,7 @@ import type { MunicipalityPopulation1991Map } from './early_war/pool_population.
 import { getEligiblePopulationCount } from './early_war/pool_population.js';
 import { type SiegeRatioByMunFaction, getSiegeRatio } from './early_war/compute_siege_state.js';
 import { isEmergentFormationSuppressed } from './recruitment_engine.js';
+import { ensureBrigadeHistory } from './combat/brigade_history_recorder.js';
 import { getFactionDefaultOfficerQuality } from './combat/combat_math.js';
 import {
     getActiveMunicipalitySupport,
@@ -328,6 +329,11 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
             if (transfer <= 0) continue;
 
             (f as FormationState & { personnel: number }).personnel = current + transfer;
+            // Track peak personnel after reinforcement
+            const newPers1 = current + transfer;
+            const h1 = ensureBrigadeHistory(f);
+            if (newPers1 > h1.peak_personnel) h1.peak_personnel = newPers1;
+
             pool.available -= transfer;
             pool.committed += transfer;
             pool.updated_turn = currentTurn;
@@ -395,6 +401,11 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
         if (transfer <= 0) continue;
 
         (f as FormationState & { personnel: number }).personnel = current + transfer;
+        // Track peak personnel after reinforcement
+        const newPers2 = current + transfer;
+        const h2 = ensureBrigadeHistory(f);
+        if (newPers2 > h2.peak_personnel) h2.peak_personnel = newPers2;
+
         pool.available -= transfer;
         pool.committed += transfer;
         pool.updated_turn = currentTurn;
@@ -444,6 +455,11 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
         if (transfer <= 0) continue;
 
         (f as FormationState & { personnel: number }).personnel = current + transfer;
+        // Track peak personnel after reinforcement
+        const newPers3 = current + transfer;
+        const h3 = ensureBrigadeHistory(f);
+        if (newPers3 > h3.peak_personnel) h3.peak_personnel = newPers3;
+
         pool.available -= transfer;
         pool.committed += transfer;
         pool.updated_turn = currentTurn;
@@ -810,6 +826,11 @@ export function applyWiaTrickleback(state: GameState): WiaTricklebackReport {
 
         f.wounded_pending = pending - returned;
         f.personnel = current + returned;
+        // Track peak personnel after WIA return
+        const newPers4 = current + returned;
+        const h4 = ensureBrigadeHistory(f);
+        if (newPers4 > h4.peak_personnel) h4.peak_personnel = newPers4;
+
         report.formations_returned += 1;
         report.personnel_returned += returned;
     }

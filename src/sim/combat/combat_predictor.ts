@@ -73,6 +73,7 @@ import {
 } from './combat_math.js';
 import { findSectorForEnemyOsid, findSubSegmentForOsid } from './corps_front_sectors.js';
 import { getEnclaveGarrisonPower } from './enclave_resilience.js';
+import { getSectorPairIntelConfidence } from './sector_intel.js';
 
 // Backward-compat re-export
 export type PredictedOutcome = CombatOutcome;
@@ -82,10 +83,17 @@ export type { CombatOutcome };
 // Predictor-only constants
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Direct defenders: bot can roughly see troop presence but not exact strength. */
-const FOG_DIRECT_VISIBILITY = 0.85;
-/** After failing an attack (retreat), fog lifts — brigade learned enemy strength. */
-const FOG_AFTER_RETREAT_VISIBILITY = 0.95;
+/**
+ * Intel-scaled fog of war.
+ * fogMult = FOG_BASE + FOG_INTEL_SCALE * confidence
+ *   confidence 0.0 (blind):  0.70 — overconfident, bad predictions
+ *   confidence 0.5 (moderate): 0.825 — roughly previous default behavior
+ *   confidence 1.0 (fresh):   0.95 — near-perfect picture
+ */
+const FOG_BASE = 0.70;
+const FOG_INTEL_SCALE = 0.25;
+/** After retreat, local intel is always good — cap applies. */
+const FOG_AFTER_RETREAT_CAP = 0.95;
 
 /** Predicted outcome → numeric score for bot target scoring. */
 export const OUTCOME_SCORE: Record<CombatOutcome, number> = {
@@ -210,7 +218,6 @@ export function predictCombatOutcome(
         (repulseInfo != null && repulseInfo.osid === targetOsid && currentTurn - repulseInfo.turn <= 3);
 
     const ethBonus = (d: FormationState) => getEthnicDefenseBonus(getCoEthnicShare(targetOsid, d.faction, ethnicComposition));
-    const fogMult = learnedFromTarget ? FOG_AFTER_RETREAT_VISIBILITY : FOG_DIRECT_VISIBILITY;
 
     // ── Distance-weighted sector defense (mirrors resolver) ─────────
     // Physical defenders at OSID fight at full power. Reserves contribute
@@ -260,6 +267,11 @@ export function predictCombatOutcome(
             );
             const baseDef = physicalPower + reactiveResponse;
             const minFloor = avgBrigadePower * MIN_DEFENSE_FLOOR_FRACTION;
+            // Intel-scaled fog: look up sector-pair confidence for this attacker vs defender sector
+            const sectorConf = sector ? getSectorPairIntelConfidence(state, attackerLoc, sector.sector_id) : 0;
+            const intelFog = FOG_BASE + FOG_INTEL_SCALE * sectorConf;
+            // After retreat/repulse, brigade has direct combat intel — fog is at least FOG_AFTER_RETREAT_CAP
+            const fogMult = learnedFromTarget ? Math.max(intelFog, FOG_AFTER_RETREAT_CAP) : intelFog;
             defenderPower = Math.max(baseDef, minFloor) * fogMult;
             defenderFormation = primary;
             sectorDefBrigades = sectorBrigades;
@@ -267,9 +279,11 @@ export function predictCombatOutcome(
             defenderCohesion = defenderFormation.cohesion ?? 60;
         } else if (defenderFormations.length > 0) {
             // Brigade at OSID but not in any sector (enclave/garrison edge case)
+            // No sector → no intel → blind (confidence 0)
             defenderHasBrigade = true;
             const { primary, totalPower } = rankDefendersByPower(defenderFormations, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
-            defenderPower = totalPower * fogMult;
+            const noSectorFog = learnedFromTarget ? FOG_AFTER_RETREAT_CAP : FOG_BASE;
+            defenderPower = totalPower * noSectorFog;
             defenderFormation = primary;
             defenderDisrupted = ((defenderFormation as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0 || defenderFormation.disrupted === true;
             defenderCohesion = defenderFormation.cohesion ?? 60;
@@ -278,9 +292,11 @@ export function predictCombatOutcome(
             defenderPower = (osidPopulationMap?.get(targetOsid) ?? 5000) * MILITIA_DEFENSE_RATIO * 0.25;
         }
     } else if (defenderFormations.length > 0) {
+        // Not enemy-controlled territory but enemy brigade present — no sector intel available
         defenderHasBrigade = true;
         const { primary, totalPower } = rankDefendersByPower(defenderFormations, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
-        defenderPower = totalPower * fogMult;
+        const noSectorFog2 = learnedFromTarget ? FOG_AFTER_RETREAT_CAP : FOG_BASE;
+        defenderPower = totalPower * noSectorFog2;
         defenderFormation = primary;
         defenderDisrupted = ((defenderFormation as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0 || defenderFormation.disrupted === true;
         defenderCohesion = defenderFormation.cohesion ?? 60;
@@ -327,8 +343,8 @@ export function predictCombatOutcome(
         ? Math.min(rawPersonnelDefender, personnelAttacker * DEFENDER_CASUALTY_ENGAGEMENT_CAP)
         : rawPersonnelDefender;
     const bombardmentMult = getBombardmentCasualtyMult(attackerFormations, attackerFaction, state);
-    const [, defCasMult] = getPowerRatioCasualtyMult(powerRatio);
-    const baseAttCas = personnelAttacker * BASE_ATTACKER_LOSS_RATE * (OUTCOME_ATTACKER_MOD[predicted] ?? 1);
+    const [attCasMult, defCasMult] = getPowerRatioCasualtyMult(powerRatio);
+    const baseAttCas = personnelAttacker * BASE_ATTACKER_LOSS_RATE * (OUTCOME_ATTACKER_MOD[predicted] ?? 1) * attCasMult;
     const baseDefCas = personnelDefender * BASE_DEFENDER_LOSS_RATE * (OUTCOME_DEFENDER_MOD[predicted] ?? 1) * bombardmentMult * defCasMult;
     const expectedAttCas = Math.max(0, Math.round(baseAttCas));
     const expectedDefCas = Math.max(0, Math.round(baseDefCas));

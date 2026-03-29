@@ -166,19 +166,22 @@ export function recordAttackerEngagements(
     equipmentData?: { destroyed: { tanks: number; artillery: number }; captured: { tanks: number; artillery: number } },
     battleId?: string,
 ): void {
-    const perAttackerCas = attackerFormations.length > 0
-        ? Math.floor(totalAttackerCasualties / attackerFormations.length)
-        : 0;
+    const n = attackerFormations.length;
+    const perAttackerCas = n > 0 ? Math.floor(totalAttackerCasualties / n) : 0;
+    const casRemainder = n > 0 ? totalAttackerCasualties - perAttackerCas * n : 0;
+    const perInflicted = n > 0 ? Math.floor(totalDefenderCasualties / n) : 0;
+    const inflictRemainder = n > 0 ? totalDefenderCasualties - perInflicted * n : 0;
 
-    for (const atk of attackerFormations) {
+    for (let i = 0; i < attackerFormations.length; i++) {
+        const atk = attackerFormations[i]!;
         recordBrigadeEngagement(atk, {
             ...(battleId != null ? { battle_id: battleId } : {}),
             turn,
             osid: targetOsid,
             role: 'attacker',
             outcome,
-            casualties_taken: perAttackerCas,
-            casualties_inflicted: Math.floor(totalDefenderCasualties / attackerFormations.length),
+            casualties_taken: perAttackerCas + (i < casRemainder ? 1 : 0),
+            casualties_inflicted: perInflicted + (i < inflictRemainder ? 1 : 0),
             enemy_faction: defenderFaction,
             territory_flipped: territoryFlipped,
             was_concentrated: isConcentrated,

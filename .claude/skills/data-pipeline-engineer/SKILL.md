@@ -31,6 +31,13 @@ description: "Owns derived data pipelines: contact graph, OSID derivation, polyg
 1. **Data pipeline scripts that transform edges must preserve ALL fields** — min_dist/type loss silently broke sector splitting
 2. **Data pipeline outputs are coupled** — regenerating one file invalidates others
 3. **Derived data computed before a mutation step is stale after it** — recompute or move
+4. **Point-only polygon contacts are not real adjacency** — contact graph edges with `min_dist=0` but `shared_segments=0` are artifacts from polygon derivation (single snapped vertex, no boundary segment). 46 such edges exist, 12 cross-faction. When regenerating the contact graph, always compute and include `shared_segments` per edge. All downstream consumers (sector building, territory contiguity, front edge generation) must filter to `shared_segments >= 1`.
+
+## Contact graph integrity
+- The contact graph (`operational_contact_graph.json`) must include `shared_segments` per edge (count of consecutive shared vertex pairs between the two OSID polygons)
+- Point-only contacts (`shared_segments === 0`, `min_dist === 0`) are artifacts from polygon snapping — two polygons share a single vertex but no boundary segment
+- When regenerating the contact graph, always compute `shared_segments` from polygon geometry
+- After regeneration, verify: `edges.filter(e => e.shared_segments === 0).length` should be ~46 (artifacts), `edges.filter(e => e.shared_segments >= 1).length` should be ~1,979 (real contacts)
 
 ## Verification protocol
 After any pipeline change:

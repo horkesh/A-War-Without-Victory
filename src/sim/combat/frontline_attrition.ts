@@ -35,7 +35,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { militiaPoolKey } from '../../state/militia_pool_key.js';
 import { ensureBrigadeComposition } from './equipment_effects.js';
 import { deterministicRandom } from '../../state/deterministic_random.js';
-import { recordBrigadeEngagement } from './brigade_history_recorder.js';
+import { recordBrigadeEngagement, ensureBrigadeHistory } from './brigade_history_recorder.js';
 import {
     isGrazAccordsActive,
     isHerzegovinaTruceActive,
@@ -363,6 +363,7 @@ export function applyFrontlineAttrition(
         // ── Probabilistic friction skirmish recording ──
         // Not every week: deterministic random keyed on turn + brigade ID.
         // ~35% chance when casualties exceed threshold — some weeks quiet, some notable.
+        let frictionEngagementRecorded = false;
         if (casualties >= FRICTION_CASUALTY_THRESHOLD) {
             const frictionRoll = deterministicRandom(seed, `friction_${turn}_${fid}`);
             if (frictionRoll < FRICTION_RECORD_CHANCE) {
@@ -387,7 +388,15 @@ export function applyFrontlineAttrition(
                     was_concentrated: false,
                 });
                 report.friction_engagements++;
+                frictionEngagementRecorded = true;
             }
+        }
+        // Always update brigade history casualty tally for friction —
+        // recordBrigadeEngagement already updates total_casualties_taken for the 35%,
+        // so only add here for brigades that didn't get a full engagement recorded.
+        if (!frictionEngagementRecorded) {
+            const frictionHistory = ensureBrigadeHistory(formation);
+            frictionHistory.total_casualties_taken += casualties;
         }
 
         report.brigades_affected += 1;

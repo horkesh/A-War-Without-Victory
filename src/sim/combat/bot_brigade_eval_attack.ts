@@ -17,12 +17,18 @@ import { getAttackerSupplyPenalty, getRsVsHrhbPenalty } from './bot_brigade_supp
 import { findAdjacentFrontGap } from './bot_brigade_movement_ai.js';
 import { countFactionBrigadesAtOsid } from './bot_brigade_context.js';
 import type { Osid } from './osid_adjacency.js';
-import type { BrigadePosture, FormationState } from '../../state/game_state.js';
+import type { BrigadePosture, FactionId, FormationState, GameState } from '../../state/game_state.js';
 import { findSectorForEnemyOsid, findSubSegmentForOsid } from './corps_front_sectors.js';
 import type { CorpsFrontSector, CorpsFrontSubSegment } from '../../state/game_state.js';
 import { areRbihHrhbAllied, isFriendlyFaction, isRbihHrhbCombatEnabled } from '../early_war/alliance_update.js';
 import { isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
 import { assignedBrigadeNotOnSectorFrontOsids } from './bot_brigade_eval_front.js';
+import {
+    MAX_SECTOR_COUNTER_ATTACKS_PER_TURN,
+    COUNTER_ATTACK_MIN_PERSONNEL,
+    COUNTER_ATTACK_MIN_COHESION,
+    COUNTER_ATTACK_MAX_HOPS,
+} from './bot_constants.js';
 
 // The following functions are assumed to be exported/accessible from bot_brigade_ai_osid or another common file.
 // We will import them appropriately. For now, I'll import from bot_brigade_ai_osid if needed, but they are pure.
@@ -321,12 +327,49 @@ const effectiveDirectiveDefault: import('../../state/game_state.js').CorpsDirect
     avoid_osids: [],
     max_attackers_per_target: 2,
     reserve_fraction: 0.2,
-    min_attack_outcome: 'stalemate' as const,
+    min_attack_outcome: 'costly_victory' as const,
     aggression_modifier: 0,
 };
 
+/**
+ * BFS from source OSIDs up to maxHops, returning enemy-controlled OSIDs found.
+ * Only traverses through the adjacency graph — does not filter by faction during traversal.
+ * Deterministic: sorted iteration at each BFS level.
+ */
+export function getEnemyOsidsWithinHops(
+    sourceOsids: string[],
+    maxHops: number,
+    adjacency: Map<Osid, Osid[]>,
+    state: GameState,
+    faction: FactionId,
+): Set<string> {
+    const enemyOsids = new Set<string>();
+    const visited = new Set<string>(sourceOsids);
+    let frontier = [...sourceOsids].sort(strictCompare);
+
+    for (let hop = 0; hop < maxHops; hop++) {
+        const nextFrontier: string[] = [];
+        for (const osid of frontier) {
+            const neighbors = adjacency.get(osid as Osid) ?? [];
+            for (const n of neighbors) {
+                if (visited.has(n)) continue;
+                visited.add(n);
+                const controller = (state.political.political_controllers ?? {})[n] as string | undefined;
+                if (controller && controller !== faction) {
+                    enemyOsids.add(n);
+                }
+                // Continue BFS through both friendly and enemy territory
+                nextFrontier.push(n);
+            }
+        }
+        frontier = nextFrontier.sort(strictCompare);
+    }
+
+    return enemyOsids;
+}
+
 export function evaluateDefensive(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, corpsStance, counterAttackTarget, adjEnemy, directive, faction, isAlliedWithRBiH, state, reverseMap, terrainCache, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, result, adjacency, loc, graphAnalysis } = ctx;
+    const { brigade, corpsStance, counterAttackTarget, adjEnemy, directive, faction, isAlliedWithRBiH, state, reverseMap, terrainCache, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, result, adjacency, loc, graphAnalysis, sectorRecentRetreats, sectorCounterAttackCount } = ctx;
 
     // --- Rule 4: Defensive stance → defend, with retreat-based counter-attack only ---
 
@@ -343,13 +386,16 @@ export function evaluateDefensive(ctx: BrigadeEvaluationContext): boolean {
                 if (!nearFront) return false; // deep rear — fall through to interior movement
             }
         }
+
+        const disruptedTurns = (brigade as { disrupted_turns?: number }).disrupted_turns ?? 0;
+        const effDir = directive ?? effectiveDirectiveDefault;
+        const maxAtt = effDir.max_attackers_per_target;
+
+        // ── Self-retreat counter-attack (score 1000) ────────────────────
         // Only allow counter-attack if THIS brigade retreated from an adjacent OSID last turn
         // AND the brigade is not disrupted (routed brigades can't counter-attack)
-        const disruptedTurns = (brigade as { disrupted_turns?: number }).disrupted_turns ?? 0;
         if (counterAttackTarget && adjEnemy.includes(counterAttackTarget) && disruptedTurns === 0) {
             const targets = predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap, undefined, ethnicMap);
-            const effDir = directive ?? effectiveDirectiveDefault;
-            const maxAtt = effDir.max_attackers_per_target;
             const counter = targets.find(t => t.osid === counterAttackTarget &&
                 (chosenTargets.get(t.osid) ?? 0) < maxAtt &&
                 isOutcomeSufficientForAttack(t.prediction.predicted_outcome, 'costly_victory'));
@@ -358,9 +404,79 @@ export function evaluateDefensive(ctx: BrigadeEvaluationContext): boolean {
                 result.attack_orders[brigade.id] = counter.osid;
                 result.attack_scores[brigade.id] = 1000; // Counter-attack: high priority
                 chosenTargets.set(counter.osid, (chosenTargets.get(counter.osid) ?? 0) + 1);
+                // Increment sector counter-attack count for cap enforcement
+                const sectorId = findBrigadeSectorId(state, brigade);
+                if (sectorId) {
+                    sectorCounterAttackCount.set(sectorId, (sectorCounterAttackCount.get(sectorId) ?? 0) + 1);
+                }
                 return true;
             }
         }
+
+        // ── Broadened sector counter-attack (score 950) ─────────────────
+        // When ANY brigade in the same sector retreated recently, other healthy
+        // brigades on that sector's front can counter-attack adjacent enemy OSIDs
+        // within COUNTER_ATTACK_MAX_HOPS of the retreated-from OSID.
+        if (disruptedTurns === 0
+            && adjEnemy.length > 0
+            && (brigade.personnel ?? 0) >= COUNTER_ATTACK_MIN_PERSONNEL
+            && (brigade.cohesion ?? 0) >= COUNTER_ATTACK_MIN_COHESION
+        ) {
+            const sectorId = findBrigadeSectorId(state, brigade);
+            if (sectorId) {
+                const sectorRetreats = sectorRecentRetreats.get(sectorId);
+                const sectorCount = sectorCounterAttackCount.get(sectorId) ?? 0;
+                if (sectorRetreats && sectorRetreats.length > 0
+                    && sectorCount < MAX_SECTOR_COUNTER_ATTACKS_PER_TURN
+                ) {
+                    // Find enemy OSIDs within COUNTER_ATTACK_MAX_HOPS of any retreat OSID
+                    const retreatOsids = sectorRetreats.map(r => r.osid);
+                    const enemyTargetOsids = getEnemyOsidsWithinHops(
+                        retreatOsids,
+                        COUNTER_ATTACK_MAX_HOPS,
+                        adjacency,
+                        state,
+                        faction,
+                    );
+
+                    // Filter to only adjacent enemy OSIDs that are within range
+                    const candidateTargets = adjEnemy
+                        .filter(e => enemyTargetOsids.has(e))
+                        .sort(strictCompare);
+
+                    if (candidateTargets.length > 0) {
+                        const targets = predictAllAdjacentTargets(
+                            state, brigade.id, adjacency, reverseMap, terrainCache,
+                            'attack', supplyStateByOsid, osidPopulationMap, undefined, ethnicMap,
+                        );
+
+                        // Find best target among candidates with sufficient predicted outcome
+                        let bestTarget: typeof targets[number] | null = null;
+                        let bestRatio = -Infinity;
+                        for (const candidate of candidateTargets) {
+                            const t = targets.find(p => p.osid === candidate);
+                            if (!t) continue;
+                            if ((chosenTargets.get(t.osid) ?? 0) >= maxAtt) continue;
+                            if (!isOutcomeSufficientForAttack(t.prediction.predicted_outcome, 'costly_victory')) continue;
+                            if (t.prediction.power_ratio > bestRatio) {
+                                bestRatio = t.prediction.power_ratio;
+                                bestTarget = t;
+                            }
+                        }
+
+                        if (bestTarget) {
+                            result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
+                            result.attack_orders[brigade.id] = bestTarget.osid;
+                            result.attack_scores[brigade.id] = 950; // Below self-retreat (1000)
+                            chosenTargets.set(bestTarget.osid, (chosenTargets.get(bestTarget.osid) ?? 0) + 1);
+                            sectorCounterAttackCount.set(sectorId, sectorCount + 1);
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
         // Fill adjacent front gaps even in defensive stance
         const defHere = countFactionBrigadesAtOsid(state, faction, loc);
         if (defHere >= 2) {

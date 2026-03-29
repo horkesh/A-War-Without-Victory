@@ -191,8 +191,32 @@
 - **Right approach**: Displaced minority populations should drain to the nearest friendly-held municipality pool of their faction, modeling refugee flows to safe territory.
 - **Do instead**: When reviewing pool diagnostics, check for "stranded pools" — minority faction pools in enemy-held municipalities with no local brigade to recruit them. These are displaced populations that should be rerouted. Use `tools/diagnose_run.cjs` stranded pool check.
 
+### [Calibration] Probes are recon, not campaigns — they should not trigger operation cooldown or double exhaustion (2026-03-28) — NEW
+- **Context**: Completed probes set `last_completed_operation` which triggered 5-turn theater cooldown. Additionally, `evaluateOperationProgress` processed probes alongside `advanceSectorOffensives`, causing double exhaustion (+20 instead of +5). Combined: after one probe, corps had +20 exhaustion (near 30 max) and 5-turn cooldown. Corps launched 1-2 probes then went permanently idle.
+- **Wrong approach**: Treating probe completion identically to full operation completion in the cooldown and lifecycle systems.
+- **Right approach**: `evaluateOperationProgress` skips probe/feint (lifecycle managed by `advanceSectorOffensives`). Probes don't set `last_completed_operation` — they're recon designed to enable the follow-up, not block it.
+- **Do instead**: When adding a new operation type, verify it's handled by exactly ONE lifecycle manager and that completion side-effects (cooldown, exhaustion) are appropriate for its weight class.
+
+### [Calibration] Half-implemented bilateral scaling silently inverts ratios — verify both sides of any paired multiplier (2026-03-28) — NEW
+- **Context**: `getPowerRatioCasualtyMult()` returned `[attCasMult, defCasMult]`. Both callers used `const [, defCasMult]` — discarding the attacker multiplier. Defenders got power-ratio-scaled casualties; attackers didn't. Result: inverted casualty ratio (0.55 att:def instead of 1.5-3.0).
+- **Wrong approach**: Implementing only half of a bilateral system. The empty destructuring slot `[,` made it look intentional.
+- **Right approach**: When a function returns paired values (attacker/defender, input/output, min/max), verify BOTH are consumed. An unused return value in a pair is a bug until proven otherwise.
+- **Do instead**: After adding any function that returns paired multipliers, grep for all callers and verify both values are captured and applied. Destructuring `[, second]` should be a code smell in combat math.
+
 ### [Bot AI] Stale-count reads cause oscillation — always track planned movements (2026-03-16) — NEW
 - **Evidence**: `evaluateSectorMarch` in `bot_brigade_eval_front.ts` used `countCorpsBrigadesAtOsid()` to check overstacking. Since all brigades evaluate against the same static state in one pass, 7 brigades at OSID X all see count=7 and all march to OSID Y. Next turn: all 7 at Y, march back to X. Perpetual oscillation.
 - **Root cause**: Per-entity evaluation loop reads shared static state without tracking the effects of earlier entities' decisions in the same loop.
 - **Rule**: Any per-entity evaluation loop that reads entity counts at locations MUST maintain a running adjustment map (departures/arrivals) so entity N sees the effects of entities 1..N-1's decisions. This applies to: overstacking redistribution, front gap filling, sector march, and any future per-brigade movement evaluation.
 - **Fix**: `columnAssignments: Map<Osid, number>` passed through `BrigadeEvaluationContext`, decremented on departure, incremented on arrival, checked before issuing movement orders.
+
+### [Calibration] Forced commitment after probes contradicts the purpose of recon — if intel says "they're stronger," defend (2026-03-29) — NEW
+- **Context**: `MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT=2` forced corps to launch full attack after 2 probes regardless of predicted outcome. ARBiH issued 81 offensive orders in 40 weeks (1992) — historically almost entirely defensive. The probe system correctly gathered intel showing VRS superiority, then the forced commitment mechanic said "attack anyway."
+- **Wrong approach**: Adding a consecutive probe counter to prevent "infinite probe loops." The counter treats the symptom (probing repeatedly) without addressing why: `getSectorIntelConfidence` returns the mean across all enemy sectors, so probing one sector doesn't raise the mean above threshold.
+- **Right approach**: Check freshness per-sector-pair. If a specific enemy sector was recently probed, don't probe it again. After all stale sectors are probed, evaluate the intel. If it says "enemy is stronger," the correct response is "defend" — no forced commitment.
+- **Do instead**: Never force a bot to attack when its own intelligence assessment says it will lose. The purpose of recon is to inform the decision, not to create an obligation to act.
+
+### [Calibration] Artificial doctrine gates mask broken emergent decision-making — fix the predictor, not the gate (2026-03-29) — NEW
+- **Context**: ARBiH 81 orders in 1992. Initial investigation suggested adding more doctrine overrides (max_attack_share, aggression_modifier, stance restrictions). User corrected: "I don't want artificial coding telling them to be passive. Their bots should emergently know NOT to attack."
+- **Wrong approach**: Layering faction-specific doctrine gates, stance restrictions, and attack share caps to artificially suppress attacks. These mask the real problem: the combat predictor allows attacks at ratio 0.7 (predicted stalemate), fog of war gives a flat 15% discount on defender power regardless of intel quality, and counter-attacks bypass the normal decision chain.
+- **Right approach**: Fix the evaluation so the bot makes correct decisions emergently. Raise attack threshold to costly_victory (1.0) — faction-neutral. Scale fog with intel confidence — makes probing meaningful. Gate counter-attacks through the predictor. ARBiH in 1992 stops attacking because VRS is stronger, not because a flag says "defensive."
+- **Do instead**: When a faction is doing something ahistorical, ask "why does the bot THINK this is a good idea?" before adding gates. If the predictor is wrong, fix the predictor. If the threshold is too lenient, raise it for everyone. Faction-specific overrides are a last resort, not a first response.
