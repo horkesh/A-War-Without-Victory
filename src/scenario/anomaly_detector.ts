@@ -12,7 +12,7 @@ import { resolve } from 'node:path';
 import type { GameState, FormationId } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
 import type { AnomalyReport } from './anomaly_types.js';
-import { checkMoraleCollapseCluster, checkZeroCombatCorps, checkOrphanOperationBrigades, checkGhostParamilitaryPersonnel, checkOffensiveIntelBlindness, checkWeakerFactionAttackImbalance } from './anomaly_checks_extended.js';
+import { checkMoraleCollapseCluster, checkZeroCombatCorps, checkOrphanOperationBrigades, checkGhostParamilitaryPersonnel, checkOffensiveIntelBlindness, checkWeakerFactionAttackImbalance, checkUndefendedPaintedMismatch, checkAdjacentUncontestedTerritory } from './anomaly_checks_extended.js';
 
 // ── Helpers ────────────────────────────────────────────────────────────
 
@@ -1066,6 +1066,9 @@ export function runAnomalyDetection(state: GameState): AnomalyReport[] {
         checkGhostParamilitaryPersonnel,
         checkOffensiveIntelBlindness,
         checkWeakerFactionAttackImbalance,
+        // #27, #28 — territorial inertia checks
+        checkUndefendedPaintedMismatch,
+        checkAdjacentUncontestedTerritory,
     ];
 
     const results: AnomalyReport[] = [];

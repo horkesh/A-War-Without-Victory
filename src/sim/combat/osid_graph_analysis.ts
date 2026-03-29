@@ -344,7 +344,7 @@ export function analyzeFactionGraph(
     //    detection because they neighbor each other. BFS finds the connected component first.
     //    Scan ALL controlled OSIDs (not just front) because pockets are typically deep
     //    in the interior, surrounded by friendly territory on all sides.
-    const MAX_POCKET_CLUSTER = 3;
+    const MAX_POCKET_CLUSTER = 6;
     const pocketChecked = new Set<Osid>();
     for (const osid2 of allOsids) {
         if (!osid2.startsWith('op:')) continue;

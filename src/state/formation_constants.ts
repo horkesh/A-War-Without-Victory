@@ -304,7 +304,8 @@ export const OFFENSIVE_PARA_CIVILIAN_CASUALTY_RATE = 0.05;
 export const OFFENSIVE_PARA_LIGHT_DEFENSE_THRESHOLD = 500;
 /** Municipality scope restriction for bot factions — prevents ahistorical sweep outside known AOs. */
 export const OFFENSIVE_PARA_MUNICIPALITY_SCOPE: Record<string, string[]> = {
-    RS: ['zvornik', 'bratunac', 'vlasenica', 'srebrenica', 'rogatica', 'visegrad', 'foca', 'cajnice', 'rudo', 'gorazde'],
+    RS: ['zvornik', 'bratunac', 'vlasenica', 'srebrenica', 'rogatica', 'visegrad', 'foca', 'cajnice', 'rudo', 'gorazde',
+         'sanski_most', 'kljuc', 'prijedor', 'bosanski_novi', 'bosanski_petrovac', 'kotor_varos'],
     HRHB: ['stolac', 'capljina', 'prozor'],
 };
 

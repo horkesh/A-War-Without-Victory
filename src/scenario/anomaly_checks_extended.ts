@@ -12,6 +12,7 @@ import { resolve } from 'node:path';
 import type { GameState, FormationId } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
 import type { AnomalyReport } from './anomaly_types.js';
+import { isGrazAccordsActive } from '../sim/local_truces.js';
 
 // ── Helpers ────────────────────────────────────────────────────────────
 
@@ -437,6 +438,189 @@ export function checkWeakerFactionAttackImbalance(state: GameState): AnomalyRepo
                 });
             }
         }
+    }
+
+    return reports;
+}
+
+// ── Check #27: undefended_painted_mismatch ──────────────────────────────
+
+const PAINTED_CONTROL_PATH = 'data/source/calibration/painted_control_jan1993.json';
+const UNDEFENDED_MISMATCH_CRITICAL_THRESHOLD = 100;
+
+/**
+ * 27. undefended_painted_mismatch (warning/critical, territorial)
+ * OSIDs where the sim controller differs from the painted target AND the
+ * sim-controlling faction has ZERO brigades located at that OSID.
+ * Territory held purely by inertia — nobody defending it, nobody walking in.
+ */
+export function checkUndefendedPaintedMismatch(state: GameState): AnomalyReport[] {
+    const reports: AnomalyReport[] = [];
+    const politicalControllers = state.political.political_controllers ?? {};
+
+    // Load painted targets
+    let paintedCtrl: Record<string, string>;
+    try {
+        const paintedPath = resolve(process.cwd(), PAINTED_CONTROL_PATH);
+        const raw = JSON.parse(readFileSync(paintedPath, 'utf8'));
+        paintedCtrl = raw.by_settlement_id;
+        if (!paintedCtrl) return reports;
+    } catch {
+        // If painted control file cannot be loaded, skip silently.
+        return reports;
+    }
+
+    // Build OSID → set of factions with active brigades present
+    const formations = state.military.formations;
+    const osidBrigadeFactions = new Map<string, Set<string>>();
+    for (const fid of sortedKeys(formations as Record<string, unknown>)) {
+        const f = formations[fid];
+        if (f.status !== 'active') continue;
+        if (!isBrigadeKind(f.kind)) continue;
+        const loc = f.location_osid;
+        if (!loc) continue;
+        const set = osidBrigadeFactions.get(loc) ?? new Set<string>();
+        set.add(f.faction);
+        osidBrigadeFactions.set(loc, set);
+    }
+
+    const undefended: Array<{ osid: string; simFaction: string; paintedFaction: string }> = [];
+
+    for (const osid of sortedKeys(paintedCtrl as Record<string, unknown>)) {
+        const painted = paintedCtrl[osid];
+        const sim = politicalControllers[osid];
+        if (!sim || !painted) continue;
+        if (sim === painted) continue;
+
+        // Mismatch: check if the sim-controlling faction has any brigade here
+        const factionsPresent = osidBrigadeFactions.get(osid);
+        const hasDefender = factionsPresent != null && factionsPresent.has(sim);
+        if (!hasDefender) {
+            undefended.push({ osid, simFaction: sim, paintedFaction: painted });
+        }
+    }
+
+    if (undefended.length > 0) {
+        undefended.sort((a, b) => strictCompare(a.osid, b.osid));
+        const severity = undefended.length >= UNDEFENDED_MISMATCH_CRITICAL_THRESHOLD ? 'critical' : 'warning';
+        const detail = undefended.slice(0, 10).map(u =>
+            `${u.osid} (sim=${u.simFaction}, painted=${u.paintedFaction})`
+        ).join(', ');
+        const suffix = undefended.length > 10 ? `, ... +${undefended.length - 10} more` : '';
+        reports.push({
+            category: 'territorial',
+            severity,
+            type: 'undefended_painted_mismatch',
+            description: `${undefended.length} OSID(s) differ from painted targets with 0 defending brigades (inertia territory): ${detail}${suffix}.`,
+            entities: undefended.map(u => u.osid),
+        });
+    }
+
+    return reports;
+}
+
+// ── Check #28: adjacent_uncontested_territory ───────────────────────────
+
+/**
+ * 28. adjacent_uncontested_territory (warning, territorial)
+ * OSIDs controlled by faction Y with ZERO brigades present, where faction X
+ * has 1+ brigades at an adjacent OSID. Excludes cold fronts (RS↔HRHB under
+ * Graz Accords). Catches "why aren't you walking in?" situations.
+ */
+export function checkAdjacentUncontestedTerritory(state: GameState): AnomalyReport[] {
+    const reports: AnomalyReport[] = [];
+    const politicalControllers = state.political.political_controllers ?? {};
+    const formations = state.military.formations;
+    const grazActive = isGrazAccordsActive(state);
+
+    // Load OSID adjacency graph
+    const graphPath = resolve(process.cwd(), 'data/derived/operational/operational_contact_graph.json');
+    let adjacency: Map<string, string[]>;
+    try {
+        const raw = JSON.parse(readFileSync(graphPath, 'utf8'));
+        const edges: Array<{ a: string; b: string; min_dist?: number; shared_segments?: number }> = Array.isArray(raw) ? raw : (raw.edges ?? []);
+        adjacency = new Map<string, string[]>();
+        for (const e of edges) {
+            if (!e?.a || !e?.b) continue;
+            // Only shared-boundary edges (min_dist === 0 or absent).
+            if (e.min_dist != null && e.min_dist > 0) continue;
+            if (e.shared_segments != null && e.shared_segments === 0) continue;
+            const listA = adjacency.get(e.a) ?? [];
+            if (!listA.includes(e.b)) listA.push(e.b);
+            adjacency.set(e.a, listA);
+            const listB = adjacency.get(e.b) ?? [];
+            if (!listB.includes(e.a)) listB.push(e.a);
+            adjacency.set(e.b, listB);
+        }
+    } catch {
+        return reports;
+    }
+
+    // Build OSID → set of factions with active brigades present
+    const osidBrigadeFactions = new Map<string, Set<string>>();
+    for (const fid of sortedKeys(formations as Record<string, unknown>)) {
+        const f = formations[fid];
+        if (f.status !== 'active') continue;
+        if (!isBrigadeKind(f.kind)) continue;
+        const loc = f.location_osid;
+        if (!loc) continue;
+        const set = osidBrigadeFactions.get(loc) ?? new Set<string>();
+        set.add(f.faction);
+        osidBrigadeFactions.set(loc, set);
+    }
+
+    const uncontested: Array<{ osid: string; controller: string; adjacentFaction: string; adjacentOsid: string }> = [];
+
+    for (const osid of sortedKeys(politicalControllers as Record<string, unknown>)) {
+        const controller = politicalControllers[osid];
+        if (!controller) continue;
+
+        // Skip if the controller has brigades here — it's defended
+        const factionsHere = osidBrigadeFactions.get(osid);
+        if (factionsHere && factionsHere.has(controller)) continue;
+
+        // Check adjacent OSIDs for enemy brigades
+        const neighbors = adjacency.get(osid) ?? [];
+        let found = false;
+        for (const adj of neighbors.slice().sort(strictCompare)) {
+            if (found) break;
+            const adjFactions = osidBrigadeFactions.get(adj);
+            if (!adjFactions) continue;
+
+            for (const adjFaction of [...adjFactions].sort(strictCompare)) {
+                if (adjFaction === controller) continue; // same faction, not enemy
+
+                // Cold front filter: RS↔HRHB under Graz Accords
+                if (grazActive) {
+                    const pair = [controller, adjFaction].sort(strictCompare);
+                    if (pair[0] === 'HRHB' && pair[1] === 'RS') continue;
+                }
+
+                uncontested.push({
+                    osid,
+                    controller,
+                    adjacentFaction: adjFaction,
+                    adjacentOsid: adj,
+                });
+                found = true;
+                break;
+            }
+        }
+    }
+
+    if (uncontested.length > 0) {
+        uncontested.sort((a, b) => strictCompare(a.osid, b.osid));
+        const detail = uncontested.slice(0, 10).map(u =>
+            `${u.osid} (${u.controller}, no defenders) adj to ${u.adjacentOsid} (${u.adjacentFaction} brigade present)`
+        ).join(', ');
+        const suffix = uncontested.length > 10 ? `, ... +${uncontested.length - 10} more` : '';
+        reports.push({
+            category: 'territorial',
+            severity: 'warning',
+            type: 'adjacent_uncontested_territory',
+            description: `${uncontested.length} OSID(s) have no defending brigades with enemy brigades at adjacent OSIDs: ${detail}${suffix}.`,
+            entities: uncontested.map(u => u.osid),
+        });
     }
 
     return reports;

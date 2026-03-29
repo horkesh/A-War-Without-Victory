@@ -21,7 +21,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { seedDisplacementTimerOnFlip } from '../../state/displacement_takeover.js';
 
 /** Max cluster size for auto-flip. Clusters > 3 are too large to flip without military action. */
-const MAX_POCKET_CLUSTER = 3;
+const MAX_POCKET_CLUSTER = 6;
 
 /**
  * Week threshold for Croat-Bosniak war onset (~April 1993, week 52 from Apr 1992 start).
