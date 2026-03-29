@@ -14,6 +14,11 @@
 **Casualties:** RS taken=23,751 inflicted=30,086. RBiH taken=72,510 inflicted=10,109. HRHB taken=6,419 inflicted=4,015.
 **Changes:** SpatialContext (Phases 0-4), corps launch feasibility, ops reevaluation, emergency retreat reachability, phantom defender fix, bfsDistance friendly-only, multi-brigade main/support (70%/40%).
 **Key observations:** Multi-brigade support modifier reduced RS offensive power (~1.2pp). n1203 (pre-multi-brigade) was 92.1%. The -1.2pp from support modifier is mechanically correct — support brigades contributing 70% vs 100% power makes operations slightly weaker.
+**War-or-Game verdict:** APPROVED WITH CAVEATS.
+**P0-1:** HRHB ghost faction after w13 — 0 orders w21-40, two corps with zero battles. Biggest realism gap.
+**P0-2:** RBiH casualties pathological (72k vs RS 24k, 2.9:1). 0% ARBiH objective completion w21+. Entrenchment too punitive.
+**P1:** RS +43 OSIDs but -5.2pp area (small settlements, missing large blocks). 79 brigades (39%) never fight. SRK ring thinning. Op Herzegovina Consolidation zombie.
+**Positive:** Enclave formation correct, RS→RBiH tempo arc mirrors history, Op Corridor partial (accurate), displacement scale realistic.
 
 ## n1203 (2026-03-29) — SpatialContext + 6 fixes (pre-multi-brigade)
 
