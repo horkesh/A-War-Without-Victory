@@ -48,6 +48,8 @@ import { isFriendlyFaction as isFriendlyFactionCtrl } from '../early_war/allianc
 import { isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
 import { tickPreparation, hasUnresolvedProbe, autoResolveProbe } from './operation_preparation.js';
 import { RS_BLITZ_PHASE_END_WEEK } from './bot_constants.js';
+import { basePower, VICTORY_THRESHOLD_COSTLY } from './combat_math.js';
+import { findSectorForEnemyOsid } from './corps_front_sectors.js';
 import { seedDisplacementTimerOnFlip } from '../../state/displacement_takeover.js';
 import type { PreparationEvent } from '../turn_pipeline_types.js';
 import { checkLoanedArrivals, areLoanedBrigadesReady, cleanupDissolvedLoans } from './operation_reinforcement.js';
@@ -99,6 +101,80 @@ const OBJECTIVES_PER_BRIGADE = 0.5; // 1 objective per 2 brigades
 
 /** Personnel floor below which a brigade cannot attack (mirrors bot_brigade_eval_attack gate). */
 const COMBAT_INEFFECTIVE_PERSONNEL = 400;
+
+/**
+ * Attack posture discount for feasibility estimation.
+ * Conservative: uses attack (0.8×), not assault (0.6×).
+ * This intentionally overestimates attacker power relative to the real predictor
+ * (which includes fog-of-war, terrain, supply, etc.) so we only reject truly hopeless ops.
+ */
+const FEASIBILITY_ATTACK_POSTURE_MULT = 0.8;
+
+/**
+ * Feasibility check: can the attacker pool achieve at least costly_victory against
+ * ANY proposed objective? Uses basePower (personnel × equipment × experience × cohesion)
+ * with a conservative attack posture discount vs the full defender sector.
+ *
+ * This is intentionally optimistic — it only rejects operations where even the most
+ * generous estimate shows no objective is achievable. The real predictor with terrain,
+ * fog-of-war, entrenchment, and supply will further filter at brigade execution time.
+ *
+ * Returns true if at least one objective appears feasible.
+ */
+function checkLaunchFeasibility(
+    state: GameState,
+    corpsBrigadeIds: FormationId[],
+    objectives: string[],
+    faction: FactionId,
+    corpsId: FormationId,
+): boolean {
+    const formations = state.military.formations ?? {};
+
+    // Compute total attacker base power (all corps brigades that can attack)
+    let totalAttackerPower = 0;
+    for (const bid of corpsBrigadeIds) {
+        const f = formations[bid];
+        if (!f || f.status !== 'active') continue;
+        if ((f.personnel ?? 0) < COMBAT_INEFFECTIVE_PERSONNEL) continue;
+        if ((f.disrupted_turns ?? 0) > 0) continue;
+        totalAttackerPower += basePower(f) * FEASIBILITY_ATTACK_POSTURE_MULT;
+    }
+
+    if (totalAttackerPower <= 0) return false;
+
+    // Check each objective: estimate defender power from the defending sector
+    for (const obj of objectives) {
+        // Find the sector defending this objective
+        const pc = state.political?.political_controllers ?? {};
+        const defenderFaction = pc[obj];
+        if (!defenderFaction || defenderFaction === faction) continue;
+
+        const sector = findSectorForEnemyOsid(state, obj, defenderFaction);
+        if (!sector) {
+            // No defending sector means militia-only defense — always feasible
+            return true;
+        }
+
+        // Sum defender sector base power (all brigades in the sector)
+        let sectorDefenderPower = 0;
+        for (const defBid of sector.assigned_brigade_ids) {
+            const df = formations[defBid];
+            if (!df || df.status !== 'active') continue;
+            sectorDefenderPower += basePower(df);
+        }
+
+        if (sectorDefenderPower <= 0) return true; // Undefended sector
+
+        // Power ratio: attacker pool vs entire defending sector.
+        // This is generous to the attacker because in reality only a fraction
+        // of the sector's brigades would react to any single OSID attack.
+        const ratio = totalAttackerPower / sectorDefenderPower;
+        if (ratio >= VICTORY_THRESHOLD_COSTLY) return true;
+    }
+
+    // No objective appears achievable
+    return false;
+}
 
 /** Build OSID adjacency from front edges — fallback when caller doesn't provide one. */
 function buildOsidAdjacencyFromFrontEdges(state: GameState): Map<string, string[]> {
@@ -1577,6 +1653,16 @@ export function evaluateCorpsOffensiveLaunch(
 
     // Need at least 1 objective for a sector offensive
     if (objectives.length < 1) return null;
+
+    // ── Feasibility gate ─────────────────────────────────────────────────
+    // Reject operations where the attacker pool cannot achieve even costly_victory
+    // against ANY proposed objective. Prevents zombie ops that permanently block
+    // the corps slot because brigades refuse to execute hopeless attacks.
+    if (!checkLaunchFeasibility(state, corpsBrigadeIds, objectives, faction, corpsId)) {
+        const corpsName = formations[corpsId]?.name ?? corpsId;
+        console.warn(`[feasibility] ${corpsName}: rejected op — no objective achievable at costly_victory (${objectives.length} objectives, ${corpsBrigadeIds.length} brigades)`);
+        return null;
+    }
 
     // Enclave brigade filter: enclave-tagged brigades cannot participate in operations
     // targeting OSIDs outside their enclave. Organically implements the "corridor-widening only"
