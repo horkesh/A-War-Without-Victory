@@ -7,6 +7,7 @@ import {
     StateMeta
 } from './game_state.js';
 import { canonicalizePoliticalSideId, defaultArmyLabelForSide, POLITICAL_SIDES, type ArmyLabel, type PoliticalSideId } from './identity.js';
+import { applyMigrations } from './save_migration.js';
 import { serializeGameState } from './serializeGameState.js';
 
 export interface ValidationResult {
@@ -28,6 +29,8 @@ export function serializeState(state: GameState): string {
 export function deserializeState(payload: string): GameState {
     const parsed = JSON.parse(payload) as unknown;
     const migrated = migrateState(parsed);
+    // Apply versioned migrations from the save_migration registry
+    applyMigrations(migrated);
     assertNoErrors(validateState(migrated), 'State failed validation after deserialize');
 
     return migrated;
@@ -550,6 +553,23 @@ function migrateState(raw: unknown): GameState {
             // Displacement event log: default to empty array
             if (!(candidate as any).displacement.displacement_event_log) {
                 (candidate as any).displacement.displacement_event_log = [];
+            }
+
+            // Migrate corps_command active_operation → active_operations
+            const corpsCommand = mil?.corps_command;
+            if (corpsCommand && typeof corpsCommand === 'object') {
+                const ccRec = corpsCommand as Record<string, any>;
+                const ccKeys = Object.keys(ccRec).sort();
+                for (const corpsId of ccKeys) {
+                    const cmd = ccRec[corpsId];
+                    if (!cmd || typeof cmd !== 'object') continue;
+                    if (!cmd.active_operations) {
+                        cmd.active_operations = cmd.active_operation
+                            ? [cmd.active_operation]
+                            : [];
+                        delete cmd.active_operation;
+                    }
+                }
             }
 
             // AoR phase-out: strip legacy keys so serialization allowlist passes (War phase uses location_osid only)

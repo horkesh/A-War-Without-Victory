@@ -208,4 +208,65 @@ describe('Edge cases', () => {
         const cmd = makeCmd([]);
         expect(getPrimaryOperation(cmd)).toBeNull();
     });
+
+    // TODO: add secondary op type guard test
+    // When cmd.active_operations.length > 0 (slot 0 occupied), bot AI should only
+    // push ops with type 'probe' or 'sector_attack' into additional slots.
+    // A 'general_offensive' in a secondary slot must be rejected by the guard in
+    // bot_corps_directives.ts (around the evaluateCorpsOffensiveLaunch push site).
+});
+
+// ---------------------------------------------------------------------------
+// 8. Emergency defense overflow slot
+// ---------------------------------------------------------------------------
+describe('Emergency defense overflow slot', () => {
+    function makeEmergencyOp(brigades: string[]): CorpsOperation {
+        return {
+            name: 'Emergency Defense (test_corps)',
+            type: 'strategic_defense',
+            phase: 'execution',
+            started_turn: 1,
+            phase_started_turn: 1,
+            participating_brigades: brigades,
+            is_emergency: true,
+        } as CorpsOperation;
+    }
+
+    /** Mirrors the guard logic in generateEmergencyDefensiveOperations. */
+    function canLaunchEmergencyDefense(cmd: CorpsCommandState): boolean {
+        return !cmd.active_operations.some(op => op.is_emergency);
+    }
+
+    it('emergency defensive op launches even when all slots are full', () => {
+        // Corps with 8 brigades: 1 slot max. Fill it with a normal op.
+        const normalOp = makeOp('Op Alpha', ['b1', 'b2']);
+        const cmd = makeCmd([normalOp]);
+
+        // Normal slot check says no room
+        expect(hasAvailableSlot(cmd, 8)).toBe(false);
+        // But emergency defense CAN launch (overflow slot)
+        expect(canLaunchEmergencyDefense(cmd)).toBe(true);
+
+        // Simulate what generateEmergencyDefensiveOperations does: push the emergency op
+        const emergencyOp = makeEmergencyOp(['b3', 'b4']);
+        cmd.active_operations.push(emergencyOp);
+
+        // Now 2 ops on a 1-slot corps: normal + emergency overflow
+        expect(cmd.active_operations).toHaveLength(2);
+        expect(cmd.active_operations[1].is_emergency).toBe(true);
+    });
+
+    it('second emergency defense is blocked when one already exists', () => {
+        const normalOp = makeOp('Op Alpha', ['b1', 'b2']);
+        const emergencyOp = makeEmergencyOp(['b3', 'b4']);
+        const cmd = makeCmd([normalOp, emergencyOp]);
+
+        // Cannot launch another emergency — max 1
+        expect(canLaunchEmergencyDefense(cmd)).toBe(false);
+    });
+
+    it('emergency defense can launch on a corps with zero active ops', () => {
+        const cmd = makeCmd([]);
+        expect(canLaunchEmergencyDefense(cmd)).toBe(true);
+    });
 });

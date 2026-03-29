@@ -390,7 +390,9 @@ export function generateEmergencyDefensiveOperations(
     for (const corps of corpsList) {
         const cmd = corpsCommand[corps.id];
         if (!cmd) continue;
-        if (hasActiveOperation(cmd)) continue;
+        // Allow exactly 1 emergency defensive op as overflow — skip only if one already exists
+        const hasEmergencyAlready = cmd.active_operations.some(op => op.is_emergency);
+        if (hasEmergencyAlready) continue;
         // Only for defensive corps facing extreme threat
         if (cmd.stance !== 'defensive') continue;
         // Allow slightly higher exhaustion for emergencies (+10 above normal cap)
@@ -440,7 +442,8 @@ export function generateEmergencyDefensiveOperations(
             started_turn: turn,
             phase_started_turn: turn,
             target_settlements: uniqueTargets.slice(0, 20), // Cap target list
-            participating_brigades: participants.map(b => b.id)
+            participating_brigades: participants.map(b => b.id),
+            is_emergency: true,
         };
 
         cmd.active_operations.push(operation);

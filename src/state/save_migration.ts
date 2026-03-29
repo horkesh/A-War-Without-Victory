@@ -76,3 +76,23 @@ registerMigration({
         }
     },
 });
+
+// v2: Migrate active_operation (single nullable) → active_operations (array)
+registerMigration({
+    version: 2,
+    description: 'Migrate corps_command active_operation to active_operations array',
+    migrate: (state) => {
+        const corpsCommand = (state.military as any)?.corps_command;
+        if (!corpsCommand || typeof corpsCommand !== 'object') return;
+        for (const corpsId of Object.keys(corpsCommand).sort()) {
+            const cmd = corpsCommand[corpsId];
+            if (!cmd || typeof cmd !== 'object') continue;
+            if (!cmd.active_operations) {
+                cmd.active_operations = (cmd as any).active_operation
+                    ? [(cmd as any).active_operation]
+                    : [];
+                delete (cmd as any).active_operation;
+            }
+        }
+    },
+});

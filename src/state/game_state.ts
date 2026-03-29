@@ -38,7 +38,7 @@ import type { BrigadeWarStory } from '../sim/war_stories.js';
 import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 
-export const CURRENT_SCHEMA_VERSION = 1 as const;
+export const CURRENT_SCHEMA_VERSION = 2 as const;
 
 // --- ID types (canonical) ---
 export type FactionId = string;
@@ -344,6 +344,9 @@ export interface CorpsOperation {
     pending_casualties?: PendingOperationCasualties;
     /** Previous turn's objective control snapshot for diff (OSID→faction). */
     _prev_objective_state?: Record<string, string | null>;
+
+    /** True when this is an emergency defensive operation (bypasses slot limit, max 1). */
+    is_emergency?: boolean;
 
     // --- Synchronized operation fields (Army HQ Gathering v0.4.7) ---
     /** If part of a synchronized operation, the sync op name */

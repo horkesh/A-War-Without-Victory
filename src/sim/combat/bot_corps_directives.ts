@@ -1918,9 +1918,14 @@ export function generateCorpsDirectives(
                                 op.postponement_count = 0;
                             }
                         }
-                        cmd.active_operations.push(op);
-                        cmd.consecutive_probes = 0; // Reset probe counter on full attack
-                        assignOperationCommander(state, op, corps.id, faction);
+                        // Secondary slot ops must be probe or sector_attack only
+                        if (cmd.active_operations.length > 0 && op.type !== 'probe' && op.type !== 'sector_attack') {
+                            // Don't launch heavy ops (general_offensive, etc.) in secondary slot
+                        } else {
+                            cmd.active_operations.push(op);
+                            cmd.consecutive_probes = 0; // Reset probe counter on full attack
+                            assignOperationCommander(state, op, corps.id, faction);
+                        }
                     }
                 }
             }
