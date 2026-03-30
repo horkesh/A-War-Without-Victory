@@ -1,3 +1,33 @@
+## [2026-03-30] P0 Tasks 5 — Balanced Zone Opportunity Ops + Target Preservation (20142315)
+
+### Change
+**P0 Task 5: Widen opportunity eligibility to balanced zones** (`426a8da7`): `plan.ts` — opportunity plans now fire for `balanced` zones (surplus ≥ `MIN_BRIGADES_FOR_PLAN`), not just `projecting`. Projecting still prioritised. Probe initiative threshold 0.6→0.3. 70 new tests added.
+
+**P0 Task 5 follow-up: Preserve offensive_targets after plan clears** (`20142315`): `emit.ts` — `buildOffensiveTargets` reads active operation objectives when plan is null (RC1). `deriveTargetsFromSectors` falls back to active op objectives when sector `sub_segments` have no `enemy_osids` (RC2). `buildOperations` returns early when `participatingBrigades` is empty after surplus-pool intersection (RC3). `briefing.ts` + `commander_state.ts` updated to pass `active_operations` through. 158 new tests added.
+
+**Chronicling discipline** (`99568902`): Post-commit hook warns when no `PROJECT_LEDGER.md` entry exists for today. Napkin rule added: write `working-on.md` at session START, not end.
+
+### Status
+- P0 Tasks 1-5: ALL committed. Branch 9 commits ahead of origin/main.
+- Calibration run NOT yet done — P0 fix unverified. Next: run 40w + expert panel + War-or-Game sign-off.
+- War-or-Game: NOT YET — pending calibration.
+
+## [2026-03-30] Session Recovery + Master Roadmap Unification + P0 Task 4
+
+### Change
+**Session recovery after computer crash.** Working-on.md successfully preserved context. No work lost.
+
+**Master Roadmap unification.** Created `docs/plans/MASTER_ROADMAP.md` as single source of truth for AWWV development roadmap (v0.1→v1.0+). Supersedes `docs/plans/2026-03-22-v06x-master-roadmap.md` and `docs/30_planning/_legacy/ROADMAP_TO_1_0.md`. Trimmed `docs/20_engineering/VERSIONING.md` to version-scheme-only. Added supersession notices to stale files. Added 4 missing plan file references to Key Plan Documents table. Updated memory pointer.
+
+**Railroad Hunter Report** (`docs/40_reports/20260330_RAILROAD_HUNTER_REPORT.md`) confirmed fully intact — 5 sections: corps exemptions, 6 movement systems, 3 pathfinding engines, op launch gates, personality modifiers.
+
+**P0 Task 4 committed** (`b89c1547`): doctrine phase railroads removed from commander system. `doctrine_stance` gate that blocked opportunity plans for defensive/reorganize stances removed from `plan.ts`. Stance modifier removed from `computeAggressionModifier` in `emit.ts`. `briefing.ts` hardcodes `'balanced'` (deprecated field, kept for interface compat). Test added.
+
+### Status
+- Branch: 6 commits ahead of origin/main. Working tree clean.
+- P0 fix plan: Tasks 1-4 complete (committed). Task 5 (calibration + balanced zone expansion) is next.
+- War-or-Game: NOT YET — pending Task 5 calibration.
+
 ## [2026-03-30] v0.8 Corps Commander Intelligence — Night Shift Implementation (n1213 = 92.2%)
 
 ### Change
