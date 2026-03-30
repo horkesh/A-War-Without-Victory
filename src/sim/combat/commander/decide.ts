@@ -249,7 +249,6 @@ function classifySectorActivity(
     turn: number,
 ): SectorActivityEntry[] {
     const entries: SectorActivityEntry[] = [];
-    const previousOsidSets = buildPreviousOsidSets(previousState);
 
     // Parse intel data for enemy strength estimates
     const intelData = briefing.intel_data as {
@@ -275,19 +274,9 @@ function classifySectorActivity(
             }
         }
 
-        // Check for territory changes in this sector's OSIDs
+        // Check for territory changes: count previous-zone OSIDs no longer held
         let osidsLost = 0;
         if (previousState) {
-            for (const osid of sector.territory_osids) {
-                // If this OSID was in our previous zones but isn't now, territory was lost
-                for (const [, prevOsids] of previousOsidSets) {
-                    if (prevOsids.has(osid)) {
-                        // OSID still in our territory — not lost
-                        break;
-                    }
-                }
-            }
-            // Check if any previous OSIDs for this sector are now missing
             for (const prevZone of previousState.zone_assessments) {
                 for (const osid of prevZone.osids) {
                     if (sector.territory_osids.includes(osid)) continue;
@@ -350,20 +339,6 @@ function strengthCategoryToEstimate(
         case 'unknown': return 500;
         default: return 500;
     }
-}
-
-/**
- * Build a map of zone_id -> Set<osid> from previous state for loss detection.
- */
-function buildPreviousOsidSets(
-    previousState: CommanderState | null,
-): Map<string, Set<string>> {
-    const result = new Map<string, Set<string>>();
-    if (!previousState) return result;
-    for (const zone of previousState.zone_assessments) {
-        result.set(zone.zone_id, new Set(zone.osids));
-    }
-    return result;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -430,15 +405,6 @@ function computeStanceChanges(
     const concentrationSectors = new Set<string>();
     for (const [sectorId, detected] of Object.entries(intelPicture.concentration_detected)) {
         if (detected) concentrationSectors.add(sectorId);
-    }
-
-    // Map sectors to zones for threat lookup
-    const sectorToZone = new Map<string, ZoneAssessment>();
-    const sortedZones = [...zones].sort((a, b) => strictCompare(a.zone_id, b.zone_id));
-    for (const zone of sortedZones) {
-        // A sector belongs to a zone if they share OSIDs
-        // For now, use zone's assigned_brigades to find relevant sectors
-        // (sectors and zones are both keyed by corps territory)
     }
 
     // Process each sector with activity data

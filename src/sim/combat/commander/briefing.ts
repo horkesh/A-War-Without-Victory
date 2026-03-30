@@ -22,7 +22,6 @@ import type { SpatialContext } from '../../spatial_context.js';
 
 import type {
     CommanderBriefing,
-    CommanderState,
     OfficerPersonality,
 } from './commander_state.js';
 
@@ -141,9 +140,6 @@ function tryAnalyzeFrontGeometry(
     }
     const enemyOsids = [...enemyOsidSet].sort(strictCompare);
 
-    // Target OSIDs = enemy OSIDs for geometry analysis (the full hostile boundary)
-    const targetOsids = enemyOsids;
-
     // analyzeFrontGeometry expects mutable Map — cast adjacency (read-only access)
     const adjMap = spatial.adjacency as Map<string, string[]>;
 
@@ -151,7 +147,7 @@ function tryAnalyzeFrontGeometry(
         faction,
         factionOsids,
         enemyOsids,
-        targetOsids,
+        enemyOsids, // target OSIDs = full hostile boundary
         adjMap,
         ethnicMap,
     );
@@ -272,10 +268,8 @@ export function buildBriefing(
     // 8. Pre-planned operations
     const prePlannedOps = getPrePlannedOps(state, corpsId);
 
-    // 9. Previous commander state (not yet on CorpsCommandState — return null)
-    const previousState: CommanderState | null = null;
-
-    // 10. Assemble briefing
+    // 9. Assemble briefing
+    // previous_state is null here — commander_loop.ts reads it from corps_command separately
     return {
         corps_id: corpsId,
         faction,
@@ -292,6 +286,6 @@ export function buildBriefing(
         corps_stance: corpsStance,
         officer_personality: personality,
         pre_planned_ops: prePlannedOps,
-        previous_state: previousState,
+        previous_state: null,
     };
 }

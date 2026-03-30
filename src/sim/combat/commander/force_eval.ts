@@ -44,8 +44,8 @@ const GARRISON_FITNESS_FLOOR = 0.2;
  * The briefing supply_by_osid is typed as unknown for now; brigades don't carry
  * supply_status directly. Use a conservative default.
  */
-function supplyMult(_supplyStatus: string | undefined): number {
-    switch (_supplyStatus) {
+function supplyMult(supplyStatus: string | undefined): number {
+    switch (supplyStatus) {
         case 'adequate': return 1.0;
         case 'strained': return 0.75;
         case 'critical': return 0.5;
