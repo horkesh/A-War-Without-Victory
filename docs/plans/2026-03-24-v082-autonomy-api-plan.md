@@ -1,10 +1,12 @@
-# v0.8.2 — Autonomy Depth + Claude API Integration
+# v0.8.4 — Autonomy Depth + Claude API Integration
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
+**Roadmap slot:** v0.8.4 (renumbered 2026-03-30; was v0.8.3)
+**Gate:** LLM integration sits on top of cleaned command ownership, not underneath it.
 **Goal:** Let the player choose how much to delegate. At any autonomy level, the player can grab the wheel for specific decisions. Claude API replaces the formula bot at the political leader level for non-player factions (and optionally for the player's own faction at higher delegation levels).
 
-**Depends on:** v0.8.0 (political bot) and v0.8.1 (order interpretation). Both must ship first — this plan layers on top.
+**Depends on:** v0.8.2 (political bot) and v0.8.3 (order interpretation). Both must ship first — this plan layers on top.
 
 **Tech Stack:** TypeScript (sim engine + Electron IPC). Vitest for tests. `@anthropic-ai/sdk` (already integrated).
 
@@ -476,7 +478,7 @@ Load a save from an AI-assisted game. Replay 10 turns. Verify identical state ha
 
 | Phase | Sessions | Depends On |
 |-------|----------|------------|
-| A: State + Skeleton | 1 | v0.8.1 shipped |
+| A: State + Skeleton | 1 | v0.8.3 shipped |
 | B: Override System | 1 | Phase A |
 | C: Claude API | 2 | Phase A |
 | D: UI | 2 | Phase B + C |

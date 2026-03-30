@@ -71,6 +71,12 @@ Event flag wiring (25 flags), exhaustion overhaul, Codex QA (30 essay correction
 
 **Architecture:** `docs/plans/2026-03-25-command-chain-architecture.md`
 
+**Sequencing principles (non-negotiable):**
+1. Operations are the first command object that must become singular and authoritative. Do not accept split operation state as "good enough."
+2. Commander maturity (belief state, competing options, decision traces) happens before political-bot and LLM expansion. Building political personality on top of a threshold machine produces sophisticated illusion, not real command.
+3. Cleanup work is feature-enabling, not optional polish. Overlapping ownership directly blocks believable commander behavior, future political bots, and any LLM layer.
+4. UI refinement follows backend authority. A richer ops panel does not prove the underlying operation object is coherent.
+
 ### v0.8.0 — Corps Commander Intelligence (ON MAIN)
 
 PERCEIVE-DECIDE-EXECUTE per-corps loop. 10 files in `src/sim/combat/commander/` (~3,800 lines). Zone detection, garrison allocation (Grigsby two-pass), multi-turn planning, intel-reactive stance, force fitness scoring. Replaces `generateCorpsDirectives` behind `USE_COMMANDER_LOOP` flag. Concurrent corps operations (multi-slot). Serializer Map/Set support.
@@ -85,7 +91,28 @@ PERCEIVE-DECIDE-EXECUTE per-corps loop. 10 files in `src/sim/combat/commander/` 
 3. Old code removal (Step 10) — remove `generateCorpsDirectives`, make `USE_COMMANDER_LOOP` permanent
 4. Railroad cleanup per `docs/40_reports/20260330_RAILROAD_HUNTER_REPORT.md`
 
-### v0.8.1 — Political Leader Bot + Patron Phone Call
+### v0.8.1 — Commander Maturity
+
+**Gate:** Only starts after War-or-Game approves the commander system and P0 (combat drought) is confirmed fixed.
+
+**Theme:** Make the commander think structurally before adding personality. No LLM flavor, no political theater — real deterministic reasoning depth.
+
+**Why this milestone exists before political-bot work:** If authority is still split and the commander is still a threshold machine, adding political personality, refusal logic, or LLM flavor builds better-organized illusion rather than better command. This milestone makes the commander genuinely mind-like first.
+
+Done means for this milestone:
+- belief state exists separately from raw world state (not just reading `GameState` directly)
+- candidate intents compete against each other (not a single option evaluated in isolation)
+- memory from prior turns affects future scoring
+- constraints and preferences are structurally distinct from execution mechanics
+- reasoning traces exist (for debugging + later UI surface)
+
+Primary targets: `src/sim/combat/commander/assess.ts`, `src/sim/combat/commander/allocate.ts`, `src/sim/combat/commander/plan.ts`, `src/sim/combat/commander/decide.ts`, `src/sim/combat/commander/briefing.ts`, `src/sim/combat/commander/emit.ts`
+
+Plan: `docs/plans/2026-03-25-command-chain-architecture.md`
+
+### v0.8.2 — Political Leader Bot + Patron Phone Call
+
+**Gate:** Requires v0.8.1 Commander Maturity to be complete. Political behavior built on a stable military command truth.
 
 Political leader bot for non-player factions: event responses, alliance posture, war crimes policy, patron interaction. Replaces flat `pickBotResponseV1` with faction-specific political personality (Karadzic=expansionist-nationalist, Izetbegovic=survival-internationalist, Boban=opportunist-patron-dependent). Dual-track evaluator blending military situation and strategic dimensions.
 
@@ -95,7 +122,9 @@ Plans: `docs/plans/2026-03-24-v080-political-leader-bot-plan.md`, `docs/plans/20
 
 **Estimated scope:** ~1,660 new lines, ~105 new tests, 7 phases.
 
-### v0.8.2 — Order Interpretation + Warlord Problem
+### v0.8.3 — Order Interpretation + Warlord Problem
+
+**Gate:** Requires v0.8.2. Assumes corps and army systems are already coherent.
 
 Order interpretation system: when the player issues a corps stance change, launches an operation, or force-launches an attack, the order passes through the assigned corps commander's personality filter. The commander may comply, creatively interpret, delay, or refuse. Political capital resource for overriding refusals.
 
@@ -103,15 +132,33 @@ Order interpretation system: when the player issues a corps stance change, launc
 
 Plan: `docs/plans/2026-03-24-v081-order-interpretation-plan.md`, architecture section 2.
 
-### v0.8.3 — Autonomy Depth + Claude API at Political Level
+### v0.8.4 — Autonomy Depth + Claude API at Political Level
+
+**Gate:** Requires v0.8.3. LLM integration sits on top of cleaned command ownership, not underneath it.
 
 Player political posture IPC (set war-crimes-policy, set alliance-posture, set political priorities). Optional LLM-assisted political leader decisions extending existing AI Commander architecture. Personality drift: leader personality changes based on war outcome.
 
 Plan: `docs/plans/2026-03-24-v082-autonomy-api-plan.md`.
 
-### v0.8.x-final — Old Code Removal + Railroad Cleanup
+### v0.8.x-final — Command Authority Cleanup + Old Code Removal
 
-Remove `generateCorpsDirectives`, make `USE_COMMANDER_LOOP` permanent. Clean up hardcoded rails cataloged in `docs/40_reports/20260330_RAILROAD_HUNTER_REPORT.md`: doctrine phase constants that override commander judgment, corps name-checks, blitz phase exemptions.
+**What this milestone is about:** Making ownership singular. This is where the repo stops lying to itself about who is in charge.
+
+**Operations are the proof of concept.** Before this milestone closes, operations must answer yes to all of:
+1. Is there one canonical operation object?
+2. Is there one canonical lifecycle?
+3. Is there one canonical creation / launch / update path?
+4. Does the UI reflect that same truth?
+
+**Cleanup targets:**
+
+- Remove `generateCorpsDirectives`, make `USE_COMMANDER_LOOP` permanent
+- Clean up hardcoded rails cataloged in `docs/40_reports/20260330_RAILROAD_HUNTER_REPORT.md`: doctrine phase constants that override commander judgment, corps name-checks, blitz phase exemptions
+- Operations ownership: one canonical operation object with one lifecycle (`sector_offensive.ts`, `operation_preparation.ts`, `bot_corps_operations.ts`)
+- Movement ownership: reduce movement writers from ~7 competing sources to one intent owner + small execution stack
+- Boundary comments in all hotspot files naming what is canonical vs transitional
+
+Done means: `generateCorpsDirectives` is deleted (not flagged, not behind a dead branch — deleted). `apply_brigade_reposition.ts` dead ballast is removed. Every hotspot file has an ownership comment at its top.
 
 ---
 
@@ -289,8 +336,9 @@ These need design sessions before implementation. Preserved from the original ro
 | Strategic dimensions | Functional (6 dimensions, Dayton merge) |
 | Scenarios (40w/52w/56w) | Complete |
 | AI Commander infrastructure | Functional (14 modules, multi-model routing) |
-| Political Leader Bot | Not started (v0.8.1) |
-| Order Interpretation | Not started (v0.8.2) |
+| Commander Maturity (belief state, motive stack, traces) | Not started (v0.8.1) |
+| Political Leader Bot | Not started (v0.8.2) |
+| Order Interpretation | Not started (v0.8.3) |
 | Consequence system | Not started (v0.9.0) |
 | Cost Ledger | Not started (v0.9.0) |
 | Ghost Map | Not started (v0.7.2) |
@@ -320,8 +368,8 @@ Features that make AWWV 10x more powerful, assigned to specific versions. Source
 | **Ghost Map** | v0.7.2 | Low | 1991 census demographics overlay beneath current military situation |
 | **Exhaustion Clock** | v0.7.2 | Low | Visual depletion indicator (candle metaphor) in Army HQ |
 | **Letter Home** | v0.7.1 | Low | Procedural casualty vignettes in CoS briefing |
-| **Patron Phone Call** | v0.8.1 | Medium | 8-12 dramatic patron pressure events with ICTY-sourced dialogue |
-| **Command Chain That Disobeys** | v0.8.2 | High | Officers interpret, delay, refuse orders |
+| **Patron Phone Call** | v0.8.2 | Medium | 8-12 dramatic patron pressure events with ICTY-sourced dialogue |
+| **Command Chain That Disobeys** | v0.8.3 | High | Officers interpret, delay, refuse orders |
 | **Cost Ledger** | v0.9.0 | Medium | ICTY-style prosecutorial endgame narrative |
 | **Endgame Comparison** | v0.9.1 | Medium | Your war vs real war side-by-side |
 | **Map That Scars** | v0.9.4 | Low-Med | Visual degradation over time |
@@ -351,9 +399,9 @@ Patch bumps (0.X.1, 0.X.2) are for significant fixes within a milestone — not 
 | `docs/plans/2026-03-30-corps-commander-intelligence.md` | v0.8.0 commander system design |
 | `docs/plans/2026-03-30-p0-combat-drought-fix.md` | v0.8.0 P0 fix plan |
 | `docs/plans/2026-03-25-command-chain-architecture.md` | v0.8 full architecture |
-| `docs/plans/2026-03-24-v080-political-leader-bot-plan.md` | v0.8.1 political bot (38 tasks) |
-| `docs/plans/2026-03-24-v081-order-interpretation-plan.md` | v0.8.2 order interpretation |
-| `docs/plans/2026-03-24-v082-autonomy-api-plan.md` | v0.8.3 autonomy + Claude API |
+| `docs/plans/2026-03-24-v080-political-leader-bot-plan.md` | v0.8.2 political bot (38 tasks) |
+| `docs/plans/2026-03-24-v081-order-interpretation-plan.md` | v0.8.3 order interpretation |
+| `docs/plans/2026-03-24-v082-autonomy-api-plan.md` | v0.8.4 autonomy + Claude API |
 | `docs/plans/2026-03-24-v090-consequence-system-plan.md` | v0.9.0 consequence system |
 | `docs/plans/2026-03-29-concurrent-corps-operations.md` | v0.8.0 concurrent corps ops design |
 | `docs/40_reports/20260330_RAILROAD_HUNTER_REPORT.md` | Simplification hit list |

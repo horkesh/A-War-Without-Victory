@@ -1,7 +1,9 @@
-# v0.8.1 Order Interpretation System -- Implementation Plan
+# v0.8.3 Order Interpretation System -- Implementation Plan
 
 **Date:** 2026-03-24
-**Status:** DRAFT -- ready for review
+**Status:** DRAFT -- NOT STARTED
+**Roadmap slot:** v0.8.3 (renumbered 2026-03-30; was v0.8.2)
+**Gate:** v0.8.2 Political Leader Bot must be complete. Assumes corps and army systems are already coherent.
 **Author:** Architect (Pyrrhic Games)
 **Scope:** Officers interpret player orders through personality, creating friction between political intent and military execution
 **Prerequisites:** Officer system (98 named officers, competence/aggressiveness 1-5), Operation Preparation System, Corps Directive pipeline
@@ -358,7 +360,7 @@ The `stage-corps-stance-order` IPC handler (line 1087) currently writes stance d
 corpsCommand.stance = stance;
 ```
 
-After v0.8.1, it becomes:
+After v0.8.3, it becomes:
 
 ```javascript
 // Store player's raw intent
@@ -611,7 +613,7 @@ const FORCE_HALT_MORALE_PENALTY = -10;
 
 ---
 
-## 12. Future Extensions (NOT in v0.8.1)
+## 12. Future Extensions (NOT in v0.8.3)
 
 - **Command autonomy slider** (backlog item from MEMORY.md): Player sets how much latitude officers get. Full autonomy = no interpretation, officers execute exactly. Low autonomy = interpretation system active. Could be per-corps or faction-wide.
 - **Officer relationships**: Officers who like each other cooperate; feuding officers (Halilovic vs Delic) create cross-corps friction. Requires relationship graph.

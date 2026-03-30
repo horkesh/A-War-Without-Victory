@@ -46,6 +46,14 @@
 **[OPEN] Gap finder remaining design gaps:**
 - P2: Attack-through stall counter, corridor terrain broad-front, reinforcement corridor safety, sectors stale after combat.
 
+**Session 2026-03-30 (Session 2 — Roadmap Restructuring + Implementation Program):**
+- Taskforce session: converted repo-health consolidated audit into sequenced implementation program.
+- **Roadmap renumbered:** v0.8.1 Commander Maturity inserted (belief state, competing intents, decision traces). Political Bot v0.8.1→v0.8.2, Order Interp v0.8.2→v0.8.3, Autonomy v0.8.3→v0.8.4.
+- **v0.8.x-final** expanded to "Command Authority Cleanup" with operations 4-question gate. 4 sequencing principles added to v0.8 header.
+- **5 workstreams defined:** A=commander stabilization, B=authority cleanup, C=commander maturity, D=political bot, E=simplification.
+- All plan files updated (headers, gate statements, 15+ version refs in command-chain-architecture.md). Ledger entry written.
+- **Immediate next: fix slot cap P0 (`phase !== 'recovery'` in emit.ts), then War-or-Game approval.**
+
 **Session 2026-03-30 (Session 1 — Recovery + Roadmap + P0 Task 4):**
 - Session recovered from crash. working-on.md preserved context. No work lost.
 - MASTER_ROADMAP.md created (unified roadmap v0.1→v1.0+). VERSIONING.md trimmed to scheme-only. Supersession notices added to 2 stale plans. Memory updated.

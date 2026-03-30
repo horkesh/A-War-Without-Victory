@@ -1,7 +1,9 @@
-# v0.8.0 Political Leader Bot
+# v0.8.2 Political Leader Bot
 
 **Date:** 2026-03-24
-**Status:** PLAN
+**Status:** PLAN — NOT STARTED
+**Roadmap slot:** v0.8.2 (renumbered 2026-03-30; was v0.8.1)
+**Gate:** v0.8.1 Commander Maturity must be complete before starting this plan. Political behavior built on a threshold machine produces illusion, not command.
 **Prerequisite:** v0.7.0 (event flag wiring, Dynamic Codex scaffolding complete)
 **Estimated tasks:** 38
 
@@ -180,7 +182,7 @@ The political bot writes to state fields that the military chain already reads:
 
 - [ ] **7.5** Run smoke-test triad: `tsc --noEmit` + `vitest run` + `desktop:map:build`. All must pass. Acceptance: zero errors.
 
-- [ ] **7.6** Update `docs/PROJECT_LEDGER.md` with v0.8.0 changelog. Update `MEMORY.md` with political bot architecture summary. Acceptance: ledger and memory updated.
+- [ ] **7.6** Update `docs/PROJECT_LEDGER.md` with v0.8.2 changelog. Update `MEMORY.md` with political bot architecture summary. Acceptance: ledger and memory updated.
 
 ---
 

@@ -2,8 +2,10 @@
 
 **Date:** 2026-03-25
 **Author:** Technical Architect
-**Status:** DESIGN -- awaiting nightshift implementation plan
+**Status:** DESIGN — implementation plans exist for all sections. Roadmap renumbered 2026-03-30.
 **Depends on:** v0.7.0 (event flag wiring -- COMPLETE), v0.7.1 (essay template engine -- can parallel)
+
+**SEQUENCING GATE (added 2026-03-30):** Section 1 (Political Leader Bot, v0.8.2) must not start until v0.8.1 Commander Maturity is complete. Section 1 built on a threshold machine produces illusion, not political command. See `MASTER_ROADMAP.md` v0.8.1 milestone for what must be done first.
 
 ---
 
@@ -17,7 +19,7 @@ The architecture extends three existing systems (officer system, event system, p
 
 ---
 
-## 1. Political Leader Bot (v0.8.0)
+## 1. Political Leader Bot (v0.8.2)
 
 ### 1.1 Purpose
 
@@ -130,7 +132,7 @@ evaluate-events (existing)
     |-- for non-player factions: currently auto-responds via pickBotResponseV1
     |
     v
-political-leader-decisions (NEW, v0.8.0)
+political-leader-decisions (NEW, v0.8.2)
     |-- for each non-player faction with pending decisions:
     |     1. Read PoliticalLeaderState (posture, priorities, capital)
     |     2. Score each option using pickPoliticalResponse() (NEW)
@@ -220,9 +222,9 @@ This extends the existing `PatronDirective` pattern (already on GameState as `Pa
 
 ### 1.7 IPC Contract (Player Political Decisions)
 
-For the PLAYER faction, the political leader bot does not auto-respond. Instead, the player makes political decisions through existing event decision UI. No new IPC channels are needed for v0.8.0 -- the existing `respond-to-event-decision` channel handles all player political choices.
+For the PLAYER faction, the political leader bot does not auto-respond. Instead, the player makes political decisions through existing event decision UI. No new IPC channels are needed for v0.8.2 -- the existing `respond-to-event-decision` channel handles all player political choices.
 
-New IPC channels for player political posture (optional, can defer to v0.8.2):
+New IPC channels for player political posture (optional, can defer to v0.8.4):
 
 ```
 set-war-crimes-policy:  { policy: WarCrimesPolicy }
@@ -234,7 +236,7 @@ These allow the player to set political constraints that their OWN military bot 
 
 ---
 
-## 2. Order Interpretation (v0.8.1)
+## 2. Order Interpretation (v0.8.3)
 
 ### 2.1 Core Concept
 
@@ -355,7 +357,7 @@ const POLITICAL_CAPITAL_START: Record<FactionId, number> = {
 
 **Override mechanic:** When the player receives a refusal/delay/creative interpretation, they can spend political capital to force compliance. The UI shows the cost. If they have insufficient capital, they must accept the interpretation.
 
-**Integration with existing warlord_friction.ts:** The existing `FrictionEvent` system fires `ignored_stance`, `unauthorized_op`, and `refused_release` events. In v0.8.1, these friction events generate `InterpretedOrder` entries that the player can override with political capital. The friction system remains the stochastic trigger; the override system provides the player agency response.
+**Integration with existing warlord_friction.ts:** The existing `FrictionEvent` system fires `ignored_stance`, `unauthorized_op`, and `refused_release` events. In v0.8.3, these friction events generate `InterpretedOrder` entries that the player can override with political capital. The friction system remains the stochastic trigger; the override system provides the player agency response.
 
 ### 2.5 UI Contract
 
@@ -383,7 +385,7 @@ Auto-resolved at turn end if player doesn't act (commander's interpretation stan
 
 ---
 
-## 3. Patron Phone Call Integration (v0.8.0)
+## 3. Patron Phone Call Integration (v0.8.2)
 
 ### 3.1 Design Intent
 
@@ -437,13 +439,13 @@ Events fire via the existing pressure/condition system. `trigger_week` is a guid
 
 ### 3.4 Patron State
 
-The existing `PatronRelationship` interface in `negotiation_types.ts` is sufficient for v0.8.0. It already tracks:
+The existing `PatronRelationship` interface in `negotiation_types.ts` is sufficient for v0.8.2. It already tracks:
 - `support_level` (0-100) -- drives supply, diplomatic cover
 - `override_authority` (0-100) -- drives forced compliance
 - `sanctions_active` (boolean) -- supply cutoff
 - `relationship_events` (string[]) -- history
 
-**New fields for v0.8.0** (extend `PatronRelationship`):
+**New fields for v0.8.2** (extend `PatronRelationship`):
 
 ```typescript
 // Add to PatronRelationship in negotiation_types.ts:
@@ -490,12 +492,12 @@ calls_complied: number;
 | `src/state/political_leader_types.ts` | Type definitions for political leader state | ~80 |
 | `src/sim/political/political_leader_bot.ts` | Political leader decision engine | ~250 |
 | `src/sim/political/political_directive.ts` | PoliticalDirective type + derivation | ~100 |
-| `src/sim/political/order_interpretation.ts` | interpretOrder() + override logic (v0.8.1) | ~300 |
-| `src/sim/political/political_capital.ts` | Capital accumulation + spending (v0.8.1) | ~120 |
+| `src/sim/political/order_interpretation.ts` | interpretOrder() + override logic (v0.8.3) | ~300 |
+| `src/sim/political/political_capital.ts` | Capital accumulation + spending (v0.8.3) | ~120 |
 | `data/scenarios/leaders/apr1992_leaders.json` | Historical leader profiles (3 entries) | ~60 |
 | `data/scenarios/events/patron_calls.json` | Patron phone call events (8-12) | ~400 |
-| `src/desktop/components/PatronCallModal.tsx` | Full-screen patron call UI (v0.8.0) | ~200 |
-| `src/desktop/components/OrderInterpretationModal.tsx` | Override/accept UI (v0.8.1) | ~150 |
+| `src/desktop/components/PatronCallModal.tsx` | Full-screen patron call UI (v0.8.2) | ~200 |
+| `src/desktop/components/OrderInterpretationModal.tsx` | Override/accept UI (v0.8.3) | ~150 |
 | **Total new** | | **~1,660** |
 
 ### 4.2 Modified Files
@@ -511,7 +513,7 @@ calls_complied: number;
 | `src/sim/combat/bot_corps_directives.ts` | Read `political_directives` for stance ceiling + paramilitary authorization | 15 lines |
 | `src/sim/negotiation/patron_pressure.ts` | Integrate patience/defiance into `computeOverrideAuthority()` | 20 lines |
 | `src/sim/negotiation/patron_events.ts` | Load patron calls from JSON alongside existing hardcoded events | 15 lines |
-| `src/sim/briefing/collect_briefing.ts` | Add `order_interpretations` section to `CommandBriefing` (v0.8.1) | 20 lines |
+| `src/sim/briefing/collect_briefing.ts` | Add `order_interpretations` section to `CommandBriefing` (v0.8.3) | 20 lines |
 | `src/desktop/electron-main.cjs` | Add IPC handlers for override/accept interpretation + political posture (4 channels) | 40 lines |
 | `src/state/negotiation_types.ts` | Add `createDefaultPatronRelationship` patience field defaults | 3 lines |
 
@@ -541,7 +543,7 @@ All new fields are optional (`?:`) on `MilitaryState` and `PatronRelationship`. 
 
 ### 5.2 Event System Extensions
 
-**New EventEffect type (v0.8.0):**
+**New EventEffect type (v0.8.2):**
 
 ```typescript
 export interface EventEffectLeaderChange {
@@ -553,7 +555,7 @@ export interface EventEffectLeaderChange {
 
 Added to the `EventEffect` union type. Applied in `apply_effects.ts`. Swaps `political_leaders[faction]` to a new leader profile.
 
-**New EventCondition type (v0.8.0):**
+**New EventCondition type (v0.8.2):**
 
 ```typescript
 | { type: 'patron_patience_below'; faction: FactionId; threshold: number }
@@ -587,7 +589,9 @@ All new systems must be deterministic:
 
 ## 6. Implementation Sequence
 
-### Phase 1: Political Leader Bot (v0.8.0, ~3 sessions)
+**Note (2026-03-30):** A new Phase 0 — Commander Maturity (v0.8.1) — is gated before Phase 1. See `MASTER_ROADMAP.md`. Do not start Phase 1 until v0.8.1 is complete and War-or-Game approved.
+
+### Phase 1: Political Leader Bot (v0.8.2, ~3 sessions)
 
 1. **Types + Data:** `political_leader_types.ts`, `apr1992_leaders.json`, extend `MilitaryState`
 2. **Decision Engine:** `political_leader_bot.ts` with `pickPoliticalResponse()`
@@ -595,7 +599,7 @@ All new systems must be deterministic:
 4. **Political Directive:** `political_directive.ts`, modify `bot_corps_directives.ts` to read directives
 5. **Tests:** Political response scoring, directive derivation
 
-### Phase 2: Patron Phone Calls (v0.8.0, ~2 sessions)
+### Phase 2: Patron Phone Calls (v0.8.2, ~2 sessions)
 
 1. **Event Data:** `patron_calls.json` (8-12 events with `patron_call` metadata)
 2. **Event Type Extension:** Add `PatronCallMetadata` to `EventDefinition`
@@ -604,7 +608,7 @@ All new systems must be deterministic:
 5. **UI:** `PatronCallModal.tsx` (can defer to separate UI session)
 6. **Tests:** Patron call loading, patience mechanics, compliance/defiance effects
 
-### Phase 3: Order Interpretation (v0.8.1, ~3 sessions)
+### Phase 3: Order Interpretation (v0.8.3, ~3 sessions)
 
 1. **Core Logic:** `order_interpretation.ts` with `interpretOrder()`
 2. **Political Capital:** `political_capital.ts` with accumulation/spending
@@ -613,7 +617,7 @@ All new systems must be deterministic:
 5. **UI:** `OrderInterpretationModal.tsx`, briefing integration
 6. **Tests:** Decision matrix coverage, capital edge cases, friction integration
 
-### Phase 4: Autonomy Depth (v0.8.2, ~2 sessions)
+### Phase 4: Autonomy Depth (v0.8.4, ~2 sessions)
 
 1. **Player Political Posture IPC:** `set-war-crimes-policy`, `set-alliance-posture`, `set-political-priority`
 2. **Claude API Integration:** Optional LLM-assisted political leader decisions (extends existing AI Commander architecture in `src/sim/ai_commander/`)
@@ -631,7 +635,7 @@ These rules must hold for the entire v0.8.x implementation:
 4. **Patron calls are events.** They use the existing event system, not a parallel system. EventDefinition is the canonical schema.
 5. **One change per calibration run.** Every phase gets a 40w regression check before proceeding.
 6. **Political directives constrain, they don't replace.** Corps directives still run their full logic; political directives provide ceilings and gates, not commands.
-7. **No calibration regression.** v0.8.0 should not change headless scenario outcomes when political leader data is absent. The fallback path must be identical to current behavior.
+7. **No calibration regression.** v0.8.2 should not change headless scenario outcomes when political leader data is absent. The fallback path must be identical to current behavior.
 
 ---
 
@@ -641,4 +645,4 @@ These rules must hold for the entire v0.8.x implementation:
 2. **Political capital visibility:** Should political capital be always visible in the HQ UI, or only shown when an interpretation event requires spending it?
 3. **Patron call frequency:** 8-12 events over 180 weeks means roughly one every 15-22 weeks. Is this too sparse? Should we add recurring patron pressure calls (every N turns when conditions persist)?
 4. **Order interpretation scope:** Should interpretation apply only to corps-level orders (stance, operations) or also to brigade-level orders (sector stance, posture)? Brigade-level would be more historically accurate but significantly more complex.
-5. **Warlord Problem depth:** The existing `warlord_friction.ts` is stochastic and cosmetic. Should v0.8.1 make friction events mechanically binding (commander actually ignores the order), or keep them as notifications with an override option?
+5. **Warlord Problem depth:** The existing `warlord_friction.ts` is stochastic and cosmetic. Should v0.8.3 make friction events mechanically binding (commander actually ignores the order), or keep them as notifications with an override option?

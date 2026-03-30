@@ -16964,3 +16964,43 @@ Added a shared Claude CLI operating layer in `.claude/` to make repo work more s
 ### Files
 - `src/sim/combat/commander/emit.ts` (Fix 1, Fix 2, Fix 4)
 - `src/sim/combat/commander/plan.ts` (Fix 5)
+
+## [2026-03-30] Roadmap Restructuring + Implementation Program (Taskforce Session 2)
+
+### Change
+
+Taskforce session converting the 2026-03-30 repo-health consolidated audit into an actionable, sequenced implementation program. Documentation only — no sim code changed.
+
+**MASTER_ROADMAP.md restructured:**
+- Inserted new **v0.8.1 Commander Maturity** milestone (belief state, motive stack, candidate option competition, decision traces, constraint/preference separation). Hard gate before political-bot work.
+- Renumbered downstream milestones: Political Leader Bot v0.8.1→**v0.8.2**, Order Interpretation v0.8.2→**v0.8.3**, Autonomy Depth v0.8.3→**v0.8.4**
+- Expanded v0.8.x-final to **"Command Authority Cleanup + Old Code Removal"** with explicit operations 4-question gate (one object, one lifecycle, one creation path, UI reflects same truth)
+- Added 4 non-negotiable sequencing principles to v0.8 header
+- Updated status table, Legendary Features table, Key Plan Documents table to match
+
+**Plan files updated (headers + gate statements):**
+- `docs/plans/2026-03-24-v080-political-leader-bot-plan.md` → v0.8.2, Gate added
+- `docs/plans/2026-03-24-v081-order-interpretation-plan.md` → v0.8.3, Gate added
+- `docs/plans/2026-03-24-v082-autonomy-api-plan.md` → v0.8.4, Gate added
+- `docs/plans/2026-03-25-command-chain-architecture.md` → all 15+ version refs updated, sequencing gate note + Phase 0 Commander Maturity note added
+
+**Implementation program (5 workstreams):**
+- **A — Commander stabilization (v0.8.0.x):** fix slot cap P0 (`phase !== 'recovery'` filter), War-or-Game approval, commander traceability
+- **B — Command authority cleanup (v0.8.x-final):** delete `generateCorpsDirectives`, operations 4-question audit, movement writers reduction, hotspot ownership comments
+- **C — Commander maturity (v0.8.1):** belief state, competing intents scored, turn memory, decision traces, constraint/preference separation
+- **D — Political Leader Bot (v0.8.2):** gated behind C complete
+- **E — Repo-wide simplification (v0.8-to-v0.9):** parallel pickup — movement unification, pathfinding, dead branch removal
+
+### Why
+
+The audit finding: roadmap was sequencing political-bot and LLM work before command ownership was real. Building political personality on top of a threshold machine produces better-organized illusion, not better command. The new sequence enforces: make authority singular → make commander think better → then add personality.
+
+### Determinism
+No sim code touched. Documentation only.
+
+### Files
+- `docs/plans/MASTER_ROADMAP.md`
+- `docs/plans/2026-03-24-v080-political-leader-bot-plan.md`
+- `docs/plans/2026-03-24-v081-order-interpretation-plan.md`
+- `docs/plans/2026-03-24-v082-autonomy-api-plan.md`
+- `docs/plans/2026-03-25-command-chain-architecture.md`
