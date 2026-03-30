@@ -49,6 +49,9 @@ const MAX_RESERVE_FRACTION = 0.5;
 /** Max sector activity log entries to retain. */
 const MAX_SECTOR_ACTIVITY_LOG = 20;
 
+/** Max operation history entries to retain in CommanderState. */
+const MAX_OPERATION_HISTORY_ENTRIES = 20;
+
 /** Max BFS hops from brigade location to first objective OSID (through friendly territory). */
 const MAX_REACHABILITY_HOPS = 8;
 
@@ -727,9 +730,52 @@ function buildUpdatedState(
             return strictCompare(a.sector_id, b.sector_id);
         });
 
-    // Merge operation history: previous + completed ops
+    // Merge operation history: previous + newly-closed plans this turn.
+    // Written when a plan is abandoned (explicit failure) or handed off to
+    // execution (cleared from executing status). This gives the commander
+    // memory of recent attempts so plan.ts can avoid re-targeting the same
+    // objectives immediately after failure.
     const previousHistory = briefing.previous_state?.operation_history ?? [];
     const operationHistory: OperationHistoryEntry[] = [...previousHistory];
+
+    if (planDecision.action === 'abandoned' && planDecision.plan) {
+        // Plan was explicitly abandoned (viability drop, suspension timeout, etc.)
+        operationHistory.push({
+            operation_name: `cmd_${briefing.corps_id}_t${planDecision.plan.created_turn}`,
+            type: 'sector_attack',
+            started_turn: planDecision.plan.created_turn,
+            ended_turn: briefing.turn,
+            outcome: 'abandoned',
+            osids_captured: [],
+            // Store targeted osids in osids_lost so plan.ts can detect repeat-failure
+            // patterns and cool down before re-targeting the same objectives.
+            osids_lost: [...planDecision.plan.target_osids].sort(strictCompare),
+            casualties_inflicted: 0,
+            casualties_suffered: 0,
+        });
+    } else if (
+        planDecision.action === 'none' &&
+        planDecision.plan === null &&
+        briefing.previous_state?.current_plan?.status === 'executing'
+    ) {
+        // Plan just cleared from executing status — handed off to the execution
+        // pipeline. Outcome unknown at this stage; record as 'partial'.
+        const prev = briefing.previous_state.current_plan;
+        operationHistory.push({
+            operation_name: `cmd_${briefing.corps_id}_t${prev.created_turn}`,
+            type: 'sector_attack',
+            started_turn: prev.created_turn,
+            ended_turn: briefing.turn,
+            outcome: 'partial',
+            osids_captured: [],
+            osids_lost: [],
+            casualties_inflicted: 0,
+            casualties_suffered: 0,
+        });
+    }
+
+    // Cap history at the last MAX_OPERATION_HISTORY_ENTRIES entries (oldest first).
+    const cappedHistory = operationHistory.slice(-MAX_OPERATION_HISTORY_ENTRIES);
 
     // Build garrison budget record
     const garrisonBudget: Record<string, number> = {};
@@ -743,7 +789,7 @@ function buildUpdatedState(
         force_assessment: forces,
         current_plan: planDecision.plan,
         sector_activity_log: cappedLog,
-        operation_history: operationHistory,
+        operation_history: cappedHistory,
         intel_picture: decisions.intel_picture,
         garrison_budget: garrisonBudget,
         last_assessment_turn: briefing.turn,
