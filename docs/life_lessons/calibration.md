@@ -244,3 +244,15 @@
 - **Wrong approach**: Not checking scope constants when investigating territorial mismatches. The anomaly detector had 26 checks but none compared against painted targets.
 - **Right approach**: When territory mismatches persist with zero defenders, check the paramilitary scope constants and the rear pocket cluster size threshold.
 - **Do instead**: After adding paramilitaries for a region, verify the scope includes all relevant municipalities. Run the anomaly detector's new undefended_painted_mismatch check (#27) to catch any remaining gaps.
+
+### [Calibration] Slot cap must exclude completed (recovery-phase) ops — counting them starves the pipeline (2026-03-30) — NEW
+- **Context**: Fix 1 added a slot cap to `emit.ts buildOperations` to prevent zombie op accumulation. The cap checked `briefing.active_operations.length >= getMaxOperationSlots(n)`. Recovery-phase ops are completed and cooling down — they're still in `active_operations` but no longer consuming real capacity. With cap=1 for a 12-brigade corps, any completed op blocked new op emission for 2-3 turns, creating an 18-week combat drought in n1217.
+- **Wrong approach**: Counting all ops in `active_operations` against the cap. Recovery ops are done — they're dead weight in the array, not real competitors for the slot.
+- **Right approach**: Filter: `const activeSlotUsers = briefing.active_operations.filter(op => op.phase !== 'recovery')`. Cap applies only to planning + execution phase ops.
+- **Do instead**: When implementing any slot/capacity cap on an array that has a lifecycle (planning→execution→recovery→removed), always ask: "which lifecycle phases represent real capacity consumption?" Cap only those phases.
+
+### [Calibration] Implementing a feedback write without a feedback read is half-done — verify the consumer exists (2026-03-30) — NEW
+- **Context**: Fix 2 wrote `OperationHistoryEntry` records in `emit.ts buildUpdatedState` so the commander would remember failed objectives. The intent was for `plan.ts selectOpportunityTargets()` to query history and apply a cooldown before re-targeting recently-failed OSIDs. The write was implemented and committed. The read was not. History was inert for the entire n1217 run.
+- **Wrong approach**: Implementing the producer of a feedback loop, verifying the data is written, calling it done. The loop only closes when there's a consumer.
+- **Right approach**: Before merging any "memory" or "feedback" fix, verify: (a) writer exists, (b) reader exists, (c) reader is reachable on the code path that should benefit. For op_history: `plan.ts selectOpportunityTargets()` must query `briefing.previous_state?.operation_history` and filter targets that appear in recent `osids_lost` entries.
+- **Do instead**: When writing a feedback mechanism, immediately search for where it will be read. If the reader doesn't exist yet, either implement it in the same commit or mark the fix as PARTIAL in the ledger.

@@ -1,41 +1,56 @@
-# Working On — 2026-03-30 (Session: n1216 Post-Run Panel)
+# Working On — 2026-03-30 (Session: n1217 Regression)
 
-## Current Task
-Post-run two-tier panel complete for n1216. Synthesizing results. Next: implement fixes.
+## Current State
+- n1217: 92.2% area-weighted, 22/22 anchors, 6/6 benchmarks — MAP HOLDS
+- P0 REGRESSION: 38 battles, 18-week drought (w23-40) vs 69 battles in n1216
+- War-or-Game: NOT APPROVED
 
-## State
-- n1216 committed: 91.8% area-weighted, 21/22 anchors, 6/6 benchmarks
-- 69 battles, longest stretch 2 weeks — P0 macro FIXED by Tasks 1-5
-- War-or-Game: NOT APPROVED (valid_for_combat_calibration=false, 493 zero-eligible-attacker ops)
-- 4 railroads identified by Railroad Hunter
-- 6 fixes proposed and canon-reviewed
+## Root Cause (confirmed by Gap Finder)
+**Slot cap counts recovery-phase ops.** With cap=1 per 12 brigades:
+- Op completes → enters `phase: 'recovery'` (2-3 turns)
+- Recovery op still occupies the slot
+- `briefing.active_operations.length >= 1` → emit.ts blocks new op
+- Commander plans continuously but can never emit while recovery-phase op exists
+- Result: 2-3 turn blackout per cycle, compounding → 18-week drought
 
-## Railroads Found (all in commander/)
-1. P0: Slot cap bypass — `emit.ts buildOperations` never calls `hasAvailableSlot` → zombie ops (vrs_2nd_krajina 40 ops in 40 weeks)
-2. P0: operation_history never written — no memory of zero-attack failures → same objectives re-planned forever
-3. P0: Brigade rotation gap — no cooldown after op participation → same 7-8 brigades re-assigned every generation (5th Corps)
-4. P1: initial_strength not set on commander ops → power-attrition abort gate dead
+## P0 Fix Required
+**File:** `src/sim/combat/commander/emit.ts`, function `buildOperations`
 
-## Proposed Fixes (priority order per Canon Reviewer)
-1. Fix 1: `emit.ts` — call `hasAvailableSlot` before emitting new op (COMPLIANT, low risk)
-2. Fix 4: `emit.ts buildOperations` — set `initial_strength` at emit time (COMPLIANT, low risk)
-3. Fix 2: `emit.ts buildUpdatedState` — write OperationHistoryEntry on plan complete/abandon (COMPLIANT)
-4. Fix 5: `plan.ts isBesiegedCorps` — require ALL zones besieged OR physical isolation (COMPLIANT)
-5. Fix 6: HRHB stance unlock — investigate corps vs sector blockage layer first (CONDITIONAL)
-6. Fix 3: Brigade cooldown N turns after op participation (AMBIGUOUS — calibration validation required)
+**Change:** Filter recovery-phase ops out of slot cap count:
+```typescript
+// OLD (line 524):
+if (briefing.active_operations.length >= getMaxOperationSlots(briefing.brigades.length)) {
 
-## Other Issues
-- Jajce event fires w40, should be ~w27-29 (timing offset)
-- arbih_120th spawn mismatch: spawned w27, referenced in Op Teočak (w1)
-- 9 active brigades morale <10 not dissolving (HRHB 3x morale=0 with high personnel)
-- activity_summary all zeros (pipeline issue)
-- equipment reporting bug (end_report reads wrong field, composition.tanks has data)
+// NEW:
+const activeSlotUsers = briefing.active_operations.filter(op => op.phase !== 'recovery');
+if (activeSlotUsers.length >= getMaxOperationSlots(briefing.brigades.length)) {
+```
+Same fix needed for the PROBE emission check at line 635:
+```typescript
+// OLD:
+briefing.active_operations.length < getMaxOperationSlots(briefing.brigades.length)
+
+// NEW:
+activeNonRecovery.length < getMaxOperationSlots(briefing.brigades.length)
+```
+
+## P1 Fix (Fix 2 completion)
+`plan.ts selectOpportunityTargets()` must query `operation_history` for recently-failed OSIDs.
+Currently: history is written but never read. The cooldown mechanism is inert.
+
+## Commits This Session
+- 84974d80: fix(commander): Fix 1+4 — slot cap guard + initial_strength on commander ops
+- a7d7f71a: fix(commander): Fix 2 — write operation_history on plan abandon + execution handoff
+- 0e0b0d73: fix(commander): tighten isBesiegedCorps — main-body corridor_width gate
 
 ## Next Steps
-1. Implement Fixes 1+4 (pure correctness, no unknowns)
-2. Implement Fix 2 (operation_history write)
-3. Implement Fix 5 (besieged corps gate)
-4. Investigate HRHB corps-vs-sector blockage
-5. Implement Fix 6 (HRHB stance unlock)
-6. Run 40w, dispatch panel
-7. Schedule crons A+B (missing)
+1. **Implement P0 fix** — filter recovery-phase ops from slot cap count (emit.ts, 2 sites)
+2. Typecheck + vitest
+3. Run n1218
+4. Dispatch two-tier panel on n1218
+5. If combat restored: implement Fix 2 completion (plan.ts op_history query)
+6. War-or-Game sign-off
+
+## Fix 6 Status: CLOSED
+HRHB passivity = structural. No valid war enemies in 40w period (RS cold front, RBiH allied).
+Probe ops cycle harmlessly. Not a bug.

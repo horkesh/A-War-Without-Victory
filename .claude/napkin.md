@@ -9,8 +9,10 @@
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
 ## Current State (2026-03-30, v0.8.0 Commander System on main)
-**n1213: 92.2% area-weighted (40w, ties ATH). Commander system live behind USE_COMMANDER_LOOP flag. 11 commits, 41 tests.**
-**P0: Tasks 1-4 complete (lifecycle, targets, previous_state, doctrine removal). Task 5 next: calibration + balanced zone expansion.**
+**n1217: 92.2% area-weighted (40w). 22/22 anchors. 6/6 benchmarks. MAP HOLDS.**
+**P0: 18-week combat drought (w23-40). 38 battles vs 69 in n1216. COMBAT BROKEN AGAIN.**
+**Root cause: slot cap counts recovery-phase ops → pipeline bottleneck. Fix: exclude phase==='recovery' from slot cap count in emit.ts.**
+**Fix 2 inert: operation_history written but plan.ts never reads it.**
 
 **[MERGED] Concurrent corps operations.** `active_operations[]` replaces `active_operation`. Slot cap floor(brigades/12). 7 helpers. Emergency defense overflow. Bot secondary op guard. Save migration v1→v2. 84 files, +1459/-525.
 **[MERGED] Krajina paramilitary scope.** 6 municipalities added to RS offensive sweep. MAX_POCKET_CLUSTER 3→6. +3.0pp.

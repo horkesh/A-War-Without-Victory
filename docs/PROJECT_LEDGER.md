@@ -16903,3 +16903,64 @@ No impact. Event trigger changes are deterministic (same `fired_event_ids` state
 ### Files
 - `src/sim/combat/attack_resolution_osid.ts` (2 lines)
 - `src/sim/combat/combat_predictor.ts` (2 lines)
+## [2026-03-30] Claude CLI Taskforce Scaffolding + Crash-Resistant Workflow
+
+### Change
+Added a shared Claude CLI operating layer in `.claude/` to make repo work more self-correcting, owner-safe, and crash-resilient.
+
+**New taskforce briefs:** created `.claude/agents/` with reusable mission files for `self-correcting-implementer`, `authority-auditor`, `ui-truth-keeper`, `operations-reality-checker`, and `roadmap-slotter`.
+
+**New reusable commands:** added `.claude/commands/checkpoint.md` and `.claude/commands/taskforce.md` so Claude can work in short loops, checkpoint progress into active docs, and explicitly state canonical owner / demoted path / done means / UI truth / roadmap slot before major work.
+
+**Shared hook discipline:** expanded `.claude/settings.json` with PostToolUse reminders for Edit/Write/MultiEdit/Bash to push self-correction, checkpointing, and singular-ownership thinking during live sessions.
+
+**Documentation alignment:** updated `.claude/README.md` and the consolidated repo-health audit to include Claude CLI operating rules, owner checklist usage, and direct roadmap patch guidance.
+
+### Purpose
+- reduce lost work from crashes by normalizing short-loop checkpointing
+- make Claude directly correct structural drift instead of only describing it
+- give owner and implementers a stable taskforce pattern for operations, roadmap, and architecture work
+
+## [2026-03-30] Commander Fixes 1+2+4+5 — n1217 P0 Regression Found
+
+### Change
+
+**Post-crash recovery session. Starting point: n1216 (91.8%, 69 battles, 21/22 anchors).**
+
+**Fix 1+4: Slot cap guard + initial_strength (commit 84974d80)**
+- `emit.ts buildOperations`: added slot cap guard — `if (briefing.active_operations.length >= getMaxOperationSlots(briefing.brigades.length)) return ops`. Prevents zombie op accumulation (vrs_2nd_krajina had 40 ops in n1213).
+- `emit.ts buildOperations`: set `initial_strength` at emit time from brigade personnel sum. Powers the power-attrition abort gate in `sector_offensive.ts` (was dead — field never populated).
+
+**Fix 2: operation_history writes (commit a7d7f71a)**
+- `emit.ts buildUpdatedState`: writes `OperationHistoryEntry` on plan abandoned (outcome: 'abandoned', osids_lost = targeted OSIDs) and on execution handoff (outcome: 'partial'). Capped at MAX_OPERATION_HISTORY_ENTRIES=20.
+
+**Fix 5: isBesiegedCorps corridor_width gate (commit 0e0b0d73)**
+- `plan.ts isBesiegedCorps`: added Case B — corps treated as besieged when main body zone has `corridor_width <= 1`, even if a fringe zone is non-besieged. Previous check (all-zones-besieged only) missed isolated-main-body case.
+
+**Fix 6 investigation: HRHB passivity — CLOSED, no code change**
+- HRHB corps stance = `balanced` — not the blockage.
+- HRHB sectors = `screening` — correctly set by quiet-sector logic.
+- Root cause: HRHB has no valid combat enemies in the 40w scenario period (RS = cold front, RBiH = allied). Probe ops cycle harmlessly each turn. Structural, not a bug.
+
+**n1217 run: P0 REGRESSION**
+- Run: `runs/apr1992_definitive_40w__77cac5e01d3c929e__w40_n1217`
+- **92.2% area-weighted. 22/22 anchors PASS. 6/6 benchmarks PASS.** MAP HOLDS.
+- **38 battles. 18-week zero-battle drought (w23-40). COMBAT BROKEN AGAIN.**
+- Root cause found (Gap Finder): slot cap counts recovery-phase ops. A 12-brigade corps capped at 1 op; when the op enters recovery (2-3 turns), no new op can be emitted. Pipeline bottleneck silences all combat from w23 onward.
+- Fix needed: exclude `phase === 'recovery'` ops from slot cap count in `emit.ts`.
+- Fix 2 partially inert: `operation_history` written but `plan.ts` never reads it — no cooldown gate for re-targeting.
+
+### Calibration
+- **n1217: 92.2% area-weighted. 22/22 anchors. 6/6 benchmarks. 38 battles. 18-week drought. War-or-Game: NOT APPROVED.**
+
+### Determinism
+- No new randomness introduced. Sorted iteration via strictCompare throughout.
+
+### Verification
+- `npx tsc --noEmit` — clean after each fix
+- `npm run test:vitest` — 1686 tests, 137 suites. 14 pre-existing failures (event_timing × 13, integration_run_summary × 1), 1671 passing. No regressions.
+- n1217 scenario run completed.
+
+### Files
+- `src/sim/combat/commander/emit.ts` (Fix 1, Fix 2, Fix 4)
+- `src/sim/combat/commander/plan.ts` (Fix 5)

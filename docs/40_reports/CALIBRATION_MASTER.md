@@ -15,6 +15,18 @@ Every calibration run is reviewed by a two-tier expert panel before any action i
 
 **Orchestrator** synthesizes, gives go/no-go, updates this file + PROJECT_LEDGER.md.
 
+## n1217 COMMANDER FIXES 1+2+4+5 (2026-03-30)
+- **92.2% area-weighted (40w)**. 22/22 anchors PASS. 6/6 benchmarks PASS. MAP HOLDS.
+- **38 battles. 18-week zero-battle drought (w23-40). COMBAT BROKEN AGAIN.**
+- Regression vs n1216 (69 battles, 2-week max). Fix 1 (slot cap) overcorrected: recovery-phase ops count against the single slot, blocking new op emission for 2-3 turns per cycle.
+- Root cause: `briefing.active_operations.length` includes recovery-phase ops. With cap=1 (12 brigades), any completed op blocks the slot until `advanceSectorOffensives` removes it.
+- Fix 2 partially inert: `operation_history` is written but `plan.ts` never reads it — no cooldown on re-targeting.
+- `valid_for_combat_calibration: false` — 155 zero-eligible-attacker ops (down from 493).
+- vrs_2nd_krajina: 1 op (was 40 zombies in n1213). Fix 1 effective for accumulation prevention.
+- War-or-Game: **NOT APPROVED**.
+- **P0 fix needed**: exclude `phase === 'recovery'` from slot cap check in `emit.ts buildOperations`.
+- Run: `runs/apr1992_definitive_40w__77cac5e01d3c929e__w40_n1217`
+
 ## n1216 REACHABILITY FILTER + TASKS 1-5 (2026-03-30)
 - **91.8% area-weighted (40w)**. 21/22 anchors PASS (brka_2 FAIL: sim=RS, expected=RBiH). 6/6 benchmarks PASS.
 - 69 battles, 10 silent weeks, longest stretch 2 weeks. **P0 combat drought FIXED at macro level.**

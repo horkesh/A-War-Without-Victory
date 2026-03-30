@@ -1,10 +1,18 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-03-29. 158 lessons across 8 topic files.
+> Last restructured: 2026-03-30. 160 lessons across 8 topic files.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
 ## Recently Violated (always read these)
+
+### [Calibration] Slot cap must exclude recovery-phase ops — counting them starves the pipeline (2026-03-30) — NEW
+- See `docs/life_lessons/calibration.md` for full entry.
+- **Do instead**: `briefing.active_operations.filter(op => op.phase !== 'recovery')` for the slot cap check. Cap applies to planning + execution only.
+
+### [Calibration] Implementing a feedback write without a feedback read is half-done (2026-03-30) — NEW
+- See `docs/life_lessons/calibration.md` for full entry.
+- **Do instead**: When writing a feedback mechanism, immediately verify the reader exists and is reachable. If not, mark the fix PARTIAL in the ledger.
 
 ### [Data] Data pipeline scripts that transform edges must preserve ALL fields — min_dist/type loss silently broke sector splitting (2026-03-23) — NEW
 - **Context**: `merge_micro_osids.cjs` remapped edges with `return { a, b }` — stripping `type` and `min_dist` fields. The `derive_operational_settlements.ts` script computed `min_dist` from polygon geometry, but the merge step (run after derivation) discarded it. The operational contact graph had 0/2047 edges with `min_dist`, making ALL adjacency threshold filters (`frontEdgeAdj` at 33m, `strictAdj` at 5.5m, `caseBSplitAdj` at 16.6m) identical to full unfiltered adjacency.

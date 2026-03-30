@@ -1168,3 +1168,19 @@ RS offensive paramilitary scope was hardcoded to Drina valley only, excluding th
 
 ### Column March Skip Prevents Trivial Captures
 `bot_brigade_ai_osid.ts:441-444` skips column-marching brigades entirely — they never evaluate uncontested occupation. A brigade marching past undefended enemy territory cannot capture it, even at zero cost. This is a systemic issue for any turn where brigades are reassigned between sectors.
+
+## [2026-03-30] Commander Slot Cap — Recovery Phase Must Not Count
+
+### Slot cap lifecycle interaction
+The commander's slot cap (`getMaxOperationSlots`) counts ALL entries in `briefing.active_operations`, including ops in `phase: 'recovery'`. Recovery-phase ops are completed — they've finished execution and are cooling down before `advanceSectorOffensives` removes them (after `RECOVERY_DURATION` turns). Counting them as "active" for capacity purposes creates a 2-3 turn blackout per op cycle. With cap=1 for a typical 12-brigade corps, this compounds into multi-week combat droughts. Fix: `briefing.active_operations.filter(op => op.phase !== 'recovery')` for the slot cap check only — recovery ops should still be visible to briefing for other purposes (e.g. not re-planning the same objectives).
+
+### Implication
+Any slot cap, throttle, or concurrency limit applied to an array with a multi-phase lifecycle must explicitly define which phases consume capacity. Planning + execution = real capacity. Recovery = cooldown bookkeeping.
+
+## [2026-03-30] Fix 2 (operation_history) — Write Without Read
+
+### Operation history is currently inert
+`emit.ts buildUpdatedState` correctly writes `OperationHistoryEntry` records (outcome: 'abandoned'/'partial', osids_lost = targeted OSIDs). These are persisted in `corps.commander_state.operation_history` (capped at 20). However, `plan.ts selectOpportunityTargets()` does NOT query this history. It reads only `zone.enemy_adjacent_osids` from the current spatial state. There is no cooldown that prevents a plan from re-targeting an OSID that appeared in `osids_lost` in the last N turns. The feedback loop is half-implemented: writer exists, reader does not.
+
+### What the reader needs to do
+`plan.ts` should filter `candidateOsids` against a recent-failure set derived from `briefing.previous_state?.operation_history`. An OSID that appears in the last 2-3 history entries' `osids_lost` should be on cooldown (skip for N turns). This prevents the Bihać paralysis pattern (5th Corps targeting brekovica_2 across 6 op generations).
