@@ -16,6 +16,7 @@ import type {
     SectorStance,
 } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
+import { spatialFriendlyDistance } from '../../spatial_context.js';
 import type {
     CommanderBriefing,
     CommanderOutput,
@@ -46,6 +47,9 @@ const MAX_RESERVE_FRACTION = 0.5;
 
 /** Max sector activity log entries to retain. */
 const MAX_SECTOR_ACTIVITY_LOG = 20;
+
+/** Max BFS hops from brigade location to first objective OSID (through friendly territory). */
+const MAX_REACHABILITY_HOPS = 8;
 
 /** Min attack outcome by zone posture (most restrictive → least). */
 const POSTURE_MIN_OUTCOME: Record<ZonePosture, CorpsDirective['min_attack_outcome']> = {
@@ -515,16 +519,64 @@ function buildOperations(
             allocation.surplus_pool.map(ev => ev.brigade_id),
         );
 
-        // Intersect plan's assigned brigades with surplus pool
+        // Build brigade location lookup from briefing
+        const brigadeLocationMap = new Map<string, string>();
+        for (const b of briefing.brigades) {
+            if (b.location_osid) brigadeLocationMap.set(b.id, b.location_osid);
+        }
+
+        // Determine the first objective OSID for reachability filtering
+        const planTargetOsids = planDecision.plan.target_osids;
+        const firstObjectiveOsid = planTargetOsids.length > 0
+            ? [...planTargetOsids].sort(strictCompare)[0]!
+            : null;
+
+        // Intersect plan's assigned brigades with surplus pool, then filter by
+        // reachability: brigade must be able to BFS through friendly territory
+        // to the first objective OSID within MAX_REACHABILITY_HOPS.
+        // This prevents creating operations where all brigades are physically
+        // disconnected from the objective (causes zero eligible attackers at execution).
         const participatingBrigades = [...planDecision.plan.assigned_brigades]
-            .filter(id => surplusSet.has(id))
+            .filter(id => {
+                if (!surplusSet.has(id)) return false;
+                if (!firstObjectiveOsid) return true; // no specific target — allow all surplus
+                const locationOsid = brigadeLocationMap.get(id);
+                if (!locationOsid) return false;
+                // Check if brigade can reach a friendly OSID adjacent to the objective,
+                // or the objective itself (objectives are enemy-controlled so friendly BFS
+                // can reach the adjacent friendly OSID).
+                // Use spatialFriendlyDistance to check friendly-territory path length.
+                // The objective is enemy-held, so BFS from brigade to objective will fail
+                // unless we check adjacency. Instead, we check that the brigade can reach
+                // any friendly OSID adjacent to the objective within hop limit.
+                const adjacency = briefing.spatial.adjacency;
+                const friendlyOsids = briefing.spatial.friendlyOsidsByFaction.get(briefing.faction);
+                if (!friendlyOsids) return false;
+                // Compute adjacent friendly OSIDs to objective
+                const objectiveNeighbors = adjacency.get(firstObjectiveOsid as any) ?? [];
+                const friendlyApproachOsids = objectiveNeighbors.filter(n => friendlyOsids.has(n));
+                if (friendlyApproachOsids.length === 0) return false; // objective has no friendly approach
+                // Check BFS distance from brigade location to any friendly approach OSID
+                for (const approachOsid of friendlyApproachOsids.sort(strictCompare)) {
+                    const dist = spatialFriendlyDistance(
+                        briefing.spatial,
+                        briefing.faction,
+                        locationOsid,
+                        approachOsid,
+                        MAX_REACHABILITY_HOPS,
+                    );
+                    if (dist >= 0) return true; // reachable within hop limit
+                }
+                return false; // not reachable through friendly territory
+            })
             .sort(strictCompare);
 
         // RC3: guard — never inject an operation with zero participants.
         // This happens when all assigned brigades have been rotated out of the
-        // surplus pool between plan creation and launch.
+        // surplus pool between plan creation and launch, or when none can
+        // physically reach the operation objective through friendly territory.
         if (participatingBrigades.length === 0) {
-            // Skip: no participants available from surplus pool — operation would stall.
+            // Skip: no reachable participants available — operation would stall.
             return ops;
         }
 

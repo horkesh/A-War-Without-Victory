@@ -314,11 +314,10 @@ function tryCreateFromOpportunity(
 ): PlanDecision | null {
     if (surplusPool.length < MIN_BRIGADES_FOR_PLAN) return null;
 
-    // Find projecting or balanced zones with sufficient surplus
+    // Find projecting or balanced zones (surplus check is already done at corps level above)
     const eligibleZones = zones
         .filter(z =>
-            (z.posture === 'projecting' || z.posture === 'balanced') &&
-            z.surplus_brigades.length >= MIN_BRIGADES_FOR_PLAN
+            (z.posture === 'projecting' || z.posture === 'balanced')
         )
         .sort((a, b) => {
             // Prefer projecting over balanced
