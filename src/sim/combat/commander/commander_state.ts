@@ -129,7 +129,7 @@ export interface ForceAssessment {
     readonly total_brigades: number;
     readonly combat_effective: number;
     readonly evaluations: readonly BrigadeEvaluation[];
-    readonly by_zone: ReadonlyMap<string, readonly BrigadeEvaluation[]>;
+    readonly by_zone: Readonly<Record<string, readonly BrigadeEvaluation[]>>;
     readonly tier_counts: {
         readonly main_effort: number;
         readonly active_defense: number;
@@ -206,11 +206,11 @@ export interface OperationHistoryEntry {
 
 export interface IntelPicture {
     /** 0-1 confidence per zone. */
-    readonly zone_confidence: ReadonlyMap<string, number>;
+    readonly zone_confidence: Readonly<Record<string, number>>;
     /** sector_id -> detected offensive signs. */
-    readonly offensive_signs: ReadonlyMap<string, number>;
+    readonly offensive_signs: Readonly<Record<string, number>>;
     /** sector_id -> enemy massing. */
-    readonly concentration_detected: ReadonlyMap<string, boolean>;
+    readonly concentration_detected: Readonly<Record<string, boolean>>;
     readonly last_updated_turn: number;
 }
 
@@ -227,7 +227,7 @@ export interface CommanderState {
     operation_history: OperationHistoryEntry[];
     intel_picture: IntelPicture;
     /** Min brigades per zone. */
-    garrison_budget: Map<string, number>;
+    garrison_budget: Record<string, number>;
     last_assessment_turn: number;
 }
 

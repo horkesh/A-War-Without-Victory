@@ -644,10 +644,10 @@ function buildUpdatedState(
     const previousHistory = briefing.previous_state?.operation_history ?? [];
     const operationHistory: OperationHistoryEntry[] = [...previousHistory];
 
-    // Build garrison budget map
-    const garrisonBudget = new Map<string, number>();
+    // Build garrison budget record
+    const garrisonBudget: Record<string, number> = {};
     for (const zone of zones) {
-        garrisonBudget.set(zone.zone_id, zone.garrison_budget);
+        garrisonBudget[zone.zone_id] = zone.garrison_budget;
     }
 
     return {

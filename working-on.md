@@ -1,59 +1,44 @@
-# Working On — Session 2026-03-30 (Night Shift)
+# Working On — v0.8 Corps Commander Intelligence (Post Night Shift)
 
-## v0.8 Corps Commander Intelligence
+## Current State
+- **11 commits** implementing full PERCEIVE->DECIDE->EXECUTE commander pipeline
+- **92.2% area-weighted** (n1213, ties ATH) but **war goes silent after w20** (P0)
+- **War-or-Game: NOT APPROVED** — territory correct, combat catastrophically low
+- **USE_COMMANDER_LOOP = true** in bot_corps_ai.ts (feature flag, old code preserved)
+- **41 unit tests** in tests/commander/commander.test.ts
 
-Implementing the most important architectural change in the project — replacing 15 separate brigade movement systems and a 1400-line generateCorpsDirectives with ONE intelligent commander decision loop.
+## P0: War Goes Silent After Week 20
+The commander's PLAN phase only creates opportunity operations for `projecting` zones. By w20, all corps are `defending`/`balanced`. Fix in `src/sim/combat/commander/plan.ts`:
+- Lower opportunity threshold from `projecting` to `balanced` with surplus >= 3
+- Add continuous probe mechanism for `active_defense` sectors
+- Consider army HQ operation generation for strategic course correction
 
-Design doc: docs/plans/2026-03-30-corps-commander-intelligence.md
+## Railroad Hunter Agents (Results Pending)
+3 agents were dispatched at shift end to catalog hardcoded railroads:
+1. **Corps exemptions** — SIEGE_EXEMPT, name checks, magic thresholds
+2. **Brigade movement** — 15 separate systems fighting each other
+3. **Operation launch** — doctrine blocks, exhaustion gates, hardcoded timing
 
-### Why This Is Urgent
+Re-dispatch if results were lost with shift context.
 
-Concurrent ops (n1211) exposed a critical flaw: Sarajevo's garrison marched to Breza because the sector system treated the whole 1st Corps territory as one zone. 13 brigades column-marched out through the Ilidza corridor before Op Prsten closed it. By turn 11 the city was empty and fell to paramilitary sweep. This never happened in 1200+ prior runs — concurrent ops caused more aggressive redistribution that stripped the garrison.
+## Step 10 (Old Code Removal) — DEFERRED
+Old `generateCorpsDirectives` preserved behind feature flag. Don't remove until:
+1. P0 combat drought is fixed
+2. War-or-Game approves
+3. Integration test baselines updated
 
-### Root Cause (from day session investigation)
+## Open Issues
+- P0: 19 silent weeks (w21-w39)
+- P1: 36 battles (was 62)
+- P1: Donji Vakuf still RBiH
+- P2: 0 tanks (equipment tracking broken)
+- P2: Att:Def ratio 0.27:1
+- P2: Kalinovik pocket (3 RBiH OSIDs)
 
-1. Column march teleportation: paths computed pre-combat, not revalidated at arrival
-2. No zone awareness: sector system sees one big blob, not besieged/open zones
-3. No garrison lock: no system prevents stripping a critical position
-4. 15 separate brigade movement systems fighting each other
-5. Information silently dropped between 114 pipeline steps
-
-### Architecture: PERCEIVE → DECIDE → EXECUTE
-
-- PERCEIVE: world state derivation (SpatialContext, supply, sectors)
-- DECIDE: ONE commander loop per corps (assess→allocate→plan→decide→emit)
-- EXECUTE: combat resolution, effects (unchanged)
-
-### 10 Implementation Steps
-
-1. Type definitions (commander_state.ts)
-2. buildBriefing() (briefing.ts)
-3. ASSESS phase (assess.ts) — zones, threats, force eval
-4. ALLOCATE phase (allocate.ts) — garrison lock, surplus — FIXES SARAJEVO
-5. PLAN phase (plan.ts) — multi-turn intentions
-6. DECIDE phase (decide.ts) — intel reactive
-7. EMIT phase (emit.ts) — produce existing interface
-8. Wire commander loop (commander_loop.ts)
-9. CommanderState on game_state.ts + save migration
-10. Delete old code (phased)
-
-### Baseline
-
-- n1211 with enriched contact graph: 90.2% area-weighted
-- 21/22 anchors (Sarajevo Centar FAILED — this is what we're fixing)
-- 44% zero-attack operations
-- 95 battles, 107 orders
-
-### Key Decisions Already Made
-
-- Corridor-width for besieged detection (not encirclement ratio)
-- Commitment ratio for SRK-type corps
-- Garrison budget posture-dependent (8/12/15/20 edges per brigade)
-- Equipment class matters for force evaluation
-- Population protection via co-ethnic garrison boost
-- Commander personality as deterministic parameters
-- Same output interface (CorpsDirective) — downstream unchanged
-
-### Contact Graph
-
-The enriched contact graph (shared_segments) is committed and correct. 48 point-only contacts filtered. This is the true baseline.
+## Key Files
+- Commander: `src/sim/combat/commander/` (10 files)
+- Wiring: `src/sim/combat/bot_corps_ai.ts` (USE_COMMANDER_LOOP flag)
+- Serializer: `src/state/serializeGameState.ts` (Map/Set support added)
+- Tests: `tests/commander/commander.test.ts`
+- Visual morning report: `docs/60_visualisations/20260330_nightshift_morning_report.html`
+- Markdown morning report: `morning-report.md`

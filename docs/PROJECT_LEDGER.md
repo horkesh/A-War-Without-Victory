@@ -1,3 +1,31 @@
+## [2026-03-30] v0.8 Corps Commander Intelligence — Night Shift Implementation (n1213 = 92.2%)
+
+### Change
+**Complete PERCEIVE->DECIDE->EXECUTE corps commander pipeline.** 10 new files in `src/sim/combat/commander/` (~3,800 lines). Per-corps `BotCorpsCommander` replaces per-faction `generateCorpsDirectives`. Old code preserved behind `USE_COMMANDER_LOOP` feature flag.
+
+**Architecture:** buildBriefing -> assessSituation (zones, threats, force eval) -> allocateBrigades (Grigsby two-pass: garrison LOCKED, surplus for ops) -> managePlan (multi-turn intentions) -> makeDecisions (intel-reactive) -> emitCommanderOutput (same CorpsDirective/CorpsOperation interface).
+
+**Key features:** Zone detection via SpatialContext connected components. Corridor-width BFS (<=1=besieged). Posture-dependent garrison budgets (besieged=8, defending=12, balanced=15, projecting=20 edges/brigade). Brigade fitness scoring with Decisive Campaigns tiered assignment. Officer personality from existing 4 attributes. CommanderState persisted on CorpsCommandState.
+
+**Serializer updated:** Maps and Sets now valid in GameState (serialized as sorted plain objects/arrays). Engine Invariants §13.1 updated.
+
+**41 unit tests** in `tests/commander/commander.test.ts`.
+
+### Results
+- **n1213: 92.2% area-weighted (40w)**. 22/22 anchors PASS. 6/6 benchmarks PASS.
+- +2.0pp from 90.2% baseline. Ties ATH (n1146).
+- Sarajevo: HELD (7 brigades). Gorazde: HELD (4 brigades).
+- **P0: War goes silent after w20.** 19 consecutive zero-combat weeks. 36 battles (was 62). Commander too conservative after pre-planned ops exhaust.
+- **War-or-Game: NOT APPROVED.** Territory correct but combat activity catastrophically low.
+
+### Verification
+- `npx tsc --noEmit` (clean). 1661 tests pass (41 new). 17 pre-existing integration failures (need baseline update).
+
+### Open
+- P0: Combat drought w21-w39. PLAN phase needs opportunity ops for balanced zones.
+- P1: Donji Vakuf still RBiH. P2: 0 tanks. P2: Att:Def 0.27:1. P2: Kalinovik pocket.
+- Step 10 (old code removal) deferred until P0 fixed.
+
 ## [2026-03-30] Contact Graph Enrichment + Corps Commander Intelligence Design (n1211 = 90.2% true baseline)
 
 ### Change

@@ -159,7 +159,7 @@ export function evaluateCorpsForces(
     }
 
     const evaluations: BrigadeEvaluation[] = [];
-    const byZone = new Map<string, BrigadeEvaluation[]>();
+    const byZone: Record<string, BrigadeEvaluation[]> = {};
     let combatEffective = 0;
     let mainEffort = 0;
     let activeDefense = 0;
@@ -185,10 +185,10 @@ export function evaluateCorpsForces(
 
         // Group by zone
         const zoneKey = currentZone ?? '__unassigned__';
-        let zoneEvals = byZone.get(zoneKey);
+        let zoneEvals = byZone[zoneKey];
         if (!zoneEvals) {
             zoneEvals = [];
-            byZone.set(zoneKey, zoneEvals);
+            byZone[zoneKey] = zoneEvals;
         }
         zoneEvals.push(evaluation);
     }

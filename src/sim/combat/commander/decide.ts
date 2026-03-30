@@ -149,7 +149,7 @@ function updateIntelPicture(
     turn: number,
 ): IntelPicture {
     const prevIntel = previousState?.intel_picture ?? null;
-    const prevZoneConfidence = prevIntel?.zone_confidence ?? new Map<string, number>();
+    const prevZoneConfidence: Readonly<Record<string, number>> = prevIntel?.zone_confidence ?? {};
 
     // Parse intel_data (loosely typed for now)
     const intelData = briefing.intel_data as {
@@ -160,8 +160,8 @@ function updateIntelPicture(
     const sectorIntel = intelData?.sector_intel ?? {};
 
     // Build offensive_signs and concentration_detected from sector intel records
-    const offensiveSigns = new Map<string, number>();
-    const concentrationDetected = new Map<string, boolean>();
+    const offensiveSigns: Record<string, number> = {};
+    const concentrationDetected: Record<string, boolean> = {};
 
     const sectorIds = Object.keys(sectorIntel).sort(strictCompare);
     for (const sectorId of sectorIds) {
@@ -179,19 +179,19 @@ function updateIntelPicture(
         }
 
         if (signsCount > 0) {
-            offensiveSigns.set(sectorId, signsCount);
+            offensiveSigns[sectorId] = signsCount;
         }
         if (hasConcentration) {
-            concentrationDetected.set(sectorId, true);
+            concentrationDetected[sectorId] = true;
         }
     }
 
     // Update zone confidence: blend previous confidence with new intel
-    const zoneConfidence = new Map<string, number>();
+    const zoneConfidence: Record<string, number> = {};
     const sortedZones = [...zones].sort((a, b) => strictCompare(a.zone_id, b.zone_id));
 
     for (const zone of sortedZones) {
-        const prevConf = prevZoneConfidence.get(zone.zone_id) ?? BASE_ZONE_CONFIDENCE;
+        const prevConf = prevZoneConfidence[zone.zone_id] ?? BASE_ZONE_CONFIDENCE;
 
         // Gather all sector intel records relevant to this zone
         let maxTurnsContact = 0;
@@ -223,7 +223,7 @@ function updateIntelPicture(
         newConf = Math.min(newConf, hasOffensiveSigns ? 1.0 : MAX_PASSIVE_CONFIDENCE);
         newConf = Math.max(newConf, BASE_ZONE_CONFIDENCE);
 
-        zoneConfidence.set(zone.zone_id, newConf);
+        zoneConfidence[zone.zone_id] = newConf;
     }
 
     return {
@@ -428,7 +428,7 @@ function computeStanceChanges(
 
     // Concentration-detected sectors from intel
     const concentrationSectors = new Set<string>();
-    for (const [sectorId, detected] of intelPicture.concentration_detected) {
+    for (const [sectorId, detected] of Object.entries(intelPicture.concentration_detected)) {
         if (detected) concentrationSectors.add(sectorId);
     }
 

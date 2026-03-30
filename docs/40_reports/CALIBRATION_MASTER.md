@@ -3,6 +3,18 @@
 **Purpose:** Persistent lessons-learned record for war-phase calibration (April 1992 onward). 40w primary, 104w force trajectory.
 **Updated:** 2026-03-29 (n1210 — 5 fixes: Visegrad OOB + siege calc + JNA ghosts + sector reassignment + MIN_SECTOR_BRIGADES)
 
+## n1213 v0.8 CORPS COMMANDER (2026-03-30 Night Shift)
+- **92.2% area-weighted (40w)**. 22/22 anchors PASS. 6/6 benchmarks PASS. Ties ATH (n1146).
+- +2.0pp from n1211 baseline. Commander: PERCEIVE->DECIDE->EXECUTE per-corps loop.
+- Sarajevo HELD (7 brigades, garrison allocation working). Gorazde HELD (4 brigades).
+- **P0: 19 consecutive silent weeks (w21-w39).** 36 battles (was 62, -42%). War dies at w20.
+- RS w40: 0.510 vs 0.553 target (-0.043, 86% toward fail boundary).
+- Regions: Krajina 99.6%, Posavina 94.5%, Herzegovina 93.2%, Central Corridor 90.3%, Sarajevo 89.9%, Central Bosnia 87.2%, Drina 83.6%.
+- War-or-Game: NOT APPROVED — territory correct, combat activity catastrophically low.
+- Att:Def ratio 0.27:1 (worsened from 0.43). 86% decisive victories. Power ratios up to 83:1.
+- 0 tanks across all factions (equipment tracking broken or not populated).
+- Files: `src/sim/combat/commander/` (10 files, ~3,800 lines), `bot_corps_ai.ts`, `serializeGameState.ts`.
+
 ## n1211 TRUE BASELINE (2026-03-30) — With Enriched Contact Graph
 - **90.2% area-weighted (40w)**. 21/22 anchors (Sarajevo Centar FAILED). 5/6 benchmarks.
 - Previous 90.9% was measured in worktree without shared_segments enrichment.
