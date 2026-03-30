@@ -578,12 +578,18 @@ function findBestStagingZone(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Helper: check if corps is besieged (all zones besieged)
+// Helper: check if corps is besieged (all zones besieged, or main body isolated)
 // ═══════════════════════════════════════════════════════════════════════════
 
 function isBesiegedCorps(zones: readonly ZoneAssessment[]): boolean {
     if (zones.length === 0) return false;
-    return zones.every(z => z.posture === 'besieged');
+    // Case A: all zones besieged
+    if (zones.every(z => z.posture === 'besieged')) return true;
+    // Case B: main body is physically isolated (corridor_width <= 1) even if a
+    // fringe zone is technically non-besieged. A corps whose core is cut off
+    // cannot plan distant offensives regardless of fringe zone posture.
+    const mainBody = zones.find(z => z.is_main_body);
+    return mainBody != null && mainBody.corridor_width <= 1;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
