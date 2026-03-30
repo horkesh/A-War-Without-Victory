@@ -980,6 +980,76 @@ describe('plan', () => {
         expect(result.plan!.source).toBe('opportunity');
         expect(result.plan!.target_osids.length).toBeGreaterThan(0);
     });
+
+    it('creates opportunity plan from balanced zone with sufficient surplus', () => {
+        // Task 5: balanced zones (not just projecting) should now be eligible
+        const zoneId = 'zone:test_corps:0' as ZoneId;
+        const brigIds = ['b1', 'b2', 'b3', 'b4'].map(id => id as FormationId);
+        const zones = [makeZone({
+            zone_id: zoneId,
+            posture: 'balanced',
+            front_edge_count: 20,
+            surplus_brigades: brigIds,
+            assigned_brigades: brigIds,
+            enemy_adjacent_osids: ['op:target:target_1', 'op:target:target_2'],
+        })];
+        const evals = brigIds.map(id => makeEval({
+            brigade_id: id,
+            current_zone: zoneId,
+            is_combat_effective: true,
+            is_disrupted: false,
+        }));
+        const forces = makeForces(evals, zones);
+        const briefing = makeMinimalBriefing({ doctrine_stance: 'balanced' });
+
+        const result = managePlan(briefing, zones, forces, evals, null, 10);
+
+        // balanced zone with surplus >= MIN_BRIGADES_FOR_PLAN must create a plan
+        expect(result.action).toBe('created');
+        expect(result.plan).not.toBeNull();
+        expect(result.plan!.source).toBe('opportunity');
+    });
+
+    it('prefers projecting zone over balanced zone when both have surplus', () => {
+        // Task 5: projecting should always be chosen first
+        const projectingId = 'zone:test_corps:0' as ZoneId;
+        const balancedId = 'zone:test_corps:1' as ZoneId;
+        const projBrigs = ['p1', 'p2', 'p3'].map(id => id as FormationId);
+        const balBrigs = ['b1', 'b2', 'b3', 'b4', 'b5'].map(id => id as FormationId);
+        // balanced has MORE surplus brigades, but projecting should still win
+        const zones = [
+            makeZone({
+                zone_id: projectingId,
+                posture: 'projecting',
+                front_edge_count: 15,
+                surplus_brigades: projBrigs,
+                assigned_brigades: projBrigs,
+                enemy_adjacent_osids: ['op:target:proj_1'],
+            }),
+            makeZone({
+                zone_id: balancedId,
+                posture: 'balanced',
+                front_edge_count: 15,
+                surplus_brigades: balBrigs,
+                assigned_brigades: balBrigs,
+                enemy_adjacent_osids: ['op:target:bal_1'],
+            }),
+        ];
+        const evals = [
+            ...projBrigs.map(id => makeEval({ brigade_id: id, current_zone: projectingId, is_combat_effective: true, is_disrupted: false })),
+            ...balBrigs.map(id => makeEval({ brigade_id: id, current_zone: balancedId, is_combat_effective: true, is_disrupted: false })),
+        ];
+        const forces = makeForces(evals, zones);
+        const briefing = makeMinimalBriefing({ doctrine_stance: 'balanced' });
+
+        const result = managePlan(briefing, zones, forces, evals, null, 10);
+
+        expect(result.action).toBe('created');
+        expect(result.plan).not.toBeNull();
+        expect(result.plan!.source).toBe('opportunity');
+        // The plan should use the projecting zone's targets, not the balanced zone's
+        expect(result.plan!.target_osids).toContain('op:target:proj_1');
+    });
 });
 
 // ═══════════════════════════════════════════════════════════════════════════

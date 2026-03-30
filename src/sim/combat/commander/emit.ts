@@ -535,7 +535,7 @@ function buildOperations(
         ops.length === 0 &&
         allocation.can_launch_ops &&
         allocation.surplus_pool.length > 0 &&
-        personality.initiative > 0.6
+        personality.initiative > 0.3
     ) {
         // Probe operations use a single surplus brigade on the weakest enemy position.
         // The actual probe target selection is left to sector_offensive downstream;

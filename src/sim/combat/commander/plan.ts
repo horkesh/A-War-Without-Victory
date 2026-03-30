@@ -314,26 +314,33 @@ function tryCreateFromOpportunity(
 ): PlanDecision | null {
     if (surplusPool.length < MIN_BRIGADES_FOR_PLAN) return null;
 
-    // Find projecting zones with surplus
-    const projectingZones = zones
-        .filter(z => z.posture === 'projecting' && z.surplus_brigades.length >= MIN_BRIGADES_FOR_PLAN)
+    // Find projecting or balanced zones with sufficient surplus
+    const eligibleZones = zones
+        .filter(z =>
+            (z.posture === 'projecting' || z.posture === 'balanced') &&
+            z.surplus_brigades.length >= MIN_BRIGADES_FOR_PLAN
+        )
         .sort((a, b) => {
+            // Prefer projecting over balanced
+            const posturePriority = (p: string) => p === 'projecting' ? 0 : 1;
+            const posDiff = posturePriority(a.posture) - posturePriority(b.posture);
+            if (posDiff !== 0) return posDiff;
             const diff = b.surplus_brigades.length - a.surplus_brigades.length;
             if (diff !== 0) return diff;
             return strictCompare(a.zone_id, b.zone_id);
         });
 
-    if (projectingZones.length === 0) return null;
+    if (eligibleZones.length === 0) return null;
 
     // Check besieged corps rule
     if (isBesiegedCorps(zones)) {
         // Besieged corps can only do local ops
         // Still allow opportunity within hop limit
-        const bestZone = projectingZones[0]!;
+        const bestZone = eligibleZones[0]!;
         return createOpportunityPlan(briefing, bestZone, surplusPool, turn, true);
     }
 
-    const bestZone = projectingZones[0]!;
+    const bestZone = eligibleZones[0]!;
     return createOpportunityPlan(briefing, bestZone, surplusPool, turn, false);
 }
 
