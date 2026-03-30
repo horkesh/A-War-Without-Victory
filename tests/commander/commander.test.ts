@@ -947,6 +947,39 @@ describe('plan', () => {
         expect(result.plan).toBeNull();
         expect(result.reason).toContain('execution pipeline');
     });
+
+    it('should create opportunity plans regardless of former doctrine stance', () => {
+        // A corps with surplus in a projecting zone should create plans
+        // even though the old system would have blocked it with defensive doctrine
+        const zoneId = 'zone:test_corps:0' as ZoneId;
+        const brigIds = ['b1', 'b2', 'b3', 'b4'].map(id => id as FormationId);
+        const zones = [makeZone({
+            zone_id: zoneId,
+            posture: 'projecting',
+            front_edge_count: 15,
+            surplus_brigades: brigIds,
+            assigned_brigades: brigIds,
+            enemy_adjacent_osids: ['op:target:target_1', 'op:target:target_2'],
+        })];
+        const evals = brigIds.map(id => makeEval({
+            brigade_id: id,
+            current_zone: zoneId,
+            is_combat_effective: true,
+            is_disrupted: false,
+        }));
+        const forces = makeForces(evals, zones);
+
+        // Set doctrine_stance to 'defensive' — the old system would have blocked this
+        const briefing = makeMinimalBriefing({ doctrine_stance: 'defensive' });
+
+        const result = managePlan(briefing, zones, forces, evals, null, 10);
+
+        // Plan should be created despite defensive doctrine stance
+        expect(result.action).toBe('created');
+        expect(result.plan).not.toBeNull();
+        expect(result.plan!.source).toBe('opportunity');
+        expect(result.plan!.target_osids.length).toBeGreaterThan(0);
+    });
 });
 
 // ═══════════════════════════════════════════════════════════════════════════

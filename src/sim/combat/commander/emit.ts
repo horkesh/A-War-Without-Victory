@@ -174,8 +174,8 @@ function buildDirective(
     // min_attack_outcome: based on dominant posture
     const minAttackOutcome = computeMinAttackOutcome(zones);
 
-    // aggression_modifier: from personality and doctrine stance
-    const aggressionModifier = computeAggressionModifier(personality, briefing.doctrine_stance);
+    // aggression_modifier: from personality (doctrine stance removed — emergent behavior)
+    const aggressionModifier = computeAggressionModifier(personality);
 
     // sector_targets: plan targets mapped to sectors
     const sectorTargets = buildSectorTargets(planDecision, briefing);
@@ -300,21 +300,10 @@ function computeMinAttackOutcome(zones: ZoneAssessment[]): CorpsDirective['min_a
     return POSTURE_MIN_OUTCOME[worstPosture];
 }
 
-/** Compute aggression modifier from personality and doctrine stance. */
-function computeAggressionModifier(personality: OfficerPersonality, doctrineStance: string): number {
-    // Base from personality: aggression 0-1 maps to -0.1 to +0.15
-    const personalityMod = (personality.aggression - 0.4) * 0.375;
-
-    // Stance modifier
-    let stanceMod = 0;
-    switch (doctrineStance) {
-        case 'offensive': stanceMod = 0.05; break;
-        case 'balanced': stanceMod = 0; break;
-        case 'defensive': stanceMod = -0.10; break;
-        case 'reorganize': stanceMod = -0.20; break;
-    }
-
-    return personalityMod + stanceMod;
+/** Compute aggression modifier from personality only.
+ *  Doctrine stance removed — commander decides from zone posture + personality. */
+function computeAggressionModifier(personality: OfficerPersonality): number {
+    return (personality.aggression - 0.4) * 0.375;
 }
 
 /** Map plan targets to sectors via sector sub-segment enemy OSIDs. */

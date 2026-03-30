@@ -333,11 +333,6 @@ function tryCreateFromOpportunity(
         return createOpportunityPlan(briefing, bestZone, surplusPool, turn, true);
     }
 
-    // Defensive or reorganize stance means no opportunity plans
-    if (briefing.doctrine_stance === 'defensive' || briefing.doctrine_stance === 'reorganize') {
-        return null;
-    }
-
     const bestZone = projectingZones[0]!;
     return createOpportunityPlan(briefing, bestZone, surplusPool, turn, false);
 }

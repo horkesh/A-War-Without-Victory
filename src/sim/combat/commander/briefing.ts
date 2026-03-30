@@ -25,7 +25,6 @@ import type {
     OfficerPersonality,
 } from './commander_state.js';
 
-import { getActiveDoctrinePhase } from '../bot_strategy.js';
 import { getCorpsSubordinates } from '../bot_corps_helpers.js';
 import { getCorpsCommander } from '../officer_system.js';
 import { analyzeFrontGeometry, type FrontGeometryAssessment } from '../front_geometry_analysis.js';
@@ -248,10 +247,10 @@ export function buildBriefing(
         );
     }
 
-    // 5. Doctrine stance from active doctrine phase
-    const timeline = state.military.war_timeline;
-    const doctrinePhase = getActiveDoctrinePhase(faction, turn, timeline);
-    const doctrineStance = doctrinePhase?.default_corps_stance ?? 'balanced';
+    // 5. Doctrine stance — deprecated for commander system.
+    // Commander decides from zone posture + personality, not hardcoded week schedule.
+    // Kept as 'balanced' for interface compatibility.
+    const doctrineStance = 'balanced';
 
     // 6. Front geometry (best-effort)
     const frontGeometry = tryAnalyzeFrontGeometry(
