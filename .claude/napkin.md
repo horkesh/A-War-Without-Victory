@@ -8,9 +8,9 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-30, v0.7.0 + Concurrent Ops + Contact Graph Enrichment)
-**n1211: 90.2% area-weighted (40w) — TRUE BASELINE with enriched contact graph. 21/22 anchors (Sarajevo Centar FAILED). 5/6 benchmarks (RS w40 FAIL).**
-**v0.8 Corps Commander Intelligence: design complete, nightshift handoff ready. PERCEIVE→DECIDE→EXECUTE architecture.**
+## Current State (2026-03-30, v0.8.0 Commander System on main)
+**n1213: 92.2% area-weighted (40w, ties ATH). Commander system live behind USE_COMMANDER_LOOP flag. 11 commits, 41 tests.**
+**P0: war goes silent after w20 (19 zero-combat weeks). War-or-Game: NOT APPROVED.**
 
 **[MERGED] Concurrent corps operations.** `active_operations[]` replaces `active_operation`. Slot cap floor(brigades/12). 7 helpers. Emergency defense overflow. Bot secondary op guard. Save migration v1→v2. 84 files, +1459/-525.
 **[MERGED] Krajina paramilitary scope.** 6 municipalities added to RS offensive sweep. MAX_POCKET_CLUSTER 3→6. +3.0pp.
@@ -32,7 +32,7 @@
 **[OPEN] RS w40 benchmark.** 49.7% vs 55.3% target. RS stalls mid-war. 33 total orders, 32 ops with zero eligible attackers.
 **[OPEN] Sarajevo regression.** -3.5pp from prior run. Needs investigation.
 **[OPEN] Equipment asymmetry in combat resolution.** ARBiH rifle-only brigades attacking VRS artillery+tanks should face massive power disadvantage. Combat predictor should reflect this so corps AI rejects suicidal ops.
-**[OPEN] Intelligent corps/army commanders.** Replace hardcoded rules (MIN_SECTOR_BRIGADES, slot caps, exhaustion thresholds) with per-turn CO decision-making: defend sectors first, allocate surplus for ops, adjust to conditions.
+**[RESOLVED] Intelligent corps/army commanders.** v0.8 PERCEIVE→DECIDE→EXECUTE architecture implemented and on main behind USE_COMMANDER_LOOP flag. 11 commits, 41 tests.
 **[OPEN] 41 invalid operations (32 zero-eligible-attacker).** Ops launching but nobody can fight.
 **[OPEN] HRHB passivity.** 8 total orders, 2 dead corps (HVO Central Bosnia, HVO Tomislavgrad).
 **[OPEN] Column march skip.** Brigades in column transit can't capture adjacent undefended territory.

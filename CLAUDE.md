@@ -46,7 +46,8 @@ Smoke-test triad after every change: `tsc --noEmit` + `vitest run` + `desktop:ma
 
 - Sim core: `src/sim/` | State: `src/state/` | Scenarios: `src/scenario/`
 - Combat: `src/sim/combat/` | Bot AI: `bot_strategy.ts`, `bot_corps_ai.ts`, `bot_brigade_ai_osid.ts`
-- War pipeline: `src/sim/turn_phases/war_phases.ts` (138 steps)
+- Commander: `src/sim/combat/commander/` (v0.8 corps commander intelligence, 10 files)
+- War pipeline: `src/sim/turn_phases/war_phases.ts` (151 steps)
 - Desktop: `src/desktop/` | Tactical map: `src/ui/map/`
 - Canon: `docs/10_canon/` | Engineering: `docs/20_engineering/` | Reports: `docs/40_reports/`
 - Skills: `.claude/skills/` (60+ Pyrrhic team roles)

@@ -87,25 +87,39 @@ Nightshift 2026-03-23 delivered v0.6.2-v0.6.4 in a single session. 75 events wit
 
 - v0.6.5: Offensive paramilitary sweep — Drina valley ethnic cleansing model. Extends `paramilitary_sweep.ts` with front-line offensive mode. Target: +2-3pp calibration (92% → 94-95%). **Must land BEFORE v0.7.0** (establishes higher baseline; `drina_cleansing_occurred` flag fires more reliably). Plan: `docs/plans/2026-03-24-offensive-paramilitary-sweep-plan.md`
 
-### 0.7.x — Dynamic Codex (ACTIVE)
+### 0.7.x — Dynamic Codex ✓ (MOSTLY COMPLETE)
 Plans: `docs/plans/2026-03-23-event-flag-wiring-plan.md`, `2026-03-23-essay-template-engine-plan.md`, `2026-03-23-canon-audit-checklist.md`
 
 The Codex transforms from static essays into a living historical document that morphs with player decisions.
 
-- v0.7.0: Event flag wiring + exhaustion overhaul + Codex QA **COMPLETE**. 25 flags wired, 7 FIXED→CONDITIONAL endgame chain, pool decay, 30 essay corrections across 3-pass QA. 91.6% calibration.
+- v0.7.0: Event flag wiring + exhaustion overhaul + Codex QA **COMPLETE**. 25 flags wired, 7 FIXED→CONDITIONAL endgame chain, pool decay, 30 essay corrections across 3-pass QA. 91.6% calibration. Contact graph shared_segments enrichment. SpatialContext shared spatial layer. 712 OSIDs (32 micro-OSIDs merged). n1211 = 90.2% true baseline.
 - v0.7.0.1: Author 13 missing 1992 foundation essays (barracks seizures, Sarajevo siege, JNA withdrawal, Drina cleansing, Operation Corridor, Mostar liberation, Srebrenica enclave, HRHB political goal, arms embargo). /historian + /narrative-designer.
 - v0.7.1: Essay template engine (dynamic_sections, divergence notes, ghost entries), Codex UI. **+ Letter Home**: procedural casualty vignettes in CoS briefing (template-driven, 1 per turn). **Can parallel with v0.8.0** — no dependency
 - v0.7.2: Warroom React migration. **+ Ghost Map**: 1991 census demographics overlay (Deck.gl ScatterplotLayer, toolbar toggle). **+ Exhaustion Clock**: visual depletion indicator in Army HQ (single component, reads warPhaseExhaustion). **+ Ops Modal UX Overhaul**: 4 work packages — parameter strip subtitles/tooltips, brigade card readability, G-2 phase redesign, modal flow fixes (pointer-events bug first). Prompt: `docs/40_reports/PROMPT_OPS_MODAL_UX_OVERHAUL.md`
 - v0.7.3: Canon audit (remove September 1991 start, peace phase references from all docs) — cleanup last, lowest risk
 
-### 0.8.x — Command Chain
-Plans: TBD (write after v0.7.0 ships). **v0.8.0 can start alongside v0.7.1** — depends on flags (v0.7.0), not essays.
+### 0.8.x — Command Chain (ACTIVE)
+Plans: `docs/plans/2026-03-25-command-chain-architecture.md`, `docs/plans/2026-03-30-corps-commander-intelligence.md`, `docs/plans/2026-03-24-v080-political-leader-bot-plan.md`
 
-The player commands through a hierarchy of AI personalities that can be delegated to or overridden.
+The player commands through a hierarchy of AI personalities that can be delegated to or overridden. Corps commanders make emergent decisions based on zone posture, force balance, and personality — not hardcoded doctrine phases.
 
-- v0.8.0: Political leader bot for non-player factions (event responses, alliance, diplomacy, war crimes policy). **+ Patron Phone Call**: 8-12 dramatic patron pressure events with ICTY-sourced dialogue, player decisions
-- v0.8.1: Order interpretation system (officer personality filters commands — creative interpretation, delay, refusal). Includes Warlord Problem (militia integration resistance) as sub-feature
-- v0.8.2: Autonomy depth + Claude API at political level
+- v0.8.0: **Corps Commander Intelligence** — PERCEIVE→DECIDE→EXECUTE per-corps loop. 10 files in `src/sim/combat/commander/` (~3,800 lines). Zone detection, garrison allocation (Grigsby two-pass), multi-turn planning, intel-reactive stance, force fitness scoring. Replaces `generateCorpsDirectives` behind `USE_COMMANDER_LOOP` flag. **ON MAIN** (n1213 = 92.2%, 22/22 anchors). **P0: combat drought after w20 — fix in progress.** Concurrent corps operations (multi-slot). Serializer Map/Set support. 1661 tests.
+- v0.8.1: Political leader bot for non-player factions (event responses, alliance, diplomacy, war crimes policy). **+ Patron Phone Call**: 8-12 dramatic patron pressure events with ICTY-sourced dialogue, player decisions. Plan: `docs/plans/2026-03-24-v080-political-leader-bot-plan.md`
+- v0.8.2: Order interpretation system (officer personality filters commands — creative interpretation, delay, refusal). Includes Warlord Problem (militia integration resistance) as sub-feature
+- v0.8.3: Autonomy depth + Claude API at political level
+- v0.8.x-final: Old code removal (Step 10) — remove `generateCorpsDirectives`, make `USE_COMMANDER_LOOP` permanent. Railroad cleanup per `docs/40_reports/20260330_RAILROAD_HUNTER_REPORT.md`.
+
+### 0.8→0.9 — Repo-Wide Simplification
+No version bump — engineering milestone between feature releases.
+
+Stabilization and technical debt cleanup after Command Chain ships. Uses railroad hunter report as hit list.
+
+- Movement system unification (6 competing systems → 1-2)
+- Pathfinding consolidation (3 separate engines → 1 with caching)
+- String hardcoding → TypeScript enums (postures, classifications, faction IDs)
+- Dead branch removal (ZoC/AoR era, old bot_corps_directives)
+- bot_constants.ts scattered magic numbers → domain-grouped constant files
+- Canon doc propagation (Systems Manual, Game Bible updated for v0.8 architecture)
 
 ### 0.9.x — Consequences + Polish
 Plans: TBD (write after v0.8 ships)
@@ -205,7 +219,7 @@ Reserved for fundamental engine/design changes that break save compatibility or 
 | Sound/music | ✗ Not started |
 | Localization | ✗ Not started (v0.8+ scope: B/C/S + English) |
 
-**Current version: 0.6.1** — Political Wargame (v0.6.x COMPLETE). 1410 tests, 116 suites. 92.0% area-weighted (honest baseline, n1029). 96-essay Codex (all 5-round QA certified + deep historian audit). 94 events across 1992-1995 with rich mechanical effects (75 events, 9 effect types). Event dependency graph mapped. Dynamic Codex design established. Campaign starts April 1992 (Sep 1991 start CUT). Chronicle, Wrapped, HQ deep drill-down, Dayton dimension merge all shipped. **Next: v0.7.0 (event flag wiring).**
+**Current version: 0.8.0** — Command Chain (v0.8.x ACTIVE). 1661 tests, 98 suites. 92.2% area-weighted (n1213, ties ATH). Corps Commander Intelligence on main behind `USE_COMMANDER_LOOP` flag. 96-essay Codex certified. 94 events. 712 OSIDs. Concurrent corps operations. P0: combat drought after w20 (fix in progress — plan lifecycle bugs + doctrine railroad removal). **Next: War-or-Game approval → old code removal → v0.8.1 (political leader bot).**
 
 ---
 
