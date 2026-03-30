@@ -52,7 +52,7 @@
 - **v0.8.x-final** expanded to "Command Authority Cleanup" with operations 4-question gate. 4 sequencing principles added to v0.8 header.
 - **5 workstreams defined:** A=commander stabilization, B=authority cleanup, C=commander maturity, D=political bot, E=simplification.
 - All plan files updated (headers, gate statements, 15+ version refs in command-chain-architecture.md). Ledger entry written.
-- **Immediate next: fix slot cap P0 (`phase !== 'recovery'` in emit.ts), then War-or-Game approval.**
+- **Immediate next: fix slot cap P0 (`phase !== 'recovery'` in emit.ts), then run two-tier panel (War-or-Game = Tier 1; Orchestrator issues go/no-go).**
 
 **Session 2026-03-30 (Session 1 — Recovery + Roadmap + P0 Task 4):**
 - Session recovered from crash. working-on.md preserved context. No work lost.

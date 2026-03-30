@@ -16985,7 +16985,7 @@ Taskforce session converting the 2026-03-30 repo-health consolidated audit into 
 - `docs/plans/2026-03-25-command-chain-architecture.md` → all 15+ version refs updated, sequencing gate note + Phase 0 Commander Maturity note added
 
 **Implementation program (5 workstreams):**
-- **A — Commander stabilization (v0.8.0.x):** fix slot cap P0 (`phase !== 'recovery'` filter), War-or-Game approval, commander traceability
+- **A — Commander stabilization (v0.8.0.x):** fix slot cap P0 (`phase !== 'recovery'` filter), two-tier panel go/no-go (Orchestrator synthesis), commander traceability
 - **B — Command authority cleanup (v0.8.x-final):** delete `generateCorpsDirectives`, operations 4-question audit, movement writers reduction, hotspot ownership comments
 - **C — Commander maturity (v0.8.1):** belief state, competing intents scored, turn memory, decision traces, constraint/preference separation
 - **D — Political Leader Bot (v0.8.2):** gated behind C complete

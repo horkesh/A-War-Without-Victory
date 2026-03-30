@@ -87,7 +87,7 @@ PERCEIVE-DECIDE-EXECUTE per-corps loop. 10 files in `src/sim/combat/commander/` 
 
 **Next steps (in order):**
 1. Fix P0 combat drought — restore healthy mid/late-war combat tempo
-2. War-or-Game approval on commander system
+2. Two-tier panel go/no-go on commander system (War-or-Game is Tier 1 investigator; Orchestrator issues the actual verdict)
 3. Old code removal (Step 10) — remove `generateCorpsDirectives`, make `USE_COMMANDER_LOOP` permanent
 4. Railroad cleanup per `docs/40_reports/20260330_RAILROAD_HUNTER_REPORT.md`
 
