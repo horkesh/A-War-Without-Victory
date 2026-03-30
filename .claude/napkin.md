@@ -46,6 +46,10 @@
 **[OPEN] Gap finder remaining design gaps:**
 - P2: Attack-through stall counter, corridor terrain broad-front, reinforcement corridor safety, sectors stale after combat.
 
+**Session 2026-03-30 (Session 3 — v0.7 debt reslotted):**
+- 4 floating v0.7 sub-milestones given explicit homes: essays→v0.8.0.x parallel, template engine+Letter Home+Warroom migration+canon audit→v0.8-to-v0.9, Ops Modal+Ghost Map+Exhaustion Clock→v0.9.1.
+- v0.7 now "core complete" not "mostly complete." Status table, Legendary Features table, hit list updated.
+
 **Session 2026-03-30 (Session 2 — Roadmap Restructuring + Implementation Program):**
 - Taskforce session: converted repo-health consolidated audit into sequenced implementation program.
 - **Roadmap renumbered:** v0.8.1 Commander Maturity inserted (belief state, competing intents, decision traces). Political Bot v0.8.1→v0.8.2, Order Interp v0.8.2→v0.8.3, Autonomy v0.8.3→v0.8.4.

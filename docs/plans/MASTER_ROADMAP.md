@@ -54,14 +54,16 @@ Emergent event system (pressure-based triggers, 14 condition types, recurrence).
 ### v0.6.x — Political Wargame (2026-03-23)
 Transformed AWWV from military simulation into political wargame. Calibration framework with automated regression and baseline freeze. 1993-1994 events (42 total), Game Chronicle, AI Commander + Events integration, HQ deep drill-down. 1995 endgame events (20), Dayton dimension merge, Chronicle Wrapped, Staff/Situation Map. 96 historical essays (500 words each, /historian-generated, 5-round QA certified + deep audit). All delivered across v0.6.1-v0.6.4.
 
-### v0.7.0 — Dynamic Codex (2026-03-28, mostly complete)
+### v0.7.0 — Dynamic Codex (2026-03-28, core complete)
 Event flag wiring (25 flags), exhaustion overhaul, Codex QA (30 essay corrections across 3-pass QA). 7 FIXED-to-CONDITIONAL endgame chain. Pool decay system. Contact graph shared_segments enrichment (48 phantom adjacencies filtered). SpatialContext shared spatial layer. 712 OSIDs (32 micro-OSIDs merged). n1211 = 90.2% true baseline with enriched contact graph.
 
-**Remaining v0.7 work (can parallel with v0.8):**
-- v0.7.0.1: Author 13 missing 1992 foundation essays (barracks seizures, Sarajevo siege, JNA withdrawal, Drina cleansing, etc.)
-- v0.7.1: Essay template engine (dynamic_sections, divergence notes, ghost entries) + Codex UI + **Letter Home** (procedural casualty vignettes in CoS briefing). Plans: `docs/plans/2026-03-23-essay-template-engine-plan.md`, `docs/plans/2026-03-25-letter-home-and-essay-authoring-spec.md`
-- v0.7.2: Warroom React migration + **Ghost Map** (1991 census demographics overlay) + **Exhaustion Clock** (visual depletion indicator) + Ops Modal UX Overhaul. Plans: `docs/plans/2026-03-24-v072-warroom-react-migration-plan.md`, `docs/plans/2026-03-25-ghost-map-exhaustion-clock-spec.md`, `docs/40_reports/PROMPT_OPS_MODAL_UX_OVERHAUL.md`
-- v0.7.3: Canon audit (remove September 1991 start, peace phase references from all docs). Plan: `docs/plans/2026-03-23-canon-audit-checklist.md`
+**v0.7 sub-milestones reslotted (2026-03-30):** The following items were open when v0.8 started. They have been moved to their logical homes rather than left as floating "can parallel" debt:
+
+- v0.7.0.1 (13 missing 1992 essays) → **v0.8.0.x parallel track** — pure content, no engine risk
+- v0.7.1 (essay template engine + Letter Home) → **v0.8-to-v0.9** — prerequisite for v0.9.1 dynamic essays
+- v0.7.2 Warroom React migration → **v0.8-to-v0.9** — tech refactor, belongs with simplification
+- v0.7.2 Ops Modal UX Overhaul + Ghost Map + Exhaustion Clock → **v0.9.1** — UI refinement after ops authority is real
+- v0.7.3 (canon audit) → **v0.8-to-v0.9** — doc/code sync, matches that phase's goals
 
 ---
 
@@ -90,6 +92,9 @@ PERCEIVE-DECIDE-EXECUTE per-corps loop. 10 files in `src/sim/combat/commander/` 
 2. Two-tier post-run panel go/no-go on commander system (7 Tier 1 investigators + 5 Tier 2 analysts; Orchestrator issues verdict — see napkin §Post-Run Analysis Protocol)
 3. Old code removal (Step 10) — remove `generateCorpsDirectives`, make `USE_COMMANDER_LOOP` permanent
 4. Railroad cleanup per `docs/40_reports/20260330_RAILROAD_HUNTER_REPORT.md`
+
+**Parallel content track (v0.8.0.x, no engine risk):**
+- v0.7.0.1: Author 13 missing 1992 foundation essays (barracks seizures, Sarajevo siege, JNA withdrawal, Drina cleansing, etc.). Spec: `docs/plans/2026-03-25-letter-home-and-essay-authoring-spec.md`. Assign to `/historian` + `/narrative-designer` — completely independent of engine work.
 
 ### v0.8.1 — Commander Maturity
 
@@ -177,6 +182,9 @@ No version bump — engineering milestone between feature releases. Stabilizatio
 | Magic numbers | bot_constants.ts scattered thresholds | Domain-grouped constant files |
 | Canon docs | Systems Manual and Game Bible reference pre-v0.8 architecture | Updated for v0.8 command chain |
 | Connectivity checks | Column march validates destination but not path; no enclave boundary check during transit | Full path validation |
+| **Essay template engine + Letter Home** | Not built — v0.7.1 debt. Required before v0.9.1 dynamic essays. | Build `dynamic_sections`, divergence notes, ghost entries; Letter Home vignettes in CoS briefing. Plans: `docs/plans/2026-03-23-essay-template-engine-plan.md`, `docs/plans/2026-03-25-letter-home-and-essay-authoring-spec.md` |
+| **Warroom React migration** | Vanilla TS + canvas — v0.7.2 debt. Refactor, not feature work. | Migrate to React. Plan: `docs/plans/2026-03-24-v072-warroom-react-migration-plan.md` |
+| **Canon audit (v0.7.3)** | Sep 1991 start + peace phase refs still live in docs and code | Remove all references. Plan: `docs/plans/2026-03-23-canon-audit-checklist.md` |
 
 ---
 
@@ -201,6 +209,14 @@ Spec: `docs/plans/2026-03-26-cost-ledger-template-format.md`.
 **+ Endgame Comparison** (Legendary Feature): Split-screen your-war-vs-real-war at milestone weeks. Territory, casualties, displacement side by side. "Could I have done better? Could anyone?"
 
 Spec: `docs/plans/2026-03-26-endgame-comparison-data-requirements.md`.
+
+**Gate:** Requires essay template engine (v0.8-to-v0.9) to be complete — dynamic sections and divergence notes depend on it.
+
+**+ Ghost Map** (Legendary Feature, reslotted from v0.7.2): 1991 census demographics overlay beneath current military situation. Shows what the land looked like before the war. Low effort, high interpretive power.
+
+**+ Exhaustion Clock** (Legendary Feature, reslotted from v0.7.2): Visual depletion indicator (candle metaphor) in Army HQ. Shows faction-level exhaustion at a glance.
+
+**+ Ops Modal UX Overhaul** (reslotted from v0.7.2): Redesign the operations panel to reflect the canonical operation object established in v0.8.x-final. Must follow ops authority cleanup — do not build UI on top of split ops state. Spec: `docs/40_reports/PROMPT_OPS_MODAL_UX_OVERHAUL.md`
 
 ### v0.9.2 — External Playtesting + Balance
 
@@ -329,7 +345,7 @@ These need design sessions before implementation. Preserved from the original ro
 | Calibration pipeline | Complete (92.2% area-weighted, n1213) |
 | Desktop app (Electron v41) | Functional |
 | Tactical map (React + MapLibre + Deck.gl) | Functional |
-| Warroom (vanilla TS + canvas) | Functional (React migration planned v0.7.2) |
+| Warroom (vanilla TS + canvas) | Functional (React migration reslotted → v0.8-to-v0.9) |
 | Army HQ (4-tab command center) | Functional |
 | Events/decisions | Functional (94 events, pressure system, 14 condition types) |
 | Historical essays (Codex) | Complete (96 certified, 13 missing 1992 essays pending) |
@@ -341,9 +357,9 @@ These need design sessions before implementation. Preserved from the original ro
 | Order Interpretation | Not started (v0.8.3) |
 | Consequence system | Not started (v0.9.0) |
 | Cost Ledger | Not started (v0.9.0) |
-| Ghost Map | Not started (v0.7.2) |
+| Ghost Map | Not started (v0.9.1) |
 | Map That Scars | Not started (v0.9.4) |
-| Letter Home | Not started (v0.7.1) |
+| Letter Home | Not started (v0.8-to-v0.9) |
 | Refugee Column | Not started (v0.9.4) |
 | Corridor Heartbeat | Not started (v0.9.4) |
 | Endgame Comparison | Not started (v0.9.1) |
@@ -365,9 +381,9 @@ Features that make AWWV 10x more powerful, assigned to specific versions. Source
 
 | Feature | Version | Effort | Description |
 |---------|---------|--------|-------------|
-| **Ghost Map** | v0.7.2 | Low | 1991 census demographics overlay beneath current military situation |
-| **Exhaustion Clock** | v0.7.2 | Low | Visual depletion indicator (candle metaphor) in Army HQ |
-| **Letter Home** | v0.7.1 | Low | Procedural casualty vignettes in CoS briefing |
+| **Ghost Map** | v0.9.1 | Low | 1991 census demographics overlay beneath current military situation |
+| **Exhaustion Clock** | v0.9.1 | Low | Visual depletion indicator (candle metaphor) in Army HQ |
+| **Letter Home** | v0.8-to-v0.9 | Low | Procedural casualty vignettes in CoS briefing |
 | **Patron Phone Call** | v0.8.2 | Medium | 8-12 dramatic patron pressure events with ICTY-sourced dialogue |
 | **Command Chain That Disobeys** | v0.8.3 | High | Officers interpret, delay, refuse orders |
 | **Cost Ledger** | v0.9.0 | Medium | ICTY-style prosecutorial endgame narrative |

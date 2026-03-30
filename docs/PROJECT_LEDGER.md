@@ -16965,6 +16965,25 @@ Added a shared Claude CLI operating layer in `.claude/` to make repo work more s
 - `src/sim/combat/commander/emit.ts` (Fix 1, Fix 2, Fix 4)
 - `src/sim/combat/commander/plan.ts` (Fix 5)
 
+## [2026-03-30] v0.7 Debt Reslotted — Sub-milestones Given Explicit Homes
+
+### Change
+
+Four open v0.7 sub-milestones that had been floating as "can parallel with v0.8" were given explicit roadmap slots:
+
+| Item | From | To |
+|------|------|----|
+| v0.7.0.1 — 13 missing 1992 essays | floating debt | v0.8.0.x parallel content track |
+| v0.7.1 — Essay template engine + Letter Home | floating debt | v0.8-to-v0.9 (prerequisite for v0.9.1) |
+| v0.7.2 — Warroom React migration | floating debt | v0.8-to-v0.9 (tech refactor) |
+| v0.7.2 — Ops Modal UX Overhaul + Ghost Map + Exhaustion Clock | floating debt | v0.9.1 (after ops authority is real) |
+| v0.7.3 — Canon audit | floating debt | v0.8-to-v0.9 (doc/code sync) |
+
+v0.7 now described as "core complete" rather than "mostly complete." Status table, Legendary Features table, and v0.8-to-v0.9 hit list all updated to match.
+
+### Files
+- `docs/plans/MASTER_ROADMAP.md`
+
 ## [2026-03-30] Roadmap Restructuring + Implementation Program (Taskforce Session 2)
 
 ### Change
