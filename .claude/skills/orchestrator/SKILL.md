@@ -47,6 +47,29 @@ A **dispatcher**. You receive the user's intent, break it into questions, send t
 - Questions that need the user's decision.
 - Next actions (who does what).
 
+## Post-Run Calibration Review Protocol
+
+After EVERY scenario run, execute this two-tier panel. Do NOT analyze the run yourself.
+
+### Tier 1 — Investigators (dispatch in parallel, read raw run data)
+- `/scenario-creator-runner-tester` — calibration %, anchors, benchmarks, events, troop strengths, per-region breakdown
+- `/anomaly-triage` — anomaly detector output, pattern analysis, root cause flags
+- `/war-or-game` — realism: would a real commander find this absurd? P0/P1/P2 triage
+- `/operations-expert` — op health: failures, zero-eligible-attacker, staging, idle corps, order counts
+- `/sector-expert` — sector health: empty sectors, density imbalance, assignment gaps
+- `/formation-expert` — OOB: brigade counts, pool drain, dissolution, elite loans, militia spawns
+- `/historian` — historical plausibility: faction behaviour, territory, event timing vs BiH war record
+
+### Tier 2 — Analysts (dispatch after Tier 1 reports; read Tier 1 findings, propose solutions)
+- `/gap-finder` — design gaps implied by findings; **only analyst with authority to dispatch agents and question specialists directly**
+- `/game-designer` — design intent: bug or feature? mechanic consistency
+- `/corps-army-commander` — AI behaviour fixes given ops/sector findings
+- `/modern-wargame-expert` — representation audit: does UI truthfully reflect what the run showed?
+- `/canon-compliance-reviewer` — gate: do proposed solutions violate canon/phase specs?
+
+### Synthesis
+Orchestrator collates all reports, attributes findings ("War-or-Game found X"), gives go/no-go. Update CALIBRATION_MASTER + ledger.
+
 ## Process
 - Follow session startup (napkin, ledger, life lessons).
 - Document decisions in ledger. Thematic knowledge in LEDGER_KNOWLEDGE.

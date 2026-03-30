@@ -3,6 +3,18 @@
 **Purpose:** Persistent lessons-learned record for war-phase calibration (April 1992 onward). 40w primary, 104w force trajectory.
 **Updated:** 2026-03-29 (n1210 — 5 fixes: Visegrad OOB + siege calc + JNA ghosts + sector reassignment + MIN_SECTOR_BRIGADES)
 
+## Review Methodology
+
+Every calibration run is reviewed by a two-tier expert panel before any action is taken.
+
+**Tier 1 — Investigators** (read raw run data, report facts):
+`/scenario-creator-runner-tester`, `/anomaly-triage`, `/war-or-game`, `/operations-expert`, `/sector-expert`, `/formation-expert`, `/historian`
+
+**Tier 2 — Analysts** (read Tier 1 reports, propose solutions):
+`/gap-finder` *(unique authority: may dispatch agents + question specialists directly)*, `/game-designer`, `/corps-army-commander`, `/modern-wargame-expert`, `/canon-compliance-reviewer`
+
+**Orchestrator** synthesizes, gives go/no-go, updates this file + PROJECT_LEDGER.md.
+
 ## n1213 v0.8 CORPS COMMANDER (2026-03-30 Night Shift)
 - **92.2% area-weighted (40w)**. 22/22 anchors PASS. 6/6 benchmarks PASS. Ties ATH (n1146).
 - +2.0pp from n1211 baseline. Commander: PERCEIVE->DECIDE->EXECUTE per-corps loop.

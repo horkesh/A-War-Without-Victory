@@ -117,13 +117,21 @@
 ## Post-Run Analysis Protocol (MANDATORY — orchestrator must not analyze directly)
 After EVERY scenario run, the orchestrator:
 1. **Collect raw data**: Run `compare_painted_vs_sim.cjs`, `diagnose_run.cjs`, `validate_run_consistency.cjs`. Present raw numbers ONLY.
-2. **Dispatch expert panel (in parallel)**:
-   - `/scenario-creator-runner-tester` — full run report: calibration, anchors, benchmarks, events, troop strengths, per-region breakdown, flags
-   - `/war-or-game` — realism assessment: would a real commander find this absurd? P1/P2/P3 triage
-   - `/operations-expert` — operation health: Op failures, staging issues, idle corps, order counts
+2. **Dispatch Tier 1 — Investigators (in parallel)**:
+   - `/scenario-creator-runner-tester` — calibration %, anchors, benchmarks, events, troop strengths, per-region breakdown
+   - `/anomaly-triage` — anomaly detector output, pattern analysis, root cause flags
+   - `/war-or-game` — realism: would a real commander find this absurd? P0/P1/P2 triage
+   - `/operations-expert` — op health: failures, zero-eligible-attacker, staging, idle corps, order counts
    - `/sector-expert` — sector health: empty sectors, density imbalance, assignment gaps
-3. **Cross-review**: Have experts review each other's findings. Formation expert checks elite loan claims. Historian verifies historical claims.
-4. **Synthesize**: Orchestrator collates expert reports, attributes all findings ("War-or-Game found X"), recommends course of action. Does NOT add own analysis.
+   - `/formation-expert` — OOB: brigade counts, pool drain, dissolution, elite loans, militia spawns
+   - `/historian` — historical plausibility: faction behaviour, territory, event timing vs BiH war record
+3. **Dispatch Tier 2 — Analysts (after Tier 1 reports)**:
+   - `/gap-finder` — design gaps implied by findings; **only analyst with authority to dispatch agents and question specialists directly**
+   - `/game-designer` — design intent: bug or feature? mechanic consistency
+   - `/corps-army-commander` — AI behaviour fixes given ops/sector findings
+   - `/modern-wargame-expert` — representation audit: does UI truthfully reflect what the run showed?
+   - `/canon-compliance-reviewer` — gate: do proposed solutions violate canon/phase specs?
+4. **Synthesize**: Orchestrator collates all reports, attributes findings ("War-or-Game found X"), gives go/no-go. Does NOT add own analysis.
 5. **Record**: Update CALIBRATION_MASTER with the run entry.
 
 ## Execution & Validation
