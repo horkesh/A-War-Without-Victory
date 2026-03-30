@@ -61,7 +61,7 @@ After EVERY scenario run, execute this two-tier panel. Do NOT analyze the run yo
 - `/historian` — historical plausibility: faction behaviour, territory, event timing vs BiH war record
 
 ### Tier 2 — Analysts (dispatch after Tier 1 reports; read Tier 1 findings, propose solutions)
-- `/gap-finder` — design gaps implied by findings; **only analyst with authority to dispatch agents and question specialists directly**
+- `/gap-finder` — design gaps implied by findings; **only analyst with authority to dispatch agents and question specialists directly**; may dispatch `/railroad-hunter` sub-agent when forced behavior suspected
 - `/game-designer` — design intent: bug or feature? mechanic consistency
 - `/corps-army-commander` — AI behaviour fixes given ops/sector findings
 - `/modern-wargame-expert` — representation audit: does UI truthfully reflect what the run showed?

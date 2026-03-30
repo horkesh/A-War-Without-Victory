@@ -126,11 +126,12 @@ After EVERY scenario run, the orchestrator:
    - `/formation-expert` — OOB: brigade counts, pool drain, dissolution, elite loans, militia spawns
    - `/historian` — historical plausibility: faction behaviour, territory, event timing vs BiH war record
 3. **Dispatch Tier 2 — Analysts (after Tier 1 reports)**:
-   - `/gap-finder` — design gaps implied by findings; **only analyst with authority to dispatch agents and question specialists directly**
+   - `/gap-finder` — design gaps implied by findings; **only analyst with authority to dispatch agents and question specialists directly**; dispatches `/railroad-hunter` when forced behavior suspected
    - `/game-designer` — design intent: bug or feature? mechanic consistency
    - `/corps-army-commander` — AI behaviour fixes given ops/sector findings
    - `/modern-wargame-expert` — representation audit: does UI truthfully reflect what the run showed?
    - `/canon-compliance-reviewer` — gate: do proposed solutions violate canon/phase specs?
+   > `/railroad-hunter` — Gap Finder's sub-agent only; not a standing panel member. Classifies behavior as EMERGENT / RAILROAD / PARTIAL RAILROAD. Reports to Gap Finder.
 4. **Synthesize**: Orchestrator collates all reports, attributes findings ("War-or-Game found X"), gives go/no-go. Does NOT add own analysis.
 5. **Record**: Update CALIBRATION_MASTER with the run entry.
 
