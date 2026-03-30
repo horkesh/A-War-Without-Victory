@@ -74,9 +74,10 @@ export function detectZones(
         const isMainBody = compIdx === mainBodyCompIdx;
         const zoneId = `zone:${corpsId}:${compIdx}` as ZoneId;
 
-        // Count front edges overlapping this zone
+        // Count front edges overlapping this zone and collect enemy adjacent OSIDs
         let frontEdgeCount = 0;
         const frontOsidsInZone = new Set<string>();
+        const enemyAdjacentSet = new Set<string>();
         for (const sector of sectors) {
             if (sector.corps_id !== corpsId) continue;
             for (const subSeg of sector.sub_segments) {
@@ -90,9 +91,13 @@ export function detectZones(
                 }
                 if (overlapCount > 0) {
                     frontEdgeCount += subSeg.length_edges;
+                    for (const eo of subSeg.enemy_osids) {
+                        enemyAdjacentSet.add(eo);
+                    }
                 }
             }
         }
+        const enemyAdjacentOsids = [...enemyAdjacentSet].sort(strictCompare);
 
         // Compute depth via BFS from front OSIDs inward
         const depth = computeZoneDepth(frontOsidsInZone, zoneOsidSet, spatial);
@@ -128,8 +133,9 @@ export function detectZones(
         const posture = derivePosture(corridorWidth, frontEdgeCount, assignedBrigadeIds.length);
 
         // Compute garrison budget
-        const edgesPerBrigade = getEdgesPerBrigade(posture);
-        const garrisonBudget = frontEdgeCount > 0 ? Math.ceil(frontEdgeCount / edgesPerBrigade) : 0;
+        const garrisonBudget = frontEdgeCount > 0
+            ? Math.ceil(frontEdgeCount / GARRISON_EDGES_PER_BRIGADE[posture])
+            : 0;
 
         // Commitment ratio
         const commitmentRatio = computeCommitmentRatio(frontEdgeCount, assignedBrigadeIds.length);
@@ -158,6 +164,7 @@ export function detectZones(
             surplus_brigades: surplusBrigades,
             deficit,
             is_main_body: isMainBody,
+            enemy_adjacent_osids: enemyAdjacentOsids,
         });
     }
 
@@ -324,9 +331,3 @@ function derivePosture(
     return 'balanced';
 }
 
-/**
- * Get edges-per-brigade constant for a given posture.
- */
-function getEdgesPerBrigade(posture: ZonePosture): number {
-    return GARRISON_EDGES_PER_BRIGADE[posture];
-}

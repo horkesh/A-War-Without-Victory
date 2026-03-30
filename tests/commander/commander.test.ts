@@ -90,6 +90,7 @@ function makeZone(overrides: Partial<ZoneAssessment> = {}): ZoneAssessment {
         surplus_brigades: [],
         deficit: 0,
         is_main_body: true,
+        enemy_adjacent_osids: [],
         ...overrides,
     } as ZoneAssessment;
 }
@@ -869,6 +870,82 @@ describe('plan', () => {
         // Should not create a plan for distant targets when besieged
         expect(result.plan).toBeNull();
         expect(result.action).toBe('none');
+    });
+
+    it('opportunity plan gets non-empty target_osids from zone enemy_adjacent_osids', () => {
+        const zoneId = 'zone:test_corps:0' as ZoneId;
+        const brigIds = ['b1', 'b2', 'b3', 'b4'].map(id => id as FormationId);
+        const zones = [makeZone({
+            zone_id: zoneId,
+            posture: 'projecting',
+            front_edge_count: 20,
+            surplus_brigades: brigIds,
+            assigned_brigades: brigIds,
+            enemy_adjacent_osids: ['op:enemy:e1', 'op:enemy:e2', 'op:enemy:e3'],
+        })];
+        const evals = brigIds.map(id => makeEval({
+            brigade_id: id,
+            current_zone: zoneId,
+            is_combat_effective: true,
+            is_disrupted: false,
+        }));
+        const forces = makeForces(evals, zones);
+
+        const briefing = makeMinimalBriefing({
+            doctrine_stance: 'balanced',
+        });
+
+        const result = managePlan(briefing, zones, forces, evals, null, 10);
+
+        expect(result.action).toBe('created');
+        expect(result.plan).not.toBeNull();
+        expect(result.plan!.source).toBe('opportunity');
+        expect(result.plan!.target_osids.length).toBeGreaterThan(0);
+        // Targets should be a subset of the zone's enemy_adjacent_osids
+        for (const t of result.plan!.target_osids) {
+            expect(['op:enemy:e1', 'op:enemy:e2', 'op:enemy:e3']).toContain(t);
+        }
+    });
+
+    it('should clear executing plan so new plans can be created', () => {
+        const zoneId = 'zone:test_corps:0' as ZoneId;
+        const brigIds = ['b1', 'b2', 'b3', 'b4'].map(id => id as FormationId);
+        const zones = [makeZone({
+            zone_id: zoneId,
+            posture: 'balanced',
+            front_edge_count: 30,
+            surplus_brigades: brigIds,
+            assigned_brigades: brigIds,
+        })];
+        const evals = brigIds.map(id => makeEval({
+            brigade_id: id,
+            current_zone: zoneId,
+            is_combat_effective: true,
+            is_disrupted: false,
+        }));
+        const forces = makeForces(evals, zones);
+        const briefing = makeMinimalBriefing({ doctrine_stance: 'balanced' });
+
+        const executingPlan: CommanderPlan = {
+            plan_id: 'plan_test_t5_opportunity',
+            objective_description: 'offensive opportunity from zone_main',
+            target_osids: [],
+            required_brigades: 4,
+            assigned_brigades: brigIds,
+            staging_zone: zoneId,
+            status: 'executing',
+            created_turn: 5,
+            target_ready_turn: 7,
+            concentration_progress: 1.0,
+            viability_score: 0.8,
+            source: 'opportunity',
+        };
+
+        const result = managePlan(briefing, zones, forces, evals, executingPlan, 10);
+
+        // Executing plan should be cleared (null), not stuck forever
+        expect(result.plan).toBeNull();
+        expect(result.reason).toContain('execution pipeline');
     });
 });
 

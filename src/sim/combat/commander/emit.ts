@@ -120,15 +120,11 @@ export function emitCommanderOutput(
         decisions,
     );
 
-    // 5. Garrison locks directly from allocation
-    const garrisonLocks = allocation.garrison_locks.map(lock => ({
-        brigade_id: lock.brigade_id,
-        zone_id: lock.zone_id,
-        reason: lock.reason,
-    }));
+    // 5. Garrison locks directly from allocation (same shape, pass through)
+    const garrisonLocks = allocation.garrison_locks;
 
     // 6. Reinforcement requests from decisions
-    const reinforcementRequests = [...decisions.reinforcement_requests];
+    const reinforcementRequests = decisions.reinforcement_requests;
 
     // 7. Plan updates from plan decision
     const planUpdates = buildPlanUpdates(planDecision);
@@ -283,14 +279,20 @@ function computeReserveFraction(allocation: AllocationResult, forces: ForceAsses
     return Math.min(MAX_RESERVE_FRACTION, Math.max(0, raw));
 }
 
+/** Posture severity: lower = more constrained. */
+const POSTURE_SEVERITY: Record<ZonePosture, number> = {
+    besieged: 0,
+    defending: 1,
+    balanced: 2,
+    projecting: 3,
+};
+
 /** Compute min attack outcome based on the most constrained (worst) zone posture. */
 function computeMinAttackOutcome(zones: ZoneAssessment[]): CorpsDirective['min_attack_outcome'] {
-    // Find the most constrained posture across all zones
-    const postureOrder: ZonePosture[] = ['besieged', 'defending', 'balanced', 'projecting'];
     let worstPosture: ZonePosture = 'projecting';
 
     for (const zone of zones) {
-        if (postureOrder.indexOf(zone.posture) < postureOrder.indexOf(worstPosture)) {
+        if (POSTURE_SEVERITY[zone.posture] < POSTURE_SEVERITY[worstPosture]) {
             worstPosture = zone.posture;
         }
     }
@@ -498,7 +500,7 @@ function buildOperations(
     if (
         planDecision.plan &&
         ACTIVE_PLAN_STATUSES.has(planDecision.plan.status) &&
-        planDecision.plan.target_osids.length > 0
+        (planDecision.plan.target_osids.length > 0 || planDecision.plan.source === 'opportunity')
     ) {
         const surplusSet = new Set(
             allocation.surplus_pool.map(ev => ev.brigade_id),
@@ -511,7 +513,9 @@ function buildOperations(
 
         if (participatingBrigades.length > 0) {
             const sectorId = findSectorWithMostTargetOverlap(planDecision, briefing);
-            const objectives = [...planDecision.plan.target_osids].sort(strictCompare);
+            const objectives = planDecision.plan.target_osids.length > 0
+                ? [...planDecision.plan.target_osids].sort(strictCompare)
+                : deriveTargetsFromSectors(briefing, Math.floor(participatingBrigades.length * 0.5));
 
             const op: CorpsOperation = {
                 name: `cmd_${briefing.corps_id}_t${briefing.turn}`,
@@ -680,4 +684,23 @@ function buildPlanUpdates(
         action: mappedAction,
         reason: planDecision.reason,
     }];
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// deriveTargetsFromSectors — fallback for opportunity plans with empty targets
+// ═══════════════════════════════════════════════════════════════════════════
+
+function deriveTargetsFromSectors(briefing: CommanderBriefing, maxTargets: number): string[] {
+    const targets = new Set<string>();
+    const corpsSectors = briefing.sectors
+        .filter(s => s.corps_id === briefing.corps_id)
+        .sort((a, b) => strictCompare(a.sector_id, b.sector_id));
+    for (const sector of corpsSectors) {
+        for (const subSeg of sector.sub_segments) {
+            for (const eo of subSeg.enemy_osids) {
+                targets.add(eo);
+            }
+        }
+    }
+    return [...targets].sort(strictCompare).slice(0, Math.max(1, maxTargets));
 }

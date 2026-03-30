@@ -76,6 +76,8 @@ export interface ZoneAssessment {
     readonly deficit: number;
     /** Largest connected component. */
     readonly is_main_body: boolean;
+    /** Enemy OSIDs adjacent to this zone's front (from sector sub_segments). */
+    readonly enemy_adjacent_osids: readonly string[];
 }
 
 // ---------------------------------------------------------------------------

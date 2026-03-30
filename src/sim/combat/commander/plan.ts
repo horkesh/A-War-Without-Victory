@@ -46,9 +46,6 @@ export const MAX_SUSPENSION_TURNS = 3;
 /** Brigades that can concentrate per turn (movement rate). */
 export const PLAN_CONCENTRATION_RATE = 2;
 
-/** Minimum force ratio (attackers / estimated defenders) for opportunity plans. */
-const OPPORTUNITY_FORCE_RATIO = 2.5;
-
 /** Viability score below which a plan is abandoned. */
 const VIABILITY_ABANDON_THRESHOLD = 0.2;
 
@@ -145,6 +142,17 @@ function advanceExistingPlan(
             plan: { ...plan, status: 'suspended', suspension_reason: suspendReason },
             action: 'suspended',
             reason: suspendReason,
+            concentration_orders: [],
+        };
+    }
+
+    // Executing plans have been handed to EMIT — they're done from the planner's perspective.
+    // Clear the plan so new plans can be created next turn.
+    if (plan.status === 'executing') {
+        return {
+            plan: null,
+            action: 'none',
+            reason: 'plan handed to execution pipeline',
             concentration_orders: [],
         };
     }
@@ -357,7 +365,7 @@ function createOpportunityPlan(
         objective_description: isLocal
             ? `local opportunity from ${stagingZone.zone_id}`
             : `offensive opportunity from ${stagingZone.zone_id}`,
-        target_osids: [],  // EMIT phase will determine specific targets
+        target_osids: selectOpportunityTargets(stagingZone, requiredBrigades),
         required_brigades: requiredBrigades,
         assigned_brigades: assignedBrigades,
         staging_zone: stagingZone.zone_id,
@@ -381,6 +389,20 @@ function createOpportunityPlan(
             : `offensive opportunity: ${requiredBrigades} brigades at ${stagingZone.zone_id}`,
         concentration_orders: concentrationOrders,
     };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Helper: select opportunity targets from zone's enemy adjacency
+// ═══════════════════════════════════════════════════════════════════════════
+
+function selectOpportunityTargets(
+    stagingZone: ZoneAssessment,
+    requiredBrigades: number,
+): string[] {
+    const enemyOsids = stagingZone.enemy_adjacent_osids;
+    if (enemyOsids.length === 0) return [];
+    const maxObjectives = Math.max(1, Math.min(6, Math.floor(requiredBrigades * 0.5)));
+    return [...enemyOsids].sort(strictCompare).slice(0, maxObjectives);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
