@@ -15,6 +15,17 @@ Every calibration run is reviewed by a two-tier expert panel before any action i
 
 **Orchestrator** synthesizes, gives go/no-go, updates this file + PROJECT_LEDGER.md.
 
+## n1216 REACHABILITY FILTER + TASKS 1-5 (2026-03-30)
+- **91.8% area-weighted (40w)**. 21/22 anchors PASS (brka_2 FAIL: sim=RS, expected=RBiH). 6/6 benchmarks PASS.
+- 69 battles, 10 silent weeks, longest stretch 2 weeks. **P0 combat drought FIXED at macro level.**
+- `valid_for_combat_calibration: false` — 493 zero-eligible-attacker ops, 1,028 invalid op events.
+- RS w40: 51.3% vs 55.3% target (-4pp, barely within ±5pp tolerance). RS stalls after w21.
+- HRHB: 0 battles, 0 attack orders across 40 weeks. hvo_central_bosnia + hvo_tomislavgrad dead fronts.
+- War-or-Game: **NOT APPROVED**.
+- **4 railroads found:** (1) Slot cap bypass in emit.ts → zombie op accumulation. (2) operation_history never written → same objectives planned forever. (3) No brigade cooldown → 5th Corps Bihać paralysis (7 brigades stuck at brekovica_2 × 6 op generations). (4) initial_strength not set → power-attrition abort dead.
+- **6 fixes proposed** (see ledger 2026-03-30). Priority: Fix 1 (slot cap) → Fix 4 (initial_strength) → Fix 2 (op history) → Fix 5 (besieged gate) → Fix 6 (HRHB stance) → Fix 3 (brigade cooldown).
+- Files: `src/sim/combat/commander/emit.ts`, `plan.ts`, `decide.ts`.
+
 ## n1213 v0.8 CORPS COMMANDER (2026-03-30 Night Shift)
 - **92.2% area-weighted (40w)**. 22/22 anchors PASS. 6/6 benchmarks PASS. Ties ATH (n1146).
 - +2.0pp from n1211 baseline. Commander: PERCEIVE->DECIDE->EXECUTE per-corps loop.

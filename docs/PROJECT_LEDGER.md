@@ -1,3 +1,26 @@
+## [2026-03-30] n1216 Post-Run Panel — 4 Railroads Identified, 6 Fixes Proposed
+
+### Run: n1216 (a48f8ac4 + reachability filter)
+- **91.8% area-weighted** | 21/22 anchors | 6/6 benchmarks | 69 battles | longest stretch: 2 weeks
+- P0 combat drought **FIXED at macro level** by Tasks 1-5
+- RS w40: 51.3% (target 55.3%, -4pp, barely within tolerance)
+- `valid_for_combat_calibration: false` — 493 zero-eligible-attacker operations, 1,028 invalid op events
+- War-or-Game: **NOT APPROVED**
+
+### Panel Findings
+**Tier 1:** Scenario tester (91.8%, 21/22, 6/6), War-or-Game (P0-A/B/C/D), Operations Expert (18 zero-attack ops, zombie accumulation), Anomaly Triage (40 vrs_2nd_krajina ops spawned, none fired), Formation Expert (4 elite loans 0 battles), Sector Expert (57 sectors, hrhb_travnik unassigned), Historian (VRS silent 19w, HRHB 0 battles — both CRITICAL anachronisms)
+
+**Tier 2 / Railroad Hunter — 4 railroads found:**
+1. **P0 RAILROAD**: `emit.ts buildOperations` bypasses slot cap → zombie op accumulation (vrs_2nd_krajina: 40 ops / 40 weeks, 7 simultaneous)
+2. **P0 RAILROAD**: `operation_history` never written → zero-attack failures never remembered → same objectives planned forever
+3. **P0 PARTIAL RAILROAD**: No brigade cooldown after op participation → same brigades re-assigned every generation (5th Corps Bihać paralysis)
+4. **P1 DEAD CODE**: `initial_strength` not set on commander ops → power-attrition abort gate never fires
+
+**Canon Compliance:** All 6 fixes COMPLIANT (Fix 3 ambiguous re: HRHB passivity, Fix 6 conditional on blockage investigation)
+
+### Next
+Implement Fixes 1+4 (pure correctness) → Fix 2 (op history) → Fix 5 (besieged gate) → investigate HRHB blockage layer → Fix 6.
+
 ## [2026-03-30] P0 Tasks 5 — Balanced Zone Opportunity Ops + Target Preservation (20142315)
 
 ### Change
