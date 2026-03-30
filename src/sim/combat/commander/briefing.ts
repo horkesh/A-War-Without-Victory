@@ -14,6 +14,7 @@ import type {
     FormationState,
     GameState,
     CorpsFrontSector,
+    CorpsOperation,
 } from '../../../state/game_state.js';
 import type { OperationalToCanonicalReverseMap } from '../../../data/operational_data_types.js';
 import type { OsidEthnicComposition } from '../ethnic_defense.js';
@@ -169,6 +170,19 @@ function getPrePlannedOps(
     return cmd.queued_operations ?? [];
 }
 
+/**
+ * Get active operations currently running for a corps.
+ * Used by the commander loop to derive offensive_targets when no plan is active.
+ */
+function getActiveOperations(
+    state: GameState,
+    corpsId: FormationId,
+): readonly CorpsOperation[] {
+    const cmd = state.military.corps_command?.[corpsId];
+    if (!cmd) return [];
+    return cmd.active_operations ?? [];
+}
+
 // ---------------------------------------------------------------------------
 // Intel data (stub — collect what exists)
 // ---------------------------------------------------------------------------
@@ -270,7 +284,10 @@ export function buildBriefing(
     // 9. Previous commander state from last turn's persisted state
     const previousState = corpsCmd?.commander_state ?? null;
 
-    // 10. Assemble briefing
+    // 10. Active operations currently in the field (needed by emit for RC1 fallback)
+    const activeOperations = getActiveOperations(state, corpsId);
+
+    // 11. Assemble briefing
     return {
         corps_id: corpsId,
         faction,
@@ -288,5 +305,6 @@ export function buildBriefing(
         officer_personality: personality,
         pre_planned_ops: prePlannedOps,
         previous_state: previousState,
+        active_operations: activeOperations,
     };
 }

@@ -156,8 +156,8 @@ function buildDirective(
     // assigned_front_ids: all edge IDs from all sectors for this corps
     const assignedFrontIds = collectAssignedFrontIds(briefing);
 
-    // offensive_targets: from plan's target_osids if plan is executing, else empty
-    const offensiveTargets = buildOffensiveTargets(planDecision);
+    // offensive_targets: from plan's target_osids if plan is executing, else fall back to active ops
+    const offensiveTargets = buildOffensiveTargets(planDecision, briefing);
 
     // hold_osids: front OSIDs in zones with posture 'besieged' or 'defending'
     const holdOsids = buildHoldOsids(zones, briefing);
@@ -223,14 +223,34 @@ function collectAssignedFrontIds(briefing: CommanderBriefing): string[] {
     return [...edgeIds].sort(strictCompare);
 }
 
-/** Build offensive targets from plan if plan is executing/ready, else empty. */
-function buildOffensiveTargets(planDecision: PlanDecision): string[] {
+/** Build offensive targets from plan if plan is executing/ready.
+ *  RC1 fix: when no active plan, fall back to objectives from operations already
+ *  in the field — prevents the directive losing targets after plan hands off
+ *  to the execution pipeline and gets cleared to null. */
+function buildOffensiveTargets(
+    planDecision: PlanDecision,
+    briefing: CommanderBriefing,
+): string[] {
     if (
         planDecision.plan &&
         ACTIVE_PLAN_STATUSES.has(planDecision.plan.status)
     ) {
         return [...planDecision.plan.target_osids].sort(strictCompare);
     }
+
+    // RC1: no live plan — derive targets from any operation currently executing
+    const executingObjectives = new Set<string>();
+    for (const op of briefing.active_operations) {
+        if (op.phase === 'execution' || op.phase === 'planning') {
+            for (const obj of op.objectives ?? []) {
+                executingObjectives.add(obj);
+            }
+        }
+    }
+    if (executingObjectives.size > 0) {
+        return [...executingObjectives].sort(strictCompare);
+    }
+
     return [];
 }
 
@@ -500,34 +520,40 @@ function buildOperations(
             .filter(id => surplusSet.has(id))
             .sort(strictCompare);
 
-        if (participatingBrigades.length > 0) {
-            const sectorId = findSectorWithMostTargetOverlap(planDecision, briefing);
-            const objectives = planDecision.plan.target_osids.length > 0
-                ? [...planDecision.plan.target_osids].sort(strictCompare)
-                : deriveTargetsFromSectors(briefing, Math.floor(participatingBrigades.length * 0.5));
-
-            const op: CorpsOperation = {
-                name: `cmd_${briefing.corps_id}_t${briefing.turn}`,
-                type: 'sector_attack',
-                phase: 'planning',
-                started_turn: briefing.turn,
-                phase_started_turn: briefing.turn,
-                participating_brigades: participatingBrigades,
-                sector_id: sectorId ?? undefined,
-                objectives,
-                current_objective_index: 0,
-                planning_duration: 1,
-                supply_readiness: 1.0,
-                momentum: 0,
-                failure_count: 0,
-                consecutive_failures_on_current: 0,
-                attack_attempt_count: 0,
-                objective_capture_count: 0,
-                movement_only_execution_turns: 0,
-                idle_execution_turn_streak: 0,
-            };
-            ops.push(op);
+        // RC3: guard — never inject an operation with zero participants.
+        // This happens when all assigned brigades have been rotated out of the
+        // surplus pool between plan creation and launch.
+        if (participatingBrigades.length === 0) {
+            // Skip: no participants available from surplus pool — operation would stall.
+            return ops;
         }
+
+        const sectorId = findSectorWithMostTargetOverlap(planDecision, briefing);
+        const objectives = planDecision.plan.target_osids.length > 0
+            ? [...planDecision.plan.target_osids].sort(strictCompare)
+            : deriveTargetsFromSectors(briefing, Math.floor(participatingBrigades.length * 0.5));
+
+        const op: CorpsOperation = {
+            name: `cmd_${briefing.corps_id}_t${briefing.turn}`,
+            type: 'sector_attack',
+            phase: 'planning',
+            started_turn: briefing.turn,
+            phase_started_turn: briefing.turn,
+            participating_brigades: participatingBrigades,
+            sector_id: sectorId ?? undefined,
+            objectives,
+            current_objective_index: 0,
+            planning_duration: 1,
+            supply_readiness: 1.0,
+            momentum: 0,
+            failure_count: 0,
+            consecutive_failures_on_current: 0,
+            attack_attempt_count: 0,
+            objective_capture_count: 0,
+            movement_only_execution_turns: 0,
+            idle_execution_turn_streak: 0,
+        };
+        ops.push(op);
     }
 
     // If no plan but surplus and high-initiative commander: probe weak positions
@@ -691,5 +717,15 @@ function deriveTargetsFromSectors(briefing: CommanderBriefing, maxTargets: numbe
             }
         }
     }
+
+    // RC2: if sector scan yielded nothing, fall back to active operation objectives
+    if (targets.size === 0) {
+        for (const op of briefing.active_operations) {
+            for (const obj of op.objectives ?? []) {
+                targets.add(obj);
+            }
+        }
+    }
+
     return [...targets].sort(strictCompare).slice(0, Math.max(1, maxTargets));
 }

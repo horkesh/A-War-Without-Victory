@@ -275,6 +275,8 @@ export interface CommanderBriefing {
     readonly pre_planned_ops: readonly unknown[];
     /** Last turn's state for continuity. */
     readonly previous_state: CommanderState | null;
+    /** Active operations currently running for this corps (from CorpsCommandState). */
+    readonly active_operations: readonly CorpsOperation[];
 }
 
 // ---------------------------------------------------------------------------

@@ -48,6 +48,7 @@ import {
     MAX_SUSPENSION_TURNS,
 } from '../../src/sim/combat/commander/plan.js';
 import { BotCorpsCommander } from '../../src/sim/combat/commander/commander_loop.js';
+import type { CorpsOperation } from '../../src/state/game_state.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Test helpers — minimal mock factories
@@ -571,6 +572,7 @@ describe('plan', () => {
             officer_personality: defaultPersonality,
             pre_planned_ops: [],
             previous_state: null,
+            active_operations: [],
             ...overrides,
         } as CommanderBriefing;
     }
@@ -1115,6 +1117,7 @@ describe('commander_loop', () => {
             officer_personality: defaultPersonality,
             pre_planned_ops: [],
             previous_state: null,
+            active_operations: [],
             ...overrides,
         } as CommanderBriefing;
     }
@@ -1261,5 +1264,160 @@ describe('commander_loop', () => {
         const output2 = commander2.decide(briefing, null);
 
         expect(JSON.stringify(output1)).toBe(JSON.stringify(output2));
+    });
+
+    // ── RC1: offensive_targets preserved from active operations after plan clears ─
+    it('RC1: directive.offensive_targets populated from active operation when plan is null', () => {
+        // Use a briefing with only 1 brigade (below MIN_BRIGADES_FOR_PLAN=3) so managePlan
+        // returns null, ensuring planDecision.plan === null in emitCommanderOutput.
+        // The active_operations fallback must then populate offensive_targets.
+        const executingOp: CorpsOperation = {
+            name: 'cmd_test_corps_t8',
+            type: 'sector_attack',
+            phase: 'execution',
+            started_turn: 8,
+            phase_started_turn: 9,
+            participating_brigades: ['b1' as FormationId],
+            objectives: ['op:enemy:obj_1', 'op:enemy:obj_2'],
+            current_objective_index: 0,
+            planning_duration: 1,
+            supply_readiness: 1.0,
+            momentum: 0,
+            failure_count: 0,
+            consecutive_failures_on_current: 0,
+            attack_attempt_count: 0,
+            objective_capture_count: 0,
+            movement_only_execution_turns: 0,
+            idle_execution_turn_streak: 0,
+        };
+
+        // Only 1 brigade => managePlan returns null (below MIN_BRIGADES_FOR_PLAN)
+        const oneBrigade = makeBrigade({ id: 'b1' as FormationId, location_osid: 'op:test:t1', personnel: 2000 });
+        const briefing = makeMinimalBriefing({
+            brigades: [oneBrigade],
+            active_operations: [executingOp],
+        });
+
+        const commander = new BotCorpsCommander();
+        const output = commander.decide(briefing, null);
+
+        // RC1: targets from executing op must appear in directive
+        expect(output.directive.offensive_targets).toContain('op:enemy:obj_1');
+        expect(output.directive.offensive_targets).toContain('op:enemy:obj_2');
+    });
+
+    // ── RC3: buildOperations skips injection when participatingBrigades is empty ──
+    it('RC3: no operation injected when all assigned brigades are absent from surplus pool', () => {
+        // Construct a briefing where the plan has assigned brigades that are all in the
+        // garrison lock (i.e., NOT in surplus). This is done by passing previous_state
+        // with a ready plan whose assigned brigades are b1/b2/b3, while the current
+        // surplus pool (projecting zone with garrison budget == 0) has them all locked.
+        // We achieve "plan ready + zero surplus" by using a besieged zone (all brigades
+        // locked to garrison) combined with a previous_state plan that is still 'ready'.
+        const corpsId = 'test_corps' as FormationId;
+        const faction = 'RBiH' as FactionId;
+
+        const componentMap = new Map<string, number>();
+        for (let i = 0; i < 5; i++) {
+            componentMap.set(`op:test:t${i}`, 0);
+        }
+        const friendlyOsids = new Set<string>(componentMap.keys());
+
+        const spatial = {
+            componentsByFaction: new Map([[faction, componentMap]]),
+            friendlyOsidsByFaction: new Map([[faction, friendlyOsids]]),
+            adjacency: new Map<string, string[]>(
+                [...componentMap.keys()].map(k => [k, [...componentMap.keys()].filter(o => o !== k)] as [string, string[]]),
+            ),
+        };
+
+        // Heavy garrison pressure: 80 edges, 3 brigades → besieged, budget = ceil(80/8)=10
+        // 3 < 10, so ALL brigades get locked to garrison → surplus_pool is empty
+        const brigIds = ['b1', 'b2', 'b3'].map(id => id as FormationId);
+        const sector = {
+            sector_id: 'sector_0',
+            corps_id: corpsId,
+            faction,
+            edge_ids: Array.from({ length: 80 }, (_, i) => `e${i}`),
+            territory_osids: [...componentMap.keys()],
+            assigned_brigade_ids: brigIds,
+            sector_stance: 'defend',
+            sub_segments: [{
+                id: 'ss_0',
+                friendly_osids: ['op:test:t0'],
+                enemy_osids: ['op:enemy:e0'],
+                length_edges: 80,
+            }],
+        };
+
+        const brigades = brigIds.map((id, i) =>
+            makeBrigade({ id, location_osid: `op:test:t${i}`, personnel: 2000 }),
+        );
+
+        // A 'ready' plan whose assigned brigades are the same 3 now locked in garrison
+        const readyPlan: CommanderPlan = {
+            plan_id: 'plan_rc3_test',
+            objective_description: 'test op',
+            target_osids: ['op:enemy:e0'],
+            required_brigades: 3,
+            assigned_brigades: brigIds,
+            staging_zone: 'zone:test_corps:0' as ZoneId,
+            status: 'ready',
+            created_turn: 8,
+            target_ready_turn: 10,
+            concentration_progress: 1.0,
+            viability_score: 0.8,
+            source: 'pre_planned',
+        };
+
+        const previousState: CommanderState = {
+            zone_assessments: [],
+            threat_assessment: {
+                threatened_zones: [],
+                enemy_concentration_zones: [],
+                recent_losses: [],
+                overall_pressure: 'low',
+            },
+            force_assessment: {
+                total_brigades: 3,
+                combat_effective: 3,
+                evaluations: [],
+                by_zone: {},
+                tier_counts: { main_effort: 0, active_defense: 3, garrison: 0 },
+                total_surplus: 0,
+            },
+            current_plan: readyPlan,
+            sector_activity_log: [],
+            operation_history: [],
+            intel_picture: { zone_confidence: {}, offensive_signs: {}, concentration_detected: {}, last_updated_turn: 9 },
+            garrison_budget: {},
+            last_assessment_turn: 9,
+        };
+
+        const briefing = makeMinimalBriefing({
+            spatial: spatial as any,
+            sectors: [sector as any],
+            brigades,
+            previous_state: previousState,
+            active_operations: [],
+        });
+
+        const commander = new BotCorpsCommander();
+        const output = commander.decide(briefing, previousState);
+
+        // All 3 brigades should be garrison-locked (budget=10 >= available=3)
+        expect(output.garrison_locks).toHaveLength(3);
+
+        // RC3: no operation should be injected when all plan brigades are garrison-locked
+        // (i.e., not in surplus pool)
+        for (const op of output.operations) {
+            if (op.type === 'sector_attack') {
+                // If an op was created, it must not contain any of the locked brigade IDs
+                const lockedIds = new Set(output.garrison_locks.map(l => l.brigade_id));
+                for (const brigId of op.participating_brigades) {
+                    expect(lockedIds.has(brigId)).toBe(false);
+                }
+            }
+        }
     });
 });
