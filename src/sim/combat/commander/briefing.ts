@@ -268,8 +268,10 @@ export function buildBriefing(
     // 8. Pre-planned operations
     const prePlannedOps = getPrePlannedOps(state, corpsId);
 
-    // 9. Assemble briefing
-    // previous_state is null here — commander_loop.ts reads it from corps_command separately
+    // 9. Previous commander state from last turn's persisted state
+    const previousState = corpsCmd?.commander_state ?? null;
+
+    // 10. Assemble briefing
     return {
         corps_id: corpsId,
         faction,
@@ -286,6 +288,6 @@ export function buildBriefing(
         corps_stance: corpsStance,
         officer_personality: personality,
         pre_planned_ops: prePlannedOps,
-        previous_state: null,
+        previous_state: previousState,
     };
 }
