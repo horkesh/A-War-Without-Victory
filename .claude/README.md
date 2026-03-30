@@ -90,6 +90,13 @@ Additional shared Claude CLI support lives in:
 - `agents/` - reusable agent briefs for taskforce-style work
 - `commands/` - slash-command prompts for repeatable workflows such as checkpoints and taskforce mode
 - `settings.json` - shared hook reminders and orchestration guardrails
+- `.githooks/` - local git hooks for governance enforcement
+
+Important governance docs also live in:
+
+- `docs/20_engineering/ROADMAP_GOVERNANCE.md`
+- `docs/20_engineering/COMMAND_AUTHORITY_GATES.md`
+- `docs/30_planning/_task_artifacts/ACTIVE_TASK_GOVERNANCE.md`
 
 ## Notes
 

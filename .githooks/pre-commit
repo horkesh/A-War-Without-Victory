@@ -1,0 +1,11 @@
+#!/bin/sh
+
+powershell -NoProfile -ExecutionPolicy Bypass -File "scripts/repo/check_claude_governance.ps1" -Staged
+status=$?
+
+if [ $status -ne 0 ]; then
+  echo "Claude governance check failed. Update docs/30_planning/_task_artifacts/ACTIVE_TASK_GOVERNANCE.md before committing."
+  exit $status
+fi
+
+exit 0

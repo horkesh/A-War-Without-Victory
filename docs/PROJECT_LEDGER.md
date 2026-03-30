@@ -16914,6 +16914,10 @@ Added a shared Claude CLI operating layer in `.claude/` to make repo work more s
 
 **Shared hook discipline:** expanded `.claude/settings.json` with PostToolUse reminders for Edit/Write/MultiEdit/Bash to push self-correction, checkpointing, and singular-ownership thinking during live sessions.
 
+**Hard governance layer:** added `docs/20_engineering/ROADMAP_GOVERNANCE.md`, `docs/20_engineering/COMMAND_AUTHORITY_GATES.md`, and `.claude/commands/roadmap-patch.md` so roadmap edits and command-system work are governed by explicit repo-local rules rather than relying on chat memory.
+
+**Blocking governance enforcement:** added `docs/30_planning/_task_artifacts/ACTIVE_TASK_GOVERNANCE.md`, `.claude/commands/governance-review.md`, `scripts/repo/check_claude_governance.ps1`, and `.githooks/pre-commit`. Configured `git config core.hooksPath .githooks` so governed commits now fail if the active governance artifact is missing required sections.
+
 **Documentation alignment:** updated `.claude/README.md` and the consolidated repo-health audit to include Claude CLI operating rules, owner checklist usage, and direct roadmap patch guidance.
 
 ### Purpose

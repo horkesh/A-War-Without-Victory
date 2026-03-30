@@ -6,6 +6,8 @@
 
 **Master files:** Calibration → `docs/40_reports/CALIBRATION_MASTER.md`; GUI (map + warroom) → `docs/40_reports/GUI_MASTER.md`; Warroom → `docs/40_reports/WARROOM_MASTER.md`; Real War → `docs/40_reports/REAL_WAR_MASTER.md`; Sectors → `docs/40_reports/SECTOR_MASTER.md`; **Bosniak-Croat Conflict → `docs/40_reports/BOSNIAK_CROAT_CONFLICT_MASTER.md`**. Do instead: When doing calibration, GUI, warroom, sector, realism, or HRHB-RBiH conflict work, read the relevant master first and update it during the session.
 
+**Governing docs (read for any architecture, roadmap, or commander work):** Roadmap → `docs/plans/MASTER_ROADMAP.md` (single source of truth for all milestones, sequencing, and done-means). Repo health + commander intelligence audit → `docs/40_reports/audits/20260330_REPO_HEALTH_CONSOLIDATED.md` (external findings on overlapping ownership, commander maturity requirements, workstream sequencing — treat as a standing brief, not a one-time read).
+
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
 ## Current State (2026-03-30, v0.8.0 Commander System on main)
