@@ -1,3 +1,7 @@
+> **SUPERSEDED** — This document was the v0.6.x roadmap. It has been superseded by [`docs/plans/MASTER_ROADMAP.md`](MASTER_ROADMAP.md) as of 2026-03-30. Do not update this file.
+
+---
+
 # v0.6.x Master Roadmap — The Political War
 
 **Date:** 2026-03-22
