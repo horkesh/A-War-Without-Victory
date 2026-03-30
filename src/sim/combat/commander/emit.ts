@@ -17,6 +17,7 @@ import type {
 } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { spatialFriendlyDistance } from '../../spatial_context.js';
+import { getMaxOperationSlots } from '../corps_operation_helpers.js';
 import type {
     CommanderBriefing,
     CommanderOutput,
@@ -515,6 +516,11 @@ function buildOperations(
         ACTIVE_PLAN_STATUSES.has(planDecision.plan.status) &&
         (planDecision.plan.target_osids.length > 0 || planDecision.plan.source === 'opportunity')
     ) {
+        // Slot cap guard: don't emit a new op if corps is already at capacity.
+        // Mirrors hasAvailableSlot() used in bot_corps_directives / bot_corps_operations.
+        if (briefing.active_operations.length >= getMaxOperationSlots(briefing.brigades.length)) {
+            return ops;
+        }
         const surplusSet = new Set(
             allocation.surplus_pool.map(ev => ev.brigade_id),
         );
@@ -585,6 +591,10 @@ function buildOperations(
             ? [...planDecision.plan.target_osids].sort(strictCompare)
             : deriveTargetsFromSectors(briefing, Math.floor(participatingBrigades.length * 0.5));
 
+        // Build a personnel lookup for initial_strength calculation.
+        const personnelById = new Map<string, number>();
+        for (const b of briefing.brigades) personnelById.set(b.id, b.personnel ?? 0);
+
         const op: CorpsOperation = {
             name: `cmd_${briefing.corps_id}_t${briefing.turn}`,
             type: 'sector_attack',
@@ -604,6 +614,11 @@ function buildOperations(
             objective_capture_count: 0,
             movement_only_execution_turns: 0,
             idle_execution_turn_streak: 0,
+            // Set at emit time so power-attrition abort gate fires correctly for
+            // commander-generated ops (operation_aar.ts skips the write when already set).
+            initial_strength: participatingBrigades.reduce(
+                (sum, id) => sum + (personnelById.get(id) ?? 0), 0,
+            ),
         };
         ops.push(op);
     }
@@ -613,7 +628,8 @@ function buildOperations(
         ops.length === 0 &&
         allocation.can_launch_ops &&
         allocation.surplus_pool.length > 0 &&
-        personality.initiative > 0.3
+        personality.initiative > 0.3 &&
+        briefing.active_operations.length < getMaxOperationSlots(briefing.brigades.length)
     ) {
         // Probe operations use a single surplus brigade on the weakest enemy position.
         // The actual probe target selection is left to sector_offensive downstream;
