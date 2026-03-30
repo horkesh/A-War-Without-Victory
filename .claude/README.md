@@ -85,6 +85,12 @@ Each skill directory contains:
 - `SKILL.md` - Main skill definition with metadata and instructions
 - Supporting files (*.md, *.ts, *.sh, *.dot) - Additional documentation and examples
 
+Additional shared Claude CLI support lives in:
+
+- `agents/` - reusable agent briefs for taskforce-style work
+- `commands/` - slash-command prompts for repeatable workflows such as checkpoints and taskforce mode
+- `settings.json` - shared hook reminders and orchestration guardrails
+
 ## Notes
 
 - Skills maintain the same structure as Cursor skills for consistency

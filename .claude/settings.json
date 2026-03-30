@@ -2,6 +2,39 @@
   "hooks": {
     "PostToolUse": [
       {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"SELF-CORRECTION REMINDER: After editing files, check for overlapping ownership, stale paths, fake flexibility, missing canonical/transitional comments, and UI/engine truth drift. Prefer singular ownership. If progress is meaningful, checkpoint it before continuing.\"}}'",
+            "timeout": 5,
+            "statusMessage": "Checking self-correction discipline..."
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"SELF-CORRECTION REMINDER: After writing files, check for overlapping ownership, stale paths, fake flexibility, missing canonical/transitional comments, and UI/engine truth drift. Prefer singular ownership. If progress is meaningful, checkpoint it before continuing.\"}}'",
+            "timeout": 5,
+            "statusMessage": "Checking self-correction discipline..."
+          }
+        ]
+      },
+      {
+        "matcher": "MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"SELF-CORRECTION REMINDER: After multi-file edits, verify canonical owner, demoted path, done means, and the UI/report surface that reflects the new truth. Checkpoint the work before continuing if the loop was meaningful.\"}}'",
+            "timeout": 5,
+            "statusMessage": "Checking self-correction discipline..."
+          }
+        ]
+      },
+      {
         "matcher": "Bash",
         "hooks": [
           {
@@ -9,6 +42,12 @@
             "command": "jq -r '.tool_response // \"\"' | grep -qiE '(area-weighted match|compare_painted_vs_sim|final_state_hash|run_summary\\.json|anchor_checks)' && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"ORCHESTRATOR ENFORCEMENT: This Bash output contains scenario run results. You MUST dispatch /war-or-game and /scenario-creator-runner-tester to analyze these results BEFORE presenting any interpretation to the user. Present raw numbers only. All analysis must be attributed to experts.\"}}' || true",
             "timeout": 5,
             "statusMessage": "Checking orchestrator enforcement..."
+          },
+          {
+            "type": "command",
+            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"LOOP DISCIPLINE REMINDER: If the last command changed state, verified progress, or produced a milestone result, update the active report/plan/working note with a short checkpoint before moving on.\"}}'",
+            "timeout": 5,
+            "statusMessage": "Checking checkpoint discipline..."
           }
         ]
       }
