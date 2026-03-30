@@ -10,7 +10,7 @@
 
 ## Current State (2026-03-30, v0.8.0 Commander System on main)
 **n1213: 92.2% area-weighted (40w, ties ATH). Commander system live behind USE_COMMANDER_LOOP flag. 11 commits, 41 tests.**
-**P0: war goes silent after w20 (19 zero-combat weeks). War-or-Game: NOT APPROVED.**
+**P0: Tasks 1-4 complete (lifecycle, targets, previous_state, doctrine removal). Task 5 next: calibration + balanced zone expansion.**
 
 **[MERGED] Concurrent corps operations.** `active_operations[]` replaces `active_operation`. Slot cap floor(brigades/12). 7 helpers. Emergency defense overflow. Bot secondary op guard. Save migration v1→v2. 84 files, +1459/-525.
 **[MERGED] Krajina paramilitary scope.** 6 municipalities added to RS offensive sweep. MAX_POCKET_CLUSTER 3→6. +3.0pp.
@@ -43,6 +43,12 @@
 **[OPEN] 68+ brigade drifts.** Structural feedback loop identified but fix approach wrong.
 **[OPEN] Gap finder remaining design gaps:**
 - P2: Attack-through stall counter, corridor terrain broad-front, reinforcement corridor safety, sectors stale after combat.
+
+**Session 2026-03-30 (Session 1 — Recovery + Roadmap + P0 Task 4):**
+- Session recovered from crash. working-on.md preserved context. No work lost.
+- MASTER_ROADMAP.md created (unified roadmap v0.1→v1.0+). VERSIONING.md trimmed to scheme-only. Supersession notices added to 2 stale plans. Memory updated.
+- P0 Task 4 committed: doctrine phase railroads removed from commander (plan.ts gate, emit.ts aggression modifier, briefing.ts hardcoded 'balanced'). Test added.
+- 6 commits ahead of origin/main. Next: Task 5 calibration run + balanced zone expansion.
 
 **Session 2026-03-29 (Session 3 — Concurrent Ops + Krajina, n1210→n1211):**
 - Concurrent corps operations merged (84 files, +1459/-525). Save migration v1→v2. Krajina paramilitary scope (+6 muns, MAX_POCKET_CLUSTER 3→6). 2 new anomaly checks (#27, #28). Net: +3.2pp from n1210.
@@ -105,6 +111,8 @@
    Do instead: Run `CronList` at session start. Crons are session-only and auto-expire after 3 days. **Re-schedule every session.** Two required crons:
    **(A) Daily Pyrrhic Standup** — cron `27 6 * * *`. Invokes /orchestrator to convene Pyrrhic team. Three phases: (1) Yesterday's retrospective (good/bad/ugly from `git log --since=24h`, ledger, life lessons), (2) Fresh game analysis (CALIBRATION_MASTER, REAL_WAR_MASTER, War-or-Game assessment), (3) Today's priorities — plan big and ambitious (3-5 items a team of AI agents can accomplish). Present everything via /visual-explainer as a war room briefing board. Full prompt stored in `memory/cron_daily_standup.md`.
    **(B) Life-lessons review** — cron `3 6 * * *`. Gather 24h git activity, detect life-lesson violations, synthesize new lessons, promote/demote, generate visual report via `/visual-explainer`.
+3. **[2026-03-30] Write working-on.md at session START — ALWAYS**
+   Do instead: Before writing any code, create `working-on.md` at project root capturing: what you're working on, current state, open tasks. Update it at each commit. Delete only at session closeout. This is a crash-recovery artifact — if the session dies, the next session reads it first. Do NOT wait until session end to write it.
 
 ## Post-Run Analysis Protocol (MANDATORY — orchestrator must not analyze directly)
 After EVERY scenario run, the orchestrator:
