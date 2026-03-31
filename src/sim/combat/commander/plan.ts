@@ -131,7 +131,12 @@ export function managePlan(
         return advanceExistingPlan(briefing, zones, forces, surplusPool, previousPlan, turn);
     }
 
-    // No existing plan — evaluate whether to create one
+    // No existing plan — evaluate whether to create one.
+    // Defensive / reorganizing corps do not initiate new offensive plans.
+    if (briefing.corps_stance === 'defensive' || briefing.corps_stance === 'reorganize') {
+        return { plan: null, action: 'none', reason: `corps in ${briefing.corps_stance} stance — no new plans`, concentration_orders: [] };
+    }
+
     // Priority 1: pre-planned operations
     const prePlannedDecision = tryCreateFromPrePlanned(briefing, zones, surplusPool, turn);
     if (prePlannedDecision) return prePlannedDecision;

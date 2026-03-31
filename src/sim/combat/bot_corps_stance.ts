@@ -207,6 +207,15 @@ export function generateCorpsStanceOrders(
                     }
                 }
             }
+            // E3: HVO Central Bosnia — no offensive ops until RBiH-HRHB war begins.
+            // Historically Blaskic's forces held defensive positions vs VRS in 1992;
+            // offensive activity only emerged after the Croat-Bosniak war started.
+            if (corps.id === 'hvo_central_bosnia') {
+                const rbihHrhbWarStarted = state.political.rbih_hrhb_state?.war_started_turn != null;
+                if (!rbihHrhbWarStarted) {
+                    stance = 'defensive';
+                }
+            }
         }
 
         // Patron directive ceiling: Zagreb's political orders constrain HVO corps stances

@@ -1,3 +1,31 @@
+## [2026-03-31] n1250–n1251 — HVO CB defensive gate; 93.6% new ATH
+
+### Summary
+Two fixes: (1) hvo_central_bosnia forced to defensive stance before RBiH-HRHB war starts; (2) defensive/reorganize corps skip new plan creation in commander. n1251: **93.6% (new ATH)**, anomalies 65→47, zero_exec 14→10, orphans 28→15.
+
+### Changes
+
+**1. hvo_central_bosnia pre-war stance gate (bot_corps_stance.ts)**
+- Added E3 override: when `rbih_hrhb_state?.war_started_turn == null`, force `hvo_central_bosnia` to `defensive`. Historical basis: Blaskic's forces held defensive positions vs VRS in 1992; offensive activity only emerged after the Croat-Bosniak war started. This is a scenario correctness fix, not a mechanics change.
+
+**2. Defensive corps skip plan creation (plan.ts)**
+- `managePlan()`: when `corps_stance === 'defensive' || corps_stance === 'reorganize'`, return immediately without creating new plans. Previously the commander created plans for defensive corps (including hvo_central_bosnia) which then failed at execution, producing zero_exec and orphan anomalies. Existing plans are not abandoned — they continue via `advanceExistingPlan`.
+
+### Results (n1251)
+- Area-weighted: **93.6%** (new ATH)
+- Battles: 84 | Orders: 111
+- Anomalies: 47 (was 65, -18) | zero_exec: 10 (was 14) | orphans: 15 (was 28)
+
+### Remaining zero_exec (10)
+- arbih_1st_corps ×2, arbih_3rd_corps ×1, hvo_southeast_herzegovina ×1
+- vrs_1st_krajina ×2, vrs_2nd_krajina ×1, vrs_east_bosnian ×3
+
+### Files
+- `src/sim/combat/bot_corps_stance.ts`
+- `src/sim/combat/commander/plan.ts`
+
+---
+
 ## [2026-03-31] n1246–n1249 — Catastrophe memory, elite loan expiry, check #29; 93.5% ATH
 
 ### Summary
