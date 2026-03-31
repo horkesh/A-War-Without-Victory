@@ -120,6 +120,10 @@ export interface BrigadeEvaluation {
     /** personnel >= 400. */
     readonly is_combat_effective: boolean;
     readonly is_disrupted: boolean;
+    /** brigade.home_defense_active — blocked from attack/assault posture at execution. */
+    readonly is_home_defense: boolean;
+    /** brigade.morale — used to gate critical-morale brigades out of ops selection. */
+    readonly morale: number;
     readonly current_zone: ZoneId | null;
 }
 

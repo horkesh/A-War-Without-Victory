@@ -85,6 +85,7 @@ describe('war-phase step ordering', () => {
         // +1 from compute-spatial-context-pre-combat (SpatialContext Phase 0: cached spatial snapshot)
         // +1 from compute-spatial-context-post-combat (SpatialContext Phase 0: post-combat refresh)
         // +1 from reevaluate-weakened-operations (abort degenerate ops after brigade losses)
-        expect(stepNames.length).toBe(151);
+        // +1 from check-brigade-dissolution-post-combat (second pass after morale-drift catches post-combat threshold crossings)
+        expect(stepNames.length).toBe(152);
     });
 });

@@ -1,7 +1,7 @@
 # AWWV Calibration Master Reference
 
 **Purpose:** Persistent lessons-learned record for war-phase calibration (April 1992 onward). 40w primary, 104w force trajectory.
-**Updated:** 2026-03-31 (n1234 — P0 drought FIXED; 103 battles; 38/40 weeks combat)
+**Updated:** 2026-03-31 (n1237 — traces removed, P0-A/B fixed, Op Prsten Ilijas split; 78 battles; 31/40 weeks combat)
 
 ## Review Methodology
 
@@ -14,6 +14,45 @@ Every calibration run is reviewed by a two-tier expert panel before any action i
 `/gap-finder` *(unique authority: may dispatch agents + question specialists directly)*, `/game-designer`, `/corps-army-commander`, `/modern-wargame-expert`, `/canon-compliance-reviewer`
 
 **Orchestrator** synthesizes, gives go/no-go, updates this file + PROJECT_LEDGER.md.
+
+## n1237 TWO-TIER PANEL — CONDITIONAL NO-GO for v0.8.1 (2026-03-31)
+- **92.3% area-weighted (40w). 22/22 anchors. 6/6 benchmarks. 78 battles. 31/40 combat weeks.**
+- **final_state_hash: d63148930f19ee35**
+- valid_for_combat_calibration: false (319 invalid ops, 166 zero-eligible executions)
+- Run: `runs/apr1992_definitive_40w__77cac5e01d3c929e__w40_n1237`
+
+### Changes vs n1234
+- [CMD]/[VIA] debug traces removed from `emit.ts` and `plan.ts`
+- 16 pre-existing test failures fixed (13 event_timing baseline refresh, 2 stacking threshold, 1 anomaly threshold)
+- Zero-eligible-execution root cause fixed: `is_home_defense` + `morale` added to BrigadeEvaluation; `selectBrigadesForPlan` filters home_defense_active brigades; `emit.ts` homeDefenseSet guard added
+- New pipeline step: `check-brigade-dissolution-post-combat` after morale-drift (151→152 steps)
+- Op Prsten: `northern_ring` split into `northern_ring` (Vogošća, 4 brigades) + `ilijas_ring` (Ilijas, 3 brigades incl. 2 new JNA phantoms: `jna_ilijas_garrison_det` + `jna_ilijas_north_to_tg`)
+
+### Panel Verdict: CONDITIONAL NO-GO for v0.8.1
+Two P0s found during panel and fixed (not yet validated by a run):
+
+**P0-A — allocate.ts home_defense surplus contamination**
+- Home_defense brigades were included in surplus pool → inflated plan viability → plans launched with brigades that could never execute
+- Fix: `allocate.ts` surplus pool filter adds `&& !ev.is_home_defense`
+
+**P0-B — morale gate absent from selectBrigadesForPlan**
+- Critically low morale brigades (≤15) were selected for ops → guaranteed zero-eligible execution at brigade_posture.ts
+- Fix: `plan.ts:selectBrigadesForPlan` adds `ev.morale > CRITICAL_MORALE_THRESHOLD` (15) filter
+
+### Panel Design Decisions
+- **SRK siege containment role confirmed:** No artificial ops for SRK. Post-Prsten inertia is by design — SRK holds the ring, doesn't push. Not a calibration defect.
+- **ARBiH emergent suppression confirmed (Option A):** Let calibration enforce ARBiH suppression naturally via equipment asymmetry and entrenchment; do not add artificial throttles.
+- **HRHB "5-8%" claim corrected:** Historian's historical reference is the Jan 1993 painted map. That IS the historical reference — no discrepancy to fix.
+
+### P1 Tracking (post-panel, not blocking n1238)
+1. vrs_herzegovina geographic targeting — ops pulling toward Foca, not Mostar corridor
+2. SRK post-Prsten inertia — by design, confirmed; monitor for regression
+3. Jajce timing — sim captures w40 (late), historical fall was w26; structural (1KK op chain)
+4. vrs_1st_krajina idle brigades — ~22/36 drifted, no active ops after Corridor secured
+5. UI prerequisites for v0.8.1 — 4 items identified; prerequisite for release, not for calibration
+
+### Pending: n1238
+n1238 not yet run. Will validate: P0-A (allocate.ts filter) + P0-B (morale gate) + Op Prsten Ilijas split. If 319 invalid ops and 166 ZEA counts drop substantially, proceed to War-or-Game re-review. If not, re-panel.
 
 ## n1234 P0 DROUGHT FIXED — 6 plan.ts/zone_detection.ts bugs (2026-03-31)
 - **92.2% area-weighted (40w). 22/22 anchors. 6/6 benchmarks. 103 battles. 38/40 weeks with combat.**

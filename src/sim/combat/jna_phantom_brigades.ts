@@ -165,6 +165,32 @@ const JNA_PHANTOM_DEFS: PhantomDef[] = [
         no_equipment_handoff: true,
     },
     {
+        // JNA Ilijas Garrison Detachment — elements of the JNA Ilijas barracks
+        // that remained after the Rajlovac TG withdrew, providing local fire support
+        // to the SDS-organised Ilijas Serb TO (April-May 1992).
+        // Infantry only: no equipment handoff.
+        id: 'jna_ilijas_garrison_det' as FormationId,
+        name: 'JNA Ilijaš Garrison Detachment',
+        corps_id: 'vrs_sarajevo_romanija' as FormationId,
+        location_osid: 'op:ilijas:srednje',
+        withdrawal_turn: 10,
+        tanks: 0, artillery: 0, apcs: 0,
+        no_equipment_handoff: true,
+    },
+    {
+        // Ilijaš North Serb TO — Serb Territorial Defence units from the northern
+        // Ilijas villages (Dragoradi, Krivajevici, Sirovine area) mobilised under
+        // JNA/SDS coordination to close the northern siege ring (April 1992).
+        // Staging from podlugovi (ljesevo OSID does not exist in data).
+        id: 'jna_ilijas_north_to_tg' as FormationId,
+        name: 'Ilijaš North TO Tactical Group',
+        corps_id: 'vrs_sarajevo_romanija' as FormationId,
+        location_osid: 'op:ilijas:podlugovi',
+        withdrawal_turn: 10,
+        tanks: 0, artillery: 0, apcs: 0,
+        no_equipment_handoff: true,
+    },
+    {
         // JNA 37th Corps forward elements at Nevesinje (BB1 p.480).
         // Represent JNA command authority + mobilized local Serb reservists.
         id: 'jna_nevesinje_garrison' as FormationId,

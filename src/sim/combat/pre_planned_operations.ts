@@ -238,17 +238,28 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
             },
             {
                 axis_id: 'northern_ring',
-                name: 'Northern Ring',
+                name: 'Northern Ring — Vogošća',
                 brigades: [
                     'rs_3rd_sarajevo_infantry',
                     'rs_4th_sarajevo_light_infantry',
                     'jna_rajlovac_barracks_tg',
                     'jna_vogosca_to_tg',
-                    'jna_ilijas_to_tg',
                 ],
                 objectives: [
                     'op:vogosca:svrake',
                     'op:vogosca:hotonj',
+                ],
+                staging_osid: 'op:vogosca:vogosca_3',
+            },
+            {
+                axis_id: 'ilijas_ring',
+                name: 'Ilijas Ring',
+                brigades: [
+                    'jna_ilijas_to_tg',
+                    'jna_ilijas_garrison_det',
+                    'jna_ilijas_north_to_tg',
+                ],
+                objectives: [
                     'op:ilijas:medojevici',
                     'op:ilijas:dragoradi',
                     'op:ilijas:krivajevici',

@@ -11,11 +11,13 @@
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
 ## Current State (2026-03-31, v0.8.0 Commander System on main)
-**n1234: 92.2% area-weighted (40w). 22/22 anchors. 6/6 benchmarks. 103 battles. 38/40 weeks combat. hash: 45d8fde0a760c080.**
-**P0 DROUGHT FIXED. Weekly: 1-6 battles/week throughout. One zero week (w22) — normal variance.**
-**War-or-Game: PENDING RE-REVIEW (103 battles in target range, calibration slightly below n1233 ATH 92.6%).**
-**Active: 6 bugs fixed in plan.ts + zone_detection.ts (concentration time-based, OSID-anchored zones, zone fallback, viability brigade fix, suspend check, abandoned plan clear). [CMD]/[VIA] traces live in emit.ts/plan.ts.**
-**Remaining: zero-eligible-execution on some ARBiH/HVO commander ops. HVO 0 orders expected pre-April 1993.**
+**n1238: 92.5% ATH (+0.2pp), 22/22 anchors, 6/6 benchmarks. 81 battles, 33/40 combat weeks. hash: eb2031726bfcc542.**
+**P0-A (allocate.ts home_defense surplus filter) VALIDATED. P0-B (morale gate) VALIDATED. Casualty ratio: 0.545 (was 0.37).**
+**Op Prsten Ilijas: 3/4 captured (medojevici ✓, dragoradi ✓, krivajevici ✓, sirovine ✗). Invalid ops: 247 (was 319, -22%).**
+**valid_for_combat_calibration: still false (247 invalid ops). vrs_herzegovina targeting fix (P1) pending.**
+**War-or-Game: PENDING RE-REVIEW (panel design decisions: SRK containment confirmed, ARBiH suppression Option A, HRHB painted reference = historical).**
+**Remaining P1s: vrs_herzegovina geographic targeting, SRK post-Prsten inertia (by design), Jajce timing w40 vs w26, vrs_1st_krajina idle brigades, 4 UI prerequisites for v0.8.1.**
+**1 pre-existing test failure: integration_formation_integrity — rs_1st_drvar morale=6 dissolution gap (P1).**
 
 **[MERGED] Concurrent corps operations.** `active_operations[]` replaces `active_operation`. Slot cap floor(brigades/12). 7 helpers. Emergency defense overflow. Bot secondary op guard. Save migration v1→v2. 84 files, +1459/-525.
 **[MERGED] Krajina paramilitary scope.** 6 municipalities added to RS offensive sweep. MAX_POCKET_CLUSTER 3→6. +3.0pp.

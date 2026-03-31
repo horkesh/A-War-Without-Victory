@@ -1,6 +1,6 @@
 # AWWV Master Roadmap — Pyrrhic Games
 
-**Last Updated:** 2026-03-30
+**Last Updated:** 2026-03-31
 **Current Version:** 0.8.0 (Command Chain)
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."
@@ -208,6 +208,8 @@ No version bump — engineering milestone between feature releases. Stabilizatio
 | Execution entrypoints | `src/turn/pipeline.ts` + `src/sim/run_combat_browser.ts` are live variants adding cognitive overhead alongside canonical `src/sim/turn_pipeline.ts` | Consolidate or explicitly mark non-authoritative with ownership comment |
 | Magic numbers | bot_constants.ts scattered thresholds | Domain-grouped constant files |
 | Canon docs | Systems Manual and Game Bible reference pre-v0.8 architecture | Updated for v0.8 command chain |
+| Save/load + replay hardening | Desktop save/load still partial while later milestones depend on replay/log truth | Explicit save/load, replay, and migration hardening. Plan: `docs/plans/2026-03-31-v08to09-save-load-and-replay-hardening-plan.md` |
+| UI surface ownership | Army HQ, Warroom, map panels, ops modal, and future command-review surfaces can drift into duplicate half-owners | One clear ownership matrix for command, ops, review, and explanation surfaces. Plan: `docs/plans/2026-03-31-v08to09-ui-surface-ownership-plan.md` |
 | Army-command maturity | Army layer is serviceable but still undernamed and too implicit as a real command substrate | Explicit army-command maturity and responsibility model. Plan: `docs/plans/2026-03-31-v08to09-army-command-maturity-plan.md` |
 | Army ↔ corps command coherence | Assumed rather than owned; handshake and authority boundaries are still undernamed | Named handshake rules, ownership comments, and explicit authority boundaries. Plan: `docs/plans/2026-03-31-v08to09-army-corps-authority-coherence-plan.md` |
 | Commander explanation surfaces | Traces are becoming real, but staff/player-facing surfaces are still implicit | Build truthful explanation surfaces from real traces, not theater. Plan: `docs/plans/2026-03-31-v08to09-commander-explanation-surfaces-plan.md` |
@@ -228,7 +230,9 @@ No version bump — engineering milestone between feature releases. Stabilizatio
 
 Divergence events: ahistorical player decisions trigger realistic consequence chains. No cleansing leads to partisan resistance. Alliance holds eliminates Washington Agreement chain. Srebrenica defended changes NATO intervention calculus.
 
-Plan: `docs/plans/2026-03-24-v090-consequence-system-plan.md`.
+**Gate:** This milestone does not close until the project has explicit victory conditions / Pyrrhic scoring and a resolved sensitive-history design gate for atrocity / genocide representation. These are gold blockers, not optional future philosophy.
+
+Plans: `docs/plans/2026-03-24-v090-consequence-system-plan.md`, `docs/plans/2026-03-31-v090-victory-conditions-and-pyrrhic-scoring-plan.md`, `docs/plans/2026-03-31-v090-sensitive-history-design-gate-plan.md`.
 
 **+ Cost Ledger** (Legendary Feature): ICTY-style prosecutorial endgame narrative. Every decision — ethnic cleansing tolerated, enclaves abandoned, paramilitary sweeps authorized — silently recorded. After Dayton, the player receives a prosecutorial narrative adapted from real ICTY case structures. Not a score. An indictment. Template-driven, reads event flags + casualties + displacement.
 
@@ -253,6 +257,10 @@ Spec: `docs/plans/2026-03-26-endgame-comparison-data-requirements.md`.
 ### v0.9.2 — External Playtesting + Balance
 
 Closed alpha: 10-20 testers from strategy game community. Structured feedback collection: clarity, pacing, difficulty, bugs, UX confusion points. Balance pass incorporating playtest feedback.
+
+**Onboarding is owned here, not left floating:** tutorial, first-session guidance, and command-review literacy all need real player feedback. Do not leave tutorial/onboarding as a vague pre-gold chore.
+
+Plan: `docs/plans/2026-03-31-v092-tutorial-and-onboarding-plan.md`.
 
 ### v0.9.3 — Performance + Accessibility
 
@@ -368,7 +376,7 @@ These need design sessions before implementation. Preserved from the original ro
 | Bot AI (3-tier: army/corps/brigade) | Complete |
 | Corps Commander Intelligence (v0.8) | Active — on main, P0 fix in progress |
 | Corps sectors | Complete |
-| Operations + preparation | Complete (concurrent multi-slot) |
+| Operations + preparation | Functional, but authority cleanup and ops singularity still pending |
 | Named officers + succession | Complete |
 | Supply reserves | Complete |
 | Equipment pipeline | Complete |
@@ -395,12 +403,12 @@ These need design sessions before implementation. Preserved from the original ro
 | Refugee Column | Not started (v0.9.4) |
 | Corridor Heartbeat | Not started (v0.9.4) |
 | Endgame Comparison | Not started (v0.9.1) |
-| Tutorial | Not started |
+| Tutorial | Not started (roadmap-owned in v0.9.2) |
 | Sound/audio | Not started (post-1.0) |
 | Localization | Not started (post-1.0) |
 | Peace phase | CUT — game starts April 1992 |
-| Save/load | Partial (headless OK, desktop partial) |
-| Victory conditions | Stub |
+| Save/load | Partial (headless OK, desktop partial; roadmap-owned hardening in v0.8-to-v0.9) |
+| Victory conditions | Stub (roadmap-owned in v0.9.0) |
 | Diplomacy layer | Partial (patron pressure, alliance, IVP) |
 
 **Current:** 1661 tests, 98 suites. 92.2% area-weighted calibration (n1213, ties ATH). 712 OSIDs. 94 events. 96 certified essays.
@@ -452,6 +460,8 @@ Patch bumps (0.X.1, 0.X.2) are for significant fixes within a milestone — not 
 | `docs/plans/2026-03-31-v081-intelligence-assurance-harness-plan.md` | v0.8.1 anti-theater proof harness |
 | `docs/plans/2026-03-31-v08x-operations-singularity-plan.md` | v0.8.x operations singularity implementation plan |
 | `docs/plans/2026-03-31-v08x-command-authority-cleanup-plan.md` | v0.8.x-final overarching command authority cleanup plan |
+| `docs/plans/2026-03-31-v08to09-save-load-and-replay-hardening-plan.md` | v0.8-to-v0.9 save/load, replay, and migration hardening |
+| `docs/plans/2026-03-31-v08to09-ui-surface-ownership-plan.md` | v0.8-to-v0.9 UI surface ownership matrix |
 | `docs/plans/2026-03-31-v08to09-army-command-maturity-plan.md` | v0.8-to-v0.9 army-command maturity |
 | `docs/plans/2026-03-31-v08to09-army-corps-authority-coherence-plan.md` | v0.8-to-v0.9 army/corps handshake and authority coherence |
 | `docs/plans/2026-03-31-v08to09-commander-explanation-surfaces-plan.md` | v0.8-to-v0.9 truthful explanation surfaces |
@@ -461,6 +471,9 @@ Patch bumps (0.X.1, 0.X.2) are for significant fixes within a milestone — not 
 | `docs/plans/2026-03-24-v081-order-interpretation-plan.md` | v0.8.3 order interpretation |
 | `docs/plans/2026-03-24-v082-autonomy-api-plan.md` | v0.8.4 autonomy + Claude API |
 | `docs/plans/2026-03-24-v090-consequence-system-plan.md` | v0.9.0 consequence system |
+| `docs/plans/2026-03-31-v090-victory-conditions-and-pyrrhic-scoring-plan.md` | v0.9.0 victory conditions and Pyrrhic score |
+| `docs/plans/2026-03-31-v090-sensitive-history-design-gate-plan.md` | v0.9.0 sensitive-history / atrocity representation gate |
+| `docs/plans/2026-03-31-v092-tutorial-and-onboarding-plan.md` | v0.9.2 tutorial and onboarding |
 | `docs/plans/2026-03-29-concurrent-corps-operations.md` | v0.8.0 concurrent corps ops design |
 | `docs/40_reports/20260330_RAILROAD_HUNTER_REPORT.md` | Simplification hit list |
 | `docs/plans/2026-03-21-tech-debt-backlog.md` | Technical debt backlog (simplification phase) |

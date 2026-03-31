@@ -1116,6 +1116,14 @@ If the roadmap says later milestones “assume” coherence, explanation, review
 ### Hidden prerequisites need one plan each when ownership differs
 If a “missing item” really contains different owners or different milestone slots, do not hide them in one umbrella plan. Split them into separate plans so roadmap slotting, done-means, and reviewer responsibility stay unambiguous.
 
+## Gold Blockers Must Be Slotted Before Gold (2026-03-31)
+
+### Stubs and partial systems are not harmless if v1.0 promises them
+If the roadmap still says `save/load: partial`, `victory conditions: stub`, or `tutorial: not started` while `v1.0` promises a ship, those are not background imperfections. They are gold blockers. Move them into named roadmap lanes early enough that later features do not quietly depend on them.
+
+### UI ownership must be explicit when multiple command surfaces coexist
+When Army HQ, Warroom, map panels, and modal flows all exist, roadmap-level ownership must be explicit or each new feature will duplicate logic in a different place. A surface ownership matrix is an architectural dependency, not just UX cleanup.
+
 ## BFS Territory Assignment — Corps Home Municipality Coupling (2026-03-26)
 
 ### A single brigade in the wrong corps cascades BFS territory through entire municipalities

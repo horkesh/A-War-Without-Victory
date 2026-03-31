@@ -29,6 +29,7 @@ import type {
 } from './commander_state.js';
 
 import { BESIEGED_SURPLUS_HOP_LIMIT } from './allocate.js';
+import { CRITICAL_MORALE_THRESHOLD } from '../combat_math.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -549,7 +550,7 @@ function selectBrigadesForPlan(
     count: number,
 ): FormationId[] {
     const sorted = [...surplusPool]
-        .filter(ev => ev.is_combat_effective && !ev.is_disrupted)
+        .filter(ev => ev.is_combat_effective && !ev.is_disrupted && !ev.is_home_defense && ev.morale > CRITICAL_MORALE_THRESHOLD)
         .sort((a, b) => {
             const fitDiff = b.fitness_offense - a.fitness_offense;
             if (fitDiff !== 0) return fitDiff;
@@ -663,7 +664,6 @@ function computeViabilityScore(
         stagingZone = zones.find(z => (z.osids as readonly string[]).includes(storedAnchorOsid));
     }
     if (!stagingZone) {
-        process.stdout.write(`[VIA] NO_ZONE staging=${plan.staging_zone} avail=[${zones.map(z => z.zone_id).join('|')}]\n`);
         return 0.0; // Staging zone truly lost (anchor OSID captured by enemy)
     }
     if (stagingZone.posture === 'defending') score *= 0.7;
@@ -676,7 +676,6 @@ function computeViabilityScore(
     const effectiveForPlan = freshSurplusEffective + plan.assigned_brigades.length;
     if (effectiveForPlan < plan.required_brigades) {
         score *= effectiveForPlan / plan.required_brigades;
-        process.stdout.write(`[VIA] LOW_BRIGADES effective=${effectiveForPlan} required=${plan.required_brigades} assigned=${plan.assigned_brigades.length} freshSurplus=${freshSurplusEffective}\n`);
     }
 
     return Math.max(0, Math.min(1, score));

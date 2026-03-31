@@ -1454,6 +1454,30 @@ export const warPhases: NamedPhase[] = [
             );
         }
     },
+    // --- Second dissolution pass: catches brigades whose morale/cohesion dropped
+    // below threshold during post-combat drift (morale-drift, cohesion-drift).
+    // The first pass (line ~373) runs before combat and cannot catch these.
+    // This pass is additive — no change for brigades above threshold.
+    {
+        name: 'check-brigade-dissolution-post-combat',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const { dissolveCombatIneffectiveBrigades } = await import('../combat/brigade_dissolution.js');
+            const dissolutionReport = dissolveCombatIneffectiveBrigades(context.state);
+            if (dissolutionReport.dissolved_count > 0) {
+                // Merge into existing dissolution report if present
+                const existing = context.report.brigade_dissolution;
+                if (existing) {
+                    context.report.brigade_dissolution = {
+                        dissolved_count: existing.dissolved_count + dissolutionReport.dissolved_count,
+                        dissolved_brigades: [...existing.dissolved_brigades, ...dissolutionReport.dissolved_brigades],
+                    };
+                } else {
+                    context.report.brigade_dissolution = dissolutionReport;
+                }
+            }
+        }
+    },
     {
         name: 'apply-frontline-attrition',
         run: (context) => {

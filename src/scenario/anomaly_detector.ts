@@ -1004,7 +1004,7 @@ function detectCombatIneffectiveConcentration(state: GameState): AnomalyReport[]
         const c = corpsBrigades[corpsId];
         if (c.total === 0) continue;
         const pct = c.ineffective / c.total;
-        if (pct > 0.40) {
+        if (pct > 0.55) {
             flagged.push({
                 corpsId,
                 faction: c.faction,

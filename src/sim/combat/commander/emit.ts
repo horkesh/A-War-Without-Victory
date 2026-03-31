@@ -115,31 +115,6 @@ export function emitCommanderOutput(
         personality,
     );
 
-    // [DEBUG] Commander decision trace — REMOVE after drought diagnosis
-    {
-        const t = briefing.turn;
-        const cid = briefing.corps_id;
-        const planStatus = planDecision.plan?.status ?? 'null';
-        const nonRecovery = briefing.active_operations.filter(op => op.phase !== 'recovery').length;
-        const slotMax = getMaxOperationSlots(briefing.brigades.length);
-        let line: string;
-        if (operations.length > 0) {
-            line = `[CMD] t${t} ${cid}: EMIT ${operations[0]?.name}\n`;
-        } else {
-            let why: string;
-            const activeStatuses = new Set(['ready', 'executing']);
-            if (!planDecision.plan || !activeStatuses.has(planDecision.plan.status)) {
-                why = `no_active_plan(status=${planStatus} action=${planDecision.action} "${planDecision.reason}")`;
-            } else if (nonRecovery >= slotMax) {
-                why = `slot_full(${nonRecovery}/${slotMax} ops=[${briefing.active_operations.map(o => `${o.name}:${o.phase}`).join(',')}])`;
-            } else {
-                why = `brigade_filter_empty(surplus=${allocation.surplus_pool.length} assigned=${planDecision.plan?.assigned_brigades.length ?? 0} targets=${planDecision.plan?.target_osids.length ?? 0})`;
-            }
-            line = `[CMD] t${t} ${cid}: SKIP ${why}\n`;
-        }
-        process.stdout.write(line);
-    }
-
     // 3. Build sector stances
     const sectorStances = buildSectorStances(briefing, decisions);
 
@@ -581,9 +556,17 @@ function buildOperations(
         // to the first objective OSID within MAX_REACHABILITY_HOPS.
         // This prevents creating operations where all brigades are physically
         // disconnected from the objective (causes zero eligible attackers at execution).
+        // Build a home-defense lookup so we can exclude brigades that cannot attack.
+        const homeDefenseSet = new Set<string>(
+            briefing.brigades
+                .filter(b => b.home_defense_active === true)
+                .map(b => b.id),
+        );
+
         const participatingBrigades = [...planDecision.plan.assigned_brigades]
             .filter(id => {
                 if (!surplusSet.has(id)) return false;
+                if (homeDefenseSet.has(id)) return false; // home_defense blocks attack posture at execution
                 if (!reachabilityObjectiveOsid) return true; // truly no targets — allow all surplus
                 const locationOsid = brigadeLocationMap.get(id);
                 if (!locationOsid) return false;
