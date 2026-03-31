@@ -275,7 +275,7 @@ export function allocateBrigades(
     const surplusEvals: BrigadeEvaluation[] = [];
 
     for (const ev of [...forces.evaluations].sort((a, b) => strictCompare(a.brigade_id, b.brigade_id))) {
-        if (!garrisonAssigned.has(ev.brigade_id) && !ev.is_home_defense) {
+        if (!garrisonAssigned.has(ev.brigade_id)) {
             surplusEvals.push(ev);
         }
     }

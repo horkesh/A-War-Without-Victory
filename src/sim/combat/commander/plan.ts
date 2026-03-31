@@ -700,7 +700,7 @@ function selectBrigadesForPlan(
     count: number,
 ): FormationId[] {
     const sorted = [...surplusPool]
-        .filter(ev => ev.is_combat_effective && !ev.is_disrupted && !ev.is_home_defense && ev.morale > CRITICAL_MORALE_THRESHOLD)
+        .filter(ev => ev.is_combat_effective && !ev.is_disrupted && ev.morale > CRITICAL_MORALE_THRESHOLD)
         .sort((a, b) => {
             const fitDiff = b.fitness_offense - a.fitness_offense;
             if (fitDiff !== 0) return fitDiff;
