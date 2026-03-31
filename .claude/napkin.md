@@ -10,11 +10,12 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-30, v0.8.0 Commander System on main)
-**n1217: 92.2% area-weighted (40w). 22/22 anchors. 6/6 benchmarks. MAP HOLDS.**
-**P0: 18-week combat drought (w23-40). 38 battles vs 69 in n1216. COMBAT BROKEN AGAIN.**
-**Root cause: slot cap counts recovery-phase ops → pipeline bottleneck. Fix: exclude phase==='recovery' from slot cap count in emit.ts.**
-**Fix 2 inert: operation_history written but plan.ts never reads it.**
+## Current State (2026-03-31, v0.8.0 Commander System on main)
+**n1234: 92.2% area-weighted (40w). 22/22 anchors. 6/6 benchmarks. 103 battles. 38/40 weeks combat. hash: 45d8fde0a760c080.**
+**P0 DROUGHT FIXED. Weekly: 1-6 battles/week throughout. One zero week (w22) — normal variance.**
+**War-or-Game: PENDING RE-REVIEW (103 battles in target range, calibration slightly below n1233 ATH 92.6%).**
+**Active: 6 bugs fixed in plan.ts + zone_detection.ts (concentration time-based, OSID-anchored zones, zone fallback, viability brigade fix, suspend check, abandoned plan clear). [CMD]/[VIA] traces live in emit.ts/plan.ts.**
+**Remaining: zero-eligible-execution on some ARBiH/HVO commander ops. HVO 0 orders expected pre-April 1993.**
 
 **[MERGED] Concurrent corps operations.** `active_operations[]` replaces `active_operation`. Slot cap floor(brigades/12). 7 helpers. Emergency defense overflow. Bot secondary op guard. Save migration v1→v2. 84 files, +1459/-525.
 **[MERGED] Krajina paramilitary scope.** 6 municipalities added to RS offensive sweep. MAX_POCKET_CLUSTER 3→6. +3.0pp.
@@ -38,7 +39,7 @@
 **[OPEN] Equipment asymmetry in combat resolution.** ARBiH rifle-only brigades attacking VRS artillery+tanks should face massive power disadvantage. Combat predictor should reflect this so corps AI rejects suicidal ops.
 **[RESOLVED] Intelligent corps/army commanders.** v0.8 PERCEIVE→DECIDE→EXECUTE architecture implemented and on main behind USE_COMMANDER_LOOP flag. 11 commits, 41 tests.
 **[OPEN] 41 invalid operations (32 zero-eligible-attacker).** Ops launching but nobody can fight.
-**[OPEN] HRHB passivity.** 8 total orders, 2 dead corps (HVO Central Bosnia, HVO Tomislavgrad).
+**[NOT A BUG] HRHB passivity in 40w scenario.** HRHB-RBiH war starts April 1993 (end of 40w window). Zero HRHB attacks against RBiH is historically correct. HVO Central Bosnia / Tomislavgrad dead fronts are expected within this scenario window.
 **[OPEN] Column march skip.** Brigades in column transit can't capture adjacent undefended territory.
 **[OPEN] Garrison cannibalization.** No holdback at op launch — corps strips sectors bare for ops.
 **[OPEN] Ilijas 4 OSIDs census-derived RBiH.** Need early-war seizure event, not OSID override.
@@ -156,10 +157,10 @@ After EVERY scenario run, the orchestrator:
    Do instead: After any line-assignment/march fix, verify the target brigade in final_save has (a) `onSectorFront=true`, (b) no deep-rear friction OSIDs in `brigade_history.engagements`, and (c) fresh 40w run evidence recorded in PROJECT_LEDGER.
 1. **[2026-03-11] NEVER claim a fix works without running the scenario and verifying the output**
    Do instead: After any bug fix, run a fresh scenario (`npm run sim:scenario:run:40w`), then write a diagnostic script to verify the specific bug is gone. Check for related issues (e.g. other code paths that do the same wrong thing). Always verify with data, never with assumptions.
-2. **[2026-03-14] /war-or-game sign-off required after every phase — standing directive**
-   Do instead: After each implementation phase runs the scenario and comparison tool, invoke /war-or-game to sign off. If he raises P1 issues, slot them into the sprint plan before moving to the next phase. If P2, add to backlog. No phase is complete without the sign-off.
+2. **[2026-03-30 UPDATED] Two-tier post-run panel required after every calibration run — standing directive**
+   Do instead: After every scenario run, dispatch the full two-tier panel (see §Post-Run Analysis Protocol). /war-or-game is Tier 1 investigator — its sign-off alone is NOT sufficient. Orchestrator issues go/no-go only after all Tier 2 analysts report. No phase is complete without Orchestrator go/no-go.
 3. **[2026-03-11] One-change-then-verify calibration protocol (MANDATORY)**
-   Do instead: (1) Change ONE parameter or fix ONE bug. Never bundle. (2) Run fresh 40w scenario. (3) Run comparison tool. (4) Run /war-or-game sign-off. (5) Record result in CALIBRATION_MASTER.md.
+   Do instead: (1) Change ONE parameter or fix ONE bug. Never bundle. (2) Run fresh 40w scenario. (3) Run comparison tool. (4) Dispatch two-tier post-run panel — Orchestrator issues go/no-go. (5) Record result in CALIBRATION_MASTER.md.
 4. **[2026-03-07] Classify phases by real code impact, not plan labels**
    Do instead: Before parallelizing or skipping regression, audit the task list. If a phase touches schema, IPC, bot logic, pipeline, or serialization, treat it as engine-touching even if the plan calls it UI-only.
 5. **[2026-02-25] Determinism is sacred**

@@ -668,8 +668,9 @@ describe('plan', () => {
         const result = managePlan(briefing, zones, forces, evals, existingPlan, 10);
 
         expect(result.plan).not.toBeNull();
-        // All 5 brigades are in the staging zone, so progress should be 1.0
-        expect(result.plan!.concentration_progress).toBe(1.0);
+        // Concentration is time-based: (turn - created_turn) / (target_ready_turn - created_turn)
+        // = (10 - 8) / (12 - 8) = 0.5. Brigade physical location is no longer used.
+        expect(result.plan!.concentration_progress).toBe(0.5);
     });
 
     it('transitions to ready at 80% concentration', () => {

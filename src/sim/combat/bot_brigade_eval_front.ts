@@ -66,7 +66,10 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
 
     // --- Sector march: brigade assigned/reserve in a sector but not on its front → column march ---
     // This overrides home defense: the corps needs this brigade at the front.
-    if (state.military.corps_front_sectors && (!isActiveSectorOperationParticipant || offAssignedFront)) {
+    // Op participants are exempt: they march toward objectives (evaluateSectorAttack handles them).
+    // The old `|| offAssignedFront` caused oscillation — op participants advancing off-sector
+    // were rerouted back to sector front every turn, producing ZEA and recovery-no-attempt.
+    if (state.military.corps_front_sectors && !isActiveSectorOperationParticipant) {
         let assignedSector: (typeof state.military.corps_front_sectors)[string] | null = null;
         let isReserve = false;
         for (const sid of Object.keys(state.military.corps_front_sectors).sort(strictCompare)) {

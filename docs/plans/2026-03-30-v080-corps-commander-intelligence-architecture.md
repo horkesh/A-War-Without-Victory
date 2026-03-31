@@ -1,4 +1,45 @@
-# Corps Commander Intelligence — v0.8 Command Chain Design
+# v0.8.0 Corps Commander Intelligence Architecture
+
+**Status:** ARCHITECTURE / DESIGN REFERENCE  
+**Roadmap slot:** v0.8.0  
+**Use this document for:** architecture, model boundaries, migration rationale, and deletion targets  
+**Do not use this document as the sole execution plan.** Active execution is governed by:
+- `docs/plans/2026-03-30-p0-combat-drought-fix.md` for live stabilization
+- `docs/plans/2026-03-31-v081-commander-maturity-plan.md` for post-stabilization commander deepening
+- `docs/plans/2026-03-31-v08x-command-authority-cleanup-plan.md` for singular-ownership cleanup
+
+## Intelligence Assurance
+
+This is how the project should decide whether the corps commanders are genuinely intelligent or just better-organized railroads.
+
+### What must be true
+
+- commanders reason from a persistent belief state, not only current raw truth
+- multiple candidate intents are generated and scored, not just one path evaluated in isolation
+- prior outcomes change future decisions through lessons or memory
+- hard constraints and soft preferences are distinct in the decision model
+- the execution bridge does not silently replace or nullify commander intent
+- structured decision traces exist for every major corps decision
+
+### What does NOT count as intelligence
+
+- more personality flavor text
+- more thresholds with no competing intents
+- hidden doctrine rails dressed up as preferences
+- downstream systems quietly overriding commander choices
+- corps-name special cases that fake good behavior
+
+### Required proof
+
+- two similar corps with different personalities make different but still legible choices in the same broad situation
+- a commander that fails in one zone becomes more cautious there later for a visible reason
+- a commander under degraded intel behaves differently from one with strong confidence
+- a rejected intent can be explained as impossible, unattractive, or politically blocked
+- post-run traces can explain why a corps attacked, waited, redirected, or refused
+
+### Anti-theater rule
+
+If the system cannot explain a decision in structured terms, or if the explanation does not match the actual execution path, treat that as failure. Good prose is not evidence of intelligence.
 
 ## Problem
 
@@ -188,3 +229,4 @@ The Bosnian War was defined by static fronts, attritional sieges, and occasional
 - **Operations Expert**: Reachability at launch (P0). Static holdback (P1). Zone surplus as ceiling. Don't auto-abort on zone transition. Add zone fatigue modifier.
 - **Modern Wargame Expert**: Grigsby two-pass, DC:B personality, SC objective scoring, CO2 re-evaluation, UoC pocket economics, AGEOD posture.
 - **Technical Architect**: PERCEIVE→DECIDE→EXECUTE. ICorpsCommander interface. Shadow mode migration. 114→55 steps. 15 systems → 1 commander loop.
+

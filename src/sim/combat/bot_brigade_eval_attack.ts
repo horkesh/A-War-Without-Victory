@@ -93,7 +93,7 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
     // Combat ineffective gate: brigades below minimum personnel defend only.
     // A 300-man brigade cannot execute an attack — it needs to reconstitute.
     const COMBAT_INEFFECTIVE_PERSONNEL = 400;
-    if (assignedBrigadeNotOnSectorFrontOsids(state, brigade, loc)) {
+    if (!isActiveSectorOperationParticipant && assignedBrigadeNotOnSectorFrontOsids(state, brigade, loc)) {
         return false;
     }
     if ((brigade.personnel ?? 0) < COMBAT_INEFFECTIVE_PERSONNEL) {

@@ -3,10 +3,20 @@
 **Date:** 2026-03-24
 **Status:** DRAFT -- NOT STARTED
 **Roadmap slot:** v0.8.3 (renumbered 2026-03-30; was v0.8.2)
-**Gate:** v0.8.2 Political Leader Bot must be complete. Assumes corps and army systems are already coherent.
+**Gate:** v0.8.2 Political Leader Bot must be complete. Requires explicit army/corps coherence and a truthful player command review surface; do not execute this milestone on hidden ownership assumptions.
 **Author:** Architect (Pyrrhic Games)
 **Scope:** Officers interpret player orders through personality, creating friction between political intent and military execution
 **Prerequisites:** Officer system (98 named officers, competence/aggressiveness 1-5), Operation Preparation System, Corps Directive pipeline
+**Overseer:** Orchestrator
+**Architect:** Technical Architect / Architect - flags architectural decisions for user review
+**Primary implementer roles:** Gameplay Programmer, UI/UX Developer, Systems Programmer, QA Engineer
+**Primary reviewer roles:** `/simplify`, Code Review, UI Truth Keeper, War-or-Game
+**Sign-off:** Orchestrator, Architect, War-or-Game
+
+**Relevant life lessons to respect while executing:**
+- `docs/life_lessons.md`: Frustration is acceptable only when it is legible
+- `docs/life_lessons.md`: Decisions without traces are undebuggable
+- `docs/life_lessons.md`: Verify the actual code path you changed is the one being used
 
 ---
 
@@ -515,6 +525,9 @@ This system ONLY affects the player faction. Bot factions are unaffected. Theref
 ## 9. Implementation Sequence
 
 ### Phase 1: Core interpretation engine (2-3 sessions)
+**Assigned to:** Gameplay Programmer + Systems Programmer  
+**Reviewer:** `/simplify`, Code Review  
+**Sign-off:** Orchestrator, Architect, War-or-Game
 
 1. **Task 1.1:** Add new types to `officer_types.ts` (OrderSnapshot, extended OfficerEventType, extended PendingOfficerEvent)
 2. **Task 1.2:** Add new fields to `NamedOfficerState` (override_count, last_override_turn, cowed_until_turn)
@@ -524,6 +537,9 @@ This system ONLY affects the player faction. Bot factions are unaffected. Theref
 6. **Task 1.6:** Typecheck + test pass
 
 ### Phase 2: IPC wiring (1 session)
+**Assigned to:** Systems Programmer  
+**Reviewer:** `/simplify`, Code Review  
+**Sign-off:** Orchestrator, Architect
 
 7. **Task 2.1:** Modify `stage-corps-stance-order` in `electron-main.cjs` to call `interpretStanceOrder`
 8. **Task 2.2:** Modify `stage-corps-operation-order` to call `interpretOperationLaunch`
@@ -533,12 +549,18 @@ This system ONLY affects the player faction. Bot factions are unaffected. Theref
 12. **Task 2.6:** Add `preview-order-interpretation` IPC handler
 
 ### Phase 3: Pipeline step (1 session)
+**Assigned to:** Systems Programmer + Gameplay Programmer  
+**Reviewer:** `/simplify`, Code Review, War-or-Game  
+**Sign-off:** Orchestrator, Architect, War-or-Game
 
 13. **Task 3.1:** Add `decay-officer-interpretation-state` step to `war_phases.ts`
 14. **Task 3.2:** Wire delayed halt resolution into pipeline
 15. **Task 3.3:** Integration test: 40w run with player faction
 
 ### Phase 4: UI (2 sessions)
+**Assigned to:** UI/UX Developer + Gameplay Programmer  
+**Reviewer:** `/simplify`, UI Truth Keeper, Modern Wargame Expert  
+**Sign-off:** Orchestrator, Architect
 
 16. **Task 4.1:** Add interpretation preview tooltip to OOBSidebar stance buttons
 17. **Task 4.2:** Create `OrderInterpretationPanel.tsx` component
@@ -547,6 +569,9 @@ This system ONLY affects the player faction. Bot factions are unaffected. Theref
 20. **Task 4.5:** Add interpretation events to briefing/notification flow
 
 ### Phase 5: Polish (1 session)
+**Assigned to:** UI/UX Developer + QA Engineer  
+**Reviewer:** `/simplify`, UI Truth Keeper  
+**Sign-off:** Orchestrator, Architect, War-or-Game
 
 21. **Task 5.1:** Historical flavor text for specific officers (Mladic, Dudakovic, Halilovic, etc.)
 22. **Task 5.2:** Smoke-test triad: `tsc --noEmit` + `vitest run` + `desktop:map:build`
@@ -647,3 +672,32 @@ const FORCE_HALT_MORALE_PENALTY = -10;
 4. Preview tooltip correctly predicts interpretation outcome before player commits.
 5. All 15 unit tests pass. Typecheck clean. No calibration regression on headless 40w run.
 6. System adds meaningful decisions without feeling like input lag.
+
+## Protocol Enforcement
+
+- [ ] Orchestrator oversees all phases
+- [ ] Architect flags any new state fields, IPC, or player-command data-flow changes for user review
+- [ ] `.claude/napkin.md` read at session start and updated during work
+- [ ] `docs/life_lessons.md` scanned before each phase
+- [ ] smoke-test triad runs after every phase
+- [ ] engine and UI changes stay in separate commits unless explicitly justified
+- [ ] `/create-report` writes a completion report to `docs/40_reports/implemented/` when the milestone closes
+
+## Completion Checklist
+
+- [ ] completion report created in `docs/40_reports/implemented/`
+- [ ] `docs/plans/MASTER_ROADMAP.md` updated if scope/gates/status changed
+- [ ] `docs/plans/2026-03-31-v083-player-command-review-ux-plan.md` remains aligned with the implemented review surface
+- [ ] `docs/plans/2026-03-31-v08to09-army-corps-authority-coherence-plan.md` remains aligned with the implemented command handshake
+- [ ] `docs/plans/2026-03-31-v08to09-commander-explanation-surfaces-plan.md` remains aligned with the explanation payload actually exposed
+- [ ] `docs/PROJECT_LEDGER.md` appended
+- [ ] `.claude/napkin.md` updated with recurring order-interpretation lessons
+- [ ] relevant engineering docs updated if command flow or IPC changed materially
+- [ ] `package.json` version bumped when the milestone completes
+- [ ] version tag created and pushed when the milestone completes
+
+## Companion Plans
+
+- `docs/plans/2026-03-31-v083-player-command-review-ux-plan.md`
+- `docs/plans/2026-03-31-v08to09-army-corps-authority-coherence-plan.md`
+- `docs/plans/2026-03-31-v08to09-commander-explanation-surfaces-plan.md`

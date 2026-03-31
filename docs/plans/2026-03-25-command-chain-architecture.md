@@ -589,7 +589,7 @@ All new systems must be deterministic:
 
 ## 6. Implementation Sequence
 
-**Note (2026-03-30):** A new Phase 0 — Commander Maturity (v0.8.1) — is gated before Phase 1. See `MASTER_ROADMAP.md`. Do not start Phase 1 until v0.8.1 is complete and War-or-Game approved.
+**Note (2026-03-30):** A new Phase 0 — Commander Maturity (v0.8.1) — is gated before Phase 1. See `MASTER_ROADMAP.md`. Do not start Phase 1 until v0.8.1 is complete and the full two-tier post-run panel produces Orchestrator go/no-go.
 
 ### Phase 1: Political Leader Bot (v0.8.2, ~3 sessions)
 

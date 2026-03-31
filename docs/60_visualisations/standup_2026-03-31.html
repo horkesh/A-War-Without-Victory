@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWWV War Room Briefing — 2026-03-31</title>
+<style>
+  :root {
+    --bg: #0a0a12;
+    --card: #141420;
+    --card2: #1a1a2a;
+    --border: #2a2a3a;
+    --border2: #3a3a4e;
+    --text: #d8d8e8;
+    --muted: #7a7a9a;
+    --dim: #4a4a6a;
+    --red: #e05555;
+    --red-glow: rgba(224,85,85,0.18);
+    --orange: #e09030;
+    --yellow: #d4b44a;
+    --green: #4ab870;
+    --blue: #4a90d4;
+    --purple: #9b6fd4;
+    --cyan: #4ad4c8;
+    --mono: 'Courier New', 'Lucida Console', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--mono);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── HEADER ── */
+  .war-header {
+    background: linear-gradient(180deg, #0d0d1e 0%, #0a0a12 100%);
+    border-bottom: 2px solid var(--border2);
+    padding: 18px 28px 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .war-header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      rgba(74,144,212,0.02) 3px,
+      rgba(74,144,212,0.02) 4px
+    );
+    pointer-events: none;
+  }
+  .header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .header-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--blue);
+    text-shadow: 0 0 18px rgba(74,144,212,0.4);
+  }
+  .header-sub {
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 1.5px;
+    margin-top: 3px;
+  }
+  .header-meta {
+    text-align: right;
+    font-size: 0.68rem;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+  .header-meta span { color: var(--text); }
+  .p0-banner {
+    margin-top: 10px;
+    background: linear-gradient(90deg, #3a0a0a, #2a0a0a, #3a0a0a);
+    border: 1px solid var(--red);
+    border-radius: 3px;
+    padding: 7px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 0.78rem;
+    letter-spacing: 1px;
+  }
+  .p0-badge {
+    background: var(--red);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    border-radius: 2px;
+    letter-spacing: 2px;
+    animation: p0-pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes p0-pulse {
+    0%,100% { opacity: 1; box-shadow: 0 0 6px var(--red); }
+    50%      { opacity: 0.7; box-shadow: 0 0 16px var(--red); }
+  }
+  .p0-text { color: var(--red); font-weight: 700; letter-spacing: 0.5px; }
+  .p0-detail { color: var(--muted); font-size: 0.7rem; }
+
+  /* ── LAYOUT ── */
+  .columns {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr 1fr;
+    gap: 0;
+    min-height: calc(100vh - 130px);
+  }
+  .col {
+    padding: 16px 14px;
+    border-right: 1px solid var(--border);
+  }
+  .col:last-child { border-right: none; }
+
+  /* ── SECTION HEADERS ── */
+  .section-label {
+    font-size: 0.6rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-label .phase-num {
+    color: var(--blue);
+    margin-right: 6px;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+  }
+  .card-title {
+    font-size: 0.62rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 7px;
+  }
+
+  /* ── RETRO COMMIT STAT ── */
+  .commit-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.72rem;
+  }
+  .commit-row:last-child { border-bottom: none; }
+  .commit-type { color: var(--muted); }
+  .commit-count { color: var(--blue); font-weight: 700; font-size: 0.85rem; }
+
+  /* ── RETRO ITEMS ── */
+  .retro-item {
+    border-radius: 3px;
+    padding: 7px 10px;
+    margin-bottom: 6px;
+    font-size: 0.7rem;
+    line-height: 1.5;
+    border-left: 3px solid;
+  }
+  .retro-good  { background: rgba(74,184,112,0.08); border-color: var(--green);  color: var(--text); }
+  .retro-bad   { background: rgba(224,144,48,0.08); border-color: var(--yellow); color: var(--text); }
+  .retro-ugly  { background: rgba(224,85,85,0.10);  border-color: var(--red);    color: var(--text); }
+  .retro-label {
+    font-size: 0.58rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .good-label  { color: var(--green); }
+  .bad-label   { color: var(--yellow); }
+  .ugly-label  { color: var(--red); }
+
+  .new-lesson {
+    background: rgba(74,144,212,0.08);
+    border: 1px solid rgba(74,144,212,0.25);
+    border-radius: 3px;
+    padding: 6px 10px;
+    font-size: 0.67rem;
+    margin-bottom: 5px;
+    color: var(--text);
+  }
+  .new-lesson .lesson-tag {
+    color: var(--blue);
+    font-size: 0.58rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-right: 6px;
+  }
+
+  /* ── CALIBRATION CHART ── */
+  .chart-wrap {
+    position: relative;
+    width: 100%;
+  }
+  svg.cal-chart {
+    width: 100%;
+    height: 220px;
+    display: block;
+    overflow: visible;
+  }
+
+  /* ── METRIC TABLE ── */
+  .metric-row {
+    display: grid;
+    grid-template-columns: 2.5fr 1.4fr 1.2fr 0.9fr;
+    padding: 5px 8px;
+    font-size: 0.67rem;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+  }
+  .metric-row:last-child { border-bottom: none; }
+  .metric-row.header-row {
+    font-size: 0.58rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-bottom: 6px;
+  }
+  .status-pass { color: var(--green); font-weight: 700; font-size: 0.68rem; }
+  .status-fail { color: var(--red);   font-weight: 700; font-size: 0.68rem; }
+  .val-num     { color: var(--blue);  font-weight: 700; }
+
+  /* ── REALISM GAP ── */
+  .realism-box {
+    background: rgba(155,111,212,0.08);
+    border: 1px solid rgba(155,111,212,0.3);
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-size: 0.68rem;
+    line-height: 1.6;
+    font-style: italic;
+    color: #c0b0e0;
+    margin-bottom: 10px;
+  }
+  .realism-box .quote-attr {
+    font-style: normal;
+    color: var(--muted);
+    font-size: 0.6rem;
+    margin-top: 6px;
+    display: block;
+  }
+  .territory-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .terr-pill {
+    flex: 1;
+    background: var(--card2);
+    border: 1px solid var(--border2);
+    border-radius: 3px;
+    padding: 5px 8px;
+    text-align: center;
+    font-size: 0.68rem;
+  }
+  .terr-pill .faction { font-size: 0.58rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  .terr-pill .pct     { font-size: 1.1rem; font-weight: 700; margin-top: 1px; }
+  .rs-c  { color: #e05555; }
+  .rbih-c { color: #4a90d4; }
+  .hrhb-c { color: #4ab870; }
+
+  /* ── CANON DRIFT TABLE ── */
+  .drift-row {
+    display: grid;
+    grid-template-columns: 0.6fr 1fr 2.5fr;
+    padding: 5px 8px;
+    font-size: 0.64rem;
+    border-bottom: 1px solid var(--border);
+    line-height: 1.45;
+    align-items: start;
+    gap: 6px;
+  }
+  .drift-row:last-child { border-bottom: none; }
+  .drift-row.hdr { font-size: 0.57rem; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; padding-bottom: 5px; }
+  .sev-p2 { color: var(--orange); font-weight: 700; }
+  .sev-p3 { color: var(--yellow); font-weight: 700; }
+  .drift-file { color: var(--blue); font-size: 0.62rem; }
+  .drift-issue { color: var(--text); }
+
+  /* ── BACKLOG TRIAGE ── */
+  .triage-group { margin-bottom: 10px; }
+  .triage-label {
+    font-size: 0.58rem;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 2px;
+    display: inline-block;
+    margin-bottom: 6px;
+  }
+  .t-park     { background: rgba(212,180,74,0.15);  color: var(--yellow); border: 1px solid rgba(212,180,74,0.35); }
+  .t-defer    { background: rgba(74,144,212,0.12);  color: var(--blue);   border: 1px solid rgba(74,144,212,0.3); }
+  .t-kill     { background: rgba(224,85,85,0.12);   color: var(--red);    border: 1px solid rgba(224,85,85,0.3); }
+  .t-monitor  { background: rgba(74,184,112,0.10);  color: var(--green);  border: 1px solid rgba(74,184,112,0.3); }
+  .t-escalate { background: rgba(224,144,48,0.12);  color: var(--orange); border: 1px solid rgba(224,144,48,0.3); }
+
+  .triage-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 5px 9px;
+    font-size: 0.66rem;
+    margin-bottom: 4px;
+    line-height: 1.45;
+    color: var(--text);
+  }
+  .triage-item .item-id { color: var(--muted); margin-right: 5px; }
+  .triage-item .item-note { color: var(--dim); font-size: 0.61rem; display: block; margin-top: 2px; }
+
+  /* ── PRIORITY BOARD ── */
+  .priority-card {
+    border-radius: 4px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    border: 1px solid;
+    font-size: 0.68rem;
+    line-height: 1.5;
+    position: relative;
+  }
+  .pri-p0 {
+    background: rgba(224,85,85,0.08);
+    border-color: var(--red);
+    animation: border-pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes border-pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(224,85,85,0); border-color: var(--red); }
+    50%      { box-shadow: 0 0 10px 2px rgba(224,85,85,0.35); border-color: #ff6666; }
+  }
+  .pri-p1   { background: rgba(224,144,48,0.07); border-color: var(--orange); }
+  .pri-p2   { background: rgba(212,180,74,0.06); border-color: var(--yellow); }
+  .pri-p3   { background: rgba(74,144,212,0.07); border-color: rgba(74,144,212,0.5); }
+  .pri-p4   { background: rgba(155,111,212,0.07); border-color: rgba(155,111,212,0.5); }
+  .pri-num {
+    position: absolute; top: 8px; right: 10px;
+    font-size: 1.6rem;
+    font-weight: 700;
+    opacity: 0.12;
+    line-height: 1;
+  }
+  .pri-title { font-weight: 700; font-size: 0.72rem; margin-bottom: 4px; }
+  .p0-title  { color: var(--red); }
+  .p1-title  { color: var(--orange); }
+  .p2-title  { color: var(--yellow); }
+  .p3-title  { color: var(--blue); }
+  .p4-title  { color: var(--purple); }
+  .pri-what  { color: var(--muted); font-size: 0.62rem; margin-bottom: 3px; }
+  .pri-done  { color: var(--green); font-size: 0.61rem; }
+  .pri-done::before { content: '✓ DONE WHEN: '; }
+
+  /* ── CASUALTY SECTION ── */
+  .faction-bar-wrap { margin-bottom: 10px; }
+  .faction-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.64rem;
+    margin-bottom: 3px;
+  }
+  .bar-bg {
+    background: var(--border);
+    border-radius: 2px;
+    height: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.4s ease;
+    display: flex;
+    align-items: center;
+    padding-left: 6px;
+    font-size: 0.58rem;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+  }
+  .bar-rs   { background: linear-gradient(90deg, #c04040, #e05555); }
+  .bar-rbih { background: linear-gradient(90deg, #3070c0, #4a90d4); }
+  .bar-hist { background: rgba(74,184,112,0.3); border: 1px dashed var(--green); position: absolute; top: 0; height: 100%; }
+  .ratio-verdict { font-size: 0.62rem; padding: 1px 6px; border-radius: 2px; font-weight: 700; }
+  .verdict-pass     { background: rgba(74,184,112,0.15); color: var(--green); }
+  .verdict-borderline { background: rgba(212,180,74,0.15); color: var(--yellow); }
+  .verdict-fail     { background: rgba(224,85,85,0.15); color: var(--red); }
+
+  /* outcome donut wrapper */
+  .donut-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 8px;
+  }
+  .donut-legend { flex: 1; }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.63rem;
+    padding: 2px 0;
+  }
+  .legend-dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .legend-val { margin-left: auto; font-weight: 700; }
+
+  /* ── WAR-OR-GAME VERDICT ── */
+  .wog-verdict {
+    background: rgba(224,85,85,0.08);
+    border: 2px solid var(--red);
+    border-radius: 4px;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 10px;
+  }
+  .wog-label { font-size: 0.58rem; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+  .wog-status {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--red);
+    letter-spacing: 3px;
+    text-shadow: 0 0 14px rgba(224,85,85,0.5);
+    line-height: 1;
+  }
+  .wog-reason { font-size: 0.64rem; color: #c08080; line-height: 1.5; }
+
+  /* ── FOOTER ── */
+  .war-footer {
+    background: var(--card);
+    border-top: 1px solid var(--border2);
+    padding: 8px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.62rem;
+    color: var(--muted);
+  }
+  .footer-item span { color: var(--text); }
+  .footer-ath { color: var(--green); font-weight: 700; }
+  .footer-wog { color: var(--red); font-weight: 700; }
+
+  /* ── SCANLINE OVERLAY ── */
+  .scanlines {
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.04) 2px,
+      rgba(0,0,0,0.04) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── MISC ── */
+  .mono { font-family: var(--mono); }
+  .bold { font-weight: 700; }
+  hr.sec-div {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 10px 0;
+  }
+  .inline-tag {
+    font-size: 0.58rem;
+    padding: 1px 5px;
+    border-radius: 2px;
+    margin-right: 4px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .tag-fix  { background: rgba(224,144,48,0.15); color: var(--orange); }
+  .tag-feat { background: rgba(74,184,112,0.12); color: var(--green);  }
+  .tag-docs { background: rgba(74,144,212,0.12); color: var(--blue);   }
+  .tag-ref  { background: rgba(155,111,212,0.12); color: var(--purple);}
+</style>
+</head>
+<body>
+<div class="scanlines"></div>
+
+<!-- ═══════════════════ HEADER ═══════════════════ -->
+<div class="war-header">
+  <div class="header-top">
+    <div>
+      <div class="header-title">A War Without Victory — War Room</div>
+      <div class="header-sub">BOSNIAN WAR STRATEGIC SIMULATION &nbsp;|&nbsp; PYRRHIC GAMES STUDIO &nbsp;|&nbsp; DAILY STANDUP</div>
+    </div>
+    <div class="header-meta">
+      <div>DATE: <span>2026-03-31 (TUESDAY)</span></div>
+      <div>BRANCH: <span>main</span></div>
+      <div>VERSION: <span>v0.8.0 Commander System</span></div>
+      <div>ATH: <span class="footer-ath">92.5% (n1224)</span></div>
+    </div>
+  </div>
+  <div class="p0-banner">
+    <div class="p0-badge">P0</div>
+    <div class="p0-text">COMBAT DROUGHT PARTIALLY FIXED</div>
+    <div class="p0-detail">n1224: 61/150–250 battles target &nbsp;|&nbsp; hasAvailableSlot() broken in 4/5 callers &nbsp;|&nbsp; Commander ops: 0/17 battles &nbsp;|&nbsp; War-or-Game: NO-GO</div>
+  </div>
+</div>
+
+<!-- ═══════════════════ COLUMNS ═══════════════════ -->
+<div class="columns">
+
+<!-- ╔══════════════════════════════════╗ -->
+<!-- ║         LEFT COLUMN              ║ -->
+<!-- ╚══════════════════════════════════╝ -->
+<div class="col">
+
+  <!-- PHASE 1: RETROSPECTIVE -->
+  <div class="section-label"><span class="phase-num">§1</span> YESTERDAY'S RETROSPECTIVE</div>
+
+  <div class="card">
+    <div class="card-title">24-Hour Commit Breakdown — 25 total</div>
+    <div class="commit-row"><span class="commit-type"><span class="inline-tag tag-docs">docs</span> Documentation</span><span class="commit-count">11</span></div>
+    <div class="commit-row"><span class="commit-type"><span class="inline-tag tag-fix">fix</span> fix(commander)</span><span class="commit-count">8</span></div>
+    <div class="commit-row"><span class="commit-type"><span class="inline-tag tag-feat">feat</span> Features</span><span class="commit-count">3</span></div>
+    <div class="commit-row"><span class="commit-type"><span class="inline-tag tag-ref">ref</span> Refactor / Chore</span><span class="commit-count">2</span></div>
+    <div class="commit-row"><span class="commit-type"><span class="inline-tag tag-feat">feat</span> feat(skills)</span><span class="commit-count">1</span></div>
+  </div>
+
+  <div class="section-label" style="margin-top:10px"><span class="good-label">◆</span> THE GOOD</div>
+  <div class="retro-item retro-good">
+    <div class="retro-label good-label">ATH</div>
+    92.5% area-weighted (n1224) — up from 92.2%. New all-time high.
+  </div>
+  <div class="retro-item retro-good">
+    <div class="retro-label good-label">PROCESS</div>
+    Two-tier panel protocol followed: 7 Tier 1 agents dispatched in parallel.
+  </div>
+  <div class="retro-item retro-good">
+    <div class="retro-label good-label">RECOVERY</div>
+    Crash recovery worked: working-on.md preserved full session context.
+  </div>
+  <div class="retro-item retro-good">
+    <div class="retro-label good-label">SELF-CORRECT</div>
+    Trimming exemption reverted after run data showed no effect. Self-correction loop worked.
+  </div>
+  <div class="retro-item retro-good">
+    <div class="retro-label good-label">FIX</div>
+    min_attack_outcome='stalemate' on commander ops improved battles 50→61.
+  </div>
+
+  <div class="section-label" style="margin-top:10px"><span class="bad-label">◆</span> THE BAD</div>
+  <div class="retro-item retro-bad">
+    <div class="retro-label bad-label">WASTE</div>
+    7 calibration runs (n1218→n1224) to diagnose a single bug — 6 wasted runs.
+  </div>
+  <div class="retro-item retro-bad">
+    <div class="retro-label bad-label">PARTIAL FIX</div>
+    emit.ts slot cap fixed in ONE place; 4 other callers left broken. System still broken.
+  </div>
+  <div class="retro-item retro-bad">
+    <div class="retro-label bad-label">DIAGNOSIS</div>
+    Expert diagnosis (trimming) code-path correct but run-data wrong → 1 wasted run (n1223).
+  </div>
+  <div class="retro-item retro-bad">
+    <div class="retro-label bad-label">COMMANDER</div>
+    Loop still broken: all 17 commander ops had 0 battles in n1224.
+  </div>
+  <div class="retro-item retro-bad">
+    <div class="retro-label bad-label">P0 PERSISTS</div>
+    valid_for_combat_calibration=false. 208 zero-eligible-attacker ops remain.
+  </div>
+
+  <div class="section-label" style="margin-top:10px"><span class="ugly-label">◆</span> THE UGLY</div>
+  <div class="retro-item retro-ugly">
+    <div class="retro-label ugly-label">LESSON VIOLATED</div>
+    Slot cap lesson VIOLATED the same day it was written (2026-03-30 → 2026-03-31).
+  </div>
+  <div class="retro-item retro-ugly">
+    <div class="retro-label ugly-label">ORCHESTRATOR</div>
+    Did direct investigation before user corrected it: "Shouldn't you send out experts?"
+  </div>
+  <div class="retro-item retro-ugly">
+    <div class="retro-label ugly-label">ROOT CAUSE</div>
+    6-run waste root cause: forgot fixing one caller doesn't fix the system. Classic.
+  </div>
+
+  <div class="section-label" style="margin-top:10px"><span style="color:var(--blue)">◆</span> NEW LESSONS (this session)</div>
+  <div class="new-lesson">
+    <span class="lesson-tag">[calibration]</span>
+    Fix ALL callers — grep "active_operations" before declaring slot-cap fix done.
+  </div>
+  <div class="new-lesson">
+    <span class="lesson-tag">[process]</span>
+    Validate expert diagnosis against run data BEFORE implementing. Require a falsifiable prediction.
+  </div>
+
+  <hr class="sec-div" style="margin-top:14px">
+
+  <!-- PHASE 6: CASUALTY DEEP DIVE -->
+  <div class="section-label" style="margin-top:6px"><span class="phase-num">§6</span> TUESDAY DEEP-DIVE — CASUALTY RATIOS</div>
+  <div style="font-size:0.62rem; color:var(--muted); margin-bottom:8px;">n1224 data · 61 battles</div>
+
+  <div class="faction-bar-wrap">
+    <div class="faction-bar-label">
+      <span><span class="rs-c bold">RS (VRS)</span> — 40 battles &nbsp;|&nbsp; Att:Def ratio 0.34:1</span>
+      <span><span class="ratio-verdict verdict-borderline">BORDERLINE PASS</span></span>
+    </div>
+    <div class="faction-bar-label" style="font-size:0.58rem; color:var(--muted)">
+      <span>Target: 0.20–0.33:1</span><span>← slightly over</span>
+    </div>
+    <div class="bar-bg">
+      <div class="bar-fill bar-rs" style="width:34%">0.34</div>
+      <div class="bar-hist" style="left:20%; width:13%"></div>
+    </div>
+  </div>
+
+  <div class="faction-bar-wrap" style="margin-top:10px">
+    <div class="faction-bar-label">
+      <span><span class="rbih-c bold">RBiH (ARBiH)</span> — 21 battles &nbsp;|&nbsp; Att:Def ratio 5.49:1</span>
+      <span><span class="ratio-verdict verdict-fail">OVER LIMIT</span></span>
+    </div>
+    <div class="faction-bar-label" style="font-size:0.58rem; color:var(--muted)">
+      <span>Target: 2:1–4:1</span><span>37% above ceiling</span>
+    </div>
+    <div class="bar-bg">
+      <div class="bar-fill bar-rbih" style="width:80%">5.49</div>
+      <div class="bar-hist" style="left:30%; width:20%"></div>
+    </div>
+  </div>
+
+  <div class="faction-bar-wrap" style="margin-top:10px">
+    <div class="faction-bar-label">
+      <span><span style="color:var(--green)" class="bold">HRHB (HVO)</span> — 0 battles</span>
+      <span><span class="ratio-verdict" style="background:rgba(100,100,100,0.15);color:var(--dim)">N/A</span></span>
+    </div>
+    <div class="bar-bg"><div class="bar-fill" style="width:0%; background:var(--border2)"></div></div>
+  </div>
+
+  <!-- OUTCOME DONUT -->
+  <div style="font-size:0.62rem; color:var(--muted); margin:10px 0 6px;">Outcome distribution — 61 battles</div>
+  <div class="donut-row">
+    <svg width="90" height="90" viewBox="0 0 90 90">
+      <g transform="translate(45,45)">
+        <!-- decisive_victory: 35/61 = 57.4% -->
+        <path d="M0,0 L0,-38 A38,38 0 0,1 36.1,-12.4 Z" fill="#e05555"/>
+        <!-- catastrophic: 21/61 = 34.4% -->
+        <path d="M0,0 L36.1,-12.4 A38,38 0 0,1 -5.4,37.6 Z" fill="#3060a0"/>
+        <!-- stalemate: 3/61 = 4.9% -->
+        <path d="M0,0 L-5.4,37.6 A38,38 0 0,1 -25.6,28.6 Z" fill="#d4b44a"/>
+        <!-- repulsed: 2/61 = 3.3% -->
+        <path d="M0,0 L-25.6,28.6 A38,38 0 0,1 -38,-0.8 Z" fill="#7a7a9a"/>
+        <!-- victory+costly: 0 -->
+        <path d="M0,0 L-38,-0.8 A38,38 0 0,1 0,-38 Z" fill="#2a2a3a"/>
+        <circle r="20" fill="#141420"/>
+        <text x="0" y="4" text-anchor="middle" fill="#d8d8e8" font-size="9" font-family="Courier New">61</text>
+        <text x="0" y="13" text-anchor="middle" fill="#7a7a9a" font-size="6" font-family="Courier New">battles</text>
+      </g>
+    </svg>
+    <div class="donut-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#e05555"></div><span>decisive_victory</span><span class="legend-val rs-c">35 (57%)</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3060a0"></div><span>catastrophic</span><span class="legend-val rbih-c">21 (34%)</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#d4b44a"></div><span>stalemate</span><span class="legend-val" style="color:var(--yellow)">3 (5%)</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#7a7a9a"></div><span>repulsed</span><span class="legend-val" style="color:var(--muted)">2 (3%)</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#2a2a3a; border:1px solid var(--border2)"></div><span style="color:var(--red)">victory / costly ← MISSING</span><span class="legend-val" style="color:var(--red)">0 (0%)</span></div>
+    </div>
+  </div>
+
+  <div style="margin-top:8px; background:rgba(224,85,85,0.07); border:1px solid rgba(224,85,85,0.2); border-radius:3px; padding:7px 10px; font-size:0.64rem; line-height:1.5;">
+    <span style="color:var(--red); font-weight:700;">WORST OUTLIER:</span> Bihac cluster — 12 battles, ARBiH 501st/502nd/505th vs rs_15th_biha (near-dissolved). Ratios 10:1–13:1. <span style="color:var(--orange)">P0 artifact</span> (repeat attack loop), NOT a constants problem.
+  </div>
+  <div style="margin-top:6px; background:rgba(74,184,112,0.06); border:1px solid rgba(74,184,112,0.2); border-radius:3px; padding:7px 10px; font-size:0.64rem; line-height:1.5; color:#a0d0a8;">
+    <span style="color:var(--green); font-weight:700;">DIAGNOSIS:</span> Constants mostly OK. Empty victory/costly band is real: RS clusters at PR&gt;2.5 (→decisive), RBiH at PR&lt;0.5 (→catastrophic). Fix P0 first. If messy middle still empty post-fix, lower VICTORY_THRESHOLD_DECISIVE 2.0→1.7.
+  </div>
+
+</div><!-- /col left -->
+
+
+<!-- ╔══════════════════════════════════╗ -->
+<!-- ║         CENTER COLUMN            ║ -->
+<!-- ╚══════════════════════════════════╝ -->
+<div class="col">
+
+  <!-- PHASE 2: CALIBRATION TRAJECTORY -->
+  <div class="section-label"><span class="phase-num">§2</span> CALIBRATION TRAJECTORY — LAST 12 RUNS</div>
+
+  <div class="card chart-wrap" style="padding:14px 10px 10px;">
+    <div class="card-title">Area-Weighted % Over Time &nbsp;|&nbsp; ATH = 92.5% (n1224)</div>
+
+    <svg class="cal-chart" viewBox="0 0 560 200" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="lineGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" style="stop-color:#4a90d4;stop-opacity:0.35"/>
+          <stop offset="100%" style="stop-color:#4a90d4;stop-opacity:0.02"/>
+        </linearGradient>
+        <marker id="arrowDown" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#e05555"/>
+        </marker>
+        <marker id="arrowUp" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+          <path d="M6,0 L0,3 L6,6 Z" fill="#4ab870"/>
+        </marker>
+      </defs>
+
+      <!-- Grid -->
+      <line x1="40" y1="10"  x2="550" y2="10"  stroke="#2a2a3a" stroke-width="0.5"/>
+      <line x1="40" y1="40"  x2="550" y2="40"  stroke="#2a2a3a" stroke-width="0.5"/>
+      <line x1="40" y1="70"  x2="550" y2="70"  stroke="#2a2a3a" stroke-width="0.5"/>
+      <line x1="40" y1="100" x2="550" y2="100" stroke="#2a2a3a" stroke-width="0.5"/>
+      <line x1="40" y1="130" x2="550" y2="130" stroke="#2a2a3a" stroke-width="0.5"/>
+      <line x1="40" y1="160" x2="550" y2="160" stroke="#2a2a3a" stroke-width="0.5"/>
+
+      <!-- Y axis labels: range 87% to 93% mapped to 160→10px -->
+      <!-- 87=160, 88=133.3, 89=106.7, 90=80, 91=53.3, 92=26.7, 93=0 -->
+      <text x="36" y="164" text-anchor="end" fill="#4a4a6a" font-size="8" font-family="Courier New">87%</text>
+      <text x="36" y="137" text-anchor="end" fill="#4a4a6a" font-size="8" font-family="Courier New">88%</text>
+      <text x="36" y="110" text-anchor="end" fill="#4a4a6a" font-size="8" font-family="Courier New">89%</text>
+      <text x="36" y="83"  text-anchor="end" fill="#4a4a6a" font-size="8" font-family="Courier New">90%</text>
+      <text x="36" y="56"  text-anchor="end" fill="#4a4a6a" font-size="8" font-family="Courier New">91%</text>
+      <text x="36" y="29"  text-anchor="end" fill="#4a4a6a" font-size="8" font-family="Courier New">92%</text>
+
+      <!-- ATH line at 92.5% → y = 160 - (5.5/6)*150 = 160 - 137.5 = 22.5 ≈ 23 -->
+      <line x1="40" y1="23" x2="550" y2="23" stroke="#4ab870" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="552" y="26" fill="#4ab870" font-size="7" font-family="Courier New">ATH 92.5%</text>
+
+      <!-- 90% pass threshold at y=80 -->
+      <line x1="40" y1="80" x2="550" y2="80" stroke="#d4b44a" stroke-width="0.5" stroke-dasharray="2,4" opacity="0.5"/>
+      <text x="552" y="83" fill="#d4b44a" font-size="6" font-family="Courier New">90%</text>
+
+      <!--
+        Data points. Y = 160 - ((val-87)/6)*150
+        n1029: 92.0 → y = 160 - (5.0/6)*150 = 160-125 = 35
+        n1170: 90.0 → y = 160 - (3.0/6)*150 = 160-75 = 85
+        n1194: 88.4 → y = 160 - (1.4/6)*150 = 160-35 = 125
+        n1204: 90.9 → y = 160 - (3.9/6)*150 = 160-97.5 = 62.5
+        n1205: 92.1 → y = 160 - (5.1/6)*150 = 160-127.5 = 32.5
+        n1210: 87.7 → y = 160 - (0.7/6)*150 = 160-17.5 = 142.5
+        n1211: 90.2 → y = 160 - (3.2/6)*150 = 160-80 = 80
+        n1213: 92.2 → y = 160 - (5.2/6)*150 = 160-130 = 30
+        n1216: 91.8 → y = 160 - (4.8/6)*150 = 160-120 = 40
+        n1217: 92.2 → y = 30
+        n1218: 91.8 → y = 40
+        n1224: 92.5 → y = 23
+        X positions: 12 points, x range 50-540, step = 490/11 ≈ 44.5
+        x[0]=50, x[1]=94.5, x[2]=139, x[3]=183.5, x[4]=228, x[5]=272.5, x[6]=317, x[7]=361.5, x[8]=406, x[9]=450.5, x[10]=495, x[11]=539
+      -->
+
+      <!-- Area fill -->
+      <polygon
+        points="50,35 94.5,85 139,125 183.5,62.5 228,32.5 272.5,142.5 317,80 361.5,30 406,40 450.5,30 495,40 539,23 539,165 50,165"
+        fill="url(#lineGrad)"/>
+
+      <!-- Line -->
+      <polyline
+        points="50,35 94.5,85 139,125 183.5,62.5 228,32.5 272.5,142.5 317,80 361.5,30 406,40 450.5,30 495,40 539,23"
+        fill="none" stroke="#4a90d4" stroke-width="1.8"/>
+
+      <!-- DOWN arrows at deliberate drops -->
+      <!-- n1170 drop: midpoint between n1029(50,35) and n1170(94.5,85) -->
+      <line x1="72" y1="48" x2="72" y2="64" stroke="#e05555" stroke-width="1.5" marker-end="url(#arrowDown)"/>
+      <!-- n1194 drop -->
+      <line x1="117" y1="96" x2="117" y2="112" stroke="#e05555" stroke-width="1.5" marker-end="url(#arrowDown)"/>
+      <!-- n1210 BIG DROP -->
+      <line x1="250" y1="42" x2="250" y2="130" stroke="#e05555" stroke-width="1.5" marker-end="url(#arrowDown)"/>
+      <text x="254" y="90" fill="#e05555" font-size="7" font-family="Courier New">-4.4pp</text>
+      <text x="254" y="98" fill="#e05555" font-size="6" font-family="Courier New">deliberate</text>
+
+      <!-- UP arrows at gains -->
+      <line x1="205" y1="50" x2="205" y2="38" stroke="#4ab870" stroke-width="1.5" marker-end="url(#arrowUp)"/>
+      <line x1="340" y1="68" x2="340" y2="37" stroke="#4ab870" stroke-width="1.5" marker-end="url(#arrowUp)"/>
+      <line x1="528" y1="35" x2="528" y2="18" stroke="#4ab870" stroke-width="1.5" marker-end="url(#arrowUp)"/>
+      <text x="514" y="13" fill="#4ab870" font-size="7" font-family="Courier New">NEW ATH</text>
+
+      <!-- Data points -->
+      <!-- n1029 -->
+      <circle cx="50"   cy="35"   r="4" fill="#4a90d4" stroke="#0a0a12" stroke-width="1.5"/>
+      <!-- n1170 -->
+      <circle cx="94.5" cy="85"   r="4" fill="#4a90d4" stroke="#0a0a12" stroke-width="1.5"/>
+      <!-- n1194 -->
+      <circle cx="139"  cy="125"  r="4" fill="#4a90d4" stroke="#0a0a12" stroke-width="1.5"/>
+      <!-- n1204 -->
+      <circle cx="183.5" cy="62.5" r="4" fill="#4a90d4" stroke="#0a0a12" stroke-width="1.5"/>
+      <!-- n1205 -->
+      <circle cx="228"  cy="32.5" r="4" fill="#4a90d4" stroke="#0a0a12" stroke-width="1.5"/>
+      <!-- n1210 — big drop — red dot -->
+      <circle cx="272.5" cy="142.5" r="5" fill="#e05555" stroke="#0a0a12" stroke-width="1.5"/>
+      <!-- n1211 -->
+      <circle cx="317"  cy="80"   r="4" fill="#4a90d4" stroke="#0a0a12" stroke-width="1.5"/>
+      <!-- n1213 — prev ATH — green diamond -->
+      <polygon points="361.5,24 367,30 361.5,36 356,30" fill="#4ab870" stroke="#0a0a12" stroke-width="1.5"/>
+      <!-- n1216 -->
+      <circle cx="406"  cy="40"   r="4" fill="#4a90d4" stroke="#0a0a12" stroke-width="1.5"/>
+      <!-- n1217 — prev ATH tie -->
+      <polygon points="450.5,24 456,30 450.5,36 445,30" fill="#4ab870" stroke="#0a0a12" stroke-width="1.5"/>
+      <!-- n1218 -->
+      <circle cx="495"  cy="40"   r="4" fill="#e09030" stroke="#0a0a12" stroke-width="1.5"/>
+      <!-- n1224 — new ATH — star-ish large green -->
+      <polygon points="539,15 543,22 539,17 535,22" fill="#4ab870" stroke="#0a0a12" stroke-width="1"/>
+      <circle cx="539"  cy="23"   r="5.5" fill="#4ab870" stroke="#0a0a12" stroke-width="1.5"/>
+
+      <!-- Run number labels (selected) -->
+      <text x="46"   y="30"   fill="#4a90d4" font-size="6.5" font-family="Courier New" text-anchor="middle">n1029</text>
+      <text x="272.5" y="157" fill="#e05555" font-size="6.5" font-family="Courier New" text-anchor="middle">n1210</text>
+      <text x="361.5" y="45"  fill="#4ab870" font-size="6.5" font-family="Courier New" text-anchor="middle">n1213</text>
+      <text x="539"   y="17"  fill="#4ab870" font-size="6.5" font-family="Courier New" text-anchor="middle">n1224</text>
+      <text x="495"   y="53"  fill="#e09030" font-size="6.5" font-family="Courier New" text-anchor="middle">n1218</text>
+      <text x="228"   y="26"  fill="#4a90d4" font-size="6.5" font-family="Courier New" text-anchor="middle">n1205</text>
+
+      <!-- Inflection annotations -->
+      <text x="42"  y="175" fill="#4a4a6a" font-size="6" font-family="Courier New">honest baseline</text>
+      <text x="262" y="185" fill="#e05555" font-size="6" font-family="Courier New" text-anchor="middle">siege/OOB phantom fix</text>
+      <text x="350" y="175" fill="#4ab870" font-size="6" font-family="Courier New" text-anchor="middle">Commander v0.8</text>
+      <text x="495" y="53"  fill="#e09030" font-size="5.5" font-family="Courier New" text-anchor="middle">partial fix</text>
+
+    </svg>
+  </div>
+
+  <!-- PHASE 3: GAME STATE -->
+  <div class="section-label" style="margin-top:8px"><span class="phase-num">§3</span> GAME STATE SNAPSHOT — n1224 (2026-03-31)</div>
+
+  <div class="card" style="padding:8px 0 0;">
+    <div class="metric-row header-row">
+      <span>Metric</span><span>Value</span><span>Target</span><span>Status</span>
+    </div>
+    <div class="metric-row">
+      <span>Area-weighted</span>
+      <span class="val-num">92.5%</span>
+      <span style="color:var(--muted)">≥90%</span>
+      <span class="status-pass">PASS</span>
+    </div>
+    <div class="metric-row">
+      <span>OSID match</span>
+      <span class="val-num">90.7%</span>
+      <span style="color:var(--muted)">≥88%</span>
+      <span class="status-pass">PASS</span>
+    </div>
+    <div class="metric-row">
+      <span>Anchors</span>
+      <span class="val-num">22/22</span>
+      <span style="color:var(--muted)">22/22</span>
+      <span class="status-pass">PASS</span>
+    </div>
+    <div class="metric-row">
+      <span>Benchmarks</span>
+      <span class="val-num">6/6</span>
+      <span style="color:var(--muted)">6/6</span>
+      <span class="status-pass">PASS</span>
+    </div>
+    <div class="metric-row" style="background:rgba(224,85,85,0.05)">
+      <span>Total battles</span>
+      <span class="val-num" style="color:var(--red)">61</span>
+      <span style="color:var(--muted)">150–250</span>
+      <span class="status-fail">FAIL</span>
+    </div>
+    <div class="metric-row" style="background:rgba(224,85,85,0.05)">
+      <span>Battleless weeks</span>
+      <span class="val-num" style="color:var(--red)">11</span>
+      <span style="color:var(--muted)">≤4</span>
+      <span class="status-fail">FAIL</span>
+    </div>
+    <div class="metric-row" style="background:rgba(224,85,85,0.05)">
+      <span>Commander ops battles</span>
+      <span class="val-num" style="color:var(--red)">0/17</span>
+      <span style="color:var(--muted)">~50+</span>
+      <span class="status-fail">FAIL</span>
+    </div>
+    <div class="metric-row" style="background:rgba(224,85,85,0.05)">
+      <span>valid_for_combat_calib.</span>
+      <span class="val-num" style="color:var(--red); font-size:0.62rem">false</span>
+      <span style="color:var(--muted)">true</span>
+      <span class="status-fail">FAIL</span>
+    </div>
+  </div>
+
+  <!-- War-or-Game verdict -->
+  <div class="wog-verdict">
+    <div>
+      <div class="wog-label">War-or-Game</div>
+      <div class="wog-status">NO-GO</div>
+    </div>
+    <div class="wog-reason">
+      "The war effectively ends at week 22. VRS armies — historically conducting their most intensive operations Oct–Dec 1992 — take a five-month coffee break. 208 operations execute with zero eligible attackers. Mladic would not accept this."
+    </div>
+  </div>
+
+  <!-- Territory -->
+  <div style="font-size:0.62rem; color:var(--muted); margin-bottom:5px;">Territory at w40:</div>
+  <div class="territory-row">
+    <div class="terr-pill">
+      <div class="faction">RS</div>
+      <div class="pct rs-c">62.5%</div>
+      <div style="font-size:0.58rem; color:var(--muted)">target ~67%</div>
+    </div>
+    <div class="terr-pill">
+      <div class="faction">RBiH</div>
+      <div class="pct rbih-c">24.6%</div>
+      <div style="font-size:0.58rem; color:var(--muted)">&nbsp;</div>
+    </div>
+    <div class="terr-pill">
+      <div class="faction">HRHB</div>
+      <div class="pct hrhb-c">13.0%</div>
+      <div style="font-size:0.58rem; color:var(--muted)">&nbsp;</div>
+    </div>
+  </div>
+
+  <!-- PHASE 4: CANON DRIFT -->
+  <div class="section-label" style="margin-top:12px"><span class="phase-num">§4</span> CANON DRIFT WARNINGS</div>
+
+  <div class="card" style="padding:8px 0 0;">
+    <div class="drift-row hdr">
+      <span>Sev</span><span>File</span><span>Issue</span>
+    </div>
+    <div class="drift-row">
+      <span class="sev-p2">P2</span>
+      <span class="drift-file">emit.ts</span>
+      <span class="drift-issue">POSTURE_MIN_OUTCOME table undocumented in canon. Systems_Manual §6.5 has no mention of besieged→decisive, defending→victory mapping.</span>
+    </div>
+    <div class="drift-row">
+      <span class="sev-p2">P2</span>
+      <span class="drift-file">sector_offensive.ts</span>
+      <span class="drift-issue">Execution backstop cites §7.6 (prep phase) but §7.6 covers preparation stalls, not execution aborts. MAX_EXECUTION_TURNS_ZERO_ATTACKS=5 undocumented.</span>
+    </div>
+    <div class="drift-row">
+      <span class="sev-p2">P2</span>
+      <span class="drift-file">plan.ts</span>
+      <span class="drift-issue">Besieged Corps Rule (2-hop local op limit for 5th Corps Bihac) — BESIEGED_SURPLUS_HOP_LIMIT=2 has no canonical basis in any doc.</span>
+    </div>
+    <div class="drift-row">
+      <span class="sev-p3">P3</span>
+      <span class="drift-file">bot_brigade_eval_attack.ts</span>
+      <span class="drift-issue">§6.5 says home defenders blocked with NO exemption; code exempts op participants. Undocumented contradiction.</span>
+    </div>
+  </div>
+
+</div><!-- /col center -->
+
+
+<!-- ╔══════════════════════════════════╗ -->
+<!-- ║         RIGHT COLUMN             ║ -->
+<!-- ╚══════════════════════════════════╝ -->
+<div class="col">
+
+  <!-- PHASE 5: BACKLOG TRIAGE -->
+  <div class="section-label"><span class="phase-num">§5</span> STALE BACKLOG TRIAGE</div>
+
+  <div class="triage-group">
+    <div class="triage-label t-park">PARK — keep, no active sprint</div>
+    <div class="triage-item">
+      <span class="item-id">#27</span> 2nd Corps Lukavac thin front — no fix since n696
+      <span class="item-note">→ Park, review post-drought</span>
+    </div>
+    <div class="triage-item">
+      <span class="item-id">#31</span> Teočak bot strategic focus — engine fix described, never implemented
+      <span class="item-note">→ Park until v0.8.1</span>
+    </div>
+    <div class="triage-item">
+      <span class="item-id">H4</span> VRS armor not concentrated for offense — staging still open
+      <span class="item-note">→ Park</span>
+    </div>
+    <div class="triage-item">
+      <span class="item-id">—</span> 0 dissolved at w40 (n647 finding, no action taken)
+      <span class="item-note">→ Park, check after P0 fixed</span>
+    </div>
+    <div class="triage-item">
+      <span class="item-id">#3</span> per-formation casualty_ledger never populated
+      <span class="item-note">→ Park post-v0.8</span>
+    </div>
+  </div>
+
+  <div class="triage-group">
+    <div class="triage-label t-defer">DEFER CORRECTLY</div>
+    <div class="triage-item">
+      <span class="item-id">#14</span> HVO CB sectorless
+      <span class="item-note">→ Correctly deferred until April 1993 scenario. Leave alone.</span>
+    </div>
+    <div class="triage-item">
+      <span class="item-id">#25</span> Podrinje planning duration + Srebrenica Ring axis (root causes #1/#2)
+      <span class="item-note">→ Defer until ops engine stable</span>
+    </div>
+  </div>
+
+  <div class="triage-group">
+    <div class="triage-label t-kill">KILL</div>
+    <div class="triage-item">
+      <span class="item-id">#20</span> 30 RBiH brigades at 3,000 cap uniformity
+      <span class="item-note">→ KILL as standalone. Downstream of mobilization math. Re-open only if post-P0 data shows unrealistic behavior.</span>
+    </div>
+  </div>
+
+  <div class="triage-group">
+    <div class="triage-label t-monitor">MONITOR</div>
+    <div class="triage-item">
+      <span class="item-id">#6/#8</span> Coverage + stacking
+      <span class="item-note">→ Continue monitoring post-drought fix</span>
+    </div>
+  </div>
+
+  <div class="triage-group">
+    <div class="triage-label t-escalate">ESCALATE</div>
+    <div class="triage-item">
+      <span class="item-id">#24</span> RS 89% attack success rate (target 60–75%)
+      <span class="item-note">→ Needs investigation after P0 fixed. Current rate inflated by early-war easy attacks dominating drought sample.</span>
+    </div>
+    <div class="triage-item">
+      <span class="item-id">#43</span> RBiH overmobilized 161k vs historical 100–130k
+      <span class="item-note">→ Escalate to post-drought investigation</span>
+    </div>
+  </div>
+
+  <hr class="sec-div" style="margin-top:6px">
+
+  <!-- PHASE 7: TODAY'S PRIORITIES -->
+  <div class="section-label" style="margin-top:6px"><span class="phase-num">§7</span> TODAY'S PRIORITIES</div>
+
+  <!-- P1: hasAvailableSlot -->
+  <div class="priority-card pri-p0">
+    <div class="pri-num">1</div>
+    <div class="pri-title p0-title">P0 BLOCKER — FIX hasAvailableSlot()</div>
+    <div class="pri-what">WHERE: corps_operation_helpers.ts:10 &nbsp;|&nbsp; ROLE: Gameplay Programmer</div>
+    <div style="font-size:0.65rem; color:var(--text); margin:4px 0; line-height:1.5;">
+      Filter <code style="background:rgba(255,255,255,0.07); padding:1px 4px; border-radius:2px;">op.phase !== 'recovery'</code> in <code style="background:rgba(255,255,255,0.07); padding:1px 4px; border-radius:2px;">hasAvailableSlot()</code>. TRUE root cause of 6-session drought. emit.ts was band-aid on 1 of 5 places. All 4 other callers use broken <code style="background:rgba(255,255,255,0.07); padding:1px 4px; border-radius:2px;">active_operations.length</code> count.
+    </div>
+    <div class="pri-done">n1225 shows &gt;100 battles, consecutive drought weeks ≤2</div>
+    <div style="font-size:0.6rem; color:var(--red); margin-top:3px;">RISK: P0 persists indefinitely; War-or-Game approval impossible</div>
+  </div>
+
+  <!-- P2: Run n1225 + panel -->
+  <div class="priority-card pri-p1">
+    <div class="pri-num">2</div>
+    <div class="pri-title p1-title">RUN n1225 + TWO-TIER PANEL</div>
+    <div class="pri-what">40w scenario after P0 fix &nbsp;|&nbsp; 7 Tier 1 + 5 Tier 2 agents</div>
+    <div style="font-size:0.65rem; color:var(--text); margin:4px 0; line-height:1.5;">
+      Verify hasAvailableSlot fix eliminates drought. Full parallel panel dispatch. Orchestrator issues go/no-go on War-or-Game from Tier 2 synthesis.
+    </div>
+    <div class="pri-done">valid_for_combat_calibration=true, War-or-Game APPROVED or specific P1 list returned</div>
+  </div>
+
+  <!-- P3: Calibration master -->
+  <div class="priority-card pri-p2">
+    <div class="pri-num">3</div>
+    <div class="pri-title p2-title">UPDATE CALIBRATION_MASTER</div>
+    <div class="pri-what">docs/40_reports/CALIBRATION_MASTER.md &nbsp;|&nbsp; 6 runs missing (n1218→n1224)</div>
+    <div style="font-size:0.65rem; color:var(--text); margin:4px 0; line-height:1.5;">
+      Add n1218→n1224 entries. Log area%, battles, battleless, hash, change summary for each run.
+    </div>
+    <div class="pri-done">All runs logged with full metadata</div>
+  </div>
+
+  <!-- P4: Canon drift -->
+  <div class="priority-card pri-p3">
+    <div class="pri-num">4</div>
+    <div class="pri-title p3-title">PATCH CANON DRIFT (3× P2 items)</div>
+    <div class="pri-what">Systems_Manual §6.5 + §7.6 + commander section &nbsp;|&nbsp; Role: Technical Architect</div>
+    <div style="font-size:0.65rem; color:var(--text); margin:4px 0; line-height:1.5;">
+      Add: POSTURE_MIN_OUTCOME table, execution backstop citation fix, Besieged Corps Rule. Update §6.5 op-participant exemption. v0.8.1 Commander Maturity milestone requires canon to reflect implementation.
+    </div>
+    <div class="pri-done">3 entries added, §6.5 exemption updated</div>
+  </div>
+
+  <!-- P5: Commander loop -->
+  <div class="priority-card pri-p4">
+    <div class="pri-num">5</div>
+    <div class="pri-title p4-title">INVESTIGATE COMMANDER LOOP INDEPENDENTLY</div>
+    <div class="pri-what">Even after slot fix, commander ops may still produce 0 battles &nbsp;|&nbsp; Roles: Operations Expert + systematic-debugging</div>
+    <div style="font-size:0.65rem; color:var(--text); margin:4px 0; line-height:1.5;">
+      Trace why 17 commander ops had 0 battles in n1224 even when slots were available in early weeks. "All 17 commander ops, 0 battles" is a separate failure mode from slot blockage.
+    </div>
+    <div class="pri-done">At least one VRS/RBiH commander op shows battles in n1225, or specific new root cause identified</div>
+  </div>
+
+</div><!-- /col right -->
+</div><!-- /columns -->
+
+<!-- ═══════════════════ FOOTER ═══════════════════ -->
+<div class="war-footer">
+  <div class="footer-item">BRANCH: <span>main</span></div>
+  <div class="footer-item">LAST RUN: <span>n1224</span></div>
+  <div class="footer-item">ATH: <span class="footer-ath">92.5%</span></div>
+  <div class="footer-item">PREV ATH: <span>92.2% (n1213/n1217)</span></div>
+  <div class="footer-item">BATTLES: <span style="color:var(--red)">61/150–250</span></div>
+  <div class="footer-item">ANCHORS: <span style="color:var(--green)">22/22</span></div>
+  <div class="footer-item">BENCHMARKS: <span style="color:var(--green)">6/6</span></div>
+  <div class="footer-item">WAR-OR-GAME: <span class="footer-wog">NO-GO</span></div>
+  <div class="footer-item" style="color:var(--dim)">Generated 2026-03-31 &nbsp;|&nbsp; Pyrrhic Games</div>
+</div>
+
+</body>
+</html>

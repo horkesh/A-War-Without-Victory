@@ -13,7 +13,7 @@ When this works:
 
 ## Design Doc
 
-`docs/plans/2026-03-30-corps-commander-intelligence.md` — READ EVERY WORD. This was synthesized from 5 expert consultations (Game Designer, War-or-Game, Operations Expert, Modern Wargame Expert, Technical Architect).
+`docs/plans/2026-03-30-v080-corps-commander-intelligence-architecture.md` — READ EVERY WORD. This was synthesized from 5 expert consultations (Game Designer, War-or-Game, Operations Expert, Modern Wargame Expert, Technical Architect).
 
 ## Mandatory Reading
 
@@ -183,3 +183,4 @@ A morning report that says:
 - "SRK commitment ratio 8.9 — zero surplus, pure screening posture. No brigades pulled for other ops."
 - "Zero-attack operations: 3/27 (11%) down from 12/27 (44%)."
 - "Calibration: XX.X% area-weighted, Sarajevo Centar anchor PASSES."
+

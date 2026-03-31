@@ -1098,6 +1098,22 @@ export function advanceSectorOffensives(
                 }
             }
 
+            // Execution-phase backstop: abort any op that has been executing for
+            // MAX_EXECUTION_TURNS_ZERO_ATTACKS turns without a single logged attack.
+            // Prevents dead ops from consuming corps op slots for 13-15 turns due to
+            // the anyMoved/idle oscillation that prevents normal abort thresholds
+            // (idle_execution_turn_streak, movement_only_execution_turns) from
+            // accumulating fast enough. Canon-approved: equivalent to corps commander
+            // discretion to abort when operational window has closed (Systems Manual §7.6).
+            const MAX_EXECUTION_TURNS_ZERO_ATTACKS = 5;
+            if ((op.attack_attempt_count ?? 0) === 0) {
+                const executionTurnsElapsed = turn - (op.phase_started_turn ?? turn);
+                if (executionTurnsElapsed >= MAX_EXECUTION_TURNS_ZERO_ATTACKS) {
+                    beginRecovery(op, turn, 'no_logged_attempt', state);
+                    continue;
+                }
+            }
+
             if (op.type === 'probe' && !multiAxis && (op.attack_attempt_count ?? 0) > 0) {
                 beginRecovery(op, turn, op.last_result === 'captured' ? 'completed' : 'probe_complete', state);
                 continue;

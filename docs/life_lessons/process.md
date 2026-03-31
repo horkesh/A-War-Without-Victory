@@ -3,6 +3,19 @@
 
 ---
 
+### [Process] Decisions without traces are undebuggable — instrument before investigating (2026-03-31) — NEW
+- **Context**: The commander pipeline (briefing→plan→decide→emit) emits ops or it doesn't. No log entry, no skip reason, no per-corps per-turn record of why an op was blocked. Two full sessions (n1217→n1225, ~8 calibration runs) diagnosed root causes entirely from static code reading — both diagnoses were wrong. The actual cause remains unknown because we cannot observe what the system decided at runtime.
+- **Wrong approach**: Reading source code to theorize why a system makes no-op decisions. Code reading shows what CAN happen; it cannot tell you what IS happening on a specific run with specific state.
+- **Right approach**: Any system that makes yes/no choices (op emission, plan activation, slot checks) must emit a structured trace of those choices during simulation. One line per decision, written to the run directory. Read the trace after the run — root cause in 5 minutes.
+- **Do instead**: Before any further debugging of the commander drought: add `commander_trace.jsonl` to the run output. One entry per corps per turn: `{ corps_id, turn, emitted_op, skip_reason }`. Then read 40 lines instead of spending hours on agent-based code analysis.
+- **Broader rule**: If a system has been debugged twice without finding the root cause, the answer is never "run more agents." It is always "add instrumentation."
+
+### [Process] Validate expert diagnosis against run data BEFORE implementing the fix (2026-03-31) — NEW
+- **Context**: Operations Expert analyzed code paths and concluded "per-corps trimming removes op participant attacks — trimming is the root cause." The fix was implemented and n1223 run. `attack_attempt_count` in the diagnostic stayed 0 across all op participant eligible turns — identical to the pre-fix run. The diagnosis was wrong; trimming was irrelevant because attack orders were never generated in the first place.
+- **Wrong approach**: Dispatching an expert who analyses code paths in isolation, getting a confident root-cause conclusion, and implementing immediately. Code-path analysis shows what CAN happen, not what IS happening in a specific run. The expert's chain was mechanically valid but didn't match the actual data path taken at runtime.
+- **Right approach**: For any "root cause" diagnosis, require the expert to state: "If this is the root cause, then diagnostic field X should change from Y to Z after the fix." If the fix lands and X does not change, the diagnosis is wrong — do not proceed.
+- **Do instead**: Before implementing any expert-proposed fix, ask: "What specific diagnostic value in the weekly_report.jsonl would change if this fix is correct?" Run n+1 and check that field first. If unchanged, reject the diagnosis and re-investigate rather than running further fixes on top.
+
 ### [Process] READ mandatory startup files BEFORE any action — reverted deliberate work due to ignorance (2026-03-30) — NEW
 - **Context**: Session started with a 40w run. Contact graph had been enriched with shared_segments (deliberate work from 2026-03-28, documented in napkin item #10). Without reading the napkin or ledger properly, reverted the contact graph to the committed version, destroying deliberate work. Had to re-run the enrichment script. Multiple agents dispatched without SpatialContext awareness — the biggest architectural change of the day.
 - **Wrong approach**: Skimming startup files, then acting on incomplete understanding. Declaring "the 90.9% is correct" without knowing the enrichment history. Reverting files without understanding why they were modified.

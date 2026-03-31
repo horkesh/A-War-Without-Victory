@@ -1,14 +1,15 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-03-30. 160 lessons across 8 topic files.
+> Last restructured: 2026-03-31. 163 lessons across 8 topic files.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
 ## Recently Violated (always read these)
 
-### [Calibration] Slot cap must exclude recovery-phase ops — counting them starves the pipeline (2026-03-30) — NEW
+### [Calibration] Slot cap must exclude recovery-phase ops — AND verify every caller uses the function you fixed (2026-03-30, EXTENDED 2026-03-31)
 - See `docs/life_lessons/calibration.md` for full entry.
-- **Do instead**: `briefing.active_operations.filter(op => op.phase !== 'recovery')` for the slot cap check. Cap applies to planning + execution only.
+- **Original lesson**: `briefing.active_operations.filter(op => op.phase !== 'recovery')` for the slot cap check in emit.ts.
+- **Extension (2026-03-31)**: Even fixing emit.ts AND `hasAvailableSlot()` may be insufficient — `commander/emit.ts` has its own inline guard and never calls `hasAvailableSlot()`. Fixing a utility function that your actual code path doesn't call is an inert no-op. Before declaring any fix complete: (1) grep for all callers, (2) verify the code path you care about actually reaches the function you changed.
 
 ### [Calibration] Implementing a feedback write without a feedback read is half-done (2026-03-30) — NEW
 - See `docs/life_lessons/calibration.md` for full entry.
@@ -77,6 +78,12 @@
 - **Cost**: Extra investigation cycle. The systematic trace approach in the second pass was correct — should have been applied from the start.
 
 ## New Lessons (always read these)
+
+### [Process] Decisions without traces are undebuggable — instrument before investigating (2026-03-31) — NEW → see `process.md`
+
+### [Calibration] Fix the symptom in ALL callers — AND verify your fix is on the actual code path (2026-03-31) — NEW → see `calibration.md`
+
+### [Process] Validate expert diagnosis against run data BEFORE implementing the fix (2026-03-31) — NEW → see `process.md`
 
 ### [Process] READ mandatory startup files BEFORE any action — reverted deliberate work due to ignorance (2026-03-30) — NEW → see `process.md`
 
@@ -194,11 +201,11 @@
 
 | File | Topics | Lessons | Load when... |
 |------|--------|---------|-------------|
-| [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Combat, Bot AI | 36 | Running calibration scenarios, tuning parameters, OOB changes |
+| [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Combat, Bot AI | 37 | Running calibration scenarios, tuning parameters, OOB changes |
 | [architecture.md](life_lessons/architecture.md) | Architecture, Engine, Scaling, Defaults, Data Integrity | 46 | Changing engine structure, state, pipeline, adding systems |
 | [data_pipeline.md](life_lessons/data_pipeline.md) | Data, Pipeline, Geometry | 10 | Modifying derived data, running data scripts, geometry work |
 | [ui_map.md](life_lessons/ui_map.md) | UI, GUI, MapLibre, Rendering, React | 12 | Frontend, map, tactical overlay, modal work |
-| [process.md](life_lessons/process.md) | Process, Planning, QA, Quality, Night Shift, Debugging | 41 | General development process (skim at session start) |
+| [process.md](life_lessons/process.md) | Process, Planning, QA, Quality, Night Shift, Debugging | 42 | General development process (skim at session start) |
 | [sectors.md](life_lessons/sectors.md) | Sectors, Design | 5 | Sector system, front lines, territory assignment |
 | [platform.md](life_lessons/platform.md) | Platform, Tooling | 4 | Build issues, platform-specific bugs, tooling |
 | [events.md](life_lessons/events.md) | Events | 1 | Event system, flag gates, triggers |

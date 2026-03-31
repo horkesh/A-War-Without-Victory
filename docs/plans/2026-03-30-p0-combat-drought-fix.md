@@ -7,6 +7,18 @@
 **Architecture:** Four sequential calibration runs. Each fixes one bug class, verified independently. Gap B (stuck plans) → Gap C (empty targets) → Gap A (blind briefing) → Doctrine removal.
 
 **Tech Stack:** TypeScript, Vitest, `npm run sim:scenario:run:40w` for calibration.
+**Roadmap slot:** v0.8.0 P0 stabilization
+**Overseer:** Orchestrator
+**Architect:** Technical Architect / Architect - flags architectural decisions for user review
+**Primary implementer roles:** Gameplay Programmer, Systems Programmer, QA Engineer
+**Primary reviewer roles:** `/simplify`, Code Review, War-or-Game
+**Sign-off:** Orchestrator, Architect, War-or-Game
+
+**Relevant life lessons to respect while executing:**
+- `docs/life_lessons.md`: Decisions without traces are undebuggable - instrument before investigating
+- `docs/life_lessons.md`: Fix the symptom in ALL callers - verify the actual code path uses the function you changed
+- `docs/life_lessons.md`: One change per calibration run
+- `docs/life_lessons.md`: Implementing a feedback write without a feedback read is half-done
 
 ---
 
@@ -519,7 +531,7 @@ git commit -m "feat(commander): widen opportunity eligibility to balanced zones 
 
 ---
 
-## Task 6: Calibration Validation + War-or-Game
+## Task 6: Calibration Validation + Two-Tier Post-Run Panel
 
 After all fixes:
 
@@ -531,7 +543,7 @@ After all fixes:
    - Battles > 50 (target: 60+)
    - No 5+ consecutive zero-combat weeks
    - Sarajevo HELD, Gorazde HELD
-3. If passing, invoke `/war-or-game` for approval
+3. If passing, dispatch full two-tier post-run panel (7 Tier 1 investigators in parallel, then 5 Tier 2 analysts) — Orchestrator issues go/no-go
 4. Update `docs/40_reports/CALIBRATION_MASTER.md` with results
 5. Update `docs/PROJECT_LEDGER.md`
 
@@ -543,3 +555,21 @@ After all fixes:
 - **Sarajevo/Gorazde regression**: Both are besieged zones. Besieged corps never generate opportunity plans. Garrison locks prevent stripping.
 - **One change per calibration**: Tasks 1-3 are bug fixes (not behavioral changes) — they can be committed together. Task 4 (doctrine removal) is the behavioral change requiring its own calibration. Task 5 (widen eligibility) is a second behavioral change if needed.
 - **Rollback**: `USE_COMMANDER_LOOP = false` in `bot_corps_ai.ts` reverts to old system instantly.
+
+## Protocol Enforcement
+
+- [ ] Orchestrator oversees all tasks
+- [ ] `.claude/napkin.md` read at session start and updated during work
+- [ ] `docs/life_lessons.md` scanned before each task
+- [ ] smoke-test triad runs after every task, not just at the end
+- [ ] one change per calibration run is respected for behavior-changing steps
+- [ ] `docs/40_reports/CALIBRATION_MASTER.md` and `docs/PROJECT_LEDGER.md` are updated when results land
+
+## Completion Checklist
+
+- [ ] post-w20 combat drought resolved or explicitly re-characterized with evidence
+- [ ] two-tier post-run panel completed
+- [ ] `docs/40_reports/CALIBRATION_MASTER.md` updated
+- [ ] `docs/PROJECT_LEDGER.md` appended
+- [ ] `.claude/napkin.md` updated with recurring commander-stabilization lessons
+- [ ] milestone status in `docs/plans/MASTER_ROADMAP.md` updated if the verdict changes roadmap gating

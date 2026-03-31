@@ -1,0 +1,50 @@
+
+> awwv@0.6.1 sim:scenario:run:40w
+> tsx tools/scenario_runner/run_scenario_with_preflight.ts --scenario data/scenarios/apr1992_definitive_40w.json --unique --map --out runs 2
+
+
+> awwv@0.6.1 sim:scenario:harness
+> tsx tools/scenario_runner/run_scenario.ts --scenario data/scenarios/apr1992_definitive_40w.json --unique --map --out runs 2
+
+[E5] Political control initialized (hybrid_1992, threshold=0.7): 5822 canonical graph nodes (SID-keyed), RBiH=2297, RS=2507, HRHB=1018. Promoted to OSID when operational data present.
+[Recruitment] Mandatory: 172, Elective: 3, Skipped: control=0 manpower=4 capital=0 equipment=0
+  RBiH: capital=400 equipment=100
+  RS: capital=400 equipment=800
+  HRHB: capital=270 equipment=350
+[Placement] Spread 0 brigades to front; 120 front OSIDs now covered
+  HRHB: spread=0 covered=18
+  RBiH: spread=0 covered=44
+  RS: spread=0 covered=58
+[op-validation] 4 issue(s) at injection: 0 error(s), 4 warning(s)
+  [WARN] Operation Teočak [kalesija_assault]: brigade_missing — Brigade "arbih_120th_liberation_black_swans" not found in formations
+  [WARN] Operation Teočak [kalesija_assault]: brigade_missing — Brigade "arbih_241st_spreca_muslim_light_gazije" not found in formations
+  [WARN] Operation Teočak [kalesija_assault]: brigade_missing — Brigade "arbih_242nd_zvornik_muslim_light" not found in formations
+  [WARN] Operation Teočak [kalesija_assault]: brigade_missing — Brigade "arbih_245th_mountain" not found in formations
+[op-validation] 3 issue(s) at injection: 0 error(s), 3 warning(s)
+  [WARN] Operation Foca [foca_valley]: brigade_missing — Brigade "jna_mostar_garrison_tg" not found in formations
+  [WARN] Operation Foca [foca_valley]: all_objectives_owned — All 7 objectives already controlled by RS
+  [WARN] Operation Foca [foca_valley]: axis_empty — Axis would be empty: 0 valid objectives
+[op-validation] 4 issue(s) at injection: 0 error(s), 4 warning(s)
+  [WARN] Operation Jackal [stolac_sweep]: brigade_missing — Brigade "hv_113th_brigade_tg" not found in formations
+  [WARN] Operation Jackal [stolac_sweep]: brigade_missing — Brigade "hv_116th_brigade_tg" not found in formations
+  [WARN] Operation Jackal [stolac_sweep]: brigade_missing — Brigade "hv_1st_guards_tg" not found in formations
+  [WARN] Operation Jackal [stolac_sweep]: brigade_missing — Brigade "hv_4th_guards_tg" not found in formations
+[E5] Political control initialized (scenario mun1990-only): 5822 canonical graph nodes (SID-keyed), RBiH=2091, RS=2775, HRHB=956, null=0. Promoted to OSID when operational data present.
+outDir: runs\apr1992_definitive_40w__77cac5e01d3c929e__w40_n1228
+paths: runs\apr1992_definitive_40w__77cac5e01d3c929e__w40_n1228\initial_save.json
+       runs\apr1992_definitive_40w__77cac5e01d3c929e__w40_n1228\final_save.json
+       runs\apr1992_definitive_40w__77cac5e01d3c929e__w40_n1228\weekly_report.jsonl
+       runs\apr1992_definitive_40w__77cac5e01d3c929e__w40_n1228\run_summary.json
+       runs\apr1992_definitive_40w__77cac5e01d3c929e__w40_n1228\control_delta.json
+       runs\apr1992_definitive_40w__77cac5e01d3c929e__w40_n1228\end_report.md
+       runs\apr1992_definitive_40w__77cac5e01d3c929e__w40_n1228\activity_summary.json
+       runs\apr1992_definitive_40w__77cac5e01d3c929e__w40_n1228\formation_delta.json
+final_state_hash: 1a895727d0795f7c
+
+--- Tactical map viewer ---
+Final state copied to: data/derived/latest_run_final_save.json
+To view on map:
+  1) npm run dev:map
+  2) Open http://localhost:3001/map_hoi.html
+  3) In "Dataset" choose "Latest run" or use "Load state file" and select the file above.
+---

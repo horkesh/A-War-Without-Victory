@@ -115,6 +115,31 @@ export function emitCommanderOutput(
         personality,
     );
 
+    // [DEBUG] Commander decision trace — REMOVE after drought diagnosis
+    {
+        const t = briefing.turn;
+        const cid = briefing.corps_id;
+        const planStatus = planDecision.plan?.status ?? 'null';
+        const nonRecovery = briefing.active_operations.filter(op => op.phase !== 'recovery').length;
+        const slotMax = getMaxOperationSlots(briefing.brigades.length);
+        let line: string;
+        if (operations.length > 0) {
+            line = `[CMD] t${t} ${cid}: EMIT ${operations[0]?.name}\n`;
+        } else {
+            let why: string;
+            const activeStatuses = new Set(['ready', 'executing']);
+            if (!planDecision.plan || !activeStatuses.has(planDecision.plan.status)) {
+                why = `no_active_plan(status=${planStatus} action=${planDecision.action} "${planDecision.reason}")`;
+            } else if (nonRecovery >= slotMax) {
+                why = `slot_full(${nonRecovery}/${slotMax} ops=[${briefing.active_operations.map(o => `${o.name}:${o.phase}`).join(',')}])`;
+            } else {
+                why = `brigade_filter_empty(surplus=${allocation.surplus_pool.length} assigned=${planDecision.plan?.assigned_brigades.length ?? 0} targets=${planDecision.plan?.target_osids.length ?? 0})`;
+            }
+            line = `[CMD] t${t} ${cid}: SKIP ${why}\n`;
+        }
+        process.stdout.write(line);
+    }
+
     // 3. Build sector stances
     const sectorStances = buildSectorStances(briefing, decisions);
 
@@ -521,7 +546,9 @@ function buildOperations(
     ) {
         // Slot cap guard: don't emit a new op if corps is already at capacity.
         // Mirrors hasAvailableSlot() used in bot_corps_directives / bot_corps_operations.
-        if (briefing.active_operations.length >= getMaxOperationSlots(briefing.brigades.length)) {
+        // Exclude recovery-phase ops — they don't occupy an active slot.
+        const activeSlotUsers = briefing.active_operations.filter(op => op.phase !== 'recovery');
+        if (activeSlotUsers.length >= getMaxOperationSlots(briefing.brigades.length)) {
             return ops;
         }
         const surplusSet = new Set(
@@ -540,6 +567,15 @@ function buildOperations(
             ? [...planTargetOsids].sort(strictCompare)[0]!
             : null;
 
+        // When plan has no specific target OSIDs, pre-derive them now so reachability
+        // validation can still apply. Without this, the filter below short-circuits
+        // with `return true` for all surplus brigades, admitting rear-area brigades
+        // that cannot reach the front-adjacent enemy OSIDs used as derived targets.
+        // This was the root cause of dead commander-generated ops (ZEA, 13-15 turn stalls).
+        const reachabilityObjectiveOsid = firstObjectiveOsid
+            ?? deriveTargetsFromSectors(briefing, 1)[0]
+            ?? null;
+
         // Intersect plan's assigned brigades with surplus pool, then filter by
         // reachability: brigade must be able to BFS through friendly territory
         // to the first objective OSID within MAX_REACHABILITY_HOPS.
@@ -548,7 +584,7 @@ function buildOperations(
         const participatingBrigades = [...planDecision.plan.assigned_brigades]
             .filter(id => {
                 if (!surplusSet.has(id)) return false;
-                if (!firstObjectiveOsid) return true; // no specific target — allow all surplus
+                if (!reachabilityObjectiveOsid) return true; // truly no targets — allow all surplus
                 const locationOsid = brigadeLocationMap.get(id);
                 if (!locationOsid) return false;
                 // Check if brigade can reach a friendly OSID adjacent to the objective,
@@ -562,7 +598,7 @@ function buildOperations(
                 const friendlyOsids = briefing.spatial.friendlyOsidsByFaction.get(briefing.faction);
                 if (!friendlyOsids) return false;
                 // Compute adjacent friendly OSIDs to objective
-                const objectiveNeighbors = adjacency.get(firstObjectiveOsid as any) ?? [];
+                const objectiveNeighbors = adjacency.get(reachabilityObjectiveOsid as any) ?? [];
                 const friendlyApproachOsids = objectiveNeighbors.filter(n => friendlyOsids.has(n));
                 if (friendlyApproachOsids.length === 0) return false; // objective has no friendly approach
                 // Check BFS distance from brigade location to any friendly approach OSID
@@ -617,6 +653,10 @@ function buildOperations(
             objective_capture_count: 0,
             movement_only_execution_turns: 0,
             idle_execution_turn_streak: 0,
+            // Commander-generated ops: attack at rough parity (≥0.7 ratio).
+            // Default costly_victory (≥1.0) causes drought when defenders are entrenched.
+            // Pre-planned ops use 'repulsed' (≥0.5); 'stalemate' is appropriate for AI ops.
+            min_attack_outcome: 'stalemate',
             // Set at emit time so power-attrition abort gate fires correctly for
             // commander-generated ops (operation_aar.ts skips the write when already set).
             initial_strength: participatingBrigades.reduce(
@@ -632,7 +672,7 @@ function buildOperations(
         allocation.can_launch_ops &&
         allocation.surplus_pool.length > 0 &&
         personality.initiative > 0.3 &&
-        briefing.active_operations.length < getMaxOperationSlots(briefing.brigades.length)
+        briefing.active_operations.filter(op => op.phase !== 'recovery').length < getMaxOperationSlots(briefing.brigades.length)
     ) {
         // Probe operations use a single surplus brigade on the weakest enemy position.
         // The actual probe target selection is left to sector_offensive downstream;

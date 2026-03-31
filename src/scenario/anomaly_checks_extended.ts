@@ -97,6 +97,7 @@ export function checkZeroCombatCorps(state: GameState): AnomalyReport[] {
 
     // Identify corps that have sectors with front edges
     const corpsWithFronts: Record<string, { sectorCount: number; edgeCount: number }> = {};
+    const corpsOpposingFactions: Record<string, Set<string>> = {};
     for (const sectorId of sortedKeys(sectors as Record<string, unknown>)) {
         const sector = sectors[sectorId];
         if (sector.edge_ids.length === 0) continue;
@@ -104,6 +105,8 @@ export function checkZeroCombatCorps(state: GameState): AnomalyReport[] {
         if (!corpsWithFronts[cid]) corpsWithFronts[cid] = { sectorCount: 0, edgeCount: 0 };
         corpsWithFronts[cid].sectorCount++;
         corpsWithFronts[cid].edgeCount += sector.edge_ids.length;
+        if (!corpsOpposingFactions[cid]) corpsOpposingFactions[cid] = new Set();
+        for (const f of (sector.opposing_factions ?? [])) corpsOpposingFactions[cid].add(f);
     }
 
     // For each corps with fronts, check if any brigade has fought
@@ -125,6 +128,17 @@ export function checkZeroCombatCorps(state: GameState): AnomalyReport[] {
         }
 
         if (totalBrigades > 0 && totalBattles === 0) {
+            // Suppress for HRHB corps facing only RBiH before the HRHB-RBiH war starts.
+            // The ARBiH-HVO war begins April 1993 (~w52 from April 1992 start). In the 40w
+            // scenario HVO Central Bosnia / Tomislavgrad silence is historically correct.
+            if (faction === 'HRHB') {
+                const opposing = corpsOpposingFactions[corpsId] ?? new Set<string>();
+                const rbihWarStarted = state.political.rbih_hrhb_state?.war_started_turn != null;
+                if (!rbihWarStarted && opposing.size > 0 && [...opposing].every(f => f === 'RBiH')) {
+                    continue;
+                }
+            }
+
             const info = corpsWithFronts[corpsId];
             reports.push({
                 category: 'combat',

@@ -3,6 +3,12 @@
 
 ---
 
+### [Calibration] Fix the symptom in ALL callers — AND verify your fix is actually on the code path (2026-03-31)
+- **Context**: n1218 fixed `emit.ts` to filter `op.phase !== 'recovery'`. n1225 then fixed `hasAvailableSlot()` in `corps_operation_helpers.ts` — but `commander/emit.ts` never calls `hasAvailableSlot()`; it has its own inline slot guard. The n1225 fix was byte-for-byte inert (identical hash to n1224). 7 calibration runs and ~6 hours spent on wrong diagnoses.
+- **Wrong approach**: (1) Fixing a utility function without verifying the code path you care about calls it. (2) Trusting agent code-path analysis as "confirmed root cause" without runtime validation. Both failures occurred here.
+- **Right approach**: When fixing any gate condition: (1) grep for all callers of the function, (2) trace the ACTUAL execution path for the failing case (commander ops) and confirm it passes through the function you changed, (3) require a falsifiable prediction ("field X changes from Y to Z") before declaring a fix validated.
+- **Do instead**: After applying any fix, check `final_state_hash`. If identical to the previous run, the fix was inert — do not proceed, investigate why the code path wasn't reached.
+
 ### [Calibration] Calibration % means nothing if reached through broken mechanics — GOLDEN RULE (2026-03-26) — NEW
 - **Context**: 91.7% calibration was inflated by: Drina Corps besieging Sarajevo (wrong corps assignment), brigades silently dropped from sector assignment, brigades >8 hops from front permanently stuck in rear. Fixing all four bugs dropped calibration to 91.4% but made the simulation mechanically correct.
 - **Wrong approach**: Hesitating on mechanically correct fixes because they regress calibration %. Offering to revert correct fixes because of -0.3pp. Treating calibration as a decision criterion rather than an indicator.

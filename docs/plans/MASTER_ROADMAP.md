@@ -96,13 +96,17 @@ PERCEIVE-DECIDE-EXECUTE per-corps loop. 10 files in `src/sim/combat/commander/` 
 **Parallel content track (v0.8.0.x, no engine risk):**
 - v0.7.0.1: Author 13 missing 1992 foundation essays (barracks seizures, Sarajevo siege, JNA withdrawal, Drina cleansing, etc.). Spec: `docs/plans/2026-03-25-letter-home-and-essay-authoring-spec.md`. Assign to `/historian` + `/narrative-designer` — completely independent of engine work.
 
+**Execution plan:** `docs/plans/2026-03-31-v080x-1992-foundation-essays-plan.md`
+
 ### v0.8.1 — Commander Maturity
 
-**Gate:** Only starts after War-or-Game approves the commander system and P0 (combat drought) is confirmed fixed.
+**Gate:** Only starts after the full two-tier post-run panel (7 Tier 1 investigators + 5 Tier 2 analysts) produces Orchestrator go/no-go on the commander system, P0 (combat drought) is confirmed fixed, and operations singularity is credible enough that the commander is reasoning through one real command object rather than a split ops model. War-or-Game is one Tier 1 investigator — its sign-off alone is not sufficient.
 
 **Theme:** Make the commander think structurally before adding personality. No LLM flavor, no political theater — real deterministic reasoning depth.
 
 **Why this milestone exists before political-bot work:** If authority is still split and the commander is still a threshold machine, adding political personality, refusal logic, or LLM flavor builds better-organized illusion rather than better command. This milestone makes the commander genuinely mind-like first.
+
+**Army-command note:** Army commanders are not getting a separate named maturity milestone inside early `v0.8.x`. During `v0.8.0` through `v0.8.2`, the existing army layer remains serviceable while corps command is made real first. If a dedicated army-commander maturity pass is needed, it belongs in `v0.8-to-v0.9` after corps maturity and command-authority cleanup, before any full corps/army LLM play.
 
 Done means for this milestone:
 - belief state exists separately from raw world state (not just reading `GameState` directly)
@@ -110,10 +114,12 @@ Done means for this milestone:
 - memory from prior turns affects future scoring
 - constraints and preferences are structurally distinct from execution mechanics
 - reasoning traces exist (for debugging + later UI surface)
+- relationship model exists: commanders track trust/familiarity with the player, sibling corps, and patrons — prerequisite for order interpretation in v0.8.3
+- intelligence assurance harness exists: sampled corps traces, anti-theater checks, and explicit proof criteria for “this is intelligent, not just decorated rails”
 
 Primary targets: `src/sim/combat/commander/assess.ts`, `src/sim/combat/commander/allocate.ts`, `src/sim/combat/commander/plan.ts`, `src/sim/combat/commander/decide.ts`, `src/sim/combat/commander/briefing.ts`, `src/sim/combat/commander/emit.ts`
 
-Plan: `docs/plans/2026-03-25-command-chain-architecture.md`
+Plans: `docs/plans/2026-03-25-command-chain-architecture.md`, `docs/plans/2026-03-31-v081-commander-maturity-plan.md`, `docs/plans/2026-03-31-v081-intelligence-assurance-harness-plan.md`
 
 ### v0.8.2 — Political Leader Bot + Patron Phone Call
 
@@ -129,31 +135,49 @@ Plans: `docs/plans/2026-03-24-v080-political-leader-bot-plan.md`, `docs/plans/20
 
 ### v0.8.3 — Order Interpretation + Warlord Problem
 
-**Gate:** Requires v0.8.2. Assumes corps and army systems are already coherent.
+**Gate:** Requires v0.8.2. Corps and army systems must be explicit enough that order interpretation is not hiding ownership confusion. The player must have a minimum viable command review surface for preview / understand / accept / override before “disobedience” is treated as a feature rather than backend ambiguity.
 
 Order interpretation system: when the player issues a corps stance change, launches an operation, or force-launches an attack, the order passes through the assigned corps commander's personality filter. The commander may comply, creatively interpret, delay, or refuse. Political capital resource for overriding refusals.
 
 **The Warlord Problem** as sub-feature: early-war militia commanders (low political_reliability) who refuse subordination. Political capital to integrate. Connects existing `warlord_friction.ts` stochastic triggers to the deterministic override pathway.
 
-Plan: `docs/plans/2026-03-24-v081-order-interpretation-plan.md`, architecture section 2.
+**Minimum viable command review surface owned here:** before finalizing this milestone, the player can inspect what order was issued, how the corps/army chain interpreted it, what was accepted or modified, why friction occurred, and what override cost is being proposed. This is the minimum truthful UX layer for command friction.
+
+Plans: `docs/plans/2026-03-24-v081-order-interpretation-plan.md`, `docs/plans/2026-03-31-v083-player-command-review-ux-plan.md`, `docs/plans/2026-03-31-v08to09-army-corps-authority-coherence-plan.md`, `docs/plans/2026-03-31-v08to09-commander-explanation-surfaces-plan.md`, architecture section 2.
 
 ### v0.8.4 — Autonomy Depth + Claude API at Political Level
 
-**Gate:** Requires v0.8.3. LLM integration sits on top of cleaned command ownership, not underneath it.
+**Gate:** Requires v0.8.3. LLM integration sits on top of cleaned command ownership, not underneath it. Replay/log determinism, decision auditability, fallback behavior, and player review surfaces must be explicit before any API-assisted autonomy is treated as roadmap-ready.
 
 Player political posture IPC (set war-crimes-policy, set alliance-posture, set political priorities). Optional LLM-assisted political leader decisions extending existing AI Commander architecture. Personality drift: leader personality changes based on war outcome.
 
-Plan: `docs/plans/2026-03-24-v082-autonomy-api-plan.md`.
+**Determinism and review requirement:** every API-assisted action must be reviewable as a structured decision with deterministic replay semantics, fallback behavior if the API is unavailable, and a player-facing surface for understanding or rejecting the result.
+
+Plans: `docs/plans/2026-03-24-v082-autonomy-api-plan.md`, `docs/plans/2026-03-31-v084-autonomy-determinism-and-review-plan.md`, `docs/plans/2026-03-31-v08to09-commander-explanation-surfaces-plan.md`.
 
 ### v0.8.x-final — Command Authority Cleanup + Old Code Removal
 
 **What this milestone is about:** Making ownership singular. This is where the repo stops lying to itself about who is in charge.
+
+**Primary gate inside this milestone: Operations Singularity.** Treat this as the first real proof that command authority is becoming honest. It is not background cleanup. It is the prerequisite object-level cleanup that later commander maturity and ops UX work depend on.
+
+**Gate requirement — every cleanup task must answer all five before it is considered done:**
+1. What is the canonical owner after this change?
+2. What competing path is being removed or demoted?
+3. What test or observable behavior proves the change is real?
+4. What UI or report surface now reflects the new truth?
+5. What future milestone does this unblock?
+
+If the implementer cannot answer all five, the task is not ready to start.
 
 **Operations are the proof of concept.** Before this milestone closes, operations must answer yes to all of:
 1. Is there one canonical operation object?
 2. Is there one canonical lifecycle?
 3. Is there one canonical creation / launch / update path?
 4. Does the UI reflect that same truth?
+
+**Implementation plan:** `docs/plans/2026-03-31-v08x-operations-singularity-plan.md`
+**Overarching cleanup plan:** `docs/plans/2026-03-31-v08x-command-authority-cleanup-plan.md`
 
 **Cleanup targets:**
 
@@ -171,6 +195,8 @@ Done means: `generateCorpsDirectives` is deleted (not flagged, not behind a dead
 
 No version bump — engineering milestone between feature releases. Stabilization and technical debt cleanup after Command Chain ships.
 
+**Gate requirement — same 5-question rule as v0.8.x-final applies to every task here:** canonical owner after change / old path removed or demoted / done-means proof / UI or doc surface that reflects the new truth / future milestone unblocked.
+
 **Hit list** (from Railroad Hunter Report):
 
 | Area | Current State | Target |
@@ -179,8 +205,14 @@ No version bump — engineering milestone between feature releases. Stabilizatio
 | Pathfinding | 3 separate engines (settlement BFS, OSID Dijkstra, graph BFS), no shared cache | 1 engine with caching, unified tie-breaking |
 | String hardcoding | Postures, classifications, faction IDs as string literals | TypeScript enums throughout |
 | Dead branches | ZoC/AoR era code, old bot_corps_directives paths | Removed |
+| Execution entrypoints | `src/turn/pipeline.ts` + `src/sim/run_combat_browser.ts` are live variants adding cognitive overhead alongside canonical `src/sim/turn_pipeline.ts` | Consolidate or explicitly mark non-authoritative with ownership comment |
 | Magic numbers | bot_constants.ts scattered thresholds | Domain-grouped constant files |
 | Canon docs | Systems Manual and Game Bible reference pre-v0.8 architecture | Updated for v0.8 command chain |
+| Army-command maturity | Army layer is serviceable but still undernamed and too implicit as a real command substrate | Explicit army-command maturity and responsibility model. Plan: `docs/plans/2026-03-31-v08to09-army-command-maturity-plan.md` |
+| Army ↔ corps command coherence | Assumed rather than owned; handshake and authority boundaries are still undernamed | Named handshake rules, ownership comments, and explicit authority boundaries. Plan: `docs/plans/2026-03-31-v08to09-army-corps-authority-coherence-plan.md` |
+| Commander explanation surfaces | Traces are becoming real, but staff/player-facing surfaces are still implicit | Build truthful explanation surfaces from real traces, not theater. Plan: `docs/plans/2026-03-31-v08to09-commander-explanation-surfaces-plan.md` |
+| Player command review UX | Order friction and later API autonomy assume preview/review/override surfaces that are not yet roadmap-owned strongly enough | Minimum viable review surface for order interpretation. Plan: `docs/plans/2026-03-31-v083-player-command-review-ux-plan.md` |
+| Autonomy determinism and review | API-assisted autonomy can still be mistaken for readiness without hardened replay/fallback/review gates | Explicit determinism, fallback, and player-review contract. Plan: `docs/plans/2026-03-31-v084-autonomy-determinism-and-review-plan.md` |
 | Connectivity checks | Column march validates destination but not path; no enclave boundary check during transit | Full path validation |
 | **Essay template engine + Letter Home** | Not built — v0.7.1 debt. Required before v0.9.1 dynamic essays. | Build `dynamic_sections`, divergence notes, ghost entries; Letter Home vignettes in CoS briefing. Plans: `docs/plans/2026-03-23-essay-template-engine-plan.md`, `docs/plans/2026-03-25-letter-home-and-essay-authoring-spec.md` |
 | **Warroom React migration** | Vanilla TS + canvas — v0.7.2 debt. Refactor, not feature work. | Migrate to React. Plan: `docs/plans/2026-03-24-v072-warroom-react-migration-plan.md` |
@@ -412,9 +444,19 @@ Patch bumps (0.X.1, 0.X.2) are for significant fixes within a milestone — not 
 
 | Document | Scope |
 |----------|-------|
-| `docs/plans/2026-03-30-corps-commander-intelligence.md` | v0.8.0 commander system design |
+| `docs/plans/2026-03-30-v080-corps-commander-intelligence-architecture.md` | v0.8.0 commander system architecture |
 | `docs/plans/2026-03-30-p0-combat-drought-fix.md` | v0.8.0 P0 fix plan |
+| `docs/plans/2026-03-31-v080x-1992-foundation-essays-plan.md` | v0.8.0.x missing 1992 essays execution plan |
 | `docs/plans/2026-03-25-command-chain-architecture.md` | v0.8 full architecture |
+| `docs/plans/2026-03-31-v081-commander-maturity-plan.md` | v0.8.1 commander maturity implementation plan |
+| `docs/plans/2026-03-31-v081-intelligence-assurance-harness-plan.md` | v0.8.1 anti-theater proof harness |
+| `docs/plans/2026-03-31-v08x-operations-singularity-plan.md` | v0.8.x operations singularity implementation plan |
+| `docs/plans/2026-03-31-v08x-command-authority-cleanup-plan.md` | v0.8.x-final overarching command authority cleanup plan |
+| `docs/plans/2026-03-31-v08to09-army-command-maturity-plan.md` | v0.8-to-v0.9 army-command maturity |
+| `docs/plans/2026-03-31-v08to09-army-corps-authority-coherence-plan.md` | v0.8-to-v0.9 army/corps handshake and authority coherence |
+| `docs/plans/2026-03-31-v08to09-commander-explanation-surfaces-plan.md` | v0.8-to-v0.9 truthful explanation surfaces |
+| `docs/plans/2026-03-31-v083-player-command-review-ux-plan.md` | v0.8.3 player command review UX |
+| `docs/plans/2026-03-31-v084-autonomy-determinism-and-review-plan.md` | v0.8.4 determinism, fallback, and review gates |
 | `docs/plans/2026-03-24-v080-political-leader-bot-plan.md` | v0.8.2 political bot (38 tasks) |
 | `docs/plans/2026-03-24-v081-order-interpretation-plan.md` | v0.8.3 order interpretation |
 | `docs/plans/2026-03-24-v082-autonomy-api-plan.md` | v0.8.4 autonomy + Claude API |

@@ -112,6 +112,13 @@ function advanceExistingPlan(
     plan: CommanderPlan,
     turn: number,
 ): PlanDecision {
+    // Clear already-abandoned plans so new plans can be created next turn.
+    // Abandoned plans are stored in state for one turn to allow EMIT to see the reason,
+    // but on the NEXT advance they must be cleared rather than re-evaluated.
+    if (plan.status === 'abandoned') {
+        return { plan: null, action: 'none', reason: 'clearing abandoned plan', concentration_orders: [] };
+    }
+
     // Check for abandon conditions first
     const abandonReason = checkAbandonConditions(plan, zones, surplusPool, turn);
     if (abandonReason) {
@@ -160,11 +167,13 @@ function advanceExistingPlan(
     // If previously suspended, resume to concentrating
     const effectiveStatus: CommanderPlanStatus = plan.status === 'suspended' ? 'concentrating' : plan.status;
 
-    // Compute concentration progress
-    const brigadesAtStaging = countBrigadesInZone(plan.assigned_brigades, surplusPool, plan.staging_zone);
-    const concentrationProgress = plan.required_brigades > 0
-        ? Math.min(1.0, brigadesAtStaging / plan.required_brigades)
-        : 0;
+    // Compute concentration progress — time-based, not location-based.
+    // Concentration orders are planning artefacts; no downstream system physically
+    // moves brigades to the staging zone, so we measure elapsed turns vs target.
+    const concentrationDuration = plan.target_ready_turn - plan.created_turn;
+    const concentrationProgress = concentrationDuration <= 0
+        ? 1.0
+        : Math.min(1.0, (turn - plan.created_turn) / concentrationDuration);
 
     // Compute viability
     const viability = computeViabilityScore(plan, zones, surplusPool);
@@ -227,7 +236,7 @@ function advanceExistingPlan(
     return {
         plan: advancedPlan,
         action: 'advanced',
-        reason: `concentrating: ${brigadesAtStaging}/${plan.required_brigades} brigades at staging`,
+        reason: `concentrating: ${(concentrationProgress * 100).toFixed(0)}% (turn ${turn} / target ${plan.target_ready_turn})`,
         concentration_orders: concentrationOrders,
     };
 }
@@ -425,16 +434,19 @@ function checkAbandonConditions(
         return 'staging zone is now besieged';
     }
 
-    // Required brigades no longer achievable
-    const availableSurplus = surplusPool.length;
-    if (availableSurplus < Math.ceil(plan.required_brigades * 0.5)) {
-        return `insufficient brigades: ${availableSurplus} available, ${plan.required_brigades} required`;
+    // Required brigades no longer achievable — check assigned brigade availability,
+    // not raw surplus pool size (which fluctuates with garrison budgets).
+    const abandonAssignedIds = new Set(plan.assigned_brigades);
+    const abandonAvailable = surplusPool.filter(ev => abandonAssignedIds.has(ev.brigade_id)).length;
+    if (abandonAvailable < Math.ceil(plan.required_brigades * 0.5)) {
+        return `assigned brigades depleted: ${abandonAvailable}/${plan.required_brigades}`;
     }
 
-    // Plan has been active too long without reaching ready (stalled)
+    // Plan has been active too long without reaching ready (stalled).
+    // With time-based concentration this should rarely fire; keep as safety net.
     const turnsSinceCreation = turn - plan.created_turn;
     const expectedDuration = (plan.target_ready_turn - plan.created_turn) * 2;
-    if (plan.status === 'concentrating' && turnsSinceCreation > Math.max(expectedDuration, 6)) {
+    if (plan.status === 'concentrating' && turnsSinceCreation > Math.max(expectedDuration, 10)) {
         return `stalled: ${turnsSinceCreation} turns without reaching ready state`;
     }
 
@@ -456,19 +468,26 @@ function checkSuspendConditions(
         return null;
     }
 
-    // Check for high/critical threat in any zone
+    // Only suspend if the staging zone itself is under high/critical threat.
+    // Checking any zone caused ARBiH corps with perpetually thin fronts (deficit>2
+    // in a non-staging zone) to suspend every plan before it reached 'ready'.
     const previousThreat = briefing.previous_state?.threat_assessment;
     if (previousThreat) {
-        for (const tz of previousThreat.threatened_zones) {
-            if (tz.threat_level === 'high' || tz.threat_level === 'critical') {
-                return `zone ${tz.zone_id} under ${tz.threat_level} threat`;
-            }
+        const stagingZoneThreat = previousThreat.threatened_zones.find(
+            tz => tz.zone_id === plan.staging_zone
+        );
+        if (stagingZoneThreat?.threat_level === 'high' || stagingZoneThreat?.threat_level === 'critical') {
+            return `staging zone ${plan.staging_zone} under ${stagingZoneThreat.threat_level} threat`;
         }
     }
 
-    // Surplus dropped below required
-    if (surplusPool.length < plan.required_brigades) {
-        return `surplus dropped to ${surplusPool.length}, need ${plan.required_brigades}`;
+    // Assigned brigades depleted below half — plan is no longer viable.
+    // Check assigned brigade availability, not raw surplus pool size, because
+    // surplusPool fluctuates with garrison budgets and does not track plan commitment.
+    const suspendAssignedIds = new Set(plan.assigned_brigades);
+    const availableAssigned = surplusPool.filter(ev => suspendAssignedIds.has(ev.brigade_id)).length;
+    if (availableAssigned < Math.ceil(plan.required_brigades * 0.5)) {
+        return `assigned brigades depleted: ${availableAssigned}/${plan.required_brigades} available`;
     }
 
     return null;
@@ -636,24 +655,28 @@ function computeViabilityScore(
 ): number {
     let score = 1.0;
 
-    // Penalty if staging zone is under pressure
-    const stagingZone = zones.find(z => z.zone_id === plan.staging_zone);
-    if (!stagingZone) return 0.0; // Staging zone lost entirely
+    // Exact match first; fall back to OSID-content search if zone was re-anchored
+    // (zone gained a lex-smaller OSID this turn, shifting the anchor without losing territory).
+    let stagingZone = zones.find(z => z.zone_id === plan.staging_zone);
+    if (!stagingZone) {
+        const storedAnchorOsid = plan.staging_zone.split(':').slice(2).join(':');
+        stagingZone = zones.find(z => (z.osids as readonly string[]).includes(storedAnchorOsid));
+    }
+    if (!stagingZone) {
+        process.stdout.write(`[VIA] NO_ZONE staging=${plan.staging_zone} avail=[${zones.map(z => z.zone_id).join('|')}]\n`);
+        return 0.0; // Staging zone truly lost (anchor OSID captured by enemy)
+    }
     if (stagingZone.posture === 'defending') score *= 0.7;
     if (stagingZone.deficit > 0) score *= 0.8;
 
-    // Penalty for insufficient surplus
-    const combatEffectiveSurplus = surplusPool.filter(ev => ev.is_combat_effective).length;
-    if (combatEffectiveSurplus < plan.required_brigades) {
-        score *= combatEffectiveSurplus / plan.required_brigades;
-    }
-
-    // Penalty for assigned brigades lost (no longer in surplus pool)
-    const surplusIds = new Set(surplusPool.map(ev => ev.brigade_id));
-    const assignedStillAvailable = plan.assigned_brigades.filter(id => surplusIds.has(id)).length;
-    if (plan.assigned_brigades.length > 0) {
-        const retentionRate = assignedStillAvailable / plan.assigned_brigades.length;
-        score *= retentionRate;
+    const assignedIds = new Set(plan.assigned_brigades);
+    const freshSurplusEffective = surplusPool.filter(
+        ev => ev.is_combat_effective && !assignedIds.has(ev.brigade_id),
+    ).length;
+    const effectiveForPlan = freshSurplusEffective + plan.assigned_brigades.length;
+    if (effectiveForPlan < plan.required_brigades) {
+        score *= effectiveForPlan / plan.required_brigades;
+        process.stdout.write(`[VIA] LOW_BRIGADES effective=${effectiveForPlan} required=${plan.required_brigades} assigned=${plan.assigned_brigades.length} freshSurplus=${freshSurplusEffective}\n`);
     }
 
     return Math.max(0, Math.min(1, score));

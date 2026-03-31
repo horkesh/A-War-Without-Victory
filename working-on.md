@@ -1,56 +1,53 @@
-# Working On — 2026-03-30 (Session: n1217 Regression)
+# Working On (2026-03-31)
 
-## Current State
-- n1217: 92.2% area-weighted, 22/22 anchors, 6/6 benchmarks — MAP HOLDS
-- P0 REGRESSION: 38 battles, 18-week drought (w23-40) vs 69 battles in n1216
-- War-or-Game: NOT APPROVED
+## Status: P0 DROUGHT FIXED
 
-## Root Cause (confirmed by Gap Finder)
-**Slot cap counts recovery-phase ops.** With cap=1 per 12 brigades:
-- Op completes → enters `phase: 'recovery'` (2-3 turns)
-- Recovery op still occupies the slot
-- `briefing.active_operations.length >= 1` → emit.ts blocks new op
-- Commander plans continuously but can never emit while recovery-phase op exists
-- Result: 2-3 turn blackout per cycle, compounding → 18-week drought
+P0 combat drought (war silent post-w22) confirmed fixed in n1234.
 
-## P0 Fix Required
-**File:** `src/sim/combat/commander/emit.ts`, function `buildOperations`
+## n1234 Final State
+- 92.2% area-weighted (40w)
+- 103 battles, 38/40 weeks with combat (1 zero week at w22 — normal variance)
+- hash: 45d8fde0a760c080
+- War-or-Game: PENDING RE-REVIEW
 
-**Change:** Filter recovery-phase ops out of slot cap count:
-```typescript
-// OLD (line 524):
-if (briefing.active_operations.length >= getMaxOperationSlots(briefing.brigades.length)) {
+## Six Bugs Fixed (plan.ts + zone_detection.ts)
 
-// NEW:
-const activeSlotUsers = briefing.active_operations.filter(op => op.phase !== 'recovery');
-if (activeSlotUsers.length >= getMaxOperationSlots(briefing.brigades.length)) {
-```
-Same fix needed for the PROBE emission check at line 635:
-```typescript
-// OLD:
-briefing.active_operations.length < getMaxOperationSlots(briefing.brigades.length)
+1. Concentration progress was brigade-location-based → brigades never moved → always 0
+   Fix: time-based `(turn - created_turn) / (target_ready_turn - created_turn)`
 
-// NEW:
-activeNonRecovery.length < getMaxOperationSlots(briefing.brigades.length)
-```
+2. Zone IDs were array-index based (`zone:corps:compIdx`) → unstable across turns
+   Fix: OSID-anchored IDs (`zone:corps:lex_first_osid`)
 
-## P1 Fix (Fix 2 completion)
-`plan.ts selectOpportunityTargets()` must query `operation_history` for recently-failed OSIDs.
-Currently: history is written but never read. The cooldown mechanism is inert.
+3. Zone re-anchoring when zone grows → stored staging_zone stale → viability=0
+   Fix: OSID-content fallback in computeViabilityScore
 
-## Commits This Session
-- 84974d80: fix(commander): Fix 1+4 — slot cap guard + initial_strength on commander ops
-- a7d7f71a: fix(commander): Fix 2 — write operation_history on plan abandon + execution handoff
-- 0e0b0d73: fix(commander): tighten isBesiegedCorps — main-body corridor_width gate
+4. Viability penalized assigned brigades (committed brigades left surplus pool)
+   Fix: count `plan.assigned_brigades.length` as effective
 
-## Next Steps
-1. **Implement P0 fix** — filter recovery-phase ops from slot cap count (emit.ts, 2 sites)
-2. Typecheck + vitest
-3. Run n1218
-4. Dispatch two-tier panel on n1218
-5. If combat restored: implement Fix 2 completion (plan.ts op_history query)
-6. War-or-Game sign-off
+5. Suspend check: `surplusPool.length < required` fires on garrison fluctuation
+   Fix: check assigned brigade availability (50% threshold)
 
-## Fix 6 Status: CLOSED
-HRHB passivity = structural. No valid war enemies in 40w period (RS cold front, RBiH allied).
-Probe ops cycle harmlessly. Not a bug.
+6. Abandoned plans persisted in state, blocking new plan creation
+   Fix: clear on entry to advanceExistingPlan if status === 'abandoned'
+
+## Remaining Issues (not drought-related)
+
+- `operation_zero_eligible_execution` on some ARBiH/HVO commander ops
+  These ops are emitted but brigades can't execute attacks. The reachability filter
+  in emit.ts line 584-616 is meant to prevent this but some ops still fail.
+  Likely cause: sector_offensive.ts execution requires brigades in specific sectors
+  or with specific stances. Not blocking P0 fix sign-off.
+
+- HVO 0 orders — expected pre-April 1993 (HRHB-RBiH war not started)
+
+- Calibration 92.2% vs n1233 ATH 92.6% — may need re-calibration pass.
+
+## [CMD]/[VIA] Trace Instrumentation (remove when done)
+
+Traces are LIVE in emit.ts and plan.ts. Remove when drought investigation complete.
+- src/sim/combat/commander/emit.ts (CMD trace after buildOperations)
+- src/sim/combat/commander/plan.ts (VIA trace in computeViabilityScore)
+
+## Tests
+- 16 failures, all pre-existing (13 event_timing, 2 stacking, 1 critical anomaly)
+- Commander test updated for time-based concentration

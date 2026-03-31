@@ -6,6 +6,17 @@
 **Gate:** v0.8.1 Commander Maturity must be complete before starting this plan. Political behavior built on a threshold machine produces illusion, not command.
 **Prerequisite:** v0.7.0 (event flag wiring, Dynamic Codex scaffolding complete)
 **Estimated tasks:** 38
+**Overseer:** Orchestrator
+**Architect:** Technical Architect / Architect - flags architectural decisions for user review
+**Primary implementer roles:** Gameplay Programmer, Systems Programmer, Game Designer, QA Engineer
+**Primary reviewer roles:** `/simplify`, Code Review, Canon Compliance Reviewer, War-or-Game
+**Sign-off:** Orchestrator, Architect, War-or-Game
+
+**Relevant life lessons to respect while executing:**
+- `docs/life_lessons.md`: Calibration % means nothing if reached through broken mechanics
+- `docs/life_lessons.md`: NEVER fabricate historical claims - dispatch /historian, don't speculate
+- `docs/life_lessons.md`: Decisions without traces are undebuggable - instrument before investigating
+- `docs/life_lessons.md`: One change per calibration run
 
 ---
 
@@ -94,7 +105,12 @@ The political bot writes to state fields that the military chain already reads:
 
 ## Phases
 
+All phases below are Pyrrhic execution phases. Each phase ends with `/simplify`, smoke-test triad, verification-before-completion, pre-commit-check, and a commit before the next phase begins.
+
 ### Phase 1: Political Personality Framework (6 tasks)
+**Assigned to:** Gameplay Programmer + Game Designer  
+**Reviewer:** `/simplify`, Code Review, Canon Compliance Reviewer  
+**Sign-off:** Orchestrator, Architect, War-or-Game
 
 - [ ] **1.1** Define `PoliticalPersonality` interface in new file `src/sim/political/political_personality.ts`. Fields: `faction`, `archetype` (string label), `dimension_weights` (Record<DimensionId, number>, must sum to 1.0), `risk_tolerance` (0-1), `patron_sensitivity` (0-1), `divergence_threshold` (number), `situation_weight_curve` (early/late war blend), `war_crimes_tolerance` (0-1, RS=0.7, RBiH=0.1, HRHB=0.4). Acceptance: types compile, no runtime code yet.
 
@@ -109,6 +125,9 @@ The political bot writes to state fields that the military chain already reads:
 - [ ] **1.6** Write 15+ unit tests for personality framework. Cover: all 3 factions produce valid assessments, situation weight curve bounds, dimension score matches manual calculation. File: `tests/sim/political/political_personality.test.ts`. Acceptance: all tests pass.
 
 ### Phase 2: Event Decision Engine (8 tasks)
+**Assigned to:** Gameplay Programmer + Systems Programmer  
+**Reviewer:** `/simplify`, Code Review, Canon Compliance Reviewer  
+**Sign-off:** Orchestrator, Architect, War-or-Game
 
 - [ ] **2.1** Create `src/sim/political/political_event_decision.ts`. Implement `scorePoliticalOption(option: EventResponseOption, assessment: PoliticalAssessment, personality: PoliticalPersonality): number`. Score formula: `dimension_shift_value * personality_weight + aggression_affinity * risk_tolerance + (1 - risk_level) * (1 - risk_tolerance) + patron_pressure_alignment`. Acceptance: unit test — RS scores expansionist options higher, RBiH scores diplomatic options higher.
 
@@ -127,6 +146,9 @@ The political bot writes to state fields that the military chain already reads:
 - [ ] **2.8** Write 25+ tests for event decision engine. Cover: all `bot_response_logic` modes, divergence threshold, faction-specific scoring, edge cases (single option, no dimension_shifts). Acceptance: all tests pass, no regressions in existing event tests.
 
 ### Phase 3: Peace Plan & Negotiation Intelligence (6 tasks)
+**Assigned to:** Gameplay Programmer + Game Designer  
+**Reviewer:** `/simplify`, Code Review, Canon Compliance Reviewer  
+**Sign-off:** Orchestrator, Architect, War-or-Game
 
 - [ ] **3.1** Replace `computeBotResponse` in `peace_plans.ts` with `computePoliticalPeacePlanResponse(state, plan, faction)`. Logic: (a) if patron override > personality's `patron_sensitivity * 100`, accept; (b) compute "plan attractiveness" = `(proposed_split[faction] - currentTerritory) * territorial_weight + intl_standing_impact + patron_impact`; (c) accept if attractiveness > `risk_tolerance * -10` (risk-tolerant leaders accept worse deals). Acceptance: RS rejects Vance-Owen when holding >45% (historical). RBiH accepts Contact Group under patron pressure. Unit tests.
 
@@ -141,6 +163,9 @@ The political bot writes to state fields that the military chain already reads:
 - [ ] **3.6** Write 15+ tests for peace plan and negotiation intelligence. Acceptance: all pass.
 
 ### Phase 4: Alliance & Diplomacy Management (5 tasks)
+**Assigned to:** Gameplay Programmer + Systems Programmer  
+**Reviewer:** `/simplify`, Code Review, Canon Compliance Reviewer  
+**Sign-off:** Orchestrator, Architect, War-or-Game
 
 - [ ] **4.1** Implement `evaluateGrazAccordsBreak(state: GameState, faction: FactionId): { should_break: boolean, reason: string }`. Logic for RS: break when `territorial_legitimacy > 60 AND military_credibility > 55` (confident enough to fight on two fronts). For HRHB: break when `patron_confidence < 40` (Zagreb withdrawing support) or `territory under threat`. Never for RBiH (they don't control it). Acceptance: unit test per faction. Deterministic.
 
@@ -153,6 +178,9 @@ The political bot writes to state fields that the military chain already reads:
 - [ ] **4.5** Write 10+ tests for alliance and diplomacy management. Acceptance: all pass.
 
 ### Phase 5: War Crimes Policy (4 tasks)
+**Assigned to:** Gameplay Programmer + Game Designer  
+**Reviewer:** `/simplify`, Code Review, Canon Compliance Reviewer  
+**Sign-off:** Orchestrator, Architect, War-or-Game
 
 - [ ] **5.1** Define `WarCrimesPolicy` type: `'restrained' | 'permissive' | 'encouraged'`. Add to `PoliticalPersonality` as `default_war_crimes_policy`. RS=permissive, RBiH=restrained, HRHB=permissive. Acceptance: type compiles.
 
@@ -163,6 +191,9 @@ The political bot writes to state fields that the military chain already reads:
 - [ ] **5.4** Wire war crimes policy into `civilian_casualties_caused` tracking. When policy is `encouraged`, ethnic cleansing events fire more frequently (add pressure rate modifier gated by `event_flags.war_crimes_policy_[faction] = 'encouraged'`). When `restrained`, pressure rate reduced. Acceptance: integration test — scenario run with restrained RS produces fewer war crimes events.
 
 ### Phase 6: Resource Allocation (3 tasks)
+**Assigned to:** Gameplay Programmer  
+**Reviewer:** `/simplify`, Code Review  
+**Sign-off:** Orchestrator, Architect
 
 - [ ] **6.1** Define `ResourcePriority` type: `{ military: number, diplomatic: number, humanitarian: number }` (weights summing to 1.0). Add `default_resource_priority` to `PoliticalPersonality`. RS: {military: 0.6, diplomatic: 0.15, humanitarian: 0.25}. RBiH: {military: 0.45, diplomatic: 0.30, humanitarian: 0.25}. HRHB: {military: 0.5, diplomatic: 0.25, humanitarian: 0.25}. Acceptance: types compile.
 
@@ -171,6 +202,9 @@ The political bot writes to state fields that the military chain already reads:
 - [ ] **6.3** Wire resource allocation into supply system. `military` weight scales `PATRON_AID_SCALE` for the faction. `diplomatic` weight scales peace plan acceptance flexibility. `humanitarian` weight reduces war crimes pressure accumulation rate. Acceptance: integration test — RBiH with high diplomatic priority gets slightly better international standing over time.
 
 ### Phase 7: Integration & Pipeline (6 tasks)
+**Assigned to:** Systems Programmer + QA Engineer  
+**Reviewer:** `/simplify`, Code Review, War-or-Game  
+**Sign-off:** Orchestrator, Architect, War-or-Game
 
 - [ ] **7.1** Create `src/sim/political/political_leader_bot.ts` — the top-level orchestrator. `runPoliticalLeaderBot(state: GameState, faction: FactionId): PoliticalLeaderReport`. Calls: `computePoliticalAssessment`, `generatePoliticalDirectives`, `evaluateWarCrimesPolicy`, `computeResourceAllocation`. Writes all outputs to state. Returns a report for logging/debugging. Acceptance: full integration — all sub-systems called in correct order, state mutated correctly.
 
@@ -233,3 +267,23 @@ All of the following must be true:
 10. Smoke-test triad passes: `tsc --noEmit` + `vitest run` + `desktop:map:build`.
 11. Determinism verified: two identical runs produce identical save files.
 12. Ledger and memory updated.
+
+## Protocol Enforcement
+
+- [ ] Orchestrator oversees every phase
+- [ ] Architect flags any new state fields, IPC, or command-chain ownership changes for user review
+- [ ] `.claude/napkin.md` read at session start and updated during work
+- [ ] `docs/life_lessons.md` scanned before each phase
+- [ ] smoke-test triad runs after every phase, not just at the end
+- [ ] one change per calibration run is respected whenever simulation behavior changes
+- [ ] `/create-report` writes a completion report to `docs/40_reports/implemented/` when the milestone closes
+
+## Completion Checklist
+
+- [ ] completion report created in `docs/40_reports/implemented/`
+- [ ] `docs/plans/MASTER_ROADMAP.md` updated if scope/gates/status changed
+- [ ] `docs/PROJECT_LEDGER.md` appended
+- [ ] `.claude/napkin.md` updated with recurring lessons
+- [ ] relevant canon/engineering docs updated if political command flow changed materially
+- [ ] `package.json` version bumped when the milestone completes
+- [ ] version tag created and pushed when the milestone completes

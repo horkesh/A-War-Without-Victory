@@ -3,7 +3,7 @@
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Roadmap slot:** v0.8.4 (renumbered 2026-03-30; was v0.8.3)
-**Gate:** LLM integration sits on top of cleaned command ownership, not underneath it.
+**Gate:** LLM integration sits on top of cleaned command ownership, not underneath it. Replay/log determinism, fallback behavior, and assisted-decision review rules must be explicit before this milestone counts as ready.
 **Goal:** Let the player choose how much to delegate. At any autonomy level, the player can grab the wheel for specific decisions. Claude API replaces the formula bot at the political leader level for non-player factions (and optionally for the player's own faction at higher delegation levels).
 
 **Depends on:** v0.8.2 (political bot) and v0.8.3 (order interpretation). Both must ship first — this plan layers on top.
@@ -11,6 +11,17 @@
 **Tech Stack:** TypeScript (sim engine + Electron IPC). Vitest for tests. `@anthropic-ai/sdk` (already integrated).
 
 **Audit date:** 2026-03-24. Infrastructure surveyed: 16 modules in `src/sim/ai_commander/`, 4 pipeline steps in `war_phases.ts` (ai-army-decisions, ai-corps-decisions, ai-corps-dialogue, ai-war-dispatches), event decision system (`evaluate_events.ts` + `bot_response.ts`), IPC layer (`electron-main.cjs` + `preload.cjs`).
+**Status:** PLAN - NOT STARTED
+**Overseer:** Orchestrator
+**Architect:** Technical Architect / Architect - flags architectural decisions for user review
+**Primary implementer roles:** Systems Programmer, UI/UX Developer, Platform Specialist, QA Engineer
+**Primary reviewer roles:** `/simplify`, Code Review, Determinism Auditor, UI Truth Keeper
+**Sign-off:** Orchestrator, Architect, War-or-Game
+
+**Relevant life lessons to respect while executing:**
+- `docs/life_lessons.md`: Determinism is sacred - replay/log truth beats live model calls
+- `docs/life_lessons.md`: UI truth must match backend truth
+- `docs/life_lessons.md`: Verify fallback paths, not just happy-path API success
 
 ---
 
@@ -150,6 +161,9 @@ New IPC channels in `electron-main.cjs`:
 ## Implementation Phases
 
 ### Phase A: State + Autonomy Skeleton (no API calls)
+**Assigned to:** Systems Programmer  
+**Reviewer:** `/simplify`, Code Review, Determinism Auditor  
+**Sign-off:** Orchestrator, Architect
 
 **Estimated effort:** 1 session
 
@@ -194,6 +208,9 @@ Currently, `ai-army-decisions` skips the player faction. Change: if `autonomy_le
 ---
 
 ### Phase B: Override System (grab the wheel)
+**Assigned to:** Systems Programmer + UI/UX Developer  
+**Reviewer:** `/simplify`, Code Review, UI Truth Keeper  
+**Sign-off:** Orchestrator, Architect
 
 **Estimated effort:** 1 session
 
@@ -238,6 +255,9 @@ New state field: `state.military.ai_proposals?: Record<string, CorpsDecision>`. 
 ---
 
 ### Phase C: Claude API at Political Level
+**Assigned to:** Systems Programmer + Platform Specialist  
+**Reviewer:** `/simplify`, Code Review, Determinism Auditor  
+**Sign-off:** Orchestrator, Architect, War-or-Game
 
 **Estimated effort:** 2 sessions
 
@@ -348,6 +368,9 @@ Log all political AI decisions for replay determinism.
 ---
 
 ### Phase D: UI Integration
+**Assigned to:** UI/UX Developer + Systems Programmer  
+**Reviewer:** `/simplify`, UI Truth Keeper, Modern Wargame Expert  
+**Sign-off:** Orchestrator, Architect
 
 **Estimated effort:** 2 sessions
 
@@ -386,6 +409,9 @@ The AI army decision already includes `briefing_text` (in-character, 2-3 sentenc
 ---
 
 ### Phase E: Testing + Polish
+**Assigned to:** QA Engineer + Platform Specialist  
+**Reviewer:** `/simplify`, Determinism Auditor, UI Truth Keeper  
+**Sign-off:** Orchestrator, Architect, War-or-Game
 
 **Estimated effort:** 1 session
 
@@ -486,3 +512,30 @@ Load a save from an AI-assisted game. Replay 10 turns. Verify identical state ha
 | **Total** | **7 sessions** | |
 
 Phases B and C can run in parallel after Phase A completes.
+
+## Protocol Enforcement
+
+- [ ] Orchestrator oversees all phases
+- [ ] Architect flags any new state fields, IPC, save/log contracts, or routing changes for user review
+- [ ] `.claude/napkin.md` read at session start and updated during work
+- [ ] `docs/life_lessons.md` scanned before each phase
+- [ ] smoke-test triad runs after every phase
+- [ ] replay determinism is treated as a first-class gate, not a final polish task
+- [ ] `/create-report` writes a completion report to `docs/40_reports/implemented/` when the milestone closes
+
+## Completion Checklist
+
+- [ ] completion report created in `docs/40_reports/implemented/`
+- [ ] `docs/plans/MASTER_ROADMAP.md` updated if scope/gates/status changed
+- [ ] `docs/plans/2026-03-31-v084-autonomy-determinism-and-review-plan.md` remains aligned with the implemented save/log/replay and fallback behavior
+- [ ] `docs/plans/2026-03-31-v08to09-commander-explanation-surfaces-plan.md` remains aligned with the explanation/review surface actually exposed to the player
+- [ ] `docs/PROJECT_LEDGER.md` appended
+- [ ] `.claude/napkin.md` updated with recurring autonomy/API lessons
+- [ ] relevant engineering docs updated if save/log/IPC contracts changed materially
+- [ ] `package.json` version bumped when the milestone completes
+- [ ] version tag created and pushed when the milestone completes
+
+## Companion Plans
+
+- `docs/plans/2026-03-31-v084-autonomy-determinism-and-review-plan.md`
+- `docs/plans/2026-03-31-v08to09-commander-explanation-surfaces-plan.md`

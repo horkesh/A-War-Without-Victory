@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWWV Retrospective — 2026-03-31</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0f0f14;
+    --bg2:       #16161f;
+    --bg3:       #1e1e2a;
+    --border:    #2a2a3a;
+    --text:      #d0d0e0;
+    --muted:     #7070a0;
+    --red:       #e05060;
+    --red-bg:    #2a1520;
+    --yellow:    #e0b040;
+    --yellow-bg: #221a05;
+    --green:     #40c070;
+    --green-bg:  #0a1f12;
+    --blue:      #4090e0;
+    --blue-bg:   #0a1828;
+    --orange:    #e07030;
+    --orange-bg: #201208;
+    --mono:      'Courier New', 'Consolas', monospace;
+    --sans:      'Segoe UI', 'Inter', system-ui, sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 13px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .topbar-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.02em;
+  }
+  .topbar-sub {
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .topbar-badges {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+    flex-wrap: wrap;
+  }
+  .badge {
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+  .badge-red    { background: var(--red-bg);    color: var(--red);    border: 1px solid var(--red); }
+  .badge-yellow { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow); }
+  .badge-green  { background: var(--green-bg);  color: var(--green);  border: 1px solid var(--green); }
+  .badge-blue   { background: var(--blue-bg);   color: var(--blue);   border: 1px solid var(--blue); }
+  .badge-orange { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange); }
+
+  /* ── MAIN GRID ── */
+  .main {
+    display: grid;
+    grid-template-columns: 320px 1fr 280px;
+    gap: 1px;
+    background: var(--border);
+    flex: 1;
+  }
+
+  .col {
+    background: var(--bg);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow-y: auto;
+  }
+
+  /* ── SECTION HEADERS ── */
+  .sec-header {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── CALIBRATION RUNS ── */
+  .run-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .run-card.worse  { border-left-color: var(--red); }
+  .run-card.neutral{ border-left-color: var(--yellow); }
+  .run-card.better { border-left-color: var(--green); }
+  .run-card.baseline{ border-left-color: var(--muted); }
+
+  .run-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .run-id {
+    font-weight: 700;
+    font-size: 13px;
+    color: #fff;
+  }
+  .run-hash {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    background: var(--bg3);
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+  .run-outcome {
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .run-outcome.worse  { color: var(--red); }
+  .run-outcome.neutral{ color: var(--yellow); }
+  .run-outcome.better { color: var(--green); }
+  .run-outcome.baseline{ color: var(--muted); }
+
+  .run-bars {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .bar-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .bar-label {
+    font-size: 10px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+  }
+  .bar-track {
+    height: 8px;
+    background: var(--bg3);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+  }
+  .bar-battles { background: var(--blue); }
+  .bar-drought  { background: var(--red); }
+
+  .run-note {
+    font-size: 11px;
+    color: var(--muted);
+    font-style: italic;
+    line-height: 1.4;
+  }
+
+  /* ── LESSON CARDS ── */
+  .lesson-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .lesson-card {
+    border-radius: 4px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    border: 1px solid transparent;
+  }
+  .lesson-card.violated { background: var(--red-bg);    border-color: #3a1520; }
+  .lesson-card.nearmiss { background: var(--yellow-bg); border-color: #332208; }
+  .lesson-card.positive { background: var(--green-bg);  border-color: #0f2818; }
+  .lesson-card.newlesson{ background: var(--blue-bg);   border-color: #0e2035; }
+
+  .lesson-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .lesson-card.violated .lesson-label { color: var(--red); }
+  .lesson-card.nearmiss .lesson-label { color: var(--yellow); }
+  .lesson-card.positive .lesson-label { color: var(--green); }
+  .lesson-card.newlesson .lesson-label{ color: var(--blue); }
+
+  .lesson-title {
+    font-weight: 600;
+    font-size: 12px;
+    color: #e0e0f0;
+    line-height: 1.35;
+  }
+  .lesson-body {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .lesson-action {
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+  .lesson-card.violated .lesson-action { color: var(--red); }
+  .lesson-card.newlesson .lesson-action { color: var(--blue); }
+
+  .lessons-group-header {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 0 2px;
+  }
+  .lessons-group-header.violated { color: var(--red); }
+  .lessons-group-header.nearmiss { color: var(--yellow); }
+  .lessons-group-header.positive { color: var(--green); }
+  .lessons-group-header.newlesson{ color: var(--blue); }
+
+  /* ── RIGHT COLUMN ── */
+  .commit-breakdown {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .commit-total {
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+  }
+  .commit-total-label {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+  .commit-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .commit-bar-track {
+    flex: 1;
+    height: 6px;
+    background: var(--bg3);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .commit-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+  }
+  .commit-count {
+    font-size: 11px;
+    font-weight: 600;
+    color: #fff;
+    min-width: 14px;
+    text-align: right;
+  }
+  .commit-cat {
+    font-size: 11px;
+    color: var(--text);
+    min-width: 90px;
+  }
+
+  .key-fixes {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .fix-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    font-size: 11px;
+    line-height: 1.4;
+    color: var(--text);
+  }
+  .fix-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--blue);
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+
+  .next-action-box {
+    background: var(--orange-bg);
+    border: 1px solid var(--orange);
+    border-radius: 6px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .next-action-header {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--orange);
+  }
+  .next-action-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.4;
+  }
+  .next-action-code {
+    font-family: var(--mono);
+    font-size: 11px;
+    background: #120a04;
+    border: 1px solid #3a2010;
+    border-radius: 3px;
+    padding: 6px 10px;
+    color: #e8a060;
+    line-height: 1.5;
+  }
+  .next-action-body {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .stat-row {
+    display: flex;
+    gap: 8px;
+  }
+  .stat-box {
+    flex: 1;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 8px 10px;
+    text-align: center;
+  }
+  .stat-val {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    padding: 6px 20px;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+
+  /* ── SEPARATOR ── */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 2px 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div>
+    <div class="topbar-title">A War Without Victory — Session Retrospective</div>
+    <div class="topbar-sub">2026-03-31 · Calibration Sprint: P0 Combat Drought Investigation</div>
+  </div>
+  <div class="topbar-badges">
+    <span class="badge badge-blue">7 Calibration Runs</span>
+    <span class="badge badge-blue">25 Commits</span>
+    <span class="badge badge-red">2 Violations</span>
+    <span class="badge badge-yellow">2 Near-Misses</span>
+    <span class="badge badge-green">3 Positives</span>
+    <span class="badge badge-orange">P0 Unresolved</span>
+  </div>
+</div>
+
+<!-- MAIN GRID -->
+<div class="main">
+
+  <!-- LEFT: CALIBRATION RUNS -->
+  <div class="col">
+    <div class="sec-header">Calibration Runs — n1217 → n1224</div>
+
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="stat-val" style="color:var(--muted)">38</div>
+        <div class="stat-label">Battles (start)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" style="color:var(--green)">61</div>
+        <div class="stat-label">Battles (best)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" style="color:var(--red)">20</div>
+        <div class="stat-label">Max drought wks</div>
+      </div>
+    </div>
+
+    <!-- n1217 baseline -->
+    <div class="run-card baseline">
+      <div class="run-top">
+        <span class="run-id">n1217</span>
+        <span class="run-hash">baseline</span>
+        <span class="run-outcome baseline">P0 BASELINE</span>
+      </div>
+      <div class="run-bars">
+        <div class="bar-group">
+          <div class="bar-label"><span>Battles</span><span>38</span></div>
+          <div class="bar-track"><div class="bar-fill bar-battles" style="width:38%"></div></div>
+        </div>
+        <div class="bar-group">
+          <div class="bar-label"><span>Drought wks</span><span>18</span></div>
+          <div class="bar-track"><div class="bar-fill bar-drought" style="width:90%"></div></div>
+        </div>
+      </div>
+      <div class="run-note">Slot cap counts recovery-phase ops → blocks new emission</div>
+    </div>
+
+    <!-- n1218 -->
+    <div class="run-card better">
+      <div class="run-top">
+        <span class="run-id">n1218</span>
+        <span class="run-hash">emit.ts fix</span>
+        <span class="run-outcome better">+17 battles</span>
+      </div>
+      <div class="run-bars">
+        <div class="bar-group">
+          <div class="bar-label"><span>Battles</span><span>55</span></div>
+          <div class="bar-track"><div class="bar-fill bar-battles" style="width:55%"></div></div>
+        </div>
+        <div class="bar-group">
+          <div class="bar-label"><span>Drought wks</span><span>9</span></div>
+          <div class="bar-track"><div class="bar-fill bar-drought" style="width:45%"></div></div>
+        </div>
+      </div>
+      <div class="run-note">Slot cap fix in emit.ts only — hasAvailableSlot() still broken elsewhere</div>
+    </div>
+
+    <!-- n1219 -->
+    <div class="run-card neutral">
+      <div class="run-top">
+        <span class="run-id">n1219</span>
+        <span class="run-hash">participant exempt</span>
+        <span class="run-outcome neutral">oscillation stopped</span>
+      </div>
+      <div class="run-bars">
+        <div class="bar-group">
+          <div class="bar-label"><span>Battles</span><span>55</span></div>
+          <div class="bar-track"><div class="bar-fill bar-battles" style="width:55%"></div></div>
+        </div>
+        <div class="bar-group">
+          <div class="bar-label"><span>Drought wks</span><span>15</span></div>
+          <div class="bar-track"><div class="bar-fill bar-drought" style="width:75%"></div></div>
+        </div>
+      </div>
+      <div class="run-note">Same battle count, drought crept back — root unresolved</div>
+    </div>
+
+    <!-- n1220 -->
+    <div class="run-card neutral">
+      <div class="run-top">
+        <span class="run-id">n1220</span>
+        <span class="run-hash" style="font-family:var(--mono)">ad0ddc</span>
+        <span class="run-outcome neutral">new problem</span>
+      </div>
+      <div class="run-bars">
+        <div class="bar-group">
+          <div class="bar-label"><span>Battles</span><span>50</span></div>
+          <div class="bar-track"><div class="bar-fill bar-battles" style="width:50%"></div></div>
+        </div>
+        <div class="bar-group">
+          <div class="bar-label"><span>Drought wks</span><span>16</span></div>
+          <div class="bar-track"><div class="bar-fill bar-drought" style="width:80%"></div></div>
+        </div>
+      </div>
+      <div class="run-note">eval_front fix resolved oscillation; drought persists differently</div>
+    </div>
+
+    <!-- n1221 -->
+    <div class="run-card worse">
+      <div class="run-top">
+        <span class="run-id">n1221</span>
+        <span class="run-hash" style="font-family:var(--mono)">e7a073</span>
+        <span class="run-outcome worse">WORSE</span>
+      </div>
+      <div class="run-bars">
+        <div class="bar-group">
+          <div class="bar-label"><span>Battles</span><span>49</span></div>
+          <div class="bar-track"><div class="bar-fill bar-battles" style="width:49%"></div></div>
+        </div>
+        <div class="bar-group">
+          <div class="bar-label"><span>Drought wks</span><span>17</span></div>
+          <div class="bar-track"><div class="bar-fill bar-drought" style="width:85%"></div></div>
+        </div>
+      </div>
+      <div class="run-note">Backstop n=5 — counterproductive</div>
+    </div>
+
+    <!-- n1222 -->
+    <div class="run-card worse">
+      <div class="run-top">
+        <span class="run-id">n1222</span>
+        <span class="run-hash" style="font-family:var(--mono)">e7a073</span>
+        <span class="run-outcome worse">NO EFFECT</span>
+      </div>
+      <div class="run-bars">
+        <div class="bar-group">
+          <div class="bar-label"><span>Battles</span><span>49</span></div>
+          <div class="bar-track"><div class="bar-fill bar-battles" style="width:49%"></div></div>
+        </div>
+        <div class="bar-group">
+          <div class="bar-label"><span>Drought wks</span><span>17</span></div>
+          <div class="bar-track"><div class="bar-fill bar-drought" style="width:85%"></div></div>
+        </div>
+      </div>
+      <div class="run-note">Emit reachability — same hash as n1221. Inert change.</div>
+    </div>
+
+    <!-- n1223 -->
+    <div class="run-card worse">
+      <div class="run-top">
+        <span class="run-id">n1223</span>
+        <span class="run-hash">reverted</span>
+        <span class="run-outcome worse">WRONG CAUSE</span>
+      </div>
+      <div class="run-bars">
+        <div class="bar-group">
+          <div class="bar-label"><span>Battles</span><span>47</span></div>
+          <div class="bar-track"><div class="bar-fill bar-battles" style="width:47%"></div></div>
+        </div>
+        <div class="bar-group">
+          <div class="bar-label"><span>Drought wks</span><span>20</span></div>
+          <div class="bar-track"><div class="bar-fill bar-drought" style="width:100%"></div></div>
+        </div>
+      </div>
+      <div class="run-note">Trimming exemption — expert diagnosis wrong. Reverted correctly.</div>
+    </div>
+
+    <!-- n1224 -->
+    <div class="run-card better">
+      <div class="run-top">
+        <span class="run-id">n1224</span>
+        <span class="run-hash" style="font-family:var(--mono)">132eb2</span>
+        <span class="run-outcome better">best session</span>
+      </div>
+      <div class="run-bars">
+        <div class="bar-group">
+          <div class="bar-label"><span>Battles</span><span>61</span></div>
+          <div class="bar-track"><div class="bar-fill bar-battles" style="width:61%"></div></div>
+        </div>
+        <div class="bar-group">
+          <div class="bar-label"><span>Drought wks</span><span>11</span></div>
+          <div class="bar-track"><div class="bar-fill bar-drought" style="width:55%"></div></div>
+        </div>
+      </div>
+      <div class="run-note">min_attack_outcome=stalemate — improvement, not the fix. P0 persists.</div>
+    </div>
+
+  </div>
+
+  <!-- CENTER: LIFE LESSONS -->
+  <div class="col">
+    <div class="sec-header">Life Lessons Audit</div>
+
+    <div class="lesson-section">
+      <div class="lessons-group-header violated">Violated — 2 Active Lessons Broken</div>
+
+      <div class="lesson-card violated">
+        <div class="lesson-label">Violation #1 — Critical</div>
+        <div class="lesson-title">[Calibration] Slot cap must exclude recovery-phase ops</div>
+        <div class="lesson-body">
+          Written 2026-03-30 (yesterday). Lesson explicitly named emit.ts. Fix applied there.
+          But <code style="font-family:var(--mono);font-size:10px;color:#e08080">hasAvailableSlot()</code> in
+          <code style="font-family:var(--mono);font-size:10px;color:#e08080">corps_operation_helpers.ts</code>
+          is the actual gate — 4 callers, same broken logic, never patched.
+          6 additional broken runs resulted before root cause was identified.
+        </div>
+        <div class="lesson-action">→ PROMOTED to top of recently-violated. Lesson written in same session it was violated.</div>
+      </div>
+
+      <div class="lesson-card violated">
+        <div class="lesson-label">Violation #2 — Near-Miss</div>
+        <div class="lesson-title">[Calibration] One change per run</div>
+        <div class="lesson-body">
+          n1224 bundled two logical changes in a single run: revert trimming exemption +
+          add stalemate threshold. Technically sequential, executed as one.
+          Borderline — changes were directionally correct, but attribution is ambiguous.
+        </div>
+        <div class="lesson-action">→ NEAR-MISS. Flag for next session.</div>
+      </div>
+
+      <div class="lesson-card nearmiss">
+        <div class="lesson-label">Near-Miss — Self-Corrected</div>
+        <div class="lesson-title">[Process] Orchestrator must not analyze scenario results</div>
+        <div class="lesson-body">
+          Session began with direct investigation before dispatch. Caught mid-session after
+          user prompted: "Shouldn't you send out experts?" Corrected immediately.
+          Two-tier panel dispatched correctly from that point forward.
+        </div>
+        <div class="lesson-action">→ Self-corrected. No new runs wasted. Pattern: catch earlier next time.</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="lesson-section">
+      <div class="lessons-group-header positive">Observed — Positive Behaviors</div>
+
+      <div class="lesson-card positive">
+        <div class="lesson-label">Followed — Two-Tier Panel</div>
+        <div class="lesson-title">7 Tier 1 agents dispatched in parallel after n1224</div>
+        <div class="lesson-body">
+          Post-run panel protocol executed correctly. Investigator + analyst tiers
+          separated. Parallel dispatch maintained. Synthesis consolidated by Orchestrator.
+        </div>
+      </div>
+
+      <div class="lesson-card positive">
+        <div class="lesson-label">Followed — Crash Recovery</div>
+        <div class="lesson-title">working-on.md read at session start</div>
+        <div class="lesson-body">
+          Interrupted context from previous session recovered correctly.
+          Session startup protocol executed in full order.
+        </div>
+      </div>
+
+      <div class="lesson-card positive">
+        <div class="lesson-label">Followed — Revert Discipline</div>
+        <div class="lesson-title">Trimming exemption reverted when root cause invalidated</div>
+        <div class="lesson-body">
+          Operations Expert diagnosed trimming as root cause. Run data showed
+          attack_attempt_count=0 — diagnosis could not explain the diagnostic.
+          Fix reverted cleanly. Good discipline; one run wasted, not two.
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="lesson-section">
+      <div class="lessons-group-header newlesson">New Lessons Proposed — 2</div>
+
+      <div class="lesson-card newlesson">
+        <div class="lesson-label">New Lesson — Calibration</div>
+        <div class="lesson-title">Fix the symptom in ALL callers — not just the first file you find</div>
+        <div class="lesson-body">
+          emit.ts was fixed. hasAvailableSlot() in corps_operation_helpers.ts is the actual
+          gate with 4 callers. Partial fix masked the real problem for 6 runs.
+        </div>
+        <div class="lesson-action">→ Do instead: grep ALL callers of any gating condition before closing the fix.</div>
+      </div>
+
+      <div class="lesson-card newlesson">
+        <div class="lesson-label">New Lesson — Debugging</div>
+        <div class="lesson-title">Validate expert diagnosis against run data BEFORE implementing</div>
+        <div class="lesson-body">
+          Operations Expert said "trimming removes op attacks." Applied fix. Run data showed
+          same attack_attempt_count=0 — the diagnosis couldn't explain the observable.
+          1 run wasted on a wrong root cause.
+        </div>
+        <div class="lesson-action">→ Do instead: before any "root cause" fix, verify it predicts WHY the diagnostic would change. If it can't, it's the wrong fix.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: COMMITS + NEXT ACTION -->
+  <div class="col">
+    <div class="sec-header">Commit Activity — Last 24h</div>
+
+    <div class="commit-breakdown">
+      <div>
+        <div class="commit-total">25</div>
+        <div class="commit-total-label">total commits</div>
+      </div>
+      <div class="divider" style="margin:4px 0"></div>
+
+      <div class="commit-row">
+        <div class="commit-cat">docs</div>
+        <div class="commit-bar-track">
+          <div class="commit-bar-fill" style="width:44%; background:var(--muted)"></div>
+        </div>
+        <div class="commit-count">11</div>
+      </div>
+
+      <div class="commit-row">
+        <div class="commit-cat">fix(commander)</div>
+        <div class="commit-bar-track">
+          <div class="commit-bar-fill" style="width:32%; background:var(--red)"></div>
+        </div>
+        <div class="commit-count">8</div>
+      </div>
+
+      <div class="commit-row">
+        <div class="commit-cat">feat</div>
+        <div class="commit-bar-track">
+          <div class="commit-bar-fill" style="width:12%; background:var(--green)"></div>
+        </div>
+        <div class="commit-count">3</div>
+      </div>
+
+      <div class="commit-row">
+        <div class="commit-cat">refactor/chore</div>
+        <div class="commit-bar-track">
+          <div class="commit-bar-fill" style="width:8%; background:var(--blue)"></div>
+        </div>
+        <div class="commit-count">2</div>
+      </div>
+
+      <div class="commit-row">
+        <div class="commit-cat">feat(skills)</div>
+        <div class="commit-bar-track">
+          <div class="commit-bar-fill" style="width:4%; background:var(--yellow)"></div>
+        </div>
+        <div class="commit-count">1</div>
+      </div>
+    </div>
+
+    <div class="sec-header" style="margin-top:4px">Key Fixes This Session</div>
+
+    <div class="key-fixes">
+      <div class="fix-item"><div class="fix-dot"></div><span>Slot cap guard — emit.ts (partial)</span></div>
+      <div class="fix-item"><div class="fix-dot"></div><span>operation_history write path</span></div>
+      <div class="fix-item"><div class="fix-dot"></div><span>isBesiegedCorps tighten</span></div>
+      <div class="fix-item"><div class="fix-dot"></div><span>Reachability filter on brigade eval</span></div>
+      <div class="fix-item"><div class="fix-dot"></div><span>Doctrine phase railroads removed</span></div>
+      <div class="fix-item"><div class="fix-dot"></div><span>Opportunity target preservation</span></div>
+      <div class="fix-item"><div class="fix-dot"></div><span>Balanced zone ops enabled</span></div>
+      <div class="fix-item" style="color:var(--orange)"><div class="fix-dot" style="background:var(--orange)"></div><span>min_attack_outcome=stalemate (n1224 — best result)</span></div>
+    </div>
+
+    <div class="sec-header" style="margin-top:4px">Key Docs Added</div>
+
+    <div class="key-fixes">
+      <div class="fix-item"><div class="fix-dot" style="background:var(--muted)"></div><span>Master roadmap restructuring</span></div>
+      <div class="fix-item"><div class="fix-dot" style="background:var(--muted)"></div><span>v0.8.1 Commander Maturity milestone</span></div>
+      <div class="fix-item"><div class="fix-dot" style="background:var(--muted)"></div><span>Two-tier post-run panel protocol</span></div>
+      <div class="fix-item"><div class="fix-dot" style="background:var(--muted)"></div><span>Railroad Hunter skill added</span></div>
+      <div class="fix-item"><div class="fix-dot" style="background:var(--muted)"></div><span>Governing docs napkin pointer</span></div>
+    </div>
+
+    <div class="sec-header" style="margin-top:4px">Next Action</div>
+
+    <div class="next-action-box">
+      <div class="next-action-header">P0 Fix — One Line</div>
+      <div class="next-action-title">Fix hasAvailableSlot() — filter recovery-phase ops</div>
+      <div class="next-action-code">// corps_operation_helpers.ts:10<br>ops.filter(op =&gt; op.phase !== 'recovery')<br>  .length &lt; MAX_CONCURRENT_OPS</div>
+      <div class="next-action-body">
+        This is the actual slot gate — 4 callers feed through it. emit.ts was a partial fix.
+        hasAvailableSlot() counts recovery ops against the cap, blocking all new emission
+        from week 20 onward when ops pile into recovery.<br><br>
+        Expected: drought eliminated. Run n1225 immediately after. Compare battles vs n1218 (55).
+        If battles &gt;80 and drought &lt;5 weeks — P0 closed.
+      </div>
+    </div>
+
+    <div class="stat-row" style="margin-top:4px">
+      <div class="stat-box">
+        <div class="stat-val" style="color:var(--red)">P0</div>
+        <div class="stat-label">Status</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" style="color:var(--yellow)">92.2%</div>
+        <div class="stat-label">Area Score</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" style="color:var(--green)">22/22</div>
+        <div class="stat-label">Anchors</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  AWWV v0.8.0 &nbsp;·&nbsp; Pyrrhic Games &nbsp;·&nbsp; Branch: main &nbsp;·&nbsp;
+  n1217→n1224 &nbsp;·&nbsp; 40-week calibration scenario (Jan 1993 targets) &nbsp;·&nbsp;
+  War-or-Game: NOT APPROVED
+</div>
+
+</body>
+</html>

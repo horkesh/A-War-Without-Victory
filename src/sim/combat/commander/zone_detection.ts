@@ -72,7 +72,9 @@ export function detectZones(
         const zoneOsids = componentGroups.get(compIdx)!;
         const zoneOsidSet = new Set(zoneOsids);
         const isMainBody = compIdx === mainBodyCompIdx;
-        const zoneId = `zone:${corpsId}:${compIdx}` as ZoneId;
+        // Use the lex-first OSID as the zone ID anchor — stable across turns even if
+        // connected-component indices re-number due to sector changes or brigade movement.
+        const zoneId = `zone:${corpsId}:${[...zoneOsids].sort(strictCompare)[0]}` as ZoneId;
 
         // Count front edges overlapping this zone and collect enemy adjacent OSIDs
         let frontEdgeCount = 0;

@@ -1108,6 +1108,14 @@ The 5 original integration suites (scenario round-trip, event system, save/load,
 ### Integration tests are the last gate before calibration runs
 The smoke-test triad (`tsc --noEmit` + `vitest run` + `desktop:map:build`) catches type errors, unit regressions, and build failures. But integration tests catch semantic regressions: "the scenario still runs to completion," "events still fire at the right week," "save/load produces identical state," "no brigade has negative personnel." These are the tests that would have caught the displacement phantom gap (3,700 missing casualties between two tracking systems) if they had existed earlier.
 
+## Roadmap Assumptions Must Become Named Work (2026-03-31)
+
+### Silent assumptions create implementation drift
+If the roadmap says later milestones “assume” coherence, explanation, review, or determinism surfaces without naming those as explicit work, implementers will fill the gap differently or skip it entirely. Fix by converting hidden prerequisites into named roadmap lanes with linked plans and done-means. This is especially important for command hierarchy, explanation UI, and API-assisted autonomy where polished behavior can hide unresolved ownership.
+
+### Hidden prerequisites need one plan each when ownership differs
+If a “missing item” really contains different owners or different milestone slots, do not hide them in one umbrella plan. Split them into separate plans so roadmap slotting, done-means, and reviewer responsibility stay unambiguous.
+
 ## BFS Territory Assignment — Corps Home Municipality Coupling (2026-03-26)
 
 ### A single brigade in the wrong corps cascades BFS territory through entire municipalities

@@ -1,7 +1,7 @@
 # AWWV Calibration Master Reference
 
 **Purpose:** Persistent lessons-learned record for war-phase calibration (April 1992 onward). 40w primary, 104w force trajectory.
-**Updated:** 2026-03-29 (n1210 — 5 fixes: Visegrad OOB + siege calc + JNA ghosts + sector reassignment + MIN_SECTOR_BRIGADES)
+**Updated:** 2026-03-31 (n1234 — P0 drought FIXED; 103 battles; 38/40 weeks combat)
 
 ## Review Methodology
 
@@ -14,6 +14,85 @@ Every calibration run is reviewed by a two-tier expert panel before any action i
 `/gap-finder` *(unique authority: may dispatch agents + question specialists directly)*, `/game-designer`, `/corps-army-commander`, `/modern-wargame-expert`, `/canon-compliance-reviewer`
 
 **Orchestrator** synthesizes, gives go/no-go, updates this file + PROJECT_LEDGER.md.
+
+## n1234 P0 DROUGHT FIXED — 6 plan.ts/zone_detection.ts bugs (2026-03-31)
+- **92.2% area-weighted (40w). 22/22 anchors. 6/6 benchmarks. 103 battles. 38/40 weeks with combat.**
+- **final_state_hash: 45d8fde0a760c080** (deterministic, verified n1235 same hash)
+- P0 confirmed fixed: weekly distribution 1-6 battles/week throughout; one zero week (w22) normal variance.
+- Six compounding bugs in `plan.ts` and `zone_detection.ts`:
+  1. Concentration progress used physical brigade location (`countBrigadesInZone`) — no movement system executes concentration orders → always 0 → `concentrating` forever. **Fix: time-based progress.**
+  2. Zone IDs were array-index based (`zone:corps:compIdx`) → unstable across turns → `staging_zone` lookup fails. **Fix: OSID-anchored IDs.**
+  3. Zone re-anchoring when zone grows → stored staging_zone stale → viability=0. **Fix: OSID-content fallback.**
+  4. Viability penalized assigned brigades (committed brigades left surplus pool → "lost"). **Fix: count assigned_brigades as effective.**
+  5. Suspend check used `surplusPool.length < required` (raw pool fluctuates with garrison) → immediate suspend. **Fix: count assigned brigade availability.**
+  6. Abandoned plans persisted in state, blocking new plan creation. **Fix: clear on next entry.**
+- Remaining: `operation_zero_eligible_execution` on some ARBiH/HVO commander ops (separate issue). HVO 0 orders expected pre-April 1993.
+- Calibration slightly below n1233 ATH (92.6%) but P0 resolved is the dominant result.
+- War-or-Game: PENDING (not re-reviewed after drought fix).
+- Run: `runs/apr1992_definitive_40w__77cac5e01d3c929e__w40_n1234`
+
+## n1233 CONCENTRATION + ZONE STABILITY FIXES (2026-03-31)
+- **92.6% area-weighted (40w) — ATH.** 22/22 anchors. 6/6 benchmarks. 71 battles.
+- Applied bugs 1-3 (time-based concentration, OSID-anchored zones, staging fallback). Plans reaching ready/executing.
+- Still had abandoned plan persistence (bug 6) → 71 battles only.
+- final_state_hash: 7e8306d160694c40
+- Run: `runs/apr1992_definitive_40w__77cac5e01d3c929e__w40_n1233`
+
+## n1226–n1232 INSTRUMENTATION + INCREMENTAL FIXES (2026-03-31)
+- Instrumentation added: `[CMD]` per-corps per-turn emit/skip trace, `[VIA]` viability path trace.
+- Identified plan lifecycle bugs via trace analysis. Bugs 1-4 applied incrementally.
+- Battle counts: ~62 throughout (drought continued until all 6 bugs fixed).
+- Hash range: various (62-71 battles).
+
+## n1225 INERT FIX — hasAvailableSlot() never called by emit.ts (2026-03-31)
+- **92.5% area-weighted (40w). 22/22 anchors. 6/6 benchmarks. 61 battles. 11 battleless weeks.**
+- **final_state_hash: 132eb2163d156168** — byte-for-byte identical to n1224. Fix had ZERO effect.
+- Fix applied: `hasAvailableSlot()` in `corps_operation_helpers.ts:10` — filter `op.phase !== 'recovery'` before slot cap comparison.
+- Root cause of zero effect: `commander/emit.ts` **never calls `hasAvailableSlot()`**. It has its own inline slot guard at line ~525 that already filters `phase !== 'recovery'` (added in the n1218 fix session). The fix patched a utility function the commander loop doesn't use.
+- `hasAvailableSlot()` IS called by `bot_corps_directives.ts`, `bot_corps_operations.ts`, `bot_corps_corridor.ts` — but those are non-commander (baseline bot) op paths, not the drought source.
+- **P0 drought root cause still UNKNOWN.** The commander pipeline (briefing→plan→decide→emit) is completely silent on why it stops emitting ops post-w22. No skip reasons logged anywhere.
+- **Fix reverted** — `corps_operation_helpers.ts` back to original.
+- **Next required action:** instrument commander pipeline with per-corps per-turn decision trace before any further fix attempts. Diagnosing from static code reading has failed 8 consecutive times.
+- Run: `runs/apr1992_definitive_40w__77cac5e01d3c929e__w40_n1225`
+
+## n1224 min_attack_outcome STALEMATE on commander ops (2026-03-31)
+- **92.5% area-weighted (40w) — NEW ATH**. 22/22 anchors PASS. 6/6 benchmarks PASS.
+- **61 battles. 11 battleless weeks [1,16,23,24,25,26,27,30,35,39,40]. War-or-Game: NOT APPROVED.**
+- Fix: `emit.ts` — set `min_attack_outcome: 'stalemate'` on commander-generated `sector_attack` ops. Lowers attack threshold from `costly_victory` (≥1.0 power ratio) to `stalemate` (≥0.7). After w22 entrenchment buildup, ≥1.0 is unachievable everywhere → 0 attack orders from all commander ops.
+- Battles improved 50→61. Drought improved 16→11 weeks (w23-27 gap remains).
+- All 17 commander ops still had 0 battles — improvement came entirely from baseline bot, not commander loop. Commander loop broken independently.
+- final_state_hash: 132eb2163d156168
+- Run: `runs/apr1992_definitive_40w__77cac5e01d3c929e__w40_n1224`
+
+## n1223 WRONG FIX — trimming exemption for op participants (2026-03-31, REVERTED)
+- **47 battles (WORSE)**. Previous baseline ~50. Fix made combat worse.
+- Fix applied: exempted op participant brigades from per-corps trimming in `bot_brigade_ai_osid.ts:551-568`.
+- Diagnosis was wrong: `attack_attempt_count` stayed 0 in all commander ops — attack orders were never generated, not trimmed. Trimming is irrelevant when no attack orders exist to trim.
+- Diagnostic field `eligible_attacker_count` was misleading: it counts ALL corps brigades adjacent to enemy, not op participants specifically. Op participants never reached `canDirectAttackObjective=true` because `isOutcomeSufficientForAttack` failed (entrenched defenders, power ratio < min_attack_outcome threshold).
+- **Reverted immediately.** `bot_brigade_ai_osid.ts` back to original.
+- Run: `runs/apr1992_definitive_40w__77cac5e01d3c929e__w40_n1223`
+
+## n1219–n1222 INTERMEDIATE DEBUGGING RUNS (2026-03-31)
+- Fixes from n1218 panel diagnosis (bot_brigade_eval_attack.ts op participant exemption + plan.ts staging-zone scope):
+  - **n1219**: `bot_brigade_eval_attack.ts:96` — op participant exemption from sector-front gate (`isActiveSectorOperationParticipant` guard). KEEP.
+  - **n1220**: `bot_brigade_eval_front.ts:69` — removed `|| offAssignedFront` condition. KEEP.
+  - **n1221–n1222**: Intermediate investigation runs. Battle counts not recorded (investigation runs, not calibration-significant).
+- These fixes addressed the brigade oscillation / ZEA (zero-eligible-attacker) issue from n1218 panel. Drought continued — these fixed a secondary issue, not the P0.
+- Runs: `runs/apr1992_definitive_40w__77cac5e01d3c929e__w40_n1219` through `_n1222`
+
+## n1218 SLOT CAP FIX (emit.ts phase!=='recovery') (2026-03-30)
+- **91.8% area-weighted (40w)**. 21/22 anchors (brka_2 FAIL — same as n1216). 6/6 benchmarks PASS.
+- **55 battles. 9-week zero-battle drought (w28-36). COMBAT STILL BROKEN.**
+- Slot cap fix applied (emit.ts filters recovery-phase ops). Drought improved 18→9 weeks — fix was correct but insufficient.
+- **Root cause identified by two-tier panel:** `bot_brigade_eval_attack.ts:96` — `assignedBrigadeNotOnSectorFrontOsids` fires BEFORE `isActiveSectorOperationParticipant` check. Op participants who march toward objectives are silently rerouted back to home sector, producing movement oscillation. This generates all 204 ZEA turns and 190 recovery-without-attempt ops.
+- Secondary cause: `plan.ts checkSuspendConditions` suspends on ANY high-threat zone, not just staging zone. ARBiH corps perpetually suspended, never reach `ready` state.
+- att:def ratio: 0.34 (worsened from 0.43). Game-designer: do not touch casualty constants — reassess after drought fix (selection bias, not math error).
+- 7/16 corps with 0 battles. 112 brigades never fight. HRHB 0 orders (structural feature — no war enemies in 40w).
+- 57 brigades drifted >4 hops. vrs_1st_krajina: 22/36 drifted. Home-recall FLAGGED by canon (must not pull from active ops).
+- War-or-Game: **NOT APPROVED**. Historian: **NOT APPROVED**. Orchestrator: **NO-GO**.
+- **P0 fix:** `bot_brigade_eval_attack.ts:96` — wrap `assignedBrigadeNotOnSectorFrontOsids` with `!isActiveSectorOperationParticipant` (1 line). Batch with `plan.ts checkSuspendConditions` staging-zone scope (~5 lines). Run n1219.
+- UI gap: all 6 key findings INVISIBLE or PARTIALLY VISIBLE. `generateBriefing` has no time-series pattern detection. P1 debt.
+- Run: `runs/apr1992_definitive_40w__77cac5e01d3c929e__w40_n1218`
 
 ## n1217 COMMANDER FIXES 1+2+4+5 (2026-03-30)
 - **92.2% area-weighted (40w)**. 22/22 anchors PASS. 6/6 benchmarks PASS. MAP HOLDS.

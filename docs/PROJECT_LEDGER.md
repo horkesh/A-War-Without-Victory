@@ -1,3 +1,113 @@
+## [2026-03-31] P0 Combat Drought FIXED — n1226–n1234 (9 runs, 6 bugs found and fixed)
+
+### Summary
+P0 combat drought (war silent post-w22) confirmed fixed. Concentration of five compounding bugs in `plan.ts` and `zone_detection.ts` caused the commander pipeline to never advance plans from `concentrating` to `ready`. Also fixed: anomaly detector false-positive for HVO passivity pre-April 1993.
+
+### Root Causes Found (6 bugs, 5 in plan.ts alone)
+
+**Bug 1 — Concentration progress used physical brigade location** (`plan.ts`)
+`countBrigadesInZone` checked `ev.current_zone === stagingZone`. But `concentration_orders` are planning artefacts — no downstream system physically moves brigades to the staging zone. So `concentrationProgress` was always 0, and plans stayed in `concentrating` forever.
+**Fix:** Time-based concentration: `(turn - created_turn) / (target_ready_turn - created_turn)`.
+
+**Bug 2 — Zone IDs were array-index based, unstable across turns** (`zone_detection.ts`)
+Zone IDs built as `zone:${corpsId}:${compIdx}`. If a component was re-indexed due to sector changes, the stored `staging_zone` ID no longer matched. Every plan's `staging_zone` lookup failed on turn T+1.
+**Fix:** OSID-anchored zone IDs: `zone:${corpsId}:${lex_first_osid}`.
+
+**Bug 3 — Zone re-anchoring when zone gained lex-smaller OSID** (`plan.ts computeViabilityScore`)
+If a zone grew and acquired a lex-smaller OSID, the anchor shifted. Old `staging_zone` still pointed to the previous anchor. Viability returned 0.0 → plan abandoned.
+**Fix:** Fallback lookup by OSID content if exact ID not found.
+
+**Bug 4 — Viability penalized plans for their own assigned brigades** (`plan.ts computeViabilityScore`)
+Old viability code counted only `freshSurplus.filter(!assignedIds)`. Committed brigades left the surplus pool → appeared "lost" → viability dropped → plan abandoned at T+1.
+**Fix:** `effectiveForPlan = freshSurplusEffective + plan.assigned_brigades.length`.
+
+**Bug 5 — Suspend check used raw surplus pool count** (`plan.ts checkSuspendConditions`)
+`surplusPool.length < plan.required_brigades` fires when any brigade moves from surplus to garrison. Plan required_brigades was often set to `surplusPool.length` at creation → any garrison change = immediate suspend.
+**Fix:** Count assigned brigade availability: `surplusPool.filter(ev => assignedIds.has(ev.brigade_id)).length < required * 0.5`.
+
+**Bug 6 — Abandoned plans persisted in state, blocking new plan creation** (`plan.ts advanceExistingPlan`)
+When a plan was abandoned, `advanceExistingPlan` returned `{ plan: { ...plan, status: 'abandoned' } }`. Next turn, this plan was re-processed: `checkAbandonConditions` skipped already-abandoned plans, code fell through to "still concentrating" → plan stored again as `abandoned` → corps never created new plans.
+**Fix:** Clear abandoned plans at top of `advanceExistingPlan`: if `plan.status === 'abandoned'` → return `{ plan: null }`.
+
+### Instrumentation Added (kept in code for ongoing diagnostics)
+- `[CMD]` trace: per-corps per-turn emit/skip reason (stdout)
+- `[VIA]` trace: viability score path detail (stdout)
+
+### Runs (abbreviated)
+- **n1226–n1229**: Instrumentation added; first three bugs identified by trace analysis
+- **n1230–n1232**: Bugs 1-3 fixed (zone stability + viability); plans concentrating but not advancing (bugs 5-6 not yet found)
+- **n1233**: Fixed bugs 5-6 (suspend check + abandoned persistence). **92.6% ATH, 71 battles.**
+- **n1234**: Added check for already-abandoned plan on entry. **92.2%, 103 battles, 38/40 weeks with combat. DROUGHT FIXED.**
+
+### Final State (n1234)
+- **92.2% area-weighted (40w). 22/22 anchors. 6/6 benchmarks. 103 battles. 38/40 weeks with combat.**
+- Weekly distribution: 1-6 battles/week throughout. One zero-combat week (w22) — within normal variance.
+- Remaining: zero-eligible-execution on some ARBiH/HVO commander ops (separate issue, not drought).
+- HRHB has 0 orders (expected — HVO-ARBiH war starts April 1993, not in scope).
+- **final_state_hash: 45d8fde0a760c080** (deterministic — confirmed by running n1235 same hash).
+- War-or-Game: PENDING RE-REVIEW (103 battles is within target range but calibration slightly below n1233 ATH of 92.6%).
+
+### Anomaly Detector Fix
+`anomaly_checks_extended.ts`: `zero_combat_corps` suppressed for HRHB corps facing only RBiH when `war_started_turn == null`. HVO passivity pre-April 1993 is expected behavior, not a bug.
+
+### Test Impact
+One commander unit test updated (`tests/commander/commander.test.ts:672`) — concentration progress expectation changed from brigade-count-based (1.0) to time-based (0.5) for turn 10 with `target_ready_turn=12`.
+
+### Files Changed
+- `src/sim/combat/commander/plan.ts` (bugs 1, 3-6)
+- `src/sim/combat/commander/zone_detection.ts` (bug 2)
+- `src/sim/combat/commander/emit.ts` (CMD trace instrumentation)
+- `src/scenario/anomaly_checks_extended.ts` (HRHB passivity carve-out)
+- `tests/commander/commander.test.ts` (concentration test updated)
+- `docs/life_lessons/process.md` (new lesson: instrument before investigating)
+- `docs/life_lessons/calibration.md` (slot cap lesson corrected)
+
+## [2026-03-31] P0 Drought Investigation — n1219–n1225 (7 runs, no fix landed)
+
+### Summary
+Seven calibration runs. Zero net improvement over n1218. P0 combat drought (war goes silent post-w22) remains unresolved. Two confirmed wrong diagnoses. One new ATH (92.5%) achieved as a side effect.
+
+### Runs
+
+**n1219–n1220** — Applied fixes from n1218 two-tier panel diagnosis:
+- `bot_brigade_eval_attack.ts:96`: op participant exemption from sector-front gate (`isActiveSectorOperationParticipant` guard). KEPT.
+- `bot_brigade_eval_front.ts:69`: removed `|| offAssignedFront`. KEPT.
+- These addressed brigade oscillation / ZEA secondary issue. Drought continued.
+
+**n1221–n1222** — Intermediate investigation runs. No calibration-significant changes.
+
+**n1223** — WRONG FIX, REVERTED. Trimming exemption for op participants in `bot_brigade_ai_osid.ts:551`. Diagnosis: per-corps trimming was removing op participant attack orders. Reality: `attack_attempt_count` stayed 0 — orders were never generated, not trimmed. 47 battles (worse). Reverted.
+
+**n1224** — `emit.ts`: `min_attack_outcome: 'stalemate'` on commander-generated `sector_attack` ops. Lowers threshold from costly_victory (≥1.0 power ratio) to stalemate (≥0.7). After w22 entrenchment builds, ≥1.0 is unachievable everywhere. **Result: 61 battles, 92.5% area-weighted (NEW ATH), 22/22 anchors, 6/6 benchmarks, 11 battleless weeks.** Fix is KEPT. Commander ops still 0 battles — improvement from baseline bot only.
+
+**n1225** — INERT FIX. `hasAvailableSlot()` in `corps_operation_helpers.ts:10` — filter `phase !== 'recovery'`. Diagnosis: this was the upstream gate blocking 4 callers. Reality: `commander/emit.ts` never calls `hasAvailableSlot()` — it has its own inline guard that already filters recovery-phase ops. Byte-for-byte identical to n1224 (same hash `132eb2163d156168`). Reverted.
+
+### Root Cause Status
+**Unknown.** The commander pipeline (briefing→plan→decide→emit) produces no diagnostic output explaining why ops stop being emitted post-w22. Static code reading has produced 2 wrong diagnoses across 2 sessions. Runtime instrumentation is required before further fix attempts.
+
+### Process Failures
+1. Both diagnoses (trimming theory, hasAvailableSlot theory) were produced by agents reading code paths in isolation — same failure mode as the process lesson written 2026-03-31.
+2. The "confirmed root cause" from the Tier 1 panel was wrong. Panel authority ≠ correctness.
+3. Consumed ~6 hours and ~7 calibration runs on unvalidated diagnoses.
+
+### Calibration State
+- **n1224/n1225: 92.5% area-weighted (40w) — ATH. 22/22 anchors. 6/6 benchmarks. 61 battles. 11 battleless weeks. War-or-Game: NOT APPROVED.**
+- Active on main: `emit.ts min_attack_outcome: 'stalemate'` (n1224), `bot_brigade_eval_attack.ts` op participant exemption (n1219), `bot_brigade_eval_front.ts` offAssignedFront removal (n1220).
+
+### New Life Lessons
+- `[Calibration]` lesson updated: `hasAvailableSlot()` theory was wrong — corrected in calibration.md
+- `[Process]` new lesson: decisions without traces are undebuggable — instrument before investigating
+
+### Files Changed
+- `src/sim/combat/commander/emit.ts` (n1224 — min_attack_outcome: stalemate, KEPT)
+- `src/sim/combat/bot_brigade_eval_attack.ts` (n1219 — op participant exemption, KEPT)
+- `src/sim/combat/bot_brigade_eval_front.ts` (n1220 — offAssignedFront removal, KEPT)
+- `src/sim/combat/corps_operation_helpers.ts` (n1225 — inert fix, REVERTED)
+- `src/sim/combat/bot_brigade_ai_osid.ts` (n1223 — trimming exemption, REVERTED)
+- `docs/40_reports/CALIBRATION_MASTER.md` (n1219–n1225 entries added)
+- `docs/life_lessons/calibration.md` (slot cap lesson corrected)
+- `docs/life_lessons/process.md` (new lesson: decision traces)
+
 ## [2026-03-30] n1216 Post-Run Panel — 4 Railroads Identified, 6 Fixes Proposed
 
 ### Run: n1216 (a48f8ac4 + reachability filter)
@@ -16903,6 +17013,18 @@ No impact. Event trigger changes are deterministic (same `fired_event_ids` state
 ### Files
 - `src/sim/combat/attack_resolution_osid.ts` (2 lines)
 - `src/sim/combat/combat_predictor.ts` (2 lines)
+## [2026-03-31] Operations Singularity Elevated To Explicit v0.8 Gate
+
+### Change
+Tightened `docs/plans/MASTER_ROADMAP.md` so operations singularity is no longer implied background cleanup. `v0.8.1` now explicitly gates on operations being credible enough that the commander is reasoning through one real command object rather than a split ops model. `v0.8.x-final` now names **Operations Singularity** as its primary gate.
+
+Added a dedicated implementation plan: `docs/plans/2026-03-31-v08x-operations-singularity-plan.md`.
+
+### Purpose
+- make operations singularity visible to implementers as the first real proof of honest command authority
+- prevent `v0.8.1` Commander Maturity from starting on top of split operation truth
+- turn prior audit language into one concrete planning artifact
+
 ## [2026-03-30] Claude CLI Taskforce Scaffolding + Crash-Resistant Workflow
 
 ### Change
@@ -16924,6 +17046,93 @@ Added a shared Claude CLI operating layer in `.claude/` to make repo work more s
 - reduce lost work from crashes by normalizing short-loop checkpointing
 - make Claude directly correct structural drift instead of only describing it
 - give owner and implementers a stable taskforce pattern for operations, roadmap, and architecture work
+
+## [2026-03-31] Pyrrhic Retrofit For v0.8.1 And Ops-Singularity Plans
+
+### Change
+
+Retrofitted the two newest roadmap-critical plan documents so they comply with the canonical Pyrrhic planning and process rules instead of only being high-quality strategy memos.
+
+**Updated plan files:**
+- `docs/plans/2026-03-31-v081-commander-maturity-plan.md`
+- `docs/plans/2026-03-31-v08x-operations-singularity-plan.md`
+
+**What was added to both plans:**
+- explicit overseer / architect / implementer / reviewer / sign-off ownership
+- relevant life-lesson scan for execution
+- phase-by-phase Pyrrhic task structure with concrete deliverables and done gates
+- mandatory `/simplify` + smoke-test + verification + pre-commit discipline at every phase boundary
+- protocol enforcement section
+- completion checklist including report, ledger, napkin, roadmap, version bump, and tag expectations
+
+### Why
+
+The repo's canonical Pyrrhic rules require plans to be self-contained enough for disciplined autonomous execution. The two new plans were strategically strong, but not yet process-complete. This retrofit turns them into execution-ready plans rather than advisory outlines.
+
+### Determinism
+
+Documentation only. No gameplay or runtime behavior changed.
+
+### Files
+- `docs/plans/2026-03-31-v081-commander-maturity-plan.md`
+- `docs/plans/2026-03-31-v08x-operations-singularity-plan.md`
+
+## [2026-03-31] Filled Remaining v0.8 Plan Gaps
+
+### Change
+
+Audited the `v0.8.*` roadmap band for actual execution-plan coverage rather than just whether a related design doc existed.
+
+Created the two missing execution-grade plan files:
+- `docs/plans/2026-03-31-v080x-1992-foundation-essays-plan.md`
+- `docs/plans/2026-03-31-v08x-command-authority-cleanup-plan.md`
+
+Updated `MASTER_ROADMAP.md` so both are linked from the relevant milestone sections and from the Key Plan Documents table.
+
+### Why
+
+The `v0.8` roadmap had two real coverage holes:
+- the `v0.8.0.x` parallel missing-essays lane had specs and references, but no dedicated execution plan
+- `v0.8.x-final` had the operations-singularity subplan, but no overarching command-authority cleanup plan covering movement ownership, legacy path removal, hotspot annotation, and UI truth cleanup
+
+This closes those documentation gaps so the entire active `v0.8` band now has milestone-level planning coverage.
+
+### Determinism
+
+Documentation only. No runtime or simulation behavior changed.
+
+### Files
+- `docs/plans/2026-03-31-v080x-1992-foundation-essays-plan.md`
+- `docs/plans/2026-03-31-v08x-command-authority-cleanup-plan.md`
+- `docs/plans/MASTER_ROADMAP.md`
+
+## [2026-03-31] Retrofitted Remaining v0.8 Plans To Pyrrhic Standard
+
+### Change
+
+Retrofitted the remaining active `v0.8` roadmap-facing plans so they follow the project’s Pyrrhic planning/process rules instead of relying on older pre-Pyrrhic structure.
+
+Updated:
+- `docs/plans/2026-03-24-v080-political-leader-bot-plan.md`
+- `docs/plans/2026-03-24-v081-order-interpretation-plan.md`
+- `docs/plans/2026-03-24-v082-autonomy-api-plan.md`
+- `docs/plans/2026-03-30-p0-combat-drought-fix.md`
+- `docs/plans/2026-03-30-v080-corps-commander-intelligence-architecture.md` (clarified as architecture/design reference, not the live execution plan)
+
+### Why
+
+After the earlier roadmap cleanup, the remaining weak point was that several `v0.8` plans still existed in an older planning style. They were strategically useful, but not yet disciplined enough for Pyrrhic execution or autonomous handoff.
+
+### Determinism
+
+Documentation only. No runtime behavior changed.
+
+### Files
+- `docs/plans/2026-03-24-v080-political-leader-bot-plan.md`
+- `docs/plans/2026-03-24-v081-order-interpretation-plan.md`
+- `docs/plans/2026-03-24-v082-autonomy-api-plan.md`
+- `docs/plans/2026-03-30-p0-combat-drought-fix.md`
+- `docs/plans/2026-03-30-v080-corps-commander-intelligence-architecture.md`
 
 ## [2026-03-30] Commander Fixes 1+2+4+5 — n1217 P0 Regression Found
 
@@ -17027,3 +17236,98 @@ No sim code touched. Documentation only.
 - `docs/plans/2026-03-24-v081-order-interpretation-plan.md`
 - `docs/plans/2026-03-24-v082-autonomy-api-plan.md`
 - `docs/plans/2026-03-25-command-chain-architecture.md`
+
+## [2026-03-31] Renamed v0.8 Corps Commander Architecture + Clarified Army-Commander Slot
+
+### Change
+
+Renamed the old commander architecture doc from `docs/plans/2026-03-30-corps-commander-intelligence.md` to:
+- `docs/plans/2026-03-30-v080-corps-commander-intelligence-architecture.md`
+
+Updated roadmap, ledger references, and `nightshift-handoff.md` to point at the new filename. Also added an explicit army-command note to `MASTER_ROADMAP.md`:
+- early `v0.8.x` focuses on making corps command real first
+- a dedicated army-commander maturity pass, if needed, belongs in `v0.8-to-v0.9` after corps maturity and command-authority cleanup
+
+Added an `Intelligence Assurance` section to the renamed architecture doc so the project has explicit anti-theater criteria for deciding whether corps commanders are genuinely intelligent.
+
+### Why
+
+The old filename was inconsistent with the rest of the versioned roadmap plans, and the roadmap was still too implicit about where army-command work belongs.
+
+### Determinism
+Documentation only. No runtime behavior changed.
+
+### Files
+- `docs/plans/2026-03-30-v080-corps-commander-intelligence-architecture.md`
+- `docs/plans/MASTER_ROADMAP.md`
+- `docs/PROJECT_LEDGER.md`
+- `nightshift-handoff.md`
+
+## [2026-03-31] Named Silent Roadmap Assumptions As Explicit Work
+
+### Change
+
+Tightened `MASTER_ROADMAP.md` so several previously implied command-chain assumptions are now named as explicit roadmap work:
+
+- `v0.8.1` now requires an **intelligence assurance harness** so “commander maturity” has an anti-theater proof standard
+- `v0.8.3` now explicitly requires a minimum viable **command review surface** instead of assuming command coherence exists
+- `v0.8.4` now explicitly requires **replay/log determinism, fallback behavior, and player review surfaces** before API-assisted autonomy counts as roadmap-ready
+- `v0.8-to-v0.9` now explicitly names:
+  - army ↔ corps command coherence
+  - commander explanation surfaces
+  - player command review UX
+
+Added two new Pyrrhic-compliant plan files:
+- `docs/plans/2026-03-31-v081-intelligence-assurance-harness-plan.md`
+- `docs/plans/2026-03-31-v08to09-army-command-coherence-and-explanation-plan.md`
+
+### Why
+
+The roadmap was still quietly assuming several important implementation lanes instead of naming them. That leaves too much room for implementers to “know what we mean” and build on hidden ambiguity.
+
+### Determinism
+Documentation only. No runtime behavior changed.
+
+### Files
+- `docs/plans/MASTER_ROADMAP.md`
+- `docs/plans/2026-03-31-v081-intelligence-assurance-harness-plan.md`
+- `docs/plans/2026-03-31-v08to09-army-command-coherence-and-explanation-plan.md`
+- `docs/PROJECT_LEDGER.md`
+
+## [2026-03-31] Replaced Umbrella Hidden-Prerequisite Plan With Full-Fledged Per-Lane Plans
+
+### Change
+
+Reworked the newly named roadmap assumptions so they no longer depend on one umbrella “army / coherence / explanation” plan.
+
+Created separate full-fledged Pyrrhic plans for:
+- `docs/plans/2026-03-31-v08to09-army-command-maturity-plan.md`
+- `docs/plans/2026-03-31-v08to09-army-corps-authority-coherence-plan.md`
+- `docs/plans/2026-03-31-v08to09-commander-explanation-surfaces-plan.md`
+- `docs/plans/2026-03-31-v083-player-command-review-ux-plan.md`
+- `docs/plans/2026-03-31-v084-autonomy-determinism-and-review-plan.md`
+
+Updated `MASTER_ROADMAP.md` so:
+- `v0.8.3` points to command review UX + coherence + explanation plans
+- `v0.8.4` points to autonomy determinism/review + explanation surfaces
+- `v0.8-to-v0.9` explicitly names army-command maturity as its own lane
+- key plan documents now reference the split plan set instead of the deleted umbrella plan
+
+Deleted:
+- `docs/plans/2026-03-31-v08to09-army-command-coherence-and-explanation-plan.md`
+
+### Why
+
+The umbrella plan was still too vague for execution. It mixed several different owners and scopes into one doc, which is exactly the kind of ambiguity that lets implementers “fill in the blanks” inconsistently.
+
+### Determinism
+Documentation only. No runtime behavior changed.
+
+### Files
+- `docs/plans/MASTER_ROADMAP.md`
+- `docs/plans/2026-03-31-v08to09-army-command-maturity-plan.md`
+- `docs/plans/2026-03-31-v08to09-army-corps-authority-coherence-plan.md`
+- `docs/plans/2026-03-31-v08to09-commander-explanation-surfaces-plan.md`
+- `docs/plans/2026-03-31-v083-player-command-review-ux-plan.md`
+- `docs/plans/2026-03-31-v084-autonomy-determinism-and-review-plan.md`
+- `docs/PROJECT_LEDGER.md`
