@@ -270,7 +270,9 @@ describe('mobilization bot stance — RS unaffected', () => {
 
 describe('mobilization bot stance — reversion after mobilization expires', () => {
     it('after mobilization expires, HRHB corps reverts to normal doctrine', () => {
-        const corpsId = 'hvo_central_bosnia';
+        // Use hvo_southeast_herzegovina — hvo_central_bosnia has an E3 gate that forces
+        // defensive until the RBiH-HRHB war starts, independent of mobilization state.
+        const corpsId = 'hvo_southeast_herzegovina';
         const state = makeState({
             // 4 turns after mobilization started = expired
             turn: 32,
