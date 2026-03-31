@@ -39,6 +39,13 @@ import { CRITICAL_MORALE_THRESHOLD } from '../combat_math.js';
 /** Minimum surplus brigades required to create a plan. */
 export const MIN_BRIGADES_FOR_PLAN = 3;
 
+/**
+ * Number of turns an OSID from a failed operation stays on cooldown.
+ * Prevents re-attacking the same OSID immediately after a catastrophic outcome.
+ * Transient and op-scoped — computed in-memory at plan creation, never stored in GameState.
+ */
+const CATASTROPHIC_OSID_COOLDOWN_TURNS = 4;
+
 /** Fraction of required brigades at staging before plan is 'ready'. */
 export const CONCENTRATION_READY_THRESHOLD = 0.8;
 
@@ -53,6 +60,38 @@ const VIABILITY_ABANDON_THRESHOLD = 0.2;
 
 /** Max BFS hops from brigade location to objective approach OSID (matches emit.ts). */
 const MAX_REACHABILITY_HOPS = 8;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// buildCatastrophicOsidCooldownSet — transient cooldown for failed objectives
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Builds an in-memory set of OSIDs that are on cooldown due to recent operation
+ * failures. Only considers entries from the current operation window
+ * (within CATASTROPHIC_OSID_COOLDOWN_TURNS turns).
+ *
+ * Canon constraint: this is transient and op-scoped — computed fresh each time
+ * plan creation runs. It does NOT persist in GameState and does NOT function as
+ * a faction-level or cross-operation exclusion list. This is categorically
+ * different from the banned `avoided_osids_by_faction`.
+ */
+function buildCatastrophicOsidCooldownSet(
+    briefing: CommanderBriefing,
+    currentTurn: number,
+): Set<string> {
+    const cooldown = new Set<string>();
+    const history = briefing.previous_state?.operation_history;
+    if (!history) return cooldown;
+    for (const entry of history) {
+        if (entry.osids_lost.length === 0) continue;
+        if ((currentTurn - entry.ended_turn) < CATASTROPHIC_OSID_COOLDOWN_TURNS) {
+            for (const osid of entry.osids_lost) {
+                cooldown.add(osid);
+            }
+        }
+    }
+    return cooldown;
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // PlanDecision — output of managePlan
@@ -386,8 +425,15 @@ function createOpportunityPlan(
         return null;
     }
 
+    // Apply catastrophic-outcome cooldown: suppress OSIDs where recent ops failed.
+    // Fall back to the full reachable set if every candidate is on cooldown (avoids
+    // indefinite planning freeze when the corps has only one axis of advance).
+    const cooldownSet = buildCatastrophicOsidCooldownSet(briefing, briefing.turn);
+    const cooledCandidates = reachableEnemyOsids.filter(osid => !cooldownSet.has(osid));
+    const effectiveOsids = cooledCandidates.length > 0 ? cooledCandidates : reachableEnemyOsids;
+
     // Wrap as a ZoneAssessment-like object with filtered enemy OSIDs for selectOpportunityTargets.
-    const filteredZone: ZoneAssessment = { ...stagingZone, enemy_adjacent_osids: reachableEnemyOsids };
+    const filteredZone: ZoneAssessment = { ...stagingZone, enemy_adjacent_osids: effectiveOsids };
 
     const brigadesAlreadyAtStaging = countBrigadesInZone(assignedBrigades, surplusPool, stagingZone.zone_id);
     const brigadesToMove = Math.max(0, requiredBrigades - brigadesAlreadyAtStaging);
