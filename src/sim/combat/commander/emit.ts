@@ -609,9 +609,39 @@ function buildOperations(
         }
 
         const sectorId = findSectorWithMostTargetOverlap(planDecision, briefing);
-        const objectives = planDecision.plan.target_osids.length > 0
+
+        // Build the set of enemy OSIDs actually present in this corps's sector sub_segments.
+        // An objective that is no longer in any sub_segment.enemy_osids means the sector
+        // front has shifted and collectObjectiveApproachOsids will return an empty approach
+        // set — causing every brigade to have no valid attack position and the op to stall
+        // indefinitely (zero attacks per turn). Drop such stale objectives now.
+        const reachableEnemyOsids = new Set<string>();
+        for (const sector of briefing.sectors) {
+            if (sector.corps_id !== briefing.corps_id) continue;
+            for (const seg of sector.sub_segments ?? []) {
+                for (const osid of seg.enemy_osids ?? []) {
+                    reachableEnemyOsids.add(osid);
+                }
+            }
+        }
+
+        const rawObjectives = planDecision.plan.target_osids.length > 0
             ? [...planDecision.plan.target_osids].sort(strictCompare)
             : deriveTargetsFromSectors(briefing, Math.floor(participatingBrigades.length * 0.5));
+
+        // Filter: drop any objective OSID not reachable from this corps's front segments.
+        // Only apply when the corps has at least one reachable enemy OSID (i.e., the set
+        // is non-empty), to avoid incorrectly zeroing objectives for a corps with no sectors.
+        const objectives = reachableEnemyOsids.size > 0
+            ? rawObjectives.filter(osid => reachableEnemyOsids.has(osid))
+            : rawObjectives;
+
+        // Guard: if every plan objective was stale (none survived the filter), skip
+        // creating this operation rather than injecting an empty-objectives op that
+        // would immediately stall. The plan will be abandoned on the next assess cycle.
+        if (objectives.length === 0) {
+            return ops;
+        }
 
         // Build a personnel lookup for initial_strength calculation.
         const personnelById = new Map<string, number>();
