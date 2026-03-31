@@ -597,7 +597,9 @@ const HRHB_PRE_PLANNED: PrePlannedOp[] = [
             {
                 axis_id: 'stolac_sweep',
                 name: 'Stolac-Čapljina Sweep',
-                // Main effort: Tasovčići → Rotimlja → Stolac
+                // Main effort: Čapljina → Tasovčići → Hodbina → Rotimlja → Stolac
+                // HVO sweeps VRS from east Neretva bank, then takes Stolac town.
+                // Pješivac Kula and Hatelji excluded — VRS retains inland positions.
                 // Mostar Hills axis REMOVED: vranjevići/kružanj painted RS in Jan 1993
                 // (VRS held those positions; HVO did not take them in Op Jackal)
                 brigades: [
@@ -614,8 +616,8 @@ const HRHB_PRE_PLANNED: PrePlannedOp[] = [
                 ],
                 objectives: [
                     'op:capljina:tasovcici_2',
+                    'op:mostar:hodbina_2',
                     'op:stolac:rotimlja_2',
-                    'op:stolac:pjesivac_kula_2',
                     'op:stolac:stolac_2',
                 ],
                 staging_osid: 'op:capljina:tasovcici_2',

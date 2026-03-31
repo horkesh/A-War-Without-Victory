@@ -97,6 +97,7 @@ const JNA_PHANTOM_DEFS: PhantomDef[] = [
             'op:stolac:rotimlja_2',
             'op:stolac:pjesivac_kula_2',
             'op:capljina:tasovcici_2',
+            'op:mostar:hodbina_2',
         ],
     },
     {
