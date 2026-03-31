@@ -1546,18 +1546,14 @@ export function resolveAttackOrdersOsid(
             // except decisive_victory. BB2 p.479: "hung on at Gradina — the key to ARBiH defenses."
             const capitalLastStand = isEnclaveCapital(targetOsid);
             // ARBiH homeland defense: fighters refuse to retreat even under heavy losses.
-            // n536: In co-ethnic homeland (≥50%), absorb ALL outcomes including decisive_victory
-            // when morale ≥ 40. ARBiH didn't retreat from their villages — they stood and died,
-            // and the VRS paid in blood for every meter. This is the Bosnian War's defining
-            // characteristic. Both sides bleed (MORALE_ABSORPTION_CAS_MULT applies).
-            // At morale < 40, absorb costly_victory + victory only (exhaustion sets in).
+            // n536: In co-ethnic homeland (≥50%), absorb victory + costly_victory at any morale.
+            // ARBiH didn't retreat from their villages — they stood and died, and VRS paid in
+            // blood for every meter. Both sides bleed (MORALE_ABSORPTION_CAS_MULT applies).
+            // n1240 (EI §9.6 + SM §7.4): decisive_victory ALWAYS flips — no exception.
+            // homelandAbsorbDecisive (n536–n539) removed: absorbing decisive_victory at any
+            // power ratio violates Engine Invariants §9.6. A 23× ratio attack on a displaced
+            // Brčko brigade defending Ilijas was being absorbed, preventing OSID transfer.
             const homelandLastStand = defenderFaction === 'RBiH' && coEthnicShare >= 0.50;
-            // n537: morale 40 too aggressive (4/6 fail). n538: morale 55 still too aggressive (3/6 fail).
-            // n539: morale 65 — only fresh, high-morale defenders absorb decisive_victory.
-            // As morale degrades from repeated attacks, defenders eventually break.
-            // This models the historical pattern: initial resistance is fierce, but sustained
-            // VRS pressure eventually overruns positions through attrition.
-            const homelandAbsorbDecisive = homelandLastStand && defMorale >= 65;
             // All factions: any defender absorbs costly_victory at morale ≥ floor.
             // n536: RS/HRHB also absorb 'victory' at high morale — professional forces
             // don't retreat from a single costly engagement.
@@ -1565,11 +1561,9 @@ export function resolveAttackOrdersOsid(
                 && (outcome === 'costly_victory' || outcome === 'victory');
             const absorb = capitalLastStand
                 ? (outcome !== 'decisive_victory')
-                : homelandAbsorbDecisive
-                    ? (outcome === 'decisive_victory' || outcome === 'victory' || outcome === 'costly_victory')
-                    : homelandLastStand
-                        ? (outcome === 'costly_victory' || outcome === 'victory')
-                        : professionalResilience;
+                : homelandLastStand
+                    ? (outcome === 'costly_victory' || outcome === 'victory')
+                    : professionalResilience;
             if (absorb && flip) {
                 flip = false;
                 moraleAbsorbed = true;
@@ -1582,11 +1576,9 @@ export function resolveAttackOrdersOsid(
                     affected_formation: defenderFormation.id,
                     description: capitalLastStand
                         ? 'Enclave capital last stand — defenders fight to the last.'
-                        : homelandAbsorbDecisive
-                            ? 'ARBiH homeland determination — refused to abandon homes, both sides bled.'
-                            : homelandLastStand
-                                ? 'ARBiH homeland last stand — absorbed defeat without retreating.'
-                                : 'Defender morale held — absorbed attack without retreating.',
+                        : homelandLastStand
+                            ? 'ARBiH homeland last stand — absorbed defeat without retreating.'
+                            : 'Defender morale held — absorbed attack without retreating.',
                     effects: { flip_prevented: true, morale_drain: -5 },
                 };
                 battleSnapEvents.push(ev);
