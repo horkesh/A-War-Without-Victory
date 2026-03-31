@@ -17,7 +17,7 @@
 
 import type { FormationId } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
-import { spatialFriendlyDistance } from '../../spatial_context.js';
+import { spatialFriendlyDistance, spatialSameComponent } from '../../spatial_context.js';
 
 import type {
     CommanderBriefing,
@@ -406,11 +406,11 @@ function tryCreateFromOpportunity(
         // Besieged corps can only do local ops
         // Still allow opportunity within hop limit
         const bestZone = eligibleZones[0]!;
-        return createOpportunityPlan(briefing, bestZone, surplusPool, turn, true, zones);
+        return createOpportunityPlan(briefing, bestZone, surplusPool, turn, true);
     }
 
     const bestZone = eligibleZones[0]!;
-    return createOpportunityPlan(briefing, bestZone, surplusPool, turn, false, zones);
+    return createOpportunityPlan(briefing, bestZone, surplusPool, turn, false);
 }
 
 function createOpportunityPlan(
@@ -419,7 +419,6 @@ function createOpportunityPlan(
     surplusPool: BrigadeEvaluation[],
     turn: number,
     isLocal: boolean,
-    allZones: ZoneAssessment[],
 ): PlanDecision | null {
     const requiredBrigades = Math.max(
         MIN_BRIGADES_FOR_PLAN,
@@ -436,7 +435,6 @@ function createOpportunityPlan(
         briefing,
         assignedBrigades,
         stagingZone.enemy_adjacent_osids,
-        allZones,
     );
 
     // If no enemy objectives survive the reachability filter, this plan cannot be created.
@@ -520,7 +518,6 @@ function filterReachableObjectives(
     briefing: CommanderBriefing,
     assignedBrigades: readonly FormationId[],
     candidateOsids: readonly string[],
-    zones: readonly ZoneAssessment[],
 ): string[] {
     if (candidateOsids.length === 0) return [];
 
@@ -530,17 +527,6 @@ function filterReachableObjectives(
     if (!adjacency || !fofMap) return [...candidateOsids];
     const factionFriendlyOsids = fofMap.get(briefing.faction);
     if (!factionFriendlyOsids) return [...candidateOsids];
-
-    // Restrict BFS to OSIDs within this corps's zones to avoid ghost paths through
-    // disconnected friendly enclaves (e.g. Sarajevo reaching Foča via RBiH faction set).
-    // Fall back to faction-wide set if no zones provided or zones have no OSIDs.
-    const corpsOsids = new Set<string>();
-    for (const zone of zones) {
-        for (const osid of zone.osids) {
-            corpsOsids.add(osid);
-        }
-    }
-    const friendlyOsids: ReadonlySet<string> = corpsOsids.size > 0 ? corpsOsids : factionFriendlyOsids;
 
     // Build location map from briefing brigades (FormationState has location_osid).
     const brigadeLocationMap = new Map<string, string>();
@@ -561,12 +547,26 @@ function filterReachableObjectives(
         // Objectives are enemy-held; BFS through friendly territory to an approach
         // OSID (a friendly OSID neighboring the objective) instead of the objective itself.
         const neighbors = adjacency.get(candidateOsid as any) ?? [];
-        const approachOsids = (neighbors as readonly string[]).filter(n => friendlyOsids.has(n));
+        const approachOsids = (neighbors as readonly string[]).filter(n => factionFriendlyOsids.has(n));
         if (approachOsids.length === 0) continue; // objective has no friendly approach
 
-        // Check if any assigned brigade can reach any approach OSID within hop limit.
+        // Component-sameness gate: reject objectives whose approach OSIDs are in a different
+        // connected component from ALL assigned brigades. This prevents enclave corps
+        // (e.g. arbih_1st_corps in Sarajevo) from planning objectives reachable only via
+        // disconnected RBiH territory (Foča/Kalinovik), without restricting which approach
+        // OSIDs are visible. spatialFriendlyDistance alone does not enforce this — it does
+        // plain BFS through the faction-wide friendly set and would find a "path" through
+        // Tuzla/Goražde that doesn't exist on the ground.
+        const approachesInSameComponent = approachOsids.filter(approachOsid =>
+            assignedLocations.some(loc =>
+                spatialSameComponent(briefing.spatial, briefing.faction, loc, approachOsid)
+            )
+        );
+        if (approachesInSameComponent.length === 0) continue; // objective unreachable from this enclave
+
+        // Check if any assigned brigade can reach any same-component approach OSID within hop limit.
         let objectiveReachable = false;
-        outer: for (const approachOsid of approachOsids.slice().sort(strictCompare)) {
+        outer: for (const approachOsid of approachesInSameComponent.slice().sort(strictCompare)) {
             for (const locationOsid of assignedLocations) {
                 const dist = spatialFriendlyDistance(
                     briefing.spatial,
