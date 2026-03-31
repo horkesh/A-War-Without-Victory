@@ -1152,12 +1152,14 @@ export function advanceSectorOffensives(
                 }
                 releaseOperationCommander(state, op);
 
-                // Activate east Herzegovina truce after Op Jackal (HRHB east-pair op) ends.
+                // Activate east Herzegovina truce only when Op Jackal (pre-planned HRHB op) completes.
                 // Historical: VRS-HRHB ceasefire in east Herzegovina held after June 1992 HVO offensive.
-                // Only triggered by HRHB side — VRS Herzegovina ops completing should NOT freeze the truce.
+                // Op Jackal is an exception from Graz accords — it proceeds regardless of Graz status.
+                // Probes and bot-generated ops must NOT trigger the truce prematurely.
                 if (isGrazAccordsActive(state)
                     && isEastHerzegovinaPair(corpsId)
                     && faction === 'HRHB'
+                    && op.is_pre_planned === true
                     && state.political.graz_east_herzegovina_active_turn == null) {
                     state.political.graz_east_herzegovina_active_turn = turn;
                 }

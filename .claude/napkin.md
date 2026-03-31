@@ -11,12 +11,12 @@
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
 ## Current State (2026-03-31, v0.8.0 Commander System on main)
-**n1238: 92.5% ATH (+0.2pp), 22/22 anchors, 6/6 benchmarks. 81 battles, 33/40 combat weeks. hash: eb2031726bfcc542.**
-**P0-A (allocate.ts home_defense surplus filter) VALIDATED. P0-B (morale gate) VALIDATED. Casualty ratio: 0.545 (was 0.37).**
-**Op Prsten Ilijas: 3/4 captured (medojevici ✓, dragoradi ✓, krivajevici ✓, sirovine ✗). Invalid ops: 247 (was 319, -22%).**
-**valid_for_combat_calibration: still false (247 invalid ops). vrs_herzegovina targeting fix (P1) pending.**
-**War-or-Game: PENDING RE-REVIEW (panel design decisions: SRK containment confirmed, ARBiH suppression Option A, HRHB painted reference = historical).**
-**Remaining P1s: vrs_herzegovina geographic targeting, SRK post-Prsten inertia (by design), Jajce timing w40 vs w26, vrs_1st_krajina idle brigades, 4 UI prerequisites for v0.8.1.**
+**n1256: 94.2% ATH area-weighted (+1.7pp), 22/22 anchors (+brcko RS added), 6/6 benchmarks. 73 battles, 36/40 combat weeks. hash: 5fa01bbdecc43f5f.**
+**Op Jackal: WORKING — Solid Victory (4 stars, t15), hodbina_2+rotimlja_2 captured. Graz fix ✓ (fires t15). Staging fix ✓ (capljina_2).**
+**valid_for_combat_calibration: false (73 battles, target 150-250). War-or-Game: NOT APPROVED.**
+**[RESOLVED] Slot cap recovery filter — already committed in fix(commander): Fix 1+4. Napkin entry was stale.**
+**[P0] Brigade drift: rs_1st_posavina_infantry at banja_luka_2 (home: brcko) — left Brčko undefended, ARBiH captured it. Investigation dispatched.**
+**Remaining P1s (priority order): brigade drift (P0→P1), HRHB patron directive faction-wide overcap (blocks Tomislavgrad/NW Bosnia), hatelji_2/pjesivac_kula_2 VRS sector gap, tasovcici_2 premature capture before Jackal, 73 battles tempo, vrs_herzegovina targeting.**
 **1 pre-existing test failure: integration_formation_integrity — rs_1st_drvar morale=6 dissolution gap (P1).**
 
 **[MERGED] Concurrent corps operations.** `active_operations[]` replaces `active_operation`. Slot cap floor(brigades/12). 7 helpers. Emergency defense overflow. Bot secondary op guard. Save migration v1→v2. 84 files, +1459/-525.
@@ -241,6 +241,7 @@ After EVERY scenario run, the orchestrator:
 **All P3 items RESOLVED (2026-03-25).** Gorazde: Operation Circle event flips 3 OSIDs. Hrasnica: 102nd relocated to Hadzici (refugee brigade). Remaining: `op:gorazde:kolovarice` mismatch (needs /historian research).
 
 **Ops engine backlog (2026-03-28):**
+- **[P1] Bake initial OSID control into scenario JSON (2026-03-31)** — initial `political_controllers` currently derived at runtime from municipality-level data → wrong per-OSID assignments (e.g. all Stolac/Capljina OSIDs init as RS, blocking Op Jackal staging). Fix: write explicit `initial_osid_controllers` map into scenario JSON (one-time curation per scenario); read it at init instead of deriving. Discovered during Op Jackal root-cause investigation. Historian must determine correct April 1992 per-OSID controllers for Stolac/Capljina before Op Jackal can be fixed.
 - **[P1] `validateOpAtInjection()`** — engine-level validation firing at op injection. Five failure modes to catch: (1) non-existent OSID objectives, (2) staging not adjacent to first-objective path, (3) brigade doesn't exist at injection turn, (4) all objectives already friendly-controlled, (5) cross-corps axis assignment. Stop patching individual ops; fix the engine.
 - **[P2] Check #12 false positive** — `operation_zero_eligible_execution` flags Op Drina + Op Visegrad (consolidation sweeps). Fix: one-line exclusion `if (op.success && op.captures > 0 && op.attacks === 0) skip`. Files: `anomaly_detector.ts`.
 - **[P2] Ghost sector investigation** — 5 empty sectors with front edges. `phantom_sector_advantage` check #11 may be reading the wrong fields to detect these. Verify which field represents "sector has no brigades" in the anomaly detector vs the sector data structure.

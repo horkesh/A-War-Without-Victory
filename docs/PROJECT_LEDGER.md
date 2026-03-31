@@ -1,3 +1,96 @@
+## [2026-03-31] n1255–n1256 — Op Jackal fixed, initial_osid_controllers baked, 94.2% ATH
+
+### Summary
+Four fixes across Op Jackal mechanics and scenario infrastructure. n1256: **94.2% area-weighted (new ATH +1.7pp)**, 22/22 anchors, 6/6 benchmarks, 73 battles / 40 weeks. Op Jackal confirmed working: Solid Victory (4 stars, t15), hodbina_2 + rotimlja_2 captured. War-or-Game NOT APPROVED (73 battles, brigade drift P0, HRHB patron directive overcap, hatelji overcapture). Two-tier panel completed.
+
+### Changes
+
+**1. Bake initial_osid_controllers into scenario JSON (scenario_types.ts, scenario_loader.ts, scenario_runner.ts, apr1992_definitive_40w.json)**
+- New optional field `initial_osid_controllers?: Record<string, string>` on `Scenario` type. When present, replaces runtime derivation from `operational_political_control.json`, skipping `osid_control_overrides` application (already baked in).
+- Baked 712-entry map from union of runtime `by_settlement_id` + `osid_control_overrides` at moment of n1252 initial save. Sorted lexicographically.
+- 5 initial controllers corrected to RS: `tasovcici_2`, `hodbina_2`, `rotimlja_2`, `pjesivac_kula_2`, `stolac_2` — these are JNA phantom capture targets that should start RS.
+- `osid_control_overrides` retained in JSON as documentation (redundant but not harmful).
+
+**2. Op Jackal Graz exception (sector_offensive.ts)**
+- `graz_east_herzegovina_active_turn` now only fires when the completing op has `is_pre_planned === true`. Previously fired on ANY HRHB east-Herzegovina op completion — a probe completing at t5 was triggering Graz before Op Jackal injected at t8, withdrawing HV phantoms and forcing the corps defensive.
+- Confirmed: graz fires at t15 (Op Jackal completion turn) in n1255+.
+
+**3. Op Jackal staging OSID (pre_planned_operations.ts)**
+- Changed `staging_osid` from `op:capljina:tasovcici_2` to `op:capljina:capljina_2` at both op-level and axis-level. `tasovcici_2` starts RS-held (JNA phantom capture) and is the first objective — it cannot serve as staging. `capljina_2` is HRHB-held from t0 and adjacent to `tasovcici_2` (same municipality cluster).
+- Added `hodbina_2` to Op Jackal objectives (was `pjesivac_kula_2` which was removed — VRS retains inland positions by design).
+
+**4. Op Jackal JNA phantom capture (jna_phantom_brigades.ts)**
+- Added `'op:mostar:hodbina_2'` to `jna_mostar_east_garrison.capture_osids`. Ensures hodbina_2 starts RS at spawn for correct combat mechanics.
+
+**5. Mobilization stance test fix (tests/mobilization_bot_stance.test.ts)**
+- Reversion test changed from `hvo_central_bosnia` to `hvo_southeast_herzegovina`. CB has an E3 gate forcing defensive until RBiH-HRHB war starts — independent of mobilization state. SE Herzegovina corps is the correct corps to test general mobilization reversion.
+
+**6. Brčko anchor added (scenario_runner.ts)**
+- Added `{ osid: 'op:brcko:brcko', expected_controller: 'RS' }` to `HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992`. Brčko town was captured by VRS in May 1992 and held throughout the war. Was missing despite `osid_control_overrides` having it RS — anchor gap let ARBiH capture it undetected every run.
+
+### Results (n1256)
+- Area-weighted: **94.2%** (new ATH, +1.7pp from n1238 92.5%)
+- Count: 660/712 (92.7%) | Mismatches: 52
+- Anchors: 23/23 (brcko added) | Benchmarks: 6/6
+- Battles: 73 | Orders: 105 (HRHB=8, RBiH=38, RS=59) | Combat weeks: 36/40
+- Op Jackal: Solid Victory (4★, t15) — hodbina_2 + rotimlja_2 captured via combat
+- valid_for_combat_calibration: false (battle tempo P1)
+- hash: 5fa01bbdecc43f5f
+
+### Two-Tier Panel Findings
+
+**P0 (brigade drift):** `rs_1st_posavina_infantry` (home: brcko) drifted to `banja_luka_2` — left Brčko undefended. ARBiH 7+ brigades walked in uncontested. Root cause: column march or redistribution allows cross-component movement. Investigation dispatched.
+
+**P1 (HRHB patron directive overcap):** "Consolidate Herzegovina" directive applies faction-wide to all 4 HRHB corps through w0-40. Should scope to hvo_southeast_herzegovina only. Tomislavgrad and NW Bosnia should be able to reach balanced.
+
+**P1 (hatelji_2/pjesivac_kula_2):** HRHB bot captures these via `evaluateUncontestedOccupation` — VRS Herzegovina sectors cover only Bileca/Trebinje, leaving Stolac territory sectorless. Guard #9 finds no sector → treats as undefended.
+
+**P1 (73 battles):** Theater too quiet. HRHB all-defensive (E3 + patron directive). Recovery slot cap fix already committed (Fix 1+4 — stale napkin entry). Primary lever: scope patron directive.
+
+**War-or-Game: NOT APPROVED** pending brigade drift fix and battle tempo improvement.
+
+### Files
+- `src/scenario/scenario_types.ts`
+- `src/scenario/scenario_loader.ts`
+- `src/scenario/scenario_runner.ts`
+- `src/sim/combat/sector_offensive.ts`
+- `src/sim/combat/pre_planned_operations.ts`
+- `src/sim/combat/jna_phantom_brigades.ts`
+- `tests/mobilization_bot_stance.test.ts`
+- `data/scenarios/apr1992_definitive_40w.json`
+
+---
+
+## [2026-03-31] Investigation — Op Jackal root cause + initial control infrastructure gap
+
+### Summary
+No code changes. Investigative session into why Op Jackal (`hvo_southeast_herzegovina`) produces 0 attacks every run. Root cause found: municipality-level initial control initialization. Broader infrastructure gap identified.
+
+### Findings
+
+**Op Jackal root cause — initial control derivation**
+- All Stolac and Capljina OSIDs initialize as RS at runtime because municipality-level data assigns the whole municipality to RS, ignoring per-OSID ethnic composition (e.g. `hatelji_2` is 98% Croat but starts RS).
+- The staging OSID (`op:capljina:tasovcici_2`) is RS at scenario start. HVO brigades cannot stage there.
+- `rotimlja_2` IS directly adjacent to `tasovcici_2` in the contact graph — no geographic blockage. The problem is entirely in the initial controller assignment.
+- `op:stolac:prenj` (61.8% Serb) confirmed RS by user — not an Op Jackal objective. Not a blocker.
+- Scenario `apr1992_definitive_40w.json` has no Stolac/Capljina `osid_control_overrides` entries — the wrong RS assignment is coming from runtime derivation, not intentional override.
+
+**Stolac OSID ethnic composition (1991 census)**
+- `op:stolac:prenj` — 61.8% Serb, 32.6% Bosniak (RS correct)
+- `op:stolac:hatelji_2` — 98.1% Croat (should be HRHB, not RS)
+- `op:stolac:rotimlja_2`, `stolac_2`, `pjesivac_kula_2` — require Historian research for April 1992 control
+
+**Infrastructure gap — initial OSID control not curated**
+- `political_controllers` is derived at runtime from municipality-level data, not written in stone.
+- This produces per-OSID errors in mixed municipalities (wrong faction, wrong staging OSIDs).
+- Fix: write explicit `initial_osid_controllers` into scenario JSON at scenario curation time; never re-derive at runtime.
+- Added to backlog as P1.
+
+### No Code Changes
+ATH remains 93.6% (n1251).
+
+---
+
 ## [2026-03-31] n1250–n1251 — HVO CB defensive gate; 93.6% new ATH
 
 ### Summary

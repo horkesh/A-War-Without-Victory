@@ -587,10 +587,11 @@ const HRHB_PRE_PLANNED: PrePlannedOp[] = [
         corps: 'hvo_southeast_herzegovina',
         faction: 'HRHB',
         name: 'Operation Jackal',
-        // Staging at tasovcici_2 (HRHB-held, directly adjacent to rotimlja_2).
-        // capljina_2 was the original staging but is not adjacent to rotimlja_2 —
-        // brigades marched south to Čapljina and could never reach the Stolac targets.
-        staging_osid: 'op:capljina:tasovcici_2',
+        // Staging at capljina_2 (HRHB-held from t0, same municipality as tasovcici_2).
+        // tasovcici_2 starts RS-held (JNA phantom capture) and is the first objective —
+        // it cannot serve as staging. capljina_2 is adjacent to tasovcici_2 within
+        // the op:capljina: municipality cluster.
+        staging_osid: 'op:capljina:capljina_2',
         available_from: 8,
         min_attack_outcome: 'repulsed',
         axes: [
@@ -620,7 +621,7 @@ const HRHB_PRE_PLANNED: PrePlannedOp[] = [
                     'op:stolac:rotimlja_2',
                     'op:stolac:stolac_2',
                 ],
-                staging_osid: 'op:capljina:tasovcici_2',
+                staging_osid: 'op:capljina:capljina_2',
             },
         ],
     },
