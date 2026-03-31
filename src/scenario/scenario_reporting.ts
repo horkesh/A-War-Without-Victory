@@ -150,9 +150,12 @@ export function buildWeeklyReport(
     const week_index = state.meta.turn;
     const phase = state.meta.phase;
 
+    // war_exhaustion is the authoritative unbounded accumulator (Engine Invariants §8).
+    // profile.exhaustion is a legacy normalized field used by older mechanics; do not read it here.
+    const warExhaustion = state.political.war_exhaustion ?? {};
     const factions = (state.factions ?? []).map((f) => ({
         id: f.id,
-        exhaustion: f.profile?.exhaustion ?? 0,
+        exhaustion: warExhaustion[f.id] ?? 0,
         supply_pressure: state.political.war_supply_pressure?.[f.id]
     })).sort((a, b) => strictCompare(a.id, b.id));
 

@@ -153,16 +153,18 @@ const TRIGGERED_OPS: TriggeredOpDef[] = [
                 axis_id: 'mostar_heights',
                 name: 'Mostar Heights',
                 corps: 'vrs_herzegovina',
-                // nevesinje (home krekovi_2, 1 hop to sopilja staging) attacks vranjevici_2 then
-                // kruzanj_2. sopilja is directly adjacent to vranjevici_2 (confirmed in graph).
-                // Objectives start HRHB, painted RS — valid VRS targets.
-                // vranjevici_2 must be first (sopilja adjacent); kruzanj_2 follows in chain.
+                // sopilja is adjacent to vranjevici_2 (RS, march waypoint via osid_control_overrides).
+                // vranjevici_2 is adjacent to blagaj_2 (RBiH) and hodbina_2 follows.
+                // vranjevici_2 and kruzanj_2 are RS from turn 0 (painted overrides) so they are
+                // stripped by buildAxesFromDef; blagaj_2 is the actual first enemy objective.
+                // Historical: VRS pushed into the Neretva valley south of Mostar throughout 1992-93.
                 brigades: [
                     'rs_nevesinje_brigade' as FormationId,
                 ],
                 objectives: [
-                    'op:mostar:vranjevici_2',
-                    'op:mostar:kruzanj_2',
+                    'op:mostar:vranjevici_2',   // RS waypoint (sopilja-adjacent); stripped at execution
+                    'op:mostar:blagaj_2',        // RBiH — first real target, Neretva valley approach
+                    'op:mostar:hodbina_2',       // RBiH — follow-on objective south of Blagaj
                 ],
                 staging_osid: 'op:nevesinje:sopilja',
             },
@@ -170,12 +172,17 @@ const TRIGGERED_OPS: TriggeredOpDef[] = [
                 axis_id: 'konjic_south',
                 name: 'Konjic South',
                 corps: 'vrs_herzegovina',
+                // bijela_2 (RS, staging) is adjacent to glavaticevo_2 (RS, march waypoint).
+                // glavaticevo_2 is adjacent to dzepi_2 (RBiH); dzepi_2 is adjacent to konjic_2 (RBiH).
+                // glavaticevo_2 and ljuta are RS from turn 0 so stripped at execution.
+                // Historical: VRS Herzegovina maintained pressure on southern Konjic throughout 1992-93.
                 brigades: [
                     'rs_2nd_herzegovina_light_infantry' as FormationId,
                 ],
                 objectives: [
-                    'op:konjic:glavaticevo_2',
-                    'op:konjic:ljuta',
+                    'op:konjic:glavaticevo_2',  // RS waypoint (bijela_2-adjacent); stripped at execution
+                    'op:konjic:dzepi_2',         // RBiH — first real target, southern Konjic valley
+                    'op:konjic:konjic_2',        // RBiH — follow-on, Konjic town axis
                 ],
                 staging_osid: 'op:konjic:bijela_2',
             },

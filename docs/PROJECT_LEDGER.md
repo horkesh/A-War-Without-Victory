@@ -1,3 +1,54 @@
+## [2026-03-31] n1243–n1245 — Op Hz Consolidation + Op Foca objectives fixed; 93.3% ATH
+
+### Summary
+Three previously-dead named operations now execute. Orphan reports reduced 51→26. n1245: **93.3%**, 22/22 anchors, 6/6 benchmarks. ATH is 93.6% (n1240); current baseline holds at 93.3% pending P1 fixes.
+
+### Changes
+
+**1. Exhaustion reporter field fix (n1242, diagnostic only)**
+- `scenario_reporting.ts`: weekly report now reads `state.political.war_exhaustion` (authoritative accumulator) instead of `f.profile.exhaustion` (legacy normalized field, always 0). No sim behavior change — exhaustion was accumulating correctly in `war_exhaustion` all along. Confirmed: bot_corps_ai exhaustion gates read `profile.exhaustion` — they remain inactive (P1, deferred).
+
+**2. Op Herzegovina Consolidation objectives fix (n1243)**
+- `triggered_operations.ts`: both axes had all objectives RS-owned at w24 injection → `op_empty` every run.
+- `mostar_heights`: replaced with RS waypoint → `blagaj_2` (RBiH) → `hodbina_2` (RBiH).
+- `konjic_south`: replaced with RS waypoint → `dzepi_2` (RBiH) → `konjic_2` (RBiH).
+- Historical basis: VRS Herzegovina pressing into Neretva valley in late 1992.
+
+**3. Op Foca objectives fix (n1243–n1245)**
+- `pre_planned_operations.ts`: both axes had all objectives RS-owned at w7 injection → axes silently dropped every run.
+- `foca_valley`: RS waypoint (`prevrac`) + `op:gorazde:kolovarice` (RBiH-held, painted RS). VRS Goražde enclave approach (BB2 p.289). `ustipraca_2` excluded (painted RBiH).
+- `kalinovik`: RS waypoints (`vlaholje`, `varos_2`) + `golubici_2` + `sela_2` (both kalinovik municipality, painted RS, RBiH-held in sim).
+
+### Results (n1245)
+- Area-weighted: **93.3%** (ATH 93.6%)
+- Anchors: 22/22 | Benchmarks: 6/6
+- Orphan reports: 26 (was 51 in n1240)
+- Anomalies: 64 (was 86 in n1240)
+- DRINA: 88.9% | SARAJEVO: 87.0% (variance) | HERZEGOVINA: 94.8%
+
+### Open P1s
+- Issue #46: ARBiH catastrophe memory (no per-OSID cooldown in op loop)
+- Bot exhaustion gates: `bot_corps_ai` reads `profile.exhaustion` = 0, not `war_exhaustion`
+- Elite loan recall: `tickEliteLoans` needs `ELITE_LOAN_MAX_DURATION = 12`
+- Check #29 army_hq exemption: narrow to active-loan check only
+
+### Files
+- `src/scenario/scenario_reporting.ts`
+- `src/sim/combat/triggered_operations.ts`
+- `src/sim/combat/pre_planned_operations.ts`
+- `docs/40_reports/REAL_WAR_MASTER.md`
+- `.claude/napkin.md`
+
+---
+
+## [2026-03-31] P0 Fix — Orphan Operation Brigades (movement_only reset bug)
+
+`sector_offensive.ts`: `movement_only_execution_turns` was unconditionally reset to 0 on a failed objective attack (both flat-op and multi-axis paths). When brigades stranded far from objectives (`anyMoved=true`) co-existed with brigades attacking the objective, each attack turn masked the march signal — the counter never accumulated to `MAX_MOVEMENT_ONLY_EXECUTION_TURNS=4`. Ops cycled attack/march indefinitely (up to `MAX_TOTAL_FAILURES=8` turns) locking brigades as orphans.
+
+Fix: conditional reset — `if (!anyMoved) movement_only_execution_turns = 0` in both paths. When any op brigade is in transit while another attacks, the march counter persists and the movement-only stall fires normally. Only resets on capture (unchanged) or when no brigades are marching (clean attack turn). 1685 tests pass, typecheck clean.
+
+---
+
 ## [2026-03-31] n1238 — P0 Fixes + Op Prsten Validated
 
 n1238: 92.5% ATH, 22/22, 6/6. 81 battles, 33/40 weeks. hash: eb2031726bfcc542.

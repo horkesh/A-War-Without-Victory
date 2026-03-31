@@ -314,21 +314,26 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         ],
     },
     {
-        // Operation Foča — VRS Herzegovina Corps consolidates Foča municipality and
-        // the Kalinovik salient. Fires after Op Višegrad completes (~w12).
-        // Historically VRS seized all of Foča and the Kalinovik highlands (BB1 p.193, BB2 p.514).
+        // Operation Foča — VRS Herzegovina Corps pushes north from Foča into the Goražde
+        // enclave corridor and from Kalinovik into Trnovo. Fires after Op Višegrad completes (~w12).
+        // Historically VRS held the Foča-Kalinovik axis and pressed the Goražde pocket (BB1 p.193,
+        // BB2 p.514).
         //
-        // IMPORTANT: Foča-municipality OSIDs (foca_3, brusna_2, etc.) start RBiH but get
-        // captured organically by VRS sector AI before the queue fires. Those objectives
-        // are filtered out at injection time (controller !== RS check). Op still fires
-        // because the kalinovik axis objectives (varos_2, golubici_2, sela_2, konjic:ljuta,
-        // konjic:glavaticevo_2) are in SEPARATE municipalities — not captured by normal
-        // Herzegovina Corps sector offense which stays in Foča/Nevesinje area.
+        // IMPORTANT: All Foča-municipality OSIDs (foca_3, brusna_2, etc.) AND all Kalinovik
+        // OSIDs start RS (municipality-level initial control). The old objective lists were
+        // entirely RS from turn 0 — both axes produced op_empty on every run.
         //
-        // Foca Valley axis: staging foca_3 (RS by w12). foca_3 is adjacent to brusna_2,
-        // patkovina, prevrac, zavait_3 — all valid first objectives.
-        // Kalinovik axis: staging kalinovik_2 (initial RBiH). Chain:
-        //   varos_2 → golubici_2 → sela_2 → konjic:ljuta → konjic:glavaticevo_2
+        // foca_valley fix: foca_3 → prevrac (RS waypoint, foca_3-adjacent). The original
+        //   gorazde:kolovarice + gorazde:ustipraca_2 objectives are painted RBiH and caused RS
+        //   over-capture (DRINA regression -2.8pp in n1243). Objectives removed; op now secures
+        //   the Foča-Goražde approach line without penetrating the enclave. VRS historically pressed
+        //   the Goražde enclave from the west (BB2 p.289) but did not capture these OSIDs by Jan 1993.
+        //
+        // kalinovik fix: kalinovik_2 → vlaholje (RS waypoint) → varos_2 (RS waypoint) →
+        //   kalinovik:golubici_2 (painted RS, sim=RBiH) → kalinovik:sela_2 (painted RS, sim=RBiH).
+        //   Original trnovo:delijas + trnovo:kijevo_2 targets are painted RBiH and caused SARAJEVO
+        //   regression (-4.9pp in n1243). Replaced with RS-painted kalinovik OSIDs currently held
+        //   by RBiH — legitimate targets that fix the regression without over-capturing.
         corps: 'vrs_herzegovina',
         faction: 'RS',
         name: 'Operation Foca',
@@ -342,14 +347,12 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'rs_bilea_brigade',
                     'jna_mostar_garrison_tg',
                 ],
+                // foca_3 → prevrac (RS waypoint) → kolovarice (RBiH; painted RS — valid target).
+                // ustipraca_2 removed (painted RBiH, caused DRINA over-capture in n1243).
+                // VRS historically pressed the Goražde enclave from the west (BB2 p.289).
                 objectives: [
-                    'op:foca:brusna_2',
-                    'op:foca:kosman',
-                    'op:foca:tjentiste_2',
-                    'op:foca:miljevina_2',
-                    'op:foca:izbisno',
-                    'op:foca:patkovina',
-                    'op:foca:ustikolina',
+                    'op:foca:prevrac',              // RS waypoint (foca_3-adjacent); stripped at execution
+                    'op:gorazde:kolovarice',         // RBiH-held; painted RS — legitimate enclave approach target
                 ],
                 staging_osid: 'op:foca:foca_3',
             },
@@ -361,15 +364,16 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'rs_kalinovik_brigade',
                     'jna_kalinovik_to_tg',
                 ],
-                // Kalinovik → Konjic chain: after Kalinovik cleared, push into
-                // southern Konjic (ljuta, glavaticevo_2 — both adjacent to sela_2).
-                // Historically VRS 2nd Herzegovina held this salient throughout (BB2 p.514).
+                // kalinovik_2 → vlaholje (RS waypoint) → varos_2 (RS waypoint) →
+                // kalinovik:golubici_2 (painted RS, sim=RBiH — legitimate RS target) →
+                // kalinovik:sela_2 (painted RS, sim=RBiH — legitimate RS target).
+                // Original trnovo:delijas + trnovo:kijevo_2 removed — both painted RBiH and
+                // caused SARAJEVO regression when RS captured them (n1243).
                 objectives: [
-                    'op:kalinovik:varos_2',
-                    'op:kalinovik:golubici_2',
-                    'op:kalinovik:sela_2',
-                    'op:konjic:ljuta',
-                    'op:konjic:glavaticevo_2',
+                    'op:kalinovik:vlaholje',         // RS waypoint (kalinovik_2-adjacent); stripped
+                    'op:kalinovik:varos_2',          // RS waypoint (vlaholje-adjacent); stripped
+                    'op:kalinovik:golubici_2',       // painted RS, currently RBiH — correct target
+                    'op:kalinovik:sela_2',           // painted RS, currently RBiH — follow-on
                 ],
                 staging_osid: 'op:kalinovik:kalinovik_2',
             },

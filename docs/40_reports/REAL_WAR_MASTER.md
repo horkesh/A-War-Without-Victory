@@ -8,7 +8,113 @@ In the Bosnian War, every brigade mattered. Commanders fought with what they had
 
 ---
 
-## Latest Review: n1150 (2026-03-28) — Ops Validation Engine Gate + Ghost Sector Sanitizer
+## Latest Review: n1240 (2026-03-31) — homelandAbsorbDecisive Removed; decisive always flips
+
+**Run:** `runs/apr1992_definitive_40w__77cac5e01d3c929e__w40_n1240` | 93.6% area-weighted | 22/22 anchors | 6/6 benchmarks
+
+### Checklist
+
+| # | Check | Verdict |
+|---|-------|---------|
+| 1 | Outcome distribution | CONDITIONAL PASS — 41% decisive, 22% catastrophic, 13% costly, 9% stalemate, 9% repulsed, 6% victory. Decisive rate down from n1150 (56%), more spread into costly/stalemate/repulsed — healthier mid-range. Catastrophic 22% = correct punishment for under-strength attacks. |
+| 2 | Casualty volume | PASS — 18.8k attacker + 25.6k defender = ~44k battle casualties. Plus civilian/displacement. Within historical range. |
+| 3 | Casualty ratios | CONDITIONAL PASS WITH CONCERNS — Overall att:def 0.731. By phase: blitz 0.232 (correct — VRS steamrolling), sustained 0.956 (reasonable parity), consolidation 1.664 (INVERTED — RBiH attackers taking 67% more casualties than RS defenders in late war). The consolidation inversion is driven by RBiH catastrophic attacks at sub-0.35 power ratios. See Issue #46. |
+| 4 | Territory | PASS — RS 52.9% (benchmark 55.3%, deviation -2.4pp, within 5pp tolerance). RBiH 34.8% (above 32.9% benchmark — slight overhold). HRHB 12.2% (above 11.8% benchmark). 22/22 anchors clean. |
+| 5 | Force strength | CONDITIONAL — RS 97k (PASS, range 80-100k). RBiH 158k (MARGINAL — still above historical 100-130k but improved from n1150's 161k). HRHB 49k (MARGINAL — above 25-40k historical range). All exhaustion values read 0 across all factions/all weeks — P1 concern, see Issue #47. |
+| 6 | Operational tempo | PASS — 87 battles, 38/40 weeks with combat (only w0 and w14 zero-battle). 2.17 battles/wk overall. Blitz 28 battles w0-12 (correct intensity), sustained 25 w12-26, consolidation 34 w26-40 (elevated by RBiH suicide attacks). |
+| 7 | Smell test | CONDITIONAL PASS — Blitz battles plausible. Late-war RBiH behavior has serious realism problems. See below. |
+
+### Smell Test — Key Battles
+
+**W2, VRS 1st Bratunac → Bratunac (PR 2.82, decisive, att 264, def 811)** — Bratunac fell April 1992 to VRS/paramilitaries. Ratio and outcome match. PASS.
+
+**W2, JNA 4th Corps TG → Ilidža (PR 10.82, decisive, att 218, def 2880)** — JNA rolling ARBiH defenders in the Sarajevo suburbs week 2. Overwhelmingly plausible for April 1992. Defender 2,880 casualties at 10.82:1 is extreme but correct for a unit caught without cover by armor+artillery. PASS.
+
+**W4, INA Ilijas Garrison → Krivajevići (PR 175.50, decisive, att 110, def 57)** — PR of 175 is the highest in the run. A near-empty hamlet falling to JNA garrison in week 4. Defender takes fewer casualties than attacker despite the extreme ratio (57 vs 110). With homelandAbsorbDecisive removed, this decisive still flips — attacker wins decisively at 175:1 despite taking almost 2× the casualties. Mechanically the ratio is correct (tiny isolated ARBiH position), but att > def casualties at 175:1 is a model quirk. Not flagged as a blocking issue but noted. WATCH.
+
+**W12, VRS 1st Trebava → Garjevac (RS attacks HRHB, PR 2.80, decisive, def brigade = null)** — RS brigade attacks an HRHB-controlled OSID, defender listed as `null`. Defender is absent (uncontested occupation). 12 such battles recorded this run. PASS — uncontested occupation behavior is correct.
+
+**W26-W40, RBiH vs Doboj — 7 battles, 5 catastrophic** — ARBiH brigades repeatedly slam into Doboj at PR 0.24-0.40, taking 450-800 casualties against 47-123 defenders. Five DIFFERENT brigades (330th, 327th, 110th HVO, 17th, 314th, 373rd, 372nd) are fed into the same meat-grinder over 19 weeks. Each takes catastrophic casualties. **This is the most glaring realism problem in the run.** No real corps commander sends a fresh brigade against a known impenetrable position week after week. See Issue #46.
+
+**W35-W38, arbih_503rd → Bihać (3 catastrophic in 4 weeks, PR 0.12-0.29)** — The 503rd attacks the same Bihać OSID three times in four weeks at sub-0.30 power ratios, losing 546-649 men each time (total ~1,774 casualties) against 43-75 defenders. The brigade is visibly dying. No intervention from corps AI. See Issue #46.
+
+**W36, RBiH 120th → Skakava Donja (PR 2.31, decisive, att 95, def 26)** — First n1240-specific decisive flip test: RBiH attacker takes 95 casualties, RS defender takes only 26, but RBiH wins decisively (PR ≥ 2.0 threshold) and captures the OSID. Mechanically correct post-homelandAbsorbDecisive removal. Realism verdict: with a 2.31:1 power advantage, the attacker flipping regardless of absolute casualty numbers is defensible — this is an assault that succeeded at moderate cost. PASS.
+
+**W27-W29, arbih_442nd → Bijela/Konjic (victory/costly, PR 1.57-1.61)** — ARBiH 442nd mountain brigade pushing VRS out of Konjic municipality. Historically plausible — ARBiH did conduct local counteroffensives in the Neretva valley. Costs are proportionate. PASS.
+
+### New Findings
+
+**Issue #46 (NEW, P1): ARBiH bot sends fresh brigades into known catastrophic positions — Doboj and Bihać meat-grinders.**
+
+Seven different ARBiH brigades attack Doboj across w21-w40 at PR 0.24-0.40. Five are catastrophic (450-800 att casualties vs 47-123 defenders). The 503rd attacks Bihać three times in consecutive weeks at PR 0.12-0.29 (losing 1,774 total against ~181 defenders). The bot has no memory of previous catastrophic outcomes at a given OSID. A real ARBiH corps commander would halt offensive operations at a target where five consecutive attacks failed catastrophically — Halilović was callous but not suicidal. This pattern inflates late-war casualty counts, inverts the consolidation-phase att:def ratio (1.664 — attackers taking 67% more casualties than defenders), and burns through ARBiH manpower unrealistically.
+
+**Historical context:** ARBiH did attack repeatedly at Doboj and along the Posavina, but not with fresh brigades every 2-3 weeks against the same fortified position at 3:1 odds against. Real repeat attacks waited for reinforcement, re-supply, and new intelligence. The sim's bot has no learning or inhibition on catastrophic targets.
+
+**Root cause:** Corps AI operation loop has no "catastrophic at this OSID → suspend objective" gate. Once an operation targets an OSID, it keeps assigning new brigades until the objective is either captured or the operation expires. No per-OSID catastrophe threshold exists.
+
+**Status:** P1 — this is the dominant realism failure in n1240. Blocks late-war mechanistic correctness even though aggregate calibration is high.
+
+---
+
+**Issue #47 (NEW, P1): Faction exhaustion is 0 for all factions across all 40 weeks.**
+
+Every faction reads `exhaustion: 0` at w10, w20, and w40. Supply pressure is 100 (max pressure) for all factions all the time. In a 40-week war that kills 44k combatants and displaces over 1M civilians, zero faction exhaustion is not plausible. Historical context: by January 1993, all three factions were experiencing ammunition shortages, manpower strain, and morale fatigue. The exhaustion system either isn't running, isn't writing to the weekly report field, or the numerator accounting bug from the life_lessons calibration.md entry applies here.
+
+**Root cause:** Unknown — could be: (a) exhaustion computation not wired into weekly report, (b) field path mismatch in GameStateAdapter, (c) the threshold accounting bug documented in life_lessons (most values far below threshold). Needs diagnostic.
+
+**Status:** P1 — exhaustion=0 across 40 weeks means no political collapse pressure, no attrition-driven behavior change, no negative-sum dynamics. This is a core mechanic that must be functioning.
+
+---
+
+**Issue #48 (NEW, P2): homelandAbsorbDecisive removal — two edge cases need monitoring.**
+
+With `homelandAbsorbDecisive` removed, decisive_victory always flips. This run shows 36 decisive battles, all 36 flipped (100%). Two edge cases observed:
+
+1. **W4 Krivajevići**: PR 175.50, att 110 > def 57. Attacker wins decisively at 175:1 but takes nearly 2× defender casualties in absolute terms. The power ratio correctly drives the outcome, but the casualty model produces an attacker paying more than the defender at extreme ratios — a quirk of the cube-root scaling at very high PR.
+
+2. **W36 Skakava Donja**: PR 2.31, att 95 > def 26. Attacker flips with 3.7× the defender's casualties. At PR 2.31 (just over the decisive threshold), this is the intended behavior — but it represents a case where a "decisive" outcome looks tactically costly in absolute terms.
+
+Neither case is blocking. The removal of homelandAbsorbDecisive is correct — previously a decisive attack on homeland OSIDs would be absorbed, creating a mechanic that prevented any homeland OSID from ever being captured by decisive_victory. That was worse. These edge cases are expected consequences of deterministic threshold logic.
+
+**Status:** P2 — monitor in future runs. If decisive victories at PR 2.0-2.5 show att > def casualties regularly, consider whether the decisive threshold is too low or casualty scaling needs a floor.
+
+---
+
+**Issue #49 (NEW, P2): 238 invalid operations / 122 zero-eligible-attacker operations.**
+
+The combat_causality section records 238 invalid operation execution events across 40 weeks. 122 are zero-eligible-attacker (operation fires but no brigade can attack). The `valid_for_combat_calibration` flag is `false` for the entire run. While the validation gate (validateOpAtInjection) now surfaces these as warnings rather than silent failures, 238 invalid executions across 10 operations over 40 weeks means the operational machinery is firing correctly in fewer than half its turns. `op_injection_validation` shows Operation Foca firing with all 7 objectives already owned by RS and Operation Herzegovina Consolidation failing entirely (all axes dropped). These are data staleness issues — operations defined for earlier turns being injected after their objectives are already captured.
+
+**Historical context:** No corps commander issues attack orders for positions his own army already holds.
+
+**Status:** P2 — partially addressed by the validation gate. Root cause: operation objective lists not checking current control at injection time before committing.
+
+---
+
+**Issue #42 update (Idle brigades): STILL OPEN.** n1240 shows RBiH running 49 orders vs RS 63 — ratio improved from n1150 (11 RBiH orders was too passive). RBiH is now fighting aggressively in late war (w26-40 has 28 RBiH battles). The idleness problem has shifted: the issue is no longer zero activity but *catastrophic* activity (Issue #46 above).
+
+**Issue #43 update (RBiH overmobilized): MARGINAL IMPROVEMENT.** RBiH 158k vs 161k in n1150. Still above 100-130k historical range. Not resolved.
+
+**Issue #44 update (Inverted casualty ratio): PARTIALLY RESOLVED.** Overall att:def improved from 0.43-0.56 (n1150) to 0.731 (n1240). Blitz phase 0.232 is correct (VRS steamroll). The inversion now only appears in consolidation phase (1.664) and is driven by the Issue #46 meat-grinder pattern, not a systemic model flaw.
+
+**Issue #45 update (Phantom ops): PARTIALLY IMPROVED.** Validation gate now surfaces 9 warnings + 1 error. 238 invalid executions still occur but are now visible. Root cause structural work still needed.
+
+### Verdict
+
+**WAR-OR-GAME: WITHHOLDS APPROVAL.**
+
+93.6% area-weighted is an ATH and 22/22 anchors is clean. The macro picture — VRS blitz, enclave formation, RBiH counteroffensives emerging in late war — is the best the sim has produced. The homelandAbsorbDecisive removal works correctly for its intended purpose.
+
+However, two P1 issues block approval:
+
+1. **Issue #46 (ARBiH meat-grinder):** Five different ARBiH brigades sent to die at Doboj across 19 weeks at 3:1 odds against. The 503rd destroys itself attacking the same Bihać position three weeks running at 0.12-0.29 power ratio. This is the dominant behavioral failure — the bot has no catastrophe-memory on repeated objectives. It inflates late-war casualties, inverts the consolidation-phase att:def ratio to 1.664, and burns through ARBiH manpower ahistorically.
+
+2. **Issue #47 (Exhaustion = 0 always):** A 40-week war producing zero faction exhaustion at any point is not a war — it's a board game where nobody gets tired. If the exhaustion system isn't running or isn't writing, a core negative-sum mechanic is dead. This needs a diagnostic before the next run.
+
+Both issues must be addressed before War-or-Game signs off.
+
+---
+
+## Previous Review: n1150 (2026-03-28) — Ops Validation Engine Gate + Ghost Sector Sanitizer
 
 **Run:** `runs/apr1992_definitive_40w__77cac5e01d3c929e__w40_n1150` | 92.2% area-weighted | hash `1de5c05b2db9112f`
 

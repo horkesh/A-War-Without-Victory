@@ -17,6 +17,7 @@
 
 import type { FormationId } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
+import { spatialFriendlyDistance } from '../../spatial_context.js';
 
 import type {
     CommanderBriefing,
@@ -49,6 +50,9 @@ export const PLAN_CONCENTRATION_RATE = 2;
 
 /** Viability score below which a plan is abandoned. */
 const VIABILITY_ABANDON_THRESHOLD = 0.2;
+
+/** Max BFS hops from brigade location to objective approach OSID (matches emit.ts). */
+const MAX_REACHABILITY_HOPS = 8;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // PlanDecision — output of managePlan
@@ -359,13 +363,31 @@ function createOpportunityPlan(
     surplusPool: BrigadeEvaluation[],
     turn: number,
     isLocal: boolean,
-): PlanDecision {
+): PlanDecision | null {
     const requiredBrigades = Math.max(
         MIN_BRIGADES_FOR_PLAN,
         Math.min(surplusPool.length, stagingZone.surplus_brigades.length),
     );
 
     const assignedBrigades = selectBrigadesForPlan(surplusPool, requiredBrigades);
+
+    // Pre-filter enemy objectives to only those reachable by at least one assigned brigade.
+    // Mirrors the BFS reachability check in emit.ts (lines ~559-599) but applied at plan
+    // creation time, before the operation slot is consumed. Prevents vrs_herzegovina from
+    // assigning Čapljina/Mostar objectives to brigades stationed in Foča/Cajnice.
+    const reachableEnemyOsids = filterReachableObjectives(
+        briefing,
+        assignedBrigades,
+        stagingZone.enemy_adjacent_osids,
+    );
+
+    // If no enemy objectives survive the reachability filter, this plan cannot be created.
+    if (reachableEnemyOsids.length === 0) {
+        return null;
+    }
+
+    // Wrap as a ZoneAssessment-like object with filtered enemy OSIDs for selectOpportunityTargets.
+    const filteredZone: ZoneAssessment = { ...stagingZone, enemy_adjacent_osids: reachableEnemyOsids };
 
     const brigadesAlreadyAtStaging = countBrigadesInZone(assignedBrigades, surplusPool, stagingZone.zone_id);
     const brigadesToMove = Math.max(0, requiredBrigades - brigadesAlreadyAtStaging);
@@ -376,7 +398,7 @@ function createOpportunityPlan(
         objective_description: isLocal
             ? `local opportunity from ${stagingZone.zone_id}`
             : `offensive opportunity from ${stagingZone.zone_id}`,
-        target_osids: selectOpportunityTargets(stagingZone, requiredBrigades),
+        target_osids: selectOpportunityTargets(filteredZone, requiredBrigades),
         required_brigades: requiredBrigades,
         assigned_brigades: assignedBrigades,
         staging_zone: stagingZone.zone_id,
@@ -414,6 +436,77 @@ function selectOpportunityTargets(
     if (enemyOsids.length === 0) return [];
     const maxObjectives = Math.max(1, Math.min(6, Math.floor(requiredBrigades * 0.5)));
     return [...enemyOsids].sort(strictCompare).slice(0, maxObjectives);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Helper: filter enemy objectives to those reachable from assigned brigades
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Returns the subset of candidateOsids reachable by at least one assigned brigade
+ * via BFS through friendly territory within MAX_REACHABILITY_HOPS.
+ *
+ * Mirrors the reachability check in emit.ts (lines ~559-599). Objectives are
+ * enemy-held, so BFS checks the friendly OSIDs adjacent to each objective rather
+ * than the objective itself. A brigade is considered able to reach an objective
+ * if it can reach any one of the objective's friendly-side approach OSIDs.
+ */
+function filterReachableObjectives(
+    briefing: CommanderBriefing,
+    assignedBrigades: readonly FormationId[],
+    candidateOsids: readonly string[],
+): string[] {
+    if (candidateOsids.length === 0) return [];
+
+    // Guard: if spatial data is incomplete (e.g. in unit tests), pass through unfiltered.
+    const adjacency = briefing.spatial.adjacency;
+    const fofMap = briefing.spatial.friendlyOsidsByFaction;
+    if (!adjacency || !fofMap) return [...candidateOsids];
+    const friendlyOsids = fofMap.get(briefing.faction);
+    if (!friendlyOsids) return [...candidateOsids];
+
+    // Build location map from briefing brigades (FormationState has location_osid).
+    const brigadeLocationMap = new Map<string, string>();
+    for (const b of briefing.brigades) {
+        if (b.location_osid) brigadeLocationMap.set(b.id, b.location_osid);
+    }
+
+    // Collect assigned brigade locations (those that have a known OSID position).
+    const assignedLocations: string[] = [];
+    for (const id of assignedBrigades) {
+        const loc = brigadeLocationMap.get(id);
+        if (loc) assignedLocations.push(loc);
+    }
+    if (assignedLocations.length === 0) return [];
+
+    const reachable: string[] = [];
+    for (const candidateOsid of candidateOsids) {
+        // Objectives are enemy-held; BFS through friendly territory to an approach
+        // OSID (a friendly OSID neighboring the objective) instead of the objective itself.
+        const neighbors = adjacency.get(candidateOsid as any) ?? [];
+        const approachOsids = (neighbors as readonly string[]).filter(n => friendlyOsids.has(n));
+        if (approachOsids.length === 0) continue; // objective has no friendly approach
+
+        // Check if any assigned brigade can reach any approach OSID within hop limit.
+        let objectiveReachable = false;
+        outer: for (const approachOsid of approachOsids.slice().sort(strictCompare)) {
+            for (const locationOsid of assignedLocations) {
+                const dist = spatialFriendlyDistance(
+                    briefing.spatial,
+                    briefing.faction,
+                    locationOsid,
+                    approachOsid,
+                    MAX_REACHABILITY_HOPS,
+                );
+                if (dist >= 0) {
+                    objectiveReachable = true;
+                    break outer;
+                }
+            }
+        }
+        if (objectiveReachable) reachable.push(candidateOsid);
+    }
+    return reachable;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

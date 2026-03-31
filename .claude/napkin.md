@@ -287,6 +287,8 @@ After EVERY scenario run, the orchestrator:
    Do instead: `consolidateCrossCorpsFronts` in `sector_territory.ts` — if ANY edge in a component has a brigade of the minority corps, protect ALL edges of that corps in the component. Without this, isolated enclave corps (CB at Kiseljak) get drained edge-by-edge.
 5. **[2026-03-19] HRHB readiness: no reversion from active to forming (IMPLEMENTED)**
    Do instead: `deriveReadinessState` in `formation_lifecycle.ts` — once past forming, low cohesion → overextended/degraded, NOT forming. Without this, all 29 HRHB brigades oscillated active↔forming every turn.
+6. **[2026-03-31] HVO CB prep for 1993-war activation (BACKLOG)**
+   Do instead: hvo_central_bosnia zero battles in 40w is HISTORICALLY CORRECT (Lašva Valley war didn't start until 1993). Prerequisite work before 1993-war scenario: (1) CB brigade redistribution — 5/6 sectors empty, brigades cluster in Zenica sector; (2) CB operations not launching in 52w scenario; (3) Kiseljak/Vitez pocket separation. Address in HRHB-RBiH war feature branch, not 40w calibration.
 
 ## Bot AI & Combat
 1. **[2026-03-13] Triple-junction adjacency: standard for grouping, strict for splitting (n664→n682)**

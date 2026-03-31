@@ -181,11 +181,13 @@ const JNA_PHANTOM_DEFS: PhantomDef[] = [
         // Ilijaš North Serb TO — Serb Territorial Defence units from the northern
         // Ilijas villages (Dragoradi, Krivajevici, Sirovine area) mobilised under
         // JNA/SDS coordination to close the northern siege ring (April 1992).
-        // Staging from podlugovi (ljesevo OSID does not exist in data).
+        // Staged from op:sokolac:meljine_2 (RS-controlled Romanija plateau OSID,
+        // 6 shared segments with sirovine — the natural northern approach).
+        // ljesevo OSID does not exist in data; podlugovi is southern Ilijas only.
         id: 'jna_ilijas_north_to_tg' as FormationId,
         name: 'Ilijaš North TO Tactical Group',
         corps_id: 'vrs_sarajevo_romanija' as FormationId,
-        location_osid: 'op:ilijas:podlugovi',
+        location_osid: 'op:sokolac:meljine_2',
         withdrawal_turn: 10,
         tanks: 0, artillery: 0, apcs: 0,
         no_equipment_handoff: true,

@@ -1316,7 +1316,10 @@ function updateMultiAxisResults(
                 // Direct attack on current objective — standard failure tracking
                 axis.attack_attempt_count += 1;
                 axis.idle_execution_turn_streak = 0;
-                axis.movement_only_execution_turns = 0; // reset: we ARE attacking
+                // Only reset movement_only counter when no brigades are also marching.
+                // If some axis brigades are in transit while others attack, the marching
+                // signal must persist — stranded brigades cycling attack/march never reset.
+                if (!anyMoved) axis.movement_only_execution_turns = 0;
                 axis.last_result = 'failed';
                 axis.momentum = 0;
                 axis.failure_count += 1;
@@ -1521,7 +1524,10 @@ function updateLegacyFlatResults(
         if (anyAttackedObjective) {
             op.attack_attempt_count = (op.attack_attempt_count ?? 0) + 1;
             op.idle_execution_turn_streak = 0;
-            op.movement_only_execution_turns = 0; // reset: we ARE attacking
+            // Only reset movement_only counter when no brigades are also marching.
+            // If some op brigades are in transit while others attack, the marching
+            // signal must persist — stranded brigades cycling attack/march never reset.
+            if (!anyMoved) op.movement_only_execution_turns = 0;
             op.last_result = 'failed';
             op.momentum = 0;
             op.failure_count = (op.failure_count ?? 0) + 1;
