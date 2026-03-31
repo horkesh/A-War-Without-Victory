@@ -17660,3 +17660,54 @@ Documentation only. No runtime behavior changed.
 - `docs/plans/2026-03-31-v090-sensitive-history-design-gate-plan.md`
 - `docs/plans/2026-03-31-v092-tutorial-and-onboarding-plan.md`
 - `docs/PROJECT_LEDGER.md`
+
+## [2026-03-31] Desktop Startup Recovery - Warroom Load Flow And Replay Removal
+
+### Change
+
+Recovered the Electron desktop path so the game can launch and start a campaign again.
+
+- fixed desktop sim bundle loading by making `src/sim/events/event_loader.ts` resolve its module directory in both source ESM and bundled CommonJS desktop builds
+- added `tests/desktop_sim_bundle_smoke.test.ts` so the desktop bundle is built and `require()`-loaded in CI-style verification
+- guarded startup-phase debug logging in `src/scenario/scenario_runner.ts` so detached/broken Windows stdio pipes do not crash `startNewCampaign`
+- removed the dead `Load Replay` surface from Warroom and Electron desktop menus / preload bridge
+- fixed Warroom `Continue` so it only enables when a game is actually loaded
+- rewired Warroom `Load Save` to use the Electron `load-state-dialog` IPC path instead of browser-only file-input behavior when desktop IPC is present
+- updated desktop README to match the new desktop surface
+
+### Why
+
+The desktop app had two real launch blockers and then a broken Warroom entry flow behind them:
+
+- Electron installation was failing locally
+- the desktop sim bundle crashed on import because of `import.meta.url` in a CommonJS bundle
+- starting a new campaign in Electron could then still die in the main process on Windows with `EPIPE` during startup logging
+- the menu/UI still exposed replay paths that were not part of the intended current flow
+
+This pass restores the expected desktop loop: launch app, start new campaign, load save, continue loaded game.
+
+### Determinism
+
+No simulation rules changed. This pass only affects desktop host wiring, desktop bundle compatibility, and startup logging resilience. Scenario outputs and turn resolution logic are unchanged.
+
+### Verification
+
+- `node --test tests/desktop_sim_bundle_smoke.test.ts`
+- `npm run warroom:build`
+- `npm run desktop:sim:build`
+- `npm run desktop:map:build`
+- direct built-bundle smoke: `startNewCampaign(process.cwd(), 'RBiH', 'apr_1992')` completed successfully
+- Electron desktop launch survived an 18-second live startup check without immediate main-process failure
+
+### Files
+
+- `src/sim/events/event_loader.ts`
+- `src/scenario/scenario_runner.ts`
+- `src/ui/warroom/index.html`
+- `src/ui/warroom/warroom.ts`
+- `src/desktop/electron-main.cjs`
+- `src/desktop/preload.cjs`
+- `src/ui/map/desktop/useIPC.ts`
+- `src/desktop/README.md`
+- `tests/desktop_sim_bundle_smoke.test.ts`
+- `docs/PROJECT_LEDGER.md`

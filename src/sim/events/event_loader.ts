@@ -9,8 +9,14 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { EventDefinition } from './event_types.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const EVENTS_DIR = resolve(__dirname, '../../../data/scenarios/events');
+function getModuleDir(): string {
+    if (typeof __dirname === 'string') {
+        return __dirname;
+    }
+    return dirname(fileURLToPath(import.meta.url));
+}
+
+const EVENTS_DIR = resolve(getModuleDir(), '../../../data/scenarios/events');
 
 /** Event JSON file names in chronological order. */
 const EVENT_FILES = [

@@ -1,8 +1,7 @@
-# Desktop app (Electron) — tactical map + rewatch + play myself
+# Desktop app (Electron) — tactical map + play myself
 
 **Phase 1:** Launchable executable; map loads with bundled or project data.  
-**Phase 2:** Rewatch: Load replay (file picker or File → Open replay), play/pause/step; Open last run.  
-**Phase 3:** Play myself: Load scenario or state file, advance turn; map and state update after each advance.
+**Phase 2:** Play myself: Load scenario or state file, advance turn; map and state update after each advance.
 
 ## Commands
 
@@ -24,15 +23,7 @@ npm run desktop
 - **Dev (unpackaged):** Map app is served from `dist/tactical-map/`. Data and assets are read from project root `data/derived/` and `assets/` (protocol resolves `/data/derived/*` and `/assets/*` to repo).
 - **Packaged:** App and data are under `resources/` (see electron-builder config in package.json if added).
 
-## Phase 2: Rewatch
-
-- **Load Replay...** (toolbar): Opens file picker; choose `replay_timeline.json` (e.g. from a run with `npm run sim:scenario:run -- --video --map`). Play/pause/step as in browser.
-- **File → Open replay...** (menu): Same; path is stored for “Open last run”.
-- **Open last run** (toolbar, Electron only): Reloads the replay file last opened via File → Open replay.
-
-IPC (preload exposes `window.awwv`): `loadReplayDialog()`, `getLastReplayContent()`, `setReplayLoadedCallback(cb)`. Map app uses these when present to support menu and Open last run.
-
-## Phase 3: Play myself
+## Phase 2: Play myself
 
 - **Load scenario...** (layer panel when in Electron, or File → Load scenario): Opens file picker for a scenario JSON; main process runs scenario init (one week) and sends initial state to the map. Map shows control, formations, turn.
 - **Load state file...** (layer panel, or File → Load state file): Opens file picker for a saved game (e.g. `final_save.json`); main process loads and sends state to the map.

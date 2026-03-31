@@ -15,8 +15,6 @@ const path = require('path');
 const fs = require('fs');
 const http = require('http');
 
-const LAST_REPLAY_PATH_FILE = 'last-replay-path.json';
-
 /** Project root (dev) or resources root (packaged). Used for data paths and desktop sim. */
 function getBaseDir() {
   if (app.isPackaged) {
@@ -226,46 +224,6 @@ function getMapServerUrl(extraPath) {
   return `http://127.0.0.1:${mapServerPort}${extraPath || '/'}`;
 }
 
-function getLastReplayPathPath() {
-  return path.join(app.getPath('userData'), LAST_REPLAY_PATH_FILE);
-}
-
-function readLastReplayPath() {
-  try {
-    const p = getLastReplayPathPath();
-    if (fs.existsSync(p)) {
-      const data = JSON.parse(fs.readFileSync(p, 'utf8'));
-      if (data && typeof data.path === 'string') return data.path;
-    }
-  } catch (_) { }
-  return null;
-}
-
-function writeLastReplayPath(filePath) {
-  try {
-    fs.writeFileSync(getLastReplayPathPath(), JSON.stringify({ path: filePath }, null, 0));
-  } catch (_) { }
-}
-
-function showReplayDialogAndRead(win) {
-  return dialog.showOpenDialog(win || null, {
-    title: 'Open replay_timeline.json',
-    filters: [{ name: 'JSON', extensions: ['json'] }],
-    properties: ['openFile'],
-  }).then((result) => {
-    if (result.canceled || !result.filePaths.length) return null;
-    const filePath = result.filePaths[0];
-    try {
-      const content = fs.readFileSync(filePath, 'utf8');
-      const data = JSON.parse(content);
-      writeLastReplayPath(filePath);
-      return { filePath, data };
-    } catch (e) {
-      throw new Error(e.message || 'Failed to read replay file');
-    }
-  });
-}
-
 function showScenarioDialog(win) {
   return dialog.showOpenDialog(win || null, {
     title: 'Load scenario',
@@ -330,15 +288,6 @@ function createWindow() {
     {
       label: 'File',
       submenu: [
-        {
-          label: 'Open replay...', accelerator: 'CmdOrCtrl+O', click: async () => {
-            try {
-              const out = await showReplayDialogAndRead(win);
-              if (out) win.webContents.send('replay-loaded', out.data);
-            } catch (e) { console.error('Replay load failed:', e); }
-          }
-        },
-        { type: 'separator' },
         {
           label: 'Load scenario...', click: async () => {
             try {
@@ -611,23 +560,6 @@ function registerProtocol() {
 
 app.whenReady().then(() => {
   registerProtocol();
-
-  ipcMain.handle('load-replay-dialog', async () => {
-    const win = BrowserWindow.getFocusedWindow();
-    const out = await showReplayDialogAndRead(win);
-    return out ? out.data : null;
-  });
-
-  ipcMain.handle('get-last-replay', async () => {
-    const filePath = readLastReplayPath();
-    if (!filePath || !fs.existsSync(filePath)) return null;
-    try {
-      const content = fs.readFileSync(filePath, 'utf8');
-      return JSON.parse(content);
-    } catch (_) {
-      return null;
-    }
-  });
 
   // Phase 3: Play myself — load scenario, load state, advance turn
   ipcMain.handle('load-scenario-dialog', async (_event) => {

@@ -42,8 +42,6 @@ interface WindowAwwv {
     setTurnReportUpdatedCallback: (cb: ((report: unknown) => void) | null) => void;
     getRecruitmentCatalog: () => Promise<{ brigades?: unknown[]; error?: string }>;
     applyRecruitment: (brigadeId: string, equipmentClass: string) => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
-    loadReplayDialog: () => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
-    getLastReplayContent: () => Promise<string | null>;
     renameFrontSegment: (frontId: string, name: string | null) => Promise<{ ok: boolean; error?: string }>;
     renameTheatre: (theatreId: string, name: string | null) => Promise<{ ok: boolean; error?: string }>;
     setBrigadeDesiredAoRCap: (brigadeId: string, cap: number) => Promise<{ ok: boolean; error?: string }>;
@@ -156,14 +154,6 @@ export function useIPC() {
             applyRecruitment: awwv
                 ? (brigadeId: string, equipmentClass: string) => awwv.applyRecruitment(brigadeId, equipmentClass)
                 : makeNoop<{ ok: boolean; stateJson?: string; error?: string }>(),
-
-            loadReplayDialog: awwv
-                ? () => awwv.loadReplayDialog()
-                : makeNoop<{ ok: boolean; stateJson?: string; error?: string }>(),
-
-            getLastReplayContent: awwv
-                ? () => awwv.getLastReplayContent()
-                : () => Promise.resolve(null),
 
             renameFrontSegment: awwv
                 ? (frontId: string, name: string | null) => awwv.renameFrontSegment(frontId, name)

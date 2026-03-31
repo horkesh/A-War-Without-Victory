@@ -1,11 +1,7 @@
 'use strict';
 const { contextBridge, ipcRenderer } = require('electron');
-let replayLoadedCallback = null;
 let gameStateUpdatedCallback = null;
 let turnReportUpdatedCallback = null;
-ipcRenderer.on('replay-loaded', (_event, data) => {
-  if (replayLoadedCallback) replayLoadedCallback(data);
-});
 ipcRenderer.on('game-state-updated', (_event, stateJson) => {
   if (gameStateUpdatedCallback) gameStateUpdatedCallback(stateJson);
 });
@@ -13,9 +9,6 @@ ipcRenderer.on('turn-report-updated', (_event, report) => {
   if (turnReportUpdatedCallback) turnReportUpdatedCallback(report);
 });
 contextBridge.exposeInMainWorld('awwv', {
-  loadReplayDialog: () => ipcRenderer.invoke('load-replay-dialog'),
-  getLastReplayContent: () => ipcRenderer.invoke('get-last-replay'),
-  setReplayLoadedCallback: (cb) => { replayLoadedCallback = typeof cb === 'function' ? cb : null; },
   loadScenarioDialog: () => ipcRenderer.invoke('load-scenario-dialog'),
   startNewCampaign: (payload) => ipcRenderer.invoke('start-new-campaign', payload),
   loadStateDialog: () => ipcRenderer.invoke('load-state-dialog'),

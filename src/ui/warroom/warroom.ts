@@ -78,6 +78,7 @@ interface DesktopBridge {
     startNewCampaign?: (payload: { playerFaction: FactionId; scenarioKey: CampaignScenarioKey }) => Promise<{ ok: boolean; error?: string; stateJson?: string }>;
     setGameStateUpdatedCallback?: (cb: (stateJson: string) => void) => void;
     getCurrentGameState?: () => Promise<string | null>;
+    loadStateDialog?: () => Promise<{ ok: boolean; error?: string; stateJson?: string }>;
     openTacticalMapWindow?: (payload?: { mode?: 'operational' | 'sandbox' }) => Promise<unknown>;
     assignCommander?: (officerId: string, corpsId: string) => Promise<{ ok: boolean; error?: string }>;
     [key: string]: unknown;
@@ -402,10 +403,9 @@ class WarroomApp {
     /** STEP 1: Show the main menu title screen. */
     private showMainMenu(): void {
         this.showScreen('main-menu');
-        // Enable "Continue" if a game is loaded OR if we're in browser mode (to allow loading latest save)
         const continueBtn = document.getElementById('mm-continue') as HTMLButtonElement | null;
         if (continueBtn) {
-            continueBtn.disabled = !this.gameState && !!this.getDesktopBridge()?.getCurrentGameState;
+            continueBtn.disabled = !this.gameState;
         }
     }
 
@@ -449,7 +449,6 @@ class WarroomApp {
     private wireMainMenuButtons(): void {
         const newCampaignBtn = document.getElementById('mm-new-campaign');
         const loadSaveBtn = document.getElementById('mm-load-save');
-        const loadReplayBtn = document.getElementById('mm-load-replay');
         const continueBtn = document.getElementById('mm-continue');
         const fileInput = document.getElementById('mm-file-input') as HTMLInputElement | null;
 
@@ -458,15 +457,25 @@ class WarroomApp {
         }
         if (continueBtn) {
             continueBtn.onclick = () => {
-                if (this.gameState) {
-                    this.showScreen('none');
-                } else {
-                    void this.loadContinueSave();
-                }
+                if (!this.gameState) return;
+                this.showScreen('none');
             };
         }
         if (loadSaveBtn && fileInput) {
-            loadSaveBtn.onclick = () => fileInput.click();
+            loadSaveBtn.onclick = async () => {
+                if (this.desktopBridge?.loadStateDialog) {
+                    try {
+                        const result = await this.desktopBridge.loadStateDialog();
+                        if (result?.ok && result.stateJson) {
+                            this.applyGameStateFromJson(result.stateJson);
+                        }
+                    } catch (error) {
+                        console.error('[warroom] Failed to load state through desktop bridge:', error);
+                    }
+                    return;
+                }
+                fileInput.click();
+            };
             fileInput.onchange = (e: Event) => {
                 const target = e.target as HTMLInputElement;
                 const file = target.files?.[0];
@@ -477,12 +486,6 @@ class WarroomApp {
                     if (text) this.applyGameStateFromJson(text);
                 };
                 reader.readAsText(file);
-            };
-        }
-        // Load Replay — placeholder for now
-        if (loadReplayBtn) {
-            loadReplayBtn.onclick = () => {
-                console.log('[warroom] Load Replay — not yet implemented');
             };
         }
     }
@@ -556,19 +559,6 @@ class WarroomApp {
                     for (const b of scenarioButtons) b.disabled = false;
                 }
             };
-        }
-    }
-
-    /** Browser fallback for "Continue" button: loads latest run final save from disk. */
-    private async loadContinueSave(): Promise<void> {
-        try {
-            const response = await fetch('/data/derived/latest_run_final_save.json');
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const stateJson = await response.text();
-            this.applyGameStateFromJson(stateJson);
-        } catch (error) {
-            console.error('[warroom] Failed to load latest save:', error);
-            // If we can't load a save, just stay on the menu or show an alert
         }
     }
 
