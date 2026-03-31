@@ -137,10 +137,15 @@ export function managePlan(
         return { plan: null, action: 'none', reason: `corps in ${briefing.corps_stance} stance — no new plans`, concentration_orders: [] };
     }
 
-    // Guard: if this corps already has a live non-recovery op, do not create a new plan.
-    const hasLiveOp = briefing.active_operations.some(op => op.phase !== 'recovery');
-    if (hasLiveOp) {
-        return { plan: null, action: 'none', reason: 'live operation already active for this corps', concentration_orders: [] };
+    // Guard: if this corps already has a live non-recovery, non-probe op, do not create a new plan.
+    // Probes are independent of the plan system (created directly in emit.ts when ops.length === 0)
+    // and must not block opportunity plan creation — otherwise corps with only probes running
+    // (e.g. arbih_1st_corps) are starved of sector_attack ops indefinitely.
+    const hasLiveMajorOp = briefing.active_operations.some(
+        op => op.phase !== 'recovery' && op.type !== 'probe'
+    );
+    if (hasLiveMajorOp) {
+        return { plan: null, action: 'none', reason: 'major operation already active for this corps', concentration_orders: [] };
     }
 
     // Priority 1: pre-planned operations

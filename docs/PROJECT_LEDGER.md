@@ -1,3 +1,102 @@
+## [2026-03-31] n1263–n1273 — ops mechanics audit + probe guard fix (94.1%, 99 battles)
+
+### Summary
+Session focused on ops correctness ("do ops work?") rather than calibration. Three ops bugs identified and fixed, then a fourth bug found when battle count didn't recover. Final result: n1273 = 94.1% area-weighted, 99 battles, 38/40 combat weeks — matching n1262 ATH baseline.
+
+### Bugs Fixed
+
+**Bug 1 (n1263): Ghost duplicate ops** — `plan.ts:213` clears executing plan to null, then `tryCreateFromPrePlanned`/`tryCreateFromOpportunity` creates an identical new plan next turn while the original op is still in `active_operations`. Initial fix: broad "any non-recovery op → no new plan" guard. Overcorrected (see Bug 4).
+
+**Bug 2 (n1263→n1264): Unreachable objectives** — `filterReachableObjectives` used faction-wide friendly OSID set for BFS. Sarajevo enclave "reached" Foča via ghost path through disconnected RBiH territory. Fix: `spatialSameComponent` pre-filter — skip objective if approach OSIDs are in a different connected component from assigned brigade locations.
+
+**Bug 3 (n1263): Loan double-enrollment** — `getCorpsSubordinates` matched `corps_id` only, not loan state. A loaned brigade was visible to its lending corps AND auto-joined by army reserve. Fix: added `is_on_loan: boolean` to `BrigadeEvaluation` (force_eval.ts + commander_state.ts); surplus pool now excludes loaned brigades via `&& !ev.is_on_loan` in allocate.ts.
+
+**Bug 4 (n1273): Probe ops blocking plan creation** — The broad Bug 1 guard fired on probe ops (`type: 'probe'`) which are independent of the plan system. Probes are created directly in emit.ts when `ops.length === 0` and do not consume a plan slot. `arbih_1st_corps` (Sarajevo enclave, no pre-planned ops) was stuck in an infinite probe loop with 0 sector_attack ops. Fix: change guard from `op.phase !== 'recovery'` to `op.phase !== 'recovery' && op.type !== 'probe'`.
+
+### Run Log
+- **n1263 (61dfc767):** Bugs 1+2+3 bundled. Bug 2 overcorrected → arbih_1st_corps 0 objectives → 56 battles (down from 99).
+- **n1264 (component-sameness gate):** Bug 2 recorrected via `spatialSameComponent`. Still 56 battles — Bug 4 identified (probes blocking plans).
+- **n1273 (this session):** Bug 4 fixed — probe exemption in plan.ts guard. **94.1%, 99 battles, 38/40 weeks.** arbih_1st_corps: 4 completed ops in history, sector_attack op at t40.
+
+### Architecture Notes: Two Op Systems
+Pre-planned ops use TWO separate paths:
+1. **Legacy queue system** (`injectQueuedOperation`, `war_phases.ts:inject-queued-operations`): reads `cmd.queued_operations`, injects directly into `active_operations` with `is_pre_planned: true`, SHIFTS entry off queue. Runs BEFORE commander loop.
+2. **Commander system** (`tryCreateFromPrePlanned`, `plan.ts`): reads same `cmd.queued_operations` via `briefing.pre_planned_ops`. BUT: queue is already consumed by legacy system before commander runs → `tryCreateFromPrePlanned` sees empty queue for all corps with pre-planned ops. Only `tryCreateFromOpportunity` fires for them. Pre-planned ops via commander path = effectively dead code for these corps.
+
+Corps with NO pre-planned ops (e.g. arbih_1st_corps, arbih_5th_corps) rely entirely on `tryCreateFromOpportunity`.
+
+### Open (pre-existing)
+- boljanic_2 anchor: RS, actual=RBiH — requires pre_planned_operations.ts change for vrs_east_bosnian retake targeting Doboj
+- HRHB patron directive scope fix (faction-wide defensive → hvo_southeast_herzegovina only)
+- jajce_falls turn_min 40→28
+
+---
+
+## [2026-03-31] n1258–n1262 — home-defense surplus fix + two-tier panel (RUNNING n1262)
+
+### Summary
+Five calibration runs this session. Root cause of Brčko/Doboj anchor failures traced through two-tier panel and fixed in n1262.
+
+**Run log:**
+- **n1257 (53596aaf):** Corps boundary guard (drift fix) + city anchors. rs_1st_posavina no longer drifts to Banja Luka. brcko + boljanic_2 anchors added (25 total).
+- **n1258–n1259:** Phantom objective validation gate (c1d13721) — filter objectives to reachableEnemyOsids at op creation. Prevents stale objectives stalling ops. ~93.3%.
+- **n1260:** No change (hash baseline). 93.3%.
+- **n1261 (96828392):** homeDefenseSet removal from emit.ts — zero effect. Same hash as n1260. The emit.ts filter was dead code: upstream filters in allocate.ts:278 and plan.ts:703 excluded home-defense brigades first.
+- **n1262 (d9c174ad) RUNNING:** Remove `!ev.is_home_defense` from BOTH allocate.ts:278 (surplus pool) AND plan.ts:703 (selectBrigadesForPlan). The real fix.
+
+### Two-Tier Panel Findings (n1261, 93.28%)
+**Calibration:** 23/25 anchors (brcko + boljanic_2 fail). 2/6 benchmarks (HRHB only). 79 battles, 34/40 combat weeks.
+
+**Root cause chain for Brčko/Doboj failures:**
+1. Home-defense brigades excluded from surplus pool → Op Koridor under-strength (4/7 objectives only)
+2. vrs_east_bosnian t13 follow-up stalls (execution stall, 0 attacks)
+3. ARBiH 2nd Corps t21: 8 attacks captures all Brčko OSIDs
+4. Objective validation gate blocks retake (bijela_2/domaljevac_2 not in sub_segment enemy_osids after fall)
+5. Ghost duplicate ops vrs_1st_krajina t29+t30 (identical objectives, both planning stall, 14–15 brigades locked)
+6. rs_1st_bijeljina_panthers + rs_1st_semberija dissolve t34–35 → cascade
+
+**home_defense_active flag mechanics:** Set by `compute_home_defense.ts` per-turn. True when brigade NOT in executing op AND physically in home municipality. Cleared automatically on op execution. Garrison-first in allocate.ts satisfies minimum zone defense before surplus computed — safety maintained when filter removed.
+
+**Post-panel fix queue:**
+1. n1262 (RUNNING): allocate.ts + plan.ts home-defense filter removal
+2. n1263: HRHB patron directive scope fix (faction-wide → hvo_southeast_herzegovina only, JSON change)
+3. n1264: Ghost duplicate op prevention (has_live_commander_op guard in plan.ts)
+4. n1265: jajce_falls turn_min 40→28 (scenario JSON, keep condition)
+
+**Canon gate (canon-compliance-reviewer):** Retake objective gate relaxation = FAIL (EI §9.6). Correct retake approach: triggered retake op via queued_operations (medium complexity, deferred). Ghost dup prevention, stall abort, sector coherence = PASS.
+
+---
+
+## [2026-03-31] n1257 — Corps boundary guard (brigade drift fix) + city anchors (PENDING RUN)
+
+### Summary
+Brigade drift root cause fixed and two city anchors added. Pending n1257 run to verify. commit: 53596aaf.
+
+### Changes
+
+**1. Corps boundary guard on all march BFS functions (osid_column_movement.ts, brigade_front_distribution.ts, brigade_home_return.ts)**
+- Root cause of drift: all three march functions used faction-wide friendly-OSID sets with no corps boundary check. `dijkstraFriendlyPath` traversed any friendly OSID regardless of corps. `MAX_REDISTRIBUTION_DISTANCE=20` allowed crossing from Brčko to Banja Luka.
+- Fix: `buildCorpsAllowedOsids(corpsId, state)` builds the union of `territory_osids` + sub-segment `friendly_osids` across all sectors of a corps. This set is passed as `allowedOsids` to `dijkstraFriendlyPath` (optional param, falls back to faction-wide for orphan brigades). Same guard applied in Phase B target selection (`brigade_front_distribution.ts`) and return march BFS (`brigade_home_return.ts`).
+- Expected outcome: rs_1st_posavina_infantry stays in Brčko/Posavina theater; rs_2nd_armored retreat after Doboj loss stays within vrs_1st_krajina territory.
+
+**2. City anchors added (scenario_runner.ts)**
+- `op:doboj:boljanic_2` → RS: contains Doboj city (27,498 pop). OSID named after constituent village Boljanić, not the city.
+- `op:bugojno:kopcic_2` → RBiH: contains Bugojno city (22,641 pop). OSID named after Kopčić.
+- Documents OSID naming-mismatch pattern: clustering picks anchor from a small constituent settlement; urban center has `has_svg=false` and is absorbed. Audit via `constituent_sids` / settlement_name field in `operational_settlements.geojson`, not OSID slug.
+
+### Doboj Diagnosis (n1256 run, not yet fixed)
+- `rs_2nd_armored` loses `boljanic_2` (Doboj city) at t22 via combat (ARBiH 327th Vitezka Mountain, costly victory)
+- Brigade retreats to `op:gracanica:petrovo_2` (far from Doboj); ends run morale=2, 464 personnel — combat ineffective
+- `vrs_1st_krajina` has **zero front sectors** at end of run → no sector reassignment mechanism for `boljanic_2`
+- Two VRS retake ops (t29–t39) both stall: planning succeeds, zero attacks executed (zero-eligible-attacker pattern)
+- Corps boundary guard addresses retreat routing; zero-sector and stalling-ops issues remain open
+
+### OSID Naming-Mismatch Audit Methodology
+Correct approach when investigating a city: look up `constituent_sids` and `settlement_name` in `operational_settlements.geojson`, not the OSID slug. Known aliases confirmed this session:
+- `boljanic_2` = Doboj city | `kopcic_2` = Bugojno city | `brcko` = Brčko city | `zvornik` = Zvornik city | `pale` = Pale | `foca_3` = Foča city | `jajce_3` = Jajce city | `mostar_istok_2` + `mostar_zapad_2` = Mostar (split) | `listica:siroki_brijeg_2` = Široki Brijeg | `duvno:tomislavgrad_2` = Tomislavgrad | `bosanska_dubica:kozarska_dubica` = Kozarska Dubica
+
+---
+
 ## [2026-03-31] n1255–n1256 — Op Jackal fixed, initial_osid_controllers baked, 94.2% ATH
 
 ### Summary

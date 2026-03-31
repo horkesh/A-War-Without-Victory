@@ -11,13 +11,16 @@
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
 ## Current State (2026-03-31, v0.8.0 Commander System on main)
-**n1256: 94.2% ATH area-weighted (+1.7pp), 22/22 anchors (+brcko RS added), 6/6 benchmarks. 73 battles, 36/40 combat weeks. hash: 5fa01bbdecc43f5f.**
-**Op Jackal: WORKING — Solid Victory (4 stars, t15), hodbina_2+rotimlja_2 captured. Graz fix ✓ (fires t15). Staging fix ✓ (capljina_2).**
-**valid_for_combat_calibration: false (73 battles, target 150-250). War-or-Game: NOT APPROVED.**
-**[RESOLVED] Slot cap recovery filter — already committed in fix(commander): Fix 1+4. Napkin entry was stale.**
-**[P0] Brigade drift: rs_1st_posavina_infantry at banja_luka_2 (home: brcko) — left Brčko undefended, ARBiH captured it. Investigation dispatched.**
-**Remaining P1s (priority order): brigade drift (P0→P1), HRHB patron directive faction-wide overcap (blocks Tomislavgrad/NW Bosnia), hatelji_2/pjesivac_kula_2 VRS sector gap, tasovcici_2 premature capture before Jackal, 73 battles tempo, vrs_herzegovina targeting.**
-**1 pre-existing test failure: integration_formation_integrity — rs_1st_drvar morale=6 dissolution gap (P1).**
+**ATH BASELINE: n1256: 94.2% area-weighted, 23/23 anchors, 6/6 benchmarks. 73 battles, 36/40 combat weeks. hash: 5fa01bbdecc43f5f.**
+**n1273 COMPLETE: 94.1%, 24/25 anchors (brcko FAIL), 6/6 benchmarks, 99 battles, 38/40 combat weeks. hash: 1bfa86eaf4c82606.**
+**Ops mechanics audit: 4 bugs fixed (ghost dups, unreachable objectives, loan exclusivity, probe guard). See ledger for details.**
+**Op Jackal: Brilliant Victory 5★ (t15). Drift fix ✓. Doboj ✓. brcko still FAIL (ARBiH 2nd Corps captures with 8-attack op at t21; brcko not in Op Koridor objectives).**
+**valid_for_combat_calibration: false (99 battles, target 150-250). War-or-Game: NOT APPROVED.**
+**[RESOLVED] Brigade drift, objective validation gate, homeDefense surplus filters (allocate+plan), ghost duplicates, BFS faction-wide scope, loan exclusivity, probe guard blocking plans.**
+**[RESOLVED] OSID naming-mismatch: boljanic_2=Doboj, kopcic_2=Bugojno, brcko=Brčko, foca_3=Foča.**
+**Remaining P1s: brcko anchor (Op Koridor doesn't target brcko city; needs pre_planned_operations.ts change or new op), battle tempo 99 vs 150-250, HRHB patron directive scope fix (JSON), jajce_falls turn_min 40→28.**
+**Pre-existing gap revealed: Goražde enclave brigades (arbih_808th, arbih_843rd) not assigned to reachable sectors — anomaly detector exemption added for placement:fixed_home_osid.**
+**TWO OP SYSTEMS: (1) Legacy injectQueuedOperation (war_phases inject-queued-operations step, BEFORE commander) — consumes queued_operations, injects is_pre_planned ops directly. (2) Commander tryCreateFromOpportunity — runs AFTER legacy, for corps with no queued_operations (arbih_1st, arbih_5th, etc.). tryCreateFromPrePlanned is dead code — queue already consumed. Plan guard must exempt probes (type='probe' are independent of plan slots).**
 
 **[MERGED] Concurrent corps operations.** `active_operations[]` replaces `active_operation`. Slot cap floor(brigades/12). 7 helpers. Emergency defense overflow. Bot secondary op guard. Save migration v1→v2. 84 files, +1459/-525.
 **[MERGED] Krajina paramilitary scope.** 6 municipalities added to RS offensive sweep. MAX_POCKET_CLUSTER 3→6. +3.0pp.
