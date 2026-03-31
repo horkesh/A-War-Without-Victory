@@ -121,6 +121,12 @@ export interface Scenario {
      */
     war_force_transition_after_turns?: number;
     /**
+     * Baked initial OSID→faction map. When present, replaces the runtime derivation
+     * (operational_political_control.json load) and already includes any osid_control_overrides.
+     * Keys: OSID strings ("op:mun:slug"). Values: FactionId ("RS", "RBiH", "HRHB").
+     */
+    initial_osid_controllers?: Record<string, string>;
+    /**
      * Per-OSID political control overrides. Applied after OSID promotion (majority voting),
      * before OOB formation creation. Used for historically accurate initial control that
      * differs from municipality-level ethnic majority (e.g. Brčko: city held by VRS despite

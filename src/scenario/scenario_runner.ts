@@ -1009,6 +1009,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         }
 
         // Apply ethnic-majority OSID control from derived data.
+        // When scenario.initial_osid_controllers is present, use it directly (already includes
+        // osid_control_overrides) instead of loading operational_political_control.json.
         // The hybrid_1992 init mode's ethnic lookup fails for OSID keys (looks up
         // "op:mun:slug" in data keyed by "S123456"). This step loads the pre-derived
         // operational_political_control.json (40% ethnic majority threshold, HRHB→RBiH
@@ -1016,15 +1018,21 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         // Historical: April 1992 control followed ethnic concentrations, not municipality admin.
         if (operationalData?.operationalToCanonical) {
             try {
-                const opControlPath = join(baseDir ?? '', 'data/derived/operational/operational_political_control.json');
-                const opControlRaw = JSON.parse(await readFile(opControlPath, 'utf8')) as {
-                    by_settlement_id?: Record<string, string>;
-                };
-                if (opControlRaw.by_settlement_id) {
+                let bySettlementId: Record<string, string> | undefined;
+                if (scenario.initial_osid_controllers && Object.keys(scenario.initial_osid_controllers).length > 0) {
+                    bySettlementId = scenario.initial_osid_controllers;
+                } else {
+                    const opControlPath = join(baseDir ?? '', 'data/derived/operational/operational_political_control.json');
+                    const opControlRaw = JSON.parse(await readFile(opControlPath, 'utf8')) as {
+                        by_settlement_id?: Record<string, string>;
+                    };
+                    bySettlementId = opControlRaw.by_settlement_id;
+                }
+                if (bySettlementId) {
                     const pc = state.political.political_controllers ?? {};
-                    const sortedOsids = Object.keys(opControlRaw.by_settlement_id).sort((a, b) => a.localeCompare(b));
+                    const sortedOsids = Object.keys(bySettlementId).sort((a, b) => a.localeCompare(b));
                     for (const osid of sortedOsids) {
-                        const faction = opControlRaw.by_settlement_id[osid];
+                        const faction = bySettlementId[osid];
                         if (faction) pc[osid] = faction as FactionId;
                     }
                     state.political.political_controllers = pc;
@@ -1048,7 +1056,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         // Apply per-OSID political control overrides from scenario config (after ethnic control, before OOB).
         // Historical accuracy: some OSIDs need different controllers than ethnic majority.
         // E.g. Brčko city held by VRS despite Bosniak municipality majority.
-        if (scenario.osid_control_overrides && Object.keys(scenario.osid_control_overrides).length > 0) {
+        // Skip when initial_osid_controllers is present — overrides are already baked into it.
+        if (!scenario.initial_osid_controllers && scenario.osid_control_overrides && Object.keys(scenario.osid_control_overrides).length > 0) {
             const beforeOverrideControllers = { ...(state.political.political_controllers ?? {}) };
             applyOsidControlOverrides(state, scenario.osid_control_overrides);
             initOverrideChangeCount = countInitOverrideChanges(

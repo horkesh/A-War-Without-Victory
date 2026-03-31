@@ -339,6 +339,18 @@ export function normalizeScenario(raw: unknown): Scenario {
     // Supply reserves system (Phase A)
     const supply_reserves_enabled = o.supply_reserves_enabled === true ? true : undefined;
 
+    // Baked initial OSID controllers (replaces runtime derivation when present)
+    const initial_osid_controllers = (() => {
+        const raw = o.initial_osid_controllers;
+        if (raw == null || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
+        const VALID = new Set(['RS', 'RBiH', 'HRHB']);
+        const result: Record<string, string> = {};
+        for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
+            if (typeof k === 'string' && typeof v === 'string' && VALID.has(v)) result[k] = v;
+        }
+        return Object.keys(result).length > 0 ? result : undefined;
+    })();
+
     // Per-OSID political control overrides (applied after OSID promotion, before OOB)
     const osid_control_overrides = (() => {
         const raw = o.osid_control_overrides;
@@ -421,6 +433,7 @@ export function normalizeScenario(raw: unknown): Scenario {
             war_force_transition_after_turns,
             avoided_osids_by_faction,
             supply_reserves_enabled,
+            initial_osid_controllers,
             osid_control_overrides,
             war_timeline,
             init_officers
@@ -467,6 +480,7 @@ export function normalizeScenario(raw: unknown): Scenario {
         war_force_transition_after_turns,
         avoided_osids_by_faction,
         supply_reserves_enabled,
+        initial_osid_controllers,
         osid_control_overrides,
         war_timeline,
         init_officers
