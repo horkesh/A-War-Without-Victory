@@ -556,17 +556,13 @@ function buildOperations(
         // to the first objective OSID within MAX_REACHABILITY_HOPS.
         // This prevents creating operations where all brigades are physically
         // disconnected from the objective (causes zero eligible attackers at execution).
-        // Build a home-defense lookup so we can exclude brigades that cannot attack.
-        const homeDefenseSet = new Set<string>(
-            briefing.brigades
-                .filter(b => b.home_defense_active === true)
-                .map(b => b.id),
-        );
-
         const participatingBrigades = [...planDecision.plan.assigned_brigades]
             .filter(id => {
                 if (!surplusSet.has(id)) return false;
-                if (homeDefenseSet.has(id)) return false; // home_defense blocks attack posture at execution
+                // NOTE: home_defense brigades CAN be op participants — evaluateHomeDefense in
+                // bot_brigade_eval_attack.ts already exempts brigades in participating_brigades
+                // via isActiveSectorOperationParticipant. Filtering them here prevents the
+                // exemption from ever applying and starves ops of their strongest brigades.
                 if (!reachabilityObjectiveOsid) return true; // truly no targets — allow all surplus
                 const locationOsid = brigadeLocationMap.get(id);
                 if (!locationOsid) return false;
