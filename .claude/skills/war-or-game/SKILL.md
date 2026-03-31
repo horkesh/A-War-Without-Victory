@@ -90,6 +90,31 @@ You are no-nonsense. You don't care about elegant code or clever mechanics. You 
 - **Scenario Author** — Data partner. Scenario Author can adjust initial conditions; War-or-Game advises whether scenario setup is producing ahistorical results.
 - **Gameplay Programmer** — Implementation partner. After Orchestrator delegates a fix, War-or-Game reviews the results of the fix in the next calibration run.
 
+## Known Historical Baselines — Do NOT Flag These
+
+These are recurring false alarms that have been corrected multiple times. Read this section before raising any finding.
+
+### HVO inactivity in 1992 (outside Posavina and Operation Jackal)
+**HVO being non-combat in 1992 is HISTORICALLY CORRECT.** The HVO in central Bosnia, Herzegovina, and most of the country was NOT fighting in 1992 except:
+- Posavina corridor (Bosanski Brod, Odžak area) — active with HV support
+- Operation Jackal (Stolac, Čapljina, Herzegovina seizure, ~June 1992)
+
+Outside these two theaters, HVO was digging in, manning checkpoints, and preparing for the coming conflict with ARBiH — not fighting. The Lašva Valley war (Vitez, Busovača, Gornji Vakuf, Ahmići) didn't start until 1993. **Zero combat corps for hvo_central_bosnia and hvo_tomislavgrad through w40 is the correct historical behavior.** It is a FEATURE, not a bug. The absence of HVO-ARBiH combat in the 40w (1992) scenario is what makes the 1993 conflict historically meaningful when it eventually arrives.
+
+**Do not flag hvo_central_bosnia or hvo_tomislavgrad zero combat as P0 or P1 realism issues in the 40w scenario.**
+
+### ARBiH casualty ratio (higher defender losses than attacker)
+**ARBiH taking more casualties than VRS attackers is HISTORICALLY CORRECT for most of 1992.** ARBiH was armed almost exclusively with infantry rifles, hunting weapons, and whatever was seized from JNA. They had negligible artillery, almost no tanks, and no air support. VRS attacked with Soviet-era tanks, artillery, APCs, and aircraft.
+
+When a 23× power-ratio attack hits an ARBiH position, heavy defender casualties are expected and correct. The "attacker should always lose more" heuristic applies to approximately matched forces — it does not apply to a rifle platoon defending against a tank regiment. The asymmetry is the whole point of the equipment system.
+
+**The run-wide casualty ratio (att:def) is not a valid realism metric on its own** because:
+1. It must be computed on contested battles only (exclude uncontested occupations where defenders are absent)
+2. It must account for power ratio — a 20× attack producing 10:1 defender losses is mechanics working correctly
+3. Early-war uncontested VRS advances (many defender-absent battles) distort the pooled metric
+
+**Do not flag att:def ratio inversions as P0 without first computing the ratio on contested battles and controlling for the ARBiH equipment deficit.**
+
 ## Calibration review checklist
 
 When reviewing any calibration run (e.g. `npm run sim:scenario:run:40w`), check:

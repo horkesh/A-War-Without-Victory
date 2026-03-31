@@ -1027,6 +1027,96 @@ function detectCombatIneffectiveConcentration(state: GameState): AnomalyReport[]
     return reports;
 }
 
+/**
+ * 29. cross_corps_sector_assignment (warning)
+ * A brigade assigned to a sector whose corps_id does not match the brigade's own corps_id.
+ * Root cause: sector Phase 2 BFS fills across corps boundaries when home OSIDs are in
+ * enemy-held territory, claiming distant front edges and assigning foreign brigades to them.
+ * Effect: foreign brigades become sector-coverage primary defenders in battles far from their
+ * theater (e.g. arbih_215th Brčko brigade as primary defender at op:ilijas:sirovine), and
+ * the homeland-defense morale absorption mechanic incorrectly applies because it is keyed
+ * on the target OSID's co-ethnic share, not the defender's home municipality.
+ * n1239: arbih_215th_vitezka_mountain (arbih_2nd_corps, home=op:brcko:bijela_2) was
+ * sector-assigned to a vrs_sarajevo_romanija sector covering sirovine, causing decisive_victory
+ * attacks to be absorbed by homelandAbsorbDecisive and preventing OSID transfer.
+ */
+function detectCrossCorpsSectorAssignment(state: GameState): AnomalyReport[] {
+    const reports: AnomalyReport[] = [];
+    const formations = state.military.formations;
+    const sectors = state.military.corps_front_sectors ?? {};
+
+    const violations: Array<{
+        brigadeId: string;
+        brigadeFaction: string;
+        brigadeCorps: string;
+        sectorId: string;
+        sectorCorps: string;
+        sectorFaction: string;
+        brigadeLocation: string;
+        brigadeHome: string;
+    }> = [];
+
+    // Build a set of army_hq corps IDs — elite brigades belonging to army HQ are
+    // intentionally loaned to subordinate corps sectors and are NOT a cross-assignment bug.
+    const armyHqCorps = new Set<string>();
+    for (const fid of sortedKeys(formations as Record<string, unknown>)) {
+        const f = formations[fid];
+        if (f.kind === 'army_hq') armyHqCorps.add(fid);
+    }
+
+    for (const sectorId of sortedKeys(sectors as Record<string, unknown>)) {
+        const sector = sectors[sectorId];
+        const sectorCorps = sector.corps_id;
+        const sectorFaction = sector.faction;
+
+        // Check both assigned and reserve brigades — both participate in sector coverage defense.
+        const allBrigadeIds = [
+            ...(sector.assigned_brigade_ids ?? []),
+            ...(sector.reserve_brigade_ids ?? []),
+        ].sort(strictCompare);
+
+        for (const bid of allBrigadeIds) {
+            const f = formations[bid];
+            if (!f) continue;
+            if (f.status !== 'active') continue;
+            if (!f.corps_id) continue;
+            if (f.corps_id === sectorCorps) continue;
+            // Elite brigades from army HQ are loaned to subordinate corps by design — not a bug.
+            if (armyHqCorps.has(f.corps_id)) continue;
+
+            violations.push({
+                brigadeId: bid,
+                brigadeFaction: f.faction ?? 'unknown',
+                brigadeCorps: f.corps_id,
+                sectorId,
+                sectorCorps,
+                sectorFaction,
+                brigadeLocation: f.location_osid ?? 'none',
+                brigadeHome: f.home_osid ?? 'none',
+            });
+        }
+    }
+
+    if (violations.length === 0) return reports;
+
+    violations.sort((a, b) => strictCompare(a.brigadeId, b.brigadeId));
+
+    const detail = violations.slice(0, 15).map(v =>
+        `${v.brigadeId} (corps=${v.brigadeCorps}, home=${v.brigadeHome}) in sector ${v.sectorId} (corps=${v.sectorCorps})`
+    ).join('; ');
+    const suffix = violations.length > 15 ? `; ... +${violations.length - 15} more` : '';
+
+    reports.push({
+        category: 'deployment',
+        severity: 'warning',
+        type: 'cross_corps_sector_assignment',
+        description: `${violations.length} brigade(s) are assigned to sectors belonging to a different corps. Foreign-corps brigades become sector-coverage defenders in wrong theaters and receive incorrect homeland-defense bonuses: ${detail}${suffix}.`,
+        entities: violations.map(v => v.brigadeId),
+    });
+
+    return reports;
+}
+
 // ── Public entry point ─────────────────────────────────────────────────
 
 /**
@@ -1069,6 +1159,8 @@ export function runAnomalyDetection(state: GameState): AnomalyReport[] {
         // #27, #28 — territorial inertia checks
         checkUndefendedPaintedMismatch,
         checkAdjacentUncontestedTerritory,
+        // #29 — cross-corps sector assignment (sector BFS boundary leak)
+        detectCrossCorpsSectorAssignment,
     ];
 
     const results: AnomalyReport[] = [];
