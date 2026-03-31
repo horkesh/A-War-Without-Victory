@@ -34,6 +34,31 @@ import { ensureBrigadeComposition } from './equipment_effects.js';
 import { isFriendlyFaction } from '../early_war/alliance_update.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Corps boundary helpers
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Build the set of OSIDs that belong to a given corps, from
+ * `state.military.corps_front_sectors`. Includes all territory_osids and
+ * sub_segment friendly_osids for every sector owned by this corps.
+ *
+ * Returns undefined (not an empty Set) when the corps has no sectors so
+ * callers can safely pass `undefined` to dijkstraFriendlyPath and get
+ * faction-wide BFS (graceful degradation for orphan brigades).
+ */
+function buildCorpsAllowedOsids(corpsId: string, state: GameState): Set<string> | undefined {
+    const allowed = new Set<string>();
+    for (const sector of Object.values(state.military.corps_front_sectors ?? {})) {
+        if (sector.corps_id !== corpsId) continue;
+        for (const osid of sector.territory_osids ?? []) allowed.add(osid);
+        for (const seg of sector.sub_segments ?? []) {
+            for (const osid of seg.friendly_osids ?? []) allowed.add(osid);
+        }
+    }
+    return allowed.size > 0 ? allowed : undefined;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Constants
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -159,6 +184,11 @@ export function getOsidColumnRate(formation: FormationState): number {
  * Returns: { path: Osid[], totalCost: number } or null if unreachable.
  * path includes both source and destination.
  *
+ * @param allowedOsids - Optional corps-boundary set. When provided, BFS only traverses
+ *   nodes that are in this set (in addition to the friendly check). The source and
+ *   destination are always included regardless. Pass undefined for the legacy
+ *   faction-wide behavior (orphan brigades, fallback cases).
+ *
  * Deterministic: priority queue tie-breaks by OSID sort order.
  */
 export function dijkstraFriendlyPath(
@@ -168,7 +198,8 @@ export function dijkstraFriendlyPath(
     adjacency: Map<Osid, Osid[]>,
     state: GameState,
     reverseMap: OperationalToCanonicalReverseMap,
-    terrainData: TerrainScalarsData
+    terrainData: TerrainScalarsData,
+    allowedOsids?: Set<string>,
 ): { path: Osid[]; totalCost: number } | null {
     if (fromOsid === toOsid) return { path: [fromOsid], totalCost: 0 };
 
@@ -211,6 +242,9 @@ export function dijkstraFriendlyPath(
         const neighbors = adjacency.get(current) ?? [];
         for (const n of neighbors) {
             if (visited.has(n)) continue;
+            // Corps boundary guard: when an allowed set is provided, only traverse
+            // nodes within that set (source/destination are exempt).
+            if (allowedOsids !== undefined && n !== toOsid && !allowedOsids.has(n)) continue;
             // Traverse through friendly/allied or unoccupied territory (or the destination itself)
             const controller = getPoliticalControllerOSID(state, n, reverseMap);
             if (!isFriendlyFaction(controller, factionId, state) && controller !== null && n !== toOsid) continue;
@@ -350,8 +384,14 @@ export function processOsidColumnMovement(
 
         const factionId = f.faction as FactionId;
 
-        // Compute terrain-weighted path through friendly territory
-        const result = dijkstraFriendlyPath(loc, destOsid, factionId, adjacency, state, reverseMap, terrainData);
+        // Corps boundary guard: build the allowed OSID set for this brigade's corps so
+        // that Dijkstra cannot route through another corps' territory.
+        // Falls back to undefined (faction-wide BFS) for orphan brigades or corps with no sectors.
+        const corpsId = (f as { corps_id?: string | null }).corps_id;
+        const allowedOsids = corpsId ? buildCorpsAllowedOsids(corpsId, state) : undefined;
+
+        // Compute terrain-weighted path through friendly territory (corps-restricted)
+        const result = dijkstraFriendlyPath(loc, destOsid, factionId, adjacency, state, reverseMap, terrainData, allowedOsids);
         if (!result || result.path.length <= 1) {
             report.column_blocked += 1;
             delete movementOrders[formationId];

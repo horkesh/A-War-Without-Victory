@@ -17,6 +17,28 @@ import type { CorpsFrontSector, CorpsCommandState, FactionId, FormationState, Ga
 import { strictCompare } from '../../state/validateGameState.js';
 import { bfsDistance } from './sector_utils.js';
 
+// ── Corps boundary helpers ─────────────────────────────────────────────────────
+
+/**
+ * Build the set of OSIDs that belong to a given corps, derived from
+ * `state.military.corps_front_sectors`. Includes all territory_osids and
+ * sub_segment friendly_osids for every sector owned by this corps.
+ *
+ * Returns an empty set (not undefined) when the corps has no sectors, so
+ * callers can detect the "no sectors" case and fall back to faction-wide BFS.
+ */
+function getCorpsAllowedOsids(corpsId: string, state: GameState): Set<string> {
+    const allowed = new Set<string>();
+    for (const sector of Object.values(state.military.corps_front_sectors ?? {})) {
+        if (sector.corps_id !== corpsId) continue;
+        for (const osid of sector.territory_osids ?? []) allowed.add(osid);
+        for (const seg of sector.sub_segments ?? []) {
+            for (const osid of seg.friendly_osids ?? []) allowed.add(osid);
+        }
+    }
+    return allowed;
+}
+
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 /** Max hops before we skip redistribution (brigade too far, will be reassigned). */
@@ -236,11 +258,31 @@ export function distributeBrigadesToFront(
                 if (!loc) continue;
                 if (frontOsidSet.has(loc)) continue; // Already at front
 
+                // Corps boundary guard: restrict BFS traversal and target pool to
+                // OSIDs within this brigade's own corps territory. Falls back to
+                // faction-wide set when the brigade has no corps or corps has no sectors.
+                const corpsId = f.corps_id;
+                const corpsAllowed = corpsId ? getCorpsAllowedOsids(corpsId, state) : new Set<string>();
+                const useCorpsBoundary = corpsAllowed.size > 0;
+
+                // Filter front OSIDs to only those reachable within corps territory
+                const candidateFrontOsids = useCorpsBoundary
+                    ? sortedFrontOsids.filter(o => corpsAllowed.has(o))
+                    : sortedFrontOsids;
+                // If all targets are outside corps territory, fall back to full set
+                const effectiveFrontOsids = candidateFrontOsids.length > 0 ? candidateFrontOsids : sortedFrontOsids;
+
                 // Pick least-stacked front OSID, tie-break by home match then deterministic
-                const target = pickLeastStackedTarget(sortedFrontOsids, osidCount, f.home_osid);
+                const target = pickLeastStackedTarget(effectiveFrontOsids, osidCount, f.home_osid);
+
+                // BFS friendly set: intersect with corps boundary when available
+                const factionFriendly = friendlyByFaction.get(sector.faction);
+                const bfsFriendly = (useCorpsBoundary && factionFriendly)
+                    ? new Set([...factionFriendly].filter(o => corpsAllowed.has(o)))
+                    : factionFriendly;
 
                 // Compute distance
-                const dist = bfsDistance(loc, target, adjacency, friendlyByFaction.get(sector.faction));
+                const dist = bfsDistance(loc, target, adjacency, bfsFriendly);
 
                 if (dist === 1) {
                     // Adjacent: move directly

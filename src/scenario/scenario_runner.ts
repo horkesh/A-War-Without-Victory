@@ -481,6 +481,10 @@ const HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992: Array<{ osid: string; expected
     { osid: 'op:zenica:zenica_2', expected_controller: 'RBiH' },          // Zenica — ARBiH 3rd Corps HQ
     { osid: 'op:travnik:travnik_2', expected_controller: 'RBiH' },        // Travnik — ARBiH held
     { osid: 'op:mostar:mostar_zapad_2', expected_controller: 'HRHB' },    // Mostar west — HVO controlled
+    // NOTE: OSID names reflect clustering anchor settlement, not always the dominant city.
+    // boljanic_2 = Doboj city (27k pop); kopcic_2 = Bugojno city (22k pop)
+    { osid: 'op:doboj:boljanic_2', expected_controller: 'RS' },           // Doboj city (named boljanic_2) — VRS from May 1992
+    { osid: 'op:bugojno:kopcic_2', expected_controller: 'RBiH' },         // Bugojno city (named kopcic_2) — ARBiH/HVO held Apr 1992
 ];
 
 function countControllers(snapshot: ControlKey[]): Map<string, number> {

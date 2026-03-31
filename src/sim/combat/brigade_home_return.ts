@@ -12,6 +12,25 @@ import type { CorpsCommandState, FormationId, FormationState, GameState, Operati
 import type { TurnContext } from '../turn_pipeline_types.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
+// ── Corps boundary helpers ─────────────────────────────────────────────────────
+
+/**
+ * Build the set of OSIDs that belong to a given corps, from
+ * `state.military.corps_front_sectors`. Returns an empty set when the corps
+ * has no sectors (caller should fall back to faction-wide BFS).
+ */
+function getCorpsAllowedOsids(corpsId: string, state: GameState): Set<string> {
+    const allowed = new Set<string>();
+    for (const sector of Object.values(state.military.corps_front_sectors ?? {})) {
+        if (sector.corps_id !== corpsId) continue;
+        for (const osid of sector.territory_osids ?? []) allowed.add(osid);
+        for (const seg of sector.sub_segments ?? []) {
+            for (const osid of seg.friendly_osids ?? []) allowed.add(osid);
+        }
+    }
+    return allowed;
+}
+
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 /** Only check every N turns (not every turn — avoids oscillation with garrison-fill). */
@@ -224,15 +243,23 @@ export function computeReturnMarches(
         // Skip if no corps (unattached)
         const corpsId = f.corps_id;
         if (!corpsId) continue;
+
+        // Corps boundary guard: restrict BFS to this brigade's own corps territory.
+        // Falls back to faction-wide friendlyOsids when corps has no sectors.
+        const corpsAllowed = getCorpsAllowedOsids(corpsId, state);
+        const bfsFriendly = corpsAllowed.size > 0
+            ? new Set([...friendlyOsids].filter(o => corpsAllowed.has(o)))
+            : friendlyOsids;
+
         // If the brigade can reach its corps front, it's not truly orphaned — skip.
         const corpsFrontSet = corpsFrontTargets.get(corpsId);
         if (corpsFrontSet && corpsFrontSet.size > 0) {
-            const distToCorpsFront = bfsDistanceToAny(loc, corpsFrontSet, adjacency, friendlyOsids);
+            const distToCorpsFront = bfsDistanceToAny(loc, corpsFrontSet, adjacency, bfsFriendly);
             if (distToCorpsFront != null) continue;
         }
 
-        // BFS toward home municipality through friendly territory
-        const result = bfsTowardHome(loc, homeMun, adjacency, friendlyOsids);
+        // BFS toward home municipality through corps-restricted friendly territory
+        const result = bfsTowardHome(loc, homeMun, adjacency, bfsFriendly);
         if (!result) continue;
         if (result.distance <= RETURN_DISPLACEMENT_THRESHOLD) continue;
 
