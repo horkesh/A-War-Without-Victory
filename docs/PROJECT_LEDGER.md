@@ -1,3 +1,41 @@
+## [2026-03-31] n1246–n1249 — Catastrophe memory, elite loan expiry, check #29; 93.5% ATH
+
+### Summary
+Three fixes across commander and army reserve systems. n1249: **93.5%**, 84 battles, 111 orders, 28 orphan reports, 65 anomalies. ATH tie. Investigated pre-planned reachability fix (n1248) — caused orphan regression 28→58; reverted in n1249 (wrong phase: plan-creation vs execution-time). n1248 fully recovered.
+
+### Changes
+
+**1. Catastrophe memory — per-OSID cooldown on failed ops (n1246)**
+- `plan.ts`: Added `CATASTROPHIC_OSID_COOLDOWN_TURNS = 4`. `buildCatastrophicOsidCooldownSet()` scans `operation_history` for recently-abandoned ops (within 4 turns) and excludes their lost OSIDs from new opportunity plans. att:def ratio improved 0.729 → 0.840. ARBiH meat-grinder pattern broken.
+
+**2. Elite loan max duration — hard cap 12 turns (n1246)**
+- `army_reserve_system.ts` / `elite_loan_types.ts`: Added `ELITE_LOAN_MAX_DURATION = 12`. `tickEliteLoans()` now triggers forced recall when `turnsSinceLoan >= 12`, regardless of `hasActiveOp`. Corps with perpetually-executing ops (e.g. rs_65th in VRS) now return elite brigades after max 12 turns.
+
+**3. Check #29 — army_hq exemption narrowed to active loans (n1249)**
+- `anomaly_detector.ts`: Replaced blanket `armyHqCorps.has(f.corps_id) → continue` with loan-specific check: only exempt army HQ brigades that have an active loan TO the sector's corps. Mis-assigned HQ brigades without an active loan now correctly flagged.
+
+**4. Pre-planned reachability fix — attempted and reverted (n1248→n1249)**
+- Added `filterReachableObjectives` call to `tryCreateFromPrePlanned`. Caused orphan regression 28→58, anomalies 64→100. Root cause: check used current brigade positions; pre-planned ops execute after concentration, when brigades are already near staging. Reverted. Comment added documenting why this check belongs in emit.ts (execution time), not plan.ts (plan-creation time).
+
+### Results (n1249)
+- Area-weighted: **93.5%** (ATH tie)
+- Anchors: 22/22 | Benchmarks: 6/6
+- Battles: 84 | Orders: 111 | att:def ratio: 0.840
+- Orphan reports: 28 | Anomalies: 65
+
+### Open P1s
+- Bot exhaustion gates: `bot_corps_ai` reads `profile.exhaustion` = 0, not `war_exhaustion` — exhaustion suppression never fires
+- Orphan operation brigades: 28 remaining (fix must go in emit.ts at execution time, not plan.ts)
+- operation_zero_eligible_execution: 14 — ops where no brigades staged
+
+### Files
+- `src/sim/combat/commander/plan.ts`
+- `src/sim/combat/army_reserve_system.ts`
+- `src/state/elite_loan_types.ts`
+- `src/scenario/anomaly_detector.ts`
+
+---
+
 ## [2026-03-31] n1243–n1245 — Op Hz Consolidation + Op Foca objectives fixed; 93.3% ATH
 
 ### Summary

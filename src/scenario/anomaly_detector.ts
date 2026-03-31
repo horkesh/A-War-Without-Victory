@@ -1081,8 +1081,13 @@ function detectCrossCorpsSectorAssignment(state: GameState): AnomalyReport[] {
             if (f.status !== 'active') continue;
             if (!f.corps_id) continue;
             if (f.corps_id === sectorCorps) continue;
-            // Elite brigades from army HQ are loaned to subordinate corps by design — not a bug.
-            if (armyHqCorps.has(f.corps_id)) continue;
+            // Army HQ brigades are only exempt when actively on loan to THIS sector's corps.
+            // A brigade physically stationed in a distant sector without an active loan is a
+            // real mis-assignment (e.g. rs_65th at op:foca assigned to vrs_sarajevo_romanija).
+            if (armyHqCorps.has(f.corps_id)) {
+                const loan = f.elite_loan_state;
+                if (loan?.on_loan && loan.loaned_to_corps === sectorCorps) continue;
+            }
 
             violations.push({
                 brigadeId: bid,

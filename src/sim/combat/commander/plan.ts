@@ -327,10 +327,16 @@ function tryCreateFromPrePlanned(
     // Assign brigades from surplus pool (sorted by offensive fitness)
     const assignedBrigades = selectBrigadesForPlan(surplusPool, requiredBrigades);
 
+    // Pre-planned ops are designed to execute AFTER concentration, not from current positions.
+    // Reachability is enforced in emit.ts (buildAxesFromDef) at execution time when brigades
+    // are already near staging. Applying it here at plan-creation time incorrectly rejects
+    // valid pre-planned ops whose brigades will march toward staging over the next few turns.
+    const targetOsids = extractTargetOsids(opDef);
+
     const plan: CommanderPlan = {
         plan_id: `plan_${briefing.corps_id}_t${turn}_${opName.replace(/\s+/g, '_').toLowerCase()}`,
         objective_description: opName,
-        target_osids: extractTargetOsids(opDef),
+        target_osids: targetOsids,
         required_brigades: requiredBrigades,
         assigned_brigades: assignedBrigades,
         staging_zone: stagingZone.zone_id,
