@@ -19,6 +19,7 @@ import type { GameState, FormationState, FactionId, FormationId } from '../../st
 import type { Osid } from './osid_adjacency.js';
 import {
     ELITE_LOAN_MIN_DURATION,
+    ELITE_LOAN_MAX_DURATION,
     ELITE_LOAN_COOLDOWN,
     ELITE_CASUALTY_THRESHOLD,
     ELITE_MORALE_RECALL,
@@ -642,8 +643,13 @@ export function tickEliteLoans(state: GameState, turn: number): void {
         const sector = Object.keys(cfs).sort(strictCompare).map(k => cfs[k]).find(s => s.corps_id === corpsId);
         const threatHigh = sector ? sector.threat_ratio >= 1.5 : false;
 
-        // Op ended + no high threat → recall
-        if (!hasActiveOp && !threatHigh) {
+        // Hard cap: force recall after ELITE_LOAN_MAX_DURATION turns regardless of op status.
+        // Prevents elite brigades from being locked on_loan indefinitely by perpetually-executing ops.
+        const atMaxDuration = turnsSinceLoan >= ELITE_LOAN_MAX_DURATION;
+
+        // Op ended + no high threat → voluntary recall; or hard cap reached → forced recall
+        const voluntaryRecall = !hasActiveOp && !threatHigh;
+        if (voluntaryRecall || atMaxDuration) {
             const hadOp = episode?.reason === 'offensive_support' || episode?.reason === 'exploitation';
             recallEliteLoan(state, bid, hadOp ? 'op_complete' : 'need_expired', turn);
             continue;
