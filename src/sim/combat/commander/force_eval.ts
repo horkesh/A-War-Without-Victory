@@ -111,6 +111,7 @@ export function evaluateBrigade(
         tier,
         is_combat_effective: isCombatEffective,
         is_disrupted: isDisrupted,
+        is_on_loan: brigade.elite_loan_state?.on_loan ?? false,
         is_home_defense: brigade.home_defense_active ?? false,
         morale: brigade.morale ?? 50,
         current_zone: currentZone,

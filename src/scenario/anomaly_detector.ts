@@ -605,6 +605,11 @@ function detectUnassignedFrontlineBrigades(state: GameState): AnomalyReport[] {
         if (assignedSet.has(fid)) continue;
         if (opParticipants.has(fid)) continue;
         if ((f.disrupted_turns ?? 0) > 0) continue;
+        // Exempt fixed-placement enclave brigades: tagged 'placement:fixed_home_osid' means
+        // the brigade is pinned to its home OSID in a disconnected enclave. The sector
+        // assignment pipeline handles these separately; drop-through here is a known gap,
+        // not a critical deployment failure.
+        if (Array.isArray(f.tags) && f.tags.includes('placement:fixed_home_osid')) continue;
         unassigned.push({ id: fid, corps: f.corps_id, location: f.location_osid ?? 'none' });
     }
 

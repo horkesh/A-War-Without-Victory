@@ -137,6 +137,12 @@ export function managePlan(
         return { plan: null, action: 'none', reason: `corps in ${briefing.corps_stance} stance — no new plans`, concentration_orders: [] };
     }
 
+    // Guard: if this corps already has a live non-recovery op, do not create a new plan.
+    const hasLiveOp = briefing.active_operations.some(op => op.phase !== 'recovery');
+    if (hasLiveOp) {
+        return { plan: null, action: 'none', reason: 'live operation already active for this corps', concentration_orders: [] };
+    }
+
     // Priority 1: pre-planned operations
     const prePlannedDecision = tryCreateFromPrePlanned(briefing, zones, surplusPool, turn);
     if (prePlannedDecision) return prePlannedDecision;
@@ -400,11 +406,11 @@ function tryCreateFromOpportunity(
         // Besieged corps can only do local ops
         // Still allow opportunity within hop limit
         const bestZone = eligibleZones[0]!;
-        return createOpportunityPlan(briefing, bestZone, surplusPool, turn, true);
+        return createOpportunityPlan(briefing, bestZone, surplusPool, turn, true, zones);
     }
 
     const bestZone = eligibleZones[0]!;
-    return createOpportunityPlan(briefing, bestZone, surplusPool, turn, false);
+    return createOpportunityPlan(briefing, bestZone, surplusPool, turn, false, zones);
 }
 
 function createOpportunityPlan(
@@ -413,6 +419,7 @@ function createOpportunityPlan(
     surplusPool: BrigadeEvaluation[],
     turn: number,
     isLocal: boolean,
+    allZones: ZoneAssessment[],
 ): PlanDecision | null {
     const requiredBrigades = Math.max(
         MIN_BRIGADES_FOR_PLAN,
@@ -429,6 +436,7 @@ function createOpportunityPlan(
         briefing,
         assignedBrigades,
         stagingZone.enemy_adjacent_osids,
+        allZones,
     );
 
     // If no enemy objectives survive the reachability filter, this plan cannot be created.
@@ -512,6 +520,7 @@ function filterReachableObjectives(
     briefing: CommanderBriefing,
     assignedBrigades: readonly FormationId[],
     candidateOsids: readonly string[],
+    zones: readonly ZoneAssessment[],
 ): string[] {
     if (candidateOsids.length === 0) return [];
 
@@ -519,8 +528,19 @@ function filterReachableObjectives(
     const adjacency = briefing.spatial.adjacency;
     const fofMap = briefing.spatial.friendlyOsidsByFaction;
     if (!adjacency || !fofMap) return [...candidateOsids];
-    const friendlyOsids = fofMap.get(briefing.faction);
-    if (!friendlyOsids) return [...candidateOsids];
+    const factionFriendlyOsids = fofMap.get(briefing.faction);
+    if (!factionFriendlyOsids) return [...candidateOsids];
+
+    // Restrict BFS to OSIDs within this corps's zones to avoid ghost paths through
+    // disconnected friendly enclaves (e.g. Sarajevo reaching Foča via RBiH faction set).
+    // Fall back to faction-wide set if no zones provided or zones have no OSIDs.
+    const corpsOsids = new Set<string>();
+    for (const zone of zones) {
+        for (const osid of zone.osids) {
+            corpsOsids.add(osid);
+        }
+    }
+    const friendlyOsids: ReadonlySet<string> = corpsOsids.size > 0 ? corpsOsids : factionFriendlyOsids;
 
     // Build location map from briefing brigades (FormationState has location_osid).
     const brigadeLocationMap = new Map<string, string>();

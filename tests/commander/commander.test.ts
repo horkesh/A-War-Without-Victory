@@ -107,6 +107,7 @@ function makeEval(overrides: Partial<BrigadeEvaluation> = {}): BrigadeEvaluation
         tier: 'active_defense' as const,
         is_combat_effective: true,
         is_disrupted: false,
+        is_on_loan: false,
         is_home_defense: false,
         morale: 80,
         current_zone: 'zone:test_corps:0' as ZoneId,
