@@ -761,11 +761,12 @@ describe('plan', () => {
             source: 'pre_planned',
         };
 
-        // Previous state with a high-threat zone -> triggers suspension
+        // Previous state with a critical-threat zone -> triggers suspension
+        // (high is intentionally NOT suspendable — structural baseline for narrow-corridor corps)
         const previousState: CommanderState = {
             zone_assessments: [zones[0]!],
             threat_assessment: {
-                threatened_zones: [{ zone_id: zoneId, threat_level: 'high' }],
+                threatened_zones: [{ zone_id: zoneId, threat_level: 'critical' }],
                 enemy_concentration_zones: [],
                 recent_losses: [],
                 overall_pressure: 'heavy',
@@ -821,11 +822,11 @@ describe('plan', () => {
             suspension_reason: 'threat escalation',
         };
 
-        // Still under threat -> triggers suspend check, and suspended duration >= MAX_SUSPENSION_TURNS
+        // Still under critical threat -> triggers suspend check, and suspended duration >= MAX_SUSPENSION_TURNS
         const previousState: CommanderState = {
             zone_assessments: [zones[0]!],
             threat_assessment: {
-                threatened_zones: [{ zone_id: zoneId, threat_level: 'high' }],
+                threatened_zones: [{ zone_id: zoneId, threat_level: 'critical' }],
                 enemy_concentration_zones: [],
                 recent_losses: [],
                 overall_pressure: 'heavy',

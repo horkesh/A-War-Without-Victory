@@ -639,8 +639,10 @@ function checkSuspendConditions(
     surplusPool: BrigadeEvaluation[],
     briefing: CommanderBriefing,
 ): string | null {
-    // Only concentrating or ready plans can be suspended
-    if (plan.status !== 'concentrating' && plan.status !== 'ready' && plan.status !== 'suspended') {
+    // Only concentrating plans can be suspended — 'ready' plans must launch or wait,
+    // never retreat to suspended. Suspending a ready plan on objective-capture threat
+    // is inverted logic: the enemy taking your objective is reason to attack faster.
+    if (plan.status !== 'concentrating' && plan.status !== 'suspended') {
         return null;
     }
 
@@ -652,18 +654,26 @@ function checkSuspendConditions(
         const stagingZoneThreat = previousThreat.threatened_zones.find(
             tz => tz.zone_id === plan.staging_zone
         );
-        if (stagingZoneThreat?.threat_level === 'high' || stagingZoneThreat?.threat_level === 'critical') {
-            return `staging zone ${plan.staging_zone} under ${stagingZoneThreat.threat_level} threat`;
+        // Suspend only on critical (active territory loss) — high is structural baseline for
+        // narrow-corridor corps (e.g. Posavina) and must not permanently veto offensive action.
+        if (stagingZoneThreat?.threat_level === 'critical') {
+            return `staging zone ${plan.staging_zone} under critical threat`;
         }
     }
 
     // Assigned brigades depleted below half — plan is no longer viable.
-    // Check assigned brigade availability, not raw surplus pool size, because
-    // surplusPool fluctuates with garrison budgets and does not track plan commitment.
+    // A brigade is "alive" if the commander system knows about it: either in the surplus
+    // pool or in a zone's assigned_brigades (garrison-locked). briefing.brigades is
+    // FormationState[] and may be empty in tests / minimal briefings — don't rely on it.
     const suspendAssignedIds = new Set(plan.assigned_brigades);
-    const availableAssigned = surplusPool.filter(ev => suspendAssignedIds.has(ev.brigade_id)).length;
-    if (availableAssigned < Math.ceil(plan.required_brigades * 0.5)) {
-        return `assigned brigades depleted: ${availableAssigned}/${plan.required_brigades} available`;
+    const knownBrigadeIds = new Set<string>();
+    for (const ev of surplusPool) knownBrigadeIds.add(ev.brigade_id);
+    for (const z of zones) {
+        for (const bid of z.assigned_brigades) knownBrigadeIds.add(bid);
+    }
+    const activeAssigned = plan.assigned_brigades.filter(bid => knownBrigadeIds.has(bid)).length;
+    if (activeAssigned < Math.ceil(plan.required_brigades * 0.5)) {
+        return `assigned brigades depleted: ${activeAssigned}/${plan.required_brigades} in commander system`;
     }
 
     return null;

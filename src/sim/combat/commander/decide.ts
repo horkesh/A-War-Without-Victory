@@ -8,7 +8,7 @@
  * Deterministic: sorted iteration via strictCompare, no Math.random(), no Date.now().
  */
 
-import type { FormationId, SectorStance, SectorIntelRecord } from '../../../state/game_state.js';
+import type { FormationId, SectorStance, SectorIntelRecord, CorpsFrontSector } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import type {
     CommanderBriefing,
@@ -29,6 +29,9 @@ import type {
 
 /** Turns of quiet before a sector is eligible for thinning to 'screening'. */
 const QUIET_TURNS_FOR_SCREENING = 5;
+// Sectors with threat_ratio at or above this threshold must not drop below 'defend'.
+// Matches the evaluateSectorStances threshold in bot_corps_directives.ts.
+const SCREENING_MAX_THREAT_RATIO = 1.5;
 
 /** Casualty threshold to classify sector activity as 'skirmish'. */
 const SKIRMISH_CASUALTY_THRESHOLD = 10;
@@ -107,7 +110,7 @@ export function makeDecisions(
 
     // 3. Reactive stance changes
     const stanceChanges = computeStanceChanges(
-        zones, threats, intelPicture, activityEntries, previousState, personality,
+        zones, threats, intelPicture, activityEntries, previousState, personality, briefing.sectors,
     );
 
     // 4. Reserve shifting
@@ -361,8 +364,15 @@ function computeStanceChanges(
     activityEntries: SectorActivityEntry[],
     previousState: CommanderState | null,
     personality: OfficerPersonality,
+    sectors: readonly CorpsFrontSector[],
 ): Array<{ sector_id: string; new_stance: SectorStance; reason: string }> {
     const changes: Array<{ sector_id: string; new_stance: SectorStance; reason: string }> = [];
+
+    // Build threat_ratio lookup by sector_id
+    const threatRatioBySector = new Map<string, number>();
+    for (const sec of sectors) {
+        threatRatioBySector.set(sec.sector_id, sec.threat_ratio);
+    }
 
     // Build threat level lookup by zone
     const threatByZone = new Map<string, string>();
@@ -446,11 +456,16 @@ function computeStanceChanges(
         } else if (activity.activity === 'active') {
             newStance = 'defend';
             reason = 'active enemy engagement — defending';
-        } else if (totalQuiet >= QUIET_TURNS_FOR_SCREENING && personality.aggression > 0.4) {
+        } else if (totalQuiet >= QUIET_TURNS_FOR_SCREENING
+                && (threatRatioBySector.get(sectorId) ?? 0) < SCREENING_MAX_THREAT_RATIO
+                && personality.aggression > 0.4) {
             // Quiet sector — aggressive commanders thin the line to free reserves
+            // Guard: only when threat_ratio is genuinely low; high-threat sectors stay at defend.
             newStance = 'screening';
             reason = `quiet for ${totalQuiet} turns — thinning line to free reserves`;
-        } else if (totalQuiet >= QUIET_TURNS_FOR_SCREENING && personality.caution <= 0.5) {
+        } else if (totalQuiet >= QUIET_TURNS_FOR_SCREENING
+                && (threatRatioBySector.get(sectorId) ?? 0) < SCREENING_MAX_THREAT_RATIO
+                && personality.caution <= 0.5) {
             // Even moderate commanders consider screening after prolonged quiet
             newStance = 'screening';
             reason = `quiet for ${totalQuiet} turns — screening posture`;
@@ -593,10 +608,12 @@ function evaluatePlanSuspension(
     const stagingThreat = threats.threatened_zones.find(
         tz => tz.zone_id === currentPlan.staging_zone,
     );
-    if (stagingThreat && (stagingThreat.threat_level === 'high' || stagingThreat.threat_level === 'critical')) {
+    // Suspend only on critical (active territory loss) — high is structural baseline for
+    // narrow-corridor corps (e.g. Posavina) and must not permanently veto offensive action.
+    if (stagingThreat && stagingThreat.threat_level === 'critical') {
         return {
             suspend_plan: true,
-            suspend_reason: `staging zone ${currentPlan.staging_zone} under ${stagingThreat.threat_level} threat`,
+            suspend_reason: `staging zone ${currentPlan.staging_zone} under critical threat`,
         };
     }
 
