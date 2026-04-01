@@ -81,6 +81,7 @@ export interface AllocationResult {
 export function computeGarrisonBudget(
     zone: ZoneAssessment,
     personality: OfficerPersonality,
+    _isMustHold = false,
 ): number {
     if (zone.front_edge_count === 0) return 0;
 
@@ -197,7 +198,7 @@ export function allocateBrigades(
     const zonesWithBudgets: ZoneAssessment[] = [];
 
     for (const zone of zones) {
-        const budget = computeGarrisonBudget(zone, personality);
+        const budget = computeGarrisonBudget(zone, personality, zone.is_must_hold);
         budgetByZone.set(zone.zone_id, budget);
 
         // Create a temporary zone with the personality-adjusted garrison budget

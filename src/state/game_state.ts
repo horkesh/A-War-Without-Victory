@@ -1612,6 +1612,12 @@ export interface CorpsFrontSector {
     sector_stance: SectorStance;
     /** Who set this stance: bot AI or player. Player overrides persist until changed. */
     stance_source: 'bot' | 'player';
+    /** This sector is strategically critical — its loss carries outsized consequences. */
+    must_hold?: boolean;
+    /** Who set must_hold: authored in scenario data, bot assessment, or player decision. */
+    must_hold_source?: 'scenario' | 'bot' | 'player';
+    /** Human-readable label for CoS briefing (e.g. "Posavina Corridor anchor"). */
+    must_hold_reason?: string;
 }
 
 /**

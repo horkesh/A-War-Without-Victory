@@ -78,6 +78,8 @@ export interface ZoneAssessment {
     readonly is_main_body: boolean;
     /** Enemy OSIDs adjacent to this zone's front (from sector sub_segments). */
     readonly enemy_adjacent_osids: readonly string[];
+    /** Any sector covering this zone has must_hold=true. Derived each turn; not stored in scenario. */
+    readonly is_must_hold: boolean;
 }
 
 // ---------------------------------------------------------------------------

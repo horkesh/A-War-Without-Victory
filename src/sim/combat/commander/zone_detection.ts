@@ -149,6 +149,10 @@ export function detectZones(
         // Surplus brigade IDs (last N by sorted order — those beyond garrison budget)
         const surplusBrigades = surplus > 0 ? assignedBrigadeIds.slice(garrisonBudget) : [];
 
+        const isMustHold = sectors.some(
+            sec => sec.must_hold === true && sec.territory_osids.some(o => zoneOsidSet.has(o))
+        );
+
         zones.push({
             zone_id: zoneId,
             corps_id: corpsId,
@@ -167,6 +171,7 @@ export function detectZones(
             deficit,
             is_main_body: isMainBody,
             enemy_adjacent_osids: enemyAdjacentOsids,
+            is_must_hold: isMustHold,
         });
     }
 
