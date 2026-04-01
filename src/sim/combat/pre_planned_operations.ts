@@ -642,6 +642,7 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
                 name: 'Kalesija Assault',
                 brigades: [
                     'arbih_2nd_tuzla',
+                    'arbih_120th_liberation_black_swans',
                     'arbih_241st_spreca_muslim_light_gazije',
                     'arbih_242nd_zvornik_muslim_light',
                     'arbih_245th_mountain',
@@ -695,7 +696,12 @@ function buildAxesFromDef(
             const corpsId = getFormationCorpsId(formation);
             if (corpsId && EXEMPT_CORPS_IDS.has(corpsId)) {
                 if (!formation.elite_loan_state) return false; // non-elite exempt = skip
-                eliteLoans.push({ brigadeId: fid, corpsId: def.corps });
+                // Only schedule a new loan if not already loaned to this corps
+                // (e.g. a probe may have already loaned the brigade at the same turn).
+                const ls = formation.elite_loan_state;
+                if (!ls.on_loan || ls.loaned_to_corps !== def.corps) {
+                    eliteLoans.push({ brigadeId: fid, corpsId: def.corps });
+                }
             }
             return true;
         }).sort(strictCompare);
