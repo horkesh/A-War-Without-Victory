@@ -979,11 +979,10 @@ export function parseGameState(json: unknown): LoadedGameState {
                     force_ratio_estimate: typeof op.force_ratio_estimate === 'number' ? op.force_ratio_estimate : undefined,
                     postponement_count: typeof op.postponement_count === 'number' ? op.postponement_count : undefined,
                     has_active_probe: op.active_probe != null && typeof op.active_probe === 'object' ? true : undefined,
-                    // Sector-anchored launch contract fields (Phase 2 scaffolding — populated by emit.ts).
-                    supporting_sector_ids: op.supporting_sector_ids,
-                    primary_sector_brigades: op.primary_sector_brigades,
-                    attached_brigades: op.attached_brigades,
-                    reinforcement_source: op.reinforcement_source,
+                    supporting_sector_ids: Array.isArray(op.supporting_sector_ids) ? (op.supporting_sector_ids as string[]).filter(id => typeof id === 'string').sort(strictCompare) : undefined,
+                    primary_sector_brigades: Array.isArray(op.primary_sector_brigades) ? (op.primary_sector_brigades as string[]).filter(id => typeof id === 'string').sort(strictCompare) : undefined,
+                    attached_brigades: Array.isArray(op.attached_brigades) ? (op.attached_brigades as string[]).filter(id => typeof id === 'string').sort(strictCompare) : undefined,
+                    reinforcement_source: typeof op.reinforcement_source === 'string' ? op.reinforcement_source as OperationView['reinforcement_source'] : undefined,
                 });
             }
             } // end for-of activeOps

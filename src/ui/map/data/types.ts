@@ -479,7 +479,6 @@ export interface OperationView {
     postponement_count?: number;
     /** Whether an active probe is in progress. */
     has_active_probe?: boolean;
-    // --- Sector-anchored launch contract (Phase 2 scaffolding) ---
     /** Other sectors that contributed attached brigades to this operation. */
     supporting_sector_ids?: string[];
     /** Brigade IDs drawn from the primary sector at launch. */

@@ -82,6 +82,8 @@ export function OperationDetail({ railSlot }: OperationDetailProps) {
 
   const objectives = op.objectives ?? [];
   const currentIdx = op.current_objective_index ?? 0;
+  const getSectorName = (sid: string) =>
+    loadedGameState.corpsFrontSectors?.find(s => s.sector_id === sid)?.display_name ?? sid;
 
   return (
     <div
@@ -188,7 +190,7 @@ export function OperationDetail({ railSlot }: OperationDetailProps) {
             <div className="flex justify-between">
               <span className="text-text-secondary">Primary sector</span>
               <span className="text-text-primary font-mono text-[11px]">
-                {loadedGameState.corpsFrontSectors?.find(s => s.sector_id === op.sector_id)?.display_name ?? op.sector_id}
+                {getSectorName(op.sector_id)}
               </span>
             </div>
             {op.primary_sector_brigades != null && op.primary_sector_brigades.length > 0 && (
@@ -210,7 +212,7 @@ export function OperationDetail({ railSlot }: OperationDetailProps) {
                 <span className="text-text-secondary shrink-0">Risk transferred from</span>
                 <span className="text-amber-300 text-[11px] text-right">
                   {op.supporting_sector_ids
-                    .map(sid => loadedGameState.corpsFrontSectors?.find(s => s.sector_id === sid)?.display_name ?? sid)
+                    .map(sid => getSectorName(sid))
                     .join(', ')}
                 </span>
               </div>

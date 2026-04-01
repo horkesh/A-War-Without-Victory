@@ -542,7 +542,6 @@ function buildOperations(
             if (b.location_osid) brigadeLocationMap.set(b.id, b.location_osid);
         }
 
-        // ─── SECTOR-ANCHORED PARTICIPANT SELECTION (Phase 3) ────────────────────
         // Primary sector is identified first. The default participant pool derives
         // from that sector's assigned brigades (∩ surplusSet ∩ reachable).
         // Cross-sector brigades join only as explicit bounded attachments via the
@@ -572,15 +571,18 @@ function buildOperations(
         // friendly OSID adjacent to the first objective within MAX_REACHABILITY_HOPS.
         // NOTE: home_defense brigades CAN be op participants — evaluateHomeDefense in
         // bot_brigade_eval_attack.ts already exempts them via isActiveSectorOperationParticipant.
+        // Approach OSIDs are constant for the whole buildOperations call — computed once here.
+        const friendlyApproachOsids: readonly string[] = (() => {
+            if (!reachabilityObjectiveOsid || !friendlyOsids) return [];
+            const neighbors = (adjacencyMap.get(reachabilityObjectiveOsid as any) ?? []) as readonly string[];
+            return neighbors.filter(n => friendlyOsids.has(n)).sort(strictCompare);
+        })();
         const canReach = (brigadeId: string): boolean => {
             if (!reachabilityObjectiveOsid) return true;
+            if (friendlyApproachOsids.length === 0) return false;
             const locationOsid = brigadeLocationMap.get(brigadeId);
             if (!locationOsid) return false;
-            if (!friendlyOsids) return false;
-            const objectiveNeighbors = (adjacencyMap.get(reachabilityObjectiveOsid as any) ?? []) as readonly string[];
-            const friendlyApproachOsids = [...objectiveNeighbors].filter(n => friendlyOsids.has(n));
-            if (friendlyApproachOsids.length === 0) return false;
-            for (const approachOsid of friendlyApproachOsids.sort(strictCompare)) {
+            for (const approachOsid of friendlyApproachOsids) {
                 const dist = spatialFriendlyDistance(briefing.spatial, briefing.faction, locationOsid, approachOsid, MAX_REACHABILITY_HOPS);
                 if (dist >= 0) return true;
             }
@@ -599,14 +601,19 @@ function buildOperations(
         const attachedPool: string[] = [];
         const attachmentSectorIds = new Set<string>();
         if (primarySector) {
+            // Pre-build the set of all OSIDs neighboring any primary-sector territory OSID.
+            // Avoids creating a new Set per candidate sector inside the filter.
+            const primaryNeighborSet = new Set<string>();
+            for (const osid of primarySector.territory_osids) {
+                for (const n of (adjacencyMap.get(osid as any) ?? []) as readonly string[]) {
+                    primaryNeighborSet.add(n);
+                }
+            }
+
             const adjacentCorpsSectors = briefing.sectors
                 .filter(s => {
                     if (s.corps_id !== briefing.corps_id || s.sector_id === sectorId) return false;
-                    const adjTerrSet = new Set(s.territory_osids);
-                    return primarySector.territory_osids.some(osid => {
-                        const neighbors = (adjacencyMap.get(osid as any) ?? []) as readonly string[];
-                        return neighbors.some(n => adjTerrSet.has(n));
-                    });
+                    return s.territory_osids.some(osid => primaryNeighborSet.has(osid));
                 })
                 .sort((a, b) => strictCompare(a.sector_id, b.sector_id));
 
