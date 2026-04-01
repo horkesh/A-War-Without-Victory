@@ -407,6 +407,17 @@ export interface CorpsFrontSectorView {
     }>;
 }
 
+/**
+ * CANONICAL UI-FACING OPERATION MODEL
+ *
+ * All operation data shown to the player must flow through this type.
+ * Populated exclusively by GameStateAdapter (operation extraction block).
+ * UI surfaces must not read CorpsOperation directly from GameState.
+ *
+ * Lifecycle: planning → execution → recovery (matches engine CorpsOperation.phase)
+ * Permitted creation: pre_planned_operations.ts (player/queued), commander/emit.ts (AI)
+ * Lifecycle owner: sector_offensive.ts + evaluateOperationProgress()
+ */
 export interface OperationView {
     corps_id: string;
     corps_name: string;

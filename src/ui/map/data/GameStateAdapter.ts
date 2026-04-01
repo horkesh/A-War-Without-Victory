@@ -886,6 +886,8 @@ export function parseGameState(json: unknown): LoadedGameState {
         }
     }
 
+    // CANONICAL OPERATION EXTRACTION — maps CorpsOperation → OperationView.
+    // This is the single permitted UI read path for operation data.
     // Parse active operations from corps_command
     const operations: OperationView[] = [];
     if (rawCorpsCommand) {

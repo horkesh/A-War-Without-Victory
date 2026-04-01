@@ -40,9 +40,14 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
             ? formatCorpsDisplayName(corpsFormation.name, corpsFormation.id)
             : corpsId;
 
-        // Find selected officer or corps commander
-        const officer = officerId
-            ? (loadedGameState.namedOfficerData ?? []).find((o) => o.id === officerId)
+        // Commander identity sourced from OperationView.commander_officer_id (canonical)
+        // Fall back to officerId prop (player planning selection) if no matching operation exists yet.
+        const matchingOperation = (loadedGameState.operations ?? []).find(
+            (op) => op.corps_id === corpsId && op.phase !== 'recovery'
+        );
+        const resolvedOfficerId = matchingOperation?.commander_officer_id ?? officerId;
+        const officer = resolvedOfficerId
+            ? (loadedGameState.namedOfficerData ?? []).find((o) => o.id === resolvedOfficerId)
             : (loadedGameState.namedOfficerData ?? []).find(
                 (o) => o.assigned_corps_id === corpsId && o.acting_commander
               );
