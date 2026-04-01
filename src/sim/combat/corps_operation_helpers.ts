@@ -137,6 +137,29 @@ export function buildCommanderOperation(
     };
 }
 
+/** Factory for AI-generated emergency defensive operations (strategic_defense type). */
+export function buildEmergencyDefenseOperation(
+    corpsId: string,
+    turn: number,
+    participatingBrigades: string[],
+    targetSettlements: string[],
+): CorpsOperation {
+    return {
+        name: `Emergency Defense (${corpsId})`,
+        type: 'strategic_defense',
+        phase: 'planning',
+        started_turn: turn,
+        phase_started_turn: turn,
+        participating_brigades: participatingBrigades,
+        target_settlements: targetSettlements,
+        supply_readiness: 1.0,
+        momentum: 0,
+        failure_count: 0,
+        consecutive_failures_on_current: 0,
+        is_emergency: true,
+    };
+}
+
 /** Factory for commander-generated probe operations (single surplus brigade). */
 export function buildProbeOperation(
     corpsId: string,

@@ -44,7 +44,7 @@ import {
     getFactionCorps,
     sortByPersonnelDesc,
 } from './bot_corps_helpers.js';
-import { getAvailableBrigades, hasActiveOperation } from './corps_operation_helpers.js';
+import { buildEmergencyDefenseOperation, getAvailableBrigades, hasActiveOperation } from './corps_operation_helpers.js';
 
 /**
  * Generate OG activation orders for active operations in execution phase.
@@ -185,16 +185,10 @@ export function generateEmergencyDefensiveOperations(
 
         if (participants.length < 2) continue;
 
-        const operation: CorpsOperation = {
-            name: `Emergency Defense (${corps.id})`,
-            type: 'strategic_defense',
-            phase: 'planning',
-            started_turn: turn,
-            phase_started_turn: turn,
-            target_settlements: uniqueTargets.slice(0, 20), // Cap target list
-            participating_brigades: participants.map(b => b.id),
-            is_emergency: true,
-        };
+        // PERMITTED CREATION ENTRY POINT — emergency defensive operations.
+        const operation = buildEmergencyDefenseOperation(
+            corps.id, turn, participants.map(b => b.id), uniqueTargets.slice(0, 20),
+        );
 
         cmd.active_operations.push(operation);
         assignOperationCommander(state, operation, corps.id, faction);
