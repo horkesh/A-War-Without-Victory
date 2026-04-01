@@ -126,3 +126,36 @@ The base Deck counter layer was changed to render the full formation feature set
 See:
 
 - [20260401_DECK_COUNTER_VISIBILITY_CONTRACT_FIX.md](./20260401_DECK_COUNTER_VISIBILITY_CONTRACT_FIX.md)
+
+## Follow-up: Hover Must Not Whiten Brigades (2026-04-01)
+
+After the visibility-contract fix, one more regression remained: merely hovering a corps or sector could still change brigade counters, making units appear to flicker between faction color and white.
+
+### Root cause
+
+The Deck highlight bridge was still mixing two different concepts:
+
+- transient hover context used for line emphasis
+- durable selection state used for brigade whitening
+
+`collectHighlightedFormationIds()` accepted both selected and hovered ids, so the same highlighted formation set was being used for:
+
+- corps/sector line glow
+- white brigade overlays
+
+At the same time, the base Deck icon layer had been taught to swap to white icons when a formation id appeared in that highlighted set.
+
+### Correction
+
+- `MapContainer.tsx`: Deck brigade whitening now derives only from real selection state:
+  - `selectedFormationId`
+  - `selectedCorpsId`
+  - `selectedCorpsFrontSectorId`
+- hover state remains available for sector/front-line emphasis, but no longer feeds the Deck white-counter path
+- `buildTacticalDeckLayers.ts`: base Deck counters always render faction-colored `icon_id`; white counters are produced only by the dedicated highlighted overlay layer
+
+### Resulting contract
+
+- all brigades remain visible in faction color in normal map state
+- hover may emphasize lines/sector context, but must not recolor brigade counters
+- only selected brigade / sector / corps state may whiten brigade counters

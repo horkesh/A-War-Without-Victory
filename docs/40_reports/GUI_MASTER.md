@@ -183,3 +183,7 @@ Map overlay sources are created in `runUpdate` inside nested `requestAnimationFr
 ### 6. Deck counter visibility contract must match highlight contract
 
 When Deck owns brigade counters, the base Deck layer and the highlighted Deck layer must render from the same formation visibility set. A broken version of `buildTacticalDeckLayers.ts` rendered only `is_stack_top` features in the base layer while the highlighted overlay rendered matching formations from the full feature set. That made corps/sector/OOB selection act like a hidden visibility mode: units could disappear in normal state and reappear when highlighted. Rule: highlights may restyle visibility, not redefine it. If Deck counters are the canonical renderer, the base layer must already include every formation that the highlight layer may paint.
+
+### 7. Hover and selection must not share brigade whitening
+
+Deck brigade whitening must be driven only by durable selection state. A broken version of the map selection bridge mixed `hoveredSectorId` / `hoveredCorpsId` into the same highlighted formation id set used for white brigade overlays, and the base Deck icon layer also swapped to white from that set. The result was visible brigade flicker while merely hovering sector/corps UI. Rule: hover may drive line emphasis or contextual focus, but only `selectedFormationId`, `selectedCorpsId`, and `selectedCorpsFrontSectorId` may whiten brigade counters.

@@ -180,8 +180,6 @@ function collectHighlightedFormationIds(args: {
   selectedFormationId: string | null;
   selectedCorpsId: string | null;
   selectedCorpsFrontSectorId: string | null;
-  hoveredSectorId: string | null;
-  hoveredCorpsId: string | null;
 }): string[] {
   const {
     formationsGeoJson,
@@ -189,20 +187,16 @@ function collectHighlightedFormationIds(args: {
     selectedFormationId,
     selectedCorpsId,
     selectedCorpsFrontSectorId,
-    hoveredSectorId,
-    hoveredCorpsId,
   } = args;
 
   const highlightedFormationIds = new Set<string>();
   const activeSectorIds = new Set<string>();
 
-  if (hoveredSectorId) activeSectorIds.add(hoveredSectorId);
   if (selectedCorpsFrontSectorId) activeSectorIds.add(selectedCorpsFrontSectorId);
 
-  const activeCorpsId = selectedCorpsId || hoveredCorpsId;
-  if (activeCorpsId && loadedGameState?.corpsFrontSectors) {
+  if (selectedCorpsId && loadedGameState?.corpsFrontSectors) {
     loadedGameState.corpsFrontSectors
-      .filter((sector) => sector.corps_id === activeCorpsId)
+      .filter((sector) => sector.corps_id === selectedCorpsId)
       .forEach((sector) => activeSectorIds.add(sector.sector_id));
   }
 
@@ -250,8 +244,6 @@ function composeDeckLayersForCurrentSelection(args: {
       selectedFormationId: args.selectedFormationId,
       selectedCorpsId: args.selectedCorpsId,
       selectedCorpsFrontSectorId: args.selectedCorpsFrontSectorId,
-      hoveredSectorId: args.hoveredSectorId,
-      hoveredCorpsId: args.hoveredCorpsId,
     }),
   });
 }

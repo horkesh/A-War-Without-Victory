@@ -1212,3 +1212,7 @@ Any slot cap, throttle, or concurrency limit applied to an array with a multi-ph
 ## [2026-04-01] Deck counter visibility must not differ between normal and highlighted state
 
 When Deck owns brigade counters, the base Deck layer and the highlighted Deck layer must render from the same formation visibility set. Rendering only `is_stack_top` in the base layer while rendering the full formation set in the highlighted overlay creates a hidden second visibility mode: units appear to vanish in normal map state and reappear when corps/sector/OOB selection highlights them. The invariant is simple: highlight may restyle a unit that is already visible, but must never be the thing that makes that unit visible in the first place.
+
+## [2026-04-01] Hover context must not share the Deck white-counter path with selection
+
+Deck brigade whitening and line-hover emphasis are different concepts and must not share the same highlighted id set. A broken version of `MapContainer.tsx` fed `hoveredSectorId` / `hoveredCorpsId` into the same highlighted formation list used for Deck white counters, and `buildTacticalDeckLayers.ts` also let the base Deck icon layer swap to white icons from that set. That made transient hover behave like selection and caused visible brigade flicker. Rule: hover may emphasize lines or contextual focus, but only selected brigade / sector / corps state may whiten brigade counters.

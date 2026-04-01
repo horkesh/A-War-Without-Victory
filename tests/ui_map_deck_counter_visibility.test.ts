@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { buildTacticalDeckLayers } from '../src/ui/map/layers/buildTacticalDeckLayers.js';
+import {
+    buildTacticalDeckLayers,
+    getBaseFormationIconId,
+    getHighlightedFormationIconId,
+} from '../src/ui/map/layers/buildTacticalDeckLayers.js';
 
 function makeFeature(id: string, isStackTop: boolean) {
     return {
@@ -53,5 +57,20 @@ test('highlight overlay remains a styling layer, not a visibility backdoor', () 
         highlightedLayer.props.data.map((feature: any) => feature.properties.id),
         ['b_hidden'],
         'highlight layer should only restyle requested formations',
+    );
+});
+
+test('base deck counters stay faction-colored while selected formations get a white overlay', () => {
+    const feature = makeFeature('b_selected', false) as any;
+
+    assert.equal(
+        getBaseFormationIconId(feature),
+        'brigade__RS__h100__m100_b_selected',
+        'base layer should keep the selected formation in faction colors',
+    );
+    assert.equal(
+        getHighlightedFormationIconId(feature),
+        'white__brigade__RS__h100__m100_b_selected',
+        'highlight overlay should provide the white selected counter',
     );
 });

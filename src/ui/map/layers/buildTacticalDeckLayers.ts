@@ -14,6 +14,14 @@ function getHighlightedFeatures(features: Feature[], highlightedFormationIdSet: 
     return features.filter(f => highlightedFormationIdSet.has(f.properties?.id));
 }
 
+export function getBaseFormationIconId(feature: any): string {
+    return feature.properties.icon_id;
+}
+
+export function getHighlightedFormationIconId(feature: any): string {
+    return feature.properties.white_icon_id ?? feature.properties.icon_id;
+}
+
 /** Settlement label data — set externally by MapContainer when label GeoJSON is built. */
 let _labelFeatures: Feature[] = [];
 export function setSettlementLabelData(features: Feature[]) {
@@ -81,11 +89,7 @@ export function buildTacticalDeckLayers(
             id: 'deck-formations-icons',
             data: formationsGeoJson.features,
             getIcon: (d: any) => ({
-                url: getIconDataUrl(
-                    highlightedFormationIdSet.has(d.properties.id)
-                        ? (d.properties.white_icon_id ?? d.properties.icon_id)
-                        : d.properties.icon_id
-                ),
+                url: getIconDataUrl(getBaseFormationIconId(d)),
                 width: 160,
                 height: 80,
             }),
@@ -99,7 +103,6 @@ export function buildTacticalDeckLayers(
             parameters: { depthTest: false },
             updateTriggers: {
                 getSize: zoom,
-                getIcon: highlightedFormationKey,
             }
         }),
     );
@@ -110,7 +113,7 @@ export function buildTacticalDeckLayers(
                 id: 'deck-formations-highlighted',
                 data: highlightedFeatures,
                 getIcon: (d: any) => ({
-                    url: getIconDataUrl(d.properties.white_icon_id ?? d.properties.icon_id),
+                    url: getIconDataUrl(getHighlightedFormationIconId(d)),
                     width: 160,
                     height: 80,
                 }),

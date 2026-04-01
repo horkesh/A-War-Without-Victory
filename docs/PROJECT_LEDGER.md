@@ -18401,3 +18401,29 @@ Fixed a map visibility regression where normal Deck rendering hid non-top-stack 
 - `npx.cmd tsc --noEmit -p tsconfig.json`
 - `npm.cmd run desktop:map:build`
 - `npm.cmd run warroom:build`
+
+---
+
+## [2026-04-01] Tactical map hover-vs-selection counter contract fix
+
+### Summary
+Fixed the remaining Deck counter regression where hovering a corps or sector could recolor brigade counters and make units appear to flicker between normal and highlighted states.
+
+### Root cause
+- `MapContainer.tsx` mixed `hoveredSectorId` / `hoveredCorpsId` into the same highlighted formation id set used by Deck white-counter rendering.
+- `buildTacticalDeckLayers.ts` also let the base Deck icon layer swap to white icons from that highlighted set.
+
+This incorrectly gave hover the same visual authority as selection.
+
+### Fix
+- Deck brigade whitening now derives only from:
+  - `selectedFormationId`
+  - `selectedCorpsId`
+  - `selectedCorpsFrontSectorId`
+- Base Deck counters always render faction-colored `icon_id`
+- White brigade counters render only in the dedicated highlighted overlay layer
+
+### Verification
+- `node_modules\\.bin\\tsx.cmd --test tests\\ui_map_deck_counter_visibility.test.ts`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run desktop:map:build`
