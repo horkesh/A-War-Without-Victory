@@ -326,6 +326,45 @@ Density range improved from 100:1 (n623) to 33:1 (n624) after Herzegovina/SRK fi
 
 **Impact:** sela_2 becomes an isolated enclave (no real segment contacts to other RBiH territory). Sector arbih_1st_corps:7 splits into separate Trnovo and Kalinovik components. Expected calibration impact from fixing phantom sector bridging.
 
+### Sector Merge Contiguity Regression (2026-04-01)
+
+**Problem:** Two RS sectors contained geographically isolated sub-segments — unrelated fronts merged into a single sector by the post-split merge logic:
+
+- `sector:vrs_drina:1`: `subseg:vrs_drina:1` (Bratunac/Srebrenica encirclement, 13 edges) + `subseg:sector:vrs_drina:3:split0` (Kalesija/Zvornik/Kladanj front, 10 edges) — ~50km apart, zero shared front-edge OSIDs
+- `sector:vrs_herzegovina:0`: `subseg:vrs_herzegovina:0` (Goražde/Foča encirclement, 14 edges) + `subseg:vrs_herzegovina:3` (Kalinovik/Konjic/Trnovo front, 19 edges) — geographically separate arcs, zero shared front-edge OSIDs
+
+All other sectors (26 RBiH, 8 HRHB, remaining 21 RS) passed edge-by-edge contiguity audit. All sub-segments were individually contiguous. This was NOT internal sub-segment fragmentation — it was sector-level isolation after `splitNonContiguousSectors` had already correctly separated these sub-segments (evidenced by `:split0` / `:3` suffixes in sub-segment IDs).
+
+**Root cause:** Two post-split merge paths re-grouped them:
+
+1. **Step 4d** (brigade-ratio merge loop in `buildFactionSectors`): if `corpsBrigadeCount / corpsSectors.length < MIN_SECTOR_BRIGADES (2)`, merges smallest sector into adjacent neighbor using `areSectorsTerritoryAdjacent`
+2. **`mergeSmallAdjacentSectors`**: post-build pass using the same criterion
+
+Both used `areSectorsTerritoryAdjacent` — territory polygon contact — as the sole merge gate. The bridge OSIDs that passed this check:
+
+- `vrs_drina:1`: `op:bratunac:polom` ↔ `op:zvornik:novo_selo` — min_dist=0, shared_segments=9 (genuine polygon boundary in the rear interior, not on the front line)
+- `vrs_herzegovina:0`: `op:foca:donje_zesce` ↔ `op:foca:izbisno` — min_dist=0, shared_segments=8 (same municipality; donje_zesce faces Goražde east, izbisno faces Kalinovik south — different tactical directions)
+
+**Key insight:** Tightening the adjacency threshold would NOT have fixed this — both bridges are min_dist=0, shared_segments>0, passing every threshold filter including sharedBoundaryAdj (≤5.5m). The merge was being gated on the wrong criterion entirely. Territory polygon contact is necessary but not sufficient for sector merging; front-edge adjacency is the correct gate.
+
+**Downstream damage confirmed:**
+- `Operation Cerska-Kamenica` (vrs_drina, t40): `rs_1st_zvornik` (at `op:zvornik:kozluk_2`, Zvornik front) locked into Srebrenica objectives via adjacent-sector attachment. 0 attack attempts — a confirmed ZEA (zero-eligible-attacker) case.
+- Stance computation: single sector stance applied across both isolated fronts; a battle on Srebrenica would change posture of Zvornik brigades and vice versa.
+- Threat ratio averaging: combined threat picture suppresses correct response on each front independently.
+- Briefing/sector intel: one combined threat display for two independent theaters.
+- Safe systems (not affected): brigade distribution (sub-segment scoped), zone detection (spatial component level), garrison budget.
+
+**Fix — `areSectorsFrontEdgeAdjacent`** added to `corps_front_sectors.ts`:
+- Collects `friendly_osids` from all sub-segments of each candidate sector
+- Checks whether any OSID in sector A has a neighbor in sector B via `frontEdgeAdj` (33m threshold — same as `FRONT_EDGE_MAX_GAP` used throughout)
+- Returns false if either sector has an empty front-edge OSID set
+
+Guard inserted in both merge paths — after `areSectorsTerritoryAdjacent` passes, must also pass `areSectorsFrontEdgeAdjacent` before merge proceeds. The `frontEdgeAdj` map was already being built correctly in `buildCorpsFrontSectors` (lines 101–112) as a local variable; it is now wired through as a parameter to both `buildFactionSectors` and `mergeSmallAdjacentSectors`.
+
+**Design principle reaffirmed:** Small + isolated = valid sector. Encirclement rings (Srebrenica, Goražde) share the same topology as the Sarajevo siege sector. A sector with low brigade count that is geographically disconnected from its neighbors must NOT be merged — it is a distinct theater. The merge step must never force-merge two sectors whose front-edge OSID sets are not adjacent, regardless of brigade count or territory polygon contact.
+
+**Verification:** `npx tsc --noEmit` passes clean.
+
 ---
 
 ## Diagnostic Tools

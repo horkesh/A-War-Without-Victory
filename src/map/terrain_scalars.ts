@@ -13,23 +13,6 @@
  * Deterministic: no randomness, cached after first load.
  */
 
-// Node.js imports are lazily loaded to allow browser-safe imports
-// of the pure functions (getTerrainScalarsForSid, getMaxAttackersForTarget).
-// Only loadTerrainScalars() uses the Node.js APIs.
-let _readFile: typeof import('node:fs/promises').readFile | null = null;
-let _resolve: typeof import('node:path').resolve | null = null;
-
-async function ensureNodeImports(): Promise<void> {
-    if (!_readFile) {
-        const fs = await import('node:fs/promises');
-        _readFile = fs.readFile;
-    }
-    if (!_resolve) {
-        const path = await import('node:path');
-        _resolve = path.resolve;
-    }
-}
-
 // --- Types ---
 
 export interface TerrainScalars {
@@ -59,28 +42,6 @@ const DEFAULT_TERRAIN: TerrainScalars = {
 // --- Cache ---
 
 let cache: TerrainScalarsData | null = null;
-
-// --- Loader ---
-
-const DEFAULT_PATH = 'data/derived/terrain/settlements_terrain_scalars.json';
-
-/**
- * Load terrain scalars from disk. Caches after first load.
- * Safe to call multiple times; subsequent calls return the cache.
- */
-export async function loadTerrainScalars(filePath?: string): Promise<TerrainScalarsData> {
-    if (cache) return cache;
-
-    await ensureNodeImports();
-    const absPath = _resolve!(filePath ?? DEFAULT_PATH);
-    const raw = JSON.parse(await _readFile!(absPath, 'utf8') as string) as {
-        by_sid?: Record<string, TerrainScalars>;
-    };
-
-    const bySid = raw.by_sid ?? {};
-    cache = { by_sid: bySid };
-    return cache;
-}
 
 /**
  * Get terrain scalars for a specific settlement.

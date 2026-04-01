@@ -1,3 +1,24 @@
+## [2026-04-01] Dev Map Browser-Safe Import Recovery
+
+### Summary
+Recovered `npm run dev:map` after Vite crashed on `__vite-browser-external:fs` from the tactical-map browser bundle. Root cause was a browser-safety boundary breach: shared combat/map helpers pulled Node-only file-system loaders into the client import graph.
+
+### Changes
+- Added `src/map/terrain_scalars_node.ts` as the Node-only loader for terrain scalars.
+- Added `src/sim/combat/combat_terrain_sets_node.ts` as the Node-only loader for `urban_osids.json` and `forest_osids.json`.
+- Restored browser-safe boundaries in `src/map/terrain_scalars.ts` and `src/sim/combat/combat_math.ts`.
+- Rewired Node callers in `src/desktop/desktop_sim.ts`, `src/scenario/scenario_runner.ts`, and `src/sim/turn_phases/war_phases.ts`.
+- Added regression test `tests/ui_map_browser_safe_imports.test.ts`.
+
+### Verification
+- `node_modules\.bin\tsx.cmd --test tests\ui_map_browser_safe_imports.test.ts`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run desktop:map:build`
+
+### Lessons
+- Shared browser-facing helpers must never own file-system loading directly or indirectly.
+- Move disk-backed loaders into adjacent `*_node.ts` modules and inject data into shared helpers instead.
+
 ## [2026-04-01] n1288 + Combat Factor Overhaul
 
 ### Summary

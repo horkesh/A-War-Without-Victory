@@ -63,6 +63,8 @@ import {
     computeEngagementLevel
 } from './baseline_ops_scheduler.js';
 import { backfillFormationLocationOsid, loadOperationalData, loadOperationalEdges } from './../data/operational_data.js';
+import { setUrbanOsidSet, setForestOsidSet } from '../sim/combat/combat_math.js';
+import { loadUrbanOsidSet, loadForestOsidSet } from '../sim/combat/combat_terrain_sets_node.js';
 import { displaceFormationsInEnemyTerritory } from '../sim/combat/attack_resolution_osid.js';
 import { loadInitialFormations } from './initial_formations_loader.js';
 import {
@@ -942,6 +944,11 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         } catch {
             // canonical_to_operational_map.json may be missing; location_osid will not be set
         }
+        // Initialize data-driven terrain classification sets before combat runs.
+        // Keep Node-only file loading out of combat_math so browser map bundles can
+        // safely import the combat helpers without pulling in fs/path.
+        setUrbanOsidSet(loadUrbanOsidSet());
+        setForestOsidSet(loadForestOsidSet());
         if (scenario.init_formations_oob || scenario.recruitment_mode === 'player_choice') {
             oobBrigades = await loadOobBrigades(baseDir);
             oobCorps = await loadOobCorps(baseDir);

@@ -72,6 +72,7 @@ import {
     getConcentrationBonus,
     getArtillerySuppression,
     getBombardmentCasualtyMult,
+    getDefensiveFireMult,
     getSupplyMult,
     classifyOutcome,
     computeAttackerPower,
@@ -90,6 +91,8 @@ import {
     getReactiveDistanceWeight,
     HOME_DEFENSE_REACTIVE_BONUS,
     SECTOR_STANCE_REACTIVE_BONUS,
+    getWarExhaustionTempoMult,
+    getLanchesterConcentrationBonus,
 } from './combat_math.js';
 import { OFFICER_CASUALTY_MULT, OFFICER_QUALITY_FLOOR } from './officer_quality_update.js';
 import { isSupportBrigadeOnActiveOp } from './sector_offensive.js';
@@ -980,7 +983,8 @@ export function resolveAttackOrdersOsid(
             // Support brigades contribute reduced power — main brigade carries the assault
             const supportMult = isSupportBrigadeOnActiveOp(state, a.id, a.corps_id) ? SUPPORT_POWER_MULT : 1.0;
             return s + rawPower * supportMult;
-        }, 0) * coordPenalty * seasonal.attack_mult * concentrationBonus;
+        }, 0) * coordPenalty * seasonal.attack_mult * concentrationBonus
+            * getWarExhaustionTempoMult(state, attackerFaction); // P7: war exhaustion → attack tempo penalty
         defenderPower *= seasonal.defense_mult;
 
         const powerRatio = defenderPower <= 0 ? 10 : attackerPower / defenderPower;
@@ -1027,10 +1031,17 @@ export function resolveAttackOrdersOsid(
         // n536: raised 0.15→0.30 — sweeping a village costs more than 5 men.
         const militiaOnlyMult = defenderFormation ? 1.0 : 0.30;
         const [attCasMult, defCasMult] = getPowerRatioCasualtyMult(powerRatio);
-        const baseAttackerCas = personnelAttacker * BASE_ATTACKER_LOSS_RATE * (OUTCOME_ATTACKER_MOD[outcome] ?? 1) * lastStandCasMult * militiaOnlyMult * attCasMult;
+        const defensiveFireMult = getDefensiveFireMult(
+            sectorDefenseBrigades ?? (defenderFormation ? [defenderFormation] : []),
+            controller ?? attackerFaction,
+            state
+        );
+        const baseAttackerCas = personnelAttacker * BASE_ATTACKER_LOSS_RATE * (OUTCOME_ATTACKER_MOD[outcome] ?? 1) * lastStandCasMult * militiaOnlyMult * attCasMult * defensiveFireMult;
         const baseDefenderCas = personnelDefender * BASE_DEFENDER_LOSS_RATE * (OUTCOME_DEFENDER_MOD[outcome] ?? 1) * lastStandCasMult * bombardmentMult * defCasMult;
         const finalAttackerCas = Math.min(personnelAttacker - MIN_COMBAT_PERSONNEL, Math.max(0, Math.round(baseAttackerCas)));
-        const finalDefenderCas = Math.min(personnelDefender, Math.max(0, Math.round(baseDefenderCas)));
+        const finalDefenderCas = Math.min(personnelDefender, Math.max(0, Math.round(
+            baseDefenderCas * getLanchesterConcentrationBonus(attackerFormations.length, powerRatio) // P10: Lanchester numerical superiority
+        )));
 
         // Build defender contribution records for Layer C battle reports
         let defenderContributions: DefenderContribution[] | undefined;

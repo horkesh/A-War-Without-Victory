@@ -268,7 +268,13 @@ export function createOobFormations(
         }
         // Pre-war brigades (mandatory, available from turn 0) were already organized
         // before the simulation starts. Set initial entrenchment for defense bonus.
-        if (b.mandatory && (b.available_from === 0 || b.available_from === undefined)) {
+        // If the OOB provides an explicit initial_entrenchment_turns, use that (capped at 20).
+        // Otherwise fall back to the legacy flat value of 4 for all mandatory turn-0 brigades.
+        const MAX_ENTRENCHMENT_TURNS_SEED = 20;
+        if (typeof b.initial_entrenchment_turns === 'number' && b.initial_entrenchment_turns > 0) {
+            (formation as { entrenchment_turns?: number }).entrenchment_turns =
+                Math.min(MAX_ENTRENCHMENT_TURNS_SEED, b.initial_entrenchment_turns);
+        } else if (b.mandatory && (b.available_from === 0 || b.available_from === undefined)) {
             (formation as { entrenchment_turns?: number }).entrenchment_turns = 4;
         }
         // Officer quality: use per-brigade OOB override or faction default

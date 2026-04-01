@@ -12,7 +12,7 @@ import { buildAdjacencyMap } from '../../map/adjacency_map.js';
 import { computeFrontEdges, computeFrontEdgesOsid } from '../../map/front_edges.js';
 import { computeFrontRegions } from '../../map/front_regions.js';
 import { loadSettlementGraph } from '../../map/settlements.js';
-import { loadTerrainScalars } from '../../map/terrain_scalars.js';
+import { loadTerrainScalars } from '../../map/terrain_scalars_node.js';
 import { backfillFormationLocationOsid, computeOsidPopulation, loadOperationalCentroids, loadOperationalData, loadOperationalEdges } from '../../data/operational_data.js';
 import { loadSettlementEthnicityData } from '../../data/settlement_ethnicity.js';
 import { buildSidToMunFromSettlements, buildOsidToMunFromReverseMap } from '../../scenario/oob_early_war_entry.js';

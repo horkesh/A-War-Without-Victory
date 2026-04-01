@@ -34,7 +34,6 @@ import { buildOsidAdjacency, buildSharedBoundaryAdjacency, type Osid } from './o
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { FRONT_EDGE_MAX_GAP } from '../../map/front_edges.js';
 import {
     EXEMPT_CORPS_IDS,
     MIN_SECTOR_BRIGADES,
@@ -43,6 +42,7 @@ import { getCorpsArmyPriorities } from './bot_strategy.js';
 
 // ── Imported from extracted modules ──────────────────────────────────────
 import { buildFriendlyComponents, getSectorComponent, getCorpsForFaction, getFactions, isSectorColdFront } from './sector_utils.js';
+import { buildEdgeAdjacency as _buildEdgeAdjacency } from './sector_edge_adjacency.js';
 import { assertBrigadeReachability, assertSectorBrigadesActive } from './sector_assertions.js';
 import {
     mapOsidsToCorps,
@@ -97,19 +97,6 @@ export function buildCorpsFrontSectors(
     // Shared-boundary-only adjacency for territory contiguity checks.
     // Territory must be connected through direct polygon contact — no distance-contact bridging.
     const sharedBoundaryAdj = (spatial?.sharedBoundaryAdjacency as Map<Osid, Osid[]>) ?? buildSharedBoundaryAdjacency(edges);
-    // Front-edge-compatible adjacency: same threshold as FRONT_EDGE_MAX_GAP.
-    const frontEdgeAdj = new Map<Osid, Osid[]>();
-    for (const e of edges) {
-        if (!e?.a || !e?.b) continue;
-        if (e.min_dist !== undefined && e.min_dist > FRONT_EDGE_MAX_GAP) continue;
-        const listA = frontEdgeAdj.get(e.a as Osid) ?? [];
-        if (!listA.includes(e.b as Osid)) listA.push(e.b as Osid);
-        frontEdgeAdj.set(e.a as Osid, listA);
-        const listB = frontEdgeAdj.get(e.b as Osid) ?? [];
-        if (!listB.includes(e.a as Osid)) listB.push(e.a as Osid);
-        frontEdgeAdj.set(e.b as Osid, listB);
-    }
-    for (const list of frontEdgeAdj.values()) list.sort(strictCompare);
     // Strict shared-boundary adjacency (5.5m) for friendly-territory reachability.
     // Same as sharedBoundaryAdj — reuse the already-computed map.
     const strictAdj = sharedBoundaryAdj;
@@ -127,13 +114,20 @@ export function buildCorpsFrontSectors(
         caseBSplitAdj.set(e.b as Osid, listB);
     }
     for (const list of caseBSplitAdj.values()) list.sort(strictCompare);
+    // Build edge metadata lookup from osidFrontEdges — used by areSectorsFrontEdgeAdjacent
+    // for triple-junction edge-to-edge adjacency checks in both merge passes.
+    const globalEdgeMeta = new Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>();
+    for (const fe of osidFrontEdges) {
+        globalEdgeMeta.set(fe.edge_id, { a: fe.a, b: fe.b, side_a: fe.side_a, side_b: fe.side_b });
+    }
+
     const formations = state.military.formations ?? {};
     const factions = getFactions(state);
     const result: Record<string, CorpsFrontSector> = {};
 
     for (const faction of factions) {
         const factionSectors = buildFactionSectors(
-            state, faction, osidFrontEdges, adjacency, sharedBoundaryAdj, strictAdj, caseBSplitAdj, formations, reverseMap, centroids, spatial
+            state, faction, osidFrontEdges, adjacency, sharedBoundaryAdj, strictAdj, caseBSplitAdj, globalEdgeMeta, formations, reverseMap, centroids, spatial
         );
         for (const sector of factionSectors) {
             result[sector.sector_id] = sector;
@@ -144,7 +138,7 @@ export function buildCorpsFrontSectors(
     // municipality territory. Prevents splitting two brigades defending the same
     // area into separate sectors (Brcko fix: 215th and 108th were in different
     // sectors, so reactive defense couldn't concentrate them).
-    mergeSmallAdjacentSectors(result, adjacency);
+    mergeSmallAdjacentSectors(result, adjacency, globalEdgeMeta, sharedBoundaryAdj, centroids);
 
     // Post-merge contiguity repair: mergeSmallAdjacentSectors unions territory sets
     // without verifying contiguity. Repair any disconnected territory that resulted.
@@ -172,10 +166,15 @@ const MERGE_SMALL_SECTOR_THRESHOLD = 3;
  * Merge small adjacent sectors belonging to the same corps when they share
  * municipality territory. "Adjacent" means their territory_osids overlap in
  * at least one municipality, OR their friendly_osids are OSID-adjacent.
+ * Front-edge contiguity guard: only merges if the two sectors' edge sets are
+ * connected via triple-junction edge adjacency (Cases A/B via buildEdgeAdjacency).
  */
 function mergeSmallAdjacentSectors(
     sectors: Record<string, CorpsFrontSector>,
     adjacency: Map<Osid, Osid[]>,
+    edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
+    sharedBoundaryAdj: Map<Osid, Osid[]>,
+    centroids?: OsidCentroidMap,
 ): void {
     let merged = true;
     while (merged) {
@@ -194,8 +193,13 @@ function mergeSmallAdjacentSectors(
                 if (b.assigned_brigade_ids.length === 0) continue; // don't merge empty sectors
                 if (a.assigned_brigade_ids.length + b.assigned_brigade_ids.length > MERGE_MAX_COMBINED_BRIGADES) continue;
 
-                // Check adjacency: do any territory OSIDs share an OSID neighbor?
+                // Check territory adjacency: do any territory OSIDs share an OSID neighbor?
                 if (!areSectorsTerritoryAdjacent(a, b, adjacency)) continue;
+                // Front-edge contiguity guard: sectors must share at least one
+                // front-edge-adjacent OSID pair. Blocks merging isolated fronts
+                // (e.g. enclave ring + main front) that share territory topology
+                // but whose front-line edge sets are geographically disconnected.
+                if (!areSectorsFrontEdgeAdjacent(a, b, edgeMeta, sharedBoundaryAdj, centroids)) continue;
 
                 // Merge b into a
                 a.edge_ids = [...new Set([...a.edge_ids, ...b.edge_ids])].sort(strictCompare);
@@ -232,6 +236,74 @@ function areSectorsTerritoryAdjacent(
     return false;
 }
 
+/**
+ * Front-edge contiguity guard for sector merges.
+ *
+ * Returns true iff at least one edge in sector A's edge set is triple-junction-adjacent
+ * to at least one edge in sector B's edge set, via buildEdgeAdjacency (Cases A/B).
+ *
+ * This is stricter than OSID-level polygon adjacency: two front-line OSIDs can share
+ * a polygon corner (min_dist=0) while belonging to entirely different front-line arcs
+ * (e.g. donje_zesce facing east on the Goražde ring, izbisno facing south on the
+ * Kalinovik/Konjic front). OSID adjacency connects them; edge adjacency does not —
+ * because no triple junction exists between their edge sets.
+ *
+ * Sectors with no edge_ids on either side will always return false — they cannot be
+ * merged under this guard (no edge evidence of connectivity).
+ */
+function areSectorsFrontEdgeAdjacent(
+    a: CorpsFrontSector,
+    b: CorpsFrontSector,
+    edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
+    sharedBoundaryAdj: Map<Osid, Osid[]>,
+    centroids?: OsidCentroidMap,
+): boolean {
+    const aEdges = a.edge_ids;
+    const bEdges = b.edge_ids;
+    if (aEdges.length === 0 || bEdges.length === 0) return false;
+
+    const bEdgeSet = new Set(bEdges);
+
+    // Determine faction from sector — needed to orient friendly/hostile sides in buildEdgeAdjacency.
+    const faction = a.faction;
+
+    // Fast path: if any edge in A and any edge in B share the same friendly OSID,
+    // they are on the same polygon face of the front line and are trivially adjacent.
+    // This handles cases where hostile OSIDs are not linked in sharedBoundaryAdj
+    // (e.g. test environments with minimal edge metadata, or sub-segments split
+    // along the same friendly OSID). Triple-junction Cases A/B would eventually
+    // connect them, but only if the hostile OSIDs are mutually adjacent — which
+    // they may not be when edge metadata is incomplete.
+    {
+        const aFriendly = new Set<string>();
+        for (const eid of aEdges) {
+            const meta = edgeMeta.get(eid);
+            if (!meta) continue;
+            const friendly = meta.side_a === faction ? meta.a : meta.side_b === faction ? meta.b : null;
+            if (friendly) aFriendly.add(friendly);
+        }
+        for (const eid of bEdges) {
+            const meta = edgeMeta.get(eid);
+            if (!meta) continue;
+            const friendly = meta.side_a === faction ? meta.a : meta.side_b === faction ? meta.b : null;
+            if (friendly && aFriendly.has(friendly)) return true;
+        }
+    }
+
+    // Build edge adjacency for the combined edge set using triple-junction (Cases A/B).
+    const combined = [...aEdges, ...bEdges];
+    const edgeAdj = _buildEdgeAdjacency(combined, edgeMeta, faction, sharedBoundaryAdj, sharedBoundaryAdj, centroids);
+
+    // Check: does any edge in A have a neighbor in B?
+    for (const eid of aEdges) {
+        const neighbors = edgeAdj.get(eid) ?? [];
+        for (const n of neighbors) {
+            if (bEdgeSet.has(n)) return true;
+        }
+    }
+    return false;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Per-Faction Sector Building
 // ═══════════════════════════════════════════════════════════════════════════
@@ -244,6 +316,7 @@ function buildFactionSectors(
     sharedBoundaryAdj: Map<Osid, Osid[]>,
     strictAdj: Map<Osid, Osid[]>,
     caseBSplitAdj: Map<Osid, Osid[]>,
+    edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
     formations: Record<FormationId, FormationState>,
     reverseMap: Map<string, string[]> | null,
     centroids?: OsidCentroidMap,
@@ -374,6 +447,8 @@ function buildFactionSectors(
                     if (i === smallestIdx) continue;
                     const candidate = corpsSectors[i]!;
                     if (!areSectorsTerritoryAdjacent(target, candidate, adjacency)) continue;
+                    // Front-edge contiguity guard: block merges across isolated fronts
+                    if (!areSectorsFrontEdgeAdjacent(target, candidate, edgeMeta, sharedBoundaryAdj, centroids)) continue;
                     if (candidate.length_edges < bestNeighborSize ||
                         (candidate.length_edges === bestNeighborSize && bestNeighborIdx >= 0 &&
                             strictCompare(candidate.sector_id, corpsSectors[bestNeighborIdx]!.sector_id) < 0)) {

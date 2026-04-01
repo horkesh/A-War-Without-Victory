@@ -40,6 +40,8 @@ export interface OobBrigade {
     composition?: BrigadeComposition;
     /** Initial morale [0,100]. When set, overrides default (60). Enclave brigades: 70 (desperation bonus). */
     initial_morale?: number;
+    /** Initial entrenchment turns [0,20]. Siege-line and river-line brigades dug in before scenario start. Capped at MAX_ENTRENCHMENT_TURNS_SEED (20). */
+    initial_entrenchment_turns?: number;
     /** Custom tags from OOB (e.g. 'enclave'). Merged into formation tags at creation. */
     tags?: string[];
     /** Per-brigade terrain defense bonus (e.g. mountain/fortified position). Multiplicative: × (1 + bonus). */
@@ -162,6 +164,8 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
         const honor = (r.honor === 'slavna' || r.honor === 'viteska') ? r.honor as 'slavna' | 'viteska' : undefined;
         const home_osid = typeof r.home_osid === 'string' && r.home_osid.trim() ? r.home_osid.trim() : undefined;
         const initial_morale = typeof r.initial_morale === 'number' && Number.isFinite(r.initial_morale) ? r.initial_morale : undefined;
+        const initial_entrenchment_turns = typeof r.initial_entrenchment_turns === 'number' && Number.isFinite(r.initial_entrenchment_turns) && r.initial_entrenchment_turns > 0
+            ? r.initial_entrenchment_turns : undefined;
         const composition = isRecord(r.composition) ? r.composition as unknown as BrigadeComposition : undefined;
         const oobTags = Array.isArray(r.tags) ? (r.tags as unknown[]).filter((t): t is string => typeof t === 'string').map(t => t.trim()).filter(t => t.length > 0) : undefined;
         const defense_terrain_bonus = typeof r.defense_terrain_bonus === 'number' && Number.isFinite(r.defense_terrain_bonus) ? r.defense_terrain_bonus : undefined;
@@ -201,6 +205,7 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
             ...(initial_personnel != null && { initial_personnel }),
             ...(initial_cohesion != null && { initial_cohesion }),
             ...(initial_morale != null && { initial_morale }),
+            ...(initial_entrenchment_turns != null && { initial_entrenchment_turns }),
             ...(honor && { honor }),
             ...(home_osid && { home_osid }),
             ...(composition && { composition }),

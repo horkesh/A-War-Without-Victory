@@ -7,7 +7,7 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { buildAdjacencyMap } from '../map/adjacency_map.js';
 import { loadSettlementGraph } from '../map/settlements.js';
-import { loadTerrainScalars } from '../map/terrain_scalars.js';
+import { loadTerrainScalars } from '../map/terrain_scalars_node.js';
 import type { LoadedSettlementGraph } from '../map/settlements_parse.js';
 import { loadMunicipalityHqSettlement, loadOobBrigades } from '../scenario/oob_loader.js';
 import { buildSidToMunFromSettlements } from '../scenario/oob_early_war_entry.js';
@@ -854,4 +854,3 @@ export function redirectReserveLoan(
     deployEliteLoan(state, brigadeId, newCorpsId, reason, 0, state.meta.turn);
     return { ok: true };
 }
-
