@@ -18585,3 +18585,24 @@ P1 defensive fire alone closed it. No must_hold needed. Holds RS all 40 turns.
 ### Open P1s: vrs_east_bosnian ZEA, suspend counter, HRHB directive, jajce turn_min, 3 stale ssid refs, P5/P6/P9
 
 ---
+
+## [2026-04-02] Op Teočak — assembly zone fix + planning window extension
+
+### Summary
+Op Teočak was launching with 3 brigades attacking one-by-one (never concentrated) because `countAssembledBrigades` only counted brigades at the single `staging_osid`, missing brigades already at front OSIDs adjacent to the objective. Planning window was also too short for 2nd Tuzla's 3-hop march.
+
+### Root cause
+`force_staging` sub-phase advanced prematurely — brigades at `kalesija_selo`/`kikaci` (directly adjacent to `rastosnica_2`) were not counted as assembled because they weren't at `kalesija_grad_2` specifically. Execution opened before the force was in position. Each brigade then attacked on a different turn, `was_concentrated: false` on all 3 attacks.
+
+### Changes
+- `operation_preparation.ts`: `countAssembledBrigades` expanded for pre-planned ops (no `sector_id`) to count brigades across ALL corps sectors, not just at staging_osid. Determinism via `strictCompare`.
+- `pre_planned_operations.ts`: `planning_duration` 5→7 (2nd Tuzla needs 3 hops + buffer). Removed `arbih_120th_liberation_black_swans` from axis (was re-loaned to 3rd Corps mid-op, never attacked objective).
+
+### Verification
+- `npx tsc --noEmit` clean
+- `npm run test:vitest` 1685/1686 pass, 1 skipped (pre-existing)
+
+### Expected effect
+All 3–4 Kalesija brigades recognized as assembled simultaneously → execution waits until force is genuinely concentrated → `was_concentrated: true` → higher power ratio → rastosnica_2 should flip.
+
+---
