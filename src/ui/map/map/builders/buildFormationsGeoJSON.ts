@@ -12,6 +12,7 @@ export interface FormationMarkerProperties {
   name: string;
   kind: string;
   faction: string;
+  corps_id: string | null;
   icon_id: string;
   white_icon_id: string;
   status: string;
@@ -131,6 +132,7 @@ export function buildFormationsGeoJSON(
         name: formation.name,
         kind: formation.kind,
         faction: formation.faction,
+        corps_id: formation.corps_id ?? null,
         icon_id: icon_id,
         white_icon_id: `white__${icon_id}`,
         status: formation.status,

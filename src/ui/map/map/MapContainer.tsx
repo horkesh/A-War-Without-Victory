@@ -38,6 +38,7 @@ import type { RadialMenuItem } from '../components/RadialMenu';
 import { rewritePmtilesUrls } from './rewritePmtilesUrls';
 import { useIPC } from '../desktop/useIPC';
 import { stageMoveOrderFromOsid, stageAssignBrigadeToSectorAction } from '../desktop/orderActions';
+import { collectHighlightedFormationIds } from './highlightSelection';
 import styleJson from './awwv_map_style.json';
 import { MapboxOverlay } from '@deck.gl/mapbox';
 import { composeTacticalDeckLayers, DEFAULT_DECK_LAYER_CAPABILITIES } from '../layers/composeTacticalDeckLayers';
@@ -173,46 +174,6 @@ const GHOST_PATH_SOURCE_ID = 'ghost-paths';
 const GHOST_PATH_LAYER_ID = 'ghost-paths-line';
 import { buildGhostPathsGeoJSON } from './builders/buildGhostPathsGeoJSON';
 const ENCLAVE_LABEL_LAYER_ID = 'enclave-label';
-
-function collectHighlightedFormationIds(args: {
-  formationsGeoJson: FeatureCollection | null;
-  loadedGameState: LoadedGameState | null;
-  selectedFormationId: string | null;
-  selectedCorpsId: string | null;
-  selectedCorpsFrontSectorId: string | null;
-}): string[] {
-  const {
-    formationsGeoJson,
-    loadedGameState,
-    selectedFormationId,
-    selectedCorpsId,
-    selectedCorpsFrontSectorId,
-  } = args;
-
-  const highlightedFormationIds = new Set<string>();
-  const activeSectorIds = new Set<string>();
-
-  if (selectedCorpsFrontSectorId) activeSectorIds.add(selectedCorpsFrontSectorId);
-
-  if (selectedCorpsId && loadedGameState?.corpsFrontSectors) {
-    loadedGameState.corpsFrontSectors
-      .filter((sector) => sector.corps_id === selectedCorpsId)
-      .forEach((sector) => activeSectorIds.add(sector.sector_id));
-  }
-
-  if (selectedFormationId) highlightedFormationIds.add(selectedFormationId);
-
-  if (formationsGeoJson && activeSectorIds.size > 0) {
-    for (const feature of formationsGeoJson.features) {
-      const formationId = feature.properties?.id;
-      const sectorId = feature.properties?.sector_id;
-      if (typeof formationId !== 'string' || typeof sectorId !== 'string') continue;
-      if (activeSectorIds.has(sectorId)) highlightedFormationIds.add(formationId);
-    }
-  }
-
-  return [...highlightedFormationIds].sort((a, b) => a.localeCompare(b));
-}
 
 function composeDeckLayersForCurrentSelection(args: {
   formationsGeoJson: FeatureCollection;
@@ -1882,7 +1843,7 @@ export function MapContainer() {
         !!selectedFormationId && !selectedCorpsId && !selectedCorpsFrontSectorId;
       // Use sector_id IN filter for corps (covers all brigades assigned to corps sectors)
       const unitFilter: any = selectedCorpsId
-        ? ['in', ['get', 'sector_id'], ['literal', ids]]
+        ? ['==', ['get', 'corps_id'], selectedCorpsId]
         : selectedCorpsFrontSectorId
           ? ['==', ['get', 'sector_id'], selectedCorpsFrontSectorId]
           : ['==', ['get', 'sector_id'], '__none__'];

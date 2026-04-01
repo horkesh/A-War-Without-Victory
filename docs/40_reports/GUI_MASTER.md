@@ -187,3 +187,7 @@ When Deck owns brigade counters, the base Deck layer and the highlighted Deck la
 ### 7. Hover and selection must not share brigade whitening
 
 Deck brigade whitening must be driven only by durable selection state. A broken version of the map selection bridge mixed `hoveredSectorId` / `hoveredCorpsId` into the same highlighted formation id set used for white brigade overlays, and the base Deck icon layer also swapped to white from that set. The result was visible brigade flicker while merely hovering sector/corps UI. Rule: hover may drive line emphasis or contextual focus, but only `selectedFormationId`, `selectedCorpsId`, and `selectedCorpsFrontSectorId` may whiten brigade counters.
+
+### 8. Corps brigade highlighting must not depend on sector assignment
+
+Corps-level map highlighting must use direct corps ownership, not sector-derived membership. A broken version of the Deck selection bridge highlighted corps brigades by collecting the corps' sectors and then matching formations by `sector_id`, which skipped reserve or otherwise non-sector-assigned brigades. Rule: sector highlighting is `sector_id`-based; corps highlighting must use `corps_id` and include all corps-owned brigades.

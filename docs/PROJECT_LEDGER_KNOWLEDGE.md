@@ -1216,3 +1216,7 @@ When Deck owns brigade counters, the base Deck layer and the highlighted Deck la
 ## [2026-04-01] Hover context must not share the Deck white-counter path with selection
 
 Deck brigade whitening and line-hover emphasis are different concepts and must not share the same highlighted id set. A broken version of `MapContainer.tsx` fed `hoveredSectorId` / `hoveredCorpsId` into the same highlighted formation list used for Deck white counters, and `buildTacticalDeckLayers.ts` also let the base Deck icon layer swap to white icons from that set. That made transient hover behave like selection and caused visible brigade flicker. Rule: hover may emphasize lines or contextual focus, but only selected brigade / sector / corps state may whiten brigade counters.
+
+## [2026-04-01] Corps selection must be corps-owned, not sector-derived
+
+Corps selection and sector selection are not interchangeable. A broken version of the map highlight bridge derived corps-selected brigades indirectly from sector membership, which omitted reserve or otherwise non-sector-assigned brigades that still belonged to the corps. Rule: sector highlighting may rely on `sector_id`, but corps highlighting must have direct access to `corps_id` and select all corps-owned brigades whether or not they currently sit in a sector assignment.

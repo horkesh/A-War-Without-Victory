@@ -159,3 +159,28 @@ At the same time, the base Deck icon layer had been taught to swap to white icon
 - all brigades remain visible in faction color in normal map state
 - hover may emphasize lines/sector context, but must not recolor brigade counters
 - only selected brigade / sector / corps state may whiten brigade counters
+
+## Follow-up: Corps Selection Must Use Corps Ownership, Not Only Sector Membership (2026-04-01)
+
+After the hover/selection split, one more corps-specific gap remained: selecting a corps still failed to whiten every brigade belonging to that corps.
+
+### Root cause
+
+The corps highlight path was still effectively sector-derived:
+
+- corps selection gathered sector ids from `corpsFrontSectors`
+- highlighted brigades were then discovered by matching `feature.properties.sector_id`
+
+That misses real corps-owned brigades which do not currently have a sector assignment, such as reserves or other non-front brigades.
+
+### Correction
+
+- `buildFormationsGeoJSON.ts` now carries `corps_id` into formation marker properties
+- the selection helper now highlights corps-owned brigades directly by `corps_id`
+- sector selection remains sector-scoped
+- MapLibre pulse/white-overlay fallback filters for corps selection now also use `corps_id` instead of only `sector_id`
+
+### Resulting contract
+
+- sector selection highlights brigades assigned to that sector
+- corps selection highlights all brigades belonging to that corps, including brigades without a current sector assignment

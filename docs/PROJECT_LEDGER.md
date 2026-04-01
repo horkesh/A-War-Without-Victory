@@ -18427,3 +18427,28 @@ This incorrectly gave hover the same visual authority as selection.
 - `node_modules\\.bin\\tsx.cmd --test tests\\ui_map_deck_counter_visibility.test.ts`
 - `npx.cmd tsc --noEmit -p tsconfig.json`
 - `npm.cmd run desktop:map:build`
+
+---
+
+## [2026-04-01] Tactical map corps selection now highlights all corps brigades
+
+### Summary
+Fixed a remaining corps-selection bug where selecting a corps failed to whiten every brigade belonging to that corps.
+
+### Root cause
+The corps highlight path was still sector-derived:
+- it gathered the corps' sector ids
+- then highlighted only formations whose marker properties matched those `sector_id`s
+
+That skipped corps brigades without a current sector assignment.
+
+### Fix
+- `src/ui/map/map/builders/buildFormationsGeoJSON.ts`: formation marker properties now include `corps_id`
+- `src/ui/map/map/highlightSelection.ts`: corps selection now highlights by `corps_id`, while sector selection remains sector-scoped
+- `src/ui/map/map/MapContainer.tsx`: corps white-overlay/pulse fallback now filters by `corps_id`
+- Added regression test `tests/ui_map_corps_selection_highlight.test.ts`
+
+### Verification
+- `node_modules\\.bin\\tsx.cmd --test tests\\ui_map_deck_counter_visibility.test.ts tests\\ui_map_corps_selection_highlight.test.ts`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run desktop:map:build`
