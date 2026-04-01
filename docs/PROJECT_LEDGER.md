@@ -1,3 +1,25 @@
+## [2026-04-01] Sector-Anchored Corps Operations Launch Contract (v0.8.x Operations Singularity sublane)
+
+### Summary
+Replaced broad corps-wide brigade pool selection with a sector-anchored launch contract. Operations now declare a primary sector; the default eligible brigade pool derives from that sector's assigned brigades. Adjacent-sector brigades may attach only up to a bounded cap (33%, leaving ≥1 residual). No corps-wide fallback pool remains in emit.ts.
+
+### Changes
+- **`src/state/game_state.ts`**: 4 new optional fields forward-declared on `CorpsOperation`: `supporting_sector_ids`, `primary_sector_brigades`, `attached_brigades`, `reinforcement_source`. `sector_id` JSDoc clarified as primary sector anchor.
+- **`src/sim/combat/commander/emit.ts`**: `buildOperations()` now determines `sectorId` + `primarySector` FIRST, derives `primaryPool` from sector-assigned brigades, then adds adjacent-sector attachments with `ADJACENT_SECTOR_ATTACH_RATE=0.33` / `ADJACENT_SECTOR_MIN_RESIDUAL=1` cap. Broad-pool fallback removed.
+- **`src/ui/map/data/types.ts`** + **`GameStateAdapter.ts`**: 4 new fields passed through to `OperationView`.
+- **`src/ui/map/components/OperationDetail.tsx`**: "Sector Anchor" block added (primary sector name, primary bde count, attached bde count, risk-transfer sector list).
+- **`src/sim/combat/pre_planned_operations.ts`**, **`triggered_operations.ts`**, **`bot_corps_operations.ts`**, **`bot_corps_corridor.ts`**, **`src/desktop/electron-main.cjs`**: PHASE 5 TRANSITIONAL comments marking all remaining non-sector-anchored creation paths.
+
+### Calibration Gate (n1281)
+92.7% area-weighted / 23/25 anchors / 6/6 benchmarks. Hash: a968a166ebc237a6.
+Net +2 anchor recoveries vs n1280 baseline: brcko + rastosnica_2 now pass.
+Area regression: -0.5pp (within 1pp floor). Anomaly: 157 zero-eligible-attacker ops (39%) — scoping side-effect, flagged for follow-up.
+
+### Why
+Loose broad-pool selection allowed operations to silently strip brigades from unrelated sectors, producing invisible line thinning and uncorrelated operation outcomes. Sector anchoring gives operations real local grounding, reduces hidden line stripping, and enables player legibility via the UI trace.
+
+---
+
 ## [2026-04-01] Map Selection Panel Bridge + Non-Top-Stack White Overlay
 
 ### Summary

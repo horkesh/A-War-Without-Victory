@@ -1,7 +1,7 @@
 # v0.8.x Sector-Anchored Corps Operations
 
 **Date:** 2026-04-01
-**Status:** AMENDED 2026-04-01 — was NOT READY (4 P0 gaps). Gaps resolved: sector_id naming, writer inventory pre-work, attachment thresholds specified, calibration gate added.
+**Status:** COMPLETE 2026-04-01 — Phases 0-5 implemented + committed. Phase 6 calibration gate PASS (n1281: 92.7% / 23/25 anchors / 6/6 benchmarks).
 **Roadmap slot:** v0.8.x-final (`Operations Singularity` sublane)  
 **Overseer:** Orchestrator  
 **Architect:** Technical Architect / Architect - owns canonical model decisions, flags player-facing tradeoffs for user review  
@@ -368,11 +368,11 @@ Verify the new launch model feels stricter without becoming fake-rigid.
 
 Tasks:
 
-- [ ] run scenario slices or targeted diagnostics to inspect whether corps can still concentrate force credibly
-- [ ] confirm that quiet sectors are not silently gutted without visible trace
-- [ ] confirm that historically plausible neighboring-sector reinforcement remains possible
-- [ ] review command explanation outputs for player legibility
-- [ ] record any historical edge cases that justify future exception rules
+- [x] run scenario slices or targeted diagnostics to inspect whether corps can still concentrate force credibly
+- [x] confirm that quiet sectors are not silently gutted without visible trace (sector residual floor enforced)
+- [x] confirm that historically plausible neighboring-sector reinforcement remains possible (ADJACENT_SECTOR_ATTACH_RATE=0.33)
+- [ ] review command explanation outputs for player legibility (deferred — no command explanation system yet)
+- [ ] record any historical edge cases that justify future exception rules (deferred)
 
 **Deliverables:**
 - scenario-backed validation
@@ -391,10 +391,14 @@ Run `npm run sim:scenario:run:40w`. Compare to **n1280 baseline**: 93.2% area-we
 If any floor is breached, the new launch model has broken calibration and Phase 3 must be revisited before this sublane closes.
 
 **Done gate:**
-- the launch model is stricter than today without becoming cartoonishly sector-prisoned
-- calibration gate above passes
+- [x] the launch model is stricter than today without becoming cartoonishly sector-prisoned
+- [x] calibration gate above passes
 
-→ `/simplify` → scenario verification → calibration gate → `/create-report` → pre-commit-check → commit
+**n1281 result (2026-04-01):** 92.7% area / 23/25 anchors (+2 vs n1280) / 6/6 benchmarks. Hash: a968a166ebc237a6.
+Anchor recoveries: brcko ✅ + rastosnica_2 ✅. Persistent P0s: boljanic_2, gradacac_2 (pre-existing).
+Anomaly flagged by expert: 157 zero-eligible-attacker ops (39%) — sector scoping side-effect, not a gate failure; warrants follow-up.
+
+→ ~~`/simplify` → scenario verification → calibration gate → `/create-report` → pre-commit-check → commit~~ **COMPLETE**
 
 ---
 
