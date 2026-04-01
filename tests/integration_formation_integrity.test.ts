@@ -9,6 +9,7 @@ import {
     DISSOLUTION_PERSONNEL_THRESHOLD,
     DISSOLUTION_COHESION_THRESHOLD,
     DISSOLUTION_MORALE_THRESHOLD,
+    DISSOLUTION_PERSONNEL_CAP,
 } from '../src/sim/combat/brigade_dissolution.js';
 
 const SCENARIO_40W = join(process.cwd(), 'data', 'scenarios', 'apr1992_definitive_40w.json');
@@ -105,6 +106,10 @@ describe('formation integrity (40w)', () => {
             const personnel = fm.personnel ?? 1000;
             const cohesion = fm.cohesion ?? 60;
             const morale = fm.morale ?? 60;
+
+            // Mirror dissolution logic: brigades above the personnel cap are demoralized,
+            // not destroyed — combat penalties apply but dissolution does not fire.
+            if (personnel >= DISSOLUTION_PERSONNEL_CAP) continue;
 
             let criteriaCount = 0;
             if (personnel < DISSOLUTION_PERSONNEL_THRESHOLD) criteriaCount++;

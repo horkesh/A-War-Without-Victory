@@ -640,9 +640,12 @@ function buildOperations(
 
         let participatingBrigades = [...primaryPool, ...attachedPool].sort(strictCompare);
 
-        // Guard: insufficient sector-anchored force — skip op.
-        // Corps must concentrate before attacking; silent corps-wide draft removed.
-        if (participatingBrigades.length < MIN_BRIGADES_FOR_PLAN) {
+        // When the primary sector is anchored, 2 brigades is viable — the sector
+        // anchor provides strategic coherence the old broad-pool lacked. The predictor
+        // (force_ratio_estimate) will determine how quickly a thin op fails at execution.
+        // Without an anchor (fallback: no sector matched) keep the corps-wide floor.
+        const minForOp = primarySector ? 2 : MIN_BRIGADES_FOR_PLAN;
+        if (participatingBrigades.length < minForOp) {
             return ops;
         }
 
@@ -679,7 +682,7 @@ function buildOperations(
                     const evictSet = new Set(sortedTaken.slice(0, mustReturn));
                     const trimmedParticipants = participatingBrigades.filter(id => !evictSet.has(id));
 
-                    if (trimmedParticipants.length < MIN_BRIGADES_FOR_PLAN) {
+                    if (trimmedParticipants.length < minForOp) {
                         return ops;
                     }
                     participatingBrigades = trimmedParticipants;
