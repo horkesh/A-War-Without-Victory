@@ -98,7 +98,14 @@ export function buildCorpsOperation(
     };
 }
 
-/** Factory for commander-generated sector-attack operations. */
+/**
+ * Factory for commander-generated sector-attack operations.
+ *
+ * `sectorId` is the primary sector anchor (`op.sector_id`). Under the sector-anchored
+ * launch contract (Phase 3), callers must supply this — it will become required.
+ * Current callers pass it from `findSectorWithMostTargetOverlap`; corridor breach
+ * passes `undefined` (no sector) — both are transitional behavior.
+ */
 export function buildCommanderOperation(
     corpsId: string,
     turn: number,

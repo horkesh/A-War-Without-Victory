@@ -552,6 +552,16 @@ function buildOperations(
             ?? deriveTargetsFromSectors(briefing, 1)[0]
             ?? null;
 
+        // TRANSITIONAL — BROAD-POOL BRIGADE SELECTION.
+        // Current model: plan.assigned_brigades is drawn from the corps-wide surplus pool
+        // (any surplus brigade in any sector). The primary sector is identified afterward
+        // via findSectorWithMostTargetOverlap and stored as op.sector_id, but it does NOT
+        // drive participant selection. Cross-sector brigades enter silently.
+        //
+        // Target (Phase 3, sector-anchored launch contract): select primary_sector first,
+        // derive the default pool from that sector's assigned brigades, then attach
+        // cross-sector brigades explicitly (op.attached_brigades, op.reinforcement_source).
+        //
         // Intersect plan's assigned brigades with surplus pool, then filter by
         // reachability: brigade must be able to BFS through friendly territory
         // to the first objective OSID within MAX_REACHABILITY_HOPS.

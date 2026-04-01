@@ -265,8 +265,23 @@ export interface CorpsOperation {
     /** Independent axes of advance. When present, per-axis fields drive execution. */
     axes?: OperationAxis[];
     // --- Sector offensive fields (type === 'sector_attack') ---
-    /** Which sector this launches from. */
+    /**
+     * Primary sector anchor — the sector this operation is anchored to.
+     * Under the sector-anchored launch contract (Phase 3), this must be set at launch
+     * and the default eligible brigade pool must be derived from this sector's assigned brigades.
+     * Do NOT add a separate `primary_sector_id` field — this IS the primary sector anchor.
+     */
     sector_id?: string;
+
+    // --- Sector-anchored launch contract — Phase 2 scaffolding (not yet populated) ---
+    /** Sectors explicitly contributing attachments or accepting transferred risk. */
+    supporting_sector_ids?: string[];
+    /** Brigade IDs drawn from the primary sector at launch time. Stored for traces. Deterministic order. */
+    primary_sector_brigades?: string[];
+    /** Brigade IDs from outside the primary sector, explicitly attached as reinforcements. Deterministic order. */
+    attached_brigades?: string[];
+    /** Why non-primary brigades are present. Absent = all brigades from primary sector. */
+    reinforcement_source?: 'adjacent_sector' | 'corps_reserve' | 'army_loan';
     /** Ordered OSID targets (legacy flat list — used when axes is absent). */
     objectives?: string[];
     /** Next OSID to attack (legacy — used when axes is absent). */

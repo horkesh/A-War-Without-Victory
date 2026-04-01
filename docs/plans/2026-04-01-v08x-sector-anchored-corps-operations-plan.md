@@ -163,9 +163,9 @@ Before touching any launch code, enumerate every path that currently creates a `
 | `injectQueuedOperation` | `pre_planned_operations.ts` | player pre-planned | ✅ `buildCorpsOperation` |
 | commander emit (sector_attack) | `commander/emit.ts` | AI opportunistic | ✅ `buildCommanderOperation` |
 | commander emit (probe) | `commander/emit.ts` | AI probe | ✅ `buildProbeOperation` |
-| `generateEmergencyDefensiveOperations` | `bot_corps_operations.ts` | AI emergency | ❌ inline literal |
-| triggered ops | `triggered_operations.ts` | scenario/event | ❌ inline literal |
-| corridor breach | `bot_corps_corridor.ts` | AI corridor | ❌ inline literal |
+| `generateEmergencyDefensiveOperations` | `bot_corps_operations.ts` | AI emergency | ✅ `buildEmergencyDefenseOperation` (migrated 2026-04-01, commit dbdbf729) |
+| triggered ops | `triggered_operations.ts` | scenario/event | ✅ `buildCorpsOperation(…, false)` (migrated 2026-04-01, commit 27cc72a6) |
+| corridor breach | `bot_corps_corridor.ts` | AI corridor | ✅ `buildCommanderOperation` (migrated 2026-04-01, commit 27cc72a6) |
 
 **Task:** Before Phase 1 starts, verify this table is still accurate (`grep -rn "CorpsOperation = {" src/`). If new paths are found, add them. Phase 3 must address every row.
 
@@ -184,23 +184,28 @@ Remove ambiguity before touching launch code.
 
 Tasks:
 
-- [ ] add a short canonical-owner note in the relevant ops hotspot files naming this as the target launch contract
-- [ ] document the required operation fields:
-  - `primary_sector_id`
-  - `supporting_sector_ids`
-  - `primary_sector_brigades`
-  - `attached_brigades`
-  - `reinforcement_source`
-- [ ] explicitly mark pure broad corps-wide free-pool launch as transitional / non-target behavior
-- [ ] update roadmap and ops-singularity references so implementers know this is now the chosen direction
+- [x] add a short canonical-owner note in the relevant ops hotspot files naming this as the target launch contract
+  - `sector_offensive.ts`: target launch contract paragraph added to header (2026-04-01)
+  - `corps_operation_helpers.ts`: `buildCommanderOperation` JSDoc notes `sectorId` target = required (2026-04-01)
+- [x] document the required operation fields:
+  - `sector_id` (existing — IS the primary sector anchor; JSDoc improved in `game_state.ts`, 2026-04-01)
+  - `supporting_sector_ids` (new — forward-declared as `?` in `game_state.ts`, 2026-04-01)
+  - `primary_sector_brigades` (new — forward-declared as `?` in `game_state.ts`, 2026-04-01)
+  - `attached_brigades` (new — forward-declared as `?` in `game_state.ts`, 2026-04-01)
+  - `reinforcement_source` (new — forward-declared as `?` in `game_state.ts`, 2026-04-01)
+- [x] explicitly mark pure broad corps-wide free-pool launch as transitional / non-target behavior
+  - `emit.ts` `buildOperations()`: TRANSITIONAL — BROAD-POOL BRIGADE SELECTION comment added (2026-04-01)
+- [x] update roadmap and ops-singularity references so implementers know this is now the chosen direction
+  - Plan table of writer inventory updated (all 6 paths ✅); Phase 0 verified clean
 
 **Deliverables:**
-- explicit canonical launch model
-- explicit rejection of sector-launched and silent broad-pool launch
-- docs aligned around one target
+- explicit canonical launch model ✅
+- explicit rejection of sector-launched and silent broad-pool launch ✅
+- docs aligned around one target ✅
 
 **Done gate:**
-- a maintainer can answer "how are operations supposed to launch?" in one sentence
+- a maintainer can answer "how are operations supposed to launch?" in one sentence ✅
+  → "Corps launches; sector anchors; sector brigades form the default pool; outside brigades join only as explicit reinforcements."
 
 → `/simplify` → documentation verification → commit
 
