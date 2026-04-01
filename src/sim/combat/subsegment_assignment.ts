@@ -17,8 +17,6 @@ import { bfsDistance } from './sector_utils.js';
 /** Sub-segments wider than this get 2+ brigades. */
 const WIDE_SEGMENT_THRESHOLD = 5;
 
-/** Home OSID affinity bonus when brigade's home_osid is in the sub-segment's friendly OSIDs. */
-const HOME_AFFINITY_BONUS = 1.3;
 
 /** Mechanized/motorized brigade terrain affinity bonus for non-mountain sub-segments. */
 const MECH_TERRAIN_BONUS = 1.2;
@@ -148,10 +146,6 @@ export function assignBrigadesToSubSegments(
                     if (d < minDist) minDist = d;
                 }
                 let score = 1.0 / (1 + (minDist === Infinity ? 20 : minDist));
-
-                if (brigHome && ss.friendly_osids.includes(brigHome)) {
-                    score *= HOME_AFFINITY_BONUS;
-                }
 
                 if (isMech) {
                     score *= MECH_TERRAIN_BONUS;

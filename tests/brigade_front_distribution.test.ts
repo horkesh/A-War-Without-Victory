@@ -327,8 +327,11 @@ describe('distributeBrigadesToFront', () => {
         expect(state.military.formations.brig_2.location_osid).toBe('op:test:only');
     });
 
-    it('prefers home OSID when breaking ties', () => {
-        // 2 brigades at A, frontOsids=[A, B, C]. brig_2's home is B. A↔B, A↔C.
+    it('uses strictCompare tiebreak when stacked (no home_osid preference)', () => {
+        // 2 brigades at A, frontOsids=[A, B, C]. A↔B, A↔C.
+        // Phase A sorts brigade candidates by strictCompare: brig_1 < brig_2.
+        // brig_1 processes first, moves to B (first by strictCompare among empty neighbors B, C).
+        // brig_2 is no longer stacked so stays at A.
         const state = makeState({
             brig_1: makeFormation({ location_osid: 'op:test:a', home_osid: 'op:test:a' }),
             brig_2: makeFormation({ location_osid: 'op:test:a', home_osid: 'op:test:b' }),
@@ -355,9 +358,9 @@ describe('distributeBrigadesToFront', () => {
 
         distributeBrigadesToFront(state, sectors, adjacency);
 
-        // brig_2 should move to B (its home_osid), brig_1 stays at A
-        expect(state.military.formations.brig_2.location_osid).toBe('op:test:b');
-        expect(state.military.formations.brig_1.location_osid).toBe('op:test:a');
+        // brig_1 (sorts first) moves to B (first empty neighbor by strictCompare), brig_2 stays at A
+        expect(state.military.formations.brig_1.location_osid).toBe('op:test:b');
+        expect(state.military.formations.brig_2.location_osid).toBe('op:test:a');
     });
 
     it('resets entrenchment when moving a fresh brigade (entrenchment < 1)', () => {

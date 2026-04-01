@@ -13,7 +13,7 @@
  * Deterministic: sorted iteration via strictCompare, no Math.random(), no timestamps.
  */
 
-import type { CorpsFrontSector, CorpsCommandState, FactionId, FormationState, GameState, SettlementId } from '../../state/game_state.js';
+import type { CorpsFrontSector, CorpsCommandState, FactionId, GameState, SettlementId } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { bfsDistance } from './sector_utils.js';
 
@@ -90,12 +90,11 @@ function buildOperationParticipantSet(state: GameState): Set<string> {
  *
  * Without distToTarget (Phase A adjacency checks), falls back to pure stack count.
  *
- * Tie-break: home_osid match → deterministic sort.
+ * Tie-break: deterministic sort (strictCompare).
  */
 function pickLeastStackedTarget(
     frontOsids: string[],
     osidCount: Map<string, number>,
-    homeOsid: string | undefined,
     distToTarget?: Map<string, number>,
 ): string {
     const effectiveCost = (osid: string): number => {
@@ -106,44 +105,23 @@ function pickLeastStackedTarget(
 
     let bestOsid = frontOsids[0]!;
     let bestCost = effectiveCost(bestOsid);
-    let bestIsHome = bestOsid === homeOsid;
 
     for (let i = 1; i < frontOsids.length; i++) {
         const osid = frontOsids[i]!;
         const cost = effectiveCost(osid);
-        const isHome = osid === homeOsid;
 
         if (
             cost < bestCost ||
-            (cost === bestCost && isHome && !bestIsHome) ||
-            (cost === bestCost && isHome === bestIsHome && strictCompare(osid, bestOsid) < 0)
+            (cost === bestCost && strictCompare(osid, bestOsid) < 0)
         ) {
             bestOsid = osid;
             bestCost = cost;
-            bestIsHome = isHome;
         }
     }
 
     return bestOsid;
 }
 
-/**
- * Check if a brigade's home_osid is an empty adjacent front OSID from its current location.
- * Used to prioritize brigades that want to "go home" during redistribution.
- */
-function hasEmptyHomeNeighbor(
-    f: FormationState | undefined,
-    adjacency: Map<string, string[]>,
-    frontOsidSet: Set<string>,
-    osidCount: Map<string, number>,
-): boolean {
-    const loc = f?.location_osid;
-    const home = f?.home_osid;
-    if (!loc || !home || !frontOsidSet.has(home)) return false;
-    if ((osidCount.get(home) ?? 0) > 0) return false; // home not empty
-    const neighbors = adjacency.get(loc) ?? [];
-    return neighbors.includes(home);
-}
 
 // ── Main function ─────────────────────────────────────────────────────────────
 
@@ -223,8 +201,7 @@ export function distributeBrigadesToFront(
             const sortedFrontOsids = [...frontOsids].sort(strictCompare);
 
             // ── Phase A: Redistribute stacked brigades to adjacent empty front OSIDs ──
-            // Sort brigades: those with home_osid matching an empty adjacent front OSID go first
-            // (they're motivated to move to their home). Deterministic tie-break by ID.
+            // Sort purely by ID for determinism.
             const phaseABrigades = eligibleBrigadeIds
                 .filter(bid => {
                     const f = formations[bid];
@@ -235,15 +212,7 @@ export function distributeBrigadesToFront(
                     if ((f.entrenchment_turns ?? 0) >= ENTRENCHMENT_REDISTRIBUTION_THRESHOLD) return false;
                     return true;
                 })
-                .sort((a, b) => {
-                    const fA = formations[a];
-                    const fB = formations[b];
-                    const aHasHomeTarget = hasEmptyHomeNeighbor(fA, adjacency, frontOsidSet, osidCount);
-                    const bHasHomeTarget = hasEmptyHomeNeighbor(fB, adjacency, frontOsidSet, osidCount);
-                    if (aHasHomeTarget && !bHasHomeTarget) return -1;
-                    if (!aHasHomeTarget && bHasHomeTarget) return 1;
-                    return strictCompare(a, b);
-                });
+                .sort(strictCompare);
 
             for (const bid of phaseABrigades) {
                 const f = formations[bid]!;
@@ -253,15 +222,9 @@ export function distributeBrigadesToFront(
 
                 // Find adjacent empty front OSID
                 const neighbors = adjacency.get(loc) ?? [];
-                const homeOsid = f.home_osid;
                 const candidates = neighbors
                     .filter(n => frontOsidSet.has(n) && (osidCount.get(n) ?? 0) === 0)
-                    .sort((a, b) => {
-                        const aHome = a === homeOsid ? 0 : 1;
-                        const bHome = b === homeOsid ? 0 : 1;
-                        if (aHome !== bHome) return aHome - bHome;
-                        return strictCompare(a, b);
-                    });
+                    .sort(strictCompare);
 
                 if (candidates.length === 0) continue;
 
@@ -280,6 +243,10 @@ export function distributeBrigadesToFront(
                 const loc = f.location_osid;
                 if (!loc) continue;
                 if (frontOsidSet.has(loc)) continue; // Already at front
+
+                // Skip brigades already in transit — re-issuing orders resets their progress
+                const movementState = state.military.brigade_movement_state;
+                if (movementState?.[bid]?.status === 'in_transit') continue;
 
                 // Corps boundary guard: restrict BFS traversal and target pool to
                 // OSIDs within this brigade's own corps territory. Falls back to
@@ -308,7 +275,7 @@ export function distributeBrigadesToFront(
                 }
 
                 // Pick distance-weighted least-cost target (score = stack_count + weight × dist)
-                const target = pickLeastStackedTarget(effectiveFrontOsids, osidCount, f.home_osid, distToTarget);
+                const target = pickLeastStackedTarget(effectiveFrontOsids, osidCount, distToTarget);
 
                 // Use pre-computed distance for march decision
                 const dist = distToTarget.get(target) ?? Infinity;

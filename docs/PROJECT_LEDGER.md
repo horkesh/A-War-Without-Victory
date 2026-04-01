@@ -1,3 +1,27 @@
+## [2026-04-01] n1278 — commander correction pass + remove home_osid auto-return
+
+### Summary
+Root cause investigation found two structural defects in brigade front distribution. Three changes implemented. 1685 tests pass, typecheck clean. Calibration run pending.
+
+### Root Causes Found
+1. **Phase B re-orders in-transit brigades every turn** — `brigade_front_distribution.ts` Phase B only checked `frontOsidSet.has(loc)`. In-transit brigades are still at a rear OSID, so Phase B re-issued a march order every turn, causing `osid-column-movement` to reset transit state from scratch. Brigades never accumulated progress. 22 cross-faction brigades confirmed to have both transit state AND new order simultaneously.
+2. **home_osid tiebreaker pulls brigades rearward** — `pickLeastStackedTarget` favoured `home_osid` as a tiebreaker. 9 VRS brigades were marching toward interior RS towns (bileca_2, avtovac_2, bjelajce_2, maslovare_2, crkvena_2…) instead of their assigned front OSIDs.
+3. **Authority gap: commander had zero movement authority** — commander runs at step 983, Phase B at step 679. Commander had no path to write `brigade_movement_orders`. Wrong orders were invisible to it.
+
+### Changes
+- **`src/sim/combat/brigade_front_distribution.ts`**: Removed `home_osid` tiebreaker from `pickLeastStackedTarget` (parameter removed, `isHome`/`bestIsHome` logic deleted, tiebreak now pure `strictCompare`). Removed `hasEmptyHomeNeighbor` priority from Phase A sort. Added `in_transit` guard at top of Phase B loop: `if (movementState?.[bid]?.status === 'in_transit') continue;`
+- **`src/sim/combat/subsegment_assignment.ts`**: Removed `HOME_AFFINITY_BONUS` — no longer applied in brigade×sub-segment affinity scoring.
+- **`src/sim/combat/commander_march_correction.ts`** (new file): `correctMarchOrders(state, adjacency)` — for each active brigade with `assigned_sub_segment_id`, if its march order destination is outside the sub-segment's `friendly_osids`, override with nearest reachable `friendly_osid` by BFS. Fully emergent: no brigade IDs, no OSID names hardcoded.
+- **`src/sim/turn_phases/war_phases.ts`**: New step `commander-correct-march-orders` inserted after `generate-bot-corps-orders`. Step count 152→153.
+
+### Design Principle
+The corps commander is now the authority on where brigades march. Sub-segment assignment (`assigned_sub_segment_id`) defines each brigade's valid front OSID pool. The commander enforces it. Phase B may still issue orders — if they're wrong, the commander overrides them one step later.
+
+### Results
+Calibration run pending (n1278).
+
+---
+
 ## [2026-04-01] n1277 — sub_segment assignment fix (reverted, net negative)
 
 ### Summary
@@ -17928,4 +17952,42 @@ No simulation rules changed. This pass only affects desktop host wiring, desktop
 - `src/ui/map/desktop/useIPC.ts`
 - `src/desktop/README.md`
 - `tests/desktop_sim_bundle_smoke.test.ts`
+- `docs/PROJECT_LEDGER.md`
+
+## [2026-04-01] Sector-Anchored Corps Operations - Pyrrhic Plan And Roadmap Slotting
+
+### Change
+
+Converted the operations launch-authority convene into a concrete Pyrrhic implementation plan and slotted it into the master roadmap as an explicit `v0.8.x-final` / `Operations Singularity` sublane.
+
+- created `docs/plans/2026-04-01-v08x-sector-anchored-corps-operations-plan.md`
+- made the canonical target explicit:
+  - corps remains the sole operation launch authority
+  - every operation must declare a `primary_sector`
+  - default brigade pool comes from brigades assigned to that sector
+  - non-primary-sector brigades join only as explicit reinforcements / attachments
+- updated `docs/plans/MASTER_ROADMAP.md` so the roadmap no longer leaves operation launch semantics implicit inside the broader ops-singularity cleanup band
+- updated the parent `v0.8.x` cleanup plans so they point at the new subplan directly
+
+### Why
+
+The convene produced a real architectural answer, but it was still only a report.
+Without a dedicated execution-grade plan, implementers could still interpret `Operations Singularity` too loosely and keep the old broad corps-wide free-pool launch model alive by habit.
+
+This pass turns the decision into:
+
+- one named roadmap lane
+- one canonical launch contract
+- one Pyrrhic-compliant implementation plan with phases, gates, roles, and done-means
+
+### Determinism
+
+Documentation only. No runtime behavior changed.
+
+### Files
+
+- `docs/plans/2026-04-01-v08x-sector-anchored-corps-operations-plan.md`
+- `docs/plans/2026-03-31-v08x-operations-singularity-plan.md`
+- `docs/plans/2026-03-31-v08x-command-authority-cleanup-plan.md`
+- `docs/plans/MASTER_ROADMAP.md`
 - `docs/PROJECT_LEDGER.md`
