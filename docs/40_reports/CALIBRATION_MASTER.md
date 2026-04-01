@@ -1,7 +1,7 @@
 # AWWV Calibration Master Reference
 
 **Purpose:** Persistent lessons-learned record for war-phase calibration (April 1992 onward). 40w primary, 104w force trajectory.
-**Updated:** 2026-04-01 (n1281 — sector-anchored launch contract; 92.7% area-weighted, 23/25 anchors, +2 recoveries)
+**Updated:** 2026-04-01 (n1282 — Fix 1: depletion loop repair; 92.7% area-weighted, 22/25 anchors)
 
 ## Review Methodology
 
@@ -14,6 +14,25 @@ Every calibration run is reviewed by a two-tier expert panel before any action i
 `/gap-finder` *(unique authority: may dispatch agents + question specialists directly)*, `/game-designer`, `/corps-army-commander`, `/modern-wargame-expert`, `/canon-compliance-reviewer`
 
 **Orchestrator** synthesizes, gives go/no-go, updates this file + PROJECT_LEDGER.md.
+
+## n1282 FIX 1 — DEPLETION LOOP REPAIR (2026-04-01)
+- **92.7% area-weighted (40w). 22/25 anchors. 6/6 benchmarks. 84 battles.**
+- **final_state_hash: 2bcd55343b6fb99f**
+- Orders by faction: RS=60, RBiH=32, HRHB=9 (total=101).
+- RBiH orders recovered from 23 (n1281 collapsed) to 32 (+39%). No territorial overcorrection.
+- Benchmarks held 6/6. Area flat vs n1281. ZEA marginal improvement: 157→142.
+- **brcko re-failed** (23→22 anchors). Hypothesis: Fix 1 lowered MIN floor for ALL factions; thin RS Brčko corridor ops (now 2-brigade viable) may be pulling garrison brigades into attack, leaving brcko under-defended. Investigation needed.
+
+### Change vs n1281
+`emit.ts buildOperations()`: `MIN_BRIGADES_FOR_PLAN` floor lowered to 2 when `primarySector` is identified (was 3 unconditional). Without an anchor (fallback path) the corps-wide floor of 3 remains. The force_ratio_estimate predictor handles thin ops at execution via shorter predicted_max_turns.
+`tests/integration_formation_integrity.test.ts`: Added `DISSOLUTION_PERSONNEL_CAP` guard — brigades above 800 personnel are demoralized but not dissolved (mirroring actual dissolution logic).
+
+### Open P0s after n1282
+1. **brcko** (`op:brcko:brcko`) — re-failed after n1281 recovery. Hypothesis: thin 2-brigade RS ops in Brčko corridor draining garrison. Investigate RS op pool selection near Brčko.
+2. **boljanic_2** — ARBiH operational pressure on Doboj, insufficient RS garrison. Pre-existing.
+3. **gradacac_2** — RS overperforming on newly-covered fronts. Pre-existing.
+
+---
 
 ## n1281 SECTOR-ANCHORED LAUNCH CONTRACT (2026-04-01)
 - **92.7% area-weighted (40w). 23/25 anchors. 6/6 benchmarks.**
