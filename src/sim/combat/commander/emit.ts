@@ -17,7 +17,7 @@ import type {
 } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { spatialFriendlyDistance } from '../../spatial_context.js';
-import { getMaxOperationSlots } from '../corps_operation_helpers.js';
+import { buildCommanderOperation, buildProbeOperation, getMaxOperationSlots } from '../corps_operation_helpers.js';
 import type {
     CommanderBriefing,
     CommanderOutput,
@@ -725,35 +725,20 @@ function buildOperations(
         const personnelById = new Map<string, number>();
         for (const b of briefing.brigades) personnelById.set(b.id, b.personnel ?? 0);
 
-        const op: CorpsOperation = {
-            name: `cmd_${briefing.corps_id}_t${briefing.turn}`,
-            type: 'sector_attack',
-            phase: 'planning',
-            started_turn: briefing.turn,
-            phase_started_turn: briefing.turn,
-            participating_brigades: participatingBrigades,
-            sector_id: sectorId ?? undefined,
+        const initialStrength = participatingBrigades.reduce(
+            (sum, id) => sum + (personnelById.get(id) ?? 0), 0,
+        );
+
+        // PERMITTED CREATION ENTRY POINT — commander-generated operations only.
+        // All CorpsOperation objects must be built via the factory functions in corps_operation_helpers.ts.
+        const op = buildCommanderOperation(
+            briefing.corps_id,
+            briefing.turn,
+            participatingBrigades,
+            sectorId ?? undefined,
             objectives,
-            current_objective_index: 0,
-            planning_duration: 1,
-            supply_readiness: 1.0,
-            momentum: 0,
-            failure_count: 0,
-            consecutive_failures_on_current: 0,
-            attack_attempt_count: 0,
-            objective_capture_count: 0,
-            movement_only_execution_turns: 0,
-            idle_execution_turn_streak: 0,
-            // Commander-generated ops: attack at rough parity (≥0.7 ratio).
-            // Default costly_victory (≥1.0) causes drought when defenders are entrenched.
-            // Pre-planned ops use 'repulsed' (≥0.5); 'stalemate' is appropriate for AI ops.
-            min_attack_outcome: 'stalemate',
-            // Set at emit time so power-attrition abort gate fires correctly for
-            // commander-generated ops (operation_aar.ts skips the write when already set).
-            initial_strength: participatingBrigades.reduce(
-                (sum, id) => sum + (personnelById.get(id) ?? 0), 0,
-            ),
-        };
+            initialStrength,
+        );
         ops.push(op);
     }
 
@@ -777,23 +762,13 @@ function buildOperations(
             })[0];
 
         if (probeBrigade) {
-            const probeOp: CorpsOperation = {
-                name: `probe_${briefing.corps_id}_t${briefing.turn}`,
-                type: 'probe',
-                phase: 'planning',
-                started_turn: briefing.turn,
-                phase_started_turn: briefing.turn,
-                participating_brigades: [probeBrigade.brigade_id],
-                planning_duration: 0,
-                supply_readiness: 1.0,
-                momentum: 0,
-                failure_count: 0,
-                consecutive_failures_on_current: 0,
-                attack_attempt_count: 0,
-                objective_capture_count: 0,
-                movement_only_execution_turns: 0,
-                idle_execution_turn_streak: 0,
-            };
+            // PERMITTED CREATION ENTRY POINT — commander-generated operations only.
+            // All CorpsOperation objects must be built via the factory functions in corps_operation_helpers.ts.
+            const probeOp = buildProbeOperation(
+                briefing.corps_id,
+                briefing.turn,
+                probeBrigade.brigade_id,
+            );
             ops.push(probeOp);
         }
     }

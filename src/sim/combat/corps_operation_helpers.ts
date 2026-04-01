@@ -1,4 +1,13 @@
-import type { CorpsCommandState, CorpsOperation } from '../../state/game_state.js';
+import type { CorpsCommandState, CorpsOperation, FormationId, OperationAxis } from '../../state/game_state.js';
+import { strictCompare } from '../../state/validateGameState.js';
+
+// ─── Minimal type for pre-planned op fields consumed by buildCorpsOperation ──
+interface PrePlannedOpDef {
+    name: string;
+    planning_duration?: number;
+    staging_osid: string;
+    min_attack_outcome?: CorpsOperation['min_attack_outcome'];
+}
 
 /** Max concurrent operation slots for a corps based on brigade count */
 export function getMaxOperationSlots(activeBrigadeCount: number): number {
@@ -50,4 +59,103 @@ export function getPrimaryOperation(cmd: CorpsCommandState): CorpsOperation | nu
 export function removeOperation(cmd: CorpsCommandState, op: CorpsOperation): void {
     const idx = cmd.active_operations.indexOf(op);
     if (idx >= 0) cmd.active_operations.splice(idx, 1);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CorpsOperation factory functions — canonical construction entry points.
+// ALL CorpsOperation objects must be built via one of these factories.
+// Entry points: buildCorpsOperation (pre-planned), buildCommanderOperation,
+// buildProbeOperation (commander-generated).
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Factory for pre-planned and player-queued operations (scenario-authored). */
+export function buildCorpsOperation(
+    def: PrePlannedOpDef,
+    axes: OperationAxis[],
+    participating: FormationId[],
+    turn: number,
+): CorpsOperation {
+    const allObjectives = axes.flatMap(a => a.objectives);
+    return {
+        name: def.name,
+        type: 'sector_attack',
+        phase: 'planning',
+        started_turn: turn,
+        phase_started_turn: turn,
+        participating_brigades: [...new Set(participating)].sort(strictCompare),
+        axes,
+        objectives: [...new Set(allObjectives)],
+        current_objective_index: 0,
+        planning_duration: def.planning_duration ?? 1,
+        supply_readiness: 1.0,
+        momentum: 0,
+        failure_count: 0,
+        consecutive_failures_on_current: 0,
+        staging_osid: def.staging_osid,
+        is_pre_planned: true,
+        ...(def.min_attack_outcome ? { min_attack_outcome: def.min_attack_outcome } : {}),
+    };
+}
+
+/** Factory for commander-generated sector-attack operations. */
+export function buildCommanderOperation(
+    corpsId: string,
+    turn: number,
+    participatingBrigades: string[],
+    sectorId: string | undefined,
+    objectives: string[],
+    initialStrength: number,
+): CorpsOperation {
+    return {
+        name: `cmd_${corpsId}_t${turn}`,
+        type: 'sector_attack',
+        phase: 'planning',
+        started_turn: turn,
+        phase_started_turn: turn,
+        participating_brigades: participatingBrigades,
+        sector_id: sectorId ?? undefined,
+        objectives,
+        current_objective_index: 0,
+        planning_duration: 1,
+        supply_readiness: 1.0,
+        momentum: 0,
+        failure_count: 0,
+        consecutive_failures_on_current: 0,
+        attack_attempt_count: 0,
+        objective_capture_count: 0,
+        movement_only_execution_turns: 0,
+        idle_execution_turn_streak: 0,
+        // Commander-generated ops: attack at rough parity (≥0.7 ratio).
+        // Default costly_victory (≥1.0) causes drought when defenders are entrenched.
+        // Pre-planned ops use 'repulsed' (≥0.5); 'stalemate' is appropriate for AI ops.
+        min_attack_outcome: 'stalemate',
+        // Set at emit time so power-attrition abort gate fires correctly for
+        // commander-generated ops (operation_aar.ts skips the write when already set).
+        initial_strength: initialStrength,
+    };
+}
+
+/** Factory for commander-generated probe operations (single surplus brigade). */
+export function buildProbeOperation(
+    corpsId: string,
+    turn: number,
+    brigadeId: string,
+): CorpsOperation {
+    return {
+        name: `probe_${corpsId}_t${turn}`,
+        type: 'probe',
+        phase: 'planning',
+        started_turn: turn,
+        phase_started_turn: turn,
+        participating_brigades: [brigadeId],
+        planning_duration: 0,
+        supply_readiness: 1.0,
+        momentum: 0,
+        failure_count: 0,
+        consecutive_failures_on_current: 0,
+        attack_attempt_count: 0,
+        objective_capture_count: 0,
+        movement_only_execution_turns: 0,
+        idle_execution_turn_streak: 0,
+    };
 }

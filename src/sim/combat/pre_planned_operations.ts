@@ -27,7 +27,7 @@ import { getFormationCorpsId } from './corps_sector_partition.js';
 import { deployEliteLoan } from './army_reserve_system.js';
 import { validateOpAtInjection, collectOpInjectionWarnings } from './operation_validation.js';
 import type { OpInjectionWarning } from './operation_validation.js';
-import { hasActiveOperation, isSlot0AvailableForQueue } from './corps_operation_helpers.js';
+import { buildCorpsOperation, hasActiveOperation, isSlot0AvailableForQueue } from './corps_operation_helpers.js';
 // Graz truce imports removed: east Herzegovina truce is handled by sector_offensive
 // on operation completion (graz_east_herzegovina_active_turn), not by injection.
 
@@ -752,29 +752,8 @@ function deployPrePlannedEliteLoans(
     }
 }
 
-function buildCorpsOperation(def: PrePlannedOp, axes: OperationAxis[], participating: FormationId[], turn: number): CorpsOperation {
-    const allObjectives = axes.flatMap(a => a.objectives);
-    return {
-        name: def.name,
-        type: 'sector_attack',
-        phase: 'planning',
-        started_turn: turn,
-        phase_started_turn: turn,
-        participating_brigades: [...new Set(participating)].sort(strictCompare),
-        axes,
-        objectives: [...new Set(allObjectives)],
-        current_objective_index: 0,
-        planning_duration: def.planning_duration ?? 1,
-        supply_readiness: 1.0,
-        momentum: 0,
-        failure_count: 0,
-        consecutive_failures_on_current: 0,
-        staging_osid: def.staging_osid,
-        is_pre_planned: true,
-        ...(def.min_attack_outcome ? { min_attack_outcome: def.min_attack_outcome } : {}),
-    };
-}
-
+// PERMITTED CREATION ENTRY POINT — pre-planned and player-queued operations only.
+// All CorpsOperation objects must be built via buildCorpsOperation() in corps_operation_helpers.ts.
 /**
  * Inject pre-planned VRS operations into corps_command at scenario start.
  * Each operation starts in planning phase with planning_duration: 1.
@@ -870,6 +849,8 @@ export function injectPrePlannedOperations(state: GameState): void {
     }
 }
 
+// PERMITTED CREATION ENTRY POINT — pre-planned and player-queued operations only.
+// All CorpsOperation objects must be built via buildCorpsOperation() in corps_operation_helpers.ts.
 /**
  * Inject a queued operation by name for a corps.
  * Called when a corps completes an operation and has queued_operations.
