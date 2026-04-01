@@ -81,3 +81,23 @@ Result:
 - This change restores visible selection truth for the active Deck counter renderer.
 - It does not redesign corps-card click semantics or broader sidebar selection UX.
 - It also does not attempt to restore MapLibre-only brigade hover behavior; this pass focused on the explicit selection behaviors requested.
+
+## Follow-up: Formation Panels + Non-Top-Stack White Selection
+
+After the first restore pass, two additional issues remained:
+
+- formation-driven panels were not always feeding the same corps/sector hover truth as the OOB sidebar
+- selected brigades could still fail to appear white when they were not the top-of-stack feature rendered by the base Deck counter layer
+
+### Follow-up implementation
+
+- added a dedicated highlighted Deck icon layer so selected/highlighted brigades render in white even when they are not the top stack feature
+- bridged formation panels into map highlight state:
+  - `OrbatPanel.tsx`
+  - `CorpsDetail.tsx`
+  - `CorpsFrontPanel.tsx`
+- panel-driven corps/sector context now updates the same `hoveredCorpsId` / `hoveredSectorId` state used by the map highlight logic
+
+### Follow-up verification
+
+- `npm run warroom:build`

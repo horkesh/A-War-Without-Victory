@@ -143,6 +143,8 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
   const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
   const setSelectedSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
   const setHoveredOsids = useGameStore((s) => s.setHoveredOsids);
+  const setHoveredCorpsId = useGameStore((s) => s.setHoveredCorpsId);
+  const setHoveredSectorId = useGameStore((s) => s.setHoveredSectorId);
   const panToOsid = useGameStore((s) => s.panToOsid);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
@@ -155,6 +157,26 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
   useEffect(() => {
     setActiveTab('overview');
   }, [selectedSectorId]);
+
+  useEffect(() => {
+    if (!selectedCorpsId) return;
+    setHoveredCorpsId(selectedCorpsId);
+    return () => {
+      if (useGameStore.getState().hoveredCorpsId === selectedCorpsId) {
+        setHoveredCorpsId(null);
+      }
+    };
+  }, [selectedCorpsId, setHoveredCorpsId]);
+
+  useEffect(() => {
+    if (!selectedSectorId) return;
+    setHoveredSectorId(selectedSectorId);
+    return () => {
+      if (useGameStore.getState().hoveredSectorId === selectedSectorId) {
+        setHoveredSectorId(null);
+      }
+    };
+  }, [selectedSectorId, setHoveredSectorId]);
 
   const _sector = loadedGameState?.corpsFrontSectors?.find((s) => s.sector_id === selectedSectorId) ?? null;
   const sectorFriendlyOsids = useMemo(
@@ -550,8 +572,14 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                             selectedOperationKey: null,
                             selectedOsid: null,
                           })}
-                          onMouseEnter={() => f.location_osid && setHoveredOsids([f.location_osid])}
-                          onMouseLeave={() => setHoveredOsids([])}
+                          onMouseEnter={() => {
+                            if (f.location_osid) setHoveredOsids([f.location_osid]);
+                            setHoveredSectorId(selectedSectorId);
+                          }}
+                          onMouseLeave={() => {
+                            setHoveredOsids([]);
+                            setHoveredSectorId(selectedSectorId);
+                          }}
                         >
                           <span className="truncate mr-2 font-medium">{f.name}</span>
                           <span className="text-neutral-500 text-[10px] tabular-nums shrink-0">
@@ -581,8 +609,14 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                             selectedOperationKey: null,
                             selectedOsid: null,
                           })}
-                          onMouseEnter={() => f.location_osid && setHoveredOsids([f.location_osid])}
-                          onMouseLeave={() => setHoveredOsids([])}
+                          onMouseEnter={() => {
+                            if (f.location_osid) setHoveredOsids([f.location_osid]);
+                            setHoveredSectorId(selectedSectorId);
+                          }}
+                          onMouseLeave={() => {
+                            setHoveredOsids([]);
+                            setHoveredSectorId(selectedSectorId);
+                          }}
                         >
                           <span className="truncate mr-2 text-neutral-600 italic leading-none">{f.name}</span>
                           <span className="text-neutral-400 text-[9px] tabular-nums shrink-0 leading-none">

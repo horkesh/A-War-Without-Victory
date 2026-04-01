@@ -1,3 +1,83 @@
+## [2026-04-01] Map Selection Panel Bridge + Non-Top-Stack White Overlay
+
+### Summary
+Follow-up to the Deck highlight restore. Formation-driven panels now feed the same corps/sector highlight state as the OOB sidebar, and selected brigades can render white even when they are not the top-of-stack feature in the base Deck counter layer.
+
+### Change
+- **`src/ui/map/layers/buildTacticalDeckLayers.ts`**: added a dedicated highlighted Deck icon layer so selected/highlighted brigades render in white even when they are not `is_stack_top`.
+- **`src/ui/map/components/OrbatPanel.tsx`**: ORBAT panel now drives `hoveredCorpsId` and brigade hover also drives `hoveredSectorId`, so map highlighting follows the panel context.
+- **`src/ui/map/components/CorpsDetail.tsx`**: corps detail panel now drives corps hover context and brigade hover drives sector hover context.
+- **`src/ui/map/components/CorpsFrontPanel.tsx`**: sector/corps context remains active while interacting with sector panel brigade lists.
+- **`docs/40_reports/implemented/20260401_MAP_SELECTION_DECK_HIGHLIGHT_RESTORE.md`**: extended with the follow-up behavior and rationale.
+
+### Why
+The first Deck restore fixed the renderer boundary, but two gaps remained:
+- panel interactions were not consistently feeding the same corps/sector map-highlight state as the sidebar
+- some selected brigades still stayed visually unchanged because only the base top-of-stack counter layer was visible
+
+This pass makes the active panels and the active renderer speak the same selection language.
+
+### Verification
+- `npm run warroom:build`
+
+---
+
+## [2026-04-01] n1280 — sector_splitting sub-segment ID fix (corps_id → sector_id)
+
+### Summary
+Single targeted fix: sub-segment ID generation used `corps_id` (shared by all sectors in a corps) instead of `sector_id` (unique per sector). This caused silent Map overwrites whenever a corps had more than one sector — the second entry for `vrs_1st_krajina:split0` silently clobbered the first, making 23 brigades invisible to all commander correction logic. Four ID generation sites changed.
+
+### Change
+- **`src/sim/combat/sector_splitting.ts`**: 4 sub-segment ID generation sites changed from `subseg:${sector.corps_id}:split${ci}` / `ftsplit${ci}` / `merged${indexHint}` to `subseg:${sector.sector_id}:split${ci}` / `ftsplit${ci}` / `merged${indexHint}`. `sector_id` is unique per sector; `corps_id` is not.
+
+### Results
+| Metric | n1279 | n1280 |
+|---|---|---|
+| Area-weighted | 93.5% | 93.2% |
+| Anchors | 22/25 | 21/25 |
+| Benchmarks | 6/6 | 6/6 |
+| Battles | 84 | — |
+| VRS at-front | 52.4% (BROKEN) | **74.4%** (61/82) |
+| Hash | b45b8937b29fe849 | 80647861cf5a24f3 |
+
+### Key Findings
+- **VRS at-front recovered**: 52.4% → 74.4%, above the pre-fix baseline of ~71%. Fix is working correctly.
+- **Zero wrong-destination march orders. Zero duplicate sub-segment IDs. komar_2 pileup resolved.**
+- **brcko structural root cause confirmed**: `brcko_2` is NOT in any sector's `territory_osids` — it is structurally orphaned from the sector system. No brigade can ever be assigned there via normal sector assignment. This is the real cause of the persistent brcko anchor failure, not brigade distribution.
+- **gradacac_2 / rastosnica_2 regressions**: RS brigades are now correctly covering fronts they were previously absent from. The calibration regression reflects RS overperforming on newly-covered fronts, not a wrong fix.
+- **3 brigades with stale assigned_sub_segment_id**: 705th Slavna Mountain, Bileća Brigade, 1st Laktaši — dead IDs from renamed/merged sectors.
+
+### What's Still Open
+brcko structural fix (sector coverage gap), gradacac_2/rastosnica_2 calibration (RS sector assignment overreach), stale `assigned_sub_segment_id` references (3 brigades).
+
+---
+
+## [2026-04-01] n1279 — correctTransitStates + sector_splitting Path 1/Path 2 guards
+
+### Summary
+Three changes on top of n1278 commander correction infrastructure. `correctTransitStates()` extends the commander correction pass to cover in-transit brigades (not just those with pending march orders). Two `sector_splitting.ts` guards prevent empty `friendly_osids` from corrupting sub-segment state. VRS at-front metric revealed as broken (52.4%) due to duplicate sub-segment IDs — root cause identified, fix in n1280.
+
+### Changes
+1. **`src/sim/combat/commander_march_correction.ts`** — new `correctTransitStates()` function: scans `brigade_movement_state` for in-transit brigades whose transit destination falls outside their assigned sub-segment `friendly_osids`; cancels the transit state (`delete brigade_movement_state[bid]`) and issues a corrected BFS march order. Runs immediately after `correctMarchOrders` in the `commander-correct-march-orders` pipeline step (step 153).
+2. **`src/sim/combat/sector_splitting.ts` Path 1** — `splitNonContiguousSectors` strict Case B block: changed `else if (meta.side_b === faction)` to bare `else`, matching the `findSubSegments` pattern. Prevents empty `friendly_osids` when an OSID is contested or null at snapshot time.
+3. **`src/sim/combat/sector_splitting.ts` Path 2** — added `allFriendly` rebuild guard: when `allFriendly` is empty due to upstream corruption, rebuilds directly from `edgeMeta` using the same faction-side logic as `findSubSegments`. Without this, every edge blindly treats osidB as friendly.
+
+### Results
+| Metric | n1278 | n1279 |
+|---|---|---|
+| Area-weighted | (pending) | 93.5% |
+| Anchors | (pending) | 22/25 |
+| Benchmarks | (pending) | 6/6 |
+| Battles | — | 84 |
+| VRS at-front | — | 52.4% (BROKEN) |
+| New anchor fail | — | gradacac_2 = RS |
+| Hash | — | b45b8937b29fe849 |
+
+### Root Cause of VRS Regression
+`vrs_1st_krajina:split0` appeared twice in `corps_front_sectors` with different `friendly_osids`. The commander correction pass builds a sub-segment → friendly_osids lookup using a Map; the second entry silently overwrote the first. Brigades assigned to the "lost" split0 were invisible to all correction logic. Fix: change sub-segment ID generation from `corps_id` to `sector_id` (n1280).
+
+---
+
 ## [2026-04-01] n1278 — commander correction pass + remove home_osid auto-return
 
 ### Summary

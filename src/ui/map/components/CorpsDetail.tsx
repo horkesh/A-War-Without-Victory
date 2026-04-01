@@ -36,6 +36,8 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
   const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
   const setOpsPlanningContext = useGameStore((s) => s.setOpsPlanningContext);
   const setHoveredOsids = useGameStore((s) => s.setHoveredOsids);
+  const setHoveredCorpsId = useGameStore((s) => s.setHoveredCorpsId);
+  const setHoveredSectorId = useGameStore((s) => s.setHoveredSectorId);
   const setLoadError = useGameStore((s) => s.setLoadError);
   const setTooltipTargetWithPosition = useGameStore((s) => s.setTooltipTargetWithPosition);
   const clearTooltipTarget = useGameStore((s) => s.clearTooltipTarget);
@@ -61,9 +63,30 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
     [loadedGameState?.operations, selectedCorpsId]
   );
 
+  const sectorIdByBrigadeId = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const sector of corpsSectors) {
+      for (const brigadeId of sector.assigned_brigade_ids) map.set(brigadeId, sector.sector_id);
+      for (const brigadeId of sector.reserve_brigade_ids) {
+        if (!map.has(brigadeId)) map.set(brigadeId, sector.sector_id);
+      }
+    }
+    return map;
+  }, [corpsSectors]);
+
   useEffect(() => {
     setActiveTab('overview');
   }, [selectedCorpsId]);
+
+  useEffect(() => {
+    if (!selectedCorpsId) return;
+    setHoveredCorpsId(selectedCorpsId);
+    return () => {
+      if (useGameStore.getState().hoveredCorpsId === selectedCorpsId) {
+        setHoveredCorpsId(null);
+      }
+    };
+  }, [selectedCorpsId, setHoveredCorpsId]);
 
   if (operationsPanelOpen || !selectedCorpsId) return null;
 
@@ -298,6 +321,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                     onClick={() => setSelectedFormationId(f.id)}
                     onHoverChange={(hovered, e) => {
                       setHoveredOsids(hovered ? (f.aorSettlementIds ?? (f.location_osid ? [f.location_osid] : [])) : []);
+                      setHoveredSectorId(hovered ? (sectorIdByBrigadeId.get(f.id) ?? null) : null);
                       if (hovered) {
                         setTooltipTargetWithPosition(
                           { type: 'formation', id: f.id },

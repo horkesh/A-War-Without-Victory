@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { LEFT_DETAIL_PANEL_STYLE } from './panelRail';
 import { BrigadeRow } from './BrigadeRow';
@@ -14,6 +14,8 @@ export function OrbatPanel() {
     const setSelectedOrbatCorpsId = useGameStore((s) => s.setSelectedOrbatCorpsId);
     const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
     const setHoveredOsids = useGameStore((s) => s.setHoveredOsids);
+    const setHoveredCorpsId = useGameStore((s) => s.setHoveredCorpsId);
+    const setHoveredSectorId = useGameStore((s) => s.setHoveredSectorId);
     const setTooltipTargetWithPosition = useGameStore((s) => s.setTooltipTargetWithPosition);
     const clearTooltipTarget = useGameStore((s) => s.clearTooltipTarget);
     const panToOsid = useGameStore((s) => s.panToOsid);
@@ -42,6 +44,27 @@ export function OrbatPanel() {
             (s) => s.corps_id === selectedOrbatCorpsId
         );
     }, [loadedGameState?.corpsFrontSectors, selectedOrbatCorpsId]);
+
+    const sectorIdByBrigadeId = useMemo(() => {
+        const map = new Map<string, string>();
+        for (const sector of corpsSectors) {
+            for (const brigadeId of sector.assigned_brigade_ids) map.set(brigadeId, sector.sector_id);
+            for (const brigadeId of sector.reserve_brigade_ids) {
+                if (!map.has(brigadeId)) map.set(brigadeId, sector.sector_id);
+            }
+        }
+        return map;
+    }, [corpsSectors]);
+
+    useEffect(() => {
+        if (!selectedOrbatCorpsId) return;
+        setHoveredCorpsId(selectedOrbatCorpsId);
+        return () => {
+            if (useGameStore.getState().hoveredCorpsId === selectedOrbatCorpsId) {
+                setHoveredCorpsId(null);
+            }
+        };
+    }, [selectedOrbatCorpsId, setHoveredCorpsId]);
 
     if (!corps) return null;
 
@@ -112,6 +135,7 @@ export function OrbatPanel() {
                                 onHoverChange={(hovered, e) => {
                                     const osids = hovered ? (b.aorSettlementIds ?? (b.location_osid ? [b.location_osid] : [])) : [];
                                     setHoveredOsids(osids);
+                                    setHoveredSectorId(hovered ? (sectorIdByBrigadeId.get(b.id) ?? null) : null);
                                     if (hovered) {
                                         setTooltipTargetWithPosition(
                                             { type: 'formation', id: b.id },

@@ -14,6 +14,11 @@ function getTopStack(features: Feature[]): Feature[] {
     return features.filter(f => f.properties?.is_stack_top);
 }
 
+/** Highlighted formations render as a dedicated overlay so non-top-stack selections stay visible. */
+function getHighlightedFeatures(features: Feature[], highlightedFormationIdSet: Set<string>): Feature[] {
+    return features.filter(f => highlightedFormationIdSet.has(f.properties?.id));
+}
+
 /** Settlement label data — set externally by MapContainer when label GeoJSON is built. */
 let _labelFeatures: Feature[] = [];
 export function setSettlementLabelData(features: Feature[]) {
@@ -73,6 +78,9 @@ export function buildTacticalDeckLayers(
     }
 
     const topStack = getTopStack(formationsGeoJson.features);
+    const highlightedFeatures = highlightedFormationIds.length > 0
+        ? getHighlightedFeatures(formationsGeoJson.features, highlightedFormationIdSet)
+        : [];
 
     layers.push(
         new IconLayer({
@@ -101,6 +109,30 @@ export function buildTacticalDeckLayers(
             }
         }),
     );
+
+    if (highlightedFeatures.length > 0) {
+        layers.push(
+            new IconLayer({
+                id: 'deck-formations-highlighted',
+                data: highlightedFeatures,
+                getIcon: (d: any) => ({
+                    url: getIconDataUrl(d.properties.white_icon_id ?? d.properties.icon_id),
+                    width: 160,
+                    height: 80,
+                }),
+                getPosition: (d: any) => d.geometry.coordinates,
+                getSize: iconHeight + 2,
+                sizeUnits: 'pixels',
+                sizeScale: 1,
+                pickable: false,
+                parameters: { depthTest: false },
+                updateTriggers: {
+                    getSize: zoom,
+                    getIcon: highlightedFormationKey,
+                }
+            }),
+        );
+    }
 
     return layers;
 }
