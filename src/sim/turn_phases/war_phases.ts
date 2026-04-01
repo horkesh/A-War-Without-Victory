@@ -123,7 +123,7 @@ import { detectFronts } from '../combat/front_emergence.js';
 import { buildLocalFronts } from '../combat/local_front_defense.js';
 import { buildCorpsFrontSectors, assignBrigadesToSubSegments, REASSIGNMENT_ENTRENCHMENT_RETAIN } from '../combat/corps_front_sectors.js';
 import { distributeBrigadesToFront } from '../combat/brigade_front_distribution.js';
-import { correctMarchOrders } from '../combat/commander_march_correction.js';
+import { correctMarchOrders, correctTransitStates } from '../combat/commander_march_correction.js';
 import { evaluateHomeReturn } from '../combat/brigade_home_return.js';
 import { applyFrontlineAttrition } from '../combat/frontline_attrition.js';
 import { advanceSectorOffensives, updateSectorOffensiveResults, reevaluateWeakenedOperations } from '../combat/sector_offensive.js';
@@ -1035,6 +1035,7 @@ export const warPhases: NamedPhase[] = [
             if (!spatial) return;
             const adjacency = spatial.preCombat.adjacency as Map<string, string[]>;
             correctMarchOrders(context.state, adjacency);
+            correctTransitStates(context.state, adjacency);
         },
     },
     {

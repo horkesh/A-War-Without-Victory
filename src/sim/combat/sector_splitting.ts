@@ -58,6 +58,18 @@ export function splitNonContiguousSectors(
         for (const ss of sector.sub_segments) {
             for (const o of ss.friendly_osids) allFriendly.add(o);
         }
+        // Guard: if upstream sub_segments had empty friendly_osids (Path 2 corruption),
+        // rebuild allFriendly directly from edgeMeta using the same faction-side logic
+        // as findSubSegments. Without this, allFriendly.has(osidA) is always false and
+        // osidB is blindly treated as friendly for every edge.
+        if (allFriendly.size === 0 && faction && edgeMeta) {
+            for (const eid of sector.edge_ids) {
+                const meta = edgeMeta.get(eid);
+                if (!meta) continue;
+                if (meta.side_a === faction) { allFriendly.add(meta.a); }
+                else { allFriendly.add(meta.b); }
+            }
+        }
 
         // Build edge adjacency for this sector's edges.
         // When faction info is available, use triple-junction connectivity
@@ -177,7 +189,7 @@ export function splitNonContiguousSectors(
                     const meta = edgeMeta.get(eid);
                     if (!meta) continue;
                     if (meta.side_a === faction) { compFriendly.add(meta.a); compEnemy.add(meta.b); }
-                    else if (meta.side_b === faction) { compFriendly.add(meta.b); compEnemy.add(meta.a); }
+                    else { compFriendly.add(meta.b); compEnemy.add(meta.a); }
                 }
                 const compEdgeIds = [...compEdges].sort(strictCompare);
                 if (compEdgeIds.length === 0) continue;

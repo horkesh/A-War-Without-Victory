@@ -19,6 +19,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 export function correctMarchOrders(state: GameState, adjacency: Map<string, string[]>): void {
     const formations = state.military.formations ?? {};
     const moveOrders = state.military.brigade_movement_orders ?? {};
+    const moveStates = state.military.brigade_movement_state ?? {};
     const sectors = state.military.corps_front_sectors ?? {};
 
     // Build sub-segment lookup: sub_segment_id → friendly_osids
@@ -80,6 +81,89 @@ export function correctMarchOrders(state: GameState, adjacency: Map<string, stri
         if (bestDist === Infinity) continue; // Unreachable — leave order as-is
 
         // Override the march order
+        if (!state.military.brigade_movement_orders) state.military.brigade_movement_orders = {};
+        state.military.brigade_movement_orders[bid] = {
+            destination_sids: [bestOsid as SettlementId],
+        };
+    }
+}
+
+/**
+ * Cancel in-transit movement states whose destination falls outside the brigade's
+ * assigned sub-segment friendly_osids, then issue a corrected march order.
+ *
+ * Must run AFTER correctMarchOrders so the new order is set in the same pass.
+ * osid-column-movement (step 576) runs the NEXT turn and will consume the new order.
+ *
+ * Deterministic: sorted iteration via strictCompare, no Math.random(), no timestamps.
+ */
+export function correctTransitStates(state: GameState, adjacency: Map<string, string[]>): void {
+    const formations = state.military.formations ?? {};
+    const moveStates = state.military.brigade_movement_state ?? {};
+    const sectors = state.military.corps_front_sectors ?? {};
+
+    // Build sub-segment lookup: sub_segment_id → friendly_osids
+    const subSegFrontOsids = new Map<string, string[]>();
+    for (const sector of Object.values(sectors)) {
+        for (const ss of sector.sub_segments ?? []) {
+            if (ss.friendly_osids.length > 0) {
+                subSegFrontOsids.set(ss.sub_segment_id, ss.friendly_osids);
+            }
+        }
+    }
+
+    // Build friendly OSID set per faction for BFS pathing
+    const friendlyByFaction = new Map<string, Set<string>>();
+    const pc = state.political?.political_controllers ?? {};
+    for (const [osid, controller] of Object.entries(pc)) {
+        if (!controller) continue;
+        let s = friendlyByFaction.get(controller);
+        if (!s) { s = new Set<string>(); friendlyByFaction.set(controller, s); }
+        s.add(osid);
+    }
+
+    for (const [bid, f] of Object.entries(formations).sort(([a], [b]) => strictCompare(a, b))) {
+        if (!f || f.status === 'inactive') continue;
+        const ssId = f.assigned_sub_segment_id;
+        if (!ssId) continue;
+
+        const frontOsids = subSegFrontOsids.get(ssId);
+        if (!frontOsids || frontOsids.length === 0) continue;
+
+        // Only act on brigades currently in transit
+        const transitState = moveStates[bid];
+        if (!transitState || transitState.status !== 'in_transit') continue;
+
+        const loc = f.location_osid;
+        if (!loc) continue;
+
+        // Brigade already at a valid front position — don't interrupt its transit
+        if (frontOsids.includes(loc)) continue;
+
+        const transitDest = transitState.destination_sids?.[0];
+        if (!transitDest) continue;
+        if (frontOsids.includes(transitDest)) continue; // Transit destination already correct
+
+        // Wrong transit destination — cancel transit state first, then issue corrected order
+        delete state.military.brigade_movement_state![bid];
+
+        const factionFriendly = friendlyByFaction.get(f.faction);
+        const sortedFrontOsids = [...frontOsids].sort(strictCompare);
+
+        let bestOsid = sortedFrontOsids[0]!;
+        let bestDist = bfsDistance(loc, bestOsid, adjacency, factionFriendly);
+
+        for (const osid of sortedFrontOsids.slice(1)) {
+            const d = bfsDistance(loc, osid, adjacency, factionFriendly);
+            if (d < bestDist || (d === bestDist && strictCompare(osid, bestOsid) < 0)) {
+                bestDist = d;
+                bestOsid = osid;
+            }
+        }
+
+        if (bestDist === Infinity) continue; // Unreachable — leave cancelled, no new order
+
+        // Issue corrected march order (consumed by osid-column-movement next turn)
         if (!state.military.brigade_movement_orders) state.military.brigade_movement_orders = {};
         state.military.brigade_movement_orders[bid] = {
             destination_sids: [bestOsid as SettlementId],
