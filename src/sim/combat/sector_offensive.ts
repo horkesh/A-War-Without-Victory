@@ -60,7 +60,18 @@ import { isEastHerzegovinaPair, isGrazAccordsActive } from '../local_truces.js';
 import { isFriendlyFaction as isFriendlyFactionCtrl } from '../early_war/alliance_update.js';
 import { isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
 import { tickPreparation, hasUnresolvedProbe, autoResolveProbe } from './operation_preparation.js';
-import { RS_BLITZ_PHASE_END_WEEK } from './bot_constants.js';
+import {
+    RS_BLITZ_PHASE_END_WEEK,
+    BRIGADE_LOSS_THRESHOLD,
+    COHESION_HEALTHY_THRESHOLD,
+    EXECUTION_MAX_DURATION,
+    PLANNING_DURATION,
+    PROGRESS_FAILURE_THRESHOLD,
+    PROGRESS_SUCCESS_THRESHOLD,
+    RECOVERY_DURATION,
+    PERSONNEL_HEALTHY_THRESHOLD,
+} from './bot_constants.js';
+import { getFactionCorps, getCorpsSubordinates, sortByPersonnelDesc } from './bot_corps_helpers.js';
 import { basePower, VICTORY_THRESHOLD_COSTLY } from './combat_math.js';
 import { findSectorForEnemyOsid } from './corps_front_sectors.js';
 import { seedDisplacementTimerOnFlip } from '../../state/displacement_takeover.js';
@@ -68,7 +79,7 @@ import type { PreparationEvent } from '../turn_pipeline_types.js';
 import { checkLoanedArrivals, areLoanedBrigadesReady, cleanupDissolvedLoans } from './operation_reinforcement.js';
 import { MAX_OP_LOAN_DISTANCE, LOAN_STAGING_BUFFER_TURNS } from './operation_reinforcement_constants.js';
 import { hasActiveOperation, removeOperation } from './corps_operation_helpers.js';
-import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
+import { MIN_ATTACK_PERSONNEL, MAX_BRIGADE_PERSONNEL } from '../../state/formation_constants.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Equipment priority
@@ -2083,4 +2094,103 @@ function appendReevaluationLog(
         active_brigades: activeBrigades,
         total_personnel: totalPersonnel,
     });
+}
+
+/**
+ * Evaluate progress of active operations and advance/abort them.
+ * Handles general_offensive and strategic_defense op types.
+ * sector_attack, probe, and feint have their own lifecycle in advanceSectorOffensives().
+ * Called each turn for active operations.
+ */
+export function evaluateOperationProgress(
+    state: GameState,
+    faction: FactionId
+): void {
+    const corpsCommand = state.military.corps_command;
+    if (!corpsCommand) return;
+
+    const corpsList = getFactionCorps(state, faction);
+    const turn = state.meta?.turn ?? 0;
+    const pc = state.political.political_controllers ?? {};
+    const formations = state.military.formations ?? {};
+
+    for (const corps of corpsList) {
+        const cmd = corpsCommand[corps.id];
+        if (!hasActiveOperation(cmd)) continue;
+
+        for (const op of [...cmd.active_operations]) {
+            // sector_attack, probe, and feint ops have their own lifecycle in
+            // advanceSectorOffensives(). Processing them here would cause double
+            // phase transitions and double exhaustion costs.
+            if (op.type === 'sector_attack' || op.type === 'probe' || op.type === 'feint') continue;
+
+            const turnsInPhase = turn - op.phase_started_turn;
+
+            if (op.phase === 'planning') {
+                // Advance to execution after planning duration
+                if (turnsInPhase >= PLANNING_DURATION) {
+                    op.phase = 'execution';
+                    op.phase_started_turn = turn;
+                }
+            } else if (op.phase === 'execution') {
+                // Check progress
+                const targets = op.target_settlements ?? [];
+                if (targets.length > 0) {
+                    const captured = targets.filter(sid => pc[sid] === faction).length;
+                    const captureRate = captured / targets.length;
+
+                    // Abort if failing after 2 turns
+                    if (turnsInPhase >= 2 && captureRate < PROGRESS_FAILURE_THRESHOLD) {
+                        op.phase = 'recovery';
+                        op.phase_started_turn = turn;
+                        continue;
+                    }
+
+                    // Success or max duration reached
+                    if (captureRate >= PROGRESS_SUCCESS_THRESHOLD || turnsInPhase >= EXECUTION_MAX_DURATION) {
+                        op.phase = 'recovery';
+                        op.phase_started_turn = turn;
+                        continue;
+                    }
+                } else if (turnsInPhase >= EXECUTION_MAX_DURATION) {
+                    op.phase = 'recovery';
+                    op.phase_started_turn = turn;
+                    continue;
+                }
+
+                // Replace heavily damaged brigades
+                const updatedParticipants: FormationId[] = [];
+                for (const brigId of op.participating_brigades) {
+                    const brig = formations[brigId];
+                    if (!brig || brig.status !== 'active') continue;
+                    const startPersonnel = MAX_BRIGADE_PERSONNEL; // approximate
+                    const currentPersonnel = brig.personnel ?? 0;
+                    const lossRate = 1 - (currentPersonnel / startPersonnel);
+                    if (lossRate > BRIGADE_LOSS_THRESHOLD) {
+                        // Try to find a replacement from the same corps
+                        const subordinates = getCorpsSubordinates(state, corps.id);
+                        const replacement = subordinates.find(s =>
+                            !op.participating_brigades.includes(s.id) &&
+                            (s.personnel ?? 0) / MAX_BRIGADE_PERSONNEL >= PERSONNEL_HEALTHY_THRESHOLD &&
+                            (s.cohesion ?? 60) >= COHESION_HEALTHY_THRESHOLD
+                        );
+                        if (replacement) {
+                            updatedParticipants.push(replacement.id);
+                            continue;
+                        }
+                    }
+                    updatedParticipants.push(brigId);
+                }
+                op.participating_brigades = updatedParticipants;
+            } else if (op.phase === 'recovery') {
+                // Clear operation after recovery duration
+                if (turnsInPhase >= RECOVERY_DURATION) {
+                    releaseOperationCommander(state, op);
+                    removeOperation(cmd, op);
+                    // Add exhaustion from the operation
+                    cmd.corps_exhaustion = Math.min(100, cmd.corps_exhaustion + 15);
+                }
+            }
+        }
+    }
 }

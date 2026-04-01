@@ -31,7 +31,8 @@ import { analyzeFactionGraph, type FactionGraphAnalysis } from './osid_graph_ana
 
 // ── Submodule imports for orchestrator ──────────────────────────────────
 import { setArmyStandingOrder, coordinateMultiCorpsOffensive, generateCorpsStanceOrders } from './bot_corps_stance.js';
-import { evaluateOperationProgress, generateOGActivationOrders, generateEmergencyDefensiveOperations } from './bot_corps_operations.js';
+import { evaluateOperationProgress } from './sector_offensive.js';
+import { generateOGActivationOrders, generateEmergencyDefensiveOperations } from './bot_corps_operations.js';
 import { attemptCorridorBreach } from './bot_corps_corridor.js';
 import { evaluateSectorStances } from './bot_corps_directives.js';
 import { generateArmyHQOverrides } from './army_hq_overrides.js';
@@ -66,11 +67,11 @@ export {
     coordinateMultiCorpsOffensive,
 } from './bot_corps_stance.js';
 
-// From bot_corps_operations
+// From sector_offensive (canonical lifecycle owner)
+export { evaluateOperationProgress } from './sector_offensive.js';
+
+// From bot_corps_operations (creation/activation entry points only)
 export {
-    getOperationCatalog,
-    generateCorpsOperationOrders,
-    evaluateOperationProgress,
     generateOGActivationOrders,
     generateEmergencyDefensiveOperations,
 } from './bot_corps_operations.js';
