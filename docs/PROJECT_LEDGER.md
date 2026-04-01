@@ -18179,3 +18179,38 @@ The ops singularity plan's four questions are now answered:
 4. UI reflects that truth — ✅ `OperationView` declared canonical; all surfaces verified phase-consistent; commander identity fixed
 
 Phase 5 (diagnostics/player explanation unification) deferred to v0.8-to-v0.9 — not blocking.
+
+---
+
+## 2026-04-01 — Factory coverage complete + plan amendments
+
+### Session commits (continued)
+
+| Hash | Description |
+|------|-------------|
+| `7a27afa2` | docs(plans): amend sector-anchored ops plan + session doc updates |
+| `27cc72a6` | refactor(ops): migrate triggered and corridor breach ops to factory functions |
+| `dbdbf729` | refactor(ops): migrate emergency defense op to factory; complete factory coverage |
+
+### Factory coverage — all six CorpsOperation creation paths
+
+All inline `CorpsOperation` literal constructions eliminated. Every creation path now goes through a named factory in `corps_operation_helpers.ts`:
+
+| Factory | Callers |
+|---------|---------|
+| `buildCorpsOperation(def, axes, participating, turn, isPrePlanned=true)` | `injectQueuedOperation` (true), triggered ops (false) |
+| `buildCommanderOperation(corpsId, turn, brigades, sectorId, objectives, strength, name?)` | commander emit (sector_attack), corridor breach (name override) |
+| `buildEmergencyDefenseOperation(corpsId, turn, brigades, targets)` | `generateEmergencyDefensiveOperations` |
+| `buildProbeOperation(corpsId, turn, brigadeId)` | commander emit (probe) |
+
+`buildCorpsOperation` `isPrePlanned` param added (default `true`) — triggered ops pass `false` so they don't gate slot-0. `TriggeredOpDef.min_attack_outcome` tightened from `string` to `CorpsOperation['min_attack_outcome']`.
+
+### Sector-anchored plan amended (7a27afa2)
+
+Four P0 gaps resolved:
+1. `primary_sector_id` → `sector_id` (existing field on `CorpsOperation`, no duplicate needed)
+2. Phase 0 added: writer inventory table (6 paths, all now factory-covered)
+3. Phase 3 attachment thresholds specified: adjacent-sector (33% cap, 1 residual minimum), corps reserve (all reserve brigades), army loan (blocked until loan system exists)
+4. Phase 6 calibration gate added: 40w run vs n1280 baseline, floors at 92.2% / 21 anchors / 6 benchmarks
+
+Status changed from "NOT READY" to "AMENDED — READY FOR EXECUTION".
