@@ -1,3 +1,38 @@
+## [2026-04-01] n1277 — sub_segment assignment fix (reverted, net negative)
+
+### Summary
+Investigated and attempted to fix boljanic_2 anchor failure via sub_segment assignment algorithm. Two approaches tried (corps-wide front OSID check in Phase B, then first-pass penalty in `assignBrigadesToSubSegments`). Both reverted.
+
+### Root Cause Confirmed: boljanic_2 is a Doboj structural issue
+- 7 Doboj OSIDs fell to RBiH (not just boljanic_2). ARBiH 2nd Corps has sustained operational pressure on the Doboj area.
+- rs_2nd_armored ends n1277 with 163 personnel at Derventa (near-ghost from combat exposure in Doboj area).
+- The failure is NOT brigade drift — it's inadequate RS garrison coverage for the Doboj front.
+- Phase B march distance-weighting (weight=0.3) and osidCount reservation (both in n1274/n1275) are correct and stay.
+
+### Approaches Tried (Both Reverted)
+**Approach 1 (Phase B, corps-wide front OSID check):** Added `corpsFrontOsids` map; Phase B skips brigades already at any corps front OSID. Caused SRK siege ring to drop from 4→2 brigades (cascade: prevented cross-front march that was indirectly maintaining Sarajevo periphery). Reverted.
+
+**Approach 2 (Phase B, sector-wide check):** Same cascade; sector scope insufficient because boljanic_2 and Brčko sub_segments are in different CorpsFrontSectors. Reverted.
+
+**Approach 3 (sub_segment assignment first-pass penalty):** Penalized brigades already at other sub_segments' front OSIDs in first-pass candidate selection (`assignBrigadesToSubSegments`). Did NOT fix boljanic_2 (rs_2nd_armored still drifted; different brigades assigned but same ARBiH pressure). Introduced dissolution timing edge case (rs_3rd_banja_luka: cohesion=17, morale=6, not dissolved due to end-of-run timing gap). Net -0.1pp. Reverted.
+
+### New Architecture Finding
+Sub_segment assignment first-pass uses alphabetical tiebreak when all brigades have similar (tiny) scores for a distant sub_segment. Architecturally sound but non-obvious. Changing the tiebreak cascades unpredictably across the whole sim.
+
+### n1277 Results (reverted state, same as n1275)
+| Metric | n1275 | n1277 |
+|---|---|---|
+| Area-weighted | 94.0% | 93.9% |
+| Anchors | 23/25 | 23/25 |
+| Battles | 86 | 90 |
+| boljanic_2 | FAIL | FAIL |
+| brcko | FAIL | FAIL |
+
+### What to do next
+boljanic_2 needs a structural fix for ARBiH ops pressure on Doboj, not a brigade placement tweak. Options: (1) Investigate why ARBiH 2nd Corps generates 7+ Doboj OSID captures — is this a targeting/op planning issue? (2) Proposal 3 (commitment-ratio Phase B eligibility) — only march rear brigades to under-committed zones. (3) Look at whether op:doboj sector is under-garrisoned due to 1KK spreading too thin.
+
+---
+
 ## [2026-04-01] n1275–n1276 — osidCount reservation fix + weight experiment (reverted to 0.3)
 
 ### Summary

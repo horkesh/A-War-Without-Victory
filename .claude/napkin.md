@@ -13,13 +13,13 @@
 ## Current State (2026-04-01, v0.8.0 Commander System on main)
 **ATH BASELINE: n1256: 94.2% area-weighted, 23/23 anchors, 6/6 benchmarks. 73 battles, 36/40 combat weeks. hash: 5fa01bbdecc43f5f.**
 **n1273 COMPLETE: 94.1%, 24/25 anchors (boljanic_2 FAIL only), 6/6 benchmarks, 99 battles, 38/40 combat weeks. hash: 1bfa86eaf4c82606.**
-**n1275 STABLE: 94.0%, 23/25 anchors (brcko+boljanic_2 FAIL), 6/6 benchmarks, 86 battles. osidCount reservation fix active, weight=0.3.**
-**n1274: 94.2% ATH tied, boljanic_2 PASS (accidental — non-home defenders happened to be nearby), brcko FAIL.**
-**n1276 REVERTED: weight=1.0 produced 93.3% (−0.9pp), wrong-direction battles, net regression. Do not retry weight tuning — wrong lever for boljanic_2.**
-**BOLJANIC_2 ROOT CAUSE (new diagnosis 2026-04-01): Failure mode is ARBiH operational pressure, NOT march distance. rs_2nd_armored ends w40 with location_osid=undefined + corps_id=undefined (617 personnel, assigned to sector but physically lost). 18 battles all at bukovica_velika_2, not boljanic_2. ARBiH attacks boljanic_2 via ops uncontested. PHASE_B_DISTANCE_WEIGHT cannot fix this.**
-**rs_2nd_armored undefined location_osid BUG: brigade alive (617 pers), valid sector assignment, but no physical location at w40. Likely stuck in operation participant state or march cleared location. New P1 bug.**
-**Remaining P0s: boljanic_2 (ARBiH ops pressure + rs_2nd_armored location bug), brcko (structural, 10 ARBiH brigades at donji_rahic), battle tempo 86 vs 150-250. P1s: HRHB patron directive scope fix, jajce_falls turn_min 40→28.**
-**EMERGENT PROPOSALS FOR DRIFT (pending): Proposal 2 = corridor-width garrison multiplier (allocate.ts). Proposal 3 = commitment-ratio Phase B eligibility. These address garrison budget, not march distance — correct lever family for structural fixes.**
+**n1275 STABLE BASELINE: 94.0%, 23/25 anchors (brcko+boljanic_2 FAIL), 6/6 benchmarks, 86 battles. osidCount reservation fix active, weight=0.3. All 137 tests pass.**
+**n1277 REVERTED: sub_segment assignment fix (3 approaches tried). None fixed boljanic_2. Net -0.1pp + test failure. Reverted to n1275 state.**
+**BOLJANIC_2 FINAL DIAGNOSIS (2026-04-01): Structural ARBiH ops pressure on Doboj. 7 Doboj OSIDs fall RBiH. rs_2nd_armored reduced to 163 pers by combat exposure. NOT a brigade drift/march issue. Phase B and sub_segment fixes both failed — wrong layer. Fix must address ARBiH targeting/op pressure OR RS garrison budget for Doboj sector.**
+**rs_2nd_armored location_osid=undefined (n1275/n1276 transient state): RESOLVED as misdiagnosis. In stable runs, brigade is alive but near-ghost (163 pers) at Derventa/Doboj area. Combat exposure, not location bug.**
+**Remaining P0s: boljanic_2 (Doboj structural — ARBiH ops + thin RS garrison), brcko (structural, 10 ARBiH brigades at donji_rahic), battle tempo 86 vs 150-250. P1s: HRHB patron directive scope fix, jajce_falls turn_min 40→28.**
+**FAILED APPROACHES for boljanic_2: Phase B corps-wide front OSID check (→SRK siege drop 4→2), Phase B sector-wide check (same cascade), sub_segment first-pass penalty (different cascades, no fix).**
+**NEXT APPROACH for boljanic_2: Proposal 3 (commitment-ratio Phase B eligibility filter) OR investigate ARBiH 2nd Corps op generation targeting Doboj. corridor_width=Infinity for main body → Proposal 2 won't help main body zones.**
 **[RESOLVED] Brigade drift, objective validation gate, homeDefense surplus filters (allocate+plan), ghost duplicates, BFS faction-wide scope, loan exclusivity, probe guard blocking plans.**
 **[RESOLVED] OSID naming-mismatch: boljanic_2=Doboj, kopcic_2=Bugojno, brcko=Brčko, foca_3=Foča.**
 **Pre-existing gap revealed: Goražde enclave brigades (arbih_808th, arbih_843rd) not assigned to reachable sectors — anomaly detector exemption added for placement:fixed_home_osid.**
