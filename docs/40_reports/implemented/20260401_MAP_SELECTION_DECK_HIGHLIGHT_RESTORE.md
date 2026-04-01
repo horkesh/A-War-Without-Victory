@@ -101,3 +101,28 @@ After the first restore pass, two additional issues remained:
 ### Follow-up verification
 
 - `npm run warroom:build`
+
+## Follow-up: Deck Visibility Contract (2026-04-01)
+
+After the selection restore, a deeper regression surfaced: non-top-stack formations could be hidden in normal map view but reappear when selected through corps/sector/OOB highlighting.
+
+### Root cause
+
+- the base Deck counter layer rendered only `is_stack_top` features
+- the highlighted Deck overlay rendered matching formations from the full feature set
+- MapLibre `formation-markers` was already hidden when Deck counters were enabled
+
+That created a broken invariant:
+
+- normal visibility used one rule
+- highlight visibility used another
+
+So selection acted like a hidden visibility mode instead of a pure styling layer.
+
+### Correction
+
+The base Deck counter layer was changed to render the full formation feature set, restoring a single visibility contract between normal map state and highlighted state.
+
+See:
+
+- [20260401_DECK_COUNTER_VISIBILITY_CONTRACT_FIX.md](./20260401_DECK_COUNTER_VISIBILITY_CONTRACT_FIX.md)

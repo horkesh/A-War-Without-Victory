@@ -9,11 +9,6 @@ import { IconLayer, TextLayer } from '@deck.gl/layers';
 import type { FeatureCollection, Feature } from 'geojson';
 import { getIconDataUrl } from '../map/formationIcons';
 
-/** Extract top-of-stack features for rendering. */
-function getTopStack(features: Feature[]): Feature[] {
-    return features.filter(f => f.properties?.is_stack_top);
-}
-
 /** Highlighted formations render as a dedicated overlay so non-top-stack selections stay visible. */
 function getHighlightedFeatures(features: Feature[], highlightedFormationIdSet: Set<string>): Feature[] {
     return features.filter(f => highlightedFormationIdSet.has(f.properties?.id));
@@ -77,7 +72,6 @@ export function buildTacticalDeckLayers(
         else iconHeight = 32 + (zoom - 12) * (40 - 32) / 2;
     }
 
-    const topStack = getTopStack(formationsGeoJson.features);
     const highlightedFeatures = highlightedFormationIds.length > 0
         ? getHighlightedFeatures(formationsGeoJson.features, highlightedFormationIdSet)
         : [];
@@ -85,7 +79,7 @@ export function buildTacticalDeckLayers(
     layers.push(
         new IconLayer({
             id: 'deck-formations-icons',
-            data: topStack,
+            data: formationsGeoJson.features,
             getIcon: (d: any) => ({
                 url: getIconDataUrl(
                     highlightedFormationIdSet.has(d.properties.id)

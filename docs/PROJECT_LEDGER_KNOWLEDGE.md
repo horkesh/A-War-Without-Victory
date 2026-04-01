@@ -1208,3 +1208,7 @@ Any slot cap, throttle, or concurrency limit applied to an array with a multi-ph
 
 ### What the reader needs to do
 `plan.ts` should filter `candidateOsids` against a recent-failure set derived from `briefing.previous_state?.operation_history`. An OSID that appears in the last 2-3 history entries' `osids_lost` should be on cooldown (skip for N turns). This prevents the Bihać paralysis pattern (5th Corps targeting brekovica_2 across 6 op generations).
+
+## [2026-04-01] Deck counter visibility must not differ between normal and highlighted state
+
+When Deck owns brigade counters, the base Deck layer and the highlighted Deck layer must render from the same formation visibility set. Rendering only `is_stack_top` in the base layer while rendering the full formation set in the highlighted overlay creates a hidden second visibility mode: units appear to vanish in normal map state and reappear when corps/sector/OOB selection highlights them. The invariant is simple: highlight may restyle a unit that is already visible, but must never be the thing that makes that unit visible in the first place.

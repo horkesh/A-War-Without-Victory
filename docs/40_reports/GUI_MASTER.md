@@ -179,3 +179,7 @@ Map overlay sources are created in `runUpdate` inside nested `requestAnimationFr
 ---
 
 *For calibration status and gates, use [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md). For thematic GUI decisions and patterns, see docs/PROJECT_LEDGER_KNOWLEDGE.md and .claude/napkin.md § GUI / HoI Map.*
+
+### 6. Deck counter visibility contract must match highlight contract
+
+When Deck owns brigade counters, the base Deck layer and the highlighted Deck layer must render from the same formation visibility set. A broken version of `buildTacticalDeckLayers.ts` rendered only `is_stack_top` features in the base layer while the highlighted overlay rendered matching formations from the full feature set. That made corps/sector/OOB selection act like a hidden visibility mode: units could disappear in normal state and reappear when highlighted. Rule: highlights may restyle visibility, not redefine it. If Deck counters are the canonical renderer, the base layer must already include every formation that the highlight layer may paint.

@@ -18380,3 +18380,24 @@ Run D: author `must_hold: true` on brcko corridor sector in scenario JSON. Raise
 
 ### Secondary open issue
 vrs_east_bosnian: all non-Koridor ops have total_attacks=0. Separate P1. Root cause: objectives not reachable via BFS from brigade positions, or stale objective filter. Part of 39% zero-eligible-attacker anomaly.
+---
+
+## [2026-04-01] Tactical map Deck counter visibility contract fix
+
+### Summary
+Fixed a map visibility regression where normal Deck rendering hid non-top-stack formations while corps/sector/OOB selection could still reveal them through the highlighted overlay. Selection had become a backdoor visibility mode instead of a pure highlight mode.
+
+### Root cause
+- Base Deck layer rendered only `is_stack_top` formations.
+- Highlight overlay rendered from the full formation set.
+- MapLibre `formation-markers` is hidden when Deck counters are enabled, so Deck is the only normal unit-visibility path.
+
+### Fix
+- `src/ui/map/layers/buildTacticalDeckLayers.ts`: base `deck-formations-icons` now renders the full formation feature set, not only top-of-stack entries.
+- Added regression test `tests/ui_map_deck_counter_visibility.test.ts` to lock the visibility contract.
+
+### Verification
+- `node_modules\\.bin\\tsx.cmd --test tests\\ui_map_deck_counter_visibility.test.ts`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run desktop:map:build`
+- `npm.cmd run warroom:build`
