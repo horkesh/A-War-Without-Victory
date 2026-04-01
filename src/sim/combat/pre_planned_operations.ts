@@ -635,14 +635,13 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         staging_osid: 'op:kalesija:kalesija_grad_2',
         available_from: 15,
         min_attack_outcome: 'repulsed',
-        planning_duration: 5, // 2nd Tuzla needs 3 hops to march from Tuzla to Kalesija
+        planning_duration: 7, // 2nd Tuzla needs 3 hops from Tuzla + 2 prep sub-phases + buffer
         axes: [
             {
                 axis_id: 'kalesija_assault',
                 name: 'Kalesija Assault',
                 brigades: [
                     'arbih_2nd_tuzla',
-                    'arbih_120th_liberation_black_swans', // elite loan from General Staff
                     'arbih_241st_spreca_muslim_light_gazije',
                     'arbih_242nd_zvornik_muslim_light',
                     'arbih_245th_mountain',
