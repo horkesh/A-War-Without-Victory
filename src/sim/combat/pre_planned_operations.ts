@@ -676,18 +676,18 @@ function buildAxesFromDef(
     const allParticipating: FormationId[] = [];
     const eliteLoans: { brigadeId: FormationId; corpsId: string }[] = [];
 
+    const movementState = state.military.brigade_movement_state ?? {};
     for (const axisDef of def.axes) {
-        const movementState = state.military.brigade_movement_state ?? {};
         const axisBrigades = axisDef.brigades.filter((fid) => {
             const formation = formations[fid];
             if (!formation) return false;
             if (!isEligibleOperationFormation(formation)) return false;
-            // RC2: exclude combat-ineffective brigades — they pass isEligibleOperationFormation
+            // Exclude combat-ineffective brigades — they pass isEligibleOperationFormation
             // (which only checks kind/status) but will fail at execution, causing zero
             // eligible attackers per turn.
             if ((formation.personnel ?? 0) < MIN_ATTACK_PERSONNEL) return false;
             if ((formation.disrupted_turns ?? 0) > 0) return false;
-            // RC5: exclude brigades currently in column-march transit — they are already
+            // Exclude brigades currently in column-march transit — they are already
             // marching somewhere else and contribute zero eligible attackers until they arrive.
             if (movementState[fid]?.status === 'in_transit') return false;
             // Exempt-corps brigades (e.g. General Staff elites) are allowed

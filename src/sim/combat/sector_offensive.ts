@@ -8,10 +8,6 @@
  * bot_corps_operations.ts is the legacy/transitional path and is non-authoritative.
  * operation_preparation.ts owns the preparation sub-phase.
  * operation_prediction.ts owns predictive/advisory computation.
- */
-
-/**
- * Sector offensive lifecycle management.
  *
  * A sector offensive IS a CorpsOperation with type === 'sector_attack'.
  * Lifecycle: planning → execution → recovery → removed from state.
@@ -114,7 +110,6 @@ export function resolveEquipmentClass(f: { equipment_class?: string; tags?: stri
 // ═══════════════════════════════════════════════════════════════════════════
 
 /** Minimum brigades in sector to launch an offensive. */
-// Minimum brigades required to launch a sector offensive.
 // Single-brigade "operations" are not operations — they hammer one objective,
 // fail 3 consecutive idle turns, and "complete" with 0 captures.
 // 2 brigades = minimum for realistic combined-arms commitment.

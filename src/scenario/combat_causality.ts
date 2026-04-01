@@ -108,7 +108,7 @@ export function createBotOrderDiagnosticsSnapshot(
         if (typeof destination !== 'string' || destination.length === 0) continue;
         movementOrdersByBrigade[brigadeId] = destination;
     }
-    // RC1/RC4: also count brigades that are in_transit via column march.
+    // Also count brigades that are in_transit via column march.
     // Column-march orders live in brigade_movement_state (persistent), not
     // brigade_movement_orders (turn-scoped). Without this, the diagnostic fires
     // a false-positive 'execution_without_eligible_attackers' every march turn.

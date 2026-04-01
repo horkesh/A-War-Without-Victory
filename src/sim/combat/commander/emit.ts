@@ -233,7 +233,7 @@ function collectAssignedFrontIds(briefing: CommanderBriefing): string[] {
 }
 
 /** Build offensive targets from plan if plan is executing/ready.
- *  RC1 fix: when no active plan, fall back to objectives from operations already
+ *  When no active plan, fall back to objectives from operations already
  *  in the field — prevents the directive losing targets after plan hands off
  *  to the execution pipeline and gets cleared to null. */
 function buildOffensiveTargets(
@@ -247,7 +247,7 @@ function buildOffensiveTargets(
         return [...planDecision.plan.target_osids].sort(strictCompare);
     }
 
-    // RC1: no live plan — derive targets from any operation currently executing
+    // No live plan — derive targets from any operation currently executing
     const executingObjectives = new Set<string>();
     for (const op of briefing.active_operations) {
         if (op.phase === 'execution' || op.phase === 'planning') {
@@ -557,7 +557,7 @@ function buildOperations(
         // to the first objective OSID within MAX_REACHABILITY_HOPS.
         // This prevents creating operations where all brigades are physically
         // disconnected from the objective (causes zero eligible attackers at execution).
-        const participatingBrigades = [...planDecision.plan.assigned_brigades]
+        let participatingBrigades = [...planDecision.plan.assigned_brigades]
             .filter(id => {
                 if (!surplusSet.has(id)) return false;
                 // NOTE: home_defense brigades CAN be op participants — evaluateHomeDefense in
@@ -596,7 +596,7 @@ function buildOperations(
             })
             .sort(strictCompare);
 
-        // RC3: guard — never inject an operation with zero participants.
+        // Guard — never inject an operation with zero participants.
         // This happens when all assigned brigades have been rotated out of the
         // surplus pool between plan creation and launch, or when none can
         // physically reach the operation objective through friendly territory.
@@ -607,7 +607,7 @@ function buildOperations(
 
         const sectorId = findSectorWithMostTargetOverlap(planDecision, briefing);
 
-        // RC4: garrison floor — ensure the primary sector retains at least
+        // Garrison floor — ensure the primary sector retains at least
         // garrison_budget brigades after this op takes its participants.
         //
         // The allocate pass locks garrison brigades out of surplus_pool, so in
@@ -677,12 +677,7 @@ function buildOperations(
                             return ops;
                         }
 
-                        // Replace the mutable reference for the rest of the function
-                        // (TypeScript: re-assign via const re-declaration is not allowed,
-                        //  so we use a separate variable and reference it below)
-                        // eslint-disable-next-line no-param-reassign
-                        participatingBrigades.length = 0;
-                        for (const id of trimmedParticipants) participatingBrigades.push(id);
+                        participatingBrigades = trimmedParticipants;
                     }
                 }
             }
@@ -938,7 +933,7 @@ function deriveTargetsFromSectors(briefing: CommanderBriefing, maxTargets: numbe
         }
     }
 
-    // RC2: if sector scan yielded nothing, fall back to active operation objectives
+    // If sector scan yielded nothing, fall back to active operation objectives
     if (targets.size === 0) {
         for (const op of briefing.active_operations) {
             for (const obj of op.objectives ?? []) {

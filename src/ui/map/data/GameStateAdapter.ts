@@ -894,14 +894,16 @@ export function parseGameState(json: unknown): LoadedGameState {
         for (const fv of formations) {
             if (fv.kind !== 'corps' && fv.kind !== 'corps_asset') continue;
             const cc = rawCorpsCommand[fv.id];
+            // Legacy compat: old save files used singular active_operation; new saves use active_operations[].
             const activeOps = (Array.isArray(cc?.active_operations) ? cc.active_operations : cc?.active_operation ? [cc.active_operation] : []) as any[];
             for (const op of activeOps) {
             if (op && typeof op === 'object' && op.name) {
                 const participatingBrigadeIds = Array.isArray(op.participating_brigades)
                     ? (op.participating_brigades as string[]).filter((id): id is string => typeof id === 'string').sort(strictCompare)
                     : undefined;
-                const participatingFormations = participatingBrigadeIds
-                    ? formations.filter((formation) => participatingBrigadeIds.includes(formation.id))
+                const participatingSet = participatingBrigadeIds ? new Set(participatingBrigadeIds) : null;
+                const participatingFormations = participatingSet
+                    ? formations.filter((f) => participatingSet.has(f.id))
                     : [];
                 const avgCohesion = participatingFormations.length > 0
                     ? participatingFormations.reduce((sum, formation) => sum + finiteNumber(formation.cohesion, 0), 0) / participatingFormations.length

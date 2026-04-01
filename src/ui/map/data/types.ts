@@ -415,8 +415,7 @@ export interface CorpsFrontSectorView {
  * UI surfaces must not read CorpsOperation directly from GameState.
  *
  * Lifecycle: planning → execution → recovery (matches engine CorpsOperation.phase)
- * Permitted creation: pre_planned_operations.ts (player/queued), commander/emit.ts (AI)
- * Lifecycle owner: sector_offensive.ts + evaluateOperationProgress()
+ * Reflects CorpsOperation; see sector_offensive.ts for lifecycle and corps_operation_helpers.ts for creation rules.
  */
 export interface OperationView {
     corps_id: string;
