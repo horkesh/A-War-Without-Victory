@@ -3,6 +3,24 @@
 
 ---
 
+### [Architecture] Always check what's already running before building a new detection system (2026-04-01) — NEW
+- **Context**: Designed a full "authored corridor" system (chokepoint_osids, zone anchors, width thresholds) to detect strategically vital sectors. Investigation revealed `osid_graph_analysis.ts` already had articulation point detection (`isChokepoint`, `FactionGraphAnalysis.chokepoints[]`) running every turn. The entire detection layer was superseded by finding existing infrastructure. Only display labels (~10 entries) were actually needed.
+- **Wrong approach**: Jumping to a new system design without grepping for the core algorithm first. "We need chokepoint detection" → design doc → implementation plan → code, without checking whether the game already computes chokepoints.
+- **Right approach**: Before designing any detection, analysis, or classification system, grep for the core concept in the codebase. `grep -r "chokepoint\|articulation" src/` takes 2 seconds and can save hours of design work.
+- **Do instead**: When a domain expert proposes a new system, the first step is always: "Does this already exist?" Search before designing. If partial infrastructure exists, build on it rather than beside it.
+
+### [Architecture] Secondary checks that duplicate primary system logic are always dead code (2026-04-01) — NEW
+- **Context**: The garrison floor safety net in `emit.ts` (lines 652-691) was a retroactive eviction block intended to pull over-committed brigades back from surplus_pool. It could never fire: `allocateBrigades()` already excluded garrison-locked brigades from surplus_pool before `emit.ts` runs. The secondary check duplicated the primary system's exclusion logic, but downstream — so its precondition was always false.
+- **Wrong approach**: Adding a secondary safety net without verifying that the primary system actually allows the condition the net guards against. "Belt and suspenders" logic that can't fire is noise, not safety.
+- **Right approach**: When a secondary check duplicates a primary system's logic, trace whether the primary system can even produce the state the secondary check is guarding. If not, remove the secondary check and fix the primary system if its guarantee is insufficient.
+- **Do instead**: When reviewing safety-net code, ask: "Can the primary system produce the input that would make this fire?" If no, the secondary check is dead. Single-ownership principle: one system owns a resource; secondary checks on that resource are symptoms of unclear ownership.
+
+### [Architecture] Emergent > authored when topology is already encoded in game state (2026-04-01) — NEW
+- **Context**: Named corridor authoring (explicit chokepoint_osids, zone anchors, authored width thresholds, hardcoded `corridor_municipalities` in `bot_strategy.ts`) was the proposed design. The OSID graph already captured the topology via articulation point detection. Display labels are the only authoring needed — the strategic significance emerges from graph structure.
+- **Wrong approach**: Hardcoding strategic geography as data overrides when the engine already computes structural equivalents from first principles. Authored lists go stale as map data changes; emergent computation stays correct automatically.
+- **Right approach**: Default to emergent computation from existing game state. Author only the human-meaningful labels (display names, UI hints). If the topology is already in the graph, trust the graph.
+- **Do instead**: Before authoring a strategic list (corridors, chokepoints, vital sectors), ask: "Does the engine already compute a structural equivalent?" Check `osid_graph_analysis.ts`, `front_geometry_analysis.ts`, sector ratings, and supply chain analysis. Authored data is a last resort, not a first instinct.
+
 ### [Architecture] Phase B column march doesn't reserve the target in osidCount — simultaneous pileup (2026-04-01) — NEW
 - **Context**: `distributeBrigadesToFront` Phase B iterates eligible brigades and for each one calls `pickLeastStackedTarget`, then issues a column march order. `osidCount` is only updated for direct adjacent moves (dist=1). For multi-hop marches, `osidCount` is never incremented for the target. When multiple brigades near the same area are processed in the same turn, every brigade sees the target as empty and issues a march order to it. In n1274 this produced 9 vrs_1st_krajina brigades simultaneously ordered to `op:lukavac:brijesnica_donja_2`.
 - **Why it didn't show before**: Before distance-weighting (n1274), brigades had global target scatter — different brigades picked different distant targets, so simultaneous pileup was rare. Distance-weighting concentrates local brigades on the same nearby OSID, making the missing reservation visible.

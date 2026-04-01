@@ -18236,3 +18236,88 @@ Four P0 gaps resolved:
 4. Phase 6 calibration gate added: 40w run vs n1280 baseline, floors at 92.2% / 21 anchors / 6 benchmarks
 
 Status changed from "NOT READY" to "AMENDED — READY FOR EXECUTION".
+
+---
+
+## [2026-04-01] n1282 — Depletion loop repair + formation test guard
+
+### Summary
+Two changes in one commit: (1) lowered `MIN_BRIGADES_FOR_PLAN` to 2 for sector-anchored ops so under-strength sectors can still generate operations; (2) added `DISSOLUTION_PERSONNEL_CAP` guard to the formation integrity test so brigades above 800 personnel are demoralized not dissolved, mirroring actual dissolution logic.
+
+### Changes
+- **`src/sim/combat/commander/emit.ts`**: `MIN_BRIGADES_FOR_PLAN` lowered from 3 to 2. RBiH orders 23→32. The depletion loop (brigades cycling through ops and returning at minimum strength) was starving sectors of eligible attackers by requiring a 3-brigade quorum.
+- **Formation integrity test**: Added `DISSOLUTION_PERSONNEL_CAP` (800) guard. Brigades above this threshold are demoralized, not dissolved — the test previously checked dissolution for all under-morale brigades regardless of strength, diverging from production logic.
+
+### Calibration Gate (n1282)
+92.7% area-weighted / 22/25 anchors / 6/6 benchmarks. commit: `536b24db`.
+Regression: brcko re-failed (was passing in n1281). Hypothesis: changed op timing on RS side. Garrison-locked brigades cannot reach surplus_pool, so RS garrison drain is not the mechanism.
+
+### Why
+Sector-anchored ops require a local brigade quorum. Under sustained combat, sectors frequently drop below 3 brigades — the old floor silently suppressed all op generation in those sectors. Lowering to 2 restores attack continuity without permitting single-brigade operations.
+
+---
+
+## [2026-04-01] Garrison floor safety net removal (Run A)
+
+### Summary
+Removed dead code from `emit.ts` lines 652-691. The garrison floor safety net was a retroactive eviction block intended to pull over-committed brigades back from surplus_pool. It could never fire: `allocateBrigades()` excludes garrison-locked brigades from surplus_pool before emit.ts runs. Single-ownership principle: `allocateBrigades()` is the sole garrison authority.
+
+### Changes
+- **`src/sim/combat/commander/emit.ts`**: ~40 lines of unreachable garrison eviction logic removed. No behavior change; 137/137 tests pass.
+
+### Why
+Dead code in a calibration-sensitive file is actively harmful — it creates false hypotheses during regression investigation ("maybe the safety net is firing") and obscures ownership of garrison logic. Removing it makes `allocateBrigades()` the unambiguous single authority.
+
+### commit: `9d2f7c30`
+
+---
+
+## [2026-04-01] Must-hold system design — panel approved
+
+### Summary
+Full panel review (Historian — all three factions, Game Designer, Technical Architect) produced an approved must-hold design. Run sequence B-F planned.
+
+### Design decisions
+- `CorpsFrontSector.must_hold?: boolean` — new optional field; false/absent = normal garrison logic.
+- `ZoneAssessment.is_must_hold` — derived flag propagated through assessment pipeline.
+- `computeGarrisonBudget(isMustHold)` — hard gate fires only when `garrison_deficit > 0 AND is_under_pressure`. No unconditional floor that ignores pressure.
+- HRHB Phase B must-holds are event-triggered via `isRbihHrhbCombatEnabled()` (not permanent).
+- RS must-holds include: Brčko corridor sectors, Posavina axis, Sarajevo siege ring, Trebinje access.
+- RBiH must-holds include: Bihać enclave, Goražde enclave, Sarajevo defensive perimeter.
+
+### Reference
+`docs/40_reports/MUST_HOLD_MASTER.md`
+
+---
+
+## [2026-04-01] Corridor awareness — emergent detection approved
+
+### Summary
+Design decision: do not author a separate corridor detection system. Articulation point detection already runs in `osid_graph_analysis.ts` (`isChokepoint`, `FactionGraphAnalysis.chokepoints[]`) every turn. Works for main-body internal bottlenecks (Brčko). Only authoring needed: display labels JSON (~10 entries).
+
+### Findings
+- `osid_graph_analysis.ts`: `isChokepoint()` + `FactionGraphAnalysis.chokepoints[]` — live, running every turn.
+- `front_geometry_analysis.ts`: `detectSalients()` — grouping algorithm already exists.
+- `bot_strategy.ts`: `corridor_municipalities` hardcoded array — to be replaced by emergent chokepoint data in a follow-up.
+- No new detection infrastructure required.
+
+### Why
+Named corridor authoring (chokepoint_osids, zone anchors, authored width thresholds) was unnecessary because the OSID graph already captures topology. Display labels are the only human-authored layer needed. Emergent > authored when topology is sufficient.
+
+### Reference
+`docs/40_reports/MUST_HOLD_MASTER.md`
+
+---
+
+## [2026-04-01] Travnik supply axis correction (knowledge)
+
+### Summary
+Previous session analysis incorrectly described Travnik-Lašva as an ARBiH supply axis from Croatia. Corrected via historian review.
+
+### Correct axis
+- Primary: Neretva valley — Ploče → Mostar → Jablanica → Konjic.
+- Secondary: Prozor hinge — Tomislavgrad → Prozor → Jablanica.
+- Travnik = 3rd Corps HQ + Bosniak population anchor in Central Bosnia. Not a supply corridor.
+
+### Why it matters
+Bot corridor-awareness logic and must-hold sector seeding must not treat Travnik as an axis node. Any corridor score that routes supply through Lašva valley would be historically incorrect and would misdirect bot priorities.

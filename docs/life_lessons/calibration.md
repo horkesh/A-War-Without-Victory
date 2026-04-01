@@ -3,6 +3,12 @@
 
 ---
 
+### [Calibration] Expert hypotheses on regression causes need mechanistic verification before acting (2026-04-01) — NEW
+- **Context**: brcko anchor re-failed in n1282 after the `MIN_BRIGADES_FOR_PLAN` depletion fix. The leading hypothesis was "Fix 1 allows thin RS ops to drain Brčko corridor garrison." This was plausible but mechanistically wrong: garrison-locked brigades cannot reach surplus_pool (verified by the garrison floor safety net being dead code). The actual cause was sensitivity to changed op timing, not garrison drain.
+- **Wrong approach**: Designing a fix (must-hold system, corridor garrison multiplier) based on a hypothesis that hasn't been verified against the code. A plausible narrative about cause-and-effect is not the same as confirmed causation.
+- **Right approach**: Before acting on a regression hypothesis, trace the mechanism in code. Check: (1) Can garrison-locked brigades actually reach the pool the hypothesis assumes they're drawn from? (2) Does the hypothesis predict a specific state change — if so, check that state in the run output. If the mechanism can't fire, the hypothesis is wrong regardless of how plausible the story sounds.
+- **Do instead**: When a calibration anchor regresses, write down the mechanistic prediction ("garrison-locked brigades reach surplus_pool via X path") and verify it against `emit.ts` and `allocateBrigades()` before designing a countermeasure. A wrong diagnosis leads to a correct-looking fix that solves nothing.
+
 ### [Calibration] Fix the symptom in ALL callers — AND verify your fix is actually on the code path (2026-03-31)
 - **Context**: n1218 fixed `emit.ts` to filter `op.phase !== 'recovery'`. n1225 then fixed `hasAvailableSlot()` in `corps_operation_helpers.ts` — but `commander/emit.ts` never calls `hasAvailableSlot()`; it has its own inline slot guard. The n1225 fix was byte-for-byte inert (identical hash to n1224). 7 calibration runs and ~6 hours spent on wrong diagnoses.
 - **Wrong approach**: (1) Fixing a utility function without verifying the code path you care about calls it. (2) Trusting agent code-path analysis as "confirmed root cause" without runtime validation. Both failures occurred here.
