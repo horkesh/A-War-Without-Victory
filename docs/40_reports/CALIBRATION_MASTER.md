@@ -1,7 +1,7 @@
 # AWWV Calibration Master Reference
 
 **Purpose:** Persistent lessons-learned record for war-phase calibration (April 1992 onward). 40w primary, 104w force trajectory.
-**Updated:** 2026-04-01 (n1280 — sub-segment ID collision fix; VRS at-front 74.4%; 93.2% area-weighted, 21/25 anchors)
+**Updated:** 2026-04-01 (n1281 — sector-anchored launch contract; 92.7% area-weighted, 23/25 anchors, +2 recoveries)
 
 ## Review Methodology
 
@@ -14,6 +14,24 @@ Every calibration run is reviewed by a two-tier expert panel before any action i
 `/gap-finder` *(unique authority: may dispatch agents + question specialists directly)*, `/game-designer`, `/corps-army-commander`, `/modern-wargame-expert`, `/canon-compliance-reviewer`
 
 **Orchestrator** synthesizes, gives go/no-go, updates this file + PROJECT_LEDGER.md.
+
+## n1281 SECTOR-ANCHORED LAUNCH CONTRACT (2026-04-01)
+- **92.7% area-weighted (40w). 23/25 anchors. 6/6 benchmarks.**
+- **final_state_hash: a968a166ebc237a6**
+- Net +2 anchor recoveries vs n1280: brcko (`op:brcko:brcko`) ✅, rastosnica_2 ✅.
+- Persistent failures: boljanic_2, gradacac_2 (pre-existing P0s, unrelated to this change).
+
+### Change vs n1280
+`emit.ts buildOperations()`: primary sector now determined FIRST; participant pool derives from that sector's assigned brigades (∩ surplusSet ∩ reachable). Adjacent-sector brigades may attach up to `ADJACENT_SECTOR_ATTACH_RATE=0.33` of their assigned count (≥1 residual left behind). No corps-wide broad-pool fallback. New `CorpsOperation` fields: `primary_sector_brigades`, `attached_brigades`, `supporting_sector_ids`, `reinforcement_source`. UI: "Sector Anchor" block in `OperationDetail.tsx`.
+
+### Anomaly: Zero-Eligible-Attacker Ops
+157/402 operations (39%) executed with no eligible brigades. Sector scoping correctly restricts the pool but some ops now launch against a sector anchor whose assigned brigades are all in-transit, disrupted, or otherwise unavailable at execution time. Not a gate failure; warrants follow-up investigation.
+
+### Open P0s after n1281
+1. boljanic_2 — ARBiH operational pressure on Doboj, insufficient RS garrison. FAILED APPROACHES: Phase B corps-wide check, Phase B sector-wide check, sub_segment first-pass penalty. Next: Proposal 3 (commitment-ratio Phase B eligibility filter) OR investigate ARBiH 2nd Corps op targeting.
+2. gradacac_2 — RS overperforming on newly-covered fronts; sector assignment scope tuning needed.
+
+---
 
 ## n1280 SUB-SEGMENT ID COLLISION FIX (2026-04-01)
 - **93.2% area-weighted (40w). 21/25 anchors. 6/6 benchmarks.**
