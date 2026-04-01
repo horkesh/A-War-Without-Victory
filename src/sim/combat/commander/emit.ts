@@ -744,6 +744,46 @@ function buildOperations(
             objectives,
             initialStrength,
         );
+
+        // Populate sector-anchored launch contract fields (Phase 2 scaffolding).
+        // Phase 3 will restructure participant selection to be sector-first; for now
+        // we derive the categorization post-hoc from the sector the op is anchored to.
+        if (sectorId) {
+            const anchoredSector = briefing.sectors.find(s => s.sector_id === sectorId);
+            if (anchoredSector) {
+                const primaryBrigadeSet = new Set(anchoredSector.assigned_brigade_ids);
+                const primarySectorBrigades = participatingBrigades
+                    .filter(id => primaryBrigadeSet.has(id))
+                    .sort(strictCompare);
+                const attachedBrigades = participatingBrigades
+                    .filter(id => !primaryBrigadeSet.has(id))
+                    .sort(strictCompare);
+
+                if (primarySectorBrigades.length > 0) {
+                    op.primary_sector_brigades = primarySectorBrigades;
+                }
+                if (attachedBrigades.length > 0) {
+                    op.attached_brigades = attachedBrigades;
+                    // Identify which other corps sectors contributed attached brigades.
+                    const supportingIds = new Set<string>();
+                    for (const sector of briefing.sectors) {
+                        if (sector.corps_id !== briefing.corps_id) continue;
+                        if (sector.sector_id === sectorId) continue;
+                        const sectorBrigadeSet = new Set(sector.assigned_brigade_ids);
+                        if (attachedBrigades.some(id => sectorBrigadeSet.has(id))) {
+                            supportingIds.add(sector.sector_id);
+                        }
+                    }
+                    if (supportingIds.size > 0) {
+                        op.supporting_sector_ids = [...supportingIds].sort(strictCompare);
+                    }
+                    // Mark as adjacent-sector reinforcement (simplified for Phase 2;
+                    // Phase 3 can distinguish adjacent-sector vs corps-reserve).
+                    op.reinforcement_source = 'adjacent_sector';
+                }
+            }
+        }
+
         ops.push(op);
     }
 

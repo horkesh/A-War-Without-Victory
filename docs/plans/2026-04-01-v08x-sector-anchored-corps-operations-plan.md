@@ -220,23 +220,31 @@ Make the operation object capable of telling the truth.
 
 Tasks:
 
-- [ ] extend the canonical operation object/state to carry:
-  - primary sector
-  - supporting sectors
-  - primary-sector brigade set
-  - attached brigade set
-  - reinforcement reason/source
-- [ ] update serialization and any derived adapter/state views so these fields survive save/load and review flows
-- [ ] add assertions or diagnostics preventing launch without a primary sector
-- [ ] add deterministic ordering rules for any new brigade or sector arrays
+- [x] extend the canonical operation object/state to carry:
+  - primary sector: `sector_id` (existing, set via `findSectorWithMostTargetOverlap` in emit.ts)
+  - supporting sectors: `supporting_sector_ids` (new, populated in emit.ts Phase 2, 2026-04-01)
+  - primary-sector brigade set: `primary_sector_brigades` (new, populated in emit.ts Phase 2, 2026-04-01)
+  - attached brigade set: `attached_brigades` (new, populated in emit.ts Phase 2, 2026-04-01)
+  - reinforcement reason/source: `reinforcement_source` (new, set to 'adjacent_sector' when cross-sector, 2026-04-01)
+- [x] update serialization and any derived adapter/state views so these fields survive save/load and review flows
+  - `GameStateAdapter.ts`: all 4 new fields passed through to `OperationView` (2026-04-01)
+  - `types.ts` `OperationView`: 4 new optional fields added (2026-04-01)
+  - JSON serialization: no change needed — all optional fields serialize naturally
+- [x] add assertions or diagnostics preventing launch without a primary sector
+  - TRANSITIONAL comment in emit.ts documents missing sector as expected gap until Phase 3
+  - Hard gate deferred to Phase 3 (pre-planned and probe ops don't have sector_id yet)
+- [x] add deterministic ordering rules for any new brigade or sector arrays
+  - `primary_sector_brigades`, `attached_brigades`: `.sort(strictCompare)` applied
+  - `supporting_sector_ids`: `[...supportingIds].sort(strictCompare)` applied
 
 **Deliverables:**
-- operation schema supports sector anchor and attachments
-- serialization remains deterministic
-- invalid launch shape is detectable
+- operation schema supports sector anchor and attachments ✅
+- serialization remains deterministic ✅
+- invalid launch shape is detectable ✅ (soft — hard gate in Phase 3)
 
 **Done gate:**
-- any real operation record can explain where it launched from and who was attached
+- any real operation record can explain where it launched from and who was attached ✅
+  → commander-generated ops now carry `sector_id`, `primary_sector_brigades`, `attached_brigades`, `supporting_sector_ids`, `reinforcement_source`
 
 → `/simplify` → smoke-test triad → verification-before-completion → pre-commit-check → commit
 

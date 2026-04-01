@@ -479,6 +479,15 @@ export interface OperationView {
     postponement_count?: number;
     /** Whether an active probe is in progress. */
     has_active_probe?: boolean;
+    // --- Sector-anchored launch contract (Phase 2 scaffolding) ---
+    /** Other sectors that contributed attached brigades to this operation. */
+    supporting_sector_ids?: string[];
+    /** Brigade IDs drawn from the primary sector at launch. */
+    primary_sector_brigades?: string[];
+    /** Brigade IDs from outside the primary sector, explicitly attached. */
+    attached_brigades?: string[];
+    /** Why non-primary brigades are present. Absent = all from primary sector. */
+    reinforcement_source?: 'adjacent_sector' | 'corps_reserve' | 'army_loan';
 }
 
 /** Sector intelligence record — enemy assessment from one friendly sector. */
