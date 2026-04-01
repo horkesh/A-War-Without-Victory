@@ -68,12 +68,13 @@ export function removeOperation(cmd: CorpsCommandState, op: CorpsOperation): voi
 // buildProbeOperation (commander-generated).
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Factory for pre-planned and player-queued operations (scenario-authored). */
+/** Factory for pre-planned, player-queued, and triggered operations. */
 export function buildCorpsOperation(
     def: PrePlannedOpDef,
     axes: OperationAxis[],
     participating: FormationId[],
     turn: number,
+    isPrePlanned = true,
 ): CorpsOperation {
     const allObjectives = axes.flatMap(a => a.objectives);
     return {
@@ -92,7 +93,7 @@ export function buildCorpsOperation(
         failure_count: 0,
         consecutive_failures_on_current: 0,
         staging_osid: def.staging_osid,
-        is_pre_planned: true,
+        ...(isPrePlanned ? { is_pre_planned: true } : {}),
         ...(def.min_attack_outcome ? { min_attack_outcome: def.min_attack_outcome } : {}),
     };
 }
@@ -105,9 +106,10 @@ export function buildCommanderOperation(
     sectorId: string | undefined,
     objectives: string[],
     initialStrength: number,
+    name?: string,
 ): CorpsOperation {
     return {
-        name: `cmd_${corpsId}_t${turn}`,
+        name: name ?? `cmd_${corpsId}_t${turn}`,
         type: 'sector_attack',
         phase: 'planning',
         started_turn: turn,

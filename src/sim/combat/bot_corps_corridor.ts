@@ -29,7 +29,7 @@ import {
     getFactionCorps,
     sortByPersonnelDesc,
 } from './bot_corps_helpers.js';
-import { getAvailableBrigades, hasAvailableSlot } from './corps_operation_helpers.js';
+import { buildCommanderOperation, getAvailableBrigades, hasAvailableSlot } from './corps_operation_helpers.js';
 
 export interface CorridorTarget {
     breachSettlements: SettlementId[];
@@ -145,15 +145,12 @@ export function attemptCorridorBreach(
 
             if (participants.length < 2) continue;
 
-            const operation: CorpsOperation = {
-                name: `Corridor Breach (${faction})`,
-                type: 'sector_attack',
-                phase: 'planning',
-                started_turn: turn,
-                phase_started_turn: turn,
-                target_settlements: target.breachSettlements,
-                participating_brigades: participants.map(b => b.id)
-            };
+            // PERMITTED CREATION ENTRY POINT — corridor breach operations.
+            const initialStrength = participants.reduce((sum, b) => sum + (b.personnel ?? 0), 0);
+            const operation = buildCommanderOperation(
+                corps.id, turn, participants.map(b => b.id), undefined, [], initialStrength,
+                `Corridor Breach (${faction})`,
+            );
 
             cmd.active_operations.push(operation);
             assignOperationCommander(state, operation, corps.id, faction);

@@ -26,7 +26,7 @@ import { assignOperationCommander } from './officer_system.js';
 import { isEligibleOperationFormation } from '../../state/formation_constants.js';
 import { validateOpAtInjection, collectOpInjectionWarnings } from './operation_validation.js';
 import type { ValidatableOpDef } from './operation_validation.js';
-import { hasActiveOperation, hasAvailableSlot } from './corps_operation_helpers.js';
+import { buildCorpsOperation, hasActiveOperation, hasAvailableSlot } from './corps_operation_helpers.js';
 
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -55,7 +55,7 @@ interface TriggeredOpDef {
     /** Planning duration in turns. */
     planning_duration: number;
     /** Override minimum attack outcome for brigades in this operation. */
-    min_attack_outcome?: string;
+    min_attack_outcome?: CorpsOperation['min_attack_outcome'];
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -316,23 +316,9 @@ function buildOperation(
 
     const allObjectives = builtAxes.flatMap(a => a.objectives);
 
-    const op: CorpsOperation = {
-        name: def.name,
-        type: 'sector_attack',
-        phase: 'planning',
-        started_turn: turn,
-        phase_started_turn: turn,
-        participating_brigades: [...new Set(allParticipating)].sort(strictCompare),
-        axes: builtAxes,
-        objectives: [...new Set(allObjectives)],
-        current_objective_index: 0,
-        planning_duration: def.planning_duration,
-        supply_readiness: 1.0,
-        momentum: 0,
-        failure_count: 0,
-        consecutive_failures_on_current: 0,
-        staging_osid: def.staging_osid,
-    };
+    // PERMITTED CREATION ENTRY POINT — triggered (condition/time-gated) operations.
+    // Not pre-planned (no is_pre_planned flag) — does not occupy the slot-0 queue.
+    const op = buildCorpsOperation(def, builtAxes, allParticipating, turn, false);
 
     return { op, corpsAxes };
 }
