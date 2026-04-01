@@ -209,7 +209,6 @@ export function useMapInteractions(
     const priorityLayers = [
       'battle-markers-pulse',
       'formation-markers',
-      'formation-labels',
       'front-edges-hover-pos',
       'front-edges-hover-neg',
       'front-edges-highlight-pos',
@@ -261,7 +260,7 @@ export function useMapInteractions(
     if (!onContextMenu) return;
     const point = { x: e.originalEvent.clientX, y: e.originalEvent.clientY };
 
-    const contextLayerIds = ['formation-markers', 'formation-labels',
+    const contextLayerIds = ['formation-markers',
       'front-edges-hover-pos', 'front-edges-hover-neg',
       'osid-control-fill'].filter(id => !!map.getLayer(id));
 
@@ -271,7 +270,7 @@ export function useMapInteractions(
     if (!first) { onContextMenu('empty', null, point); return; }
 
     const props = first.properties as Record<string, unknown>;
-    if (['formation-markers', 'formation-labels'].includes(first.layer.id)) {
+    if (first.layer.id === 'formation-markers') {
       onContextMenu('formation', props, point);
     } else if (first.layer.id.includes('front-edges')) {
       onContextMenu('front', props, point);
@@ -303,8 +302,6 @@ export function useMapInteractions(
   if (onFormationHover) {
     safeOn('mousemove', 'formation-markers', handleFormationMouseMove);
     safeOn('mouseleave', 'formation-markers', handleFormationMouseLeave);
-    safeOn('mousemove', 'formation-labels', handleFormationMouseMove);
-    safeOn('mouseleave', 'formation-labels', handleFormationMouseLeave);
   }
 
   for (const layerId of frontEdgeLayers) {
@@ -354,8 +351,6 @@ export function useMapInteractions(
     if (onFormationHover) {
       safeOff('mousemove', 'formation-markers', handleFormationMouseMove);
       safeOff('mouseleave', 'formation-markers', handleFormationMouseLeave);
-      safeOff('mousemove', 'formation-labels', handleFormationMouseMove);
-      safeOff('mouseleave', 'formation-labels', handleFormationMouseLeave);
     }
 
     if (hoverTimeout) clearTimeout(hoverTimeout);

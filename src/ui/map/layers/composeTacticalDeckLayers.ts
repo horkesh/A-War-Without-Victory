@@ -22,6 +22,7 @@ export function composeTacticalDeckLayers(args: {
   labelsVisible: boolean;
   formationsVisible: boolean;
   zoom: number;
+  highlightedFormationIds?: readonly string[];
   loadedGameState: LoadedGameState | null;
   centroidLookup: OsidCentroidLookup;
   /** Omit to use {@link DEFAULT_DECK_LAYER_CAPABILITIES} (all off). */
@@ -48,6 +49,7 @@ export function composeTacticalDeckLayers(args: {
         args.labelsVisible,
         args.formationsVisible,
         args.zoom,
+        args.highlightedFormationIds,
       )
     : [];
   return [...ghost, ...under, ...counters];

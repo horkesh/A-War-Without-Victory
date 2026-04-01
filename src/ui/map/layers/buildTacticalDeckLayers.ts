@@ -24,9 +24,12 @@ export function buildTacticalDeckLayers(
     formationsGeoJson: FeatureCollection,
     _labelsVisible: boolean,
     formationsVisible: boolean,
-    zoom: number
+    zoom: number,
+    highlightedFormationIds: readonly string[] = [],
 ) {
     const layers: any[] = [];
+    const highlightedFormationIdSet = new Set(highlightedFormationIds);
+    const highlightedFormationKey = highlightedFormationIds.join('|');
 
     // Settlement labels via Deck.gl TextLayer (bypasses broken MapLibre symbol pipeline)
     if (_labelFeatures.length > 0 && zoom >= 7) {
@@ -76,7 +79,11 @@ export function buildTacticalDeckLayers(
             id: 'deck-formations-icons',
             data: topStack,
             getIcon: (d: any) => ({
-                url: getIconDataUrl(d.properties.icon_id),
+                url: getIconDataUrl(
+                    highlightedFormationIdSet.has(d.properties.id)
+                        ? (d.properties.white_icon_id ?? d.properties.icon_id)
+                        : d.properties.icon_id
+                ),
                 width: 160,
                 height: 80,
             }),
@@ -88,7 +95,10 @@ export function buildTacticalDeckLayers(
             autoHighlight: true,
             highlightColor: [255, 255, 255, 80],
             parameters: { depthTest: false },
-            updateTriggers: { getSize: zoom }
+            updateTriggers: {
+                getSize: zoom,
+                getIcon: highlightedFormationKey,
+            }
         }),
     );
 

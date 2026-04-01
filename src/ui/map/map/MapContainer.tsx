@@ -174,6 +174,87 @@ const GHOST_PATH_LAYER_ID = 'ghost-paths-line';
 import { buildGhostPathsGeoJSON } from './builders/buildGhostPathsGeoJSON';
 const ENCLAVE_LABEL_LAYER_ID = 'enclave-label';
 
+function collectHighlightedFormationIds(args: {
+  formationsGeoJson: FeatureCollection | null;
+  loadedGameState: LoadedGameState | null;
+  selectedFormationId: string | null;
+  selectedCorpsId: string | null;
+  selectedCorpsFrontSectorId: string | null;
+  hoveredSectorId: string | null;
+  hoveredCorpsId: string | null;
+}): string[] {
+  const {
+    formationsGeoJson,
+    loadedGameState,
+    selectedFormationId,
+    selectedCorpsId,
+    selectedCorpsFrontSectorId,
+    hoveredSectorId,
+    hoveredCorpsId,
+  } = args;
+
+  const highlightedFormationIds = new Set<string>();
+  const activeSectorIds = new Set<string>();
+
+  if (hoveredSectorId) activeSectorIds.add(hoveredSectorId);
+  if (selectedCorpsFrontSectorId) activeSectorIds.add(selectedCorpsFrontSectorId);
+
+  const activeCorpsId = selectedCorpsId || hoveredCorpsId;
+  if (activeCorpsId && loadedGameState?.corpsFrontSectors) {
+    loadedGameState.corpsFrontSectors
+      .filter((sector) => sector.corps_id === activeCorpsId)
+      .forEach((sector) => activeSectorIds.add(sector.sector_id));
+  }
+
+  if (selectedFormationId) highlightedFormationIds.add(selectedFormationId);
+
+  if (formationsGeoJson && activeSectorIds.size > 0) {
+    for (const feature of formationsGeoJson.features) {
+      const formationId = feature.properties?.id;
+      const sectorId = feature.properties?.sector_id;
+      if (typeof formationId !== 'string' || typeof sectorId !== 'string') continue;
+      if (activeSectorIds.has(sectorId)) highlightedFormationIds.add(formationId);
+    }
+  }
+
+  return [...highlightedFormationIds].sort((a, b) => a.localeCompare(b));
+}
+
+function composeDeckLayersForCurrentSelection(args: {
+  formationsGeoJson: FeatureCollection;
+  labelsVisible: boolean;
+  formationsVisible: boolean;
+  zoom: number;
+  loadedGameState: LoadedGameState | null;
+  centroidLookup: Map<string, [number, number]>;
+  ghostMapVisible: boolean;
+  ghostMapData?: GhostMapDatum[];
+  selectedFormationId: string | null;
+  selectedCorpsId: string | null;
+  selectedCorpsFrontSectorId: string | null;
+  hoveredSectorId: string | null;
+  hoveredCorpsId: string | null;
+}) {
+  return composeTacticalDeckLayers({
+    formationsGeoJson: args.formationsGeoJson,
+    labelsVisible: args.labelsVisible,
+    formationsVisible: args.formationsVisible,
+    zoom: args.zoom,
+    loadedGameState: args.loadedGameState,
+    centroidLookup: args.centroidLookup,
+    capabilities: { ...DEFAULT_DECK_LAYER_CAPABILITIES, ghostMapVisible: args.ghostMapVisible },
+    ghostMapData: args.ghostMapData,
+    highlightedFormationIds: collectHighlightedFormationIds({
+      formationsGeoJson: args.formationsGeoJson,
+      loadedGameState: args.loadedGameState,
+      selectedFormationId: args.selectedFormationId,
+      selectedCorpsId: args.selectedCorpsId,
+      selectedCorpsFrontSectorId: args.selectedCorpsFrontSectorId,
+      hoveredSectorId: args.hoveredSectorId,
+      hoveredCorpsId: args.hoveredCorpsId,
+    }),
+  });
+}
 
 export function MapContainer() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -479,17 +560,32 @@ export function MapContainer() {
         zoomThrottleTimer = setTimeout(() => {
           zoomThrottleTimer = null;
           if (deckOverlayRef.current && lastFormationsGeoJsonRef.current) {
-            const { formationsVisible: fVis, labelsVisible: lVis, loadedGameState, ghostMapVisible: gmVis } = useGameStore.getState();
+            const {
+              formationsVisible: fVis,
+              labelsVisible: lVis,
+              loadedGameState,
+              ghostMapVisible: gmVis,
+              selectedFormationId: deckSelectedFormationId,
+              selectedCorpsId: deckSelectedCorpsId,
+              selectedCorpsFrontSectorId: deckSelectedSectorId,
+              hoveredSectorId: deckHoveredSectorId,
+              hoveredCorpsId: deckHoveredCorpsId,
+            } = useGameStore.getState();
             deckOverlayRef.current.setProps({
-              layers: composeTacticalDeckLayers({
+              layers: composeDeckLayersForCurrentSelection({
                 formationsGeoJson: lastFormationsGeoJsonRef.current,
                 labelsVisible: lVis,
                 formationsVisible: fVis,
                 zoom: map.getZoom(),
                 loadedGameState,
                 centroidLookup: osidCentroidsRef.current,
-                capabilities: { ...DEFAULT_DECK_LAYER_CAPABILITIES, ghostMapVisible: gmVis },
+                ghostMapVisible: gmVis,
                 ghostMapData: ghostMapDataRef.current ?? undefined,
+                selectedFormationId: deckSelectedFormationId,
+                selectedCorpsId: deckSelectedCorpsId,
+                selectedCorpsFrontSectorId: deckSelectedSectorId,
+                hoveredSectorId: deckHoveredSectorId,
+                hoveredCorpsId: deckHoveredCorpsId,
               }),
             });
           }
@@ -989,17 +1085,29 @@ export function MapContainer() {
 
                     // Update Deck.gl layers
                     if (deckOverlayRef.current) {
-                      const gmVis = useGameStore.getState().ghostMapVisible;
+                      const {
+                        ghostMapVisible: gmVis,
+                        selectedFormationId: deckSelectedFormationId,
+                        selectedCorpsId: deckSelectedCorpsId,
+                        selectedCorpsFrontSectorId: deckSelectedSectorId,
+                        hoveredSectorId: deckHoveredSectorId,
+                        hoveredCorpsId: deckHoveredCorpsId,
+                      } = useGameStore.getState();
                       deckOverlayRef.current.setProps({
-                        layers: composeTacticalDeckLayers({
+                        layers: composeDeckLayersForCurrentSelection({
                           formationsGeoJson,
                           labelsVisible: lVis,
                           formationsVisible: fVis,
                           zoom: initialMap.getZoom(),
                           loadedGameState: state,
                           centroidLookup: osidCentroidsRef.current,
-                          capabilities: { ...DEFAULT_DECK_LAYER_CAPABILITIES, ghostMapVisible: gmVis },
+                          ghostMapVisible: gmVis,
                           ghostMapData: ghostMapDataRef.current ?? undefined,
+                          selectedFormationId: deckSelectedFormationId,
+                          selectedCorpsId: deckSelectedCorpsId,
+                          selectedCorpsFrontSectorId: deckSelectedSectorId,
+                          hoveredSectorId: deckHoveredSectorId,
+                          hoveredCorpsId: deckHoveredCorpsId,
                         }),
                       });
                     }
@@ -2410,18 +2518,23 @@ export function MapContainer() {
     if (!mapReady || !map || !deckOverlayRef.current || !lastFormationsGeoJsonRef.current) return;
     const { formationsVisible: fVis, labelsVisible: lVis, loadedGameState: gs } = useGameStore.getState();
     deckOverlayRef.current.setProps({
-      layers: composeTacticalDeckLayers({
+      layers: composeDeckLayersForCurrentSelection({
         formationsGeoJson: lastFormationsGeoJsonRef.current,
         labelsVisible: lVis,
         formationsVisible: fVis,
         zoom: map.getZoom(),
         loadedGameState: gs,
         centroidLookup: osidCentroidsRef.current,
-        capabilities: { ...DEFAULT_DECK_LAYER_CAPABILITIES, ghostMapVisible },
+        ghostMapVisible,
         ghostMapData: ghostMapDataRef.current ?? undefined,
+        selectedFormationId,
+        selectedCorpsId,
+        selectedCorpsFrontSectorId,
+        hoveredSectorId,
+        hoveredCorpsId,
       }),
     });
-  }, [mapReady, ghostMapVisible]);
+  }, [mapReady, ghostMapVisible, selectedFormationId, selectedCorpsId, selectedCorpsFrontSectorId, hoveredSectorId, hoveredCorpsId]);
 
   useEffect(() => {
     const map = mapRef.current;

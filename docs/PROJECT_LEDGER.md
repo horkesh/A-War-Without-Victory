@@ -17795,6 +17795,38 @@ Documentation only. No runtime behavior changed.
 - `docs/plans/2026-03-30-v080-corps-commander-intelligence-architecture.md`
 - `docs/plans/MASTER_ROADMAP.md`
 - `docs/PROJECT_LEDGER.md`
+
+## [2026-04-01] Map Selection Deck Highlight Restore
+
+### Change
+
+Restored visible brigade selection highlighting after the counter renderer moved to Deck.gl.
+
+- updated `src/ui/map/layers/buildTacticalDeckLayers.ts` so visible brigade counters can switch to `white_icon_id`
+- updated `src/ui/map/layers/composeTacticalDeckLayers.ts` to pass selection-derived highlighted formation ids into the Deck layer builder
+- updated `src/ui/map/map/MapContainer.tsx` to derive highlighted brigade ids from brigade / sector / corps selection state and refresh Deck layers when that state changes
+- removed `formation-labels` from the remaining MapLibre interaction hooks in `src/ui/map/map/useMapInteractions.ts`
+- documented the fix in `docs/40_reports/implemented/20260401_MAP_SELECTION_DECK_HIGHLIGHT_RESTORE.md`
+
+### Why
+
+Corps, sector, and brigade selection were still updating state and MapLibre highlight layers correctly, but the visible brigade counters had moved to Deck.gl.
+That left the old white-counter selection path attached to hidden MapLibre symbol layers, so the feature looked broken even though most of the selection pipeline still existed.
+
+This pass makes the active renderer obey the same selection truth as the existing line/sector highlight path.
+
+### Verification
+
+- `npm run warroom:build`
+
+### Files
+
+- `src/ui/map/layers/buildTacticalDeckLayers.ts`
+- `src/ui/map/layers/composeTacticalDeckLayers.ts`
+- `src/ui/map/map/MapContainer.tsx`
+- `src/ui/map/map/useMapInteractions.ts`
+- `docs/40_reports/implemented/20260401_MAP_SELECTION_DECK_HIGHLIGHT_RESTORE.md`
+- `docs/PROJECT_LEDGER.md`
 - `nightshift-handoff.md`
 
 ## [2026-03-31] Named Silent Roadmap Assumptions As Explicit Work
