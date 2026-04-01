@@ -13,15 +13,13 @@
 ## Current State (2026-04-01, v0.8.0 Commander System on main)
 **ATH BASELINE: n1256: 94.2% area-weighted, 23/23 anchors, 6/6 benchmarks. 73 battles, 36/40 combat weeks. hash: 5fa01bbdecc43f5f.**
 **n1273 COMPLETE: 94.1%, 24/25 anchors (boljanic_2 FAIL only), 6/6 benchmarks, 99 battles, 38/40 combat weeks. hash: 1bfa86eaf4c82606.**
-**n1274 COMPLETE: 94.2% (ATH tied), 24/25 anchors (brcko FAIL — new regression), 6/6 benchmarks, 94 battles, 40/40 combat weeks. hash: 2a1b68b6cbb1ff16.**
-**Change n1274: Phase B distance-weighted target selection (PHASE_B_DISTANCE_WEIGHT=0.3). boljanic_2 FIXED (held RS all 40 turns). brcko regressed. Brigade drift persists in new form.**
-**Op Jackal: Brilliant Victory 5★ (t15). op:brcko:brcko FAIL again in n1274 (RBiH holds from t30). potocari_2 IS already in Op Koridor objectives — was false finding.**
-**valid_for_combat_calibration: false (94 battles, target 150-250). War-or-Game: NOT APPROVED.**
-**TWO ENGINE FAILURES IN PHASE B (brigade_front_distribution.ts):**
-**(1) osidCount not updated on column march issuance — only updated on direct moves. Multiple brigades simultaneously issue march orders to the same target → pileup. n1274: 9 vrs_1st_krajina brigades stacked at brijesnica_donja_2. Fix: reserve target in osidCount when issuing a column march.**
-**(2) Distance weighting reduces extreme cross-country marches but creates local convergence — brigades near same area all converge on the same nearest OSID. Root drift pathology (Phase 1 position-locking overrides home municipality) unchanged.**
-**Root drift architecture: Phase 1 assigns brigades by physical position (unconditional). Home_osid affinity is only Phase 2 tiebreaker. Phase B marches away from home → Phase 1 locks there → drift is permanent. Distance weighting changes destination, doesn't fix locking.**
-**Remaining P0s: brcko FAIL, battle tempo 94 vs 150-250, brigade drift (changed form). Remaining P1s: HRHB patron directive scope fix (JSON), jajce_falls turn_min 40→28.**
+**n1275 STABLE: 94.0%, 23/25 anchors (brcko+boljanic_2 FAIL), 6/6 benchmarks, 86 battles. osidCount reservation fix active, weight=0.3.**
+**n1274: 94.2% ATH tied, boljanic_2 PASS (accidental — non-home defenders happened to be nearby), brcko FAIL.**
+**n1276 REVERTED: weight=1.0 produced 93.3% (−0.9pp), wrong-direction battles, net regression. Do not retry weight tuning — wrong lever for boljanic_2.**
+**BOLJANIC_2 ROOT CAUSE (new diagnosis 2026-04-01): Failure mode is ARBiH operational pressure, NOT march distance. rs_2nd_armored ends w40 with location_osid=undefined + corps_id=undefined (617 personnel, assigned to sector but physically lost). 18 battles all at bukovica_velika_2, not boljanic_2. ARBiH attacks boljanic_2 via ops uncontested. PHASE_B_DISTANCE_WEIGHT cannot fix this.**
+**rs_2nd_armored undefined location_osid BUG: brigade alive (617 pers), valid sector assignment, but no physical location at w40. Likely stuck in operation participant state or march cleared location. New P1 bug.**
+**Remaining P0s: boljanic_2 (ARBiH ops pressure + rs_2nd_armored location bug), brcko (structural, 10 ARBiH brigades at donji_rahic), battle tempo 86 vs 150-250. P1s: HRHB patron directive scope fix, jajce_falls turn_min 40→28.**
+**EMERGENT PROPOSALS FOR DRIFT (pending): Proposal 2 = corridor-width garrison multiplier (allocate.ts). Proposal 3 = commitment-ratio Phase B eligibility. These address garrison budget, not march distance — correct lever family for structural fixes.**
 **[RESOLVED] Brigade drift, objective validation gate, homeDefense surplus filters (allocate+plan), ghost duplicates, BFS faction-wide scope, loan exclusivity, probe guard blocking plans.**
 **[RESOLVED] OSID naming-mismatch: boljanic_2=Doboj, kopcic_2=Bugojno, brcko=Brčko, foca_3=Foča.**
 **Pre-existing gap revealed: Goražde enclave brigades (arbih_808th, arbih_843rd) not assigned to reachable sectors — anomaly detector exemption added for placement:fixed_home_osid.**

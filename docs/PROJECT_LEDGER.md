@@ -1,3 +1,36 @@
+## [2026-04-01] n1275–n1276 — osidCount reservation fix + weight experiment (reverted to 0.3)
+
+### Summary
+Two runs investigating Phase B march tuning. Key new diagnosis: boljanic_2's failure mode is ARBiH operational pressure, not march distance — PHASE_B_DISTANCE_WEIGHT is the wrong lever for that anchor.
+
+### Changes
+- **n1275**: Added osidCount reservation on column march issuance (1 line). Prevents simultaneous pileup where multiple brigades all march to the same vacancy. hash: 5640b463915325b8
+- **n1276**: Raised PHASE_B_DISTANCE_WEIGHT 0.3 → 1.0. Reverted same session. hash: 0cd8798051272a84
+
+### Results
+
+| Metric | n1274 | n1275 | n1276 |
+|---|---|---|---|
+| Area-weighted | 94.2% | 94.0% | 93.3% |
+| Anchors | 24/25 | 23/25 | 23/25 |
+| Battles | 94 | 86 | 105 |
+| boljanic_2 | PASS | FAIL | FAIL |
+| brcko | FAIL | FAIL | FAIL |
+
+### n1276 Analysis (weight=1.0)
+- 105 battles (+19 vs n1275) but from wrong-direction flips (extra RS→RBiH in Central Bosnia/Sarajevo)
+- CENTRAL_CORRIDOR +3.0pp, POSAVINA_NE −1.9pp, net −0.9pp overall
+- Conclusion: weight=1.0 is too strong; reverted to 0.3
+
+### New Root Cause: boljanic_2 (rs_2nd_armored location bug)
+rs_2nd_armored ends n1276 with `location_osid: undefined`, `corps_id: undefined` despite 617 personnel and valid sector assignment. Its 18 battles were all at bukovica_velika_2, not boljanic_2. ARBiH attacks boljanic_2 operationally while no RS brigade is physically present. This is a separate bug from drift — the brigade is alive but has no physical location in the game state.
+
+### Stable State
+n1275 committed: osidCount reservation active, weight=0.3. 94.0%, 23/25 anchors, 86 battles.
+Next: Proposal 2 (corridor-width garrison multiplier) or investigate rs_2nd_armored location_osid=undefined.
+
+---
+
 ## [2026-04-01] n1274 — Phase B distance-weighted march + root drift diagnosis (94.2%, 94 battles)
 
 ### Summary
