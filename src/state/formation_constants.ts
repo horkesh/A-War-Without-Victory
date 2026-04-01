@@ -75,7 +75,10 @@ export const MIN_COMBAT_PERSONNEL = 100;
 /** Minimum personnel to be eligible for offensive action. Below this, brigade can only defend.
  *  A sub-battalion-sized unit cannot assault positions — it lacks mass and fire support.
  *  Prevents death-spiral attacks where depleted brigades repeatedly throw 300-person
- *  units at fortified positions. At 500, roughly company+ level — minimum for coordinated attack. */
+ *  units at fortified positions. At 500, roughly company+ level — minimum for coordinated attack.
+ *  Canonical single source: replaces COMBAT_INEFFECTIVE_PERSONNEL = 400 local constants that
+ *  existed in sector_offensive.ts and bot_brigade_eval_attack.ts (those were diverged from this
+ *  value; unified to 500 to match calibration-tested behaviour). */
 export const MIN_ATTACK_PERSONNEL = 500;
 
 /** Maximum fatigue a formation can accumulate. Shared across combat resolution, fatigue recovery, and combat power calculation. */

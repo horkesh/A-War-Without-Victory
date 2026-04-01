@@ -21,7 +21,7 @@ import { createSingleAxis } from './sector_offensive.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { assignOperationCommander } from './officer_system.js';
-import { isEligibleOperationFormation } from '../../state/formation_constants.js';
+import { isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { EXEMPT_CORPS_IDS } from './corps_front_sectors_constants.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 import { deployEliteLoan } from './army_reserve_system.js';
@@ -677,10 +677,19 @@ function buildAxesFromDef(
     const eliteLoans: { brigadeId: FormationId; corpsId: string }[] = [];
 
     for (const axisDef of def.axes) {
+        const movementState = state.military.brigade_movement_state ?? {};
         const axisBrigades = axisDef.brigades.filter((fid) => {
             const formation = formations[fid];
             if (!formation) return false;
             if (!isEligibleOperationFormation(formation)) return false;
+            // RC2: exclude combat-ineffective brigades — they pass isEligibleOperationFormation
+            // (which only checks kind/status) but will fail at execution, causing zero
+            // eligible attackers per turn.
+            if ((formation.personnel ?? 0) < MIN_ATTACK_PERSONNEL) return false;
+            if ((formation.disrupted_turns ?? 0) > 0) return false;
+            // RC5: exclude brigades currently in column-march transit — they are already
+            // marching somewhere else and contribute zero eligible attackers until they arrive.
+            if (movementState[fid]?.status === 'in_transit') return false;
             // Exempt-corps brigades (e.g. General Staff elites) are allowed
             // if explicitly named in a pre-planned op — they get an elite loan
             // to the operation's corps at injection time.

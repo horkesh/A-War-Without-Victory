@@ -56,6 +56,7 @@ import type { PreparationEvent } from '../turn_pipeline_types.js';
 import { checkLoanedArrivals, areLoanedBrigadesReady, cleanupDissolvedLoans } from './operation_reinforcement.js';
 import { MAX_OP_LOAN_DISTANCE, LOAN_STAGING_BUFFER_TURNS } from './operation_reinforcement_constants.js';
 import { hasActiveOperation, removeOperation } from './corps_operation_helpers.js';
+import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Equipment priority
@@ -101,8 +102,9 @@ const MAX_OBJECTIVES_CAP = 6;
 /** Objectives per brigade ratio — scales op scope with force size. */
 const OBJECTIVES_PER_BRIGADE = 0.5; // 1 objective per 2 brigades
 
-/** Personnel floor below which a brigade cannot attack (mirrors bot_brigade_eval_attack gate). */
-const COMBAT_INEFFECTIVE_PERSONNEL = 400;
+// Personnel floor below which a brigade cannot attack — use MIN_ATTACK_PERSONNEL (500) from
+// formation_constants (canonical single source, shared with bot_brigade_eval_attack).
+// NOTE: the local constant was previously 400 — unified to 500 to match MIN_ATTACK_PERSONNEL.
 
 /**
  * Attack posture discount for feasibility estimation.
@@ -137,7 +139,7 @@ function checkLaunchFeasibility(
     for (const bid of corpsBrigadeIds) {
         const f = formations[bid];
         if (!f || f.status !== 'active') continue;
-        if ((f.personnel ?? 0) < COMBAT_INEFFECTIVE_PERSONNEL) continue;
+        if ((f.personnel ?? 0) < MIN_ATTACK_PERSONNEL) continue;
         if ((f.disrupted_turns ?? 0) > 0) continue;
         totalAttackerPower += basePower(f) * FEASIBILITY_ATTACK_POSTURE_MULT;
     }
@@ -1611,7 +1613,7 @@ function hasEligibleAttackersForLaunch(
         const f = formations?.[id];
         if (!f) continue;
         if (f.status !== 'active') continue;
-        if ((f.personnel ?? 0) < COMBAT_INEFFECTIVE_PERSONNEL) continue;
+        if ((f.personnel ?? 0) < MIN_ATTACK_PERSONNEL) continue;
         if ((f.disrupted_turns ?? 0) > 0) continue;
         return true;
     }

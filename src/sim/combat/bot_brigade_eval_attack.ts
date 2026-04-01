@@ -41,6 +41,7 @@ import {
     applySectorOffensiveDirectiveOverride,
     getBrigadeAxis
 } from './bot_brigade_ai_osid.js'; // Will need to export these from bot_brigade_ai_osid.ts
+import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 
 export function evaluateHomeDefense(ctx: BrigadeEvaluationContext): boolean {
     const { brigade, cmd, loc, faction, adjacency, state, reverseMap, terrainCache, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, result, isActiveSectorOperationParticipant, graphAnalysis, adjEnemy } = ctx;
@@ -90,13 +91,14 @@ export function evaluateSupplyGate(ctx: BrigadeEvaluationContext): boolean {
 export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
     const { brigade, activeOp, isActiveSectorOperationParticipant, loc, faction, adjacency, state, reverseMap, terrainCache, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, result } = ctx;
 
-    // Combat ineffective gate: brigades below minimum personnel defend only.
-    // A 300-man brigade cannot execute an attack — it needs to reconstitute.
-    const COMBAT_INEFFECTIVE_PERSONNEL = 400;
+    // Combat ineffective gate: brigades below minimum personnel (500) defend only.
+    // A sub-battalion unit cannot execute an attack — it needs to reconstitute.
+    // Uses MIN_ATTACK_PERSONNEL from formation_constants (canonical single source).
+    // NOTE: the local constant was previously 400 — unified to 500 to match MIN_ATTACK_PERSONNEL.
     if (!isActiveSectorOperationParticipant && assignedBrigadeNotOnSectorFrontOsids(state, brigade, loc)) {
         return false;
     }
-    if ((brigade.personnel ?? 0) < COMBAT_INEFFECTIVE_PERSONNEL) {
+    if ((brigade.personnel ?? 0) < MIN_ATTACK_PERSONNEL) {
         result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
         return true;
     }
