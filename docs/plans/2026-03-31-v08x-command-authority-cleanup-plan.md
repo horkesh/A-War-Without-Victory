@@ -69,6 +69,7 @@ It is a controlled cleanup with known hotspots.
 
 Tasks:
 - [ ] execute `docs/plans/2026-03-31-v08x-operations-singularity-plan.md`
+- [ ] execute `docs/plans/2026-04-01-v08x-sector-anchored-corps-operations-plan.md`
 - [ ] record canonical operation owner and demoted path in code and docs
 - [ ] ensure UI and diagnostics speak about the same operation object
 

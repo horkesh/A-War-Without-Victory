@@ -168,6 +168,19 @@ Reason:
 
 `bot_brigade_ai_osid.ts`
 
+### Canonical launch-model direction
+
+`docs/plans/2026-04-01-v08x-sector-anchored-corps-operations-plan.md`
+
+Operations should launch as:
+
+- sector-anchored
+- corps-authorized
+- reinforcement-bounded
+
+This is the target launch contract inside the canonical operations world.
+It does not create a second ops architecture.
+
 ### Demoted / transitional path
 
 `bot_corps_operations.ts`
@@ -247,6 +260,7 @@ Stop operation objects from being born in inconsistent ways.
 Tasks:
 
 - [ ] Identify the single canonical creation path for player and AI operations
+- [ ] align launch semantics with `docs/plans/2026-04-01-v08x-sector-anchored-corps-operations-plan.md`
 - [ ] Reduce or remove direct raw operation-object staging through desktop IPC where it bypasses the command model
 - [ ] Ensure launch / postpone / halt / probe updates go through the same command path
 - [ ] Add boundary comments naming which layers may create or mutate operation records

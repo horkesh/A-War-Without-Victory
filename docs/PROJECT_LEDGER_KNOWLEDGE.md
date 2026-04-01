@@ -1124,6 +1124,14 @@ If the roadmap still says `save/load: partial`, `victory conditions: stub`, or `
 ### UI ownership must be explicit when multiple command surfaces coexist
 When Army HQ, Warroom, map panels, and modal flows all exist, roadmap-level ownership must be explicit or each new feature will duplicate logic in a different place. A surface ownership matrix is an architectural dependency, not just UX cleanup.
 
+## Sector-Anchored Corps Operations (2026-04-01)
+
+### The right fix for loose corps ops is stricter launch semantics, not sector sovereignty
+If broad corps-launched operations feel too detached from frontage truth, the answer is not to let sectors become independent launch authorities. The cleaner model is: corps remains the sole launch authority, every operation names a `primary_sector`, the default brigade pool comes from that sector, and non-primary brigades join only as explicit reinforcements or attachments. This preserves hierarchy while grounding the op locally.
+
+### Operations should be sector-anchored, not sector-imprisoned
+Hard sector-only launch rules are too rigid for real concentration of effort. Real operations may draw from neighboring frontage or reserve brigades, but those additions must be explicit and visible. The canonical pattern is: primary sector defines the local identity and default pool, while adjacent-sector or reserve brigades appear as tagged attachments with visible risk transfer elsewhere.
+
 ## BFS Territory Assignment — Corps Home Municipality Coupling (2026-03-26)
 
 ### A single brigade in the wrong corps cascades BFS territory through entire municipalities

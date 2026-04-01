@@ -1,0 +1,390 @@
+# v0.8.x Sector-Anchored Corps Operations
+
+**Date:** 2026-04-01  
+**Status:** PLAN - READY FOR EXECUTION  
+**Roadmap slot:** v0.8.x-final (`Operations Singularity` sublane)  
+**Overseer:** Orchestrator  
+**Architect:** Technical Architect / Architect - owns canonical model decisions, flags player-facing tradeoffs for user review  
+**Primary implementer roles:** Gameplay Programmer, Technical Architect, UI/UX Developer, Systems Programmer  
+**Primary reviewer roles:** Authority Auditor, UI Truth Keeper, Modern Wargame Expert, `/simplify`, Code Review  
+**Sign-off:** Orchestrator, Architect, War-or-Game  
+**Purpose:** Replace loose corps-wide operation launch with a stricter model that keeps corps command as the sole launch authority while anchoring every operation to a real sector and a bounded reinforcement envelope.
+
+**Relevant life lessons to respect while executing:**
+- `docs/life_lessons.md`: Decisions without traces are undebuggable - instrument before investigating
+- `docs/life_lessons.md`: Fix the symptom in ALL callers - verify the actual code path uses the function you changed
+- `docs/life_lessons.md`: Build diagnostic tools, not one-off scripts
+- `docs/life_lessons.md`: Calibration % means nothing if reached through broken mechanics
+- `docs/life_lessons.md`: Gap finder asks the questions nobody else thinks to ask - use before architectural work
+
+---
+
+## 0. Why This Exists
+
+The current broad corps-launched model is too loose.
+It lets operations look corps-authored while still drawing from an overly abstract brigade pool.
+
+The rejected alternative is also wrong:
+
+- sectors should **not** become launch authorities
+
+The chosen model is:
+
+- **sector-anchored**
+- **corps-authorized**
+- **reinforcement-bounded**
+
+That means:
+
+1. corps command remains the only authority that launches operations
+2. every operation must declare a `primary_sector`
+3. the default eligible brigade pool comes from brigades assigned to that sector
+4. brigades from outside that sector may join only through explicit reinforcement rules
+5. those attachments must be visible in engine state, traces, and UI
+
+This gives the game:
+
+- real local grounding
+- less hidden line stripping
+- better player legibility
+- cleaner future commander intelligence
+
+It is not a separate operations world.
+It is the tighter launch contract the canonical operations world should use.
+
+---
+
+## 1. Canonical Recommendation
+
+### Canonical launch authority
+
+Corps command.
+
+No sector may independently launch operations.
+No UI surface may imply otherwise.
+
+### Canonical local anchor
+
+`primary_sector_id`
+
+Every operation must name the sector it is primarily launching from.
+
+### Canonical participant semantics
+
+- `primary_sector_brigades`: default participating brigades from the chosen sector
+- `attached_brigades`: brigades explicitly added from outside the primary sector
+- `supporting_sector_ids`: sectors contributing attachments or accepting risk
+- `reinforcement_source`: why the non-primary brigades are present
+
+### Canonical rule
+
+Operations are **sector-anchored, not sector-imprisoned**.
+
+The main effort should usually come from the primary sector.
+Cross-sector concentration remains possible, but only explicitly and visibly.
+
+---
+
+## 2. Existing Scaffolding
+
+The repo already has most of the mechanics needed.
+The missing piece is the launch contract.
+
+### 2.1 Existing engine scaffolding
+
+- `src/sim/combat/sector_offensive.ts`
+- `src/sim/combat/operation_preparation.ts`
+- `src/sim/combat/operation_prediction.ts`
+- `src/sim/combat/bot_brigade_ai_osid.ts`
+- `src/sim/combat/corps_operation_helpers.ts`
+- `src/sim/combat/commander/emit.ts`
+- `src/sim/combat/commander/plan.ts`
+
+What already exists:
+
+- operations lifecycle ownership
+- preparation and execution phases
+- sector models and sector-assigned brigades
+- commander-generated operation intent
+- operation review surfaces
+
+### 2.2 Existing document scaffolding
+
+- `docs/40_reports/convenes/20260401_OPS_LAUNCH_AUTHORITY_CONVENE.md`
+- `docs/40_reports/convenes/20260401_OPS_LAUNCH_AUTHORITY_ADDENDUM_SECTOR_SCOPED.md`
+- `docs/plans/2026-03-31-v08x-operations-singularity-plan.md`
+- `docs/plans/2026-03-31-v08x-command-authority-cleanup-plan.md`
+
+This plan turns the convene decision into an execution-grade lane.
+
+---
+
+## 3. Definition Of Done
+
+This sublane is complete only when all of the following are true:
+
+1. every launched operation has one explicit `primary_sector`
+2. the default eligible brigade pool is derived from that sector
+3. non-primary-sector brigades join only through explicit reinforcement / attachment semantics
+4. traces and diagnostics can show which brigades were primary-sector vs attached
+5. the player-facing operation review surface shows the same truth
+6. no parallel launch path still creates corps operations from a broad invisible corps-wide pool
+
+If any of those are false, the launch model is still too loose.
+
+---
+
+## 4. Non-Negotiable Rules
+
+1. Sectors do not become mini-commanders.
+2. Corps command remains the only operation launch authority.
+3. The operation object, not ad hoc helper state, must carry sector anchor and attachment truth.
+4. Cross-sector massing is allowed only as explicit reinforcement, never silent pool leakage.
+5. UI language must say:
+   - "Corps X is launching Operation Y in Sector Z"
+   - not "the sector launched an operation"
+6. Attachments must imply visible risk transfer somewhere else in traces, review UI, or diagnostics.
+
+---
+
+## 5. Pyrrhic Execution Plan
+
+### Phase 1. Freeze The Canonical Model (~1 session)
+
+**Assigned to:** Technical Architect  
+**Reviewer:** Authority Auditor, Modern Wargame Expert, `/simplify`  
+**Sign-off:** Orchestrator, Architect
+
+Goal:
+Remove ambiguity before touching launch code.
+
+Tasks:
+
+- [ ] add a short canonical-owner note in the relevant ops hotspot files naming this as the target launch contract
+- [ ] document the required operation fields:
+  - `primary_sector_id`
+  - `supporting_sector_ids`
+  - `primary_sector_brigades`
+  - `attached_brigades`
+  - `reinforcement_source`
+- [ ] explicitly mark pure broad corps-wide free-pool launch as transitional / non-target behavior
+- [ ] update roadmap and ops-singularity references so implementers know this is now the chosen direction
+
+**Deliverables:**
+- explicit canonical launch model
+- explicit rejection of sector-launched and silent broad-pool launch
+- docs aligned around one target
+
+**Done gate:**
+- a maintainer can answer "how are operations supposed to launch?" in one sentence
+
+→ `/simplify` → documentation verification → commit
+
+### Phase 2. Add Operation Object Scaffolding (~1 session)
+
+**Assigned to:** Gameplay Programmer + Systems Programmer  
+**Reviewer:** Authority Auditor, Code Review  
+**Sign-off:** Orchestrator, Architect
+
+Goal:
+Make the operation object capable of telling the truth.
+
+Tasks:
+
+- [ ] extend the canonical operation object/state to carry:
+  - primary sector
+  - supporting sectors
+  - primary-sector brigade set
+  - attached brigade set
+  - reinforcement reason/source
+- [ ] update serialization and any derived adapter/state views so these fields survive save/load and review flows
+- [ ] add assertions or diagnostics preventing launch without a primary sector
+- [ ] add deterministic ordering rules for any new brigade or sector arrays
+
+**Deliverables:**
+- operation schema supports sector anchor and attachments
+- serialization remains deterministic
+- invalid launch shape is detectable
+
+**Done gate:**
+- any real operation record can explain where it launched from and who was attached
+
+→ `/simplify` → smoke-test triad → verification-before-completion → pre-commit-check → commit
+
+### Phase 3. Rework Eligibility And Launch Selection (~1-2 sessions)
+
+**Assigned to:** Gameplay Programmer  
+**Reviewer:** Authority Auditor, War-or-Game, Code Review  
+**Sign-off:** Orchestrator, Architect
+
+Goal:
+Replace broad free-pool launch with sector-anchored eligibility.
+
+Tasks:
+
+- [ ] make operation launch choose a `primary_sector` first
+- [ ] derive the default eligible brigade pool from brigades assigned to that sector
+- [ ] define bounded attachment rules for:
+  - adjacent-sector support
+  - corps reserve support
+  - temporary loan / attachment
+- [ ] ensure the default main effort usually comes from the primary sector
+- [ ] prevent silent attachment from the wider corps pool
+- [ ] add diagnostics for rejected attachments and launch denials caused by sector insufficiency
+
+**Deliverables:**
+- sector-first launch flow
+- explicit bounded reinforcement rules
+- no silent corps-wide brigade vacuum
+
+**Done gate:**
+- operation launch no longer behaves like an invisible corps-wide draft
+
+→ `/simplify` → smoke-test triad → verification-before-completion → pre-commit-check → commit
+
+### Phase 4. Trace Risk Transfer And Command Explanation (~1 session)
+
+**Assigned to:** Systems Programmer + UI/UX Developer  
+**Reviewer:** UI Truth Keeper, Authority Auditor  
+**Sign-off:** Orchestrator, Architect
+
+Goal:
+Make the cost of attachments and sector choice visible.
+
+Tasks:
+
+- [ ] extend commander traces / operation traces with:
+  - chosen primary sector
+  - primary-sector brigades
+  - attached brigades
+  - affected sectors
+  - accepted risk elsewhere
+- [ ] ensure operation diagnostics can distinguish:
+  - primary-sector failure
+  - insufficient sector force
+  - denied reinforcement
+  - over-attachment / line-strip risk
+- [ ] update operation review UI language to reflect the same structure
+
+**Deliverables:**
+- traceable launch rationale
+- visible cross-sector tradeoffs
+- truthful player-facing explanation
+
+**Done gate:**
+- a user can tell which sector is carrying the operation and which other sectors paid for it
+
+→ `/simplify` → smoke-test triad → verification-before-completion → pre-commit-check → commit
+
+### Phase 5. Demote Transitional Launch Paths (~1 session)
+
+**Assigned to:** Technical Architect + Gameplay Programmer  
+**Reviewer:** Authority Auditor, Code Review  
+**Sign-off:** Orchestrator, Architect, War-or-Game
+
+Goal:
+Stop legacy launch semantics from silently surviving.
+
+Tasks:
+
+- [ ] inventory all operation creation paths that can still bypass sector anchoring
+- [ ] remove or demote any helper path that can still create a broad-pool corps op without explicit attachments
+- [ ] add top-of-file comments where transitional helpers must temporarily survive
+- [ ] confirm UI and desktop/IPC paths cannot create conceptually different operation records
+
+**Deliverables:**
+- one truthful launch contract
+- no peer launch path with looser hidden rules
+- transitional notes where temporary bridges remain
+
+**Done gate:**
+- maintainers can no longer accidentally create the old broad-pool launch model through a side path
+
+→ `/simplify` → smoke-test triad → verification-before-completion → pre-commit-check → commit
+
+### Phase 6. Historical / Gameplay Validation (~1 session)
+
+**Assigned to:** Scenario Creator Runner Tester + War-or-Game  
+**Reviewer:** Modern Wargame Expert, QA Engineer  
+**Sign-off:** Orchestrator
+
+Goal:
+Verify the new launch model feels stricter without becoming fake-rigid.
+
+Tasks:
+
+- [ ] run scenario slices or targeted diagnostics to inspect whether corps can still concentrate force credibly
+- [ ] confirm that quiet sectors are not silently gutted without visible trace
+- [ ] confirm that historically plausible neighboring-sector reinforcement remains possible
+- [ ] review command explanation outputs for player legibility
+- [ ] record any historical edge cases that justify future exception rules
+
+**Deliverables:**
+- scenario-backed validation
+- explicit list of acceptable vs suspicious attachment patterns
+- evidence that the model is grounded, not theatrical
+
+**Done gate:**
+- the launch model is stricter than today without becoming cartoonishly sector-prisoned
+
+→ `/simplify` → scenario verification → `/create-report` → pre-commit-check → commit
+
+---
+
+## 6. Protocol Enforcement
+
+- [ ] Orchestrator oversees the sublane
+- [ ] Architect flags architectural tradeoffs for user review
+- [ ] `.claude/napkin.md` read at session start and updated if recurring lessons emerge
+- [ ] `docs/PROJECT_LEDGER.md` updated when this sublane materially changes plan or ownership truth
+- [ ] `docs/life_lessons.md` scanned before each implementation phase
+- [ ] every phase answers:
+  - canonical owner after the change
+  - path removed or demoted
+  - proof the change is real
+  - UI/report surface reflecting the truth
+  - milestone unblocked
+- [ ] all new arrays / collections preserve deterministic ordering
+- [ ] `/create-report` writes the implementation report when the sublane closes
+
+---
+
+## 7. Completion Checklist
+
+- [ ] one canonical launch model is documented and implemented
+- [ ] every operation has a primary sector
+- [ ] default participant pool is sector-derived
+- [ ] cross-sector brigades are explicit attachments or reinforcements
+- [ ] traces and UI expose primary vs attached brigades
+- [ ] broad free-pool launch semantics are removed or clearly transitional
+- [ ] serialization and replay surfaces preserve the new fields
+- [ ] `docs/PROJECT_LEDGER.md` appended
+- [ ] `docs/PROJECT_LEDGER_KNOWLEDGE.md` updated if reusable lessons emerged
+- [ ] completion report written in `docs/40_reports/implemented/`
+
+---
+
+## 8. What This Unblocks
+
+- cleaner `v0.8.x-final` operations singularity
+- more believable commander tradeoffs in `v0.8.1`
+- truthful operation review UX in `v0.8.3`
+- later ops modal overhaul in `v0.9.1` on top of one real launch model
+
+---
+
+## 9. Summary For Implementers
+
+Do not make sectors operation owners.
+
+Do not keep the current invisible broad-pool launch model either.
+
+Implement this:
+
+- corps launches
+- sector anchors
+- sector brigades form the default pool
+- outside brigades join only as explicit reinforcements
+- traces and UI must show the tradeoff
+
+If a launched operation still cannot say "this is my primary sector, these are my local brigades, these are my attachments, and this is the risk I accepted elsewhere," this sublane is not done.

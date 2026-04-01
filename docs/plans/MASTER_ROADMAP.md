@@ -177,6 +177,7 @@ If the implementer cannot answer all five, the task is not ready to start.
 4. Does the UI reflect that same truth?
 
 **Implementation plan:** `docs/plans/2026-03-31-v08x-operations-singularity-plan.md`
+**Launch-model subplan:** `docs/plans/2026-04-01-v08x-sector-anchored-corps-operations-plan.md`
 **Overarching cleanup plan:** `docs/plans/2026-03-31-v08x-command-authority-cleanup-plan.md`
 
 **Cleanup targets:**
@@ -184,6 +185,7 @@ If the implementer cannot answer all five, the task is not ready to start.
 - Remove `generateCorpsDirectives`, make `USE_COMMANDER_LOOP` permanent
 - Clean up hardcoded rails cataloged in `docs/40_reports/20260330_RAILROAD_HUNTER_REPORT.md`: doctrine phase constants that override commander judgment, corps name-checks, blitz phase exemptions
 - Operations ownership: one canonical operation object with one lifecycle (`sector_offensive.ts`, `operation_preparation.ts`, `bot_corps_operations.ts`)
+- Operation launch contract: sector-anchored, corps-authorized, reinforcement-bounded. Corps remains the only launch authority; every operation names a `primary_sector`; default brigade pool comes from that sector; non-primary brigades join only as explicit attachments/reinforcements. Plan: `docs/plans/2026-04-01-v08x-sector-anchored-corps-operations-plan.md`
 - Movement ownership: reduce movement writers from ~7 competing sources to one intent owner + small execution stack
 - Boundary comments in all hotspot files naming what is canonical vs transitional
 
