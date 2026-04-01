@@ -46,11 +46,11 @@
 **[OPEN] RS w40 benchmark.** 49.7% vs 55.3% target. RS stalls mid-war. 33 total orders, 32 ops with zero eligible attackers.
 **[OPEN] Sarajevo regression.** -3.5pp from prior run. Needs investigation.
 **[OPEN] Equipment asymmetry in combat resolution.** ARBiH rifle-only brigades attacking VRS artillery+tanks should face massive power disadvantage. Combat predictor should reflect this so corps AI rejects suicidal ops.
-**[RESOLVED] Intelligent corps/army commanders.** v0.8 PERCEIVE→DECIDE→EXECUTE architecture implemented and on main behind USE_COMMANDER_LOOP flag. 11 commits, 41 tests.
-**[OPEN] 41 invalid operations (32 zero-eligible-attacker).** Ops launching but nobody can fight.
+**[RESOLVED] Intelligent corps/army commanders.** v0.8 PERCEIVE→DECIDE→EXECUTE architecture unconditional on main. USE_COMMANDER_LOOP flag removed 2026-04-01 (commit 7fca069d).
+**[RESOLVED] 41 invalid operations (32 zero-eligible-attacker).** RC1–RC3 fixed 2026-04-01 (commit 32facc16): in-transit brigade diagnostic, legacy brigade filter, unified MIN_ATTACK_PERSONNEL=500.
 **[NOT A BUG] HRHB passivity in 40w scenario.** HRHB-RBiH war starts April 1993 (end of 40w window). Zero HRHB attacks against RBiH is historically correct. HVO Central Bosnia / Tomislavgrad dead fronts are expected within this scenario window.
 **[OPEN] Column march skip.** Brigades in column transit can't capture adjacent undefended territory.
-**[OPEN] Garrison cannibalization.** No holdback at op launch — corps strips sectors bare for ops.
+**[RESOLVED] Garrison cannibalization.** Garrison floor enforced at op launch via `garrison_budget` check in `emit.ts:buildOperations()`. Weakest brigades evicted if floor violated; op skipped if trimmed below MIN_BRIGADES_FOR_PLAN. Commit 6a5d39ce.
 **[OPEN] Ilijas 4 OSIDs census-derived RBiH.** Need early-war seizure event, not OSID override.
 **[OPEN] Derventa anchor FAILED.** HRHB holds derventa_2. 1KK op chain timing cascade.
 **[OPEN] Herzegovina structural gap.** 8 brigades, 81 front edges, ops pull to Foca.
