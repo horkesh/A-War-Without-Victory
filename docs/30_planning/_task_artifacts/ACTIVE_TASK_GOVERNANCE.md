@@ -3,76 +3,82 @@
 ## Task
 
 Task name:
-Operations singularity roadmap tightening + implementation plan
+Studio truth-governance contracts + player-knowledge roadmap integration
 
 Owner-level intent:
-Make operations singularity explicit in the roadmap and give implementers one concrete plan document for the first truly real command object in the game.
+Turn studio-level product-truth instincts into hard repo process: player-visible-state contract, canonical UI ownership, debug-surface policy, fixed done-means block, and roadmap ownership for player-knowledge integrity.
 
 ## Scope
 
 Files / systems in scope:
-- `docs/plans/2026-03-31-v08x-operations-singularity-plan.md`
+- `docs/plans/2026-04-01-v08x-player-knowledge-integrity-plan.md`
 - `docs/plans/MASTER_ROADMAP.md`
-- `src/sim/combat/sector_offensive.ts` as analysis target only
-- `src/sim/combat/operation_preparation.ts` as analysis target only
-- `src/sim/combat/operation_prediction.ts` as analysis target only
-- `src/sim/combat/bot_corps_operations.ts` as analysis target only
-- `src/ui/map/components/OperationsPanel.tsx` as analysis target only
-- `src/ui/map/components/ops_modal/OpsPlanningModal.tsx` as analysis target only
+- `docs/20_engineering/PLAYER_VISIBLE_STATE.md`
+- `docs/20_engineering/UI_OWNERSHIP_MATRIX.md`
+- `docs/20_engineering/DEBUG_SURFACE_POLICY.md`
+- `docs/20_engineering/FEATURE_DONE_MEANS.md`
+- `docs/20_engineering/ROADMAP_GOVERNANCE.md`
+- `docs/20_engineering/COMMAND_AUTHORITY_GATES.md`
+- `.claude/commands/taskforce.md`
+- `.claude/commands/governance-review.md`
+- `.claude/napkin.md`
+- `docs/PROJECT_LEDGER.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
 
 Files / systems explicitly out of scope:
 - gameplay code changes
 - canon documents
-- operations execution code changes
-- commander cognition implementation
+- UI implementation changes
+- renderer/data-boundary code changes
 
 ## Canonical owner
 
 What system owns the decision after this change?
-The roadmap/planning layer owns the sequencing and implementation brief for operations singularity. The operations stack centered on `sector_offensive.ts` remains the intended canonical future owner of operations lifecycle.
+The studio-governance layer owns the product-truth rules. `PLAYER_VISIBLE_STATE.md` owns what the player may know, `UI_OWNERSHIP_MATRIX.md` owns canonical surface ownership, `DEBUG_SURFACE_POLICY.md` owns debug-vs-player boundaries, and `FEATURE_DONE_MEANS.md` owns the minimum completion block.
 
 ## Demoted path
 
 What old path is removed, demoted, or declared non-authoritative?
-No runtime path is removed by this task. The plan should demote vague “ops cleanup later” language in favor of one explicit operations singularity plan and stronger roadmap gate language.
+Pure chat memory, reviewer instinct, and ad-hoc owner advice are demoted as the primary source of truth for these rules. The repo-local governance docs become canonical.
 
 ## Decision boundary
 
 What is this system allowed to decide?
-This task is allowed to define scope, phases, acceptance criteria, scaffolding assessment, and milestone linkage for operations singularity.
+This task is allowed to define player-visible-state rules, canonical UI ownership language, debug-surface policy, fixed completion language, and roadmap slotting for player-knowledge integrity.
 
 What must not also decide this elsewhere?
-Parallel audit docs or ad-hoc chat planning should not become alternate master plans for ops consolidation.
+Future chat advice or ad-hoc doc fragments should not silently replace the studio governance docs without explicit updates.
 
 ## Done means
 
 What test, report, or observable behavior proves the change is real?
-- a new dedicated operations singularity plan file exists
-- `MASTER_ROADMAP.md` points to it
-- the roadmap makes ops singularity a visible gate, not background cleanup
+- the four new engineering governance docs exist
+- taskforce / governance-review commands reference them
+- `MASTER_ROADMAP.md` names player-knowledge integrity and studio truth governance explicitly
+- ledger and knowledge docs record the doctrine
 
 ## UI/report truth
 
 What player-facing or report-facing surface reflects the new truth?
-`MASTER_ROADMAP.md` and the new operations singularity plan become the visible planning truth for the implementer.
+`MASTER_ROADMAP.md`, the four engineering governance docs, and the updated Claude command files become the visible truth for implementers and reviewers.
 
 ## Roadmap slot
 
 What milestone does this belong in?
-Roadmap/planning support for `v0.8.x-final`, with explicit gating impact on `v0.8.1`.
+Primarily `v0.8.x-final`, with immediate `v0.8.0.x` hotfix implications for worst player-facing leaks.
 
 Why here and not later?
-Because operations singularity is the gating proof that commander reality is working, and the roadmap still under-expresses that.
+Because richer commander UX and political/LLM work should not sit on top of unresolved player-truth leaks or unclear UI ownership.
 
 ## What this unlocks
 
 What future work becomes safe only after this is done?
-Commander maturity, political bot work, order interpretation, and ops UX overhaul without building on split operation truth.
+Player-knowledge leak fixes, truthful command-review UX, Codex/Warroom/tactical-map shell cleanup, and later commander/autonomy surfaces without rebuilding this governance argument every session.
 
 ## Exact milestone changes
 
 Use this section only if roadmap edits are involved.
-Add the new operations singularity plan document to `MASTER_ROADMAP.md` and strengthen the `v0.8.x-final` / `v0.8.1` dependency wording.
+Add player-knowledge integrity and studio-truth-governance docs to the roadmap as explicit `v0.8.x-final` work and cross-cutting simplification dependencies.
 
 ## Exact renumbering
 
@@ -82,25 +88,20 @@ No milestone renumbering in this task.
 ## Items moved
 
 Use this section only if roadmap edits are involved.
-No roadmap items moved between milestones in this task.
+No milestone renumbering or item migration.
 
 ## Sequencing risks avoided
 
 Use this section only if roadmap edits are involved.
-Avoids implementers treating operations singularity as background cleanup instead of the first real gate before commander maturity and later AI layers.
+Avoids implementers treating player-visible truth, debug boundaries, and canonical UI ownership as optional polish or remembered lore instead of roadmap-owned work.
 
 ## Operations gate
 
 Use this section if operations are in scope.
-Operations are directly in scope for this task as a planning and roadmap gate.
-
-- one canonical operation object?
-- one canonical lifecycle?
-- one canonical creation / launch / update path?
-- UI reflects the same truth?
+Operations are not directly in scope for implementation here, but remain governed by the same product-truth rules: ops UI must not leak hidden truth and must respect canonical UI ownership.
 
 ## Checkpoints
 
 - date: 2026-03-31
-  progress: Collected roadmap wording and existing ops scaffolding from `sector_offensive.ts`, concurrent ops plan, multi-brigade spec, and prior operations audit findings.
-  next verification: Create the operations singularity plan file, tighten the roadmap gate language, then run the governance check script.
+  progress: Added the player-knowledge-integrity plan, four studio governance docs, updated taskforce/review commands, and wired the roadmap/ledger/knowledge/napkin.
+  next verification: Run the governance check script and verify the new docs are the canonical reference points for future work.

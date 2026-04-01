@@ -70,6 +70,11 @@ High-value comments in this repo should mostly explain:
 - what is canonical
 - what this layer must not also decide
 
+Player-facing work should also explain when relevant:
+
+- whether this surface is player-safe, staff abstraction, or debug-only
+- which canonical UI surface owns the concept
+
 Avoid comment spam.
 Prefer boundary comments over narration comments.
 

@@ -1220,3 +1220,32 @@ Deck brigade whitening and line-hover emphasis are different concepts and must n
 ## [2026-04-01] Corps selection must be corps-owned, not sector-derived
 
 Corps selection and sector selection are not interchangeable. A broken version of the map highlight bridge derived corps-selected brigades indirectly from sector membership, which omitted reserve or otherwise non-sector-assigned brigades that still belonged to the corps. Rule: sector highlighting may rely on `sector_id`, but corps highlighting must have direct access to `corps_id` and select all corps-owned brigades whether or not they currently sit in a sector assignment.
+
+## [2026-04-01] Idle Army HQ reserve brigades are legitimate sectorless exceptions
+
+The current architecture does not make `sector_id` universal. Unloaned elite reserve brigades in `arbih_general_staff`, `vrs_main_staff`, and `hvo_main_staff` are intentionally exempt from normal sector ownership until they are loaned to a field corps. Inactive/forming brigades may also lack sector assignment. Treat missing `sector_id` as a bug only for active, non-exempt field-corps brigades. This resolves the contradiction between sector comments claiming universality and the actual army-reserve loan design.
+## Player Knowledge Integrity (2026-04-01)
+
+### Fog is not a substitute for a player-facing state boundary
+If the renderer receives near-full game truth and the UI merely draws fog polygons over it, the product is still architecturally omniscient. A player-facing wargame must distinguish between simulation truth and player-visible truth at the data-boundary level, not just at the rendering layer.
+
+### Raw ids in player UI are a systems smell, not a cosmetic nit
+Strings like `arbih_3rd_corps`, raw `sector_id`, raw `axis_1`, or backend assignment ids leaking into normal UI mean the display layer is still coupled directly to engine identifiers. Treat this as a contract violation. Player-safe surfaces render display names; raw ids belong only to explicit debug/dev views.
+
+### Tactical map, Warroom, and Codex must share one honest information contract
+Navigation and information ownership are linked. If standalone tactical map has no clear return path, or Codex survives only as a hidden shortcut, the shell architecture has drifted. Player knowledge integrity is not just a payload issue; it also requires explicit UI ownership of where intelligence, records, and command review live.
+
+## Studio Truth Governance (2026-04-01)
+
+### A few short contracts beat a lot of remembered advice
+If product-truth rules only live in chat, audits, or reviewer instinct, they will be forgotten. The durable fix is to keep a small set of governing docs that define player-visible state, canonical UI ownership, debug-only surfaces, and the fixed completion block for serious work.
+
+### Every serious change should answer the same five lines
+The minimum owner-friendly completion language is:
+- Canonical owner
+- Demoted path
+- Player-visible truth
+- Canonical UI surface
+- Done means
+
+If a task cannot answer those five lines, it is not actually ready to be called done.

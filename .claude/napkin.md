@@ -62,6 +62,7 @@
 **[OPEN] 68+ brigade drifts.** Structural feedback loop identified but fix approach wrong.
 **[OPEN] Gap finder remaining design gaps:**
 - P2: Attack-through stall counter, corridor terrain broad-front, reinforcement corridor safety, sectors stale after combat.
+**[KNOWN INVARIANT] Army HQ reserve brigades may have no sector_id while idle.** Do instead: treat `vrs_main_staff`, `arbih_general_staff`, and `hvo_main_staff` elite reserve brigades as legitimate sectorless exceptions until loaned. Only active non-exempt field-corps brigades should be treated as sector-mandatory.
 
 **Session 2026-03-30 (Session 3 — v0.7 debt reslotted):**
 - 4 floating v0.7 sub-milestones given explicit homes: essays→v0.8.0.x parallel, template engine+Letter Home+Warroom migration+canon audit→v0.8-to-v0.9, Ops Modal+Ghost Map+Exhaustion Clock→v0.9.1.
@@ -377,6 +378,8 @@ After EVERY scenario run, the orchestrator:
     Do instead: `issuePostOperationReturnMarches()` in `sector_offensive.ts`. Fires at recovery completion for ALL participants outside home municipality (no distance threshold). Orders consumed by `osid-column-movement` (step 496) next turn. Existing `return-displaced-brigades` (step 608) only catches >3 hops + runs every 4 turns. Pipeline order: step 496 osid-column-movement → step 517 apply-brigade-movement → step 608 return-displaced → step 708 advance-sector-offensives. Column-stance orders from step 708 survive to next turn's step 496.
 
 ## GUI / HoI Map
+1. **[2026-04-01] Fog is not enough - player-facing state must be filtered before render**
+   Do instead: Treat desktop / tactical-map player knowledge as a data-boundary contract. Do not ship near-full GameState to the renderer and trust fog or panel discipline to hide it later. Raw ids like `arbih_3rd_corps`, raw sector ids, and enemy/internal ops belong only in explicit debug surfaces.
 1. **[2026-03-15] Unified bottom strip: map modes + territory + toggles**
    Do instead: `BottomStatusStrip.tsx` is the single bottom bar: `[Map Mode Pills] | [Territory % area-weighted] | [Layer Toggles]`. z-20 (above map, below panels z-50-100). `MapModeToolbar` exists but is NOT rendered. Territory % uses km² from `osid_areas.json`. 7 modes (keys 1-7): Political, Ethnic, Supply, Casualties, Morale, Operations, Defense. Pressure/density modes removed (broken/redundant). Casualties + morale use continuous `interpolate` gradients. 7 layer toggles: Front, Units, Labels, Minimap, Fog, Battles, Points.
 2. **[2026-03-11] GameStateAdapter is the single chokepoint — check paths FIRST**

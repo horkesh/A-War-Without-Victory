@@ -1,3 +1,28 @@
+## [2026-04-01] n1288 + Combat Factor Overhaul
+
+### Summary
+n1288 = 93.3% area-weighted (new ATH), 24/25 anchors (+1 vs n1287), 6/6 benchmarks, hash 9344d886b3257fb6. brcko P0 resolved without must_hold (4 RS brigades hold corridor all 40 turns). gradacac_2 recovered. Only failure: boljanic_2 (pre-existing P1).
+
+### Sector System Fixes
+- Sector merge guard: added `areSectorsFrontEdgeAdjacent()` using triple-junction edge adjacency (not OSID polygon adjacency). `vrs_drina:1` now correctly split into Srebrenica encirclement sector + Kalesija/Zvornik sector. `vrs_herzegovina:0` fix completed with edge-to-edge check replacing OSID check. Test regression fixed (shared-friendly-OSID fast path).
+- Design principle confirmed: enclave rings (Srebrenica, Goražde) are valid small isolated sectors — same topology as Sarajevo siege. Merge must never re-unite fronts the splitter correctly separated.
+
+### Combat Factor Overhaul — 6 of 10 gaps closed (P1, P2, P3, P7, P8, P10)
+- **P1:** `getDefensiveFireMult()` — defender artillery/armor now increases attacker casualties. VRS 15 art = +13.5% attacker cas; ARBiH 1 art = +1%. Fixes Brcko historical implausibility.
+- **P2:** Urban terrain data-driven (population ≥10k AND density ≥500/km²). 19 OSIDs. Replaces brittle Sarajevo string matching.
+- **P3:** Morale soft bonus curve above critical floor (`1.0 + 0.15×morale/100`). Range [1.0, 1.15].
+- **P7:** War exhaustion → attack penalty. Linear 1.0→0.85 between exhaustion 500–800. Attack only.
+- **P8:** `initial_entrenchment_turns` in OOB JSON. 10 SRK brigades=18 turns, 5 Drina river-line=12 turns.
+- **P10:** Lanchester concentration bonus on defender casualties. +5%/extra brigade above 2, gated on ≥3 attackers and powerRatio ≥1.5.
+
+### Remaining Gaps
+P4 (forest terrain — needs terrain data audit), P5 (NATO air — 52w only, zero 40w risk), P6 (breakthrough — feature-flag gate needed), P9 (supply recalibration — solo run required).
+
+### Verification
+All tests pass: 1685/1685, tsc clean.
+
+---
+
 ## [2026-04-01] Sector-Anchored Corps Operations Launch Contract (v0.8.x Operations Singularity sublane)
 
 ### Summary
@@ -18452,3 +18477,59 @@ That skipped corps brigades without a current sector assignment.
 - `node_modules\\.bin\\tsx.cmd --test tests\\ui_map_deck_counter_visibility.test.ts tests\\ui_map_corps_selection_highlight.test.ts`
 - `npx.cmd tsc --noEmit -p tsconfig.json`
 - `npm.cmd run desktop:map:build`
+## [2026-04-01] Player Knowledge Integrity plan added and slotted into roadmap
+
+### Summary
+Added a new Pyrrhic implementation plan for player-facing information integrity and wired it into the roadmap. This turns the desktop/tactical-map leak audit into named work instead of leaving it as loose architecture advice.
+
+### Added
+- **New plan:** `docs/plans/2026-04-01-v08x-player-knowledge-integrity-plan.md`
+
+### Roadmap changes
+- **`docs/plans/MASTER_ROADMAP.md`**
+  - `v0.8.x-final` cleanup targets now explicitly include **player knowledge integrity**
+  - immediate `v0.8.0.x` hotfix lane called out for the worst live leaks
+  - `v0.8-to-v0.9` hit list now names player knowledge integrity as a cross-surface dependency alongside UI ownership
+
+### Why
+The audit found that the desktop / tactical-map stack still behaves like an omniscient staff debugger too often:
+- renderer receives near-full truth
+- fog is acting like a visual effect, not a hard player-knowledge boundary
+- several panels can render enemy/internal truth directly
+- raw internal ids still leak into player-facing strings
+- standalone tactical map lacks a truthful return path to Warroom
+- Codex exists but has lost a clear visible affordance
+
+This plan makes those problems roadmap-owned.
+
+---
+
+## [2026-04-01] Studio truth-governance contracts added
+
+### Summary
+Added four short engineering governance documents so product-truth rules stop living only in audits and chat. Also updated the Claude taskforce / governance-review commands and roadmap governance docs so future work reads and uses those contracts.
+
+### Added
+- `docs/20_engineering/PLAYER_VISIBLE_STATE.md`
+- `docs/20_engineering/UI_OWNERSHIP_MATRIX.md`
+- `docs/20_engineering/DEBUG_SURFACE_POLICY.md`
+- `docs/20_engineering/FEATURE_DONE_MEANS.md`
+
+### Updated
+- `.claude/commands/taskforce.md`
+- `.claude/commands/governance-review.md`
+- `docs/20_engineering/ROADMAP_GOVERNANCE.md`
+- `docs/20_engineering/COMMAND_AUTHORITY_GATES.md`
+- `docs/plans/MASTER_ROADMAP.md`
+- `.claude/napkin.md`
+
+### Why
+The project needed a few hard studio habits, not more vague good intentions:
+- one player-visible-state contract
+- one canonical UI ownership matrix
+- one explicit debug-surface policy
+- one fixed five-line "done means" block for serious work
+
+This is meant to catch blind spots earlier, especially for player-truth leaks, duplicate UI ownership, and work that sounds advanced without being structurally honest.
+
+---

@@ -11,6 +11,10 @@ The main rule is:
 
 **do not place higher-order intelligence or expressive AI work on top of unresolved command ownership**
 
+An equally important companion rule is:
+
+**do not place richer UX, Codex, or command-review surfaces on top of unresolved player-visible-state leaks**
+
 ## Mandatory milestone logic
 
 Use these roadmap bands exactly:
@@ -37,6 +41,7 @@ Use these roadmap bands exactly:
 - removes or demotes old command paths
 - reduces overlapping decision writers
 - adds canonical / transitional ownership annotations
+- establishes player-visible-state, debug-surface, or canonical-UI governance
 
 ### Put work in `v0.8.1` if it:
 
@@ -74,6 +79,15 @@ Do not place a task into a later "AI" milestone if it is really fixing:
 - unclear canonical authority
 
 Those are cleanup tasks, not AI-expansion tasks.
+
+The same rule applies to:
+
+- raw-id leaks into player UI
+- renderer omniscience hidden behind fog
+- missing Warroom / tactical-map shell ownership
+- hidden or ambiguous Codex entrypoints
+
+Those are ownership and product-truth tasks, not polish.
 
 ## Mandatory roadmap patch protocol
 
