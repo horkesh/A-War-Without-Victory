@@ -33,16 +33,13 @@ import { analyzeFactionGraph, type FactionGraphAnalysis } from './osid_graph_ana
 import { setArmyStandingOrder, coordinateMultiCorpsOffensive, generateCorpsStanceOrders } from './bot_corps_stance.js';
 import { evaluateOperationProgress, generateOGActivationOrders, generateEmergencyDefensiveOperations } from './bot_corps_operations.js';
 import { attemptCorridorBreach } from './bot_corps_corridor.js';
-import { generateCorpsDirectives, evaluateSectorStances } from './bot_corps_directives.js';
+import { evaluateSectorStances } from './bot_corps_directives.js';
 import { generateArmyHQOverrides } from './army_hq_overrides.js';
 import { getFactionCorps, getCorpsSubordinates } from './bot_corps_helpers.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 // ── v0.8 Commander Loop ────────────────────────────────────────────────
 import { runCommanderForCorps, applyCommanderOutput } from './commander/commander_loop.js';
-
-/** When true, use new commander loop instead of generateCorpsDirectives. */
-export const USE_COMMANDER_LOOP = true;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Re-exports for backward compatibility
@@ -94,7 +91,6 @@ export {
     areDirectiveSectorsAdjacent,
     findTargetOsidsFromMunicipalities,
     findFriendlyOsidsFromMunicipalities,
-    generateCorpsDirectives,
 } from './bot_corps_directives.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -207,7 +203,7 @@ export function generateAllCorpsOrders(
     // 2. Corps stance selection
     generateCorpsStanceOrders(state, faction, edges, sidToMun);
 
-    // 3. Named operations now launch from sectors inside generateCorpsDirectives (step 6).
+    // 3. Named operations now launch from sectors inside the commander loop (step 6).
     // The old catalog-based generateCorpsOperationOrders is disabled — it pulled brigades
     // from the entire corps pool without sector assignment, creating bloated non-sector ops.
 
@@ -231,8 +227,8 @@ export function generateAllCorpsOrders(
     // 6b. Evaluate sector stances (Layer B: independent sector stances)
     evaluateSectorStances(state, faction);
 
-    if (USE_COMMANDER_LOOP && spatial) {
-        // v0.8 Commander Loop: per-corps decision loop replaces generateCorpsDirectives
+    if (spatial) {
+        // v0.8 Commander Loop: per-corps PERCEIVE→DECIDE→EXECUTE pipeline
         const corpsList = getFactionCorps(state, faction);
         for (const corps of corpsList) {
             const output = runCommanderForCorps(
@@ -248,9 +244,6 @@ export function generateAllCorpsOrders(
             );
             applyCommanderOutput(state, corps.id, output);
         }
-    } else {
-        // Old path: generateCorpsDirectives (per-faction)
-        generateCorpsDirectives(state, faction, effectiveOsidEdges, reverseMap ?? null, graphAnalysis, supplyByOsid, ethnicMap, adjacency);
     }
 
     // Final cleanup: prune any 0-edge ghost sectors (pocket containment artifacts)

@@ -1039,7 +1039,7 @@ export const warPhases: NamedPhase[] = [
         },
     },
     {
-        // Recompute after bot corps orders: generateCorpsDirectives rearranges,
+        // Recompute after bot corps orders: the commander loop rearranges,
         // concentrates, and splits sectors — renumbering their IDs. The initial
         // compute at step 639 used pre-rearrangement IDs; this refresh aligns
         // sector_combat_ratings with the final corps_front_sectors saved to state.

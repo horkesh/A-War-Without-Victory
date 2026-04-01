@@ -82,13 +82,12 @@ export class BotCorpsCommander implements ICorpsCommander {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// runCommanderForCorps — drop-in replacement for generateCorpsDirectives (per-corps)
+// runCommanderForCorps — per-corps PERCEIVE→DECIDE→EXECUTE commander loop
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
  * Run the commander loop for a single corps.
- * This is the drop-in replacement for generateCorpsDirectives,
- * called once per corps instead of once per faction.
+ * Called once per corps (PERCEIVE→DECIDE→EXECUTE) inside generateAllCorpsOrders.
  */
 export function runCommanderForCorps(
     state: GameState,
@@ -118,7 +117,7 @@ export function runCommanderForCorps(
 /**
  * Apply commander output to game state.
  * Writes CorpsDirective, operations, sector stances back to GameState.
- * This replaces the mutation logic in generateCorpsDirectives.
+ * Writes CorpsDirective, operations, and sector stances back to GameState.
  */
 export function applyCommanderOutput(
     state: GameState,
