@@ -83,15 +83,17 @@ Event flag wiring (25 flags), exhaustion overhaul, Codex QA (30 essay correction
 
 PERCEIVE-DECIDE-EXECUTE per-corps loop. 10 files in `src/sim/combat/commander/` (~3,800 lines). Zone detection, garrison allocation (Grigsby two-pass), multi-turn planning, intel-reactive stance, force fitness scoring. Replaces `generateCorpsDirectives` behind `USE_COMMANDER_LOOP` flag. Concurrent corps operations (multi-slot). Serializer Map/Set support.
 
-**Status:** n1213 = 92.2% area-weighted, 22/22 anchors, 1661 tests, 41 commander-specific tests.
+**Status:** n1289 = 93.2% area-weighted, 25/25 anchors (first ever), 6/6 benchmarks, 1685 tests. Combat factor overhaul complete (P1–P4, P7, P8, P10). Sector merge guard implemented. brcko P0 resolved. generateCorpsDirectives removed. USE_COMMANDER_LOOP flag removed.
 
-**P0 in progress:** Combat drought after w20 (19 zero-combat weeks). War-or-Game: NOT APPROVED. Fix targets plan lifecycle bugs + doctrine railroad removal. See `docs/plans/2026-03-30-p0-combat-drought-fix.md`.
+**Open P0:** gradacac_2 (RS overperforming newly-covered fronts — pre-existing).
+
+**Open P1s:** vrs_east_bosnian zero-attack ops, estimateTurnsActive suspend counter, HRHB patron directive, jajce turn_min, 3 stale ssid refs. Deferred: P5 NATO air, P6 breakthrough, P9 supply recalibration.
 
 **Next steps (in order):**
-1. Fix P0 combat drought — restore healthy mid/late-war combat tempo
-2. Two-tier post-run panel go/no-go on commander system (7 Tier 1 investigators + 5 Tier 2 analysts; Orchestrator issues verdict — see napkin §Post-Run Analysis Protocol)
-3. Old code removal (Step 10) — remove `generateCorpsDirectives`, make `USE_COMMANDER_LOOP` permanent
-4. Railroad cleanup per `docs/40_reports/20260330_RAILROAD_HUNTER_REPORT.md`
+1. Investigate + fix gradacac_2 P0
+2. vrs_east_bosnian zero-attack ops (39% ZEA structural root cause)
+3. P9 supply recalibration (solo run, high cascade risk)
+4. v0.8.1 Commander Maturity gate check
 
 **Parallel content track (v0.8.0.x, no engine risk):**
 - v0.7.0.1: Author 13 missing 1992 foundation essays (barracks seizures, Sarajevo siege, JNA withdrawal, Drina cleansing, etc.). Spec: `docs/plans/2026-03-25-letter-home-and-essay-authoring-spec.md`. Assign to `/historian` + `/narrative-designer` — completely independent of engine work.

@@ -1,7 +1,7 @@
 # AWWV Calibration Master Reference
 
 **Purpose:** Persistent lessons-learned record for war-phase calibration (April 1992 onward). 40w primary, 104w force trajectory.
-**Updated:** 2026-04-01 (n1287 — ready-plan suspension fix; 92.8% area-weighted, 23/25 anchors)
+**Updated:** 2026-04-01 (n1289 — 7 combat factor gaps + sector merge guard; 93.2% area-weighted, 25/25 anchors — first ever)
 
 ## Review Methodology
 
@@ -14,6 +14,22 @@ Every calibration run is reviewed by a two-tier expert panel before any action i
 `/gap-finder` *(unique authority: may dispatch agents + question specialists directly)*, `/game-designer`, `/corps-army-commander`, `/modern-wargame-expert`, `/canon-compliance-reviewer`
 
 **Orchestrator** synthesizes, gives go/no-go, updates this file + PROJECT_LEDGER.md.
+
+## n1289 (2026-04-01)
+- **93.2% area-weighted. 25/25 anchors (HISTORIC FIRST — all passing including brcko). 6/6 benchmarks. Hash: a95995f2b1ab899c. Commit: a61a8344.**
+- Changes: 7 combat factor gaps (P1–P4, P7, P8, P10) + sector merge guard (`areSectorsFrontEdgeAdjacent`)
+- brcko P0 resolved by P1 (defensive fire) alone — no must_hold needed
+- Open P0s: gradacac_2 (RS overperforming, pre-existing)
+- Open P1s: vrs_east_bosnian ZEA, estimateTurnsActive suspend counter, HRHB patron directive, jajce turn_min 40→28, 3 stale ssid refs, P5/P6/P9 deferred
+
+---
+
+## n1288 (2026-04-01)
+- **93.3% area-weighted. 23/25 anchors (brcko recovered, gradacac_2 fail). 6/6 benchmarks.**
+- Change: sector merge guard first pass — `frontEdgeAdj` dead local promoted to active parameter
+- brcko recovered vs n1287; Herzegovina cross-sector merge still present
+
+---
 
 ## n1287 (2026-04-01)
 - **92.8% area-weighted. 23/25 anchors. 6/6 benchmarks. Hash: 25ef181d6e3daaae.**

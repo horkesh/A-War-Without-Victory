@@ -18554,3 +18554,34 @@ The project needed a few hard studio habits, not more vague good intentions:
 This is meant to catch blind spots earlier, especially for player-truth leaks, duplicate UI ownership, and work that sounds advanced without being structurally honest.
 
 ---
+
+## [2026-04-01] n1289 — Combat Factor Overhaul (P1–P4, P7, P8, P10) + Sector Merge Guard
+
+### Summary
+Seven combat factor gaps implemented, sector merge contiguity regression fixed. First run ever with 25/25 anchors. brcko P0 resolved without must_hold.
+
+### Result
+- **93.2% area-weighted (40w). 25/25 anchors (HISTORIC FIRST). 6/6 benchmarks.**
+- Hash: `a95995f2b1ab899c`. Commit: `a61a8344`.
+
+### Sector Fix
+- `areSectorsFrontEdgeAdjacent()` — edge-to-edge triple-junction check guards both Step 4d loop and `mergeSmallAdjacentSectors`
+- Root cause: OSID polygon contact (min_dist=0) is the wrong adjacency test — `donje_zesce`↔`izbisno` are genuine polygon neighbors but face different fronts
+- Shared-friendly-OSID fast path for synthetic test edges (no min_dist field)
+
+### Combat Factors Implemented
+- **P1 Defensive fire** — `getDefensiveFireMult()`: VRS 15 art = 1.135× attacker cas. MAX 1.8×. Alone resolved brcko.
+- **P2 Urban terrain** — Data-driven pop≥10k + density≥500/km². 19 OSIDs (`urban_osids.json`). Replaces brittle string matching.
+- **P3 Morale graduated curve** — `1.0 + 0.15 × (morale/100)` above critical floor.
+- **P4 Forest terrain** — Elevation+slope proxy (elev≥900m, slope≥0.50). 106 OSIDs (`forest_osids.json`). Defender +15%.
+- **P7 War exhaustion tempo** — Linear 1.0→0.85 between exhaustion 500–800. Attacker only.
+- **P8 Prepared positions** — `initial_entrenchment_turns` OOB field. SRK=18, Drina river-line=12.
+- **P10 Lanchester concentration** — +5%/brigade above 2, cap 30%. Defender casualties only.
+
+### brcko P0 Resolved
+P1 defensive fire alone closed it. No must_hold needed. Holds RS all 40 turns.
+
+### Open P0s: gradacac_2 (RS overperforming, pre-existing)
+### Open P1s: vrs_east_bosnian ZEA, suspend counter, HRHB directive, jajce turn_min, 3 stale ssid refs, P5/P6/P9
+
+---

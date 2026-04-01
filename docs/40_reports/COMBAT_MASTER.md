@@ -12,14 +12,14 @@ Single source of truth for combat resolution design decisions, factor implementa
 
 ---
 
-## Current State (n1288)
+## Current State (n1289)
 
 | Metric | Value |
 |---|---|
-| Calibration | 93.3% area-weighted (40w) — new ATH |
-| Anchors | 24/25 (boljanic_2 FAIL — pre-existing P1) |
+| Calibration | 93.2% area-weighted (40w) |
+| Anchors | 25/25 (HISTORIC FIRST — all passing including brcko) |
 | Benchmarks | 6/6 |
-| Hash | 9344d886b3257fb6 |
+| Hash | a95995f2b1ab899c |
 | Attacker:defender casualty ratio | ~0.33:1 (defenders take ~3× casualties) |
 | Decisive victory share | ~87% of battles |
 
@@ -101,11 +101,9 @@ Single source of truth for combat resolution design decisions, factor implementa
 
 ---
 
-### P4 — Forest terrain: absent
+### P4 — Forest terrain ✓ IMPLEMENTED 2026-04-01
 
-**Root cause:** No `forest_density` scalar exists in `TerrainScalarsData`. Central Bosnia forest fighting — critical to early ARBiH performance — is entirely unmodeled.
-
-**Fix:** `forest_density` scalar in TerrainScalarsData, ×1.15 friction modifier for dense forest applied to defender.
+**Implementation:** Highland elevation+slope proxy: `elevation_mean_m ≥ 900 AND slope_index ≥ 0.50`. 106 OSIDs in `data/derived/operational/forest_osids.json`. `getForestMult()` returns FOREST_DEFENSE_MULT=1.15, applied to defender power only. Covers Vlašić, Romanija, Igman/Bjelašnica, Treskavica highlands. Ozren and Majevica correctly excluded (below 900m). Loaded at scenario start via `setForestOsidSet()` in `combat_terrain_sets_node.ts`.
 
 ---
 
@@ -167,7 +165,7 @@ Sector merge guard regression fixed: `areSectorsFrontEdgeAdjacent` added a share
 
 **Historical basis:** ARBiH could not realistically threaten Brčko in 1992. Corridor cuts that occurred were by HVO/HV at Orašje, not by ARBiH at Brčko. (*Jelisić* TJ §§24–27 confirms RS continuous hold from May 1992 through the full 40-week scenario window.)
 
-**Status:** Root cause of brcko anchor failure confirmed. Immediate fix path is `must_hold: true` on the corridor sector (Run D). P1 defender artillery fix addresses the underlying mechanic.
+**Status:** RESOLVED — P1 defensive fire alone closed the brcko anchor. No must_hold needed. VRS artillery defense raises attacker casualties enough that ARBiH rifle-only brigades cannot sustain the corridor assault.
 
 ---
 

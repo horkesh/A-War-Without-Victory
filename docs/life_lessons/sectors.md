@@ -9,6 +9,13 @@
 - **Right approach**: If ANY edge in a connected component has a brigade from the minority corps, protect ALL edges of that corps in the component. Brigade presence = corps has a physical claim to the entire local front, not just the specific OSID.
 - **Do instead**: When debugging "corps X has 0 sectors despite brigades at front", trace through: (1) does the corps exist as a formation? (2) does `mapOsidsToCorps` assign its home OSIDs? (3) does `partitionFrontEdges` give it edges? (4) does consolidation steal them? Use debug logging at each step boundary.
 
+### [Sectors] Sector merge guards must use front-edge adjacency, not OSID polygon contact (2026-04-01) — NEW
+- **Context**: `areSectorsTerritoryAdjacent` returned true for Herzegovina sectors (Drina Foča vs West Herzegovina) because `op:foca:donje_zesce` and `op:foca:izbisno` have min_dist=0 — genuine polygon neighbors. But they face completely different fronts. The merge guard was answering the wrong question: "do these territories touch?" instead of "do these front edges form a contiguous line?"
+- **Impact**: Sectors on opposite sides of the country were merging into a single sector via Step 4d and `mergeSmallAdjacentSectors`. Brigades from different fronts were pooled together, disrupting assignment logic.
+- **Wrong approach**: Using OSID polygon adjacency (territory contact) as a sector merge predicate. Two OSIDs can share a polygon edge across a mountain range with no tactical connection.
+- **Right approach**: `areSectorsFrontEdgeAdjacent` — check whether any edge from sector A is triple-junction adjacent (Cases A/B at 33m threshold) to any edge from sector B. Two front-line segments form a contiguous sector only if their edges actually meet at a shared polygon vertex shared with the same friendly/hostile OSID.
+- **Do instead**: When writing any "are these two sectors adjacent?" check, always ask: adjacent in territory, or adjacent along the front LINE? For sector merge decisions, always use front-edge adjacency, never polygon contact. Enclave rings (Srebrenica, Goražde) are valid isolated sectors — small + isolated is correct topology for a besieged enclave.
+
 ### [Sectors] Small adjacent sectors in the same corps should merge (2026-03-18) — NEW
 - **Context**: Brcko anchor failed (12/13) because the 215th and 108th brigades were in different sectors despite defending the same front. Reactive defense (which operates within sectors) never activated — each brigade fought alone against 3-11x odds. The sector system split co-located brigades into separate sectors.
 - **Wrong approach**: Accepting any sector partition where brigades are technically "in a sector." The sector system created many 1-2 edge sectors at Brcko instead of merging them into a defensible unit.

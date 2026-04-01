@@ -1,8 +1,21 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-01. 196 lessons across 9 topic files.
+> Last restructured: 2026-04-01. 199 lessons across 9 topic files.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
+
+## New Lessons (2026-04-01)
+
+### [Combat] Equipment asymmetry must apply to BOTH sides of every battle — see `docs/life_lessons/combat.md`
+- When the well-equipped faction defends, their heavy weapons must punish the attacker. One-sided equipment multipliers silently break anchor fidelity (brcko failed for multiple runs because RS artillery was silent on defense).
+
+### [Sectors] Sector merge guards must use front-edge adjacency, not OSID polygon contact — see `docs/life_lessons/sectors.md`
+- Two OSIDs can share a polygon edge across a mountain range with no tactical connection. Always check edge-to-edge triple-junction adjacency (33m threshold) for sector merge decisions.
+
+### [Data] Data-driven geographic classification beats string matching — see `docs/life_lessons/data_pipeline.md`
+- Compute classification from authoritative data (census, elevation, slope), write to JSON, load once at scenario start. Pattern: `data/derived/operational/<type>_osids.json` + `*_node.ts` loader.
+
+---
 
 ## Recently Violated (always read these)
 

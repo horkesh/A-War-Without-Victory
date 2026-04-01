@@ -9,6 +9,13 @@
 - **Right approach**: Add `if (state.military.brigade_movement_state?.[bid]?.status === 'in_transit') continue;` at the top of the Phase B loop. A brigade already marching is already doing what Phase B wants — do not interrupt it.
 - **Do instead**: Any distribution pass that issues movement orders MUST first check whether the brigade is already in transit. Re-issuing a march order resets the transit state and wastes accumulated progress.
 
+### [Combat] Equipment asymmetry must apply to BOTH sides of every battle (2026-04-01) — NEW
+- **Context**: ARBiH rifle-only brigades could fictionally capture `op:brcko:brcko` in 1992 because RS artillery had zero active-battle effect when defending. `getBombardmentCasualtyMult()` applied VRS artillery advantage only on attack. When VRS defended, their 15 artillery pieces contributed nothing to attacker casualties. The equipment asymmetry was one-sided.
+- **Impact**: brcko anchor failed for multiple runs. Root cause was not garrison density (disproved) but missing defensive fire. P1 fix (`getDefensiveFireMult()`) resolved it without must_hold — VRS 15 art = 1.135× attacker cas, making ARBiH rifle-only assaults unsustainable.
+- **Wrong approach**: Adding attacker-side equipment multipliers only. Assuming "artillery = offensive weapon" in combat resolution.
+- **Right approach**: Any equipment advantage that raises casualties must be realized symmetrically — when the well-equipped faction attacks AND when it defends. The same artillery that bombards before an attack fires back at attackers.
+- **Do instead**: When auditing combat factors, check every multiplier for directional asymmetry. Ask: "if this faction defends with this equipment, does the enemy pay a cost?" If not, it's a gap.
+
 ### [Combat] home_osid is a recruitment artifact, not a strategic destination (2026-04-01) — NEW
 - **Context**: Using `home_osid` as a march tiebreaker in `pickLeastStackedTarget` caused 9 VRS brigades to march toward interior RS municipalities instead of their assigned sector fronts. `home_osid` records where a brigade was recruited — it has no tactical meaning.
 - **Wrong approach**: Using `home_osid` to bias march target scoring. Brigades home-march to inland recruitment towns while assigned front sectors go uncovered.
