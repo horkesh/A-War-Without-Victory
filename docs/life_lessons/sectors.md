@@ -44,12 +44,6 @@
 - **Right approach**: Use bare `else` matching the `findSubSegments` pattern. The fallback (treat `meta.b` as friendly when `side_a` is not faction) handles all edge cases gracefully, including contested and null-controlled OSIDs.
 - **Do instead**: In front-edge parsing that assigns "friendly" and "hostile" sides, use `else` not `else if` for the fallback assignment. Any `else if` that can fail leaves a gap for contested/transitional OSID states.
 
-### [Sectors] brcko_2 orphaned from sector system — structural gap, not a distribution problem (2026-04-01) — NEW
-- **Context**: `op:brcko:brcko_2` does not appear in any sector's `territory_osids`. No brigade can ever be assigned there because the sector system doesn't cover it. No amount of distribution fixing will put a brigade at brcko. The anchor failure is a sector coverage gap.
-- **Wrong approach**: Investigating brigade distribution, march targets, and column march eligibility when the fundamental issue is that the OSID isn't in any sector at all.
-- **Right approach**: When an anchor persistently fails despite correct brigade distribution logic, check whether the OSID is covered by any sector (`grep` for the OSID in `corps_front_sectors` territory_osids). A missing OSID in sector coverage is a different problem class from a missing brigade.
-- **Do instead**: For any persistent anchor failure: (1) check whether the OSID appears in sector territory_osids, (2) check whether it appears in any sub-segment's `friendly_osids`, (3) only then investigate brigade-level distribution. Sector coverage gaps are invisible to distribution fixes.
-
 ### [Sectors] SRK siege ring is a load-bearing architectural assumption — Phase B cannot be its sole source of coverage (2026-04-01) — NEW
 - **Context**: The Sarajevo siege ring (vrs_sarajevo_romanija) maintained coverage via Phase B cross-front marching — accidental emergent behavior, not intentional design. Any Phase B eligibility filter checking corps or sector boundaries caused SRK coverage to drop from ~4 to ~2 brigades near Sarajevo. Three separate fix attempts all hit this cascade.
 - **Wrong approach**: Modifying Phase B march eligibility without verifying SRK's brigade coverage independently. The siege ring silently depends on cross-front marching that any boundary filter breaks.

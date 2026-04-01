@@ -18103,3 +18103,79 @@ Documentation only. No runtime behavior changed.
 - `docs/plans/2026-03-31-v08x-command-authority-cleanup-plan.md`
 - `docs/plans/MASTER_ROADMAP.md`
 - `docs/PROJECT_LEDGER.md`
+
+---
+
+## 2026-04-01 — Operations Singularity Phases 1+2 + "Solid System" fixes
+
+### Session commits (in order)
+
+| Hash | Description |
+|------|-------------|
+| `7fca069d` | fix(commander): remove `generateCorpsDirectives` dead code and `USE_COMMANDER_LOOP` flag |
+| `32facc16` | fix(ops): fix zero-eligible-attacker diagnostic false positives and legacy op brigade filters |
+| `6a5d39ce` | fix(commander): enforce garrison floor in primary sector at op launch |
+| `bd1712dd` | docs(ops): declare canonical operation lifecycle ownership — Phase 1 singularity |
+| `b5d89af2` | refactor(ops): consolidate `evaluateOperationProgress` into `sector_offensive` — Phase 2 singularity |
+
+### Summary
+
+**"Solid System" cleanup sequence (items 1-3 of 5):**
+
+1. **Dead code burial** (`7fca069d`): `generateCorpsDirectives` (~1430 lines) and `USE_COMMANDER_LOOP` flag permanently removed. `bot_corps_directives.ts` 1990→545 lines. The commander loop now runs unconditionally.
+
+2. **Zero-eligible-attacker fixes** (`32facc16`): Five root causes fixed:
+   - RC1: diagnostic false-positives from column-march invisibility (in-transit brigades now counted)
+   - RC2: legacy `buildAxesFromDef` didn't filter personnel-weak, disrupted, or in-transit brigades
+   - RC3: two diverged local `COMBAT_INEFFECTIVE_PERSONNEL = 400` constants raised to canonical `MIN_ATTACK_PERSONNEL = 500`
+
+3. **Garrison floor enforcement** (`6a5d39ce`): `emit.ts` `buildOperations()` now checks primary sector's `garrison_budget` before finalizing op participant list. Weakest brigades evicted if floor would be violated; op skipped if trimmed below `MIN_BRIGADES_FOR_PLAN` (3).
+
+**Operations Singularity Phases 1+2:**
+
+4. **Phase 1 — Declare ownership** (`bd1712dd`): Canonical owner comments added to `sector_offensive.ts`, `operation_preparation.ts`, `operation_prediction.ts`. `bot_corps_operations.ts` marked TRANSITIONAL / LEGACY.
+
+5. **Phase 2 — Collapse lifecycle split** (`b5d89af2`): `evaluateOperationProgress` (previously handling `general_offensive`/`strategic_defense` lifecycle in `bot_corps_operations.ts`) moved into `sector_offensive.ts`. All op-type lifecycle now in one canonical owner. Dead catalog functions `getOperationCatalog` + `generateCorpsOperationOrders` removed. `bot_corps_operations.ts` now contains only two permitted entry points: `generateOGActivationOrders` + `generateEmergencyDefensiveOperations`.
+
+### Determinism
+
+No `Math.random()` introduced. Sorted iteration unchanged. Calibration state: n1280 still valid baseline (no sim logic changed).
+
+### Next
+
+Phase 3 (Unify Creation/Launch Path) and Phase 4 (UI Truth) remain. Also pending: brcko anchor investigation, ops singularity gate before sector-anchored launch contract.
+
+---
+
+## 2026-04-01 — Operations Singularity Phases 3+4 + Roadmap corrections
+
+### Session commits (continued)
+
+| Hash | Description |
+|------|-------------|
+| `14b9b74d` | refactor(ops): extract CorpsOperation factories to corps_operation_helpers — Phase 3 singularity |
+| `8820ef43` | docs(ops): canonical UI operation model comments + commander identity fix — Phase 4 singularity |
+
+### Phase 3 — Unify Creation Path
+
+`buildCorpsOperation` (previously private to `pre_planned_operations.ts`) moved to `corps_operation_helpers.ts` as an exported factory. Two companion factories added: `buildCommanderOperation` (for `sector_attack` ops from commander loop) and `buildProbeOperation` (for probe ops). `emit.ts` inline `CorpsOperation` literal constructions replaced with factory calls. Boundary comments on both permitted creation entry points.
+
+### Phase 4 — UI Truth Alignment
+
+`OperationView` in `types.ts` declared CANONICAL UI-FACING OPERATION MODEL. `GameStateAdapter.ts` operation extraction block marked as the single permitted UI read path. `AuthorizePhase.tsx` commander identity fixed to prefer `OperationView.commander_officer_id` over the planning-store prop when an operation already exists in state. Phase language verified consistent across all surfaces.
+
+### Roadmap corrections
+
+- `apply_brigade_reposition.ts` label corrected in MASTER_ROADMAP — it is **live player infrastructure** (wired at `war_phases.ts:1147`), not dead ballast. Label was wrong; file must NOT be deleted.
+- Operations ownership entry updated to reflect singularity completion.
+- Sector-anchored launch contract entry updated: not yet implemented, plan needs amendment before execution.
+
+### Ops Singularity — Complete definition
+
+The ops singularity plan's four questions are now answered:
+1. One canonical operation object — ✅ `CorpsOperation` (unchanged)
+2. One canonical lifecycle — ✅ `sector_offensive.ts` owns all op-type lifecycle (including `evaluateOperationProgress` moved in from `bot_corps_operations.ts`)
+3. One canonical creation path — ✅ `corps_operation_helpers.ts` factory functions; two permitted entry points with boundary comments
+4. UI reflects that truth — ✅ `OperationView` declared canonical; all surfaces verified phase-consistent; commander identity fixed
+
+Phase 5 (diagnostics/player explanation unification) deferred to v0.8-to-v0.9 — not blocking.

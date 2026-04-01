@@ -97,9 +97,6 @@
 ### [Sectors] `else if` in front-edge friendly assignment = contested OSID blind spot (2026-04-01) — NEW → see `sectors.md`
 - Use bare `else` (matching `findSubSegments` pattern). `else if (meta.side_b === faction)` silently produces sub-segments with empty `friendly_osids` for contested OSIDs.
 
-### [Sectors] brcko_2 orphaned from sector system — structural gap, not a distribution problem (2026-04-01) — NEW → see `sectors.md`
-- Check sector `territory_osids` coverage before investigating brigade distribution. Missing OSID in sector coverage is a different problem class.
-
 ### [Sectors] SRK siege ring cannot rely on Phase B cross-front march accidents (2026-04-01) — NEW → see `sectors.md`
 - Any Phase B eligibility filter breaks SRK coverage. Verify sub-segment assignment can sustain the siege ring independently before modifying Phase B.
 

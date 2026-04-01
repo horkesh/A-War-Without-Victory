@@ -1,7 +1,7 @@
 # v0.8.x Sector-Anchored Corps Operations
 
-**Date:** 2026-04-01  
-**Status:** PLAN - READY FOR EXECUTION  
+**Date:** 2026-04-01
+**Status:** AMENDED 2026-04-01 — was NOT READY (4 P0 gaps). Gaps resolved: sector_id naming, writer inventory pre-work, attachment thresholds specified, calibration gate added.
 **Roadmap slot:** v0.8.x-final (`Operations Singularity` sublane)  
 **Overseer:** Orchestrator  
 **Architect:** Technical Architect / Architect - owns canonical model decisions, flags player-facing tradeoffs for user review  
@@ -65,16 +65,18 @@ No UI surface may imply otherwise.
 
 ### Canonical local anchor
 
-`primary_sector_id`
+`sector_id` — **already exists on `CorpsOperation`** (game_state.ts line ~313).
 
-Every operation must name the sector it is primarily launching from.
+Do NOT add a separate `primary_sector_id` field. `sector_id` IS the primary sector anchor. Phase 2 scaffolding must use this existing field, not create a duplicate.
 
-### Canonical participant semantics
+### Canonical participant semantics — new fields to add
 
-- `primary_sector_brigades`: default participating brigades from the chosen sector
-- `attached_brigades`: brigades explicitly added from outside the primary sector
-- `supporting_sector_ids`: sectors contributing attachments or accepting risk
-- `reinforcement_source`: why the non-primary brigades are present
+These do NOT yet exist on `CorpsOperation` and must be added in Phase 2:
+
+- `supporting_sector_ids?: string[]` — sectors explicitly contributing attachments or accepting risk transfer
+- `primary_sector_brigades?: string[]` — brigade IDs from the primary sector (derived at launch, stored for traces)
+- `attached_brigades?: string[]` — brigade IDs from outside the primary sector, explicitly attached
+- `reinforcement_source?: 'adjacent_sector' | 'corps_reserve' | 'army_loan'` — why non-primary brigades are present
 
 ### Canonical rule
 
@@ -148,6 +150,28 @@ If any of those are false, the launch model is still too loose.
 ---
 
 ## 5. Pyrrhic Execution Plan
+
+### Phase 0. Writer Inventory (pre-work, ~30 min)
+
+**Assigned to:** Technical Architect
+**Sign-off:** Orchestrator
+
+Before touching any launch code, enumerate every path that currently creates a `CorpsOperation` object. Phase 3 must cover all of them. As of 2026-04-01, known paths:
+
+| Path | File | Type | Uses factory? |
+|------|------|------|---------------|
+| `injectQueuedOperation` | `pre_planned_operations.ts` | player pre-planned | ✅ `buildCorpsOperation` |
+| commander emit (sector_attack) | `commander/emit.ts` | AI opportunistic | ✅ `buildCommanderOperation` |
+| commander emit (probe) | `commander/emit.ts` | AI probe | ✅ `buildProbeOperation` |
+| `generateEmergencyDefensiveOperations` | `bot_corps_operations.ts` | AI emergency | ❌ inline literal |
+| triggered ops | `triggered_operations.ts` | scenario/event | ❌ inline literal |
+| corridor breach | `bot_corps_corridor.ts` | AI corridor | ❌ inline literal |
+
+**Task:** Before Phase 1 starts, verify this table is still accurate (`grep -rn "CorpsOperation = {" src/`). If new paths are found, add them. Phase 3 must address every row.
+
+**Done gate:** Complete row-accurate writer table exists before Phase 1 begins.
+
+---
 
 ### Phase 1. Freeze The Canonical Model (~1 session)
 
@@ -224,10 +248,10 @@ Tasks:
 
 - [ ] make operation launch choose a `primary_sector` first
 - [ ] derive the default eligible brigade pool from brigades assigned to that sector
-- [ ] define bounded attachment rules for:
-  - adjacent-sector support
-  - corps reserve support
-  - temporary loan / attachment
+- [ ] define bounded attachment rules with explicit thresholds:
+  - **Adjacent-sector support**: sector must share a front-edge adjacency with the primary sector (same `buildEdgeAdjacency` definition used by sector splitting). Max brigades attachable = `floor(adjacent_sector.assigned_brigades.length × 0.33)` — one third of that sector's garrison, rounded down. Minimum 1 must remain in the adjacent sector after attachment.
+  - **Corps reserve**: brigades explicitly marked `stance: 'reserve'` at the corps level. No adjacency constraint. Max attachable = all reserve brigades (they exist to reinforce). Reserve is depleted by attachment and must be explicitly rebuilt.
+  - **Army loan**: cross-corps brigade loan authorised by army HQ. Requires `reinforcement_source: 'army_loan'` and a matching loan record. Max duration = 4 turns; auto-returns after expiry. Not implemented in v0.8 — placeholder only; attachment of army-loaned brigades is blocked until army loan system exists.
 - [ ] ensure the default main effort usually comes from the primary sector
 - [ ] prevent silent attachment from the wider corps pool
 - [ ] add diagnostics for rejected attachments and launch denials caused by sector insufficiency
@@ -324,10 +348,22 @@ Tasks:
 - explicit list of acceptable vs suspicious attachment patterns
 - evidence that the model is grounded, not theatrical
 
+**Calibration gate (required before sign-off):**
+
+Run `npm run sim:scenario:run:40w`. Compare to **n1280 baseline**: 93.2% area-weighted, 21/25 anchors, 6/6 benchmarks.
+
+- Area-weighted must not regress more than 1pp (floor: 92.2%)
+- Anchor count must not regress (floor: 21/25)
+- Benchmark count must not regress (floor: 6/6)
+- Zero new commander observation categories introduced
+
+If any floor is breached, the new launch model has broken calibration and Phase 3 must be revisited before this sublane closes.
+
 **Done gate:**
 - the launch model is stricter than today without becoming cartoonishly sector-prisoned
+- calibration gate above passes
 
-→ `/simplify` → scenario verification → `/create-report` → pre-commit-check → commit
+→ `/simplify` → scenario verification → calibration gate → `/create-report` → pre-commit-check → commit
 
 ---
 

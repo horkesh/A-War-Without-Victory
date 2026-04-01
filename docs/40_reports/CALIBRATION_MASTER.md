@@ -19,7 +19,7 @@ Every calibration run is reviewed by a two-tier expert panel before any action i
 - **93.2% area-weighted (40w). 21/25 anchors. 6/6 benchmarks.**
 - **final_state_hash: 80647861cf5a24f3**
 - VRS at-front: **74.4%** (61/82) — recovered from 52.4% in n1279, above pre-fix baseline of ~71%.
-- Failing anchors: brcko_2, boljanic_2, gradacac_2, rastosnica_2.
+- Failing anchors: brcko, boljanic_2, gradacac_2, rastosnica_2.
 
 ### Change vs n1279
 - `src/sim/combat/sector_splitting.ts`: 4 sub-segment ID generation sites changed from `subseg:${sector.corps_id}:split${ci}` / `ftsplit${ci}` / `merged${indexHint}` to `subseg:${sector.sector_id}:split${ci}` / `ftsplit${ci}` / `merged${indexHint}`. `sector_id` is unique per sector; `corps_id` is shared by all sectors in a corps, causing silent Map overwrites when a corps had >1 sector.
@@ -29,15 +29,14 @@ Every calibration run is reviewed by a two-tier expert panel before any action i
 
 ### Key Findings
 - Zero wrong-destination march orders after fix. Zero duplicate sub-segment IDs. `komar_2` pileup (was 5–12 brigades) resolved.
-- `brcko_2` structurally orphaned: not in any sector's `territory_osids`. Persistent brcko anchor failure is a sector coverage gap, not a brigade distribution issue.
+- `brcko` anchor (`op:brcko:brcko`) failing. Previous "structurally orphaned" diagnosis was a naming mismatch — `op:brcko:brcko_2` does not exist; real cause of anchor failure is unknown.
 - `gradacac_2` / `rastosnica_2` regressions: RS brigades now correctly covering fronts they were absent from before. Calibration drop reflects RS overperforming on newly-covered fronts — not a wrong fix, requires sector assignment tuning.
 - 3 brigades with stale `assigned_sub_segment_id` (705th Slavna Mountain, Bileća Brigade, 1st Laktaši) — dead IDs from renamed/merged sectors. P1.
 
 ### Open P0s after n1280
-1. brcko_2 structural gap — OSID not in any sector's territory_osids.
+1. brcko (`op:brcko:brcko`) — anchor failing; previous structural-gap diagnosis was a naming mismatch. Real cause unknown — investigate.
 2. boljanic_2 — ARBiH operational pressure on Doboj, insufficient RS garrison.
 3. gradacac_2 / rastosnica_2 — RS overperforming on newly-covered fronts; sector assignment scope tuning needed.
-4. Battle tempo 93 vs 150-250 target.
 
 ---
 

@@ -184,12 +184,12 @@ If the implementer cannot answer all five, the task is not ready to start.
 
 - Remove `generateCorpsDirectives`, make `USE_COMMANDER_LOOP` permanent
 - Clean up hardcoded rails cataloged in `docs/40_reports/20260330_RAILROAD_HUNTER_REPORT.md`: doctrine phase constants that override commander judgment, corps name-checks, blitz phase exemptions
-- Operations ownership: one canonical operation object with one lifecycle (`sector_offensive.ts`, `operation_preparation.ts`, `bot_corps_operations.ts`)
-- Operation launch contract: sector-anchored, corps-authorized, reinforcement-bounded. Corps remains the only launch authority; every operation names a `primary_sector`; default brigade pool comes from that sector; non-primary brigades join only as explicit attachments/reinforcements. Plan: `docs/plans/2026-04-01-v08x-sector-anchored-corps-operations-plan.md`
+- Operations ownership: one canonical operation object with one lifecycle ✅ (2026-04-01 — `sector_offensive.ts` owns all op-type lifecycle; `corps_operation_helpers.ts` owns creation factories; `bot_corps_operations.ts` demoted to permitted activation entry points only; `OperationView` + `GameStateAdapter` declared canonical UI path; `AuthorizePhase.tsx` commander identity fixed)
+- Operation launch contract: sector-anchored, corps-authorized, reinforcement-bounded — NOT YET IMPLEMENTED. Plan: `docs/plans/2026-04-01-v08x-sector-anchored-corps-operations-plan.md` (needs amendment before execution — sector_id naming, writer inventory, attachment thresholds, calibration gate)
 - Movement ownership: reduce movement writers from ~7 competing sources to one intent owner + small execution stack
 - Boundary comments in all hotspot files naming what is canonical vs transitional
 
-Done means: `generateCorpsDirectives` is deleted (not flagged, not behind a dead branch — deleted). `apply_brigade_reposition.ts` dead ballast is removed. Every hotspot file has an ownership comment at its top.
+Done means: `generateCorpsDirectives` is deleted ✅ (2026-04-01). `apply_brigade_reposition.ts` is **NOT dead ballast** — it is live player infrastructure wired at `war_phases.ts:1147`; roadmap label was wrong, do not delete. Every hotspot file has an ownership comment at its top.
 
 ---
 

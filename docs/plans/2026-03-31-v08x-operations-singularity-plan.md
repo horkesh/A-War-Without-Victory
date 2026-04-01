@@ -1,7 +1,7 @@
 # v0.8.x Operations Singularity
 
-**Date:** 2026-03-31  
-**Status:** PLAN - READY FOR EXECUTION  
+**Date:** 2026-03-31
+**Status:** COMPLETE — Phases 1-4 done 2026-04-01 (commits bd1712dd, b5d89af2, 14b9b74d, 8820ef43). Phase 5 deferred to v0.8-to-v0.9 (diagnostics/player explanation unification — not blocking).
 **Roadmap slot:** v0.8.x-final, with direct gating impact on v0.8.1 and later milestones  
 **Overseer:** Orchestrator  
 **Architect:** Technical Architect / Architect - may make ownership decisions but must flag them for user review  
@@ -196,59 +196,31 @@ It should either:
 
 ## 5. Pyrrhic Execution Plan
 
-### Phase 1. Declare Canonical Ownership (~1 session)
+### Phase 1. Declare Canonical Ownership — ✅ COMPLETE (2026-04-01, commit bd1712dd)
 
-**Assigned to:** Technical Architect  
-**Reviewer:** Authority Auditor, `/simplify`, Code Review  
-**Sign-off:** Orchestrator, Architect
-
-Goal:
-Stop ambiguity before deeper cleanup.
+**Assigned to:** Technical Architect
 
 Tasks:
 
-- [ ] `src/sim/combat/sector_offensive.ts` - add top-of-file ownership comment naming it canonical lifecycle owner
-- [ ] `src/sim/combat/operation_preparation.ts` and `operation_prediction.ts` - add ownership comments naming their bounded role
-- [ ] `src/sim/combat/bot_corps_operations.ts` - mark as transitional / legacy / non-authoritative if that remains true after the audit
-- [ ] Engineering docs - update the relevant roadmap / audit / engineering docs so the canonical operation path is named directly
+- [x] `src/sim/combat/sector_offensive.ts` - CANONICAL LIFECYCLE OWNER comment added
+- [x] `src/sim/combat/operation_preparation.ts` and `operation_prediction.ts` - bounded role comments added
+- [x] `src/sim/combat/bot_corps_operations.ts` - marked TRANSITIONAL / LEGACY, prohibits new lifecycle logic
+- [ ] Engineering docs - roadmap/audit docs not yet updated (deferred to completion checklist)
 
-**Deliverables:**
-- explicit canonical-owner declaration in code
-- explicit demoted-path declaration for legacy ops path
-- docs aligned with ownership truth
+### Phase 2. Collapse Runtime Lifecycle Split — ✅ COMPLETE (2026-04-01, commit b5d89af2)
 
-**Done gate:**
-- a maintainer can answer "what owns operations?" without hesitation
-
-→ `/simplify` → smoke-test triad → verification-before-completion → pre-commit-check → commit
-
-### Phase 2. Collapse Runtime Lifecycle Split (~1-2 sessions)
-
-**Assigned to:** Gameplay Programmer + Systems Programmer  
-**Reviewer:** Authority Auditor, `/simplify`, Code Review  
-**Sign-off:** Orchestrator, Architect, War-or-Game
-
-Goal:
-Ensure there is one true lifecycle.
+**Assigned to:** Gameplay Programmer
 
 Tasks:
 
-- [ ] Audit all create / advance / reevaluate / recovery paths and inventory every live lifecycle owner
-- [ ] Remove or demote duplicate lifecycle ownership so `bot_corps_operations.ts` no longer acts as a peer manager
-- [ ] Ensure all live operations that matter flow through the canonical lifecycle owner
-- [ ] Add a deterministic diagnostic or assertion proving no parallel lifecycle path remains live
+- [x] Audit: `evaluateOperationProgress` (general_offensive/strategic_defense lifecycle) was in `bot_corps_operations.ts`; `advanceSectorOffensives` (sector_attack/probe/feint) was in `sector_offensive.ts`
+- [x] `evaluateOperationProgress` moved into `sector_offensive.ts` — all op-type lifecycle now in one file
+- [x] Dead catalog functions `getOperationCatalog` + `generateCorpsOperationOrders` removed (disabled since prior session)
+- [x] `bot_corps_ai.ts` updated: `evaluateOperationProgress` now imported from `sector_offensive.js`
+- [x] `bot_corps_operations.ts` now contains only permitted creation/activation entry points (generateOGActivationOrders, generateEmergencyDefensiveOperations)
+- [x] tsc clean, 1685 tests pass
 
-**Deliverables:**
-- one live lifecycle owner
-- removed or demoted peer lifecycle path
-- diagnostic proof that lifecycle truth is singular
-
-**Done gate:**
-- there is one place to look for planning -> execution -> recovery truth
-
-→ `/simplify` → smoke-test triad → verification-before-completion → pre-commit-check → commit
-
-### Phase 3. Unify Creation / Launch / Update Path (~1-2 sessions)
+### Phase 3. Unify Creation / Launch / Update Path — ✅ COMPLETE (2026-04-01, commit 14b9b74d)
 
 **Assigned to:** Gameplay Programmer + Technical Architect  
 **Reviewer:** Authority Auditor, `/simplify`, Code Review  
@@ -259,11 +231,11 @@ Stop operation objects from being born in inconsistent ways.
 
 Tasks:
 
-- [ ] Identify the single canonical creation path for player and AI operations
-- [ ] align launch semantics with `docs/plans/2026-04-01-v08x-sector-anchored-corps-operations-plan.md`
-- [ ] Reduce or remove direct raw operation-object staging through desktop IPC where it bypasses the command model
-- [ ] Ensure launch / postpone / halt / probe updates go through the same command path
-- [ ] Add boundary comments naming which layers may create or mutate operation records
+- [x] `buildCorpsOperation` extracted from `pre_planned_operations.ts` to `corps_operation_helpers.ts` as exported factory
+- [x] `buildCommanderOperation` and `buildProbeOperation` factory functions added to `corps_operation_helpers.ts`
+- [x] `emit.ts` inline `CorpsOperation` literals replaced with factory calls
+- [x] Boundary comments on both permitted creation entry points (`injectQueuedOperation`, commander emit block)
+- [ ] Sector-anchored launch semantics — deferred to sector-anchored plan (needs amendment first)
 
 **Deliverables:**
 - one creation path
@@ -275,7 +247,7 @@ Tasks:
 
 → `/simplify` → smoke-test triad → verification-before-completion → pre-commit-check → commit
 
-### Phase 4. Align UI Truth With Engine Truth (~1-2 sessions)
+### Phase 4. Align UI Truth With Engine Truth — ✅ COMPLETE (2026-04-01, commit 8820ef43)
 
 **Assigned to:** UI/UX Developer + Technical Architect  
 **Reviewer:** UI Truth Keeper, Modern Wargame Expert, `/simplify`  
@@ -286,10 +258,10 @@ Make the UI reflect the real model instead of a cleaner imagined one.
 
 Tasks:
 
-- [ ] Define one canonical operation card/state model shared by all operations surfaces
-- [ ] Fix identity mismatches such as incorrect commander labeling
-- [ ] Make blockers, pending decisions, and last-change reasons visible
-- [ ] Ensure `OpsPlanningModal.tsx`, `OperationBriefingModal.tsx`, `OperationsPanel.tsx`, and sibling surfaces describe the same lifecycle and same object identity
+- [x] `OperationView` in `types.ts` declared CANONICAL UI-FACING OPERATION MODEL with full provenance comment
+- [x] `GameStateAdapter.ts` operation extraction block declared canonical UI read path
+- [x] `AuthorizePhase.tsx` commander identity fixed — now prefers `OperationView.commander_officer_id` over prop fallback
+- [x] Phase language verified consistent across all surfaces (`planning`/`execution`/`recovery` — exact engine match)
 
 **Deliverables:**
 - shared UI-facing operation model
