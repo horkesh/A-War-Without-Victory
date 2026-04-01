@@ -649,47 +649,6 @@ function buildOperations(
             return ops;
         }
 
-        // Garrison floor safety net — catches drift between plan creation and launch.
-        // allocate pass already locks garrison brigades out of surplus_pool, but
-        // garrison_budget can be raised by a threat upgrade after the allocate pass.
-        if (primarySector) {
-            const sectorBrigadeSet = new Set(primarySector.assigned_brigade_ids);
-            let primaryZone: (typeof allocation.zones)[number] | undefined;
-            let bestOverlap = 0;
-            for (const zone of allocation.zones) {
-                const overlap = zone.assigned_brigades.filter(id => sectorBrigadeSet.has(id)).length;
-                if (overlap > bestOverlap) {
-                    bestOverlap = overlap;
-                    primaryZone = zone;
-                }
-            }
-
-            if (primaryZone && primaryZone.garrison_budget > 0) {
-                const zoneSet = new Set(primaryZone.assigned_brigades);
-                const takenFromZone = participatingBrigades.filter(id => zoneSet.has(id));
-                const remainingAfterOp = primaryZone.assigned_brigades.length - takenFromZone.length;
-
-                if (remainingAfterOp < primaryZone.garrison_budget) {
-                    const mustReturn = primaryZone.garrison_budget - remainingAfterOp;
-                    const evalByBrigade = new Map(allocation.surplus_pool.map(ev => [ev.brigade_id, ev]));
-                    const sortedTaken = [...takenFromZone].sort((a, b) => {
-                        const fa = evalByBrigade.get(a)?.fitness_offense ?? 0;
-                        const fb = evalByBrigade.get(b)?.fitness_offense ?? 0;
-                        if (fa !== fb) return fa - fb;
-                        return strictCompare(a, b);
-                    });
-
-                    const evictSet = new Set(sortedTaken.slice(0, mustReturn));
-                    const trimmedParticipants = participatingBrigades.filter(id => !evictSet.has(id));
-
-                    if (trimmedParticipants.length < minForOp) {
-                        return ops;
-                    }
-                    participatingBrigades = trimmedParticipants;
-                }
-            }
-        }
-
         // Build the set of enemy OSIDs actually present in this corps's sector sub_segments.
         // An objective that is no longer in any sub_segment.enemy_osids means the sector
         // front has shifted and collectObjectiveApproachOsids will return an empty approach
