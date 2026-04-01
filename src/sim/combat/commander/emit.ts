@@ -34,6 +34,7 @@ import type {
 } from './commander_state.js';
 import type { AllocationResult } from './allocate.js';
 import type { PlanDecision } from './plan.js';
+import { MIN_BRIGADES_FOR_PLAN } from './plan.js';
 import type { DecisionResult } from './decide.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -605,6 +606,87 @@ function buildOperations(
         }
 
         const sectorId = findSectorWithMostTargetOverlap(planDecision, briefing);
+
+        // RC4: garrison floor — ensure the primary sector retains at least
+        // garrison_budget brigades after this op takes its participants.
+        //
+        // The allocate pass locks garrison brigades out of surplus_pool, so in
+        // theory every brigade in participatingBrigades is already "above the
+        // floor". In practice plan.assigned_brigades can include brigades whose
+        // zone garrison_budget changed between plan creation and launch (e.g.
+        // threat raised the posture from projecting→defending), and the surplus
+        // pool intersection happens without re-checking the budget. This guard
+        // catches that drift.
+        //
+        // Algorithm:
+        //   1. Find the zone that owns the primary sector's territory.
+        //   2. Count how many participating brigades belong to that zone.
+        //   3. If removing them would drop the zone below garrison_budget, trim
+        //      the lowest-fitness participants from the zone until the floor is met.
+        //   4. If the trimmed list falls below MIN_BRIGADES_FOR_PLAN, skip the op.
+        if (sectorId) {
+            const primarySector = briefing.sectors.find(s => s.sector_id === sectorId);
+            if (primarySector) {
+                // Find the zone whose assigned_brigades overlap most with this sector.
+                const sectorBrigadeSet = new Set(primarySector.assigned_brigade_ids);
+                let primaryZone: (typeof allocation.zones)[number] | undefined;
+                let bestOverlap = 0;
+                for (const zone of allocation.zones) {
+                    const overlap = zone.assigned_brigades.filter(id => sectorBrigadeSet.has(id)).length;
+                    if (overlap > bestOverlap) {
+                        bestOverlap = overlap;
+                        primaryZone = zone;
+                    }
+                }
+
+                if (primaryZone && primaryZone.garrison_budget > 0) {
+                    const zoneSet = new Set(primaryZone.assigned_brigades);
+                    // Brigades being taken from this zone by the op
+                    const takenFromZone = participatingBrigades.filter(id => zoneSet.has(id));
+                    const remainingAfterOp =
+                        primaryZone.assigned_brigades.length - takenFromZone.length;
+
+                    if (remainingAfterOp < primaryZone.garrison_budget) {
+                        // How many zone-brigades we must give back to meet the floor
+                        const mustReturn =
+                            primaryZone.garrison_budget - remainingAfterOp;
+
+                        // Sort taken-from-zone brigades by ascending offense fitness
+                        // (weakest attackers returned to garrison first — keeps the
+                        // best attackers in the op as long as the floor allows it).
+                        const evalByBrigade = new Map(
+                            allocation.surplus_pool.map(ev => [ev.brigade_id, ev]),
+                        );
+                        const sortedTaken = [...takenFromZone].sort((a, b) => {
+                            const fa = evalByBrigade.get(a)?.fitness_offense ?? 0;
+                            const fb = evalByBrigade.get(b)?.fitness_offense ?? 0;
+                            if (fa !== fb) return fa - fb; // weakest first
+                            return strictCompare(a, b);
+                        });
+
+                        // Build set of brigade IDs to evict from the op
+                        const evictSet = new Set(sortedTaken.slice(0, mustReturn));
+
+                        // Rebuild participant list without evicted brigades
+                        const trimmedParticipants = participatingBrigades.filter(
+                            id => !evictSet.has(id),
+                        );
+
+                        // If trimming leaves us below the minimum viable op size, skip
+                        if (trimmedParticipants.length < MIN_BRIGADES_FOR_PLAN) {
+                            return ops;
+                        }
+
+                        // Replace the mutable reference for the rest of the function
+                        // (TypeScript: re-assign via const re-declaration is not allowed,
+                        //  so we use a separate variable and reference it below)
+                        // eslint-disable-next-line no-param-reassign
+                        participatingBrigades.length = 0;
+                        for (const id of trimmedParticipants) participatingBrigades.push(id);
+                    }
+                }
+            }
+        }
 
         // Build the set of enemy OSIDs actually present in this corps's sector sub_segments.
         // An objective that is no longer in any sub_segment.enemy_osids means the sector
