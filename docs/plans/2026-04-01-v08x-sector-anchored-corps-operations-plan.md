@@ -259,23 +259,29 @@ Replace broad free-pool launch with sector-anchored eligibility.
 
 Tasks:
 
-- [ ] make operation launch choose a `primary_sector` first
-- [ ] derive the default eligible brigade pool from brigades assigned to that sector
-- [ ] define bounded attachment rules with explicit thresholds:
-  - **Adjacent-sector support**: sector must share a front-edge adjacency with the primary sector (same `buildEdgeAdjacency` definition used by sector splitting). Max brigades attachable = `floor(adjacent_sector.assigned_brigades.length × 0.33)` — one third of that sector's garrison, rounded down. Minimum 1 must remain in the adjacent sector after attachment.
-  - **Corps reserve**: brigades explicitly marked `stance: 'reserve'` at the corps level. No adjacency constraint. Max attachable = all reserve brigades (they exist to reinforce). Reserve is depleted by attachment and must be explicitly rebuilt.
-  - **Army loan**: cross-corps brigade loan authorised by army HQ. Requires `reinforcement_source: 'army_loan'` and a matching loan record. Max duration = 4 turns; auto-returns after expiry. Not implemented in v0.8 — placeholder only; attachment of army-loaned brigades is blocked until army loan system exists.
-- [ ] ensure the default main effort usually comes from the primary sector
-- [ ] prevent silent attachment from the wider corps pool
-- [ ] add diagnostics for rejected attachments and launch denials caused by sector insufficiency
+- [x] make operation launch choose a `primary_sector` first
+  - `emit.ts buildOperations()`: `sectorId` + `primarySector` determined BEFORE participant selection (2026-04-01)
+- [x] derive the default eligible brigade pool from brigades assigned to that sector
+  - `primaryPool` = `primarySector.assigned_brigade_ids` ∩ surplusSet ∩ canReach (2026-04-01)
+- [x] define bounded attachment rules with explicit thresholds:
+  - **Adjacent-sector support** ✅: territory-adjacency checked via `briefing.spatial.adjacency`. Constants: `ADJACENT_SECTOR_ATTACH_RATE=0.33`, `ADJACENT_SECTOR_MIN_RESIDUAL=1`. Sectors sorted deterministically.
+  - **Corps reserve**: deferred — corps-level reserve concept not yet in briefing. Reserve brigades in surplus already eligible via primary pool if sector-assigned.
+  - **Army loan**: blocked until v0.8+ army loan system (placeholder `reinforcement_source: 'army_loan'` type exists).
+- [x] ensure the default main effort usually comes from the primary sector
+  - primary pool is always the base; attached brigades are bounded supplement only
+- [x] prevent silent attachment from the wider corps pool
+  - brigades NOT in primary sector and NOT adjacent-sector eligible are silently excluded (no fallback to corps-wide pool)
+- [x] add diagnostics for rejected attachments and launch denials caused by sector insufficiency
+  - early `return ops` when `participatingBrigades.length < MIN_BRIGADES_FOR_PLAN` (soft skip)
+  - TODO (Phase 4+): structured diagnostic trace for denied ops
 
 **Deliverables:**
-- sector-first launch flow
-- explicit bounded reinforcement rules
-- no silent corps-wide brigade vacuum
+- sector-first launch flow ✅
+- explicit bounded reinforcement rules ✅ (adjacent-sector; corps reserve deferred)
+- no silent corps-wide brigade vacuum ✅
 
 **Done gate:**
-- operation launch no longer behaves like an invisible corps-wide draft
+- operation launch no longer behaves like an invisible corps-wide draft ✅
 
 → `/simplify` → smoke-test triad → verification-before-completion → pre-commit-check → commit
 

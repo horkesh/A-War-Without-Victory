@@ -56,6 +56,11 @@ const MAX_OPERATION_HISTORY_ENTRIES = 20;
 /** Max BFS hops from brigade location to first objective OSID (through friendly territory). */
 const MAX_REACHABILITY_HOPS = 8;
 
+/** Max fraction of an adjacent sector's total assigned brigades that may attach to an op. */
+const ADJACENT_SECTOR_ATTACH_RATE = 0.33;
+/** Minimum brigades that must remain in an adjacent sector after attachment. */
+const ADJACENT_SECTOR_MIN_RESIDUAL = 1;
+
 /** Min attack outcome by zone posture (most restrictive → least). */
 const POSTURE_MIN_OUTCOME: Record<ZonePosture, CorpsDirective['min_attack_outcome']> = {
     besieged: 'decisive_victory',
@@ -537,158 +542,140 @@ function buildOperations(
             if (b.location_osid) brigadeLocationMap.set(b.id, b.location_osid);
         }
 
-        // Determine the first objective OSID for reachability filtering
+        // ─── SECTOR-ANCHORED PARTICIPANT SELECTION (Phase 3) ────────────────────
+        // Primary sector is identified first. The default participant pool derives
+        // from that sector's assigned brigades (∩ surplusSet ∩ reachable).
+        // Cross-sector brigades join only as explicit bounded attachments via the
+        // adjacent-sector cap (ADJACENT_SECTOR_ATTACH_RATE). No silent corps-wide draft.
+
+        const sectorId = findSectorWithMostTargetOverlap(planDecision, briefing);
+        const primarySector = sectorId
+            ? briefing.sectors.find(s => s.sector_id === sectorId)
+            : undefined;
+
+        // Determine the first objective OSID for reachability filtering.
+        // When plan has no specific target OSIDs, pre-derive them so reachability
+        // validation can still apply (prevents rear-area brigades entering the pool).
+        // Root of the original ZEA / 13-15 turn stall bug — preserve this guard.
         const planTargetOsids = planDecision.plan.target_osids;
         const firstObjectiveOsid = planTargetOsids.length > 0
             ? [...planTargetOsids].sort(strictCompare)[0]!
             : null;
-
-        // When plan has no specific target OSIDs, pre-derive them now so reachability
-        // validation can still apply. Without this, the filter below short-circuits
-        // with `return true` for all surplus brigades, admitting rear-area brigades
-        // that cannot reach the front-adjacent enemy OSIDs used as derived targets.
-        // This was the root cause of dead commander-generated ops (ZEA, 13-15 turn stalls).
         const reachabilityObjectiveOsid = firstObjectiveOsid
             ?? deriveTargetsFromSectors(briefing, 1)[0]
             ?? null;
 
-        // TRANSITIONAL — BROAD-POOL BRIGADE SELECTION.
-        // Current model: plan.assigned_brigades is drawn from the corps-wide surplus pool
-        // (any surplus brigade in any sector). The primary sector is identified afterward
-        // via findSectorWithMostTargetOverlap and stored as op.sector_id, but it does NOT
-        // drive participant selection. Cross-sector brigades enter silently.
-        //
-        // Target (Phase 3, sector-anchored launch contract): select primary_sector first,
-        // derive the default pool from that sector's assigned brigades, then attach
-        // cross-sector brigades explicitly (op.attached_brigades, op.reinforcement_source).
-        //
-        // Intersect plan's assigned brigades with surplus pool, then filter by
-        // reachability: brigade must be able to BFS through friendly territory
-        // to the first objective OSID within MAX_REACHABILITY_HOPS.
-        // This prevents creating operations where all brigades are physically
-        // disconnected from the objective (causes zero eligible attackers at execution).
-        let participatingBrigades = [...planDecision.plan.assigned_brigades]
-            .filter(id => {
-                if (!surplusSet.has(id)) return false;
-                // NOTE: home_defense brigades CAN be op participants — evaluateHomeDefense in
-                // bot_brigade_eval_attack.ts already exempts brigades in participating_brigades
-                // via isActiveSectorOperationParticipant. Filtering them here prevents the
-                // exemption from ever applying and starves ops of their strongest brigades.
-                if (!reachabilityObjectiveOsid) return true; // truly no targets — allow all surplus
-                const locationOsid = brigadeLocationMap.get(id);
-                if (!locationOsid) return false;
-                // Check if brigade can reach a friendly OSID adjacent to the objective,
-                // or the objective itself (objectives are enemy-controlled so friendly BFS
-                // can reach the adjacent friendly OSID).
-                // Use spatialFriendlyDistance to check friendly-territory path length.
-                // The objective is enemy-held, so BFS from brigade to objective will fail
-                // unless we check adjacency. Instead, we check that the brigade can reach
-                // any friendly OSID adjacent to the objective within hop limit.
-                const adjacency = briefing.spatial.adjacency;
-                const friendlyOsids = briefing.spatial.friendlyOsidsByFaction.get(briefing.faction);
-                if (!friendlyOsids) return false;
-                // Compute adjacent friendly OSIDs to objective
-                const objectiveNeighbors = adjacency.get(reachabilityObjectiveOsid as any) ?? [];
-                const friendlyApproachOsids = objectiveNeighbors.filter(n => friendlyOsids.has(n));
-                if (friendlyApproachOsids.length === 0) return false; // objective has no friendly approach
-                // Check BFS distance from brigade location to any friendly approach OSID
-                for (const approachOsid of friendlyApproachOsids.sort(strictCompare)) {
-                    const dist = spatialFriendlyDistance(
-                        briefing.spatial,
-                        briefing.faction,
-                        locationOsid,
-                        approachOsid,
-                        MAX_REACHABILITY_HOPS,
-                    );
-                    if (dist >= 0) return true; // reachable within hop limit
-                }
-                return false; // not reachable through friendly territory
-            })
-            .sort(strictCompare);
+        const adjacencyMap = briefing.spatial.adjacency;
+        const friendlyOsids = briefing.spatial.friendlyOsidsByFaction.get(briefing.faction);
 
-        // Guard — never inject an operation with zero participants.
-        // This happens when all assigned brigades have been rotated out of the
-        // surplus pool between plan creation and launch, or when none can
-        // physically reach the operation objective through friendly territory.
-        if (participatingBrigades.length === 0) {
-            // Skip: no reachable participants available — operation would stall.
+        // Reachability check: brigade must BFS through friendly territory to a
+        // friendly OSID adjacent to the first objective within MAX_REACHABILITY_HOPS.
+        // NOTE: home_defense brigades CAN be op participants — evaluateHomeDefense in
+        // bot_brigade_eval_attack.ts already exempts them via isActiveSectorOperationParticipant.
+        const canReach = (brigadeId: string): boolean => {
+            if (!reachabilityObjectiveOsid) return true;
+            const locationOsid = brigadeLocationMap.get(brigadeId);
+            if (!locationOsid) return false;
+            if (!friendlyOsids) return false;
+            const objectiveNeighbors = (adjacencyMap.get(reachabilityObjectiveOsid as any) ?? []) as readonly string[];
+            const friendlyApproachOsids = [...objectiveNeighbors].filter(n => friendlyOsids.has(n));
+            if (friendlyApproachOsids.length === 0) return false;
+            for (const approachOsid of friendlyApproachOsids.sort(strictCompare)) {
+                const dist = spatialFriendlyDistance(briefing.spatial, briefing.faction, locationOsid, approachOsid, MAX_REACHABILITY_HOPS);
+                if (dist >= 0) return true;
+            }
+            return false;
+        };
+
+        // Primary pool: brigades assigned to the primary sector that are surplus + reachable.
+        const primaryPool: string[] = primarySector
+            ? primarySector.assigned_brigade_ids
+                .filter(id => surplusSet.has(id) && canReach(id))
+                .sort(strictCompare)
+            : [];
+
+        // Adjacent-sector attachments: bounded by ADJACENT_SECTOR_ATTACH_RATE per sector.
+        // Only sectors territory-adjacent to the primary sector may contribute.
+        const attachedPool: string[] = [];
+        const attachmentSectorIds = new Set<string>();
+        if (primarySector) {
+            const adjacentCorpsSectors = briefing.sectors
+                .filter(s => {
+                    if (s.corps_id !== briefing.corps_id || s.sector_id === sectorId) return false;
+                    const adjTerrSet = new Set(s.territory_osids);
+                    return primarySector.territory_osids.some(osid => {
+                        const neighbors = (adjacencyMap.get(osid as any) ?? []) as readonly string[];
+                        return neighbors.some(n => adjTerrSet.has(n));
+                    });
+                })
+                .sort((a, b) => strictCompare(a.sector_id, b.sector_id));
+
+            for (const adjSector of adjacentCorpsSectors) {
+                const totalAssigned = adjSector.assigned_brigade_ids.length;
+                // Cap: floor(total × ADJACENT_SECTOR_ATTACH_RATE), leaving ≥ ADJACENT_SECTOR_MIN_RESIDUAL behind.
+                const maxAttachable = Math.min(
+                    Math.floor(totalAssigned * ADJACENT_SECTOR_ATTACH_RATE),
+                    Math.max(0, totalAssigned - ADJACENT_SECTOR_MIN_RESIDUAL),
+                );
+                if (maxAttachable <= 0) continue;
+
+                const eligibleFromSector = adjSector.assigned_brigade_ids
+                    .filter(id => surplusSet.has(id) && canReach(id))
+                    .sort(strictCompare)
+                    .slice(0, maxAttachable);
+
+                if (eligibleFromSector.length > 0) {
+                    attachedPool.push(...eligibleFromSector);
+                    attachmentSectorIds.add(adjSector.sector_id);
+                }
+            }
+        }
+
+        let participatingBrigades = [...primaryPool, ...attachedPool].sort(strictCompare);
+
+        // Guard: insufficient sector-anchored force — skip op.
+        // Corps must concentrate before attacking; silent corps-wide draft removed.
+        if (participatingBrigades.length < MIN_BRIGADES_FOR_PLAN) {
             return ops;
         }
 
-        const sectorId = findSectorWithMostTargetOverlap(planDecision, briefing);
-
-        // Garrison floor — ensure the primary sector retains at least
-        // garrison_budget brigades after this op takes its participants.
-        //
-        // The allocate pass locks garrison brigades out of surplus_pool, so in
-        // theory every brigade in participatingBrigades is already "above the
-        // floor". In practice plan.assigned_brigades can include brigades whose
-        // zone garrison_budget changed between plan creation and launch (e.g.
-        // threat raised the posture from projecting→defending), and the surplus
-        // pool intersection happens without re-checking the budget. This guard
-        // catches that drift.
-        //
-        // Algorithm:
-        //   1. Find the zone that owns the primary sector's territory.
-        //   2. Count how many participating brigades belong to that zone.
-        //   3. If removing them would drop the zone below garrison_budget, trim
-        //      the lowest-fitness participants from the zone until the floor is met.
-        //   4. If the trimmed list falls below MIN_BRIGADES_FOR_PLAN, skip the op.
-        if (sectorId) {
-            const primarySector = briefing.sectors.find(s => s.sector_id === sectorId);
-            if (primarySector) {
-                // Find the zone whose assigned_brigades overlap most with this sector.
-                const sectorBrigadeSet = new Set(primarySector.assigned_brigade_ids);
-                let primaryZone: (typeof allocation.zones)[number] | undefined;
-                let bestOverlap = 0;
-                for (const zone of allocation.zones) {
-                    const overlap = zone.assigned_brigades.filter(id => sectorBrigadeSet.has(id)).length;
-                    if (overlap > bestOverlap) {
-                        bestOverlap = overlap;
-                        primaryZone = zone;
-                    }
+        // Garrison floor safety net — catches drift between plan creation and launch.
+        // allocate pass already locks garrison brigades out of surplus_pool, but
+        // garrison_budget can be raised by a threat upgrade after the allocate pass.
+        if (primarySector) {
+            const sectorBrigadeSet = new Set(primarySector.assigned_brigade_ids);
+            let primaryZone: (typeof allocation.zones)[number] | undefined;
+            let bestOverlap = 0;
+            for (const zone of allocation.zones) {
+                const overlap = zone.assigned_brigades.filter(id => sectorBrigadeSet.has(id)).length;
+                if (overlap > bestOverlap) {
+                    bestOverlap = overlap;
+                    primaryZone = zone;
                 }
+            }
 
-                if (primaryZone && primaryZone.garrison_budget > 0) {
-                    const zoneSet = new Set(primaryZone.assigned_brigades);
-                    // Brigades being taken from this zone by the op
-                    const takenFromZone = participatingBrigades.filter(id => zoneSet.has(id));
-                    const remainingAfterOp =
-                        primaryZone.assigned_brigades.length - takenFromZone.length;
+            if (primaryZone && primaryZone.garrison_budget > 0) {
+                const zoneSet = new Set(primaryZone.assigned_brigades);
+                const takenFromZone = participatingBrigades.filter(id => zoneSet.has(id));
+                const remainingAfterOp = primaryZone.assigned_brigades.length - takenFromZone.length;
 
-                    if (remainingAfterOp < primaryZone.garrison_budget) {
-                        // How many zone-brigades we must give back to meet the floor
-                        const mustReturn =
-                            primaryZone.garrison_budget - remainingAfterOp;
+                if (remainingAfterOp < primaryZone.garrison_budget) {
+                    const mustReturn = primaryZone.garrison_budget - remainingAfterOp;
+                    const evalByBrigade = new Map(allocation.surplus_pool.map(ev => [ev.brigade_id, ev]));
+                    const sortedTaken = [...takenFromZone].sort((a, b) => {
+                        const fa = evalByBrigade.get(a)?.fitness_offense ?? 0;
+                        const fb = evalByBrigade.get(b)?.fitness_offense ?? 0;
+                        if (fa !== fb) return fa - fb;
+                        return strictCompare(a, b);
+                    });
 
-                        // Sort taken-from-zone brigades by ascending offense fitness
-                        // (weakest attackers returned to garrison first — keeps the
-                        // best attackers in the op as long as the floor allows it).
-                        const evalByBrigade = new Map(
-                            allocation.surplus_pool.map(ev => [ev.brigade_id, ev]),
-                        );
-                        const sortedTaken = [...takenFromZone].sort((a, b) => {
-                            const fa = evalByBrigade.get(a)?.fitness_offense ?? 0;
-                            const fb = evalByBrigade.get(b)?.fitness_offense ?? 0;
-                            if (fa !== fb) return fa - fb; // weakest first
-                            return strictCompare(a, b);
-                        });
+                    const evictSet = new Set(sortedTaken.slice(0, mustReturn));
+                    const trimmedParticipants = participatingBrigades.filter(id => !evictSet.has(id));
 
-                        // Build set of brigade IDs to evict from the op
-                        const evictSet = new Set(sortedTaken.slice(0, mustReturn));
-
-                        // Rebuild participant list without evicted brigades
-                        const trimmedParticipants = participatingBrigades.filter(
-                            id => !evictSet.has(id),
-                        );
-
-                        // If trimming leaves us below the minimum viable op size, skip
-                        if (trimmedParticipants.length < MIN_BRIGADES_FOR_PLAN) {
-                            return ops;
-                        }
-
-                        participatingBrigades = trimmedParticipants;
+                    if (trimmedParticipants.length < MIN_BRIGADES_FOR_PLAN) {
+                        return ops;
                     }
+                    participatingBrigades = trimmedParticipants;
                 }
             }
         }
@@ -745,43 +732,14 @@ function buildOperations(
             initialStrength,
         );
 
-        // Populate sector-anchored launch contract fields (Phase 2 scaffolding).
-        // Phase 3 will restructure participant selection to be sector-first; for now
-        // we derive the categorization post-hoc from the sector the op is anchored to.
-        if (sectorId) {
-            const anchoredSector = briefing.sectors.find(s => s.sector_id === sectorId);
-            if (anchoredSector) {
-                const primaryBrigadeSet = new Set(anchoredSector.assigned_brigade_ids);
-                const primarySectorBrigades = participatingBrigades
-                    .filter(id => primaryBrigadeSet.has(id))
-                    .sort(strictCompare);
-                const attachedBrigades = participatingBrigades
-                    .filter(id => !primaryBrigadeSet.has(id))
-                    .sort(strictCompare);
-
-                if (primarySectorBrigades.length > 0) {
-                    op.primary_sector_brigades = primarySectorBrigades;
-                }
-                if (attachedBrigades.length > 0) {
-                    op.attached_brigades = attachedBrigades;
-                    // Identify which other corps sectors contributed attached brigades.
-                    const supportingIds = new Set<string>();
-                    for (const sector of briefing.sectors) {
-                        if (sector.corps_id !== briefing.corps_id) continue;
-                        if (sector.sector_id === sectorId) continue;
-                        const sectorBrigadeSet = new Set(sector.assigned_brigade_ids);
-                        if (attachedBrigades.some(id => sectorBrigadeSet.has(id))) {
-                            supportingIds.add(sector.sector_id);
-                        }
-                    }
-                    if (supportingIds.size > 0) {
-                        op.supporting_sector_ids = [...supportingIds].sort(strictCompare);
-                    }
-                    // Mark as adjacent-sector reinforcement (simplified for Phase 2;
-                    // Phase 3 can distinguish adjacent-sector vs corps-reserve).
-                    op.reinforcement_source = 'adjacent_sector';
-                }
-            }
+        // Sector-anchored launch contract fields — direct from Phase 3 pool selection.
+        if (primaryPool.length > 0) op.primary_sector_brigades = primaryPool;
+        if (attachedPool.length > 0) {
+            op.attached_brigades = attachedPool;
+            op.reinforcement_source = 'adjacent_sector';
+        }
+        if (attachmentSectorIds.size > 0) {
+            op.supporting_sector_ids = [...attachmentSectorIds].sort(strictCompare);
         }
 
         ops.push(op);

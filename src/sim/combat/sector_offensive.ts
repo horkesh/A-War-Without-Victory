@@ -29,12 +29,12 @@
  *   See bot_brigade_ai_osid.ts (attack order generation) and combat-causality invalidation
  *   "operation_execution_without_eligible_attackers" when execution runs with zero such brigades.
  *
- * **Target launch contract (sector-anchored, Phase 3):**
- * Every operation must declare a primary sector (`sector_id`). The default eligible brigade
- * pool is derived from brigades assigned to that sector. Cross-sector brigades join only as
- * explicit reinforcements (`attached_brigades`, `reinforcement_source`). Current commander
- * emit uses a corps-wide surplus pool — that is transitional behavior, targeted for replacement.
- * See `docs/plans/2026-04-01-v08x-sector-anchored-corps-operations-plan.md`.
+ * **Sector-anchored launch contract (Phase 3 implemented):**
+ * Every commander-generated operation declares a primary sector (`sector_id`). The default
+ * eligible brigade pool derives from that sector's assigned brigades. Cross-sector brigades
+ * join only as explicit bounded attachments (`attached_brigades`, `reinforcement_source`,
+ * `supporting_sector_ids`). See `docs/plans/2026-04-01-v08x-sector-anchored-corps-operations-plan.md`.
+ * Pre-planned and probe ops do not yet carry full sector anchoring — Phase 5 closes that gap.
  *
  * Deterministic: sorted iteration, no randomness, no timestamps.
  */
