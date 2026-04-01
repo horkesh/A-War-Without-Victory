@@ -102,7 +102,7 @@ export function splitNonContiguousSectors(
                     const compEdgeIds = sector.edge_ids.slice();
                     const isLargest = ci === largestIdx;
                     const subSeg: CorpsFrontSubSegment = {
-                        sub_segment_id: `subseg:${sector.corps_id}:split${ci}`,
+                        sub_segment_id: `subseg:${sector.sector_id}:split${ci}`,
                         edge_ids: isLargest ? compEdgeIds : [],
                         friendly_osids: [...comp].sort(strictCompare),
                         enemy_osids: [...sector.sub_segments.flatMap(ss => ss.enemy_osids)].sort(strictCompare),
@@ -196,7 +196,7 @@ export function splitNonContiguousSectors(
 
                 const isLargest = ci === largestCi;
                 const subSeg: CorpsFrontSubSegment = {
-                    sub_segment_id: `subseg:${sector.corps_id}:ftsplit${ci}`,
+                    sub_segment_id: `subseg:${sector.sector_id}:ftsplit${ci}`,
                     edge_ids: compEdgeIds,
                     friendly_osids: [...compFriendly].sort(strictCompare),
                     enemy_osids: [...compEnemy].sort(strictCompare),
@@ -265,7 +265,7 @@ export function splitNonContiguousSectors(
             if (compEdgeIds.length === 0 && compFriendly.size === 0) continue;
 
             const subSeg: CorpsFrontSubSegment = {
-                sub_segment_id: `subseg:${sector.corps_id}:split${ci}`,
+                sub_segment_id: `subseg:${sector.sector_id}:split${ci}`,
                 edge_ids: compEdgeIds,
                 friendly_osids: [...compFriendly].sort(strictCompare),
                 enemy_osids: [...compEnemy].sort(strictCompare),
@@ -605,7 +605,7 @@ export function mergeSectors(
 
     // Merge sub-segments
     const mergedSubSeg: CorpsFrontSubSegment = {
-        sub_segment_id: `subseg:${corpsId}:merged${indexHint}`,
+        sub_segment_id: `subseg:${base.sector_id}:merged${indexHint}`,
         edge_ids: edgeIds,
         friendly_osids: [...new Set([
             ...base.sub_segments.flatMap(ss => ss.friendly_osids),
