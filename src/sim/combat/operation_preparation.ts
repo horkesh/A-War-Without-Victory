@@ -1,4 +1,12 @@
 /**
+ * PREPARATION SUB-PHASE OWNER — called by canonical lifecycle owner (sector_offensive.ts)
+ *
+ * This file owns the preparation sub-phase within the 'planning' state of a CorpsOperation.
+ * It does NOT own the broader operation lifecycle. All entry points are called from
+ * sector_offensive.ts (advanceSectorOffensives), never directly from the pipeline.
+ */
+
+/**
  * Operation Preparation System — sub-state machine within the 'planning' phase.
  *
  * When a CorpsOperation enters planning, the preparation system drives it through:

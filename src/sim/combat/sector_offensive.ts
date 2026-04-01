@@ -1,4 +1,16 @@
 /**
+ * CANONICAL LIFECYCLE OWNER — Corps Operations
+ *
+ * This file is the single authoritative owner of the corps operation lifecycle:
+ * planning → preparation → execution → recovery.
+ *
+ * All operation creation, advancement, and recovery flows through here.
+ * bot_corps_operations.ts is the legacy/transitional path and is non-authoritative.
+ * operation_preparation.ts owns the preparation sub-phase.
+ * operation_prediction.ts owns predictive/advisory computation.
+ */
+
+/**
  * Sector offensive lifecycle management.
  *
  * A sector offensive IS a CorpsOperation with type === 'sector_attack'.

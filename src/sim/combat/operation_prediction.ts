@@ -1,4 +1,12 @@
 /**
+ * PREDICTIVE/ADVISORY OWNER — called by canonical lifecycle owner (sector_offensive.ts)
+ *
+ * This file owns predictive and advisory computation for planned operations.
+ * It is read-only with respect to GameState and does NOT own the operation lifecycle.
+ * Called by sector_offensive.ts and the Ops Planning UI; never mutates operation state.
+ */
+
+/**
  * Operation Prediction Engine — G-2 live briefing support.
  *
  * Computes predicted outcomes for planned operations using the existing

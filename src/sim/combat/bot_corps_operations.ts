@@ -1,4 +1,13 @@
 /**
+ * TRANSITIONAL / LEGACY — Non-Authoritative Operation Path
+ *
+ * This file was a peer operation manager but is no longer the lifecycle owner.
+ * It is being progressively folded into the canonical path in sector_offensive.ts.
+ * Do NOT add new operation lifecycle logic here.
+ * The canonical path is: sector_offensive.ts → operation_preparation.ts / operation_prediction.ts
+ */
+
+/**
  * Named operation management: catalog, launch, progress evaluation,
  * OG activation, and emergency defensive operations.
  *
