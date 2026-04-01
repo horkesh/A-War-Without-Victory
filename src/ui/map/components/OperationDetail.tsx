@@ -181,6 +181,43 @@ export function OperationDetail({ railSlot }: OperationDetailProps) {
           </div>
         )}
 
+        {/* Sector anchor — shows primary sector and cross-sector risk transfer */}
+        {op.sector_id && (
+          <div className="border-t border-panel-border pt-2 mb-3 space-y-1">
+            <div className="text-text-secondary text-[10px] uppercase tracking-wide font-semibold mb-1">Sector Anchor</div>
+            <div className="flex justify-between">
+              <span className="text-text-secondary">Primary sector</span>
+              <span className="text-text-primary font-mono text-[11px]">
+                {loadedGameState.corpsFrontSectors?.find(s => s.sector_id === op.sector_id)?.display_name ?? op.sector_id}
+              </span>
+            </div>
+            {op.primary_sector_brigades != null && op.primary_sector_brigades.length > 0 && (
+              <div className="flex justify-between">
+                <span className="text-text-secondary">Primary bdes</span>
+                <span className="text-text-primary tabular-nums">{op.primary_sector_brigades.length}</span>
+              </div>
+            )}
+            {op.attached_brigades != null && op.attached_brigades.length > 0 && (
+              <div className="flex justify-between">
+                <span className="text-text-secondary">Attached bdes</span>
+                <span className="text-amber-300 tabular-nums" title="Brigades drawn from adjacent sectors — risk transferred to those sectors">
+                  {op.attached_brigades.length}
+                </span>
+              </div>
+            )}
+            {op.supporting_sector_ids != null && op.supporting_sector_ids.length > 0 && (
+              <div className="flex justify-between items-start gap-2">
+                <span className="text-text-secondary shrink-0">Risk transferred from</span>
+                <span className="text-amber-300 text-[11px] text-right">
+                  {op.supporting_sector_ids
+                    .map(sid => loadedGameState.corpsFrontSectors?.find(s => s.sector_id === sid)?.display_name ?? sid)
+                    .join(', ')}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Objectives */}
         {objectives.length > 0 && (
           <div className="border-t border-panel-border pt-2">

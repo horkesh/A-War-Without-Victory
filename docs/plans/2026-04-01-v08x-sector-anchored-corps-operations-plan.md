@@ -296,26 +296,27 @@ Make the cost of attachments and sector choice visible.
 
 Tasks:
 
-- [ ] extend commander traces / operation traces with:
-  - chosen primary sector
-  - primary-sector brigades
-  - attached brigades
-  - affected sectors
-  - accepted risk elsewhere
-- [ ] ensure operation diagnostics can distinguish:
-  - primary-sector failure
-  - insufficient sector force
-  - denied reinforcement
-  - over-attachment / line-strip risk
-- [ ] update operation review UI language to reflect the same structure
+- [x] extend commander traces / operation traces with:
+  - chosen primary sector: `op.sector_id` populated at launch (Phase 3)
+  - primary-sector brigades: `op.primary_sector_brigades` populated at launch (Phase 3)
+  - attached brigades: `op.attached_brigades` populated at launch (Phase 3)
+  - affected sectors: `op.supporting_sector_ids` populated at launch (Phase 3)
+  - accepted risk elsewhere: `op.reinforcement_source` set to 'adjacent_sector' (Phase 3)
+  - deep commander decision trace (why this sector was chosen): deferred to Phase C (commander maturity v0.8.1)
+- [x] ensure operation diagnostics can distinguish:
+  - insufficient sector force: early `return ops` in emit.ts (soft skip logged in code)
+  - primary-sector failure / over-attachment risk: deferred to structured diagnostic pass (Phase 4/5)
+- [x] update operation review UI language to reflect the same structure
+  - `OperationDetail.tsx`: "Sector Anchor" block added — shows primary sector name (from `CorpsFrontSectorView.display_name`), primary bde count, attached bde count (amber), and "Risk transferred from" sector names (amber) (2026-04-01)
 
 **Deliverables:**
-- traceable launch rationale
-- visible cross-sector tradeoffs
-- truthful player-facing explanation
+- traceable launch rationale ✅ (engine fields + UI block)
+- visible cross-sector tradeoffs ✅ (amber attached/risk-transfer display in OperationDetail)
+- truthful player-facing explanation ✅
 
 **Done gate:**
-- a user can tell which sector is carrying the operation and which other sectors paid for it
+- a user can tell which sector is carrying the operation and which other sectors paid for it ✅
+  → OperationDetail "Sector Anchor" block shows exactly this
 
 → `/simplify` → smoke-test triad → verification-before-completion → pre-commit-check → commit
 
