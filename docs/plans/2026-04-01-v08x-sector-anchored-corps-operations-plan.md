@@ -331,18 +331,29 @@ Stop legacy launch semantics from silently surviving.
 
 Tasks:
 
-- [ ] inventory all operation creation paths that can still bypass sector anchoring
-- [ ] remove or demote any helper path that can still create a broad-pool corps op without explicit attachments
-- [ ] add top-of-file comments where transitional helpers must temporarily survive
-- [ ] confirm UI and desktop/IPC paths cannot create conceptually different operation records
+- [x] inventory all operation creation paths that can still bypass sector anchoring
+  - 4 engine paths remain without sector-anchor fields: pre-planned, triggered, emergency defense, corridor breach. None are broad-pool. All explicitly inventoried.
+  - 1 IPC/desktop path: `electron-main.cjs` `stage-corps-operation-order` — player-authored, not broad-pool. `sector_id` already flows in from payload.
+- [x] remove or demote any helper path that can still create a broad-pool corps op without explicit attachments
+  - The ONLY broad-pool path was `emit.ts buildOperations()` — eliminated in Phase 3.
+  - All remaining paths (pre-planned, triggered, emergency, corridor breach, IPC) use explicit participant lists, not a corp-wide broad pool.
+- [x] add top-of-file comments where transitional helpers must temporarily survive
+  - `pre_planned_operations.ts` injectQueuedOperation: PHASE 5 TRANSITIONAL comment added
+  - `triggered_operations.ts` buildTriggeredOp: PHASE 5 TRANSITIONAL comment added
+  - `bot_corps_operations.ts` generateEmergencyDefensiveOperations: PHASE 5 TRANSITIONAL comment added
+  - `bot_corps_corridor.ts` corridor breach: PHASE 5 TRANSITIONAL comment added
+  - `electron-main.cjs` IPC handler: PHASE 5 TRANSITIONAL comment added (CJS/ESM boundary noted)
+- [x] confirm UI and desktop/IPC paths cannot create conceptually different operation records
+  - Confirmed: `electron-main.cjs` creates player-authored ops with explicit brigade/sector selection. Not conceptually different — just missing categorization fields. No broad-pool leakage.
 
 **Deliverables:**
-- one truthful launch contract
-- no peer launch path with looser hidden rules
-- transitional notes where temporary bridges remain
+- one truthful launch contract ✅ (broad-pool eliminated; remaining paths are explicit)
+- no peer launch path with looser hidden rules ✅
+- transitional notes where temporary bridges remain ✅
 
 **Done gate:**
-- maintainers can no longer accidentally create the old broad-pool launch model through a side path
+- maintainers can no longer accidentally create the old broad-pool launch model through a side path ✅
+  → All 5 remaining transitional paths documented with PHASE 5 TRANSITIONAL comments
 
 → `/simplify` → smoke-test triad → verification-before-completion → pre-commit-check → commit
 

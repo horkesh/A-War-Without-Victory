@@ -1064,6 +1064,11 @@ app.whenReady().then(() => {
       const corpsCommand = ensureCorpsCommandEntry(state, corpsId);
       const turn = state.meta?.turn ?? 0;
       if (!corpsCommand.active_operations) corpsCommand.active_operations = [];
+      // PHASE 5 TRANSITIONAL: PLAYER-AUTHORED op creation (ops modal IPC path).
+      // sector_id flows in from the payload (line below). Brigade categorization fields
+      // (primary_sector_brigades, attached_brigades, supporting_sector_ids) are absent —
+      // player explicitly selects brigades, so no automatic categorization is needed.
+      // Cannot use TypeScript factories here (CJS/ESM boundary). Not broad-pool.
       corpsCommand.active_operations.push({
         name,
         type,

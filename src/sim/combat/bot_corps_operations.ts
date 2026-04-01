@@ -186,6 +186,9 @@ export function generateEmergencyDefensiveOperations(
         if (participants.length < 2) continue;
 
         // PERMITTED CREATION ENTRY POINT — emergency defensive operations.
+        // PHASE 5 TRANSITIONAL: sector_id not yet derived. Could be computed from brigade
+        // locations → CorpsFrontSector.assigned_brigade_ids lookup. Brigade categorization
+        // fields absent. Not broad-pool — participants are threat-selected. Deferred.
         const operation = buildEmergencyDefenseOperation(
             corps.id, turn, participants.map(b => b.id), uniqueTargets.slice(0, 20),
         );

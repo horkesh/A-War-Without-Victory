@@ -146,6 +146,9 @@ export function attemptCorridorBreach(
             if (participants.length < 2) continue;
 
             // PERMITTED CREATION ENTRY POINT — corridor breach operations.
+            // PHASE 5 TRANSITIONAL: sectorId=undefined — corridor breach has no natural sector
+            // anchor in v0.8 (it operates across corps boundaries). Brigade categorization fields
+            // absent. Not broad-pool — participants are threat-selected. Deferred.
             const initialStrength = participants.reduce((sum, b) => sum + (b.personnel ?? 0), 0);
             const operation = buildCommanderOperation(
                 corps.id, turn, participants.map(b => b.id), undefined, [], initialStrength,

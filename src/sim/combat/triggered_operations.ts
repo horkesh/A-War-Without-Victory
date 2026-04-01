@@ -318,6 +318,8 @@ function buildOperation(
 
     // PERMITTED CREATION ENTRY POINT — triggered (condition/time-gated) operations.
     // Not pre-planned (no is_pre_planned flag) — does not occupy the slot-0 queue.
+    // PHASE 5 TRANSITIONAL: sector_id and brigade categorization fields not yet populated.
+    // Not broad-pool — brigades are axis-defined. Sector anchoring deferred.
     const op = buildCorpsOperation(def, builtAxes, allParticipating, turn, false);
 
     return { op, corpsAxes };

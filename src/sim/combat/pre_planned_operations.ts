@@ -851,6 +851,10 @@ export function injectPrePlannedOperations(state: GameState): void {
 
 // PERMITTED CREATION ENTRY POINT — pre-planned and player-queued operations only.
 // All CorpsOperation objects must be built via buildCorpsOperation() in corps_operation_helpers.ts.
+// PHASE 5 TRANSITIONAL: sector_id is not yet derived at injection time. staging_osid is available
+// from the PrePlannedOpDef and could be used to look up the containing CorpsFrontSector. Brigade
+// categorization fields (primary_sector_brigades, attached_brigades) are also absent. This path
+// does NOT use broad-pool selection — brigades are axis-defined. Sector anchoring is deferred.
 /**
  * Inject a queued operation by name for a corps.
  * Called when a corps completes an operation and has queued_operations.
