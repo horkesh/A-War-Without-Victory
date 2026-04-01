@@ -44,6 +44,14 @@ function getCorpsAllowedOsids(corpsId: string, state: GameState): Set<string> {
 /** Max hops before we skip redistribution (brigade too far, will be reassigned). */
 const MAX_REDISTRIBUTION_DISTANCE = 20;
 
+/**
+ * Weight applied to BFS distance in Phase B target scoring.
+ * Score = stack_count + PHASE_B_DISTANCE_WEIGHT × distance.
+ * At 0.3, a 7-hop march to an empty OSID costs the same as a 2-hop march to a position
+ * with 1 brigade — keeping brigades near their current front instead of chasing distant vacancies.
+ */
+const PHASE_B_DISTANCE_WEIGHT = 0.3;
+
 /** Brigades with this many entrenchment turns or more are NOT redistributed in Phase A.
  *  Only freshly-arrived brigades get spread — entrenched positions are too valuable to abandon. */
 const ENTRENCHMENT_REDISTRIBUTION_THRESHOLD = 1;
@@ -74,29 +82,43 @@ function buildOperationParticipantSet(state: GameState): Set<string> {
 
 /**
  * Pick the best target front OSID for a rear brigade.
- * Prefers: least-stacked OSID → home_osid match → deterministic sort.
+ *
+ * When distToTarget is provided (Phase B), scoring is:
+ *   effective_cost = stack_count + PHASE_B_DISTANCE_WEIGHT × distance
+ * This keeps brigades near their current position instead of chasing distant vacancies.
+ *
+ * Without distToTarget (Phase A adjacency checks), falls back to pure stack count.
+ *
+ * Tie-break: home_osid match → deterministic sort.
  */
 function pickLeastStackedTarget(
     frontOsids: string[],
     osidCount: Map<string, number>,
     homeOsid: string | undefined,
+    distToTarget?: Map<string, number>,
 ): string {
+    const effectiveCost = (osid: string): number => {
+        const count = osidCount.get(osid) ?? 0;
+        const dist = distToTarget?.get(osid) ?? 0;
+        return count + PHASE_B_DISTANCE_WEIGHT * dist;
+    };
+
     let bestOsid = frontOsids[0]!;
-    let bestCount = osidCount.get(bestOsid) ?? 0;
+    let bestCost = effectiveCost(bestOsid);
     let bestIsHome = bestOsid === homeOsid;
 
     for (let i = 1; i < frontOsids.length; i++) {
         const osid = frontOsids[i]!;
-        const count = osidCount.get(osid) ?? 0;
+        const cost = effectiveCost(osid);
         const isHome = osid === homeOsid;
 
         if (
-            count < bestCount ||
-            (count === bestCount && isHome && !bestIsHome) ||
-            (count === bestCount && isHome === bestIsHome && strictCompare(osid, bestOsid) < 0)
+            cost < bestCost ||
+            (cost === bestCost && isHome && !bestIsHome) ||
+            (cost === bestCost && isHome === bestIsHome && strictCompare(osid, bestOsid) < 0)
         ) {
             bestOsid = osid;
-            bestCount = count;
+            bestCost = cost;
             bestIsHome = isHome;
         }
     }
@@ -272,17 +294,23 @@ export function distributeBrigadesToFront(
                 // If all targets are outside corps territory, fall back to full set
                 const effectiveFrontOsids = candidateFrontOsids.length > 0 ? candidateFrontOsids : sortedFrontOsids;
 
-                // Pick least-stacked front OSID, tie-break by home match then deterministic
-                const target = pickLeastStackedTarget(effectiveFrontOsids, osidCount, f.home_osid);
-
                 // BFS friendly set: intersect with corps boundary when available
                 const factionFriendly = friendlyByFaction.get(sector.faction);
                 const bfsFriendly = (useCorpsBoundary && factionFriendly)
                     ? new Set([...factionFriendly].filter(o => corpsAllowed.has(o)))
                     : factionFriendly;
 
-                // Compute distance
-                const dist = bfsDistance(loc, target, adjacency, bfsFriendly);
+                // Pre-compute distances to all candidates so target selection is distance-aware
+                const distToTarget = new Map<string, number>();
+                for (const osid of effectiveFrontOsids) {
+                    distToTarget.set(osid, bfsDistance(loc, osid, adjacency, bfsFriendly));
+                }
+
+                // Pick distance-weighted least-cost target (score = stack_count + weight × dist)
+                const target = pickLeastStackedTarget(effectiveFrontOsids, osidCount, f.home_osid, distToTarget);
+
+                // Use pre-computed distance for march decision
+                const dist = distToTarget.get(target) ?? Infinity;
 
                 if (dist === 1) {
                     // Adjacent: move directly

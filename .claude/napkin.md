@@ -10,17 +10,23 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-03-31, v0.8.0 Commander System on main)
+## Current State (2026-04-01, v0.8.0 Commander System on main)
 **ATH BASELINE: n1256: 94.2% area-weighted, 23/23 anchors, 6/6 benchmarks. 73 battles, 36/40 combat weeks. hash: 5fa01bbdecc43f5f.**
-**n1273 COMPLETE: 94.1%, 24/25 anchors (brcko FAIL), 6/6 benchmarks, 99 battles, 38/40 combat weeks. hash: 1bfa86eaf4c82606.**
-**Ops mechanics audit: 4 bugs fixed (ghost dups, unreachable objectives, loan exclusivity, probe guard). See ledger for details.**
-**Op Jackal: Brilliant Victory 5★ (t15). Drift fix ✓. Doboj ✓. brcko still FAIL (ARBiH 2nd Corps captures with 8-attack op at t21; brcko not in Op Koridor objectives).**
-**valid_for_combat_calibration: false (99 battles, target 150-250). War-or-Game: NOT APPROVED.**
+**n1273 COMPLETE: 94.1%, 24/25 anchors (boljanic_2 FAIL only), 6/6 benchmarks, 99 battles, 38/40 combat weeks. hash: 1bfa86eaf4c82606.**
+**n1274 COMPLETE: 94.2% (ATH tied), 24/25 anchors (brcko FAIL — new regression), 6/6 benchmarks, 94 battles, 40/40 combat weeks. hash: 2a1b68b6cbb1ff16.**
+**Change n1274: Phase B distance-weighted target selection (PHASE_B_DISTANCE_WEIGHT=0.3). boljanic_2 FIXED (held RS all 40 turns). brcko regressed. Brigade drift persists in new form.**
+**Op Jackal: Brilliant Victory 5★ (t15). op:brcko:brcko FAIL again in n1274 (RBiH holds from t30). potocari_2 IS already in Op Koridor objectives — was false finding.**
+**valid_for_combat_calibration: false (94 battles, target 150-250). War-or-Game: NOT APPROVED.**
+**TWO ENGINE FAILURES IN PHASE B (brigade_front_distribution.ts):**
+**(1) osidCount not updated on column march issuance — only updated on direct moves. Multiple brigades simultaneously issue march orders to the same target → pileup. n1274: 9 vrs_1st_krajina brigades stacked at brijesnica_donja_2. Fix: reserve target in osidCount when issuing a column march.**
+**(2) Distance weighting reduces extreme cross-country marches but creates local convergence — brigades near same area all converge on the same nearest OSID. Root drift pathology (Phase 1 position-locking overrides home municipality) unchanged.**
+**Root drift architecture: Phase 1 assigns brigades by physical position (unconditional). Home_osid affinity is only Phase 2 tiebreaker. Phase B marches away from home → Phase 1 locks there → drift is permanent. Distance weighting changes destination, doesn't fix locking.**
+**Remaining P0s: brcko FAIL, battle tempo 94 vs 150-250, brigade drift (changed form). Remaining P1s: HRHB patron directive scope fix (JSON), jajce_falls turn_min 40→28.**
 **[RESOLVED] Brigade drift, objective validation gate, homeDefense surplus filters (allocate+plan), ghost duplicates, BFS faction-wide scope, loan exclusivity, probe guard blocking plans.**
 **[RESOLVED] OSID naming-mismatch: boljanic_2=Doboj, kopcic_2=Bugojno, brcko=Brčko, foca_3=Foča.**
-**Remaining P1s: brcko anchor (Op Koridor doesn't target brcko city; needs pre_planned_operations.ts change or new op), battle tempo 99 vs 150-250, HRHB patron directive scope fix (JSON), jajce_falls turn_min 40→28.**
 **Pre-existing gap revealed: Goražde enclave brigades (arbih_808th, arbih_843rd) not assigned to reachable sectors — anomaly detector exemption added for placement:fixed_home_osid.**
 **TWO OP SYSTEMS: (1) Legacy injectQueuedOperation (war_phases inject-queued-operations step, BEFORE commander) — consumes queued_operations, injects is_pre_planned ops directly. (2) Commander tryCreateFromOpportunity — runs AFTER legacy, for corps with no queued_operations (arbih_1st, arbih_5th, etc.). tryCreateFromPrePlanned is dead code — queue already consumed. Plan guard must exempt probes (type='probe' are independent of plan slots).**
+**EMERGENT PROPOSALS FOR DRIFT (Game Designer, 2026-04-01): Proposal 2 = corridor-width garrison multiplier (allocate.ts, uses ZoneAssessment.corridor_width — topological bottleneck detection, no brigade IDs). Proposal 3 = commitment-ratio Phase B eligibility filter (only route brigades to zones with commitment_ratio above threshold). Neither yet implemented.**
 
 **[MERGED] Concurrent corps operations.** `active_operations[]` replaces `active_operation`. Slot cap floor(brigades/12). 7 helpers. Emergency defense overflow. Bot secondary op guard. Save migration v1→v2. 84 files, +1459/-525.
 **[MERGED] Krajina paramilitary scope.** 6 municipalities added to RS offensive sweep. MAX_POCKET_CLUSTER 3→6. +3.0pp.

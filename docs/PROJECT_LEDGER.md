@@ -1,3 +1,54 @@
+## [2026-04-01] n1274 — Phase B distance-weighted march + root drift diagnosis (94.2%, 94 battles)
+
+### Summary
+Session investigated the Doboj (boljanic_2) fall from n1273 and implemented a first emergent fix. Root cause of brigade drift was fully diagnosed. Three new engine failures identified in `brigade_front_distribution.ts`. n1274 result: ATH tied at 94.2%, boljanic_2 fixed, brcko regressed, drift persists in new form.
+
+### Root Cause Diagnosis: Brigade Drift (Operations Expert + Game Designer)
+
+**Phase B architecture has two compounding failures:**
+
+1. **Zero distance cost in `pickLeastStackedTarget`** — picks globally least-stacked front OSID with no distance penalty. A brigade 15 hops from a vacancy sees it as equally attractive as one 2 hops away. rs_2nd_armored (home: boljanic_2) was pulled south to donja_bocinja_2 by Phase B; rs_1st_armored (home: maricka_2/Prijedor) wandered 15+ hops into the Doboj area as the sole w28 defender.
+
+2. **osidCount not updated on column march issuance** — Phase B only updates `osidCount` for direct moves (dist=1). When multiple brigades near the same area all receive column march orders in the same turn, each one sees the target as "still empty." Result in n1274: 9 vrs_1st_krajina brigades all issued march orders to `op:lukavac:brijesnica_donja_2` simultaneously. The pileup was invisible to Phase B as it iterated.
+
+3. **Phase 1 position-locking overrides home municipality** — Brigade assignment Phase 1 assigns by physical presence on a front OSID (unconditional). Home_osid affinity is only a Phase 2 tiebreaker (-2 hop discount). Once Phase B has marched a brigade away from home, Phase 1 locks it at the new location. Drift is therefore permanent until a new Phase B march fires.
+
+**Sector IDs are ephemeral** — rebuilt every turn, not persistent. "Brigade follows its sector" is not a real mechanism; brigades follow their physical location into the reconstituted sector that covers that OSID.
+
+### Fix: Proposal 1 (n1274)
+
+`brigade_front_distribution.ts` — `pickLeastStackedTarget` now accepts optional `distToTarget: Map<string, number>`. Phase B pre-computes BFS distances to all candidate OSIDs before selection. Score = `stack_count + 0.3 × BFS_distance` (PHASE_B_DISTANCE_WEIGHT=0.3). Equivalent: a 7-hop march to an empty OSID costs the same as a 2-hop march to a position with 1 brigade.
+
+### n1274 Results
+
+| Metric | n1273 | n1274 | Delta |
+|---|---|---|---|
+| Area-weighted | 94.1% | **94.2%** | +0.1pp (ATH tied) |
+| Anchors | 24/25 | 24/25 | Different fail |
+| Benchmarks | 6/6 | 6/6 | ✓ |
+| Battles | 99 | 94 | −5 |
+| boljanic_2 | **FAIL** | **PASS** | Fixed (held all 40 turns) |
+| brcko | PASS | **FAIL** | New regression |
+
+**boljanic_2 held RS all 40 turns.** 4 ARBiH attacks repulsed (t14, t28, t29, t30). Fix worked for this anchor. However defenders were not rs_2nd_armored (home unit) but rs_2nd_banja_luka + rs_11th_dubica + rs_12th_kotorsko.
+
+**brcko regressed.** op:brcko:brcko flipped RS→RBiH at t30. No brigade covering the core OSID when ARBiH pushed (t30–t39, 7 consecutive turns). Same root cause as drift.
+
+**Drift persists in new form.** rs_2nd_armored moved from Maglaj (n1273) to Vozuća (n1274). rs_1st_armored now at Jajce. Phase B pileup: 9 vrs_1st_krajina brigades at brijesnica_donja_2 simultaneously.
+
+### Open Issues After n1274
+
+**P0:**
+1. **osidCount not updated on march** — reserve target in osidCount when issuing column march orders. Will eliminate simultaneous-march pileups.
+2. **brcko regression** — no brigade covers core brcko OSID. Structural: same drift pathology.
+3. **Battle tempo** — 94 battles vs 150-250 target. Nine ops generated zero attack orders.
+
+**Emergent proposals not yet implemented (Game Designer, 2026-04-01):**
+- **Proposal 2 — Corridor-width garrison multiplier** (`allocate.ts`, `computeGarrisonBudget`): multiply budget by up to 1.5× for zones with `corridor_width ≤ 3`. Uses existing `ZoneAssessment.corridor_width`. Topological bottleneck signal — no brigade IDs or OSID hardcoding.
+- **Proposal 3 — Commitment-ratio Phase B eligibility** (`brigade_front_distribution.ts`): Phase B only routes brigades to zones with `commitment_ratio` above threshold. Redistributes to stretched zones, not well-garrisoned ones.
+
+---
+
 ## [2026-03-31] n1263–n1273 — ops mechanics audit + probe guard fix (94.1%, 99 battles)
 
 ### Summary

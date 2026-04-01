@@ -1,6 +1,6 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-03-31. 163 lessons across 8 topic files.
+> Last restructured: 2026-04-01. 165 lessons across 8 topic files.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
@@ -78,6 +78,12 @@
 - **Cost**: Extra investigation cycle. The systematic trace approach in the second pass was correct — should have been applied from the start.
 
 ## New Lessons (always read these)
+
+### [Architecture] Phase B column march doesn't reserve the target — simultaneous pileup (2026-04-01) — NEW → see `architecture.md`
+- osidCount only updated on direct moves, not on column march issuance. Multiple brigades see same target as empty, all march there. Fix: increment osidCount when issuing a march order.
+
+### [Architecture] Phase B distance-weighting changes drift destination, not drift permanence (2026-04-01) — NEW → see `architecture.md`
+- Phase 1 (physical position) assigns unconditionally. Phase B distance fix changes WHERE a brigade drifts to, but Phase 1 still locks it there. Two-component bug requires two-component fix.
 
 ### [Process] Decisions without traces are undebuggable — instrument before investigating (2026-03-31) — NEW → see `process.md`
 

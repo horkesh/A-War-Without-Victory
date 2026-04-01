@@ -3,6 +3,18 @@
 
 ---
 
+### [Architecture] Phase B column march doesn't reserve the target in osidCount — simultaneous pileup (2026-04-01) — NEW
+- **Context**: `distributeBrigadesToFront` Phase B iterates eligible brigades and for each one calls `pickLeastStackedTarget`, then issues a column march order. `osidCount` is only updated for direct adjacent moves (dist=1). For multi-hop marches, `osidCount` is never incremented for the target. When multiple brigades near the same area are processed in the same turn, every brigade sees the target as empty and issues a march order to it. In n1274 this produced 9 vrs_1st_krajina brigades simultaneously ordered to `op:lukavac:brijesnica_donja_2`.
+- **Why it didn't show before**: Before distance-weighting (n1274), brigades had global target scatter — different brigades picked different distant targets, so simultaneous pileup was rare. Distance-weighting concentrates local brigades on the same nearby OSID, making the missing reservation visible.
+- **Fix**: When issuing a column march order in Phase B, immediately increment `osidCount.set(target, (osidCount.get(target) ?? 0) + 1)` so the next brigade in the loop sees the target as "reserved."
+- **Do instead**: Any time you write a pick-and-order loop, ask: "Does picking update the state that the next pick reads?" If not, you have a simultaneous-reservation bug.
+
+### [Architecture] Phase B distance-weighting changes drift destination, not drift permanence (2026-04-01) — NEW
+- **Context**: Brigade drift has two components: (1) Phase B picks the wrong march target, sending brigades far from home. (2) Phase 1 assigns by physical position unconditionally — once a brigade is physically at a front OSID, Phase 1 locks it there regardless of home municipality. Fixing Phase B target selection (Proposal 1, n1274) changed WHERE brigades drifted to (Vozuća instead of Maglaj) but didn't prevent Phase 1 from locking them in the new location. The drift pathology persists in a different form.
+- **Root cause of permanence**: Home_osid affinity exists only in Phase 2 as a -2 hop discount. Phase 1 fires first and is unconditional. There is no mechanism to recall a brigade that Phase B has marched to a new front OSID — the new physical position becomes the new assignment.
+- **Implication**: Fixing march target selection alone is insufficient. Full drift prevention requires either (a) a stronger home-affinity signal that survives Phase 1, OR (b) emergent structural signals (corridor-width, commitment-ratio) that make the commander naturally value certain sectors more highly, OR (c) a post-march recall step.
+- **Do instead**: When fixing a two-component bug (selection + locking), verify both components are addressed. Fixing selection without fixing locking just changes which wrong location the brigade gets locked into.
+
 ### [Architecture] Concurrent ops exposed that single-op cap was accidentally preventing garrison stripping (2026-03-30) — NEW
 - **Context**: For 1200+ runs, Sarajevo never fell. Concurrent ops (n1211) changed `active_operation` (single nullable) to `active_operations[]`. With multiple op slots, more brigades get committed → sector system redistributes more aggressively → Sarajevo garrison shipped to Breza → city falls to paramilitary sweep at turn 11. The old single-op cap accidentally prevented this by limiting how many brigades could be pulled from garrison.
 - **Wrong approach**: Assuming that a feature change (concurrent ops) only affects what it explicitly changes (op slots). The cascade through brigade redistribution was invisible because the single-op cap was an accidental safety net, not a deliberate design choice.
