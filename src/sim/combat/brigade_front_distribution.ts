@@ -47,8 +47,9 @@ const MAX_REDISTRIBUTION_DISTANCE = 20;
 /**
  * Weight applied to BFS distance in Phase B target scoring.
  * Score = stack_count + PHASE_B_DISTANCE_WEIGHT × distance.
- * At 0.3, a 7-hop march to an empty OSID costs the same as a 2-hop march to a position
- * with 1 brigade — keeping brigades near their current front instead of chasing distant vacancies.
+ * At 0.3, a 7-hop march to an empty OSID (cost 2.1) ties a 2-hop march to a position
+ * with 1 brigade (cost 1.6) — modest locality bias without over-pinning brigades in place.
+ * Higher values (tested: 1.0) produce wrong-direction battles and net calibration regression.
  */
 const PHASE_B_DISTANCE_WEIGHT = 0.3;
 
@@ -318,7 +319,8 @@ export function distributeBrigadesToFront(
                     f.entrenchment_turns = 0;
                     osidCount.set(target, (osidCount.get(target) ?? 0) + 1);
                 } else if (dist > 1 && dist <= MAX_REDISTRIBUTION_DISTANCE) {
-                    // Issue column march order
+                    // Issue column march order and reserve the target so later brigades
+                    // in this loop see it as occupied (prevents simultaneous pileup)
                     if (!state.military.brigade_movement_orders) {
                         state.military.brigade_movement_orders = {};
                     }
@@ -326,6 +328,7 @@ export function distributeBrigadesToFront(
                         destination_sids: [target as SettlementId],
                         stance: 'column',
                     } as { destination_sids: SettlementId[] };
+                    osidCount.set(target, (osidCount.get(target) ?? 0) + 1);
                 }
                 // If dist > MAX_REDISTRIBUTION_DISTANCE or Infinity: skip
             }
