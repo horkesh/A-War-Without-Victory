@@ -126,3 +126,8 @@ Before ANY operation change:
 5. If op fires but wrong brigades: check `buildAxesFromDef` filter — `isEligibleOperationFormation` (kind+status), `EXEMPT_CORPS_IDS`
 6. If ping-pong: decisive victory but OSID retaken next turn — counts as failure toward cap
 7. **Always add debug logging** (`console.log` in bot_brigade_eval_attack.ts) before theorizing. Trace the exact code path.
+
+## Session Lessons (2026-04-01)
+
+### Commander Authority Gap
+- **Commander has zero movement authority by design.** `applyCommanderOutput` never writes `brigade_movement_orders`. If a commander correction pass needs to redirect brigades (e.g. cancel wrong-destination marches), the write path to `brigade_movement_orders` must be added explicitly — it does not exist in the base implementation. Verify this path exists before relying on any correction pass to physically reposition brigades.

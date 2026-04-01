@@ -12,15 +12,15 @@
 
 ## Current State (2026-04-01, v0.8.0 Commander System on main)
 **ATH BASELINE: n1256: 94.2% area-weighted, 23/23 anchors, 6/6 benchmarks. 73 battles, 36/40 combat weeks. hash: 5fa01bbdecc43f5f.**
-**n1273 COMPLETE: 94.1%, 24/25 anchors (boljanic_2 FAIL only), 6/6 benchmarks, 99 battles, 38/40 combat weeks. hash: 1bfa86eaf4c82606.**
-**n1275 STABLE BASELINE: 94.0%, 23/25 anchors (brcko+boljanic_2 FAIL), 6/6 benchmarks, 86 battles. osidCount reservation fix active, weight=0.3. All 137 tests pass.**
-**n1277 REVERTED: sub_segment assignment fix (3 approaches tried). None fixed boljanic_2. Net -0.1pp + test failure. Reverted to n1275 state.**
+**n1275 STABLE BASELINE: 94.0%, 23/25 anchors (brcko+boljanic_2 FAIL), 6/6 benchmarks, 86 battles.**
+**n1278: Commander correction pass + home_osid removal from Phase B + in_transit guard added.**
+**n1279: Transit state cancellation + sector split else-if fix — BROKEN: duplicate sub-segment IDs caused VRS at-front to drop to 52.4%.**
+**n1280 CURRENT: 93.2%, 21/25 anchors (brcko+boljanic_2+gradacac_2+rastosnica_2 FAIL), 6/6 benchmarks. hash: 80647861cf5a24f3. Sub-segment ID fix (sector_id not corps_id prefix) → VRS at-front 74.4% (above baseline). Commander correction pass working — zero wrong-destination orders, komar_2 pileup resolved.**
 **BOLJANIC_2 FINAL DIAGNOSIS (2026-04-01): Structural ARBiH ops pressure on Doboj. 7 Doboj OSIDs fall RBiH. rs_2nd_armored reduced to 163 pers by combat exposure. NOT a brigade drift/march issue. Phase B and sub_segment fixes both failed — wrong layer. Fix must address ARBiH targeting/op pressure OR RS garrison budget for Doboj sector.**
-**rs_2nd_armored location_osid=undefined (n1275/n1276 transient state): RESOLVED as misdiagnosis. In stable runs, brigade is alive but near-ghost (163 pers) at Derventa/Doboj area. Combat exposure, not location bug.**
-**Remaining P0s: boljanic_2 (Doboj structural — ARBiH ops + thin RS garrison), brcko (structural, 10 ARBiH brigades at donji_rahic), battle tempo 86 vs 150-250. P1s: HRHB patron directive scope fix, jajce_falls turn_min 40→28.**
+**Remaining P0s: brcko_2 (OSID not in any sector's territory_osids — sector coverage fix needed), boljanic_2 (Doboj structural — ARBiH ops + thin RS garrison), gradacac_2+rastosnica_2 (RS overperforming on newly-covered fronts — sector assignment investigation needed), battle tempo 93 vs 150-250. P1s: HRHB patron directive scope fix, jajce_falls turn_min 40→28, 3 stale ssid refs (705th Slavna, Bileća Brigade, 1st Laktaši — dead sub-segment IDs).**
 **FAILED APPROACHES for boljanic_2: Phase B corps-wide front OSID check (→SRK siege drop 4→2), Phase B sector-wide check (same cascade), sub_segment first-pass penalty (different cascades, no fix).**
 **NEXT APPROACH for boljanic_2: Proposal 3 (commitment-ratio Phase B eligibility filter) OR investigate ARBiH 2nd Corps op generation targeting Doboj. corridor_width=Infinity for main body → Proposal 2 won't help main body zones.**
-**[RESOLVED] Brigade drift, objective validation gate, homeDefense surplus filters (allocate+plan), ghost duplicates, BFS faction-wide scope, loan exclusivity, probe guard blocking plans.**
+**[RESOLVED] Brigade drift, objective validation gate, homeDefense surplus filters (allocate+plan), ghost duplicates, BFS faction-wide scope, loan exclusivity, probe guard blocking plans, Phase B re-order bug (in_transit guard), home_osid auto-return (removed from Phase B), commander movement authority gap (correction pass added), duplicate sub-segment IDs (sector_id prefix fix), empty friendly_osids in splitNonContiguousSectors (else-if→else fix), komar_2 pileup.**
 **[RESOLVED] OSID naming-mismatch: boljanic_2=Doboj, kopcic_2=Bugojno, brcko=Brčko, foca_3=Foča.**
 **Pre-existing gap revealed: Goražde enclave brigades (arbih_808th, arbih_843rd) not assigned to reachable sectors — anomaly detector exemption added for placement:fixed_home_osid.**
 **TWO OP SYSTEMS: (1) Legacy injectQueuedOperation (war_phases inject-queued-operations step, BEFORE commander) — consumes queued_operations, injects is_pre_planned ops directly. (2) Commander tryCreateFromOpportunity — runs AFTER legacy, for corps with no queued_operations (arbih_1st, arbih_5th, etc.). tryCreateFromPrePlanned is dead code — queue already consumed. Plan guard must exempt probes (type='probe' are independent of plan slots).**
@@ -299,26 +299,26 @@ After EVERY scenario run, the orchestrator:
    Do instead: hvo_central_bosnia zero battles in 40w is HISTORICALLY CORRECT (Lašva Valley war didn't start until 1993). Prerequisite work before 1993-war scenario: (1) CB brigade redistribution — 5/6 sectors empty, brigades cluster in Zenica sector; (2) CB operations not launching in 52w scenario; (3) Kiseljak/Vitez pocket separation. Address in HRHB-RBiH war feature branch, not 40w calibration.
 
 ## Bot AI & Combat
-1. **[2026-03-13] Triple-junction adjacency: standard for grouping, strict for splitting (n664→n682)**
+1. **[2026-04-01] Commander correction pass — step 153 in war_phases.ts (n1278)**
+   Do instead: `commander-correct-march-orders` step 153 calls `correctMarchOrders` + `correctTransitStates` in `commander_march_correction.ts`. Commander is now the authority on brigade positioning — corrects wrong-destination orders and stale transit states each turn. Sub-segment IDs use `sector_id` prefix (not `corps_id`): format `subseg:sector:${sectorId}:split${n}`. Verify ID format when debugging stale ssid references.
+2. **[2026-03-13] Triple-junction adjacency: standard for grouping, strict for splitting (n664→n682)**
    Do instead: `buildEdgeAdjacency` (33m `frontEdgeAdj`) for sub-segment grouping (Steps 1-3). `buildEdgeAdjacencyStrictCaseB` for contiguity split (Step 4b): Case A always, Case B only when both fi-H and fj-H in strict adjacency (≤5.5m `SHARED_BOUNDARY_THRESHOLD`). Standard Case B bridges front edges on opposite sides of enemy pockets (e.g. dragoradi↔olovo_2 via krivajevici at 16.9m); strict Case B cuts these. Municipality guard on `mapOsidsToCorps` Phase 2 BFS prevents corps territory race.
-2. **[2026-03-14] Supply gate strips all offensive targets when critical_fraction > 0.5**
+3. **[2026-03-14] Supply gate strips all offensive targets when critical_fraction > 0.5**
    Do instead: `assessCorpsSupplyHealth` in `bot_corps_directives.ts` clears `offensiveTargets` when >50% brigades critical supply AND upgrades `min_attack_outcome` to `costly_victory` when adequate_fraction < 5%. Besieged pockets (Orašje) are always critical supply — stance change alone won't enable attacks. This is correct and historically accurate.
-3. **[2026-03-11] RS three-phase doctrine — organic tempo decay (n579)**
+4. **[2026-03-11] RS three-phase doctrine — organic tempo decay (n579)**
    Do instead: w0-12 blitz (0.35/0.15), w12-26 sustained (0.25/0.08), w26+ consolidation (0.20/0.05). Late-war params have ZERO calibration effect. Early-war intensity is the primary lever.
-4. **[2026-03-10] Enclave defense overhaul — Sarajevo holds (n524→n527)**
+5. **[2026-03-10] Enclave defense overhaul — Sarajevo holds (n524→n527)**
    Do instead: `ALWAYS_BESIEGED_ENCLAVES` forces Sarajevo strained supply. `initial_resilience=20`. `getEnclaveGarrisonPower()` adds civilian defense volume. Urban mult 2.0×. `URBAN_TANK_TERRAIN_FLOOR=1.7`. Key lesson: personnel ratio trumps multipliers — need raw volume.
-5. **[2026-03-11] RBiH defensive w0-15, restrained balanced w15-56**
+6. **[2026-03-11] RBiH defensive w0-15, restrained balanced w15-56**
    Do instead: ARBiH defensive through w15, then balanced with low attack share (0.12) and negative aggression (-0.05) through w40.
-6. **[2026-03-12] Operation Preparation System IMPLEMENTED**
+7. **[2026-03-12] Operation Preparation System IMPLEMENTED**
    Do instead: `operation_preparation.ts` — 5-phase state machine (intel_gathering→force_staging→supply_check→assessment→ready). Commander personality drives tempo. Probes as sub-actions. `tickPreparation()` in pipeline. UI: `CommanderSelectionModal.tsx` + `OperationBriefingModal.tsx`. 45 tests. Player `force_launch` override. Intel-gated launch gate in `bot_corps_directives.ts`.
-7. **[2026-03-14] Graz Accords / Local Truces — faction-level block (n697)**
+8. **[2026-03-14] Graz Accords / Local Truces — faction-level block (n697)**
    Do instead: `src/sim/local_truces.ts` — fires at week 4. Faction-level block: when Herzegovina truce active, ALL RS corps (except vrs_1st_krajina, vrs_2nd_krajina) blocked from HRHB. Corps-pair truce (Herzegovina) + Kiseljak OSID exclusion. Cold fronts: `isColdFront()` exempts from attrition/bombardment.
-8. **[2026-03-07] Pre-planned VRS operations (5 corps only) + JNA ghost Kupres**
+9. **[2026-03-07] Pre-planned VRS operations (5 corps only) + JNA ghost Kupres**
    Do instead: `injectPrePlannedOperations(state)` sets corps to `offensive` PERMANENTLY. Only original 5 corps. 2KK has NO pre-planned op.
-9. **[2026-03-10] Cross-corps sector assignment must stay hard-blocked**
-   Do instead: In `classifyBrigadesByTerritory`, never assign a brigade to another corps sector. All fallback paths must preserve brigade corps ownership.
-10. **[2026-03-13] Flat reserve pooling hides corps organizational structure**
-    Do instead: When a higher-level system (corps) makes positioning decisions, the lower-level system (combat) MUST respect those decisions. If combat treats all reserves as interchangeable (`sectorReserves = totalPower - physicalPower`), corps home-affinity assignment is wasted. Per-entity contribution with spatial weighting (distance + home bonus) is required for non-uniform defense.
+10. **[2026-03-10] Cross-corps sector assignment must stay hard-blocked**
+    Do instead: In `classifyBrigadesByTerritory`, never assign a brigade to another corps sector. All fallback paths must preserve brigade corps ownership.
 
 ## Officer Architecture
 1. **[2026-03-15] Officer succession is player-choice for player faction (events, not auto-retire)**

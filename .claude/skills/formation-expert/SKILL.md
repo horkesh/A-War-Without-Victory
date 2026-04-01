@@ -102,3 +102,11 @@ When explaining behavior or tracing bugs, cite both the canon/design doc and the
 
 - Clear cause-and-effect from op/strength → pools → spawn.
 - Cite file and constant (e.g. POOL_SCALE_FACTOR, batchSize) when explaining numbers.
+
+## Session Lessons (2026-04-01)
+
+### Brigade Movement & Distribution
+- **Phase B re-orders in-transit brigades every turn unless guarded.** Add `if (state.military.brigade_movement_state?.[bid]?.status === 'in_transit') continue;` at the top of Phase B loop. Any distribution pass that issues movement orders MUST check in-transit state first.
+- **`home_osid` is a recruitment artifact, not a strategic destination.** Never use it in march target scoring or assignment priority. Tiebreaks use pure `strictCompare`.
+- **Commander has zero movement authority by design.** `applyCommanderOutput` never writes `brigade_movement_orders`. Any correction pass that needs to issue movement orders must explicitly add this write path — it does not exist by default.
+- **Commander correction pass must cancel in-transit states too.** Must handle both `brigade_movement_orders` (pending) and `brigade_movement_state` (in-transit). `osid-column-movement` converts pending orders to transit state before the commander correction pass runs — targeting only orders misses already-transiting brigades.

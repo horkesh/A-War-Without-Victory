@@ -1,7 +1,7 @@
 # AWWV Calibration Master Reference
 
 **Purpose:** Persistent lessons-learned record for war-phase calibration (April 1992 onward). 40w primary, 104w force trajectory.
-**Updated:** 2026-03-31 (n1237 — traces removed, P0-A/B fixed, Op Prsten Ilijas split; 78 battles; 31/40 weeks combat)
+**Updated:** 2026-04-01 (n1280 — sub-segment ID collision fix; VRS at-front 74.4%; 93.2% area-weighted, 21/25 anchors)
 
 ## Review Methodology
 
@@ -14,6 +14,62 @@ Every calibration run is reviewed by a two-tier expert panel before any action i
 `/gap-finder` *(unique authority: may dispatch agents + question specialists directly)*, `/game-designer`, `/corps-army-commander`, `/modern-wargame-expert`, `/canon-compliance-reviewer`
 
 **Orchestrator** synthesizes, gives go/no-go, updates this file + PROJECT_LEDGER.md.
+
+## n1280 SUB-SEGMENT ID COLLISION FIX (2026-04-01)
+- **93.2% area-weighted (40w). 21/25 anchors. 6/6 benchmarks.**
+- **final_state_hash: 80647861cf5a24f3**
+- VRS at-front: **74.4%** (61/82) — recovered from 52.4% in n1279, above pre-fix baseline of ~71%.
+- Failing anchors: brcko_2, boljanic_2, gradacac_2, rastosnica_2.
+
+### Change vs n1279
+- `src/sim/combat/sector_splitting.ts`: 4 sub-segment ID generation sites changed from `subseg:${sector.corps_id}:split${ci}` / `ftsplit${ci}` / `merged${indexHint}` to `subseg:${sector.sector_id}:split${ci}` / `ftsplit${ci}` / `merged${indexHint}`. `sector_id` is unique per sector; `corps_id` is shared by all sectors in a corps, causing silent Map overwrites when a corps had >1 sector.
+
+### Root Cause Fixed
+`vrs_1st_krajina:split0` was being generated twice (once per sector in that corps). The commander correction pass builds a `sub_segment_id → friendly_osids` Map; the second entry silently clobbered the first. 23 brigades assigned to the overwritten split0 were invisible to all correction logic — they kept wrong march orders and wrong transit states indefinitely.
+
+### Key Findings
+- Zero wrong-destination march orders after fix. Zero duplicate sub-segment IDs. `komar_2` pileup (was 5–12 brigades) resolved.
+- `brcko_2` structurally orphaned: not in any sector's `territory_osids`. Persistent brcko anchor failure is a sector coverage gap, not a brigade distribution issue.
+- `gradacac_2` / `rastosnica_2` regressions: RS brigades now correctly covering fronts they were absent from before. Calibration drop reflects RS overperforming on newly-covered fronts — not a wrong fix, requires sector assignment tuning.
+- 3 brigades with stale `assigned_sub_segment_id` (705th Slavna Mountain, Bileća Brigade, 1st Laktaši) — dead IDs from renamed/merged sectors. P1.
+
+### Open P0s after n1280
+1. brcko_2 structural gap — OSID not in any sector's territory_osids.
+2. boljanic_2 — ARBiH operational pressure on Doboj, insufficient RS garrison.
+3. gradacac_2 / rastosnica_2 — RS overperforming on newly-covered fronts; sector assignment scope tuning needed.
+4. Battle tempo 93 vs 150-250 target.
+
+---
+
+## n1279 correctTransitStates + sector_splitting PATH GUARDS (2026-04-01)
+- **93.5% area-weighted (40w). 22/25 anchors. 6/6 benchmarks. 84 battles.**
+- **final_state_hash: b45b8937b29fe849**
+- VRS at-front: **52.4% (BROKEN)** — worse than n1275 baseline (~71%). Root cause: duplicate sub-segment IDs (fixed in n1280).
+- New anchor failure: gradacac_2 (sim=RS, expected=RBiH). rastosnica_2 also failing.
+
+### Changes vs n1278
+1. `src/sim/combat/commander_march_correction.ts` — added `correctTransitStates()`: scans `brigade_movement_state` for in-transit brigades whose transit destination falls outside their assigned sub-segment `friendly_osids`; cancels the transit state and issues a corrected BFS march order. Runs after `correctMarchOrders` in the `commander-correct-march-orders` step (step 153).
+2. `src/sim/combat/sector_splitting.ts` Path 1 — `splitNonContiguousSectors` strict Case B block: `else if (meta.side_b === faction)` → bare `else`. Prevents empty `friendly_osids` when an OSID is contested or null at snapshot time.
+3. `src/sim/combat/sector_splitting.ts` Path 2 — added `allFriendly` rebuild guard: when `allFriendly` is empty due to upstream corruption, rebuilds directly from `edgeMeta` using the same faction-side logic as `findSubSegments`.
+
+### Root Cause Identified (fixed in n1280)
+`splitNonContiguousSectors` used `corps_id` as sub-segment ID prefix; counter resets per call → `vrs_1st_krajina:split0` appeared twice. Commander correction pass Map lookup silently overwrote the first entry; 23 brigades became invisible to all correction logic.
+
+---
+
+## n1278 COMMANDER MARCH CORRECTION PASS + HOME_OSID REMOVAL (2026-04-01)
+- Calibration not recorded — intermediate run, issue discovered immediately (correction pass blind to in-transit brigades).
+
+### Changes
+- `src/sim/combat/commander_march_correction.ts` (new file): `correctMarchOrders(state, adjacency)` — for each active brigade with `assigned_sub_segment_id`, if its march order destination is outside the sub-segment's `friendly_osids`, overrides with nearest reachable `friendly_osid` by BFS. Fully emergent: no brigade IDs or OSID names hardcoded.
+- `src/sim/turn_phases/war_phases.ts`: new step `commander-correct-march-orders` (step 153) inserted after `generate-bot-corps-orders`. Step count 152→153.
+- `src/sim/combat/brigade_front_distribution.ts`: removed `home_osid` tiebreaker from `pickLeastStackedTarget`; added `in_transit` guard at top of Phase B loop (`if (movementState?.[bid]?.status === 'in_transit') continue`).
+- `src/sim/combat/subsegment_assignment.ts`: removed `HOME_AFFINITY_BONUS` from brigade×sub-segment affinity scoring.
+
+### Issue Found
+`correctMarchOrders` only checked `brigade_movement_orders`. But `osid-column-movement` (step 576) runs before the commander pass and converts pending orders into `brigade_movement_state`. Brigades already in transit retained wrong destinations. Fix: `correctTransitStates()` added in n1279.
+
+---
 
 ## n1237 TWO-TIER PANEL — CONDITIONAL NO-GO for v0.8.1 (2026-03-31)
 - **92.3% area-weighted (40w). 22/22 anchors. 6/6 benchmarks. 78 battles. 31/40 combat weeks.**

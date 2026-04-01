@@ -129,3 +129,15 @@ CorpsFrontSubSegment {
 4. **Pipeline reordering invalidates derived data** — if you move a step, check ALL derivations
 5. **Sector IDs change after merge/split** — anything caching sector IDs must refresh
 6. **Point-only contacts (shared vertex, 0 segments) are data artifacts from polygon derivation** — never treat as real adjacency. 46 such edges exist in the contact graph (12 cross-faction). Example: sela_2-golubici_2 share 1 vertex but 0 boundary segments, with RS territory (Obalj, Ljuta) between them. This caused sector arbih_1st_corps:7 to bridge Trnovo and Kalinovik into one sector. Always require `shared_segments >= 1`.
+
+## Session Lessons (2026-04-01)
+
+### Sub-segment IDs
+- **Sub-segment IDs must use `sector_id` prefix, not `corps_id`.** `corps_id` is shared by all sectors in a corps; the per-call counter resets → duplicate IDs silently overwrite each other in Map lookups. Always use `sector.sector_id` as the prefix when constructing `sub_segment_id`.
+- **Duplicate sub-segment IDs make commander correction pass blind** — in n1279, 23 brigades were invisible to the pass, VRS at-front dropped from 71% to 52.4%. Always verify IDs are unique before implementing any pass that reads sub-segments by ID.
+
+### Sector Splitting
+- **`else if (meta.side_b === faction)` misses contested/null OSIDs.** Use bare `else` for the second branch in sector-splitting logic; `else if` on the opposing faction creates a blind spot for any OSID that is contested or has no controller.
+
+### Structural Orphans
+- **`brcko_2` is structurally orphaned** — not in any sector's `territory_osids`. No distribution fix can route brigades there until the sector system covers it. This is a sector coverage gap, not a bot or distribution problem.

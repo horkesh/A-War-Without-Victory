@@ -85,3 +85,9 @@ When assessing plausibility or designing historical starting points, consult the
 - Run summary: control flips, formation deltas, army strengths; one-line plausibility verdict.
 - **Flags:** Bullet list of ahistorical or unintended items with short rationale.
 - **Proposals:** Numbered conceptual recommendations (what to add/change, which role could implement).
+
+## Session Lessons (2026-04-01)
+
+### Calibration Interpretation
+- **Duplicate sub-segment IDs silently corrupt calibration.** n1279 showed VRS at-front dropping from 71% to 52.4% due to duplicate IDs — the commander correction pass was blind to 23 brigades. Always verify sub-segment ID uniqueness when calibration regresses sharply after an infrastructure change.
+- **Distinguish distribution regression from sector overreach before reverting.** If RS brigades cover previously-empty fronts and win anchors there, that is a sector assignment issue (overreach), not a distribution regression. Do not revert a distribution fix because new anchors drop — diagnose whether the dropped anchor reflects brigades in the wrong sector, not wrong distribution logic.

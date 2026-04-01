@@ -1,6 +1,6 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-01. 165 lessons across 8 topic files.
+> Last restructured: 2026-04-01. 176 lessons across 9 topic files.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
@@ -78,6 +78,36 @@
 - **Cost**: Extra investigation cycle. The systematic trace approach in the second pass was correct — should have been applied from the start.
 
 ## New Lessons (always read these)
+
+### [Combat] Phase B re-orders in-transit brigades every turn unless guarded (2026-04-01) — NEW → see `combat.md`
+- Add `if (brigade_movement_state?.[bid]?.status === 'in_transit') continue;` at top of Phase B loop. Re-issuing a march order resets transit state and discards accumulated progress.
+
+### [Combat] home_osid is a recruitment artifact, not a strategic destination (2026-04-01) — NEW → see `combat.md`
+- Remove `home_osid` from all march target scoring. It biased 9 VRS brigades toward inland recruitment towns instead of assigned sector fronts.
+
+### [Combat] Commander has zero movement authority by design — must explicitly add it (2026-04-01) — NEW → see `combat.md`
+- Commander writes only `directive`, `active_operations`, `sector_stance`. It never touches `brigade_movement_orders`. The authority gap is structural — must be bridged explicitly in code.
+
+### [Combat] Commander correction pass must also cancel wrong in-transit states (2026-04-01) — NEW → see `combat.md`
+- `correctMarchOrders` only catches pending orders. Brigades already converted to `in_transit` by `osid-column-movement` (step 576) escape correction. Add `correctTransitStates` for the other half.
+
+### [Sectors] Sub-segment IDs must use sector_id as prefix, not corps_id (2026-04-01) — NEW → see `sectors.md`
+- `corps_id` is shared across all sectors; counter resets per call → duplicate IDs, second overwrites first silently in every Map lookup.
+
+### [Sectors] `else if` in front-edge friendly assignment = contested OSID blind spot (2026-04-01) — NEW → see `sectors.md`
+- Use bare `else` (matching `findSubSegments` pattern). `else if (meta.side_b === faction)` silently produces sub-segments with empty `friendly_osids` for contested OSIDs.
+
+### [Sectors] brcko_2 orphaned from sector system — structural gap, not a distribution problem (2026-04-01) — NEW → see `sectors.md`
+- Check sector `territory_osids` coverage before investigating brigade distribution. Missing OSID in sector coverage is a different problem class.
+
+### [Sectors] SRK siege ring cannot rely on Phase B cross-front march accidents (2026-04-01) — NEW → see `sectors.md`
+- Any Phase B eligibility filter breaks SRK coverage. Verify sub-segment assignment can sustain the siege ring independently before modifying Phase B.
+
+### [Sectors] Alphabetical tiebreak in sub-segment assignment = architectural cascade risk (2026-04-01) — NEW → see `sectors.md`
+- Diff brigade-to-subsegment mapping before/after any scoring change. Assignments shifting for brigades outside the targeted sector = cascade risk, must be analyzed before proceeding.
+
+### [Calibration] Brigade distribution regression vs sector assignment overreach — distinguish before reverting (2026-04-01) — NEW → see `calibration.md`
+- When a distribution fix drops anchors, check WHY. If the brigade followed its sub-segment assignment correctly, fix the assignment upstream — not the distribution fix downstream.
 
 ### [Architecture] Phase B column march doesn't reserve the target — simultaneous pileup (2026-04-01) — NEW → see `architecture.md`
 - osidCount only updated on direct moves, not on column march issuance. Multiple brigades see same target as empty, all march there. Fix: increment osidCount when issuing a march order.
@@ -207,11 +237,12 @@
 
 | File | Topics | Lessons | Load when... |
 |------|--------|---------|-------------|
-| [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Combat, Bot AI | 37 | Running calibration scenarios, tuning parameters, OOB changes |
+| [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Bot AI | 38 | Running calibration scenarios, tuning parameters, OOB changes |
+| [combat.md](life_lessons/combat.md) | Combat, Brigade Distribution, March System | 8 | Combat resolution, brigade movement, march/distribution system |
 | [architecture.md](life_lessons/architecture.md) | Architecture, Engine, Scaling, Defaults, Data Integrity | 46 | Changing engine structure, state, pipeline, adding systems |
 | [data_pipeline.md](life_lessons/data_pipeline.md) | Data, Pipeline, Geometry | 10 | Modifying derived data, running data scripts, geometry work |
 | [ui_map.md](life_lessons/ui_map.md) | UI, GUI, MapLibre, Rendering, React | 12 | Frontend, map, tactical overlay, modal work |
 | [process.md](life_lessons/process.md) | Process, Planning, QA, Quality, Night Shift, Debugging | 42 | General development process (skim at session start) |
-| [sectors.md](life_lessons/sectors.md) | Sectors, Design | 5 | Sector system, front lines, territory assignment |
+| [sectors.md](life_lessons/sectors.md) | Sectors, Design | 11 | Sector system, front lines, territory assignment, sub-segments |
 | [platform.md](life_lessons/platform.md) | Platform, Tooling | 4 | Build issues, platform-specific bugs, tooling |
 | [events.md](life_lessons/events.md) | Events | 1 | Event system, flag gates, triggers |

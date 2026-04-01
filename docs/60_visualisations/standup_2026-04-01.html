@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PYRRHIC GAMES — WAR ROOM BRIEFING // 2026-04-01</title>
+<style>
+  :root {
+    --bg:        #0a0c0e;
+    --surface:   #111418;
+    --panel:     #161b22;
+    --border:    #30363d;
+    --accent:    #4a90d9;
+    --green:     #3fb950;
+    --red:       #f85149;
+    --orange:    #d29922;
+    --yellow:    #e3b341;
+    --dim:       #8b949e;
+    --text:      #c9d1d9;
+    --bright:    #f0f6fc;
+    --rs:        #c0392b;
+    --arbih:     #2e7d32;
+    --hvo:       #1565c0;
+    --glow-g:    rgba(63,185,80,0.15);
+    --glow-r:    rgba(248,81,73,0.15);
+    --glow-a:    rgba(74,144,217,0.15);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Courier New', Courier, monospace;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  /* ── Header ────────────────────────────────────────────────────── */
+  .masthead {
+    border: 1px solid var(--accent);
+    background: linear-gradient(180deg, #0e1520 0%, var(--surface) 100%);
+    padding: 18px 24px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .masthead::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 28px,
+      rgba(74,144,217,0.04) 28px, rgba(74,144,217,0.04) 29px
+    );
+    pointer-events: none;
+  }
+  .masthead-top {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .masthead-label {
+    font-size: 10px; letter-spacing: 4px; color: var(--accent);
+    text-transform: uppercase;
+  }
+  .masthead-title {
+    font-size: 26px; font-weight: bold; color: var(--bright);
+    letter-spacing: 2px;
+  }
+  .masthead-sub {
+    font-size: 11px; color: var(--dim); letter-spacing: 1px;
+  }
+  .masthead-meta {
+    font-size: 11px; color: var(--dim); text-align: right;
+  }
+  .masthead-meta span { color: var(--accent); }
+
+  /* ── Grid layout ───────────────────────────────────────────────── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 16px; }
+  .span-2 { grid-column: span 2; }
+
+  /* ── Panels ────────────────────────────────────────────────────── */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+  }
+  .panel.glow-green { border-color: var(--green); background: linear-gradient(135deg, var(--panel), var(--glow-g)); }
+  .panel.glow-red   { border-color: var(--red);   background: linear-gradient(135deg, var(--panel), var(--glow-r)); }
+  .panel.glow-blue  { border-color: var(--accent); background: linear-gradient(135deg, var(--panel), var(--glow-a)); }
+  .panel-title {
+    font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--dim); margin-bottom: 10px; padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .panel-title .badge {
+    float: right; font-size: 8px; padding: 1px 6px;
+    background: var(--accent); color: #000; letter-spacing: 1px;
+  }
+  .panel-title .badge.red   { background: var(--red); }
+  .panel-title .badge.green { background: var(--green); }
+  .panel-title .badge.orange{ background: var(--orange); }
+
+  /* ── Big stat ──────────────────────────────────────────────────── */
+  .stat-big { font-size: 38px; font-weight: bold; line-height: 1; }
+  .stat-big.green  { color: var(--green); }
+  .stat-big.red    { color: var(--red); }
+  .stat-big.yellow { color: var(--yellow); }
+  .stat-label { font-size: 10px; color: var(--dim); margin-top: 2px; letter-spacing: 1px; }
+  .stat-delta { font-size: 11px; margin-top: 4px; }
+  .stat-delta.up   { color: var(--green); }
+  .stat-delta.down { color: var(--red); }
+  .stat-delta.flat { color: var(--dim); }
+
+  /* ── Calibration bar chart ─────────────────────────────────────── */
+  .calbar-row {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 5px; font-size: 10px;
+  }
+  .calbar-label { width: 58px; color: var(--dim); flex-shrink: 0; text-align: right; }
+  .calbar-track {
+    flex: 1; height: 14px; background: #1c2128;
+    border: 1px solid var(--border); position: relative;
+  }
+  .calbar-fill {
+    height: 100%; background: var(--accent);
+    transition: width 0.3s;
+  }
+  .calbar-fill.ath  { background: var(--green); }
+  .calbar-fill.prev { background: #2c4a6e; }
+  .calbar-value { width: 42px; color: var(--bright); flex-shrink: 0; }
+  .calbar-note  { width: 90px; color: var(--dim); font-size: 9px; flex-shrink: 0; }
+
+  /* ── Anchor table ──────────────────────────────────────────────── */
+  table { width: 100%; border-collapse: collapse; font-size: 10px; }
+  th { font-size: 8px; letter-spacing: 2px; text-transform: uppercase;
+       color: var(--dim); padding: 4px 6px; border-bottom: 1px solid var(--border); text-align: left; }
+  td { padding: 4px 6px; border-bottom: 1px solid #1c2128; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #1c2128; }
+  .pass { color: var(--green); }
+  .fail { color: var(--red); }
+  .warn { color: var(--orange); }
+  .dim  { color: var(--dim); }
+
+  /* ── Priority table ────────────────────────────────────────────── */
+  .priority-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 8px 0; border-bottom: 1px solid #1c2128;
+    font-size: 11px;
+  }
+  .priority-row:last-child { border-bottom: none; }
+  .priority-num {
+    font-size: 18px; font-weight: bold; flex-shrink: 0;
+    width: 28px; line-height: 1.2;
+  }
+  .priority-body { flex: 1; }
+  .priority-title { color: var(--bright); margin-bottom: 2px; }
+  .priority-detail { color: var(--dim); font-size: 10px; }
+  .priority-tag {
+    font-size: 8px; padding: 1px 5px; letter-spacing: 1px;
+    border: 1px solid; margin-left: 4px; vertical-align: middle;
+    text-transform: uppercase;
+  }
+  .priority-tag.p0 { color: var(--red); border-color: var(--red); }
+  .priority-tag.p1 { color: var(--orange); border-color: var(--orange); }
+  .priority-tag.p2 { color: var(--dim); border-color: var(--border); }
+
+  /* ── Retrospective ─────────────────────────────────────────────── */
+  .retro-section { margin-bottom: 10px; }
+  .retro-section-title {
+    font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+  .retro-section-title.good { color: var(--green); }
+  .retro-section-title.bad  { color: var(--red); }
+  .retro-section-title.ugly { color: var(--orange); }
+  .retro-item {
+    font-size: 10px; color: var(--text); padding: 4px 8px;
+    border-left: 2px solid; margin-bottom: 3px;
+    background: #1c2128;
+  }
+  .retro-item.good { border-color: var(--green); }
+  .retro-item.bad  { border-color: var(--red); }
+  .retro-item.ugly { border-color: var(--orange); }
+  .retro-sub { font-size: 9px; color: var(--dim); margin-top: 2px; }
+
+  /* ── Ops tempo ─────────────────────────────────────────────────── */
+  .tempo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .tempo-card {
+    background: #1c2128; padding: 8px 10px; border: 1px solid var(--border);
+  }
+  .tempo-card .num { font-size: 22px; font-weight: bold; }
+  .tempo-card .num.bad  { color: var(--red); }
+  .tempo-card .num.warn { color: var(--orange); }
+  .tempo-card .num.good { color: var(--green); }
+  .tempo-card .lbl { font-size: 9px; color: var(--dim); letter-spacing: 1px; }
+
+  /* ── Progress bars ─────────────────────────────────────────────── */
+  .progress-row { margin-bottom: 6px; }
+  .progress-label { font-size: 10px; color: var(--dim); margin-bottom: 2px; display: flex; justify-content: space-between; }
+  .progress-track { height: 8px; background: #1c2128; border: 1px solid var(--border); }
+  .progress-fill { height: 100%; }
+
+  /* ── Faction pills ─────────────────────────────────────────────── */
+  .faction-rs   { color: #ff6b6b; }
+  .faction-arbih{ color: #69db7c; }
+  .faction-hvo  { color: #74c0fc; }
+
+  /* ── Status pill ───────────────────────────────────────────────── */
+  .pill {
+    display: inline-block; font-size: 8px; padding: 1px 6px;
+    letter-spacing: 1px; text-transform: uppercase; border: 1px solid;
+    margin: 1px;
+  }
+  .pill.green  { color: var(--green); border-color: var(--green); }
+  .pill.red    { color: var(--red); border-color: var(--red); }
+  .pill.orange { color: var(--orange); border-color: var(--orange); }
+  .pill.blue   { color: var(--accent); border-color: var(--accent); }
+  .pill.dim    { color: var(--dim); border-color: var(--border); }
+
+  /* ── Canon drift ───────────────────────────────────────────────── */
+  .drift-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 0; border-bottom: 1px solid #1c2128; font-size: 10px;
+  }
+  .drift-row:last-child { border-bottom: none; }
+  .drift-status { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+  .drift-status.ok   { background: var(--green); }
+  .drift-status.gap  { background: var(--orange); }
+  .drift-status.fail { background: var(--red); }
+  .drift-body { flex: 1; }
+  .drift-title { color: var(--bright); }
+  .drift-detail { color: var(--dim); font-size: 9px; }
+
+  /* ── Life lessons ──────────────────────────────────────────────── */
+  .lesson {
+    padding: 8px 10px; border-left: 3px solid var(--accent);
+    background: #1a2030; margin-bottom: 8px; font-size: 10px;
+  }
+  .lesson-title { color: var(--bright); margin-bottom: 3px; font-size: 11px; }
+  .lesson-body  { color: var(--dim); }
+
+  /* ── Trajectory sparkline (CSS-only) ───────────────────────────── */
+  .spark { display: flex; align-items: flex-end; gap: 3px; height: 50px; padding: 0 4px; }
+  .spark-bar {
+    flex: 1; background: var(--accent); min-width: 4px;
+    position: relative; cursor: default;
+    transition: background 0.2s;
+  }
+  .spark-bar:hover { background: var(--green); }
+  .spark-bar.ath  { background: var(--green); }
+  .spark-bar.low  { background: #2c4a6e; }
+  .spark-bar.rev  { background: #3a1a1a; }
+  .spark-labels {
+    display: flex; justify-content: space-between;
+    font-size: 8px; color: var(--dim); padding: 2px 4px; margin-top: 2px;
+  }
+
+  /* ── Footer ────────────────────────────────────────────────────── */
+  .footer {
+    margin-top: 20px; padding: 10px 16px;
+    border: 1px solid var(--border); background: var(--surface);
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 9px; color: var(--dim); letter-spacing: 1px;
+  }
+  .footer span { color: var(--accent); }
+
+  /* ── Scrollbar ─────────────────────────────────────────────────── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════════════ MASTHEAD -->
+<div class="masthead">
+  <div class="masthead-top">
+    <div>
+      <div class="masthead-label">// PYRRHIC GAMES — DAILY STANDUP BRIEFING</div>
+      <div class="masthead-title">A WAR WITHOUT VICTORY</div>
+      <div class="masthead-sub">STRATEGIC SIMULATION · BOSNIAN WAR 1992–1995 · v0.8.0-CANDIDATE</div>
+    </div>
+    <div class="masthead-meta">
+      DATE: <span>2026-04-01</span><br>
+      BUILD: <span>n1275</span><br>
+      HASH: <span>2a1b68b6</span><br>
+      BRANCH: <span>main</span>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════ ROW 1: HEADLINE STATS -->
+<div class="grid-4">
+
+  <div class="panel glow-green">
+    <div class="panel-title">Area-Weighted Score <span class="badge green">STABLE</span></div>
+    <div class="stat-big green">94.0%</div>
+    <div class="stat-label">40W CALIBRATION (n1275)</div>
+    <div class="stat-delta up">▲ ATH baseline: 94.2% (n1274)</div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Anchors</div>
+    <div class="stat-big yellow">24/25</div>
+    <div class="stat-label">ANCHORS PASSING</div>
+    <div class="stat-delta down">✗ brcko persistent P0</div>
+  </div>
+
+  <div class="panel glow-red">
+    <div class="panel-title">Battle Tempo <span class="badge red">P0</span></div>
+    <div class="stat-big red">90</div>
+    <div class="stat-label">BATTLES / 40W (TARGET: 150–250)</div>
+    <div class="stat-delta down">▼ 2.25/week — target 3.75+</div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Benchmarks</div>
+    <div class="stat-big green">6/6</div>
+    <div class="stat-label">BENCHMARKS PASSING</div>
+    <div class="stat-delta flat">All 6 faction territory benchmarks OK</div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════ ROW 2: TRAJECTORY + RETRO -->
+<div class="grid-2">
+
+  <div class="panel">
+    <div class="panel-title">Calibration Trajectory — n1211 → n1275</div>
+    <div class="spark">
+      <!-- scaled: 90=0%, 94.2=100% range; bars as % of 50px height -->
+      <!-- n1211=90.2%, n1220=90.5%, n1230=91.2%, n1238=92.5%, n1245=93.0%, n1250=93.5%,
+           n1256=94.2%ATH, n1260=93.8%, n1265=93.9%, n1270=94.0%, n1273=94.1%, n1274=94.2%ATH,
+           n1275=94.0%, n1276=94.0%, n1277=94.0%reverted -->
+      <div class="spark-bar low"  style="height:5%"  title="n1211: 90.2%"></div>
+      <div class="spark-bar low"  style="height:8%"  title="n1220: 90.5%"></div>
+      <div class="spark-bar low"  style="height:24%" title="n1230: 91.2%"></div>
+      <div class="spark-bar"      style="height:55%" title="n1238: 92.5%"></div>
+      <div class="spark-bar"      style="height:67%" title="n1245: 93.0%"></div>
+      <div class="spark-bar"      style="height:79%" title="n1250: 93.5%"></div>
+      <div class="spark-bar ath"  style="height:100%" title="n1256: 94.2% ATH"></div>
+      <div class="spark-bar"      style="height:86%" title="n1260: 93.8%"></div>
+      <div class="spark-bar"      style="height:88%" title="n1265: 93.9%"></div>
+      <div class="spark-bar"      style="height:95%" title="n1270: 94.0%"></div>
+      <div class="spark-bar"      style="height:98%" title="n1273: 94.1%"></div>
+      <div class="spark-bar ath"  style="height:100%" title="n1274: 94.2% ATH"></div>
+      <div class="spark-bar"      style="height:95%" title="n1275: 94.0% stable"></div>
+      <div class="spark-bar"      style="height:95%" title="n1276: 94.0%"></div>
+      <div class="spark-bar rev"  style="height:92%" title="n1277: reverted (3 approaches)"></div>
+    </div>
+    <div class="spark-labels">
+      <span>n1211</span>
+      <span style="color:var(--green)">n1256 ATH</span>
+      <span style="color:var(--green)">n1274 ATH</span>
+      <span style="color:var(--red)">n1277↩</span>
+    </div>
+    <div style="margin-top:8px; font-size:10px; color: var(--dim);">
+      <span style="color:var(--green)">▓ </span>ATH &nbsp;
+      <span style="color:var(--accent)">▓ </span>Stable &nbsp;
+      <span style="color:#2c4a6e">▓ </span>Early climb &nbsp;
+      <span style="color:#3a1a1a">▓ </span>Reverted
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Retrospective</div>
+    <div class="retro-section">
+      <div class="retro-section-title good">// THE GOOD</div>
+      <div class="retro-item good">Phase B distance-weighted march (0.3 weight) delivered ATH tie
+        <div class="retro-sub">n1274: 94.2% area-weighted, boljanic_2 FIXED for that run</div>
+      </div>
+      <div class="retro-item good">Alphabetical tiebreak root cause fully mapped
+        <div class="retro-sub">Assignment cascade understood — sub_segment first-pass mechanism documented</div>
+      </div>
+      <div class="retro-item good">3 non-railroad fix approaches tried systematically
+        <div class="retro-sub">All reverted cleanly; no permanent regression introduced</div>
+      </div>
+    </div>
+    <div class="retro-section">
+      <div class="retro-section-title bad">// THE BAD</div>
+      <div class="retro-item bad">boljanic_2 structurally failing — 7 Doboj OSIDs fall to ARBiH
+        <div class="retro-sub">Root: ARBiH 2nd Corps ops pressure, not brigade drift</div>
+      </div>
+      <div class="retro-item bad">SRK siege ring accidentally maintained by wrong Phase B behavior
+        <div class="retro-sub">Any Phase B eligibility fix causes SRK cascade (4→2 brigades near Sarajevo)</div>
+      </div>
+      <div class="retro-item bad">Proposal 2 (corridor-width) blocked — Infinity for main body zones
+        <div class="retro-sub">Only affects isolated pockets/enclaves, useless for Doboj</div>
+      </div>
+    </div>
+    <div class="retro-section">
+      <div class="retro-section-title ugly">// THE UGLY</div>
+      <div class="retro-item ugly">Exhaustion system reads 0 ALL 40 WEEKS for all factions
+        <div class="retro-sub">Entire negative-sum design pillar is inert — P1 #47</div>
+      </div>
+      <div class="retro-item ugly">343 invalid operations in n1275 run
+        <div class="retro-sub">arbih_1st_corps: 5 consecutive zero-eligible ops t18-t37</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════ ROW 3: P0 STATUS + OPS TEMPO -->
+<div class="grid-2">
+
+  <div class="panel glow-red">
+    <div class="panel-title">Open P0 Issues <span class="badge red">3 ACTIVE</span></div>
+    <table>
+      <thead>
+        <tr>
+          <th>Issue</th>
+          <th>Status</th>
+          <th>Root Cause</th>
+          <th>Approach</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="fail">boljanic_2 anchor</td>
+          <td><span class="pill red">FAILING</span></td>
+          <td class="dim">ARBiH 2nd Corps ops pressure (7 Doboj OSIDs fall)</td>
+          <td class="dim">Proposal 3: commitment-ratio filter</td>
+        </tr>
+        <tr>
+          <td class="fail">brcko anchor</td>
+          <td><span class="pill red">FAILING</span></td>
+          <td class="dim">10 ARBiH brigades stacked at donji_rahic</td>
+          <td class="dim">Ops-level investigation needed</td>
+        </tr>
+        <tr>
+          <td class="fail">Battle tempo</td>
+          <td><span class="pill red">60% of target</span></td>
+          <td class="dim">343 invalid ops · arbih_1st_corps broken t18-t37</td>
+          <td class="dim">Invalid ops root cause investigation</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top: 12px;">
+      <div class="panel-title" style="margin-bottom:6px;">Anchor Status — 25 Total</div>
+      <div style="display:flex; flex-wrap:wrap; gap:4px;">
+        <span class="pill green">zepa_2=RBiH</span>
+        <span class="pill green">vitinica_2=RBiH</span>
+        <span class="pill green">rastosnica_2=RBiH</span>
+        <span class="pill green">derventa_2=RS</span>
+        <span class="pill green">boljanic_2=RS</span>
+        <span class="pill green">vlasenica_2=RS</span>
+        <span class="pill green">kljuc_2=RS</span>
+        <span class="pill green">sanski_most_2=RS</span>
+        <span class="pill green">bijeljina_2=RS</span>
+        <span class="pill green">gradacac_2=RS</span>
+        <span class="pill green">tuzla_2=RBiH</span>
+        <span class="pill green">sarajevo_2=RBiH</span>
+        <span class="pill green">mostar_2=HRHB</span>
+        <span class="pill green">livno_2=HRHB</span>
+        <span class="pill green">cazin_2=RBiH</span>
+        <span class="pill green">bihac_2=RBiH</span>
+        <span class="pill green">gorazde_2=RBiH</span>
+        <span class="pill green">travnik_2=RBiH</span>
+        <span class="pill green">jajce_2=RS</span>
+        <span class="pill green">prijedor_2=RS</span>
+        <span class="pill green">doboj_2=RS</span>
+        <span class="pill green">foca_2=RS</span>
+        <span class="pill green">zvornik_2=RS</span>
+        <span class="pill green">srebrenica_2=RS</span>
+        <span class="pill red">brcko_2=RS</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Wednesday Deep-Dive — Operational Tempo <span class="badge orange">CRITICAL</span></div>
+
+    <div class="tempo-grid">
+      <div class="tempo-card">
+        <div class="num bad">2.25</div>
+        <div class="lbl">BATTLES / WEEK (target ≥3.5)</div>
+      </div>
+      <div class="tempo-card">
+        <div class="num bad">343</div>
+        <div class="lbl">INVALID OPERATIONS</div>
+      </div>
+      <div class="tempo-card">
+        <div class="num warn">90</div>
+        <div class="lbl">BATTLES / 40W (target 150–250)</div>
+      </div>
+      <div class="tempo-card">
+        <div class="num bad">62</div>
+        <div class="lbl">BRIGADES NEVER FOUGHT</div>
+      </div>
+    </div>
+
+    <div style="font-size: 10px; color: var(--dim); margin-bottom: 10px;">
+      <span class="faction-arbih">ARBiH 1st Corps</span> — completely broken t18–t37:
+      5 consecutive turns of zero eligible attackers. 10 brigades stacked at donji_rahic
+      with no valid op objectives. Invalid ops account for ~23% of all planned operations.
+    </div>
+
+    <div style="font-size: 10px; margin-bottom: 6px;">
+      <span style="color:var(--bright);">Corps invalid op breakdown (estimated):</span>
+    </div>
+    <div class="progress-row">
+      <div class="progress-label"><span class="faction-arbih">arbih_1st_corps</span><span class="fail">~120 invalid</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:35%;background:var(--green);height:100%"></div></div>
+    </div>
+    <div class="progress-row">
+      <div class="progress-label"><span class="faction-rs">vrs_1st_krajina_corps</span><span class="warn">~60 invalid</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:17%;background:var(--rs);height:100%"></div></div>
+    </div>
+    <div class="progress-row">
+      <div class="progress-label"><span class="faction-arbih">arbih_2nd_corps</span><span class="warn">~50 invalid</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:15%;background:var(--green);height:100%"></div></div>
+    </div>
+    <div class="progress-row">
+      <div class="progress-label"><span style="color:var(--dim);">other corps</span><span class="dim">~113 invalid</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:33%;background:var(--border);height:100%"></div></div>
+    </div>
+
+    <div style="margin-top:10px; padding:8px; background:#1c2128; border-left:3px solid var(--orange); font-size:10px;">
+      <span style="color:var(--orange);">ROOT HYPOTHESIS:</span>
+      <span style="color:var(--dim)"> arbih_1st_corps has no reachable enemy OSIDs from donji_rahic cluster
+      after t18 ARBiH ops push past front. Missing op planning gate for isolated pockets.</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════ ROW 4: CANON DRIFT + BACKLOG -->
+<div class="grid-2">
+
+  <div class="panel">
+    <div class="panel-title">Canon Drift Audit <span class="badge green">NO DRIFT</span></div>
+
+    <div class="drift-row">
+      <div class="drift-status ok"></div>
+      <div class="drift-body">
+        <div class="drift-title">Phase B distance-weighted march (PHASE_B_DISTANCE_WEIGHT=0.3)</div>
+        <div class="drift-detail">Implemented n1274, emergent, passes Systems Manual BFS distance principle</div>
+      </div>
+    </div>
+    <div class="drift-row">
+      <div class="drift-status ok"></div>
+      <div class="drift-body">
+        <div class="drift-title">HOME_AFFINITY_BONUS=1.3 in sub_segment assignment</div>
+        <div class="drift-detail">Weak affinity consistent with emergent behavior mandate; not a railroad</div>
+      </div>
+    </div>
+    <div class="drift-row">
+      <div class="drift-status ok"></div>
+      <div class="drift-body">
+        <div class="drift-title">SIEGE_EXEMPT_CORPS hardcode (SRK + arbih_1st)</div>
+        <div class="drift-detail">Engineering exemption, not gameplay railroad — acceptable per canon hierarchy</div>
+      </div>
+    </div>
+    <div class="drift-row">
+      <div class="drift-status gap"></div>
+      <div class="drift-body">
+        <div class="drift-title">ENTRENCHMENT_REDISTRIBUTION_THRESHOLD not in Systems Manual</div>
+        <div class="drift-detail">GAP: constant=1 used in brigade_front_distribution.ts; not documented in canon</div>
+      </div>
+    </div>
+    <div class="drift-row">
+      <div class="drift-status ok"></div>
+      <div class="drift-body">
+        <div class="drift-title">Dissolution 2-of-3 criteria (pers&lt;400, coh≤20, mor≤15)</div>
+        <div class="drift-detail">Matches EI §12. End-of-turn timing gap is a known edge case (not drift)</div>
+      </div>
+    </div>
+    <div class="drift-row">
+      <div class="drift-status ok"></div>
+      <div class="drift-body">
+        <div class="drift-title">HRHB cold-front exemption from VRS</div>
+        <div class="drift-detail">Graz Accords canon; isColdFront() in frontline_attrition.ts</div>
+      </div>
+    </div>
+
+    <div style="margin-top:10px; padding:8px; background:#1c2128; border-left:3px solid var(--orange); font-size:10px;">
+      <span style="color:var(--orange);">ACTION NEEDED:</span>
+      <span style="color:var(--dim);"> Add ENTRENCHMENT_REDISTRIBUTION_THRESHOLD to Systems Manual combat constants section.</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Stale Backlog Triage</div>
+    <table>
+      <thead>
+        <tr><th>Item</th><th>Severity</th><th>Age</th><th>Decision</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Exhaustion system reads 0 all 40w</td>
+          <td><span class="pill orange">P1 #47</span></td>
+          <td class="dim">3+ wks</td>
+          <td class="warn">ESCALATE</td>
+        </tr>
+        <tr>
+          <td>arbih_1st_corps zero-eligible ops t18-t37</td>
+          <td><span class="pill orange">P1</span></td>
+          <td class="dim">2 wks</td>
+          <td class="warn">ESCALATE</td>
+        </tr>
+        <tr>
+          <td>HRHB patron directive scope (JSON fix)</td>
+          <td><span class="pill orange">P1</span></td>
+          <td class="dim">1 wk</td>
+          <td class="warn">ESCALATE</td>
+        </tr>
+        <tr>
+          <td>Battle tempo 90 vs 150-250 target</td>
+          <td><span class="pill red">P0</span></td>
+          <td class="dim">ongoing</td>
+          <td class="warn">ESCALATE</td>
+        </tr>
+        <tr>
+          <td>boljanic_2 — structural ARBiH ops pressure</td>
+          <td><span class="pill red">P0</span></td>
+          <td class="dim">1 wk</td>
+          <td class="dim">PARK — Proposal 3 pending</td>
+        </tr>
+        <tr>
+          <td>brcko — 10 brigades stacked donji_rahic</td>
+          <td><span class="pill red">P0</span></td>
+          <td class="dim">1 wk</td>
+          <td class="dim">PARK — needs ops investigation</td>
+        </tr>
+        <tr>
+          <td>jajce_falls turn_min 40→28</td>
+          <td><span class="pill orange">P1</span></td>
+          <td class="dim">3 wks</td>
+          <td class="dim">PARK — historical accuracy</td>
+        </tr>
+        <tr>
+          <td>War-or-Game approval blocked (drift + brcko)</td>
+          <td><span class="pill red">BLOCKER</span></td>
+          <td class="dim">ongoing</td>
+          <td class="fail">UNBLOCKED when P0s cleared</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════ ROW 5: PRIORITIES + LIFE LESSONS -->
+<div class="grid-2">
+
+  <div class="panel glow-blue">
+    <div class="panel-title">Session Priorities — Ranked</div>
+
+    <div class="priority-row">
+      <div class="priority-num" style="color:var(--red);">1</div>
+      <div class="priority-body">
+        <div class="priority-title">
+          arbih_1st_corps zero-eligible ops investigation
+          <span class="priority-tag p0">P0</span>
+        </div>
+        <div class="priority-detail">
+          5 consecutive turns t18–t37 with no eligible attackers. Root cause: likely isolated
+          pocket with no reachable enemy OSIDs after ARBiH ops push. Fix battle tempo from 90→150+.
+          Dispatch: Operations Expert.
+        </div>
+      </div>
+    </div>
+
+    <div class="priority-row">
+      <div class="priority-num" style="color:var(--red);">2</div>
+      <div class="priority-body">
+        <div class="priority-title">
+          343 invalid ops root cause
+          <span class="priority-tag p0">P0</span>
+        </div>
+        <div class="priority-detail">
+          What constitutes an "invalid op"? Zero eligible brigade count vs. bad objective?
+          Invalid OSID vs. staging failure? Need per-type breakdown. Dispatch: Operations Expert.
+        </div>
+      </div>
+    </div>
+
+    <div class="priority-row">
+      <div class="priority-num" style="color:var(--orange);">3</div>
+      <div class="priority-body">
+        <div class="priority-title">
+          Exhaustion system P1 #47 — reads 0 all 40w
+          <span class="priority-tag p1">P1</span>
+        </div>
+        <div class="priority-detail">
+          Entire negative-sum design pillar is inert. If exhaustion never fires, the game's
+          core thesis (war without victory, attrition collapses factions) cannot manifest.
+          Dispatch: Gameplay Programmer.
+        </div>
+      </div>
+    </div>
+
+    <div class="priority-row">
+      <div class="priority-num" style="color:var(--orange);">4</div>
+      <div class="priority-body">
+        <div class="priority-title">
+          Proposal 3: commitment-ratio Phase B eligibility filter
+          <span class="priority-tag p1">P1</span>
+        </div>
+        <div class="priority-detail">
+          Only route Phase B brigades to under-garrisoned zones (commitment_ratio &lt; threshold).
+          Emergent — no brigade IDs, pure zone-level signal. Blocked: SRK crutch must be fixed first.
+          Pre-condition: validate SRK siege ring is correctly maintained independently.
+        </div>
+      </div>
+    </div>
+
+    <div class="priority-row">
+      <div class="priority-num" style="color:var(--dim);">5</div>
+      <div class="priority-body">
+        <div class="priority-title">
+          HRHB patron directive scope JSON fix
+          <span class="priority-tag p1">P1</span>
+        </div>
+        <div class="priority-detail">
+          Quick scope fix — limit to hvo_southeast_herzegovina only, not faction-wide.
+          15-minute change, very low risk. Good session warm-up task.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">New Life Lessons Proposed</div>
+
+    <div class="lesson">
+      <div class="lesson-title">SRK siege ring is a load-bearing architectural assumption</div>
+      <div class="lesson-body">
+        The Sarajevo siege ring (vrs_sarajevo_romanija) is maintained via Phase B cross-front
+        marching — an accidental emergent behavior. Any Phase B eligibility filter that checks
+        corps or sector boundaries will cascade into SRK coverage dropping from ~4 to ~2 brigades.
+        Before modifying Phase B logic, verify that SRK can maintain coverage independently
+        (via sub_segment assignment, not Phase B marching).
+        <br><br>
+        <span style="color:var(--orange);">STATUS: Proposed — not yet written to life_lessons/</span>
+      </div>
+    </div>
+
+    <div class="lesson">
+      <div class="lesson-title">Alphabetical tiebreak = architectural cascade risk</div>
+      <div class="lesson-body">
+        Sub_segment first-pass assignment uses alphabetical tiebreak when all brigades have
+        equal tiny scores for a distant sub_segment. This is not a bug — it's a deterministic
+        fallback. But it means any change to scoring (penalties, bonuses) that shifts one
+        brigade's assignment can cascade unpredictably to ALL other brigades in the sector.
+        Test cross-sector effects before committing any sub_segment scoring change.
+        <br><br>
+        <span style="color:var(--orange);">STATUS: Proposed — not yet written to life_lessons/</span>
+      </div>
+    </div>
+
+    <div style="margin-top: 12px; padding: 8px; background:#1c2128; border-left:3px solid var(--accent); font-size:10px; color:var(--dim);">
+      Both lessons pending write to <code>docs/life_lessons/combat.md</code>.
+      Run <code>docs/life_lessons.md</code> index update after writing.
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════ ROW 6: WAR-OR-GAME STATUS -->
+<div class="panel" style="margin-bottom:16px;">
+  <div class="panel-title">War-or-Game Approval Status <span class="badge red">NOT APPROVED</span></div>
+  <div style="display:grid; grid-template-columns: repeat(5,1fr); gap:12px;">
+
+    <div style="text-align:center; padding:10px; background:#1c2128; border:1px solid var(--border);">
+      <div style="font-size:20px; color:var(--red);">✗</div>
+      <div style="font-size:9px; color:var(--dim); margin-top:4px; letter-spacing:1px;">BRIGADE DRIFT</div>
+      <div style="font-size:9px; color:var(--text); margin-top:2px;">rs_2nd_armored → Vozuća. Phase B osidCount not updated on march issuance → pileup</div>
+    </div>
+
+    <div style="text-align:center; padding:10px; background:#1c2128; border:1px solid var(--border);">
+      <div style="font-size:20px; color:var(--red);">✗</div>
+      <div style="font-size:9px; color:var(--dim); margin-top:4px; letter-spacing:1px;">brcko UNCOVERED</div>
+      <div style="font-size:9px; color:var(--text); margin-top:2px;">No RS brigade covers core brcko OSID. 10 ARBiH brigades at donji_rahic</div>
+    </div>
+
+    <div style="text-align:center; padding:10px; background:#1c2128; border:1px solid var(--border);">
+      <div style="font-size:20px; color:var(--red);">✗</div>
+      <div style="font-size:9px; color:var(--dim); margin-top:4px; letter-spacing:1px;">BATTLE TEMPO LOW</div>
+      <div style="font-size:9px; color:var(--text); margin-top:2px;">90 battles / 40w. 62 brigades never fought. 343 invalid ops</div>
+    </div>
+
+    <div style="text-align:center; padding:10px; background:#1c2128; border:1px solid var(--border);">
+      <div style="font-size:20px; color:var(--green);">✓</div>
+      <div style="font-size:9px; color:var(--dim); margin-top:4px; letter-spacing:1px;">TERRITORY PLAUSIBLE</div>
+      <div style="font-size:9px; color:var(--text); margin-top:2px;">94.0% area-weighted. 6/6 benchmarks. Faction territories broadly correct</div>
+    </div>
+
+    <div style="text-align:center; padding:10px; background:#1c2128; border:1px solid var(--border);">
+      <div style="font-size:20px; color:var(--orange);">~</div>
+      <div style="font-size:9px; color:var(--dim); margin-top:4px; letter-spacing:1px;">EXHAUSTION INERT</div>
+      <div style="font-size:9px; color:var(--text); margin-top:2px;">Reads 0 all 40w. Core game thesis (negative-sum) not yet manifesting</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════ FOOTER -->
+<div class="footer">
+  <span>PYRRHIC GAMES // A WAR WITHOUT VICTORY v0.8.0-CANDIDATE</span>
+  <span>BUILD <span>n1275</span> // 2026-04-01 DAILY STANDUP // HASH <span>2a1b68b6cbb1ff16</span></span>
+  <span>94.0% AREA-WEIGHTED // 24/25 ANCHORS // 6/6 BENCHMARKS</span>
+</div>
+
+</body>
+</html>

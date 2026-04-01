@@ -31,3 +31,33 @@
 - **Context**: Three major design decisions emerged in rapid conversation: (1) Codex is a dynamic encyclopedia, (2) game starts April 1992 only, (3) command hierarchy with AI slots. Each changes the foundational architecture. If captured only in conversation, they'd be lost on context compaction.
 - **Right approach**: As soon as a design decision is made, write it to memory AND update the canonical docs (VERSIONING.md, napkin, ledger). Don't wait for implementation — the decision IS the deliverable.
 - **Do instead**: When a conversation produces a design decision that changes the project's direction, immediately: (1) save to memory, (2) update VERSIONING.md or relevant canon doc, (3) note in napkin. Three touchpoints ensure the decision propagates to future sessions.
+
+### [Sectors] Sub-segment IDs must use sector_id as prefix, not corps_id (2026-04-01) — NEW
+- **Context**: `splitNonContiguousSectors` used `subseg:${sector.corps_id}:split${ci}` for generated IDs. `corps_id` is shared by all sectors in a corps; the counter resets per call. Two sectors in the same corps produce identical IDs (`vrs_1st_krajina:split0` twice). The second silently overwrites the first in every Map lookup. Brigades assigned to the lost sub-segment are permanently invisible to correction passes and at-front detection.
+- **Wrong approach**: Using `corps_id` (shared across all sectors in the corps) as the prefix. ID collisions are silent — no error, no warning, just phantom sub-segments.
+- **Right approach**: Use `sector.sector_id` as the prefix — it is unique per sector. New format: `subseg:sector:vrs_1st_krajina:3:split0`. Apply consistently to all four ID generation sites in `sector_splitting.ts`.
+- **Do instead**: Any generated ID that must be globally unique must be prefixed by the most specific unique parent (sector_id, not corps_id). Before using an ID scheme, verify two sectors in the same corps produce different IDs.
+
+### [Sectors] `else if (meta.side_b === faction)` in sector splitting = contested OSID blind spot (2026-04-01) — NEW
+- **Context**: `splitNonContiguousSectors` strict Case B used `else if` instead of bare `else`. When an OSID on the friendly side of a front edge is contested or null-controlled at snapshot time (just changed hands), neither condition fires and `compFriendly` stays empty. The sub-segment survives the filter (`edge_ids` non-empty) but has no valid front OSID — brigades assigned to it can never be routed.
+- **Wrong approach**: `else if (meta.side_b === faction)` — fails on any OSID that is contested, null-controlled, or in transition. Produces structurally sound-looking sub-segments with empty `friendly_osids`.
+- **Right approach**: Use bare `else` matching the `findSubSegments` pattern. The fallback (treat `meta.b` as friendly when `side_a` is not faction) handles all edge cases gracefully, including contested and null-controlled OSIDs.
+- **Do instead**: In front-edge parsing that assigns "friendly" and "hostile" sides, use `else` not `else if` for the fallback assignment. Any `else if` that can fail leaves a gap for contested/transitional OSID states.
+
+### [Sectors] brcko_2 orphaned from sector system — structural gap, not a distribution problem (2026-04-01) — NEW
+- **Context**: `op:brcko:brcko_2` does not appear in any sector's `territory_osids`. No brigade can ever be assigned there because the sector system doesn't cover it. No amount of distribution fixing will put a brigade at brcko. The anchor failure is a sector coverage gap.
+- **Wrong approach**: Investigating brigade distribution, march targets, and column march eligibility when the fundamental issue is that the OSID isn't in any sector at all.
+- **Right approach**: When an anchor persistently fails despite correct brigade distribution logic, check whether the OSID is covered by any sector (`grep` for the OSID in `corps_front_sectors` territory_osids). A missing OSID in sector coverage is a different problem class from a missing brigade.
+- **Do instead**: For any persistent anchor failure: (1) check whether the OSID appears in sector territory_osids, (2) check whether it appears in any sub-segment's `friendly_osids`, (3) only then investigate brigade-level distribution. Sector coverage gaps are invisible to distribution fixes.
+
+### [Sectors] SRK siege ring is a load-bearing architectural assumption — Phase B cannot be its sole source of coverage (2026-04-01) — NEW
+- **Context**: The Sarajevo siege ring (vrs_sarajevo_romanija) maintained coverage via Phase B cross-front marching — accidental emergent behavior, not intentional design. Any Phase B eligibility filter checking corps or sector boundaries caused SRK coverage to drop from ~4 to ~2 brigades near Sarajevo. Three separate fix attempts all hit this cascade.
+- **Wrong approach**: Modifying Phase B march eligibility without verifying SRK's brigade coverage independently. The siege ring silently depends on cross-front marching that any boundary filter breaks.
+- **Right approach**: Before modifying Phase B march eligibility, verify that SRK can maintain siege ring coverage through sub-segment assignment alone. If it can't, the sub-segment assignment is broken — fix that first.
+- **Do instead**: The siege ring must be maintained by explicit sector sub-segment coverage (brigades assigned via `classifyBrigadesByTerritory`), not by Phase B march accidents. When testing any Phase B change, check SRK coverage as a canary: if SRK drops below 3 brigades on the siege ring, the change is breaking load-bearing march behavior.
+
+### [Sectors] Alphabetical tiebreak in sub-segment assignment = architectural cascade risk (2026-04-01) — NEW
+- **Context**: Sub-segment first-pass assignment uses alphabetical tiebreak when all brigades have equal tiny scores for a distant sub-segment. This is deterministic but fragile: any change to scoring that shifts one brigade's assignment can cascade unpredictably to ALL other brigades in the sector. boljanic_2 fix attempts repeatedly hit this.
+- **Wrong approach**: Treating alphabetical tiebreak as "safe" because it's deterministic. It is deterministic but highly sensitive — a 0.01 score delta for one brigade reshuffles all downstream assignments.
+- **Right approach**: Before committing any sub-segment scoring change, test cross-sector effects by checking whether other brigades' assignments change. If they do, that change is not isolated.
+- **Do instead**: When modifying sub-segment assignment scoring, diff the brigade-to-subsegment mapping before and after. If assignments change for brigades NOT in the targeted sector, the change has architectural cascade risk and must be analyzed before proceeding.
