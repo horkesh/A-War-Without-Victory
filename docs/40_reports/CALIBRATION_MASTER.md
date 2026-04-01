@@ -1,7 +1,7 @@
 # AWWV Calibration Master Reference
 
 **Purpose:** Persistent lessons-learned record for war-phase calibration (April 1992 onward). 40w primary, 104w force trajectory.
-**Updated:** 2026-04-01 (n1282 — Fix 1: depletion loop repair; 92.7% area-weighted, 22/25 anchors)
+**Updated:** 2026-04-01 (n1287 — ready-plan suspension fix; 92.8% area-weighted, 23/25 anchors)
 
 ## Review Methodology
 
@@ -14,6 +14,41 @@ Every calibration run is reviewed by a two-tier expert panel before any action i
 `/gap-finder` *(unique authority: may dispatch agents + question specialists directly)*, `/game-designer`, `/corps-army-commander`, `/modern-wargame-expert`, `/canon-compliance-reviewer`
 
 **Orchestrator** synthesizes, gives go/no-go, updates this file + PROJECT_LEDGER.md.
+
+## n1287 (2026-04-01)
+- **92.8% area-weighted. 23/25 anchors. 6/6 benchmarks. Hash: 25ef181d6e3daaae.**
+- Change: ready-plan suspension fix — `ready` plans excluded from `checkSuspendConditions`; brigade depletion check uses brigade existence not surplusPool
+- brcko still failing: uncontested occupation at t29 (garrison density, not ops). Run D needed.
+- Secondary bug identified: `estimateTurnsActive` broken suspend counter — plans can't self-abandon via MAX_SUSPENSION_TURNS.
+
+### Root cause: brcko P0 (definitive)
+`op:brcko:brcko` falls via uncontested occupation at t29. No ARBiH operation — simply no RS defender present. Corridor zone: 3 brigades, garrison_budget=3, zero surplus. Brigades distributed to tisina, potocari_2, krepsic; none covers brcko itself. Bijeljina zone has 5 surplus brigades but wrong zone. Fix: Run D — `must_hold: true` on brcko corridor sector in scenario JSON.
+
+### Historian verdict (ICTY)
+Brčko held RS continuously from ~1–3 May 1992 through January 1993. ARBiH never retook it. Posavina Corridor never cut. Sources: *Jelisić* TJ §§24–27, *Todorović* SJ, Burg & Shoup pp.130–134. brcko=RBiH at w40 is historically wrong — P0 is valid.
+
+### Open P0s after n1287
+1. **brcko** — corridor garrison density. Fix: must_hold=true on corridor sector (Run D).
+2. **gradacac_2** — RS overperforming on newly-covered fronts. Pre-existing.
+
+### Open P1s after n1287
+- vrs_east_bosnian zero-attacks: all non-Koridor ops total_attacks=0. BFS reachability or stale objective filter. Part of 39% ZEA anomaly.
+- `estimateTurnsActive` broken suspend counter: suspendedTurns goes negative, plans can't self-abandon. Hardening pass.
+
+---
+
+## n1284–n1285 (2026-04-01)
+- Both identical hash 4f1e6cd04e3835e9. Zero delta. Fixes were no-ops (code already correct, or wrong code path targeted).
+
+---
+
+## n1283 (2026-04-01)
+- **92.7% area-weighted. 23/25 anchors. 6/6 benchmarks. Hash: 4f1e6cd04e3835e9.**
+- Change: stance screening gate — `threat_ratio < 1.5` required for `screening` in `computeStanceChanges`
+- Recovered: boljanic_2. Failing: brcko, gradacac_2.
+- RBiH orders 29 (down 3), RS 57. Stance fix working: vrs_east_bosnian all sectors → defend.
+
+---
 
 ## n1282 FIX 1 — DEPLETION LOOP REPAIR (2026-04-01)
 - **92.7% area-weighted (40w). 22/25 anchors. 6/6 benchmarks. 84 battles.**

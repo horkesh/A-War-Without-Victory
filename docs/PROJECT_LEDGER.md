@@ -18321,3 +18321,62 @@ Previous session analysis incorrectly described Travnik-Lašva as an ARBiH suppl
 
 ### Why it matters
 Bot corridor-awareness logic and must-hold sector seeding must not treat Travnik as an axis node. Any corridor score that routes supply through Lašva valley would be historically incorrect and would misdirect bot priorities.
+
+---
+
+## [2026-04-01] n1283 — stance screening fix + boljanic_2 recovery
+
+### Summary
+Stance bot fix: `computeStanceChanges` in `decide.ts` now gates `screening` on `threat_ratio < 1.5`. Sectors with extreme threat_ratio (vrs_east_bosnian: 105–172) no longer drop to screening when quiet. Side effect: boljanic_2 anchor recovered (22→23/25).
+
+### Results
+92.7% area, 23/25 anchors (was 22/25), 6/6 benchmarks. Hash: 4f1e6cd04e3835e9.
+Anchors recovered: boljanic_2. Still failing: brcko, gradacac_2.
+RBiH orders: 29 (down 3 from n1282 — expected, RS sectors now defending).
+
+### Files changed
+- `src/sim/combat/commander/decide.ts`: SCREENING_MAX_THREAT_RATIO=1.5 constant, threatRatioBySector map, guard on both screening branches, CorpsFrontSector import + sectors param
+
+---
+
+## [2026-04-01] n1284–n1285 — zero-delta runs (fixes already applied)
+
+### Summary
+Two attempted fixes had no effect — code was already correct from prior sessions or targeted wrong code paths. Three identical hashes (4f1e6cd04e3835e9). No calibration change.
+
+### Lessons
+- Brigade depletion check comment said "not raw surplus pool" but code used surplusPool — fixed in n1285 attempt but run was zero-delta because the real oscillation driver was different.
+- n1284: `high → critical` suspension threshold was already `=== 'critical'` in the file.
+
+---
+
+## [2026-04-01] n1287 — ready-plan suspension fix
+
+### Summary
+Plans in `ready` status were suspendable. When RBiH advanced on brcko, bijeljina staging zone flagged `critical` threat → plan suspended. Inverted logic: enemy capturing your objective is reason to attack faster, not suspend. Fixed: `ready` plans excluded from `checkSuspendConditions`. New hash confirms fix landed.
+
+### Results
+92.8% area (+0.1pp), 23/25 anchors, 6/6 benchmarks. Hash: 25ef181d6e3daaae.
+brcko still failing — uncontested occupation at t29, garrison density issue.
+Secondary bug noted: `estimateTurnsActive` produces negative suspendedTurns — plans can't escape suspension via MAX_SUSPENSION_TURNS. Fix later.
+
+### Files changed
+- `src/sim/combat/commander/plan.ts`:
+  - Brigade depletion check: `surplusPool.filter(...)` → `briefing.brigades.filter(b => b.status === 'active')`
+  - Ready-plan suspension: removed `'ready'` from suspendable statuses in `checkSuspendConditions`
+
+---
+
+## [2026-04-01] Brcko P0 root cause (definitive) + historian confirmation
+
+### Summary
+After three mechanical fixes, brcko anchor still fails. Root cause: garrison density, not plan/ops. `op:brcko:brcko` falls via uncontested occupation at turn 29 — no ARBiH operation, simply no RS defender present. Corridor zone has 3 brigades / budget=3 / zero surplus. Brigades distribute to tisina, potocari_2, krepsic — none covers brcko itself.
+
+### Historian verdict (ICTY)
+Brčko held by RS continuously from ~1–3 May 1992 through January 1993. ARBiH never retook it. Posavina Corridor never cut. Sources: *Jelisić* TJ §§24–27, *Todorović* SJ, Burg & Shoup pp.130–134. brcko=RBiH at week 40 is historically wrong — P0 is valid.
+
+### Fix path
+Run D: author `must_hold: true` on brcko corridor sector in scenario JSON. Raises garrison budget for corridor zone to cover op:brcko:brcko.
+
+### Secondary open issue
+vrs_east_bosnian: all non-Koridor ops have total_attacks=0. Separate P1. Root cause: objectives not reachable via BFS from brigade positions, or stale objective filter. Part of 39% zero-eligible-attacker anomaly.
