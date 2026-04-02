@@ -265,6 +265,17 @@ After EVERY scenario run, the orchestrator:
 - **[P2] Op Donji Vakuf** — `rs_19th` dissolves before injection; 2 objectives (`torlakovac_2`, `babin_potok_2`) always pre-captured. Need dissolution-resistant brigade assignment + conditional objective guard.
 - **[P3] Op Kotor Varos** — 1KK queue always full w10-w40; Kotor Varos never gets its op. Design queue priority mechanism or dedicated 2KK handoff.
 
+**Engine health quick wins (2026-04-02) — all ≤30 lines, high-confidence fixes:**
+- **[P1] Combat predictor blind to defender multipliers** — `checkLaunchFeasibility()` uses `basePower × 0.8` only; ignores defender artillery (`getDefensiveFireMult` up to 1.8×), terrain (urban 1.35×, forest 1.15×), entrenchment (+51%). **Primary driver of 47% ZEA rate.** Fix: multiply defender raw power by these factors before computing required force. File: `bot_corps_directives.ts`. ~30 lines.
+- **[P1] `recent_territory_change` hardcoded 0** — `assessCorps()` returns 0 always. Theater Assessment trend-blind. Fix: count Δ(friendly_osids) over last 3–5 turns. File: `src/sim/combat/commander/assess.ts`. ~20 lines.
+- **[P1] `supply_by_osid` never consumed by briefing** — hardcoded 0.8. Fix: read supply for sector OSIDs, derive min/mean, pass to briefing. File: `src/sim/combat/commander/briefing.ts`. ~15 lines.
+- **[P2] Feint has zero enemy effect** — applies −5 cohesion to own brigades only. Fix: when feint active on sector, raise enemy sector threat_ratio ×1.5 for the duration. File: `src/sim/combat/sector_offensive.ts`. ~20 lines.
+- **[P2] Corps exhaustion not in briefing** — field exists in state, never passed. Fix: single lookup. File: `briefing.ts`. ~5 lines.
+- **[P2] Enemy equipment absent from briefing** — Fix: derive `{ artillery, tanks, infantry_only }` from adjacent enemy brigades. File: `briefing.ts`. ~25 lines.
+- **[P2] Op-level failure cap broken (Issue #29)** — cap applied per-axis (8 failures each), not per-operation. File: `sector_offensive.ts`. ~10 lines.
+- **[P2] Winter season combat modifier absent** — Fix: `getSeasonalCombatMult(week)` ~15% attacker penalty weeks 1–8 and 48–52. File: `combat_math.ts`. ~15 lines.
+- **[P0] CampaignPlan not wired to corps CO briefings** — `army_hq_gathering.ts` produces `CampaignPlan` every turn; `buildBriefing()` never reads it. Strategic layer structurally disconnected. Needs design first. File: `commander/briefing.ts`. ~30 lines wiring, but requires design of how priorities map to briefing fields.
+
 **Deferred to roadmap:**
 - Front Line Terrain Tinting (P4) → v0.9.4 (Map That Scars milestone)
 - Elevation Profile on Ops Axes (P4) → v0.9.4 (visual polish)
