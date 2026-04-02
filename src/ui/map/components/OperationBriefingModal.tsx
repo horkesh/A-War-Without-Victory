@@ -7,6 +7,7 @@ import type { NamedOfficerView } from '../data/types';
 import { useGameStore } from '../store/gameStore';
 import { formatRank, getArchetype, formatPips, getRatingColor } from '../utils/officerCharacter';
 import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
+import { findPlayerFacingOperationByKey } from '../../shared/playerVisibility';
 
 interface OperationBriefingModalProps {
     isOpen: boolean;
@@ -53,9 +54,10 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
 
     const { operation, commander } = useMemo(() => {
         if (!loadedGameState || !context) return { operation: null, commander: null };
-        const op = loadedGameState.operations?.find(
-            (o) => o.corps_id === context.corpsId && o.name === context.operationName,
-        ) ?? null;
+        const op = findPlayerFacingOperationByKey(
+            loadedGameState,
+            `${context.corpsId}|${context.operationName}`,
+        );
         let cdr: NamedOfficerView | null = null;
         if (op?.commander_officer_id && loadedGameState.namedOfficerData) {
             cdr = loadedGameState.namedOfficerData.find((o) => o.id === op.commander_officer_id) ?? null;

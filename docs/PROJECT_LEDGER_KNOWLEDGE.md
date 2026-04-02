@@ -1688,3 +1688,11 @@ The dangerous split is not multiple `deployEliteLoan(...)` functions. The danger
 ### On-loan elites must obey the receiving corps, not their original corps metadata
 
 An elite brigade can stay owned by Main Staff in `corps_id` while still being operationally attached elsewhere. Any return-to-corps, homeward movement, or sector-assignment logic that reasons from original `corps_id` while `elite_loan_state.on_loan` is true will eventually create contradictory states: on-loan brigades marching home, sitting unresolved, or getting assigned to the wrong corps' sector truth.
+
+### Legacy frontline density must be all-or-nothing once sectors are canonical
+
+If sectors exist, they are the frontline truth. A single brigade that happens to be missing from sector assignment must not silently regain density bonuses or penalties from `brigade_front_assignment`, because that creates per-brigade split truth inside combat math. Legacy frontline density is only acceptable when sector frontline truth is absent globally.
+
+### Player-safe selectors need to be reused by every modal, not just the main panels
+
+In AWWV, a shell can look player-safe overall while one modal still reaches into raw omniscient collections. `OperationBriefingModal` showed the pattern: the safe selector already existed, but the modal had its own direct `loadedGameState.operations.find(...)`. Once player-safe selectors exist, modals and secondary panels should consume them instead of re-querying raw state locally.

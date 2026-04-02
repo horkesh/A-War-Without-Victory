@@ -21311,3 +21311,23 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
   - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
 - Important note:
   - repo-wide `tsc --noEmit` still reports unrelated pre-existing UI/test debt outside this slice; focused truth/loan/sector suites are green
+
+## 2026-04-03 - Frontline compatibility and briefing selector mop-up
+
+- Root cause findings:
+  - `local_front_defense.ts` could still revive legacy `brigade_front_assignment` density for an individual brigade even when sector truth existed globally; that meant combat math could accept a stale compatibility front for one brigade after the engine had already said sectors are canonical
+  - `OperationBriefingModal.tsx` still bypassed the player-facing operation filter and searched raw `loadedGameState.operations` directly
+- Changes:
+  - `src/sim/combat/local_front_defense.ts`
+    - legacy front-density fallback now applies only when no live sector frontline truth exists at all
+  - `src/ui/map/components/OperationBriefingModal.tsx`
+    - now resolves the selected operation through `findPlayerFacingOperationByKey(...)`
+  - `tests/local_front_density_modifier_precedence.test.ts`
+    - added coverage proving an unassigned brigade does not regain legacy density while sectors still exist
+  - `tests/ui_opord_player_safe_labels.test.ts`
+    - added a source-level guard proving the briefing modal uses the player-facing selector instead of direct raw-op lookup
+- Verification:
+  - `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\local_front_density_modifier_precedence.test.ts`
+  - `node .\\node_modules\\vitest\\vitest.mjs run tests\\engine_honesty_legacy_contracts.test.ts tests\\ui_opord_player_safe_labels.test.ts tests\\ui_player_visibility.test.ts tests\\ui_map_render_smoke.test.ts`
+- Environment note:
+  - `npm.cmd run warroom:build` is currently blocked in this environment because `vite` is not on PATH here (`'vite' is not recognized...`); the focused shell tests are green

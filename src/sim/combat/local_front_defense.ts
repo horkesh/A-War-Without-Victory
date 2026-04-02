@@ -18,6 +18,7 @@ import type {
     GameState
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { hasLiveSectorFrontlineTruth } from './front_assignment.js';
 
 /** Coverage density: below this ratio, defense power is penalized. */
 const THIN_FRONT_THRESHOLD = 0.5;
@@ -160,6 +161,8 @@ export function getLocalFrontDensityModifier(
 ): number {
     const sectorModifier = findSectorDensityModifier(state, formation);
     if (sectorModifier !== null) return sectorModifier;
+
+    if (hasLiveSectorFrontlineTruth(state)) return 1.0;
 
     const legacyModifier = findLegacyFrontDensityModifier(state, formation);
     if (legacyModifier !== null) return legacyModifier;

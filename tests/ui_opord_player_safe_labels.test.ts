@@ -84,6 +84,8 @@ describe('buildOpordDisplayModel', () => {
         expect(oobSource).toContain('getPlayerSafeMilitaryFactionName(op.faction)');
         expect(oobSource).not.toContain('View ${faction} army summary');
         expect(briefingSource).toContain('getPlayerSafeMilitaryFactionName(operation.faction)');
+        expect(briefingSource).toContain('findPlayerFacingOperationByKey');
+        expect(briefingSource).not.toContain('loadedGameState.operations?.find');
         expect(attackSource).toContain('getPlayerSafeMilitaryFactionName(attacker.faction)');
         expect(attackSource).toContain('getPlayerSafeMilitaryFactionName(defender.faction)');
         expect(eventSource).toContain('getPlayerSafePoliticalFactionName(effect.faction)');
