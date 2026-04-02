@@ -19461,3 +19461,34 @@ Why this matters:
 - local commanders should not plan as if neighboring friendly corps do not exist
 - this turns “adjacent corps posture” from a design note into a real briefing input
 - proximity-based summaries are an honest first step toward cross-corps timing without pretending full coordination already exists
+
+---
+### 2026-04-02 — Engine health Wave 1 continued: retired brigade reposition orders no longer pretend to be a live player command
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing a product-truth contradiction between desktop order staging and war-phase execution.
+
+Implemented:
+- `src/desktop/desktop_sim.ts`
+  - `validateBrigadeRepositionOrder(...)` now rejects new reposition orders explicitly with `Brigade reposition orders are retired; use movement or sector assignment instead`
+- `src/ui/map/data/GameStateAdapter.ts`
+  - player-facing loaded state no longer exposes `repositionOrders`; stale save data may still carry the field, but the map shell no longer presents it as an active order type
+- `tests/engine_honesty_legacy_contracts.test.ts`
+  - added regressions proving the desktop contract rejects new reposition staging
+  - added regressions proving the player shell does not expose retired reposition orders
+- `docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md`
+  - updated `stage-brigade-reposition-order` to a retired compatibility rejection channel
+- `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`
+  - removed reposition from live order-arrow / panel / desktop-shell contract language
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded the Wave 1 report with the reposition-retirement checkpoint
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\engine_honesty_legacy_contracts.test.ts`
+  - PASS (`5` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- fake commands are worse than missing commands because they teach players and future agents to trust a lie
+- if a war-phase sink intentionally does nothing, the earliest honest desktop boundary should reject it rather than stage it
+- player-facing adapters should not keep presenting retired order types just because older saves still carry the field

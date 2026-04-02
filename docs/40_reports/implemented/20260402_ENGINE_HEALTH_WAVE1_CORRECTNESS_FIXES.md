@@ -850,3 +850,27 @@ Why this matters:
 - local commanders should not plan as if neighboring friendly corps do not exist
 - “adjacent corps” only becomes real when the briefing contract carries it, not when a design note says it would be nice
 - proximity-based summaries are a cheap honest first step toward cross-corps timing without pretending true synchronized planning already exists
+
+## Additional Wave 1 slice: retired brigade reposition orders no longer masquerade as a live player command
+
+This checkpoint closes a nastier product-truth contradiction than a typical legacy helper. Brigade reposition orders were still accepted by the desktop contract, serialized into state, parsed by the tactical-map adapter, and documented as a live order type — but the war phase consumed them as a no-op compatibility sink with no gameplay effect.
+
+Implemented:
+- `src/desktop/desktop_sim.ts`
+  - `validateBrigadeRepositionOrder(...)` now rejects new reposition orders explicitly with a retirement message instead of validating a fake feature
+- `src/ui/map/data/GameStateAdapter.ts`
+  - player-facing loaded state no longer exposes `repositionOrders`; stale save data may still carry the field, but the tactical-map shell no longer presents it as an active order type
+- `tests/engine_honesty_legacy_contracts.test.ts`
+  - added regressions proving the desktop contract rejects new reposition staging
+  - added regressions proving the player shell does not expose retired reposition orders
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\engine_honesty_legacy_contracts.test.ts`
+  - PASS (`5` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- fake commands are worse than missing commands because they train players and future agents to trust a lie
+- if a war-phase sink intentionally does nothing, the earliest honest desktop boundary should reject it rather than stage it
+- player-facing adapters should not keep presenting retired order types just because old saves still contain the field

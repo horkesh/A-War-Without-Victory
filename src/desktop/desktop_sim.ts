@@ -495,13 +495,23 @@ export async function validateBrigadeMovementOrder(
     return { valid: true };
 }
 
-/** Validate reposition order: 1–4 contiguous, same-faction (no path check). */
+/** Retired compatibility validator: brigade reposition orders are no longer a live player command. */
 export async function validateBrigadeRepositionOrder(
     state: GameState,
     brigadeId: string,
     settlementIds: string[],
     baseDir: string
 ): Promise<{ valid: boolean; error?: string }> {
+    void state;
+    void brigadeId;
+    void settlementIds;
+    void baseDir;
+    return {
+        valid: false,
+        error: 'Brigade reposition orders are retired; use movement or sector assignment instead',
+    };
+
+    /*
     if (!settlementIds.length || settlementIds.length > 4) {
         return { valid: false, error: 'Settlements must be 1–4' };
     }
@@ -522,6 +532,7 @@ export async function validateBrigadeRepositionOrder(
         return { valid: false, error: 'Settlements must be contiguous' };
     }
     return { valid: true };
+    */
 }
 
 function normalizeEdgeId(edgeId: string): string | null {

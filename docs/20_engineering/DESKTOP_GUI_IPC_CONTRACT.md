@@ -91,12 +91,12 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 - `stage-brigade-reposition-order` (invoke)
   - Payload: `{ brigadeId: string, settlementIds: string[] }`
   - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: validates reposition order in main process (1–4 contiguous settlements, all same-faction). If valid, sets `state.brigade_reposition_orders[brigadeId] = { settlement_ids: sorted settlementIds }`, reserializes, sends state via `game-state-updated`. If invalid, returns `{ ok: false, error }` and does not mutate state.
+  - Behavior: **retired compatibility channel.** Main process rejects the request with a player-facing error (`Brigade reposition orders are retired; use movement or sector assignment instead`) and does not mutate state.
 
 - `clear-orders` (invoke)
   - Payload: `{ brigadeId: string }`
   - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: removes brigade from `brigade_attack_orders`, `brigade_posture_orders`, `brigade_mun_orders`, `brigade_movement_orders`, `brigade_reposition_orders`, and `brigade_deploy_orders`; also removes any entries in `brigade_aor_orders` where `from_brigade === brigadeId` or `to_brigade === brigadeId`. Reserializes, sends state via `game-state-updated`.
+  - Behavior: removes brigade from `brigade_attack_orders`, `brigade_posture_orders`, `brigade_mun_orders`, `brigade_movement_orders`, retired `brigade_reposition_orders`, and `brigade_deploy_orders`; also removes any entries in `brigade_aor_orders` where `from_brigade === brigadeId` or `to_brigade === brigadeId`. Reserializes, sends state via `game-state-updated`.
 
 - `stage-corps-stance-order` (invoke)
   - Payload: `{ corpsId: string, stance: string }`

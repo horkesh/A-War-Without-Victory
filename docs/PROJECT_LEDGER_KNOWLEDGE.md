@@ -1359,3 +1359,7 @@ When a mechanic survives in types, comments, and docs but the live branch is eff
 ### Commander intelligence gets fake quickly when local briefings hide neighboring friendly reality
 
 A corps AI that sees enemy pressure but not adjacent friendly corps posture will look “decisive” while still planning in a vacuum. The honest first step is not full multi-corps coordination; it is making neighboring corps stance and active-op load part of the briefing contract. In AWWV, proximity-based adjacent-corps summaries are cheap, deterministic, and much better than pretending local commanders operate alone.
+
+### Retired player commands must fail early, not stage successfully and vanish later
+
+If a command reaches desktop IPC, serializes into state, shows up in adapters, and only then disappears in a no-op war-phase sink, the product has already lied to the player. In AWWV, retired commands like brigade reposition should be rejected at the earliest contract boundary with a clear replacement path, and player-facing adapters should stop surfacing their stale save data.

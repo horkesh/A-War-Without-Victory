@@ -1041,16 +1041,9 @@ export function parseGameState(json: unknown): LoadedGameState {
         }
     }
 
+    // Brigade reposition orders are retired. Older saves may still carry the field,
+    // but the player-facing shell must not present it as an active order type.
     const repositionOrders: RepositionOrderView[] = [];
-    const rawReposition = state.military.brigade_reposition_orders as Record<string, { settlement_ids?: string[] }> | undefined;
-    if (rawReposition && typeof rawReposition === 'object' && !Array.isArray(rawReposition)) {
-        for (const [brigadeId, order] of Object.entries(rawReposition).sort((a, b) => a[0].localeCompare(b[0]))) {
-            const sids = order?.settlement_ids;
-            if (Array.isArray(sids) && sids.length > 0) {
-                repositionOrders.push({ brigadeId, settlementIds: [...sids].sort() });
-            }
-        }
-    }
 
     const aorOrders: AoROrderView[] = [];
     const rawAoROrders = state.brigade_aor_orders as Array<{ settlement_id?: string; from_brigade?: string; to_brigade?: string }> | undefined;
