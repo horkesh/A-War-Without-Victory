@@ -1413,3 +1413,10 @@ Army-HQ reserve formations like General Staff / Main Staff brigades are intentio
 ### Deception mechanics are fake until they touch a live pressure currency
 
 Feints can look “implemented” because they exist in types, intel, and UI language, but that still means very little if they never alter the same values that reserve requests, threat balancing, and command caution actually consume. In AWWV, the honest repair path is to wire feints into `threat_ratio` or another existing canonical pressure signal instead of inventing a decorative side effect.
+### Transitional operation creators must obey the same anchor contract as canonical ones
+
+In AWWV, the most dangerous legacy combat files are not dead sinks but older creator paths that still birth real operations while skipping newer required fields. Corridor-breach operations were one such case: still live, still side-effecting, and still creating ops without `sector_id` until explicitly repaired. Treat every permitted operation creator as part of the same canonical contract surface.
+
+### Hard-coded test allowlists are authority surfaces too
+
+If the repo uses an explicit test include list, a new regression file is not protected until that list includes it. That means the test runner can report green while silently omitting the very guard a fix depends on. In this repo, update the allowlist in the same slice as any new Vitest regression or the test is theater.

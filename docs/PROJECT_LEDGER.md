@@ -19831,3 +19831,32 @@ Why this matters:
 - a feint that never changes enemy-side pressure is not a deception mechanic, it is just a mislabeled self-tax
 - routing the effect through `threat_ratio` means reserve requests, sector balancing, and commander caution can now all react through existing canonical logic
 - this is the right kind of engine-health repair: revive the feature by attaching it to a real live currency instead of adding another parallel subsystem
+### 2026-04-02 - Engine health Wave 1 continued: corridor breach operations are now sector-anchored too
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, removing another half-alive operation-authority exception: corridor-breach ops were still being created without a canonical sector anchor even though newer operation paths already required one.
+
+Implemented:
+- `src/sim/combat/bot_corps_corridor.ts`
+  - corridor-breach creation now derives a primary sector from the launching corps's current sector membership and participating brigades
+  - the legacy creator now passes that `sector_id` into `buildCommanderOperation(...)` instead of creating a live unanchored operation
+- `tests/bot_corps_corridor.test.ts`
+  - added a regression proving corridor-breach ops inherit the launching corps sector anchor
+- `vitest.config.ts`
+  - added the new regression to the explicit Vitest allowlist so the protection actually runs in this branch
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded the Wave 1 report with this checkpoint
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\bot_corps_corridor.test.ts tests\corps_level_operations.test.ts`
+  - PASS (`11` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Environment note:
+- `npx tsc --noEmit -p tsconfig.json` is still globally noisy in the clean lane because the linked frontend dependency state is missing React/Vite browser typings
+- that remains a separate worktree verification debt, not a regression introduced by this slice
+
+Why this matters:
+- transitional operation creators are exactly where fake exceptions survive longest
+- if corridor breach stayed unanchored, every downstream lifecycle and UI path would keep learning that `sector_id` is optional in practice
+- a regression test that does not run because of a stale allowlist is another form of split truth, so the test-config repair is part of the same honesty pass

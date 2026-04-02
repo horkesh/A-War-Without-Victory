@@ -149,6 +149,22 @@ Why this is the right contract:
 - `formation.ops.fatigue` is already the engine’s living tactical fatigue truth; this change makes the commander consume it instead of inventing a shadow field
 - this closes another split-truth gap where the engine tracked local fatigue but the planner still behaved as if all available brigades were equally fresh
 
+### 9. Corridor-breach operations are no longer an unanchored legacy exception
+
+Files:
+- `src/sim/combat/bot_corps_corridor.ts`
+- `vitest.config.ts`
+
+Change:
+- corridor-breach creation now derives a `primarySectorId` from the launching corps's current sector map and participating brigades
+- the legacy creator now passes that anchor into `buildCommanderOperation(...)` instead of creating a live operation with `sector_id = undefined`
+- the new regression test was added to the explicit Vitest allowlist so this protection cannot be silently skipped by the branch's hard-coded test include contract
+
+Why this is the right contract:
+- a transitional creator that still births live operations is more dangerous than a dormant sink
+- as long as corridor breach could still skip `sector_id`, downstream lifecycle, UI, and diagnostics had to keep treating sector anchoring as optional
+- a regression test that never runs is theater; the allowlist fix is part of the correctness repair, not build housekeeping
+
 ## Tests added or extended
 
 - `tests/probe_preparation.test.ts`
@@ -168,6 +184,8 @@ Why this is the right contract:
   - added coverage proving heavy local fatigue blocks creation of a fresh opportunity plan
 - `tests/commander/commander.test.ts`
   - added coverage proving high average brigade fatigue blocks fresh offensive planning in the general commander suite
+- `tests/bot_corps_corridor.test.ts`
+  - added coverage proving corridor-breach operations inherit a sector anchor from the launching corps's sector-assigned brigades
 
 ## Verification
 
@@ -244,9 +262,21 @@ Result:
 - `4` commander / Army HQ files passed
 - `124` tests passed
 
+Additional verification:
+
+```powershell
+node_modules\.bin\vitest.cmd run tests\bot_corps_corridor.test.ts tests\corps_level_operations.test.ts
+```
+
+Result:
+- `2` operation-authority files passed
+- `11` tests passed
+
 Execution note:
 - `npm run desktop:map:build` is currently blocked in the clean lane by missing `@vitejs/plugin-react` resolution from the shared `node_modules` link
 - that appears to be environment/tooling drift in the clean lane, not a regression introduced by this checkpoint
+- `npx tsc --noEmit -p tsconfig.json` is also currently not a meaningful gate in the clean lane because the worktree's linked dependency state is missing React/Vite browser typings globally
+- that typecheck noise predates this corridor checkpoint and should be treated as a separate environment-verification debt unless/until the clean lane gets its own healthy frontend dependency install
 
 ## Architectural takeaways
 
@@ -257,6 +287,7 @@ Execution note:
 - Typed strategic fields that stay pinned to a placeholder constant are just decorative architecture until they ingest real events.
 - Player-facing threat/intel surfaces should consume deeper engine truth only through a translation layer that talks about friendly fronts, not enemy internal ids.
 - Standalone tactical map is a product shell, not just a renderer; if it has no route back to HQ or no visible records entrypoint, the shell architecture is lying.
+- Explicit test allowlists are an authority surface too; if a new regression test is not on the list, the repo can claim protection it does not actually run.
 
 ## Roadmap fit
 
