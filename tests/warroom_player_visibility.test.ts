@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { extractWarData } from '../src/ui/warroom/data/war_data_extractor.js';
 import { ReportsModal } from '../src/ui/warroom/components/ReportsModal.js';
 import { MagazineModal } from '../src/ui/warroom/components/MagazineModal.js';
@@ -323,5 +325,20 @@ describe('warroom player visibility', () => {
     expect(text).toContain('Army HQ');
     expect(text).not.toContain('FORMATIONS (');
     expect(text).not.toContain('ASSIGN COMMANDER');
+  });
+
+  it('warroom alliance milestone wording uses human-readable labels instead of raw faction ids', () => {
+    const declarationModalSource = readFileSync(
+      resolve(process.cwd(), 'src/ui/warroom/components/DeclarationEventModal.ts'),
+      'utf8',
+    );
+    expect(declarationModalSource).toContain('Bosniak-Croat ceasefire takes effect');
+    expect(declarationModalSource).not.toContain('RBiH-HRHB ceasefire takes effect');
+
+    const factionOverviewSource = readFileSync(
+      resolve(process.cwd(), 'src/ui/warroom/components/FactionOverviewPanel.ts'),
+      'utf8',
+    );
+    expect(factionOverviewSource).toContain('Bosniak-Croat relationship');
   });
 });

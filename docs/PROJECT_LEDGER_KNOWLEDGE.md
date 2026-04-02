@@ -1588,3 +1588,8 @@ If a bottom strip, menu item, or button is made player-safe but the dashboard or
 
 Economy, supply, and reserve screens often get treated as harmless because they are not on the map. In a faction-play strategy game they are still player shells. If they show exact all-faction values by default, the product is still leaking debug truth under calmer styling.
 
+
+### Shared relationship concepts must keep one player-facing label across shells
+
+If peace shell, tactical shell, and Warroom each name the same alliance or diplomatic relationship differently, the product feels like multiple stitched interfaces. Treat cross-shell vocabulary as architecture, not cosmetic copy.
+

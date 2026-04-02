@@ -20999,3 +20999,18 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
   - docs/40_reports/implemented/20260402_ECONOMY_LOGISTICS_PLAYER_TRUTH.md`r
   - docs/40_reports/GUI_MASTER.md`r
 
+
+## 2026-04-02 - Cross-shell alliance vocabulary cleanup
+
+- Worktree/branch: F:\AWWV_exec_clean on codex/engine-health-wave1`r
+- Normalized alliance wording across peace shell and Warroom milestone surfaces.
+- PeaceStatusPanel.tsx, DeclarationEventModal.ts, and FactionOverviewPanel.ts now use human-readable Bosniak-Croat wording instead of raw faction-id shorthand for the alliance relationship.
+- Added regression guards in 	ests/ui_player_visibility.test.ts and 	ests/warroom_player_visibility.test.ts.
+- Verification:
+  - 
+ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_shell_navigation.test.ts`r
+  - powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`r
+- Docs:
+  - docs/40_reports/implemented/20260402_CROSS_SHELL_ALLIANCE_VOCABULARY_CLEANUP.md`r
+  - docs/40_reports/GUI_MASTER.md`r
+

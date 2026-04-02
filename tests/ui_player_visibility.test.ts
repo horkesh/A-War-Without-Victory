@@ -357,4 +357,14 @@ describe('player visibility helpers', () => {
     expect(economySource).toContain('route.faction === playerFaction');
     expect(economySource).toContain('No friendly facilities data');
   });
+
+  it('keeps peace shell alliance wording human-readable', () => {
+    const source = readFileSync(
+      new URL('../src/ui/map/components/PeaceStatusPanel.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(source).toContain('Bosniak-Croat Alliance');
+    expect(source).not.toContain('RBiH–HRHB Alliance');
+  });
 });

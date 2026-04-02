@@ -303,3 +303,9 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - SupplyPanel.tsx and EconomyPanel.tsx now scope mounted player-mode data to the player's side instead of showing exact all-faction logistics/reserve truth.
 - See docs/40_reports/implemented/20260402_ECONOMY_LOGISTICS_PLAYER_TRUTH.md.
 
+
+## 2026-04-02 - Cross-shell alliance vocabulary cleanup
+
+- Peace shell and Warroom milestone surfaces now use Bosniak-Croat wording consistently for the alliance relationship.
+- See docs/40_reports/implemented/20260402_CROSS_SHELL_ALLIANCE_VOCABULARY_CLEANUP.md.
+

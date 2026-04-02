@@ -35,7 +35,7 @@ function AllianceBar({ value }: { value: number }) {
     return (
         <div className="space-y-0.5">
             <div className="flex justify-between text-[9px]">
-                <span className="text-text-secondary uppercase tracking-wider">RBiH–HRHB Alliance</span>
+                <span className="text-text-secondary uppercase tracking-wider">Bosniak-Croat Alliance</span>
                 <span style={{ color }} className="font-semibold">{label}</span>
             </div>
             <div className="h-1.5 bg-black/30 rounded-full overflow-hidden relative">

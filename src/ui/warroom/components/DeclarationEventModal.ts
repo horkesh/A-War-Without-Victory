@@ -59,7 +59,7 @@ const EVENT_DISPLAYS: Record<string, (event: Phase0Event, playerFaction: Faction
     }),
     ceasefire_declared: (_event, _pf) => ({
         title: 'CEASEFIRE DECLARED',
-        subtitle: 'RBiH-HRHB ceasefire takes effect',
+        subtitle: 'Bosniak-Croat ceasefire takes effect',
         body: 'After months of fighting, both sides have agreed to cease hostilities. The ceasefire marks a turning point in the conflict.',
         color: '#00e878',
         bgOverlay: 'rgba(0, 232, 120, 0.08)',

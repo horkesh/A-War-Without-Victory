@@ -300,7 +300,7 @@ export class FactionOverviewPanel {
             allianceSection.className = 'faction-overview-section';
             allianceSection.innerHTML = `
                 <h3>ALLIANCE STATUS</h3>
-                <div class="fo-stat-row"><span class="fo-stat-label">RBiH-HRHB relationship</span><span class="fo-stat-value" style="color:${relationColor}">${snap.rbihHrhbRelationship.toFixed(2)}</span></div>
+                <div class="fo-stat-row"><span class="fo-stat-label">Bosniak-Croat relationship</span><span class="fo-stat-value" style="color:${relationColor}">${snap.rbihHrhbRelationship.toFixed(2)}</span></div>
                 <div class="wr-bar-track wr-bar-thin"><div class="wr-bar-fill" style="background:${relationColor}; width:${relationshipPct}%;"></div></div>
                 <div class="wr-dialog-info wr-info-muted" style="margin-top: 6px;">Coordinated investments preserve alliance cohesion; unilateral actions degrade it.</div>
             `;
