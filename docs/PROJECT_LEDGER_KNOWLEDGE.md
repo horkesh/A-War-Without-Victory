@@ -1613,3 +1613,7 @@ Warroom modals, newspapers, magazines, and scenario cards inherit spacing from a
 
 If Army HQ cards and collapsible sections have too much fixed height and padding, the interface starts feeling ceremonial instead of operational. Prefer compact corps cards, shorter section headers, and tighter expanded-detail spacing so more command truth stays above the fold.
 
+### Product shells need an explicit hierarchy, not just a component map
+
+In AWWV, it is not enough to know which panel owns operations or records. The repo also needs to say which shell starts play, which shell owns the battlespace, which shell owns command review, and which shell owns knowledge. If that stays implicit, Warroom, Tactical Map, Army HQ, and Codex drift into overlapping tools.
+

@@ -21058,3 +21058,21 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
   - `docs/40_reports/implemented/20260402_ARMY_HQ_DENSITY_PASS.md`
   - `docs/40_reports/GUI_MASTER.md`
 
+
+## 2026-04-02 - Product shell hierarchy architecture pass
+
+- Worktree/branch: F:\AWWV_exec_clean on codex/engine-health-wave1
+- Added an explicit shell-hierarchy authority contract so Warroom, Tactical Map, Army HQ, and Codex stop drifting into overlapping ownership.
+- New canonical doc: `docs/20_engineering/PRODUCT_SHELL_HIERARCHY.md`
+- Wired the shell hierarchy into the architecture stack and repo front door:
+  - `docs/20_engineering/PRODUCT_ARCHITECTURE_AUTHORITY.md`
+  - `docs/20_engineering/UI_OWNERSHIP_MATRIX.md`
+  - `docs/20_engineering/REPO_MAP.md`
+  - `README.md`
+  - `docs/plans/2026-04-01-v08x-player-knowledge-integrity-plan.md`
+- Added implementation/report propagation:
+  - `docs/40_reports/implemented/20260402_PRODUCT_SHELL_HIERARCHY_ARCHITECTURE_PASS.md`
+  - `docs/40_reports/GUI_MASTER.md`
+- Verification:
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+

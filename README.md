@@ -8,6 +8,8 @@ Deterministic strategic-political simulation of the 1992-1995 Bosnian War.
   - milestone sequencing and current delivery truth
 - [docs/20_engineering/PRODUCT_ARCHITECTURE_AUTHORITY.md](docs/20_engineering/PRODUCT_ARCHITECTURE_AUTHORITY.md)
   - which architecture docs are live authority vs historical context
+- [docs/20_engineering/PRODUCT_SHELL_HIERARCHY.md](docs/20_engineering/PRODUCT_SHELL_HIERARCHY.md)
+  - canonical shell hierarchy for Warroom, Tactical Map, Army HQ, and Codex
 - [docs/20_engineering/REPO_MAP.md](docs/20_engineering/REPO_MAP.md)
   - code/repo map and canonical entrypoints
 - [docs/20_engineering/CODE_CANON.md](docs/20_engineering/CODE_CANON.md)

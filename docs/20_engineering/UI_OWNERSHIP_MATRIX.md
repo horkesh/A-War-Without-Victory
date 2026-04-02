@@ -2,6 +2,8 @@
 
 This file defines which UI surface canonically owns which player-facing concept.
 
+For shell hierarchy and handoff rules between Warroom, Tactical Map, Army HQ, and Codex, see [PRODUCT_SHELL_HIERARCHY.md](PRODUCT_SHELL_HIERARCHY.md).
+
 ## Purpose
 
 One concept should have one canonical UI owner.

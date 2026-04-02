@@ -25,6 +25,7 @@ This is a product-architecture map, not a changelog and not a speculative vision
 ### 3. Player-truth and shell ownership
 - [PLAYER_VISIBLE_STATE.md](PLAYER_VISIBLE_STATE.md)
 - [UI_OWNERSHIP_MATRIX.md](UI_OWNERSHIP_MATRIX.md)
+- [PRODUCT_SHELL_HIERARCHY.md](PRODUCT_SHELL_HIERARCHY.md)
 - [DEBUG_SURFACE_POLICY.md](DEBUG_SURFACE_POLICY.md)
 - [FEATURE_DONE_MEANS.md](FEATURE_DONE_MEANS.md)
 

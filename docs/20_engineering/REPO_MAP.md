@@ -5,6 +5,7 @@ This doc is a minimal, code-facing map of the repo. It is not a design doc.
 
 **Canonical entry points and pipeline step list:** See [PIPELINE_ENTRYPOINTS.md](PIPELINE_ENTRYPOINTS.md). That doc is the single source for entry point details and turn-pipeline step names; this doc is the high-level "where to look" map.
 **Product architecture authority:** See [PRODUCT_ARCHITECTURE_AUTHORITY.md](PRODUCT_ARCHITECTURE_AUTHORITY.md) for which architecture docs are live authority versus historical context.
+**Player shell hierarchy:** See [PRODUCT_SHELL_HIERARCHY.md](PRODUCT_SHELL_HIERARCHY.md) for the canonical relationship between Warroom, Tactical Map, Army HQ, and Codex.
 
 **External experts:** For a single handover covering project state, what is done, what needs to be done, and rules, see `docs/40_reports/EXTERNAL_EXPERT_HANDOVER.md`.
 
