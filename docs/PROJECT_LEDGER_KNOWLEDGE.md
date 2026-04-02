@@ -1339,3 +1339,6 @@ Bottom strips, overview cards, and situation tabs often get treated like harmles
 
 ### Tooltip cards are player surfaces, not debug exceptions
 Hover cards feel small, but players experience them as authoritative UI. Treat formation, settlement, and front tooltips exactly like any other player-facing panel: own truth may be detailed, enemy truth should collapse to contact-level abstraction unless a deliberate player-facing design says otherwise.
+
+### Settlement timelines can re-leak omniscient truth even after the visible card looks clean
+Filtering stationed units and pending orders is not enough if the same selected-settlement panel still forwards raw operation history or brigade movement logs into its timeline tab. For dossier-style surfaces, protect every tab at the input boundary, not just the first screenful of content.

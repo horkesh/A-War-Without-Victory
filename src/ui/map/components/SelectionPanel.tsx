@@ -9,7 +9,13 @@ import { getRightPanelStyle, getPanelRailStyle } from './panelRail';
 import { buildOsidToSectorMap } from '../utils/sectorUtils';
 import { getOperationId } from '../utils/operations';
 import { getCurrentEthnicForOsid } from '../map/builders/buildEthnicGeoJSON';
-import { resolvePlayerFacingFaction } from '../../shared/playerVisibility';
+import {
+  filterPlayerFacingFormations,
+  filterPlayerFacingMovementsByOsid,
+  filterPlayerFacingOperationHistory,
+  filterPlayerFacingSectors,
+  resolvePlayerFacingFaction,
+} from '../../shared/playerVisibility';
 import { getPlayerVisibleOperations } from '../../shared/playerFacingLabels';
 
 interface SelectionPanelProps {
@@ -47,7 +53,8 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
     );
   }
 
-  const formations = getFormationsAtOsid(loadedGameState?.formations, selectedOsid);
+  const playerFacingFormations = filterPlayerFacingFormations(loadedGameState);
+  const formations = getFormationsAtOsid(playerFacingFormations, selectedOsid);
   const playerFaction = resolvePlayerFacingFaction(loadedGameState);
   const selectedMunId = selectedOsid.split(':')[1] ?? null;
   const rawActiveSupport = playerFaction ? loadedGameState?.municipalitySupportOrders?.[playerFaction] : undefined;
@@ -80,7 +87,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
   const statusLabel = loadedGameState?.statusBySettlement?.[selectedOsid] ?? null;
 
   const sectorInfo = (() => {
-    const sectors = loadedGameState?.corpsFrontSectors;
+    const sectors = filterPlayerFacingSectors(loadedGameState);
     const edgesOsid = loadedGameState?.frontEdgesOsid;
     if (!sectors?.length || !edgesOsid?.length) return { sectorName: null as string | null, sectorFaction: null as string | null, sectorId: null as string | null };
     const osidToSector = buildOsidToSectorMap(sectors, edgesOsid);
@@ -139,23 +146,26 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
   for (const f of formationsForDetail) {
     brigadeCountByFaction[f.faction] = (brigadeCountByFaction[f.faction] ?? 0) + 1;
   }
+  const playerFormationIds = new Set(playerFacingFormations.map((formation) => formation.id));
+  const playerFacingOperationHistory = filterPlayerFacingOperationHistory(loadedGameState);
+  const playerFacingMovementsByOsid = filterPlayerFacingMovementsByOsid(loadedGameState);
 
   const pendingOrders = (() => {
     if (!loadedGameState) return undefined;
     const attack =
-      loadedGameState.attackOrders?.filter((o) => o.targetSettlementId === selectedOsid).map((o) => ({
+      loadedGameState.attackOrders?.filter((o) => o.targetSettlementId === selectedOsid && playerFormationIds.has(o.brigadeId)).map((o) => ({
         brigadeId: o.brigadeId,
-        brigadeName: loadedGameState.formations?.find((fr) => fr.id === o.brigadeId)?.name,
+        brigadeName: playerFacingFormations.find((fr) => fr.id === o.brigadeId)?.name,
       })) ?? [];
     const move =
-      loadedGameState.movementOrdersSettlement?.filter((o) => o.targetSettlementIds?.includes(selectedOsid)).map((o) => ({
+      loadedGameState.movementOrdersSettlement?.filter((o) => o.targetSettlementIds?.includes(selectedOsid) && playerFormationIds.has(o.brigadeId)).map((o) => ({
         brigadeId: o.brigadeId,
-        brigadeName: loadedGameState.formations?.find((fr) => fr.id === o.brigadeId)?.name,
+        brigadeName: playerFacingFormations.find((fr) => fr.id === o.brigadeId)?.name,
       })) ?? [];
     const reposition =
-      loadedGameState.repositionOrders?.filter((o) => o.settlementIds?.includes(selectedOsid)).map((o) => ({
+      loadedGameState.repositionOrders?.filter((o) => o.settlementIds?.includes(selectedOsid) && playerFormationIds.has(o.brigadeId)).map((o) => ({
         brigadeId: o.brigadeId,
-        brigadeName: loadedGameState.formations?.find((fr) => fr.id === o.brigadeId)?.name,
+        brigadeName: playerFacingFormations.find((fr) => fr.id === o.brigadeId)?.name,
       })) ?? [];
     if (attack.length === 0 && move.length === 0 && reposition.length === 0) return undefined;
     return { attack, move, reposition };
@@ -248,9 +258,9 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
           currentEthnic={currentEthnic ?? undefined}
           displacementEventLog={loadedGameState?.displacementEventLog}
           allControlEvents={loadedGameState?.allControlEvents}
-          operationHistory={loadedGameState?.operationHistory}
+          operationHistory={playerFacingOperationHistory}
           battlesByOsid={loadedGameState?.battlesByOsid}
-          movementsByOsid={loadedGameState?.movementsByOsid}
+          movementsByOsid={playerFacingMovementsByOsid}
           supplyTransitionsByOsid={loadedGameState?.supplyTransitionsByOsid}
           historicalEventsByTurn={loadedGameState?.historicalEventsByTurn}
         />

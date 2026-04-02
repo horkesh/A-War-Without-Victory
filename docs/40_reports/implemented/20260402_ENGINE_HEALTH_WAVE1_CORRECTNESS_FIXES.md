@@ -704,3 +704,28 @@ Why this matters:
 - in a grand-strategy / operational game, hover surfaces are part of the player contract, not harmless chrome
 - exact enemy unit names and line composition in normal hover are cheat-surface leaks, not “nice debug detail”
 - codifying the rule in one helper module is cheaper and safer than re-fighting the same leak in every tooltip-shaped component
+
+## Additional Wave 1 slice: settlement selection panel now filters dossier and timeline truth
+
+This checkpoint closes the next player-facing leak seam after tooltip cleanup: the selected-settlement panel was already filtering some visible lists, but its dossier/timeline inputs still forwarded raw omniscient operation history and brigade movement logs.
+
+Implemented:
+- `src/ui/shared/playerVisibility.ts`
+  - added `filterPlayerFacingOperationHistory(...)` so settlement/history surfaces can consume only player-faction operation AARs
+  - added `filterPlayerFacingMovementsByOsid(...)` so timeline panels only receive movement records for player-owned formations
+- `src/ui/map/components/SelectionPanel.tsx`
+  - stationed formations, sector lookup, pending orders, operation targeting, movement timeline, and operation-history timeline inputs now all route through player-facing filters
+  - the selection panel no longer mixes a player-safe overview with omniscient dossier tabs
+- `tests/ui_player_visibility.test.ts`
+  - added regressions proving operation history and per-OSID movement logs are filtered to player-owned truth before downstream panels consume them
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\ui_map_tooltip_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`20` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- settlement detail panels are not “safer” just because they are selected rather than hovered; they are still player surfaces
+- partial filtering is dangerous because it makes one tab look honest while another tab quietly leaks enemy unit or operation truth
+- pushing the filters into shared visibility helpers is cheaper than doing another one-off anti-leak sweep later

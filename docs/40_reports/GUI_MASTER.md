@@ -220,3 +220,7 @@ Bottom status strips, overview tabs, and quick casualty/territory summaries are 
 ### 15. Hover tooltips are player surfaces, not staff consoles
 
 Formation, settlement, and front hover cards must obey the same player-truth contract as any larger panel. Own formations may keep exact detail. Enemy hover should collapse to contact-level abstractions unless the product deliberately supports more. Settlement hover should not quietly enumerate enemy garrisons, and front hover should not reveal enemy unit names just because the mouse crossed a line. If a tooltip needs richer truth for debugging, that belongs behind an explicit debug surface, not in normal play.
+
+### 16. Selected-settlement dossiers must filter timeline truth too
+
+Selection panels are not safer than tooltips just because they are bigger. If a selected-settlement dossier filters stationed units but still forwards omniscient operation history or brigade-movement logs into its timeline tab, the panel is still a cheat surface. Treat settlement detail as a single player-facing contract: overview, orders, sector context, movement timeline, and operation history all need the same faction-scoped filtering before they render.

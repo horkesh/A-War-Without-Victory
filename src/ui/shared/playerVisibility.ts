@@ -31,6 +31,25 @@ export function filterPlayerFacingOperations(state: LoadedGameState | null | und
   return getPlayerVisibleOperations(state.operations, resolvePlayerFacingFaction(state));
 }
 
+export function filterPlayerFacingOperationHistory(
+  state: LoadedGameState | null | undefined,
+): NonNullable<LoadedGameState['operationHistory']> {
+  if (!state?.operationHistory) return [];
+  return getPlayerVisibleFactions(state.operationHistory, resolvePlayerFacingFaction(state));
+}
+
+export function filterPlayerFacingMovementsByOsid(
+  state: LoadedGameState | null | undefined,
+): LoadedGameState['movementsByOsid'] {
+  if (!state?.movementsByOsid) return {};
+  const playerFormationIds = new Set(filterPlayerFacingFormations(state).map((formation) => formation.id));
+  const filteredEntries = Object.entries(state.movementsByOsid).map(([osid, movements]) => ([
+    osid,
+    movements.filter((movement) => playerFormationIds.has(movement.formation_id)),
+  ]));
+  return Object.fromEntries(filteredEntries);
+}
+
 export function filterPlayerVisibleMapFormations(state: LoadedGameState | null | undefined): FormationView[] {
   if (!state?.formations) return [];
   const playerFaction = resolvePlayerFacingFaction(state);

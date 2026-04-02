@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import type { LoadedGameState, OperationView } from '../src/ui/map/data/types.js';
 import {
   filterPlayerFacingFormations,
+  filterPlayerFacingMovementsByOsid,
   filterPlayerFacingOperations,
+  filterPlayerFacingOperationHistory,
   filterPlayerFacingSectors,
   getPlayerFacingFaction,
   filterPlayerVisibleMapFormations,
@@ -39,6 +41,71 @@ describe('player visibility helpers', () => {
     expect(filterPlayerFacingFormations(state).map((f) => f.id)).toEqual(['arbih_3rd_corps']);
     expect(filterPlayerFacingSectors(state).map((s) => s.sector_id)).toEqual(['s_1']);
     expect(filterPlayerFacingOperations(state).map((o) => o.name)).toEqual(['Op Tuzla']);
+  });
+
+  it('filters operation history and movement logs to player-owned formations only', () => {
+    const state = {
+      player_faction: 'RBiH',
+      formations: [
+        { id: 'arbih_b1', faction: 'RBiH', name: '1st Brigade', kind: 'brigade', readiness: 'active', cohesion: 80, fatigue: 0, status: 'active', createdTurn: 1, tags: [] },
+        { id: 'rs_b1', faction: 'RS', name: 'Enemy Brigade', kind: 'brigade', readiness: 'active', cohesion: 80, fatigue: 0, status: 'active', createdTurn: 1, tags: [] },
+      ],
+      operationHistory: [
+        {
+          operation_id: 'op_1',
+          operation_name: 'Own Op',
+          corps_id: 'arbih_3rd_corps',
+          faction: 'RBiH',
+          started_turn: 1,
+          ended_turn: 2,
+          outcome: 'success',
+          objectives_targeted: ['osid_a'],
+          objectives_captured: ['osid_a'],
+          total_attacks: 1,
+          casualties_suffered: { killed: 1, wounded: 2 },
+          casualties_inflicted: { killed: 3, wounded: 4 },
+          equipment_lost: { tanks: 0, artillery: 0 },
+          equipment_destroyed: { tanks: 0, artillery: 0 },
+          equipment_captured: { tanks: 0, artillery: 0 },
+          grade: { stars: 2, verdict: 'solid', factors: {} },
+          duration_turns: 1,
+          weekly_log: [],
+        },
+        {
+          operation_id: 'op_2',
+          operation_name: 'Enemy Op',
+          corps_id: 'vrs_1st_krajina',
+          faction: 'RS',
+          started_turn: 1,
+          ended_turn: 2,
+          outcome: 'success',
+          objectives_targeted: ['osid_b'],
+          objectives_captured: ['osid_b'],
+          total_attacks: 1,
+          casualties_suffered: { killed: 1, wounded: 2 },
+          casualties_inflicted: { killed: 3, wounded: 4 },
+          equipment_lost: { tanks: 0, artillery: 0 },
+          equipment_destroyed: { tanks: 0, artillery: 0 },
+          equipment_captured: { tanks: 0, artillery: 0 },
+          grade: { stars: 2, verdict: 'solid', factors: {} },
+          duration_turns: 1,
+          weekly_log: [],
+        },
+      ],
+      movementsByOsid: {
+        osid_a: [
+          { turn: 2, formation_id: 'arbih_b1', formation_name: '1st Brigade', type: 'arrived' },
+          { turn: 2, formation_id: 'rs_b1', formation_name: 'Enemy Brigade', type: 'arrived' },
+        ],
+      },
+    } as unknown as LoadedGameState;
+
+    expect(filterPlayerFacingOperationHistory(state).map((entry) => entry.operation_name)).toEqual(['Own Op']);
+    expect(filterPlayerFacingMovementsByOsid(state)).toEqual({
+      osid_a: [
+        { turn: 2, formation_id: 'arbih_b1', formation_name: '1st Brigade', type: 'arrived' },
+      ],
+    });
   });
 
   it('operation arrows are built only for player-facing operations', () => {

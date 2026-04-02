@@ -43,6 +43,32 @@ Engine-derived chokepoint detection (`engineMustHold`) disabled with `false &&`.
 - `integration_anomaly.test.ts` — 3 pass
 
 ---
+### 2026-04-02 — Engine health Wave 1 continued: settlement dossiers now filter timeline truth
+
+Continued the clean-lane player-knowledge sweep in `F:\AWWV_exec_clean`, closing the next leak seam after tooltip cleanup: selected-settlement dossiers were already filtering some visible lists, but still forwarded raw omniscient operation history and brigade movement logs into timeline surfaces.
+
+Implemented:
+- `src/ui/shared/playerVisibility.ts`
+  - added `filterPlayerFacingOperationHistory(...)` so dossier/timeline surfaces can consume only player-faction operation AARs
+  - added `filterPlayerFacingMovementsByOsid(...)` so settlement timelines only receive movement records for player-owned formations
+- `src/ui/map/components/SelectionPanel.tsx`
+  - stationed formations, pending orders, operation targeting, operation history, and movement timeline inputs now all route through player-facing filters
+  - the selection panel no longer mixes a player-safe overview with omniscient dossier tabs
+- `tests/ui_player_visibility.test.ts`
+  - added regressions proving operation history and per-OSID movement logs are filtered to player-owned truth before downstream panels consume them
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\ui_map_tooltip_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`20` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- selected-settlement dossiers are still player surfaces, not a safer place to leak omniscient truth
+- partial filtering is a trap because one tab can look honest while another quietly leaks enemy movement or operation truth
+- pushing the contract into shared visibility helpers is cheaper than re-fighting the same leak in every future dossier panel
+
+---
 
 ### 2026-04-02 â€” Engine health Wave 1 continued: local brigade fatigue now reaches commander planning
 
