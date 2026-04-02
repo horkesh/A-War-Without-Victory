@@ -75,6 +75,15 @@ test('applyFatigueRecovery treats sector-assigned brigades as frontline formatio
 test('applyFatigueRecovery still honors legacy front assignments as compatibility fallback', () => {
     const state = makeState();
     state.military.brigade_front_assignment = { b2: 'RBiH__RS__S1__S2' };
+    state.military.assignable_front_segments = [
+        {
+            front_id: 'RBiH__RS__S1__S2',
+            edge_ids: ['S1__S2'],
+            side_a: 'RBiH',
+            side_b: 'RS',
+            length_edges: 1,
+        },
+    ] as any;
 
     applyFatigueRecovery(state);
 

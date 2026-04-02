@@ -23,6 +23,7 @@ function activeBrigades(state: GameState): FormationState[] {
 
 export function buildFrontlineAssignedFormationSet(state: GameState): Set<FormationId> {
     const assigned = new Set<FormationId>();
+    const formations = state.military.formations ?? {};
 
     const sectors = state.military.corps_front_sectors;
     if (sectors && typeof sectors === 'object') {
@@ -41,9 +42,14 @@ export function buildFrontlineAssignedFormationSet(state: GameState): Set<Format
     }
 
     const assignmentMap = state.military.brigade_front_assignment;
+    const segments = state.military.assignable_front_segments ?? [];
+    const validSegmentIds = new Set(segments.map((segment) => segment.front_id));
     if (assignmentMap && typeof assignmentMap === 'object') {
         for (const [formationId, frontId] of Object.entries(assignmentMap)) {
-            if (frontId) assigned.add(formationId as FormationId);
+            if (!frontId || !validSegmentIds.has(frontId)) continue;
+            const formation = formations[formationId as FormationId];
+            if (!formation || formation.status !== 'active') continue;
+            assigned.add(formationId as FormationId);
         }
     }
 

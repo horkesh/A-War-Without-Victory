@@ -1508,3 +1508,6 @@ In AWWV, `GameStateAdapter` is not just a parser; it defines the default vocabul
 ### Compatibility objects should not stay live runtime truth after their last real consumer is gone
 
 In AWWV, `local_fronts` survived as a rebuilt runtime object long after sectors had become the real frontline authority. Once the last meaningful fallback could be computed directly from `brigade_front_assignment + assignable_front_segments`, continuing to rebuild `local_fronts` every turn only preserved the illusion that the old lane still mattered. Strong cleanup often means deleting the rebuild path before deleting the schema field.
+### Legacy fallback helpers should validate their own inputs instead of demanding ritual repair passes
+
+In AWWV, `brigade_front_assignment` survived only as a compatibility lane, but `buildFrontlineAssignedFormationSet(...)` still trusted any non-null legacy entry. That forced the engine to keep running repair passes just to stop stale front IDs and dead formations from polluting frontline truth. A compatibility fallback is healthier when the helper itself ignores invalid segments and inactive formations, so the repo stops preserving old state merely to keep old assumptions comfortable.

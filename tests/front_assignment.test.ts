@@ -145,3 +145,33 @@ test('sector frontline truth ignores stale legacy front assignments when sectors
     assert.equal(isBrigadeAssignedToFront(state, 'b3'), false);
 });
 
+test('legacy frontline fallback ignores invalid segments and inactive formations without repair', () => {
+    const state = makeState();
+    state.military.brigade_front_assignment = {
+        b1: 'RBiH__RS__S1__S2',
+        b2: 'MISSING_FRONT',
+        b3: 'RBiH__RS__S1__S2',
+    } as any;
+    state.military.formations = {
+        ...state.military.formations,
+        b3: {
+            id: 'b3',
+            faction: 'RBiH',
+            name: 'Inactive Ghost',
+            created_turn: 1,
+            status: 'destroyed',
+            assignment: null,
+            kind: 'brigade',
+            personnel: 0,
+            cohesion: 0,
+            tags: [],
+            location_osid: 'op:test_mun:s1',
+        },
+    } as any;
+
+    const assigned = buildFrontlineAssignedFormationSet(state);
+    assert.deepStrictEqual([...assigned].sort(), ['b1']);
+    assert.equal(isBrigadeAssignedToFront(state, 'b2'), false);
+    assert.equal(isBrigadeAssignedToFront(state, 'b3'), false);
+});
+

@@ -20499,3 +20499,30 @@ Why this matters:
 - `local_fronts` had become a rebuilt-every-turn compatibility object with almost no live authority left
 - deriving fallback density from the surviving primitive data is cleaner and harder to lie with
 - this is exactly the kind of repo simplification stronger studios do to keep migrations from stalling half-finished
+### 2026-04-02 - Legacy front-assignment fallback hardening
+
+Hardened the remaining `brigade_front_assignment` fallback so stale legacy entries no longer silently shape frontline truth, then removed the redundant end-of-turn repair pass that only existed to keep that old map looking alive.
+
+Implemented:
+- `src/sim/combat/front_assignment.ts`
+  - legacy fallback now ignores front IDs that no longer exist in `assignable_front_segments`
+  - inactive formations no longer count as frontline through stale legacy assignment rows
+- `src/sim/turn_pipeline.ts`
+  - `refreshFrontEdgeSnapshot(...)` no longer runs a duplicate end-of-turn `ensureBrigadeFrontAssignments(...)` pass
+- `tests/front_assignment.test.ts`
+  - now proves invalid legacy segments and inactive formations are ignored without repair
+- `tests/formation_fatigue_frontline_assignment.test.ts`
+  - compatibility fallback test now proves the legacy path only works when the segment still exists
+- `docs/40_reports/implemented/20260402_LEGACY_FRONT_ASSIGNMENT_FALLBACK_HARDENING.md`
+  - documented the slice
+
+Verification:
+- `node_modules\.bin\tsx.cmd --test tests\front_assignment.test.ts tests\local_front_density_modifier_precedence.test.ts tests\formation_fatigue_frontline_assignment.test.ts`
+  - PASS (`9` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- the engine no longer needs a second ritual repair pass just to keep fallback state from lying
+- stale legacy front IDs are now compatibility baggage instead of accidental frontline authority
+- this further narrows the old front-assignment lane without breaking first-turn compatibility for saves that still need it
