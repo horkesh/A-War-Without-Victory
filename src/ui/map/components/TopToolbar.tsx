@@ -196,7 +196,7 @@ export function TopToolbar({
         <button
           id="btn-back-to-hq"
           className={TOOLBAR_BUTTON_CLASS}
-          title="Return to warroom HQ"
+          title="Return to Warroom"
           onClick={() => {
             if (isEmbedded) {
               window.parent.postMessage({ type: 'awwv-back-to-hq' }, '*');
@@ -205,7 +205,7 @@ export function TopToolbar({
             void ipc.focusWarroom();
           }}
         >
-          HQ
+          WARROOM
         </button>
       )}
 
@@ -281,6 +281,18 @@ export function TopToolbar({
           className={TOOLBAR_BUTTON_CLASS}
         >
           ECONOMY
+        </button>
+      </div>
+
+      <div className={MODULAR_SECTION_CLASS}>
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+        <div className="module-header">Reference</div>
+        <button
+          onClick={() => setCodexOpen(true)}
+          className={TOOLBAR_BUTTON_CLASS}
+          title="Open Codex"
+        >
+          CODEX
         </button>
       </div>
 

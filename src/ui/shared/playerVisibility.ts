@@ -31,6 +31,16 @@ export function filterPlayerFacingOperations(state: LoadedGameState | null | und
   return getPlayerVisibleOperations(state.operations, resolvePlayerFacingFaction(state));
 }
 
+export function findPlayerFacingOperationByKey(
+  state: LoadedGameState | null | undefined,
+  selectedOperationKey: string | null | undefined,
+): OperationView | null {
+  if (!selectedOperationKey) return null;
+  return filterPlayerFacingOperations(state).find(
+    (operation) => `${operation.corps_id}|${operation.name}` === selectedOperationKey,
+  ) ?? null;
+}
+
 export function filterPlayerFacingActiveOperations(
   state: LoadedGameState | null | undefined,
 ): NonNullable<LoadedGameState['activeOperations']> {

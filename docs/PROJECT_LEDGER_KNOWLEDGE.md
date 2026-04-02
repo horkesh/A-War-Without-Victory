@@ -1456,3 +1456,10 @@ Even if sectors are treated as primary truth in big systems, a small helper like
 ### A runtime export is still a live promise even after the UI stops calling it
 
 In AWWV, retiring a feature only at preload/IPC level is not enough if `desktop_sim.ts` still exports the old mutator. Future work will discover the export, assume the capability is still supported, and route around the shell cleanup. Dead desktop-sim exports should be removed once archived code is the only remaining caller.
+### A player-facing contract is still fake if one detail panel bypasses it
+
+In AWWV, shared helpers like `filterPlayerFacingOperations(...)` only become real protection once every consuming panel uses them. `OperationDetail.tsx` was still reading `loadedGameState.operations` directly, which meant the repo could claim player-safe operation filtering while a selected-key path still exposed enemy truth. When a player-facing filter exists, add a tiny keyed lookup helper beside it and route every detail panel through the same contract instead of letting each panel rediscover its own selection logic.
+
+### A shell affordance can be "technically present" and still functionally absent
+
+The standalone tactical map already had a Warroom-focus IPC path and Codex still existed, but both were buried deeply enough that the product still felt like it had lost them. In AWWV, navigation and reference affordances should be judged by live-user discoverability, not by whether some underlying hook technically survives. If a player needs specialist knowledge or keyboard habits to find a route back or open Codex, the shell is still lying about what the product supports.

@@ -7,6 +7,7 @@ import {
   filterPlayerFacingOperations,
   filterPlayerFacingOperationHistory,
   filterPlayerFacingSectors,
+  findPlayerFacingOperationByKey,
   getPlayerFacingFaction,
   filterPlayerVisibleMapFormations,
 } from '../src/ui/shared/playerVisibility.js';
@@ -208,5 +209,29 @@ describe('player visibility helpers', () => {
 
     const geo = buildFormationsGeoJSON(state, baseGeo as any);
     expect(geo.features.map((feature) => feature.properties.id)).toEqual(['enemy_seen', 'own_1']);
+  });
+
+  it('selected operation lookup refuses to expose enemy operations selected by raw key', () => {
+    const state = {
+      player_faction: 'RBiH',
+      formations: [],
+      operations: [
+        { corps_id: 'arbih_3rd_corps', corps_name: '3rd Corps', faction: 'RBiH', name: 'Own Op', type: 'sector_attack', phase: 'planning', started_turn: 1, current_objective_index: 0, objectives: ['osid_a'], participating_brigade_count: 1 },
+        { corps_id: 'vrs_1st_krajina', corps_name: '1st Krajina Corps', faction: 'RS', name: 'Enemy Op', type: 'sector_attack', phase: 'execution', started_turn: 1, current_objective_index: 0, objectives: ['osid_b'], participating_brigade_count: 1 },
+      ] satisfies OperationView[],
+      corpsFrontSectors: [],
+    } as unknown as LoadedGameState;
+
+    const enemyOperation = findPlayerFacingOperationByKey(
+      state,
+      'vrs_1st_krajina|Enemy Op',
+    );
+    expect(enemyOperation).toBeNull();
+
+    const ownOperation = findPlayerFacingOperationByKey(
+      state,
+      'arbih_3rd_corps|Own Op',
+    );
+    expect(ownOperation?.name).toBe('Own Op');
   });
 });

@@ -6,6 +6,7 @@ import { getPanelRailStyle } from './panelRail';
 import { getFormationCommander } from '../utils/officerUtils';
 import { OfficerProfile } from './OfficerProfile';
 import { getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
+import { findPlayerFacingOperationByKey } from '../../shared/playerVisibility';
 
 function PhaseBadge({ phase }: { phase: string }) {
   const cls =
@@ -72,12 +73,7 @@ export function OperationDetail({ railSlot }: OperationDetailProps) {
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
 
-  if (!selectedOperationKey || !loadedGameState) return null;
-
-  const [corpsId, opName] = selectedOperationKey.split('|');
-  const op = loadedGameState.operations?.find(
-    (o) => o.corps_id === corpsId && o.name === opName
-  ) ?? null;
+  const op = findPlayerFacingOperationByKey(loadedGameState, selectedOperationKey);
 
   if (!op) return null;
 

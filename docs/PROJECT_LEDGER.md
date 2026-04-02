@@ -20058,3 +20058,33 @@ Verification:
 Why this matters:
 - even after the live shell stops calling a legacy lane, the runtime still lies if the lower API keeps exporting it
 - deleting the dead exports makes the desktop sim surface match the live product truth and removes another place future refactors could accidentally resurrect old front/theatre mechanics
+### 2026-04-02 - Player shell affordance and operation-detail visibility cleanup
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing another player-truth/UI leak while making the desktop shell more legible.
+
+Implemented:
+- `src/ui/map/components/TopToolbar.tsx`
+  - made the standalone return affordance explicit as `WARROOM`
+  - added a visible `CODEX` toolbar entry in the `Reference` module
+- `src/ui/shared/playerVisibility.ts`
+  - added `findPlayerFacingOperationByKey(...)` so operation selection can resolve through the same player-facing filter contract used elsewhere
+- `src/ui/map/components/OperationDetail.tsx`
+  - now resolves the selected operation through the shared player-facing lookup instead of reading `loadedGameState.operations` directly
+- `tests/ui_player_visibility.test.ts`
+  - added a regression proving raw enemy operation keys do not resolve through the player-facing selection lookup
+- `docs/40_reports/implemented/20260402_PLAYER_SHELL_AFFORDANCE_AND_OPERATION_DETAIL_VISIBILITY.md`
+  - documented this shell/visibility cleanup slice
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts`
+  - PASS (`7` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Known environment note:
+- `npm run desktop:map:build` could not be re-run in this execution worktree because the worktree environment is currently missing `@vitejs/plugin-react`; this appears to be an execution-lane dependency/setup issue rather than a failure introduced by this slice
+
+Why this matters:
+- the player-facing operation contract already existed, but `OperationDetail` was still bypassing it directly
+- the tactical-map shell also still behaved like a legacy/debug surface because the Warroom return path and Codex entrypoint were not obvious enough in normal use
+- this slice removes one more omniscient panel path and makes the shell better match the intended product hierarchy before the deeper Army HQ threat/intel cleanup
