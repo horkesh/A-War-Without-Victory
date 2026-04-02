@@ -522,7 +522,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
             {formation.location_osid && (
               <div className="text-xs min-w-0">
                 <span className="text-text-secondary">Location: </span>
-                <span className="font-mono text-text-primary break-all" title={formation.location_osid}>
+                <span className="text-text-primary break-all">
                   {getOsidDisplayName(formation.location_osid, osidDisplayNames)}
                 </span>
               </div>
@@ -531,7 +531,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
             {isBrigade && (
               <div className="text-xs min-w-0">
                 <span className="text-text-secondary">Home municipality: </span>
-                <span className="font-mono text-text-primary break-all" title={formation.municipalityId ?? '—'}>
+                <span className="text-text-primary break-all">
                       {formation.municipalityId ? getPlayerSafeMunicipalityName(formation.municipalityId, '—') : '—'}
                 </span>
               </div>

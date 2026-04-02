@@ -35,7 +35,7 @@ export interface AttackConfirmationProps {
  */
 export function AttackConfirmation({
   attacker,
-  targetOsid,
+  targetOsid: _targetOsid,
   targetDisplayName,
   defender,
   terrainSummary,
@@ -113,7 +113,7 @@ export function AttackConfirmation({
 
           <div>
             <span className="text-text-secondary">Target: </span>
-            <span className="text-text-primary font-mono" title={targetOsid}>
+            <span className="text-text-primary">
               {targetDisplayName}
             </span>
           </div>

@@ -325,12 +325,8 @@ export class SettlementInfoPanel {
                         <span class="value">${this.props.selectedSettlement?.properties?.municipal_seat ? 'MUNICIPAL SEAT' : 'SUBORDINATE'}</span>
                     </div>
                     <div class="settlement-info-field-row">
-                        <span class="label">Settlement ID</span>
-                        <span class="value font-mono">${escapeHtml(data.sid)}</span>
-                    </div>
-                    <div class="settlement-info-field-row">
-                        <span class="label">Municipality ID</span>
-                        <span class="value font-mono">${escapeHtml(data.mun1990Id)}</span>
+                        <span class="label">Administrative Region</span>
+                        <span class="value">${escapeHtml(data.munName)}</span>
                     </div>
                 </div>
             </div>

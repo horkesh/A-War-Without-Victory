@@ -360,4 +360,15 @@ describe('warroom player visibility', () => {
     expect(factionOverviewSource).not.toContain('HRHB declaration imminent');
     expect(factionOverviewSource).not.toContain("rsPressurePct.toFixed(0) + '%'");
   });
+
+  it('settlement info panel does not expose raw settlement or municipality ids', () => {
+    const source = readFileSync(
+      resolve('src/ui/warroom/components/SettlementInfoPanel.ts'),
+      'utf8',
+    );
+
+    expect(source).not.toContain('Settlement ID');
+    expect(source).not.toContain('Municipality ID');
+    expect(source).toContain('Administrative Region');
+  });
 });

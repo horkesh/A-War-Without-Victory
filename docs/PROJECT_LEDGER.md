@@ -21128,3 +21128,23 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - Docs:
   - `docs/40_reports/implemented/20260402_AOR_CAP_BRIDGE_RETIREMENT.md`
 
+
+## 2026-04-02 - Player-safe ID leak mop-up
+
+- Worktree/branch: F:\AWWV_merge_wave2 on codex/main-merge-wave1
+- Removed remaining raw engine-ID leaks from:
+  - `src/ui/map/components/AttackConfirmation.tsx`
+  - `src/ui/map/components/FormationDetail.tsx`
+  - `src/ui/warroom/components/SettlementInfoPanel.ts`
+- Attack confirmation no longer exposes raw target OSIDs via hover title.
+- Formation detail no longer exposes raw `location_osid` or municipality ids via hover titles.
+- Warroom settlement info admin tab now shows `Administrative Region` instead of raw `Settlement ID` / `Municipality ID`.
+- Added regressions in:
+  - `tests/ui_player_visibility.test.ts`
+  - `tests/warroom_player_visibility.test.ts`
+- Verification:
+  - `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts`
+  - `F:\A-War-Without-Victory\node_modules\.bin\tsx.cmd --test tests\ui_map_game_state_adapter.test.ts`
+- Docs:
+  - `docs/40_reports/implemented/20260402_PLAYER_SAFE_ID_LEAK_MOPUP.md`
+

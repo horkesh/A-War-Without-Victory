@@ -1629,3 +1629,7 @@ In AWWV, a compatibility field can linger for save/load reasons without doing mu
 
 In AWWV, "we already removed that IPC" is not trustworthy until preload, Electron main, the live IPC hook, and the live adapter all agree. Compatibility ghosts often survive in exactly one of those layers and quietly keep a dead concept available.
 
+### Hover titles are a common leak path for raw engine ids
+
+In AWWV, a panel can look player-safe at first glance while still leaking raw OSIDs or municipality ids through `title=` attributes and admin detail rows. Player-shell audits need to check hover text and metadata fields, not just visible labels.
+

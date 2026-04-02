@@ -329,3 +329,8 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - The pass keeps the same command information but makes the mounted Army HQ shell feel more like a compressed command desk and less like a slide stack.
 - See `docs/40_reports/implemented/20260402_ARMY_HQ_DENSITY_PASS.md`.
 
+## 2026-04-02 - Player-safe ID leak mop-up
+
+- Attack confirmation, formation detail, and the Warroom settlement panel no longer expose raw OSIDs or municipality ids to the player shell.
+- See `docs/40_reports/implemented/20260402_PLAYER_SAFE_ID_LEAK_MOPUP.md`.
+

@@ -376,4 +376,19 @@ describe('player visibility helpers', () => {
     expect(source).toContain('Declaration posture:');
     expect(source).not.toContain('ProgressBar value={f.declaration_pressure}');
   });
+
+  it('removes raw engine ids from attack confirmation and formation detail shells', () => {
+    const attackConfirmationSource = readFileSync(
+      new URL('../src/ui/map/components/AttackConfirmation.tsx', import.meta.url),
+      'utf8',
+    );
+    expect(attackConfirmationSource).not.toContain('title={targetOsid}');
+
+    const formationDetailSource = readFileSync(
+      new URL('../src/ui/map/components/FormationDetail.tsx', import.meta.url),
+      'utf8',
+    );
+    expect(formationDetailSource).not.toContain('title={formation.location_osid}');
+    expect(formationDetailSource).not.toContain("title={formation.municipalityId ?? '—'}");
+  });
 });
