@@ -261,11 +261,12 @@ describe('Tactical map render smoke', () => {
 
     expect(rendered).toContain('3rd Corps front');
     expect(rendered).toContain('hostile offensive preparation');
-    expect(rendered).toContain('hostile operation in execution');
     expect(rendered).not.toContain('vrs_1st_krajina');
     expect(rendered).not.toContain('1st Krajina Corps');
     expect(rendered).not.toContain('op_vrs_secret_thunder');
     expect(rendered).not.toContain('op_vrs_followup');
+    expect(rendered).not.toContain('hostile operation in execution');
+    expect(rendered).not.toContain('hostile operation staging');
   });
 
   it('player-facing label helpers never fall back to raw ids', () => {

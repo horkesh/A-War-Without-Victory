@@ -20088,3 +20088,29 @@ Why this matters:
 - the player-facing operation contract already existed, but `OperationDetail` was still bypassing it directly
 - the tactical-map shell also still behaved like a legacy/debug surface because the Warroom return path and Codex entrypoint were not obvious enough in normal use
 - this slice removes one more omniscient panel path and makes the shell better match the intended product hierarchy before the deeper Army HQ threat/intel cleanup
+### 2026-04-02 - Army HQ threat assessment made player-safe
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, removing another omniscient player-facing panel path from the tactical-map shell.
+
+Implemented:
+- `src/ui/map/components/army_hq/generateThreatAssessment.ts`
+  - removed direct synthesis from raw enemy operations (`execution`, `staging`, `stalled`)
+  - threat generation now uses player-plausible sector-intel observations only:
+    - hostile offensive preparation
+    - hostile defenses consolidating
+    - weak intelligence picture
+- `tests/ui_map_render_smoke.test.ts`
+  - updated the threat-assessment regression so the Army HQ threat model no longer claims exact hostile operation execution/staging from raw enemy state
+- `docs/40_reports/implemented/20260402_ARMY_HQ_THREAT_ASSESSMENT_PLAYER_SAFE.md`
+  - documented the player-safe threat-assessment cleanup
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts tests\ui_player_visibility.test.ts`
+  - PASS (`20` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- the previous threat panel hid raw enemy ids but still reasoned from omniscient enemy operation state
+- that made Army HQ look like a believable staff abstraction while still behaving like a disguised debug surface
+- grounding threat assessment in sector intel only keeps the feature useful without teaching the player impossible certainty

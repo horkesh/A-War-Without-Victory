@@ -31,12 +31,6 @@ function describeStrength(strengthCategories: string[]): string {
     return strengthCategories[strengthCategories.length - 1].toUpperCase();
 }
 
-function classifyMomentum(momentum: number): string {
-    if (momentum >= 2) return 'Breakthrough risk elevated';
-    if (momentum >= 1) return 'Hostile pressure increasing';
-    return 'Contact sustained';
-}
-
 export function generateThreatAssessment(
     state: LoadedGameState,
     faction: string,
@@ -46,7 +40,6 @@ export function generateThreatAssessment(
     const tid = () => `threat-${nextId++}`;
 
     const sectorIntel: SectorIntelRecordView[] = (state as LoadedGameState & { sectorIntel?: SectorIntelRecordView[] }).sectorIntel ?? [];
-    const allOps = state.operations ?? [];
     const sectors = state.corpsFrontSectors ?? [];
     const formations = state.formations ?? [];
 
@@ -61,20 +54,19 @@ export function generateThreatAssessment(
         });
     }
 
-    const enemyCorpsToFriendlyCorps = new Map<string, { corpsId: string; corpsName: string }>();
-    for (const rec of sectorIntel) {
-        const enemyCorpsId = rec.enemy_corps_id ?? '';
-        if (!enemyCorpsId || enemyCorpsToFriendlyCorps.has(enemyCorpsId)) continue;
-        const friendly = sectorToCorps.get(rec.friendly_sector_id);
-        if (friendly) enemyCorpsToFriendlyCorps.set(enemyCorpsId, friendly);
-    }
-
     const offensiveSignsBySector = new Map<string, SectorIntelRecordView[]>();
+    const defensivePostureBySector = new Map<string, SectorIntelRecordView[]>();
     for (const rec of sectorIntel) {
-        if (!rec.offensive_signs && rec.posture_observed !== 'offensive_prep') continue;
-        const list = offensiveSignsBySector.get(rec.friendly_sector_id) ?? [];
-        list.push(rec);
-        offensiveSignsBySector.set(rec.friendly_sector_id, list);
+        if (rec.offensive_signs || rec.posture_observed === 'offensive_prep') {
+            const list = offensiveSignsBySector.get(rec.friendly_sector_id) ?? [];
+            list.push(rec);
+            offensiveSignsBySector.set(rec.friendly_sector_id, list);
+        }
+        if (rec.posture === 'defending' || rec.posture_observed === 'defending') {
+            const list = defensivePostureBySector.get(rec.friendly_sector_id) ?? [];
+            list.push(rec);
+            defensivePostureBySector.set(rec.friendly_sector_id, list);
+        }
     }
 
     for (const [friendlySectorId, records] of offensiveSignsBySector) {
@@ -95,49 +87,19 @@ export function generateThreatAssessment(
         });
     }
 
-    const enemyOps = allOps.filter((op) => op.faction !== faction && op.phase === 'execution');
-    for (const op of enemyOps) {
-        const ourCorps = enemyCorpsToFriendlyCorps.get(op.corps_id);
-        items.push({
-            id: tid(),
-            severity: 'active',
-            title: `${frontLabel(ourCorps?.corpsName)} - hostile operation in execution`,
-            detail: classifyMomentum(op.momentum ?? 0),
-            friendlyCorpsId: ourCorps?.corpsId,
-            friendlyCorpsName: ourCorps?.corpsName,
-        });
-    }
-
-    const enemyStagingOps = allOps.filter(
-        (op) =>
-            op.faction !== faction &&
-            (op.preparation_sub_phase === 'force_staging' ||
-                op.preparation_sub_phase === 'assessment' ||
-                op.preparation_sub_phase === 'intel_gathering'),
-    );
-    for (const op of enemyStagingOps) {
-        if (enemyOps.some((e) => e.corps_id === op.corps_id)) continue;
-        const ourCorps = enemyCorpsToFriendlyCorps.get(op.corps_id);
-        items.push({
-            id: tid(),
-            severity: 'active',
-            title: `${frontLabel(ourCorps?.corpsName)} - hostile operation staging`,
-            detail: 'Hostile preparations are being organized behind this front.',
-            friendlyCorpsId: ourCorps?.corpsId,
-            friendlyCorpsName: ourCorps?.corpsName,
-        });
-    }
-
-    const stalledOps = allOps.filter(
-        (op) => op.faction !== faction && op.phase === 'execution' && (op.consecutive_failures_on_current ?? 0) >= 3,
-    );
-    for (const op of stalledOps) {
-        const ourCorps = enemyCorpsToFriendlyCorps.get(op.corps_id);
+    for (const [friendlySectorId, records] of defensivePostureBySector) {
+        if (offensiveSignsBySector.has(friendlySectorId)) continue;
+        const avgConf = records.reduce((sum, record) => sum + record.confidence, 0) / records.length;
+        if (avgConf < 0.5) continue;
+        const ourCorps = sectorToCorps.get(friendlySectorId);
         items.push({
             id: tid(),
             severity: 'hardened',
-            title: `${frontLabel(ourCorps?.corpsName)} - hostile assault spent`,
-            detail: 'Recent hostile attacks have stalled and appear to be losing tempo.',
+            title: `${frontLabel(ourCorps?.corpsName)} - hostile defenses consolidating`,
+            detail: avgConf >= 0.75
+                ? 'Entrenchment and defensive posture are consistently reported along this front.'
+                : 'Defensive preparations are being reported along this front.',
+            confidence: avgConf,
             friendlyCorpsId: ourCorps?.corpsId,
             friendlyCorpsName: ourCorps?.corpsName,
         });
