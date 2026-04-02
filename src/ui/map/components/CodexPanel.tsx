@@ -103,21 +103,21 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
 
     return (
         <div className="fixed inset-0 z-[900] flex items-center justify-center bg-black/70 backdrop-blur-sm">
-            <div className="w-[860px] max-w-[95vw] h-[80vh] bg-[#0c0e14] border border-neutral-700/50 rounded-lg shadow-2xl flex flex-col overflow-hidden">
+            <div className="w-[800px] max-w-[95vw] h-[82vh] bg-[#0c0e14] border border-neutral-700/50 rounded-lg shadow-2xl flex flex-col overflow-hidden">
                 {/* Header */}
-                <div className="flex items-center justify-between px-4 py-2.5 border-b border-neutral-700/50 bg-[#10131a]">
-                    <div className="flex items-center gap-3">
-                        <div className="text-amber-400 text-lg font-bold tracking-[0.15em] uppercase">
+                <div className="flex items-center justify-between px-3.5 py-2 border-b border-neutral-700/50 bg-[#10131a]">
+                    <div className="flex items-center gap-2.5">
+                        <div className="text-amber-400 text-[15px] font-bold tracking-[0.13em] uppercase">
                             Codex
                         </div>
-                        <div className="text-[10px] text-neutral-500">
+                        <div className="text-[9px] text-neutral-500">
                             {unlockedCount} / {totalEssays} essays unlocked
                         </div>
                     </div>
                     <button
                         type="button"
                         onClick={onClose}
-                        className="text-neutral-500 hover:text-neutral-300 transition-colors text-sm px-2 py-1"
+                        className="text-neutral-500 hover:text-neutral-300 transition-colors text-[11px] px-2 py-0.5"
                     >
                         ESC
                     </button>
@@ -126,7 +126,7 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
                 {/* Body: sidebar + content */}
                 <div className="flex flex-1 min-h-0">
                     {/* Sidebar — essay list grouped by year */}
-                    <div className="w-[260px] border-r border-neutral-700/30 overflow-y-auto bg-[#0d0f16]">
+                    <div className="w-[236px] border-r border-neutral-700/30 overflow-y-auto bg-[#0d0f16]">
                         {YEARS.map((year) => {
                             const yearEssays = essaysByYear.get(year) ?? [];
                             const yearUnlocked = yearEssays.filter((e) => firedEventIds.has(e.event_id)).length;
@@ -137,9 +137,9 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
                                     <button
                                         type="button"
                                         onClick={() => setExpandedYear(isExpanded ? null : year)}
-                                        className="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-white/5 transition-colors border-b border-neutral-800/50"
+                                        className="w-full flex items-center justify-between px-2.5 py-1.5 text-left hover:bg-white/5 transition-colors border-b border-neutral-800/50"
                                     >
-                                        <span className="text-[11px] font-bold text-neutral-300 tracking-[0.1em]">
+                                        <span className="text-[10px] font-bold text-neutral-300 tracking-[0.08em]">
                                             {year}
                                         </span>
                                         <span className="text-[9px] text-neutral-500">
@@ -155,7 +155,7 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
                                                 key={essay.id}
                                                 type="button"
                                                 onClick={() => setSelectedEssayId(essay.id)}
-                                                className={`w-full text-left px-3.5 py-1.5 border-b border-neutral-800/30 transition-all ${
+                                            className={`w-full text-left px-3 py-1.5 border-b border-neutral-800/30 transition-all ${
                                                     isSelected
                                                         ? 'bg-amber-400/10 border-l-2 border-l-amber-400'
                                                         : 'hover:bg-white/3 border-l-2 border-l-transparent'
@@ -183,12 +183,12 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
                     </div>
 
                     {/* Content viewer */}
-                    <div className="flex-1 overflow-y-auto p-4">
+                    <div className="flex-1 overflow-y-auto p-3">
                         {!selectedEssay ? (
                             <div className="flex items-center justify-center h-full">
                                 <div className="text-center">
-                                    <div className="text-neutral-600 text-sm mb-2">Select an essay</div>
-                                    <div className="text-neutral-700 text-[10px] max-w-[300px]">
+                                    <div className="text-neutral-600 text-[13px] mb-2">Select an essay</div>
+                                    <div className="text-neutral-700 text-[9px] max-w-[280px]">
                                         Historical essays are unlocked as you experience events during the war.
                                         Each essay provides context drawn from ICTY trial records, academic sources,
                                         and primary documents.
@@ -198,29 +198,29 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
                         ) : !isSelectedUnlocked ? (
                             <div className="flex items-center justify-center h-full">
                                 <div className="text-center">
-                                    <div className="text-neutral-500 text-sm mb-2">{selectedEssay.title}</div>
-                                    <div className="text-[10px] text-neutral-600 border border-neutral-700/30 rounded-md px-4 py-3 bg-neutral-800/20 max-w-[350px]">
+                                    <div className="text-neutral-500 text-[13px] mb-2">{selectedEssay.title}</div>
+                                    <div className="text-[9px] text-neutral-600 border border-neutral-700/30 rounded-md px-3 py-2.5 bg-neutral-800/20 max-w-[330px]">
                                         Experience this event during gameplay to unlock the full historical essay.
                                     </div>
                                 </div>
                             </div>
                         ) : (
                             /* Paper aesthetic for unlocked essay */
-                            <div className="bg-[#f5f0e8] border border-neutral-300 rounded-lg shadow-md relative max-w-[560px] mx-auto">
+                            <div className="bg-[#f5f0e8] border border-neutral-300 rounded-lg shadow-md relative max-w-[540px] mx-auto">
                                 {/* Stamp */}
-                                <div className="absolute top-3 right-4 opacity-[0.06] font-black text-2xl -rotate-12 select-none uppercase text-neutral-800 pointer-events-none">
+                                <div className="absolute top-2.5 right-3.5 opacity-[0.06] font-black text-[22px] -rotate-12 select-none uppercase text-neutral-800 pointer-events-none">
                                     CODEX
                                 </div>
 
                                 {/* Header */}
-                                <div className="px-4 py-2.5 border-b border-neutral-300/60 bg-[#ebe5d8] rounded-t-lg">
+                                <div className="px-3.5 py-2 border-b border-neutral-300/60 bg-[#ebe5d8] rounded-t-lg">
                                     <div className="flex items-center gap-2 mb-1">
                                         <CategoryBadge category={selectedEssay.category} />
                                         <span className="text-[8px] uppercase text-neutral-500 tracking-[0.15em]">
                                             {selectedEssay.year}
                                         </span>
                                     </div>
-                                    <div className="text-[13px] font-bold text-neutral-800 leading-tight" style={{ fontFamily: 'Georgia, serif' }}>
+                                    <div className="text-[12px] font-bold text-neutral-800 leading-tight" style={{ fontFamily: 'Georgia, serif' }}>
                                         {selectedEssay.title}
                                     </div>
                                     <div className="text-[8px] text-neutral-500 mt-1 italic">
@@ -229,18 +229,18 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
                                 </div>
 
                                 {/* Body */}
-                                <div className="px-4 py-3.5">
+                                <div className="px-3.5 py-3">
                                     {selectedEssay.content ? (
                                         <div
-                                            className="text-[10px] text-neutral-700 leading-relaxed"
+                                            className="text-[9px] text-neutral-700 leading-relaxed"
                                             style={{ fontFamily: 'Georgia, serif' }}
                                         >
                                             {selectedEssay.content.split('\n\n').map((para, i) => (
-                                                <p key={i} className="mb-3 last:mb-0">{para}</p>
+                                                <p key={i} className="mb-2.5 last:mb-0">{para}</p>
                                             ))}
                                         </div>
                                     ) : (
-                                    <div className="text-[10px] text-neutral-400 italic text-center py-5" style={{ fontFamily: 'Georgia, serif' }}>
+                                    <div className="text-[9px] text-neutral-400 italic text-center py-4" style={{ fontFamily: 'Georgia, serif' }}>
                                             Essay content pending generation.
                                         </div>
                                     )}
@@ -248,7 +248,7 @@ export function CodexPanel({ isOpen, onClose }: CodexPanelProps) {
 
                                 {/* Sources footer */}
                                 {selectedEssay.sources && selectedEssay.sources.length > 0 && (
-                                    <div className="px-4 py-2 border-t border-neutral-300/60 bg-[#ebe5d8] rounded-b-lg">
+                                    <div className="px-3.5 py-1.5 border-t border-neutral-300/60 bg-[#ebe5d8] rounded-b-lg">
                                         <div className="text-[7px] uppercase text-neutral-500 font-bold tracking-[0.15em] mb-1">
                                             Sources
                                         </div>

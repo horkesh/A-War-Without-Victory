@@ -20633,3 +20633,24 @@ Verification:
 Why this matters:
 - command-density work has to start at the shared shell primitives or every downstream panel re-inflates itself
 - this pass cuts wasted chrome from the top toolbar, the left command rail, and shared floating panels so more actual command context fits on screen
+### 2026-04-02 - Tactical shell density pass 4
+
+Extended the density pass into the larger strategic overlays so Army HQ and Codex stop feeling like roomy dashboard exceptions to the tighter tactical shell.
+
+Implemented:
+- `src/ui/map/components/army_hq/ArmyHQModal.tsx`
+  - reduced header chrome, tab-row padding, crest footprint, top-grid spacing, and corps-card section spacing
+- `src/ui/map/components/CodexPanel.tsx`
+  - narrowed the shell slightly and tightened sidebar/content/paper-view spacing
+- `docs/40_reports/implemented/20260402_TACTICAL_SHELL_DENSITY_PASS_4.md`
+  - documented the slice
+
+Verification:
+- `node_modules\\.bin\\vitest.cmd run tests\\ui_map_render_smoke.test.ts tests\\ui_player_visibility.test.ts tests\\warroom_player_visibility.test.ts`
+  - PASS (`26` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- the larger strategic overlays define whether the product feels cohesive or like several different UI eras stitched together
+- density has to reach Army HQ and Codex too, or the product still wastes attention whenever the player leaves the map shell

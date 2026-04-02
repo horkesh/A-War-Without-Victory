@@ -1523,3 +1523,6 @@ In AWWV, engineering docs that still listed `assign-brigade-to-front`, `rename-f
 ### Shared shell spacing must be treated like gameplay balance, not cosmetics
 
 In AWWV, if `TopToolbar`, `AccordionHeader`, `GlassPanel`, or the main command rail are roomy by default, every downstream panel inherits wasted space no matter how carefully the leaf components are designed. Density work should start with the shared shell authorities and toolbar-clearance rules, because that is where command context is won or lost across the whole product.
+### Large overlays must speak the same density language as the tactical shell
+
+In AWWV, Army HQ, Codex, and similar full-size overlays cannot be allowed to drift into a roomier, slower dashboard style just because they are modal. If those shells use larger paddings, taller tab rows, and oversized crests by default, the player experiences the product as several stitched-together interfaces instead of one command console.

@@ -238,3 +238,6 @@ If a module is documented as dormant or compatibility-only, it must not still bu
 ### 20. Shared shell spacing authorities determine whether the UI feels like a command console or a roomy dashboard
 
 If `TopToolbar`, `GlassPanel`, `AccordionHeader`, `module-header`, or the main rail-clearance variable are generous by default, every downstream screen inherits avoidable chrome and blank space. In AWWV, density work should start with those shared shell authorities before leaf-card polish, because command UX quality depends on how much useful state fits above the fold.
+### 21. Large modal shells must not drift into a different UX era
+
+Army HQ, Codex, and other full-size overlays should obey the same density language as the tactical shell. If they keep roomier headers, tab rows, sidebars, and paper panes just because they are modals, the product stops feeling like one coherent command environment and starts feeling like several stitched-together UI generations.
