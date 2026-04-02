@@ -1440,3 +1440,7 @@ The OPSEC briefing card disappeared not because OPSEC was unimplemented, but bec
 ### An unused desktop bridge is still a live product promise until removed
 
 If preload exports a method, the React IPC contract mirrors it, and Electron handles it, the repo is still promising that capability to future work even when no current UI calls it. In AWWV, `renameFrontSegment(...)` and `renameTheatre(...)` were dead shell bridges that needed removal precisely because they looked alive and therefore invited accidental reuse.
+
+### Sector truth and frontline fatigue must use the same assignment currency
+
+If sectors are the primary frontline organization model but fatigue still keys off legacy front assignment, the engine is silently using two different meanings of "on the line." In AWWV, frontline-duty fatigue should treat sector membership as primary truth and only fall back to `brigade_front_assignment` for compatibility while the deeper local-front lane is still being classified.

@@ -19950,3 +19950,28 @@ Verification:
 Why this matters:
 - dead shell bridges are still product truth until the shell stops exporting them
 - removing unused rename bridges makes it harder for future refactors to accidentally resurrect front/theatre naming as phantom live features
+### 2026-04-02 - Engine health Wave 1 continued: frontline fatigue now follows sector assignment truth
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, fixing a deeper split-truth inside the engine core. `applyFatigueRecovery(...)` was still deciding who counted as "frontline" purely from `brigade_front_assignment`, even though current frontline organization has largely moved to corps front sectors.
+
+Implemented:
+- `src/state/formation_fatigue.ts`
+  - added a unified `buildFrontlineAssignedSet(...)` helper
+  - frontline duty fatigue now treats corps-front sector assignments (`assigned_brigade_ids` and `reserve_brigade_ids`) as the primary authority
+  - legacy `brigade_front_assignment` remains as compatibility fallback for older saves and still-live local-front mechanics
+- `tests/formation_fatigue_frontline_assignment.test.ts`
+  - added a regression proving sector-assigned brigades accrue frontline-duty fatigue
+  - added a compatibility regression proving legacy front assignment still works as fallback
+- `docs/40_reports/implemented/20260402_FRONTLINE_FATIGUE_SECTOR_ALIGNMENT.md`
+  - documented the root cause and the new sector-first/front-legacy-fallback rule
+
+Verification:
+- `node_modules\.bin\tsx.cmd --test tests\formation_fatigue_frontline_assignment.test.ts`
+  - PASS (`2` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- frontline fatigue is core engine truth, not just a cosmetic stat
+- if combat density and fatigue read different assignment currencies, the simulation quietly punishes or spares brigades based on the wrong layer
+- this keeps sectors as the primary frontline authority while preserving front assignment as a compatibility fallback until the deeper local-front lane is fully classified

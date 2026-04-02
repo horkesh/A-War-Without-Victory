@@ -265,6 +265,32 @@ const FATIGUE_RECOVERY_INTERVAL = 2;
  *  faster from combat bonuses. */
 const FRONTLINE_FATIGUE_PER_TURN = 0.5;
 
+function buildFrontlineAssignedSet(state: GameState): Set<string> {
+    const assigned = new Set<string>();
+
+    const sectors = state.military.corps_front_sectors;
+    if (sectors && typeof sectors === 'object') {
+        for (const sector of Object.values(sectors)) {
+            if (!sector) continue;
+            for (const brigadeId of sector.assigned_brigade_ids ?? []) {
+                assigned.add(brigadeId);
+            }
+            for (const brigadeId of sector.reserve_brigade_ids ?? []) {
+                assigned.add(brigadeId);
+            }
+        }
+    }
+
+    const legacyAssignments = state.military.brigade_front_assignment;
+    if (legacyAssignments && typeof legacyAssignments === 'object') {
+        for (const [brigadeId, frontId] of Object.entries(legacyAssignments)) {
+            if (frontId) assigned.add(brigadeId);
+        }
+    }
+
+    return assigned;
+}
+
 /**
  * Apply per-turn fatigue recovery and frontline duty fatigue to all active formations.
  * Called once per turn from the war pipeline, regardless of combat activity.
@@ -282,7 +308,7 @@ export function applyFatigueRecovery(state: GameState, engagedFormationIds?: Set
     if (!formations) return;
     const currentTurn = state.meta?.turn ?? 0;
     const isRecoveryTurn = currentTurn % FATIGUE_RECOVERY_INTERVAL === 0;
-    const assignments = state.military.brigade_front_assignment;
+    const frontlineAssigned = buildFrontlineAssignedSet(state);
 
     for (const [fid, formation] of Object.entries(formations)) {
         if (!formation || formation.status !== 'active') continue;
@@ -290,7 +316,7 @@ export function applyFatigueRecovery(state: GameState, engagedFormationIds?: Set
             formation.ops = { fatigue: 0, last_supplied_turn: null };
         }
         let current = formation.ops.fatigue ?? 0;
-        const isFrontAssigned = !!(assignments && assignments[fid]);
+        const isFrontAssigned = frontlineAssigned.has(fid);
         const wasEngaged = engagedFormationIds ? engagedFormationIds.has(fid) : false;
 
         // Recovery: -1 every 2 turns, UNLESS engaged in combat this turn
