@@ -156,6 +156,35 @@ function appendReserveDecision(
     state.military.reserve_request_history.push(entry);
 }
 
+const COMMANDER_REQUEST_PRIORITY_SCORE: Record<'critical' | 'high' | 'medium' | 'low', number> = {
+    critical: 90,
+    high: 75,
+    medium: 60,
+    low: 45,
+};
+
+function summarizeCommanderReserveNeed(
+    requests: ReadonlyArray<{ zone_id: string; brigades_needed: number; priority: 'critical' | 'high' | 'medium' | 'low' }> | undefined,
+): { priority: 'critical' | 'high' | 'medium' | 'low'; brigadesNeeded: number; focusZoneId: string } | null {
+    if (!requests || requests.length === 0) return null;
+
+    const sorted = [...requests].sort((a, b) => {
+        const priorityDelta = COMMANDER_REQUEST_PRIORITY_SCORE[b.priority] - COMMANDER_REQUEST_PRIORITY_SCORE[a.priority];
+        if (priorityDelta !== 0) return priorityDelta;
+        const brigadeDelta = b.brigades_needed - a.brigades_needed;
+        if (brigadeDelta !== 0) return brigadeDelta;
+        return strictCompare(a.zone_id, b.zone_id);
+    });
+
+    const top = sorted[0];
+    const brigadesNeeded = sorted.reduce((sum, req) => sum + Math.max(0, req.brigades_needed), 0);
+    return {
+        priority: top.priority,
+        brigadesNeeded,
+        focusZoneId: top.zone_id,
+    };
+}
+
 // ─── Request generation ───────────────────────────────────────────────────────
 
 /**
@@ -196,6 +225,7 @@ export function generateArmyReserveRequests(
         const cmd = corpsCommand[corpsId];
         const sector = Object.keys(corpsSectors).sort(strictCompare).map(k => corpsSectors[k]).find(s => s.corps_id === corpsId);
         const op = getPrimaryOperation(cmd);
+        const commanderNeed = summarizeCommanderReserveNeed(cmd?.commander_reinforcement_requests);
 
         let bestReason: ReserveRequestReason | null = null;
         let bestRawPriority = 0;
@@ -242,6 +272,26 @@ export function generateArmyReserveRequests(
                     bestRawPriority = rawPriority;
                     bestDescription = `Op "${op.name}" captured objectives — elite needed to exploit gains`;
                 }
+            }
+        }
+
+        // 4. Explicit commander reinforcement pressure — this closes the loop between corps
+        // requests, Army HQ theater assessment, and the elite reserve request queue.
+        if (commanderNeed) {
+            const inferredReason: ReserveRequestReason =
+                op && (op.phase === 'execution' || op.phase === 'planning')
+                    ? 'offensive_support'
+                    : 'defensive_gap';
+            const rawPriority = Math.min(
+                95,
+                COMMANDER_REQUEST_PRIORITY_SCORE[commanderNeed.priority] + Math.min(10, Math.max(0, commanderNeed.brigadesNeeded - 1) * 3),
+            );
+            if (rawPriority > bestRawPriority) {
+                bestReason = inferredReason;
+                bestRawPriority = rawPriority;
+                bestDescription =
+                    `Commander requested ${commanderNeed.brigadesNeeded} brigade(s) for ${commanderNeed.focusZoneId} ` +
+                    `(${commanderNeed.priority} priority)`;
             }
         }
 

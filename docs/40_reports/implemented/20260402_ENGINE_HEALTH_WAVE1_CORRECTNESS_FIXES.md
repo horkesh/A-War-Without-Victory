@@ -874,3 +874,26 @@ Why this matters:
 - fake commands are worse than missing commands because they train players and future agents to trust a lie
 - if a war-phase sink intentionally does nothing, the earliest honest desktop boundary should reject it rather than stage it
 - player-facing adapters should not keep presenting retired order types just because old saves still contain the field
+
+## Additional Wave 1 slice: commander reinforcement pressure now reaches the elite reserve queue
+
+This checkpoint closes the next split-truth loop in the Army HQ layer. Corps commanders were already persisting reinforcement requests onto `CorpsCommandState`, and Army HQ gathering was already reading them for front-priority scoring, but the actual elite reserve request generator still ignored those commander signals and relied only on its older sector/op heuristics.
+
+Implemented:
+- `src/sim/combat/army_reserve_system.ts`
+  - added deterministic summarization of `commander_reinforcement_requests`
+  - `generateArmyReserveRequests(...)` now converts explicit commander pressure into a real reserve request candidate
+  - commander-signaled pressure now competes with the older offensive/defensive/exploitation heuristics instead of dying after theater assessment
+- `tests/army_reserve_system.test.ts`
+  - added a regression proving a corps with commander reinforcement pressure but no legacy heuristic trigger still produces a pending elite reserve request
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\army_reserve_system.test.ts tests\army_hq_gathering.test.ts tests\commander\reinforcement_signal_flow.test.ts`
+  - PASS (`79` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- reinforcement loops are only real when the same signal survives all the way from corps assessment to reserve action
+- if Army HQ scoring hears the corps commander but the reserve queue does not, the repo still has a split-truth command stack
+- this turns commander reinforcement pressure from a diagnostic into an actionable reserve input without pretending the full strategic reserve system is finished

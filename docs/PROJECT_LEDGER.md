@@ -19492,3 +19492,31 @@ Why this matters:
 - fake commands are worse than missing commands because they teach players and future agents to trust a lie
 - if a war-phase sink intentionally does nothing, the earliest honest desktop boundary should reject it rather than stage it
 - player-facing adapters should not keep presenting retired order types just because older saves still carry the field
+
+---
+### 2026-04-02 — Engine health Wave 1 continued: commander reinforcement pressure now reaches the elite reserve queue
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing the next split-truth loop in Army HQ reserve handling.
+
+Implemented:
+- `src/sim/combat/army_reserve_system.ts`
+  - added deterministic summarization of persisted `commander_reinforcement_requests`
+  - `generateArmyReserveRequests(...)` now converts explicit corps commander pressure into a real reserve-request candidate
+  - commander-signaled need now competes with the older offensive / defensive / exploitation heuristics instead of dying after theater assessment
+- `tests/army_reserve_system.test.ts`
+  - added a regression proving a corps with commander reinforcement pressure but no legacy heuristic trigger still produces a pending elite reserve request
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded the Wave 1 report with the reserve-loop checkpoint
+- `docs/20_engineering/AI_STRATEGY_SPECIFICATION.md`
+  - updated `BRIEF-GAP-7` to record that the elite reserve queue now hears commander pressure too
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\army_reserve_system.test.ts tests\army_hq_gathering.test.ts tests\commander\reinforcement_signal_flow.test.ts`
+  - PASS (`79` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- a reinforcement loop is not real until the same signal survives all the way from corps commander output to actual reserve-request generation
+- if Army HQ scoring hears the corps commander but the elite reserve queue does not, the repo is still carrying split command truth
+- this makes commander reinforcement pressure actionable without pretending the broader reserve-transfer system is already finished

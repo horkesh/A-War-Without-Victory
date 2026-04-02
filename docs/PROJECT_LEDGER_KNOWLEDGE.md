@@ -1363,3 +1363,7 @@ A corps AI that sees enemy pressure but not adjacent friendly corps posture will
 ### Retired player commands must fail early, not stage successfully and vanish later
 
 If a command reaches desktop IPC, serializes into state, shows up in adapters, and only then disappears in a no-op war-phase sink, the product has already lied to the player. In AWWV, retired commands like brigade reposition should be rejected at the earliest contract boundary with a clear replacement path, and player-facing adapters should stop surfacing their stale save data.
+
+### Commander reinforcement pressure and elite reserve requests are not the same thing, but they must connect
+
+`commander_reinforcement_requests` on `CorpsCommandState` are the raw corps-to-Army-HQ pressure signal. `pending_reserve_requests` in the elite loan system are the downstream Army HQ reserve-action surface. Treating them as separate is correct; leaving them disconnected is not. The honest contract is: corps commanders persist reinforcement pressure, Army HQ theater assessment reads it, and the elite reserve queue must also consume it when generating candidate reserve loans.
