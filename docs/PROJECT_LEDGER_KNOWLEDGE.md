@@ -1550,3 +1550,6 @@ In AWWV, if a file is an old harness, a smoke path, or a compatibility entrypoin
 - 2026-04-02: Army HQ `SUMMARY` is a player-facing shell, not an all-faction debug dashboard. In player mode it should show own-side exact values and theater-wide aggregates, while enemy-wide totals stay in staff abstractions instead of exact scoreboard tables.
 - 2026-04-02: Warroom `FactionOverviewPanel` is a strategic shell summary, not a second command desk. It may summarize command posture and direct the player toward Army HQ, but detailed formations, officer rosters, and commander reassignment belong to Army HQ command-review surfaces.
 - 2026-04-02: If the tactical map is a live desktop shell, the mounted toolbar must expose a visible path back to Warroom. A bridge method sitting unused in legacy code does not count as product-shell ownership.
+### 22. Player-facing vocabulary drift is a shell-integrity bug, not copy polish
+
+If Army HQ, Chronicle, OPORD, or Warroom panels still say OSID, raw faction ids, or similar engine nouns, the shell still sounds like an internal tool even if the underlying data is player-safe. Treat vocabulary cleanup as part of player-truth enforcement and lock it into the canonical existing test suites rather than adding orphan test files the repo will not normally run.

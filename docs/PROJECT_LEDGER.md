@@ -20866,3 +20866,20 @@ Why this matters:
   - `docs/40_reports/implemented/20260402_TACTICAL_MAP_WARROOM_RETURN_RESTORATION.md`
   - `docs/40_reports/GUI_MASTER.md`
   - `docs/40_reports/WARROOM_MASTER.md`
+
+## 2026-04-02 - Player-safe vocabulary cleanup
+
+- Worktree/branch: `F:\AWWV_exec_clean` on `codex/engine-health-wave1`
+- Cleaned remaining engine-facing language from live player-facing shell surfaces.
+- Army HQ combat records now summarize territorial change as `Positions`.
+- Ops modal `ObjectiveList` now labels staging as `Staging Area`.
+- Chronicle Wrapped now uses political-side display names and `positions` wording instead of raw faction ids or `OSIDs`.
+- Added regression coverage to canonical existing suites:
+  - `tests/wrapped_slides.test.ts`
+  - `tests/ui_opord_player_safe_labels.test.ts`
+- Verification:
+  - `node_modules\.bin\vitest.cmd run tests\wrapped_slides.test.ts tests\ui_opord_player_safe_labels.test.ts tests\warroom_player_visibility.test.ts tests\ui_shell_navigation.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_PLAYER_SAFE_VOCABULARY_CLEANUP.md`
+  - `docs/40_reports/GUI_MASTER.md`

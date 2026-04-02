@@ -50,7 +50,7 @@ export function CombatRecordSection({ corpsId, corps }: CombatRecordSectionProps
                         <span className="text-text-primary">{cs.casualty_exchange_ratio.toFixed(2)}:1</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-text-secondary">Territory</span>
+                        <span className="text-text-secondary">Positions</span>
                         <span>
                             <span className="text-green-700">+{cs.total_osids_captured}</span>
                             {' / '}

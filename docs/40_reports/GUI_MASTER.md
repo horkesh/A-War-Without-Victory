@@ -248,3 +248,7 @@ If `TopToolbar`, `GlassPanel`, `AccordionHeader`, `module-header`, or the main r
 ### 21. Large modal shells must not drift into a different UX era
 
 Army HQ, Codex, and other full-size overlays should obey the same density language as the tactical shell. If they keep roomier headers, tab rows, sidebars, and paper panes just because they are modals, the product stops feeling like one coherent command environment and starts feeling like several stitched-together UI generations.
+
+### 22. Player-facing UI must never speak engine vocabulary when a human phrase exists
+
+OSID, raw faction ids, and similar backend nouns are valid in engine code, canon, and tests. They are not valid in the live player shell when a human phrase like staging area, positions, or a political-side display name can carry the meaning. The product should sound like a command environment, not a debugger.
