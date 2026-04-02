@@ -1291,6 +1291,9 @@ Corps offensive go/no-go checks that ignore obvious defender artillery, entrench
 ### A typed strategic field pinned to a placeholder constant is decorative, not alive
 `recent_territory_change` in Army HQ gathering looked like strategic-awareness scaffolding, but while it stayed hardcoded to `0` it was only decorative architecture. The right repair was not to invent a giant new subsystem; it was to feed the field from the existing `political.control_events` stream, scoped to each corps's current front neighborhood. In this repo, always ask whether a field is powered by live events or merely present in the type system.
 
+### Army HQ intent must reach `CommanderBriefing` as structured targets, not only as stance flavor
+If `CampaignPlan` only affects corps stance ceilings, the strategic layer still talks mostly to itself. The corps commander needs structured Army HQ intent in its briefing: front role, offensive targets, hold targets, and synchronized-op slice. The safest first implementation is to thread those fields into `CommanderBriefing`, merge campaign hold targets into `must_hold_osids`, and use offensive targets to bias opportunity staging/target choice without removing corps autonomy.
+
 ### Shared label helpers are cheaper than another anti-leak sweep
 Player-facing raw-id leaks often survive not in the main happy-path labels, but in fallback strings and secondary shells like Warroom. If map and Warroom each improvise their own `?? id` fallback, raw corps or sector ids will eventually leak back in. Centralize player-facing corps / sector / assigned-command label translation in one shared helper and make fallbacks generic (`This corps`, `Assigned sector`, `Assigned command`) rather than engine identifiers.
 

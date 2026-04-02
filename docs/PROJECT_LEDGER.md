@@ -43,6 +43,36 @@ Engine-derived chokepoint detection (`engineMustHold`) disabled with `false &&`.
 - `integration_anomaly.test.ts` — 3 pass
 
 ---
+### 2026-04-02 — Engine health slice: Army HQ campaign intent now reaches corps planning
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing a structural disconnect between Army HQ gathering and corps commander planning.
+
+Implemented:
+- `src/sim/combat/commander/commander_state.ts`
+  - added explicit Army HQ campaign intent fields to `CommanderBriefing`
+- `src/sim/combat/commander/briefing.ts`
+  - now reads the current `CampaignPlan` for the corps
+  - carries front role, offensive targets, hold targets, doctrine ceiling, and synchronized-op slice into the commander briefing
+  - merges campaign `hold_targets` into `must_hold_osids`
+- `src/sim/combat/commander/plan.ts`
+  - opportunity planning now prefers staging zones and target OSIDs that align with Army HQ offensive targets when the corps is on a primary/secondary front
+- `tests/commander/briefing_campaign_intent.test.ts`
+  - added coverage for campaign-intent propagation and target-priority behavior
+- `vitest.config.ts`
+  - wired the new test into the allowlisted Vitest suite
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\briefing_campaign_intent.test.ts tests\commander\commander.test.ts tests\army_hq_gathering.test.ts`
+  - PASS (`115` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- Army HQ intent is no longer flattened into stance-only guidance
+- strategic hold targets now affect the same `must_hold` substrate the commander already uses
+- offensive opportunity planning is now theater-aware without making the corps commander a scripted puppet
+
+---
 
 ### 2026-04-02 — Engine health Wave 1: ops truth after target/participant narrowing
 

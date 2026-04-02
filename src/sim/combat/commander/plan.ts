@@ -321,7 +321,7 @@ function tryCreateFromPrePlanned(
     const opName = (opDef['name'] as string) ?? 'pre_planned_op';
 
     // Find the best staging zone: zone with most surplus, preferring projecting posture
-    const stagingZone = findBestStagingZone(zones, surplusPool);
+    const stagingZone = findBestStagingZone(briefing, zones, surplusPool);
     if (!stagingZone) return null;
 
     // Determine required brigades: scale to main_effort capacity (n1298).
@@ -518,6 +518,7 @@ function selectOpportunityTargets(
     const enemyOsids = stagingZone.enemy_adjacent_osids;
     if (enemyOsids.length === 0) return [];
     const maxObjectives = Math.max(1, Math.min(6, Math.floor(requiredBrigades * 0.5)));
+    const campaignTargetSet = new Set(briefing.campaign_offensive_targets);
 
     // Rank by number of staging-zone OSIDs adjacent to each enemy OSID.
     // More approach vectors = more exposed target = higher priority.
@@ -532,6 +533,8 @@ function selectOpportunityTargets(
 
     return [...enemyOsids]
         .sort((a, b) => {
+            const campaignDiff = Number(campaignTargetSet.has(b)) - Number(campaignTargetSet.has(a));
+            if (campaignDiff !== 0) return campaignDiff;
             const diff = approachCount(b) - approachCount(a); // descending
             return diff !== 0 ? diff : strictCompare(a, b);
         })
@@ -786,6 +789,7 @@ function selectBrigadesForPlan(
 // ═══════════════════════════════════════════════════════════════════════════
 
 function findBestStagingZone(
+    briefing: CommanderBriefing,
     zones: readonly ZoneAssessment[],
     surplusPool: readonly BrigadeEvaluation[],
 ): ZoneAssessment | null {
@@ -797,9 +801,18 @@ function findBestStagingZone(
         besieged: 99,
     };
 
+    const campaignTargetSet = new Set(briefing.campaign_offensive_targets);
+    const wantsCampaignPush = briefing.campaign_role === 'primary' || briefing.campaign_role === 'secondary';
+
     const candidates = zones
         .filter(z => z.posture !== 'besieged' && z.front_edge_count > 0)
         .sort((a, b) => {
+            if (wantsCampaignPush && campaignTargetSet.size > 0) {
+                const aMatches = a.enemy_adjacent_osids.some(osid => campaignTargetSet.has(osid)) ? 1 : 0;
+                const bMatches = b.enemy_adjacent_osids.some(osid => campaignTargetSet.has(osid)) ? 1 : 0;
+                const matchDiff = bMatches - aMatches;
+                if (matchDiff !== 0) return matchDiff;
+            }
             // 1. Posture priority
             const posA = posturePriority[a.posture] ?? 99;
             const posB = posturePriority[b.posture] ?? 99;

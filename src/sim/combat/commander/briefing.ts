@@ -20,6 +20,7 @@ import type { OperationalToCanonicalReverseMap } from '../../../data/operational
 import type { OsidEthnicComposition } from '../ethnic_defense.js';
 import type { FactionGraphAnalysis } from '../osid_graph_analysis.js';
 import type { SpatialContext } from '../../spatial_context.js';
+import type { CampaignPlan, SyncOpParticipant } from '../army_hq_gathering_types.js';
 
 import type {
     CommanderBriefing,
@@ -216,6 +217,48 @@ function collectIntelData(
     };
 }
 
+function collectCampaignIntent(
+    state: GameState,
+    faction: FactionId,
+    corpsId: FormationId,
+): {
+    role: CommanderBriefing['campaign_role'];
+    offensiveTargets: readonly string[];
+    holdTargets: readonly string[];
+    stanceCeiling: CommanderBriefing['campaign_stance_ceiling'];
+    syncRole: CommanderBriefing['campaign_sync_role'];
+    syncTargets: readonly string[];
+} {
+    const plan: CampaignPlan | null | undefined = state.military.campaign_plans?.[faction];
+    const turn = state.meta?.turn ?? 0;
+    if (!plan || plan.valid_until_turn < turn) {
+        return {
+            role: null,
+            offensiveTargets: [],
+            holdTargets: [],
+            stanceCeiling: null,
+            syncRole: null,
+            syncTargets: [],
+        };
+    }
+
+    const frontPriority = plan.front_priorities.find(p => p.corps_id === corpsId);
+    let syncParticipant: SyncOpParticipant | undefined;
+    for (const syncOp of plan.synchronized_operations) {
+        syncParticipant = syncOp.participants.find(participant => participant.corps_id === corpsId);
+        if (syncParticipant) break;
+    }
+
+    return {
+        role: frontPriority?.role ?? null,
+        offensiveTargets: [...(frontPriority?.offensive_targets ?? [])].sort(strictCompare),
+        holdTargets: [...(frontPriority?.hold_targets ?? [])].sort(strictCompare),
+        stanceCeiling: plan.doctrine_override?.corps_stance_ceilings?.[corpsId] ?? null,
+        syncRole: syncParticipant?.role ?? null,
+        syncTargets: [...(syncParticipant?.target_osids ?? [])].sort(strictCompare),
+    };
+}
+
 // ---------------------------------------------------------------------------
 // Main entry point
 // ---------------------------------------------------------------------------
@@ -287,8 +330,14 @@ export function buildBriefing(
     // 10. Active operations currently in the field (needed by emit for RC1 fallback)
     const activeOperations = getActiveOperations(state, corpsId);
 
-    // 11. Assemble briefing
-    const mustHoldOsids: string[] = state.military.must_hold_osids_by_corps?.[corpsId] ?? [];
+    // 11. Army HQ campaign intent for this corps
+    const campaignIntent = collectCampaignIntent(state, faction, corpsId);
+
+    // 12. Assemble briefing
+    const mustHoldOsids = [
+        ...(state.military.must_hold_osids_by_corps?.[corpsId] ?? []),
+        ...campaignIntent.holdTargets,
+    ].sort(strictCompare);
 
     return {
         corps_id: corpsId,
@@ -309,5 +358,11 @@ export function buildBriefing(
         previous_state: previousState,
         active_operations: activeOperations,
         must_hold_osids: mustHoldOsids,
+        campaign_role: campaignIntent.role,
+        campaign_offensive_targets: campaignIntent.offensiveTargets,
+        campaign_hold_targets: campaignIntent.holdTargets,
+        campaign_stance_ceiling: campaignIntent.stanceCeiling,
+        campaign_sync_role: campaignIntent.syncRole,
+        campaign_sync_targets: campaignIntent.syncTargets,
     };
 }

@@ -256,12 +256,12 @@ This section documents known gaps in what the corps CO `CommanderBriefing` knows
 **Impact:** P2. The reinforcement feedback loop is broken. Corps in crisis can't signal HQ for help, and HQ can't redistribute strategic reserves based on request signals.
 **Fix:** In `army_hq_gathering.ts`, scan `corps_command` for pending reinforcement requests; factor into `CampaignPlan.front_priorities`; emit reserve brigade transfer directives.
 
-### ARMY-GAP-1: `CampaignPlan` never read by corps CO briefings — P0
+### ARMY-GAP-1: `CampaignPlan` briefing disconnect — partially resolved on 2026-04-02
 
 **Files:** `src/sim/combat/army_hq_gathering.ts`, `src/sim/combat/commander/briefing.ts`
-**Gap:** `army_hq_gathering.ts` produces a `CampaignPlan` each turn with `front_priorities`, `doctrine_overrides`, and synchronized operations. `buildBriefing()` does not read it. Corps COs are unaware of Army HQ's theater-level plan.
-**Impact:** P0. Army HQ exists but is structurally disconnected. A Drina Corps CO planning operations has no knowledge of Army-level prioritization (e.g., "concentrate on Posavina, hold elsewhere"). The strategic layer cannot direct corps behavior.
-**Fix:** Pass `CampaignPlan` into `buildBriefing()`. Apply `doctrine_overrides` to planning thresholds. Use `front_priorities` to weight sector offensive scoring.
+**Original gap:** `army_hq_gathering.ts` produced a `CampaignPlan` each turn with `front_priorities`, `doctrine_overrides`, and synchronized operations, but `buildBriefing()` did not read it. Corps COs were unaware of Army HQ's theater-level plan.
+**Implemented on 2026-04-02:** `CommanderBriefing` now carries campaign front role, offensive targets, hold targets, doctrine ceiling, and synchronized-op participant data. Campaign `hold_targets` also merge into `must_hold_osids`, and opportunity planning now prefers Army HQ offensive targets when selecting staging zones and target OSIDs.
+**Remaining gap:** Campaign intent is now present, but only opportunity planning and `must_hold` behavior consume it directly. Further work should still use front priorities to influence broader sector offensive scoring and synchronized multi-corps timing.
 
 ### ARMY-GAP-2: Feint operation type has zero combat effect — dead code
 

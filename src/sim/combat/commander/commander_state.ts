@@ -21,6 +21,10 @@ import type { SpatialContext } from '../../spatial_context.js';
 import type { FactionGraphAnalysis } from '../osid_graph_analysis.js';
 import type { OsidEthnicComposition } from '../ethnic_defense.js';
 import type { FrontGeometryAssessment } from '../front_geometry_analysis.js';
+import type {
+    FrontPriority,
+    SyncOpParticipant,
+} from '../army_hq_gathering_types.js';
 
 // ---------------------------------------------------------------------------
 // 1. ZoneId — branded string for zone identification
@@ -287,6 +291,18 @@ export interface CommanderBriefing {
     readonly active_operations: readonly CorpsOperation[];
     /** Scenario-authored must-hold OSIDs for this corps. Zones containing these get 1.5× garrison budget. */
     readonly must_hold_osids: readonly string[];
+    /** Army HQ campaign front role for this corps, if a current gathering plan exists. */
+    readonly campaign_role: FrontPriority['role'] | null;
+    /** Army HQ offensive target shortlist for this corps. */
+    readonly campaign_offensive_targets: readonly string[];
+    /** Army HQ hold-at-all-costs targets for this corps. */
+    readonly campaign_hold_targets: readonly string[];
+    /** Army HQ stance ceiling for this corps from doctrine override. */
+    readonly campaign_stance_ceiling: FrontPriority['suggested_stance'] | null;
+    /** Role inside any synchronized multi-corps operation currently naming this corps. */
+    readonly campaign_sync_role: SyncOpParticipant['role'] | null;
+    /** Target OSIDs from the synchronized operation participant slice, if present. */
+    readonly campaign_sync_targets: readonly string[];
 }
 
 // ---------------------------------------------------------------------------

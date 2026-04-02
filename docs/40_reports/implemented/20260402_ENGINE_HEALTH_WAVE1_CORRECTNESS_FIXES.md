@@ -417,3 +417,40 @@ Why this matters:
 - fog only becomes a meaningful product rule when renderer visibility actually consults it
 - a player shell that still advertises omniscient ops, territory, or casualty totals is a debug shell in nicer clothes
 - once player-facing filters exist, they need to be applied consistently across map, tactical HUD, and Warroom or the product will keep re-leaking the same truth through secondary surfaces
+
+## Additional Wave 1 slice: Army HQ campaign intent now reaches corps planning
+
+This checkpoint closed one of the most important “strategy talks to itself” gaps in the engine: Army HQ gathering was already producing front priorities, hold targets, and synchronized-op roles, but the corps commander briefing was flattening all of that down to a generic stance before planning began.
+
+Implemented:
+- `src/sim/combat/commander/commander_state.ts`
+  - expanded `CommanderBriefing` with explicit Army HQ campaign intent fields:
+    - `campaign_role`
+    - `campaign_offensive_targets`
+    - `campaign_hold_targets`
+    - `campaign_stance_ceiling`
+    - `campaign_sync_role`
+    - `campaign_sync_targets`
+- `src/sim/combat/commander/briefing.ts`
+  - now reads the live faction `CampaignPlan`
+  - carries the current corps’s front-priority role, offensive target shortlist, doctrine ceiling, and sync-op slice into the briefing
+  - merges Army HQ `hold_targets` into `must_hold_osids`, so strategic hold intent reaches garrison logic instead of dying in the gathering layer
+- `src/sim/combat/commander/plan.ts`
+  - opportunity planning now prefers staging zones whose adjacent enemy OSIDs intersect Army HQ offensive targets when the corps is on a primary/secondary front
+  - target ranking now prefers Army HQ offensive targets inside the chosen staging zone before falling back to local exposure scoring
+- `tests/commander/briefing_campaign_intent.test.ts`
+  - added regression coverage proving briefing propagation and hold-target merging
+  - added regression coverage proving opportunity plans prioritize Army HQ offensive targets
+- `vitest.config.ts`
+  - wired the new briefing/intent regression into the allowlisted Vitest harness
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\briefing_campaign_intent.test.ts tests\commander\commander.test.ts tests\army_hq_gathering.test.ts`
+  - PASS (`115` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- Army HQ strategy is no longer reduced to “stance only”
+- strategic hold intent now affects the same `must_hold` substrate the commander already respects
+- corps commanders still choose how to fight, but they no longer ignore the theater-level target emphasis the engine is already computing
