@@ -25,6 +25,7 @@ import type {
     TrendDirection,
 } from '../../../state/game_state.js';
 import { getEnemyFactions, personnelToStrengthCategory } from './fog_of_war.js';
+import { getPlayerSafeBrigadeName, getPlayerSafeCorpsName } from '../../map/utils/playerSafeText.js';
 
 // ---------------------------------------------------------------------------
 // Snapshot sub-interfaces
@@ -351,7 +352,9 @@ function extractOwnForces(state: GameState, pf: FactionId): OwnForcesSnapshot {
         const ms = movementState[fid];
         details.push({
             id: fid,
-            name: f.name ?? fid,
+            name: kind === 'corps' || kind === 'corps_asset'
+                ? getPlayerSafeCorpsName(f.name ?? null, fid)
+                : getPlayerSafeBrigadeName(f.name ?? null),
             kind,
             personnel: f.personnel ?? 0,
             cohesion: f.cohesion ?? 0,
@@ -538,7 +541,7 @@ function extractCorpsOps(state: GameState, pf: FactionId): CorpsOperationSnapsho
 
         results.push({
             corpsId,
-            corpsName: f.name ?? corpsId,
+            corpsName: getPlayerSafeCorpsName(f.name ?? null, corpsId),
             stance: corps.stance,
             operation: corps.active_operations?.[0] ?? null,
         });

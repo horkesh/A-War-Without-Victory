@@ -15,6 +15,7 @@ import { turnToDateString, formatOperationType, toTitleCase } from '../utils/for
 import { getFormationCommander } from '../utils/officerUtils';
 import { OfficerProfile } from './OfficerProfile';
 import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
+import { getPlayerSafeBrigadeName } from '../utils/playerSafeText';
 
 function compareOperations(a: OperationView, b: OperationView): number {
   return (
@@ -450,7 +451,9 @@ export function OperationsPanel() {
                     <div className="text-[11px] text-text-secondary mb-1 uppercase tracking-wide">Allocated Assets</div>
                     <div className="flex flex-wrap gap-1">
                       {selectedOperation.participating_brigade_ids.map(bId => {
-                        const bName = loadedGameState.formations.find(f => f.id === bId)?.name ?? bId;
+                        const bName = getPlayerSafeBrigadeName(
+                          loadedGameState.formations.find(f => f.id === bId)?.name ?? null,
+                        );
                         return (
                           <button
                             key={bId}

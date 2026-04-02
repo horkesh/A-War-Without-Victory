@@ -12,7 +12,7 @@ import { FACTION_COLORS_SUBTLE } from '../utils/theme';
 import { toTitleCase } from '../utils/formatters';
 import { SettlementTimeline } from './SettlementTimeline';
 import { buildSettlementTimeline } from '../utils/buildSettlementTimeline';
-import { getPlayerSafeBrigadeName } from '../utils/playerSafeText';
+import { getPlayerSafeBrigadeName, getPlayerSafeMunicipalityName } from '../utils/playerSafeText';
 
 function num(v: unknown): number {
   return typeof v === 'number' && Number.isFinite(v) ? v : 0;
@@ -715,7 +715,7 @@ export function SettlementDetailContent({
         {isPanel && activeTab === 'municipality' && disp && (
           <div className="pt-2 space-y-2">
             <div className="text-[10px] text-text-secondary uppercase font-semibold">
-              {municipality ?? munId ?? 'Municipality'} — Population
+              {(municipality || getPlayerSafeMunicipalityName(munId, 'Municipality'))} — Population
             </div>
             <div className="flex items-center gap-2 text-[11px]">
               <span className="text-text-secondary">Pre-war</span>

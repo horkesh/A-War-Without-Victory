@@ -14,6 +14,7 @@ import { generateTurnEvents } from '../data/turn_event_generator.js';
 import { getPreviousSnapshot, getLastTurnReport } from '../data/warroom_state.js';
 import { FACTION_COLORS, factionCssClass, getPlayerFaction, toTickerTurn, turnToDateString } from './warroom_utils.js';
 import { getWarroomFactionIdentity } from './warroom_identity.js';
+import { getPlayerSafeCorpsName } from '../../map/utils/playerSafeText.js';
 
 interface NewspaperContent {
     factionId: string;
@@ -147,10 +148,10 @@ export class NewspaperModal {
         const nameById = new Map<string, string>();
         const data = this.gameState.military.named_officer_data ?? [];
         for (const o of data) {
-            nameById.set(o.id, o.name ?? o.id);
+            nameById.set(o.id, o.name ?? 'An officer');
         }
         const corpsName = (corpsId: string): string =>
-            this.gameState.military.formations?.[corpsId]?.name ?? corpsId;
+            getPlayerSafeCorpsName(this.gameState.military.formations?.[corpsId]?.name ?? null, corpsId);
 
         const lines: string[] = [];
         const replacements = succession.replacements ?? [];

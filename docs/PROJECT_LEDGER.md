@@ -20173,3 +20173,34 @@ Why this matters:
 - once the obvious omniscience leaks are gone, the remaining "small" fallbacks become the main way the product still smells like a debug shell
 - raw ids in cards, queues, and detail panels are still player-facing truth leaks, not harmless chrome
 - this slice pushes more of the tactical-map shell through one shared player-safe naming layer instead of letting each component improvise its own fallback behavior
+### 2026-04-02 - Warroom and detail-shell player-safe name hardening
+
+Continued the clean-lane player-truth execution in `F:\AWWV_exec_clean`, hardening another set of remaining `name ?? id` seams in the map and Warroom shells.
+
+Implemented:
+- `src/ui/map/components/OperationsPanel.tsx`
+  - allocated-asset labels now use player-safe brigade fallback text instead of raw brigade ids
+- `src/ui/map/components/FormationDetail.tsx`
+  - municipality line now uses player-safe municipality labels
+- `src/ui/map/components/SettlementDetailContent.tsx`
+  - municipality population header now falls back to player-safe municipality text instead of raw ids
+- `src/ui/warroom/data/war_data_extractor.ts`
+  - own-force formation names now use player-safe corps/brigade labeling
+  - own corps-operation labels now use player-safe corps naming
+- `src/ui/warroom/components/NewspaperModal.ts`
+  - officer-succession prose now uses neutral officer fallback text plus player-safe corps naming
+- `tests/warroom_player_visibility.test.ts`
+  - added regression coverage proving `extractWarData(...)` does not quietly emit raw corps/brigade ids in player-facing snapshots
+- `docs/40_reports/implemented/20260402_WARROOM_AND_DETAIL_PLAYER_SAFE_NAME_HARDENING.md`
+  - documented this naming-hardening slice
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`25` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- the remaining leaks are now mostly subtle naming degradations rather than giant omniscience failures
+- those still matter because players read summary rails and Warroom prose as product truth
+- this slice keeps the player-facing shell converging on one shared naming contract instead of letting each panel improvise its own fallback behavior

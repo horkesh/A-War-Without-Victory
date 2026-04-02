@@ -1472,3 +1472,6 @@ In AWWV, once the obvious leaks are fixed, the remaining debug smell usually sur
 ### Card titles and summary badges are fallback hot spots
 
 In AWWV, the easiest place for raw ids to sneak back in is not the big hero panel but the compact cards: corps cards, tactical cards, combat-summary badges, enclave tiles, and loan banners. Those components often use `name ?? id` or `display_name ?? key` patterns that feel harmless until the product is missing one label. Route those fallbacks through shared player-safe helpers instead of letting each card improvise its own last-resort string.
+### Warroom extractors are part of the player shell, not backend plumbing
+
+If `extractWarData(...)` or newspaper/report builders fall back to raw ids, the leak is just as real as if a React component printed them directly. In AWWV, treat Warroom data extractors and prose generators as player-facing authority surfaces: they need the same player-safe naming contract as the map UI, not their own `name ?? id` shortcuts.

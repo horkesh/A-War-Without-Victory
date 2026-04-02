@@ -16,6 +16,7 @@ import { TabBar } from './TabBar';
 import { computeBrigadeEffectiveness } from '../utils/combatEffectiveness';
 import { Icon } from './icons/Icon';
 import { getPlayerFacingCorpsName, getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
+import { getPlayerSafeMunicipalityName } from '../utils/playerSafeText';
 
 
 /** Zero combat summary for brigades that have not yet been in combat (so Combat Record always shows). */
@@ -531,7 +532,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
               <div className="text-xs min-w-0">
                 <span className="text-text-secondary">Home municipality: </span>
                 <span className="font-mono text-text-primary break-all" title={formation.municipalityId ?? '—'}>
-                  {formation.municipalityId ? toTitleCase(formation.municipalityId) : '—'}
+                      {formation.municipalityId ? getPlayerSafeMunicipalityName(formation.municipalityId, '—') : '—'}
                 </span>
               </div>
             )}

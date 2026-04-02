@@ -136,4 +136,47 @@ describe('warroom player visibility', () => {
       collapsedMunicipalities: [],
     });
   });
+
+  it('extractWarData uses player-safe names for own formations and corps operations', () => {
+    const state = {
+      meta: { turn: 9, phase: 'war' },
+      factions: [
+        { id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
+        { id: 'RS', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
+      ],
+      military: {
+        formations: {
+          arbih_3rd_corps: { faction: 'RBiH', kind: 'corps', status: 'active', name: 'arbih_3rd_corps', personnel: 0 },
+          arbih_b1: { faction: 'RBiH', kind: 'brigade', status: 'active', personnel: 1200, corps_id: 'arbih_3rd_corps', name: '' },
+        },
+        casualty_ledger: {},
+        front_edges: [],
+        front_pressure: {},
+        front_segments: {},
+        militia_garrison: {},
+        brigade_movement_state: {},
+        brigade_encircled: {},
+        corps_command: {
+          arbih_3rd_corps: { stance: 'balanced', active_operations: [] },
+        },
+      },
+      political: {
+        political_controllers: {},
+        war_exhaustion: { RBiH: 0.1 },
+        loss_of_control_trends: { by_faction: { RBiH: { exhaustion_trend: 'flat' } } },
+      },
+      displacement: {
+        displacement_state: {},
+        displacement_camp_state: {},
+        hostile_takeover_timers: {},
+        civilian_casualties: {},
+        sustainability_state: {},
+      },
+    } as unknown as GameState;
+
+    const snap = extractWarData(state, 'RBiH');
+    expect(snap.ownForces.formationDetails.find((f) => f.id === 'arbih_3rd_corps')?.name).toBe('3rd Corps');
+    expect(snap.ownForces.formationDetails.find((f) => f.id === 'arbih_b1')?.name).toBe('Assigned brigade');
+    expect(snap.ownCorpsOps[0]?.corpsName).toBe('3rd Corps');
+  });
 });
