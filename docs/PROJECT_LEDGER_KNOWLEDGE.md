@@ -1657,3 +1657,7 @@ If a ceasefire or Washington tracker says `RS territory > 40%` or `HRHB exhausti
 
 If the peace shell badge uses a military-facing label but the live war shell falls back to the raw faction id, the product reads like stitched eras instead of one command interface. Keep Warroom header badges on the same player-facing label contract across phases.
 
+### Hover titles need the same player-safe contract as visible labels
+
+If the visible queue entry is humanized but the `title=` attribute still carries a raw OSID, the player shell is still leaking engine truth on hover. Player-safe audits need to check hover text in queues and strips, not just modals and detail panels.
+

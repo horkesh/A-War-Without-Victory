@@ -123,7 +123,7 @@ export function OrderQueue() {
             <span className="truncate text-text-primary min-w-0">
               {formationName(order.formationId, formationNamesById)}
             </span>
-            <span className="truncate text-text-secondary min-w-0" title={order.targetOsid ?? order.postureName}>
+            <span className="truncate text-text-secondary min-w-0" title={orderTargetLabel(order, osidDisplayNames)}>
               {orderTargetLabel(order, osidDisplayNames)}
             </span>
             <button

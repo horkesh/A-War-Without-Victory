@@ -405,4 +405,14 @@ describe('player visibility helpers', () => {
     expect(source).not.toContain('title={`RS: ${plan.proposedSplit.RS}%`}');
     expect(source).not.toContain('title={`HRHB: ${plan.proposedSplit.HRHB}%`}');
   });
+
+  it('keeps staged-order hover labels player-safe instead of exposing raw target ids', () => {
+    const source = readFileSync(
+      new URL('../src/ui/map/components/OrderQueue.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(source).not.toContain('title={order.targetOsid ?? order.postureName}');
+    expect(source).toContain('title={orderTargetLabel(order, osidDisplayNames)}');
+  });
 });

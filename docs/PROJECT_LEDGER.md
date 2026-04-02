@@ -21229,3 +21229,16 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - Docs:
   - `docs/40_reports/implemented/20260402_DIPLOMACY_SHELL_PLAYER_LANGUAGE.md`
 
+
+## 2026-04-02 - Order queue hover leak cleanup
+
+- Worktree/branch: F:\AWWV_merge_wave2 on codex/main-merge-wave1
+- Removed one remaining raw-id hover leak from `src/ui/map/components/OrderQueue.tsx`.
+- The staged-order target hover title now uses the same player-safe `orderTargetLabel(...)` as the visible shell text instead of leaking `targetOsid`.
+- Added a regression in `tests/ui_player_visibility.test.ts`.
+- Verification:
+  - `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\ui_map_render_smoke.test.ts tests\ui_shell_navigation.test.ts tests\warroom_player_visibility.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_PLAYER_SAFE_ID_LEAK_MOPUP.md`
+
