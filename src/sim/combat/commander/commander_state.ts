@@ -229,6 +229,19 @@ export interface IntelPicture {
 }
 
 // ---------------------------------------------------------------------------
+// 11b. EnemyEquipmentSummary
+// ---------------------------------------------------------------------------
+
+export interface EnemyEquipmentSummary {
+    /** Sum of enemy tanks across adjacent enemy sectors. */
+    readonly tanks: number;
+    /** Sum of enemy artillery across adjacent enemy sectors. */
+    readonly artillery: number;
+    /** True when no heavy equipment is detected in adjacent enemy sectors. */
+    readonly infantry_only: boolean;
+}
+
+// ---------------------------------------------------------------------------
 // 12. CommanderState — persistent per corps, lives on CorpsCommandState
 // ---------------------------------------------------------------------------
 
@@ -284,6 +297,8 @@ export interface CommanderBriefing {
     readonly corps_stance: string;
     /** Current corps-level exhaustion (0-100). */
     readonly corps_exhaustion: number;
+    /** Summary of heavy equipment across enemy sectors facing this corps. */
+    readonly enemy_equipment_summary: EnemyEquipmentSummary;
     readonly officer_personality: OfficerPersonality;
     /** Pre-planned ops for this corps. */
     readonly pre_planned_ops: readonly unknown[];

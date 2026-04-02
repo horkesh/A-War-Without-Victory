@@ -220,6 +220,7 @@ This section documents known gaps in what the corps CO `CommanderBriefing` knows
 **Gap:** `CommanderBriefing` has no enemy equipment summary. The CO cannot distinguish an ARBiH rifle-only opponent from a VRS artillery+tank formation.
 **Impact:** P1. Corps CO cannot weight the casualty risk or adjust force requirement. Applies equally to `checkLaunchFeasibility()` (see COMBAT_MASTER P14) and to the CO's qualitative stance/operation decisions.
 **Fix:** Add `enemy_equipment_summary: { artillery: number; tanks: number; infantry_only: boolean }` derived from brigades in enemy sectors adjacent to this corps.
+**Status (2026-04-02): partially resolved.** `CommanderBriefing` now carries `enemy_equipment_summary`, derived from adjacent enemy sectors, and commander planning uses it to require an extra brigade against heavy enemy armor/artillery fronts. Remaining work: broader commander stance, reserve, and execution logic can still become more equipment-aware later.
 
 ### BRIEF-GAP-3: Fatigue signal absent — no `brigade_fatigue_index`
 

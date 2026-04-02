@@ -116,6 +116,11 @@ function makeMinimalBriefing(overrides: Partial<CommanderBriefing> = {}): Comman
         doctrine_stance: 'balanced',
         corps_stance: 'balanced',
         corps_exhaustion: 0,
+        enemy_equipment_summary: {
+            tanks: 0,
+            artillery: 0,
+            infantry_only: true,
+        },
         officer_personality: {
             aggression: 0.6,
             caution: 0.3,
@@ -256,6 +261,178 @@ describe('commander briefing campaign intent', () => {
         expect(briefing.must_hold_osids).toEqual(['op:test:campaign_hold', 'op:test:scripted_hold']);
         expect(briefing.corps_exhaustion).toBe(14);
     });
+
+    it('buildBriefing summarizes adjacent enemy equipment from opposing sectors', () => {
+        const corpsId = 'test_corps' as FormationId;
+        const enemyCorpsId = 'enemy_corps' as FormationId;
+        const faction = 'RBiH' as FactionId;
+        const enemyFaction = 'RS' as FactionId;
+
+        const friendlySector: CorpsFrontSector = {
+            sector_id: 'sector:friendly',
+            corps_id: corpsId,
+            faction,
+            opposing_factions: [enemyFaction],
+            edge_ids: ['e1'],
+            sub_segments: [{
+                id: 'ss_friendly',
+                friendly_osids: ['op:test:t1'],
+                enemy_osids: ['op:enemy:e1'],
+                length_edges: 1,
+            }],
+            length_edges: 1,
+            territory_osids: ['op:test:t1'],
+            assigned_brigade_ids: ['b1' as FormationId],
+            reserve_brigade_ids: [],
+            stance: 'defend',
+            sector_stance: 'defend',
+            local_priority: 0,
+            vulnerability: 0,
+            opportunity_score: 0,
+        } as unknown as CorpsFrontSector;
+
+        const enemySector: CorpsFrontSector = {
+            sector_id: 'sector:enemy',
+            corps_id: enemyCorpsId,
+            faction: enemyFaction,
+            opposing_factions: [faction],
+            edge_ids: ['e2'],
+            sub_segments: [{
+                id: 'ss_enemy',
+                friendly_osids: ['op:enemy:e1'],
+                enemy_osids: ['op:test:t1'],
+                length_edges: 1,
+            }],
+            length_edges: 1,
+            territory_osids: ['op:enemy:e1'],
+            assigned_brigade_ids: ['enemy_mech' as FormationId, 'enemy_inf' as FormationId],
+            reserve_brigade_ids: [],
+            stance: 'defend',
+            sector_stance: 'defend',
+            local_priority: 0,
+            vulnerability: 0,
+            opportunity_score: 0,
+        } as unknown as CorpsFrontSector;
+
+        const friendlyBrigade: FormationState = {
+            id: 'b1' as FormationId,
+            faction,
+            name: 'Friendly Brigade',
+            created_turn: 0,
+            status: 'active',
+            assignment: null,
+            kind: 'brigade',
+            personnel: 1800,
+            cohesion: 60,
+            morale: 60,
+            location_osid: 'op:test:t1',
+            corps_id: corpsId,
+        } as FormationState;
+
+        const enemyMechanized: FormationState = {
+            id: 'enemy_mech' as FormationId,
+            faction: enemyFaction,
+            name: 'Enemy Mechanized',
+            created_turn: 0,
+            status: 'active',
+            assignment: null,
+            kind: 'brigade',
+            personnel: 2200,
+            cohesion: 70,
+            morale: 65,
+            location_osid: 'op:enemy:e1',
+            corps_id: enemyCorpsId,
+            composition: {
+                infantry: 800,
+                tanks: 12,
+                artillery: 6,
+                aa_systems: 1,
+                tank_condition: { operational: 1, degraded: 0, non_operational: 0 },
+                artillery_condition: { operational: 1, degraded: 0, non_operational: 0 },
+            },
+        } as unknown as FormationState;
+
+        const enemyInfantry: FormationState = {
+            id: 'enemy_inf' as FormationId,
+            faction: enemyFaction,
+            name: 'Enemy Infantry',
+            created_turn: 0,
+            status: 'active',
+            assignment: null,
+            kind: 'brigade',
+            personnel: 1600,
+            cohesion: 55,
+            morale: 55,
+            location_osid: 'op:enemy:e1',
+            corps_id: enemyCorpsId,
+            composition: {
+                infantry: 900,
+                tanks: 0,
+                artillery: 0,
+                aa_systems: 0,
+                tank_condition: { operational: 0, degraded: 0, non_operational: 1 },
+                artillery_condition: { operational: 0, degraded: 0, non_operational: 1 },
+            },
+        } as unknown as FormationState;
+
+        const state = {
+            meta: { turn: 10 },
+            military: {
+                formations: {
+                    [friendlyBrigade.id]: friendlyBrigade,
+                    [enemyMechanized.id]: enemyMechanized,
+                    [enemyInfantry.id]: enemyInfantry,
+                },
+                corps_front_sectors: {
+                    [friendlySector.sector_id]: friendlySector,
+                    [enemySector.sector_id]: enemySector,
+                },
+                corps_command: {
+                    [corpsId]: {
+                        stance: 'balanced',
+                        corps_exhaustion: 14,
+                        active_operations: [],
+                    },
+                },
+                must_hold_osids_by_corps: {},
+                sector_intel: {},
+                opsec_sectors: [],
+            },
+            political: {
+                political_controllers: {
+                    'op:test:t1': faction,
+                    'op:enemy:e1': enemyFaction,
+                },
+            },
+        } as unknown as GameState;
+
+        const briefing = buildBriefing(
+            state,
+            corpsId,
+            faction,
+            {
+                adjacency: new Map([
+                    ['op:test:t1', ['op:enemy:e1']],
+                    ['op:enemy:e1', ['op:test:t1']],
+                ]),
+                friendlyOsidsByFaction: new Map([
+                    [faction, new Set(['op:test:t1'])],
+                    [enemyFaction, new Set(['op:enemy:e1'])],
+                ]),
+            } as any,
+            [],
+            null,
+            null,
+            null,
+            null,
+        );
+
+        expect(briefing.enemy_equipment_summary).toEqual({
+            tanks: 12,
+            artillery: 6,
+            infantry_only: false,
+        });
+    });
 });
 
 describe('commander planning campaign intent', () => {
@@ -300,5 +477,52 @@ describe('commander planning campaign intent', () => {
         expect(result.action).toBe('created');
         expect(result.plan).not.toBeNull();
         expect(result.plan!.target_osids[0]).toBe('op:enemy:priority');
+    });
+
+    it('opportunity plan demands more brigades against heavy enemy equipment', () => {
+        const stagingZone = makeZone({
+            zone_id: 'zone:test_corps:0' as ZoneId,
+            posture: 'projecting',
+            front_edge_count: 10,
+            surplus_brigades: ['b1', 'b2', 'b3', 'b4'].map(id => id as FormationId),
+            assigned_brigades: ['b1', 'b2', 'b3', 'b4'].map(id => id as FormationId),
+            enemy_adjacent_osids: ['op:enemy:priority'],
+            osids: ['op:test:t1', 'op:test:t2'],
+        });
+        const zones = [stagingZone];
+        const evals = ['b1', 'b2', 'b3', 'b4'].map((id, index) => makeEval({
+            brigade_id: id as FormationId,
+            current_zone: stagingZone.zone_id,
+            fitness_offense: 1.0 - index * 0.1,
+            tier: index < 3 ? 'main_effort' : 'active_defense',
+        }));
+        const forces = makeForces(evals, zones);
+
+        const briefing = makeMinimalBriefing({
+            enemy_equipment_summary: {
+                tanks: 12,
+                artillery: 12,
+                infantry_only: false,
+            },
+            brigades: ['b1', 'b2', 'b3', 'b4'].map((id, index) => ({
+                id: id as FormationId,
+                faction: 'RBiH' as FactionId,
+                name: id,
+                created_turn: 0,
+                status: 'active',
+                assignment: null,
+                kind: 'brigade',
+                personnel: 1800,
+                cohesion: 60,
+                morale: 60,
+                location_osid: index === 0 ? 'op:test:t1' : 'op:test:t2',
+            })) as FormationState[],
+        });
+
+        const result = managePlan(briefing, zones, forces, evals, null, 10);
+
+        expect(result.action).toBe('created');
+        expect(result.plan).not.toBeNull();
+        expect(result.plan!.required_brigades).toBe(4);
     });
 });

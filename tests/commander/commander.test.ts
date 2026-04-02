@@ -620,6 +620,11 @@ describe('plan', () => {
             doctrine_stance: 'balanced',
             corps_stance: 'balanced',
             corps_exhaustion: 0,
+            enemy_equipment_summary: {
+                tanks: 0,
+                artillery: 0,
+                infantry_only: true,
+            },
             officer_personality: defaultPersonality,
             pre_planned_ops: [],
             previous_state: null,
@@ -1199,6 +1204,11 @@ describe('commander_loop', () => {
             doctrine_stance: 'balanced',
             corps_stance: 'balanced',
             corps_exhaustion: 0,
+            enemy_equipment_summary: {
+                tanks: 0,
+                artillery: 0,
+                infantry_only: true,
+            },
             officer_personality: defaultPersonality,
             pre_planned_ops: [],
             previous_state: null,

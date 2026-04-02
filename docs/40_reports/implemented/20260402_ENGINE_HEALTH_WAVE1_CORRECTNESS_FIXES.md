@@ -539,3 +539,33 @@ What remains true:
 Why this matters:
 - this is a good example of a dangerous repo blindspot: a finding that was once correct can become half-stale after surrounding systems evolve
 - before “fixing” an audit item, prove whether it is still dead, half-alive, or already consumed by the current pipeline
+
+## Additional Wave 1 slice: adjacent enemy heavy equipment now shapes commander planning
+
+This checkpoint closes another commander-briefing blindspot: the corps commander could already count brigades and pressure, but still had no way to distinguish a lightly held infantry front from an adjacent armored/artillery-heavy sector.
+
+Implemented:
+- `src/sim/combat/commander/commander_state.ts`
+  - `CommanderBriefing` now includes canonical `enemy_equipment_summary`
+- `src/sim/combat/commander/briefing.ts`
+  - now derives adjacent enemy-sector heavy equipment truth from the real corps-front contact map
+  - summarizes total enemy `tanks`, `artillery`, and whether the facing enemy is effectively `infantry_only`
+- `src/sim/combat/commander/plan.ts`
+  - opportunity and pre-planned offensive creation now require an extra brigade when the facing enemy front is heavy enough to be qualitatively different
+  - this extra requirement can pull in one support-grade brigade when needed, instead of pretending the corps should attack the same way against every enemy mix
+- `tests/commander/briefing_campaign_intent.test.ts`
+  - added regression coverage proving the briefing carries adjacent enemy equipment truth
+  - added regression coverage proving heavy enemy equipment increases required brigades for opportunity planning
+- `tests/commander/commander.test.ts`
+  - updated commander briefing fixtures to match the stricter contract
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\briefing_campaign_intent.test.ts tests\commander\commander.test.ts tests\commander\reinforcement_signal_flow.test.ts tests\army_hq_gathering.test.ts`
+  - PASS (`121` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- without this, the commander was still planning as if “enemy frontage” mattered but “enemy quality” did not
+- heavy opposing armor/artillery now changes the concentration requirement before the operation exists, not only later in combat math
+- this is the kind of fix that makes the AI less theatrical and more honestly constrained

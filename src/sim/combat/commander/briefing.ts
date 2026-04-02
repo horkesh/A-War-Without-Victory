@@ -24,12 +24,14 @@ import type { CampaignPlan, SyncOpParticipant } from '../army_hq_gathering_types
 
 import type {
     CommanderBriefing,
+    EnemyEquipmentSummary,
     OfficerPersonality,
 } from './commander_state.js';
 
 import { getCorpsSubordinates } from '../bot_corps_helpers.js';
 import { getCorpsCommander } from '../officer_system.js';
 import { analyzeFrontGeometry, type FrontGeometryAssessment } from '../front_geometry_analysis.js';
+import { findSectorForEnemyOsid } from '../sector_utils.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 
 // ---------------------------------------------------------------------------
@@ -224,6 +226,45 @@ function collectIntelData(
     };
 }
 
+function collectEnemyEquipmentSummary(
+    state: GameState,
+    sectors: readonly CorpsFrontSector[],
+): EnemyEquipmentSummary {
+    const sectorLookup = state.military.corps_front_sectors ?? {};
+    const formations = state.military.formations ?? {};
+    const adjacentEnemySectorIds = new Set<string>();
+
+    for (const sector of [...sectors].sort((a, b) => strictCompare(a.sector_id, b.sector_id))) {
+        for (const subSegment of [...sector.sub_segments].sort((a, b) => strictCompare(a.id, b.id))) {
+            for (const enemyOsid of [...subSegment.enemy_osids].sort(strictCompare)) {
+                const enemySector = findSectorForEnemyOsid(state, enemyOsid);
+                if (!enemySector) continue;
+                if (enemySector.faction === sector.faction) continue;
+                adjacentEnemySectorIds.add(enemySector.sector_id);
+            }
+        }
+    }
+
+    let tanks = 0;
+    let artillery = 0;
+    for (const sectorId of [...adjacentEnemySectorIds].sort(strictCompare)) {
+        const enemySector = sectorLookup[sectorId];
+        if (!enemySector) continue;
+        for (const brigadeId of [...enemySector.assigned_brigade_ids].sort(strictCompare)) {
+            const brigade = formations[brigadeId];
+            if (!brigade || brigade.status !== 'active') continue;
+            tanks += brigade.composition?.tanks ?? 0;
+            artillery += brigade.composition?.artillery ?? 0;
+        }
+    }
+
+    return {
+        tanks,
+        artillery,
+        infantry_only: tanks === 0 && artillery === 0,
+    };
+}
+
 function collectCampaignIntent(
     state: GameState,
     faction: FactionId,
@@ -337,6 +378,7 @@ export function buildBriefing(
     // 10. Active operations currently in the field (needed by emit for RC1 fallback)
     const activeOperations = getActiveOperations(state, corpsId);
     const corpsExhaustion = getCorpsExhaustion(state, corpsId);
+    const enemyEquipmentSummary = collectEnemyEquipmentSummary(state, sectors);
 
     // 11. Army HQ campaign intent for this corps
     const campaignIntent = collectCampaignIntent(state, faction, corpsId);
@@ -362,6 +404,7 @@ export function buildBriefing(
         doctrine_stance: doctrineStance,
         corps_stance: corpsStance,
         corps_exhaustion: corpsExhaustion,
+        enemy_equipment_summary: enemyEquipmentSummary,
         officer_personality: personality,
         pre_planned_ops: prePlannedOps,
         previous_state: previousState,

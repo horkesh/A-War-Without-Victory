@@ -1303,6 +1303,9 @@ The older corps-op path already respected `MAX_EXHAUSTION_FOR_OPERATION`, but th
 ### Re-check “dead mechanic” audit findings against live consumers before implementing them
 Engine-health audits are valuable, but in a fast-moving repo an old true finding can become half-stale after downstream consumers are added. The feint audit item is the current example: feints are still underpowered, but they already flow through sector intel into `offensive_signs`, commander `concentration_detected`, and `fortify` reactions. Before spending a checkpoint on a “dead” mechanic, prove whether it is still dead, only weak, or already consumed.
 
+### Commander briefing must distinguish enemy frontage from enemy quality
+Brigade counts and front pressure are not enough for honest planning. If the briefing cannot tell a lightly held infantry sector from an artillery-and-armor heavy sector, the commander will size operations as if every enemy front were the same. Adjacent enemy heavy equipment should be summarized in the briefing contract and allowed to raise the required brigade mass for new offensives.
+
 ### Shared label helpers are cheaper than another anti-leak sweep
 Player-facing raw-id leaks often survive not in the main happy-path labels, but in fallback strings and secondary shells like Warroom. If map and Warroom each improvise their own `?? id` fallback, raw corps or sector ids will eventually leak back in. Centralize player-facing corps / sector / assigned-command label translation in one shared helper and make fallbacks generic (`This corps`, `Assigned sector`, `Assigned command`) rather than engine identifiers.
 

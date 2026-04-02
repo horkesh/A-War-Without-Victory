@@ -44,6 +44,34 @@ Engine-derived chokepoint detection (`engineMustHold`) disabled with `false &&`.
 
 ---
 
+### 2026-04-02 â€” Engine health Wave 1 continued: enemy heavy equipment reaches commander planning
+
+Continued the clean-lane Wave 1 execution in `F:\AWWV_exec_clean`, closing another commander blindspot that looked small in types but large in behavior: the corps commander still had no way to tell whether the adjacent enemy front was infantry-thin or armored/artillery-heavy.
+
+Implemented:
+- `src/sim/combat/commander/commander_state.ts`
+  - `CommanderBriefing` now carries `enemy_equipment_summary`
+- `src/sim/combat/commander/briefing.ts`
+  - derives adjacent enemy-sector heavy-equipment truth from real front contact and summarizes enemy `tanks`, `artillery`, and `infantry_only`
+- `src/sim/combat/commander/plan.ts`
+  - new offensive plans now demand an extra brigade when the facing enemy front is heavy enough to change casualty risk materially
+  - this extra requirement can pull in one support-grade brigade when needed rather than pretending only `main_effort` brigades matter in every assault
+- `tests/commander/briefing_campaign_intent.test.ts`
+  - added regressions proving the briefing summary exists and that heavy enemy equipment changes required brigade count
+- `tests/commander/commander.test.ts`
+  - updated commander fixtures for the stricter briefing contract
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\briefing_campaign_intent.test.ts tests\commander\commander.test.ts tests\commander\reinforcement_signal_flow.test.ts tests\army_hq_gathering.test.ts`
+  - PASS (`121` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- commander planning now reacts to enemy front quality before an op is born, not only once combat resolves
+- this closes another “good-looking contract, dead behavior” gap in the AI layer
+- the engine gets more honest when the commander briefing stops flattening every enemy into the same generic frontage problem
+
 ### 2026-04-02 — Engine health Wave 1 continued: corps exhaustion reaches commander planning
 
 Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing another split-truth gap between the legacy corps-op path and the newer commander-intelligence path.

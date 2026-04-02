@@ -59,8 +59,24 @@ export const PLAN_CONCENTRATION_RATE = 2;
 /** Viability score below which a plan is abandoned. */
 const VIABILITY_ABANDON_THRESHOLD = 0.2;
 
+/** Enemy tanks/artillery at or above this threshold force an extra brigade in planning. */
+const HEAVY_ENEMY_TANK_THRESHOLD = 12;
+const HEAVY_ENEMY_ARTILLERY_THRESHOLD = 12;
+
 /** Max BFS hops from brigade location to objective approach OSID (matches emit.ts). */
 const MAX_REACHABILITY_HOPS = 8;
+
+function getEnemyEquipmentBrigadeBump(briefing: CommanderBriefing): number {
+    const summary = briefing.enemy_equipment_summary;
+    if (summary.infantry_only) return 0;
+    if (
+        summary.tanks >= HEAVY_ENEMY_TANK_THRESHOLD ||
+        summary.artillery >= HEAVY_ENEMY_ARTILLERY_THRESHOLD
+    ) {
+        return 1;
+    }
+    return 0;
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // buildCatastrophicOsidCooldownSet — transient cooldown for failed objectives
@@ -338,7 +354,11 @@ function tryCreateFromPrePlanned(
     // mainEffortCap = tier_counts.main_effort: only brigades capable of offensive ops.
     // A corps with 2 main_effort brigades out of 10 total deploys 3 (floor), not all 10.
     const mainEffortLimit = mainEffortCap > 0 ? mainEffortCap : surplusPool.length;
-    const requiredBrigades = Math.max(MIN_BRIGADES_FOR_PLAN, Math.min(mainEffortLimit, surplusPool.length));
+    const baseRequiredBrigades = Math.max(MIN_BRIGADES_FOR_PLAN, Math.min(mainEffortLimit, surplusPool.length));
+    const requiredBrigades = baseRequiredBrigades + getEnemyEquipmentBrigadeBump(briefing);
+    if (requiredBrigades > surplusPool.length) {
+        return null;
+    }
 
     // Estimate concentration time: 1 turn per 2 brigades that need to move
     const brigadesAlreadyAtStaging = countBrigadesInZone(
@@ -444,10 +464,14 @@ function createOpportunityPlan(
     // it has main_effort-capable brigades. Garrison-tier brigades don't belong in assaults.
     const naturalRequired = Math.min(surplusPool.length, stagingZone.surplus_brigades.length);
     const mainEffortLimit = mainEffortCap > 0 ? mainEffortCap : naturalRequired;
-    const requiredBrigades = Math.max(
+    const baseRequiredBrigades = Math.max(
         MIN_BRIGADES_FOR_PLAN,
         Math.min(mainEffortLimit, naturalRequired),
     );
+    const requiredBrigades = baseRequiredBrigades + getEnemyEquipmentBrigadeBump(briefing);
+    if (requiredBrigades > naturalRequired) {
+        return null;
+    }
 
     const assignedBrigades = selectBrigadesForPlan(surplusPool, requiredBrigades);
 
