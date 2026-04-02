@@ -69,6 +69,7 @@ export function detectZones(
     sectors: CorpsFrontSector[],
     ethnicMap: OsidEthnicComposition | null,
     graphAnalysis: FactionGraphAnalysis | null = null,
+    mustHoldOsids: ReadonlySet<string> = new Set(),
 ): ZoneAssessment[] {
     // 1. Get connected component map for this faction
     const componentMap = spatial.componentsByFaction.get(faction);
@@ -186,10 +187,11 @@ export function detectZones(
         // Surplus brigade IDs (last N by sorted order — those beyond garrison budget)
         const surplusBrigades = surplus > 0 ? assignedBrigadeIds.slice(garrisonBudget) : [];
 
-        // Track 1: scenario-authored must_hold on any sector covering this zone.
-        const scenarioMustHold = sectors.some(
-            sec => sec.must_hold === true && sec.territory_osids.some(o => zoneOsidSet.has(o))
-        );
+        // Track 1: scenario-authored must_hold.
+        // Primary: any zone OSID in the scenario-authored mustHoldOsids set (from briefing).
+        // Fallback: sector.must_hold flag (set by external tooling or future player UI).
+        const scenarioMustHold = (mustHoldOsids.size > 0 && zoneOsids.some(o => mustHoldOsids.has(o)))
+            || sectors.some(sec => sec.must_hold === true && sec.territory_osids.some(o => zoneOsidSet.has(o)));
 
         // Track 2: engine-derived — zone contains a structural chokepoint whose removal
         // would isolate at least MUST_HOLD_MIN_CLUSTER_SIZE friendly OSIDs.

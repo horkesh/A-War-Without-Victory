@@ -66,6 +66,7 @@ export function assessSituation(
         [...corpsSectors],
         briefing.ethnic_map,
         briefing.graph_analysis,
+        new Set(briefing.must_hold_osids),
     );
 
     // 3. Evaluate forces

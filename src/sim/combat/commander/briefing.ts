@@ -288,6 +288,8 @@ export function buildBriefing(
     const activeOperations = getActiveOperations(state, corpsId);
 
     // 11. Assemble briefing
+    const mustHoldOsids: string[] = state.military.must_hold_osids_by_corps?.[corpsId] ?? [];
+
     return {
         corps_id: corpsId,
         faction,
@@ -306,5 +308,6 @@ export function buildBriefing(
         pre_planned_ops: prePlannedOps,
         previous_state: previousState,
         active_operations: activeOperations,
+        must_hold_osids: mustHoldOsids,
     };
 }

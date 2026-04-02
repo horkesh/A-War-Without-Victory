@@ -1686,6 +1686,8 @@ war_jna?: JNATransitionState;
 siege_turn_counters?: Record<string, number>;
 /** General supply reserves per faction [0..100]. Consumed by maintenance; replenished by facilities/patron. */
 general_supply_reserve?: Record<FactionId, number>;
+/** Scenario-authored must-hold OSIDs per corps. Set once at scenario load; read by commander briefing. Key: corps_id. */
+must_hold_osids_by_corps?: Record<string, string[]>;
 /** Heavy munitions reserves per faction [0..100]. Consumed by combat; replenished by ammo facilities/patron. */
 heavy_munitions_reserve?: Record<FactionId, number>;
 /** Canonical front-edge snapshot for GUI rendering and deterministic diagnostics. */

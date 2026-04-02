@@ -1284,6 +1284,10 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             state.military.formation_spawn_directive = scenario.formation_spawn_directive;
         }
 
+        if (scenario.must_hold_osids_by_corps && Object.keys(scenario.must_hold_osids_by_corps).length > 0) {
+            state.military.must_hold_osids_by_corps = scenario.must_hold_osids_by_corps;
+        }
+
         if (scenario.coercion_pressure_by_municipality && Object.keys(scenario.coercion_pressure_by_municipality).length > 0) {
             const keys = Object.keys(scenario.coercion_pressure_by_municipality).sort(strictCompare);
             state.political.coercion_pressure_by_municipality = {};

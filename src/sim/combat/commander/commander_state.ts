@@ -285,6 +285,8 @@ export interface CommanderBriefing {
     readonly previous_state: CommanderState | null;
     /** Active operations currently running for this corps (from CorpsCommandState). */
     readonly active_operations: readonly CorpsOperation[];
+    /** Scenario-authored must-hold OSIDs for this corps. Zones containing these get 1.5× garrison budget. */
+    readonly must_hold_osids: readonly string[];
 }
 
 // ---------------------------------------------------------------------------
