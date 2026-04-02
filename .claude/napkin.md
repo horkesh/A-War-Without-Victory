@@ -498,3 +498,5 @@ After EVERY scenario run, the orchestrator:
    Do instead: OPORDs, objective lists, and HQ roster/history hover rows must resolve settlement labels through player-safe helpers. Exact internal identifiers belong only in debug-only surfaces.
 2. **[2026-04-02] Warroom faction overview stays strategic**
    Do instead: Warroom may summarize command posture, but detailed formations, personnel rosters, reserve handling, and commander reassignment belong to Army HQ. If Warroom starts doing those things again, it is stealing ownership from the command shell.
+3. **[2026-04-02] Tactical map must always show the way back to Warroom**
+   Do instead: If desktop IPC is available or the map is embedded, the mounted tactical toolbar must expose a visible `WARROOM` return affordance. A hidden bridge method in legacy code is not enough.

@@ -14,6 +14,7 @@ import { advanceTurnAndSync } from '../desktop/orderActions';
 import { loadLatestRunSaveAsText, loadRunFinalSaveAsText } from '../data/DataLoader';
 import { getArmyCrest, getArmyName } from '../utils/factionAssets';
 import { formatTurnLabel } from '../utils/formatters';
+import { shouldShowWarroomReturn, isEmbeddedTacticalMap } from '../utils/warroomReturn';
 import { OfficerEventBadge } from './OfficerEventBadge';
 
 interface PresidentialToolbarProps {
@@ -54,6 +55,8 @@ export function PresidentialToolbar({
     const playerFaction = loadedGameState?.player_faction ?? '';
     const crestUrl = getArmyCrest(playerFaction);
     const armyName = getArmyName(playerFaction);
+    const embedded = typeof window !== 'undefined' && isEmbeddedTacticalMap(window.location.search);
+    const showWarroomReturn = typeof window !== 'undefined' && shouldShowWarroomReturn(window.location.search, ipc.isAvailable);
 
     const handleAdvanceTurn = useCallback(async () => {
         if (!ipc.isAvailable || advancing) return;
@@ -113,6 +116,20 @@ export function PresidentialToolbar({
 
                 {/* LEFT: Date */}
                 <div className="flex items-center gap-3 min-w-[180px]">
+                    {showWarroomReturn && (
+                        <button
+                            onClick={() => {
+                                if (embedded) {
+                                    window.parent.postMessage({ type: 'awwv-back-to-hq' }, '*');
+                                    return;
+                                }
+                                void ipc.focusWarroom();
+                            }}
+                            className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-amber-400 hover:text-amber-300 transition-colors"
+                        >
+                            WARROOM
+                        </button>
+                    )}
                     <button
                         onClick={() => useGameStore.getState().setChronicleOpen(true)}
                         className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors"

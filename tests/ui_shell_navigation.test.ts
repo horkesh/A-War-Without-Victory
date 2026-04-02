@@ -5,6 +5,7 @@ import {
   openArmyHQTab,
   type ShellNavigationState,
 } from '../src/ui/map/utils/shellNavigation.js';
+import { isEmbeddedTacticalMap, shouldShowWarroomReturn } from '../src/ui/map/utils/warroomReturn.js';
 
 function createState(playerFaction: string | null = 'RBiH'): ShellNavigationState & {
   calls: Array<[string, unknown]>;
@@ -69,5 +70,12 @@ describe('shellNavigation', () => {
     expect(openArmyHQRecordsSubTab(state, 'aar')).toBe(false);
     expect(openArmyHQBriefingForCorps(state, 'arbih_3rd_corps')).toBe(false);
     expect(state.calls).toEqual([]);
+  });
+
+  it('shows a Warroom return affordance for standalone desktop and embedded tactical shells', () => {
+    expect(isEmbeddedTacticalMap('?embedded=1')).toBe(true);
+    expect(shouldShowWarroomReturn('?embedded=1', false)).toBe(true);
+    expect(shouldShowWarroomReturn('', true)).toBe(true);
+    expect(shouldShowWarroomReturn('', false)).toBe(false);
   });
 });

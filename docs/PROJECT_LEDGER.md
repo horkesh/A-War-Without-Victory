@@ -20850,3 +20850,19 @@ Why this matters:
   - `docs/40_reports/implemented/20260402_WARROOM_FACTION_SHELL_HANDOFF.md`
   - `docs/40_reports/WARROOM_MASTER.md`
   - `docs/40_reports/GUI_MASTER.md`
+
+## 2026-04-02 - Tactical-map Warroom return restoration
+
+- Worktree/branch: `F:\AWWV_exec_clean` on `codex/engine-health-wave1`
+- Restored the visible `WARROOM` return path in the live mounted tactical shell.
+- Added `src/ui/map/utils/warroomReturn.ts` so the shell contract is expressed as testable logic instead of disappearing into component branches.
+- `PresidentialToolbar` now shows a `WARROOM` action when desktop IPC is available or the tactical map is embedded.
+- Embedded mode returns through `awwv-back-to-hq`; standalone desktop mode uses `ipc.focusWarroom()`.
+- Added regression coverage to `tests/ui_shell_navigation.test.ts`.
+- Verification:
+  - `node_modules\.bin\vitest.cmd run tests\ui_shell_navigation.test.ts tests\warroom_player_visibility.test.ts tests\warroom_smoke.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_TACTICAL_MAP_WARROOM_RETURN_RESTORATION.md`
+  - `docs/40_reports/GUI_MASTER.md`
+  - `docs/40_reports/WARROOM_MASTER.md`
