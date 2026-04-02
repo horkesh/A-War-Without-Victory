@@ -20581,3 +20581,24 @@ Why this matters:
 - dead view-model bridges are how obsolete gameplay concepts keep re-entering the player shell
 - removing them tightens the product contract without touching the underlying sim compatibility state
 - this is exactly the kind of repo simplification that prevents future Claude work from drifting back toward fake UI ownership
+### 2026-04-02 - Front/theatre contract doc alignment
+
+Aligned the main tactical-map and desktop IPC engineering docs with the current shell contract: sectors are the live frontline/player-shell authority, while front assignment and theatre naming now belong to compatibility/history context instead of active UI ownership.
+
+Implemented:
+- `docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md`
+  - removed retired live-channel entries for `assign-brigade-to-front`, `rename-front-segment`, and `rename-theatre`
+  - corrected state-contract wording so raw compatibility state is no longer described as live player-shell truth
+- `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`
+  - corrected §10.4 and related desktop-flow text so front/theatre metadata is described as compatibility/history state
+  - changed the old front-assignment verification step into a legacy compatibility check
+- `docs/40_reports/implemented/20260402_FRONT_THEATRE_CONTRACT_DOC_ALIGNMENT.md`
+  - documented the slice
+
+Verification:
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- stale contract docs are one of the fastest ways for future agents to resurrect dead product concepts
+- aligning the docs keeps repo memory consistent with the actual desktop shell and current engine authority

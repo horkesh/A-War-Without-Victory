@@ -418,16 +418,16 @@ There is no front between RBiH and HRHB until they are at war. The map does not 
 
 **Single source of truth:** 2D tactical map and 3D operational map both consume the **same** game state. All load paths (file picker, desktop IPC `game-state-updated`, advance turn, replay) supply the same raw `GameState` to the map layer. The 2D map uses `GameStateAdapter.parseGameState()` → `LoadedGameState`; the 3D map receives state via `push3DState` → `__awwv3dApplySave` → `toViewerSave()` (ViewerStateAdapter). Both adapters read from the same fields when given the same state.
 
-**Front-related state:** Persisted in `GameState` and used by both views:
+**Front-related state:** Persisted in `GameState` and used by both views, but not all persisted front-era metadata remains a live player-shell concept:
 
 - **`front_edges`** — Hostile-boundary edges (where two hostile settlements meet); derived each turn in the pipeline and persisted; 2D front-line layer and 3D front mesh use this when present (with identical fallback when absent).
-- **`assignable_front_segments`** — Contiguous hostile-boundary segments (HoI-style fronts), derived from `front_edges`; each segment has `front_id`, `edge_ids`, `side_a`/`side_b`, optional `name`, `theatre_id`. Brigade panel "Front Assignment" dropdown lists these; `assign-brigade-to-front` IPC writes `brigade_front_assignment`.
-- **`brigade_front_assignment`** — `Record<FormationId, string | null>`: brigade → `front_id` or `null` (reserve). Engine gates pressure, attack, posture, movement, and reposition on "assigned to a front" (reserve brigades do not contribute).
-- **`theatres`** and **`army_theatre_assignment`** — Theatre → Army hierarchy; segments may have `theatre_id`; OOB and hierarchy panel show Theatre → Army → Corps → Brigade and Reserve/front labels.
+- **`assignable_front_segments`** — Compatibility-era contiguous hostile-boundary segments derived from `front_edges`. They still exist in raw state and are still used for certain fallback computations and front-edge tooltip grouping, but they are no longer a primary live player-shell command concept.
+- **`brigade_front_assignment`** — Compatibility fallback mapping from brigade → `front_id`/reserve. The modern engine uses corps sectors as frontline authority once they exist; legacy front assignment survives for old-save/repair paths and selected fallback logic only.
+- **`theatres`** and **`army_theatre_assignment`** — Still present in raw state for compatibility/sim lineage, but no current tactical-map `LoadedGameState` surface treats them as active player-facing UI ownership.
 
 **Day-only 3D:** The operational 3D map starts in day mode (night mode disabled); no day/night toggle in the default flow.
 
-**Verification:** See §21.3 (test plan) for front-assignment and 2D/3D parity checks.
+**Verification:** See §21.3 (test plan) for canonical front-edge and 2D/3D parity checks. Front assignment / theatre naming checks in older reports should now be read as historical implementation context, not as the current live player-shell contract.
 
 ---
 
@@ -859,7 +859,7 @@ The entire UI uses a dark wargame theme (316 lines). Key decisions:
 
 ## 21. Desktop (Electron) and IPC
 
-When desktop mode runs in Electron (`npm run desktop`), the app now launches into the **warroom renderer first** (`awwv://warroom/index.html`) with a New Campaign launcher flow: choose side (RBiH/RS/HRHB) and scenario (`sep_1991` or `apr_1992`), then receive canonical state from main via `game-state-updated`. The **IPC contract** is in [DESKTOP_GUI_IPC_CONTRACT.md](DESKTOP_GUI_IPC_CONTRACT.md): `start-new-campaign` (side + scenarioKey), `advance-turn` (optional `phase0Directives` payload), `get-current-game-state`, recruitment channels, and live order staging channels (`stage-attack-order`, `stage-posture-order`, `stage-move-order`, `stage-deploy-order`, `stage-undeploy-order`, `stage-brigade-movement-order`, `assign-brigade-to-front`, `rename-front-segment`, `rename-theatre`, `clear-orders`, `stage-corps-stance-order`). Retired `stage-brigade-reposition-order` remains only as a compatibility rejection channel. Main process owns canonical state and turn advancement for all phases (`peace`, `war`); renderer state updates are driven by IPC broadcasts.
+When desktop mode runs in Electron (`npm run desktop`), the app now launches into the **warroom renderer first** (`awwv://warroom/index.html`) with a New Campaign launcher flow: choose side (RBiH/RS/HRHB) and scenario (`sep_1991` or `apr_1992`), then receive canonical state from main via `game-state-updated`. The **IPC contract** is in [DESKTOP_GUI_IPC_CONTRACT.md](DESKTOP_GUI_IPC_CONTRACT.md): `start-new-campaign` (side + scenarioKey), `advance-turn` (optional `phase0Directives` payload), `get-current-game-state`, recruitment channels, and live order staging channels such as `stage-attack-order`, `stage-posture-order`, `stage-move-order`, `stage-deploy-order`, `stage-undeploy-order`, `stage-brigade-movement-order`, `assign-brigade-to-sector`, `clear-orders`, and `stage-corps-stance-order`. Retired `stage-brigade-reposition-order`, `assign-brigade-to-front`, `rename-front-segment`, and `rename-theatre` are historical compatibility context, not current live shell affordances. Main process owns canonical state and turn advancement for all phases (`peace`, `war`); renderer state updates are driven by IPC broadcasts.
 
 ### 21.1. Embedded mode (iframe in warroom)
 
@@ -877,7 +877,7 @@ As of 2026-02-20, the tactical map opens as a **full-screen iframe layer inside 
 
 ### 21.3 Verification (test plan)
 
-- **Front assignment:** Load a war-phase save that has `assignable_front_segments`. In the brigade panel, use "Front Assignment" to assign a brigade to a front or Reserve; confirm state updates and persists after advance turn. Reserve brigades do not apply pressure or receive attack orders (engine and bot respect `hasValidFrontAssignment`).
+- **Legacy front compatibility:** Load a war-phase save that still carries `assignable_front_segments` / `brigade_front_assignment` and verify the compatibility fallback remains stable where sectors are absent. The live player shell should not expose front-assignment editing as a primary command surface.
 - **2D/3D parity:** Load the same save in desktop (2D tactical map and 3D operational map). Confirm both show the same front line (same segments and extent); OOB shows Reserve vs front name per brigade; assignable segments list matches in both.
 - **Day default (3D):** Open the 3D operational map; confirm it starts in day mode (no night toggle required for normal use).
 

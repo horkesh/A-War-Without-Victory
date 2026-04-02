@@ -1517,3 +1517,6 @@ In AWWV, once `corps_front_sectors` already exist, rerunning `ensureBrigadeFront
 ### Dead loaded-state bridges are product debt even when the engine still keeps the underlying data
 
 In AWWV, `theatres`, `army_theatre_assignment`, and `segment.theatre_id` still existed for sim/compatibility reasons, but no live player-facing surface actually used them. Keeping those fields in `LoadedGameState` made the shell imply ownership it no longer had. When a product surface does not use a concept, stop carrying it in the loaded UI model even if the engine still stores it underneath.
+### Stale contract docs can resurrect dead systems just as effectively as stale code
+
+In AWWV, engineering docs that still listed `assign-brigade-to-front`, `rename-front-segment`, or theatre naming as live tactical-shell affordances were actively misleading, because the actual preload/main-process bridge had already retired them. When a product concept dies, update the contract docs quickly or the repo will keep teaching future agents that the ghost is still real.

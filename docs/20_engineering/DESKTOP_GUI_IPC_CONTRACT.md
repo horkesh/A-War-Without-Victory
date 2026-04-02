@@ -9,7 +9,7 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 - Renderer consumers: `src/ui/warroom/warroom.ts`, `src/ui/map/MapApp.ts` (via embedded iframe)
 - Sim adapter: `src/desktop/desktop_sim.ts`
 
-**State contract (front assignment and theatres):** The same serialized `GameState` is pushed to all renderers via `game-state-updated`. It includes `front_edges`, `assignable_front_segments`, `brigade_front_assignment`, `theatres`, `army_theatre_assignment`, and `military.campaign_plans` (read-only; CampaignPlan objects produced by Army HQ Gathering — see `army_hq_gathering.ts`). The 2D tactical map and 3D operational map both read these from the same payload; see [TACTICAL_MAP_SYSTEM.md](TACTICAL_MAP_SYSTEM.md) §10.4 for single-source and verification.
+**State contract (current player shell):** The same serialized `GameState` is pushed to all renderers via `game-state-updated`. The raw payload may still contain compatibility-era state such as `assignable_front_segments`, `brigade_front_assignment`, `theatres`, and `army_theatre_assignment`, but the live tactical-map `LoadedGameState` no longer treats theatre/front-assignment metadata as active player-facing shell concepts. The current player shell centers on canonical front edges, corps sectors, sector overrides, and `military.campaign_plans` (read-only; CampaignPlan objects produced by Army HQ Gathering — see `army_hq_gathering.ts`). See [TACTICAL_MAP_SYSTEM.md](TACTICAL_MAP_SYSTEM.md) §10.4 for current single-source notes.
 
 **Derived adapter fields (not IPC channels):** `GameStateAdapter.ts` derives additional view-model fields from the raw `GameState` payload. Notable: `sectorIntel` (`SectorIntelRecordView[]`) — derived from `state.sector_intel` and `state.military.corps_front_sectors` in a single merged pass (also produces `fogOfWar`). Exposes 11 fields per enemy sector: sector ID, faction, corps, strength category, posture, offensive_signs, confidence, visible brigades, friendly OSIDs, enemy OSIDs, assessed turn. Consumed by Army HQ intelligence panels (ThreatAssessment, ForceReadiness, SupplyIntelligence) and corps card threat badges. No IPC round-trip — entirely client-side derivation from the `game-state-updated` payload.
 
@@ -58,25 +58,10 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
   - Returns: `{ ok: boolean, error?: string }`
   - Behavior: stages undeploy posture transition by setting `state.brigade_deploy_orders[brigadeId] = "undeploy"`, reserializes, sends state via `game-state-updated`.
 
-- `assign-brigade-to-front` (invoke)
-  - Payload: `{ brigadeId: string, frontId: string | null }`
-  - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: validates brigade and front segment ID (`assignable_front_segments`), writes `state.brigade_front_assignment[brigadeId] = frontId` (`null` = reserve), reserializes, sends state via `game-state-updated`.
-
 - `assign-brigade-to-sector` (invoke)
   - Payload: `{ brigadeId: string, sectorId: string | null }`
   - Returns: `{ ok: boolean, error?: string }`
   - Behavior: permanent player sector override. Validates same-corps constraint: sector `corps_id` must match brigade `corps_id`. Writes `state.military.brigade_sector_override[brigadeId] = sectorId`; `null` clears the override. Persists until explicitly cleared. `classifyBrigadesByTerritory` respects this override before its Phase 1 (frontline-by-position) logic. Invalid/stale overrides (wrong corps, brigade dissolved) fall through silently to normal assignment. Reserializes and broadcasts update. Source: `desktop_sim.ts::assignBrigadeToSector`.
-
-- `rename-front-segment` (invoke)
-  - Payload: `{ frontId: string, name: string | null }`
-  - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: updates optional `name` on `state.assignable_front_segments[*]`; null/empty clears the name. Reserializes and broadcasts update.
-
-- `rename-theatre` (invoke)
-  - Payload: `{ theatreId: string, name: string | null }`
-  - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: updates `state.theatres[theatreId].name`; null/empty restores default `<faction> Theatre`. Reserializes and broadcasts update.
 
 - `stage-brigade-aor-order` (invoke)
   - Payload: `{ settlementId: string, fromBrigadeId: string, toBrigadeId: string }`
