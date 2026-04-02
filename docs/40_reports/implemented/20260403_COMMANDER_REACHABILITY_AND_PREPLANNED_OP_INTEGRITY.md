@@ -69,6 +69,20 @@ Why:
 - that was too narrow for deep-rear brigades already standing inside another sector's territory
 - it contradicted the broader sector rule that deep-rear brigades can stay assigned truthfully and march forward later
 
+### 5. Distinguished true reachability from the Phase 2c operational-zone cap
+
+File:
+- `src/sim/combat/brigade_assignment.ts`
+
+Change:
+- the late trap/remediation pass no longer uses `PHASE_2C_MAX_HOPS` as a binary truth check
+- it now uses a much larger truthful-reachability horizon when deciding whether a brigade can still belong to its assigned sector or another same-corps sector
+
+Why:
+- `PHASE_2C_MAX_HOPS` is an operational distribution cap, not a proof that a brigade is physically unreachable
+- the old trap logic treated `>4 hops from the front` as `unreachable`
+- that created false unresolved churn for deep-rear brigades in long interior corridors, especially in later `vrs_1st_krajina` turns
+
 ## Tests
 
 Added:
@@ -84,6 +98,7 @@ What is now covered:
 - commander viability overrides never move an exposed brigade into a different connected component
 - stale player sector overrides are ignored when geography has drifted into another component
 - unreachable brigades are rescued into territory-owning same-corps sectors before being marked unresolved
+- deep-rear brigades are not dropped just because they sit beyond the short Phase 2c hop cap
 
 ## Verification
 
@@ -97,9 +112,21 @@ Scenario run:
 - Output: `runs/apr1992_definitive_40w__d452d2a10f3d69af__w40_n1300`
 - Final hash: `d5fe7dbb0d98b360`
 
+Follow-up scenario run after the deeper trap fix:
+- `runs/apr1992_definitive_40w__d452d2a10f3d69af__w40_n1302`
+- Final hash: `b795ae4ac0150e82`
+
 ## Outcome
 
 The specific surviving reachability invariant around `rs_skelani_battalion` no longer appears in the fresh `n1300` run, which strongly supports the commander-override diagnosis.
+
+The deeper trap fix also materially reduced late-turn sector churn in the fresh `n1302` run:
+- the recurring `vrs_1st_krajina` unresolved spiral disappeared from console output
+- `hvo_nikola_subic_zrinski_brigade` no longer repeated the old "assigned sector became unreachable" churn
+- the remaining big unresolved cluster is now narrower and more informative:
+  - `hrhb_travnik_brigade`
+  - loaned reserve brigades with no truthful receiving sector
+  - a smaller ARBiH mountain/reconcentration set
 
 The sector lane is still not "finished":
 - multiple brigades still become honestly unresolved later in the run

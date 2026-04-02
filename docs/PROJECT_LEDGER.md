@@ -21265,9 +21265,16 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - Additional hardening in the same lane:
   - stale `brigade_sector_override` entries are now ignored when they point into another connected component
   - late rescue of unreachable brigades now prefers another same-corps sector that already truthfully owns the brigade's current territory before marking it unresolved
+  - late rescue no longer treats the 4-hop Phase 2c operational-zone cap as a true reachability proof
 - Added regressions in `tests/brigade_territory_reconciliation.test.ts` for:
   - stale player overrides
   - territory-owning sector rescue
+  - deep-rear truthful sector retention beyond the short assignment hop cap
+- Follow-up scenario evidence after the deeper trap fix:
+  - fresh run `runs/apr1992_definitive_40w__d452d2a10f3d69af__w40_n1302`
+  - final hash `b795ae4ac0150e82`
+  - recurring late-turn `vrs_1st_krajina` unresolved churn disappeared from console output
+  - `hvo_nikola_subic_zrinski_brigade` no longer repeated the old "assigned sector became unreachable" churn
 - Follow-on swamp still visible:
-  - late-turn honest unresolved brigades remain in `vrs_1st_krajina`, `hvo_central_bosnia`, and some loaned reserve cases
-  - next wave should target sectors that become unreachable over time, not the already-fixed commander viability leak
+  - late-turn unresolveds are now concentrated much more narrowly in `hrhb_travnik_brigade`, some loaned reserve brigades, and a smaller ARBiH mountain/reconcentration set
+  - next wave should target why those brigades truly have no same-component sector, not the already-fixed commander/override/trap leaks

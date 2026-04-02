@@ -1669,6 +1669,10 @@ If sector assignment and coverage passes are made honest, do not assume the job 
 
 `brigade_sector_override` looked harmless because it belonged to the player shell, but it was still writing directly into sector truth. If a brigade retreats or relocates into another connected component, an old override becomes stale intent and must be ignored instead of reapplied. In this repo, shell persistence can be just as dangerous as AI logic if it is allowed to bypass current spatial truth.
 
+### Short assignment hop caps are not the same thing as true reachability
+
+In AWWV, `PHASE_2C_MAX_HOPS` is a distribution cap for assigning pooled brigades inside an operational zone. It should not be reused as a binary truth test for whether a brigade can belong to a sector at all. Doing so turns deep-rear but still truthful brigades into fake "unreachable" unresolveds and creates later-turn churn that looks like a sector-construction bug.
+
 ### Stale scenario-authored brigade references are different from runtime missing-brigade failures
 
 `Operation Foca` still carried `jna_mostar_garrison_tg` even though the brigade predictably withdraws before queued injection time. That warning looked like a runtime integrity failure, but the real problem was stale authored data. When queued-op warnings appear, first ask whether the brigade is supposed to exist at that lifecycle moment before changing validation logic.

@@ -636,4 +636,60 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
         expect(staleSector.assigned_brigade_ids).not.toContain('brig_override_guard');
         expect(correctSector.assigned_brigade_ids).toContain('brig_override_guard');
     });
+
+    it('keeps deep-rear brigades assigned when their sector front is truthful but farther than the phase-2 hop cap', () => {
+        const deepSector = makeSector(
+            'sector:vrs_drina:0',
+            'vrs_drina',
+            [makeSubSeg('deep', ['op:m:front_0'], ['op:m:enemy_0'], 3)],
+            ['op:m:front_0', 'op:m:rear_1', 'op:m:rear_2', 'op:m:rear_3', 'op:m:rear_4', 'op:m:rear_5'],
+        );
+
+        const brig = makeFormation({
+            id: 'brig_deep_rear',
+            location_osid: 'op:m:rear_5',
+            corps_id: 'vrs_drina',
+        });
+
+        const formations: Record<FormationId, FormationState> = {
+            brig_deep_rear: brig,
+        };
+
+        const componentOf = makeComponentOf({
+            'op:m:front_0': 0,
+            'op:m:rear_1': 0,
+            'op:m:rear_2': 0,
+            'op:m:rear_3': 0,
+            'op:m:rear_4': 0,
+            'op:m:rear_5': 0,
+        });
+
+        const adjacency = makeAdjacency([
+            ['op:m:front_0', 'op:m:rear_1'],
+            ['op:m:rear_1', 'op:m:rear_2'],
+            ['op:m:rear_2', 'op:m:rear_3'],
+            ['op:m:rear_3', 'op:m:rear_4'],
+            ['op:m:rear_4', 'op:m:rear_5'],
+        ]);
+
+        const friendlyOsids = new Set(['op:m:front_0', 'op:m:rear_1', 'op:m:rear_2', 'op:m:rear_3', 'op:m:rear_4', 'op:m:rear_5']);
+        const commanderProfiles = new Map<string, CorpsCommanderProfile>();
+
+        classifyBrigadesByTerritory(
+            [deepSector],
+            'RS' as FactionId,
+            formations,
+            adjacency,
+            friendlyOsids,
+            componentOf,
+            commanderProfiles,
+            undefined,
+            {
+                meta: { turn: 0 } as any,
+                military: { formations } as any,
+            } as any,
+        );
+
+        expect(deepSector.assigned_brigade_ids).toContain('brig_deep_rear');
+    });
 });

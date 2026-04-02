@@ -42,6 +42,7 @@ const VRS_1K_LINE_DISTANCE_MAX_HOPS = 6;
  */
 export const DRIFT_RECALL_SECTOR_SKIP_HOPS = 6;
 const FEINT_THREAT_MULTIPLIER = 1.5;
+const TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS = 30;
 
 function operationObjectives(op: { axes?: Array<{ objectives?: string[] }>; objectives?: string[] }): string[] {
     if (op.axes && op.axes.length > 0) {
@@ -661,7 +662,13 @@ export function classifyBrigadesByTerritory(
                 const f = formations[bid];
                 if (!f || f.status !== 'active' || !f.location_osid) continue;
                 const frontSet = frontBySector.get(sector.sector_id) ?? new Set<string>();
-                const reachCurrent = friendlyDistanceToAny(f.location_osid, frontSet, adjacency, friendlyOsids, PHASE_2C_MAX_HOPS);
+                const reachCurrent = friendlyDistanceToAny(
+                    f.location_osid,
+                    frontSet,
+                    adjacency,
+                    friendlyOsids,
+                    TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS,
+                );
                 if (reachCurrent != null) continue;
                 const brigComp = componentOf.get(f.location_osid) ?? -2;
                 const territoryMatches = sectors
@@ -691,7 +698,7 @@ export function classifyBrigadesByTerritory(
                             frontBySector.get(s.sector_id) ?? new Set<string>(),
                             adjacency,
                             friendlyOsids,
-                            PHASE_2C_MAX_HOPS
+                            TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS
                         );
                         return { sector: s, dist: d };
                     })
