@@ -22,6 +22,7 @@ import { rewritePmtilesUrls } from '../../map/rewritePmtilesUrls';
 import styleJson from '../../map/awwv_map_style.json';
 import { ModalMapSource } from '../../utils/ModalMapSource';
 import type { AxisState } from './types';
+import { humanizeOsid } from '../../utils/osidDisplayName';
 
 // Faction-colored axis palettes
 const AXIS_PALETTES: Record<string, string[]> = {
@@ -333,7 +334,7 @@ export function OpsMap({
 
                     // Build terrain tooltip content
                     const sid = props.sid as string | undefined;
-                    const name = props.settlement_name as string ?? hoveredOsid;
+                    const name = (props.settlement_name as string | undefined) ?? humanizeOsid(hoveredOsid);
                     const terrain = sid ? terrainDataRef.current.get(sid) : undefined;
                     const controller = controlDataRef.current[hoveredOsid] ?? '—';
                     const selLabel = isSelectable

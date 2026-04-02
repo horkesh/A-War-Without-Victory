@@ -20204,3 +20204,29 @@ Why this matters:
 - the remaining leaks are now mostly subtle naming degradations rather than giant omniscience failures
 - those still matter because players read summary rails and Warroom prose as product truth
 - this slice keeps the player-facing shell converging on one shared naming contract instead of letting each panel improvise its own fallback behavior
+### 2026-04-02 - Legacy Warroom/planning surface name mop-up
+
+Finished a smaller residual player-truth cleanup pass in `F:\AWWV_exec_clean`, targeting older Warroom-planning surfaces and the ops-modal hover label where raw ids could still leak through last-resort text paths.
+
+Implemented:
+- `src/ui/warroom/components/SettlementInfoPanel.ts`
+  - settlement title fallback now uses a neutral settlement label instead of raw `sid`
+  - municipality fallback now uses player-safe municipality naming instead of `Municipality <id>`
+- `src/ui/warroom/components/WarPlanningMap.ts`
+  - wall-map search index now uses player-safe settlement fallback labels
+  - investment-panel municipality fallback now uses player-safe municipality naming
+- `src/ui/map/components/ops_modal/OpsMap.tsx`
+  - hovered settlement label now humanizes the fallback OSID instead of printing raw `op:` identifiers
+- `docs/40_reports/implemented/20260402_LEGACY_WARROOM_SURFACE_NAME_MOPUP.md`
+  - documented this residual cleanup slice
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`25` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- older planning surfaces are exactly where raw-id fallbacks survive after the obvious shell leaks are fixed
+- a player-facing shell is only as honest as its least-maintained still-live panel
+- this slice removes more of the “half-alive debug shell” smell from Warroom and ops planning without inventing new naming logic

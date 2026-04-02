@@ -5,6 +5,7 @@
  */
 
 import type { GameState } from '../../../state/game_state.js';
+import { getPlayerSafeMunicipalityName } from '../../map/utils/playerSafeText.js';
 
 type GeoFeature = {
     properties?: {
@@ -98,6 +99,11 @@ function getCensusId(sid: string): string {
     return sid.startsWith('S') ? sid.slice(1) : sid;
 }
 
+function getPlayerSafeSettlementLabel(sid: string): string {
+    const normalized = sid.startsWith('S') ? sid.slice(1) : sid;
+    return normalized ? `Settlement ${normalized}` : 'Selected settlement';
+}
+
 type TabId = 'overview' | 'admin' | 'control' | 'intel';
 
 export class SettlementInfoPanel {
@@ -148,7 +154,7 @@ export class SettlementInfoPanel {
         const factionColor = SIDE_COLORS[controller] ?? SIDE_COLORS['null'];
         const factionLabel = SIDE_LABELS[controller] ?? 'Neutral';
 
-        const settlementName = settlementNames?.by_census_id?.[censusId]?.name ?? sid;
+        const settlementName = settlementNames?.by_census_id?.[censusId]?.name ?? getPlayerSafeSettlementLabel(sid);
 
         let munName = '—';
         let mun1990Id = '—';
@@ -160,7 +166,7 @@ export class SettlementInfoPanel {
             } else if (mun1990Names?.by_municipality_id?.[midStr]) {
                 munName = mun1990Names.by_municipality_id[midStr].display_name;
             } else {
-                munName = `Municipality ${munId}`;
+                munName = getPlayerSafeMunicipalityName(midStr, 'Municipality');
             }
         }
 

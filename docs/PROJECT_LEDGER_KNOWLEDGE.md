@@ -1475,3 +1475,6 @@ In AWWV, the easiest place for raw ids to sneak back in is not the big hero pane
 ### Warroom extractors are part of the player shell, not backend plumbing
 
 If `extractWarData(...)` or newspaper/report builders fall back to raw ids, the leak is just as real as if a React component printed them directly. In AWWV, treat Warroom data extractors and prose generators as player-facing authority surfaces: they need the same player-safe naming contract as the map UI, not their own `name ?? id` shortcuts.
+### Older planning surfaces are where raw-id fallback leaks like to survive
+
+Once the obvious map-shell leaks are cleaned up, the remaining player-truth damage often lives in less-central panels that still look alive: old Warroom settlement panels, planning maps, search indexes, and modal hover tooltips. In AWWV, those surfaces need the same player-safe fallback discipline as the primary shell; otherwise the product still degrades into engine identifiers precisely where nobody is looking closely.
