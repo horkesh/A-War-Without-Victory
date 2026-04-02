@@ -340,4 +340,21 @@ describe('player visibility helpers', () => {
     expect(source).toContain('Hostile-held');
     expect(source).toContain('Enemy losses remain part of staff reporting and records');
   });
+
+  it('keeps logistics and economy shells scoped to the player side in player mode', () => {
+    const supplySource = readFileSync(
+      new URL('../src/ui/map/components/SupplyPanel.tsx', import.meta.url),
+      'utf8',
+    );
+    expect(supplySource).toContain('isPlayerFaction ? [playerFaction] : FACTIONS');
+    expect(supplySource).toContain('getPlayerSafeMilitaryFactionName');
+
+    const economySource = readFileSync(
+      new URL('../src/ui/map/components/EconomyPanel.tsx', import.meta.url),
+      'utf8',
+    );
+    expect(economySource).toContain('facility.controller === playerFaction');
+    expect(economySource).toContain('route.faction === playerFaction');
+    expect(economySource).toContain('No friendly facilities data');
+  });
 });

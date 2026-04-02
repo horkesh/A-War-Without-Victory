@@ -20983,3 +20983,19 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
   - docs/40_reports/implemented/20260402_STRATEGIC_DASHBOARD_PLAYER_TRUTH.md`r
   - docs/40_reports/GUI_MASTER.md`r
 
+
+## 2026-04-02 - Economy and logistics player truth
+
+- Worktree/branch: F:\AWWV_exec_clean on codex/engine-health-wave1`r
+- Scoped the mounted economy and logistics shells to player-side truth in player mode.
+- SupplyPanel.tsx now shows only the player's military side reserves when a player faction is present.
+- EconomyPanel.tsx now filters facilities, smuggling routes, and embargo rows to the player side in player mode.
+- Added regression guards in 	ests/ui_player_visibility.test.ts.
+- Verification:
+  - 
+ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_shell_navigation.test.ts`r
+  - powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`r
+- Docs:
+  - docs/40_reports/implemented/20260402_ECONOMY_LOGISTICS_PLAYER_TRUTH.md`r
+  - docs/40_reports/GUI_MASTER.md`r
+

@@ -60,8 +60,13 @@ function ReserveGauge({ label, value, color }: { label: string; value: number; c
 
 export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
     const reserves = state.factionReserves;
-    const facilities = state.productionFacilities ?? [];
-    const routes = state.smugglingRoutes ?? [];
+    const playerFaction = state.player_faction;
+    const isPlayerFaction = playerFaction === 'RS' || playerFaction === 'RBiH' || playerFaction === 'HRHB';
+    const facilities = (state.productionFacilities ?? []).filter((facility) => !isPlayerFaction || facility.controller === playerFaction);
+    const routes = (state.smugglingRoutes ?? []).filter((route) => !isPlayerFaction || route.faction === playerFaction);
+    const embargoEntries = state.embargoStatus
+        ? Object.entries(state.embargoStatus).filter(([faction]) => !isPlayerFaction || faction === playerFaction)
+        : [];
 
     return (
         <GlassPanel position="right" title="Economy" onClose={onClose} width="340px">
@@ -72,7 +77,7 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
                 </h3>
                 {reserves ? (
                     <div className="space-y-2">
-                        {FACTIONS.map((faction) => {
+                        {(isPlayerFaction ? [playerFaction] : FACTIONS).map((faction) => {
                             const r = reserves[faction];
                             const color = FACTION_COLORS[faction] ?? 'text-text-primary';
                             return (
@@ -119,7 +124,9 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
                         ))}
                     </div>
                 ) : (
-                    <div className="text-text-secondary text-[10px] italic">No facilities data</div>
+                    <div className="text-text-secondary text-[10px] italic">
+                        {isPlayerFaction ? 'No friendly facilities data' : 'No facilities data'}
+                    </div>
                 )}
             </section>
 
@@ -154,7 +161,9 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
                         ))}
                     </div>
                 ) : (
-                    <div className="text-text-secondary text-[10px] italic">No route data</div>
+                    <div className="text-text-secondary text-[10px] italic">
+                        {isPlayerFaction ? 'No friendly route data' : 'No route data'}
+                    </div>
                 )}
             </section>
 
@@ -164,8 +173,8 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
                     Embargo Status
                 </h3>
                 <div className="text-[10px] text-text-secondary space-y-0.5">
-                    {state.embargoStatus ? (
-                        Object.entries(state.embargoStatus).sort(([a], [b]) => a.localeCompare(b)).map(([faction, status]) => (
+                    {embargoEntries.length > 0 ? (
+                        embargoEntries.sort(([a], [b]) => a.localeCompare(b)).map(([faction, status]) => (
                             <div key={faction} className="flex items-center gap-1">
                                 <span className={`w-[42px] ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>{getPlayerSafeMilitaryFactionName(faction)}</span>
                                 <span className="tabular-nums">
@@ -177,7 +186,7 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
                             </div>
                         ))
                     ) : (
-                        <span className="italic">No embargo data</span>
+                        <span className="italic">{isPlayerFaction ? 'No friendly embargo data' : 'No embargo data'}</span>
                     )}
                 </div>
             </section>

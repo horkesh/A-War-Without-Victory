@@ -5,6 +5,7 @@
  */
 import type { LoadedGameState } from '../data/types';
 import { FACTION_COLORS } from '../utils/theme';
+import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 
 const FACTIONS = ['RS', 'RBiH', 'HRHB'] as const;
 
@@ -42,6 +43,8 @@ function pressureClass(pressure: number): 'open' | 'strained' | 'cut' {
 export function SupplyPanel({ state }: SupplyPanelProps) {
   const reserves = state.factionReserves;
   const pressure = state.warPhaseSupplyPressure ?? {};
+  const playerFaction = state.player_faction;
+  const isPlayerFaction = playerFaction === 'RS' || playerFaction === 'RBiH' || playerFaction === 'HRHB';
 
   // Corridor summary: count factions by pressure class
   let open = 0, strained = 0, cut = 0;
@@ -61,15 +64,15 @@ export function SupplyPanel({ state }: SupplyPanelProps) {
         Logistics
       </div>
 
-      {/* Reserve bars per faction */}
+      {/* Reserve bars */}
       {reserves ? (
         <div className="space-y-2">
-          {FACTIONS.map((faction) => {
+          {(isPlayerFaction ? [playerFaction] : FACTIONS).map((faction) => {
             const r = reserves[faction];
             const color = FACTION_COLORS[faction] ?? 'text-text-primary';
             return (
               <div key={faction} className="space-y-0.5">
-                <span className={`text-[10px] font-semibold ${color}`}>{faction}</span>
+                <span className={`text-[10px] font-semibold ${color}`}>{getPlayerSafeMilitaryFactionName(faction, faction)}</span>
                 <ReserveBar label="Supply" value={r?.generalSupply ?? 0} color="text-text-secondary" />
                 <ReserveBar label="Ammo" value={r?.heavyMunitions ?? 0} color="text-text-secondary" />
               </div>

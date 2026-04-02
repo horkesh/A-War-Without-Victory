@@ -1583,3 +1583,8 @@ If a summary tab or war dashboard still says RBiH, RS, or similar shorthand, the
 
 If a bottom strip, menu item, or button is made player-safe but the dashboard or modal it opens still exposes exact enemy truth, the shell contract is still broken. Player-facing truth must hold across the entire interaction path, not just the first click.
 
+
+### Administrative panels can leak just as badly as battlefield panels
+
+Economy, supply, and reserve screens often get treated as harmless because they are not on the map. In a faction-play strategy game they are still player shells. If they show exact all-faction values by default, the product is still leaking debug truth under calmer styling.
+

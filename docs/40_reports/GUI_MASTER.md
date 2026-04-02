@@ -297,3 +297,9 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - In player mode it shows exact friendly values and aggregated hostile-held summaries rather than exact all-faction territory/casualty/reserve scoreboards.
 - See docs/40_reports/implemented/20260402_STRATEGIC_DASHBOARD_PLAYER_TRUTH.md.
 
+
+## 2026-04-02 - Economy and logistics player truth
+
+- SupplyPanel.tsx and EconomyPanel.tsx now scope mounted player-mode data to the player's side instead of showing exact all-faction logistics/reserve truth.
+- See docs/40_reports/implemented/20260402_ECONOMY_LOGISTICS_PLAYER_TRUTH.md.
+
