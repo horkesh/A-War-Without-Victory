@@ -329,4 +329,15 @@ describe('player visibility helpers', () => {
     expect(warSummarySource).toContain('const { playerFaction, areaPct, personnelByFaction, totalDisplaced, displacedByFaction } = data;');
     expect(warSummarySource).toContain('getPlayerSafeMilitaryFactionName');
   });
+
+  it('keeps the strategic dashboard player-safe when opened from the live bottom strip', () => {
+    const source = readFileSync(
+      new URL('../src/ui/map/components/StrategicDashboard.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(source).toContain('Enemy control remains aggregated here.');
+    expect(source).toContain('Hostile-held');
+    expect(source).toContain('Enemy losses remain part of staff reporting and records');
+  });
 });

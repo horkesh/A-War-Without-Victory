@@ -10,6 +10,7 @@ import React, { useMemo } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { FACTION_HEX_COLORS } from '../utils/theme';
 import osidAreasData from '../../../../data/derived/operational/osid_areas.json';
+import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 
 const osidAreas = osidAreasData as { total_area_km2: number; areas: Record<string, number> };
 
@@ -31,6 +32,11 @@ interface TerritoryDataPoint {
 export const StrategicDashboard = React.memo(function StrategicDashboard() {
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const setStrategicDashboardOpen = useGameStore((s) => s.setStrategicDashboardOpen);
+  const playerFaction = loadedGameState?.player_faction;
+  const isPlayerFaction = playerFaction === 'RS' || playerFaction === 'RBiH' || playerFaction === 'HRHB';
+  const playerMilitaryLabel = isPlayerFaction
+    ? getPlayerSafeMilitaryFactionName(playerFaction)
+    : null;
 
   // Build territory history from turn summaries
   const territoryHistory = useMemo<TerritoryDataPoint[]>(() => {
@@ -162,33 +168,73 @@ export const StrategicDashboard = React.memo(function StrategicDashboard() {
             <h3 className="text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-2">
               Current Territory Control (Area-Weighted)
             </h3>
-            <div className="flex items-center gap-4">
-              {FACTIONS.map((faction) => (
-                <div key={faction} className="flex items-center gap-2">
-                  <div
-                    className="w-3 h-3 rounded-sm"
-                    style={{ backgroundColor: FACTION_HEX_COLORS[faction] }}
-                  />
-                  <span className="text-xs font-mono text-text-primary">
-                    {FACTION_LABEL[faction]}: <span className="font-bold tabular-nums">{currentTerritory[faction].toFixed(1)}%</span>
-                  </span>
+            {isPlayerFaction ? (
+              <>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-3 h-3 rounded-sm"
+                      style={{ backgroundColor: FACTION_HEX_COLORS[playerFaction] }}
+                    />
+                    <span className="text-xs font-mono text-text-primary">
+                      {playerMilitaryLabel}: <span className="font-bold tabular-nums">{currentTerritory[playerFaction].toFixed(1)}%</span>
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-sm bg-white/20" />
+                    <span className="text-xs font-mono text-text-secondary">
+                      Hostile-held: <span className="font-bold tabular-nums">{(100 - currentTerritory[playerFaction]).toFixed(1)}%</span>
+                    </span>
+                  </div>
                 </div>
-              ))}
-            </div>
 
-            {/* Stacked bar */}
-            <div className="flex h-5 rounded-sm overflow-hidden border border-white/10 mt-2">
-              {FACTIONS.map((faction) => (
-                <div
-                  key={faction}
-                  className="h-full transition-all duration-500"
-                  style={{
-                    width: `${currentTerritory[faction]}%`,
-                    backgroundColor: FACTION_HEX_COLORS[faction],
-                  }}
-                />
-              ))}
-            </div>
+                <div className="flex h-5 rounded-sm overflow-hidden border border-white/10 mt-2">
+                  <div
+                    className="h-full transition-all duration-500"
+                    style={{
+                      width: `${currentTerritory[playerFaction]}%`,
+                      backgroundColor: FACTION_HEX_COLORS[playerFaction],
+                    }}
+                  />
+                  <div
+                    className="h-full transition-all duration-500 bg-white/10"
+                    style={{ width: `${Math.max(0, 100 - currentTerritory[playerFaction])}%` }}
+                  />
+                </div>
+                <div className="mt-2 text-[10px] text-text-secondary leading-snug">
+                  Enemy control remains aggregated here. Exact all-faction totals belong to staff/debug surfaces, not the live player dashboard.
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-4">
+                  {FACTIONS.map((faction) => (
+                    <div key={faction} className="flex items-center gap-2">
+                      <div
+                        className="w-3 h-3 rounded-sm"
+                        style={{ backgroundColor: FACTION_HEX_COLORS[faction] }}
+                      />
+                      <span className="text-xs font-mono text-text-primary">
+                        {FACTION_LABEL[faction]}: <span className="font-bold tabular-nums">{currentTerritory[faction].toFixed(1)}%</span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex h-5 rounded-sm overflow-hidden border border-white/10 mt-2">
+                  {FACTIONS.map((faction) => (
+                    <div
+                      key={faction}
+                      className="h-full transition-all duration-500"
+                      style={{
+                        width: `${currentTerritory[faction]}%`,
+                        backgroundColor: FACTION_HEX_COLORS[faction],
+                      }}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
           </div>
 
           {/* Territory over time */}
@@ -223,18 +269,37 @@ export const StrategicDashboard = React.memo(function StrategicDashboard() {
                   );
                 })}
 
-                {/* Stacked areas */}
-                {(['HRHB', 'RBiH', 'RS'] as const).map((faction) => (
+                {/* Trend layers */}
+                {isPlayerFaction ? (
                   <path
-                    key={faction}
-                    d={paths[faction] ?? ''}
-                    fill={FACTION_HEX_COLORS[faction]}
-                    fillOpacity={0.7}
-                    stroke={FACTION_HEX_COLORS[faction]}
-                    strokeWidth={0.5}
-                    strokeOpacity={0.9}
+                    d={territoryHistory
+                      .map((dp, index) => {
+                        const minTurn = territoryHistory[0].turn;
+                        const maxTurn = territoryHistory[territoryHistory.length - 1].turn;
+                        const turnRange = Math.max(maxTurn - minTurn, 1);
+                        const x = padding.left + ((dp.turn - minTurn) / turnRange) * plotWidth;
+                        const y = padding.top + plotHeight - (dp[playerFaction] / 100) * plotHeight;
+                        return `${index === 0 ? 'M' : 'L'}${x},${y}`;
+                      })
+                      .join(' ')}
+                    fill="none"
+                    stroke={FACTION_HEX_COLORS[playerFaction]}
+                    strokeWidth={2}
+                    strokeOpacity={0.95}
                   />
-                ))}
+                ) : (
+                  (['HRHB', 'RBiH', 'RS'] as const).map((faction) => (
+                    <path
+                      key={faction}
+                      d={paths[faction] ?? ''}
+                      fill={FACTION_HEX_COLORS[faction]}
+                      fillOpacity={0.7}
+                      stroke={FACTION_HEX_COLORS[faction]}
+                      strokeWidth={0.5}
+                      strokeOpacity={0.9}
+                    />
+                  ))
+                )}
 
                 {/* X-axis labels */}
                 {xLabels.map((l, i) => (
@@ -264,33 +329,56 @@ export const StrategicDashboard = React.memo(function StrategicDashboard() {
               <h3 className="text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-2">
                 Cumulative War Casualties
               </h3>
-              <div className="grid grid-cols-3 gap-3">
-                {FACTIONS.map((faction) => {
-                  const c = casualties[faction] ?? { kia: 0, battles: 0 };
-                  return (
+              {isPlayerFaction ? (
+                <div className="p-2.5 bg-black/15 rounded border border-white/5">
+                  <div className="flex items-center gap-1.5 mb-1">
                     <div
-                      key={faction}
-                      className="p-2.5 bg-black/15 rounded border border-white/5"
-                    >
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <div
-                          className="w-2 h-2 rounded-sm"
-                          style={{ backgroundColor: FACTION_HEX_COLORS[faction] }}
-                        />
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
-                          {FACTION_LABEL[faction]}
-                        </span>
+                      className="w-2 h-2 rounded-sm"
+                      style={{ backgroundColor: FACTION_HEX_COLORS[playerFaction] }}
+                    />
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+                      {playerMilitaryLabel}
+                    </span>
+                  </div>
+                  <div className="text-sm font-mono text-text-primary font-bold tabular-nums">
+                    {(casualties[playerFaction] ?? { kia: 0 }).kia.toLocaleString()}
+                  </div>
+                  <div className="text-[9px] text-text-muted font-mono">
+                    casualties across {(casualties[playerFaction] ?? { battles: 0 }).battles} engagements
+                  </div>
+                  <div className="mt-2 text-[10px] text-text-secondary leading-snug">
+                    Enemy losses remain part of staff reporting and records, not a live exact scoreboard here.
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-3">
+                  {FACTIONS.map((faction) => {
+                    const c = casualties[faction] ?? { kia: 0, battles: 0 };
+                    return (
+                      <div
+                        key={faction}
+                        className="p-2.5 bg-black/15 rounded border border-white/5"
+                      >
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <div
+                            className="w-2 h-2 rounded-sm"
+                            style={{ backgroundColor: FACTION_HEX_COLORS[faction] }}
+                          />
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+                            {FACTION_LABEL[faction]}
+                          </span>
+                        </div>
+                        <div className="text-sm font-mono text-text-primary font-bold tabular-nums">
+                          {c.kia.toLocaleString()}
+                        </div>
+                        <div className="text-[9px] text-text-muted font-mono">
+                          casualties across {c.battles} engagements
+                        </div>
                       </div>
-                      <div className="text-sm font-mono text-text-primary font-bold tabular-nums">
-                        {c.kia.toLocaleString()}
-                      </div>
-                      <div className="text-[9px] text-text-muted font-mono">
-                        casualties across {c.battles} engagements
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 
@@ -300,33 +388,53 @@ export const StrategicDashboard = React.memo(function StrategicDashboard() {
               <h3 className="text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-2">
                 Supply Reserves
               </h3>
-              <div className="grid grid-cols-3 gap-3">
-                {FACTIONS.map((faction) => {
-                  const reserves = (loadedGameState.factionReserves as Record<string, { general_supply_reserve?: number; heavy_munitions_reserve?: number } | undefined>)?.[faction];
-                  return (
+              {isPlayerFaction ? (
+                <div className="p-2.5 bg-black/15 rounded border border-white/5">
+                  <div className="flex items-center gap-1.5 mb-1">
                     <div
-                      key={faction}
-                      className="p-2.5 bg-black/15 rounded border border-white/5"
-                    >
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <div
-                          className="w-2 h-2 rounded-sm"
-                          style={{ backgroundColor: FACTION_HEX_COLORS[faction] }}
-                        />
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
-                          {FACTION_LABEL[faction]}
-                        </span>
+                      className="w-2 h-2 rounded-sm"
+                      style={{ backgroundColor: FACTION_HEX_COLORS[playerFaction] }}
+                    />
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+                      {playerMilitaryLabel}
+                    </span>
+                  </div>
+                  <div className="text-[11px] font-mono text-text-primary tabular-nums">
+                    General: {((loadedGameState.factionReserves as Record<string, { general_supply_reserve?: number } | undefined>)?.[playerFaction]?.general_supply_reserve ?? 0).toFixed(1)}
+                  </div>
+                  <div className="text-[11px] font-mono text-text-primary tabular-nums">
+                    Heavy: {((loadedGameState.factionReserves as Record<string, { heavy_munitions_reserve?: number } | undefined>)?.[playerFaction]?.heavy_munitions_reserve ?? 0).toFixed(1)}
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-3">
+                  {FACTIONS.map((faction) => {
+                    const reserves = (loadedGameState.factionReserves as Record<string, { general_supply_reserve?: number; heavy_munitions_reserve?: number } | undefined>)?.[faction];
+                    return (
+                      <div
+                        key={faction}
+                        className="p-2.5 bg-black/15 rounded border border-white/5"
+                      >
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <div
+                            className="w-2 h-2 rounded-sm"
+                            style={{ backgroundColor: FACTION_HEX_COLORS[faction] }}
+                          />
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+                            {FACTION_LABEL[faction]}
+                          </span>
+                        </div>
+                        <div className="text-[11px] font-mono text-text-primary tabular-nums">
+                          General: {reserves?.general_supply_reserve?.toFixed(1) ?? 'N/A'}
+                        </div>
+                        <div className="text-[11px] font-mono text-text-primary tabular-nums">
+                          Heavy: {reserves?.heavy_munitions_reserve?.toFixed(1) ?? 'N/A'}
+                        </div>
                       </div>
-                      <div className="text-[11px] font-mono text-text-primary tabular-nums">
-                        General: {reserves?.general_supply_reserve?.toFixed(1) ?? 'N/A'}
-                      </div>
-                      <div className="text-[11px] font-mono text-text-primary tabular-nums">
-                        Heavy: {reserves?.heavy_munitions_reserve?.toFixed(1) ?? 'N/A'}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
         </div>

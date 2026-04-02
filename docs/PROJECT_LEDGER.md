@@ -20968,3 +20968,18 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
   - docs/40_reports/implemented/20260402_SUMMARY_SHELL_PLAYER_SAFE_LABELS.md`r
   - docs/40_reports/GUI_MASTER.md`r
 
+
+## 2026-04-02 - Strategic dashboard player truth
+
+- Worktree/branch: F:\AWWV_exec_clean on codex/engine-health-wave1`r
+- Aligned StrategicDashboard.tsx with the live player-truth contract instead of letting it remain an all-faction scoreboard behind the safe bottom strip.
+- In player mode, the dashboard now shows exact friendly values and aggregated hostile-held summaries for territory, casualties, and reserves.
+- Added a regression guard in 	ests/ui_player_visibility.test.ts.
+- Verification:
+  - 
+ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_shell_navigation.test.ts`r
+  - powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`r
+- Docs:
+  - docs/40_reports/implemented/20260402_STRATEGIC_DASHBOARD_PLAYER_TRUTH.md`r
+  - docs/40_reports/GUI_MASTER.md`r
+

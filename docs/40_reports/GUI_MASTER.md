@@ -290,3 +290,10 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - WarSummaryContent.tsx now reads the canonical player faction from uildWarSummaryOverviewModel(...) and uses player-safe military faction names in the player header.
 - See docs/40_reports/implemented/20260402_SUMMARY_SHELL_PLAYER_SAFE_LABELS.md.
 
+
+## 2026-04-02 - Strategic dashboard player truth
+
+- StrategicDashboard.tsx now follows the same player-safe contract as the bottom status strip.
+- In player mode it shows exact friendly values and aggregated hostile-held summaries rather than exact all-faction territory/casualty/reserve scoreboards.
+- See docs/40_reports/implemented/20260402_STRATEGIC_DASHBOARD_PLAYER_TRUTH.md.
+

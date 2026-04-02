@@ -1578,3 +1578,8 @@ If a persistent shell strip shows exact all-faction territory or strength percen
 
 If a summary tab or war dashboard still says RBiH, RS, or similar shorthand, the live shell is still talking like an internal tool even if the deeper panels are clean. Treat summary surfaces as first-class player-language contracts and lock them into the existing player-visibility test suite.
 
+
+### A safe launcher does not make an unsafe destination acceptable
+
+If a bottom strip, menu item, or button is made player-safe but the dashboard or modal it opens still exposes exact enemy truth, the shell contract is still broken. Player-facing truth must hold across the entire interaction path, not just the first click.
+
