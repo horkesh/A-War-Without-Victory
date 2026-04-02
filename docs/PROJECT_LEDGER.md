@@ -69,6 +69,35 @@ Why this matters:
 - pushing the contract into shared visibility helpers is cheaper than re-fighting the same leak in every future dossier panel
 
 ---
+### 2026-04-02 — Engine health Wave 1 continued: Warroom enemy contacts now stay abstract
+
+Continued the clean-lane player-knowledge sweep in `F:\AWWV_exec_clean`, closing the next desktop-shell leak seam: Warroom reports and magazine panels were still printing exact enemy formation names because the extracted contact snapshot itself carried raw hostile identifiers.
+
+Implemented:
+- `src/ui/warroom/data/war_data_extractor.ts`
+  - `ContactedFormation` is now player-facing by construction: abstract label plus strength/location context, no raw enemy formation id or name
+  - hostile contact extraction now emits `Enemy contact` instead of exact enemy formation labels
+- `src/ui/warroom/components/ReportsModal.ts`
+  - enemy-contact report lines now render the abstract Warroom contact label
+- `src/ui/warroom/components/MagazineModal.ts`
+  - enemy-assessment rows now render the same abstract contact label
+- `tests/warroom_player_visibility.test.ts`
+  - new regressions proving the snapshot contract stays abstract and both Warroom report surfaces avoid raw enemy formation names
+- `vitest.config.ts`
+  - wired the new regression into the explicit Vitest whitelist and jsdom match list
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\warroom_player_visibility.test.ts tests\warroom_smoke.test.ts tests\ui_player_visibility.test.ts`
+  - PASS (`10` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- if the snapshot contract is omniscient, every polished Warroom panel has to “remember not to say too much,” which always regresses
+- abstracting enemy contacts at extraction time is cheaper and safer than patching each downstream Warroom panel separately
+- this keeps Warroom acting like a headquarters shell instead of a debug console with nice typography
+
+---
 
 ### 2026-04-02 â€” Engine health Wave 1 continued: local brigade fatigue now reaches commander planning
 

@@ -282,7 +282,7 @@ export class ReportsModal {
         } else {
             for (const cf of snap.contactedEnemyFormations) {
                 const contactLoc = cf.contactSettlement ?? 'unknown';
-                lines.push(`  ${cf.name} | Strength: ${cf.strengthCategory} | Last contact: ${contactLoc}`);
+                lines.push(`  ${cf.label} | Strength: ${cf.strengthCategory} | Last contact: ${contactLoc}`);
             }
         }
 

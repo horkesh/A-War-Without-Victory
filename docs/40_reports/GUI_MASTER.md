@@ -224,3 +224,7 @@ Formation, settlement, and front hover cards must obey the same player-truth con
 ### 16. Selected-settlement dossiers must filter timeline truth too
 
 Selection panels are not safer than tooltips just because they are bigger. If a selected-settlement dossier filters stationed units but still forwards omniscient operation history or brigade-movement logs into its timeline tab, the panel is still a cheat surface. Treat settlement detail as a single player-facing contract: overview, orders, sector context, movement timeline, and operation history all need the same faction-scoped filtering before they render.
+
+### 17. Warroom contact reporting must abstract hostile identities at the snapshot boundary
+
+Warroom reports and magazine panels should not rely on every downstream renderer remembering to hide raw enemy formation names. If the headquarters shell is player-facing, its extracted contact snapshot should already speak in abstractions like `Enemy contact`, plus strength and location context. The cheaper and safer rule is: fix the snapshot contract once, then let every Warroom surface consume the same player-safe contact model.

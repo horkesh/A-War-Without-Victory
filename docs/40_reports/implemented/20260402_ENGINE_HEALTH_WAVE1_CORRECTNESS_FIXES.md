@@ -729,3 +729,31 @@ Why this matters:
 - settlement detail panels are not “safer” just because they are selected rather than hovered; they are still player surfaces
 - partial filtering is dangerous because it makes one tab look honest while another tab quietly leaks enemy unit or operation truth
 - pushing the filters into shared visibility helpers is cheaper than doing another one-off anti-leak sweep later
+
+## Additional Wave 1 slice: Warroom enemy contacts now stay abstract
+
+This checkpoint closes the next player-facing leak seam in the desktop shell: Warroom report and magazine surfaces were still printing exact enemy formation names because the warroom snapshot contract itself carried raw enemy identifiers.
+
+Implemented:
+- `src/ui/warroom/data/war_data_extractor.ts`
+  - `ContactedFormation` is now player-facing by construction: abstract `label` plus strength/contact context, no raw enemy formation id or name
+  - contacted enemy extraction now emits `Enemy contact` instead of exact hostile formation labels
+- `src/ui/warroom/components/ReportsModal.ts`
+  - enemy-contact report lines now render the abstract Warroom contact label instead of raw hostile formation names
+- `src/ui/warroom/components/MagazineModal.ts`
+  - enemy assessment rows now render the same abstract contact label
+- `tests/warroom_player_visibility.test.ts`
+  - new regressions proving the snapshot contract stays abstract and both Warroom report surfaces avoid raw enemy formation names
+- `vitest.config.ts`
+  - wired the new Warroom visibility regression into the explicit Vitest whitelist and jsdom match list
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\warroom_player_visibility.test.ts tests\warroom_smoke.test.ts tests\ui_player_visibility.test.ts`
+  - PASS (`10` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- if the snapshot contract is omniscient, every polished Warroom panel has to “remember not to say too much,” which always regresses
+- abstracting enemy contacts at extraction time is cheaper and safer than patching each downstream Warroom panel separately
+- this keeps Warroom acting like a headquarters shell instead of a debug console with nice typography

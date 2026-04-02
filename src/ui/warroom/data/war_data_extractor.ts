@@ -104,8 +104,7 @@ export interface CorpsOperationSnapshot {
 }
 
 export interface ContactedFormation {
-    formationId: string;
-    name: string;
+    label: string;
     strengthCategory: string;
     contactSettlement: SettlementId | null;
     detectedTurn: number;
@@ -582,7 +581,7 @@ function extractContactedEnemies(state: GameState, pf: FactionId): ContactedForm
     const results: ContactedFormation[] = [];
 
     // Casualty ledger per-formation keys: enemy formations that took casualties = contacted
-    const existingIds = new Set(results.map(r => r.formationId));
+    const existingIds = new Set<string>();
     for (const enemyFaction of enemies) {
         const enemyLedger = state.military.casualty_ledger?.[enemyFaction];
         if (!enemyLedger?.per_formation) continue;
@@ -591,8 +590,7 @@ function extractContactedEnemies(state: GameState, pf: FactionId): ContactedForm
             const f = state.military.formations[fmtId];
             if (!f) continue;
             results.push({
-                formationId: fmtId,
-                name: f.name ?? fmtId,
+                label: 'Enemy contact',
                 strengthCategory: personnelToStrengthCategory(f.personnel ?? 1000),
                 contactSettlement: null,
                 detectedTurn: 0,
@@ -601,8 +599,8 @@ function extractContactedEnemies(state: GameState, pf: FactionId): ContactedForm
         }
     }
 
-    // Sort by settlement, then by formation ID
-    results.sort((a, b) => sc(a.contactSettlement ?? '', b.contactSettlement ?? '') || sc(a.formationId, b.formationId));
+    // Sort by settlement, then by abstract label
+    results.sort((a, b) => sc(a.contactSettlement ?? '', b.contactSettlement ?? '') || sc(a.label, b.label));
     return results;
 }
 

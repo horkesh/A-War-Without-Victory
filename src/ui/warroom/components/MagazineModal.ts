@@ -484,7 +484,7 @@ export class MagazineModal {
         for (const enemy of contacts) {
             const contactLocation = enemy.contactSettlement ?? 'unknown';
             section.appendChild(this.createStatRow(
-                enemy.name,
+                enemy.label,
                 `${enemy.strengthCategory} \u2014 ${contactLocation}`
             ));
         }

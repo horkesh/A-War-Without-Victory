@@ -1342,3 +1342,6 @@ Hover cards feel small, but players experience them as authoritative UI. Treat f
 
 ### Settlement timelines can re-leak omniscient truth even after the visible card looks clean
 Filtering stationed units and pending orders is not enough if the same selected-settlement panel still forwards raw operation history or brigade movement logs into its timeline tab. For dossier-style surfaces, protect every tab at the input boundary, not just the first screenful of content.
+
+### Warroom contact snapshots should be abstract before they hit the UI
+If `extractWarData()` hands Warroom exact enemy formation names or ids, every report or magazine renderer has to remember not to print them. Fix that once at the snapshot boundary: make hostile contacts player-facing by construction (`Enemy contact` + strength/location context), then let every downstream Warroom surface consume the same safe contract.
