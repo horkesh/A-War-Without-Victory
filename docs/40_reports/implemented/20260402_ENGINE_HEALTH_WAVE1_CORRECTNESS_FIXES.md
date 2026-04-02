@@ -1125,3 +1125,27 @@ Why this matters:
 - a retired command is still harmful if the desktop shell continues to advertise it as part of the live product contract
 - validation-only retirement is not enough; honest systems fail at the earliest boundary and stop pretending the command exists
 - this shrinks future Claude confusion because the repo now says the same thing in validation, IPC wiring, and runtime surface area
+
+## Additional Wave 1 slice: Army HQ reserve corps no longer trigger fake missing-sector alerts
+
+This checkpoint closes a misleading Army HQ false positive. The briefing generator was correctly telling us when a field corps had active brigades but no front sectors, but it was also flagging intentionally exempt reserve corps such as General Staff / Main Staff formations. That made the UI accuse the engine of being broken in a place where the design was actually working as intended.
+
+Implemented:
+- `src/ui/map/components/army_hq/generateBriefing.ts`
+  - extracted the pure briefing policy out of the React component so briefing rules can be tested without JSX/runtime coupling
+  - exempt reserve corps now skip the `has no front sectors assigned` critical alert via `isSectorAssignmentExemptCorpsId(...)`
+- `src/ui/map/components/army_hq/SituationBriefing.tsx`
+  - reduced to rendering-only wrapper around the pure briefing module
+- `tests/ui_map_render_smoke.test.ts`
+  - added regression coverage proving Army HQ briefing does not flag exempt reserve corps as missing sectors
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts`
+  - PASS (`13` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- false critical alerts are engine-health bugs too, because they teach players and future implementers the wrong invariant
+- reserve/army-HQ exceptions should be explicit policy, not accidental fallout from a UI component
+- extracting the generator makes future briefing-truth fixes cheaper and safer because they are no longer trapped inside TSX

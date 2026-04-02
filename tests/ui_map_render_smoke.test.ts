@@ -9,6 +9,7 @@ import { buildFogOfWarGeoJSON } from '../src/ui/map/map/builders/buildFogOfWarGe
 import { buildFormationsGeoJSON } from '../src/ui/map/map/builders/buildFormationsGeoJSON.js';
 import { buildOperationArrowsGeoJSON } from '../src/ui/map/map/builders/buildOperationArrowsGeoJSON.js';
 import { deriveUrbanTier } from '../src/ui/map/map/builders/urbanSettlementTiers.js';
+import { generateBriefing } from '../src/ui/map/components/army_hq/generateBriefing.js';
 import { generateThreatAssessment } from '../src/ui/map/components/army_hq/generateThreatAssessment.js';
 import {
   getAssignedCommandLabel,
@@ -351,5 +352,54 @@ describe('Tactical map render smoke', () => {
 
     expect(names.some((name) => name.includes('Own Op'))).toBe(true);
     expect(names.some((name) => name.includes('Enemy Op'))).toBe(false);
+  });
+
+  it('army hq briefing does not flag exempt reserve corps as missing sectors', () => {
+    const state = {
+      turn: 12,
+      formations: [
+        {
+          id: 'arbih_general_staff',
+          faction: 'RBiH',
+          name: 'General Staff ARBiH',
+          kind: 'corps',
+          status: 'active',
+          readiness: 'active',
+          cohesion: 80,
+          fatigue: 0,
+          createdTurn: 1,
+          tags: [],
+        },
+        {
+          id: 'arbih_guards_brigade',
+          faction: 'RBiH',
+          name: 'Guards Brigade',
+          kind: 'brigade',
+          status: 'active',
+          readiness: 'active',
+          cohesion: 80,
+          fatigue: 0,
+          createdTurn: 1,
+          tags: [],
+          corps_id: 'arbih_general_staff',
+          personnel: 1800,
+        },
+      ],
+      corpsFrontSectors: [],
+      operations: [],
+      pendingOfficerEvents: [],
+      pendingEventDecisions: [],
+      enclaveResilience: {},
+      warPhaseExhaustion: { RBiH: 0 },
+      factionReserves: { RBiH: { generalSupply: 100, heavyMunitions: 10 } },
+      latestTurnSummary: { battles: [] },
+      war_alliance_rbih_hrhb: 1,
+    } as unknown as LoadedGameState;
+
+    const items = generateBriefing(state, 'RBiH');
+    const rendered = items.map((item) => `${item.title} ${item.detail}`).join(' || ');
+
+    expect(rendered).not.toContain('General Staff ARBiH has no front sectors assigned');
+    expect(rendered).not.toContain('brigades without sector assignment');
   });
 });

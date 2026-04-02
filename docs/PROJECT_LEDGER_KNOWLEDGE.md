@@ -1405,3 +1405,7 @@ Players trust the small overview boxes as much as the big detail panels. If a su
 ### Validation-only retirement still leaves a fake command alive
 
 If validation rejects a command but preload, IPC clients, and the main process still advertise it, the repo is still teaching future work that the mechanic exists. In AWWV, a retired command is only honestly retired when the earliest desktop/UI boundary stops exporting it entirely.
+
+### Exempt reserve corps must not be judged by field-corps invariants
+
+Army-HQ reserve formations like General Staff / Main Staff brigades are intentionally allowed to exist without front sectors until they are loaned into field-corps command. If a player-facing alert blindly says every active brigade-bearing corps must have sectors, the UI becomes the liar. In AWWV, reserve-corps exceptions should live in pure briefing policy and be regression-tested there.
