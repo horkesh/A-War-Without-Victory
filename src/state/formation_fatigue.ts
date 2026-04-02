@@ -5,6 +5,7 @@ import { FATIGUE_MAX } from './formation_constants.js';
 import type { FactionId, FormationId, FormationState, GameState } from './game_state.js';
 import { getSettlementControlStatus } from './settlement_control.js';
 import { computeSupplyReachability } from './supply_reachability.js';
+import { buildFrontlineAssignedFormationSet } from '../sim/combat/front_assignment.js';
 
 import type { EdgeRecord } from '../map/settlements.js';
 import { getEdgeCapacityMultiplier } from '../sim/collapse/capacity_modifiers.js';
@@ -265,32 +266,6 @@ const FATIGUE_RECOVERY_INTERVAL = 2;
  *  faster from combat bonuses. */
 const FRONTLINE_FATIGUE_PER_TURN = 0.5;
 
-function buildFrontlineAssignedSet(state: GameState): Set<string> {
-    const assigned = new Set<string>();
-
-    const sectors = state.military.corps_front_sectors;
-    if (sectors && typeof sectors === 'object') {
-        for (const sector of Object.values(sectors)) {
-            if (!sector) continue;
-            for (const brigadeId of sector.assigned_brigade_ids ?? []) {
-                assigned.add(brigadeId);
-            }
-            for (const brigadeId of sector.reserve_brigade_ids ?? []) {
-                assigned.add(brigadeId);
-            }
-        }
-    }
-
-    const legacyAssignments = state.military.brigade_front_assignment;
-    if (legacyAssignments && typeof legacyAssignments === 'object') {
-        for (const [brigadeId, frontId] of Object.entries(legacyAssignments)) {
-            if (frontId) assigned.add(brigadeId);
-        }
-    }
-
-    return assigned;
-}
-
 /**
  * Apply per-turn fatigue recovery and frontline duty fatigue to all active formations.
  * Called once per turn from the war pipeline, regardless of combat activity.
@@ -308,7 +283,7 @@ export function applyFatigueRecovery(state: GameState, engagedFormationIds?: Set
     if (!formations) return;
     const currentTurn = state.meta?.turn ?? 0;
     const isRecoveryTurn = currentTurn % FATIGUE_RECOVERY_INTERVAL === 0;
-    const frontlineAssigned = buildFrontlineAssignedSet(state);
+    const frontlineAssigned = buildFrontlineAssignedFormationSet(state);
 
     for (const [fid, formation] of Object.entries(formations)) {
         if (!formation || formation.status !== 'active') continue;

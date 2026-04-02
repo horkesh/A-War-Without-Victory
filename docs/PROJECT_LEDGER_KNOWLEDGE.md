@@ -1444,3 +1444,7 @@ If preload exports a method, the React IPC contract mirrors it, and Electron han
 ### Sector truth and frontline fatigue must use the same assignment currency
 
 If sectors are the primary frontline organization model but fatigue still keys off legacy front assignment, the engine is silently using two different meanings of "on the line." In AWWV, frontline-duty fatigue should treat sector membership as primary truth and only fall back to `brigade_front_assignment` for compatibility while the deeper local-front lane is still being classified.
+
+### Shared frontline helpers and reports must follow the same sector-first contract as core mechanics
+
+Once sectors become the practical frontline authority, any shared helper like `isBrigadeAssignedToFront(...)` becomes a high-risk seam: battle resolution, posture gating, and reporting all inherit whatever lie it tells. In AWWV, the safe pattern is one shared helper that reads sectors first and legacy front assignment second, and then reuse that helper everywhere instead of letting each subsystem invent its own idea of "frontline."

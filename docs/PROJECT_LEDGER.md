@@ -19975,3 +19975,38 @@ Why this matters:
 - frontline fatigue is core engine truth, not just a cosmetic stat
 - if combat density and fatigue read different assignment currencies, the simulation quietly punishes or spares brigades based on the wrong layer
 - this keeps sectors as the primary frontline authority while preserving front assignment as a compatibility fallback until the deeper local-front lane is fully classified
+
+### 2026-04-02 - Engine health Wave 1 continued: frontline helper and reporting now follow sector truth
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, fixing the deeper shared helper and reporting seam after the frontline-fatigue alignment pass.
+
+Implemented:
+- `src/sim/combat/front_assignment.ts`
+  - added `buildFrontlineAssignedFormationSet(state)` as the shared frontline helper
+  - the helper now treats corps-front sectors (`assigned_brigade_ids` and `reserve_brigade_ids`) as the primary frontline authority
+  - legacy `brigade_front_assignment` remains as compatibility fallback
+  - `isBrigadeAssignedToFront(...)` now reads that unified set instead of the legacy assignment map alone
+- `src/state/formation_fatigue.ts`
+  - now reuses the shared frontline helper instead of maintaining a private duplicate
+- `src/scenario/scenario_end_report.ts`
+  - `computeArmyStrengthsSummary(...)` now counts frontline brigades from the unified sector-first helper rather than only from `brigade_front_assignment`
+- `tests/front_assignment.test.ts`
+  - added a regression proving sectors alone make a brigade count as frontline
+- `tests/scenario_end_report_army_strengths.test.ts`
+  - added a regression proving army-strength reporting counts sector frontline brigades first, with legacy fallback
+- `docs/40_reports/implemented/20260402_FRONTLINE_ASSIGNMENT_HELPER_ALIGNMENT.md`
+  - documented the helper/reporting contract cleanup
+
+Verification:
+- `node_modules\.bin\tsx.cmd --test tests\front_assignment.test.ts tests\formation_fatigue_frontline_assignment.test.ts tests\scenario_end_report_army_strengths.test.ts`
+  - PASS (`6` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Known unrelated verification state:
+- `npx.cmd tsc --noEmit -p tsconfig.json` still fails in this worktree due to pre-existing React/JSX typing/tooling problems under `src/ui/map/*`; this slice did not introduce those failures.
+
+Why this matters:
+- sectors had already become the practical frontline authority
+- but battle gating, posture gating, and end-of-run reporting were still capable of telling the old `brigade_front_assignment` story
+- this removes another half-alive legacy seam and keeps mechanics and reporting on the same sector-first contract

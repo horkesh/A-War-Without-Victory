@@ -3,7 +3,7 @@ import { test } from 'node:test';
 
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
-import { ensureBrigadeFrontAssignments, isBrigadeAssignedToFront } from '../src/sim/combat/front_assignment.js';
+import { buildFrontlineAssignedFormationSet, ensureBrigadeFrontAssignments, isBrigadeAssignedToFront } from '../src/sim/combat/front_assignment.js';
 
 function makeState(): GameState {
     return {
@@ -76,5 +76,29 @@ test('ensureBrigadeFrontAssignments repairs invalid assignments', () => {
     ensureBrigadeFrontAssignments(state);
     assert.strictEqual(state.military.brigade_front_assignment?.b1, 'RBiH__RS__S1__S2');
     assert.strictEqual(state.military.brigade_front_assignment?.b2, 'RBiH__RS__S1__S2');
+});
+
+test('isBrigadeAssignedToFront treats corps sectors as frontline truth without legacy front assignments', () => {
+    const state = makeState();
+    state.military.brigade_front_assignment = {};
+    state.military.corps_front_sectors = {
+        sector_1: {
+            sector_id: 'sector_1',
+            corps_id: 'arbih_3rd_corps',
+            assigned_brigade_ids: ['b1'],
+            reserve_brigade_ids: ['b2'],
+            edge_ids: ['S1__S2'],
+            length_edges: 1,
+            posture: 'balanced',
+            objective: 'hold_line',
+            pressure_target: 0.5,
+            last_updated_turn: 8,
+        },
+    } as any;
+
+    const assigned = buildFrontlineAssignedFormationSet(state);
+    assert.deepStrictEqual([...assigned].sort(), ['b1', 'b2']);
+    assert.ok(isBrigadeAssignedToFront(state, 'b1'));
+    assert.ok(isBrigadeAssignedToFront(state, 'b2'));
 });
 

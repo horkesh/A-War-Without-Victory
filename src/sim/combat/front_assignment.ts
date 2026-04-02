@@ -21,6 +21,32 @@ function activeBrigades(state: GameState): FormationState[] {
         );
 }
 
+export function buildFrontlineAssignedFormationSet(state: GameState): Set<FormationId> {
+    const assigned = new Set<FormationId>();
+
+    const sectors = state.military.corps_front_sectors;
+    if (sectors && typeof sectors === 'object') {
+        for (const sector of Object.values(sectors)) {
+            if (!sector) continue;
+            for (const brigadeId of sector.assigned_brigade_ids ?? []) {
+                assigned.add(brigadeId as FormationId);
+            }
+            for (const brigadeId of sector.reserve_brigade_ids ?? []) {
+                assigned.add(brigadeId as FormationId);
+            }
+        }
+    }
+
+    const assignmentMap = state.military.brigade_front_assignment;
+    if (assignmentMap && typeof assignmentMap === 'object') {
+        for (const [formationId, frontId] of Object.entries(assignmentMap)) {
+            if (frontId) assigned.add(formationId as FormationId);
+        }
+    }
+
+    return assigned;
+}
+
 export function hasValidFrontAssignment(state: GameState, formationId: FormationId): boolean {
     const segments = state.military.assignable_front_segments ?? [];
     // Backward-compatible behavior for legacy saves/tests before segment derivation exists.
@@ -35,7 +61,7 @@ export function hasValidFrontAssignment(state: GameState, formationId: Formation
 export function isBrigadeAssignedToFront(state: GameState, formationId: FormationId): boolean {
     const formation = state.military.formations?.[formationId];
     if (!formation || (formation.kind ?? 'brigade') !== 'brigade') return false;
-    return hasValidFrontAssignment(state, formationId);
+    return buildFrontlineAssignedFormationSet(state).has(formationId);
 }
 
 /**
