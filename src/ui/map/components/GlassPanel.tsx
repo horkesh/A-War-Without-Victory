@@ -62,7 +62,7 @@ export function GlassPanel({
                     style={{ width, maxHeight: '80vh' }}
                 >
                     <PanelHeader title={title} onClose={onClose} />
-                    <div className="overflow-y-auto p-4" style={{ maxHeight: 'calc(80vh - 48px)' }}>
+                    <div className="overflow-y-auto p-3" style={{ maxHeight: 'calc(80vh - 44px)' }}>
                         {children}
                     </div>
                 </div>
@@ -78,7 +78,7 @@ export function GlassPanel({
                 style={{ zIndex, maxHeight: '40vh' }}
             >
                 <PanelHeader title={title} onClose={onClose} />
-                <div className="overflow-y-auto p-4" style={{ maxHeight: 'calc(40vh - 48px)' }}>
+                <div className="overflow-y-auto p-3" style={{ maxHeight: 'calc(40vh - 44px)' }}>
                     {children}
                 </div>
             </div>
@@ -93,7 +93,7 @@ export function GlassPanel({
             style={{ zIndex, width }}
         >
             <PanelHeader title={title} onClose={onClose} />
-            <div className="overflow-y-auto p-4" style={{ height: 'calc(100% - 48px)' }}>
+            <div className="overflow-y-auto p-3" style={{ height: 'calc(100% - 44px)' }}>
                 {children}
             </div>
         </div>
@@ -102,9 +102,9 @@ export function GlassPanel({
 
 function PanelHeader({ title, onClose }: { title: string; onClose?: () => void }) {
     return (
-        <div className="flex items-center justify-between px-4 py-3 border-b border-[rgba(180,160,130,0.15)]">
+        <div className="flex items-center justify-between px-3 py-2 border-b border-[rgba(180,160,130,0.15)]">
             <h2
-                className="text-accent-gold uppercase tracking-[0.3em] text-sm font-black"
+                className="text-accent-gold uppercase tracking-[0.24em] text-[13px] font-black"
                 style={{ textShadow: '0 0 8px rgba(196,163,90,0.3)' }}
             >
                 {title}

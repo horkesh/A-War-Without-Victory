@@ -161,9 +161,9 @@ export function ArmyHQModal() {
 
             <div className="relative flex-1 flex flex-col h-full overflow-hidden bg-panel-bg text-text-primary">
 
-                <div className="flex items-center justify-between px-6 py-2.5 shrink-0 border-b border-panel-border bg-panel-card">
+                <div className="flex items-center justify-between px-5 py-2 shrink-0 border-b border-panel-border bg-panel-card">
                     {/* Left: back/close + crest + title */}
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
                         <button
                             type="button"
                             onClick={() => {
@@ -173,12 +173,12 @@ export function ArmyHQModal() {
                                     setOpen(false);
                                 }
                             }}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-text-secondary border border-panel-border rounded-md hover:bg-panel-hover hover:text-text-primary transition-colors"
+                            className="flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-text-secondary border border-panel-border rounded-md hover:bg-panel-hover hover:text-text-primary transition-colors"
                         >
                             {expandedCorpsId ? '← BACK' : '← MAP'}
                         </button>
                         {crestSrc && (
-                            <img src={crestSrc} alt="" className="w-10 h-10 object-contain opacity-80" draggable={false} />
+                            <img src={crestSrc} alt="" className="w-9 h-9 object-contain opacity-80" draggable={false} />
                         )}
                         <div>
                             <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold">
@@ -197,7 +197,7 @@ export function ArmyHQModal() {
                     </div>
 
                     {/* Right: emergency posture + situation + close */}
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
                         {!expandedCorpsId && ipc.isAvailable && (
                             <select
                                 defaultValue=""
@@ -207,7 +207,7 @@ export function ArmyHQModal() {
                                         e.target.value = '';
                                     }
                                 }}
-                                className="text-[10px] font-bold uppercase bg-panel-bg text-amber-400 border border-amber-400/50 rounded-md px-3 py-1.5 cursor-pointer focus:outline-none focus:border-amber-400 hover:bg-amber-400/10 transition-colors"
+                                className="text-[10px] font-bold uppercase bg-panel-bg text-amber-400 border border-amber-400/50 rounded-md px-2.5 py-1 cursor-pointer focus:outline-none focus:border-amber-400 hover:bg-amber-400/10 transition-colors"
                             >
                                 <option value="" disabled>EMERGENCY POSTURE</option>
                                 <option value="defensive">ALL DEFENSIVE</option>
@@ -234,13 +234,13 @@ export function ArmyHQModal() {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-0.5 px-6 py-1.5 bg-panel-bg border-b border-panel-border shrink-0">
+                <div className="flex items-center gap-0.5 px-5 py-1 bg-panel-bg border-b border-panel-border shrink-0">
                     {HQ_TABS.map(({ id, label }) => (
                         <button
                             key={id}
                             type="button"
                             onClick={() => setActiveTab(id)}
-                            className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] rounded-md transition-all ${
+                            className={`px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] rounded-md transition-all ${
                                 activeTab === id
                                     ? 'bg-amber-400/15 text-amber-400 border border-amber-400/30'
                                     : 'text-text-secondary hover:text-text-primary hover:bg-white/5 border border-transparent'
@@ -251,14 +251,14 @@ export function ArmyHQModal() {
                     ))}
                 </div>
 
-                <div className="relative flex-1 overflow-y-auto px-6 pt-4 pb-6">
+                <div className="relative flex-1 overflow-y-auto px-5 pt-3 pb-5">
 
                     {/* ═══ BRIEFING TAB ═══ */}
                     {activeTab === 'briefing' && (
                         <>
                             {/* Top section: Commander | CoS Brief | Crest | Strategic Position */}
                             {!expandedCorpsId && (
-                                <div className="grid grid-cols-1 gap-3 mb-4 items-start lg:grid-cols-12 lg:gap-4">
+                                <div className="grid grid-cols-1 gap-2.5 mb-3 items-start lg:grid-cols-12 lg:gap-3">
                                     {/* Commander */}
                                     <div className="bg-panel-card border border-panel-border rounded-lg p-3 lg:col-span-3">
                                         <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-2 pb-1.5 border-b border-panel-border">
@@ -271,7 +271,7 @@ export function ArmyHQModal() {
                                                 No commander data available
                                             </div>
                                         )}
-                                        <div className="mt-2 grid grid-cols-3 gap-1.5">
+                                        <div className="mt-2 grid grid-cols-3 gap-1">
                                             <div className="rounded border border-panel-border bg-panel-bg px-1.5 py-1">
                                                 <div className="text-[8px] uppercase tracking-wide text-text-secondary">Critical</div>
                                                 <div className="text-[11px] font-bold text-red-400">
@@ -351,7 +351,7 @@ export function ArmyHQModal() {
                                     ALL CORPS ({data.corpsFormations.length})
                                 </div>
 
-                                <div className={`grid gap-3 ${expandedCorpsId
+                                <div className={`grid gap-2.5 ${expandedCorpsId
                                     ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6'
                                     : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5'
                                 }`}>

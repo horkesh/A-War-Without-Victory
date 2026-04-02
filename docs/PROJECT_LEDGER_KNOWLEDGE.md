@@ -1484,3 +1484,6 @@ If pending personnel/replacement events are derived in an adapter and that adapt
 ### Tactical-map shells should default to command density, not roomy dashboard spacing
 
 In AWWV, once the shell is truthful, the next quality jump is usually density: toolbar chrome, detail panels, and operation cards should behave like a command console, not a generic spacious web app. Compact spacing is not just cosmetic; it determines how much command context the player can hold on screen at once.
+### Shared panel primitives are spacing authority surfaces
+
+If a common shell primitive like `GlassPanel` is roomy by default, every downstream overlay inherits that waste even when the individual panel code is otherwise disciplined. In AWWV, density work should start at the shell primitives and the structural rails (`OOBSidebar`, Army HQ, Codex), not only at the leaf cards.

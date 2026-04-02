@@ -20286,3 +20286,29 @@ Why this matters:
 - once the shell is truthful, the next studio-quality problem is usually density, not correctness
 - strategy games benefit from compact clarity; oversized cards and roomy chrome waste attention and screen space
 - this slice shifts the primary tactical shell toward a more command-console feel without changing information ownership
+### 2026-04-02 - Tactical shell density pass 2
+
+Continued the density/whitespace cleanup in `F:\AWWV_exec_clean`, moving from the tactical detail panels into the structural shells that set spacing conventions for the rest of the product.
+
+Implemented:
+- `src/ui/map/components/OOBSidebar.tsx`
+  - narrowed the rail slightly and reduced section padding / faction-divider footprint
+- `src/ui/map/components/army_hq/ArmyHQModal.tsx`
+  - compacted header, tab row, top briefing grid, and corps-grid gaps
+- `src/ui/map/components/CodexPanel.tsx`
+  - tightened shell width, sidebar row padding, content padding, and paper-view spacing
+- `src/ui/map/components/GlassPanel.tsx`
+  - reduced shared panel header/content padding so downstream overlays inherit a denser layout baseline
+- `docs/40_reports/implemented/20260402_TACTICAL_SHELL_DENSITY_PASS_2.md`
+  - documented this second density slice
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`26` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- shell density is set by the structural components, not just the detail cards
+- `GlassPanel` is especially important because it propagates spacing habits across many overlays
+- this slice makes the command shell feel more deliberate and less like a padded generic dashboard

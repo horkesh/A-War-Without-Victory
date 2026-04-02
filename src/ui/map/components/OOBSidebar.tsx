@@ -219,10 +219,10 @@ export function OOBSidebar() {
   if (!loadedGameState) {
     return (
       <div
-        className="absolute left-0 bottom-9 z-10 w-72 flex flex-col bg-panel-bg/95 backdrop-blur-sm border-r border-panel-border overflow-hidden"
+        className="absolute left-0 bottom-9 z-10 w-[17rem] flex flex-col bg-panel-bg/95 backdrop-blur-sm border-r border-panel-border overflow-hidden"
         style={{ direction: 'ltr', top: 'var(--awwv-toolbar-clearance, 7.5rem)' }}
       >
-        <div className="px-3 py-3 font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold border-b border-panel-border glow-text">
+        <div className="px-3 py-2 font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold border-b border-panel-border glow-text">
           Command
         </div>
         <div className="p-3 text-xs text-text-secondary italic">Load a save to see army and situation views.</div>
@@ -232,7 +232,7 @@ export function OOBSidebar() {
 
   return (
     <div
-      className="absolute left-0 bottom-9 z-10 w-72 flex flex-col bg-panel-bg/95 backdrop-blur-sm border-r border-panel-border overflow-hidden"
+        className="absolute left-0 bottom-9 z-10 w-[17rem] flex flex-col bg-panel-bg/95 backdrop-blur-sm border-r border-panel-border overflow-hidden"
       style={{ direction: 'ltr', top: 'var(--awwv-toolbar-clearance, 7.5rem)' }}
     >
       {/* Overlay — explicitly absolute to avoid flex-item space consumption */}
@@ -241,7 +241,7 @@ export function OOBSidebar() {
         style={{ position: 'absolute' }}
       ></div>
 
-      <div className="px-3 py-2 font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold border-b border-panel-border shrink-0 relative z-10 glow-text">
+      <div className="px-3 py-1.5 font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold border-b border-panel-border shrink-0 relative z-10 glow-text">
         Command
       </div>
 
@@ -271,7 +271,7 @@ export function OOBSidebar() {
             onToggle={() => toggleSection('army')}
           />
           {expandedSections.army && (
-            <div className="p-3 space-y-3">
+            <div className="p-2.5 space-y-2.5">
               {!armyByFaction || armyByFaction.size === 0 ? (
                 <div className="text-xs text-text-secondary italic">No formations.</div>
               ) : (
@@ -308,7 +308,7 @@ export function OOBSidebar() {
                       {factionIndex > 0 && (
                         <div className="h-px bg-panel-border mt-2 mb-1" />
                       )}
-                      <div className={`flex items-center justify-center gap-2.5 py-2 -mx-3 px-3 border-y ${FACTION_DIVIDER_BORDER[faction] ?? 'border-panel-border'} ${FACTION_DIVIDER_BG[faction] ?? 'bg-panel-card'}`}>
+                      <div className={`flex items-center justify-center gap-2 py-1.5 -mx-2.5 px-2.5 border-y ${FACTION_DIVIDER_BORDER[faction] ?? 'border-panel-border'} ${FACTION_DIVIDER_BG[faction] ?? 'bg-panel-card'}`}>
                         {getArmyCrest(faction) && (
                           <img src={getArmyCrest(faction)} alt="" className="w-4 h-4 object-contain opacity-70" />
                         )}
@@ -457,14 +457,14 @@ export function OOBSidebar() {
             onToggle={() => toggleSection('mobilization')}
           />
           {expandedSections.mobilization && (
-            <div className="p-3 space-y-2 text-xs">
+            <div className="p-2.5 space-y-1.5 text-xs">
               {!mobilizationSummary ? (
                 <div className="text-text-secondary italic px-1">No mobilization data.</div>
               ) : (
                 FACTION_ORDER.filter((faction) => faction === playerFaction && Boolean(mobilizationSummary[faction])).map((faction) => {
                   const summary = mobilizationSummary[faction]!;
                   return (
-                    <div key={faction} className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
+                    <div key={faction} className="rounded border border-panel-border bg-panel-card p-1.5 space-y-1">
                       <div className={`font-mono text-[11px] font-medium ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>
                         {faction}
                       </div>
@@ -507,7 +507,7 @@ export function OOBSidebar() {
             onToggle={() => toggleSection('operations')}
           />
           {expandedSections.operations && (
-            <div className="p-3 space-y-2 text-xs">
+            <div className="p-2.5 space-y-1.5 text-xs">
               {!operationsByFaction ? (
                 <div className="text-text-secondary italic px-1">No active operations.</div>
               ) : (
