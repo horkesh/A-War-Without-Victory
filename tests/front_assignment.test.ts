@@ -3,7 +3,7 @@ import { test } from 'node:test';
 
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
-import { buildFrontlineAssignedFormationSet, ensureBrigadeFrontAssignments, isBrigadeAssignedToFront } from '../src/sim/combat/front_assignment.js';
+import { buildFrontlineAssignedFormationSet, ensureBrigadeFrontAssignments, hasLiveSectorFrontlineTruth, isBrigadeAssignedToFront } from '../src/sim/combat/front_assignment.js';
 
 function makeState(): GameState {
     return {
@@ -173,5 +173,27 @@ test('legacy frontline fallback ignores invalid segments and inactive formations
     assert.deepStrictEqual([...assigned].sort(), ['b1']);
     assert.equal(isBrigadeAssignedToFront(state, 'b2'), false);
     assert.equal(isBrigadeAssignedToFront(state, 'b3'), false);
+});
+
+test('hasLiveSectorFrontlineTruth only reports true when sector state actually exists', () => {
+    const state = makeState();
+    assert.equal(hasLiveSectorFrontlineTruth(state), false);
+
+    state.military.corps_front_sectors = {
+        sector_1: {
+            sector_id: 'sector_1',
+            corps_id: 'arbih_3rd_corps',
+            assigned_brigade_ids: [],
+            reserve_brigade_ids: [],
+            edge_ids: ['S1__S2'],
+            length_edges: 1,
+            posture: 'balanced',
+            objective: 'hold_line',
+            pressure_target: 0.5,
+            last_updated_turn: 8,
+        },
+    } as any;
+
+    assert.equal(hasLiveSectorFrontlineTruth(state), true);
 });
 

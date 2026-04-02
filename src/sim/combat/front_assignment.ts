@@ -25,12 +25,10 @@ export function buildFrontlineAssignedFormationSet(state: GameState): Set<Format
     const assigned = new Set<FormationId>();
     const formations = state.military.formations ?? {};
 
-    const sectors = state.military.corps_front_sectors;
-    if (sectors && typeof sectors === 'object') {
-        let sawSector = false;
+    if (hasLiveSectorFrontlineTruth(state)) {
+        const sectors = state.military.corps_front_sectors ?? {};
         for (const sector of Object.values(sectors)) {
             if (!sector) continue;
-            sawSector = true;
             for (const brigadeId of sector.assigned_brigade_ids ?? []) {
                 assigned.add(brigadeId as FormationId);
             }
@@ -38,7 +36,7 @@ export function buildFrontlineAssignedFormationSet(state: GameState): Set<Format
                 assigned.add(brigadeId as FormationId);
             }
         }
-        if (sawSector) return assigned;
+        return assigned;
     }
 
     const assignmentMap = state.military.brigade_front_assignment;
@@ -54,6 +52,12 @@ export function buildFrontlineAssignedFormationSet(state: GameState): Set<Format
     }
 
     return assigned;
+}
+
+export function hasLiveSectorFrontlineTruth(state: GameState): boolean {
+    const sectors = state.military.corps_front_sectors;
+    if (!sectors || typeof sectors !== 'object') return false;
+    return Object.values(sectors).some((sector) => sector != null);
 }
 
 export function hasValidFrontAssignment(state: GameState, formationId: FormationId): boolean {

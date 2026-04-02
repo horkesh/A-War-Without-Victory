@@ -20526,3 +20526,28 @@ Why this matters:
 - the engine no longer needs a second ritual repair pass just to keep fallback state from lying
 - stale legacy front IDs are now compatibility baggage instead of accidental frontline authority
 - this further narrows the old front-assignment lane without breaking first-turn compatibility for saves that still need it
+### 2026-04-02 - Legacy front-assignment phase narrowing
+
+Narrowed the explicit `ensure-brigade-front-assignment` war phase so it only runs when sector-based frontline truth is absent.
+
+Implemented:
+- `src/sim/combat/front_assignment.ts`
+  - added `hasLiveSectorFrontlineTruth(state)` so the engine can tell whether sector truth already exists
+  - `buildFrontlineAssignedFormationSet(...)` now uses the same gate for clearer authority flow
+- `src/sim/turn_phases/war_phases.ts`
+  - `ensure-brigade-front-assignment` now exits early when `corps_front_sectors` already exist
+- `tests/front_assignment.test.ts`
+  - added coverage for the new sector-truth gate
+- `docs/40_reports/implemented/20260402_LEGACY_FRONT_ASSIGNMENT_PHASE_NARROWING.md`
+  - documented the slice
+
+Verification:
+- `node_modules\.bin\tsx.cmd --test tests\front_assignment.test.ts tests\local_front_density_modifier_precedence.test.ts tests\formation_fatigue_frontline_assignment.test.ts`
+  - PASS (`10` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- the compatibility repair path now behaves like a fallback instead of a mandatory war-turn ritual
+- sectors keep their place as the real frontline authority once they exist
+- the repo becomes less likely to fool future agents into treating legacy front assignment as still co-equal with sectors

@@ -1511,3 +1511,6 @@ In AWWV, `local_fronts` survived as a rebuilt runtime object long after sectors 
 ### Legacy fallback helpers should validate their own inputs instead of demanding ritual repair passes
 
 In AWWV, `brigade_front_assignment` survived only as a compatibility lane, but `buildFrontlineAssignedFormationSet(...)` still trusted any non-null legacy entry. That forced the engine to keep running repair passes just to stop stale front IDs and dead formations from polluting frontline truth. A compatibility fallback is healthier when the helper itself ignores invalid segments and inactive formations, so the repo stops preserving old state merely to keep old assumptions comfortable.
+### Compatibility phases should stop running once modern authority already exists
+
+In AWWV, once `corps_front_sectors` already exist, rerunning `ensureBrigadeFrontAssignments(...)` every war turn only keeps the legacy front-assignment lane warm. A good migration rule is: if the new authority is already present, compatibility repair should stand down and only wake up for true absence or old-save recovery.
