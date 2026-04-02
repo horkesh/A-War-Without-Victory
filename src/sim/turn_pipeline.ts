@@ -1,5 +1,7 @@
 /**
  * Turn pipeline orchestrator.
+ * Canonical war-phase turn entrypoint for live simulation, scenario runs, and desktop play.
+ * If you are changing war behavior, start here rather than the prototype/minimal harnesses.
  * Assembles war-phase and early-war steps, runs them in sequence via runTurn().
  * Step implementations live in turn_phases/war_phases.ts and turn_phases/early_war_phases.ts.
  * Types, context helpers, and caches live in turn_pipeline_types.ts.

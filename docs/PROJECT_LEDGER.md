@@ -20703,3 +20703,26 @@ Verification:
 Why this matters:
 - a weak root teaches weak repo habits
 - archiving stale trace dumps and replacing a placeholder README with a real entry guide makes the repository feel owned instead of accidental
+### 2026-04-02 - Entrypoint authority comment hardening
+
+Added explicit authority comments to the main pipeline files so the correct runtime lane is obvious at the code surface, not only in docs.
+
+Implemented:
+- `src/sim/turn_pipeline.ts`
+  - now declares itself the canonical war-phase entrypoint
+- `src/state/turn_pipeline.ts`
+  - now declares itself the canonical non-war/state-pipeline authority
+- `src/turn/pipeline.ts`
+  - now declares itself a legacy/minimal harness
+- `src/index.ts`
+  - now declares itself a smoke entrypoint
+- `docs/40_reports/implemented/20260402_ENTRYPOINT_AUTHORITY_COMMENT_HARDENING.md`
+  - documented the slice
+
+Verification:
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- entrypoint authority should be visible where changes begin, not only in the surrounding documentation
+- this reduces the chance of future Claude or human work landing in the wrong turn-pipeline lane

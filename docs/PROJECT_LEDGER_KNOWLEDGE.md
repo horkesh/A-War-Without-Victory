@@ -1532,3 +1532,6 @@ In AWWV, the dangerous architecture docs are not necessarily the oldest ones. Th
 ### Repo root is a product surface too
 
 In AWWV, the repository root teaches every new human and agent how seriously the project is curated. A placeholder README and stray trace dumps signal accidental ownership. A strong root should point cleanly at the live authorities and archive session residue instead of letting it masquerade as current truth.
+### Ownership comments belong in the code, not only in engineering docs
+
+In AWWV, if a file is an old harness, a smoke path, or a compatibility entrypoint, the warning should live in the file header itself. Otherwise the repo depends on implementers remembering external docs while staring at code that still looks live.

@@ -1,3 +1,11 @@
+/**
+ * Legacy/minimal pipeline harness.
+ *
+ * This file is useful for smoke tests and older prototype flows, but it is not
+ * the canonical war-phase runtime. Live war behavior belongs in
+ * `src/sim/turn_pipeline.ts`.
+ */
+
 import { cloneGameState } from '../state/clone.js';
 import { GameState } from '../state/game_state.js';
 import { defaultSteps } from './steps.js';
