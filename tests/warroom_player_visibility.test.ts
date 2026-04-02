@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { extractWarData } from '../src/ui/warroom/data/war_data_extractor.js';
 import { ReportsModal } from '../src/ui/warroom/components/ReportsModal.js';
 import { MagazineModal } from '../src/ui/warroom/components/MagazineModal.js';
+import { CommandBriefingModal } from '../src/ui/warroom/components/CommandBriefingModal.js';
 import type { GameState } from '../src/state/game_state.js';
 
 describe('warroom player visibility', () => {
@@ -178,5 +179,93 @@ describe('warroom player visibility', () => {
     expect(snap.ownForces.formationDetails.find((f) => f.id === 'arbih_3rd_corps')?.name).toBe('3rd Corps');
     expect(snap.ownForces.formationDetails.find((f) => f.id === 'arbih_b1')?.name).toBe('Assigned brigade');
     expect(snap.ownCorpsOps[0]?.corpsName).toBe('3rd Corps');
+  });
+
+  it('warroom command briefing uses derived command-shell warnings instead of hardcoded certainty', () => {
+    const state = {
+      meta: { turn: 9, phase: 'war' },
+      factions: [
+        { id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
+        { id: 'RS', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
+      ],
+      military: {
+        formations: {
+          own_1: { faction: 'RBiH', kind: 'brigade', status: 'active', personnel: 900, posture: 'routed', name: 'Own Brigade' },
+        },
+        casualty_ledger: {},
+        front_edges: [
+          { edge_id: 'edge_1', settlement_a: 'op:sarajevo:centar', settlement_b: 'op:grbavica:south', side_a: 'RBiH', side_b: 'RS', pressure: 0.7, friction: 0.3, tier: 'exposed' },
+        ],
+        front_pressure: {},
+        front_segments: {},
+        militia_garrison: {},
+        brigade_movement_state: {},
+        brigade_encircled: { own_1: true },
+        corps_command: {
+          arbih_3rd_corps: { stance: 'balanced', active_operations: [{ type: 'sector_attack', phase: 'preparing', started_turn: 8 }] },
+        },
+      },
+      political: {
+        political_controllers: {},
+        war_exhaustion: { RBiH: 0.2 },
+        loss_of_control_trends: { by_faction: { RBiH: { exhaustion_trend: 'flat' } } },
+      },
+      displacement: {
+        displacement_state: {},
+        displacement_camp_state: { camp_a: {} },
+        hostile_takeover_timers: { pocket_1: {} },
+        civilian_casualties: {},
+        sustainability_state: { sarajevo: { mun_id: 'sarajevo', collapsed: false, sustainability_score: 25 } },
+      },
+    } as unknown as GameState;
+
+    const panel = new CommandBriefingModal(state).render();
+    const text = panel.textContent ?? '';
+
+    expect(text).toContain('brigade routed in recent fighting');
+    expect(text).toContain('front edge');
+    expect(text).toContain('hostile population-pressure timer');
+    expect(text).not.toContain('UNHCR humanitarian convoys are moving with minimal disruption.');
+    expect(text).not.toContain('No critical enclaves nearing collapse this week.');
+  });
+
+  it('warroom reports use generic player-safe authorship instead of fake specific headquarters', () => {
+    const state = {
+      meta: { turn: 9, phase: 'war' },
+      factions: [
+        { id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
+        { id: 'RS', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
+      ],
+      military: {
+        formations: {},
+        casualty_ledger: {},
+        front_edges: [],
+        front_pressure: {},
+        front_segments: {},
+        militia_garrison: {},
+        brigade_movement_state: {},
+        brigade_encircled: {},
+        corps_command: {},
+      },
+      political: {
+        political_controllers: {},
+        war_exhaustion: { RBiH: 0.2 },
+        loss_of_control_trends: { by_faction: { RBiH: { exhaustion_trend: 'flat' } } },
+      },
+      displacement: {
+        displacement_state: {},
+        displacement_camp_state: {},
+        hostile_takeover_timers: {},
+        civilian_casualties: {},
+        sustainability_state: {},
+      },
+    } as unknown as GameState;
+
+    const panel = new ReportsModal(state).render();
+    const text = panel.textContent ?? '';
+
+    expect(text).toContain('Field Intelligence Summary Desk');
+    expect(text).toContain('Duty Intelligence Officer');
+    expect(text).not.toContain('2nd Corps Intelligence Section');
   });
 });

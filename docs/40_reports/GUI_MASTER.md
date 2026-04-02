@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-03-27
+**Updated:** 2026-04-02
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 
@@ -47,6 +47,7 @@
 
 | Date | Change | Report / spec |
 |------|--------|----------------|
+| 2026-04-02 | **Warroom command shell truth + density pass** â€” Warroom reports and command briefing no longer pretend to know more than the extracted player-facing snapshot, report authorship is generic/player-safe instead of fake-specific, help text reflects current anchors, and Warroom modal chrome was tightened to better match the tactical shell. | [implemented/20260402_WARROOM_COMMAND_SHELL_TRUTH_AND_DENSITY_PASS.md](implemented/20260402_WARROOM_COMMAND_SHELL_TRUTH_AND_DENSITY_PASS.md), [WARROOM_MASTER.md](WARROOM_MASTER.md) |
 | 2026-04-01 | **Dev-map browser-safe import recovery** — Recovered `npm run dev:map` after Node-only `fs/path` imports leaked into the tactical-map browser graph through shared combat/terrain helpers. Split Node loaders into `terrain_scalars_node.ts` and `combat_terrain_sets_node.ts`, restored browser-safe shared helpers, and added a bundle regression test. | [implemented/20260401_DEV_MAP_BROWSER_SAFE_IMPORT_RECOVERY.md](implemented/20260401_DEV_MAP_BROWSER_SAFE_IMPORT_RECOVERY.md) |
 | 2026-03-27 | **Command sidebar layout knowledge** — Documented why the left Command rail sits far below the Presidential bar (shared `--awwv-toolbar-clearance` vs. centered crest), corps list spacing (`space-y-3`, `CorpsCard`/`FlipCard`), why prior blank-space audits missed it, and options (split CSS vars, tighter list, z-index). | [implemented/20260327_COMMAND_SIDEBAR_LAYOUT_KNOWLEDGE.md](implemented/20260327_COMMAND_SIDEBAR_LAYOUT_KNOWLEDGE.md) |
 | 2026-03-27 | **Production `dist/tactical-map` live verification** — After `desktop:map:build`, static-served bundle with `?live=1`: no DEV badge or dev strip; screenshot + accessibility pass. Map data may not load without Vite `/data` middleware (check scope: dev chrome only). | [implemented/20260327_PROD_BUNDLE_LIVE_MAP_VERIFICATION.md](implemented/20260327_PROD_BUNDLE_LIVE_MAP_VERIFICATION.md) |

@@ -49,19 +49,19 @@ const REPORT_HEADERS: Record<string, { from: string; to: string; signature: stri
 
 const WAR_REPORT_HEADERS: Record<string, { from: string; to: string; signature: string }> = {
     RBiH: {
-        from: '2nd Corps Intelligence Section',
-        to: 'ARBiH General Staff, Sarajevo',
-        signature: 'Chief, 2nd Corps Intelligence Section',
+        from: 'Field Intelligence Summary Desk',
+        to: 'ARBiH General Staff',
+        signature: 'Duty Intelligence Officer',
     },
     RS: {
-        from: 'Main Staff Intelligence Department',
-        to: 'VRS Supreme Command, Pale',
-        signature: 'Chief, Main Staff Intelligence Department',
+        from: 'Main Staff Field Intelligence Desk',
+        to: 'VRS Main Staff',
+        signature: 'Duty Intelligence Officer',
     },
     HRHB: {
-        from: 'HVO Intelligence Section',
-        to: 'HVO General Staff, Mostar',
-        signature: 'Chief, HVO Intelligence Section',
+        from: 'Operational Intelligence Desk',
+        to: 'HVO General Staff',
+        signature: 'Duty Intelligence Officer',
     },
 };
 

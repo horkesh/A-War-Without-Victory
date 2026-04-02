@@ -127,11 +127,11 @@
 .wr-dialog {
     background: #10101e;
     color: #d8d8e0;
-    padding: 28px;
+    padding: 22px 24px;
     border: 1px solid #252540;
     border-radius: 4px;
     font-family: 'IBM Plex Mono', 'Consolas', monospace;
-    max-width: 420px;
+    max-width: 400px;
 }
 
 .wr-dialog h2,
@@ -282,13 +282,13 @@
 
 /* ─── Faction Overview Panel ────────────────────── */
 .faction-overview-panel {
-    width: 760px;
-    max-height: 640px;
+    width: 724px;
+    max-height: 620px;
     overflow-y: auto;
     background: #10101e;
     color: #d8d8e0;
     font-family: 'IBM Plex Mono', 'Consolas', monospace;
-    padding: 24px;
+    padding: 20px;
 }
 
 .faction-overview-header {
@@ -604,11 +604,11 @@
 
 /* ─── Magazine Modal (Operational Review) ───────── */
 .magazine-modal {
-    width: 700px;
-    max-height: 900px;
+    width: 680px;
+    max-height: 860px;
     overflow-y: auto;
     background: #10101e;
-    padding: 28px 32px;
+    padding: 24px 28px;
     color: #d8d8e0;
     font-family: 'IBM Plex Mono', 'Consolas', monospace;
 }
@@ -625,10 +625,10 @@
 
 .magazine-month-year {
     text-align: center;
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
     letter-spacing: 2px;
-    margin-bottom: 24px;
+    margin-bottom: 18px;
     color: #d8d8e0;
 }
 
@@ -671,7 +671,7 @@
     text-align: center;
     background: #161628;
     border: 1px solid #252540;
-    padding: 14px 16px;
+    padding: 12px 14px;
     border-radius: 3px;
     flex: 1;
 }
@@ -686,7 +686,7 @@
 }
 
 .magazine-stat-value {
-    font-size: 28px;
+    font-size: 24px;
     font-weight: 700;
     color: #d8d8e0;
 }
@@ -752,11 +752,11 @@
 
 /* ─── Reports Modal (Situation Report) ──────────── */
 .reports-modal {
-    width: 680px;
-    max-height: 900px;
+    width: 660px;
+    max-height: 860px;
     overflow-y: auto;
     background: #10101e;
-    padding: 32px 36px;
+    padding: 28px 30px;
     font-family: 'IBM Plex Mono', 'Consolas', monospace;
     color: #d8d8e0;
     position: relative;
@@ -774,24 +774,24 @@
 .report-classification-top {
     position: absolute;
     top: 12px;
-    left: 36px;
+    left: 30px;
 }
 
 .report-classification-bottom {
     position: absolute;
     bottom: 12px;
-    right: 36px;
+    right: 30px;
 }
 
 .report-header {
-    margin-top: 20px;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
+    margin-top: 16px;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
     border-bottom: 1px solid #252540;
 }
 
 .report-field {
-    margin: 6px 0;
+    margin: 4px 0;
     font-size: 12px;
     color: #8888a0;
 }
@@ -804,15 +804,15 @@
 
 .report-body {
     font-size: 11px;
-    line-height: 1.7;
-    margin-bottom: 24px;
+    line-height: 1.58;
+    margin-bottom: 18px;
     white-space: pre-wrap;
     color: #8888a0;
 }
 
 .report-signature {
     text-align: right;
-    margin-top: 32px;
+    margin-top: 22px;
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 1px;

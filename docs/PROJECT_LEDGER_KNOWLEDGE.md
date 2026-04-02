@@ -1463,6 +1463,9 @@ In AWWV, shared helpers like `filterPlayerFacingOperations(...)` only become rea
 ### A shell affordance can be "technically present" and still functionally absent
 
 The standalone tactical map already had a Warroom-focus IPC path and Codex still existed, but both were buried deeply enough that the product still felt like it had lost them. In AWWV, navigation and reference affordances should be judged by live-user discoverability, not by whether some underlying hook technically survives. If a player needs specialist knowledge or keyboard habits to find a route back or open Codex, the shell is still lying about what the product supports.
+### Warroom command prose must never be more certain than the extracted player-facing snapshot
+
+In AWWV, headquarters surfaces like Command Briefing and Reports are part of the player shell, not theatrical wrappers around hidden truth. Hardcoded lines such as “no critical enclaves” or fake-specific authorship like “2nd Corps Intelligence Section” become structural lies if the underlying Warroom snapshot never proved them. Warroom can summarize and frame, but its prose should always be derived from player-facing extraction or stay explicitly generic.
 ### Hiding raw enemy ids is not enough if the panel still reasons from omniscient state
 
 In AWWV, a player-facing surface can look safe because it prints only friendly-front language while still cheating underneath. Army HQ threat assessment was a clear example: no raw enemy corps ids or op names in the text, but the warnings still came from exact enemy operation phase/state. Treat data provenance as part of player-safety. If a panel is supposed to be a staff abstraction, it should be derived from player-plausible intel inputs, not from cleaned-up omniscient inputs.

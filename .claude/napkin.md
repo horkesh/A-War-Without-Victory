@@ -237,6 +237,8 @@ After EVERY scenario run, the orchestrator:
    Do instead: When auditing `src/ui/map` via browser automation, avoid `Escape` for closing overlays unless the overlay explicitly advertises `[ESC]`; otherwise it may open the Pause menu and pollute screenshots/findings.
 10. **[2026-03-26] War Summary/Summary focused tabs should render only focused section**
    Do instead: When `SituationTab` is used with `focusSection` (Army HQ `SUMMARY` and War Summary modal), render only that section card and suppress overview/snapshot/alliance/alerts blocks to avoid duplicate-content dead space.
+11. **[2026-04-02] Warroom command prose must derive from snapshot truth or stay generic**
+   Do instead: In `src/ui/warroom`, never hardcode confident lines like safe convoys, calm enclaves, or fake-specific staff authorship unless `extractWarData(...)` actually proves them. Warroom is a player-facing shell, not a narrative wrapper for hidden truth.
 9. **[2026-03-26] Toolbar-clearance verification must include live + dev contexts**
    Do instead: For top-toolbar clearance checks, always capture one no-dev-strip (`?live=1`) shot and one dev-strip shot with side panels visible, then state overlap verdict explicitly in the report.
 

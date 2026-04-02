@@ -20726,3 +20726,36 @@ Verification:
 Why this matters:
 - entrypoint authority should be visible where changes begin, not only in the surrounding documentation
 - this reduces the chance of future Claude or human work landing in the wrong turn-pipeline lane
+### 2026-04-02 - Warroom command shell truth and density pass
+
+Cleaned up the Warroom shell where it was still sounding more certain than its actual data contract allowed.
+
+Implemented:
+- `src/ui/warroom/components/CommandBriefingModal.ts`
+  - removed hardcoded enclave/convoy certainty and replaced it with derived command-priority, enclave, and logistics summaries from the Warroom snapshot
+- `src/ui/warroom/components/ReportsModal.ts`
+  - replaced fake-specific war-phase authorship (`2nd Corps Intelligence Section`) with generic player-safe headquarters authorship
+- `src/ui/warroom/components/OperationalSituationModal.ts`
+  - clarified the modal toward sector stress + desk-map handoff and surfaced exposed-front and active-operation counts
+- `src/ui/warroom/warroom.ts`
+  - corrected stale help/anchor wording
+- `src/ui/warroom/styles/modals.css`
+  - tightened dialog/report/magazine/faction-overview spacing
+- `tests/warroom_player_visibility.test.ts`
+  - added regression coverage for truthful command-shell prose and generic report authorship
+- `docs/40_reports/implemented/20260402_WARROOM_COMMAND_SHELL_TRUTH_AND_DENSITY_PASS.md`
+  - documented the slice
+- `docs/40_reports/WARROOM_MASTER.md`
+  - updated current truth and recent changes
+- `docs/40_reports/GUI_MASTER.md`
+  - propagated the GUI-level summary
+
+Verification:
+- `node_modules\\.bin\\vitest.cmd run tests\\warroom_player_visibility.test.ts tests\\warroom_smoke.test.ts`
+  - PASS
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- Warroom is a player-facing headquarters shell, not a debug-flavored narrative wrapper
+- it should summarize and interpret command truth, but it must not invent specificity or certainty the player-facing snapshot does not support

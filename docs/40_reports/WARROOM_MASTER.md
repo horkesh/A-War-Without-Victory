@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for warroom status (scene, modals, hotspots, assets). Read first when starting warroom work; update during the session when completing warroom changes.
 
-**Updated:** 2026-03-12
+**Updated:** 2026-04-02
 
 **Relationship:** Warroom is part of the canonical GUI. For overall GUI status use [GUI_MASTER.md](GUI_MASTER.md). This document is the warroom-specific control file — one place to see what exists, what’s proposed, and where to record changes.
 
@@ -84,6 +84,8 @@
 
 - **Region data:** Click/hover geometry is in `public/data/ui/hq_clickable_regions.json`. Region bounds must match the scene plate; default JSON has `options.calendar_baked_in_art: true` so the runtime does not draw a second calendar when the room art already shows one. For a different room layout, use a custom region file (see § Region data and new room layout).
 - **Modals (implemented):** Newspaper, Magazine, Reports, Diplomacy, Faction Overview (COMMAND + commander assignment), Advance turn confirmation, Declaration event, War begins, Settings (placeholder), Help (warroom controls), “Line dead” (diplomacy in peace).
+- **Command-shell truth (2026-04-02):** Reports now use generic player-safe headquarters authorship instead of fake-specific section names, and Command Briefing derives its warnings from the extracted Warroom snapshot instead of hardcoded enclave/convoy claims.
+- **Density direction (2026-04-02):** Warroom modal chrome has been tightened to better match the tactical shell. The intended direction is command-console density, not roomy dashboard spacing.
 - **Commander assignment:** **Warroom only** — Faction Overview (wall flag) → COMMAND section → CHANGE → ASSIGN COMMANDER modal. Map UI displays only; no assignment there. IPC: `assign-commander`.
 
 ---
@@ -150,6 +152,7 @@ Documented so future work can prioritise. See also [GUI_MASTER.md](GUI_MASTER.md
 
 | Date | Change | Report / reference |
 |------|--------|--------------------|
+| 2026-04-02 | **Warroom command shell truth + density pass:** Reports now use generic player-safe headquarters authorship instead of fake-specific section names; Command Briefing now derives warnings from the extracted command snapshot instead of hardcoded enclave/convoy certainty; Operational Situation and help copy were clarified; shared modal spacing tightened. | [implemented/20260402_WARROOM_COMMAND_SHELL_TRUTH_AND_DENSITY_PASS.md](implemented/20260402_WARROOM_COMMAND_SHELL_TRUTH_AND_DENSITY_PASS.md) |
 | 2026-03-12 | **Operation Preparation System UI wired:** CommanderSelectionModal (officer roster with competence/aggressiveness, regional fit, prep-time estimates) + OperationBriefingModal (readiness gauges, commander assessment, Launch/Probe/Postpone/Abort actions) now connected via IPC to operation state machine. Triggered from OpsPlanningModal submission and CorpsFrontPanel assessment-ready button. | This file § Modals |
 | 2026-03-10 | **Twelve-anchor contract:** Prompt pack expanded from eight to twelve baked props — coatrack+cap/uniform (`commander_coatrack`), urgent folder (`enclave_dispatch_folder`), sealed packet (`intelligence_packet`), honors shelf/frame (`honors_memorial`). RS §9.6–9.10 blocks and shared core updated; §3a table in clean-room handover. | [20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md](handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md) §3a |
 | 2026-03-09 | **Phase 2 Completion (Modals):** Implemented `CommandBriefingModal` (linked to `command_briefing_folio`), `OperationalSituationModal` (linked to `desk_map`), and functional `SettingsModal` (toolbar). Removed placeholder routing. | This file § Modals |
