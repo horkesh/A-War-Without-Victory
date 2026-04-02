@@ -208,6 +208,35 @@ function sc(a: string, b: string): number {
     return a < b ? -1 : a > b ? 1 : 0;
 }
 
+function deriveMunicipalityControllerByOsid(state: GameState): Map<string, FactionId | null> {
+    const counts = new Map<string, Map<FactionId, number>>();
+    const controllers = state.political.political_controllers ?? {};
+
+    for (const settlementId of Object.keys(controllers).sort(sc)) {
+        const controller = controllers[settlementId];
+        if (controller == null) continue;
+        if (!settlementId.startsWith('op:')) continue;
+        const parts = settlementId.split(':');
+        if (parts.length < 3) continue;
+        const municipalityId = parts[1];
+        if (!municipalityId) continue;
+
+        const perFaction = counts.get(municipalityId) ?? new Map<FactionId, number>();
+        perFaction.set(controller, (perFaction.get(controller) ?? 0) + 1);
+        counts.set(municipalityId, perFaction);
+    }
+
+    const result = new Map<string, FactionId | null>();
+    for (const [municipalityId, perFaction] of Array.from(counts.entries()).sort(([a], [b]) => sc(a, b))) {
+        const ranking = Array.from(perFaction.entries()).sort((a, b) => {
+            if (a[1] !== b[1]) return b[1] - a[1];
+            return sc(a[0], b[0]);
+        });
+        result.set(municipalityId, ranking[0]?.[0] ?? null);
+    }
+    return result;
+}
+
 // ---------------------------------------------------------------------------
 // Extraction
 // ---------------------------------------------------------------------------
@@ -457,21 +486,17 @@ function extractExhaustion(state: GameState, pf: FactionId): ExhaustionSnapshot 
 
 function extractSupply(state: GameState, pf: FactionId): SupplySnapshot {
     const sustState = state.displacement.sustainability_state ?? {};
-    const controllers = state.political.political_controllers ?? {};
+    const municipalityController = deriveMunicipalityControllerByOsid(state);
 
     let adequate = 0;
     let strained = 0;
     let critical = 0;
     const collapsed: string[] = [];
 
-    // Map settlements to municipalities for controller check
-    // Sustainability is per-municipality, so check if any settlement in that municipality is controlled by player
     for (const munId of Object.keys(sustState).sort(sc)) {
         const s = sustState[munId];
         if (!s) continue;
-
-        // Check if this municipality is relevant to player (simplified: check if any settlement in it is player-controlled)
-        // For now, include all municipalities in the supply overview
+        if (municipalityController.get(munId) !== pf) continue;
         if (s.collapsed) {
             collapsed.push(munId);
         } else if (s.sustainability_score < 30) {

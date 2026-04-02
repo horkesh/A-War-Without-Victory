@@ -1382,3 +1382,14 @@ The obvious primary labels can look clean while Army HQ headings, reserve reques
 ### Transitional operation creators are more dangerous than dormant sinks
 
 The worst legacy combat files are not the inert no-op sinks; they are the older creation paths that still produce real operations while skipping newer canonical fields. In AWWV, every permitted operation creator must satisfy the same core contract as the canonical lifecycle owner. Emergency defensive ops in `bot_corps_operations.ts` were a model example: still live, still side-effecting, and still creating unanchored operations until they were forced to derive `sector_id` from the participant brigades.
+### Stale regression suites are dangerous when they still look authoritative
+
+The scripted-operation node:test suites were still enforcing an older catalog (`9` pre-planned ops, triggered `Operation Jajce`) and older queue truth long after the live engine had moved on. In AWWV, a stale regression file is not neutral documentation; it is an active source of wrong confidence. If a suite still looks canonical, modernize it to current truth or fence it off explicitly.
+
+### Summary chrome lies just as easily as detail panels
+
+Warroom `ownSupply` looked harmless because it was only a summary box, but it was still counting municipalities outside the player’s control. In this repo, overview numbers are not safer than detail tabs. If a summary panel says `own`, it must be scoped to the player’s actual holdings, not global state.
+
+### Queued-order lists are player surfaces too
+
+Raw formation ids do not stop being leaks just because they appear in a small order queue instead of a marquee panel. Order rails, badges, and miniature lists are still part of the product shell. If a player-facing list needs a fallback, use neutral brigade text rather than engine identifiers.

@@ -1004,3 +1004,42 @@ Why this matters:
 - the most dangerous transitional ops code is the code that is still allowed to create real operations with missing canonical fields
 - sector anchoring only becomes honest when every live creation path respects it, not just the newest commander path
 - this shrinks the gap between the repo's written ops contract and the operations actually entering the lifecycle
+## Additional Wave 1 slice: player shell and scripted-op regressions now match live truth
+
+This checkpoint drained two quieter but important swamp pockets: a remaining player-facing fallback leak in queued orders, and stale scripted-operation tests that were still enforcing an older operation catalog and pre-anchor contract.
+
+Implemented:
+- `src/ui/map/components/OrderQueue.tsx`
+  - queued-order formation labels now resolve through `getPlayerSafeBrigadeName(...)`
+  - removed the raw `formationId` tooltip/title fallback from the player shell
+- `src/ui/warroom/data/war_data_extractor.ts`
+  - Warroom supply summaries now scope `ownSupply` to municipalities actually controlled by the player faction instead of counting the whole map
+  - added deterministic municipality-majority control derivation from OSID-level `political_controllers`
+- `src/sim/combat/pre_planned_operations.ts`
+  - initial and queued scripted operations now derive and store a primary `sector_id`
+- `src/sim/combat/triggered_operations.ts`
+  - triggered scripted operations now derive and store a primary `sector_id`
+- `tests/pre_planned_operations.test.ts`
+  - modernized the suite to the current 14-operation catalog and current queue chains
+  - added sector-anchor assertions for injected pre-planned operations
+- `tests/triggered_operations.test.ts`
+  - modernized the suite to the current 4-operation triggered catalog
+  - removed stale expectations for retired/renamed ops
+  - added sector-anchor assertions for triggered operations
+- `tests/ui_map_render_smoke.test.ts`
+  - added player-safe brigade fallback coverage
+- `tests/warroom_player_visibility.test.ts`
+  - added coverage proving Warroom `ownSupply` counts only player-controlled municipalities
+
+Verification:
+- `node_modules\.bin\tsx.cmd --test tests\pre_planned_operations.test.ts tests\triggered_operations.test.ts`
+  - PASS (`16` tests)
+- `node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts tests\warroom_player_visibility.test.ts`
+  - PASS (`15` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- a player shell is still leaking if queued orders can fall back to raw formation ids
+- Warroom supply chrome becomes omniscient the moment `ownSupply` stops meaning “municipalities I actually control”
+- stale regression suites are dangerous when they still look authoritative but verify old catalogs, old queue chains, or pre-sector-anchor operation truth

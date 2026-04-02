@@ -27,7 +27,12 @@ import { getFormationCorpsId } from './corps_sector_partition.js';
 import { deployEliteLoan } from './army_reserve_system.js';
 import { validateOpAtInjection, collectOpInjectionWarnings } from './operation_validation.js';
 import type { OpInjectionWarning } from './operation_validation.js';
-import { buildCorpsOperation, hasActiveOperation, isSlot0AvailableForQueue } from './corps_operation_helpers.js';
+import {
+    buildCorpsOperation,
+    derivePrimarySectorForBrigades,
+    hasActiveOperation,
+    isSlot0AvailableForQueue,
+} from './corps_operation_helpers.js';
 // Graz truce imports removed: east Herzegovina truce is handled by sector_offensive
 // on operation completion (graz_east_herzegovina_active_turn), not by injection.
 
@@ -805,7 +810,12 @@ export function injectPrePlannedOperations(state: GameState): void {
 
         deployPrePlannedEliteLoans(state, result.eliteLoans, def, turn);
 
-        const op = buildCorpsOperation(def, result.axes, result.participating, turn);
+        const primarySectorId = derivePrimarySectorForBrigades(
+            Object.values(state.military.corps_front_sectors ?? {}),
+            def.corps,
+            result.participating,
+        );
+        const op = buildCorpsOperation(def, result.axes, result.participating, turn, true, primarySectorId);
         cmd.active_operations.push(op);
         assignOperationCommander(state, op, def.corps, def.faction);
         cmd.stance = 'offensive';
@@ -856,10 +866,6 @@ export function injectPrePlannedOperations(state: GameState): void {
 
 // PERMITTED CREATION ENTRY POINT — pre-planned and player-queued operations only.
 // All CorpsOperation objects must be built via buildCorpsOperation() in corps_operation_helpers.ts.
-// PHASE 5 TRANSITIONAL: sector_id is not yet derived at injection time. staging_osid is available
-// from the PrePlannedOpDef and could be used to look up the containing CorpsFrontSector. Brigade
-// categorization fields (primary_sector_brigades, attached_brigades) are also absent. This path
-// does NOT use broad-pool selection — brigades are axis-defined. Sector anchoring is deferred.
 /**
  * Inject a queued operation by name for a corps.
  * Called when a corps completes an operation and has queued_operations.
@@ -912,7 +918,12 @@ export function injectQueuedOperation(state: GameState, corpsId: string): boolea
     cmd.queued_operations.shift();
     if (cmd.queued_operations.length === 0) delete cmd.queued_operations;
 
-    const op = buildCorpsOperation(def, result.axes, result.participating, turn);
+    const primarySectorId = derivePrimarySectorForBrigades(
+        Object.values(state.military.corps_front_sectors ?? {}),
+        corpsId,
+        result.participating,
+    );
+    const op = buildCorpsOperation(def, result.axes, result.participating, turn, true, primarySectorId);
     cmd.active_operations.push(op);
     assignOperationCommander(state, op, corpsId, def.faction);
     cmd.stance = 'offensive';

@@ -289,6 +289,7 @@ describe('Tactical map render smoke', () => {
     expect(getPlayerSafeDecisionTitle(undefined)).toBe('Pending decision');
     expect(getPlayerSafeEnclaveName(undefined)).toBe('Friendly enclave');
     expect(getPlayerSafeBrigadeName(undefined)).toBe('Assigned brigade');
+    expect(getPlayerSafeBrigadeName('')).toBe('Assigned brigade');
   });
 
   it('player-facing operation filtering hides non-player factions from omniscient state', () => {

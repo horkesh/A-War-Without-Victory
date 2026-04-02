@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useGameStore, type StagedOrder } from '../store/gameStore';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
+import { getPlayerSafeBrigadeName } from '../utils/playerSafeText';
 
 function formationName(formationId: string, formationNamesById: Map<string, string>): string {
-  return formationNamesById.get(formationId) ?? formationId;
+  return getPlayerSafeBrigadeName(formationNamesById.get(formationId));
 }
 
 function orderTargetLabel(order: StagedOrder, osidDisplayNames: Record<string, string> | null): string {
@@ -119,7 +120,7 @@ export function OrderQueue() {
             <span className="shrink-0 font-mono text-text-secondary uppercase w-14">
               {order.type}
             </span>
-            <span className="truncate text-text-primary min-w-0" title={order.formationId}>
+            <span className="truncate text-text-primary min-w-0">
               {formationName(order.formationId, formationNamesById)}
             </span>
             <span className="truncate text-text-secondary min-w-0" title={order.targetOsid ?? order.postureName}>

@@ -77,4 +77,53 @@ describe('warroom player visibility', () => {
     expect(section.textContent).toContain('Enemy contact');
     expect(section.textContent).not.toContain('Enemy Shock Brigade');
   });
+
+  it('extractWarData scopes supply summaries to player-controlled municipalities', () => {
+    const state = {
+      meta: { turn: 7, phase: 'war' },
+      factions: [
+        { id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
+        { id: 'RS', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
+      ],
+      military: {
+        formations: {},
+        casualty_ledger: {},
+        front_edges: [],
+        front_pressure: {},
+        front_segments: {},
+        militia_garrison: {},
+        brigade_movement_state: {},
+        brigade_encircled: {},
+        corps_command: {},
+      },
+      political: {
+        political_controllers: {
+          'op:tuzla:centar': 'RBiH',
+          'op:tuzla:west': 'RBiH',
+          'op:bijeljina:center': 'RS',
+          'op:bijeljina:north': 'RS',
+        },
+        war_exhaustion: { RBiH: 0.1 },
+        loss_of_control_trends: { by_faction: { RBiH: { exhaustion_trend: 'flat' } } },
+      },
+      displacement: {
+        displacement_state: {},
+        displacement_camp_state: {},
+        hostile_takeover_timers: {},
+        civilian_casualties: {},
+        sustainability_state: {
+          tuzla: { mun_id: 'tuzla', collapsed: false, sustainability_score: 25 },
+          bijeljina: { mun_id: 'bijeljina', collapsed: true, sustainability_score: 10 },
+        },
+      },
+    } as unknown as GameState;
+
+    const snap = extractWarData(state, 'RBiH');
+    expect(snap.ownSupply).toEqual({
+      adequateCount: 0,
+      strainedCount: 0,
+      criticalCount: 1,
+      collapsedMunicipalities: [],
+    });
+  });
 });

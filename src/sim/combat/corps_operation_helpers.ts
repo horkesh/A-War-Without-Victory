@@ -75,6 +75,7 @@ export function buildCorpsOperation(
     participating: FormationId[],
     turn: number,
     isPrePlanned = true,
+    sectorId?: string,
 ): CorpsOperation {
     const allObjectives = axes.flatMap(a => a.objectives);
     return {
@@ -93,6 +94,7 @@ export function buildCorpsOperation(
         failure_count: 0,
         consecutive_failures_on_current: 0,
         staging_osid: def.staging_osid,
+        ...(sectorId ? { sector_id: sectorId } : {}),
         ...(isPrePlanned ? { is_pre_planned: true } : {}),
         ...(def.min_attack_outcome ? { min_attack_outcome: def.min_attack_outcome } : {}),
     };

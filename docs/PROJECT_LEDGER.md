@@ -19645,3 +19645,45 @@ Why this matters:
 - the repo’s most dangerous legacy files are the ones that still look alive enough for the next fix to reuse them
 - this turns one of those risks into a failing test instead of a future archaeology project
 - it also makes the intended authority fence explicit for anyone touching combat/sector plumbing later
+---
+### 2026-04-02 — Engine health Wave 1 continued: player shell and scripted-op regressions now match live truth
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, draining a mixed swamp pocket of player-shell fallback leaks, omniscient Warroom supply chrome, and stale scripted-operation tests that were still enforcing old engine truth.
+
+Implemented:
+- `src/ui/map/components/OrderQueue.tsx`
+  - queued-order brigade labels now resolve through `getPlayerSafeBrigadeName(...)`
+  - removed the raw `formationId` title fallback from the player-facing order list
+- `src/ui/warroom/data/war_data_extractor.ts`
+  - Warroom `ownSupply` now scopes to municipalities actually controlled by the player faction
+  - added deterministic municipality-majority control derivation from OSID-level `political_controllers`
+- `src/sim/combat/pre_planned_operations.ts`
+  - initial and queued scripted operations now derive and retain a primary `sector_id`
+- `src/sim/combat/triggered_operations.ts`
+  - triggered scripted operations now derive and retain a primary `sector_id`
+- `tests/pre_planned_operations.test.ts`
+  - modernized to the current 14-operation pre-planned catalog and current queue chains
+  - added sector-anchor assertions
+- `tests/triggered_operations.test.ts`
+  - modernized to the current 4-operation triggered catalog
+  - removed stale expectations for retired/renamed ops
+  - added sector-anchor assertions
+- `tests/ui_map_render_smoke.test.ts`
+  - added player-safe brigade fallback coverage
+- `tests/warroom_player_visibility.test.ts`
+  - added coverage proving Warroom `ownSupply` counts only player-controlled municipalities
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded the Wave 1 report with this checkpoint
+
+Verification:
+- `node_modules\.bin\tsx.cmd --test tests\pre_planned_operations.test.ts tests\triggered_operations.test.ts`
+  - PASS (`16` tests)
+- `node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts tests\warroom_player_visibility.test.ts`
+  - PASS (`15` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- player-shell leaks often survive in fallback strings and summary chrome after the obvious panels are fixed
+- scripted-op tests that still verify old catalogs are false comfort, not regression protection
+- sector anchoring only becomes trustworthy when historical/scripted operation injectors follow the same contract as the rest of the ops lifecycle
