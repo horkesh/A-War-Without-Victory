@@ -19403,3 +19403,32 @@ Verification:
 Why this matters:
 - dormant compatibility layers are still dangerous if they quietly refresh timestamps or other canonical metadata
 - this removes one more split-truth writer from the core combat engine
+
+---
+### 2026-04-02 — Engine health Wave 1 continued: engine `must_hold` now uses corps-boundary isolation instead of a dead branch
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, draining another decorative mechanics trap from commander zone detection.
+
+Implemented:
+- `src/sim/combat/commander/zone_detection.ts`
+  - replaced the hard-disabled engine `must_hold` path with a corps-boundary-aware chokepoint split test
+  - a zone now becomes engine `must_hold` only when removing a chokepoint disconnects the current zone from a substantial friendly component outside the corps’s own territory set
+  - same-corps internal chokepoints without scenario-authored hold data no longer trigger fake must-hold status
+- `tests/commander/briefing_campaign_intent.test.ts`
+  - added regressions proving an external corridor chokepoint becomes `is_must_hold === true`
+  - added regressions proving an internal same-corps chokepoint stays `is_must_hold === false`
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded the Wave 1 report with the new must-hold honesty checkpoint
+- `docs/20_engineering/AI_STRATEGY_SPECIFICATION.md`
+  - recorded the old dead-branch problem and the new corps-boundary discriminator as `BRIEF-GAP-8`
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\briefing_campaign_intent.test.ts`
+  - PASS (`13` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- hard-disabled mechanics are dangerous because they leave the architecture looking richer than the runtime really is
+- `must_hold` is only useful if the engine can derive it honestly rather than flooding same-corps geometry with false alarms
+- this restores a real defensive signal to commander zoning without reviving the old overfiring corridor heuristic

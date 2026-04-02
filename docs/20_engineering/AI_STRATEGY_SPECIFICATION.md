@@ -280,3 +280,9 @@ This section documents known gaps in what the corps CO `CommanderBriefing` knows
 **Gap:** No seasonal modifier exists. Bosnian winters (Dec–Mar) significantly degraded offensive operations — frozen ground, snow-blocked mountain passes, supply difficulty. The 40-week scenario runs Jan–Oct 1993, spanning a full winter. Both sides suffered but mountain-based operations were especially constrained.
 **Impact:** P2. Operations in Ozren, Vlašić, Igman highlands run at full capacity in January as in July. VRS mountain drives (Majevica, Trebević) are unrealistically winter-agnostic.
 **Fix:** `getSeasonalCombatMult(week, latitude)` — reduce attacker power by ~15% in weeks 1–8 (Jan–Feb) and 48–52 (Dec), scaled by elevation. Defender unaffected (prepared positions, local terrain familiarity). Winter window aligns with known operational pauses in the historical record.
+
+### BRIEF-GAP-8: Engine `must_hold` had been decorative because the chokepoint heuristic was hard-disabled
+
+**File:** `src/sim/combat/commander/zone_detection.ts`
+**Original gap:** Engine-derived `must_hold` had been reduced to `false && ...` because the old chokepoint heuristic could not tell the difference between a true external corridor and an internal same-corps split. That left the type and comments alive while the actual engine path never contributed anything.
+**Status (2026-04-02): partially resolved.** Engine `must_hold` now uses a corps-boundary-aware component split: a chokepoint only becomes `must_hold` when removing it disconnects the current zone from a substantial friendly component outside the corps’s own territory set. Internal same-corps chokepoints without scenario-authored data remain non-mandatory. Remaining work: validate the new discriminator against long-run sector behavior and scenario-authored holdouts to make sure it catches real corridors without recreating the old false-positive flood.

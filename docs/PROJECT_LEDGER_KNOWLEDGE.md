@@ -1351,3 +1351,7 @@ Operation history and active-op ledgers feel archival, which makes them easy pla
 ### Compatibility sinks are still dangerous if they refresh timestamps
 
 In AWWV, a legacy helper can look harmless because it only computes zero deltas, but it still becomes a second authority path if it updates canonical state metadata like `last_updated_turn`. A compatibility sink is only honest when it consumes old calls without mutating live truth at all.
+
+### Hard-disabled mechanics are architecture debt, not neutral safety rails
+
+When a mechanic survives in types, comments, and docs but the live branch is effectively `false && ...`, the repo becomes more misleading than if the mechanic had simply been deleted. In AWWV, treat these as engine-health bugs: either remove the decorative path or replace it with a narrower honest discriminator. The engine `must_hold` repair is the model case — revive the signal only with a corps-boundary-aware test that can explain why it fires.

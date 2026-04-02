@@ -802,3 +802,27 @@ Why this matters:
 - `src/state/front_pressure.ts` is the canonical pressure owner and should be the only normal writer
 - dormant compatibility layers become dangerous when they still touch live state “harmlessly”
 - this removes one more split-truth edge where comments, imports, and runtime behavior were disagreeing
+
+## Additional Wave 1 slice: engine must-hold zones now use real corps-boundary isolation
+
+This checkpoint drains another decorative-architecture trap from commander zone detection. Engine-derived `must_hold` looked alive, but the live path had been hard-disabled because the old chokepoint heuristic overfired on internal corps geometry and could not distinguish “vital external corridor” from “same-corps internal split.”
+
+Implemented:
+- `src/sim/combat/commander/zone_detection.ts`
+  - replaced the dead `false && ...` must-hold branch with a corps-boundary-aware isolation test
+  - engine-derived `must_hold` now fires only when removing a chokepoint disconnects the current zone from a substantial friendly component that sits outside the corps’s own territorial set
+  - internal same-corps chokepoints without scenario support no longer become fake must-hold zones
+- `tests/commander/briefing_campaign_intent.test.ts`
+  - added regressions proving an outside-corps corridor chokepoint becomes `is_must_hold === true`
+  - added regressions proving an internal same-corps chokepoint stays `is_must_hold === false` without scenario-authored must-hold data
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\briefing_campaign_intent.test.ts`
+  - PASS (`13` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- `must_hold` only matters if the engine can derive it honestly instead of either overflagging everything or giving up entirely
+- hard-disabled mechanics are usually worse than missing mechanics because they convince later agents the system is already accounted for
+- this restores one more piece of commander defensive truth without reintroducing the old false-positive corridor panic

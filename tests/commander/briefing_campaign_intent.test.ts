@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { buildBriefing } from '../../src/sim/combat/commander/briefing.js';
 import { managePlan } from '../../src/sim/combat/commander/plan.js';
+import { detectZones } from '../../src/sim/combat/commander/zone_detection.js';
 
 import type {
     CorpsFrontSector,
@@ -262,6 +263,117 @@ describe('commander briefing campaign intent', () => {
         expect(briefing.campaign_sync_targets).toEqual(['op:enemy:priority']);
         expect(briefing.must_hold_osids).toEqual(['op:test:campaign_hold', 'op:test:scripted_hold']);
         expect(briefing.corps_exhaustion).toBe(14);
+    });
+
+    it('flags a zone as must-hold when its chokepoint disconnects the corps from outside-corps friendly territory', () => {
+        const corpsOsids = ['op:test:a', 'op:test:b', 'op:test:c'];
+        const allFriendlyOsids = ['op:test:a', 'op:test:b', 'op:test:c', 'op:test:d', 'op:test:e'];
+        const sector: CorpsFrontSector = {
+            sector_id: 'sector:test',
+            corps_id: 'test_corps' as FormationId,
+            faction: 'RS' as FactionId,
+            opposing_factions: ['RBiH' as FactionId],
+            edge_ids: ['edge:test'],
+            sub_segments: [{
+                id: 'ss:test',
+                friendly_osids: ['op:test:c'],
+                enemy_osids: ['op:enemy:x'],
+                length_edges: 1,
+            }],
+            length_edges: 1,
+            territory_osids: corpsOsids,
+            assigned_brigade_ids: [],
+            reserve_brigade_ids: [],
+            stance: 'defend',
+            sector_stance: 'defend',
+            local_priority: 0,
+            vulnerability: 0,
+            opportunity_score: 0,
+        } as unknown as CorpsFrontSector;
+
+        const zones = detectZones(
+            'test_corps' as FormationId,
+            'RS' as FactionId,
+            [] as FormationState[],
+            corpsOsids,
+            {
+                adjacency: new Map<string, string[]>([
+                    ['op:test:a', ['op:test:b']],
+                    ['op:test:b', ['op:test:a', 'op:test:c']],
+                    ['op:test:c', ['op:test:b', 'op:test:d', 'op:enemy:x']],
+                    ['op:test:d', ['op:test:c', 'op:test:e']],
+                    ['op:test:e', ['op:test:d']],
+                ]),
+                friendlyOsidsByFaction: new Map<FactionId, Set<string>>([
+                    ['RS' as FactionId, new Set(allFriendlyOsids)],
+                ]),
+                componentsByFaction: new Map<FactionId, Map<string, number>>([
+                    ['RS' as FactionId, new Map(corpsOsids.map((osid) => [osid, 0]))],
+                ]),
+            } as any,
+            [sector],
+            null,
+            { faction: 'RS', chokepoints: ['op:test:c'] } as any,
+            new Set(),
+        );
+
+        expect(zones).toHaveLength(1);
+        expect(zones[0]!.is_must_hold).toBe(true);
+    });
+
+    it('does not flag a same-corps internal chokepoint as must-hold without scenario data', () => {
+        const corpsOsids = ['op:test:a', 'op:test:b', 'op:test:c', 'op:test:d', 'op:test:e'];
+        const sector: CorpsFrontSector = {
+            sector_id: 'sector:test',
+            corps_id: 'test_corps' as FormationId,
+            faction: 'RS' as FactionId,
+            opposing_factions: ['RBiH' as FactionId],
+            edge_ids: ['edge:test'],
+            sub_segments: [{
+                id: 'ss:test',
+                friendly_osids: ['op:test:c'],
+                enemy_osids: ['op:enemy:x'],
+                length_edges: 1,
+            }],
+            length_edges: 1,
+            territory_osids: corpsOsids,
+            assigned_brigade_ids: [],
+            reserve_brigade_ids: [],
+            stance: 'defend',
+            sector_stance: 'defend',
+            local_priority: 0,
+            vulnerability: 0,
+            opportunity_score: 0,
+        } as unknown as CorpsFrontSector;
+
+        const zones = detectZones(
+            'test_corps' as FormationId,
+            'RS' as FactionId,
+            [] as FormationState[],
+            corpsOsids,
+            {
+                adjacency: new Map<string, string[]>([
+                    ['op:test:a', ['op:test:b']],
+                    ['op:test:b', ['op:test:a', 'op:test:c']],
+                    ['op:test:c', ['op:test:b', 'op:test:d', 'op:enemy:x']],
+                    ['op:test:d', ['op:test:c', 'op:test:e']],
+                    ['op:test:e', ['op:test:d']],
+                ]),
+                friendlyOsidsByFaction: new Map<FactionId, Set<string>>([
+                    ['RS' as FactionId, new Set(corpsOsids)],
+                ]),
+                componentsByFaction: new Map<FactionId, Map<string, number>>([
+                    ['RS' as FactionId, new Map(corpsOsids.map((osid) => [osid, 0]))],
+                ]),
+            } as any,
+            [sector],
+            null,
+            { faction: 'RS', chokepoints: ['op:test:c'] } as any,
+            new Set(),
+        );
+
+        expect(zones).toHaveLength(1);
+        expect(zones[0]!.is_must_hold).toBe(false);
     });
 
     it('buildBriefing summarizes adjacent enemy equipment from opposing sectors', () => {
