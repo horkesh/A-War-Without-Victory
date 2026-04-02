@@ -19748,3 +19748,33 @@ Why this matters:
 - summary chrome is a player surface, not a safe place to leak raw sim labels
 - once municipality/enclave/corridor fallbacks are centralized, future overview panels are less likely to regress into slug-printing behavior
 - player-safe text rules become a testable contract instead of an aesthetic preference
+
+---
+### 2026-04-02 — Engine health Wave 1 continued: retired brigade reposition no longer survives in the live desktop shell
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, removing a fake live command path for the already-retired brigade reposition mechanic.
+
+Implemented:
+- `src/desktop/preload.cjs`
+  - removed the `stageBrigadeRepositionOrder` bridge export from the live desktop shell
+- `src/ui/map/desktop/useIPC.ts`
+  - removed the retired brigade-reposition method from the React IPC contract
+- `src/desktop/electron-main.cjs`
+  - removed the `stage-brigade-reposition-order` main-process handler so the command can no longer masquerade as a live staging route
+- `tests/engine_honesty_legacy_contracts.test.ts`
+  - added a static regression proving the retired brigade-reposition bridge no longer appears in live preload / IPC / main-process code
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded the Wave 1 report with this checkpoint
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\engine_honesty_legacy_contracts.test.ts`
+  - PASS (`7` tests)
+- `git grep -n "stageBrigadeRepositionOrder\|stage-brigade-reposition-order" -- src tests`
+  - only archived UI and the regression test itself remain
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- a command is still part of the product lie if preload and IPC wiring keep advertising it after gameplay retired it
+- honest retirement means removing the surface at the earliest boundary, not just returning an error later
+- this removes one more half-alive authority path that future Claude sessions could mistake for a valid implementation seam

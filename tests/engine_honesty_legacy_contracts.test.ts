@@ -167,4 +167,15 @@ describe('engine honesty legacy contracts', () => {
 
     expect(offenders).toEqual([]);
   });
+
+  it('does not advertise retired brigade reposition desktop bridge paths in live code', () => {
+    const preload = readFileSync(join(process.cwd(), 'src', 'desktop', 'preload.cjs'), 'utf8');
+    const electronMain = readFileSync(join(process.cwd(), 'src', 'desktop', 'electron-main.cjs'), 'utf8');
+    const useIpc = readFileSync(join(process.cwd(), 'src', 'ui', 'map', 'desktop', 'useIPC.ts'), 'utf8');
+
+    expect(preload).not.toContain('stageBrigadeRepositionOrder');
+    expect(preload).not.toContain('stage-brigade-reposition-order');
+    expect(electronMain).not.toContain('stage-brigade-reposition-order');
+    expect(useIpc).not.toContain('stageBrigadeRepositionOrder');
+  });
 });

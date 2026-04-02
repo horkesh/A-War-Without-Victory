@@ -959,30 +959,6 @@ app.whenReady().then(() => {
     }
   });
 
-  ipcMain.handle('stage-brigade-reposition-order', async (_event, payload) => {
-    const { brigadeId, settlementIds } = payload || {};
-    if (!currentGameStateJson || typeof brigadeId !== 'string' || !Array.isArray(settlementIds)) {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    const sids = settlementIds.filter(s => typeof s === 'string');
-    if (sids.length === 0) return { ok: false, error: 'At least one settlement required' };
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      const result = await sim.validateBrigadeRepositionOrder(state, brigadeId, sids, getBaseDir());
-      if (!result.valid) {
-        return { ok: false, error: result.error || 'Invalid reposition order' };
-      }
-      if (!state.brigade_reposition_orders) state.brigade_reposition_orders = {};
-      state.brigade_reposition_orders[brigadeId] = { settlement_ids: [...sids].sort() };
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
-  });
-
   ipcMain.handle('clear-orders', async (_event, payload) => {
     const { brigadeId } = payload || {};
     if (!currentGameStateJson || typeof brigadeId !== 'string') {

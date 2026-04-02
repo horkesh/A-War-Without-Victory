@@ -1401,3 +1401,7 @@ It is not enough for “most” operations to carry `sector_id`. As long as prob
 ### Summary-shell labels are still product truth, not harmless chrome
 
 Players trust the small overview boxes as much as the big detail panels. If a summary card prints raw `mun_id`, enclave slugs, or route-faction codes, the product is still leaking engine truth even when the deeper surfaces are clean. In AWWV, municipality/enclave/corridor fallback text belongs in one shared player-safe helper layer so overview panels do not quietly improvise their own raw-id leaks.
+
+### Validation-only retirement still leaves a fake command alive
+
+If validation rejects a command but preload, IPC clients, and the main process still advertise it, the repo is still teaching future work that the mechanic exists. In AWWV, a retired command is only honestly retired when the earliest desktop/UI boundary stops exporting it entirely.

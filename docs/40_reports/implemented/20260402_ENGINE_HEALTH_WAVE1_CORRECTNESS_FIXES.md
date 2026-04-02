@@ -1098,3 +1098,30 @@ Why this matters:
 - players experience summary chrome as authoritative UI just as much as the deep detail panels
 - once one shared helper owns municipality, enclave, and corridor fallbacks, future surfaces are much less likely to improvise raw-id leaks
 - this turns “pretty the slug later” into a small tested player-facing contract instead of a recurring cleanup chore
+
+## Additional Wave 1 slice: retired brigade reposition no longer masquerades as a live desktop command
+
+This checkpoint drains a classic half-alive authority path. `validateBrigadeRepositionOrder(...)` had already been hard-disabled, but the desktop shell still advertised `stageBrigadeRepositionOrder` through preload, React IPC wiring, and the main-process handler. That meant the repo was still carrying a fake live command path for a mechanic we had already declared retired.
+
+Implemented:
+- `src/desktop/preload.cjs`
+  - removed the `stageBrigadeRepositionOrder` bridge export from the live desktop surface
+- `src/ui/map/desktop/useIPC.ts`
+  - removed the retired `stageBrigadeRepositionOrder` method from the live IPC client contract
+- `src/desktop/electron-main.cjs`
+  - removed the `stage-brigade-reposition-order` IPC handler instead of continuing to carry a never-valid staging route
+- `tests/engine_honesty_legacy_contracts.test.ts`
+  - added a static fence proving the retired brigade-reposition bridge no longer appears in live preload / main-process / React IPC code
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\engine_honesty_legacy_contracts.test.ts`
+  - PASS (`7` tests)
+- `git grep -n "stageBrigadeRepositionOrder\|stage-brigade-reposition-order" -- src tests`
+  - only archived UI and the regression test itself remain
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- a retired command is still harmful if the desktop shell continues to advertise it as part of the live product contract
+- validation-only retirement is not enough; honest systems fail at the earliest boundary and stop pretending the command exists
+- this shrinks future Claude confusion because the repo now says the same thing in validation, IPC wiring, and runtime surface area
