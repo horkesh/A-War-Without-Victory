@@ -55,6 +55,9 @@ const MULTI_BRIGADE_EFFICIENCY_3 = 0.75;
 const SAME_CORPS_EFFICIENCY_2 = 0.9;
 const SAME_CORPS_EFFICIENCY_3 = 0.82;
 const OG_COORDINATION_BONUS = 1.1;
+/** n1300: per-point competence adjustment to coordination efficiency (±4% per point from baseline 3). */
+const COORDINATION_COMPETENCE_STEP = 0.04;
+const DEFAULT_OFFICER_COMPETENCE_BATTLE = 3;
 const DEFENDER_OUTNUMBERED_BONUS = 1.15;
 const MAX_ATTACKERS_PER_TARGET = 12;
 const LINKING_DEFENSE_BONUS = 1.1;
@@ -264,6 +267,26 @@ export interface BattleResolutionReport {
 // ═══════════════════════════════════════════════════════════════════════════
 // Helpers
 // ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * n1300: Coordination penalty/bonus factor from corps commander competence.
+ * effN_adjusted = effN_base × (1.0 - (3 - competence_int) × 0.04)
+ * competence 5 → +8%, 3 → neutral, 1 → -8%. Clamped [0.85, 1.10].
+ */
+function getCoordinationCompetenceFactor(state: GameState, corpsId: string | undefined): number {
+    if (!corpsId) return 1.0;
+    const officers = state.military.named_officers;
+    const officerData = state.military.named_officer_data;
+    if (!officers || !officerData) return 1.0;
+    let competence = DEFAULT_OFFICER_COMPETENCE_BATTLE;
+    for (const [officerId, os] of Object.entries(officers)) {
+        if (os.assigned_corps_id !== corpsId || os.status !== 'active') continue;
+        const data = officerData.find(o => o.id === officerId);
+        if (data) { competence = Math.max(1, Math.min(5, data.competence)); break; }
+    }
+    const factor = 1.0 - (DEFAULT_OFFICER_COMPETENCE_BATTLE - competence) * COORDINATION_COMPETENCE_STEP;
+    return clamp(factor, 0.85, 1.10);
+}
 
 function buildAdjacency(edges: EdgeRecord[]): Map<SettlementId, SettlementId[]> {
     const adj = new Map<SettlementId, SettlementId[]>();
@@ -898,9 +921,13 @@ export function resolveBattleOrders(
             return corpsId && formations[corpsId] && attackerIds.every(o => formations[o]?.corps_id === corpsId);
         });
         const hasOG = attackerIds.some(id => (formations[id]?.kind ?? 'brigade') === 'operational_group' || formations[id]?.kind === 'og');
-        const effN = attackerIds.length === 1 ? 1 : attackerIds.length === 2
+        const effNBase = attackerIds.length === 1 ? 1 : attackerIds.length === 2
             ? (sameCorps ? SAME_CORPS_EFFICIENCY_2 : MULTI_BRIGADE_EFFICIENCY_2)
             : (sameCorps ? SAME_CORPS_EFFICIENCY_3 : MULTI_BRIGADE_EFFICIENCY_3);
+        // n1300: scale multi-brigade coordination efficiency by corps commander competence (±4%/point from baseline 3)
+        const attackerCorpsId = formations[attackerIds[0]!]?.corps_id ?? undefined;
+        const coordFactor = attackerIds.length > 1 ? getCoordinationCompetenceFactor(state, attackerCorpsId) : 1.0;
+        const effN = effNBase * coordFactor;
         const ogMult = hasOG ? OG_COORDINATION_BONUS : 1;
         for (const aid of attackerIds) {
             const rawGarrison = formations[aid]?.personnel ?? 0;
