@@ -200,6 +200,13 @@ export function classifyBrigadesByTerritory(
             if (!fCorpsId) continue;
             const sector = sectorById.get(sectorId);
             if (!sector || sector.corps_id !== fCorpsId) continue; // stale/wrong corps — fall through
+            if (!f.location_osid) continue;
+            const brigComp = componentOf.get(f.location_osid) ?? -2;
+            const sectorComp = getSectorComponent(sector, componentOf);
+            if (sectorComp !== brigComp) {
+                console.warn(`[brigade_assignment] Ignored stale player override ${bid} -> ${sector.sector_id}: component ${brigComp} cannot reach component ${sectorComp}`);
+                continue;
+            }
             sector.assigned_brigade_ids.push(bid);
             playerOverridden.add(bid);
         }
@@ -656,6 +663,26 @@ export function classifyBrigadesByTerritory(
                 const frontSet = frontBySector.get(sector.sector_id) ?? new Set<string>();
                 const reachCurrent = friendlyDistanceToAny(f.location_osid, frontSet, adjacency, friendlyOsids, PHASE_2C_MAX_HOPS);
                 if (reachCurrent != null) continue;
+                const brigComp = componentOf.get(f.location_osid) ?? -2;
+                const territoryMatches = sectors
+                    .filter(s =>
+                        s.corps_id === sector.corps_id
+                        && s.sector_id !== sector.sector_id
+                        && s.territory_osids.includes(f.location_osid!)
+                        && getSectorComponent(s, componentOf) === brigComp
+                    )
+                    .sort((a, b) => {
+                        const aNeed = a.length_edges - a.assigned_brigade_ids.length;
+                        const bNeed = b.length_edges - b.assigned_brigade_ids.length;
+                        return bNeed - aNeed || strictCompare(a.sector_id, b.sector_id);
+                    });
+                if (territoryMatches.length > 0) {
+                    const idx = sector.assigned_brigade_ids.indexOf(bid);
+                    if (idx >= 0) sector.assigned_brigade_ids.splice(idx, 1);
+                    territoryMatches[0]!.assigned_brigade_ids.push(bid);
+                    console.warn(`[brigade_assignment] Reassigned unreachable ${bid} from ${sector.sector_id} to territory-owning ${territoryMatches[0]!.sector_id}`);
+                    continue;
+                }
                 const sameCorps = sectors
                     .filter(s => s.corps_id === sector.corps_id && s.sector_id !== sector.sector_id)
                     .map(s => {

@@ -41,6 +41,34 @@ Why:
 - that allowed a late commander override to recreate a cross-component sector assignment after the earlier sector pipeline had already been made more honest
 - this was the strongest root-cause candidate for the surviving `rs_skelani_battalion -> sector:vrs_drina:1` invariant violation
 
+### 3. Guarded player sector overrides against stale cross-component intent
+
+File:
+- `src/sim/combat/brigade_assignment.ts`
+
+Change:
+- player-driven `brigade_sector_override` now only pins a brigade when the target sector is in the same connected component as the brigade's current location
+- stale overrides are ignored and logged instead of being written into sector truth
+
+Why:
+- the live player shell could carry forward old sector intent after combat retreat, relocation, or loan/recall movement
+- before this fix, the override path only enforced "same corps", not "same reachable geography"
+- that made persisted player intent a late-turn truth leak
+
+### 4. Rescue pass now prefers territory-owning same-corps sectors before giving up
+
+File:
+- `src/sim/combat/brigade_assignment.ts`
+
+Change:
+- when an assigned brigade's current sector becomes unreachable, the rescue pass now first checks whether another same-corps sector already truthfully owns the brigade's current `location_osid`
+- if so, the brigade is moved there before the old short-hop front-reachability fallback runs
+
+Why:
+- the old rescue path only asked "can you reach some other sector's front in 4 hops?"
+- that was too narrow for deep-rear brigades already standing inside another sector's territory
+- it contradicted the broader sector rule that deep-rear brigades can stay assigned truthfully and march forward later
+
 ## Tests
 
 Added:
@@ -48,11 +76,14 @@ Added:
 
 Updated:
 - `tests/pre_planned_operations.test.ts`
+- `tests/brigade_territory_reconciliation.test.ts`
 
 What is now covered:
 - queued runtime validation still warns when a real brigade is truly missing at injection time
 - `Operation Foca` no longer depends on a phantom that predictably disappears before queue time
 - commander viability overrides never move an exposed brigade into a different connected component
+- stale player sector overrides are ignored when geography has drifted into another component
+- unreachable brigades are rescued into territory-owning same-corps sectors before being marked unresolved
 
 ## Verification
 

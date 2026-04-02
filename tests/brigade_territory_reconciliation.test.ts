@@ -528,4 +528,112 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
         expect(recipient.assigned_brigade_ids).toEqual([]);
         expect(donor.assigned_brigade_ids).toEqual(['brig_donor_a', 'brig_donor_b']);
     });
+
+    it('rescues an unreachable brigade into another same-corps sector that truthfully owns its territory', () => {
+        const wrongSector = makeSector(
+            'sector:vrs_drina:0',
+            'vrs_drina',
+            [makeSubSeg('wrong', ['op:m:front_wrong'], ['op:m:enemy_1'], 3)],
+            ['op:m:front_wrong'],
+        );
+        const correctSector = makeSector(
+            'sector:vrs_drina:1',
+            'vrs_drina',
+            [makeSubSeg('correct', ['op:m:front_correct'], ['op:m:enemy_2'], 3)],
+            ['op:m:front_correct', 'op:m:rear_correct'],
+        );
+
+        const brig = makeFormation({
+            id: 'brig_rehome',
+            location_osid: 'op:m:rear_correct',
+            corps_id: 'vrs_drina',
+        });
+
+        const formations: Record<FormationId, FormationState> = {
+            brig_rehome: brig,
+        };
+
+        const componentOf = makeComponentOf({
+            'op:m:front_wrong': 0,
+            'op:m:front_correct': 0,
+            'op:m:rear_correct': 0,
+        });
+
+        const adjacency = makeAdjacency([
+            ['op:m:rear_correct', 'op:m:front_correct'],
+        ]);
+
+        const friendlyOsids = new Set(['op:m:front_wrong', 'op:m:front_correct', 'op:m:rear_correct']);
+        const commanderProfiles = new Map<string, CorpsCommanderProfile>();
+
+        classifyBrigadesByTerritory(
+            [wrongSector, correctSector],
+            'RS' as FactionId,
+            formations,
+            adjacency,
+            friendlyOsids,
+            componentOf,
+            commanderProfiles,
+            { brig_rehome: 'sector:vrs_drina:0' },
+            {
+                meta: { turn: 0 } as any,
+                military: { formations } as any,
+            } as any,
+        );
+
+        expect(wrongSector.assigned_brigade_ids).not.toContain('brig_rehome');
+        expect(correctSector.assigned_brigade_ids).toContain('brig_rehome');
+    });
+
+    it('ignores stale player overrides that point into a different connected component', () => {
+        const correctSector = makeSector(
+            'sector:vrs_drina:0',
+            'vrs_drina',
+            [makeSubSeg('correct', ['op:m:front_a'], ['op:m:enemy_1'], 3)],
+            ['op:m:front_a', 'op:m:rear_a'],
+        );
+        const staleSector = makeSector(
+            'sector:vrs_drina:1',
+            'vrs_drina',
+            [makeSubSeg('stale', ['op:m:front_b'], ['op:m:enemy_2'], 3)],
+            ['op:m:front_b'],
+        );
+
+        const brig = makeFormation({
+            id: 'brig_override_guard',
+            location_osid: 'op:m:rear_a',
+            corps_id: 'vrs_drina',
+        });
+
+        const formations: Record<FormationId, FormationState> = {
+            brig_override_guard: brig,
+        };
+
+        const componentOf = makeComponentOf({
+            'op:m:front_a': 0,
+            'op:m:rear_a': 0,
+            'op:m:front_b': 1,
+        });
+
+        const adjacency = makeAdjacency([
+            ['op:m:rear_a', 'op:m:front_a'],
+        ]);
+
+        const friendlyOsids = new Set(['op:m:front_a', 'op:m:rear_a', 'op:m:front_b']);
+        const commanderProfiles = new Map<string, CorpsCommanderProfile>();
+
+        classifyBrigadesByTerritory(
+            [correctSector, staleSector],
+            'RS' as FactionId,
+            formations,
+            adjacency,
+            friendlyOsids,
+            componentOf,
+            commanderProfiles,
+            { brig_override_guard: 'sector:vrs_drina:1' },
+        );
+
+        expect(staleSector.assigned_brigade_ids).not.toContain('brig_override_guard');
+        expect(correctSector.assigned_brigade_ids).toContain('brig_override_guard');
+    });
 });

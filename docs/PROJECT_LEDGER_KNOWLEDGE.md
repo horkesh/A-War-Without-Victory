@@ -1665,6 +1665,10 @@ If the visible queue entry is humanized but the `title=` attribute still carries
 
 If sector assignment and coverage passes are made honest, do not assume the job is done. In AWWV, `commander_override.ts` was still able to move an exposed brigade into the corps' globally "safest" sector without respecting connected-component truth, recreating a reachability invariant violation late in the pipeline. When chasing surviving sector mismatches, always inspect the post-assignment review/mutation layers, not just the main assignment passes.
 
+### Persisted player intent must never outrank current geography
+
+`brigade_sector_override` looked harmless because it belonged to the player shell, but it was still writing directly into sector truth. If a brigade retreats or relocates into another connected component, an old override becomes stale intent and must be ignored instead of reapplied. In this repo, shell persistence can be just as dangerous as AI logic if it is allowed to bypass current spatial truth.
+
 ### Stale scenario-authored brigade references are different from runtime missing-brigade failures
 
 `Operation Foca` still carried `jna_mostar_garrison_tg` even though the brigade predictably withdraws before queued injection time. That warning looked like a runtime integrity failure, but the real problem was stale authored data. When queued-op warnings appear, first ask whether the brigade is supposed to exist at that lifecycle moment before changing validation logic.

@@ -21262,6 +21262,12 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
   - fresh run `runs/apr1992_definitive_40w__d452d2a10f3d69af__w40_n1300`
   - final hash `d5fe7dbb0d98b360`
   - the earlier `rs_skelani_battalion -> sector:vrs_drina:1` reachability invariant no longer appeared in the new run
+- Additional hardening in the same lane:
+  - stale `brigade_sector_override` entries are now ignored when they point into another connected component
+  - late rescue of unreachable brigades now prefers another same-corps sector that already truthfully owns the brigade's current territory before marking it unresolved
+- Added regressions in `tests/brigade_territory_reconciliation.test.ts` for:
+  - stale player overrides
+  - territory-owning sector rescue
 - Follow-on swamp still visible:
   - late-turn honest unresolved brigades remain in `vrs_1st_krajina`, `hvo_central_bosnia`, and some loaned reserve cases
   - next wave should target sectors that become unreachable over time, not the already-fixed commander viability leak
