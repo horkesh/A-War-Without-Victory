@@ -1611,7 +1611,7 @@ app.whenReady().then(() => {
     try {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
-      const result = sim.approveReserveRequest(state, corpsId, brigadeId, typeof reason === 'string' ? reason : undefined);
+      const result = await sim.approveReserveRequest(state, corpsId, brigadeId, typeof reason === 'string' ? reason : undefined, getBaseDir());
       if (!result.ok) return result;
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);
@@ -1665,7 +1665,7 @@ app.whenReady().then(() => {
     try {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
-      const result = sim.redirectReserveLoan(state, brigadeId, newCorpsId);
+      const result = await sim.redirectReserveLoan(state, brigadeId, newCorpsId, getBaseDir());
       if (!result.ok) return result;
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);

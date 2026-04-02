@@ -87,6 +87,7 @@ import {
     type CombatCausalityInvalidationReason,
     type CombatCausalitySummary
 } from './combat_causality.js';
+import { buildOsidAdjacency } from '../sim/combat/osid_adjacency.js';
 import {
     countInitOverrideChanges,
     mergeControlChangeAttributionSummaries,
@@ -1362,7 +1363,14 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             initializeCorpsCommand(state);
             spawnJnaPhantomBrigades(state);
             initializeCorpsCommand(state); // re-init after JNA spawn to pick up synthetic JNA corps
-            injectPrePlannedOperations(state);
+            let prePlannedAdjacency;
+            try {
+                const preEdges = await loadOperationalEdges(baseDir);
+                if (preEdges?.length) prePlannedAdjacency = buildOsidAdjacency(preEdges);
+            } catch {
+                // Operational edges may be missing in niche harness contexts.
+            }
+            injectPrePlannedOperations(state, prePlannedAdjacency);
         }
         if (operationalData?.canonicalToOperational) {
             backfillFormationLocationOsid(state, operationalData.canonicalToOperational);

@@ -21278,3 +21278,36 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - Follow-on swamp still visible:
   - late-turn unresolveds are now concentrated much more narrowly in `hrhb_travnik_brigade`, some loaned reserve brigades, and a smaller ARBiH mountain/reconcentration set
   - next wave should target why those brigades truly have no same-component sector, not the already-fixed commander/override/trap leaks
+
+## 2026-04-03 - Sector territory and elite-loan truth canonicalization
+
+- Root cause findings:
+  - `sector_territory.ts` was still laundering orphan territory across corps boundaries in both the post-Voronoi orphan sweep and disconnected-territory repair
+  - elite-loan truth was still split across bot assignment, pre-planned-op injection, and desktop player approval/redirect paths
+- Canonicalization work:
+  - orphan territory claiming now respects truthful owner corps; disconnected components no longer get silently reassigned into another corps
+  - on-loan elites now route toward their receiving corps in `bot_brigade_eval_front.ts`
+  - redeploying an elite clears stale homeward movement orders/state
+  - `tickEliteLoans(...)` now auto-recalls stranded loans with no friendly route to receiving-corps sector territory
+  - a shared route-validity helper in `army_reserve_system.ts` now gates:
+    - bot reserve auto-assignment
+    - queued / scenario-start pre-planned elite deployment
+    - desktop player approve / redirect reserve actions
+- Files:
+  - `src/sim/combat/sector_territory.ts`
+  - `src/sim/combat/army_reserve_system.ts`
+  - `src/sim/combat/bot_brigade_eval_front.ts`
+  - `src/sim/combat/pre_planned_operations.ts`
+  - `src/scenario/scenario_runner.ts`
+  - `src/sim/turn_phases/war_phases.ts`
+  - `src/desktop/desktop_sim.ts`
+  - `src/desktop/electron-main.cjs`
+- Tests:
+  - added `tests/elite_loan_return_to_corps.test.ts`
+  - updated `tests/army_reserve_system.test.ts`, `tests/pre_planned_operations.test.ts`, `tests/sector_territory_contiguity_repair.test.ts`
+- Verification:
+  - `node .\\node_modules\\vitest\\vitest.mjs run tests\\army_reserve_system.test.ts tests\\sector_territory_contiguity_repair.test.ts tests\\elite_loan_return_to_corps.test.ts tests\\brigade_territory_reconciliation.test.ts tests\\pre_planned_operations.test.ts`
+  - `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\commander_override_reachability.test.ts tests\\pre_planned_operations.test.ts tests\\scenario_activity_truth.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+- Important note:
+  - repo-wide `tsc --noEmit` still reports unrelated pre-existing UI/test debt outside this slice; focused truth/loan/sector suites are green

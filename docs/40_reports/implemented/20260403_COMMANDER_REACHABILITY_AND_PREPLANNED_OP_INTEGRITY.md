@@ -136,3 +136,79 @@ The sector lane is still not "finished":
   - loaned army-reserve brigades that still cannot find a truthful receiving sector
 
 But this slice removed one fake queued-op warning and one real late-stage truth leak instead of papering over either of them.
+
+## Follow-up: sector territory and elite-loan truth
+
+After the `n1302` run narrowed the remaining unresolved set, the next root-cause pass found two deeper truth failures:
+
+1. `sector_territory.ts` still had cross-corps territory laundering:
+   - post-Voronoi orphan claiming could hand an unclaimed friendly OSID to the nearest already-claimed sector even when that sector belonged to another corps
+   - disconnected-territory repair could reassign orphan components to adjacent sectors of another corps
+2. elite-loan lifecycle truth was still split:
+   - on-loan elites could keep stale homeward movement from an earlier recall
+   - queued pre-planned operations could still count exempt-corps elites as participants even when no truthful friendly route to the receiving corps sector territory existed
+   - desktop player approve/redirect paths did not yet share the same route-validity gate as bot reserve assignment
+
+### Additional changes
+
+Files:
+- `src/sim/combat/sector_territory.ts`
+- `src/sim/combat/army_reserve_system.ts`
+- `src/sim/combat/bot_brigade_eval_front.ts`
+- `src/sim/combat/pre_planned_operations.ts`
+- `src/scenario/scenario_runner.ts`
+- `src/sim/turn_phases/war_phases.ts`
+- `src/desktop/desktop_sim.ts`
+- `src/desktop/electron-main.cjs`
+
+What changed:
+- sector territory orphan claiming now respects truthful owner corps when one exists; unclaimed friendly OSIDs no longer get silently laundered into a neighboring corps during the post-Voronoi sweep
+- disconnected territory repair now only reassigns orphan components to sectors of the same corps
+- on-loan elites now route toward the receiving corps in `evaluateReturnToCorps(...)` instead of reasoning from their original `corps_id`
+- redeploying an elite loan now clears stale `brigade_movement_orders` / `brigade_movement_state` so a recalled brigade cannot stay "on loan" while marching home on an old order
+- `tickEliteLoans(...)` now recalls a loan that no longer has any friendly route to receiving-corps sector territory
+- a canonical helper now answers one question across loan callers: can this elite truthfully reach the receiving corps sector territory?
+- queued pre-planned operations now use the same route-validity gate before counting exempt-corps elites as participating brigades
+- scenario-start and queued pre-planned injections now receive adjacency so they can use the same truthful gate
+- desktop player approve/redirect reserve actions now validate the same route truth before mutating loan state
+
+### Tests
+
+Added:
+- `tests/elite_loan_return_to_corps.test.ts`
+
+Updated:
+- `tests/army_reserve_system.test.ts`
+- `tests/pre_planned_operations.test.ts`
+- `tests/sector_territory_contiguity_repair.test.ts`
+
+What is now covered:
+- disconnected orphan territory is not reassigned across corps boundaries
+- the post-Voronoi sweep does not launder orphan territory into another corps
+- on-loan elites route toward the receiving corps's territory
+- redeploying a recalled elite clears stale homeward movement
+- bot reserve assignment does not auto-deploy an elite if no friendly route to receiving-corps sector territory exists
+- queued pre-planned injection does not count unreachable exempt-corps elites as operation participants
+- stranded loans are auto-recalled when the receiving corps sector territory becomes unreachable
+
+### Verification
+
+Focused tests:
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\army_reserve_system.test.ts tests\\sector_territory_contiguity_repair.test.ts tests\\elite_loan_return_to_corps.test.ts tests\\brigade_territory_reconciliation.test.ts tests\\pre_planned_operations.test.ts`
+- `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\commander_override_reachability.test.ts tests\\pre_planned_operations.test.ts tests\\scenario_activity_truth.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+Note:
+- `npx.cmd tsc --noEmit -p tsconfig.json` still reports unrelated pre-existing UI/test debt outside this slice; the focused engine/loan/sector suites for this work are green
+
+### Outcome
+
+The remaining unresolved bucket is now much closer to real engine truth:
+- cross-corps territory contamination is no longer silently rewriting sector ownership
+- elite-loan truth is more centralized around one route-validity rule instead of separate bot/preplanned/player assumptions
+
+This does **not** mean the whole loan/frontline swamp is gone. The next major authority pockets are:
+- remaining compatibility truth in `front_assignment.ts` / `local_front_defense.ts`
+- the player shell's still-too-broad ingress boundary (`GameStateAdapter`, Army HQ threat generation, and one remaining operation modal bypass)
+
+But this follow-up removes another pair of false-authority writers instead of adding more exceptions around them.

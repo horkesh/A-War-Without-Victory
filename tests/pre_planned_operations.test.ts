@@ -11,6 +11,7 @@ import type {
     FormationState,
     GameState,
 } from '../src/state/game_state.js';
+import type { Osid } from '../src/sim/combat/osid_adjacency.js';
 
 function makeMinimalState(): GameState {
     const formations: Record<string, FormationState> = {};
@@ -209,6 +210,51 @@ describe('pre-planned operations', () => {
             ),
             'queued Foca injection should still warn about truly missing brigades'
         );
+    });
+
+    it('does not inject unreachable exempt-corps elites into queued operations', () => {
+        const state = makeMinimalState();
+        const opDef = _ALL_PRE_PLANNED.find((def) => def.corps === 'arbih_2nd_corps');
+        assert.ok(opDef, 'ARBiH 2nd Corps pre-planned op must exist');
+        state.meta.turn = opDef!.available_from ?? 15;
+
+        const elite = state.military.formations!['arbih_120th_liberation_black_swans']!;
+        elite.corps_id = 'arbih_general_staff';
+        elite.location_osid = 'op:mun:o0';
+        elite.home_osid = 'op:mun:o0';
+        elite.elite_loan_state = {
+            on_loan: false,
+            loaned_to_corps: null,
+            loan_start_turn: null,
+            last_recall_turn: null,
+            loan_start_personnel: null,
+            permanently_degraded: false,
+            current_episode_id: null,
+        } as any;
+        state.military.corps_front_sectors!['sector:arbih_2nd_corps:0']!.territory_osids = ['op:mun:o2'];
+        state.military.corps_front_sectors!['sector:arbih_2nd_corps:0']!.assigned_brigade_ids =
+            state.military.corps_front_sectors!['sector:arbih_2nd_corps:0']!.assigned_brigade_ids.filter((id) => id !== 'arbih_120th_liberation_black_swans');
+        state.political.political_controllers = {
+            ...state.political.political_controllers,
+            'op:mun:o0': 'RBiH',
+            'op:mun:o1': 'RS',
+            'op:mun:o2': 'RBiH',
+        } as any;
+        state.military.corps_command!.arbih_2nd_corps!.active_operations = [];
+        state.military.corps_command!.arbih_2nd_corps!.queued_operations = [opDef!.name];
+
+        const adjacency = new Map<Osid, Osid[]>([
+            ['op:mun:o0' as Osid, ['op:mun:o1' as Osid]],
+            ['op:mun:o1' as Osid, ['op:mun:o0' as Osid, 'op:mun:o2' as Osid]],
+            ['op:mun:o2' as Osid, ['op:mun:o1' as Osid]],
+        ]);
+
+        const injected = injectQueuedOperation(state, 'arbih_2nd_corps', adjacency);
+
+        assert.equal(injected, true);
+        const op = state.military.corps_command!.arbih_2nd_corps!.active_operations[0]!;
+        assert.ok(!op.participating_brigades.includes('arbih_120th_liberation_black_swans'));
+        assert.equal(elite.elite_loan_state!.on_loan, false);
     });
 
     it('does not pin queued Operation Foca to a phantom that predictably withdraws before queue time', () => {

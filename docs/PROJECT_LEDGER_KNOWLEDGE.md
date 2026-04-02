@@ -1676,3 +1676,15 @@ In AWWV, `PHASE_2C_MAX_HOPS` is a distribution cap for assigning pooled brigades
 ### Stale scenario-authored brigade references are different from runtime missing-brigade failures
 
 `Operation Foca` still carried `jna_mostar_garrison_tg` even though the brigade predictably withdraws before queued injection time. That warning looked like a runtime integrity failure, but the real problem was stale authored data. When queued-op warnings appear, first ask whether the brigade is supposed to exist at that lifecycle moment before changing validation logic.
+
+### Territory repair must never launder ownership across corps boundaries
+
+In AWWV, disconnected-territory repair and orphan territory sweeps are not neutral cleanup passes. If they can hand an OSID to the nearest same-faction sector regardless of corps, they silently rewrite sector truth and then force brigade assignment to solve a contradiction the territory layer itself created. If an OSID has a truthful owner corps, only same-corps sectors may claim it; otherwise it should stay unresolved rather than being laundered.
+
+### Elite-loan validity must be one shared rule across bot, preplanned, and player paths
+
+The dangerous split is not multiple `deployEliteLoan(...)` functions. The dangerous split is different callers using different ideas of whether a loan is actually possible. In AWWV, reserve auto-assignment, queued pre-planned elite deployment, and desktop approve/redirect actions all need the same question answered from the same helper: can this brigade reach the receiving corps's sector territory through friendly space right now?
+
+### On-loan elites must obey the receiving corps, not their original corps metadata
+
+An elite brigade can stay owned by Main Staff in `corps_id` while still being operationally attached elsewhere. Any return-to-corps, homeward movement, or sector-assignment logic that reasons from original `corps_id` while `elite_loan_state.on_loan` is true will eventually create contradictory states: on-loan brigades marching home, sitting unresolved, or getting assigned to the wrong corps' sector truth.

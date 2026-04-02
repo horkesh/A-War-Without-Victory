@@ -242,8 +242,12 @@ export function evaluateReturnToCorps(ctx: BrigadeEvaluationContext): boolean {
         if ((s.reserve_brigade_ids ?? []).includes(brigade.id)) return false;
     }
 
-    // Check: is the brigade in ANY of its own corps's sector territories?
-    const corpsId = brigade.corps_id;
+    // Check: is the brigade in ANY of its target corps's sector territories?
+    // Elite reserve loans remain owned by main staff in corps_id, but while on
+    // loan they should route toward the receiving corps's sector footprint.
+    const corpsId = brigade.elite_loan_state?.on_loan
+        ? brigade.elite_loan_state.loaned_to_corps
+        : brigade.corps_id;
     if (!corpsId) return false;
     for (const s of Object.values(sectors)) {
         if (s.corps_id === corpsId && s.territory_osids.includes(loc)) return false;

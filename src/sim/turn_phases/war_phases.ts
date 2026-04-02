@@ -838,12 +838,14 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             const cc = context.state.military.corps_command;
             if (!cc) return;
+            const spatial = getSpatialContextCache(context);
+            const adjacency = spatial?.preCombat.adjacency as Map<Osid, Osid[]> | undefined;
             for (const corpsId of Object.keys(cc).sort()) {
                 const cmd = cc[corpsId];
                 // Queued pre-planned ops are sequential and occupy slot 0.
                 // Bot AI ops in other slots do NOT block queue injection.
                 if (cmd?.queued_operations?.length && isSlot0AvailableForQueue(cmd)) {
-                    injectQueuedOperation(context.state, corpsId);
+                    injectQueuedOperation(context.state, corpsId, adjacency);
                 }
             }
         }
@@ -1808,7 +1810,8 @@ export const warPhases: NamedPhase[] = [
         name: 'tick-elite-loans',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            tickEliteLoans(context.state, context.state.meta.turn);
+            const spatial = getSpatialContextCache(context);
+            tickEliteLoans(context.state, context.state.meta.turn, spatial?.preCombat.adjacency as Map<Osid, Osid[]> | undefined);
         }
     },
     {

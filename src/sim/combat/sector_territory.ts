@@ -335,9 +335,13 @@ export function assignTerritoryVoronoi(
 
     // Post-Voronoi sweep: claim any unclaimed friendly OSIDs that BFS missed.
     // These are interior OSIDs not reachable from front edges because all paths
-    // to them went through territory belonging to a different corps. Assign them
-    // to the nearest sector (by hop count through friendly territory, ignoring
-    // corps boundaries) so they get sector-pooled defense.
+    // to them went through territory belonging to a different corps.
+    //
+    // IMPORTANT: this sweep must not launder an orphaned OSID into a different
+    // corps simply because that corps already has the nearest claimed territory.
+    // If a truthful owner corps exists in osidToCorps, only same-corps sectors
+    // may claim it here. Otherwise the OSID must stay unclaimed and surface as
+    // unresolved rather than silently contaminating another corps's territory.
     const unclaimed: string[] = [];
     for (const osid of friendlyOsids) {
         if (!claimed.has(osid)) unclaimed.push(osid);
@@ -347,6 +351,7 @@ export function assignTerritoryVoronoi(
         // BFS from each unclaimed OSID to find nearest claimed OSID
         unclaimed.sort(strictCompare);
         for (const orphan of unclaimed) {
+            const ownerCorps = osidToCorps?.get(orphan as Osid) ?? null;
             const visited = new Set<string>([orphan]);
             let frontier = [orphan];
             let found = false;
@@ -360,6 +365,7 @@ export function assignTerritoryVoronoi(
                         if (claimed.has(n)) {
                             // Assign orphan to the same sector as this neighbor
                             const sIdx = claimed.get(n)!;
+                            if (ownerCorps && sectors[sIdx]!.corps_id !== ownerCorps) continue;
                             // No territory cap — claim orphan unconditionally.
                             claimed.set(orphan, sIdx);
                             found = true;
@@ -470,11 +476,14 @@ export function repairDisconnectedTerritory(
         sector.territory_osids = [...kept].sort(strictCompare);
         anyRepair = true;
 
-        // Reassign orphaned components to adjacent sectors.
-        for (let ci = 0; ci < components.length; ci++) {
-            if (ci === largestIdx) continue;
-            const orphan = components[ci]!;
-            const orphanOsids = [...orphan].sort(strictCompare);
+            // Reassign orphaned components to adjacent sectors.
+            // Never hand a disconnected orphan to another corps here; if the
+            // original corps cannot retain it contiguously, surfacing the gap
+            // is more truthful than laundering the territory across corps lines.
+            for (let ci = 0; ci < components.length; ci++) {
+                if (ci === largestIdx) continue;
+                const orphan = components[ci]!;
+                const orphanOsids = [...orphan].sort(strictCompare);
 
             // Find the best adjacent sector for this orphan component.
             // "Adjacent" = any OSID in the orphan has an adjacency neighbor that
@@ -482,16 +491,17 @@ export function repairDisconnectedTerritory(
             let bestSectorIdx = -1;
             let bestSectorSize = -1;
             for (const osid of orphanOsids) {
-                const neighbors = adjacency.get(osid as Osid) ?? [];
-                for (const n of neighbors) {
-                    if (orphan.has(n)) continue; // same orphan component
-                    const claimingSectors = territoryIndex.get(n);
-                    if (!claimingSectors) continue;
-                    for (const candidateSi of claimingSectors) {
-                        if (candidateSi === si) continue; // skip the sector we just split from
-                        // Prefer the sector with the most territory (stable reassignment).
-                        const candidateSize = sectors[candidateSi]!.territory_osids.length;
-                        if (candidateSize > bestSectorSize ||
+                    const neighbors = adjacency.get(osid as Osid) ?? [];
+                    for (const n of neighbors) {
+                        if (orphan.has(n)) continue; // same orphan component
+                        const claimingSectors = territoryIndex.get(n);
+                        if (!claimingSectors) continue;
+                        for (const candidateSi of claimingSectors) {
+                            if (candidateSi === si) continue; // skip the sector we just split from
+                            if (sectors[candidateSi]!.corps_id !== sector.corps_id) continue;
+                            // Prefer the sector with the most territory (stable reassignment).
+                            const candidateSize = sectors[candidateSi]!.territory_osids.length;
+                            if (candidateSize > bestSectorSize ||
                             (candidateSize === bestSectorSize && bestSectorIdx >= 0 &&
                                 strictCompare(sectors[candidateSi]!.sector_id, sectors[bestSectorIdx]!.sector_id) < 0)) {
                             bestSectorSize = candidateSize;

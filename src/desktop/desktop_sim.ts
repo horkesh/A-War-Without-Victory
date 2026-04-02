@@ -40,7 +40,8 @@ import type { EquipmentClass } from '../state/recruitment_types.js';
 import { isValidEquipmentClass } from '../state/recruitment_types.js';
 import { deserializeState, serializeState } from '../state/serialize.js';
 import { strictCompare } from '../state/validateGameState.js';
-import { deployEliteLoan, recallEliteLoan } from '../sim/combat/army_reserve_system.js';
+import type { Osid } from '../sim/combat/osid_adjacency.js';
+import { canEliteLoanReachCorpsTerritory, deployEliteLoan, recallEliteLoan } from '../sim/combat/army_reserve_system.js';
 
 function settlementGraphOptions(baseDir: string): { settlementsPath: string; edgesPath: string } {
     return {
@@ -413,6 +414,11 @@ import {
 let cachedOpData: Awaited<ReturnType<typeof loadOperationalData>> | null = null;
 let cachedEdges: Awaited<ReturnType<typeof loadOperationalEdges>> | null = null;
 
+async function getCachedOsidAdjacency(baseDir: string): Promise<Map<Osid, Osid[]>> {
+    if (!cachedEdges) cachedEdges = await loadOperationalEdges(baseDir);
+    return buildOsidAdjacency(cachedEdges);
+}
+
 export async function queryOperationPrediction(
     state: GameState,
     request: OperationPredictionRequest,
@@ -675,17 +681,22 @@ export function assignBrigadeToSector(
 }
 
 /** Player approves a pending reserve request, deploying the suggested (or specified) brigade. */
-export function approveReserveRequest(
+export async function approveReserveRequest(
     state: GameState,
     corpsId: string,
     brigadeId: string,
-    decisionReason?: string
-): { ok: true } | { ok: false; error: string } {
+    decisionReason?: string,
+    baseDir?: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
     const f = state.military.formations?.[brigadeId];
     if (!f) return { ok: false, error: `Brigade not found: ${brigadeId}` };
     if (!f.elite_loan_state) return { ok: false, error: `${brigadeId} is not an elite brigade` };
     if (f.elite_loan_state.on_loan) return { ok: false, error: `${brigadeId} is already on loan` };
     if (f.elite_loan_state.permanently_degraded) return { ok: false, error: `${brigadeId} has permanently lost elite status` };
+    if (!baseDir) return { ok: false, error: 'Base directory required to validate reserve deployment route' };
+    if (!canEliteLoanReachCorpsTerritory(state, brigadeId, corpsId, await getCachedOsidAdjacency(baseDir))) {
+        return { ok: false, error: `No friendly route from ${brigadeId} to ${corpsId} sector territory` };
+    }
     // Find the pending request to get the reason; fall back to 'offensive_support'
     const req = state.military.pending_reserve_requests?.find(r => r.corps_id === corpsId);
     const reason = req?.reason ?? 'offensive_support';
@@ -797,14 +808,19 @@ export function recallEliteBrigade(
 }
 
 /** Player redirects a loaned elite brigade to a different corps (recall + re-deploy). */
-export function redirectReserveLoan(
+export async function redirectReserveLoan(
     state: GameState,
     brigadeId: string,
-    newCorpsId: string
-): { ok: true } | { ok: false; error: string } {
+    newCorpsId: string,
+    baseDir?: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
     const f = state.military.formations?.[brigadeId];
     if (!f) return { ok: false, error: `Brigade not found: ${brigadeId}` };
     if (!f.elite_loan_state) return { ok: false, error: `${brigadeId} is not an elite brigade` };
+    if (!baseDir) return { ok: false, error: 'Base directory required to validate reserve redeployment route' };
+    if (!canEliteLoanReachCorpsTerritory(state, brigadeId, newCorpsId, await getCachedOsidAdjacency(baseDir))) {
+        return { ok: false, error: `No friendly route from ${brigadeId} to ${newCorpsId} sector territory` };
+    }
     if (f.elite_loan_state.on_loan) {
         recallEliteLoan(state, brigadeId, 'player_recall', state.meta.turn);
     }
