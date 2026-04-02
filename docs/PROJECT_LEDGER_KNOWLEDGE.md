@@ -1502,3 +1502,6 @@ In AWWV, NewspaperModal, Chronicle builders, and Warroom data extractors are not
 ### Shared frontline helpers must not union old and new authority paths once the new path exists
 
 In AWWV, `buildFrontlineAssignedFormationSet(...)` feeds battle eligibility, posture, fatigue, and reporting. If that helper unions corps sectors with legacy `brigade_front_assignment`, stale legacy data can keep extra brigades frontline forever. Once sectors exist, they should be authoritative; legacy front assignment should become fallback-only rather than “safety net truth.”
+### Loaded-state defaults are another authority layer
+
+In AWWV, `GameStateAdapter` is not just a parser; it defines the default vocabulary many UI panels inherit. If formation names, officer names, or fired-event titles fall back to raw ids there, the leak spreads widely. Hardening the view model is often more effective than fixing half a dozen leaf panels one by one.

@@ -14,7 +14,7 @@ import { getFormationCommander } from '../utils/officerUtils';
 import { OfficerProfile } from './OfficerProfile';
 import { BrigadeRow } from './BrigadeRow';
 import { TabBar } from './TabBar';
-import { toTitleCase } from '../utils/formatters';
+import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
 import { aggregateEffectiveness } from '../utils/combatEffectiveness';
 import { Icon } from './icons/Icon';
 
@@ -116,7 +116,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
   const corpsColor = corpsColorMap[selectedCorpsId] ?? '#888';
   const totalPersonnel = subordinates.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
   const corpsDisplayName = corpsFormation.name === corpsFormation.id
-    ? toTitleCase(corpsFormation.name.replace(/^(RS|RBiH|HRHB)_/i, ''))
+    ? getPlayerSafeCorpsName(null, corpsFormation.id)
     : corpsFormation.name;
 
   const tabs = [

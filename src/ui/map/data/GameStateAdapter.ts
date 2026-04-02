@@ -14,6 +14,7 @@ import type {
 } from './types';
 import {
     getPlayerSafeCorpsName,
+    getPlayerSafeDecisionTitle,
     getPlayerSafeDisplayLabel,
     getPlayerSafeOfficerName,
 } from '../utils/playerSafeText.js';
@@ -672,7 +673,9 @@ export function parseGameState(json: unknown): LoadedGameState {
             } : undefined;
 
             const fv: FormationView = {
-                id, faction: (f.faction as string) ?? '', name: (f.name as string) ?? id,
+                id,
+                faction: (f.faction as string) ?? '',
+                name: getPlayerSafeDisplayLabel(typeof f.name === 'string' ? f.name : id, 'Formation'),
                 kind: ((f.kind as string) === 'corps_asset' && (id.endsWith('_staff') || id.endsWith('_general_staff'))) ? 'army_hq' : ((f.kind as string) ?? 'brigade'),
                 readiness: (f.readiness as string) ?? 'active',
                 cohesion: (f.cohesion as number) ?? 100, fatigue: (ops?.fatigue as number) ?? 0,
@@ -1356,7 +1359,7 @@ export function parseGameState(json: unknown): LoadedGameState {
             const os = rawOfficers[id];
             officerList.push({
                 id,
-                name: typeof data.name === 'string' ? data.name : id,
+                name: getPlayerSafeOfficerName(typeof data.name === 'string' ? data.name : null),
                 faction: typeof data.faction === 'string' ? data.faction : '',
                 rank: typeof data.rank === 'string' ? data.rank : 'corps_commander',
                 competence: finiteNumber(data.competence, 0),
@@ -2268,7 +2271,7 @@ function deriveFiredEvents(state: any): LoadedGameState['firedEvents'] {
         entries.push({
             id,
             turn: info?.turn ?? 0,
-            title: info?.text ?? id,
+            title: getPlayerSafeDecisionTitle(info?.text ?? id),
             narrative: '',
             category: 'military',
             effects: [],

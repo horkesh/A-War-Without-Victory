@@ -20449,3 +20449,26 @@ Why this matters:
 - battle eligibility, posture gating, fatigue, and reporting all inherit frontline truth from this helper
 - unioning sectors with stale legacy front assignments was keeping the migration “half done”
 - this slice makes sector authority more real at the engine seam that other systems actually consume
+### 2026-04-02 - Player-safe view-model hardening
+
+Hardened a few remaining loaded-state fallbacks so raw ids stop entering the player shell through view-model defaults.
+
+Implemented:
+- `src/ui/map/data/GameStateAdapter.ts`
+  - formation names now humanize id fallbacks
+  - named officer names now fall back to `An officer`
+  - fired-event titles now use the shared decision-title helper
+- `src/ui/map/components/CorpsDetail.tsx`
+  - corps fallback naming now uses the shared corps helper
+- `docs/40_reports/implemented/20260402_PLAYER_SAFE_VIEW_MODEL_HARDENING.md`
+  - documented the slice
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`26` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- view-model defaults are another high-leverage leak point because many panels inherit them at once
+- this reduces the number of places where raw ids can still enter the product shell before rendering
