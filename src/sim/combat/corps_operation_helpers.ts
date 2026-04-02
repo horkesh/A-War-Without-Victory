@@ -1,4 +1,4 @@
-import type { CorpsCommandState, CorpsOperation, FormationId, OperationAxis } from '../../state/game_state.js';
+import type { CorpsCommandState, CorpsFrontSector, CorpsOperation, FormationId, OperationAxis } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 // ─── Minimal type for pre-planned op fields consumed by buildCorpsOperation ──
@@ -150,6 +150,7 @@ export function buildEmergencyDefenseOperation(
     turn: number,
     participatingBrigades: string[],
     targetSettlements: string[],
+    sectorId?: string,
 ): CorpsOperation {
     return {
         name: `Emergency Defense (${corpsId})`,
@@ -158,6 +159,7 @@ export function buildEmergencyDefenseOperation(
         started_turn: turn,
         phase_started_turn: turn,
         participating_brigades: participatingBrigades,
+        sector_id: sectorId,
         target_settlements: targetSettlements,
         supply_readiness: 1.0,
         momentum: 0,
@@ -165,6 +167,43 @@ export function buildEmergencyDefenseOperation(
         consecutive_failures_on_current: 0,
         is_emergency: true,
     };
+}
+
+/**
+ * Derive the primary sector anchor for a set of corps brigades.
+ * Uses the sector with the strongest participant overlap; prefers assigned over reserve
+ * membership and then narrower deterministic tiebreakers.
+ */
+export function derivePrimarySectorForBrigades(
+    sectors: ReadonlyArray<CorpsFrontSector> | null | undefined,
+    corpsId: string,
+    brigadeIds: ReadonlyArray<string>,
+): string | undefined {
+    if (!sectors || brigadeIds.length === 0) return undefined;
+    const brigadeIdSet = new Set(brigadeIds);
+
+    const candidates = sectors
+        .filter((sector) => sector.corps_id === corpsId)
+        .map((sector) => {
+            const assignedMatches = sector.assigned_brigade_ids.filter((bid) => brigadeIdSet.has(bid)).length;
+            const reserveMatches = (sector.reserve_brigade_ids ?? []).filter((bid) => brigadeIdSet.has(bid)).length;
+            return {
+                sectorId: sector.sector_id,
+                assignedMatches,
+                reserveMatches,
+                totalMatches: assignedMatches + reserveMatches,
+                lengthEdges: sector.length_edges,
+            };
+        })
+        .filter((candidate) => candidate.totalMatches > 0)
+        .sort((a, b) =>
+            b.totalMatches - a.totalMatches
+            || b.assignedMatches - a.assignedMatches
+            || a.lengthEdges - b.lengthEdges
+            || strictCompare(a.sectorId, b.sectorId)
+        );
+
+    return candidates[0]?.sectorId;
 }
 
 /** Factory for commander-generated probe operations (single surplus brigade). */

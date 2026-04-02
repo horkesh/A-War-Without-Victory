@@ -1378,3 +1378,7 @@ If a legacy helper still has one tolerated compatibility consumer, future refact
 ### Player-facing fallback strings are where raw engine ids sneak back in
 
 The obvious primary labels can look clean while Army HQ headings, reserve requests, briefing alerts, or enclave summaries still do `?? corpsId` or `?? enclaveId`. In AWWV, treat fallback text as a governed player-safety surface: use one tiny pure helper layer and neutral fallbacks like `This corps`, `Friendly enclave`, `Assigned command`, and `Assigned brigade` instead of reprinting engine identifiers.
+
+### Transitional operation creators are more dangerous than dormant sinks
+
+The worst legacy combat files are not the inert no-op sinks; they are the older creation paths that still produce real operations while skipping newer canonical fields. In AWWV, every permitted operation creator must satisfy the same core contract as the canonical lifecycle owner. Emergency defensive ops in `bot_corps_operations.ts` were a model example: still live, still side-effecting, and still creating unanchored operations until they were forced to derive `sector_id` from the participant brigades.

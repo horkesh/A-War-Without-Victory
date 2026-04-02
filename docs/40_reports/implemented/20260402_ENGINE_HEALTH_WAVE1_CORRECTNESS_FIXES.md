@@ -978,3 +978,29 @@ Why this matters:
 - raw ids usually leak back into products through fallback strings, not through the obvious primary labels
 - once player-safe text rules live in one pure helper, future shells are less likely to improvise their own `?? id` leak
 - this turns a recurring UI hygiene problem into a small, testable contract instead of another vibes-based cleanup
+
+## Additional Wave 1 slice: emergency defensive operations now inherit a real sector anchor
+
+This checkpoint closes a still-live transitional seam in combat authority. Emergency defensive operations were already a permitted creation path in `bot_corps_operations.ts`, but they still explicitly created `strategic_defense` operations without `sector_id`. That meant a real operation could enter the canonical lifecycle already violating the sector-anchored contract the rest of the repo is moving toward.
+
+Implemented:
+- `src/sim/combat/corps_operation_helpers.ts`
+  - `buildEmergencyDefenseOperation(...)` now accepts and stores `sector_id`
+  - added `derivePrimarySectorForBrigades(...)` to deterministically anchor an operation to the sector with the strongest participant overlap
+- `src/sim/combat/bot_corps_operations.ts`
+  - emergency defensive ops now derive a primary sector from the chosen participant brigades before creation
+  - removed the stale comment claiming sector derivation was still deferred
+- `tests/corps_operation_helpers.test.ts`
+  - added regressions proving the sector-derivation helper chooses the strongest overlap
+  - added regressions proving emergency defensive ops retain the derived `sector_id`
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\corps_operation_helpers.test.ts tests\concurrent_operations.test.ts`
+  - PASS (`48` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- the most dangerous transitional ops code is the code that is still allowed to create real operations with missing canonical fields
+- sector anchoring only becomes honest when every live creation path respects it, not just the newest commander path
+- this shrinks the gap between the repo's written ops contract and the operations actually entering the lifecycle

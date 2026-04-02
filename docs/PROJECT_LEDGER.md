@@ -43,6 +43,37 @@ Engine-derived chokepoint detection (`engineMustHold`) disabled with `false &&`.
 - `integration_anomaly.test.ts` — 3 pass
 
 ---
+### 2026-04-02 — Engine health Wave 1 continued: emergency defensive operations now inherit a real sector anchor
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing a live transitional seam in combat authority.
+
+Implemented:
+- `src/sim/combat/corps_operation_helpers.ts`
+  - `buildEmergencyDefenseOperation(...)` now accepts and stores `sector_id`
+  - added `derivePrimarySectorForBrigades(...)` to deterministically anchor an operation to the sector with the strongest participant overlap
+- `src/sim/combat/bot_corps_operations.ts`
+  - emergency defensive ops now derive a primary sector from the selected participant brigades before creation
+  - removed the stale comment claiming sector derivation was still deferred
+- `tests/corps_operation_helpers.test.ts`
+  - added regressions proving the sector-derivation helper chooses the strongest overlap
+  - added regressions proving emergency defensive ops retain the derived `sector_id`
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded with this emergency-defense sector-anchor checkpoint
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+  - recorded the broader blindspot: transitional operation creators are more dangerous than dormant compatibility sinks
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\corps_operation_helpers.test.ts tests\concurrent_operations.test.ts`
+  - PASS (`48` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- a live operation creator is not harmless transitional code if it still skips fields the canonical lifecycle now assumes
+- sector anchoring only becomes honest when every permitted creation path respects it, not just the newest commander path
+- this removes one more “looks temporary but still writes truth” seam from the combat layer
+
+---
 ### 2026-04-02 — Engine health Wave 1 continued: Army HQ player-facing fallback labels no longer leak raw engine ids
 
 Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, draining a recurring player-truth swamp in secondary UI shells.
