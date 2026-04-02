@@ -19805,3 +19805,29 @@ Why this matters:
 - the product should not accuse the engine of being wrong when the design intentionally allows sectorless army-reserve formations
 - false critical alerts create just as much confusion as missing alerts, especially in a repo already full of stale invariants
 - extracting the generator turns briefing truth into a pure, reviewable policy surface instead of a component side-effect
+
+---
+### 2026-04-02 — Engine health Wave 1 continued: feints now apply real enemy-side pressure
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, converting feints from mostly cosmetic/self-costing operations into a real pressure signal that the defending side reacts to.
+
+Implemented:
+- `src/sim/combat/brigade_assignment.ts`
+  - `recomputeSectorPowerAndThreat(...)` now inspects active enemy feints and applies a deterministic `×1.5` threat-ratio multiplier to sectors they target
+- `src/sim/combat/corps_front_sectors.ts`
+  - canonical threat recomputation now receives the full state so feint pressure can flow through the normal sector-power path
+- `tests/sector_power_threat_recompute.test.ts`
+  - added regression coverage proving enemy feints raise the targeted sector’s `threat_ratio`
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded the Wave 1 report with this checkpoint
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\sector_power_threat_recompute.test.ts tests\h_phase_intelligence_warfare.test.ts tests\army_reserve_system.test.ts`
+  - PASS (`20` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- a feint that never changes enemy-side pressure is not a deception mechanic, it is just a mislabeled self-tax
+- routing the effect through `threat_ratio` means reserve requests, sector balancing, and commander caution can now all react through existing canonical logic
+- this is the right kind of engine-health repair: revive the feature by attaching it to a real live currency instead of adding another parallel subsystem

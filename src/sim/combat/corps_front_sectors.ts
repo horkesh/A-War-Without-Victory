@@ -535,7 +535,7 @@ function buildFactionSectors(
     deduplicateBrigadesAcrossSectors(sectors);
 
     // Step 8c: Recompute defensive_power and threat_ratio from final brigade sets.
-    recomputeSectorPowerAndThreat(sectors, formations, faction);
+    recomputeSectorPowerAndThreat(sectors, formations, faction, state);
 
     // Final prune: remove ghost artifact sectors
     const pruned = sectors.filter(s => {

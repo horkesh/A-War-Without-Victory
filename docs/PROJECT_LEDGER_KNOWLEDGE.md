@@ -1409,3 +1409,7 @@ If validation rejects a command but preload, IPC clients, and the main process s
 ### Exempt reserve corps must not be judged by field-corps invariants
 
 Army-HQ reserve formations like General Staff / Main Staff brigades are intentionally allowed to exist without front sectors until they are loaned into field-corps command. If a player-facing alert blindly says every active brigade-bearing corps must have sectors, the UI becomes the liar. In AWWV, reserve-corps exceptions should live in pure briefing policy and be regression-tested there.
+
+### Deception mechanics are fake until they touch a live pressure currency
+
+Feints can look “implemented” because they exist in types, intel, and UI language, but that still means very little if they never alter the same values that reserve requests, threat balancing, and command caution actually consume. In AWWV, the honest repair path is to wire feints into `threat_ratio` or another existing canonical pressure signal instead of inventing a decorative side effect.

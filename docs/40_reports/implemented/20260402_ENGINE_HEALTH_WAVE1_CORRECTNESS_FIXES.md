@@ -1149,3 +1149,27 @@ Why this matters:
 - false critical alerts are engine-health bugs too, because they teach players and future implementers the wrong invariant
 - reserve/army-HQ exceptions should be explicit policy, not accidental fallout from a UI component
 - extracting the generator makes future briefing-truth fixes cheaper and safer because they are no longer trapped inside TSX
+
+## Additional Wave 1 slice: feints now apply real enemy-side pressure
+
+This checkpoint closes one of the clearest “feature exists on paper, does nothing in practice” gaps from the engine-health audit. Feints were already visible in intel and types, but they were not touching the actual pressure currency the engine uses for reserve requests, sector equalization, or commander line-thinning decisions. That meant a feint mostly just cost the attacker cohesion and theater attention.
+
+Implemented:
+- `src/sim/combat/brigade_assignment.ts`
+  - `recomputeSectorPowerAndThreat(...)` now receives live state and checks for active enemy feints targeting each sector’s territory
+  - targeted sectors get a deterministic `×1.5` threat-ratio multiplier while the enemy feint is active in planning or execution
+- `src/sim/combat/corps_front_sectors.ts`
+  - threat recomputation now passes the full state so feint pressure can be applied in the canonical sector-power path
+- `tests/sector_power_threat_recompute.test.ts`
+  - added regression coverage proving an active enemy feint raises the targeted sector’s `threat_ratio`
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\sector_power_threat_recompute.test.ts tests\h_phase_intelligence_warfare.test.ts tests\army_reserve_system.test.ts`
+  - PASS (`20` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- feints should manipulate the enemy’s defensive posture, not just create a nice label and self-inflicted cohesion cost
+- by writing the effect into `threat_ratio`, the feint finally influences the same downstream systems that already drive reserve requests and line-thinning
+- this is the healthy pattern for AWWV: prefer fixing a dead feature by wiring it into an existing canonical currency instead of inventing a parallel mechanic

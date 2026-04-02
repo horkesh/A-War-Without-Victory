@@ -41,6 +41,44 @@ const VRS_1K_LINE_DISTANCE_MAX_HOPS = 6;
  * into a distant sector.
  */
 export const DRIFT_RECALL_SECTOR_SKIP_HOPS = 6;
+const FEINT_THREAT_MULTIPLIER = 1.5;
+
+function operationObjectives(op: { axes?: Array<{ objectives?: string[] }>; objectives?: string[] }): string[] {
+    if (op.axes && op.axes.length > 0) {
+        return op.axes.flatMap((axis) => axis.objectives ?? []);
+    }
+    return op.objectives ?? [];
+}
+
+function hasActiveEnemyFeintAgainstSector(
+    state: GameState,
+    sector: CorpsFrontSector,
+    faction: FactionId,
+): boolean {
+    const corpsCommand = state.military.corps_command ?? {};
+    const territoryOsids = new Set(sector.territory_osids);
+
+    for (const command of Object.values(corpsCommand)) {
+        if (!command?.active_operations) continue;
+        for (const operation of command.active_operations) {
+            if (operation.type !== 'feint') continue;
+            if (operation.phase !== 'planning' && operation.phase !== 'execution') continue;
+
+            const participatingFaction = operation.participating_brigades
+                .map((brigadeId) => state.military.formations?.[brigadeId]?.faction)
+                .find((candidate): candidate is FactionId => candidate != null);
+            if (!participatingFaction || participatingFaction === faction) continue;
+
+            for (const objective of operationObjectives(operation)) {
+                if (territoryOsids.has(objective)) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
 
 function friendlyDistanceToAny(
     startOsid: string,
@@ -1292,6 +1330,7 @@ export function recomputeSectorPowerAndThreat(
     sectors: CorpsFrontSector[],
     formations: Record<FormationId, FormationState>,
     faction: FactionId,
+    state: GameState,
 ): void {
     const allFormIds = Object.keys(formations).sort(strictCompare);
     for (const s of sectors) {
@@ -1316,6 +1355,10 @@ export function recomputeSectorPowerAndThreat(
         s.threat_ratio = s.defensive_power > 0
             ? enemyPower / s.defensive_power
             : (enemyPower > 0 ? 9999 : 0);
+
+        if (s.threat_ratio > 0 && hasActiveEnemyFeintAgainstSector(state, s, faction)) {
+            s.threat_ratio *= FEINT_THREAT_MULTIPLIER;
+        }
     }
 }
 
