@@ -1448,3 +1448,7 @@ If sectors are the primary frontline organization model but fatigue still keys o
 ### Shared frontline helpers and reports must follow the same sector-first contract as core mechanics
 
 Once sectors become the practical frontline authority, any shared helper like `isBrigadeAssignedToFront(...)` becomes a high-risk seam: battle resolution, posture gating, and reporting all inherit whatever lie it tells. In AWWV, the safe pattern is one shared helper that reads sectors first and legacy front assignment second, and then reuse that helper everywhere instead of letting each subsystem invent its own idea of "frontline."
+
+### Precedence bugs in tiny combat helpers can preserve legacy behavior long after the main architecture moves on
+
+Even if sectors are treated as primary truth in big systems, a small helper like `getLocalFrontDensityModifier(...)` can still bend combat if it checks `brigade_front_assignment/local_fronts` first. In AWWV, whenever both a new and old assignment currency coexist, the lookup order itself is a gameplay rule and should be treated as one.

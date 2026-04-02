@@ -20010,3 +20010,27 @@ Why this matters:
 - sectors had already become the practical frontline authority
 - but battle gating, posture gating, and end-of-run reporting were still capable of telling the old `brigade_front_assignment` story
 - this removes another half-alive legacy seam and keeps mechanics and reporting on the same sector-first contract
+
+### 2026-04-02 - Engine health Wave 1 continued: front-density helper now prefers sectors over legacy fronts
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, fixing another quiet precedence bug in combat math support code.
+
+Implemented:
+- `src/sim/combat/local_front_defense.ts`
+  - updated `getLocalFrontDensityModifier(...)` so it now checks `corps_front_sectors` first
+  - legacy `brigade_front_assignment/local_fronts` remains as fallback only
+- `tests/local_front_density_modifier_precedence.test.ts`
+  - added a regression proving sector density wins when both sector and legacy front assignment exist
+- `docs/40_reports/implemented/20260402_FRONT_DENSITY_SECTOR_PRECEDENCE.md`
+  - documented the precedence bug and the sector-first correction
+
+Verification:
+- `node_modules\.bin\tsx.cmd --test tests\local_front_density_modifier_precedence.test.ts tests\front_assignment.test.ts tests\formation_fatigue_frontline_assignment.test.ts tests\scenario_end_report_army_strengths.test.ts`
+  - PASS (`7` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- `getLocalFrontDensityModifier(...)` feeds combat math
+- if it keeps preferring the old front lane, the engine can still defend brigades using stale frontage truth even after sectors became the primary assignment model
+- this removes another small helper that could quietly reintroduce legacy behavior into otherwise cleaned-up frontline mechanics

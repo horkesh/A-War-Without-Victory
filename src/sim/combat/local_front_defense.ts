@@ -183,14 +183,6 @@ export function getLocalFrontDensityModifier(
     state: GameState,
     formation: FormationState
 ): number {
-    // Path 1: player-assigned front (legacy)
-    const frontId = state.military.brigade_front_assignment?.[formation.id];
-    if (frontId) {
-        const front = state.military.local_fronts?.[frontId];
-        if (front) return frontDensityModifier(front.assigned_brigade_ids.length, front.coverage_length);
-    }
-
-    // Path 2: corps sector (bot/sim path)
     const sectors = state.military.corps_front_sectors;
     if (sectors) {
         for (const sid of Object.keys(sectors).sort(strictCompare)) {
@@ -199,6 +191,12 @@ export function getLocalFrontDensityModifier(
                 return frontDensityModifier(sector.assigned_brigade_ids.length, sector.length_edges);
             }
         }
+    }
+
+    const frontId = state.military.brigade_front_assignment?.[formation.id];
+    if (frontId) {
+        const front = state.military.local_fronts?.[frontId];
+        if (front) return frontDensityModifier(front.assigned_brigade_ids.length, front.coverage_length);
     }
 
     return 1.0;
