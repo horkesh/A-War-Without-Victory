@@ -12,16 +12,18 @@ Single source of truth for combat resolution design decisions, factor implementa
 
 ---
 
-## Current State (n1289)
+## Current State (n1302)
 
 | Metric | Value |
 |---|---|
-| Calibration | 93.2% area-weighted (40w) |
-| Anchors | 25/25 (HISTORIC FIRST — all passing including brcko) |
+| Calibration | **93.7% area-weighted (40w) — NEW ATH** |
+| Anchors | 25/25 |
 | Benchmarks | 6/6 |
-| Hash | a95995f2b1ab899c |
-| Attacker:defender casualty ratio | ~0.33:1 (defenders take ~3× casualties) |
+| Hash | 0cf989330bd36cc8 |
+| Attacker:defender casualty ratio | 0.814 (attack_resolution) / 0.63 (anomaly_detection) — source discrepancy unresolved |
 | Decisive victory share | ~87% of battles |
+
+**Note on casualty ratio:** The aggregate number is faction-blind. VRS-attacks-ARBiH and ARBiH-attacks-VRS have opposing expected ratios. See "Faction-Specific Casualty Context" section below.
 
 ---
 
@@ -149,7 +151,46 @@ Single source of truth for combat resolution design decisions, factor implementa
 
 ---
 
+### P11 — Multi-brigade coordination: no officer quality effect ✓ IMPLEMENTED 2026-04-02 (n1300)
+
+**Implementation:** `getCoordinationCompetenceFactor()` in `battle_resolution.ts`. Applies only to multi-brigade attacks (single-brigade unaffected). Formula: `effN_adjusted = effN_base × (1.0 - (3 - competence_int) × 0.04)`. Range: competence 5 = +8%, baseline 3 = neutral, competence 1 = -8%. Clamped [0.85, 1.10].
+
+**Historical basis:** JNA-trained VRS staff (Mladić, Milovanović, Talić) extracted more from combined-arms coordination than ARBiH improvised commanders. A modest ±8% swing at extremes is conservative but directionally correct.
+
+---
+
+### P12 — Opportunity target selection: no tactical intelligence (lexicographic only) ✓ IMPLEMENTED 2026-04-02 (n1301)
+
+**Implementation:** `selectOpportunityTargets()` in `commander/plan.ts`. Ranks enemy OSIDs by approach count — number of staging-zone OSIDs adjacent to each target. More approach vectors = more exposed = higher priority. Falls back to lex sort if spatial data absent.
+
+**Historical basis:** Commanders prefer soft flanks and exposed salients. Lex sort picked arbitrary targets with no tactical rationale.
+
+---
+
+## Faction-Specific Casualty Context
+
+**The single aggregate att:def ratio is insufficient for realism assessment.** This war has opposing asymmetries by faction pair.
+
+| Faction pair | Attacker | Expected att:def ratio | Why |
+|---|---|---|---|
+| ARBiH attacks VRS | ARBiH rifle-only | **2:1 to 4:1** (ARBiH bleeds) | VRS defensive fire (15 art) punishes rifle-only assault. `getDefensiveFireMult()` = 1.135× attacker cas. Historical: Ozren/Majevica/Brcko offensives failed catastrophically. |
+| VRS attacks ARBiH | VRS armor+art | **0.5:1 to 1.2:1** (VRS lighter) | VRS firepower dominates. ARBiH defender absorbs `getBombardmentCasualtyMult()`. VRS can take *fewer* casualties than defenders — this is historically correct, not a bug. |
+| ARBiH defends vs VRS | — | ARBiH still bleeds | VRS bombardment fires regardless of who is "attacking." ARBiH defenders absorb artillery. Defender role ≠ protected from firepower. |
+| HRHB attacks RS | HVO | ~1:1 to 1.5:1 | HVO had JNA-inherited equipment, closer to parity. |
+
+**When reviewing runs:** Always partition by faction pair before concluding. If ARBiH-attacks-VRS shows near-parity, the equipment asymmetry isn't biting — flag P1. If the aggregate looks "attacker heavy" it may be because the aggregate mixes ARBiH-attacks-VRS (high attacker losses) with VRS-attacks-ARBiH (low attacker losses).
+
+---
+
 ## Key Decisions & Lessons
+
+### 2026-04-02 — Commander Intelligence n1294–n1301
+
+Eight commander system improvements shipped together (pre-planned sequence). Key results at n1302: +0.5pp area (93.7% ATH), 25/25 anchors, 6/6 benchmarks. Specific impacts:
+
+- **must_hold garrison (n1295–n1296):** 1.5× garrison budget for vrs_posavina (Brcko) and vrs_east_bosnian (Doboj). Worked as intended — Brcko held all 40w from n1289 P1 defensive fire alone; must_hold adds a second structural guarantee. Track 2 (engine chokepoint detection) disabled: fraction-of-faction-total threshold 0.05 can't discriminate RS Brcko (~9% of RS territory) from ARBiH Central Bosnia valley passes (~8% of ARBiH territory). Needs corps-boundary discriminator or absolute OSID count.
+- **Op scale cap (n1298):** Capping to `tier_counts.main_effort` did not change total order counts (91 — identical to n1289), but ZEA rate rose 39%→47%. Eligible attacker pools narrowing as intended; expected tradeoff.
+- **DRINA regression:** n1302 DRINA 86.6% vs implied ~88% at n1289. Possible cause: must_hold corridor garrison changes freed Drina Corps brigades toward eastern OSID captures. Investigate vrs_drina operation counts vs n1289.
 
 ### 2026-04-01 — Sector Merge Guard Regression Fix
 
