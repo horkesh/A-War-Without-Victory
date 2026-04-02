@@ -18805,3 +18805,21 @@ Why this matters:
 - This is the first implemented slice of `player-knowledge integrity` from the roadmap that is not just documentation. The immediate contract is now clearer: player-facing tactical-map surfaces may consume deeper engine truth, but they must narrate it as player/staff abstractions tied to friendly fronts rather than leaking enemy internals.
 
 ---
+
+### 2026-04-02 — Player-facing fallback sweep: no raw ids in generic degrade paths
+
+Small follow-on cleanup in the same clean lane:
+
+- `army_hq/SituationBriefing.tsx`
+  - low-intel and thin-front alerts now fall back to `this sector` instead of raw `sector_id`
+- `OfficerEventBadge.tsx`
+  - replacement-commander modal now falls back to `this corps` instead of raw `corps_id`
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts`
+  - PASS
+
+Why this matters:
+- The most stubborn player-facing leaks often live in fallback strings rather than the main happy-path labels. Fixing those now helps keep the UI translation layer honest as the branch keeps moving.
+
+---

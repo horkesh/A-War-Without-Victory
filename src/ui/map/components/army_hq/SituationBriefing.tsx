@@ -152,7 +152,7 @@ export function generateBriefing(
         if ((sector.intel_confidence ?? 1) < 0.3) {
             items.push({
                 id: id(), severity: 'warning', category: 'intel',
-                title: `Low intel in ${sector.display_name ?? sector.sector_id}`,
+                title: `Low intel in ${sectorLabel(sector.display_name)}`,
                 detail: `Intel confidence ${Math.round((sector.intel_confidence ?? 0) * 100)}%`,
                 corpsId: sector.corps_id,
                 target: { type: 'sector', sectorId: sector.sector_id },
@@ -221,7 +221,7 @@ export function generateBriefing(
         if (brigadeCount < 2 && edgeCount > 4) {
             items.push({
                 id: id(), severity: 'warning', category: 'defense',
-                title: `Thin front: ${sector.display_name ?? sector.sector_id}`,
+                title: `Thin front: ${sectorLabel(sector.display_name)}`,
                 detail: `${brigadeCount} brigade${brigadeCount !== 1 ? 's' : ''} covering ${edgeCount} edges`,
                 corpsId: sector.corps_id,
                 target: { type: 'sector', sectorId: sector.sector_id },
@@ -355,3 +355,4 @@ export function SituationBriefing({ items, onNavigate }: SituationBriefingProps)
         </div>
     );
 }
+    const sectorLabel = (displayName?: string) => displayName ?? 'this sector';

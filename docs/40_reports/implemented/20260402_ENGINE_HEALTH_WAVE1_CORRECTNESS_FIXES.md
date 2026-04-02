@@ -116,6 +116,20 @@ Why this is the right contract:
 - standalone desktop map without a clear path back to HQ is shell drift, not a minor UX nit
 - pure view-model generators are easier to lock with tests than JSX-bound logic
 
+### 7. Briefing and officer-event fallbacks no longer degrade to raw ids
+
+Files:
+- `src/ui/map/components/army_hq/SituationBriefing.tsx`
+- `src/ui/map/components/OfficerEventBadge.tsx`
+
+Change:
+- situation briefing no longer falls back to raw `sector_id` in low-intel / thin-front alert titles
+- officer replacement modal no longer falls back to raw `corps_id`
+
+Why this is the right contract:
+- fallback paths are where player-facing integrity quietly dies
+- if a display name is missing, the right fallback is generic player language (`this sector`, `this corps`), not backend identifiers
+
 ## Tests added or extended
 
 - `tests/probe_preparation.test.ts`
