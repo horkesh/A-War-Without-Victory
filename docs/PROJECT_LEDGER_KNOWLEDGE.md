@@ -1293,3 +1293,12 @@ If `LoadedGameState` still carries full-faction operation truth, any global play
 
 ### Sidebars grouped by all factions are debug shells in disguise
 If an Army / Operations / Sectors rail groups content by RS, RBiH, and HRHB inside normal player mode, that surface is leaking omniscient truth even when individual cards look polished. Treat all global rails and overlay builders as player-faction-only by default; opt into debug omniscience explicitly elsewhere.
+
+### Focused regression files are safer than trusting broad legacy suites
+Some long-lived node:test suites in this repo already carry unrelated failures or stale expectations, which makes them weak gates for new engine-health work. When fixing a subtle split-truth bug, add a small focused regression file and wire it into the Vitest whitelist, rather than pretending a noisy broad suite proves the new invariant.
+
+### Launch feasibility must be checked against the final participant set
+If launch screening runs before enclave filters, reserve trimming, or other participant narrowing, the operation can be approved based on brigades that never actually join it. In AWWV, feasibility is only honest when it is evaluated on the real participating brigade set.
+
+### Objective-specific prep logic must stay objective-specific all the way down
+It is not enough for intel confidence to be objective-aware if force-ratio estimation still sums defenders from every facing sector on the front. Preparation math should use one shared notion of “which enemy sectors this operation is actually targeting.”

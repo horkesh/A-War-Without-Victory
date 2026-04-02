@@ -44,6 +44,33 @@ Engine-derived chokepoint detection (`engineMustHold`) disabled with `false &&`.
 
 ---
 
+### 2026-04-02 — Engine health Wave 1: ops truth after target/participant narrowing
+
+Continued the clean-lane Wave 1 execution in `F:\AWWV_exec_clean` on branch `codex/engine-health-wave1`, this time on the quieter operation-preparation / launch-screening side.
+
+Implemented:
+- `operation_preparation.ts`
+  - force-ratio estimation now narrows defender strength to the enemy sectors that actually cover the operation's objectives
+  - objective-sector resolution is now shared between intel-confidence and force-ratio paths so prep logic talks about the same target set
+- `sector_offensive.ts`
+  - launch feasibility is re-checked after enclave filtering and reserve trimming, so launch approval cannot borrow strength from brigades that will never enter the actual participant set
+- focused regression coverage:
+  - `tests/probe_preparation.test.ts`
+  - `tests/engine_health_wave1_ops_truth.test.ts`
+  - `vitest.config.ts` updated so the new focused regression is not silently skipped by the whitelist harness
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\probe_preparation.test.ts tests\engine_health_wave1_ops_truth.test.ts`
+  - PASS (`36` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Execution note:
+- `tsc --noEmit -p tsconfig.json` in the clean lane is still blocked by missing React/Vite packages in the linked toolchain. Treat that as lane-environment drift, not evidence against this ops slice.
+
+Why this matters:
+- This closes a subtle optimism leak. Before the fix, prep confidence could be objective-specific while force-ratio estimation still counted defenders from unrelated enemy sectors, and launch feasibility could still approve an operation based on brigades that would later be filtered out. That is exactly the kind of split truth that makes commanders look stupid for the wrong reason.
+
 ### 2026-04-02 â€” Player-facing label discipline: secondary panel leak sweep
 
 Continued the clean-lane player-knowledge integrity pass in `F:\AWWV_exec_clean` on branch `codex/engine-health-wave1`.

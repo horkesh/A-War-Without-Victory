@@ -160,7 +160,7 @@ const FEASIBILITY_ATTACK_POSTURE_MULT = 0.8;
  */
 function checkLaunchFeasibility(
     state: GameState,
-    corpsBrigadeIds: FormationId[],
+    attackerBrigadeIds: FormationId[],
     objectives: string[],
     faction: FactionId,
     corpsId: FormationId,
@@ -169,7 +169,7 @@ function checkLaunchFeasibility(
 
     // Compute total attacker base power (all corps brigades that can attack)
     let totalAttackerPower = 0;
-    for (const bid of corpsBrigadeIds) {
+    for (const bid of attackerBrigadeIds) {
         const f = formations[bid];
         if (!f || f.status !== 'active') continue;
         if ((f.personnel ?? 0) < MIN_ATTACK_PERSONNEL) continue;
@@ -1833,6 +1833,13 @@ export function evaluateCorpsOffensiveLaunch(
     const participating = sortedByPriority
         .slice(0, sortedByPriority.length - reserveCount)
         .slice(0, MAX_PARTICIPATING_BRIGADES);
+    if (participating.length < MIN_BRIGADES_FOR_OFFENSIVE) return null;
+    if (!hasEligibleAttackersForLaunch(formations, participating)) return null;
+    if (!checkLaunchFeasibility(state, participating, objectives, faction, corpsId)) {
+        const corpsName = formations[corpsId]?.name ?? corpsId;
+        console.warn(`[feasibility] ${corpsName}: rejected op after participant trim - no objective achievable at costly_victory (${objectives.length} objectives, ${participating.length} participating brigades)`);
+        return null;
+    }
 
     // Pick staging OSID: nearest corps friendly OSID to first objective.
     // Falls back to first friendly OSID in corps territory (deterministic, sorted).

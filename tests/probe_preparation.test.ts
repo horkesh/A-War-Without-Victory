@@ -27,6 +27,7 @@ import {
     getPreparationMaxTurns,
     getGoThreshold,
     getOperationIntelConfidence,
+    estimateForceRatio,
     selectProbeBrigades,
     resolveActiveProbe,
     autoResolveProbe,
@@ -306,6 +307,87 @@ describe('getOperationIntelConfidence', () => {
             objectives: ['enemy_target_2'],
         });
         expect(getOperationIntelConfidence(state, op)).toBeCloseTo(0.35, 2);
+    });
+});
+
+describe('estimateForceRatio', () => {
+    it('uses only the enemy sector that actually covers the operation objective', () => {
+        const state = makeMinimalState();
+        state.military.formations = {
+            atk_1: makeFormation('atk_1', { personnel: 1200 }),
+            atk_2: makeFormation('atk_2', { personnel: 1200 }),
+            def_small: makeFormation('def_small', { faction: 'RBiH', personnel: 1000 }),
+            def_large_a: makeFormation('def_large_a', { faction: 'RBiH', personnel: 3000 }),
+            def_large_b: makeFormation('def_large_b', { faction: 'RBiH', personnel: 3000 }),
+        };
+        addSectorIntel(state, 'sector_a', 'enemy_sector_small', 0.9);
+        addSectorIntel(state, 'sector_a', 'enemy_sector_large', 0.9);
+        state.military.corps_front_sectors = {
+            sector_a: {
+                sector_id: 'sector_a',
+                corps_id: 'vrs_1kk',
+                faction: 'RS',
+                opposing_factions: ['RBiH'],
+                edge_ids: [],
+                sub_segments: [],
+                length_edges: 1,
+                territory_osids: ['own_osid'],
+                assigned_brigade_ids: [],
+                reserve_brigade_ids: [],
+                density: 1,
+                threat_ratio: 1,
+                defensive_power: 1,
+                sector_stance: 'defend',
+                stance_source: 'bot',
+            },
+            enemy_sector_small: {
+                sector_id: 'enemy_sector_small',
+                corps_id: 'arbih_2nd_corps',
+                faction: 'RBiH',
+                opposing_factions: ['RS'],
+                edge_ids: [],
+                sub_segments: [{ id: 'sub_small', edge_ids: [], friendly_osids: ['enemy_target_small'], enemy_osids: ['own_osid'], coverage_length: 1 }],
+                length_edges: 1,
+                territory_osids: ['enemy_target_small'],
+                assigned_brigade_ids: ['def_small'],
+                reserve_brigade_ids: [],
+                density: 1,
+                threat_ratio: 1,
+                defensive_power: 1,
+                sector_stance: 'defend',
+                stance_source: 'bot',
+            },
+            enemy_sector_large: {
+                sector_id: 'enemy_sector_large',
+                corps_id: 'arbih_3rd_corps',
+                faction: 'RBiH',
+                opposing_factions: ['RS'],
+                edge_ids: [],
+                sub_segments: [{ id: 'sub_large', edge_ids: [], friendly_osids: ['enemy_target_large'], enemy_osids: ['own_osid'], coverage_length: 1 }],
+                length_edges: 1,
+                territory_osids: ['enemy_target_large'],
+                assigned_brigade_ids: ['def_large_a', 'def_large_b'],
+                reserve_brigade_ids: [],
+                density: 1,
+                threat_ratio: 1,
+                defensive_power: 1,
+                sector_stance: 'defend',
+                stance_source: 'bot',
+            },
+        } as any;
+        state.political.political_controllers = {
+            own_osid: 'RS',
+            enemy_target_small: 'RBiH',
+            enemy_target_large: 'RBiH',
+        };
+        const op = makeOperation({
+            sector_id: 'sector_a',
+            participating_brigades: ['atk_1', 'atk_2'],
+            objectives: ['enemy_target_small'],
+        });
+
+        const ratio = estimateForceRatio(state, op, 5, 0.9);
+        expect(ratio).toBeGreaterThan(2.0);
     });
 });
 

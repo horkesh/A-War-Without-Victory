@@ -356,3 +356,34 @@ Why this matters:
 - the most dangerous player-facing leaks are not only raw labels
 - they are whole panels that quietly behave like staff-god-mode debug shells
 - until a real renderer-state boundary exists, global lists and map overlays must filter omniscient state before they render
+
+## Additional Wave 1 slice: ops truth after target/participant narrowing
+
+This checkpoint fixed two quieter engine-health lies inside the operation-launch and preparation chain.
+
+Implemented:
+- `src/sim/combat/operation_preparation.ts`
+  - `estimateForceRatio(...)` now narrows defender strength to the enemy sectors that actually cover the operation's objectives when that mapping is available
+  - extracted shared objective-sector resolution helper so intel confidence and force-ratio estimation use the same target set
+- `src/sim/combat/sector_offensive.ts`
+  - launch feasibility is now re-checked after enclave filtering and reserve trimming so launch approval cannot borrow strength from brigades that never actually join the operation
+- `tests/probe_preparation.test.ts`
+  - added regression coverage proving force-ratio estimation ignores unrelated enemy sectors on the same front
+- `tests/engine_health_wave1_ops_truth.test.ts`
+  - added focused regression proving an operation is rejected when the only viable brigade is trimmed out of the actual participant set
+- `vitest.config.ts`
+  - wired the new focused engine-health regression into the whitelist harness so it actually runs in CI/local verification
+
+Verification:
+- `node_modules\\.bin\\vitest.cmd run tests\\probe_preparation.test.ts tests\\engine_health_wave1_ops_truth.test.ts`
+  - PASS (`36` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+  - PASS
+
+Environment note:
+- `npx.cmd tsc --noEmit -p tsconfig.json` in the clean lane is still blocked by missing React/Vite packages in the linked toolchain. That remains lane environment drift, not a regression from this ops slice.
+
+Why this matters:
+- objective-specific preparation only becomes honest when confidence and force-ratio math are talking about the same enemy
+- launch screening is still lying if it approves an operation based on brigades that will be filtered out before execution
+- brittle monolithic legacy suites are not enough here; focused regression harnesses are how we keep these subtle optimism leaks dead
