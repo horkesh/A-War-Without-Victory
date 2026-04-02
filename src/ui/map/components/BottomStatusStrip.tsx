@@ -52,6 +52,9 @@ export function BottomStatusStrip() {
     if (net < 0) return ' \u2193'; // down arrow
     return ' \u2192'; // right arrow (stable)
   }, [territoryNet]);
+  const playerTerritoryPct = territoryPct[playerFaction as 'RS' | 'RBiH' | 'HRHB'] ?? 0;
+  const hostileHeldPct = Math.max(0, 100 - playerTerritoryPct);
+  const playerTerritoryTrend = getTrendArrow(playerFaction as 'RS' | 'RBiH' | 'HRHB');
 
   // Map mode
   const setStrategicDashboardOpen = useGameStore((s) => s.setStrategicDashboardOpen);
@@ -106,10 +109,6 @@ export function BottomStatusStrip() {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [moreExpanded]);
-
-  // Faction-specific ordering: player faction first
-  const factions: Array<'RS' | 'RBiH' | 'HRHB'> = ['RS', 'RBiH', 'HRHB'];
-  const orderedFactions = [playerFaction as 'RS' | 'RBiH' | 'HRHB', ...factions.filter(f => f !== playerFaction)];
 
   // Faction-contextual indicator
   const alliance = loadedGameState?.war_alliance_rbih_hrhb;
@@ -176,45 +175,46 @@ export function BottomStatusStrip() {
         onClick={() => setStrategicDashboardOpen(true)}
         title="Open Strategic Dashboard"
       >
-        {/* Stacked bar */}
+        {/* Player-safe bar */}
         <div className="flex h-[14px] rounded-sm overflow-hidden w-[180px] border border-white/10" title="Territory control (area-weighted)">
-          {orderedFactions.map((faction) => {
-            const pct = territoryPct[faction];
-            const hex = FACTION_HEX_COLORS[faction] ?? '#888';
-            return (
-              <div
-                key={faction}
-                className="h-full transition-all duration-500 relative group"
-                style={{ width: `${pct}%`, backgroundColor: hex }}
-              >
-                {/* Show percentage label inside bar segment if wide enough */}
-                {pct > 15 && (
-                  <span className="absolute inset-0 flex items-center justify-center text-[8px] font-mono font-bold text-white/90 tabular-nums drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
-                    {pct.toFixed(0)}%
-                  </span>
-                )}
-              </div>
-            );
-          })}
+          <div
+            className="h-full transition-all duration-500 relative group"
+            style={{ width: `${playerTerritoryPct}%`, backgroundColor: FACTION_HEX_COLORS[playerFaction] ?? '#888' }}
+          >
+            {playerTerritoryPct > 15 && (
+              <span className="absolute inset-0 flex items-center justify-center text-[8px] font-mono font-bold text-white/90 tabular-nums drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
+                {playerTerritoryPct.toFixed(0)}%
+              </span>
+            )}
+          </div>
+          <div
+            className="h-full transition-all duration-500 relative group bg-white/10"
+            style={{ width: `${hostileHeldPct}%` }}
+          >
+            {hostileHeldPct > 15 && (
+              <span className="absolute inset-0 flex items-center justify-center text-[8px] font-mono font-bold text-white/70 tabular-nums drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
+                {hostileHeldPct.toFixed(0)}%
+              </span>
+            )}
+          </div>
         </div>
 
-        {/* Faction labels with trend arrows */}
+        {/* Player-safe labels */}
         <div className="flex items-center gap-1.5">
-          {orderedFactions.map((faction, idx) => {
-            const pct = territoryPct[faction];
-            const isPlayer = faction === playerFaction;
-            const color = FACTION_COLORS_SUBTLE[faction] ?? 'text-text-primary';
-            const trend = getTrendArrow(faction);
-            return (
-              <span key={faction} className={`flex items-center gap-0.5 font-mono tabular-nums ${color}`}>
-                {idx > 0 && <span className="text-white/10 mr-0.5">|</span>}
-                <span className={isPlayer ? 'text-[11px] font-bold' : 'text-[9px]'}>
-                  {faction} {pct.toFixed(1)}%
-                  {trend && <span className={`ml-0.5 ${trend.includes('\u2191') ? 'text-emerald-400' : trend.includes('\u2193') ? 'text-red-400' : 'text-text-secondary/50'}`}>{trend}</span>}
+          <span className={`flex items-center gap-0.5 font-mono tabular-nums ${FACTION_COLORS_SUBTLE[playerFaction] ?? 'text-text-primary'}`}>
+            <span className="text-[11px] font-bold">
+              Friendly {playerTerritoryPct.toFixed(1)}%
+              {playerTerritoryTrend && (
+                <span className={`ml-0.5 ${playerTerritoryTrend.includes('\u2191') ? 'text-emerald-400' : playerTerritoryTrend.includes('\u2193') ? 'text-red-400' : 'text-text-secondary/50'}`}>
+                  {playerTerritoryTrend}
                 </span>
-              </span>
-            );
-          })}
+              )}
+            </span>
+          </span>
+          <span className="text-white/10">|</span>
+          <span className="flex items-center gap-0.5 font-mono tabular-nums text-text-secondary">
+            <span className="text-[9px]">Hostile-held {hostileHeldPct.toFixed(1)}%</span>
+          </span>
         </div>
       </div>
 

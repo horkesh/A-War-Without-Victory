@@ -1569,3 +1569,7 @@ Attack confirmations, event queues, and decision modals should use player-safe m
 ### Tactical rail detail panels must obey the same player-language contract as modals
 
 Operation detail, corps detail, and sector dossier rails are part of the live command shell. They should not keep raw faction ids just because they feel more technical than the toolbar or OOB.
+
+### Bottom status strips must not quietly become omniscient scoreboards
+
+If a persistent shell strip shows exact all-faction territory or strength percentages, it is acting like a debug/status console even when the styling is elegant. High-frequency strips should default to player-safe framing and leave richer cross-faction totals to explicitly owned analysis surfaces.

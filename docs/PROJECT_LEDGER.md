@@ -20939,3 +20939,16 @@ Why this matters:
 - Docs:
   - `docs/40_reports/implemented/20260402_PLAYER_SAFE_RAIL_PANEL_LABELS.md`
   - `docs/40_reports/GUI_MASTER.md`
+
+## 2026-04-02 - Bottom status strip player truth
+
+- Worktree/branch: `F:\AWWV_exec_clean` on `codex/engine-health-wave1`
+- Reframed the live bottom status strip away from exact all-faction territory percentages.
+- `BottomStatusStrip.tsx` now shows player-safe `Friendly` control and aggregated `Hostile-held` share instead of acting like a neutral all-faction scoreboard.
+- Added a regression guard in `tests/ui_player_visibility.test.ts`.
+- Verification:
+  - `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\ui_opord_player_safe_labels.test.ts tests\warroom_player_visibility.test.ts tests\ui_shell_navigation.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_BOTTOM_STATUS_STRIP_PLAYER_TRUTH.md`
+  - `docs/40_reports/GUI_MASTER.md`

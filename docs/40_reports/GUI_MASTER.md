@@ -278,3 +278,8 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 
 - Operation detail, corps detail, and sector dossier rails now use player-safe military faction naming in visible identity lines.
 - See `docs/40_reports/implemented/20260402_PLAYER_SAFE_RAIL_PANEL_LABELS.md`.
+
+## 2026-04-02 - Bottom status strip player truth
+
+- Bottom status strip now shows player-safe `Friendly` control and aggregated `Hostile-held` share instead of exact all-faction territory percentages.
+- See `docs/40_reports/implemented/20260402_BOTTOM_STATUS_STRIP_PLAYER_TRUTH.md`.

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 import type { LoadedGameState, OperationView } from '../src/ui/map/data/types.js';
 import {
   filterPlayerFacingActiveOperations,
@@ -300,5 +301,16 @@ describe('player visibility helpers', () => {
     expect(parsed.pendingOfficerEvents?.[0]?.officer_name).toBe('An officer');
     expect(parsed.pendingOfficerEvents?.[0]?.current_commander_name).toBe('An officer');
     expect(parsed.pendingOfficerEvents?.[0]?.corps_name).toBe('3rd Corps');
+  });
+
+  it('keeps the bottom status strip player-safe instead of acting as an all-faction territory scoreboard', () => {
+    const source = readFileSync(
+      new URL('../src/ui/map/components/BottomStatusStrip.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(source).toContain('Hostile-held');
+    expect(source).toContain('Friendly');
+    expect(source).not.toContain('orderedFactions.map');
   });
 });
