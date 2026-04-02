@@ -21094,3 +21094,19 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - Docs:
   - `docs/40_reports/implemented/20260402_LOCAL_FRONT_CONSTRUCTOR_RETIREMENT.md`
 
+
+## 2026-04-02 - Theatre tagging runtime retirement
+
+- Worktree/branch: F:\AWWV_exec_clean on codex/engine-health-wave1
+- Removed live turn-pipeline calls to `ensureDefaultTheatres(...)` and `assignFrontSegmentTheatres(...)`.
+- `src/sim/turn_pipeline.ts` and `src/sim/turn_phases/war_phases.ts` now derive `assignable_front_segments` directly from current front edges with no theatre-tagging pass.
+- Marked `src/state/theatres.ts` honestly as a legacy compatibility helper module.
+- Added a regression in `tests/engine_honesty_legacy_contracts.test.ts` proving:
+  - the live turn pipelines no longer call the theatre helpers
+  - the theatre helper file is documented as compatibility-only
+- Verification:
+  - `node_modules\.bin\vitest.cmd run tests\engine_honesty_legacy_contracts.test.ts tests\front_assignment.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_THEATRE_TAGGING_RUNTIME_RETIREMENT.md`
+

@@ -221,4 +221,16 @@ describe('engine honesty legacy contracts', () => {
     expect(localFrontDefense).not.toContain('export function buildLocalFronts');
     expect(gameState).toContain('Legacy compatibility cache only. No longer rebuilt in the live war pipeline.');
   });
+
+  it('does not keep theatre tagging in the live turn pipelines', () => {
+    const warPhases = readFileSync(join(process.cwd(), 'src', 'sim', 'turn_phases', 'war_phases.ts'), 'utf8');
+    const turnPipeline = readFileSync(join(process.cwd(), 'src', 'sim', 'turn_pipeline.ts'), 'utf8');
+    const theatres = readFileSync(join(process.cwd(), 'src', 'state', 'theatres.ts'), 'utf8');
+
+    expect(warPhases).not.toContain('assignFrontSegmentTheatres');
+    expect(warPhases).not.toContain('ensureDefaultTheatres');
+    expect(turnPipeline).not.toContain('assignFrontSegmentTheatres');
+    expect(turnPipeline).not.toContain('ensureDefaultTheatres');
+    expect(theatres).toContain('Legacy theatre compatibility helpers.');
+  });
 });

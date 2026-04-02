@@ -1621,3 +1621,7 @@ In AWWV, it is not enough to know which panel owns operations or records. The re
 
 In AWWV, a legacy state field can be relatively harmless if everyone knows it is compatibility baggage. A constructor or builder that still looks capable of recreating that layer is worse, because it teaches future work that the layer might still be canonical. If a runtime layer has been retired, kill the constructor too or mark it unmistakably as archival.
 
+### Dead writers are worse than dead readers
+
+In AWWV, a compatibility field can linger for save/load reasons without doing much harm. A live pipeline writer that keeps rebuilding that field every turn is different: it keeps the old concept feeling current. If a layer is no longer canonical, stop refreshing it in the live pipeline before you worry about full schema deletion.
+
