@@ -19,8 +19,8 @@ export interface GlassPanelProps {
 }
 
 const POSITION_CLASSES: Record<GlassPanelProps['position'], string> = {
-    left: 'fixed left-0 top-16 bottom-0',
-    right: 'fixed right-0 top-16 bottom-0',
+    left: 'fixed left-0 top-14 bottom-0',
+    right: 'fixed right-0 top-14 bottom-0',
     overlay: 'fixed inset-0 flex items-center justify-center',
     'bottom-tray': 'fixed bottom-0 left-0 right-0',
 };
@@ -59,10 +59,10 @@ export function GlassPanel({
                 <div
                     ref={panelRef}
                     className={`relative bg-panel-bg/95 backdrop-blur-md border border-[rgba(180,160,130,0.15)] shadow-xl rounded-lg overflow-hidden animate-slideUp ${className}`}
-                    style={{ width, maxHeight: '80vh' }}
+                    style={{ width, maxHeight: '84vh' }}
                 >
                     <PanelHeader title={title} onClose={onClose} />
-                    <div className="overflow-y-auto p-3" style={{ maxHeight: 'calc(80vh - 44px)' }}>
+                    <div className="overflow-y-auto px-2.5 py-2" style={{ maxHeight: 'calc(84vh - 38px)' }}>
                         {children}
                     </div>
                 </div>
@@ -75,10 +75,10 @@ export function GlassPanel({
             <div
                 ref={panelRef}
                 className={`${POSITION_CLASSES['bottom-tray']} bg-panel-bg/95 backdrop-blur-md border-t border-[rgba(180,160,130,0.15)] shadow-xl animate-slideUp ${className}`}
-                style={{ zIndex, maxHeight: '40vh' }}
+                style={{ zIndex, maxHeight: '44vh' }}
             >
                 <PanelHeader title={title} onClose={onClose} />
-                <div className="overflow-y-auto p-3" style={{ maxHeight: 'calc(40vh - 44px)' }}>
+                <div className="overflow-y-auto px-2.5 py-2" style={{ maxHeight: 'calc(44vh - 38px)' }}>
                     {children}
                 </div>
             </div>
@@ -93,7 +93,7 @@ export function GlassPanel({
             style={{ zIndex, width }}
         >
             <PanelHeader title={title} onClose={onClose} />
-            <div className="overflow-y-auto p-3" style={{ height: 'calc(100% - 44px)' }}>
+            <div className="overflow-y-auto px-2.5 py-2" style={{ height: 'calc(100% - 38px)' }}>
                 {children}
             </div>
         </div>
@@ -102,9 +102,9 @@ export function GlassPanel({
 
 function PanelHeader({ title, onClose }: { title: string; onClose?: () => void }) {
     return (
-        <div className="flex items-center justify-between px-3 py-2 border-b border-[rgba(180,160,130,0.15)]">
+        <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-[rgba(180,160,130,0.15)]">
             <h2
-                className="text-accent-gold uppercase tracking-[0.24em] text-[13px] font-black"
+                className="text-accent-gold uppercase tracking-[0.22em] text-[12px] font-black leading-none"
                 style={{ textShadow: '0 0 8px rgba(196,163,90,0.3)' }}
             >
                 {title}
@@ -112,7 +112,7 @@ function PanelHeader({ title, onClose }: { title: string; onClose?: () => void }
             {onClose && (
                 <button
                     onClick={onClose}
-                    className="text-text-secondary hover:text-accent-gold transition-colors text-lg leading-none"
+                    className="text-text-secondary hover:text-accent-gold transition-colors text-base leading-none"
                     aria-label="Close panel"
                 >
                     &times;

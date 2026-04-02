@@ -606,7 +606,7 @@ function App() {
   return (
     <div
       className="h-screen w-screen relative"
-      style={{ ['--awwv-toolbar-clearance' as string]: devMode ? '8.5rem' : '7.5rem' }}
+      style={{ ['--awwv-toolbar-clearance' as string]: devMode ? '7.5rem' : '6.5rem' }}
     >
       <MapContainer />
       <PresidentialToolbar

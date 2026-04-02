@@ -10,8 +10,8 @@ import type { LoadedGameState, SummaryFocusSection } from '../data/types';
 
 const LOAD_TIMEOUT_MS = 25000;
 
-const TOOLBAR_BUTTON_CLASS = 'px-2.5 py-0.5 text-[9px] font-mono uppercase tracking-[0.12em] bg-black/40 hover:bg-interactive/20 text-text-primary border border-white/10 rounded transition-all disabled:opacity-30 hover:border-interactive/40 hover:shadow-glow-sm hover:text-interactive active:scale-95';
-const MODULAR_SECTION_CLASS = 'flex items-center gap-1.5 px-2.5 py-0.5 bg-black/20 border border-white/5 rounded-md relative overflow-hidden group';
+const TOOLBAR_BUTTON_CLASS = 'px-2 py-0.5 text-[8px] font-mono uppercase tracking-[0.12em] bg-black/35 hover:bg-interactive/20 text-text-primary border border-white/10 rounded transition-all disabled:opacity-30 hover:border-interactive/40 hover:shadow-glow-sm hover:text-interactive active:scale-95 leading-tight';
+const MODULAR_SECTION_CLASS = 'flex items-center gap-1 px-2 py-0.5 bg-black/20 border border-white/5 rounded-md relative overflow-hidden group min-h-[2rem]';
 const SUMMARY_SHORTCUTS: Array<{ focus: SummaryFocusSection; label: string; getCount?: (state: LoadedGameState) => number | null }> = [
   {
     focus: 'ivp',
@@ -187,7 +187,7 @@ export function TopToolbar({
 
   return (
     <div
-      className="absolute top-0 left-0 right-0 z-10 flex items-center gap-3 px-3 py-1.5 bg-glass border-b border-white/10 shadow-2xl group/toolbar text-text-primary"
+      className="absolute top-0 left-0 right-0 z-10 flex items-center gap-2 px-2.5 py-1 bg-glass border-b border-white/10 shadow-2xl group/toolbar text-text-primary"
     >
       <div className="absolute inset-0 scanline-texture opacity-[0.03] pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-r from-accent-gold/5 via-transparent to-transparent pointer-events-none" />
@@ -209,42 +209,42 @@ export function TopToolbar({
         </button>
       )}
 
-      <div className="flex items-center gap-2.5 shrink-0 relative">
-        <div className="absolute -left-3 top-0 bottom-0 w-1 bg-accent-gold shadow-glow-gold opacity-80" />
+      <div className="flex items-center gap-2 shrink-0 relative">
+        <div className="absolute -left-2.5 top-0 bottom-0 w-1 bg-accent-gold shadow-glow-gold opacity-80" />
         {crestUrl && (
-          <img src={crestUrl} alt="" className="w-6 h-6 object-contain drop-shadow-glow-gold brightness-125" />
+          <img src={crestUrl} alt="" className="w-5 h-5 object-contain drop-shadow-glow-gold brightness-125" />
         )}
         <div className="flex flex-col">
-          <span className="font-sans text-[11px] text-accent-gold tracking-[0.2em] uppercase font-bold glow-text leading-tight">
+          <span className="font-sans text-[10px] text-accent-gold tracking-[0.18em] uppercase font-bold glow-text leading-tight">
             Warroom Console
           </span>
-          <span className="font-mono text-[9px] text-text-secondary uppercase tracking-widest opacity-60">
+          <span className="font-mono text-[8px] text-text-secondary uppercase tracking-[0.24em] opacity-60 leading-tight">
             A War Without Victory v0.6.1
           </span>
         </div>
         {devMode && (
-          <span className="ml-1 px-1.5 py-0.5 text-[8px] font-mono uppercase tracking-[0.3em] bg-amber-900/40 text-amber-500 border border-amber-500/30 rounded-full shadow-inner">
+          <span className="ml-0.5 px-1 py-0.5 text-[7px] font-mono uppercase tracking-[0.26em] bg-amber-900/40 text-amber-500 border border-amber-500/30 rounded-full shadow-inner">
             D_MODE
           </span>
         )}
       </div>
 
-      <div className="h-6 w-[2px] bg-white/15 mx-1" />
+      <div className="h-5 w-px bg-white/15 mx-0.5" />
 
       <div className={MODULAR_SECTION_CLASS}>
         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
         <div className="module-header">Systems</div>
         {devMode && (
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             <button onClick={handleLoadClick} disabled={loading} className={TOOLBAR_BUTTON_CLASS} title="Select save file">LOAD</button>
             <button onClick={handleLoadLatest} disabled={loading} className={TOOLBAR_BUTTON_CLASS} title="Load most recent session">LATEST</button>
-            <div className="flex items-center gap-1 ml-1">
+            <div className="flex items-center gap-1 ml-0.5">
               <input
                 type="text"
                 value={runIdInput}
                 onChange={(e) => setRunIdInput(e.target.value)}
                 placeholder="RUN_ID"
-                className="w-20 px-1 py-0.5 text-[9px] font-mono bg-black/40 border border-white/10 rounded text-text-primary focus:border-interactive/40 focus:outline-none transition-colors"
+                className="w-[4.5rem] px-1 py-0.5 text-[8px] font-mono bg-black/40 border border-white/10 rounded text-text-primary focus:border-interactive/40 focus:outline-none transition-colors"
                 onKeyDown={(e) => e.key === 'Enter' && handleLoadRun()}
               />
               <button onClick={handleLoadRun} disabled={loading || !runIdInput.trim()} className={TOOLBAR_BUTTON_CLASS}>SYNC</button>
@@ -346,7 +346,7 @@ export function TopToolbar({
 
       <div className={MODULAR_SECTION_CLASS}>
         <div className="module-header">Intel</div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           {summaryShortcuts.map((shortcut) => (
             <button
               key={shortcut.label}
@@ -361,10 +361,10 @@ export function TopToolbar({
         </div>
       </div>
 
-      <div className="ml-auto flex items-center gap-2">
+      <div className="ml-auto flex items-center gap-1.5">
         <div className={MODULAR_SECTION_CLASS}>
           <div className="module-header">History</div>
-          <div className="flex gap-1.5">
+          <div className="flex gap-1">
             <button onClick={() => onOpenSummary?.('overview')} disabled={!loadedGameState} className={TOOLBAR_BUTTON_CLASS}>SUMMARY</button>
             <button onClick={() => onOpenAAR?.()} disabled={!loadedGameState} className={TOOLBAR_BUTTON_CLASS}>AAR</button>
             <button onClick={() => onOpenOpsHistory?.()} disabled={!loadedGameState} className={TOOLBAR_BUTTON_CLASS}>OPS</button>
@@ -374,13 +374,13 @@ export function TopToolbar({
           </div>
         </div>
 
-        <div className="flex flex-col items-end justify-center min-w-[140px] px-3 py-1 border-l border-white/10 bg-black/10">
+        <div className="flex flex-col items-end justify-center min-w-[120px] px-2 py-0.5 border-l border-white/10 bg-black/10">
           {loadedGameState ? (
             <>
-              <div className="text-[11px] font-mono text-text-primary tracking-wider glow-text uppercase">
+              <div className="text-[10px] font-mono text-text-primary tracking-[0.12em] glow-text uppercase leading-tight">
                 {formatTurnLabel(loadedGameState.label)}
               </div>
-              <div className="flex items-center gap-2 text-[8px] font-mono text-text-secondary uppercase tracking-[0.2em] opacity-80">
+              <div className="flex items-center gap-1.5 text-[7px] font-mono text-text-secondary uppercase tracking-[0.18em] opacity-80">
                 <span>{loadedGameState.phase}</span>
                 <span className="w-1 h-1 rounded-full bg-interactive animate-pulse" />
                 <span>{loadedGameState.formations.length} FORMATIONS</span>

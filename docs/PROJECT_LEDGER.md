@@ -20602,3 +20602,34 @@ Verification:
 Why this matters:
 - stale contract docs are one of the fastest ways for future agents to resurrect dead product concepts
 - aligning the docs keeps repo memory consistent with the actual desktop shell and current engine authority
+### 2026-04-02 - Tactical shell density pass 3
+
+Continued the UI/UX swamp drain by tightening the shared spacing authority surfaces that were still making the tactical shell feel roomy instead of command-dense.
+
+Implemented:
+- `src/ui/map/components/TopToolbar.tsx`
+  - reduced shell padding, section gaps, crest/title footprint, and telemetry width
+- `src/ui/map/components/OOBSidebar.tsx`
+  - narrowed the command rail and reduced padding across army, mobilization, operations, and sectors sections
+- `src/ui/map/components/AccordionHeader.tsx`
+  - tightened section header spacing for every accordion user
+- `src/ui/map/components/GlassPanel.tsx`
+  - reduced header height and content padding while increasing usable overlay/tray space
+- `src/ui/map/App.tsx`
+  - reduced toolbar clearance so side rails sit closer to the command bar
+- `src/ui/map/styles/globals.css`
+  - tightened `.module-header` spacing rhythm
+- `docs/40_reports/implemented/20260402_TACTICAL_SHELL_DENSITY_PASS_3.md`
+  - documented the slice
+
+Verification:
+- `node_modules\\.bin\\vitest.cmd run tests\\ui_map_render_smoke.test.ts`
+  - PASS (`13` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+  - PASS
+- `npm.cmd run desktop:map:build`
+  - blocked by missing local `@vitejs/plugin-react` in this clean worktree; recorded as environment limitation, not a known UI regression
+
+Why this matters:
+- command-density work has to start at the shared shell primitives or every downstream panel re-inflates itself
+- this pass cuts wasted chrome from the top toolbar, the left command rail, and shared floating panels so more actual command context fits on screen

@@ -1520,3 +1520,6 @@ In AWWV, `theatres`, `army_theatre_assignment`, and `segment.theatre_id` still e
 ### Stale contract docs can resurrect dead systems just as effectively as stale code
 
 In AWWV, engineering docs that still listed `assign-brigade-to-front`, `rename-front-segment`, or theatre naming as live tactical-shell affordances were actively misleading, because the actual preload/main-process bridge had already retired them. When a product concept dies, update the contract docs quickly or the repo will keep teaching future agents that the ghost is still real.
+### Shared shell spacing must be treated like gameplay balance, not cosmetics
+
+In AWWV, if `TopToolbar`, `AccordionHeader`, `GlassPanel`, or the main command rail are roomy by default, every downstream panel inherits wasted space no matter how carefully the leaf components are designed. Density work should start with the shared shell authorities and toolbar-clearance rules, because that is where command context is won or lost across the whole product.

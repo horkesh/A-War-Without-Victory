@@ -235,3 +235,6 @@ Operations history feels archival, but it is still part of the normal player she
 ### 19. Compatibility sinks must not quietly refresh canonical state
 
 If a module is documented as dormant or compatibility-only, it must not still bump timestamps or rewrite canonical state as a side effect. A no-op sink that still touches `front_pressure` teaches the repo that two writers are acceptable. Keep reusable computations if they help tests or future reactivation, but make the sink itself truly inert.
+### 20. Shared shell spacing authorities determine whether the UI feels like a command console or a roomy dashboard
+
+If `TopToolbar`, `GlassPanel`, `AccordionHeader`, `module-header`, or the main rail-clearance variable are generous by default, every downstream screen inherits avoidable chrome and blank space. In AWWV, density work should start with those shared shell authorities before leaf-card polish, because command UX quality depends on how much useful state fits above the fold.

@@ -219,20 +219,20 @@ export function OOBSidebar() {
   if (!loadedGameState) {
     return (
       <div
-        className="absolute left-0 bottom-9 z-10 w-[17rem] flex flex-col bg-panel-bg/95 backdrop-blur-sm border-r border-panel-border overflow-hidden"
+        className="absolute left-0 bottom-9 z-10 w-[15.5rem] flex flex-col bg-panel-bg/95 backdrop-blur-sm border-r border-panel-border overflow-hidden"
         style={{ direction: 'ltr', top: 'var(--awwv-toolbar-clearance, 7.5rem)' }}
       >
-        <div className="px-3 py-2 font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold border-b border-panel-border glow-text">
+        <div className="px-2.5 py-1.5 font-sans text-[11px] text-accent-gold uppercase tracking-[0.14em] font-semibold border-b border-panel-border glow-text">
           Command
         </div>
-        <div className="p-3 text-xs text-text-secondary italic">Load a save to see army and situation views.</div>
+        <div className="px-2.5 py-2 text-[11px] text-text-secondary italic">Load a save to see army and situation views.</div>
       </div>
     );
   }
 
   return (
     <div
-        className="absolute left-0 bottom-9 z-10 w-[17rem] flex flex-col bg-panel-bg/95 backdrop-blur-sm border-r border-panel-border overflow-hidden"
+        className="absolute left-0 bottom-9 z-10 w-[15.5rem] flex flex-col bg-panel-bg/95 backdrop-blur-sm border-r border-panel-border overflow-hidden"
       style={{ direction: 'ltr', top: 'var(--awwv-toolbar-clearance, 7.5rem)' }}
     >
       {/* Overlay — explicitly absolute to avoid flex-item space consumption */}
@@ -241,7 +241,7 @@ export function OOBSidebar() {
         style={{ position: 'absolute' }}
       ></div>
 
-      <div className="px-3 py-1.5 font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold border-b border-panel-border shrink-0 relative z-10 glow-text">
+      <div className="px-2.5 py-1.5 font-sans text-[11px] text-accent-gold uppercase tracking-[0.14em] font-semibold border-b border-panel-border shrink-0 relative z-10 glow-text">
         Command
       </div>
 
@@ -271,7 +271,7 @@ export function OOBSidebar() {
             onToggle={() => toggleSection('army')}
           />
           {expandedSections.army && (
-            <div className="p-2.5 space-y-2.5">
+            <div className="p-2 space-y-2">
               {!armyByFaction || armyByFaction.size === 0 ? (
                 <div className="text-xs text-text-secondary italic">No formations.</div>
               ) : (
@@ -303,20 +303,20 @@ export function OOBSidebar() {
                   };
 
                   return (
-                    <div key={faction} className="space-y-2">
+                    <div key={faction} className="space-y-1.5">
                       {/* Faction divider — prominent separator between army sections */}
                       {factionIndex > 0 && (
-                        <div className="h-px bg-panel-border mt-2 mb-1" />
+                        <div className="h-px bg-panel-border mt-1.5 mb-1" />
                       )}
-                      <div className={`flex items-center justify-center gap-2 py-1.5 -mx-2.5 px-2.5 border-y ${FACTION_DIVIDER_BORDER[faction] ?? 'border-panel-border'} ${FACTION_DIVIDER_BG[faction] ?? 'bg-panel-card'}`}>
+                      <div className={`flex items-center justify-center gap-1.5 py-1 -mx-2 px-2 border-y ${FACTION_DIVIDER_BORDER[faction] ?? 'border-panel-border'} ${FACTION_DIVIDER_BG[faction] ?? 'bg-panel-card'}`}>
                         {getArmyCrest(faction) && (
-                          <img src={getArmyCrest(faction)} alt="" className="w-4 h-4 object-contain opacity-70" />
+                          <img src={getArmyCrest(faction)} alt="" className="w-3.5 h-3.5 object-contain opacity-70" />
                         )}
-                        <span className={`text-[11px] font-mono font-bold uppercase tracking-[0.2em] ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>
+                        <span className={`text-[10px] font-mono font-bold uppercase tracking-[0.16em] ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>
                           {getArmyName(faction) ?? faction}
                         </span>
                         {getArmyCrest(faction) && (
-                          <img src={getArmyCrest(faction)} alt="" className="w-4 h-4 object-contain opacity-70" />
+                          <img src={getArmyCrest(faction)} alt="" className="w-3.5 h-3.5 object-contain opacity-70" />
                         )}
                       </div>
                       <div
@@ -324,12 +324,12 @@ export function OOBSidebar() {
                         tabIndex={0}
                         onClick={() => toggle(faction)}
                         onKeyDown={(e) => e.key === 'Enter' && toggle(faction)}
-                        className="w-full flex items-center justify-between px-2 py-1.5 rounded font-mono text-xs font-medium bg-panel-card border border-panel-border text-left hover:bg-panel-hover transition-colors cursor-pointer group/faction"
+                        className="w-full flex items-center justify-between px-2 py-1 rounded font-mono text-[11px] font-medium bg-panel-card border border-panel-border text-left hover:bg-panel-hover transition-colors cursor-pointer group/faction"
                       >
                         <div className="flex flex-col gap-0.5 min-w-0">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1.5">
                             {getArmyCrest(faction) && (
-                              <img src={getArmyCrest(faction)} alt="" className="w-5 h-5 object-contain" />
+                              <img src={getArmyCrest(faction)} alt="" className="w-4.5 h-4.5 object-contain" />
                             )}
                             <button
                               type="button"
@@ -344,7 +344,7 @@ export function OOBSidebar() {
                             const commander = getFactionArmyCommander(faction, loadedGameState);
                             if (commander) {
                               return (
-                                <div className="text-[10px] text-text-secondary pl-7">
+                                <div className="text-[9px] text-text-secondary pl-6">
                                   <div>CO:</div>
                                   <div className="text-accent-gold font-semibold">{formatRank(commander.rank)} {commander.name}</div>
                                 </div>
@@ -353,8 +353,8 @@ export function OOBSidebar() {
                             return null;
                           })()}
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-text-secondary tabular-nums text-[10px]">{formations.length + reserves.length} formations</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-text-secondary tabular-nums text-[9px]">{formations.length + reserves.length} formations</span>
                           <span
                             className="text-text-secondary group-hover/faction:text-text-primary transition-colors"
                           >
@@ -457,7 +457,7 @@ export function OOBSidebar() {
             onToggle={() => toggleSection('mobilization')}
           />
           {expandedSections.mobilization && (
-            <div className="p-2.5 space-y-1.5 text-xs">
+            <div className="p-2 space-y-1.5 text-[11px]">
               {!mobilizationSummary ? (
                 <div className="text-text-secondary italic px-1">No mobilization data.</div>
               ) : (
@@ -465,7 +465,7 @@ export function OOBSidebar() {
                   const summary = mobilizationSummary[faction]!;
                   return (
                     <div key={faction} className="rounded border border-panel-border bg-panel-card p-1.5 space-y-1">
-                      <div className={`font-mono text-[11px] font-medium ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>
+                      <div className={`font-mono text-[10px] font-medium ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>
                         {faction}
                       </div>
                       <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
@@ -507,7 +507,7 @@ export function OOBSidebar() {
             onToggle={() => toggleSection('operations')}
           />
           {expandedSections.operations && (
-            <div className="p-2.5 space-y-1.5 text-xs">
+            <div className="p-2 space-y-1.5 text-[11px]">
               {!operationsByFaction ? (
                 <div className="text-text-secondary italic px-1">No active operations.</div>
               ) : (
@@ -515,7 +515,7 @@ export function OOBSidebar() {
                   const ops = operationsByFaction.get(faction)!;
                   return (
                     <div key={faction} className="space-y-1">
-                      <div className={`font-mono text-[11px] font-medium px-1 ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>
+                      <div className={`font-mono text-[10px] font-medium px-1 ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>
                         {faction}
                       </div>
                       {ops.map((op) => {
@@ -529,7 +529,7 @@ export function OOBSidebar() {
                             key={opKey}
                             type="button"
                             onClick={() => setSelectedOperationKey(isSelected ? null : opKey)}
-                            className={`w-full text-left rounded border p-2 space-y-1 transition-colors ${isSelected ? 'border-accent-gold bg-panel-active' : 'border-panel-border bg-panel-card hover:bg-panel-hover'}`}
+                            className={`w-full text-left rounded border px-2 py-1.5 space-y-1 transition-colors ${isSelected ? 'border-accent-gold bg-panel-active' : 'border-panel-border bg-panel-card hover:bg-panel-hover'}`}
                           >
                             <div className={`font-sans text-[11px] font-semibold ${FACTION_COLORS[op.faction] ?? 'text-text-primary'}`}>
                               {op.name}
@@ -575,7 +575,7 @@ export function OOBSidebar() {
             onToggle={() => toggleSection('sectors')}
           />
           {expandedSections.sectors && (
-            <div className="p-3 space-y-2 text-xs">
+            <div className="p-2.5 space-y-1.5 text-[11px]">
               {!sectorsByFaction ? (
                 <div className="text-text-secondary italic px-1">No sector data.</div>
               ) : (
@@ -583,7 +583,7 @@ export function OOBSidebar() {
                   const sectors = sectorsByFaction.get(faction)!;
                   return (
                     <div key={faction} className="space-y-1">
-                      <div className={`font-mono text-[11px] font-medium px-1 ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>
+                      <div className={`font-mono text-[10px] font-medium px-1 ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>
                         {faction}
                       </div>
                       {sectors.map((sector) => {
@@ -594,7 +594,7 @@ export function OOBSidebar() {
                             type="button"
                             data-sector-id={sector.sector_id}
                             onClick={() => setSelectedCorpsFrontSectorId(sector.sector_id)}
-                            className={`w-full flex items-center gap-2 px-2 py-1.5 rounded border transition-colors text-left ${selectedCorpsFrontSectorId === sector.sector_id
+                            className={`w-full flex items-center gap-1.5 px-2 py-1 rounded border transition-colors text-left ${selectedCorpsFrontSectorId === sector.sector_id
                               ? 'border-accent-gold bg-panel-active'
                               : 'border-panel-border bg-panel-card hover:bg-panel-hover'
                               }`}
