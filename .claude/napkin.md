@@ -10,122 +10,29 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-04-02, v0.8.0 Commander System on main)
-**n1302 NEW ATH (2026-04-02): 93.7% area-weighted, 25/25 anchors, 6/6 benchmarks. Hash: 0cf989330bd36cc8. Commander Intelligence Overhaul n1294–n1301: must_hold wiring (Brcko/Doboj 1.5× garrison), org readiness gate (zero main_effort → defensive), op scale cap by main_effort_count, enemy_concentration_zones from intel picture, coordination ±4%/pt officer competence, strength-based opportunity targets. gradacac_2+vozuca_2 both PASS. Open P1s: DRINA regression (~1.5pp, RS overcapturing), casualty ratio discrepancy (0.814 vs 0.63 in two reporting paths), ZEA rate 47% (up from 39%).**
+## Current State (2026-04-02, v0.8.0 Commander Intelligence Overhaul on main)
+**n1302 ATH: 93.7% area-weighted, 25/25 anchors, 6/6 benchmarks. hash: 0cf989330bd36cc8.**
+Commander Intelligence Overhaul (n1294–1301): must_hold 1.5× garrison (Brcko/Doboj), org readiness gate (zero main_effort → defensive), op scale cap by main_effort_count, enemy_concentration_zones from intel picture, coordination ±4%/pt officer competence, strength-based opportunity target ranking.
 
-**ATH BASELINE: n1256: 94.2% area-weighted, 23/23 anchors, 6/6 benchmarks. 73 battles, 36/40 combat weeks. hash: 5fa01bbdecc43f5f.**
-**n1289: 93.2%, 25/25 anchors (HISTORIC FIRST — all passing incl. brcko), 6/6 benchmarks. hash: a95995f2b1ab899c.**
-**n1275 STABLE BASELINE: 94.0%, 23/25 anchors (brcko+boljanic_2 FAIL), 6/6 benchmarks, 86 battles.**
-**n1278: Commander correction pass + home_osid removal from Phase B + in_transit guard added.**
-**n1279: Transit state cancellation + sector split else-if fix — BROKEN: duplicate sub-segment IDs caused VRS at-front to drop to 52.4%.**
-**n1289 CURRENT: 93.2%, 25/25 anchors (HISTORIC FIRST — all passing incl. brcko), 6/6 benchmarks. hash: a95995f2b1ab899c. Combat factor overhaul: P1 defensive fire, P2 urban data-driven (19 OSIDs), P3 graduated morale, P4 forest highland proxy (106 OSIDs), P7 war exhaustion tempo, P8 SRK initial entrenchment, P10 Lanchester concentration. Sector merge guard (areSectorsFrontEdgeAdjacent edge-to-edge). brcko fixed by P1 alone — VRS artillery defense raises attacker casualties enough. Commit: a61a8344.**
-**n1283–n1285: stance screening fix landed (n1283, hash 4f1e6cd04e3835e9, 23/25, boljanic_2 recovered). n1284–n1285 zero-delta (fixes already in code).**
-**n1282: 92.7%, 22/25 anchors (brcko+boljanic_2+gradacac_2 FAIL), 6/6 benchmarks. hash: 2bcd55343b6fb99f. Fix 1 depletion loop — MIN=2 for sector-anchored ops (was 3). RBiH orders 23→32. brcko re-failed (was recovered in n1281); DISPROVED hypothesis: thin 2-brigade RS ops pulling garrison. Real cause: corridor zone zero-surplus, brcko OSID uncovered.**
-**n1281: 92.7%, 23/25 anchors (boljanic_2+gradacac_2 FAIL), 6/6 benchmarks. hash: a968a166ebc237a6. Sector-anchored launch contract.**
-**n1280: 93.2%, 21/25 anchors, 6/6. Sub-segment ID fix → VRS at-front 74.4%.**
-**BOLJANIC_2 CONFIRMED ROOT CAUSE (2026-04-02): arbih_3rd_corps auto-generates ops via findTargetOsidsFromMunicipalities() adjacency walk from petrovo_2 (Ozren foothold) — no depth filter. vrs_1st_krajina directive has no hold_osids for Doboj; garrison budget drained north by Posavina corridor ops. rs_2nd_armored displaced to petrovo_2 (856 pers, morale 35); only rs_1st_krnjin at boljanic_2 vs 15-brigade ARBiH op. Falls turn 31. FIX: add boljanic_2 + adjacent Doboj OSIDs to vrs_1st_krajina hold_osids.**
-**Remaining P0s: gradacac_2 (RS overperforming on newly-covered fronts — pre-existing). [RESOLVED P0] brcko: fixed by P1 defensive fire. [RESOLVED] vozuca_2 (PASS at n1302). [RESOLVED] gradacac_2 PASS at n1302. P1s: boljanic_2 (Doboj — fix above), DRINA regression (n1302 86.6% vs ~88% n1289 — investigate Drina Corps freed brigades → eastern OSID overcapture), CASUALTY RATIO DISCREPANCY (attack_resolution reports 0.814, anomaly_detection reports 0.63 — data source mismatch), ZEA rate 47% (up from 39% — op-scale cap narrowing pools), ANCHOR GAP (petrovo_2 + brijesnica_donja_2 unanchored — add both as RS to scenario_runner.ts), vrs_east_bosnian zero-attack ops, estimateTurnsActive broken suspend counter, HRHB patron directive scope fix, jajce_falls turn_min 40→28, 3 stale ssid refs, P5 NATO air, P6 breakthrough, P9 supply recalibration. Track 2 engine chokepoint detection DISABLED (fraction-of-faction-total threshold 0.05 can't separate RS Brcko ~9% from ARBiH Central Bosnia valleys ~8% — needs corps-boundary discriminator or absolute count).**
-**FAILED APPROACHES for boljanic_2: Phase B corps-wide front OSID check (→SRK siege drop 4→2), Phase B sector-wide check (same cascade), sub_segment first-pass penalty (different cascades, no fix). All failed because they targeted the wrong layer (movement/distribution). Root cause is directive garrison budget, not brigade positioning.**
-**OZREN POCKET: 4 RS positions (petrovo_2, brijesnica_donja_2, vozuca_2 + 1 unnamed) all flip RBiH by w31–40. Historical fall: September 1995 (Op Farz). Fix: add hold_osids protection to Ozren brigade directives. Add petrovo_2 + brijesnica_donja_2 as RS anchors.**
-**[RESOLVED] Sector-anchored launch contract (2026-04-01, Phases 0-6 complete). emit.ts broad-pool replaced by sector-first selection. UI Sector Anchor block. Phase 5 transitional comments on all 5 remaining non-anchored paths. Plan: docs/plans/2026-04-01-v08x-sector-anchored-corps-operations-plan.md.**
-**[RESOLVED] Brigade drift, objective validation gate, homeDefense surplus filters (allocate+plan), ghost duplicates, BFS faction-wide scope, loan exclusivity, probe guard blocking plans, Phase B re-order bug (in_transit guard), home_osid auto-return (removed from Phase B), commander movement authority gap (correction pass added), duplicate sub-segment IDs (sector_id prefix fix), empty friendly_osids in splitNonContiguousSectors (else-if→else fix), komar_2 pileup. generateCorpsDirectives removed (2026-04-01, commit 7fca069d) — bot_corps_directives.ts 1990→545 lines. USE_COMMANDER_LOOP flag removed.**
-**[RESOLVED] OSID naming-mismatch: boljanic_2=Doboj, kopcic_2=Bugojno, brcko=Brčko, foca_3=Foča.**
-**Pre-existing gap revealed: Goražde enclave brigades (arbih_808th, arbih_843rd) not assigned to reachable sectors — anomaly detector exemption added for placement:fixed_home_osid.**
-**TWO OP SYSTEMS: (1) Legacy injectQueuedOperation (war_phases inject-queued-operations step, BEFORE commander) — consumes queued_operations, injects is_pre_planned ops directly. (2) Commander tryCreateFromOpportunity — runs AFTER legacy, for corps with no queued_operations (arbih_1st, arbih_5th, etc.). tryCreateFromPrePlanned is dead code — queue already consumed. Plan guard must exempt probes (type='probe' are independent of plan slots).**
-**EMERGENT PROPOSALS FOR DRIFT (Game Designer, 2026-04-01): Proposal 2 = corridor-width garrison multiplier (allocate.ts, uses ZoneAssessment.corridor_width — topological bottleneck detection, no brigade IDs). Proposal 3 = commitment-ratio Phase B eligibility filter (only route brigades to zones with commitment_ratio above threshold). Neither yet implemented.**
+**ATH BASELINE: n1256 — 94.2%, 23/23 anchors, 6/6 benchmarks, 73 battles. hash: 5fa01bbdecc43f5f.**
 
-**[MERGED] Concurrent corps operations.** `active_operations[]` replaces `active_operation`. Slot cap floor(brigades/12). 7 helpers. Emergency defense overflow. Bot secondary op guard. Save migration v1→v2. 84 files, +1459/-525.
-**[MERGED] Krajina paramilitary scope.** 6 municipalities added to RS offensive sweep. MAX_POCKET_CLUSTER 3→6. +3.0pp.
-**[MERGED] 2 new anomaly checks.** #27 undefended_painted_mismatch, #28 adjacent_uncontested_territory.
+**Open P1s:**
+- **DRINA regression (~1.5pp)**: must_hold freed Drina brigades → eastern OSID overcapture. Investigate Drina Corps freed brigades → where they go.
+- **boljanic_2 (Doboj)**: arbih_3rd_corps auto-generates ops from petrovo_2 adjacency; vrs_1st_krajina has no hold_osids for Doboj. rs_2nd_armored displaced to petrovo_2 (856 pers, morale 35). Fix: add boljanic_2 + adjacent Doboj OSIDs to vrs_1st_krajina hold_osids.
+- **Ozren pocket** (petrovo_2, brijesnica_donja_2, vozuca_2): all flip RBiH w31–40 (historical fall: Sep 1995). Fix: add hold_osids to Ozren brigades; add petrovo_2 + brijesnica_donja_2 as RS anchors in scenario_runner.ts.
+- **Casualty ratio discrepancy**: attack_resolution reports 0.814, anomaly_detection reports 0.63 — data source mismatch.
+- **ZEA rate 47%** (up from 39%): op-scale cap narrowing eligible attacker pools.
+- vrs_east_bosnian zero-attack ops; estimateTurnsActive broken suspend counter; jajce_falls turn_min 40→28; 3 stale ssid refs; P5 NATO air; P6 breakthrough; P9 supply recalibration.
 
-**[RESOLVED] Visegrad Brigade OOB.** Moved to vrs_drina. Correct.
-**[RESOLVED] Sarajevo siege SID/OSID.** Fixed, now returns PARTIAL not phantom BESIEGED.
-**[RESOLVED] Sector reassignment dead code.** evaluateSectorMarch now processes reassignment orders.
-**[RESOLVED] MIN_SECTOR_BRIGADES=2.** Small corps get fewer sectors.
-**[RESOLVED] SpatialContext shared spatial layer.** Phase 0-4 complete. 22→1 buildOsidAdjacency calls/turn.
-**[RESOLVED] Corps launch feasibility + ops reevaluation + emergency retreat + phantom defender + bfsDistance + multi-brigade main/support.** All n1204/n1205 fixes retained.
-**[RESOLVED] JNA ghost brigades.** 3 infantry-only phantoms for Op Prsten + Op Foca. Op Prsten objectives reordered.
-**[RESOLVED] Concurrent corps ops plan.** Implemented and merged. 84 files, +1459/-525.
+**TWO OP SYSTEMS (architecture — do not confuse):**
+1. **Legacy** `injectQueuedOperation` (`inject-queued-operations` step, BEFORE commander): consumes queued_operations for corps with pre-planned ops. `tryCreateFromPrePlanned` = dead code (queue already consumed).
+2. **Commander** `tryCreateFromOpportunity`: runs AFTER legacy; only fires for corps with no pre-planned ops (arbih_1st, arbih_5th, etc.).
 
-**[FAILED+REVERTED] Brigade drift home recall.** FAR_FROM_HOME_LINE_THRESHOLD=5 caused 59% of brigades to abandon positions. Approach fundamentally wrong for BiH war.
-**[FAILED+REVERTED] Op Prijedor JNA ghosts.** Made Prijedor succeed too fast, broke 1KK chain → lost Jajce.
-**[FAILED+REVERTED] 2nd Herzegovina home→konjic.** Konjic is enemy territory.
+**Emergent proposals (not yet implemented):**
+- Proposal 2: corridor-width garrison multiplier (`allocate.ts`, `ZoneAssessment.corridor_width`)
+- Proposal 3: commitment-ratio Phase B eligibility filter
 
-**[OPEN] RS w40 benchmark.** 49.7% vs 55.3% target. RS stalls mid-war. 33 total orders, 32 ops with zero eligible attackers.
-**[OPEN] Sarajevo regression.** -3.5pp from prior run. Needs investigation.
-**[OPEN] Equipment asymmetry in combat resolution.** ARBiH rifle-only brigades attacking VRS artillery+tanks should face massive power disadvantage. Combat predictor should reflect this so corps AI rejects suicidal ops.
-**[RESOLVED] Intelligent corps/army commanders.** v0.8 PERCEIVE→DECIDE→EXECUTE architecture unconditional on main. USE_COMMANDER_LOOP flag removed 2026-04-01 (commit 7fca069d).
-**[RESOLVED] 41 invalid operations (32 zero-eligible-attacker).** RC1–RC3 fixed 2026-04-01 (commit 32facc16): in-transit brigade diagnostic, legacy brigade filter, unified MIN_ATTACK_PERSONNEL=500.
-**[NOT A BUG] HRHB passivity in 40w scenario.** HRHB-RBiH war starts April 1993 (end of 40w window). Zero HRHB attacks against RBiH is historically correct. HVO Central Bosnia / Tomislavgrad dead fronts are expected within this scenario window.
-**[OPEN] Column march skip.** Brigades in column transit can't capture adjacent undefended territory.
-**[RESOLVED] Garrison cannibalization.** Garrison floor enforced at op launch via `garrison_budget` check in `emit.ts:buildOperations()`. Weakest brigades evicted if floor violated; op skipped if trimmed below MIN_BRIGADES_FOR_PLAN. Commit 6a5d39ce.
-**[OPEN] Ilijas 4 OSIDs census-derived RBiH.** Need early-war seizure event, not OSID override.
-**[OPEN] Derventa anchor FAILED.** HRHB holds derventa_2. 1KK op chain timing cascade.
-**[OPEN] Herzegovina structural gap.** 8 brigades, 81 front edges, ops pull to Foca.
-**[OPEN] 68+ brigade drifts.** Structural feedback loop identified but fix approach wrong.
-**[OPEN] Gap finder remaining design gaps:**
-- P2: Attack-through stall counter, corridor terrain broad-front, reinforcement corridor safety, sectors stale after combat.
-**[KNOWN INVARIANT] Army HQ reserve brigades may have no sector_id while idle.** Do instead: treat `vrs_main_staff`, `arbih_general_staff`, and `hvo_main_staff` elite reserve brigades as legitimate sectorless exceptions until loaned. Only active non-exempt field-corps brigades should be treated as sector-mandatory.
-
-**Session 2026-03-30 (Session 3 — v0.7 debt reslotted):**
-- 4 floating v0.7 sub-milestones given explicit homes: essays→v0.8.0.x parallel, template engine+Letter Home+Warroom migration+canon audit→v0.8-to-v0.9, Ops Modal+Ghost Map+Exhaustion Clock→v0.9.1.
-- v0.7 now "core complete" not "mostly complete." Status table, Legendary Features table, hit list updated.
-
-**Session 2026-03-30 (Session 2 — Roadmap Restructuring + Implementation Program):**
-- Taskforce session: converted repo-health consolidated audit into sequenced implementation program.
-- **Roadmap renumbered:** v0.8.1 Commander Maturity inserted (belief state, competing intents, decision traces). Political Bot v0.8.1→v0.8.2, Order Interp v0.8.2→v0.8.3, Autonomy v0.8.3→v0.8.4.
-- **v0.8.x-final** expanded to "Command Authority Cleanup" with operations 4-question gate. 4 sequencing principles added to v0.8 header.
-- **5 workstreams defined:** A=commander stabilization, B=authority cleanup, C=commander maturity, D=political bot, E=simplification.
-- All plan files updated (headers, gate statements, 15+ version refs in command-chain-architecture.md). Ledger entry written.
-- **Immediate next: fix slot cap P0 (`phase !== 'recovery'` in emit.ts), then run full two-tier post-run panel (7 Tier 1 investigators in parallel, then 5 Tier 2 analysts; Orchestrator issues go/no-go).**
-
-**Session 2026-03-30 (Session 1 — Recovery + Roadmap + P0 Task 4):**
-- Session recovered from crash. working-on.md preserved context. No work lost.
-- MASTER_ROADMAP.md created (unified roadmap v0.1→v1.0+). VERSIONING.md trimmed to scheme-only. Supersession notices added to 2 stale plans. Memory updated.
-- P0 Task 4 committed: doctrine phase railroads removed from commander (plan.ts gate, emit.ts aggression modifier, briefing.ts hardcoded 'balanced'). Test added.
-- 6 commits ahead of origin/main. Next: Task 5 calibration run + balanced zone expansion.
-
-**Session 2026-03-29 (Session 3 — Concurrent Ops + Krajina, n1210→n1211):**
-- Concurrent corps operations merged (84 files, +1459/-525). Save migration v1→v2. Krajina paramilitary scope (+6 muns, MAX_POCKET_CLUSTER 3→6). 2 new anomaly checks (#27, #28). Net: +3.2pp from n1210.
-
-**Session 2026-03-29 (Session 2 — OOB + Siege + Sector fixes, n1205→n1210):**
-- Visegrad Brigade OOB moved to vrs_drina. Sarajevo siege SID→OSID fix (PARTIAL not phantom BESIEGED). Sector reassignment dead code fixed. MIN_SECTOR_BRIGADES=2. JNA ghost brigades for Op Prsten + Op Foca.
-- Brigade drift home recall REVERTED (59% abandonment). Op Prijedor JNA ghosts REVERTED (broke 1KK chain). 2nd Herzegovina home→konjic REVERTED (enemy territory).
-- Concurrent corps ops plan written (15 tasks, 28 files). Net: -4.4pp, mechanically correct.
-
-**Session 2026-03-29 (Session 1 — SpatialContext + architectural fixes, n1194→n1205):**
-- SpatialContext Phases 0-4, corps launch feasibility, ops reevaluation, emergency retreat reachability, phantom defender fix, bfsDistance friendly-only, multi-brigade main/support. Intel/probe overhaul (5 items). Brigade assignment (23→0 unassigned). Pocket evacuation. Anomaly detector + diagnostics.
-
-**Design specs delivered:**
-- `docs/30_planning/MULTI_BRIGADE_OPERATION_DESIGN_SPEC.md` — main/support roles.
-- `docs/plans/2026-03-29-concurrent-corps-operations.md` — concurrent corps ops (15 tasks, 28 files).
-**Session 2026-03-28 (Session 2 — Empty Sectors + Passive Brigades):**
-- **Territory-based brigade reconciliation (Phase 1.5)**: `classifyBrigadesByTerritory` now matches pooled brigades by `location_osid` vs `territory_osids` before Phase 2 BFS. Fixed SRK sector:1 (14 edges, 0 brigades). **0 empty contested sectors (was 5).**
-- **Cold-front sector suppression REVERTED**: Removing sectors from Voronoi cascades globally. Ghost sanitizer sufficient.
-- **Probe pipeline triple fix**: (1) `evaluateOperationProgress` now skips probe/feint (double processing bug). (2) Probes don't trigger `last_completed_operation` cooldown. (3) Supply filter relaxed: `strained` brigades CAN attack (0.75× penalty via getSupplyMult), only `critical` excluded. Root cause: 94% of RBiH territory is `strained` — the old filter killed ALL RBiH operations.
-- **n1169: 103 battles (was 68, +51%), RBiH 47 orders (was 12, +292%), 72 passive brigades 30.3% (was 92/39%).** -0.9pp from RBiH overcapture.
-- **Also added**: exhaustion gate (MAX_EXHAUSTION=30/probe=40), cooldown 8→5, counter-attack broadening (sector-wide, 2-turn window), planning cap 4. These had zero immediate effect but are correct architecturally.
-**Session 2026-03-28 (Session 1):** `validateOpAtInjection` engine gate, ghost sector sanitizer, anomaly detector wiring, Op fixes. **n1150: 92.2%, 22/22, 6/6.**
-**Session 2026-03-27 (IPC + 1991 Cleanup):** Restored 10+ IPC handlers in `useIPC.ts` (Settings, AI, Replays); synchronized with `preload.cjs`. Decommissioned `sep_1991` scenario across Electron/UI. Deleted legacy `bridge.ts`. Propagated to master docs.
-**Earlier 2026-03-27 (diagnostic fixes):** Probe type gate (probes re-enabled), overflow threshold `<` not `<=`, orphan pool drainage to strategic reserve, east Herzegovina Bosniak displacement reroute. Results: 62 battles (was 44), HRHB 8 attacks (was 0), 4th Corps 9/10 healthy (was 2/10), 0 stranded pools (was 3), 2 empty sectors (was 6), 0 diagnostic errors (was 2).
-**Earlier 2026-03-27:** Sector-coverage displacement guard, cross-faction HRHB pool seeding (5x mult, 4 missing brigades), 255th Slavna enclave at Teočak, 246th at vitinica_2, Op Teočak second axis, Black Swans elite loan via deployment_osid. Pre-commit hook: tsc-only (~15s).
-**Combat audit (2026-03-26, 11 sequential fixes verified):**
-- **P1-P4:** OOB corps correction (2nd Romanija→SRK), BFS component guards, redistribution distance 8→20 (+ bfsDistance cap 10→20), silent drop fallback. Net -0.3pp (correct mechanics exposed artificial inflation).
-- **P5 Posavina pockets:** 103rd/104th dissolution via `pocket_destroyable` tag — brigades no longer teleport to Mostar.
-- **P6 Probe loop:** `consecutive_probes` only resets on non-probe op completion. Infinite probe chains eliminated.
-- **P7 Zombie ops:** `general_offensive`/`strategic_defense` coerced to `sector_attack` at injection — dead execution logic removed.
-- **P8 Paramilitary ordering:** `consolidate-rear-pockets` swapped before `paramilitary-advance` in `war_phases.ts`.
-- **P9 Assembly gate:** `computePlanningDuration()` extended by march estimate; force_staging waits for 60% assembly or 5-turn timeout. Zero-attacker ops eliminated.
-- **P10/P11 Intel:** Passive buildup raised (RBiH 0.06→0.12, RS/HRHB→0.08). OPSEC now writes `opsec_sectors[]`. Concentration detection +0.10 on 2+ reserve brigades.
-- **P14 Data silos:** Deterministic `battle_id` join key (`{turn}:{osid}:{attacker}:{defender|null}`) propagates to battles, ops, territory flips, brigade history. Friction: `{turn}:{osid}:friction:{brigadeId}`.
-- **P15 Friction:** `frontline_attrition.ts` records skirmish BrigadeEngagements when casualties ≥15 (35% deterministic chance).
-- **Anomaly detector:** `src/scenario/anomaly_detector.ts` — 12 post-run checks, wired into harness.
-**Open:** **[P1] Intel/Probe overhaul (5 items)**: (1) Probe freshness per-sector-pair + remove forced commitment, (2) attack threshold stalemate→costly_victory, (3) OPSEC offensive_signs threshold lowered + defensive reaction enabled, (4) fog scaled by intel confidence, (5) counter-attacks gated through predictor. Root cause: ARBiH 81 orders in 1992 — bots don't emergently know not to attack. Also open: RBiH overmobilized 161k (P4), inverted casualty ratio 0.43 att:def (P5), P16 (strategic reserve 0 manpower).
-**Roadmap:** v0.7.1 version bump, visual verification, canon audit Phase D/E, then v0.8=Command Chain.
-**Army HQ restoration (2026-03-25):** Known-good baseline c80d5767. Rule: never rewrite ArmyHQModal.tsx or SituationBriefing.tsx — targeted edits only.
-**HRHB-RBiH conflict:** P1 ALL RESOLVED (n963). Master: `docs/40_reports/BOSNIAK_CROAT_CONFLICT_MASTER.md`.
-**Calibration freeze rule:** Any sim-affecting change needs `npm run calibrate:40w` regression check vs frozen baseline.
-**Diagnostic toolset:** `tools/diagnose_run.cjs` — run after every calibration run. Checks: drift, siege health, empty sectors, depleted corps, stranded pools.
+**[KNOWN INVARIANT] Army HQ reserve brigades may have no sector_id while idle.** Treat `vrs_main_staff`, `arbih_general_staff`, and `hvo_main_staff` elite reserve brigades as legitimate sectorless exceptions until loaned. Only active non-exempt field-corps brigades are sector-mandatory.
 
 ## Integration Test Suites (9 suites, WS6)
 1. `tests/integration_deployment_health.test.ts` — app bootstrap, Electron readiness
@@ -139,9 +46,7 @@
 9. Scenario manifest — scenario JSON schema + baseline regression
 
 ## Session Startup (do these EVERY session — BEFORE any work)
-1. **[2026-03-21] Settlement Timeline + engine tracking COMPLETE.**
-   Do instead: 12 event types wired, 5 engine persistence features shipped. Next: Kalinovik OOB, RS w20, dark BiH mask, Army HQ Nerve Center.
-2. **[2026-03-13] Check crons and schedule if missing — ALWAYS (two crons)**
+1. **[2026-03-13] Check crons and schedule if missing — ALWAYS (two crons)**
    Do instead: Run `CronList` at session start. Crons are session-only and auto-expire after 3 days. **Re-schedule every session.** Two required crons:
    **(A) Daily Pyrrhic Standup** — cron `27 6 * * *`. Invokes /orchestrator to convene Pyrrhic team. Three phases: (1) Yesterday's retrospective (good/bad/ugly from `git log --since=24h`, ledger, life lessons), (2) Fresh game analysis (CALIBRATION_MASTER, REAL_WAR_MASTER, War-or-Game assessment), (3) Today's priorities — plan big and ambitious (3-5 items a team of AI agents can accomplish). Present everything via /visual-explainer as a war room briefing board. Full prompt stored in `memory/cron_daily_standup.md`.
    **(B) Life-lessons review** — cron `3 6 * * *`. Gather 24h git activity, detect life-lesson violations, synthesize new lessons, promote/demote, generate visual report via `/visual-explainer`.
