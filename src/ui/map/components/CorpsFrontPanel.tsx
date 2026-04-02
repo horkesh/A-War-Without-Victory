@@ -8,6 +8,7 @@ import { getOperationId, getOperationPhaseBadgeClass } from '../utils/operations
 import { getPanelRailStyle } from './panelRail';
 import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { useIPC } from '../desktop/useIPC';
+import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
 
 /** Strength class badge with color coding. */
 function StrengthBadge({ strengthClass }: { strengthClass?: 'fortress' | 'strong' | 'adequate' | 'thin' | 'critical' }) {
@@ -188,7 +189,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
   const relatedOperations = useMemo(
     () => {
       if (!_sector) return [];
-      return [...(loadedGameState?.operations ?? [])]
+      return [...filterPlayerFacingOperations(loadedGameState)]
         .filter((op) => {
           if (op.corps_id !== _sector.corps_id) return false;
           if (op.sector_id === _sector.sector_id) return true;
@@ -197,7 +198,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
         })
         .sort(compareOperations);
     },
-    [loadedGameState?.operations, _sector, sectorFriendlySet]
+    [loadedGameState, _sector, sectorFriendlySet]
   );
 
   if (operationsPanelOpen || !selectedSectorId || !loadedGameState?.corpsFrontSectors) return null;
@@ -338,7 +339,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
             ['overview', 'Overview'],
             ['forces', 'ORBAT'],
             ['logistics', 'Logistics'],
-            ['ops', 'Operations'],
+            ['ops', 'Ops Snapshot'],
           ] as const).map(([tabId, label]) => (
             <button
               key={tabId}
@@ -676,6 +677,10 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
           <div role="tabpanel" id="sector-intel-panel-ops" aria-labelledby="sector-intel-tab-ops" hidden={activeTab !== 'ops'} className="p-4 relative z-10">
             {activeTab === 'ops' && (
               <div className="p-4 relative z-10 space-y-3">
+                <div className="text-[9px] uppercase font-bold text-neutral-500">Field Snapshot</div>
+                <div className="text-[10px] text-neutral-500 -mt-2">
+                  Sector panels summarize live directives. Full command review belongs in Army HQ and operation briefings.
+                </div>
                 {relatedOperations.length === 0 ? (
                   <div className="text-[10px] text-neutral-500 italic uppercase">/// NO ACTIVE DIRECTIVES IDENTIFIED ///</div>
                 ) : (
@@ -761,7 +766,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                     }}
                     className="kbd-focus w-full text-[10px] uppercase font-bold bg-neutral-200 hover:bg-neutral-300 text-neutral-800 py-2 border border-neutral-400 transition-colors"
                   >
-                    Draft New Directive (Ops Planning)
+                    Draft New Directive in HQ
                   </button>
                 </div>
               </div>

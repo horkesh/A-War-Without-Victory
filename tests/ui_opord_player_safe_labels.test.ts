@@ -101,7 +101,14 @@ describe('buildOpordDisplayModel', () => {
         expect(decisionSource).toContain('getPlayerSafePoliticalFactionName(decision.faction)');
         expect(operationDetailSource).toContain('getPlayerSafeMilitaryFactionName(op.faction)');
         expect(corpsDetailSource).toContain('getPlayerSafeMilitaryFactionName(corpsFormation.faction)');
+        expect(corpsDetailSource).toContain('filterPlayerFacingOperations');
+        expect(corpsDetailSource).not.toContain('loadedGameState?.operations?.filter');
+        expect(corpsDetailSource).toContain('Full command review belongs in Army HQ');
         expect(sectorPanelSource).toContain('getPlayerSafeMilitaryFactionName(sector.faction)');
+        expect(sectorPanelSource).toContain('filterPlayerFacingOperations');
+        expect(sectorPanelSource).not.toContain('loadedGameState?.operations ?? []');
+        expect(sectorPanelSource).toContain('Full command review belongs in Army HQ');
+        expect(oobSource).toContain('filterPlayerFacingOperations');
         expect(authorizeSource).toContain('findPlayerFacingOperationByKey');
         expect(authorizeSource).not.toContain('loadedGameState.operations ?? []).find');
         expect(commanderSelectionSource).toContain('findPlayerFacingOperationByKey');

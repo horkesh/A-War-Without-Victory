@@ -21411,3 +21411,24 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 
 ### Verification
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\brigade_territory_reconciliation.test.ts tests\\commander_driven_brigade_assignment.test.ts`
+
+## 2026-04-03 - Corps-panel operation handoff discipline
+
+### Summary
+- Routed `CorpsDetail`, `CorpsFrontPanel`, and `OOBSidebar` through the shared player-facing operation selector.
+- Reframed the corps ops tabs as field snapshots with explicit handoff to Army HQ and briefing flows for full command review.
+
+### Files changed
+- `src/ui/map/components/CorpsDetail.tsx`
+- `src/ui/map/components/CorpsFrontPanel.tsx`
+- `src/ui/map/components/OOBSidebar.tsx`
+- `tests/ui_opord_player_safe_labels.test.ts`
+- `docs/40_reports/implemented/20260403_CORPS_PANEL_OPERATION_HANDOFF_DISCIPLINE.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- Even after adapter-level scoping, the tactical shell still had multiple panels behaving like co-equal operation browsers.
+- Shared player-facing selectors need to be used everywhere, not just in the obvious top-level panels, or future work drifts back toward raw reads and duplicate ownership.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_opord_player_safe_labels.test.ts tests\\ui_player_visibility.test.ts tests\\ui_map_render_smoke.test.ts`
