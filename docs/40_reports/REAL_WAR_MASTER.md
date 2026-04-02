@@ -8,7 +8,104 @@ In the Bosnian War, every brigade mattered. Commanders fought with what they had
 
 ---
 
-## Latest Review: n1240 (2026-03-31) — homelandAbsorbDecisive Removed; decisive always flips
+## Latest Review: n1302 (2026-04-02) — Commander Intelligence Overhaul; 93.7% ATH, 25/25 anchors
+
+**Run:** `runs/apr1992_definitive_40w__...` | 93.7% area-weighted | 25/25 anchors | 6/6 benchmarks | hash `0cf989330bd36cc8`
+
+### Summary
+
+New ATH. 25/25 anchors is a historic first. Commander intelligence overhaul (n1294–n1301) shipped: must_hold garrison wiring, org readiness gate, op scale cap, enemy concentration zones, multi-brigade coordination with officer competence, strength-based opportunity target ranking.
+
+### Known Issues at n1302
+
+- **DRINA regression** (~1.5pp vs n1289): Possible freed-brigade cascade from corridor garrison changes. Investigate vrs_drina op counts.
+- **ZEA rate 47%** (combat predictor blindspot — COMBAT_MASTER P14): Predictor ignores defender artillery, terrain, entrenchment. 47% of all operations fire with zero eligible attackers. P1.
+- **Casualty ratio discrepancy** (0.814 att:def aggregate vs 0.63 in anomaly_detection — different denominators, both faction-blind). See COMBAT_MASTER "Faction-Specific Casualty Context" for correct per-faction-pair interpretation.
+- **Exhaustion = 0** (Issue #47 carried from n1240): Still not resolved. Core negative-sum mechanic still dead.
+
+### Verdict
+
+**WAR-OR-GAME: NOT REVIEWED.** War-or-Game is not dispatched automatically from calibration panels (see memory/feedback). Calibration health at 93.7% and 25/25 anchors suggests the macro picture is sound. Issue #46 (ARBiH meat-grinder) and Issue #47 (exhaustion=0) remain open from n1240.
+
+---
+
+## Historical/Doctrinal Blindspot Audit (2026-04-02, Engine Health Review)
+
+Findings from the engine health audit regarding what the sim is structurally blind to about the actual Bosnian War. These are not calibration gaps — they are engine capabilities that do not exist at all.
+
+### HIST-GAP-1: UNPROFOR absent as a mechanical entity — P0
+
+**Gap:** UNPROFOR had 38,000 troops in BiH by 1993 and was the primary supply route into all three major enclaves (Srebrenica, Žepa, Goražde). Their convoys determined whether besieged populations and ARBiH units could resupply. UNPROFOR protection zones in Srebrenica, Žepa, Goražde, Bihać, Tuzla, Sarajevo were the defining strategic facts of 1993–1995.
+
+**Engine reality:** No UNPROFOR entity exists. Enclave supply is computed purely from geographic connectivity and faction supply networks. There is no mechanism where VRS interdicting a convoy reduces enclave supply, or where UNPROFOR presence changes the cost-calculation of an attack.
+
+**Impact:** Enclave dynamics are structurally wrong. Srebrenica in the sim is a pure military siege. In reality it was a partially-open enclave with UN-negotiated supply access, checkpoints, and demilitarization demands. The UNPROFOR layer is the primary reason the 1993–1995 enclave situation looked the way it did.
+
+**Priority:** P0 for v0.9 (Consequences). Not needed for current 40w calibration (Jan 1993 = UNPROFOR just arriving), but essential for any 52w or campaign scenario extending past mid-1993.
+
+---
+
+### HIST-GAP-2: VRS enclave strategy missing — "strangle not capture" — P0
+
+**Gap:** Historically, VRS deliberately refrained from final capture of Srebrenica, Goražde, Bihać, and Žepa throughout 1993–1994. These enclaves were used as bargaining chips — their continued existence justified RS territorial claims, generated civilian hostage leverage, and constrained ARBiH forces that couldn't leave.
+
+**Engine reality:** The bot always attacks at available power whenever it has a positive force ratio. There is no mechanism for "hold available but do not take." VRS will capture any enclave it can reach if the numbers support it.
+
+**Impact:** This is the hardest historical pattern to reproduce without explicit design support. The "strangle not capture" posture requires the bot to recognise specific OSIDs as tactically capturable but strategically valuable as unresolved situations. No equivalent decision framework exists.
+
+**Priority:** P0 for strategic realism. This is a qualitative difference between "wargame that wins" and "sim that represents the war." The RS player's incentive structure must include enclave maintenance as a valid goal. Needs a commander directive type: `contain` (blockade, restrict supply, don't capture).
+
+---
+
+### HIST-GAP-3: Radio/communications quality absent — P0
+
+**Gap:** ARBiH communicated on captured JNA radios, civilian channels, and improvised systems. VRS had JNA-inherited secure communications. This asymmetry meant VRS could coordinate multi-corps operations while ARBiH corps commanders often didn't know what adjacent corps were doing, let alone what was happening at the front.
+
+**Engine reality:** All three factions have identical information access. `buildBriefing()` gives every corps CO complete sector intelligence (modulated by `getSectorIntelConfidence()` but not by communications quality). The ARBiH CO planning an operation at Doboj has the same information fidelity as the VRS CO defending it.
+
+**Impact:** ARBiH operations are planned with unrealistic coordination quality. The "adjacent corps posture absent" gap (BRIEF-GAP-5) partially reflects this, but the root structural issue is that comms asymmetry doesn't exist anywhere in the engine.
+
+**Priority:** P0 for CO intelligence realism. Simplest proximate fix: lower ARBiH `INTEL_GATE_LAUNCH_THRESHOLD` floor (already at 0.40, higher than RS 0.25), and reduce ARBiH intel confidence gain rate. More complete fix: faction-differentiated `brigade_visibility_range` controlling how much of the enemy picture each CO sees.
+
+---
+
+### HIST-GAP-4: Ammunition scarcity per brigade — P0
+
+**Gap:** Individual brigade ammunition levels drove tactical decisions in the Bosnian War in a way that the strategic supply system doesn't capture. ARBiH brigades routinely had 2-3 days of ammunition for an operation with no resupply. VRS brigades often fought at half-capacity when the Posavina corridor was contested. Artillery units sometimes had ammunition for 20–30 rounds total per engagement.
+
+**Engine reality:** Supply is a zone-level factor applied as a single multiplier (`supply_by_osid`). Brigades have no individual ammunition or logistics state. A brigade attacking at `supply: strained (0.75×)` is modeled identically to a brigade with 2 days of ammo — no distinction between "logistics strained but sufficient for one operation" and "genuinely combat-ineffective without resupply."
+
+**Impact:** Operations don't feel resource-constrained in the way that defined Bosnian War command decisions. Commanders would abort operations due to ammunition, not because the force ratio was wrong. The P9 supply recalibration (COMBAT_MASTER) addresses supply routing; this gap is about individual unit logistics state.
+
+**Priority:** P0 for long-term simulation fidelity. Prototype path: add `ammunition_level: number` to `BrigadeState`, drain on operations, resupply from corps supply pool. Not needed for current 40w window (roughly correct behavior from zone supply) but critical for 52w.
+
+---
+
+### HIST-GAP-5: ARBiH 1993 reorganization step-change absent — P1
+
+**Gap:** In late 1992 – early 1993, ARBiH underwent a major structural reorganization: the TO (Territorial Defence) system was formalized into an army hierarchy with corps, divisions, and brigades. This produced a real step-change in ARBiH operational capability — from a loose collection of local defence units to a recognizable command structure.
+
+**Engine reality:** The scenario seeds ARBiH with a complete corps structure from turn 0. There is no modeled transition from TO chaos to corps structure. ARBiH at week 1 has the same organizational capability as ARBiH at week 26.
+
+**Impact:** Early-war ARBiH is too organized. The 1992 ARBiH was making it up as they went — officers were appointed based on availability, not training; units had no organic logistics; orders reached the front 24-48 hours late. The engine models the post-reorganization force as a baseline, not the chaotic pre-reorganization force.
+
+**Priority:** P1. Addressable via scenario tuning (low planning confidence, high intel thresholds for weeks 1–15) without structural changes. The Life Lesson on `home_osid` being a recruitment artifact also applies here — early ARBiH brigade capability was extremely home-bound.
+
+---
+
+### HIST-GAP-6: Ethnic cleansing as a strategic tool — absent — P1
+
+**Gap:** VRS and HVO deliberately cleansed territory to change the demographic facts on the ground, making post-war return difficult and creating ethnically homogenous buffers. This was a strategic decision (Karadzic's Six Goals explicitly included territorial contiguity with Serbia and ethnic separation), not a side effect of combat. Towns like Prijedor, Foča, Zvornik, Vlasenica were cleansed *before* being "defended" — the population was removed so the question of reconquest became moot.
+
+**Engine reality:** Control flips are purely military — a brigade attacks, wins, and the political_controller changes. Civilian displacement follows from control changes and is modeled at the aggregate municipal level. There is no mechanism where a faction proactively displaces civilians to lock in territorial control without military action, nor where the displacement itself changes the strategic situation.
+
+**Impact:** This is a deep design question, not a quick fix. The ethnic cleansing layer is part of the reason the Bosnian War's end state looked the way it did. Without it, the sim models a conventional war with civilian casualties. Implementing it requires a decision-event layer where factions can choose "cleanse and hold" as an alternative to "attack and hold" for certain OSIDs — with its own political cost, international reaction, and strategic effect.
+
+**Priority:** P1 for v0.9 (Consequences). The negative-sum dynamic the game is designed to express is partly about these irreversible decisions. Without a cleansing mechanic, the game cannot fully represent what commanders in this war were actually deciding.
+
+---
+
+## Previous Review: n1240 (2026-03-31) — homelandAbsorbDecisive Removed; decisive always flips
 
 **Run:** `runs/apr1992_definitive_40w__77cac5e01d3c929e__w40_n1240` | 93.6% area-weighted | 22/22 anchors | 6/6 benchmarks
 
@@ -53,6 +150,14 @@ Seven different ARBiH brigades attack Doboj across w21-w40 at PR 0.24-0.40. Five
 **Root cause:** Corps AI operation loop has no "catastrophic at this OSID → suspend objective" gate. Once an operation targets an OSID, it keeps assigning new brigades until the objective is either captured or the operation expires. No per-OSID catastrophe threshold exists.
 
 **Status:** P1 — this is the dominant realism failure in n1240. Blocks late-war mechanistic correctness even though aggregate calibration is high.
+
+**Confirmed Doboj mechanism (2026-04-02 investigation):** The proximate failure is structural, not just bot learning.
+- `arbih_3rd_corps` auto-generates ops targeting `boljanic_2` (Doboj city) via `findTargetOsidsFromMunicipalities()` adjacency walk from `petrovo_2` (Gračanica, RS-held Ozren foothold on 3rd Corps flank). No depth filter exists — any enemy OSID reachable from a front sector becomes a candidate.
+- `vrs_1st_krajina` directive has no `hold_osids` for Doboj OSIDs. Corridor ops (Posavina) drain the garrison budget northward.
+- `rs_2nd_armored` brigade gets displaced to petrovo_2 (856 pers, morale 35 by w31), leaving only `rs_1st_krnjin` at boljanic_2 facing a 15-brigade ARBiH operation. Falls turn 31.
+- Fix: add Doboj OSIDs (`boljanic_2` + adjacent) to `vrs_1st_krajina` `hold_osids` directive.
+
+**Ozren pocket collapse (same investigation):** All four RS Ozren brigade home positions flip RBiH by w31–40 in current runs. `petrovo_2` (1st Ozren Brigade home), `brijesnica_donja_2` (2nd Ozren home), `vozuca_2` (4th Ozren home) all fall. Historically the Ozren pocket persisted until September 1995 (Operation Farz), well outside the 40w window. Root cause: no dedicated `hold_osids` protection for the Ozren brigades' home OSIDs. Anchor gap: only `vozuca_2` is in `HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992`; `petrovo_2` and `brijesnica_donja_2` are unanchored (invisible to calibration scoring). Fix: add both as `expected_controller: 'RS'` anchors.
 
 ---
 

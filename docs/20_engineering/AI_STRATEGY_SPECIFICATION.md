@@ -146,7 +146,7 @@ Operations pass through a preparation phase between launch and execution. The pr
 
 **Probe mechanic:** During preparation, commanders may order reconnaissance-in-force probes. `selectProbeBrigades()` chooses candidates (equipment priority, ≥400 personnel, not disrupted). Resolution via `resolveActiveProbe()`: `PROBE_FORCE_COMMITMENT_FACTOR=0.4`, `PROBE_EXHAUSTION_COST=5`. Counter-probe: defenders gain `COUNTER_PROBE_CONFIDENCE_GAIN=0.15` intel about the probing force. Unresolved probes block sub-phase advancement; `autoResolveProbe()` resolves stale probes (≥2 turns).
 
-**Safety valves:** Anti-paralysis forced launch at `preparation_max_turns`. `MAX_POSTPONEMENTS=2` limits commander postponements.
+**Safety valves:** Anti-paralysis forced launch at `preparation_max_turns`. `MAX_POSTPONEMENTS=2` limits commander postponements. `preparation_max_turns` is initialised as `max(getPreparationMaxTurns(aggressiveness), op.planning_duration ?? 0)` — a pre-planned op's declared `planning_duration` is a *minimum* floor that the anti-paralysis clock cannot undercut. Without this floor, aggressiveness-5 commanders (3-turn anti-paralysis) silently discarded any `planning_duration > 3` and launched early. (n1293)
 
 **State fields (CorpsOperation):** `preparation_sub_phase`, `preparation_turns_elapsed`, `preparation_max_turns`, `intel_confidence_at_assessment`, `supply_readiness_at_assessment`, `force_ratio_estimate`, `commander_assessment`, `postponement_count`, `active_probe: OperationActiveProbe`.
 
@@ -201,3 +201,78 @@ Before launching sector offensives, the corps AI gates on sector intel confidenc
 
 **Tests:** `tests/intel_gated_operations.test.ts` — 12 tests covering threshold checks, RS blitz exemption, probe downgrade mechanics, consecutive probe commitment.
 
+---
+
+## Commander Intelligence Blindspot Audit (2026-04-02, Engine Health Audit)
+
+This section documents known gaps in what the corps CO `CommanderBriefing` knows vs. what it needs to make sound decisions. All gaps discovered during a comprehensive engine health review (n1302 run).
+
+### BRIEF-GAP-1: Supply hardcoded at 0.8 — `supply_by_osid` never consumed
+
+**File:** `src/sim/combat/commander/briefing.ts`
+**Gap:** `CommanderBriefing.supply_status` is hardcoded to `0.8`. The real supply field `state.military.supply_by_osid` exists and is populated each turn. The corps CO always believes it has 80% supply regardless of actual supply state.
+**Impact:** P1. Corps CO never modulates aggression based on supply. The 94% RBiH strained-supply condition (0.75× combat multiplier) is invisible to corps commanders — ARBiH COs attack as if well-supplied.
+**Fix:** Read `supply_by_osid` for sector OSIDs; derive min/mean supply and pass to briefing.
+
+### BRIEF-GAP-2: Enemy equipment class absent from briefing
+
+**File:** `src/sim/combat/commander/briefing.ts`
+**Gap:** `CommanderBriefing` has no enemy equipment summary. The CO cannot distinguish an ARBiH rifle-only opponent from a VRS artillery+tank formation.
+**Impact:** P1. Corps CO cannot weight the casualty risk or adjust force requirement. Applies equally to `checkLaunchFeasibility()` (see COMBAT_MASTER P14) and to the CO's qualitative stance/operation decisions.
+**Fix:** Add `enemy_equipment_summary: { artillery: number; tanks: number; infantry_only: boolean }` derived from brigades in enemy sectors adjacent to this corps.
+
+### BRIEF-GAP-3: Fatigue signal absent — no `brigade_fatigue_index`
+
+**File:** `src/sim/combat/commander/briefing.ts`
+**Gap:** Briefing includes brigade counts but not average fatigue. A CO ordering a third operation in six turns cannot see that his brigades are running at 80% fatigue.
+**Impact:** P2. Leads to op-stacking on exhausted formations. `getWarExhaustionTempoMult()` applies globally but the CO has no individual-formation fatigue awareness.
+**Fix:** Add `avg_fatigue_pct` and `brigades_above_fatigue_threshold` to briefing from `brigade_movement_state` fatigue fields.
+
+### BRIEF-GAP-4: Corps exhaustion not in briefing
+
+**File:** `src/sim/combat/commander/briefing.ts`
+**Gap:** `state.military.corps_exhaustion[corpsId]` exists but is not included in `CommanderBriefing`. The Theater Assessment (`assessCorps()`) reads `state.meta.war_exhaustion` but not corps-level exhaustion.
+**Impact:** P2. Corps-level exhaustion differentiates corps that have fought heavily from fresh corps. A Drina Corps CO at exhaustion 0.8 should behave differently from a fresh reserve CO.
+**Fix:** Include `corps_exhaustion` from state in briefing (single lookup).
+
+### BRIEF-GAP-5: Adjacent corps posture absent
+
+**File:** `src/sim/combat/commander/briefing.ts`
+**Gap:** Corps CO has no visibility into what adjacent friendly corps are doing. A Drina Corps CO planning Kamenica doesn't know that East Bosnian Corps is simultaneously defending Brcko with all available brigades.
+**Impact:** P2. Cannot coordinate timing, share staging zones, or avoid cannibalizing the same pool of brigades.
+**Fix:** Add `adjacent_corps: { corpsId: string; stance: string; active_ops: number }[]` from `state.military.corps_command`.
+
+### BRIEF-GAP-6: `recent_territory_change` hardcoded to 0
+
+**File:** `src/sim/combat/commander/assess.ts`
+**Gap:** `assessCorps()` returns `recent_territory_change: 0` always (hardcoded placeholder). The Theater Assessment is blind to whether a corps has been losing OSIDs in recent turns.
+**Impact:** P1. A corps losing 3 OSIDs/turn should trigger defensive reassessment. Currently the threat response is purely instantaneous (current threat_ratio), not trend-based. Corps COs don't know if they're bleeding territory.
+**Fix:** Compute over the last 3–5 turns: `Δ(friendly_osids)` for the corps area. Negative = ground loss = raise threat estimate; positive = gaining ground = can be more ambitious.
+
+### BRIEF-GAP-7: Reinforcement requests not consumed by Army HQ
+
+**File:** `src/sim/combat/army_hq_gathering.ts`
+**Gap:** Corps COs can emit reinforcement requests (field exists on `CorpsCommandState`). Army HQ gathering sees all corps states but does not read or act on these requests. Requests accumulate, are never cleared.
+**Impact:** P2. The reinforcement feedback loop is broken. Corps in crisis can't signal HQ for help, and HQ can't redistribute strategic reserves based on request signals.
+**Fix:** In `army_hq_gathering.ts`, scan `corps_command` for pending reinforcement requests; factor into `CampaignPlan.front_priorities`; emit reserve brigade transfer directives.
+
+### ARMY-GAP-1: `CampaignPlan` never read by corps CO briefings — P0
+
+**Files:** `src/sim/combat/army_hq_gathering.ts`, `src/sim/combat/commander/briefing.ts`
+**Gap:** `army_hq_gathering.ts` produces a `CampaignPlan` each turn with `front_priorities`, `doctrine_overrides`, and synchronized operations. `buildBriefing()` does not read it. Corps COs are unaware of Army HQ's theater-level plan.
+**Impact:** P0. Army HQ exists but is structurally disconnected. A Drina Corps CO planning operations has no knowledge of Army-level prioritization (e.g., "concentrate on Posavina, hold elsewhere"). The strategic layer cannot direct corps behavior.
+**Fix:** Pass `CampaignPlan` into `buildBriefing()`. Apply `doctrine_overrides` to planning thresholds. Use `front_priorities` to weight sector offensive scoring.
+
+### ARMY-GAP-2: Feint operation type has zero combat effect — dead code
+
+**File:** `src/sim/combat/sector_offensive.ts` (operation resolution), `army_hq_gathering.ts` (feint generation)
+**Gap:** Feint operations are generated by Army HQ gathering and exist in the type system. However, the resolution path applies only −5 cohesion to own brigades and zero effect on the enemy. The intended effect (drawing enemy reserves toward a false threat) is not implemented.
+**Impact:** P2. Every feint wastes brigades on a self-inflicted cohesion drain for zero tactical gain. Army HQ generating feints actively harms the factions it serves.
+**Fix:** Implement feint effect: when a feint operation is active on a sector, raise enemy sector threat_ratio by a multiplier (e.g., ×1.5) for the duration, simulating the enemy response to a perceived threat. Remove own-cohesion penalty or reduce to ×0.5 of current.
+
+### ARMY-GAP-3: No winter season combat modifier
+
+**File:** `src/sim/combat/combat_math.ts`
+**Gap:** No seasonal modifier exists. Bosnian winters (Dec–Mar) significantly degraded offensive operations — frozen ground, snow-blocked mountain passes, supply difficulty. The 40-week scenario runs Jan–Oct 1993, spanning a full winter. Both sides suffered but mountain-based operations were especially constrained.
+**Impact:** P2. Operations in Ozren, Vlašić, Igman highlands run at full capacity in January as in July. VRS mountain drives (Majevica, Trebević) are unrealistically winter-agnostic.
+**Fix:** `getSeasonalCombatMult(week, latitude)` — reduce attacker power by ~15% in weeks 1–8 (Jan–Feb) and 48–52 (Dec), scaled by elevation. Defender unaffected (prepared positions, local terrain familiarity). Winter window aligns with known operational pauses in the historical record.

@@ -167,6 +167,35 @@ Single source of truth for combat resolution design decisions, factor implementa
 
 ---
 
+### P13 — Defender armor/tanks: no dedicated anti-attacker multiplier (Engine Health Audit, 2026-04-02)
+
+**Gap:** `getDefensiveFireMult()` covers artillery only. VRS 40 tanks on defense have zero anti-attacker multiplier. Historically, tanks in defensive positions were one of the most dangerous threats facing advancing infantry — they could hold prepared positions and deliver direct fire against assaults.
+
+**Scope:** `getBombardmentCasualtyMult()` (attacker's artillery advantage on offense) and `getDefensiveFireMult()` (defender's artillery advantage) are both implemented. But neither function touches the `tanks` equipment field.
+
+**Expected delta:** ~+10–20% attacker casualties in VRS-defended OSID battles with 10+ tanks. Does not affect ARBiH (no significant armour pool). Symmetry: if `getDefensiveFireMult()` uses `artillery`, a parallel `armor` term should raise attacker casualties when the defender has tanks.
+
+**Fix path:** Add an armor-defense term inside `getDefensiveFireMult()` or a new `getArmorDefenseMult()`. Scale sub-linearly (tanks in prepared positions differ from tanks in the open). Calibrate to observed ARBiH-attacks-VRS casualty ratios.
+
+**Priority:** P2 — equipment asymmetry is partially captured (artillery); armor gap means VRS prepared-position defense is under-represented. Not P1 because artillery fire carries most of the historical weight.
+
+---
+
+### P14 — Combat predictor blind to defender artillery, terrain, and entrenchment: drives 47% ZEA rate (Engine Health Audit, 2026-04-02)
+
+**Gap:** `checkLaunchFeasibility()` in `bot_corps_directives.ts` computes force requirement as `basePower × 0.8`. It does not include:
+- Defender artillery (`getDefensiveFireMult()` — up to 1.8×)
+- Terrain multipliers (urban 1.35×, forest 1.15×, combined up to ~1.55×)
+- Entrenchment bonus (SRK 18-turn initial = up to +51% effective defense)
+
+**Impact:** A defender with 15 artillery, urban cover, and 10 turns entrenched has effective defensive power ≈2.5× raw brigade strength. The predictor sees raw power. Corps CO thinks the operation is feasible; launches; hits the real multipliers; zero eligible attackers. This is the primary mechanical driver of the 47% ZEA rate.
+
+**Fix path:** Expose `getDefensiveFireMult()`, `getUrbanMult()`, `getForestMult()`, and entrenchment scaling to `checkLaunchFeasibility()`. Compute adjusted required-power as: `rawDefPower × defensiveFire × terrain × entrenchment / targetRatio`. This gives the CO an honest force requirement before committing.
+
+**Priority:** P1 — 47% ZEA rate is a major engine health problem. Operations that never find eligible attackers waste 39% of all planning cycles. Fixing the predictor will reduce ZEA toward the expected 10–15% operational pause range.
+
+---
+
 ## Faction-Specific Casualty Context
 
 **The single aggregate att:def ratio is insufficient for realism assessment.** This war has opposing asymmetries by faction pair.

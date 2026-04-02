@@ -243,6 +243,33 @@ Files: `game_state.ts` (types), `combat_math.ts` (constants), `bot_corps_directi
 **Root cause:** `ensureMinimumSectorCoverage` can only transfer brigades from sectors with surplus. If no corps brigade has surplus within reachable territory, sector stays empty.
 **Analysis:** HVO Central Bosnia has 5 empty sectors — only 2 brigades for 7 sectors (12 total edges). These are tiny isolated HVO enclaves that can't all be manned. ARBiH 3rd/4th Corps are thin in secondary areas. VRS SRK:3 is a 1-edge fragment. These are structural — factions don't have enough troops to man every sector.
 
+### P1: Corridor width used for posture classification only — garrison multiplier not implemented (2026-04-02)
+
+**Gap:** Corridor width data exists (`corridor_analysis.ts`, `corridor_width_by_osid`) and is used in a single place: classifying sectors as `besieged` vs `not-besieged` for stance purposes. There is no garrison multiplier that scales brigade allocation based on corridor width.
+
+**Design proposal:** Proposal 2 (corridor-width garrison multiplier in `allocate.ts`) — narrow corridors (width < 5km) get a 1.5×–2.0× garrison budget multiplier, so the allocation system naturally concentrates brigades at bottlenecks without hardcoding brigade-to-OSID assignments. This is an emergent, data-driven approach (battlefield signal → budget → brigade behavior), not a railroad.
+
+**Status:** Proposal 2 approved in design but not yet implemented. The `false &&` guard in `assess.ts` for engine-derived must_hold (see next issue) is the companion piece. Both should ship together for the Brcko/Doboj corridor defense to emerge structurally.
+
+---
+
+### P1: Engine-derived must_hold detection disabled — `false &&` in assess.ts (2026-04-02)
+
+**Gap:** `assessCorps()` in `src/sim/combat/commander/assess.ts` has a `false &&` guard disabling the engine-computed chokepoint detection path. The detection logic (`osid_graph_analysis.ts` articulation-point algorithm) exists and is imported, but the result is never used to set `is_must_hold` on sectors.
+
+**Why it's disabled:** The current trigger — `MUST_HOLD_MIN_ISOLATED_FRACTION = 0.05` (fraction of total faction territory) — cannot discriminate between RS Brcko (~9% of RS territory, genuine corridor chokepoint) and ARBiH Central Bosnia valley passes (~8% of ARBiH territory, distributed mountain terrain). A size-threshold fires on both or neither; it can't detect structural chokepoints.
+
+**Needed fix:** Replace fraction-of-faction-total with structural/topological signals:
+1. **Corps-boundary articulation:** An OSID is a must_hold candidate if removing it disconnects two corps sub-sectors within the same faction's territory (articulation point in the faction graph).
+2. **Absolute OSID count:** Isolated sub-graph ≤ 3 OSIDs after removal = chokepoint (Brcko corridor is geometrically narrow; ARBiH CB valleys have many parallel paths).
+3. Both conditions AND: must be a corps-graph cut AND leave an isolated sub-graph ≤ 3 OSIDs.
+
+**Current workaround:** Manual `must_hold` overrides in OOB JSON for `vrs_posavina` (Brcko) and `vrs_east_bosnian` (Doboj) with 1.5× garrison budget. These are correct but hardcoded. The engine detection path must be fixed before the manual overrides can be removed.
+
+**Files:** `src/sim/combat/commander/assess.ts` (disabled guard), `src/sim/combat/osid_graph_analysis.ts` (articulation-point logic, correct but under-used), `src/sim/combat/commander/allocate.ts` (reads `is_must_hold` for budget multiplier).
+
+---
+
 ### P2: 12 unassigned brigades with personnel
 
 | Brigade | Corps | Location | Personnel |
