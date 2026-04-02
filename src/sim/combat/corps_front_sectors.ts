@@ -6,8 +6,11 @@
  * friendly OSID to the nearest corps; front edges are then partitioned accordingly.
  *
  * GOLDEN RULES:
- *   1. Every active non-exempt field brigade MUST be assigned to a sector.
- *      Army-HQ / main-staff reserve brigades are the standing exception until loaned.
+ *   1. Every active non-exempt field brigade should be assigned to a sector
+ *      when that assignment is spatially truthful. Army-HQ / main-staff reserve
+ *      brigades are the standing exception until loaned, and disconnected or
+ *      unresolved brigades must stay unresolved rather than being force-written
+ *      into false sector truth.
  *   2. Brigades at a sector MUST be at the frontline. Exception: one reserve
  *      brigade per sector sits 1 hop behind the front (recovery/reaction).
  *      Deep-rear brigades are kept assigned and march forward via interior movement.
@@ -154,8 +157,33 @@ export function buildCorpsFrontSectors(
 
     // Sync sector assignments back to formation.assignment
     syncSectorAssignmentsToFormations(result, formations);
+    state.military.unresolved_sector_brigades = collectUnresolvedSectorBrigades(result, formations);
 
     return result;
+}
+
+function collectUnresolvedSectorBrigades(
+    sectors: Record<string, CorpsFrontSector>,
+    formations: Record<FormationId, FormationState>,
+): FormationId[] {
+    const assigned = new Set<FormationId>();
+    for (const sector of Object.values(sectors)) {
+        if (!sector) continue;
+        for (const brigadeId of sector.assigned_brigade_ids ?? []) assigned.add(brigadeId);
+        for (const brigadeId of sector.reserve_brigade_ids ?? []) assigned.add(brigadeId);
+    }
+
+    return Object.keys(formations)
+        .sort(strictCompare)
+        .filter((formationId): formationId is FormationId => {
+            const formation = formations[formationId];
+            if (!formation || formation.status !== 'active') return false;
+            if (formation.kind !== 'brigade' && formation.kind !== 'og' && formation.kind !== 'operational_group') return false;
+            const corpsId = getFormationCorpsId(formation);
+            const loaned = !!formation.elite_loan_state?.on_loan;
+            if (isSectorAssignmentExemptCorpsId(corpsId) && !loaned) return false;
+            return !assigned.has(formationId);
+        });
 }
 
 /** Maximum combined brigades for a merge candidate pair. */

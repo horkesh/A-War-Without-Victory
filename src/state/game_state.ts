@@ -1754,6 +1754,8 @@ casualty_ledger?: CasualtyLedger;
 local_fronts?: Record<string, LocalFront>;
 /** Corps front sectors: per-corps slices of hostile boundary. Derived each turn (Engine Invariants §13). */
 corps_front_sectors?: Record<string, CorpsFrontSector>;
+/** Active non-exempt field brigades that could not be placed truthfully into any sector this turn. Derived each turn. */
+unresolved_sector_brigades?: FormationId[];
 /** Sector combat power ratings: per-sector offensive/defensive power. Derived each turn after sector partition. */
 sector_combat_ratings?: Record<string, SectorCombatRating>;
 /** Sector-facing intelligence: per-friendly-sector intelligence records (one per facing enemy sector). Derived each turn. */

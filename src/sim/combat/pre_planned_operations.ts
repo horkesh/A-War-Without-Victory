@@ -350,7 +350,6 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 brigades: [
                     'rs_foa_brigade',
                     'rs_bilea_brigade',
-                    'jna_mostar_garrison_tg',
                 ],
                 // foca_3 → prevrac (RS waypoint) → kolovarice (RBiH; painted RS — valid target).
                 // ustipraca_2 removed (painted RBiH, caused DRINA over-capture in n1243).
@@ -781,9 +780,11 @@ export function injectPrePlannedOperations(state: GameState): void {
     const formations = state.military.formations ?? {};
     const turn = state.meta?.turn ?? 0;
 
-    // Validate all definitions and collect warnings
+    // Validate only definitions that are actually eligible to inject now.
+    // Deferred operations are validated when their queue slot becomes live.
     const allWarnings: OpInjectionWarning[] = [];
     for (const def of ALL_PRE_PLANNED) {
+        if (def.available_from != null && turn < def.available_from) continue;
         const cmd = corpsCommand[def.corps];
         const warnings = validateOpAtInjection(def, state, undefined, cmd ?? undefined);
         allWarnings.push(...warnings);

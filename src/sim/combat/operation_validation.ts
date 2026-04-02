@@ -250,7 +250,12 @@ export function collectOpInjectionWarnings(state: GameState, warnings: OpInjecti
     if (!state.military.op_injection_warnings) state.military.op_injection_warnings = [];
     const existing = state.military.op_injection_warnings;
     for (const w of warnings) {
-        const isDupe = existing.some(e => e.op_name === w.op_name && e.axis_id === w.axis_id && e.check === w.check);
+        const isDupe = existing.some((e) =>
+            e.op_name === w.op_name &&
+            e.axis_id === w.axis_id &&
+            e.check === w.check &&
+            e.detail === w.detail
+        );
         if (!isDupe) existing.push(w);
     }
 }

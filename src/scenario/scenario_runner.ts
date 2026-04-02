@@ -133,6 +133,7 @@ import type {
     WeeklyReportRow
 } from './scenario_reporting.js';
 import { buildWeeklyReport } from './scenario_reporting.js';
+import type { TurnReport } from '../sim/turn_pipeline_types.js';
 import type { Scenario, ScenarioAction } from './scenario_types.js';
 import { evaluateVictoryConditions } from './victory_conditions.js';
 
@@ -303,6 +304,45 @@ export interface RunScenarioResult {
         replay_timeline?: string;
         /** Optional per-week smart-bot diagnostics. */
         bot_diagnostics?: string;
+    };
+}
+
+export function deriveWeeklyActivityCounts(
+    state: GameState,
+    turnReport: Pick<Partial<TurnReport>, 'phase_f_displacement' | 'front_pressure' | 'displacement'>,
+): WeeklyActivityCounts {
+    const triggerReport = turnReport.phase_f_displacement?.trigger_report;
+    if (triggerReport) {
+        return {
+            front_active_set_size: triggerReport.front_active_set_size,
+            pressure_eligible_size: triggerReport.pressure_eligible_size,
+            displacement_trigger_eligible_size: triggerReport.displacement_trigger_eligible_size,
+        };
+    }
+
+    let front_active_set_size = 0;
+    if (state.military.front_segments) {
+        for (const seg of Object.values(state.military.front_segments)) {
+            if ((seg as { active?: boolean }).active) front_active_set_size++;
+        }
+    }
+
+    let pressure_eligible_size = 0;
+    if (turnReport.front_pressure?.pressure_deltas) {
+        pressure_eligible_size = Object.keys(turnReport.front_pressure.pressure_deltas).length;
+    }
+
+    let displacement_trigger_eligible_size = 0;
+    if (turnReport.displacement?.by_municipality) {
+        displacement_trigger_eligible_size = turnReport.displacement.by_municipality.filter(
+            (row: { displacement_this_turn?: number }) => (row.displacement_this_turn ?? 0) > 0
+        ).length;
+    }
+
+    return {
+        front_active_set_size,
+        pressure_eligible_size,
+        displacement_trigger_eligible_size,
     };
 }
 
@@ -1869,29 +1909,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 });
             }
 
-            // Metrics derivation from active pipeline phases
-            let front_active_set_size = 0;
-            if (state.military.front_segments) {
-                for (const seg of Object.values(state.military.front_segments)) {
-                    if ((seg as any).active) front_active_set_size++;
-                }
-            }
-
-            let pressure_eligible_size = 0;
-            if (turnReport.front_pressure?.pressure_deltas) {
-                pressure_eligible_size = Object.keys(turnReport.front_pressure.pressure_deltas).length;
-            }
-
-            let displacement_trigger_eligible_size = 0;
-            if (turnReport.displacement?.by_municipality) {
-                displacement_trigger_eligible_size = turnReport.displacement.by_municipality.filter(r => r.displacement_this_turn > 0).length;
-            }
-
-            const activity: WeeklyActivityCounts = {
-                front_active_set_size,
-                pressure_eligible_size,
-                displacement_trigger_eligible_size
-            };
+            const activity = deriveWeeklyActivityCounts(state, turnReport);
             activityCountsPerWeek.push(activity);
 
             let ops: { enabled: boolean; level: number } | undefined;

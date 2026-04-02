@@ -12,6 +12,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { getCorpsCommander } from './officer_system.js';
 import type { ArmyOperationPriority } from './bot_strategy.js';
 import { munFromOsid } from './osid_adjacency.js';
+import { getSectorComponent, getSectorFrontOsids } from './sector_utils.js';
 import {
     COMMANDER_COMPETENCE_OVERRIDE_THRESHOLD,
     GARRISON_BUDGET_EDGES_PER_BRIGADE,
@@ -493,7 +494,7 @@ function applyPositionViability(
     commanderProfile: CorpsCommanderProfile,
     overrides: CommanderOverride[],
     overriddenBrigadeIds: Set<string>,
-    _componentOf: Map<string, number>,
+    componentOf: Map<string, number>,
     adjacency: Map<string, string[]>,
     friendlyOsids: Set<string>,
 ): void {
@@ -555,23 +556,43 @@ function applyPositionViability(
         || strictCompare(a.brigadeId, b.brigadeId)
     );
 
-    // Find safest sector (lowest threat, has territory)
-    const safestSector = [...corpsSectors]
-        .filter(s => s.territory_osids.length > 0)
-        .sort((a, b) => a.threat_ratio - b.threat_ratio || strictCompare(a.sector_id, b.sector_id))[0];
-
-    if (!safestSector) return;
-
-    // Issue withdrawal overrides (capped)
     let withdrawCount = 0;
     for (const exposed of exposedBrigades) {
         if (withdrawCount >= MAX_VIABILITY_WITHDRAWALS_PER_CORPS) break;
-        if (exposed.sectorId === safestSector.sector_id) continue;
+        const formation = formations[exposed.brigadeId];
+        if (!formation?.location_osid) continue;
+        const brigadeComponent = componentOf.get(formation.location_osid) ?? -2;
+
+        const safestReachableSector = [...corpsSectors]
+            .filter(s => s.sector_id !== exposed.sectorId)
+            .map((sector) => {
+                if (sector.territory_osids.length === 0) return null;
+                const sectorComponent = getSectorComponent(sector, componentOf);
+                if (sectorComponent !== brigadeComponent) return null;
+                const frontSet = getSectorFrontOsids(sector);
+                const distance = friendlyDistanceToAny(
+                    formation.location_osid!,
+                    frontSet,
+                    adjacency,
+                    friendlyOsids,
+                    20,
+                );
+                if (distance == null) return null;
+                return { sector, distance };
+            })
+            .filter((candidate): candidate is { sector: CorpsFrontSector; distance: number } => candidate != null)
+            .sort((a, b) =>
+                a.sector.threat_ratio - b.sector.threat_ratio
+                || a.distance - b.distance
+                || strictCompare(a.sector.sector_id, b.sector.sector_id)
+            )[0];
+
+        if (!safestReachableSector) continue;
 
         overrides.push({
             brigade_id: exposed.brigadeId,
             from_sector_id: exposed.sectorId,
-            to_sector_id: safestSector.sector_id,
+            to_sector_id: safestReachableSector.sector.sector_id,
             reason: 'position_viability',
         });
         overriddenBrigadeIds.add(exposed.brigadeId);

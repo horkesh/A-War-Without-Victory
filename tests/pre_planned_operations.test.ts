@@ -1,7 +1,9 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { injectPrePlannedOperations, _ALL_PRE_PLANNED } from '../src/sim/combat/pre_planned_operations.js';
+import { injectPrePlannedOperations, injectQueuedOperation, _ALL_PRE_PLANNED } from '../src/sim/combat/pre_planned_operations.js';
+import { collectOpInjectionWarnings } from '../src/sim/combat/operation_validation.js';
+import type { OpInjectionWarning } from '../src/sim/combat/operation_validation.js';
 import type {
     CorpsCommandState,
     CorpsFrontSector,
@@ -36,7 +38,7 @@ function makeMinimalState(): GameState {
                 reserve_brigade_ids: [],
                 length_edges: 1,
                 territory_osids: [],
-            } as CorpsFrontSector;
+            } as unknown as CorpsFrontSector;
         }
 
         for (const axisDef of def.axes) {
@@ -174,5 +176,72 @@ describe('pre-planned operations', () => {
         assert.ok(!zvornikAxis!.objectives.includes('op:zvornik:zvornik'));
         assert.ok(!zvornikAxis!.objectives.includes('op:zvornik:novo_selo'));
         assert.ok(zvornikAxis!.objectives.length > 0);
+    });
+
+    it('does not emit brigade-missing warnings for deferred operations before available_from', () => {
+        const state = makeMinimalState();
+        delete state.military.formations['arbih_120th_liberation_black_swans'];
+
+        injectPrePlannedOperations(state);
+
+        const warnings = state.military.op_injection_warnings ?? [];
+        assert.ok(
+            !warnings.some((warning) => warning.op_name === 'Operation Teočak'),
+            'deferred Teočak warnings should not be emitted before available_from'
+        );
+    });
+
+    it('still validates queued operations at runtime when brigades are truly missing', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 8;
+        delete state.military.formations['rs_gacko_brigade'];
+        state.military.corps_command!.vrs_herzegovina!.queued_operations = ['Operation Foca'];
+
+        const injected = injectQueuedOperation(state, 'vrs_herzegovina');
+
+        assert.equal(injected, true);
+        const warnings = state.military.op_injection_warnings ?? [];
+        assert.ok(
+            warnings.some((warning) =>
+                warning.op_name === 'Operation Foca' &&
+                warning.check === 'brigade_missing' &&
+                warning.detail.includes('rs_gacko_brigade')
+            ),
+            'queued Foca injection should still warn about truly missing brigades'
+        );
+    });
+
+    it('does not pin queued Operation Foca to a phantom that predictably withdraws before queue time', () => {
+        const foca = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Foca');
+        assert.ok(foca, 'Operation Foca must exist in the pre-planned catalog');
+
+        const brigades = foca!.axes.flatMap((axis) => axis.brigades);
+        assert.ok(!brigades.includes('jna_mostar_garrison_tg'));
+    });
+
+    it('preserves brigade-level warning detail when collecting multiple missing brigades on one axis', () => {
+        const state = makeMinimalState();
+        const warnings: OpInjectionWarning[] = [
+            {
+                op_name: 'Operation Test',
+                axis_id: 'axis_1',
+                check: 'brigade_missing',
+                detail: 'Brigade "a" not found in formations',
+                severity: 'warning',
+                turn: 0,
+            },
+            {
+                op_name: 'Operation Test',
+                axis_id: 'axis_1',
+                check: 'brigade_missing',
+                detail: 'Brigade "b" not found in formations',
+                severity: 'warning',
+                turn: 0,
+            },
+        ];
+
+        collectOpInjectionWarnings(state, warnings);
+
+        assert.equal(state.military.op_injection_warnings?.length, 2);
     });
 });

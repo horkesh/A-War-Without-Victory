@@ -21242,3 +21242,26 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - Docs:
   - `docs/40_reports/implemented/20260402_PLAYER_SAFE_ID_LEAK_MOPUP.md`
 
+## 2026-04-03 - Commander reachability truth and pre-planned-op integrity
+
+- Root cause cleanup, not patchwork:
+  - removed stale `Operation Foca` phantom dependence in `src/sim/combat/pre_planned_operations.ts`
+  - constrained commander `position_viability` withdrawals in `src/sim/combat/commander_override.ts` to reachable same-component sectors
+- Why this mattered:
+  - queued-op validation was still warning on a brigade (`jna_mostar_garrison_tg`) that predictably withdraws before `Foca` can inject
+  - commander review could still recreate a cross-component sector mismatch after the earlier truthful assignment passes had already cleaned the state
+- Added/updated regressions:
+  - `tests/commander_override_reachability.test.ts`
+  - `tests/pre_planned_operations.test.ts`
+- Verification:
+  - `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\commander_override_reachability.test.ts tests\\pre_planned_operations.test.ts tests\\scenario_activity_truth.test.ts`
+  - `node .\\node_modules\\vitest\\vitest.mjs run tests\\brigade_territory_reconciliation.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+  - `node .\\node_modules\\tsx\\dist\\cli.mjs tools\\scenario_runner\\run_scenario.ts --scenario data\\scenarios\\apr1992_definitive_40w.json --unique --map --out runs`
+- Scenario evidence:
+  - fresh run `runs/apr1992_definitive_40w__d452d2a10f3d69af__w40_n1300`
+  - final hash `d5fe7dbb0d98b360`
+  - the earlier `rs_skelani_battalion -> sector:vrs_drina:1` reachability invariant no longer appeared in the new run
+- Follow-on swamp still visible:
+  - late-turn honest unresolved brigades remain in `vrs_1st_krajina`, `hvo_central_bosnia`, and some loaned reserve cases
+  - next wave should target sectors that become unreachable over time, not the already-fixed commander viability leak
