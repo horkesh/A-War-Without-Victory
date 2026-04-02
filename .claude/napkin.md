@@ -492,3 +492,7 @@ After EVERY scenario run, the orchestrator:
    Do instead: No `PhaseI`, `PhaseII` identifiers. `rear_pocket_consolidation.ts` replaces deleted `consolidation_flips.ts`.
 3. **[2026-03-08] Deep merging test mocks with nested state**
    Do instead: Standard `...overrides` overwrites nested structures entirely. Manually deep merge or spread inside the nested object literal.
+
+## Player Shell Discipline
+1. **[2026-04-02] Player-facing operation documents must never print raw OSIDs**
+   Do instead: OPORDs, objective lists, and HQ roster/history hover rows must resolve settlement labels through player-safe helpers. Exact internal identifiers belong only in debug-only surfaces.

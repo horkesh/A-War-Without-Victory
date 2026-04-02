@@ -30,6 +30,7 @@
 - **War-only (examples):** Real Diplomacy (Belgrade/Zagreb/Alliance), Command Briefing, Operational Situation, IVP breakdown, Turn-End Intelligence, Enclave Crisis, Honors/Memorials (when implemented). Advance turn in war shows combat/stability preview.
 - **Shared with different content:** Newspaper (Phase 0 events vs war headlines), Magazine (pre-war org review vs war operational review), Reports (mun intel vs operational briefs), Faction Overview (capital/org vs territory/military/command).
 - **Implementation:** Modal *routing* (which modal opens for a hotspot) and *content* both depend on `meta.phase`. Prefer explicit “peace modal set” vs “war modal set” in code (e.g. hotspot → modal mapping keyed by phase) so adding phase-exclusive modals stays clear.
+- **Player-facing label discipline:** Warroom-adjacent shells and overlays must resolve settlement/command labels through player-safe helpers. OPORDs, roster/history hover titles, and faction reports are not exempt just because they look like documents.
 
 ### Summary
 

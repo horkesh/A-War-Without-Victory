@@ -169,7 +169,7 @@ export function WarSummaryContent() {
                                         </tr>
                                         <tr>
                                             <td className="text-[11px] text-text-secondary py-0.5">WIA</td>
-                                            {FACTIONS.map((f) => (
+                                            {WAR_SUMMARY_FACTIONS.map((f) => (
                                                 <td key={f} className="text-[12px] text-text-primary text-right px-2 py-0.5 tabular-nums">{fmtK(casualtyLedger?.[f]?.wounded ?? 0)}</td>
                                             ))}
                                         </tr>

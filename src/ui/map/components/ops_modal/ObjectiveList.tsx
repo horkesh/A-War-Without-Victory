@@ -94,7 +94,7 @@ export function ObjectiveList({ plan, onUpdate, osidDisplayNames, onAdvance }: O
                                 </span>
 
                                 {/* Name */}
-                                <span className="text-[10px] text-white flex-1 truncate" title={osid}>
+                                <span className="text-[10px] text-white flex-1 truncate" title={displayName}>
                                     {displayName}
                                 </span>
 

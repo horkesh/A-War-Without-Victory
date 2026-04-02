@@ -4,6 +4,12 @@
 
 **Dormant compatibility layers must say they are dormant (2026-04-02):** `brigade_pressure.ts` and `apply_brigade_reposition.ts` are dangerous not because they exist, but because they still look alive. When a legacy path is intentionally inert, comments should say so plainly or future work will route authority back into it by mistake.
 
+## 2026-04-02 - Player-facing operation documents must never print raw OSIDs
+
+- OPORDs, objective lists, and HQ roster/history hover titles are player-facing surfaces.
+- They must resolve settlement labels through shared display-name helpers instead of leaking raw OSIDs in body text or `title` attributes.
+- If a planning/document surface needs exact internal identifiers, that belongs behind an explicit debug-only path, not in normal player play.
+
 # AWWV Project Ledger — Thematic Knowledge Base
 
 **Last Updated:** 2026-03-27

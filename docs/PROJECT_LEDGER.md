@@ -1,3 +1,34 @@
+## 2026-04-02 - Player-safe ops labels and HQ roster polish
+
+### Summary
+- Removed raw OSID leakage from OPORD / objective-list / HQ roster hover surfaces.
+- Added a pure OPORD display helper so planning documents resolve settlement names through player-safe labels.
+- Corrected the lingering Army HQ war-summary fallback bug.
+
+### Files changed
+- `src/ui/map/components/ops_modal/opordDisplay.ts`
+- `src/ui/map/components/ops_modal/OpordDocument.tsx`
+- `src/ui/map/components/ops_modal/AuthorizePhase.tsx`
+- `src/ui/map/components/ops_modal/ObjectiveList.tsx`
+- `src/ui/map/components/army_hq/OrbatSection.tsx`
+- `src/ui/map/components/army_hq/WarSummaryContent.tsx`
+- `tests/ui_opord_player_safe_labels.test.ts`
+- `vitest.config.ts`
+- `docs/40_reports/implemented/20260402_PLAYER_SAFE_OPS_LABELS_AND_HQ_ROSTER_POLISH.md`
+- `docs/40_reports/GUI_MASTER.md`
+- `docs/40_reports/WARROOM_MASTER.md`
+- `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`
+- `docs/40_reports/README.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- Even after the larger player-truth cleanup, operation documents and HQ roster/history rows could still leak raw engine identifiers.
+- Those leaks make the player shell feel like a debug console and train later work to accept raw IDs in user-facing prose.
+
+### Verification
+- `node_modules\.bin\vitest.cmd run tests\ui_opord_player_safe_labels.test.ts tests\ui_army_hq_war_summary_visibility.test.ts tests\ui_shell_navigation.test.ts tests\warroom_player_visibility.test.ts tests\warroom_smoke.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+
 ## 2026-04-02 - Army HQ summary player-truth pass
 
 ### Summary

@@ -69,3 +69,9 @@
 | **UI blank-space remediation P2-C + console debug + verification addendum (2026-03-26)** | [20260326_UI_BLANK_SPACE_P2C_IMPLEMENTATION.md](implemented/20260326_UI_BLANK_SPACE_P2C_IMPLEMENTATION.md), [20260326_UI_CONSOLE_DEBUG_WAVE2.md](implemented/20260326_UI_CONSOLE_DEBUG_WAVE2.md), [20260326_UI_BLANK_SPACE_VISUAL_VERIFICATION_WAVE2.md](implemented/20260326_UI_BLANK_SPACE_VISUAL_VERIFICATION_WAVE2.md), [20260326_UI_BLANK_SPACE_VISUAL_VERIFICATION_WAVE2_ADDENDUM.md](implemented/20260326_UI_BLANK_SPACE_VISUAL_VERIFICATION_WAVE2_ADDENDUM.md) — Remaining overlay pass shipped (Army Reserve + Chronicle), bottom-strip runtime crash fixed, and post-fix visual verification updated (`BS-010` PASS, `BS-011` PARTIAL). |
 
 *Last updated: 2026-03-08. For backlog (not yet implemented), see [CONSOLIDATED_BACKLOG.md](CONSOLIDATED_BACKLOG.md). For patterns and corrections, see [CONSOLIDATED_LESSONS_LEARNED.md](CONSOLIDATED_LESSONS_LEARNED.md) and .claude/napkin.md.*
+# 2026-04-02 - Player-safe ops labels and HQ roster polish
+
+- OPORD / objective-list surfaces now resolve settlement names through player-safe labels instead of printing raw OSIDs.
+- Army HQ ORBAT recent-engagement hover titles now use formatted settlement names.
+- Fixed a lingering Army HQ war-summary fallback bug in the wounded table.
+- Report: `docs/40_reports/implemented/20260402_PLAYER_SAFE_OPS_LABELS_AND_HQ_ROSTER_POLISH.md`

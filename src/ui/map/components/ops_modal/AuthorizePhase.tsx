@@ -25,6 +25,7 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
     const setLoadError = useGameStore((s) => s.setLoadError);
     const setOperationTargetOsids = useGameStore((s) => s.setOperationTargetOsids);
     const loadedGameState = useGameStore((s) => s.loadedGameState);
+    const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
 
     const [isStamped, setIsStamped] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -158,6 +159,7 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
                     faction={faction}
                     date={date}
                     isStamped={isStamped}
+                    osidDisplayNames={osidDisplayNames}
                 />
             </div>
 
