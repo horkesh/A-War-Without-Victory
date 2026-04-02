@@ -1573,3 +1573,8 @@ Operation detail, corps detail, and sector dossier rails are part of the live co
 ### Bottom status strips must not quietly become omniscient scoreboards
 
 If a persistent shell strip shows exact all-faction territory or strength percentages, it is acting like a debug/status console even when the styling is elegant. High-frequency strips should default to player-safe framing and leave richer cross-faction totals to explicitly owned analysis surfaces.
+
+### Summary shells are where raw engine vocabulary quietly re-enters
+
+If a summary tab or war dashboard still says RBiH, RS, or similar shorthand, the live shell is still talking like an internal tool even if the deeper panels are clean. Treat summary surfaces as first-class player-language contracts and lock them into the existing player-visibility test suite.
+

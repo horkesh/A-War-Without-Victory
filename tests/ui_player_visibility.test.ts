@@ -313,4 +313,20 @@ describe('player visibility helpers', () => {
     expect(source).toContain('Friendly');
     expect(source).not.toContain('orderedFactions.map');
   });
+
+  it('keeps summary shells player-safe instead of showing raw faction ids', () => {
+    const situationTabSource = readFileSync(
+      new URL('../src/ui/map/components/SituationTab.tsx', import.meta.url),
+      'utf8',
+    );
+    expect(situationTabSource).toContain('Alliance Gauge (Bosniak-Croat)');
+    expect(situationTabSource).toContain('getPlayerSafeMilitaryFactionName');
+
+    const warSummarySource = readFileSync(
+      new URL('../src/ui/map/components/army_hq/WarSummaryContent.tsx', import.meta.url),
+      'utf8',
+    );
+    expect(warSummarySource).toContain('const { playerFaction, areaPct, personnelByFaction, totalDisplaced, displacedByFaction } = data;');
+    expect(warSummarySource).toContain('getPlayerSafeMilitaryFactionName');
+  });
 });

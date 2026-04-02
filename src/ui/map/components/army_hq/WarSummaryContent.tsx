@@ -8,6 +8,7 @@ import { useGameStore } from '../../store/gameStore';
 import { formatTurnLabel, fmtK, fmtPct } from '../../utils/formatters';
 import { getFactionFlag } from '../../utils/factionAssets';
 import { FACTION_HEX_COLORS, FACTION_SHORT_LABELS } from '../../utils/theme';
+import { getPlayerSafeMilitaryFactionName } from '../../utils/playerSafeText';
 import { SituationTab } from '../SituationTab';
 import { buildWarSummaryOverviewModel, WAR_SUMMARY_FACTIONS } from './warSummaryOverview';
 
@@ -31,7 +32,7 @@ export function WarSummaryContent() {
 
     const data = useMemo(() => buildWarSummaryOverviewModel(loadedGameState), [loadedGameState]);
 
-    const { areaPct, personnelByFaction, totalDisplaced, displacedByFaction } = data;
+    const { playerFaction, areaPct, personnelByFaction, totalDisplaced, displacedByFaction } = data;
 
     return (
         <div className="w-full max-w-[1100px]">
@@ -247,7 +248,7 @@ function PlayerFactionHeader({ faction }: { faction: (typeof WAR_SUMMARY_FACTION
         <div className="flex items-center gap-2">
             {getFactionFlag(faction) && <img src={getFactionFlag(faction)} alt="" className="w-4 h-3 object-cover rounded-[1px]" />}
             <span className="text-[11px] font-semibold" style={{ color: FACTION_HEX_COLORS[faction] }}>
-                {FACTION_SHORT_LABELS[faction]}
+                {getPlayerSafeMilitaryFactionName(faction, FACTION_SHORT_LABELS[faction])}
             </span>
         </div>
     );

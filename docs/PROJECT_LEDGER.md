@@ -20952,3 +20952,19 @@ Why this matters:
 - Docs:
   - `docs/40_reports/implemented/20260402_BOTTOM_STATUS_STRIP_PLAYER_TRUTH.md`
   - `docs/40_reports/GUI_MASTER.md`
+
+## 2026-04-02 - Summary shell player-safe labels
+
+- Worktree/branch: F:\AWWV_exec_clean on codex/engine-health-wave1`r
+- Normalized SituationTab.tsx and WarSummaryContent.tsx away from raw faction-id shell language.
+- SituationTab.tsx now uses player-safe military/political phrasing in territory, casualties, and alliance copy.
+- WarSummaryContent.tsx now reads playerFaction from the canonical overview model and uses player-safe military faction names in the player header.
+- Added regression guards in 	ests/ui_player_visibility.test.ts.
+- Verification:
+  - 
+ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_shell_navigation.test.ts`r
+  - powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`r
+- Docs:
+  - docs/40_reports/implemented/20260402_SUMMARY_SHELL_PLAYER_SAFE_LABELS.md`r
+  - docs/40_reports/GUI_MASTER.md`r
+

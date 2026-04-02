@@ -283,3 +283,10 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 
 - Bottom status strip now shows player-safe `Friendly` control and aggregated `Hostile-held` share instead of exact all-faction territory percentages.
 - See `docs/40_reports/implemented/20260402_BOTTOM_STATUS_STRIP_PLAYER_TRUTH.md`.
+
+## 2026-04-02 - Summary shell player-safe labels
+
+- SituationTab.tsx now uses player-safe military/political wording in territory, casualty, and alliance copy instead of raw faction ids.
+- WarSummaryContent.tsx now reads the canonical player faction from uildWarSummaryOverviewModel(...) and uses player-safe military faction names in the player header.
+- See docs/40_reports/implemented/20260402_SUMMARY_SHELL_PLAYER_SAFE_LABELS.md.
+

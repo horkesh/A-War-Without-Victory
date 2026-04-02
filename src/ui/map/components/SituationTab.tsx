@@ -7,7 +7,9 @@ import { filterPlayerFacingOperations, getPlayerFacingFaction } from '../../shar
 import {
   getPlayerSafeCorridorLabel,
   getPlayerSafeEnclaveName,
+  getPlayerSafeMilitaryFactionName,
   getPlayerSafeMunicipalityName,
+  getPlayerSafePoliticalFactionName,
 } from '../utils/playerSafeText';
 import {
     DRINA_BLOCKADE_THRESHOLD,
@@ -127,6 +129,8 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
   const supply = computeSupplySummary(state);
   const ivpScore = computeIvpScore(state);
   const playerFaction = getPlayerFacingFaction(state);
+  const playerMilitaryLabel = playerFaction ? getPlayerSafeMilitaryFactionName(playerFaction) : null;
+  const playerPoliticalLabel = playerFaction ? getPlayerSafePoliticalFactionName(playerFaction) : null;
   const activeMunicipalitySupport = playerFaction
     ? state.municipalitySupportOrders?.[playerFaction]
     : undefined;
@@ -151,7 +155,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
   const showSection = (section: SummaryFocusSection): boolean => !focusedMode || focusSection === section;
 
   if (supply.cut > 0) alerts.push(`${supply.cut} supply channel(s) cut`);
-  if (alliance < -0.25) alerts.push('RBiH-HRHB alliance under strain');
+  if (alliance < -0.25) alerts.push('Bosniak-Croat alliance under strain');
   if (ivpScore >= 60) alerts.push('International visibility pressure elevated');
 
   useEffect(() => {
@@ -172,7 +176,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
         <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Territory</div>
         {playerFaction ? (
           <div className="flex items-center justify-between">
-            <span className={FACTION_COLORS[playerFaction]}>{playerFaction}</span>
+            <span className={FACTION_COLORS[playerFaction]}>{playerMilitaryLabel}</span>
             <span className="text-text-secondary tabular-nums">{territoryPct[playerFaction].toFixed(1)}%</span>
           </div>
         ) : (
@@ -198,7 +202,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
           const military = row ? `${row.killed} KIA / ${row.wounded} WIA / ${row.missing_captured} MIA` : 'No data';
           return (
             <div className="flex items-center justify-between gap-2">
-              <span className={FACTION_COLORS[playerFaction]}>{playerFaction}</span>
+              <span className={FACTION_COLORS[playerFaction]}>{playerMilitaryLabel}</span>
               <span className="text-text-secondary text-right">{military}</span>
             </div>
           );
@@ -210,7 +214,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
 
       {!focusedMode && (
       <section data-summary-section="alliance" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
-        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Alliance Gauge (RBiH-HRHB)</div>
+        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Alliance Gauge (Bosniak-Croat)</div>
         <div className="h-2 rounded bg-panel-bg overflow-hidden">
           <div className="h-full bg-interactive" style={{ width: `${alliancePct}%` }} />
         </div>
@@ -290,7 +294,9 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
       {showSection('support') && activeMunicipalitySupport && activeMunicipalitySupport.staged_turn === state.turn && (
         <section data-summary-section="support" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
           <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Phase E Local Support</div>
-          <div className="text-text-secondary">{activeMunicipalitySupport.label}</div>
+          <div className="text-text-secondary">
+            {activeMunicipalitySupport.label.replace(/\bRBiH\b/g, playerPoliticalLabel ?? 'friendly authorities')}
+          </div>
           <div className="text-text-secondary">
             Target municipality: {getPlayerSafeMunicipalityName(activeMunicipalitySupport.mun_id)}
           </div>
