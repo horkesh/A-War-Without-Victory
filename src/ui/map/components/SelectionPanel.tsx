@@ -9,6 +9,7 @@ import { getRightPanelStyle, getPanelRailStyle } from './panelRail';
 import { buildOsidToSectorMap } from '../utils/sectorUtils';
 import { getOperationId } from '../utils/operations';
 import { getCurrentEthnicForOsid } from '../map/builders/buildEthnicGeoJSON';
+import { getPlayerSafeMunicipalityName } from '../utils/playerSafeText';
 import {
   filterPlayerFacingFormations,
   filterPlayerFacingMovementsByOsid,
@@ -270,7 +271,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
               Phase E Local Support
             </div>
             <div className="text-xs text-text-secondary">
-              {activeSupport?.label ?? 'Local support'} target: {activeSupport ? activeSupport.mun_id : 'none staged'}
+              {activeSupport?.label ?? 'Local support'} target: {activeSupport ? getPlayerSafeMunicipalityName(activeSupport.mun_id) : 'none staged'}
             </div>
             <button
               type="button"
@@ -281,7 +282,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
               Stage {supportLabel}
             </button>
             <div className="text-[11px] text-text-secondary">
-              Target municipality: {selectedMunId}
+              Target municipality: {getPlayerSafeMunicipalityName(selectedMunId)}
             </div>
             {supportMessage && <div className="text-[11px] text-text-secondary">{supportMessage}</div>}
           </div>

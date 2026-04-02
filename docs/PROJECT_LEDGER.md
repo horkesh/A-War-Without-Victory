@@ -20114,3 +20114,29 @@ Why this matters:
 - the previous threat panel hid raw enemy ids but still reasoned from omniscient enemy operation state
 - that made Army HQ look like a believable staff abstraction while still behaving like a disguised debug surface
 - grounding threat assessment in sector intel only keeps the feature useful without teaching the player impossible certainty
+### 2026-04-02 - Player-safe fallback text and Warroom report label cleanup
+
+Continued the clean-lane engine-health/player-truth execution in `F:\AWWV_exec_clean`, removing another class of smaller but still product-visible leaks.
+
+Implemented:
+- `src/ui/map/components/SelectionPanel.tsx`
+  - local-support staging copy now uses player-safe municipality labels instead of raw `mun_id`
+- `src/ui/map/components/SettlementDetailContent.tsx`
+  - pending order rows now use player-safe brigade fallback text instead of raw brigade ids
+- `src/ui/warroom/components/ReportsModal.ts`
+  - added settlement-label humanization for front status, enemy contact locations, and collapsed municipality lists
+- `tests/warroom_player_visibility.test.ts`
+  - added regression coverage proving Warroom reports humanize raw settlement identifiers instead of leaking engine ids
+- `docs/40_reports/implemented/20260402_PLAYER_SAFE_FALLBACK_TEXT_AND_WARROOM_LABELS.md`
+  - documented this fallback/shell text cleanup slice
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\warroom_player_visibility.test.ts tests\ui_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`23` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- once the obvious omniscient panels are fixed, the remaining leaks often survive in fallback text and summary prose
+- those are still player-facing product truth, not harmless chrome
+- this slice keeps tightening the rule that player-facing text must resolve to human labels or neutral safe fallbacks rather than engine identifiers

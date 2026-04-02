@@ -1466,3 +1466,6 @@ The standalone tactical map already had a Warroom-focus IPC path and Codex still
 ### Hiding raw enemy ids is not enough if the panel still reasons from omniscient state
 
 In AWWV, a player-facing surface can look safe because it prints only friendly-front language while still cheating underneath. Army HQ threat assessment was a clear example: no raw enemy corps ids or op names in the text, but the warnings still came from exact enemy operation phase/state. Treat data provenance as part of player-safety. If a panel is supposed to be a staff abstraction, it should be derived from player-plausible intel inputs, not from cleaned-up omniscient inputs.
+### Small fallback strings are still part of the product shell
+
+In AWWV, once the obvious leaks are fixed, the remaining debug smell usually survives in support rails, order summaries, and report prose. Raw `mun_id`, raw brigade ids, or raw OSID strings in those places are not harmless because players read them as the game speaking plainly. Treat fallback copy as a governed surface: if the UI has to degrade, it should degrade to a human label or a neutral safe phrase, not to an engine identifier.

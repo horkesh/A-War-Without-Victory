@@ -141,6 +141,19 @@ export class ReportsModal {
             .join(' ');
     }
 
+    private formatSettlementLabel(value: string | null | undefined): string {
+        const raw = (value ?? '').trim();
+        if (!raw) return 'Unknown location';
+        const normalized = raw.startsWith('op:')
+            ? raw.split(':').slice(1).join(' ')
+            : raw.replace(/[_:-]/g, ' ');
+        return normalized
+            .split(/\s+/)
+            .filter(Boolean)
+            .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+            .join(' ');
+    }
+
     /**
      * Generate the report body from municipality intelligence.
      */
@@ -247,7 +260,7 @@ export class ReportsModal {
             for (const e of ordered) {
                 const tierLabel = e.tier.toUpperCase();
                 const prefix = e.tier === 'exposed' ? '  ' : '  ';
-                lines.push(`${prefix}${e.settlementA} \u2194 ${e.settlementB}`);
+                lines.push(`${prefix}${this.formatSettlementLabel(e.settlementA)} \u2194 ${this.formatSettlementLabel(e.settlementB)}`);
                 lines.push(`${prefix}Pressure: ${e.pressure} | Friction: ${e.friction} | ${tierLabel}`);
             }
         }
@@ -281,7 +294,7 @@ export class ReportsModal {
             lines.push('  No enemy formations engaged this period.');
         } else {
             for (const cf of snap.contactedEnemyFormations) {
-                const contactLoc = cf.contactSettlement ?? 'unknown';
+                const contactLoc = this.formatSettlementLabel(cf.contactSettlement);
                 lines.push(`  ${cf.label} | Strength: ${cf.strengthCategory} | Last contact: ${contactLoc}`);
             }
         }
@@ -304,7 +317,7 @@ export class ReportsModal {
         lines.push(divider);
 
         const collapsedList = snap.ownSupply.collapsedMunicipalities.length > 0
-            ? snap.ownSupply.collapsedMunicipalities.join(', ')
+            ? snap.ownSupply.collapsedMunicipalities.map((municipalityId) => this.formatSettlementLabel(municipalityId)).join(', ')
             : 'None';
         lines.push(`  Collapsed: ${collapsedList}`);
         lines.push(`  Critical: ${snap.ownSupply.criticalCount}`);

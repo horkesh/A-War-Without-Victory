@@ -56,7 +56,9 @@ describe('warroom player visibility', () => {
 
   it('warroom report and magazine surfaces do not print raw enemy formation names', () => {
     const snap = {
-      engagedFrontEdges: [],
+      engagedFrontEdges: [
+        { settlementA: 'op:sarajevo:centar', settlementB: 'op:grbavica:south', pressure: 0.8, friction: 0.4, tier: 'exposed' },
+      ],
       ownForces: {
         formationDetails: [],
       },
@@ -65,13 +67,21 @@ describe('warroom player visibility', () => {
       ],
       brigadeMovement: { encircled: [] },
       ownDisplacement: { activeHostileTakeoverTimers: 0, activeCamps: 0 },
-      ownSupply: { criticalCount: 0, strainedCount: 0, collapsedMunicipalities: [] },
+      ownSupply: { criticalCount: 0, strainedCount: 0, collapsedMunicipalities: ['bijeljina_center'] },
       ownCorpsOps: [],
     } as any;
 
     const reportBody = (new ReportsModal({} as any) as any).generateWarReportBody(snap, 4);
     expect(reportBody).toContain('Enemy contact');
     expect(reportBody).not.toContain('Enemy Shock Brigade');
+    expect(reportBody).toContain('Sarajevo Centar');
+    expect(reportBody).toContain('Grbavica South');
+    expect(reportBody).toContain('Sarajevo 1');
+    expect(reportBody).toContain('Bijeljina Center');
+    expect(reportBody).not.toContain('op:sarajevo:centar');
+    expect(reportBody).not.toContain('op:grbavica:south');
+    expect(reportBody).not.toContain('sarajevo_1');
+    expect(reportBody).not.toContain('bijeljina_center');
 
     const section = (new MagazineModal({} as any) as any).renderEnemyAssessmentSection(snap);
     expect(section.textContent).toContain('Enemy contact');
