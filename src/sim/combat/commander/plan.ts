@@ -475,7 +475,7 @@ function createOpportunityPlan(
         objective_description: isLocal
             ? `local opportunity from ${stagingZone.zone_id}`
             : `offensive opportunity from ${stagingZone.zone_id}`,
-        target_osids: selectOpportunityTargets(filteredZone, requiredBrigades),
+        target_osids: selectOpportunityTargets(filteredZone, requiredBrigades, briefing),
         required_brigades: requiredBrigades,
         assigned_brigades: assignedBrigades,
         staging_zone: stagingZone.zone_id,
@@ -505,14 +505,37 @@ function createOpportunityPlan(
 // Helper: select opportunity targets from zone's enemy adjacency
 // ═══════════════════════════════════════════════════════════════════════════
 
+/**
+ * n1301: Select opportunity targets ranked by approach count (strength-based).
+ * Enemy OSIDs with more friendly-zone neighbors are more exposed and thus
+ * preferred attack vectors. Secondary sort: lexicographic for determinism.
+ */
 function selectOpportunityTargets(
     stagingZone: ZoneAssessment,
     requiredBrigades: number,
+    briefing: CommanderBriefing,
 ): string[] {
     const enemyOsids = stagingZone.enemy_adjacent_osids;
     if (enemyOsids.length === 0) return [];
     const maxObjectives = Math.max(1, Math.min(6, Math.floor(requiredBrigades * 0.5)));
-    return [...enemyOsids].sort(strictCompare).slice(0, maxObjectives);
+
+    // Rank by number of staging-zone OSIDs adjacent to each enemy OSID.
+    // More approach vectors = more exposed target = higher priority.
+    // Guard: adjacency may be absent in unit tests — fall back to lex sort.
+    const zoneOsidSet = new Set(stagingZone.osids);
+    const adjacency = briefing.spatial?.adjacency;
+    const approachCount = (osid: string): number => {
+        if (!adjacency) return 0;
+        const neighbors = adjacency.get(osid as any) ?? [];
+        return (neighbors as readonly string[]).filter(n => zoneOsidSet.has(n)).length;
+    };
+
+    return [...enemyOsids]
+        .sort((a, b) => {
+            const diff = approachCount(b) - approachCount(a); // descending
+            return diff !== 0 ? diff : strictCompare(a, b);
+        })
+        .slice(0, maxObjectives);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
