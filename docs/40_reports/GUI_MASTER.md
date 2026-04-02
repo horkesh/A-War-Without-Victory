@@ -228,3 +228,7 @@ Selection panels are not safer than tooltips just because they are bigger. If a 
 ### 17. Warroom contact reporting must abstract hostile identities at the snapshot boundary
 
 Warroom reports and magazine panels should not rely on every downstream renderer remembering to hide raw enemy formation names. If the headquarters shell is player-facing, its extracted contact snapshot should already speak in abstractions like `Enemy contact`, plus strength and location context. The cheaper and safer rule is: fix the snapshot contract once, then let every Warroom surface consume the same player-safe contact model.
+
+### 18. Records/history panels must not become omniscient archives
+
+Operations history feels archival, but it is still part of the normal player shell. If the records tab reads all-faction active operations or all-faction completed operation history directly from `LoadedGameState`, it becomes a debug archive with nice styling. Treat records/history surfaces like any other player-facing panel: they should consume player-scoped visibility helpers, not raw global ledgers.

@@ -6,6 +6,11 @@ import { useMemo, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { humanizeOsid } from '../utils/osidDisplayName';
 import type { LoadedGameState } from '../data/types';
+import {
+    filterPlayerFacingActiveOperations,
+    filterPlayerFacingFormations,
+    filterPlayerFacingOperationHistory,
+} from '../../shared/playerVisibility';
 
 // --- Faction styling ---
 const FACTION_COLOR: Record<string, string> = {
@@ -320,7 +325,7 @@ export function OperationHistoryPanel({ isOpen, onClose, embedded }: OperationHi
     const corpsNameById = useMemo(
         () =>
             new Map(
-                (loadedGameState?.formations ?? [])
+                filterPlayerFacingFormations(loadedGameState)
                     .filter((f) => f.kind === 'corps' || f.kind === 'army_hq' || f.kind === 'corps_asset')
                     .map((f) => [f.id, f.name]),
             ),
@@ -329,8 +334,8 @@ export function OperationHistoryPanel({ isOpen, onClose, embedded }: OperationHi
 
     if (!isOpen || !loadedGameState) return null;
 
-    const history = loadedGameState.operationHistory ?? [];
-    const active = loadedGameState.activeOperations ?? [];
+    const history = filterPlayerFacingOperationHistory(loadedGameState);
+    const active = filterPlayerFacingActiveOperations(loadedGameState);
     const sortedHistory = [...history].sort((a, b) => b.ended_turn - a.ended_turn);
 
     const tabClass = (t: Tab) =>

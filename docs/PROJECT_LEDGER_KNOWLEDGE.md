@@ -1345,3 +1345,6 @@ Filtering stationed units and pending orders is not enough if the same selected-
 
 ### Warroom contact snapshots should be abstract before they hit the UI
 If `extractWarData()` hands Warroom exact enemy formation names or ids, every report or magazine renderer has to remember not to print them. Fix that once at the snapshot boundary: make hostile contacts player-facing by construction (`Enemy contact` + strength/location context), then let every downstream Warroom surface consume the same safe contract.
+
+### Records panels are debug shells unless they consume player-scoped history helpers
+Operation history and active-op ledgers feel archival, which makes them easy places for omniscient truth to survive. If a records panel reads global operation arrays directly from `LoadedGameState`, it is still a debug shell. Route those surfaces through the same player-visibility helpers used elsewhere.

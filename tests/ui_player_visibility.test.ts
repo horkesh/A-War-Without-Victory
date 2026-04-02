@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { LoadedGameState, OperationView } from '../src/ui/map/data/types.js';
 import {
+  filterPlayerFacingActiveOperations,
   filterPlayerFacingFormations,
   filterPlayerFacingMovementsByOsid,
   filterPlayerFacingOperations,
@@ -92,6 +93,34 @@ describe('player visibility helpers', () => {
           weekly_log: [],
         },
       ],
+      activeOperations: [
+        {
+          corps_id: 'arbih_3rd_corps',
+          operation_name: 'Own Active Op',
+          faction: 'RBiH',
+          type: 'sector_attack',
+          phase: 'planning',
+          started_turn: 2,
+          participating_brigades: ['arbih_b1'],
+          objectives_count: 1,
+          objectives_captured: 0,
+          attacks: 0,
+          weekly_log_length: 1,
+        },
+        {
+          corps_id: 'vrs_1st_krajina',
+          operation_name: 'Enemy Active Op',
+          faction: 'RS',
+          type: 'sector_attack',
+          phase: 'execution',
+          started_turn: 2,
+          participating_brigades: ['rs_b1'],
+          objectives_count: 1,
+          objectives_captured: 0,
+          attacks: 1,
+          weekly_log_length: 1,
+        },
+      ],
       movementsByOsid: {
         osid_a: [
           { turn: 2, formation_id: 'arbih_b1', formation_name: '1st Brigade', type: 'arrived' },
@@ -100,6 +129,7 @@ describe('player visibility helpers', () => {
       },
     } as unknown as LoadedGameState;
 
+    expect(filterPlayerFacingActiveOperations(state).map((entry) => entry.operation_name)).toEqual(['Own Active Op']);
     expect(filterPlayerFacingOperationHistory(state).map((entry) => entry.operation_name)).toEqual(['Own Op']);
     expect(filterPlayerFacingMovementsByOsid(state)).toEqual({
       osid_a: [

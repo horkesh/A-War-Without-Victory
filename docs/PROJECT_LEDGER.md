@@ -98,6 +98,31 @@ Why this matters:
 - this keeps Warroom acting like a headquarters shell instead of a debug console with nice typography
 
 ---
+### 2026-04-02 — Engine health Wave 1 continued: operation records now obey player-facing visibility
+
+Continued the clean-lane player-knowledge sweep in `F:\AWWV_exec_clean`, closing the next “polished debug archive” seam: the operations history panel was still reading global active operations and global completed-operation history directly from `LoadedGameState`.
+
+Implemented:
+- `src/ui/shared/playerVisibility.ts`
+  - added `filterPlayerFacingActiveOperations(...)` so records/history surfaces can consume only player-faction live operations
+- `src/ui/map/components/OperationHistoryPanel.tsx`
+  - active and completed operation lists now route through player-facing visibility helpers
+  - corps-name resolution now derives from player-facing formations instead of the full omniscient formation set
+- `tests/ui_player_visibility.test.ts`
+  - expanded regression coverage to prove active-operation filtering follows the same player-faction rule as operation-history filtering
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`19` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- history/records panels are where omniscient truth loves to survive because they feel archival rather than live
+- if the records tab can see everyone’s operations, it is still a debug shell even if the map itself is player-safe
+- once the helper contract exists, every records-style surface should consume it instead of rolling its own filters
+
+---
 
 ### 2026-04-02 â€” Engine health Wave 1 continued: local brigade fatigue now reaches commander planning
 

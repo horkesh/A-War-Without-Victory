@@ -31,6 +31,13 @@ export function filterPlayerFacingOperations(state: LoadedGameState | null | und
   return getPlayerVisibleOperations(state.operations, resolvePlayerFacingFaction(state));
 }
 
+export function filterPlayerFacingActiveOperations(
+  state: LoadedGameState | null | undefined,
+): NonNullable<LoadedGameState['activeOperations']> {
+  if (!state?.activeOperations) return [];
+  return getPlayerVisibleFactions(state.activeOperations, resolvePlayerFacingFaction(state));
+}
+
 export function filterPlayerFacingOperationHistory(
   state: LoadedGameState | null | undefined,
 ): NonNullable<LoadedGameState['operationHistory']> {
