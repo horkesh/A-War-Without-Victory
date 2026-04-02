@@ -1294,6 +1294,9 @@ Corps offensive go/no-go checks that ignore obvious defender artillery, entrench
 ### Army HQ intent must reach `CommanderBriefing` as structured targets, not only as stance flavor
 If `CampaignPlan` only affects corps stance ceilings, the strategic layer still talks mostly to itself. The corps commander needs structured Army HQ intent in its briefing: front role, offensive targets, hold targets, and synchronized-op slice. The safest first implementation is to thread those fields into `CommanderBriefing`, merge campaign hold targets into `must_hold_osids`, and use offensive targets to bias opportunity staging/target choice without removing corps autonomy.
 
+### Corps reinforcement requests are only real once Army HQ can hear them
+`DecisionResult.reinforcement_requests` and `CommanderOutput.reinforcement_requests` already existed, but until `applyCommanderOutput(...)` persisted them into `CorpsCommandState`, Army HQ gathering had no way to consume the signal. The honest contract is: corps commanders may emit reinforcement pressure each turn, corps state persists it, and Army HQ reads it as a strategic pressure signal for front-role shaping. Do not short-circuit that by pretending these are already the same object as `pending_reserve_requests`; that older reserve-loan queue is a downstream Army HQ decision surface, not the raw corps signal.
+
 ### Shared label helpers are cheaper than another anti-leak sweep
 Player-facing raw-id leaks often survive not in the main happy-path labels, but in fallback strings and secondary shells like Warroom. If map and Warroom each improvise their own `?? id` fallback, raw corps or sector ids will eventually leak back in. Centralize player-facing corps / sector / assigned-command label translation in one shared helper and make fallbacks generic (`This corps`, `Assigned sector`, `Assigned command`) rather than engine identifiers.
 

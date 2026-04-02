@@ -494,6 +494,12 @@ export interface CorpsCommandState {
     status_reason?: string;
     /** Diagnostic: gate audit trace for operation launch evaluation. */
     op_launch_trace?: string[];
+    /** Latest commander-generated reinforcement pressure signals for Army HQ consumption. */
+    commander_reinforcement_requests?: Array<{
+        zone_id: string;
+        brigades_needed: number;
+        priority: 'critical' | 'high' | 'medium' | 'low';
+    }>;
     /** Persistent commander state for v0.8 intelligent corps AI. */
     commander_state?: CommanderState;
 }

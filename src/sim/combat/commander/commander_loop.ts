@@ -156,4 +156,11 @@ export function applyCommanderOutput(
 
     // 5. Persist commander state for next turn's continuity
     corps.commander_state = output.updated_state;
+
+    // 6. Persist commander reinforcement pressure so Army HQ can consume it next turn.
+    corps.commander_reinforcement_requests = output.reinforcement_requests.map(request => ({
+        zone_id: request.zone_id,
+        brigades_needed: request.brigades_needed,
+        priority: request.priority,
+    }));
 }

@@ -18953,6 +18953,45 @@ Why this matters:
 
 ---
 
+### 2026-04-02 — Engine health Wave 1 continued: corps reinforcement pressure reaches Army HQ
+
+Continued the clean-lane Wave 1 execution in `F:\AWWV_exec_clean` on branch `codex/engine-health-wave1`, focusing on another half-alive core-engine loop: corps commanders were already generating reinforcement requests, but Army HQ gathering had no way to hear them.
+
+Implemented:
+- `src/state/game_state.ts`
+  - `CorpsCommandState` now persists `commander_reinforcement_requests`
+- `src/sim/combat/commander/commander_loop.ts`
+  - `applyCommanderOutput(...)` now writes commander reinforcement requests back to corps state
+- `src/sim/combat/army_hq_gathering_types.ts`
+  - `CorpsAssessment` now carries top reinforcement priority and total brigades requested
+- `src/sim/combat/army_hq_gathering.ts`
+  - Army HQ assessment now summarizes persisted corps reinforcement pressure
+  - opportunity scoring now accounts for that pressure
+  - front-role generation now refuses to leave a high/critical requesting corps on `economy`
+- `src/sim/combat/army_hq_gathering_constants.ts`
+  - added explicit reinforcement-pressure score modifiers
+- `tests/commander/reinforcement_signal_flow.test.ts`
+  - new focused regression proving the signal survives the commander loop
+- `tests/army_hq_gathering.test.ts`
+  - new regressions proving Army HQ consumes the signal and changes campaign-role output
+- `vitest.config.ts`
+  - wired the new commander/Army HQ regression file into the Vitest allowlist
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\reinforcement_signal_flow.test.ts tests\army_hq_gathering.test.ts`
+  - PASS (`66` tests)
+- `node_modules\.bin\vitest.cmd run tests\commander\commander.test.ts tests\commander\briefing_campaign_intent.test.ts tests\commander\reinforcement_signal_flow.test.ts tests\army_hq_gathering.test.ts`
+  - PASS (`118` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- this closes another “typed but inert” engine-health blindspot
+- the command stack now supports a real corps → Army HQ pressure signal instead of silently discarding it
+- strategic planning can now react to frontline reinforcement need before the branch moves on to larger ops/authority cleanup
+
+---
+
 ### 2026-04-02 — Player-facing fallback sweep: no raw ids in generic degrade paths
 
 Small follow-on cleanup in the same clean lane:

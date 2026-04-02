@@ -244,6 +244,7 @@ function assessCorps(state: GameState, faction: FactionId, corpsId: string): Cor
     const cc = state.military.corps_command?.[corpsId];
     const exhaustion = cc?.corps_exhaustion ?? 0;
     const hasActiveOp = (cc?.active_operations?.length ?? 0) > 0;
+    const reinforcementSignal = summarizeCommanderReinforcementPressure(cc?.commander_reinforcement_requests);
 
     // Count active brigades and sum personnel
     let availableBrigades = 0;
@@ -279,7 +280,35 @@ function assessCorps(state: GameState, faction: FactionId, corpsId: string): Cor
         sector_threat_avg: sectorThreatAvg,
         available_brigades: availableBrigades,
         officer_competence: officerCompetence,
+        commander_reinforcement_priority: reinforcementSignal.priority,
+        commander_reinforcement_brigades_needed: reinforcementSignal.brigadesNeeded,
     };
+}
+
+function summarizeCommanderReinforcementPressure(
+    requests: Array<{ zone_id: string; brigades_needed: number; priority: 'critical' | 'high' | 'medium' | 'low' }> | undefined,
+): { priority: 'critical' | 'high' | 'medium' | 'low' | null; brigadesNeeded: number } {
+    if (!requests || requests.length === 0) {
+        return { priority: null, brigadesNeeded: 0 };
+    }
+
+    const priorityOrder: Record<'critical' | 'high' | 'medium' | 'low', number> = {
+        critical: 4,
+        high: 3,
+        medium: 2,
+        low: 1,
+    };
+
+    let topPriority: 'critical' | 'high' | 'medium' | 'low' | null = null;
+    let brigadesNeeded = 0;
+    for (const request of requests) {
+        brigadesNeeded += Math.max(0, request.brigades_needed);
+        if (!topPriority || priorityOrder[request.priority] > priorityOrder[topPriority]) {
+            topPriority = request.priority;
+        }
+    }
+
+    return { priority: topPriority, brigadesNeeded };
 }
 
 /** Look up the corps commander competence from named officer data. */
@@ -492,6 +521,14 @@ function computeOpportunityScore(ca: CorpsAssessment): number {
     if (ca.sector_threat_avg < OPPORTUNITY_SCORE.LOW_THREAT_THRESHOLD) score += OPPORTUNITY_SCORE.LOW_THREAT_BONUS;
     else if (ca.sector_threat_avg > OPPORTUNITY_SCORE.HIGH_THREAT_THRESHOLD) score += OPPORTUNITY_SCORE.HIGH_THREAT_PENALTY;
 
+    if (ca.commander_reinforcement_priority) {
+        score += OPPORTUNITY_SCORE.COMMANDER_REINFORCEMENT_PRIORITY[ca.commander_reinforcement_priority];
+        score += Math.max(
+            OPPORTUNITY_SCORE.COMMANDER_REINFORCEMENT_MAX_BRIGADE_PENALTY,
+            ca.commander_reinforcement_brigades_needed * OPPORTUNITY_SCORE.COMMANDER_REINFORCEMENT_PER_BRIGADE_NEEDED,
+        );
+    }
+
     return score;
 }
 
@@ -640,6 +677,12 @@ function generateFrontPriorities(
             role = 'secondary';
             suggestedStance = 'balanced';
             primaryCount--;
+        }
+
+        // Corps actively asking Army HQ for reinforcement should not be treated as a cheap economy front.
+        if (role === 'economy' && (ca.commander_reinforcement_priority === 'critical' || ca.commander_reinforcement_priority === 'high')) {
+            role = ca.strength_class === 'critical' ? 'contain' : 'secondary';
+            suggestedStance = role === 'contain' ? 'defensive' : 'balanced';
         }
 
         const targets = computeCorpsTargets(state, ca.corps_id, role);

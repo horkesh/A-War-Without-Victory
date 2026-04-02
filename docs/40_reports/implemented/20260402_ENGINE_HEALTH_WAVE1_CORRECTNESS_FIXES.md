@@ -454,3 +454,42 @@ Why this matters:
 - Army HQ strategy is no longer reduced to “stance only”
 - strategic hold intent now affects the same `must_hold` substrate the commander already respects
 - corps commanders still choose how to fight, but they no longer ignore the theater-level target emphasis the engine is already computing
+
+## Additional Wave 1 slice: corps reinforcement pressure now reaches Army HQ
+
+This checkpoint closes another dead feedback loop in the command stack: corps commanders were already emitting reinforcement requests, but those requests died inside `CommanderOutput` and never reached Army HQ gathering.
+
+Implemented:
+- `src/state/game_state.ts`
+  - `CorpsCommandState` now persists `commander_reinforcement_requests` as a canonical corps-side strategic signal
+- `src/sim/combat/commander/commander_loop.ts`
+  - `applyCommanderOutput(...)` now writes the commander’s reinforcement requests back into corps state for next-turn continuity
+- `src/sim/combat/army_hq_gathering_types.ts`
+  - `CorpsAssessment` now carries:
+    - `commander_reinforcement_priority`
+    - `commander_reinforcement_brigades_needed`
+- `src/sim/combat/army_hq_gathering.ts`
+  - Army HQ theater assessment now summarizes the persisted commander requests into a corps-level pressure signal
+  - opportunity scoring now penalizes corps that are actively asking for reinforcement instead of pretending they are equally suitable offensive candidates
+  - front-priority generation now refuses to leave a high/critical requesting corps on an `economy` role
+- `src/sim/combat/army_hq_gathering_constants.ts`
+  - added explicit reinforcement-pressure score modifiers so the signal is visible in role shaping instead of being hand-waved
+- `tests/commander/reinforcement_signal_flow.test.ts`
+  - new focused regression proving the commander signal survives `applyCommanderOutput(...)`
+- `tests/army_hq_gathering.test.ts`
+  - added regressions proving Army HQ sees the persisted signal and changes front-role classification because of it
+- `vitest.config.ts`
+  - wired the new focused commander/Army HQ regression file into the Vitest allowlist
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\reinforcement_signal_flow.test.ts tests\army_hq_gathering.test.ts`
+  - PASS (`66` tests)
+- `node_modules\.bin\vitest.cmd run tests\commander\commander.test.ts tests\commander\briefing_campaign_intent.test.ts tests\commander\reinforcement_signal_flow.test.ts tests\army_hq_gathering.test.ts`
+  - PASS (`118` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- this repo already had the data and the types for corps reinforcement pressure, but not the behavior
+- a request that never reaches the next decision-maker is not a subsystem, it is decorative architecture
+- Army HQ can now hear when a corps is asking for help, which is the minimum honest substrate before any more elaborate reserve-transfer or synchronized-op logic can claim to be “strategic”
