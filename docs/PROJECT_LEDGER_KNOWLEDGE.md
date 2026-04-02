@@ -1633,3 +1633,11 @@ In AWWV, "we already removed that IPC" is not trustworthy until preload, Electro
 
 In AWWV, a panel can look player-safe at first glance while still leaking raw OSIDs or municipality ids through `title=` attributes and admin detail rows. Player-shell audits need to check hover text and metadata fields, not just visible labels.
 
+### Browser fallbacks and sample shells can quietly resurrect dead authority
+
+In AWWV, a mock `dev:map` state that still seeds `brigade_front_assignment`, `army_theatre_assignment`, or `theatres` teaches every future shell change that those concepts are still alive. Sample state and browser fallbacks are part of product truth; they must not smuggle retired authority back into the live shell.
+
+### Compatibility comments need to tell the next agent what not to trust
+
+If `GameState` comments say “HoI-style theatre model” without also saying “compatibility-only,” Claude or a tired developer will eventually treat that field like a live design commitment. In a repo with long migrations, schema comments are operational guidance and should explicitly mark residue as fallback-only.
+

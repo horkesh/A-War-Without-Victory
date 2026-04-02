@@ -1702,13 +1702,13 @@ heavy_munitions_reserve?: Record<FactionId, number>;
 front_edges?: FrontEdgeState[];
 /** OSID front-edge snapshot (War phase operational view) for HoI/OSID consumers. */
 war_front_edges_osid?: FrontEdgeState[];
-/** HoI-style assignable front segments derived from canonical front_edges. */
+/** Legacy compatibility snapshot derived from canonical front_edges for old front-assignment consumers. */
 assignable_front_segments?: AssignableFrontSegmentState[];
-/** HoI-style brigade assignment to an assignable front segment. null = reserve. */
+/** Legacy compatibility fallback only. Null = reserve; sectors/front edges are the live frontline truth. */
 brigade_front_assignment?: Record<FormationId, string | null>;
-/** HoI-style top-level theatre model. */
+/** Legacy theatre compatibility state. Not a live player-shell or turn-pipeline authority. */
 theatres?: Record<string, TheatreState>;
-/** Army (army_hq) to theatre assignment map. */
+/** Legacy theatre compatibility assignment. Preserved only for old saves/tools. */
 army_theatre_assignment?: Record<FormationId, string>;
 /**
      * Corps front assignment (HoI-style): per-corps normalized edge_ids (e.g. "S1__S2").
@@ -1717,7 +1717,7 @@ army_theatre_assignment?: Record<FormationId, string>;
 corps_front_edges?: Record<FormationId, string[]>;
 /** Optional fallback front lines for controlled withdrawal. */
 corps_fallback_front_edges?: Record<FormationId, string[]>;
-/** Player/bot desired AoR settlement cap per brigade (1–4). When set, overrides personnel-based cap. (Legacy; AoR removed.) */
+/** Legacy AoR tuning compatibility field. Do not expose in the live player shell and do not write new values. */
 brigade_desired_aor_cap?: Record<FormationId, number>;
 /** Pending brigade posture orders (consumed once per turn). */
 brigade_posture_orders?: BrigadePostureOrder[];

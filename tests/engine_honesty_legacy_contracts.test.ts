@@ -249,4 +249,29 @@ describe('engine honesty legacy contracts', () => {
     expect(turnPipeline).not.toContain('ensureDefaultTheatres');
     expect(theatres).toContain('Legacy theatre compatibility helpers.');
   });
+
+  it('does not seed dead front or theatre shell state in browser fallback campaign loading', () => {
+    const browserFallback = readFileSync(join(process.cwd(), 'src', 'ui', 'map', 'desktop', 'campaignRecruitmentActions.ts'), 'utf8');
+
+    expect(browserFallback).not.toContain('brigade_front_assignment: {}');
+    expect(browserFallback).not.toContain('army_theatre_assignment: {}');
+    expect(browserFallback).not.toContain('theatres: {}');
+  });
+
+  it('marks legacy front and theatre schema fields honestly as compatibility-only', () => {
+    const gameState = readFileSync(join(process.cwd(), 'src', 'state', 'game_state.ts'), 'utf8');
+
+    expect(gameState).toContain('Legacy compatibility snapshot derived from canonical front_edges');
+    expect(gameState).toContain('Legacy compatibility fallback only. Null = reserve; sectors/front edges are the live frontline truth.');
+    expect(gameState).toContain('Legacy theatre compatibility state. Not a live player-shell or turn-pipeline authority.');
+    expect(gameState).toContain('Legacy theatre compatibility assignment. Preserved only for old saves/tools.');
+    expect(gameState).toContain('Legacy AoR tuning compatibility field. Do not expose in the live player shell and do not write new values.');
+  });
+
+  it('does not advertise retired AoR-cap IPC channels in the desktop contract doc', () => {
+    const ipcContract = readFileSync(join(process.cwd(), 'docs', '20_engineering', 'DESKTOP_GUI_IPC_CONTRACT.md'), 'utf8');
+
+    expect(ipcContract).not.toContain('set-brigade-desired-aor-cap');
+    expect(ipcContract).toContain('must treat those as compatibility/history residue rather than active shell concepts');
+  });
 });

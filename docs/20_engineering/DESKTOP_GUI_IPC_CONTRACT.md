@@ -9,7 +9,7 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 - Renderer consumers: `src/ui/warroom/warroom.ts`, `src/ui/map/MapApp.ts` (via embedded iframe)
 - Sim adapter: `src/desktop/desktop_sim.ts`
 
-**State contract (current player shell):** The same serialized `GameState` is pushed to all renderers via `game-state-updated`. The raw payload may still contain compatibility-era state such as `assignable_front_segments`, `brigade_front_assignment`, `theatres`, and `army_theatre_assignment`, but the live tactical-map `LoadedGameState` no longer treats theatre/front-assignment metadata as active player-facing shell concepts. The current player shell centers on canonical front edges, corps sectors, sector overrides, and `military.campaign_plans` (read-only; CampaignPlan objects produced by Army HQ Gathering — see `army_hq_gathering.ts`). See [TACTICAL_MAP_SYSTEM.md](TACTICAL_MAP_SYSTEM.md) §10.4 for current single-source notes.
+**State contract (current player shell):** The same serialized `GameState` is pushed to all renderers via `game-state-updated`. The raw payload may still contain compatibility-era state such as `assignable_front_segments`, `brigade_front_assignment`, `theatres`, and `army_theatre_assignment`, but the live tactical-map `LoadedGameState` must treat those as compatibility/history residue rather than active shell concepts. The current player shell centers on canonical front edges, corps sectors, sector overrides, and `military.campaign_plans` (read-only; CampaignPlan objects produced by Army HQ Gathering — see `army_hq_gathering.ts`). See [TACTICAL_MAP_SYSTEM.md](TACTICAL_MAP_SYSTEM.md) §10.4 for current single-source notes.
 
 **Derived adapter fields (not IPC channels):** `GameStateAdapter.ts` derives additional view-model fields from the raw `GameState` payload. Notable: `sectorIntel` (`SectorIntelRecordView[]`) — derived from `state.sector_intel` and `state.military.corps_front_sectors` in a single merged pass (also produces `fogOfWar`). Exposes 11 fields per enemy sector: sector ID, faction, corps, strength category, posture, offensive_signs, confidence, visible brigades, friendly OSIDs, enemy OSIDs, assessed turn. Consumed by Army HQ intelligence panels (ThreatAssessment, ForceReadiness, SupplyIntelligence) and corps card threat badges. No IPC round-trip — entirely client-side derivation from the `game-state-updated` payload.
 
@@ -87,11 +87,6 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
   - Payload: `{ corpsId: string, stance: string }`
   - Returns: `{ ok: boolean, error?: string }`
   - Behavior: sets or updates corps stance (e.g. defensive/balanced/offensive/reorganize) in state (corps_command), reserializes, sends state via `game-state-updated`.
-
-- `set-brigade-desired-aor-cap` (invoke)
-  - Payload: `{ brigadeId: string, cap: number | null }`
-  - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: sets `state.brigade_desired_aor_cap[brigadeId]` to a value between 1 and 4. Reserializes and broadcasts. `null` clears the cap.
 
 - `stage-sector-stance-order` (invoke)
   - Payload: `{ corpsId: string, sectorId: string, stance: 'hold' | 'defend' | 'defend_at_all_costs' | 'elastic_defense' | 'counterattack' | 'dig_in' }`

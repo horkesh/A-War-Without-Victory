@@ -21148,3 +21148,27 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - Docs:
   - `docs/40_reports/implemented/20260402_PLAYER_SAFE_ID_LEAK_MOPUP.md`
 
+
+## 2026-04-02 - Compatibility shell truth hardening
+
+- Worktree/branch: F:\AWWV_merge_wave2 on codex/main-merge-wave1
+- Stopped the `dev:map` browser fallback from seeding dead shell-era fields in `campaignRecruitmentActions.ts`:
+  - `brigade_front_assignment`
+  - `army_theatre_assignment`
+  - `theatres`
+- Hardened `src/state/game_state.ts` comments so the remaining compatibility-era fields are described honestly:
+  - `assignable_front_segments` = compatibility snapshot
+  - `brigade_front_assignment` = legacy fallback only
+  - `theatres` / `army_theatre_assignment` = compatibility residue
+  - `brigade_desired_aor_cap` = legacy AoR tuning field
+- Removed the stale `set-brigade-desired-aor-cap` section from `docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md`.
+- Added regressions in `tests/engine_honesty_legacy_contracts.test.ts` proving:
+  - the browser fallback no longer seeds those dead shell fields
+  - the schema comments advertise them as compatibility-only
+  - the desktop IPC contract no longer documents the retired AoR-cap bridge
+- Verification:
+  - `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\engine_honesty_legacy_contracts.test.ts tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_COMPATIBILITY_SHELL_TRUTH_HARDENING.md`
+

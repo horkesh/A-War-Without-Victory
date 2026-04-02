@@ -54,9 +54,6 @@ export async function startCampaignFromSidePicker(
                     formations: {},
                     militia_pools: {},
                     brigade_movement_state: {},
-                    brigade_front_assignment: {},
-                    army_theatre_assignment: {},
-                    theatres: {},
                     casualty_ledger: {},
                 },
                 political: {
