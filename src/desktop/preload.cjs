@@ -26,7 +26,6 @@ contextBridge.exposeInMainWorld('awwv', {
   stageMoveOrder: (brigadeId, targetMunicipalityId) => ipcRenderer.invoke('stage-move-order', { brigadeId, targetMunicipalityId }),
   stageDeployOrder: (brigadeId) => ipcRenderer.invoke('stage-deploy-order', { brigadeId }),
   stageUndeployOrder: (brigadeId) => ipcRenderer.invoke('stage-undeploy-order', { brigadeId }),
-  assignBrigadeToFront: (brigadeId, frontId) => ipcRenderer.invoke('assign-brigade-to-front', { brigadeId, frontId }),
   assignBrigadeToSector: (brigadeId, sectorId) => ipcRenderer.invoke('assign-brigade-to-sector', { brigadeId, sectorId }),
   renameFrontSegment: (frontId, name) => ipcRenderer.invoke('rename-front-segment', { frontId, name }),
   renameTheatre: (theatreId, name) => ipcRenderer.invoke('rename-theatre', { theatreId, name }),

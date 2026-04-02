@@ -795,25 +795,6 @@ app.whenReady().then(() => {
     }
   });
 
-  ipcMain.handle('assign-brigade-to-front', async (_event, payload) => {
-    const { brigadeId, frontId } = payload || {};
-    const normalizedFrontId = frontId == null ? null : String(frontId);
-    if (!currentGameStateJson || typeof brigadeId !== 'string') {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      const result = sim.assignBrigadeToFront(state, brigadeId, normalizedFrontId);
-      if (!result.ok) return result;
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
-  });
-
   ipcMain.handle('rename-front-segment', async (_event, payload) => {
     const { frontId, name } = payload || {};
     const normalizedName = name == null ? null : String(name);

@@ -178,4 +178,15 @@ describe('engine honesty legacy contracts', () => {
     expect(electronMain).not.toContain('stage-brigade-reposition-order');
     expect(useIpc).not.toContain('stageBrigadeRepositionOrder');
   });
+
+  it('does not advertise legacy front-assignment desktop bridge paths in live code', () => {
+    const preload = readFileSync(join(process.cwd(), 'src', 'desktop', 'preload.cjs'), 'utf8');
+    const electronMain = readFileSync(join(process.cwd(), 'src', 'desktop', 'electron-main.cjs'), 'utf8');
+    const useIpc = readFileSync(join(process.cwd(), 'src', 'ui', 'map', 'desktop', 'useIPC.ts'), 'utf8');
+
+    expect(preload).not.toContain('assignBrigadeToFront');
+    expect(preload).not.toContain('assign-brigade-to-front');
+    expect(electronMain).not.toContain('assign-brigade-to-front');
+    expect(useIpc).not.toContain('assignBrigadeToFront');
+  });
 });

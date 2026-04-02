@@ -78,7 +78,6 @@ interface WindowAwwv {
     stageOpsecToggle: (sectorId: string, active: boolean) => Promise<{ ok: boolean; error?: string }>;
     stageMunicipalitySupportOrder: (payload: { faction: 'RS' | 'RBiH' | 'HRHB'; munId: string; type: 'weapons_shipment' | 'staff_priority' | 'croatian_support_package' }) => Promise<{ ok: boolean; error?: string }>;
     clearOrders: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
-    assignBrigadeToFront: (brigadeId: string, frontId: string) => Promise<{ ok: boolean; error?: string }>;
     assignBrigadeToSector: (brigadeId: string, sectorId: string | null) => Promise<{ ok: boolean; error?: string }>;
     queryMovementRange: (brigadeId: string) => Promise<unknown>;
     queryMovementPath: (brigadeId: string, destinationSid: string) => Promise<unknown>;
@@ -288,10 +287,6 @@ export function useIPC() {
 
             clearOrders: awwv
                 ? (brigadeId: string) => awwv.clearOrders(brigadeId)
-                : makeNoop<{ ok: boolean; error?: string }>(),
-
-            assignBrigadeToFront: awwv
-                ? (brigadeId: string, frontId: string) => awwv.assignBrigadeToFront(brigadeId, frontId)
                 : makeNoop<{ ok: boolean; error?: string }>(),
 
             assignBrigadeToSector: awwv

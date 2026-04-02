@@ -1424,3 +1424,15 @@ If the repo uses an explicit test include list, a new regression file is not pro
 ### Player-facing sector orders must not secretly write the older front-assignment lane
 
 If a tactical-map action is labeled as a brigade-to-sector command, it must route through the canonical sector override contract all the way down. In AWWV, `stageAssignBrigadeToSectorAction(...)` accidentally writing `assignBrigadeToFront(...)` was not just a UI bug; it revived `brigade_front_assignment/local_fronts`, which still influences combat density. Treat any player-facing order surface that secretly writes an older authority lane as a serious engine-health bug.
+
+### A player-facing concept is still alive if preload, IPC, adapter, and sidebar all still mention it
+
+Even after a mechanic has a newer canonical replacement, the old concept remains live product truth if the desktop bridge exports it, the main process handles it, the adapter serializes it, and a sidebar still reasons from it. In AWWV, `assignBrigadeToFront(...)` and `brigadeFrontAssignment` had already outlived their intended player-facing role, but they still shaped the desktop shell until every one of those boundaries was cleaned up together.
+
+### Sparse-state adapter reads are part of engine health, not just test hygiene
+
+If `parseGameState(...)` assumes whole state branches like `displacement` always exist, tests may be the first thing to complain, but the real bug is that the player shell only works on happy-path saves. In AWWV, optional-reading sparse branches is not “being lax”; it is making the renderer robust to compatibility saves, partial fixtures, and evolving state contracts.
+
+### Wrong-branch reads in adapters silently delete whole gameplay signals
+
+The OPSEC briefing card disappeared not because OPSEC was unimplemented, but because the adapter read `opsec_sectors` from the wrong place. That kind of bug is especially dangerous: the data exists, the UI logic exists, and only the translation layer lies. In AWWV, adapters are authority surfaces and should be audited with the same suspicion as core sim code.

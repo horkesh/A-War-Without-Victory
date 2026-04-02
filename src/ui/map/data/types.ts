@@ -514,7 +514,6 @@ export interface LoadedGameState {
     controlBySettlement: Record<string, string | null>;
     statusBySettlement: Record<string, string>;
     brigadeAorByFormationId: Record<string, string[]>;
-    brigadeFrontAssignment?: Record<string, string | null>;
     theatres?: Record<string, TheatreView>;
     armyTheatreAssignment?: Record<string, string>;
     brigadeDesiredAoRCap?: Record<string, number>;

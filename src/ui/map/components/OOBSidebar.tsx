@@ -11,6 +11,7 @@ import { getArmyCrest, getArmyName } from '../utils/factionAssets';
 import { getFactionArmyCommander } from '../utils/officerUtils';
 import { formatRank } from '../utils/officerCharacter';
 import { getPlayerFacingFaction, getPlayerVisibleFactions, getPlayerVisibleOperations } from '../../shared/playerFacingLabels';
+import { isSectorAssignmentExemptCorpsId } from '../../../sim/combat/corps_front_sectors_constants.js';
 
 const FACTION_ORDER = ['RS', 'RBiH', 'HRHB'] as const;
 
@@ -103,11 +104,9 @@ export function OOBSidebar() {
   const reserveByFaction = useMemo(() => {
     const map = new Map<string, FormationView[]>();
     if (!loadedGameState || !loadedGameState.formations || !playerFaction) return map;
-    const hasFrontAssignments = Boolean(loadedGameState.brigadeFrontAssignment);
     for (const formation of getPlayerVisibleFactions(loadedGameState.formations, playerFaction)) {
       if (formation.kind !== 'brigade') continue;
-      const frontAssignment = loadedGameState.brigadeFrontAssignment?.[formation.id] ?? null;
-      const isReserve = hasFrontAssignments ? !frontAssignment : !formation.corps_id;
+      const isReserve = !formation.corps_id || isSectorAssignmentExemptCorpsId(formation.corps_id);
       if (!isReserve) continue;
       const list = map.get(formation.faction) ?? [];
       list.push(formation);

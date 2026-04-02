@@ -19887,3 +19887,41 @@ Why this matters:
 - a player-visible sector command must not secretly mutate the older front-assignment authority path
 - this is exactly the kind of half-alive shell mismatch that keeps legacy combat writers alive after the architecture has supposedly moved on
 - routing the map-click path into the same override lane as the rest of the UI makes sector assignment truth much harder to split again
+### 2026-04-02 - Engine health Wave 1 continued: retire front assignment from the live player shell
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, removing the remaining live desktop/UI exposure of `assignBrigadeToFront(...)` and `brigadeFrontAssignment`. The tactical map had already moved to the canonical brigade-sector override model, but the preload bridge, IPC contract, adapter, and sidebar still taught the product that front assignment was a current player-facing concept.
+
+Implemented:
+- `src/desktop/preload.cjs`
+  - removed the live `assignBrigadeToFront(...)` bridge export
+- `src/ui/map/desktop/useIPC.ts`
+  - removed `assignBrigadeToFront(...)` from the React IPC contract
+- `src/desktop/electron-main.cjs`
+  - removed the `assign-brigade-to-front` main-process handler from the live desktop shell
+- `src/ui/map/data/GameStateAdapter.ts`
+  - stopped surfacing `brigadeFrontAssignment` in `LoadedGameState`
+  - hardened sparse-state parsing with optional reads for `displacement.civilian_casualties` and `displacement.displacement_state`
+  - fixed OPSEC-sector parsing to read `state.military.opsec_sectors` first, with root fallback only for compatibility
+- `src/ui/map/data/types.ts`
+  - removed `brigadeFrontAssignment` from the player-facing loaded-state contract
+- `src/ui/map/components/OOBSidebar.tsx`
+  - reserve classification now uses explicit corps policy (`!corps_id` or sector-assignment-exempt corps) instead of the older front-assignment lane
+- `tests/engine_honesty_legacy_contracts.test.ts`
+  - added a regression proving the live desktop shell no longer advertises `assignBrigadeToFront(...)`
+- `tests/ui_map_game_state_adapter.test.ts`
+  - updated the parsed-state expectation so the player shell no longer receives `brigadeFrontAssignment`
+- `docs/40_reports/implemented/20260402_FRONT_ASSIGNMENT_PLAYER_SHELL_RETIREMENT.md`
+  - documented the shell-retirement slice and the adapter hardening it exposed
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_map_order_actions.test.ts tests\engine_honesty_legacy_contracts.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`22` tests)
+- `node_modules\.bin\tsx.cmd --test tests\ui_map_game_state_adapter.test.ts`
+  - PASS (`11` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- a legacy concept is still live if the preload bridge, main-process handler, adapter, and sidebar all keep teaching the product that it exists
+- player-facing reserve classification should follow explicit corps/sector policy, not a ghost lane inherited from earlier UI eras
+- the adapter hardening matters beyond this slice: sparse-state tolerance and correct OPSEC sourcing stop happy-path assumptions from masquerading as product truth

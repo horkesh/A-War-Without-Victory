@@ -500,17 +500,6 @@ export function parseGameState(json: unknown): LoadedGameState {
         }
     }
 
-    let brigadeFrontAssignment: LoadedGameState['brigadeFrontAssignment'] | undefined;
-    const rawFrontAssignment = state.military.brigade_front_assignment as any | undefined;
-    if (rawFrontAssignment && typeof rawFrontAssignment === 'object' && !Array.isArray(rawFrontAssignment)) {
-        const out: NonNullable<LoadedGameState['brigadeFrontAssignment']> = {};
-        for (const formationId of Object.keys(rawFrontAssignment).sort((a, b) => a.localeCompare(b))) {
-            const value = rawFrontAssignment[formationId];
-            out[formationId] = typeof value === 'string' ? value : null;
-        }
-        if (Object.keys(out).length > 0) brigadeFrontAssignment = out;
-    }
-
     let armyTheatreAssignment: LoadedGameState['armyTheatreAssignment'] | undefined;
     const rawArmyTheatreAssignment = state.military.army_theatre_assignment as any | undefined;
     if (rawArmyTheatreAssignment && typeof rawArmyTheatreAssignment === 'object' && !Array.isArray(rawArmyTheatreAssignment)) {
@@ -1121,7 +1110,7 @@ export function parseGameState(json: unknown): LoadedGameState {
     }
 
     let civilianCasualties: LoadedGameState['civilianCasualties'] | undefined;
-    const rawCivilianCasualties = state.displacement.civilian_casualties as Record<string, Record<string, unknown>> | undefined;
+    const rawCivilianCasualties = state.displacement?.civilian_casualties as Record<string, Record<string, unknown>> | undefined;
     if (rawCivilianCasualties && typeof rawCivilianCasualties === 'object' && !Array.isArray(rawCivilianCasualties)) {
         const out: NonNullable<LoadedGameState['civilianCasualties']> = {};
         for (const faction of Object.keys(rawCivilianCasualties).sort((a, b) => a.localeCompare(b))) {
@@ -1493,7 +1482,7 @@ export function parseGameState(json: unknown): LoadedGameState {
     }
 
     const displacementByMun: LoadedGameState['displacementByMun'] = {};
-    const rawDisplacement = state.displacement.displacement_state as Record<string, Record<string, unknown>> | undefined;
+    const rawDisplacement = state.displacement?.displacement_state as Record<string, Record<string, unknown>> | undefined;
     if (rawDisplacement && typeof rawDisplacement === 'object' && !Array.isArray(rawDisplacement)) {
         for (const [munId, row] of Object.entries(rawDisplacement).sort((a, b) => a[0].localeCompare(b[0]))) {
             const originalPopulation = typeof row.original_population === 'number' && Number.isFinite(row.original_population) ? row.original_population : 0;
@@ -1631,10 +1620,13 @@ export function parseGameState(json: unknown): LoadedGameState {
 
     let corpsFrontSectors: CorpsFrontSectorView[] | undefined;
     const rawSectors = state.military.corps_front_sectors as Record<string, Record<string, unknown>> | undefined;
+    const rawOpsecSectors = Array.isArray(state.military.opsec_sectors)
+        ? state.military.opsec_sectors
+        : Array.isArray((state as any).opsec_sectors)
+            ? (state as any).opsec_sectors
+            : [];
     const opsecSectorSet = new Set(
-        Array.isArray((state as any).opsec_sectors)
-            ? ((state as any).opsec_sectors as string[]).filter((value): value is string => typeof value === 'string')
-            : []
+        rawOpsecSectors.filter((value): value is string => typeof value === 'string')
     );
     if (rawSectors && typeof rawSectors === 'object' && !Array.isArray(rawSectors)) {
         const out: CorpsFrontSectorView[] = [];
@@ -1814,7 +1806,7 @@ export function parseGameState(json: unknown): LoadedGameState {
             date: metadataDate,
         },
         formations, militiaPools, controlBySettlement, statusBySettlement,
-        brigadeAorByFormationId, brigadeFrontAssignment, theatres, armyTheatreAssignment,
+        brigadeAorByFormationId, theatres, armyTheatreAssignment,
         attackOrders, aorOrders, recentControlEvents, allControlEvents: recentControlEvents, displacementEventLog: displacementEventLogRaw, recruitment,
         armyStance, casualtyLedger, civilianCasualties, internationalVisibilityPressure, ivpConsequencesActive, pendingConvoyDecisions, municipalitySupportOrders,
         sarajevoTunnelOperational: Boolean(state.military.sarajevo_tunnel_operational), warPhaseSupplyPressure, warPhaseExhaustion,
