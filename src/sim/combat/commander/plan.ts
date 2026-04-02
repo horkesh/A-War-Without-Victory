@@ -62,6 +62,7 @@ const VIABILITY_ABANDON_THRESHOLD = 0.2;
 /** Enemy tanks/artillery at or above this threshold force an extra brigade in planning. */
 const HEAVY_ENEMY_TANK_THRESHOLD = 12;
 const HEAVY_ENEMY_ARTILLERY_THRESHOLD = 12;
+const HIGH_AVG_FATIGUE_PCT_FOR_NEW_PLAN = 65;
 
 /** Max BFS hops from brigade location to objective approach OSID (matches emit.ts). */
 const MAX_REACHABILITY_HOPS = 8;
@@ -76,6 +77,13 @@ function getEnemyEquipmentBrigadeBump(briefing: CommanderBriefing): number {
         return 1;
     }
     return 0;
+}
+
+function getFatigueBlockReason(briefing: CommanderBriefing): string | null {
+    if (briefing.avg_fatigue_pct >= HIGH_AVG_FATIGUE_PCT_FOR_NEW_PLAN) {
+        return `average brigade fatigue ${briefing.avg_fatigue_pct}% too high for a fresh operation`;
+    }
+    return null;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -159,6 +167,16 @@ export function managePlan(
             plan: null,
             action: 'none',
             reason: `corps exhaustion ${briefing.corps_exhaustion} above operation threshold ${MAX_EXHAUSTION_FOR_OPERATION}`,
+            concentration_orders: [],
+        };
+    }
+
+    const fatigueBlockReason = getFatigueBlockReason(briefing);
+    if (fatigueBlockReason) {
+        return {
+            plan: null,
+            action: 'none',
+            reason: fatigueBlockReason,
             concentration_orders: [],
         };
     }

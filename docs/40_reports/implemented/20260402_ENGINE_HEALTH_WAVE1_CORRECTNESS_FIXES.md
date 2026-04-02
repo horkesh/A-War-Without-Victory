@@ -130,6 +130,25 @@ Why this is the right contract:
 - fallback paths are where player-facing integrity quietly dies
 - if a display name is missing, the right fallback is generic player language (`this sector`, `this corps`), not backend identifiers
 
+### 8. Commander briefing now carries real brigade fatigue, and planning respects it
+
+Files:
+- `src/sim/combat/commander/commander_state.ts`
+- `src/sim/combat/commander/briefing.ts`
+- `src/sim/combat/commander/plan.ts`
+
+Change:
+- `CommanderBriefing` now carries:
+  - `avg_fatigue_pct`
+  - `brigades_above_fatigue_threshold`
+- the briefing derives both values from the live `formation.ops.fatigue` field on subordinate brigades
+- fresh offensive plans are now blocked when the corps-local brigade pool is already heavily fatigued
+
+Why this is the right contract:
+- commander intelligence should not know corps exhaustion globally while remaining blind to the actual wear state of the brigades it intends to spend
+- `formation.ops.fatigue` is already the engine’s living tactical fatigue truth; this change makes the commander consume it instead of inventing a shadow field
+- this closes another split-truth gap where the engine tracked local fatigue but the planner still behaved as if all available brigades were equally fresh
+
 ## Tests added or extended
 
 - `tests/probe_preparation.test.ts`
@@ -144,6 +163,11 @@ Why this is the right contract:
   - added coverage proving recent front gains/losses are derived from nearby control events instead of a placeholder constant
 - `tests/ui_map_render_smoke.test.ts`
   - added coverage proving threat assessment uses friendly front labels and does not leak raw enemy corps ids or operation names
+- `tests/commander/briefing_campaign_intent.test.ts`
+  - added coverage proving the briefing summarizes subordinate brigade fatigue from `formation.ops.fatigue`
+  - added coverage proving heavy local fatigue blocks creation of a fresh opportunity plan
+- `tests/commander/commander.test.ts`
+  - added coverage proving high average brigade fatigue blocks fresh offensive planning in the general commander suite
 
 ## Verification
 
@@ -209,6 +233,16 @@ powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps
 
 Result:
 - `Claude governance check: OK`
+
+Additional verification:
+
+```powershell
+node_modules\.bin\vitest.cmd run tests\commander\briefing_campaign_intent.test.ts tests\commander\commander.test.ts tests\commander\reinforcement_signal_flow.test.ts tests\army_hq_gathering.test.ts
+```
+
+Result:
+- `4` commander / Army HQ files passed
+- `124` tests passed
 
 Execution note:
 - `npm run desktop:map:build` is currently blocked in the clean lane by missing `@vitejs/plugin-react` resolution from the shared `node_modules` link

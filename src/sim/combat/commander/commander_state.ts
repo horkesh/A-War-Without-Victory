@@ -297,6 +297,10 @@ export interface CommanderBriefing {
     readonly corps_stance: string;
     /** Current corps-level exhaustion (0-100). */
     readonly corps_exhaustion: number;
+    /** Average subordinate brigade fatigue as 0-100 percent of FATIGUE_MAX. */
+    readonly avg_fatigue_pct: number;
+    /** Number of subordinate brigades at or above the high-fatigue threshold. */
+    readonly brigades_above_fatigue_threshold: number;
     /** Summary of heavy equipment across enemy sectors facing this corps. */
     readonly enemy_equipment_summary: EnemyEquipmentSummary;
     readonly officer_personality: OfficerPersonality;

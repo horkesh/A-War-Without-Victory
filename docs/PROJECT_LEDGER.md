@@ -44,6 +44,35 @@ Engine-derived chokepoint detection (`engineMustHold`) disabled with `false &&`.
 
 ---
 
+### 2026-04-02 â€” Engine health Wave 1 continued: local brigade fatigue now reaches commander planning
+
+Continued the clean-lane Wave 1 execution in `F:\AWWV_exec_clean`, closing another commander blindspot that looked innocuous in the audit but dangerous in play: the corps commander could see corps-level exhaustion while staying blind to the actual fatigue state of the brigades it was about to throw into another operation.
+
+Implemented:
+- `src/sim/combat/commander/commander_state.ts`
+  - `CommanderBriefing` now carries `avg_fatigue_pct` and `brigades_above_fatigue_threshold`
+- `src/sim/combat/commander/briefing.ts`
+  - derives brigade-fatigue truth from live `formation.ops.fatigue`
+  - summarizes average local fatigue plus how many subordinate brigades are already at the high-fatigue threshold
+- `src/sim/combat/commander/plan.ts`
+  - fresh offensive plans are now blocked when the local brigade pool is already heavily fatigued
+- `tests/commander/briefing_campaign_intent.test.ts`
+  - added regression proving the briefing summarizes live subordinate fatigue
+  - added regression proving heavy local fatigue blocks opportunity-plan creation
+- `tests/commander/commander.test.ts`
+  - added regression proving high average brigade fatigue blocks fresh offensive planning in the main commander suite
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\briefing_campaign_intent.test.ts tests\commander\commander.test.ts tests\commander\reinforcement_signal_flow.test.ts tests\army_hq_gathering.test.ts`
+  - PASS (`124` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- the commander no longer sees worn-out brigades as interchangeable with fresh ones
+- the fix uses the engine’s actual fatigue truth (`formation.ops.fatigue`) instead of inventing another shadow wear model
+- this closes another split-truth gap where the engine tracked local wear but fresh plans ignored it
+
 ### 2026-04-02 â€” Engine health Wave 1 continued: enemy heavy equipment reaches commander planning
 
 Continued the clean-lane Wave 1 execution in `F:\AWWV_exec_clean`, closing another commander blindspot that looked small in types but large in behavior: the corps commander still had no way to tell whether the adjacent enemy front was infantry-thin or armored/artillery-heavy.
