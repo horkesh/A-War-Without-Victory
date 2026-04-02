@@ -3,6 +3,7 @@ import type { LoadedGameState, SummaryFocusSection } from '../data/types';
 import { FACTION_COLORS } from '../utils/theme';
 import { useIPC } from '../desktop/useIPC';
 import { DiplomacyOverview } from './DiplomacyOverview';
+import { filterPlayerFacingOperations, getPlayerFacingFaction } from '../../shared/playerVisibility';
 import {
     DRINA_BLOCKADE_THRESHOLD,
     INTERNATIONAL_SANCTIONS_THRESHOLD,
@@ -12,8 +13,6 @@ import {
     ivpComponentLabel,
     sortIvpConsequenceIds,
 } from '../../../state/patron_pressure.js';
-
-const FACTIONS = ['RS', 'RBiH', 'HRHB'] as const;
 
 interface OsidAreasFile {
   total_area_km2: number;
@@ -122,10 +121,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
   const front = computeFrontSummary(state);
   const supply = computeSupplySummary(state);
   const ivpScore = computeIvpScore(state);
-  const playerFaction =
-    state.player_faction === 'RBiH' || state.player_faction === 'RS' || state.player_faction === 'HRHB'
-      ? state.player_faction
-      : null;
+  const playerFaction = getPlayerFacingFaction(state);
   const activeMunicipalitySupport = playerFaction
     ? state.municipalitySupportOrders?.[playerFaction]
     : undefined;
@@ -133,8 +129,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
   const alliancePct = Math.max(0, Math.min(100, ((alliance + 1) / 2) * 100));
   const alerts: string[] = [];
   const [convoyMessage, setConvoyMessage] = useState<string | null>(null);
-  const playerOperations = [...(state.operations ?? [])]
-    .filter((operation) => operation.faction === playerFaction)
+  const playerOperations = [...filterPlayerFacingOperations(state)]
     .sort((a, b) => a.name.localeCompare(b.name) || a.corps_id.localeCompare(b.corps_id));
   const fragileOperations = playerOperations
     .filter((operation) => (
@@ -170,12 +165,14 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
       {!focusedMode && (
       <section data-summary-section="overview" className="rounded border border-panel-border bg-panel-card p-2 space-y-2">
         <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Territory</div>
-        {FACTIONS.map((faction) => (
-          <div key={faction} className="flex items-center justify-between">
-            <span className={FACTION_COLORS[faction]}>{faction}</span>
-            <span className="text-text-secondary tabular-nums">{territoryPct[faction].toFixed(1)}%</span>
+        {playerFaction ? (
+          <div className="flex items-center justify-between">
+            <span className={FACTION_COLORS[playerFaction]}>{playerFaction}</span>
+            <span className="text-text-secondary tabular-nums">{territoryPct[playerFaction].toFixed(1)}%</span>
           </div>
-        ))}
+        ) : (
+          <div className="text-text-secondary">Territory summary unavailable.</div>
+        )}
       </section>
       )}
 
@@ -191,16 +188,18 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
       {showSection('casualties') && (
       <section data-summary-section="casualties" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
         <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Casualties</div>
-        {FACTIONS.map((faction) => {
-          const row = state.casualtyLedger?.[faction];
+        {playerFaction ? (() => {
+          const row = state.casualtyLedger?.[playerFaction];
           const military = row ? `${row.killed} KIA / ${row.wounded} WIA / ${row.missing_captured} MIA` : 'No data';
           return (
-            <div key={faction} className="flex items-center justify-between gap-2">
-              <span className={FACTION_COLORS[faction]}>{faction}</span>
+            <div className="flex items-center justify-between gap-2">
+              <span className={FACTION_COLORS[playerFaction]}>{playerFaction}</span>
               <span className="text-text-secondary text-right">{military}</span>
             </div>
           );
-        })}
+        })() : (
+          <div className="text-text-secondary">Casualty summary unavailable.</div>
+        )}
       </section>
       )}
 

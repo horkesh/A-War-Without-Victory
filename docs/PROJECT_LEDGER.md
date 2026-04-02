@@ -18963,3 +18963,33 @@ Why this matters:
 - This is exactly the class of repo blindspot that causes Claude or humans to “fix” the wrong thing later. The worst legacy code is not always dead code; it is code that still looks like an owner while no longer producing meaningful truth.
 
 ---
+### 2026-04-02 â€” Player-visible map shell tightened: fog-backed formation visibility and non-omniscient summaries
+
+Continued the clean-lane Wave 1 player-truth sweep in `F:\AWWV_exec_clean`, focusing on the quieter surfaces that still behaved like debug dashboards even after the first round of map/Warroom cleanup.
+
+Implemented:
+- `src/ui/shared/playerVisibility.ts`
+  - added `filterPlayerVisibleMapFormations(...)` so formation rendering can distinguish between player-owned units and fog-visible enemy units
+- `src/ui/map/map/builders/buildFormationsGeoJSON.ts`
+  - now renders all player formations plus only enemy formations whose OSIDs are exposed through `fogOfWar.visibleEnemyOsids`
+- `src/ui/map/components/BottomStatusStrip.tsx`
+  - operation count now uses player-visible operations instead of omniscient global totals
+- `src/ui/map/components/SituationTab.tsx`
+  - territory and casualty blocks now report only the player faction in normal player mode rather than a three-faction omniscient summary
+- `src/ui/warroom/components/FactionOverviewPanel.ts`
+  - folded the pending assigned-command label cleanup into the same checkpoint
+- `tests/ui_player_visibility.test.ts`
+  - added regressions for fog-backed formation visibility and map GeoJSON filtering
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\ui_map_render_smoke.test.ts tests\warroom_smoke.test.ts`
+  - PASS (`18` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- fog only becomes product truth when actual formation rendering consumes it
+- summary chrome is part of the player shell; if it shows omniscient totals it leaks just as surely as a detail panel
+- once player-facing filters exist, they must be reused across tactical map and Warroom or the repo drifts back into split truth
+
+---

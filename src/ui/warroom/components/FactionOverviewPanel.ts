@@ -28,6 +28,7 @@ import {
     turnToWeekString
 } from './warroom_utils.js';
 import { getWarroomFactionIdentity } from './warroom_identity.js';
+import { getAssignedCommandLabel } from '../../shared/playerFacingLabels.js';
 
 interface Phase0Snapshot {
     factionId: FactionId;
@@ -484,7 +485,9 @@ export class FactionOverviewPanel {
             li.style.marginBottom = '4px';
 
             const info = document.createElement('span');
-            const corpsLabel = o.assigned_corps_id ? ` \u2014 ${o.assigned_corps_id}` : ' \u2014 \u2014';
+            const corpsLabel = o.assigned_corps_id
+                ? ` \u2014 ${getAssignedCommandLabel(o.assigned_corps_id, snap.ownForces.formationDetails)}`
+                : ' \u2014 \u2014';
             const actingLabel = o.acting_commander ? ' (Acting)' : '';
             info.textContent = `${o.name} [${o.rank}] ${statusLabel(o.status)}${actingLabel}${corpsLabel}`;
             li.appendChild(info);
@@ -540,7 +543,7 @@ export class FactionOverviewPanel {
         dialog.innerHTML = `
             <h2 class="text-accent-gold">ASSIGN COMMANDER</h2>
             <div class="wr-dialog-body">
-                <div style="margin-bottom: 10px; font-size: 12px; color: #ccc;">Select a new commander for <strong>${corpsId}</strong></div>
+                <div style="margin-bottom: 10px; font-size: 12px; color: #ccc;">Select a new commander for <strong>${getAssignedCommandLabel(corpsId, snap.ownForces.formationDetails)}</strong></div>
                 ${reservesHtml}
             </div>
             <div class="wr-dialog-actions" style="margin-top: 15px;">

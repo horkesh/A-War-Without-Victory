@@ -30,3 +30,15 @@ export function filterPlayerFacingOperations(state: LoadedGameState | null | und
   if (!state?.operations) return [];
   return getPlayerVisibleOperations(state.operations, resolvePlayerFacingFaction(state));
 }
+
+export function filterPlayerVisibleMapFormations(state: LoadedGameState | null | undefined): FormationView[] {
+  if (!state?.formations) return [];
+  const playerFaction = resolvePlayerFacingFaction(state);
+  if (!playerFaction) return [...state.formations];
+
+  const visibleEnemyOsids = new Set(state.fogOfWar?.visibleEnemyOsids ?? []);
+  return state.formations.filter((formation) => (
+    formation.faction === playerFaction
+    || (typeof formation.location_osid === 'string' && visibleEnemyOsids.has(formation.location_osid))
+  ));
+}

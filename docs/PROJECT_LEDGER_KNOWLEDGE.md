@@ -1302,3 +1302,8 @@ If launch screening runs before enclave filters, reserve trimming, or other part
 
 ### Objective-specific prep logic must stay objective-specific all the way down
 It is not enough for intel confidence to be objective-aware if force-ratio estimation still sums defenders from every facing sector on the front. Preparation math should use one shared notion of “which enemy sectors this operation is actually targeting.”
+### Player-facing fog only matters if formation rendering consumes it
+If the tactical map builder ignores `fogOfWar.visibleEnemyOsids` and renders every formation in `LoadedGameState`, then fog is just decorative paint over an omniscient renderer. Player-owned formations can render unconditionally; enemy formations should render only when the player-visible state boundary explicitly exposes them.
+
+### Summary chrome leaks just as badly as detail panels
+Bottom strips, overview cards, and situation tabs often get treated like harmless dashboard furniture, but they are where omniscient territory percentages, casualty ledgers, and operation totals quietly leak back into player mode. Product-truth sweeps must include those summary surfaces, not just the obvious tooltip/detail panels.

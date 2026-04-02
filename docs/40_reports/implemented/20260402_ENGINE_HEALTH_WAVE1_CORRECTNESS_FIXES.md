@@ -387,3 +387,33 @@ Why this matters:
 - objective-specific preparation only becomes honest when confidence and force-ratio math are talking about the same enemy
 - launch screening is still lying if it approves an operation based on brigades that will be filtered out before execution
 - brittle monolithic legacy suites are not enough here; focused regression harnesses are how we keep these subtle optimism leaks dead
+
+## Additional Wave 1 slice: player-visible map/state shell tightened again
+
+This checkpoint pushed the player-truth sweep one layer deeper by fixing omniscient tactical-map summaries and making formation rendering obey the existing fog-derived visibility contract instead of treating every formation as globally renderable.
+
+Implemented:
+- `src/ui/shared/playerVisibility.ts`
+  - added `filterPlayerVisibleMapFormations(...)` so map rendering can distinguish between player-owned formations and fog-visible enemy formations
+- `src/ui/map/map/builders/buildFormationsGeoJSON.ts`
+  - now renders all player formations plus only those enemy formations whose OSIDs are in `fogOfWar.visibleEnemyOsids`
+  - stops the tactical map from quietly using full omniscient formation truth as its default render contract
+- `src/ui/map/components/BottomStatusStrip.tsx`
+  - active operation count is now player-facing instead of reading `loadedGameState.operations.length`
+- `src/ui/map/components/SituationTab.tsx`
+  - territory and casualty overview blocks now report only the player faction in normal player mode instead of a three-faction omniscient scoreboard
+- `src/ui/warroom/components/FactionOverviewPanel.ts`
+  - folded the pending player-facing command-label cleanup into the same checkpoint so Warroom keeps pace with the tactical-map truth model
+- `tests/ui_player_visibility.test.ts`
+  - added regressions proving map visibility keeps own formations plus only fog-visible enemy formations
+
+Verification:
+- `node_modules\\.bin\\vitest.cmd run tests\\ui_player_visibility.test.ts tests\\ui_map_render_smoke.test.ts tests\\warroom_smoke.test.ts`
+  - PASS (`18` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- fog only becomes a meaningful product rule when renderer visibility actually consults it
+- a player shell that still advertises omniscient ops, territory, or casualty totals is a debug shell in nicer clothes
+- once player-facing filters exist, they need to be applied consistently across map, tactical HUD, and Warroom or the product will keep re-leaking the same truth through secondary surfaces

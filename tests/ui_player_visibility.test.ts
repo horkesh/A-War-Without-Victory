@@ -5,8 +5,10 @@ import {
   filterPlayerFacingOperations,
   filterPlayerFacingSectors,
   getPlayerFacingFaction,
+  filterPlayerVisibleMapFormations,
 } from '../src/ui/shared/playerVisibility.js';
 import { buildOperationArrowsGeoJSON } from '../src/ui/map/map/builders/buildOperationArrowsGeoJSON.js';
+import { buildFormationsGeoJSON } from '../src/ui/map/map/builders/buildFormationsGeoJSON.js';
 
 describe('player visibility helpers', () => {
   it('normalizes player faction and rejects unknown values', () => {
@@ -60,5 +62,54 @@ describe('player visibility helpers', () => {
 
     expect(names.some((name) => name.includes('Op Tuzla'))).toBe(true);
     expect(names.some((name) => name.includes('Op Doboj'))).toBe(false);
+  });
+
+  it('keeps all own formations plus only fog-visible enemy formations on the map', () => {
+    const state = {
+      player_faction: 'RBiH',
+      fogOfWar: {
+        visibleEnemyOsids: ['osid_enemy_visible'],
+        visibleEnemySectorIds: [],
+      },
+      formations: [
+        { id: 'own_1', faction: 'RBiH', name: 'Own Brigade', kind: 'brigade', readiness: 'active', cohesion: 80, fatigue: 0, status: 'active', createdTurn: 1, tags: [], location_osid: 'osid_own' },
+        { id: 'enemy_seen', faction: 'RS', name: 'Seen Enemy', kind: 'brigade', readiness: 'active', cohesion: 80, fatigue: 0, status: 'active', createdTurn: 1, tags: [], location_osid: 'osid_enemy_visible' },
+        { id: 'enemy_hidden', faction: 'RS', name: 'Hidden Enemy', kind: 'brigade', readiness: 'active', cohesion: 80, fatigue: 0, status: 'active', createdTurn: 1, tags: [], location_osid: 'osid_enemy_hidden' },
+      ],
+    } as unknown as LoadedGameState;
+
+    expect(filterPlayerVisibleMapFormations(state).map((f) => f.id)).toEqual(['own_1', 'enemy_seen']);
+  });
+
+  it('formation geojson excludes enemy formations outside fog visibility', () => {
+    const state = {
+      player_faction: 'RBiH',
+      fogOfWar: {
+        visibleEnemyOsids: ['op:enemy_seen'],
+        visibleEnemySectorIds: [],
+      },
+      controlBySettlement: {
+        'op:own': 'RBiH',
+        'op:enemy_seen': 'RS',
+        'op:enemy_hidden': 'RS',
+      },
+      formations: [
+        { id: 'own_1', faction: 'RBiH', name: 'Own Brigade', kind: 'brigade', readiness: 'active', cohesion: 80, fatigue: 0, status: 'active', createdTurn: 1, tags: [], location_osid: 'op:own', personnel: 1200 },
+        { id: 'enemy_seen', faction: 'RS', name: 'Seen Enemy', kind: 'brigade', readiness: 'active', cohesion: 80, fatigue: 0, status: 'active', createdTurn: 1, tags: [], location_osid: 'op:enemy_seen', personnel: 1100 },
+        { id: 'enemy_hidden', faction: 'RS', name: 'Hidden Enemy', kind: 'brigade', readiness: 'active', cohesion: 80, fatigue: 0, status: 'active', createdTurn: 1, tags: [], location_osid: 'op:enemy_hidden', personnel: 1000 },
+      ],
+    } as unknown as LoadedGameState;
+
+    const baseGeo = {
+      type: 'FeatureCollection',
+      features: [
+        { type: 'Feature', geometry: { type: 'Polygon', coordinates: [[[18, 44], [18.4, 44], [18.4, 44.4], [18, 44.4], [18, 44]]] }, properties: { osid: 'op:own' } },
+        { type: 'Feature', geometry: { type: 'Polygon', coordinates: [[[19, 44], [19.4, 44], [19.4, 44.4], [19, 44.4], [19, 44]]] }, properties: { osid: 'op:enemy_seen' } },
+        { type: 'Feature', geometry: { type: 'Polygon', coordinates: [[[20, 44], [20.4, 44], [20.4, 44.4], [20, 44.4], [20, 44]]] }, properties: { osid: 'op:enemy_hidden' } },
+      ],
+    } as const;
+
+    const geo = buildFormationsGeoJSON(state, baseGeo as any);
+    expect(geo.features.map((feature) => feature.properties.id)).toEqual(['enemy_seen', 'own_1']);
   });
 });

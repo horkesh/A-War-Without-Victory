@@ -4,6 +4,7 @@ import { FACTION_COLORS_SUBTLE, FACTION_HEX_COLORS } from '../utils/theme';
 import { MAP_MODES, DEV_LAYER_TOGGLES, LIVE_LAYER_TOGGLES } from '../utils/mapModes';
 import { Icon } from './icons/Icon';
 import osidAreasData from '../../../../data/derived/operational/osid_areas.json';
+import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
 
 const osidAreas = osidAreasData as { total_area_km2: number; areas: Record<string, number> };
 
@@ -19,6 +20,10 @@ const secondaryModes = MAP_MODES.filter(m => !PRIMARY_MODES.includes(m.id));
 export function BottomStatusStrip() {
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const playerFaction = loadedGameState?.player_faction ?? 'RS';
+  const playerOperations = useMemo(
+    () => filterPlayerFacingOperations(loadedGameState),
+    [loadedGameState],
+  );
 
   // Territory control — area-weighted
   const controlBySettlement = loadedGameState?.controlBySettlement;
@@ -243,12 +248,12 @@ export function BottomStatusStrip() {
         })()}
 
         {/* Active operations count */}
-        {loadedGameState?.operations && loadedGameState.operations.length > 0 && (
+        {playerOperations.length > 0 && (
           <>
             <span className="text-white/10">|</span>
             <span className="flex items-center gap-1 text-accent-gold">
               <Icon name="operation" size={10} color="#c4a35a" />
-              <span className="text-[9px]">{loadedGameState.operations.length} ops</span>
+              <span className="text-[9px]">{playerOperations.length} ops</span>
             </span>
           </>
         )}

@@ -208,3 +208,11 @@ If `LoadedGameState` still carries omniscient operation or sector truth, any pla
 ### 12. Global command rails are not debug consoles
 
 OOB sidebars, operation lists, mobilization summaries, sector accordions, and map overlay builders must default to the player faction only. If a global rail groups content by all factions, it is acting like a debug shell even when the styling looks player-facing.
+
+### 13. Formation visibility must obey player truth, not raw formation presence
+
+`buildFormationsGeoJSON.ts` must not treat every formation in `LoadedGameState.formations` as renderable by default. In player mode, the tactical map should render all player-owned formations plus only those enemy formations that the fog contract explicitly exposes (currently `fogOfWar.visibleEnemyOsids`). Otherwise the renderer becomes omniscient even when the rest of the shell speaks in player-safe language.
+
+### 14. Situation summaries and status strips are part of the player shell
+
+Bottom status strips, overview tabs, and quick casualty/territory summaries are not harmless chrome. If they show global operation counts, all-faction territory shares, or all-faction casualty totals in normal player mode, they are leaking omniscient truth just as surely as a tooltip would. Treat these summary surfaces as player-facing by default and require explicit debug-only opt-in for global scoreboards.
