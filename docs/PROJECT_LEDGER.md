@@ -20834,3 +20834,19 @@ Why this matters:
   - `docs/40_reports/implemented/20260402_SHELL_OWNERSHIP_AND_HQ_RECORDS_CANONICALIZATION.md`
   - `docs/40_reports/GUI_MASTER.md`
   - `docs/20_engineering/UI_OWNERSHIP_MATRIX.md`
+
+## 2026-04-02 - Warroom faction shell handoff
+
+- Worktree/branch: `F:\AWWV_exec_clean` on `codex/engine-health-wave1`
+- Tightened Warroom/Army HQ shell ownership by removing detailed command review from the war-phase `FactionOverviewPanel`.
+- Warroom no longer renders own-formations detail, officer rosters, or commander reassignment from the faction-overview shell.
+- Added a compact `COMMAND SHELL` summary with corps in field, active brigades, officers on duty, and units in transit.
+- Added player-facing handoff copy that explicitly pushes detailed formation review, reserve handling, operations review, and commander changes back to Army HQ via the desk map.
+- Added regression coverage in `tests/warroom_player_visibility.test.ts`.
+- Verification:
+  - `node_modules\.bin\vitest.cmd run tests\warroom_player_visibility.test.ts tests\warroom_smoke.test.ts tests\ui_opord_player_safe_labels.test.ts tests\ui_army_hq_war_summary_visibility.test.ts tests\ui_shell_navigation.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_WARROOM_FACTION_SHELL_HANDOFF.md`
+  - `docs/40_reports/WARROOM_MASTER.md`
+  - `docs/40_reports/GUI_MASTER.md`

@@ -75,3 +75,9 @@
 - Army HQ ORBAT recent-engagement hover titles now use formatted settlement names.
 - Fixed a lingering Army HQ war-summary fallback bug in the wounded table.
 - Report: `docs/40_reports/implemented/20260402_PLAYER_SAFE_OPS_LABELS_AND_HQ_ROSTER_POLISH.md`
+
+# 2026-04-02 - Warroom faction shell handoff
+
+- Warroom `FactionOverviewPanel` no longer renders detailed formations, officer rosters, or commander reassignment.
+- Warroom now summarizes command-shell posture and explicitly hands detailed command review back to Army HQ via the desk map.
+- Report: `docs/40_reports/implemented/20260402_WARROOM_FACTION_SHELL_HANDOFF.md`

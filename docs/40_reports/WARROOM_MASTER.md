@@ -154,6 +154,7 @@ Documented so future work can prioritise. See also [GUI_MASTER.md](GUI_MASTER.md
 
 | Date | Change | Report / reference |
 |------|--------|--------------------|
+| 2026-04-02 | **Warroom faction shell handoff:** the war-phase Faction Overview no longer acts like a second Army HQ. Detailed formations, officer rosters, and commander reassignment were removed from Warroom and replaced with a compact `COMMAND SHELL` summary that points detailed review back to Army HQ via the desk map. | [implemented/20260402_WARROOM_FACTION_SHELL_HANDOFF.md](implemented/20260402_WARROOM_FACTION_SHELL_HANDOFF.md) |
 | 2026-04-02 | **Warroom command shell truth + density pass:** Reports now use generic player-safe headquarters authorship instead of fake-specific section names; Command Briefing now derives warnings from the extracted command snapshot instead of hardcoded enclave/convoy certainty; Operational Situation and help copy were clarified; shared modal spacing tightened. | [implemented/20260402_WARROOM_COMMAND_SHELL_TRUTH_AND_DENSITY_PASS.md](implemented/20260402_WARROOM_COMMAND_SHELL_TRUTH_AND_DENSITY_PASS.md) |
 | 2026-04-02 | **Army HQ summary player-truth alignment:** the tactical-map/Army-HQ summary surface no longer behaves like an all-faction debug scoreboard. Own-side exact values remain; enemy-wide totals are pushed back into staff abstractions and reports. | [implemented/20260402_ARMY_HQ_WAR_SUMMARY_PLAYER_TRUTH.md](implemented/20260402_ARMY_HQ_WAR_SUMMARY_PLAYER_TRUTH.md) |
 | 2026-03-12 | **Operation Preparation System UI wired:** CommanderSelectionModal (officer roster with competence/aggressiveness, regional fit, prep-time estimates) + OperationBriefingModal (readiness gauges, commander assessment, Launch/Probe/Postpone/Abort actions) now connected via IPC to operation state machine. Triggered from OpsPlanningModal submission and CorpsFrontPanel assessment-ready button. | This file § Modals |
@@ -200,6 +201,7 @@ Overlays (e.g. calendar) and click/hover hotspots use **region geometry** from a
 - **Symbolism:** In-scene documents, binders, stamps must use **RBiH-era (1992–1998)** only; no post-1998 BiH crest. See same handover.
 - **Peace vs war:** Modal logic remains split between **prewar** and **war**, but current art direction expands war visuals into yearly states: `prewar` + `year1/year2/year3/year4` per faction. War modals stay the same from April 1992 onward; only the room art ages by year.
 - **Hotspot contract:** Use physical anchor ids for new behavior; legacy action strings are compatibility only.
+- **Command review ownership:** Warroom summarizes command-shell posture only. Detailed formations, personnel rosters, reserve handling, and commander reassignment belong to Army HQ via the desk map.
 - **Commander assignment:** Stays in Warroom Faction Overview → COMMAND; do not duplicate assignment UI in map without design decision.
 - **New warroom modals:** Align with proposed list above and nano banana §7 when adding; update this table when a proposed modal is implemented. Add to the correct set (peace and/or war).
 

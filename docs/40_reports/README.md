@@ -101,3 +101,7 @@ The main docs index is [docs/00_start_here/docs_index.md](../00_start_here/docs_
 ---
 
 *This README is the structural entrypoint for 40_reports. For thematic knowledge (decisions, patterns), see docs/PROJECT_LEDGER_KNOWLEDGE.md and `.claude/napkin.md`.*
+
+Latest shell-ownership work:
+
+- [implemented/20260402_WARROOM_FACTION_SHELL_HANDOFF.md](implemented/20260402_WARROOM_FACTION_SHELL_HANDOFF.md) - Warroom faction overview now stays strategic and hands detailed command review back to Army HQ.

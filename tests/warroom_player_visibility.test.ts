@@ -3,6 +3,7 @@ import { extractWarData } from '../src/ui/warroom/data/war_data_extractor.js';
 import { ReportsModal } from '../src/ui/warroom/components/ReportsModal.js';
 import { MagazineModal } from '../src/ui/warroom/components/MagazineModal.js';
 import { CommandBriefingModal } from '../src/ui/warroom/components/CommandBriefingModal.js';
+import { FactionOverviewPanel } from '../src/ui/warroom/components/FactionOverviewPanel.js';
 import type { GameState } from '../src/state/game_state.js';
 
 describe('warroom player visibility', () => {
@@ -267,5 +268,60 @@ describe('warroom player visibility', () => {
     expect(text).toContain('Field Intelligence Summary Desk');
     expect(text).toContain('Duty Intelligence Officer');
     expect(text).not.toContain('2nd Corps Intelligence Section');
+  });
+
+  it('warroom faction overview hands detailed command review off to Army HQ', () => {
+    const state = {
+      meta: { turn: 10, phase: 'war' },
+      factions: [
+        { id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
+        { id: 'RS', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
+      ],
+      military: {
+        formations: {
+          arbih_3rd_corps: { faction: 'RBiH', kind: 'corps', status: 'active', name: 'arbih_3rd_corps' },
+          arbih_b1: { faction: 'RBiH', kind: 'brigade', status: 'active', personnel: 1200, corps_id: 'arbih_3rd_corps' },
+        },
+        casualty_ledger: {},
+        front_edges: [],
+        front_pressure: {},
+        front_segments: {},
+        militia_garrison: {},
+        brigade_movement_state: {
+          arbih_b1: { status: 'deployed', destination_osid: null, source_osid: null, progress: 0, turns_remaining: 0 },
+        },
+        brigade_encircled: {},
+        corps_command: {
+          arbih_3rd_corps: { stance: 'balanced', active_operations: [] },
+        },
+      },
+      political: {
+        political_controllers: {},
+        war_exhaustion: { RBiH: 0.2 },
+        loss_of_control_trends: { by_faction: { RBiH: { exhaustion_trend: 'flat' } } },
+      },
+      displacement: {
+        displacement_state: {},
+        displacement_camp_state: {},
+        hostile_takeover_timers: {},
+        civilian_casualties: {},
+        sustainability_state: {},
+      },
+      officers: {
+        officer_pool: {
+          officer_1: { id: 'officer_1', name: 'Nihad', faction: 'RBiH', rank: 'Colonel', status: 'active', assigned_corps_id: 'arbih_3rd_corps' },
+        },
+      },
+    } as unknown as GameState;
+
+    const modalManager = { showModal() {}, hideModal() {} };
+    const panel = new FactionOverviewPanel(state, modalManager).render();
+    const text = panel.textContent ?? '';
+
+    expect(text).toContain('COMMAND SHELL');
+    expect(text).toContain('Detailed formation dispositions');
+    expect(text).toContain('Army HQ');
+    expect(text).not.toContain('FORMATIONS (');
+    expect(text).not.toContain('ASSIGN COMMANDER');
   });
 });
