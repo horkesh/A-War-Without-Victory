@@ -1499,3 +1499,6 @@ In AWWV, once a data adapter or loader chooses to fall back to a raw id, every d
 ### Prose builders and narrative outputs need the same player-safe naming contract as UI panels
 
 In AWWV, NewspaperModal, Chronicle builders, and Warroom data extractors are not “secondary output”; they are part of the product shell. If they fall back to officer ids, event ids, or formation ids, the repo still speaks like tooling even after the visible panels are cleaned up. Route prose generation through the same player-safe helpers as the UI.
+### Shared frontline helpers must not union old and new authority paths once the new path exists
+
+In AWWV, `buildFrontlineAssignedFormationSet(...)` feeds battle eligibility, posture, fatigue, and reporting. If that helper unions corps sectors with legacy `brigade_front_assignment`, stale legacy data can keep extra brigades frontline forever. Once sectors exist, they should be authoritative; legacy front assignment should become fallback-only rather than “safety net truth.”

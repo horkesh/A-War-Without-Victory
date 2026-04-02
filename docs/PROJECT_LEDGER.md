@@ -20426,3 +20426,26 @@ Why this matters:
 - prose generators are still player-facing authority surfaces
 - older Warroom/Chronicle text is exactly where raw ids tend to survive after the main UI is cleaned up
 - this keeps the repo’s player-facing voice consistent across shell, reports, and narrative output
+### 2026-04-02 - Sector frontline authority hardening
+
+Returned to the core engine and tightened frontline precedence so sectors now truly outrank stale legacy front assignments when both are present.
+
+Implemented:
+- `src/sim/combat/front_assignment.ts`
+  - `buildFrontlineAssignedFormationSet(...)` now returns sector-driven frontline truth when sectors exist
+  - legacy `brigade_front_assignment` is fallback-only when sectors are absent
+- `tests/front_assignment.test.ts`
+  - added regression coverage proving stale legacy assignments no longer keep extra brigades frontline once sectors exist
+- `docs/40_reports/implemented/20260402_SECTOR_FRONTLINE_AUTHORITY_HARDENING.md`
+  - documented the slice
+
+Verification:
+- `node_modules\.bin\tsx.cmd --test tests\front_assignment.test.ts tests\local_front_density_modifier_precedence.test.ts tests\formation_fatigue_frontline_assignment.test.ts`
+  - PASS (`7` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- battle eligibility, posture gating, fatigue, and reporting all inherit frontline truth from this helper
+- unioning sectors with stale legacy front assignments was keeping the migration “half done”
+- this slice makes sector authority more real at the engine seam that other systems actually consume

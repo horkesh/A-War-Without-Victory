@@ -26,8 +26,10 @@ export function buildFrontlineAssignedFormationSet(state: GameState): Set<Format
 
     const sectors = state.military.corps_front_sectors;
     if (sectors && typeof sectors === 'object') {
+        let sawSector = false;
         for (const sector of Object.values(sectors)) {
             if (!sector) continue;
+            sawSector = true;
             for (const brigadeId of sector.assigned_brigade_ids ?? []) {
                 assigned.add(brigadeId as FormationId);
             }
@@ -35,6 +37,7 @@ export function buildFrontlineAssignedFormationSet(state: GameState): Set<Format
                 assigned.add(brigadeId as FormationId);
             }
         }
+        if (sawSector) return assigned;
     }
 
     const assignmentMap = state.military.brigade_front_assignment;
