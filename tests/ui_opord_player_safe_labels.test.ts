@@ -45,4 +45,20 @@ describe('buildOpordDisplayModel', () => {
         expect(source).toContain('Staging Area');
         expect(source).not.toContain('Staging OSID');
     });
+
+    it('keeps tactical shell faction labels player-safe in OOB and operation briefing surfaces', () => {
+        const oobSource = readFileSync(
+            new URL('../src/ui/map/components/OOBSidebar.tsx', import.meta.url),
+            'utf8',
+        );
+        const briefingSource = readFileSync(
+            new URL('../src/ui/map/components/OperationBriefingModal.tsx', import.meta.url),
+            'utf8',
+        );
+
+        expect(oobSource).toContain('getPlayerSafeMilitaryFactionName(faction)');
+        expect(oobSource).toContain('getPlayerSafeMilitaryFactionName(op.faction)');
+        expect(oobSource).not.toContain('View ${faction} army summary');
+        expect(briefingSource).toContain('getPlayerSafeMilitaryFactionName(operation.faction)');
+    });
 });

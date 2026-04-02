@@ -1557,3 +1557,7 @@ If Army HQ, Chronicle, OPORD, or Warroom panels still say OSID, raw faction ids,
 ### Tactical operations panel must stay map-facing
 
 If `OperationsPanel.tsx` says Army HQ owns command review, it must not still expose launch, halt, or other command staging buttons. Tactical operations UI may summarize field state and hand off to Army HQ or corps orders, but command authority must stay singular.
+
+### Player-facing faction rails should never fall back to raw faction ids
+
+OOB headings, operation subtitles, and briefing headers are core shell surfaces. They must use player-safe military or political faction names rather than raw ids like `RBiH` when a clearer human-facing label is available.

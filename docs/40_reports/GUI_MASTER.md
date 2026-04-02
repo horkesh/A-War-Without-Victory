@@ -260,3 +260,10 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - Army HQ remains the canonical command review and control owner.
 - Operation header now uses player-safe military faction names instead of raw faction ids.
 - See `docs/40_reports/implemented/20260402_TACTICAL_OPERATIONS_PANEL_SHELL_OWNERSHIP.md`.
+
+## 2026-04-02 - Player-safe faction shell labels
+
+- OOBSidebar army summary affordances now use player-safe military faction names.
+- OOB mobilization/operations headings and operation subtitles no longer fall back to raw faction ids.
+- Operation Briefing modal now shows corps plus player-safe military faction naming in the header.
+- See `docs/40_reports/implemented/20260402_PLAYER_SAFE_FACTION_SHELL_LABELS.md`.

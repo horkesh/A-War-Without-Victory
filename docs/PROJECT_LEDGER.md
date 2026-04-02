@@ -20897,3 +20897,18 @@ Why this matters:
 - Docs:
   - `docs/40_reports/implemented/20260402_TACTICAL_OPERATIONS_PANEL_SHELL_OWNERSHIP.md`
   - `docs/40_reports/GUI_MASTER.md`
+
+## 2026-04-02 - Player-safe faction shell labels
+
+- Worktree/branch: `F:\AWWV_exec_clean` on `codex/engine-health-wave1`
+- Removed another cluster of raw faction-id leaks from live map-shell UI.
+- `OOBSidebar.tsx` now uses player-safe military faction names in army summary affordances, mobilization/operations headings, and operation card subtitles.
+- `OperationBriefingModal.tsx` now renders the selected operation header with player-safe military faction naming.
+- HQ reserve rail now uses `Reserve HQ / <name>` instead of stale symbol residue.
+- Added regression coverage in `tests/ui_opord_player_safe_labels.test.ts`.
+- Verification:
+  - `node_modules\.bin\vitest.cmd run tests\ui_opord_player_safe_labels.test.ts tests\warroom_player_visibility.test.ts tests\ui_shell_navigation.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_PLAYER_SAFE_FACTION_SHELL_LABELS.md`
+  - `docs/40_reports/GUI_MASTER.md`

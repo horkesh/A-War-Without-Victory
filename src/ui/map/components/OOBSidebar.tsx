@@ -7,7 +7,7 @@ import { SituationTab } from './SituationTab';
 import { buildCorpsColorMap } from '../map/builders/buildCorpsFrontLinesGeoJSON';
 import { AccordionHeader } from './AccordionHeader';
 import { toTitleCase } from '../utils/formatters';
-import { getPlayerSafeCorpsName, getPlayerSafeMunicipalityName } from '../utils/playerSafeText';
+import { getPlayerSafeCorpsName, getPlayerSafeMilitaryFactionName, getPlayerSafeMunicipalityName } from '../utils/playerSafeText';
 import { getArmyCrest, getArmyName } from '../utils/factionAssets';
 import { getFactionArmyCommander } from '../utils/officerUtils';
 import { formatRank } from '../utils/officerCharacter';
@@ -335,9 +335,9 @@ export function OOBSidebar() {
                               type="button"
                               onClick={(e) => { e.stopPropagation(); setSelectedArmyId(faction); }}
                               className={`${FACTION_COLORS[faction] ?? 'text-text-primary'} hover:underline truncate`}
-                              title={`View ${faction} army summary`}
+                              title={`View ${getPlayerSafeMilitaryFactionName(faction)} army summary`}
                             >
-                              {getArmyName(faction) ? `${getArmyName(faction)} · ${faction}` : faction}
+                              {getArmyName(faction) ? `${getArmyName(faction)} / ${getPlayerSafeMilitaryFactionName(faction)}` : getPlayerSafeMilitaryFactionName(faction)}
                             </button>
                           </div>
                           {(() => {
@@ -379,7 +379,7 @@ export function OOBSidebar() {
                               >
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-2 min-w-0">
-                                    <span className="text-[9px] text-accent-gold font-bold uppercase tracking-wider">★ {hqName}</span>
+                                    <span className="text-[9px] text-accent-gold font-bold uppercase tracking-wider">Reserve HQ / {hqName}</span>
                                   </div>
                                   <span className="text-[10px] text-text-secondary tabular-nums shrink-0">{hqBrigades.length} units</span>
                                 </div>
@@ -466,7 +466,7 @@ export function OOBSidebar() {
                   return (
                     <div key={faction} className="rounded border border-panel-border bg-panel-card p-1.5 space-y-1">
                       <div className={`font-mono text-[10px] font-medium ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>
-                        {faction}
+                        {getPlayerSafeMilitaryFactionName(faction)}
                       </div>
                       <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
                         <span className="text-text-secondary">Available</span>
@@ -516,7 +516,7 @@ export function OOBSidebar() {
                   return (
                     <div key={faction} className="space-y-1">
                       <div className={`font-mono text-[10px] font-medium px-1 ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>
-                        {faction}
+                        {getPlayerSafeMilitaryFactionName(faction)}
                       </div>
                       {ops.map((op) => {
                         const phaseBg = op.phase === 'execution' ? 'bg-red-800/60' : op.phase === 'planning' ? 'bg-yellow-700/60' : 'bg-neutral-600/60';
@@ -535,7 +535,7 @@ export function OOBSidebar() {
                               {op.name}
                             </div>
                             <div className="text-text-secondary text-[10px]">
-                              {op.corps_name} &middot; {op.faction}
+                              {op.corps_name} / {getPlayerSafeMilitaryFactionName(op.faction)}
                             </div>
                             <div className="flex items-center gap-2 text-[10px]">
                               <span className={`px-1.5 py-0.5 rounded text-white uppercase font-semibold ${phaseBg}`}>
