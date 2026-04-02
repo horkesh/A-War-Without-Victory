@@ -149,7 +149,7 @@ export function managePlan(
     }
 
     // Priority 1: pre-planned operations
-    const prePlannedDecision = tryCreateFromPrePlanned(briefing, zones, surplusPool, turn);
+    const prePlannedDecision = tryCreateFromPrePlanned(briefing, zones, surplusPool, forces.tier_counts.main_effort, turn);
     if (prePlannedDecision) return prePlannedDecision;
 
     // Priority 2: opportunity (weak/undefended enemy zone adjacent to surplus)
@@ -309,6 +309,7 @@ function tryCreateFromPrePlanned(
     briefing: CommanderBriefing,
     zones: ZoneAssessment[],
     surplusPool: BrigadeEvaluation[],
+    mainEffortCap: number,
     turn: number,
 ): PlanDecision | null {
     if (!briefing.pre_planned_ops || briefing.pre_planned_ops.length === 0) return null;
@@ -323,8 +324,11 @@ function tryCreateFromPrePlanned(
     const stagingZone = findBestStagingZone(zones, surplusPool);
     if (!stagingZone) return null;
 
-    // Determine required brigades: scale to estimated task, minimum 3
-    const requiredBrigades = Math.max(MIN_BRIGADES_FOR_PLAN, surplusPool.length);
+    // Determine required brigades: scale to main_effort capacity (n1298).
+    // mainEffortCap = tier_counts.main_effort: only brigades capable of offensive ops.
+    // A corps with 2 main_effort brigades out of 10 total deploys 3 (floor), not all 10.
+    const mainEffortLimit = mainEffortCap > 0 ? mainEffortCap : surplusPool.length;
+    const requiredBrigades = Math.max(MIN_BRIGADES_FOR_PLAN, Math.min(mainEffortLimit, surplusPool.length));
 
     // Estimate concentration time: 1 turn per 2 brigades that need to move
     const brigadesAlreadyAtStaging = countBrigadesInZone(
@@ -411,23 +415,28 @@ function tryCreateFromOpportunity(
         // Besieged corps can only do local ops
         // Still allow opportunity within hop limit
         const bestZone = eligibleZones[0]!;
-        return createOpportunityPlan(briefing, bestZone, surplusPool, turn, true);
+        return createOpportunityPlan(briefing, bestZone, surplusPool, forces.tier_counts.main_effort, turn, true);
     }
 
     const bestZone = eligibleZones[0]!;
-    return createOpportunityPlan(briefing, bestZone, surplusPool, turn, false);
+    return createOpportunityPlan(briefing, bestZone, surplusPool, forces.tier_counts.main_effort, turn, false);
 }
 
 function createOpportunityPlan(
     briefing: CommanderBriefing,
     stagingZone: ZoneAssessment,
     surplusPool: BrigadeEvaluation[],
+    mainEffortCap: number,
     turn: number,
     isLocal: boolean,
 ): PlanDecision | null {
+    // Cap by main_effort tier count (n1298) — corps deploys at most as many brigades as
+    // it has main_effort-capable brigades. Garrison-tier brigades don't belong in assaults.
+    const naturalRequired = Math.min(surplusPool.length, stagingZone.surplus_brigades.length);
+    const mainEffortLimit = mainEffortCap > 0 ? mainEffortCap : naturalRequired;
     const requiredBrigades = Math.max(
         MIN_BRIGADES_FOR_PLAN,
-        Math.min(surplusPool.length, stagingZone.surplus_brigades.length),
+        Math.min(mainEffortLimit, naturalRequired),
     );
 
     const assignedBrigades = selectBrigadesForPlan(surplusPool, requiredBrigades);
