@@ -1529,3 +1529,6 @@ In AWWV, Army HQ, Codex, and similar full-size overlays cannot be allowed to dri
 ### Architecture docs need explicit authority, not just timestamps
 
 In AWWV, the dangerous architecture docs are not necessarily the oldest ones. They are the ones that still look polished and plausible enough to be mistaken for current truth. A strong repo should name which architecture documents are live authority and which are historical archaeology, otherwise implementers will keep mixing eras and calling it context.
+### Repo root is a product surface too
+
+In AWWV, the repository root teaches every new human and agent how seriously the project is curated. A placeholder README and stray trace dumps signal accidental ownership. A strong root should point cleanly at the live authorities and archive session residue instead of letting it masquerade as current truth.

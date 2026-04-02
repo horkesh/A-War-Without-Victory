@@ -20679,3 +20679,27 @@ Verification:
 Why this matters:
 - stale architecture prose was becoming a bug source
 - strong studios make current architecture authority explicit instead of trusting everyone to remember which polished old document is still real
+### 2026-04-02 - Root entrypoint and artifact hygiene
+
+Cleaned up the repository root so it stops acting like a mixed pile of live authorities and stale session residue.
+
+Implemented:
+- `README.md`
+  - replaced the placeholder with a real root guide pointing to the roadmap, architecture authority map, repo map, code canon, ledger, and GUI master
+- `commander_trace.txt`
+  - archived to `docs/70_archive/root_session_artifacts/commander_trace.txt`
+- `remaining_errors.txt`
+  - archived to `docs/70_archive/root_session_artifacts/remaining_errors.txt`
+- `docs/70_archive/root_session_artifacts/README.md`
+  - created archive guidance for future root-level residue
+- `docs/40_reports/implemented/20260402_ROOT_ENTRYPOINT_AND_ARTIFACT_HYGIENE.md`
+  - documented the slice
+
+Verification:
+- `git grep` showed no live references to the archived root trace/error artifacts
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- a weak root teaches weak repo habits
+- archiving stale trace dumps and replacing a placeholder README with a real entry guide makes the repository feel owned instead of accidental
