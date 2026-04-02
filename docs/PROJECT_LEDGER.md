@@ -20759,3 +20759,20 @@ Verification:
 Why this matters:
 - Warroom is a player-facing headquarters shell, not a debug-flavored narrative wrapper
 - it should summarize and interpret command truth, but it must not invent specificity or certainty the player-facing snapshot does not support
+## 2026-04-02 - Shell ownership + HQ records canonicalization
+
+- Worktree/branch: `F:\AWWV_exec_clean` on `codex/engine-health-wave1`
+- Tightened live product-shell ownership so records/history no longer behave like orphan top-level modals.
+- Added shared `shellNavigation` helpers for routing the tactical shell into Army HQ summary/records/briefing.
+- Added `armyHQRecordsSubTab` to the map store and made `RecordsContent` consume shared state so top-level shell code can open AAR vs operation history intentionally.
+- `PresidentialToolbar` is now treated as the live tactical-map shell and gained explicit `SUMMARY`, `RECORDS`, `OPS`, `EVENTS`, and `CODEX` buttons.
+- Tactical `OperationsPanel` is now labeled as a field snapshot and gains an `HQ Review` handoff so it no longer reads like a second headquarters.
+- Removed app-level primary ownership of standalone AAR / operation-history modals from `App.tsx`; Army HQ records is now the canonical path.
+- Added `tests/ui_shell_navigation.test.ts` and whitelisted it in `vitest.config.ts`.
+- Verification:
+  - `node_modules\.bin\vitest.cmd run tests\ui_shell_navigation.test.ts tests\warroom_player_visibility.test.ts tests\warroom_smoke.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_SHELL_OWNERSHIP_AND_HQ_RECORDS_CANONICALIZATION.md`
+  - `docs/40_reports/GUI_MASTER.md`
+  - `docs/20_engineering/UI_OWNERSHIP_MATRIX.md`

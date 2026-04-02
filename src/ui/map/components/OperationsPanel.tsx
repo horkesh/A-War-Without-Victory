@@ -16,6 +16,7 @@ import { getFormationCommander } from '../utils/officerUtils';
 import { OfficerProfile } from './OfficerProfile';
 import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
 import { getPlayerSafeBrigadeName } from '../utils/playerSafeText';
+import { openArmyHQBriefingForCorps } from '../utils/shellNavigation';
 
 function compareOperations(a: OperationView, b: OperationView): number {
   return (
@@ -48,6 +49,11 @@ export function OperationsPanel() {
   const panToOsid = useGameStore((s) => s.panToOsid);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
+  const setSelectedArmyId = useGameStore((s) => s.setSelectedArmyId);
+  const setArmyHQOpen = useGameStore((s) => s.setArmyHQOpen);
+  const setArmyHQTab = useGameStore((s) => s.setArmyHQTab);
+  const setArmyHQRecordsSubTab = useGameStore((s) => s.setArmyHQRecordsSubTab);
+  const setArmyHQExpandedCorpsId = useGameStore((s) => s.setArmyHQExpandedCorpsId);
   const lastAutoFocusOperationKeyRef = useRef<string | null>(null);
   const operationCardRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const objectiveButtonRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -213,6 +219,17 @@ export function OperationsPanel() {
     setOperationTargetOsids([]);
   };
 
+  const openHQReview = () => {
+    openArmyHQBriefingForCorps({
+      loadedGameState,
+      setSelectedArmyId,
+      setArmyHQOpen,
+      setArmyHQTab,
+      setArmyHQRecordsSubTab,
+      setArmyHQExpandedCorpsId,
+    }, selectedOperation?.corps_id ?? null);
+  };
+
   const haltOperation = async (digInOnHalt: boolean) => {
     if (!selectedOperation) return;
     const result = await ipc.stageOperationHalt({
@@ -240,14 +257,28 @@ export function OperationsPanel() {
       <div className="absolute top-0 left-0 w-full h-full crt-overlay pointer-events-none z-50 opacity-40"></div>
 
       <div className="flex items-center justify-between px-3 py-2 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0 relative z-10 glow-text text-accent-gold uppercase text-xs font-semibold">
-        Operations Center
-        <button
+        <div className="flex flex-col">
+          <span>Field Ops Snapshot</span>
+          <span className="text-[9px] font-mono text-text-secondary normal-case tracking-[0.12em]">
+            Army HQ owns command review. This panel stays map-facing.
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={openHQReview}
+            disabled={!selectedOperation}
+            className="kbd-focus rounded border border-accent-gold/30 px-2 py-1 text-[9px] font-mono uppercase tracking-[0.16em] text-accent-gold hover:bg-accent-gold/10 disabled:opacity-30"
+          >
+            HQ Review
+          </button>
+          <button
           onClick={close}
           aria-label="Close operations panel"
           className="kbd-focus text-text-secondary hover:text-interactive text-sm leading-none rounded"
         >
           ✕
-        </button>
+          </button>
+        </div>
       </div>
 
       {operations.length === 0 ? (

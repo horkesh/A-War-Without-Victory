@@ -87,6 +87,7 @@
 - **Command-shell truth (2026-04-02):** Reports now use generic player-safe headquarters authorship instead of fake-specific section names, and Command Briefing derives its warnings from the extracted Warroom snapshot instead of hardcoded enclave/convoy claims.
 - **Density direction (2026-04-02):** Warroom modal chrome has been tightened to better match the tactical shell. The intended direction is command-console density, not roomy dashboard spacing.
 - **Commander assignment:** **Warroom only** — Faction Overview (wall flag) → COMMAND section → CHANGE → ASSIGN COMMANDER modal. Map UI displays only; no assignment there. IPC: `assign-commander`.
+- **Shell relationship:** Tactical-map top-shell history access now routes through Army HQ / Codex instead of orphan top-level history modals; Warroom remains the strategic shell and return destination, not a second owner of Army HQ records.
 
 ---
 

@@ -23,9 +23,23 @@ interface PresidentialToolbarProps {
     pressureWarning: boolean;
     /** Pending officer events. */
     pendingOfficerEvents: boolean;
+    onOpenSummary?: () => void;
+    onOpenRecords?: () => void;
+    onOpenOpsHistory?: () => void;
+    onOpenCodex?: () => void;
+    onOpenEventLog?: () => void;
 }
 
-export function PresidentialToolbar({ pendingDecisions, pressureWarning, pendingOfficerEvents }: PresidentialToolbarProps) {
+export function PresidentialToolbar({
+    pendingDecisions,
+    pressureWarning,
+    pendingOfficerEvents,
+    onOpenSummary,
+    onOpenRecords,
+    onOpenOpsHistory,
+    onOpenCodex,
+    onOpenEventLog,
+}: PresidentialToolbarProps) {
     const ipc = useIPC();
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const loadSave = useGameStore((s) => s.loadSave);
@@ -122,6 +136,43 @@ export function PresidentialToolbar({ pendingDecisions, pressureWarning, pending
                             DEV
                         </span>
                     )}
+                    <div className="flex items-center gap-1 border-l border-white/10 pl-3">
+                        <button
+                            onClick={onOpenSummary}
+                            disabled={!loadedGameState}
+                            className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                        >
+                            SUMMARY
+                        </button>
+                        <button
+                            onClick={onOpenRecords}
+                            disabled={!loadedGameState}
+                            className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                        >
+                            RECORDS
+                        </button>
+                        <button
+                            onClick={onOpenOpsHistory}
+                            disabled={!loadedGameState}
+                            className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                        >
+                            OPS
+                        </button>
+                        <button
+                            onClick={onOpenEventLog}
+                            disabled={!loadedGameState}
+                            className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                        >
+                            EVENTS
+                        </button>
+                        <button
+                            onClick={onOpenCodex}
+                            disabled={!loadedGameState}
+                            className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                        >
+                            CODEX
+                        </button>
+                    </div>
                 </div>
 
                 {/* CENTER: Alert badges (crest is separate floating element below) */}

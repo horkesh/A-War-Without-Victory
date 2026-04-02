@@ -396,6 +396,8 @@ After EVERY scenario run, the orchestrator:
 ## GUI / HoI Map
 1. **[2026-04-01] Fog is not enough - player-facing state must be filtered before render**
    Do instead: Treat desktop / tactical-map player knowledge as a data-boundary contract. Do not ship near-full GameState to the renderer and trust fog or panel discipline to hide it later. Raw ids like `arbih_3rd_corps`, raw sector ids, and enemy/internal ops belong only in explicit debug surfaces.
+2. **[2026-04-02] PresidentialToolbar is the live shell; Army HQ RECORDS owns history**
+   Do instead: Start shell/navigation work from `PresidentialToolbar.tsx`, not the older `TopToolbar.tsx`. Route AAR and operation history through Army HQ `RECORDS`; tactical-map ops UI should stay a field snapshot and hand command review off to HQ.
 1. **[2026-03-15] Unified bottom strip: map modes + territory + toggles**
    Do instead: `BottomStatusStrip.tsx` is the single bottom bar: `[Map Mode Pills] | [Territory % area-weighted] | [Layer Toggles]`. z-20 (above map, below panels z-50-100). `MapModeToolbar` exists but is NOT rendered. Territory % uses km² from `osid_areas.json`. 7 modes (keys 1-7): Political, Ethnic, Supply, Casualties, Morale, Operations, Defense. Pressure/density modes removed (broken/redundant). Casualties + morale use continuous `interpolate` gradients. 7 layer toggles: Front, Units, Labels, Minimap, Fog, Battles, Points.
 2. **[2026-03-11] GameStateAdapter is the single chokepoint — check paths FIRST**
