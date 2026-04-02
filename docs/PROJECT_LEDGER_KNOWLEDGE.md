@@ -1,3 +1,9 @@
+**Sector assignment truth must distinguish field corps from army-HQ reserves (2026-04-02):** The repo should never again speak as if `every active brigade must have a sector_id` without qualification. The true rule is narrower: every active non-exempt field brigade is sector-mandatory; idle Main Staff / General Staff reserve brigades are intentionally sectorless until loaned or attached. Canonical helper: `isSectorAssignmentExemptCorpsId(...)` in `corps_front_sectors_constants.ts`.
+
+**Diagnostic assertion files are not the same thing as enforcement (2026-04-02):** A file named `sector_assertions.ts` can easily mislead agents into believing the invariant is hard-enforced even when the functions only log. In AWWV, be explicit: if a rail logs but does not throw or rewrite state, document it as a diagnostic sink, not an enforcement point.
+
+**Dormant compatibility layers must say they are dormant (2026-04-02):** `brigade_pressure.ts` and `apply_brigade_reposition.ts` are dangerous not because they exist, but because they still look alive. When a legacy path is intentionally inert, comments should say so plainly or future work will route authority back into it by mistake.
+
 # AWWV Project Ledger — Thematic Knowledge Base
 
 **Last Updated:** 2026-03-27

@@ -22,7 +22,7 @@ import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { assignOperationCommander } from './officer_system.js';
 import { isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
-import { EXEMPT_CORPS_IDS } from './corps_front_sectors_constants.js';
+import { isSectorAssignmentExemptCorpsId } from './corps_front_sectors_constants.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 import { deployEliteLoan } from './army_reserve_system.js';
 import { validateOpAtInjection, collectOpInjectionWarnings } from './operation_validation.js';
@@ -694,7 +694,7 @@ function buildAxesFromDef(
             // if explicitly named in a pre-planned op — they get an elite loan
             // to the operation's corps at injection time.
             const corpsId = getFormationCorpsId(formation);
-            if (corpsId && EXEMPT_CORPS_IDS.has(corpsId)) {
+            if (isSectorAssignmentExemptCorpsId(corpsId)) {
                 if (!formation.elite_loan_state) return false; // non-elite exempt = skip
                 // Only schedule a new loan if not already loaned to this corps
                 // (e.g. a probe may have already loaned the brigade at the same turn).

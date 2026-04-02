@@ -1,8 +1,10 @@
 /**
- * Stage 3: Brigade-derived pressure computation.
+ * Legacy brigade-derived pressure computation.
  *
- * Brigades are the primary source of front pressure in War phase.
- * Pressure = f(density, posture, composition, cohesion, supply, resilience, corps bonus).
+ * This module is still wired into the war pipeline, but it is currently a
+ * dormant compatibility layer: front-edge deltas resolve to zero while the
+ * real front-pressure truth lives elsewhere. Keep that fact explicit so future
+ * work does not mistake this file for the active pressure owner.
  *
  * Deterministic: no randomness.
  */
@@ -116,7 +118,9 @@ export function computeBrigadeDefense(
 
 /**
  * Compute brigade-derived pressure for all front edges.
- * Used in War phase to replace the edge-posture-based system.
+ *
+ * Current contract: returns a structurally valid zero-delta report so older
+ * pipeline steps can execute without mutating live front-pressure truth.
  */
 export function computeBrigadePressureByEdge(
     state: GameState,

@@ -33,7 +33,7 @@ import {
     type ReserveRequestPurpose,
     type EliteRecallReason,
 } from '../../state/elite_loan_types.js';
-import { EXEMPT_CORPS_IDS } from './corps_front_sectors_constants.js';
+import { isSectorAssignmentExemptCorpsId } from './corps_front_sectors_constants.js';
 import { computeOsidGraphDistance } from './home_distance.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getPrimaryOperation } from './corps_operation_helpers.js';
@@ -177,7 +177,7 @@ export function generateArmyReserveRequests(
 
     for (const corpsId of allCorpsIds) {
         // Only eligible (non-exempt) corps
-        if (EXEMPT_CORPS_IDS.has(corpsId)) continue;
+        if (isSectorAssignmentExemptCorpsId(corpsId)) continue;
 
         // Determine faction from any active brigade in this corps
         let corpsFaction: string | null = null;

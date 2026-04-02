@@ -18963,6 +18963,43 @@ Why this matters:
 - This is exactly the class of repo blindspot that causes Claude or humans to “fix” the wrong thing later. The worst legacy code is not always dead code; it is code that still looks like an owner while no longer producing meaningful truth.
 
 ---
+### 2026-04-02 — Engine honesty slice: sector exemptions and legacy authority comments made explicit
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, focusing on one of the repo's highest-risk blindspots: files whose runtime behavior and comments were teaching different truths.
+
+Implemented:
+- `src/sim/combat/corps_front_sectors_constants.ts`
+  - added canonical `isSectorAssignmentExemptCorpsId(...)` helper for army-HQ / main-staff reserve exceptions
+- `src/sim/combat/corps_front_sectors.ts`
+  - sector header now states the true rule: active non-exempt field brigades are sector-mandatory; army-HQ reserve brigades are the standing exception until loaned
+- `src/sim/combat/brigade_assignment.ts`
+  - comments and classification gates now use the same exemption contract
+- `src/sim/combat/army_reserve_system.ts`
+  - now reads the canonical exemption helper instead of open-coding the set lookup
+- `src/sim/combat/pre_planned_operations.ts`
+  - same helper adoption for consistency
+- `src/sim/combat/sector_assertions.ts`
+  - rewritten as an honest diagnostic-rail file instead of claiming stronger hard enforcement than it actually provides
+- `src/sim/combat/brigade_pressure.ts`
+  - comments now explicitly classify the file as a dormant compatibility layer with zero-delta live behavior
+- `src/sim/combat/apply_brigade_reposition.ts`
+  - comments now explicitly classify the file as a legacy compatibility sink that clears old orders without mutating live sector truth
+- `tests/engine_honesty_legacy_contracts.test.ts`
+  - added regression coverage for the sector-exemption helper and the reposition compatibility-sink contract
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\engine_honesty_legacy_contracts.test.ts tests\army_reserve_system.test.ts`
+  - PASS (`14` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- this is exactly the kind of repo drift that causes future AI agents to “fix” the wrong layer
+- in a strategy/sim repo, stale comments and half-alive compatibility layers can be more dangerous than obvious dead code
+- the foundation gets stronger when helper contracts, comments, and runtime behavior all teach the same truth
+
+---
+
 ### 2026-04-02 â€” Player-visible map shell tightened: fog-backed formation visibility and non-omniscient summaries
 
 Continued the clean-lane Wave 1 player-truth sweep in `F:\AWWV_exec_clean`, focusing on the quieter surfaces that still behaved like debug dashboards even after the first round of map/Warroom cleanup.

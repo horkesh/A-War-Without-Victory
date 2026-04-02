@@ -15,8 +15,8 @@ import { getFormationCorpsId } from './corps_sector_partition.js';
 import { munFromOsid, type Osid } from './osid_adjacency.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import {
-    EXEMPT_CORPS_IDS,
     GARRISON_BUDGET_EDGES_PER_BRIGADE,
+    isSectorAssignmentExemptCorpsId,
     PHASE_2C_MAX_HOPS,
 } from './corps_front_sectors_constants.js';
 import { getSectorComponent, getSectorFrontOsids, bfsToNearestSector } from './sector_utils.js';
@@ -120,10 +120,10 @@ function dissolvePocketDestroyableBrigade(
  * - Brigade at an OSID in a sector's territory_osids → assigned to that sector.
  * - Brigade in friendly territory but not in any sector's territory → assigned
  *   to the nearest sector (BFS through friendly territory).
- * - General staff units are exempt.
+ * - Idle army-HQ / main-staff reserve brigades are exempt until loaned.
  *
- * GOLDEN RULE: Every active brigade MUST end up in a sector. If a brigade
- * falls through all classification priorities, that's a bug — investigate.
+ * GOLDEN RULE: Every active non-exempt field brigade MUST end up in a sector.
+ * If one falls through all classification priorities, that's a bug — investigate.
  *
  * Clears existing assigned/reserve lists and rebuilds from scratch.
  * Deterministic: sorted iteration via strictCompare.
@@ -229,7 +229,7 @@ export function classifyBrigadesByTerritory(
         }
 
         const fCorpsId = getFormationCorpsId(f);
-        if (fCorpsId && EXEMPT_CORPS_IDS.has(fCorpsId) && !loanedCorpsMap.has(fid)) continue;
+        if (isSectorAssignmentExemptCorpsId(fCorpsId) && !loanedCorpsMap.has(fid)) continue;
 
         // ── Drift note: brigades far from home are still assigned where they ARE ──
         // Previously, drifted brigades (>6 hops from home) were silently excluded
@@ -770,7 +770,7 @@ export function classifyBrigadesByTerritory(
             if (!f || f.faction !== faction || f.status !== 'active') continue;
             if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
             const fCorpsId = getFormationCorpsId(f);
-            if (fCorpsId && EXEMPT_CORPS_IDS.has(fCorpsId) && !loanedCorpsMap.has(fid)) continue;
+            if (isSectorAssignmentExemptCorpsId(fCorpsId) && !loanedCorpsMap.has(fid)) continue;
             // Brigade fell through the entire pipeline — force-assign to neediest sector
             let bestSector: CorpsFrontSector | null = null;
             let bestNeed = -Infinity;
@@ -845,7 +845,7 @@ export function assignCrossCorpsEnclaveDefenders(
         if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
         if (!f.location_osid) continue;
         const fCorpsId = getFormationCorpsId(f);
-        if (fCorpsId && EXEMPT_CORPS_IDS.has(fCorpsId)) continue;
+        if (isSectorAssignmentExemptCorpsId(fCorpsId)) continue;
 
         const loc = f.location_osid;
         const ownCorpsHasSectors = sectors.some(s => s.corps_id === fCorpsId);

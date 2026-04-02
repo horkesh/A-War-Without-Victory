@@ -148,3 +148,31 @@ Done means:
 - each of the three files is explicitly classified in docs/comments
 - no live comment overclaims a truth the engine no longer enforces
 - future cleanup work can remove or preserve them intentionally instead of guessing
+
+## Follow-on execution note (2026-04-02)
+
+This audit is no longer only descriptive.
+
+The clean-lane Wave 1 execution now codifies several of the truth-classification decisions directly in code:
+
+- `corps_front_sectors_constants.ts`
+  - adds a canonical `isSectorAssignmentExemptCorpsId(...)` helper
+- `corps_front_sectors.ts` / `brigade_assignment.ts`
+  - sector comments now state the true rule:
+    - active non-exempt field brigades are sector-mandatory
+    - idle army-HQ / main-staff reserve brigades are exempt until loaned
+- `sector_assertions.ts`
+  - comments now describe the file honestly as a diagnostic assertion sink, not a throw-on-violation enforcement layer
+- `brigade_pressure.ts`
+  - comments now state plainly that the file is a dormant compatibility layer whose live edge deltas currently resolve to zero
+- `apply_brigade_reposition.ts`
+  - comments now state plainly that the file is a compatibility sink clearing a legacy queue rather than mutating live sector/OSID truth
+
+Verification:
+- `node_modules\\.bin\\vitest.cmd run tests\\engine_honesty_legacy_contracts.test.ts tests\\army_reserve_system.test.ts`
+  - PASS (`14` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+  - PASS
+
+This matters because the first line of defense against future Claude regressions is not only code behavior.
+It is making sure the code, the comments, and the helper contracts all teach the same truth.
