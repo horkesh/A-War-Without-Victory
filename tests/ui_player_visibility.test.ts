@@ -391,4 +391,18 @@ describe('player visibility helpers', () => {
     expect(formationDetailSource).not.toContain('title={formation.location_osid}');
     expect(formationDetailSource).not.toContain("title={formation.municipalityId ?? '—'}");
   });
+
+  it('keeps peace-plan faction labels player-safe instead of using raw faction ids', () => {
+    const source = readFileSync(
+      new URL('../src/ui/map/components/PeacePlanModal.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(source).toContain("getPlayerSafePoliticalFactionName('RBiH')");
+    expect(source).toContain("getPlayerSafePoliticalFactionName('RS')");
+    expect(source).toContain("getPlayerSafePoliticalFactionName('HRHB')");
+    expect(source).not.toContain('title={`RBiH: ${plan.proposedSplit.RBiH}%`}');
+    expect(source).not.toContain('title={`RS: ${plan.proposedSplit.RS}%`}');
+    expect(source).not.toContain('title={`HRHB: ${plan.proposedSplit.HRHB}%`}');
+  });
 });

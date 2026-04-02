@@ -21191,3 +21191,22 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - Docs:
   - `docs/40_reports/implemented/20260402_COMMAND_SHELL_DENSITY_PASS.md`
 
+
+## 2026-04-02 - Player language shell sweep
+
+- Worktree/branch: F:\AWWV_merge_wave2 on codex/main-merge-wave1
+- Removed the last obvious live-shell raw faction shorthand from:
+  - `src/ui/map/components/PeacePlanModal.tsx`
+  - `src/ui/warroom/components/SettlementInfoPanel.ts`
+- Peace-plan territorial split labels now route through `getPlayerSafePoliticalFactionName(...)` instead of showing `RBiH`, `RS`, and `HRHB`.
+- Warroom settlement control labels now use player-facing political names instead of `RBiH (Green)`, `RS (Crimson)`, and `HRHB (Blue)`.
+- Added regressions in:
+  - `tests/ui_player_visibility.test.ts`
+  - `tests/warroom_player_visibility.test.ts`
+- Verification:
+  - `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_shell_navigation.test.ts tests\ui_map_render_smoke.test.ts`
+  - `npm.cmd run warroom:build`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_PLAYER_LANGUAGE_SHELL_SWEEP.md`
+

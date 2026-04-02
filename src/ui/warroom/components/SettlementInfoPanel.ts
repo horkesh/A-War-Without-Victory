@@ -5,7 +5,11 @@
  */
 
 import type { GameState } from '../../../state/game_state.js';
-import { getPlayerSafeMunicipalityName, getPlayerSafeSettlementName } from '../../map/utils/playerSafeText.js';
+import {
+    getPlayerSafeMunicipalityName,
+    getPlayerSafePoliticalFactionName,
+    getPlayerSafeSettlementName,
+} from '../../map/utils/playerSafeText.js';
 
 type GeoFeature = {
     properties?: {
@@ -58,9 +62,9 @@ const SIDE_COLORS: Record<string, string> = {
 };
 
 const SIDE_LABELS: Record<string, string> = {
-    RBiH: 'RBiH (Green)',
-    RS: 'RS (Crimson)',
-    HRHB: 'HRHB (Blue)',
+    RBiH: getPlayerSafePoliticalFactionName('RBiH'),
+    RS: getPlayerSafePoliticalFactionName('RS'),
+    HRHB: getPlayerSafePoliticalFactionName('HRHB'),
     null: 'Neutral'
 };
 

@@ -334,3 +334,8 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - Attack confirmation, formation detail, and the Warroom settlement panel no longer expose raw OSIDs or municipality ids to the player shell.
 - See `docs/40_reports/implemented/20260402_PLAYER_SAFE_ID_LEAK_MOPUP.md`.
 
+## 2026-04-02 - Player language shell sweep
+
+- PeacePlanModal.tsx and Warroom SettlementInfoPanel now use player-facing political faction names instead of raw faction shorthand in diplomatic and settlement shells.
+- See `docs/40_reports/implemented/20260402_PLAYER_LANGUAGE_SHELL_SWEEP.md`.
+

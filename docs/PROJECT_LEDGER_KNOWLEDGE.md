@@ -1645,3 +1645,7 @@ If `GameState` comments say “HoI-style theatre model” without also saying �
 
 In AWWV, the worst UI airiness usually does not come from one bad card. It comes from a few reused shells like Army HQ, summary modals, and Codex carrying oversized padding and gutters. Tightening the shared command shells first changes the whole product tone faster than polishing isolated leaf components.
 
+### Diplomatic and civic shells should use political names, not faction shorthand
+
+In AWWV, `RBiH`, `RS`, and `HRHB` can be acceptable in some military-facing summaries, but they feel like backend shorthand in peace-plan and settlement-control shells. Diplomatic and civic surfaces should default to player-safe political names through `getPlayerSafePoliticalFactionName(...)`.
+

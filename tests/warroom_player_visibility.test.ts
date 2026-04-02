@@ -371,4 +371,18 @@ describe('warroom player visibility', () => {
     expect(source).not.toContain('Municipality ID');
     expect(source).toContain('Administrative Region');
   });
+
+  it('settlement info panel uses human-readable faction labels instead of raw faction shorthand', () => {
+    const source = readFileSync(
+      resolve('src/ui/warroom/components/SettlementInfoPanel.ts'),
+      'utf8',
+    );
+
+    expect(source).toContain("getPlayerSafePoliticalFactionName('RBiH')");
+    expect(source).toContain("getPlayerSafePoliticalFactionName('RS')");
+    expect(source).toContain("getPlayerSafePoliticalFactionName('HRHB')");
+    expect(source).not.toContain('RBiH (Green)');
+    expect(source).not.toContain('RS (Crimson)');
+    expect(source).not.toContain('HRHB (Blue)');
+  });
 });
