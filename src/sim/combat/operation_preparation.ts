@@ -309,7 +309,7 @@ export const ASSEMBLY_THRESHOLD = 0.6;
  * for 1-hop adjacency (all OSIDs in the operational zone near staging).
  * Used during force_staging to ensure brigades have assembled before execution.
  */
-function countAssembledBrigades(state: GameState, op: CorpsOperation, corpsId?: string): number {
+function countAssembledBrigades(state: GameState, op: CorpsOperation): number {
     const formations = state.military.formations ?? {};
     const staging = op.staging_osid;
     if (!staging) return op.participating_brigades.length; // no staging = all assembled
@@ -325,28 +325,16 @@ function countAssembledBrigades(state: GameState, op: CorpsOperation, corpsId?: 
     // Sector territory_osids are all friendly OSIDs in the sector zone;
     // sub_segment friendly_osids are the front-line OSIDs adjacent to objectives.
     // A brigade at any of these is "assembled" for this operation.
-    if (state.military.corps_front_sectors) {
-        if (op.sector_id) {
-            // Named sector: use it directly (commander-generated ops)
-            const sector = state.military.corps_front_sectors[op.sector_id];
-            if (sector) {
-                for (const osid of sector.territory_osids ?? []) assemblyOsids.add(osid);
-                for (const sub of sector.sub_segments ?? []) {
-                    for (const osid of sub.friendly_osids) assemblyOsids.add(osid);
-                }
-            }
-        } else if (corpsId) {
-            // Pre-planned ops (no sector_id): expand to all sectors owned by this corps.
-            // Brigades at any front OSID in their assigned corps sector count as assembled —
-            // they are at attack position even if not at the staging OSID specifically.
-            for (const sector of Object.values(state.military.corps_front_sectors).sort(
-                (a, b) => strictCompare(a.sector_id, b.sector_id)
-            )) {
-                if (sector.corps_id !== corpsId) continue;
-                for (const osid of sector.territory_osids ?? []) assemblyOsids.add(osid);
-                for (const sub of sector.sub_segments ?? []) {
-                    for (const osid of sub.friendly_osids) assemblyOsids.add(osid);
-                }
+    // NOTE: Pre-planned ops (no sector_id) do NOT expand to all corps sectors —
+    // that would cause premature force_staging advancement. Only staging + objective
+    // OSIDs count; ASSEMBLY_TIMEOUT_TURNS (5) is the safety valve for late arrivals.
+    if (state.military.corps_front_sectors && op.sector_id) {
+        // Named sector: use it directly (commander-generated ops)
+        const sector = state.military.corps_front_sectors[op.sector_id];
+        if (sector) {
+            for (const osid of sector.territory_osids ?? []) assemblyOsids.add(osid);
+            for (const sub of sector.sub_segments ?? []) {
+                for (const osid of sub.friendly_osids) assemblyOsids.add(osid);
             }
         }
     }
@@ -404,7 +392,12 @@ export function tickPreparation(
     if (!op.preparation_sub_phase) {
         op.preparation_sub_phase = 'intel_gathering';
         op.preparation_turns_elapsed = 0;
-        op.preparation_max_turns = getPreparationMaxTurns(aggressiveness);
+        // If the op definition specifies planning_duration, honour it as a minimum —
+        // an aggressive commander cannot auto-launch before the planned window.
+        const aggressivenessMaxTurns = getPreparationMaxTurns(aggressiveness);
+        op.preparation_max_turns = op.planning_duration != null
+            ? Math.max(aggressivenessMaxTurns, op.planning_duration)
+            : aggressivenessMaxTurns;
         op.postponement_count = 0;
     }
 
@@ -503,7 +496,7 @@ export function tickPreparation(
                 // or any sector territory/friendly OSID)?
                 // Don't advance to supply_check until ASSEMBLY_THRESHOLD assembled
                 // or ASSEMBLY_TIMEOUT_TURNS elapsed since preparation started.
-                const assembled = countAssembledBrigades(state, op, corpsId);
+                const assembled = countAssembledBrigades(state, op);
                 const assemblyFraction = op.participating_brigades.length > 0
                     ? assembled / op.participating_brigades.length
                     : 1.0;

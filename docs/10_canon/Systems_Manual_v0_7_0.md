@@ -323,6 +323,8 @@ When War phase runs, attack orders are resolved as **discrete attacks** per targ
 
 **Anti-paralysis safety valve:** If `preparation_turns_elapsed ≥ preparation_max_turns` and the commander hasn't issued `launch`, the system forces a launch to prevent indefinite preparation stalls.
 
+**`planning_duration` floor on `preparation_max_turns` (n1293):** `preparation_max_turns` is initialised as `max(getPreparationMaxTurns(aggressiveness), op.planning_duration ?? 0)`. A pre-planned op's declared `planning_duration` acts as a *minimum* floor — an aggressive commander (aggressiveness 5 → 3 turns from anti-paralysis) cannot auto-launch before the declared window expires. Without this floor, any `planning_duration > aggressivenessMaxTurns` was silently discarded and the op launched prematurely. Pre-planned ops (`op.planning_duration` set) always wait at least that many turns before forced launch.
+
 **Postponement:** Commander may postpone (up to `MAX_POSTPONEMENTS=2`), resetting the assessment sub-phase while preserving accumulated intel and readiness.
 
 **State fields on CorpsOperation:** `preparation_sub_phase`, `preparation_turns_elapsed`, `preparation_max_turns`, `intel_confidence_at_assessment`, `supply_readiness_at_assessment`, `force_ratio_estimate`, `commander_assessment`, `postponement_count`, `active_probe: OperationActiveProbe`.
