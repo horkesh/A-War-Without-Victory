@@ -643,4 +643,66 @@ describe('commander planning campaign intent', () => {
         expect(result.reason).toContain('fatigue');
         expect(result.plan).toBeNull();
     });
+
+    it('does not create a fresh offensive plan on an economy front', () => {
+        const zoneId = 'zone:test_corps:0' as ZoneId;
+        const brigIds = ['b1', 'b2', 'b3'].map(id => id as FormationId);
+        const zones = [makeZone({
+            zone_id: zoneId,
+            posture: 'projecting',
+            front_edge_count: 10,
+            enemy_adjacent_osids: ['op:enemy:e1'],
+            surplus_brigades: brigIds,
+            assigned_brigades: brigIds,
+        })];
+        const evals = brigIds.map(id => makeEval({
+            brigade_id: id,
+            current_zone: zoneId,
+            tier: 'main_effort',
+            is_combat_effective: true,
+            is_disrupted: false,
+        }));
+        const forces = makeForces(evals, zones);
+
+        const briefing = makeMinimalBriefing({
+            campaign_role: 'economy',
+        });
+
+        const result = managePlan(briefing, zones, forces, evals, null, 10);
+
+        expect(result.action).toBe('none');
+        expect(result.reason).toContain('economy');
+        expect(result.plan).toBeNull();
+    });
+
+    it('does not create a fresh offensive plan on a contain front', () => {
+        const zoneId = 'zone:test_corps:0' as ZoneId;
+        const brigIds = ['b1', 'b2', 'b3'].map(id => id as FormationId);
+        const zones = [makeZone({
+            zone_id: zoneId,
+            posture: 'projecting',
+            front_edge_count: 10,
+            enemy_adjacent_osids: ['op:enemy:e1'],
+            surplus_brigades: brigIds,
+            assigned_brigades: brigIds,
+        })];
+        const evals = brigIds.map(id => makeEval({
+            brigade_id: id,
+            current_zone: zoneId,
+            tier: 'main_effort',
+            is_combat_effective: true,
+            is_disrupted: false,
+        }));
+        const forces = makeForces(evals, zones);
+
+        const briefing = makeMinimalBriefing({
+            campaign_role: 'contain',
+        });
+
+        const result = managePlan(briefing, zones, forces, evals, null, 10);
+
+        expect(result.action).toBe('none');
+        expect(result.reason).toContain('contain');
+        expect(result.plan).toBeNull();
+    });
 });

@@ -629,3 +629,25 @@ Why this matters:
 - briefing awareness alone was not enough; the commander could still block one plan for fatigue while rating the same tired brigades as pristine assault assets in allocation logic
 - this keeps force scoring, planning, and combat power pointed at the same wear model instead of reintroducing fatigue blindness one layer lower
 - in this repo, a signal only becomes honest once every downstream scorer that claims to care about combat fitness actually consumes it
+
+## Additional Wave 1 slice: Army HQ economy/contain roles now constrain corps planning
+
+This checkpoint closes another strategy-honesty gap: `CampaignPlan` front roles were already reaching `CommanderBriefing`, but local corps planning still treated `economy` and `contain` mostly as flavor unless local opportunity scoring happened to fail on its own.
+
+Implemented:
+- `src/sim/combat/commander/plan.ts`
+  - fresh offensive plan creation is now explicitly blocked when Army HQ has marked the corps front as `economy` or `contain`
+  - the planner now returns a truthful reason instead of falling through to a generic `no viable plan available`
+- `tests/commander/briefing_campaign_intent.test.ts`
+  - added regressions proving fresh offensive plans are not created on `economy` or `contain` fronts
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\briefing_campaign_intent.test.ts tests\commander\commander.test.ts tests\commander\reinforcement_signal_flow.test.ts tests\army_hq_gathering.test.ts`
+  - PASS (`128` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- a theater role that only works because local opportunity scoring happens to fail is decorative strategy, not command authority
+- `economy` and `contain` now mean something mechanically at the exact place where fresh offensives are invented
+- this makes Army HQ and corps planning tell the same story about which fronts are supposed to push and which fronts are supposed to hold

@@ -19218,3 +19218,29 @@ Why this matters:
 - this keeps planning, scoring, and combat math pointed at the same wear model instead of letting commander sophistication drift back into theater
 
 ---
+### 2026-04-02 â€” Engine health Wave 1 continued: Army HQ front roles now constrain fresh corps offensives
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing another quiet split-truth gap between Army HQ strategy and corps-level plan creation.
+
+Implemented:
+- `src/sim/combat/commander/plan.ts`
+  - fresh offensive plan creation is now explicitly blocked on `economy` and `contain` fronts
+  - planner returns a truthful role-based reason instead of generic `no viable plan available`
+- `tests/commander/briefing_campaign_intent.test.ts`
+  - added regressions proving `economy` and `contain` campaign roles suppress fresh offensive plan creation
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded Wave 1 report with the strategy-role checkpoint
+- `docs/20_engineering/AI_STRATEGY_SPECIFICATION.md`
+  - updated `ARMY-GAP-1` so the spec records that campaign roles now constrain plan creation instead of remaining advisory flavor
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\briefing_campaign_intent.test.ts tests\commander\commander.test.ts tests\commander\reinforcement_signal_flow.test.ts tests\army_hq_gathering.test.ts`
+  - PASS (`128` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- a theater role that only works because local opportunity scoring happens to fail is decorative strategy
+- Army HQ `economy` / `contain` roles now have force at the exact point where fresh corps offensives would otherwise be invented
+
+---

@@ -86,6 +86,13 @@ function getFatigueBlockReason(briefing: CommanderBriefing): string | null {
     return null;
 }
 
+function getCampaignRoleBlockReason(briefing: CommanderBriefing): string | null {
+    if (briefing.campaign_role === 'economy' || briefing.campaign_role === 'contain') {
+        return `campaign role ${briefing.campaign_role} forbids a fresh offensive plan`;
+    }
+    return null;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // buildCatastrophicOsidCooldownSet — transient cooldown for failed objectives
 // ═══════════════════════════════════════════════════════════════════════════
@@ -177,6 +184,16 @@ export function managePlan(
             plan: null,
             action: 'none',
             reason: fatigueBlockReason,
+            concentration_orders: [],
+        };
+    }
+
+    const campaignRoleBlockReason = getCampaignRoleBlockReason(briefing);
+    if (campaignRoleBlockReason) {
+        return {
+            plan: null,
+            action: 'none',
+            reason: campaignRoleBlockReason,
             concentration_orders: [],
         };
     }
