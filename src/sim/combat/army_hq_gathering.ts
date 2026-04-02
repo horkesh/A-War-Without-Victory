@@ -267,6 +267,7 @@ function assessCorps(state: GameState, faction: FactionId, corpsId: string): Cor
 
     // Sector threat average from sector_combat_ratings
     const sectorThreatAvg = computeSectorThreatAvg(state, faction, corpsId);
+    const recentTerritoryChange = computeRecentTerritoryChange(state, faction, corpsId);
 
     return {
         corps_id: corpsId,
@@ -274,7 +275,7 @@ function assessCorps(state: GameState, faction: FactionId, corpsId: string): Cor
         strength_class: strengthClass,
         exhaustion,
         has_active_op: hasActiveOp,
-        recent_territory_change: 0, // Placeholder for v0.4.7
+        recent_territory_change: recentTerritoryChange,
         sector_threat_avg: sectorThreatAvg,
         available_brigades: availableBrigades,
         officer_competence: officerCompetence,
@@ -328,6 +329,56 @@ function computeSectorThreatAvg(state: GameState, faction: FactionId, corpsId: s
         count++;
     }
     return count > 0 ? totalThreat / count : 0.5;
+}
+
+const RECENT_TERRITORY_CHANGE_WINDOW = 6;
+
+/**
+ * Compute net recent territory change for a corps from political control events.
+ *
+ * The signal is scoped to the corps's current front neighborhood:
+ * - sector territory_osids
+ * - front-line friendly_osids
+ * - front-line enemy_osids
+ *
+ * Positive = recent gains near this corps's front.
+ * Negative = recent losses near this corps's front.
+ */
+function computeRecentTerritoryChange(
+    state: GameState,
+    faction: FactionId,
+    corpsId: string,
+): number {
+    const currentTurn = state.meta?.turn ?? 0;
+    const recentCutoff = currentTurn - RECENT_TERRITORY_CHANGE_WINDOW;
+    const sectors = state.military.corps_front_sectors ?? {};
+    const scopeOsids = new Set<string>();
+
+    for (const sector of Object.values(sectors)) {
+        if (!sector || sector.corps_id !== corpsId) continue;
+        for (const osid of sector.territory_osids ?? []) scopeOsids.add(osid);
+        for (const sub of sector.sub_segments ?? []) {
+            for (const osid of sub.friendly_osids ?? []) scopeOsids.add(osid);
+            for (const osid of sub.enemy_osids ?? []) scopeOsids.add(osid);
+        }
+    }
+
+    if (scopeOsids.size === 0) return 0;
+
+    const controlEvents = state.political.control_events ?? [];
+    let delta = 0;
+    for (const event of controlEvents) {
+        if (event.turn <= recentCutoff) continue;
+        if (!scopeOsids.has(event.settlement_id)) continue;
+
+        const gained = event.to === faction && event.from !== faction;
+        const lost = event.from === faction && event.to !== faction;
+
+        if (gained) delta += 1;
+        else if (lost) delta -= 1;
+    }
+
+    return delta;
 }
 
 /** Derive territory trend from corps strength distribution. */

@@ -58,18 +58,23 @@ Implemented the first correctness wave in clean branch `codex/engine-health-wave
   - launch feasibility now accounts for defender artillery, entrenchment, and terrain defensive multipliers instead of screening attacks from raw attacker/defender base power alone.
 - `src/sim/combat/commander/force_eval.ts` + `src/sim/combat/commander/assess.ts`
   - commander brigade fitness now consumes `briefing.supply_by_osid` at each brigade's actual `location_osid` instead of always using the conservative unknown/default supply multiplier.
+- `src/sim/combat/army_hq_gathering.ts`
+  - `recent_territory_change` is no longer a dead placeholder; it now derives a net gain/loss signal from recent `political.control_events` scoped to each corps's front neighborhood.
 
 **Regression coverage added/extended:**
 - `tests/probe_preparation.test.ts`
 - `tests/war_termination.test.ts`
 - `tests/corps_level_operations.test.ts`
 - `tests/commander/commander.test.ts`
+- `tests/army_hq_gathering.test.ts`
 
 **Verification:**
 - `vitest run tests\probe_preparation.test.ts tests\war_termination.test.ts tests\corps_level_operations.test.ts`
 - result: `61/61` tests passing
 - `vitest run tests\commander\commander.test.ts`
 - result: `50/50` tests passing
+- `vitest run tests\army_hq_gathering.test.ts`
+- result: `63/63` tests passing
 
 **Meaning:**
 - This is the first implemented slice of the 2026-04-02 engine-health triage.

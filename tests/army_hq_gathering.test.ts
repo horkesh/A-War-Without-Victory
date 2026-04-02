@@ -172,6 +172,8 @@ function makeTheaterState(overrides: {
     formations?: Record<string, Partial<FormationState>>;
     corpsCommand?: Record<string, { corps_exhaustion?: number; active_operations?: unknown }>;
     generalSupplyReserve?: Record<string, number>;
+    controlEvents?: Array<{ turn: number; settlement_id: string; from: string | null; to: string | null; mechanism?: 'combat' | 'consolidation' | 'abandoned' | 'event' }>;
+    corpsFrontSectors?: Record<string, unknown>;
 } = {}): GameState {
     const formations: Record<string, FormationState> = {};
     if (overrides.formations) {
@@ -198,9 +200,15 @@ function makeTheaterState(overrides: {
             front_posture: {},
             corps_command: overrides.corpsCommand ?? {},
             general_supply_reserve: overrides.generalSupplyReserve ?? {},
+            corps_front_sectors: overrides.corpsFrontSectors ?? {},
             fired_event_ids: [],
         } as unknown as GameState['military'],
-        political: {} as unknown as GameState['political'],
+        political: {
+            control_events: (overrides.controlEvents ?? []).map((event) => ({
+                mechanism: 'combat',
+                ...event,
+            })),
+        } as unknown as GameState['political'],
         factions: {} as GameState['factions'],
         displacement: {} as GameState['displacement'],
     } as unknown as GameState;
@@ -293,6 +301,67 @@ describe('assessTheater', () => {
         expect(staff.attendance).toBe('excluded');
         expect(staff.strength_class).toBe('strong');
         expect(staff.available_brigades).toBe(1);
+    });
+
+    it('tracks recent territory gains and losses near each corps front', () => {
+        const state = makeTheaterState({
+            turn: 20,
+            formations: {
+                bde_1: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 1200, status: 'active' },
+                bde_2: { faction: 'RS', corps_id: 'vrs_drina', personnel: 1200, status: 'active' },
+            },
+            corpsFrontSectors: {
+                krajina_sector: makeSector({
+                    sector_id: 'krajina_sector',
+                    corps_id: 'vrs_1st_krajina',
+                    friendly_osids: ['op:krajina:held'],
+                    enemy_osids: ['op:krajina:target'],
+                }),
+                drina_sector: makeSector({
+                    sector_id: 'drina_sector',
+                    corps_id: 'vrs_drina',
+                    friendly_osids: ['op:drina:held'],
+                    enemy_osids: ['op:drina:target'],
+                }),
+            },
+            controlEvents: [
+                { turn: 19, settlement_id: 'op:krajina:target', from: 'RBiH', to: 'RS' },
+                { turn: 18, settlement_id: 'op:drina:held', from: 'RS', to: 'RBiH' },
+                { turn: 12, settlement_id: 'op:krajina:stale', from: 'RBiH', to: 'RS' },
+            ],
+        });
+
+        const assessment = assessTheater(state, 'RS');
+        const krajina = assessment.corps_assessments.find(c => c.corps_id === 'vrs_1st_krajina')!;
+        const drina = assessment.corps_assessments.find(c => c.corps_id === 'vrs_drina')!;
+
+        expect(krajina.recent_territory_change).toBe(1);
+        expect(drina.recent_territory_change).toBe(-1);
+    });
+
+    it('ignores control events outside the corps front neighborhood', () => {
+        const state = makeTheaterState({
+            turn: 20,
+            formations: {
+                bde_1: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 1200, status: 'active' },
+            },
+            corpsFrontSectors: {
+                krajina_sector: makeSector({
+                    sector_id: 'krajina_sector',
+                    corps_id: 'vrs_1st_krajina',
+                    friendly_osids: ['op:krajina:held'],
+                    enemy_osids: ['op:krajina:target'],
+                }),
+            },
+            controlEvents: [
+                { turn: 19, settlement_id: 'op:other:unrelated', from: 'RBiH', to: 'RS' },
+            ],
+        });
+
+        const assessment = assessTheater(state, 'RS');
+        const krajina = assessment.corps_assessments.find(c => c.corps_id === 'vrs_1st_krajina')!;
+
+        expect(krajina.recent_territory_change).toBe(0);
     });
 });
 
