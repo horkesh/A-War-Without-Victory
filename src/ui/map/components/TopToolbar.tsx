@@ -10,8 +10,8 @@ import type { LoadedGameState, SummaryFocusSection } from '../data/types';
 
 const LOAD_TIMEOUT_MS = 25000;
 
-const TOOLBAR_BUTTON_CLASS = 'px-3 py-1 text-[10px] font-mono uppercase tracking-[0.15em] bg-black/40 hover:bg-interactive/20 text-text-primary border border-white/10 rounded transition-all disabled:opacity-30 hover:border-interactive/40 hover:shadow-glow-sm hover:text-interactive active:scale-95';
-const MODULAR_SECTION_CLASS = 'flex items-center gap-2 px-3 py-1 bg-black/20 border border-white/5 rounded-md relative overflow-hidden group';
+const TOOLBAR_BUTTON_CLASS = 'px-2.5 py-0.5 text-[9px] font-mono uppercase tracking-[0.12em] bg-black/40 hover:bg-interactive/20 text-text-primary border border-white/10 rounded transition-all disabled:opacity-30 hover:border-interactive/40 hover:shadow-glow-sm hover:text-interactive active:scale-95';
+const MODULAR_SECTION_CLASS = 'flex items-center gap-1.5 px-2.5 py-0.5 bg-black/20 border border-white/5 rounded-md relative overflow-hidden group';
 const SUMMARY_SHORTCUTS: Array<{ focus: SummaryFocusSection; label: string; getCount?: (state: LoadedGameState) => number | null }> = [
   {
     focus: 'ivp',
@@ -187,7 +187,7 @@ export function TopToolbar({
 
   return (
     <div
-      className="absolute top-0 left-0 right-0 z-10 flex items-center gap-4 px-4 py-2 bg-glass border-b border-white/10 shadow-2xl group/toolbar text-text-primary"
+      className="absolute top-0 left-0 right-0 z-10 flex items-center gap-3 px-3 py-1.5 bg-glass border-b border-white/10 shadow-2xl group/toolbar text-text-primary"
     >
       <div className="absolute inset-0 scanline-texture opacity-[0.03] pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-r from-accent-gold/5 via-transparent to-transparent pointer-events-none" />
@@ -209,10 +209,10 @@ export function TopToolbar({
         </button>
       )}
 
-      <div className="flex items-center gap-3 shrink-0 relative">
-        <div className="absolute -left-4 top-0 bottom-0 w-1 bg-accent-gold shadow-glow-gold opacity-80" />
+      <div className="flex items-center gap-2.5 shrink-0 relative">
+        <div className="absolute -left-3 top-0 bottom-0 w-1 bg-accent-gold shadow-glow-gold opacity-80" />
         {crestUrl && (
-          <img src={crestUrl} alt="" className="w-7 h-7 object-contain drop-shadow-glow-gold brightness-125" />
+          <img src={crestUrl} alt="" className="w-6 h-6 object-contain drop-shadow-glow-gold brightness-125" />
         )}
         <div className="flex flex-col">
           <span className="font-sans text-[11px] text-accent-gold tracking-[0.2em] uppercase font-bold glow-text leading-tight">
@@ -229,7 +229,7 @@ export function TopToolbar({
         )}
       </div>
 
-      <div className="h-8 w-[2px] bg-white/15 mx-1" />
+      <div className="h-6 w-[2px] bg-white/15 mx-1" />
 
       <div className={MODULAR_SECTION_CLASS}>
         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/5 to-transparent" />

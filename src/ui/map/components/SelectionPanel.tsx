@@ -42,7 +42,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
         style={{ ...getPanelRailStyle(railSlot, '20rem'), direction: 'ltr' }}
       >
         <div className="h-10 bg-panel-card border-b border-panel-border panel-shimmer" />
-        <div className="p-4 space-y-4">
+        <div className="p-3 space-y-3">
           <div className="h-6 w-3/4 bg-panel-card rounded panel-shimmer" />
           <div className="space-y-2">
             <div className="h-4 w-full bg-panel-card rounded panel-shimmer" />
@@ -213,7 +213,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
       className="panel-power-on weathered-panel panel-slide-in-right flex flex-col rounded-lg shadow-xl"
       style={{ ...getRightPanelStyle('20rem'), direction: 'ltr' }}
     >
-      <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
+      <div className="flex items-center justify-between px-3 py-2 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
         <div className="flex items-center gap-2">
           {loadedGameState?.controlBySettlement?.[selectedOsid] && getFactionFlag(loadedGameState.controlBySettlement[selectedOsid]) && (
             <img
@@ -234,7 +234,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
         </button>
       </div>
 
-      <div className="p-4 overflow-auto">
+      <div className="p-3 overflow-auto">
         <SettlementDetailContent
           osid={selectedOsid}
           osidDisplayNames={osidDisplayNames}
@@ -266,7 +266,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
           historicalEventsByTurn={loadedGameState?.historicalEventsByTurn}
         />
         {playerFaction && selectedMunId && (
-          <div className="mt-4 rounded border border-panel-border bg-panel-card p-3 space-y-2">
+          <div className="mt-3 rounded border border-panel-border bg-panel-card p-2.5 space-y-1.5">
             <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">
               Phase E Local Support
             </div>

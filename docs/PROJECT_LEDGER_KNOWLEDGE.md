@@ -1481,3 +1481,6 @@ Once the obvious map-shell leaks are cleaned up, the remaining player-truth dama
 ### Officer-event adapters are player-facing surfaces too
 
 If pending personnel/replacement events are derived in an adapter and that adapter falls back to raw officer ids or corps ids, the leak is still real even though no React component explicitly prints the id. In AWWV, event/adaptor text should degrade to neutral phrases like `An officer` and player-safe corps names, not to backend identifiers.
+### Tactical-map shells should default to command density, not roomy dashboard spacing
+
+In AWWV, once the shell is truthful, the next quality jump is usually density: toolbar chrome, detail panels, and operation cards should behave like a command console, not a generic spacious web app. Compact spacing is not just cosmetic; it determines how much command context the player can hold on screen at once.

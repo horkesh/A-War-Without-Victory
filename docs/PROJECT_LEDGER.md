@@ -20256,3 +20256,33 @@ Why this matters:
 - adapters are authority surfaces too; if they fallback to raw ids, the player shell is still lying
 - the standalone Warroom viewer is older but still live, which makes its fallback leaks more dangerous rather than less
 - this slice leaves the remaining raw-fallback search results looking mostly like benign internal sorting/defaulting rather than live player-facing leaks
+### 2026-04-02 - Tactical shell density pass 1
+
+After the player-truth shell reached a healthier state, started the queued UI/UX density pass in `F:\AWWV_exec_clean`, focusing on the highest-traffic tactical-map shells instead of ornamental or low-frequency panels.
+
+Implemented:
+- `src/ui/map/components/TopToolbar.tsx`
+  - tightened module gaps, button padding, crest footprint, and overall toolbar vertical density
+- `src/ui/map/components/SelectionPanel.tsx`
+  - compacted skeleton spacing, body padding, and local-support card footprint
+- `src/ui/map/components/FormationDetail.tsx`
+  - reduced header/body padding and overview rhythm
+- `src/ui/map/components/CorpsDetail.tsx`
+  - reduced padding and whitespace across overview, sectors, ops, and orders tabs
+- `src/ui/map/components/OperationsPanel.tsx`
+  - tightened header, left operation rail, operation cards, and right detail pane
+- `src/ui/map/components/ArmyReservePanel.tsx`
+  - reduced reserve-shell card padding and inter-section dead air
+- `docs/40_reports/implemented/20260402_TACTICAL_SHELL_DENSITY_PASS_1.md`
+  - documented this density slice
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`26` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- once the shell is truthful, the next studio-quality problem is usually density, not correctness
+- strategy games benefit from compact clarity; oversized cards and roomy chrome waste attention and screen space
+- this slice shifts the primary tactical shell toward a more command-console feel without changing information ownership

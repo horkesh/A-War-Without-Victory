@@ -131,7 +131,7 @@ export function OperationsPanel() {
             <div className="h-12 w-full bg-panel-card rounded panel-shimmer" />
             <div className="h-12 w-full bg-panel-card rounded panel-shimmer" />
           </div>
-          <div className="col-span-7 p-3 space-y-4">
+          <div className="col-span-7 p-2.5 space-y-3">
             <div className="h-6 w-3/4 bg-panel-card rounded panel-shimmer" />
             <div className="space-y-2">
               <div className="h-4 w-full bg-panel-card rounded panel-shimmer" />
@@ -239,7 +239,7 @@ export function OperationsPanel() {
     >
       <div className="absolute top-0 left-0 w-full h-full crt-overlay pointer-events-none z-50 opacity-40"></div>
 
-      <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0 relative z-10 glow-text text-accent-gold uppercase text-xs font-semibold">
+      <div className="flex items-center justify-between px-3 py-2 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0 relative z-10 glow-text text-accent-gold uppercase text-xs font-semibold">
         Operations Center
         <button
           onClick={close}
@@ -259,7 +259,7 @@ export function OperationsPanel() {
           {/* Left: operation list */}
           <div className="col-span-5 border-r border-panel-border overflow-auto">
             <div
-              className="p-2 space-y-1"
+              className="p-1.5 space-y-1"
               role="listbox"
               aria-label="Operations list"
             >
@@ -284,7 +284,7 @@ export function OperationsPanel() {
                     }}
                     onClick={() => setSelectedOperationKey(id)}
                     onKeyDown={(event) => handleOperationCardKeyDown(event, index)}
-                    className={`kbd-focus w-full text-left rounded border px-2 py-1.5 transition-all duration-200 ease-out hover:-translate-y-[1px] ${selected
+                    className={`kbd-focus w-full text-left rounded border px-2 py-1 transition-all duration-200 ease-out hover:-translate-y-[1px] ${selected
                       ? 'border-accent-gold bg-panel-active shadow-[0_0_0_1px_rgba(212,175,55,0.22)]'
                       : 'border-panel-border bg-panel-card hover:bg-panel-hover'
                       }`}
@@ -321,7 +321,7 @@ export function OperationsPanel() {
           </div>
 
           {/* Right: detail */}
-          <div className="col-span-7 overflow-auto p-3 space-y-2">
+          <div className="col-span-7 overflow-auto p-2.5 space-y-1.5">
             {selectedOperation ? (
               <>
                 <div className={`text-sm font-semibold ${FACTION_COLORS[selectedOperation.faction] ?? 'text-text-primary'}`}>

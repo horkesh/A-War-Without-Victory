@@ -81,7 +81,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
         style={getPanelRailStyle(railSlot, '24rem', 'left')}
       >
         <div className="h-10 bg-panel-card border-b border-panel-border panel-shimmer" />
-        <div className="p-4 space-y-4">
+        <div className="p-3 space-y-3">
           <div className="h-4 w-1/2 bg-panel-card rounded panel-shimmer" />
           <div className="h-6 w-3/4 bg-panel-card rounded panel-shimmer" />
           <div className="space-y-2">
@@ -142,7 +142,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
       style={getPanelRailStyle(railSlot, '24rem', 'left')}
     >
       {/* Header */}
-      <div className={`flex items-center justify-between px-4 py-2.5 ${headerBgClass} rounded-t-lg border-b border-panel-border shrink-0`}>
+      <div className={`flex items-center justify-between px-3 py-2 ${headerBgClass} rounded-t-lg border-b border-panel-border shrink-0`}>
         <div className="flex items-center gap-2">
           {getArmyCrest(formation.faction) && (
             <img src={getArmyCrest(formation.faction)} alt="" className="w-4 h-4 object-contain" />
@@ -173,7 +173,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
 
       <TabBar tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <div className="p-4 flex-1 space-y-3 overflow-auto min-h-0 min-w-0 relative">
+      <div className="p-3 flex-1 space-y-2.5 overflow-auto min-h-0 min-w-0 relative">
         {/* Faction crest watermark */}
         {getArmyCrest(formation.faction) && (
           <div

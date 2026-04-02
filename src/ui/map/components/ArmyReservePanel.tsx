@@ -119,7 +119,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                 >×</button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-3 space-y-4 text-[11px]">
+            <div className="flex-1 overflow-y-auto p-2.5 space-y-3 text-[11px]">
 
                 {/* ── Reserve Pool ─────────────────────────────────────── */}
                 <section>
@@ -129,7 +129,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                     {elites.length === 0 ? (
                         <div className="text-text-secondary italic">No elite brigades in reserve pool.</div>
                     ) : (
-                        <div className="space-y-2">
+                        <div className="space-y-1.5">
                             {elites.map(brigade => {
                                 const ls = brigade.eliteLoanState!;
                                 const pct = brigade.personnel != null ? Math.min(100, Math.round((brigade.personnel / 2200) * 100)) : 0;
@@ -137,7 +137,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                     <button
                                         key={brigade.id}
                                         type="button"
-                                        className="w-full text-left bg-black/20 border border-panel-border/40 rounded p-2 space-y-1.5 hover:bg-panel-hover transition-colors cursor-pointer"
+                                        className="w-full text-left bg-black/20 border border-panel-border/40 rounded p-1.5 space-y-1 hover:bg-panel-hover transition-colors cursor-pointer"
                                         onClick={() => useGameStore.setState({ selectedFormationId: brigade.id })}
                                     >
                                         <div className="flex items-center justify-between">
@@ -233,7 +233,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                         <div className="text-[10px] text-accent-gold uppercase tracking-widest font-bold opacity-70 mb-2">
                             Pending Requests ({pendingRequests.length})
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-1.5">
                             {pendingRequests.map((req, idx) => (
                                 <div key={idx} className="bg-black/20 border border-panel-border/40 rounded p-2 space-y-2">
                                     <div className="flex items-start justify-between gap-2">
