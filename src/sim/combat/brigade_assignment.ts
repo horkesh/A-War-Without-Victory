@@ -691,7 +691,11 @@ export function classifyBrigadesByTerritory(
                     continue;
                 }
                 const sameCorps = sectors
-                    .filter(s => s.corps_id === sector.corps_id && s.sector_id !== sector.sector_id)
+                    .filter(s =>
+                        s.corps_id === sector.corps_id
+                        && s.sector_id !== sector.sector_id
+                        && getSectorComponent(s, componentOf) === brigComp
+                    )
                     .map(s => {
                         const d = friendlyDistanceToAny(
                             f.location_osid as string,
@@ -745,7 +749,11 @@ export function classifyBrigadesByTerritory(
                 );
                 if (ownDist == null || ownDist <= VRS_1K_LINE_DISTANCE_MAX_HOPS) continue;
                 const candidates = rearGuardSectors
-                    .filter(s => s.sector_id !== sector.sector_id && s.corps_id === sector.corps_id)
+                    .filter(s =>
+                        s.sector_id !== sector.sector_id
+                        && s.corps_id === sector.corps_id
+                        && getSectorComponent(s, componentOf) === (componentOf.get(f.location_osid!) ?? -2)
+                    )
                     .map(s => {
                         const d = friendlyDistanceToAny(
                             f.location_osid as string,

@@ -692,4 +692,62 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
 
         expect(deepSector.assigned_brigade_ids).toContain('brig_deep_rear');
     });
+
+    it('does not cross-component reassign an unreachable brigade during trap remediation', () => {
+        const sector1 = makeSector(
+            'sector:vrs_drina:0',
+            'vrs_drina',
+            [makeSubSeg('s1', ['op:m:front_a'], ['op:m:enemy_a'], 3)],
+            ['op:m:front_a', 'op:m:depth_a'],
+        );
+        const sector2 = makeSector(
+            'sector:vrs_drina:1',
+            'vrs_drina',
+            [makeSubSeg('s2', ['op:m:front_c'], ['op:m:enemy_c'], 3)],
+            ['op:m:front_c'],
+        );
+
+        const brig = makeFormation({
+            id: 'brig_trapped',
+            location_osid: 'op:m:depth_a',
+            corps_id: 'vrs_drina',
+        });
+
+        const formations: Record<FormationId, FormationState> = {
+            brig_trapped: brig,
+        };
+
+        const componentOf = makeComponentOf({
+            'op:m:front_a': 0,
+            'op:m:depth_a': 0,
+            'op:m:front_c': 1,
+        });
+
+        const adjacency = makeAdjacency([
+            ['op:m:depth_a', 'op:m:front_c'],
+        ]);
+
+        const friendlyOsids = new Set(['op:m:front_a', 'op:m:depth_a', 'op:m:front_c']);
+        const commanderProfiles = new Map<string, CorpsCommanderProfile>();
+
+        classifyBrigadesByTerritory(
+            [sector1, sector2],
+            'RS' as FactionId,
+            formations,
+            adjacency,
+            friendlyOsids,
+            componentOf,
+            commanderProfiles,
+            undefined,
+            {
+                meta: { turn: 0 } as any,
+                military: { formations } as any,
+            } as any,
+        );
+
+        expect(sector1.assigned_brigade_ids).not.toContain('brig_trapped');
+        expect(sector2.assigned_brigade_ids).not.toContain('brig_trapped');
+        expect(sector1.reserve_brigade_ids).not.toContain('brig_trapped');
+        expect(sector2.reserve_brigade_ids).not.toContain('brig_trapped');
+    });
 });

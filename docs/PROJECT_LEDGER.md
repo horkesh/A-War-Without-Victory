@@ -21392,3 +21392,22 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\ui_map_game_state_adapter.test.ts`
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_player_visibility.test.ts tests\\ui_map_render_smoke.test.ts tests\\ui_opord_player_safe_labels.test.ts`
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\warroom_player_visibility.test.ts tests\\ui_shell_navigation.test.ts tests\\warroom_smoke.test.ts`
+
+## 2026-04-03 - Trap remediation truthful sector assignment
+
+### Summary
+- Removed the cross-component fallback from the late trap-remediation and rear-guard rebalance passes in `brigade_assignment.ts`.
+- Added regression coverage proving that unreachable brigades now remain unresolved instead of being reassigned into a merely reachable but spatially false same-corps sector.
+
+### Files changed
+- `src/sim/combat/brigade_assignment.ts`
+- `tests/brigade_territory_reconciliation.test.ts`
+- `docs/40_reports/implemented/20260403_TRAP_REMEDIATION_TRUTHFUL_SECTOR_ASSIGNMENT.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- Sector assignment had become mostly honest in the early phases, but a later repair pass could still launder brigades across connected components after the honest passes had already failed.
+- That meant the engine was still able to invent false sector truth late in the pipeline and then surface the contradiction as an invariant warning.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\brigade_territory_reconciliation.test.ts tests\\commander_driven_brigade_assignment.test.ts`
