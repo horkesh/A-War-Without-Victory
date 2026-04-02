@@ -75,7 +75,15 @@ import {
     PERSONNEL_HEALTHY_THRESHOLD,
 } from './bot_constants.js';
 import { getFactionCorps, getCorpsSubordinates, sortByPersonnelDesc } from './bot_corps_helpers.js';
-import { basePower, VICTORY_THRESHOLD_COSTLY } from './combat_math.js';
+import {
+    ENTRENCHMENT_PER_TURN,
+    MAX_ENTRENCHMENT,
+    basePower,
+    VICTORY_THRESHOLD_COSTLY,
+    getDefensiveFireMult,
+    getForestMult,
+    getUrbanMult,
+} from './combat_math.js';
 import { findSectorForEnemyOsid } from './corps_front_sectors.js';
 import { seedDisplacementTimerOnFlip } from '../../state/displacement_takeover.js';
 import type { PreparationEvent } from '../turn_pipeline_types.js';
@@ -186,18 +194,32 @@ function checkLaunchFeasibility(
 
         // Sum defender sector base power (all brigades in the sector)
         let sectorDefenderPower = 0;
+        const defenders: FormationState[] = [];
         for (const defBid of sector.assigned_brigade_ids) {
             const df = formations[defBid];
             if (!df || df.status !== 'active') continue;
             sectorDefenderPower += basePower(df);
+            defenders.push(df);
         }
 
         if (sectorDefenderPower <= 0) return true; // Undefended sector
 
+        const defensiveFireMult = getDefensiveFireMult(defenders, defenderFaction, state);
+        const entrenchmentMult = defenders.reduce((best, defender) => {
+            const entrenchmentTurns = Math.min(
+                MAX_ENTRENCHMENT,
+                (defender as { entrenchment_turns?: number }).entrenchment_turns ?? 0,
+            );
+            const mult = 1.0 + Math.sqrt(entrenchmentTurns) * ENTRENCHMENT_PER_TURN * 2;
+            return Math.max(best, mult);
+        }, 1.0);
+        const terrainMult = Math.max(getUrbanMult(obj), getForestMult(obj));
+        const adjustedDefenderPower = sectorDefenderPower * defensiveFireMult * entrenchmentMult * terrainMult;
+
         // Power ratio: attacker pool vs entire defending sector.
         // This is generous to the attacker because in reality only a fraction
         // of the sector's brigades would react to any single OSID attack.
-        const ratio = totalAttackerPower / sectorDefenderPower;
+        const ratio = totalAttackerPower / adjustedDefenderPower;
         if (ratio >= VICTORY_THRESHOLD_COSTLY) return true;
     }
 

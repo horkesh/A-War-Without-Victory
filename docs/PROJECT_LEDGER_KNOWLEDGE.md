@@ -1265,3 +1265,14 @@ The minimum owner-friendly completion language is:
 - Done means
 
 If a task cannot answer those five lines, it is not actually ready to be called done.
+
+## Engine Health Wave 1 (2026-04-02)
+
+### Objective-specific intel should degrade gracefully, not collapse to fake blindness
+Preparation logic should prefer the intel record that actually faces the targeted enemy sector when the engine can resolve the objective honestly. But thinner state slices and older tests may not carry enough geometry/controller structure to map objective OSIDs back to enemy sectors. In that case, the honest fallback is “best known facing-sector intel,” not `0`. This preserves objective relevance without making the engine lie that it knows nothing.
+
+### War termination must read the political exhaustion ledger, not shadow profile fields
+If victory logic reads `formation profile exhaustion` while the political layer maintains canonical `war_exhaustion`, the engine can end a war from stale or shadow state. Treat `state.political.war_exhaustion` as authoritative everywhere strategic termination matters; keep legacy profile exhaustion only as compatibility fallback.
+
+### Launch feasibility is strategy truth, not just combat tuning
+Corps offensive go/no-go checks that ignore obvious defender artillery, entrenchment, and terrain bonuses are not merely “undertuned” â€” they are epistemically wrong. Feasibility screening is part of command honesty. If those defender advantages are known enough to affect real headquarters decisions, they belong in launch screening, not only in later combat resolution.

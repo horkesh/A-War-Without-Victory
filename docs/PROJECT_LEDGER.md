@@ -44,6 +44,37 @@ Engine-derived chokepoint detection (`engineMustHold`) disabled with `false &&`.
 
 ---
 
+### 2026-04-02 â€” Engine health Wave 1 correctness fixes (clean execution lane)
+
+Implemented the first correctness wave in clean branch `codex/engine-health-wave1` under `F:\AWWV_exec_clean`.
+
+**Fixes landed in code:**
+- `src/sim/combat/operation_preparation.ts`
+  - `getOperationIntelConfidence()` now prefers the intel record facing the enemy sector that actually contains the operation objective.
+  - When the state slice is too thin to resolve objective â†’ enemy-sector honestly, it falls back to the best facing-sector record instead of collapsing to false zero-confidence.
+- `src/scenario/victory_conditions.ts`
+  - victory/war termination now treats `state.political.war_exhaustion` as authoritative, with legacy formation-profile exhaustion only as fallback.
+- `src/sim/combat/sector_offensive.ts`
+  - launch feasibility now accounts for defender artillery, entrenchment, and terrain defensive multipliers instead of screening attacks from raw attacker/defender base power alone.
+
+**Regression coverage added/extended:**
+- `tests/probe_preparation.test.ts`
+- `tests/war_termination.test.ts`
+- `tests/corps_level_operations.test.ts`
+
+**Verification:**
+- `vitest run tests\probe_preparation.test.ts tests\war_termination.test.ts tests\corps_level_operations.test.ts`
+- result: `61/61` tests passing
+
+**Meaning:**
+- This is the first implemented slice of the 2026-04-02 engine-health triage.
+- It closes three “engine uses the wrong truth source” bugs before commander-maturity work continues.
+
+**Report:**
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+
+---
+
 ## [2026-04-01] Dev Map Browser-Safe Import Recovery
 
 ### Summary
