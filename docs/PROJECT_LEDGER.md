@@ -19382,3 +19382,24 @@ Why this matters:
 - centralizing the rule in one helper makes future leak cleanup cheaper and future regressions easier to catch
 
 ---
+---
+### 2026-04-02 â€” Engine health Wave 1 continued: legacy brigade pressure is now a true sink
+
+Drained another half-alive authority path in the clean lane `F:\AWWV_exec_clean`.
+
+Implemented:
+- `src/sim/combat/brigade_pressure.ts`
+  - converted `applyBrigadePressureToState()` into a truly inert compatibility sink
+  - canonical pressure ownership remains in `src/state/front_pressure.ts`
+- `tests/engine_honesty_legacy_contracts.test.ts`
+  - added a regression proving legacy brigade pressure no longer mutates `state.military.front_pressure`
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\engine_honesty_legacy_contracts.test.ts tests\brigade_pressure.test.ts`
+  - PASS (`23` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- dormant compatibility layers are still dangerous if they quietly refresh timestamps or other canonical metadata
+- this removes one more split-truth writer from the core combat engine

@@ -232,3 +232,6 @@ Warroom reports and magazine panels should not rely on every downstream renderer
 ### 18. Records/history panels must not become omniscient archives
 
 Operations history feels archival, but it is still part of the normal player shell. If the records tab reads all-faction active operations or all-faction completed operation history directly from `LoadedGameState`, it becomes a debug archive with nice styling. Treat records/history surfaces like any other player-facing panel: they should consume player-scoped visibility helpers, not raw global ledgers.
+### 19. Compatibility sinks must not quietly refresh canonical state
+
+If a module is documented as dormant or compatibility-only, it must not still bump timestamps or rewrite canonical state as a side effect. A no-op sink that still touches `front_pressure` teaches the repo that two writers are acceptable. Keep reusable computations if they help tests or future reactivation, but make the sink itself truly inert.

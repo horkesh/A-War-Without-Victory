@@ -157,42 +157,16 @@ export function computeBrigadePressureByEdge(
 }
 
 /**
- * Apply brigade-derived pressure to the front_pressure state.
- * Called from the turn pipeline when War phase is active and brigade_aor exists.
+ * Consume the legacy brigade-pressure path without mutating canonical pressure.
+ *
+ * The canonical front-pressure owner is `state/front_pressure.ts`.
+ * This compatibility sink remains only so older callers can invoke it safely
+ * without creating a second writer or silently bumping pressure timestamps.
  */
 export function applyBrigadePressureToState(
-    state: GameState,
-    edges: EdgeRecord[]
+    _state: GameState,
+    _edges: EdgeRecord[]
 ): void {
-    const pc = state.political.political_controllers ?? {};
-
-    // Collect front edges
-    const frontEdges: Array<{ a: SettlementId; b: SettlementId }> = [];
-    for (const edge of edges) {
-        const controlA = pc[edge.a];
-        const controlB = pc[edge.b];
-        if (controlA && controlB && controlA !== controlB) {
-            frontEdges.push(edge);
-        }
-    }
-
-    const pressureResult = computeBrigadePressureByEdge(state, frontEdges, edges);
-
-    // Update front_pressure state
-    if (!state.military.front_pressure) state.military.front_pressure = {};
-    for (const [eid, pressure] of Object.entries(pressureResult.edge_pressure)) {
-        const existing = state.military.front_pressure[eid];
-        if (existing) {
-            existing.value += Math.round(pressure.delta);
-            existing.max_abs = Math.max(existing.max_abs, Math.abs(existing.value));
-            existing.last_updated_turn = state.meta.turn;
-        } else {
-            state.military.front_pressure[eid] = {
-                edge_id: eid,
-                value: Math.round(pressure.delta),
-                max_abs: Math.abs(Math.round(pressure.delta)),
-                last_updated_turn: state.meta.turn
-            };
-        }
-    }
+    // Intentionally inert. Older callers may still route through this helper,
+    // but live front-pressure truth must come from the canonical state owner.
 }

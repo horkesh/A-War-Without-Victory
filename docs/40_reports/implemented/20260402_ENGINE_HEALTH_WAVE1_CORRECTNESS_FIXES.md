@@ -781,3 +781,24 @@ Why this matters:
 - history/records panels are where omniscient truth loves to survive because they feel archival rather than live
 - if the records tab can see everyone’s operations, it is still a debug shell even if the map itself is player-safe
 - once the helper contract exists, every records-style surface should consume it instead of rolling its own filters
+## Additional Wave 1 slice: legacy brigade pressure no longer writes canonical front pressure
+
+This checkpoint drains one of the nastier half-alive authority paths in the core engine. `brigade_pressure.ts` already described itself as a dormant compatibility layer, but its sink function still mutated `state.military.front_pressure` by refreshing timestamps even when every computed delta was zero.
+
+Implemented:
+- `src/sim/combat/brigade_pressure.ts`
+  - converted `applyBrigadePressureToState()` into a truly inert compatibility sink
+  - kept the reusable brigade-pressure computation helpers intact for targeted historical tests, but removed the hidden write path into canonical front-pressure state
+- `tests/engine_honesty_legacy_contracts.test.ts`
+  - added a regression proving the legacy brigade-pressure sink no longer mutates `front_pressure`
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\engine_honesty_legacy_contracts.test.ts tests\brigade_pressure.test.ts`
+  - PASS (`23` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- `src/state/front_pressure.ts` is the canonical pressure owner and should be the only normal writer
+- dormant compatibility layers become dangerous when they still touch live state “harmlessly”
+- this removes one more split-truth edge where comments, imports, and runtime behavior were disagreeing

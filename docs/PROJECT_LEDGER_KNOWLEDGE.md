@@ -1348,3 +1348,6 @@ If `extractWarData()` hands Warroom exact enemy formation names or ids, every re
 
 ### Records panels are debug shells unless they consume player-scoped history helpers
 Operation history and active-op ledgers feel archival, which makes them easy places for omniscient truth to survive. If a records panel reads global operation arrays directly from `LoadedGameState`, it is still a debug shell. Route those surfaces through the same player-visibility helpers used elsewhere.
+### Compatibility sinks are still dangerous if they refresh timestamps
+
+In AWWV, a legacy helper can look harmless because it only computes zero deltas, but it still becomes a second authority path if it updates canonical state metadata like `last_updated_turn`. A compatibility sink is only honest when it consumes old calls without mutating live truth at all.
