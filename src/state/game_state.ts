@@ -1567,9 +1567,11 @@ export interface GameState {
 }
 
 /**
- * Local front: a defensive sector composed of contiguous front edges, with
- * assigned brigades whose power is diluted by coverage length.
- * Derived each turn (Engine Invariants §13: no serialization of derived state).
+ * Legacy local-front compatibility shape.
+ *
+ * Historical saves may still carry this cache, but the live engine no longer
+ * rebuilds or relies on a `local_fronts` runtime layer. Corps-front sectors are
+ * the active frontline authority.
  */
 export interface LocalFront {
     id: string;                       // e.g. "front_rs_drina_north"
@@ -1748,7 +1750,7 @@ settlement_holdouts?: Record<SettlementId, SettlementHoldoutState>;
 recruitment_state?: RecruitmentResourceState;
 /** Cumulative casualty ledger (killed, wounded, missing/captured) per faction and formation. */
 casualty_ledger?: CasualtyLedger;
-/** Local fronts: bot/player-defined defensive sectors with coverage-based power. Derived each turn. */
+/** Legacy compatibility cache only. No longer rebuilt in the live war pipeline. */
 local_fronts?: Record<string, LocalFront>;
 /** Corps front sectors: per-corps slices of hostile boundary. Derived each turn (Engine Invariants §13). */
 corps_front_sectors?: Record<string, CorpsFrontSector>;

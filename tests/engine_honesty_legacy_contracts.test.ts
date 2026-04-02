@@ -213,4 +213,12 @@ describe('engine honesty legacy contracts', () => {
     expect(desktopSim).not.toContain('export function renameFrontSegment');
     expect(desktopSim).not.toContain('export function renameTheatre');
   });
+
+  it('does not keep a dead local-front constructor pretending to be live runtime authority', () => {
+    const localFrontDefense = readFileSync(join(process.cwd(), 'src', 'sim', 'combat', 'local_front_defense.ts'), 'utf8');
+    const gameState = readFileSync(join(process.cwd(), 'src', 'state', 'game_state.ts'), 'utf8');
+
+    expect(localFrontDefense).not.toContain('export function buildLocalFronts');
+    expect(gameState).toContain('Legacy compatibility cache only. No longer rebuilt in the live war pipeline.');
+  });
 });

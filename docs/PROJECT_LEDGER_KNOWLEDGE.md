@@ -1617,3 +1617,7 @@ If Army HQ cards and collapsible sections have too much fixed height and padding
 
 In AWWV, it is not enough to know which panel owns operations or records. The repo also needs to say which shell starts play, which shell owns the battlespace, which shell owns command review, and which shell owns knowledge. If that stays implicit, Warroom, Tactical Map, Army HQ, and Codex drift into overlapping tools.
 
+### Dead constructors are more dangerous than dead fields
+
+In AWWV, a legacy state field can be relatively harmless if everyone knows it is compatibility baggage. A constructor or builder that still looks capable of recreating that layer is worse, because it teaches future work that the layer might still be canonical. If a runtime layer has been retired, kill the constructor too or mark it unmistakably as archival.
+

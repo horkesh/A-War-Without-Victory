@@ -21076,3 +21076,21 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - Verification:
   - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
 
+
+## 2026-04-02 - Local front constructor retirement
+
+- Worktree/branch: F:\AWWV_exec_clean on codex/engine-health-wave1
+- Removed the dead `buildLocalFronts(...)` constructor from `src/sim/combat/local_front_defense.ts`.
+- Reframed `local_front_defense.ts` around its true job:
+  - shared frontline-density formula
+  - legacy `brigade_front_assignment` compatibility fallback only
+- Updated `src/state/game_state.ts` comments so `LocalFront` / `local_fronts` are explicitly documented as legacy compatibility state rather than a live runtime layer.
+- Added a regression in `tests/engine_honesty_legacy_contracts.test.ts` proving:
+  - there is no exported `buildLocalFronts(...)`
+  - `local_fronts` is documented as a legacy cache, not as active turn-pipeline truth
+- Verification:
+  - `node_modules\.bin\vitest.cmd run tests\engine_honesty_legacy_contracts.test.ts tests\local_front_density_modifier_precedence.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_LOCAL_FRONT_CONSTRUCTOR_RETIREMENT.md`
+
