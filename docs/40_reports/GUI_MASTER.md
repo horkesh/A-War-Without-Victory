@@ -339,3 +339,8 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - PeacePlanModal.tsx and Warroom SettlementInfoPanel now use player-facing political faction names instead of raw faction shorthand in diplomatic and settlement shells.
 - See `docs/40_reports/implemented/20260402_PLAYER_LANGUAGE_SHELL_SWEEP.md`.
 
+## 2026-04-02 - Diplomacy shell player language
+
+- DiplomacyModal.ts now uses player-facing political faction names in visible diplomatic checklist/outlook copy instead of raw shorthand like `RS` or `HRHB`.
+- See `docs/40_reports/implemented/20260402_DIPLOMACY_SHELL_PLAYER_LANGUAGE.md`.
+

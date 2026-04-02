@@ -1649,3 +1649,7 @@ In AWWV, the worst UI airiness usually does not come from one bad card. It comes
 
 In AWWV, `RBiH`, `RS`, and `HRHB` can be acceptable in some military-facing summaries, but they feel like backend shorthand in peace-plan and settlement-control shells. Diplomatic and civic surfaces should default to player-safe political names through `getPlayerSafePoliticalFactionName(...)`.
 
+### Diplomacy checklists are part of player-facing language, not internal design notation
+
+If a ceasefire or Washington tracker says `RS territory > 40%` or `HRHB exhaustion > 35`, the player is reading design shorthand instead of a political brief. Diplomacy shells should translate those conditions into player-facing faction names even when the underlying thresholds stay mechanical.
+

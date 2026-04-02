@@ -21210,3 +21210,21 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - Docs:
   - `docs/40_reports/implemented/20260402_PLAYER_LANGUAGE_SHELL_SWEEP.md`
 
+
+## 2026-04-02 - Diplomacy shell player language
+
+- Worktree/branch: F:\AWWV_merge_wave2 on codex/main-merge-wave1
+- Replaced raw faction shorthand in `src/ui/warroom/components/DiplomacyModal.ts` with player-facing political names in visible diplomatic copy.
+- This affects:
+  - RS patron-backing note
+  - HRHB capability outlook joint-pressure line
+  - ceasefire tracker checklist wording
+  - Washington tracker checklist wording
+- Added a source regression in `tests/warroom_player_visibility.test.ts`.
+- Verification:
+  - `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\warroom_player_visibility.test.ts tests\ui_shell_navigation.test.ts tests\ui_map_render_smoke.test.ts`
+  - `npm.cmd run warroom:build`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_DIPLOMACY_SHELL_PLAYER_LANGUAGE.md`
+

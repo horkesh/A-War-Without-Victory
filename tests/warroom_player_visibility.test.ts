@@ -385,4 +385,18 @@ describe('warroom player visibility', () => {
     expect(source).not.toContain('RS (Crimson)');
     expect(source).not.toContain('HRHB (Blue)');
   });
+
+  it('diplomacy modal uses political faction names instead of raw shorthand in live copy', () => {
+    const source = readFileSync(
+      resolve('src/ui/warroom/components/DiplomacyModal.ts'),
+      'utf8',
+    );
+
+    expect(source).toContain("getPlayerSafePoliticalFactionName('RS')");
+    expect(source).toContain("getPlayerSafePoliticalFactionName('RBiH')");
+    expect(source).toContain("getPlayerSafePoliticalFactionName('HRHB')");
+    expect(source).not.toContain('Joint Pressure Bonus vs RS');
+    expect(source).not.toContain("conditionRow('W5', 'RS territory > 40%'");
+    expect(source).not.toContain("conditionRow('C2', 'HRHB exhaustion > 35'");
+  });
 });
