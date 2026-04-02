@@ -63,3 +63,32 @@ That meant a legacy front-assignment concept still looked alive in the live prod
 
 - keep `assignBrigadeToFront(...)` as a sim-side compatibility lane only until a broader local-front authority decision is made
 - audit the remaining sim consumers of `brigade_front_assignment/local_fronts` and decide which are still canonical, compatibility-only, or ready for retirement
+
+## Additional shell cleanup in the same lane
+
+While tracing the same dead desktop surface, another pair of unused bridges showed up:
+
+- `renameFrontSegment(...)`
+- `renameTheatre(...)`
+
+They were still exported through preload, React IPC, and Electron main-process handlers, but nothing in the live UI or tests used them. That made them a second example of a product contract that still looked alive purely because the shell kept advertising it.
+
+Implemented:
+- `src/desktop/preload.cjs`
+  - removed `renameFrontSegment(...)` and `renameTheatre(...)`
+- `src/ui/map/desktop/useIPC.ts`
+  - removed both unused renaming methods from the live IPC contract
+- `src/desktop/electron-main.cjs`
+  - removed the `rename-front-segment` and `rename-theatre` handlers
+- `tests/engine_honesty_legacy_contracts.test.ts`
+  - added a regression proving those dead renaming bridges no longer appear in the live desktop shell
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\engine_honesty_legacy_contracts.test.ts tests\ui_map_render_smoke.test.ts tests\ui_map_order_actions.test.ts`
+  - PASS (`23` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- dead shell bridges are still product truth until the shell stops exporting them
+- removing unused rename bridges makes it harder for future refactors to accidentally resurrect front/theatre naming as a phantom live feature

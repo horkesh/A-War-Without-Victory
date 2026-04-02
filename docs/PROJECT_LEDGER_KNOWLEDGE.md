@@ -1436,3 +1436,7 @@ If `parseGameState(...)` assumes whole state branches like `displacement` always
 ### Wrong-branch reads in adapters silently delete whole gameplay signals
 
 The OPSEC briefing card disappeared not because OPSEC was unimplemented, but because the adapter read `opsec_sectors` from the wrong place. That kind of bug is especially dangerous: the data exists, the UI logic exists, and only the translation layer lies. In AWWV, adapters are authority surfaces and should be audited with the same suspicion as core sim code.
+
+### An unused desktop bridge is still a live product promise until removed
+
+If preload exports a method, the React IPC contract mirrors it, and Electron handles it, the repo is still promising that capability to future work even when no current UI calls it. In AWWV, `renameFrontSegment(...)` and `renameTheatre(...)` were dead shell bridges that needed removal precisely because they looked alive and therefore invited accidental reuse.

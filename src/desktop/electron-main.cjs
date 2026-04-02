@@ -795,44 +795,6 @@ app.whenReady().then(() => {
     }
   });
 
-  ipcMain.handle('rename-front-segment', async (_event, payload) => {
-    const { frontId, name } = payload || {};
-    const normalizedName = name == null ? null : String(name);
-    if (!currentGameStateJson || typeof frontId !== 'string') {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      const result = sim.renameFrontSegment(state, frontId, normalizedName);
-      if (!result.ok) return result;
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
-  });
-
-  ipcMain.handle('rename-theatre', async (_event, payload) => {
-    const { theatreId, name } = payload || {};
-    const normalizedName = name == null ? null : String(name);
-    if (!currentGameStateJson || typeof theatreId !== 'string') {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      const result = sim.renameTheatre(state, theatreId, normalizedName);
-      if (!result.ok) return result;
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
-  });
-
   ipcMain.handle('stage-corps-front-order', async (_event, payload) => {
     const { corpsId, edgeIds } = payload || {};
     if (!currentGameStateJson || typeof corpsId !== 'string' || !Array.isArray(edgeIds)) {

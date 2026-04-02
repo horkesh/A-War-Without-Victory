@@ -42,8 +42,6 @@ interface WindowAwwv {
     setTurnReportUpdatedCallback: (cb: ((report: unknown) => void) | null) => void;
     getRecruitmentCatalog: () => Promise<{ brigades?: unknown[]; error?: string }>;
     applyRecruitment: (brigadeId: string, equipmentClass: string) => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
-    renameFrontSegment: (frontId: string, name: string | null) => Promise<{ ok: boolean; error?: string }>;
-    renameTheatre: (theatreId: string, name: string | null) => Promise<{ ok: boolean; error?: string }>;
     setBrigadeDesiredAoRCap: (brigadeId: string, cap: number) => Promise<{ ok: boolean; error?: string }>;
     getSettings: () => Promise<{ ok: boolean; settings?: unknown; error?: string }>;
     saveSettings: (settings: unknown) => Promise<{ ok: boolean; error?: string }>;
@@ -152,14 +150,6 @@ export function useIPC() {
             applyRecruitment: awwv
                 ? (brigadeId: string, equipmentClass: string) => awwv.applyRecruitment(brigadeId, equipmentClass)
                 : makeNoop<{ ok: boolean; stateJson?: string; error?: string }>(),
-
-            renameFrontSegment: awwv
-                ? (frontId: string, name: string | null) => awwv.renameFrontSegment(frontId, name)
-                : makeNoop<{ ok: boolean; error?: string }>(),
-
-            renameTheatre: awwv
-                ? (theatreId: string, name: string | null) => awwv.renameTheatre(theatreId, name)
-                : makeNoop<{ ok: boolean; error?: string }>(),
 
             setBrigadeDesiredAoRCap: awwv
                 ? (brigadeId: string, cap: number) => awwv.setBrigadeDesiredAoRCap(brigadeId, cap)

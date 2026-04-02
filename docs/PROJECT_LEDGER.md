@@ -19925,3 +19925,28 @@ Why this matters:
 - a legacy concept is still live if the preload bridge, main-process handler, adapter, and sidebar all keep teaching the product that it exists
 - player-facing reserve classification should follow explicit corps/sector policy, not a ghost lane inherited from earlier UI eras
 - the adapter hardening matters beyond this slice: sparse-state tolerance and correct OPSEC sourcing stop happy-path assumptions from masquerading as product truth
+### 2026-04-02 - Engine health Wave 1 continued: remove dead front/theatre rename shell bridges
+
+Continued the same desktop-shell cleanup in `F:\AWWV_exec_clean`, removing two more unused player-facing bridges that had no live UI owner: `renameFrontSegment(...)` and `renameTheatre(...)`. They still existed in preload, React IPC, and Electron main-process handlers even though nothing in the live map shell called them.
+
+Implemented:
+- `src/desktop/preload.cjs`
+  - removed `renameFrontSegment(...)` and `renameTheatre(...)` from the live bridge
+- `src/ui/map/desktop/useIPC.ts`
+  - removed both methods from the live React IPC contract
+- `src/desktop/electron-main.cjs`
+  - removed the `rename-front-segment` and `rename-theatre` handlers
+- `tests/engine_honesty_legacy_contracts.test.ts`
+  - added a regression proving those dead rename bridges no longer appear in live desktop code
+- `docs/40_reports/implemented/20260402_FRONT_ASSIGNMENT_PLAYER_SHELL_RETIREMENT.md`
+  - expanded the report with this adjacent shell-retirement slice
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\engine_honesty_legacy_contracts.test.ts tests\ui_map_render_smoke.test.ts tests\ui_map_order_actions.test.ts`
+  - PASS (`23` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- dead shell bridges are still product truth until the shell stops exporting them
+- removing unused rename bridges makes it harder for future refactors to accidentally resurrect front/theatre naming as phantom live features

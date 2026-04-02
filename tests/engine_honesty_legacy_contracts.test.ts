@@ -189,4 +189,20 @@ describe('engine honesty legacy contracts', () => {
     expect(electronMain).not.toContain('assign-brigade-to-front');
     expect(useIpc).not.toContain('assignBrigadeToFront');
   });
+
+  it('does not advertise unused front/theatre renaming bridges in live code', () => {
+    const preload = readFileSync(join(process.cwd(), 'src', 'desktop', 'preload.cjs'), 'utf8');
+    const electronMain = readFileSync(join(process.cwd(), 'src', 'desktop', 'electron-main.cjs'), 'utf8');
+    const useIpc = readFileSync(join(process.cwd(), 'src', 'ui', 'map', 'desktop', 'useIPC.ts'), 'utf8');
+
+    expect(preload).not.toContain('renameFrontSegment');
+    expect(preload).not.toContain('rename-front-segment');
+    expect(electronMain).not.toContain('rename-front-segment');
+    expect(useIpc).not.toContain('renameFrontSegment');
+
+    expect(preload).not.toContain('renameTheatre');
+    expect(preload).not.toContain('rename-theatre');
+    expect(electronMain).not.toContain('rename-theatre');
+    expect(useIpc).not.toContain('renameTheatre');
+  });
 });
