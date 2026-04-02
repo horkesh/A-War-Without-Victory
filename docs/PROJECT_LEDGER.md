@@ -21045,3 +21045,16 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
   - `docs/40_reports/implemented/20260402_WARROOM_MODAL_DENSITY_PASS.md`
   - `docs/40_reports/GUI_MASTER.md`
 
+
+## 2026-04-02 - Army HQ density pass
+
+- Worktree/branch: F:\AWWV_exec_clean on codex/engine-health-wave1
+- Tightened the mounted Army HQ shell at the shared component layer instead of tweaking one paragraph at a time.
+- Reduced collapsible-section padding, shortened corps-card vertical rhythm, and compacted expanded operation detail spacing.
+- Verification:
+  - `node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts tests\ui_player_visibility.test.ts tests\ui_shell_navigation.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_ARMY_HQ_DENSITY_PASS.md`
+  - `docs/40_reports/GUI_MASTER.md`
+

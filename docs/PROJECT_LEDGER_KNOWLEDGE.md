@@ -1608,3 +1608,8 @@ Raw shorthand like `RS declaration imminent` or `Army of RBiH` leaks product ton
 
 Warroom modals, newspapers, magazines, and scenario cards inherit spacing from a small number of shell classes. If those classes stay loose, every new surface feels airy and under-filled no matter how good the content is. Tighten the shared shells first before polishing one-off panels.
 
+
+### Army HQ should read like a command desk, not a presentation
+
+If Army HQ cards and collapsible sections have too much fixed height and padding, the interface starts feeling ceremonial instead of operational. Prefer compact corps cards, shorter section headers, and tighter expanded-detail spacing so more command truth stays above the fold.
+

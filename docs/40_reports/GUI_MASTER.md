@@ -322,3 +322,9 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - The pass reduces inherited padding and blank vertical bands without changing information ownership or command flow.
 - See `docs/40_reports/implemented/20260402_WARROOM_MODAL_DENSITY_PASS.md`.
 
+## 2026-04-02 - Army HQ density pass
+
+- Tightened Army HQ collapsible sections, corps cards, and expanded operation detail spacing.
+- The pass keeps the same command information but makes the mounted Army HQ shell feel more like a compressed command desk and less like a slide stack.
+- See `docs/40_reports/implemented/20260402_ARMY_HQ_DENSITY_PASS.md`.
+

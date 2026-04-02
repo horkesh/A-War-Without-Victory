@@ -221,7 +221,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
     }, [gameState.operationHistory, op.name, op.corps_id]);
 
     return (
-        <div className="px-5 py-4 space-y-5 text-[11px] border-t border-panel-border/50 bg-panel-card font-mono">
+        <div className="px-4 py-3 space-y-4 text-[11px] border-t border-panel-border/50 bg-panel-card font-mono">
             {/* Commander personality card */}
             {cmdOfficer && (
                 <div className="flex items-start gap-4 px-3 py-2.5 border border-panel-border/50 bg-panel-bg rounded-md">
