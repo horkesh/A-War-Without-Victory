@@ -603,3 +603,29 @@ Why this matters:
 - without this, the commander was still planning as if “enemy frontage” mattered but “enemy quality” did not
 - heavy opposing armor/artillery now changes the concentration requirement before the operation exists, not only later in combat math
 - this is the kind of fix that makes the AI less theatrical and more honestly constrained
+
+## Additional Wave 1 slice: brigade fatigue now reaches commander force scoring
+
+This checkpoint closes the next split-truth gap after the briefing/planning fatigue fix: the commander could now *know* local brigade fatigue, but force evaluation still rated tired brigades as if they were fresh.
+
+Implemented:
+- `src/sim/combat/commander/force_eval.ts`
+  - brigade offensive and defensive fitness now apply a fatigue multiplier derived from live `formation.ops.fatigue`
+  - the multiplier is aligned with the canonical combat floors already used in `combat_math.ts`
+    - attack floor `0.6`
+    - defense floor `0.75`
+  - borderline assault brigades can now fall out of `main_effort` when fatigue has actually worn them down
+- `tests/commander/commander.test.ts`
+  - added regression coverage proving brigade fitness drops with heavy local fatigue
+  - added regression coverage proving fatigue can demote a borderline assault brigade out of `main_effort`
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\commander.test.ts tests\commander\briefing_campaign_intent.test.ts tests\commander\reinforcement_signal_flow.test.ts tests\army_hq_gathering.test.ts`
+  - PASS (`126` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- briefing awareness alone was not enough; the commander could still block one plan for fatigue while rating the same tired brigades as pristine assault assets in allocation logic
+- this keeps force scoring, planning, and combat power pointed at the same wear model instead of reintroducing fatigue blindness one layer lower
+- in this repo, a signal only becomes honest once every downstream scorer that claims to care about combat fitness actually consumes it

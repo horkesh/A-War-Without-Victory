@@ -228,7 +228,7 @@ This section documents known gaps in what the corps CO `CommanderBriefing` knows
 **Gap:** Briefing includes brigade counts but not average fatigue. A CO ordering a third operation in six turns cannot see that his brigades are running at 80% fatigue.
 **Impact:** P2. Leads to op-stacking on exhausted formations. `getWarExhaustionTempoMult()` applies globally but the CO has no individual-formation fatigue awareness.
 **Fix:** Add `avg_fatigue_pct` and `brigades_above_fatigue_threshold` to briefing from live `formation.ops.fatigue`.
-**Status (2026-04-02): partially resolved.** `CommanderBriefing` now carries `avg_fatigue_pct` and `brigades_above_fatigue_threshold`, both derived from subordinate brigades’ real `formation.ops.fatigue`. Fresh plan creation now blocks when average local fatigue is already too high. Remaining work: deeper stance, reserve, and execution logic can still become more fatigue-aware later.
+**Status (2026-04-02): partially resolved.** `CommanderBriefing` now carries `avg_fatigue_pct` and `brigades_above_fatigue_threshold`, both derived from subordinate brigades’ real `formation.ops.fatigue`. Fresh plan creation now blocks when average local fatigue is already too high, and `force_eval.ts` now applies local fatigue directly to brigade offensive/defensive fitness using the same fatigue floors as `combat_math.ts`. Remaining work: deeper stance, reserve, and execution logic can still become more fatigue-aware later.
 
 ### BRIEF-GAP-4: Corps exhaustion not in briefing
 

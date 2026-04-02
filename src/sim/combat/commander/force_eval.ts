@@ -9,6 +9,7 @@
  */
 
 import type { FormationId, FormationState } from '../../../state/game_state.js';
+import { FATIGUE_MAX } from '../../../state/formation_constants.js';
 import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../../state/supply_state_derivation.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { resolveEquipmentClass, getEquipmentOffensivePriority } from '../sector_offensive.js';
@@ -35,6 +36,10 @@ const ACTIVE_DEFENSE_FITNESS_THRESHOLD = 0.3;
 
 /** Minimum garrison fitness floor for depleted units. */
 const GARRISON_FITNESS_FLOOR = 0.2;
+
+/** Shared fatigue effectiveness floors aligned with combat_math.ts. */
+const FATIGUE_ATTACK_FLOOR = 0.6;
+const FATIGUE_DEFEND_FLOOR = 0.75;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Supply multiplier
@@ -69,6 +74,14 @@ function getBrigadeSupplyState(
     return osidEntry?.state;
 }
 
+function getFatigueMult(brigade: FormationState, mode: 'attack' | 'defend'): number {
+    const fatigue = brigade.ops?.fatigue ?? 0;
+    if (fatigue <= 0) return 1.0;
+    const ratio = Math.min(1.0, fatigue / FATIGUE_MAX);
+    const floor = mode === 'attack' ? FATIGUE_ATTACK_FLOOR : FATIGUE_DEFEND_FLOOR;
+    return 1.0 - ratio * (1.0 - floor);
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // evaluateBrigade — single brigade fitness scoring
 // ═══════════════════════════════════════════════════════════════════════════
@@ -92,6 +105,8 @@ export function evaluateBrigade(
     const equipClass = resolveEquipmentClass(brigade);
     const equipPriority = getEquipmentOffensivePriority(equipClass);
     const sMult = supplyMult(supplyStatus);
+    const fatigueOffenseMult = getFatigueMult(brigade, 'attack');
+    const fatigueDefenseMult = getFatigueMult(brigade, 'defend');
 
     // Fitness formulas from design doc
     const personnelNorm = personnel / STANDARD_PERSONNEL;
@@ -99,10 +114,12 @@ export function evaluateBrigade(
 
     const fitnessOffense = personnelNorm * sMult * cohesionNorm
         * (1 + equipPriority * 0.25)
+        * fatigueOffenseMult
         * (isDisrupted ? 0 : 1);
 
     const fitnessDefense = personnelNorm * sMult * cohesionNorm
         * (1 + entrenchment * 0.1)
+        * fatigueDefenseMult
         * 0.5;
 
     const fitnessGarrison = Math.max(GARRISON_FITNESS_FLOOR, personnelNorm * 0.5);

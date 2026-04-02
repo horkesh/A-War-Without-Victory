@@ -421,6 +421,48 @@ describe('force_eval', () => {
         expect(forces.evaluations[0]!.fitness_offense).toBeCloseTo(0.875, 3);
         expect(forces.evaluations[0]!.fitness_defense).toBeCloseTo(0.25, 3);
     });
+
+    it('evaluateBrigade penalizes heavy local fatigue in both offense and defense fitness', () => {
+        const fresh = makeBrigade({
+            personnel: 2500,
+            cohesion: 100,
+            equipment_class: 'mechanized',
+            ops: { fatigue: 0 } as FormationState['ops'],
+        });
+        const tired = makeBrigade({
+            personnel: 2500,
+            cohesion: 100,
+            equipment_class: 'mechanized',
+            ops: { fatigue: 30 } as FormationState['ops'],
+        });
+
+        const freshEval = evaluateBrigade(fresh, null, 'adequate');
+        const tiredEval = evaluateBrigade(tired, null, 'adequate');
+
+        expect(tiredEval.fitness_offense).toBeLessThan(freshEval.fitness_offense);
+        expect(tiredEval.fitness_defense).toBeLessThan(freshEval.fitness_defense);
+    });
+
+    it('evaluateBrigade can demote a high-fatigue brigade out of main_effort', () => {
+        const fresh = makeBrigade({
+            personnel: 1200,
+            cohesion: 60,
+            equipment_class: 'motorized',
+            ops: { fatigue: 0 } as FormationState['ops'],
+        });
+        const tired = makeBrigade({
+            personnel: 1200,
+            cohesion: 60,
+            equipment_class: 'motorized',
+            ops: { fatigue: 30 } as FormationState['ops'],
+        });
+
+        const freshEval = evaluateBrigade(fresh, null, 'adequate');
+        const tiredEval = evaluateBrigade(tired, null, 'adequate');
+
+        expect(freshEval.tier).toBe('main_effort');
+        expect(tiredEval.tier).not.toBe('main_effort');
+    });
 });
 
 // ═══════════════════════════════════════════════════════════════════════════

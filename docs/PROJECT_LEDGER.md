@@ -19189,3 +19189,32 @@ Why this matters:
 - once player-facing filters exist, they must be reused across tactical map and Warroom or the repo drifts back into split truth
 
 ---
+### 2026-04-02 â€” Engine health Wave 1 continued: commander force scoring now respects brigade fatigue
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing the next commander split-truth gap after the earlier briefing/planning fatigue work.
+
+Implemented:
+- `src/sim/combat/commander/force_eval.ts`
+  - brigade offensive and defensive fitness now apply a multiplier derived from live `formation.ops.fatigue`
+  - aligned the commander-side fatigue floors with `combat_math.ts`:
+    - attack floor `0.6`
+    - defense floor `0.75`
+- `tests/commander/commander.test.ts`
+  - added regressions proving heavy local fatigue lowers brigade fitness
+  - added regressions proving fatigue can demote a borderline assault brigade out of `main_effort`
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded Wave 1 report with the fatigue-force-scoring checkpoint
+- `docs/20_engineering/AI_STRATEGY_SPECIFICATION.md`
+  - updated BRIEF-GAP-3 status so the spec now records both the briefing fix and the downstream force-eval fix
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\commander.test.ts tests\commander\briefing_campaign_intent.test.ts tests\commander\reinforcement_signal_flow.test.ts tests\army_hq_gathering.test.ts`
+  - PASS (`126` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- the commander could already “know” brigade fatigue in briefing/planning, but still rate exhausted brigades as fresh in force scoring
+- this keeps planning, scoring, and combat math pointed at the same wear model instead of letting commander sophistication drift back into theater
+
+---
