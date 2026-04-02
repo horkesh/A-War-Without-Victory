@@ -21215,6 +21215,7 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 
 - Worktree/branch: F:\AWWV_merge_wave2 on codex/main-merge-wave1
 - Replaced raw faction shorthand in `src/ui/warroom/components/DiplomacyModal.ts` with player-facing political names in visible diplomatic copy.
+- Also aligned `src/ui/warroom/components/FactionOverviewPanel.ts` so the live war header badge uses the military-facing label instead of the raw faction id.
 - This affects:
   - RS patron-backing note
   - HRHB capability outlook joint-pressure line

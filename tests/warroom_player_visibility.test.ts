@@ -399,4 +399,14 @@ describe('warroom player visibility', () => {
     expect(source).not.toContain("conditionRow('W5', 'RS territory > 40%'");
     expect(source).not.toContain("conditionRow('C2', 'HRHB exhaustion > 35'");
   });
+
+  it('warroom live faction header uses the military-facing label instead of raw faction id', () => {
+    const source = readFileSync(
+      resolve('src/ui/warroom/components/FactionOverviewPanel.ts'),
+      'utf8',
+    );
+
+    expect(source).toContain('${getFactionMilitaryLabel(pf)}');
+    expect(source).not.toContain('${pf}</div>');
+  });
 });

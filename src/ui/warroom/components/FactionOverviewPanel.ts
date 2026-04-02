@@ -367,7 +367,7 @@ export class FactionOverviewPanel {
         const header = document.createElement('div');
         header.className = 'faction-overview-header';
         header.innerHTML = `
-            <div class="fo-faction-badge text-accent-gold" style="color:${fc.primary}">${pf}</div>
+            <div class="fo-faction-badge text-accent-gold" style="color:${fc.primary}">${getFactionMilitaryLabel(pf)}</div>
             <h2 class="text-accent-gold">${this.getFactionDisplayName(pf)}</h2>
             <div class="meta">${turnToWeekString(snap.turn)}</div>
             <div class="meta">${identity.ceremonialLine}</div>

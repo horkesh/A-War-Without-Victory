@@ -1653,3 +1653,7 @@ In AWWV, `RBiH`, `RS`, and `HRHB` can be acceptable in some military-facing summ
 
 If a ceasefire or Washington tracker says `RS territory > 40%` or `HRHB exhaustion > 35`, the player is reading design shorthand instead of a political brief. Diplomacy shells should translate those conditions into player-facing faction names even when the underlying thresholds stay mechanical.
 
+### Warroom header badges should be consistent across peace and war shells
+
+If the peace shell badge uses a military-facing label but the live war shell falls back to the raw faction id, the product reads like stitched eras instead of one command interface. Keep Warroom header badges on the same player-facing label contract across phases.
+

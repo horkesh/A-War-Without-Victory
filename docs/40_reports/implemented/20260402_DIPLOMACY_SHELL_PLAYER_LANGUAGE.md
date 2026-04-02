@@ -7,6 +7,7 @@ This pass cleaned up the last obvious raw faction shorthand in the live Warroom 
 Updated:
 
 - `src/ui/warroom/components/DiplomacyModal.ts`
+- `src/ui/warroom/components/FactionOverviewPanel.ts`
 
 The modal still presents faction-specific diplomatic realities, but it now does so in player-facing political language instead of raw shorthand like `RS` or `HRHB` inside visible checklist and outlook text.
 
@@ -32,6 +33,21 @@ Examples of the old language:
 
 Those are now phrased using player-facing political names instead.
 
+### Warroom live header badge alignment
+
+`FactionOverviewPanel.ts` also had one smaller but important inconsistency:
+
+- the peace/pre-war shell used the military-facing badge label
+- the live war shell still showed the raw faction id in the header badge
+
+This pass aligns the live war header with the same military-facing label rule, so the shell now uses:
+
+- `ARBiH`
+- `VRS`
+- `HVO`
+
+instead of raw faction ids in the header badge.
+
 ## Why this matters
 
 The diplomacy shell is not a debug dashboard. It is a player-facing political surface.
@@ -51,6 +67,7 @@ The new assertion proves:
 
 - `DiplomacyModal.ts` uses `getPlayerSafePoliticalFactionName(...)`
 - the older raw checklist labels are gone from the source
+- `FactionOverviewPanel.ts` uses the military-facing header badge label instead of `${pf}`
 
 ## Verification
 
