@@ -18686,3 +18686,45 @@ Confirmed as a seam issue between `arbih_2nd_corps` and `arbih_3rd_corps` AoR. O
 3. Investigate vozuca_2 seam — may need `vrs_drina` or dedicated Ozren brigade `hold_osids`
 
 ---
+
+## 2026-04-02 — Engine Health Audit & Master Doc Propagation
+
+**Commits:** `8371d9fe` (n1302 doc pass), `6b538ace` (engine health master docs)
+
+### Engine Health Audit — 33 Findings
+
+Comprehensive engine health review dispatched via 4 parallel specialist agents (combat mechanics, CO intelligence, operations, historical/doctrinal). Goal: find structural blindspots in mechanics and CO intelligence, not calibration tuning.
+
+**Key P0 findings:**
+- `CampaignPlan` from `army_hq_gathering.ts` never read by corps CO briefings (ARMY-GAP-1). Strategic layer structurally disconnected.
+- UNPROFOR absent as mechanical entity (HIST-GAP-1). Primary supply route to all enclaves unmodeled.
+- VRS "strangle not capture" enclave strategy absent (HIST-GAP-2). Bot always attacks at available power — no `contain` directive type.
+- Comms quality asymmetry absent (HIST-GAP-3). ARBiH and VRS COs have identical information fidelity.
+- Per-brigade ammunition scarcity absent (HIST-GAP-4). Zone-level supply doesn't capture brigade-level ammo constraints that drove real tactical decisions.
+
+**Key P1 findings:**
+- Combat predictor blind to defender artillery/terrain/entrenchment — primary driver of 47% ZEA rate (COMBAT-P14).
+- `supply_by_osid` never consumed by briefing; hardcoded 0.8 (BRIEF-GAP-1).
+- `recent_territory_change` hardcoded 0 in `assessCorps()` — Theater Assessment trend-blind (BRIEF-GAP-6).
+- Defender tanks have no anti-attacker multiplier (COMBAT-P13, P2).
+- Feint operations produce zero enemy effect — only drain own cohesion (ARMY-GAP-2).
+
+**Master docs updated:**
+- `COMBAT_MASTER.md` — P13 (defender armor) + P14 (predictor blindspot) added to P-list
+- `AI_STRATEGY_SPECIFICATION.md` — Commander Intelligence Blindspot Audit section (8 named gaps)
+- `REAL_WAR_MASTER.md` — n1302 latest review stub + Historical/Doctrinal Blindspot Audit (6 gaps)
+- `SECTOR_MASTER.md` — Corridor width garrison multiplier (Proposal 2 not implemented) + engine must_hold detection disabled (`false &&` in assess.ts, needs corps-boundary discriminator)
+
+**HTML audit dashboard:** `C:/Users/User/.agent/diagrams/engine_health_audit.html`
+
+**Life lessons added (2026-04-02):**
+- [combat.md] Aggregate casualty ratio is faction-blind — always partition by attacker/defender faction pair
+- [calibration.md] Garrison multiplier for must_hold zones can free adjacent brigades toward unintended targets
+- [architecture.md] Fraction-of-faction-total thresholds can't discriminate between strategically different corridors
+
+**Open work from this session (not implemented):**
+- 8 quick wins identified (feint wiring, supply in force_eval, corps exhaustion in briefing, recent_territory_change, op-level failure abort, winter mult, enemy equipment in briefing, must_hold chokepoint discriminator)
+- ARMY-GAP-1 (CampaignPlan → briefing wiring) — P0, needs design before implementation
+- HIST-GAP-1–4 — P0 for v0.9 scope
+
+---
