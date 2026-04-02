@@ -5,6 +5,11 @@
  */
 
 import type { GameState } from '../../../state/game_state.js';
+import {
+    getPlayerSafeMunicipalityName,
+    getPlayerSafePoliticalFactionName,
+    getPlayerSafeSettlementName,
+} from '../../map/utils/playerSafeText.js';
 
 type GeoFeature = {
     properties?: {
@@ -57,9 +62,9 @@ const SIDE_COLORS: Record<string, string> = {
 };
 
 const SIDE_LABELS: Record<string, string> = {
-    RBiH: 'RBiH (Green)',
-    RS: 'RS (Crimson)',
-    HRHB: 'HRHB (Blue)',
+    RBiH: getPlayerSafePoliticalFactionName('RBiH'),
+    RS: getPlayerSafePoliticalFactionName('RS'),
+    HRHB: getPlayerSafePoliticalFactionName('HRHB'),
     null: 'Neutral'
 };
 
@@ -148,7 +153,7 @@ export class SettlementInfoPanel {
         const factionColor = SIDE_COLORS[controller] ?? SIDE_COLORS['null'];
         const factionLabel = SIDE_LABELS[controller] ?? 'Neutral';
 
-        const settlementName = settlementNames?.by_census_id?.[censusId]?.name ?? sid;
+        const settlementName = settlementNames?.by_census_id?.[censusId]?.name ?? getPlayerSafeSettlementName(sid);
 
         let munName = '—';
         let mun1990Id = '—';
@@ -160,7 +165,7 @@ export class SettlementInfoPanel {
             } else if (mun1990Names?.by_municipality_id?.[midStr]) {
                 munName = mun1990Names.by_municipality_id[midStr].display_name;
             } else {
-                munName = `Municipality ${munId}`;
+                munName = getPlayerSafeMunicipalityName(midStr, 'Municipality');
             }
         }
 
@@ -324,12 +329,8 @@ export class SettlementInfoPanel {
                         <span class="value">${this.props.selectedSettlement?.properties?.municipal_seat ? 'MUNICIPAL SEAT' : 'SUBORDINATE'}</span>
                     </div>
                     <div class="settlement-info-field-row">
-                        <span class="label">Settlement ID</span>
-                        <span class="value font-mono">${escapeHtml(data.sid)}</span>
-                    </div>
-                    <div class="settlement-info-field-row">
-                        <span class="label">Municipality ID</span>
-                        <span class="value font-mono">${escapeHtml(data.mun1990Id)}</span>
+                        <span class="label">Administrative Region</span>
+                        <span class="value">${escapeHtml(data.munName)}</span>
                     </div>
                 </div>
             </div>

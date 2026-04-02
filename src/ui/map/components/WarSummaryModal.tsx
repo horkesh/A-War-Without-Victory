@@ -119,8 +119,8 @@ export function WarSummaryModal({ isOpen, focusSection = 'overview', onClose }: 
                     background: 'rgba(26, 24, 21, 0.97)',
                     border: '1px solid rgba(180, 160, 130, 0.22)',
                     borderRadius: 8,
-                    padding: '24px 28px',
-                    width: 'min(1100px, 92vw)',
+                    padding: '18px 20px',
+                    width: 'min(1040px, 90vw)',
                     boxShadow: '0 8px 32px rgba(0,0,0,0.7)',
                     backdropFilter: 'blur(8px)',
                     color: '#d5c9bc',
@@ -129,7 +129,7 @@ export function WarSummaryModal({ isOpen, focusSection = 'overview', onClose }: 
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
                     <div>
                         <div style={{ fontSize: 13, fontWeight: 700, color: '#c4a35a', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                             War Summary
@@ -146,7 +146,7 @@ export function WarSummaryModal({ isOpen, focusSection = 'overview', onClose }: 
                     </button>
                 </div>
 
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
                     {SUMMARY_SECTIONS.map(([section, label]) => {
                         const active = activeSection === section;
                         return (
@@ -174,7 +174,7 @@ export function WarSummaryModal({ isOpen, focusSection = 'overview', onClose }: 
 
                 {activeSection === 'overview' ? (
                     <>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 10 }}>
                         <Section title="Territory">
                             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                 <thead>
@@ -290,13 +290,13 @@ export function WarSummaryModal({ isOpen, focusSection = 'overview', onClose }: 
                         </div>
                     </>
                 ) : (
-                    <div style={{ maxHeight: '28rem', overflow: 'auto', marginBottom: 16, paddingRight: 4, border: '1px solid rgba(180, 160, 130, 0.18)', borderRadius: 6, padding: 8, background: 'rgba(42, 39, 35, 0.6)' }}>
+                    <div style={{ maxHeight: '26rem', overflow: 'auto', marginBottom: 12, paddingRight: 4, border: '1px solid rgba(180, 160, 130, 0.18)', borderRadius: 6, padding: 8, background: 'rgba(42, 39, 35, 0.6)' }}>
                         <SituationTab state={loadedGameState} focusSection={activeSection} />
                     </div>
                 )}
 
                 {/* Footer */}
-                <div style={{ marginTop: 20, textAlign: 'right' }}>
+                <div style={{ marginTop: 14, textAlign: 'right' }}>
                     <button
                         onClick={onClose}
                         style={{
@@ -319,8 +319,8 @@ export function WarSummaryModal({ isOpen, focusSection = 'overview', onClose }: 
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
     return (
-        <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 10, color: '#8a7d70', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6, borderBottom: '1px solid rgba(180, 160, 130, 0.14)', paddingBottom: 4 }}>
+        <div style={{ marginBottom: 12 }}>
+            <div style={{ fontSize: 10, color: '#8a7d70', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4, borderBottom: '1px solid rgba(180, 160, 130, 0.14)', paddingBottom: 4 }}>
                 {title}
             </div>
             {children}

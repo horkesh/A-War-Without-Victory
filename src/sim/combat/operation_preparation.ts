@@ -118,15 +118,50 @@ export function getOperationIntelConfidence(
         }
     }
 
-    // Best confidence among records whose enemy sector faces our objectives
+    if (objectives.size === 0) {
+        return records.reduce((best, rec) => Math.max(best, rec.confidence), 0);
+    }
+
+    const objectiveEnemySectors = collectObjectiveEnemySectorIds(state, objectives);
+
+    if (objectiveEnemySectors.size === 0) {
+        // Objective-specific intel is only meaningful when we can actually map
+        // the target OSIDs back to enemy sectors. Older or thinner state slices
+        // may not carry that geometry, so fall back to the best facing-sector
+        // record instead of treating the operation as having no usable intel.
+        return records.reduce((best, rec) => Math.max(best, rec.confidence), 0);
+    }
+
     let best = 0;
     for (const rec of records) {
-        // If we have no objectives to match, take any record
-        if (objectives.size === 0 || rec.confidence > best) {
-            best = Math.max(best, rec.confidence);
-        }
+        if (!objectiveEnemySectors.has(rec.enemy_sector_id)) continue;
+        best = Math.max(best, rec.confidence);
     }
+
+    if (best <= 0) {
+        return records.reduce((fallback, rec) => Math.max(fallback, rec.confidence), 0);
+    }
+
     return best;
+}
+
+function collectObjectiveEnemySectorIds(
+    state: GameState,
+    objectives: ReadonlySet<string>,
+): Set<string> {
+    const objectiveEnemySectors = new Set<string>();
+    for (const objective of objectives) {
+        const controller = state.political?.political_controllers?.[objective];
+        if (!controller) continue;
+        const sector = state.military.corps_front_sectors
+            ? Object.values(state.military.corps_front_sectors).find(
+                s => s.faction === controller && (s.territory_osids?.includes(objective)
+                    || s.sub_segments.some(sub => sub.friendly_osids.includes(objective))),
+            )
+            : null;
+        if (sector) objectiveEnemySectors.add(sector.sector_id);
+    }
+    return objectiveEnemySectors;
 }
 
 /**
@@ -148,6 +183,15 @@ export function estimateForceRatio(
     }
     if (ownStrength === 0) return 0;
 
+    const objectives = new Set(op.objectives ?? []);
+    if (objectives.size === 0 && op.axes) {
+        for (const axis of op.axes) {
+            for (const obj of axis.objectives) objectives.add(obj);
+        }
+    }
+
+    const objectiveEnemySectors = collectObjectiveEnemySectorIds(state, objectives);
+
     // Estimate enemy strength from sector data
     let enemyStrength = 0;
     if (op.sector_id && state.military.corps_front_sectors) {
@@ -157,6 +201,7 @@ export function estimateForceRatio(
             const intel = state.military.sector_intel?.[op.sector_id];
             if (intel) {
                 for (const rec of intel) {
+                    if (objectiveEnemySectors.size > 0 && !objectiveEnemySectors.has(rec.enemy_sector_id)) continue;
                     const enemySector = state.military.corps_front_sectors?.[rec.enemy_sector_id];
                     if (!enemySector) continue;
                     // Count enemy brigades in that sector

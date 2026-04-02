@@ -336,6 +336,20 @@ export function normalizeScenario(raw: unknown): Scenario {
         return Object.keys(result).length > 0 ? result : undefined;
     })();
 
+    // Scenario-authored must-hold OSIDs per corps
+    const must_hold_osids_by_corps: Record<string, string[]> | undefined = (() => {
+        const raw = o.must_hold_osids_by_corps;
+        if (raw == null || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
+        const result: Record<string, string[]> = {};
+        for (const [k, v] of Object.entries(raw as Record<string, unknown>)) {
+            if (typeof k === 'string' && Array.isArray(v)) {
+                const osids = (v as unknown[]).filter((x): x is string => typeof x === 'string').sort();
+                if (osids.length > 0) result[k] = osids;
+            }
+        }
+        return Object.keys(result).length > 0 ? result : undefined;
+    })();
+
     // Supply reserves system (Phase A)
     const supply_reserves_enabled = o.supply_reserves_enabled === true ? true : undefined;
 
@@ -432,6 +446,7 @@ export function normalizeScenario(raw: unknown): Scenario {
             war_entrenchment_init_turns,
             war_force_transition_after_turns,
             avoided_osids_by_faction,
+            must_hold_osids_by_corps,
             supply_reserves_enabled,
             initial_osid_controllers,
             osid_control_overrides,
@@ -479,6 +494,7 @@ export function normalizeScenario(raw: unknown): Scenario {
         war_entrenchment_init_turns,
         war_force_transition_after_turns,
         avoided_osids_by_faction,
+        must_hold_osids_by_corps,
         supply_reserves_enabled,
         initial_osid_controllers,
         osid_control_overrides,

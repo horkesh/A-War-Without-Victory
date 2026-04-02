@@ -1,10 +1,12 @@
 /**
- * Local Fronts: defensive sectors composed of contiguous front edges.
+ * Legacy frontline-density helpers.
  *
- * Key mechanic: coverage density. A brigade covering 20 edges is much weaker
- * per-edge than one covering 5. Thin fronts collapse; concentrated fronts hold.
+ * The active engine now treats corps-front sectors as frontline truth.
+ * This file survives for one narrow reason: it still provides the shared
+ * density formula plus a compatibility fallback for older front-assignment
+ * state when sector truth is unavailable.
  *
- * Derived each turn (Engine Invariants §13: no serialization of derived state).
+ * It is no longer the owner of a live "local fronts" runtime layer.
  * Deterministic: sorted iteration via strictCompare, no Math.random().
  */
 
@@ -13,20 +15,15 @@ import type {
     FactionId,
     FormationId,
     FormationState,
-    GameState,
-    LocalFront
+    GameState
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Constants
-// ═══════════════════════════════════════════════════════════════════════════
-
 /** Coverage density: below this ratio, defense power is penalized. */
-const THIN_FRONT_THRESHOLD = 0.5;  // brigades / edges
+const THIN_FRONT_THRESHOLD = 0.5;
 
 /** Coverage density: above this ratio, mutual support bonus applies. */
-const DENSE_FRONT_THRESHOLD = 1.0;  // brigades / edges
+const DENSE_FRONT_THRESHOLD = 1.0;
 
 /** Maximum mutual support bonus for dense fronts. */
 const MAX_DENSITY_BONUS = 1.25;
@@ -34,12 +31,8 @@ const MAX_DENSITY_BONUS = 1.25;
 /** Minimum coverage penalty for very thin fronts. */
 const MIN_COVERAGE_PENALTY = 0.6;
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Defensive Power Calculation
-// ═══════════════════════════════════════════════════════════════════════════
-
 /**
- * Compute brigade power contribution to a local front.
+ * Compute brigade power contribution to a frontage.
  * Uses simplified basePower (personnel × equipment × experience × cohesion × honor).
  */
 function brigadePower(formation: FormationState): number {
@@ -56,22 +49,21 @@ function brigadePower(formation: FormationState): number {
 /**
  * Compute front density modifier.
  * - density < THIN_FRONT_THRESHOLD → penalty (down to MIN_COVERAGE_PENALTY)
- * - density between thresholds → 1.0 (normal)
+ * - density between thresholds → 1.0
  * - density > DENSE_FRONT_THRESHOLD → bonus (up to MAX_DENSITY_BONUS)
- * Exported so attack resolution can apply the same formula to sector-coverage defense.
+ *
+ * Exported so attack resolution and sector coverage can share one formula.
  */
 export function frontDensityModifier(assignedBrigades: number, coverageLength: number): number {
     if (coverageLength <= 0) return 1.0;
     const density = assignedBrigades / coverageLength;
 
     if (density >= DENSE_FRONT_THRESHOLD) {
-        // Linear bonus: 1.0 at threshold → MAX_DENSITY_BONUS at 2× threshold
         const bonusFraction = Math.min(1.0, (density - DENSE_FRONT_THRESHOLD) / DENSE_FRONT_THRESHOLD);
         return 1.0 + bonusFraction * (MAX_DENSITY_BONUS - 1.0);
     }
 
     if (density < THIN_FRONT_THRESHOLD) {
-        // Linear penalty: 1.0 at threshold → MIN_COVERAGE_PENALTY at density=0
         const penaltyFraction = density / THIN_FRONT_THRESHOLD;
         return MIN_COVERAGE_PENALTY + penaltyFraction * (1.0 - MIN_COVERAGE_PENALTY);
     }
@@ -80,11 +72,9 @@ export function frontDensityModifier(assignedBrigades: number, coverageLength: n
 }
 
 /**
- * Compute defensive power for a local front.
+ * Compute defensive power for a frontage from its assigned brigades.
  *
  * defensive_power = sum(brigade_power) × density_modifier / coverage_length
- *
- * Returns per-edge defensive power (higher = harder to attack any edge on this front).
  */
 export function computeLocalFrontDefensivePower(
     formations: Record<FormationId, FormationState>,
@@ -95,9 +85,9 @@ export function computeLocalFrontDefensivePower(
 
     let totalPower = 0;
     for (const brigId of assignedBrigadeIds) {
-        const f = formations[brigId];
-        if (f && f.status === 'active') {
-            totalPower += brigadePower(f);
+        const formation = formations[brigId];
+        if (formation && formation.status === 'active') {
+            totalPower += brigadePower(formation);
         }
     }
 
@@ -105,101 +95,74 @@ export function computeLocalFrontDefensivePower(
     return (totalPower * densityMod) / coverageLength;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Local Front Construction (Bot)
-// ═══════════════════════════════════════════════════════════════════════════
+function findFrontSegment(
+    segments: AssignableFrontSegmentState[],
+    frontId: string
+): AssignableFrontSegmentState | null {
+    return segments.find((segment) => segment.front_id === frontId) ?? null;
+}
 
-/**
- * Build local fronts from assignable front segments and brigade assignments.
- *
- * Each front segment where a faction has assigned brigades becomes a LocalFront.
- * Coverage length = segment edge count. Assigned brigades = those mapped to this segment.
- *
- * Deterministic: processes segments in sorted order by front_id.
- */
-export function buildLocalFronts(state: GameState): Record<string, LocalFront> {
-    const segments = state.military.assignable_front_segments;
-    const assignments = state.military.brigade_front_assignment;
-    const formations = state.military.formations ?? {};
-    const turn = state.meta?.turn ?? 0;
+function countAssignedBrigadesForFront(
+    assignments: Record<string, string | null>,
+    frontId: string
+): number {
+    let assignedCount = 0;
+    for (const brigadeId of Object.keys(assignments).sort(strictCompare)) {
+        if (assignments[brigadeId] === frontId) assignedCount += 1;
+    }
+    return assignedCount;
+}
 
-    if (!segments || !assignments) return {};
+function findSectorDensityModifier(
+    state: GameState,
+    formation: FormationState
+): number | null {
+    const sectors = state.military.corps_front_sectors;
+    if (!sectors) return null;
 
-    const result: Record<string, LocalFront> = {};
-
-    // Group brigades by their assigned front_id
-    const brigadesByFront: Record<string, string[]> = {};
-    const sortedBrigadeIds = Object.keys(assignments).sort(strictCompare);
-    for (const brigId of sortedBrigadeIds) {
-        const frontId = assignments[brigId];
-        if (!frontId) continue; // reserve brigade, not assigned to any front
-        if (!brigadesByFront[frontId]) brigadesByFront[frontId] = [];
-        brigadesByFront[frontId]!.push(brigId);
+    for (const sectorId of Object.keys(sectors).sort(strictCompare)) {
+        const sector = sectors[sectorId]!;
+        if (!sector.assigned_brigade_ids.includes(formation.id)) continue;
+        return frontDensityModifier(sector.assigned_brigade_ids.length, sector.length_edges);
     }
 
-    // Build local front for each segment that has assigned brigades
-    const sortedSegments = [...segments].sort((a, b) => strictCompare(a.front_id, b.front_id));
-    for (const seg of sortedSegments) {
-        const brigIds = brigadesByFront[seg.front_id];
-        if (!brigIds || brigIds.length === 0) continue;
+    return null;
+}
 
-        // Determine faction from first assigned brigade
-        const firstBrig = formations[brigIds[0]!];
-        if (!firstBrig) continue;
-        const faction = firstBrig.faction as FactionId;
+function findLegacyFrontDensityModifier(
+    state: GameState,
+    formation: FormationState
+): number | null {
+    const frontId = state.military.brigade_front_assignment?.[formation.id];
+    if (!frontId) return null;
 
-        const coverageLength = seg.length_edges;
-        const defensivePower = computeLocalFrontDefensivePower(
-            formations,
-            brigIds,
-            coverageLength
-        );
+    const segments = state.military.assignable_front_segments ?? [];
+    const segment = findFrontSegment(segments, frontId);
+    if (!segment) return null;
 
-        result[seg.front_id] = {
-            id: seg.front_id,
-            faction,
-            name: seg.name ?? seg.front_id,
-            created_turn: turn,
-            assigned_brigade_ids: brigIds,
-            edge_ids: seg.edge_ids,
-            coverage_length: coverageLength,
-            defensive_power: defensivePower
-        };
-    }
-
-    return result;
+    const assignments = state.military.brigade_front_assignment ?? {};
+    const assignedCount = countAssignedBrigadesForFront(assignments, frontId);
+    return frontDensityModifier(assignedCount, segment.length_edges);
 }
 
 /**
- * Get the front density modifier for a specific brigade.
+ * Get the frontline density modifier for a specific brigade.
  *
  * Lookup order:
- * 1. brigade_front_assignment (player-facing legacy path)
- * 2. corps_front_sectors (bot/sim path — populated each turn by buildCorpsFrontSectors)
+ * 1. corps_front_sectors (live frontline truth)
+ * 2. brigade_front_assignment (legacy compatibility fallback)
  *
- * Returns 1.0 if brigade is not assigned to any front or sector.
+ * Returns 1.0 if the brigade is not assigned to any live frontline.
  */
 export function getLocalFrontDensityModifier(
     state: GameState,
     formation: FormationState
 ): number {
-    // Path 1: player-assigned front (legacy)
-    const frontId = state.military.brigade_front_assignment?.[formation.id];
-    if (frontId) {
-        const front = state.military.local_fronts?.[frontId];
-        if (front) return frontDensityModifier(front.assigned_brigade_ids.length, front.coverage_length);
-    }
+    const sectorModifier = findSectorDensityModifier(state, formation);
+    if (sectorModifier !== null) return sectorModifier;
 
-    // Path 2: corps sector (bot/sim path)
-    const sectors = state.military.corps_front_sectors;
-    if (sectors) {
-        for (const sid of Object.keys(sectors).sort(strictCompare)) {
-            const sector = sectors[sid]!;
-            if (sector.assigned_brigade_ids.includes(formation.id)) {
-                return frontDensityModifier(sector.assigned_brigade_ids.length, sector.length_edges);
-            }
-        }
-    }
+    const legacyModifier = findLegacyFrontDensityModifier(state, formation);
+    if (legacyModifier !== null) return legacyModifier;
 
     return 1.0;
 }

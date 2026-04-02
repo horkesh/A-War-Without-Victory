@@ -31,6 +31,7 @@ import type {
 
 import { BESIEGED_SURPLUS_HOP_LIMIT } from './allocate.js';
 import { CRITICAL_MORALE_THRESHOLD } from '../combat_math.js';
+import { MAX_EXHAUSTION_FOR_OPERATION } from '../bot_constants.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -58,8 +59,55 @@ export const PLAN_CONCENTRATION_RATE = 2;
 /** Viability score below which a plan is abandoned. */
 const VIABILITY_ABANDON_THRESHOLD = 0.2;
 
+/** Enemy tanks/artillery at or above this threshold force an extra brigade in planning. */
+const HEAVY_ENEMY_TANK_THRESHOLD = 12;
+const HEAVY_ENEMY_ARTILLERY_THRESHOLD = 12;
+const HIGH_AVG_FATIGUE_PCT_FOR_NEW_PLAN = 65;
+
 /** Max BFS hops from brigade location to objective approach OSID (matches emit.ts). */
 const MAX_REACHABILITY_HOPS = 8;
+
+function getEnemyEquipmentBrigadeBump(briefing: CommanderBriefing): number {
+    const summary = briefing.enemy_equipment_summary;
+    if (summary.infantry_only) return 0;
+    if (
+        summary.tanks >= HEAVY_ENEMY_TANK_THRESHOLD ||
+        summary.artillery >= HEAVY_ENEMY_ARTILLERY_THRESHOLD
+    ) {
+        return 1;
+    }
+    return 0;
+}
+
+function getFatigueBlockReason(briefing: CommanderBriefing): string | null {
+    if (briefing.avg_fatigue_pct >= HIGH_AVG_FATIGUE_PCT_FOR_NEW_PLAN) {
+        return `average brigade fatigue ${briefing.avg_fatigue_pct}% too high for a fresh operation`;
+    }
+    return null;
+}
+
+function getCampaignRoleBlockReason(briefing: CommanderBriefing): string | null {
+    if (briefing.campaign_role === 'economy' || briefing.campaign_role === 'contain') {
+        return `campaign role ${briefing.campaign_role} forbids a fresh offensive plan`;
+    }
+    return null;
+}
+
+function getSyncRoleBlockReason(briefing: CommanderBriefing): string | null {
+    if (briefing.campaign_sync_role === 'feint' || briefing.campaign_sync_role === 'fixing') {
+        return `synchronized role ${briefing.campaign_sync_role} forbids a fresh offensive plan`;
+    }
+    return null;
+}
+
+function getPriorityTargetSet(briefing: CommanderBriefing): Set<string> {
+    const syncTargets =
+        briefing.campaign_sync_role === 'main_effort' || briefing.campaign_sync_role === 'supporting'
+            ? briefing.campaign_sync_targets
+            : [];
+    const preferredTargets = syncTargets.length > 0 ? syncTargets : briefing.campaign_offensive_targets;
+    return new Set(preferredTargets);
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // buildCatastrophicOsidCooldownSet — transient cooldown for failed objectives
@@ -137,6 +185,45 @@ export function managePlan(
         return { plan: null, action: 'none', reason: `corps in ${briefing.corps_stance} stance — no new plans`, concentration_orders: [] };
     }
 
+    if (briefing.corps_exhaustion > MAX_EXHAUSTION_FOR_OPERATION) {
+        return {
+            plan: null,
+            action: 'none',
+            reason: `corps exhaustion ${briefing.corps_exhaustion} above operation threshold ${MAX_EXHAUSTION_FOR_OPERATION}`,
+            concentration_orders: [],
+        };
+    }
+
+    const fatigueBlockReason = getFatigueBlockReason(briefing);
+    if (fatigueBlockReason) {
+        return {
+            plan: null,
+            action: 'none',
+            reason: fatigueBlockReason,
+            concentration_orders: [],
+        };
+    }
+
+    const campaignRoleBlockReason = getCampaignRoleBlockReason(briefing);
+    if (campaignRoleBlockReason) {
+        return {
+            plan: null,
+            action: 'none',
+            reason: campaignRoleBlockReason,
+            concentration_orders: [],
+        };
+    }
+
+    const syncRoleBlockReason = getSyncRoleBlockReason(briefing);
+    if (syncRoleBlockReason) {
+        return {
+            plan: null,
+            action: 'none',
+            reason: syncRoleBlockReason,
+            concentration_orders: [],
+        };
+    }
+
     // Guard: if this corps already has a live non-recovery, non-probe op, do not create a new plan.
     // Probes are independent of the plan system (created directly in emit.ts when ops.length === 0)
     // and must not block opportunity plan creation — otherwise corps with only probes running
@@ -149,7 +236,7 @@ export function managePlan(
     }
 
     // Priority 1: pre-planned operations
-    const prePlannedDecision = tryCreateFromPrePlanned(briefing, zones, surplusPool, turn);
+    const prePlannedDecision = tryCreateFromPrePlanned(briefing, zones, surplusPool, forces.tier_counts.main_effort, turn);
     if (prePlannedDecision) return prePlannedDecision;
 
     // Priority 2: opportunity (weak/undefended enemy zone adjacent to surplus)
@@ -309,6 +396,7 @@ function tryCreateFromPrePlanned(
     briefing: CommanderBriefing,
     zones: ZoneAssessment[],
     surplusPool: BrigadeEvaluation[],
+    mainEffortCap: number,
     turn: number,
 ): PlanDecision | null {
     if (!briefing.pre_planned_ops || briefing.pre_planned_ops.length === 0) return null;
@@ -320,11 +408,18 @@ function tryCreateFromPrePlanned(
     const opName = (opDef['name'] as string) ?? 'pre_planned_op';
 
     // Find the best staging zone: zone with most surplus, preferring projecting posture
-    const stagingZone = findBestStagingZone(zones, surplusPool);
+    const stagingZone = findBestStagingZone(briefing, zones, surplusPool);
     if (!stagingZone) return null;
 
-    // Determine required brigades: scale to estimated task, minimum 3
-    const requiredBrigades = Math.max(MIN_BRIGADES_FOR_PLAN, surplusPool.length);
+    // Determine required brigades: scale to main_effort capacity (n1298).
+    // mainEffortCap = tier_counts.main_effort: only brigades capable of offensive ops.
+    // A corps with 2 main_effort brigades out of 10 total deploys 3 (floor), not all 10.
+    const mainEffortLimit = mainEffortCap > 0 ? mainEffortCap : surplusPool.length;
+    const baseRequiredBrigades = Math.max(MIN_BRIGADES_FOR_PLAN, Math.min(mainEffortLimit, surplusPool.length));
+    const requiredBrigades = baseRequiredBrigades + getEnemyEquipmentBrigadeBump(briefing);
+    if (requiredBrigades > surplusPool.length) {
+        return null;
+    }
 
     // Estimate concentration time: 1 turn per 2 brigades that need to move
     const brigadesAlreadyAtStaging = countBrigadesInZone(
@@ -411,24 +506,33 @@ function tryCreateFromOpportunity(
         // Besieged corps can only do local ops
         // Still allow opportunity within hop limit
         const bestZone = eligibleZones[0]!;
-        return createOpportunityPlan(briefing, bestZone, surplusPool, turn, true);
+        return createOpportunityPlan(briefing, bestZone, surplusPool, forces.tier_counts.main_effort, turn, true);
     }
 
     const bestZone = eligibleZones[0]!;
-    return createOpportunityPlan(briefing, bestZone, surplusPool, turn, false);
+    return createOpportunityPlan(briefing, bestZone, surplusPool, forces.tier_counts.main_effort, turn, false);
 }
 
 function createOpportunityPlan(
     briefing: CommanderBriefing,
     stagingZone: ZoneAssessment,
     surplusPool: BrigadeEvaluation[],
+    mainEffortCap: number,
     turn: number,
     isLocal: boolean,
 ): PlanDecision | null {
-    const requiredBrigades = Math.max(
+    // Cap by main_effort tier count (n1298) — corps deploys at most as many brigades as
+    // it has main_effort-capable brigades. Garrison-tier brigades don't belong in assaults.
+    const naturalRequired = Math.min(surplusPool.length, stagingZone.surplus_brigades.length);
+    const mainEffortLimit = mainEffortCap > 0 ? mainEffortCap : naturalRequired;
+    const baseRequiredBrigades = Math.max(
         MIN_BRIGADES_FOR_PLAN,
-        Math.min(surplusPool.length, stagingZone.surplus_brigades.length),
+        Math.min(mainEffortLimit, naturalRequired),
     );
+    const requiredBrigades = baseRequiredBrigades + getEnemyEquipmentBrigadeBump(briefing);
+    if (requiredBrigades > naturalRequired) {
+        return null;
+    }
 
     const assignedBrigades = selectBrigadesForPlan(surplusPool, requiredBrigades);
 
@@ -466,7 +570,7 @@ function createOpportunityPlan(
         objective_description: isLocal
             ? `local opportunity from ${stagingZone.zone_id}`
             : `offensive opportunity from ${stagingZone.zone_id}`,
-        target_osids: selectOpportunityTargets(filteredZone, requiredBrigades),
+        target_osids: selectOpportunityTargets(filteredZone, requiredBrigades, briefing),
         required_brigades: requiredBrigades,
         assigned_brigades: assignedBrigades,
         staging_zone: stagingZone.zone_id,
@@ -496,14 +600,40 @@ function createOpportunityPlan(
 // Helper: select opportunity targets from zone's enemy adjacency
 // ═══════════════════════════════════════════════════════════════════════════
 
+/**
+ * n1301: Select opportunity targets ranked by approach count (strength-based).
+ * Enemy OSIDs with more friendly-zone neighbors are more exposed and thus
+ * preferred attack vectors. Secondary sort: lexicographic for determinism.
+ */
 function selectOpportunityTargets(
     stagingZone: ZoneAssessment,
     requiredBrigades: number,
+    briefing: CommanderBriefing,
 ): string[] {
     const enemyOsids = stagingZone.enemy_adjacent_osids;
     if (enemyOsids.length === 0) return [];
     const maxObjectives = Math.max(1, Math.min(6, Math.floor(requiredBrigades * 0.5)));
-    return [...enemyOsids].sort(strictCompare).slice(0, maxObjectives);
+    const campaignTargetSet = getPriorityTargetSet(briefing);
+
+    // Rank by number of staging-zone OSIDs adjacent to each enemy OSID.
+    // More approach vectors = more exposed target = higher priority.
+    // Guard: adjacency may be absent in unit tests — fall back to lex sort.
+    const zoneOsidSet = new Set(stagingZone.osids);
+    const adjacency = briefing.spatial?.adjacency;
+    const approachCount = (osid: string): number => {
+        if (!adjacency) return 0;
+        const neighbors = adjacency.get(osid as any) ?? [];
+        return (neighbors as readonly string[]).filter(n => zoneOsidSet.has(n)).length;
+    };
+
+    return [...enemyOsids]
+        .sort((a, b) => {
+            const campaignDiff = Number(campaignTargetSet.has(b)) - Number(campaignTargetSet.has(a));
+            if (campaignDiff !== 0) return campaignDiff;
+            const diff = approachCount(b) - approachCount(a); // descending
+            return diff !== 0 ? diff : strictCompare(a, b);
+        })
+        .slice(0, maxObjectives);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -754,6 +884,7 @@ function selectBrigadesForPlan(
 // ═══════════════════════════════════════════════════════════════════════════
 
 function findBestStagingZone(
+    briefing: CommanderBriefing,
     zones: readonly ZoneAssessment[],
     surplusPool: readonly BrigadeEvaluation[],
 ): ZoneAssessment | null {
@@ -765,9 +896,18 @@ function findBestStagingZone(
         besieged: 99,
     };
 
+    const campaignTargetSet = getPriorityTargetSet(briefing);
+    const wantsCampaignPush = briefing.campaign_role === 'primary' || briefing.campaign_role === 'secondary';
+
     const candidates = zones
         .filter(z => z.posture !== 'besieged' && z.front_edge_count > 0)
         .sort((a, b) => {
+            if (wantsCampaignPush && campaignTargetSet.size > 0) {
+                const aMatches = a.enemy_adjacent_osids.some(osid => campaignTargetSet.has(osid)) ? 1 : 0;
+                const bMatches = b.enemy_adjacent_osids.some(osid => campaignTargetSet.has(osid)) ? 1 : 0;
+                const matchDiff = bMatches - aMatches;
+                if (matchDiff !== 0) return matchDiff;
+            }
             // 1. Posture priority
             const posA = posturePriority[a.posture] ?? 99;
             const posB = posturePriority[b.posture] ?? 99;

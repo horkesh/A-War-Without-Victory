@@ -15,6 +15,90 @@ import { getCoEthnicShare } from '../ethnic_defense.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import type { ZoneAssessment, ZoneId, ZonePosture } from './commander_state.js';
 import { GARRISON_EDGES_PER_BRIGADE } from './allocate.js';
+import type { FactionGraphAnalysis } from '../osid_graph_analysis.js';
+
+/**
+ * Minimum fraction of faction-total friendly OSIDs that must be isolated by
+ * removing a chokepoint for the zone to be flagged as must_hold.
+ * 0.05 = 5% of faction territory: ~18 OSIDs for RS (~350), ~10 for RBiH (~200).
+ * Filters minor valley chokepoints; only strategic corridors (Brcko-scale) qualify.
+ */
+const MUST_HOLD_MIN_ISOLATED_FRACTION = 0.05;
+
+/**
+ * BFS count of reachable OSIDs from `source` through `friendlySet`, excluding
+ * `excludeOsid`. Used to measure the cluster size isolated by a chokepoint removal.
+ */
+function bfsCountExcluding(
+    source: string,
+    friendlySet: ReadonlySet<string>,
+    adjacency: ReadonlyMap<string, readonly string[]>,
+    excludeOsid: string,
+): number {
+    const visited = new Set<string>([source]);
+    let frontier = [source];
+    while (frontier.length > 0) {
+        const next: string[] = [];
+        for (const osid of frontier) {
+            for (const n of (adjacency.get(osid) ?? [])) {
+                if (!visited.has(n) && friendlySet.has(n) && n !== excludeOsid) {
+                    visited.add(n);
+                    next.push(n);
+                }
+            }
+        }
+        frontier = next;
+    }
+    return visited.size;
+}
+
+interface FriendlyComponentFacts {
+    members: Set<string>;
+    hasZoneOsid: boolean;
+    hasOutsideCorpsOsid: boolean;
+}
+
+function collectFriendlyComponentsExcluding(
+    friendlySet: ReadonlySet<string>,
+    adjacency: ReadonlyMap<string, readonly string[]>,
+    excludeOsid: string,
+    zoneOsidSet: ReadonlySet<string>,
+    corpsOsidSet: ReadonlySet<string>,
+): FriendlyComponentFacts[] {
+    const visited = new Set<string>();
+    const components: FriendlyComponentFacts[] = [];
+
+    const sortedFriendly = [...friendlySet].sort(strictCompare);
+    for (const source of sortedFriendly) {
+        if (source === excludeOsid || visited.has(source)) continue;
+
+        const members = new Set<string>([source]);
+        let frontier = [source];
+        visited.add(source);
+        let hasZoneOsid = zoneOsidSet.has(source);
+        let hasOutsideCorpsOsid = !corpsOsidSet.has(source);
+
+        while (frontier.length > 0) {
+            const next: string[] = [];
+            for (const osid of frontier) {
+                for (const n of (adjacency.get(osid) ?? [])) {
+                    if (n === excludeOsid || visited.has(n) || !friendlySet.has(n)) continue;
+                    visited.add(n);
+                    members.add(n);
+                    if (zoneOsidSet.has(n)) hasZoneOsid = true;
+                    if (!corpsOsidSet.has(n)) hasOutsideCorpsOsid = true;
+                    next.push(n);
+                }
+            }
+            next.sort(strictCompare);
+            frontier = next;
+        }
+
+        components.push({ members, hasZoneOsid, hasOutsideCorpsOsid });
+    }
+
+    return components;
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // detectZones — partition corps territory into connected zones
@@ -32,6 +116,8 @@ export function detectZones(
     spatial: SpatialContext,
     sectors: CorpsFrontSector[],
     ethnicMap: OsidEthnicComposition | null,
+    graphAnalysis: FactionGraphAnalysis | null = null,
+    mustHoldOsids: ReadonlySet<string> = new Set(),
 ): ZoneAssessment[] {
     // 1. Get connected component map for this faction
     const componentMap = spatial.componentsByFaction.get(faction);
@@ -149,9 +235,49 @@ export function detectZones(
         // Surplus brigade IDs (last N by sorted order — those beyond garrison budget)
         const surplusBrigades = surplus > 0 ? assignedBrigadeIds.slice(garrisonBudget) : [];
 
-        const isMustHold = sectors.some(
-            sec => sec.must_hold === true && sec.territory_osids.some(o => zoneOsidSet.has(o))
-        );
+        // Track 1: scenario-authored must_hold.
+        // Primary: any zone OSID in the scenario-authored mustHoldOsids set (from briefing).
+        // Fallback: sector.must_hold flag (set by external tooling or future player UI).
+        const scenarioMustHold = (mustHoldOsids.size > 0 && zoneOsids.some(o => mustHoldOsids.has(o)))
+            || sectors.some(sec => sec.must_hold === true && sec.territory_osids.some(o => zoneOsidSet.has(o)));
+
+        // Track 2: engine-derived — zone contains a structural chokepoint whose removal
+        // would isolate at least MUST_HOLD_MIN_CLUSTER_SIZE friendly OSIDs.
+        const chokepointSet = new Set(graphAnalysis?.chokepoints ?? []);
+        const minIsolated = Math.ceil(allFriendlyOsids.size * MUST_HOLD_MIN_ISOLATED_FRACTION);
+        // DISABLED: fraction-of-faction-total can't separate RS Brcko (~9%) from ARBiH Central
+        // Bosnia valley passes (~8%) — both fall in the same range, so any threshold either
+        // over-garrisons ARBiH 4th Corps (cascade → depletion) or misses Brcko.
+        // Fix needed: replace fraction with absolute OSID count OR corps-boundary discriminator
+        // (only fire if isolated cluster spans a different corps jurisdiction).
+        // Track this as a P1 calibration item: run 40w scenario with logging to measure
+        // actual Posavina pocket size vs ARBiH valley cluster sizes.
+        const engineMustHold = chokepointSet.size > 0 && zoneOsids.some(osid => {
+            if (!chokepointSet.has(osid)) return false;
+            const neighbors = (spatial.adjacency.get(osid as string) ?? [])
+                .filter((n: string) => allFriendlyOsids.has(n) && n !== osid);
+            if (neighbors.length < 2) return false;
+
+            const adj = spatial.adjacency as ReadonlyMap<string, readonly string[]>;
+            const components = collectFriendlyComponentsExcluding(
+                allFriendlyOsids,
+                adj,
+                osid,
+                zoneOsidSet,
+                corpsOsidSet,
+            );
+
+            const zoneComponent = components.find(component => component.hasZoneOsid);
+            if (!zoneComponent) return false;
+
+            return components.some(component =>
+                component !== zoneComponent &&
+                component.hasOutsideCorpsOsid &&
+                component.members.size >= minIsolated
+            );
+        });
+
+        const isMustHold = scenarioMustHold || engineMustHold;
 
         zones.push({
             zone_id: zoneId,

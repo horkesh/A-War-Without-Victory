@@ -1,8 +1,10 @@
 /**
- * Stage 3: Brigade-derived pressure computation.
+ * Legacy brigade-derived pressure computation.
  *
- * Brigades are the primary source of front pressure in War phase.
- * Pressure = f(density, posture, composition, cohesion, supply, resilience, corps bonus).
+ * This module is still wired into the war pipeline, but it is currently a
+ * dormant compatibility layer: front-edge deltas resolve to zero while the
+ * real front-pressure truth lives elsewhere. Keep that fact explicit so future
+ * work does not mistake this file for the active pressure owner.
  *
  * Deterministic: no randomness.
  */
@@ -116,7 +118,9 @@ export function computeBrigadeDefense(
 
 /**
  * Compute brigade-derived pressure for all front edges.
- * Used in War phase to replace the edge-posture-based system.
+ *
+ * Current contract: returns a structurally valid zero-delta report so older
+ * pipeline steps can execute without mutating live front-pressure truth.
  */
 export function computeBrigadePressureByEdge(
     state: GameState,
@@ -153,42 +157,16 @@ export function computeBrigadePressureByEdge(
 }
 
 /**
- * Apply brigade-derived pressure to the front_pressure state.
- * Called from the turn pipeline when War phase is active and brigade_aor exists.
+ * Consume the legacy brigade-pressure path without mutating canonical pressure.
+ *
+ * The canonical front-pressure owner is `state/front_pressure.ts`.
+ * This compatibility sink remains only so older callers can invoke it safely
+ * without creating a second writer or silently bumping pressure timestamps.
  */
 export function applyBrigadePressureToState(
-    state: GameState,
-    edges: EdgeRecord[]
+    _state: GameState,
+    _edges: EdgeRecord[]
 ): void {
-    const pc = state.political.political_controllers ?? {};
-
-    // Collect front edges
-    const frontEdges: Array<{ a: SettlementId; b: SettlementId }> = [];
-    for (const edge of edges) {
-        const controlA = pc[edge.a];
-        const controlB = pc[edge.b];
-        if (controlA && controlB && controlA !== controlB) {
-            frontEdges.push(edge);
-        }
-    }
-
-    const pressureResult = computeBrigadePressureByEdge(state, frontEdges, edges);
-
-    // Update front_pressure state
-    if (!state.military.front_pressure) state.military.front_pressure = {};
-    for (const [eid, pressure] of Object.entries(pressureResult.edge_pressure)) {
-        const existing = state.military.front_pressure[eid];
-        if (existing) {
-            existing.value += Math.round(pressure.delta);
-            existing.max_abs = Math.max(existing.max_abs, Math.abs(existing.value));
-            existing.last_updated_turn = state.meta.turn;
-        } else {
-            state.military.front_pressure[eid] = {
-                edge_id: eid,
-                value: Math.round(pressure.delta),
-                max_abs: Math.abs(Math.round(pressure.delta)),
-                last_updated_turn: state.meta.turn
-            };
-        }
-    }
+    // Intentionally inert. Older callers may still route through this helper,
+    // but live front-pressure truth must come from the canonical state owner.
 }

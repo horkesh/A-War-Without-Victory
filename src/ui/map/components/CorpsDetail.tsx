@@ -14,7 +14,8 @@ import { getFormationCommander } from '../utils/officerUtils';
 import { OfficerProfile } from './OfficerProfile';
 import { BrigadeRow } from './BrigadeRow';
 import { TabBar } from './TabBar';
-import { toTitleCase } from '../utils/formatters';
+import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
+import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
 import { aggregateEffectiveness } from '../utils/combatEffectiveness';
 import { Icon } from './icons/Icon';
 
@@ -97,7 +98,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
         style={getPanelRailStyle(railSlot, '24rem', 'left')}
       >
         <div className="h-10 bg-panel-card border-b border-panel-border panel-shimmer" />
-        <div className="p-4 space-y-4">
+        <div className="p-3 space-y-3">
           <div className="h-6 w-3/4 bg-panel-card rounded panel-shimmer" />
           <div className="space-y-2">
             <div className="h-4 w-full bg-panel-card rounded panel-shimmer" />
@@ -116,7 +117,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
   const corpsColor = corpsColorMap[selectedCorpsId] ?? '#888';
   const totalPersonnel = subordinates.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
   const corpsDisplayName = corpsFormation.name === corpsFormation.id
-    ? toTitleCase(corpsFormation.name.replace(/^(RS|RBiH|HRHB)_/i, ''))
+    ? getPlayerSafeCorpsName(null, corpsFormation.id)
     : corpsFormation.name;
 
   const tabs = [
@@ -151,7 +152,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
       style={getPanelRailStyle(railSlot, '24rem', 'left')}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card border-b border-panel-border shrink-0">
+      <div className="flex items-center justify-between px-3 py-2 bg-panel-card border-b border-panel-border shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           <span className="inline-block w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: corpsColor }} />
           <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold truncate">
@@ -178,10 +179,10 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
 
         {/* ── OVERVIEW ── */}
         {activeTab === 'overview' && (
-          <div className="p-4 space-y-4">
+          <div className="p-3 space-y-3">
             <div className="text-text-secondary text-[11px]">
               <span className={FACTION_COLORS[corpsFormation.faction] ?? 'text-text-primary'}>
-                {corpsFormation.faction}
+                {getPlayerSafeMilitaryFactionName(corpsFormation.faction)}
               </span>
               {' · '}
               <span className="capitalize">{corpsFormation.corpsStance ?? 'unknown'}</span>
@@ -310,7 +311,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
         {activeTab === 'orbat' && (
           <div className="py-1">
             {subordinates.length === 0 ? (
-              <div className="p-4 text-text-secondary italic text-xs">No subordinate brigades.</div>
+              <div className="p-3 text-text-secondary italic text-xs">No subordinate brigades.</div>
             ) : (
               [...subordinates]
                 .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
@@ -339,7 +340,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
 
         {/* ── SECTORS ── */}
         {activeTab === 'sectors' && (
-          <div className="p-4 space-y-1">
+          <div className="p-3 space-y-1">
             {corpsSectors.length === 0 ? (
               <div className="text-text-secondary italic text-xs">No sectors assigned.</div>
             ) : (
@@ -395,7 +396,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
 
         {/* ── OPS ── */}
         {activeTab === 'ops' && (
-          <div className="p-4 space-y-3">
+          <div className="p-3 space-y-2.5">
             {corpsOps.length === 0 ? (
               <div className="text-text-secondary italic text-xs">No active operations.</div>
             ) : (
@@ -482,7 +483,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
 
         {/* ── ORDERS ── */}
         {activeTab === 'orders' && (
-          <div className="p-4 space-y-4">
+          <div className="p-3 space-y-3">
             <div>
               <div className="text-[10px] text-text-secondary uppercase tracking-widest font-bold mb-2">
                 Corps Stance
@@ -508,7 +509,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
               </div>
             </div>
 
-            <div className="border-t border-panel-border pt-4">
+            <div className="border-t border-panel-border pt-3">
               <div className="text-[10px] text-text-secondary uppercase tracking-widest font-bold mb-2">
                 Operations
               </div>

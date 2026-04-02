@@ -494,6 +494,12 @@ export interface CorpsCommandState {
     status_reason?: string;
     /** Diagnostic: gate audit trace for operation launch evaluation. */
     op_launch_trace?: string[];
+    /** Latest commander-generated reinforcement pressure signals for Army HQ consumption. */
+    commander_reinforcement_requests?: Array<{
+        zone_id: string;
+        brigades_needed: number;
+        priority: 'critical' | 'high' | 'medium' | 'low';
+    }>;
     /** Persistent commander state for v0.8 intelligent corps AI. */
     commander_state?: CommanderState;
 }
@@ -1561,9 +1567,11 @@ export interface GameState {
 }
 
 /**
- * Local front: a defensive sector composed of contiguous front edges, with
- * assigned brigades whose power is diluted by coverage length.
- * Derived each turn (Engine Invariants §13: no serialization of derived state).
+ * Legacy local-front compatibility shape.
+ *
+ * Historical saves may still carry this cache, but the live engine no longer
+ * rebuilds or relies on a `local_fronts` runtime layer. Corps-front sectors are
+ * the active frontline authority.
  */
 export interface LocalFront {
     id: string;                       // e.g. "front_rs_drina_north"
@@ -1686,19 +1694,21 @@ war_jna?: JNATransitionState;
 siege_turn_counters?: Record<string, number>;
 /** General supply reserves per faction [0..100]. Consumed by maintenance; replenished by facilities/patron. */
 general_supply_reserve?: Record<FactionId, number>;
+/** Scenario-authored must-hold OSIDs per corps. Set once at scenario load; read by commander briefing. Key: corps_id. */
+must_hold_osids_by_corps?: Record<string, string[]>;
 /** Heavy munitions reserves per faction [0..100]. Consumed by combat; replenished by ammo facilities/patron. */
 heavy_munitions_reserve?: Record<FactionId, number>;
 /** Canonical front-edge snapshot for GUI rendering and deterministic diagnostics. */
 front_edges?: FrontEdgeState[];
 /** OSID front-edge snapshot (War phase operational view) for HoI/OSID consumers. */
 war_front_edges_osid?: FrontEdgeState[];
-/** HoI-style assignable front segments derived from canonical front_edges. */
+/** Legacy compatibility snapshot derived from canonical front_edges for old front-assignment consumers. */
 assignable_front_segments?: AssignableFrontSegmentState[];
-/** HoI-style brigade assignment to an assignable front segment. null = reserve. */
+/** Legacy compatibility fallback only. Null = reserve; sectors/front edges are the live frontline truth. */
 brigade_front_assignment?: Record<FormationId, string | null>;
-/** HoI-style top-level theatre model. */
+/** Legacy theatre compatibility state. Not a live player-shell or turn-pipeline authority. */
 theatres?: Record<string, TheatreState>;
-/** Army (army_hq) to theatre assignment map. */
+/** Legacy theatre compatibility assignment. Preserved only for old saves/tools. */
 army_theatre_assignment?: Record<FormationId, string>;
 /**
      * Corps front assignment (HoI-style): per-corps normalized edge_ids (e.g. "S1__S2").
@@ -1707,7 +1717,7 @@ army_theatre_assignment?: Record<FormationId, string>;
 corps_front_edges?: Record<FormationId, string[]>;
 /** Optional fallback front lines for controlled withdrawal. */
 corps_fallback_front_edges?: Record<FormationId, string[]>;
-/** Player/bot desired AoR settlement cap per brigade (1–4). When set, overrides personnel-based cap. (Legacy; AoR removed.) */
+/** Legacy AoR tuning compatibility field. Do not expose in the live player shell and do not write new values. */
 brigade_desired_aor_cap?: Record<FormationId, number>;
 /** Pending brigade posture orders (consumed once per turn). */
 brigade_posture_orders?: BrigadePostureOrder[];
@@ -1740,7 +1750,7 @@ settlement_holdouts?: Record<SettlementId, SettlementHoldoutState>;
 recruitment_state?: RecruitmentResourceState;
 /** Cumulative casualty ledger (killed, wounded, missing/captured) per faction and formation. */
 casualty_ledger?: CasualtyLedger;
-/** Local fronts: bot/player-defined defensive sectors with coverage-based power. Derived each turn. */
+/** Legacy compatibility cache only. No longer rebuilt in the live war pipeline. */
 local_fronts?: Record<string, LocalFront>;
 /** Corps front sectors: per-corps slices of hostile boundary. Derived each turn (Engine Invariants §13). */
 corps_front_sectors?: Record<string, CorpsFrontSector>;

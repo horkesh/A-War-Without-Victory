@@ -1,5 +1,12 @@
 # Morning Report — Night Shift 2026-03-30
 
+> Historical session artifact. Useful for archaeology, not current architecture authority or current project status.
+>
+> For live project truth, use:
+> - `docs/plans/MASTER_ROADMAP.md`
+> - `docs/PROJECT_LEDGER.md`
+> - `docs/20_engineering/PRODUCT_ARCHITECTURE_AUTHORITY.md`
+
 ## Summary
 Built the complete v0.8 Corps Commander Intelligence system in one shift: 10 new files (~3,800 lines), 11 commits, 41 tests. Calibration: **92.2% area-weighted** (tied ATH), up from 90.2% baseline. Architecture: PERCEIVE->DECIDE->EXECUTE per-corps commander loop. **Critical finding: war goes silent after week 20** (19 consecutive zero-combat weeks). War-or-Game: NOT APPROVED — territory correct, combat activity catastrophically reduced.
 

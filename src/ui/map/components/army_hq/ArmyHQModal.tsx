@@ -16,6 +16,7 @@ import { ExhaustionClock } from './ExhaustionClock';
 import { aggregateEffectiveness } from '../../utils/combatEffectiveness';
 import { getArmyCrest, getArmyName } from '../../utils/factionAssets';
 import { turnToDateString } from '../../utils/formatters';
+import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
 import { WarSummaryContent } from './WarSummaryContent';
 import { RecordsContent } from './RecordsContent';
 import { PersonnelContent } from './PersonnelContent';
@@ -160,9 +161,9 @@ export function ArmyHQModal() {
 
             <div className="relative flex-1 flex flex-col h-full overflow-hidden bg-panel-bg text-text-primary">
 
-                <div className="flex items-center justify-between px-6 py-2.5 shrink-0 border-b border-panel-border bg-panel-card">
+                <div className="flex items-center justify-between px-3 py-1 shrink-0 border-b border-panel-border bg-panel-card">
                     {/* Left: back/close + crest + title */}
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
                         <button
                             type="button"
                             onClick={() => {
@@ -172,20 +173,23 @@ export function ArmyHQModal() {
                                     setOpen(false);
                                 }
                             }}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-text-secondary border border-panel-border rounded-md hover:bg-panel-hover hover:text-text-primary transition-colors"
+                            className="flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-text-secondary border border-panel-border rounded-md hover:bg-panel-hover hover:text-text-primary transition-colors"
                         >
                             {expandedCorpsId ? '← BACK' : '← MAP'}
                         </button>
                         {crestSrc && (
-                            <img src={crestSrc} alt="" className="w-10 h-10 object-contain opacity-80" draggable={false} />
+                            <img src={crestSrc} alt="" className="w-8 h-8 object-contain opacity-80" draggable={false} />
                         )}
                         <div>
-                            <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold">
+                            <div className="text-[8px] uppercase tracking-[0.22em] text-text-secondary font-bold">
                                 {expandedCorpsId ? `${getArmyName(faction) ?? faction} HQ` : (FACTION_DISPLAY[faction] ?? faction)}
                             </div>
-                            <div className="text-[16px] font-bold uppercase tracking-wide text-text-primary">
+                            <div className="text-[14px] font-bold uppercase tracking-[0.04em] text-text-primary leading-tight">
                                 {expandedCorpsId
-                                    ? data?.corpsFormations.find(c => c.id === expandedCorpsId)?.name ?? expandedCorpsId
+                                    ? getPlayerSafeCorpsName(
+                                        data?.corpsFormations.find(c => c.id === expandedCorpsId)?.name,
+                                        expandedCorpsId,
+                                    )
                                     : `${getArmyName(faction) ?? faction} MAIN STAFF`
                                 }
                             </div>
@@ -193,7 +197,7 @@ export function ArmyHQModal() {
                     </div>
 
                     {/* Right: emergency posture + situation + close */}
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
                         {!expandedCorpsId && ipc.isAvailable && (
                             <select
                                 defaultValue=""
@@ -203,7 +207,7 @@ export function ArmyHQModal() {
                                         e.target.value = '';
                                     }
                                 }}
-                                className="text-[10px] font-bold uppercase bg-panel-bg text-amber-400 border border-amber-400/50 rounded-md px-3 py-1.5 cursor-pointer focus:outline-none focus:border-amber-400 hover:bg-amber-400/10 transition-colors"
+                                className="text-[9px] font-bold uppercase bg-panel-bg text-amber-400 border border-amber-400/50 rounded-md px-2 py-0.5 cursor-pointer focus:outline-none focus:border-amber-400 hover:bg-amber-400/10 transition-colors"
                             >
                                 <option value="" disabled>EMERGENCY POSTURE</option>
                                 <option value="defensive">ALL DEFENSIVE</option>
@@ -213,30 +217,30 @@ export function ArmyHQModal() {
                             </select>
                         )}
                         <div className="text-right">
-                            <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold">
+                            <div className="text-[8px] uppercase tracking-[0.22em] text-text-secondary font-bold">
                                 STRATEGIC SITUATION
                             </div>
-                            <div className="text-[13px] font-bold text-text-primary tabular-nums">
+                            <div className="text-[12px] font-bold text-text-primary tabular-nums">
                                 Week {state.turn} {`\u2014 ${turnToDateString(state.turn ?? 0)}`}
                             </div>
                         </div>
                         <button
                             type="button"
                             onClick={() => { setExpandedCorpsId(null); setOpen(false); }}
-                            className="text-text-secondary hover:text-text-primary text-[20px] leading-none transition-colors px-1"
+                            className="text-text-secondary hover:text-text-primary text-[18px] leading-none transition-colors px-1"
                         >
                             &times;
                         </button>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-0.5 px-6 py-1.5 bg-panel-bg border-b border-panel-border shrink-0">
+                <div className="flex items-center gap-0.5 px-3 py-0.5 bg-panel-bg border-b border-panel-border shrink-0">
                     {HQ_TABS.map(({ id, label }) => (
                         <button
                             key={id}
                             type="button"
                             onClick={() => setActiveTab(id)}
-                            className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] rounded-md transition-all ${
+                            className={`px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.15em] rounded-md transition-all ${
                                 activeTab === id
                                     ? 'bg-amber-400/15 text-amber-400 border border-amber-400/30'
                                     : 'text-text-secondary hover:text-text-primary hover:bg-white/5 border border-transparent'
@@ -247,17 +251,17 @@ export function ArmyHQModal() {
                     ))}
                 </div>
 
-                <div className="relative flex-1 overflow-y-auto px-6 pt-4 pb-6">
+                <div className="relative flex-1 overflow-y-auto px-3 pt-2 pb-3">
 
                     {/* ═══ BRIEFING TAB ═══ */}
                     {activeTab === 'briefing' && (
                         <>
                             {/* Top section: Commander | CoS Brief | Crest | Strategic Position */}
                             {!expandedCorpsId && (
-                                <div className="grid grid-cols-1 gap-3 mb-4 items-start lg:grid-cols-12 lg:gap-4">
+                                <div className="grid grid-cols-1 gap-1.5 mb-2 items-start lg:grid-cols-12 lg:gap-2">
                                     {/* Commander */}
-                                    <div className="bg-panel-card border border-panel-border rounded-lg p-3 lg:col-span-3">
-                                        <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-2 pb-1.5 border-b border-panel-border">
+                                    <div className="bg-panel-card border border-panel-border rounded-lg p-2 lg:col-span-3">
+                                        <div className="text-[8px] uppercase tracking-[0.22em] text-text-secondary font-bold mb-1 pb-1 border-b border-panel-border">
                                             COMMANDER
                                         </div>
                                         {data.commander ? (
@@ -267,7 +271,7 @@ export function ArmyHQModal() {
                                                 No commander data available
                                             </div>
                                         )}
-                                        <div className="mt-2 grid grid-cols-3 gap-1.5">
+                                            <div className="mt-1 grid grid-cols-3 gap-1">
                                             <div className="rounded border border-panel-border bg-panel-bg px-1.5 py-1">
                                                 <div className="text-[8px] uppercase tracking-wide text-text-secondary">Critical</div>
                                                 <div className="text-[11px] font-bold text-red-400">
@@ -300,16 +304,16 @@ export function ArmyHQModal() {
                                     </div>
 
                                     {/* Army Crest */}
-                                    <div className="flex flex-col items-center justify-center px-2 py-1 select-none lg:col-span-2">
+                                        <div className="flex flex-col items-center justify-center px-1 py-0.5 select-none lg:col-span-2">
                                         {crestSrc && (
                                             <img
                                                 src={crestSrc}
                                                 alt={`${FACTION_DISPLAY[faction] ?? faction} crest`}
-                                                className="w-[96px] h-[96px] lg:w-[108px] lg:h-[108px] object-contain drop-shadow-lg"
+                                                className="w-[72px] h-[72px] lg:w-[84px] lg:h-[84px] object-contain drop-shadow-lg"
                                                 draggable={false}
                                             />
                                         )}
-                                        <div className="text-[9px] uppercase tracking-[0.15em] text-text-secondary mt-1.5 text-center leading-relaxed">
+                                        <div className="text-[8px] uppercase tracking-[0.13em] text-text-secondary mt-1 text-center leading-relaxed">
                                             {FACTION_DISPLAY[faction] ?? faction}
                                         </div>
                                     </div>
@@ -343,11 +347,11 @@ export function ArmyHQModal() {
 
                             {/* Corps Cards */}
                             <div>
-                                <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-3 pb-1.5 border-b border-panel-border">
+                                <div className="text-[8px] uppercase tracking-[0.22em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
                                     ALL CORPS ({data.corpsFormations.length})
                                 </div>
 
-                                <div className={`grid gap-3 ${expandedCorpsId
+                                <div className={`grid gap-2 ${expandedCorpsId
                                     ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6'
                                     : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5'
                                 }`}>

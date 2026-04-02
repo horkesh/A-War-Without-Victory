@@ -2,6 +2,8 @@
 
 This file defines which UI surface canonically owns which player-facing concept.
 
+For shell hierarchy and handoff rules between Warroom, Tactical Map, Army HQ, and Codex, see [PRODUCT_SHELL_HIERARCHY.md](PRODUCT_SHELL_HIERARCHY.md).
+
 ## Purpose
 
 One concept should have one canonical UI owner.
@@ -75,7 +77,11 @@ Other surfaces may summarize or link to it, but they do not become co-owners of 
 
 - `operations`
   - canonical owner: Army HQ / command review flow
-  - tactical map may visualize, but should not become a second operations truth
+  - tactical map may visualize via field snapshots, but should not become a second operations truth
+
+- `AAR / operation history`
+  - canonical owner: Army HQ `RECORDS`
+  - other shells may link into it, but should not reopen orphan history ownership elsewhere
 
 - `return from standalone tactical map`
   - canonical owner: Warroom shell

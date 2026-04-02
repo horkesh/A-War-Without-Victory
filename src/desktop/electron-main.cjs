@@ -795,63 +795,6 @@ app.whenReady().then(() => {
     }
   });
 
-  ipcMain.handle('assign-brigade-to-front', async (_event, payload) => {
-    const { brigadeId, frontId } = payload || {};
-    const normalizedFrontId = frontId == null ? null : String(frontId);
-    if (!currentGameStateJson || typeof brigadeId !== 'string') {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      const result = sim.assignBrigadeToFront(state, brigadeId, normalizedFrontId);
-      if (!result.ok) return result;
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
-  });
-
-  ipcMain.handle('rename-front-segment', async (_event, payload) => {
-    const { frontId, name } = payload || {};
-    const normalizedName = name == null ? null : String(name);
-    if (!currentGameStateJson || typeof frontId !== 'string') {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      const result = sim.renameFrontSegment(state, frontId, normalizedName);
-      if (!result.ok) return result;
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
-  });
-
-  ipcMain.handle('rename-theatre', async (_event, payload) => {
-    const { theatreId, name } = payload || {};
-    const normalizedName = name == null ? null : String(name);
-    if (!currentGameStateJson || typeof theatreId !== 'string') {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      const result = sim.renameTheatre(state, theatreId, normalizedName);
-      if (!result.ok) return result;
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
-  });
-
   ipcMain.handle('stage-corps-front-order', async (_event, payload) => {
     const { corpsId, edgeIds } = payload || {};
     if (!currentGameStateJson || typeof corpsId !== 'string' || !Array.isArray(edgeIds)) {
@@ -909,31 +852,6 @@ app.whenReady().then(() => {
     }
   });
 
-  ipcMain.handle('set-brigade-desired-aor-cap', async (_event, payload) => {
-    const { brigadeId, cap } = payload || {};
-    if (!currentGameStateJson || typeof brigadeId !== 'string') {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    const clearCap = typeof cap !== 'number' || cap < 1;
-    const capped = clearCap ? 0 : Math.min(4, Math.max(1, Math.floor(cap)));
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      if (!state.brigade_desired_aor_cap) state.brigade_desired_aor_cap = {};
-      if (clearCap) {
-        delete state.brigade_desired_aor_cap[brigadeId];
-        if (Object.keys(state.brigade_desired_aor_cap).length === 0) delete state.brigade_desired_aor_cap;
-      } else {
-        state.brigade_desired_aor_cap[brigadeId] = capped;
-      }
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
-  });
-
   ipcMain.handle('stage-brigade-movement-order', async (_event, payload) => {
     const { brigadeId, targetSettlementIds } = payload || {};
     if (!currentGameStateJson || typeof brigadeId !== 'string' || !Array.isArray(targetSettlementIds)) {
@@ -951,30 +869,6 @@ app.whenReady().then(() => {
       if (!state.brigade_movement_orders) state.brigade_movement_orders = {};
       state.brigade_movement_orders[brigadeId] = { destination_sids: [...sids].sort() };
       if (state.brigade_mun_orders) delete state.brigade_mun_orders[brigadeId];
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
-  });
-
-  ipcMain.handle('stage-brigade-reposition-order', async (_event, payload) => {
-    const { brigadeId, settlementIds } = payload || {};
-    if (!currentGameStateJson || typeof brigadeId !== 'string' || !Array.isArray(settlementIds)) {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    const sids = settlementIds.filter(s => typeof s === 'string');
-    if (sids.length === 0) return { ok: false, error: 'At least one settlement required' };
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      const result = await sim.validateBrigadeRepositionOrder(state, brigadeId, sids, getBaseDir());
-      if (!result.valid) {
-        return { ok: false, error: result.error || 'Invalid reposition order' };
-      }
-      if (!state.brigade_reposition_orders) state.brigade_reposition_orders = {};
-      state.brigade_reposition_orders[brigadeId] = { settlement_ids: [...sids].sort() };
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);
       return { ok: true };

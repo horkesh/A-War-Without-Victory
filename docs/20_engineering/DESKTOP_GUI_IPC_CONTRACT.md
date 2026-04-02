@@ -9,7 +9,7 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 - Renderer consumers: `src/ui/warroom/warroom.ts`, `src/ui/map/MapApp.ts` (via embedded iframe)
 - Sim adapter: `src/desktop/desktop_sim.ts`
 
-**State contract (front assignment and theatres):** The same serialized `GameState` is pushed to all renderers via `game-state-updated`. It includes `front_edges`, `assignable_front_segments`, `brigade_front_assignment`, `theatres`, `army_theatre_assignment`, and `military.campaign_plans` (read-only; CampaignPlan objects produced by Army HQ Gathering — see `army_hq_gathering.ts`). The 2D tactical map and 3D operational map both read these from the same payload; see [TACTICAL_MAP_SYSTEM.md](TACTICAL_MAP_SYSTEM.md) §10.4 for single-source and verification.
+**State contract (current player shell):** The same serialized `GameState` is pushed to all renderers via `game-state-updated`. The raw payload may still contain compatibility-era state such as `assignable_front_segments`, `brigade_front_assignment`, `theatres`, and `army_theatre_assignment`, but the live tactical-map `LoadedGameState` must treat those as compatibility/history residue rather than active shell concepts. The current player shell centers on canonical front edges, corps sectors, sector overrides, and `military.campaign_plans` (read-only; CampaignPlan objects produced by Army HQ Gathering — see `army_hq_gathering.ts`). See [TACTICAL_MAP_SYSTEM.md](TACTICAL_MAP_SYSTEM.md) §10.4 for current single-source notes.
 
 **Derived adapter fields (not IPC channels):** `GameStateAdapter.ts` derives additional view-model fields from the raw `GameState` payload. Notable: `sectorIntel` (`SectorIntelRecordView[]`) — derived from `state.sector_intel` and `state.military.corps_front_sectors` in a single merged pass (also produces `fogOfWar`). Exposes 11 fields per enemy sector: sector ID, faction, corps, strength category, posture, offensive_signs, confidence, visible brigades, friendly OSIDs, enemy OSIDs, assessed turn. Consumed by Army HQ intelligence panels (ThreatAssessment, ForceReadiness, SupplyIntelligence) and corps card threat badges. No IPC round-trip — entirely client-side derivation from the `game-state-updated` payload.
 
@@ -58,25 +58,10 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
   - Returns: `{ ok: boolean, error?: string }`
   - Behavior: stages undeploy posture transition by setting `state.brigade_deploy_orders[brigadeId] = "undeploy"`, reserializes, sends state via `game-state-updated`.
 
-- `assign-brigade-to-front` (invoke)
-  - Payload: `{ brigadeId: string, frontId: string | null }`
-  - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: validates brigade and front segment ID (`assignable_front_segments`), writes `state.brigade_front_assignment[brigadeId] = frontId` (`null` = reserve), reserializes, sends state via `game-state-updated`.
-
 - `assign-brigade-to-sector` (invoke)
   - Payload: `{ brigadeId: string, sectorId: string | null }`
   - Returns: `{ ok: boolean, error?: string }`
   - Behavior: permanent player sector override. Validates same-corps constraint: sector `corps_id` must match brigade `corps_id`. Writes `state.military.brigade_sector_override[brigadeId] = sectorId`; `null` clears the override. Persists until explicitly cleared. `classifyBrigadesByTerritory` respects this override before its Phase 1 (frontline-by-position) logic. Invalid/stale overrides (wrong corps, brigade dissolved) fall through silently to normal assignment. Reserializes and broadcasts update. Source: `desktop_sim.ts::assignBrigadeToSector`.
-
-- `rename-front-segment` (invoke)
-  - Payload: `{ frontId: string, name: string | null }`
-  - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: updates optional `name` on `state.assignable_front_segments[*]`; null/empty clears the name. Reserializes and broadcasts update.
-
-- `rename-theatre` (invoke)
-  - Payload: `{ theatreId: string, name: string | null }`
-  - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: updates `state.theatres[theatreId].name`; null/empty restores default `<faction> Theatre`. Reserializes and broadcasts update.
 
 - `stage-brigade-aor-order` (invoke)
   - Payload: `{ settlementId: string, fromBrigadeId: string, toBrigadeId: string }`
@@ -91,22 +76,17 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 - `stage-brigade-reposition-order` (invoke)
   - Payload: `{ brigadeId: string, settlementIds: string[] }`
   - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: validates reposition order in main process (1–4 contiguous settlements, all same-faction). If valid, sets `state.brigade_reposition_orders[brigadeId] = { settlement_ids: sorted settlementIds }`, reserializes, sends state via `game-state-updated`. If invalid, returns `{ ok: false, error }` and does not mutate state.
+  - Behavior: **retired compatibility channel.** Main process rejects the request with a player-facing error (`Brigade reposition orders are retired; use movement or sector assignment instead`) and does not mutate state.
 
 - `clear-orders` (invoke)
   - Payload: `{ brigadeId: string }`
   - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: removes brigade from `brigade_attack_orders`, `brigade_posture_orders`, `brigade_mun_orders`, `brigade_movement_orders`, `brigade_reposition_orders`, and `brigade_deploy_orders`; also removes any entries in `brigade_aor_orders` where `from_brigade === brigadeId` or `to_brigade === brigadeId`. Reserializes, sends state via `game-state-updated`.
+  - Behavior: removes brigade from `brigade_attack_orders`, `brigade_posture_orders`, `brigade_mun_orders`, `brigade_movement_orders`, retired `brigade_reposition_orders`, and `brigade_deploy_orders`; also removes any entries in `brigade_aor_orders` where `from_brigade === brigadeId` or `to_brigade === brigadeId`. Reserializes, sends state via `game-state-updated`.
 
 - `stage-corps-stance-order` (invoke)
   - Payload: `{ corpsId: string, stance: string }`
   - Returns: `{ ok: boolean, error?: string }`
   - Behavior: sets or updates corps stance (e.g. defensive/balanced/offensive/reorganize) in state (corps_command), reserializes, sends state via `game-state-updated`.
-
-- `set-brigade-desired-aor-cap` (invoke)
-  - Payload: `{ brigadeId: string, cap: number | null }`
-  - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: sets `state.brigade_desired_aor_cap[brigadeId]` to a value between 1 and 4. Reserializes and broadcasts. `null` clears the cap.
 
 - `stage-sector-stance-order` (invoke)
   - Payload: `{ corpsId: string, sectorId: string, stance: 'hold' | 'defend' | 'defend_at_all_costs' | 'elastic_defense' | 'counterattack' | 'dig_in' }`

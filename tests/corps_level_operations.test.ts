@@ -255,6 +255,51 @@ describe('Corps-Level Operation Launch', () => {
         expect(op!.sector_id).toBeUndefined();
     });
 
+    it('rejects offensives that only look viable because defender bonuses are ignored', () => {
+        const state = makeState(5, {
+            corps_1: { corps_id: 'corps_1' as any, personnel: 5000, kind: 'corps', location_osid: 'own_osid' },
+            atk_1: { corps_id: 'corps_1' as any, location_osid: 'own_osid', personnel: 900, experience: 0.3, cohesion: 70, composition: { infantry: 900, tanks: 0, artillery: 0, aa_systems: 0, tank_condition: { operational: 0 }, artillery_condition: { operational: 0 } } as any },
+            atk_2: { corps_id: 'corps_1' as any, location_osid: 'own_osid', personnel: 900, experience: 0.3, cohesion: 70, composition: { infantry: 900, tanks: 0, artillery: 0, aa_systems: 0, tank_condition: { operational: 0 }, artillery_condition: { operational: 0 } } as any },
+            def_1: {
+                faction: 'RBiH' as FactionId,
+                corps_id: 'arbih_2nd_corps' as any,
+                location_osid: 'enemy_osid',
+                personnel: 1000,
+                experience: 0.4,
+                cohesion: 80,
+                entrenchment_turns: 9,
+                composition: { infantry: 800, tanks: 0, artillery: 60, aa_systems: 0, tank_condition: { operational: 0 }, artillery_condition: { operational: 1 } } as any,
+            },
+        }, {
+            'sector:corps_1:0': {
+                corps_id: 'corps_1',
+                sub_segments: [makeSub(['own_osid'], ['enemy_osid'])],
+                territory_osids: ['own_osid'],
+                assigned_brigade_ids: ['atk_1', 'atk_2'],
+            },
+            'sector:arbih_2nd_corps:0': {
+                corps_id: 'arbih_2nd_corps' as any,
+                faction: 'RBiH' as FactionId,
+                opposing_factions: ['RS' as FactionId],
+                sub_segments: [makeSub(['enemy_osid'], ['own_osid'])],
+                territory_osids: ['enemy_osid'],
+                assigned_brigade_ids: ['def_1'],
+            },
+        }, [
+            { a: 'own_osid', b: 'enemy_osid' },
+        ]);
+
+        const op = evaluateCorpsOffensiveLaunch(
+            state, 'corps_1', 'RS' as FactionId,
+            ['atk_1', 'atk_2'],
+            ['enemy_osid'],
+            ['enemy_osid'],
+            null, undefined, 'sector:corps_1:0',
+        );
+
+        expect(op).toBeNull();
+    });
+
     it('picks staging OSID nearest to first objective', () => {
         const state = makeState(5, {
             'b1': { corps_id: 'corps_1' as any, location_osid: 'op:a:far' },

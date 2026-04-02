@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { OperationView } from '../data/types';
 import { useGameStore } from '../store/gameStore';
 import { DETAIL_PANEL_STYLE } from './panelRail';
-import { useIPC } from '../desktop/useIPC';
 import {
   getOperationId,
   getOperationPhaseBadgeClass,
@@ -14,6 +13,9 @@ import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { turnToDateString, formatOperationType, toTitleCase } from '../utils/formatters';
 import { getFormationCommander } from '../utils/officerUtils';
 import { OfficerProfile } from './OfficerProfile';
+import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
+import { getPlayerSafeBrigadeName, getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
+import { openArmyHQBriefingForCorps } from '../utils/shellNavigation';
 
 function compareOperations(a: OperationView, b: OperationView): number {
   return (
@@ -34,7 +36,6 @@ function getOperationHealthSummary(operation: OperationView): { label: string; c
 }
 
 export function OperationsPanel() {
-  const ipc = useIPC();
   const isOpen = useGameStore((s) => s.isOperationsPanelOpen);
   const setIsOpen = useGameStore((s) => s.setIsOperationsPanelOpen);
   const selectedOperationKey = useGameStore((s) => s.selectedOperationKey);
@@ -46,15 +47,21 @@ export function OperationsPanel() {
   const panToOsid = useGameStore((s) => s.panToOsid);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
+  const setSelectedArmyId = useGameStore((s) => s.setSelectedArmyId);
+  const setArmyHQOpen = useGameStore((s) => s.setArmyHQOpen);
+  const setArmyHQTab = useGameStore((s) => s.setArmyHQTab);
+  const setArmyHQRecordsSubTab = useGameStore((s) => s.setArmyHQRecordsSubTab);
+  const setArmyHQExpandedCorpsId = useGameStore((s) => s.setArmyHQExpandedCorpsId);
   const lastAutoFocusOperationKeyRef = useRef<string | null>(null);
   const operationCardRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const objectiveButtonRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const [objectiveHoverOsid, setObjectiveHoverOsid] = useState<string | null>(null);
-  const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   const operations = useMemo(
-    () => [...(loadedGameState?.operations ?? [])].sort(compareOperations),
-    [loadedGameState?.operations]
+    () => loadedGameState
+      ? filterPlayerFacingOperations(loadedGameState).sort(compareOperations)
+      : [],
+    [loadedGameState]
   );
 
   const selectedOperation = useMemo(() => {
@@ -94,7 +101,6 @@ export function OperationsPanel() {
   // Clear objective hover when selection changes
   useEffect(() => {
     setObjectiveHoverOsid(null);
-    setActionMessage(null);
   }, [selectedOperationKey]);
 
   // Pan map to operation area whenever an operation is selected (from sidebar, command briefing, or operations list)
@@ -127,7 +133,7 @@ export function OperationsPanel() {
             <div className="h-12 w-full bg-panel-card rounded panel-shimmer" />
             <div className="h-12 w-full bg-panel-card rounded panel-shimmer" />
           </div>
-          <div className="col-span-7 p-3 space-y-4">
+          <div className="col-span-7 p-2.5 space-y-3">
             <div className="h-6 w-3/4 bg-panel-card rounded panel-shimmer" />
             <div className="space-y-2">
               <div className="h-4 w-full bg-panel-card rounded panel-shimmer" />
@@ -166,14 +172,6 @@ export function OperationsPanel() {
   const readinessTone = (value: number) =>
     value >= 0.7 ? 'bg-green-500/80' : value >= 0.4 ? 'bg-amber-400/80' : 'bg-red-500/80';
 
-  const setActionMessageFromResult = (
-    result: { ok: boolean; error?: string },
-    successMessage: string,
-    failureMessage: string
-  ) => {
-    setActionMessage(result.ok ? successMessage : (result.error ?? failureMessage));
-  };
-
   const handleOperationCardKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
     if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp' && event.key !== 'Home' && event.key !== 'End') return;
     event.preventDefault();
@@ -209,23 +207,15 @@ export function OperationsPanel() {
     setOperationTargetOsids([]);
   };
 
-  const haltOperation = async (digInOnHalt: boolean) => {
-    if (!selectedOperation) return;
-    const result = await ipc.stageOperationHalt({
-      corpsId: selectedOperation.corps_id,
-      operationName: selectedOperation.name,
-      digInOnHalt,
-    });
-    setActionMessageFromResult(result, 'Halt order staged.', 'Failed to stage halt order.');
-  };
-
-  const forceLaunch = async () => {
-    if (!selectedOperation) return;
-    const result = await ipc.stageOperationForceLaunch({
-      corpsId: selectedOperation.corps_id,
-      operationName: selectedOperation.name,
-    });
-    setActionMessageFromResult(result, 'Early launch staged.', 'Failed to stage early launch.');
+  const openHQReview = () => {
+    openArmyHQBriefingForCorps({
+      loadedGameState,
+      setSelectedArmyId,
+      setArmyHQOpen,
+      setArmyHQTab,
+      setArmyHQRecordsSubTab,
+      setArmyHQExpandedCorpsId,
+    }, selectedOperation?.corps_id ?? null);
   };
 
   return (
@@ -235,15 +225,29 @@ export function OperationsPanel() {
     >
       <div className="absolute top-0 left-0 w-full h-full crt-overlay pointer-events-none z-50 opacity-40"></div>
 
-      <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0 relative z-10 glow-text text-accent-gold uppercase text-xs font-semibold">
-        Operations Center
-        <button
+      <div className="flex items-center justify-between px-3 py-2 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0 relative z-10 glow-text text-accent-gold uppercase text-xs font-semibold">
+        <div className="flex flex-col">
+          <span>Field Ops Snapshot</span>
+          <span className="text-[9px] font-mono text-text-secondary normal-case tracking-[0.12em]">
+            Army HQ owns command review. This panel stays map-facing.
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={openHQReview}
+            disabled={!selectedOperation}
+            className="kbd-focus rounded border border-accent-gold/30 px-2 py-1 text-[9px] font-mono uppercase tracking-[0.16em] text-accent-gold hover:bg-accent-gold/10 disabled:opacity-30"
+          >
+            HQ Review
+          </button>
+          <button
           onClick={close}
           aria-label="Close operations panel"
           className="kbd-focus text-text-secondary hover:text-interactive text-sm leading-none rounded"
         >
           ✕
-        </button>
+          </button>
+        </div>
       </div>
 
       {operations.length === 0 ? (
@@ -255,7 +259,7 @@ export function OperationsPanel() {
           {/* Left: operation list */}
           <div className="col-span-5 border-r border-panel-border overflow-auto">
             <div
-              className="p-2 space-y-1"
+              className="p-1.5 space-y-1"
               role="listbox"
               aria-label="Operations list"
             >
@@ -280,7 +284,7 @@ export function OperationsPanel() {
                     }}
                     onClick={() => setSelectedOperationKey(id)}
                     onKeyDown={(event) => handleOperationCardKeyDown(event, index)}
-                    className={`kbd-focus w-full text-left rounded border px-2 py-1.5 transition-all duration-200 ease-out hover:-translate-y-[1px] ${selected
+                    className={`kbd-focus w-full text-left rounded border px-2 py-1 transition-all duration-200 ease-out hover:-translate-y-[1px] ${selected
                       ? 'border-accent-gold bg-panel-active shadow-[0_0_0_1px_rgba(212,175,55,0.22)]'
                       : 'border-panel-border bg-panel-card hover:bg-panel-hover'
                       }`}
@@ -317,21 +321,16 @@ export function OperationsPanel() {
           </div>
 
           {/* Right: detail */}
-          <div className="col-span-7 overflow-auto p-3 space-y-2">
+          <div className="col-span-7 overflow-auto p-2.5 space-y-1.5">
             {selectedOperation ? (
               <>
                 <div className={`text-sm font-semibold ${FACTION_COLORS[selectedOperation.faction] ?? 'text-text-primary'}`}>
                   {selectedOperation.name}
                 </div>
                 <div className="text-xs text-text-secondary">
-                  {selectedOperation.corps_name} · {selectedOperation.faction}
+                  {selectedOperation.corps_name} / {getPlayerSafeMilitaryFactionName(selectedOperation.faction)}
                 </div>
 
-                {actionMessage && (
-                  <div className="text-[10px] text-accent-gold border border-panel-border rounded px-2 py-1 bg-panel-card/70">
-                    {actionMessage}
-                  </div>
-                )}
 
                 {/* Phase timeline */}
                 <div className="flex flex-wrap gap-1 pt-1 border-t border-panel-border">
@@ -447,7 +446,9 @@ export function OperationsPanel() {
                     <div className="text-[11px] text-text-secondary mb-1 uppercase tracking-wide">Allocated Assets</div>
                     <div className="flex flex-wrap gap-1">
                       {selectedOperation.participating_brigade_ids.map(bId => {
-                        const bName = loadedGameState.formations.find(f => f.id === bId)?.name ?? bId;
+                        const bName = getPlayerSafeBrigadeName(
+                          loadedGameState.formations.find(f => f.id === bId)?.name ?? null,
+                        );
                         return (
                           <button
                             key={bId}
@@ -584,35 +585,6 @@ export function OperationsPanel() {
 
                 {/* Open Corps Orders */}
                 <div className="pt-1 border-t border-panel-border">
-                  {selectedOperation.phase === 'execution' && (
-                    <div className="mb-2 grid grid-cols-2 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => void haltOperation(false)}
-                        className="kbd-focus text-xs font-sans px-2 py-2 rounded border border-panel-border text-text-primary hover:bg-panel-hover"
-                      >
-                        Halt
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => void haltOperation(true)}
-                        className="kbd-focus text-xs font-sans px-2 py-2 rounded border border-panel-border text-text-primary hover:bg-panel-hover"
-                      >
-                        Halt + Dig In
-                      </button>
-                    </div>
-                  )}
-                  {selectedOperation.phase === 'planning' && phaseTurnCount != null && phaseTurnCount >= 2 && (
-                    <div className="mb-2">
-                      <button
-                        type="button"
-                        onClick={() => void forceLaunch()}
-                        className="kbd-focus w-full text-xs font-sans px-2 py-2 rounded border border-panel-border text-text-primary hover:bg-panel-hover"
-                      >
-                        Launch Now
-                      </button>
-                    </div>
-                  )}
                   <button
                     type="button"
                     onClick={() => {

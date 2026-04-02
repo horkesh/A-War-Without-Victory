@@ -15,8 +15,8 @@ import { getFormationCorpsId } from './corps_sector_partition.js';
 import { munFromOsid, type Osid } from './osid_adjacency.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import {
-    EXEMPT_CORPS_IDS,
     GARRISON_BUDGET_EDGES_PER_BRIGADE,
+    isSectorAssignmentExemptCorpsId,
     PHASE_2C_MAX_HOPS,
 } from './corps_front_sectors_constants.js';
 import { getSectorComponent, getSectorFrontOsids, bfsToNearestSector } from './sector_utils.js';
@@ -41,6 +41,44 @@ const VRS_1K_LINE_DISTANCE_MAX_HOPS = 6;
  * into a distant sector.
  */
 export const DRIFT_RECALL_SECTOR_SKIP_HOPS = 6;
+const FEINT_THREAT_MULTIPLIER = 1.5;
+
+function operationObjectives(op: { axes?: Array<{ objectives?: string[] }>; objectives?: string[] }): string[] {
+    if (op.axes && op.axes.length > 0) {
+        return op.axes.flatMap((axis) => axis.objectives ?? []);
+    }
+    return op.objectives ?? [];
+}
+
+function hasActiveEnemyFeintAgainstSector(
+    state: GameState,
+    sector: CorpsFrontSector,
+    faction: FactionId,
+): boolean {
+    const corpsCommand = state.military.corps_command ?? {};
+    const territoryOsids = new Set(sector.territory_osids);
+
+    for (const command of Object.values(corpsCommand)) {
+        if (!command?.active_operations) continue;
+        for (const operation of command.active_operations) {
+            if (operation.type !== 'feint') continue;
+            if (operation.phase !== 'planning' && operation.phase !== 'execution') continue;
+
+            const participatingFaction = operation.participating_brigades
+                .map((brigadeId) => state.military.formations?.[brigadeId]?.faction)
+                .find((candidate): candidate is FactionId => candidate != null);
+            if (!participatingFaction || participatingFaction === faction) continue;
+
+            for (const objective of operationObjectives(operation)) {
+                if (territoryOsids.has(objective)) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
 
 function friendlyDistanceToAny(
     startOsid: string,
@@ -120,10 +158,10 @@ function dissolvePocketDestroyableBrigade(
  * - Brigade at an OSID in a sector's territory_osids → assigned to that sector.
  * - Brigade in friendly territory but not in any sector's territory → assigned
  *   to the nearest sector (BFS through friendly territory).
- * - General staff units are exempt.
+ * - Idle army-HQ / main-staff reserve brigades are exempt until loaned.
  *
- * GOLDEN RULE: Every active brigade MUST end up in a sector. If a brigade
- * falls through all classification priorities, that's a bug — investigate.
+ * GOLDEN RULE: Every active non-exempt field brigade MUST end up in a sector.
+ * If one falls through all classification priorities, that's a bug — investigate.
  *
  * Clears existing assigned/reserve lists and rebuilds from scratch.
  * Deterministic: sorted iteration via strictCompare.
@@ -229,7 +267,7 @@ export function classifyBrigadesByTerritory(
         }
 
         const fCorpsId = getFormationCorpsId(f);
-        if (fCorpsId && EXEMPT_CORPS_IDS.has(fCorpsId) && !loanedCorpsMap.has(fid)) continue;
+        if (isSectorAssignmentExemptCorpsId(fCorpsId) && !loanedCorpsMap.has(fid)) continue;
 
         // ── Drift note: brigades far from home are still assigned where they ARE ──
         // Previously, drifted brigades (>6 hops from home) were silently excluded
@@ -770,7 +808,7 @@ export function classifyBrigadesByTerritory(
             if (!f || f.faction !== faction || f.status !== 'active') continue;
             if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
             const fCorpsId = getFormationCorpsId(f);
-            if (fCorpsId && EXEMPT_CORPS_IDS.has(fCorpsId) && !loanedCorpsMap.has(fid)) continue;
+            if (isSectorAssignmentExemptCorpsId(fCorpsId) && !loanedCorpsMap.has(fid)) continue;
             // Brigade fell through the entire pipeline — force-assign to neediest sector
             let bestSector: CorpsFrontSector | null = null;
             let bestNeed = -Infinity;
@@ -845,7 +883,7 @@ export function assignCrossCorpsEnclaveDefenders(
         if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
         if (!f.location_osid) continue;
         const fCorpsId = getFormationCorpsId(f);
-        if (fCorpsId && EXEMPT_CORPS_IDS.has(fCorpsId)) continue;
+        if (isSectorAssignmentExemptCorpsId(fCorpsId)) continue;
 
         const loc = f.location_osid;
         const ownCorpsHasSectors = sectors.some(s => s.corps_id === fCorpsId);
@@ -1292,6 +1330,7 @@ export function recomputeSectorPowerAndThreat(
     sectors: CorpsFrontSector[],
     formations: Record<FormationId, FormationState>,
     faction: FactionId,
+    state: GameState,
 ): void {
     const allFormIds = Object.keys(formations).sort(strictCompare);
     for (const s of sectors) {
@@ -1316,6 +1355,10 @@ export function recomputeSectorPowerAndThreat(
         s.threat_ratio = s.defensive_power > 0
             ? enemyPower / s.defensive_power
             : (enemyPower > 0 ? 9999 : 0);
+
+        if (s.threat_ratio > 0 && hasActiveEnemyFeintAgainstSector(state, s, faction)) {
+            s.threat_ratio *= FEINT_THREAT_MULTIPLIER;
+        }
     }
 }
 

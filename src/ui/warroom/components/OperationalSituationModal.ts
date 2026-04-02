@@ -42,6 +42,8 @@ export class OperationalSituationModal {
             const cutOffBrigades = warData.brigadeMovement.encircled.length;
             const starvingBrigades = warData.ownSupply.criticalCount;
             const attacksConducted = warData.ownCorpsOps.filter(o => o.operation?.type === 'general_offensive' || o.operation?.type === 'sector_attack').length;
+            const exposedFronts = warData.engagedFrontEdges.filter((edge) => edge.tier === 'exposed').length;
+            const activeOps = warData.ownCorpsOps.filter((entry) => entry.operation != null).length;
             
             content = `
                 <h2><span class="wr-text-primary">OPERATIONAL SITUATION</span></h2>
@@ -54,7 +56,9 @@ export class OperationalSituationModal {
                     <div style="margin-bottom: 20px;">
                         <h3 style="color: ${accentColor}; font-size: 14px; margin-bottom: 5px;">SECTOR STRESS</h3>
                         <ul style="list-style-type: square; padding-left: 20px;">
-                            <li>Active Offensives: ${attacksConducted}</li>
+                            <li>Active offensive axes: ${attacksConducted}</li>
+                            <li>Corps with active operation packets: ${activeOps}</li>
+                            <li>Front edges rated exposed: ${exposedFronts}</li>
                             <li>Brigades Routed: ${routedBrigades}</li>
                         </ul>
                     </div>
@@ -75,7 +79,7 @@ export class OperationalSituationModal {
                     </div>
 
                     <div style="text-align: center; margin-top: 30px;">
-                        <button class="wr-btn" id="wr-btn-open-map-situ" style="font-family: inherit; font-weight: bold;">PROCEED TO DESK MAP</button>
+                        <button class="wr-btn" id="wr-btn-open-map-situ" style="font-family: inherit; font-weight: bold;">OPEN DESK MAP CONTEXT</button>
                     </div>
                 </div>
             `;

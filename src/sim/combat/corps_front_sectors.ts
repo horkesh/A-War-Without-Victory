@@ -6,7 +6,8 @@
  * friendly OSID to the nearest corps; front edges are then partitioned accordingly.
  *
  * GOLDEN RULES:
- *   1. Every active brigade MUST be assigned to a sector. No exceptions.
+ *   1. Every active non-exempt field brigade MUST be assigned to a sector.
+ *      Army-HQ / main-staff reserve brigades are the standing exception until loaned.
  *   2. Brigades at a sector MUST be at the frontline. Exception: one reserve
  *      brigade per sector sits 1 hop behind the front (recovery/reaction).
  *      Deep-rear brigades are kept assigned and march forward via interior movement.
@@ -35,7 +36,7 @@ import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import {
-    EXEMPT_CORPS_IDS,
+    isSectorAssignmentExemptCorpsId,
     MIN_SECTOR_BRIGADES,
 } from './corps_front_sectors_constants.js';
 import { getCorpsArmyPriorities } from './bot_strategy.js';
@@ -367,7 +368,7 @@ function buildFactionSectors(
     // Step 4: Build multi-sectors (sub-segments promoted to independent sectors)
     const sectors: CorpsFrontSector[] = [];
     for (const corpsId of corpsIds) {
-        if (EXEMPT_CORPS_IDS.has(corpsId)) continue;
+        if (isSectorAssignmentExemptCorpsId(corpsId)) continue;
         const edgeIds = corpsEdges.get(corpsId);
         if (!edgeIds || edgeIds.length === 0) continue;
 
@@ -534,7 +535,7 @@ function buildFactionSectors(
     deduplicateBrigadesAcrossSectors(sectors);
 
     // Step 8c: Recompute defensive_power and threat_ratio from final brigade sets.
-    recomputeSectorPowerAndThreat(sectors, formations, faction);
+    recomputeSectorPowerAndThreat(sectors, formations, faction, state);
 
     // Final prune: remove ghost artifact sectors
     const pruned = sectors.filter(s => {

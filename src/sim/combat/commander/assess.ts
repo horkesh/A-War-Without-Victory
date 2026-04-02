@@ -65,13 +65,44 @@ export function assessSituation(
         briefing.spatial,
         [...corpsSectors],
         briefing.ethnic_map,
+        briefing.graph_analysis,
+        new Set(briefing.must_hold_osids),
     );
 
     // 3. Evaluate forces
-    const forces = evaluateCorpsForces(briefing.brigades, zones);
+    const forces = evaluateCorpsForces(briefing.brigades, zones, briefing.supply_by_osid);
 
-    // 4. Assess threats
-    const threats = assessThreats(zones, briefing.previous_state, briefing.turn);
+    // 4. Build concentration zone list from previous intel picture
+    // concentration_detected is keyed by sector_id; map via osid overlap to zone_id.
+    const concentrationZoneIds: ZoneId[] = [];
+    const prevIntel = briefing.previous_state?.intel_picture ?? null;
+    if (prevIntel) {
+        // Build osid → zone_id reverse map
+        const osidToZone = new Map<string, ZoneId>();
+        for (const zone of zones) {
+            for (const osid of zone.osids) {
+                osidToZone.set(osid, zone.zone_id);
+            }
+        }
+        const seenZones = new Set<ZoneId>();
+        for (const [sectorId, detected] of Object.entries(prevIntel.concentration_detected).sort(
+            (a, b) => strictCompare(a[0], b[0]),
+        )) {
+            if (!detected) continue;
+            const sector = corpsSectors.find(s => s.sector_id === sectorId);
+            if (!sector) continue;
+            for (const osid of [...sector.territory_osids].sort(strictCompare)) {
+                const zoneId = osidToZone.get(osid);
+                if (zoneId && !seenZones.has(zoneId)) {
+                    seenZones.add(zoneId);
+                    concentrationZoneIds.push(zoneId);
+                }
+            }
+        }
+    }
+
+    // 5. Assess threats
+    const threats = assessThreats(zones, briefing.previous_state, briefing.turn, concentrationZoneIds);
 
     return { zones, forces, threats };
 }
@@ -93,6 +124,7 @@ export function assessThreats(
     zones: ZoneAssessment[],
     previousState: CommanderState | null,
     turn: number,
+    concentrationZoneIds: readonly ZoneId[] = [],
 ): ThreatAssessment {
     // Build set of previously held OSIDs per zone for loss detection
     const previousOsidsByZone = new Map<string, Set<string>>();
@@ -104,7 +136,7 @@ export function assessThreats(
 
     const threatenedZones: Array<{ zone_id: ZoneId; threat_level: 'low' | 'medium' | 'high' | 'critical' }> = [];
     const recentLosses: Array<{ zone_id: ZoneId; osids_lost: readonly string[]; turn: number }> = [];
-    const enemyConcentrationZones: ZoneId[] = [];
+    const enemyConcentrationZones: ZoneId[] = [...concentrationZoneIds].sort(strictCompare);
 
     let worstThreat: 'low' | 'medium' | 'high' | 'critical' = 'low';
 

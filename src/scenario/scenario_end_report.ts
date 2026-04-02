@@ -6,6 +6,7 @@
 import type { LoadedSettlementGraph } from '../map/settlements.js';
 import type { GameState } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
+import { buildFrontlineAssignedFormationSet } from '../sim/combat/front_assignment.js';
 import type { WeeklyActivityCounts, WeeklyReportRow } from './scenario_reporting.js';
 import type { CorpsAiReportEntry } from '../sim/combat/bot_corps_ai.js';
 import type { OperationAAR } from '../sim/combat/operation_aar.js';
@@ -442,9 +443,8 @@ export function computeArmyStrengthsSummary(state: GameState): ArmyStrengthsSumm
 
     const assignmentCounts = new Map<string, number>();
     for (const fid of factions) assignmentCounts.set(fid, 0);
-    const assignments = state.military.brigade_front_assignment ?? {};
-    for (const [formationId, frontId] of Object.entries(assignments)) {
-        if (typeof frontId !== 'string' || frontId.length === 0) continue;
+    const frontlineAssigned = buildFrontlineAssignedFormationSet(state);
+    for (const formationId of [...frontlineAssigned].sort(strictCompare)) {
         const formation = state.military.formations?.[formationId];
         const fid = formation?.faction;
         if (!fid) continue;

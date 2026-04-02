@@ -189,6 +189,21 @@ describe('War Termination', () => {
             expect(result.trigger).toBe('victory_condition');
             expect(result.winner).toBe('RBiH');
         });
+
+        it('uses political war_exhaustion as the authoritative exhaustion value', () => {
+            const state = minimalWarState({ turn: 30 });
+            state.meta.victory_conditions = {
+                by_faction: {
+                    RBiH: { min_controlled_settlements: 1, max_exhaustion: 20 }
+                }
+            };
+            state.political.political_controllers = { S1: 'RBiH' };
+            state.political.war_exhaustion = { RBiH: 30, RS: 0, HRHB: 0 } as any;
+            state.factions.find((f) => f.id === 'RBiH')!.profile.exhaustion = 10;
+
+            const result = checkWarTermination(state);
+            expect(result.game_over).toBe(false);
+        });
     });
 
     describe('applyWarTermination', () => {

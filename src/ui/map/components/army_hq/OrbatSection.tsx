@@ -179,7 +179,7 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
                         {engagements.slice(0, 5).map((e, i) => (
                             <div key={i} className="flex items-center gap-2 text-[10px]">
                                 <span className="text-text-secondary/50 w-6 shrink-0">W{e.turn}</span>
-                                <span className="text-text-secondary/40 truncate w-20 shrink-0" title={e.osid}>{formatOsidLabel(e.osid)}</span>
+                                <span className="text-text-secondary/40 truncate w-20 shrink-0" title={formatOsidLabel(e.osid)}>{formatOsidLabel(e.osid)}</span>
                                 <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded border leading-none`}
                                     style={{ color: OUTCOME_COLORS[e.outcome] ?? '#d4c5a0', borderColor: (OUTCOME_COLORS[e.outcome] ?? '#d4c5a0') + '40' }}>
                                     {e.outcome.replace(/_/g, ' ')}

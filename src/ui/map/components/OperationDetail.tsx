@@ -5,6 +5,9 @@ import { formatOperationType, turnToDateString, toTitleCase } from '../utils/for
 import { getPanelRailStyle } from './panelRail';
 import { getFormationCommander } from '../utils/officerUtils';
 import { OfficerProfile } from './OfficerProfile';
+import { getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
+import { findPlayerFacingOperationByKey } from '../../shared/playerVisibility';
+import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 
 function PhaseBadge({ phase }: { phase: string }) {
   const cls =
@@ -71,19 +74,14 @@ export function OperationDetail({ railSlot }: OperationDetailProps) {
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
 
-  if (!selectedOperationKey || !loadedGameState) return null;
-
-  const [corpsId, opName] = selectedOperationKey.split('|');
-  const op = loadedGameState.operations?.find(
-    (o) => o.corps_id === corpsId && o.name === opName
-  ) ?? null;
+  const op = findPlayerFacingOperationByKey(loadedGameState, selectedOperationKey);
 
   if (!op) return null;
 
   const objectives = op.objectives ?? [];
   const currentIdx = op.current_objective_index ?? 0;
   const getSectorName = (sid: string) =>
-    loadedGameState.corpsFrontSectors?.find(s => s.sector_id === sid)?.display_name ?? sid;
+    getPlayerFacingSectorName(sid, loadedGameState.corpsFrontSectors ?? []);
 
   return (
     <div
@@ -108,7 +106,7 @@ export function OperationDetail({ railSlot }: OperationDetailProps) {
         <div className="mb-3">
           <div className="font-semibold text-text-primary text-[13px]">{op.name}</div>
           <div className="text-text-secondary mt-0.5 flex items-center gap-2 flex-wrap">
-            <span className={FACTION_COLORS[op.faction] ?? 'text-text-primary'}>{op.faction}</span>
+            <span className={FACTION_COLORS[op.faction] ?? 'text-text-primary'}>{getPlayerSafeMilitaryFactionName(op.faction)}</span>
             <span>·</span>
             <span>{op.corps_name}</span>
           </div>

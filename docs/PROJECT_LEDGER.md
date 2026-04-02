@@ -1,3 +1,539 @@
+## 2026-04-02 - Player-safe ops labels and HQ roster polish
+
+### Summary
+- Removed raw OSID leakage from OPORD / objective-list / HQ roster hover surfaces.
+- Added a pure OPORD display helper so planning documents resolve settlement names through player-safe labels.
+- Corrected the lingering Army HQ war-summary fallback bug.
+
+### Files changed
+- `src/ui/map/components/ops_modal/opordDisplay.ts`
+- `src/ui/map/components/ops_modal/OpordDocument.tsx`
+- `src/ui/map/components/ops_modal/AuthorizePhase.tsx`
+- `src/ui/map/components/ops_modal/ObjectiveList.tsx`
+- `src/ui/map/components/army_hq/OrbatSection.tsx`
+- `src/ui/map/components/army_hq/WarSummaryContent.tsx`
+- `tests/ui_opord_player_safe_labels.test.ts`
+- `vitest.config.ts`
+- `docs/40_reports/implemented/20260402_PLAYER_SAFE_OPS_LABELS_AND_HQ_ROSTER_POLISH.md`
+- `docs/40_reports/GUI_MASTER.md`
+- `docs/40_reports/WARROOM_MASTER.md`
+- `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`
+- `docs/40_reports/README.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- Even after the larger player-truth cleanup, operation documents and HQ roster/history rows could still leak raw engine identifiers.
+- Those leaks make the player shell feel like a debug console and train later work to accept raw IDs in user-facing prose.
+
+### Verification
+- `node_modules\.bin\vitest.cmd run tests\ui_opord_player_safe_labels.test.ts tests\ui_army_hq_war_summary_visibility.test.ts tests\ui_shell_navigation.test.ts tests\warroom_player_visibility.test.ts tests\warroom_smoke.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+
+## 2026-04-02 - Army HQ summary player-truth pass
+
+### Summary
+- Removed exact all-faction overview tables from `WarSummaryContent` in player mode.
+- Added a pure overview-model helper so the visibility contract is testable without JSX/runtime fragility.
+- Indexed the change in GUI/Warroom report masters and 40_reports indices.
+
+### Files changed
+- `src/ui/map/components/army_hq/WarSummaryContent.tsx`
+- `src/ui/map/components/army_hq/warSummaryOverview.ts`
+- `tests/ui_army_hq_war_summary_visibility.test.ts`
+- `vitest.config.ts`
+- `docs/40_reports/implemented/20260402_ARMY_HQ_WAR_SUMMARY_PLAYER_TRUTH.md`
+- `docs/40_reports/GUI_MASTER.md`
+- `docs/40_reports/WARROOM_MASTER.md`
+- `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`
+- `docs/40_reports/README.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- Army HQ `SUMMARY` was still acting like a debug scoreboard by exposing exact all-faction territory/personnel/casualty/displacement tables.
+- That violated the player-visible-state contract and made the headquarters shell more omniscient than the intended player role.
+
+### Verification
+- `node_modules\.bin\vitest.cmd run tests\ui_army_hq_war_summary_visibility.test.ts tests\ui_shell_navigation.test.ts tests\warroom_player_visibility.test.ts tests\warroom_smoke.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+
+## [2026-04-02] Commander Intelligence Overhaul n1294–n1301
+
+### Summary
+Eight planned commander intelligence improvements implemented and committed. All pass typecheck + integration anomaly test + full vitest suite (1685 pass, 1 skip).
+
+### Changes
+
+**n1294 — Scenario must_hold data wiring (7 files)**
+- `data/scenarios/apr1992_definitive_40w.json`: authored `must_hold_osids_by_corps` for `vrs_posavina` (brcko_2) and `vrs_east_bosnian` (doboj_2, boljanic_2)
+- `src/scenario/scenario_types.ts`: added `must_hold_osids_by_corps?` to `Scenario`
+- `src/scenario/scenario_loader.ts`: parse block (both return paths)
+- `src/state/game_state.ts`: `must_hold_osids_by_corps?` on `MilitaryState`
+- `src/scenario/scenario_runner.ts`: copies field to initial state
+- `src/sim/combat/commander/commander_state.ts`: `must_hold_osids` on `CommanderBriefing`
+- `src/sim/combat/commander/briefing.ts`: populates from `state.military.must_hold_osids_by_corps?.[corpsId]`
+
+**n1295+n1296 — is_must_hold in zone detection (committed prior session)**
+- `zone_detection.ts`: Track 1 (scenario OSIDs) + Track 2 (engine chokepoints, disabled pending calibration)
+- `assess.ts`: passes `new Set(briefing.must_hold_osids)` as 9th arg to `detectZones`
+- `allocate.ts`: `computeGarrisonBudget` applies 1.5× multiplier when `zone.is_must_hold`
+
+**n1297 — Organizational readiness gate**
+- `bot_corps_stance.ts`: corps with zero main-effort brigades capped at 'defensive' stance (blocks plan creation without capable heavy units)
+
+**n1298 — Op scale cap by main_effort_count**
+- `plan.ts`: `tryCreateFromPrePlanned` and `createOpportunityPlan` both cap `requiredBrigades` to `tier_counts.main_effort` — models ARBiH rifle-only phase where few brigades qualify as main effort
+
+**n1299 — Populate enemy_concentration_zones**
+- `assess.ts`: maps `previous_state.intel_picture.concentration_detected` (keyed by sector_id) through `territory_osids` → osid→zone reverse map → `ZoneId` list in `ThreatAssessment.enemy_concentration_zones`
+
+**n1300 — Coordination penalty/bonus from officer competence**
+- `battle_resolution.ts`: multi-brigade `effN` now scaled by `getCoordinationCompetenceFactor()`: ±4% per point from baseline competence 3, clamped [0.85, 1.10]. Single-brigade attacks unaffected.
+
+**n1301 — Strength-based opportunity target ranking**
+- `plan.ts`: `selectOpportunityTargets` ranks enemy OSIDs by approach count (number of zone OSIDs adjacent to each target). More approach vectors = more exposed = higher priority. Falls back to lex sort if spatial data absent.
+
+### Track 2 status
+Engine-derived chokepoint detection (`engineMustHold`) disabled with `false &&`. Root cause: fraction-of-faction-total threshold (0.05) can't separate RS Brcko (~9% RS) from ARBiH Central Bosnia valleys (~8% ARBiH). Needs: corps-boundary discriminator OR absolute OSID count. Logged as P1 calibration item.
+
+### Verification
+- `npx tsc --noEmit` — clean
+- `npm run test:vitest` — 1685 pass, 1 skip, 0 fail
+- `integration_anomaly.test.ts` — 3 pass
+
+---
+### 2026-04-02 — Engine health Wave 1 continued: emergency defensive operations now inherit a real sector anchor
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing a live transitional seam in combat authority.
+
+Implemented:
+- `src/sim/combat/corps_operation_helpers.ts`
+  - `buildEmergencyDefenseOperation(...)` now accepts and stores `sector_id`
+  - added `derivePrimarySectorForBrigades(...)` to deterministically anchor an operation to the sector with the strongest participant overlap
+- `src/sim/combat/bot_corps_operations.ts`
+  - emergency defensive ops now derive a primary sector from the selected participant brigades before creation
+  - removed the stale comment claiming sector derivation was still deferred
+- `tests/corps_operation_helpers.test.ts`
+  - added regressions proving the sector-derivation helper chooses the strongest overlap
+  - added regressions proving emergency defensive ops retain the derived `sector_id`
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded with this emergency-defense sector-anchor checkpoint
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+  - recorded the broader blindspot: transitional operation creators are more dangerous than dormant compatibility sinks
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\corps_operation_helpers.test.ts tests\concurrent_operations.test.ts`
+  - PASS (`48` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- a live operation creator is not harmless transitional code if it still skips fields the canonical lifecycle now assumes
+- sector anchoring only becomes honest when every permitted creation path respects it, not just the newest commander path
+- this removes one more “looks temporary but still writes truth” seam from the combat layer
+
+---
+### 2026-04-02 — Engine health Wave 1 continued: Army HQ player-facing fallback labels no longer leak raw engine ids
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, draining a recurring player-truth swamp in secondary UI shells.
+
+Implemented:
+- `src/ui/map/utils/formatters.ts`
+  - hardened `formatCorpsDisplayName(...)` so raw corps ids no longer surface unchanged in player-facing fallback paths
+- `src/ui/map/utils/playerSafeText.ts`
+  - added a tiny pure helper layer for player-safe corps, enclave, decision, and brigade fallback labels
+- `src/ui/map/components/army_hq/ArmyHQModal.tsx`
+  - expanded-corps heading now uses a player-safe corps fallback
+- `src/ui/map/components/army_hq/SituationBriefing.tsx`
+  - pending decisions, enclave alerts, corps-without-sectors, low-cohesion warnings, and ineffective-brigade warnings now use player-safe fallback labels
+- `src/ui/map/components/ArmyReservePanel.tsx`
+  - reserve request corps names now fall back to `Assigned command`
+  - suggested brigade fallback now uses `Assigned brigade`
+  - reserve base OSIDs are humanized before display
+- `src/ui/map/components/army_hq/ForceReadiness.tsx`
+  - corps readiness rows now use player-safe corps naming
+- `src/ui/map/components/army_hq/SupplyIntelligence.tsx`
+  - enclave fallback labels now render as `Friendly enclave`
+- `tests/ui_map_render_smoke.test.ts`
+  - added focused regressions proving the player-safe text helpers return neutral labels instead of raw ids
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded with this player-facing fallback-label checkpoint
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+  - recorded the fallback-string blindspot so later agents treat it as a first-class player-truth concern
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts`
+  - PASS (`12` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Environment note:
+- `npm.cmd run desktop:map:build` currently fails in the clean worktree because `@vitejs/plugin-react` is unavailable there. This is an environment/dependency gap in the isolated lane, not a regression introduced by this slice.
+
+Why this matters:
+- raw ids usually leak back into products through fallback strings, not through the obvious primary labels
+- once player-safe text rules live in one pure helper, future shells are less likely to improvise their own `?? id` leak
+- this turns a recurring UI hygiene problem into a small, testable contract instead of another vibes-based cleanup
+
+---
+### 2026-04-02 — Engine health Wave 1 continued: settlement dossiers now filter timeline truth
+
+Continued the clean-lane player-knowledge sweep in `F:\AWWV_exec_clean`, closing the next leak seam after tooltip cleanup: selected-settlement dossiers were already filtering some visible lists, but still forwarded raw omniscient operation history and brigade movement logs into timeline surfaces.
+
+Implemented:
+- `src/ui/shared/playerVisibility.ts`
+  - added `filterPlayerFacingOperationHistory(...)` so dossier/timeline surfaces can consume only player-faction operation AARs
+  - added `filterPlayerFacingMovementsByOsid(...)` so settlement timelines only receive movement records for player-owned formations
+- `src/ui/map/components/SelectionPanel.tsx`
+  - stationed formations, pending orders, operation targeting, operation history, and movement timeline inputs now all route through player-facing filters
+  - the selection panel no longer mixes a player-safe overview with omniscient dossier tabs
+- `tests/ui_player_visibility.test.ts`
+  - added regressions proving operation history and per-OSID movement logs are filtered to player-owned truth before downstream panels consume them
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\ui_map_tooltip_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`20` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- selected-settlement dossiers are still player surfaces, not a safer place to leak omniscient truth
+- partial filtering is a trap because one tab can look honest while another quietly leaks enemy movement or operation truth
+- pushing the contract into shared visibility helpers is cheaper than re-fighting the same leak in every future dossier panel
+
+---
+### 2026-04-02 — Engine health Wave 1 continued: Warroom enemy contacts now stay abstract
+
+Continued the clean-lane player-knowledge sweep in `F:\AWWV_exec_clean`, closing the next desktop-shell leak seam: Warroom reports and magazine panels were still printing exact enemy formation names because the extracted contact snapshot itself carried raw hostile identifiers.
+
+Implemented:
+- `src/ui/warroom/data/war_data_extractor.ts`
+  - `ContactedFormation` is now player-facing by construction: abstract label plus strength/location context, no raw enemy formation id or name
+  - hostile contact extraction now emits `Enemy contact` instead of exact enemy formation labels
+- `src/ui/warroom/components/ReportsModal.ts`
+  - enemy-contact report lines now render the abstract Warroom contact label
+- `src/ui/warroom/components/MagazineModal.ts`
+  - enemy-assessment rows now render the same abstract contact label
+- `tests/warroom_player_visibility.test.ts`
+  - new regressions proving the snapshot contract stays abstract and both Warroom report surfaces avoid raw enemy formation names
+- `vitest.config.ts`
+  - wired the new regression into the explicit Vitest whitelist and jsdom match list
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\warroom_player_visibility.test.ts tests\warroom_smoke.test.ts tests\ui_player_visibility.test.ts`
+  - PASS (`10` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- if the snapshot contract is omniscient, every polished Warroom panel has to “remember not to say too much,” which always regresses
+- abstracting enemy contacts at extraction time is cheaper and safer than patching each downstream Warroom panel separately
+- this keeps Warroom acting like a headquarters shell instead of a debug console with nice typography
+
+---
+### 2026-04-02 — Engine health Wave 1 continued: operation records now obey player-facing visibility
+
+Continued the clean-lane player-knowledge sweep in `F:\AWWV_exec_clean`, closing the next “polished debug archive” seam: the operations history panel was still reading global active operations and global completed-operation history directly from `LoadedGameState`.
+
+Implemented:
+- `src/ui/shared/playerVisibility.ts`
+  - added `filterPlayerFacingActiveOperations(...)` so records/history surfaces can consume only player-faction live operations
+- `src/ui/map/components/OperationHistoryPanel.tsx`
+  - active and completed operation lists now route through player-facing visibility helpers
+  - corps-name resolution now derives from player-facing formations instead of the full omniscient formation set
+- `tests/ui_player_visibility.test.ts`
+  - expanded regression coverage to prove active-operation filtering follows the same player-faction rule as operation-history filtering
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`19` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- history/records panels are where omniscient truth loves to survive because they feel archival rather than live
+- if the records tab can see everyone’s operations, it is still a debug shell even if the map itself is player-safe
+- once the helper contract exists, every records-style surface should consume it instead of rolling its own filters
+
+---
+
+### 2026-04-02 â€” Engine health Wave 1 continued: local brigade fatigue now reaches commander planning
+
+Continued the clean-lane Wave 1 execution in `F:\AWWV_exec_clean`, closing another commander blindspot that looked innocuous in the audit but dangerous in play: the corps commander could see corps-level exhaustion while staying blind to the actual fatigue state of the brigades it was about to throw into another operation.
+
+Implemented:
+- `src/sim/combat/commander/commander_state.ts`
+  - `CommanderBriefing` now carries `avg_fatigue_pct` and `brigades_above_fatigue_threshold`
+- `src/sim/combat/commander/briefing.ts`
+  - derives brigade-fatigue truth from live `formation.ops.fatigue`
+  - summarizes average local fatigue plus how many subordinate brigades are already at the high-fatigue threshold
+- `src/sim/combat/commander/plan.ts`
+  - fresh offensive plans are now blocked when the local brigade pool is already heavily fatigued
+- `tests/commander/briefing_campaign_intent.test.ts`
+  - added regression proving the briefing summarizes live subordinate fatigue
+  - added regression proving heavy local fatigue blocks opportunity-plan creation
+- `tests/commander/commander.test.ts`
+  - added regression proving high average brigade fatigue blocks fresh offensive planning in the main commander suite
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\briefing_campaign_intent.test.ts tests\commander\commander.test.ts tests\commander\reinforcement_signal_flow.test.ts tests\army_hq_gathering.test.ts`
+  - PASS (`124` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- the commander no longer sees worn-out brigades as interchangeable with fresh ones
+- the fix uses the engine’s actual fatigue truth (`formation.ops.fatigue`) instead of inventing another shadow wear model
+- this closes another split-truth gap where the engine tracked local wear but fresh plans ignored it
+
+### 2026-04-02 â€” Engine health Wave 1 continued: enemy heavy equipment reaches commander planning
+
+Continued the clean-lane Wave 1 execution in `F:\AWWV_exec_clean`, closing another commander blindspot that looked small in types but large in behavior: the corps commander still had no way to tell whether the adjacent enemy front was infantry-thin or armored/artillery-heavy.
+
+Implemented:
+- `src/sim/combat/commander/commander_state.ts`
+  - `CommanderBriefing` now carries `enemy_equipment_summary`
+- `src/sim/combat/commander/briefing.ts`
+  - derives adjacent enemy-sector heavy-equipment truth from real front contact and summarizes enemy `tanks`, `artillery`, and `infantry_only`
+- `src/sim/combat/commander/plan.ts`
+  - new offensive plans now demand an extra brigade when the facing enemy front is heavy enough to change casualty risk materially
+  - this extra requirement can pull in one support-grade brigade when needed rather than pretending only `main_effort` brigades matter in every assault
+- `tests/commander/briefing_campaign_intent.test.ts`
+  - added regressions proving the briefing summary exists and that heavy enemy equipment changes required brigade count
+- `tests/commander/commander.test.ts`
+  - updated commander fixtures for the stricter briefing contract
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\briefing_campaign_intent.test.ts tests\commander\commander.test.ts tests\commander\reinforcement_signal_flow.test.ts tests\army_hq_gathering.test.ts`
+  - PASS (`121` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- commander planning now reacts to enemy front quality before an op is born, not only once combat resolves
+- this closes another “good-looking contract, dead behavior” gap in the AI layer
+- the engine gets more honest when the commander briefing stops flattening every enemy into the same generic frontage problem
+
+### 2026-04-02 — Engine health Wave 1 continued: corps exhaustion reaches commander planning
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing another split-truth gap between the legacy corps-op path and the newer commander-intelligence path.
+
+Implemented:
+- `src/sim/combat/commander/commander_state.ts`
+  - `CommanderBriefing` now carries `corps_exhaustion`
+- `src/sim/combat/commander/briefing.ts`
+  - `buildBriefing(...)` now reads `corps_command[corpsId].corps_exhaustion` into the briefing contract
+- `src/sim/combat/commander/plan.ts`
+  - new-plan creation now respects `MAX_EXHAUSTION_FOR_OPERATION`, aligning commander planning with the older corps-op launch gate
+- `tests/commander/briefing_campaign_intent.test.ts`
+  - added regression proving the briefing carries the live corps exhaustion value
+- `tests/commander/commander.test.ts`
+  - added regression proving an exhausted corps does not create a new offensive plan
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\briefing_campaign_intent.test.ts tests\commander\commander.test.ts tests\commander\reinforcement_signal_flow.test.ts tests\army_hq_gathering.test.ts`
+  - PASS (`119` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Investigative note:
+- Re-checked the earlier “feint has zero enemy effect” audit item against live code.
+- That finding is now partially stale: enemy feints already flow through sector intel into `offensive_signs`, `concentration_detected`, and commander `fortify` reactions.
+- Feints remain underpowered as deception, but they are no longer fully inert.
+
+Why this matters:
+- a corps too exhausted to launch should also be too exhausted to invent fresh offensive plans
+- this keeps the old corps-op path and the newer commander pipeline from teaching different operational truth
+
+---
+### 2026-04-02 — Engine health slice: Army HQ campaign intent now reaches corps planning
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing a structural disconnect between Army HQ gathering and corps commander planning.
+
+Implemented:
+- `src/sim/combat/commander/commander_state.ts`
+  - added explicit Army HQ campaign intent fields to `CommanderBriefing`
+- `src/sim/combat/commander/briefing.ts`
+  - now reads the current `CampaignPlan` for the corps
+  - carries front role, offensive targets, hold targets, doctrine ceiling, and synchronized-op slice into the commander briefing
+  - merges campaign `hold_targets` into `must_hold_osids`
+- `src/sim/combat/commander/plan.ts`
+  - opportunity planning now prefers staging zones and target OSIDs that align with Army HQ offensive targets when the corps is on a primary/secondary front
+- `tests/commander/briefing_campaign_intent.test.ts`
+  - added coverage for campaign-intent propagation and target-priority behavior
+- `vitest.config.ts`
+  - wired the new test into the allowlisted Vitest suite
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\briefing_campaign_intent.test.ts tests\commander\commander.test.ts tests\army_hq_gathering.test.ts`
+  - PASS (`115` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- Army HQ intent is no longer flattened into stance-only guidance
+- strategic hold targets now affect the same `must_hold` substrate the commander already uses
+- offensive opportunity planning is now theater-aware without making the corps commander a scripted puppet
+
+---
+
+### 2026-04-02 — Engine health Wave 1: ops truth after target/participant narrowing
+
+Continued the clean-lane Wave 1 execution in `F:\AWWV_exec_clean` on branch `codex/engine-health-wave1`, this time on the quieter operation-preparation / launch-screening side.
+
+Implemented:
+- `operation_preparation.ts`
+  - force-ratio estimation now narrows defender strength to the enemy sectors that actually cover the operation's objectives
+  - objective-sector resolution is now shared between intel-confidence and force-ratio paths so prep logic talks about the same target set
+- `sector_offensive.ts`
+  - launch feasibility is re-checked after enclave filtering and reserve trimming, so launch approval cannot borrow strength from brigades that will never enter the actual participant set
+- focused regression coverage:
+  - `tests/probe_preparation.test.ts`
+  - `tests/engine_health_wave1_ops_truth.test.ts`
+  - `vitest.config.ts` updated so the new focused regression is not silently skipped by the whitelist harness
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\probe_preparation.test.ts tests\engine_health_wave1_ops_truth.test.ts`
+  - PASS (`36` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Execution note:
+- `tsc --noEmit -p tsconfig.json` in the clean lane is still blocked by missing React/Vite packages in the linked toolchain. Treat that as lane-environment drift, not evidence against this ops slice.
+
+Why this matters:
+- This closes a subtle optimism leak. Before the fix, prep confidence could be objective-specific while force-ratio estimation still counted defenders from unrelated enemy sectors, and launch feasibility could still approve an operation based on brigades that would later be filtered out. That is exactly the kind of split truth that makes commanders look stupid for the wrong reason.
+
+### 2026-04-02 â€” Player-facing label discipline: secondary panel leak sweep
+
+Continued the clean-lane player-knowledge integrity pass in `F:\AWWV_exec_clean` on branch `codex/engine-health-wave1`.
+
+Implemented:
+- `src/ui/shared/playerFacingLabels.ts`
+  - centralized shared helpers for player-facing corps/sector/assignment labels
+  - added player-faction operation filtering helper
+- `src/ui/map/components/OperationsPanel.tsx`
+  - standalone operations list now renders only player-faction operations
+- `src/ui/map/components/OperationDetail.tsx`
+  - sector labels now use player-facing names instead of raw sector ids
+- `src/ui/map/components/FormationDetail.tsx`
+  - sector badge title now uses player-facing sector naming
+- `src/ui/warroom/components/FactionOverviewPanel.ts`
+  - officer roster / commander reassignment dialog now resolve corps labels through display names
+- `src/ui/map/utils/officerUtils.ts`
+  - generic unavailability reasons no longer leak enclave ids or raw corps ids
+- `tests/ui_map_render_smoke.test.ts`
+  - added regression coverage for shared label helpers and player-faction operation filtering
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts`
+  - PASS (`9` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- The worst player-facing leaks often reappear in secondary panels and fallback text after the main surface is fixed. This checkpoint turns label translation and op visibility into shared rules instead of one-off cleanup.
+
+---
+
+### 2026-04-02 â€” Player-facing label safety extended across map and Warroom
+
+Continued Wave 1 player-truth cleanup in the clean lane by removing another class of low-grade but persistent leaks: fallback strings that degraded to raw corps or sector ids when lookups were missing.
+
+Implemented:
+- added `src/ui/shared/playerFacingLabels.ts`
+  - shared player-safe corps / sector / assigned-command label helpers
+- `OperationDetail.tsx`
+  - sector anchor labels no longer fall back to raw `sector_id`
+- `FormationDetail.tsx`
+  - brigade sector title/hover text now uses player-facing sector names
+- `ui/map/utils/officerUtils.ts`
+  - availability reasons no longer expose raw enclave ids or raw assigned corps ids
+- `ui/warroom/components/FactionOverviewPanel.ts`
+  - officer roster and reassignment dialog now use formation display names instead of raw corps ids
+- `tests/ui_map_render_smoke.test.ts`
+  - added label-safety regression coverage
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts tests\warroom_smoke.test.ts`
+  - PASS (`11` tests)
+
+Why this matters:
+- player-facing integrity is not just about enemy leaks
+- it is also about never letting normal UI fall back to engine identifiers
+- the rule now applies across both tactical-map React surfaces and the older Warroom shell
+
+---
+
+### 2026-04-02 â€” Player-only command rails and operation arrows
+
+Continued the clean-lane player-knowledge integrity pass by closing a broader omniscience leak: several tactical-map global rails were still grouping or rendering content for all factions instead of only the player faction.
+
+Implemented:
+- `src/ui/shared/playerFacingLabels.ts`
+  - added `getPlayerFacingFaction`, `getPlayerVisibleFactions`, and `getPlayerVisibleOperations`
+- `src/ui/map/components/OOBSidebar.tsx`
+  - Army, Mobilization, Operations, and Sectors accordions now render only the player faction
+  - counts now derive from player-visible collections
+- `src/ui/map/components/SelectionPanel.tsx`
+  - settlement operation summaries now filter to player-visible operations
+- `src/ui/map/map/builders/buildOperationArrowsGeoJSON.ts`
+  - operation arrows now render only player-visible operations
+- `tests/ui_map_render_smoke.test.ts`
+  - added regression coverage for player-visible faction filtering and player-only operation arrows
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts tests\warroom_smoke.test.ts`
+  - PASS (`13` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- global command rails are the easiest place for debug-shell omniscience to sneak back into the player experience
+- until a real renderer-state boundary exists, every player-facing list and map overlay must explicitly filter omniscient state before render
+
+---
+
+### 2026-04-02 â€” Engine health Wave 1 correctness fixes (clean execution lane)
+
+Implemented the first correctness wave in clean branch `codex/engine-health-wave1` under `F:\AWWV_exec_clean`.
+
+**Fixes landed in code:**
+- `src/sim/combat/operation_preparation.ts`
+  - `getOperationIntelConfidence()` now prefers the intel record facing the enemy sector that actually contains the operation objective.
+  - When the state slice is too thin to resolve objective â†’ enemy-sector honestly, it falls back to the best facing-sector record instead of collapsing to false zero-confidence.
+- `src/scenario/victory_conditions.ts`
+  - victory/war termination now treats `state.political.war_exhaustion` as authoritative, with legacy formation-profile exhaustion only as fallback.
+- `src/sim/combat/sector_offensive.ts`
+  - launch feasibility now accounts for defender artillery, entrenchment, and terrain defensive multipliers instead of screening attacks from raw attacker/defender base power alone.
+- `src/sim/combat/commander/force_eval.ts` + `src/sim/combat/commander/assess.ts`
+  - commander brigade fitness now consumes `briefing.supply_by_osid` at each brigade's actual `location_osid` instead of always using the conservative unknown/default supply multiplier.
+- `src/sim/combat/army_hq_gathering.ts`
+  - `recent_territory_change` is no longer a dead placeholder; it now derives a net gain/loss signal from recent `political.control_events` scoped to each corps's front neighborhood.
+
+**Regression coverage added/extended:**
+- `tests/probe_preparation.test.ts`
+- `tests/war_termination.test.ts`
+- `tests/corps_level_operations.test.ts`
+- `tests/commander/commander.test.ts`
+- `tests/army_hq_gathering.test.ts`
+
+**Verification:**
+- `vitest run tests\probe_preparation.test.ts tests\war_termination.test.ts tests\corps_level_operations.test.ts`
+- result: `61/61` tests passing
+- `vitest run tests\commander\commander.test.ts`
+- result: `50/50` tests passing
+- `vitest run tests\army_hq_gathering.test.ts`
+- result: `63/63` tests passing
+
+**Meaning:**
+- This is the first implemented slice of the 2026-04-02 engine-health triage.
+- It closes three “engine uses the wrong truth source” bugs before commander-maturity work continues.
+
+**Report:**
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+
+---
+
 ## [2026-04-01] Dev Map Browser-Safe Import Recovery
 
 ### Summary
@@ -18586,23 +19122,2123 @@ P1 defensive fire alone closed it. No must_hold needed. Holds RS all 40 turns.
 
 ---
 
-## [2026-04-02] Op Teočak — assembly zone fix + planning window extension
+## [2026-04-02] Op Teočak — parallel timer fix + planning window extension (n1293)
 
 ### Summary
-Op Teočak was launching with 3 brigades attacking one-by-one (never concentrated) because `countAssembledBrigades` only counted brigades at the single `staging_osid`, missing brigades already at front OSIDs adjacent to the objective. Planning window was also too short for 2nd Tuzla's 3-hop march.
+Op Teočak was launching 4 weeks early (w18 instead of w22) because `preparation_max_turns` was set purely from commander aggressiveness (level 5 → 3 turns), completely ignoring `op.planning_duration`. The 3-turn anti-paralysis clock overrode the 5-turn declared window. Each brigade attacked on a different turn with `was_concentrated: false`.
 
 ### Root cause
-`force_staging` sub-phase advanced prematurely — brigades at `kalesija_selo`/`kikaci` (directly adjacent to `rastosnica_2`) were not counted as assembled because they weren't at `kalesija_grad_2` specifically. Execution opened before the force was in position. Each brigade then attacked on a different turn, `was_concentrated: false` on all 3 attacks.
+`tickPreparation()` initialised `preparation_max_turns = getPreparationMaxTurns(aggressiveness)` with no reference to `op.planning_duration`. For aggressiveness=5: `max(2, 8-5) = 3`. Op Teočak's `planning_duration: 5` was silently discarded. The force launched before the 2nd Tuzla Brigade could complete its 3-hop march from Tuzla to the Kalesija staging area. This exact failure mode was predicted in `docs/40_reports/20260321_HERZEGOVINA_CALIBRATION_SESSION.md` on 2026-03-21 — 12 days before the fix.
+
+Note: an assembly zone expansion (corps-wide `countAssembledBrigades`) was also attempted (n1291) but confirmed inert via identical hash — it was reverted. The root cause was exclusively the timer, not the assembly count.
 
 ### Changes
-- `operation_preparation.ts`: `countAssembledBrigades` expanded for pre-planned ops (no `sector_id`) to count brigades across ALL corps sectors, not just at staging_osid. Determinism via `strictCompare`.
-- `pre_planned_operations.ts`: `planning_duration` 5→7 (2nd Tuzla needs 3 hops + buffer). Removed `arbih_120th_liberation_black_swans` from axis (was re-loaned to 3rd Corps mid-op, never attacked objective).
+- `operation_preparation.ts`: `preparation_max_turns` now initialised as `max(getPreparationMaxTurns(aggressiveness), op.planning_duration ?? 0)`. Pre-planned ops honour their declared window as a minimum floor — an aggressive commander cannot auto-launch before the planned window expires.
+- `pre_planned_operations.ts`: `planning_duration` 5→7 (2nd Tuzla needs 3 hops + buffer). `arbih_120th_liberation_black_swans` **restored** to axis (had been incorrectly removed; brigade has `deployment_osid: op:kalesija:kalesija_grad_2` — deliberately staged there as elite loan).
+
+### Result (n1293)
+- **Hash: 594bffac65edb783.** Op fires at w22 (7 turns from injection at w15). `was_concentrated: true`. rastosnica_2 = RBiH.
+- **23/25 anchors. 6/6 benchmarks.** Regression: vozuca_2 new FAIL (RS→RBiH) — hypothesis: 4-week delay frees 2nd Corps brigades during w18–22 interval, enabling attack on vozuca_2. Under investigation.
 
 ### Verification
 - `npx tsc --noEmit` clean
 - `npm run test:vitest` 1685/1686 pass, 1 skipped (pre-existing)
 
-### Expected effect
-All 3–4 Kalesija brigades recognized as assembled simultaneously → execution waits until force is genuinely concentrated → `was_concentrated: true` → higher power ratio → rastosnica_2 should flip.
+---
+
+## [2026-04-02] Doboj/Ozren investigation — full panel analysis
+
+### Summary
+Full panel investigation into the persistent boljanic_2 (Doboj city) FAIL and the collapse of the entire Ozren pocket in current 40w runs.
+
+### boljanic_2 root cause confirmed
+`arbih_3rd_corps` auto-generates ops that target `boljanic_2` via `findTargetOsidsFromMunicipalities()` adjacency walk from `petrovo_2` (Gračanica — RS-held Ozren foothold on 3rd Corps flank). No depth filter exists. `vrs_1st_krajina` directive has no `hold_osids` for Doboj OSIDs — garrison budget is drained north by Posavina corridor ops. `rs_2nd_armored` brigade gets displaced to petrovo_2 (856 pers, morale 35), leaving only `rs_1st_krnjin` at boljanic_2 facing a 15-brigade ARBiH operation. Falls turn 31.
+
+Note: this is the same structural ARBiH pressure identified in n1240 Issue #46 (bot no-memory catastrophic meat-grinder). The confirmed root cause is the directive layer, not the bot learning layer — `hold_osids` is the fix, not a catastrophe-threshold gate.
+
+### Ozren pocket collapse
+All four RS Ozren brigade home OSIDs flip RBiH by w31–40:
+- `petrovo_2` — 1st Ozren Brigade home (Gračanica municipality)
+- `brijesnica_donja_2` — 2nd Ozren Brigade home (Lukavac municipality)
+- `vozuca_2` — 4th Ozren Brigade home (Zavidovići municipality)
+
+Historical: Ozren pocket persisted until September 1995 (Operation Farz). Falling by w31 is a ~3-year acceleration. Root cause: no `hold_osids` protection for these positions.
+
+### Anchor gap
+`petrovo_2` and `brijesnica_donja_2` are NOT in `HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992` (`src/scenario/scenario_runner.ts` lines 459–489). Only `vozuca_2` is anchored. The pocket collapse has been invisible to calibration scoring. Fix: add both as `expected_controller: 'RS'`.
+
+### vozuca_2 regression (n1293)
+Confirmed as a seam issue between `arbih_2nd_corps` and `arbih_3rd_corps` AoR. Op Teočak's 4-week delay freed 2nd Corps brigades during w18–22, which auto-generated ops targeting vozuca_2 via the corps boundary. Separate from the boljanic_2 mechanism but same class of problem.
+
+### Fix directions
+1. Add `boljanic_2` + adjacent Doboj OSIDs to `vrs_1st_krajina` `hold_osids` directive
+2. Add `petrovo_2 → RS` and `brijesnica_donja_2 → RS` to anchor array in `scenario_runner.ts`
+3. Investigate vozuca_2 seam — may need `vrs_drina` or dedicated Ozren brigade `hold_osids`
 
 ---
+
+## 2026-04-02 — Engine Health Audit & Master Doc Propagation
+
+**Commits:** `8371d9fe` (n1302 doc pass), `6b538ace` (engine health master docs)
+
+### Engine Health Audit — 33 Findings
+
+Comprehensive engine health review dispatched via 4 parallel specialist agents (combat mechanics, CO intelligence, operations, historical/doctrinal). Goal: find structural blindspots in mechanics and CO intelligence, not calibration tuning.
+
+**Key P0 findings:**
+- `CampaignPlan` from `army_hq_gathering.ts` never read by corps CO briefings (ARMY-GAP-1). Strategic layer structurally disconnected.
+- UNPROFOR absent as mechanical entity (HIST-GAP-1). Primary supply route to all enclaves unmodeled.
+- VRS "strangle not capture" enclave strategy absent (HIST-GAP-2). Bot always attacks at available power — no `contain` directive type.
+- Comms quality asymmetry absent (HIST-GAP-3). ARBiH and VRS COs have identical information fidelity.
+- Per-brigade ammunition scarcity absent (HIST-GAP-4). Zone-level supply doesn't capture brigade-level ammo constraints that drove real tactical decisions.
+
+**Key P1 findings:**
+- Combat predictor blind to defender artillery/terrain/entrenchment — primary driver of 47% ZEA rate (COMBAT-P14).
+- `supply_by_osid` never consumed by briefing; hardcoded 0.8 (BRIEF-GAP-1).
+- `recent_territory_change` hardcoded 0 in `assessCorps()` — Theater Assessment trend-blind (BRIEF-GAP-6).
+- Defender tanks have no anti-attacker multiplier (COMBAT-P13, P2).
+- Feint operations produce zero enemy effect — only drain own cohesion (ARMY-GAP-2).
+
+**Master docs updated:**
+- `COMBAT_MASTER.md` — P13 (defender armor) + P14 (predictor blindspot) added to P-list
+- `AI_STRATEGY_SPECIFICATION.md` — Commander Intelligence Blindspot Audit section (8 named gaps)
+- `REAL_WAR_MASTER.md` — n1302 latest review stub + Historical/Doctrinal Blindspot Audit (6 gaps)
+- `SECTOR_MASTER.md` — Corridor width garrison multiplier (Proposal 2 not implemented) + engine must_hold detection disabled (`false &&` in assess.ts, needs corps-boundary discriminator)
+
+**HTML audit dashboard:** `C:/Users/User/.agent/diagrams/engine_health_audit.html`
+
+**Life lessons added (2026-04-02):**
+- [combat.md] Aggregate casualty ratio is faction-blind — always partition by attacker/defender faction pair
+- [calibration.md] Garrison multiplier for must_hold zones can free adjacent brigades toward unintended targets
+- [architecture.md] Fraction-of-faction-total thresholds can't discriminate between strategically different corridors
+
+**Open work from this session (not implemented):**
+- 8 quick wins identified (feint wiring, supply in force_eval, corps exhaustion in briefing, recent_territory_change, op-level failure abort, winter mult, enemy equipment in briefing, must_hold chokepoint discriminator)
+- ARMY-GAP-1 (CampaignPlan → briefing wiring) — P0, needs design before implementation
+- HIST-GAP-1–4 — P0 for v0.9 scope
+
+---
+
+### 2026-04-02 — Engine health Wave 1 continued: player-facing integrity hotfixes
+
+Continued the clean-lane Wave 1 execution in `F:\AWWV_exec_clean` on branch `codex/engine-health-wave1`, focusing on the immediate player-facing integrity lane rather than the deeper renderer-state boundary refactor.
+
+Implemented:
+- `TopToolbar.tsx`
+  - standalone tactical map now exposes a real desktop return-to-Warroom action via `focusWarroom()`
+  - Codex restored as a visible top-toolbar entrypoint
+- `Tooltip.tsx`
+  - formation tooltip no longer renders raw `corps_id`
+- `OperationHistoryPanel.tsx`
+  - active/history cards now render corps display names instead of raw ids
+- `CommanderSelectionModal.tsx`
+  - assignment/unavailable reasons now use display names rather than raw corps ids / enclave ids
+- `army_hq/PersonnelContent.tsx`
+  - officer roster now shows assigned corps display names
+- `army_hq/ThreatAssessment.tsx`
+  - player-facing threat language rewritten around friendly-front abstractions
+  - no longer surfaces raw enemy corps ids or enemy operation names in normal presentation
+- `army_hq/generateThreatAssessment.ts`
+  - extracted pure generator so player-facing threat language can be tested without React renderer imports
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts`
+  - PASS (`7` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Execution note:
+- `npm run desktop:map:build` is currently blocked in the clean lane by missing `@vitejs/plugin-react` resolution from the shared `node_modules` link. This appears to be environment/tooling drift in the clean execution lane rather than a regression from this checkpoint.
+
+Why this matters:
+- This is the first implemented slice of `player-knowledge integrity` from the roadmap that is not just documentation. The immediate contract is now clearer: player-facing tactical-map surfaces may consume deeper engine truth, but they must narrate it as player/staff abstractions tied to friendly fronts rather than leaking enemy internals.
+
+---
+
+### 2026-04-02 — Engine health Wave 1 continued: corps reinforcement pressure reaches Army HQ
+
+Continued the clean-lane Wave 1 execution in `F:\AWWV_exec_clean` on branch `codex/engine-health-wave1`, focusing on another half-alive core-engine loop: corps commanders were already generating reinforcement requests, but Army HQ gathering had no way to hear them.
+
+Implemented:
+- `src/state/game_state.ts`
+  - `CorpsCommandState` now persists `commander_reinforcement_requests`
+- `src/sim/combat/commander/commander_loop.ts`
+  - `applyCommanderOutput(...)` now writes commander reinforcement requests back to corps state
+- `src/sim/combat/army_hq_gathering_types.ts`
+  - `CorpsAssessment` now carries top reinforcement priority and total brigades requested
+- `src/sim/combat/army_hq_gathering.ts`
+  - Army HQ assessment now summarizes persisted corps reinforcement pressure
+  - opportunity scoring now accounts for that pressure
+  - front-role generation now refuses to leave a high/critical requesting corps on `economy`
+- `src/sim/combat/army_hq_gathering_constants.ts`
+  - added explicit reinforcement-pressure score modifiers
+- `tests/commander/reinforcement_signal_flow.test.ts`
+  - new focused regression proving the signal survives the commander loop
+- `tests/army_hq_gathering.test.ts`
+  - new regressions proving Army HQ consumes the signal and changes campaign-role output
+- `vitest.config.ts`
+  - wired the new commander/Army HQ regression file into the Vitest allowlist
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\reinforcement_signal_flow.test.ts tests\army_hq_gathering.test.ts`
+  - PASS (`66` tests)
+- `node_modules\.bin\vitest.cmd run tests\commander\commander.test.ts tests\commander\briefing_campaign_intent.test.ts tests\commander\reinforcement_signal_flow.test.ts tests\army_hq_gathering.test.ts`
+  - PASS (`118` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- this closes another “typed but inert” engine-health blindspot
+- the command stack now supports a real corps → Army HQ pressure signal instead of silently discarding it
+- strategic planning can now react to frontline reinforcement need before the branch moves on to larger ops/authority cleanup
+
+---
+
+### 2026-04-02 — Player-facing fallback sweep: no raw ids in generic degrade paths
+
+Small follow-on cleanup in the same clean lane:
+
+- `army_hq/SituationBriefing.tsx`
+  - low-intel and thin-front alerts now fall back to `this sector` instead of raw `sector_id`
+- `OfficerEventBadge.tsx`
+  - replacement-commander modal now falls back to `this corps` instead of raw `corps_id`
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts`
+  - PASS
+
+Why this matters:
+- The most stubborn player-facing leaks often live in fallback strings rather than the main happy-path labels. Fixing those now helps keep the UI translation layer honest as the branch keeps moving.
+
+---
+
+### 2026-04-02 — Legacy authority classification: ops/movement/pressure files
+
+Audited several high-risk “legacy” combat files in the clean lane to classify them by actual live authority rather than age or naming:
+
+- `bot_corps_operations.ts`
+  - still authoritative for emergency defensive-op creation and OG activation entry points
+  - not removable yet
+- `apply_brigade_reposition.ts`
+  - intentional no-op compatibility sink
+  - still invoked by the war pipeline, but does not mutate live AoR truth
+- `brigade_aor_legacy.ts` + `brigade_pressure.ts`
+  - dangerous half-alive layer
+  - still imported by live pressure code, while the actual pressure computation currently resolves to zero
+  - comments in `war_phases.ts` still imply stronger live relevance than the runtime behavior justifies
+
+Artifact:
+- `docs/40_reports/audits/20260402_LEGACY_AUTHORITY_CLASSIFICATION.md`
+
+Why this matters:
+- This is exactly the class of repo blindspot that causes Claude or humans to “fix” the wrong thing later. The worst legacy code is not always dead code; it is code that still looks like an owner while no longer producing meaningful truth.
+
+---
+### 2026-04-02 — Engine honesty slice: sector exemptions and legacy authority comments made explicit
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, focusing on one of the repo's highest-risk blindspots: files whose runtime behavior and comments were teaching different truths.
+
+Implemented:
+- `src/sim/combat/corps_front_sectors_constants.ts`
+  - added canonical `isSectorAssignmentExemptCorpsId(...)` helper for army-HQ / main-staff reserve exceptions
+- `src/sim/combat/corps_front_sectors.ts`
+  - sector header now states the true rule: active non-exempt field brigades are sector-mandatory; army-HQ reserve brigades are the standing exception until loaned
+- `src/sim/combat/brigade_assignment.ts`
+  - comments and classification gates now use the same exemption contract
+- `src/sim/combat/army_reserve_system.ts`
+  - now reads the canonical exemption helper instead of open-coding the set lookup
+- `src/sim/combat/pre_planned_operations.ts`
+  - same helper adoption for consistency
+- `src/sim/combat/sector_assertions.ts`
+  - rewritten as an honest diagnostic-rail file instead of claiming stronger hard enforcement than it actually provides
+- `src/sim/combat/brigade_pressure.ts`
+  - comments now explicitly classify the file as a dormant compatibility layer with zero-delta live behavior
+- `src/sim/combat/apply_brigade_reposition.ts`
+  - comments now explicitly classify the file as a legacy compatibility sink that clears old orders without mutating live sector truth
+- `tests/engine_honesty_legacy_contracts.test.ts`
+  - added regression coverage for the sector-exemption helper and the reposition compatibility-sink contract
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\engine_honesty_legacy_contracts.test.ts tests\army_reserve_system.test.ts`
+  - PASS (`14` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- this is exactly the kind of repo drift that causes future AI agents to “fix” the wrong layer
+- in a strategy/sim repo, stale comments and half-alive compatibility layers can be more dangerous than obvious dead code
+- the foundation gets stronger when helper contracts, comments, and runtime behavior all teach the same truth
+
+---
+
+### 2026-04-02 â€” Player-visible map shell tightened: fog-backed formation visibility and non-omniscient summaries
+
+Continued the clean-lane Wave 1 player-truth sweep in `F:\AWWV_exec_clean`, focusing on the quieter surfaces that still behaved like debug dashboards even after the first round of map/Warroom cleanup.
+
+Implemented:
+- `src/ui/shared/playerVisibility.ts`
+  - added `filterPlayerVisibleMapFormations(...)` so formation rendering can distinguish between player-owned units and fog-visible enemy units
+- `src/ui/map/map/builders/buildFormationsGeoJSON.ts`
+  - now renders all player formations plus only enemy formations whose OSIDs are exposed through `fogOfWar.visibleEnemyOsids`
+- `src/ui/map/components/BottomStatusStrip.tsx`
+  - operation count now uses player-visible operations instead of omniscient global totals
+- `src/ui/map/components/SituationTab.tsx`
+  - territory and casualty blocks now report only the player faction in normal player mode rather than a three-faction omniscient summary
+- `src/ui/warroom/components/FactionOverviewPanel.ts`
+  - folded the pending assigned-command label cleanup into the same checkpoint
+- `tests/ui_player_visibility.test.ts`
+  - added regressions for fog-backed formation visibility and map GeoJSON filtering
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\ui_map_render_smoke.test.ts tests\warroom_smoke.test.ts`
+  - PASS (`18` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- fog only becomes product truth when actual formation rendering consumes it
+- summary chrome is part of the player shell; if it shows omniscient totals it leaks just as surely as a detail panel
+- once player-facing filters exist, they must be reused across tactical map and Warroom or the repo drifts back into split truth
+
+---
+### 2026-04-02 â€” Engine health Wave 1 continued: commander force scoring now respects brigade fatigue
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing the next commander split-truth gap after the earlier briefing/planning fatigue work.
+
+Implemented:
+- `src/sim/combat/commander/force_eval.ts`
+  - brigade offensive and defensive fitness now apply a multiplier derived from live `formation.ops.fatigue`
+  - aligned the commander-side fatigue floors with `combat_math.ts`:
+    - attack floor `0.6`
+    - defense floor `0.75`
+- `tests/commander/commander.test.ts`
+  - added regressions proving heavy local fatigue lowers brigade fitness
+  - added regressions proving fatigue can demote a borderline assault brigade out of `main_effort`
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded Wave 1 report with the fatigue-force-scoring checkpoint
+- `docs/20_engineering/AI_STRATEGY_SPECIFICATION.md`
+  - updated BRIEF-GAP-3 status so the spec now records both the briefing fix and the downstream force-eval fix
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\commander.test.ts tests\commander\briefing_campaign_intent.test.ts tests\commander\reinforcement_signal_flow.test.ts tests\army_hq_gathering.test.ts`
+  - PASS (`126` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- the commander could already “know” brigade fatigue in briefing/planning, but still rate exhausted brigades as fresh in force scoring
+- this keeps planning, scoring, and combat math pointed at the same wear model instead of letting commander sophistication drift back into theater
+
+---
+### 2026-04-02 â€” Engine health Wave 1 continued: Army HQ front roles now constrain fresh corps offensives
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing another quiet split-truth gap between Army HQ strategy and corps-level plan creation.
+
+Implemented:
+- `src/sim/combat/commander/plan.ts`
+  - fresh offensive plan creation is now explicitly blocked on `economy` and `contain` fronts
+  - planner returns a truthful role-based reason instead of generic `no viable plan available`
+- `tests/commander/briefing_campaign_intent.test.ts`
+  - added regressions proving `economy` and `contain` campaign roles suppress fresh offensive plan creation
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded Wave 1 report with the strategy-role checkpoint
+- `docs/20_engineering/AI_STRATEGY_SPECIFICATION.md`
+  - updated `ARMY-GAP-1` so the spec records that campaign roles now constrain plan creation instead of remaining advisory flavor
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\briefing_campaign_intent.test.ts tests\commander\commander.test.ts tests\commander\reinforcement_signal_flow.test.ts tests\army_hq_gathering.test.ts`
+  - PASS (`128` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- a theater role that only works because local opportunity scoring happens to fail is decorative strategy
+- Army HQ `economy` / `contain` roles now have force at the exact point where fresh corps offensives would otherwise be invented
+
+---
+### 2026-04-02 â€” Engine health Wave 1 continued: synchronized-op briefing data now changes planning behavior
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing another half-alive strategy path: synchronized-operation roles and targets were present in the corps briefing, but were still mostly descriptive instead of behavioral.
+
+Implemented:
+- `src/sim/combat/commander/plan.ts`
+  - synchronized-op `main_effort` / `supporting` targets now outrank broader campaign offensive targets when choosing staging and opportunity objectives
+  - synchronized-op `feint` / `fixing` roles now explicitly block the generic fresh-offensive path instead of falling through to a plan type that cannot honestly realize them
+- `tests/commander/briefing_campaign_intent.test.ts`
+  - added regressions proving synchronized-op targets outrank broader campaign targets
+  - added regressions proving `feint` / `fixing` synchronized roles suppress generic fresh offensive plan creation
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded Wave 1 report with the synchronized-op honesty checkpoint
+- `docs/20_engineering/AI_STRATEGY_SPECIFICATION.md`
+  - updated `ARMY-GAP-1` to record that synchronized-op intent now changes target priority and role legality in local planning
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\briefing_campaign_intent.test.ts tests\commander\commander.test.ts tests\commander\reinforcement_signal_flow.test.ts tests\army_hq_gathering.test.ts`
+  - PASS (`131` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- synchronized ops were at risk of becoming exactly the kind of sophisticated-sounding decorative architecture this triage is meant to kill
+- target coordination is now real enough to affect plan choice, and unsupported sync roles now fail honestly instead of pretending the generic offensive path is close enough
+
+---
+### 2026-04-02 â€” Engine health Wave 1 continued: hover tooltips now obey player-facing truth
+
+Continued the clean-lane player-knowledge sweep in `F:\AWWV_exec_clean`, starting with the most visible leak surface: tactical-map hover tooltips.
+
+Implemented:
+- `src/ui/map/components/tooltipPlayerSafe.ts`
+  - new canonical player-safe tooltip shaping helper
+  - own formations keep exact detail
+  - enemy formations collapse to `Enemy contact`
+  - settlement hover lists keep only player-owned stationed formations
+  - front hover keeps own line detail while reducing enemy side to contact-count abstraction
+- `src/ui/map/components/Tooltip.tsx`
+  - now routes formation, front, and settlement hover through the player-safe helper instead of rendering raw omniscient state directly
+  - defense preview now uses player-owned brigades only
+- `tests/ui_map_tooltip_player_visibility.test.ts`
+  - new regressions locking the tooltip visibility contract
+- `vitest.config.ts`
+  - wired the focused tooltip regression file into the explicit Vitest whitelist
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_map_tooltip_player_visibility.test.ts tests\ui_player_visibility.test.ts`
+  - PASS (`8` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- hover cards are part of the player shell, not a debug exception
+- exact enemy unit names and local enemy composition in normal hover are cheat-surface leaks
+- centralizing the rule in one helper makes future leak cleanup cheaper and future regressions easier to catch
+
+---
+---
+### 2026-04-02 â€” Engine health Wave 1 continued: legacy brigade pressure is now a true sink
+
+Drained another half-alive authority path in the clean lane `F:\AWWV_exec_clean`.
+
+Implemented:
+- `src/sim/combat/brigade_pressure.ts`
+  - converted `applyBrigadePressureToState()` into a truly inert compatibility sink
+  - canonical pressure ownership remains in `src/state/front_pressure.ts`
+- `tests/engine_honesty_legacy_contracts.test.ts`
+  - added a regression proving legacy brigade pressure no longer mutates `state.military.front_pressure`
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\engine_honesty_legacy_contracts.test.ts tests\brigade_pressure.test.ts`
+  - PASS (`23` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- dormant compatibility layers are still dangerous if they quietly refresh timestamps or other canonical metadata
+- this removes one more split-truth writer from the core combat engine
+
+---
+### 2026-04-02 — Engine health Wave 1 continued: engine `must_hold` now uses corps-boundary isolation instead of a dead branch
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, draining another decorative mechanics trap from commander zone detection.
+
+Implemented:
+- `src/sim/combat/commander/zone_detection.ts`
+  - replaced the hard-disabled engine `must_hold` path with a corps-boundary-aware chokepoint split test
+  - a zone now becomes engine `must_hold` only when removing a chokepoint disconnects the current zone from a substantial friendly component outside the corps’s own territory set
+  - same-corps internal chokepoints without scenario-authored hold data no longer trigger fake must-hold status
+- `tests/commander/briefing_campaign_intent.test.ts`
+  - added regressions proving an external corridor chokepoint becomes `is_must_hold === true`
+  - added regressions proving an internal same-corps chokepoint stays `is_must_hold === false`
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded the Wave 1 report with the new must-hold honesty checkpoint
+- `docs/20_engineering/AI_STRATEGY_SPECIFICATION.md`
+  - recorded the old dead-branch problem and the new corps-boundary discriminator as `BRIEF-GAP-8`
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\briefing_campaign_intent.test.ts`
+  - PASS (`13` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- hard-disabled mechanics are dangerous because they leave the architecture looking richer than the runtime really is
+- `must_hold` is only useful if the engine can derive it honestly rather than flooding same-corps geometry with false alarms
+- this restores a real defensive signal to commander zoning without reviving the old overfiring corridor heuristic
+
+---
+### 2026-04-02 — Engine health Wave 1 continued: commander briefings now include adjacent friendly corps posture
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing another local-only commander blindspot.
+
+Implemented:
+- `src/sim/combat/commander/commander_state.ts`
+  - added `AdjacentCorpsSummary` and `CommanderBriefing.adjacent_corps`
+- `src/sim/combat/commander/briefing.ts`
+  - added deterministic collection of adjacent friendly corps based on active same-faction brigades physically neighboring the corps area
+  - each summary now carries neighboring `corps_id`, current `stance`, and active-operation count
+- `tests/commander/briefing_campaign_intent.test.ts`
+  - added a regression proving the briefing includes nearby friendly corps while excluding distant same-faction corps
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded the Wave 1 report with the adjacent-corps briefing checkpoint
+- `docs/20_engineering/AI_STRATEGY_SPECIFICATION.md`
+  - updated `BRIEF-GAP-5` to record the new adjacent-corps context contract and its remaining limits
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\briefing_campaign_intent.test.ts`
+  - PASS (`14` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- local commanders should not plan as if neighboring friendly corps do not exist
+- this turns “adjacent corps posture” from a design note into a real briefing input
+- proximity-based summaries are an honest first step toward cross-corps timing without pretending full coordination already exists
+
+---
+### 2026-04-02 — Engine health Wave 1 continued: retired brigade reposition orders no longer pretend to be a live player command
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing a product-truth contradiction between desktop order staging and war-phase execution.
+
+Implemented:
+- `src/desktop/desktop_sim.ts`
+  - `validateBrigadeRepositionOrder(...)` now rejects new reposition orders explicitly with `Brigade reposition orders are retired; use movement or sector assignment instead`
+- `src/ui/map/data/GameStateAdapter.ts`
+  - player-facing loaded state no longer exposes `repositionOrders`; stale save data may still carry the field, but the map shell no longer presents it as an active order type
+- `tests/engine_honesty_legacy_contracts.test.ts`
+  - added regressions proving the desktop contract rejects new reposition staging
+  - added regressions proving the player shell does not expose retired reposition orders
+- `docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md`
+  - updated `stage-brigade-reposition-order` to a retired compatibility rejection channel
+- `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`
+  - removed reposition from live order-arrow / panel / desktop-shell contract language
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded the Wave 1 report with the reposition-retirement checkpoint
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\engine_honesty_legacy_contracts.test.ts`
+  - PASS (`5` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- fake commands are worse than missing commands because they teach players and future agents to trust a lie
+- if a war-phase sink intentionally does nothing, the earliest honest desktop boundary should reject it rather than stage it
+- player-facing adapters should not keep presenting retired order types just because older saves still carry the field
+
+---
+### 2026-04-02 — Engine health Wave 1 continued: commander reinforcement pressure now reaches the elite reserve queue
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing the next split-truth loop in Army HQ reserve handling.
+
+Implemented:
+- `src/sim/combat/army_reserve_system.ts`
+  - added deterministic summarization of persisted `commander_reinforcement_requests`
+  - `generateArmyReserveRequests(...)` now converts explicit corps commander pressure into a real reserve-request candidate
+  - commander-signaled need now competes with the older offensive / defensive / exploitation heuristics instead of dying after theater assessment
+- `tests/army_reserve_system.test.ts`
+  - added a regression proving a corps with commander reinforcement pressure but no legacy heuristic trigger still produces a pending elite reserve request
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded the Wave 1 report with the reserve-loop checkpoint
+- `docs/20_engineering/AI_STRATEGY_SPECIFICATION.md`
+  - updated `BRIEF-GAP-7` to record that the elite reserve queue now hears commander pressure too
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\army_reserve_system.test.ts tests\army_hq_gathering.test.ts tests\commander\reinforcement_signal_flow.test.ts`
+  - PASS (`79` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- a reinforcement loop is not real until the same signal survives all the way from corps commander output to actual reserve-request generation
+- if Army HQ scoring hears the corps commander but the elite reserve queue does not, the repo is still carrying split command truth
+- this makes commander reinforcement pressure actionable without pretending the broader reserve-transfer system is already finished
+
+---
+### 2026-04-02 — Engine health Wave 1 continued: Army HQ front priorities now respect recent territorial trend
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing a theater-level honesty gap around `recent_territory_change`.
+
+Implemented:
+- `src/sim/combat/army_hq_gathering_constants.ts`
+  - added explicit opportunity-score modifiers for recent territorial loss and gain
+- `src/sim/combat/army_hq_gathering.ts`
+  - `computeOpportunityScore(...)` now penalizes corps that have been losing ground and modestly rewards corps that are consolidating gains
+- `tests/army_hq_gathering.test.ts`
+  - added a regression proving a corps with recent territorial losses no longer outranks a similarly strong stable corps for the primary role
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded the Wave 1 report with the territorial-trend checkpoint
+- `docs/20_engineering/AI_STRATEGY_SPECIFICATION.md`
+  - corrected `BRIEF-GAP-6` so it points at the real Army HQ/front-priority gap and records the remaining local-commander asymmetry honestly
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\army_hq_gathering.test.ts`
+  - PASS (`66` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- a theater plan should not treat a corps that is actively losing ground like a normal offensive opportunity
+- this turns recent territorial change from a decorative assessment field into a real front-role input
+- it also removes a stale-doc trap: the old write-up pointed at the wrong subsystem and would have sent the next agent after the wrong fix
+
+---
+### 2026-04-02 — Engine health Wave 1 continued: legacy brigade AoR imports are now regression-gated
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, adding a hard guardrail around a half-dead legacy authority path.
+
+Implemented:
+- `tests/engine_honesty_legacy_contracts.test.ts`
+  - added a static regression that scans active `src/` files and fails if non-archived runtime code starts importing `brigade_aor_legacy.ts`
+  - current honest allowance is explicit: only `brigade_pressure.ts` may still import it, and that module is already fenced as a no-op compatibility sink
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded the Wave 1 report with the new regression-gate checkpoint
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\engine_honesty_legacy_contracts.test.ts`
+  - PASS (`6` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- the repo’s most dangerous legacy files are the ones that still look alive enough for the next fix to reuse them
+- this turns one of those risks into a failing test instead of a future archaeology project
+- it also makes the intended authority fence explicit for anyone touching combat/sector plumbing later
+---
+### 2026-04-02 — Engine health Wave 1 continued: player shell and scripted-op regressions now match live truth
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, draining a mixed swamp pocket of player-shell fallback leaks, omniscient Warroom supply chrome, and stale scripted-operation tests that were still enforcing old engine truth.
+
+Implemented:
+- `src/ui/map/components/OrderQueue.tsx`
+  - queued-order brigade labels now resolve through `getPlayerSafeBrigadeName(...)`
+  - removed the raw `formationId` title fallback from the player-facing order list
+- `src/ui/warroom/data/war_data_extractor.ts`
+  - Warroom `ownSupply` now scopes to municipalities actually controlled by the player faction
+  - added deterministic municipality-majority control derivation from OSID-level `political_controllers`
+- `src/sim/combat/pre_planned_operations.ts`
+  - initial and queued scripted operations now derive and retain a primary `sector_id`
+- `src/sim/combat/triggered_operations.ts`
+  - triggered scripted operations now derive and retain a primary `sector_id`
+- `tests/pre_planned_operations.test.ts`
+  - modernized to the current 14-operation pre-planned catalog and current queue chains
+  - added sector-anchor assertions
+- `tests/triggered_operations.test.ts`
+  - modernized to the current 4-operation triggered catalog
+  - removed stale expectations for retired/renamed ops
+  - added sector-anchor assertions
+- `tests/ui_map_render_smoke.test.ts`
+  - added player-safe brigade fallback coverage
+- `tests/warroom_player_visibility.test.ts`
+  - added coverage proving Warroom `ownSupply` counts only player-controlled municipalities
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded the Wave 1 report with this checkpoint
+
+Verification:
+- `node_modules\.bin\tsx.cmd --test tests\pre_planned_operations.test.ts tests\triggered_operations.test.ts`
+  - PASS (`16` tests)
+- `node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts tests\warroom_player_visibility.test.ts`
+  - PASS (`15` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- player-shell leaks often survive in fallback strings and summary chrome after the obvious panels are fixed
+- scripted-op tests that still verify old catalogs are false comfort, not regression protection
+- sector anchoring only becomes trustworthy when historical/scripted operation injectors follow the same contract as the rest of the ops lifecycle
+
+---
+### 2026-04-02 — Engine health Wave 1 continued: probe operations now obey the sector-anchored contract too
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing the last obvious live exception in current operation birth paths.
+
+Implemented:
+- `src/sim/combat/corps_operation_helpers.ts`
+  - `buildProbeOperation(...)` now accepts and stores `sector_id`
+  - removed transitional language suggesting commander-created missing-sector ops are still acceptable
+- `src/sim/combat/commander/emit.ts`
+  - probe generation now derives a primary sector from the probe brigade before creating the operation shell
+- `src/sim/combat/sector_offensive.ts`
+  - lifecycle-owner docs now describe sector anchoring as the contract for all current live operation creation paths
+- `tests/corps_operation_helpers.test.ts`
+  - added a regression proving probe operations retain the supplied sector anchor
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded the Wave 1 report with this checkpoint
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\corps_operation_helpers.test.ts tests\commander\commander.test.ts`
+  - PASS (`80` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- a canonical field is not canonical if probe operations are still allowed to skip it
+- this removes another “special case” that future Claude work could mistake for a valid pattern
+- once every live birth path is sector-anchored, later ops cleanup can simplify around that assumption instead of carrying conditional logic forever
+
+---
+### 2026-04-02 — Engine health Wave 1 continued: summary-shell labels now follow player-safe text rules
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing a quiet player-facing leak in the Situation summary shell.
+
+Implemented:
+- `src/ui/map/utils/playerSafeText.ts`
+  - added `getPlayerSafeMunicipalityName(...)`
+  - added `getPlayerSafeCorridorLabel(...)`
+  - upgraded enclave fallback handling so slug-style ids are humanized instead of leaked
+- `src/ui/map/components/SituationTab.tsx`
+  - convoy summaries now use player-safe enclave and corridor labels
+  - local-support summaries now humanize municipality ids before display
+- `tests/ui_map_render_smoke.test.ts`
+  - added regressions proving the shared helpers humanize municipality/enclave slugs and abstract route-faction codes into player-facing corridor labels
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded the Wave 1 report with this checkpoint
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts`
+  - PASS (`12` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Environment note:
+- `npx.cmd tsc --noEmit -p tsconfig.json` still fails in the clean worktree because React / Vite type dependencies are not fully available there; this remains an isolated-lane dependency/setup issue, not a regression from this slice.
+
+Why this matters:
+- summary chrome is a player surface, not a safe place to leak raw sim labels
+- once municipality/enclave/corridor fallbacks are centralized, future overview panels are less likely to regress into slug-printing behavior
+- player-safe text rules become a testable contract instead of an aesthetic preference
+
+---
+### 2026-04-02 — Engine health Wave 1 continued: retired brigade reposition no longer survives in the live desktop shell
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, removing a fake live command path for the already-retired brigade reposition mechanic.
+
+Implemented:
+- `src/desktop/preload.cjs`
+  - removed the `stageBrigadeRepositionOrder` bridge export from the live desktop shell
+- `src/ui/map/desktop/useIPC.ts`
+  - removed the retired brigade-reposition method from the React IPC contract
+- `src/desktop/electron-main.cjs`
+  - removed the `stage-brigade-reposition-order` main-process handler so the command can no longer masquerade as a live staging route
+- `tests/engine_honesty_legacy_contracts.test.ts`
+  - added a static regression proving the retired brigade-reposition bridge no longer appears in live preload / IPC / main-process code
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded the Wave 1 report with this checkpoint
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\engine_honesty_legacy_contracts.test.ts`
+  - PASS (`7` tests)
+- `git grep -n "stageBrigadeRepositionOrder\|stage-brigade-reposition-order" -- src tests`
+  - only archived UI and the regression test itself remain
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- a command is still part of the product lie if preload and IPC wiring keep advertising it after gameplay retired it
+- honest retirement means removing the surface at the earliest boundary, not just returning an error later
+- this removes one more half-alive authority path that future Claude sessions could mistake for a valid implementation seam
+
+---
+### 2026-04-02 — Engine health Wave 1 continued: Army HQ reserve corps no longer trigger fake missing-sector alerts
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, removing a misleading Army HQ briefing alert that was treating intentionally sector-exempt reserve corps as if they were broken field formations.
+
+Implemented:
+- `src/ui/map/components/army_hq/generateBriefing.ts`
+  - extracted the pure briefing generator out of the TSX component so alert policy can be tested directly
+  - `has no front sectors assigned` now skips corps ids covered by `isSectorAssignmentExemptCorpsId(...)`
+- `src/ui/map/components/army_hq/SituationBriefing.tsx`
+  - reduced to a render wrapper around the pure generator module
+- `tests/ui_map_render_smoke.test.ts`
+  - added a regression proving exempt reserve corps do not trigger the missing-sector critical alert
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded the Wave 1 report with this checkpoint
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts`
+  - PASS (`13` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- the product should not accuse the engine of being wrong when the design intentionally allows sectorless army-reserve formations
+- false critical alerts create just as much confusion as missing alerts, especially in a repo already full of stale invariants
+- extracting the generator turns briefing truth into a pure, reviewable policy surface instead of a component side-effect
+
+---
+### 2026-04-02 — Engine health Wave 1 continued: feints now apply real enemy-side pressure
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, converting feints from mostly cosmetic/self-costing operations into a real pressure signal that the defending side reacts to.
+
+Implemented:
+- `src/sim/combat/brigade_assignment.ts`
+  - `recomputeSectorPowerAndThreat(...)` now inspects active enemy feints and applies a deterministic `×1.5` threat-ratio multiplier to sectors they target
+- `src/sim/combat/corps_front_sectors.ts`
+  - canonical threat recomputation now receives the full state so feint pressure can flow through the normal sector-power path
+- `tests/sector_power_threat_recompute.test.ts`
+  - added regression coverage proving enemy feints raise the targeted sector’s `threat_ratio`
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded the Wave 1 report with this checkpoint
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\sector_power_threat_recompute.test.ts tests\h_phase_intelligence_warfare.test.ts tests\army_reserve_system.test.ts`
+  - PASS (`20` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- a feint that never changes enemy-side pressure is not a deception mechanic, it is just a mislabeled self-tax
+- routing the effect through `threat_ratio` means reserve requests, sector balancing, and commander caution can now all react through existing canonical logic
+- this is the right kind of engine-health repair: revive the feature by attaching it to a real live currency instead of adding another parallel subsystem
+### 2026-04-02 - Engine health Wave 1 continued: corridor breach operations are now sector-anchored too
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, removing another half-alive operation-authority exception: corridor-breach ops were still being created without a canonical sector anchor even though newer operation paths already required one.
+
+Implemented:
+- `src/sim/combat/bot_corps_corridor.ts`
+  - corridor-breach creation now derives a primary sector from the launching corps's current sector membership and participating brigades
+  - the legacy creator now passes that `sector_id` into `buildCommanderOperation(...)` instead of creating a live unanchored operation
+- `tests/bot_corps_corridor.test.ts`
+  - added a regression proving corridor-breach ops inherit the launching corps sector anchor
+- `vitest.config.ts`
+  - added the new regression to the explicit Vitest allowlist so the protection actually runs in this branch
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded the Wave 1 report with this checkpoint
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\bot_corps_corridor.test.ts tests\corps_level_operations.test.ts`
+  - PASS (`11` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Environment note:
+- `npx tsc --noEmit -p tsconfig.json` is still globally noisy in the clean lane because the linked frontend dependency state is missing React/Vite browser typings
+- that remains a separate worktree verification debt, not a regression introduced by this slice
+
+Why this matters:
+- transitional operation creators are exactly where fake exceptions survive longest
+- if corridor breach stayed unanchored, every downstream lifecycle and UI path would keep learning that `sector_id` is optional in practice
+- a regression test that does not run because of a stale allowlist is another form of split truth, so the test-config repair is part of the same honesty pass
+### 2026-04-02 - Engine health Wave 1 continued: map-click sector orders now honor canonical sector overrides
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing a live split-authority bug in the desktop shell. The tactical-map click path looked like a brigade-to-sector command, but it was still calling the older `assignBrigadeToFront(...)` IPC route under the hood and writing the `brigade_front_assignment/local_fronts` lane that still influences combat density.
+
+Implemented:
+- `src/ui/map/desktop/orderActions.ts`
+  - `stageAssignBrigadeToSectorAction(...)` now routes through `ipc.assignBrigadeToSector(...)` instead of the older front-assignment bridge
+  - clarified the contract comment so future work knows this path must not write the older local-front lane
+- `tests/ui_map_order_actions.test.ts`
+  - added a regression proving the staged sector action calls `assignBrigadeToSector(...)`
+  - proved it does not call `assignBrigadeToFront(...)`
+  - proved the queued order still records a sector assignment for the UI shell
+- `vitest.config.ts`
+  - added the new regression file to the explicit Vitest include list so the guard actually executes in this branch
+- `docs/40_reports/implemented/20260402_MAP_SECTOR_ORDER_CANONICALIZATION.md`
+  - documented the root cause, implementation, and combat-authority implications of the fix
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_map_order_actions.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`14` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- a player-visible sector command must not secretly mutate the older front-assignment authority path
+- this is exactly the kind of half-alive shell mismatch that keeps legacy combat writers alive after the architecture has supposedly moved on
+- routing the map-click path into the same override lane as the rest of the UI makes sector assignment truth much harder to split again
+### 2026-04-02 - Engine health Wave 1 continued: retire front assignment from the live player shell
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, removing the remaining live desktop/UI exposure of `assignBrigadeToFront(...)` and `brigadeFrontAssignment`. The tactical map had already moved to the canonical brigade-sector override model, but the preload bridge, IPC contract, adapter, and sidebar still taught the product that front assignment was a current player-facing concept.
+
+Implemented:
+- `src/desktop/preload.cjs`
+  - removed the live `assignBrigadeToFront(...)` bridge export
+- `src/ui/map/desktop/useIPC.ts`
+  - removed `assignBrigadeToFront(...)` from the React IPC contract
+- `src/desktop/electron-main.cjs`
+  - removed the `assign-brigade-to-front` main-process handler from the live desktop shell
+- `src/ui/map/data/GameStateAdapter.ts`
+  - stopped surfacing `brigadeFrontAssignment` in `LoadedGameState`
+  - hardened sparse-state parsing with optional reads for `displacement.civilian_casualties` and `displacement.displacement_state`
+  - fixed OPSEC-sector parsing to read `state.military.opsec_sectors` first, with root fallback only for compatibility
+- `src/ui/map/data/types.ts`
+  - removed `brigadeFrontAssignment` from the player-facing loaded-state contract
+- `src/ui/map/components/OOBSidebar.tsx`
+  - reserve classification now uses explicit corps policy (`!corps_id` or sector-assignment-exempt corps) instead of the older front-assignment lane
+- `tests/engine_honesty_legacy_contracts.test.ts`
+  - added a regression proving the live desktop shell no longer advertises `assignBrigadeToFront(...)`
+- `tests/ui_map_game_state_adapter.test.ts`
+  - updated the parsed-state expectation so the player shell no longer receives `brigadeFrontAssignment`
+- `docs/40_reports/implemented/20260402_FRONT_ASSIGNMENT_PLAYER_SHELL_RETIREMENT.md`
+  - documented the shell-retirement slice and the adapter hardening it exposed
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_map_order_actions.test.ts tests\engine_honesty_legacy_contracts.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`22` tests)
+- `node_modules\.bin\tsx.cmd --test tests\ui_map_game_state_adapter.test.ts`
+  - PASS (`11` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- a legacy concept is still live if the preload bridge, main-process handler, adapter, and sidebar all keep teaching the product that it exists
+- player-facing reserve classification should follow explicit corps/sector policy, not a ghost lane inherited from earlier UI eras
+- the adapter hardening matters beyond this slice: sparse-state tolerance and correct OPSEC sourcing stop happy-path assumptions from masquerading as product truth
+### 2026-04-02 - Engine health Wave 1 continued: remove dead front/theatre rename shell bridges
+
+Continued the same desktop-shell cleanup in `F:\AWWV_exec_clean`, removing two more unused player-facing bridges that had no live UI owner: `renameFrontSegment(...)` and `renameTheatre(...)`. They still existed in preload, React IPC, and Electron main-process handlers even though nothing in the live map shell called them.
+
+Implemented:
+- `src/desktop/preload.cjs`
+  - removed `renameFrontSegment(...)` and `renameTheatre(...)` from the live bridge
+- `src/ui/map/desktop/useIPC.ts`
+  - removed both methods from the live React IPC contract
+- `src/desktop/electron-main.cjs`
+  - removed the `rename-front-segment` and `rename-theatre` handlers
+- `tests/engine_honesty_legacy_contracts.test.ts`
+  - added a regression proving those dead rename bridges no longer appear in live desktop code
+- `docs/40_reports/implemented/20260402_FRONT_ASSIGNMENT_PLAYER_SHELL_RETIREMENT.md`
+  - expanded the report with this adjacent shell-retirement slice
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\engine_honesty_legacy_contracts.test.ts tests\ui_map_render_smoke.test.ts tests\ui_map_order_actions.test.ts`
+  - PASS (`23` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- dead shell bridges are still product truth until the shell stops exporting them
+- removing unused rename bridges makes it harder for future refactors to accidentally resurrect front/theatre naming as phantom live features
+### 2026-04-02 - Engine health Wave 1 continued: frontline fatigue now follows sector assignment truth
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, fixing a deeper split-truth inside the engine core. `applyFatigueRecovery(...)` was still deciding who counted as "frontline" purely from `brigade_front_assignment`, even though current frontline organization has largely moved to corps front sectors.
+
+Implemented:
+- `src/state/formation_fatigue.ts`
+  - added a unified `buildFrontlineAssignedSet(...)` helper
+  - frontline duty fatigue now treats corps-front sector assignments (`assigned_brigade_ids` and `reserve_brigade_ids`) as the primary authority
+  - legacy `brigade_front_assignment` remains as compatibility fallback for older saves and still-live local-front mechanics
+- `tests/formation_fatigue_frontline_assignment.test.ts`
+  - added a regression proving sector-assigned brigades accrue frontline-duty fatigue
+  - added a compatibility regression proving legacy front assignment still works as fallback
+- `docs/40_reports/implemented/20260402_FRONTLINE_FATIGUE_SECTOR_ALIGNMENT.md`
+  - documented the root cause and the new sector-first/front-legacy-fallback rule
+
+Verification:
+- `node_modules\.bin\tsx.cmd --test tests\formation_fatigue_frontline_assignment.test.ts`
+  - PASS (`2` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- frontline fatigue is core engine truth, not just a cosmetic stat
+- if combat density and fatigue read different assignment currencies, the simulation quietly punishes or spares brigades based on the wrong layer
+- this keeps sectors as the primary frontline authority while preserving front assignment as a compatibility fallback until the deeper local-front lane is fully classified
+
+### 2026-04-02 - Engine health Wave 1 continued: frontline helper and reporting now follow sector truth
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, fixing the deeper shared helper and reporting seam after the frontline-fatigue alignment pass.
+
+Implemented:
+- `src/sim/combat/front_assignment.ts`
+  - added `buildFrontlineAssignedFormationSet(state)` as the shared frontline helper
+  - the helper now treats corps-front sectors (`assigned_brigade_ids` and `reserve_brigade_ids`) as the primary frontline authority
+  - legacy `brigade_front_assignment` remains as compatibility fallback
+  - `isBrigadeAssignedToFront(...)` now reads that unified set instead of the legacy assignment map alone
+- `src/state/formation_fatigue.ts`
+  - now reuses the shared frontline helper instead of maintaining a private duplicate
+- `src/scenario/scenario_end_report.ts`
+  - `computeArmyStrengthsSummary(...)` now counts frontline brigades from the unified sector-first helper rather than only from `brigade_front_assignment`
+- `tests/front_assignment.test.ts`
+  - added a regression proving sectors alone make a brigade count as frontline
+- `tests/scenario_end_report_army_strengths.test.ts`
+  - added a regression proving army-strength reporting counts sector frontline brigades first, with legacy fallback
+- `docs/40_reports/implemented/20260402_FRONTLINE_ASSIGNMENT_HELPER_ALIGNMENT.md`
+  - documented the helper/reporting contract cleanup
+
+Verification:
+- `node_modules\.bin\tsx.cmd --test tests\front_assignment.test.ts tests\formation_fatigue_frontline_assignment.test.ts tests\scenario_end_report_army_strengths.test.ts`
+  - PASS (`6` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Known unrelated verification state:
+- `npx.cmd tsc --noEmit -p tsconfig.json` still fails in this worktree due to pre-existing React/JSX typing/tooling problems under `src/ui/map/*`; this slice did not introduce those failures.
+
+Why this matters:
+- sectors had already become the practical frontline authority
+- but battle gating, posture gating, and end-of-run reporting were still capable of telling the old `brigade_front_assignment` story
+- this removes another half-alive legacy seam and keeps mechanics and reporting on the same sector-first contract
+
+### 2026-04-02 - Engine health Wave 1 continued: front-density helper now prefers sectors over legacy fronts
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, fixing another quiet precedence bug in combat math support code.
+
+Implemented:
+- `src/sim/combat/local_front_defense.ts`
+  - updated `getLocalFrontDensityModifier(...)` so it now checks `corps_front_sectors` first
+  - legacy `brigade_front_assignment/local_fronts` remains as fallback only
+- `tests/local_front_density_modifier_precedence.test.ts`
+  - added a regression proving sector density wins when both sector and legacy front assignment exist
+- `docs/40_reports/implemented/20260402_FRONT_DENSITY_SECTOR_PRECEDENCE.md`
+  - documented the precedence bug and the sector-first correction
+
+Verification:
+- `node_modules\.bin\tsx.cmd --test tests\local_front_density_modifier_precedence.test.ts tests\front_assignment.test.ts tests\formation_fatigue_frontline_assignment.test.ts tests\scenario_end_report_army_strengths.test.ts`
+  - PASS (`7` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- `getLocalFrontDensityModifier(...)` feeds combat math
+- if it keeps preferring the old front lane, the engine can still defend brigades using stale frontage truth even after sectors became the primary assignment model
+- this removes another small helper that could quietly reintroduce legacy behavior into otherwise cleaned-up frontline mechanics
+
+### 2026-04-02 - Engine health Wave 1 continued: desktop sim no longer exports dead front/theatre mutation helpers
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, removing another half-alive authority surface after the shell-side retirement work.
+
+Implemented:
+- `src/desktop/desktop_sim.ts`
+  - removed `assignBrigadeToFront(...)`
+  - removed `renameFrontSegment(...)`
+  - removed `renameTheatre(...)`
+- `tests/engine_honesty_legacy_contracts.test.ts`
+  - added a regression proving those retired helpers are no longer exported from `desktop_sim.ts`
+- `docs/40_reports/implemented/20260402_DESKTOP_SIM_LEGACY_FRONT_EXPORT_RETIREMENT.md`
+  - documented the dead-export retirement
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\engine_honesty_legacy_contracts.test.ts`
+  - PASS (`10` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS (`no governed files changed`)
+
+Why this matters:
+- even after the live shell stops calling a legacy lane, the runtime still lies if the lower API keeps exporting it
+- deleting the dead exports makes the desktop sim surface match the live product truth and removes another place future refactors could accidentally resurrect old front/theatre mechanics
+### 2026-04-02 - Player shell affordance and operation-detail visibility cleanup
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing another player-truth/UI leak while making the desktop shell more legible.
+
+Implemented:
+- `src/ui/map/components/TopToolbar.tsx`
+  - made the standalone return affordance explicit as `WARROOM`
+  - added a visible `CODEX` toolbar entry in the `Reference` module
+- `src/ui/shared/playerVisibility.ts`
+  - added `findPlayerFacingOperationByKey(...)` so operation selection can resolve through the same player-facing filter contract used elsewhere
+- `src/ui/map/components/OperationDetail.tsx`
+  - now resolves the selected operation through the shared player-facing lookup instead of reading `loadedGameState.operations` directly
+- `tests/ui_player_visibility.test.ts`
+  - added a regression proving raw enemy operation keys do not resolve through the player-facing selection lookup
+- `docs/40_reports/implemented/20260402_PLAYER_SHELL_AFFORDANCE_AND_OPERATION_DETAIL_VISIBILITY.md`
+  - documented this shell/visibility cleanup slice
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts`
+  - PASS (`7` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Known environment note:
+- `npm run desktop:map:build` could not be re-run in this execution worktree because the worktree environment is currently missing `@vitejs/plugin-react`; this appears to be an execution-lane dependency/setup issue rather than a failure introduced by this slice
+
+Why this matters:
+- the player-facing operation contract already existed, but `OperationDetail` was still bypassing it directly
+- the tactical-map shell also still behaved like a legacy/debug surface because the Warroom return path and Codex entrypoint were not obvious enough in normal use
+- this slice removes one more omniscient panel path and makes the shell better match the intended product hierarchy before the deeper Army HQ threat/intel cleanup
+### 2026-04-02 - Army HQ threat assessment made player-safe
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, removing another omniscient player-facing panel path from the tactical-map shell.
+
+Implemented:
+- `src/ui/map/components/army_hq/generateThreatAssessment.ts`
+  - removed direct synthesis from raw enemy operations (`execution`, `staging`, `stalled`)
+  - threat generation now uses player-plausible sector-intel observations only:
+    - hostile offensive preparation
+    - hostile defenses consolidating
+    - weak intelligence picture
+- `tests/ui_map_render_smoke.test.ts`
+  - updated the threat-assessment regression so the Army HQ threat model no longer claims exact hostile operation execution/staging from raw enemy state
+- `docs/40_reports/implemented/20260402_ARMY_HQ_THREAT_ASSESSMENT_PLAYER_SAFE.md`
+  - documented the player-safe threat-assessment cleanup
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts tests\ui_player_visibility.test.ts`
+  - PASS (`20` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- the previous threat panel hid raw enemy ids but still reasoned from omniscient enemy operation state
+- that made Army HQ look like a believable staff abstraction while still behaving like a disguised debug surface
+- grounding threat assessment in sector intel only keeps the feature useful without teaching the player impossible certainty
+### 2026-04-02 - Player-safe fallback text and Warroom report label cleanup
+
+Continued the clean-lane engine-health/player-truth execution in `F:\AWWV_exec_clean`, removing another class of smaller but still product-visible leaks.
+
+Implemented:
+- `src/ui/map/components/SelectionPanel.tsx`
+  - local-support staging copy now uses player-safe municipality labels instead of raw `mun_id`
+- `src/ui/map/components/SettlementDetailContent.tsx`
+  - pending order rows now use player-safe brigade fallback text instead of raw brigade ids
+- `src/ui/warroom/components/ReportsModal.ts`
+  - added settlement-label humanization for front status, enemy contact locations, and collapsed municipality lists
+- `tests/warroom_player_visibility.test.ts`
+  - added regression coverage proving Warroom reports humanize raw settlement identifiers instead of leaking engine ids
+- `docs/40_reports/implemented/20260402_PLAYER_SAFE_FALLBACK_TEXT_AND_WARROOM_LABELS.md`
+  - documented this fallback/shell text cleanup slice
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\warroom_player_visibility.test.ts tests\ui_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`23` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- once the obvious omniscient panels are fixed, the remaining leaks often survive in fallback text and summary prose
+- those are still player-facing product truth, not harmless chrome
+- this slice keeps tightening the rule that player-facing text must resolve to human labels or neutral safe fallbacks rather than engine identifiers
+### 2026-04-02 - Player-safe fallback card text hardening
+
+Continued the clean-lane player-truth execution in `F:\AWWV_exec_clean`, removing another class of quieter but still recurring UI leaks: raw-id fallback labels inside cards and side panels.
+
+Implemented:
+- `src/ui/map/components/CombatSummaryPanel.tsx`
+  - most-victorious and heaviest-loss brigade labels now use player-safe brigade fallback text
+- `src/ui/map/components/CorpsCard.tsx`
+  - corps cards now derive display text through the player-safe corps-name formatter
+- `src/ui/map/components/OOBSidebar.tsx`
+  - corps rows now use player-safe corps naming
+  - mobilization top-pool entries now humanize municipality labels instead of printing raw `mun_id`
+- `src/ui/map/components/FormationDetail.tsx`
+  - elite-loan destination text now resolves through player-facing corps naming rather than raw `loaned_to_corps`
+- `src/ui/map/components/TacticalCard.tsx`
+  - tactical-card title fallback now uses neutral brigade text instead of raw formation ids
+- `src/ui/map/components/EnclaveDashboard.tsx`
+  - enclave labels now use player-safe enclave naming rather than raw ids
+- `tests/ui_player_visibility.test.ts`
+  - added a regression contract for player-safe fallback text
+- `docs/40_reports/implemented/20260402_PLAYER_SAFE_FALLBACK_CARD_TEXT_HARDENING.md`
+  - documented this card/shell fallback cleanup
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`24` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- once the obvious omniscience leaks are gone, the remaining "small" fallbacks become the main way the product still smells like a debug shell
+- raw ids in cards, queues, and detail panels are still player-facing truth leaks, not harmless chrome
+- this slice pushes more of the tactical-map shell through one shared player-safe naming layer instead of letting each component improvise its own fallback behavior
+### 2026-04-02 - Warroom and detail-shell player-safe name hardening
+
+Continued the clean-lane player-truth execution in `F:\AWWV_exec_clean`, hardening another set of remaining `name ?? id` seams in the map and Warroom shells.
+
+Implemented:
+- `src/ui/map/components/OperationsPanel.tsx`
+  - allocated-asset labels now use player-safe brigade fallback text instead of raw brigade ids
+- `src/ui/map/components/FormationDetail.tsx`
+  - municipality line now uses player-safe municipality labels
+- `src/ui/map/components/SettlementDetailContent.tsx`
+  - municipality population header now falls back to player-safe municipality text instead of raw ids
+- `src/ui/warroom/data/war_data_extractor.ts`
+  - own-force formation names now use player-safe corps/brigade labeling
+  - own corps-operation labels now use player-safe corps naming
+- `src/ui/warroom/components/NewspaperModal.ts`
+  - officer-succession prose now uses neutral officer fallback text plus player-safe corps naming
+- `tests/warroom_player_visibility.test.ts`
+  - added regression coverage proving `extractWarData(...)` does not quietly emit raw corps/brigade ids in player-facing snapshots
+- `docs/40_reports/implemented/20260402_WARROOM_AND_DETAIL_PLAYER_SAFE_NAME_HARDENING.md`
+  - documented this naming-hardening slice
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`25` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- the remaining leaks are now mostly subtle naming degradations rather than giant omniscience failures
+- those still matter because players read summary rails and Warroom prose as product truth
+- this slice keeps the player-facing shell converging on one shared naming contract instead of letting each panel improvise its own fallback behavior
+### 2026-04-02 - Legacy Warroom/planning surface name mop-up
+
+Finished a smaller residual player-truth cleanup pass in `F:\AWWV_exec_clean`, targeting older Warroom-planning surfaces and the ops-modal hover label where raw ids could still leak through last-resort text paths.
+
+Implemented:
+- `src/ui/warroom/components/SettlementInfoPanel.ts`
+  - settlement title fallback now uses a neutral settlement label instead of raw `sid`
+  - municipality fallback now uses player-safe municipality naming instead of `Municipality <id>`
+- `src/ui/warroom/components/WarPlanningMap.ts`
+  - wall-map search index now uses player-safe settlement fallback labels
+  - investment-panel municipality fallback now uses player-safe municipality naming
+- `src/ui/map/components/ops_modal/OpsMap.tsx`
+  - hovered settlement label now humanizes the fallback OSID instead of printing raw `op:` identifiers
+- `docs/40_reports/implemented/20260402_LEGACY_WARROOM_SURFACE_NAME_MOPUP.md`
+  - documented this residual cleanup slice
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`25` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- older planning surfaces are exactly where raw-id fallbacks survive after the obvious shell leaks are fixed
+- a player-facing shell is only as honest as its least-maintained still-live panel
+- this slice removes more of the “half-alive debug shell” smell from Warroom and ops planning without inventing new naming logic
+### 2026-04-02 - Player-safe officer event and Warroom viewer labels
+
+Kept draining the player-truth shell in `F:\AWWV_exec_clean`, this time targeting two subtler but still-live seams: adapter-derived officer-event labels and the standalone Warroom map viewer.
+
+Implemented:
+- `src/ui/map/data/GameStateAdapter.ts`
+  - pending officer events now use `An officer` instead of raw officer ids when a name is missing
+  - pending officer event corps names now resolve through player-safe corps naming instead of raw corps ids
+- `src/ui/warroom/map_viewer_app.ts`
+  - settlement tooltip/panel fallback names now humanize settlement ids instead of printing raw `sid`
+  - municipality fallback text now humanizes municipality ids instead of printing raw ids
+- `tests/ui_player_visibility.test.ts`
+  - added regression coverage proving `parseGameState(...)` keeps pending officer-event labels player-safe
+- `docs/40_reports/implemented/20260402_PLAYER_SAFE_OFFICER_EVENT_AND_WARROOM_VIEWER_LABELS.md`
+  - documented this slice
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`26` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- adapters are authority surfaces too; if they fallback to raw ids, the player shell is still lying
+- the standalone Warroom viewer is older but still live, which makes its fallback leaks more dangerous rather than less
+- this slice leaves the remaining raw-fallback search results looking mostly like benign internal sorting/defaulting rather than live player-facing leaks
+### 2026-04-02 - Tactical shell density pass 1
+
+After the player-truth shell reached a healthier state, started the queued UI/UX density pass in `F:\AWWV_exec_clean`, focusing on the highest-traffic tactical-map shells instead of ornamental or low-frequency panels.
+
+Implemented:
+- `src/ui/map/components/TopToolbar.tsx`
+  - tightened module gaps, button padding, crest footprint, and overall toolbar vertical density
+- `src/ui/map/components/SelectionPanel.tsx`
+  - compacted skeleton spacing, body padding, and local-support card footprint
+- `src/ui/map/components/FormationDetail.tsx`
+  - reduced header/body padding and overview rhythm
+- `src/ui/map/components/CorpsDetail.tsx`
+  - reduced padding and whitespace across overview, sectors, ops, and orders tabs
+- `src/ui/map/components/OperationsPanel.tsx`
+  - tightened header, left operation rail, operation cards, and right detail pane
+- `src/ui/map/components/ArmyReservePanel.tsx`
+  - reduced reserve-shell card padding and inter-section dead air
+- `docs/40_reports/implemented/20260402_TACTICAL_SHELL_DENSITY_PASS_1.md`
+  - documented this density slice
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`26` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- once the shell is truthful, the next studio-quality problem is usually density, not correctness
+- strategy games benefit from compact clarity; oversized cards and roomy chrome waste attention and screen space
+- this slice shifts the primary tactical shell toward a more command-console feel without changing information ownership
+### 2026-04-02 - Tactical shell density pass 2
+
+Continued the density/whitespace cleanup in `F:\AWWV_exec_clean`, moving from the tactical detail panels into the structural shells that set spacing conventions for the rest of the product.
+
+Implemented:
+- `src/ui/map/components/OOBSidebar.tsx`
+  - narrowed the rail slightly and reduced section padding / faction-divider footprint
+- `src/ui/map/components/army_hq/ArmyHQModal.tsx`
+  - compacted header, tab row, top briefing grid, and corps-grid gaps
+- `src/ui/map/components/CodexPanel.tsx`
+  - tightened shell width, sidebar row padding, content padding, and paper-view spacing
+- `src/ui/map/components/GlassPanel.tsx`
+  - reduced shared panel header/content padding so downstream overlays inherit a denser layout baseline
+- `docs/40_reports/implemented/20260402_TACTICAL_SHELL_DENSITY_PASS_2.md`
+  - documented this second density slice
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`26` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- shell density is set by the structural components, not just the detail cards
+- `GlassPanel` is especially important because it propagates spacing habits across many overlays
+- this slice makes the command shell feel more deliberate and less like a padded generic dashboard
+### 2026-04-02 - Player-safe fallback helper canonicalization
+
+Removed another quiet source of player-shell drift in `F:\AWWV_exec_clean` by centralizing officer/settlement/municipality fallback text into the shared `playerSafeText` layer.
+
+Implemented:
+- `src/ui/map/utils/playerSafeText.ts`
+  - added shared `getPlayerSafeOfficerName(...)`
+  - added shared `getPlayerSafeSettlementName(...)`
+- `src/ui/map/data/GameStateAdapter.ts`
+  - pending officer event names now use the shared helper
+- `src/ui/warroom/components/NewspaperModal.ts`
+  - officer fallback names now use the shared helper
+- `src/ui/warroom/components/SettlementInfoPanel.ts`
+  - removed local settlement fallback helper
+- `src/ui/warroom/components/WarPlanningMap.ts`
+  - removed local settlement fallback helper
+- `src/ui/warroom/map_viewer_app.ts`
+  - removed duplicated identifier/fallback helpers and now uses the shared settlement / municipality helpers
+- `docs/40_reports/implemented/20260402_PLAYER_SAFE_FALLBACK_HELPER_CANONICALIZATION.md`
+  - documented the slice
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`26` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- shared player-safe helpers only become real product boundaries once local fallback clones are deleted
+- duplicated fallback helpers are how raw ids and inconsistent tone sneak back into old shell surfaces
+- centralizing them now reduces future drift before the larger architecture reshaping pass
+### 2026-04-02 - Player-safe faction label canonicalization
+
+Standardized political and military faction labels in the clean lane so peace/event surfaces stop carrying their own dictionaries and raw-code fallbacks.
+
+Implemented:
+- `src/ui/map/utils/playerSafeText.ts`
+  - added shared political and military faction-label helpers
+- `src/ui/map/components/PeaceStatusPanel.tsx`
+  - now uses shared faction helpers for card labels and event badges
+- `src/ui/map/components/PeacePlanModal.tsx`
+  - now uses shared political faction labels
+- `src/ui/map/components/DiplomacyOverview.tsx`
+  - now uses shared political faction labels
+- `src/ui/map/App.tsx`
+  - event-effect fallback text now uses shared military faction labels
+- `tests/ui_player_visibility.test.ts`
+  - added regression assertions for the new helper contract
+- `docs/40_reports/implemented/20260402_PLAYER_SAFE_FACTION_LABEL_CANONICALIZATION.md`
+  - documented the slice
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`26` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- peace/event language is where raw faction codes feel most like debug leakage
+- shared faction helpers reduce drift across map shell, peace shell, diplomacy shell, and event shell
+- this keeps pushing the repo toward one canonical player-facing dialect instead of several slightly different ones
+### 2026-04-02 - Player-safe adapter and economy label hardening
+
+Kept pushing the player-truth cleanup down into the adapter/data layer and economy shell so raw ids stop resurfacing through “innocent” fallback paths.
+
+Implemented:
+- `src/ui/map/utils/playerSafeText.ts`
+  - added generic `getPlayerSafeDisplayLabel(...)`
+- `src/ui/map/data/DataLoader.ts`
+  - event-definition fallback titles now humanize ids
+- `src/ui/map/data/GameStateAdapter.ts`
+  - humanized fallback names for facilities, smuggling routes, movement logs, historical events, and pending peace plans
+- `src/ui/map/components/EconomyPanel.tsx`
+  - reserve/controller/route/embargo badges now use player-safe faction labels instead of raw codes
+- `tests/ui_player_visibility.test.ts`
+  - added generic display-label regression coverage
+- `docs/40_reports/implemented/20260402_PLAYER_SAFE_ADAPTER_AND_ECONOMY_LABEL_HARDENING.md`
+  - documented the slice
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`26` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- adapter-side `name ?? id` fallbacks are one of the most persistent ways for raw engine truth to leak back into the UI
+- economy shells are especially vulnerable because bracketed faction badges can make debug codes look official
+- this slice makes the player-facing data pipeline more truthful before the broader architecture reshape
+### 2026-04-02 - Player-safe Warroom prose hardening
+
+Hardened the remaining Warroom/Chronicle prose generators so they stop falling back to raw ids in officer and event text.
+
+Implemented:
+- `src/ui/warroom/components/NewspaperModal.ts`
+  - officer succession/casualty/retirement lines now fall back to `An officer`
+- `src/ui/warroom/data/war_data_extractor.ts`
+  - officer extraction now uses the shared player-safe officer helper
+- `src/ui/map/components/chronicle/generateChronicleEntries.ts`
+  - formation/event fallback titles now humanize ids
+  - military detail badges now use player-safe military faction labels
+- `docs/40_reports/implemented/20260402_PLAYER_SAFE_WARROOM_PROSE_HARDENING.md`
+  - documented the slice
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`26` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- prose generators are still player-facing authority surfaces
+- older Warroom/Chronicle text is exactly where raw ids tend to survive after the main UI is cleaned up
+- this keeps the repo’s player-facing voice consistent across shell, reports, and narrative output
+### 2026-04-02 - Sector frontline authority hardening
+
+Returned to the core engine and tightened frontline precedence so sectors now truly outrank stale legacy front assignments when both are present.
+
+Implemented:
+- `src/sim/combat/front_assignment.ts`
+  - `buildFrontlineAssignedFormationSet(...)` now returns sector-driven frontline truth when sectors exist
+  - legacy `brigade_front_assignment` is fallback-only when sectors are absent
+- `tests/front_assignment.test.ts`
+  - added regression coverage proving stale legacy assignments no longer keep extra brigades frontline once sectors exist
+- `docs/40_reports/implemented/20260402_SECTOR_FRONTLINE_AUTHORITY_HARDENING.md`
+  - documented the slice
+
+Verification:
+- `node_modules\.bin\tsx.cmd --test tests\front_assignment.test.ts tests\local_front_density_modifier_precedence.test.ts tests\formation_fatigue_frontline_assignment.test.ts`
+  - PASS (`7` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- battle eligibility, posture gating, fatigue, and reporting all inherit frontline truth from this helper
+- unioning sectors with stale legacy front assignments was keeping the migration “half done”
+- this slice makes sector authority more real at the engine seam that other systems actually consume
+### 2026-04-02 - Player-safe view-model hardening
+
+Hardened a few remaining loaded-state fallbacks so raw ids stop entering the player shell through view-model defaults.
+
+Implemented:
+- `src/ui/map/data/GameStateAdapter.ts`
+  - formation names now humanize id fallbacks
+  - named officer names now fall back to `An officer`
+  - fired-event titles now use the shared decision-title helper
+- `src/ui/map/components/CorpsDetail.tsx`
+  - corps fallback naming now uses the shared corps helper
+- `docs/40_reports/implemented/20260402_PLAYER_SAFE_VIEW_MODEL_HARDENING.md`
+  - documented the slice
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`26` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- view-model defaults are another high-leverage leak point because many panels inherit them at once
+- this reduces the number of places where raw ids can still enter the product shell before rendering
+### 2026-04-02 - Local fronts runtime demotion
+
+Demoted `local_fronts` out of the live war runtime by moving the legacy density fallback onto `brigade_front_assignment + assignable_front_segments`.
+
+Implemented:
+- `src/sim/combat/local_front_defense.ts`
+  - density fallback no longer depends on `state.military.local_fronts`
+- `src/sim/turn_pipeline.ts`
+  - stopped rebuilding `local_fronts` during war refresh
+- `src/sim/turn_phases/war_phases.ts`
+  - stopped rebuilding `local_fronts` in the war pipeline
+  - updated comments to reflect sectors as the live frontline authority
+- `tests/local_front_density_modifier_precedence.test.ts`
+  - now proves legacy density fallback works without `local_fronts`
+- `docs/40_reports/implemented/20260402_LOCAL_FRONTS_RUNTIME_DEMOTION.md`
+  - documented the slice
+
+Verification:
+- `node_modules\.bin\tsx.cmd --test tests\front_assignment.test.ts tests\local_front_density_modifier_precedence.test.ts tests\formation_fatigue_frontline_assignment.test.ts`
+  - PASS (`8` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- `local_fronts` had become a rebuilt-every-turn compatibility object with almost no live authority left
+- deriving fallback density from the surviving primitive data is cleaner and harder to lie with
+- this is exactly the kind of repo simplification stronger studios do to keep migrations from stalling half-finished
+### 2026-04-02 - Legacy front-assignment fallback hardening
+
+Hardened the remaining `brigade_front_assignment` fallback so stale legacy entries no longer silently shape frontline truth, then removed the redundant end-of-turn repair pass that only existed to keep that old map looking alive.
+
+Implemented:
+- `src/sim/combat/front_assignment.ts`
+  - legacy fallback now ignores front IDs that no longer exist in `assignable_front_segments`
+  - inactive formations no longer count as frontline through stale legacy assignment rows
+- `src/sim/turn_pipeline.ts`
+  - `refreshFrontEdgeSnapshot(...)` no longer runs a duplicate end-of-turn `ensureBrigadeFrontAssignments(...)` pass
+- `tests/front_assignment.test.ts`
+  - now proves invalid legacy segments and inactive formations are ignored without repair
+- `tests/formation_fatigue_frontline_assignment.test.ts`
+  - compatibility fallback test now proves the legacy path only works when the segment still exists
+- `docs/40_reports/implemented/20260402_LEGACY_FRONT_ASSIGNMENT_FALLBACK_HARDENING.md`
+  - documented the slice
+
+Verification:
+- `node_modules\.bin\tsx.cmd --test tests\front_assignment.test.ts tests\local_front_density_modifier_precedence.test.ts tests\formation_fatigue_frontline_assignment.test.ts`
+  - PASS (`9` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- the engine no longer needs a second ritual repair pass just to keep fallback state from lying
+- stale legacy front IDs are now compatibility baggage instead of accidental frontline authority
+- this further narrows the old front-assignment lane without breaking first-turn compatibility for saves that still need it
+### 2026-04-02 - Legacy front-assignment phase narrowing
+
+Narrowed the explicit `ensure-brigade-front-assignment` war phase so it only runs when sector-based frontline truth is absent.
+
+Implemented:
+- `src/sim/combat/front_assignment.ts`
+  - added `hasLiveSectorFrontlineTruth(state)` so the engine can tell whether sector truth already exists
+  - `buildFrontlineAssignedFormationSet(...)` now uses the same gate for clearer authority flow
+- `src/sim/turn_phases/war_phases.ts`
+  - `ensure-brigade-front-assignment` now exits early when `corps_front_sectors` already exist
+- `tests/front_assignment.test.ts`
+  - added coverage for the new sector-truth gate
+- `docs/40_reports/implemented/20260402_LEGACY_FRONT_ASSIGNMENT_PHASE_NARROWING.md`
+  - documented the slice
+
+Verification:
+- `node_modules\.bin\tsx.cmd --test tests\front_assignment.test.ts tests\local_front_density_modifier_precedence.test.ts tests\formation_fatigue_frontline_assignment.test.ts`
+  - PASS (`10` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- the compatibility repair path now behaves like a fallback instead of a mandatory war-turn ritual
+- sectors keep their place as the real frontline authority once they exist
+- the repo becomes less likely to fool future agents into treating legacy front assignment as still co-equal with sectors
+### 2026-04-02 - Dead theatre view-model bridges removal
+
+Removed dead theatre/front-assignment metadata from the loaded player-facing map state so the shell only carries concepts that a live UI actually uses.
+
+Implemented:
+- `src/ui/map/data/types.ts`
+  - removed `LoadedGameState.theatres`
+  - removed `LoadedGameState.armyTheatreAssignment`
+  - removed `AssignableFrontSegmentView.theatre_id`
+- `src/ui/map/data/GameStateAdapter.ts`
+  - stopped parsing `military.theatres`
+  - stopped parsing `military.army_theatre_assignment`
+  - stopped copying `segment.theatre_id` into the loaded front-segment view
+- `tests/ui_map_game_state_adapter.test.ts`
+  - updated adapter regression coverage for the leaner shell contract
+- `docs/40_reports/implemented/20260402_DEAD_THEATRE_VIEW_MODEL_BRIDGES_REMOVAL.md`
+  - documented the slice
+
+Verification:
+- `node_modules\.bin\tsx.cmd --test tests\ui_map_game_state_adapter.test.ts`
+  - PASS (`11` tests)
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts`
+  - PASS (`13` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- dead view-model bridges are how obsolete gameplay concepts keep re-entering the player shell
+- removing them tightens the product contract without touching the underlying sim compatibility state
+- this is exactly the kind of repo simplification that prevents future Claude work from drifting back toward fake UI ownership
+### 2026-04-02 - Front/theatre contract doc alignment
+
+Aligned the main tactical-map and desktop IPC engineering docs with the current shell contract: sectors are the live frontline/player-shell authority, while front assignment and theatre naming now belong to compatibility/history context instead of active UI ownership.
+
+Implemented:
+- `docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md`
+  - removed retired live-channel entries for `assign-brigade-to-front`, `rename-front-segment`, and `rename-theatre`
+  - corrected state-contract wording so raw compatibility state is no longer described as live player-shell truth
+- `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`
+  - corrected §10.4 and related desktop-flow text so front/theatre metadata is described as compatibility/history state
+  - changed the old front-assignment verification step into a legacy compatibility check
+- `docs/40_reports/implemented/20260402_FRONT_THEATRE_CONTRACT_DOC_ALIGNMENT.md`
+  - documented the slice
+
+Verification:
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- stale contract docs are one of the fastest ways for future agents to resurrect dead product concepts
+- aligning the docs keeps repo memory consistent with the actual desktop shell and current engine authority
+### 2026-04-02 - Tactical shell density pass 3
+
+Continued the UI/UX swamp drain by tightening the shared spacing authority surfaces that were still making the tactical shell feel roomy instead of command-dense.
+
+Implemented:
+- `src/ui/map/components/TopToolbar.tsx`
+  - reduced shell padding, section gaps, crest/title footprint, and telemetry width
+- `src/ui/map/components/OOBSidebar.tsx`
+  - narrowed the command rail and reduced padding across army, mobilization, operations, and sectors sections
+- `src/ui/map/components/AccordionHeader.tsx`
+  - tightened section header spacing for every accordion user
+- `src/ui/map/components/GlassPanel.tsx`
+  - reduced header height and content padding while increasing usable overlay/tray space
+- `src/ui/map/App.tsx`
+  - reduced toolbar clearance so side rails sit closer to the command bar
+- `src/ui/map/styles/globals.css`
+  - tightened `.module-header` spacing rhythm
+- `docs/40_reports/implemented/20260402_TACTICAL_SHELL_DENSITY_PASS_3.md`
+  - documented the slice
+
+Verification:
+- `node_modules\\.bin\\vitest.cmd run tests\\ui_map_render_smoke.test.ts`
+  - PASS (`13` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+  - PASS
+- `npm.cmd run desktop:map:build`
+  - blocked by missing local `@vitejs/plugin-react` in this clean worktree; recorded as environment limitation, not a known UI regression
+
+Why this matters:
+- command-density work has to start at the shared shell primitives or every downstream panel re-inflates itself
+- this pass cuts wasted chrome from the top toolbar, the left command rail, and shared floating panels so more actual command context fits on screen
+### 2026-04-02 - Tactical shell density pass 4
+
+Extended the density pass into the larger strategic overlays so Army HQ and Codex stop feeling like roomy dashboard exceptions to the tighter tactical shell.
+
+Implemented:
+- `src/ui/map/components/army_hq/ArmyHQModal.tsx`
+  - reduced header chrome, tab-row padding, crest footprint, top-grid spacing, and corps-card section spacing
+- `src/ui/map/components/CodexPanel.tsx`
+  - narrowed the shell slightly and tightened sidebar/content/paper-view spacing
+- `docs/40_reports/implemented/20260402_TACTICAL_SHELL_DENSITY_PASS_4.md`
+  - documented the slice
+
+Verification:
+- `node_modules\\.bin\\vitest.cmd run tests\\ui_map_render_smoke.test.ts tests\\ui_player_visibility.test.ts tests\\warroom_player_visibility.test.ts`
+  - PASS (`26` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- the larger strategic overlays define whether the product feels cohesive or like several different UI eras stitched together
+- density has to reach Army HQ and Codex too, or the product still wastes attention whenever the player leaves the map shell
+### 2026-04-02 - Product architecture authority alignment
+
+Added an explicit architecture-authority map so the repo stops treating older architecture summaries, handoff memos, and live engineering docs as if they were all equally current.
+
+Implemented:
+- `docs/20_engineering/PRODUCT_ARCHITECTURE_AUTHORITY.md`
+  - new authority map for current product architecture docs
+- `docs/20_engineering/REPO_MAP.md`
+  - now points to the architecture authority map
+- `docs/20_engineering/CODE_CANON.md`
+  - now names the authority map as the way to resolve architecture-era doc conflicts
+- `ARCHITECTURE_SUMMARY.md`
+  - now marked as historical context, not live architecture authority
+- `codex.md`, `nightshift-handoff.md`, `morning-report.md`
+  - now explicitly routed away from live architecture authority
+- `docs/40_reports/implemented/20260402_PRODUCT_ARCHITECTURE_AUTHORITY_ALIGNMENT.md`
+  - documented the slice
+
+Verification:
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- stale architecture prose was becoming a bug source
+- strong studios make current architecture authority explicit instead of trusting everyone to remember which polished old document is still real
+### 2026-04-02 - Root entrypoint and artifact hygiene
+
+Cleaned up the repository root so it stops acting like a mixed pile of live authorities and stale session residue.
+
+Implemented:
+- `README.md`
+  - replaced the placeholder with a real root guide pointing to the roadmap, architecture authority map, repo map, code canon, ledger, and GUI master
+- `commander_trace.txt`
+  - archived to `docs/70_archive/root_session_artifacts/commander_trace.txt`
+- `remaining_errors.txt`
+  - archived to `docs/70_archive/root_session_artifacts/remaining_errors.txt`
+- `docs/70_archive/root_session_artifacts/README.md`
+  - created archive guidance for future root-level residue
+- `docs/40_reports/implemented/20260402_ROOT_ENTRYPOINT_AND_ARTIFACT_HYGIENE.md`
+  - documented the slice
+
+Verification:
+- `git grep` showed no live references to the archived root trace/error artifacts
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- a weak root teaches weak repo habits
+- archiving stale trace dumps and replacing a placeholder README with a real entry guide makes the repository feel owned instead of accidental
+### 2026-04-02 - Entrypoint authority comment hardening
+
+Added explicit authority comments to the main pipeline files so the correct runtime lane is obvious at the code surface, not only in docs.
+
+Implemented:
+- `src/sim/turn_pipeline.ts`
+  - now declares itself the canonical war-phase entrypoint
+- `src/state/turn_pipeline.ts`
+  - now declares itself the canonical non-war/state-pipeline authority
+- `src/turn/pipeline.ts`
+  - now declares itself a legacy/minimal harness
+- `src/index.ts`
+  - now declares itself a smoke entrypoint
+- `docs/40_reports/implemented/20260402_ENTRYPOINT_AUTHORITY_COMMENT_HARDENING.md`
+  - documented the slice
+
+Verification:
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- entrypoint authority should be visible where changes begin, not only in the surrounding documentation
+- this reduces the chance of future Claude or human work landing in the wrong turn-pipeline lane
+### 2026-04-02 - Warroom command shell truth and density pass
+
+Cleaned up the Warroom shell where it was still sounding more certain than its actual data contract allowed.
+
+Implemented:
+- `src/ui/warroom/components/CommandBriefingModal.ts`
+  - removed hardcoded enclave/convoy certainty and replaced it with derived command-priority, enclave, and logistics summaries from the Warroom snapshot
+- `src/ui/warroom/components/ReportsModal.ts`
+  - replaced fake-specific war-phase authorship (`2nd Corps Intelligence Section`) with generic player-safe headquarters authorship
+- `src/ui/warroom/components/OperationalSituationModal.ts`
+  - clarified the modal toward sector stress + desk-map handoff and surfaced exposed-front and active-operation counts
+- `src/ui/warroom/warroom.ts`
+  - corrected stale help/anchor wording
+- `src/ui/warroom/styles/modals.css`
+  - tightened dialog/report/magazine/faction-overview spacing
+- `tests/warroom_player_visibility.test.ts`
+  - added regression coverage for truthful command-shell prose and generic report authorship
+- `docs/40_reports/implemented/20260402_WARROOM_COMMAND_SHELL_TRUTH_AND_DENSITY_PASS.md`
+  - documented the slice
+- `docs/40_reports/WARROOM_MASTER.md`
+  - updated current truth and recent changes
+- `docs/40_reports/GUI_MASTER.md`
+  - propagated the GUI-level summary
+
+Verification:
+- `node_modules\\.bin\\vitest.cmd run tests\\warroom_player_visibility.test.ts tests\\warroom_smoke.test.ts`
+  - PASS
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- Warroom is a player-facing headquarters shell, not a debug-flavored narrative wrapper
+- it should summarize and interpret command truth, but it must not invent specificity or certainty the player-facing snapshot does not support
+## 2026-04-02 - Shell ownership + HQ records canonicalization
+
+- Worktree/branch: `F:\AWWV_exec_clean` on `codex/engine-health-wave1`
+- Tightened live product-shell ownership so records/history no longer behave like orphan top-level modals.
+- Added shared `shellNavigation` helpers for routing the tactical shell into Army HQ summary/records/briefing.
+- Added `armyHQRecordsSubTab` to the map store and made `RecordsContent` consume shared state so top-level shell code can open AAR vs operation history intentionally.
+- `PresidentialToolbar` is now treated as the live tactical-map shell and gained explicit `SUMMARY`, `RECORDS`, `OPS`, `EVENTS`, and `CODEX` buttons.
+- Tactical `OperationsPanel` is now labeled as a field snapshot and gains an `HQ Review` handoff so it no longer reads like a second headquarters.
+- Removed app-level primary ownership of standalone AAR / operation-history modals from `App.tsx`; Army HQ records is now the canonical path.
+- Added `tests/ui_shell_navigation.test.ts` and whitelisted it in `vitest.config.ts`.
+- Verification:
+  - `node_modules\.bin\vitest.cmd run tests\ui_shell_navigation.test.ts tests\warroom_player_visibility.test.ts tests\warroom_smoke.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_SHELL_OWNERSHIP_AND_HQ_RECORDS_CANONICALIZATION.md`
+  - `docs/40_reports/GUI_MASTER.md`
+  - `docs/20_engineering/UI_OWNERSHIP_MATRIX.md`
+
+## 2026-04-02 - Warroom faction shell handoff
+
+- Worktree/branch: `F:\AWWV_exec_clean` on `codex/engine-health-wave1`
+- Tightened Warroom/Army HQ shell ownership by removing detailed command review from the war-phase `FactionOverviewPanel`.
+- Warroom no longer renders own-formations detail, officer rosters, or commander reassignment from the faction-overview shell.
+- Added a compact `COMMAND SHELL` summary with corps in field, active brigades, officers on duty, and units in transit.
+- Added player-facing handoff copy that explicitly pushes detailed formation review, reserve handling, operations review, and commander changes back to Army HQ via the desk map.
+- Added regression coverage in `tests/warroom_player_visibility.test.ts`.
+- Verification:
+  - `node_modules\.bin\vitest.cmd run tests\warroom_player_visibility.test.ts tests\warroom_smoke.test.ts tests\ui_opord_player_safe_labels.test.ts tests\ui_army_hq_war_summary_visibility.test.ts tests\ui_shell_navigation.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_WARROOM_FACTION_SHELL_HANDOFF.md`
+  - `docs/40_reports/WARROOM_MASTER.md`
+  - `docs/40_reports/GUI_MASTER.md`
+
+## 2026-04-02 - Tactical-map Warroom return restoration
+
+- Worktree/branch: `F:\AWWV_exec_clean` on `codex/engine-health-wave1`
+- Restored the visible `WARROOM` return path in the live mounted tactical shell.
+- Added `src/ui/map/utils/warroomReturn.ts` so the shell contract is expressed as testable logic instead of disappearing into component branches.
+- `PresidentialToolbar` now shows a `WARROOM` action when desktop IPC is available or the tactical map is embedded.
+- Embedded mode returns through `awwv-back-to-hq`; standalone desktop mode uses `ipc.focusWarroom()`.
+- Added regression coverage to `tests/ui_shell_navigation.test.ts`.
+- Verification:
+  - `node_modules\.bin\vitest.cmd run tests\ui_shell_navigation.test.ts tests\warroom_player_visibility.test.ts tests\warroom_smoke.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_TACTICAL_MAP_WARROOM_RETURN_RESTORATION.md`
+  - `docs/40_reports/GUI_MASTER.md`
+  - `docs/40_reports/WARROOM_MASTER.md`
+
+## 2026-04-02 - Player-safe vocabulary cleanup
+
+- Worktree/branch: `F:\AWWV_exec_clean` on `codex/engine-health-wave1`
+- Cleaned remaining engine-facing language from live player-facing shell surfaces.
+- Army HQ combat records now summarize territorial change as `Positions`.
+- Ops modal `ObjectiveList` now labels staging as `Staging Area`.
+- Chronicle Wrapped now uses political-side display names and `positions` wording instead of raw faction ids or `OSIDs`.
+- Added regression coverage to canonical existing suites:
+  - `tests/wrapped_slides.test.ts`
+  - `tests/ui_opord_player_safe_labels.test.ts`
+- Verification:
+  - `node_modules\.bin\vitest.cmd run tests\wrapped_slides.test.ts tests\ui_opord_player_safe_labels.test.ts tests\warroom_player_visibility.test.ts tests\ui_shell_navigation.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_PLAYER_SAFE_VOCABULARY_CLEANUP.md`
+  - `docs/40_reports/GUI_MASTER.md`
+
+## 2026-04-02 - Tactical operations panel ownership cleanup
+
+- Worktree/branch: `F:\AWWV_exec_clean` on `codex/engine-health-wave1`
+- Removed live command-authority actions from `src/ui/map/components/OperationsPanel.tsx`; Army HQ remains the canonical operation review/control owner.
+- Tactical operations panel now stays map-facing and hands off through `HQ Review` / `Open Corps Orders` only.
+- Selected operation header now uses player-safe military faction naming instead of raw faction ids.
+- Added regression coverage in `tests/ui_shell_navigation.test.ts` to keep the panel free of `Launch Now`, `Halt + Dig In`, and desktop command staging bridges.
+- Verification:
+  - `node_modules\.bin\vitest.cmd run tests\ui_shell_navigation.test.ts tests\warroom_player_visibility.test.ts tests\ui_opord_player_safe_labels.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_TACTICAL_OPERATIONS_PANEL_SHELL_OWNERSHIP.md`
+  - `docs/40_reports/GUI_MASTER.md`
+
+## 2026-04-02 - Player-safe faction shell labels
+
+- Worktree/branch: `F:\AWWV_exec_clean` on `codex/engine-health-wave1`
+- Removed another cluster of raw faction-id leaks from live map-shell UI.
+- `OOBSidebar.tsx` now uses player-safe military faction names in army summary affordances, mobilization/operations headings, and operation card subtitles.
+- `OperationBriefingModal.tsx` now renders the selected operation header with player-safe military faction naming.
+- HQ reserve rail now uses `Reserve HQ / <name>` instead of stale symbol residue.
+- Added regression coverage in `tests/ui_opord_player_safe_labels.test.ts`.
+- Verification:
+  - `node_modules\.bin\vitest.cmd run tests\ui_opord_player_safe_labels.test.ts tests\warroom_player_visibility.test.ts tests\ui_shell_navigation.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_PLAYER_SAFE_FACTION_SHELL_LABELS.md`
+  - `docs/40_reports/GUI_MASTER.md`
+
+## 2026-04-02 - Player-safe event and attack labels
+
+- Worktree/branch: `F:\AWWV_exec_clean` on `codex/engine-health-wave1`
+- Cleaned raw faction-id jargon out of live attack confirmation and event decision shells.
+- `AttackConfirmation.tsx` now uses player-safe military faction names for attacker and defender labels.
+- `EventModal.tsx` and `EventDecisionModal.tsx` now use player-safe political faction naming in effect summaries, faction badges, and decision headers.
+- Added regression guards in the canonical `tests/ui_opord_player_safe_labels.test.ts` suite.
+- Verification:
+  - `node_modules\.bin\vitest.cmd run tests\ui_opord_player_safe_labels.test.ts tests\warroom_player_visibility.test.ts tests\ui_shell_navigation.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_PLAYER_SAFE_EVENT_AND_ATTACK_LABELS.md`
+  - `docs/40_reports/GUI_MASTER.md`
+
+## 2026-04-02 - Player-safe rail panel labels
+
+- Worktree/branch: `F:\AWWV_exec_clean` on `codex/engine-health-wave1`
+- Cleaned raw faction-id labels out of the tactical rail detail panels.
+- `OperationDetail.tsx`, `CorpsDetail.tsx`, and `CorpsFrontPanel.tsx` now use player-safe military faction naming in visible identity/header lines.
+- Extended `tests/ui_opord_player_safe_labels.test.ts` to guard the rail panel contract.
+- Verification:
+  - `node_modules\.bin\vitest.cmd run tests\ui_opord_player_safe_labels.test.ts tests\warroom_player_visibility.test.ts tests\ui_shell_navigation.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_PLAYER_SAFE_RAIL_PANEL_LABELS.md`
+  - `docs/40_reports/GUI_MASTER.md`
+
+## 2026-04-02 - Bottom status strip player truth
+
+- Worktree/branch: `F:\AWWV_exec_clean` on `codex/engine-health-wave1`
+- Reframed the live bottom status strip away from exact all-faction territory percentages.
+- `BottomStatusStrip.tsx` now shows player-safe `Friendly` control and aggregated `Hostile-held` share instead of acting like a neutral all-faction scoreboard.
+- Added a regression guard in `tests/ui_player_visibility.test.ts`.
+- Verification:
+  - `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\ui_opord_player_safe_labels.test.ts tests\warroom_player_visibility.test.ts tests\ui_shell_navigation.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_BOTTOM_STATUS_STRIP_PLAYER_TRUTH.md`
+  - `docs/40_reports/GUI_MASTER.md`
+
+## 2026-04-02 - Summary shell player-safe labels
+
+- Worktree/branch: F:\AWWV_exec_clean on codex/engine-health-wave1`r
+- Normalized SituationTab.tsx and WarSummaryContent.tsx away from raw faction-id shell language.
+- SituationTab.tsx now uses player-safe military/political phrasing in territory, casualties, and alliance copy.
+- WarSummaryContent.tsx now reads playerFaction from the canonical overview model and uses player-safe military faction names in the player header.
+- Added regression guards in 	ests/ui_player_visibility.test.ts.
+- Verification:
+  - 
+ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_shell_navigation.test.ts`r
+  - powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`r
+- Docs:
+  - docs/40_reports/implemented/20260402_SUMMARY_SHELL_PLAYER_SAFE_LABELS.md`r
+  - docs/40_reports/GUI_MASTER.md`r
+
+
+## 2026-04-02 - Strategic dashboard player truth
+
+- Worktree/branch: F:\AWWV_exec_clean on codex/engine-health-wave1`r
+- Aligned StrategicDashboard.tsx with the live player-truth contract instead of letting it remain an all-faction scoreboard behind the safe bottom strip.
+- In player mode, the dashboard now shows exact friendly values and aggregated hostile-held summaries for territory, casualties, and reserves.
+- Added a regression guard in 	ests/ui_player_visibility.test.ts.
+- Verification:
+  - 
+ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_shell_navigation.test.ts`r
+  - powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`r
+- Docs:
+  - docs/40_reports/implemented/20260402_STRATEGIC_DASHBOARD_PLAYER_TRUTH.md`r
+  - docs/40_reports/GUI_MASTER.md`r
+
+
+## 2026-04-02 - Economy and logistics player truth
+
+- Worktree/branch: F:\AWWV_exec_clean on codex/engine-health-wave1`r
+- Scoped the mounted economy and logistics shells to player-side truth in player mode.
+- SupplyPanel.tsx now shows only the player's military side reserves when a player faction is present.
+- EconomyPanel.tsx now filters facilities, smuggling routes, and embargo rows to the player side in player mode.
+- Added regression guards in 	ests/ui_player_visibility.test.ts.
+- Verification:
+  - 
+ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_shell_navigation.test.ts`r
+  - powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`r
+- Docs:
+  - docs/40_reports/implemented/20260402_ECONOMY_LOGISTICS_PLAYER_TRUTH.md`r
+  - docs/40_reports/GUI_MASTER.md`r
+
+
+## 2026-04-02 - Cross-shell alliance vocabulary cleanup
+
+- Worktree/branch: F:\AWWV_exec_clean on codex/engine-health-wave1`r
+- Normalized alliance wording across peace shell and Warroom milestone surfaces.
+- PeaceStatusPanel.tsx, DeclarationEventModal.ts, and FactionOverviewPanel.ts now use human-readable Bosniak-Croat wording instead of raw faction-id shorthand for the alliance relationship.
+- Added regression guards in 	ests/ui_player_visibility.test.ts and 	ests/warroom_player_visibility.test.ts.
+- Verification:
+  - 
+ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_shell_navigation.test.ts`r
+  - powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`r
+- Docs:
+  - docs/40_reports/implemented/20260402_CROSS_SHELL_ALLIANCE_VOCABULARY_CLEANUP.md`r
+  - docs/40_reports/GUI_MASTER.md`r
+
+
+## 2026-04-02 - Phase 0 player-shell truth cleanup
+
+- Worktree/branch: F:\AWWV_exec_clean on codex/engine-health-wave1
+- Tightened the last mounted Phase 0 shell leaks instead of leaving Warroom half-clean.
+- PeaceStatusPanel.tsx now keeps exact pre-war capital only for the player faction and shows hostile declaration posture qualitatively instead of as exact progress bars.
+- FactionOverviewPanel.ts now uses player-facing military badges and declaration-drive wording, and no longer warns with raw shorthand like `RS declaration imminent`.
+- DeclarationEventModal.ts now refers to the Bosnian Army instead of `Army of RBiH`.
+- Added regression guards in `tests/ui_player_visibility.test.ts` and `tests/warroom_player_visibility.test.ts`.
+- Verification:
+  - `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_shell_navigation.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_PHASE0_PLAYER_SHELL_TRUTH_CLEANUP.md`
+  - `docs/40_reports/GUI_MASTER.md`
+
+
+## 2026-04-02 - Warroom modal density pass
+
+- Worktree/branch: F:\AWWV_exec_clean on codex/engine-health-wave1
+- Tightened Warroom shell density so the modal family stops carrying inherited dead air.
+- Reduced shared dialog padding and spacing, tightened faction overview and warning stacks, compacted newspaper and magazine shells, and shrank the main-menu / scenario-picker card footprint.
+- Also tightened the Help modal body so it reads like a compact control card instead of a poster.
+- Verification:
+  - `npm.cmd run warroom:build`
+  - `node_modules\.bin\vitest.cmd run tests\warroom_player_visibility.test.ts tests\ui_shell_navigation.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_WARROOM_MODAL_DENSITY_PASS.md`
+  - `docs/40_reports/GUI_MASTER.md`
+
+
+## 2026-04-02 - Army HQ density pass
+
+- Worktree/branch: F:\AWWV_exec_clean on codex/engine-health-wave1
+- Tightened the mounted Army HQ shell at the shared component layer instead of tweaking one paragraph at a time.
+- Reduced collapsible-section padding, shortened corps-card vertical rhythm, and compacted expanded operation detail spacing.
+- Verification:
+  - `node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts tests\ui_player_visibility.test.ts tests\ui_shell_navigation.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_ARMY_HQ_DENSITY_PASS.md`
+  - `docs/40_reports/GUI_MASTER.md`
+
+
+## 2026-04-02 - Product shell hierarchy architecture pass
+
+- Worktree/branch: F:\AWWV_exec_clean on codex/engine-health-wave1
+- Added an explicit shell-hierarchy authority contract so Warroom, Tactical Map, Army HQ, and Codex stop drifting into overlapping ownership.
+- New canonical doc: `docs/20_engineering/PRODUCT_SHELL_HIERARCHY.md`
+- Wired the shell hierarchy into the architecture stack and repo front door:
+  - `docs/20_engineering/PRODUCT_ARCHITECTURE_AUTHORITY.md`
+  - `docs/20_engineering/UI_OWNERSHIP_MATRIX.md`
+  - `docs/20_engineering/REPO_MAP.md`
+  - `README.md`
+  - `docs/plans/2026-04-01-v08x-player-knowledge-integrity-plan.md`
+- Added implementation/report propagation:
+  - `docs/40_reports/implemented/20260402_PRODUCT_SHELL_HIERARCHY_ARCHITECTURE_PASS.md`
+  - `docs/40_reports/GUI_MASTER.md`
+- Verification:
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+
+
+## 2026-04-02 - Local front constructor retirement
+
+- Worktree/branch: F:\AWWV_exec_clean on codex/engine-health-wave1
+- Removed the dead `buildLocalFronts(...)` constructor from `src/sim/combat/local_front_defense.ts`.
+- Reframed `local_front_defense.ts` around its true job:
+  - shared frontline-density formula
+  - legacy `brigade_front_assignment` compatibility fallback only
+- Updated `src/state/game_state.ts` comments so `LocalFront` / `local_fronts` are explicitly documented as legacy compatibility state rather than a live runtime layer.
+- Added a regression in `tests/engine_honesty_legacy_contracts.test.ts` proving:
+  - there is no exported `buildLocalFronts(...)`
+  - `local_fronts` is documented as a legacy cache, not as active turn-pipeline truth
+- Verification:
+  - `node_modules\.bin\vitest.cmd run tests\engine_honesty_legacy_contracts.test.ts tests\local_front_density_modifier_precedence.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_LOCAL_FRONT_CONSTRUCTOR_RETIREMENT.md`
+
+
+## 2026-04-02 - Theatre tagging runtime retirement
+
+- Worktree/branch: F:\AWWV_exec_clean on codex/engine-health-wave1
+- Removed live turn-pipeline calls to `ensureDefaultTheatres(...)` and `assignFrontSegmentTheatres(...)`.
+- `src/sim/turn_pipeline.ts` and `src/sim/turn_phases/war_phases.ts` now derive `assignable_front_segments` directly from current front edges with no theatre-tagging pass.
+- Marked `src/state/theatres.ts` honestly as a legacy compatibility helper module.
+- Added a regression in `tests/engine_honesty_legacy_contracts.test.ts` proving:
+  - the live turn pipelines no longer call the theatre helpers
+  - the theatre helper file is documented as compatibility-only
+- Verification:
+  - `node_modules\.bin\vitest.cmd run tests\engine_honesty_legacy_contracts.test.ts tests\front_assignment.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_THEATRE_TAGGING_RUNTIME_RETIREMENT.md`
+
+
+## 2026-04-02 - AoR cap bridge retirement
+
+- Worktree/branch: F:\AWWV_exec_clean on codex/engine-health-wave1
+- Removed the dead `setBrigadeDesiredAoRCap(...)` bridge from:
+  - `src/desktop/preload.cjs`
+  - `src/ui/map/desktop/useIPC.ts`
+- Removed the `set-brigade-desired-aor-cap` IPC handler from `src/desktop/electron-main.cjs`.
+- Removed the live tactical-map adapter/view-model exposure of `brigadeDesiredAoRCap` from:
+  - `src/ui/map/data/GameStateAdapter.ts`
+  - `src/ui/map/data/types.ts`
+- Added a regression in `tests/engine_honesty_legacy_contracts.test.ts` proving the live player shell no longer exposes the bridge or adapter field.
+- Verification:
+  - `node_modules\.bin\vitest.cmd run tests\engine_honesty_legacy_contracts.test.ts tests\ui_map_game_state_adapter.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_AOR_CAP_BRIDGE_RETIREMENT.md`
+
+
+## 2026-04-02 - Player-safe ID leak mop-up
+
+- Worktree/branch: F:\AWWV_merge_wave2 on codex/main-merge-wave1
+- Removed remaining raw engine-ID leaks from:
+  - `src/ui/map/components/AttackConfirmation.tsx`
+  - `src/ui/map/components/FormationDetail.tsx`
+  - `src/ui/warroom/components/SettlementInfoPanel.ts`
+- Attack confirmation no longer exposes raw target OSIDs via hover title.
+- Formation detail no longer exposes raw `location_osid` or municipality ids via hover titles.
+- Warroom settlement info admin tab now shows `Administrative Region` instead of raw `Settlement ID` / `Municipality ID`.
+- Added regressions in:
+  - `tests/ui_player_visibility.test.ts`
+  - `tests/warroom_player_visibility.test.ts`
+- Verification:
+  - `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts`
+  - `F:\A-War-Without-Victory\node_modules\.bin\tsx.cmd --test tests\ui_map_game_state_adapter.test.ts`
+- Docs:
+  - `docs/40_reports/implemented/20260402_PLAYER_SAFE_ID_LEAK_MOPUP.md`
+
+
+## 2026-04-02 - Compatibility shell truth hardening
+
+- Worktree/branch: F:\AWWV_merge_wave2 on codex/main-merge-wave1
+- Stopped the `dev:map` browser fallback from seeding dead shell-era fields in `campaignRecruitmentActions.ts`:
+  - `brigade_front_assignment`
+  - `army_theatre_assignment`
+  - `theatres`
+- Hardened `src/state/game_state.ts` comments so the remaining compatibility-era fields are described honestly:
+  - `assignable_front_segments` = compatibility snapshot
+  - `brigade_front_assignment` = legacy fallback only
+  - `theatres` / `army_theatre_assignment` = compatibility residue
+  - `brigade_desired_aor_cap` = legacy AoR tuning field
+- Removed the stale `set-brigade-desired-aor-cap` section from `docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md`.
+- Added regressions in `tests/engine_honesty_legacy_contracts.test.ts` proving:
+  - the browser fallback no longer seeds those dead shell fields
+  - the schema comments advertise them as compatibility-only
+  - the desktop IPC contract no longer documents the retired AoR-cap bridge
+- Verification:
+  - `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\engine_honesty_legacy_contracts.test.ts tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_COMPATIBILITY_SHELL_TRUTH_HARDENING.md`
+
+
+## 2026-04-02 - Command shell density pass
+
+- Worktree/branch: F:\AWWV_merge_wave2 on codex/main-merge-wave1
+- Tightened the most frequently used command-shell surfaces instead of chasing isolated widgets:
+  - `src/ui/map/components/army_hq/ArmyHQModal.tsx`
+  - `src/ui/map/components/army_hq/PersonnelContent.tsx`
+  - `src/ui/map/components/WarSummaryModal.tsx`
+  - `src/ui/map/components/CodexPanel.tsx`
+- Reduced oversized padding, guttering, and empty space in Army HQ, the personnel tab, the War Summary modal, and Codex so the product reads more like a command desk than a presentation layer.
+- Verification:
+  - `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts tests\ui_shell_navigation.test.ts tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts`
+  - `npm.cmd run warroom:build`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Known limitation:
+  - `npm.cmd run desktop:map:build` still fails in the merge worktree because that environment cannot resolve `@vitejs/plugin-react`; this is an existing worktree environment issue, not a density-pass regression.
+- Docs:
+  - `docs/40_reports/implemented/20260402_COMMAND_SHELL_DENSITY_PASS.md`
+
+
+## 2026-04-02 - Player language shell sweep
+
+- Worktree/branch: F:\AWWV_merge_wave2 on codex/main-merge-wave1
+- Removed the last obvious live-shell raw faction shorthand from:
+  - `src/ui/map/components/PeacePlanModal.tsx`
+  - `src/ui/warroom/components/SettlementInfoPanel.ts`
+- Peace-plan territorial split labels now route through `getPlayerSafePoliticalFactionName(...)` instead of showing `RBiH`, `RS`, and `HRHB`.
+- Warroom settlement control labels now use player-facing political names instead of `RBiH (Green)`, `RS (Crimson)`, and `HRHB (Blue)`.
+- Added regressions in:
+  - `tests/ui_player_visibility.test.ts`
+  - `tests/warroom_player_visibility.test.ts`
+- Verification:
+  - `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_shell_navigation.test.ts tests\ui_map_render_smoke.test.ts`
+  - `npm.cmd run warroom:build`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_PLAYER_LANGUAGE_SHELL_SWEEP.md`
+
+
+## 2026-04-02 - Diplomacy shell player language
+
+- Worktree/branch: F:\AWWV_merge_wave2 on codex/main-merge-wave1
+- Replaced raw faction shorthand in `src/ui/warroom/components/DiplomacyModal.ts` with player-facing political names in visible diplomatic copy.
+- Also aligned `src/ui/warroom/components/FactionOverviewPanel.ts` so the live war header badge uses the military-facing label instead of the raw faction id.
+- This affects:
+  - RS patron-backing note
+  - HRHB capability outlook joint-pressure line
+  - ceasefire tracker checklist wording
+  - Washington tracker checklist wording
+- Added a source regression in `tests/warroom_player_visibility.test.ts`.
+- Verification:
+  - `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\warroom_player_visibility.test.ts tests\ui_shell_navigation.test.ts tests\ui_map_render_smoke.test.ts`
+  - `npm.cmd run warroom:build`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_DIPLOMACY_SHELL_PLAYER_LANGUAGE.md`
+
+
+## 2026-04-02 - Order queue hover leak cleanup
+
+- Worktree/branch: F:\AWWV_merge_wave2 on codex/main-merge-wave1
+- Removed one remaining raw-id hover leak from `src/ui/map/components/OrderQueue.tsx`.
+- The staged-order target hover title now uses the same player-safe `orderTargetLabel(...)` as the visible shell text instead of leaking `targetOsid`.
+- Added a regression in `tests/ui_player_visibility.test.ts`.
+- Verification:
+  - `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\ui_map_render_smoke.test.ts tests\ui_shell_navigation.test.ts tests\warroom_player_visibility.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_PLAYER_SAFE_ID_LEAK_MOPUP.md`
+

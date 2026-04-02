@@ -42,9 +42,6 @@ interface WindowAwwv {
     setTurnReportUpdatedCallback: (cb: ((report: unknown) => void) | null) => void;
     getRecruitmentCatalog: () => Promise<{ brigades?: unknown[]; error?: string }>;
     applyRecruitment: (brigadeId: string, equipmentClass: string) => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
-    renameFrontSegment: (frontId: string, name: string | null) => Promise<{ ok: boolean; error?: string }>;
-    renameTheatre: (theatreId: string, name: string | null) => Promise<{ ok: boolean; error?: string }>;
-    setBrigadeDesiredAoRCap: (brigadeId: string, cap: number) => Promise<{ ok: boolean; error?: string }>;
     getSettings: () => Promise<{ ok: boolean; settings?: unknown; error?: string }>;
     saveSettings: (settings: unknown) => Promise<{ ok: boolean; error?: string }>;
     getAiCommanderConfig: () => Promise<{ mode: string; session_cost_estimate: number }>;
@@ -56,7 +53,6 @@ interface WindowAwwv {
     stageDeployOrder: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
     stageUndeployOrder: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
     stageBrigadeMovementOrder: (brigadeId: string, targetSettlementIds: string[]) => Promise<{ ok: boolean; error?: string }>;
-    stageBrigadeRepositionOrder: (brigadeId: string, settlementIds: string[]) => Promise<{ ok: boolean; error?: string }>;
     stageBrigadeAoROrder: (settlementId: string, fromBrigadeId: string, toBrigadeId: string) => Promise<{ ok: boolean; error?: string }>;
     stageCorpsFrontOrder: (corpsId: string, edgeIds: string[]) => Promise<{ ok: boolean; error?: string }>;
     stageCorpsAttackAxisOrder: (corpsId: string, edgeIds: string[]) => Promise<{ ok: boolean; error?: string }>;
@@ -79,7 +75,6 @@ interface WindowAwwv {
     stageOpsecToggle: (sectorId: string, active: boolean) => Promise<{ ok: boolean; error?: string }>;
     stageMunicipalitySupportOrder: (payload: { faction: 'RS' | 'RBiH' | 'HRHB'; munId: string; type: 'weapons_shipment' | 'staff_priority' | 'croatian_support_package' }) => Promise<{ ok: boolean; error?: string }>;
     clearOrders: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
-    assignBrigadeToFront: (brigadeId: string, frontId: string) => Promise<{ ok: boolean; error?: string }>;
     assignBrigadeToSector: (brigadeId: string, sectorId: string | null) => Promise<{ ok: boolean; error?: string }>;
     queryMovementRange: (brigadeId: string) => Promise<unknown>;
     queryMovementPath: (brigadeId: string, destinationSid: string) => Promise<unknown>;
@@ -155,18 +150,6 @@ export function useIPC() {
                 ? (brigadeId: string, equipmentClass: string) => awwv.applyRecruitment(brigadeId, equipmentClass)
                 : makeNoop<{ ok: boolean; stateJson?: string; error?: string }>(),
 
-            renameFrontSegment: awwv
-                ? (frontId: string, name: string | null) => awwv.renameFrontSegment(frontId, name)
-                : makeNoop<{ ok: boolean; error?: string }>(),
-
-            renameTheatre: awwv
-                ? (theatreId: string, name: string | null) => awwv.renameTheatre(theatreId, name)
-                : makeNoop<{ ok: boolean; error?: string }>(),
-
-            setBrigadeDesiredAoRCap: awwv
-                ? (brigadeId: string, cap: number) => awwv.setBrigadeDesiredAoRCap(brigadeId, cap)
-                : makeNoop<{ ok: boolean; error?: string }>(),
-
             getSettings: awwv
                 ? () => awwv.getSettings()
                 : makeNoop<{ ok: boolean; settings?: unknown; error?: string }>(),
@@ -209,10 +192,6 @@ export function useIPC() {
 
             stageBrigadeMovementOrder: awwv
                 ? (brigadeId: string, targetSettlementIds: string[]) => awwv.stageBrigadeMovementOrder(brigadeId, targetSettlementIds)
-                : makeNoop<{ ok: boolean; error?: string }>(),
-
-            stageBrigadeRepositionOrder: awwv
-                ? (brigadeId: string, settlementIds: string[]) => awwv.stageBrigadeRepositionOrder(brigadeId, settlementIds)
                 : makeNoop<{ ok: boolean; error?: string }>(),
 
             stageBrigadeAoROrder: awwv
@@ -293,10 +272,6 @@ export function useIPC() {
 
             clearOrders: awwv
                 ? (brigadeId: string) => awwv.clearOrders(brigadeId)
-                : makeNoop<{ ok: boolean; error?: string }>(),
-
-            assignBrigadeToFront: awwv
-                ? (brigadeId: string, frontId: string) => awwv.assignBrigadeToFront(brigadeId, frontId)
                 : makeNoop<{ ok: boolean; error?: string }>(),
 
             assignBrigadeToSector: awwv

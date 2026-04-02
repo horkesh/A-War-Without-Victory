@@ -91,7 +91,8 @@ describe('generateWrappedSlides', () => {
             const slides = generateWrappedSlides(makeMinimalState({ turn: 40, player_faction: 'RS' }));
             const slide = slides.find(s => s.id === 'your_war')!;
             expect(slide.heroValue).toBe('40');
-            expect(slide.subtitle).toContain('RS');
+            expect(slide.subtitle).toContain('Republika Srpska');
+            expect(slide.subtitle).not.toContain('RS');
             expect(slide.subtitle).toContain('40');
             expect(slide.data?.faction).toBe('RS');
         });
@@ -263,6 +264,26 @@ describe('generateWrappedSlides', () => {
             expect(slide.data?.earlyGains).toBe(13);
             expect(slide.data?.earlyLosses).toBe(2);
             expect(slide.data?.earlyBattles).toBe(3);
+            expect(slide.detail).toContain('positions');
+            expect(slide.detail).not.toContain('OSIDs');
         });
+    });
+
+    it('keeps wrapped vocabulary player-safe', () => {
+        const slides = generateWrappedSlides(makeMinimalState({
+            player_faction: 'RBiH',
+            turnSummaries: [
+                makeTurnSummary(1, { territory_net: { RBiH: 2 } }),
+                makeTurnSummary(2, { territory_net: { RBiH: -1 } }),
+            ],
+            negotiatingCapital: { RBiH: 14 },
+        }));
+
+        const summaryText = slides
+            .flatMap((slide) => [slide.title, slide.subtitle, slide.heroLabel, slide.detail].filter(Boolean))
+            .join(' ');
+
+        expect(summaryText).toContain('Republic of Bosnia and Herzegovina');
+        expect(summaryText).not.toContain(' OSID');
     });
 });

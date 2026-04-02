@@ -14,6 +14,7 @@
 - `docs/life_lessons.md`: UI can lie even when the code "works"
 - `docs/life_lessons.md`: one surface should own one truth
 - `docs/life_lessons.md`: flexibility is often unresolved architecture wearing makeup
+- `docs/20_engineering/PRODUCT_SHELL_HIERARCHY.md`: Warroom is the primary shell, Tactical Map is the battlespace shell, Army HQ owns command review, and Codex owns knowledge/reference
 
 ---
 

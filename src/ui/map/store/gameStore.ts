@@ -139,12 +139,14 @@ export interface GameStore {
   /** Army HQ modal state. */
   armyHQOpen: boolean;
   armyHQTab: 'briefing' | 'summary' | 'records' | 'personnel';
+  armyHQRecordsSubTab: 'aar' | 'ops';
   armyHQExpandedCorpsId: string | null;
   armyHQExpandedSections: Record<string, boolean>;
   armyHQOfficerSelectionCorpsId: string | null;
   pauseMenuOpen: boolean;
   setArmyHQOpen: (open: boolean) => void;
   setArmyHQTab: (tab: 'briefing' | 'summary' | 'records' | 'personnel') => void;
+  setArmyHQRecordsSubTab: (subTab: 'aar' | 'ops') => void;
   setArmyHQExpandedCorpsId: (id: string | null) => void;
   toggleArmyHQSection: (key: string) => void;
   setArmyHQOfficerSelectionCorpsId: (id: string | null) => void;
@@ -336,6 +338,7 @@ export const useGameStore = create<GameStore>((set) => ({
 
   armyHQOpen: false,
   armyHQTab: 'briefing',
+  armyHQRecordsSubTab: 'aar',
   armyHQExpandedCorpsId: null,
   armyHQExpandedSections: {},
   armyHQOfficerSelectionCorpsId: null,
@@ -350,6 +353,14 @@ export const useGameStore = create<GameStore>((set) => ({
   }),
   setArmyHQTab: (tab) => set({
     armyHQTab: tab,
+    ...(tab !== 'records' ? { armyHQRecordsSubTab: 'aar' } : {}),
+    armyHQExpandedCorpsId: null,
+    armyHQExpandedSections: {},
+    armyHQOfficerSelectionCorpsId: null,
+  }),
+  setArmyHQRecordsSubTab: (subTab) => set({
+    armyHQTab: 'records',
+    armyHQRecordsSubTab: subTab,
     armyHQExpandedCorpsId: null,
     armyHQExpandedSections: {},
     armyHQOfficerSelectionCorpsId: null,

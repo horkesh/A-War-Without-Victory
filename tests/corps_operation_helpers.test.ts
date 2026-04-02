@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
+    buildEmergencyDefenseOperation,
+    buildProbeOperation,
+    derivePrimarySectorForBrigades,
     getMaxOperationSlots,
     hasAvailableSlot,
     findBrigadeOperation,
@@ -127,5 +130,59 @@ describe('removeOperation', () => {
         const cmd = { active_operations: [op1] } as any;
         removeOperation(cmd, other);
         expect(cmd.active_operations).toEqual([op1]);
+    });
+});
+
+describe('emergency defense sector anchoring', () => {
+    it('anchors emergency defense to the sector with the strongest participant overlap', () => {
+        const sectorId = derivePrimarySectorForBrigades(
+            [
+                {
+                    sector_id: 'sector:arbih_3rd:ozren',
+                    corps_id: 'arbih_3rd_corps',
+                    assigned_brigade_ids: ['b1', 'b2'],
+                    reserve_brigade_ids: ['b5'],
+                    length_edges: 6,
+                },
+                {
+                    sector_id: 'sector:arbih_3rd:tuzla',
+                    corps_id: 'arbih_3rd_corps',
+                    assigned_brigade_ids: ['b3'],
+                    reserve_brigade_ids: ['b4'],
+                    length_edges: 4,
+                },
+            ] as any,
+            'arbih_3rd_corps',
+            ['b1', 'b2', 'b4'],
+        );
+
+        expect(sectorId).toBe('sector:arbih_3rd:ozren');
+    });
+
+    it('builds emergency defense operations with the derived sector anchor', () => {
+        const operation = buildEmergencyDefenseOperation(
+            'arbih_3rd_corps',
+            8,
+            ['b1', 'b2'],
+            ['op:tuzla:center'],
+            'sector:arbih_3rd:ozren',
+        );
+
+        expect(operation.type).toBe('strategic_defense');
+        expect(operation.sector_id).toBe('sector:arbih_3rd:ozren');
+        expect(operation.is_emergency).toBe(true);
+    });
+
+    it('builds probe operations with a sector anchor when supplied', () => {
+        const operation = buildProbeOperation(
+            'arbih_3rd_corps',
+            8,
+            'b1',
+            'sector:arbih_3rd:ozren',
+        );
+
+        expect(operation.type).toBe('probe');
+        expect(operation.sector_id).toBe('sector:arbih_3rd:ozren');
+        expect(operation.participating_brigades).toEqual(['b1']);
     });
 });

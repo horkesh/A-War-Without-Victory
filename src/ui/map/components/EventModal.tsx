@@ -8,6 +8,7 @@
 import { GlassPanel } from './GlassPanel';
 import { Icon, type IconName } from './icons/Icon';
 import type { EventEffect } from '../../../sim/events/event_types';
+import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 
 /** Display-ready event data for the modal. */
 export interface EventDisplayData {
@@ -68,17 +69,21 @@ function extractFactions(effects: EventDisplayData['effects']): string[] {
     return Array.from(factions).sort();
 }
 
+function formatAllianceLabel(): string {
+    return `${getPlayerSafePoliticalFactionName('RBiH')} / ${getPlayerSafePoliticalFactionName('HRHB')} alliance`;
+}
+
 /** Describe an EventEffect for display. Reuses logic from EventDecisionModal. */
 export function describeEventEffect(effect: EventEffect): string {
     switch (effect.kind) {
         case 'narrative': return effect.text;
-        case 'morale_change': return `${effect.faction} morale ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'supply_delta': return `${effect.faction} supply ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'cohesion_change': return `${effect.faction} cohesion ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'humanitarian_impact': return `${effect.faction} humanitarian impact${effect.war_crimes_delta ? ` (${effect.war_crimes_delta > 0 ? '+' : ''}${effect.war_crimes_delta})` : ''}`;
-        case 'patron_pressure': return `${effect.faction} patron pressure ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'alliance_change': return `RBiH-HRHB alliance ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'negotiation_capital': return `${effect.faction} ${effect.dimension} ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
+        case 'morale_change': return `${getPlayerSafePoliticalFactionName(effect.faction)} morale ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
+        case 'supply_delta': return `${getPlayerSafePoliticalFactionName(effect.faction)} supply ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
+        case 'cohesion_change': return `${getPlayerSafePoliticalFactionName(effect.faction)} cohesion ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
+        case 'humanitarian_impact': return `${getPlayerSafePoliticalFactionName(effect.faction)} humanitarian impact${effect.war_crimes_delta ? ` (${effect.war_crimes_delta > 0 ? '+' : ''}${effect.war_crimes_delta})` : ''}`;
+        case 'patron_pressure': return `${getPlayerSafePoliticalFactionName(effect.faction)} patron pressure ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
+        case 'alliance_change': return `${formatAllianceLabel()} ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
+        case 'negotiation_capital': return `${getPlayerSafePoliticalFactionName(effect.faction)} ${effect.dimension} ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
     }
     return effect.kind;
 }
@@ -145,7 +150,7 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge, on
                                         border: `1px solid ${FACTION_COLORS[fid] ?? '#888'}40`,
                                     }}
                                 >
-                                    {fid}
+                                    {getPlayerSafePoliticalFactionName(fid)}
                                 </span>
                             ))}
                         </div>

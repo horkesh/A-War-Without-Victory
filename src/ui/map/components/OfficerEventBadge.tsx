@@ -145,7 +145,7 @@ function OfficerEventModal({ events, onClose }: {
           {event.type === 'replacement_suggested' ? (
             <>
               <div className="text-[11px] text-text-secondary leading-relaxed">
-                A replacement commander is available for <span className="text-text-primary font-bold">{event.corps_name ?? event.corps_id}</span>.
+                A replacement commander is available for <span className="text-text-primary font-bold">{event.corps_name ?? 'this corps'}</span>.
                 You may accept the replacement or keep the current commander.
               </div>
 

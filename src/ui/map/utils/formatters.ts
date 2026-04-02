@@ -76,10 +76,24 @@ export function turnToISODate(turn: number): string {
  * Format a corps formation's display name.
  * Strips faction prefix and converts to title case if name === id.
  */
-export function formatCorpsDisplayName(name: string, id: string): string {
-    return name === id
-        ? toTitleCase(name.replace(/^(RS|RBiH|HRHB)_/i, ''))
-        : name;
+export function formatCorpsDisplayName(
+    name: string | null | undefined,
+    id: string | null | undefined,
+    fallback = 'This corps',
+): string {
+    const safeName = (name ?? '').trim();
+    const safeId = (id ?? '').trim();
+
+    if (safeName && safeName !== safeId) return safeName;
+
+    if (safeName && safeName === safeId) {
+        const stripped = safeName
+            .replace(/^(RS|RBiH|HRHB|VRS|ARBIH|HVO|rs|rbih|hrhb|vrs|arbih|hvo)_/i, '')
+            .trim();
+        if (stripped && stripped !== safeName) return toTitleCase(stripped);
+    }
+
+    return fallback;
 }
 
 /** Compact personnel display: 2400 → "2.4k", 800 → "800". */

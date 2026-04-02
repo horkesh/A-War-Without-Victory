@@ -1,8 +1,27 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-01. 199 lessons across 9 topic files.
+> Last restructured: 2026-04-02. 204 lessons across 9 topic files.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
+
+## New Lessons (2026-04-02)
+
+### [Combat] Aggregate casualty ratio is faction-blind — always partition by attacker/defender faction pair — see `docs/life_lessons/combat.md`
+- A single att:def ratio for AWWV is meaningless. ARBiH-attacks-VRS: ARBiH takes 2–4× casualties (rifle-only vs armor+artillery). VRS-attacks-ARBiH: VRS may take *fewer* than defenders. ARBiH defending against VRS still bleeds from bombardment. Report faction pairs, not the aggregate.
+
+### [Calibration] Garrison multiplier for must_hold zones can free adjacent brigades toward unintended targets — see `docs/life_lessons/calibration.md`
+- n1302 DRINA regression (~1.5pp): must_hold 1.5× garrison for Brcko/Doboj corridors potentially freed Drina Corps brigades from those garrison duties → eastern OSID overcapture. Garrison changes don't just protect — they redistribute the surplus elsewhere. Always check which corps get freed brigades and where they go.
+
+### [Architecture] Fraction-of-faction-total thresholds can't discriminate between strategically different corridors — see `docs/life_lessons/architecture.md`
+- Track 2 chokepoint detection: `MUST_HOLD_MIN_ISOLATED_FRACTION = 0.05` (5% of faction territory) hits RS Brcko (~9%) AND ARBiH Central Bosnia valley passes (~8%). Any single threshold either over-garrisons ARBiH 4th Corps or misses Brcko. Fix: use corps-boundary discriminator (only trigger if isolated cluster spans a different corps jurisdiction) or absolute OSID count.
+
+### [Operations] `planning_duration` and `preparation_max_turns` are parallel timers — declared window doesn't constrain anti-paralysis — see `docs/life_lessons/calibration.md`
+- `getPreparationMaxTurns(aggressiveness)` fires before `planning_duration`. Aggressive commander (aggressiveness=5) → max_turns=3, silently overrides any `planning_duration`. Fix: `max(aggressivenessMaxTurns, op.planning_duration ?? 0)` at init.
+
+### [Operations] Assembly zone for pre-planned ops must stay narrow — all-corps expansion defeats force_staging wait — see `docs/life_lessons/calibration.md`
+- Expanding to all corps sectors hits ASSEMBLY_THRESHOLD on turn 1 (any 3 brigades anywhere in the corps count). Correct scope: staging_osid + objectives only. ASSEMBLY_TIMEOUT_TURNS=5 is the safety valve.
+
+---
 
 ## New Lessons (2026-04-01)
 
@@ -259,7 +278,7 @@
 
 | File | Topics | Lessons | Load when... |
 |------|--------|---------|-------------|
-| [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Bot AI | 46 | Running calibration scenarios, tuning parameters, OOB changes |
+| [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Bot AI | 48 | Running calibration scenarios, tuning parameters, OOB changes |
 | [combat.md](life_lessons/combat.md) | Combat, Brigade Distribution, March System | 4 | Combat resolution, brigade movement, march/distribution system |
 | [architecture.md](life_lessons/architecture.md) | Architecture, Engine, Scaling, Defaults, Data Integrity | 55 | Changing engine structure, state, pipeline, adding systems |
 | [data_pipeline.md](life_lessons/data_pipeline.md) | Data, Pipeline, Geometry | 10 | Modifying derived data, running data scripts, geometry work |

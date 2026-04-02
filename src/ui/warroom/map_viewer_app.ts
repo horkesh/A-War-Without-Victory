@@ -1,3 +1,8 @@
+import {
+    getPlayerSafeMunicipalityName,
+    getPlayerSafeSettlementName,
+} from '../map/utils/playerSafeText.js';
+
 /**
  * Standalone War Planning Map viewer — from scratch, full GUI.
  * Open via http://localhost:3000/map_viewer_standalone.html
@@ -497,7 +502,7 @@ async function main(): Promise<void> {
                 const controller = controlData.by_settlement_id?.[key] ?? controlData.by_settlement_id?.[sid] ?? 'null';
                 const censusId = sid.startsWith('S') ? sid.slice(1) : sid;
                 const nameEntry = settlementNames[censusId] ?? settlementNames[sid];
-                const name = (feature.properties as { name?: string })?.name ?? nameEntry?.name ?? sid;
+                const name = (feature.properties as { name?: string })?.name ?? nameEntry?.name ?? getPlayerSafeSettlementName(sid);
                 const pop = (feature.properties as { pop?: number })?.pop;
                 const popStr = pop != null ? pop.toLocaleString() : '—';
                 showTooltip(`${name} — ${controller} — pop ${popStr}`, e.clientX, e.clientY);
@@ -538,14 +543,14 @@ async function main(): Promise<void> {
         const censusId = sid.startsWith('S') ? sid.slice(1) : sid;
         const nameEntry = settlementNames[censusId] ?? settlementNames[sid];
         const props = found.properties as { name?: string; pop?: number; nato_class?: string; majority_ethnicity?: string };
-        const name = props?.name ?? nameEntry?.name ?? sid;
+        const name = props?.name ?? nameEntry?.name ?? getPlayerSafeSettlementName(sid);
         const pop = props?.pop;
         const popStr = pop != null ? pop.toLocaleString() : '—';
         const natoClass = props?.nato_class ?? '—';
         const munId = found.properties?.municipality_id;
         const munMid = munId != null ? String(munId) : undefined;
         const munEntry = munMid ? mun1990Names[munMid] : undefined;
-        const munName = munEntry?.display_name ?? munMid ?? '—';
+        const munName = munEntry?.display_name ?? getPlayerSafeMunicipalityName(munMid, 'Municipality');
         const contested = status === 'CONTESTED' || status === 'HIGHLY_CONTESTED' ? ` (${status})` : '';
         const stateLabel = status ?? 'CONSOLIDATED';
 

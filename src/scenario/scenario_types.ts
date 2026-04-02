@@ -149,5 +149,12 @@ export interface Scenario {
     war_timeline?: string;
     /** Officer data file ID. When set, loads named officers from data/scenarios/officers/{id}_officers.json. */
     init_officers?: string;
+    /**
+     * Scenario-authored must-hold OSIDs per corps. Commander garisons these zones at 1.5×
+     * budget regardless of dynamic posture. Use for corridor lynchpins (Brcko, Doboj) where
+     * historical necessity demands stronger defense than the engine would derive autonomously.
+     * Keys: corps_id (e.g. "vrs_posavina"). Values: OSID list.
+     */
+    must_hold_osids_by_corps?: Record<string, string[]>;
 }
 

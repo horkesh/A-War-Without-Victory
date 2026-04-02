@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { EnclaveResilienceView, LoadedGameState } from '../data/types';
 import { AIRDROP_GENERAL_SUPPLY_PER_ENCLAVE, AIRDROP_MAX_SUPPLY_PER_TURN } from '../../../state/supply_reserve_constants';
 import { useIPC } from '../desktop/useIPC';
+import { getPlayerSafeEnclaveName } from '../utils/playerSafeText';
 
 interface EnclaveDashboardProps {
   state: LoadedGameState;
@@ -132,7 +133,7 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
                 <div className="flex items-center justify-between gap-2">
                   <div>
                     <div className="font-sans text-sm text-text-primary font-semibold">
-                      {enclave.display_name ?? enclaveId}
+                      {getPlayerSafeEnclaveName(enclave.display_name ?? enclaveId)}
                     </div>
                     <div className="text-[10px] uppercase tracking-wide text-text-secondary">
                       {enclave.faction ?? 'Unknown'}

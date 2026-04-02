@@ -1,0 +1,63 @@
+import { describe, expect, it } from 'vitest';
+import type { LoadedGameState } from '../src/ui/map/data/types.js';
+import { buildWarSummaryOverviewModel } from '../src/ui/map/components/army_hq/warSummaryOverview.js';
+
+function makeLoadedGameState(): LoadedGameState {
+  return {
+    label: 'Week 4',
+    turn: 4,
+    phase: 'war',
+    formations: [
+      { id: 'arbih_3rd_corps', faction: 'RBiH', name: 'arbih_3rd_corps', kind: 'corps', readiness: 'ready', cohesion: 60, fatigue: 10, status: 'active', createdTurn: 0, tags: [] },
+      { id: 'arbih_b1', faction: 'RBiH', name: 'Assigned brigade', kind: 'brigade', readiness: 'ready', cohesion: 62, fatigue: 8, status: 'active', createdTurn: 0, tags: [], personnel: 1200, corps_id: 'arbih_3rd_corps' },
+      { id: 'rs_b1', faction: 'RS', name: 'Enemy Shock Brigade', kind: 'brigade', readiness: 'ready', cohesion: 70, fatigue: 4, status: 'active', createdTurn: 0, tags: [], personnel: 2400, corps_id: 'vrs_drinac' },
+      { id: 'hrhb_b1', faction: 'HRHB', name: 'Western Battalion', kind: 'brigade', readiness: 'ready', cohesion: 58, fatigue: 7, status: 'active', createdTurn: 0, tags: [], personnel: 1800, corps_id: 'hvo_central' },
+    ],
+    militiaPools: [],
+    controlBySettlement: {
+      'op:sarajevo:centar': 'RBiH',
+      'op:bijeljina:center': 'RS',
+      'op:mostar:west': 'HRHB',
+    },
+    statusBySettlement: {},
+    brigadeAorByFormationId: {},
+    attackOrders: [],
+    aorOrders: [],
+    recentControlEvents: [],
+    allControlEvents: [],
+    displacementEventLog: [],
+    battlesByOsid: {},
+    movementsByOsid: {},
+    supplyTransitionsByOsid: {},
+    historicalEventsByTurn: [],
+    casualtyLedger: {
+      RBiH: { killed: 100, wounded: 250, missing_captured: 0 },
+      RS: { killed: 300, wounded: 500, missing_captured: 0 },
+      HRHB: { killed: 120, wounded: 190, missing_captured: 0 },
+    },
+    displacementByMun: {},
+    departedByOsid: {
+      'op:sarajevo:centar': { RBiH: 4000, RS: 5000 },
+      'op:bijeljina:center': { RS: 7000, HRHB: 1000 },
+    },
+    pressureWarning: false,
+    player_faction: 'RBiH',
+  } as LoadedGameState;
+}
+
+describe('ui army hq war summary visibility', () => {
+  it('builds a player-safe overview model keyed to the player faction', () => {
+    const model = buildWarSummaryOverviewModel(makeLoadedGameState());
+
+    expect(model.playerFaction).toBe('RBiH');
+    expect(model.personnelByFaction.RBiH).toBe(1200);
+    expect(model.personnelByFaction.RS).toBe(2400);
+    expect(model.personnelByFaction.HRHB).toBe(1800);
+    expect(model.displacedByFaction.RBiH).toBe(4000);
+    expect(model.displacedByFaction.RS).toBe(12000);
+    expect(model.displacedByFaction.HRHB).toBe(1000);
+    expect(model.areaPct.RBiH).toBeGreaterThanOrEqual(0);
+    expect(model.areaPct.RS).toBeGreaterThanOrEqual(0);
+    expect(model.areaPct.HRHB).toBeGreaterThanOrEqual(0);
+  });
+});

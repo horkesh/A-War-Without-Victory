@@ -1,5 +1,12 @@
 # Night Shift Handoff — 2026-03-30
 
+> Historical handoff artifact. Useful for archaeology, not current architecture authority.
+>
+> For live architecture and roadmap truth, start with:
+> - `docs/20_engineering/PRODUCT_ARCHITECTURE_AUTHORITY.md`
+> - `docs/20_engineering/REPO_MAP.md`
+> - `docs/plans/MASTER_ROADMAP.md`
+
 ## Mission
 
 Build intelligent corps commanders that think like real military officers. This is not a code reorganization — it's building the BRAIN of the game. Every corps CO should assess his situation, protect his people, plan ahead, react to threats, and make decisions a real Bosnian War commander would recognize.

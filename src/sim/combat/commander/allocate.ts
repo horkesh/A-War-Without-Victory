@@ -46,6 +46,9 @@ const AGGRESSIVE_THRESHOLD = 0.7;
 /** Garrison budget reduction for aggressive commanders (fraction). */
 const AGGRESSIVE_BUDGET_REDUCTION = 0.1;
 
+/** Garrison budget multiplier for must-hold zones (structural chokepoints). */
+const MUST_HOLD_BUDGET_MULTIPLIER = 1.5;
+
 /** Besieged zone surplus is locked to local ops within this many hops. */
 export const BESIEGED_SURPLUS_HOP_LIMIT = 2;
 
@@ -81,12 +84,19 @@ export interface AllocationResult {
 export function computeGarrisonBudget(
     zone: ZoneAssessment,
     personality: OfficerPersonality,
-    _isMustHold = false,
+    isMustHold = false,
 ): number {
     if (zone.front_edge_count === 0) return 0;
 
     const edgesPerBrigade = GARRISON_EDGES_PER_BRIGADE[zone.posture];
     let budget = Math.ceil(zone.front_edge_count / edgesPerBrigade);
+
+    // Must-hold zones (structural chokepoints) get a garrison floor bump
+    // applied BEFORE personality modifiers so aggressive commanders cannot
+    // strip corridor-entrance zones below the structural minimum.
+    if (isMustHold) {
+        budget = Math.ceil(budget * MUST_HOLD_BUDGET_MULTIPLIER);
+    }
 
     // Personality modifiers
     if (personality.caution > CAUTIOUS_THRESHOLD) {

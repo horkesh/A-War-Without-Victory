@@ -1,3 +1,11 @@
+/**
+ * Legacy theatre compatibility helpers.
+ *
+ * The live player shell no longer treats theatres or theatre-tagged front
+ * segments as active ownership concepts. This module remains only so older
+ * saves/tests can still be normalized or migrated intentionally.
+ */
+
 import type { AssignableFrontSegmentState, FormationId, GameState, TheatreState } from './game_state.js';
 import { strictCompare } from './validateGameState.js';
 

@@ -6,6 +6,7 @@
  * All data comes from formations already in LoadedGameState — no adapter changes.
  */
 import type { FormationView, OperationView } from '../../data/types';
+import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
 
 // ── Types ────────────────────────────────────────────────────────────────
 
@@ -75,7 +76,7 @@ export function generateForceReadiness(
         if (corpsBrigades.length === 0) {
             result.push({
                 corpsId: corps.id,
-                corpsName: corps.name ?? corps.id,
+                corpsName: getPlayerSafeCorpsName(corps.name, corps.id),
                 grade: 'INEFFECTIVE',
                 ineffectiveCount: 0,
                 totalBrigades: 0,
@@ -106,7 +107,7 @@ export function generateForceReadiness(
 
         result.push({
             corpsId: corps.id,
-            corpsName: corps.name ?? corps.id,
+            corpsName: getPlayerSafeCorpsName(corps.name, corps.id),
             grade,
             ineffectiveCount,
             totalBrigades: corpsBrigades.length,

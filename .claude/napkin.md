@@ -10,8 +10,11 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-04-01, v0.8.0 Commander System on main)
+## Current State (2026-04-02, v0.8.0 Commander System on main)
+**n1302 NEW ATH (2026-04-02): 93.7% area-weighted, 25/25 anchors, 6/6 benchmarks. Hash: 0cf989330bd36cc8. Commander Intelligence Overhaul n1294–n1301: must_hold wiring (Brcko/Doboj 1.5× garrison), org readiness gate (zero main_effort → defensive), op scale cap by main_effort_count, enemy_concentration_zones from intel picture, coordination ±4%/pt officer competence, strength-based opportunity targets. gradacac_2+vozuca_2 both PASS. Open P1s: DRINA regression (~1.5pp, RS overcapturing), casualty ratio discrepancy (0.814 vs 0.63 in two reporting paths), ZEA rate 47% (up from 39%).**
+
 **ATH BASELINE: n1256: 94.2% area-weighted, 23/23 anchors, 6/6 benchmarks. 73 battles, 36/40 combat weeks. hash: 5fa01bbdecc43f5f.**
+**n1289: 93.2%, 25/25 anchors (HISTORIC FIRST — all passing incl. brcko), 6/6 benchmarks. hash: a95995f2b1ab899c.**
 **n1275 STABLE BASELINE: 94.0%, 23/25 anchors (brcko+boljanic_2 FAIL), 6/6 benchmarks, 86 battles.**
 **n1278: Commander correction pass + home_osid removal from Phase B + in_transit guard added.**
 **n1279: Transit state cancellation + sector split else-if fix — BROKEN: duplicate sub-segment IDs caused VRS at-front to drop to 52.4%.**
@@ -20,10 +23,10 @@
 **n1282: 92.7%, 22/25 anchors (brcko+boljanic_2+gradacac_2 FAIL), 6/6 benchmarks. hash: 2bcd55343b6fb99f. Fix 1 depletion loop — MIN=2 for sector-anchored ops (was 3). RBiH orders 23→32. brcko re-failed (was recovered in n1281); DISPROVED hypothesis: thin 2-brigade RS ops pulling garrison. Real cause: corridor zone zero-surplus, brcko OSID uncovered.**
 **n1281: 92.7%, 23/25 anchors (boljanic_2+gradacac_2 FAIL), 6/6 benchmarks. hash: a968a166ebc237a6. Sector-anchored launch contract.**
 **n1280: 93.2%, 21/25 anchors, 6/6. Sub-segment ID fix → VRS at-front 74.4%.**
-**BOLJANIC_2 FINAL DIAGNOSIS (2026-04-01): Structural ARBiH ops pressure on Doboj. 7 Doboj OSIDs fall RBiH. rs_2nd_armored reduced to 163 pers by combat exposure. NOT a brigade drift/march issue. Phase B and sub_segment fixes both failed — wrong layer. Fix must address ARBiH targeting/op pressure OR RS garrison budget for Doboj sector.**
-**Remaining P0s: gradacac_2 (RS overperforming on newly-covered fronts — pre-existing). [RESOLVED P0] brcko: fixed by P1 defensive fire — VRS artillery raises attacker casualties, ARBiH rifle-only can't sustain. P1s: vrs_east_bosnian zero-attack ops (all non-Koridor total_attacks=0, BFS reachability or stale objective filter, 39% ZEA), estimateTurnsActive broken suspend counter (suspendedTurns negative, MAX_SUSPENSION_TURNS can't trigger), HRHB patron directive scope fix, jajce_falls turn_min 40→28, 3 stale ssid refs (705th Slavna, Bileća Brigade, 1st Laktaši), P5 NATO air (zero effect), P6 breakthrough (feature-flag gate needed), P9 supply recalibration (94% RBiH strained = 0.75× baseline).**
-**FAILED APPROACHES for boljanic_2: Phase B corps-wide front OSID check (→SRK siege drop 4→2), Phase B sector-wide check (same cascade), sub_segment first-pass penalty (different cascades, no fix).**
-**NEXT APPROACH for boljanic_2: Proposal 3 (commitment-ratio Phase B eligibility filter) OR investigate ARBiH 2nd Corps op generation targeting Doboj. corridor_width=Infinity for main body → Proposal 2 won't help main body zones.**
+**BOLJANIC_2 CONFIRMED ROOT CAUSE (2026-04-02): arbih_3rd_corps auto-generates ops via findTargetOsidsFromMunicipalities() adjacency walk from petrovo_2 (Ozren foothold) — no depth filter. vrs_1st_krajina directive has no hold_osids for Doboj; garrison budget drained north by Posavina corridor ops. rs_2nd_armored displaced to petrovo_2 (856 pers, morale 35); only rs_1st_krnjin at boljanic_2 vs 15-brigade ARBiH op. Falls turn 31. FIX: add boljanic_2 + adjacent Doboj OSIDs to vrs_1st_krajina hold_osids.**
+**Remaining P0s: gradacac_2 (RS overperforming on newly-covered fronts — pre-existing). [RESOLVED P0] brcko: fixed by P1 defensive fire. [RESOLVED] vozuca_2 (PASS at n1302). [RESOLVED] gradacac_2 PASS at n1302. P1s: boljanic_2 (Doboj — fix above), DRINA regression (n1302 86.6% vs ~88% n1289 — investigate Drina Corps freed brigades → eastern OSID overcapture), CASUALTY RATIO DISCREPANCY (attack_resolution reports 0.814, anomaly_detection reports 0.63 — data source mismatch), ZEA rate 47% (up from 39% — op-scale cap narrowing pools), ANCHOR GAP (petrovo_2 + brijesnica_donja_2 unanchored — add both as RS to scenario_runner.ts), vrs_east_bosnian zero-attack ops, estimateTurnsActive broken suspend counter, HRHB patron directive scope fix, jajce_falls turn_min 40→28, 3 stale ssid refs, P5 NATO air, P6 breakthrough, P9 supply recalibration. Track 2 engine chokepoint detection DISABLED (fraction-of-faction-total threshold 0.05 can't separate RS Brcko ~9% from ARBiH Central Bosnia valleys ~8% — needs corps-boundary discriminator or absolute count).**
+**FAILED APPROACHES for boljanic_2: Phase B corps-wide front OSID check (→SRK siege drop 4→2), Phase B sector-wide check (same cascade), sub_segment first-pass penalty (different cascades, no fix). All failed because they targeted the wrong layer (movement/distribution). Root cause is directive garrison budget, not brigade positioning.**
+**OZREN POCKET: 4 RS positions (petrovo_2, brijesnica_donja_2, vozuca_2 + 1 unnamed) all flip RBiH by w31–40. Historical fall: September 1995 (Op Farz). Fix: add hold_osids protection to Ozren brigade directives. Add petrovo_2 + brijesnica_donja_2 as RS anchors.**
 **[RESOLVED] Sector-anchored launch contract (2026-04-01, Phases 0-6 complete). emit.ts broad-pool replaced by sector-first selection. UI Sector Anchor block. Phase 5 transitional comments on all 5 remaining non-anchored paths. Plan: docs/plans/2026-04-01-v08x-sector-anchored-corps-operations-plan.md.**
 **[RESOLVED] Brigade drift, objective validation gate, homeDefense surplus filters (allocate+plan), ghost duplicates, BFS faction-wide scope, loan exclusivity, probe guard blocking plans, Phase B re-order bug (in_transit guard), home_osid auto-return (removed from Phase B), commander movement authority gap (correction pass added), duplicate sub-segment IDs (sector_id prefix fix), empty friendly_osids in splitNonContiguousSectors (else-if→else fix), komar_2 pileup. generateCorpsDirectives removed (2026-04-01, commit 7fca069d) — bot_corps_directives.ts 1990→545 lines. USE_COMMANDER_LOOP flag removed.**
 **[RESOLVED] OSID naming-mismatch: boljanic_2=Doboj, kopcic_2=Bugojno, brcko=Brčko, foca_3=Foča.**
@@ -234,6 +237,8 @@ After EVERY scenario run, the orchestrator:
    Do instead: When auditing `src/ui/map` via browser automation, avoid `Escape` for closing overlays unless the overlay explicitly advertises `[ESC]`; otherwise it may open the Pause menu and pollute screenshots/findings.
 10. **[2026-03-26] War Summary/Summary focused tabs should render only focused section**
    Do instead: When `SituationTab` is used with `focusSection` (Army HQ `SUMMARY` and War Summary modal), render only that section card and suppress overview/snapshot/alliance/alerts blocks to avoid duplicate-content dead space.
+11. **[2026-04-02] Warroom command prose must derive from snapshot truth or stay generic**
+   Do instead: In `src/ui/warroom`, never hardcode confident lines like safe convoys, calm enclaves, or fake-specific staff authorship unless `extractWarData(...)` actually proves them. Warroom is a player-facing shell, not a narrative wrapper for hidden truth.
 9. **[2026-03-26] Toolbar-clearance verification must include live + dev contexts**
    Do instead: For top-toolbar clearance checks, always capture one no-dev-strip (`?live=1`) shot and one dev-strip shot with side panels visible, then state overlap verdict explicitly in the report.
 
@@ -261,6 +266,17 @@ After EVERY scenario run, the orchestrator:
 - **[P2] Op Herzegovina Consolidation** — `rs_2nd_herzegovina` spawns w20 but op fires w12 → axis always dropped. Either delay op to w22+ or find a w12-eligible replacement brigade.
 - **[P2] Op Donji Vakuf** — `rs_19th` dissolves before injection; 2 objectives (`torlakovac_2`, `babin_potok_2`) always pre-captured. Need dissolution-resistant brigade assignment + conditional objective guard.
 - **[P3] Op Kotor Varos** — 1KK queue always full w10-w40; Kotor Varos never gets its op. Design queue priority mechanism or dedicated 2KK handoff.
+
+**Engine health quick wins (2026-04-02) — all ≤30 lines, high-confidence fixes:**
+- **[P1] Combat predictor blind to defender multipliers** — `checkLaunchFeasibility()` uses `basePower × 0.8` only; ignores defender artillery (`getDefensiveFireMult` up to 1.8×), terrain (urban 1.35×, forest 1.15×), entrenchment (+51%). **Primary driver of 47% ZEA rate.** Fix: multiply defender raw power by these factors before computing required force. File: `bot_corps_directives.ts`. ~30 lines.
+- **[P1] `recent_territory_change` hardcoded 0** — `assessCorps()` returns 0 always. Theater Assessment trend-blind. Fix: count Δ(friendly_osids) over last 3–5 turns. File: `src/sim/combat/commander/assess.ts`. ~20 lines.
+- **[P1] `supply_by_osid` never consumed by briefing** — hardcoded 0.8. Fix: read supply for sector OSIDs, derive min/mean, pass to briefing. File: `src/sim/combat/commander/briefing.ts`. ~15 lines.
+- **[P2] Feint has zero enemy effect** — applies −5 cohesion to own brigades only. Fix: when feint active on sector, raise enemy sector threat_ratio ×1.5 for the duration. File: `src/sim/combat/sector_offensive.ts`. ~20 lines.
+- **[P2] Corps exhaustion not in briefing** — field exists in state, never passed. Fix: single lookup. File: `briefing.ts`. ~5 lines.
+- **[P2] Enemy equipment absent from briefing** — Fix: derive `{ artillery, tanks, infantry_only }` from adjacent enemy brigades. File: `briefing.ts`. ~25 lines.
+- **[P2] Op-level failure cap broken (Issue #29)** — cap applied per-axis (8 failures each), not per-operation. File: `sector_offensive.ts`. ~10 lines.
+- **[P2] Winter season combat modifier absent** — Fix: `getSeasonalCombatMult(week)` ~15% attacker penalty weeks 1–8 and 48–52. File: `combat_math.ts`. ~15 lines.
+- **[P0] CampaignPlan not wired to corps CO briefings** — `army_hq_gathering.ts` produces `CampaignPlan` every turn; `buildBriefing()` never reads it. Strategic layer structurally disconnected. Needs design first. File: `commander/briefing.ts`. ~30 lines wiring, but requires design of how priorities map to briefing fields.
 
 **Deferred to roadmap:**
 - Front Line Terrain Tinting (P4) → v0.9.4 (Map That Scars milestone)
@@ -380,6 +396,10 @@ After EVERY scenario run, the orchestrator:
 ## GUI / HoI Map
 1. **[2026-04-01] Fog is not enough - player-facing state must be filtered before render**
    Do instead: Treat desktop / tactical-map player knowledge as a data-boundary contract. Do not ship near-full GameState to the renderer and trust fog or panel discipline to hide it later. Raw ids like `arbih_3rd_corps`, raw sector ids, and enemy/internal ops belong only in explicit debug surfaces.
+2. **[2026-04-02] PresidentialToolbar is the live shell; Army HQ RECORDS owns history**
+   Do instead: Start shell/navigation work from `PresidentialToolbar.tsx`, not the older `TopToolbar.tsx`. Route AAR and operation history through Army HQ `RECORDS`; tactical-map ops UI should stay a field snapshot and hand command review off to HQ.
+3. **[2026-04-02] Army HQ SUMMARY is player-safe, not an all-faction scoreboard**
+   Do instead: Keep own-side exact territory/personnel/casualty values in `WarSummaryContent`, allow theater-wide aggregates when useful, and push enemy-wide totals back into staff abstractions instead of exact comparison tables.
 1. **[2026-03-15] Unified bottom strip: map modes + territory + toggles**
    Do instead: `BottomStatusStrip.tsx` is the single bottom bar: `[Map Mode Pills] | [Territory % area-weighted] | [Layer Toggles]`. z-20 (above map, below panels z-50-100). `MapModeToolbar` exists but is NOT rendered. Territory % uses km² from `osid_areas.json`. 7 modes (keys 1-7): Political, Ethnic, Supply, Casualties, Morale, Operations, Defense. Pressure/density modes removed (broken/redundant). Casualties + morale use continuous `interpolate` gradients. 7 layer toggles: Front, Units, Labels, Minimap, Fog, Battles, Points.
 2. **[2026-03-11] GameStateAdapter is the single chokepoint — check paths FIRST**
@@ -472,3 +492,11 @@ After EVERY scenario run, the orchestrator:
    Do instead: No `PhaseI`, `PhaseII` identifiers. `rear_pocket_consolidation.ts` replaces deleted `consolidation_flips.ts`.
 3. **[2026-03-08] Deep merging test mocks with nested state**
    Do instead: Standard `...overrides` overwrites nested structures entirely. Manually deep merge or spread inside the nested object literal.
+
+## Player Shell Discipline
+1. **[2026-04-02] Player-facing operation documents must never print raw OSIDs**
+   Do instead: OPORDs, objective lists, and HQ roster/history hover rows must resolve settlement labels through player-safe helpers. Exact internal identifiers belong only in debug-only surfaces.
+2. **[2026-04-02] Warroom faction overview stays strategic**
+   Do instead: Warroom may summarize command posture, but detailed formations, personnel rosters, reserve handling, and commander reassignment belong to Army HQ. If Warroom starts doing those things again, it is stealing ownership from the command shell.
+3. **[2026-04-02] Tactical map must always show the way back to Warroom**
+   Do instead: If desktop IPC is available or the map is embedded, the mounted tactical toolbar must expose a visible `WARROOM` return affordance. A hidden bridge method in legacy code is not enough.

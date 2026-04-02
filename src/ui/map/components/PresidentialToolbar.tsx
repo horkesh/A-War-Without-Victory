@@ -14,6 +14,7 @@ import { advanceTurnAndSync } from '../desktop/orderActions';
 import { loadLatestRunSaveAsText, loadRunFinalSaveAsText } from '../data/DataLoader';
 import { getArmyCrest, getArmyName } from '../utils/factionAssets';
 import { formatTurnLabel } from '../utils/formatters';
+import { shouldShowWarroomReturn, isEmbeddedTacticalMap } from '../utils/warroomReturn';
 import { OfficerEventBadge } from './OfficerEventBadge';
 
 interface PresidentialToolbarProps {
@@ -23,9 +24,23 @@ interface PresidentialToolbarProps {
     pressureWarning: boolean;
     /** Pending officer events. */
     pendingOfficerEvents: boolean;
+    onOpenSummary?: () => void;
+    onOpenRecords?: () => void;
+    onOpenOpsHistory?: () => void;
+    onOpenCodex?: () => void;
+    onOpenEventLog?: () => void;
 }
 
-export function PresidentialToolbar({ pendingDecisions, pressureWarning, pendingOfficerEvents }: PresidentialToolbarProps) {
+export function PresidentialToolbar({
+    pendingDecisions,
+    pressureWarning,
+    pendingOfficerEvents,
+    onOpenSummary,
+    onOpenRecords,
+    onOpenOpsHistory,
+    onOpenCodex,
+    onOpenEventLog,
+}: PresidentialToolbarProps) {
     const ipc = useIPC();
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const loadSave = useGameStore((s) => s.loadSave);
@@ -40,6 +55,8 @@ export function PresidentialToolbar({ pendingDecisions, pressureWarning, pending
     const playerFaction = loadedGameState?.player_faction ?? '';
     const crestUrl = getArmyCrest(playerFaction);
     const armyName = getArmyName(playerFaction);
+    const embedded = typeof window !== 'undefined' && isEmbeddedTacticalMap(window.location.search);
+    const showWarroomReturn = typeof window !== 'undefined' && shouldShowWarroomReturn(window.location.search, ipc.isAvailable);
 
     const handleAdvanceTurn = useCallback(async () => {
         if (!ipc.isAvailable || advancing) return;
@@ -99,6 +116,20 @@ export function PresidentialToolbar({ pendingDecisions, pressureWarning, pending
 
                 {/* LEFT: Date */}
                 <div className="flex items-center gap-3 min-w-[180px]">
+                    {showWarroomReturn && (
+                        <button
+                            onClick={() => {
+                                if (embedded) {
+                                    window.parent.postMessage({ type: 'awwv-back-to-hq' }, '*');
+                                    return;
+                                }
+                                void ipc.focusWarroom();
+                            }}
+                            className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-amber-400 hover:text-amber-300 transition-colors"
+                        >
+                            WARROOM
+                        </button>
+                    )}
                     <button
                         onClick={() => useGameStore.getState().setChronicleOpen(true)}
                         className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors"
@@ -122,6 +153,43 @@ export function PresidentialToolbar({ pendingDecisions, pressureWarning, pending
                             DEV
                         </span>
                     )}
+                    <div className="flex items-center gap-1 border-l border-white/10 pl-3">
+                        <button
+                            onClick={onOpenSummary}
+                            disabled={!loadedGameState}
+                            className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                        >
+                            SUMMARY
+                        </button>
+                        <button
+                            onClick={onOpenRecords}
+                            disabled={!loadedGameState}
+                            className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                        >
+                            RECORDS
+                        </button>
+                        <button
+                            onClick={onOpenOpsHistory}
+                            disabled={!loadedGameState}
+                            className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                        >
+                            OPS
+                        </button>
+                        <button
+                            onClick={onOpenEventLog}
+                            disabled={!loadedGameState}
+                            className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                        >
+                            EVENTS
+                        </button>
+                        <button
+                            onClick={onOpenCodex}
+                            disabled={!loadedGameState}
+                            className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                        >
+                            CODEX
+                        </button>
+                    </div>
                 </div>
 
                 {/* CENTER: Alert badges (crest is separate floating element below) */}

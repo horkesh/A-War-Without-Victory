@@ -21,6 +21,45 @@ function activeBrigades(state: GameState): FormationState[] {
         );
 }
 
+export function buildFrontlineAssignedFormationSet(state: GameState): Set<FormationId> {
+    const assigned = new Set<FormationId>();
+    const formations = state.military.formations ?? {};
+
+    if (hasLiveSectorFrontlineTruth(state)) {
+        const sectors = state.military.corps_front_sectors ?? {};
+        for (const sector of Object.values(sectors)) {
+            if (!sector) continue;
+            for (const brigadeId of sector.assigned_brigade_ids ?? []) {
+                assigned.add(brigadeId as FormationId);
+            }
+            for (const brigadeId of sector.reserve_brigade_ids ?? []) {
+                assigned.add(brigadeId as FormationId);
+            }
+        }
+        return assigned;
+    }
+
+    const assignmentMap = state.military.brigade_front_assignment;
+    const segments = state.military.assignable_front_segments ?? [];
+    const validSegmentIds = new Set(segments.map((segment) => segment.front_id));
+    if (assignmentMap && typeof assignmentMap === 'object') {
+        for (const [formationId, frontId] of Object.entries(assignmentMap)) {
+            if (!frontId || !validSegmentIds.has(frontId)) continue;
+            const formation = formations[formationId as FormationId];
+            if (!formation || formation.status !== 'active') continue;
+            assigned.add(formationId as FormationId);
+        }
+    }
+
+    return assigned;
+}
+
+export function hasLiveSectorFrontlineTruth(state: GameState): boolean {
+    const sectors = state.military.corps_front_sectors;
+    if (!sectors || typeof sectors !== 'object') return false;
+    return Object.values(sectors).some((sector) => sector != null);
+}
+
 export function hasValidFrontAssignment(state: GameState, formationId: FormationId): boolean {
     const segments = state.military.assignable_front_segments ?? [];
     // Backward-compatible behavior for legacy saves/tests before segment derivation exists.
@@ -35,7 +74,7 @@ export function hasValidFrontAssignment(state: GameState, formationId: Formation
 export function isBrigadeAssignedToFront(state: GameState, formationId: FormationId): boolean {
     const formation = state.military.formations?.[formationId];
     if (!formation || (formation.kind ?? 'brigade') !== 'brigade') return false;
-    return hasValidFrontAssignment(state, formationId);
+    return buildFrontlineAssignedFormationSet(state).has(formationId);
 }
 
 /**

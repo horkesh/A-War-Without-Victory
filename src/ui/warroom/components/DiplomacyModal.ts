@@ -18,6 +18,7 @@
 import type { FactionId, GameState } from '../../../state/game_state.js';
 import { extractWarData, type WarDataSnapshot } from '../data/war_data_extractor.js';
 import { FACTION_COLORS, factionCssClass, getPlayerFaction, trendArrow, turnToWeekString } from './warroom_utils.js';
+import { getPlayerSafePoliticalFactionName } from '../../map/utils/playerSafeText.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -75,6 +76,11 @@ function conditionRow(
 
 export class DiplomacyModal {
     private gameState: GameState;
+    private readonly factionPoliticalLabels = {
+        RS: getPlayerSafePoliticalFactionName('RS'),
+        RBiH: getPlayerSafePoliticalFactionName('RBiH'),
+        HRHB: getPlayerSafePoliticalFactionName('HRHB'),
+    };
 
     constructor(gameState: GameState) {
         this.gameState = gameState;
@@ -162,7 +168,7 @@ export class DiplomacyModal {
         // Allied channels note
         const note = document.createElement('div');
         note.style.cssText = 'text-align:center;font-size:11px;color:#555570;margin-top:16px;font-style:italic;';
-        note.textContent = 'No allied channels active \u2014 RS fights with patron backing';
+        note.textContent = `No allied channels active \u2014 ${this.factionPoliticalLabels.RS} fights with patron backing`;
         modal.appendChild(note);
 
         return modal;
@@ -268,7 +274,7 @@ export class DiplomacyModal {
             <div style="margin-bottom:6px;font-size:11px;color:#8888a0;font-style:italic;">If Washington Agreement signed:</div>
             ${statRow('Equipment Access', `${pct(currentEquipAccess)} \u2192 65.0%`)}
             ${statRow('Croatian Support', `${pct(currentCroatianSupport)} \u2192 90.0%`)}
-            ${statRow('Joint Pressure Bonus vs RS', '1.15x')}
+            ${statRow(`Joint pressure bonus vs ${this.factionPoliticalLabels.RS}`, '1.15x')}
         `));
 
         return modal;
@@ -348,11 +354,11 @@ export class DiplomacyModal {
         return this.createSection('CEASEFIRE TRACKER', `
             ${statusLabel}
             ${conditionRow('C1', 'War duration \u2265 20 turns', c1Met ? 'met' : 'unmet', c1Detail)}
-            ${conditionRow('C2', 'HRHB exhaustion > 35', c2Status, c2Detail)}
-            ${conditionRow('C3', `${viewer === 'RBiH' ? 'Own' : 'RBiH'} exhaustion > 30`, c3Status, c3Detail)}
+            ${conditionRow('C2', `${this.factionPoliticalLabels.HRHB} exhaustion > 35`, c2Status, c2Detail)}
+            ${conditionRow('C3', `${viewer === 'RBiH' ? 'Own' : this.factionPoliticalLabels.RBiH} exhaustion > 30`, c3Status, c3Detail)}
             ${conditionRow('C4', 'Stalemate \u2265 4 turns', c4Met ? 'met' : 'unmet', c4Detail)}
             ${conditionRow('C5', 'IVP momentum > 40%', c5Met ? 'met' : 'unmet', c5Detail)}
-            ${conditionRow('C6', 'HRHB patron constraint > 45%', c6Status, c6Detail)}
+            ${conditionRow('C6', `${this.factionPoliticalLabels.HRHB} patron constraint > 45%`, c6Status, c6Detail)}
         `);
     }
 
@@ -434,8 +440,8 @@ export class DiplomacyModal {
             ${conditionRow('W1', 'Ceasefire active', w1Status, w1Detail)}
             ${conditionRow('W2', 'Ceasefire \u2265 4 turns', w2Status, w2Detail)}
             ${conditionRow('W3', 'IVP momentum > 50%', w3Met ? 'met' : 'unmet', w3Detail)}
-            ${conditionRow('W4', 'HRHB patron constraint > 55%', w4Status, w4Detail)}
-            ${conditionRow('W5', 'RS territory > 40%', w5Met ? 'met' : 'unmet', w5Detail)}
+            ${conditionRow('W4', `${this.factionPoliticalLabels.HRHB} patron constraint > 55%`, w4Status, w4Detail)}
+            ${conditionRow('W5', `${this.factionPoliticalLabels.RS} territory > 40%`, w5Met ? 'met' : 'unmet', w5Detail)}
             ${conditionRow('W6', 'Combined exhaustion > 55', w6Status, w6Detail)}
         `);
     }

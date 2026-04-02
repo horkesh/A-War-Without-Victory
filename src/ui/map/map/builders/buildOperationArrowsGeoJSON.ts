@@ -2,6 +2,7 @@ import type { Feature, FeatureCollection, LineString, Polygon, Point } from 'geo
 import type { LoadedGameState } from '../../data/types';
 import { type OsidCentroidLookup, resolveOsidKey } from './geojsonLookup';
 import { hashString, buildBezierCurve, buildArrowheadTriangle, buildTaperedArrowBody } from './arrowGeometry';
+import { getPlayerVisibleOperations } from '../../../shared/playerFacingLabels.js';
 
 // ── Faction colors for operation arrows ─────────────────────────────────────
 
@@ -122,7 +123,7 @@ export function buildOperationArrowsGeoJSON(
   centroidLookup: OsidCentroidLookup,
 ): FeatureCollection {
   const features: OpArrowFeature[] = [];
-  const ops = state.operations;
+  const ops = getPlayerVisibleOperations(state.operations ?? [], state.player_faction);
   if (!ops || ops.length === 0) return { type: 'FeatureCollection', features: [] };
 
   for (const op of ops) {

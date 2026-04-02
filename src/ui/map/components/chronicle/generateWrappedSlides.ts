@@ -8,6 +8,17 @@ export interface WrappedSlide {
     data?: Record<string, unknown>;
 }
 
+const PLAYER_FACTION_LABELS: Record<string, string> = {
+    RBiH: 'Republic of Bosnia and Herzegovina',
+    RS: 'Republika Srpska',
+    HRHB: 'Herceg-Bosna',
+};
+
+function getFactionDisplayLabel(faction: string | undefined): string {
+    if (!faction) return 'Unknown';
+    return PLAYER_FACTION_LABELS[faction] ?? faction;
+}
+
 /**
  * Pure analysis function: reads adapted game state and produces 10 slides
  * summarizing the player's war for the "Chronicle Wrapped" presentation.
@@ -23,6 +34,7 @@ export function generateWrappedSlides(state: any): WrappedSlide[] {
     const firedEvents: any[] = state?.firedEvents ?? [];
     const historicalEventsByTurn: any[] = state?.historicalEventsByTurn ?? [];
     const playerFaction: string = state?.player_faction ?? 'Unknown';
+    const playerFactionLabel = getFactionDisplayLabel(playerFaction);
     const currentTurn: number = state?.turn ?? 0;
     const phase: string = state?.phase ?? 'unknown';
 
@@ -30,7 +42,7 @@ export function generateWrappedSlides(state: any): WrappedSlide[] {
     slides.push({
         id: 'your_war',
         title: 'Your War',
-        subtitle: `You led ${playerFaction} through ${currentTurn} weeks of conflict`,
+        subtitle: `You led ${playerFactionLabel} through ${currentTurn} weeks of conflict`,
         heroValue: String(currentTurn),
         heroLabel: 'weeks at war',
         detail: `Phase: ${phase}`,
@@ -54,7 +66,7 @@ export function generateWrappedSlides(state: any): WrappedSlide[] {
         subtitle: `The first 8 weeks set the stage`,
         heroValue: earlyBattles > 0 ? String(earlyBattles) : '0',
         heroLabel: 'early battles',
-        detail: `Territory: +${earlyGains} / -${earlyLosses} OSIDs`,
+        detail: `Territory shifts: +${earlyGains} / -${earlyLosses} positions`,
         data: { earlyGains, earlyLosses, earlyBattles },
     });
 
@@ -138,7 +150,7 @@ export function generateWrappedSlides(state: any): WrappedSlide[] {
         subtitle: `Your forces at their peak`,
         heroValue: String(totalFormations),
         heroLabel: 'formations fielded',
-        detail: `Peak territory gain: +${peakTerritory} OSIDs. Operations launched: ${opsLaunched}`,
+        detail: `Peak territory gain: +${peakTerritory} positions. Operations launched: ${opsLaunched}`,
         data: { peakTerritory, totalFormations, opsLaunched, totalGained },
     });
 
@@ -227,7 +239,7 @@ export function generateWrappedSlides(state: any): WrappedSlide[] {
             ? negotiatingCapital[playerFaction].toFixed(0)
             : '-',
         heroLabel: 'final score',
-        detail: playerFaction,
+        detail: playerFactionLabel,
         data: finalDimensions,
     });
 

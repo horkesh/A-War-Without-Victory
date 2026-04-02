@@ -1,5 +1,7 @@
 /**
  * Phase A1.2: Canonical weekly turn pipeline (roadmap-aligned).
+ * Canonical non-war/state-pipeline authority. Live war-phase execution belongs
+ * in `src/sim/turn_pipeline.ts`.
  *
  * runOneTurn(state, inputs) → newState
  *

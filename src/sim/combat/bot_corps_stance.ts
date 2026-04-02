@@ -115,6 +115,20 @@ export function generateCorpsStanceOrders(
             }
         }
 
+        // --- N1297: Organizational readiness gate ---
+        // If the previous turn's commander assessment shows zero main_effort brigades,
+        // the corps has no offensive capacity (rifle-only, no artillery/tanks).
+        // Cap at 'defensive' — brigade AI can still repel attacks, but no new plans.
+        // Naturally models ARBiH early war (w0–w12 rifle-only) vs VRS (artillery day 1).
+        // RS corridor override below may upgrade defensive → balanced for existential fronts.
+        if (stance !== 'reorganize') {
+            const prevForce = cmd.commander_state?.force_assessment;
+            if (prevForce && prevForce.tier_counts.main_effort === 0
+                && STANCE_RANK[stance] > STANCE_RANK['defensive']) {
+                stance = 'defensive';
+            }
+        }
+
         // --- Faction-specific overrides (E1-E3 personality) ---
 
         if (faction === 'RS') {

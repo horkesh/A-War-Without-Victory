@@ -21,9 +21,9 @@ export function CollapsibleSection({ sectionKey, title, count, children, default
             <button
                 type="button"
                 onClick={() => toggle(sectionKey)}
-                className="w-full flex items-center justify-between px-6 py-2.5 hover:bg-panel-bg transition-colors group"
+                className="w-full flex items-center justify-between px-4 py-2 hover:bg-panel-bg transition-colors group"
             >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5">
                     <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-400 group-hover:text-amber-300"
                         style={{ fontFamily: 'IBM Plex Sans Condensed, sans-serif' }}>
                         {title}
@@ -39,7 +39,7 @@ export function CollapsibleSection({ sectionKey, title, count, children, default
                 </span>
             </button>
             {expanded && (
-                <div className="px-6 pb-4 pt-2 border-t border-panel-border/50">
+                <div className="px-4 pb-3 pt-1.5 border-t border-panel-border/50">
                     {children}
                 </div>
             )}

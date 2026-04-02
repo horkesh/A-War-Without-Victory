@@ -162,6 +162,74 @@ describe('recomputeSectorPowerAndThreat — runs after all assignment steps (n69
         }
     });
 
+    it('active enemy feints raise threat_ratio on the targeted sector', () => {
+        const base = makeLinearFrontState({
+            formations: {
+                enemy_brig: makeFormation('enemy_brig', {
+                    faction: 'RBiH' as FactionId,
+                    kind: 'brigade' as any,
+                    corps_id: 'arbih_1st_corps' as any,
+                    location_osid: 'op:zon:e3',
+                    home_osid: 'op:zon:e3',
+                    personnel: 1500,
+                }),
+            },
+        });
+        const withFeint = makeLinearFrontState({
+            formations: {
+                enemy_brig: makeFormation('enemy_brig', {
+                    faction: 'RBiH' as FactionId,
+                    kind: 'brigade' as any,
+                    corps_id: 'arbih_1st_corps' as any,
+                    location_osid: 'op:zon:e3',
+                    home_osid: 'op:zon:e3',
+                    personnel: 1500,
+                }),
+            },
+        });
+
+        withFeint.state.military.corps_command = {
+            arbih_1st_corps: {
+                command_span: 5,
+                subordinate_count: 1,
+                og_slots: 1,
+                active_ogs: [],
+                corps_exhaustion: 0,
+                stance: 'offensive',
+                active_operations: [{
+                    name: 'Maskirovka',
+                    type: 'feint',
+                    phase: 'planning',
+                    started_turn: 10,
+                    phase_started_turn: 10,
+                    participating_brigades: ['enemy_brig'],
+                    objectives: ['op:zon:f3'],
+                    current_objective_index: 0,
+                }],
+            },
+        } as any;
+
+        const baseSectors = Object.values(buildCorpsFrontSectors(base.state, base.edges, null)).filter(
+            (sector) =>
+                sector.faction === 'RS' &&
+                sector.sub_segments.some((subSegment) => subSegment.enemy_osids.includes('op:zon:e3')) &&
+                sector.assigned_brigade_ids.length > 0,
+        );
+        const feintSectors = Object.values(buildCorpsFrontSectors(withFeint.state, withFeint.edges, null)).filter(
+            (sector) =>
+                sector.faction === 'RS' &&
+                sector.sub_segments.some((subSegment) => subSegment.enemy_osids.includes('op:zon:e3')) &&
+                sector.assigned_brigade_ids.length > 0,
+        );
+
+        expect(baseSectors.length).toBeGreaterThan(0);
+        expect(feintSectors.length).toBe(baseSectors.length);
+        for (let i = 0; i < baseSectors.length; i++) {
+            expect(feintSectors[i]!.threat_ratio).toBeGreaterThan(baseSectors[i]!.threat_ratio);
+            expect(feintSectors[i]!.threat_ratio).toBeCloseTo(baseSectors[i]!.threat_ratio * 1.5, 5);
+        }
+    });
+
     it('all sectors have finite non-negative dp and threat_ratio (never NaN/undefined)', () => {
         const { state, edges } = makeLinearFrontState({
             formations: {

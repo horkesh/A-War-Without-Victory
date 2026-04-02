@@ -8,12 +8,7 @@
 import type { LoadedGameState } from '../data/types';
 import { useIPC } from '../desktop/useIPC';
 import { useGameStore } from '../store/gameStore';
-
-const FACTION_LABELS: Record<string, string> = {
-    RBiH: 'Republic of Bosnia-Herzegovina',
-    RS: 'Republika Srpska',
-    HRHB: 'Herceg-Bosna (HVO)',
-};
+import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 
 const INSTITUTIONAL_LABELS: Record<string, string> = {
     cantonization: 'Ethnic Cantonization',
@@ -31,6 +26,11 @@ interface PeacePlanModalProps {
 export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
     const ipc = useIPC();
     const setLoadError = useGameStore((s) => s.setLoadError);
+    const proposedFactionLabels = {
+        RBiH: getPlayerSafePoliticalFactionName('RBiH'),
+        RS: getPlayerSafePoliticalFactionName('RS'),
+        HRHB: getPlayerSafePoliticalFactionName('HRHB'),
+    };
 
     const handleRespond = (response: 'accepted' | 'rejected') => {
         // Dismiss immediately — don't wait for IPC
@@ -85,17 +85,17 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                     </div>
                     <div className="flex gap-1 h-5 rounded overflow-hidden border border-[#8a7a60]/30 mb-2">
                         <div className="bg-[#4a7a4a]" style={{ width: `${(plan.proposedSplit.RBiH / splitTotal) * 100}%` }}
-                             title={`RBiH: ${plan.proposedSplit.RBiH}%`} />
+                             title={`${proposedFactionLabels.RBiH}: ${plan.proposedSplit.RBiH}%`} />
                         <div className="bg-[#4a5a8a]" style={{ width: `${(plan.proposedSplit.RS / splitTotal) * 100}%` }}
-                             title={`RS: ${plan.proposedSplit.RS}%`} />
+                             title={`${proposedFactionLabels.RS}: ${plan.proposedSplit.RS}%`} />
                         <div className="bg-[#8a6a3a]" style={{ width: `${(plan.proposedSplit.HRHB / splitTotal) * 100}%` }}
-                             title={`HRHB: ${plan.proposedSplit.HRHB}%`} />
+                             title={`${proposedFactionLabels.HRHB}: ${plan.proposedSplit.HRHB}%`} />
                     </div>
                     <div className="flex justify-between text-[11px] text-[#6a5a40]"
                          style={{ fontFamily: 'Courier New, monospace' }}>
-                        <span>RBiH {plan.proposedSplit.RBiH}%</span>
-                        <span>RS {plan.proposedSplit.RS}%</span>
-                        <span>HRHB {plan.proposedSplit.HRHB}%</span>
+                        <span>{proposedFactionLabels.RBiH} {plan.proposedSplit.RBiH}%</span>
+                        <span>{proposedFactionLabels.RS} {plan.proposedSplit.RS}%</span>
+                        <span>{proposedFactionLabels.HRHB} {plan.proposedSplit.HRHB}%</span>
                     </div>
                     <div className="text-[11px] text-[#6a5a40] mt-2">
                         <span className="font-bold text-[#2a2016]">Institutional model:</span>{' '}
@@ -111,7 +111,7 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                     <div className="space-y-1.5">
                         {Object.entries(plan.botResponses).map(([faction, response]) => (
                             <div key={faction} className="flex items-center justify-between text-[12px]">
-                                <span className="text-[#2a2016]">{FACTION_LABELS[faction] ?? faction}</span>
+                                <span className="text-[#2a2016]">{getPlayerSafePoliticalFactionName(faction)}</span>
                                 <span className={`font-bold uppercase text-[11px] px-2 py-0.5 rounded border ${
                                     response === 'accepted'
                                         ? 'text-[#2a6a2a] bg-[#d0e8d0] border-[#2a6a2a]/30'

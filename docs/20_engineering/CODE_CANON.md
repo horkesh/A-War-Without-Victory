@@ -37,12 +37,14 @@ Primary entrypoints (from deterministic discovery):
 - Serialization core: `src/state/serialize.ts` and `src/state/serializeGameState.ts`
 - Minimal smoke entrypoint: `src/index.ts`
 - Map pipeline: `docs/20_engineering/MAP_BUILD_SYSTEM.md` (scripts under `scripts/map/`)
+- Product architecture authority: `docs/20_engineering/PRODUCT_ARCHITECTURE_AUTHORITY.md`
 - Tactical Map (canonical map GUI): `docs/20_engineering/TACTICAL_MAP_SYSTEM.md` §0 and `docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md` — React + MapLibre app in `src/ui/map/`; `npm run dev:map`
 
 ## Single Source of Truth for Entry Points
 Only the entrypoints listed in `docs/20_engineering/REPO_MAP.md` and `docs/20_engineering/PIPELINE_ENTRYPOINTS.md`,
 and approved in ADRs, are canonical.
 Do not add or use shadow entrypoints.
+Do not treat historical root summaries or handoff memos as co-equal architecture authority; use `docs/20_engineering/PRODUCT_ARCHITECTURE_AUTHORITY.md` to resolve doc-era conflicts.
 
 ## Contradiction and Change Protocol
 If code conflicts with canon:

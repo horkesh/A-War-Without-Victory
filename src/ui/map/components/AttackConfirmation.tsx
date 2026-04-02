@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { FACTION_COLORS_SUBTLE } from '../utils/theme';
+import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 
 /** Attacker formation summary for the confirmation modal. */
 export interface AttackConfirmationAttacker {
@@ -34,7 +35,7 @@ export interface AttackConfirmationProps {
  */
 export function AttackConfirmation({
   attacker,
-  targetOsid,
+  targetOsid: _targetOsid,
   targetDisplayName,
   defender,
   terrainSummary,
@@ -107,12 +108,12 @@ export function AttackConfirmation({
             <span className={FACTION_COLORS_SUBTLE[attacker.faction] ?? 'text-text-primary'}>
               {attacker.name}
             </span>
-            <span className="text-text-secondary ml-1">({attacker.faction})</span>
+            <span className="text-text-secondary ml-1">({getPlayerSafeMilitaryFactionName(attacker.faction)})</span>
           </div>
 
           <div>
             <span className="text-text-secondary">Target: </span>
-            <span className="text-text-primary font-mono" title={targetOsid}>
+            <span className="text-text-primary">
               {targetDisplayName}
             </span>
           </div>
@@ -125,7 +126,7 @@ export function AttackConfirmation({
                   {defender.name}
                 </span>
                 <span className="text-text-secondary ml-1">
-                  (strength: {typeof defender.strength === 'number' ? defender.strength.toLocaleString() : defender.strength})
+                  ({getPlayerSafeMilitaryFactionName(defender.faction)} / strength: {typeof defender.strength === 'number' ? defender.strength.toLocaleString() : defender.strength})
                 </span>
               </>
             ) : (

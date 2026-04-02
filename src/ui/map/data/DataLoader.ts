@@ -1,4 +1,5 @@
 import type { FeatureCollection } from 'geojson';
+import { getPlayerSafeDisplayLabel } from '../utils/playerSafeText.js';
 
 interface PoliticalControlPayload {
   by_settlement_id?: Record<string, string | null>;
@@ -83,7 +84,7 @@ export async function loadEventDefinitions(): Promise<Map<string, EventDefinitio
       if (!ev.id) continue;
       map.set(ev.id, {
         id: ev.id,
-        title: ev.title ?? ev.id,
+        title: getPlayerSafeDisplayLabel(ev.title ?? ev.id, 'Untitled event'),
         narrative: ev.narrative ?? '',
         category: ev.category ?? 'military',
         effects: Array.isArray(ev.effects) ? ev.effects : ev.effect ? [ev.effect] : [],

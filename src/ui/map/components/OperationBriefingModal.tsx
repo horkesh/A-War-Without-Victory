@@ -6,6 +6,7 @@ import { useMemo } from 'react';
 import type { NamedOfficerView } from '../data/types';
 import { useGameStore } from '../store/gameStore';
 import { formatRank, getArchetype, formatPips, getRatingColor } from '../utils/officerCharacter';
+import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 
 interface OperationBriefingModalProps {
     isOpen: boolean;
@@ -80,7 +81,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                     </div>
                     <div className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Operations Briefing</div>
                     <div className="text-sm font-bold mt-0.5">{operation.name}</div>
-                    <div className="text-[10px] text-neutral-500">{operation.corps_name} — {operation.faction}</div>
+                    <div className="text-[10px] text-neutral-500">{operation.corps_name} / {getPlayerSafeMilitaryFactionName(operation.faction)}</div>
                 </div>
 
                 {/* Commander info */}

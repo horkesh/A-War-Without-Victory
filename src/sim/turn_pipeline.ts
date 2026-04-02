@@ -1,5 +1,7 @@
 /**
  * Turn pipeline orchestrator.
+ * Canonical war-phase turn entrypoint for live simulation, scenario runs, and desktop play.
+ * If you are changing war behavior, start here rather than the prototype/minimal harnesses.
  * Assembles war-phase and early-war steps, runs them in sequence via runTurn().
  * Step implementations live in turn_phases/war_phases.ts and turn_phases/early_war_phases.ts.
  * Types, context helpers, and caches live in turn_pipeline_types.ts.
@@ -10,9 +12,6 @@ import { EdgeRecord, loadSettlementGraph } from '../map/settlements.js';
 import { deriveAssignableFrontSegments } from '../state/assignable_front_segments.js';
 import { cloneGameState } from '../state/clone.js';
 import { GameState } from '../state/game_state.js';
-import { assignFrontSegmentTheatres, ensureDefaultTheatres } from '../state/theatres.js';
-import { ensureBrigadeFrontAssignments } from './combat/front_assignment.js';
-import { buildLocalFronts } from './combat/local_front_defense.js';
 import { earlyWarPhases } from './turn_phases/early_war_phases.js';
 import { warPhases } from './turn_phases/war_phases.js';
 
@@ -153,16 +152,13 @@ async function refreshFrontEdgeSnapshot(state: GameState, input: TurnInput): Pro
     const edges = await getEdgesForTurn(input);
     const derivedFrontEdges = computeFrontEdges(state, edges);
     state.military.front_edges = derivedFrontEdges;
-    ensureDefaultTheatres(state);
     const frontEdgesForSegments =
         state.meta.phase === 'war' && state.military.war_front_edges_osid?.length
             ? state.military.war_front_edges_osid
             : derivedFrontEdges;
-    const segments = deriveAssignableFrontSegments(frontEdgesForSegments);
-    state.military.assignable_front_segments = assignFrontSegmentTheatres(state, segments);
+    state.military.assignable_front_segments = deriveAssignableFrontSegments(frontEdgesForSegments);
     if (state.meta.phase === 'war') {
-        ensureBrigadeFrontAssignments(state);
-        state.military.local_fronts = buildLocalFronts(state);
+        state.military.local_fronts = undefined;
     }
 }
 
