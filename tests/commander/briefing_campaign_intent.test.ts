@@ -124,6 +124,7 @@ function makeMinimalBriefing(overrides: Partial<CommanderBriefing> = {}): Comman
             artillery: 0,
             infantry_only: true,
         },
+        adjacent_corps: [],
         officer_personality: {
             aggression: 0.6,
             caution: 0.3,
@@ -185,7 +186,6 @@ describe('commander briefing campaign intent', () => {
             location_osid: 'op:test:t1',
             corps_id: corpsId,
         } as FormationState;
-
         const state = {
             meta: { turn: 10 },
             military: {
@@ -263,6 +263,152 @@ describe('commander briefing campaign intent', () => {
         expect(briefing.campaign_sync_targets).toEqual(['op:enemy:priority']);
         expect(briefing.must_hold_osids).toEqual(['op:test:campaign_hold', 'op:test:scripted_hold']);
         expect(briefing.corps_exhaustion).toBe(14);
+    });
+
+    it('buildBriefing includes adjacent friendly corps posture summaries', () => {
+        const corpsId = 'test_corps' as FormationId;
+        const adjacentCorpsId = 'adjacent_corps' as FormationId;
+        const distantCorpsId = 'distant_corps' as FormationId;
+        const faction = 'RBiH' as FactionId;
+
+        const sector: CorpsFrontSector = {
+            sector_id: 'sector:test',
+            corps_id: corpsId,
+            faction,
+            opposing_factions: ['RS' as FactionId],
+            edge_ids: ['e1'],
+            sub_segments: [{
+                id: 'ss1',
+                friendly_osids: ['op:test:t1'],
+                enemy_osids: ['op:enemy:e1'],
+                length_edges: 1,
+            }],
+            length_edges: 1,
+            territory_osids: ['op:test:t1', 'op:test:t2'],
+            assigned_brigade_ids: ['b1' as FormationId],
+            reserve_brigade_ids: [],
+            stance: 'defend',
+            sector_stance: 'defend',
+            local_priority: 0,
+            vulnerability: 0,
+            opportunity_score: 0,
+        } as unknown as CorpsFrontSector;
+
+        const brigade: FormationState = {
+            id: 'b1' as FormationId,
+            faction,
+            name: 'Test Brigade',
+            created_turn: 0,
+            status: 'active',
+            assignment: null,
+            kind: 'brigade',
+            personnel: 1800,
+            cohesion: 60,
+            morale: 60,
+            location_osid: 'op:test:t1',
+            corps_id: corpsId,
+        } as FormationState;
+        const adjacentBrigade: FormationState = {
+            id: 'b2' as FormationId,
+            faction,
+            name: 'Adjacent Brigade',
+            created_turn: 0,
+            status: 'active',
+            assignment: null,
+            kind: 'brigade',
+            personnel: 1700,
+            cohesion: 58,
+            morale: 62,
+            location_osid: 'op:adjacent:a',
+            corps_id: adjacentCorpsId,
+        } as FormationState;
+        const distantBrigade: FormationState = {
+            id: 'b3' as FormationId,
+            faction,
+            name: 'Distant Brigade',
+            created_turn: 0,
+            status: 'active',
+            assignment: null,
+            kind: 'brigade',
+            personnel: 1600,
+            cohesion: 59,
+            morale: 61,
+            location_osid: 'op:distant:a',
+            corps_id: distantCorpsId,
+        } as FormationState;
+
+        const state = {
+            meta: { turn: 10 },
+            military: {
+                formations: {
+                    [brigade.id]: brigade,
+                    [adjacentBrigade.id]: adjacentBrigade,
+                    [distantBrigade.id]: distantBrigade,
+                    [corpsId]: { id: corpsId, faction, name: 'Test Corps', status: 'active' },
+                    [adjacentCorpsId]: { id: adjacentCorpsId, faction, name: 'Adjacent Corps', status: 'active' },
+                    [distantCorpsId]: { id: distantCorpsId, faction, name: 'Distant Corps', status: 'active' },
+                },
+                corps_front_sectors: { [sector.sector_id]: sector },
+                corps_command: {
+                    [corpsId]: {
+                        stance: 'balanced',
+                        corps_exhaustion: 14,
+                        active_operations: [],
+                    },
+                    [adjacentCorpsId]: {
+                        stance: 'offensive',
+                        corps_exhaustion: 5,
+                        active_operations: [
+                            { id: 'op:adjacent:1', name: 'Adjacent Op' },
+                            { id: 'op:adjacent:2', name: 'Adjacent Op 2' },
+                        ],
+                    },
+                    [distantCorpsId]: {
+                        stance: 'defensive',
+                        corps_exhaustion: 7,
+                        active_operations: [{ id: 'op:distant:1', name: 'Distant Op' }],
+                    },
+                },
+                must_hold_osids_by_corps: {},
+                sector_intel: {},
+                opsec_sectors: [],
+            },
+        } as unknown as GameState;
+
+        const briefing = buildBriefing(
+            state,
+            corpsId,
+            faction,
+            {
+                adjacency: new Map<string, string[]>([
+                    ['op:test:t1', ['op:test:t2', 'op:adjacent:a']],
+                    ['op:test:t2', ['op:test:t1']],
+                    ['op:adjacent:a', ['op:test:t1', 'op:adjacent:b']],
+                    ['op:adjacent:b', ['op:adjacent:a']],
+                    ['op:distant:a', ['op:distant:b']],
+                    ['op:distant:b', ['op:distant:a']],
+                ]),
+                friendlyOsidsByFaction: new Map([[faction, new Set([
+                    'op:test:t1',
+                    'op:test:t2',
+                    'op:adjacent:a',
+                    'op:adjacent:b',
+                    'op:distant:a',
+                    'op:distant:b',
+                ])]]),
+            } as any,
+            [],
+            null,
+            null,
+            null,
+            null,
+        );
+
+        expect(briefing.adjacent_corps).toEqual([{
+            corps_id: adjacentCorpsId,
+            stance: 'offensive',
+            active_operations: 2,
+        }]);
     });
 
     it('flags a zone as must-hold when its chokepoint disconnects the corps from outside-corps friendly territory', () => {

@@ -241,6 +241,12 @@ export interface EnemyEquipmentSummary {
     readonly infantry_only: boolean;
 }
 
+export interface AdjacentCorpsSummary {
+    readonly corps_id: FormationId;
+    readonly stance: string;
+    readonly active_operations: number;
+}
+
 // ---------------------------------------------------------------------------
 // 12. CommanderState — persistent per corps, lives on CorpsCommandState
 // ---------------------------------------------------------------------------
@@ -303,6 +309,8 @@ export interface CommanderBriefing {
     readonly brigades_above_fatigue_threshold: number;
     /** Summary of heavy equipment across enemy sectors facing this corps. */
     readonly enemy_equipment_summary: EnemyEquipmentSummary;
+    /** Friendly neighboring corps with brigades physically adjacent to this corps area. */
+    readonly adjacent_corps: readonly AdjacentCorpsSummary[];
     readonly officer_personality: OfficerPersonality;
     /** Pre-planned ops for this corps. */
     readonly pre_planned_ops: readonly unknown[];

@@ -244,6 +244,7 @@ This section documents known gaps in what the corps CO `CommanderBriefing` knows
 **Gap:** Corps CO has no visibility into what adjacent friendly corps are doing. A Drina Corps CO planning Kamenica doesn't know that East Bosnian Corps is simultaneously defending Brcko with all available brigades.
 **Impact:** P2. Cannot coordinate timing, share staging zones, or avoid cannibalizing the same pool of brigades.
 **Fix:** Add `adjacent_corps: { corpsId: string; stance: string; active_ops: number }[]` from `state.military.corps_command`.
+**Status (2026-04-02): partially resolved.** `CommanderBriefing` now carries `adjacent_corps`, derived deterministically from active same-faction brigades physically neighboring the corps area, with each summary exposing neighboring `corps_id`, current `stance`, and active-operation count. Remaining work: broader planning/execution logic still treats this as context rather than a hard coordination input; future waves can use it to shape staging conflicts, reserve cannibalization, and synchronized timing.
 
 ### BRIEF-GAP-6: `recent_territory_change` hardcoded to 0
 

@@ -1355,3 +1355,7 @@ In AWWV, a legacy helper can look harmless because it only computes zero deltas,
 ### Hard-disabled mechanics are architecture debt, not neutral safety rails
 
 When a mechanic survives in types, comments, and docs but the live branch is effectively `false && ...`, the repo becomes more misleading than if the mechanic had simply been deleted. In AWWV, treat these as engine-health bugs: either remove the decorative path or replace it with a narrower honest discriminator. The engine `must_hold` repair is the model case — revive the signal only with a corps-boundary-aware test that can explain why it fires.
+
+### Commander intelligence gets fake quickly when local briefings hide neighboring friendly reality
+
+A corps AI that sees enemy pressure but not adjacent friendly corps posture will look “decisive” while still planning in a vacuum. The honest first step is not full multi-corps coordination; it is making neighboring corps stance and active-op load part of the briefing contract. In AWWV, proximity-based adjacent-corps summaries are cheap, deterministic, and much better than pretending local commanders operate alone.

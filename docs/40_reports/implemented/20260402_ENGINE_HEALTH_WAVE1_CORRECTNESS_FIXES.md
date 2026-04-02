@@ -826,3 +826,27 @@ Why this matters:
 - `must_hold` only matters if the engine can derive it honestly instead of either overflagging everything or giving up entirely
 - hard-disabled mechanics are usually worse than missing mechanics because they convince later agents the system is already accounted for
 - this restores one more piece of commander defensive truth without reintroducing the old false-positive corridor panic
+
+## Additional Wave 1 slice: commander briefings now include adjacent friendly corps posture
+
+This checkpoint closes another local-only commander blindspot. The corps commander could already see enemy pressure, campaign intent, fatigue, exhaustion, and heavy equipment, but it still had no structured awareness of what neighboring friendly corps were doing right now.
+
+Implemented:
+- `src/sim/combat/commander/commander_state.ts`
+  - added `AdjacentCorpsSummary` and `CommanderBriefing.adjacent_corps`
+- `src/sim/combat/commander/briefing.ts`
+  - added deterministic collection of adjacent friendly corps based on active same-faction brigades physically neighboring the corps area
+  - each adjacent summary now carries neighboring `corps_id`, current `stance`, and active-operation count
+- `tests/commander/briefing_campaign_intent.test.ts`
+  - added a regression proving the briefing includes nearby friendly corps while excluding distant same-faction corps
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\briefing_campaign_intent.test.ts`
+  - PASS (`14` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- local commanders should not plan as if neighboring friendly corps do not exist
+- “adjacent corps” only becomes real when the briefing contract carries it, not when a design note says it would be nice
+- proximity-based summaries are a cheap honest first step toward cross-corps timing without pretending true synchronized planning already exists

@@ -19432,3 +19432,32 @@ Why this matters:
 - hard-disabled mechanics are dangerous because they leave the architecture looking richer than the runtime really is
 - `must_hold` is only useful if the engine can derive it honestly rather than flooding same-corps geometry with false alarms
 - this restores a real defensive signal to commander zoning without reviving the old overfiring corridor heuristic
+
+---
+### 2026-04-02 — Engine health Wave 1 continued: commander briefings now include adjacent friendly corps posture
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing another local-only commander blindspot.
+
+Implemented:
+- `src/sim/combat/commander/commander_state.ts`
+  - added `AdjacentCorpsSummary` and `CommanderBriefing.adjacent_corps`
+- `src/sim/combat/commander/briefing.ts`
+  - added deterministic collection of adjacent friendly corps based on active same-faction brigades physically neighboring the corps area
+  - each summary now carries neighboring `corps_id`, current `stance`, and active-operation count
+- `tests/commander/briefing_campaign_intent.test.ts`
+  - added a regression proving the briefing includes nearby friendly corps while excluding distant same-faction corps
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded the Wave 1 report with the adjacent-corps briefing checkpoint
+- `docs/20_engineering/AI_STRATEGY_SPECIFICATION.md`
+  - updated `BRIEF-GAP-5` to record the new adjacent-corps context contract and its remaining limits
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\briefing_campaign_intent.test.ts`
+  - PASS (`14` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- local commanders should not plan as if neighboring friendly corps do not exist
+- this turns “adjacent corps posture” from a design note into a real briefing input
+- proximity-based summaries are an honest first step toward cross-corps timing without pretending full coordination already exists
