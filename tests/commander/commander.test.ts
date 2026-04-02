@@ -27,6 +27,7 @@ import type {
     ThreatAssessment,
     CommanderOutput,
 } from '../../src/sim/combat/commander/commander_state.js';
+import type { SupplyStateByOsidReport } from '../../src/state/supply_state_derivation.js';
 import {
     measureCorridorWidth,
     computeCommitmentRatio,
@@ -373,6 +374,52 @@ describe('force_eval', () => {
         // b2 active_defense (high stats, no equip), b3 garrison (depleted)
         expect(forces.tier_counts.garrison).toBeGreaterThanOrEqual(1);
         expect(forces.evaluations).toHaveLength(3);
+    });
+
+    it('evaluateBrigade uses explicit supply state instead of the conservative default', () => {
+        const brigade = makeBrigade({
+            personnel: 2500,
+            cohesion: 100,
+            equipment_class: 'mechanized',
+        });
+
+        const adequate = evaluateBrigade(brigade, null, 'adequate');
+        const critical = evaluateBrigade(brigade, null, 'critical');
+        const unknown = evaluateBrigade(brigade, null);
+
+        expect(adequate.fitness_offense).toBeCloseTo(1.75, 2);
+        expect(critical.fitness_offense).toBeCloseTo(0.875, 3);
+        expect(unknown.fitness_offense).toBeCloseTo(1.4, 2);
+        expect(adequate.fitness_offense).toBeGreaterThan(unknown.fitness_offense);
+        expect(unknown.fitness_offense).toBeGreaterThan(critical.fitness_offense);
+    });
+
+    it('evaluateCorpsForces reads supply_by_osid for brigade fitness', () => {
+        const brigades = [
+            makeBrigade({
+                id: 'b1' as FormationId,
+                personnel: 2500,
+                cohesion: 100,
+                equipment_class: 'mechanized',
+                location_osid: 'op:test:test_1',
+                faction: 'RS',
+            }),
+        ];
+        const zones = [makeZone({ assigned_brigades: ['b1' as FormationId] })];
+        const supplyByOsid: SupplyStateByOsidReport = {
+            schema: 1,
+            turn: 10,
+            factions: [{
+                faction_id: 'RS',
+                by_osid: [{ osid: 'op:test:test_1', state: 'critical' }],
+            }],
+        };
+
+        const forces = evaluateCorpsForces(brigades, zones, supplyByOsid);
+
+        expect(forces.evaluations).toHaveLength(1);
+        expect(forces.evaluations[0]!.fitness_offense).toBeCloseTo(0.875, 3);
+        expect(forces.evaluations[0]!.fitness_defense).toBeCloseTo(0.25, 3);
     });
 });
 

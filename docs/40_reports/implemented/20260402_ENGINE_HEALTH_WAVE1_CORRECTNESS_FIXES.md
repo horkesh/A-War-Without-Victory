@@ -7,6 +7,7 @@ This report records the first implemented slice of the 2026-04-02 engine-health 
 - objective-relevant operation intel confidence
 - authoritative war exhaustion in victory termination
 - more honest corps offensive launch feasibility
+- commander force evaluation consuming `supply_by_osid`
 
 These are `v0.8.0.x` correctness fixes, not feature additions.
 
@@ -60,6 +61,21 @@ Why this is the right contract:
 - a launch screen that ignores obvious defender bonuses will green-light offensives that any competent headquarters would reject
 - this was a real “engine lies to itself” issue, not just tuning
 
+### 4. Commander force evaluation now consumes local supply truth
+
+Files:
+- `src/sim/combat/commander/force_eval.ts`
+- `src/sim/combat/commander/assess.ts`
+
+Change:
+- brigade fitness scoring now reads `supply_by_osid` from the commander briefing when that report is available
+- brigades use the supply state at their actual `location_osid` instead of always inheriting the conservative unknown/default multiplier
+
+Why this is the right contract:
+- the commander briefing already carries local supply truth
+- if force scoring ignores it, the engine is pretending to be more wired than it really is
+- this closes the gap between “we derived supply by OSID” and “the commander actually uses it”
+
 ## Tests added or extended
 
 - `tests/probe_preparation.test.ts`
@@ -68,6 +84,8 @@ Why this is the right contract:
   - added coverage proving political war exhaustion is authoritative
 - `tests/corps_level_operations.test.ts`
   - added coverage proving launch feasibility rejects offensives that only look viable because defender bonuses were ignored
+- `tests/commander/commander.test.ts`
+  - added coverage proving brigade and corps force evaluation consume explicit supply-state truth
 
 ## Verification
 
@@ -82,14 +100,25 @@ node_modules\.bin\vitest.cmd run tests\probe_preparation.test.ts tests\war_termi
 ```
 
 Result:
-- `3` test files passed
-- `61` tests passed
+- `3` targeted engine-health test files passed
+- `61` tests passed in that targeted slice
+
+Additional verification:
+
+```powershell
+node_modules\.bin\vitest.cmd run tests\commander\commander.test.ts
+```
+
+Result:
+- `1` additional commander suite passed
+- `50` tests passed
 
 ## Architectural takeaways
 
 - `Best available` is not always the right truth source; the engine often needs `best relevant`.
 - Shadow state fields are dangerous even when they look harmless.
 - Feasibility logic is part of strategy honesty, not just combat tuning.
+- A derived report that never gets consumed is not a feature yet; it is deferred wiring.
 
 ## Roadmap fit
 
@@ -106,11 +135,13 @@ Canonical owner:
 - operation-preparation owns objective-relevant preparation intel reads
 - political war-exhaustion ledger owns exhaustion truth for victory checks
 - sector-offensive launch feasibility owns honest go/no-go screening
+- commander force evaluation owns brigade-fitness use of `supply_by_osid`
 
 Demoted path:
 - “best record no matter which objective is being attacked”
 - “formation profile exhaustion as de facto war-end authority”
 - “base-power-only launch viability”
+- “local supply report exists but force scoring still uses a fake default”
 
 Player-visible truth:
 - indirect for now; these are engine-honesty fixes that shape later player-facing realism

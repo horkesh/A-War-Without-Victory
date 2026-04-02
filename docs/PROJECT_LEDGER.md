@@ -56,15 +56,20 @@ Implemented the first correctness wave in clean branch `codex/engine-health-wave
   - victory/war termination now treats `state.political.war_exhaustion` as authoritative, with legacy formation-profile exhaustion only as fallback.
 - `src/sim/combat/sector_offensive.ts`
   - launch feasibility now accounts for defender artillery, entrenchment, and terrain defensive multipliers instead of screening attacks from raw attacker/defender base power alone.
+- `src/sim/combat/commander/force_eval.ts` + `src/sim/combat/commander/assess.ts`
+  - commander brigade fitness now consumes `briefing.supply_by_osid` at each brigade's actual `location_osid` instead of always using the conservative unknown/default supply multiplier.
 
 **Regression coverage added/extended:**
 - `tests/probe_preparation.test.ts`
 - `tests/war_termination.test.ts`
 - `tests/corps_level_operations.test.ts`
+- `tests/commander/commander.test.ts`
 
 **Verification:**
 - `vitest run tests\probe_preparation.test.ts tests\war_termination.test.ts tests\corps_level_operations.test.ts`
 - result: `61/61` tests passing
+- `vitest run tests\commander\commander.test.ts`
+- result: `50/50` tests passing
 
 **Meaning:**
 - This is the first implemented slice of the 2026-04-02 engine-health triage.

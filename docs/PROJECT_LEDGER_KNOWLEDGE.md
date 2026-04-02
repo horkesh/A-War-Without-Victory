@@ -1276,3 +1276,5 @@ If victory logic reads `formation profile exhaustion` while the political layer 
 
 ### Launch feasibility is strategy truth, not just combat tuning
 Corps offensive go/no-go checks that ignore obvious defender artillery, entrenchment, and terrain bonuses are not merely “undertuned” â€” they are epistemically wrong. Feasibility screening is part of command honesty. If those defender advantages are known enough to affect real headquarters decisions, they belong in launch screening, not only in later combat resolution.
+### A derived report that nobody consumes is not implemented truth yet
+`supply_by_osid` reaching the commander briefing looked like good architecture, but until brigade fitness actually read local supply state by brigade location, the commander was still making decisions from a fake default. In this repo, always inspect the last consumer in the chain. A data report is only real when the scorer, planner, or UI surface that claims to depend on it actually reads it.

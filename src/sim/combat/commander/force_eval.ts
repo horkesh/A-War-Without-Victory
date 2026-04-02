@@ -9,6 +9,7 @@
  */
 
 import type { FormationId, FormationState } from '../../../state/game_state.js';
+import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../../state/supply_state_derivation.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { resolveEquipmentClass, getEquipmentOffensivePriority } from '../sector_offensive.js';
 import type { ZoneAssessment, ZoneId, BrigadeEvaluation, ForceAssessment } from './commander_state.js';
@@ -51,6 +52,21 @@ function supplyMult(supplyStatus: string | undefined): number {
         case 'critical': return 0.5;
         default: return 0.8; // unknown / not available
     }
+}
+
+function getBrigadeSupplyState(
+    brigade: FormationState,
+    supplyByOsid: unknown,
+): SupplyStateLevel | undefined {
+    if (!brigade.location_osid || !brigade.faction || !supplyByOsid || typeof supplyByOsid !== 'object') {
+        return undefined;
+    }
+    const report = supplyByOsid as Partial<SupplyStateByOsidReport>;
+    const factions = Array.isArray(report.factions) ? report.factions : [];
+    const factionEntry = factions.find(entry => entry?.faction_id === brigade.faction);
+    if (!factionEntry || !Array.isArray(factionEntry.by_osid)) return undefined;
+    const osidEntry = factionEntry.by_osid.find(entry => entry?.osid === brigade.location_osid);
+    return osidEntry?.state;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -152,6 +168,7 @@ export function assignBrigadeToZone(
 export function evaluateCorpsForces(
     brigades: readonly FormationState[],
     zoneAssessments: ZoneAssessment[],
+    supplyByOsid?: unknown,
 ): ForceAssessment {
     // Build a fast lookup: OSID -> ZoneId
     const osidToZone = new Map<string, ZoneId>();
@@ -175,7 +192,11 @@ export function evaluateCorpsForces(
         const loc = brigade.location_osid;
         const currentZone = loc ? (osidToZone.get(loc) ?? null) : null;
 
-        const evaluation = evaluateBrigade(brigade, currentZone);
+        const evaluation = evaluateBrigade(
+            brigade,
+            currentZone,
+            getBrigadeSupplyState(brigade, supplyByOsid),
+        );
         evaluations.push(evaluation);
 
         if (evaluation.is_combat_effective) combatEffective++;
