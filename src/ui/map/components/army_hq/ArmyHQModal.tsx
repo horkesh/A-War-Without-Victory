@@ -16,6 +16,7 @@ import { ExhaustionClock } from './ExhaustionClock';
 import { aggregateEffectiveness } from '../../utils/combatEffectiveness';
 import { getArmyCrest, getArmyName } from '../../utils/factionAssets';
 import { turnToDateString } from '../../utils/formatters';
+import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
 import { WarSummaryContent } from './WarSummaryContent';
 import { RecordsContent } from './RecordsContent';
 import { PersonnelContent } from './PersonnelContent';
@@ -185,7 +186,10 @@ export function ArmyHQModal() {
                             </div>
                             <div className="text-[16px] font-bold uppercase tracking-wide text-text-primary">
                                 {expandedCorpsId
-                                    ? data?.corpsFormations.find(c => c.id === expandedCorpsId)?.name ?? expandedCorpsId
+                                    ? getPlayerSafeCorpsName(
+                                        data?.corpsFormations.find(c => c.id === expandedCorpsId)?.name,
+                                        expandedCorpsId,
+                                    )
                                     : `${getArmyName(faction) ?? faction} MAIN STAFF`
                                 }
                             </div>

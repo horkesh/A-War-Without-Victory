@@ -5,6 +5,11 @@
  */
 import type { LoadedGameState, FactionId } from '../../data/types';
 import { turnToDateString } from '../../utils/formatters';
+import {
+    getPlayerSafeCorpsName,
+    getPlayerSafeDecisionTitle,
+    getPlayerSafeEnclaveName,
+} from '../../utils/playerSafeText';
 
 // ── Types ────────────────────────────────────────────────────────────
 export type BriefingTarget =
@@ -60,6 +65,10 @@ export function generateBriefing(
     const pendingOfficerEvents = (state.pendingOfficerEvents ?? []).filter(
         (e) => e.faction === faction && !e.acknowledged,
     );
+    const getCorpsLabel = (corpsId: string | null | undefined): string => {
+        const corps = corpsFormations.find((entry) => entry.id === corpsId);
+        return getPlayerSafeCorpsName(corps?.name, corpsId);
+    };
 
     // ── CRITICAL ─────────────────────────────────────────────────────
 
@@ -70,7 +79,7 @@ export function generateBriefing(
     for (const decision of pendingDecisions) {
         items.push({
             id: id(), severity: 'critical', category: 'event_decision',
-            title: decision.event_title ?? `Decision: ${decision.event_id}`,
+            title: getPlayerSafeDecisionTitle(decision.event_title),
             detail: `${decision.response_options?.length ?? 0} options — awaiting your response`,
             target: { type: 'none' },
         });
@@ -81,7 +90,7 @@ export function generateBriefing(
         if (enc.supply_state === 'critical' && enc.faction === faction) {
             items.push({
                 id: id(), severity: 'critical', category: 'supply',
-                title: `${enc.display_name ?? enclaveId} supply critical`,
+                title: `${getPlayerSafeEnclaveName(enc.display_name)} supply critical`,
                 detail: `Enclave resilience ${enc.resilience ?? 0} — isolated ${enc.isolation_turns ?? 0} turns`,
                 target: { type: 'none' },
             });
@@ -95,7 +104,7 @@ export function generateBriefing(
         if (!corpsHasSectors && corpsBrigades.length > 0) {
             items.push({
                 id: id(), severity: 'critical', category: 'sectors',
-                title: `${corps.name ?? corps.id} has no front sectors assigned`,
+                title: `${getPlayerSafeCorpsName(corps.name, corps.id)} has no front sectors assigned`,
                 detail: `${corpsBrigades.length} brigades without sector assignment`,
                 corpsId: corps.id,
                 target: { type: 'corps', corpsId: corps.id },
@@ -137,7 +146,7 @@ export function generateBriefing(
         if (avgCohesion < 40) {
             items.push({
                 id: id(), severity: 'critical', category: 'cohesion',
-                title: `${corps.name ?? corps.id} cohesion critical (${Math.round(avgCohesion)})`,
+                title: `${getPlayerSafeCorpsName(corps.name, corps.id)} cohesion critical (${Math.round(avgCohesion)})`,
                 detail: `${corpsBrigades.length} brigades, avg cohesion ${Math.round(avgCohesion)}`,
                 corpsId: corps.id,
                 target: { type: 'corps', corpsId: corps.id },
@@ -180,7 +189,7 @@ export function generateBriefing(
         }
     }
     for (const [corpsId, count] of Object.entries(ineffByCorps)) {
-        const corpsName = corpsFormations.find((c) => c.id === corpsId)?.name ?? corpsId;
+        const corpsName = getCorpsLabel(corpsId);
         items.push({
             id: id(), severity: 'warning', category: 'personnel',
             title: `${count} brigade${count > 1 ? 's' : ''} combat ineffective in ${corpsName}`,

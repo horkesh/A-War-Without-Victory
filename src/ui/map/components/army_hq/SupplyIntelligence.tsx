@@ -8,6 +8,7 @@
  */
 import type { LoadedGameState, FormationView } from '../../data/types';
 import { turnToDateString } from '../../utils/formatters';
+import { getPlayerSafeEnclaveName } from '../../utils/playerSafeText';
 
 import {
     MAINTENANCE_DRAIN_PER_FORMATION,
@@ -101,7 +102,7 @@ export function getEnclaveStatuses(
         if (enc.faction !== faction) continue;
         statuses.push({
             id,
-            displayName: enc.display_name ?? id,
+            displayName: getPlayerSafeEnclaveName(enc.display_name),
             resilience: Math.round(enc.resilience ?? 0),
             maxResilience: 50, // ENCLAVE_CONFIG max
             siegeTurns: Math.round(enc.isolation_turns ?? 0),

@@ -1375,3 +1375,6 @@ Computing `recent_territory_change` in theater assessment is not enough by itsel
 ### Fence half-dead legacy helpers with static tests before they get reused
 
 If a legacy helper still has one tolerated compatibility consumer, future refactors will be tempted to import it again because it “already works.” In AWWV, that is exactly when a dead authority path comes back to life. Prefer a small static regression gate that names the allowed consumer set explicitly, so the next accidental import fails fast instead of silently reviving old truth.
+### Player-facing fallback strings are where raw engine ids sneak back in
+
+The obvious primary labels can look clean while Army HQ headings, reserve requests, briefing alerts, or enclave summaries still do `?? corpsId` or `?? enclaveId`. In AWWV, treat fallback text as a governed player-safety surface: use one tiny pure helper layer and neutral fallbacks like `This corps`, `Friendly enclave`, `Assigned command`, and `Assigned brigade` instead of reprinting engine identifiers.

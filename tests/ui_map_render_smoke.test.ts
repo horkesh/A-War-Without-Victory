@@ -17,6 +17,12 @@ import {
   getPlayerVisibleFactions,
   getPlayerVisibleOperations,
 } from '../src/ui/shared/playerFacingLabels.js';
+import {
+  getPlayerSafeBrigadeName,
+  getPlayerSafeCorpsName,
+  getPlayerSafeDecisionTitle,
+  getPlayerSafeEnclaveName,
+} from '../src/ui/map/utils/playerSafeText.js';
 import type { LoadedGameState } from '../src/ui/map/data/types.js';
 import type { FeatureCollection } from 'geojson';
 
@@ -274,6 +280,15 @@ describe('Tactical map render smoke', () => {
     expect(getPlayerFacingCorpsName('arbih_5th_corps', new Map())).toBe('This corps');
     expect(getPlayerFacingSectorName('sector:arbih_5th:0', [])).toBe('Assigned sector');
     expect(getAssignedCommandLabel('arbih_5th_corps', new Map())).toBe('Assigned command');
+  });
+
+  it('player-safe text helpers replace internal fallback ids with neutral labels', () => {
+    expect(getPlayerSafeCorpsName('arbih_3rd_corps', 'arbih_3rd_corps')).toBe('3rd Corps');
+    expect(getPlayerSafeCorpsName('vrs_1st_krajina', 'vrs_1st_krajina')).toBe('1st Krajina');
+    expect(getPlayerSafeCorpsName(undefined, 'arbih_5th_corps')).toBe('This corps');
+    expect(getPlayerSafeDecisionTitle(undefined)).toBe('Pending decision');
+    expect(getPlayerSafeEnclaveName(undefined)).toBe('Friendly enclave');
+    expect(getPlayerSafeBrigadeName(undefined)).toBe('Assigned brigade');
   });
 
   it('player-facing operation filtering hides non-player factions from omniscient state', () => {

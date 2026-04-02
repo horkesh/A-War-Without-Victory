@@ -940,3 +940,41 @@ Why this matters:
 - the most dangerous legacy code is the kind that still looks reusable enough for the next fix to pull it back in
 - static regression gates are cheaper than another archaeological cleanup after the wrong helper starts shaping runtime truth again
 - this is the kind of small hardening step that keeps the repo honest over time instead of relying on memory
+
+## Additional Wave 1 slice: Army HQ player-facing fallback labels no longer leak raw engine ids
+
+This checkpoint drains another kind of swamp: secondary player-facing shells that still fell back to raw engine ids when a display name was missing. The leaks were not in the main happy-path labels, but in Army HQ summary cards, situation briefings, reserve requests, and enclave fallback strings. That is exactly where future Claude edits tend to reintroduce `?? corpsId` style mistakes.
+
+Implemented:
+- `src/ui/map/utils/formatters.ts`
+  - hardened `formatCorpsDisplayName(...)` so raw corps ids no longer surface unchanged in player-facing fallback paths
+- `src/ui/map/utils/playerSafeText.ts`
+  - added a small pure helper layer for player-safe corps, enclave, decision, and brigade fallback labels
+- `src/ui/map/components/army_hq/ArmyHQModal.tsx`
+  - expanded-corps heading now uses a player-safe corps fallback instead of echoing the raw corps id
+- `src/ui/map/components/army_hq/SituationBriefing.tsx`
+  - pending decisions, enclave alerts, corps-without-sectors, low-cohesion warnings, and ineffective-brigade warnings now use player-safe fallback labels
+- `src/ui/map/components/ArmyReservePanel.tsx`
+  - reserve request corps names now fall back to `Assigned command`
+  - suggested brigade fallback now uses `Assigned brigade`
+  - reserve base OSIDs are humanized before display
+- `src/ui/map/components/army_hq/ForceReadiness.tsx`
+  - corps readiness rows now use player-safe corps naming
+- `src/ui/map/components/army_hq/SupplyIntelligence.tsx`
+  - enclave fallback labels now render as `Friendly enclave`
+- `tests/ui_map_render_smoke.test.ts`
+  - added focused regressions proving the player-safe text helpers return neutral labels rather than raw ids
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts`
+  - PASS (`12` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Environment note:
+- `npm.cmd run desktop:map:build` currently fails in `F:\AWWV_exec_clean` because the clean worktree does not have `@vitejs/plugin-react` available. This is an environment/dependency issue in the isolated lane, not a regression introduced by this slice.
+
+Why this matters:
+- raw ids usually leak back into products through fallback strings, not through the obvious primary labels
+- once player-safe text rules live in one pure helper, future shells are less likely to improvise their own `?? id` leak
+- this turns a recurring UI hygiene problem into a small, testable contract instead of another vibes-based cleanup

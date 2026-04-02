@@ -10,6 +10,9 @@ import { useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { useIPC } from '../desktop/useIPC';
 import { getPanelRailStyle } from './panelRail';
+import { getPlayerFacingCorpsName } from '../../shared/playerFacingLabels';
+import { humanizeOsid } from '../utils/osidDisplayName';
+import { getPlayerSafeBrigadeName } from '../utils/playerSafeText';
 
 const REASON_LABELS: Record<string, string> = {
     offensive_support: 'Offensive Support',
@@ -60,9 +63,12 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
     // Tracker data
     const tracker = loadedGameState.eliteBrigadeTracker ?? {};
     const activeLoans = elites.filter((brigade) => brigade.eliteLoanState?.on_loan);
+    const corpsNameById = loadedGameState.formations
+        .filter((formation) => formation.kind === 'corps' || formation.kind === 'corps_asset')
+        .map((formation) => ({ id: formation.id, name: formation.name }));
 
     function getCorpsName(corpsId: string): string {
-        return loadedGameState!.formations.find(f => f.id === corpsId)?.name ?? corpsId;
+        return getPlayerFacingCorpsName(corpsId, corpsNameById, 'Assigned command');
     }
 
     async function handleApprove(corpsId: string, brigadeId: string | null) {
@@ -179,7 +185,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                         )}
                                         {!ls.on_loan && ls.base_osid && (
                                             <div className="text-[10px] text-text-secondary">
-                                                Base: {ls.base_osid}
+                                                Base: {humanizeOsid(ls.base_osid)}
                                             </div>
                                         )}
                                     </button>
@@ -255,7 +261,9 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                     {req.suggested_brigade_id && (
                                         <div className="text-[10px] text-text-secondary">
                                             Suggested: <span className="text-text-primary">{
-                                                loadedGameState.formations.find(f => f.id === req.suggested_brigade_id)?.name ?? req.suggested_brigade_id
+                                                getPlayerSafeBrigadeName(
+                                                    loadedGameState.formations.find(f => f.id === req.suggested_brigade_id)?.name,
+                                                )
                                             }</span>
                                         </div>
                                     )}

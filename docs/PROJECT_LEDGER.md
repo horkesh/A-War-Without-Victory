@@ -43,6 +43,49 @@ Engine-derived chokepoint detection (`engineMustHold`) disabled with `false &&`.
 - `integration_anomaly.test.ts` — 3 pass
 
 ---
+### 2026-04-02 — Engine health Wave 1 continued: Army HQ player-facing fallback labels no longer leak raw engine ids
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, draining a recurring player-truth swamp in secondary UI shells.
+
+Implemented:
+- `src/ui/map/utils/formatters.ts`
+  - hardened `formatCorpsDisplayName(...)` so raw corps ids no longer surface unchanged in player-facing fallback paths
+- `src/ui/map/utils/playerSafeText.ts`
+  - added a tiny pure helper layer for player-safe corps, enclave, decision, and brigade fallback labels
+- `src/ui/map/components/army_hq/ArmyHQModal.tsx`
+  - expanded-corps heading now uses a player-safe corps fallback
+- `src/ui/map/components/army_hq/SituationBriefing.tsx`
+  - pending decisions, enclave alerts, corps-without-sectors, low-cohesion warnings, and ineffective-brigade warnings now use player-safe fallback labels
+- `src/ui/map/components/ArmyReservePanel.tsx`
+  - reserve request corps names now fall back to `Assigned command`
+  - suggested brigade fallback now uses `Assigned brigade`
+  - reserve base OSIDs are humanized before display
+- `src/ui/map/components/army_hq/ForceReadiness.tsx`
+  - corps readiness rows now use player-safe corps naming
+- `src/ui/map/components/army_hq/SupplyIntelligence.tsx`
+  - enclave fallback labels now render as `Friendly enclave`
+- `tests/ui_map_render_smoke.test.ts`
+  - added focused regressions proving the player-safe text helpers return neutral labels instead of raw ids
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded with this player-facing fallback-label checkpoint
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+  - recorded the fallback-string blindspot so later agents treat it as a first-class player-truth concern
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts`
+  - PASS (`12` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Environment note:
+- `npm.cmd run desktop:map:build` currently fails in the clean worktree because `@vitejs/plugin-react` is unavailable there. This is an environment/dependency gap in the isolated lane, not a regression introduced by this slice.
+
+Why this matters:
+- raw ids usually leak back into products through fallback strings, not through the obvious primary labels
+- once player-safe text rules live in one pure helper, future shells are less likely to improvise their own `?? id` leak
+- this turns a recurring UI hygiene problem into a small, testable contract instead of another vibes-based cleanup
+
+---
 ### 2026-04-02 — Engine health Wave 1 continued: settlement dossiers now filter timeline truth
 
 Continued the clean-lane player-knowledge sweep in `F:\AWWV_exec_clean`, closing the next leak seam after tooltip cleanup: selected-settlement dossiers were already filtering some visible lists, but still forwarded raw omniscient operation history and brigade movement logs into timeline surfaces.
