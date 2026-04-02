@@ -161,18 +161,18 @@ export class NewspaperModal {
             return a.new_officer < b.new_officer ? -1 : a.new_officer > b.new_officer ? 1 : 0;
         });
         for (const r of sortedReplacements) {
-            const name = nameById.get(r.new_officer) ?? r.new_officer;
+            const name = nameById.get(r.new_officer) ?? getPlayerSafeOfficerName(null);
             const corps = corpsName(r.corps_id);
             lines.push(`[Turn ${report?.turn ?? '?'}] ${name} assigned to ${corps}.`);
         }
         const casualties = succession.casualties ?? [];
         for (const id of [...casualties].sort((a, b) => a < b ? -1 : a > b ? 1 : 0)) {
-            const name = nameById.get(id) ?? id;
+            const name = nameById.get(id) ?? getPlayerSafeOfficerName(null);
             lines.push(`[Turn ${report?.turn ?? '?'}] ${name} killed in action.`);
         }
         const departures = succession.departures ?? [];
         for (const id of [...departures].sort((a, b) => a < b ? -1 : a > b ? 1 : 0)) {
-            const name = nameById.get(id) ?? id;
+            const name = nameById.get(id) ?? getPlayerSafeOfficerName(null);
             lines.push(`[Turn ${report?.turn ?? '?'}] ${name} retired.`);
         }
         return lines;

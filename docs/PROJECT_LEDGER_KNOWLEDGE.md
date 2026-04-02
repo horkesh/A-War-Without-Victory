@@ -1496,3 +1496,6 @@ In AWWV, peace/diplomacy surfaces often want political names while event/combat 
 ### Adapter-side `name ?? id` fallbacks are product policy, not harmless plumbing
 
 In AWWV, once a data adapter or loader chooses to fall back to a raw id, every downstream screen inherits that choice. Facilities, routes, movement logs, historical events, and peace-plan titles all proved that player-facing leakage can start in the adapter layer long before React renders anything. Humanize or neutralize those fallbacks at the source instead of expecting every shell to clean them up later.
+### Prose builders and narrative outputs need the same player-safe naming contract as UI panels
+
+In AWWV, NewspaperModal, Chronicle builders, and Warroom data extractors are not “secondary output”; they are part of the product shell. If they fall back to officer ids, event ids, or formation ids, the repo still speaks like tooling even after the visible panels are cleaned up. Route prose generation through the same player-safe helpers as the UI.

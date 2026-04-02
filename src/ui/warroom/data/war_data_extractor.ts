@@ -25,7 +25,11 @@ import type {
     TrendDirection,
 } from '../../../state/game_state.js';
 import { getEnemyFactions, personnelToStrengthCategory } from './fog_of_war.js';
-import { getPlayerSafeBrigadeName, getPlayerSafeCorpsName } from '../../map/utils/playerSafeText.js';
+import {
+    getPlayerSafeBrigadeName,
+    getPlayerSafeCorpsName,
+    getPlayerSafeOfficerName,
+} from '../../map/utils/playerSafeText.js';
 
 // ---------------------------------------------------------------------------
 // Snapshot sub-interfaces
@@ -723,7 +727,7 @@ function extractOfficersByFaction(
         const os = officers[id] as { status?: string; assigned_corps_id?: string | null; acting_commander?: boolean } | undefined;
         list.push({
             id,
-            name: typeof (d as { name?: string }).name === 'string' ? (d as { name: string }).name : id,
+            name: getPlayerSafeOfficerName(typeof (d as { name?: string }).name === 'string' ? (d as { name: string }).name : null),
             rank: typeof (d as { rank?: string }).rank === 'string' ? (d as { rank: string }).rank : 'corps_commander',
             status: typeof os?.status === 'string' ? os.status : 'active',
             assigned_corps_id: typeof os?.assigned_corps_id === 'string' ? os.assigned_corps_id : null,

@@ -20401,3 +20401,28 @@ Why this matters:
 - adapter-side `name ?? id` fallbacks are one of the most persistent ways for raw engine truth to leak back into the UI
 - economy shells are especially vulnerable because bracketed faction badges can make debug codes look official
 - this slice makes the player-facing data pipeline more truthful before the broader architecture reshape
+### 2026-04-02 - Player-safe Warroom prose hardening
+
+Hardened the remaining Warroom/Chronicle prose generators so they stop falling back to raw ids in officer and event text.
+
+Implemented:
+- `src/ui/warroom/components/NewspaperModal.ts`
+  - officer succession/casualty/retirement lines now fall back to `An officer`
+- `src/ui/warroom/data/war_data_extractor.ts`
+  - officer extraction now uses the shared player-safe officer helper
+- `src/ui/map/components/chronicle/generateChronicleEntries.ts`
+  - formation/event fallback titles now humanize ids
+  - military detail badges now use player-safe military faction labels
+- `docs/40_reports/implemented/20260402_PLAYER_SAFE_WARROOM_PROSE_HARDENING.md`
+  - documented the slice
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`26` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- prose generators are still player-facing authority surfaces
+- older Warroom/Chronicle text is exactly where raw ids tend to survive after the main UI is cleaned up
+- this keeps the repo’s player-facing voice consistent across shell, reports, and narrative output
