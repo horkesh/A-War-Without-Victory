@@ -1,7 +1,7 @@
 # AWWV Calibration Master Reference
 
 **Purpose:** Persistent lessons-learned record for war-phase calibration (April 1992 onward). 40w primary, 104w force trajectory.
-**Updated:** 2026-04-01 (n1289 — 7 combat factor gaps + sector merge guard; 93.2% area-weighted, 25/25 anchors — first ever)
+**Updated:** 2026-04-02 (n1302 — Commander Intelligence Overhaul n1294–n1301; **NEW ATH: 93.7%, 25/25, 6/6**)
 
 ## Review Methodology
 
@@ -14,6 +14,35 @@ Every calibration run is reviewed by a two-tier expert panel before any action i
 `/gap-finder` *(unique authority: may dispatch agents + question specialists directly)*, `/game-designer`, `/corps-army-commander`, `/modern-wargame-expert`, `/canon-compliance-reviewer`
 
 **Orchestrator** synthesizes, gives go/no-go, updates this file + PROJECT_LEDGER.md.
+
+## n1302 (2026-04-02) — NEW ATH
+- **93.7% area-weighted. 25/25 anchors. 6/6 benchmarks. Hash: 0cf989330bd36cc8.**
+- Run dir: `apr1992_definitive_40w__d452d2a10f3d69af__w40_n1294`
+- Changes: Commander Intelligence Overhaul n1294–n1301 — must_hold wiring (Brcko/Doboj 1.5× garrison), org readiness gate, op scale cap by main_effort_count, enemy_concentration_zones from intel, multi-brigade coordination ±4%/pt officer competence, strength-based opportunity target ranking.
+- gradacac_2 **PASS** (was failing n1290–n1293, recovered). vozuca_2 **PASS** (was failing n1293, recovered).
+- DRINA regressed ~1.5pp (86.6%) — RS overcapturing Bratunac/Foča/Rogatica/Srebrenica/Višegrad/Vlasenica. Possible cause: must_hold corridor changes freed Drina Corps brigades.
+- ZEA rate elevated: 47% (was ~39% at n1281). Op-scale cap narrowing eligible attacker pools may be a factor.
+- Order counts identical to n1289: RS=62, RBiH=22, HRHB=7, 91 total, 32 weeks with orders.
+- **P1 open:** Casualty ratio discrepancy — `attack_resolution` reports 0.814 att:def, `anomaly_detection` reports 0.63. Source mismatch unresolved.
+- **P1 open:** 112 adjacent-uncontested OSIDs (pre-existing brigade concentration thinning).
+- **WOG verdict: APPROVE WITH CONCERNS.** No P0 blockers.
+- Commits: c63c2313 (n1294–n1296) + b0d06442 (n1297) + 6f6f3c52 (n1298) + 0f3b05df (n1299) + ce6f2b97 (n1300) + fe7c5630 (n1301).
+
+---
+
+## n1293 (2026-04-02)
+- **~93.2% area-weighted. 23/25 anchors (gradacac_2 pre-existing + vozuca_2 NEW). 6/6 benchmarks. Hash: 594bffac65edb783.**
+- Change: `preparation_max_turns = max(getPreparationMaxTurns(aggressiveness), op.planning_duration ?? 0)` in `tickPreparation()`. Pre-planned ops now honour their declared window as a minimum floor. `planning_duration` 5→7 on Op Teočak. `arbih_120th_liberation_black_swans` restored to axis.
+- Op Teočak fires at w22 (7 turns from injection). `was_concentrated: true`. rastosnica_2 = RBiH. ✓
+- New FAIL: vozuca_2 (RS→RBiH). Root cause: seam between arbih_2nd_corps and arbih_3rd_corps AoR. Op Teočak's 4-week delay freed 2nd Corps brigades during w18–22, which auto-generated ops targeting vozuca_2 (on the 2nd/3rd Corps boundary). Under investigation.
+- Assembly zone corps-wide expansion (n1291) confirmed inert — identical hash, reverted.
+- **Doboj/Ozren investigation (2026-04-02):** Full panel analysis of boljanic_2 persistent FAIL and Ozren pocket collapse.
+  - **boljanic_2 (Doboj city) root cause confirmed:** `arbih_3rd_corps` auto-generates ops that pick up `boljanic_2` via adjacency walk from `petrovo_2` (Gračanica — RS-held Ozren foothold). `findTargetOsidsFromMunicipalities()` has no depth filter. `vrs_1st_krajina` directive has no `hold_osids` for Doboj OSIDs — garrison budget gets drained north by Posavina corridor ops. `rs_2nd_armored` brigade displaced to petrovo_2 (856 pers, morale 35) — only `rs_1st_krnjin` defending boljanic_2 against 15-brigade ARBiH operation; falls turn 31.
+  - **Ozren pocket collapse (all 4 RS positions flip):** `petrovo_2` (1st Ozren home), `brijesnica_donja_2` (2nd Ozren home), `vozuca_2` (4th Ozren home) all flip RBiH. Historical: Ozren pocket fell September 1995 (Operation Farz) — well after 40w window. Falling by w31 is a ~3-year acceleration. Root cause: no dedicated garrison protection for the 4 Ozren brigades' home OSIDs.
+  - **Anchor gap:** `petrovo_2` and `brijesnica_donja_2` are NOT in `HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992`. Only `vozuca_2` is anchored. Fix direction: add both as `expected_controller: 'RS'` anchors.
+  - **Fix directions:** (1) Add Doboj OSIDs to `vrs_1st_krajina` `hold_osids` directive. (2) Add `petrovo_2 → RS` and `brijesnica_donja_2 → RS` to anchor array in `scenario_runner.ts`. (3) Fix seam between 2nd/3rd Corps for vozuca_2.
+
+---
 
 ## n1289 (2026-04-01)
 - **93.2% area-weighted. 25/25 anchors (HISTORIC FIRST — all passing including brcko). 6/6 benchmarks. Hash: a95995f2b1ab899c. Commit: a61a8344.**
