@@ -6,6 +6,7 @@ import { buildCorpsColorMap } from '../map/builders/buildCorpsFrontLinesGeoJSON'
 import { collectSectorFriendlyOsids } from '../utils/sectorUtils';
 import { getOperationId, getOperationPhaseBadgeClass } from '../utils/operations';
 import { getPanelRailStyle } from './panelRail';
+import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { useIPC } from '../desktop/useIPC';
 
 /** Strength class badge with color coding. */
@@ -313,7 +314,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
             </div>
           </div>
           <div className="text-neutral-600 mt-2 text-[10px] space-y-0.5 uppercase">
-            <div><span className="font-bold text-neutral-800">FACTION:</span> <span className={FACTION_COLORS[sector.faction] ?? 'text-neutral-800'}>{sector.faction}</span></div>
+            <div><span className="font-bold text-neutral-800">FACTION:</span> <span className={FACTION_COLORS[sector.faction] ?? 'text-neutral-800'}>{getPlayerSafeMilitaryFactionName(sector.faction)}</span></div>
             <div><span className="font-bold text-neutral-800">CORPS STANCE:</span> {corpsStance}</div>
             <div><span className="font-bold text-neutral-800">SECTOR STANCE:</span> {sectorStanceLabel}{currentStanceSource === 'player' ? ' (MANUAL)' : ''}</div>
             <div>

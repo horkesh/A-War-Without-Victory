@@ -273,3 +273,8 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - Attack confirmation now shows player-safe military faction names for attacker and defender.
 - Event modal and EventDecision modal now use player-safe political faction naming in effect summaries and headers.
 - See `docs/40_reports/implemented/20260402_PLAYER_SAFE_EVENT_AND_ATTACK_LABELS.md`.
+
+## 2026-04-02 - Player-safe rail panel labels
+
+- Operation detail, corps detail, and sector dossier rails now use player-safe military faction naming in visible identity lines.
+- See `docs/40_reports/implemented/20260402_PLAYER_SAFE_RAIL_PANEL_LABELS.md`.

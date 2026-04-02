@@ -67,6 +67,18 @@ describe('buildOpordDisplayModel', () => {
             new URL('../src/ui/map/components/EventDecisionModal.tsx', import.meta.url),
             'utf8',
         );
+        const operationDetailSource = readFileSync(
+            new URL('../src/ui/map/components/OperationDetail.tsx', import.meta.url),
+            'utf8',
+        );
+        const corpsDetailSource = readFileSync(
+            new URL('../src/ui/map/components/CorpsDetail.tsx', import.meta.url),
+            'utf8',
+        );
+        const sectorPanelSource = readFileSync(
+            new URL('../src/ui/map/components/CorpsFrontPanel.tsx', import.meta.url),
+            'utf8',
+        );
 
         expect(oobSource).toContain('getPlayerSafeMilitaryFactionName(faction)');
         expect(oobSource).toContain('getPlayerSafeMilitaryFactionName(op.faction)');
@@ -77,5 +89,8 @@ describe('buildOpordDisplayModel', () => {
         expect(eventSource).toContain('getPlayerSafePoliticalFactionName(effect.faction)');
         expect(eventSource).toContain("getPlayerSafePoliticalFactionName('RBiH')");
         expect(decisionSource).toContain('getPlayerSafePoliticalFactionName(decision.faction)');
+        expect(operationDetailSource).toContain('getPlayerSafeMilitaryFactionName(op.faction)');
+        expect(corpsDetailSource).toContain('getPlayerSafeMilitaryFactionName(corpsFormation.faction)');
+        expect(sectorPanelSource).toContain('getPlayerSafeMilitaryFactionName(sector.faction)');
     });
 });

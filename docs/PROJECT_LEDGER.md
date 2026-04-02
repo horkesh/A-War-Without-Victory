@@ -20926,3 +20926,16 @@ Why this matters:
 - Docs:
   - `docs/40_reports/implemented/20260402_PLAYER_SAFE_EVENT_AND_ATTACK_LABELS.md`
   - `docs/40_reports/GUI_MASTER.md`
+
+## 2026-04-02 - Player-safe rail panel labels
+
+- Worktree/branch: `F:\AWWV_exec_clean` on `codex/engine-health-wave1`
+- Cleaned raw faction-id labels out of the tactical rail detail panels.
+- `OperationDetail.tsx`, `CorpsDetail.tsx`, and `CorpsFrontPanel.tsx` now use player-safe military faction naming in visible identity/header lines.
+- Extended `tests/ui_opord_player_safe_labels.test.ts` to guard the rail panel contract.
+- Verification:
+  - `node_modules\.bin\vitest.cmd run tests\ui_opord_player_safe_labels.test.ts tests\warroom_player_visibility.test.ts tests\ui_shell_navigation.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_PLAYER_SAFE_RAIL_PANEL_LABELS.md`
+  - `docs/40_reports/GUI_MASTER.md`

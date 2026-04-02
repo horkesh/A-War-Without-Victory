@@ -1565,3 +1565,7 @@ OOB headings, operation subtitles, and briefing headers are core shell surfaces.
 ### Event and attack modals are player shells, not debug/status readouts
 
 Attack confirmations, event queues, and decision modals should use player-safe military or political faction language just like any larger panel. These are high-attention decision surfaces, so raw faction ids leak product tone fast.
+
+### Tactical rail detail panels must obey the same player-language contract as modals
+
+Operation detail, corps detail, and sector dossier rails are part of the live command shell. They should not keep raw faction ids just because they feel more technical than the toolbar or OOB.

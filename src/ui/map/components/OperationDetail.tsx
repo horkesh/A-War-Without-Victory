@@ -7,6 +7,7 @@ import { getFormationCommander } from '../utils/officerUtils';
 import { OfficerProfile } from './OfficerProfile';
 import { getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
 import { findPlayerFacingOperationByKey } from '../../shared/playerVisibility';
+import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 
 function PhaseBadge({ phase }: { phase: string }) {
   const cls =
@@ -105,7 +106,7 @@ export function OperationDetail({ railSlot }: OperationDetailProps) {
         <div className="mb-3">
           <div className="font-semibold text-text-primary text-[13px]">{op.name}</div>
           <div className="text-text-secondary mt-0.5 flex items-center gap-2 flex-wrap">
-            <span className={FACTION_COLORS[op.faction] ?? 'text-text-primary'}>{op.faction}</span>
+            <span className={FACTION_COLORS[op.faction] ?? 'text-text-primary'}>{getPlayerSafeMilitaryFactionName(op.faction)}</span>
             <span>·</span>
             <span>{op.corps_name}</span>
           </div>

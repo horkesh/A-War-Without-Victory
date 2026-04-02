@@ -14,6 +14,7 @@ import { getFormationCommander } from '../utils/officerUtils';
 import { OfficerProfile } from './OfficerProfile';
 import { BrigadeRow } from './BrigadeRow';
 import { TabBar } from './TabBar';
+import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
 import { aggregateEffectiveness } from '../utils/combatEffectiveness';
 import { Icon } from './icons/Icon';
@@ -181,7 +182,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
           <div className="p-3 space-y-3">
             <div className="text-text-secondary text-[11px]">
               <span className={FACTION_COLORS[corpsFormation.faction] ?? 'text-text-primary'}>
-                {corpsFormation.faction}
+                {getPlayerSafeMilitaryFactionName(corpsFormation.faction)}
               </span>
               {' · '}
               <span className="capitalize">{corpsFormation.corpsStance ?? 'unknown'}</span>
