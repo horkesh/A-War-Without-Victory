@@ -619,6 +619,7 @@ describe('plan', () => {
             intel_data: null,
             doctrine_stance: 'balanced',
             corps_stance: 'balanced',
+            corps_exhaustion: 0,
             officer_personality: defaultPersonality,
             pre_planned_ops: [],
             previous_state: null,
@@ -679,6 +680,37 @@ describe('plan', () => {
 
         // Only 1 surplus, MIN_BRIGADES_FOR_PLAN = 3
         expect(result.action).toBe('none');
+        expect(result.plan).toBeNull();
+    });
+
+    it('does not create a new offensive plan when corps exhaustion is above the launch threshold', () => {
+        const zoneId = 'zone:test_corps:0' as ZoneId;
+        const brigIds = ['b1', 'b2', 'b3', 'b4'].map(id => id as FormationId);
+        const zones = [makeZone({
+            zone_id: zoneId,
+            posture: 'projecting',
+            front_edge_count: 10,
+            enemy_adjacent_osids: ['op:enemy:e1', 'op:enemy:e2'],
+            surplus_brigades: brigIds,
+            assigned_brigades: brigIds,
+        })];
+        const evals = brigIds.map(id => makeEval({
+            brigade_id: id,
+            current_zone: zoneId,
+            tier: 'main_effort',
+            is_combat_effective: true,
+            is_disrupted: false,
+        }));
+        const forces = makeForces(evals, zones);
+
+        const briefing = makeMinimalBriefing({
+            corps_exhaustion: 31,
+        });
+
+        const result = managePlan(briefing, zones, forces, evals, null, 10);
+
+        expect(result.action).toBe('none');
+        expect(result.reason).toContain('corps exhaustion');
         expect(result.plan).toBeNull();
     });
 
@@ -1166,6 +1198,7 @@ describe('commander_loop', () => {
             intel_data: null,
             doctrine_stance: 'balanced',
             corps_stance: 'balanced',
+            corps_exhaustion: 0,
             officer_personality: defaultPersonality,
             pre_planned_ops: [],
             previous_state: null,

@@ -115,6 +115,7 @@ function makeMinimalBriefing(overrides: Partial<CommanderBriefing> = {}): Comman
         intel_data: null,
         doctrine_stance: 'balanced',
         corps_stance: 'balanced',
+        corps_exhaustion: 0,
         officer_personality: {
             aggression: 0.6,
             caution: 0.3,
@@ -185,6 +186,7 @@ describe('commander briefing campaign intent', () => {
                 corps_command: {
                     [corpsId]: {
                         stance: 'balanced',
+                        corps_exhaustion: 14,
                         active_operations: [],
                     },
                 },
@@ -252,6 +254,7 @@ describe('commander briefing campaign intent', () => {
         expect(briefing.campaign_sync_role).toBe('main_effort');
         expect(briefing.campaign_sync_targets).toEqual(['op:enemy:priority']);
         expect(briefing.must_hold_osids).toEqual(['op:test:campaign_hold', 'op:test:scripted_hold']);
+        expect(briefing.corps_exhaustion).toBe(14);
     });
 });
 

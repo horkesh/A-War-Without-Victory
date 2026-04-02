@@ -282,6 +282,8 @@ export interface CommanderBriefing {
     readonly doctrine_stance: string;
     /** Current corps stance. */
     readonly corps_stance: string;
+    /** Current corps-level exhaustion (0-100). */
+    readonly corps_exhaustion: number;
     readonly officer_personality: OfficerPersonality;
     /** Pre-planned ops for this corps. */
     readonly pre_planned_ops: readonly unknown[];

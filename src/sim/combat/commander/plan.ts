@@ -31,6 +31,7 @@ import type {
 
 import { BESIEGED_SURPLUS_HOP_LIMIT } from './allocate.js';
 import { CRITICAL_MORALE_THRESHOLD } from '../combat_math.js';
+import { MAX_EXHAUSTION_FOR_OPERATION } from '../bot_constants.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -135,6 +136,15 @@ export function managePlan(
     // Defensive / reorganizing corps do not initiate new offensive plans.
     if (briefing.corps_stance === 'defensive' || briefing.corps_stance === 'reorganize') {
         return { plan: null, action: 'none', reason: `corps in ${briefing.corps_stance} stance — no new plans`, concentration_orders: [] };
+    }
+
+    if (briefing.corps_exhaustion > MAX_EXHAUSTION_FOR_OPERATION) {
+        return {
+            plan: null,
+            action: 'none',
+            reason: `corps exhaustion ${briefing.corps_exhaustion} above operation threshold ${MAX_EXHAUSTION_FOR_OPERATION}`,
+            concentration_orders: [],
+        };
     }
 
     // Guard: if this corps already has a live non-recovery, non-probe op, do not create a new plan.

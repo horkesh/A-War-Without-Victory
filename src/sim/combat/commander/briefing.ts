@@ -184,6 +184,13 @@ function getActiveOperations(
     return cmd.active_operations ?? [];
 }
 
+function getCorpsExhaustion(
+    state: GameState,
+    corpsId: FormationId,
+): number {
+    return state.military.corps_command?.[corpsId]?.corps_exhaustion ?? 0;
+}
+
 // ---------------------------------------------------------------------------
 // Intel data (stub — collect what exists)
 // ---------------------------------------------------------------------------
@@ -329,6 +336,7 @@ export function buildBriefing(
 
     // 10. Active operations currently in the field (needed by emit for RC1 fallback)
     const activeOperations = getActiveOperations(state, corpsId);
+    const corpsExhaustion = getCorpsExhaustion(state, corpsId);
 
     // 11. Army HQ campaign intent for this corps
     const campaignIntent = collectCampaignIntent(state, faction, corpsId);
@@ -353,6 +361,7 @@ export function buildBriefing(
         intel_data: intelData,
         doctrine_stance: doctrineStance,
         corps_stance: corpsStance,
+        corps_exhaustion: corpsExhaustion,
         officer_personality: personality,
         pre_planned_ops: prePlannedOps,
         previous_state: previousState,

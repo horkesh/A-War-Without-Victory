@@ -493,3 +493,49 @@ Why this matters:
 - this repo already had the data and the types for corps reinforcement pressure, but not the behavior
 - a request that never reaches the next decision-maker is not a subsystem, it is decorative architecture
 - Army HQ can now hear when a corps is asking for help, which is the minimum honest substrate before any more elaborate reserve-transfer or synchronized-op logic can claim to be “strategic”
+
+## Additional Wave 1 slice: corps exhaustion now reaches commander planning
+
+This checkpoint closes another quiet honesty gap in the commander pipeline: the old corps-op path already refused to launch new operations above `MAX_EXHAUSTION_FOR_OPERATION`, but the newer commander-plan path was missing that same constraint because `CommanderBriefing` did not carry corps exhaustion at all.
+
+Implemented:
+- `src/sim/combat/commander/commander_state.ts`
+  - `CommanderBriefing` now includes canonical `corps_exhaustion`
+- `src/sim/combat/commander/briefing.ts`
+  - `buildBriefing(...)` now reads `corps_command[corpsId].corps_exhaustion` and threads it into the commander briefing contract
+- `src/sim/combat/commander/plan.ts`
+  - new-plan creation now respects the existing `MAX_EXHAUSTION_FOR_OPERATION` threshold from `bot_constants.ts`
+  - exhausted corps stop at the planning gate instead of creating fresh offensive intentions the older operation path would have rejected
+- `tests/commander/briefing_campaign_intent.test.ts`
+  - added regression coverage proving the briefing now carries the live corps exhaustion value
+- `tests/commander/commander.test.ts`
+  - added regression coverage proving exhausted corps do not create new offensive plans
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\briefing_campaign_intent.test.ts tests\commander\commander.test.ts tests\commander\reinforcement_signal_flow.test.ts tests\army_hq_gathering.test.ts`
+  - PASS (`119` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- a corps that is too exhausted to launch should also be too exhausted to invent fresh offensive plans
+- this keeps the commander-intelligence path and the older corps-op threshold from teaching different truths
+- in this repo, a missing field in the briefing contract is often more dangerous than an obviously broken formula because it makes the AI sound sophisticated while staying strategically blind
+
+## Investigative note: feints are weak, but not dead anymore
+
+During this wave I also re-checked the earlier engine-health finding that feints had “zero enemy effect.” That finding is now partially stale.
+
+Confirmed live behavior:
+- `deriveSectorIntel(...)` classifies enemy feints as `offensive_prep`
+- enemy-facing sector intel records set `offensive_signs=true`
+- commander `makeDecisions(...)` converts that into `concentration_detected`
+- the enemy commander can react by shifting the facing sector to `fortify`
+
+What remains true:
+- feints are still weaker and cruder than they should be as a deception system
+- but they are no longer literally inert
+
+Why this matters:
+- this is a good example of a dangerous repo blindspot: a finding that was once correct can become half-stale after surrounding systems evolve
+- before “fixing” an audit item, prove whether it is still dead, half-alive, or already consumed by the current pipeline

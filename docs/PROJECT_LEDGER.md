@@ -43,6 +43,39 @@ Engine-derived chokepoint detection (`engineMustHold`) disabled with `false &&`.
 - `integration_anomaly.test.ts` — 3 pass
 
 ---
+
+### 2026-04-02 — Engine health Wave 1 continued: corps exhaustion reaches commander planning
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing another split-truth gap between the legacy corps-op path and the newer commander-intelligence path.
+
+Implemented:
+- `src/sim/combat/commander/commander_state.ts`
+  - `CommanderBriefing` now carries `corps_exhaustion`
+- `src/sim/combat/commander/briefing.ts`
+  - `buildBriefing(...)` now reads `corps_command[corpsId].corps_exhaustion` into the briefing contract
+- `src/sim/combat/commander/plan.ts`
+  - new-plan creation now respects `MAX_EXHAUSTION_FOR_OPERATION`, aligning commander planning with the older corps-op launch gate
+- `tests/commander/briefing_campaign_intent.test.ts`
+  - added regression proving the briefing carries the live corps exhaustion value
+- `tests/commander/commander.test.ts`
+  - added regression proving an exhausted corps does not create a new offensive plan
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\briefing_campaign_intent.test.ts tests\commander\commander.test.ts tests\commander\reinforcement_signal_flow.test.ts tests\army_hq_gathering.test.ts`
+  - PASS (`119` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Investigative note:
+- Re-checked the earlier “feint has zero enemy effect” audit item against live code.
+- That finding is now partially stale: enemy feints already flow through sector intel into `offensive_signs`, `concentration_detected`, and commander `fortify` reactions.
+- Feints remain underpowered as deception, but they are no longer fully inert.
+
+Why this matters:
+- a corps too exhausted to launch should also be too exhausted to invent fresh offensive plans
+- this keeps the old corps-op path and the newer commander pipeline from teaching different operational truth
+
+---
 ### 2026-04-02 — Engine health slice: Army HQ campaign intent now reaches corps planning
 
 Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing a structural disconnect between Army HQ gathering and corps commander planning.

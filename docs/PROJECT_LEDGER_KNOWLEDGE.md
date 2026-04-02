@@ -1297,6 +1297,12 @@ If `CampaignPlan` only affects corps stance ceilings, the strategic layer still 
 ### Corps reinforcement requests are only real once Army HQ can hear them
 `DecisionResult.reinforcement_requests` and `CommanderOutput.reinforcement_requests` already existed, but until `applyCommanderOutput(...)` persisted them into `CorpsCommandState`, Army HQ gathering had no way to consume the signal. The honest contract is: corps commanders may emit reinforcement pressure each turn, corps state persists it, and Army HQ reads it as a strategic pressure signal for front-role shaping. Do not short-circuit that by pretending these are already the same object as `pending_reserve_requests`; that older reserve-loan queue is a downstream Army HQ decision surface, not the raw corps signal.
 
+### Corps exhaustion must travel through the briefing contract, not just legacy launch gates
+The older corps-op path already respected `MAX_EXHAUSTION_FOR_OPERATION`, but the newer commander-planning path was missing the same truth because `CommanderBriefing` did not carry `corps_exhaustion`. Treat exhaustion as part of what the commander knows, not just a late launch veto in older code. If a corps is too exhausted to launch, it should also be too exhausted to create a fresh offensive plan.
+
+### Re-check “dead mechanic” audit findings against live consumers before implementing them
+Engine-health audits are valuable, but in a fast-moving repo an old true finding can become half-stale after downstream consumers are added. The feint audit item is the current example: feints are still underpowered, but they already flow through sector intel into `offensive_signs`, commander `concentration_detected`, and `fortify` reactions. Before spending a checkpoint on a “dead” mechanic, prove whether it is still dead, only weak, or already consumed.
+
 ### Shared label helpers are cheaper than another anti-leak sweep
 Player-facing raw-id leaks often survive not in the main happy-path labels, but in fallback strings and secondary shells like Warroom. If map and Warroom each improvise their own `?? id` fallback, raw corps or sector ids will eventually leak back in. Centralize player-facing corps / sector / assigned-command label translation in one shared helper and make fallbacks generic (`This corps`, `Assigned sector`, `Assigned command`) rather than engine identifiers.
 
