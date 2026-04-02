@@ -1420,3 +1420,7 @@ In AWWV, the most dangerous legacy combat files are not dead sinks but older cre
 ### Hard-coded test allowlists are authority surfaces too
 
 If the repo uses an explicit test include list, a new regression file is not protected until that list includes it. That means the test runner can report green while silently omitting the very guard a fix depends on. In this repo, update the allowlist in the same slice as any new Vitest regression or the test is theater.
+
+### Player-facing sector orders must not secretly write the older front-assignment lane
+
+If a tactical-map action is labeled as a brigade-to-sector command, it must route through the canonical sector override contract all the way down. In AWWV, `stageAssignBrigadeToSectorAction(...)` accidentally writing `assignBrigadeToFront(...)` was not just a UI bug; it revived `brigade_front_assignment/local_fronts`, which still influences combat density. Treat any player-facing order surface that secretly writes an older authority lane as a serious engine-health bug.

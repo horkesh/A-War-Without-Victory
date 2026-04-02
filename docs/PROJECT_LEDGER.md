@@ -19860,3 +19860,30 @@ Why this matters:
 - transitional operation creators are exactly where fake exceptions survive longest
 - if corridor breach stayed unanchored, every downstream lifecycle and UI path would keep learning that `sector_id` is optional in practice
 - a regression test that does not run because of a stale allowlist is another form of split truth, so the test-config repair is part of the same honesty pass
+### 2026-04-02 - Engine health Wave 1 continued: map-click sector orders now honor canonical sector overrides
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing a live split-authority bug in the desktop shell. The tactical-map click path looked like a brigade-to-sector command, but it was still calling the older `assignBrigadeToFront(...)` IPC route under the hood and writing the `brigade_front_assignment/local_fronts` lane that still influences combat density.
+
+Implemented:
+- `src/ui/map/desktop/orderActions.ts`
+  - `stageAssignBrigadeToSectorAction(...)` now routes through `ipc.assignBrigadeToSector(...)` instead of the older front-assignment bridge
+  - clarified the contract comment so future work knows this path must not write the older local-front lane
+- `tests/ui_map_order_actions.test.ts`
+  - added a regression proving the staged sector action calls `assignBrigadeToSector(...)`
+  - proved it does not call `assignBrigadeToFront(...)`
+  - proved the queued order still records a sector assignment for the UI shell
+- `vitest.config.ts`
+  - added the new regression file to the explicit Vitest include list so the guard actually executes in this branch
+- `docs/40_reports/implemented/20260402_MAP_SECTOR_ORDER_CANONICALIZATION.md`
+  - documented the root cause, implementation, and combat-authority implications of the fix
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_map_order_actions.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`14` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- a player-visible sector command must not secretly mutate the older front-assignment authority path
+- this is exactly the kind of half-alive shell mismatch that keeps legacy combat writers alive after the architecture has supposedly moved on
+- routing the map-click path into the same override lane as the rest of the UI makes sector assignment truth much harder to split again
