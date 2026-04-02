@@ -3,6 +3,7 @@ import type { FormationView } from '../data/types';
 import { FACTION_COLORS } from '../utils/theme';
 import { Icon, type IconName } from './icons/Icon';
 import { FlipCard } from './army_hq/FlipCard';
+import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
 
 const STANCE_ICON: Record<string, IconName> = {
   offensive: 'offensive', defensive: 'defensive', reorganize: 'reorganizing', balanced: 'balanced',
@@ -87,7 +88,7 @@ export function CorpsCard({
   activeOperationPhase,
 }: CorpsCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
-  const displayName = corpsName ?? `Corps ${corpsId}`;
+  const displayName = getPlayerSafeCorpsName(corpsName, corpsId);
   const factionClass = FACTION_COLORS[faction] ?? 'text-text-primary';
   const totalPersonnel = brigades.reduce((s, b) => s + (b.personnel ?? 0), 0);
   const avgCohesion = getAvgCohesion(brigades);

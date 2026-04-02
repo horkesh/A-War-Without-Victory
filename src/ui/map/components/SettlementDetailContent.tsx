@@ -12,6 +12,7 @@ import { FACTION_COLORS_SUBTLE } from '../utils/theme';
 import { toTitleCase } from '../utils/formatters';
 import { SettlementTimeline } from './SettlementTimeline';
 import { buildSettlementTimeline } from '../utils/buildSettlementTimeline';
+import { getPlayerSafeBrigadeName, getPlayerSafeMunicipalityName } from '../utils/playerSafeText';
 
 function num(v: unknown): number {
   return typeof v === 'number' && Number.isFinite(v) ? v : 0;
@@ -428,17 +429,17 @@ export function SettlementDetailContent({
             <ul className="space-y-1 text-[10px]">
               {pendingOrders.attack.map(({ brigadeId, brigadeName }) => (
                 <li key={`attack-${brigadeId}`} className="text-amber-300/90">
-                  Attack: {brigadeName ?? brigadeId} → this settlement
+                  Attack: {getPlayerSafeBrigadeName(brigadeName)} → this settlement
                 </li>
               ))}
               {pendingOrders.move.map(({ brigadeId, brigadeName }) => (
                 <li key={`move-${brigadeId}`} className="text-blue-300/90">
-                  Move: {brigadeName ?? brigadeId} → here
+                  Move: {getPlayerSafeBrigadeName(brigadeName)} → here
                 </li>
               ))}
               {pendingOrders.reposition.map(({ brigadeId, brigadeName }) => (
                 <li key={`repos-${brigadeId}`} className="text-text-secondary">
-                  Reposition: {brigadeName ?? brigadeId} → here
+                  Reposition: {getPlayerSafeBrigadeName(brigadeName)} → here
                 </li>
               ))}
             </ul>
@@ -714,7 +715,7 @@ export function SettlementDetailContent({
         {isPanel && activeTab === 'municipality' && disp && (
           <div className="pt-2 space-y-2">
             <div className="text-[10px] text-text-secondary uppercase font-semibold">
-              {municipality ?? munId ?? 'Municipality'} — Population
+              {(municipality || getPlayerSafeMunicipalityName(munId, 'Municipality'))} — Population
             </div>
             <div className="flex items-center gap-2 text-[11px]">
               <span className="text-text-secondary">Pre-war</span>

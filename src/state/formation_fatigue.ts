@@ -5,6 +5,7 @@ import { FATIGUE_MAX } from './formation_constants.js';
 import type { FactionId, FormationId, FormationState, GameState } from './game_state.js';
 import { getSettlementControlStatus } from './settlement_control.js';
 import { computeSupplyReachability } from './supply_reachability.js';
+import { buildFrontlineAssignedFormationSet } from '../sim/combat/front_assignment.js';
 
 import type { EdgeRecord } from '../map/settlements.js';
 import { getEdgeCapacityMultiplier } from '../sim/collapse/capacity_modifiers.js';
@@ -282,7 +283,7 @@ export function applyFatigueRecovery(state: GameState, engagedFormationIds?: Set
     if (!formations) return;
     const currentTurn = state.meta?.turn ?? 0;
     const isRecoveryTurn = currentTurn % FATIGUE_RECOVERY_INTERVAL === 0;
-    const assignments = state.military.brigade_front_assignment;
+    const frontlineAssigned = buildFrontlineAssignedFormationSet(state);
 
     for (const [fid, formation] of Object.entries(formations)) {
         if (!formation || formation.status !== 'active') continue;
@@ -290,7 +291,7 @@ export function applyFatigueRecovery(state: GameState, engagedFormationIds?: Set
             formation.ops = { fatigue: 0, last_supplied_turn: null };
         }
         let current = formation.ops.fatigue ?? 0;
-        const isFrontAssigned = !!(assignments && assignments[fid]);
+        const isFrontAssigned = frontlineAssigned.has(fid);
         const wasEngaged = engagedFormationIds ? engagedFormationIds.has(fid) : false;
 
         // Recovery: -1 every 2 turns, UNLESS engaged in combat this turn

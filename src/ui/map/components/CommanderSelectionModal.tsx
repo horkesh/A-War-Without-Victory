@@ -1,5 +1,5 @@
 /**
- * Commander Selection Modal — officer roster for assigning an operations commander.
+ * Commander Selection Modal - officer roster for assigning an operations commander.
  * Shows available officers with stats, preparation time estimates, regional fit,
  * and greyed-out unavailable officers with reasons.
  */
@@ -20,39 +20,26 @@ import { getPreparationMaxTurns } from '../../../sim/combat/operation_preparatio
 interface CommanderSelectionModalProps {
     isOpen: boolean;
     onClose: () => void;
-    /** Callback when an officer is selected. */
     onSelect?: (officerId: string) => void;
 }
 
-/** Availability status for an officer. */
 function getAvailabilityStatus(
     officer: NamedOfficerView,
     targetCorpsId: string,
+    corpsNameById: Map<string, string>,
 ): { available: boolean; reason?: string } {
-    if (officer.status === 'kia') return { available: false, reason: `KIA` };
+    if (officer.status === 'kia') return { available: false, reason: 'KIA' };
     if (officer.status === 'captured') return { available: false, reason: 'CAPTURED' };
     if (officer.status === 'retired') return { available: false, reason: 'RETIRED' };
-    if (officer.rank === 'army_commander') return { available: false, reason: 'ARMY HQ — unavailable' };
-
-    // Enclave lock
-    if (officer.enclave_lock) {
-        return { available: false, reason: `ENCLAVE LOCKED: ${officer.enclave_lock.enclave_id}` };
-    }
-
-    // Already commanding another operation
-    if (officer.assigned_operation) {
-        return { available: false, reason: `ASSIGNED: ${officer.assigned_operation}` };
-    }
-
-    // Active corps commander (can't be pulled for ops)
+    if (officer.rank === 'army_commander') return { available: false, reason: 'ARMY HQ - unavailable' };
+    if (officer.enclave_lock) return { available: false, reason: 'ENCLAVE LOCKED' };
+    if (officer.assigned_operation) return { available: false, reason: `ASSIGNED: ${officer.assigned_operation}` };
     if (officer.assigned_corps_id && officer.assigned_corps_id !== targetCorpsId && !officer.acting_commander) {
-        return { available: false, reason: `CORPS COMMANDER — ${officer.assigned_corps_id}` };
+        return { available: false, reason: `CORPS COMMANDER - ${corpsNameById.get(officer.assigned_corps_id) ?? 'Another Corps'}` };
     }
-
     return { available: true };
 }
 
-/** Regional fit label. */
 function getRegionalFit(officer: NamedOfficerView, targetCorpsId: string): { label: string; color: string; penalty: string } {
     if (officer.home_corps_id === targetCorpsId) {
         return { label: 'HOME CORPS', color: 'text-green-600', penalty: 'no penalty' };
@@ -67,20 +54,27 @@ export function CommanderSelectionModal({ isOpen, onClose, onSelect }: Commander
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const context = useGameStore((s) => s.commanderSelectionContext);
 
-    const { availableOfficers, unavailableOfficers, operation } = useMemo(() => {
-        if (!loadedGameState || !context) return { availableOfficers: [], unavailableOfficers: [], operation: null };
+    const { availableOfficers, unavailableOfficers, operation, corpsName } = useMemo(() => {
+        if (!loadedGameState || !context) {
+            return { availableOfficers: [], unavailableOfficers: [], operation: null, corpsName: 'Command' };
+        }
 
         const { namedOfficerData, operations } = loadedGameState;
         const op = operations?.find((o) => o.corps_id === context.corpsId && o.name === context.operationName) ?? null;
         const corpsFormation = loadedGameState.formations.find((f) => f.id === context.corpsId);
         const faction = corpsFormation?.faction ?? '';
+        const corpsNameById = new Map(
+            loadedGameState.formations
+                .filter((f) => f.kind === 'corps' || f.kind === 'corps_asset' || f.kind === 'army_hq')
+                .map((f) => [f.id, f.name]),
+        );
 
         const factionOfficers = (namedOfficerData ?? []).filter((o) => o.faction === faction);
         const avail: Array<{ officer: NamedOfficerView; fit: ReturnType<typeof getRegionalFit> }> = [];
         const unavail: Array<{ officer: NamedOfficerView; reason: string }> = [];
 
         for (const officer of factionOfficers) {
-            const status = getAvailabilityStatus(officer, context.corpsId);
+            const status = getAvailabilityStatus(officer, context.corpsId, corpsNameById);
             if (status.available) {
                 avail.push({ officer, fit: getRegionalFit(officer, context.corpsId) });
             } else {
@@ -88,14 +82,18 @@ export function CommanderSelectionModal({ isOpen, onClose, onSelect }: Commander
             }
         }
 
-        // Sort available: home corps first, then by competence descending
         avail.sort((a, b) => {
             if (a.fit.label === 'HOME CORPS' && b.fit.label !== 'HOME CORPS') return -1;
             if (b.fit.label === 'HOME CORPS' && a.fit.label !== 'HOME CORPS') return 1;
             return b.officer.competence - a.officer.competence;
         });
 
-        return { availableOfficers: avail, unavailableOfficers: unavail, operation: op };
+        return {
+            availableOfficers: avail,
+            unavailableOfficers: unavail,
+            operation: op,
+            corpsName: corpsNameById.get(context.corpsId) ?? 'Command',
+        };
     }, [loadedGameState, context]);
 
     if (!isOpen || !context) return null;
@@ -103,17 +101,14 @@ export function CommanderSelectionModal({ isOpen, onClose, onSelect }: Commander
     return (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60">
             <div className="bg-white border-2 border-neutral-400 shadow-xl max-w-xl w-full max-h-[80vh] flex flex-col">
-                {/* Header */}
                 <div className="px-4 py-3 border-b-2 border-neutral-300 bg-neutral-100">
                     <div className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Assign Operations Commander</div>
                     <div className="text-sm font-bold mt-0.5">
-                        {operation?.name ?? context.operationName} — {context.corpsId}
+                        {operation?.name ?? context.operationName} - {corpsName}
                     </div>
                 </div>
 
-                {/* Scrollable officer list */}
                 <div className="flex-1 overflow-y-auto p-3 space-y-2">
-                    {/* Available officers */}
                     {availableOfficers.map(({ officer, fit }) => {
                         const prepEst = getPreparationMaxTurns(officer.aggressiveness);
                         const personality = getPersonalitySummary(officer.competence, officer.aggressiveness);
@@ -160,7 +155,6 @@ export function CommanderSelectionModal({ isOpen, onClose, onSelect }: Commander
                         );
                     })}
 
-                    {/* Unavailable officers — greyed out */}
                     {unavailableOfficers.length > 0 && (
                         <div className="pt-2 border-t border-neutral-200">
                             <div className="text-[8px] uppercase text-neutral-400 font-bold mb-1">Unavailable</div>
@@ -178,7 +172,6 @@ export function CommanderSelectionModal({ isOpen, onClose, onSelect }: Commander
                     )}
                 </div>
 
-                {/* Footer */}
                 <div className="px-4 py-3 border-t-2 border-neutral-300 bg-neutral-50 flex justify-end">
                     <button
                         type="button"

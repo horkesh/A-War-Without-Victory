@@ -29,7 +29,12 @@ import {
     getFactionCorps,
     sortByPersonnelDesc,
 } from './bot_corps_helpers.js';
-import { buildCommanderOperation, getAvailableBrigades, hasAvailableSlot } from './corps_operation_helpers.js';
+import {
+    buildCommanderOperation,
+    derivePrimarySectorForBrigades,
+    getAvailableBrigades,
+    hasAvailableSlot,
+} from './corps_operation_helpers.js';
 
 export interface CorridorTarget {
     breachSettlements: SettlementId[];
@@ -145,13 +150,19 @@ export function attemptCorridorBreach(
 
             if (participants.length < 2) continue;
 
+            const primarySectorId = derivePrimarySectorForBrigades(
+                Object.values(state.military.corps_front_sectors ?? {}),
+                corps.id,
+                participants.map((brigade) => brigade.id),
+            );
+
             // PERMITTED CREATION ENTRY POINT — corridor breach operations.
-            // PHASE 5 TRANSITIONAL: sectorId=undefined — corridor breach has no natural sector
-            // anchor in v0.8 (it operates across corps boundaries). Brigade categorization fields
-            // absent. Not broad-pool — participants are threat-selected. Deferred.
+            // Even when the target corridor spans a broader theater concern, the launching corps
+            // still needs a canonical sector anchor so downstream lifecycle, UI, and diagnostics
+            // do not treat it as a special unanchored exception.
             const initialStrength = participants.reduce((sum, b) => sum + (b.personnel ?? 0), 0);
             const operation = buildCommanderOperation(
-                corps.id, turn, participants.map(b => b.id), undefined, [], initialStrength,
+                corps.id, turn, participants.map(b => b.id), primarySectorId, [], initialStrength,
                 `Corridor Breach (${faction})`,
             );
 

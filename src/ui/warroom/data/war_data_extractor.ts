@@ -25,6 +25,11 @@ import type {
     TrendDirection,
 } from '../../../state/game_state.js';
 import { getEnemyFactions, personnelToStrengthCategory } from './fog_of_war.js';
+import {
+    getPlayerSafeBrigadeName,
+    getPlayerSafeCorpsName,
+    getPlayerSafeOfficerName,
+} from '../../map/utils/playerSafeText.js';
 
 // ---------------------------------------------------------------------------
 // Snapshot sub-interfaces
@@ -104,8 +109,7 @@ export interface CorpsOperationSnapshot {
 }
 
 export interface ContactedFormation {
-    formationId: string;
-    name: string;
+    label: string;
     strengthCategory: string;
     contactSettlement: SettlementId | null;
     detectedTurn: number;
@@ -207,6 +211,35 @@ export interface WarDataSnapshot {
 
 function sc(a: string, b: string): number {
     return a < b ? -1 : a > b ? 1 : 0;
+}
+
+function deriveMunicipalityControllerByOsid(state: GameState): Map<string, FactionId | null> {
+    const counts = new Map<string, Map<FactionId, number>>();
+    const controllers = state.political.political_controllers ?? {};
+
+    for (const settlementId of Object.keys(controllers).sort(sc)) {
+        const controller = controllers[settlementId];
+        if (controller == null) continue;
+        if (!settlementId.startsWith('op:')) continue;
+        const parts = settlementId.split(':');
+        if (parts.length < 3) continue;
+        const municipalityId = parts[1];
+        if (!municipalityId) continue;
+
+        const perFaction = counts.get(municipalityId) ?? new Map<FactionId, number>();
+        perFaction.set(controller, (perFaction.get(controller) ?? 0) + 1);
+        counts.set(municipalityId, perFaction);
+    }
+
+    const result = new Map<string, FactionId | null>();
+    for (const [municipalityId, perFaction] of Array.from(counts.entries()).sort(([a], [b]) => sc(a, b))) {
+        const ranking = Array.from(perFaction.entries()).sort((a, b) => {
+            if (a[1] !== b[1]) return b[1] - a[1];
+            return sc(a[0], b[0]);
+        });
+        result.set(municipalityId, ranking[0]?.[0] ?? null);
+    }
+    return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -323,7 +356,9 @@ function extractOwnForces(state: GameState, pf: FactionId): OwnForcesSnapshot {
         const ms = movementState[fid];
         details.push({
             id: fid,
-            name: f.name ?? fid,
+            name: kind === 'corps' || kind === 'corps_asset'
+                ? getPlayerSafeCorpsName(f.name ?? null, fid)
+                : getPlayerSafeBrigadeName(f.name ?? null),
             kind,
             personnel: f.personnel ?? 0,
             cohesion: f.cohesion ?? 0,
@@ -458,21 +493,17 @@ function extractExhaustion(state: GameState, pf: FactionId): ExhaustionSnapshot 
 
 function extractSupply(state: GameState, pf: FactionId): SupplySnapshot {
     const sustState = state.displacement.sustainability_state ?? {};
-    const controllers = state.political.political_controllers ?? {};
+    const municipalityController = deriveMunicipalityControllerByOsid(state);
 
     let adequate = 0;
     let strained = 0;
     let critical = 0;
     const collapsed: string[] = [];
 
-    // Map settlements to municipalities for controller check
-    // Sustainability is per-municipality, so check if any settlement in that municipality is controlled by player
     for (const munId of Object.keys(sustState).sort(sc)) {
         const s = sustState[munId];
         if (!s) continue;
-
-        // Check if this municipality is relevant to player (simplified: check if any settlement in it is player-controlled)
-        // For now, include all municipalities in the supply overview
+        if (municipalityController.get(munId) !== pf) continue;
         if (s.collapsed) {
             collapsed.push(munId);
         } else if (s.sustainability_score < 30) {
@@ -514,7 +545,7 @@ function extractCorpsOps(state: GameState, pf: FactionId): CorpsOperationSnapsho
 
         results.push({
             corpsId,
-            corpsName: f.name ?? corpsId,
+            corpsName: getPlayerSafeCorpsName(f.name ?? null, corpsId),
             stance: corps.stance,
             operation: corps.active_operations?.[0] ?? null,
         });
@@ -582,7 +613,7 @@ function extractContactedEnemies(state: GameState, pf: FactionId): ContactedForm
     const results: ContactedFormation[] = [];
 
     // Casualty ledger per-formation keys: enemy formations that took casualties = contacted
-    const existingIds = new Set(results.map(r => r.formationId));
+    const existingIds = new Set<string>();
     for (const enemyFaction of enemies) {
         const enemyLedger = state.military.casualty_ledger?.[enemyFaction];
         if (!enemyLedger?.per_formation) continue;
@@ -591,8 +622,7 @@ function extractContactedEnemies(state: GameState, pf: FactionId): ContactedForm
             const f = state.military.formations[fmtId];
             if (!f) continue;
             results.push({
-                formationId: fmtId,
-                name: f.name ?? fmtId,
+                label: 'Enemy contact',
                 strengthCategory: personnelToStrengthCategory(f.personnel ?? 1000),
                 contactSettlement: null,
                 detectedTurn: 0,
@@ -601,8 +631,8 @@ function extractContactedEnemies(state: GameState, pf: FactionId): ContactedForm
         }
     }
 
-    // Sort by settlement, then by formation ID
-    results.sort((a, b) => sc(a.contactSettlement ?? '', b.contactSettlement ?? '') || sc(a.formationId, b.formationId));
+    // Sort by settlement, then by abstract label
+    results.sort((a, b) => sc(a.contactSettlement ?? '', b.contactSettlement ?? '') || sc(a.label, b.label));
     return results;
 }
 
@@ -697,7 +727,7 @@ function extractOfficersByFaction(
         const os = officers[id] as { status?: string; assigned_corps_id?: string | null; acting_commander?: boolean } | undefined;
         list.push({
             id,
-            name: typeof (d as { name?: string }).name === 'string' ? (d as { name: string }).name : id,
+            name: getPlayerSafeOfficerName(typeof (d as { name?: string }).name === 'string' ? (d as { name: string }).name : null),
             rank: typeof (d as { rank?: string }).rank === 'string' ? (d as { rank: string }).rank : 'corps_commander',
             status: typeof os?.status === 'string' ? os.status : 'active',
             assigned_corps_id: typeof os?.assigned_corps_id === 'string' ? os.assigned_corps_id : null,

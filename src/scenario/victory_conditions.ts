@@ -67,8 +67,9 @@ export function evaluateVictoryConditions(
         if (!controller) continue;
         byFactionCount.set(controller, (byFactionCount.get(controller) ?? 0) + 1);
     }
+    const warExhaustion = state.political.war_exhaustion ?? {};
     const factionExhaustion = new Map(
-        (state.factions ?? []).map((f) => [f.id, f.profile.exhaustion ?? 0] as const)
+        (state.factions ?? []).map((f) => [f.id, warExhaustion[f.id] ?? f.profile.exhaustion ?? 0] as const)
     );
     const evaluations = Object.keys(victoryConditions.by_faction)
         .sort((a, b) => a.localeCompare(b))

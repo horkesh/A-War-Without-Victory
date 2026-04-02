@@ -9,6 +9,15 @@ import { getRightPanelStyle, getPanelRailStyle } from './panelRail';
 import { buildOsidToSectorMap } from '../utils/sectorUtils';
 import { getOperationId } from '../utils/operations';
 import { getCurrentEthnicForOsid } from '../map/builders/buildEthnicGeoJSON';
+import { getPlayerSafeMunicipalityName } from '../utils/playerSafeText';
+import {
+  filterPlayerFacingFormations,
+  filterPlayerFacingMovementsByOsid,
+  filterPlayerFacingOperationHistory,
+  filterPlayerFacingSectors,
+  resolvePlayerFacingFaction,
+} from '../../shared/playerVisibility';
+import { getPlayerVisibleOperations } from '../../shared/playerFacingLabels';
 
 interface SelectionPanelProps {
   railSlot?: 'primary' | 'secondary';
@@ -33,7 +42,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
         style={{ ...getPanelRailStyle(railSlot, '20rem'), direction: 'ltr' }}
       >
         <div className="h-10 bg-panel-card border-b border-panel-border panel-shimmer" />
-        <div className="p-4 space-y-4">
+        <div className="p-3 space-y-3">
           <div className="h-6 w-3/4 bg-panel-card rounded panel-shimmer" />
           <div className="space-y-2">
             <div className="h-4 w-full bg-panel-card rounded panel-shimmer" />
@@ -45,11 +54,9 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
     );
   }
 
-  const formations = getFormationsAtOsid(loadedGameState?.formations, selectedOsid);
-  const playerFaction =
-    loadedGameState?.player_faction === 'RBiH' || loadedGameState?.player_faction === 'RS' || loadedGameState?.player_faction === 'HRHB'
-      ? loadedGameState.player_faction
-      : null;
+  const playerFacingFormations = filterPlayerFacingFormations(loadedGameState);
+  const formations = getFormationsAtOsid(playerFacingFormations, selectedOsid);
+  const playerFaction = resolvePlayerFacingFaction(loadedGameState);
   const selectedMunId = selectedOsid.split(':')[1] ?? null;
   const rawActiveSupport = playerFaction ? loadedGameState?.municipalitySupportOrders?.[playerFaction] : undefined;
   const activeSupport = rawActiveSupport?.staged_turn === loadedGameState?.turn ? rawActiveSupport : undefined;
@@ -67,7 +74,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
   }));
 
   const operationsTargetingOsid =
-    loadedGameState?.operations
+    getPlayerVisibleOperations(loadedGameState?.operations ?? [], playerFaction)
       ?.filter((op) => op.objectives?.includes(selectedOsid))
       .map((op) => ({ name: op.name, faction: op.faction, phase: op.phase, operationKey: getOperationId(op) }))
     ?? [];
@@ -81,7 +88,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
   const statusLabel = loadedGameState?.statusBySettlement?.[selectedOsid] ?? null;
 
   const sectorInfo = (() => {
-    const sectors = loadedGameState?.corpsFrontSectors;
+    const sectors = filterPlayerFacingSectors(loadedGameState);
     const edgesOsid = loadedGameState?.frontEdgesOsid;
     if (!sectors?.length || !edgesOsid?.length) return { sectorName: null as string | null, sectorFaction: null as string | null, sectorId: null as string | null };
     const osidToSector = buildOsidToSectorMap(sectors, edgesOsid);
@@ -140,23 +147,26 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
   for (const f of formationsForDetail) {
     brigadeCountByFaction[f.faction] = (brigadeCountByFaction[f.faction] ?? 0) + 1;
   }
+  const playerFormationIds = new Set(playerFacingFormations.map((formation) => formation.id));
+  const playerFacingOperationHistory = filterPlayerFacingOperationHistory(loadedGameState);
+  const playerFacingMovementsByOsid = filterPlayerFacingMovementsByOsid(loadedGameState);
 
   const pendingOrders = (() => {
     if (!loadedGameState) return undefined;
     const attack =
-      loadedGameState.attackOrders?.filter((o) => o.targetSettlementId === selectedOsid).map((o) => ({
+      loadedGameState.attackOrders?.filter((o) => o.targetSettlementId === selectedOsid && playerFormationIds.has(o.brigadeId)).map((o) => ({
         brigadeId: o.brigadeId,
-        brigadeName: loadedGameState.formations?.find((fr) => fr.id === o.brigadeId)?.name,
+        brigadeName: playerFacingFormations.find((fr) => fr.id === o.brigadeId)?.name,
       })) ?? [];
     const move =
-      loadedGameState.movementOrdersSettlement?.filter((o) => o.targetSettlementIds?.includes(selectedOsid)).map((o) => ({
+      loadedGameState.movementOrdersSettlement?.filter((o) => o.targetSettlementIds?.includes(selectedOsid) && playerFormationIds.has(o.brigadeId)).map((o) => ({
         brigadeId: o.brigadeId,
-        brigadeName: loadedGameState.formations?.find((fr) => fr.id === o.brigadeId)?.name,
+        brigadeName: playerFacingFormations.find((fr) => fr.id === o.brigadeId)?.name,
       })) ?? [];
     const reposition =
-      loadedGameState.repositionOrders?.filter((o) => o.settlementIds?.includes(selectedOsid)).map((o) => ({
+      loadedGameState.repositionOrders?.filter((o) => o.settlementIds?.includes(selectedOsid) && playerFormationIds.has(o.brigadeId)).map((o) => ({
         brigadeId: o.brigadeId,
-        brigadeName: loadedGameState.formations?.find((fr) => fr.id === o.brigadeId)?.name,
+        brigadeName: playerFacingFormations.find((fr) => fr.id === o.brigadeId)?.name,
       })) ?? [];
     if (attack.length === 0 && move.length === 0 && reposition.length === 0) return undefined;
     return { attack, move, reposition };
@@ -203,7 +213,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
       className="panel-power-on weathered-panel panel-slide-in-right flex flex-col rounded-lg shadow-xl"
       style={{ ...getRightPanelStyle('20rem'), direction: 'ltr' }}
     >
-      <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
+      <div className="flex items-center justify-between px-3 py-2 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
         <div className="flex items-center gap-2">
           {loadedGameState?.controlBySettlement?.[selectedOsid] && getFactionFlag(loadedGameState.controlBySettlement[selectedOsid]) && (
             <img
@@ -224,7 +234,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
         </button>
       </div>
 
-      <div className="p-4 overflow-auto">
+      <div className="p-3 overflow-auto">
         <SettlementDetailContent
           osid={selectedOsid}
           osidDisplayNames={osidDisplayNames}
@@ -249,19 +259,19 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
           currentEthnic={currentEthnic ?? undefined}
           displacementEventLog={loadedGameState?.displacementEventLog}
           allControlEvents={loadedGameState?.allControlEvents}
-          operationHistory={loadedGameState?.operationHistory}
+          operationHistory={playerFacingOperationHistory}
           battlesByOsid={loadedGameState?.battlesByOsid}
-          movementsByOsid={loadedGameState?.movementsByOsid}
+          movementsByOsid={playerFacingMovementsByOsid}
           supplyTransitionsByOsid={loadedGameState?.supplyTransitionsByOsid}
           historicalEventsByTurn={loadedGameState?.historicalEventsByTurn}
         />
         {playerFaction && selectedMunId && (
-          <div className="mt-4 rounded border border-panel-border bg-panel-card p-3 space-y-2">
+          <div className="mt-3 rounded border border-panel-border bg-panel-card p-2.5 space-y-1.5">
             <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">
               Phase E Local Support
             </div>
             <div className="text-xs text-text-secondary">
-              {activeSupport?.label ?? 'Local support'} target: {activeSupport ? activeSupport.mun_id : 'none staged'}
+              {activeSupport?.label ?? 'Local support'} target: {activeSupport ? getPlayerSafeMunicipalityName(activeSupport.mun_id) : 'none staged'}
             </div>
             <button
               type="button"
@@ -272,7 +282,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
               Stage {supportLabel}
             </button>
             <div className="text-[11px] text-text-secondary">
-              Target municipality: {selectedMunId}
+              Target municipality: {getPlayerSafeMunicipalityName(selectedMunId)}
             </div>
             {supportMessage && <div className="text-[11px] text-text-secondary">{supportMessage}</div>}
           </div>

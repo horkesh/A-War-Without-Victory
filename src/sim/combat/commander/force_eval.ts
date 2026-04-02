@@ -9,6 +9,8 @@
  */
 
 import type { FormationId, FormationState } from '../../../state/game_state.js';
+import { FATIGUE_MAX } from '../../../state/formation_constants.js';
+import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../../state/supply_state_derivation.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { resolveEquipmentClass, getEquipmentOffensivePriority } from '../sector_offensive.js';
 import type { ZoneAssessment, ZoneId, BrigadeEvaluation, ForceAssessment } from './commander_state.js';
@@ -35,6 +37,10 @@ const ACTIVE_DEFENSE_FITNESS_THRESHOLD = 0.3;
 /** Minimum garrison fitness floor for depleted units. */
 const GARRISON_FITNESS_FLOOR = 0.2;
 
+/** Shared fatigue effectiveness floors aligned with combat_math.ts. */
+const FATIGUE_ATTACK_FLOOR = 0.6;
+const FATIGUE_DEFEND_FLOOR = 0.75;
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Supply multiplier
 // ═══════════════════════════════════════════════════════════════════════════
@@ -51,6 +57,29 @@ function supplyMult(supplyStatus: string | undefined): number {
         case 'critical': return 0.5;
         default: return 0.8; // unknown / not available
     }
+}
+
+function getBrigadeSupplyState(
+    brigade: FormationState,
+    supplyByOsid: unknown,
+): SupplyStateLevel | undefined {
+    if (!brigade.location_osid || !brigade.faction || !supplyByOsid || typeof supplyByOsid !== 'object') {
+        return undefined;
+    }
+    const report = supplyByOsid as Partial<SupplyStateByOsidReport>;
+    const factions = Array.isArray(report.factions) ? report.factions : [];
+    const factionEntry = factions.find(entry => entry?.faction_id === brigade.faction);
+    if (!factionEntry || !Array.isArray(factionEntry.by_osid)) return undefined;
+    const osidEntry = factionEntry.by_osid.find(entry => entry?.osid === brigade.location_osid);
+    return osidEntry?.state;
+}
+
+function getFatigueMult(brigade: FormationState, mode: 'attack' | 'defend'): number {
+    const fatigue = brigade.ops?.fatigue ?? 0;
+    if (fatigue <= 0) return 1.0;
+    const ratio = Math.min(1.0, fatigue / FATIGUE_MAX);
+    const floor = mode === 'attack' ? FATIGUE_ATTACK_FLOOR : FATIGUE_DEFEND_FLOOR;
+    return 1.0 - ratio * (1.0 - floor);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -76,6 +105,8 @@ export function evaluateBrigade(
     const equipClass = resolveEquipmentClass(brigade);
     const equipPriority = getEquipmentOffensivePriority(equipClass);
     const sMult = supplyMult(supplyStatus);
+    const fatigueOffenseMult = getFatigueMult(brigade, 'attack');
+    const fatigueDefenseMult = getFatigueMult(brigade, 'defend');
 
     // Fitness formulas from design doc
     const personnelNorm = personnel / STANDARD_PERSONNEL;
@@ -83,10 +114,12 @@ export function evaluateBrigade(
 
     const fitnessOffense = personnelNorm * sMult * cohesionNorm
         * (1 + equipPriority * 0.25)
+        * fatigueOffenseMult
         * (isDisrupted ? 0 : 1);
 
     const fitnessDefense = personnelNorm * sMult * cohesionNorm
         * (1 + entrenchment * 0.1)
+        * fatigueDefenseMult
         * 0.5;
 
     const fitnessGarrison = Math.max(GARRISON_FITNESS_FLOOR, personnelNorm * 0.5);
@@ -152,6 +185,7 @@ export function assignBrigadeToZone(
 export function evaluateCorpsForces(
     brigades: readonly FormationState[],
     zoneAssessments: ZoneAssessment[],
+    supplyByOsid?: unknown,
 ): ForceAssessment {
     // Build a fast lookup: OSID -> ZoneId
     const osidToZone = new Map<string, ZoneId>();
@@ -175,7 +209,11 @@ export function evaluateCorpsForces(
         const loc = brigade.location_osid;
         const currentZone = loc ? (osidToZone.get(loc) ?? null) : null;
 
-        const evaluation = evaluateBrigade(brigade, currentZone);
+        const evaluation = evaluateBrigade(
+            brigade,
+            currentZone,
+            getBrigadeSupplyState(brigade, supplyByOsid),
+        );
         evaluations.push(evaluation);
 
         if (evaluation.is_combat_effective) combatEffective++;

@@ -9,6 +9,7 @@ import {
     recallEliteLoan,
     tickEliteLoans,
     evaluateArmyReserveAssignments,
+    generateArmyReserveRequests,
 } from '../src/sim/combat/army_reserve_system.js';
 import {
     createEliteLoanState,
@@ -343,5 +344,64 @@ describe('evaluateArmyReserveAssignments', () => {
 
         expect(elite.elite_loan_state!.on_loan).toBe(false);
         expect(state.military.pending_reserve_requests).toHaveLength(1);
+    });
+});
+
+describe('generateArmyReserveRequests', () => {
+    it('turns commander reinforcement pressure into a real reserve request even without heuristic sector triggers', () => {
+        const adj = chainAdj(6);
+        const elite = makeElite('rs_1st_guards', 'RS', 'op:mun:o1');
+        const frontline = {
+            id: 'vrs_2nd_krajina_bde_1',
+            faction: 'RS',
+            name: '2nd Krajina Brigade',
+            created_turn: 0,
+            status: 'active',
+            assignment: null,
+            personnel: 1200,
+            morale: 65,
+            cohesion: 55,
+            corps_id: 'vrs_2nd_krajina',
+            location_osid: 'op:mun:o3',
+            home_osid: 'op:mun:o3',
+        } as unknown as FormationState;
+
+        const state = makeState({
+            formations: {
+                rs_1st_guards: elite,
+                vrs_2nd_krajina_bde_1: frontline,
+            },
+            corps_command: {
+                vrs_2nd_krajina: {
+                    commander_reinforcement_requests: [
+                        { zone_id: 'zone:vrs_2nd_krajina:ozren', brigades_needed: 2, priority: 'critical' },
+                        { zone_id: 'zone:vrs_2nd_krajina:doboj', brigades_needed: 1, priority: 'medium' },
+                    ],
+                    active_operations: [],
+                },
+            },
+            corps_front_sectors: {
+                sec_a: {
+                    corps_id: 'vrs_2nd_krajina',
+                    threat_ratio: 1.2,
+                    assigned_brigade_ids: ['vrs_2nd_krajina_bde_1'],
+                },
+            },
+            player_faction: 'RBiH',
+            turn: 10,
+        });
+
+        generateArmyReserveRequests(state, adj);
+
+        expect(state.military.pending_reserve_requests).toHaveLength(1);
+        expect(state.military.pending_reserve_requests?.[0]).toMatchObject({
+            corps_id: 'vrs_2nd_krajina',
+            faction: 'RS',
+            reason: 'defensive_gap',
+            suggested_brigade_id: 'rs_1st_guards',
+        });
+        expect(state.military.pending_reserve_requests?.[0].description).toContain('Commander requested 3 brigade(s)');
+        expect(state.military.pending_reserve_requests?.[0].description).toContain('critical priority');
+        expect(state.military.pending_reserve_requests?.[0].priority).toBeGreaterThan(0);
     });
 });

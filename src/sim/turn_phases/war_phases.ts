@@ -32,7 +32,6 @@ import { expandRegionPostureToEdges } from '../../state/front_posture_regions.js
 import { accumulateFrontPressure } from '../../state/front_pressure.js';
 import { syncFrontSegments } from '../../state/front_segments.js';
 import { deriveAssignableFrontSegments } from '../../state/assignable_front_segments.js';
-import { assignFrontSegmentTheatres, ensureDefaultTheatres } from '../../state/theatres.js';
 import { GameState, type FactionId, type LegacyBrigadeAoRState, type EffectivePostureExposureState } from '../../state/game_state.js';
 import { updateHeavyEquipmentState } from '../../state/heavy_equipment.js';
 import { updateLegitimacyState } from '../../state/legitimacy.js';
@@ -120,7 +119,6 @@ import { getRSMaintenanceCapacityMult, runEquipmentProgression } from '../combat
 import { updateEnclaveResilience } from '../combat/enclave_resilience.js';
 import { updateExhaustion } from '../combat/exhaustion.js';
 import { detectFronts } from '../combat/front_emergence.js';
-import { buildLocalFronts } from '../combat/local_front_defense.js';
 import { buildCorpsFrontSectors, assignBrigadesToSubSegments, REASSIGNMENT_ENTRENCHMENT_RETAIN } from '../combat/corps_front_sectors.js';
 import { distributeBrigadesToFront } from '../combat/brigade_front_distribution.js';
 import { correctMarchOrders, correctTransitStates } from '../combat/commander_march_correction.js';
@@ -134,7 +132,7 @@ import { checkTriggeredOperations } from '../combat/triggered_operations.js';
 import { computeMilitiaGarrisons } from '../combat/militia_garrison.js';
 import { activateOGs, updateOGLifecycle } from '../combat/operational_groups.js';
 import { deriveSectorIntel } from '../combat/sector_intel.js';
-import { ensureBrigadeFrontAssignments } from '../combat/front_assignment.js';
+import { ensureBrigadeFrontAssignments, hasLiveSectorFrontlineTruth } from '../combat/front_assignment.js';
 import { resolveAttackOrders } from '../combat/resolve_attack_orders.js';
 import { resolveAttackOrdersOsid, displaceFormationsInEnemyTerritory } from '../combat/attack_resolution_osid.js';
 import { applyBrigadeMovementOrders } from '../combat/brigade_movement_orders.js';
@@ -267,7 +265,6 @@ export const warPhases: NamedPhase[] = [
             if (!edges) return;
             const derivedFrontEdges = computeFrontEdges(context.state, edges);
             syncFrontSegments(context.state, derivedFrontEdges);
-            ensureDefaultTheatres(context.state);
             // In war phase, prefer OSID front edges (from previous turn's refreshFrontEdgeSnapshot)
             // for segment derivation. Canonical SID edges produce front_ids that can't be matched
             // against OSID-keyed political_controllers and brigade location_osid.
@@ -275,14 +272,14 @@ export const warPhases: NamedPhase[] = [
                 context.state.meta.phase === 'war' && context.state.military.war_front_edges_osid?.length
                     ? context.state.military.war_front_edges_osid
                     : derivedFrontEdges;
-            const segments = deriveAssignableFrontSegments(frontEdgesForSegments);
-            context.state.military.assignable_front_segments = assignFrontSegmentTheatres(context.state, segments);
+            context.state.military.assignable_front_segments = deriveAssignableFrontSegments(frontEdgesForSegments);
         }
     },
     {
         name: 'ensure-brigade-front-assignment',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
+            if (hasLiveSectorFrontlineTruth(context.state)) return;
             ensureBrigadeFrontAssignments(context.state);
         }
     },
@@ -290,7 +287,7 @@ export const warPhases: NamedPhase[] = [
         name: 'compute-local-fronts',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            context.state.military.local_fronts = buildLocalFronts(context.state);
+            context.state.military.local_fronts = undefined;
         }
     },
     {
@@ -632,10 +629,9 @@ export const warPhases: NamedPhase[] = [
             );
         }
     },
-    // Note: brigade_front_assignment and local_fronts are NOT overwritten by sector system.
-    // Sectors are an organizational layer for corps targeting and directives.
-    // The density modifier continues to use the existing local_fronts (faction-level aggregation)
-    // because per-sector density would over-penalize overextended factions (VRS historically thin).
+    // Note: brigade_front_assignment survives only as a compatibility fallback.
+    // Sectors are the live frontline authority, and local_fronts are no longer rebuilt
+    // as runtime truth once the modern sector pipeline is available.
 
     {
         name: 'assign-brigades-to-subsegments',

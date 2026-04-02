@@ -244,6 +244,7 @@ function assessCorps(state: GameState, faction: FactionId, corpsId: string): Cor
     const cc = state.military.corps_command?.[corpsId];
     const exhaustion = cc?.corps_exhaustion ?? 0;
     const hasActiveOp = (cc?.active_operations?.length ?? 0) > 0;
+    const reinforcementSignal = summarizeCommanderReinforcementPressure(cc?.commander_reinforcement_requests);
 
     // Count active brigades and sum personnel
     let availableBrigades = 0;
@@ -267,6 +268,7 @@ function assessCorps(state: GameState, faction: FactionId, corpsId: string): Cor
 
     // Sector threat average from sector_combat_ratings
     const sectorThreatAvg = computeSectorThreatAvg(state, faction, corpsId);
+    const recentTerritoryChange = computeRecentTerritoryChange(state, faction, corpsId);
 
     return {
         corps_id: corpsId,
@@ -274,11 +276,39 @@ function assessCorps(state: GameState, faction: FactionId, corpsId: string): Cor
         strength_class: strengthClass,
         exhaustion,
         has_active_op: hasActiveOp,
-        recent_territory_change: 0, // Placeholder for v0.4.7
+        recent_territory_change: recentTerritoryChange,
         sector_threat_avg: sectorThreatAvg,
         available_brigades: availableBrigades,
         officer_competence: officerCompetence,
+        commander_reinforcement_priority: reinforcementSignal.priority,
+        commander_reinforcement_brigades_needed: reinforcementSignal.brigadesNeeded,
     };
+}
+
+function summarizeCommanderReinforcementPressure(
+    requests: Array<{ zone_id: string; brigades_needed: number; priority: 'critical' | 'high' | 'medium' | 'low' }> | undefined,
+): { priority: 'critical' | 'high' | 'medium' | 'low' | null; brigadesNeeded: number } {
+    if (!requests || requests.length === 0) {
+        return { priority: null, brigadesNeeded: 0 };
+    }
+
+    const priorityOrder: Record<'critical' | 'high' | 'medium' | 'low', number> = {
+        critical: 4,
+        high: 3,
+        medium: 2,
+        low: 1,
+    };
+
+    let topPriority: 'critical' | 'high' | 'medium' | 'low' | null = null;
+    let brigadesNeeded = 0;
+    for (const request of requests) {
+        brigadesNeeded += Math.max(0, request.brigades_needed);
+        if (!topPriority || priorityOrder[request.priority] > priorityOrder[topPriority]) {
+            topPriority = request.priority;
+        }
+    }
+
+    return { priority: topPriority, brigadesNeeded };
 }
 
 /** Look up the corps commander competence from named officer data. */
@@ -328,6 +358,56 @@ function computeSectorThreatAvg(state: GameState, faction: FactionId, corpsId: s
         count++;
     }
     return count > 0 ? totalThreat / count : 0.5;
+}
+
+const RECENT_TERRITORY_CHANGE_WINDOW = 6;
+
+/**
+ * Compute net recent territory change for a corps from political control events.
+ *
+ * The signal is scoped to the corps's current front neighborhood:
+ * - sector territory_osids
+ * - front-line friendly_osids
+ * - front-line enemy_osids
+ *
+ * Positive = recent gains near this corps's front.
+ * Negative = recent losses near this corps's front.
+ */
+function computeRecentTerritoryChange(
+    state: GameState,
+    faction: FactionId,
+    corpsId: string,
+): number {
+    const currentTurn = state.meta?.turn ?? 0;
+    const recentCutoff = currentTurn - RECENT_TERRITORY_CHANGE_WINDOW;
+    const sectors = state.military.corps_front_sectors ?? {};
+    const scopeOsids = new Set<string>();
+
+    for (const sector of Object.values(sectors)) {
+        if (!sector || sector.corps_id !== corpsId) continue;
+        for (const osid of sector.territory_osids ?? []) scopeOsids.add(osid);
+        for (const sub of sector.sub_segments ?? []) {
+            for (const osid of sub.friendly_osids ?? []) scopeOsids.add(osid);
+            for (const osid of sub.enemy_osids ?? []) scopeOsids.add(osid);
+        }
+    }
+
+    if (scopeOsids.size === 0) return 0;
+
+    const controlEvents = state.political.control_events ?? [];
+    let delta = 0;
+    for (const event of controlEvents) {
+        if (event.turn <= recentCutoff) continue;
+        if (!scopeOsids.has(event.settlement_id)) continue;
+
+        const gained = event.to === faction && event.from !== faction;
+        const lost = event.from === faction && event.to !== faction;
+
+        if (gained) delta += 1;
+        else if (lost) delta -= 1;
+    }
+
+    return delta;
 }
 
 /** Derive territory trend from corps strength distribution. */
@@ -440,6 +520,24 @@ function computeOpportunityScore(ca: CorpsAssessment): number {
     // Threat modifiers
     if (ca.sector_threat_avg < OPPORTUNITY_SCORE.LOW_THREAT_THRESHOLD) score += OPPORTUNITY_SCORE.LOW_THREAT_BONUS;
     else if (ca.sector_threat_avg > OPPORTUNITY_SCORE.HIGH_THREAT_THRESHOLD) score += OPPORTUNITY_SCORE.HIGH_THREAT_PENALTY;
+
+    if (ca.recent_territory_change <= -2) {
+        score += OPPORTUNITY_SCORE.TERRITORY_LOSS_HIGH_PENALTY;
+    } else if (ca.recent_territory_change < 0) {
+        score += OPPORTUNITY_SCORE.TERRITORY_LOSS_LOW_PENALTY;
+    } else if (ca.recent_territory_change >= 2) {
+        score += OPPORTUNITY_SCORE.TERRITORY_GAIN_HIGH_BONUS;
+    } else if (ca.recent_territory_change > 0) {
+        score += OPPORTUNITY_SCORE.TERRITORY_GAIN_LOW_BONUS;
+    }
+
+    if (ca.commander_reinforcement_priority) {
+        score += OPPORTUNITY_SCORE.COMMANDER_REINFORCEMENT_PRIORITY[ca.commander_reinforcement_priority];
+        score += Math.max(
+            OPPORTUNITY_SCORE.COMMANDER_REINFORCEMENT_MAX_BRIGADE_PENALTY,
+            ca.commander_reinforcement_brigades_needed * OPPORTUNITY_SCORE.COMMANDER_REINFORCEMENT_PER_BRIGADE_NEEDED,
+        );
+    }
 
     return score;
 }
@@ -589,6 +687,12 @@ function generateFrontPriorities(
             role = 'secondary';
             suggestedStance = 'balanced';
             primaryCount--;
+        }
+
+        // Corps actively asking Army HQ for reinforcement should not be treated as a cheap economy front.
+        if (role === 'economy' && (ca.commander_reinforcement_priority === 'critical' || ca.commander_reinforcement_priority === 'high')) {
+            role = ca.strength_class === 'critical' ? 'contain' : 'secondary';
+            suggestedStance = role === 'contain' ? 'defensive' : 'balanced';
         }
 
         const targets = computeCorpsTargets(state, ca.corps_id, role);

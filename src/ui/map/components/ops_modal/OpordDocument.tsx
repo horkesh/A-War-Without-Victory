@@ -5,6 +5,7 @@
 import type { OpsPlanState } from './types';
 import { OP_TYPE_LABELS, TEMPO_LABELS, TOLERANCE_LABELS, FACTION_ARMY_HEADERS } from './types';
 import type { PredictionResult } from './usePrediction';
+import { buildOpordDisplayModel } from './opordDisplay';
 
 interface OpordDocumentProps {
     plan: OpsPlanState;
@@ -14,12 +15,14 @@ interface OpordDocumentProps {
     faction: string;
     date: string;
     isStamped: boolean;
+    osidDisplayNames: Record<string, string> | null;
 }
 
-export function OpordDocument({ plan, prediction, commanderName, corpsName, faction, date, isStamped }: OpordDocumentProps) {
+export function OpordDocument({ plan, prediction, commanderName, corpsName, faction, date, isStamped, osidDisplayNames }: OpordDocumentProps) {
     const headers = FACTION_ARMY_HEADERS[faction] ?? FACTION_ARMY_HEADERS.RBiH;
     const allBrigades = plan.axes.flatMap((a) => a.brigadeIds);
-    const allObjectives = plan.axes.flatMap((a) => a.objectives);
+    const display = buildOpordDisplayModel(plan, osidDisplayNames);
+    const allObjectives = display.objectiveLabels;
 
     return (
         <div className="relative bg-[#f0e8d8] rounded-lg border border-[#c0b090] p-8 max-w-[600px] mx-auto shadow-2xl"
@@ -95,12 +98,12 @@ export function OpordDocument({ plan, prediction, commanderName, corpsName, fact
                         4. PROVEDBA (Execution)
                     </div>
                     <div className="text-[10px] text-[#4a4238] leading-relaxed">
-                        {plan.axes.map((axis, idx) => (
+                        {display.axes.map((axis, idx) => (
                             <div key={axis.id} className="mb-1">
                                 <span className="font-bold">Axis {idx + 1} ({axis.name}):</span>{' '}
-                                {axis.brigadeIds.length} brigade{axis.brigadeIds.length !== 1 ? 's' : ''},{' '}
-                                {axis.objectives.length} objective{axis.objectives.length !== 1 ? 's' : ''}.
-                                {axis.stagingOsid && <> Staging: {axis.stagingOsid}.</>}
+                                {axis.brigadeCount} brigade{axis.brigadeCount !== 1 ? 's' : ''},{' '}
+                                {axis.objectiveCount} objective{axis.objectiveCount !== 1 ? 's' : ''}.
+                                {axis.stagingLabel && <> Staging: {axis.stagingLabel}.</>}
                             </div>
                         ))}
                     </div>
@@ -113,8 +116,8 @@ export function OpordDocument({ plan, prediction, commanderName, corpsName, fact
                     </div>
                     <div className="text-[10px] text-[#4a4238] leading-relaxed">
                         {allObjectives.length} objective{allObjectives.length !== 1 ? 's' : ''}.
-                        {plan.schwerpunktOsid && (
-                            <> Schwerpunkt: <span className="font-bold">{plan.schwerpunktOsid}</span>.</>
+                        {display.schwerpunktLabel && (
+                            <> Schwerpunkt: <span className="font-bold">{display.schwerpunktLabel}</span>.</>
                         )}
                     </div>
                 </div>

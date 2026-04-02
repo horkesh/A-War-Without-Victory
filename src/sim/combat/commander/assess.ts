@@ -70,7 +70,7 @@ export function assessSituation(
     );
 
     // 3. Evaluate forces
-    const forces = evaluateCorpsForces(briefing.brigades, zones);
+    const forces = evaluateCorpsForces(briefing.brigades, zones, briefing.supply_by_osid);
 
     // 4. Build concentration zone list from previous intel picture
     // concentration_detected is keyed by sector_id; map via osid overlap to zone_id.

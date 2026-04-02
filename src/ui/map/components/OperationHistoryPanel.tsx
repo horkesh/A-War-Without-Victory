@@ -2,10 +2,15 @@
  * Operation History Panel — shows completed operation AARs and active ops.
  * Two tabs: Active (in-progress) and History (completed with star grades).
  */
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { humanizeOsid } from '../utils/osidDisplayName';
 import type { LoadedGameState } from '../data/types';
+import {
+    filterPlayerFacingActiveOperations,
+    filterPlayerFacingFormations,
+    filterPlayerFacingOperationHistory,
+} from '../../shared/playerVisibility';
 
 // --- Faction styling ---
 const FACTION_COLOR: Record<string, string> = {
@@ -60,6 +65,10 @@ type CompletedOp = NonNullable<LoadedGameState['operationHistory']>[number];
 type ActiveOp = NonNullable<LoadedGameState['activeOperations']>[number];
 type Tab = 'active' | 'history';
 
+function getCorpsDisplayName(corpsNameById: Map<string, string>, corpsId: string): string {
+    return corpsNameById.get(corpsId) ?? 'Field Command';
+}
+
 // --- Sub-components ---
 
 function FactionTag({ faction }: { faction: string }) {
@@ -110,7 +119,7 @@ function ExchangeRatio({ suffered, inflicted }: { suffered: { killed: number; wo
 
 // --- Completed operation card ---
 
-function CompletedOpCard({ op }: { op: CompletedOp }) {
+function CompletedOpCard({ op, corpsName }: { op: CompletedOp; corpsName: string }) {
     const [expanded, setExpanded] = useState(false);
     const objRate = op.objectives_targeted.length > 0
         ? `${op.objectives_captured.length}/${op.objectives_targeted.length}`
@@ -135,7 +144,7 @@ function CompletedOpCard({ op }: { op: CompletedOp }) {
                             </div>
                         )}
                         <div className="text-[9px] text-text-muted">
-                            {op.corps_id} | W{op.started_turn}-W{op.ended_turn} ({op.duration_turns}w) | Obj {objRate}
+                            {corpsName} | W{op.started_turn}-W{op.ended_turn} ({op.duration_turns}w) | Obj {objRate}
                         </div>
                     </div>
                     <div className="flex flex-col items-end shrink-0 gap-0.5">
@@ -271,7 +280,7 @@ function CompletedOpCard({ op }: { op: CompletedOp }) {
 
 // --- Active operation card ---
 
-function ActiveOpCard({ op }: { op: ActiveOp }) {
+function ActiveOpCard({ op, corpsName }: { op: ActiveOp; corpsName: string }) {
     const objRate = op.objectives_count > 0 ? `${op.objectives_captured}/${op.objectives_count}` : '0/0';
     return (
         <div className="border border-panel-border/50 rounded bg-panel-card/50 mb-2 px-3 py-2">
@@ -285,7 +294,7 @@ function ActiveOpCard({ op }: { op: ActiveOp }) {
                         <div className="text-[9px] text-text-muted">OiC: {op.commander_name}</div>
                     )}
                     <div className="text-[9px] text-text-muted">
-                        {op.corps_id} | Since W{op.started_turn} | {op.participating_brigades.length} bdes
+                        {corpsName} | Since W{op.started_turn} | {op.participating_brigades.length} bdes
                     </div>
                 </div>
                 <div className="flex flex-col items-end shrink-0 gap-0.5">
@@ -313,11 +322,20 @@ interface OperationHistoryPanelProps {
 export function OperationHistoryPanel({ isOpen, onClose, embedded }: OperationHistoryPanelProps) {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const [tab, setTab] = useState<Tab>('active');
+    const corpsNameById = useMemo(
+        () =>
+            new Map(
+                filterPlayerFacingFormations(loadedGameState)
+                    .filter((f) => f.kind === 'corps' || f.kind === 'army_hq' || f.kind === 'corps_asset')
+                    .map((f) => [f.id, f.name]),
+            ),
+        [loadedGameState?.formations],
+    );
 
     if (!isOpen || !loadedGameState) return null;
 
-    const history = loadedGameState.operationHistory ?? [];
-    const active = loadedGameState.activeOperations ?? [];
+    const history = filterPlayerFacingOperationHistory(loadedGameState);
+    const active = filterPlayerFacingActiveOperations(loadedGameState);
     const sortedHistory = [...history].sort((a, b) => b.ended_turn - a.ended_turn);
 
     const tabClass = (t: Tab) =>
@@ -343,7 +361,11 @@ export function OperationHistoryPanel({ isOpen, onClose, embedded }: OperationHi
                         <div className="text-text-muted text-center py-8 text-[11px]">No active operations.</div>
                     ) : (
                         active.map((op) => (
-                            <ActiveOpCard key={`${op.corps_id}:${op.operation_name}:${op.started_turn}`} op={op} />
+                            <ActiveOpCard
+                                key={`${op.corps_id}:${op.operation_name}:${op.started_turn}`}
+                                op={op}
+                                corpsName={getCorpsDisplayName(corpsNameById, op.corps_id)}
+                            />
                         ))
                     )
                 )}
@@ -352,7 +374,11 @@ export function OperationHistoryPanel({ isOpen, onClose, embedded }: OperationHi
                         <div className="text-text-muted text-center py-8 text-[11px]">No completed operations yet.</div>
                     ) : (
                         sortedHistory.map((op) => (
-                            <CompletedOpCard key={op.operation_id} op={op} />
+                            <CompletedOpCard
+                                key={op.operation_id}
+                                op={op}
+                                corpsName={getCorpsDisplayName(corpsNameById, op.corps_id)}
+                            />
                         ))
                     )
                 )}

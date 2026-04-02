@@ -172,6 +172,8 @@ function makeTheaterState(overrides: {
     formations?: Record<string, Partial<FormationState>>;
     corpsCommand?: Record<string, { corps_exhaustion?: number; active_operations?: unknown }>;
     generalSupplyReserve?: Record<string, number>;
+    controlEvents?: Array<{ turn: number; settlement_id: string; from: string | null; to: string | null; mechanism?: 'combat' | 'consolidation' | 'abandoned' | 'event' }>;
+    corpsFrontSectors?: Record<string, unknown>;
 } = {}): GameState {
     const formations: Record<string, FormationState> = {};
     if (overrides.formations) {
@@ -198,9 +200,15 @@ function makeTheaterState(overrides: {
             front_posture: {},
             corps_command: overrides.corpsCommand ?? {},
             general_supply_reserve: overrides.generalSupplyReserve ?? {},
+            corps_front_sectors: overrides.corpsFrontSectors ?? {},
             fired_event_ids: [],
         } as unknown as GameState['military'],
-        political: {} as unknown as GameState['political'],
+        political: {
+            control_events: (overrides.controlEvents ?? []).map((event) => ({
+                mechanism: 'combat',
+                ...event,
+            })),
+        } as unknown as GameState['political'],
         factions: {} as GameState['factions'],
         displacement: {} as GameState['displacement'],
     } as unknown as GameState;
@@ -294,6 +302,89 @@ describe('assessTheater', () => {
         expect(staff.strength_class).toBe('strong');
         expect(staff.available_brigades).toBe(1);
     });
+
+    it('tracks recent territory gains and losses near each corps front', () => {
+        const state = makeTheaterState({
+            turn: 20,
+            formations: {
+                bde_1: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 1200, status: 'active' },
+                bde_2: { faction: 'RS', corps_id: 'vrs_drina', personnel: 1200, status: 'active' },
+            },
+            corpsFrontSectors: {
+                krajina_sector: makeSector({
+                    sector_id: 'krajina_sector',
+                    corps_id: 'vrs_1st_krajina',
+                    friendly_osids: ['op:krajina:held'],
+                    enemy_osids: ['op:krajina:target'],
+                }),
+                drina_sector: makeSector({
+                    sector_id: 'drina_sector',
+                    corps_id: 'vrs_drina',
+                    friendly_osids: ['op:drina:held'],
+                    enemy_osids: ['op:drina:target'],
+                }),
+            },
+            controlEvents: [
+                { turn: 19, settlement_id: 'op:krajina:target', from: 'RBiH', to: 'RS' },
+                { turn: 18, settlement_id: 'op:drina:held', from: 'RS', to: 'RBiH' },
+                { turn: 12, settlement_id: 'op:krajina:stale', from: 'RBiH', to: 'RS' },
+            ],
+        });
+
+        const assessment = assessTheater(state, 'RS');
+        const krajina = assessment.corps_assessments.find(c => c.corps_id === 'vrs_1st_krajina')!;
+        const drina = assessment.corps_assessments.find(c => c.corps_id === 'vrs_drina')!;
+
+        expect(krajina.recent_territory_change).toBe(1);
+        expect(drina.recent_territory_change).toBe(-1);
+    });
+
+    it('surfaces persisted commander reinforcement pressure in theater assessment', () => {
+        const state = makeTheaterState({
+            formations: {
+                bde_1: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 1100, status: 'active' },
+            },
+            corpsCommand: {
+                vrs_1st_krajina: {
+                    commander_reinforcement_requests: [
+                        { zone_id: 'zone:vrs_1st_krajina:ozren', brigades_needed: 2, priority: 'critical' },
+                        { zone_id: 'zone:vrs_1st_krajina:doboj', brigades_needed: 1, priority: 'medium' },
+                    ],
+                },
+            },
+        });
+
+        const assessment = assessTheater(state, 'RS');
+        const krajina = assessment.corps_assessments.find(c => c.corps_id === 'vrs_1st_krajina')!;
+
+        expect(krajina.commander_reinforcement_priority).toBe('critical');
+        expect(krajina.commander_reinforcement_brigades_needed).toBe(3);
+    });
+
+    it('ignores control events outside the corps front neighborhood', () => {
+        const state = makeTheaterState({
+            turn: 20,
+            formations: {
+                bde_1: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 1200, status: 'active' },
+            },
+            corpsFrontSectors: {
+                krajina_sector: makeSector({
+                    sector_id: 'krajina_sector',
+                    corps_id: 'vrs_1st_krajina',
+                    friendly_osids: ['op:krajina:held'],
+                    enemy_osids: ['op:krajina:target'],
+                }),
+            },
+            controlEvents: [
+                { turn: 19, settlement_id: 'op:other:unrelated', from: 'RBiH', to: 'RS' },
+            ],
+        });
+
+        const assessment = assessTheater(state, 'RS');
+        const krajina = assessment.corps_assessments.find(c => c.corps_id === 'vrs_1st_krajina')!;
+
+        expect(krajina.recent_territory_change).toBe(0);
+    });
 });
 
 // ── Campaign Plan Generation ────────────────────────────────────────────────
@@ -309,6 +400,8 @@ function makeCorpsAssessment(overrides: Partial<CorpsAssessment> & { corps_id: s
         sector_threat_avg: 0.5,
         available_brigades: 5,
         officer_competence: 3.0,
+        commander_reinforcement_priority: null,
+        commander_reinforcement_brigades_needed: 0,
         ...overrides,
     };
 }
@@ -453,6 +546,61 @@ describe('generateCampaignPlan', () => {
 
         expect(plan.doctrine_override!.army_stance).toBe('balanced');
         expect(plan.doctrine_override!.aggression_modifier).toBeLessThan(0);
+    });
+
+    it('critical commander reinforcement pressure keeps a corps out of economy role', () => {
+        const assessment = makeAssessment({
+            corps_assessments: [
+                makeCorpsAssessment({
+                    corps_id: 'vrs_1st_krajina',
+                    available_brigades: 2,
+                    strength_class: 'adequate',
+                    sector_threat_avg: 0.9,
+                    commander_reinforcement_priority: 'critical',
+                    commander_reinforcement_brigades_needed: 2,
+                }),
+                makeCorpsAssessment({
+                    corps_id: 'vrs_drina',
+                    available_brigades: 6,
+                    strength_class: 'strong',
+                    sector_threat_avg: 0.2,
+                }),
+            ],
+        });
+        const state = makeMinimalState({ turn: 60 });
+        const plan = generateCampaignPlan(state, 'RS', assessment, 60, 'regular_cadence', false);
+
+        const krajina = plan.front_priorities.find(p => p.corps_id === 'vrs_1st_krajina')!;
+        expect(krajina.role).not.toBe('economy');
+    });
+
+    it('recent territorial losses penalize front opportunity and keep a bleeding corps out of primary role', () => {
+        const assessment = makeAssessment({
+            corps_assessments: [
+                makeCorpsAssessment({
+                    corps_id: 'vrs_1st_krajina',
+                    available_brigades: 8,
+                    strength_class: 'strong',
+                    sector_threat_avg: 0.2,
+                    recent_territory_change: -2,
+                }),
+                makeCorpsAssessment({
+                    corps_id: 'vrs_drina',
+                    available_brigades: 7,
+                    strength_class: 'strong',
+                    sector_threat_avg: 0.2,
+                    recent_territory_change: 0,
+                }),
+            ],
+        });
+        const state = makeMinimalState({ turn: 60 });
+        const plan = generateCampaignPlan(state, 'RS', assessment, 60, 'regular_cadence', false);
+
+        const krajina = plan.front_priorities.find(p => p.corps_id === 'vrs_1st_krajina')!;
+        const drina = plan.front_priorities.find(p => p.corps_id === 'vrs_drina')!;
+
+        expect(drina.role).toBe('primary');
+        expect(krajina.role).not.toBe('primary');
     });
 });
 

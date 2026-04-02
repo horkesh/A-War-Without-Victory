@@ -12,6 +12,12 @@ import type {
     MilitiaPoolView, MobilizationSummaryView, MovementOrderSettlementView, NamedOfficerStateView, NamedOfficerView,
     OperationView, RepositionOrderView, RecruitmentView,
 } from './types';
+import {
+    getPlayerSafeCorpsName,
+    getPlayerSafeDecisionTitle,
+    getPlayerSafeDisplayLabel,
+    getPlayerSafeOfficerName,
+} from '../utils/playerSafeText.js';
 import { buildControlLookup, buildStatusLookup } from './ControlLookup.js';
 import { getMunicipalitySupportLabel } from '../../../sim/combat/municipality_support.js';
 import { strictCompare } from '../../../state/validateGameState.js';
@@ -500,53 +506,6 @@ export function parseGameState(json: unknown): LoadedGameState {
         }
     }
 
-    let brigadeFrontAssignment: LoadedGameState['brigadeFrontAssignment'] | undefined;
-    const rawFrontAssignment = state.military.brigade_front_assignment as any | undefined;
-    if (rawFrontAssignment && typeof rawFrontAssignment === 'object' && !Array.isArray(rawFrontAssignment)) {
-        const out: NonNullable<LoadedGameState['brigadeFrontAssignment']> = {};
-        for (const formationId of Object.keys(rawFrontAssignment).sort((a, b) => a.localeCompare(b))) {
-            const value = rawFrontAssignment[formationId];
-            out[formationId] = typeof value === 'string' ? value : null;
-        }
-        if (Object.keys(out).length > 0) brigadeFrontAssignment = out;
-    }
-
-    let armyTheatreAssignment: LoadedGameState['armyTheatreAssignment'] | undefined;
-    const rawArmyTheatreAssignment = state.military.army_theatre_assignment as any | undefined;
-    if (rawArmyTheatreAssignment && typeof rawArmyTheatreAssignment === 'object' && !Array.isArray(rawArmyTheatreAssignment)) {
-        const out: NonNullable<LoadedGameState['armyTheatreAssignment']> = {};
-        for (const armyId of Object.keys(rawArmyTheatreAssignment).sort((a, b) => a.localeCompare(b))) {
-            const theatreId = rawArmyTheatreAssignment[armyId];
-            if (typeof theatreId === 'string' && theatreId.length > 0) out[armyId] = theatreId;
-        }
-        if (Object.keys(out).length > 0) armyTheatreAssignment = out;
-    }
-
-    let theatres: LoadedGameState['theatres'] | undefined;
-    const rawTheatres = state.military.theatres as Record<string, Record<string, unknown>> | undefined;
-    if (rawTheatres && typeof rawTheatres === 'object' && !Array.isArray(rawTheatres)) {
-        const out: NonNullable<LoadedGameState['theatres']> = {};
-        for (const theatreId of Object.keys(rawTheatres).sort((a, b) => a.localeCompare(b))) {
-            const row = rawTheatres[theatreId] ?? {};
-            const faction = typeof row.faction === 'string' ? row.faction : '';
-            if (!faction) continue;
-            const armyIds = Array.isArray(row.army_ids)
-                ? row.army_ids.filter((id): id is string => typeof id === 'string' && id.length > 0).sort((a, b) => a.localeCompare(b))
-                : undefined;
-            const regionScope = Array.isArray(row.region_scope)
-                ? row.region_scope.filter((id): id is string => typeof id === 'string' && id.length > 0).sort((a, b) => a.localeCompare(b))
-                : undefined;
-            out[theatreId] = {
-                id: typeof row.id === 'string' && row.id.length > 0 ? row.id : theatreId,
-                name: typeof row.name === 'string' && row.name.length > 0 ? row.name : `${faction} Theatre`,
-                faction,
-            };
-            if (armyIds && armyIds.length > 0) out[theatreId].army_ids = armyIds;
-            if (regionScope && regionScope.length > 0) out[theatreId].region_scope = regionScope;
-        }
-        if (Object.keys(out).length > 0) theatres = out;
-    }
-
     // Brigade history lives on each formation (state.formations[id].brigade_history), not in a separate state.brigade_history.
     // Fallback to state.brigade_history for any legacy save that might have used that shape.
     const brigadeHistoryRecord = state.brigade_history as Record<string, Record<string, unknown>> | undefined;
@@ -678,7 +637,9 @@ export function parseGameState(json: unknown): LoadedGameState {
             } : undefined;
 
             const fv: FormationView = {
-                id, faction: (f.faction as string) ?? '', name: (f.name as string) ?? id,
+                id,
+                faction: (f.faction as string) ?? '',
+                name: getPlayerSafeDisplayLabel(typeof f.name === 'string' ? f.name : id, 'Formation'),
                 kind: ((f.kind as string) === 'corps_asset' && (id.endsWith('_staff') || id.endsWith('_general_staff'))) ? 'army_hq' : ((f.kind as string) ?? 'brigade'),
                 readiness: (f.readiness as string) ?? 'active',
                 cohesion: (f.cohesion as number) ?? 100, fatigue: (ops?.fatigue as number) ?? 0,
@@ -1041,16 +1002,9 @@ export function parseGameState(json: unknown): LoadedGameState {
         }
     }
 
+    // Brigade reposition orders are retired. Older saves may still carry the field,
+    // but the player-facing shell must not present it as an active order type.
     const repositionOrders: RepositionOrderView[] = [];
-    const rawReposition = state.military.brigade_reposition_orders as Record<string, { settlement_ids?: string[] }> | undefined;
-    if (rawReposition && typeof rawReposition === 'object' && !Array.isArray(rawReposition)) {
-        for (const [brigadeId, order] of Object.entries(rawReposition).sort((a, b) => a[0].localeCompare(b[0]))) {
-            const sids = order?.settlement_ids;
-            if (Array.isArray(sids) && sids.length > 0) {
-                repositionOrders.push({ brigadeId, settlementIds: [...sids].sort() });
-            }
-        }
-    }
 
     const aorOrders: AoROrderView[] = [];
     const rawAoROrders = state.brigade_aor_orders as Array<{ settlement_id?: string; from_brigade?: string; to_brigade?: string }> | undefined;
@@ -1128,7 +1082,7 @@ export function parseGameState(json: unknown): LoadedGameState {
     }
 
     let civilianCasualties: LoadedGameState['civilianCasualties'] | undefined;
-    const rawCivilianCasualties = state.displacement.civilian_casualties as Record<string, Record<string, unknown>> | undefined;
+    const rawCivilianCasualties = state.displacement?.civilian_casualties as Record<string, Record<string, unknown>> | undefined;
     if (rawCivilianCasualties && typeof rawCivilianCasualties === 'object' && !Array.isArray(rawCivilianCasualties)) {
         const out: NonNullable<LoadedGameState['civilianCasualties']> = {};
         for (const faction of Object.keys(rawCivilianCasualties).sort((a, b) => a.localeCompare(b))) {
@@ -1241,7 +1195,7 @@ export function parseGameState(json: unknown): LoadedGameState {
             const f = rawFacilities[fid];
             return {
                 id: f.facility_id ?? fid,
-                name: f.name ?? fid,
+                name: getPlayerSafeDisplayLabel(f.name ?? fid, 'Production facility'),
                 type: f.type ?? 'unknown',
                 municipality: f.municipality_id ?? '',
                 condition: typeof f.current_condition === 'number' ? f.current_condition : 1,
@@ -1269,7 +1223,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         smugglingRoutes = rawRoutes
             .sort((a: any, b: any) => String(a.id ?? '').localeCompare(String(b.id ?? '')))
             .map((r: any) => {
-                const meta = ROUTE_NAMES[r.id] ?? { name: r.id, faction: '' };
+                const meta = ROUTE_NAMES[r.id] ?? { name: getPlayerSafeDisplayLabel(r.id, 'Supply route'), faction: '' };
                 return {
                     id: String(r.id ?? ''),
                     name: meta.name,
@@ -1369,7 +1323,7 @@ export function parseGameState(json: unknown): LoadedGameState {
             const os = rawOfficers[id];
             officerList.push({
                 id,
-                name: typeof data.name === 'string' ? data.name : id,
+                name: getPlayerSafeOfficerName(typeof data.name === 'string' ? data.name : null),
                 faction: typeof data.faction === 'string' ? data.faction : '',
                 rank: typeof data.rank === 'string' ? data.rank : 'corps_commander',
                 competence: finiteNumber(data.competence, 0),
@@ -1431,12 +1385,6 @@ export function parseGameState(json: unknown): LoadedGameState {
     // Default to RS in dev mode when no player faction set (headless scenario runs)
     const rawPlayerFaction = (meta?.player_faction as string | null | undefined) ?? null;
     const playerFaction = rawPlayerFaction ?? (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('dev') === '1' ? 'RS' : null) ?? (typeof import.meta !== 'undefined' && import.meta.env?.DEV ? 'RS' : null);
-
-    const rawDesiredCap = state.military.brigade_desired_aor_cap as Record<string, number> | undefined;
-    const brigadeDesiredAoRCap: Record<string, number> | undefined =
-        rawDesiredCap && typeof rawDesiredCap === 'object' && !Array.isArray(rawDesiredCap)
-            ? Object.fromEntries(Object.entries(rawDesiredCap).filter(([, v]) => typeof v === 'number' && v >= 1 && v <= 4).sort((a, b) => a[0].localeCompare(b[0])))
-            : undefined;
 
     // Single pass: derive fogOfWar + sectorIntel from sector_intel records
     let fogOfWar: FogOfWarView | undefined;
@@ -1500,7 +1448,7 @@ export function parseGameState(json: unknown): LoadedGameState {
     }
 
     const displacementByMun: LoadedGameState['displacementByMun'] = {};
-    const rawDisplacement = state.displacement.displacement_state as Record<string, Record<string, unknown>> | undefined;
+    const rawDisplacement = state.displacement?.displacement_state as Record<string, Record<string, unknown>> | undefined;
     if (rawDisplacement && typeof rawDisplacement === 'object' && !Array.isArray(rawDisplacement)) {
         for (const [munId, row] of Object.entries(rawDisplacement).sort((a, b) => a[0].localeCompare(b[0]))) {
             const originalPopulation = typeof row.original_population === 'number' && Number.isFinite(row.original_population) ? row.original_population : 0;
@@ -1614,7 +1562,6 @@ export function parseGameState(json: unknown): LoadedGameState {
             const lengthEdges = Number.isFinite(Number(segment.length_edges)) && Number(segment.length_edges) > 0 ? Math.floor(Number(segment.length_edges)) : edgeIds.length;
             const entry: NonNullable<LoadedGameState['assignableFrontSegments']>[number] = { front_id: frontId, edge_ids: edgeIds, side_a: sideA, side_b: sideB, length_edges: lengthEdges };
             if (typeof segment.name === 'string' && segment.name.length > 0) entry.name = segment.name;
-            if (typeof segment.theatre_id === 'string' && segment.theatre_id.length > 0) entry.theatre_id = segment.theatre_id;
             out.push(entry);
         }
         out.sort((a, b) => a.front_id.localeCompare(b.front_id));
@@ -1638,10 +1585,13 @@ export function parseGameState(json: unknown): LoadedGameState {
 
     let corpsFrontSectors: CorpsFrontSectorView[] | undefined;
     const rawSectors = state.military.corps_front_sectors as Record<string, Record<string, unknown>> | undefined;
+    const rawOpsecSectors = Array.isArray(state.military.opsec_sectors)
+        ? state.military.opsec_sectors
+        : Array.isArray((state as any).opsec_sectors)
+            ? (state as any).opsec_sectors
+            : [];
     const opsecSectorSet = new Set(
-        Array.isArray((state as any).opsec_sectors)
-            ? ((state as any).opsec_sectors as string[]).filter((value): value is string => typeof value === 'string')
-            : []
+        rawOpsecSectors.filter((value): value is string => typeof value === 'string')
     );
     if (rawSectors && typeof rawSectors === 'object' && !Array.isArray(rawSectors)) {
         const out: CorpsFrontSectorView[] = [];
@@ -1821,14 +1771,13 @@ export function parseGameState(json: unknown): LoadedGameState {
             date: metadataDate,
         },
         formations, militiaPools, controlBySettlement, statusBySettlement,
-        brigadeAorByFormationId, brigadeFrontAssignment, theatres, armyTheatreAssignment,
+        brigadeAorByFormationId,
         attackOrders, aorOrders, recentControlEvents, allControlEvents: recentControlEvents, displacementEventLog: displacementEventLogRaw, recruitment,
         armyStance, casualtyLedger, civilianCasualties, internationalVisibilityPressure, ivpConsequencesActive, pendingConvoyDecisions, municipalitySupportOrders,
         sarajevoTunnelOperational: Boolean(state.military.sarajevo_tunnel_operational), warPhaseSupplyPressure, warPhaseExhaustion,
         player_faction: playerFaction ?? undefined,
         rbih_hrhb_war_earliest_turn: rbih_hrhb_war_earliest_turn ?? null,
         war_alliance_rbih_hrhb: war_alliance_rbih_hrhb ?? null,
-        brigadeDesiredAoRCap: brigadeDesiredAoRCap && Object.keys(brigadeDesiredAoRCap).length > 0 ? brigadeDesiredAoRCap : undefined,
         frontEdges: frontEdges && frontEdges.length > 0 ? frontEdges : undefined,
         frontEdgesOsid: frontEdgesOsid && frontEdgesOsid.length > 0 ? frontEdgesOsid : undefined,
         assignableFrontSegments, frontPressureByEdge,
@@ -1962,7 +1911,7 @@ function deriveMovementsByOsid(state: any): LoadedGameState['movementsByOsid'] {
         if (!Array.isArray(summary.movements)) continue;
         for (const m of summary.movements) {
             const fid = String(m.formation_id ?? '');
-            const fname = String(m.formation_name ?? fid);
+            const fname = getPlayerSafeDisplayLabel(String(m.formation_name ?? fid), 'Formation');
             const from = String(m.from_osid ?? '');
             const to = String(m.to_osid ?? '');
             if (!from && !to) continue;
@@ -1989,7 +1938,12 @@ function deriveHistoricalEvents(state: any): LoadedGameState['historicalEventsBy
         const turn = typeof summary.turn === 'number' ? summary.turn : 0;
         if (!Array.isArray(summary.events_fired)) continue;
         for (const e of summary.events_fired) {
-            result.push({ turn, id: String(e.id ?? ''), text: String(e.text ?? '') });
+            const rawId = String(e.id ?? '');
+            result.push({
+                turn,
+                id: rawId,
+                text: getPlayerSafeDisplayLabel(String(e.text ?? rawId), 'Historical event'),
+            });
         }
     }
     return result;
@@ -2145,7 +2099,7 @@ function derivePendingOfficerEvents(state: any): LoadedGameState['pendingOfficer
 
     const getOfficerName = (id: string): string => {
         const o = officerData?.find((d: any) => d.id === id);
-        return o?.name ?? id;
+        return getPlayerSafeOfficerName(typeof o?.name === 'string' ? o.name : null);
     };
 
     const getOfficerStats = (id: string) => {
@@ -2159,9 +2113,9 @@ function derivePendingOfficerEvents(state: any): LoadedGameState['pendingOfficer
     };
 
     const getCorpsName = (corpsId: string): string => {
-        if (!formations) return corpsId;
+        if (!formations) return 'This corps';
         const f = formations[corpsId];
-        return f?.name ?? corpsId;
+        return getPlayerSafeCorpsName(f?.name ?? null, corpsId);
     };
 
     return events
@@ -2273,7 +2227,7 @@ function deriveFiredEvents(state: any): LoadedGameState['firedEvents'] {
         entries.push({
             id,
             turn: info?.turn ?? 0,
-            title: info?.text ?? id,
+            title: getPlayerSafeDecisionTitle(info?.text ?? id),
             narrative: '',
             category: 'military',
             effects: [],
@@ -2428,12 +2382,13 @@ function derivePendingPeacePlan(state: any): LoadedGameState['pendingPeacePlan']
         const { PEACE_PLANS } = require('../../../sim/negotiation/peace_plan_data.js');
         const def = PEACE_PLANS.find((p: any) => p.id === pp.plan_id);
         if (def) {
-            planName = def.name ?? pp.plan_id;
+            planName = getPlayerSafeDisplayLabel(def.name ?? pp.plan_id, 'Peace proposal');
             narrative = def.narrative ?? '';
             proposedSplit = def.proposed_split ?? proposedSplit;
             institutionalModel = def.institutional_model ?? '';
         }
     } catch { /* non-fatal — display with raw id */ }
+    planName = getPlayerSafeDisplayLabel(planName, 'Peace proposal');
     return {
         planId: pp.plan_id,
         planName,

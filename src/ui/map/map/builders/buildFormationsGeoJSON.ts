@@ -4,6 +4,7 @@ import { buildOsidCentroidLookup } from './geojsonLookup';
 import { resolveFormationLocationOsid } from './resolveFormationLocationOsid';
 import { formationIconId } from './formationIconId';
 import { getSectorIdForFormation } from '../../utils/sectorUtils';
+import { filterPlayerVisibleMapFormations } from '../../../shared/playerVisibility';
 
 export { formationIconId };
 
@@ -70,7 +71,8 @@ export function buildFormationsGeoJSON(
   const centroidLookup = buildOsidCentroidLookup(controlledOsidGeoJson);
   const unitsPerOsid = new Map<string, number>();
   // Pre-filter physical units to simplify counting and main loop
-  const physicalUnits = state.formations.filter(f =>
+  const visibleFormations = filterPlayerVisibleMapFormations(state);
+  const physicalUnits = visibleFormations.filter(f =>
     f.kind !== 'corps' && f.kind !== 'corps_asset' && f.kind !== 'army_hq'
   );
 

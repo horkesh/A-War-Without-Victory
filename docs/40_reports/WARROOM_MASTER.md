@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for warroom status (scene, modals, hotspots, assets). Read first when starting warroom work; update during the session when completing warroom changes.
 
-**Updated:** 2026-03-12
+**Updated:** 2026-04-02
 
 **Relationship:** Warroom is part of the canonical GUI. For overall GUI status use [GUI_MASTER.md](GUI_MASTER.md). This document is the warroom-specific control file — one place to see what exists, what’s proposed, and where to record changes.
 
@@ -30,6 +30,7 @@
 - **War-only (examples):** Real Diplomacy (Belgrade/Zagreb/Alliance), Command Briefing, Operational Situation, IVP breakdown, Turn-End Intelligence, Enclave Crisis, Honors/Memorials (when implemented). Advance turn in war shows combat/stability preview.
 - **Shared with different content:** Newspaper (Phase 0 events vs war headlines), Magazine (pre-war org review vs war operational review), Reports (mun intel vs operational briefs), Faction Overview (capital/org vs territory/military/command).
 - **Implementation:** Modal *routing* (which modal opens for a hotspot) and *content* both depend on `meta.phase`. Prefer explicit “peace modal set” vs “war modal set” in code (e.g. hotspot → modal mapping keyed by phase) so adding phase-exclusive modals stays clear.
+- **Player-facing label discipline:** Warroom-adjacent shells and overlays must resolve settlement/command labels through player-safe helpers. OPORDs, roster/history hover titles, and faction reports are not exempt just because they look like documents.
 
 ### Summary
 
@@ -84,7 +85,10 @@
 
 - **Region data:** Click/hover geometry is in `public/data/ui/hq_clickable_regions.json`. Region bounds must match the scene plate; default JSON has `options.calendar_baked_in_art: true` so the runtime does not draw a second calendar when the room art already shows one. For a different room layout, use a custom region file (see § Region data and new room layout).
 - **Modals (implemented):** Newspaper, Magazine, Reports, Diplomacy, Faction Overview (COMMAND + commander assignment), Advance turn confirmation, Declaration event, War begins, Settings (placeholder), Help (warroom controls), “Line dead” (diplomacy in peace).
+- **Command-shell truth (2026-04-02):** Reports now use generic player-safe headquarters authorship instead of fake-specific section names, and Command Briefing derives its warnings from the extracted Warroom snapshot instead of hardcoded enclave/convoy claims.
+- **Density direction (2026-04-02):** Warroom modal chrome has been tightened to better match the tactical shell. The intended direction is command-console density, not roomy dashboard spacing.
 - **Commander assignment:** **Warroom only** — Faction Overview (wall flag) → COMMAND section → CHANGE → ASSIGN COMMANDER modal. Map UI displays only; no assignment there. IPC: `assign-commander`.
+- **Shell relationship:** Tactical-map top-shell history access now routes through Army HQ / Codex instead of orphan top-level history modals; Warroom remains the strategic shell and return destination, not a second owner of Army HQ records.
 
 ---
 
@@ -150,6 +154,10 @@ Documented so future work can prioritise. See also [GUI_MASTER.md](GUI_MASTER.md
 
 | Date | Change | Report / reference |
 |------|--------|--------------------|
+| 2026-04-02 | **Tactical-map return restoration:** the live mounted tactical toolbar now exposes a visible `WARROOM` return path in standalone desktop and embedded tactical-map modes, using the real shell bridge instead of dead legacy toolbar code. | [implemented/20260402_TACTICAL_MAP_WARROOM_RETURN_RESTORATION.md](implemented/20260402_TACTICAL_MAP_WARROOM_RETURN_RESTORATION.md) |
+| 2026-04-02 | **Warroom faction shell handoff:** the war-phase Faction Overview no longer acts like a second Army HQ. Detailed formations, officer rosters, and commander reassignment were removed from Warroom and replaced with a compact `COMMAND SHELL` summary that points detailed review back to Army HQ via the desk map. | [implemented/20260402_WARROOM_FACTION_SHELL_HANDOFF.md](implemented/20260402_WARROOM_FACTION_SHELL_HANDOFF.md) |
+| 2026-04-02 | **Warroom command shell truth + density pass:** Reports now use generic player-safe headquarters authorship instead of fake-specific section names; Command Briefing now derives warnings from the extracted command snapshot instead of hardcoded enclave/convoy certainty; Operational Situation and help copy were clarified; shared modal spacing tightened. | [implemented/20260402_WARROOM_COMMAND_SHELL_TRUTH_AND_DENSITY_PASS.md](implemented/20260402_WARROOM_COMMAND_SHELL_TRUTH_AND_DENSITY_PASS.md) |
+| 2026-04-02 | **Army HQ summary player-truth alignment:** the tactical-map/Army-HQ summary surface no longer behaves like an all-faction debug scoreboard. Own-side exact values remain; enemy-wide totals are pushed back into staff abstractions and reports. | [implemented/20260402_ARMY_HQ_WAR_SUMMARY_PLAYER_TRUTH.md](implemented/20260402_ARMY_HQ_WAR_SUMMARY_PLAYER_TRUTH.md) |
 | 2026-03-12 | **Operation Preparation System UI wired:** CommanderSelectionModal (officer roster with competence/aggressiveness, regional fit, prep-time estimates) + OperationBriefingModal (readiness gauges, commander assessment, Launch/Probe/Postpone/Abort actions) now connected via IPC to operation state machine. Triggered from OpsPlanningModal submission and CorpsFrontPanel assessment-ready button. | This file § Modals |
 | 2026-03-10 | **Twelve-anchor contract:** Prompt pack expanded from eight to twelve baked props — coatrack+cap/uniform (`commander_coatrack`), urgent folder (`enclave_dispatch_folder`), sealed packet (`intelligence_packet`), honors shelf/frame (`honors_memorial`). RS §9.6–9.10 blocks and shared core updated; §3a table in clean-room handover. | [20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md](handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md) §3a |
 | 2026-03-09 | **Phase 2 Completion (Modals):** Implemented `CommandBriefingModal` (linked to `command_briefing_folio`), `OperationalSituationModal` (linked to `desk_map`), and functional `SettingsModal` (toolbar). Removed placeholder routing. | This file § Modals |
@@ -159,6 +167,7 @@ Documented so future work can prioritise. See also [GUI_MASTER.md](GUI_MASTER.md
 | 2026-03-08 | **Faction-specific region files:** Warroom loads `hq_<faction>_clickable_regions.json` (e.g. `hq_rbih_clickable_regions.json`, `hq_rs_clickable_regions.json`, `hq_hrhb_clickable_regions.json`) when game state has a player faction; falls back to default if missing. Staging script copies all three faction files from repo root `data/ui/`. Override still used at init when no faction is known. | warroom.ts, warroom_stage_assets.ts, WARROOM_MASTER |
 | 2026-03-08 | **Region file config + calendar overlay:** (1) Region URL is configurable via `window.__awwvWarroomRegionsUrl` so new room art can use a custom region JSON with measured quads. (2) Region JSON supports `options.calendar_baked_in_art: true`; when set, runtime does not draw the calendar overlay (avoids duplicate/mismatch when art has calendar baked). Default `hq_clickable_regions.json` now has this option set. (3) WARROOM_MASTER § Region data and new room layout added. | warroom.ts, ClickableRegionManager.ts, WARROOM_MASTER |
 | 2026-03-08 | **Flag no longer drawn as sprite:** Removed runtime flag overlay so room art is not obscured. Per clean-room handover and WARROOM_MASTER, flag is baked into room art; only calendar (and future desk map / date board) are runtime overlays. `renderFlag()` removed; `wall_flag_area` remains for click/tooltip (Faction Overview). | warroom.ts, this file |
+| 2026-04-02 | **Enemy-contact reporting made player-safe:** `extractWarData()` now emits abstract hostile contact labels for Warroom use, and Reports/Magazine enemy-assessment surfaces consume those labels instead of exact enemy formation names. This keeps Warroom acting like a headquarters shell rather than a debug console. | [20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md](implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md) |
 | 2026-03-08 | **Faction yearly rooms + overlay surfaces:** Current direction. Generate one stable room per faction, then derive `prewar/year1/year2/year3/year4` with yearly aging while preserving geometry; bake the flag into room art; keep the desk-map zone empty for projection; use a flat date / next-turn board for overlay; target archival/documentary photorealism. | [handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md](handovers/20260308_WARROOM_CLEAN_ROOM_PLUS_SPRITE.md) |
 | 2026-03-08 | **Unified room direction:** Guidance/reference doc updated to support the hybrid model rather than “everything painted except calendar.” Same room per faction, war follow-up preserves geometry, military-feel guidance retained. | [handovers/20260308_WARROOM_UNIFIED_ROOM_PROMPT_AND_MILITARY_FEEL.md](handovers/20260308_WARROOM_UNIFIED_ROOM_PROMPT_AND_MILITARY_FEEL.md) |
 | 2026-03-07 | **Six nano banana prompts:** 6 detailed prompts (prewar+war × RBiH/RS/HRHB), 2752×1536, modal placeholders, copy-paste blocks | [handovers/20260307_WARROOM_SIX_NANO_BANANA_PROMPTS.md](handovers/20260307_WARROOM_SIX_NANO_BANANA_PROMPTS.md) |
@@ -193,6 +202,7 @@ Overlays (e.g. calendar) and click/hover hotspots use **region geometry** from a
 - **Symbolism:** In-scene documents, binders, stamps must use **RBiH-era (1992–1998)** only; no post-1998 BiH crest. See same handover.
 - **Peace vs war:** Modal logic remains split between **prewar** and **war**, but current art direction expands war visuals into yearly states: `prewar` + `year1/year2/year3/year4` per faction. War modals stay the same from April 1992 onward; only the room art ages by year.
 - **Hotspot contract:** Use physical anchor ids for new behavior; legacy action strings are compatibility only.
+- **Command review ownership:** Warroom summarizes command-shell posture only. Detailed formations, personnel rosters, reserve handling, and commander reassignment belong to Army HQ via the desk map.
 - **Commander assignment:** Stays in Warroom Faction Overview → COMMAND; do not duplicate assignment UI in map without design decision.
 - **New warroom modals:** Align with proposed list above and nano banana §7 when adding; update this table when a proposed modal is implemented. Add to the correct set (peace and/or war).
 

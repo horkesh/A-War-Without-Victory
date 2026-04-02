@@ -155,7 +155,7 @@ export function ArmyHQCorpsCard({
         <button
             type="button"
             onClick={onToggleExpand}
-            className={`min-h-[280px] w-full bg-panel-card border border-panel-border overflow-hidden hover:border-amber-400/50 transition-all cursor-pointer relative flex flex-col text-left
+            className={`min-h-[256px] w-full bg-panel-card border border-panel-border overflow-hidden hover:border-amber-400/50 transition-all cursor-pointer relative flex flex-col text-left
                 ${readinessGrade && READINESS_BORDER[readinessGrade] ? `border-l-[3px] ${READINESS_BORDER[readinessGrade]}` : isCritical ? 'border-l-[3px] border-l-red-600' : noCommander ? 'border-l-[3px] border-l-amber-500' : ''}`}
         >
             {/* Threat badge */}
@@ -170,14 +170,14 @@ export function ArmyHQCorpsCard({
                 {STANCE_LABELS[data.stance] ?? data.stance}
             </div>
 
-            <div className="px-5 py-5 flex-1 flex flex-col">
+            <div className="px-4 py-4 flex-1 flex flex-col">
                 {/* Line 1: Corps name */}
                 <div className="text-[16px] font-bold text-amber-400 uppercase tracking-widest leading-tight pr-24" style={{ fontFamily: 'IBM Plex Sans Condensed, sans-serif' }}>
                     {displayName}
                 </div>
 
                 {/* Line 2: Commander + grade */}
-                <div className="text-[12px] text-text-secondary mt-2 flex items-center gap-3 font-mono">
+                <div className="text-[12px] text-text-secondary mt-1.5 flex items-center gap-2.5 font-mono">
                     {data.commander ? (
                         <span>{data.commander.name}</span>
                     ) : (
@@ -188,7 +188,7 @@ export function ArmyHQCorpsCard({
                 </div>
 
                 {/* Equipment icons */}
-                <div className="flex items-center gap-4 mt-2 text-[12px]">
+                <div className="flex items-center gap-4 mt-1.5 text-[12px]">
                     <span className="flex items-center gap-1">
                         <Icon name="tanks" size={14} className="text-text-secondary" />
                         <span className="text-text-primary font-bold tabular-nums">{data.equipment.tanksOp}</span>
@@ -202,7 +202,7 @@ export function ArmyHQCorpsCard({
                 </div>
 
                 {/* Line 3: Stats */}
-                <div className="flex items-center gap-4 mt-4 text-[12px] tabular-nums font-mono">
+                <div className="flex items-center gap-4 mt-3 text-[12px] tabular-nums font-mono">
                     <div className="flex flex-col">
                         <span className="text-[9px] text-text-secondary/60 uppercase tracking-tighter">Personnel</span>
                         <span className={`font-bold ${data.totalPersonnel >= 8000 ? 'text-emerald-400' : data.totalPersonnel >= 4000 ? 'text-accent-gold' : 'text-red-500'
@@ -222,7 +222,7 @@ export function ArmyHQCorpsCard({
 
                 {/* Active op indicator */}
                 {data.activeOp && (
-                    <div className="mt-4 pt-3 border-t border-panel-border flex flex-col gap-1">
+                    <div className="mt-3 pt-2.5 border-t border-panel-border flex flex-col gap-1">
                         <span className="text-[9px] text-red-500 font-bold tracking-[0.2em] uppercase">ACTIVE OPERATION</span>
                         <div className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
@@ -235,7 +235,7 @@ export function ArmyHQCorpsCard({
 
                 {/* This-week battles */}
                 {data.corpsBattles.length > 0 && (
-                    <div className="mt-3 flex gap-2">
+                    <div className="mt-2.5 flex gap-2">
                         <div className="px-2 py-0.5 bg-red-900/40 border border-red-500/40 text-red-400 text-[9px] font-bold tracking-widest animate-pulse">
                             CONTACT: {data.corpsBattles.length} ENGAGEMENTS
                         </div>
@@ -257,15 +257,15 @@ export function ArmyHQCorpsCard({
     // Back face: full detail sections (scrollable)
     const cardBack = (
         <div
-            className={`min-h-[280px] bg-panel-card border border-panel-border overflow-hidden flex flex-col
+            className={`min-h-[256px] bg-panel-card border border-panel-border overflow-hidden flex flex-col
                 ${isCritical ? 'border-l-[3px] border-l-red-600' : noCommander ? 'border-l-[3px] border-l-amber-500' : ''}`}
         >
             {/* Header with back button + stance dropdown */}
-            <div className="flex items-center justify-between px-6 py-4 bg-panel-card border-b border-panel-border">
+            <div className="flex items-center justify-between px-4 py-3 bg-panel-card border-b border-panel-border">
                 <button
                     type="button"
                     onClick={onToggleExpand}
-                    className="flex items-center gap-4 hover:opacity-80 transition-opacity"
+                    className="flex items-center gap-3 hover:opacity-80 transition-opacity"
                 >
                     <span className="text-[12px] text-text-secondary font-mono">&larr; Back</span>
                     <div className="text-[18px] font-bold text-amber-400 uppercase tracking-widest" style={{ fontFamily: 'IBM Plex Sans Condensed, sans-serif' }}>
@@ -275,8 +275,8 @@ export function ArmyHQCorpsCard({
                         EF: {data.eff.grade}
                     </span>
                 </button>
-                <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-4 text-[12px] tabular-nums font-mono text-text-secondary uppercase">
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3 text-[12px] tabular-nums font-mono text-text-secondary uppercase">
                         <span><b className="text-text-primary">{data.totalPersonnel.toLocaleString()}</b> Pers</span>
                         <span><b className="text-text-primary">{brigades.length}</b> Brg</span>
                         <span><b className="text-text-primary">{sectors.length}</b> Sec</span>

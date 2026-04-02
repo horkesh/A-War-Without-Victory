@@ -17,6 +17,10 @@ export interface ChronicleEntry {
 }
 
 import { humanizeOsid } from '../../utils/osidDisplayName.js';
+import {
+    getPlayerSafeDisplayLabel,
+    getPlayerSafeMilitaryFactionName,
+} from '../../utils/playerSafeText.js';
 
 const HEADLINE_EVENT_PATTERNS = ['strategic_goals', 'state_identity', 'political_goal'];
 const DIPLOMATIC_EVENT_PATTERNS = ['graz', 'ceasefire', 'alliance', 'embargo', 'conference'];
@@ -113,8 +117,8 @@ export function generateChronicleEntries(state: any): ChronicleEntry[] {
                     turn,
                     type: 'military',
                     headline: false,
-                    title: `${spawn.formation_name || spawn.formation_id || 'Unknown'} formed`,
-                    detail: spawn.faction || '',
+                    title: `${getPlayerSafeDisplayLabel(spawn.formation_name || spawn.formation_id, 'Formation')} formed`,
+                    detail: spawn.faction ? getPlayerSafeMilitaryFactionName(spawn.faction) : '',
                 });
             }
         }
@@ -125,8 +129,8 @@ export function generateChronicleEntries(state: any): ChronicleEntry[] {
                     turn,
                     type: 'military',
                     headline: true,
-                    title: `${destruction.formation_name || destruction.formation_id || 'Unknown'} destroyed`,
-                    detail: destruction.faction || '',
+                    title: `${getPlayerSafeDisplayLabel(destruction.formation_name || destruction.formation_id, 'Formation')} destroyed`,
+                    detail: destruction.faction ? getPlayerSafeMilitaryFactionName(destruction.faction) : '',
                 });
             }
         }
@@ -137,7 +141,7 @@ export function generateChronicleEntries(state: any): ChronicleEntry[] {
                     turn,
                     type: 'narrative',
                     headline: false,
-                    title: event.text || event.id || 'Notable event',
+                    title: getPlayerSafeDisplayLabel(event.text || event.id, 'Notable event'),
                     detail: '',
                 });
             }

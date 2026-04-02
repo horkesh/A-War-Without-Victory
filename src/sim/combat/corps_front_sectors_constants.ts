@@ -29,6 +29,11 @@ export const EXEMPT_CORPS_IDS = new Set<string>([
     'hvo_main_staff',
 ]);
 
+/** Army-HQ / main-staff reserve pools are intentionally sectorless until loaned or attached. */
+export function isSectorAssignmentExemptCorpsId(corpsId: string | null | undefined): boolean {
+    return typeof corpsId === 'string' && EXEMPT_CORPS_IDS.has(corpsId);
+}
+
 /** Below this competence the commander doesn't deliberately plan — falls back to BFS. */
 export const COMMANDER_COMPETENCE_ASSIGNMENT_THRESHOLD = 0.35;
 

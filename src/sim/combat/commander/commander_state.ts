@@ -21,6 +21,10 @@ import type { SpatialContext } from '../../spatial_context.js';
 import type { FactionGraphAnalysis } from '../osid_graph_analysis.js';
 import type { OsidEthnicComposition } from '../ethnic_defense.js';
 import type { FrontGeometryAssessment } from '../front_geometry_analysis.js';
+import type {
+    FrontPriority,
+    SyncOpParticipant,
+} from '../army_hq_gathering_types.js';
 
 // ---------------------------------------------------------------------------
 // 1. ZoneId — branded string for zone identification
@@ -225,6 +229,25 @@ export interface IntelPicture {
 }
 
 // ---------------------------------------------------------------------------
+// 11b. EnemyEquipmentSummary
+// ---------------------------------------------------------------------------
+
+export interface EnemyEquipmentSummary {
+    /** Sum of enemy tanks across adjacent enemy sectors. */
+    readonly tanks: number;
+    /** Sum of enemy artillery across adjacent enemy sectors. */
+    readonly artillery: number;
+    /** True when no heavy equipment is detected in adjacent enemy sectors. */
+    readonly infantry_only: boolean;
+}
+
+export interface AdjacentCorpsSummary {
+    readonly corps_id: FormationId;
+    readonly stance: string;
+    readonly active_operations: number;
+}
+
+// ---------------------------------------------------------------------------
 // 12. CommanderState — persistent per corps, lives on CorpsCommandState
 // ---------------------------------------------------------------------------
 
@@ -278,6 +301,16 @@ export interface CommanderBriefing {
     readonly doctrine_stance: string;
     /** Current corps stance. */
     readonly corps_stance: string;
+    /** Current corps-level exhaustion (0-100). */
+    readonly corps_exhaustion: number;
+    /** Average subordinate brigade fatigue as 0-100 percent of FATIGUE_MAX. */
+    readonly avg_fatigue_pct: number;
+    /** Number of subordinate brigades at or above the high-fatigue threshold. */
+    readonly brigades_above_fatigue_threshold: number;
+    /** Summary of heavy equipment across enemy sectors facing this corps. */
+    readonly enemy_equipment_summary: EnemyEquipmentSummary;
+    /** Friendly neighboring corps with brigades physically adjacent to this corps area. */
+    readonly adjacent_corps: readonly AdjacentCorpsSummary[];
     readonly officer_personality: OfficerPersonality;
     /** Pre-planned ops for this corps. */
     readonly pre_planned_ops: readonly unknown[];
@@ -287,6 +320,18 @@ export interface CommanderBriefing {
     readonly active_operations: readonly CorpsOperation[];
     /** Scenario-authored must-hold OSIDs for this corps. Zones containing these get 1.5× garrison budget. */
     readonly must_hold_osids: readonly string[];
+    /** Army HQ campaign front role for this corps, if a current gathering plan exists. */
+    readonly campaign_role: FrontPriority['role'] | null;
+    /** Army HQ offensive target shortlist for this corps. */
+    readonly campaign_offensive_targets: readonly string[];
+    /** Army HQ hold-at-all-costs targets for this corps. */
+    readonly campaign_hold_targets: readonly string[];
+    /** Army HQ stance ceiling for this corps from doctrine override. */
+    readonly campaign_stance_ceiling: FrontPriority['suggested_stance'] | null;
+    /** Role inside any synchronized multi-corps operation currently naming this corps. */
+    readonly campaign_sync_role: SyncOpParticipant['role'] | null;
+    /** Target OSIDs from the synchronized operation participant slice, if present. */
+    readonly campaign_sync_targets: readonly string[];
 }
 
 // ---------------------------------------------------------------------------

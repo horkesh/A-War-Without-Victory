@@ -6,6 +6,7 @@
 
 import type { PendingEventDecision, EventResponseOption, EventEffect } from '../../../sim/events/event_types';
 import { FACTION_COLORS } from '../utils/theme';
+import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 
 export interface EventDecisionModalProps {
     decision: PendingEventDecision;
@@ -16,13 +17,13 @@ export interface EventDecisionModalProps {
 function describeEffect(effect: EventEffect): string {
     switch (effect.kind) {
         case 'narrative': return effect.text;
-        case 'morale_change': return `${effect.faction} morale ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'supply_delta': return `${effect.faction} supply ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'cohesion_change': return `${effect.faction} cohesion ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'humanitarian_impact': return `${effect.faction} humanitarian impact${effect.war_crimes_delta ? ` (${effect.war_crimes_delta > 0 ? '+' : ''}${effect.war_crimes_delta})` : ''}`;
-        case 'patron_pressure': return `${effect.faction} patron pressure ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'alliance_change': return `RBiH-HRHB alliance ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'negotiation_capital': return `${effect.faction} ${effect.dimension} ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
+        case 'morale_change': return `${getPlayerSafePoliticalFactionName(effect.faction)} morale ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
+        case 'supply_delta': return `${getPlayerSafePoliticalFactionName(effect.faction)} supply ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
+        case 'cohesion_change': return `${getPlayerSafePoliticalFactionName(effect.faction)} cohesion ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
+        case 'humanitarian_impact': return `${getPlayerSafePoliticalFactionName(effect.faction)} humanitarian impact${effect.war_crimes_delta ? ` (${effect.war_crimes_delta > 0 ? '+' : ''}${effect.war_crimes_delta})` : ''}`;
+        case 'patron_pressure': return `${getPlayerSafePoliticalFactionName(effect.faction)} patron pressure ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
+        case 'alliance_change': return `${getPlayerSafePoliticalFactionName('RBiH')} / ${getPlayerSafePoliticalFactionName('HRHB')} alliance ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
+        case 'negotiation_capital': return `${getPlayerSafePoliticalFactionName(effect.faction)} ${effect.dimension} ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
     }
     return effect.kind;
 }
@@ -75,7 +76,7 @@ export function EventDecisionModal({ decision, onRespond }: EventDecisionModalPr
                         Decision Required
                     </span>
                     <span className={`text-[10px] font-mono ${factionColor}`}>
-                        {decision.faction} &middot; Turn {decision.turn_fired}
+                        {getPlayerSafePoliticalFactionName(decision.faction)} · Turn {decision.turn_fired}
                     </span>
                 </div>
 

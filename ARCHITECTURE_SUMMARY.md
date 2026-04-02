@@ -135,3 +135,10 @@ Calibration tests are located in `tests/calibration.test.ts` and validate:
 
 ### Phase 24: Warroom UI Overhaul & Commander Management (2026-03-07)
 Comprehensive refactoring and visual polish of the Warroom HQ interface. Unified modal shell logic across `MagazineModal.ts` and `ReportsModal.ts` to reduce redundancy. Decomposed the monolithic `SettlementInfoPanel.ts` into specialized sub-renderers for better maintainability. Implemented **Manual Commander Assignment** via a new `assign-commander` IPC channel, allowing players to reassign officers from the reserve pool to active corps with a 2-turn friction penalty. Unified campaign flow orchestration in `warroom.ts` and resolved several TypeScript lint errors.
+> Historical note only. This file is not current architecture authority.
+>
+> For live architecture truth, use:
+> - `docs/20_engineering/PRODUCT_ARCHITECTURE_AUTHORITY.md`
+> - `docs/20_engineering/REPO_MAP.md`
+> - `docs/20_engineering/CODE_CANON.md`
+> - `docs/plans/MASTER_ROADMAP.md`

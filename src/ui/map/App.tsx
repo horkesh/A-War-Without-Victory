@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { MapContainer } from './map/MapContainer';
-import { TopToolbar } from './components/TopToolbar';
 import { PresidentialToolbar } from './components/PresidentialToolbar';
 import { SelectionPanel } from './components/SelectionPanel';
 import { CorpsFrontPanel } from './components/CorpsFrontPanel';
@@ -27,8 +26,6 @@ import { OperationBriefingModal } from './components/OperationBriefingModal';
 import { SupplyPanel } from './components/SupplyPanel';
 import { EconomyPanel } from './components/EconomyPanel';
 import { EnclaveDashboard } from './components/EnclaveDashboard';
-import { AARPanel } from './components/AARPanel';
-import { OperationHistoryPanel } from './components/OperationHistoryPanel';
 import { EventModal } from './components/EventModal';
 import { EventLogPanel } from './components/EventLogPanel';
 import { AiAdvisorPanel } from './components/AiAdvisorPanel';
@@ -55,11 +52,13 @@ import { useGameStore, isDevMode } from './store/gameStore';
 import { loadLatestRunSaveAsText, loadEventDefinitions } from './data/DataLoader';
 import { getOsidDisplayName } from './utils/osidDisplayName';
 import { getFormationsAtOsid } from './utils/formationAtOsid';
+import { getPlayerSafeMilitaryFactionName } from './utils/playerSafeText';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useDesktopSession } from './hooks/useDesktopSession';
 import { useIPC } from './desktop/useIPC';
 import type { RecruitmentCatalogBrigade, StartNewCampaignPayload } from './desktop/types';
 import type { SummaryFocusSection } from './data/types';
+import { openArmyHQRecordsSubTab } from './utils/shellNavigation';
 import {
   applyRecruitmentAndSync,
   fetchRecruitmentCatalog,
@@ -196,8 +195,6 @@ function App() {
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [summaryFocus, setSummaryFocus] = useState<SummaryFocusSection>('overview');
   const [enclaveDashboardOpen, setEnclaveDashboardOpen] = useState(false);
-  const [aarOpen, setAarOpen] = useState(false);
-  const [opsHistoryOpen, setOpsHistoryOpen] = useState(false);
   const [eventLogOpen, setEventLogOpen] = useState(false);
   const [economyOpen, setEconomyOpen] = useState(false);
   const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
@@ -323,7 +320,7 @@ function App() {
           category: def?.category ?? e.category ?? 'military',
           effects: def?.effects?.map(eff => ({
             kind: eff.kind,
-            description: eff.text ?? (eff.faction ? `${eff.faction} ${eff.kind} ${(eff.delta ?? 0) > 0 ? '+' : ''}${eff.delta ?? ''}` : eff.kind),
+            description: eff.text ?? (eff.faction ? `${getPlayerSafeMilitaryFactionName(eff.faction)} ${eff.kind} ${(eff.delta ?? 0) > 0 ? '+' : ''}${eff.delta ?? ''}` : eff.kind),
           })) ?? e.effects,
           isDecision: e.isDecision,
           responseOptions: e.responseOptions,
@@ -525,9 +522,6 @@ function App() {
   const openSummary = (focus: SummaryFocusSection = 'overview') => {
     setSummaryFocus(focus);
     setSummaryOpen(true);
-    // Close other History-group panels so high-z summary doesn't occlude them
-    setAarOpen(false);
-    setOpsHistoryOpen(false);
     setEventLogOpen(false);
   };
 
@@ -573,9 +567,13 @@ function App() {
       const firstCorps = loadedGameState.formations.find(f => (f.kind === 'corps' || f.kind === 'corps_asset') && f.faction === playerFaction);
       if (firstCorps) useGameStore.getState().setSelectedOrbatCorpsId(firstCorps.id);
     }
-    // Summary/AAR etc are full-screen modals; close them to show sidebar panels
     setSummaryOpen(false);
-    setAarOpen(false);
+  };
+
+  const openArmyHQRecords = (subTab: 'aar' | 'ops') => {
+    openArmyHQRecordsSubTab(useGameStore.getState(), subTab);
+    setSummaryOpen(false);
+    setEventLogOpen(false);
   };
 
   const selectPrimaryArmy = () => {
@@ -605,13 +603,18 @@ function App() {
   return (
     <div
       className="h-screen w-screen relative"
-      style={{ ['--awwv-toolbar-clearance' as string]: devMode ? '8.5rem' : '7.5rem' }}
+      style={{ ['--awwv-toolbar-clearance' as string]: devMode ? '7.5rem' : '6.5rem' }}
     >
       <MapContainer />
       <PresidentialToolbar
         pendingDecisions={loadedGameState?.pendingEventDecisions?.length ?? 0}
         pressureWarning={loadedGameState?.pressureWarning ?? false}
         pendingOfficerEvents={Boolean(loadedGameState?.pendingOfficerEvents?.length)}
+        onOpenSummary={openSummary}
+        onOpenRecords={() => openArmyHQRecords('aar')}
+        onOpenOpsHistory={() => openArmyHQRecords('ops')}
+        onOpenCodex={() => useGameStore.getState().setCodexOpen(true)}
+        onOpenEventLog={() => setEventLogOpen(true)}
       />
       <CommandBriefingLayer
         onOpenSummary={openSummary}
@@ -672,8 +675,6 @@ function App() {
         focusSection={summaryFocus}
         onClose={() => setSummaryOpen(false)}
       />
-      <AARPanel isOpen={aarOpen} onClose={() => setAarOpen(false)} />
-      <OperationHistoryPanel isOpen={opsHistoryOpen} onClose={() => setOpsHistoryOpen(false)} />
       <ArmyHQModal />
       <ChronicleOverlay />
       <WrappedOverlay />

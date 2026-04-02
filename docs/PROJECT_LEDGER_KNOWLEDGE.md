@@ -1,3 +1,15 @@
+**Sector assignment truth must distinguish field corps from army-HQ reserves (2026-04-02):** The repo should never again speak as if `every active brigade must have a sector_id` without qualification. The true rule is narrower: every active non-exempt field brigade is sector-mandatory; idle Main Staff / General Staff reserve brigades are intentionally sectorless until loaned or attached. Canonical helper: `isSectorAssignmentExemptCorpsId(...)` in `corps_front_sectors_constants.ts`.
+
+**Diagnostic assertion files are not the same thing as enforcement (2026-04-02):** A file named `sector_assertions.ts` can easily mislead agents into believing the invariant is hard-enforced even when the functions only log. In AWWV, be explicit: if a rail logs but does not throw or rewrite state, document it as a diagnostic sink, not an enforcement point.
+
+**Dormant compatibility layers must say they are dormant (2026-04-02):** `brigade_pressure.ts` and `apply_brigade_reposition.ts` are dangerous not because they exist, but because they still look alive. When a legacy path is intentionally inert, comments should say so plainly or future work will route authority back into it by mistake.
+
+## 2026-04-02 - Player-facing operation documents must never print raw OSIDs
+
+- OPORDs, objective lists, and HQ roster/history hover titles are player-facing surfaces.
+- They must resolve settlement labels through shared display-name helpers instead of leaking raw OSIDs in body text or `title` attributes.
+- If a planning/document surface needs exact internal identifiers, that belongs behind an explicit debug-only path, not in normal player play.
+
 # AWWV Project Ledger — Thematic Knowledge Base
 
 **Last Updated:** 2026-03-27
@@ -10,6 +22,14 @@
 **Commander Intelligence — op scale cap by main_effort_count (2026-04-02, n1298):** `plan.ts` `tryCreateFromPrePlanned` and `createOpportunityPlan` both apply: `const mainEffortLimit = mainEffortCap > 0 ? mainEffortCap : naturalRequired; const requiredBrigades = Math.max(MIN_BRIGADES_FOR_PLAN, Math.min(mainEffortLimit, naturalRequired))`. `mainEffortCap` = `forces.tier_counts.main_effort`. When 0 (no eligible heavy brigades), falls back to natural surplus pool size. At n1302, total order counts stayed identical to n1289 (91 orders), but ZEA rate rose 39%→47% — eligible attacker pools narrowing as intended.
 
 **Commander Intelligence — enemy_concentration_zones (2026-04-02, n1299):** `assess.ts` `assessSituation()` builds osid→zone reverse map from `zones[]`, then iterates `prevIntel.concentration_detected` (keyed by sector_id, sourced from previous turn's `IntelPicture`). For each detected sector, walks its `territory_osids` to find zone_ids, deduplicates, passes as `concentrationZoneIds` to `assessThreats()`. `assessThreats()` now accepts `concentrationZoneIds: readonly ZoneId[] = []` and sorts into `enemy_concentration_zones` in the returned `ThreatAssessment`.
+
+**Commander intelligence must consume live brigade fatigue, not invent a second wear model (2026-04-02):** The real local wear signal is `formation.ops.fatigue`, not `brigade_movement_state` and not a new commander-only field. `CommanderBriefing` now carries `avg_fatigue_pct` and `brigades_above_fatigue_threshold`, derived directly from subordinate brigades’ `ops.fatigue`. Fresh plan creation in `plan.ts` now blocks when average brigade fatigue is already too high. Rule for future work: if the commander is being made more “aware” of wear, wire it to `formation.ops.fatigue` first and only add new fields if the engine genuinely gains new information.
+
+**A briefing fix is not complete if downstream force scoring still ignores the same signal (2026-04-02):** After fatigue entered `CommanderBriefing`, `force_eval.ts` was still rating tired brigades as if they were fresh. That split truth is exactly how AI theater creeps in: the planner sounds aware, but the scorer still lies. Wave 1 now applies fatigue directly in brigade offensive/defensive fitness using the same floors as `combat_math.ts` (`0.6` attack, `0.75` defend). Rule for future work: every newly introduced briefing signal should trigger an immediate check of the downstream scorer, allocator, and renderer that claim to use the same combat truth.
+
+**A strategic role is not real until it constrains the local planner (2026-04-02):** `CampaignPlan` front roles were already making it into `CommanderBriefing`, but `economy` and `contain` were still mostly decorative until `managePlan(...)` explicitly blocked fresh offensive plan creation on those fronts. Rule for future work: whenever Army HQ assigns a front role, inspect the exact local invention point for new plans/ops and make sure the role changes behavior there, not just in surrounding comments or summaries.
+
+**Synchronized operations are fake until they change both preference and legality (2026-04-02):** Passing `campaign_sync_role` and `campaign_sync_targets` into `CommanderBriefing` was not enough. The planner also had to (1) prefer synchronized-op targets over broader campaign targets and (2) reject generic fresh-offensive planning for roles like `feint` and `fixing` that the normal plan path cannot honestly execute. Rule for future work: whenever a coordination role enters a briefing contract, verify that it changes both target ranking and allowed plan types.
 
 **Commander Intelligence — coordination competence (2026-04-02, n1300):** `battle_resolution.ts` `getCoordinationCompetenceFactor()` looks up active corps commander from `state.military.named_officers` + `named_officer_data`. Formula: `factor = 1.0 - (3 - competence) × 0.04`, clamped [0.85, 1.10]. Applied only to multi-brigade attacks: `coordFactor = attackerIds.length > 1 ? getCoordinationCompetenceFactor(state, attackerCorpsId) : 1.0`. Then `effN = effNBase * coordFactor`. The `effNBase` still uses the existing SAME_CORPS_EFFICIENCY / MULTI_BRIGADE_EFFICIENCY constants; competence is a modifier on top. `attackerCorpsId` = first attacker's `corps_id ?? undefined` (null-guarded for TypeScript).
 
@@ -1251,6 +1271,9 @@ Strings like `arbih_3rd_corps`, raw `sector_id`, raw `axis_1`, or backend assign
 ### Tactical map, Warroom, and Codex must share one honest information contract
 Navigation and information ownership are linked. If standalone tactical map has no clear return path, or Codex survives only as a hidden shortcut, the shell architecture has drifted. Player knowledge integrity is not just a payload issue; it also requires explicit UI ownership of where intelligence, records, and command review live.
 
+### Threat assessment should speak in friendly-front abstractions
+Army HQ threat views may consume deeper engine truth, but the player-facing wording should stay anchored on the player's fronts: `3rd Corps front - hostile operation in execution`, not enemy corps ids or enemy operation names. The UI may know more than it says; that translation layer is part of product honesty.
+
 ## Studio Truth Governance (2026-04-01)
 
 ### A few short contracts beat a lot of remembered advice
@@ -1265,3 +1288,344 @@ The minimum owner-friendly completion language is:
 - Done means
 
 If a task cannot answer those five lines, it is not actually ready to be called done.
+
+## Engine Health Wave 1 (2026-04-02)
+
+### Objective-specific intel should degrade gracefully, not collapse to fake blindness
+Preparation logic should prefer the intel record that actually faces the targeted enemy sector when the engine can resolve the objective honestly. But thinner state slices and older tests may not carry enough geometry/controller structure to map objective OSIDs back to enemy sectors. In that case, the honest fallback is “best known facing-sector intel,” not `0`. This preserves objective relevance without making the engine lie that it knows nothing.
+
+### War termination must read the political exhaustion ledger, not shadow profile fields
+If victory logic reads `formation profile exhaustion` while the political layer maintains canonical `war_exhaustion`, the engine can end a war from stale or shadow state. Treat `state.political.war_exhaustion` as authoritative everywhere strategic termination matters; keep legacy profile exhaustion only as compatibility fallback.
+
+### Launch feasibility is strategy truth, not just combat tuning
+Corps offensive go/no-go checks that ignore obvious defender artillery, entrenchment, and terrain bonuses are not merely “undertuned” â€” they are epistemically wrong. Feasibility screening is part of command honesty. If those defender advantages are known enough to affect real headquarters decisions, they belong in launch screening, not only in later combat resolution.
+### A derived report that nobody consumes is not implemented truth yet
+`supply_by_osid` reaching the commander briefing looked like good architecture, but until brigade fitness actually read local supply state by brigade location, the commander was still making decisions from a fake default. In this repo, always inspect the last consumer in the chain. A data report is only real when the scorer, planner, or UI surface that claims to depend on it actually reads it.
+
+### A typed strategic field pinned to a placeholder constant is decorative, not alive
+`recent_territory_change` in Army HQ gathering looked like strategic-awareness scaffolding, but while it stayed hardcoded to `0` it was only decorative architecture. The right repair was not to invent a giant new subsystem; it was to feed the field from the existing `political.control_events` stream, scoped to each corps's current front neighborhood. In this repo, always ask whether a field is powered by live events or merely present in the type system.
+
+### Army HQ intent must reach `CommanderBriefing` as structured targets, not only as stance flavor
+If `CampaignPlan` only affects corps stance ceilings, the strategic layer still talks mostly to itself. The corps commander needs structured Army HQ intent in its briefing: front role, offensive targets, hold targets, and synchronized-op slice. The safest first implementation is to thread those fields into `CommanderBriefing`, merge campaign hold targets into `must_hold_osids`, and use offensive targets to bias opportunity staging/target choice without removing corps autonomy.
+
+### Corps reinforcement requests are only real once Army HQ can hear them
+`DecisionResult.reinforcement_requests` and `CommanderOutput.reinforcement_requests` already existed, but until `applyCommanderOutput(...)` persisted them into `CorpsCommandState`, Army HQ gathering had no way to consume the signal. The honest contract is: corps commanders may emit reinforcement pressure each turn, corps state persists it, and Army HQ reads it as a strategic pressure signal for front-role shaping. Do not short-circuit that by pretending these are already the same object as `pending_reserve_requests`; that older reserve-loan queue is a downstream Army HQ decision surface, not the raw corps signal.
+
+### Corps exhaustion must travel through the briefing contract, not just legacy launch gates
+The older corps-op path already respected `MAX_EXHAUSTION_FOR_OPERATION`, but the newer commander-planning path was missing the same truth because `CommanderBriefing` did not carry `corps_exhaustion`. Treat exhaustion as part of what the commander knows, not just a late launch veto in older code. If a corps is too exhausted to launch, it should also be too exhausted to create a fresh offensive plan.
+
+### Re-check “dead mechanic” audit findings against live consumers before implementing them
+Engine-health audits are valuable, but in a fast-moving repo an old true finding can become half-stale after downstream consumers are added. The feint audit item is the current example: feints are still underpowered, but they already flow through sector intel into `offensive_signs`, commander `concentration_detected`, and `fortify` reactions. Before spending a checkpoint on a “dead” mechanic, prove whether it is still dead, only weak, or already consumed.
+
+### Commander briefing must distinguish enemy frontage from enemy quality
+Brigade counts and front pressure are not enough for honest planning. If the briefing cannot tell a lightly held infantry sector from an artillery-and-armor heavy sector, the commander will size operations as if every enemy front were the same. Adjacent enemy heavy equipment should be summarized in the briefing contract and allowed to raise the required brigade mass for new offensives.
+
+### Shared label helpers are cheaper than another anti-leak sweep
+Player-facing raw-id leaks often survive not in the main happy-path labels, but in fallback strings and secondary shells like Warroom. If map and Warroom each improvise their own `?? id` fallback, raw corps or sector ids will eventually leak back in. Centralize player-facing corps / sector / assigned-command label translation in one shared helper and make fallbacks generic (`This corps`, `Assigned sector`, `Assigned command`) rather than engine identifiers.
+
+### Omniscient UI stores must be filtered before global player panels render
+If `LoadedGameState` still carries full-faction operation truth, any global player-facing list such as the standalone Operations panel must filter by `player_faction` before rendering. Otherwise the adapter can stay omniscient while the panel silently becomes a cheat surface. Until a real player-visible state boundary exists, panel-level filtering is part of the product contract.
+
+### Sidebars grouped by all factions are debug shells in disguise
+If an Army / Operations / Sectors rail groups content by RS, RBiH, and HRHB inside normal player mode, that surface is leaking omniscient truth even when individual cards look polished. Treat all global rails and overlay builders as player-faction-only by default; opt into debug omniscience explicitly elsewhere.
+
+### Focused regression files are safer than trusting broad legacy suites
+Some long-lived node:test suites in this repo already carry unrelated failures or stale expectations, which makes them weak gates for new engine-health work. When fixing a subtle split-truth bug, add a small focused regression file and wire it into the Vitest whitelist, rather than pretending a noisy broad suite proves the new invariant.
+
+### Launch feasibility must be checked against the final participant set
+If launch screening runs before enclave filters, reserve trimming, or other participant narrowing, the operation can be approved based on brigades that never actually join it. In AWWV, feasibility is only honest when it is evaluated on the real participating brigade set.
+
+### Objective-specific prep logic must stay objective-specific all the way down
+It is not enough for intel confidence to be objective-aware if force-ratio estimation still sums defenders from every facing sector on the front. Preparation math should use one shared notion of “which enemy sectors this operation is actually targeting.”
+### Player-facing fog only matters if formation rendering consumes it
+If the tactical map builder ignores `fogOfWar.visibleEnemyOsids` and renders every formation in `LoadedGameState`, then fog is just decorative paint over an omniscient renderer. Player-owned formations can render unconditionally; enemy formations should render only when the player-visible state boundary explicitly exposes them.
+
+### Summary chrome leaks just as badly as detail panels
+Bottom strips, overview cards, and situation tabs often get treated like harmless dashboard furniture, but they are where omniscient territory percentages, casualty ledgers, and operation totals quietly leak back into player mode. Product-truth sweeps must include those summary surfaces, not just the obvious tooltip/detail panels.
+
+### Tooltip cards are player surfaces, not debug exceptions
+Hover cards feel small, but players experience them as authoritative UI. Treat formation, settlement, and front tooltips exactly like any other player-facing panel: own truth may be detailed, enemy truth should collapse to contact-level abstraction unless a deliberate player-facing design says otherwise.
+
+### Settlement timelines can re-leak omniscient truth even after the visible card looks clean
+Filtering stationed units and pending orders is not enough if the same selected-settlement panel still forwards raw operation history or brigade movement logs into its timeline tab. For dossier-style surfaces, protect every tab at the input boundary, not just the first screenful of content.
+
+### Warroom contact snapshots should be abstract before they hit the UI
+If `extractWarData()` hands Warroom exact enemy formation names or ids, every report or magazine renderer has to remember not to print them. Fix that once at the snapshot boundary: make hostile contacts player-facing by construction (`Enemy contact` + strength/location context), then let every downstream Warroom surface consume the same safe contract.
+
+### Records panels are debug shells unless they consume player-scoped history helpers
+Operation history and active-op ledgers feel archival, which makes them easy places for omniscient truth to survive. If a records panel reads global operation arrays directly from `LoadedGameState`, it is still a debug shell. Route those surfaces through the same player-visibility helpers used elsewhere.
+### Compatibility sinks are still dangerous if they refresh timestamps
+
+In AWWV, a legacy helper can look harmless because it only computes zero deltas, but it still becomes a second authority path if it updates canonical state metadata like `last_updated_turn`. A compatibility sink is only honest when it consumes old calls without mutating live truth at all.
+
+### Hard-disabled mechanics are architecture debt, not neutral safety rails
+
+When a mechanic survives in types, comments, and docs but the live branch is effectively `false && ...`, the repo becomes more misleading than if the mechanic had simply been deleted. In AWWV, treat these as engine-health bugs: either remove the decorative path or replace it with a narrower honest discriminator. The engine `must_hold` repair is the model case — revive the signal only with a corps-boundary-aware test that can explain why it fires.
+
+### Commander intelligence gets fake quickly when local briefings hide neighboring friendly reality
+
+A corps AI that sees enemy pressure but not adjacent friendly corps posture will look “decisive” while still planning in a vacuum. The honest first step is not full multi-corps coordination; it is making neighboring corps stance and active-op load part of the briefing contract. In AWWV, proximity-based adjacent-corps summaries are cheap, deterministic, and much better than pretending local commanders operate alone.
+
+### Retired player commands must fail early, not stage successfully and vanish later
+
+If a command reaches desktop IPC, serializes into state, shows up in adapters, and only then disappears in a no-op war-phase sink, the product has already lied to the player. In AWWV, retired commands like brigade reposition should be rejected at the earliest contract boundary with a clear replacement path, and player-facing adapters should stop surfacing their stale save data.
+
+### Commander reinforcement pressure and elite reserve requests are not the same thing, but they must connect
+
+`commander_reinforcement_requests` on `CorpsCommandState` are the raw corps-to-Army-HQ pressure signal. `pending_reserve_requests` in the elite loan system are the downstream Army HQ reserve-action surface. Treating them as separate is correct; leaving them disconnected is not. The honest contract is: corps commanders persist reinforcement pressure, Army HQ theater assessment reads it, and the elite reserve queue must also consume it when generating candidate reserve loans.
+
+### Recent territorial change only matters if front-role scoring actually consumes it
+
+Computing `recent_territory_change` in theater assessment is not enough by itself. If Army HQ front-priority scoring ignores that field, the theater layer will still rank a bleeding corps like a normal offensive opportunity front. In AWWV, territorial trend must be consumed where roles are assigned, and any doc that points this gap at the wrong subsystem becomes a future bug magnet.
+
+### Fence half-dead legacy helpers with static tests before they get reused
+
+If a legacy helper still has one tolerated compatibility consumer, future refactors will be tempted to import it again because it “already works.” In AWWV, that is exactly when a dead authority path comes back to life. Prefer a small static regression gate that names the allowed consumer set explicitly, so the next accidental import fails fast instead of silently reviving old truth.
+### Player-facing fallback strings are where raw engine ids sneak back in
+
+The obvious primary labels can look clean while Army HQ headings, reserve requests, briefing alerts, or enclave summaries still do `?? corpsId` or `?? enclaveId`. In AWWV, treat fallback text as a governed player-safety surface: use one tiny pure helper layer and neutral fallbacks like `This corps`, `Friendly enclave`, `Assigned command`, and `Assigned brigade` instead of reprinting engine identifiers.
+
+### Transitional operation creators are more dangerous than dormant sinks
+
+The worst legacy combat files are not the inert no-op sinks; they are the older creation paths that still produce real operations while skipping newer canonical fields. In AWWV, every permitted operation creator must satisfy the same core contract as the canonical lifecycle owner. Emergency defensive ops in `bot_corps_operations.ts` were a model example: still live, still side-effecting, and still creating unanchored operations until they were forced to derive `sector_id` from the participant brigades.
+### Stale regression suites are dangerous when they still look authoritative
+
+The scripted-operation node:test suites were still enforcing an older catalog (`9` pre-planned ops, triggered `Operation Jajce`) and older queue truth long after the live engine had moved on. In AWWV, a stale regression file is not neutral documentation; it is an active source of wrong confidence. If a suite still looks canonical, modernize it to current truth or fence it off explicitly.
+
+### Summary chrome lies just as easily as detail panels
+
+Warroom `ownSupply` looked harmless because it was only a summary box, but it was still counting municipalities outside the player’s control. In this repo, overview numbers are not safer than detail tabs. If a summary panel says `own`, it must be scoped to the player’s actual holdings, not global state.
+
+### Queued-order lists are player surfaces too
+
+Raw formation ids do not stop being leaks just because they appear in a small order queue instead of a marquee panel. Order rails, badges, and miniature lists are still part of the product shell. If a player-facing list needs a fallback, use neutral brigade text rather than engine identifiers.
+
+### Canonical contracts only become real after the last “special case” disappears
+
+It is not enough for “most” operations to carry `sector_id`. As long as probe ops or some other live creator can still omit the field, every downstream system has to keep treating the contract as optional. In AWWV, the last exception is usually the most dangerous one because it teaches future work that the rule is negotiable.
+
+### Summary-shell labels are still product truth, not harmless chrome
+
+Players trust the small overview boxes as much as the big detail panels. If a summary card prints raw `mun_id`, enclave slugs, or route-faction codes, the product is still leaking engine truth even when the deeper surfaces are clean. In AWWV, municipality/enclave/corridor fallback text belongs in one shared player-safe helper layer so overview panels do not quietly improvise their own raw-id leaks.
+
+### Validation-only retirement still leaves a fake command alive
+
+If validation rejects a command but preload, IPC clients, and the main process still advertise it, the repo is still teaching future work that the mechanic exists. In AWWV, a retired command is only honestly retired when the earliest desktop/UI boundary stops exporting it entirely.
+
+### Exempt reserve corps must not be judged by field-corps invariants
+
+Army-HQ reserve formations like General Staff / Main Staff brigades are intentionally allowed to exist without front sectors until they are loaned into field-corps command. If a player-facing alert blindly says every active brigade-bearing corps must have sectors, the UI becomes the liar. In AWWV, reserve-corps exceptions should live in pure briefing policy and be regression-tested there.
+
+### Deception mechanics are fake until they touch a live pressure currency
+
+Feints can look “implemented” because they exist in types, intel, and UI language, but that still means very little if they never alter the same values that reserve requests, threat balancing, and command caution actually consume. In AWWV, the honest repair path is to wire feints into `threat_ratio` or another existing canonical pressure signal instead of inventing a decorative side effect.
+### Transitional operation creators must obey the same anchor contract as canonical ones
+
+In AWWV, the most dangerous legacy combat files are not dead sinks but older creator paths that still birth real operations while skipping newer required fields. Corridor-breach operations were one such case: still live, still side-effecting, and still creating ops without `sector_id` until explicitly repaired. Treat every permitted operation creator as part of the same canonical contract surface.
+
+### Hard-coded test allowlists are authority surfaces too
+
+If the repo uses an explicit test include list, a new regression file is not protected until that list includes it. That means the test runner can report green while silently omitting the very guard a fix depends on. In this repo, update the allowlist in the same slice as any new Vitest regression or the test is theater.
+
+### Player-facing sector orders must not secretly write the older front-assignment lane
+
+If a tactical-map action is labeled as a brigade-to-sector command, it must route through the canonical sector override contract all the way down. In AWWV, `stageAssignBrigadeToSectorAction(...)` accidentally writing `assignBrigadeToFront(...)` was not just a UI bug; it revived `brigade_front_assignment/local_fronts`, which still influences combat density. Treat any player-facing order surface that secretly writes an older authority lane as a serious engine-health bug.
+
+### A player-facing concept is still alive if preload, IPC, adapter, and sidebar all still mention it
+
+Even after a mechanic has a newer canonical replacement, the old concept remains live product truth if the desktop bridge exports it, the main process handles it, the adapter serializes it, and a sidebar still reasons from it. In AWWV, `assignBrigadeToFront(...)` and `brigadeFrontAssignment` had already outlived their intended player-facing role, but they still shaped the desktop shell until every one of those boundaries was cleaned up together.
+
+### Sparse-state adapter reads are part of engine health, not just test hygiene
+
+If `parseGameState(...)` assumes whole state branches like `displacement` always exist, tests may be the first thing to complain, but the real bug is that the player shell only works on happy-path saves. In AWWV, optional-reading sparse branches is not “being lax”; it is making the renderer robust to compatibility saves, partial fixtures, and evolving state contracts.
+
+### Wrong-branch reads in adapters silently delete whole gameplay signals
+
+The OPSEC briefing card disappeared not because OPSEC was unimplemented, but because the adapter read `opsec_sectors` from the wrong place. That kind of bug is especially dangerous: the data exists, the UI logic exists, and only the translation layer lies. In AWWV, adapters are authority surfaces and should be audited with the same suspicion as core sim code.
+
+### An unused desktop bridge is still a live product promise until removed
+
+If preload exports a method, the React IPC contract mirrors it, and Electron handles it, the repo is still promising that capability to future work even when no current UI calls it. In AWWV, `renameFrontSegment(...)` and `renameTheatre(...)` were dead shell bridges that needed removal precisely because they looked alive and therefore invited accidental reuse.
+
+### Sector truth and frontline fatigue must use the same assignment currency
+
+If sectors are the primary frontline organization model but fatigue still keys off legacy front assignment, the engine is silently using two different meanings of "on the line." In AWWV, frontline-duty fatigue should treat sector membership as primary truth and only fall back to `brigade_front_assignment` for compatibility while the deeper local-front lane is still being classified.
+
+### Shared frontline helpers and reports must follow the same sector-first contract as core mechanics
+
+Once sectors become the practical frontline authority, any shared helper like `isBrigadeAssignedToFront(...)` becomes a high-risk seam: battle resolution, posture gating, and reporting all inherit whatever lie it tells. In AWWV, the safe pattern is one shared helper that reads sectors first and legacy front assignment second, and then reuse that helper everywhere instead of letting each subsystem invent its own idea of "frontline."
+
+### Precedence bugs in tiny combat helpers can preserve legacy behavior long after the main architecture moves on
+
+Even if sectors are treated as primary truth in big systems, a small helper like `getLocalFrontDensityModifier(...)` can still bend combat if it checks `brigade_front_assignment/local_fronts` first. In AWWV, whenever both a new and old assignment currency coexist, the lookup order itself is a gameplay rule and should be treated as one.
+
+### A runtime export is still a live promise even after the UI stops calling it
+
+In AWWV, retiring a feature only at preload/IPC level is not enough if `desktop_sim.ts` still exports the old mutator. Future work will discover the export, assume the capability is still supported, and route around the shell cleanup. Dead desktop-sim exports should be removed once archived code is the only remaining caller.
+### A player-facing contract is still fake if one detail panel bypasses it
+
+In AWWV, shared helpers like `filterPlayerFacingOperations(...)` only become real protection once every consuming panel uses them. `OperationDetail.tsx` was still reading `loadedGameState.operations` directly, which meant the repo could claim player-safe operation filtering while a selected-key path still exposed enemy truth. When a player-facing filter exists, add a tiny keyed lookup helper beside it and route every detail panel through the same contract instead of letting each panel rediscover its own selection logic.
+
+### A shell affordance can be "technically present" and still functionally absent
+
+The standalone tactical map already had a Warroom-focus IPC path and Codex still existed, but both were buried deeply enough that the product still felt like it had lost them. In AWWV, navigation and reference affordances should be judged by live-user discoverability, not by whether some underlying hook technically survives. If a player needs specialist knowledge or keyboard habits to find a route back or open Codex, the shell is still lying about what the product supports.
+### Warroom command prose must never be more certain than the extracted player-facing snapshot
+
+In AWWV, headquarters surfaces like Command Briefing and Reports are part of the player shell, not theatrical wrappers around hidden truth. Hardcoded lines such as “no critical enclaves” or fake-specific authorship like “2nd Corps Intelligence Section” become structural lies if the underlying Warroom snapshot never proved them. Warroom can summarize and frame, but its prose should always be derived from player-facing extraction or stay explicitly generic.
+### Hiding raw enemy ids is not enough if the panel still reasons from omniscient state
+
+In AWWV, a player-facing surface can look safe because it prints only friendly-front language while still cheating underneath. Army HQ threat assessment was a clear example: no raw enemy corps ids or op names in the text, but the warnings still came from exact enemy operation phase/state. Treat data provenance as part of player-safety. If a panel is supposed to be a staff abstraction, it should be derived from player-plausible intel inputs, not from cleaned-up omniscient inputs.
+### Small fallback strings are still part of the product shell
+
+In AWWV, once the obvious leaks are fixed, the remaining debug smell usually survives in support rails, order summaries, and report prose. Raw `mun_id`, raw brigade ids, or raw OSID strings in those places are not harmless because players read them as the game speaking plainly. Treat fallback copy as a governed surface: if the UI has to degrade, it should degrade to a human label or a neutral safe phrase, not to an engine identifier.
+### Card titles and summary badges are fallback hot spots
+
+In AWWV, the easiest place for raw ids to sneak back in is not the big hero panel but the compact cards: corps cards, tactical cards, combat-summary badges, enclave tiles, and loan banners. Those components often use `name ?? id` or `display_name ?? key` patterns that feel harmless until the product is missing one label. Route those fallbacks through shared player-safe helpers instead of letting each card improvise its own last-resort string.
+### Warroom extractors are part of the player shell, not backend plumbing
+
+If `extractWarData(...)` or newspaper/report builders fall back to raw ids, the leak is just as real as if a React component printed them directly. In AWWV, treat Warroom data extractors and prose generators as player-facing authority surfaces: they need the same player-safe naming contract as the map UI, not their own `name ?? id` shortcuts.
+### Older planning surfaces are where raw-id fallback leaks like to survive
+
+Once the obvious map-shell leaks are cleaned up, the remaining player-truth damage often lives in less-central panels that still look alive: old Warroom settlement panels, planning maps, search indexes, and modal hover tooltips. In AWWV, those surfaces need the same player-safe fallback discipline as the primary shell; otherwise the product still degrades into engine identifiers precisely where nobody is looking closely.
+### Officer-event adapters are player-facing surfaces too
+
+If pending personnel/replacement events are derived in an adapter and that adapter falls back to raw officer ids or corps ids, the leak is still real even though no React component explicitly prints the id. In AWWV, event/adaptor text should degrade to neutral phrases like `An officer` and player-safe corps names, not to backend identifiers.
+### Tactical-map shells should default to command density, not roomy dashboard spacing
+
+In AWWV, once the shell is truthful, the next quality jump is usually density: toolbar chrome, detail panels, and operation cards should behave like a command console, not a generic spacious web app. Compact spacing is not just cosmetic; it determines how much command context the player can hold on screen at once.
+### Shared panel primitives are spacing authority surfaces
+
+If a common shell primitive like `GlassPanel` is roomy by default, every downstream overlay inherits that waste even when the individual panel code is otherwise disciplined. In AWWV, density work should start at the shell primitives and the structural rails (`OOBSidebar`, Army HQ, Codex), not only at the leaf cards.
+### Shared fallback helpers should be treated as player-truth authority surfaces
+
+In AWWV, once a helper like `playerSafeText.ts` exists, every Warroom/map shell that needs a last-resort officer, settlement, or municipality label should route through it instead of cloning a local version. Duplicated “small” fallback helpers drift quickly and become quiet re-entry points for raw ids, inconsistent phrasing, and different ideas of what counts as player-safe text.
+### Political-facing and military-facing faction names should not be improvised per screen
+
+In AWWV, peace/diplomacy surfaces often want political names while event/combat surfaces want military names. If each component carries its own faction label map, the product slowly develops several dialects and raw faction codes creep back in as fallbacks. Canonical player-safe helpers for both political and military faction names are cheaper and safer than letting each screen decide for itself.
+### Adapter-side `name ?? id` fallbacks are product policy, not harmless plumbing
+
+In AWWV, once a data adapter or loader chooses to fall back to a raw id, every downstream screen inherits that choice. Facilities, routes, movement logs, historical events, and peace-plan titles all proved that player-facing leakage can start in the adapter layer long before React renders anything. Humanize or neutralize those fallbacks at the source instead of expecting every shell to clean them up later.
+### Prose builders and narrative outputs need the same player-safe naming contract as UI panels
+
+In AWWV, NewspaperModal, Chronicle builders, and Warroom data extractors are not “secondary output”; they are part of the product shell. If they fall back to officer ids, event ids, or formation ids, the repo still speaks like tooling even after the visible panels are cleaned up. Route prose generation through the same player-safe helpers as the UI.
+### Shared frontline helpers must not union old and new authority paths once the new path exists
+
+In AWWV, `buildFrontlineAssignedFormationSet(...)` feeds battle eligibility, posture, fatigue, and reporting. If that helper unions corps sectors with legacy `brigade_front_assignment`, stale legacy data can keep extra brigades frontline forever. Once sectors exist, they should be authoritative; legacy front assignment should become fallback-only rather than “safety net truth.”
+### Loaded-state defaults are another authority layer
+
+In AWWV, `GameStateAdapter` is not just a parser; it defines the default vocabulary many UI panels inherit. If formation names, officer names, or fired-event titles fall back to raw ids there, the leak spreads widely. Hardening the view model is often more effective than fixing half a dozen leaf panels one by one.
+### Compatibility objects should not stay live runtime truth after their last real consumer is gone
+
+In AWWV, `local_fronts` survived as a rebuilt runtime object long after sectors had become the real frontline authority. Once the last meaningful fallback could be computed directly from `brigade_front_assignment + assignable_front_segments`, continuing to rebuild `local_fronts` every turn only preserved the illusion that the old lane still mattered. Strong cleanup often means deleting the rebuild path before deleting the schema field.
+### Legacy fallback helpers should validate their own inputs instead of demanding ritual repair passes
+
+In AWWV, `brigade_front_assignment` survived only as a compatibility lane, but `buildFrontlineAssignedFormationSet(...)` still trusted any non-null legacy entry. That forced the engine to keep running repair passes just to stop stale front IDs and dead formations from polluting frontline truth. A compatibility fallback is healthier when the helper itself ignores invalid segments and inactive formations, so the repo stops preserving old state merely to keep old assumptions comfortable.
+### Compatibility phases should stop running once modern authority already exists
+
+In AWWV, once `corps_front_sectors` already exist, rerunning `ensureBrigadeFrontAssignments(...)` every war turn only keeps the legacy front-assignment lane warm. A good migration rule is: if the new authority is already present, compatibility repair should stand down and only wake up for true absence or old-save recovery.
+### Dead loaded-state bridges are product debt even when the engine still keeps the underlying data
+
+In AWWV, `theatres`, `army_theatre_assignment`, and `segment.theatre_id` still existed for sim/compatibility reasons, but no live player-facing surface actually used them. Keeping those fields in `LoadedGameState` made the shell imply ownership it no longer had. When a product surface does not use a concept, stop carrying it in the loaded UI model even if the engine still stores it underneath.
+### Stale contract docs can resurrect dead systems just as effectively as stale code
+
+In AWWV, engineering docs that still listed `assign-brigade-to-front`, `rename-front-segment`, or theatre naming as live tactical-shell affordances were actively misleading, because the actual preload/main-process bridge had already retired them. When a product concept dies, update the contract docs quickly or the repo will keep teaching future agents that the ghost is still real.
+### Shared shell spacing must be treated like gameplay balance, not cosmetics
+
+In AWWV, if `TopToolbar`, `AccordionHeader`, `GlassPanel`, or the main command rail are roomy by default, every downstream panel inherits wasted space no matter how carefully the leaf components are designed. Density work should start with the shared shell authorities and toolbar-clearance rules, because that is where command context is won or lost across the whole product.
+### Large overlays must speak the same density language as the tactical shell
+
+In AWWV, Army HQ, Codex, and similar full-size overlays cannot be allowed to drift into a roomier, slower dashboard style just because they are modal. If those shells use larger paddings, taller tab rows, and oversized crests by default, the player experiences the product as several stitched-together interfaces instead of one command console.
+### Architecture docs need explicit authority, not just timestamps
+
+In AWWV, the dangerous architecture docs are not necessarily the oldest ones. They are the ones that still look polished and plausible enough to be mistaken for current truth. A strong repo should name which architecture documents are live authority and which are historical archaeology, otherwise implementers will keep mixing eras and calling it context.
+### Repo root is a product surface too
+
+In AWWV, the repository root teaches every new human and agent how seriously the project is curated. A placeholder README and stray trace dumps signal accidental ownership. A strong root should point cleanly at the live authorities and archive session residue instead of letting it masquerade as current truth.
+### Ownership comments belong in the code, not only in engineering docs
+
+In AWWV, if a file is an old harness, a smoke path, or a compatibility entrypoint, the warning should live in the file header itself. Otherwise the repo depends on implementers remembering external docs while staring at code that still looks live.
+- 2026-04-02: In the current map shell, `PresidentialToolbar` is the live top-level authority, not `TopToolbar.tsx`. Any future shell/navigation work must start from the mounted toolbar before trusting polished but unmounted legacy components.
+- 2026-04-02: AAR and operation history should route through Army HQ `RECORDS` as the canonical owner. If another shell needs those surfaces, it should hand the player into Army HQ rather than reopen parallel history ownership.
+- 2026-04-02: Tactical operations UI should read as a field-facing snapshot. If a panel can launch/review/own operations *and* Army HQ can also do that, the panel is probably overstepping and should hand off to HQ.
+- 2026-04-02: Army HQ `SUMMARY` is a player-facing shell, not an all-faction debug dashboard. In player mode it should show own-side exact values and theater-wide aggregates, while enemy-wide totals stay in staff abstractions instead of exact scoreboard tables.
+- 2026-04-02: Warroom `FactionOverviewPanel` is a strategic shell summary, not a second command desk. It may summarize command posture and direct the player toward Army HQ, but detailed formations, officer rosters, and commander reassignment belong to Army HQ command-review surfaces.
+- 2026-04-02: If the tactical map is a live desktop shell, the mounted toolbar must expose a visible path back to Warroom. A bridge method sitting unused in legacy code does not count as product-shell ownership.
+### 22. Player-facing vocabulary drift is a shell-integrity bug, not copy polish
+
+If Army HQ, Chronicle, OPORD, or Warroom panels still say OSID, raw faction ids, or similar engine nouns, the shell still sounds like an internal tool even if the underlying data is player-safe. Treat vocabulary cleanup as part of player-truth enforcement and lock it into the canonical existing test suites rather than adding orphan test files the repo will not normally run.
+
+### Tactical operations panel must stay map-facing
+
+If `OperationsPanel.tsx` says Army HQ owns command review, it must not still expose launch, halt, or other command staging buttons. Tactical operations UI may summarize field state and hand off to Army HQ or corps orders, but command authority must stay singular.
+
+### Player-facing faction rails should never fall back to raw faction ids
+
+OOB headings, operation subtitles, and briefing headers are core shell surfaces. They must use player-safe military or political faction names rather than raw ids like `RBiH` when a clearer human-facing label is available.
+
+### Event and attack modals are player shells, not debug/status readouts
+
+Attack confirmations, event queues, and decision modals should use player-safe military or political faction language just like any larger panel. These are high-attention decision surfaces, so raw faction ids leak product tone fast.
+
+### Tactical rail detail panels must obey the same player-language contract as modals
+
+Operation detail, corps detail, and sector dossier rails are part of the live command shell. They should not keep raw faction ids just because they feel more technical than the toolbar or OOB.
+
+### Bottom status strips must not quietly become omniscient scoreboards
+
+If a persistent shell strip shows exact all-faction territory or strength percentages, it is acting like a debug/status console even when the styling is elegant. High-frequency strips should default to player-safe framing and leave richer cross-faction totals to explicitly owned analysis surfaces.
+
+### Summary shells are where raw engine vocabulary quietly re-enters
+
+If a summary tab or war dashboard still says RBiH, RS, or similar shorthand, the live shell is still talking like an internal tool even if the deeper panels are clean. Treat summary surfaces as first-class player-language contracts and lock them into the existing player-visibility test suite.
+
+
+### A safe launcher does not make an unsafe destination acceptable
+
+If a bottom strip, menu item, or button is made player-safe but the dashboard or modal it opens still exposes exact enemy truth, the shell contract is still broken. Player-facing truth must hold across the entire interaction path, not just the first click.
+
+
+### Administrative panels can leak just as badly as battlefield panels
+
+Economy, supply, and reserve screens often get treated as harmless because they are not on the map. In a faction-play strategy game they are still player shells. If they show exact all-faction values by default, the product is still leaking debug truth under calmer styling.
+
+
+### Shared relationship concepts must keep one player-facing label across shells
+
+If peace shell, tactical shell, and Warroom each name the same alliance or diplomatic relationship differently, the product feels like multiple stitched interfaces. Treat cross-shell vocabulary as architecture, not cosmetic copy.
+
+
+### Peace-phase faction cards should not expose exact hostile declaration telemetry by default
+
+Mounted peace shells are still player surfaces. Exact hostile declaration percentages make them feel like debug dashboards even when the styling is elegant. Keep exact pre-war capital for the player side, but reduce hostile declaration status to qualitative posture unless an explicitly owned intelligence surface says otherwise.
+
+
+### Phase 0 Warroom copy is part of the same shell contract as war-phase shells
+
+Raw shorthand like `RS declaration imminent` or `Army of RBiH` leaks product tone even if the later war shells are cleaner. Treat Warroom Phase 0 badges, warnings, and event modal body text as player-facing language that needs the same discipline as tactical-map rails and Army HQ summaries.
+
+
+### Shared shell padding becomes product drift if nobody owns it
+
+Warroom modals, newspapers, magazines, and scenario cards inherit spacing from a small number of shell classes. If those classes stay loose, every new surface feels airy and under-filled no matter how good the content is. Tighten the shared shells first before polishing one-off panels.
+
+
+### Army HQ should read like a command desk, not a presentation
+
+If Army HQ cards and collapsible sections have too much fixed height and padding, the interface starts feeling ceremonial instead of operational. Prefer compact corps cards, shorter section headers, and tighter expanded-detail spacing so more command truth stays above the fold.
+
+### Product shells need an explicit hierarchy, not just a component map
+
+In AWWV, it is not enough to know which panel owns operations or records. The repo also needs to say which shell starts play, which shell owns the battlespace, which shell owns command review, and which shell owns knowledge. If that stays implicit, Warroom, Tactical Map, Army HQ, and Codex drift into overlapping tools.
+
+### Dead constructors are more dangerous than dead fields
+
+In AWWV, a legacy state field can be relatively harmless if everyone knows it is compatibility baggage. A constructor or builder that still looks capable of recreating that layer is worse, because it teaches future work that the layer might still be canonical. If a runtime layer has been retired, kill the constructor too or mark it unmistakably as archival.
+
+### Dead writers are worse than dead readers
+
+In AWWV, a compatibility field can linger for save/load reasons without doing much harm. A live pipeline writer that keeps rebuilding that field every turn is different: it keeps the old concept feeling current. If a layer is no longer canonical, stop refreshing it in the live pipeline before you worry about full schema deletion.
+
+### Docs that claim a bridge is gone must be verified against the live shell
+
+In AWWV, "we already removed that IPC" is not trustworthy until preload, Electron main, the live IPC hook, and the live adapter all agree. Compatibility ghosts often survive in exactly one of those layers and quietly keep a dead concept available.
+

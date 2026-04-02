@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-03-27
+**Updated:** 2026-04-02
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 
@@ -27,6 +27,7 @@
 ## Current status (summary)
 
 - **Canonical GUI:** React + MapLibre map app in `src/ui/map/`; warroom in `src/ui/warroom/`. Run map via `npm run dev:map`, desktop via `npm run desktop:map:build` (or Electron).
+- **Live tactical shell authority:** `PresidentialToolbar` is the mounted top shell for tactical-map play. `TopToolbar.tsx` still exists in the repo but is not the live shell and should be treated as legacy/non-authoritative until deliberately revived.
 - **Panel rail:** One right-side rail (`panelRail.ts`); App mounts primary/secondary detail (settlement, army, corps, sector, formation, operation). Settlement panel: 3 horizontal tabs (Overview | Municipality | Timeline). Overview: OSID-level population, displacement, pre-war+current ethnic (with absolute numbers), stationed units, sector. Municipality: mun-level population, displacement totals, pre-war+current ethnic structure. Timeline: "The Story of This Place" — 12-event-type chronological history (control flips, battles, displacement, kills, brigade movements, supply changes, operations, ethnic shifts, historical events). Deck.gl TextLayer for 27 settlement labels (MapLibre symbols broken). See [20260307_SETTLEMENT_PANEL_RICH_CONTENT_AND_TABS.md](implemented/20260307_SETTLEMENT_PANEL_RICH_CONTENT_AND_TABS.md).
 - **Command experience:** Army HQ Modal (`src/ui/map/components/army_hq/`, 13 components) is the player's nerve center. Dark warroom aesthetic (`bg-panel-bg`, `bg-panel-card`, `text-amber-400` headings). Three-column top: Commander (left), faction army crest 180px centered (`getArmyCrest()`), Strategic Situation stats (right). **Situation Briefing** panel: `generateBriefing()` pure function scans full game state → prioritized CRITICAL/WARNING/INFO alerts (supply, cohesion, intel, ops, personnel, territory). Click alert → flips relevant corps card. **FlipCard** animation: CSS 3D `rotateY(180deg)`, grid stacking, Safari prefix. Front = summary with equipment icons (tank/arty op/total), readiness-driven left border color, incoming threat badge from sectorIntel, health stripe (cohesion+fatigue dual bar). Back = full detail (commander, sectors, ops, ORBAT, combat record, stance dropdown). **Intelligence panels (v2):** Threat Assessment (active threats, hardened positions, intel gaps from `sectorIntel`), Force Readiness (per-corps grade COMBAT READY→INEFFECTIVE with recommendations), Supply Intelligence (canonical supply constants, enclave resilience bars, mobilization, runway projection). Keyboard: H=HQ, ESC=back/close.
 - **Fog of war:** Live from `sector_intel` via `GameStateAdapter` → `LoadedGameState.fogOfWar`; no legacy `recon_intelligence`.
@@ -47,6 +48,12 @@
 
 | Date | Change | Report / spec |
 |------|--------|----------------|
+| 2026-04-02 | **Product shell hierarchy architecture pass** — added a canonical shell hierarchy contract naming Warroom as primary shell, Tactical Map as battlespace shell, Army HQ as command-review shell, and Codex as knowledge shell, with explicit handoff rules between them. | [implemented/20260402_PRODUCT_SHELL_HIERARCHY_ARCHITECTURE_PASS.md](implemented/20260402_PRODUCT_SHELL_HIERARCHY_ARCHITECTURE_PASS.md), [../20_engineering/PRODUCT_SHELL_HIERARCHY.md](../20_engineering/PRODUCT_SHELL_HIERARCHY.md) |
+| 2026-04-02 | **Tactical-map Warroom return restoration** — the mounted `PresidentialToolbar` now exposes a visible `WARROOM` return affordance in standalone desktop and embedded tactical-map modes, using the live shell bridge instead of relying on dead legacy toolbar code. | [implemented/20260402_TACTICAL_MAP_WARROOM_RETURN_RESTORATION.md](implemented/20260402_TACTICAL_MAP_WARROOM_RETURN_RESTORATION.md) |
+| 2026-04-02 | **Warroom faction shell handoff** — Warroom's faction overview no longer renders detailed formations, officer rosters, or commander reassignment. It now summarizes command-shell posture and explicitly hands detailed command review back to Army HQ, keeping Warroom strategic and Army HQ operational. | [implemented/20260402_WARROOM_FACTION_SHELL_HANDOFF.md](implemented/20260402_WARROOM_FACTION_SHELL_HANDOFF.md), [WARROOM_MASTER.md](WARROOM_MASTER.md) |
+| 2026-04-02 | **Player-safe ops labels + HQ roster polish** — OPORDs, objective lists, and HQ recent-engagement rows now resolve settlement names through shared display helpers instead of leaking raw OSIDs; also fixed a lingering Army HQ summary fallback bug. | [implemented/20260402_PLAYER_SAFE_OPS_LABELS_AND_HQ_ROSTER_POLISH.md](implemented/20260402_PLAYER_SAFE_OPS_LABELS_AND_HQ_ROSTER_POLISH.md) |
+| 2026-04-02 | **Shell ownership + HQ records canonicalization** — the active tactical shell now routes AAR and operation history through Army HQ records, PresidentialToolbar gained explicit SUMMARY / RECORDS / OPS / EVENTS / CODEX paths, and the tactical Operations panel is now framed as a field snapshot with an `HQ Review` handoff. | [implemented/20260402_SHELL_OWNERSHIP_AND_HQ_RECORDS_CANONICALIZATION.md](implemented/20260402_SHELL_OWNERSHIP_AND_HQ_RECORDS_CANONICALIZATION.md) |
+| 2026-04-02 | **Warroom command shell truth + density pass** â€” Warroom reports and command briefing no longer pretend to know more than the extracted player-facing snapshot, report authorship is generic/player-safe instead of fake-specific, help text reflects current anchors, and Warroom modal chrome was tightened to better match the tactical shell. | [implemented/20260402_WARROOM_COMMAND_SHELL_TRUTH_AND_DENSITY_PASS.md](implemented/20260402_WARROOM_COMMAND_SHELL_TRUTH_AND_DENSITY_PASS.md), [WARROOM_MASTER.md](WARROOM_MASTER.md) |
 | 2026-04-01 | **Dev-map browser-safe import recovery** — Recovered `npm run dev:map` after Node-only `fs/path` imports leaked into the tactical-map browser graph through shared combat/terrain helpers. Split Node loaders into `terrain_scalars_node.ts` and `combat_terrain_sets_node.ts`, restored browser-safe shared helpers, and added a bundle regression test. | [implemented/20260401_DEV_MAP_BROWSER_SAFE_IMPORT_RECOVERY.md](implemented/20260401_DEV_MAP_BROWSER_SAFE_IMPORT_RECOVERY.md) |
 | 2026-03-27 | **Command sidebar layout knowledge** — Documented why the left Command rail sits far below the Presidential bar (shared `--awwv-toolbar-clearance` vs. centered crest), corps list spacing (`space-y-3`, `CorpsCard`/`FlipCard`), why prior blank-space audits missed it, and options (split CSS vars, tighter list, z-index). | [implemented/20260327_COMMAND_SIDEBAR_LAYOUT_KNOWLEDGE.md](implemented/20260327_COMMAND_SIDEBAR_LAYOUT_KNOWLEDGE.md) |
 | 2026-03-27 | **Production `dist/tactical-map` live verification** — After `desktop:map:build`, static-served bundle with `?live=1`: no DEV badge or dev strip; screenshot + accessibility pass. Map data may not load without Vite `/data` middleware (check scope: dev chrome only). | [implemented/20260327_PROD_BUNDLE_LIVE_MAP_VERIFICATION.md](implemented/20260327_PROD_BUNDLE_LIVE_MAP_VERIFICATION.md) |
@@ -130,6 +137,7 @@
 | 2026-03-15 | **Bottom strip unification + map mode overhaul** — Merged `MapModeToolbar` and `BottomStatusStrip` into single unified bottom bar (`BottomStatusStrip.tsx`). Layout: `[Map Mode Pills] \| [Territory Control %] \| [Layer Toggles]`, z-20. Territory % now area-weighted km² (from `osid_areas.json`). Removed broken `pressure` mode and redundant `density` mode. Added `casualties` mode (per-OSID battle casualties, continuous gradient) and `morale` mode (per-sector avg morale, continuous gradient). Final lineup: Political/Ethnic/Supply/Casualties/Morale/Operations/Defense (keys 1-7). Layer toggles: Front/Units/Labels/Minimap/Fog/Battles. Stacking fixes: OOBSidebar, panelRail, OrderQueue bottom clearances adjusted to clear the strip. | PROJECT_LEDGER 2026-03-15, `BottomStatusStrip.tsx`, `buildCasualtiesGeoJSON.ts` (NEW), `buildMoraleGeoJSON.ts` (NEW) |
 | 2026-03-14 | **Brigade panel rework (n717)** — Engine: `brigade_sector_override` field in `MilitaryState`; `classifyBrigadesByTerritory` respects player overrides (same-corps only); `assignBrigadeToSector()` in `desktop_sim.ts`; `assign-brigade-to-sector` IPC handler; `preload.cjs` exposed. Adapter: `homeHops`, `homeDistanceMult`, `homeIsElite`, `sectorOverrideId` from `home_distance_cache` + formation data; `brigadeSectorOverride` in `LoadedGameState`. UI: `FormationDetail.tsx` restructured into 3 tabs (Overview / Record / Orders); ATK/MOV buttons removed (architecturally wrong — bypassed CorpsOperation); DIG IN stays in header; Orders tab has home-distance effectiveness widget (Layer 1 badge + Layer 2 dual power stats) and permanent sector reassignment picker (Layer 3, same-corps only); marker desaturation Layer 4 via data-driven `icon-opacity` = `home_distance_mult × 0.96` in map style. `useMapInteractions.ts`: click handler for `osid-density-fill`. `orderActions.ts`: `assignBrigadeToSectorOverrideAction`. | Phase A–F brigade-panel-rework plan |
 | 2026-03-06 | Panel rework: CorpsFrontPanel accordions, numeric shortcuts 1–5, loading shimmer, TopToolbar glow | [20260306_GUI_PANEL_REWORK_AND_GENERAL_POLISH.md](implemented/20260306_GUI_PANEL_REWORK_AND_GENERAL_POLISH.md) |
+| 2026-04-02 | **Army HQ War Summary player-truth pass** — `WarSummaryContent` no longer shows exact all-faction territory/personnel/casualty/displacement tables in player mode. Army HQ SUMMARY now shows own-side exact values plus theater-wide aggregates, with enemy-wide truth left to staff assessments/reports. | [20260402_ARMY_HQ_WAR_SUMMARY_PLAYER_TRUTH.md](implemented/20260402_ARMY_HQ_WAR_SUMMARY_PLAYER_TRUTH.md) |
 
 ---
 
@@ -192,3 +200,132 @@ Deck brigade whitening must be driven only by durable selection state. A broken 
 ### 8. Corps brigade highlighting must not depend on sector assignment
 
 Corps-level map highlighting must use direct corps ownership, not sector-derived membership. A broken version of the Deck selection bridge highlighted corps brigades by collecting the corps' sectors and then matching formations by `sector_id`, which skipped reserve or otherwise non-sector-assigned brigades. Rule: sector highlighting is `sector_id`-based; corps highlighting must use `corps_id` and include all corps-owned brigades.
+
+### 9. Player-facing tactical-map text must never leak raw engine ids
+
+Tooltips, operation history, commander selection, personnel rosters, and Army HQ threat surfaces must render display names or friendly-front abstractions only. Strings like raw `corps_id`, `sector_id`, enclave ids, or enemy operation names in normal UI are contract violations, not cosmetic debt.
+
+### 10. Standalone tactical map must keep a visible route back to HQ and records
+
+If the tactical map is opened as its own desktop shell, it needs a visible return path to Warroom and a visible records/Codex affordance. Those are not optional convenience buttons; they are part of the product shell contract that keeps command, records, and intelligence in one coherent experience.
+
+### 11. Omniscient UI stores must be filtered before player panels render
+
+If `LoadedGameState` still carries omniscient operation or sector truth, any player-facing panel that renders lists or labels must filter by `player_faction` and resolve display names through shared label helpers before showing text. Otherwise enemy ops and raw ids leak back through secondary panels even after the main map surfaces are cleaned up.
+
+### 12. Global command rails are not debug consoles
+
+OOB sidebars, operation lists, mobilization summaries, sector accordions, and map overlay builders must default to the player faction only. If a global rail groups content by all factions, it is acting like a debug shell even when the styling looks player-facing.
+
+### 13. Formation visibility must obey player truth, not raw formation presence
+
+`buildFormationsGeoJSON.ts` must not treat every formation in `LoadedGameState.formations` as renderable by default. In player mode, the tactical map should render all player-owned formations plus only those enemy formations that the fog contract explicitly exposes (currently `fogOfWar.visibleEnemyOsids`). Otherwise the renderer becomes omniscient even when the rest of the shell speaks in player-safe language.
+
+### 14. Situation summaries and status strips are part of the player shell
+
+Bottom status strips, overview tabs, and quick casualty/territory summaries are not harmless chrome. If they show global operation counts, all-faction territory shares, or all-faction casualty totals in normal player mode, they are leaking omniscient truth just as surely as a tooltip would. Treat these summary surfaces as player-facing by default and require explicit debug-only opt-in for global scoreboards.
+
+### 15. Hover tooltips are player surfaces, not staff consoles
+
+Formation, settlement, and front hover cards must obey the same player-truth contract as any larger panel. Own formations may keep exact detail. Enemy hover should collapse to contact-level abstractions unless the product deliberately supports more. Settlement hover should not quietly enumerate enemy garrisons, and front hover should not reveal enemy unit names just because the mouse crossed a line. If a tooltip needs richer truth for debugging, that belongs behind an explicit debug surface, not in normal play.
+
+### 16. Selected-settlement dossiers must filter timeline truth too
+
+Selection panels are not safer than tooltips just because they are bigger. If a selected-settlement dossier filters stationed units but still forwards omniscient operation history or brigade-movement logs into its timeline tab, the panel is still a cheat surface. Treat settlement detail as a single player-facing contract: overview, orders, sector context, movement timeline, and operation history all need the same faction-scoped filtering before they render.
+
+### 17. Warroom contact reporting must abstract hostile identities at the snapshot boundary
+
+Warroom reports and magazine panels should not rely on every downstream renderer remembering to hide raw enemy formation names. If the headquarters shell is player-facing, its extracted contact snapshot should already speak in abstractions like `Enemy contact`, plus strength and location context. The cheaper and safer rule is: fix the snapshot contract once, then let every Warroom surface consume the same player-safe contact model.
+
+### 18. Records/history panels must not become omniscient archives
+
+Operations history feels archival, but it is still part of the normal player shell. If the records tab reads all-faction active operations or all-faction completed operation history directly from `LoadedGameState`, it becomes a debug archive with nice styling. Treat records/history surfaces like any other player-facing panel: they should consume player-scoped visibility helpers, not raw global ledgers.
+### 19. Compatibility sinks must not quietly refresh canonical state
+
+If a module is documented as dormant or compatibility-only, it must not still bump timestamps or rewrite canonical state as a side effect. A no-op sink that still touches `front_pressure` teaches the repo that two writers are acceptable. Keep reusable computations if they help tests or future reactivation, but make the sink itself truly inert.
+### 20. Shared shell spacing authorities determine whether the UI feels like a command console or a roomy dashboard
+
+If `TopToolbar`, `GlassPanel`, `AccordionHeader`, `module-header`, or the main rail-clearance variable are generous by default, every downstream screen inherits avoidable chrome and blank space. In AWWV, density work should start with those shared shell authorities before leaf-card polish, because command UX quality depends on how much useful state fits above the fold.
+### 21. Large modal shells must not drift into a different UX era
+
+Army HQ, Codex, and other full-size overlays should obey the same density language as the tactical shell. If they keep roomier headers, tab rows, sidebars, and paper panes just because they are modals, the product stops feeling like one coherent command environment and starts feeling like several stitched-together UI generations.
+
+### 22. Player-facing UI must never speak engine vocabulary when a human phrase exists
+
+OSID, raw faction ids, and similar backend nouns are valid in engine code, canon, and tests. They are not valid in the live player shell when a human phrase like staging area, positions, or a political-side display name can carry the meaning. The product should sound like a command environment, not a debugger.
+
+## 2026-04-02 - Tactical operations panel ownership cleanup
+
+- Tactical `OperationsPanel` is now map-facing only.
+- Removed `Launch Now`, `Halt`, and `Halt + Dig In` from the mounted tactical shell.
+- Army HQ remains the canonical command review and control owner.
+- Operation header now uses player-safe military faction names instead of raw faction ids.
+- See `docs/40_reports/implemented/20260402_TACTICAL_OPERATIONS_PANEL_SHELL_OWNERSHIP.md`.
+
+## 2026-04-02 - Player-safe faction shell labels
+
+- OOBSidebar army summary affordances now use player-safe military faction names.
+- OOB mobilization/operations headings and operation subtitles no longer fall back to raw faction ids.
+- Operation Briefing modal now shows corps plus player-safe military faction naming in the header.
+- See `docs/40_reports/implemented/20260402_PLAYER_SAFE_FACTION_SHELL_LABELS.md`.
+
+## 2026-04-02 - Player-safe event and attack labels
+
+- Attack confirmation now shows player-safe military faction names for attacker and defender.
+- Event modal and EventDecision modal now use player-safe political faction naming in effect summaries and headers.
+- See `docs/40_reports/implemented/20260402_PLAYER_SAFE_EVENT_AND_ATTACK_LABELS.md`.
+
+## 2026-04-02 - Player-safe rail panel labels
+
+- Operation detail, corps detail, and sector dossier rails now use player-safe military faction naming in visible identity lines.
+- See `docs/40_reports/implemented/20260402_PLAYER_SAFE_RAIL_PANEL_LABELS.md`.
+
+## 2026-04-02 - Bottom status strip player truth
+
+- Bottom status strip now shows player-safe `Friendly` control and aggregated `Hostile-held` share instead of exact all-faction territory percentages.
+- See `docs/40_reports/implemented/20260402_BOTTOM_STATUS_STRIP_PLAYER_TRUTH.md`.
+
+## 2026-04-02 - Summary shell player-safe labels
+
+- SituationTab.tsx now uses player-safe military/political wording in territory, casualty, and alliance copy instead of raw faction ids.
+- WarSummaryContent.tsx now reads the canonical player faction from uildWarSummaryOverviewModel(...) and uses player-safe military faction names in the player header.
+- See docs/40_reports/implemented/20260402_SUMMARY_SHELL_PLAYER_SAFE_LABELS.md.
+
+
+## 2026-04-02 - Strategic dashboard player truth
+
+- StrategicDashboard.tsx now follows the same player-safe contract as the bottom status strip.
+- In player mode it shows exact friendly values and aggregated hostile-held summaries rather than exact all-faction territory/casualty/reserve scoreboards.
+- See docs/40_reports/implemented/20260402_STRATEGIC_DASHBOARD_PLAYER_TRUTH.md.
+
+
+## 2026-04-02 - Economy and logistics player truth
+
+- SupplyPanel.tsx and EconomyPanel.tsx now scope mounted player-mode data to the player's side instead of showing exact all-faction logistics/reserve truth.
+- See docs/40_reports/implemented/20260402_ECONOMY_LOGISTICS_PLAYER_TRUTH.md.
+
+
+## 2026-04-02 - Cross-shell alliance vocabulary cleanup
+
+- Peace shell and Warroom milestone surfaces now use Bosniak-Croat wording consistently for the alliance relationship.
+- See docs/40_reports/implemented/20260402_CROSS_SHELL_ALLIANCE_VOCABULARY_CLEANUP.md.
+
+## 2026-04-02 - Phase 0 player-shell truth cleanup
+
+- PeaceStatusPanel now keeps exact pre-war capital only for the player faction and reduces hostile declaration telemetry to abstract posture labels.
+- FactionOverviewPanel now uses player-facing military badges and qualitative declaration-drive wording instead of raw faction shorthand and exact hostile percentages.
+- DeclarationEventModal now refers to the Bosnian Army instead of `Army of RBiH`.
+- See `docs/40_reports/implemented/20260402_PHASE0_PLAYER_SHELL_TRUTH_CLEANUP.md`.
+
+## 2026-04-02 - Warroom modal density pass
+
+- Tightened shared Warroom dialog, faction overview, newspaper, magazine, main-menu, and scenario-picker spacing.
+- The pass reduces inherited padding and blank vertical bands without changing information ownership or command flow.
+- See `docs/40_reports/implemented/20260402_WARROOM_MODAL_DENSITY_PASS.md`.
+
+## 2026-04-02 - Army HQ density pass
+
+- Tightened Army HQ collapsible sections, corps cards, and expanded operation detail spacing.
+- The pass keeps the same command information but makes the mounted Army HQ shell feel more like a compressed command desk and less like a slide stack.
+- See `docs/40_reports/implemented/20260402_ARMY_HQ_DENSITY_PASS.md`.
+

@@ -27,6 +27,7 @@ import type {
     ThreatAssessment,
     CommanderOutput,
 } from '../../src/sim/combat/commander/commander_state.js';
+import type { SupplyStateByOsidReport } from '../../src/state/supply_state_derivation.js';
 import {
     measureCorridorWidth,
     computeCommitmentRatio,
@@ -374,6 +375,94 @@ describe('force_eval', () => {
         expect(forces.tier_counts.garrison).toBeGreaterThanOrEqual(1);
         expect(forces.evaluations).toHaveLength(3);
     });
+
+    it('evaluateBrigade uses explicit supply state instead of the conservative default', () => {
+        const brigade = makeBrigade({
+            personnel: 2500,
+            cohesion: 100,
+            equipment_class: 'mechanized',
+        });
+
+        const adequate = evaluateBrigade(brigade, null, 'adequate');
+        const critical = evaluateBrigade(brigade, null, 'critical');
+        const unknown = evaluateBrigade(brigade, null);
+
+        expect(adequate.fitness_offense).toBeCloseTo(1.75, 2);
+        expect(critical.fitness_offense).toBeCloseTo(0.875, 3);
+        expect(unknown.fitness_offense).toBeCloseTo(1.4, 2);
+        expect(adequate.fitness_offense).toBeGreaterThan(unknown.fitness_offense);
+        expect(unknown.fitness_offense).toBeGreaterThan(critical.fitness_offense);
+    });
+
+    it('evaluateCorpsForces reads supply_by_osid for brigade fitness', () => {
+        const brigades = [
+            makeBrigade({
+                id: 'b1' as FormationId,
+                personnel: 2500,
+                cohesion: 100,
+                equipment_class: 'mechanized',
+                location_osid: 'op:test:test_1',
+                faction: 'RS',
+            }),
+        ];
+        const zones = [makeZone({ assigned_brigades: ['b1' as FormationId] })];
+        const supplyByOsid: SupplyStateByOsidReport = {
+            schema: 1,
+            turn: 10,
+            factions: [{
+                faction_id: 'RS',
+                by_osid: [{ osid: 'op:test:test_1', state: 'critical' }],
+            }],
+        };
+
+        const forces = evaluateCorpsForces(brigades, zones, supplyByOsid);
+
+        expect(forces.evaluations).toHaveLength(1);
+        expect(forces.evaluations[0]!.fitness_offense).toBeCloseTo(0.875, 3);
+        expect(forces.evaluations[0]!.fitness_defense).toBeCloseTo(0.25, 3);
+    });
+
+    it('evaluateBrigade penalizes heavy local fatigue in both offense and defense fitness', () => {
+        const fresh = makeBrigade({
+            personnel: 2500,
+            cohesion: 100,
+            equipment_class: 'mechanized',
+            ops: { fatigue: 0 } as FormationState['ops'],
+        });
+        const tired = makeBrigade({
+            personnel: 2500,
+            cohesion: 100,
+            equipment_class: 'mechanized',
+            ops: { fatigue: 30 } as FormationState['ops'],
+        });
+
+        const freshEval = evaluateBrigade(fresh, null, 'adequate');
+        const tiredEval = evaluateBrigade(tired, null, 'adequate');
+
+        expect(tiredEval.fitness_offense).toBeLessThan(freshEval.fitness_offense);
+        expect(tiredEval.fitness_defense).toBeLessThan(freshEval.fitness_defense);
+    });
+
+    it('evaluateBrigade can demote a high-fatigue brigade out of main_effort', () => {
+        const fresh = makeBrigade({
+            personnel: 1200,
+            cohesion: 60,
+            equipment_class: 'motorized',
+            ops: { fatigue: 0 } as FormationState['ops'],
+        });
+        const tired = makeBrigade({
+            personnel: 1200,
+            cohesion: 60,
+            equipment_class: 'motorized',
+            ops: { fatigue: 30 } as FormationState['ops'],
+        });
+
+        const freshEval = evaluateBrigade(fresh, null, 'adequate');
+        const tiredEval = evaluateBrigade(tired, null, 'adequate');
+
+        expect(freshEval.tier).toBe('main_effort');
+        expect(tiredEval.tier).not.toBe('main_effort');
+    });
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -572,6 +661,14 @@ describe('plan', () => {
             intel_data: null,
             doctrine_stance: 'balanced',
             corps_stance: 'balanced',
+            corps_exhaustion: 0,
+            avg_fatigue_pct: 0,
+            brigades_above_fatigue_threshold: 0,
+            enemy_equipment_summary: {
+                tanks: 0,
+                artillery: 0,
+                infantry_only: true,
+            },
             officer_personality: defaultPersonality,
             pre_planned_ops: [],
             previous_state: null,
@@ -632,6 +729,69 @@ describe('plan', () => {
 
         // Only 1 surplus, MIN_BRIGADES_FOR_PLAN = 3
         expect(result.action).toBe('none');
+        expect(result.plan).toBeNull();
+    });
+
+    it('does not create a new offensive plan when corps exhaustion is above the launch threshold', () => {
+        const zoneId = 'zone:test_corps:0' as ZoneId;
+        const brigIds = ['b1', 'b2', 'b3', 'b4'].map(id => id as FormationId);
+        const zones = [makeZone({
+            zone_id: zoneId,
+            posture: 'projecting',
+            front_edge_count: 10,
+            enemy_adjacent_osids: ['op:enemy:e1', 'op:enemy:e2'],
+            surplus_brigades: brigIds,
+            assigned_brigades: brigIds,
+        })];
+        const evals = brigIds.map(id => makeEval({
+            brigade_id: id,
+            current_zone: zoneId,
+            tier: 'main_effort',
+            is_combat_effective: true,
+            is_disrupted: false,
+        }));
+        const forces = makeForces(evals, zones);
+
+        const briefing = makeMinimalBriefing({
+            corps_exhaustion: 31,
+        });
+
+        const result = managePlan(briefing, zones, forces, evals, null, 10);
+
+        expect(result.action).toBe('none');
+        expect(result.reason).toContain('corps exhaustion');
+        expect(result.plan).toBeNull();
+    });
+
+    it('does not create a new offensive plan when average brigade fatigue is already high', () => {
+        const zoneId = 'zone:test_corps:0' as ZoneId;
+        const brigIds = ['b1', 'b2', 'b3', 'b4'].map(id => id as FormationId);
+        const zones = [makeZone({
+            zone_id: zoneId,
+            posture: 'projecting',
+            front_edge_count: 10,
+            enemy_adjacent_osids: ['op:enemy:e1', 'op:enemy:e2'],
+            surplus_brigades: brigIds,
+            assigned_brigades: brigIds,
+        })];
+        const evals = brigIds.map(id => makeEval({
+            brigade_id: id,
+            current_zone: zoneId,
+            tier: 'main_effort',
+            is_combat_effective: true,
+            is_disrupted: false,
+        }));
+        const forces = makeForces(evals, zones);
+
+        const briefing = makeMinimalBriefing({
+            avg_fatigue_pct: 70,
+            brigades_above_fatigue_threshold: 2,
+        });
+
+        const result = managePlan(briefing, zones, forces, evals, null, 10);
+
+        expect(result.action).toBe('none');
+        expect(result.reason).toContain('fatigue');
         expect(result.plan).toBeNull();
     });
 
@@ -1119,6 +1279,12 @@ describe('commander_loop', () => {
             intel_data: null,
             doctrine_stance: 'balanced',
             corps_stance: 'balanced',
+            corps_exhaustion: 0,
+            enemy_equipment_summary: {
+                tanks: 0,
+                artillery: 0,
+                infantry_only: true,
+            },
             officer_personality: defaultPersonality,
             pre_planned_ops: [],
             previous_state: null,

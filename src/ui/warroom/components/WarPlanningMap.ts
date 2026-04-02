@@ -11,6 +11,7 @@ import wallMapFrameUrl from '../assets/wall_map_frame_v1.webp?url';
 import type { InvestmentPanelMunInfo, Phase0DirectiveState } from './InvestmentPanel.js';
 import { InvestmentPanel } from './InvestmentPanel.js';
 import { SettlementInfoPanel } from './SettlementInfoPanel.js';
+import { getPlayerSafeMunicipalityName, getPlayerSafeSettlementName } from '../../map/utils/playerSafeText.js';
 
 /** GeoJSON Position [x, y] or [x, y, z]. */
 type Position = [number, number] | [number, number, number];
@@ -615,7 +616,7 @@ export class WarPlanningMap {
         const names = this.settlementNames?.by_census_id ?? {};
         for (const [sid, feature] of this.polygons.entries()) {
             const censusId = sid.startsWith('S') ? sid.slice(1) : sid;
-            const name = names[censusId]?.name ?? sid;
+            const name = names[censusId]?.name ?? getPlayerSafeSettlementName(sid);
             const bbox = this.getFeatureBbox(feature);
             this.searchIndex.push({ sid, name, bbox, feature });
         }
@@ -1437,7 +1438,7 @@ export class WarPlanningMap {
         const midStr = this.settlementToMidMap.get(sid) ?? String(feature.properties?.municipality_id ?? '');
         if (!midStr) return;
 
-        const munName = this.municipalitiesMap.get(midStr) ?? `Municipality ${midStr}`;
+        const munName = this.municipalitiesMap.get(midStr) ?? getPlayerSafeMunicipalityName(midStr, 'Municipality');
         const munId = midStr as MunicipalityId;
 
         // Get municipality state

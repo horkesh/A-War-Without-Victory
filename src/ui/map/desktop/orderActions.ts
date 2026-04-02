@@ -75,14 +75,16 @@ export async function stagePostureOrderAction(
  * Shifts the settlement from its current owner to the selected brigade.
  */
 /**
- * Stages a Brigade-to-Sector assignment via IPC (legacy map-click path).
+ * Stages a Brigade-to-Sector assignment via IPC from the map-click path.
+ * This must flow through the canonical sector override contract, not the
+ * older front-assignment lane.
  */
 export async function stageAssignBrigadeToSectorAction(
     { ipc, addStagedOrder, setLoadError }: PostureOrderDeps,
     brigadeId: string,
     sectorId: string,
 ): Promise<void> {
-    const result = await ipc.assignBrigadeToFront(brigadeId, sectorId);
+    const result = await ipc.assignBrigadeToSector(brigadeId, sectorId);
     if (!result.ok) {
         setLoadError(result.error ?? 'Sector assignment failed.');
         return;

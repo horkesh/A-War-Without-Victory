@@ -1,6 +1,8 @@
 /**
  * Sector invariant assertions and reachability guards.
- * Extracted from corps_front_sectors.ts — pure refactoring, zero behavior change.
+ *
+ * These are diagnostic rails, not hard-stop enforcement. They surface broken
+ * sector truth loudly, but they do not currently throw or rewrite state.
  */
 
 import type {
@@ -15,14 +17,13 @@ import { getSectorComponent } from './sector_utils.js';
  * Assert that every assigned/reserve brigade can physically reach its sector
  * through contiguous friendly territory (same connected component).
  *
- * This is the SINGLE enforcement point for the reachability invariant.
- * All assignment paths (Phase 1 positional, Phase 2 pool, coverage transfers,
- * deduplication, reclassification) flow through the sector pipeline and hit
- * this assertion before sectors are returned to consumers.
+ * This is the single diagnostic sink for the reachability invariant inside the
+ * sector pipeline. All assignment paths should flow through here before sectors
+ * are returned to consumers, but the function currently logs rather than throws.
  *
- * Logs violations as console.error. Sectors remain usable — the brigade
- * just can't physically reach its sector, which downstream guards
- * (filterReachableReassignmentOrders) will catch for march orders.
+ * Logs violations as console.error. Sectors remain usable - the brigade still
+ * cannot physically reach its sector, and downstream guards
+ * (filterReachableReassignmentOrders) can catch the same mismatch for march orders.
  */
 export function assertBrigadeReachability(
     sectors: CorpsFrontSector[],
@@ -32,7 +33,7 @@ export function assertBrigadeReachability(
     const violations: string[] = [];
     for (const sec of sectors) {
         const secComp = getSectorComponent(sec, componentOf);
-        if (secComp === -1) continue; // sector has no mapped OSIDs — skip
+        if (secComp === -1) continue; // sector has no mapped OSIDs - skip
         const allBids = [
             ...sec.assigned_brigade_ids,
             ...(sec.reserve_brigade_ids ?? []),
@@ -43,7 +44,7 @@ export function assertBrigadeReachability(
             const brigComp = componentOf.get(f.location_osid) ?? -2;
             if (brigComp !== secComp) {
                 violations.push(
-                    `${bid} (at ${f.location_osid}, comp ${brigComp}) → ${sec.sector_id} (comp ${secComp})`
+                    `${bid} (at ${f.location_osid}, comp ${brigComp}) -> ${sec.sector_id} (comp ${secComp})`
                 );
             }
         }
@@ -63,9 +64,9 @@ export function assertBrigadeReachability(
  *   - f.status === 'active'
  *   - f.lifecycle_status is NOT 'destroyed' or 'disbanded'
  *
- * Logs violations as console.error. Sectors remain usable — downstream
- * combat logic simply ignores inactive formations, but their presence
- * in a sector is a bug that must be surfaced.
+ * Logs violations as console.error. Sectors remain usable - downstream combat
+ * logic may ignore inactive formations, but their presence in a sector is still
+ * a bug that must be surfaced.
  */
 export function assertSectorBrigadesActive(
     sectors: CorpsFrontSector[],
@@ -130,7 +131,7 @@ export function filterReachableReassignmentOrders(
         const brigComp = componentOf.get(f.location_osid) ?? -2;
         if (brigComp !== secComp) {
             console.warn(
-                `[filterReachableReassignmentOrders] Dropped unreachable order: ${order.brigade_id} (comp ${brigComp}) → ${order.to_sector_id} (comp ${secComp})`
+                `[filterReachableReassignmentOrders] Dropped unreachable order: ${order.brigade_id} (comp ${brigComp}) -> ${order.to_sector_id} (comp ${secComp})`
             );
             return false;
         }

@@ -52,6 +52,54 @@ function bfsCountExcluding(
     return visited.size;
 }
 
+interface FriendlyComponentFacts {
+    members: Set<string>;
+    hasZoneOsid: boolean;
+    hasOutsideCorpsOsid: boolean;
+}
+
+function collectFriendlyComponentsExcluding(
+    friendlySet: ReadonlySet<string>,
+    adjacency: ReadonlyMap<string, readonly string[]>,
+    excludeOsid: string,
+    zoneOsidSet: ReadonlySet<string>,
+    corpsOsidSet: ReadonlySet<string>,
+): FriendlyComponentFacts[] {
+    const visited = new Set<string>();
+    const components: FriendlyComponentFacts[] = [];
+
+    const sortedFriendly = [...friendlySet].sort(strictCompare);
+    for (const source of sortedFriendly) {
+        if (source === excludeOsid || visited.has(source)) continue;
+
+        const members = new Set<string>([source]);
+        let frontier = [source];
+        visited.add(source);
+        let hasZoneOsid = zoneOsidSet.has(source);
+        let hasOutsideCorpsOsid = !corpsOsidSet.has(source);
+
+        while (frontier.length > 0) {
+            const next: string[] = [];
+            for (const osid of frontier) {
+                for (const n of (adjacency.get(osid) ?? [])) {
+                    if (n === excludeOsid || visited.has(n) || !friendlySet.has(n)) continue;
+                    visited.add(n);
+                    members.add(n);
+                    if (zoneOsidSet.has(n)) hasZoneOsid = true;
+                    if (!corpsOsidSet.has(n)) hasOutsideCorpsOsid = true;
+                    next.push(n);
+                }
+            }
+            next.sort(strictCompare);
+            frontier = next;
+        }
+
+        components.push({ members, hasZoneOsid, hasOutsideCorpsOsid });
+    }
+
+    return components;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // detectZones — partition corps territory into connected zones
 // ═══════════════════════════════════════════════════════════════════════════
@@ -204,16 +252,29 @@ export function detectZones(
         // (only fire if isolated cluster spans a different corps jurisdiction).
         // Track this as a P1 calibration item: run 40w scenario with logging to measure
         // actual Posavina pocket size vs ARBiH valley cluster sizes.
-        const engineMustHold = false && chokepointSet.size > 0 && zoneOsids.some(osid => {
+        const engineMustHold = chokepointSet.size > 0 && zoneOsids.some(osid => {
             if (!chokepointSet.has(osid)) return false;
             const neighbors = (spatial.adjacency.get(osid as string) ?? [])
                 .filter((n: string) => allFriendlyOsids.has(n) && n !== osid);
             if (neighbors.length < 2) return false;
-            // BFS from first neighbor excluding this osid; measure isolated cluster size
+
             const adj = spatial.adjacency as ReadonlyMap<string, readonly string[]>;
-            const reachable = bfsCountExcluding(neighbors[0]!, allFriendlyOsids, adj, osid);
-            const isolatedCount = allFriendlyOsids.size - reachable - 1;
-            return isolatedCount >= minIsolated;
+            const components = collectFriendlyComponentsExcluding(
+                allFriendlyOsids,
+                adj,
+                osid,
+                zoneOsidSet,
+                corpsOsidSet,
+            );
+
+            const zoneComponent = components.find(component => component.hasZoneOsid);
+            if (!zoneComponent) return false;
+
+            return components.some(component =>
+                component !== zoneComponent &&
+                component.hasOutsideCorpsOsid &&
+                component.members.size >= minIsolated
+            );
         });
 
         const isMustHold = scenarioMustHold || engineMustHold;

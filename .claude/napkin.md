@@ -237,6 +237,8 @@ After EVERY scenario run, the orchestrator:
    Do instead: When auditing `src/ui/map` via browser automation, avoid `Escape` for closing overlays unless the overlay explicitly advertises `[ESC]`; otherwise it may open the Pause menu and pollute screenshots/findings.
 10. **[2026-03-26] War Summary/Summary focused tabs should render only focused section**
    Do instead: When `SituationTab` is used with `focusSection` (Army HQ `SUMMARY` and War Summary modal), render only that section card and suppress overview/snapshot/alliance/alerts blocks to avoid duplicate-content dead space.
+11. **[2026-04-02] Warroom command prose must derive from snapshot truth or stay generic**
+   Do instead: In `src/ui/warroom`, never hardcode confident lines like safe convoys, calm enclaves, or fake-specific staff authorship unless `extractWarData(...)` actually proves them. Warroom is a player-facing shell, not a narrative wrapper for hidden truth.
 9. **[2026-03-26] Toolbar-clearance verification must include live + dev contexts**
    Do instead: For top-toolbar clearance checks, always capture one no-dev-strip (`?live=1`) shot and one dev-strip shot with side panels visible, then state overlap verdict explicitly in the report.
 
@@ -394,6 +396,10 @@ After EVERY scenario run, the orchestrator:
 ## GUI / HoI Map
 1. **[2026-04-01] Fog is not enough - player-facing state must be filtered before render**
    Do instead: Treat desktop / tactical-map player knowledge as a data-boundary contract. Do not ship near-full GameState to the renderer and trust fog or panel discipline to hide it later. Raw ids like `arbih_3rd_corps`, raw sector ids, and enemy/internal ops belong only in explicit debug surfaces.
+2. **[2026-04-02] PresidentialToolbar is the live shell; Army HQ RECORDS owns history**
+   Do instead: Start shell/navigation work from `PresidentialToolbar.tsx`, not the older `TopToolbar.tsx`. Route AAR and operation history through Army HQ `RECORDS`; tactical-map ops UI should stay a field snapshot and hand command review off to HQ.
+3. **[2026-04-02] Army HQ SUMMARY is player-safe, not an all-faction scoreboard**
+   Do instead: Keep own-side exact territory/personnel/casualty values in `WarSummaryContent`, allow theater-wide aggregates when useful, and push enemy-wide totals back into staff abstractions instead of exact comparison tables.
 1. **[2026-03-15] Unified bottom strip: map modes + territory + toggles**
    Do instead: `BottomStatusStrip.tsx` is the single bottom bar: `[Map Mode Pills] | [Territory % area-weighted] | [Layer Toggles]`. z-20 (above map, below panels z-50-100). `MapModeToolbar` exists but is NOT rendered. Territory % uses km² from `osid_areas.json`. 7 modes (keys 1-7): Political, Ethnic, Supply, Casualties, Morale, Operations, Defense. Pressure/density modes removed (broken/redundant). Casualties + morale use continuous `interpolate` gradients. 7 layer toggles: Front, Units, Labels, Minimap, Fog, Battles, Points.
 2. **[2026-03-11] GameStateAdapter is the single chokepoint — check paths FIRST**
@@ -486,3 +492,11 @@ After EVERY scenario run, the orchestrator:
    Do instead: No `PhaseI`, `PhaseII` identifiers. `rear_pocket_consolidation.ts` replaces deleted `consolidation_flips.ts`.
 3. **[2026-03-08] Deep merging test mocks with nested state**
    Do instead: Standard `...overrides` overwrites nested structures entirely. Manually deep merge or spread inside the nested object literal.
+
+## Player Shell Discipline
+1. **[2026-04-02] Player-facing operation documents must never print raw OSIDs**
+   Do instead: OPORDs, objective lists, and HQ roster/history hover rows must resolve settlement labels through player-safe helpers. Exact internal identifiers belong only in debug-only surfaces.
+2. **[2026-04-02] Warroom faction overview stays strategic**
+   Do instead: Warroom may summarize command posture, but detailed formations, personnel rosters, reserve handling, and commander reassignment belong to Army HQ. If Warroom starts doing those things again, it is stealing ownership from the command shell.
+3. **[2026-04-02] Tactical map must always show the way back to Warroom**
+   Do instead: If desktop IPC is available or the map is embedded, the mounted tactical toolbar must expose a visible `WARROOM` return affordance. A hidden bridge method in legacy code is not enough.

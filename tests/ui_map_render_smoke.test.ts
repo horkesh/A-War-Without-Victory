@@ -7,7 +7,25 @@ import { buildControlGeoJSON } from '../src/ui/map/map/builders/buildControlGeoJ
 import { buildMajorCityLabelGeoJSON } from '../src/ui/map/map/builders/buildMajorCityLabelGeoJSON.js';
 import { buildFogOfWarGeoJSON } from '../src/ui/map/map/builders/buildFogOfWarGeoJSON.js';
 import { buildFormationsGeoJSON } from '../src/ui/map/map/builders/buildFormationsGeoJSON.js';
+import { buildOperationArrowsGeoJSON } from '../src/ui/map/map/builders/buildOperationArrowsGeoJSON.js';
 import { deriveUrbanTier } from '../src/ui/map/map/builders/urbanSettlementTiers.js';
+import { generateBriefing } from '../src/ui/map/components/army_hq/generateBriefing.js';
+import { generateThreatAssessment } from '../src/ui/map/components/army_hq/generateThreatAssessment.js';
+import {
+  getAssignedCommandLabel,
+  getPlayerFacingCorpsName,
+  getPlayerFacingSectorName,
+  getPlayerVisibleFactions,
+  getPlayerVisibleOperations,
+} from '../src/ui/shared/playerFacingLabels.js';
+import {
+  getPlayerSafeBrigadeName,
+  getPlayerSafeCorridorLabel,
+  getPlayerSafeCorpsName,
+  getPlayerSafeDecisionTitle,
+  getPlayerSafeEnclaveName,
+  getPlayerSafeMunicipalityName,
+} from '../src/ui/map/utils/playerSafeText.js';
 import type { LoadedGameState } from '../src/ui/map/data/types.js';
 import type { FeatureCollection } from 'geojson';
 
@@ -186,5 +204,203 @@ describe('Tactical map render smoke', () => {
       expect(result.features[0]?.geometry?.type).toBe('Point');
       expect((result.features[0]?.properties as { location_osid?: string })?.location_osid).toBe('op:sarajevo');
     }
+  });
+
+  it('generateThreatAssessment keeps player-facing language on friendly fronts', () => {
+    const state = {
+      formations: [
+        { id: 'arbih_3rd_corps', name: '3rd Corps', faction: 'RBiH', kind: 'corps' },
+        { id: 'vrs_1st_krajina', name: '1st Krajina Corps', faction: 'RS', kind: 'corps' },
+      ],
+      corpsFrontSectors: [
+        { sector_id: 'sector:arbih_3rd:0', corps_id: 'arbih_3rd_corps', faction: 'RBiH' },
+      ],
+      operations: [
+        {
+          corps_id: 'vrs_1st_krajina',
+          faction: 'RS',
+          phase: 'execution',
+          preparation_sub_phase: null,
+          momentum: 2,
+          name: 'op_vrs_secret_thunder',
+          current_objective_index: 1,
+          objectives: ['osid_a', 'osid_b'],
+        },
+        {
+          corps_id: 'vrs_1st_krajina',
+          faction: 'RS',
+          phase: 'planning',
+          preparation_sub_phase: 'force_staging',
+          momentum: 0,
+          name: 'op_vrs_followup',
+          current_objective_index: 0,
+          objectives: ['osid_c'],
+        },
+      ],
+      sectorIntel: [
+        {
+          friendly_sector_id: 'sector:arbih_3rd:0',
+          enemy_corps_id: 'vrs_1st_krajina',
+          offensive_signs: true,
+          strength_category: 'strong',
+          confidence: 0.72,
+        },
+      ],
+    } as LoadedGameState & {
+      sectorIntel: Array<{
+        friendly_sector_id: string;
+        enemy_corps_id?: string;
+        offensive_signs: boolean;
+        strength_category?: string;
+        confidence: number;
+      }>;
+    };
+
+    const items = generateThreatAssessment(state, 'RBiH');
+    const rendered = items.map((item) => `${item.title} ${item.detail}`).join(' || ');
+
+    expect(rendered).toContain('3rd Corps front');
+    expect(rendered).toContain('hostile offensive preparation');
+    expect(rendered).not.toContain('vrs_1st_krajina');
+    expect(rendered).not.toContain('1st Krajina Corps');
+    expect(rendered).not.toContain('op_vrs_secret_thunder');
+    expect(rendered).not.toContain('op_vrs_followup');
+    expect(rendered).not.toContain('hostile operation in execution');
+    expect(rendered).not.toContain('hostile operation staging');
+  });
+
+  it('player-facing label helpers never fall back to raw ids', () => {
+    const corpsNameById = new Map([
+      ['arbih_3rd_corps', '3rd Corps'],
+    ]);
+    const sectors = [
+      { sector_id: 'sector:arbih_3rd:0', display_name: 'Ozren Sector' },
+    ];
+
+    expect(getPlayerFacingCorpsName('arbih_3rd_corps', corpsNameById)).toBe('3rd Corps');
+    expect(getPlayerFacingSectorName('sector:arbih_3rd:0', sectors)).toBe('Ozren Sector');
+    expect(getAssignedCommandLabel('arbih_3rd_corps', corpsNameById)).toBe('3rd Corps');
+
+    expect(getPlayerFacingCorpsName('arbih_5th_corps', new Map())).toBe('This corps');
+    expect(getPlayerFacingSectorName('sector:arbih_5th:0', [])).toBe('Assigned sector');
+    expect(getAssignedCommandLabel('arbih_5th_corps', new Map())).toBe('Assigned command');
+  });
+
+  it('player-safe text helpers replace internal fallback ids with neutral labels', () => {
+    expect(getPlayerSafeCorpsName('arbih_3rd_corps', 'arbih_3rd_corps')).toBe('3rd Corps');
+    expect(getPlayerSafeCorpsName('vrs_1st_krajina', 'vrs_1st_krajina')).toBe('1st Krajina');
+    expect(getPlayerSafeCorpsName(undefined, 'arbih_5th_corps')).toBe('This corps');
+    expect(getPlayerSafeDecisionTitle(undefined)).toBe('Pending decision');
+    expect(getPlayerSafeEnclaveName(undefined)).toBe('Friendly enclave');
+    expect(getPlayerSafeEnclaveName('bihac_pocket')).toBe('Bihac Pocket');
+    expect(getPlayerSafeMunicipalityName('gornji_vakuf')).toBe('Gornji Vakuf');
+    expect(getPlayerSafeCorridorLabel('RS')).toBe('VRS-controlled corridor');
+    expect(getPlayerSafeCorridorLabel('RBiH')).toBe('ARBiH-controlled corridor');
+    expect(getPlayerSafeBrigadeName(undefined)).toBe('Assigned brigade');
+    expect(getPlayerSafeBrigadeName('')).toBe('Assigned brigade');
+  });
+
+  it('player-facing operation filtering hides non-player factions from omniscient state', () => {
+    const visible = getPlayerVisibleOperations(
+      [
+        { faction: 'RBiH', name: 'Own Op' },
+        { faction: 'RS', name: 'Enemy Op' },
+      ],
+      'RBiH',
+    );
+
+    expect(visible).toEqual([{ faction: 'RBiH', name: 'Own Op' }]);
+  });
+
+  it('player-facing faction filtering hides non-player formations and sectors', () => {
+    const formations = getPlayerVisibleFactions(
+      [
+        { faction: 'RBiH', id: 'arbih_3rd_corps' },
+        { faction: 'RS', id: 'vrs_1st_krajina' },
+      ],
+      'RBiH',
+    );
+    const sectors = getPlayerVisibleFactions(
+      [
+        { faction: 'RBiH', sector_id: 's_1' },
+        { faction: 'HRHB', sector_id: 's_2' },
+      ],
+      'RBiH',
+    );
+
+    expect(formations).toEqual([{ faction: 'RBiH', id: 'arbih_3rd_corps' }]);
+    expect(sectors).toEqual([{ faction: 'RBiH', sector_id: 's_1' }]);
+  });
+
+  it('operation arrows ignore enemy operations in player mode', () => {
+    const state = {
+      player_faction: 'RBiH',
+      operations: [
+        { faction: 'RBiH', corps_id: 'arbih_3rd_corps', name: 'Own Op', objectives: ['osid_b'], staging_osid: 'osid_a' },
+        { faction: 'RS', corps_id: 'vrs_1st_krajina', name: 'Enemy Op', objectives: ['osid_d'], staging_osid: 'osid_c' },
+      ],
+    } as LoadedGameState;
+
+    const lookup = new Map<string, [number, number]>([
+      ['osid_a', [18, 44]],
+      ['osid_b', [18.2, 44.2]],
+      ['osid_c', [19, 45]],
+      ['osid_d', [19.2, 45.2]],
+    ]);
+
+    const geo = buildOperationArrowsGeoJSON(state, lookup);
+    const names = geo.features.map((feature) => String((feature.properties as { op_name?: string }).op_name ?? ''));
+
+    expect(names.some((name) => name.includes('Own Op'))).toBe(true);
+    expect(names.some((name) => name.includes('Enemy Op'))).toBe(false);
+  });
+
+  it('army hq briefing does not flag exempt reserve corps as missing sectors', () => {
+    const state = {
+      turn: 12,
+      formations: [
+        {
+          id: 'arbih_general_staff',
+          faction: 'RBiH',
+          name: 'General Staff ARBiH',
+          kind: 'corps',
+          status: 'active',
+          readiness: 'active',
+          cohesion: 80,
+          fatigue: 0,
+          createdTurn: 1,
+          tags: [],
+        },
+        {
+          id: 'arbih_guards_brigade',
+          faction: 'RBiH',
+          name: 'Guards Brigade',
+          kind: 'brigade',
+          status: 'active',
+          readiness: 'active',
+          cohesion: 80,
+          fatigue: 0,
+          createdTurn: 1,
+          tags: [],
+          corps_id: 'arbih_general_staff',
+          personnel: 1800,
+        },
+      ],
+      corpsFrontSectors: [],
+      operations: [],
+      pendingOfficerEvents: [],
+      pendingEventDecisions: [],
+      enclaveResilience: {},
+      warPhaseExhaustion: { RBiH: 0 },
+      factionReserves: { RBiH: { generalSupply: 100, heavyMunitions: 10 } },
+      latestTurnSummary: { battles: [] },
+      war_alliance_rbih_hrhb: 1,
+    } as unknown as LoadedGameState;
+
+    const items = generateBriefing(state, 'RBiH');
+    const rendered = items.map((item) => `${item.title} ${item.detail}`).join(' || ');
+
+    expect(rendered).not.toContain('General Staff ARBiH has no front sectors assigned');
+    expect(rendered).not.toContain('brigades without sector assignment');
   });
 });

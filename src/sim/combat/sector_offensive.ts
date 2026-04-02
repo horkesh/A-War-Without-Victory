@@ -34,7 +34,10 @@
  * eligible brigade pool derives from that sector's assigned brigades. Cross-sector brigades
  * join only as explicit bounded attachments (`attached_brigades`, `reinforcement_source`,
  * `supporting_sector_ids`). See `docs/plans/2026-04-01-v08x-sector-anchored-corps-operations-plan.md`.
- * Pre-planned and probe ops do not yet carry full sector anchoring — Phase 5 closes that gap.
+ * All current live operation creation paths are expected to provide a primary
+ * `sector_id` anchor. Legacy flat-field save compatibility remains supported
+ * during lifecycle advancement, but new operation birth without a sector anchor
+ * should be treated as a contract violation.
  *
  * Deterministic: sorted iteration, no randomness, no timestamps.
  */
@@ -75,7 +78,15 @@ import {
     PERSONNEL_HEALTHY_THRESHOLD,
 } from './bot_constants.js';
 import { getFactionCorps, getCorpsSubordinates, sortByPersonnelDesc } from './bot_corps_helpers.js';
-import { basePower, VICTORY_THRESHOLD_COSTLY } from './combat_math.js';
+import {
+    ENTRENCHMENT_PER_TURN,
+    MAX_ENTRENCHMENT,
+    basePower,
+    VICTORY_THRESHOLD_COSTLY,
+    getDefensiveFireMult,
+    getForestMult,
+    getUrbanMult,
+} from './combat_math.js';
 import { findSectorForEnemyOsid } from './corps_front_sectors.js';
 import { seedDisplacementTimerOnFlip } from '../../state/displacement_takeover.js';
 import type { PreparationEvent } from '../turn_pipeline_types.js';
@@ -152,7 +163,7 @@ const FEASIBILITY_ATTACK_POSTURE_MULT = 0.8;
  */
 function checkLaunchFeasibility(
     state: GameState,
-    corpsBrigadeIds: FormationId[],
+    attackerBrigadeIds: FormationId[],
     objectives: string[],
     faction: FactionId,
     corpsId: FormationId,
@@ -161,7 +172,7 @@ function checkLaunchFeasibility(
 
     // Compute total attacker base power (all corps brigades that can attack)
     let totalAttackerPower = 0;
-    for (const bid of corpsBrigadeIds) {
+    for (const bid of attackerBrigadeIds) {
         const f = formations[bid];
         if (!f || f.status !== 'active') continue;
         if ((f.personnel ?? 0) < MIN_ATTACK_PERSONNEL) continue;
@@ -186,18 +197,32 @@ function checkLaunchFeasibility(
 
         // Sum defender sector base power (all brigades in the sector)
         let sectorDefenderPower = 0;
+        const defenders: FormationState[] = [];
         for (const defBid of sector.assigned_brigade_ids) {
             const df = formations[defBid];
             if (!df || df.status !== 'active') continue;
             sectorDefenderPower += basePower(df);
+            defenders.push(df);
         }
 
         if (sectorDefenderPower <= 0) return true; // Undefended sector
 
+        const defensiveFireMult = getDefensiveFireMult(defenders, defenderFaction, state);
+        const entrenchmentMult = defenders.reduce((best, defender) => {
+            const entrenchmentTurns = Math.min(
+                MAX_ENTRENCHMENT,
+                (defender as { entrenchment_turns?: number }).entrenchment_turns ?? 0,
+            );
+            const mult = 1.0 + Math.sqrt(entrenchmentTurns) * ENTRENCHMENT_PER_TURN * 2;
+            return Math.max(best, mult);
+        }, 1.0);
+        const terrainMult = Math.max(getUrbanMult(obj), getForestMult(obj));
+        const adjustedDefenderPower = sectorDefenderPower * defensiveFireMult * entrenchmentMult * terrainMult;
+
         // Power ratio: attacker pool vs entire defending sector.
         // This is generous to the attacker because in reality only a fraction
         // of the sector's brigades would react to any single OSID attack.
-        const ratio = totalAttackerPower / sectorDefenderPower;
+        const ratio = totalAttackerPower / adjustedDefenderPower;
         if (ratio >= VICTORY_THRESHOLD_COSTLY) return true;
     }
 
@@ -1811,6 +1836,13 @@ export function evaluateCorpsOffensiveLaunch(
     const participating = sortedByPriority
         .slice(0, sortedByPriority.length - reserveCount)
         .slice(0, MAX_PARTICIPATING_BRIGADES);
+    if (participating.length < MIN_BRIGADES_FOR_OFFENSIVE) return null;
+    if (!hasEligibleAttackersForLaunch(formations, participating)) return null;
+    if (!checkLaunchFeasibility(state, participating, objectives, faction, corpsId)) {
+        const corpsName = formations[corpsId]?.name ?? corpsId;
+        console.warn(`[feasibility] ${corpsName}: rejected op after participant trim - no objective achievable at costly_victory (${objectives.length} objectives, ${participating.length} participating brigades)`);
+        return null;
+    }
 
     // Pick staging OSID: nearest corps friendly OSID to first objective.
     // Falls back to first friendly OSID in corps territory (deterministic, sorted).

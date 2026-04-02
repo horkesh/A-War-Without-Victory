@@ -26,7 +26,12 @@ import { assignOperationCommander } from './officer_system.js';
 import { isEligibleOperationFormation } from '../../state/formation_constants.js';
 import { validateOpAtInjection, collectOpInjectionWarnings } from './operation_validation.js';
 import type { ValidatableOpDef } from './operation_validation.js';
-import { buildCorpsOperation, hasActiveOperation, hasAvailableSlot } from './corps_operation_helpers.js';
+import {
+    buildCorpsOperation,
+    derivePrimarySectorForBrigades,
+    hasActiveOperation,
+    hasAvailableSlot,
+} from './corps_operation_helpers.js';
 
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -316,11 +321,15 @@ function buildOperation(
 
     const allObjectives = builtAxes.flatMap(a => a.objectives);
 
+    const primarySectorId = derivePrimarySectorForBrigades(
+        Object.values(state.military.corps_front_sectors ?? {}),
+        def.primary_corps,
+        allParticipating,
+    );
     // PERMITTED CREATION ENTRY POINT — triggered (condition/time-gated) operations.
     // Not pre-planned (no is_pre_planned flag) — does not occupy the slot-0 queue.
-    // PHASE 5 TRANSITIONAL: sector_id and brigade categorization fields not yet populated.
-    // Not broad-pool — brigades are axis-defined. Sector anchoring deferred.
-    const op = buildCorpsOperation(def, builtAxes, allParticipating, turn, false);
+    // Sector anchoring now derives from the primary corps brigade set.
+    const op = buildCorpsOperation(def, builtAxes, allParticipating, turn, false, primarySectorId);
 
     return { op, corpsAxes };
 }

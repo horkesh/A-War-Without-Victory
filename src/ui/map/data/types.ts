@@ -27,15 +27,6 @@ export interface AssignableFrontSegmentView {
     side_b: string | null;
     length_edges: number;
     name?: string;
-    theatre_id?: string;
-}
-
-export interface TheatreView {
-    id: string;
-    name: string;
-    faction: string;
-    army_ids?: string[];
-    region_scope?: string[];
 }
 
 /** Officer mutable state for UI (from GameState.named_officers). */
@@ -514,10 +505,6 @@ export interface LoadedGameState {
     controlBySettlement: Record<string, string | null>;
     statusBySettlement: Record<string, string>;
     brigadeAorByFormationId: Record<string, string[]>;
-    brigadeFrontAssignment?: Record<string, string | null>;
-    theatres?: Record<string, TheatreView>;
-    armyTheatreAssignment?: Record<string, string>;
-    brigadeDesiredAoRCap?: Record<string, number>;
     frontEdges?: FrontEdgeView[];
     frontEdgesOsid?: FrontEdgeView[];
     assignableFrontSegments?: AssignableFrontSegmentView[];

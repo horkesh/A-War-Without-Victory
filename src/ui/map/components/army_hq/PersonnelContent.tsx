@@ -1,5 +1,5 @@
 /**
- * Personnel tab content — ORBAT overview, officer roster, reserves.
+ * Personnel tab content - ORBAT overview, officer roster, reserves.
  * Recruitment modal remains separate (requires IPC callbacks from App.tsx).
  */
 import { useMemo } from 'react';
@@ -17,13 +17,13 @@ export function PersonnelContent() {
         const formations = state.formations.filter(f => f.faction === faction);
         const brigades = formations.filter(f => f.kind === 'brigade' && f.status === 'active');
         const corpsFormations = formations.filter(f => f.kind === 'corps' || f.kind === 'corps_asset');
+        const corpsNameById = new Map(corpsFormations.map((corps) => [corps.id, corps.name]));
         const totalPersonnel = brigades.reduce((s, f) => s + (f.personnel ?? 0), 0);
         const officers = (state.namedOfficerData ?? []).filter(o => o.faction === faction);
         const activeOfficers = officers.filter(o => o.status === 'active');
         const reserveOfficers = officers.filter(o => o.status === 'reserve');
         const reserves = state.factionReserves?.[faction];
 
-        // Brigade breakdown by corps
         const brigadesByCorps = new Map<string, typeof brigades>();
         for (const b of brigades) {
             const cid = b.corps_id ?? 'unassigned';
@@ -32,14 +32,22 @@ export function PersonnelContent() {
             brigadesByCorps.set(cid, list);
         }
 
-        return { brigades, corpsFormations, totalPersonnel, activeOfficers, reserveOfficers, reserves, brigadesByCorps };
+        return {
+            brigades,
+            corpsFormations,
+            corpsNameById,
+            totalPersonnel,
+            activeOfficers,
+            reserveOfficers,
+            reserves,
+            brigadesByCorps,
+        };
     }, [state, faction]);
 
     if (!data) return <div className="text-text-secondary italic text-[12px] py-8 text-center">No game state loaded</div>;
 
     return (
         <div className="space-y-6">
-            {/* Force Overview */}
             <div className="bg-panel-card border border-panel-border rounded-lg p-4">
                 <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-3 pb-1.5 border-b border-panel-border">
                     FORCE OVERVIEW
@@ -48,11 +56,10 @@ export function PersonnelContent() {
                     <StatCard label="Total Personnel" value={data.totalPersonnel.toLocaleString()} />
                     <StatCard label="Active Brigades" value={String(data.brigades.length)} />
                     <StatCard label="Corps" value={String(data.corpsFormations.length)} />
-                    <StatCard label="Supply Reserve" value={data.reserves ? Math.round(data.reserves.generalSupply ?? 0).toString() : '—'} />
+                    <StatCard label="Supply Reserve" value={data.reserves ? Math.round(data.reserves.generalSupply ?? 0).toString() : '-'} />
                 </div>
             </div>
 
-            {/* ORBAT by Corps */}
             <div className="bg-panel-card border border-panel-border rounded-lg p-4">
                 <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-3 pb-1.5 border-b border-panel-border">
                     ORDER OF BATTLE
@@ -65,7 +72,7 @@ export function PersonnelContent() {
                             <div key={corps.id} className="border border-panel-border/50 rounded-md overflow-hidden">
                                 <div className="flex items-center justify-between px-3 py-2 bg-panel-bg">
                                     <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">{corps.name}</span>
-                                    <span className="text-[10px] text-text-secondary tabular-nums">{corpsBrigades.length} brg — {formatPersonnel(corpsPers)}</span>
+                                    <span className="text-[10px] text-text-secondary tabular-nums">{corpsBrigades.length} brg - {formatPersonnel(corpsPers)}</span>
                                 </div>
                                 <div className="px-3 py-1.5 grid grid-cols-2 gap-x-4 gap-y-0.5">
                                     {corpsBrigades.map(b => (
@@ -81,7 +88,6 @@ export function PersonnelContent() {
                 </div>
             </div>
 
-            {/* Officer Roster */}
             <div className="bg-panel-card border border-panel-border rounded-lg p-4">
                 <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-3 pb-1.5 border-b border-panel-border">
                     OFFICER ROSTER ({data.activeOfficers.length} active, {data.reserveOfficers.length} reserve)
@@ -91,7 +97,10 @@ export function PersonnelContent() {
                         <div key={o.id} className="flex items-center justify-between px-2.5 py-1.5 border border-panel-border/50 rounded-md bg-panel-bg text-[10px]">
                             <div className="min-w-0">
                                 <div className="font-bold text-text-primary truncate">{o.name}</div>
-                                <div className="text-text-secondary/60 text-[9px] uppercase">{o.rank?.replace(/_/g, ' ')}{o.assigned_corps_id ? ` — ${o.assigned_corps_id.split('_').slice(-1)}` : ''}</div>
+                                <div className="text-text-secondary/60 text-[9px] uppercase">
+                                    {o.rank?.replace(/_/g, ' ')}
+                                    {o.assigned_corps_id ? ` - ${data.corpsNameById.get(o.assigned_corps_id) ?? 'Attached Command'}` : ''}
+                                </div>
                             </div>
                             <div className="flex items-center gap-2 shrink-0 tabular-nums font-mono">
                                 <span style={{ color: getRatingColor(o.competence) }}>C:{o.competence.toFixed(1)}</span>

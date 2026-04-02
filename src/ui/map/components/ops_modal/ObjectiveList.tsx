@@ -1,8 +1,8 @@
 /**
- * Objective list panel — top-right floating panel in Phase 2.
+ * Objective list panel - top-right floating panel in Phase 2.
  * Shows objectives per axis with reorder, remove, schwerpunkt toggle.
  */
-import type { AxisState, OpsPlanState } from './types';
+import type { OpsPlanState } from './types';
 import { getOsidDisplayName } from '../../utils/osidDisplayName';
 
 interface ObjectiveListProps {
@@ -88,17 +88,14 @@ export function ObjectiveList({ plan, onUpdate, osidDisplayNames, onAdvance }: O
                         const displayName = getOsidDisplayName(osid, osidDisplayNames);
                         return (
                             <div key={osid} className="flex items-center gap-1.5 group">
-                                {/* Number */}
                                 <span className="text-[10px] font-bold text-text-secondary w-4 text-right">
                                     {idx + 1}.
                                 </span>
 
-                                {/* Name */}
-                                <span className="text-[10px] text-white flex-1 truncate" title={osid}>
+                                <span className="text-[10px] text-white flex-1 truncate" title={displayName}>
                                     {displayName}
                                 </span>
 
-                                {/* Schwerpunkt star */}
                                 <button
                                     type="button"
                                     onClick={() => toggleSchwerpunkt(osid)}
@@ -107,11 +104,9 @@ export function ObjectiveList({ plan, onUpdate, osidDisplayNames, onAdvance }: O
                                     }`}
                                     title={isSchwerpunkt ? 'Main effort' : 'Set as main effort'}
                                 >
-                                    ★
+                                    *
                                 </button>
 
-                                {/* Reorder */}
-                                {/* WP4e: Always-visible reorder/remove controls */}
                                 <button
                                     type="button"
                                     onClick={() => moveObjective(idx, -1)}
@@ -129,7 +124,6 @@ export function ObjectiveList({ plan, onUpdate, osidDisplayNames, onAdvance }: O
                                     ↓
                                 </button>
 
-                                {/* Remove */}
                                 <button
                                     type="button"
                                     onClick={() => removeObjective(osid)}
@@ -144,13 +138,12 @@ export function ObjectiveList({ plan, onUpdate, osidDisplayNames, onAdvance }: O
             )}
 
             <div className="mt-2 rounded border border-[rgba(180,160,130,0.12)] bg-[rgba(180,160,130,0.05)] px-2 py-1.5">
-                <div className="text-[7px] uppercase tracking-[0.18em] text-text-secondary/70">Staging OSID</div>
+                <div className="text-[7px] uppercase tracking-[0.18em] text-text-secondary/70">Staging Area</div>
                 <div className="text-[10px] text-white truncate">
                     {selectedStaging ? getOsidDisplayName(selectedStaging, osidDisplayNames) : 'Not set'}
                 </div>
             </div>
 
-            {/* Axis tabs (if multiple axes) */}
             {plan.axes.length > 1 && (
                 <div className="flex gap-1 mt-2 pt-2 border-t border-[rgba(180,160,130,0.08)]">
                     {plan.axes.map((axis) => (
@@ -170,7 +163,6 @@ export function ObjectiveList({ plan, onUpdate, osidDisplayNames, onAdvance }: O
                 </div>
             )}
 
-            {/* Advance button — visible when objectives exist */}
             {onAdvance && objectives.length > 0 && (
                 <button
                     type="button"
@@ -179,7 +171,7 @@ export function ObjectiveList({ plan, onUpdate, osidDisplayNames, onAdvance }: O
                                bg-accent-gold/15 text-accent-gold border border-accent-gold/25
                                hover:bg-accent-gold/25 transition-all"
                 >
-                    Request G2 Assessment →
+                    {'Request G2 Assessment ->'}
                 </button>
             )}
         </div>

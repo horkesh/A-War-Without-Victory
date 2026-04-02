@@ -29,6 +29,32 @@ import {
 } from './warroom_utils.js';
 import { getWarroomFactionIdentity } from './warroom_identity.js';
 
+const FACTION_MILITARY_LABELS: Record<string, string> = {
+    RBiH: 'ARBiH',
+    RS: 'VRS',
+    HRHB: 'HVO',
+};
+
+function getFactionMilitaryLabel(factionId: string): string {
+    return FACTION_MILITARY_LABELS[factionId] ?? factionId;
+}
+
+function getDeclarationWatchLabel(pressure: number, declared: boolean): string {
+    if (declared) return 'DECLARED';
+    if (pressure >= 80) return 'CRITICAL';
+    if (pressure >= 50) return 'ELEVATED';
+    if (pressure >= 25) return 'WATCH';
+    return 'QUIET';
+}
+
+function getDeclarationWatchBandPercent(pressure: number, declared: boolean): number {
+    if (declared) return 100;
+    if (pressure >= 80) return 100;
+    if (pressure >= 50) return 75;
+    if (pressure >= 25) return 50;
+    return 25;
+}
+
 interface Phase0Snapshot {
     factionId: FactionId;
     factionName: string;
@@ -152,8 +178,8 @@ export class FactionOverviewPanel {
         const warnings: string[] = [];
         if (capitalPercent < 25) warnings.push('Capital reserves critically low');
         if (controlCounts.highlyContested > 2) warnings.push('Multiple municipalities at risk of destabilization');
-        if (rsPressure >= 80 && !rs?.declared) warnings.push('RS declaration imminent');
-        if (hrhbPressure >= 80 && !hrhb?.declared) warnings.push('HRHB declaration imminent');
+        if (rsPressure >= 80 && !rs?.declared) warnings.push('Bosnian Serb declaration pressure critical');
+        if (hrhbPressure >= 80 && !hrhb?.declared) warnings.push('Croat entity declaration pressure critical');
         if (warCountdown !== null && warCountdown <= 4) warnings.push(`War in ${warCountdown} weeks \u2014 prepare for Peace phase`);
         if (warnings.length === 0) warnings.push('No strategic warnings at this time');
 
@@ -207,7 +233,7 @@ export class FactionOverviewPanel {
         const header = document.createElement('div');
         header.className = 'faction-overview-header';
         header.innerHTML = `
-            <div class="fo-faction-badge text-accent-gold" style="color:${fc.primary}">${snap.factionId}</div>
+            <div class="fo-faction-badge text-accent-gold" style="color:${fc.primary}">${getFactionMilitaryLabel(snap.factionId)}</div>
             <h2 class="text-accent-gold">${snap.factionName}</h2>
             <div class="meta">${turnToWeekString(snap.turn)} \u2014 PRE-WAR PHASE</div>
             <div class="meta">${identity.ceremonialLine}</div>
@@ -274,17 +300,21 @@ export class FactionOverviewPanel {
         declSection.className = 'faction-overview-section';
         const rsPressurePct = Math.min(100, snap.rsPressure);
         const hrhbPressurePct = Math.min(100, snap.hrhbPressure);
+        const rsWatchLabel = getDeclarationWatchLabel(rsPressurePct, snap.rsHasDeclared);
+        const hrhbWatchLabel = getDeclarationWatchLabel(hrhbPressurePct, snap.hrhbHasDeclared);
+        const rsBandPercent = getDeclarationWatchBandPercent(rsPressurePct, snap.rsHasDeclared);
+        const hrhbBandPercent = getDeclarationWatchBandPercent(hrhbPressurePct, snap.hrhbHasDeclared);
         const rsBarColor = snap.rsHasDeclared ? '#555570' : rsPressurePct >= 80 ? '#ff3d00' : rsPressurePct >= 50 ? '#ffab00' : '#00e878';
         const hrhbBarColor = snap.hrhbHasDeclared ? '#555570' : hrhbPressurePct >= 80 ? '#ff3d00' : hrhbPressurePct >= 50 ? '#ffab00' : '#00e878';
         declSection.innerHTML = `
             <h3>DECLARATION WATCH</h3>
             <div style="margin-bottom: 8px;">
-                <div class="fo-stat-row"><span class="fo-stat-label">Republika Srpska</span><span class="fo-stat-value">${snap.rsHasDeclared ? 'DECLARED' : rsPressurePct.toFixed(0) + '%'}</span></div>
-                <div class="wr-bar-track wr-bar-thin"><div class="wr-bar-fill" style="background: ${rsBarColor}; width: ${snap.rsHasDeclared ? 100 : rsPressurePct}%;"></div></div>
+                <div class="fo-stat-row"><span class="fo-stat-label">Bosnian Serb declaration drive</span><span class="fo-stat-value">${rsWatchLabel}</span></div>
+                <div class="wr-bar-track wr-bar-thin"><div class="wr-bar-fill" style="background: ${rsBarColor}; width: ${rsBandPercent}%;"></div></div>
             </div>
             <div>
-                <div class="fo-stat-row"><span class="fo-stat-label">Herceg-Bosna</span><span class="fo-stat-value">${snap.hrhbHasDeclared ? 'DECLARED' : hrhbPressurePct.toFixed(0) + '%'}</span></div>
-                <div class="wr-bar-track wr-bar-thin"><div class="wr-bar-fill" style="background: ${hrhbBarColor}; width: ${snap.hrhbHasDeclared ? 100 : hrhbPressurePct}%;"></div></div>
+                <div class="fo-stat-row"><span class="fo-stat-label">Croat entity declaration drive</span><span class="fo-stat-value">${hrhbWatchLabel}</span></div>
+                <div class="wr-bar-track wr-bar-thin"><div class="wr-bar-fill" style="background: ${hrhbBarColor}; width: ${hrhbBandPercent}%;"></div></div>
             </div>
             ${snap.referendumHeld ? '<div class="wr-dialog-info wr-info-amber" style="margin-top: 8px; font-weight: 600;">REFERENDUM HELD</div>' : ''}
             ${snap.warCountdown !== null ? `<div class="wr-dialog-info wr-info-red" style="margin-top: 8px; font-weight: 600;">WAR IN ${snap.warCountdown} WEEKS</div>` : ''}
@@ -300,7 +330,7 @@ export class FactionOverviewPanel {
             allianceSection.className = 'faction-overview-section';
             allianceSection.innerHTML = `
                 <h3>ALLIANCE STATUS</h3>
-                <div class="fo-stat-row"><span class="fo-stat-label">RBiH-HRHB relationship</span><span class="fo-stat-value" style="color:${relationColor}">${snap.rbihHrhbRelationship.toFixed(2)}</span></div>
+                <div class="fo-stat-row"><span class="fo-stat-label">Bosniak-Croat relationship</span><span class="fo-stat-value" style="color:${relationColor}">${snap.rbihHrhbRelationship.toFixed(2)}</span></div>
                 <div class="wr-bar-track wr-bar-thin"><div class="wr-bar-fill" style="background:${relationColor}; width:${relationshipPct}%;"></div></div>
                 <div class="wr-dialog-info wr-info-muted" style="margin-top: 6px;">Coordinated investments preserve alliance cohesion; unilateral actions degrade it.</div>
             `;
@@ -396,13 +426,8 @@ export class FactionOverviewPanel {
 
         panel.appendChild(quadrants);
 
-        // Formations — own faction only, with personnel and posture
-        const formationsSection = this.renderOwnFormationsSection(snap);
-        if (formationsSection) panel.appendChild(formationsSection);
-
-        // Officers (Phase E) — own faction only
-        const officersSection = this.renderOfficersSection(snap);
-        if (officersSection) panel.appendChild(officersSection);
+        // Command handoff — Warroom summarizes command-shell truth but defers detailed review to Army HQ.
+        panel.appendChild(this.renderCommandShellHandoff(snap));
 
         // Strategic Warnings — data-driven from real state
         const warnings = this.generateWarPhaseWarnings(snap);
@@ -418,161 +443,32 @@ export class FactionOverviewPanel {
     }
 
     /**
-     * Formations section for Peace phase+: own faction formations with personnel, posture, kind.
+     * Warroom may summarize command-shell posture, but detailed command review belongs to Army HQ.
      */
-    private renderOwnFormationsSection(snap: WarDataSnapshot): HTMLElement | null {
-        const ownFormations = snap.ownForces.formationDetails;
-        if (ownFormations.length === 0) return null;
-
-        const section = document.createElement('div');
-        section.className = 'faction-overview-formations';
-        section.innerHTML = `<h3>FORMATIONS (${ownFormations.length})</h3>`;
-
-        const maxList = 10;
-        const ul = document.createElement('ul');
-        for (const f of ownFormations.slice(0, maxList)) {
-            const li = document.createElement('li');
-            const kindLabel = f.kind === 'brigade' ? '' : ` [${f.kind}]`;
-            const personnelLabel = f.personnel > 0 ? ` \u2014 ${f.personnel.toLocaleString()} pers.` : '';
-            const postureLabel = f.kind === 'brigade' || f.kind === 'operational_group'
-                ? ` (${f.posture})`
-                : '';
-            const movementLabel = f.movementStatus !== 'deployed'
-                ? ` [${f.movementStatus.toUpperCase()}]`
-                : '';
-            li.textContent = `${f.name}${kindLabel}${personnelLabel}${postureLabel}${movementLabel}`;
-            ul.appendChild(li);
-        }
-        if (ownFormations.length > maxList) {
-            const li = document.createElement('li');
-            li.textContent = `\u2026 +${ownFormations.length - maxList} more`;
-            ul.appendChild(li);
-        }
-        section.appendChild(ul);
-        return section;
-    }
-
-    /**
-     * Officers section for Peace phase+ (Phase E): list commanders for player faction.
-     */
-    private renderOfficersSection(snap: WarDataSnapshot): HTMLElement | null {
-        const pf = snap.playerFaction;
-        const list = snap.officersByFaction?.[pf];
-        if (!list || list.length === 0) return null;
-
+    private renderCommandShellHandoff(snap: WarDataSnapshot): HTMLElement {
         const section = document.createElement('div');
         section.className = 'faction-overview-section';
-        section.innerHTML = `<h3>COMMAND (${list.length})</h3>`;
 
-        const ul = document.createElement('ul');
-        const statusLabel = (s: string): string => {
-            switch (s) {
-                case 'active': return 'Active';
-                case 'reserve': return 'Reserve';
-                case 'killed': return 'Killed';
-                case 'retired': return 'Retired';
-                case 'captured': return 'Captured';
-                case 'defected': return 'Defected';
-                default: return s;
-            }
-        };
-        for (const o of list) {
-            const li = document.createElement('li');
-            li.style.display = 'flex';
-            li.style.justifyContent = 'space-between';
-            li.style.alignItems = 'center';
-            li.style.marginBottom = '4px';
+        const onDutyOfficers = (snap.officersByFaction?.[snap.playerFaction] ?? [])
+            .filter((officer) => officer.status === 'active').length;
+        const corpsInField = snap.ownForces.formationDetails.filter((formation) => formation.kind === 'corps').length;
+        const activeBrigades = snap.ownForces.formationDetails.filter(
+            (formation) => formation.kind === 'brigade' && formation.status === 'active',
+        ).length;
+        const inTransitCount = snap.brigadeMovement.inTransit.length;
 
-            const info = document.createElement('span');
-            const corpsLabel = o.assigned_corps_id ? ` \u2014 ${o.assigned_corps_id}` : ' \u2014 \u2014';
-            const actingLabel = o.acting_commander ? ' (Acting)' : '';
-            info.textContent = `${o.name} [${o.rank}] ${statusLabel(o.status)}${actingLabel}${corpsLabel}`;
-            li.appendChild(info);
-
-            if (o.status === 'active' && o.assigned_corps_id) {
-                const changeBtn = document.createElement('button');
-                changeBtn.className = 'commander-change-btn';
-                changeBtn.textContent = 'CHANGE';
-                changeBtn.style.fontSize = '10px';
-                changeBtn.style.padding = '2px 6px';
-                changeBtn.style.marginLeft = '8px';
-                changeBtn.onclick = () => {
-                    this.showOfficerSelectionDialog(o.assigned_corps_id!, snap);
-                };
-                li.appendChild(changeBtn);
-            }
-
-            ul.appendChild(li);
-        }
-        section.appendChild(ul);
-        return section;
-    }
-
-    /**
-     * Show a sub-dialog to select a new commander from the reserve pool.
-     */
-    private showOfficerSelectionDialog(corpsId: string, snap: WarDataSnapshot): void {
-        const pf = snap.playerFaction;
-        const allOfficers = snap.officersByFaction?.[pf] || [];
-        const reserves = allOfficers.filter(o => o.status === 'reserve');
-
-        const dialog = document.createElement('div');
-        dialog.className = 'wr-dialog weathered-panel';
-        dialog.style.maxWidth = '400px';
-
-        let reservesHtml = '';
-        if (reserves.length === 0) {
-            reservesHtml = '<div class="wr-dialog-notice">No officers currently in reserve pool.</div>';
-        } else {
-            reservesHtml = `
-                <div class="officer-selection-list" style="max-height: 300px; overflow-y: auto; margin-top: 10px;">
-                    ${reserves.map(o => `
-                        <div class="officer-option" style="display: flex; justify-content: space-between; align-items: center; padding: 6px; border-bottom: 1px solid rgba(255,255,255,0.1); cursor: pointer;" 
-                             onclick="this.dispatchEvent(new CustomEvent('select-officer', { detail: { id: '${o.id}' }, bubbles: true }))">
-                            <span>${o.name} [${o.rank}]</span>
-                            <span style="font-size: 10px; color: #aaa;">Comp: ${o.competence}/5</span>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-
-        dialog.innerHTML = `
-            <h2 class="text-accent-gold">ASSIGN COMMANDER</h2>
-            <div class="wr-dialog-body">
-                <div style="margin-bottom: 10px; font-size: 12px; color: #ccc;">Select a new commander for <strong>${corpsId}</strong></div>
-                ${reservesHtml}
-            </div>
-            <div class="wr-dialog-actions" style="margin-top: 15px;">
-                <button id="assign-cancel-btn" class="wr-btn wr-btn-secondary">CANCEL</button>
+        section.innerHTML = `
+            <h3>COMMAND SHELL</h3>
+            <div class="fo-stat-row"><span class="fo-stat-label">Corps in field</span><span class="fo-stat-value">${corpsInField}</span></div>
+            <div class="fo-stat-row"><span class="fo-stat-label">Active brigades</span><span class="fo-stat-value">${activeBrigades}</span></div>
+            <div class="fo-stat-row"><span class="fo-stat-label">Officers on duty</span><span class="fo-stat-value">${onDutyOfficers}</span></div>
+            <div class="fo-stat-row"><span class="fo-stat-label">Units in transit</span><span class="fo-stat-value">${inTransitCount}</span></div>
+            <div class="wr-dialog-info wr-info-muted" style="margin-top: 8px;">
+                Detailed formation dispositions, operations review, reserve handling, and commander changes belong to Army HQ via the desk map.
             </div>
         `;
 
-        this.modalManager.showModal(dialog);
-
-        // Handle selection
-        dialog.addEventListener('select-officer', async (e: any) => {
-            const officerId = e.detail.id;
-            const bridge = (window as any).awwv;
-            if (bridge?.assignCommander) {
-                try {
-                    const res = await bridge.assignCommander(officerId, corpsId);
-                    if (res.ok) {
-                        this.modalManager.hideModal();
-                        // The bridge will trigger a game-state-updated which will refresh the UI
-                    } else {
-                        alert(`Assignment failed: ${res.error}`);
-                    }
-                } catch (err) {
-                    console.error('Failed to assign commander:', err);
-                }
-            }
-        });
-
-        document.getElementById('assign-cancel-btn')!.onclick = () => {
-            // Re-show the faction overview panel
-            this.modalManager.showModal(this.render());
-        };
+        return section;
     }
 
     /**

@@ -35,8 +35,8 @@
 /* ─── Modal Content Container ───────────────────── */
 .modal-content {
     position: relative;
-    max-width: 90%;
-    max-height: 90%;
+    max-width: 88%;
+    max-height: 88%;
     overflow: auto;
     background: #10101e;
     border: 1px solid #252540;
@@ -127,16 +127,16 @@
 .wr-dialog {
     background: #10101e;
     color: #d8d8e0;
-    padding: 28px;
+    padding: 18px 20px;
     border: 1px solid #252540;
     border-radius: 4px;
     font-family: 'IBM Plex Mono', 'Consolas', monospace;
-    max-width: 420px;
+    max-width: 400px;
 }
 
 .wr-dialog h2,
 .wr-dialog h3 {
-    margin: 0 0 16px 0;
+    margin: 0 0 12px 0;
     text-align: center;
     font-size: 13px;
     font-weight: 600;
@@ -146,7 +146,7 @@
 }
 
 .wr-dialog-body {
-    margin: 12px 0;
+    margin: 8px 0;
     text-align: center;
     font-size: 12px;
     color: #8888a0;
@@ -157,7 +157,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 6px 0;
+    margin: 4px 0;
     font-size: 12px;
 }
 
@@ -165,7 +165,7 @@
 .wr-dialog-row .wr-value { color: #d8d8e0; font-weight: 600; }
 
 .wr-dialog-info {
-    margin: 8px 0;
+    margin: 6px 0;
     text-align: center;
     font-size: 11px;
 }
@@ -177,9 +177,9 @@
 
 .wr-dialog-actions {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     justify-content: center;
-    margin-top: 24px;
+    margin-top: 16px;
 }
 
 .wr-dialog-notice {
@@ -282,20 +282,20 @@
 
 /* ─── Faction Overview Panel ────────────────────── */
 .faction-overview-panel {
-    width: 760px;
-    max-height: 640px;
+    width: 724px;
+    max-height: 620px;
     overflow-y: auto;
     background: #10101e;
     color: #d8d8e0;
     font-family: 'IBM Plex Mono', 'Consolas', monospace;
-    padding: 24px;
+    padding: 16px;
 }
 
 .faction-overview-header {
     text-align: center;
     border-bottom: 1px solid #252540;
-    padding-bottom: 14px;
-    margin-bottom: 18px;
+    padding-bottom: 10px;
+    margin-bottom: 14px;
 }
 
 .faction-overview-header h2 {
@@ -315,15 +315,15 @@
 
 /* Section blocks (Phase 0 layout) */
 .faction-overview-section {
-    margin-bottom: 16px;
-    padding: 12px;
+    margin-bottom: 12px;
+    padding: 10px;
     background: #161628;
     border: 1px solid #252540;
     border-radius: 3px;
 }
 
 .faction-overview-section h3 {
-    margin: 0 0 10px 0;
+    margin: 0 0 8px 0;
     font-size: 10px;
     font-weight: 600;
     letter-spacing: 1.5px;
@@ -355,19 +355,19 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 16px;
+    gap: 10px;
+    margin-bottom: 12px;
 }
 
 .quadrant {
     background: #161628;
     border: 1px solid #252540;
-    padding: 14px;
+    padding: 12px;
     border-radius: 3px;
 }
 
 .quadrant h3 {
-    margin: 0 0 12px 0;
+    margin: 0 0 10px 0;
     font-size: 10px;
     font-weight: 600;
     letter-spacing: 1.5px;
@@ -378,7 +378,7 @@
 }
 
 .quadrant .stat {
-    margin: 8px 0;
+    margin: 6px 0;
 }
 
 .quadrant .stat-label {
@@ -396,15 +396,15 @@
 
 /* Formations section */
 .faction-overview-formations {
-    margin-bottom: 16px;
-    padding: 12px;
+    margin-bottom: 12px;
+    padding: 10px;
     background: #161628;
     border: 1px solid #252540;
     border-radius: 3px;
 }
 
 .faction-overview-formations h3 {
-    margin: 0 0 10px 0;
+    margin: 0 0 8px 0;
     font-size: 10px;
     font-weight: 600;
     letter-spacing: 1.5px;
@@ -443,8 +443,8 @@
 
 /* Warnings */
 .faction-overview-warnings {
-    margin-top: 12px;
-    padding: 12px;
+    margin-top: 10px;
+    padding: 10px;
     background: rgba(255, 61, 0, 0.06);
     border: 1px solid rgba(255, 61, 0, 0.2);
     border-radius: 3px;
@@ -483,7 +483,7 @@
     max-height: 900px;
     overflow-y: auto;
     background: #10101e;
-    padding: 32px 36px;
+    padding: 24px 28px;
     font-family: 'IBM Plex Mono', 'Consolas', monospace;
     color: #d8d8e0;
 }
@@ -504,7 +504,7 @@
     text-align: right;
     font-size: 10px;
     letter-spacing: 1px;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
     color: #555570;
 }
 
@@ -524,7 +524,7 @@
     font-size: 12px;
     font-weight: 400;
     font-style: italic;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
     color: #8888a0;
 }
 
@@ -547,7 +547,7 @@
     font-style: italic;
     font-size: 10px;
     color: #555570;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
     max-width: 500px;
     margin-left: auto;
     margin-right: auto;
@@ -556,7 +556,7 @@
 
 .newspaper-columns {
     columns: 2;
-    column-gap: 24px;
+    column-gap: 18px;
     column-rule: 1px solid #252540;
     font-size: 11px;
     line-height: 1.65;
@@ -571,8 +571,8 @@
 
 /* World briefs sidebar — "also in the news" section */
 .newspaper-world-briefs {
-    margin-top: 24px;
-    padding-top: 16px;
+    margin-top: 16px;
+    padding-top: 12px;
     border-top: 1px solid #252540;
 }
 
@@ -604,11 +604,11 @@
 
 /* ─── Magazine Modal (Operational Review) ───────── */
 .magazine-modal {
-    width: 700px;
-    max-height: 900px;
+    width: 680px;
+    max-height: 860px;
     overflow-y: auto;
     background: #10101e;
-    padding: 28px 32px;
+    padding: 20px 22px;
     color: #d8d8e0;
     font-family: 'IBM Plex Mono', 'Consolas', monospace;
 }
@@ -625,10 +625,10 @@
 
 .magazine-month-year {
     text-align: center;
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
     letter-spacing: 2px;
-    margin-bottom: 24px;
+    margin-bottom: 12px;
     color: #d8d8e0;
 }
 
@@ -644,7 +644,7 @@
     width: 100%;
     max-width: 500px;
     height: 200px;
-    margin: 0 auto 24px;
+    margin: 0 auto 16px;
     background: #161628;
     border: 1px solid #252540;
     display: flex;
@@ -657,8 +657,8 @@
 .magazine-stats {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin-bottom: 20px;
+    gap: 6px;
+    margin-bottom: 16px;
 }
 
 .magazine-stats-row {
@@ -671,7 +671,7 @@
     text-align: center;
     background: #161628;
     border: 1px solid #252540;
-    padding: 14px 16px;
+    padding: 10px 12px;
     border-radius: 3px;
     flex: 1;
 }
@@ -686,7 +686,7 @@
 }
 
 .magazine-stat-value {
-    font-size: 28px;
+    font-size: 24px;
     font-weight: 700;
     color: #d8d8e0;
 }
@@ -752,11 +752,11 @@
 
 /* ─── Reports Modal (Situation Report) ──────────── */
 .reports-modal {
-    width: 680px;
-    max-height: 900px;
+    width: 660px;
+    max-height: 860px;
     overflow-y: auto;
     background: #10101e;
-    padding: 32px 36px;
+    padding: 28px 30px;
     font-family: 'IBM Plex Mono', 'Consolas', monospace;
     color: #d8d8e0;
     position: relative;
@@ -774,24 +774,24 @@
 .report-classification-top {
     position: absolute;
     top: 12px;
-    left: 36px;
+    left: 30px;
 }
 
 .report-classification-bottom {
     position: absolute;
     bottom: 12px;
-    right: 36px;
+    right: 30px;
 }
 
 .report-header {
-    margin-top: 20px;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
+    margin-top: 16px;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
     border-bottom: 1px solid #252540;
 }
 
 .report-field {
-    margin: 6px 0;
+    margin: 4px 0;
     font-size: 12px;
     color: #8888a0;
 }
@@ -804,15 +804,15 @@
 
 .report-body {
     font-size: 11px;
-    line-height: 1.7;
-    margin-bottom: 24px;
+    line-height: 1.58;
+    margin-bottom: 18px;
     white-space: pre-wrap;
     color: #8888a0;
 }
 
 .report-signature {
     text-align: right;
-    margin-top: 32px;
+    margin-top: 22px;
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 1px;
@@ -1153,7 +1153,7 @@
     border: 1px solid #2a3a4e;
     border-radius: 8px;
     box-shadow: 0 12px 60px rgba(0, 0, 0, 0.6), 0 0 2px rgba(0, 200, 100, 0.08);
-    padding: 32px 28px 24px;
+    padding: 24px 22px 18px;
     text-align: center;
 }
 
@@ -1174,14 +1174,14 @@
     letter-spacing: 1.8px;
     text-transform: uppercase;
     color: #6a7a8e;
-    margin-bottom: 28px;
+    margin-bottom: 18px;
 }
 
 .mm-buttons {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-bottom: 24px;
+    gap: 8px;
+    margin-bottom: 16px;
 }
 
 .mm-btn {
@@ -1229,14 +1229,14 @@
 .scn-options {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
 }
 
 .scn-option {
     display: flex;
-    gap: 16px;
+    gap: 12px;
     align-items: stretch;
-    padding: 14px;
+    padding: 12px;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid #2a3a4e;
     border-radius: 6px;
@@ -1261,8 +1261,8 @@
 
 .scn-image-wrap {
     flex-shrink: 0;
-    width: 180px;
-    height: 120px;
+    width: 164px;
+    height: 108px;
     border-radius: 4px;
     overflow: hidden;
     border: 1px solid #2a3a4e;
@@ -1277,7 +1277,7 @@
 .scn-info {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
     justify-content: center;
     min-width: 0;
 }

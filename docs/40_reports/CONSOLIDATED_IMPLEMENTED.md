@@ -13,6 +13,9 @@
 ---
 
 | **Dev-map browser-safe import recovery** | [implemented/20260401_DEV_MAP_BROWSER_SAFE_IMPORT_RECOVERY.md](implemented/20260401_DEV_MAP_BROWSER_SAFE_IMPORT_RECOVERY.md) — recovered `npm run dev:map` after Node-only `fs/path` loaders leaked into the tactical-map browser import graph; split Node loaders into `*_node.ts`, kept shared helpers browser-safe, and added a browser-bundle regression test. |
+| **Shell ownership + HQ records canonicalization** | [implemented/20260402_SHELL_OWNERSHIP_AND_HQ_RECORDS_CANONICALIZATION.md](implemented/20260402_SHELL_OWNERSHIP_AND_HQ_RECORDS_CANONICALIZATION.md) — clarified that `PresidentialToolbar` is the live tactical-map shell, routed AAR/operation-history ownership through Army HQ `RECORDS`, added explicit top-shell buttons for summary/records/ops/events/Codex, and reframed tactical `OperationsPanel` as a field snapshot with `HQ Review` routing. |
+| **Army HQ war summary player-truth pass** | [implemented/20260402_ARMY_HQ_WAR_SUMMARY_PLAYER_TRUTH.md](implemented/20260402_ARMY_HQ_WAR_SUMMARY_PLAYER_TRUTH.md) — removed exact all-faction overview tables from Army HQ `SUMMARY` in player mode, keeping own-side exact values and theater-wide aggregates while pushing enemy-wide truth back into staff abstractions. |
+| **Engine-health Wave 1 correctness fixes** | [implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md](implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md) — first implemented slice of the 2026-04-02 engine triage: objective-relevant intel confidence, authoritative political war exhaustion in victory checks, and defender-aware corps launch-feasibility screening. |
 | **Spatial model evolution (AoR → ZoC → Corps Sectors)** | [20260301_SPATIAL_MODEL_EVOLUTION_AOR_ZOC_CORPS_SECTORS.md](implemented/20260301_SPATIAL_MODEL_EVOLUTION_AOR_ZOC_CORPS_SECTORS.md) — three generations of spatial model, from AoR passive pressure through ZoC attack-driven control to Corps Sector BFS partitioning + GUI visualization. Canon propagated to Systems Manual §2.1/§8, War Spec §4, context.md, IPC contract. |
 | **Multi-sector corps, supply gating, sector offensives** | [20260301_MULTI_SECTOR_SUPPLY_GATING_SECTOR_OFFENSIVES.md](implemented/20260301_MULTI_SECTOR_SUPPLY_GATING_SECTOR_OFFENSIVES.md) — Phase A: multi-sector promotion (MIN_SECTOR_EDGES, sector_targets). Phase B: supply gating (critical→defend, strained→victory-only; corps thresholds). Phase C: sector offensives (named operations, momentum, lifecycle). n314 87.4%. Canon: Systems Manual §2.1, §6.4, §6.5, §14.5; War Spec §5, §10. |
 | **Phase M — Year-one mechanics (complete)** | [PHASE_M_EXECUTION_PLAN.md](implemented/PHASE_M_EXECUTION_PLAN.md), [20260301_PHASE_M_IMPLEMENTATION_REPORT.md](implemented/20260301_PHASE_M_IMPLEMENTATION_REPORT.md), [20260301_PHASE_M_CALIBRATION_REPORT.md](implemented/20260301_PHASE_M_CALIBRATION_REPORT.md), [20260301_PHASE_M_REFACTOR_PASS_REPORT.md](implemented/20260301_PHASE_M_REFACTOR_PASS_REPORT.md) — morale drift, ZoC virtual defense, enclave deprivation, displacement routing. M1-M4 implemented; M5 deferred. n268 baseline 81.0%. Peace/war lifecycle migration complete. |
@@ -66,3 +69,15 @@
 | **UI blank-space remediation P2-C + console debug + verification addendum (2026-03-26)** | [20260326_UI_BLANK_SPACE_P2C_IMPLEMENTATION.md](implemented/20260326_UI_BLANK_SPACE_P2C_IMPLEMENTATION.md), [20260326_UI_CONSOLE_DEBUG_WAVE2.md](implemented/20260326_UI_CONSOLE_DEBUG_WAVE2.md), [20260326_UI_BLANK_SPACE_VISUAL_VERIFICATION_WAVE2.md](implemented/20260326_UI_BLANK_SPACE_VISUAL_VERIFICATION_WAVE2.md), [20260326_UI_BLANK_SPACE_VISUAL_VERIFICATION_WAVE2_ADDENDUM.md](implemented/20260326_UI_BLANK_SPACE_VISUAL_VERIFICATION_WAVE2_ADDENDUM.md) — Remaining overlay pass shipped (Army Reserve + Chronicle), bottom-strip runtime crash fixed, and post-fix visual verification updated (`BS-010` PASS, `BS-011` PARTIAL). |
 
 *Last updated: 2026-03-08. For backlog (not yet implemented), see [CONSOLIDATED_BACKLOG.md](CONSOLIDATED_BACKLOG.md). For patterns and corrections, see [CONSOLIDATED_LESSONS_LEARNED.md](CONSOLIDATED_LESSONS_LEARNED.md) and .claude/napkin.md.*
+# 2026-04-02 - Player-safe ops labels and HQ roster polish
+
+- OPORD / objective-list surfaces now resolve settlement names through player-safe labels instead of printing raw OSIDs.
+- Army HQ ORBAT recent-engagement hover titles now use formatted settlement names.
+- Fixed a lingering Army HQ war-summary fallback bug in the wounded table.
+- Report: `docs/40_reports/implemented/20260402_PLAYER_SAFE_OPS_LABELS_AND_HQ_ROSTER_POLISH.md`
+
+# 2026-04-02 - Warroom faction shell handoff
+
+- Warroom `FactionOverviewPanel` no longer renders detailed formations, officer rosters, or commander reassignment.
+- Warroom now summarizes command-shell posture and explicitly hands detailed command review back to Army HQ via the desk map.
+- Report: `docs/40_reports/implemented/20260402_WARROOM_FACTION_SHELL_HANDOFF.md`

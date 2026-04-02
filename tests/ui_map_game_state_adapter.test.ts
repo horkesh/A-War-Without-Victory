@@ -69,12 +69,6 @@ test('parseGameState extracts canonical front edge and pressure views', () => {
             b1: 'RBiH__RS__S1__S2',
             b2: null,
         },
-    army_theatre_assignment: {
-            army_rbih: 'RBiH_default',
-        },
-    theatres: {
-            RBiH_default: { id: 'RBiH_default', name: 'RBiH Theatre', faction: 'RBiH', army_ids: ['army_rbih'] },
-        },
     assignable_front_segments: [
             { front_id: 'RBiH__RS__S1__S2', edge_ids: ['S1__S2'], side_a: 'RBiH', side_b: 'RS', length_edges: 1 }
         ]
@@ -88,12 +82,9 @@ test('parseGameState extracts canonical front edge and pressure views', () => {
     assert.ok(parsed.frontEdgesOsid && parsed.frontEdgesOsid.length === 1);
     assert.strictEqual(parsed.frontEdgesOsid?.[0]?.edge_id, 'op:a__op:b');
     assert.strictEqual(parsed.frontPressureByEdge?.S1__S2?.value, -3);
-    assert.strictEqual(parsed.brigadeFrontAssignment?.b1, 'RBiH__RS__S1__S2');
-    assert.strictEqual(parsed.brigadeFrontAssignment?.b2, null);
-    assert.strictEqual(parsed.armyTheatreAssignment?.army_rbih, 'RBiH_default');
-    assert.strictEqual(parsed.theatres?.RBiH_default?.faction, 'RBiH');
     assert.ok(parsed.assignableFrontSegments && parsed.assignableFrontSegments.length === 1);
     assert.strictEqual(parsed.assignableFrontSegments?.[0]?.front_id, 'RBiH__RS__S1__S2');
+    assert.strictEqual((parsed as any).brigadeFrontAssignment, undefined);
 });
 
 test('parseGameState treats phase_ii as war for formation location_osid', () => {

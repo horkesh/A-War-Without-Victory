@@ -8,12 +8,7 @@
 import type { LoadedGameState } from '../data/types';
 import { useIPC } from '../desktop/useIPC';
 import { useGameStore } from '../store/gameStore';
-
-const FACTION_LABELS: Record<string, string> = {
-    RBiH: 'Republic of Bosnia-Herzegovina',
-    RS: 'Republika Srpska',
-    HRHB: 'Herceg-Bosna (HVO)',
-};
+import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 
 const INSTITUTIONAL_LABELS: Record<string, string> = {
     cantonization: 'Ethnic Cantonization',
@@ -111,7 +106,7 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                     <div className="space-y-1.5">
                         {Object.entries(plan.botResponses).map(([faction, response]) => (
                             <div key={faction} className="flex items-center justify-between text-[12px]">
-                                <span className="text-[#2a2016]">{FACTION_LABELS[faction] ?? faction}</span>
+                                <span className="text-[#2a2016]">{getPlayerSafePoliticalFactionName(faction)}</span>
                                 <span className={`font-bold uppercase text-[11px] px-2 py-0.5 rounded border ${
                                     response === 'accepted'
                                         ? 'text-[#2a6a2a] bg-[#d0e8d0] border-[#2a6a2a]/30'

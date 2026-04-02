@@ -10,9 +10,8 @@ import type { LoadedGameState, SummaryFocusSection } from '../data/types';
 
 const LOAD_TIMEOUT_MS = 25000;
 
-
-const TOOLBAR_BUTTON_CLASS = 'px-3 py-1 text-[10px] font-mono uppercase tracking-[0.15em] bg-black/40 hover:bg-interactive/20 text-text-primary border border-white/10 rounded transition-all disabled:opacity-30 hover:border-interactive/40 hover:shadow-glow-sm hover:text-interactive active:scale-95';
-const MODULAR_SECTION_CLASS = 'flex items-center gap-2 px-3 py-1 bg-black/20 border border-white/5 rounded-md relative overflow-hidden group';
+const TOOLBAR_BUTTON_CLASS = 'px-2 py-0.5 text-[8px] font-mono uppercase tracking-[0.12em] bg-black/35 hover:bg-interactive/20 text-text-primary border border-white/10 rounded transition-all disabled:opacity-30 hover:border-interactive/40 hover:shadow-glow-sm hover:text-interactive active:scale-95 leading-tight';
+const MODULAR_SECTION_CLASS = 'flex items-center gap-1 px-2 py-0.5 bg-black/20 border border-white/5 rounded-md relative overflow-hidden group min-h-[2rem]';
 const SUMMARY_SHORTCUTS: Array<{ focus: SummaryFocusSection; label: string; getCount?: (state: LoadedGameState) => number | null }> = [
   {
     focus: 'ivp',
@@ -48,7 +47,6 @@ interface TopToolbarProps {
   onSelectPrimaryCorps?: () => void;
 }
 
-/** True when loaded inside the warroom iframe (?embedded=1). */
 const isEmbedded = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('embedded') === '1';
 
 export function TopToolbar({
@@ -57,6 +55,7 @@ export function TopToolbar({
   onOpenOrbat, onSelectPrimaryArmy, onSelectPrimaryCorps
 }: TopToolbarProps) {
   const ipc = useIPC();
+  const setCodexOpen = useGameStore((s) => s.setCodexOpen);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const devMode = useGameStore((s) => s.devMode);
   const loadSave = useGameStore((s) => s.loadSave);
@@ -188,61 +187,64 @@ export function TopToolbar({
 
   return (
     <div
-      className="absolute top-0 left-0 right-0 z-10 flex items-center gap-4 px-4 py-2 bg-glass border-b border-white/10 shadow-2xl group/toolbar text-text-primary"
+      className="absolute top-0 left-0 right-0 z-10 flex items-center gap-2 px-2.5 py-1 bg-glass border-b border-white/10 shadow-2xl group/toolbar text-text-primary"
     >
       <div className="absolute inset-0 scanline-texture opacity-[0.03] pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-r from-accent-gold/5 via-transparent to-transparent pointer-events-none" />
 
-      {/* 0. BACK TO HQ (embedded mode only) */}
-      {isEmbedded && (
+      {(isEmbedded || ipc.isAvailable) && (
         <button
           id="btn-back-to-hq"
           className={TOOLBAR_BUTTON_CLASS}
-          title="Return to warroom HQ"
-          onClick={() => window.parent.postMessage({ type: 'awwv-back-to-hq' }, '*')}
+          title="Return to Warroom"
+          onClick={() => {
+            if (isEmbedded) {
+              window.parent.postMessage({ type: 'awwv-back-to-hq' }, '*');
+              return;
+            }
+            void ipc.focusWarroom();
+          }}
         >
-          ◀ HQ
+          WARROOM
         </button>
       )}
 
-      {/* 1. BRANDING / COMMAND CONSOLE */}
-      <div className="flex items-center gap-3 shrink-0 relative">
-        <div className="absolute -left-4 top-0 bottom-0 w-1 bg-accent-gold shadow-glow-gold opacity-80" />
+      <div className="flex items-center gap-2 shrink-0 relative">
+        <div className="absolute -left-2.5 top-0 bottom-0 w-1 bg-accent-gold shadow-glow-gold opacity-80" />
         {crestUrl && (
-          <img src={crestUrl} alt="" className="w-7 h-7 object-contain drop-shadow-glow-gold brightness-125" />
+          <img src={crestUrl} alt="" className="w-5 h-5 object-contain drop-shadow-glow-gold brightness-125" />
         )}
         <div className="flex flex-col">
-          <span className="font-sans text-[11px] text-accent-gold tracking-[0.2em] uppercase font-bold glow-text leading-tight">
+          <span className="font-sans text-[10px] text-accent-gold tracking-[0.18em] uppercase font-bold glow-text leading-tight">
             Warroom Console
           </span>
-          <span className="font-mono text-[9px] text-text-secondary uppercase tracking-widest opacity-60">
+          <span className="font-mono text-[8px] text-text-secondary uppercase tracking-[0.24em] opacity-60 leading-tight">
             A War Without Victory v0.6.1
           </span>
         </div>
         {devMode && (
-          <span className="ml-1 px-1.5 py-0.5 text-[8px] font-mono uppercase tracking-[0.3em] bg-amber-900/40 text-amber-500 border border-amber-500/30 rounded-full shadow-inner">
+          <span className="ml-0.5 px-1 py-0.5 text-[7px] font-mono uppercase tracking-[0.26em] bg-amber-900/40 text-amber-500 border border-amber-500/30 rounded-full shadow-inner">
             D_MODE
           </span>
         )}
       </div>
 
-      <div className="h-8 w-[2px] bg-white/15 mx-1" />
+      <div className="h-5 w-px bg-white/15 mx-0.5" />
 
-      {/* 2. COMMAND & SYSTEMS MODULE (Logistics) */}
       <div className={MODULAR_SECTION_CLASS}>
         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
         <div className="module-header">Systems</div>
         {devMode && (
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             <button onClick={handleLoadClick} disabled={loading} className={TOOLBAR_BUTTON_CLASS} title="Select save file">LOAD</button>
             <button onClick={handleLoadLatest} disabled={loading} className={TOOLBAR_BUTTON_CLASS} title="Load most recent session">LATEST</button>
-            <div className="flex items-center gap-1 ml-1">
+            <div className="flex items-center gap-1 ml-0.5">
               <input
                 type="text"
                 value={runIdInput}
                 onChange={(e) => setRunIdInput(e.target.value)}
                 placeholder="RUN_ID"
-                className="w-20 px-1 py-0.5 text-[9px] font-mono bg-black/40 border border-white/10 rounded text-text-primary focus:border-interactive/40 focus:outline-none transition-colors"
+                className="w-[4.5rem] px-1 py-0.5 text-[8px] font-mono bg-black/40 border border-white/10 rounded text-text-primary focus:border-interactive/40 focus:outline-none transition-colors"
                 onKeyDown={(e) => e.key === 'Enter' && handleLoadRun()}
               />
               <button onClick={handleLoadRun} disabled={loading || !runIdInput.trim()} className={TOOLBAR_BUTTON_CLASS}>SYNC</button>
@@ -253,7 +255,7 @@ export function TopToolbar({
           onClick={handleSave}
           disabled={loading || advancing || !loadedGameState || !ipc.isAvailable}
           className={`${TOOLBAR_BUTTON_CLASS} ${saveFlash ? 'border-green-500/50 text-green-400' : ''}`}
-          title={!ipc.isAvailable ? 'Save — requires desktop app' : 'Save game (Ctrl+S for quick-save)'}
+          title={!ipc.isAvailable ? 'Save - requires desktop app' : 'Save game (Ctrl+S for quick-save)'}
         >
           {saveFlash ? 'SAVED!' : 'SAVE'}
         </button>
@@ -261,7 +263,7 @@ export function TopToolbar({
           onClick={handleAdvanceTurn}
           disabled={advancing || loading || !loadedGameState || !ipc.isAvailable}
           className={`${TOOLBAR_BUTTON_CLASS} border-accent-gold/30 text-accent-gold hover:bg-accent-gold/10`}
-          title={!ipc.isAvailable ? 'Advance turn — requires desktop app' : undefined}
+          title={!ipc.isAvailable ? 'Advance turn - requires desktop app' : undefined}
         >
           {advancing ? 'ADVANCING...' : 'ADVANCE TURN'}
         </button>
@@ -269,7 +271,7 @@ export function TopToolbar({
           onClick={() => onOpenSidePicker?.()}
           disabled={loading || advancing || !ipc.isAvailable}
           className={TOOLBAR_BUTTON_CLASS}
-          title={!ipc.isAvailable ? 'Campaign — requires desktop app' : undefined}
+          title={!ipc.isAvailable ? 'Campaign - requires desktop app' : undefined}
         >
           CAMPAIGN
         </button>
@@ -282,7 +284,18 @@ export function TopToolbar({
         </button>
       </div>
 
-      {/* 2.1 COMMAND MODULE */}
+      <div className={MODULAR_SECTION_CLASS}>
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+        <div className="module-header">Reference</div>
+        <button
+          onClick={() => setCodexOpen(true)}
+          className={TOOLBAR_BUTTON_CLASS}
+          title="Open Codex"
+        >
+          CODEX
+        </button>
+      </div>
+
       <div className={MODULAR_SECTION_CLASS}>
         <div className="module-header">Command</div>
         <button
@@ -310,7 +323,6 @@ export function TopToolbar({
         </button>
       </div>
 
-      {/* 3. TACTICAL ASSETS MODULE */}
       <div className={MODULAR_SECTION_CLASS}>
         <div className="module-header">Personnel</div>
         <OfficerEventBadge />
@@ -318,7 +330,7 @@ export function TopToolbar({
           onClick={() => onOpenRecruitment?.()}
           disabled={loading || advancing || !loadedGameState || !ipc.isAvailable}
           className={TOOLBAR_BUTTON_CLASS}
-          title={!ipc.isAvailable ? 'Recruitment — requires desktop app' : undefined}
+          title={!ipc.isAvailable ? 'Recruitment - requires desktop app' : undefined}
         >
           RECRUIT
         </button>
@@ -332,10 +344,9 @@ export function TopToolbar({
         )}
       </div>
 
-      {/* 4. INTELLIGENCE MODULE */}
       <div className={MODULAR_SECTION_CLASS}>
         <div className="module-header">Intel</div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           {summaryShortcuts.map((shortcut) => (
             <button
               key={shortcut.label}
@@ -350,27 +361,26 @@ export function TopToolbar({
         </div>
       </div>
 
-      {/* 5. OPERATIONAL RECORD MODULE */}
-      <div className="ml-auto flex items-center gap-2">
+      <div className="ml-auto flex items-center gap-1.5">
         <div className={MODULAR_SECTION_CLASS}>
           <div className="module-header">History</div>
-          <div className="flex gap-1.5">
+          <div className="flex gap-1">
             <button onClick={() => onOpenSummary?.('overview')} disabled={!loadedGameState} className={TOOLBAR_BUTTON_CLASS}>SUMMARY</button>
             <button onClick={() => onOpenAAR?.()} disabled={!loadedGameState} className={TOOLBAR_BUTTON_CLASS}>AAR</button>
             <button onClick={() => onOpenOpsHistory?.()} disabled={!loadedGameState} className={TOOLBAR_BUTTON_CLASS}>OPS</button>
             <button onClick={() => onOpenEventLog?.()} disabled={!loadedGameState} className={TOOLBAR_BUTTON_CLASS}>EVENTS</button>
+            <button onClick={() => setCodexOpen(true)} disabled={!loadedGameState} className={TOOLBAR_BUTTON_CLASS}>CODEX</button>
             <button onClick={() => onOpenAiSettings?.()} className={`${TOOLBAR_BUTTON_CLASS} text-[#c4a04a] border-[#c4a04a]/20 hover:bg-[#c4a04a]/10`}>AI</button>
           </div>
         </div>
 
-        {/* 6. TELEMETRY DISPLAY */}
-        <div className="flex flex-col items-end justify-center min-w-[140px] px-3 py-1 border-l border-white/10 bg-black/10">
+        <div className="flex flex-col items-end justify-center min-w-[120px] px-2 py-0.5 border-l border-white/10 bg-black/10">
           {loadedGameState ? (
             <>
-              <div className="text-[11px] font-mono text-text-primary tracking-wider glow-text uppercase">
+              <div className="text-[10px] font-mono text-text-primary tracking-[0.12em] glow-text uppercase leading-tight">
                 {formatTurnLabel(loadedGameState.label)}
               </div>
-              <div className="flex items-center gap-2 text-[8px] font-mono text-text-secondary uppercase tracking-[0.2em] opacity-80">
+              <div className="flex items-center gap-1.5 text-[7px] font-mono text-text-secondary uppercase tracking-[0.18em] opacity-80">
                 <span>{loadedGameState.phase}</span>
                 <span className="w-1 h-1 rounded-full bg-interactive animate-pulse" />
                 <span>{loadedGameState.formations.length} FORMATIONS</span>

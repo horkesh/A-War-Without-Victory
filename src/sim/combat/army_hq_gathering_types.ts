@@ -96,6 +96,8 @@ export interface CorpsAssessment {
     sector_threat_avg: number;
     available_brigades: number;
     officer_competence: number;
+    commander_reinforcement_priority: 'critical' | 'high' | 'medium' | 'low' | null;
+    commander_reinforcement_brigades_needed: number;
 }
 
 /** Theater-wide assessment produced before plan generation */

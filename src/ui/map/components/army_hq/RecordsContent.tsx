@@ -2,7 +2,6 @@
  * Records tab content — wraps AAR, Operation History panels,
  * and Codex (historical essays) for inline rendering inside Army HQ RECORDS tab.
  */
-import { useState } from 'react';
 import { AARPanel } from '../AARPanel';
 import { OperationHistoryPanel } from '../OperationHistoryPanel';
 import { useGameStore } from '../../store/gameStore';
@@ -14,7 +13,8 @@ const SUB_TABS = [
 ];
 
 export function RecordsContent() {
-    const [subTab, setSubTab] = useState<'aar' | 'ops' | 'codex'>('aar');
+    const subTab = useGameStore((s) => s.armyHQRecordsSubTab);
+    const setSubTab = useGameStore((s) => s.setArmyHQRecordsSubTab);
     const setCodexOpen = useGameStore((s) => s.setCodexOpen);
 
     return (

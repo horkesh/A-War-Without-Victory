@@ -1,4 +1,4 @@
-import type { CorpsCommandState, CorpsOperation, FormationId, OperationAxis } from '../../state/game_state.js';
+import type { CorpsCommandState, CorpsFrontSector, CorpsOperation, FormationId, OperationAxis } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 // ─── Minimal type for pre-planned op fields consumed by buildCorpsOperation ──
@@ -75,6 +75,7 @@ export function buildCorpsOperation(
     participating: FormationId[],
     turn: number,
     isPrePlanned = true,
+    sectorId?: string,
 ): CorpsOperation {
     const allObjectives = axes.flatMap(a => a.objectives);
     return {
@@ -93,6 +94,7 @@ export function buildCorpsOperation(
         failure_count: 0,
         consecutive_failures_on_current: 0,
         staging_osid: def.staging_osid,
+        ...(sectorId ? { sector_id: sectorId } : {}),
         ...(isPrePlanned ? { is_pre_planned: true } : {}),
         ...(def.min_attack_outcome ? { min_attack_outcome: def.min_attack_outcome } : {}),
     };
@@ -101,10 +103,7 @@ export function buildCorpsOperation(
 /**
  * Factory for commander-generated sector-attack operations.
  *
- * `sectorId` is the primary sector anchor (`op.sector_id`). Under the sector-anchored
- * launch contract (Phase 3), callers must supply this — it will become required.
- * Current callers pass it from `findSectorWithMostTargetOverlap`; corridor breach
- * passes `undefined` (no sector) — both are transitional behavior.
+ * `sectorId` is the primary sector anchor (`op.sector_id`).
  */
 export function buildCommanderOperation(
     corpsId: string,
@@ -122,7 +121,7 @@ export function buildCommanderOperation(
         started_turn: turn,
         phase_started_turn: turn,
         participating_brigades: participatingBrigades,
-        sector_id: sectorId ?? undefined,
+        ...(sectorId ? { sector_id: sectorId } : {}),
         objectives,
         current_objective_index: 0,
         planning_duration: 1,
@@ -150,6 +149,7 @@ export function buildEmergencyDefenseOperation(
     turn: number,
     participatingBrigades: string[],
     targetSettlements: string[],
+    sectorId?: string,
 ): CorpsOperation {
     return {
         name: `Emergency Defense (${corpsId})`,
@@ -158,6 +158,7 @@ export function buildEmergencyDefenseOperation(
         started_turn: turn,
         phase_started_turn: turn,
         participating_brigades: participatingBrigades,
+        sector_id: sectorId,
         target_settlements: targetSettlements,
         supply_readiness: 1.0,
         momentum: 0,
@@ -167,11 +168,49 @@ export function buildEmergencyDefenseOperation(
     };
 }
 
+/**
+ * Derive the primary sector anchor for a set of corps brigades.
+ * Uses the sector with the strongest participant overlap; prefers assigned over reserve
+ * membership and then narrower deterministic tiebreakers.
+ */
+export function derivePrimarySectorForBrigades(
+    sectors: ReadonlyArray<CorpsFrontSector> | null | undefined,
+    corpsId: string,
+    brigadeIds: ReadonlyArray<string>,
+): string | undefined {
+    if (!sectors || brigadeIds.length === 0) return undefined;
+    const brigadeIdSet = new Set(brigadeIds);
+
+    const candidates = sectors
+        .filter((sector) => sector.corps_id === corpsId)
+        .map((sector) => {
+            const assignedMatches = sector.assigned_brigade_ids.filter((bid) => brigadeIdSet.has(bid)).length;
+            const reserveMatches = (sector.reserve_brigade_ids ?? []).filter((bid) => brigadeIdSet.has(bid)).length;
+            return {
+                sectorId: sector.sector_id,
+                assignedMatches,
+                reserveMatches,
+                totalMatches: assignedMatches + reserveMatches,
+                lengthEdges: sector.length_edges,
+            };
+        })
+        .filter((candidate) => candidate.totalMatches > 0)
+        .sort((a, b) =>
+            b.totalMatches - a.totalMatches
+            || b.assignedMatches - a.assignedMatches
+            || a.lengthEdges - b.lengthEdges
+            || strictCompare(a.sectorId, b.sectorId)
+        );
+
+    return candidates[0]?.sectorId;
+}
+
 /** Factory for commander-generated probe operations (single surplus brigade). */
 export function buildProbeOperation(
     corpsId: string,
     turn: number,
     brigadeId: string,
+    sectorId?: string,
 ): CorpsOperation {
     return {
         name: `probe_${corpsId}_t${turn}`,
@@ -180,6 +219,7 @@ export function buildProbeOperation(
         started_turn: turn,
         phase_started_turn: turn,
         participating_brigades: [brigadeId],
+        ...(sectorId ? { sector_id: sectorId } : {}),
         planning_duration: 0,
         supply_readiness: 1.0,
         momentum: 0,

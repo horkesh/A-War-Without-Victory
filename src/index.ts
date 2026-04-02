@@ -1,3 +1,10 @@
+/**
+ * Minimal smoke entrypoint.
+ *
+ * This file exists for tiny deterministic smoke checks and should not be
+ * treated as the main gameplay or desktop entrypoint.
+ */
+
 import { CURRENT_SCHEMA_VERSION, GameState } from './state/game_state.js';
 import { serializeState } from './state/serialize.js';
 import { executeTurn } from './turn/pipeline.js';

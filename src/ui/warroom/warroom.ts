@@ -629,18 +629,18 @@ class WarroomApp {
                 if (!this.modalManager) return;
                 const panel = document.createElement('div');
                 panel.className = 'wr-dialog';
-                panel.style.maxWidth = '500px';
+                panel.style.maxWidth = '460px';
                 panel.innerHTML = `
                     <h2>WARROOM CONTROLS</h2>
-                    <div class="wr-dialog-body" style="text-align: left; line-height: 2;">
+                    <div class="wr-dialog-body" style="text-align: left; line-height: 1.6;">
                         <div><strong style="color: #00e878;">Desk Map</strong> &mdash; Open tactical map</div>
                         <div><strong style="color: #00e878;">Sandbox</strong> &mdash; Open tactical sandbox mode</div>
                         <div><strong style="color: #00e878;">Calendar</strong> &mdash; Advance turn</div>
                         <div><strong style="color: #00e878;">Telephone</strong> &mdash; Diplomacy (war only)</div>
-                        <div><strong style="color: #00e878;">Flag</strong> &mdash; Faction overview</div>
+                        <div><strong style="color: #00e878;">Flag / Coatrack</strong> &mdash; Faction overview and command chain</div>
                         <div><strong style="color: #00e878;">Newspapers</strong> &mdash; Current events</div>
-                        <div><strong style="color: #00e878;">Military Hat</strong> &mdash; Intelligence report</div>
-                        <div><strong style="color: #00e878;">Report Stack</strong> &mdash; Turn reports</div>
+                        <div><strong style="color: #00e878;">Journal</strong> &mdash; Monthly operational review</div>
+                        <div><strong style="color: #00e878;">Report Stack</strong> &mdash; Staff report packet</div>
                         <div><strong style="color: #00e878;">Radio</strong> &mdash; News ticker</div>
                     </div>
                 `;
