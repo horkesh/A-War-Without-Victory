@@ -19,9 +19,11 @@ import {
 } from '../src/ui/shared/playerFacingLabels.js';
 import {
   getPlayerSafeBrigadeName,
+  getPlayerSafeCorridorLabel,
   getPlayerSafeCorpsName,
   getPlayerSafeDecisionTitle,
   getPlayerSafeEnclaveName,
+  getPlayerSafeMunicipalityName,
 } from '../src/ui/map/utils/playerSafeText.js';
 import type { LoadedGameState } from '../src/ui/map/data/types.js';
 import type { FeatureCollection } from 'geojson';
@@ -288,6 +290,10 @@ describe('Tactical map render smoke', () => {
     expect(getPlayerSafeCorpsName(undefined, 'arbih_5th_corps')).toBe('This corps');
     expect(getPlayerSafeDecisionTitle(undefined)).toBe('Pending decision');
     expect(getPlayerSafeEnclaveName(undefined)).toBe('Friendly enclave');
+    expect(getPlayerSafeEnclaveName('bihac_pocket')).toBe('Bihac Pocket');
+    expect(getPlayerSafeMunicipalityName('gornji_vakuf')).toBe('Gornji Vakuf');
+    expect(getPlayerSafeCorridorLabel('RS')).toBe('VRS-controlled corridor');
+    expect(getPlayerSafeCorridorLabel('RBiH')).toBe('ARBiH-controlled corridor');
     expect(getPlayerSafeBrigadeName(undefined)).toBe('Assigned brigade');
     expect(getPlayerSafeBrigadeName('')).toBe('Assigned brigade');
   });

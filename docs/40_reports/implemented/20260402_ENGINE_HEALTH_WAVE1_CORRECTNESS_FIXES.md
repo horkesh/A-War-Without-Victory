@@ -1069,3 +1069,32 @@ Why this matters:
 - canonical contracts decay when a repo keeps one “special case” around for convenience
 - probes are still real operations in the player and AI lifecycle, so they need the same anchor truth as every other live op
 - once the last exception is gone, future ops work gets simpler because `sector_id` can be assumed instead of negotiated
+
+## Additional Wave 1 slice: summary-shell labels now obey player-safe text rules too
+
+This checkpoint closes a quieter but still dangerous player-truth seam. The Situation tab was still printing raw `mun_id`, enclave slugs, and route-faction codes in its convoy and local-support summaries. The detail panels had already been cleaned up, but the overview chrome was still acting like a thin debug adapter.
+
+Implemented:
+- `src/ui/map/utils/playerSafeText.ts`
+  - added `getPlayerSafeMunicipalityName(...)`
+  - added `getPlayerSafeCorridorLabel(...)`
+  - upgraded enclave fallback handling so slug-like values such as `bihac_pocket` humanize to player-safe labels instead of leaking raw ids
+- `src/ui/map/components/SituationTab.tsx`
+  - convoy summaries now render player-safe enclave and corridor labels
+  - local-support summaries now humanize municipality ids before display
+- `tests/ui_map_render_smoke.test.ts`
+  - added regressions proving the shared player-safe helpers humanize enclave and municipality slugs and abstract route-faction codes into player-facing corridor labels
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts`
+  - PASS (`12` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Environment note:
+- `npx.cmd tsc --noEmit -p tsconfig.json` still fails in the clean worktree because React / Vite type dependencies are not fully available there; this remains an isolated-lane setup problem, not a regression introduced by this slice.
+
+Why this matters:
+- players experience summary chrome as authoritative UI just as much as the deep detail panels
+- once one shared helper owns municipality, enclave, and corridor fallbacks, future surfaces are much less likely to improvise raw-id leaks
+- this turns “pretty the slug later” into a small tested player-facing contract instead of a recurring cleanup chore

@@ -5,6 +5,11 @@ import { useIPC } from '../desktop/useIPC';
 import { DiplomacyOverview } from './DiplomacyOverview';
 import { filterPlayerFacingOperations, getPlayerFacingFaction } from '../../shared/playerVisibility';
 import {
+  getPlayerSafeCorridorLabel,
+  getPlayerSafeEnclaveName,
+  getPlayerSafeMunicipalityName,
+} from '../utils/playerSafeText';
+import {
     DRINA_BLOCKADE_THRESHOLD,
     INTERNATIONAL_SANCTIONS_THRESHOLD,
     NATO_INTERVENTION_THRESHOLD,
@@ -251,7 +256,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
           {state.pendingConvoyDecisions.map((convoy) => (
             <div key={convoy.id} className="rounded border border-panel-border bg-panel-bg/60 p-2 space-y-1">
               <div className="text-text-secondary">
-                {convoy.target_enclave} via {convoy.route_faction} corridor, {convoy.supply_amount.toFixed(2)} supply
+                {getPlayerSafeEnclaveName(convoy.target_enclave)} via {getPlayerSafeCorridorLabel(convoy.route_faction)}, {convoy.supply_amount.toFixed(2)} supply
               </div>
               <div className="flex gap-1">
                 <button
@@ -286,7 +291,9 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
         <section data-summary-section="support" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
           <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Phase E Local Support</div>
           <div className="text-text-secondary">{activeMunicipalitySupport.label}</div>
-          <div className="text-text-secondary">Target municipality: {activeMunicipalitySupport.mun_id}</div>
+          <div className="text-text-secondary">
+            Target municipality: {getPlayerSafeMunicipalityName(activeMunicipalitySupport.mun_id)}
+          </div>
         </section>
       )}
 

@@ -19716,3 +19716,35 @@ Why this matters:
 - a canonical field is not canonical if probe operations are still allowed to skip it
 - this removes another “special case” that future Claude work could mistake for a valid pattern
 - once every live birth path is sector-anchored, later ops cleanup can simplify around that assumption instead of carrying conditional logic forever
+
+---
+### 2026-04-02 — Engine health Wave 1 continued: summary-shell labels now follow player-safe text rules
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing a quiet player-facing leak in the Situation summary shell.
+
+Implemented:
+- `src/ui/map/utils/playerSafeText.ts`
+  - added `getPlayerSafeMunicipalityName(...)`
+  - added `getPlayerSafeCorridorLabel(...)`
+  - upgraded enclave fallback handling so slug-style ids are humanized instead of leaked
+- `src/ui/map/components/SituationTab.tsx`
+  - convoy summaries now use player-safe enclave and corridor labels
+  - local-support summaries now humanize municipality ids before display
+- `tests/ui_map_render_smoke.test.ts`
+  - added regressions proving the shared helpers humanize municipality/enclave slugs and abstract route-faction codes into player-facing corridor labels
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded the Wave 1 report with this checkpoint
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts`
+  - PASS (`12` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Environment note:
+- `npx.cmd tsc --noEmit -p tsconfig.json` still fails in the clean worktree because React / Vite type dependencies are not fully available there; this remains an isolated-lane dependency/setup issue, not a regression from this slice.
+
+Why this matters:
+- summary chrome is a player surface, not a safe place to leak raw sim labels
+- once municipality/enclave/corridor fallbacks are centralized, future overview panels are less likely to regress into slug-printing behavior
+- player-safe text rules become a testable contract instead of an aesthetic preference

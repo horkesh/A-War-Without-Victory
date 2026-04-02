@@ -1397,3 +1397,7 @@ Raw formation ids do not stop being leaks just because they appear in a small or
 ### Canonical contracts only become real after the last “special case” disappears
 
 It is not enough for “most” operations to carry `sector_id`. As long as probe ops or some other live creator can still omit the field, every downstream system has to keep treating the contract as optional. In AWWV, the last exception is usually the most dangerous one because it teaches future work that the rule is negotiable.
+
+### Summary-shell labels are still product truth, not harmless chrome
+
+Players trust the small overview boxes as much as the big detail panels. If a summary card prints raw `mun_id`, enclave slugs, or route-faction codes, the product is still leaking engine truth even when the deeper surfaces are clean. In AWWV, municipality/enclave/corridor fallback text belongs in one shared player-safe helper layer so overview panels do not quietly improvise their own raw-id leaks.
