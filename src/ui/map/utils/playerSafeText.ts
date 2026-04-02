@@ -25,6 +25,15 @@ function humanizeIdentifierLabel(value: string | null | undefined): string {
     return toTitleCase(normalized.replace(/[:\-]/g, '_'));
 }
 
+export function getPlayerSafeDisplayLabel(
+    value: string | null | undefined,
+    fallback = 'Untitled item',
+): string {
+    const safeValue = (value ?? '').trim();
+    if (!safeValue) return fallback;
+    return humanizeIdentifierLabel(safeValue) || fallback;
+}
+
 export function getPlayerSafeOfficerName(
     name: string | null | undefined,
     fallback = 'An officer',

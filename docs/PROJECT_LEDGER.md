@@ -20373,3 +20373,31 @@ Why this matters:
 - peace/event language is where raw faction codes feel most like debug leakage
 - shared faction helpers reduce drift across map shell, peace shell, diplomacy shell, and event shell
 - this keeps pushing the repo toward one canonical player-facing dialect instead of several slightly different ones
+### 2026-04-02 - Player-safe adapter and economy label hardening
+
+Kept pushing the player-truth cleanup down into the adapter/data layer and economy shell so raw ids stop resurfacing through “innocent” fallback paths.
+
+Implemented:
+- `src/ui/map/utils/playerSafeText.ts`
+  - added generic `getPlayerSafeDisplayLabel(...)`
+- `src/ui/map/data/DataLoader.ts`
+  - event-definition fallback titles now humanize ids
+- `src/ui/map/data/GameStateAdapter.ts`
+  - humanized fallback names for facilities, smuggling routes, movement logs, historical events, and pending peace plans
+- `src/ui/map/components/EconomyPanel.tsx`
+  - reserve/controller/route/embargo badges now use player-safe faction labels instead of raw codes
+- `tests/ui_player_visibility.test.ts`
+  - added generic display-label regression coverage
+- `docs/40_reports/implemented/20260402_PLAYER_SAFE_ADAPTER_AND_ECONOMY_LABEL_HARDENING.md`
+  - documented the slice
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`26` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- adapter-side `name ?? id` fallbacks are one of the most persistent ways for raw engine truth to leak back into the UI
+- economy shells are especially vulnerable because bracketed faction badges can make debug codes look official
+- this slice makes the player-facing data pipeline more truthful before the broader architecture reshape

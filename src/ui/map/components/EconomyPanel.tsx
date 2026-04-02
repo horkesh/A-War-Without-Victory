@@ -10,6 +10,10 @@
 import { GlassPanel } from './GlassPanel';
 import { FACTION_COLORS } from '../utils/theme';
 import type { LoadedGameState } from '../data/types';
+import {
+    getPlayerSafeMilitaryFactionName,
+    getPlayerSafePoliticalFactionName,
+} from '../utils/playerSafeText';
 
 const FACTIONS = ['RS', 'RBiH', 'HRHB'] as const;
 
@@ -73,7 +77,7 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
                             const color = FACTION_COLORS[faction] ?? 'text-text-primary';
                             return (
                                 <div key={faction} className="space-y-0.5">
-                                    <span className={`text-[10px] font-semibold ${color}`}>{faction}</span>
+                                    <span className={`text-[10px] font-semibold ${color}`}>{getPlayerSafeMilitaryFactionName(faction)}</span>
                                     <ReserveGauge label="Supply" value={r?.generalSupply ?? 0} color="text-text-secondary" />
                                     <ReserveGauge label="Ammo" value={r?.heavyMunitions ?? 0} color="text-text-secondary" />
                                 </div>
@@ -99,7 +103,7 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
                                         <span className="text-text-primary truncate">{f.name}</span>
                                         {f.controller && (
                                             <span className={`text-[8px] ${FACTION_COLORS[f.controller] ?? 'text-text-secondary'}`}>
-                                                [{f.controller}]
+                                                [{getPlayerSafePoliticalFactionName(f.controller)}]
                                             </span>
                                         )}
                                     </div>
@@ -132,7 +136,7 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
                                     <div className="flex items-center gap-1">
                                         <span className="text-text-primary truncate">{r.name}</span>
                                         <span className={`text-[8px] ${FACTION_COLORS[r.faction] ?? 'text-text-secondary'}`}>
-                                            [{r.faction}]
+                                            [{getPlayerSafeMilitaryFactionName(r.faction)}]
                                         </span>
                                         {r.disrupted && (
                                             <span className="text-red-400 text-[8px] uppercase tracking-wider">disrupted</span>
@@ -163,7 +167,7 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
                     {state.embargoStatus ? (
                         Object.entries(state.embargoStatus).sort(([a], [b]) => a.localeCompare(b)).map(([faction, status]) => (
                             <div key={faction} className="flex items-center gap-1">
-                                <span className={`w-[42px] ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>{faction}</span>
+                                <span className={`w-[42px] ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>{getPlayerSafeMilitaryFactionName(faction)}</span>
                                 <span className="tabular-nums">
                                     pipeline: {Math.round(status.pipeline * 100)}%
                                 </span>

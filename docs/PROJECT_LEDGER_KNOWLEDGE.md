@@ -1493,3 +1493,6 @@ In AWWV, once a helper like `playerSafeText.ts` exists, every Warroom/map shell 
 ### Political-facing and military-facing faction names should not be improvised per screen
 
 In AWWV, peace/diplomacy surfaces often want political names while event/combat surfaces want military names. If each component carries its own faction label map, the product slowly develops several dialects and raw faction codes creep back in as fallbacks. Canonical player-safe helpers for both political and military faction names are cheaper and safer than letting each screen decide for itself.
+### Adapter-side `name ?? id` fallbacks are product policy, not harmless plumbing
+
+In AWWV, once a data adapter or loader chooses to fall back to a raw id, every downstream screen inherits that choice. Facilities, routes, movement logs, historical events, and peace-plan titles all proved that player-facing leakage can start in the adapter layer long before React renders anything. Humanize or neutralize those fallbacks at the source instead of expecting every shell to clean them up later.

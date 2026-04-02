@@ -14,6 +14,7 @@ import {
 import {
   getPlayerSafeBrigadeName,
   getPlayerSafeCorpsName,
+  getPlayerSafeDisplayLabel,
   getPlayerSafeEnclaveName,
   getPlayerSafeMilitaryFactionName,
   getPlayerSafeMunicipalityName,
@@ -250,6 +251,7 @@ describe('player visibility helpers', () => {
     expect(getPlayerSafeBrigadeName('')).toBe('Assigned brigade');
     expect(getPlayerSafeMunicipalityName('bijeljina_center')).toBe('Bijeljina Center');
     expect(getPlayerSafeEnclaveName('gorazde_east')).toBe('Gorazde East');
+    expect(getPlayerSafeDisplayLabel('peace_plan_vance_owen', 'Untitled item')).toBe('Peace Plan Vance Owen');
     expect(getPlayerSafePoliticalFactionName('HRHB')).toBe('Croatian Republic of Herzeg-Bosnia');
     expect(getPlayerSafeMilitaryFactionName('VRS')).toBe('VRS');
     expect(getPlayerSafePoliticalFactionName('unknown')).toBe('Unknown faction');

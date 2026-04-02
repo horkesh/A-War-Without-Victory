@@ -12,7 +12,11 @@ import type {
     MilitiaPoolView, MobilizationSummaryView, MovementOrderSettlementView, NamedOfficerStateView, NamedOfficerView,
     OperationView, RepositionOrderView, RecruitmentView,
 } from './types';
-import { getPlayerSafeCorpsName, getPlayerSafeOfficerName } from '../utils/playerSafeText.js';
+import {
+    getPlayerSafeCorpsName,
+    getPlayerSafeDisplayLabel,
+    getPlayerSafeOfficerName,
+} from '../utils/playerSafeText.js';
 import { buildControlLookup, buildStatusLookup } from './ControlLookup.js';
 import { getMunicipalitySupportLabel } from '../../../sim/combat/municipality_support.js';
 import { strictCompare } from '../../../state/validateGameState.js';
@@ -1224,7 +1228,7 @@ export function parseGameState(json: unknown): LoadedGameState {
             const f = rawFacilities[fid];
             return {
                 id: f.facility_id ?? fid,
-                name: f.name ?? fid,
+                name: getPlayerSafeDisplayLabel(f.name ?? fid, 'Production facility'),
                 type: f.type ?? 'unknown',
                 municipality: f.municipality_id ?? '',
                 condition: typeof f.current_condition === 'number' ? f.current_condition : 1,
@@ -1252,7 +1256,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         smugglingRoutes = rawRoutes
             .sort((a: any, b: any) => String(a.id ?? '').localeCompare(String(b.id ?? '')))
             .map((r: any) => {
-                const meta = ROUTE_NAMES[r.id] ?? { name: r.id, faction: '' };
+                const meta = ROUTE_NAMES[r.id] ?? { name: getPlayerSafeDisplayLabel(r.id, 'Supply route'), faction: '' };
                 return {
                     id: String(r.id ?? ''),
                     name: meta.name,
@@ -1948,7 +1952,7 @@ function deriveMovementsByOsid(state: any): LoadedGameState['movementsByOsid'] {
         if (!Array.isArray(summary.movements)) continue;
         for (const m of summary.movements) {
             const fid = String(m.formation_id ?? '');
-            const fname = String(m.formation_name ?? fid);
+            const fname = getPlayerSafeDisplayLabel(String(m.formation_name ?? fid), 'Formation');
             const from = String(m.from_osid ?? '');
             const to = String(m.to_osid ?? '');
             if (!from && !to) continue;
@@ -1975,7 +1979,12 @@ function deriveHistoricalEvents(state: any): LoadedGameState['historicalEventsBy
         const turn = typeof summary.turn === 'number' ? summary.turn : 0;
         if (!Array.isArray(summary.events_fired)) continue;
         for (const e of summary.events_fired) {
-            result.push({ turn, id: String(e.id ?? ''), text: String(e.text ?? '') });
+            const rawId = String(e.id ?? '');
+            result.push({
+                turn,
+                id: rawId,
+                text: getPlayerSafeDisplayLabel(String(e.text ?? rawId), 'Historical event'),
+            });
         }
     }
     return result;
@@ -2414,12 +2423,13 @@ function derivePendingPeacePlan(state: any): LoadedGameState['pendingPeacePlan']
         const { PEACE_PLANS } = require('../../../sim/negotiation/peace_plan_data.js');
         const def = PEACE_PLANS.find((p: any) => p.id === pp.plan_id);
         if (def) {
-            planName = def.name ?? pp.plan_id;
+            planName = getPlayerSafeDisplayLabel(def.name ?? pp.plan_id, 'Peace proposal');
             narrative = def.narrative ?? '';
             proposedSplit = def.proposed_split ?? proposedSplit;
             institutionalModel = def.institutional_model ?? '';
         }
     } catch { /* non-fatal — display with raw id */ }
+    planName = getPlayerSafeDisplayLabel(planName, 'Peace proposal');
     return {
         planId: pp.plan_id,
         planName,
