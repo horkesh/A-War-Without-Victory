@@ -565,6 +565,68 @@ describe('commander planning campaign intent', () => {
         expect(result.plan!.target_osids[0]).toBe('op:enemy:priority');
     });
 
+    it('opportunity plan prioritizes synchronized-operation targets over broader campaign targets', () => {
+        const stagingZone = makeZone({
+            zone_id: 'zone:test_corps:0' as ZoneId,
+            posture: 'projecting',
+            front_edge_count: 10,
+            surplus_brigades: ['b1', 'b2', 'b3'].map(id => id as FormationId),
+            assigned_brigades: ['b1', 'b2', 'b3'].map(id => id as FormationId),
+            enemy_adjacent_osids: ['op:enemy:campaign', 'op:enemy:sync'],
+            osids: ['op:test:t1', 'op:test:t2'],
+        });
+        const zones = [stagingZone];
+        const evals = ['b1', 'b2', 'b3'].map((id, index) => makeEval({
+            brigade_id: id as FormationId,
+            current_zone: stagingZone.zone_id,
+            fitness_offense: 1.0 - index * 0.1,
+        }));
+        const forces = makeForces(evals, zones);
+
+        const briefing = makeMinimalBriefing({
+            campaign_role: 'primary',
+            campaign_offensive_targets: ['op:enemy:campaign'],
+            campaign_sync_role: 'main_effort',
+            campaign_sync_targets: ['op:enemy:sync'],
+            spatial: {
+                adjacency: new Map<string, string[]>([
+                    ['op:enemy:campaign', ['op:test:t1']],
+                    ['op:enemy:sync', ['op:test:t2']],
+                    ['op:test:t1', ['op:enemy:campaign']],
+                    ['op:test:t2', ['op:enemy:sync']],
+                ]),
+                friendlyOsidsByFaction: new Map<FactionId, Set<string>>([
+                    ['RBiH' as FactionId, new Set(['op:test:t1', 'op:test:t2'])],
+                ]),
+                componentsByFaction: new Map<FactionId, Map<string, number>>([
+                    ['RBiH' as FactionId, new Map([
+                        ['op:test:t1', 0],
+                        ['op:test:t2', 0],
+                    ])],
+                ]),
+            } as any,
+            brigades: ['b1', 'b2', 'b3'].map((id, index) => ({
+                id: id as FormationId,
+                faction: 'RBiH' as FactionId,
+                name: id,
+                created_turn: 0,
+                status: 'active',
+                assignment: null,
+                kind: 'brigade',
+                personnel: 1800,
+                cohesion: 60,
+                morale: 60,
+                location_osid: index === 0 ? 'op:test:t1' : 'op:test:t2',
+            })) as FormationState[],
+        });
+
+        const result = managePlan(briefing, zones, forces, evals, null, 10);
+
+        expect(result.action).toBe('created');
+        expect(result.plan).not.toBeNull();
+        expect(result.plan!.target_osids[0]).toBe('op:enemy:sync');
+    });
+
     it('opportunity plan demands more brigades against heavy enemy equipment', () => {
         const stagingZone = makeZone({
             zone_id: 'zone:test_corps:0' as ZoneId,
@@ -703,6 +765,72 @@ describe('commander planning campaign intent', () => {
 
         expect(result.action).toBe('none');
         expect(result.reason).toContain('contain');
+        expect(result.plan).toBeNull();
+    });
+
+    it('does not create a fresh offensive plan when synchronized role is feint', () => {
+        const zoneId = 'zone:test_corps:0' as ZoneId;
+        const brigIds = ['b1', 'b2', 'b3'].map(id => id as FormationId);
+        const zones = [makeZone({
+            zone_id: zoneId,
+            posture: 'projecting',
+            front_edge_count: 10,
+            enemy_adjacent_osids: ['op:enemy:e1'],
+            surplus_brigades: brigIds,
+            assigned_brigades: brigIds,
+        })];
+        const evals = brigIds.map(id => makeEval({
+            brigade_id: id,
+            current_zone: zoneId,
+            tier: 'main_effort',
+            is_combat_effective: true,
+            is_disrupted: false,
+        }));
+        const forces = makeForces(evals, zones);
+
+        const briefing = makeMinimalBriefing({
+            campaign_role: 'primary',
+            campaign_sync_role: 'feint',
+            campaign_sync_targets: ['op:enemy:e1'],
+        });
+
+        const result = managePlan(briefing, zones, forces, evals, null, 10);
+
+        expect(result.action).toBe('none');
+        expect(result.reason).toContain('feint');
+        expect(result.plan).toBeNull();
+    });
+
+    it('does not create a fresh offensive plan when synchronized role is fixing', () => {
+        const zoneId = 'zone:test_corps:0' as ZoneId;
+        const brigIds = ['b1', 'b2', 'b3'].map(id => id as FormationId);
+        const zones = [makeZone({
+            zone_id: zoneId,
+            posture: 'projecting',
+            front_edge_count: 10,
+            enemy_adjacent_osids: ['op:enemy:e1'],
+            surplus_brigades: brigIds,
+            assigned_brigades: brigIds,
+        })];
+        const evals = brigIds.map(id => makeEval({
+            brigade_id: id,
+            current_zone: zoneId,
+            tier: 'main_effort',
+            is_combat_effective: true,
+            is_disrupted: false,
+        }));
+        const forces = makeForces(evals, zones);
+
+        const briefing = makeMinimalBriefing({
+            campaign_role: 'primary',
+            campaign_sync_role: 'fixing',
+            campaign_sync_targets: ['op:enemy:e1'],
+        });
+
+        const result = managePlan(briefing, zones, forces, evals, null, 10);
+
+        expect(result.action).toBe('none');
+        expect(result.reason).toContain('fixing');
         expect(result.plan).toBeNull();
     });
 });

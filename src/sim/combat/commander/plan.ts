@@ -93,6 +93,22 @@ function getCampaignRoleBlockReason(briefing: CommanderBriefing): string | null 
     return null;
 }
 
+function getSyncRoleBlockReason(briefing: CommanderBriefing): string | null {
+    if (briefing.campaign_sync_role === 'feint' || briefing.campaign_sync_role === 'fixing') {
+        return `synchronized role ${briefing.campaign_sync_role} forbids a fresh offensive plan`;
+    }
+    return null;
+}
+
+function getPriorityTargetSet(briefing: CommanderBriefing): Set<string> {
+    const syncTargets =
+        briefing.campaign_sync_role === 'main_effort' || briefing.campaign_sync_role === 'supporting'
+            ? briefing.campaign_sync_targets
+            : [];
+    const preferredTargets = syncTargets.length > 0 ? syncTargets : briefing.campaign_offensive_targets;
+    return new Set(preferredTargets);
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // buildCatastrophicOsidCooldownSet — transient cooldown for failed objectives
 // ═══════════════════════════════════════════════════════════════════════════
@@ -194,6 +210,16 @@ export function managePlan(
             plan: null,
             action: 'none',
             reason: campaignRoleBlockReason,
+            concentration_orders: [],
+        };
+    }
+
+    const syncRoleBlockReason = getSyncRoleBlockReason(briefing);
+    if (syncRoleBlockReason) {
+        return {
+            plan: null,
+            action: 'none',
+            reason: syncRoleBlockReason,
             concentration_orders: [],
         };
     }
@@ -587,7 +613,7 @@ function selectOpportunityTargets(
     const enemyOsids = stagingZone.enemy_adjacent_osids;
     if (enemyOsids.length === 0) return [];
     const maxObjectives = Math.max(1, Math.min(6, Math.floor(requiredBrigades * 0.5)));
-    const campaignTargetSet = new Set(briefing.campaign_offensive_targets);
+    const campaignTargetSet = getPriorityTargetSet(briefing);
 
     // Rank by number of staging-zone OSIDs adjacent to each enemy OSID.
     // More approach vectors = more exposed target = higher priority.
@@ -870,7 +896,7 @@ function findBestStagingZone(
         besieged: 99,
     };
 
-    const campaignTargetSet = new Set(briefing.campaign_offensive_targets);
+    const campaignTargetSet = getPriorityTargetSet(briefing);
     const wantsCampaignPush = briefing.campaign_role === 'primary' || briefing.campaign_role === 'secondary';
 
     const candidates = zones

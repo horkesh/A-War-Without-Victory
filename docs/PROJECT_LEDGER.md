@@ -19244,3 +19244,30 @@ Why this matters:
 - Army HQ `economy` / `contain` roles now have force at the exact point where fresh corps offensives would otherwise be invented
 
 ---
+### 2026-04-02 â€” Engine health Wave 1 continued: synchronized-op briefing data now changes planning behavior
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing another half-alive strategy path: synchronized-operation roles and targets were present in the corps briefing, but were still mostly descriptive instead of behavioral.
+
+Implemented:
+- `src/sim/combat/commander/plan.ts`
+  - synchronized-op `main_effort` / `supporting` targets now outrank broader campaign offensive targets when choosing staging and opportunity objectives
+  - synchronized-op `feint` / `fixing` roles now explicitly block the generic fresh-offensive path instead of falling through to a plan type that cannot honestly realize them
+- `tests/commander/briefing_campaign_intent.test.ts`
+  - added regressions proving synchronized-op targets outrank broader campaign targets
+  - added regressions proving `feint` / `fixing` synchronized roles suppress generic fresh offensive plan creation
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded Wave 1 report with the synchronized-op honesty checkpoint
+- `docs/20_engineering/AI_STRATEGY_SPECIFICATION.md`
+  - updated `ARMY-GAP-1` to record that synchronized-op intent now changes target priority and role legality in local planning
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\briefing_campaign_intent.test.ts tests\commander\commander.test.ts tests\commander\reinforcement_signal_flow.test.ts tests\army_hq_gathering.test.ts`
+  - PASS (`131` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- synchronized ops were at risk of becoming exactly the kind of sophisticated-sounding decorative architecture this triage is meant to kill
+- target coordination is now real enough to affect plan choice, and unsupported sync roles now fail honestly instead of pretending the generic offensive path is close enough
+
+---

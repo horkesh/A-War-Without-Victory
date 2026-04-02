@@ -651,3 +651,26 @@ Why this matters:
 - a theater role that only works because local opportunity scoring happens to fail is decorative strategy, not command authority
 - `economy` and `contain` now mean something mechanically at the exact place where fresh offensives are invented
 - this makes Army HQ and corps planning tell the same story about which fronts are supposed to push and which fronts are supposed to hold
+
+## Additional Wave 1 slice: synchronized-op intent now changes local target choice and role legality
+
+This checkpoint closes the next decorative-strategy seam after front-role honesty: synchronized-operation roles and targets were already reaching `CommanderBriefing`, but the generic opportunity planner was still largely treating them as descriptive metadata.
+
+Implemented:
+- `src/sim/combat/commander/plan.ts`
+  - synchronized-op `main_effort` / `supporting` targets now outrank broader campaign offensive targets when choosing staging priorities and opportunity objectives
+  - synchronized-op `feint` / `fixing` roles now explicitly block the generic fresh-offensive path, because the normal offensive-plan machinery cannot honestly realize those roles yet
+- `tests/commander/briefing_campaign_intent.test.ts`
+  - added regressions proving synchronized-op targets outrank broader campaign targets
+  - added regressions proving `feint` / `fixing` synchronized roles suppress generic fresh offensive plan creation
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\commander\briefing_campaign_intent.test.ts tests\commander\commander.test.ts tests\commander\reinforcement_signal_flow.test.ts tests\army_hq_gathering.test.ts`
+  - PASS (`131` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- synchronized operations are no longer just a nicer target list; they now actually change what the corps planner prefers
+- `feint` and `fixing` were especially dangerous because they looked implemented while still falling through the generic offensive path
+- when a role cannot yet be executed honestly, the right first fix is to block the fake path rather than keep pretending it works
