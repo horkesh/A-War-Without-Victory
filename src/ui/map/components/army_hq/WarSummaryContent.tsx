@@ -3,15 +3,13 @@
  * inside Army HQ SUMMARY tab. Same data, no modal wrapper.
  */
 import { useMemo, useState } from 'react';
-import osidAreas from '../../../../../data/derived/operational/osid_areas.json';
 import type { SummaryFocusSection } from '../../data/types';
 import { useGameStore } from '../../store/gameStore';
 import { formatTurnLabel, fmtK, fmtPct } from '../../utils/formatters';
 import { getFactionFlag } from '../../utils/factionAssets';
 import { FACTION_HEX_COLORS, FACTION_SHORT_LABELS } from '../../utils/theme';
 import { SituationTab } from '../SituationTab';
-
-const FACTIONS = ['RS', 'RBiH', 'HRHB'] as const;
+import { buildWarSummaryOverviewModel, WAR_SUMMARY_FACTIONS } from './warSummaryOverview';
 
 const SUMMARY_SECTIONS: Array<[SummaryFocusSection, string]> = [
     ['overview', 'Overview'],
@@ -29,51 +27,9 @@ export function WarSummaryContent() {
 
     if (!loadedGameState) return <div className="text-text-secondary italic text-[12px] py-8 text-center">No game state loaded</div>;
 
-    const { label, formations, controlBySettlement, casualtyLedger, civilianCasualties, displacementByMun, departedByOsid } = loadedGameState;
+    const { label, casualtyLedger, civilianCasualties } = loadedGameState;
 
-    const data = useMemo(() => {
-        // Territory: area-weighted percentage per faction
-        const areasMap = (osidAreas as { total_area_km2: number; areas: Record<string, number> }).areas;
-        const areaByFaction: Record<string, number> = {};
-        let totalArea = 0;
-        for (const [osid, controller] of Object.entries(controlBySettlement)) {
-            if (!controller) continue;
-            const area = areasMap[osid] ?? 0;
-            areaByFaction[controller] = (areaByFaction[controller] ?? 0) + area;
-            totalArea += area;
-        }
-        const areaPct: Record<string, number> = {};
-        for (const f of FACTIONS) {
-            areaPct[f] = totalArea > 0 ? ((areaByFaction[f] ?? 0) / totalArea) * 100 : 0;
-        }
-
-        // Military: personnel and casualties
-        const personnelByFaction: Record<string, number> = {};
-        for (const f of formations) {
-            if (f.status === 'destroyed' || f.personnel == null) continue;
-            personnelByFaction[f.faction] = (personnelByFaction[f.faction] ?? 0) + f.personnel;
-        }
-
-        // Displacement
-        let totalDisplaced = 0;
-        const displacedByFaction: Record<string, number> = {};
-        if (departedByOsid) {
-            for (const factionCounts of Object.values(departedByOsid)) {
-                for (const [faction, count] of Object.entries(factionCounts)) {
-                    if (typeof count === 'number') {
-                        displacedByFaction[faction] = (displacedByFaction[faction] ?? 0) + count;
-                        totalDisplaced += count;
-                    }
-                }
-            }
-        } else if (displacementByMun) {
-            for (const mun of Object.values(displacementByMun)) {
-                totalDisplaced += mun.displacedOut ?? 0;
-            }
-        }
-
-        return { areaPct, personnelByFaction, totalDisplaced, displacedByFaction };
-    }, [controlBySettlement, formations, departedByOsid, displacementByMun]);
+    const data = useMemo(() => buildWarSummaryOverviewModel(loadedGameState), [loadedGameState]);
 
     const { areaPct, personnelByFaction, totalDisplaced, displacedByFaction } = data;
 
@@ -109,86 +65,139 @@ export function WarSummaryContent() {
 
             {activeSection === 'overview' ? (
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                    <SummarySection title="Territory">
-                        <table className="w-full border-collapse">
-                            <thead>
-                                <tr>
-                                    <th className="text-[10px] text-text-secondary font-semibold text-left py-1">Faction</th>
-                                    {FACTIONS.map((f) => (
-                                        <th key={f} className="text-[10px] font-semibold text-right px-2 py-1" style={{ color: FACTION_HEX_COLORS[f] }}>
-                                            <div className="flex flex-col items-end gap-0.5">
-                                                {getFactionFlag(f) && <img src={getFactionFlag(f)} alt="" className="w-3.5 h-2.5 object-cover rounded-[1px]" />}
-                                                {FACTION_SHORT_LABELS[f]}
-                                            </div>
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td className="text-[11px] text-text-secondary py-0.5">Area-weighted</td>
-                                    {FACTIONS.map((f) => (
-                                        <td key={f} className="text-[12px] text-text-primary text-right px-2 py-0.5 tabular-nums">{fmtPct(areaPct[f])}</td>
-                                    ))}
-                                </tr>
-                            </tbody>
-                        </table>
-                    </SummarySection>
-
-                    <SummarySection title="Military Strength">
-                        <table className="w-full border-collapse">
-                            <thead>
-                                <tr>
-                                    <th className="text-[10px] text-text-secondary font-semibold text-left py-1" />
-                                    {FACTIONS.map((f) => (
-                                        <th key={f} className="text-[10px] font-semibold text-right px-2 py-1" style={{ color: FACTION_HEX_COLORS[f] }}>
-                                            {FACTION_SHORT_LABELS[f]}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td className="text-[11px] text-text-secondary py-0.5">Personnel</td>
-                                    {FACTIONS.map((f) => (
-                                        <td key={f} className="text-[12px] text-text-primary text-right px-2 py-0.5 tabular-nums">{fmtK(personnelByFaction[f] ?? 0)}</td>
-                                    ))}
-                                </tr>
-                                <tr>
-                                    <td className="text-[11px] text-text-secondary py-0.5">KIA</td>
-                                    {FACTIONS.map((f) => (
-                                        <td key={f} className="text-[12px] text-text-primary text-right px-2 py-0.5 tabular-nums">{fmtK(casualtyLedger?.[f]?.killed ?? 0)}</td>
-                                    ))}
-                                </tr>
-                                <tr>
-                                    <td className="text-[11px] text-text-secondary py-0.5">WIA</td>
-                                    {FACTIONS.map((f) => (
-                                        <td key={f} className="text-[12px] text-text-primary text-right px-2 py-0.5 tabular-nums">{fmtK(casualtyLedger?.[f]?.wounded ?? 0)}</td>
-                                    ))}
-                                </tr>
-                            </tbody>
-                        </table>
-                    </SummarySection>
-
-                    <SummarySection title="Displacement">
-                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-[12px]">
-                            <div>
-                                <span className="text-text-secondary">Total displaced: </span>
-                                <span className="text-text-primary tabular-nums">{fmtK(totalDisplaced)}</span>
-                            </div>
-                            {FACTIONS.map((f) => {
-                                const n = displacedByFaction[f] ?? 0;
-                                if (n === 0) return null;
-                                return (
-                                    <div key={f} className="flex items-center gap-1">
-                                        {getFactionFlag(f) && <img src={getFactionFlag(f)} alt="" className="w-3 h-2 object-cover rounded-[1px]" />}
-                                        <span style={{ color: FACTION_HEX_COLORS[f] }}>{FACTION_SHORT_LABELS[f]}: </span>
-                                        <span className="text-text-primary tabular-nums">{fmtK(n)}</span>
+                    {playerFaction ? (
+                        <>
+                            <SummarySection title="Territory">
+                                <PlayerFactionHeader faction={playerFaction} />
+                                <div className="mt-2 space-y-1 text-[12px]">
+                                    <div className="flex items-center justify-between gap-3">
+                                        <span className="text-text-secondary">Friendly control</span>
+                                        <span className="text-text-primary tabular-nums">{fmtPct(areaPct[playerFaction] ?? 0)}</span>
                                     </div>
-                                );
-                            })}
-                        </div>
-                    </SummarySection>
+                                    <div className="text-[10px] text-text-secondary leading-snug">
+                                        Enemy control is summarized through staff assessments and front reports, not exact faction-wide totals.
+                                    </div>
+                                </div>
+                            </SummarySection>
+
+                            <SummarySection title="Military Strength">
+                                <PlayerFactionHeader faction={playerFaction} />
+                                <div className="mt-2 space-y-1 text-[12px]">
+                                    <div className="flex items-center justify-between gap-3">
+                                        <span className="text-text-secondary">Personnel</span>
+                                        <span className="text-text-primary tabular-nums">{fmtK(personnelByFaction[playerFaction] ?? 0)}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between gap-3">
+                                        <span className="text-text-secondary">KIA</span>
+                                        <span className="text-text-primary tabular-nums">{fmtK(casualtyLedger?.[playerFaction]?.killed ?? 0)}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between gap-3">
+                                        <span className="text-text-secondary">WIA</span>
+                                        <span className="text-text-primary tabular-nums">{fmtK(casualtyLedger?.[playerFaction]?.wounded ?? 0)}</span>
+                                    </div>
+                                </div>
+                            </SummarySection>
+
+                            <SummarySection title="Displacement">
+                                <div className="space-y-1 text-[12px]">
+                                    <div className="flex items-center justify-between gap-3">
+                                        <span className="text-text-secondary">Theater-wide displaced</span>
+                                        <span className="text-text-primary tabular-nums">{fmtK(totalDisplaced)}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between gap-3">
+                                        <span className="text-text-secondary">Own-side displaced</span>
+                                        <span className="text-text-primary tabular-nums">{fmtK(displacedByFaction[playerFaction] ?? 0)}</span>
+                                    </div>
+                                    <div className="text-[10px] text-text-secondary leading-snug">
+                                        Enemy displacement is not broken out here as exact faction totals in player-safe mode.
+                                    </div>
+                                </div>
+                            </SummarySection>
+                        </>
+                    ) : (
+                        <>
+                            <SummarySection title="Territory">
+                                <table className="w-full border-collapse">
+                                    <thead>
+                                        <tr>
+                                            <th className="text-[10px] text-text-secondary font-semibold text-left py-1">Faction</th>
+                                            {WAR_SUMMARY_FACTIONS.map((f) => (
+                                                <th key={f} className="text-[10px] font-semibold text-right px-2 py-1" style={{ color: FACTION_HEX_COLORS[f] }}>
+                                                    <div className="flex flex-col items-end gap-0.5">
+                                                        {getFactionFlag(f) && <img src={getFactionFlag(f)} alt="" className="w-3.5 h-2.5 object-cover rounded-[1px]" />}
+                                                        {FACTION_SHORT_LABELS[f]}
+                                                    </div>
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td className="text-[11px] text-text-secondary py-0.5">Area-weighted</td>
+                                            {WAR_SUMMARY_FACTIONS.map((f) => (
+                                                <td key={f} className="text-[12px] text-text-primary text-right px-2 py-0.5 tabular-nums">{fmtPct(areaPct[f])}</td>
+                                            ))}
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </SummarySection>
+
+                            <SummarySection title="Military Strength">
+                                <table className="w-full border-collapse">
+                                    <thead>
+                                        <tr>
+                                            <th className="text-[10px] text-text-secondary font-semibold text-left py-1" />
+                                            {WAR_SUMMARY_FACTIONS.map((f) => (
+                                                <th key={f} className="text-[10px] font-semibold text-right px-2 py-1" style={{ color: FACTION_HEX_COLORS[f] }}>
+                                                    {FACTION_SHORT_LABELS[f]}
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td className="text-[11px] text-text-secondary py-0.5">Personnel</td>
+                                            {WAR_SUMMARY_FACTIONS.map((f) => (
+                                                <td key={f} className="text-[12px] text-text-primary text-right px-2 py-0.5 tabular-nums">{fmtK(personnelByFaction[f] ?? 0)}</td>
+                                            ))}
+                                        </tr>
+                                        <tr>
+                                            <td className="text-[11px] text-text-secondary py-0.5">KIA</td>
+                                            {WAR_SUMMARY_FACTIONS.map((f) => (
+                                                <td key={f} className="text-[12px] text-text-primary text-right px-2 py-0.5 tabular-nums">{fmtK(casualtyLedger?.[f]?.killed ?? 0)}</td>
+                                            ))}
+                                        </tr>
+                                        <tr>
+                                            <td className="text-[11px] text-text-secondary py-0.5">WIA</td>
+                                            {FACTIONS.map((f) => (
+                                                <td key={f} className="text-[12px] text-text-primary text-right px-2 py-0.5 tabular-nums">{fmtK(casualtyLedger?.[f]?.wounded ?? 0)}</td>
+                                            ))}
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </SummarySection>
+
+                            <SummarySection title="Displacement">
+                                <div className="flex flex-wrap gap-x-4 gap-y-1 text-[12px]">
+                                    <div>
+                                        <span className="text-text-secondary">Total displaced: </span>
+                                        <span className="text-text-primary tabular-nums">{fmtK(totalDisplaced)}</span>
+                                    </div>
+                                    {WAR_SUMMARY_FACTIONS.map((f) => {
+                                        const n = displacedByFaction[f] ?? 0;
+                                        if (n === 0) return null;
+                                        return (
+                                            <div key={f} className="flex items-center gap-1">
+                                                {getFactionFlag(f) && <img src={getFactionFlag(f)} alt="" className="w-3 h-2 object-cover rounded-[1px]" />}
+                                                <span style={{ color: FACTION_HEX_COLORS[f] }}>{FACTION_SHORT_LABELS[f]}: </span>
+                                                <span className="text-text-primary tabular-nums">{fmtK(n)}</span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </SummarySection>
+                        </>
+                    )}
 
                     {civilianCasualties && Object.keys(civilianCasualties).length > 0 && (() => {
                         let totalKilled = 0;
@@ -229,6 +238,17 @@ function SummarySection({ title, children }: { title: string; children: React.Re
                 {title}
             </div>
             {children}
+        </div>
+    );
+}
+
+function PlayerFactionHeader({ faction }: { faction: (typeof WAR_SUMMARY_FACTIONS)[number] }) {
+    return (
+        <div className="flex items-center gap-2">
+            {getFactionFlag(faction) && <img src={getFactionFlag(faction)} alt="" className="w-4 h-3 object-cover rounded-[1px]" />}
+            <span className="text-[11px] font-semibold" style={{ color: FACTION_HEX_COLORS[faction] }}>
+                {FACTION_SHORT_LABELS[faction]}
+            </span>
         </div>
     );
 }

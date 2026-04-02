@@ -1,3 +1,30 @@
+## 2026-04-02 - Army HQ summary player-truth pass
+
+### Summary
+- Removed exact all-faction overview tables from `WarSummaryContent` in player mode.
+- Added a pure overview-model helper so the visibility contract is testable without JSX/runtime fragility.
+- Indexed the change in GUI/Warroom report masters and 40_reports indices.
+
+### Files changed
+- `src/ui/map/components/army_hq/WarSummaryContent.tsx`
+- `src/ui/map/components/army_hq/warSummaryOverview.ts`
+- `tests/ui_army_hq_war_summary_visibility.test.ts`
+- `vitest.config.ts`
+- `docs/40_reports/implemented/20260402_ARMY_HQ_WAR_SUMMARY_PLAYER_TRUTH.md`
+- `docs/40_reports/GUI_MASTER.md`
+- `docs/40_reports/WARROOM_MASTER.md`
+- `docs/40_reports/CONSOLIDATED_IMPLEMENTED.md`
+- `docs/40_reports/README.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- Army HQ `SUMMARY` was still acting like a debug scoreboard by exposing exact all-faction territory/personnel/casualty/displacement tables.
+- That violated the player-visible-state contract and made the headquarters shell more omniscient than the intended player role.
+
+### Verification
+- `node_modules\.bin\vitest.cmd run tests\ui_army_hq_war_summary_visibility.test.ts tests\ui_shell_navigation.test.ts tests\warroom_player_visibility.test.ts tests\warroom_smoke.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+
 ## [2026-04-02] Commander Intelligence Overhaul n1294–n1301
 
 ### Summary
