@@ -15,6 +15,7 @@ import { getPrestigeTier, getPrestigeTierColor, getHighestTier, getDecorationNam
 import { TabBar } from './TabBar';
 import { computeBrigadeEffectiveness } from '../utils/combatEffectiveness';
 import { Icon } from './icons/Icon';
+import { getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
 
 
 /** Zero combat summary for brigades that have not yet been in combat (so Combat Record always shows). */
@@ -251,7 +252,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                       selectedOsid: null,
                     })}
                     className="w-full text-left px-2 py-1.5 bg-accent-gold/5 border border-accent-gold/20 rounded-md flex items-center justify-between text-[11px] hover:bg-accent-gold/10 transition-colors group"
-                    title={currentSector.sector_id}
+                    title={getPlayerFacingSectorName(currentSector.sector_id, sectors)}
                   >
                     <div className="flex items-center gap-2">
                       <span className="text-accent-gold/60 uppercase font-bold tracking-tighter">Sector:</span>

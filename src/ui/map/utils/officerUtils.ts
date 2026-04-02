@@ -1,4 +1,5 @@
 import type { LoadedGameState, FormationView } from '../data/types';
+import { getAssignedCommandLabel } from '../../shared/playerFacingLabels';
 
 /**
  * Utility to find the named officer for a formation (Corps or Army level).
@@ -38,25 +39,26 @@ export function getFactionArmyCommander(
 export function getAvailabilityStatus(
     officer: { status?: string, rank?: string, enclave_lock?: { enclave_id: string }, assigned_operation?: string, assigned_corps_id?: string | null, acting_commander?: boolean },
     targetCorpsId: string,
+    corpsNameById?: Map<string, string>,
 ): { available: boolean; reason?: string } {
-    if (officer.status === 'kia') return { available: false, reason: `KIA` };
+    if (officer.status === 'kia') return { available: false, reason: 'KIA' };
     if (officer.status === 'captured') return { available: false, reason: 'CAPTURED' };
     if (officer.status === 'retired') return { available: false, reason: 'RETIRED' };
-    if (officer.rank === 'army_commander') return { available: false, reason: 'ARMY HQ — unavailable' };
+    if (officer.rank === 'army_commander') return { available: false, reason: 'ARMY HQ - unavailable' };
 
-    // Enclave lock
     if (officer.enclave_lock) {
-        return { available: false, reason: `ENCLAVE LOCKED: ${officer.enclave_lock.enclave_id}` };
+        return { available: false, reason: 'ENCLAVE LOCKED' };
     }
 
-    // Already commanding another operation
     if (officer.assigned_operation) {
         return { available: false, reason: `ASSIGNED: ${officer.assigned_operation}` };
     }
 
-    // Active corps commander (can't be pulled for ops)
     if (officer.assigned_corps_id && officer.assigned_corps_id !== targetCorpsId && !officer.acting_commander) {
-        return { available: false, reason: `CORPS COMMANDER — ${officer.assigned_corps_id}` };
+        return {
+            available: false,
+            reason: `CORPS COMMANDER - ${getAssignedCommandLabel(officer.assigned_corps_id, corpsNameById ?? new Map())}`,
+        };
     }
 
     return { available: true };

@@ -14,6 +14,7 @@ import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { turnToDateString, formatOperationType, toTitleCase } from '../utils/formatters';
 import { getFormationCommander } from '../utils/officerUtils';
 import { OfficerProfile } from './OfficerProfile';
+import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
 
 function compareOperations(a: OperationView, b: OperationView): number {
   return (
@@ -53,8 +54,10 @@ export function OperationsPanel() {
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   const operations = useMemo(
-    () => [...(loadedGameState?.operations ?? [])].sort(compareOperations),
-    [loadedGameState?.operations]
+    () => loadedGameState
+      ? filterPlayerFacingOperations(loadedGameState).sort(compareOperations)
+      : [],
+    [loadedGameState]
   );
 
   const selectedOperation = useMemo(() => {

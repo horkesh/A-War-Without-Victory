@@ -5,6 +5,7 @@ import { formatOperationType, turnToDateString, toTitleCase } from '../utils/for
 import { getPanelRailStyle } from './panelRail';
 import { getFormationCommander } from '../utils/officerUtils';
 import { OfficerProfile } from './OfficerProfile';
+import { getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
 
 function PhaseBadge({ phase }: { phase: string }) {
   const cls =
@@ -83,7 +84,7 @@ export function OperationDetail({ railSlot }: OperationDetailProps) {
   const objectives = op.objectives ?? [];
   const currentIdx = op.current_objective_index ?? 0;
   const getSectorName = (sid: string) =>
-    loadedGameState.corpsFrontSectors?.find(s => s.sector_id === sid)?.display_name ?? sid;
+    getPlayerFacingSectorName(sid, loadedGameState.corpsFrontSectors ?? []);
 
   return (
     <div

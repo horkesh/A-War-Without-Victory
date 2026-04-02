@@ -263,3 +263,96 @@ Done means:
 - the new targeted regression tests pass together
 - the three fixes are documented as canonical engine behavior
 - threat assessment regression test proves no raw enemy corps ids or operation names leak through the player-facing surface
+
+## Additional checkpoint: secondary player-facing leak sweep
+
+Follow-on player-facing integrity work in the same clean lane added a shared label/filter layer for secondary panels and fallback strings.
+
+Implemented:
+- `src/ui/shared/playerFacingLabels.ts`
+  - centralized shared helpers for player-facing corps/sector/assignment labels
+  - added player-faction operation filtering helper for omniscient UI stores
+- `src/ui/map/components/OperationsPanel.tsx`
+  - standalone operations list now renders only player-faction operations
+- `src/ui/map/components/OperationDetail.tsx`
+  - sector labels no longer fall back to raw `sector_id`
+- `src/ui/map/components/FormationDetail.tsx`
+  - sector badge title now uses player-facing sector naming
+- `src/ui/warroom/components/FactionOverviewPanel.ts`
+  - officer roster and commander reassignment dialog now resolve corps labels through display names
+- `src/ui/map/utils/officerUtils.ts`
+  - generic unavailability reasons no longer leak enclave ids or raw corps ids
+- `tests/ui_map_render_smoke.test.ts`
+  - now covers shared player-facing labels and player-faction operation filtering
+
+Verification:
+- `node_modules\\.bin\\vitest.cmd run tests\\ui_map_render_smoke.test.ts`
+  - PASS (`9` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- The worst player-facing leaks often reappear in secondary panels and fallback text after the main surface is fixed.
+- Omniscient renderer state is survivable only if player panels actively filter it before rendering.
+- Player-facing labels need one shared translation layer or raw ids will keep coming back.
+
+## Additional Wave 1 slice: player-facing label safety across map and Warroom
+
+This follow-on slice tightened the display-translation layer so player-facing surfaces do not degrade to raw corps or sector ids when a secondary lookup is missing.
+
+Implemented:
+- `src/ui/shared/playerFacingLabels.ts`
+  - shared helpers for corps / sector / assigned-command display names
+- `src/ui/map/components/OperationDetail.tsx`
+  - sector anchor labels no longer fall back to raw `sector_id`
+- `src/ui/map/components/FormationDetail.tsx`
+  - brigade sector hover/title text now uses player-facing sector labels
+- `src/ui/map/utils/officerUtils.ts`
+  - generic availability reasons no longer expose raw enclave ids or raw assigned corps ids
+- `src/ui/warroom/components/FactionOverviewPanel.ts`
+  - officer roster and reassignment dialog now use formation display names instead of raw corps ids
+- `tests/ui_map_render_smoke.test.ts`
+  - added label-safety regression coverage for corps / sector / assigned-command helpers
+
+Additional verification:
+
+```powershell
+node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts tests\warroom_smoke.test.ts
+```
+
+Result:
+- `2` UI / Warroom smoke suites passed
+- `11` tests passed
+
+Why this matters:
+- the first layer of player-truth integrity is not only hiding enemy data
+- it is also preventing fallback strings from collapsing into engine identifiers when a lookup is missing
+- that contract has to hold in both React tactical-map surfaces and older Warroom shell surfaces, or the product still feels like a debugging tool
+
+## Additional Wave 1 slice: player-only command rail and map-op visibility
+
+This checkpoint closes a more structural player-truth leak: several global tactical-map surfaces were still rendering omniscient multi-faction collections even after the first round of tooltip and fallback cleanup.
+
+Implemented:
+- `src/ui/shared/playerFacingLabels.ts`
+  - now also owns `getPlayerFacingFaction`, `getPlayerVisibleFactions`, and `getPlayerVisibleOperations`
+- `src/ui/map/components/OOBSidebar.tsx`
+  - Army, Mobilization, Operations, and Sectors accordions now render only the player faction instead of all three factions
+  - counts now derive from player-visible collections rather than omniscient totals
+- `src/ui/map/components/SelectionPanel.tsx`
+  - settlement operation lists now filter to player-faction operations before rendering
+- `src/ui/map/map/builders/buildOperationArrowsGeoJSON.ts`
+  - map operation arrows now render only player-visible operations
+- `tests/ui_map_render_smoke.test.ts`
+  - added regression coverage for player-visible faction filtering and player-only operation arrows
+
+Verification:
+- `node_modules\\.bin\\vitest.cmd run tests\\ui_map_render_smoke.test.ts tests\\warroom_smoke.test.ts`
+  - PASS (`13` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- the most dangerous player-facing leaks are not only raw labels
+- they are whole panels that quietly behave like staff-god-mode debug shells
+- until a real renderer-state boundary exists, global lists and map overlays must filter omniscient state before they render

@@ -200,3 +200,11 @@ Tooltips, operation history, commander selection, personnel rosters, and Army HQ
 ### 10. Standalone tactical map must keep a visible route back to HQ and records
 
 If the tactical map is opened as its own desktop shell, it needs a visible return path to Warroom and a visible records/Codex affordance. Those are not optional convenience buttons; they are part of the product shell contract that keeps command, records, and intelligence in one coherent experience.
+
+### 11. Omniscient UI stores must be filtered before player panels render
+
+If `LoadedGameState` still carries omniscient operation or sector truth, any player-facing panel that renders lists or labels must filter by `player_faction` and resolve display names through shared label helpers before showing text. Otherwise enemy ops and raw ids leak back through secondary panels even after the main map surfaces are cleaned up.
+
+### 12. Global command rails are not debug consoles
+
+OOB sidebars, operation lists, mobilization summaries, sector accordions, and map overlay builders must default to the player faction only. If a global rail groups content by all factions, it is acting like a debug shell even when the styling looks player-facing.

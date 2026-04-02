@@ -10,6 +10,7 @@ import { toTitleCase } from '../utils/formatters';
 import { getArmyCrest, getArmyName } from '../utils/factionAssets';
 import { getFactionArmyCommander } from '../utils/officerUtils';
 import { formatRank } from '../utils/officerCharacter';
+import { getPlayerFacingFaction, getPlayerVisibleFactions, getPlayerVisibleOperations } from '../../shared/playerFacingLabels';
 
 const FACTION_ORDER = ['RS', 'RBiH', 'HRHB'] as const;
 
@@ -80,6 +81,7 @@ export function OOBSidebar() {
   });
   const [corpsStanceOverrides, setCorpsStanceOverrides] = useState<Record<string, string>>({});
   const sidebarRef = useRef<HTMLDivElement>(null);
+  const playerFaction = loadedGameState ? getPlayerFacingFaction(loadedGameState) : null;
 
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
@@ -90,19 +92,19 @@ export function OOBSidebar() {
   const corpsFormationById = useMemo(() => {
     const map = new Map<string, FormationView>();
     if (!loadedGameState?.formations) return map;
-    for (const formation of loadedGameState.formations) {
+    for (const formation of getPlayerVisibleFactions(loadedGameState.formations, playerFaction)) {
       if (formation.kind === 'corps' || formation.kind === 'corps_asset') {
         map.set(formation.id, formation);
       }
     }
     return map;
-  }, [loadedGameState?.formations]);
+  }, [loadedGameState?.formations, playerFaction]);
 
   const reserveByFaction = useMemo(() => {
     const map = new Map<string, FormationView[]>();
-    if (!loadedGameState || !loadedGameState.formations) return map;
+    if (!loadedGameState || !loadedGameState.formations || !playerFaction) return map;
     const hasFrontAssignments = Boolean(loadedGameState.brigadeFrontAssignment);
-    for (const formation of loadedGameState.formations) {
+    for (const formation of getPlayerVisibleFactions(loadedGameState.formations, playerFaction)) {
       if (formation.kind !== 'brigade') continue;
       const frontAssignment = loadedGameState.brigadeFrontAssignment?.[formation.id] ?? null;
       const isReserve = hasFrontAssignments ? !frontAssignment : !formation.corps_id;
@@ -115,13 +117,13 @@ export function OOBSidebar() {
       list.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
     }
     return map;
-  }, [loadedGameState]);
+  }, [loadedGameState, playerFaction]);
 
   const armyByFaction = useMemo(() => {
-    if (!loadedGameState || !loadedGameState.formations) return new Map<string, FormationView[]>();
+    if (!loadedGameState || !loadedGameState.formations || !playerFaction) return new Map<string, FormationView[]>();
     const map = new Map<string, FormationView[]>();
     const reserveIds = new Set(Array.from(reserveByFaction.values()).flatMap((formations) => formations.map((f) => f.id)));
-    for (const f of loadedGameState.formations) {
+    for (const f of getPlayerVisibleFactions(loadedGameState.formations, playerFaction)) {
       if (f.kind !== 'brigade') continue;
       if (reserveIds.has(f.id)) continue;
       const list = map.get(f.faction) ?? [];
@@ -132,7 +134,7 @@ export function OOBSidebar() {
       list.sort((a, b) => (a.corps_id ?? '').localeCompare(b.corps_id ?? '', undefined, { sensitivity: 'base' }) || a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
     }
     return map;
-  }, [loadedGameState, reserveByFaction]);
+  }, [loadedGameState, reserveByFaction, playerFaction]);
 
   const corpsColorMap = useMemo(
     () => (loadedGameState?.corpsFrontSectors ? buildCorpsColorMap(loadedGameState.corpsFrontSectors) : {}),
@@ -141,7 +143,7 @@ export function OOBSidebar() {
 
   // Group operations by faction
   const operationsByFaction = useMemo(() => {
-    const ops = loadedGameState?.operations;
+    const ops = loadedGameState ? getPlayerVisibleOperations(loadedGameState.operations ?? [], playerFaction) : null;
     if (!ops || ops.length === 0) return null;
     const map = new Map<string, OperationView[]>();
     for (const op of ops) {
@@ -150,11 +152,11 @@ export function OOBSidebar() {
       map.set(op.faction, list);
     }
     return map;
-  }, [loadedGameState?.operations]);
+  }, [loadedGameState?.operations, playerFaction]);
 
   // Group sectors by faction for the Sectors accordion
   const sectorsByFaction = useMemo(() => {
-    const sectors = loadedGameState?.corpsFrontSectors;
+    const sectors = loadedGameState ? getPlayerVisibleFactions(loadedGameState.corpsFrontSectors ?? [], playerFaction) : null;
     if (!sectors || sectors.length === 0) return null;
     const map = new Map<string, typeof sectors>();
     for (const s of sectors) {
@@ -163,7 +165,7 @@ export function OOBSidebar() {
       map.set(s.faction, list);
     }
     return map;
-  }, [loadedGameState?.corpsFrontSectors]);
+  }, [loadedGameState?.corpsFrontSectors, playerFaction]);
 
   useEffect(() => {
     if (!expandedSections.army) return;
@@ -210,8 +212,8 @@ export function OOBSidebar() {
     }
     return n;
   }, [armyByFaction, reserveByFaction]);
-  const totalOperations = loadedGameState?.operations?.length ?? 0;
-  const totalSectors = loadedGameState?.corpsFrontSectors?.length ?? 0;
+  const totalOperations = loadedGameState ? getPlayerVisibleOperations(loadedGameState.operations ?? [], playerFaction).length : 0;
+  const totalSectors = loadedGameState ? getPlayerVisibleFactions(loadedGameState.corpsFrontSectors ?? [], playerFaction).length : 0;
   const mobilizationSummary = loadedGameState?.mobilizationSummary;
 
   if (!loadedGameState) {
@@ -273,7 +275,7 @@ export function OOBSidebar() {
               {!armyByFaction || armyByFaction.size === 0 ? (
                 <div className="text-xs text-text-secondary italic">No formations.</div>
               ) : (
-                FACTION_ORDER.filter((f) => armyByFaction.has(f) || reserveByFaction.has(f)).map((faction, factionIndex) => {
+                FACTION_ORDER.filter((f) => f === playerFaction && (armyByFaction.has(f) || reserveByFaction.has(f))).map((faction, factionIndex) => {
                   const formations = armyByFaction.get(faction) ?? [];
                   const reserves = reserveByFaction.get(faction) ?? [];
                   const isCollapsed = collapsed[faction];
@@ -460,7 +462,7 @@ export function OOBSidebar() {
               {!mobilizationSummary ? (
                 <div className="text-text-secondary italic px-1">No mobilization data.</div>
               ) : (
-                FACTION_ORDER.filter((faction) => Boolean(mobilizationSummary[faction])).map((faction) => {
+                FACTION_ORDER.filter((faction) => faction === playerFaction && Boolean(mobilizationSummary[faction])).map((faction) => {
                   const summary = mobilizationSummary[faction]!;
                   return (
                     <div key={faction} className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
@@ -510,7 +512,7 @@ export function OOBSidebar() {
               {!operationsByFaction ? (
                 <div className="text-text-secondary italic px-1">No active operations.</div>
               ) : (
-                FACTION_ORDER.filter((f) => operationsByFaction.has(f)).map((faction) => {
+                FACTION_ORDER.filter((f) => f === playerFaction && operationsByFaction.has(f)).map((faction) => {
                   const ops = operationsByFaction.get(faction)!;
                   return (
                     <div key={faction} className="space-y-1">
@@ -578,7 +580,7 @@ export function OOBSidebar() {
               {!sectorsByFaction ? (
                 <div className="text-text-secondary italic px-1">No sector data.</div>
               ) : (
-                FACTION_ORDER.filter((f) => sectorsByFaction.has(f)).map((faction) => {
+                FACTION_ORDER.filter((f) => f === playerFaction && sectorsByFaction.has(f)).map((faction) => {
                   const sectors = sectorsByFaction.get(faction)!;
                   return (
                     <div key={faction} className="space-y-1">

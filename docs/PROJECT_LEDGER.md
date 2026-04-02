@@ -44,6 +44,96 @@ Engine-derived chokepoint detection (`engineMustHold`) disabled with `false &&`.
 
 ---
 
+### 2026-04-02 â€” Player-facing label discipline: secondary panel leak sweep
+
+Continued the clean-lane player-knowledge integrity pass in `F:\AWWV_exec_clean` on branch `codex/engine-health-wave1`.
+
+Implemented:
+- `src/ui/shared/playerFacingLabels.ts`
+  - centralized shared helpers for player-facing corps/sector/assignment labels
+  - added player-faction operation filtering helper
+- `src/ui/map/components/OperationsPanel.tsx`
+  - standalone operations list now renders only player-faction operations
+- `src/ui/map/components/OperationDetail.tsx`
+  - sector labels now use player-facing names instead of raw sector ids
+- `src/ui/map/components/FormationDetail.tsx`
+  - sector badge title now uses player-facing sector naming
+- `src/ui/warroom/components/FactionOverviewPanel.ts`
+  - officer roster / commander reassignment dialog now resolve corps labels through display names
+- `src/ui/map/utils/officerUtils.ts`
+  - generic unavailability reasons no longer leak enclave ids or raw corps ids
+- `tests/ui_map_render_smoke.test.ts`
+  - added regression coverage for shared label helpers and player-faction operation filtering
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts`
+  - PASS (`9` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- The worst player-facing leaks often reappear in secondary panels and fallback text after the main surface is fixed. This checkpoint turns label translation and op visibility into shared rules instead of one-off cleanup.
+
+---
+
+### 2026-04-02 â€” Player-facing label safety extended across map and Warroom
+
+Continued Wave 1 player-truth cleanup in the clean lane by removing another class of low-grade but persistent leaks: fallback strings that degraded to raw corps or sector ids when lookups were missing.
+
+Implemented:
+- added `src/ui/shared/playerFacingLabels.ts`
+  - shared player-safe corps / sector / assigned-command label helpers
+- `OperationDetail.tsx`
+  - sector anchor labels no longer fall back to raw `sector_id`
+- `FormationDetail.tsx`
+  - brigade sector title/hover text now uses player-facing sector names
+- `ui/map/utils/officerUtils.ts`
+  - availability reasons no longer expose raw enclave ids or raw assigned corps ids
+- `ui/warroom/components/FactionOverviewPanel.ts`
+  - officer roster and reassignment dialog now use formation display names instead of raw corps ids
+- `tests/ui_map_render_smoke.test.ts`
+  - added label-safety regression coverage
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts tests\warroom_smoke.test.ts`
+  - PASS (`11` tests)
+
+Why this matters:
+- player-facing integrity is not just about enemy leaks
+- it is also about never letting normal UI fall back to engine identifiers
+- the rule now applies across both tactical-map React surfaces and the older Warroom shell
+
+---
+
+### 2026-04-02 â€” Player-only command rails and operation arrows
+
+Continued the clean-lane player-knowledge integrity pass by closing a broader omniscience leak: several tactical-map global rails were still grouping or rendering content for all factions instead of only the player faction.
+
+Implemented:
+- `src/ui/shared/playerFacingLabels.ts`
+  - added `getPlayerFacingFaction`, `getPlayerVisibleFactions`, and `getPlayerVisibleOperations`
+- `src/ui/map/components/OOBSidebar.tsx`
+  - Army, Mobilization, Operations, and Sectors accordions now render only the player faction
+  - counts now derive from player-visible collections
+- `src/ui/map/components/SelectionPanel.tsx`
+  - settlement operation summaries now filter to player-visible operations
+- `src/ui/map/map/builders/buildOperationArrowsGeoJSON.ts`
+  - operation arrows now render only player-visible operations
+- `tests/ui_map_render_smoke.test.ts`
+  - added regression coverage for player-visible faction filtering and player-only operation arrows
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts tests\warroom_smoke.test.ts`
+  - PASS (`13` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- global command rails are the easiest place for debug-shell omniscience to sneak back into the player experience
+- until a real renderer-state boundary exists, every player-facing list and map overlay must explicitly filter omniscient state before render
+
+---
+
 ### 2026-04-02 â€” Engine health Wave 1 correctness fixes (clean execution lane)
 
 Implemented the first correctness wave in clean branch `codex/engine-health-wave1` under `F:\AWWV_exec_clean`.

@@ -7,8 +7,16 @@ import { buildControlGeoJSON } from '../src/ui/map/map/builders/buildControlGeoJ
 import { buildMajorCityLabelGeoJSON } from '../src/ui/map/map/builders/buildMajorCityLabelGeoJSON.js';
 import { buildFogOfWarGeoJSON } from '../src/ui/map/map/builders/buildFogOfWarGeoJSON.js';
 import { buildFormationsGeoJSON } from '../src/ui/map/map/builders/buildFormationsGeoJSON.js';
+import { buildOperationArrowsGeoJSON } from '../src/ui/map/map/builders/buildOperationArrowsGeoJSON.js';
 import { deriveUrbanTier } from '../src/ui/map/map/builders/urbanSettlementTiers.js';
 import { generateThreatAssessment } from '../src/ui/map/components/army_hq/generateThreatAssessment.js';
+import {
+  getAssignedCommandLabel,
+  getPlayerFacingCorpsName,
+  getPlayerFacingSectorName,
+  getPlayerVisibleFactions,
+  getPlayerVisibleOperations,
+} from '../src/ui/shared/playerFacingLabels.js';
 import type { LoadedGameState } from '../src/ui/map/data/types.js';
 import type { FeatureCollection } from 'geojson';
 
@@ -249,5 +257,77 @@ describe('Tactical map render smoke', () => {
     expect(rendered).not.toContain('1st Krajina Corps');
     expect(rendered).not.toContain('op_vrs_secret_thunder');
     expect(rendered).not.toContain('op_vrs_followup');
+  });
+
+  it('player-facing label helpers never fall back to raw ids', () => {
+    const corpsNameById = new Map([
+      ['arbih_3rd_corps', '3rd Corps'],
+    ]);
+    const sectors = [
+      { sector_id: 'sector:arbih_3rd:0', display_name: 'Ozren Sector' },
+    ];
+
+    expect(getPlayerFacingCorpsName('arbih_3rd_corps', corpsNameById)).toBe('3rd Corps');
+    expect(getPlayerFacingSectorName('sector:arbih_3rd:0', sectors)).toBe('Ozren Sector');
+    expect(getAssignedCommandLabel('arbih_3rd_corps', corpsNameById)).toBe('3rd Corps');
+
+    expect(getPlayerFacingCorpsName('arbih_5th_corps', new Map())).toBe('This corps');
+    expect(getPlayerFacingSectorName('sector:arbih_5th:0', [])).toBe('Assigned sector');
+    expect(getAssignedCommandLabel('arbih_5th_corps', new Map())).toBe('Assigned command');
+  });
+
+  it('player-facing operation filtering hides non-player factions from omniscient state', () => {
+    const visible = getPlayerVisibleOperations(
+      [
+        { faction: 'RBiH', name: 'Own Op' },
+        { faction: 'RS', name: 'Enemy Op' },
+      ],
+      'RBiH',
+    );
+
+    expect(visible).toEqual([{ faction: 'RBiH', name: 'Own Op' }]);
+  });
+
+  it('player-facing faction filtering hides non-player formations and sectors', () => {
+    const formations = getPlayerVisibleFactions(
+      [
+        { faction: 'RBiH', id: 'arbih_3rd_corps' },
+        { faction: 'RS', id: 'vrs_1st_krajina' },
+      ],
+      'RBiH',
+    );
+    const sectors = getPlayerVisibleFactions(
+      [
+        { faction: 'RBiH', sector_id: 's_1' },
+        { faction: 'HRHB', sector_id: 's_2' },
+      ],
+      'RBiH',
+    );
+
+    expect(formations).toEqual([{ faction: 'RBiH', id: 'arbih_3rd_corps' }]);
+    expect(sectors).toEqual([{ faction: 'RBiH', sector_id: 's_1' }]);
+  });
+
+  it('operation arrows ignore enemy operations in player mode', () => {
+    const state = {
+      player_faction: 'RBiH',
+      operations: [
+        { faction: 'RBiH', corps_id: 'arbih_3rd_corps', name: 'Own Op', objectives: ['osid_b'], staging_osid: 'osid_a' },
+        { faction: 'RS', corps_id: 'vrs_1st_krajina', name: 'Enemy Op', objectives: ['osid_d'], staging_osid: 'osid_c' },
+      ],
+    } as LoadedGameState;
+
+    const lookup = new Map<string, [number, number]>([
+      ['osid_a', [18, 44]],
+      ['osid_b', [18.2, 44.2]],
+      ['osid_c', [19, 45]],
+      ['osid_d', [19.2, 45.2]],
+    ]);
+
+    const geo = buildOperationArrowsGeoJSON(state, lookup);
+    const names = geo.features.map((feature) => String((feature.properties as { op_name?: string }).op_name ?? ''));
+
+    expect(names.some((name) => name.includes('Own Op'))).toBe(true);
+    expect(names.some((name) => name.includes('Enemy Op'))).toBe(false);
   });
 });

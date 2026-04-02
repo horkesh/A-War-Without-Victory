@@ -9,6 +9,8 @@ import { getRightPanelStyle, getPanelRailStyle } from './panelRail';
 import { buildOsidToSectorMap } from '../utils/sectorUtils';
 import { getOperationId } from '../utils/operations';
 import { getCurrentEthnicForOsid } from '../map/builders/buildEthnicGeoJSON';
+import { resolvePlayerFacingFaction } from '../../shared/playerVisibility';
+import { getPlayerVisibleOperations } from '../../shared/playerFacingLabels';
 
 interface SelectionPanelProps {
   railSlot?: 'primary' | 'secondary';
@@ -46,10 +48,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
   }
 
   const formations = getFormationsAtOsid(loadedGameState?.formations, selectedOsid);
-  const playerFaction =
-    loadedGameState?.player_faction === 'RBiH' || loadedGameState?.player_faction === 'RS' || loadedGameState?.player_faction === 'HRHB'
-      ? loadedGameState.player_faction
-      : null;
+  const playerFaction = resolvePlayerFacingFaction(loadedGameState);
   const selectedMunId = selectedOsid.split(':')[1] ?? null;
   const rawActiveSupport = playerFaction ? loadedGameState?.municipalitySupportOrders?.[playerFaction] : undefined;
   const activeSupport = rawActiveSupport?.staged_turn === loadedGameState?.turn ? rawActiveSupport : undefined;
@@ -67,7 +66,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
   }));
 
   const operationsTargetingOsid =
-    loadedGameState?.operations
+    getPlayerVisibleOperations(loadedGameState?.operations ?? [], playerFaction)
       ?.filter((op) => op.objectives?.includes(selectedOsid))
       .map((op) => ({ name: op.name, faction: op.faction, phase: op.phase, operationKey: getOperationId(op) }))
     ?? [];
