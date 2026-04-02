@@ -674,3 +674,33 @@ Why this matters:
 - synchronized operations are no longer just a nicer target list; they now actually change what the corps planner prefers
 - `feint` and `fixing` were especially dangerous because they looked implemented while still falling through the generic offensive path
 - when a role cannot yet be executed honestly, the right first fix is to block the fake path rather than keep pretending it works
+
+## Additional Wave 1 slice: hover tooltips now obey player-facing truth
+
+This checkpoint starts the visible player-knowledge cleanup where users actually feel it first: hover tooltips. Before this change, tooltip surfaces still behaved like a staff/debug shell and could reveal exact enemy unit names, line composition, and local settlement truth that the player-facing product contract does not allow.
+
+Implemented:
+- `src/ui/map/components/tooltipPlayerSafe.ts`
+  - new canonical helper module for player-safe tooltip shaping
+  - own formations keep exact detail
+  - enemy formations collapse to an `Enemy contact` abstraction
+  - settlement hover unit lists keep only player-owned stationed formations
+  - front hover keeps own line detail but reduces enemy side to contact-count abstraction
+- `src/ui/map/components/Tooltip.tsx`
+  - now routes formation, front, and settlement hover content through the player-safe shaping rules instead of rendering raw omniscient state directly
+  - defense preview now uses player-owned brigades only
+- `tests/ui_map_tooltip_player_visibility.test.ts`
+  - added regressions proving own formations keep exact detail, enemy formations are abstracted, settlement tooltips exclude enemy stationed-unit leaks, and front hover hides enemy formation names
+- `vitest.config.ts`
+  - wired the new focused regression file into the repo’s explicit Vitest whitelist
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_map_tooltip_player_visibility.test.ts tests\ui_player_visibility.test.ts`
+  - PASS (`8` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- in a grand-strategy / operational game, hover surfaces are part of the player contract, not harmless chrome
+- exact enemy unit names and line composition in normal hover are cheat-surface leaks, not “nice debug detail”
+- codifying the rule in one helper module is cheaper and safer than re-fighting the same leak in every tooltip-shaped component

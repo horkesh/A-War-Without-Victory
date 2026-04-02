@@ -5,13 +5,18 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
-import { getFormationsAtOsid } from '../utils/formationAtOsid';
 import { stripFactionSuffix } from '../utils/sectorUtils';
 import { FACTION_COLORS } from '../utils/theme';
 import { SettlementDetailContent } from './SettlementDetailContent';
 import type { CorpsFrontSectorView, FormationView } from '../data/types';
 import type { TurnBattle } from '../../../state/turn_summary.js';
 import { humanizeOsid } from '../utils/osidDisplayName';
+import {
+  buildPlayerSafeFormationTooltipModel,
+  buildPlayerSafeFrontTooltipModel,
+  getPlayerSafeSettlementTooltipFormations,
+} from './tooltipPlayerSafe';
+import { getPlayerFacingFaction } from '../../shared/playerVisibility';
 
 const TOOLTIP_DELAY_MS = 300;
 const TOOLTIP_OFFSET = 12;
@@ -72,44 +77,57 @@ function FormationTooltipContent({
   osidDisplayNames,
 }: {
   formationId: string;
-  formations: { id: string; name: string; faction: string; corps_id?: string; personnel?: number; cohesion?: number; posture?: string; aorSettlementIds?: string[]; home_osid?: string; location_osid?: string }[] | undefined;
+  formations: FormationView[] | undefined;
   attackOrders: { brigadeId: string; targetSettlementId: string }[] | undefined;
   osidDisplayNames: Record<string, string> | null;
 }) {
   const formation = formations?.find((f) => f.id === formationId);
+  const playerFaction = getPlayerFacingFaction(useGameStore.getState().loadedGameState);
+  const model = buildPlayerSafeFormationTooltipModel({
+    formationId,
+    formations,
+    attackOrders,
+    osidDisplayNames,
+    playerFaction,
+  });
   if (!formation) return <div className="text-[11px] text-text-secondary">Unknown formation</div>;
 
-  const corps = formations?.find((f) => f.id === formation.corps_id);
-  const cohesion = Math.max(0, Math.min(100, formation.cohesion ?? 0));
+  if (model.classification === 'enemy_contact') {
+    return (
+      <div className="min-w-[220px] max-w-[280px]">
+        <div className="font-sans text-xs font-semibold text-accent-gold uppercase tracking-wide border-b border-panel-border pb-1 mb-2">
+          {model.title}
+        </div>
+        {model.subtitle && (
+          <div className="text-[11px] text-text-secondary mb-1">{model.subtitle}</div>
+        )}
+        <div className="text-[11px] text-text-secondary">Staff confirms visible enemy presence.</div>
+        {model.statusLine && (
+          <div className="text-[10px] text-text-muted mt-1">{model.statusLine}</div>
+        )}
+      </div>
+    );
+  }
+
+  const cohesion = Math.max(0, Math.min(100, model.cohesion ?? 0));
   const filledSegments = Math.ceil(cohesion / 20);
-  const aorIds = formation.aorSettlementIds ?? [];
-  const frontCount = 0; // could derive from front-active OSIDs if we had that
-  const aorSummary = frontCount > 0 ? `${aorIds.length} settlements (${frontCount} front)` : `${aorIds.length} settlements`;
-  const attack = attackOrders?.find((o) => o.brigadeId === formationId);
-  const orderLine = attack
-    ? `→ Attack ${getOsidDisplayName(attack.targetSettlementId, osidDisplayNames)}`
-    : '—';
 
   return (
     <div className="min-w-[220px] max-w-[300px]">
       <div className="font-sans text-xs font-semibold text-accent-gold uppercase tracking-wide border-b border-panel-border pb-1 mb-2">
-        {formation.name}
+        {model.title}
       </div>
-      {corps && (
+      {model.subtitle && (
         <div className="text-[11px] text-text-secondary mb-1">
-          {corps.name}
+          {model.subtitle}
         </div>
       )}
-      {formation.home_osid && formation.location_osid && (() => {
-        const munFrom = (o: string) => o.split(':')[1];
-        const isHome = munFrom(formation.home_osid!) === munFrom(formation.location_osid!);
-        return isHome ? (
-          <div className="text-[10px] text-green-400 mb-1">⌂ Home municipality</div>
-        ) : null;
-      })()}
-      {formation.personnel != null && (
+      {model.showHomeMunicipality && (
+        <div className="text-[10px] text-green-400 mb-1">⌂ Home municipality</div>
+      )}
+      {model.personnel != null && (
         <div className="text-[11px] text-text-secondary mb-1">
-          Personnel: {formation.personnel.toLocaleString()}
+          Personnel: {model.personnel.toLocaleString()}
         </div>
       )}
       <div className="flex items-center gap-2 text-[11px] mb-1">
@@ -124,14 +142,18 @@ function FormationTooltipContent({
         </div>
         <span className="tabular-nums">{Math.round(cohesion)}</span>
       </div>
-      {formation.posture && (
-        <div className="text-[11px] text-text-secondary mb-1">Posture: {formation.posture}</div>
+      {model.posture && (
+        <div className="text-[11px] text-text-secondary mb-1">Posture: {model.posture}</div>
       )}
-      <div className="text-[11px] text-text-secondary mb-1">AoR: {aorSummary}</div>
-      <div className="text-[11px] text-text-secondary border-t border-panel-border pt-1">
-        Order: {orderLine}
-      </div>
-      <div className="text-[11px] text-text-secondary mt-0.5">Status: Active</div>
+      {model.aorSummary && (
+        <div className="text-[11px] text-text-secondary mb-1">AoR: {model.aorSummary}</div>
+      )}
+      {model.orderLine && (
+        <div className="text-[11px] text-text-secondary border-t border-panel-border pt-1">
+          Order: {model.orderLine}
+        </div>
+      )}
+      {model.statusLine && <div className="text-[11px] text-text-secondary mt-0.5">Status: {model.statusLine}</div>}
     </div>
   );
 }
@@ -162,67 +184,59 @@ function FrontTooltipContent({
   edgeId: string;
   frontEdgesOsid: { edge_id: string; a: string; b: string; side_a: string | null; side_b: string | null }[] | undefined;
   frontPressureByEdge: Record<string, { value: number; max_abs: number }> | undefined;
-  formations: { id: string; name: string; faction: string; posture?: string; aorSettlementIds?: string[] }[] | undefined;
+  formations: FormationView[] | undefined;
   assignableFrontSegments: { front_id: string; edge_ids: string[]; side_a: string | null; side_b: string | null }[] | undefined;
-  corpsFrontSectors?: { sector_id: string; corps_id: string; display_name: string; faction: string; edge_ids: string[]; density: number; threat_ratio: number; assigned_brigade_ids: string[] }[];
+  corpsFrontSectors?: CorpsFrontSectorView[];
 }) {
   // Strip faction suffix from composite hover ID to match canonical edge IDs
   const baseEdgeId = stripFactionSuffix(edgeId);
 
   const edge = frontEdgesOsid?.find((e) => e.edge_id === baseEdgeId);
-  const sideA = edge?.side_a ?? '?';
-  const sideB = edge?.side_b ?? '?';
-  const pressure = frontPressureByEdge?.[baseEdgeId];
-  const pressureVal = pressure?.value ?? 0;
-  const pressureLine =
-    pressureVal > 0 ? `+${pressureVal.toFixed(1)} (${sideA} advantage)` : pressureVal < 0 ? `${pressureVal.toFixed(1)} (${sideB} advantage)` : 'Balanced';
-
-  const formationsOnA = formations?.filter((f) => f.faction === sideA && (f.aorSettlementIds?.includes(edge?.a ?? '') || f.aorSettlementIds?.includes(edge?.b ?? ''))) ?? [];
-  const formationsOnB = formations?.filter((f) => f.faction === sideB && (f.aorSettlementIds?.includes(edge?.a ?? '') || f.aorSettlementIds?.includes(edge?.b ?? ''))) ?? [];
-
+  const playerFaction = getPlayerFacingFaction(useGameStore.getState().loadedGameState);
+  const model = buildPlayerSafeFrontTooltipModel({
+    edgeId: baseEdgeId,
+    frontEdgesOsid,
+    frontPressureByEdge,
+    formations,
+    fogOfWar: useGameStore.getState().loadedGameState?.fogOfWar,
+    assignableFrontSegments,
+    corpsFrontSectors,
+    playerFaction,
+  });
   const segment = assignableFrontSegments?.find((s) => s.edge_ids.includes(baseEdgeId));
   const persistenceLine = segment ? `${segment.edge_ids.length} edges` : '—';
-
-  // Find sector this edge belongs to
-  const sector = corpsFrontSectors?.find((s) => s.edge_ids.includes(baseEdgeId));
-  const density = sector ? densityBadge(sector.density) : null;
-  const threat = sector ? threatBadge(sector.threat_ratio) : null;
 
   return (
     <div className="min-w-[220px] max-w-[300px]">
       <div className="font-sans text-xs font-semibold text-accent-gold uppercase tracking-wide border-b border-panel-border pb-1 mb-2">
-        Front: {sideA} — {sideB}
+        {model.title}
       </div>
-      {sector && (
+      {model.sectorName && (
         <div className="text-[11px] text-text-secondary mb-1.5">
-          Sector: {sector.display_name}
+          Sector: {model.sectorName}
         </div>
       )}
       <div className="text-[11px] text-text-secondary mb-1">Persistence: {persistenceLine}</div>
-      <div className="text-[11px] text-text-secondary mb-1">Pressure: {pressureLine}</div>
-      {density && (
+      <div className="text-[11px] text-text-secondary mb-1">Pressure: {model.pressureLine}</div>
+      {model.densityValue != null && model.densityLabel && (
         <div className="text-[11px] text-text-secondary mb-1">
-          Density: <span className={density.color}>{sector!.density.toFixed(2)} ({density.label})</span>
-          <span className="text-text-secondary/60 ml-1">
-            {sector!.assigned_brigade_ids.length}/{sector!.edge_ids.length}
-          </span>
+          Density: <span className={densityBadge(model.densityValue).color}>{model.densityValue.toFixed(2)} ({model.densityLabel})</span>
         </div>
       )}
-      {threat && (
+      {model.threatValue != null && model.threatLabel && (
         <div className="text-[11px] text-text-secondary mb-2">
-          Threat: <span className={threat.color}>{sector!.threat_ratio.toFixed(2)}× ({threat.label})</span>
+          Threat: <span className={threatBadge(model.threatValue).color}>{model.threatValue.toFixed(2)}× ({model.threatLabel})</span>
         </div>
       )}
-      {formationsOnA.length > 0 && (
+      {model.ownFormationLabels.length > 0 && (
         <div className="text-[11px] mb-1 border-t border-panel-border pt-1">
-          <span className={FACTION_COLORS[sideA] ?? 'text-text-primary'}>{sideA}:</span>{' '}
-          {formationsOnA.map((f) => `${f.name} (${f.posture ?? '—'})`).join(', ')}
+          <span className={FACTION_COLORS[playerFaction ?? ''] ?? 'text-text-primary'}>{playerFaction ?? 'Own'}:</span>{' '}
+          {model.ownFormationLabels.join(', ')}
         </div>
       )}
-      {formationsOnB.length > 0 && (
+      {model.enemyContactSummary && (
         <div className="text-[11px] text-text-secondary border-t border-panel-border pt-1">
-          <span className={FACTION_COLORS[sideB] ?? 'text-text-primary'}>{sideB}:</span>{' '}
-          {formationsOnB.map((f) => `${f.name} (${f.posture ?? '—'})`).join(', ')}
+          {model.enemyContactSummary}
         </div>
       )}
     </div>
@@ -326,6 +340,7 @@ export const Tooltip = React.memo(function Tooltip() {
   const osidPropertiesMap = useGameStore((s) => s.osidPropertiesMap);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const mapMode = useGameStore((s) => s.mapMode);
+  const playerFaction = getPlayerFacingFaction(loadedGameState);
 
   const [visible, setVisible] = useState(false);
   const [delayedTarget, setDelayedTarget] = useState<typeof tooltipTarget>(null);
@@ -369,20 +384,14 @@ export const Tooltip = React.memo(function Tooltip() {
             osidDisplayNames={osidDisplayNames}
             osidPropertiesMap={osidPropertiesMap}
             controlBySettlement={loadedGameState?.controlBySettlement}
-            formationsAtOsid={getFormationsAtOsid(loadedGameState?.formations, delayedTarget.id).map((f) => ({
-              id: f.id,
-              name: f.name,
-              faction: f.faction,
-              personnel: f.personnel,
-              kind: f.kind,
-            }))}
+            formationsAtOsid={getPlayerSafeSettlementTooltipFormations(loadedGameState, delayedTarget.id)}
             variant="tooltip"
           />
           {mapMode === 'defense' && (
             <DefensePreviewContent
               osid={delayedTarget.id}
               sectors={loadedGameState?.corpsFrontSectors}
-              formations={loadedGameState?.formations}
+              formations={(loadedGameState?.formations ?? []).filter((formation) => formation.faction === playerFaction)}
             />
           )}
         </>

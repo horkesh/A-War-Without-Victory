@@ -1336,3 +1336,6 @@ If the tactical map builder ignores `fogOfWar.visibleEnemyOsids` and renders eve
 
 ### Summary chrome leaks just as badly as detail panels
 Bottom strips, overview cards, and situation tabs often get treated like harmless dashboard furniture, but they are where omniscient territory percentages, casualty ledgers, and operation totals quietly leak back into player mode. Product-truth sweeps must include those summary surfaces, not just the obvious tooltip/detail panels.
+
+### Tooltip cards are player surfaces, not debug exceptions
+Hover cards feel small, but players experience them as authoritative UI. Treat formation, settlement, and front tooltips exactly like any other player-facing panel: own truth may be detailed, enemy truth should collapse to contact-level abstraction unless a deliberate player-facing design says otherwise.

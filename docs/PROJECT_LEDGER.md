@@ -19271,3 +19271,34 @@ Why this matters:
 - target coordination is now real enough to affect plan choice, and unsupported sync roles now fail honestly instead of pretending the generic offensive path is close enough
 
 ---
+### 2026-04-02 â€” Engine health Wave 1 continued: hover tooltips now obey player-facing truth
+
+Continued the clean-lane player-knowledge sweep in `F:\AWWV_exec_clean`, starting with the most visible leak surface: tactical-map hover tooltips.
+
+Implemented:
+- `src/ui/map/components/tooltipPlayerSafe.ts`
+  - new canonical player-safe tooltip shaping helper
+  - own formations keep exact detail
+  - enemy formations collapse to `Enemy contact`
+  - settlement hover lists keep only player-owned stationed formations
+  - front hover keeps own line detail while reducing enemy side to contact-count abstraction
+- `src/ui/map/components/Tooltip.tsx`
+  - now routes formation, front, and settlement hover through the player-safe helper instead of rendering raw omniscient state directly
+  - defense preview now uses player-owned brigades only
+- `tests/ui_map_tooltip_player_visibility.test.ts`
+  - new regressions locking the tooltip visibility contract
+- `vitest.config.ts`
+  - wired the focused tooltip regression file into the explicit Vitest whitelist
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_map_tooltip_player_visibility.test.ts tests\ui_player_visibility.test.ts`
+  - PASS (`8` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- hover cards are part of the player shell, not a debug exception
+- exact enemy unit names and local enemy composition in normal hover are cheat-surface leaks
+- centralizing the rule in one helper makes future leak cleanup cheaper and future regressions easier to catch
+
+---

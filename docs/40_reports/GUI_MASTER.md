@@ -216,3 +216,7 @@ OOB sidebars, operation lists, mobilization summaries, sector accordions, and ma
 ### 14. Situation summaries and status strips are part of the player shell
 
 Bottom status strips, overview tabs, and quick casualty/territory summaries are not harmless chrome. If they show global operation counts, all-faction territory shares, or all-faction casualty totals in normal player mode, they are leaking omniscient truth just as surely as a tooltip would. Treat these summary surfaces as player-facing by default and require explicit debug-only opt-in for global scoreboards.
+
+### 15. Hover tooltips are player surfaces, not staff consoles
+
+Formation, settlement, and front hover cards must obey the same player-truth contract as any larger panel. Own formations may keep exact detail. Enemy hover should collapse to contact-level abstractions unless the product deliberately supports more. Settlement hover should not quietly enumerate enemy garrisons, and front hover should not reveal enemy unit names just because the mouse crossed a line. If a tooltip needs richer truth for debugging, that belongs behind an explicit debug surface, not in normal play.
