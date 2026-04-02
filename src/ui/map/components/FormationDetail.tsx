@@ -15,7 +15,7 @@ import { getPrestigeTier, getPrestigeTierColor, getHighestTier, getDecorationNam
 import { TabBar } from './TabBar';
 import { computeBrigadeEffectiveness } from '../utils/combatEffectiveness';
 import { Icon } from './icons/Icon';
-import { getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
+import { getPlayerFacingCorpsName, getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
 
 
 /** Zero combat summary for brigades that have not yet been in combat (so Combat Record always shows). */
@@ -727,7 +727,11 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                         </span>
                       </div>
                       <div className="text-text-secondary">
-                        → {loadedGameState.formations.find(f => f.id === formation.eliteLoanState!.loaned_to_corps)?.name ?? formation.eliteLoanState.loaned_to_corps}
+                        → {getPlayerFacingCorpsName(
+                          formation.eliteLoanState.loaned_to_corps,
+                          loadedGameState.formations,
+                          'Assigned command',
+                        )}
                       </div>
                     </div>
                     <button

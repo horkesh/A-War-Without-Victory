@@ -3,6 +3,7 @@
  * Used by CorpsDetail, ArmyDetail, and FormationDetail.
  */
 import type { FormationView } from '../data/types';
+import { getPlayerSafeBrigadeName } from '../utils/playerSafeText';
 
 const ARC_COLORS: Record<string, string> = {
     veteran: 'text-green-400',
@@ -24,7 +25,8 @@ interface CombatSummaryPanelProps {
 
 function resolveName(id: string | null, formations?: FormationView[]): string | null {
     if (!id || !formations) return null;
-    return formations.find((f) => f.id === id)?.name ?? id;
+    const formation = formations.find((f) => f.id === id);
+    return getPlayerSafeBrigadeName(formation?.name ?? null);
 }
 
 export function CombatSummaryPanel({ summary, formations, onSelectFormation, compact, noTopBorder }: CombatSummaryPanelProps) {

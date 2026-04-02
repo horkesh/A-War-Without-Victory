@@ -11,6 +11,12 @@ import {
   getPlayerFacingFaction,
   filterPlayerVisibleMapFormations,
 } from '../src/ui/shared/playerVisibility.js';
+import {
+  getPlayerSafeBrigadeName,
+  getPlayerSafeCorpsName,
+  getPlayerSafeEnclaveName,
+  getPlayerSafeMunicipalityName,
+} from '../src/ui/map/utils/playerSafeText.js';
 import { buildOperationArrowsGeoJSON } from '../src/ui/map/map/builders/buildOperationArrowsGeoJSON.js';
 import { buildFormationsGeoJSON } from '../src/ui/map/map/builders/buildFormationsGeoJSON.js';
 
@@ -233,5 +239,13 @@ describe('player visibility helpers', () => {
       'arbih_3rd_corps|Own Op',
     );
     expect(ownOperation?.name).toBe('Own Op');
+  });
+
+  it('humanizes player-facing fallback labels instead of leaking raw ids', () => {
+    expect(getPlayerSafeCorpsName('arbih_3rd_corps', 'arbih_3rd_corps')).toBe('3rd Corps');
+    expect(getPlayerSafeCorpsName(null, 'arbih_3rd_corps')).toBe('This corps');
+    expect(getPlayerSafeBrigadeName('')).toBe('Assigned brigade');
+    expect(getPlayerSafeMunicipalityName('bijeljina_center')).toBe('Bijeljina Center');
+    expect(getPlayerSafeEnclaveName('gorazde_east')).toBe('Gorazde East');
   });
 });

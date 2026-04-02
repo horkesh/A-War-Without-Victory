@@ -20140,3 +20140,36 @@ Why this matters:
 - once the obvious omniscient panels are fixed, the remaining leaks often survive in fallback text and summary prose
 - those are still player-facing product truth, not harmless chrome
 - this slice keeps tightening the rule that player-facing text must resolve to human labels or neutral safe fallbacks rather than engine identifiers
+### 2026-04-02 - Player-safe fallback card text hardening
+
+Continued the clean-lane player-truth execution in `F:\AWWV_exec_clean`, removing another class of quieter but still recurring UI leaks: raw-id fallback labels inside cards and side panels.
+
+Implemented:
+- `src/ui/map/components/CombatSummaryPanel.tsx`
+  - most-victorious and heaviest-loss brigade labels now use player-safe brigade fallback text
+- `src/ui/map/components/CorpsCard.tsx`
+  - corps cards now derive display text through the player-safe corps-name formatter
+- `src/ui/map/components/OOBSidebar.tsx`
+  - corps rows now use player-safe corps naming
+  - mobilization top-pool entries now humanize municipality labels instead of printing raw `mun_id`
+- `src/ui/map/components/FormationDetail.tsx`
+  - elite-loan destination text now resolves through player-facing corps naming rather than raw `loaned_to_corps`
+- `src/ui/map/components/TacticalCard.tsx`
+  - tactical-card title fallback now uses neutral brigade text instead of raw formation ids
+- `src/ui/map/components/EnclaveDashboard.tsx`
+  - enclave labels now use player-safe enclave naming rather than raw ids
+- `tests/ui_player_visibility.test.ts`
+  - added a regression contract for player-safe fallback text
+- `docs/40_reports/implemented/20260402_PLAYER_SAFE_FALLBACK_CARD_TEXT_HARDENING.md`
+  - documented this card/shell fallback cleanup
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`24` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- once the obvious omniscience leaks are gone, the remaining "small" fallbacks become the main way the product still smells like a debug shell
+- raw ids in cards, queues, and detail panels are still player-facing truth leaks, not harmless chrome
+- this slice pushes more of the tactical-map shell through one shared player-safe naming layer instead of letting each component improvise its own fallback behavior

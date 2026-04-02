@@ -1469,3 +1469,6 @@ In AWWV, a player-facing surface can look safe because it prints only friendly-f
 ### Small fallback strings are still part of the product shell
 
 In AWWV, once the obvious leaks are fixed, the remaining debug smell usually survives in support rails, order summaries, and report prose. Raw `mun_id`, raw brigade ids, or raw OSID strings in those places are not harmless because players read them as the game speaking plainly. Treat fallback copy as a governed surface: if the UI has to degrade, it should degrade to a human label or a neutral safe phrase, not to an engine identifier.
+### Card titles and summary badges are fallback hot spots
+
+In AWWV, the easiest place for raw ids to sneak back in is not the big hero panel but the compact cards: corps cards, tactical cards, combat-summary badges, enclave tiles, and loan banners. Those components often use `name ?? id` or `display_name ?? key` patterns that feel harmless until the product is missing one label. Route those fallbacks through shared player-safe helpers instead of letting each card improvise its own last-resort string.

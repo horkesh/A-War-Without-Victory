@@ -7,6 +7,7 @@ import { SituationTab } from './SituationTab';
 import { buildCorpsColorMap } from '../map/builders/buildCorpsFrontLinesGeoJSON';
 import { AccordionHeader } from './AccordionHeader';
 import { toTitleCase } from '../utils/formatters';
+import { getPlayerSafeCorpsName, getPlayerSafeMunicipalityName } from '../utils/playerSafeText';
 import { getArmyCrest, getArmyName } from '../utils/factionAssets';
 import { getFactionArmyCommander } from '../utils/officerUtils';
 import { formatRank } from '../utils/officerCharacter';
@@ -398,10 +399,9 @@ export function OOBSidebar() {
                               <CorpsCard
                                 key={corpsId}
                                 corpsId={corpsId}
-                                corpsName={corpsId === '_ungrouped' ? 'Ungrouped' : (() => {
-                                  const fName = corpsFormationById.get(corpsId)?.name ?? corpsId;
-                                  return fName === corpsId ? toTitleCase(fName.replace(/^(RS|RBiH|HRHB)_/i, '')) : fName;
-                                })()}
+                                corpsName={corpsId === '_ungrouped'
+                                  ? 'Ungrouped'
+                                  : getPlayerSafeCorpsName(corpsFormationById.get(corpsId)?.name, corpsId)}
                                 brigades={brigades}
                                 faction={faction}
                                 stance={getCorpsStance(corpsId, faction)}
@@ -486,7 +486,7 @@ export function OOBSidebar() {
                           <div className="space-y-1">
                             {summary.top_pools.map((pool) => (
                               <div key={`${faction}-${pool.mun_id}`} className="flex items-center justify-between text-[11px]">
-                                <span className="text-text-secondary">{toTitleCase(pool.mun_id)}</span>
+                                <span className="text-text-secondary">{getPlayerSafeMunicipalityName(pool.mun_id)}</span>
                                 <span className="text-text-primary tabular-nums">{pool.available.toLocaleString()}</span>
                               </div>
                             ))}
