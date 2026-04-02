@@ -316,3 +316,9 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - DeclarationEventModal now refers to the Bosnian Army instead of `Army of RBiH`.
 - See `docs/40_reports/implemented/20260402_PHASE0_PLAYER_SHELL_TRUTH_CLEANUP.md`.
 
+## 2026-04-02 - Warroom modal density pass
+
+- Tightened shared Warroom dialog, faction overview, newspaper, magazine, main-menu, and scenario-picker spacing.
+- The pass reduces inherited padding and blank vertical bands without changing information ownership or command flow.
+- See `docs/40_reports/implemented/20260402_WARROOM_MODAL_DENSITY_PASS.md`.
+

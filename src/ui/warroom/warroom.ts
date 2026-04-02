@@ -629,10 +629,10 @@ class WarroomApp {
                 if (!this.modalManager) return;
                 const panel = document.createElement('div');
                 panel.className = 'wr-dialog';
-                panel.style.maxWidth = '500px';
+                panel.style.maxWidth = '460px';
                 panel.innerHTML = `
                     <h2>WARROOM CONTROLS</h2>
-                    <div class="wr-dialog-body" style="text-align: left; line-height: 2;">
+                    <div class="wr-dialog-body" style="text-align: left; line-height: 1.6;">
                         <div><strong style="color: #00e878;">Desk Map</strong> &mdash; Open tactical map</div>
                         <div><strong style="color: #00e878;">Sandbox</strong> &mdash; Open tactical sandbox mode</div>
                         <div><strong style="color: #00e878;">Calendar</strong> &mdash; Advance turn</div>

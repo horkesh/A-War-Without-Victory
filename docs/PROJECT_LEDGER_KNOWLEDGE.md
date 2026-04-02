@@ -1603,3 +1603,8 @@ Mounted peace shells are still player surfaces. Exact hostile declaration percen
 
 Raw shorthand like `RS declaration imminent` or `Army of RBiH` leaks product tone even if the later war shells are cleaner. Treat Warroom Phase 0 badges, warnings, and event modal body text as player-facing language that needs the same discipline as tactical-map rails and Army HQ summaries.
 
+
+### Shared shell padding becomes product drift if nobody owns it
+
+Warroom modals, newspapers, magazines, and scenario cards inherit spacing from a small number of shell classes. If those classes stay loose, every new surface feels airy and under-filled no matter how good the content is. Tighten the shared shells first before polishing one-off panels.
+

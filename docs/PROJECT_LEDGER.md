@@ -21030,3 +21030,18 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
   - `docs/40_reports/implemented/20260402_PHASE0_PLAYER_SHELL_TRUTH_CLEANUP.md`
   - `docs/40_reports/GUI_MASTER.md`
 
+
+## 2026-04-02 - Warroom modal density pass
+
+- Worktree/branch: F:\AWWV_exec_clean on codex/engine-health-wave1
+- Tightened Warroom shell density so the modal family stops carrying inherited dead air.
+- Reduced shared dialog padding and spacing, tightened faction overview and warning stacks, compacted newspaper and magazine shells, and shrank the main-menu / scenario-picker card footprint.
+- Also tightened the Help modal body so it reads like a compact control card instead of a poster.
+- Verification:
+  - `npm.cmd run warroom:build`
+  - `node_modules\.bin\vitest.cmd run tests\warroom_player_visibility.test.ts tests\ui_shell_navigation.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_WARROOM_MODAL_DENSITY_PASS.md`
+  - `docs/40_reports/GUI_MASTER.md`
+
