@@ -506,42 +506,6 @@ export function parseGameState(json: unknown): LoadedGameState {
         }
     }
 
-    let armyTheatreAssignment: LoadedGameState['armyTheatreAssignment'] | undefined;
-    const rawArmyTheatreAssignment = state.military.army_theatre_assignment as any | undefined;
-    if (rawArmyTheatreAssignment && typeof rawArmyTheatreAssignment === 'object' && !Array.isArray(rawArmyTheatreAssignment)) {
-        const out: NonNullable<LoadedGameState['armyTheatreAssignment']> = {};
-        for (const armyId of Object.keys(rawArmyTheatreAssignment).sort((a, b) => a.localeCompare(b))) {
-            const theatreId = rawArmyTheatreAssignment[armyId];
-            if (typeof theatreId === 'string' && theatreId.length > 0) out[armyId] = theatreId;
-        }
-        if (Object.keys(out).length > 0) armyTheatreAssignment = out;
-    }
-
-    let theatres: LoadedGameState['theatres'] | undefined;
-    const rawTheatres = state.military.theatres as Record<string, Record<string, unknown>> | undefined;
-    if (rawTheatres && typeof rawTheatres === 'object' && !Array.isArray(rawTheatres)) {
-        const out: NonNullable<LoadedGameState['theatres']> = {};
-        for (const theatreId of Object.keys(rawTheatres).sort((a, b) => a.localeCompare(b))) {
-            const row = rawTheatres[theatreId] ?? {};
-            const faction = typeof row.faction === 'string' ? row.faction : '';
-            if (!faction) continue;
-            const armyIds = Array.isArray(row.army_ids)
-                ? row.army_ids.filter((id): id is string => typeof id === 'string' && id.length > 0).sort((a, b) => a.localeCompare(b))
-                : undefined;
-            const regionScope = Array.isArray(row.region_scope)
-                ? row.region_scope.filter((id): id is string => typeof id === 'string' && id.length > 0).sort((a, b) => a.localeCompare(b))
-                : undefined;
-            out[theatreId] = {
-                id: typeof row.id === 'string' && row.id.length > 0 ? row.id : theatreId,
-                name: typeof row.name === 'string' && row.name.length > 0 ? row.name : `${faction} Theatre`,
-                faction,
-            };
-            if (armyIds && armyIds.length > 0) out[theatreId].army_ids = armyIds;
-            if (regionScope && regionScope.length > 0) out[theatreId].region_scope = regionScope;
-        }
-        if (Object.keys(out).length > 0) theatres = out;
-    }
-
     // Brigade history lives on each formation (state.formations[id].brigade_history), not in a separate state.brigade_history.
     // Fallback to state.brigade_history for any legacy save that might have used that shape.
     const brigadeHistoryRecord = state.brigade_history as Record<string, Record<string, unknown>> | undefined;
@@ -1604,7 +1568,6 @@ export function parseGameState(json: unknown): LoadedGameState {
             const lengthEdges = Number.isFinite(Number(segment.length_edges)) && Number(segment.length_edges) > 0 ? Math.floor(Number(segment.length_edges)) : edgeIds.length;
             const entry: NonNullable<LoadedGameState['assignableFrontSegments']>[number] = { front_id: frontId, edge_ids: edgeIds, side_a: sideA, side_b: sideB, length_edges: lengthEdges };
             if (typeof segment.name === 'string' && segment.name.length > 0) entry.name = segment.name;
-            if (typeof segment.theatre_id === 'string' && segment.theatre_id.length > 0) entry.theatre_id = segment.theatre_id;
             out.push(entry);
         }
         out.sort((a, b) => a.front_id.localeCompare(b.front_id));
@@ -1814,7 +1777,7 @@ export function parseGameState(json: unknown): LoadedGameState {
             date: metadataDate,
         },
         formations, militiaPools, controlBySettlement, statusBySettlement,
-        brigadeAorByFormationId, theatres, armyTheatreAssignment,
+        brigadeAorByFormationId,
         attackOrders, aorOrders, recentControlEvents, allControlEvents: recentControlEvents, displacementEventLog: displacementEventLogRaw, recruitment,
         armyStance, casualtyLedger, civilianCasualties, internationalVisibilityPressure, ivpConsequencesActive, pendingConvoyDecisions, municipalitySupportOrders,
         sarajevoTunnelOperational: Boolean(state.military.sarajevo_tunnel_operational), warPhaseSupplyPressure, warPhaseExhaustion,

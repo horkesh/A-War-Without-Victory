@@ -1514,3 +1514,6 @@ In AWWV, `brigade_front_assignment` survived only as a compatibility lane, but `
 ### Compatibility phases should stop running once modern authority already exists
 
 In AWWV, once `corps_front_sectors` already exist, rerunning `ensureBrigadeFrontAssignments(...)` every war turn only keeps the legacy front-assignment lane warm. A good migration rule is: if the new authority is already present, compatibility repair should stand down and only wake up for true absence or old-save recovery.
+### Dead loaded-state bridges are product debt even when the engine still keeps the underlying data
+
+In AWWV, `theatres`, `army_theatre_assignment`, and `segment.theatre_id` still existed for sim/compatibility reasons, but no live player-facing surface actually used them. Keeping those fields in `LoadedGameState` made the shell imply ownership it no longer had. When a product surface does not use a concept, stop carrying it in the loaded UI model even if the engine still stores it underneath.

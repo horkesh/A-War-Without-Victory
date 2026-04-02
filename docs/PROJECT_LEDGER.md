@@ -20551,3 +20551,33 @@ Why this matters:
 - the compatibility repair path now behaves like a fallback instead of a mandatory war-turn ritual
 - sectors keep their place as the real frontline authority once they exist
 - the repo becomes less likely to fool future agents into treating legacy front assignment as still co-equal with sectors
+### 2026-04-02 - Dead theatre view-model bridges removal
+
+Removed dead theatre/front-assignment metadata from the loaded player-facing map state so the shell only carries concepts that a live UI actually uses.
+
+Implemented:
+- `src/ui/map/data/types.ts`
+  - removed `LoadedGameState.theatres`
+  - removed `LoadedGameState.armyTheatreAssignment`
+  - removed `AssignableFrontSegmentView.theatre_id`
+- `src/ui/map/data/GameStateAdapter.ts`
+  - stopped parsing `military.theatres`
+  - stopped parsing `military.army_theatre_assignment`
+  - stopped copying `segment.theatre_id` into the loaded front-segment view
+- `tests/ui_map_game_state_adapter.test.ts`
+  - updated adapter regression coverage for the leaner shell contract
+- `docs/40_reports/implemented/20260402_DEAD_THEATRE_VIEW_MODEL_BRIDGES_REMOVAL.md`
+  - documented the slice
+
+Verification:
+- `node_modules\.bin\tsx.cmd --test tests\ui_map_game_state_adapter.test.ts`
+  - PASS (`11` tests)
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts`
+  - PASS (`13` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- dead view-model bridges are how obsolete gameplay concepts keep re-entering the player shell
+- removing them tightens the product contract without touching the underlying sim compatibility state
+- this is exactly the kind of repo simplification that prevents future Claude work from drifting back toward fake UI ownership
