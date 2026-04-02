@@ -21172,3 +21172,22 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - Docs:
   - `docs/40_reports/implemented/20260402_COMPATIBILITY_SHELL_TRUTH_HARDENING.md`
 
+
+## 2026-04-02 - Command shell density pass
+
+- Worktree/branch: F:\AWWV_merge_wave2 on codex/main-merge-wave1
+- Tightened the most frequently used command-shell surfaces instead of chasing isolated widgets:
+  - `src/ui/map/components/army_hq/ArmyHQModal.tsx`
+  - `src/ui/map/components/army_hq/PersonnelContent.tsx`
+  - `src/ui/map/components/WarSummaryModal.tsx`
+  - `src/ui/map/components/CodexPanel.tsx`
+- Reduced oversized padding, guttering, and empty space in Army HQ, the personnel tab, the War Summary modal, and Codex so the product reads more like a command desk than a presentation layer.
+- Verification:
+  - `F:\A-War-Without-Victory\node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts tests\ui_shell_navigation.test.ts tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts`
+  - `npm.cmd run warroom:build`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Known limitation:
+  - `npm.cmd run desktop:map:build` still fails in the merge worktree because that environment cannot resolve `@vitejs/plugin-react`; this is an existing worktree environment issue, not a density-pass regression.
+- Docs:
+  - `docs/40_reports/implemented/20260402_COMMAND_SHELL_DENSITY_PASS.md`
+

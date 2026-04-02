@@ -1641,3 +1641,7 @@ In AWWV, a mock `dev:map` state that still seeds `brigade_front_assignment`, `ar
 
 If `GameState` comments say “HoI-style theatre model” without also saying “compatibility-only,” Claude or a tired developer will eventually treat that field like a live design commitment. In a repo with long migrations, schema comments are operational guidance and should explicitly mark residue as fallback-only.
 
+### Shared shell padding is often the real source of “blank space everywhere”
+
+In AWWV, the worst UI airiness usually does not come from one bad card. It comes from a few reused shells like Army HQ, summary modals, and Codex carrying oversized padding and gutters. Tightening the shared command shells first changes the whole product tone faster than polishing isolated leaf components.
+

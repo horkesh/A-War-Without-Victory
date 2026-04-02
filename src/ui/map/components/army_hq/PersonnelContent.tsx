@@ -47,12 +47,12 @@ export function PersonnelContent() {
     if (!data) return <div className="text-text-secondary italic text-[12px] py-8 text-center">No game state loaded</div>;
 
     return (
-        <div className="space-y-6">
-            <div className="bg-panel-card border border-panel-border rounded-lg p-4">
-                <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-3 pb-1.5 border-b border-panel-border">
+        <div className="space-y-4">
+            <div className="bg-panel-card border border-panel-border rounded-lg p-3">
+                <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
                     FORCE OVERVIEW
                 </div>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-4 gap-3">
                     <StatCard label="Total Personnel" value={data.totalPersonnel.toLocaleString()} />
                     <StatCard label="Active Brigades" value={String(data.brigades.length)} />
                     <StatCard label="Corps" value={String(data.corpsFormations.length)} />
@@ -60,11 +60,11 @@ export function PersonnelContent() {
                 </div>
             </div>
 
-            <div className="bg-panel-card border border-panel-border rounded-lg p-4">
-                <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-3 pb-1.5 border-b border-panel-border">
+            <div className="bg-panel-card border border-panel-border rounded-lg p-3">
+                <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
                     ORDER OF BATTLE
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-2">
                     {data.corpsFormations.map(corps => {
                         const corpsBrigades = data.brigadesByCorps.get(corps.id) ?? [];
                         const corpsPers = corpsBrigades.reduce((s, b) => s + (b.personnel ?? 0), 0);
@@ -88,8 +88,8 @@ export function PersonnelContent() {
                 </div>
             </div>
 
-            <div className="bg-panel-card border border-panel-border rounded-lg p-4">
-                <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-3 pb-1.5 border-b border-panel-border">
+            <div className="bg-panel-card border border-panel-border rounded-lg p-3">
+                <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
                     OFFICER ROSTER ({data.activeOfficers.length} active, {data.reserveOfficers.length} reserve)
                 </div>
                 <div className="grid grid-cols-2 gap-2">
@@ -110,8 +110,8 @@ export function PersonnelContent() {
                     ))}
                 </div>
                 {data.reserveOfficers.length > 0 && (
-                    <div className="mt-3 pt-2 border-t border-panel-border/50">
-                        <div className="text-[9px] uppercase tracking-wider text-text-secondary/60 mb-1.5">RESERVE POOL</div>
+                    <div className="mt-2.5 pt-2 border-t border-panel-border/50">
+                        <div className="text-[9px] uppercase tracking-wider text-text-secondary/60 mb-1">RESERVE POOL</div>
                         <div className="flex flex-wrap gap-1.5">
                             {data.reserveOfficers.map(o => (
                                 <span key={o.id} className="text-[9px] px-2 py-0.5 border border-panel-border/40 rounded text-text-secondary bg-panel-bg">
@@ -129,7 +129,7 @@ export function PersonnelContent() {
 function StatCard({ label, value }: { label: string; value: string }) {
     return (
         <div className="text-center">
-            <div className="text-[16px] font-bold text-text-primary tabular-nums">{value}</div>
+            <div className="text-[15px] font-bold text-text-primary tabular-nums leading-tight">{value}</div>
             <div className="text-[9px] text-text-secondary uppercase tracking-wider">{label}</div>
         </div>
     );

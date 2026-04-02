@@ -161,9 +161,9 @@ export function ArmyHQModal() {
 
             <div className="relative flex-1 flex flex-col h-full overflow-hidden bg-panel-bg text-text-primary">
 
-                <div className="flex items-center justify-between px-4 py-1.5 shrink-0 border-b border-panel-border bg-panel-card">
+                <div className="flex items-center justify-between px-3 py-1 shrink-0 border-b border-panel-border bg-panel-card">
                     {/* Left: back/close + crest + title */}
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-2">
                         <button
                             type="button"
                             onClick={() => {
@@ -197,7 +197,7 @@ export function ArmyHQModal() {
                     </div>
 
                     {/* Right: emergency posture + situation + close */}
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-2">
                         {!expandedCorpsId && ipc.isAvailable && (
                             <select
                                 defaultValue=""
@@ -234,7 +234,7 @@ export function ArmyHQModal() {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-0.5 px-4 py-0.5 bg-panel-bg border-b border-panel-border shrink-0">
+                <div className="flex items-center gap-0.5 px-3 py-0.5 bg-panel-bg border-b border-panel-border shrink-0">
                     {HQ_TABS.map(({ id, label }) => (
                         <button
                             key={id}
@@ -251,17 +251,17 @@ export function ArmyHQModal() {
                     ))}
                 </div>
 
-                <div className="relative flex-1 overflow-y-auto px-4 pt-2.5 pb-4">
+                <div className="relative flex-1 overflow-y-auto px-3 pt-2 pb-3">
 
                     {/* ═══ BRIEFING TAB ═══ */}
                     {activeTab === 'briefing' && (
                         <>
                             {/* Top section: Commander | CoS Brief | Crest | Strategic Position */}
                             {!expandedCorpsId && (
-                                <div className="grid grid-cols-1 gap-2 mb-2.5 items-start lg:grid-cols-12 lg:gap-2.5">
+                                <div className="grid grid-cols-1 gap-1.5 mb-2 items-start lg:grid-cols-12 lg:gap-2">
                                     {/* Commander */}
-                                    <div className="bg-panel-card border border-panel-border rounded-lg p-2.5 lg:col-span-3">
-                                        <div className="text-[8px] uppercase tracking-[0.22em] text-text-secondary font-bold mb-1.5 pb-1 border-b border-panel-border">
+                                    <div className="bg-panel-card border border-panel-border rounded-lg p-2 lg:col-span-3">
+                                        <div className="text-[8px] uppercase tracking-[0.22em] text-text-secondary font-bold mb-1 pb-1 border-b border-panel-border">
                                             COMMANDER
                                         </div>
                                         {data.commander ? (
@@ -271,7 +271,7 @@ export function ArmyHQModal() {
                                                 No commander data available
                                             </div>
                                         )}
-                                            <div className="mt-1.5 grid grid-cols-3 gap-1">
+                                            <div className="mt-1 grid grid-cols-3 gap-1">
                                             <div className="rounded border border-panel-border bg-panel-bg px-1.5 py-1">
                                                 <div className="text-[8px] uppercase tracking-wide text-text-secondary">Critical</div>
                                                 <div className="text-[11px] font-bold text-red-400">
@@ -304,12 +304,12 @@ export function ArmyHQModal() {
                                     </div>
 
                                     {/* Army Crest */}
-                                        <div className="flex flex-col items-center justify-center px-1.5 py-0.5 select-none lg:col-span-2">
+                                        <div className="flex flex-col items-center justify-center px-1 py-0.5 select-none lg:col-span-2">
                                         {crestSrc && (
                                             <img
                                                 src={crestSrc}
                                                 alt={`${FACTION_DISPLAY[faction] ?? faction} crest`}
-                                                className="w-[84px] h-[84px] lg:w-[96px] lg:h-[96px] object-contain drop-shadow-lg"
+                                                className="w-[72px] h-[72px] lg:w-[84px] lg:h-[84px] object-contain drop-shadow-lg"
                                                 draggable={false}
                                             />
                                         )}
@@ -347,7 +347,7 @@ export function ArmyHQModal() {
 
                             {/* Corps Cards */}
                             <div>
-                                <div className="text-[8px] uppercase tracking-[0.22em] text-text-secondary font-bold mb-2.5 pb-1 border-b border-panel-border">
+                                <div className="text-[8px] uppercase tracking-[0.22em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
                                     ALL CORPS ({data.corpsFormations.length})
                                 </div>
 
