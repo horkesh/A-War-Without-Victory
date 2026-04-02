@@ -1526,3 +1526,6 @@ In AWWV, if `TopToolbar`, `AccordionHeader`, `GlassPanel`, or the main command r
 ### Large overlays must speak the same density language as the tactical shell
 
 In AWWV, Army HQ, Codex, and similar full-size overlays cannot be allowed to drift into a roomier, slower dashboard style just because they are modal. If those shells use larger paddings, taller tab rows, and oversized crests by default, the player experiences the product as several stitched-together interfaces instead of one command console.
+### Architecture docs need explicit authority, not just timestamps
+
+In AWWV, the dangerous architecture docs are not necessarily the oldest ones. They are the ones that still look polished and plausible enough to be mistaken for current truth. A strong repo should name which architecture documents are live authority and which are historical archaeology, otherwise implementers will keep mixing eras and calling it context.

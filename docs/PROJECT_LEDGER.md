@@ -20654,3 +20654,26 @@ Verification:
 Why this matters:
 - the larger strategic overlays define whether the product feels cohesive or like several different UI eras stitched together
 - density has to reach Army HQ and Codex too, or the product still wastes attention whenever the player leaves the map shell
+### 2026-04-02 - Product architecture authority alignment
+
+Added an explicit architecture-authority map so the repo stops treating older architecture summaries, handoff memos, and live engineering docs as if they were all equally current.
+
+Implemented:
+- `docs/20_engineering/PRODUCT_ARCHITECTURE_AUTHORITY.md`
+  - new authority map for current product architecture docs
+- `docs/20_engineering/REPO_MAP.md`
+  - now points to the architecture authority map
+- `docs/20_engineering/CODE_CANON.md`
+  - now names the authority map as the way to resolve architecture-era doc conflicts
+- `ARCHITECTURE_SUMMARY.md`
+  - now marked as historical context, not live architecture authority
+- `docs/40_reports/implemented/20260402_PRODUCT_ARCHITECTURE_AUTHORITY_ALIGNMENT.md`
+  - documented the slice
+
+Verification:
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- stale architecture prose was becoming a bug source
+- strong studios make current architecture authority explicit instead of trusting everyone to remember which polished old document is still real
