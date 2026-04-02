@@ -20667,6 +20667,8 @@ Implemented:
   - now names the authority map as the way to resolve architecture-era doc conflicts
 - `ARCHITECTURE_SUMMARY.md`
   - now marked as historical context, not live architecture authority
+- `codex.md`, `nightshift-handoff.md`, `morning-report.md`
+  - now explicitly routed away from live architecture authority
 - `docs/40_reports/implemented/20260402_PRODUCT_ARCHITECTURE_AUTHORITY_ALIGNMENT.md`
   - documented the slice
 

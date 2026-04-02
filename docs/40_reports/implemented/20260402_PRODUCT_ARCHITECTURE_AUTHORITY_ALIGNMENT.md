@@ -20,6 +20,8 @@ Created an explicit architecture-authority map so the repo stops treating histor
   - now treats architecture-era conflicts as something resolved through the new authority map instead of improvisation
 - `ARCHITECTURE_SUMMARY.md`
   - now clearly marked as historical context rather than current architecture authority
+- `codex.md`, `nightshift-handoff.md`, `morning-report.md`
+  - now explicitly marked/routed as primer or historical artifacts rather than live architecture authority
 
 ## Why
 
