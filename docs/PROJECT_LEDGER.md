@@ -1,3 +1,49 @@
+## [2026-04-02] Commander Intelligence Overhaul n1294–n1301
+
+### Summary
+Eight planned commander intelligence improvements implemented and committed. All pass typecheck + integration anomaly test + full vitest suite (1685 pass, 1 skip).
+
+### Changes
+
+**n1294 — Scenario must_hold data wiring (7 files)**
+- `data/scenarios/apr1992_definitive_40w.json`: authored `must_hold_osids_by_corps` for `vrs_posavina` (brcko_2) and `vrs_east_bosnian` (doboj_2, boljanic_2)
+- `src/scenario/scenario_types.ts`: added `must_hold_osids_by_corps?` to `Scenario`
+- `src/scenario/scenario_loader.ts`: parse block (both return paths)
+- `src/state/game_state.ts`: `must_hold_osids_by_corps?` on `MilitaryState`
+- `src/scenario/scenario_runner.ts`: copies field to initial state
+- `src/sim/combat/commander/commander_state.ts`: `must_hold_osids` on `CommanderBriefing`
+- `src/sim/combat/commander/briefing.ts`: populates from `state.military.must_hold_osids_by_corps?.[corpsId]`
+
+**n1295+n1296 — is_must_hold in zone detection (committed prior session)**
+- `zone_detection.ts`: Track 1 (scenario OSIDs) + Track 2 (engine chokepoints, disabled pending calibration)
+- `assess.ts`: passes `new Set(briefing.must_hold_osids)` as 9th arg to `detectZones`
+- `allocate.ts`: `computeGarrisonBudget` applies 1.5× multiplier when `zone.is_must_hold`
+
+**n1297 — Organizational readiness gate**
+- `bot_corps_stance.ts`: corps with zero main-effort brigades capped at 'defensive' stance (blocks plan creation without capable heavy units)
+
+**n1298 — Op scale cap by main_effort_count**
+- `plan.ts`: `tryCreateFromPrePlanned` and `createOpportunityPlan` both cap `requiredBrigades` to `tier_counts.main_effort` — models ARBiH rifle-only phase where few brigades qualify as main effort
+
+**n1299 — Populate enemy_concentration_zones**
+- `assess.ts`: maps `previous_state.intel_picture.concentration_detected` (keyed by sector_id) through `territory_osids` → osid→zone reverse map → `ZoneId` list in `ThreatAssessment.enemy_concentration_zones`
+
+**n1300 — Coordination penalty/bonus from officer competence**
+- `battle_resolution.ts`: multi-brigade `effN` now scaled by `getCoordinationCompetenceFactor()`: ±4% per point from baseline competence 3, clamped [0.85, 1.10]. Single-brigade attacks unaffected.
+
+**n1301 — Strength-based opportunity target ranking**
+- `plan.ts`: `selectOpportunityTargets` ranks enemy OSIDs by approach count (number of zone OSIDs adjacent to each target). More approach vectors = more exposed = higher priority. Falls back to lex sort if spatial data absent.
+
+### Track 2 status
+Engine-derived chokepoint detection (`engineMustHold`) disabled with `false &&`. Root cause: fraction-of-faction-total threshold (0.05) can't separate RS Brcko (~9% RS) from ARBiH Central Bosnia valleys (~8% ARBiH). Needs: corps-boundary discriminator OR absolute OSID count. Logged as P1 calibration item.
+
+### Verification
+- `npx tsc --noEmit` — clean
+- `npm run test:vitest` — 1685 pass, 1 skip, 0 fail
+- `integration_anomaly.test.ts` — 3 pass
+
+---
+
 ## [2026-04-01] Dev Map Browser-Safe Import Recovery
 
 ### Summary
@@ -18586,23 +18632,57 @@ P1 defensive fire alone closed it. No must_hold needed. Holds RS all 40 turns.
 
 ---
 
-## [2026-04-02] Op Teočak — assembly zone fix + planning window extension
+## [2026-04-02] Op Teočak — parallel timer fix + planning window extension (n1293)
 
 ### Summary
-Op Teočak was launching with 3 brigades attacking one-by-one (never concentrated) because `countAssembledBrigades` only counted brigades at the single `staging_osid`, missing brigades already at front OSIDs adjacent to the objective. Planning window was also too short for 2nd Tuzla's 3-hop march.
+Op Teočak was launching 4 weeks early (w18 instead of w22) because `preparation_max_turns` was set purely from commander aggressiveness (level 5 → 3 turns), completely ignoring `op.planning_duration`. The 3-turn anti-paralysis clock overrode the 5-turn declared window. Each brigade attacked on a different turn with `was_concentrated: false`.
 
 ### Root cause
-`force_staging` sub-phase advanced prematurely — brigades at `kalesija_selo`/`kikaci` (directly adjacent to `rastosnica_2`) were not counted as assembled because they weren't at `kalesija_grad_2` specifically. Execution opened before the force was in position. Each brigade then attacked on a different turn, `was_concentrated: false` on all 3 attacks.
+`tickPreparation()` initialised `preparation_max_turns = getPreparationMaxTurns(aggressiveness)` with no reference to `op.planning_duration`. For aggressiveness=5: `max(2, 8-5) = 3`. Op Teočak's `planning_duration: 5` was silently discarded. The force launched before the 2nd Tuzla Brigade could complete its 3-hop march from Tuzla to the Kalesija staging area. This exact failure mode was predicted in `docs/40_reports/20260321_HERZEGOVINA_CALIBRATION_SESSION.md` on 2026-03-21 — 12 days before the fix.
+
+Note: an assembly zone expansion (corps-wide `countAssembledBrigades`) was also attempted (n1291) but confirmed inert via identical hash — it was reverted. The root cause was exclusively the timer, not the assembly count.
 
 ### Changes
-- `operation_preparation.ts`: `countAssembledBrigades` expanded for pre-planned ops (no `sector_id`) to count brigades across ALL corps sectors, not just at staging_osid. Determinism via `strictCompare`.
-- `pre_planned_operations.ts`: `planning_duration` 5→7 (2nd Tuzla needs 3 hops + buffer). Removed `arbih_120th_liberation_black_swans` from axis (was re-loaned to 3rd Corps mid-op, never attacked objective).
+- `operation_preparation.ts`: `preparation_max_turns` now initialised as `max(getPreparationMaxTurns(aggressiveness), op.planning_duration ?? 0)`. Pre-planned ops honour their declared window as a minimum floor — an aggressive commander cannot auto-launch before the planned window expires.
+- `pre_planned_operations.ts`: `planning_duration` 5→7 (2nd Tuzla needs 3 hops + buffer). `arbih_120th_liberation_black_swans` **restored** to axis (had been incorrectly removed; brigade has `deployment_osid: op:kalesija:kalesija_grad_2` — deliberately staged there as elite loan).
+
+### Result (n1293)
+- **Hash: 594bffac65edb783.** Op fires at w22 (7 turns from injection at w15). `was_concentrated: true`. rastosnica_2 = RBiH.
+- **23/25 anchors. 6/6 benchmarks.** Regression: vozuca_2 new FAIL (RS→RBiH) — hypothesis: 4-week delay frees 2nd Corps brigades during w18–22 interval, enabling attack on vozuca_2. Under investigation.
 
 ### Verification
 - `npx tsc --noEmit` clean
 - `npm run test:vitest` 1685/1686 pass, 1 skipped (pre-existing)
 
-### Expected effect
-All 3–4 Kalesija brigades recognized as assembled simultaneously → execution waits until force is genuinely concentrated → `was_concentrated: true` → higher power ratio → rastosnica_2 should flip.
+---
+
+## [2026-04-02] Doboj/Ozren investigation — full panel analysis
+
+### Summary
+Full panel investigation into the persistent boljanic_2 (Doboj city) FAIL and the collapse of the entire Ozren pocket in current 40w runs.
+
+### boljanic_2 root cause confirmed
+`arbih_3rd_corps` auto-generates ops that target `boljanic_2` via `findTargetOsidsFromMunicipalities()` adjacency walk from `petrovo_2` (Gračanica — RS-held Ozren foothold on 3rd Corps flank). No depth filter exists. `vrs_1st_krajina` directive has no `hold_osids` for Doboj OSIDs — garrison budget is drained north by Posavina corridor ops. `rs_2nd_armored` brigade gets displaced to petrovo_2 (856 pers, morale 35), leaving only `rs_1st_krnjin` at boljanic_2 facing a 15-brigade ARBiH operation. Falls turn 31.
+
+Note: this is the same structural ARBiH pressure identified in n1240 Issue #46 (bot no-memory catastrophic meat-grinder). The confirmed root cause is the directive layer, not the bot learning layer — `hold_osids` is the fix, not a catastrophe-threshold gate.
+
+### Ozren pocket collapse
+All four RS Ozren brigade home OSIDs flip RBiH by w31–40:
+- `petrovo_2` — 1st Ozren Brigade home (Gračanica municipality)
+- `brijesnica_donja_2` — 2nd Ozren Brigade home (Lukavac municipality)
+- `vozuca_2` — 4th Ozren Brigade home (Zavidovići municipality)
+
+Historical: Ozren pocket persisted until September 1995 (Operation Farz). Falling by w31 is a ~3-year acceleration. Root cause: no `hold_osids` protection for these positions.
+
+### Anchor gap
+`petrovo_2` and `brijesnica_donja_2` are NOT in `HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992` (`src/scenario/scenario_runner.ts` lines 459–489). Only `vozuca_2` is anchored. The pocket collapse has been invisible to calibration scoring. Fix: add both as `expected_controller: 'RS'`.
+
+### vozuca_2 regression (n1293)
+Confirmed as a seam issue between `arbih_2nd_corps` and `arbih_3rd_corps` AoR. Op Teočak's 4-week delay freed 2nd Corps brigades during w18–22, which auto-generated ops targeting vozuca_2 via the corps boundary. Separate from the boljanic_2 mechanism but same class of problem.
+
+### Fix directions
+1. Add `boljanic_2` + adjacent Doboj OSIDs to `vrs_1st_krajina` `hold_osids` directive
+2. Add `petrovo_2 → RS` and `brijesnica_donja_2 → RS` to anchor array in `scenario_runner.ts`
+3. Investigate vozuca_2 seam — may need `vrs_drina` or dedicated Ozren brigade `hold_osids`
 
 ---
