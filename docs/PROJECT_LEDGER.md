@@ -18823,3 +18823,26 @@ Why this matters:
 - The most stubborn player-facing leaks often live in fallback strings rather than the main happy-path labels. Fixing those now helps keep the UI translation layer honest as the branch keeps moving.
 
 ---
+
+### 2026-04-02 — Legacy authority classification: ops/movement/pressure files
+
+Audited several high-risk “legacy” combat files in the clean lane to classify them by actual live authority rather than age or naming:
+
+- `bot_corps_operations.ts`
+  - still authoritative for emergency defensive-op creation and OG activation entry points
+  - not removable yet
+- `apply_brigade_reposition.ts`
+  - intentional no-op compatibility sink
+  - still invoked by the war pipeline, but does not mutate live AoR truth
+- `brigade_aor_legacy.ts` + `brigade_pressure.ts`
+  - dangerous half-alive layer
+  - still imported by live pressure code, while the actual pressure computation currently resolves to zero
+  - comments in `war_phases.ts` still imply stronger live relevance than the runtime behavior justifies
+
+Artifact:
+- `docs/40_reports/audits/20260402_LEGACY_AUTHORITY_CLASSIFICATION.md`
+
+Why this matters:
+- This is exactly the class of repo blindspot that causes Claude or humans to “fix” the wrong thing later. The worst legacy code is not always dead code; it is code that still looks like an owner while no longer producing meaningful truth.
+
+---
