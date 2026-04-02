@@ -18769,3 +18769,39 @@ Comprehensive engine health review dispatched via 4 parallel specialist agents (
 - HIST-GAP-1–4 — P0 for v0.9 scope
 
 ---
+
+### 2026-04-02 — Engine health Wave 1 continued: player-facing integrity hotfixes
+
+Continued the clean-lane Wave 1 execution in `F:\AWWV_exec_clean` on branch `codex/engine-health-wave1`, focusing on the immediate player-facing integrity lane rather than the deeper renderer-state boundary refactor.
+
+Implemented:
+- `TopToolbar.tsx`
+  - standalone tactical map now exposes a real desktop return-to-Warroom action via `focusWarroom()`
+  - Codex restored as a visible top-toolbar entrypoint
+- `Tooltip.tsx`
+  - formation tooltip no longer renders raw `corps_id`
+- `OperationHistoryPanel.tsx`
+  - active/history cards now render corps display names instead of raw ids
+- `CommanderSelectionModal.tsx`
+  - assignment/unavailable reasons now use display names rather than raw corps ids / enclave ids
+- `army_hq/PersonnelContent.tsx`
+  - officer roster now shows assigned corps display names
+- `army_hq/ThreatAssessment.tsx`
+  - player-facing threat language rewritten around friendly-front abstractions
+  - no longer surfaces raw enemy corps ids or enemy operation names in normal presentation
+- `army_hq/generateThreatAssessment.ts`
+  - extracted pure generator so player-facing threat language can be tested without React renderer imports
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts`
+  - PASS (`7` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Execution note:
+- `npm run desktop:map:build` is currently blocked in the clean lane by missing `@vitejs/plugin-react` resolution from the shared `node_modules` link. This appears to be environment/tooling drift in the clean execution lane rather than a regression from this checkpoint.
+
+Why this matters:
+- This is the first implemented slice of `player-knowledge integrity` from the roadmap that is not just documentation. The immediate contract is now clearer: player-facing tactical-map surfaces may consume deeper engine truth, but they must narrate it as player/staff abstractions tied to friendly fronts rather than leaking enemy internals.
+
+---

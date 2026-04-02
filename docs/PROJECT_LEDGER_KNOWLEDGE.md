@@ -1251,6 +1251,9 @@ Strings like `arbih_3rd_corps`, raw `sector_id`, raw `axis_1`, or backend assign
 ### Tactical map, Warroom, and Codex must share one honest information contract
 Navigation and information ownership are linked. If standalone tactical map has no clear return path, or Codex survives only as a hidden shortcut, the shell architecture has drifted. Player knowledge integrity is not just a payload issue; it also requires explicit UI ownership of where intelligence, records, and command review live.
 
+### Threat assessment should speak in friendly-front abstractions
+Army HQ threat views may consume deeper engine truth, but the player-facing wording should stay anchored on the player's fronts: `3rd Corps front - hostile operation in execution`, not enemy corps ids or enemy operation names. The UI may know more than it says; that translation layer is part of product honesty.
+
 ## Studio Truth Governance (2026-04-01)
 
 ### A few short contracts beat a lot of remembered advice

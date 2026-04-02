@@ -93,6 +93,29 @@ Why this is the right contract:
 - Army HQ should not deliberate as if every front were territorially static
 - this gives campaign planning a simple but real “this corps is gaining ground / losing ground / stable” input without inventing a huge new system
 
+### 6. Player-facing map shell and threat language no longer leak raw internals
+
+Files:
+- `src/ui/map/components/TopToolbar.tsx`
+- `src/ui/map/components/Tooltip.tsx`
+- `src/ui/map/components/OperationHistoryPanel.tsx`
+- `src/ui/map/components/CommanderSelectionModal.tsx`
+- `src/ui/map/components/army_hq/PersonnelContent.tsx`
+- `src/ui/map/components/army_hq/ThreatAssessment.tsx`
+- `src/ui/map/components/army_hq/generateThreatAssessment.ts`
+
+Change:
+- standalone tactical map now exposes a real desktop return-to-Warroom action through `focusWarroom()`
+- Codex has a visible top-toolbar entrypoint again
+- formation tooltip, operation history, officer assignment, and personnel roster stop rendering raw corps ids to the player
+- threat assessment now speaks in front-level abstractions such as `3rd Corps front - hostile operation in execution` instead of enemy corps ids or enemy operation names
+- threat generation was split into a pure utility so the player-facing language contract can be tested without depending on React renderer imports
+
+Why this is the right contract:
+- player-facing surfaces must describe the player's war, not expose engine internals
+- standalone desktop map without a clear path back to HQ is shell drift, not a minor UX nit
+- pure view-model generators are easier to lock with tests than JSX-bound logic
+
 ## Tests added or extended
 
 - `tests/probe_preparation.test.ts`
@@ -105,6 +128,8 @@ Why this is the right contract:
   - added coverage proving brigade and corps force evaluation consume explicit supply-state truth
 - `tests/army_hq_gathering.test.ts`
   - added coverage proving recent front gains/losses are derived from nearby control events instead of a placeholder constant
+- `tests/ui_map_render_smoke.test.ts`
+  - added coverage proving threat assessment uses friendly front labels and does not leak raw enemy corps ids or operation names
 
 ## Verification
 
@@ -152,6 +177,29 @@ Result:
 - `5` test files passed
 - `174` tests passed
 
+Additional verification:
+
+```powershell
+node_modules\.bin\vitest.cmd run tests\ui_map_render_smoke.test.ts
+```
+
+Result:
+- `1` UI smoke suite passed
+- `7` tests passed
+
+Additional verification:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1
+```
+
+Result:
+- `Claude governance check: OK`
+
+Execution note:
+- `npm run desktop:map:build` is currently blocked in the clean lane by missing `@vitejs/plugin-react` resolution from the shared `node_modules` link
+- that appears to be environment/tooling drift in the clean lane, not a regression introduced by this checkpoint
+
 ## Architectural takeaways
 
 - `Best available` is not always the right truth source; the engine often needs `best relevant`.
@@ -159,6 +207,8 @@ Result:
 - Feasibility logic is part of strategy honesty, not just combat tuning.
 - A derived report that never gets consumed is not a feature yet; it is deferred wiring.
 - Typed strategic fields that stay pinned to a placeholder constant are just decorative architecture until they ingest real events.
+- Player-facing threat/intel surfaces should consume deeper engine truth only through a translation layer that talks about friendly fronts, not enemy internal ids.
+- Standalone tactical map is a product shell, not just a renderer; if it has no route back to HQ or no visible records entrypoint, the shell architecture is lying.
 
 ## Roadmap fit
 
@@ -177,6 +227,7 @@ Canonical owner:
 - sector-offensive launch feasibility owns honest go/no-go screening
 - commander force evaluation owns brigade-fitness use of `supply_by_osid`
 - Army HQ gathering owns recent front-change signal for corps assessments
+- top-toolbar / Army HQ player surfaces own navigation and player-facing presentation of tactical-map intelligence
 
 Demoted path:
 - “best record no matter which objective is being attacked”
@@ -184,13 +235,17 @@ Demoted path:
 - “base-power-only launch viability”
 - “local supply report exists but force scoring still uses a fake default”
 - “recent_territory_change exists in the type but is always 0 in practice”
+- “raw corps ids / enemy op names in normal player-facing tactical-map UI”
 
 Player-visible truth:
-- indirect for now; these are engine-honesty fixes that shape later player-facing realism
+- player-facing surfaces may use deep engine truth internally, but they must narrate it as player front truth rather than enemy internal identifiers
 
 Canonical UI surface:
-- none yet; this is substrate work
+- top toolbar for shell navigation
+- Army HQ threat assessment for staff-level threat picture
+- operation history for player-owned operational history naming
 
 Done means:
 - the new targeted regression tests pass together
 - the three fixes are documented as canonical engine behavior
+- threat assessment regression test proves no raw enemy corps ids or operation names leak through the player-facing surface

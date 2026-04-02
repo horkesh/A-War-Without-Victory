@@ -192,3 +192,11 @@ Deck brigade whitening must be driven only by durable selection state. A broken 
 ### 8. Corps brigade highlighting must not depend on sector assignment
 
 Corps-level map highlighting must use direct corps ownership, not sector-derived membership. A broken version of the Deck selection bridge highlighted corps brigades by collecting the corps' sectors and then matching formations by `sector_id`, which skipped reserve or otherwise non-sector-assigned brigades. Rule: sector highlighting is `sector_id`-based; corps highlighting must use `corps_id` and include all corps-owned brigades.
+
+### 9. Player-facing tactical-map text must never leak raw engine ids
+
+Tooltips, operation history, commander selection, personnel rosters, and Army HQ threat surfaces must render display names or friendly-front abstractions only. Strings like raw `corps_id`, `sector_id`, enclave ids, or enemy operation names in normal UI are contract violations, not cosmetic debt.
+
+### 10. Standalone tactical map must keep a visible route back to HQ and records
+
+If the tactical map is opened as its own desktop shell, it needs a visible return path to Warroom and a visible records/Codex affordance. Those are not optional convenience buttons; they are part of the product shell contract that keeps command, records, and intelligence in one coherent experience.

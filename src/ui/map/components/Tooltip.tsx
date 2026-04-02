@@ -97,7 +97,7 @@ function FormationTooltipContent({
       </div>
       {corps && (
         <div className="text-[11px] text-text-secondary mb-1">
-          {corps.name} {formation.corps_id !== '_ungrouped' ? `(${formation.corps_id})` : ''}
+          {corps.name}
         </div>
       )}
       {formation.home_osid && formation.location_osid && (() => {

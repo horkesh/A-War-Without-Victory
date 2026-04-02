@@ -8,6 +8,7 @@ import { buildMajorCityLabelGeoJSON } from '../src/ui/map/map/builders/buildMajo
 import { buildFogOfWarGeoJSON } from '../src/ui/map/map/builders/buildFogOfWarGeoJSON.js';
 import { buildFormationsGeoJSON } from '../src/ui/map/map/builders/buildFormationsGeoJSON.js';
 import { deriveUrbanTier } from '../src/ui/map/map/builders/urbanSettlementTiers.js';
+import { generateThreatAssessment } from '../src/ui/map/components/army_hq/generateThreatAssessment.js';
 import type { LoadedGameState } from '../src/ui/map/data/types.js';
 import type { FeatureCollection } from 'geojson';
 
@@ -186,5 +187,67 @@ describe('Tactical map render smoke', () => {
       expect(result.features[0]?.geometry?.type).toBe('Point');
       expect((result.features[0]?.properties as { location_osid?: string })?.location_osid).toBe('op:sarajevo');
     }
+  });
+
+  it('generateThreatAssessment keeps player-facing language on friendly fronts', () => {
+    const state = {
+      formations: [
+        { id: 'arbih_3rd_corps', name: '3rd Corps', faction: 'RBiH', kind: 'corps' },
+        { id: 'vrs_1st_krajina', name: '1st Krajina Corps', faction: 'RS', kind: 'corps' },
+      ],
+      corpsFrontSectors: [
+        { sector_id: 'sector:arbih_3rd:0', corps_id: 'arbih_3rd_corps', faction: 'RBiH' },
+      ],
+      operations: [
+        {
+          corps_id: 'vrs_1st_krajina',
+          faction: 'RS',
+          phase: 'execution',
+          preparation_sub_phase: null,
+          momentum: 2,
+          name: 'op_vrs_secret_thunder',
+          current_objective_index: 1,
+          objectives: ['osid_a', 'osid_b'],
+        },
+        {
+          corps_id: 'vrs_1st_krajina',
+          faction: 'RS',
+          phase: 'planning',
+          preparation_sub_phase: 'force_staging',
+          momentum: 0,
+          name: 'op_vrs_followup',
+          current_objective_index: 0,
+          objectives: ['osid_c'],
+        },
+      ],
+      sectorIntel: [
+        {
+          friendly_sector_id: 'sector:arbih_3rd:0',
+          enemy_corps_id: 'vrs_1st_krajina',
+          offensive_signs: true,
+          strength_category: 'strong',
+          confidence: 0.72,
+        },
+      ],
+    } as LoadedGameState & {
+      sectorIntel: Array<{
+        friendly_sector_id: string;
+        enemy_corps_id?: string;
+        offensive_signs: boolean;
+        strength_category?: string;
+        confidence: number;
+      }>;
+    };
+
+    const items = generateThreatAssessment(state, 'RBiH');
+    const rendered = items.map((item) => `${item.title} ${item.detail}`).join(' || ');
+
+    expect(rendered).toContain('3rd Corps front');
+    expect(rendered).toContain('hostile offensive preparation');
+    expect(rendered).toContain('hostile operation in execution');
+    expect(rendered).not.toContain('vrs_1st_krajina');
+    expect(rendered).not.toContain('1st Krajina Corps');
+    expect(rendered).not.toContain('op_vrs_secret_thunder');
+    expect(rendered).not.toContain('op_vrs_followup');
   });
 });
