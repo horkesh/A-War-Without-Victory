@@ -7,18 +7,10 @@ import { useGameStore } from '../store/gameStore';
 import { FACTION_COLORS } from '../utils/theme';
 import { useIPC } from '../desktop/useIPC';
 import { advanceTurnAndSync } from '../desktop/orderActions';
-
-const FACTION_LABELS: Record<string, string> = {
-    RBiH: 'Republic of Bosnia and Herzegovina',
-    RS: 'Republika Srpska',
-    HRHB: 'Croatian Republic of Herzeg-Bosnia',
-};
-
-const FACTION_SHORT: Record<string, string> = {
-    RBiH: 'ARBiH',
-    RS: 'VRS',
-    HRHB: 'HVO',
-};
+import {
+    getPlayerSafeMilitaryFactionName,
+    getPlayerSafePoliticalFactionName,
+} from '../utils/playerSafeText';
 
 function ProgressBar({ value, max, color, label }: { value: number; max: number; color: string; label: string }) {
     const pct = Math.min(100, (value / max) * 100);
@@ -120,7 +112,7 @@ export function PeaceStatusPanel() {
                                     <div className="flex items-center gap-2">
                                         <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: color }} />
                                         <span className="text-[11px] font-bold text-text-primary uppercase tracking-wide">
-                                            {FACTION_SHORT[f.id] ?? f.id}
+                                            {getPlayerSafeMilitaryFactionName(f.id)}
                                         </span>
                                     </div>
                                     {isPlayer && (
@@ -134,7 +126,7 @@ export function PeaceStatusPanel() {
                                         </span>
                                     )}
                                 </div>
-                                <div className="text-[9px] text-text-secondary">{FACTION_LABELS[f.id] ?? f.id}</div>
+                                <div className="text-[9px] text-text-secondary">{getPlayerSafePoliticalFactionName(f.id)}</div>
 
                                 {/* Capital */}
                                 <ProgressBar value={f.capital} max={100} color={color} label="Pre-War Capital" />
@@ -161,7 +153,7 @@ export function PeaceStatusPanel() {
                             {peaceEvents.map((e, i) => (
                                 <div key={i} className="text-[10px] text-text-primary bg-black/20 px-2 py-1 rounded">
                                     <span className="font-semibold text-accent-gold">{e.type.replace(/_/g, ' ')}</span>
-                                    {e.faction && <span className="text-text-secondary ml-1">({e.faction})</span>}
+                                    {e.faction && <span className="text-text-secondary ml-1">({getPlayerSafeMilitaryFactionName(e.faction)})</span>}
                                 </div>
                             ))}
                         </div>

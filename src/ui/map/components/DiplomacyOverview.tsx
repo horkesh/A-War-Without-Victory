@@ -3,12 +3,7 @@
  * Rendered as a tab section in WarSummaryModal.
  */
 import type { LoadedGameState } from '../data/types';
-
-const FACTION_LABELS: Record<string, string> = {
-    RBiH: 'Bosnia-Herzegovina',
-    RS: 'Republika Srpska',
-    HRHB: 'Herceg-Bosna',
-};
+import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 
 const PATRON_LABELS: Record<string, string> = {
     RBiH: 'International Community',
@@ -104,7 +99,7 @@ export function DiplomacyOverview({ capital, patronOverride, playerFaction }: Di
                         return (
                             <div key={faction} className="mb-3">
                                 <div className="text-[11px] font-bold text-[#2a2016] mb-1.5">
-                                    {FACTION_LABELS[faction] ?? faction}
+                                    {getPlayerSafePoliticalFactionName(faction)}
                                     <span className="ml-2 text-[10px] font-normal text-[#6a5a40]">
                                         (Composite: {Math.round(cap.composite)})
                                     </span>

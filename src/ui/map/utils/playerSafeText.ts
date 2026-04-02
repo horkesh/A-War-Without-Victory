@@ -1,9 +1,16 @@
+import { normalizeFactionId } from '../../../state/identity.js';
 import { formatCorpsDisplayName, toTitleCase } from './formatters';
 
 const MILITARY_FACTION_LABELS: Record<string, string> = {
     RS: 'VRS',
     RBiH: 'ARBiH',
     HRHB: 'HVO',
+};
+
+const POLITICAL_FACTION_LABELS: Record<string, string> = {
+    RS: 'Republika Srpska',
+    RBiH: 'Republic of Bosnia and Herzegovina',
+    HRHB: 'Croatian Republic of Herzeg-Bosnia',
 };
 
 function humanizeIdentifierLabel(value: string | null | undefined): string {
@@ -23,6 +30,24 @@ export function getPlayerSafeOfficerName(
     fallback = 'An officer',
 ): string {
     return (name ?? '').trim() || fallback;
+}
+
+export function getPlayerSafePoliticalFactionName(
+    factionId: string | null | undefined,
+    fallback = 'Unknown faction',
+): string {
+    if (!factionId) return fallback;
+    const label = POLITICAL_FACTION_LABELS[normalizeFactionId(factionId)];
+    return label || fallback;
+}
+
+export function getPlayerSafeMilitaryFactionName(
+    factionId: string | null | undefined,
+    fallback = 'Unknown force',
+): string {
+    if (!factionId) return fallback;
+    const label = MILITARY_FACTION_LABELS[normalizeFactionId(factionId)];
+    return label || fallback;
 }
 
 export function getPlayerSafeCorpsName(

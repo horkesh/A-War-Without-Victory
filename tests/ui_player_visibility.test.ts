@@ -15,7 +15,9 @@ import {
   getPlayerSafeBrigadeName,
   getPlayerSafeCorpsName,
   getPlayerSafeEnclaveName,
+  getPlayerSafeMilitaryFactionName,
   getPlayerSafeMunicipalityName,
+  getPlayerSafePoliticalFactionName,
 } from '../src/ui/map/utils/playerSafeText.js';
 import { parseGameState } from '../src/ui/map/data/GameStateAdapter.js';
 import { buildOperationArrowsGeoJSON } from '../src/ui/map/map/builders/buildOperationArrowsGeoJSON.js';
@@ -248,6 +250,9 @@ describe('player visibility helpers', () => {
     expect(getPlayerSafeBrigadeName('')).toBe('Assigned brigade');
     expect(getPlayerSafeMunicipalityName('bijeljina_center')).toBe('Bijeljina Center');
     expect(getPlayerSafeEnclaveName('gorazde_east')).toBe('Gorazde East');
+    expect(getPlayerSafePoliticalFactionName('HRHB')).toBe('Croatian Republic of Herzeg-Bosnia');
+    expect(getPlayerSafeMilitaryFactionName('VRS')).toBe('VRS');
+    expect(getPlayerSafePoliticalFactionName('unknown')).toBe('Unknown faction');
   });
 
   it('keeps pending officer event labels player-safe when names are missing', () => {

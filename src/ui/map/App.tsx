@@ -55,6 +55,7 @@ import { useGameStore, isDevMode } from './store/gameStore';
 import { loadLatestRunSaveAsText, loadEventDefinitions } from './data/DataLoader';
 import { getOsidDisplayName } from './utils/osidDisplayName';
 import { getFormationsAtOsid } from './utils/formationAtOsid';
+import { getPlayerSafeMilitaryFactionName } from './utils/playerSafeText';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useDesktopSession } from './hooks/useDesktopSession';
 import { useIPC } from './desktop/useIPC';
@@ -323,7 +324,7 @@ function App() {
           category: def?.category ?? e.category ?? 'military',
           effects: def?.effects?.map(eff => ({
             kind: eff.kind,
-            description: eff.text ?? (eff.faction ? `${eff.faction} ${eff.kind} ${(eff.delta ?? 0) > 0 ? '+' : ''}${eff.delta ?? ''}` : eff.kind),
+            description: eff.text ?? (eff.faction ? `${getPlayerSafeMilitaryFactionName(eff.faction)} ${eff.kind} ${(eff.delta ?? 0) > 0 ? '+' : ''}${eff.delta ?? ''}` : eff.kind),
           })) ?? e.effects,
           isDecision: e.isDecision,
           responseOptions: e.responseOptions,

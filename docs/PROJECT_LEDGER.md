@@ -20343,3 +20343,33 @@ Why this matters:
 - shared player-safe helpers only become real product boundaries once local fallback clones are deleted
 - duplicated fallback helpers are how raw ids and inconsistent tone sneak back into old shell surfaces
 - centralizing them now reduces future drift before the larger architecture reshaping pass
+### 2026-04-02 - Player-safe faction label canonicalization
+
+Standardized political and military faction labels in the clean lane so peace/event surfaces stop carrying their own dictionaries and raw-code fallbacks.
+
+Implemented:
+- `src/ui/map/utils/playerSafeText.ts`
+  - added shared political and military faction-label helpers
+- `src/ui/map/components/PeaceStatusPanel.tsx`
+  - now uses shared faction helpers for card labels and event badges
+- `src/ui/map/components/PeacePlanModal.tsx`
+  - now uses shared political faction labels
+- `src/ui/map/components/DiplomacyOverview.tsx`
+  - now uses shared political faction labels
+- `src/ui/map/App.tsx`
+  - event-effect fallback text now uses shared military faction labels
+- `tests/ui_player_visibility.test.ts`
+  - added regression assertions for the new helper contract
+- `docs/40_reports/implemented/20260402_PLAYER_SAFE_FACTION_LABEL_CANONICALIZATION.md`
+  - documented the slice
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`26` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- peace/event language is where raw faction codes feel most like debug leakage
+- shared faction helpers reduce drift across map shell, peace shell, diplomacy shell, and event shell
+- this keeps pushing the repo toward one canonical player-facing dialect instead of several slightly different ones

@@ -1490,3 +1490,6 @@ If a common shell primitive like `GlassPanel` is roomy by default, every downstr
 ### Shared fallback helpers should be treated as player-truth authority surfaces
 
 In AWWV, once a helper like `playerSafeText.ts` exists, every Warroom/map shell that needs a last-resort officer, settlement, or municipality label should route through it instead of cloning a local version. Duplicated “small” fallback helpers drift quickly and become quiet re-entry points for raw ids, inconsistent phrasing, and different ideas of what counts as player-safe text.
+### Political-facing and military-facing faction names should not be improvised per screen
+
+In AWWV, peace/diplomacy surfaces often want political names while event/combat surfaces want military names. If each component carries its own faction label map, the product slowly develops several dialects and raw faction codes creep back in as fallbacks. Canonical player-safe helpers for both political and military faction names are cheaper and safer than letting each screen decide for itself.
