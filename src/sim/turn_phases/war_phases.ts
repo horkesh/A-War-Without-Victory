@@ -120,7 +120,6 @@ import { getRSMaintenanceCapacityMult, runEquipmentProgression } from '../combat
 import { updateEnclaveResilience } from '../combat/enclave_resilience.js';
 import { updateExhaustion } from '../combat/exhaustion.js';
 import { detectFronts } from '../combat/front_emergence.js';
-import { buildLocalFronts } from '../combat/local_front_defense.js';
 import { buildCorpsFrontSectors, assignBrigadesToSubSegments, REASSIGNMENT_ENTRENCHMENT_RETAIN } from '../combat/corps_front_sectors.js';
 import { distributeBrigadesToFront } from '../combat/brigade_front_distribution.js';
 import { correctMarchOrders, correctTransitStates } from '../combat/commander_march_correction.js';
@@ -290,7 +289,7 @@ export const warPhases: NamedPhase[] = [
         name: 'compute-local-fronts',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            context.state.military.local_fronts = buildLocalFronts(context.state);
+            context.state.military.local_fronts = undefined;
         }
     },
     {
@@ -632,10 +631,9 @@ export const warPhases: NamedPhase[] = [
             );
         }
     },
-    // Note: brigade_front_assignment and local_fronts are NOT overwritten by sector system.
-    // Sectors are an organizational layer for corps targeting and directives.
-    // The density modifier continues to use the existing local_fronts (faction-level aggregation)
-    // because per-sector density would over-penalize overextended factions (VRS historically thin).
+    // Note: brigade_front_assignment survives only as a compatibility fallback.
+    // Sectors are the live frontline authority, and local_fronts are no longer rebuilt
+    // as runtime truth once the modern sector pipeline is available.
 
     {
         name: 'assign-brigades-to-subsegments',

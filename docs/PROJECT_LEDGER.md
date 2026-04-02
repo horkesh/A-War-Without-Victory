@@ -20472,3 +20472,30 @@ Verification:
 Why this matters:
 - view-model defaults are another high-leverage leak point because many panels inherit them at once
 - this reduces the number of places where raw ids can still enter the product shell before rendering
+### 2026-04-02 - Local fronts runtime demotion
+
+Demoted `local_fronts` out of the live war runtime by moving the legacy density fallback onto `brigade_front_assignment + assignable_front_segments`.
+
+Implemented:
+- `src/sim/combat/local_front_defense.ts`
+  - density fallback no longer depends on `state.military.local_fronts`
+- `src/sim/turn_pipeline.ts`
+  - stopped rebuilding `local_fronts` during war refresh
+- `src/sim/turn_phases/war_phases.ts`
+  - stopped rebuilding `local_fronts` in the war pipeline
+  - updated comments to reflect sectors as the live frontline authority
+- `tests/local_front_density_modifier_precedence.test.ts`
+  - now proves legacy density fallback works without `local_fronts`
+- `docs/40_reports/implemented/20260402_LOCAL_FRONTS_RUNTIME_DEMOTION.md`
+  - documented the slice
+
+Verification:
+- `node_modules\.bin\tsx.cmd --test tests\front_assignment.test.ts tests\local_front_density_modifier_precedence.test.ts tests\formation_fatigue_frontline_assignment.test.ts`
+  - PASS (`8` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- `local_fronts` had become a rebuilt-every-turn compatibility object with almost no live authority left
+- deriving fallback density from the surviving primitive data is cleaner and harder to lie with
+- this is exactly the kind of repo simplification stronger studios do to keep migrations from stalling half-finished

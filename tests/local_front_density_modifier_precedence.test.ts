@@ -30,18 +30,15 @@ function makeState(): GameState {
             brigade_front_assignment: {
                 brig1: 'legacy_front',
             },
-            local_fronts: {
-                legacy_front: {
-                    id: 'legacy_front',
-                    faction: 'RBiH',
-                    name: 'legacy_front',
-                    created_turn: 5,
-                    assigned_brigade_ids: ['brig1'],
+            assignable_front_segments: [
+                {
+                    front_id: 'legacy_front',
                     edge_ids: ['e1', 'e2', 'e3', 'e4'],
-                    coverage_length: 4,
-                    defensive_power: 100,
+                    side_a: 'RBiH',
+                    side_b: 'RS',
+                    length_edges: 4,
                 },
-            },
+            ],
             corps_front_sectors: {
                 sector_1: {
                     sector_id: 'sector_1',
@@ -71,4 +68,13 @@ test('getLocalFrontDensityModifier prefers sector density over legacy front assi
 
     const modifier = getLocalFrontDensityModifier(state, brigade as any);
     assert.equal(modifier, 1.0);
+});
+
+test('getLocalFrontDensityModifier legacy fallback works without local_fronts runtime state', () => {
+    const state = makeState();
+    delete (state.military as any).corps_front_sectors;
+    const brigade = state.military.formations!.brig1!;
+
+    const modifier = getLocalFrontDensityModifier(state, brigade as any);
+    assert.equal(modifier, 0.8);
 });

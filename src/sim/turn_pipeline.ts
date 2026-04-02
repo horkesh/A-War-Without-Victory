@@ -12,7 +12,6 @@ import { cloneGameState } from '../state/clone.js';
 import { GameState } from '../state/game_state.js';
 import { assignFrontSegmentTheatres, ensureDefaultTheatres } from '../state/theatres.js';
 import { ensureBrigadeFrontAssignments } from './combat/front_assignment.js';
-import { buildLocalFronts } from './combat/local_front_defense.js';
 import { earlyWarPhases } from './turn_phases/early_war_phases.js';
 import { warPhases } from './turn_phases/war_phases.js';
 
@@ -162,7 +161,7 @@ async function refreshFrontEdgeSnapshot(state: GameState, input: TurnInput): Pro
     state.military.assignable_front_segments = assignFrontSegmentTheatres(state, segments);
     if (state.meta.phase === 'war') {
         ensureBrigadeFrontAssignments(state);
-        state.military.local_fronts = buildLocalFronts(state);
+        state.military.local_fronts = undefined;
     }
 }
 

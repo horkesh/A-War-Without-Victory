@@ -1505,3 +1505,6 @@ In AWWV, `buildFrontlineAssignedFormationSet(...)` feeds battle eligibility, pos
 ### Loaded-state defaults are another authority layer
 
 In AWWV, `GameStateAdapter` is not just a parser; it defines the default vocabulary many UI panels inherit. If formation names, officer names, or fired-event titles fall back to raw ids there, the leak spreads widely. Hardening the view model is often more effective than fixing half a dozen leaf panels one by one.
+### Compatibility objects should not stay live runtime truth after their last real consumer is gone
+
+In AWWV, `local_fronts` survived as a rebuilt runtime object long after sectors had become the real frontline authority. Once the last meaningful fallback could be computed directly from `brigade_front_assignment + assignable_front_segments`, continuing to rebuild `local_fronts` every turn only preserved the illusion that the old lane still mattered. Strong cleanup often means deleting the rebuild path before deleting the schema field.

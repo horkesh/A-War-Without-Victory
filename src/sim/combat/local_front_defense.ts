@@ -195,8 +195,16 @@ export function getLocalFrontDensityModifier(
 
     const frontId = state.military.brigade_front_assignment?.[formation.id];
     if (frontId) {
-        const front = state.military.local_fronts?.[frontId];
-        if (front) return frontDensityModifier(front.assigned_brigade_ids.length, front.coverage_length);
+        const segments = state.military.assignable_front_segments ?? [];
+        const segment = segments.find((seg) => seg.front_id === frontId);
+        if (!segment) return 1.0;
+
+        const assignments = state.military.brigade_front_assignment ?? {};
+        let assignedCount = 0;
+        for (const brigadeId of Object.keys(assignments).sort(strictCompare)) {
+            if (assignments[brigadeId] === frontId) assignedCount += 1;
+        }
+        return frontDensityModifier(assignedCount, segment.length_edges);
     }
 
     return 1.0;
