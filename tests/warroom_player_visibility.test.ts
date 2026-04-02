@@ -9,14 +9,14 @@ import { FactionOverviewPanel } from '../src/ui/warroom/components/FactionOvervi
 import type { GameState } from '../src/state/game_state.js';
 
 describe('warroom player visibility', () => {
-  it('extractWarData exposes contacted enemies as abstract player-facing contacts', () => {
+  it('extractWarData exposes contacted enemies as abstract front-contact summaries', () => {
     const state = {
       meta: { turn: 4, phase: 'war' },
       factions: [{ id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } }, { id: 'RS', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } }],
       military: {
         formations: {
-          arbih_b1: { faction: 'RBiH', kind: 'brigade', status: 'active', personnel: 1200 },
-          rs_b1: { faction: 'RS', kind: 'brigade', status: 'active', personnel: 1400, name: 'Enemy Shock Brigade' },
+          arbih_b1: { faction: 'RBiH', kind: 'brigade', status: 'active', personnel: 1200, location_osid: 'op:sarajevo:centar' },
+          rs_b1: { faction: 'RS', kind: 'brigade', status: 'active', personnel: 1400, name: 'Enemy Shock Brigade', location_osid: 'op:grbavica:south' },
         },
         casualty_ledger: {
           RS: {
@@ -25,9 +25,11 @@ describe('warroom player visibility', () => {
             },
           },
         },
-        front_edges: [],
-        front_pressure: {},
-        front_segments: {},
+        front_edges: [
+          { edge_id: 'edge_1', a: 'op:sarajevo:centar', b: 'op:grbavica:south', side_a: 'RBiH', side_b: 'RS' },
+        ],
+        front_pressure: { edge_1: { value: 0.8, max_abs: 1, last_updated_turn: 4 } },
+        front_segments: { edge_1: { friction: 0.3 } },
         militia_garrison: {},
         brigade_movement_state: {},
         brigade_encircled: {},
@@ -52,6 +54,7 @@ describe('warroom player visibility', () => {
       expect.objectContaining({
         label: 'Enemy contact',
         strengthCategory: expect.any(String),
+        contactSettlement: 'op:grbavica:south',
       }),
     ]);
     expect(snap.contactedEnemyFormations[0]).not.toHaveProperty('name');
@@ -182,6 +185,55 @@ describe('warroom player visibility', () => {
     expect(snap.ownForces.formationDetails.find((f) => f.id === 'arbih_3rd_corps')?.name).toBe('3rd Corps');
     expect(snap.ownForces.formationDetails.find((f) => f.id === 'arbih_b1')?.name).toBe('Assigned brigade');
     expect(snap.ownCorpsOps[0]?.corpsName).toBe('3rd Corps');
+    expect(snap.ownCorpsOps[0]?.operation).toEqual(null);
+  });
+
+  it('warroom corps operation snapshots stay summary-only instead of exposing raw CorpsOperation payloads', () => {
+    const state = {
+      meta: { turn: 9, phase: 'war' },
+      factions: [
+        { id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
+        { id: 'RS', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
+      ],
+      military: {
+        formations: {
+          arbih_3rd_corps: { faction: 'RBiH', kind: 'corps', status: 'active', name: 'arbih_3rd_corps', personnel: 0 },
+        },
+        casualty_ledger: {},
+        front_edges: [],
+        front_pressure: {},
+        front_segments: {},
+        militia_garrison: {},
+        brigade_movement_state: {},
+        brigade_encircled: {},
+        corps_command: {
+          arbih_3rd_corps: {
+            stance: 'balanced',
+            active_operations: [{ type: 'sector_attack', phase: 'execution', started_turn: 8, objectives: ['op:secret'], participating_brigades: ['arbih_b1'] }],
+          },
+        },
+      },
+      political: {
+        political_controllers: {},
+        war_exhaustion: { RBiH: 0.1 },
+        loss_of_control_trends: { by_faction: { RBiH: { exhaustion_trend: 'flat' } } },
+      },
+      displacement: {
+        displacement_state: {},
+        displacement_camp_state: {},
+        hostile_takeover_timers: {},
+        civilian_casualties: {},
+        sustainability_state: {},
+      },
+    } as unknown as GameState;
+
+    const snap = extractWarData(state, 'RBiH');
+    expect(snap.ownCorpsOps[0]?.operation).toEqual({
+      type: 'sector_attack',
+      phase: 'execution',
+      started_turn: 8,
+    });
+    expect(snap.ownCorpsOps[0]?.operation).not.toHaveProperty('objectives');
   });
 
   it('warroom command briefing uses derived command-shell warnings instead of hardcoded certainty', () => {

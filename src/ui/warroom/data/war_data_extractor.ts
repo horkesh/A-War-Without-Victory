@@ -11,7 +11,6 @@
 import type {
     BrigadeMovementState,
     CorpsCommandState,
-    CorpsOperation,
     EmbargoProfile,
     FactionId,
     FormationId,
@@ -24,7 +23,6 @@ import type {
     SettlementId,
     TrendDirection,
 } from '../../../state/game_state.js';
-import { getEnemyFactions, personnelToStrengthCategory } from './fog_of_war.js';
 import {
     getPlayerSafeBrigadeName,
     getPlayerSafeCorpsName,
@@ -105,7 +103,11 @@ export interface CorpsOperationSnapshot {
     corpsId: FormationId;
     corpsName: string;
     stance: string;
-    operation: CorpsOperation | null;
+    operation: {
+        type: string;
+        phase: string;
+        started_turn: number;
+    } | null;
 }
 
 export interface ContactedFormation {
@@ -281,11 +283,11 @@ export function extractWarData(
     // --- Diplomacy (faction-specific) ---
     const ownDiplomacy = extractDiplomacy(gameState, playerFaction);
 
-    // --- Contacted enemy formations (Tier 2) ---
-    const contactedEnemyFormations = extractContactedEnemies(gameState, playerFaction);
-
     // --- Front edges (Tier 2) ---
     const engagedFrontEdges = extractFrontEdges(gameState, playerFaction);
+
+    // --- Contacted enemy formations (Tier 2) ---
+    const contactedEnemyFormations = extractContactedEnemies(playerFaction, engagedFrontEdges);
 
     // --- Brigade movement ---
     const brigadeMovement = extractBrigadeMovement(gameState, playerFaction);
@@ -547,7 +549,13 @@ function extractCorpsOps(state: GameState, pf: FactionId): CorpsOperationSnapsho
             corpsId,
             corpsName: getPlayerSafeCorpsName(f.name ?? null, corpsId),
             stance: corps.stance,
-            operation: corps.active_operations?.[0] ?? null,
+            operation: corps.active_operations?.[0]
+                ? {
+                    type: String(corps.active_operations[0].type ?? ''),
+                    phase: String(corps.active_operations[0].phase ?? ''),
+                    started_turn: Number(corps.active_operations[0].started_turn ?? 0),
+                }
+                : null,
         });
     }
     return results;
@@ -607,31 +615,21 @@ function extractDiplomacy(state: GameState, pf: FactionId): FactionDiplomacySnap
     };
 }
 
-function extractContactedEnemies(state: GameState, pf: FactionId): ContactedFormation[] {
-    const allFactionIds = state.factions.map(f => f.id);
-    const enemies = getEnemyFactions(pf, allFactionIds);
+function extractContactedEnemies(pf: FactionId, engagedFrontEdges: FrontEdgeSnapshot[]): ContactedFormation[] {
     const results: ContactedFormation[] = [];
+    const seenEnemySettlements = new Set<string>();
 
-    // Casualty ledger per-formation keys: enemy formations that took casualties = contacted
-    const existingIds = new Set<string>();
-    for (const enemyFaction of enemies) {
-        const enemyLedger = state.military.casualty_ledger?.[enemyFaction];
-        if (!enemyLedger?.per_formation) continue;
-        for (const fmtId of Object.keys(enemyLedger.per_formation).sort(sc)) {
-            if (existingIds.has(fmtId)) continue;
-            const f = state.military.formations[fmtId];
-            if (!f) continue;
-            results.push({
-                label: 'Enemy contact',
-                strengthCategory: personnelToStrengthCategory(f.personnel ?? 1000),
-                contactSettlement: null,
-                detectedTurn: 0,
-            });
-            existingIds.add(fmtId);
-        }
+    for (const edge of engagedFrontEdges) {
+        const contactSettlement = edge.sideA === pf ? edge.settlementB : edge.settlementA;
+        if (!contactSettlement || seenEnemySettlements.has(contactSettlement)) continue;
+        seenEnemySettlements.add(contactSettlement);
+        results.push({
+            label: 'Enemy contact',
+            strengthCategory: edge.tier === 'exposed' ? 'strong' : edge.tier === 'defended' ? 'moderate' : 'light',
+            contactSettlement,
+            detectedTurn: 0,
+        });
     }
-
-    // Sort by settlement, then by abstract label
     results.sort((a, b) => sc(a.contactSettlement ?? '', b.contactSettlement ?? '') || sc(a.label, b.label));
     return results;
 }

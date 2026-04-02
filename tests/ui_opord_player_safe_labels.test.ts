@@ -79,6 +79,14 @@ describe('buildOpordDisplayModel', () => {
             new URL('../src/ui/map/components/CorpsFrontPanel.tsx', import.meta.url),
             'utf8',
         );
+        const authorizeSource = readFileSync(
+            new URL('../src/ui/map/components/ops_modal/AuthorizePhase.tsx', import.meta.url),
+            'utf8',
+        );
+        const commanderSelectionSource = readFileSync(
+            new URL('../src/ui/map/components/CommanderSelectionModal.tsx', import.meta.url),
+            'utf8',
+        );
 
         expect(oobSource).toContain('getPlayerSafeMilitaryFactionName(faction)');
         expect(oobSource).toContain('getPlayerSafeMilitaryFactionName(op.faction)');
@@ -94,5 +102,9 @@ describe('buildOpordDisplayModel', () => {
         expect(operationDetailSource).toContain('getPlayerSafeMilitaryFactionName(op.faction)');
         expect(corpsDetailSource).toContain('getPlayerSafeMilitaryFactionName(corpsFormation.faction)');
         expect(sectorPanelSource).toContain('getPlayerSafeMilitaryFactionName(sector.faction)');
+        expect(authorizeSource).toContain('findPlayerFacingOperationByKey');
+        expect(authorizeSource).not.toContain('loadedGameState.operations ?? []).find');
+        expect(commanderSelectionSource).toContain('findPlayerFacingOperationByKey');
+        expect(commanderSelectionSource).not.toContain('operations?.find((o) => o.corps_id === context.corpsId && o.name === context.operationName)');
     });
 });

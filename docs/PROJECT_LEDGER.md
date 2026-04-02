@@ -21364,3 +21364,31 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 ### Verification
 - `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\front_assignment.test.ts tests\\formation_fatigue_frontline_assignment.test.ts tests\\local_front_density_modifier_precedence.test.ts tests\\ui_map_fog_and_operation_contracts.test.ts tests\\ui_map_game_state_adapter.test.ts`
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\engine_honesty_legacy_contracts.test.ts tests\\ui_map_render_smoke.test.ts tests\\ui_player_visibility.test.ts`
+## 2026-04-03 - Player-scoped operations and Warroom shell summaries
+
+### Summary
+- Scoped tactical-map `operations`, `activeOperations`, `operationHistory`, and `pendingReserveRequests` at `GameStateAdapter` to the player faction.
+- Replaced two more direct operation bypasses with `findPlayerFacingOperationByKey(...)`.
+- Reduced Warroom corps-operation snapshots to summary-only data and switched Warroom enemy-contact sourcing from global enemy casualty ledgers to front-contact summaries.
+
+### Files changed
+- `src/ui/map/data/GameStateAdapter.ts`
+- `src/ui/map/components/CommanderSelectionModal.tsx`
+- `src/ui/map/components/ops_modal/AuthorizePhase.tsx`
+- `src/ui/warroom/data/war_data_extractor.ts`
+- `tests/ui_map_game_state_adapter.test.ts`
+- `tests/ui_opord_player_safe_labels.test.ts`
+- `tests/warroom_player_visibility.test.ts`
+- `docs/40_reports/implemented/20260403_PLAYER_SCOPED_OPERATIONS_AND_WARROOM_SHELL_SUMMARIES.md`
+- `docs/40_reports/GUI_MASTER.md`
+- `docs/40_reports/WARROOM_MASTER.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- Player-safe filtering belongs at the adapter boundary whenever possible, not only in downstream components.
+- Warroom should summarize command truth, not carry raw operation internals or infer enemy identity from global casualty ledgers.
+
+### Verification
+- `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\ui_map_game_state_adapter.test.ts`
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_player_visibility.test.ts tests\\ui_map_render_smoke.test.ts tests\\ui_opord_player_safe_labels.test.ts`
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\warroom_player_visibility.test.ts tests\\ui_shell_navigation.test.ts tests\\warroom_smoke.test.ts`

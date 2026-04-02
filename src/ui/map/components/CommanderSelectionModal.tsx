@@ -16,6 +16,7 @@ import {
     getPersonalitySummary,
 } from '../utils/officerCharacter';
 import { getPreparationMaxTurns } from '../../../sim/combat/operation_preparation';
+import { findPlayerFacingOperationByKey } from '../../shared/playerVisibility';
 
 interface CommanderSelectionModalProps {
     isOpen: boolean;
@@ -59,8 +60,8 @@ export function CommanderSelectionModal({ isOpen, onClose, onSelect }: Commander
             return { availableOfficers: [], unavailableOfficers: [], operation: null, corpsName: 'Command' };
         }
 
-        const { namedOfficerData, operations } = loadedGameState;
-        const op = operations?.find((o) => o.corps_id === context.corpsId && o.name === context.operationName) ?? null;
+        const { namedOfficerData } = loadedGameState;
+        const op = findPlayerFacingOperationByKey(loadedGameState, `${context.corpsId}|${context.operationName}`);
         const corpsFormation = loadedGameState.formations.find((f) => f.id === context.corpsId);
         const faction = corpsFormation?.faction ?? '';
         const corpsNameById = new Map(

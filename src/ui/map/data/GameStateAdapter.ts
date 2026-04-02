@@ -1792,7 +1792,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         movementOrdersSettlement: movementOrdersSettlement.length > 0 ? movementOrdersSettlement : undefined,
         repositionOrders: repositionOrders.length > 0 ? repositionOrders : undefined,
         corpsFrontSectors,
-        operations: operations.length > 0 ? operations : undefined,
+        operations: filterPlayerFacingEntriesByFaction(operations, playerFaction),
         namedOfficerData,
         namedOfficerStateById,
         factionReserves,
@@ -1809,11 +1809,11 @@ export function parseGameState(json: unknown): LoadedGameState {
         historicalEventsByTurn: deriveHistoricalEvents(state),
         latestTurnSummary: (state.turn_summaries as import('../../../state/turn_summary.js').TurnSummary[] | undefined)?.[0] ?? null,
         turnSummaries: (state.turn_summaries as import('../../../state/turn_summary.js').TurnSummary[] | undefined) ?? [],
-        operationHistory: deriveOperationHistory(state),
-        activeOperations: deriveActiveOperations(state),
+        operationHistory: filterPlayerFacingEntriesByFaction(deriveOperationHistory(state), playerFaction),
+        activeOperations: filterPlayerFacingEntriesByFaction(deriveActiveOperations(state), playerFaction),
         brigadeSectorOverride: brigadeSectorOverride && Object.keys(brigadeSectorOverride).length > 0 ? brigadeSectorOverride : undefined,
         pendingReserveRequests: Array.isArray(state.military?.pending_reserve_requests) && state.military.pending_reserve_requests.length > 0
-            ? (state.military.pending_reserve_requests as any[]).map(r => ({
+            ? ((state.military.pending_reserve_requests as any[]).map(r => ({
                 request_id: String(r.request_id ?? `req:${Number(r.turn_requested ?? 0)}:${String(r.corps_id ?? '')}:${String(r.reason ?? '')}`),
                 corps_id: String(r.corps_id ?? ''),
                 faction: String(r.faction ?? ''),
@@ -1826,7 +1826,7 @@ export function parseGameState(json: unknown): LoadedGameState {
                 description: String(r.description ?? ''),
                 suggested_brigade_id: r.suggested_brigade_id ? String(r.suggested_brigade_id) : null,
                 turn_requested: Number(r.turn_requested ?? 0),
-            }))
+            })).filter((request) => !playerFaction || request.faction === playerFaction))
             : undefined,
         eliteBrigadeTracker: deriveEliteBrigadeTracker(state),
         pendingOfficerEvents: derivePendingOfficerEvents(state),
@@ -2020,6 +2020,16 @@ function deriveOperationHistory(state: any): LoadedGameState['operationHistory']
             })),
         };
     });
+}
+
+function filterPlayerFacingEntriesByFaction<T extends { faction?: string | null }>(
+    entries: T[] | undefined,
+    playerFaction: string | null,
+): T[] | undefined {
+    if (!entries || entries.length === 0) return undefined;
+    if (!playerFaction) return entries;
+    const filtered = entries.filter((entry) => entry.faction === playerFaction);
+    return filtered.length > 0 ? filtered : undefined;
 }
 
 function deriveActiveOperations(state: any): LoadedGameState['activeOperations'] {
