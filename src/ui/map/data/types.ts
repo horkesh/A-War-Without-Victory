@@ -505,7 +505,6 @@ export interface LoadedGameState {
     controlBySettlement: Record<string, string | null>;
     statusBySettlement: Record<string, string>;
     brigadeAorByFormationId: Record<string, string[]>;
-    brigadeDesiredAoRCap?: Record<string, number>;
     frontEdges?: FrontEdgeView[];
     frontEdgesOsid?: FrontEdgeView[];
     assignableFrontSegments?: AssignableFrontSegmentView[];

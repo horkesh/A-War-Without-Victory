@@ -1625,3 +1625,7 @@ In AWWV, a legacy state field can be relatively harmless if everyone knows it is
 
 In AWWV, a compatibility field can linger for save/load reasons without doing much harm. A live pipeline writer that keeps rebuilding that field every turn is different: it keeps the old concept feeling current. If a layer is no longer canonical, stop refreshing it in the live pipeline before you worry about full schema deletion.
 
+### Docs that claim a bridge is gone must be verified against the live shell
+
+In AWWV, "we already removed that IPC" is not trustworthy until preload, Electron main, the live IPC hook, and the live adapter all agree. Compatibility ghosts often survive in exactly one of those layers and quietly keep a dead concept available.
+

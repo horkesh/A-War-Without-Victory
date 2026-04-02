@@ -852,31 +852,6 @@ app.whenReady().then(() => {
     }
   });
 
-  ipcMain.handle('set-brigade-desired-aor-cap', async (_event, payload) => {
-    const { brigadeId, cap } = payload || {};
-    if (!currentGameStateJson || typeof brigadeId !== 'string') {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    const clearCap = typeof cap !== 'number' || cap < 1;
-    const capped = clearCap ? 0 : Math.min(4, Math.max(1, Math.floor(cap)));
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      if (!state.brigade_desired_aor_cap) state.brigade_desired_aor_cap = {};
-      if (clearCap) {
-        delete state.brigade_desired_aor_cap[brigadeId];
-        if (Object.keys(state.brigade_desired_aor_cap).length === 0) delete state.brigade_desired_aor_cap;
-      } else {
-        state.brigade_desired_aor_cap[brigadeId] = capped;
-      }
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
-  });
-
   ipcMain.handle('stage-brigade-movement-order', async (_event, payload) => {
     const { brigadeId, targetSettlementIds } = payload || {};
     if (!currentGameStateJson || typeof brigadeId !== 'string' || !Array.isArray(targetSettlementIds)) {

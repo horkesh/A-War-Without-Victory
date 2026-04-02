@@ -21110,3 +21110,21 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - Docs:
   - `docs/40_reports/implemented/20260402_THEATRE_TAGGING_RUNTIME_RETIREMENT.md`
 
+
+## 2026-04-02 - AoR cap bridge retirement
+
+- Worktree/branch: F:\AWWV_exec_clean on codex/engine-health-wave1
+- Removed the dead `setBrigadeDesiredAoRCap(...)` bridge from:
+  - `src/desktop/preload.cjs`
+  - `src/ui/map/desktop/useIPC.ts`
+- Removed the `set-brigade-desired-aor-cap` IPC handler from `src/desktop/electron-main.cjs`.
+- Removed the live tactical-map adapter/view-model exposure of `brigadeDesiredAoRCap` from:
+  - `src/ui/map/data/GameStateAdapter.ts`
+  - `src/ui/map/data/types.ts`
+- Added a regression in `tests/engine_honesty_legacy_contracts.test.ts` proving the live player shell no longer exposes the bridge or adapter field.
+- Verification:
+  - `node_modules\.bin\vitest.cmd run tests\engine_honesty_legacy_contracts.test.ts tests\ui_map_game_state_adapter.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_AOR_CAP_BRIDGE_RETIREMENT.md`
+

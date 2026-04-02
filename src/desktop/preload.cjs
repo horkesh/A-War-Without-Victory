@@ -38,7 +38,6 @@ contextBridge.exposeInMainWorld('awwv', {
   querySupplyPaths: () => ipcRenderer.invoke('query-supply-paths'),
   queryCorpsSectors: () => ipcRenderer.invoke('query-corps-sectors'),
   queryBattleEvents: () => ipcRenderer.invoke('query-battle-events'),
-  setBrigadeDesiredAoRCap: (brigadeId, cap) => ipcRenderer.invoke('set-brigade-desired-aor-cap', { brigadeId, cap }),
   clearOrders: (brigadeId) => ipcRenderer.invoke('clear-orders', { brigadeId }),
   stageCorpsStanceOrder: (corpsId, stance) => ipcRenderer.invoke('stage-corps-stance-order', { corpsId, stance }),
   stageSectorStanceOrder: (sectorId, stance) => ipcRenderer.invoke('stage-sector-stance-order', { sectorId, stance }),

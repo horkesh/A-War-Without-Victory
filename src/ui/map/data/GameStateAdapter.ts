@@ -1386,12 +1386,6 @@ export function parseGameState(json: unknown): LoadedGameState {
     const rawPlayerFaction = (meta?.player_faction as string | null | undefined) ?? null;
     const playerFaction = rawPlayerFaction ?? (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('dev') === '1' ? 'RS' : null) ?? (typeof import.meta !== 'undefined' && import.meta.env?.DEV ? 'RS' : null);
 
-    const rawDesiredCap = state.military.brigade_desired_aor_cap as Record<string, number> | undefined;
-    const brigadeDesiredAoRCap: Record<string, number> | undefined =
-        rawDesiredCap && typeof rawDesiredCap === 'object' && !Array.isArray(rawDesiredCap)
-            ? Object.fromEntries(Object.entries(rawDesiredCap).filter(([, v]) => typeof v === 'number' && v >= 1 && v <= 4).sort((a, b) => a[0].localeCompare(b[0])))
-            : undefined;
-
     // Single pass: derive fogOfWar + sectorIntel from sector_intel records
     let fogOfWar: FogOfWarView | undefined;
     const sectorIntelRecords: LoadedGameState['sectorIntel'] = [];
@@ -1784,7 +1778,6 @@ export function parseGameState(json: unknown): LoadedGameState {
         player_faction: playerFaction ?? undefined,
         rbih_hrhb_war_earliest_turn: rbih_hrhb_war_earliest_turn ?? null,
         war_alliance_rbih_hrhb: war_alliance_rbih_hrhb ?? null,
-        brigadeDesiredAoRCap: brigadeDesiredAoRCap && Object.keys(brigadeDesiredAoRCap).length > 0 ? brigadeDesiredAoRCap : undefined,
         frontEdges: frontEdges && frontEdges.length > 0 ? frontEdges : undefined,
         frontEdgesOsid: frontEdgesOsid && frontEdgesOsid.length > 0 ? frontEdgesOsid : undefined,
         assignableFrontSegments, frontPressureByEdge,

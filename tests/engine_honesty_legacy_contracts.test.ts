@@ -206,6 +206,22 @@ describe('engine honesty legacy contracts', () => {
     expect(useIpc).not.toContain('renameTheatre');
   });
 
+  it('does not expose legacy AoR-cap bridges or adapter fields in the live player shell', () => {
+    const preload = readFileSync(join(process.cwd(), 'src', 'desktop', 'preload.cjs'), 'utf8');
+    const electronMain = readFileSync(join(process.cwd(), 'src', 'desktop', 'electron-main.cjs'), 'utf8');
+    const useIpc = readFileSync(join(process.cwd(), 'src', 'ui', 'map', 'desktop', 'useIPC.ts'), 'utf8');
+    const types = readFileSync(join(process.cwd(), 'src', 'ui', 'map', 'data', 'types.ts'), 'utf8');
+    const adapter = readFileSync(join(process.cwd(), 'src', 'ui', 'map', 'data', 'GameStateAdapter.ts'), 'utf8');
+
+    expect(preload).not.toContain('setBrigadeDesiredAoRCap');
+    expect(preload).not.toContain('set-brigade-desired-aor-cap');
+    expect(electronMain).not.toContain('set-brigade-desired-aor-cap');
+    expect(useIpc).not.toContain('setBrigadeDesiredAoRCap');
+    expect(types).not.toContain('brigadeDesiredAoRCap');
+    expect(adapter).not.toContain('brigadeDesiredAoRCap');
+    expect(adapter).not.toContain('brigade_desired_aor_cap');
+  });
+
   it('does not keep retired front/theatre mutation helpers exported from desktop_sim', () => {
     const desktopSim = readFileSync(join(process.cwd(), 'src', 'desktop', 'desktop_sim.ts'), 'utf8');
 

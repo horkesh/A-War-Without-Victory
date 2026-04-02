@@ -42,7 +42,6 @@ interface WindowAwwv {
     setTurnReportUpdatedCallback: (cb: ((report: unknown) => void) | null) => void;
     getRecruitmentCatalog: () => Promise<{ brigades?: unknown[]; error?: string }>;
     applyRecruitment: (brigadeId: string, equipmentClass: string) => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
-    setBrigadeDesiredAoRCap: (brigadeId: string, cap: number) => Promise<{ ok: boolean; error?: string }>;
     getSettings: () => Promise<{ ok: boolean; settings?: unknown; error?: string }>;
     saveSettings: (settings: unknown) => Promise<{ ok: boolean; error?: string }>;
     getAiCommanderConfig: () => Promise<{ mode: string; session_cost_estimate: number }>;
@@ -150,10 +149,6 @@ export function useIPC() {
             applyRecruitment: awwv
                 ? (brigadeId: string, equipmentClass: string) => awwv.applyRecruitment(brigadeId, equipmentClass)
                 : makeNoop<{ ok: boolean; stateJson?: string; error?: string }>(),
-
-            setBrigadeDesiredAoRCap: awwv
-                ? (brigadeId: string, cap: number) => awwv.setBrigadeDesiredAoRCap(brigadeId, cap)
-                : makeNoop<{ ok: boolean; error?: string }>(),
 
             getSettings: awwv
                 ? () => awwv.getSettings()
