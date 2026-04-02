@@ -18,6 +18,13 @@ function humanizeIdentifierLabel(value: string | null | undefined): string {
     return toTitleCase(normalized.replace(/[:\-]/g, '_'));
 }
 
+export function getPlayerSafeOfficerName(
+    name: string | null | undefined,
+    fallback = 'An officer',
+): string {
+    return (name ?? '').trim() || fallback;
+}
+
 export function getPlayerSafeCorpsName(
     name: string | null | undefined,
     id: string | null | undefined,
@@ -46,6 +53,14 @@ export function getPlayerSafeBrigadeName(
     fallback = 'Assigned brigade',
 ): string {
     return (name ?? '').trim() || fallback;
+}
+
+export function getPlayerSafeSettlementName(
+    settlementId: string | null | undefined,
+    fallback = 'Selected settlement',
+): string {
+    const humanized = humanizeIdentifierLabel(settlementId);
+    return humanized || fallback;
 }
 
 export function getPlayerSafeMunicipalityName(

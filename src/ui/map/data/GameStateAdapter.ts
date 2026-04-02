@@ -12,7 +12,7 @@ import type {
     MilitiaPoolView, MobilizationSummaryView, MovementOrderSettlementView, NamedOfficerStateView, NamedOfficerView,
     OperationView, RepositionOrderView, RecruitmentView,
 } from './types';
-import { getPlayerSafeCorpsName } from '../utils/playerSafeText.js';
+import { getPlayerSafeCorpsName, getPlayerSafeOfficerName } from '../utils/playerSafeText.js';
 import { buildControlLookup, buildStatusLookup } from './ControlLookup.js';
 import { getMunicipalitySupportLabel } from '../../../sim/combat/municipality_support.js';
 import { strictCompare } from '../../../state/validateGameState.js';
@@ -2131,8 +2131,7 @@ function derivePendingOfficerEvents(state: any): LoadedGameState['pendingOfficer
 
     const getOfficerName = (id: string): string => {
         const o = officerData?.find((d: any) => d.id === id);
-        const name = typeof o?.name === 'string' ? o.name.trim() : '';
-        return name || 'An officer';
+        return getPlayerSafeOfficerName(typeof o?.name === 'string' ? o.name : null);
     };
 
     const getOfficerStats = (id: string) => {

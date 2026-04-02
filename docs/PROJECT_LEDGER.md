@@ -20312,3 +20312,34 @@ Why this matters:
 - shell density is set by the structural components, not just the detail cards
 - `GlassPanel` is especially important because it propagates spacing habits across many overlays
 - this slice makes the command shell feel more deliberate and less like a padded generic dashboard
+### 2026-04-02 - Player-safe fallback helper canonicalization
+
+Removed another quiet source of player-shell drift in `F:\AWWV_exec_clean` by centralizing officer/settlement/municipality fallback text into the shared `playerSafeText` layer.
+
+Implemented:
+- `src/ui/map/utils/playerSafeText.ts`
+  - added shared `getPlayerSafeOfficerName(...)`
+  - added shared `getPlayerSafeSettlementName(...)`
+- `src/ui/map/data/GameStateAdapter.ts`
+  - pending officer event names now use the shared helper
+- `src/ui/warroom/components/NewspaperModal.ts`
+  - officer fallback names now use the shared helper
+- `src/ui/warroom/components/SettlementInfoPanel.ts`
+  - removed local settlement fallback helper
+- `src/ui/warroom/components/WarPlanningMap.ts`
+  - removed local settlement fallback helper
+- `src/ui/warroom/map_viewer_app.ts`
+  - removed duplicated identifier/fallback helpers and now uses the shared settlement / municipality helpers
+- `docs/40_reports/implemented/20260402_PLAYER_SAFE_FALLBACK_HELPER_CANONICALIZATION.md`
+  - documented the slice
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`26` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- shared player-safe helpers only become real product boundaries once local fallback clones are deleted
+- duplicated fallback helpers are how raw ids and inconsistent tone sneak back into old shell surfaces
+- centralizing them now reduces future drift before the larger architecture reshaping pass

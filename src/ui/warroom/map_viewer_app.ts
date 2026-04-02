@@ -1,3 +1,8 @@
+import {
+    getPlayerSafeMunicipalityName,
+    getPlayerSafeSettlementName,
+} from '../map/utils/playerSafeText.js';
+
 /**
  * Standalone War Planning Map viewer — from scratch, full GUI.
  * Open via http://localhost:3000/map_viewer_standalone.html
@@ -46,28 +51,6 @@ const FORMATION_DEFAULT_SHAPE: 'square' | 'diamond' = 'square';
 /** Key for political_control_data.by_settlement_id (expects S-prefixed). */
 function controlKey(sid: string): string {
     return sid.startsWith('S') ? sid : `S${sid}`;
-}
-
-function humanizeIdentifierLabel(value: string | null | undefined): string {
-    const safeValue = (value ?? '').trim();
-    if (!safeValue) return '';
-    if (!/[_:-]/.test(safeValue)) return safeValue;
-    return safeValue
-        .replace(/^op:/, '')
-        .split(/[:_-]/)
-        .filter(Boolean)
-        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-        .join(' ');
-}
-
-function getPlayerSafeSettlementLabel(sid: string): string {
-    const name = humanizeIdentifierLabel(sid);
-    return name || 'Selected settlement';
-}
-
-function getPlayerSafeMunicipalityLabel(mid: string | null | undefined): string {
-    const name = humanizeIdentifierLabel(mid);
-    return name || 'Municipality';
 }
 
 /**
@@ -519,7 +502,7 @@ async function main(): Promise<void> {
                 const controller = controlData.by_settlement_id?.[key] ?? controlData.by_settlement_id?.[sid] ?? 'null';
                 const censusId = sid.startsWith('S') ? sid.slice(1) : sid;
                 const nameEntry = settlementNames[censusId] ?? settlementNames[sid];
-                const name = (feature.properties as { name?: string })?.name ?? nameEntry?.name ?? getPlayerSafeSettlementLabel(sid);
+                const name = (feature.properties as { name?: string })?.name ?? nameEntry?.name ?? getPlayerSafeSettlementName(sid);
                 const pop = (feature.properties as { pop?: number })?.pop;
                 const popStr = pop != null ? pop.toLocaleString() : '—';
                 showTooltip(`${name} — ${controller} — pop ${popStr}`, e.clientX, e.clientY);
@@ -560,14 +543,14 @@ async function main(): Promise<void> {
         const censusId = sid.startsWith('S') ? sid.slice(1) : sid;
         const nameEntry = settlementNames[censusId] ?? settlementNames[sid];
         const props = found.properties as { name?: string; pop?: number; nato_class?: string; majority_ethnicity?: string };
-        const name = props?.name ?? nameEntry?.name ?? getPlayerSafeSettlementLabel(sid);
+        const name = props?.name ?? nameEntry?.name ?? getPlayerSafeSettlementName(sid);
         const pop = props?.pop;
         const popStr = pop != null ? pop.toLocaleString() : '—';
         const natoClass = props?.nato_class ?? '—';
         const munId = found.properties?.municipality_id;
         const munMid = munId != null ? String(munId) : undefined;
         const munEntry = munMid ? mun1990Names[munMid] : undefined;
-        const munName = munEntry?.display_name ?? getPlayerSafeMunicipalityLabel(munMid);
+        const munName = munEntry?.display_name ?? getPlayerSafeMunicipalityName(munMid, 'Municipality');
         const contested = status === 'CONTESTED' || status === 'HIGHLY_CONTESTED' ? ` (${status})` : '';
         const stateLabel = status ?? 'CONSOLIDATED';
 

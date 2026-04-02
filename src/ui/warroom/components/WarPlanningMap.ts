@@ -11,7 +11,7 @@ import wallMapFrameUrl from '../assets/wall_map_frame_v1.webp?url';
 import type { InvestmentPanelMunInfo, Phase0DirectiveState } from './InvestmentPanel.js';
 import { InvestmentPanel } from './InvestmentPanel.js';
 import { SettlementInfoPanel } from './SettlementInfoPanel.js';
-import { getPlayerSafeMunicipalityName } from '../../map/utils/playerSafeText.js';
+import { getPlayerSafeMunicipalityName, getPlayerSafeSettlementName } from '../../map/utils/playerSafeText.js';
 
 /** GeoJSON Position [x, y] or [x, y, z]. */
 type Position = [number, number] | [number, number, number];
@@ -60,11 +60,6 @@ function formatTurnDate(turn: number): string {
     const d = new Date(start);
     d.setDate(d.getDate() + turn * 7);
     return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
-}
-
-function getPlayerSafeSettlementLabel(sid: string): string {
-    const normalized = sid.startsWith('S') ? sid.slice(1) : sid;
-    return normalized ? `Settlement ${normalized}` : 'Selected settlement';
 }
 
 export class WarPlanningMap {
@@ -621,7 +616,7 @@ export class WarPlanningMap {
         const names = this.settlementNames?.by_census_id ?? {};
         for (const [sid, feature] of this.polygons.entries()) {
             const censusId = sid.startsWith('S') ? sid.slice(1) : sid;
-            const name = names[censusId]?.name ?? getPlayerSafeSettlementLabel(sid);
+            const name = names[censusId]?.name ?? getPlayerSafeSettlementName(sid);
             const bbox = this.getFeatureBbox(feature);
             this.searchIndex.push({ sid, name, bbox, feature });
         }

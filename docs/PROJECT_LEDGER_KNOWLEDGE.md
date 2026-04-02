@@ -1487,3 +1487,6 @@ In AWWV, once the shell is truthful, the next quality jump is usually density: t
 ### Shared panel primitives are spacing authority surfaces
 
 If a common shell primitive like `GlassPanel` is roomy by default, every downstream overlay inherits that waste even when the individual panel code is otherwise disciplined. In AWWV, density work should start at the shell primitives and the structural rails (`OOBSidebar`, Army HQ, Codex), not only at the leaf cards.
+### Shared fallback helpers should be treated as player-truth authority surfaces
+
+In AWWV, once a helper like `playerSafeText.ts` exists, every Warroom/map shell that needs a last-resort officer, settlement, or municipality label should route through it instead of cloning a local version. Duplicated “small” fallback helpers drift quickly and become quiet re-entry points for raw ids, inconsistent phrasing, and different ideas of what counts as player-safe text.
