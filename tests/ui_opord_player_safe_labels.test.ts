@@ -55,10 +55,27 @@ describe('buildOpordDisplayModel', () => {
             new URL('../src/ui/map/components/OperationBriefingModal.tsx', import.meta.url),
             'utf8',
         );
+        const attackSource = readFileSync(
+            new URL('../src/ui/map/components/AttackConfirmation.tsx', import.meta.url),
+            'utf8',
+        );
+        const eventSource = readFileSync(
+            new URL('../src/ui/map/components/EventModal.tsx', import.meta.url),
+            'utf8',
+        );
+        const decisionSource = readFileSync(
+            new URL('../src/ui/map/components/EventDecisionModal.tsx', import.meta.url),
+            'utf8',
+        );
 
         expect(oobSource).toContain('getPlayerSafeMilitaryFactionName(faction)');
         expect(oobSource).toContain('getPlayerSafeMilitaryFactionName(op.faction)');
         expect(oobSource).not.toContain('View ${faction} army summary');
         expect(briefingSource).toContain('getPlayerSafeMilitaryFactionName(operation.faction)');
+        expect(attackSource).toContain('getPlayerSafeMilitaryFactionName(attacker.faction)');
+        expect(attackSource).toContain('getPlayerSafeMilitaryFactionName(defender.faction)');
+        expect(eventSource).toContain('getPlayerSafePoliticalFactionName(effect.faction)');
+        expect(eventSource).toContain("getPlayerSafePoliticalFactionName('RBiH')");
+        expect(decisionSource).toContain('getPlayerSafePoliticalFactionName(decision.faction)');
     });
 });

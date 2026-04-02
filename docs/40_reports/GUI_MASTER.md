@@ -267,3 +267,9 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - OOB mobilization/operations headings and operation subtitles no longer fall back to raw faction ids.
 - Operation Briefing modal now shows corps plus player-safe military faction naming in the header.
 - See `docs/40_reports/implemented/20260402_PLAYER_SAFE_FACTION_SHELL_LABELS.md`.
+
+## 2026-04-02 - Player-safe event and attack labels
+
+- Attack confirmation now shows player-safe military faction names for attacker and defender.
+- Event modal and EventDecision modal now use player-safe political faction naming in effect summaries and headers.
+- See `docs/40_reports/implemented/20260402_PLAYER_SAFE_EVENT_AND_ATTACK_LABELS.md`.

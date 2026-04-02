@@ -1561,3 +1561,7 @@ If `OperationsPanel.tsx` says Army HQ owns command review, it must not still exp
 ### Player-facing faction rails should never fall back to raw faction ids
 
 OOB headings, operation subtitles, and briefing headers are core shell surfaces. They must use player-safe military or political faction names rather than raw ids like `RBiH` when a clearer human-facing label is available.
+
+### Event and attack modals are player shells, not debug/status readouts
+
+Attack confirmations, event queues, and decision modals should use player-safe military or political faction language just like any larger panel. These are high-attention decision surfaces, so raw faction ids leak product tone fast.

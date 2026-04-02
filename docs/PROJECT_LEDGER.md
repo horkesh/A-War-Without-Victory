@@ -20912,3 +20912,17 @@ Why this matters:
 - Docs:
   - `docs/40_reports/implemented/20260402_PLAYER_SAFE_FACTION_SHELL_LABELS.md`
   - `docs/40_reports/GUI_MASTER.md`
+
+## 2026-04-02 - Player-safe event and attack labels
+
+- Worktree/branch: `F:\AWWV_exec_clean` on `codex/engine-health-wave1`
+- Cleaned raw faction-id jargon out of live attack confirmation and event decision shells.
+- `AttackConfirmation.tsx` now uses player-safe military faction names for attacker and defender labels.
+- `EventModal.tsx` and `EventDecisionModal.tsx` now use player-safe political faction naming in effect summaries, faction badges, and decision headers.
+- Added regression guards in the canonical `tests/ui_opord_player_safe_labels.test.ts` suite.
+- Verification:
+  - `node_modules\.bin\vitest.cmd run tests\ui_opord_player_safe_labels.test.ts tests\warroom_player_visibility.test.ts tests\ui_shell_navigation.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_PLAYER_SAFE_EVENT_AND_ATTACK_LABELS.md`
+  - `docs/40_reports/GUI_MASTER.md`
