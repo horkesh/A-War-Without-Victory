@@ -103,10 +103,7 @@ export function buildCorpsOperation(
 /**
  * Factory for commander-generated sector-attack operations.
  *
- * `sectorId` is the primary sector anchor (`op.sector_id`). Under the sector-anchored
- * launch contract (Phase 3), callers must supply this — it will become required.
- * Current callers pass it from `findSectorWithMostTargetOverlap`; corridor breach
- * passes `undefined` (no sector) — both are transitional behavior.
+ * `sectorId` is the primary sector anchor (`op.sector_id`).
  */
 export function buildCommanderOperation(
     corpsId: string,
@@ -124,7 +121,7 @@ export function buildCommanderOperation(
         started_turn: turn,
         phase_started_turn: turn,
         participating_brigades: participatingBrigades,
-        sector_id: sectorId ?? undefined,
+        ...(sectorId ? { sector_id: sectorId } : {}),
         objectives,
         current_objective_index: 0,
         planning_duration: 1,
@@ -213,6 +210,7 @@ export function buildProbeOperation(
     corpsId: string,
     turn: number,
     brigadeId: string,
+    sectorId?: string,
 ): CorpsOperation {
     return {
         name: `probe_${corpsId}_t${turn}`,
@@ -221,6 +219,7 @@ export function buildProbeOperation(
         started_turn: turn,
         phase_started_turn: turn,
         participating_brigades: [brigadeId],
+        ...(sectorId ? { sector_id: sectorId } : {}),
         planning_duration: 0,
         supply_readiness: 1.0,
         momentum: 0,

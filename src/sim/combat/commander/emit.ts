@@ -17,7 +17,7 @@ import type {
 } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { spatialFriendlyDistance } from '../../spatial_context.js';
-import { buildCommanderOperation, buildProbeOperation, getMaxOperationSlots } from '../corps_operation_helpers.js';
+import { buildCommanderOperation, buildProbeOperation, derivePrimarySectorForBrigades, getMaxOperationSlots } from '../corps_operation_helpers.js';
 import type {
     CommanderBriefing,
     CommanderOutput,
@@ -734,12 +734,18 @@ function buildOperations(
             })[0];
 
         if (probeBrigade) {
+            const probeSectorId = derivePrimarySectorForBrigades(
+                briefing.sectors.filter((sector) => sector.corps_id === briefing.corps_id),
+                briefing.corps_id,
+                [probeBrigade.brigade_id],
+            );
             // PERMITTED CREATION ENTRY POINT — commander-generated operations only.
             // All CorpsOperation objects must be built via the factory functions in corps_operation_helpers.ts.
             const probeOp = buildProbeOperation(
                 briefing.corps_id,
                 briefing.turn,
                 probeBrigade.brigade_id,
+                probeSectorId,
             );
             ops.push(probeOp);
         }

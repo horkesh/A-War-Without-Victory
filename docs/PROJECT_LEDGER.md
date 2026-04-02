@@ -19687,3 +19687,32 @@ Why this matters:
 - player-shell leaks often survive in fallback strings and summary chrome after the obvious panels are fixed
 - scripted-op tests that still verify old catalogs are false comfort, not regression protection
 - sector anchoring only becomes trustworthy when historical/scripted operation injectors follow the same contract as the rest of the ops lifecycle
+
+---
+### 2026-04-02 — Engine health Wave 1 continued: probe operations now obey the sector-anchored contract too
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing the last obvious live exception in current operation birth paths.
+
+Implemented:
+- `src/sim/combat/corps_operation_helpers.ts`
+  - `buildProbeOperation(...)` now accepts and stores `sector_id`
+  - removed transitional language suggesting commander-created missing-sector ops are still acceptable
+- `src/sim/combat/commander/emit.ts`
+  - probe generation now derives a primary sector from the probe brigade before creating the operation shell
+- `src/sim/combat/sector_offensive.ts`
+  - lifecycle-owner docs now describe sector anchoring as the contract for all current live operation creation paths
+- `tests/corps_operation_helpers.test.ts`
+  - added a regression proving probe operations retain the supplied sector anchor
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded the Wave 1 report with this checkpoint
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\corps_operation_helpers.test.ts tests\commander\commander.test.ts`
+  - PASS (`80` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- a canonical field is not canonical if probe operations are still allowed to skip it
+- this removes another “special case” that future Claude work could mistake for a valid pattern
+- once every live birth path is sector-anchored, later ops cleanup can simplify around that assumption instead of carrying conditional logic forever

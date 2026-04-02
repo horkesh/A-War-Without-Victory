@@ -1043,3 +1043,29 @@ Why this matters:
 - a player shell is still leaking if queued orders can fall back to raw formation ids
 - Warroom supply chrome becomes omniscient the moment `ownSupply` stops meaning “municipalities I actually control”
 - stale regression suites are dangerous when they still look authoritative but verify old catalogs, old queue chains, or pre-sector-anchor operation truth
+
+## Additional Wave 1 slice: probe operations now obey the sector-anchored contract too
+
+This checkpoint closes the last obvious live exception in the current operation birth paths. Commander-created `probe` operations were still entering the lifecycle without a `sector_id`, even after pre-planned, triggered, emergency-defense, and main commander attack ops had been brought into the sector-anchored model.
+
+Implemented:
+- `src/sim/combat/corps_operation_helpers.ts`
+  - `buildProbeOperation(...)` now accepts and stores `sector_id`
+  - `buildCommanderOperation(...)` no longer describes missing-sector creation as acceptable transitional behavior
+- `src/sim/combat/commander/emit.ts`
+  - probe generation now derives a primary sector from the probe brigade before creating the operation shell
+- `src/sim/combat/sector_offensive.ts`
+  - lifecycle owner docs now describe sector anchoring as the contract for all live operation creation paths
+- `tests/corps_operation_helpers.test.ts`
+  - added a regression proving probe operations retain the supplied sector anchor
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\corps_operation_helpers.test.ts tests\commander\commander.test.ts`
+  - PASS (`80` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- canonical contracts decay when a repo keeps one “special case” around for convenience
+- probes are still real operations in the player and AI lifecycle, so they need the same anchor truth as every other live op
+- once the last exception is gone, future ops work gets simpler because `sector_id` can be assumed instead of negotiated

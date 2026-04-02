@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
     buildEmergencyDefenseOperation,
+    buildProbeOperation,
     derivePrimarySectorForBrigades,
     getMaxOperationSlots,
     hasAvailableSlot,
@@ -170,5 +171,18 @@ describe('emergency defense sector anchoring', () => {
         expect(operation.type).toBe('strategic_defense');
         expect(operation.sector_id).toBe('sector:arbih_3rd:ozren');
         expect(operation.is_emergency).toBe(true);
+    });
+
+    it('builds probe operations with a sector anchor when supplied', () => {
+        const operation = buildProbeOperation(
+            'arbih_3rd_corps',
+            8,
+            'b1',
+            'sector:arbih_3rd:ozren',
+        );
+
+        expect(operation.type).toBe('probe');
+        expect(operation.sector_id).toBe('sector:arbih_3rd:ozren');
+        expect(operation.participating_brigades).toEqual(['b1']);
     });
 });

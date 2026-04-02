@@ -34,7 +34,10 @@
  * eligible brigade pool derives from that sector's assigned brigades. Cross-sector brigades
  * join only as explicit bounded attachments (`attached_brigades`, `reinforcement_source`,
  * `supporting_sector_ids`). See `docs/plans/2026-04-01-v08x-sector-anchored-corps-operations-plan.md`.
- * Pre-planned and probe ops do not yet carry full sector anchoring — Phase 5 closes that gap.
+ * All current live operation creation paths are expected to provide a primary
+ * `sector_id` anchor. Legacy flat-field save compatibility remains supported
+ * during lifecycle advancement, but new operation birth without a sector anchor
+ * should be treated as a contract violation.
  *
  * Deterministic: sorted iteration, no randomness, no timestamps.
  */

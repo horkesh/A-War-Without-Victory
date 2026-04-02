@@ -1393,3 +1393,7 @@ Warroom `ownSupply` looked harmless because it was only a summary box, but it wa
 ### Queued-order lists are player surfaces too
 
 Raw formation ids do not stop being leaks just because they appear in a small order queue instead of a marquee panel. Order rails, badges, and miniature lists are still part of the product shell. If a player-facing list needs a fallback, use neutral brigade text rather than engine identifiers.
+
+### Canonical contracts only become real after the last “special case” disappears
+
+It is not enough for “most” operations to carry `sector_id`. As long as probe ops or some other live creator can still omit the field, every downstream system has to keep treating the contract as optional. In AWWV, the last exception is usually the most dangerous one because it teaches future work that the rule is negotiable.
