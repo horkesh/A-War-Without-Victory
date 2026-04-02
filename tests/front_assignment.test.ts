@@ -3,7 +3,7 @@ import { test } from 'node:test';
 
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
-import { buildFrontlineAssignedFormationSet, ensureBrigadeFrontAssignments, hasLiveSectorFrontlineTruth, isBrigadeAssignedToFront } from '../src/sim/combat/front_assignment.js';
+import { buildFrontlineAssignedFormationSet, hasLiveSectorFrontlineTruth, isBrigadeAssignedToFront } from '../src/sim/combat/front_assignment.js';
 
 function makeState(): GameState {
     return {
@@ -61,21 +61,13 @@ function makeState(): GameState {
 } as unknown as GameState;
 }
 
-test('ensureBrigadeFrontAssignments assigns brigades deterministically', () => {
+test('legacy brigade_front_assignment no longer creates runtime frontline truth', () => {
     const state = makeState();
-    ensureBrigadeFrontAssignments(state);
-    assert.strictEqual(state.military.brigade_front_assignment?.b1, 'RBiH__RS__S1__S2');
-    assert.strictEqual(state.military.brigade_front_assignment?.b2, 'RBiH__RS__S1__S2');
-    assert.ok(isBrigadeAssignedToFront(state, 'b1'));
-    assert.ok(isBrigadeAssignedToFront(state, 'b2'));
-});
-
-test('ensureBrigadeFrontAssignments repairs invalid assignments', () => {
-    const state = makeState();
-    state.military.brigade_front_assignment = { b1: 'MISSING_FRONT', b2: null };
-    ensureBrigadeFrontAssignments(state);
-    assert.strictEqual(state.military.brigade_front_assignment?.b1, 'RBiH__RS__S1__S2');
-    assert.strictEqual(state.military.brigade_front_assignment?.b2, 'RBiH__RS__S1__S2');
+    state.military.brigade_front_assignment = { b1: 'RBiH__RS__S1__S2', b2: 'RBiH__RS__S1__S2' };
+    const assigned = buildFrontlineAssignedFormationSet(state);
+    assert.deepStrictEqual([...assigned], []);
+    assert.equal(isBrigadeAssignedToFront(state, 'b1'), false);
+    assert.equal(isBrigadeAssignedToFront(state, 'b2'), false);
 });
 
 test('isBrigadeAssignedToFront treats corps sectors as frontline truth without legacy front assignments', () => {
@@ -145,7 +137,7 @@ test('sector frontline truth ignores stale legacy front assignments when sectors
     assert.equal(isBrigadeAssignedToFront(state, 'b3'), false);
 });
 
-test('legacy frontline fallback ignores invalid segments and inactive formations without repair', () => {
+test('legacy frontline fallback does not revive invalid or inactive formations', () => {
     const state = makeState();
     state.military.brigade_front_assignment = {
         b1: 'RBiH__RS__S1__S2',
@@ -170,7 +162,7 @@ test('legacy frontline fallback ignores invalid segments and inactive formations
     } as any;
 
     const assigned = buildFrontlineAssignedFormationSet(state);
-    assert.deepStrictEqual([...assigned].sort(), ['b1']);
+    assert.deepStrictEqual([...assigned], []);
     assert.equal(isBrigadeAssignedToFront(state, 'b2'), false);
     assert.equal(isBrigadeAssignedToFront(state, 'b3'), false);
 });

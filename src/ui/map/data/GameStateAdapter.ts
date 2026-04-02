@@ -1425,8 +1425,6 @@ export function parseGameState(json: unknown): LoadedGameState {
                 sectorIntelRecords.push({
                     friendly_sector_id: friendlySectorId,
                     enemy_sector_id: enemySectorId,
-                    enemy_faction: typeof rec.enemy_faction === 'string' ? rec.enemy_faction : '',
-                    enemy_corps_id: typeof rec.enemy_corps_id === 'string' ? rec.enemy_corps_id : '',
                     front_edge_count: typeof rec.front_edge_count === 'number' ? rec.front_edge_count : 0,
                     strength_category: (['unknown', 'thin', 'moderate', 'dense', 'fortress'].includes(rec.strength_category as string)
                         ? rec.strength_category as 'unknown' | 'thin' | 'moderate' | 'dense' | 'fortress' : 'unknown'),
@@ -1586,10 +1584,10 @@ export function parseGameState(json: unknown): LoadedGameState {
     let corpsFrontSectors: CorpsFrontSectorView[] | undefined;
     const rawSectors = state.military.corps_front_sectors as Record<string, Record<string, unknown>> | undefined;
     const rawOpsecSectors = Array.isArray(state.military.opsec_sectors)
-        ? state.military.opsec_sectors
+        ? state.military.opsec_sectors as unknown[]
         : Array.isArray((state as any).opsec_sectors)
-            ? (state as any).opsec_sectors
-            : [];
+            ? (state as any).opsec_sectors as unknown[]
+            : [] as unknown[];
     const opsecSectorSet = new Set(
         rawOpsecSectors.filter((value): value is string => typeof value === 'string')
     );
@@ -1602,8 +1600,12 @@ export function parseGameState(json: unknown): LoadedGameState {
             if (!corpsId || !faction) continue;
             const corpsFormation = formationsRecord[corpsId];
             const corpsName = corpsFormation && typeof corpsFormation.name === 'string' ? corpsFormation.name : corpsId;
-            const edgeIds = Array.isArray(s.edge_ids) ? (s.edge_ids as string[]).filter(e => typeof e === 'string').sort((a, b) => a.localeCompare(b)) : [];
-            const opposingFactions = Array.isArray(s.opposing_factions) ? (s.opposing_factions as string[]).filter(f => typeof f === 'string').sort((a, b) => a.localeCompare(b)) : [];
+            const edgeIds = Array.isArray(s.edge_ids)
+                ? (s.edge_ids as unknown[]).filter((value): value is string => typeof value === 'string').sort((a, b) => a.localeCompare(b))
+                : [];
+            const opposingFactions = Array.isArray(s.opposing_factions)
+                ? (s.opposing_factions as unknown[]).filter((value): value is string => typeof value === 'string').sort((a, b) => a.localeCompare(b))
+                : [];
             const subSegments = Array.isArray(s.sub_segments) ? s.sub_segments as Array<Record<string, unknown>> : [];
             const assignedBrigadeIds = Array.isArray(s.assigned_brigade_ids) ? (s.assigned_brigade_ids as string[]).filter(id => typeof id === 'string').sort((a, b) => a.localeCompare(b)) : [];
             const reserveBrigadeIds = Array.isArray(s.reserve_brigade_ids) ? (s.reserve_brigade_ids as string[]).filter(id => typeof id === 'string').sort((a, b) => a.localeCompare(b)) : [];

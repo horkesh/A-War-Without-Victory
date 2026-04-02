@@ -232,9 +232,13 @@ describe('engine honesty legacy contracts', () => {
 
   it('does not keep a dead local-front constructor pretending to be live runtime authority', () => {
     const localFrontDefense = readFileSync(join(process.cwd(), 'src', 'sim', 'combat', 'local_front_defense.ts'), 'utf8');
+    const frontAssignment = readFileSync(join(process.cwd(), 'src', 'sim', 'combat', 'front_assignment.ts'), 'utf8');
+    const warPhases = readFileSync(join(process.cwd(), 'src', 'sim', 'turn_phases', 'war_phases.ts'), 'utf8');
     const gameState = readFileSync(join(process.cwd(), 'src', 'state', 'game_state.ts'), 'utf8');
 
     expect(localFrontDefense).not.toContain('export function buildLocalFronts');
+    expect(frontAssignment).not.toContain('ensureBrigadeFrontAssignments');
+    expect(warPhases).not.toContain('ensure-brigade-front-assignment');
     expect(gameState).toContain('Legacy compatibility cache only. No longer rebuilt in the live war pipeline.');
   });
 

@@ -2,8 +2,6 @@ import type { LoadedGameState } from '../../data/types';
 
 interface SectorIntelRecordView {
     friendly_sector_id: string;
-    enemy_corps_id?: string;
-    enemy_faction?: string;
     offensive_signs: boolean;
     posture?: string;
     posture_observed?: string;

@@ -71,6 +71,9 @@ test('parseGameState derives fog-of-war visibility from sector_intel', () => {
     assert.ok(parsed.fogOfWar);
     assert.deepEqual(parsed.fogOfWar?.visibleEnemyOsids, ['op:rbih:deep', 'op:rbih:frontline']);
     assert.deepEqual(parsed.fogOfWar?.visibleEnemySectorIds, ['rbih_sector']);
+    assert.equal(parsed.sectorIntel?.[0]?.enemy_sector_id, 'rbih_sector');
+    assert.equal('enemy_faction' in (parsed.sectorIntel?.[0] ?? {}), false);
+    assert.equal('enemy_corps_id' in (parsed.sectorIntel?.[0] ?? {}), false);
   });
 
 test('fog builder uses sector-intel-derived visible enemy osids', () => {

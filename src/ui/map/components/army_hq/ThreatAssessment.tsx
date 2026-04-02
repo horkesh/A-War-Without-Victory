@@ -59,15 +59,19 @@ function ThreatSection({
                             <div className="text-[12px] text-text-primary leading-snug font-bold">{item.title}</div>
                             <div className="text-[11px] text-text-secondary leading-snug">{item.detail}</div>
                         </div>
-                        {item.friendlyCorpsId && onCorpsClick && (
+                        {(() => {
+                            const friendlyCorpsId = item.friendlyCorpsId;
+                            if (!friendlyCorpsId || !onCorpsClick) return null;
+                            return (
                             <button
                                 type="button"
-                                onClick={() => onCorpsClick(item.friendlyCorpsId)}
+                                onClick={() => onCorpsClick(friendlyCorpsId)}
                                 className="text-amber-400 hover:underline cursor-pointer text-[11px] whitespace-nowrap shrink-0"
                             >
                                 Front
                             </button>
-                        )}
+                            );
+                        })()}
                     </div>
                 ))}
             </div>

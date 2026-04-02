@@ -21331,3 +21331,36 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
   - `node .\\node_modules\\vitest\\vitest.mjs run tests\\engine_honesty_legacy_contracts.test.ts tests\\ui_opord_player_safe_labels.test.ts tests\\ui_player_visibility.test.ts tests\\ui_map_render_smoke.test.ts`
 - Environment note:
   - `npm.cmd run warroom:build` is currently blocked in this environment because `vite` is not on PATH here (`'vite' is not recognized...`); the focused shell tests are green
+## 2026-04-03 - Frontline authority and player-shell intel reduction
+
+### Summary
+- Retired `brigade_front_assignment` as a live runtime frontline authority.
+- Made sectors the only accepted frontline truth for runtime assignment, frontline fatigue, and local density modifiers.
+- Reduced the tactical-map `sectorIntel` player DTO so it no longer exports enemy corps/faction identity that the live Army HQ threat UI does not use.
+
+### Files changed
+- `src/sim/combat/front_assignment.ts`
+- `src/sim/combat/local_front_defense.ts`
+- `src/sim/turn_phases/war_phases.ts`
+- `src/ui/map/data/types.ts`
+- `src/ui/map/data/GameStateAdapter.ts`
+- `src/ui/map/components/army_hq/generateThreatAssessment.ts`
+- `src/ui/map/components/army_hq/ThreatAssessment.tsx`
+- `tests/front_assignment.test.ts`
+- `tests/formation_fatigue_frontline_assignment.test.ts`
+- `tests/local_front_density_modifier_precedence.test.ts`
+- `tests/ui_map_fog_and_operation_contracts.test.ts`
+- `tests/ui_map_render_smoke.test.ts`
+- `tests/engine_honesty_legacy_contracts.test.ts`
+- `docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md`
+- `docs/40_reports/GUI_MASTER.md`
+- `docs/40_reports/implemented/20260403_FRONTLINE_AUTHORITY_AND_PLAYER_SHELL_INTEL_REDUCTION.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- A compatibility lane that still writes or shapes runtime frontline truth is not compatibility; it is a second engine.
+- The player shell should not carry enemy identity fields “just in case” when the live UI never renders them.
+
+### Verification
+- `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\front_assignment.test.ts tests\\formation_fatigue_frontline_assignment.test.ts tests\\local_front_density_modifier_precedence.test.ts tests\\ui_map_fog_and_operation_contracts.test.ts tests\\ui_map_game_state_adapter.test.ts`
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\engine_honesty_legacy_contracts.test.ts tests\\ui_map_render_smoke.test.ts tests\\ui_player_visibility.test.ts`

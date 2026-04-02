@@ -132,7 +132,6 @@ import { checkTriggeredOperations } from '../combat/triggered_operations.js';
 import { computeMilitiaGarrisons } from '../combat/militia_garrison.js';
 import { activateOGs, updateOGLifecycle } from '../combat/operational_groups.js';
 import { deriveSectorIntel } from '../combat/sector_intel.js';
-import { ensureBrigadeFrontAssignments, hasLiveSectorFrontlineTruth } from '../combat/front_assignment.js';
 import { resolveAttackOrders } from '../combat/resolve_attack_orders.js';
 import { resolveAttackOrdersOsid, displaceFormationsInEnemyTerritory } from '../combat/attack_resolution_osid.js';
 import { applyBrigadeMovementOrders } from '../combat/brigade_movement_orders.js';
@@ -273,14 +272,6 @@ export const warPhases: NamedPhase[] = [
                     ? context.state.military.war_front_edges_osid
                     : derivedFrontEdges;
             context.state.military.assignable_front_segments = deriveAssignableFrontSegments(frontEdgesForSegments);
-        }
-    },
-    {
-        name: 'ensure-brigade-front-assignment',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            if (hasLiveSectorFrontlineTruth(context.state)) return;
-            ensureBrigadeFrontAssignments(context.state);
         }
     },
     {

@@ -484,8 +484,6 @@ export interface OperationView {
 export interface SectorIntelRecordView {
     friendly_sector_id: string;
     enemy_sector_id: string;
-    enemy_faction: string;
-    enemy_corps_id: string;
     front_edge_count: number;
     strength_category: 'unknown' | 'thin' | 'moderate' | 'dense' | 'fortress';
     posture_observed: 'unknown' | 'defensive' | 'entrenched' | 'offensive_prep';
