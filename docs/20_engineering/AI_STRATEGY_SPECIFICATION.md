@@ -246,12 +246,13 @@ This section documents known gaps in what the corps CO `CommanderBriefing` knows
 **Fix:** Add `adjacent_corps: { corpsId: string; stance: string; active_ops: number }[]` from `state.military.corps_command`.
 **Status (2026-04-02): partially resolved.** `CommanderBriefing` now carries `adjacent_corps`, derived deterministically from active same-faction brigades physically neighboring the corps area, with each summary exposing neighboring `corps_id`, current `stance`, and active-operation count. Remaining work: broader planning/execution logic still treats this as context rather than a hard coordination input; future waves can use it to shape staging conflicts, reserve cannibalization, and synchronized timing.
 
-### BRIEF-GAP-6: `recent_territory_change` hardcoded to 0
+### BRIEF-GAP-6: territorial trend was missing from commander-side planning and over-attributed to the wrong layer
 
-**File:** `src/sim/combat/commander/assess.ts`
-**Gap:** `assessCorps()` returns `recent_territory_change: 0` always (hardcoded placeholder). The Theater Assessment is blind to whether a corps has been losing OSIDs in recent turns.
-**Impact:** P1. A corps losing 3 OSIDs/turn should trigger defensive reassessment. Currently the threat response is purely instantaneous (current threat_ratio), not trend-based. Corps COs don't know if they're bleeding territory.
-**Fix:** Compute over the last 3–5 turns: `Δ(friendly_osids)` for the corps area. Negative = ground loss = raise threat estimate; positive = gaining ground = can be more ambitious.
+**Files:** `src/sim/combat/army_hq_gathering.ts`, `src/sim/combat/commander/assess.ts`
+**Original gap:** The engine-health audit originally over-attributed this to `commander/assess.ts`. The real live problem was that Army HQ already computed `recent_territory_change` per corps, but front-priority scoring mostly ignored it, so a corps bleeding ground could still rank like a normal opportunity front. Commander-local `assess.ts` also still lacks its own explicit territorial-trend signal.
+**Impact:** P1. A corps losing ground should trigger defensive reassessment at the theater layer. Without trend-aware scoring, front-role assignment leans too heavily on instantaneous strength/threat snapshots.
+**Fix:** Use `recent_territory_change` inside Army HQ opportunity scoring and keep the remaining local-commander trend gap explicit instead of pretending the wrong subsystem owns it.
+**Status (2026-04-02): partially resolved.** Army HQ now computes `recent_territory_change` and uses it directly in front-opportunity scoring, penalizing corps that are losing ground and slightly rewarding corps that are consolidating gains. Remaining work: the local commander `assess.ts` path still does not carry an explicit territorial-trend signal of its own, so theater-level and corps-level defensive reassessment are not yet fully symmetrical.
 
 ### BRIEF-GAP-7: Reinforcement requests not consumed by Army HQ
 

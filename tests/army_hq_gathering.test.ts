@@ -573,6 +573,35 @@ describe('generateCampaignPlan', () => {
         const krajina = plan.front_priorities.find(p => p.corps_id === 'vrs_1st_krajina')!;
         expect(krajina.role).not.toBe('economy');
     });
+
+    it('recent territorial losses penalize front opportunity and keep a bleeding corps out of primary role', () => {
+        const assessment = makeAssessment({
+            corps_assessments: [
+                makeCorpsAssessment({
+                    corps_id: 'vrs_1st_krajina',
+                    available_brigades: 8,
+                    strength_class: 'strong',
+                    sector_threat_avg: 0.2,
+                    recent_territory_change: -2,
+                }),
+                makeCorpsAssessment({
+                    corps_id: 'vrs_drina',
+                    available_brigades: 7,
+                    strength_class: 'strong',
+                    sector_threat_avg: 0.2,
+                    recent_territory_change: 0,
+                }),
+            ],
+        });
+        const state = makeMinimalState({ turn: 60 });
+        const plan = generateCampaignPlan(state, 'RS', assessment, 60, 'regular_cadence', false);
+
+        const krajina = plan.front_priorities.find(p => p.corps_id === 'vrs_1st_krajina')!;
+        const drina = plan.front_priorities.find(p => p.corps_id === 'vrs_drina')!;
+
+        expect(drina.role).toBe('primary');
+        expect(krajina.role).not.toBe('primary');
+    });
 });
 
 // ── Synchronized Operations ──────────────────────────────────────────────

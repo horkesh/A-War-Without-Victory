@@ -1367,3 +1367,7 @@ If a command reaches desktop IPC, serializes into state, shows up in adapters, a
 ### Commander reinforcement pressure and elite reserve requests are not the same thing, but they must connect
 
 `commander_reinforcement_requests` on `CorpsCommandState` are the raw corps-to-Army-HQ pressure signal. `pending_reserve_requests` in the elite loan system are the downstream Army HQ reserve-action surface. Treating them as separate is correct; leaving them disconnected is not. The honest contract is: corps commanders persist reinforcement pressure, Army HQ theater assessment reads it, and the elite reserve queue must also consume it when generating candidate reserve loans.
+
+### Recent territorial change only matters if front-role scoring actually consumes it
+
+Computing `recent_territory_change` in theater assessment is not enough by itself. If Army HQ front-priority scoring ignores that field, the theater layer will still rank a bleeding corps like a normal offensive opportunity front. In AWWV, territorial trend must be consumed where roles are assigned, and any doc that points this gap at the wrong subsystem becomes a future bug magnet.

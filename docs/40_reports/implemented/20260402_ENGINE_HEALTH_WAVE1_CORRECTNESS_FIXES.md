@@ -897,3 +897,26 @@ Why this matters:
 - reinforcement loops are only real when the same signal survives all the way from corps assessment to reserve action
 - if Army HQ scoring hears the corps commander but the reserve queue does not, the repo still has a split-truth command stack
 - this turns commander reinforcement pressure from a diagnostic into an actionable reserve input without pretending the full strategic reserve system is finished
+
+## Additional Wave 1 slice: Army HQ front priorities now respect recent territorial trend
+
+This checkpoint closes another theater-level honesty gap. Army HQ was already computing `recent_territory_change` per corps, but front-priority scoring still leaned almost entirely on brigade count, strength class, exhaustion, and current threat. A corps actively losing ground could still be ranked like a normal opportunity front because the trend signal was not being consumed where role assignment actually happens.
+
+Implemented:
+- `src/sim/combat/army_hq_gathering_constants.ts`
+  - added explicit opportunity-score modifiers for recent territorial loss and gain
+- `src/sim/combat/army_hq_gathering.ts`
+  - `computeOpportunityScore(...)` now penalizes corps that have been losing ground and modestly rewards corps that are consolidating gains
+- `tests/army_hq_gathering.test.ts`
+  - added a regression proving a corps with recent territorial losses no longer outranks a similarly strong stable corps for the primary role
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\army_hq_gathering.test.ts`
+  - PASS (`66` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- theater command should not rank a bleeding corps as an offensive opportunity just because the static force snapshot still looks healthy
+- this turns recent control-change history from a decorative metric into a real front-role input
+- the remaining work is now clearer: Army HQ is trend-aware, but the local commander assess path still lacks its own explicit territory-trend signal

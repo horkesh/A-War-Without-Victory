@@ -521,6 +521,16 @@ function computeOpportunityScore(ca: CorpsAssessment): number {
     if (ca.sector_threat_avg < OPPORTUNITY_SCORE.LOW_THREAT_THRESHOLD) score += OPPORTUNITY_SCORE.LOW_THREAT_BONUS;
     else if (ca.sector_threat_avg > OPPORTUNITY_SCORE.HIGH_THREAT_THRESHOLD) score += OPPORTUNITY_SCORE.HIGH_THREAT_PENALTY;
 
+    if (ca.recent_territory_change <= -2) {
+        score += OPPORTUNITY_SCORE.TERRITORY_LOSS_HIGH_PENALTY;
+    } else if (ca.recent_territory_change < 0) {
+        score += OPPORTUNITY_SCORE.TERRITORY_LOSS_LOW_PENALTY;
+    } else if (ca.recent_territory_change >= 2) {
+        score += OPPORTUNITY_SCORE.TERRITORY_GAIN_HIGH_BONUS;
+    } else if (ca.recent_territory_change > 0) {
+        score += OPPORTUNITY_SCORE.TERRITORY_GAIN_LOW_BONUS;
+    }
+
     if (ca.commander_reinforcement_priority) {
         score += OPPORTUNITY_SCORE.COMMANDER_REINFORCEMENT_PRIORITY[ca.commander_reinforcement_priority];
         score += Math.max(

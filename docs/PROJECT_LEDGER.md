@@ -19520,3 +19520,31 @@ Why this matters:
 - a reinforcement loop is not real until the same signal survives all the way from corps commander output to actual reserve-request generation
 - if Army HQ scoring hears the corps commander but the elite reserve queue does not, the repo is still carrying split command truth
 - this makes commander reinforcement pressure actionable without pretending the broader reserve-transfer system is already finished
+
+---
+### 2026-04-02 — Engine health Wave 1 continued: Army HQ front priorities now respect recent territorial trend
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, closing a theater-level honesty gap around `recent_territory_change`.
+
+Implemented:
+- `src/sim/combat/army_hq_gathering_constants.ts`
+  - added explicit opportunity-score modifiers for recent territorial loss and gain
+- `src/sim/combat/army_hq_gathering.ts`
+  - `computeOpportunityScore(...)` now penalizes corps that have been losing ground and modestly rewards corps that are consolidating gains
+- `tests/army_hq_gathering.test.ts`
+  - added a regression proving a corps with recent territorial losses no longer outranks a similarly strong stable corps for the primary role
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded the Wave 1 report with the territorial-trend checkpoint
+- `docs/20_engineering/AI_STRATEGY_SPECIFICATION.md`
+  - corrected `BRIEF-GAP-6` so it points at the real Army HQ/front-priority gap and records the remaining local-commander asymmetry honestly
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\army_hq_gathering.test.ts`
+  - PASS (`66` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- a theater plan should not treat a corps that is actively losing ground like a normal offensive opportunity
+- this turns recent territorial change from a decorative assessment field into a real front-role input
+- it also removes a stale-doc trap: the old write-up pointed at the wrong subsystem and would have sent the next agent after the wrong fix
