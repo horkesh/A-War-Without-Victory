@@ -252,3 +252,11 @@ Army HQ, Codex, and other full-size overlays should obey the same density langua
 ### 22. Player-facing UI must never speak engine vocabulary when a human phrase exists
 
 OSID, raw faction ids, and similar backend nouns are valid in engine code, canon, and tests. They are not valid in the live player shell when a human phrase like staging area, positions, or a political-side display name can carry the meaning. The product should sound like a command environment, not a debugger.
+
+## 2026-04-02 - Tactical operations panel ownership cleanup
+
+- Tactical `OperationsPanel` is now map-facing only.
+- Removed `Launch Now`, `Halt`, and `Halt + Dig In` from the mounted tactical shell.
+- Army HQ remains the canonical command review and control owner.
+- Operation header now uses player-safe military faction names instead of raw faction ids.
+- See `docs/40_reports/implemented/20260402_TACTICAL_OPERATIONS_PANEL_SHELL_OWNERSHIP.md`.

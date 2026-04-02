@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { OperationView } from '../data/types';
 import { useGameStore } from '../store/gameStore';
 import { DETAIL_PANEL_STYLE } from './panelRail';
-import { useIPC } from '../desktop/useIPC';
 import {
   getOperationId,
   getOperationPhaseBadgeClass,
@@ -15,7 +14,7 @@ import { turnToDateString, formatOperationType, toTitleCase } from '../utils/for
 import { getFormationCommander } from '../utils/officerUtils';
 import { OfficerProfile } from './OfficerProfile';
 import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
-import { getPlayerSafeBrigadeName } from '../utils/playerSafeText';
+import { getPlayerSafeBrigadeName, getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { openArmyHQBriefingForCorps } from '../utils/shellNavigation';
 
 function compareOperations(a: OperationView, b: OperationView): number {
@@ -37,7 +36,6 @@ function getOperationHealthSummary(operation: OperationView): { label: string; c
 }
 
 export function OperationsPanel() {
-  const ipc = useIPC();
   const isOpen = useGameStore((s) => s.isOperationsPanelOpen);
   const setIsOpen = useGameStore((s) => s.setIsOperationsPanelOpen);
   const selectedOperationKey = useGameStore((s) => s.selectedOperationKey);
@@ -58,7 +56,6 @@ export function OperationsPanel() {
   const operationCardRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const objectiveButtonRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const [objectiveHoverOsid, setObjectiveHoverOsid] = useState<string | null>(null);
-  const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   const operations = useMemo(
     () => loadedGameState
@@ -104,7 +101,6 @@ export function OperationsPanel() {
   // Clear objective hover when selection changes
   useEffect(() => {
     setObjectiveHoverOsid(null);
-    setActionMessage(null);
   }, [selectedOperationKey]);
 
   // Pan map to operation area whenever an operation is selected (from sidebar, command briefing, or operations list)
@@ -176,14 +172,6 @@ export function OperationsPanel() {
   const readinessTone = (value: number) =>
     value >= 0.7 ? 'bg-green-500/80' : value >= 0.4 ? 'bg-amber-400/80' : 'bg-red-500/80';
 
-  const setActionMessageFromResult = (
-    result: { ok: boolean; error?: string },
-    successMessage: string,
-    failureMessage: string
-  ) => {
-    setActionMessage(result.ok ? successMessage : (result.error ?? failureMessage));
-  };
-
   const handleOperationCardKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
     if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp' && event.key !== 'Home' && event.key !== 'End') return;
     event.preventDefault();
@@ -228,25 +216,6 @@ export function OperationsPanel() {
       setArmyHQRecordsSubTab,
       setArmyHQExpandedCorpsId,
     }, selectedOperation?.corps_id ?? null);
-  };
-
-  const haltOperation = async (digInOnHalt: boolean) => {
-    if (!selectedOperation) return;
-    const result = await ipc.stageOperationHalt({
-      corpsId: selectedOperation.corps_id,
-      operationName: selectedOperation.name,
-      digInOnHalt,
-    });
-    setActionMessageFromResult(result, 'Halt order staged.', 'Failed to stage halt order.');
-  };
-
-  const forceLaunch = async () => {
-    if (!selectedOperation) return;
-    const result = await ipc.stageOperationForceLaunch({
-      corpsId: selectedOperation.corps_id,
-      operationName: selectedOperation.name,
-    });
-    setActionMessageFromResult(result, 'Early launch staged.', 'Failed to stage early launch.');
   };
 
   return (
@@ -359,14 +328,9 @@ export function OperationsPanel() {
                   {selectedOperation.name}
                 </div>
                 <div className="text-xs text-text-secondary">
-                  {selectedOperation.corps_name} · {selectedOperation.faction}
+                  {selectedOperation.corps_name} / {getPlayerSafeMilitaryFactionName(selectedOperation.faction)}
                 </div>
 
-                {actionMessage && (
-                  <div className="text-[10px] text-accent-gold border border-panel-border rounded px-2 py-1 bg-panel-card/70">
-                    {actionMessage}
-                  </div>
-                )}
 
                 {/* Phase timeline */}
                 <div className="flex flex-wrap gap-1 pt-1 border-t border-panel-border">
@@ -621,35 +585,6 @@ export function OperationsPanel() {
 
                 {/* Open Corps Orders */}
                 <div className="pt-1 border-t border-panel-border">
-                  {selectedOperation.phase === 'execution' && (
-                    <div className="mb-2 grid grid-cols-2 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => void haltOperation(false)}
-                        className="kbd-focus text-xs font-sans px-2 py-2 rounded border border-panel-border text-text-primary hover:bg-panel-hover"
-                      >
-                        Halt
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => void haltOperation(true)}
-                        className="kbd-focus text-xs font-sans px-2 py-2 rounded border border-panel-border text-text-primary hover:bg-panel-hover"
-                      >
-                        Halt + Dig In
-                      </button>
-                    </div>
-                  )}
-                  {selectedOperation.phase === 'planning' && phaseTurnCount != null && phaseTurnCount >= 2 && (
-                    <div className="mb-2">
-                      <button
-                        type="button"
-                        onClick={() => void forceLaunch()}
-                        className="kbd-focus w-full text-xs font-sans px-2 py-2 rounded border border-panel-border text-text-primary hover:bg-panel-hover"
-                      >
-                        Launch Now
-                      </button>
-                    </div>
-                  )}
                   <button
                     type="button"
                     onClick={() => {

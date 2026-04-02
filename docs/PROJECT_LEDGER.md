@@ -20883,3 +20883,17 @@ Why this matters:
 - Docs:
   - `docs/40_reports/implemented/20260402_PLAYER_SAFE_VOCABULARY_CLEANUP.md`
   - `docs/40_reports/GUI_MASTER.md`
+
+## 2026-04-02 - Tactical operations panel ownership cleanup
+
+- Worktree/branch: `F:\AWWV_exec_clean` on `codex/engine-health-wave1`
+- Removed live command-authority actions from `src/ui/map/components/OperationsPanel.tsx`; Army HQ remains the canonical operation review/control owner.
+- Tactical operations panel now stays map-facing and hands off through `HQ Review` / `Open Corps Orders` only.
+- Selected operation header now uses player-safe military faction naming instead of raw faction ids.
+- Added regression coverage in `tests/ui_shell_navigation.test.ts` to keep the panel free of `Launch Now`, `Halt + Dig In`, and desktop command staging bridges.
+- Verification:
+  - `node_modules\.bin\vitest.cmd run tests\ui_shell_navigation.test.ts tests\warroom_player_visibility.test.ts tests\ui_opord_player_safe_labels.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_TACTICAL_OPERATIONS_PANEL_SHELL_OWNERSHIP.md`
+  - `docs/40_reports/GUI_MASTER.md`

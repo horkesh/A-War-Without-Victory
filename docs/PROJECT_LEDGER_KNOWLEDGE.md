@@ -1553,3 +1553,7 @@ In AWWV, if a file is an old harness, a smoke path, or a compatibility entrypoin
 ### 22. Player-facing vocabulary drift is a shell-integrity bug, not copy polish
 
 If Army HQ, Chronicle, OPORD, or Warroom panels still say OSID, raw faction ids, or similar engine nouns, the shell still sounds like an internal tool even if the underlying data is player-safe. Treat vocabulary cleanup as part of player-truth enforcement and lock it into the canonical existing test suites rather than adding orphan test files the repo will not normally run.
+
+### Tactical operations panel must stay map-facing
+
+If `OperationsPanel.tsx` says Army HQ owns command review, it must not still expose launch, halt, or other command staging buttons. Tactical operations UI may summarize field state and hand off to Army HQ or corps orders, but command authority must stay singular.

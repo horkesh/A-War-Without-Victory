@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
   openArmyHQBriefingForCorps,
@@ -77,5 +78,18 @@ describe('shellNavigation', () => {
     expect(shouldShowWarroomReturn('?embedded=1', false)).toBe(true);
     expect(shouldShowWarroomReturn('', true)).toBe(true);
     expect(shouldShowWarroomReturn('', false)).toBe(false);
+  });
+
+  it('keeps the tactical operations panel map-facing only', () => {
+    const source = readFileSync(
+      new URL('../src/ui/map/components/OperationsPanel.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(source).toContain('Army HQ owns command review. This panel stays map-facing.');
+    expect(source).not.toContain('Launch Now');
+    expect(source).not.toContain('Halt + Dig In');
+    expect(source).not.toContain('stageOperationForceLaunch');
+    expect(source).not.toContain('stageOperationHalt');
   });
 });
