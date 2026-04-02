@@ -1,10 +1,28 @@
 import { describe, expect, it } from 'vitest';
+import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { join, relative, sep } from 'node:path';
 import { validateBrigadeRepositionOrder } from '../src/desktop/desktop_sim.js';
 import { parseGameState } from '../src/ui/map/data/GameStateAdapter.js';
 import { isSectorAssignmentExemptCorpsId } from '../src/sim/combat/corps_front_sectors_constants.js';
 import { applyBrigadeRepositionOrders } from '../src/sim/combat/apply_brigade_reposition.js';
 import { applyBrigadePressureToState } from '../src/sim/combat/brigade_pressure.js';
 import type { GameState } from '../src/state/game_state.js';
+
+function collectTsFiles(root: string): string[] {
+  const results: string[] = [];
+  for (const entry of readdirSync(root)) {
+    const full = join(root, entry);
+    const stats = statSync(full);
+    if (stats.isDirectory()) {
+      results.push(...collectTsFiles(full));
+      continue;
+    }
+    if (full.endsWith('.ts') || full.endsWith('.tsx')) {
+      results.push(full);
+    }
+  }
+  return results;
+}
 
 describe('engine honesty legacy contracts', () => {
   it('treats only army-HQ reserve corps ids as sector-assignment exempt', () => {
@@ -128,5 +146,25 @@ describe('engine honesty legacy contracts', () => {
     applyBrigadePressureToState(state, [{ a: 's1', b: 's2' } as any]);
 
     expect(state.military.front_pressure).toEqual(before);
+  });
+
+  it('keeps legacy brigade AoR helpers fenced away from live runtime callers', () => {
+    const srcRoot = join(process.cwd(), 'src');
+    const files = collectTsFiles(srcRoot);
+    const offenders: string[] = [];
+
+    for (const file of files) {
+      const rel = relative(srcRoot, file).split(sep).join('/');
+      if (rel.startsWith('_archived/')) continue;
+      if (rel === 'sim/combat/brigade_aor_legacy.ts') continue;
+      const text = readFileSync(file, 'utf8');
+      if (text.includes("from './brigade_aor_legacy.js'") || text.includes("from \"./brigade_aor_legacy.js\"")) {
+        if (rel !== 'sim/combat/brigade_pressure.ts') {
+          offenders.push(rel);
+        }
+      }
+    }
+
+    expect(offenders).toEqual([]);
   });
 });

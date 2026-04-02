@@ -920,3 +920,23 @@ Why this matters:
 - theater command should not rank a bleeding corps as an offensive opportunity just because the static force snapshot still looks healthy
 - this turns recent control-change history from a decorative metric into a real front-role input
 - the remaining work is now clearer: Army HQ is trend-aware, but the local commander assess path still lacks its own explicit territory-trend signal
+
+## Additional Wave 1 slice: legacy brigade AoR imports are now fenced by a regression gate
+
+This checkpoint hardens one of the easiest future-Claude failure modes: half-dead legacy helpers that still look reusable. `brigade_aor_legacy.ts` is now effectively a legacy/test-support module, but without a guardrail it would be easy for a future change to import it back into live runtime code and quietly reawaken the wrong authority path.
+
+Implemented:
+- `tests/engine_honesty_legacy_contracts.test.ts`
+  - added a static regression that scans active `src/` files and fails if non-archived runtime code starts importing `brigade_aor_legacy.ts`
+  - current honest allowance: only `brigade_pressure.ts` may still import it, and that module is already fenced as a no-op compatibility sink
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\engine_honesty_legacy_contracts.test.ts`
+  - PASS (`6` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- the most dangerous legacy code is the kind that still looks reusable enough for the next fix to pull it back in
+- static regression gates are cheaper than another archaeological cleanup after the wrong helper starts shaping runtime truth again
+- this is the kind of small hardening step that keeps the repo honest over time instead of relying on memory

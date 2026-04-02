@@ -19548,3 +19548,26 @@ Why this matters:
 - a theater plan should not treat a corps that is actively losing ground like a normal offensive opportunity
 - this turns recent territorial change from a decorative assessment field into a real front-role input
 - it also removes a stale-doc trap: the old write-up pointed at the wrong subsystem and would have sent the next agent after the wrong fix
+
+---
+### 2026-04-02 — Engine health Wave 1 continued: legacy brigade AoR imports are now regression-gated
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, adding a hard guardrail around a half-dead legacy authority path.
+
+Implemented:
+- `tests/engine_honesty_legacy_contracts.test.ts`
+  - added a static regression that scans active `src/` files and fails if non-archived runtime code starts importing `brigade_aor_legacy.ts`
+  - current honest allowance is explicit: only `brigade_pressure.ts` may still import it, and that module is already fenced as a no-op compatibility sink
+- `docs/40_reports/implemented/20260402_ENGINE_HEALTH_WAVE1_CORRECTNESS_FIXES.md`
+  - expanded the Wave 1 report with the new regression-gate checkpoint
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\engine_honesty_legacy_contracts.test.ts`
+  - PASS (`6` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- the repo’s most dangerous legacy files are the ones that still look alive enough for the next fix to reuse them
+- this turns one of those risks into a failing test instead of a future archaeology project
+- it also makes the intended authority fence explicit for anyone touching combat/sector plumbing later

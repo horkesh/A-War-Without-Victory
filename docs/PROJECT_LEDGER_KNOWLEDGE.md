@@ -1371,3 +1371,7 @@ If a command reaches desktop IPC, serializes into state, shows up in adapters, a
 ### Recent territorial change only matters if front-role scoring actually consumes it
 
 Computing `recent_territory_change` in theater assessment is not enough by itself. If Army HQ front-priority scoring ignores that field, the theater layer will still rank a bleeding corps like a normal offensive opportunity front. In AWWV, territorial trend must be consumed where roles are assigned, and any doc that points this gap at the wrong subsystem becomes a future bug magnet.
+
+### Fence half-dead legacy helpers with static tests before they get reused
+
+If a legacy helper still has one tolerated compatibility consumer, future refactors will be tempted to import it again because it “already works.” In AWWV, that is exactly when a dead authority path comes back to life. Prefer a small static regression gate that names the allowed consumer set explicitly, so the next accidental import fails fast instead of silently reviving old truth.
