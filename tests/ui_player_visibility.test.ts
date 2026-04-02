@@ -17,6 +17,7 @@ import {
   getPlayerSafeEnclaveName,
   getPlayerSafeMunicipalityName,
 } from '../src/ui/map/utils/playerSafeText.js';
+import { parseGameState } from '../src/ui/map/data/GameStateAdapter.js';
 import { buildOperationArrowsGeoJSON } from '../src/ui/map/map/builders/buildOperationArrowsGeoJSON.js';
 import { buildFormationsGeoJSON } from '../src/ui/map/map/builders/buildFormationsGeoJSON.js';
 
@@ -247,5 +248,50 @@ describe('player visibility helpers', () => {
     expect(getPlayerSafeBrigadeName('')).toBe('Assigned brigade');
     expect(getPlayerSafeMunicipalityName('bijeljina_center')).toBe('Bijeljina Center');
     expect(getPlayerSafeEnclaveName('gorazde_east')).toBe('Gorazde East');
+  });
+
+  it('keeps pending officer event labels player-safe when names are missing', () => {
+    const state = {
+      meta: { turn: 10, phase: 'war' },
+      factions: [
+        { id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
+      ],
+      military: {
+        formations: {
+          arbih_3rd_corps: { faction: 'RBiH', kind: 'corps', status: 'active', name: 'arbih_3rd_corps' },
+        },
+        named_officer_data: [
+          { id: 'officer_new', faction: 'RBiH', name: '', competence: 0.6, aggressiveness: 0.4, defensive_skill: 0.5 },
+        ],
+        pending_officer_events: [
+          {
+            event_id: 'evt_1',
+            type: 'replacement_suggested',
+            faction: 'RBiH',
+            turn: 10,
+            officer_id: 'officer_new',
+            current_commander_id: 'officer_old',
+            corps_id: 'arbih_3rd_corps',
+            acknowledged: false,
+          },
+        ],
+      },
+      political: {
+        political_controllers: {},
+        war_exhaustion: { RBiH: 0.1 },
+      },
+      displacement: {
+        displacement_state: {},
+        displacement_camp_state: {},
+        hostile_takeover_timers: {},
+        civilian_casualties: {},
+        sustainability_state: {},
+      },
+    } as any;
+
+    const parsed = parseGameState(state);
+    expect(parsed.pendingOfficerEvents?.[0]?.officer_name).toBe('An officer');
+    expect(parsed.pendingOfficerEvents?.[0]?.current_commander_name).toBe('An officer');
+    expect(parsed.pendingOfficerEvents?.[0]?.corps_name).toBe('3rd Corps');
   });
 });

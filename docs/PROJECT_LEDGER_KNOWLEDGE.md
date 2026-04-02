@@ -1478,3 +1478,6 @@ If `extractWarData(...)` or newspaper/report builders fall back to raw ids, the 
 ### Older planning surfaces are where raw-id fallback leaks like to survive
 
 Once the obvious map-shell leaks are cleaned up, the remaining player-truth damage often lives in less-central panels that still look alive: old Warroom settlement panels, planning maps, search indexes, and modal hover tooltips. In AWWV, those surfaces need the same player-safe fallback discipline as the primary shell; otherwise the product still degrades into engine identifiers precisely where nobody is looking closely.
+### Officer-event adapters are player-facing surfaces too
+
+If pending personnel/replacement events are derived in an adapter and that adapter falls back to raw officer ids or corps ids, the leak is still real even though no React component explicitly prints the id. In AWWV, event/adaptor text should degrade to neutral phrases like `An officer` and player-safe corps names, not to backend identifiers.

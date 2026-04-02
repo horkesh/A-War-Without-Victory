@@ -20230,3 +20230,29 @@ Why this matters:
 - older planning surfaces are exactly where raw-id fallbacks survive after the obvious shell leaks are fixed
 - a player-facing shell is only as honest as its least-maintained still-live panel
 - this slice removes more of the “half-alive debug shell” smell from Warroom and ops planning without inventing new naming logic
+### 2026-04-02 - Player-safe officer event and Warroom viewer labels
+
+Kept draining the player-truth shell in `F:\AWWV_exec_clean`, this time targeting two subtler but still-live seams: adapter-derived officer-event labels and the standalone Warroom map viewer.
+
+Implemented:
+- `src/ui/map/data/GameStateAdapter.ts`
+  - pending officer events now use `An officer` instead of raw officer ids when a name is missing
+  - pending officer event corps names now resolve through player-safe corps naming instead of raw corps ids
+- `src/ui/warroom/map_viewer_app.ts`
+  - settlement tooltip/panel fallback names now humanize settlement ids instead of printing raw `sid`
+  - municipality fallback text now humanizes municipality ids instead of printing raw ids
+- `tests/ui_player_visibility.test.ts`
+  - added regression coverage proving `parseGameState(...)` keeps pending officer-event labels player-safe
+- `docs/40_reports/implemented/20260402_PLAYER_SAFE_OFFICER_EVENT_AND_WARROOM_VIEWER_LABELS.md`
+  - documented this slice
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_map_render_smoke.test.ts`
+  - PASS (`26` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS
+
+Why this matters:
+- adapters are authority surfaces too; if they fallback to raw ids, the player shell is still lying
+- the standalone Warroom viewer is older but still live, which makes its fallback leaks more dangerous rather than less
+- this slice leaves the remaining raw-fallback search results looking mostly like benign internal sorting/defaulting rather than live player-facing leaks
