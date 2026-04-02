@@ -1452,3 +1452,7 @@ Once sectors become the practical frontline authority, any shared helper like `i
 ### Precedence bugs in tiny combat helpers can preserve legacy behavior long after the main architecture moves on
 
 Even if sectors are treated as primary truth in big systems, a small helper like `getLocalFrontDensityModifier(...)` can still bend combat if it checks `brigade_front_assignment/local_fronts` first. In AWWV, whenever both a new and old assignment currency coexist, the lookup order itself is a gameplay rule and should be treated as one.
+
+### A runtime export is still a live promise even after the UI stops calling it
+
+In AWWV, retiring a feature only at preload/IPC level is not enough if `desktop_sim.ts` still exports the old mutator. Future work will discover the export, assume the capability is still supported, and route around the shell cleanup. Dead desktop-sim exports should be removed once archived code is the only remaining caller.

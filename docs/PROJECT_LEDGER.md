@@ -20034,3 +20034,27 @@ Why this matters:
 - `getLocalFrontDensityModifier(...)` feeds combat math
 - if it keeps preferring the old front lane, the engine can still defend brigades using stale frontage truth even after sectors became the primary assignment model
 - this removes another small helper that could quietly reintroduce legacy behavior into otherwise cleaned-up frontline mechanics
+
+### 2026-04-02 - Engine health Wave 1 continued: desktop sim no longer exports dead front/theatre mutation helpers
+
+Continued the clean-lane engine-health execution in `F:\AWWV_exec_clean`, removing another half-alive authority surface after the shell-side retirement work.
+
+Implemented:
+- `src/desktop/desktop_sim.ts`
+  - removed `assignBrigadeToFront(...)`
+  - removed `renameFrontSegment(...)`
+  - removed `renameTheatre(...)`
+- `tests/engine_honesty_legacy_contracts.test.ts`
+  - added a regression proving those retired helpers are no longer exported from `desktop_sim.ts`
+- `docs/40_reports/implemented/20260402_DESKTOP_SIM_LEGACY_FRONT_EXPORT_RETIREMENT.md`
+  - documented the dead-export retirement
+
+Verification:
+- `node_modules\.bin\vitest.cmd run tests\engine_honesty_legacy_contracts.test.ts`
+  - PASS (`10` tests)
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+  - PASS (`no governed files changed`)
+
+Why this matters:
+- even after the live shell stops calling a legacy lane, the runtime still lies if the lower API keeps exporting it
+- deleting the dead exports makes the desktop sim surface match the live product truth and removes another place future refactors could accidentally resurrect old front/theatre mechanics

@@ -674,58 +674,6 @@ export function assignBrigadeToSector(
     return { ok: true };
 }
 
-/** Assign brigade to front segment (or null to reserve). */
-export function assignBrigadeToFront(
-    state: GameState,
-    brigadeId: string,
-    frontId: string | null
-): { ok: true } | { ok: false; error: string } {
-    const formation = state.military.formations?.[brigadeId];
-    if (!formation || (formation.kind ?? 'brigade') !== 'brigade') {
-        return { ok: false, error: 'Invalid brigade formation' };
-    }
-    if (frontId !== null) {
-        const segments = state.military.assignable_front_segments ?? [];
-        const exists = segments.some((segment) => segment.front_id === frontId);
-        if (!exists) return { ok: false, error: `Unknown front_id: ${frontId}` };
-    }
-    if (!state.military.brigade_front_assignment) state.military.brigade_front_assignment = {};
-    state.military.brigade_front_assignment[brigadeId] = frontId;
-    return { ok: true };
-}
-
-/** Rename an assignable front segment. Empty name clears to default label behavior. */
-export function renameFrontSegment(
-    state: GameState,
-    frontId: string,
-    name: string | null
-): { ok: true } | { ok: false; error: string } {
-    const segments = state.military.assignable_front_segments ?? [];
-    const segment = segments.find((entry) => entry.front_id === frontId);
-    if (!segment) return { ok: false, error: `Unknown front_id: ${frontId}` };
-    const normalized = typeof name === 'string' ? name.trim() : '';
-    if (normalized.length === 0) {
-        delete segment.name;
-    } else {
-        segment.name = normalized;
-    }
-    return { ok: true };
-}
-
-/** Rename a theatre. Empty name falls back to "<faction> Theatre". */
-export function renameTheatre(
-    state: GameState,
-    theatreId: string,
-    name: string | null
-): { ok: true } | { ok: false; error: string } {
-    const theatres = state.military.theatres ?? {};
-    const theatre = theatres[theatreId];
-    if (!theatre) return { ok: false, error: `Unknown theatre_id: ${theatreId}` };
-    const normalized = typeof name === 'string' ? name.trim() : '';
-    theatre.name = normalized.length > 0 ? normalized : `${theatre.faction} Theatre`;
-    return { ok: true };
-}
-
 /** Player approves a pending reserve request, deploying the suggested (or specified) brigade. */
 export function approveReserveRequest(
     state: GameState,

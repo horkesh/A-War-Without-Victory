@@ -205,4 +205,12 @@ describe('engine honesty legacy contracts', () => {
     expect(electronMain).not.toContain('rename-theatre');
     expect(useIpc).not.toContain('renameTheatre');
   });
+
+  it('does not keep retired front/theatre mutation helpers exported from desktop_sim', () => {
+    const desktopSim = readFileSync(join(process.cwd(), 'src', 'desktop', 'desktop_sim.ts'), 'utf8');
+
+    expect(desktopSim).not.toContain('export function assignBrigadeToFront');
+    expect(desktopSim).not.toContain('export function renameFrontSegment');
+    expect(desktopSim).not.toContain('export function renameTheatre');
+  });
 });
