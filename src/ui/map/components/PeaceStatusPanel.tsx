@@ -47,6 +47,14 @@ function AllianceBar({ value }: { value: number }) {
     );
 }
 
+function getDeclarationPressureStatus(value: number, declared: boolean): string {
+    if (declared) return 'Declared';
+    if (value >= 80) return 'Critical';
+    if (value >= 50) return 'Elevated';
+    if (value >= 25) return 'Watch';
+    return 'Quiet';
+}
+
 export function PeaceStatusPanel() {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const loadSave = useGameStore((s) => s.loadSave);
@@ -128,12 +136,14 @@ export function PeaceStatusPanel() {
                                 </div>
                                 <div className="text-[9px] text-text-secondary">{getPlayerSafePoliticalFactionName(f.id)}</div>
 
-                                {/* Capital */}
-                                <ProgressBar value={f.capital} max={100} color={color} label="Pre-War Capital" />
-
-                                {/* Declaration Pressure (RS and HRHB only) */}
-                                {f.id !== 'RBiH' && !f.declared && (
-                                    <ProgressBar value={f.declaration_pressure} max={100} color="#ef4444" label="Declaration Pressure" />
+                                {isPlayer ? (
+                                    <ProgressBar value={f.capital} max={100} color={color} label="Pre-War Capital" />
+                                ) : (
+                                    <div className="text-[9px] text-text-secondary uppercase tracking-wider">
+                                        {f.declared
+                                            ? 'Political course declared'
+                                            : `Declaration posture: ${getDeclarationPressureStatus(f.declaration_pressure, f.declared)}`}
+                                    </div>
                                 )}
                             </div>
                         );

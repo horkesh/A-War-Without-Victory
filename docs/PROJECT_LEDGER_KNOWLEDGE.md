@@ -1593,3 +1593,13 @@ Economy, supply, and reserve screens often get treated as harmless because they 
 
 If peace shell, tactical shell, and Warroom each name the same alliance or diplomatic relationship differently, the product feels like multiple stitched interfaces. Treat cross-shell vocabulary as architecture, not cosmetic copy.
 
+
+### Peace-phase faction cards should not expose exact hostile declaration telemetry by default
+
+Mounted peace shells are still player surfaces. Exact hostile declaration percentages make them feel like debug dashboards even when the styling is elegant. Keep exact pre-war capital for the player side, but reduce hostile declaration status to qualitative posture unless an explicitly owned intelligence surface says otherwise.
+
+
+### Phase 0 Warroom copy is part of the same shell contract as war-phase shells
+
+Raw shorthand like `RS declaration imminent` or `Army of RBiH` leaks product tone even if the later war shells are cleaner. Treat Warroom Phase 0 badges, warnings, and event modal body text as player-facing language that needs the same discipline as tactical-map rails and Army HQ summaries.
+

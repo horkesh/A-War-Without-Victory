@@ -53,7 +53,7 @@ const EVENT_DISPLAYS: Record<string, (event: Phase0Event, playerFaction: Faction
     rbih_hrhb_war_begins: (_event, _pf) => ({
         title: 'WAR BETWEEN ALLIES',
         subtitle: 'Alliance collapses — Croat-Bosniak conflict begins',
-        body: 'The fragile alliance between Army of RBiH and HVO has shattered. Former allies now face each other across new battle lines.',
+        body: 'The fragile alliance between the Bosnian Army and HVO has shattered. Former allies now face each other across new battle lines.',
         color: '#ff3d00',
         bgOverlay: 'rgba(255, 0, 0, 0.08)',
     }),

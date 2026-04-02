@@ -21014,3 +21014,19 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
   - docs/40_reports/implemented/20260402_CROSS_SHELL_ALLIANCE_VOCABULARY_CLEANUP.md`r
   - docs/40_reports/GUI_MASTER.md`r
 
+
+## 2026-04-02 - Phase 0 player-shell truth cleanup
+
+- Worktree/branch: F:\AWWV_exec_clean on codex/engine-health-wave1
+- Tightened the last mounted Phase 0 shell leaks instead of leaving Warroom half-clean.
+- PeaceStatusPanel.tsx now keeps exact pre-war capital only for the player faction and shows hostile declaration posture qualitatively instead of as exact progress bars.
+- FactionOverviewPanel.ts now uses player-facing military badges and declaration-drive wording, and no longer warns with raw shorthand like `RS declaration imminent`.
+- DeclarationEventModal.ts now refers to the Bosnian Army instead of `Army of RBiH`.
+- Added regression guards in `tests/ui_player_visibility.test.ts` and `tests/warroom_player_visibility.test.ts`.
+- Verification:
+  - `node_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom_player_visibility.test.ts tests\ui_shell_navigation.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+- Docs:
+  - `docs/40_reports/implemented/20260402_PHASE0_PLAYER_SHELL_TRUTH_CLEANUP.md`
+  - `docs/40_reports/GUI_MASTER.md`
+

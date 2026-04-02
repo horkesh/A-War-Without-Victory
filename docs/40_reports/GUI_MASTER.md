@@ -309,3 +309,10 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - Peace shell and Warroom milestone surfaces now use Bosniak-Croat wording consistently for the alliance relationship.
 - See docs/40_reports/implemented/20260402_CROSS_SHELL_ALLIANCE_VOCABULARY_CLEANUP.md.
 
+## 2026-04-02 - Phase 0 player-shell truth cleanup
+
+- PeaceStatusPanel now keeps exact pre-war capital only for the player faction and reduces hostile declaration telemetry to abstract posture labels.
+- FactionOverviewPanel now uses player-facing military badges and qualitative declaration-drive wording instead of raw faction shorthand and exact hostile percentages.
+- DeclarationEventModal now refers to the Bosnian Army instead of `Army of RBiH`.
+- See `docs/40_reports/implemented/20260402_PHASE0_PLAYER_SHELL_TRUTH_CLEANUP.md`.
+

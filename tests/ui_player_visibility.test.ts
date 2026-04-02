@@ -367,4 +367,13 @@ describe('player visibility helpers', () => {
     expect(source).toContain('Bosniak-Croat Alliance');
     expect(source).not.toContain('RBiH–HRHB Alliance');
   });
+  it('keeps hostile declaration telemetry abstract in the peace shell', () => {
+    const source = readFileSync(
+      new URL('../src/ui/map/components/PeaceStatusPanel.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(source).toContain('Declaration posture:');
+    expect(source).not.toContain('ProgressBar value={f.declaration_pressure}');
+  });
 });

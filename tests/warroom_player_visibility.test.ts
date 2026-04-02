@@ -341,4 +341,23 @@ describe('warroom player visibility', () => {
     );
     expect(factionOverviewSource).toContain('Bosniak-Croat relationship');
   });
+  it('keeps phase 0 warroom faction copy player-safe', () => {
+    const declarationModalSource = readFileSync(
+      resolve(process.cwd(), 'src/ui/warroom/components/DeclarationEventModal.ts'),
+      'utf8',
+    );
+    expect(declarationModalSource).not.toContain('Army of RBiH and HVO');
+    expect(declarationModalSource).toContain('the Bosnian Army and HVO has shattered');
+
+    const factionOverviewSource = readFileSync(
+      resolve(process.cwd(), 'src/ui/warroom/components/FactionOverviewPanel.ts'),
+      'utf8',
+    );
+    expect(factionOverviewSource).toContain('Bosnian Serb declaration pressure critical');
+    expect(factionOverviewSource).toContain('Croat entity declaration pressure critical');
+    expect(factionOverviewSource).toContain('Bosnian Serb declaration drive');
+    expect(factionOverviewSource).not.toContain('RS declaration imminent');
+    expect(factionOverviewSource).not.toContain('HRHB declaration imminent');
+    expect(factionOverviewSource).not.toContain("rsPressurePct.toFixed(0) + '%'");
+  });
 });

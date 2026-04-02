@@ -29,6 +29,32 @@ import {
 } from './warroom_utils.js';
 import { getWarroomFactionIdentity } from './warroom_identity.js';
 
+const FACTION_MILITARY_LABELS: Record<string, string> = {
+    RBiH: 'ARBiH',
+    RS: 'VRS',
+    HRHB: 'HVO',
+};
+
+function getFactionMilitaryLabel(factionId: string): string {
+    return FACTION_MILITARY_LABELS[factionId] ?? factionId;
+}
+
+function getDeclarationWatchLabel(pressure: number, declared: boolean): string {
+    if (declared) return 'DECLARED';
+    if (pressure >= 80) return 'CRITICAL';
+    if (pressure >= 50) return 'ELEVATED';
+    if (pressure >= 25) return 'WATCH';
+    return 'QUIET';
+}
+
+function getDeclarationWatchBandPercent(pressure: number, declared: boolean): number {
+    if (declared) return 100;
+    if (pressure >= 80) return 100;
+    if (pressure >= 50) return 75;
+    if (pressure >= 25) return 50;
+    return 25;
+}
+
 interface Phase0Snapshot {
     factionId: FactionId;
     factionName: string;
@@ -152,8 +178,8 @@ export class FactionOverviewPanel {
         const warnings: string[] = [];
         if (capitalPercent < 25) warnings.push('Capital reserves critically low');
         if (controlCounts.highlyContested > 2) warnings.push('Multiple municipalities at risk of destabilization');
-        if (rsPressure >= 80 && !rs?.declared) warnings.push('RS declaration imminent');
-        if (hrhbPressure >= 80 && !hrhb?.declared) warnings.push('HRHB declaration imminent');
+        if (rsPressure >= 80 && !rs?.declared) warnings.push('Bosnian Serb declaration pressure critical');
+        if (hrhbPressure >= 80 && !hrhb?.declared) warnings.push('Croat entity declaration pressure critical');
         if (warCountdown !== null && warCountdown <= 4) warnings.push(`War in ${warCountdown} weeks \u2014 prepare for Peace phase`);
         if (warnings.length === 0) warnings.push('No strategic warnings at this time');
 
@@ -207,7 +233,7 @@ export class FactionOverviewPanel {
         const header = document.createElement('div');
         header.className = 'faction-overview-header';
         header.innerHTML = `
-            <div class="fo-faction-badge text-accent-gold" style="color:${fc.primary}">${snap.factionId}</div>
+            <div class="fo-faction-badge text-accent-gold" style="color:${fc.primary}">${getFactionMilitaryLabel(snap.factionId)}</div>
             <h2 class="text-accent-gold">${snap.factionName}</h2>
             <div class="meta">${turnToWeekString(snap.turn)} \u2014 PRE-WAR PHASE</div>
             <div class="meta">${identity.ceremonialLine}</div>
@@ -274,17 +300,21 @@ export class FactionOverviewPanel {
         declSection.className = 'faction-overview-section';
         const rsPressurePct = Math.min(100, snap.rsPressure);
         const hrhbPressurePct = Math.min(100, snap.hrhbPressure);
+        const rsWatchLabel = getDeclarationWatchLabel(rsPressurePct, snap.rsHasDeclared);
+        const hrhbWatchLabel = getDeclarationWatchLabel(hrhbPressurePct, snap.hrhbHasDeclared);
+        const rsBandPercent = getDeclarationWatchBandPercent(rsPressurePct, snap.rsHasDeclared);
+        const hrhbBandPercent = getDeclarationWatchBandPercent(hrhbPressurePct, snap.hrhbHasDeclared);
         const rsBarColor = snap.rsHasDeclared ? '#555570' : rsPressurePct >= 80 ? '#ff3d00' : rsPressurePct >= 50 ? '#ffab00' : '#00e878';
         const hrhbBarColor = snap.hrhbHasDeclared ? '#555570' : hrhbPressurePct >= 80 ? '#ff3d00' : hrhbPressurePct >= 50 ? '#ffab00' : '#00e878';
         declSection.innerHTML = `
             <h3>DECLARATION WATCH</h3>
             <div style="margin-bottom: 8px;">
-                <div class="fo-stat-row"><span class="fo-stat-label">Republika Srpska</span><span class="fo-stat-value">${snap.rsHasDeclared ? 'DECLARED' : rsPressurePct.toFixed(0) + '%'}</span></div>
-                <div class="wr-bar-track wr-bar-thin"><div class="wr-bar-fill" style="background: ${rsBarColor}; width: ${snap.rsHasDeclared ? 100 : rsPressurePct}%;"></div></div>
+                <div class="fo-stat-row"><span class="fo-stat-label">Bosnian Serb declaration drive</span><span class="fo-stat-value">${rsWatchLabel}</span></div>
+                <div class="wr-bar-track wr-bar-thin"><div class="wr-bar-fill" style="background: ${rsBarColor}; width: ${rsBandPercent}%;"></div></div>
             </div>
             <div>
-                <div class="fo-stat-row"><span class="fo-stat-label">Herceg-Bosna</span><span class="fo-stat-value">${snap.hrhbHasDeclared ? 'DECLARED' : hrhbPressurePct.toFixed(0) + '%'}</span></div>
-                <div class="wr-bar-track wr-bar-thin"><div class="wr-bar-fill" style="background: ${hrhbBarColor}; width: ${snap.hrhbHasDeclared ? 100 : hrhbPressurePct}%;"></div></div>
+                <div class="fo-stat-row"><span class="fo-stat-label">Croat entity declaration drive</span><span class="fo-stat-value">${hrhbWatchLabel}</span></div>
+                <div class="wr-bar-track wr-bar-thin"><div class="wr-bar-fill" style="background: ${hrhbBarColor}; width: ${hrhbBandPercent}%;"></div></div>
             </div>
             ${snap.referendumHeld ? '<div class="wr-dialog-info wr-info-amber" style="margin-top: 8px; font-weight: 600;">REFERENDUM HELD</div>' : ''}
             ${snap.warCountdown !== null ? `<div class="wr-dialog-info wr-info-red" style="margin-top: 8px; font-weight: 600;">WAR IN ${snap.warCountdown} WEEKS</div>` : ''}
