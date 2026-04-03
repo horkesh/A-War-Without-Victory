@@ -3,20 +3,13 @@
  *
  * The active engine now treats corps-front sectors as frontline truth.
  * This file survives for one narrow reason: it still provides the shared
- * density formula plus a compatibility fallback for older front-assignment
- * state when sector truth is unavailable.
+ * density formula used by sector-owned frontline truth.
  *
  * It is no longer the owner of a live "local fronts" runtime layer.
  * Deterministic: sorted iteration via strictCompare, no Math.random().
  */
 
-import type {
-    AssignableFrontSegmentState,
-    FactionId,
-    FormationId,
-    FormationState,
-    GameState
-} from '../../state/game_state.js';
+import type { FormationId, FormationState, GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 /** Coverage density: below this ratio, defense power is penalized. */
@@ -95,24 +88,6 @@ export function computeLocalFrontDefensivePower(
     return (totalPower * densityMod) / coverageLength;
 }
 
-function findFrontSegment(
-    segments: AssignableFrontSegmentState[],
-    frontId: string
-): AssignableFrontSegmentState | null {
-    return segments.find((segment) => segment.front_id === frontId) ?? null;
-}
-
-function countAssignedBrigadesForFront(
-    assignments: Record<string, string | null>,
-    frontId: string
-): number {
-    let assignedCount = 0;
-    for (const brigadeId of Object.keys(assignments).sort(strictCompare)) {
-        if (assignments[brigadeId] === frontId) assignedCount += 1;
-    }
-    return assignedCount;
-}
-
 function findSectorDensityModifier(
     state: GameState,
     formation: FormationState
@@ -128,29 +103,12 @@ function findSectorDensityModifier(
 
     return null;
 }
-
-function findLegacyFrontDensityModifier(
-    state: GameState,
-    formation: FormationState
-): number | null {
-    const frontId = state.military.brigade_front_assignment?.[formation.id];
-    if (!frontId) return null;
-
-    const segments = state.military.assignable_front_segments ?? [];
-    const segment = findFrontSegment(segments, frontId);
-    if (!segment) return null;
-
-    const assignments = state.military.brigade_front_assignment ?? {};
-    const assignedCount = countAssignedBrigadesForFront(assignments, frontId);
-    return frontDensityModifier(assignedCount, segment.length_edges);
-}
-
 /**
  * Get the frontline density modifier for a specific brigade.
  *
  * Lookup order:
  * 1. corps_front_sectors (live frontline truth)
- * 2. brigade_front_assignment (legacy compatibility fallback)
+ * 2. 1.0 neutral
  *
  * Returns 1.0 if the brigade is not assigned to any live frontline.
  */
@@ -160,9 +118,6 @@ export function getLocalFrontDensityModifier(
 ): number {
     const sectorModifier = findSectorDensityModifier(state, formation);
     if (sectorModifier !== null) return sectorModifier;
-
-    const legacyModifier = findLegacyFrontDensityModifier(state, formation);
-    if (legacyModifier !== null) return legacyModifier;
 
     return 1.0;
 }

@@ -38,8 +38,8 @@ interface WindowAwwv {
     startNewCampaign: (payload: StartNewCampaignPayload) => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
     advanceTurn: (payload?: { phase0Directives?: unknown[] }) => Promise<{ ok: boolean; stateJson?: string; report?: unknown; error?: string }>;
     getCurrentGameState: () => Promise<string | null>;
-    setGameStateUpdatedCallback: (cb: ((stateJson: string) => void) | null) => void;
-    setTurnReportUpdatedCallback: (cb: ((report: unknown) => void) | null) => void;
+    subscribeGameStateUpdated: (cb: (stateJson: string) => void) => () => void;
+    subscribeTurnReportUpdated: (cb: (report: unknown) => void) => () => void;
     getRecruitmentCatalog: () => Promise<{ brigades?: unknown[]; error?: string }>;
     applyRecruitment: (brigadeId: string, equipmentClass: string) => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
     getSettings: () => Promise<{ ok: boolean; settings?: unknown; error?: string }>;
@@ -53,10 +53,6 @@ interface WindowAwwv {
     stageDeployOrder: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
     stageUndeployOrder: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
     stageBrigadeMovementOrder: (brigadeId: string, targetSettlementIds: string[]) => Promise<{ ok: boolean; error?: string }>;
-    stageBrigadeAoROrder: (settlementId: string, fromBrigadeId: string, toBrigadeId: string) => Promise<{ ok: boolean; error?: string }>;
-    stageCorpsFrontOrder: (corpsId: string, edgeIds: string[]) => Promise<{ ok: boolean; error?: string }>;
-    stageCorpsAttackAxisOrder: (corpsId: string, edgeIds: string[]) => Promise<{ ok: boolean; error?: string }>;
-    stageOgSubfrontOrder: (ogId: string, corpsId: string, edgeIds: string[]) => Promise<{ ok: boolean; error?: string }>;
     stageCorpsStanceOrder: (corpsId: string, stance: string) => Promise<{ ok: boolean; error?: string }>;
     stageSectorStanceOrder: (sectorId: string, stance: string) => Promise<{ ok: boolean; error?: string }>;
     resetSectorStanceToBot: (sectorId: string) => Promise<{ ok: boolean; error?: string }>;
@@ -134,13 +130,13 @@ export function useIPC() {
                 ? () => awwv.getCurrentGameState()
                 : (): Promise<string | null> => Promise.resolve(null),
 
-            setGameStateUpdatedCallback: awwv
-                ? (cb: ((stateJson: string) => void) | null) => awwv.setGameStateUpdatedCallback(cb)
-                : (_cb: ((stateJson: string) => void) | null) => { /* noop */ },
+            subscribeGameStateUpdated: awwv
+                ? (cb: (stateJson: string) => void) => awwv.subscribeGameStateUpdated(cb)
+                : (_cb: (stateJson: string) => void) => () => { /* noop */ },
 
-            setTurnReportUpdatedCallback: awwv
-                ? (cb: ((report: unknown) => void) | null) => awwv.setTurnReportUpdatedCallback(cb)
-                : (_cb: ((report: unknown) => void) | null) => { /* noop */ },
+            subscribeTurnReportUpdated: awwv
+                ? (cb: (report: unknown) => void) => awwv.subscribeTurnReportUpdated(cb)
+                : (_cb: (report: unknown) => void) => () => { /* noop */ },
 
             getRecruitmentCatalog: awwv
                 ? () => awwv.getRecruitmentCatalog()
@@ -192,22 +188,6 @@ export function useIPC() {
 
             stageBrigadeMovementOrder: awwv
                 ? (brigadeId: string, targetSettlementIds: string[]) => awwv.stageBrigadeMovementOrder(brigadeId, targetSettlementIds)
-                : makeNoop<{ ok: boolean; error?: string }>(),
-
-            stageBrigadeAoROrder: awwv
-                ? (settlementId: string, fromBrigadeId: string, toBrigadeId: string) => awwv.stageBrigadeAoROrder(settlementId, fromBrigadeId, toBrigadeId)
-                : makeNoop<{ ok: boolean; error?: string }>(),
-
-            stageCorpsFrontOrder: awwv
-                ? (corpsId: string, edgeIds: string[]) => awwv.stageCorpsFrontOrder(corpsId, edgeIds)
-                : makeNoop<{ ok: boolean; error?: string }>(),
-
-            stageCorpsAttackAxisOrder: awwv
-                ? (corpsId: string, edgeIds: string[]) => awwv.stageCorpsAttackAxisOrder(corpsId, edgeIds)
-                : makeNoop<{ ok: boolean; error?: string }>(),
-
-            stageOgSubfrontOrder: awwv
-                ? (ogId: string, corpsId: string, edgeIds: string[]) => awwv.stageOgSubfrontOrder(ogId, corpsId, edgeIds)
                 : makeNoop<{ ok: boolean; error?: string }>(),
 
             stageCorpsStanceOrder: awwv

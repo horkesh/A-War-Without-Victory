@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { useIPC } from '../desktop/useIPC';
+import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
 import { WarCrimesBadge } from './WarCrimesBadge';
 
 function StatBar({ label, value }: { label: string; value: number }) {
@@ -90,6 +91,7 @@ function OfficerEventModal({ events, onClose }: {
   const remaining = events.filter(e => !dismissed.has(e.event_id));
   if (remaining.length === 0) { onClose(); return null; }
   const event = remaining[Math.min(currentIndex, remaining.length - 1)];
+  const corpsLabel = getPlayerSafeCorpsName(event.corps_name ?? null, event.corps_id ?? null, 'this corps');
 
   const advance = (eventId: string) => {
     setDismissed(prev => new Set(prev).add(eventId));
@@ -145,7 +147,7 @@ function OfficerEventModal({ events, onClose }: {
           {event.type === 'replacement_suggested' ? (
             <>
               <div className="text-[11px] text-text-secondary leading-relaxed">
-                A replacement commander is available for <span className="text-text-primary font-bold">{event.corps_name ?? 'this corps'}</span>.
+                A replacement commander is available for <span className="text-text-primary font-bold">{corpsLabel}</span>.
                 You may accept the replacement or keep the current commander.
               </div>
 

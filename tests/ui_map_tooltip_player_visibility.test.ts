@@ -136,7 +136,6 @@ describe('player-safe tooltip models', () => {
       frontPressureByEdge: { 'op:tuzla::op:doboj': { value: 1.2, max_abs: 2, last_updated_turn: 5 } },
       formations,
       fogOfWar: { visibleEnemyOsids: ['op:doboj'], visibleEnemySectorIds: [] },
-      assignableFrontSegments: [{ front_id: 'front_1', edge_ids: ['op:tuzla::op:doboj'], side_a: 'RBiH', side_b: 'RS' }],
       corpsFrontSectors: [{
         sector_id: 'sector_rbih',
         corps_id: 'arbih_2nd_corps',

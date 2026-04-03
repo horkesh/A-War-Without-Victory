@@ -58,6 +58,8 @@ function makeState(overrides: {
         },
         military: {
             formations: overrides.formations ?? {},
+            brigade_movement_orders: {},
+            brigade_movement_state: {},
             corps_command: overrides.corps_command ?? {},
             corps_front_sectors: overrides.corps_front_sectors ?? {},
             pending_reserve_requests: overrides.pending_reserve_requests ?? [],
@@ -131,6 +133,22 @@ describe('deployEliteLoan', () => {
         expect(tracker.episodes[0].corps_id).toBe('arbih_1st_corps');
         expect(tracker.episodes[0].reason).toBe('offensive_support');
         expect(tracker.episodes[0].travel_hops).toBe(2);
+    });
+
+    it('clears stale homeward movement when redeploying a recalled elite', () => {
+        const brigade = makeElite('arbih_guards', 'RBiH', 'op:bihac:bihac_1');
+        const state = makeState({ formations: { arbih_guards: brigade }, turn: 5 });
+        state.military.brigade_movement_orders = {
+            arbih_guards: { destination_sids: ['op:bihac:bihac_1'], stance: 'column' } as any,
+        };
+        state.military.brigade_movement_state = {
+            arbih_guards: { destination_sids: ['op:bihac:bihac_1'], path: ['op:mid', 'op:bihac:bihac_1'], stance: 'column', status: 'in_transit', turns_remaining: 2 } as any,
+        };
+
+        deployEliteLoan(state, 'arbih_guards', 'arbih_1st_corps', 'offensive_support', 2, 5);
+
+        expect(state.military.brigade_movement_orders?.arbih_guards).toBeUndefined();
+        expect(state.military.brigade_movement_state?.arbih_guards).toBeUndefined();
     });
 });
 
@@ -272,6 +290,37 @@ describe('tickEliteLoans', () => {
 
         expect(brigade.elite_loan_state!.on_loan).toBe(false);
     });
+
+    it('recalls a stranded loan when no friendly route to receiving corps territory remains', () => {
+        const brigade = makeOnLoanBrigade('rs_1st_guards', { loanStartTurn: 0 });
+        brigade.location_osid = 'op:mun:o0';
+        const state = makeState({
+            formations: { rs_1st_guards: brigade },
+            corps_command: { vrs_drina: { active_operations: [{ phase: 'execution', participating_brigades: [] }] } },
+            corps_front_sectors: {
+                sector_a: {
+                    corps_id: 'vrs_drina',
+                    territory_osids: ['op:mun:o2'],
+                    assigned_brigade_ids: ['rs_1st_guards'],
+                    reserve_brigade_ids: [],
+                    threat_ratio: 2.0,
+                },
+            },
+            turn: 10,
+        });
+        state.political.political_controllers = {
+            'op:mun:o0': 'RS',
+            'op:mun:o1': 'RBiH',
+            'op:mun:o2': 'RS',
+        } as any;
+        brigade.elite_loan_state!.on_loan = true;
+        brigade.elite_loan_state!.loaned_to_corps = 'vrs_drina';
+        brigade.elite_loan_state!.loan_start_turn = 0;
+
+        tickEliteLoans(state, 10, chainAdj(3));
+
+        expect(brigade.elite_loan_state!.on_loan).toBe(false);
+    });
 });
 
 // ── evaluateArmyReserveAssignments ────────────────────────────────────────────
@@ -296,6 +345,14 @@ describe('evaluateArmyReserveAssignments', () => {
 
         const state = makeState({
             formations: { rs_1st_guards: elite, vrs_2nd_krajina: corpsHq },
+            corps_front_sectors: {
+                sec_a: {
+                    corps_id: 'vrs_2nd_krajina',
+                    territory_osids: ['op:mun:o3'],
+                    assigned_brigade_ids: [],
+                    reserve_brigade_ids: [],
+                },
+            },
             pending_reserve_requests: [{
                 corps_id: 'vrs_2nd_krajina',
                 faction: 'RS',
@@ -310,6 +367,11 @@ describe('evaluateArmyReserveAssignments', () => {
             player_faction: 'RBiH', // RS is bot
             turn: 10,
         });
+        state.political.political_controllers = {
+            'op:mun:o1': 'RS',
+            'op:mun:o2': 'RS',
+            'op:mun:o3': 'RS',
+        } as any;
 
         evaluateArmyReserveAssignments(state, adj);
 
@@ -317,6 +379,46 @@ describe('evaluateArmyReserveAssignments', () => {
         expect(state.military.formations!['rs_1st_guards'].elite_loan_state!.loaned_to_corps).toBe('vrs_2nd_krajina');
         // Fulfilled requests are removed from pending list
         expect(state.military.pending_reserve_requests).toHaveLength(0);
+    });
+
+    it('does not auto-assign a loan when the receiving corps has no reachable friendly sector territory', () => {
+        const adj = chainAdj(3);
+        const elite = makeElite('arbih_black_swans', 'RBiH', 'op:mun:o0');
+
+        const state = makeState({
+            formations: { arbih_black_swans: elite },
+            corps_front_sectors: {
+                sec_a: {
+                    corps_id: 'arbih_2nd_corps',
+                    territory_osids: ['op:mun:o2'],
+                    assigned_brigade_ids: [],
+                    reserve_brigade_ids: [],
+                },
+            },
+            pending_reserve_requests: [{
+                corps_id: 'arbih_2nd_corps',
+                faction: 'RBiH',
+                reason: 'defensive_gap',
+                priority: 60,
+                raw_priority: 60,
+                travel_hops: 2,
+                turn_requested: 10,
+                description: 'test',
+                suggested_brigade_id: 'arbih_black_swans',
+            }],
+            player_faction: 'RS',
+            turn: 10,
+        });
+        state.political.political_controllers = {
+            'op:mun:o0': 'RBiH',
+            'op:mun:o1': 'RS',
+            'op:mun:o2': 'RBiH',
+        } as any;
+
+        evaluateArmyReserveAssignments(state, adj);
+
+        expect(elite.elite_loan_state!.on_loan).toBe(false);
+        expect(state.military.pending_reserve_requests).toHaveLength(1);
     });
 
     it('leaves player faction requests in pending list (not auto-assigned)', () => {

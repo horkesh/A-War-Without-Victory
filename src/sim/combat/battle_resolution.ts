@@ -1,8 +1,9 @@
 /**
- * War phase: Battle resolution engine.
+ * Legacy SID-based battle resolution engine.
  *
- * Replaces the simplistic garrison-based combat with a multi-factor battle system.
- * Every engagement produces detailed casualties, equipment losses, and snap events.
+ * This file is no longer the primary war-phase combat authority. The canonical
+ * resolver is `attack_resolution_osid.ts`; this module remains for the fallback
+ * `resolve_attack_orders` lane and older report/test consumers.
  *
  * Formula inputs:
  *   Personnel density, equipment (tanks/artillery/AA with condition), experience,

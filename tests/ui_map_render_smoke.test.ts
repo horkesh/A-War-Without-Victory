@@ -240,7 +240,6 @@ describe('Tactical map render smoke', () => {
       sectorIntel: [
         {
           friendly_sector_id: 'sector:arbih_3rd:0',
-          enemy_corps_id: 'vrs_1st_krajina',
           offensive_signs: true,
           strength_category: 'strong',
           confidence: 0.72,
@@ -249,7 +248,6 @@ describe('Tactical map render smoke', () => {
     } as LoadedGameState & {
       sectorIntel: Array<{
         friendly_sector_id: string;
-        enemy_corps_id?: string;
         offensive_signs: boolean;
         strength_category?: string;
         confidence: number;

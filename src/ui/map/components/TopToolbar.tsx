@@ -1,3 +1,10 @@
+/**
+ * Legacy shell prototype.
+ *
+ * `PresidentialToolbar` is the mounted tactical-map shell owner in App.tsx.
+ * Keep this component only as a historical/storyboard reference until it is
+ * either intentionally revived or archived more aggressively.
+ */
 import { useRef, useCallback, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { loadLatestRunSaveAsText, loadRunFinalSaveAsText } from '../data/DataLoader';

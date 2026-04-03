@@ -11,7 +11,7 @@ import { useGameStore } from '../store/gameStore';
 import { useIPC } from '../desktop/useIPC';
 import { getPanelRailStyle } from './panelRail';
 import { getPlayerFacingCorpsName } from '../../shared/playerFacingLabels';
-import { humanizeOsid } from '../utils/osidDisplayName';
+import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getPlayerSafeBrigadeName } from '../utils/playerSafeText';
 
 const REASON_LABELS: Record<string, string> = {
@@ -44,6 +44,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
 
     const hqId = selectedArmyHqId ?? selectedFormationId;
     if (!hqId || !loadedGameState) return null;
+    const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
 
     const armyHq = loadedGameState.formations.find(f => f.id === hqId);
     if (!armyHq || armyHq.kind !== 'army_hq') return null;
@@ -185,7 +186,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                         )}
                                         {!ls.on_loan && ls.base_osid && (
                                             <div className="text-[10px] text-text-secondary">
-                                                Base: {humanizeOsid(ls.base_osid)}
+                                                Base: {getOsidDisplayName(ls.base_osid, osidDisplayNames)}
                                             </div>
                                         )}
                                     </button>

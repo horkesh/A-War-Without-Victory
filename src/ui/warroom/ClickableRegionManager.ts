@@ -44,11 +44,11 @@ import { NewspaperModal } from './components/NewspaperModal.js';
 import { NewsTicker } from './components/NewsTicker.js';
 import { ReportsModal } from './components/ReportsModal.js';
 import { CommandBriefingModal } from './components/CommandBriefingModal.js';
-import { OperationalSituationModal } from './components/OperationalSituationModal.js';
 import { TacticalMap } from './components/TacticalMap.js';
 import { WarPlanningMap } from './components/WarPlanningMap.js';
 import { extractWarData } from './data/war_data_extractor.js';
 import { capturePreviousTurnSnapshot, getPreviousSnapshot, setPreviousSnapshot, setLastTurnReport, type LastTurnReport } from './data/warroom_state.js';
+import type { ShellHandoffCommand } from '../shared/shellHandoff.js';
 type DesktopBridge = {
     advanceTurn?: (payload?: Record<string, unknown>) => Promise<{ ok: boolean; error?: string; stateJson?: string; report?: unknown }>;
     openTacticalMapWindow?: () => Promise<unknown>;
@@ -76,6 +76,7 @@ export class ClickableRegionManager {
     private warPlanningMap: WarPlanningMap | null = null;
     private mapSceneOpenHandler: (() => void) | null = null;
     private tacticalMapOpenHandler: (() => void) | null = null;
+    private tacticalShellHandoffHandler: ((command: ShellHandoffCommand) => void) | null = null;
     private newsTicker: NewsTicker = new NewsTicker();
     private onGameStateChange: ((newState: GameState) => void) | null = null;
     private settlementGraphCache: LoadedSettlementGraph | null = null;
@@ -115,6 +116,10 @@ export class ClickableRegionManager {
     /** Called by warroom to provide tactical map scene transition (embedded iframe). */
     setTacticalMapOpenHandler(handler: () => void): void {
         this.tacticalMapOpenHandler = handler;
+    }
+
+    setTacticalShellHandoffHandler(handler: (command: ShellHandoffCommand) => void): void {
+        this.tacticalShellHandoffHandler = handler;
     }
 
     setOnGameStateChange(callback: (newState: GameState) => void): void {
@@ -306,6 +311,10 @@ export class ClickableRegionManager {
     }
 
     private openFactionOverview(gameState: unknown): void {
+        if (this.tacticalShellHandoffHandler) {
+            this.tacticalShellHandoffHandler({ kind: 'army-hq', tab: 'summary' });
+            return;
+        }
         if (!this.modalManager) {
             console.warn('ModalManager not set');
             return;
@@ -538,6 +547,10 @@ export class ClickableRegionManager {
     }
 
     private openNewspaperModal(gameState: unknown): void {
+        if (this.tacticalShellHandoffHandler) {
+            this.tacticalShellHandoffHandler({ kind: 'chronicle' });
+            return;
+        }
         if (!this.modalManager) {
             console.warn('ModalManager not set');
             return;
@@ -548,6 +561,10 @@ export class ClickableRegionManager {
     }
 
     private openMagazineModal(gameState: unknown): void {
+        if (this.tacticalShellHandoffHandler) {
+            this.tacticalShellHandoffHandler({ kind: 'army-hq', tab: 'records', recordsSubTab: 'aar' });
+            return;
+        }
         if (!this.modalManager) {
             console.warn('ModalManager not set');
             return;
@@ -558,6 +575,10 @@ export class ClickableRegionManager {
     }
 
     private openCommandBriefingModal(gameState: unknown): void {
+        if (this.tacticalShellHandoffHandler) {
+            this.tacticalShellHandoffHandler({ kind: 'army-hq', tab: 'briefing' });
+            return;
+        }
         if (!this.modalManager) {
             console.warn('ModalManager not set');
             return;
@@ -591,19 +612,11 @@ export class ClickableRegionManager {
         this.modalManager?.showModal(new IvpBreakdownModal(state).render());
     }
 
-    private openOperationalSituationModal(gameState: unknown): void {
-        if (!this.modalManager) {
-            console.warn('ModalManager not set');
+    private openReportsModal(gameState: unknown): void {
+        if (this.tacticalShellHandoffHandler) {
+            this.tacticalShellHandoffHandler({ kind: 'army-hq', tab: 'records', recordsSubTab: 'ops' });
             return;
         }
-
-        const modal = new OperationalSituationModal(gameState as GameState, () => {
-            this.openPrimaryMap(gameState);
-        });
-        this.modalManager.showModal(modal.render());
-    }
-
-    private openReportsModal(gameState: unknown): void {
         if (!this.modalManager) {
             console.warn('ModalManager not set');
             return;

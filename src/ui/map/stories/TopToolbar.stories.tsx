@@ -5,7 +5,7 @@ import { makeMockLoadedGameState } from '../__mocks__/loadedGameState';
 import { useGameStore } from '../store/gameStore';
 
 const meta: Meta<typeof TopToolbar> = {
-  title: 'AWWV/TopToolbar',
+  title: 'Legacy/TopToolbar',
   component: TopToolbar,
   parameters: {
     layout: 'fullscreen',

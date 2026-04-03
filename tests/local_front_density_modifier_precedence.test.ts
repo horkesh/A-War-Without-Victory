@@ -59,7 +59,7 @@ function makeState(): GameState {
                 },
             },
         } as any,
-    } as GameState;
+    } as unknown as GameState;
 }
 
 test('getLocalFrontDensityModifier prefers sector density over legacy front assignment', () => {
@@ -70,11 +70,20 @@ test('getLocalFrontDensityModifier prefers sector density over legacy front assi
     assert.equal(modifier, 1.0);
 });
 
-test('getLocalFrontDensityModifier legacy fallback works without local_fronts runtime state', () => {
+test('getLocalFrontDensityModifier does not revive legacy density for an unassigned brigade when sector truth exists', () => {
+    const state = makeState();
+    state.military.corps_front_sectors!.sector_1!.assigned_brigade_ids = ['brig2'];
+    const brigade = state.military.formations!.brig1!;
+
+    const modifier = getLocalFrontDensityModifier(state, brigade as any);
+    assert.equal(modifier, 1.0);
+});
+
+test('getLocalFrontDensityModifier no longer revives legacy front density without sectors', () => {
     const state = makeState();
     delete (state.military as any).corps_front_sectors;
     const brigade = state.military.formations!.brig1!;
 
     const modifier = getLocalFrontDensityModifier(state, brigade as any);
-    assert.equal(modifier, 0.8);
+    assert.equal(modifier, 1.0);
 });

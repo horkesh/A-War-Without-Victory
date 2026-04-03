@@ -31,7 +31,6 @@ import { applyFormationCommitment } from '../../state/front_posture_commitment.j
 import { expandRegionPostureToEdges } from '../../state/front_posture_regions.js';
 import { accumulateFrontPressure } from '../../state/front_pressure.js';
 import { syncFrontSegments } from '../../state/front_segments.js';
-import { deriveAssignableFrontSegments } from '../../state/assignable_front_segments.js';
 import { GameState, type FactionId, type LegacyBrigadeAoRState, type EffectivePostureExposureState } from '../../state/game_state.js';
 import { updateHeavyEquipmentState } from '../../state/heavy_equipment.js';
 import { updateLegitimacyState } from '../../state/legitimacy.js';
@@ -81,11 +80,6 @@ import { checkAndApplyWashington } from '../early_war/washington_agreement.js';
 import { updateMixedMunicipalitiesList } from '../early_war/mixed_municipality.js';
 import { checkAndApplyOperationStorm } from '../combat/operation_storm.js';
 import { tickHvIntegration } from '../combat/hv_integration.js';
-import {
-    applyCorpsAttackAxisOrders,
-    applyCorpsFrontAutoDistribution,
-    ensureDerivedCorpsFrontEdges
-} from '../combat/corps_front_assign.js';
 import { runCohesionDrift } from '../combat/cohesion_drift.js';
 import { runMoraleDrift } from '../combat/morale_drift.js';
 import { runOngoingMobilization } from '../combat/ongoing_mobilization.js';
@@ -105,7 +99,6 @@ import { applySettlementDisplacementDeltas } from '../displacement_pipeline/disp
 import { buildDisplacementCapacityReport } from '../displacement_pipeline/displacement_capacity_hooks.js';
 import { aggregateSettlementDisplacementToMunicipalities } from '../displacement_pipeline/displacement_municipality_aggregation.js';
 import { evaluateDisplacementTriggers } from '../displacement_pipeline/displacement_triggers.js';
-import { applyBrigadeRepositionOrders } from '../combat/apply_brigade_reposition.js';
 import { generateAllBotOrdersOsid, computeOsidEthnicComposition, type OsidBotContext } from '../combat/bot_brigade_ai_osid.js';
 import { generateAllCorpsOrders, extractCorpsAiReport, type CorpsAiReportEntry } from '../combat/bot_corps_ai.js';
 import { checkAndFireGrazAccords, recordTruceBroken } from '../local_truces.js';
@@ -132,7 +125,6 @@ import { checkTriggeredOperations } from '../combat/triggered_operations.js';
 import { computeMilitiaGarrisons } from '../combat/militia_garrison.js';
 import { activateOGs, updateOGLifecycle } from '../combat/operational_groups.js';
 import { deriveSectorIntel } from '../combat/sector_intel.js';
-import { ensureBrigadeFrontAssignments, hasLiveSectorFrontlineTruth } from '../combat/front_assignment.js';
 import { resolveAttackOrders } from '../combat/resolve_attack_orders.js';
 import { resolveAttackOrdersOsid, displaceFormationsInEnemyTerritory } from '../combat/attack_resolution_osid.js';
 import { applyBrigadeMovementOrders } from '../combat/brigade_movement_orders.js';
@@ -268,26 +260,6 @@ export const warPhases: NamedPhase[] = [
             // In war phase, prefer OSID front edges (from previous turn's refreshFrontEdgeSnapshot)
             // for segment derivation. Canonical SID edges produce front_ids that can't be matched
             // against OSID-keyed political_controllers and brigade location_osid.
-            const frontEdgesForSegments =
-                context.state.meta.phase === 'war' && context.state.military.war_front_edges_osid?.length
-                    ? context.state.military.war_front_edges_osid
-                    : derivedFrontEdges;
-            context.state.military.assignable_front_segments = deriveAssignableFrontSegments(frontEdgesForSegments);
-        }
-    },
-    {
-        name: 'ensure-brigade-front-assignment',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            if (hasLiveSectorFrontlineTruth(context.state)) return;
-            ensureBrigadeFrontAssignments(context.state);
-        }
-    },
-    {
-        name: 'compute-local-fronts',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            context.state.military.local_fronts = undefined;
         }
     },
     {
@@ -838,12 +810,14 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             const cc = context.state.military.corps_command;
             if (!cc) return;
+            const spatial = getSpatialContextCache(context);
+            const adjacency = spatial?.preCombat.adjacency as Map<Osid, Osid[]> | undefined;
             for (const corpsId of Object.keys(cc).sort()) {
                 const cmd = cc[corpsId];
                 // Queued pre-planned ops are sequential and occupy slot 0.
                 // Bot AI ops in other slots do NOT block queue injection.
                 if (cmd?.queued_operations?.length && isSlot0AvailableForQueue(cmd)) {
-                    injectQueuedOperation(context.state, corpsId);
+                    injectQueuedOperation(context.state, corpsId, adjacency);
                 }
             }
         }
@@ -1108,42 +1082,6 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
-        name: 'ensure-derived-corps-front-edges',
-        run: async (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            const { edges } = await getGraphAndEdges(context);
-            ensureDerivedCorpsFrontEdges(context.state, edges);
-        }
-    },
-    {
-        name: 'apply-corps-front-orders',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            if (!context.state.military.corps_front_edges) return;
-            applyCorpsFrontAutoDistribution(context.state);
-        }
-    },
-    {
-        name: 'apply-corps-attack-axis-orders',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            if (!context.state.military.corps_attack_axis_orders) return;
-            applyCorpsAttackAxisOrders(context.state);
-        }
-    },
-    {
-        name: 'apply-brigade-reposition',
-        run: async (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            if (!context.state.military.brigade_reposition_orders || Object.keys(context.state.military.brigade_reposition_orders).length === 0) return;
-            const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
-            const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
-                ? context.input.settlementEdges
-                : graph.edges;
-            applyBrigadeRepositionOrders(context.state, edges);
-        }
-    },
-    {
         name: 'apply-brigade-posture',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
@@ -1304,6 +1242,8 @@ export const warPhases: NamedPhase[] = [
                 terrainData = { by_sid: {} };
             }
 
+            // Compatibility-only SID fallback. The canonical war-phase combat
+            // resolver is `resolveAttackOrdersOsid(...)` above.
             context.report.resolve_attack_orders = resolveAttackOrders(
                 context.state, edges, terrainData, settlementToMun
             );
@@ -1808,7 +1748,8 @@ export const warPhases: NamedPhase[] = [
         name: 'tick-elite-loans',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            tickEliteLoans(context.state, context.state.meta.turn);
+            const spatial = getSpatialContextCache(context);
+            tickEliteLoans(context.state, context.state.meta.turn, spatial?.preCombat.adjacency as Map<Osid, Osid[]> | undefined);
         }
     },
     {

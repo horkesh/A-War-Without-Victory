@@ -31,6 +31,8 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const setSelectedOsid = useGameStore((s) => s.setSelectedOsid);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
+  const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
+  const setSelectedOperationKey = useGameStore((s) => s.setSelectedOperationKey);
   const [supportMessage, setSupportMessage] = useState<string | null>(null);
 
   if (!selectedOsid) return null;
@@ -256,6 +258,8 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
           pendingOrders={pendingOrders}
           militiaPools={militiaPoolsProp}
           onFormationClick={setSelectedFormationId}
+          onSectorClick={setSelectedCorpsFrontSectorId}
+          onOperationClick={setSelectedOperationKey}
           currentEthnic={currentEthnic ?? undefined}
           displacementEventLog={loadedGameState?.displacementEventLog}
           allControlEvents={loadedGameState?.allControlEvents}

@@ -81,6 +81,41 @@ test('supply pressure never decreases (no free supply)', () => {
     assert.ok(state.political.war_supply_pressure!['RS']! >= 50);
 });
 
+test('supply pressure prefers sector-owned frontage when live sector truth exists', () => {
+    const state = minimalPhaseIIState({ S1: 'RBiH', S2: 'RS' });
+    state.military.corps_front_sectors = {
+        'sector:rbih': {
+            sector_id: 'sector:rbih',
+            corps_id: 'arbih_1st_corps',
+            faction: 'RBiH',
+            opposing_factions: ['RS'],
+            edge_ids: ['e1', 'e2'],
+            sub_segments: [],
+            territory_osids: [],
+            assigned_brigade_ids: [],
+            reserve_brigade_ids: [],
+            length_edges: 2,
+        },
+        'sector:rs': {
+            sector_id: 'sector:rs',
+            corps_id: 'vrs_romanija',
+            faction: 'RS',
+            opposing_factions: ['RBiH'],
+            edge_ids: ['e1', 'e2', 'e3'],
+            sub_segments: [],
+            territory_osids: [],
+            assigned_brigade_ids: [],
+            reserve_brigade_ids: [],
+            length_edges: 3,
+        },
+    } as any;
+
+    updateSupplyPressure(state, []);
+
+    assert.strictEqual(state.political.war_supply_pressure?.RBiH, 6);
+    assert.strictEqual(state.political.war_supply_pressure?.RS, 9);
+});
+
 test('updateSupplyPressure does nothing when meta.phase is peace', () => {
     const state = minimalPhaseIIState({ S1: 'RBiH', S2: 'RS' });
     state.meta.phase = 'peace';

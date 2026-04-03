@@ -10,7 +10,7 @@ interface AdvanceTurnDeps {
 
 /**
  * Calls advance-turn IPC, loads resulting state into store, and clears staged orders.
- * TopToolbar wraps this with setAdvancing(true/false).
+ * The mounted tactical shell (`PresidentialToolbar`) wraps this with setAdvancing(true/false).
  */
 export async function advanceTurnAndSync({
     ipc,

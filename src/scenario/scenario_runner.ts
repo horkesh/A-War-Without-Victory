@@ -38,7 +38,7 @@ import {
     buildAdjacencyMap,
     computeControlFlipProposals
 } from '../state/control_flip_proposals.js';
-import { computeFrontBreaches, FRONT_BREACH_THRESHOLD } from '../state/front_breaches.js';
+import { computeFrontBreaches } from '../state/front_breaches.js';
 import type { FactionId, GameState, MunicipalityId } from '../state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../state/game_state.js';
 import { prepareNewGameState } from '../state/initialize_new_game_state.js';
@@ -87,6 +87,7 @@ import {
     type CombatCausalityInvalidationReason,
     type CombatCausalitySummary
 } from './combat_causality.js';
+import { buildOsidAdjacency } from '../sim/combat/osid_adjacency.js';
 import {
     countInitOverrideChanges,
     mergeControlChangeAttributionSummaries,
@@ -133,6 +134,7 @@ import type {
     WeeklyReportRow
 } from './scenario_reporting.js';
 import { buildWeeklyReport } from './scenario_reporting.js';
+import type { TurnReport } from '../sim/turn_pipeline_types.js';
 import type { Scenario, ScenarioAction } from './scenario_types.js';
 import { evaluateVictoryConditions } from './victory_conditions.js';
 
@@ -268,7 +270,7 @@ export interface RunScenarioOptions {
     outDirOverride?: string;
     /** When true, append _<timestamp> to run directory so each run gets a new folder (no overwrite). */
     uniqueRunFolder?: boolean;
-    /** When true: before each turn set front_posture to push on all front edges for both sides; after each turn apply breach-based control flips. */
+    /** Legacy harness flag: observe/apply real breach-based control flips without seeding synthetic frontier state. */
     postureAllPushAndApplyBreaches?: boolean;
     use_smart_bots?: boolean;
     /** Optional per-week AI diagnostics artifact (bot_diagnostics.json). */
@@ -303,6 +305,58 @@ export interface RunScenarioResult {
         replay_timeline?: string;
         /** Optional per-week smart-bot diagnostics. */
         bot_diagnostics?: string;
+    };
+}
+
+export function deriveWeeklyActivityCounts(
+    _state: GameState,
+    turnReport: Pick<Partial<TurnReport>, 'phase_f_displacement' | 'front_pressure' | 'displacement'>,
+): WeeklyActivityCounts {
+    const triggerReport = turnReport.phase_f_displacement?.trigger_report;
+    if (triggerReport) {
+        return {
+            front_active_set_size: triggerReport.front_active_set_size,
+            pressure_eligible_size: triggerReport.pressure_eligible_size,
+            displacement_trigger_eligible_size: triggerReport.displacement_trigger_eligible_size,
+        };
+    }
+
+    return {
+        front_active_set_size: 0,
+        pressure_eligible_size: 0,
+        displacement_trigger_eligible_size: 0,
+    };
+}
+
+type AttackResolutionSummaryLike = {
+    orders_processed?: number;
+    unique_attack_targets?: number;
+    flips_applied?: number;
+    casualty_attacker?: number;
+    casualty_defender?: number;
+    orders_by_faction?: Record<string, number>;
+    battles?: Array<{ defender_brigade?: string | null }>;
+};
+
+export function selectCanonicalAttackResolutionSummary(
+    turnReport: Pick<Partial<TurnReport>, 'resolve_attack_orders' | 'attack_resolution_osid'>,
+): {
+    summary?: AttackResolutionSummaryLike;
+    battles: Array<{ defender_brigade?: string | null }>;
+} {
+    const legacyResolution = turnReport.resolve_attack_orders;
+    const osidResolution = turnReport.attack_resolution_osid as AttackResolutionSummaryLike | undefined;
+
+    if (osidResolution) {
+        return {
+            summary: osidResolution,
+            battles: osidResolution.battles ?? [],
+        };
+    }
+
+    return {
+        summary: legacyResolution,
+        battles: legacyResolution?.battle_report?.battles ?? [],
     };
 }
 
@@ -1322,7 +1376,14 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             initializeCorpsCommand(state);
             spawnJnaPhantomBrigades(state);
             initializeCorpsCommand(state); // re-init after JNA spawn to pick up synthetic JNA corps
-            injectPrePlannedOperations(state);
+            let prePlannedAdjacency;
+            try {
+                const preEdges = await loadOperationalEdges(baseDir);
+                if (preEdges?.length) prePlannedAdjacency = buildOsidAdjacency(preEdges);
+            } catch {
+                // Operational edges may be missing in niche harness contexts.
+            }
+            injectPrePlannedOperations(state, prePlannedAdjacency);
         }
         if (operationalData?.canonicalToOperational) {
             backfillFormationLocationOsid(state, operationalData.canonicalToOperational);
@@ -1495,58 +1556,6 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             }
             applyActionsToState(state, actions);
             // Phase H1.8: probe_intent is harness-only; no gate toggled in sim (applyActionsToState does not mutate on probe_intent)
-
-            if (postureAllPushAndApplyBreaches && state.meta.phase === 'war') {
-                const frontEdgesPre = computeFrontEdges(state, graph.edges);
-                if (!state.military.front_posture || typeof state.military.front_posture !== 'object') state.military.front_posture = {};
-                // Asymmetric posture so pressure accumulates (side_a push, side_b hold) and breaches can fire.
-                for (const e of frontEdgesPre) {
-                    if (e.side_a) {
-                        if (!state.military.front_posture[e.side_a]) state.military.front_posture[e.side_a] = { assignments: {} };
-                        if (!state.military.front_posture[e.side_a].assignments) state.military.front_posture[e.side_a].assignments = {};
-                        state.military.front_posture[e.side_a].assignments[e.edge_id] = { edge_id: e.edge_id, posture: 'push', weight: 1 };
-                    }
-                    if (e.side_b) {
-                        if (!state.military.front_posture[e.side_b]) state.military.front_posture[e.side_b] = { assignments: {} };
-                        if (!state.military.front_posture[e.side_b].assignments) state.military.front_posture[e.side_b].assignments = {};
-                        state.military.front_posture[e.side_b].assignments[e.edge_id] = { edge_id: e.edge_id, posture: 'hold', weight: 1 };
-                    }
-                }
-                // Assign unassigned formations to a front edge (deterministic) so fatigue can accrue when unsupplied.
-                const formations = (state as any).formations as Record<string, any> | undefined;
-                if (formations && typeof formations === 'object') {
-                    const edgeSetByFaction = new Map<string, Set<string>>();
-                    for (const edge of frontEdgesPre) {
-                        if (edge.side_a && typeof edge.edge_id === 'string') {
-                            const set = edgeSetByFaction.get(edge.side_a) ?? new Set<string>();
-                            set.add(edge.edge_id);
-                            edgeSetByFaction.set(edge.side_a, set);
-                        }
-                        if (edge.side_b && typeof edge.edge_id === 'string') {
-                            const set = edgeSetByFaction.get(edge.side_b) ?? new Set<string>();
-                            set.add(edge.edge_id);
-                            edgeSetByFaction.set(edge.side_b, set);
-                        }
-                    }
-                    const edgesByFaction = new Map<string, string[]>();
-                    for (const [fid, set] of edgeSetByFaction) {
-                        edgesByFaction.set(fid, Array.from(set).sort((a, b) => a.localeCompare(b)));
-                    }
-                    const formationIds = Object.keys(formations).sort();
-                    for (const formationId of formationIds) {
-                        const f = formations[formationId];
-                        if (!f || typeof f !== 'object' || (f as any).status !== 'active') continue;
-                        const assignment = (f as any).assignment;
-                        if (assignment && typeof assignment === 'object' && (assignment.kind === 'edge' || assignment.kind === 'region')) continue;
-                        const factionId = (f as any).faction;
-                        if (typeof factionId !== 'string') continue;
-                        const edgeIds = edgesByFaction.get(factionId);
-                        if (!edgeIds || edgeIds.length === 0) continue;
-                        const idx = formationIds.indexOf(formationId) % edgeIds.length;
-                        (f as any).assignment = { kind: 'edge', edge_id: edgeIds[idx] };
-                    }
-                }
-            }
 
             // Run smart bots once per simulated week after scenario actions and posture overrides.
             if (botManager) {
@@ -1721,19 +1730,10 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     recovery_without_logged_attempt_count: weeklyCombatCausality.recovery_without_logged_attempt_count,
                     invalidation_reasons: weeklyCombatCausality.invalidation_reasons
                 };
-                const attackResolution = turnReport.resolve_attack_orders;
-                // OSID attack resolution writes to a different report key
-                const osidResolution = (turnReport as unknown as Record<string, unknown>).attack_resolution_osid as {
-                    orders_processed?: number; unique_attack_targets?: number; flips_applied?: number;
-                    casualty_attacker?: number; casualty_defender?: number; orders_by_faction?: Record<string, number>;
-                    battles?: Array<{ defender_brigade?: string | null }>;
-                } | undefined;
-                // Use whichever report is available (legacy or OSID)
-                const res = attackResolution ?? osidResolution;
+                const { summary: res, battles: battleList } = selectCanonicalAttackResolutionSummary(turnReport);
                 let weeklyDefenderPresentBattles = 0;
                 let weeklyDefenderAbsentBattles = 0;
-                // Count defender-present battles from either format
-                const battleList = attackResolution?.battle_report?.battles ?? osidResolution?.battles ?? [];
+                // Count defender-present battles from the canonical combat summary for this turn.
                 for (const battle of battleList) {
                     if (battle.defender_brigade != null) weeklyDefenderPresentBattles += 1;
                     else weeklyDefenderAbsentBattles += 1;
@@ -1834,31 +1834,6 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             if (shouldApplyBreaches && adjacencyMap && state.meta.phase === 'war') {
                 const derivedFrontEdges = computeFrontEdges(state, graph.edges);
                 let breaches = computeFrontBreaches(state, derivedFrontEdges);
-                if (postureAllPushAndApplyBreaches && breaches.length === 0 && derivedFrontEdges.length > 0) {
-                    // Harness: seed one edge so breach-based flips occur when pipeline pressure does not yet reach threshold.
-                    const firstEdge = [...derivedFrontEdges].sort((a, b) => a.edge_id.localeCompare(b.edge_id))[0];
-                    const eid = firstEdge.edge_id;
-                    if (!state.military.front_segments || typeof state.military.front_segments !== 'object') state.military.front_segments = {};
-                    (state.military.front_segments as Record<string, unknown>)[eid] = {
-                        edge_id: eid,
-                        active: true,
-                        created_turn: state.meta.turn,
-                        since_turn: state.meta.turn,
-                        last_active_turn: state.meta.turn,
-                        active_streak: 1,
-                        max_active_streak: 1,
-                        friction: 1,
-                        max_friction: 1
-                    };
-                    if (!state.military.front_pressure || typeof state.military.front_pressure !== 'object') state.military.front_pressure = {};
-                    (state.military.front_pressure as Record<string, { edge_id: string; value: number; max_abs: number; last_updated_turn: number }>)[eid] = {
-                        edge_id: eid,
-                        value: FRONT_BREACH_THRESHOLD,
-                        max_abs: FRONT_BREACH_THRESHOLD,
-                        last_updated_turn: state.meta.turn
-                    };
-                    breaches = computeFrontBreaches(state, derivedFrontEdges);
-                }
                 const proposalsFile = computeControlFlipProposals(state, derivedFrontEdges, breaches, adjacencyMap);
                 applyControlFlipProposals(state, proposalsFile);
             }
@@ -1869,29 +1844,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 });
             }
 
-            // Metrics derivation from active pipeline phases
-            let front_active_set_size = 0;
-            if (state.military.front_segments) {
-                for (const seg of Object.values(state.military.front_segments)) {
-                    if ((seg as any).active) front_active_set_size++;
-                }
-            }
-
-            let pressure_eligible_size = 0;
-            if (turnReport.front_pressure?.pressure_deltas) {
-                pressure_eligible_size = Object.keys(turnReport.front_pressure.pressure_deltas).length;
-            }
-
-            let displacement_trigger_eligible_size = 0;
-            if (turnReport.displacement?.by_municipality) {
-                displacement_trigger_eligible_size = turnReport.displacement.by_municipality.filter(r => r.displacement_this_turn > 0).length;
-            }
-
-            const activity: WeeklyActivityCounts = {
-                front_active_set_size,
-                pressure_eligible_size,
-                displacement_trigger_eligible_size
-            };
+            const activity = deriveWeeklyActivityCounts(state, turnReport);
             activityCountsPerWeek.push(activity);
 
             let ops: { enabled: boolean; level: number } | undefined;
@@ -2208,14 +2161,6 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 : {}),
             ...(attackResolutionSummary.weeks_at_war > 0 && state.displacement.civilian_casualties
                 ? { civilian_casualties: state.displacement.civilian_casualties }
-                : {}),
-            ...(attackResolutionSummary.weeks_at_war > 0
-                ? {
-                    front_corps_tracking: {
-                        corps_front_edges_present: !!(state.military.corps_front_edges && Object.keys(state.military.corps_front_edges).length > 0),
-                        corps_count: Object.keys(state.military.corps_front_edges ?? {}).length
-                    }
-                }
                 : {}),
             ...(botBenchmarkSummary ? { bot_benchmark_evaluation: botBenchmarkSummary } : {}),
             ...(victoryEvaluation ? { victory: victoryEvaluation } : {}),

@@ -68,10 +68,7 @@ test('parseGameState extracts canonical front edge and pressure views', () => {
     brigade_front_assignment: {
             b1: 'RBiH__RS__S1__S2',
             b2: null,
-        },
-    assignable_front_segments: [
-            { front_id: 'RBiH__RS__S1__S2', edge_ids: ['S1__S2'], side_a: 'RBiH', side_b: 'RS', length_edges: 1 }
-        ]
+        }
   } as any,
   political: {
     political_controllers: {}
@@ -82,8 +79,6 @@ test('parseGameState extracts canonical front edge and pressure views', () => {
     assert.ok(parsed.frontEdgesOsid && parsed.frontEdgesOsid.length === 1);
     assert.strictEqual(parsed.frontEdgesOsid?.[0]?.edge_id, 'op:a__op:b');
     assert.strictEqual(parsed.frontPressureByEdge?.S1__S2?.value, -3);
-    assert.ok(parsed.assignableFrontSegments && parsed.assignableFrontSegments.length === 1);
-    assert.strictEqual(parsed.assignableFrontSegments?.[0]?.front_id, 'RBiH__RS__S1__S2');
     assert.strictEqual((parsed as any).brigadeFrontAssignment, undefined);
 });
 
@@ -305,6 +300,48 @@ test('parseGameState derives operation readiness and offensive metadata', () => 
   political: {
     political_controllers: {}
   } as any,
+});
+
+test('parseGameState scopes player-facing operations, operation history, active operations, and reserve requests', () => {
+    const parsed = parseGameState({
+  meta: { turn: 9, phase: 'war', player_faction: 'RBiH' },
+  military: {
+    formations: {
+            arbih_3rd_corps: { id: 'arbih_3rd_corps', faction: 'RBiH', name: '3rd Corps', kind: 'corps', tags: [] },
+            vrs_1st_krajina: { id: 'vrs_1st_krajina', faction: 'RS', name: '1st Krajina Corps', kind: 'corps', tags: [] },
+            b1: { id: 'b1', faction: 'RBiH', corps_id: 'arbih_3rd_corps', name: '1st Brigade', kind: 'brigade', tags: [] },
+            e1: { id: 'e1', faction: 'RS', corps_id: 'vrs_1st_krajina', name: 'Enemy Brigade', kind: 'brigade', tags: [] },
+        },
+    corps_command: {
+            arbih_3rd_corps: {
+                active_operations: [
+                    { name: 'Own Op', type: 'sector_attack', phase: 'planning', started_turn: 9, participating_brigades: ['b1'], objectives: ['osid_a'] },
+                ],
+            },
+            vrs_1st_krajina: {
+                active_operations: [
+                    { name: 'Enemy Op', type: 'sector_attack', phase: 'execution', started_turn: 9, participating_brigades: ['e1'], objectives: ['osid_b'] },
+                ],
+            },
+        },
+    pending_reserve_requests: [
+            { request_id: 'req_own', corps_id: 'arbih_3rd_corps', faction: 'RBiH', reason: 'pressure', description: 'Need reserve', turn_requested: 9 },
+            { request_id: 'req_enemy', corps_id: 'vrs_1st_krajina', faction: 'RS', reason: 'pressure', description: 'Enemy reserve', turn_requested: 9 },
+        ],
+  } as any,
+  operation_history: [
+        { operation_id: 'own_hist', operation_name: 'Own Historic Op', corps_id: 'arbih_3rd_corps', faction: 'RBiH', started_turn: 1, ended_turn: 2, outcome: 'success', objectives_targeted: [], objectives_captured: [], total_attacks: 1, casualties_suffered: { killed: 0, wounded: 0 }, casualties_inflicted: { killed: 0, wounded: 0 }, equipment_lost: { tanks: 0, artillery: 0 }, equipment_destroyed: { tanks: 0, artillery: 0 }, equipment_captured: { tanks: 0, artillery: 0 }, grade: { stars: 2, verdict: 'solid', factors: {} }, duration_turns: 1, weekly_log: [] },
+        { operation_id: 'enemy_hist', operation_name: 'Enemy Historic Op', corps_id: 'vrs_1st_krajina', faction: 'RS', started_turn: 1, ended_turn: 2, outcome: 'success', objectives_targeted: [], objectives_captured: [], total_attacks: 1, casualties_suffered: { killed: 0, wounded: 0 }, casualties_inflicted: { killed: 0, wounded: 0 }, equipment_lost: { tanks: 0, artillery: 0 }, equipment_destroyed: { tanks: 0, artillery: 0 }, equipment_captured: { tanks: 0, artillery: 0 }, grade: { stars: 2, verdict: 'solid', factors: {} }, duration_turns: 1, weekly_log: [] },
+    ] as any,
+  political: {
+    political_controllers: {}
+  } as any,
+});
+
+    assert.deepEqual(parsed.operations?.map((operation) => operation.name), ['Own Op']);
+    assert.deepEqual(parsed.activeOperations?.map((operation) => operation.operation_name), ['Own Op']);
+    assert.deepEqual(parsed.operationHistory?.map((operation) => operation.operation_name), ['Own Historic Op']);
+    assert.deepEqual(parsed.pendingReserveRequests?.map((request) => request.request_id), ['req_own']);
 });
 
     const operation = parsed.operations?.[0];

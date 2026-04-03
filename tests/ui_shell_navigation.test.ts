@@ -1,11 +1,13 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
+  applyShellHandoffCommand,
   openArmyHQBriefingForCorps,
   openArmyHQRecordsSubTab,
   openArmyHQTab,
   type ShellNavigationState,
 } from '../src/ui/map/utils/shellNavigation.js';
+import { decodeShellHandoffCommand, encodeShellHandoffCommand } from '../src/ui/shared/shellHandoff.js';
 import { isEmbeddedTacticalMap, shouldShowWarroomReturn } from '../src/ui/map/utils/warroomReturn.js';
 
 function createState(playerFaction: string | null = 'RBiH'): ShellNavigationState & {
@@ -20,6 +22,8 @@ function createState(playerFaction: string | null = 'RBiH'): ShellNavigationStat
     setArmyHQTab: (tab) => { calls.push(['setArmyHQTab', tab]); },
     setArmyHQRecordsSubTab: (subTab) => { calls.push(['setArmyHQRecordsSubTab', subTab]); },
     setArmyHQExpandedCorpsId: (id) => { calls.push(['setArmyHQExpandedCorpsId', id]); },
+    setCodexOpen: (open) => { calls.push(['setCodexOpen', open]); },
+    setChronicleOpen: (open) => { calls.push(['setChronicleOpen', open]); },
   };
 }
 
@@ -73,6 +77,44 @@ describe('shellNavigation', () => {
     expect(state.calls).toEqual([]);
   });
 
+  it('applies Warroom shell handoff commands through canonical Army HQ navigation', () => {
+    const state = createState('RBiH');
+
+    expect(applyShellHandoffCommand(state, { kind: 'army-hq', tab: 'summary' })).toBe(true);
+    expect(applyShellHandoffCommand(state, { kind: 'army-hq', tab: 'records', recordsSubTab: 'ops' })).toBe(true);
+    expect(applyShellHandoffCommand(state, { kind: 'army-hq', tab: 'briefing', corpsId: 'arbih_3rd_corps' })).toBe(true);
+    expect(applyShellHandoffCommand(state, { kind: 'chronicle' })).toBe(true);
+    expect(applyShellHandoffCommand(state, { kind: 'codex' })).toBe(true);
+
+    expect(state.calls).toEqual([
+      ['setSelectedArmyId', 'RBiH'],
+      ['setArmyHQOpen', true],
+      ['setArmyHQTab', 'summary'],
+      ['setSelectedArmyId', 'RBiH'],
+      ['setArmyHQOpen', true],
+      ['setArmyHQRecordsSubTab', 'ops'],
+      ['setSelectedArmyId', 'RBiH'],
+      ['setArmyHQOpen', true],
+      ['setArmyHQTab', 'briefing'],
+      ['setArmyHQExpandedCorpsId', 'arbih_3rd_corps'],
+      ['setChronicleOpen', true],
+      ['setCodexOpen', true],
+    ]);
+  });
+
+  it('round-trips shared shell handoff commands for cross-shell navigation', () => {
+    const encoded = encodeShellHandoffCommand({ kind: 'army-hq', tab: 'records', recordsSubTab: 'aar' });
+
+    expect(decodeShellHandoffCommand(encoded)).toEqual({
+      kind: 'army-hq',
+      tab: 'records',
+      recordsSubTab: 'aar',
+    });
+    expect(decodeShellHandoffCommand(encodeShellHandoffCommand({ kind: 'chronicle' }))).toEqual({ kind: 'chronicle' });
+    expect(decodeShellHandoffCommand(encodeShellHandoffCommand({ kind: 'codex' }))).toEqual({ kind: 'codex' });
+    expect(decodeShellHandoffCommand('not-json')).toBeNull();
+  });
+
   it('shows a Warroom return affordance for standalone desktop and embedded tactical shells', () => {
     expect(isEmbeddedTacticalMap('?embedded=1')).toBe(true);
     expect(shouldShowWarroomReturn('?embedded=1', false)).toBe(true);
@@ -91,5 +133,70 @@ describe('shellNavigation', () => {
     expect(source).not.toContain('Halt + Dig In');
     expect(source).not.toContain('stageOperationForceLaunch');
     expect(source).not.toContain('stageOperationHalt');
+  });
+
+  it('routes Space through canonical advance-turn action instead of shell DOM scans', () => {
+    const source = readFileSync(
+      new URL('../src/ui/map/hooks/useKeyboardShortcuts.ts', import.meta.url),
+      'utf8',
+    );
+
+    expect(source).toContain('advanceTurnAndSync');
+    expect(source).not.toContain("document.querySelectorAll('button')");
+    expect(source).not.toContain("b.textContent?.includes('ADVANCE TURN')");
+  });
+
+  it('routes Ctrl+S through canonical IPC instead of raw window bridge access', () => {
+    const source = readFileSync(
+      new URL('../src/ui/map/hooks/useKeyboardShortcuts.ts', import.meta.url),
+      'utf8',
+    );
+
+    expect(source).toContain('ipc.quickSave()');
+    expect(source).not.toContain("window as unknown as { awwv?: { quickSave: () => Promise<unknown> } }");
+  });
+
+  it('keeps tactical shell top clearance tight enough that the crest does not tax every rail', () => {
+    const appSource = readFileSync(
+      new URL('../src/ui/map/App.tsx', import.meta.url),
+      'utf8',
+    );
+    const toolbarSource = readFileSync(
+      new URL('../src/ui/map/components/PresidentialToolbar.tsx', import.meta.url),
+      'utf8',
+    );
+    const railSource = readFileSync(
+      new URL('../src/ui/map/components/panelRail.ts', import.meta.url),
+      'utf8',
+    );
+
+    expect(appSource).toContain("devMode ? '6.5rem' : '5.5rem'");
+    expect(toolbarSource).toContain("className=\"w-[84px] h-[84px]");
+    expect(railSource).toContain("var(--awwv-toolbar-clearance, 5.5rem)");
+    expect(railSource).not.toContain("var(--awwv-toolbar-clearance, 7.5rem)");
+  });
+
+  it('routes Warroom staff props through shell handoff instead of opening duplicate local packets', () => {
+    const warroomSource = readFileSync(
+      new URL('../src/ui/warroom/ClickableRegionManager.ts', import.meta.url),
+      'utf8',
+    );
+    const warroomAppSource = readFileSync(
+      new URL('../src/ui/warroom/warroom.ts', import.meta.url),
+      'utf8',
+    );
+    const appSource = readFileSync(
+      new URL('../src/ui/map/App.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(warroomSource).toContain("this.tacticalShellHandoffHandler({ kind: 'army-hq', tab: 'summary' })");
+    expect(warroomSource).toContain("this.tacticalShellHandoffHandler({ kind: 'chronicle' })");
+    expect(warroomSource).toContain("this.tacticalShellHandoffHandler({ kind: 'army-hq', tab: 'briefing' })");
+    expect(warroomSource).toContain("this.tacticalShellHandoffHandler({ kind: 'army-hq', tab: 'records', recordsSubTab: 'ops' })");
+    expect(warroomAppSource).toContain('shellHandoff=');
+    expect(appSource).toContain("event.data?.type !== 'awwv-shell:handoff'");
+    expect(appSource).toContain('applyShellHandoffCommand');
+    expect(appSource).toContain("params.get('shellHandoff')");
   });
 });

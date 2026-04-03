@@ -6,7 +6,8 @@ import { useMemo } from 'react';
 import type { NamedOfficerView } from '../data/types';
 import { useGameStore } from '../store/gameStore';
 import { formatRank, getArchetype, formatPips, getRatingColor } from '../utils/officerCharacter';
-import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
+import { getPlayerSafeCorpsName, getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
+import { findPlayerFacingOperationByKey } from '../../shared/playerVisibility';
 
 interface OperationBriefingModalProps {
     isOpen: boolean;
@@ -53,9 +54,10 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
 
     const { operation, commander } = useMemo(() => {
         if (!loadedGameState || !context) return { operation: null, commander: null };
-        const op = loadedGameState.operations?.find(
-            (o) => o.corps_id === context.corpsId && o.name === context.operationName,
-        ) ?? null;
+        const op = findPlayerFacingOperationByKey(
+            loadedGameState,
+            `${context.corpsId}|${context.operationName}`,
+        );
         let cdr: NamedOfficerView | null = null;
         if (op?.commander_officer_id && loadedGameState.namedOfficerData) {
             cdr = loadedGameState.namedOfficerData.find((o) => o.id === op.commander_officer_id) ?? null;
@@ -70,6 +72,11 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
     const forceRatio = operation.force_ratio_estimate;
     const assessment = operation.commander_assessment;
     const postponements = operation.postponement_count ?? 0;
+    const corpsLabel = getPlayerSafeCorpsName(
+        operation.corps_name ?? null,
+        operation.corps_id,
+        'This corps',
+    );
 
     return (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60">
@@ -81,7 +88,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                     </div>
                     <div className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Operations Briefing</div>
                     <div className="text-sm font-bold mt-0.5">{operation.name}</div>
-                    <div className="text-[10px] text-neutral-500">{operation.corps_name} / {getPlayerSafeMilitaryFactionName(operation.faction)}</div>
+                    <div className="text-[10px] text-neutral-500">{corpsLabel} / {getPlayerSafeMilitaryFactionName(operation.faction)}</div>
                 </div>
 
                 {/* Commander info */}

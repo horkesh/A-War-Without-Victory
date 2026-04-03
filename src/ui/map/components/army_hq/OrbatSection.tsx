@@ -4,8 +4,10 @@
  */
 import { useMemo, useState } from 'react';
 import type { FormationView } from '../../data/types';
+import { useGameStore } from '../../store/gameStore';
+import { getOsidDisplayName } from '../../utils/osidDisplayName';
 import { getCohesionColor, OUTCOME_COLORS } from '../../utils/theme';
-import { formatPersonnel, formatOsidLabel } from '../../utils/formatters';
+import { formatPersonnel } from '../../utils/formatters';
 import { CollapsibleSection } from './CollapsibleSection';
 
 interface OrbatSectionProps {
@@ -49,6 +51,7 @@ const DECORATION_TIER_STYLE: Record<string, string> = {
 };
 
 function BrigadeExpandedDetail({ b }: { b: FormationView }) {
+    const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
     const morale = Math.round(b.morale ?? 0);
     const cohesion = Math.round(Math.max(0, Math.min(100, b.cohesion ?? 0)));
     const entrenchment = b.entrenchment_turns ?? 0;
@@ -77,12 +80,12 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
                 )}
                 {locationOsid && (
                     <span className="text-[10px] text-text-secondary/50">
-                        LOC <span className="text-text-secondary">{formatOsidLabel(locationOsid)}</span>
+                        LOC <span className="text-text-secondary">{getOsidDisplayName(locationOsid, osidDisplayNames)}</span>
                     </span>
                 )}
                 {homeOsid && homeOsid !== locationOsid && (
                     <span className="text-[10px] text-text-secondary/40">
-                        HOME <span className="text-text-secondary/60">{formatOsidLabel(homeOsid)}</span>
+                        HOME <span className="text-text-secondary/60">{getOsidDisplayName(homeOsid, osidDisplayNames)}</span>
                     </span>
                 )}
                 {b.home_defense_active && (
@@ -179,7 +182,12 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
                         {engagements.slice(0, 5).map((e, i) => (
                             <div key={i} className="flex items-center gap-2 text-[10px]">
                                 <span className="text-text-secondary/50 w-6 shrink-0">W{e.turn}</span>
-                                <span className="text-text-secondary/40 truncate w-20 shrink-0" title={formatOsidLabel(e.osid)}>{formatOsidLabel(e.osid)}</span>
+                                <span
+                                    className="text-text-secondary/40 truncate w-20 shrink-0"
+                                    title={getOsidDisplayName(e.osid, osidDisplayNames)}
+                                >
+                                    {getOsidDisplayName(e.osid, osidDisplayNames)}
+                                </span>
                                 <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded border leading-none`}
                                     style={{ color: OUTCOME_COLORS[e.outcome] ?? '#d4c5a0', borderColor: (OUTCOME_COLORS[e.outcome] ?? '#d4c5a0') + '40' }}>
                                     {e.outcome.replace(/_/g, ' ')}

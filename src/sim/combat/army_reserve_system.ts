@@ -37,6 +37,7 @@ import { isSectorAssignmentExemptCorpsId } from './corps_front_sectors_constants
 import { computeOsidGraphDistance } from './home_distance.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getPrimaryOperation } from './corps_operation_helpers.js';
+import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -61,6 +62,66 @@ function getCorpsReferenceOsid(state: GameState, corpsId: string): string | null
         }
     }
     return null;
+}
+
+function computeFriendlyDistanceToCorpsSectors(
+    state: GameState,
+    faction: FactionId,
+    fromOsid: Osid,
+    corpsId: string,
+    adjacency: Map<Osid, Osid[]>,
+): number {
+    const sectors = Object.values(state.military.corps_front_sectors ?? {})
+        .filter(s => s.corps_id === corpsId);
+    if (sectors.length === 0) return Infinity;
+
+    const targets = new Set<Osid>();
+    for (const sector of sectors) {
+        for (const osid of sector.territory_osids ?? []) {
+            targets.add(osid as Osid);
+        }
+    }
+    if (targets.size === 0) return Infinity;
+    if (targets.has(fromOsid)) return 0;
+
+    const visited = new Set<Osid>([fromOsid]);
+    const queue: Array<{ osid: Osid; hops: number }> = [{ osid: fromOsid, hops: 0 }];
+    let head = 0;
+    while (head < queue.length) {
+        const { osid, hops } = queue[head++]!;
+        const neighbors = adjacency.get(osid) ?? [];
+        for (const n of neighbors) {
+            if (visited.has(n)) continue;
+            const ctrl = getPoliticalControllerOSID(state, n);
+            if (ctrl !== faction) continue;
+            if (targets.has(n)) return hops + 1;
+            visited.add(n);
+            queue.push({ osid: n, hops: hops + 1 });
+        }
+    }
+
+    return Infinity;
+}
+
+export function canEliteLoanReachCorpsTerritory(
+    state: GameState,
+    brigadeId: FormationId | string,
+    corpsId: string,
+    adjacency: Map<Osid, Osid[]>,
+): boolean {
+    const formation = state.military.formations?.[brigadeId];
+    if (!formation) return false;
+    const fromOsid = (formation.location_osid ?? formation.home_osid) as Osid | undefined;
+    if (!fromOsid) return false;
+    return Number.isFinite(
+        computeFriendlyDistanceToCorpsSectors(
+            state,
+            formation.faction as FactionId,
+            fromOsid,
+            corpsId,
+            adjacency,
+        ),
+    );
 }
 
 /**
@@ -377,6 +438,11 @@ export function deployEliteLoan(
     if (!f.base_osid) {
         f.base_osid = f.location_osid ?? f.home_osid;
     }
+    // Re-deployment must clear any stale "return home" march from a previous
+    // recall; otherwise the brigade can stay marked on-loan while walking the
+    // wrong direction and never entering the receiving corps's territory.
+    delete state.military.brigade_movement_orders?.[brigadeId];
+    delete state.military.brigade_movement_state?.[brigadeId];
 
     // Ensure tracker exists
     if (!state.military.elite_brigade_tracker) state.military.elite_brigade_tracker = {};
@@ -520,6 +586,7 @@ export function evaluateArmyReserveAssignments(
                 const f = state.military.formations?.[bid];
                 const bOsid = f?.location_osid ?? f?.home_osid;
                 if (!bOsid) continue;
+                if (!canEliteLoanReachCorpsTerritory(state, bid, req.corps_id, adjacency)) continue;
                 const h = computeOsidGraphDistance(bOsid as Osid, corpsRef as Osid, adjacency);
                 if (h < nearestHops) { nearestHops = h; nearestId = bid; }
             }
@@ -562,7 +629,7 @@ export function evaluateArmyReserveAssignments(
 
         // Verify the suggested brigade is still available (another request may have claimed it)
         const f = state.military.formations?.[brigadeId];
-        if (!f || !isEliteAvailable(f, turn) || req.travel_hops > MAX_AUTO_DEPLOY_HOPS) {
+        if (!f || !isEliteAvailable(f, turn) || req.travel_hops > MAX_AUTO_DEPLOY_HOPS || !canEliteLoanReachCorpsTerritory(state, brigadeId, req.corps_id, adjacency)) {
             remaining.push(req);
             continue;
         }
@@ -611,7 +678,7 @@ export function evaluateArmyReserveAssignments(
  *  - Voluntary recall when op concluded + need expired + min duration elapsed
  *  - Updates active episode tracker fields (turns_deployed, battles_fought)
  */
-export function tickEliteLoans(state: GameState, turn: number): void {
+export function tickEliteLoans(state: GameState, turn: number, adjacency?: Map<Osid, Osid[]>): void {
     const formations = state.military.formations ?? {};
     const corpsCommand = state.military.corps_command ?? {};
     const brigadeIds = Object.keys(formations).sort(strictCompare);
@@ -684,6 +751,23 @@ export function tickEliteLoans(state: GameState, turn: number): void {
         }
 
         // ── Voluntary recall (army AI) — only after min duration ──
+        if (adjacency) {
+            const currentOsid = (f.location_osid ?? f.home_osid) as Osid | undefined;
+            if (currentOsid) {
+                const reachableHops = computeFriendlyDistanceToCorpsSectors(
+                    state,
+                    f.faction as FactionId,
+                    currentOsid,
+                    ls.loaned_to_corps,
+                    adjacency,
+                );
+                if (!Number.isFinite(reachableHops)) {
+                    recallEliteLoan(state, bid, 'need_expired', turn);
+                    continue;
+                }
+            }
+        }
+
         if (turnsSinceLoan < ELITE_LOAN_MIN_DURATION) continue;
 
         const corpsId = ls.loaned_to_corps;

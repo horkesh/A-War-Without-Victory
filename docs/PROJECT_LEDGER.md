@@ -21242,3 +21242,848 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - Docs:
   - `docs/40_reports/implemented/20260402_PLAYER_SAFE_ID_LEAK_MOPUP.md`
 
+## 2026-04-03 - Commander reachability truth and pre-planned-op integrity
+
+- Root cause cleanup, not patchwork:
+  - removed stale `Operation Foca` phantom dependence in `src/sim/combat/pre_planned_operations.ts`
+  - constrained commander `position_viability` withdrawals in `src/sim/combat/commander_override.ts` to reachable same-component sectors
+- Why this mattered:
+  - queued-op validation was still warning on a brigade (`jna_mostar_garrison_tg`) that predictably withdraws before `Foca` can inject
+  - commander review could still recreate a cross-component sector mismatch after the earlier truthful assignment passes had already cleaned the state
+- Added/updated regressions:
+  - `tests/commander_override_reachability.test.ts`
+  - `tests/pre_planned_operations.test.ts`
+- Verification:
+  - `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\commander_override_reachability.test.ts tests\\pre_planned_operations.test.ts tests\\scenario_activity_truth.test.ts`
+  - `node .\\node_modules\\vitest\\vitest.mjs run tests\\brigade_territory_reconciliation.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+  - `node .\\node_modules\\tsx\\dist\\cli.mjs tools\\scenario_runner\\run_scenario.ts --scenario data\\scenarios\\apr1992_definitive_40w.json --unique --map --out runs`
+- Scenario evidence:
+  - fresh run `runs/apr1992_definitive_40w__d452d2a10f3d69af__w40_n1300`
+  - final hash `d5fe7dbb0d98b360`
+  - the earlier `rs_skelani_battalion -> sector:vrs_drina:1` reachability invariant no longer appeared in the new run
+- Additional hardening in the same lane:
+  - stale `brigade_sector_override` entries are now ignored when they point into another connected component
+  - late rescue of unreachable brigades now prefers another same-corps sector that already truthfully owns the brigade's current territory before marking it unresolved
+  - late rescue no longer treats the 4-hop Phase 2c operational-zone cap as a true reachability proof
+- Added regressions in `tests/brigade_territory_reconciliation.test.ts` for:
+  - stale player overrides
+  - territory-owning sector rescue
+  - deep-rear truthful sector retention beyond the short assignment hop cap
+- Follow-up scenario evidence after the deeper trap fix:
+  - fresh run `runs/apr1992_definitive_40w__d452d2a10f3d69af__w40_n1302`
+  - final hash `b795ae4ac0150e82`
+  - recurring late-turn `vrs_1st_krajina` unresolved churn disappeared from console output
+  - `hvo_nikola_subic_zrinski_brigade` no longer repeated the old "assigned sector became unreachable" churn
+- Follow-on swamp still visible:
+  - late-turn unresolveds are now concentrated much more narrowly in `hrhb_travnik_brigade`, some loaned reserve brigades, and a smaller ARBiH mountain/reconcentration set
+  - next wave should target why those brigades truly have no same-component sector, not the already-fixed commander/override/trap leaks
+
+## 2026-04-03 - Sector territory and elite-loan truth canonicalization
+
+- Root cause findings:
+  - `sector_territory.ts` was still laundering orphan territory across corps boundaries in both the post-Voronoi orphan sweep and disconnected-territory repair
+  - elite-loan truth was still split across bot assignment, pre-planned-op injection, and desktop player approval/redirect paths
+- Canonicalization work:
+  - orphan territory claiming now respects truthful owner corps; disconnected components no longer get silently reassigned into another corps
+  - on-loan elites now route toward their receiving corps in `bot_brigade_eval_front.ts`
+  - redeploying an elite clears stale homeward movement orders/state
+  - `tickEliteLoans(...)` now auto-recalls stranded loans with no friendly route to receiving-corps sector territory
+  - a shared route-validity helper in `army_reserve_system.ts` now gates:
+    - bot reserve auto-assignment
+    - queued / scenario-start pre-planned elite deployment
+    - desktop player approve / redirect reserve actions
+- Files:
+  - `src/sim/combat/sector_territory.ts`
+  - `src/sim/combat/army_reserve_system.ts`
+  - `src/sim/combat/bot_brigade_eval_front.ts`
+  - `src/sim/combat/pre_planned_operations.ts`
+  - `src/scenario/scenario_runner.ts`
+  - `src/sim/turn_phases/war_phases.ts`
+  - `src/desktop/desktop_sim.ts`
+  - `src/desktop/electron-main.cjs`
+- Tests:
+  - added `tests/elite_loan_return_to_corps.test.ts`
+  - updated `tests/army_reserve_system.test.ts`, `tests/pre_planned_operations.test.ts`, `tests/sector_territory_contiguity_repair.test.ts`
+- Verification:
+  - `node .\\node_modules\\vitest\\vitest.mjs run tests\\army_reserve_system.test.ts tests\\sector_territory_contiguity_repair.test.ts tests\\elite_loan_return_to_corps.test.ts tests\\brigade_territory_reconciliation.test.ts tests\\pre_planned_operations.test.ts`
+  - `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\commander_override_reachability.test.ts tests\\pre_planned_operations.test.ts tests\\scenario_activity_truth.test.ts`
+  - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+- Important note:
+  - repo-wide `tsc --noEmit` still reports unrelated pre-existing UI/test debt outside this slice; focused truth/loan/sector suites are green
+
+## 2026-04-03 - Frontline compatibility and briefing selector mop-up
+
+- Root cause findings:
+  - `local_front_defense.ts` could still revive legacy `brigade_front_assignment` density for an individual brigade even when sector truth existed globally; that meant combat math could accept a stale compatibility front for one brigade after the engine had already said sectors are canonical
+  - `OperationBriefingModal.tsx` still bypassed the player-facing operation filter and searched raw `loadedGameState.operations` directly
+- Changes:
+  - `src/sim/combat/local_front_defense.ts`
+    - legacy front-density fallback now applies only when no live sector frontline truth exists at all
+  - `src/ui/map/components/OperationBriefingModal.tsx`
+    - now resolves the selected operation through `findPlayerFacingOperationByKey(...)`
+  - `tests/local_front_density_modifier_precedence.test.ts`
+    - added coverage proving an unassigned brigade does not regain legacy density while sectors still exist
+  - `tests/ui_opord_player_safe_labels.test.ts`
+    - added a source-level guard proving the briefing modal uses the player-facing selector instead of direct raw-op lookup
+- Verification:
+  - `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\local_front_density_modifier_precedence.test.ts`
+  - `node .\\node_modules\\vitest\\vitest.mjs run tests\\engine_honesty_legacy_contracts.test.ts tests\\ui_opord_player_safe_labels.test.ts tests\\ui_player_visibility.test.ts tests\\ui_map_render_smoke.test.ts`
+- Environment note:
+  - `npm.cmd run warroom:build` is currently blocked in this environment because `vite` is not on PATH here (`'vite' is not recognized...`); the focused shell tests are green
+## 2026-04-03 - Frontline authority and player-shell intel reduction
+
+### Summary
+- Retired `brigade_front_assignment` as a live runtime frontline authority.
+- Made sectors the only accepted frontline truth for runtime assignment, frontline fatigue, and local density modifiers.
+- Reduced the tactical-map `sectorIntel` player DTO so it no longer exports enemy corps/faction identity that the live Army HQ threat UI does not use.
+
+### Files changed
+- `src/sim/combat/front_assignment.ts`
+- `src/sim/combat/local_front_defense.ts`
+- `src/sim/turn_phases/war_phases.ts`
+- `src/ui/map/data/types.ts`
+- `src/ui/map/data/GameStateAdapter.ts`
+- `src/ui/map/components/army_hq/generateThreatAssessment.ts`
+- `src/ui/map/components/army_hq/ThreatAssessment.tsx`
+- `tests/front_assignment.test.ts`
+- `tests/formation_fatigue_frontline_assignment.test.ts`
+- `tests/local_front_density_modifier_precedence.test.ts`
+- `tests/ui_map_fog_and_operation_contracts.test.ts`
+- `tests/ui_map_render_smoke.test.ts`
+- `tests/engine_honesty_legacy_contracts.test.ts`
+- `docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md`
+- `docs/40_reports/GUI_MASTER.md`
+- `docs/40_reports/implemented/20260403_FRONTLINE_AUTHORITY_AND_PLAYER_SHELL_INTEL_REDUCTION.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- A compatibility lane that still writes or shapes runtime frontline truth is not compatibility; it is a second engine.
+- The player shell should not carry enemy identity fields “just in case” when the live UI never renders them.
+
+### Verification
+- `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\front_assignment.test.ts tests\\formation_fatigue_frontline_assignment.test.ts tests\\local_front_density_modifier_precedence.test.ts tests\\ui_map_fog_and_operation_contracts.test.ts tests\\ui_map_game_state_adapter.test.ts`
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\engine_honesty_legacy_contracts.test.ts tests\\ui_map_render_smoke.test.ts tests\\ui_player_visibility.test.ts`
+## 2026-04-03 - Player-scoped operations and Warroom shell summaries
+
+### Summary
+- Scoped tactical-map `operations`, `activeOperations`, `operationHistory`, and `pendingReserveRequests` at `GameStateAdapter` to the player faction.
+- Replaced two more direct operation bypasses with `findPlayerFacingOperationByKey(...)`.
+- Reduced Warroom corps-operation snapshots to summary-only data and switched Warroom enemy-contact sourcing from global enemy casualty ledgers to front-contact summaries.
+
+### Files changed
+- `src/ui/map/data/GameStateAdapter.ts`
+- `src/ui/map/components/CommanderSelectionModal.tsx`
+- `src/ui/map/components/ops_modal/AuthorizePhase.tsx`
+- `src/ui/warroom/data/war_data_extractor.ts`
+- `tests/ui_map_game_state_adapter.test.ts`
+- `tests/ui_opord_player_safe_labels.test.ts`
+- `tests/warroom_player_visibility.test.ts`
+- `docs/40_reports/implemented/20260403_PLAYER_SCOPED_OPERATIONS_AND_WARROOM_SHELL_SUMMARIES.md`
+- `docs/40_reports/GUI_MASTER.md`
+- `docs/40_reports/WARROOM_MASTER.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- Player-safe filtering belongs at the adapter boundary whenever possible, not only in downstream components.
+- Warroom should summarize command truth, not carry raw operation internals or infer enemy identity from global casualty ledgers.
+
+### Verification
+- `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\ui_map_game_state_adapter.test.ts`
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_player_visibility.test.ts tests\\ui_map_render_smoke.test.ts tests\\ui_opord_player_safe_labels.test.ts`
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\warroom_player_visibility.test.ts tests\\ui_shell_navigation.test.ts tests\\warroom_smoke.test.ts`
+
+## 2026-04-03 - Trap remediation truthful sector assignment
+
+### Summary
+- Removed the cross-component fallback from the late trap-remediation and rear-guard rebalance passes in `brigade_assignment.ts`.
+- Added regression coverage proving that unreachable brigades now remain unresolved instead of being reassigned into a merely reachable but spatially false same-corps sector.
+
+### Files changed
+- `src/sim/combat/brigade_assignment.ts`
+- `tests/brigade_territory_reconciliation.test.ts`
+- `docs/40_reports/implemented/20260403_TRAP_REMEDIATION_TRUTHFUL_SECTOR_ASSIGNMENT.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- Sector assignment had become mostly honest in the early phases, but a later repair pass could still launder brigades across connected components after the honest passes had already failed.
+- That meant the engine was still able to invent false sector truth late in the pipeline and then surface the contradiction as an invariant warning.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\brigade_territory_reconciliation.test.ts tests\\commander_driven_brigade_assignment.test.ts`
+
+## 2026-04-03 - Corps-panel operation handoff discipline
+
+### Summary
+- Routed `CorpsDetail`, `CorpsFrontPanel`, and `OOBSidebar` through the shared player-facing operation selector.
+- Reframed the corps ops tabs as field snapshots with explicit handoff to Army HQ and briefing flows for full command review.
+
+### Files changed
+- `src/ui/map/components/CorpsDetail.tsx`
+- `src/ui/map/components/CorpsFrontPanel.tsx`
+- `src/ui/map/components/OOBSidebar.tsx`
+- `tests/ui_opord_player_safe_labels.test.ts`
+- `docs/40_reports/implemented/20260403_CORPS_PANEL_OPERATION_HANDOFF_DISCIPLINE.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- Even after adapter-level scoping, the tactical shell still had multiple panels behaving like co-equal operation browsers.
+- Shared player-facing selectors need to be used everywhere, not just in the obvious top-level panels, or future work drifts back toward raw reads and duplicate ownership.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_opord_player_safe_labels.test.ts tests\\ui_player_visibility.test.ts tests\\ui_map_render_smoke.test.ts`
+
+## 2026-04-03 - Enclave rescue warning ownership fix
+
+### Summary
+- Moved the final sector-pipeline unresolved warning to the true end of the assignment chain, after cross-corps enclave rescue and minimum coverage have both run.
+- Added a `PENDING_ENCLAVE_REVIEW` warning for brigades that cannot reach a same-corps sector but do sit inside a same-faction connected component that enclave rescue may truthfully absorb.
+- Kept final unresolved reporting active for loaned reserve brigades so on-loan army-HQ units are still judged like real field brigades.
+
+### Files changed
+- `src/sim/combat/brigade_assignment.ts`
+- `src/sim/combat/corps_front_sectors.ts`
+- `tests/brigade_territory_reconciliation.test.ts`
+- `docs/40_reports/implemented/20260403_ENCLAVE_RESCUE_WARNING_OWNERSHIP_FIX.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- The engine was still able to say a brigade had "fallen through the sector pipeline" before the later enclave-rescue pass assigned it correctly.
+- That made the warning stream lie about the final authority chain and turned later debugging into ghost hunting.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\brigade_territory_reconciliation.test.ts tests\\commander_driven_brigade_assignment.test.ts`
+
+## 2026-04-03 - Activity report truth hardening
+
+### Summary
+- Removed the legacy proxy fallback from `deriveWeeklyActivityCounts(...)`.
+- Weekly activity stats now come only from the canonical Phase F trigger report; when that report is absent, the runner records zeros instead of inventing replacement counts from stale proxy fields.
+
+### Files changed
+- `src/scenario/scenario_runner.ts`
+- `tests/scenario_activity_truth.test.ts`
+- `docs/40_reports/implemented/20260403_ACTIVITY_REPORT_TRUTH_HARDENING.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- The old fallback re-derived "activity" from `front_segments`, `pressure_deltas`, and realized displacement rows even though Phase F already owns the real eligibility counts.
+- That made stale or mixed-era artifacts look like live engine contradictions and kept a false-authority reporting path alive.
+
+### Verification
+- `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\scenario_activity_truth.test.ts`
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\brigade_territory_reconciliation.test.ts tests\\commander_driven_brigade_assignment.test.ts`
+
+## 2026-04-03 - Legacy SID combat authority demotion
+
+### Summary
+- Demoted the SID combat path to explicit compatibility-only status in code comments and reporting surfaces.
+- Hardened the scenario harness so weekly combat aggregation prefers canonical `attack_resolution_osid` output whenever both OSID and legacy SID summaries are present.
+
+### Files changed
+- `src/scenario/scenario_runner.ts`
+- `src/scenario/scenario_end_report.ts`
+- `src/sim/combat/battle_resolution.ts`
+- `src/sim/combat/resolve_attack_orders.ts`
+- `src/sim/turn_phases/war_phases.ts`
+- `src/sim/turn_pipeline_types.ts`
+- `tests/scenario_activity_truth.test.ts`
+- `docs/40_reports/implemented/20260403_LEGACY_SID_COMBAT_AUTHORITY_DEMOTION.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- OSID combat is already the canonical war-phase resolver, but the scenario harness still had a live seam where the legacy SID summary could outrank it in weekly rollups.
+- That kept a false-authority reporting path alive and made compatibility code look more real than it is.
+
+### Verification
+- `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\scenario_activity_truth.test.ts`
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\brigade_territory_reconciliation.test.ts tests\\commander_driven_brigade_assignment.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Officer quality frontline truth alignment
+
+### Summary
+- Replaced the brigade-posture frontline proxy in `updateBrigadeOfficerQuality(...)` with canonical sector-frontline truth whenever live sectors exist.
+- Kept a narrow posture fallback only for compatibility states where no live sector truth exists at all.
+
+### Files changed
+- `src/sim/combat/officer_quality_update.ts`
+- `tests/officer_quality.test.ts`
+- `docs/40_reports/implemented/20260403_OFFICER_QUALITY_FRONTLINE_TRUTH_ALIGNMENT.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- Officer growth runs every war turn, so letting it infer "frontline" from brigade posture kept a second frontline authority alive inside a real mechanic.
+- Sector assignment is already the runtime owner of frontline truth; progression has to obey that same contract.
+
+### Verification
+- `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\officer_quality.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - War Summary shell ownership unification
+
+### Summary
+- Collapsed the duplicate War Summary owners so `WarSummaryContent` is now the only deep summary owner.
+- Turned `WarSummaryModal` into a thin tactical-shell wrapper around the Army HQ summary content instead of a second independent summary model.
+
+### Files changed
+- `src/ui/map/components/WarSummaryModal.tsx`
+- `src/ui/map/components/army_hq/WarSummaryContent.tsx`
+- `docs/40_reports/implemented/20260403_WAR_SUMMARY_SHELL_OWNERSHIP_UNIFICATION.md`
+
+### Why
+- The tactical map still had its own War Summary implementation with different truth standards, including exact all-faction strategic totals that Army HQ had already started to replace with player-safe asymmetry.
+- Duplicate shell owners are exactly how player-truth regressions keep coming back.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_army_hq_war_summary_visibility.test.ts tests\\ui_player_visibility.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Tactical operations surface consolidation
+
+### Summary
+- Removed the old rail-mounted `OperationDetail` surface so Tactical Map no longer owns operations in two different panel systems.
+- Made direct operation selection open the canonical tactical `OperationsPanel` instead of silently creating a second rail detail owner.
+
+### Files changed
+- `src/ui/map/App.tsx`
+- `src/ui/map/components/panelRail.ts`
+- `src/ui/map/store/gameStore.ts`
+- `tests/ui_map_panel_rail.test.ts`
+- `tests/ui_opord_player_safe_labels.test.ts`
+- `docs/40_reports/implemented/20260403_TACTICAL_OPERATIONS_SURFACE_CONSOLIDATION.md`
+- deleted `src/ui/map/components/OperationDetail.tsx`
+
+### Why
+- The tactical shell still had both `OperationsPanel` and `OperationDetail`, which created duplicate operations ownership before Army HQ was even considered.
+- A single map-facing tactical surface is easier to keep truthful and stops future work from drifting into another parallel operations shell.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_map_panel_rail.test.ts tests\\ui_opord_player_safe_labels.test.ts tests\\ui_shell_navigation.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Summary and Codex shell integrity pass
+
+### Summary
+- Removed the `SituationTab` front-summary fallback that was reconstructing front-state counts from compatibility `assignableFrontSegments`.
+- Reworked Army HQ Records so Codex is presented as a handoff to its own shell instead of a fake records subtab.
+- Tightened shell consistency by using canonical `activeBrigades` in Warroom and making the shared player-facing label helper type-safe.
+
+### Files changed
+- `src/ui/map/components/SituationTab.tsx`
+- `src/ui/map/components/army_hq/RecordsContent.tsx`
+- `src/ui/shared/playerFacingLabels.ts`
+- `src/ui/warroom/components/FactionOverviewPanel.ts`
+- `tests/ui_player_visibility.test.ts`
+- `docs/40_reports/implemented/20260403_SUMMARY_AND_CODEX_SHELL_INTEGRITY_PASS.md`
+
+### Why
+- Summary shells should not invent front-state from compatibility leftovers once canonical pressure data exists.
+- Codex is its own shell; presenting it as a records subtab was a shell-hierarchy lie that would keep duplicating entrypoint behavior.
+- Warroom and shared label helpers need to consume canonical counts and name sources instead of recomputing or leaning on brittle shortcuts.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_player_visibility.test.ts tests\\ui_map_render_smoke.test.ts tests\\warroom_player_visibility.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Front tooltip sector authority alignment
+
+### Summary
+- Removed the player-facing front-tooltip dependency on `assignableFrontSegments`.
+- Front tooltip persistence and sector context now come from `corpsFrontSectors`, aligning the tooltip with canonical sector/frontline ownership.
+
+### Files changed
+- `src/ui/map/components/Tooltip.tsx`
+- `src/ui/map/components/tooltipPlayerSafe.ts`
+- `tests/ui_map_tooltip_player_visibility.test.ts`
+- `docs/40_reports/implemented/20260403_FRONT_TOOLTIP_SECTOR_AUTHORITY_ALIGNMENT.md`
+
+### Why
+- The tooltip was still able to reconstruct front persistence from compatibility front-segment data after the rest of the shell had moved to sector truth.
+- That left a quiet player-facing seam where compatibility data could still outrank the canonical sector model.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_map_tooltip_player_visibility.test.ts tests\\ui_player_visibility.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Elite loan prototype retirement
+
+### Summary
+- Retired the obsolete `elite_loan.ts` prototype and its dedicated test rail.
+- Updated canon/context memory so `army_reserve_system.ts` is the sole live elite-loan owner.
+
+### Files changed
+- deleted `src/sim/combat/elite_loan.ts`
+- deleted `tests/elite_loan.test.ts`
+- `docs/10_canon/context.md`
+- `docs/40_reports/implemented/20260403_ELITE_LOAN_PROTOTYPE_RETIREMENT.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- Runtime elite loans already live entirely in `army_reserve_system.ts`, but the old prototype module and its test rail still looked authoritative enough to attract future fixes onto the wrong implementation.
+- This repo is most vulnerable to polished false authority, so dead-but-plausible prototype rails need to be removed once the real owner is clear.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\army_reserve_system.test.ts tests\\elite_loan_recall.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+## 2026-04-03 — Shell shortcut and legacy toolbar authority cleanup
+
+- Explicitly demoted `src/ui/map/components/TopToolbar.tsx` to legacy/non-canonical status and retitled its Storybook entry to `Legacy/TopToolbar` so it no longer reads like a live shell peer to `PresidentialToolbar`.
+- Replaced the tactical-map `Space` shortcut DOM scan in `src/ui/map/hooks/useKeyboardShortcuts.ts` with direct canonical routing through `advanceTurnAndSync(...)` and the live IPC bridge.
+- Added a regression assertion in `tests/ui_shell_navigation.test.ts` to keep the shortcut layer from regressing back to button-text scanning.
+## 2026-04-03 — Scenario harness frontier truth cleanup
+
+- Removed the `scenario_runner.ts` synthetic frontier writer under `postureAllPushAndApplyBreaches`: the harness no longer seeds `front_posture`, synthetic brigade edge assignments, `front_segments`, or `front_pressure` just to force breaches.
+- Added a regression check in `tests/engine_honesty_legacy_contracts.test.ts` so the harness cannot quietly drift back into manufacturing frontier truth.
+- Repo rule reinforced: scenario tooling may observe and summarize real frontier/breach state, but it must not invent live canonical preconditions for it.
+## 2026-04-03 — Sector truth now drives supply pressure and exhaustion
+
+- Repointed `src/sim/combat/supply_pressure.ts` so live frontage pressure now prefers `corps_front_sectors` edge ownership instead of legacy front-edge counting when sector truth exists.
+- Repointed `src/sim/combat/exhaustion.ts` so frontline exhaustion now prefers sector-owned frontline exposure (non-cold sectors by faction) instead of legacy `detectFronts(...)` output when sector truth exists.
+- Added dedicated precedence checks in `tests/combat_supply_pressure.test.ts` and `tests/combat_exhaustion.test.ts`.
+
+## 2026-04-03 - Displacement trigger and attack-axis authority cleanup
+
+### Summary
+- Repointed Phase F displacement-trigger eligibility to prefer `corps_front_sectors[*].edge_ids` whenever live sector truth exists.
+- Retired the dead `corps_attack_axis_orders -> brigade_attack_orders` bridge from the war pipeline and desktop/player shell.
+
+### Files changed
+- `src/sim/displacement_pipeline/displacement_triggers.ts`
+- `src/sim/combat/corps_front_assign.ts`
+- `src/sim/turn_phases/war_phases.ts`
+- `src/desktop/desktop_sim.ts`
+- `src/desktop/electron-main.cjs`
+- `src/desktop/preload.cjs`
+- `src/ui/map/desktop/useIPC.ts`
+- `src/state/game_state.ts`
+- `tests/displacement_pipeline_displacement_triggers.test.ts`
+- `tests/brigade_corps_front_assign.test.ts`
+- `tests/engine_honesty_legacy_contracts.test.ts`
+- `docs/40_reports/implemented/20260403_DISPLACEMENT_AND_ATTACK_AXIS_AUTHORITY_CLEANUP.md`
+
+### Why
+- Front/displacement activity must not keep rediscovering the front through old pressure-emergence helpers once sectors are the canonical frontline owner.
+- `corps_attack_axis_orders` was still a live false-authority seam: desktop exposed it and the war pipeline translated it into real brigade attack orders even though no live shell legitimately owned that path.
+
+### Verification
+- `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\displacement_pipeline_displacement_triggers.test.ts`
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\engine_honesty_legacy_contracts.test.ts tests\\brigade_corps_front_assign.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Army HQ threat labels player-safe
+
+### Summary
+- Hardened Army HQ threat-assessment title generation so corps-front labels use player-safe corps names even when raw formation names fall back to internal ids.
+- Added a regression to the player-visibility suite so threat titles cannot quietly leak `arbih_3rd_corps`-style strings.
+
+### Files changed
+- `src/ui/map/components/army_hq/generateThreatAssessment.ts`
+- `tests/ui_player_visibility.test.ts`
+- `docs/40_reports/implemented/20260403_ARMY_HQ_THREAT_PLAYER_SAFE_LABELS.md`
+
+### Why
+- Army HQ threat assessment is a player-trust surface. If it emits raw corps ids, the shell stops feeling like a command interface and starts reading like a debug report.
+- This was a classic summary-generator leak: most shells were already player-safe, but one title builder still trusted raw formation names.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_player_visibility.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Local fronts schema residue retirement
+
+### Summary
+- Finished the `local_fronts` cleanup by removing the dead schema/runtime residue, not just the rebuild path.
+- Removed the stale `deriveCorpsFrontMapping(...)` re-export from the live corps AI hub so the compatibility lane no longer looks canonical.
+- Synced active canon docs so they no longer claim `local_fronts` is a live derived cache.
+
+### Files changed
+- `src/state/game_state.ts`
+- `src/sim/turn_pipeline.ts`
+- `src/sim/turn_phases/war_phases.ts`
+- `src/sim/combat/bot_corps_ai.ts`
+- `tests/engine_honesty_legacy_contracts.test.ts`
+- `docs/10_canon/context.md`
+- `docs/10_canon/Systems_Manual_v0_7_0.md`
+- `docs/40_reports/implemented/20260403_LOCAL_FRONTS_SCHEMA_RESIDUE_RETIREMENT.md`
+
+### Why
+- Half-dead schema fields are future bugs because they teach later work that the old lane still matters.
+- In this repo, leaving `local_fronts` in `GameState` after the runtime stopped using it would have been a stronger false authority signal than a stale comment.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\engine_honesty_legacy_contracts.test.ts`
+
+## 2026-04-03 - Chronicle shell handoff canonicalization
+
+### Summary
+- Added `chronicle` to the shared shell-handoff contract and removed another special-case branch from the tactical-map app shell.
+- Warroom newspaper now hands off to Chronicle when the tactical shell is present, instead of pretending to own campaign memory locally.
+- Updated the shell hierarchy contract so Chronicle is explicitly named as the campaign-memory shell, separate from Army HQ records and Codex reference material.
+
+### Files changed
+- `src/ui/shared/shellHandoff.ts`
+- `src/ui/map/utils/shellNavigation.ts`
+- `src/ui/map/App.tsx`
+- `src/ui/warroom/ClickableRegionManager.ts`
+- `tests/ui_shell_navigation.test.ts`
+- `docs/20_engineering/PRODUCT_SHELL_HIERARCHY.md`
+- `docs/40_reports/implemented/20260403_CHRONICLE_SHELL_HANDOFF_CANONICALIZATION.md`
+
+### Why
+- AAA shell cohesion depends on one owner per concept. Campaign memory is not the same thing as records or essays.
+- Removing app-level special cases from handoff handling keeps the shell contract easier to trust and harder to fork accidentally.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_shell_navigation.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Assignable front segment runtime demotion
+
+### Summary
+- Stopped the live turn pipeline from rebuilding `assignable_front_segments`.
+- Tightened the honesty regression so canonical runtime files can no longer quietly bless that compatibility field as frontline truth.
+- Updated schema comments so the field is described as old-save/test baggage instead of a current runtime product.
+
+### Files changed
+- `src/sim/turn_phases/war_phases.ts`
+- `src/sim/turn_pipeline.ts`
+- `src/state/game_state.ts`
+- `tests/engine_honesty_legacy_contracts.test.ts`
+- `docs/40_reports/implemented/20260403_ASSIGNABLE_FRONT_SEGMENT_RUNTIME_DEMOTION.md`
+
+### Why
+- A dead field with a live writer is more dangerous than a dead field with a comment.
+- `assignable_front_segments` had already lost its live readers; keeping the writer would only preserve false authority for later work.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\engine_honesty_legacy_contracts.test.ts`
+
+## 2026-04-03 - Warroom to Army HQ shell handoff
+
+### Summary
+- Warroom desk props no longer own live command-review packets when the tactical shell is available.
+- Added a small shared shell-handoff command so Warroom can open the embedded tactical map directly into canonical Army HQ tabs/subtabs instead of opening duplicate Warroom-local staff modals.
+- Browser/dev Warroom launches now carry that same shell handoff into the new-tab tactical map through a one-shot query parameter, so the canonical path does not silently regress outside Electron.
+
+### Files changed
+- `src/ui/shared/shellHandoff.ts`
+- `src/ui/map/utils/shellNavigation.ts`
+- `src/ui/map/App.tsx`
+- `src/ui/warroom/ClickableRegionManager.ts`
+- `src/ui/warroom/warroom.ts`
+- `tests/ui_shell_navigation.test.ts`
+- `docs/40_reports/implemented/20260403_WARROOM_ARMYHQ_SHELL_HANDOFF.md`
+
+### Why
+- Warroom had become a second staff shell through `FactionOverviewPanel`, `CommandBriefingModal`, `ReportsModal`, and `MagazineModal`.
+- Army HQ already owns detailed command review in the tactical shell, so live Warroom prop clicks should hand off there instead of maintaining a parallel truth surface.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_shell_navigation.test.ts`
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_player_visibility.test.ts`
+- `node .\\node_modules\\vite\\bin\\vite.js build --config src\\ui\\warroom\\vite.config.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Retire dead corps-front and AoR shell bridges
+
+### Summary
+- Removed the dead desktop bridge exports for brigade AoR reshaping and corps/OG front-edge staging.
+- Deleted the matching Electron main-process handlers and the unused `desktop_sim.ts` staging helpers behind them.
+
+### Files changed
+- `src/desktop/preload.cjs`
+- `src/ui/map/desktop/useIPC.ts`
+- `src/desktop/electron-main.cjs`
+- `src/desktop/desktop_sim.ts`
+- `tests/engine_honesty_legacy_contracts.test.ts`
+- `docs/40_reports/implemented/20260403_RETIRE_DEAD_CORPS_FRONT_AND_AOR_SHELL_BRIDGES.md`
+
+### Why
+- The live tactical shell was not calling these commands, but the desktop bridge still advertised them like real player-facing authority paths.
+- That is exactly how dead concepts survive in a repo and get resurrected by future cleanup or feature work.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\engine_honesty_legacy_contracts.test.ts tests\\ui_shell_navigation.test.ts`
+- `node .\\node_modules\\vite\\bin\\vite.js build --config src\\ui\\warroom\\vite.config.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Corps-front runtime authority retirement
+
+### Summary
+- Removed the dead `corps_front_assign.ts` lane from the live war pipeline.
+- Removed `front_corps_tracking` from scenario-run summaries.
+- Removed dead `corps_front_edges`, `corps_fallback_front_edges`, and `og_subfront_edges` fields from the core state schema.
+- Updated the active technical contracts so they no longer advertise corps-front edge staging as a live runtime/player authority.
+
+### Files changed
+- `src/sim/turn_phases/war_phases.ts`
+- `src/scenario/scenario_runner.ts`
+- `src/state/game_state.ts`
+- `tests/engine_honesty_legacy_contracts.test.ts`
+- `docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md`
+- `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`
+- `docs/40_reports/implemented/20260403_CORPS_FRONT_RUNTIME_AUTHORITY_RETIREMENT.md`
+- deleted:
+  - `src/sim/combat/corps_front_assign.ts`
+  - `tests/brigade_corps_front_assign.test.ts`
+
+### Why
+- The file had become a classic false-authority seam: no real derivation, no real distribution, but still a live war-phase presence and a run-summary footprint.
+- In this repo, dead paths that still run every turn are worse than obvious legacy files because they keep teaching future agents the wrong model.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\engine_honesty_legacy_contracts.test.ts tests\\front_assignment.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+### Notes
+- `npx.cmd tsc --noEmit -p tsconfig.json` still reports unrelated pre-existing type drift outside this slice; this checkpoint did not attempt a global TS cleanup.
+
+## 2026-04-03 - Brigade reposition runtime retirement
+
+### Summary
+- Removed the dead `apply-brigade-reposition` step from the live war pipeline.
+- Deleted `src/sim/combat/apply_brigade_reposition.ts`.
+- Kept `brigade_reposition_orders` only as explicit retired compatibility residue in the schema.
+- Hardened the legacy-contract suite so this runtime sink cannot be quietly reintroduced.
+
+### Files changed
+- `src/sim/turn_phases/war_phases.ts`
+- `src/state/game_state.ts`
+- `tests/engine_honesty_legacy_contracts.test.ts`
+- `docs/40_reports/implemented/20260403_BRIGADE_REPOSITION_RUNTIME_RETIREMENT.md`
+- deleted:
+  - `src/sim/combat/apply_brigade_reposition.ts`
+
+### Why
+- The shell already rejected new brigade reposition staging and the player-facing adapter already hid the old field.
+- Leaving a no-op consumer in the canonical war pipeline was pure false authority.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\engine_honesty_legacy_contracts.test.ts tests\\front_assignment.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Tactical top-shell density and label cleanup
+
+### Summary
+- Reduced tactical-shell top clearance so rails and detail panels reclaim vertical space instead of paying for oversized crest chrome.
+- Shrunk the presidential crest footprint and its reserved spacer in the mounted toolbar.
+- Removed rough geography fallback paths from Army HQ operations review, Chronicle entry generation, and ops-planning hover tooltips.
+- Humanized ops-planning hover controller labels through player-safe political faction naming.
+
+### Files changed
+- `src/ui/map/App.tsx`
+- `src/ui/map/components/panelRail.ts`
+- `src/ui/map/components/OOBSidebar.tsx`
+- `src/ui/map/components/PresidentialToolbar.tsx`
+- `src/ui/map/components/army_hq/OperationsSection.tsx`
+- `src/ui/map/components/chronicle/generateChronicleEntries.ts`
+- `src/ui/map/components/ops_modal/OpsMap.tsx`
+- `tests/ui_shell_navigation.test.ts`
+- `tests/ui_player_visibility.test.ts`
+- `docs/40_reports/implemented/20260403_TACTICAL_TOP_SHELL_DENSITY_AND_LABEL_CLEANUP.md`
+
+### Why
+- The tactical shell should not carry a permanent dead-air tax just to accommodate decorative chrome.
+- Chronicle and ops-planning hover are still player-facing shells; rough OSID or raw faction fallback there makes the overall product feel inconsistent.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_shell_navigation.test.ts tests\\ui_player_visibility.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - AAR and reserve player-safe labels
+
+### Summary
+- Reworked `AARPanel` to use player-safe faction, brigade, and geography labels instead of hard-coded military shorthand, `humanizeOsid(...)`, or raw brigade ids.
+- Reworked `ArmyReservePanel` base-location display to use canonical OSID display names.
+
+### Files changed
+- `src/ui/map/components/AARPanel.tsx`
+- `src/ui/map/components/ArmyReservePanel.tsx`
+- `tests/ui_player_visibility.test.ts`
+- `docs/40_reports/implemented/20260403_AAR_AND_RESERVE_PLAYER_SAFE_LABELS.md`
+
+### Why
+- AAR is a high-trust report surface; if it leaks engine ids or rough fallback geography, the player experience still feels like internal tooling.
+- Reserve review is a secondary shell, but base locations should still use the same canonical display path as the rest of the product.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_player_visibility.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Desktop bridge subscription canonicalization
+
+### Summary
+- Replaced the preload bridge's singleton `set*Callback` model with subscription fanout for game-state and turn-report updates.
+- Repointed tactical-map desktop session wiring to subscribe/unsubscribe cleanly.
+- Reworked embedded tactical-map bridge subscriptions to be event-based and removed Warroom's callback re-registration workaround.
+
+### Files changed
+- `src/desktop/preload.cjs`
+- `src/ui/map/hooks/useDesktopSession.ts`
+- `src/ui/map/desktop/useIPC.ts`
+- `src/ui/map/desktop/types.ts`
+- `src/ui/map/desktop/bridge.ts`
+- `src/ui/map/index.html`
+- `src/ui/warroom/warroom.ts`
+- `tests/engine_honesty_legacy_contracts.test.ts`
+- `docs/40_reports/implemented/20260403_DESKTOP_BRIDGE_SUBSCRIPTION_CANONICALIZATION.md`
+
+### Why
+- The old bridge assumed a single desktop callback owner, which forced Warroom and tactical map into a hidden ownership fight over who received updates.
+- That made Warroom compensate by acting like a transport broker instead of just a shell.
+- Embedded tactical map also had weaker bridge semantics because only game-state updates were mirrored there.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\engine_honesty_legacy_contracts.test.ts tests\\ui_shell_navigation.test.ts`
+- `node .\\node_modules\\vite\\bin\\vite.js build --config src/ui/warroom/vite.config.ts`
+- `node .\\node_modules\\tsx\\dist\\cli.mjs tools\\ui\\warroom_stage_assets.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Operations and officer player-safe labels
+
+### Summary
+- Hardened Army HQ operations review, operation briefing, tactical operations panel, and officer replacement surfaces so they no longer trust raw corps or brigade naming.
+- Repointed Army HQ objective labels to canonical OSID display names instead of ad hoc `formatOsidLabel(...)`.
+
+### Files changed
+- `src/ui/map/components/army_hq/OperationsSection.tsx`
+- `src/ui/map/components/OperationBriefingModal.tsx`
+- `src/ui/map/components/OperationsPanel.tsx`
+- `src/ui/map/components/OfficerEventBadge.tsx`
+- `tests/ui_player_visibility.test.ts`
+- `docs/40_reports/implemented/20260403_OPERATIONS_AND_OFFICER_PLAYER_SAFE_LABELS.md`
+
+### Why
+- These are all high-trust command surfaces. If they leak raw `corps_name`, fallback brigade ids, or rough OSID formatting, the shell still reads like internal tooling.
+- Army HQ operations review is now the canonical operations shell, so its naming/display layer must be stricter than the older tactical prototypes.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_player_visibility.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Warroom dead modal and theatre residue retirement
+
+### Summary
+- Removed the unused `OperationalSituationModal` path from Warroom.
+- Deleted the dead `src/state/theatres.ts` compatibility helper module.
+- Updated Warroom help copy so it now describes Army HQ handoffs instead of older local packet ownership.
+- Hardened the legacy-honesty suite so dead theatre imports and the dead Warroom operational-situation path cannot quietly return.
+
+### Files changed
+- Deleted:
+  - `src/ui/warroom/components/OperationalSituationModal.ts`
+  - `src/state/theatres.ts`
+- Updated:
+  - `src/ui/warroom/ClickableRegionManager.ts`
+  - `src/ui/warroom/warroom.ts`
+  - `tests/engine_honesty_legacy_contracts.test.ts`
+  - `docs/40_reports/implemented/20260403_WARROOM_DEAD_MODAL_AND_THEATRE_RESIDUE_RETIREMENT.md`
+  - `docs/40_reports/GUI_MASTER.md`
+  - `docs/40_reports/WARROOM_MASTER.md`
+  - `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- Both files were classic swamp artifacts: coherent enough to look authoritative, but no longer part of the live product/runtime story.
+- Removing them is higher-value than polishing around them, because they were exactly the kind of dead rails future agents would be tempted to reuse.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\engine_honesty_legacy_contracts.test.ts tests\\ui_shell_navigation.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Assignable front segment DTO retirement
+
+### Summary
+- Removed `assignableFrontSegments` from the live tactical-map `LoadedGameState` contract.
+- Stopped `GameStateAdapter` from deriving the compatibility-era front snapshot into the player shell.
+- Updated the adapter regression test and propagated the contract change into tactical-map/system docs and repo memory.
+
+### Files changed
+- `src/ui/map/data/types.ts`
+- `src/ui/map/data/GameStateAdapter.ts`
+- `tests/ui_map_game_state_adapter.test.ts`
+- `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`
+- `docs/40_reports/GUI_MASTER.md`
+- `docs/40_reports/implemented/20260403_ASSIGNABLE_FRONT_SEGMENT_DTO_RETIREMENT.md`
+- `docs/PROJECT_LEDGER.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- `assignable_front_segments` still exists as raw compatibility state, but no active non-archived player shell consumes it anymore.
+- Keeping it in `LoadedGameState` made the tactical shell imply a second front-truth owner after sectors and front-pressure summaries had already become canonical.
+
+### Verification
+- `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\ui_map_game_state_adapter.test.ts`
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_player_visibility.test.ts`
+- `node .\\node_modules\\typescript\\bin\\tsc --noEmit -p tsconfig.json`
+
+## 2026-04-03 - Corps front mapping helper retirement
+
+### Summary
+- Removed the dead `deriveCorpsFrontMapping(...)` helper from `bot_corps_directives.ts`.
+- Added an honesty regression so the live corps directives module no longer carries a direct compatibility read from `assignable_front_segments`.
+
+### Files changed
+- `src/sim/combat/bot_corps_directives.ts`
+- `tests/engine_honesty_legacy_contracts.test.ts`
+- `docs/40_reports/implemented/20260403_CORPS_FRONT_MAPPING_HELPER_RETIREMENT.md`
+- `docs/PROJECT_LEDGER.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- The helper had no live non-archived callers left, but it still lived in a core AI directives file and read the old front-segment compatibility state.
+- That is exactly the kind of “looks alive” code that teaches future implementers the wrong authority model.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\engine_honesty_legacy_contracts.test.ts`
+
+## 2026-04-03 - Shell authority docs and shortcut canonicalization
+
+### Summary
+- Routed tactical-map quick-save through canonical IPC instead of direct `window.awwv` access.
+- Updated older engineering shell docs so they stop presenting `TopToolbar` as live authority.
+- Clarified Codex primary versus secondary entrypoints in the ownership matrix.
+
+### Files changed
+- `src/ui/map/hooks/useKeyboardShortcuts.ts`
+- `tests/ui_shell_navigation.test.ts`
+- `docs/20_engineering/MAP_UI_MASTER.md`
+- `docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md`
+- `docs/20_engineering/UI_OWNERSHIP_MATRIX.md`
+- `docs/40_reports/implemented/20260403_SHELL_AUTHORITY_DOCS_AND_SHORTCUT_CANONICALIZATION.md`
+
+### Why
+- Small shortcut bypasses are still shell-authority bugs when the rest of the product has already centralized on `useIPC()`.
+- In this repo, stale polished architecture docs are one of the easiest ways to resurrect dead shell paths in later work.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_shell_navigation.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Settlement, Army HQ, and tooltip player-safe boundary pass
+
+### Summary
+- Made `SettlementDetailContent` renderer-only by replacing direct store writes with explicit shell callbacks for sector and operation drilldown.
+- Replaced raw faction-code rendering in settlement front-sector labels with player-safe military names.
+- Swapped rough OSID formatting out of Army HQ ORBAT, Army HQ sector detail, and operation history review surfaces in favor of canonical OSID display names.
+- Humanized Warroom settlement control-status language and cleaned battle tooltip fallback naming.
+
+### Files changed
+- `src/ui/map/components/SettlementDetailContent.tsx`
+- `src/ui/map/components/SelectionPanel.tsx`
+- `src/ui/map/components/army_hq/OrbatSection.tsx`
+- `src/ui/map/components/army_hq/SectorsSection.tsx`
+- `src/ui/map/components/OperationHistoryPanel.tsx`
+- `src/ui/map/components/Tooltip.tsx`
+- `src/ui/warroom/components/SettlementInfoPanel.ts`
+- `tests/ui_player_visibility.test.ts`
+- `docs/40_reports/implemented/20260403_SETTLEMENT_ARMYHQ_AND_TOOLTIP_PLAYER_SAFE_BOUNDARY.md`
+
+### Why
+- Shared render-boundary components are a common place for false shell ownership to regrow. Moving routing back into the owning shell keeps renderers honest.
+- Army HQ and operations-review panels are high-trust player surfaces; rough OSID formatting there makes the game feel like internal tooling.
+- Warroom control wording should be player-facing prose, not raw simulation enum style.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_player_visibility.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`

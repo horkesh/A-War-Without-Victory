@@ -24,6 +24,7 @@ import {
 import { parseGameState } from '../src/ui/map/data/GameStateAdapter.js';
 import { buildOperationArrowsGeoJSON } from '../src/ui/map/map/builders/buildOperationArrowsGeoJSON.js';
 import { buildFormationsGeoJSON } from '../src/ui/map/map/builders/buildFormationsGeoJSON.js';
+import { generateThreatAssessment } from '../src/ui/map/components/army_hq/generateThreatAssessment.js';
 
 describe('player visibility helpers', () => {
   it('normalizes player faction and rejects unknown values', () => {
@@ -303,6 +304,25 @@ describe('player visibility helpers', () => {
     expect(parsed.pendingOfficerEvents?.[0]?.corps_name).toBe('3rd Corps');
   });
 
+  it('keeps Army HQ threat assessment titles player-safe when corps names fall back to ids', () => {
+    const state = {
+      formations: [
+        { id: 'arbih_3rd_corps', faction: 'RBiH', name: 'arbih_3rd_corps', kind: 'corps' },
+      ],
+      corpsFrontSectors: [
+        { sector_id: 'sector:arbih_3rd:0', corps_id: 'arbih_3rd_corps', faction: 'RBiH' },
+      ],
+      sectorIntel: [
+        { friendly_sector_id: 'sector:arbih_3rd:0', offensive_signs: true, confidence: 0.8, strength_category: 'dense' },
+      ],
+    } as any;
+
+    const [item] = generateThreatAssessment(state, 'RBiH');
+
+    expect(item?.title).toContain('3rd Corps front');
+    expect(item?.title).not.toContain('arbih_3rd_corps');
+  });
+
   it('keeps the bottom status strip player-safe instead of acting as an all-faction territory scoreboard', () => {
     const source = readFileSync(
       new URL('../src/ui/map/components/BottomStatusStrip.tsx', import.meta.url),
@@ -321,6 +341,7 @@ describe('player visibility helpers', () => {
     );
     expect(situationTabSource).toContain('Alliance Gauge (Bosniak-Croat)');
     expect(situationTabSource).toContain('getPlayerSafeMilitaryFactionName');
+    expect(situationTabSource).not.toContain('assignableFrontSegments?.length');
 
     const warSummarySource = readFileSync(
       new URL('../src/ui/map/components/army_hq/WarSummaryContent.tsx', import.meta.url),
@@ -406,6 +427,17 @@ describe('player visibility helpers', () => {
     expect(source).not.toContain('title={`HRHB: ${plan.proposedSplit.HRHB}%`}');
   });
 
+  it('keeps Codex as a shell handoff instead of a fake Army HQ records subtab', () => {
+    const source = readFileSync(
+      new URL('../src/ui/map/components/army_hq/RecordsContent.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(source).toContain('Open Codex');
+    expect(source).toContain('separate Codex shell');
+    expect(source).not.toContain("{ id: 'codex' as const, label: 'CODEX' }");
+  });
+
   it('keeps staged-order hover labels player-safe instead of exposing raw target ids', () => {
     const source = readFileSync(
       new URL('../src/ui/map/components/OrderQueue.tsx', import.meta.url),
@@ -414,5 +446,125 @@ describe('player visibility helpers', () => {
 
     expect(source).not.toContain('title={order.targetOsid ?? order.postureName}');
     expect(source).toContain('title={orderTargetLabel(order, osidDisplayNames)}');
+  });
+
+  it('keeps operations and officer shells on player-safe corps and brigade naming helpers', () => {
+    const operationsPanelSource = readFileSync(
+      new URL('../src/ui/map/components/OperationsPanel.tsx', import.meta.url),
+      'utf8',
+    );
+    const operationsSectionSource = readFileSync(
+      new URL('../src/ui/map/components/army_hq/OperationsSection.tsx', import.meta.url),
+      'utf8',
+    );
+    const briefingSource = readFileSync(
+      new URL('../src/ui/map/components/OperationBriefingModal.tsx', import.meta.url),
+      'utf8',
+    );
+    const officerSource = readFileSync(
+      new URL('../src/ui/map/components/OfficerEventBadge.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(operationsPanelSource).toContain('getPlayerSafeCorpsName');
+    expect(operationsPanelSource).toContain('getPlayerSafeBrigadeName');
+    expect(operationsSectionSource).toContain('getPlayerSafeBrigadeName');
+    expect(operationsSectionSource).toContain('getOsidDisplayName');
+    expect(briefingSource).toContain('getPlayerSafeCorpsName');
+    expect(officerSource).toContain('getPlayerSafeCorpsName');
+  });
+
+  it('keeps settlement detail player-safe and renderer-only', () => {
+    const settlementDetailSource = readFileSync(
+      new URL('../src/ui/map/components/SettlementDetailContent.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(settlementDetailSource).toContain('getPlayerSafeMilitaryFactionName');
+    expect(settlementDetailSource).toContain('onSectorClick');
+    expect(settlementDetailSource).toContain('onOperationClick');
+    expect(settlementDetailSource).not.toContain('useGameStore');
+    expect(settlementDetailSource).not.toContain(' (${sectorFaction})');
+  });
+
+  it('keeps Army HQ and operation history geography on curated display-name helpers', () => {
+    const orbatSource = readFileSync(
+      new URL('../src/ui/map/components/army_hq/OrbatSection.tsx', import.meta.url),
+      'utf8',
+    );
+    const sectorsSource = readFileSync(
+      new URL('../src/ui/map/components/army_hq/SectorsSection.tsx', import.meta.url),
+      'utf8',
+    );
+    const operationHistorySource = readFileSync(
+      new URL('../src/ui/map/components/OperationHistoryPanel.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(orbatSource).toContain('getOsidDisplayName');
+    expect(orbatSource).not.toContain('formatOsidLabel');
+    expect(sectorsSource).toContain('getOsidDisplayName');
+    expect(sectorsSource).not.toContain('formatOsidLabel');
+    expect(operationHistorySource).toContain('getOsidDisplayName');
+    expect(operationHistorySource).toContain('getPlayerSafeMilitaryFactionName');
+    expect(operationHistorySource).not.toContain('humanizeOsid');
+  });
+
+  it('keeps tooltip and warroom settlement control language player-safe', () => {
+    const tooltipSource = readFileSync(
+      new URL('../src/ui/map/components/Tooltip.tsx', import.meta.url),
+      'utf8',
+    );
+    const settlementInfoSource = readFileSync(
+      new URL('../src/ui/warroom/components/SettlementInfoPanel.ts', import.meta.url),
+      'utf8',
+    );
+
+    expect(tooltipSource).toContain('getPlayerSafeMilitaryFactionName');
+    expect(tooltipSource).toContain('getPlayerSafeSettlementName');
+    expect(tooltipSource).not.toContain('humanizeOsid');
+    expect(settlementInfoSource).toContain('formatControlStatusLabel');
+    expect(settlementInfoSource).toContain('const controlStatus = formatControlStatusLabel(');
+  });
+
+  it('keeps AAR and reserve shells on player-safe geography and brigade labels', () => {
+    const aarSource = readFileSync(
+      new URL('../src/ui/map/components/AARPanel.tsx', import.meta.url),
+      'utf8',
+    );
+    const reserveSource = readFileSync(
+      new URL('../src/ui/map/components/ArmyReservePanel.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(aarSource).toContain('getOsidDisplayName');
+    expect(aarSource).toContain('getPlayerSafeBrigadeName');
+    expect(aarSource).toContain('getPlayerSafeMilitaryFactionName');
+    expect(aarSource).not.toContain('humanizeOsid');
+    expect(reserveSource).toContain('getOsidDisplayName');
+    expect(reserveSource).not.toContain('humanizeOsid');
+  });
+
+  it('keeps chronicle and ops-planning geography on player-safe helpers', () => {
+    const chronicleSource = readFileSync(
+      new URL('../src/ui/map/components/chronicle/generateChronicleEntries.ts', import.meta.url),
+      'utf8',
+    );
+    const operationsSectionSource = readFileSync(
+      new URL('../src/ui/map/components/army_hq/OperationsSection.tsx', import.meta.url),
+      'utf8',
+    );
+    const opsMapSource = readFileSync(
+      new URL('../src/ui/map/components/ops_modal/OpsMap.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(chronicleSource).toContain('getPlayerSafeSettlementName');
+    expect(chronicleSource).not.toContain('humanizeOsid');
+    expect(operationsSectionSource).not.toContain('formatOsidLabel');
+    expect(operationsSectionSource).toContain('getOsidDisplayName');
+    expect(opsMapSource).toContain('getPlayerSafeSettlementName');
+    expect(opsMapSource).toContain('getPlayerSafePoliticalFactionName');
+    expect(opsMapSource).not.toContain('humanizeOsid');
   });
 });

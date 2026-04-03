@@ -11,7 +11,7 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 
 **State contract (current player shell):** The same serialized `GameState` is pushed to all renderers via `game-state-updated`. The raw payload may still contain compatibility-era state such as `assignable_front_segments`, `brigade_front_assignment`, `theatres`, and `army_theatre_assignment`, but the live tactical-map `LoadedGameState` must treat those as compatibility/history residue rather than active shell concepts. The current player shell centers on canonical front edges, corps sectors, sector overrides, and `military.campaign_plans` (read-only; CampaignPlan objects produced by Army HQ Gathering — see `army_hq_gathering.ts`). See [TACTICAL_MAP_SYSTEM.md](TACTICAL_MAP_SYSTEM.md) §10.4 for current single-source notes.
 
-**Derived adapter fields (not IPC channels):** `GameStateAdapter.ts` derives additional view-model fields from the raw `GameState` payload. Notable: `sectorIntel` (`SectorIntelRecordView[]`) — derived from `state.sector_intel` and `state.military.corps_front_sectors` in a single merged pass (also produces `fogOfWar`). Exposes 11 fields per enemy sector: sector ID, faction, corps, strength category, posture, offensive_signs, confidence, visible brigades, friendly OSIDs, enemy OSIDs, assessed turn. Consumed by Army HQ intelligence panels (ThreatAssessment, ForceReadiness, SupplyIntelligence) and corps card threat badges. No IPC round-trip — entirely client-side derivation from the `game-state-updated` payload.
+**Derived adapter fields (not IPC channels):** `GameStateAdapter.ts` derives additional view-model fields from the raw `GameState` payload. Notable: `sectorIntel` (`SectorIntelRecordView[]`) — derived from `state.sector_intel` and `state.military.corps_front_sectors` in a single merged pass (also produces `fogOfWar`). The live player DTO is intentionally reduced: it carries only the friendly-sector threat summary fields the Army HQ shell actually renders (`friendly_sector_id`, `enemy_sector_id`, strength category, posture, offensive signs, confidence, turns-in-contact, visible brigades, front-edge count). Raw enemy faction/corps identity stays engine-side unless and until a player-safe shell explicitly needs it. No IPC round-trip — entirely client-side derivation from the `game-state-updated` payload.
 
 ## Channels
 
@@ -118,20 +118,10 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
   - Returns: `{ ok: boolean, error?: string }`
   - Behavior: adds or removes the sector from `state.opsec_sectors`, reserializes, and broadcasts the updated state. OPSEC affects sector-intel buildup; it is not a direct combat modifier.
 
-- `stage-corps-front-order` (invoke)
-    - Payload: `{ corpsId: string, edgeIds: string[] }`
-    - Returns: `{ ok: boolean, error?: string }`
-    - Behavior: validates and normalizes front edge IDs for the corps (`A__B` sorted), writes `state.corps_front_edges[corpsId] = sortedUnique(edgeIds)`, reserializes, sends state via `game-state-updated`.
-
 - `stage-corps-attack-axis-order` (invoke)
     - Payload: `{ corpsId: string, edgeIds: string[] }`
     - Returns: `{ ok: boolean, error?: string }`
     - Behavior: validates and normalizes edge IDs, writes `state.corps_attack_axis_orders[corpsId] = { edge_ids: sortedUnique(edgeIds), created_turn }`, reserializes, sends state via `game-state-updated`.
-
-- `stage-og-subfront-order` (invoke)
-    - Payload: `{ ogId: string, corpsId: string, edgeIds: string[] }`
-    - Returns: `{ ok: boolean, error?: string }`
-    - Behavior: validates OG/corps linkage and edge subset intent, writes `state.og_subfront_edges[ogId] = sortedUnique(edgeIds)` (derived against corps front in main), reserializes, sends state via `game-state-updated`.
 
 - `assign-commander` (invoke)
     - Payload: `{ officerId: string, corpsId: string }`

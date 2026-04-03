@@ -4,13 +4,15 @@
 **Source tree:** `src/ui/map/`
 **Dev server:** `npm run dev:map` (Vite, port 3002)
 **Build:** `npm run build` → `dist/tactical-map/`
-**Last updated:** 2026-03-20
+**Last updated:** 2026-04-03
 **Dev/live mode (2026-03-10):** Single codebase with `devMode` boolean in `gameStore.ts`. `isDevMode()`: auto-ON in Vite dev, `?dev=1` in production, `?live=1` forces live. Dev mode shows full load/run toolbar + DEV badge; separate Fronts/Sectors toggles; offset sector glow. Live mode auto-loads `latest_run_final_save.json` as RBiH; merged "Front" toggle (controls `sectorsVisible`); sector glow centered on front line (no offset, wider, `line-blur`); lateral demarcation hidden. Front line features carry `sector_id`; merge key by sector creates natural visual breaks at sector boundaries.
 
 > **See also:** [TACTICAL_MAP_SYSTEM.md](TACTICAL_MAP_SYSTEM.md) — original engineering reference.
 > This document is the **component-level master reference** covering current panel layout,
 > store contract, layer system, builders, data types, and interaction model.
 > **GUI polish phases (2026-03-05):** Authoritative checklist **A–F** (Arrow overhaul, Ops Planning modal, Map mode toolbar/pressure, Battle marker pulse, Bottom status strip, General polish) is in [20260305_GUI_POLISH_ORCHESTRATED_EXECUTION.md](../40_reports/implemented/20260305_GUI_POLISH_ORCHESTRATED_EXECUTION.md) §Consolidated Phase List.
+
+> **2026-04-03 shell authority note:** This file is now a component/reference map, not the canonical owner of live shell hierarchy. Use [PRODUCT_SHELL_HIERARCHY.md](PRODUCT_SHELL_HIERARCHY.md) and [UI_OWNERSHIP_MATRIX.md](UI_OWNERSHIP_MATRIX.md) for current top-level ownership. In live runtime, `PresidentialToolbar.tsx` is the mounted tactical-map top shell; `TopToolbar.tsx` is legacy/reference only.
 
 ---
 
@@ -69,7 +71,7 @@ src/ui/map/
 │   │
 │   ├── SelectionPanel.tsx         OSID detail (right: 1rem — separate from entity panels)
 │   ├── OOBSidebar.tsx             Left accordion sidebar (Situation/Army/Ops/Sectors)
-│   ├── TopToolbar.tsx             Top bar: file/run load UI, faction gradient banner
+│   ├── TopToolbar.tsx             Legacy top bar prototype (not the mounted tactical shell)
 │   ├── MapModeToolbar.tsx         Bottom-center: map mode buttons + layer toggles
 │   ├── BottomStatusStrip.tsx      Bottom-left 1-line strip: 'FRONTLINE CONTROL' telemetry + OSID/formation details (spaced wide-kerning typography)
 │   ├── Minimap.tsx                Bottom-left 250×180px secondary map

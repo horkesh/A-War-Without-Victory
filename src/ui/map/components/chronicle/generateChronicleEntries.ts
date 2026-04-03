@@ -16,10 +16,10 @@ export interface ChronicleEntry {
     };
 }
 
-import { humanizeOsid } from '../../utils/osidDisplayName.js';
 import {
     getPlayerSafeDisplayLabel,
     getPlayerSafeMilitaryFactionName,
+    getPlayerSafeSettlementName,
 } from '../../utils/playerSafeText.js';
 
 const HEADLINE_EVENT_PATTERNS = ['strategic_goals', 'state_identity', 'political_goal'];
@@ -54,7 +54,7 @@ export function generateChronicleEntries(state: any): ChronicleEntry[] {
                 const totalCasualties = (battle.attacker_casualties || 0) + (battle.defender_casualties || 0);
                 if (!battle.territory_flipped && totalCasualties <= CASUALTY_THRESHOLD) continue;
 
-                const location = humanizeOsid(battle.osid || '');
+                const location = getPlayerSafeSettlementName(battle.osid || '', 'this position');
                 entries.push({
                     turn,
                     type: 'combat',

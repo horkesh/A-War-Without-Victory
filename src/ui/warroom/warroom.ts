@@ -32,6 +32,7 @@ import flagRsUrl from './assets/flag_RS.webp?url';
 import scnApr1992Url from './assets/scenarios/apr1992_briefing.webp?url';
 // Main menu background (game start screen)
 import gameStartBgUrl from './assets/game start.webp?url';
+import { encodeShellHandoffCommand, type ShellHandoffCommand } from '../shared/shellHandoff.js';
 
 type CampaignScenarioKey = 'apr_1992';
 
@@ -76,7 +77,8 @@ function getPlateYear(faction: FactionId, calendarYear: number): number {
 
 interface DesktopBridge {
     startNewCampaign?: (payload: { playerFaction: FactionId; scenarioKey: CampaignScenarioKey }) => Promise<{ ok: boolean; error?: string; stateJson?: string }>;
-    setGameStateUpdatedCallback?: (cb: (stateJson: string) => void) => void;
+    subscribeGameStateUpdated?: (cb: (stateJson: string) => void) => (() => void);
+    subscribeTurnReportUpdated?: (cb: (report: unknown) => void) => (() => void);
     getCurrentGameState?: () => Promise<string | null>;
     loadStateDialog?: () => Promise<{ ok: boolean; error?: string; stateJson?: string }>;
     openTacticalMapWindow?: (payload?: { mode?: 'operational' | 'sandbox' }) => Promise<unknown>;
@@ -107,8 +109,11 @@ class WarroomApp {
     private tacticalMapReady = false;
     /** HTTP base URL for the tactical map server (set at init from Electron IPC). */
     private mapServerUrl: string | null = null;
-    /** Embedded iframe subscribers to game-state-updated bridge events. */
-    private embeddedBridgeSubscribers = new Map<WindowProxy, string>();
+    /** Embedded iframe subscribers keyed by event name. */
+    private embeddedBridgeSubscribers = new Map<WindowProxy, { origin: string; events: Set<string> }>();
+    private unsubscribeDesktopGameState: (() => void) | null = null;
+    private unsubscribeDesktopTurnReport: (() => void) | null = null;
+    private pendingShellHandoff: ShellHandoffCommand | null = null;
     /** True once the user has navigated away from the initial main menu (prevents init race). */
     private userNavigatedFromMenu = false;
     /** Faction for which we last loaded region data (so we only reload when faction changes). */
@@ -164,6 +169,9 @@ class WarroomApp {
         this.regionManager.setWarPlanningMap(this.warPlanningMap);
         this.regionManager.setMapSceneOpenHandler(() => this.showMapScene());
         this.regionManager.setTacticalMapOpenHandler(() => this.showTacticalMapScene());
+        this.regionManager.setTacticalShellHandoffHandler((command) => {
+            void this.openTacticalShellHandoff(command);
+        });
 
         this.regionManager.setOnGameStateChange((newState) => {
             this.gameState = newState;
@@ -187,7 +195,7 @@ class WarroomApp {
                 this.showWarroomScene();
                 return;
             }
-            if (e.data?.type === 'awwv-bridge:subscribe-game-state') {
+            if (e.data?.type === 'awwv-bridge:subscribe-event') {
                 this.handleEmbeddedBridgeSubscription(e);
                 return;
             }
@@ -206,10 +214,15 @@ class WarroomApp {
                 if (url) this.mapServerUrl = url.replace(/\/+$/, '');
             } catch (_) { /* not available — fallback to awwv:// */ }
         }
-        if (this.desktopBridge?.setGameStateUpdatedCallback) {
-            this.desktopBridge.setGameStateUpdatedCallback((stateJson: string) => {
+        if (this.desktopBridge?.subscribeGameStateUpdated) {
+            this.unsubscribeDesktopGameState = this.desktopBridge.subscribeGameStateUpdated((stateJson: string) => {
                 this.applyGameStateFromJson(stateJson);
                 this.broadcastEmbeddedBridgeEvent('game-state-updated', stateJson);
+            });
+        }
+        if (this.desktopBridge?.subscribeTurnReportUpdated) {
+            this.unsubscribeDesktopTurnReport = this.desktopBridge.subscribeTurnReportUpdated((report: unknown) => {
+                this.broadcastEmbeddedBridgeEvent('turn-report-updated', report);
             });
         }
 
@@ -637,10 +650,10 @@ class WarroomApp {
                         <div><strong style="color: #00e878;">Sandbox</strong> &mdash; Open tactical sandbox mode</div>
                         <div><strong style="color: #00e878;">Calendar</strong> &mdash; Advance turn</div>
                         <div><strong style="color: #00e878;">Telephone</strong> &mdash; Diplomacy (war only)</div>
-                        <div><strong style="color: #00e878;">Flag / Coatrack</strong> &mdash; Faction overview and command chain</div>
+                        <div><strong style="color: #00e878;">Flag / Coatrack</strong> &mdash; Executive summary, then Army HQ handoff</div>
                         <div><strong style="color: #00e878;">Newspapers</strong> &mdash; Current events</div>
-                        <div><strong style="color: #00e878;">Journal</strong> &mdash; Monthly operational review</div>
-                        <div><strong style="color: #00e878;">Report Stack</strong> &mdash; Staff report packet</div>
+                        <div><strong style="color: #00e878;">Journal</strong> &mdash; Army HQ records handoff</div>
+                        <div><strong style="color: #00e878;">Report Stack</strong> &mdash; Army HQ operations record</div>
                         <div><strong style="color: #00e878;">Radio</strong> &mdash; News ticker</div>
                     </div>
                 `;
@@ -941,7 +954,6 @@ class WarroomApp {
             warroomScene.classList.remove('warroom-scene-hidden');
             warroomScene.setAttribute('aria-hidden', 'false');
         }
-        this.reRegisterWarroomCallback();
         this.pullLatestGameState();
     }
 
@@ -967,10 +979,14 @@ class WarroomApp {
         const isElectron = !!(window as unknown as { awwv?: unknown }).awwv;
         if (!isElectron) {
             // Dev/browser: cross-origin prevents meaningful iframe interaction
+            const handoffQuery = this.pendingShellHandoff
+                ? `?shellHandoff=${encodeShellHandoffCommand(this.pendingShellHandoff)}`
+                : '';
             const devUrl = mode === 'sandbox'
-                ? 'http://localhost:3002/tactical_sandbox.html'
-                : 'http://localhost:3002/';
+                ? `http://localhost:3002/tactical_sandbox.html${handoffQuery}`
+                : `http://localhost:3002/${handoffQuery}`;
             window.open(devUrl, '_blank');
+            this.pendingShellHandoff = null;
             return;
         }
 
@@ -1005,6 +1021,7 @@ class WarroomApp {
             iframe.onload = () => {
                 this.tacticalMapReady = true;
                 this.injectBridgeIntoTacticalMap(iframe);
+                this.flushPendingShellHandoff();
             };
 
             tacticalScene.appendChild(iframe);
@@ -1015,6 +1032,7 @@ class WarroomApp {
         } else if (this.tacticalMapReady) {
             // Push latest game state to existing iframe
             this.injectBridgeIntoTacticalMap(this.tacticalMapIframe);
+            this.flushPendingShellHandoff();
         }
 
         // Scene swap: hide desk only so warroom-scene stays visible and tactical map can show
@@ -1069,28 +1087,45 @@ class WarroomApp {
         }
     }
 
-    /**
-     * When returning from tactical map to warroom, re-register the warroom's
-     * own game state callback (the iframe may have overwritten it).
-     */
-    private reRegisterWarroomCallback(): void {
-        if (this.desktopBridge?.setGameStateUpdatedCallback) {
-            this.desktopBridge.setGameStateUpdatedCallback((stateJson: string) => {
-                this.applyGameStateFromJson(stateJson);
-                this.broadcastEmbeddedBridgeEvent('game-state-updated', stateJson);
-            });
-        }
-    }
-
     private handleEmbeddedBridgeSubscription(event: MessageEvent): void {
         const source = event.source;
         if (!source || typeof (source as WindowProxy).postMessage !== 'function') return;
-        const enabled = Boolean((event.data as { enabled?: boolean })?.enabled);
+        const data = event.data as { enabled?: boolean; eventName?: string } | null;
+        const enabled = Boolean(data?.enabled);
+        const eventName = data?.eventName;
+        if (eventName !== 'game-state-updated' && eventName !== 'turn-report-updated') return;
         const origin = typeof event.origin === 'string' ? event.origin : '*';
+        const existing = this.embeddedBridgeSubscribers.get(source as WindowProxy) ?? { origin, events: new Set<string>() };
+        existing.origin = origin;
         if (enabled) {
-            this.embeddedBridgeSubscribers.set(source as WindowProxy, origin);
+            existing.events.add(eventName);
+            this.embeddedBridgeSubscribers.set(source as WindowProxy, existing);
         } else {
-            this.embeddedBridgeSubscribers.delete(source as WindowProxy);
+            existing.events.delete(eventName);
+            if (existing.events.size === 0) {
+                this.embeddedBridgeSubscribers.delete(source as WindowProxy);
+            } else {
+                this.embeddedBridgeSubscribers.set(source as WindowProxy, existing);
+            }
+        }
+    }
+
+    private async openTacticalShellHandoff(command: ShellHandoffCommand): Promise<void> {
+        this.pendingShellHandoff = command;
+        await this.showTacticalMapScene('operational');
+        this.flushPendingShellHandoff();
+    }
+
+    private flushPendingShellHandoff(): void {
+        if (!this.pendingShellHandoff || !this.tacticalMapReady || !this.tacticalMapIframe?.contentWindow) return;
+        try {
+            this.tacticalMapIframe.contentWindow.postMessage(
+                { type: 'awwv-shell:handoff', command: this.pendingShellHandoff },
+                '*',
+            );
+            this.pendingShellHandoff = null;
+        } catch (e) {
+            console.warn('[warroom] Failed to hand off shell command to tactical map:', e);
         }
     }
 
@@ -1118,9 +1153,13 @@ class WarroomApp {
     }
 
     private broadcastEmbeddedBridgeEvent(eventName: string, payload: unknown): void {
-        for (const [target, origin] of this.embeddedBridgeSubscribers.entries()) {
+        for (const [target, subscription] of this.embeddedBridgeSubscribers.entries()) {
+            if (!subscription.events.has(eventName)) continue;
             try {
-                target.postMessage({ type: 'awwv-bridge:event', eventName, payload }, origin === 'null' ? '*' : origin);
+                target.postMessage(
+                    { type: 'awwv-bridge:event', eventName, payload },
+                    subscription.origin === 'null' ? '*' : subscription.origin,
+                );
             } catch {
                 this.embeddedBridgeSubscribers.delete(target);
             }

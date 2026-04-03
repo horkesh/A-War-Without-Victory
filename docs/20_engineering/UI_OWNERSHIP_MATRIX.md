@@ -27,6 +27,7 @@ Other surfaces may summarize or link to it, but they do not become co-owners of 
 - high-level strategic overview
 
 **May summarize but not own:**
+- staff packets, command briefings, and report-review depth
 - detailed operations internals
 - low-level formation debugging
 
@@ -83,12 +84,19 @@ Other surfaces may summarize or link to it, but they do not become co-owners of 
   - canonical owner: Army HQ `RECORDS`
   - other shells may link into it, but should not reopen orphan history ownership elsewhere
 
+- `Warroom desk props for command review`
+  - canonical owner: Army HQ / Codex depending on destination
+  - Warroom anchors may hand off into those shells, but should not revive their own local packet owners
+
 - `return from standalone tactical map`
   - canonical owner: Warroom shell
   - tactical map must expose the path, but Warroom owns the destination
 
 - `Codex access`
   - canonical owner: Codex panel/system
+  - primary entrypoint: Tactical Map `PresidentialToolbar`
+  - secondary/contextual entrypoint: Army HQ `Records`
+  - convenience entrypoint: tactical-map keyboard shortcut
   - Army HQ and Warroom may link to it, but must not hide it behind obscure flows
 
 - `threat assessment`

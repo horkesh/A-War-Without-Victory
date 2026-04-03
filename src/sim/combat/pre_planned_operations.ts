@@ -17,6 +17,7 @@ import type {
     GameState,
     OperationAxis,
 } from '../../state/game_state.js';
+import type { Osid } from './osid_adjacency.js';
 import { createSingleAxis } from './sector_offensive.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
@@ -24,7 +25,7 @@ import { assignOperationCommander } from './officer_system.js';
 import { isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { isSectorAssignmentExemptCorpsId } from './corps_front_sectors_constants.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
-import { deployEliteLoan } from './army_reserve_system.js';
+import { canEliteLoanReachCorpsTerritory, deployEliteLoan } from './army_reserve_system.js';
 import { validateOpAtInjection, collectOpInjectionWarnings } from './operation_validation.js';
 import type { OpInjectionWarning } from './operation_validation.js';
 import {
@@ -350,7 +351,6 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 brigades: [
                     'rs_foa_brigade',
                     'rs_bilea_brigade',
-                    'jna_mostar_garrison_tg',
                 ],
                 // foca_3 → prevrac (RS waypoint) → kolovarice (RBiH; painted RS — valid target).
                 // ustipraca_2 removed (painted RBiH, caused DRINA over-capture in n1243).
@@ -675,6 +675,7 @@ const ALL_PRE_PLANNED: PrePlannedOp[] = [...VRS_PRE_PLANNED, ...HRHB_PRE_PLANNED
 function buildAxesFromDef(
     def: PrePlannedOp,
     state: GameState,
+    adjacency?: Map<Osid, Osid[]>,
 ): { axes: OperationAxis[]; participating: FormationId[]; eliteLoans: { brigadeId: FormationId; corpsId: string }[] } | null {
     const formations = state.military.formations ?? {};
     const builtAxes: OperationAxis[] = [];
@@ -701,6 +702,7 @@ function buildAxesFromDef(
             const corpsId = getFormationCorpsId(formation);
             if (isSectorAssignmentExemptCorpsId(corpsId)) {
                 if (!formation.elite_loan_state) return false; // non-elite exempt = skip
+                if (adjacency && !canEliteLoanReachCorpsTerritory(state, fid, def.corps, adjacency)) return false;
                 // Only schedule a new loan if not already loaned to this corps
                 // (e.g. a probe may have already loaned the brigade at the same turn).
                 const ls = formation.elite_loan_state;
@@ -742,8 +744,12 @@ function deployPrePlannedEliteLoans(
     eliteLoans: { brigadeId: FormationId; corpsId: string }[],
     def: PrePlannedOp,
     turn: number,
+    adjacency?: Map<Osid, Osid[]>,
 ): void {
     for (const loan of eliteLoans) {
+        if (adjacency && !canEliteLoanReachCorpsTerritory(state, loan.brigadeId, loan.corpsId, adjacency)) {
+            continue;
+        }
         deployEliteLoan(
             state,
             loan.brigadeId,
@@ -774,16 +780,18 @@ function deployPrePlannedEliteLoans(
  * For now, we inject the first matching op per corps (Visegrad first since it's
  * listed first) and queue the second.
  */
-export function injectPrePlannedOperations(state: GameState): void {
+export function injectPrePlannedOperations(state: GameState, adjacency?: Map<Osid, Osid[]>): void {
     const corpsCommand = state.military.corps_command;
     if (!corpsCommand) return;
 
     const formations = state.military.formations ?? {};
     const turn = state.meta?.turn ?? 0;
 
-    // Validate all definitions and collect warnings
+    // Validate only definitions that are actually eligible to inject now.
+    // Deferred operations are validated when their queue slot becomes live.
     const allWarnings: OpInjectionWarning[] = [];
     for (const def of ALL_PRE_PLANNED) {
+        if (def.available_from != null && turn < def.available_from) continue;
         const cmd = corpsCommand[def.corps];
         const warnings = validateOpAtInjection(def, state, undefined, cmd ?? undefined);
         allWarnings.push(...warnings);
@@ -805,10 +813,10 @@ export function injectPrePlannedOperations(state: GameState): void {
         if (injectedCorps.has(def.corps)) continue;
 
         // Build axes with validated brigades and objectives
-        const result = buildAxesFromDef(def, state);
+        const result = buildAxesFromDef(def, state, adjacency);
         if (!result) continue;
 
-        deployPrePlannedEliteLoans(state, result.eliteLoans, def, turn);
+        deployPrePlannedEliteLoans(state, result.eliteLoans, def, turn, adjacency);
 
         const primarySectorId = derivePrimarySectorForBrigades(
             Object.values(state.military.corps_front_sectors ?? {}),
@@ -870,7 +878,7 @@ export function injectPrePlannedOperations(state: GameState): void {
  * Inject a queued operation by name for a corps.
  * Called when a corps completes an operation and has queued_operations.
  */
-export function injectQueuedOperation(state: GameState, corpsId: string): boolean {
+export function injectQueuedOperation(state: GameState, corpsId: string, adjacency?: Map<Osid, Osid[]>): boolean {
     const cmd = state.military.corps_command?.[corpsId];
     // Queued pre-planned ops are sequential in slot 0.
     // Bot AI ops in other slots do NOT block queue injection.
@@ -909,10 +917,10 @@ export function injectQueuedOperation(state: GameState, corpsId: string): boolea
     collectOpInjectionWarnings(state, queueWarnings);
 
     // Build axes — brigades may not exist yet; keep queue entry for retry
-    const result = buildAxesFromDef(def, state);
+    const result = buildAxesFromDef(def, state, adjacency);
     if (!result) return false;
 
-    deployPrePlannedEliteLoans(state, result.eliteLoans, def, turn);
+    deployPrePlannedEliteLoans(state, result.eliteLoans, def, turn, adjacency);
 
     // Success — consume queue entry
     cmd.queued_operations.shift();

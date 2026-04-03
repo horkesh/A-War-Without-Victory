@@ -10,6 +10,7 @@ import type { OpsPlanState } from './types';
 import type { PredictionResult } from './usePrediction';
 import { OpordDocument } from './OpordDocument';
 import { formatCorpsDisplayName, turnToISODate } from '../../utils/formatters';
+import { findPlayerFacingOperationByKey } from '../../../shared/playerVisibility';
 
 interface AuthorizePhaseProps {
     plan: OpsPlanState;
@@ -43,8 +44,9 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
 
         // Commander identity sourced from OperationView.commander_officer_id (canonical)
         // Fall back to officerId prop (player planning selection) if no matching operation exists yet.
-        const matchingOperation = (loadedGameState.operations ?? []).find(
-            (op) => op.corps_id === corpsId && op.phase !== 'recovery'
+        const matchingOperation = findPlayerFacingOperationByKey(
+            loadedGameState,
+            `${corpsId}|${plan.opName}`,
         );
         const resolvedOfficerId = matchingOperation?.commander_officer_id ?? officerId;
         const officer = resolvedOfficerId

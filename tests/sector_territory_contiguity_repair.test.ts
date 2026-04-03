@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { repairDisconnectedTerritory } from '../src/sim/combat/corps_front_sectors.js';
+import { assignTerritoryVoronoi, repairDisconnectedTerritory } from '../src/sim/combat/corps_front_sectors.js';
 import type { CorpsFrontSector, CorpsFrontSubSegment } from '../src/state/game_state.js';
 import type { Osid } from '../src/sim/combat/osid_adjacency.js';
 
@@ -103,6 +103,23 @@ describe('repairDisconnectedTerritory', () => {
         expect(sectors[1]!.territory_osids).toEqual(['op:x:x', 'op:y:y']);
     });
 
+    it('does not reassign disconnected orphan territory across corps boundaries', () => {
+        const adj = buildTestAdjacency();
+        const friendly = new Set(['op:a:a', 'op:b:b', 'op:c:c', 'op:x:x', 'op:y:y']);
+        const sector0 = makeSector('sector:corps1:0', 'corps1',
+            [makeSubSeg('subseg:0', ['op:a:a'], ['op:e:e'])],
+            ['op:a:a', 'op:b:b', 'op:c:c', 'op:x:x'],
+        );
+        const sector1 = makeSector('sector:corps2:0', 'corps2',
+            [makeSubSeg('subseg:1', ['op:y:y'], ['op:e:e'])],
+            ['op:y:y'],
+        );
+        const sectors = [sector0, sector1];
+        repairDisconnectedTerritory(sectors, adj, friendly);
+        expect(sectors[0]!.territory_osids).toEqual(['op:a:a', 'op:b:b', 'op:c:c']);
+        expect(sectors[1]!.territory_osids).toEqual(['op:y:y']);
+    });
+
     it('handles single-OSID territory without error', () => {
         const adj = buildTestAdjacency();
         const friendly = new Set(['op:a:a']);
@@ -121,5 +138,22 @@ describe('repairDisconnectedTerritory', () => {
         const sectors: CorpsFrontSector[] = [];
         repairDisconnectedTerritory(sectors, adj, friendly);
         expect(sectors).toEqual([]);
+    });
+});
+
+describe('assignTerritoryVoronoi', () => {
+    it('does not launder orphan OSIDs into another corps during post-voronoi sweep', () => {
+        const adj = buildTestAdjacency();
+        const friendly = new Set(['op:a:a', 'op:b:b', 'op:c:c']);
+        const sectors = [
+            makeSector('sector:corps2:0', 'corps2', [makeSubSeg('subseg:0', ['op:c:c'], ['op:e:e'])], []),
+        ];
+        const osidToCorps = new Map<Osid, string>([
+            ['op:a:a' as Osid, 'corps1'],
+            ['op:b:b' as Osid, 'corps1'],
+            ['op:c:c' as Osid, 'corps2'],
+        ]);
+        assignTerritoryVoronoi(sectors, adj, friendly, osidToCorps as Map<Osid, any>);
+        expect(sectors[0]!.territory_osids).toEqual(['op:c:c']);
     });
 });

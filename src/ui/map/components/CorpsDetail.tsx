@@ -18,6 +18,7 @@ import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
 import { aggregateEffectiveness } from '../utils/combatEffectiveness';
 import { Icon } from './icons/Icon';
+import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
 
 type CorpsTab = 'overview' | 'orbat' | 'sectors' | 'ops' | 'orders';
 
@@ -60,8 +61,8 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
   );
 
   const corpsOps = useMemo(
-    () => loadedGameState?.operations?.filter((op) => op.corps_id === selectedCorpsId) ?? [],
-    [loadedGameState?.operations, selectedCorpsId]
+    () => filterPlayerFacingOperations(loadedGameState).filter((op) => op.corps_id === selectedCorpsId),
+    [loadedGameState, selectedCorpsId]
   );
 
   const sectorIdByBrigadeId = useMemo(() => {
@@ -124,7 +125,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
     { id: 'overview' as const, label: 'Overview' },
     { id: 'orbat'    as const, label: 'ORBAT',   count: subordinates.length },
     { id: 'sectors'  as const, label: 'Sectors', count: corpsSectors.length },
-    { id: 'ops'      as const, label: 'Ops',     count: corpsOps.length },
+    { id: 'ops'      as const, label: 'Ops Snapshot', count: corpsOps.length },
     { id: 'orders'   as const, label: 'Orders' },
   ];
 
@@ -397,8 +398,14 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
         {/* ── OPS ── */}
         {activeTab === 'ops' && (
           <div className="p-3 space-y-2.5">
+            <div className="text-[10px] uppercase tracking-widest text-text-secondary font-bold">
+              Field Snapshot
+            </div>
+            <div className="text-[10px] text-text-secondary -mt-1">
+              Corps panels summarize live operations. Full command review belongs in Army HQ and briefing flows.
+            </div>
             {corpsOps.length === 0 ? (
-              <div className="text-text-secondary italic text-xs">No active operations.</div>
+              <div className="text-text-secondary italic text-xs">No player-facing corps operations.</div>
             ) : (
               corpsOps.map((op) => {
                 const phaseBg = op.phase === 'execution'
@@ -475,7 +482,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                 onClick={handleOpenOpsPlanning}
                 className="w-full text-xs font-sans px-2 py-2 rounded border border-panel-border text-interactive hover:bg-panel-hover transition-colors"
               >
-                Prepare Operation
+                Prepare Operation in HQ
               </button>
             </div>
           </div>
@@ -518,7 +525,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                 onClick={handleOpenOpsPlanning}
                 className="w-full text-xs font-sans px-2 py-2.5 rounded border border-panel-border text-interactive hover:bg-panel-hover transition-colors"
               >
-                Prepare Operation
+                Prepare Operation in HQ
               </button>
             </div>
           </div>

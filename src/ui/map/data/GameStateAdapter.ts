@@ -1425,8 +1425,6 @@ export function parseGameState(json: unknown): LoadedGameState {
                 sectorIntelRecords.push({
                     friendly_sector_id: friendlySectorId,
                     enemy_sector_id: enemySectorId,
-                    enemy_faction: typeof rec.enemy_faction === 'string' ? rec.enemy_faction : '',
-                    enemy_corps_id: typeof rec.enemy_corps_id === 'string' ? rec.enemy_corps_id : '',
                     front_edge_count: typeof rec.front_edge_count === 'number' ? rec.front_edge_count : 0,
                     strength_category: (['unknown', 'thin', 'moderate', 'dense', 'fortress'].includes(rec.strength_category as string)
                         ? rec.strength_category as 'unknown' | 'thin' | 'moderate' | 'dense' | 'fortress' : 'unknown'),
@@ -1549,25 +1547,6 @@ export function parseGameState(json: unknown): LoadedGameState {
             .sort((a, b) => a.edge_id.localeCompare(b.edge_id))
         : undefined;
 
-    let assignableFrontSegments: LoadedGameState['assignableFrontSegments'] | undefined;
-    if (Array.isArray(state.military.assignable_front_segments)) {
-        const out: NonNullable<LoadedGameState['assignableFrontSegments']> = [];
-        for (const segment of state.military.assignable_front_segments as Array<Record<string, unknown>>) {
-            const frontId = typeof segment.front_id === 'string' ? segment.front_id : '';
-            const edgeIds = (Array.isArray(segment.edge_ids) ? segment.edge_ids : [])
-                .map((id) => (typeof id === 'string' ? id : '')).filter((id) => id.length > 0).sort((a, b) => a.localeCompare(b));
-            if (!frontId || edgeIds.length === 0) continue;
-            const sideA = segment.side_a === 'RS' || segment.side_a === 'RBiH' || segment.side_a === 'HRHB' ? segment.side_a : null;
-            const sideB = segment.side_b === 'RS' || segment.side_b === 'RBiH' || segment.side_b === 'HRHB' ? segment.side_b : null;
-            const lengthEdges = Number.isFinite(Number(segment.length_edges)) && Number(segment.length_edges) > 0 ? Math.floor(Number(segment.length_edges)) : edgeIds.length;
-            const entry: NonNullable<LoadedGameState['assignableFrontSegments']>[number] = { front_id: frontId, edge_ids: edgeIds, side_a: sideA, side_b: sideB, length_edges: lengthEdges };
-            if (typeof segment.name === 'string' && segment.name.length > 0) entry.name = segment.name;
-            out.push(entry);
-        }
-        out.sort((a, b) => a.front_id.localeCompare(b.front_id));
-        if (out.length > 0) assignableFrontSegments = out;
-    }
-
     let frontPressureByEdge: LoadedGameState['frontPressureByEdge'] | undefined;
     const rawFrontPressure = state.military.front_pressure as Record<string, Record<string, unknown>> | undefined;
     if (rawFrontPressure && typeof rawFrontPressure === 'object' && !Array.isArray(rawFrontPressure)) {
@@ -1586,10 +1565,10 @@ export function parseGameState(json: unknown): LoadedGameState {
     let corpsFrontSectors: CorpsFrontSectorView[] | undefined;
     const rawSectors = state.military.corps_front_sectors as Record<string, Record<string, unknown>> | undefined;
     const rawOpsecSectors = Array.isArray(state.military.opsec_sectors)
-        ? state.military.opsec_sectors
+        ? state.military.opsec_sectors as unknown[]
         : Array.isArray((state as any).opsec_sectors)
-            ? (state as any).opsec_sectors
-            : [];
+            ? (state as any).opsec_sectors as unknown[]
+            : [] as unknown[];
     const opsecSectorSet = new Set(
         rawOpsecSectors.filter((value): value is string => typeof value === 'string')
     );
@@ -1602,8 +1581,12 @@ export function parseGameState(json: unknown): LoadedGameState {
             if (!corpsId || !faction) continue;
             const corpsFormation = formationsRecord[corpsId];
             const corpsName = corpsFormation && typeof corpsFormation.name === 'string' ? corpsFormation.name : corpsId;
-            const edgeIds = Array.isArray(s.edge_ids) ? (s.edge_ids as string[]).filter(e => typeof e === 'string').sort((a, b) => a.localeCompare(b)) : [];
-            const opposingFactions = Array.isArray(s.opposing_factions) ? (s.opposing_factions as string[]).filter(f => typeof f === 'string').sort((a, b) => a.localeCompare(b)) : [];
+            const edgeIds = Array.isArray(s.edge_ids)
+                ? (s.edge_ids as unknown[]).filter((value): value is string => typeof value === 'string').sort((a, b) => a.localeCompare(b))
+                : [];
+            const opposingFactions = Array.isArray(s.opposing_factions)
+                ? (s.opposing_factions as unknown[]).filter((value): value is string => typeof value === 'string').sort((a, b) => a.localeCompare(b))
+                : [];
             const subSegments = Array.isArray(s.sub_segments) ? s.sub_segments as Array<Record<string, unknown>> : [];
             const assignedBrigadeIds = Array.isArray(s.assigned_brigade_ids) ? (s.assigned_brigade_ids as string[]).filter(id => typeof id === 'string').sort((a, b) => a.localeCompare(b)) : [];
             const reserveBrigadeIds = Array.isArray(s.reserve_brigade_ids) ? (s.reserve_brigade_ids as string[]).filter(id => typeof id === 'string').sort((a, b) => a.localeCompare(b)) : [];
@@ -1780,7 +1763,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         war_alliance_rbih_hrhb: war_alliance_rbih_hrhb ?? null,
         frontEdges: frontEdges && frontEdges.length > 0 ? frontEdges : undefined,
         frontEdgesOsid: frontEdgesOsid && frontEdgesOsid.length > 0 ? frontEdgesOsid : undefined,
-        assignableFrontSegments, frontPressureByEdge,
+        frontPressureByEdge,
         displacementByMun: Object.keys(displacementByMun).length > 0 ? displacementByMun : undefined,
         departedByOsid: departedByOsid && Object.keys(departedByOsid).length > 0 ? departedByOsid : undefined,
         departedByMun: departedByMun && Object.keys(departedByMun).length > 0 ? departedByMun : undefined,
@@ -1790,7 +1773,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         movementOrdersSettlement: movementOrdersSettlement.length > 0 ? movementOrdersSettlement : undefined,
         repositionOrders: repositionOrders.length > 0 ? repositionOrders : undefined,
         corpsFrontSectors,
-        operations: operations.length > 0 ? operations : undefined,
+        operations: filterPlayerFacingEntriesByFaction(operations, playerFaction),
         namedOfficerData,
         namedOfficerStateById,
         factionReserves,
@@ -1807,11 +1790,11 @@ export function parseGameState(json: unknown): LoadedGameState {
         historicalEventsByTurn: deriveHistoricalEvents(state),
         latestTurnSummary: (state.turn_summaries as import('../../../state/turn_summary.js').TurnSummary[] | undefined)?.[0] ?? null,
         turnSummaries: (state.turn_summaries as import('../../../state/turn_summary.js').TurnSummary[] | undefined) ?? [],
-        operationHistory: deriveOperationHistory(state),
-        activeOperations: deriveActiveOperations(state),
+        operationHistory: filterPlayerFacingEntriesByFaction(deriveOperationHistory(state), playerFaction),
+        activeOperations: filterPlayerFacingEntriesByFaction(deriveActiveOperations(state), playerFaction),
         brigadeSectorOverride: brigadeSectorOverride && Object.keys(brigadeSectorOverride).length > 0 ? brigadeSectorOverride : undefined,
         pendingReserveRequests: Array.isArray(state.military?.pending_reserve_requests) && state.military.pending_reserve_requests.length > 0
-            ? (state.military.pending_reserve_requests as any[]).map(r => ({
+            ? ((state.military.pending_reserve_requests as any[]).map(r => ({
                 request_id: String(r.request_id ?? `req:${Number(r.turn_requested ?? 0)}:${String(r.corps_id ?? '')}:${String(r.reason ?? '')}`),
                 corps_id: String(r.corps_id ?? ''),
                 faction: String(r.faction ?? ''),
@@ -1824,7 +1807,7 @@ export function parseGameState(json: unknown): LoadedGameState {
                 description: String(r.description ?? ''),
                 suggested_brigade_id: r.suggested_brigade_id ? String(r.suggested_brigade_id) : null,
                 turn_requested: Number(r.turn_requested ?? 0),
-            }))
+            })).filter((request) => !playerFaction || request.faction === playerFaction))
             : undefined,
         eliteBrigadeTracker: deriveEliteBrigadeTracker(state),
         pendingOfficerEvents: derivePendingOfficerEvents(state),
@@ -2018,6 +2001,16 @@ function deriveOperationHistory(state: any): LoadedGameState['operationHistory']
             })),
         };
     });
+}
+
+function filterPlayerFacingEntriesByFaction<T extends { faction?: string | null }>(
+    entries: T[] | undefined,
+    playerFaction: string | null,
+): T[] | undefined {
+    if (!entries || entries.length === 0) return undefined;
+    if (!playerFaction) return entries;
+    const filtered = entries.filter((entry) => entry.faction === playerFaction);
+    return filtered.length > 0 ? filtered : undefined;
 }
 
 function deriveActiveOperations(state: any): LoadedGameState['activeOperations'] {

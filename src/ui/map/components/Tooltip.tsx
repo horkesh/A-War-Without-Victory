@@ -10,13 +10,16 @@ import { FACTION_COLORS } from '../utils/theme';
 import { SettlementDetailContent } from './SettlementDetailContent';
 import type { CorpsFrontSectorView, FormationView } from '../data/types';
 import type { TurnBattle } from '../../../state/turn_summary.js';
-import { humanizeOsid } from '../utils/osidDisplayName';
 import {
   buildPlayerSafeFormationTooltipModel,
   buildPlayerSafeFrontTooltipModel,
   getPlayerSafeSettlementTooltipFormations,
 } from './tooltipPlayerSafe';
 import { getPlayerFacingFaction } from '../../shared/playerVisibility';
+import {
+  getPlayerSafeMilitaryFactionName,
+  getPlayerSafeSettlementName,
+} from '../utils/playerSafeText';
 
 const TOOLTIP_DELAY_MS = 300;
 const TOOLTIP_OFFSET = 12;
@@ -29,8 +32,6 @@ const OUTCOME_COLOR: Record<string, string> = {
   decisive_victory: '#56d364', victory: '#56d364', costly_victory: '#e8a838',
   stalemate: '#aaa', repulsed: '#f47068', catastrophic: '#f44',
 };
-const FACTION_LABEL: Record<string, string> = { RS: 'VRS', RBiH: 'ARBiH', HRHB: 'HVO' };
-
 function BattleTooltipContent({ osid, battles, osidDisplayNames }: {
   osid: string;
   battles?: TurnBattle[];
@@ -38,11 +39,11 @@ function BattleTooltipContent({ osid, battles, osidDisplayNames }: {
 }) {
   const battle = battles?.find((b) => b.osid === osid);
   if (!battle) {
-    return <div className="text-[11px] text-text-secondary">Battle at {humanizeOsid(osid)}</div>;
+    return <div className="text-[11px] text-text-secondary">Battle at {getPlayerSafeSettlementName(osid, 'this position')}</div>;
   }
   const outcomeLabel = OUTCOME_LABEL[battle.outcome] ?? battle.outcome;
   const outcomeColor = OUTCOME_COLOR[battle.outcome] ?? '#aaa';
-  const locationName = getOsidDisplayName(osid, osidDisplayNames) || humanizeOsid(osid);
+  const locationName = getOsidDisplayName(osid, osidDisplayNames) || getPlayerSafeSettlementName(osid, 'this position');
   return (
     <div className="min-w-[200px] max-w-[280px]">
       <div className="font-sans text-xs font-semibold uppercase tracking-wide border-b border-panel-border pb-1 mb-2" style={{ color: outcomeColor }}>
@@ -50,9 +51,13 @@ function BattleTooltipContent({ osid, battles, osidDisplayNames }: {
       </div>
       <div className="text-[11px] text-text-primary mb-1">{locationName}</div>
       <div className="text-[10px] text-text-secondary mb-1.5">
-        <span style={{ color: FACTION_COLORS[battle.attacker_faction] ?? '#aaa' }}>{FACTION_LABEL[battle.attacker_faction] ?? battle.attacker_faction}</span>
+        <span style={{ color: FACTION_COLORS[battle.attacker_faction] ?? '#aaa' }}>
+          {getPlayerSafeMilitaryFactionName(battle.attacker_faction)}
+        </span>
         <span className="mx-1">→</span>
-        <span style={{ color: FACTION_COLORS[battle.defender_faction] ?? '#aaa' }}>{FACTION_LABEL[battle.defender_faction] ?? battle.defender_faction}</span>
+        <span style={{ color: FACTION_COLORS[battle.defender_faction] ?? '#aaa' }}>
+          {getPlayerSafeMilitaryFactionName(battle.defender_faction)}
+        </span>
         {battle.was_concentrated && <span className="ml-1 text-text-muted">({battle.all_attacker_ids.length}× concentrated)</span>}
       </div>
       <div className="grid grid-cols-2 gap-x-3 text-[10px] tabular-nums">
@@ -178,20 +183,19 @@ function FrontTooltipContent({
   frontEdgesOsid,
   frontPressureByEdge,
   formations,
-  assignableFrontSegments,
   corpsFrontSectors,
 }: {
   edgeId: string;
   frontEdgesOsid: { edge_id: string; a: string; b: string; side_a: string | null; side_b: string | null }[] | undefined;
   frontPressureByEdge: Record<string, { value: number; max_abs: number }> | undefined;
   formations: FormationView[] | undefined;
-  assignableFrontSegments: { front_id: string; edge_ids: string[]; side_a: string | null; side_b: string | null }[] | undefined;
   corpsFrontSectors?: CorpsFrontSectorView[];
 }) {
   // Strip faction suffix from composite hover ID to match canonical edge IDs
   const baseEdgeId = stripFactionSuffix(edgeId);
 
   const edge = frontEdgesOsid?.find((e) => e.edge_id === baseEdgeId);
+  const sector = corpsFrontSectors?.find((entry) => entry.edge_ids.includes(baseEdgeId));
   const playerFaction = getPlayerFacingFaction(useGameStore.getState().loadedGameState);
   const model = buildPlayerSafeFrontTooltipModel({
     edgeId: baseEdgeId,
@@ -199,12 +203,10 @@ function FrontTooltipContent({
     frontPressureByEdge,
     formations,
     fogOfWar: useGameStore.getState().loadedGameState?.fogOfWar,
-    assignableFrontSegments,
     corpsFrontSectors,
     playerFaction,
   });
-  const segment = assignableFrontSegments?.find((s) => s.edge_ids.includes(baseEdgeId));
-  const persistenceLine = segment ? `${segment.edge_ids.length} edges` : '—';
+  const persistenceLine = sector ? `${sector.edge_ids.length} edges` : '—';
 
   return (
     <div className="min-w-[220px] max-w-[300px]">
@@ -410,7 +412,6 @@ export const Tooltip = React.memo(function Tooltip() {
           frontEdgesOsid={loadedGameState?.frontEdgesOsid}
           frontPressureByEdge={loadedGameState?.frontPressureByEdge}
           formations={loadedGameState?.formations}
-          assignableFrontSegments={loadedGameState?.assignableFrontSegments}
           corpsFrontSectors={loadedGameState?.corpsFrontSectors}
         />
       )}

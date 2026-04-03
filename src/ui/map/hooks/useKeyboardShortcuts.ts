@@ -3,7 +3,9 @@
  * Single keydown handler: Enter → confirm primary (e.g. modal); 1–6 → map mode; Escape → clear selection + tooltip.
  * Does not fire when focus is inside input/textarea.
  */
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { advanceTurnAndSync } from '../desktop/orderActions';
+import { useIPC } from '../desktop/useIPC';
 import { useGameStore, type MapMode } from '../store/gameStore';
 
 const MAP_MODES_BY_KEY: MapMode[] = ['political', 'ethnic', 'supply', 'casualties', 'morale', 'operations', 'defense'];
@@ -14,6 +16,12 @@ function isFocusInInput(): boolean {
 }
 
 export function useKeyboardShortcuts(): void {
+  const ipc = useIPC();
+  const loadSave = useGameStore((s) => s.loadSave);
+  const clearStagedOrders = useGameStore((s) => s.clearStagedOrders);
+  const setLoadError = useGameStore((s) => s.setLoadError);
+  const advancingRef = useRef(false);
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (isFocusInInput()) return;
@@ -21,9 +29,8 @@ export function useKeyboardShortcuts(): void {
       // Ctrl+S → quick-save
       if ((event.ctrlKey || event.metaKey) && event.key === 's') {
         event.preventDefault();
-        const awwv = (window as unknown as { awwv?: { quickSave: () => Promise<unknown> } }).awwv;
-        if (awwv?.quickSave) {
-          awwv.quickSave().catch(() => { /* swallow */ });
+        if (ipc.isAvailable) {
+          ipc.quickSave().catch(() => { /* swallow */ });
         }
         return;
       }
@@ -101,16 +108,17 @@ export function useKeyboardShortcuts(): void {
         return;
       }
 
-      // Space → advance turn (click the toolbar button)
+      // Space → advance turn through the canonical order action, not DOM shell clicks.
       if (event.key === ' ') {
         event.preventDefault();
-        const allButtons = document.querySelectorAll('button');
-        for (const b of allButtons) {
-          if (b.textContent?.includes('ADVANCE TURN') && !b.disabled) {
-            b.click();
-            break;
-          }
-        }
+        if (event.repeat || advancingRef.current) return;
+        const store = useGameStore.getState();
+        if (!ipc.isAvailable || !store.loadedGameState) return;
+        advancingRef.current = true;
+        advanceTurnAndSync({ ipc, loadSave, clearStagedOrders, setLoadError })
+          .finally(() => {
+            advancingRef.current = false;
+          });
         return;
       }
 
@@ -132,5 +140,5 @@ export function useKeyboardShortcuts(): void {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, []);
+  }, [ipc, loadSave, clearStagedOrders, setLoadError]);
 }

@@ -105,7 +105,7 @@ export default defineConfig({
   ],
   root: mapRoot,
   define: {
-    // Injected at build time so desktop can confirm which bundle is loaded (see TopToolbar badge).
+    // Injected at build time so the tactical shell can confirm which bundle is loaded.
     __MAP_BUILD_TIME__: JSON.stringify(new Date().toISOString()),
   },
   server: {

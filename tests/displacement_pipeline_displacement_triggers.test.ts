@@ -78,3 +78,33 @@ test('evaluateDisplacementTriggers: deterministic re-run identical', () => {
     assert.deepStrictEqual(r1.deltas, r2.deltas);
     assert.deepStrictEqual(r1.report.triggered_settlements.sort(), r2.report.triggered_settlements.sort());
 });
+
+test('evaluateDisplacementTriggers: prefers sector-owned edge scope when live sector truth exists', () => {
+    const state = minimalPhaseIIState({ S1: 'RBiH', S2: 'RS', S3: 'RBiH', S4: 'RS' });
+    state.military.corps_front_sectors = {
+        'sector:rbih': {
+            sector_id: 'sector:rbih',
+            corps_id: 'arbih_1st_corps',
+            faction: 'RBiH',
+            opposing_factions: ['RS'],
+            edge_ids: ['S1__S2'],
+            sub_segments: [],
+            territory_osids: [],
+            assigned_brigade_ids: [],
+            reserve_brigade_ids: [],
+            length_edges: 1,
+        },
+    } as any;
+
+    const edges: EdgeRecord[] = [
+        { a: 'S1', b: 'S2' },
+        { a: 'S3', b: 'S4' },
+    ];
+
+    const { deltas, report } = evaluateDisplacementTriggers(state, edges);
+
+    assert.deepStrictEqual(Object.keys(deltas).sort(), ['S1', 'S2']);
+    assert.strictEqual(report.pressure_eligible_size, 1);
+    assert.strictEqual(report.front_active_set_size, 2);
+    assert.strictEqual(report.displacement_trigger_eligible_size, 2);
+});

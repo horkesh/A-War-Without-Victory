@@ -63,8 +63,11 @@ export function createDesktopBridgeClient(bridge: AwwvBridge | null): DesktopBri
       if (!bridge?.getCurrentGameState) return Promise.resolve(null);
       return bridge.getCurrentGameState();
     },
-    setGameStateUpdatedCallback(callback: ((stateJson: unknown) => void) | null) {
-      bridge?.setGameStateUpdatedCallback?.(callback);
+    subscribeGameStateUpdated(callback: (stateJson: unknown) => void) {
+      return bridge?.subscribeGameStateUpdated?.(callback) ?? (() => {});
+    },
+    subscribeTurnReportUpdated(callback: (report: unknown) => void) {
+      return bridge?.subscribeTurnReportUpdated?.(callback) ?? (() => {});
     },
     advanceTurn(payload?: unknown): Promise<AdvanceTurnResult> {
       return invokeOrUnavailable(

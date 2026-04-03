@@ -209,7 +209,7 @@ export function PresidentialToolbar({
                     {pendingOfficerEvents && <OfficerEventBadge />}
 
                     {/* Spacer for crest area */}
-                    <div className="w-28" />
+                    <div className="w-24" />
 
                     {/* Right alert: Pressure warning */}
                     {pressureWarning && (
@@ -238,17 +238,17 @@ export function PresidentialToolbar({
             {/* Army Crest — floating on top of toolbar, extends below */}
             <button
                 onClick={handleOpenHQ}
-                className="fixed top-0 left-1/2 -translate-x-1/2 z-[200] group flex flex-col items-center pointer-events-auto"
+                className="fixed top-0.5 left-1/2 -translate-x-1/2 z-[200] group flex flex-col items-center pointer-events-auto"
                 aria-label={`${armyName ?? 'Army'} HQ [H]`}
             >
-                <span className="text-[8px] font-mono font-bold uppercase tracking-[0.25em] text-amber-400/60 group-hover:text-amber-400 transition-colors mt-1 mb-0.5">
+                <span className="text-[7px] font-mono font-bold uppercase tracking-[0.22em] text-amber-400/60 group-hover:text-amber-400 transition-colors mb-0.5">
                     {armyName ?? playerFaction ?? 'COMMAND'}
                 </span>
                 {crestUrl && (
                     <img
                         src={crestUrl}
                         alt=""
-                        className="w-[100px] h-[100px] object-contain drop-shadow-[0_0_12px_rgba(212,167,58,0.4)] group-hover:drop-shadow-[0_0_20px_rgba(212,167,58,0.6)] transition-all"
+                        className="w-[84px] h-[84px] object-contain drop-shadow-[0_0_12px_rgba(212,167,58,0.4)] group-hover:drop-shadow-[0_0_18px_rgba(212,167,58,0.6)] transition-all"
                         draggable={false}
                     />
                 )}

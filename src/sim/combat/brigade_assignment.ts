@@ -42,6 +42,7 @@ const VRS_1K_LINE_DISTANCE_MAX_HOPS = 6;
  */
 export const DRIFT_RECALL_SECTOR_SKIP_HOPS = 6;
 const FEINT_THREAT_MULTIPLIER = 1.5;
+const TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS = 30;
 
 function operationObjectives(op: { axes?: Array<{ objectives?: string[] }>; objectives?: string[] }): string[] {
     if (op.axes && op.axes.length > 0) {
@@ -160,8 +161,9 @@ function dissolvePocketDestroyableBrigade(
  *   to the nearest sector (BFS through friendly territory).
  * - Idle army-HQ / main-staff reserve brigades are exempt until loaned.
  *
- * GOLDEN RULE: Every active non-exempt field brigade MUST end up in a sector.
- * If one falls through all classification priorities, that's a bug — investigate.
+ * GOLDEN RULE: Only brigades that can be placed truthfully should be written into
+ * sector truth. If a brigade falls through all classification priorities, keep it
+ * unresolved and let recall / movement / enclave logic repair it next turn.
  *
  * Clears existing assigned/reserve lists and rebuilds from scratch.
  * Deterministic: sorted iteration via strictCompare.
@@ -199,6 +201,13 @@ export function classifyBrigadesByTerritory(
             if (!fCorpsId) continue;
             const sector = sectorById.get(sectorId);
             if (!sector || sector.corps_id !== fCorpsId) continue; // stale/wrong corps — fall through
+            if (!f.location_osid) continue;
+            const brigComp = componentOf.get(f.location_osid) ?? -2;
+            const sectorComp = getSectorComponent(sector, componentOf);
+            if (sectorComp !== brigComp) {
+                console.warn(`[brigade_assignment] Ignored stale player override ${bid} -> ${sector.sector_id}: component ${brigComp} cannot reach component ${sectorComp}`);
+                continue;
+            }
             sector.assigned_brigade_ids.push(bid);
             playerOverridden.add(bid);
         }
@@ -390,35 +399,12 @@ export function classifyBrigadesByTerritory(
     for (const [corpsId, pool] of [...corpsPool.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
         const corpsSectors = sectorsByCorps.get(corpsId);
         if (!corpsSectors || corpsSectors.length === 0) {
-            // FIX 3: Corps has brigades in the pool but no sectors with edges.
-            // Force-assign each brigade to the nearest same-faction sector.
+            // Corps has brigades but no sectors with edges. Do not mint fake
+            // sector ownership across disconnected fronts; leave them unresolved.
             for (const bid of pool) {
                 const f = formations[bid];
-                if (!f?.location_osid) continue;
-                const brigComp = componentOf.get(f.location_osid) ?? -2;
-                const homeMun = f.home_osid ? munFromOsid(f.home_osid) : undefined;
-
-                // Try same-component sectors first, then any sector
-                let bestSector: CorpsFrontSector | null = null;
-                let bestScore = Infinity;
-                for (const s of sectors) {
-                    if (s.length_edges === 0) continue;
-                    const sComp = sectorComponentCache.get(s.sector_id) ?? -1;
-                    const compMatch = sComp === brigComp ? 0 : 1000;
-                    const homeMatch = homeMun && s.territory_osids.some(o => munFromOsid(o) === homeMun) ? 0 : 100;
-                    const need = Math.max(0, s.length_edges - s.assigned_brigade_ids.length);
-                    const score = compMatch + homeMatch - need;
-                    if (score < bestScore || (score === bestScore && bestSector && strictCompare(s.sector_id, bestSector.sector_id) < 0)) {
-                        bestScore = score;
-                        bestSector = s;
-                    }
-                }
-                if (bestSector) {
-                    bestSector.assigned_brigade_ids.push(bid);
-                    console.warn(`[brigade_assignment] Force-assigned ${bid} to ${bestSector.sector_id} (corps ${corpsId} has no sectors with edges)`);
-                } else {
-                    console.warn(`[brigade_assignment] UNASSIGNED ${bid}: corps ${corpsId} has no sectors, no fallback available`);
-                }
+                if (!f) continue;
+                console.warn(`[brigade_assignment] UNASSIGNED ${bid}: corps ${corpsId} has no sectors with edges`);
             }
             continue;
         }
@@ -579,17 +565,7 @@ export function classifyBrigadesByTerritory(
         for (const bid of [...pool]) {
             const f = formations[bid];
             if (!f?.location_osid) {
-                // FIX 2a: Brigade with no location — force-assign to neediest sector
-                if (sectorNeed.length > 0) {
-                    const target = [...sectorNeed].sort((a, b) =>
-                        (b.need - a.need) || strictCompare(a.sector.sector_id, b.sector.sector_id)
-                    )[0]!;
-                    target.sector.assigned_brigade_ids.push(bid);
-                    target.need = Math.max(0, target.need - 1);
-                    console.warn(`[brigade_assignment] Force-assigned ${bid} to ${target.sector.sector_id} (no location_osid)`);
-                } else {
-                    console.warn(`[brigade_assignment] UNASSIGNED ${bid}: no location_osid and no sectors available`);
-                }
+                console.warn(`[brigade_assignment] UNASSIGNED ${bid}: no location_osid`);
                 continue;
             }
             const brigComp = componentOf.get(f.location_osid) ?? -2;
@@ -621,19 +597,19 @@ export function classifyBrigadesByTerritory(
                 target.need = Math.max(0, target.need - 1);
             } else if (sectorNeed.length > 0) {
                 if (REAR_GUARD_CORPS.has(corpsId)) {
-                    // For rear-guard corps, avoid creating fake line assignments across disconnected fronts.
-                    // Park as reserve in deterministic best same-corps sector instead.
-                    const target = [...sectorNeed]
-                        .sort((a, b) =>
-                            (b.need - a.need)
-                            || (sectorEnemyPers.get(b.sector) ?? 0) - (sectorEnemyPers.get(a.sector) ?? 0)
-                            || strictCompare(a.sector.sector_id, b.sector.sector_id)
-                        )[0]!;
-                    target.sector.reserve_brigade_ids.push(bid);
-                    console.warn(`[brigade_assignment] Reserved ${bid} in ${target.sector.sector_id} (rear-guard unreachable fallback)`);
+                    console.warn(`[brigade_assignment] UNASSIGNED ${bid}: rear-guard corps brigade cannot reach any same-component sector`);
                     continue;
                 }
-                // Fallback: brigade is in a disconnected component with no matching sector.
+                const hasFactionSectorInComponent = sectors.some((s) =>
+                    s.faction === faction
+                    && getSectorComponent(s, componentOf) === brigComp
+                );
+                if (hasFactionSectorInComponent) {
+                    console.warn(`[brigade_assignment] PENDING_ENCLAVE_REVIEW ${bid}: no same-corps sector reachable from ${f.location_osid}, awaiting cross-corps enclave review`);
+                    continue;
+                }
+                // Brigade is in a disconnected component with no matching sector.
+                // Leave it unresolved rather than inventing false canonical sector truth.
 
                 // Pocket-destroyable brigades: dissolve instead of teleporting 200km.
                 // Historical: when the Posavina pocket fell, its brigades ceased to exist.
@@ -642,28 +618,13 @@ export function classifyBrigadesByTerritory(
                     console.warn(`[brigade_assignment] Pocket brigade ${f.name ?? bid} destroyed: home pocket overrun`);
                     continue; // Skip force-assignment
                 }
-
-                // Force-assign to the best sector regardless of component to avoid silent drops.
-                const fallback = [...sectorNeed]
-                    .sort((a, b) => {
-                        if (a.need > 0 && b.need <= 0) return -1;
-                        if (b.need > 0 && a.need <= 0) return 1;
-                        const aHome = homeMun && sectorMunicipalities.get(a.sector)?.has(homeMun) ? 1 : 0;
-                        const bHome = homeMun && sectorMunicipalities.get(b.sector)?.has(homeMun) ? 1 : 0;
-                        if (bHome !== aHome) return bHome - aHome;
-                        return (sectorEnemyPers.get(b.sector) ?? 0) - (sectorEnemyPers.get(a.sector) ?? 0)
-                            || strictCompare(a.sector.sector_id, b.sector.sector_id);
-                    });
-                const target = fallback[0]!;
-                target.sector.assigned_brigade_ids.push(bid);
-                target.need = Math.max(0, target.need - 1);
-                console.warn(`[brigade_assignment] Force-assigned ${bid} to ${target.sector.sector_id} (cross-component fallback)`);
+                console.warn(`[brigade_assignment] UNASSIGNED ${bid}: no reachable same-component sector from ${f.location_osid}`);
             }
         }
 
     }
 
-    // ── Force-assign loaned elites that BFS couldn't place ──
+    // ── Loaned elites: only place them when the target corps has a truthful same-component sector ──
     for (const [fid, targetCorpsId] of loanedCorpsMap) {
         let alreadyAssigned = false;
         for (const sec of sectors) {
@@ -674,10 +635,14 @@ export function classifyBrigadesByTerritory(
         }
         if (alreadyAssigned) continue;
 
+        const formation = formations[fid];
+        const location = formation?.location_osid;
+        const brigadeComponent = location ? (componentOf.get(location) ?? -2) : -2;
         let bestSector: CorpsFrontSector | null = null;
         let bestCount = -1;
         for (const sec of sectors) {
             if (sec.corps_id !== targetCorpsId) continue;
+            if ((sectorComponentCache.get(sec.sector_id) ?? -1) !== brigadeComponent) continue;
             const count = sec.assigned_brigade_ids.length;
             if (count > bestCount || (count === bestCount && bestSector && strictCompare(sec.sector_id, bestSector.sector_id) < 0)) {
                 bestCount = count;
@@ -687,6 +652,8 @@ export function classifyBrigadesByTerritory(
 
         if (bestSector) {
             bestSector.assigned_brigade_ids.push(fid);
+        } else {
+            console.warn(`[brigade_assignment] UNRESOLVED ${fid}: loaned to ${targetCorpsId} but no truthful same-component sector exists`);
         }
     }
 
@@ -695,7 +662,6 @@ export function classifyBrigadesByTerritory(
     // try reassigning to nearest reachable same-corps sector. If none reachable and
     // brigade is pocket-destroyable, dissolve it (deterministic).
     if (state) {
-        const sectorsById = new Map(sectors.map(s => [s.sector_id, s]));
         const frontBySector = new Map<string, Set<string>>();
         for (const s of sectors) frontBySector.set(s.sector_id, getSectorFrontOsids(s));
         for (const sector of sectors) {
@@ -704,17 +670,47 @@ export function classifyBrigadesByTerritory(
                 const f = formations[bid];
                 if (!f || f.status !== 'active' || !f.location_osid) continue;
                 const frontSet = frontBySector.get(sector.sector_id) ?? new Set<string>();
-                const reachCurrent = friendlyDistanceToAny(f.location_osid, frontSet, adjacency, friendlyOsids, PHASE_2C_MAX_HOPS);
+                const reachCurrent = friendlyDistanceToAny(
+                    f.location_osid,
+                    frontSet,
+                    adjacency,
+                    friendlyOsids,
+                    TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS,
+                );
                 if (reachCurrent != null) continue;
+                const brigComp = componentOf.get(f.location_osid) ?? -2;
+                const territoryMatches = sectors
+                    .filter(s =>
+                        s.corps_id === sector.corps_id
+                        && s.sector_id !== sector.sector_id
+                        && s.territory_osids.includes(f.location_osid!)
+                        && getSectorComponent(s, componentOf) === brigComp
+                    )
+                    .sort((a, b) => {
+                        const aNeed = a.length_edges - a.assigned_brigade_ids.length;
+                        const bNeed = b.length_edges - b.assigned_brigade_ids.length;
+                        return bNeed - aNeed || strictCompare(a.sector_id, b.sector_id);
+                    });
+                if (territoryMatches.length > 0) {
+                    const idx = sector.assigned_brigade_ids.indexOf(bid);
+                    if (idx >= 0) sector.assigned_brigade_ids.splice(idx, 1);
+                    territoryMatches[0]!.assigned_brigade_ids.push(bid);
+                    console.warn(`[brigade_assignment] Reassigned unreachable ${bid} from ${sector.sector_id} to territory-owning ${territoryMatches[0]!.sector_id}`);
+                    continue;
+                }
                 const sameCorps = sectors
-                    .filter(s => s.corps_id === sector.corps_id && s.sector_id !== sector.sector_id)
+                    .filter(s =>
+                        s.corps_id === sector.corps_id
+                        && s.sector_id !== sector.sector_id
+                        && getSectorComponent(s, componentOf) === brigComp
+                    )
                     .map(s => {
                         const d = friendlyDistanceToAny(
                             f.location_osid as string,
                             frontBySector.get(s.sector_id) ?? new Set<string>(),
                             adjacency,
                             friendlyOsids,
-                            PHASE_2C_MAX_HOPS
+                            TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS
                         );
                         return { sector: s, dist: d };
                     })
@@ -734,12 +730,9 @@ export function classifyBrigadesByTerritory(
                     console.warn(`[brigade_assignment] Destroyed unreachable pocket brigade ${bid} (no reachable same-corps sector)`);
                     continue;
                 }
-                const target = sectorsById.get(sector.sector_id);
-                if (target) {
-                    const idx = sector.assigned_brigade_ids.indexOf(bid);
-                    if (idx >= 0) sector.assigned_brigade_ids.splice(idx, 1);
-                    target.reserve_brigade_ids.push(bid);
-                }
+                const idx = sector.assigned_brigade_ids.indexOf(bid);
+                if (idx >= 0) sector.assigned_brigade_ids.splice(idx, 1);
+                console.warn(`[brigade_assignment] UNRESOLVED ${bid}: assigned sector ${sector.sector_id} became unreachable and no same-corps sector could absorb it`);
             }
         }
 
@@ -764,7 +757,11 @@ export function classifyBrigadesByTerritory(
                 );
                 if (ownDist == null || ownDist <= VRS_1K_LINE_DISTANCE_MAX_HOPS) continue;
                 const candidates = rearGuardSectors
-                    .filter(s => s.sector_id !== sector.sector_id && s.corps_id === sector.corps_id)
+                    .filter(s =>
+                        s.sector_id !== sector.sector_id
+                        && s.corps_id === sector.corps_id
+                        && getSectorComponent(s, componentOf) === (componentOf.get(f.location_osid!) ?? -2)
+                    )
                     .map(s => {
                         const d = friendlyDistanceToAny(
                             f.location_osid as string,
@@ -790,41 +787,6 @@ export function classifyBrigadesByTerritory(
                 console.warn(
                     `[brigade_assignment] rear-guard rebalance ${bid}: ${sector.sector_id} (dist ${ownDist}) -> ${best.sector.sector_id} (dist ${best.dist})`
                 );
-            }
-        }
-    }
-
-    // ── End-of-pipeline catch-all: warn about and force-assign any unassigned brigades ──
-    {
-        const allAssigned = new Set<string>();
-        for (const s of sectors) {
-            for (const bid of s.assigned_brigade_ids) allAssigned.add(bid);
-            for (const bid of s.reserve_brigade_ids) allAssigned.add(bid);
-        }
-        for (const fid of sortedFormIds) {
-            if (allAssigned.has(fid)) continue;
-            if (playerOverridden.has(fid)) continue;
-            const f = formations[fid];
-            if (!f || f.faction !== faction || f.status !== 'active') continue;
-            if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
-            const fCorpsId = getFormationCorpsId(f);
-            if (isSectorAssignmentExemptCorpsId(fCorpsId) && !loanedCorpsMap.has(fid)) continue;
-            // Brigade fell through the entire pipeline — force-assign to neediest sector
-            let bestSector: CorpsFrontSector | null = null;
-            let bestNeed = -Infinity;
-            for (const s of sectors) {
-                if (s.length_edges === 0) continue;
-                const need = s.length_edges - s.assigned_brigade_ids.length;
-                if (need > bestNeed || (need === bestNeed && bestSector && strictCompare(s.sector_id, bestSector.sector_id) < 0)) {
-                    bestNeed = need;
-                    bestSector = s;
-                }
-            }
-            if (bestSector) {
-                bestSector.assigned_brigade_ids.push(fid);
-                console.warn(`[brigade_assignment] CATCH-ALL: force-assigned ${fid} (${f.personnel ?? 0} pers) to ${bestSector.sector_id} — fell through entire pipeline`);
-            } else {
-                console.warn(`[brigade_assignment] UNASSIGNED: ${fid} (${f.personnel ?? 0} pers) — no sector available, corps=${fCorpsId}`);
             }
         }
     }
@@ -886,26 +848,37 @@ export function assignCrossCorpsEnclaveDefenders(
         if (isSectorAssignmentExemptCorpsId(fCorpsId)) continue;
 
         const loc = f.location_osid;
-        const ownCorpsHasSectors = sectors.some(s => s.corps_id === fCorpsId);
-        if (ownCorpsHasSectors) continue;
+        const ownCorpsSectors = sectors.filter(s => s.corps_id === fCorpsId);
+        const brigComp = componentOf.get(loc) ?? -2;
+        const ownCorpsHasSectorInComponent = ownCorpsSectors.some((s) => getSectorComponent(s, componentOf) === brigComp);
+        if (ownCorpsHasSectorInComponent) continue;
 
         let sectorIndices = frontOsidToSectors.get(loc);
         if (!sectorIndices || sectorIndices.length === 0) {
             sectorIndices = territoryOsidToSectors.get(loc);
         }
-        if (!sectorIndices || sectorIndices.length === 0) continue;
-
-        const brigComp = componentOf.get(loc) ?? -2;
-        const factionIndices = sectorIndices.filter(idx => {
+        const factionIndices = (sectorIndices ?? []).filter(idx => {
             const s = sectors[idx]!;
             return s.faction === faction
                 && getSectorComponent(s, componentOf) === brigComp;
         });
-        if (factionIndices.length === 0) continue;
+        const sameComponentFactionIndices = sectors
+            .map((s, idx) => ({ s, idx }))
+            .filter(({ s }) =>
+                s.faction === faction
+                && getSectorComponent(s, componentOf) === brigComp
+            )
+            .map(({ idx }) => idx);
 
-        let bestIdx = factionIndices[0]!;
+        let candidateIndices = factionIndices;
+        if (candidateIndices.length === 0) {
+            candidateIndices = sameComponentFactionIndices;
+        }
+        if (candidateIndices.length === 0) continue;
+
+        let bestIdx = candidateIndices[0]!;
         let bestNeed = -Infinity;
-        for (const idx of factionIndices) {
+        for (const idx of candidateIndices) {
             const s = sectors[idx]!;
             const need = s.length_edges - s.assigned_brigade_ids.length;
             if (need > bestNeed || (need === bestNeed && strictCompare(s.sector_id, sectors[bestIdx]!.sector_id) < 0)) {
@@ -924,9 +897,10 @@ export function assignCrossCorpsEnclaveDefenders(
  * - 1 hop behind front → reserve candidate (recovery/reaction force)
  * - Deeper rear → stays assigned (will march toward front via interior movement)
  *
- * GOLDEN RULE 1: Every brigade MUST be in a sector. We never drop brigades.
- * GOLDEN RULE 2: Brigades in a sector MUST be at the frontline, except
- *   one reserve per sector (1 hop behind, recovering or reaction force).
+ * GOLDEN RULE 1: Every active non-exempt field brigade should resolve into a
+ * truthful sector by the end of the assignment pipeline.
+ * GOLDEN RULE 2: Brigades in a sector should be on the frontline, except
+ * one reserve per sector (1 hop behind, recovering or reaction force).
  */
 export function reclassifyRearBrigades(
     sectors: CorpsFrontSector[],
@@ -990,6 +964,36 @@ export function reclassifyRearBrigades(
 }
 
 /**
+ * Surface any brigades that truly fell through the full sector pipeline.
+ *
+ * Call this only after same-corps assignment, enclave rescue, and minimum
+ * coverage steps have all had their chance to assign the brigade.
+ */
+export function warnUnresolvedSectorAssignments(
+    sectors: CorpsFrontSector[],
+    formations: Record<FormationId, FormationState>,
+    faction: FactionId,
+): void {
+    const allAssigned = new Set<string>();
+    for (const s of sectors) {
+        for (const bid of s.assigned_brigade_ids) allAssigned.add(bid);
+        for (const bid of s.reserve_brigade_ids) allAssigned.add(bid);
+    }
+
+    const sortedFormIds = Object.keys(formations).sort(strictCompare);
+    for (const fid of sortedFormIds) {
+        if (allAssigned.has(fid)) continue;
+        const f = formations[fid];
+        if (!f || f.faction !== faction || f.status !== 'active') continue;
+        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+        const fCorpsId = getFormationCorpsId(f);
+        const isLoaned = !!f.elite_loan_state?.on_loan && !!f.elite_loan_state?.loaned_to_corps;
+        if (isSectorAssignmentExemptCorpsId(fCorpsId) && !isLoaned) continue;
+        console.warn(`[brigade_assignment] UNRESOLVED ${fid} (${f.personnel ?? 0} pers): fell through sector pipeline, corps=${fCorpsId}`);
+    }
+}
+
+/**
  * Ensure every sector has at least one assigned brigade.
  */
 export function ensureMinimumSectorCoverage(
@@ -1046,7 +1050,9 @@ export function ensureMinimumSectorCoverage(
                 if (promoted) continue;
             }
 
-            // Step 2: transfer from surplus (same component first, then cross-component fallback)
+            // Step 2: transfer from surplus within the same connected component only.
+            // If a component has no donor, the sector stays under-covered rather than
+            // minting false cross-component sector truth.
             {
                 let transferred = false;
 
@@ -1081,45 +1087,6 @@ export function ensureMinimumSectorCoverage(
                         sector.assigned_brigade_ids.push(bid);
                         transferred = true;
                         break;
-                    }
-                }
-
-                // Pass B (FIX 2): cross-component fallback — when no same-component
-                // donors exist, allow transfers from other components if the brigade
-                // can physically reach the sector front via friendly BFS.
-                if (!transferred) {
-                    const crossCompSectors = corpsSectors
-                        .filter(s => s.assigned_brigade_ids.length > 1
-                            && s.sector_id !== sector.sector_id
-                            && getSectorComponent(s, componentOf) !== sectorComp)
-                        .sort((a, b) => b.assigned_brigade_ids.length - a.assigned_brigade_ids.length || strictCompare(a.sector_id, b.sector_id));
-
-                    for (const donor of crossCompSectors) {
-                        const donorFront = getSectorFrontOsids(donor);
-                        for (const bid of [...donor.assigned_brigade_ids].sort(strictCompare)) {
-                            const f = formations[bid];
-                            if (!f?.location_osid) continue;
-                            if (donorFront.has(f.location_osid)) continue;
-                            // Cross-component: must verify reachability via friendly BFS
-                            if (!canReachSectorFront(bid, sector)) continue;
-                            const idx = donor.assigned_brigade_ids.indexOf(bid);
-                            if (idx >= 0) donor.assigned_brigade_ids.splice(idx, 1);
-                            sector.assigned_brigade_ids.push(bid);
-                            transferred = true;
-                            break;
-                        }
-                        if (transferred) break;
-                    }
-                    if (!transferred) {
-                        for (const donor of crossCompSectors) {
-                            if (donor.assigned_brigade_ids.length <= 1) continue;
-                            const bid = donor.assigned_brigade_ids[donor.assigned_brigade_ids.length - 1]!;
-                            if (!canReachSectorFront(bid, sector)) continue;
-                            donor.assigned_brigade_ids.pop();
-                            sector.assigned_brigade_ids.push(bid);
-                            transferred = true;
-                            break;
-                        }
                     }
                 }
             }

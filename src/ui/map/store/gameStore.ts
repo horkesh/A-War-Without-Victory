@@ -387,7 +387,7 @@ export const useGameStore = create<GameStore>((set) => ({
       ? { selectedOperationKey: null }
       : {
         selectedOperationKey: key,
-        isOperationsPanelOpen: state.isOperationsPanelOpen,
+        isOperationsPanelOpen: true,
         selectedCorpsId: null,
         selectedArmyId: null,
         selectedCorpsFrontSectorId: null,

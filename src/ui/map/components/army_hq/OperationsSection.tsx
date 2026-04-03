@@ -7,7 +7,9 @@ import { useMemo, useState } from 'react';
 import type { OperationView, FormationView, LoadedGameState, NamedOfficerView } from '../../data/types';
 import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
-import { formatOsidLabel, turnToDateString } from '../../utils/formatters';
+import { turnToDateString } from '../../utils/formatters';
+import { getOsidDisplayName } from '../../utils/osidDisplayName';
+import { getPlayerSafeBrigadeName } from '../../utils/playerSafeText';
 import { CollapsibleSection } from './CollapsibleSection';
 
 type CompletedOp = NonNullable<LoadedGameState['operationHistory']>[number];
@@ -112,7 +114,7 @@ function BrigadeStatusRow({ brig }: { brig: FormationView }) {
     return (
         <div className={`flex items-center gap-2 px-2 py-0.5 text-[10px] font-mono tabular-nums ${isDisrupted ? 'bg-red-500/5 border-l-2 border-red-500/40' : 'border-l-2 border-transparent'}`}>
             <span className={`flex-1 min-w-0 truncate font-bold uppercase tracking-tighter ${isDisrupted ? 'text-red-500' : 'text-text-secondary'}`}>
-                {brig.name}
+                {getPlayerSafeBrigadeName(brig.name)}
             </span>
             <span className={`w-12 text-right ${persColor}`}>{personnel.toLocaleString()}</span>
             <span className={`w-8 text-right ${cohColor}`}>{Math.round(cohesion)}</span>
@@ -158,7 +160,7 @@ function CasualtyBlock({ suffered, inflicted, label }: {
 }
 
 /** Compact weekly log timeline for completed operations. */
-function WeeklyLogTimeline({ log }: { log: CompletedOp['weekly_log'] }) {
+function WeeklyLogTimeline({ log, resolveObjectiveLabel }: { log: CompletedOp['weekly_log']; resolveObjectiveLabel: (osid: string) => string }) {
     if (!log || log.length === 0) return null;
     return (
         <div className="space-y-1.5">
@@ -180,7 +182,7 @@ function WeeklyLogTimeline({ log }: { log: CompletedOp['weekly_log'] }) {
                             {inf > 0 && <span className="text-emerald-400/60">+{inf}e</span>}
                             {hasCaptures && (
                                 <span className="text-emerald-400 font-bold">
-                                    OBJ {entry.objectives_captured_this_turn.map(o => formatOsidLabel(o)).join(', ')}
+                                    OBJ {entry.objectives_captured_this_turn.map(resolveObjectiveLabel).join(', ')}
                                 </span>
                             )}
                             {hasEvents && (
@@ -219,6 +221,8 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
             (h) => h.operation_name === op.name && h.corps_id === op.corps_id
         );
     }, [gameState.operationHistory, op.name, op.corps_id]);
+    const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
+    const resolveObjectiveLabel = (osid: string) => getOsidDisplayName(osid, osidDisplayNames);
 
     return (
         <div className="px-4 py-3 space-y-4 text-[11px] border-t border-panel-border/50 bg-panel-card font-mono">
@@ -302,7 +306,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
             {/* Objectives */}
             {objectives.length > 0 && (
                 <div className="space-y-2">
-                    <div className="text-[10px] font-bold uppercase text-text-secondary/60 tracking-widest border-b border-panel-border/30 pb-1">STRATEGIC OBJECTIVE LISTING ({objectives.length})</div>
+                        <div className="text-[10px] font-bold uppercase text-text-secondary/60 tracking-widest border-b border-panel-border/30 pb-1">STRATEGIC OBJECTIVE LISTING ({objectives.length})</div>
                     <div className="grid gap-1">
                         {objectives.map((obj, i) => {
                             const isCurrent = i === (op.current_objective_index ?? 0);
@@ -313,7 +317,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                                         {isCurrent ? '>>' : isComplete ? '[#]' : '[ ]'}
                                     </span>
                                     <span className={`uppercase ${isCurrent ? 'text-amber-400 font-bold' : isComplete ? 'text-text-secondary/60 line-through' : 'text-text-secondary'}`}>
-                                        {formatOsidLabel(obj)}
+                                        {resolveObjectiveLabel(obj)}
                                     </span>
                                     {isCurrent && <span className="ml-auto text-[9px] text-amber-400 font-bold tracking-tighter animate-pulse">PRIMARY OBJ</span>}
                                 </div>
@@ -444,7 +448,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                     )}
 
                     {/* Weekly log timeline */}
-                    <WeeklyLogTimeline log={completedAAR.weekly_log} />
+                    <WeeklyLogTimeline log={completedAAR.weekly_log} resolveObjectiveLabel={resolveObjectiveLabel} />
                 </div>
             )}
         </div>

@@ -67,10 +67,6 @@ describe('buildOpordDisplayModel', () => {
             new URL('../src/ui/map/components/EventDecisionModal.tsx', import.meta.url),
             'utf8',
         );
-        const operationDetailSource = readFileSync(
-            new URL('../src/ui/map/components/OperationDetail.tsx', import.meta.url),
-            'utf8',
-        );
         const corpsDetailSource = readFileSync(
             new URL('../src/ui/map/components/CorpsDetail.tsx', import.meta.url),
             'utf8',
@@ -79,18 +75,38 @@ describe('buildOpordDisplayModel', () => {
             new URL('../src/ui/map/components/CorpsFrontPanel.tsx', import.meta.url),
             'utf8',
         );
+        const authorizeSource = readFileSync(
+            new URL('../src/ui/map/components/ops_modal/AuthorizePhase.tsx', import.meta.url),
+            'utf8',
+        );
+        const commanderSelectionSource = readFileSync(
+            new URL('../src/ui/map/components/CommanderSelectionModal.tsx', import.meta.url),
+            'utf8',
+        );
 
         expect(oobSource).toContain('getPlayerSafeMilitaryFactionName(faction)');
         expect(oobSource).toContain('getPlayerSafeMilitaryFactionName(op.faction)');
         expect(oobSource).not.toContain('View ${faction} army summary');
         expect(briefingSource).toContain('getPlayerSafeMilitaryFactionName(operation.faction)');
+        expect(briefingSource).toContain('findPlayerFacingOperationByKey');
+        expect(briefingSource).not.toContain('loadedGameState.operations?.find');
         expect(attackSource).toContain('getPlayerSafeMilitaryFactionName(attacker.faction)');
         expect(attackSource).toContain('getPlayerSafeMilitaryFactionName(defender.faction)');
         expect(eventSource).toContain('getPlayerSafePoliticalFactionName(effect.faction)');
         expect(eventSource).toContain("getPlayerSafePoliticalFactionName('RBiH')");
         expect(decisionSource).toContain('getPlayerSafePoliticalFactionName(decision.faction)');
-        expect(operationDetailSource).toContain('getPlayerSafeMilitaryFactionName(op.faction)');
         expect(corpsDetailSource).toContain('getPlayerSafeMilitaryFactionName(corpsFormation.faction)');
+        expect(corpsDetailSource).toContain('filterPlayerFacingOperations');
+        expect(corpsDetailSource).not.toContain('loadedGameState?.operations?.filter');
+        expect(corpsDetailSource).toContain('Full command review belongs in Army HQ');
         expect(sectorPanelSource).toContain('getPlayerSafeMilitaryFactionName(sector.faction)');
+        expect(sectorPanelSource).toContain('filterPlayerFacingOperations');
+        expect(sectorPanelSource).not.toContain('loadedGameState?.operations ?? []');
+        expect(sectorPanelSource).toContain('Full command review belongs in Army HQ');
+        expect(oobSource).toContain('filterPlayerFacingOperations');
+        expect(authorizeSource).toContain('findPlayerFacingOperationByKey');
+        expect(authorizeSource).not.toContain('loadedGameState.operations ?? []).find');
+        expect(commanderSelectionSource).toContain('findPlayerFacingOperationByKey');
+        expect(commanderSelectionSource).not.toContain('operations?.find((o) => o.corps_id === context.corpsId && o.name === context.operationName)');
     });
 });

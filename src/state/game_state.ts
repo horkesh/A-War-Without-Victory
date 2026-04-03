@@ -1567,24 +1567,6 @@ export interface GameState {
 }
 
 /**
- * Legacy local-front compatibility shape.
- *
- * Historical saves may still carry this cache, but the live engine no longer
- * rebuilds or relies on a `local_fronts` runtime layer. Corps-front sectors are
- * the active frontline authority.
- */
-export interface LocalFront {
-    id: string;                       // e.g. "front_rs_drina_north"
-    faction: FactionId;
-    name: string;
-    created_turn: number;
-    assigned_brigade_ids: string[];   // brigades covering this front
-    edge_ids: string[];               // front edges composing this sector
-    coverage_length: number;          // number of edges (proxy for front width)
-    defensive_power: number;          // computed: f(brigades, terrain, coverage)
-}
-
-/**
  * Corps front sector: a corps' managed slice of hostile boundary.
  * Derived each turn (Engine Invariants §13: no serialization of derived state).
  * Deterministic: sorted iteration via strictCompare.
@@ -1671,7 +1653,7 @@ militia_garrison?: Record<SettlementId, number>;
 brigade_movement_state?: Record<FormationId, BrigadeMovementState>;
 /** War phase (Brigade AoR Redesign Phase C): Pending movement orders (consumed each turn). destination_sids = 1–4 contiguous faction-controlled settlements. */
 brigade_movement_orders?: Record<FormationId, { destination_sids: SettlementId[] }>;
-/** War phase: Pending reposition orders (consumed each turn). Set brigade AoR to exactly these 1–4 contiguous faction-controlled settlements; no physical move. */
+/** Retired compatibility residue from older saves/tools. Live runtime no longer consumes brigade reposition orders. */
 brigade_reposition_orders?: Record<FormationId, { settlement_ids: SettlementId[] }>;
 /** War phase tactical deploy/undeploy staging (consumed each turn). */
 brigade_deploy_orders?: Record<FormationId, BrigadeDeployAction>;
@@ -1702,7 +1684,7 @@ heavy_munitions_reserve?: Record<FactionId, number>;
 front_edges?: FrontEdgeState[];
 /** OSID front-edge snapshot (War phase operational view) for HoI/OSID consumers. */
 war_front_edges_osid?: FrontEdgeState[];
-/** Legacy compatibility snapshot derived from canonical front_edges for old front-assignment consumers. */
+/** Legacy compatibility snapshot for old saves/tests only. No live turn-pipeline step should rebuild or consume it as frontline truth. */
 assignable_front_segments?: AssignableFrontSegmentState[];
 /** Legacy compatibility fallback only. Null = reserve; sectors/front edges are the live frontline truth. */
 brigade_front_assignment?: Record<FormationId, string | null>;
@@ -1710,13 +1692,6 @@ brigade_front_assignment?: Record<FormationId, string | null>;
 theatres?: Record<string, TheatreState>;
 /** Legacy theatre compatibility assignment. Preserved only for old saves/tools. */
 army_theatre_assignment?: Record<FormationId, string>;
-/**
-     * Corps front assignment (HoI-style): per-corps normalized edge_ids (e.g. "S1__S2").
-     * Army front is derived as the union of corps fronts.
-     */
-corps_front_edges?: Record<FormationId, string[]>;
-/** Optional fallback front lines for controlled withdrawal. */
-corps_fallback_front_edges?: Record<FormationId, string[]>;
 /** Legacy AoR tuning compatibility field. Do not expose in the live player shell and do not write new values. */
 brigade_desired_aor_cap?: Record<FormationId, number>;
 /** Pending brigade posture orders (consumed once per turn). */
@@ -1727,7 +1702,6 @@ brigade_attack_orders?: Record<FormationId, SettlementId | null>;
      * Corps-level attack axis orders: target geometry compressed as ordered edge_ids.
      * Intent-only order surface; translated to brigade orders by deterministic assignment.
      */
-corps_attack_axis_orders?: Record<FormationId, { edge_ids: string[]; created_turn?: number }>;
 /** Corps command state. Key: corps FormationId. */
 corps_command?: Record<FormationId, CorpsCommandState>;
 /** Equipment reserve per corps: excess from JNA phantom withdrawals. Drawn during brigade reinforcement. */
@@ -1742,8 +1716,6 @@ declined_operations?: Record<string, { declined_turn: number; decline_count: num
 army_stance?: Record<FactionId, ArmyStance>;
 /** OG activation orders (consumed once per turn). */
 og_orders?: OGActivationOrder[];
-/** Optional OG subfront extent as front edge IDs (subset of parent corps front). */
-og_subfront_edges?: Record<FormationId, string[]>;
 /** Settlement holdout state (Peace phase settlement-level control). Key: SettlementId. */
 settlement_holdouts?: Record<SettlementId, SettlementHoldoutState>;
 /** Recruitment resources: capital pools, equipment pools, recruited brigade tracking. */
@@ -1751,9 +1723,10 @@ recruitment_state?: RecruitmentResourceState;
 /** Cumulative casualty ledger (killed, wounded, missing/captured) per faction and formation. */
 casualty_ledger?: CasualtyLedger;
 /** Legacy compatibility cache only. No longer rebuilt in the live war pipeline. */
-local_fronts?: Record<string, LocalFront>;
 /** Corps front sectors: per-corps slices of hostile boundary. Derived each turn (Engine Invariants §13). */
 corps_front_sectors?: Record<string, CorpsFrontSector>;
+/** Active non-exempt field brigades that could not be placed truthfully into any sector this turn. Derived each turn. */
+unresolved_sector_brigades?: FormationId[];
 /** Sector combat power ratings: per-sector offensive/defensive power. Derived each turn after sector partition. */
 sector_combat_ratings?: Record<string, SectorCombatRating>;
 /** Sector-facing intelligence: per-friendly-sector intelligence records (one per facing enemy sector). Derived each turn. */

@@ -11,7 +11,8 @@ import { getPlayerSafeCorpsName, getPlayerSafeMilitaryFactionName, getPlayerSafe
 import { getArmyCrest, getArmyName } from '../utils/factionAssets';
 import { getFactionArmyCommander } from '../utils/officerUtils';
 import { formatRank } from '../utils/officerCharacter';
-import { getPlayerFacingFaction, getPlayerVisibleFactions, getPlayerVisibleOperations } from '../../shared/playerFacingLabels';
+import { getPlayerFacingFaction, getPlayerVisibleFactions } from '../../shared/playerFacingLabels';
+import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
 import { isSectorAssignmentExemptCorpsId } from '../../../sim/combat/corps_front_sectors_constants.js';
 
 const FACTION_ORDER = ['RS', 'RBiH', 'HRHB'] as const;
@@ -143,7 +144,7 @@ export function OOBSidebar() {
 
   // Group operations by faction
   const operationsByFaction = useMemo(() => {
-    const ops = loadedGameState ? getPlayerVisibleOperations(loadedGameState.operations ?? [], playerFaction) : null;
+    const ops = loadedGameState ? filterPlayerFacingOperations(loadedGameState) : null;
     if (!ops || ops.length === 0) return null;
     const map = new Map<string, OperationView[]>();
     for (const op of ops) {
@@ -152,7 +153,7 @@ export function OOBSidebar() {
       map.set(op.faction, list);
     }
     return map;
-  }, [loadedGameState?.operations, playerFaction]);
+  }, [loadedGameState]);
 
   // Group sectors by faction for the Sectors accordion
   const sectorsByFaction = useMemo(() => {
@@ -212,7 +213,7 @@ export function OOBSidebar() {
     }
     return n;
   }, [armyByFaction, reserveByFaction]);
-  const totalOperations = loadedGameState ? getPlayerVisibleOperations(loadedGameState.operations ?? [], playerFaction).length : 0;
+  const totalOperations = loadedGameState ? filterPlayerFacingOperations(loadedGameState).length : 0;
   const totalSectors = loadedGameState ? getPlayerVisibleFactions(loadedGameState.corpsFrontSectors ?? [], playerFaction).length : 0;
   const mobilizationSummary = loadedGameState?.mobilizationSummary;
 
@@ -220,7 +221,7 @@ export function OOBSidebar() {
     return (
       <div
         className="absolute left-0 bottom-9 z-10 w-[15.5rem] flex flex-col bg-panel-bg/95 backdrop-blur-sm border-r border-panel-border overflow-hidden"
-        style={{ direction: 'ltr', top: 'var(--awwv-toolbar-clearance, 7.5rem)' }}
+        style={{ direction: 'ltr', top: 'var(--awwv-toolbar-clearance, 5.5rem)' }}
       >
         <div className="px-2.5 py-1.5 font-sans text-[11px] text-accent-gold uppercase tracking-[0.14em] font-semibold border-b border-panel-border glow-text">
           Command
@@ -233,7 +234,7 @@ export function OOBSidebar() {
   return (
     <div
         className="absolute left-0 bottom-9 z-10 w-[15.5rem] flex flex-col bg-panel-bg/95 backdrop-blur-sm border-r border-panel-border overflow-hidden"
-      style={{ direction: 'ltr', top: 'var(--awwv-toolbar-clearance, 7.5rem)' }}
+      style={{ direction: 'ltr', top: 'var(--awwv-toolbar-clearance, 5.5rem)' }}
     >
       {/* Overlay — explicitly absolute to avoid flex-item space consumption */}
       <div
@@ -393,7 +394,7 @@ export function OOBSidebar() {
                           })}
                           {corpsEntries.map(([corpsId, brigades]) => {
                             const corpsSectors = loadedGameState?.corpsFrontSectors?.filter((s) => s.corps_id === corpsId) ?? [];
-                            const corpsOps = loadedGameState?.operations?.filter((op) => op.corps_id === corpsId) ?? [];
+                            const corpsOps = filterPlayerFacingOperations(loadedGameState).filter((op) => op.corps_id === corpsId);
                             const activeOp = corpsOps.find((op) => op.phase === 'execution');
                             return (
                               <CorpsCard

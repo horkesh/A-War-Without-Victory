@@ -11,6 +11,10 @@
 import type { FormationState, GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getFactionDefaultOfficerQuality } from './combat_math.js';
+import {
+    buildFrontlineAssignedFormationSet,
+    hasLiveSectorFrontlineTruth,
+} from './front_assignment.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -81,6 +85,9 @@ export function updateBrigadeOfficerQuality(
 
     const formations = state.military.formations ?? {};
     const turn = state.meta?.turn ?? 0;
+    const useSectorFrontlineTruth = hasLiveSectorFrontlineTruth(state);
+    const frontlineAssigned =
+        useSectorFrontlineTruth ? buildFrontlineAssignedFormationSet(state) : new Set<string>();
 
     // Track per-faction totals for average computation
     const factionSum: Record<string, number> = {};
@@ -109,7 +116,9 @@ export function updateBrigadeOfficerQuality(
 
         // Growth from combat or frontline presence
         const inCombat = engagedFormationIds.has(id);
-        const onFrontline = f.posture !== undefined && f.posture !== 'defend'; // proxy: non-default posture = front assignment
+        const onFrontline = useSectorFrontlineTruth
+            ? frontlineAssigned.has(id)
+            : f.posture !== undefined && f.posture !== 'defend';
 
         if (inCombat) {
             const growth = COMBAT_GROWTH_BASE * learningRate * (1.0 - quality * 0.5);

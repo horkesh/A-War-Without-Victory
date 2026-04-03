@@ -12,7 +12,6 @@ import { Minimap } from './components/Minimap';
 import { BottomStatusStrip } from './components/BottomStatusStrip';
 import { OOBSidebar } from './components/OOBSidebar';
 import { OperationsPanel } from './components/OperationsPanel';
-import { OperationDetail } from './components/OperationDetail';
 import { OrbatPanel } from './components/OrbatPanel';
 import { OrderQueue } from './components/OrderQueue';
 import { Tooltip } from './components/Tooltip';
@@ -58,7 +57,8 @@ import { useDesktopSession } from './hooks/useDesktopSession';
 import { useIPC } from './desktop/useIPC';
 import type { RecruitmentCatalogBrigade, StartNewCampaignPayload } from './desktop/types';
 import type { SummaryFocusSection } from './data/types';
-import { openArmyHQRecordsSubTab } from './utils/shellNavigation';
+import { applyShellHandoffCommand, openArmyHQRecordsSubTab } from './utils/shellNavigation';
+import { decodeShellHandoffCommand, isShellHandoffCommand } from '../shared/shellHandoff';
 import {
   applyRecruitmentAndSync,
   fetchRecruitmentCatalog,
@@ -208,6 +208,7 @@ function App() {
   const [recruitmentApplying, setRecruitmentApplying] = useState(false);
   const [recruitmentCatalog, setRecruitmentCatalog] = useState<RecruitmentCatalogBrigade[]>([]);
   const recruitmentCatalogRequestId = useRef(0);
+  const initialShellHandoffApplied = useRef(false);
 
   // C4.3: Combat odds — call existing query-combat-estimate when modal opens; show "—" if unavailable.
   // Phase 5 could add a dedicated combat-estimate IPC if needed; we use existing query-combat-estimate only.
@@ -576,6 +577,36 @@ function App() {
     setEventLogOpen(false);
   };
 
+  useEffect(() => {
+    const handleShellHandoff = (event: MessageEvent) => {
+      if (event.data?.type !== 'awwv-shell:handoff') return;
+      const command = event.data?.command;
+      if (!isShellHandoffCommand(command)) return;
+
+      const handled = applyShellHandoffCommand(useGameStore.getState(), command);
+      if (!handled) return;
+      setSummaryOpen(false);
+      setEventLogOpen(false);
+    };
+
+    window.addEventListener('message', handleShellHandoff);
+    return () => window.removeEventListener('message', handleShellHandoff);
+  }, []);
+
+  useEffect(() => {
+    if (initialShellHandoffApplied.current || !loadedGameState) return;
+    const params = new URLSearchParams(window.location.search);
+    const command = decodeShellHandoffCommand(params.get('shellHandoff'));
+    if (!command) return;
+    applyShellHandoffCommand(useGameStore.getState(), command);
+
+    params.delete('shellHandoff');
+    const nextQuery = params.toString();
+    const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ''}${window.location.hash}`;
+    window.history.replaceState(null, '', nextUrl);
+    initialShellHandoffApplied.current = true;
+  }, [loadedGameState]);
+
   const selectPrimaryArmy = () => {
     if (!loadedGameState) return;
     const army = loadedGameState.formations.find(f => f.kind === 'army_hq' && f.faction === playerFaction);
@@ -603,7 +634,7 @@ function App() {
   return (
     <div
       className="h-screen w-screen relative"
-      style={{ ['--awwv-toolbar-clearance' as string]: devMode ? '7.5rem' : '6.5rem' }}
+      style={{ ['--awwv-toolbar-clearance' as string]: devMode ? '6.5rem' : '5.5rem' }}
     >
       <MapContainer />
       <PresidentialToolbar
@@ -630,14 +661,12 @@ function App() {
       {/* ArmyDetail retired — faction click opens Army HQ modal */}
       {railState.primary === 'army_reserve' && <ArmyReservePanel railSlot="primary" />}
       {railState.primary === 'formation' && <FormationDetail railSlot="primary" />}
-      {railState.primary === 'operation' && <OperationDetail railSlot="primary" />}
       {railState.primary === 'orbat' && <OrbatPanel />}
 
       {railState.secondary === 'settlement' && <SelectionPanel railSlot="secondary" />}
       {railState.secondary === 'sector' && <CorpsFrontPanel railSlot="secondary" />}
       {railState.secondary === 'corps' && <CorpsDetail railSlot="secondary" />}
       {railState.secondary === 'formation' && <FormationDetail railSlot="secondary" />}
-      {railState.secondary === 'operation' && <OperationDetail railSlot="secondary" />}
       <Tooltip />
       {pendingAttackConfirmation && attackerFormation && (
         <AttackConfirmation

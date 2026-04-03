@@ -48,6 +48,9 @@
 
 | Date | Change | Report / spec |
 |------|--------|----------------|
+| 2026-04-03 | **Warroom dead modal + theatre residue retirement** — removed the unused `OperationalSituationModal` desk-map packet, deleted the dead `state/theatres.ts` helper module, and updated Warroom help copy so it reflects current Army HQ handoff ownership instead of older local-packet language. | [implemented/20260403_WARROOM_DEAD_MODAL_AND_THEATRE_RESIDUE_RETIREMENT.md](implemented/20260403_WARROOM_DEAD_MODAL_AND_THEATRE_RESIDUE_RETIREMENT.md), [WARROOM_MASTER.md](WARROOM_MASTER.md) |
+| 2026-04-03 | **Player-scoped operations + Warroom shell summaries** — `GameStateAdapter` now scopes operations/history/reserve requests to the player faction at ingress, two more planning-shell operation bypasses now use player-safe selectors, and Warroom now summarizes operations/front contact instead of carrying raw `CorpsOperation` or enemy casualty-ledger truth. | [implemented/20260403_PLAYER_SCOPED_OPERATIONS_AND_WARROOM_SHELL_SUMMARIES.md](implemented/20260403_PLAYER_SCOPED_OPERATIONS_AND_WARROOM_SHELL_SUMMARIES.md), [WARROOM_MASTER.md](WARROOM_MASTER.md) |
+| 2026-04-03 | **Frontline authority + player-shell intel reduction** — retired `brigade_front_assignment` as a live runtime frontline writer/fallback, made sectors the only accepted frontline truth for runtime mechanics, and narrowed the tactical-map `sectorIntel` DTO so Army HQ threat cards no longer receive unused enemy corps/faction identity. | [implemented/20260403_FRONTLINE_AUTHORITY_AND_PLAYER_SHELL_INTEL_REDUCTION.md](implemented/20260403_FRONTLINE_AUTHORITY_AND_PLAYER_SHELL_INTEL_REDUCTION.md), [../20_engineering/DESKTOP_GUI_IPC_CONTRACT.md](../20_engineering/DESKTOP_GUI_IPC_CONTRACT.md) |
 | 2026-04-02 | **Product shell hierarchy architecture pass** — added a canonical shell hierarchy contract naming Warroom as primary shell, Tactical Map as battlespace shell, Army HQ as command-review shell, and Codex as knowledge shell, with explicit handoff rules between them. | [implemented/20260402_PRODUCT_SHELL_HIERARCHY_ARCHITECTURE_PASS.md](implemented/20260402_PRODUCT_SHELL_HIERARCHY_ARCHITECTURE_PASS.md), [../20_engineering/PRODUCT_SHELL_HIERARCHY.md](../20_engineering/PRODUCT_SHELL_HIERARCHY.md) |
 | 2026-04-02 | **Tactical-map Warroom return restoration** — the mounted `PresidentialToolbar` now exposes a visible `WARROOM` return affordance in standalone desktop and embedded tactical-map modes, using the live shell bridge instead of relying on dead legacy toolbar code. | [implemented/20260402_TACTICAL_MAP_WARROOM_RETURN_RESTORATION.md](implemented/20260402_TACTICAL_MAP_WARROOM_RETURN_RESTORATION.md) |
 | 2026-04-02 | **Warroom faction shell handoff** — Warroom's faction overview no longer renders detailed formations, officer rosters, or commander reassignment. It now summarizes command-shell posture and explicitly hands detailed command review back to Army HQ, keeping Warroom strategic and Army HQ operational. | [implemented/20260402_WARROOM_FACTION_SHELL_HANDOFF.md](implemented/20260402_WARROOM_FACTION_SHELL_HANDOFF.md), [WARROOM_MASTER.md](WARROOM_MASTER.md) |
@@ -343,4 +346,48 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 
 - DiplomacyModal.ts now uses player-facing political faction names in visible diplomatic checklist/outlook copy instead of raw shorthand like `RS` or `HRHB`.
 - See `docs/40_reports/implemented/20260402_DIPLOMACY_SHELL_PLAYER_LANGUAGE.md`.
+
+## 2026-04-03 - Army HQ threat labels player-safe
+
+- Army HQ threat assessment titles now route corps-front naming through the shared player-safe text helpers instead of trusting raw formation names.
+- See `docs/40_reports/implemented/20260403_ARMY_HQ_THREAT_PLAYER_SAFE_LABELS.md`.
+
+## 2026-04-03 - Desktop bridge subscription canonicalization
+
+- Desktop state delivery now fans out through bridge subscriptions instead of singleton callback ownership, and embedded tactical map receives turn-report events through the same event contract.
+- See `docs/40_reports/implemented/20260403_DESKTOP_BRIDGE_SUBSCRIPTION_CANONICALIZATION.md`.
+
+## 2026-04-03 - Assignable front segment DTO retirement
+
+- `LoadedGameState` no longer carries `assignableFrontSegments`; the live tactical shell now treats `assignable_front_segments` as raw compatibility residue instead of a player-shell data contract.
+- See `docs/40_reports/implemented/20260403_ASSIGNABLE_FRONT_SEGMENT_DTO_RETIREMENT.md`.
+
+## 2026-04-03 - Operations and officer player-safe labels
+
+- Army HQ operations review, operation briefing, tactical operations detail, and officer replacement prompts now route corps/brigade/place labels through the shared player-safe helpers instead of trusting raw engine naming.
+- See `docs/40_reports/implemented/20260403_OPERATIONS_AND_OFFICER_PLAYER_SAFE_LABELS.md`.
+
+## 2026-04-03 - Settlement, Army HQ, and tooltip player-safe boundary pass
+
+- `SettlementDetailContent` no longer mutates shell selection state directly; selection shells now pass explicit callbacks.
+- Army HQ ORBAT, Army HQ sectors, operation history, tooltip battle labels, and Warroom settlement control wording now stay on player-safe naming/language helpers instead of rough OSID or raw enum fallbacks.
+- See `docs/40_reports/implemented/20260403_SETTLEMENT_ARMYHQ_AND_TOOLTIP_PLAYER_SAFE_BOUNDARY.md`.
+
+## 2026-04-03 - AAR and reserve player-safe labels
+
+- `AARPanel` now uses player-safe faction, brigade, and geography labels instead of raw brigade ids or rough OSID humanization.
+- `ArmyReservePanel` now resolves reserve base locations through the canonical display-name map as well.
+- See `docs/40_reports/implemented/20260403_AAR_AND_RESERVE_PLAYER_SAFE_LABELS.md`.
+
+## 2026-04-03 - Tactical top-shell density and label cleanup
+
+- Tactical-map shell clearance is tighter now, so OOB and detail rails reclaim vertical space instead of paying for oversized crest chrome.
+- Chronicle and ops-planning hover labels now stay on the player-safe geography/faction helpers too.
+- See `docs/40_reports/implemented/20260403_TACTICAL_TOP_SHELL_DENSITY_AND_LABEL_CLEANUP.md`.
+
+## 2026-04-03 - Warroom to Army HQ shell handoff
+
+- Warroom desk props for faction overview, command briefing, and report review now hand off into the embedded tactical shell instead of opening parallel Warroom-local staff packets.
+- Tactical-shell receipt is handled through `awwv-shell:handoff` plus the canonical Army HQ navigation helpers in `src/ui/map/utils/shellNavigation.ts`.
+- See `docs/40_reports/implemented/20260403_WARROOM_ARMYHQ_SHELL_HANDOFF.md`.
 

@@ -13,7 +13,6 @@ import type {
     CorpsFrontSector,
     CorpsOperation,
     FactionId,
-    FormationId,
     FormationState,
     GameState,
     SectorStance,
@@ -229,64 +228,6 @@ export function shouldLaunchProbeInstead(
 
     const threshold = INTEL_GATE_LAUNCH_THRESHOLD[faction as NonNullable<FactionId>] ?? 0.30;
     return sectorIntelConfidence < threshold;
-}
-
-/**
- * Derive which front segments a corps covers, based on where its brigades are.
- * A corps "covers" a front segment if any of its brigades are at an OSID that
- * is an endpoint of one of the segment's hostile boundary edges.
- *
- * Returns Record<corpsId, frontId[]> (sorted).
- * Deterministic: sorted iteration throughout.
- */
-export function deriveCorpsFrontMapping(
-    state: GameState,
-    faction: FactionId
-): Map<FormationId, string[]> {
-    const result = new Map<FormationId, string[]>();
-    const segments = state.military.assignable_front_segments ?? [];
-    const formations = state.military.formations ?? {};
-
-    // Build brigade_osid → corps_id mapping
-    const osidToCorps = new Map<string, Set<string>>();
-    for (const id of Object.keys(formations).sort(strictCompare)) {
-        const f = formations[id];
-        if (!f || f.faction !== faction || f.status !== 'active') continue;
-        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
-        if (!f.location_osid || !f.corps_id) continue;
-        let set = osidToCorps.get(f.location_osid);
-        if (!set) { set = new Set(); osidToCorps.set(f.location_osid, set); }
-        set.add(f.corps_id);
-    }
-
-    // For each front segment, find which corps have brigades at its edge endpoints
-    for (const seg of segments) {
-        if (seg.side_a !== faction && seg.side_b !== faction) continue;
-        // Extract OSIDs from edge_ids (format: "osidA__osidB")
-        const segOsids = new Set<string>();
-        for (const eid of seg.edge_ids) {
-            const parts = eid.split('__');
-            if (parts.length === 2) {
-                segOsids.add(parts[0]!);
-                segOsids.add(parts[1]!);
-            }
-        }
-        // Find corps with brigades at or adjacent to segment OSIDs
-        for (const osid of segOsids) {
-            const corpsSet = osidToCorps.get(osid);
-            if (corpsSet) {
-                for (const corpsId of corpsSet) {
-                    let list = result.get(corpsId);
-                    if (!list) { list = []; result.set(corpsId, list); }
-                    if (!list.includes(seg.front_id)) list.push(seg.front_id);
-                }
-            }
-        }
-    }
-
-    // Sort each corps's front list
-    for (const list of result.values()) list.sort(strictCompare);
-    return result;
 }
 
 export function collectSectorFriendlyOsids(sector: CorpsFrontSector): string[] {

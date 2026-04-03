@@ -1,10 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import { validateBrigadeRepositionOrder } from '../src/desktop/desktop_sim.js';
 import { parseGameState } from '../src/ui/map/data/GameStateAdapter.js';
 import { isSectorAssignmentExemptCorpsId } from '../src/sim/combat/corps_front_sectors_constants.js';
-import { applyBrigadeRepositionOrders } from '../src/sim/combat/apply_brigade_reposition.js';
 import { applyBrigadePressureToState } from '../src/sim/combat/brigade_pressure.js';
 import type { GameState } from '../src/state/game_state.js';
 
@@ -33,30 +32,6 @@ describe('engine honesty legacy contracts', () => {
     expect(isSectorAssignmentExemptCorpsId('arbih_3rd_corps')).toBe(false);
     expect(isSectorAssignmentExemptCorpsId('vrs_1st_krajina')).toBe(false);
     expect(isSectorAssignmentExemptCorpsId(null)).toBe(false);
-  });
-
-  it('consumes legacy brigade reposition orders without mutating formation truth', () => {
-    const state = {
-      military: {
-        brigade_reposition_orders: {
-          b1: { destination_sids: ['osid:foo'] },
-        },
-        formations: {
-          b1: {
-            id: 'b1',
-            faction: 'RBiH',
-            kind: 'brigade',
-            status: 'active',
-            location_osid: 'osid:bar',
-          },
-        },
-      },
-    } as unknown as GameState;
-
-    applyBrigadeRepositionOrders(state, []);
-
-    expect(state.military.brigade_reposition_orders).toBeUndefined();
-    expect(state.military.formations.b1.location_osid).toBe('osid:bar');
   });
 
   it('rejects new brigade reposition orders at the desktop contract boundary', async () => {
@@ -179,6 +154,13 @@ describe('engine honesty legacy contracts', () => {
     expect(useIpc).not.toContain('stageBrigadeRepositionOrder');
   });
 
+  it('does not keep retired brigade reposition handling in the live war pipeline', () => {
+    const warPhases = readFileSync(join(process.cwd(), 'src', 'sim', 'turn_phases', 'war_phases.ts'), 'utf8');
+
+    expect(warPhases).not.toContain('apply-brigade-reposition');
+    expect(warPhases).not.toContain('applyBrigadeRepositionOrders');
+  });
+
   it('does not advertise legacy front-assignment desktop bridge paths in live code', () => {
     const preload = readFileSync(join(process.cwd(), 'src', 'desktop', 'preload.cjs'), 'utf8');
     const electronMain = readFileSync(join(process.cwd(), 'src', 'desktop', 'electron-main.cjs'), 'utf8');
@@ -188,6 +170,121 @@ describe('engine honesty legacy contracts', () => {
     expect(preload).not.toContain('assign-brigade-to-front');
     expect(electronMain).not.toContain('assign-brigade-to-front');
     expect(useIpc).not.toContain('assignBrigadeToFront');
+  });
+
+  it('does not advertise retired AoR and corps-front staging bridges in live code', () => {
+    const preload = readFileSync(join(process.cwd(), 'src', 'desktop', 'preload.cjs'), 'utf8');
+    const electronMain = readFileSync(join(process.cwd(), 'src', 'desktop', 'electron-main.cjs'), 'utf8');
+    const useIpc = readFileSync(join(process.cwd(), 'src', 'ui', 'map', 'desktop', 'useIPC.ts'), 'utf8');
+    const desktopSim = readFileSync(join(process.cwd(), 'src', 'desktop', 'desktop_sim.ts'), 'utf8');
+
+    expect(preload).not.toContain('stageBrigadeAoROrder');
+    expect(preload).not.toContain('stage-brigade-aor-order');
+    expect(electronMain).not.toContain('stage-brigade-aor-order');
+    expect(useIpc).not.toContain('stageBrigadeAoROrder');
+
+    expect(preload).not.toContain('stageCorpsFrontOrder');
+    expect(preload).not.toContain('stage-corps-front-order');
+    expect(electronMain).not.toContain('stage-corps-front-order');
+    expect(useIpc).not.toContain('stageCorpsFrontOrder');
+    expect(desktopSim).not.toContain('export async function stageCorpsFrontOrder');
+
+    expect(preload).not.toContain('stageOgSubfrontOrder');
+    expect(preload).not.toContain('stage-og-subfront-order');
+    expect(electronMain).not.toContain('stage-og-subfront-order');
+    expect(useIpc).not.toContain('stageOgSubfrontOrder');
+    expect(desktopSim).not.toContain('export function stageOgSubfrontOrder');
+  });
+
+  it('does not keep dead corps-front runtime authority in the live war pipeline or state schema', () => {
+    const warPhases = readFileSync(join(process.cwd(), 'src', 'sim', 'turn_phases', 'war_phases.ts'), 'utf8');
+    const scenarioRunner = readFileSync(join(process.cwd(), 'src', 'scenario', 'scenario_runner.ts'), 'utf8');
+    const gameState = readFileSync(join(process.cwd(), 'src', 'state', 'game_state.ts'), 'utf8');
+
+    expect(warPhases).not.toContain('ensure-derived-corps-front-edges');
+    expect(warPhases).not.toContain('apply-corps-front-orders');
+    expect(warPhases).not.toContain('ensureDerivedCorpsFrontEdges');
+    expect(warPhases).not.toContain('applyCorpsFrontAutoDistribution');
+    expect(scenarioRunner).not.toContain('front_corps_tracking');
+    expect(gameState).not.toContain('corps_front_edges?:');
+    expect(gameState).not.toContain('corps_fallback_front_edges?:');
+    expect(gameState).not.toContain('og_subfront_edges?:');
+  });
+
+  it('does not keep dead theatre compatibility helpers or the unused operational-situation modal path', () => {
+    const clickableRegionManager = readFileSync(join(process.cwd(), 'src', 'ui', 'warroom', 'ClickableRegionManager.ts'), 'utf8');
+    const warroom = readFileSync(join(process.cwd(), 'src', 'ui', 'warroom', 'warroom.ts'), 'utf8');
+
+    expect(clickableRegionManager).not.toContain('OperationalSituationModal');
+    expect(clickableRegionManager).not.toContain('openOperationalSituationModal');
+    expect(warroom).toContain('Army HQ operations record');
+    expect(warroom).toContain('Army HQ records handoff');
+
+    const srcRoot = join(process.cwd(), 'src');
+    const files = collectTsFiles(srcRoot);
+    const theatreImportOffenders: string[] = [];
+    for (const file of files) {
+      const rel = relative(srcRoot, file).split(sep).join('/');
+      if (rel.startsWith('_archived/')) continue;
+      const text = readFileSync(file, 'utf8');
+      if (text.includes("from './theatres.js'") || text.includes("from '../state/theatres.js'") || text.includes("from \"./theatres.js\"") || text.includes("from \"../state/theatres.js\"")) {
+        theatreImportOffenders.push(rel);
+      }
+    }
+
+    expect(theatreImportOffenders).toEqual([]);
+  });
+
+  it('does not keep retired corps attack-axis bridge paths in live code', () => {
+    const preload = readFileSync(join(process.cwd(), 'src', 'desktop', 'preload.cjs'), 'utf8');
+    const electronMain = readFileSync(join(process.cwd(), 'src', 'desktop', 'electron-main.cjs'), 'utf8');
+    const useIpc = readFileSync(join(process.cwd(), 'src', 'ui', 'map', 'desktop', 'useIPC.ts'), 'utf8');
+    const desktopSim = readFileSync(join(process.cwd(), 'src', 'desktop', 'desktop_sim.ts'), 'utf8');
+    const warPhases = readFileSync(join(process.cwd(), 'src', 'sim', 'turn_phases', 'war_phases.ts'), 'utf8');
+    const gameState = readFileSync(join(process.cwd(), 'src', 'state', 'game_state.ts'), 'utf8');
+
+    expect(preload).not.toContain('stageCorpsAttackAxisOrder');
+    expect(preload).not.toContain('stage-corps-attack-axis-order');
+    expect(electronMain).not.toContain('stage-corps-attack-axis-order');
+    expect(useIpc).not.toContain('stageCorpsAttackAxisOrder');
+    expect(desktopSim).not.toContain('export function stageCorpsAttackAxisOrder');
+    expect(warPhases).not.toContain('apply-corps-attack-axis-orders');
+    expect(warPhases).not.toContain('applyCorpsAttackAxisOrders');
+    expect(gameState).not.toContain('corps_attack_axis_orders?:');
+  });
+
+  it('uses subscription-based desktop bridge fanout instead of singleton callback slots', () => {
+    const preload = readFileSync(join(process.cwd(), 'src', 'desktop', 'preload.cjs'), 'utf8');
+    const useIpc = readFileSync(join(process.cwd(), 'src', 'ui', 'map', 'desktop', 'useIPC.ts'), 'utf8');
+    const useDesktopSession = readFileSync(join(process.cwd(), 'src', 'ui', 'map', 'hooks', 'useDesktopSession.ts'), 'utf8');
+    const warroom = readFileSync(join(process.cwd(), 'src', 'ui', 'warroom', 'warroom.ts'), 'utf8');
+    const embeddedMap = readFileSync(join(process.cwd(), 'src', 'ui', 'map', 'index.html'), 'utf8');
+
+    expect(preload).toContain('subscribeGameStateUpdated');
+    expect(preload).toContain('subscribeTurnReportUpdated');
+    expect(preload).not.toContain('let gameStateUpdatedCallback');
+    expect(preload).not.toContain('let turnReportUpdatedCallback');
+    expect(preload).not.toContain('setGameStateUpdatedCallback');
+    expect(preload).not.toContain('setTurnReportUpdatedCallback');
+
+    expect(useIpc).toContain('subscribeGameStateUpdated');
+    expect(useIpc).toContain('subscribeTurnReportUpdated');
+    expect(useIpc).not.toContain('setGameStateUpdatedCallback');
+    expect(useIpc).not.toContain('setTurnReportUpdatedCallback');
+
+    expect(useDesktopSession).toContain('subscribeGameStateUpdated');
+    expect(useDesktopSession).toContain('subscribeTurnReportUpdated');
+    expect(useDesktopSession).not.toContain('setGameStateUpdatedCallback');
+    expect(useDesktopSession).not.toContain('setTurnReportUpdatedCallback');
+
+    expect(warroom).toContain('awwv-bridge:subscribe-event');
+    expect(warroom).not.toContain('awwv-bridge:subscribe-game-state');
+    expect(warroom).not.toContain('reRegisterWarroomCallback');
+
+    expect(embeddedMap).toContain('subscribeGameStateUpdated');
+    expect(embeddedMap).toContain('subscribeTurnReportUpdated');
+    expect(embeddedMap).toContain('turn-report-updated');
+    expect(embeddedMap).not.toContain('setGameStateUpdatedCallback');
   });
 
   it('does not advertise unused front/theatre renaming bridges in live code', () => {
@@ -230,24 +327,46 @@ describe('engine honesty legacy contracts', () => {
     expect(desktopSim).not.toContain('export function renameTheatre');
   });
 
-  it('does not keep a dead local-front constructor pretending to be live runtime authority', () => {
+  it('does not keep a dead local-front constructor or schema field pretending to be live runtime authority', () => {
     const localFrontDefense = readFileSync(join(process.cwd(), 'src', 'sim', 'combat', 'local_front_defense.ts'), 'utf8');
+    const frontAssignment = readFileSync(join(process.cwd(), 'src', 'sim', 'combat', 'front_assignment.ts'), 'utf8');
+    const warPhases = readFileSync(join(process.cwd(), 'src', 'sim', 'turn_phases', 'war_phases.ts'), 'utf8');
     const gameState = readFileSync(join(process.cwd(), 'src', 'state', 'game_state.ts'), 'utf8');
+    const turnPipeline = readFileSync(join(process.cwd(), 'src', 'sim', 'turn_pipeline.ts'), 'utf8');
 
     expect(localFrontDefense).not.toContain('export function buildLocalFronts');
-    expect(gameState).toContain('Legacy compatibility cache only. No longer rebuilt in the live war pipeline.');
+    expect(frontAssignment).not.toContain('ensureBrigadeFrontAssignments');
+    expect(warPhases).not.toContain('ensure-brigade-front-assignment');
+    expect(warPhases).not.toContain('compute-local-fronts');
+    expect(turnPipeline).not.toContain('local_fronts = undefined');
+    expect(gameState).not.toContain('export interface LocalFront');
+    expect(gameState).not.toContain('local_fronts?:');
+  });
+
+  it('does not keep dead corps-front mapping helpers wired to compatibility segment snapshots', () => {
+    const directives = readFileSync(join(process.cwd(), 'src', 'sim', 'combat', 'bot_corps_directives.ts'), 'utf8');
+    const corpsAi = readFileSync(join(process.cwd(), 'src', 'sim', 'combat', 'bot_corps_ai.ts'), 'utf8');
+    const warPhases = readFileSync(join(process.cwd(), 'src', 'sim', 'turn_phases', 'war_phases.ts'), 'utf8');
+    const turnPipeline = readFileSync(join(process.cwd(), 'src', 'sim', 'turn_pipeline.ts'), 'utf8');
+
+    expect(directives).not.toContain('deriveCorpsFrontMapping');
+    expect(directives).not.toContain('state.military.assignable_front_segments ?? []');
+    expect(corpsAi).not.toContain('deriveCorpsFrontMapping');
+    expect(warPhases).not.toContain('deriveAssignableFrontSegments');
+    expect(warPhases).not.toContain('assignable_front_segments =');
+    expect(turnPipeline).not.toContain('deriveAssignableFrontSegments');
+    expect(turnPipeline).not.toContain('assignable_front_segments =');
   });
 
   it('does not keep theatre tagging in the live turn pipelines', () => {
     const warPhases = readFileSync(join(process.cwd(), 'src', 'sim', 'turn_phases', 'war_phases.ts'), 'utf8');
     const turnPipeline = readFileSync(join(process.cwd(), 'src', 'sim', 'turn_pipeline.ts'), 'utf8');
-    const theatres = readFileSync(join(process.cwd(), 'src', 'state', 'theatres.ts'), 'utf8');
 
     expect(warPhases).not.toContain('assignFrontSegmentTheatres');
     expect(warPhases).not.toContain('ensureDefaultTheatres');
     expect(turnPipeline).not.toContain('assignFrontSegmentTheatres');
     expect(turnPipeline).not.toContain('ensureDefaultTheatres');
-    expect(theatres).toContain('Legacy theatre compatibility helpers.');
+    expect(existsSync(join(process.cwd(), 'src', 'state', 'theatres.ts'))).toBe(false);
   });
 
   it('does not seed dead front or theatre shell state in browser fallback campaign loading', () => {
@@ -273,5 +392,14 @@ describe('engine honesty legacy contracts', () => {
 
     expect(ipcContract).not.toContain('set-brigade-desired-aor-cap');
     expect(ipcContract).toContain('must treat those as compatibility/history residue rather than active shell concepts');
+  });
+
+  it('does not let the scenario harness seed synthetic frontier state to force breaches', () => {
+    const runner = readFileSync(join(process.cwd(), 'src', 'scenario', 'scenario_runner.ts'), 'utf8');
+
+    expect(runner).not.toContain("state.military.front_posture[e.side_a].assignments[e.edge_id]");
+    expect(runner).not.toContain("(f as any).assignment = { kind: 'edge', edge_id:");
+    expect(runner).not.toContain("(state.military.front_segments as Record<string, unknown>)[eid] =");
+    expect(runner).not.toContain("(state.military.front_pressure as Record<string, { edge_id: string; value: number; max_abs: number; last_updated_turn: number }>)[eid] =");
   });
 });

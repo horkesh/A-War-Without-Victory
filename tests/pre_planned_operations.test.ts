@@ -1,7 +1,9 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { injectPrePlannedOperations, _ALL_PRE_PLANNED } from '../src/sim/combat/pre_planned_operations.js';
+import { injectPrePlannedOperations, injectQueuedOperation, _ALL_PRE_PLANNED } from '../src/sim/combat/pre_planned_operations.js';
+import { collectOpInjectionWarnings } from '../src/sim/combat/operation_validation.js';
+import type { OpInjectionWarning } from '../src/sim/combat/operation_validation.js';
 import type {
     CorpsCommandState,
     CorpsFrontSector,
@@ -9,6 +11,7 @@ import type {
     FormationState,
     GameState,
 } from '../src/state/game_state.js';
+import type { Osid } from '../src/sim/combat/osid_adjacency.js';
 
 function makeMinimalState(): GameState {
     const formations: Record<string, FormationState> = {};
@@ -36,7 +39,7 @@ function makeMinimalState(): GameState {
                 reserve_brigade_ids: [],
                 length_edges: 1,
                 territory_osids: [],
-            } as CorpsFrontSector;
+            } as unknown as CorpsFrontSector;
         }
 
         for (const axisDef of def.axes) {
@@ -174,5 +177,117 @@ describe('pre-planned operations', () => {
         assert.ok(!zvornikAxis!.objectives.includes('op:zvornik:zvornik'));
         assert.ok(!zvornikAxis!.objectives.includes('op:zvornik:novo_selo'));
         assert.ok(zvornikAxis!.objectives.length > 0);
+    });
+
+    it('does not emit brigade-missing warnings for deferred operations before available_from', () => {
+        const state = makeMinimalState();
+        delete state.military.formations['arbih_120th_liberation_black_swans'];
+
+        injectPrePlannedOperations(state);
+
+        const warnings = state.military.op_injection_warnings ?? [];
+        assert.ok(
+            !warnings.some((warning) => warning.op_name === 'Operation Teočak'),
+            'deferred Teočak warnings should not be emitted before available_from'
+        );
+    });
+
+    it('still validates queued operations at runtime when brigades are truly missing', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 8;
+        delete state.military.formations['rs_gacko_brigade'];
+        state.military.corps_command!.vrs_herzegovina!.queued_operations = ['Operation Foca'];
+
+        const injected = injectQueuedOperation(state, 'vrs_herzegovina');
+
+        assert.equal(injected, true);
+        const warnings = state.military.op_injection_warnings ?? [];
+        assert.ok(
+            warnings.some((warning) =>
+                warning.op_name === 'Operation Foca' &&
+                warning.check === 'brigade_missing' &&
+                warning.detail.includes('rs_gacko_brigade')
+            ),
+            'queued Foca injection should still warn about truly missing brigades'
+        );
+    });
+
+    it('does not inject unreachable exempt-corps elites into queued operations', () => {
+        const state = makeMinimalState();
+        const opDef = _ALL_PRE_PLANNED.find((def) => def.corps === 'arbih_2nd_corps');
+        assert.ok(opDef, 'ARBiH 2nd Corps pre-planned op must exist');
+        state.meta.turn = opDef!.available_from ?? 15;
+
+        const elite = state.military.formations!['arbih_120th_liberation_black_swans']!;
+        elite.corps_id = 'arbih_general_staff';
+        elite.location_osid = 'op:mun:o0';
+        elite.home_osid = 'op:mun:o0';
+        elite.elite_loan_state = {
+            on_loan: false,
+            loaned_to_corps: null,
+            loan_start_turn: null,
+            last_recall_turn: null,
+            loan_start_personnel: null,
+            permanently_degraded: false,
+            current_episode_id: null,
+        } as any;
+        state.military.corps_front_sectors!['sector:arbih_2nd_corps:0']!.territory_osids = ['op:mun:o2'];
+        state.military.corps_front_sectors!['sector:arbih_2nd_corps:0']!.assigned_brigade_ids =
+            state.military.corps_front_sectors!['sector:arbih_2nd_corps:0']!.assigned_brigade_ids.filter((id) => id !== 'arbih_120th_liberation_black_swans');
+        state.political.political_controllers = {
+            ...state.political.political_controllers,
+            'op:mun:o0': 'RBiH',
+            'op:mun:o1': 'RS',
+            'op:mun:o2': 'RBiH',
+        } as any;
+        state.military.corps_command!.arbih_2nd_corps!.active_operations = [];
+        state.military.corps_command!.arbih_2nd_corps!.queued_operations = [opDef!.name];
+
+        const adjacency = new Map<Osid, Osid[]>([
+            ['op:mun:o0' as Osid, ['op:mun:o1' as Osid]],
+            ['op:mun:o1' as Osid, ['op:mun:o0' as Osid, 'op:mun:o2' as Osid]],
+            ['op:mun:o2' as Osid, ['op:mun:o1' as Osid]],
+        ]);
+
+        const injected = injectQueuedOperation(state, 'arbih_2nd_corps', adjacency);
+
+        assert.equal(injected, true);
+        const op = state.military.corps_command!.arbih_2nd_corps!.active_operations[0]!;
+        assert.ok(!op.participating_brigades.includes('arbih_120th_liberation_black_swans'));
+        assert.equal(elite.elite_loan_state!.on_loan, false);
+    });
+
+    it('does not pin queued Operation Foca to a phantom that predictably withdraws before queue time', () => {
+        const foca = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Foca');
+        assert.ok(foca, 'Operation Foca must exist in the pre-planned catalog');
+
+        const brigades = foca!.axes.flatMap((axis) => axis.brigades);
+        assert.ok(!brigades.includes('jna_mostar_garrison_tg'));
+    });
+
+    it('preserves brigade-level warning detail when collecting multiple missing brigades on one axis', () => {
+        const state = makeMinimalState();
+        const warnings: OpInjectionWarning[] = [
+            {
+                op_name: 'Operation Test',
+                axis_id: 'axis_1',
+                check: 'brigade_missing',
+                detail: 'Brigade "a" not found in formations',
+                severity: 'warning',
+                turn: 0,
+            },
+            {
+                op_name: 'Operation Test',
+                axis_id: 'axis_1',
+                check: 'brigade_missing',
+                detail: 'Brigade "b" not found in formations',
+                severity: 'warning',
+                turn: 0,
+            },
+        ];
+
+        collectOpInjectionWarnings(state, warnings);
+
+        assert.equal(state.military.op_injection_warnings?.length, 2);
     });
 });
