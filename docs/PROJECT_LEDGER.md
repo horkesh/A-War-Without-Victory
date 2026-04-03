@@ -1,3 +1,54 @@
+## 2026-04-03 - Presidential play package (overnight bundle: shell alignment + delegation foundations + decision events)
+
+### Summary
+Three-phase overnight work package to make presidential play more real, legible, and fun.
+
+**Phase A — Shell behavior alignment:**
+- Audited all shell navigation flows (toolbar, keyboard shortcuts, Army HQ tabs, handoffs)
+- Fixed duplicate Chronicle affordance: date label demoted from `<button>` to `<span>` — CHRONICLE button is now the single canonical path from toolbar
+- 8-check Playwright verification script: `scripts/playwright_shell_navigation_verify.mjs`
+- All keyboard shortcuts verified correct (H=HQ, S=Summary, O=Ops, C=Chronicle, X=Codex, E=Events)
+- No remaining brigade-commander framing found in labels/tooltips
+
+**Phase B — Delegation/Override/Command Friction foundations:**
+- Embryonic audit: 18+ player IPC actions classified by command level (2 L1, 11 L2, 5 L3) — none tagged or cost-bearing
+- 8 embryonic mechanisms found (stance_source, warlord friction, army HQ overrides, political leader types) — all exist, none connected to player visibility
+- 7 missing concepts identified (command_authority, command level tags, override cost, delegation visibility, friction display, strategic priorities, unified friction log)
+- Canonical terminology table: Strategic Guidance / Army/Corps Directives / Direct Intervention; command_authority (player) vs political_capital (bot)
+- 6-phase execution plan: `docs/plans/2026-04-03-delegation-override-command-friction-plan.md`
+
+**Phase C — Presidential decisions between operations:**
+- Events system audit: 22 condition types, 11 effect types, pressure/recurrence/flags already built — more capable than currently used
+- 95 events total, 20 decision events — but 29-turn gap in mid-1993, 20-turn gap in 1994
+- 5 presidential decision event types designed: Strategic Posture Review, Patron Pressure Response, Commander Confidence Crisis, Humanitarian Crisis Response, Visit to the Front
+- Visit to the Front: periodic event (~12 turns), choose theater, temporary morale/compliance boost, political risk — NOT a travel simulator
+- 4 ideas cut as subsystems in disguise (Resource Allocation Board, Personnel Screen, Intel Briefing, Ceasefire Mini-Game)
+- 3 event types slot into v0.8.0.x parallel content track (pure JSON, zero engine risk)
+
+### Files changed
+- `src/ui/map/components/PresidentialToolbar.tsx` (date button→span)
+- `scripts/playwright_shell_navigation_verify.mjs` (new)
+- `docs/40_reports/implemented/20260403_SHELL_BEHAVIOR_ALIGNMENT_PHASE_A.md` (new)
+- `docs/40_reports/implemented/20260403_DELEGATION_OVERRIDE_FOUNDATIONS.md` (new)
+- `docs/40_reports/implemented/20260403_PRESIDENTIAL_DECISIONS_BETWEEN_OPS.md` (new)
+- `docs/plans/2026-04-03-delegation-override-command-friction-plan.md` (new)
+- `docs/plans/MASTER_ROADMAP.md` (presidential decision events added to v0.8.0.x + v0.8.2)
+- `docs/PROJECT_LEDGER.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- Shell behavior had one remaining duplicate affordance (date+CHRONICLE both opening Chronicle)
+- Presidential command doctrine existed as a document but had no implementation substrate — no command level tags, no cost model, no friction visibility
+- Between operations, the player had up to 29 consecutive turns with no meaningful decision — dead time that undermined the presidential fantasy
+
+### Verification
+- `npx tsc --noEmit` — clean
+- `vitest` — 1869 pass, 20 pre-existing failures (brigade_posture, commander_override, etc.)
+- `vite build` — success
+- Playwright script ready for manual verification
+
+---
+
 ## 2026-04-03 - Army HQ presidential shell behavior (WARROOM return + FIELD label)
 
 ### Summary
