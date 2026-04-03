@@ -21631,3 +21631,8 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - Explicitly demoted `src/ui/map/components/TopToolbar.tsx` to legacy/non-canonical status and retitled its Storybook entry to `Legacy/TopToolbar` so it no longer reads like a live shell peer to `PresidentialToolbar`.
 - Replaced the tactical-map `Space` shortcut DOM scan in `src/ui/map/hooks/useKeyboardShortcuts.ts` with direct canonical routing through `advanceTurnAndSync(...)` and the live IPC bridge.
 - Added a regression assertion in `tests/ui_shell_navigation.test.ts` to keep the shortcut layer from regressing back to button-text scanning.
+## 2026-04-03 — Scenario harness frontier truth cleanup
+
+- Removed the `scenario_runner.ts` synthetic frontier writer under `postureAllPushAndApplyBreaches`: the harness no longer seeds `front_posture`, synthetic brigade edge assignments, `front_segments`, or `front_pressure` just to force breaches.
+- Added a regression check in `tests/engine_honesty_legacy_contracts.test.ts` so the harness cannot quietly drift back into manufacturing frontier truth.
+- Repo rule reinforced: scenario tooling may observe and summarize real frontier/breach state, but it must not invent live canonical preconditions for it.

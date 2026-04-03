@@ -278,4 +278,13 @@ describe('engine honesty legacy contracts', () => {
     expect(ipcContract).not.toContain('set-brigade-desired-aor-cap');
     expect(ipcContract).toContain('must treat those as compatibility/history residue rather than active shell concepts');
   });
+
+  it('does not let the scenario harness seed synthetic frontier state to force breaches', () => {
+    const runner = readFileSync(join(process.cwd(), 'src', 'scenario', 'scenario_runner.ts'), 'utf8');
+
+    expect(runner).not.toContain("state.military.front_posture[e.side_a].assignments[e.edge_id]");
+    expect(runner).not.toContain("(f as any).assignment = { kind: 'edge', edge_id:");
+    expect(runner).not.toContain("(state.military.front_segments as Record<string, unknown>)[eid] =");
+    expect(runner).not.toContain("(state.military.front_pressure as Record<string, { edge_id: string; value: number; max_abs: number; last_updated_turn: number }>)[eid] =");
+  });
 });
