@@ -21,6 +21,12 @@
 - **Right approach**: If a brigade's current `location_osid` is on sector A's frontline, sector A owns it until movement changes that fact. Commander review may plan or stage future transfers, but it may not instantly rewrite frontline ownership.
 - **Do instead**: Before any late rebalance pass moves a brigade between sectors, ask whether the brigade is physically front-anchored right now. If yes, do not transfer it on paper.
 
+### [Sectors] Cross-corps enclave rescue must match physical front or territory truth (2026-04-03) – NEW
+- **Context**: The enclave-rescue rule drifted from “a brigade physically at a same-faction frontline may defend it” into “any brigade in the same component can be assigned to that sector.” `hrhb_travnik_brigade` then got laundered into `sector:hvo_tomislavgrad:0` despite standing on neither that sector's front nor its territory.
+- **Wrong approach**: Using same-component membership as enough proof of sector ownership during cross-corps rescue.
+- **Right approach**: Cross-corps rescue is only truthful when the brigade's current `location_osid` is already on that sector's frontline or inside its territory. Otherwise the brigade stays unresolved.
+- **Do instead**: Treat unresolved as honest. Let movement, loans, or future sector formation solve the problem instead of assigning the brigade to a foreign sector that does not physically own its position.
+
 ### [Sectors] Sector merge guards must use front-edge adjacency, not OSID polygon contact (2026-04-01) — NEW
 - **Context**: `areSectorsTerritoryAdjacent` returned true for Herzegovina sectors (Drina Foča vs West Herzegovina) because `op:foca:donje_zesce` and `op:foca:izbisno` have min_dist=0 — genuine polygon neighbors. But they face completely different fronts. The merge guard was answering the wrong question: "do these territories touch?" instead of "do these front edges form a contiguous line?"
 - **Impact**: Sectors on opposite sides of the country were merging into a single sector via Step 4d and `mergeSmallAdjacentSectors`. Brigades from different fronts were pooled together, disrupting assignment logic.

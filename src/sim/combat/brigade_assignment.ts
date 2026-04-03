@@ -862,18 +862,7 @@ export function assignCrossCorpsEnclaveDefenders(
             return s.faction === faction
                 && getSectorComponent(s, componentOf) === brigComp;
         });
-        const sameComponentFactionIndices = sectors
-            .map((s, idx) => ({ s, idx }))
-            .filter(({ s }) =>
-                s.faction === faction
-                && getSectorComponent(s, componentOf) === brigComp
-            )
-            .map(({ idx }) => idx);
-
-        let candidateIndices = factionIndices;
-        if (candidateIndices.length === 0) {
-            candidateIndices = sameComponentFactionIndices;
-        }
+        const candidateIndices = factionIndices;
         if (candidateIndices.length === 0) continue;
 
         let bestIdx = candidateIndices[0]!;

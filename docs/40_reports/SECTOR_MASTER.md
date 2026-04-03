@@ -431,6 +431,34 @@ Rule:
 - it may not rewrite frontline ownership without movement
 - sectors remain frontlines, not command preference buckets
 
+### Cross-corps enclave rescue must not become same-component sector laundering (2026-04-03)
+
+The enclave-rescue principle is narrower than the old implementation had become.
+
+What is valid:
+- a brigade's own corps has no sector in that component
+- the brigade is physically on another same-faction sector's frontline or within that sector's territory
+- the rescue pass assigns it there because the brigade is actually defending that line
+
+What is invalid:
+- the brigade shares only connected-component membership with a same-faction sector
+- but its current `location_osid` is on neither that sector's frontline nor its territory
+- the rescue pass still assigns it there anyway
+
+Concrete `n1307` repro:
+- `hrhb_travnik_brigade`
+- location: `op:novi_travnik:rat_2`
+- falsely assigned to `sector:hvo_tomislavgrad:0`
+- that sector owned neither the location's frontline nor its territory
+
+Fix:
+- `assignCrossCorpsEnclaveDefenders(...)` now only rescues into foreign sectors that already truthfully own the brigade's current location by frontline or territory
+- the same-component fallback was removed
+
+Rule:
+- cross-corps rescue is allowed for real enclave/frontline defense
+- it is not allowed as a general same-component catch basin for unresolved brigades
+
 ---
 
 ## Diagnostic Tools

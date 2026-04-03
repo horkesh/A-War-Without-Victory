@@ -794,7 +794,7 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
         expect(homeCorpsSector.assigned_brigade_ids).not.toContain('brig_enclave');
     });
 
-    it('assigns an enclave defender to a same-component faction sector even when its current OSID is not already in sector territory', () => {
+    it('does not assign an enclave defender to a same-component faction sector when its current OSID is not on that sector front or in its territory', () => {
         const homeCorpsSector = makeSector(
             'sector:vrs_drina:0',
             'vrs_drina',
@@ -831,11 +831,11 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
             componentOf,
         );
 
-        expect(localFactionSector.assigned_brigade_ids).toContain('brig_component_only');
+        expect(localFactionSector.assigned_brigade_ids).not.toContain('brig_component_only');
         expect(homeCorpsSector.assigned_brigade_ids).not.toContain('brig_component_only');
     });
 
-    it('does not emit a final unresolved warning when enclave rescue assigns the brigade', () => {
+    it('does emit a final unresolved warning when enclave rescue has no truthful front or territory claim to assign', () => {
         const homeCorpsSector = makeSector(
             'sector:vrs_drina:0',
             'vrs_drina',
@@ -888,8 +888,8 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
             warnSpy.mockRestore();
         }
 
-        expect(localFactionSector.assigned_brigade_ids).toContain('brig_rescued_enclave');
-        expect(emittedUnresolved).toBe(false);
+        expect(localFactionSector.assigned_brigade_ids).not.toContain('brig_rescued_enclave');
+        expect(emittedUnresolved).toBe(true);
     });
 
     it('does emit a final unresolved warning for a loaned reserve brigade that still falls through', () => {

@@ -22256,3 +22256,25 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\commander_driven_brigade_assignment.test.ts`
 - `npx.cmd tsc --noEmit -p tsconfig.json`
 - `npm.cmd run sim:scenario:run:40w`
+
+## 2026-04-03 - Cross-corps enclave rescue truth narrowing
+
+### Summary
+- Narrowed cross-corps enclave rescue so it only assigns a brigade to a foreign corps sector when that sector truthfully owns the brigade's current location by frontline or territory.
+- Removed the broader same-component fallback that was still able to mint false foreign-sector ownership.
+- Verified the fix with focused tests and a fresh 40-week run `n1308`.
+
+### Files changed
+- `src/sim/combat/brigade_assignment.ts`
+- `tests/brigade_territory_reconciliation.test.ts`
+- `docs/40_reports/implemented/20260403_CROSS_CORPS_ENCLAVE_RESCUE_TRUTH_NARROWING.md`
+
+### Why
+- "Bullets don't check org charts" is only valid when the brigade is physically at that front.
+- The old fallback allowed `assignCrossCorpsEnclaveDefenders(...)` to assign brigades to any same-faction sector in the component even when that sector owned neither the brigade's frontline nor territory.
+- Concrete repro from `n1307`: `hrhb_travnik_brigade` at `op:novi_travnik:rat_2` was falsely assigned to `sector:hvo_tomislavgrad:0`.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\brigade_territory_reconciliation.test.ts tests\\commander_driven_brigade_assignment.test.ts`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run sim:scenario:run:40w`
