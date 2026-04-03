@@ -33,6 +33,7 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Active / Recent Accepted Lanes
 
+- `44356235`+`59b9f2f7`+`16a0726b`+`37668647` Presidential Command Friction Wave 1 — command strain visibility + warlord friction surfaced + institutional story in ops review
 - `3a80f60a` map-first usability restoration
 - `962414fc` player-knowledge integrity wave 1
 - `25cea9ea` presidential command doctrine codification
@@ -45,7 +46,14 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Next Priority Lanes
 
-1. **CLOSED 2026-04-04** — Warroom React migration complete.
+1. **ACTIVE 2026-04-04** — Presidential Command Friction Wave 1 complete. Wave 2 candidates:
+   - Wire friction resolution flow (player can acknowledge/accept a warlord friction event — sets `resolved: true`)
+   - Add `command_strain` decay visualization (show how strain will decay next turn)
+   - Expand strain sources: corps exhaustion above threshold, consecutive failed ops
+   - Connect strain to commander competence penalty (Wave 1 deferred this intentionally)
+   - Supply CA recovery rate from strain label (compromised corps recover CA slower)
+
+2. **CLOSED 2026-04-04** — Warroom React migration complete.
    - Wave 1 (2026-04-03): React WarroomShellLayer foundation, scene plate + hotspot overlays, `?view=warroom` activation. Report: `docs/40_reports/implemented/20260403_WARROOM_REACT_SHELL_FOUNDATION.md`.
    - Wave 1b runtime wiring (2026-04-03): `REACT_SHELL_ENABLED=true`, iframe loads with `?embedded=1&view=warroom`, live room navigation is React. Report: `docs/40_reports/implemented/20260403_WARROOM_REACT_SHELL_ENTRY.md`.
    - Wave 2 (2026-04-03): canvas render loop gated, mouse handlers gated, `advance-turn` wired, `AdvanceTurnModal`. Report: `docs/40_reports/implemented/20260403_WARROOM_REACT_MIGRATION_WAVE2.md`.
@@ -90,3 +98,5 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 - Which remaining player-facing surfaces still leak staff certainty or internal jargon?
 - RESOLVED (wave 3): all warroom hotspot groups now have React-owned behavior. Next open question: which in-room overlays should expand (e.g. WarroomStatusBar → richer campaign pulse) vs which should remain pure handoffs.
+- Wave 2 friction: should warlord friction resolution require a player action (acknowledge event → sets resolved: true), or auto-resolve after N turns? Auto-resolve keeps it lightweight; player acknowledgement gives it more weight. Unresolved events currently accumulate indefinitely — need a decay or resolution path.
+- Should command strain affect anything mechanically in Wave 2 (e.g. compromised corps gets -5% attack modifier), or remain purely informational? Wave 1 deliberately avoids fake penalties — Wave 2 should only add real ones grounded in existing data.

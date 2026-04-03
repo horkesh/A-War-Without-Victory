@@ -1,3 +1,14 @@
+## 2026-04-04 - Presidential Command Friction Wave 1
+
+- New `src/ui/map/data/command_strain.ts`: `computeCorpsCommandStrain()` derives per-corps strain from `was_force_launched` active ops (+3/op) and unresolved `FrictionEvent` entries for the corps commander (+2/event), each decayed -1/turn. Never stored on GameState — computed on-read. `getCommandStrainLabel()` buckets 0=healthy, 1-5=strained, 6+=compromised.
+- `GameStateAdapter.ts`: corps loop now populates `commandStrain`, `commandStrainLabel`, `activeFrictionTypes` on each `FormationView` — first time `friction_events` is ever read by UI layer.
+- `ArmyHQCorpsCard.tsx`: front face shows amber `⚠ COMMAND STRAINED` / red `⚠ COMMAND COMPROMISED` badge when strain>0; `FRICTION ACTIVE` badge when unresolved friction events exist. Back face shows banner row with numeric score and friction indicator.
+- `OperationBriefingModal.tsx`: `CommandRecord` gains a fifth row when `wasForce=true AND strain>0` — institutional cost made legible next to the CA cost. Button label fixed: "Force Launch" → "Direct Intervention".
+- `OperationHistoryPanel.tsx`: completed force-launched ops now show "Note: Presidential override contributed to command strain on this corps."
+- `ForceLaunchBadge` confirmed legacy-fallback-only (pre-snapshot ops only).
+- +17 strain tests; 53/53 pass. tsc clean. Governance OK.
+- Report: `docs/40_reports/implemented/20260404_PRESIDENTIAL_COMMAND_FRICTION_WAVE1.md`
+
 ## 2026-04-04 - Runtime Asset Canonicalization
 
 - Deleted 11 dead PNG twins from `src/ui/warroom/assets/` (crest_*, flag_*, game start.png, wall_map_frame_v1.png) — zero live code references; WebP twins are the live imports
