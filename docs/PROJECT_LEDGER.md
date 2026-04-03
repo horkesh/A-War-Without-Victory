@@ -21716,6 +21716,29 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - `node .\\node_modules\\vite\\bin\\vite.js build --config src\\ui\\warroom\\vite.config.ts`
 - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
 
+## 2026-04-03 - Retire dead corps-front and AoR shell bridges
+
+### Summary
+- Removed the dead desktop bridge exports for brigade AoR reshaping and corps/OG front-edge staging.
+- Deleted the matching Electron main-process handlers and the unused `desktop_sim.ts` staging helpers behind them.
+
+### Files changed
+- `src/desktop/preload.cjs`
+- `src/ui/map/desktop/useIPC.ts`
+- `src/desktop/electron-main.cjs`
+- `src/desktop/desktop_sim.ts`
+- `tests/engine_honesty_legacy_contracts.test.ts`
+- `docs/40_reports/implemented/20260403_RETIRE_DEAD_CORPS_FRONT_AND_AOR_SHELL_BRIDGES.md`
+
+### Why
+- The live tactical shell was not calling these commands, but the desktop bridge still advertised them like real player-facing authority paths.
+- That is exactly how dead concepts survive in a repo and get resurrected by future cleanup or feature work.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\engine_honesty_legacy_contracts.test.ts tests\\ui_shell_navigation.test.ts`
+- `node .\\node_modules\\vite\\bin\\vite.js build --config src\\ui\\warroom\\vite.config.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
 ## 2026-04-03 - Tactical top-shell density and label cleanup
 
 ### Summary

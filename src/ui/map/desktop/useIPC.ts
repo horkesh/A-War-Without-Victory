@@ -53,9 +53,6 @@ interface WindowAwwv {
     stageDeployOrder: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
     stageUndeployOrder: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
     stageBrigadeMovementOrder: (brigadeId: string, targetSettlementIds: string[]) => Promise<{ ok: boolean; error?: string }>;
-    stageBrigadeAoROrder: (settlementId: string, fromBrigadeId: string, toBrigadeId: string) => Promise<{ ok: boolean; error?: string }>;
-    stageCorpsFrontOrder: (corpsId: string, edgeIds: string[]) => Promise<{ ok: boolean; error?: string }>;
-    stageOgSubfrontOrder: (ogId: string, corpsId: string, edgeIds: string[]) => Promise<{ ok: boolean; error?: string }>;
     stageCorpsStanceOrder: (corpsId: string, stance: string) => Promise<{ ok: boolean; error?: string }>;
     stageSectorStanceOrder: (sectorId: string, stance: string) => Promise<{ ok: boolean; error?: string }>;
     resetSectorStanceToBot: (sectorId: string) => Promise<{ ok: boolean; error?: string }>;
@@ -191,18 +188,6 @@ export function useIPC() {
 
             stageBrigadeMovementOrder: awwv
                 ? (brigadeId: string, targetSettlementIds: string[]) => awwv.stageBrigadeMovementOrder(brigadeId, targetSettlementIds)
-                : makeNoop<{ ok: boolean; error?: string }>(),
-
-            stageBrigadeAoROrder: awwv
-                ? (settlementId: string, fromBrigadeId: string, toBrigadeId: string) => awwv.stageBrigadeAoROrder(settlementId, fromBrigadeId, toBrigadeId)
-                : makeNoop<{ ok: boolean; error?: string }>(),
-
-            stageCorpsFrontOrder: awwv
-                ? (corpsId: string, edgeIds: string[]) => awwv.stageCorpsFrontOrder(corpsId, edgeIds)
-                : makeNoop<{ ok: boolean; error?: string }>(),
-
-            stageOgSubfrontOrder: awwv
-                ? (ogId: string, corpsId: string, edgeIds: string[]) => awwv.stageOgSubfrontOrder(ogId, corpsId, edgeIds)
                 : makeNoop<{ ok: boolean; error?: string }>(),
 
             stageCorpsStanceOrder: awwv

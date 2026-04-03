@@ -190,6 +190,30 @@ describe('engine honesty legacy contracts', () => {
     expect(useIpc).not.toContain('assignBrigadeToFront');
   });
 
+  it('does not advertise retired AoR and corps-front staging bridges in live code', () => {
+    const preload = readFileSync(join(process.cwd(), 'src', 'desktop', 'preload.cjs'), 'utf8');
+    const electronMain = readFileSync(join(process.cwd(), 'src', 'desktop', 'electron-main.cjs'), 'utf8');
+    const useIpc = readFileSync(join(process.cwd(), 'src', 'ui', 'map', 'desktop', 'useIPC.ts'), 'utf8');
+    const desktopSim = readFileSync(join(process.cwd(), 'src', 'desktop', 'desktop_sim.ts'), 'utf8');
+
+    expect(preload).not.toContain('stageBrigadeAoROrder');
+    expect(preload).not.toContain('stage-brigade-aor-order');
+    expect(electronMain).not.toContain('stage-brigade-aor-order');
+    expect(useIpc).not.toContain('stageBrigadeAoROrder');
+
+    expect(preload).not.toContain('stageCorpsFrontOrder');
+    expect(preload).not.toContain('stage-corps-front-order');
+    expect(electronMain).not.toContain('stage-corps-front-order');
+    expect(useIpc).not.toContain('stageCorpsFrontOrder');
+    expect(desktopSim).not.toContain('export async function stageCorpsFrontOrder');
+
+    expect(preload).not.toContain('stageOgSubfrontOrder');
+    expect(preload).not.toContain('stage-og-subfront-order');
+    expect(electronMain).not.toContain('stage-og-subfront-order');
+    expect(useIpc).not.toContain('stageOgSubfrontOrder');
+    expect(desktopSim).not.toContain('export function stageOgSubfrontOrder');
+  });
+
   it('does not keep retired corps attack-axis bridge paths in live code', () => {
     const preload = readFileSync(join(process.cwd(), 'src', 'desktop', 'preload.cjs'), 'utf8');
     const electronMain = readFileSync(join(process.cwd(), 'src', 'desktop', 'electron-main.cjs'), 'utf8');

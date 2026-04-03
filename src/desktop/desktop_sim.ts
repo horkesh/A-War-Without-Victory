@@ -15,10 +15,6 @@ import { createStateFromScenario } from '../scenario/scenario_runner.js';
 import { shortestPathThroughFriendly } from '../sim/combat/brigade_movement.js';
 import { buildAdjacencyFromEdges, isSettlementSetContiguous } from '../sim/combat/war_adjacency.js';
 import { estimateAttackCost, type AttackEstimate } from '../sim/combat/combat_estimate.js';
-import {
-    applyCorpsFrontAutoDistributionForCorps,
-    ensureDerivedCorpsFrontEdges,
-} from '../sim/combat/corps_front_assign.js';
 import { computeFrontWidthMetrics } from '../sim/combat/front_width_metrics.js';
 import { applyRecruitment, initializeRecruitmentResources, recruitBrigade } from '../sim/recruitment_engine.js';
 import { runTurn } from '../sim/turn_pipeline.js';
@@ -539,74 +535,6 @@ export async function validateBrigadeRepositionOrder(
     }
     return { valid: true };
     */
-}
-
-function normalizeEdgeId(edgeId: string): string | null {
-    const parts = edgeId.split('__');
-    if (parts.length !== 2) return null;
-    const a = parts[0]?.trim();
-    const b = parts[1]?.trim();
-    if (!a || !b) return null;
-    return a < b ? `${a}__${b}` : `${b}__${a}`;
-}
-
-/** Validate and stage corps front edges; auto-distribute nearby front settlements to corps brigades. */
-export async function stageCorpsFrontOrder(
-    state: GameState,
-    corpsId: string,
-    edgeIds: string[],
-    baseDir: string
-): Promise<{ ok: true } | { ok: false; error: string }> {
-    const corps = state.military.formations?.[corpsId];
-    const kind = corps?.kind ?? 'corps';
-    const isCorpsLike = kind === 'corps' || kind === 'corps_asset' || kind === 'army_hq';
-    if (!corps || !isCorpsLike) {
-        return { ok: false, error: 'Invalid corps formation' };
-    }
-    const normalized = edgeIds
-        .map((id) => normalizeEdgeId(id))
-        .filter((id): id is string => id !== null)
-        .sort(strictCompare);
-    if (normalized.length === 0) {
-        return { ok: false, error: 'At least one valid edge_id is required' };
-    }
-    const graph = await loadSettlementGraph(settlementGraphOptions(baseDir));
-    const validEdgeIds = new Set<string>();
-    for (const e of graph.edges) {
-        validEdgeIds.add(e.a < e.b ? `${e.a}__${e.b}` : `${e.b}__${e.a}`);
-    }
-    for (const id of normalized) {
-        if (!validEdgeIds.has(id)) {
-            return { ok: false, error: `Unknown edge_id: ${id}` };
-        }
-    }
-    if (!state.military.corps_front_edges) state.military.corps_front_edges = {};
-    state.military.corps_front_edges[corpsId] = [...new Set(normalized)].sort(strictCompare);
-    ensureDerivedCorpsFrontEdges(state, graph.edges);
-    applyCorpsFrontAutoDistributionForCorps(state, corpsId);
-    return { ok: true };
-}
-
-/** Stage OG subfront edges; must be subset of parent corps front edge set. */
-export function stageOgSubfrontOrder(
-    state: GameState,
-    ogId: string,
-    corpsId: string,
-    edgeIds: string[]
-): { ok: true } | { ok: false; error: string } {
-    const normalized = edgeIds
-        .map((id) => normalizeEdgeId(id))
-        .filter((id): id is string => id !== null)
-        .sort(strictCompare);
-    if (normalized.length === 0) return { ok: false, error: 'At least one valid edge_id is required' };
-    const corpsEdges = new Set((state.military.corps_front_edges?.[corpsId] ?? []).map((id) => normalizeEdgeId(id)).filter((id): id is string => id !== null));
-    if (corpsEdges.size === 0) return { ok: false, error: 'Parent corps has no front edges' };
-    for (const id of normalized) {
-        if (!corpsEdges.has(id)) return { ok: false, error: `Subfront edge ${id} is outside corps front` };
-    }
-    if (!state.military.og_subfront_edges) state.military.og_subfront_edges = {};
-    state.military.og_subfront_edges[ogId] = [...new Set(normalized)].sort(strictCompare);
-    return { ok: true };
 }
 
 /** Assign brigade to a corps front sector (permanent player override).

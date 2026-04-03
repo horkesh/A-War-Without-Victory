@@ -771,11 +771,6 @@ app.whenReady().then(() => {
     return stageDeployOrder(brigadeId, 'undeploy');
   });
 
-  // AoR reshape orders removed (OSID migration complete — brigade_aor no longer used).
-  ipcMain.handle('stage-brigade-aor-order', async (_event, _payload) => {
-    return { ok: false, error: 'AoR reshape orders are not supported (OSID mode active)' };
-  });
-
   ipcMain.handle('assign-brigade-to-sector', async (_event, payload) => {
     const { brigadeId, sectorId } = payload || {};
     const normalizedSectorId = sectorId == null ? null : String(sectorId);
@@ -786,44 +781,6 @@ app.whenReady().then(() => {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
       const result = sim.assignBrigadeToSector(state, brigadeId, normalizedSectorId);
-      if (!result.ok) return result;
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
-  });
-
-  ipcMain.handle('stage-corps-front-order', async (_event, payload) => {
-    const { corpsId, edgeIds } = payload || {};
-    if (!currentGameStateJson || typeof corpsId !== 'string' || !Array.isArray(edgeIds)) {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      const ids = edgeIds.filter((id) => typeof id === 'string');
-      const result = await sim.stageCorpsFrontOrder(state, corpsId, ids, getBaseDir());
-      if (!result.ok) return result;
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
-  });
-
-  ipcMain.handle('stage-og-subfront-order', async (_event, payload) => {
-    const { ogId, corpsId, edgeIds } = payload || {};
-    if (!currentGameStateJson || typeof ogId !== 'string' || typeof corpsId !== 'string' || !Array.isArray(edgeIds)) {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      const ids = edgeIds.filter((id) => typeof id === 'string');
-      const result = sim.stageOgSubfrontOrder(state, ogId, corpsId, ids);
       if (!result.ok) return result;
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);
