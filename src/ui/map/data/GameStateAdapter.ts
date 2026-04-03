@@ -943,6 +943,7 @@ export function parseGameState(json: unknown): LoadedGameState {
                     preparation_turns_elapsed: typeof op.preparation_turns_elapsed === 'number' ? op.preparation_turns_elapsed : undefined,
                     preparation_max_turns: typeof op.preparation_max_turns === 'number' ? op.preparation_max_turns : undefined,
                     commander_assessment: typeof op.commander_assessment === 'string' ? op.commander_assessment as OperationView['commander_assessment'] : undefined,
+                    commander_assessment_at_launch: typeof op.commander_assessment_at_launch === 'string' ? op.commander_assessment_at_launch as OperationView['commander_assessment_at_launch'] : undefined,
                     intel_confidence_at_assessment: typeof op.intel_confidence_at_assessment === 'number' ? op.intel_confidence_at_assessment : undefined,
                     supply_readiness_at_assessment: typeof op.supply_readiness_at_assessment === 'number' ? op.supply_readiness_at_assessment : undefined,
                     force_ratio_estimate: typeof op.force_ratio_estimate === 'number' ? op.force_ratio_estimate : undefined,
@@ -2015,6 +2016,7 @@ function deriveOperationHistory(state: any): LoadedGameState['operationHistory']
             })),
             force_launched: aar.force_launched === true ? true : undefined,
             ca_cost_at_launch: typeof aar.ca_cost_at_launch === 'number' ? aar.ca_cost_at_launch : undefined,
+            commander_assessment_at_launch: typeof aar.commander_assessment_at_launch === 'string' ? aar.commander_assessment_at_launch as 'launch' | 'postpone' | 'abort' : undefined,
         };
     });
 }

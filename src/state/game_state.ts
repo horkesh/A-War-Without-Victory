@@ -348,6 +348,9 @@ export interface CorpsOperation {
     force_ratio_estimate?: number;
     /** Commander's go/no-go recommendation. */
     commander_assessment?: CommanderAssessment;
+    /** Snapshot of commander's go/no-go recommendation at the moment of presidential approval or force-launch.
+     *  Set once at decision time; never recomputed. Survives recovery reset. */
+    commander_assessment_at_launch?: CommanderAssessment;
     /** Number of postponements (max 2 before forced abort). */
     postponement_count?: number;
     /** Active probe sub-action within preparation. */

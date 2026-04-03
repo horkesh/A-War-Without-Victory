@@ -53,12 +53,55 @@ function AssessmentBadge({ assessment }: { assessment?: string }) {
     }
 }
 
-/** Shown on operations in execution/recovery that were force-launched. */
+/**
+ * Shown on executing/recovery ops that were force-launched AND lack a commander_assessment_at_launch
+ * snapshot (i.e. operations launched before this feature was added). Legacy fallback only.
+ */
 function ForceLaunchBadge({ caCost }: { caCost: number }) {
     return (
         <div className="mx-4 mt-3 mb-1 px-3 py-1.5 border border-amber-400/40 bg-amber-50 flex items-center gap-2">
             <span className="text-[10px] uppercase font-bold tracking-wider text-amber-800">⚠ Presidential Override — Direct Intervention</span>
             <span className="text-[9px] text-amber-600" style={{ opacity: 0.7 }}>Cost: {caCost} CA</span>
+        </div>
+    );
+}
+
+/** Command Record — canonical four-part presidential decision surface.
+ *  Shown on executing/recovery ops when commander_assessment_at_launch is available. */
+function CommandRecord({ assessmentAtLaunch, wasForce, caCost }: {
+    assessmentAtLaunch: 'launch' | 'postpone' | 'abort';
+    wasForce: boolean;
+    caCost: number;
+}) {
+    return (
+        <div className="mx-4 mt-3 mb-1 border border-neutral-300 bg-neutral-50">
+            <div className="px-3 py-1.5 border-b border-neutral-200 bg-neutral-100">
+                <span className="text-[9px] uppercase font-bold tracking-wider text-neutral-600">Command Record</span>
+            </div>
+            <div className="px-3 py-2 space-y-1">
+                <div className="flex items-center gap-2">
+                    <span className="text-[9px] uppercase font-bold text-neutral-500 w-36 shrink-0">Commander Recommended</span>
+                    <AssessmentBadge assessment={assessmentAtLaunch} />
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="text-[9px] uppercase font-bold text-neutral-500 w-36 shrink-0">Presidential Decision</span>
+                    {wasForce ? (
+                        <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-amber-100 text-amber-800 border border-amber-400">
+                            ⚠ Overrode Command Chain
+                        </span>
+                    ) : (
+                        <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-green-100 text-green-800 border border-green-300">
+                            Approved
+                        </span>
+                    )}
+                </div>
+                {wasForce && (
+                    <div className="flex items-center gap-2">
+                        <span className="text-[9px] uppercase font-bold text-neutral-500 w-36 shrink-0">Command Authority Spent</span>
+                        <span className="text-[10px] font-mono text-amber-700">{caCost} CA</span>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
@@ -157,9 +200,18 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                     <div className="text-[10px] text-neutral-500">{corpsLabel} / {getPlayerSafeMilitaryFactionName(operation.faction)}</div>
                 </div>
 
-                {/* Presidential Override badge — only on executing/recovery ops that were force-launched */}
-                {operation.was_force_launched && operation.phase !== 'planning' && (
-                    <ForceLaunchBadge caCost={FORCE_LAUNCH_COST} />
+                {/* Command Record — canonical decision surface for executing/recovery ops */}
+                {operation.phase !== 'planning' && operation.commander_assessment_at_launch != null ? (
+                    <CommandRecord
+                        assessmentAtLaunch={operation.commander_assessment_at_launch}
+                        wasForce={operation.was_force_launched === true}
+                        caCost={FORCE_LAUNCH_COST}
+                    />
+                ) : (
+                    /* Legacy fallback: force-launched ops without a snapshot (pre-feature) */
+                    operation.was_force_launched && operation.phase !== 'planning' && (
+                        <ForceLaunchBadge caCost={FORCE_LAUNCH_COST} />
+                    )
                 )}
 
                 {/* Commander info */}

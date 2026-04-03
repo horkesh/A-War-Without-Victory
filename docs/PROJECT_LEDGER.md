@@ -1,3 +1,15 @@
+## 2026-04-03 - Presidential Command-Review Loop: commander_assessment_at_launch
+- Added `commander_assessment_at_launch?: CommanderAssessment` to `CorpsOperation` (game_state.ts) — snapshot set once at presidential decision time, never recomputed
+- electron-main.cjs: force-launch handler snapshots `op.commander_assessment`; normal-launch handler snapshots `op.commander_assessment ?? 'launch'`
+- `OperationAAR` interface gains `commander_assessment_at_launch`; `finalizeOperationAAR` copies it from op when present
+- `OperationView` + `operationHistory` element type in types.ts gain the field; GameStateAdapter maps it in both active ops and `deriveOperationHistory()`
+- `CommandRecord` component added to `OperationBriefingModal.tsx` — renders Commander Recommendation + Presidential Decision + CA cost in one coherent block for executing/recovery ops with a snapshot
+- `ForceLaunchBadge` demoted to legacy-only fallback (ops launched before this feature)
+- `OperationHistoryPanel.tsx` expanded view: command record provenance sentence added alongside existing compact amber badge
+- 7 new tests in `command_authority.test.ts` cover full pipeline (snapshot set, AAR copy, adapter extraction, graceful degradation)
+- tsc clean, vitest clean (pre-existing failures unchanged), vite build clean, governance OK
+- Report: `docs/40_reports/implemented/20260403_PRESIDENTIAL_COMMAND_REVIEW_LOOP.md`
+
 ## 2026-04-03 - Command Authority override badge in Operation History Panel
 - Wired `force_launched` and `ca_cost_at_launch` from `OperationAAR` through `GameStateAdapter.deriveOperationHistory()` → `types.ts` → `OperationHistoryPanel.tsx`
 - Amber "⚠ Override" badge renders in CompletedOpCard compact header (visible without expanding)

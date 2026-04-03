@@ -209,6 +209,29 @@ function CompletedOpCard({
                         ))}
                     </div>
 
+                    {/* Command Record — expanded provenance sentence */}
+                    {op.commander_assessment_at_launch != null && (
+                        <div className="text-[9px] text-text-muted border-t border-panel-border/30 pt-1.5">
+                            <span className="uppercase font-bold text-text-secondary">Command Record: </span>
+                            {op.force_launched ? (
+                                <>
+                                    Commander recommended <span className="font-semibold text-text-primary capitalize">{op.commander_assessment_at_launch}</span>
+                                    {' — '}
+                                    <span className="text-amber-400 font-semibold">President overrode command chain</span>
+                                    {op.ca_cost_at_launch != null && (
+                                        <span className="text-text-muted"> (cost: {op.ca_cost_at_launch} CA)</span>
+                                    )}
+                                </>
+                            ) : (
+                                <>
+                                    Commander recommended <span className="font-semibold text-text-primary capitalize">{op.commander_assessment_at_launch}</span>
+                                    {' — '}
+                                    <span className="text-green-400 font-semibold">President approved</span>
+                                </>
+                            )}
+                        </div>
+                    )}
+
                     {/* Objectives */}
                     {op.objectives_targeted.length > 0 && (
                         <div>

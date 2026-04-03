@@ -1069,6 +1069,7 @@ app.whenReady().then(() => {
       }
       op.force_launch = true;
       op.was_force_launched = true;
+      op.commander_assessment_at_launch = op.commander_assessment;
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);
       return { ok: true };
@@ -1096,6 +1097,7 @@ app.whenReady().then(() => {
       switch (decision) {
         case 'launch':
           op.force_launch = true;
+          op.commander_assessment_at_launch = op.commander_assessment ?? 'launch';
           break;
         case 'postpone':
           op.postponement_count = (op.postponement_count || 0) + 1;

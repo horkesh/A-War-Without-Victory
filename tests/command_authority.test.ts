@@ -287,6 +287,85 @@ describe('command authority', () => {
         });
     });
 
+    describe('commander_assessment_at_launch snapshot', () => {
+        /** Simulate the electron-main force-launch handler setting the snapshot. */
+        function simulateForceLaunchWithSnapshot(op: Partial<CorpsOperation>): void {
+            op.force_launch = true;
+            op.was_force_launched = true;
+            op.commander_assessment_at_launch = op.commander_assessment;
+        }
+
+        /** Simulate the electron-main normal-launch handler setting the snapshot. */
+        function simulateNormalLaunchWithSnapshot(op: Partial<CorpsOperation>): void {
+            op.force_launch = true;
+            op.commander_assessment_at_launch = op.commander_assessment ?? 'launch';
+        }
+
+        /** Simulate finalizeOperationAAR copying commander_assessment_at_launch to the AAR. */
+        function buildAARWithAssessmentSnapshot(op: Partial<CorpsOperation>): Pick<OperationAAR, 'force_launched' | 'ca_cost_at_launch' | 'commander_assessment_at_launch'> {
+            return {
+                force_launched: op.was_force_launched ?? false,
+                ca_cost_at_launch: op.was_force_launched ? 15 : undefined,
+                commander_assessment_at_launch: op.commander_assessment_at_launch,
+            };
+        }
+
+        /** Simulate adapter deriveOperationHistory extraction of commander_assessment_at_launch. */
+        function extractAssessmentSnapshot(aar: Record<string, unknown>): { commander_assessment_at_launch?: string } {
+            return {
+                commander_assessment_at_launch: typeof aar.commander_assessment_at_launch === 'string'
+                    ? aar.commander_assessment_at_launch
+                    : undefined,
+            };
+        }
+
+        it('commander_assessment_at_launch is set on force-launch to commander snapshot', () => {
+            const op: Partial<CorpsOperation> = { commander_assessment: 'abort' };
+            simulateForceLaunchWithSnapshot(op);
+            expect(op.commander_assessment_at_launch).toBe('abort');
+            expect(op.was_force_launched).toBe(true);
+        });
+
+        it('commander_assessment_at_launch is set on normal launch to commander snapshot', () => {
+            const op: Partial<CorpsOperation> = { commander_assessment: 'launch' };
+            simulateNormalLaunchWithSnapshot(op);
+            expect(op.commander_assessment_at_launch).toBe('launch');
+            expect(op.was_force_launched).toBeUndefined();
+        });
+
+        it('commander_assessment_at_launch defaults to launch when commander_assessment absent on normal launch', () => {
+            const op: Partial<CorpsOperation> = {};
+            simulateNormalLaunchWithSnapshot(op);
+            expect(op.commander_assessment_at_launch).toBe('launch');
+        });
+
+        it('finalizeOperationAAR copies commander_assessment_at_launch to the AAR when present', () => {
+            const op: Partial<CorpsOperation> = { was_force_launched: true, commander_assessment_at_launch: 'abort' };
+            const aar = buildAARWithAssessmentSnapshot(op);
+            expect(aar.commander_assessment_at_launch).toBe('abort');
+            expect(aar.force_launched).toBe(true);
+            expect(aar.ca_cost_at_launch).toBe(15);
+        });
+
+        it('finalizeOperationAAR does NOT include commander_assessment_at_launch when absent (graceful degradation)', () => {
+            const op: Partial<CorpsOperation> = { was_force_launched: true };
+            const aar = buildAARWithAssessmentSnapshot(op);
+            expect(aar.commander_assessment_at_launch).toBeUndefined();
+        });
+
+        it('deriveOperationHistory maps commander_assessment_at_launch from AAR when present', () => {
+            const aar: Record<string, unknown> = { commander_assessment_at_launch: 'postpone' };
+            const result = extractAssessmentSnapshot(aar);
+            expect(result.commander_assessment_at_launch).toBe('postpone');
+        });
+
+        it('deriveOperationHistory does NOT include commander_assessment_at_launch when AAR lacks it', () => {
+            const aar: Record<string, unknown> = {};
+            const result = extractAssessmentSnapshot(aar);
+            expect(result.commander_assessment_at_launch).toBeUndefined();
+        });
+    });
+
     describe('full cycle: deduct then recover', () => {
         it('deduct 15, recover 2 per turn, takes 8 turns to fully recover', () => {
             const auth = makeAuth();

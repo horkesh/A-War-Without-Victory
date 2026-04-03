@@ -452,6 +452,8 @@ export interface OperationView {
     preparation_max_turns?: number;
     /** Commander's go/no-go recommendation. */
     commander_assessment?: 'launch' | 'postpone' | 'abort';
+    /** Snapshot of commander's recommendation at the moment of presidential decision. Set once; never recomputed. */
+    commander_assessment_at_launch?: 'launch' | 'postpone' | 'abort';
     /** Intel confidence snapshot at assessment. */
     intel_confidence_at_assessment?: number;
     /** Supply readiness snapshot at assessment. */
@@ -612,6 +614,8 @@ export interface LoadedGameState {
         force_launched?: boolean;
         /** CA cost paid at time of force-launch (always 15 when force_launched is true). */
         ca_cost_at_launch?: number;
+        /** Snapshot of commander's recommendation at the moment of presidential decision. */
+        commander_assessment_at_launch?: 'launch' | 'postpone' | 'abort';
     }>;
     /** Player-issued permanent sector assignments (brigade_sector_override). */
     brigadeSectorOverride?: Record<string, string>;

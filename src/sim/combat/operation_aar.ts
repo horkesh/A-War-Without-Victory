@@ -7,7 +7,7 @@
  * compiled into a full OperationAAR and stored in GameState.operation_history.
  */
 
-import type { GameState, CorpsOperation, FormationId } from '../../state/game_state.js';
+import type { GameState, CorpsOperation, FormationId, CommanderAssessment } from '../../state/game_state.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
@@ -117,6 +117,8 @@ export interface OperationAAR {
     force_launched?: boolean;
     /** CA cost paid at time of force-launch. Always 15 when force_launched is true. */
     ca_cost_at_launch?: number;
+    /** Snapshot of commander's recommendation at the moment of presidential decision. */
+    commander_assessment_at_launch?: CommanderAssessment;
 }
 
 // ─── Pending accumulator (lives on CorpsOperation during lifecycle) ─────────
@@ -650,6 +652,9 @@ export function finalizeOperationAAR(
     if (op.was_force_launched) {
         aar.force_launched = true;
         aar.ca_cost_at_launch = 15;
+    }
+    if (op.commander_assessment_at_launch != null) {
+        aar.commander_assessment_at_launch = op.commander_assessment_at_launch;
     }
 
     if (!state.operation_history) state.operation_history = [];
