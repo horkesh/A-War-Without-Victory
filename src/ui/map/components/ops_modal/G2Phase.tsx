@@ -1,18 +1,21 @@
 /**
  * Phase 3 — G2 Assessment clipboard.
- * Slides in from right. Three tabs: narrative assessment + raw intel + map legend.
+ * Slides in from right. Two player-facing tabs: narrative assessment + map legend.
+ *
+ * Note: RawIntelTab is intentionally excluded from normal play (debug-only — not shown
+ * in normal play). The "Assessment" tab (NarrativeTab) is the canonical player-facing
+ * G-2 briefing surface. See DEBUG_SURFACE_POLICY.md and PLAYER_VISIBLE_STATE.md.
  */
 import { useMemo, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import type { OpsPlanState } from './types';
 import type { PredictionResult } from './usePrediction';
 import { NarrativeTab } from './NarrativeTab';
-import { RawIntelTab } from './RawIntelTab';
 import { MapLegendTab } from './MapLegendTab';
 import { formatCorpsDisplayName, turnToISODate } from '../../utils/formatters';
 
-// WP3c: Three tabs
-type G2Tab = 'assessment' | 'raw_intel' | 'map_legend';
+// Two player-facing tabs — raw_intel demoted to debug-only
+type G2Tab = 'assessment' | 'map_legend';
 
 interface G2PhaseProps {
     plan: OpsPlanState;
@@ -112,17 +115,6 @@ export function G2Phase({ plan, prediction, loading, error, corpsId, onAdvance }
                         </button>
                         <button
                             type="button"
-                            onClick={() => setActiveTab('raw_intel')}
-                            className={`px-3 py-1 rounded text-[9px] font-bold uppercase tracking-wider transition-colors
-                                ${activeTab === 'raw_intel'
-                                    ? 'bg-[#3a3228] text-[#faf6ef]'
-                                    : 'bg-[#d6ccb7] text-[#4a4238] hover:bg-[#c0b090]'
-                                }`}
-                        >
-                            Raw Intel
-                        </button>
-                        <button
-                            type="button"
                             onClick={() => setActiveTab('map_legend')}
                             className={`px-3 py-1 rounded text-[9px] font-bold uppercase tracking-wider transition-colors
                                 ${activeTab === 'map_legend'
@@ -165,16 +157,14 @@ export function G2Phase({ plan, prediction, loading, error, corpsId, onAdvance }
                     {/* WP3c: Map Legend tab */}
                     {activeTab === 'map_legend' && <MapLegendTab />}
 
-                    {!loading && prediction && activeTab !== 'map_legend' && (
-                        activeTab === 'assessment'
-                            ? <NarrativeTab
-                                prediction={prediction}
-                                commanderName={commanderName}
-                                corpsName={corpsName}
-                                faction={faction}
-                                date={date}
-                              />
-                            : <RawIntelTab prediction={prediction} />
+                    {!loading && prediction && activeTab === 'assessment' && (
+                        <NarrativeTab
+                            prediction={prediction}
+                            commanderName={commanderName}
+                            corpsName={corpsName}
+                            faction={faction}
+                            date={date}
+                        />
                     )}
                 </div>
 

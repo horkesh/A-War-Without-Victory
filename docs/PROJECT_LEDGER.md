@@ -1,3 +1,12 @@
+## 2026-04-03 - Player-Knowledge Integrity Wave 2
+- RawIntelTab demoted: removed "Raw Intel" tab from G2Phase ops clipboard — tab exposed exact engine integers (casualty count, 2-decimal force ratio, raw defense strength) in normal play; file preserved with debug-only doc comment
+- `G2Tab` type narrowed from 3 values to 2 (`assessment` | `map_legend`); RawIntelTab import removed from G2Phase.tsx
+- `generateThreatAssessment.ts`: `describeStrength()` replaced raw enum uppercase (`DENSE`/`FORTRESS`/`THIN`/`MODERATE`) with uncertainty-qualified language via `STRENGTH_DISPLAY` map; exact `Confidence N%` replaced with `describeConfidence()` bucketing (High/Moderate/Low)
+- Simplify pass confirmed CorpsFrontPanel StrengthBadge + warroom_utils strengthCategoryLabel + Tooltip density labels are own-force data — out of scope
+- 6 new regression tests in `tests/player_knowledge_integrity.test.ts` (wave 2 suite); all 12 tests pass
+- tsc clean, vitest 0 new failures, vite build clean, governance OK
+- Report: `docs/40_reports/implemented/20260403_PLAYER_KNOWLEDGE_INTEGRITY_WAVE2.md`
+
 ## 2026-04-03 - Presidential Between-Ops Events: Strategic Posture Review + Visit to the Front
 - Authored 6 recurring presidential decision events in `data/scenarios/events/war_1993.json` (48 total, was 42)
 - Strategic Posture Review × 3 factions: fires every ~11 turns via pressure system; 3 standard options + war-weariness escalation on 3rd+ fire; covers mid-1993 through late-1994 decision gaps

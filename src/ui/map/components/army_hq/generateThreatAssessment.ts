@@ -25,9 +25,24 @@ function frontLabel(corpsName?: string, fallback?: string): string {
     return `${corpsName ?? fallback ?? 'Front'} front`;
 }
 
+/** Map raw engine strength_category enum values to player-safe uncertainty language. */
+const STRENGTH_DISPLAY: Record<string, string> = {
+    thin:     'limited enemy presence (assessed)',
+    moderate: 'moderate enemy strength (estimated)',
+    dense:    'significant enemy presence (estimated)',
+    fortress: 'heavily fortified (assessed)',
+};
+
 function describeStrength(strengthCategories: string[]): string {
-    if (strengthCategories.length === 0) return 'unknown';
-    return strengthCategories[strengthCategories.length - 1].toUpperCase();
+    if (strengthCategories.length === 0) return 'enemy strength unknown';
+    const raw = strengthCategories[strengthCategories.length - 1].toLowerCase();
+    return STRENGTH_DISPLAY[raw] ?? 'enemy presence reported (estimated)';
+}
+
+function describeConfidence(confidence: number): string {
+    if (confidence >= 0.8) return 'High confidence';
+    if (confidence >= 0.5) return 'Moderate confidence';
+    return 'Low confidence';
 }
 
 export function generateThreatAssessment(
@@ -83,7 +98,7 @@ export function generateThreatAssessment(
             id: tid(),
             severity: 'active',
             title: `${frontLabel(corpsInfo?.corpsName)} - hostile offensive preparation`,
-            detail: `Strength estimate: ${describeStrength(strengthCategories)}. Confidence ${Math.round(bestConf * 100)}%. ${records.length} sector${records.length > 1 ? 's' : ''} reporting preparation signs.`,
+            detail: `Strength estimate: ${describeStrength(strengthCategories)}. ${describeConfidence(bestConf)}. ${records.length} sector${records.length > 1 ? 's' : ''} reporting preparation signs.`,
             confidence: bestConf,
             friendlyCorpsId: corpsInfo?.corpsId,
             friendlyCorpsName: corpsInfo?.corpsName,

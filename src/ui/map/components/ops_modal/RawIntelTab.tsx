@@ -1,6 +1,14 @@
 /**
- * Raw intel tab — quantitative data from the prediction.
- * Uses ReadinessBar from plan_ui, force ratio display, casualty estimates.
+ * RawIntelTab — Debug-only. NOT rendered in normal play.
+ *
+ * This component exposes exact engine-computed values (force ratio to 2 decimal
+ * places, exact casualty integers, raw defense strength numbers) that violate the
+ * Presidential Command Doctrine: the player (as faction president) receives staff
+ * assessments, not simulation truth.
+ *
+ * It is preserved here for developer/analyst use only. To expose it, gate it behind
+ * an explicit debug mode flag — never add it back to G2Phase tab list directly.
+ * See: DEBUG_SURFACE_POLICY.md, PLAYER_VISIBLE_STATE.md.
  */
 import type { PredictionResult } from './usePrediction';
 import { ReadinessBar } from '../plan_ui/ReadinessBar';
