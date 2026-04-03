@@ -10,6 +10,10 @@ One concept should have one canonical UI owner.
 
 Other surfaces may summarize or link to it, but they do not become co-owners of the same truth.
 
+## Governing Principle
+
+The player is the faction president (wartime political leader). Shell ownership follows from this: the president's desk (Warroom), the military command center they visit (Army HQ), the field situation room they observe (Tactical Map). For the full command-level doctrine, see [PRESIDENTIAL_COMMAND_DOCTRINE.md](PRESIDENTIAL_COMMAND_DOCTRINE.md).
+
 ## Surface classes
 
 - `canonical owner` = the main place where the concept is reviewed or acted on

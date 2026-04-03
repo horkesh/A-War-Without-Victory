@@ -11,6 +11,18 @@ It exists to answer four recurring questions:
 
 This is not a UI style guide. It is a product-ownership contract.
 
+## Presidential Model
+
+The player is the faction president (wartime political leader). Shell ownership follows from this identity:
+
+- **Warroom** = the president's desk. Strategic guidance, event decisions, campaign overview. The player LIVES here.
+- **Army HQ** = the military command center the president visits. Corps briefings, operations review, personnel decisions. The player REVIEWS here.
+- **Tactical Map** = the field situation room the president observes. Spatial awareness, front lines, settlement detail. The player OBSERVES here, and occasionally INTERVENES directly.
+- **Chronicle** = the presidential archive. The player reviews what has happened.
+- **Codex** = the reference library. The player consults background knowledge.
+
+For the full command-level doctrine (strategic guidance, active command, direct intervention), see [PRESIDENTIAL_COMMAND_DOCTRINE.md](PRESIDENTIAL_COMMAND_DOCTRINE.md).
+
 ## Core rule
 
 The product is not four separate apps.

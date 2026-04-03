@@ -1,3 +1,27 @@
+## 2026-04-03 - Presidential command doctrine codification
+
+### Summary
+- Created `docs/20_engineering/PRESIDENTIAL_COMMAND_DOCTRINE.md` — single referenceable contract for player identity and command levels.
+- Defines three command levels: Level 1 Strategic Guidance (default loop), Level 2 Army/Corps Directives (active command), Level 3 Direct Intervention (exceptional override with visible cost).
+- Updated `PRODUCT_SHELL_HIERARCHY.md` with Presidential Model section mapping shells to presidential verbs (LIVES/VISITS/OBSERVES/REVIEWS/CONSULTS).
+- Updated `UI_OWNERSHIP_MATRIX.md` with Governing Principle paragraph.
+- Verified Game Bible §21 and Rulebook §1 already consistent — no canon edits needed.
+
+### Files changed
+- `docs/20_engineering/PRESIDENTIAL_COMMAND_DOCTRINE.md` (new)
+- `docs/20_engineering/PRODUCT_SHELL_HIERARCHY.md`
+- `docs/20_engineering/UI_OWNERSHIP_MATRIX.md`
+- `docs/40_reports/implemented/20260403_PRESIDENTIAL_COMMAND_DOCTRINE_CODIFICATION.md`
+- `docs/PROJECT_LEDGER.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- Canon already said the player is the wartime political leader, but no single contract defined what that means for command levels, shell ownership, or future mechanic design. New features had no single doc to check for player-identity consistency.
+
+### Verification
+- `check_claude_governance.ps1` — OK
+- Grep for contradictory language across all docs — zero matches
+
 ## 2026-04-03 - Adapter defense-in-depth: player-faction scoping
 
 ### Summary
