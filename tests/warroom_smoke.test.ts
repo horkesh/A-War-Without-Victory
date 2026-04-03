@@ -1,6 +1,11 @@
 /**
  * Warroom smoke: desk_map click path invokes map scene handler without crash.
  * Phase E Trust-and-Baseline — automated "load warroom → select map" path.
+ *
+ * Note: ClickableRegionManager is no longer instantiated in WarroomApp (removed in
+ * the Wave 3 legacy canvas deletion pass, 2026-04-04). These tests exercise the class
+ * independently, which remains valid — the class still exists and is used by React's
+ * WarroomShellLayer for region-data contract tests.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ClickableRegionManager } from '../src/ui/warroom/ClickableRegionManager.js';

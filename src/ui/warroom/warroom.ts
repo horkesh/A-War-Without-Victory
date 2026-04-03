@@ -1,29 +1,10 @@
 import type { FactionId, GameState } from '../../state/game_state.js';
 import { deserializeState } from '../../state/serialize.js';
-import { ClickableRegionManager } from './ClickableRegionManager.js';
-import { HoverRenderer } from './HoverRenderer.js';
 import { ModalManager } from './components/ModalManager.js';
 import { SettingsModal } from './components/SettingsModal.js';
 
-import { NewspaperModal } from './components/NewspaperModal.js';
-import { TacticalMap } from './components/TacticalMap.js';
-import { WallCalendar } from './components/WallCalendar.js';
-import { OsidThumbnailRenderer } from './components/OsidThumbnailRenderer.js';
 import { WarPlanningMap } from './components/WarPlanningMap.js';
-import { setScenarioStartDate, turnToCalendarMonthYear, turnToDateString, turnToShortLabel } from './components/warroom_utils.js';
-// Asset URLs via Vite so dev server serves them from the module graph
-import hqRbih1992Url from './assets/hq_rbih_1992.webp?url';
-import hqRbih1993Url from './assets/hq_rbih_1993.webp?url';
-import hqRbih1994Url from './assets/hq_rbih_1994.webp?url';
-import hqRbih1995Url from './assets/hq_rbih_1995.webp?url';
-import hqRs1992Url from './assets/hq_rs_1992.webp?url';
-import hqRs1993Url from './assets/hq_rs_1993.webp?url';
-import hqRs1994Url from './assets/hq_rs_1994.webp?url';
-import hqRs1995Url from './assets/hq_rs_1995.webp?url';
-import hqHrhb1992Url from './assets/hq_hrhb_1992.webp?url';
-import hqHrhb1993Url from './assets/hq_hrhb_1993.webp?url';
-import hqHrhb1994Url from './assets/hq_hrhb_1994.webp?url';
-import hqHrhb1995Url from './assets/hq_hrhb_1995.webp?url';
+import { setScenarioStartDate, turnToShortLabel } from './components/warroom_utils.js';
 // Flag assets — drawn dynamically on the wall per player faction
 import flagHrhbUrl from './assets/flag_HRHB.webp?url';
 import flagRbihUrl from './assets/flag_RBiH.webp?url';
@@ -34,53 +15,7 @@ import scnApr1992Url from './assets/scenarios/apr1992_briefing.webp?url';
 import gameStartBgUrl from './assets/game start.webp?url';
 import { encodeShellHandoffCommand, type ShellHandoffCommand } from '../shared/shellHandoff.js';
 
-/**
- * REACT_SHELL_ENABLED: when true, the tactical-map iframe loads with ?view=warroom
- * so the React shell owns Warroom navigation. Set false to revert to the legacy canvas path.
- * This flag exists for migration safety — remove once the React path is canonical.
- */
-const REACT_SHELL_ENABLED = true;
-
 type CampaignScenarioKey = 'apr_1992';
-
-/** Display resolution for runtime: half of authoring (2752×1536) to reduce decode and canvas memory. Region JSON stays 2752×1536; hit-test scales automatically. */
-const WARROOM_SCENE_WIDTH = 1376;
-const WARROOM_SCENE_HEIGHT = 768;
-const WARROOM_CALENDAR_REGION_IDS = ['wall_calendar_area', 'wall_calendar'] as const;
-
-/** If this file exists, it is used when no faction-specific file is available. */
-const OVERRIDE_REGIONS_URL = '/data/ui/hq_clickable_regions_override.json';
-
-/** URL for faction-specific region file: hq_rbih_clickable_regions.json, hq_rs_clickable_regions.json, hq_hrhb_clickable_regions.json */
-function getFactionRegionsUrl(faction: FactionId): string {
-    return `/data/ui/hq_${faction.toLowerCase()}_clickable_regions.json`;
-}
-
-/** Try override file first, then per-faction candidates. No generic default. */
-function getInitialRegionCandidates(): string[] {
-    return [
-        OVERRIDE_REGIONS_URL,
-        getFactionRegionsUrl('RBiH'),
-        getFactionRegionsUrl('RS'),
-        getFactionRegionsUrl('HRHB')
-    ];
-}
-/** Year-keyed plate URLs per faction. Plates switch each April. */
-const WARROOM_YEAR_PLATE_URLS: Record<FactionId, Record<number, string>> = {
-    RBiH: { 1992: hqRbih1992Url, 1993: hqRbih1993Url, 1994: hqRbih1994Url, 1995: hqRbih1995Url },
-    RS: { 1992: hqRs1992Url, 1993: hqRs1993Url, 1994: hqRs1994Url, 1995: hqRs1995Url },
-    HRHB: { 1992: hqHrhb1992Url, 1993: hqHrhb1993Url, 1994: hqHrhb1994Url, 1995: hqHrhb1995Url }
-};
-
-/** Given a calendar year from the current turn, return the plate year (latest available <= calendarYear). */
-function getPlateYear(faction: FactionId, calendarYear: number): number {
-    const years = Object.keys(WARROOM_YEAR_PLATE_URLS[faction] ?? {}).map(Number).sort((a, b) => a - b);
-    let best = years[0] ?? 1992;
-    for (const y of years) {
-        if (y <= calendarYear) best = y;
-    }
-    return best;
-}
 
 interface DesktopBridge {
     startNewCampaign?: (payload: { playerFaction: FactionId; scenarioKey: CampaignScenarioKey }) => Promise<{ ok: boolean; error?: string; stateJson?: string }>;
@@ -94,20 +29,11 @@ interface DesktopBridge {
 }
 
 class WarroomApp {
-    private canvas: HTMLCanvasElement;
-    private ctx: CanvasRenderingContext2D;
     private gameState: GameState | null = null;
 
-    private calendar = new WallCalendar();
-    private map = new TacticalMap();
     private warPlanningMap = new WarPlanningMap();
-    private regionManager = new ClickableRegionManager();
-    private hoverRenderer = new HoverRenderer();
     private modalManager = new ModalManager();
 
-    /** Keyed by "faction:year" e.g. "RBiH:1992" */
-    private scenePlateImages: Map<string, HTMLImageElement> = new Map();
-    private flagImages: Map<string, HTMLImageElement> = new Map();
     private desktopBridge: DesktopBridge | null = null;
     /** Faction chosen in step 2, used when step 3 fires. */
     private pendingFaction: FactionId | null = null;
@@ -125,24 +51,8 @@ class WarroomApp {
     private pendingShellHandoff: ShellHandoffCommand | null = null;
     /** True once the user has navigated away from the initial main menu (prevents init race). */
     private userNavigatedFromMenu = false;
-    /** Faction for which we last loaded region data (so we only reload when faction changes). */
-    private lastLoadedRegionsFaction: FactionId | null = null;
-    /** Offscreen canvas for the cork board staff map thumbnail. */
-    private thumbnailCanvas: HTMLCanvasElement = document.createElement('canvas');
-    /** True when game state changed and thumbnail needs re-rendering. */
-    private thumbnailDirty = true;
-    /** OSID-based thumbnail renderer for the cork board staff map. */
-    private osidThumbnail = new OsidThumbnailRenderer();
-    /** True while the canvas render loop is scheduled (controls requestAnimationFrame). */
-    private renderLoopRunning = false;
 
     constructor() {
-        this.canvas = document.getElementById('warroom-canvas') as HTMLCanvasElement;
-        // Match the canonical warroom scene-plate resolution.
-        this.canvas.width = WARROOM_SCENE_WIDTH;
-        this.canvas.height = WARROOM_SCENE_HEIGHT;
-        this.ctx = this.canvas.getContext('2d')!;
-
         this.init();
     }
 
@@ -164,55 +74,17 @@ class WarroomApp {
         this.wireSidePickerButtons();
         this.wireScenarioPickerButtons();
 
-        // Load scene-plate, component assets, and runtime overlays in parallel.
-        // LEGACY FALLBACK: Scene plates and flags are loaded by React's static imports when REACT_SHELL_ENABLED.
-        await Promise.all([
-            REACT_SHELL_ENABLED ? Promise.resolve() : this.loadScenePlateAssets(),
-            this.calendar.loadAssets(),
-            this.map.loadAssets(),
-            REACT_SHELL_ENABLED ? Promise.resolve() : this.loadFlagAssets(),
-            this.osidThumbnail.load()
-        ]);
-
-        await this.loadInitialRegions();
-        this.regionManager.setCanvasScale(this.canvas.width, this.canvas.height);
-        this.regionManager.setModalManager(this.modalManager);
-        this.regionManager.setTacticalMap(this.map);
-        this.regionManager.setWarPlanningMap(this.warPlanningMap);
-        this.regionManager.setMapSceneOpenHandler(() => this.showMapScene());
-        this.regionManager.setTacticalMapOpenHandler(() => this.showTacticalMapScene());
-        this.regionManager.setTacticalShellHandoffHandler((command) => {
-            void this.openTacticalShellHandoff(command);
-        });
-
-        this.regionManager.setOnGameStateChange((newState) => {
-            this.gameState = newState;
-            const faction = (newState.meta.player_faction ?? newState.factions[0]?.id ?? 'RBiH') as FactionId;
-            void this.ensureRegionsLoadedForFaction(faction);
-            this.updateUIOverlay();
-        });
-
         const mapScene = document.getElementById('map-scene');
         if (mapScene) {
             mapScene.appendChild(this.warPlanningMap.getContainer());
             this.warPlanningMap.setCloseCallback(() => this.showWarroomScene());
         }
         this.wireToolbar();
-        this.canvas.addEventListener('mousemove', (e) => {
-            // LEGACY ROOM CANVAS: React owns hotspot interaction when REACT_SHELL_ENABLED.
-            if (REACT_SHELL_ENABLED && this.tacticalMapInWarroomMode) return;
-            this.onMouseMove(e);
-        });
-        this.canvas.addEventListener('click', (e) => {
-            // LEGACY ROOM CANVAS: React owns hotspot interaction when REACT_SHELL_ENABLED.
-            if (REACT_SHELL_ENABLED && this.tacticalMapInWarroomMode) return;
-            this.onClick(e);
-        });
 
         // Listen for "back to HQ" messages from the embedded tactical map iframe
         window.addEventListener('message', (e) => {
             if (e.data?.type === 'awwv-back-to-hq') {
-                if (REACT_SHELL_ENABLED && this.tacticalMapInWarroomMode && this.tacticalMapIframe?.contentWindow) {
+                if (this.tacticalMapInWarroomMode && this.tacticalMapIframe?.contentWindow) {
                     // React owns the warroom view — tell the iframe to switch back to warroom screen.
                     // Keep the tactical scene visible (iframe stays loaded, React handles the swap).
                     this.tacticalMapIframe.contentWindow.postMessage(
@@ -271,40 +143,6 @@ class WarroomApp {
             this.showMainMenu();
         }
 
-        // LEGACY ROOM CANVAS: start the canvas render loop only when not in React warroom mode.
-        // When REACT_SHELL_ENABLED, the loop will self-stop on the first frame after warroom mode activates.
-        this.startRenderLoop();
-    }
-
-    /** Load scene plates for a single faction (or all if none specified). */
-    private async loadScenePlateAssets(faction?: FactionId) {
-        const tasks: Array<Promise<[string, HTMLImageElement]>> = [];
-        const entries = faction
-            ? [[faction, WARROOM_YEAR_PLATE_URLS[faction]] as const]
-            : (Object.entries(WARROOM_YEAR_PLATE_URLS) as Array<[string, Record<number, string>]>);
-        for (const [f, yearMap] of entries) {
-            for (const [year, url] of Object.entries(yearMap)) {
-                const key = `${f}:${year}`;
-                if (this.scenePlateImages.has(key)) continue; // already loaded
-                tasks.push(this.loadImage(url).then(img => [key, img]));
-            }
-        }
-        const loaded = await Promise.all(tasks);
-        for (const [key, image] of loaded) {
-            this.scenePlateImages.set(key, image);
-        }
-    }
-
-    private loadImage(src: string): Promise<HTMLImageElement> {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            img.onload = () => resolve(img);
-            img.onerror = (e) => {
-                console.error(`Failed to load image: ${src}`, e);
-                reject(new Error(`Failed to load image: ${src}`));
-            };
-            img.src = src;
-        });
     }
 
     async loadMockState(params?: { turn?: number; phase?: string; faction?: FactionId; politicalControllers?: Record<string, string | null> }) {
@@ -346,9 +184,6 @@ class WarroomApp {
         }
 
         setScenarioStartDate(this.gameState.meta.scenario_start_date);
-        if (params?.faction) {
-            await this.ensureRegionsLoadedForFaction(params.faction);
-        }
         this.updateUIOverlay();
     }
 
@@ -386,9 +221,6 @@ class WarroomApp {
         this.warPlanningMap.setControlFromState(this.gameState);
         this.warPlanningMap.setGameState(this.gameState);
         this.warPlanningMap.setPlayerFaction(playerFaction);
-        this.osidThumbnail.setControlFromState(this.gameState);
-        this.osidThumbnail.setPlayerFaction(playerFaction);
-        this.thumbnailDirty = true;
         this.updateToolbarTurnDisplay();
     }
 
@@ -399,8 +231,6 @@ class WarroomApp {
     private applyGameStateFromJson(stateJson: string): void {
         try {
             this.gameState = deserializeState(stateJson);
-            const faction = (this.gameState.meta.player_faction ?? this.gameState.factions[0]?.id ?? 'RBiH') as FactionId;
-            void this.ensureRegionsLoadedForFaction(faction);
             // Sync scenario epoch so date helpers produce correct calendar dates
             setScenarioStartDate(this.gameState.meta.scenario_start_date);
             // Defer DOM work to the next task so the triggering click is consumed and UI stays responsive.
@@ -413,13 +243,9 @@ class WarroomApp {
                 const isViewingTacticalMap = tacticalScene && !tacticalScene.classList.contains('tactical-map-scene-hidden');
                 const isViewingWarPlanningMap = mapScene && !mapScene.classList.contains('map-scene-hidden');
                 if (!isViewingTacticalMap && !isViewingWarPlanningMap) {
-                    if (REACT_SHELL_ENABLED) {
-                        // React shell owns room navigation — load iframe with warroom view instead of
-                        // showing the legacy canvas desk. The iframe stays loaded for the session.
-                        void this.showTacticalMapScene('warroom');
-                    } else {
-                        this.showScreen('none');
-                    }
+                    // React shell owns room navigation — load iframe with warroom view instead of
+                    // showing the legacy canvas desk. The iframe stays loaded for the session.
+                    void this.showTacticalMapScene('warroom');
                 }
             }, 0);
         } catch (error) {
@@ -713,287 +539,6 @@ class WarroomApp {
         }
     }
 
-    // LEGACY ROOM CANVAS: Only active when REACT_SHELL_ENABLED=false (or during legacy fallback).
-    // When the React shell is the live path, the render loop is stopped.
-    // Delete this block when REACT_SHELL_ENABLED is permanently true.
-    private startRenderLoop(): void {
-        if (this.renderLoopRunning) return;
-        this.renderLoopRunning = true;
-        this.renderLoop();
-    }
-
-    private stopRenderLoop(): void {
-        this.renderLoopRunning = false;
-        // The current in-flight requestAnimationFrame will fire once more but will
-        // check renderLoopRunning and not reschedule.
-    }
-
-    renderLoop() {
-        if (!this.renderLoopRunning) return; // stopped — do not reschedule
-        // LEGACY ROOM CANVAS: React owns room rendering when REACT_SHELL_ENABLED and warroom mode active.
-        if (REACT_SHELL_ENABLED && this.tacticalMapInWarroomMode) {
-            // Stop the loop — React iframe owns the room surface.
-            this.renderLoopRunning = false;
-            return;
-        }
-        this.render();
-        requestAnimationFrame(() => this.renderLoop());
-    }
-
-    render() {
-        if (!this.gameState) return;
-        const W = this.canvas.width;
-        const H = this.canvas.height;
-        const playerFaction = (this.gameState.meta.player_faction ?? this.gameState.factions[0]?.id ?? 'RBiH') as FactionId;
-        const calYear = turnToCalendarMonthYear(this.gameState.meta.turn).year;
-        const plateYear = getPlateYear(playerFaction, calYear);
-        const scenePlate = this.scenePlateImages.get(`${playerFaction}:${plateYear}`)
-            ?? this.scenePlateImages.get(`RBiH:${plateYear}`)
-            ?? null;
-
-        this.ctx.clearRect(0, 0, W, H);
-
-        // 1. Background (all props baked in)
-        if (scenePlate) {
-            this.ctx.drawImage(scenePlate, 0, 0, W, H);
-        }
-
-        // 2. Runtime overlays: calendar only (flag is baked into room art per WARROOM_MASTER / clean-room handover)
-
-        const calMY = turnToCalendarMonthYear(this.gameState.meta.turn);
-        const calCanvas = this.calendar.render({
-            month: calMY.month,
-            year: calMY.year,
-            currentTurn: this.gameState.meta.turn,
-            startTurn: 0
-        });
-        const calendarBounds = WARROOM_CALENDAR_REGION_IDS
-            .map((regionId) => this.regionManager.getScaledRegionById(regionId))
-            .find((region) => region != null);
-        if (calendarBounds && !this.regionManager.isCalendarBakedInArt()) {
-            this.ctx.drawImage(
-                calCanvas,
-                calendarBounds.bounds.x,
-                calendarBounds.bounds.y,
-                calendarBounds.bounds.width,
-                calendarBounds.bounds.height
-            );
-        }
-
-        // 2b. Cork board staff map
-        const corkRegion = this.regionManager.getScaledRegionById('wall_cork_board');
-        if (corkRegion) {
-            this.renderCorkBoardMap(corkRegion.bounds);
-        }
-
-        // 2c. Whiteboard date
-        const dateRegion = this.regionManager.getScaledRegionById('wall_calendar_area');
-        if (dateRegion) {
-            this.renderWhiteboardDate(dateRegion.bounds);
-        }
-
-        // 3. Hover highlight
-        const hoveredRegion = this.regionManager.getHoveredRegion();
-        if (hoveredRegion) {
-            this.hoverRenderer.renderHighlight(this.ctx, hoveredRegion);
-        }
-    }
-
-    private renderCorkBoardMap(bounds: { x: number; y: number; width: number; height: number }): void {
-        const PAD = 8;
-        const mapW = bounds.width - PAD * 2;
-        const mapH = bounds.height - PAD * 2;
-        if (mapW <= 0 || mapH <= 0) return;
-
-        // Resize offscreen canvas if needed
-        if (this.thumbnailCanvas.width !== Math.ceil(mapW) || this.thumbnailCanvas.height !== Math.ceil(mapH)) {
-            this.thumbnailCanvas.width = Math.ceil(mapW);
-            this.thumbnailCanvas.height = Math.ceil(mapH);
-            this.thumbnailDirty = true;
-        }
-
-        // Re-render thumbnail only when game state changes
-        if (this.thumbnailDirty) {
-            const tCtx = this.thumbnailCanvas.getContext('2d');
-            if (!tCtx) return;
-            tCtx.clearRect(0, 0, mapW, mapH);
-            // White paper background
-            tCtx.fillStyle = '#f5f2ea';
-            tCtx.fillRect(0, 0, mapW, mapH);
-            // Draw OSID territorial control + front lines
-            this.osidThumbnail.render(tCtx, mapW, mapH);
-            this.thumbnailDirty = false;
-        }
-
-        this.ctx.save();
-
-        const paperX = bounds.x + PAD;
-        const paperY = bounds.y + PAD;
-
-        // Slight rotation for pinned-paper effect (~0.5 degrees)
-        const cx = bounds.x + bounds.width / 2;
-        const cy = bounds.y + bounds.height / 2;
-        this.ctx.translate(cx, cy);
-        this.ctx.rotate(0.008);
-        this.ctx.translate(-cx, -cy);
-
-        // Paper shadow (depth against cork board)
-        this.ctx.shadowColor = 'rgba(0,0,0,0.35)';
-        this.ctx.shadowBlur = 4;
-        this.ctx.shadowOffsetX = 2;
-        this.ctx.shadowOffsetY = 2;
-        this.ctx.fillStyle = '#f5f2ea';
-        this.ctx.fillRect(paperX, paperY, mapW, mapH);
-        this.ctx.shadowColor = 'transparent';
-
-        // Draw map on paper (normal blend — opaque, sits on top of cork)
-        this.ctx.drawImage(this.thumbnailCanvas, paperX, paperY, mapW, mapH);
-
-        // Thin paper edge
-        this.ctx.strokeStyle = 'rgba(0,0,0,0.12)';
-        this.ctx.lineWidth = 0.5;
-        this.ctx.strokeRect(paperX, paperY, mapW, mapH);
-
-        // Pushpins at top corners
-        this.drawPushPin(paperX + 6, paperY + 6);
-        this.drawPushPin(paperX + mapW - 6, paperY + 6);
-
-        this.ctx.restore();
-    }
-
-    private drawPushPin(x: number, y: number): void {
-        this.ctx.save();
-        this.ctx.shadowColor = 'rgba(0,0,0,0.5)';
-        this.ctx.shadowBlur = 3;
-        this.ctx.shadowOffsetX = 1;
-        this.ctx.shadowOffsetY = 2;
-        // Pin body
-        this.ctx.fillStyle = '#c0392b';
-        this.ctx.beginPath();
-        this.ctx.arc(x, y, 3.5, 0, Math.PI * 2);
-        this.ctx.fill();
-        // Pin highlight
-        this.ctx.shadowColor = 'transparent';
-        this.ctx.fillStyle = 'rgba(255,255,255,0.35)';
-        this.ctx.beginPath();
-        this.ctx.arc(x - 0.8, y - 0.8, 1.5, 0, Math.PI * 2);
-        this.ctx.fill();
-        this.ctx.restore();
-    }
-
-    private renderWhiteboardDate(bounds: { x: number; y: number; width: number; height: number }): void {
-        if (!this.gameState) return;
-        const dateStr = turnToDateString(this.gameState.meta.turn);
-
-        this.ctx.save();
-        // Smaller font — fits comfortably without filling the whole board
-        const fontSize = Math.min(bounds.height * 0.20, bounds.width / dateStr.length * 1.2);
-
-        // Greasy blue dry-erase marker — semi-transparent, smudged look
-        this.ctx.font = `bold ${Math.round(fontSize)}px "Segoe Script", "Comic Sans MS", cursive`;
-        this.ctx.textAlign = 'center';
-        this.ctx.textBaseline = 'middle';
-
-        const cx = bounds.x + bounds.width / 2;
-        const cy = bounds.y + bounds.height * 0.42;
-
-        // Ghost smudge layer (previous writing not fully erased)
-        this.ctx.globalAlpha = 0.06;
-        this.ctx.fillStyle = '#1a3faa';
-        this.ctx.fillText(dateStr, cx + 1.5, cy + 1);
-        this.ctx.globalAlpha = 1.0;
-
-        // Main text — slightly transparent for greasy marker look
-        this.ctx.globalAlpha = 0.70;
-        this.ctx.fillStyle = '#152d7a';
-        this.ctx.shadowColor = 'rgba(0,0,60,0.12)';
-        this.ctx.shadowBlur = 2;
-        this.ctx.shadowOffsetX = 0.3;
-        this.ctx.shadowOffsetY = 0.3;
-        this.ctx.fillText(dateStr, cx, cy);
-
-        // Second pass — ink buildup on edges (thicker strokes)
-        this.ctx.globalAlpha = 0.20;
-        this.ctx.fillText(dateStr, cx + 0.3, cy + 0.2);
-        this.ctx.globalAlpha = 1.0;
-        this.ctx.shadowColor = 'transparent';
-
-        // Underline — greasy and wobbly
-        const textWidth = this.ctx.measureText(dateStr).width;
-        this.ctx.globalAlpha = 0.55;
-        this.ctx.strokeStyle = '#152d7a';
-        this.ctx.lineWidth = Math.max(1.2, fontSize * 0.06);
-        this.ctx.lineCap = 'round';
-        const underY = cy + fontSize * 0.55;
-        this.ctx.beginPath();
-        this.ctx.moveTo(cx - textWidth / 2, underY);
-        this.ctx.quadraticCurveTo(cx, underY + 1.5, cx + textWidth / 2, underY - 0.5);
-        this.ctx.stroke();
-        this.ctx.globalAlpha = 1.0;
-
-        this.ctx.restore();
-    }
-
-    private async loadFlagAssets() {
-        const entries: Array<[string, string]> = [
-            ['RBiH', flagRbihUrl],
-            ['RS', flagRsUrl],
-            ['HRHB', flagHrhbUrl]
-        ];
-        const loaded = await Promise.all(entries.map(async ([id, src]) => [id, await this.loadImage(src)] as const));
-        for (const [id, img] of loaded) {
-            this.flagImages.set(id, img);
-        }
-    }
-
-    /**
-     * Load some region data during startup, but never let a missing default file
-     * abort warroom init. This keeps the menu/campaign flow alive even when the
-     * shared regions file is intentionally removed in favor of per-faction files.
-     */
-    private async loadInitialRegions(): Promise<void> {
-        for (const url of getInitialRegionCandidates()) {
-            try {
-                const response = await fetch(url);
-                if (!response.ok) continue;
-                await this.regionManager.loadRegions(url);
-                return;
-            } catch {
-                // Try the next candidate.
-            }
-        }
-        // No regions yet — ensureRegionsLoadedForFaction will load once faction is known.
-    }
-
-    /** Load faction-specific region file when player faction is known. */
-    private async ensureRegionsLoadedForFaction(faction: FactionId): Promise<void> {
-        if (this.lastLoadedRegionsFaction === faction) return;
-        // Lazy-load this faction's scene plates (skips if already loaded)
-        void this.loadScenePlateAssets(faction);
-        const url = getFactionRegionsUrl(faction);
-        try {
-            const r = await fetch(url);
-            if (r.ok) {
-                await this.regionManager.loadRegions(url);
-                this.lastLoadedRegionsFaction = faction;
-                return;
-            }
-        } catch {
-            // ignore — keep previous regions
-        }
-    }
-
-    /** Scene swap: show map scene (full-screen), hide warroom. */
-    private showMapScene(): void {
-        const desk = document.getElementById('warroom-desk');
-        const mapScene = document.getElementById('map-scene');
-        if (desk) desk.classList.add('warroom-desk-hidden');
-        if (mapScene) {
-            mapScene.classList.remove('map-scene-hidden');
-            mapScene.setAttribute('aria-hidden', 'false');
-        }
-    }
-
     /** Scene swap: show warroom desk, hide map and tactical scenes. */
     private showWarroomScene(): void {
         const desk = document.getElementById('warroom-desk');
@@ -1013,10 +558,6 @@ class WarroomApp {
             warroomScene.classList.remove('warroom-scene-hidden');
             warroomScene.setAttribute('aria-hidden', 'false');
         }
-        // LEGACY ROOM CANVAS: if falling back from warroom mode (e.g. REACT_SHELL_ENABLED=false
-        // or an explicit legacy reversion), restart the canvas render loop so the desk redraws.
-        this.tacticalMapInWarroomMode = false;
-        this.startRenderLoop();
         this.pullLatestGameState();
     }
 
@@ -1186,7 +727,7 @@ class WarroomApp {
     }
 
     private async openTacticalShellHandoff(command: ShellHandoffCommand): Promise<void> {
-        if (REACT_SHELL_ENABLED && this.tacticalMapInWarroomMode && this.tacticalMapReady && this.tacticalMapIframe?.contentWindow) {
+        if (this.tacticalMapInWarroomMode && this.tacticalMapReady && this.tacticalMapIframe?.contentWindow) {
             // React is showing the warroom view inside the already-loaded iframe.
             // Send the handoff directly — React will switch to game view without an iframe reload.
             this.tacticalMapIframe.contentWindow.postMessage(
@@ -1250,24 +791,6 @@ class WarroomApp {
         }
     }
 
-    private onMouseMove(e: MouseEvent) {
-        const rect = this.canvas.getBoundingClientRect();
-        const scaleX = this.canvas.width / rect.width;
-        const scaleY = this.canvas.height / rect.height;
-        const canvasX = (e.clientX - rect.left) * scaleX;
-        const canvasY = (e.clientY - rect.top) * scaleY;
-        this.regionManager.onMouseMove(canvasX, canvasY, e.clientX, e.clientY, this.canvas);
-    }
-
-    private onClick(e: MouseEvent) {
-        if (!this.gameState) return;
-        const rect = this.canvas.getBoundingClientRect();
-        const scaleX = this.canvas.width / rect.width;
-        const scaleY = this.canvas.height / rect.height;
-        const canvasX = (e.clientX - rect.left) * scaleX;
-        const canvasY = (e.clientY - rect.top) * scaleY;
-        this.regionManager.onClick(canvasX, canvasY, this.gameState);
-    }
 }
 
 new WarroomApp();
