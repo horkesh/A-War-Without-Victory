@@ -1,10 +1,17 @@
 /**
- * PresidentialToolbar — The president's desk.
+ * PresidentialToolbar — The president's field command bar.
  *
- * Minimal chrome: date (left), alert badges + army crest (center), advance turn (right).
- * Everything else lives in Army HQ (military), pause menu (settings/save), or dev overlay.
+ * This toolbar sits on the Tactical Map (the field situation room).
+ * The president's desk is the Warroom; this bar is the command interface
+ * the president uses while observing the battlefield.
  *
- * Replaces TopToolbar for the "president's desk" metaphor.
+ * Layout: date + navigation (left), alert badges + army crest (center), advance turn (right).
+ * Deep review routes to Army HQ. Campaign context routes to Warroom.
+ *
+ * Command levels on this bar:
+ * - Level 1 (Strategic Guidance): ADVANCE TURN, SUMMARY (map-local briefing)
+ * - Level 2 (Army HQ handoff): RECORDS, OPS (opens Army HQ or map-local panels)
+ * - Reference: EVENTS, CODEX, CHRONICLE
  */
 
 import { useRef, useState, useCallback } from 'react';
@@ -126,6 +133,7 @@ export function PresidentialToolbar({
                                 void ipc.focusWarroom();
                             }}
                             className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-amber-400 hover:text-amber-300 transition-colors"
+                            title="Return to president's desk"
                         >
                             WARROOM
                         </button>
@@ -133,6 +141,7 @@ export function PresidentialToolbar({
                     <button
                         onClick={() => useGameStore.getState().setChronicleOpen(true)}
                         className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors"
+                        title="Campaign timeline"
                     >
                         CHRONICLE
                     </button>
@@ -158,6 +167,7 @@ export function PresidentialToolbar({
                             onClick={onOpenSummary}
                             disabled={!loadedGameState}
                             className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                            title="Field situation briefing"
                         >
                             SUMMARY
                         </button>
@@ -165,6 +175,7 @@ export function PresidentialToolbar({
                             onClick={onOpenRecords}
                             disabled={!loadedGameState}
                             className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                            title="Army HQ staff records"
                         >
                             RECORDS
                         </button>
@@ -172,6 +183,7 @@ export function PresidentialToolbar({
                             onClick={onOpenOpsHistory}
                             disabled={!loadedGameState}
                             className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                            title="Active operations"
                         >
                             OPS
                         </button>
@@ -179,6 +191,7 @@ export function PresidentialToolbar({
                             onClick={onOpenEventLog}
                             disabled={!loadedGameState}
                             className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                            title="Event log"
                         >
                             EVENTS
                         </button>
@@ -186,6 +199,7 @@ export function PresidentialToolbar({
                             onClick={onOpenCodex}
                             disabled={!loadedGameState}
                             className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                            title="Historical reference"
                         >
                             CODEX
                         </button>
@@ -240,6 +254,7 @@ export function PresidentialToolbar({
                 onClick={handleOpenHQ}
                 className="fixed top-0.5 left-1/2 -translate-x-1/2 z-[200] group flex flex-col items-center pointer-events-auto"
                 aria-label={`${armyName ?? 'Army'} HQ [H]`}
+                title="Visit Army HQ [H]"
             >
                 <span className="text-[7px] font-mono font-bold uppercase tracking-[0.22em] text-amber-400/60 group-hover:text-amber-400 transition-colors mb-0.5">
                     {armyName ?? playerFaction ?? 'COMMAND'}

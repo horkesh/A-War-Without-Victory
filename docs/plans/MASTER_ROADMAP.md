@@ -71,6 +71,8 @@ Event flag wiring (25 flags), exhaustion overhaul, Codex QA (30 essay correction
 
 **Theme:** The player commands through a hierarchy of AI personalities that can be delegated to or overridden. Corps commanders make emergent decisions based on zone posture, force balance, and personality. The gap between intent and execution is where the Bosnian War lived.
 
+**Player role reminder (do not let future work drift):** The player is the faction president. The default loop is presidential: strategic guidance, reserve allocation, approval or denial of plans, and selective intervention through Army HQ and corps. Direct brigade-level control remains an exceptional override, not the baseline fantasy.
+
 **Architecture:** `docs/plans/2026-03-25-command-chain-architecture.md`
 
 **Sequencing principles (non-negotiable):**
@@ -131,6 +133,8 @@ Plans: `docs/plans/2026-03-25-command-chain-architecture.md`, `docs/plans/2026-0
 Political leader bot for non-player factions: event responses, alliance posture, war crimes policy, patron interaction. Replaces flat `pickBotResponseV1` with faction-specific political personality (Karadzic=expansionist-nationalist, Izetbegovic=survival-internationalist, Boban=opportunist-patron-dependent). Dual-track evaluator blending military situation and strategic dimensions.
 
 **Patron Phone Call:** 8-12 dramatic patron pressure events with ICTY-sourced dialogue and player decisions. Milosevic calling Karadzic about the corridor. Tudjman ordering Boban to ceasefire. Holbrooke pressuring Izetbegovic. Events use existing event system with enhanced presentation (full-screen modal, dialogue, urgency timer).
+
+**Presidential presence hooks (lightweight, not a travel simulator):** This milestone is also the natural home for small, high-impact presidential decision rituals between operations, such as a "visit to the front" event/card. These should be implemented as event-driven political/military choices that temporarily change morale, urgency, commander compliance, and visibility at a selected corps/sector — not as a separate movement or map-mode subsystem.
 
 Plans: `docs/plans/2026-03-24-v080-political-leader-bot-plan.md`, `docs/plans/2026-03-25-command-chain-architecture.md` section 1 and 3.
 

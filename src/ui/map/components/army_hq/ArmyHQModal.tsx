@@ -1,7 +1,12 @@
 /**
- * Army HQ Modal — Multi-tab military command center.
+ * Army HQ Modal — The military command center the president visits.
+ *
  * Tabs: BRIEFING | SUMMARY | RECORDS | PERSONNEL
- * Full-screen command overview for the player's faction.
+ * The president reviews corps briefings, operations, personnel, and records here.
+ * This is Level 2 (Army/Corps Directives) in the presidential command doctrine.
+ * The president sets intent; corps commanders interpret and execute.
+ *
+ * See: docs/20_engineering/PRESIDENTIAL_COMMAND_DOCTRINE.md
  */
 import { useCallback, useEffect, useMemo } from 'react';
 import { useGameStore } from '../../store/gameStore';

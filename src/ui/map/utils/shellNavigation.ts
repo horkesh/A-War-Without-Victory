@@ -1,3 +1,13 @@
+/**
+ * Shell navigation helpers — routes the president between shells.
+ *
+ * Presidential command doctrine:
+ * - Warroom = president's desk (campaign context, return destination)
+ * - Army HQ = military command center (command review, records, personnel)
+ * - Tactical Map = field situation room (observation, selective intervention)
+ *
+ * These helpers handle handoffs from Tactical Map into Army HQ tabs.
+ */
 import type { ArmyHQRecordsSubTab, ArmyHQTab, ShellHandoffCommand } from '../../shared/shellHandoff';
 
 export interface ShellNavigationState {

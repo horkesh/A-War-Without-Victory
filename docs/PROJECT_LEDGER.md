@@ -1,3 +1,40 @@
+## 2026-04-03 - Presidential shell alignment (tooltips + docstring framing)
+
+### Summary
+- Updated PresidentialToolbar docstring from "president's desk" to "president's field command bar" with command-level taxonomy.
+- Added 8 player-facing tooltips to toolbar buttons (WARROOM, CHRONICLE, SUMMARY, RECORDS, OPS, EVENTS, CODEX, army crest).
+- Updated ArmyHQModal docstring to reflect presidential visit model ("the military command center the president visits").
+- Added module-level doctrine docstring to shellNavigation.ts.
+
+### Files changed
+- `src/ui/map/components/PresidentialToolbar.tsx`
+- `src/ui/map/components/army_hq/ArmyHQModal.tsx`
+- `src/ui/map/utils/shellNavigation.ts`
+- `docs/40_reports/implemented/20260403_PRESIDENTIAL_SHELL_ALIGNMENT.md`
+- `docs/PROJECT_LEDGER.md`
+
+### Why
+- The presidential command doctrine was codified but live code still carried older framing. Tooltips help players distinguish map-local summaries from Army HQ handoffs.
+
+### Verification
+- `npx tsc --noEmit` — clean
+- `vite build` — success
+- `check_claude_governance.ps1` — OK
+
+## 2026-04-03 - Roadmap made explicit about presidential role and front visits
+
+### Summary
+- Updated `docs/plans/MASTER_ROADMAP.md` to make the player-role reminder explicit in the active v0.8 Command Chain section: the player is the faction president and the default loop is delegated/presidential rather than brigade-command baseline.
+- Added a roadmap note under v0.8.2 that lightweight "visit to the front" style presidential presence decisions belong in the event/political layer, not as a new travel simulator or map-mode subsystem.
+
+### Files changed
+- `docs/plans/MASTER_ROADMAP.md`
+- `docs/PROJECT_LEDGER.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- The doctrine already existed in canon and engineering docs, but the roadmap did not say it loudly enough. This makes the role fantasy harder to forget during planning and helps future event work fill the space between operations with meaningful presidential decisions instead of dead time.
+
 ## 2026-04-03 - Presidential command doctrine codification
 
 ### Summary
