@@ -21605,3 +21605,24 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 ### Verification
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_map_tooltip_player_visibility.test.ts tests\\ui_player_visibility.test.ts`
 - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Elite loan prototype retirement
+
+### Summary
+- Retired the obsolete `elite_loan.ts` prototype and its dedicated test rail.
+- Updated canon/context memory so `army_reserve_system.ts` is the sole live elite-loan owner.
+
+### Files changed
+- deleted `src/sim/combat/elite_loan.ts`
+- deleted `tests/elite_loan.test.ts`
+- `docs/10_canon/context.md`
+- `docs/40_reports/implemented/20260403_ELITE_LOAN_PROTOTYPE_RETIREMENT.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- Runtime elite loans already live entirely in `army_reserve_system.ts`, but the old prototype module and its test rail still looked authoritative enough to attract future fixes onto the wrong implementation.
+- This repo is most vulnerable to polished false authority, so dead-but-plausible prototype rails need to be removed once the real owner is clear.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\army_reserve_system.test.ts tests\\elite_loan_recall.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
