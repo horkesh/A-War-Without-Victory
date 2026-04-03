@@ -72,6 +72,31 @@ test('applyFatigueRecovery treats sector-assigned brigades as frontline formatio
     assert.strictEqual(state.military.formations.b2.ops?.fatigue, 0);
 });
 
+test('applyFatigueRecovery does not treat sector reserves as frontline formations', () => {
+    const state = makeState();
+    state.military.corps_front_sectors = {
+        sector_1: {
+            sector_id: 'sector_1',
+            corps_id: 'rbih_corps',
+            faction: 'RBiH',
+            edge_ids: ['S1__S2'],
+            assigned_brigade_ids: [],
+            reserve_brigade_ids: ['b1'],
+            sub_segments: [],
+            opposing_factions: ['RS'],
+            length_edges: 1,
+            density: 1,
+            threat_ratio: 1,
+            defensive_power: 100,
+        },
+    } as any;
+
+    applyFatigueRecovery(state);
+
+    assert.strictEqual(state.military.formations.b1.ops?.fatigue, 0);
+    assert.strictEqual(state.military.formations.b2.ops?.fatigue, 0);
+});
+
 test('applyFatigueRecovery does not revive legacy front assignments when sector truth is absent', () => {
     const state = makeState();
     state.military.brigade_front_assignment = { b2: 'RBiH__RS__S1__S2' };

@@ -953,6 +953,67 @@ export function reclassifyRearBrigades(
 }
 
 /**
+ * Final truth pass: a sector may only keep brigades it physically owns.
+ *
+ * Ownership is truthful when the brigade's current location is on the sector
+ * frontline, inside the sector's territory, or one hop behind the frontline
+ * as a reserve position. Anything else is future intent, not current
+ * frontline truth, and must be stripped before sectors are returned.
+ */
+export function enforcePhysicalSectorOwnership(
+    sectors: CorpsFrontSector[],
+    formations: Record<FormationId, FormationState>,
+    adjacency: Map<Osid, Osid[]>,
+    friendlyOsids: Set<string>,
+): void {
+    for (const sector of sectors) {
+        const frontSet = getSectorFrontOsids(sector);
+        const territorySet = new Set(sector.territory_osids);
+        const oneHopBehind = new Set<string>();
+
+        for (const fo of frontSet) {
+            for (const n of (adjacency.get(fo as Osid) ?? [])) {
+                if (frontSet.has(n)) continue;
+                if (!friendlyOsids.has(n)) continue;
+                oneHopBehind.add(n);
+            }
+        }
+
+        const classifyClaim = (locationOsid: string | undefined): 'front' | 'territory' | 'reserve' | null => {
+            if (!locationOsid) return null;
+            if (frontSet.has(locationOsid)) return 'front';
+            if (territorySet.has(locationOsid)) return 'territory';
+            if (oneHopBehind.has(locationOsid)) return 'reserve';
+            return null;
+        };
+
+        const nextAssigned: FormationId[] = [];
+        const nextReserve: FormationId[] = [];
+
+        for (const bid of sector.assigned_brigade_ids) {
+            const claim = classifyClaim(formations[bid]?.location_osid);
+            if (claim === 'front' || claim === 'territory') {
+                nextAssigned.push(bid);
+            } else if (claim === 'reserve') {
+                nextReserve.push(bid);
+            }
+        }
+
+        for (const bid of sector.reserve_brigade_ids) {
+            const claim = classifyClaim(formations[bid]?.location_osid);
+            if (claim === 'front' || claim === 'territory' || claim === 'reserve') {
+                nextReserve.push(bid);
+            }
+        }
+
+        nextAssigned.sort(strictCompare);
+        nextReserve.sort(strictCompare);
+        sector.assigned_brigade_ids = nextAssigned;
+        sector.reserve_brigade_ids = nextReserve;
+    }
+}
+
+/**
  * Surface any brigades that truly fell through the full sector pipeline.
  *
  * Call this only after same-corps assignment, enclave rescue, and minimum

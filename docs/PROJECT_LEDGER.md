@@ -1,3 +1,34 @@
+## 2026-04-03 - Physical sector ownership and frontline reserve split
+
+### Summary
+- Added a final physical-ownership truth pass to the sector pipeline so late sector writers can no longer leave brigades in sectors that do not physically own their current positions.
+- Narrowed frontline truth so sector reserves no longer count as frontline-assigned formations for fatigue, reporting, and other downstream consumers.
+- Verified the change with focused tests and a fresh 40-week run (`n1309`).
+
+### Files changed
+- `src/sim/combat/brigade_assignment.ts`
+- `src/sim/combat/corps_front_sectors.ts`
+- `src/sim/combat/front_assignment.ts`
+- `tests/brigade_territory_reconciliation.test.ts`
+- `tests/front_assignment.test.ts`
+- `tests/formation_fatigue_frontline_assignment.test.ts`
+- `docs/40_reports/implemented/20260403_PHYSICAL_SECTOR_OWNERSHIP_AND_FRONTLINE_RESERVE_SPLIT.md`
+- `docs/40_reports/SECTOR_MASTER.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+- `docs/life_lessons/sectors.md`
+- `.claude/napkin.md`
+
+### Why
+- Sector contiguity and cross-corps rescue were cleaner, but the engine could still end a turn with paper assignments created by late coverage/review passes.
+- `buildFrontlineAssignedFormationSet(...)` still treated `reserve_brigade_ids` as frontline truth, which leaked reserve state into fatigue, reporting, and officer-quality logic.
+
+### Verification
+- `node .\node_modules\vitest\vitest.mjs run tests\brigade_territory_reconciliation.test.ts tests\commander_driven_brigade_assignment.test.ts`
+- `node .\node_modules\tsx\dist\cli.mjs --test tests\front_assignment.test.ts tests\formation_fatigue_frontline_assignment.test.ts`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run sim:scenario:run:40w`
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+
 ## 2026-04-02 - Player-safe ops labels and HQ roster polish
 
 ### Summary

@@ -34,6 +34,10 @@ Commander Intelligence Overhaul (n1294–1301): must_hold 1.5× garrison (Brcko/
 
 **[KNOWN INVARIANT] Army HQ reserve brigades may have no sector_id while idle.** Treat `vrs_main_staff`, `arbih_general_staff`, and `hvo_main_staff` elite reserve brigades as legitimate sectorless exceptions until loaned. Only active non-exempt field-corps brigades are sector-mandatory.
 
+**Sector truth after late writers (2026-04-03):** Contiguity and enclave rescue are not enough by themselves. `corps_front_sectors` must finish with a final physical-ownership pass that strips brigades not physically on the sector front, in sector territory, or one hop behind as reserve. Emit unresolved warnings only after that pass.
+
+**Frontline truth excludes reserves (2026-04-03):** `buildFrontlineAssignedFormationSet(...)` should use only `assigned_brigade_ids`. `reserve_brigade_ids` remain sector-owned but must not leak into fatigue, officer-quality, or reporting as if they are holding the line.
+
 ## Integration Test Suites (9 suites, WS6)
 1. `tests/integration_deployment_health.test.ts` — app bootstrap, Electron readiness
 2. `tests/integration_run_diagnostics.test.ts` — diagnose_run.cjs output validation

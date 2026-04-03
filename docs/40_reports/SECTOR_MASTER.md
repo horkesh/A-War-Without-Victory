@@ -1,10 +1,25 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-03-19 (sector demarcation lines re-enabled on map)
+**Updated:** 2026-04-03 (physical sector ownership and reserve/frontline truth hardened)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
 
 ---
+
+## 2026-04-03: Physical sector ownership hardening
+
+**Change:** Added a final sector truth pass after late assignment/review phases. `enforcePhysicalSectorOwnership(...)` strips any brigade from a sector unless its current `location_osid` is:
+- on the sector frontline,
+- inside the sector territory,
+- or one hop behind the frontline as reserve.
+
+**Why:** Contiguity and cross-corps rescue were no longer the only sources of false sector truth. Late coverage / commander-review style passes could still leave brigades rostered into sectors they did not physically hold. The engine was then returning those rosters as if they were present frontline truth.
+
+**Related frontline change:** `buildFrontlineAssignedFormationSet(...)` now uses only `assigned_brigade_ids`; sector reserves remain sector-owned but no longer count as line brigades for fatigue, officer-quality updates, or scenario reporting.
+
+**Run evidence:** Fresh run `n1309` kept `cross_corps_sector_assignment = 0` and sharply reduced false final-sector ownership. The remaining unresolved brigades are now largely exposed honestly instead of being paper-washed into sectors.
+
+**Report:** [implemented/20260403_PHYSICAL_SECTOR_OWNERSHIP_AND_FRONTLINE_RESERVE_SPLIT.md](implemented/20260403_PHYSICAL_SECTOR_OWNERSHIP_AND_FRONTLINE_RESERVE_SPLIT.md)
 
 ## Current State (n842)
 

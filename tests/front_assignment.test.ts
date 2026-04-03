@@ -70,7 +70,7 @@ test('legacy brigade_front_assignment no longer creates runtime frontline truth'
     assert.equal(isBrigadeAssignedToFront(state, 'b2'), false);
 });
 
-test('isBrigadeAssignedToFront treats corps sectors as frontline truth without legacy front assignments', () => {
+test('isBrigadeAssignedToFront treats only assigned corps-sector brigades as frontline truth', () => {
     const state = makeState();
     state.military.brigade_front_assignment = {};
     state.military.corps_front_sectors = {
@@ -89,9 +89,9 @@ test('isBrigadeAssignedToFront treats corps sectors as frontline truth without l
     } as any;
 
     const assigned = buildFrontlineAssignedFormationSet(state);
-    assert.deepStrictEqual([...assigned].sort(), ['b1', 'b2']);
+    assert.deepStrictEqual([...assigned].sort(), ['b1']);
     assert.ok(isBrigadeAssignedToFront(state, 'b1'));
-    assert.ok(isBrigadeAssignedToFront(state, 'b2'));
+    assert.equal(isBrigadeAssignedToFront(state, 'b2'), false);
 });
 
 test('sector frontline truth ignores stale legacy front assignments when sectors exist', () => {
@@ -133,7 +133,7 @@ test('sector frontline truth ignores stale legacy front assignments when sectors
     } as any;
 
     const assigned = buildFrontlineAssignedFormationSet(state);
-    assert.deepStrictEqual([...assigned].sort(), ['b1', 'b2']);
+    assert.deepStrictEqual([...assigned].sort(), ['b1']);
     assert.equal(isBrigadeAssignedToFront(state, 'b3'), false);
 });
 

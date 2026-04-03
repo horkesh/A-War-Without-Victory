@@ -10,6 +10,7 @@ import {
     classifyBrigadesByTerritory,
     ensureMinimumSectorCoverage,
     assignCrossCorpsEnclaveDefenders,
+    enforcePhysicalSectorOwnership,
     warnUnresolvedSectorAssignments,
 } from '../src/sim/combat/brigade_assignment.js';
 import type {
@@ -890,6 +891,37 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
 
         expect(localFactionSector.assigned_brigade_ids).not.toContain('brig_rescued_enclave');
         expect(emittedUnresolved).toBe(true);
+    });
+
+    it('strips late paper assignments that are not on the sector front, territory, or one-hop reserve band', () => {
+        const sector = makeSector(
+            'sector:vrs_drina:0',
+            'vrs_drina',
+            [makeSubSeg('front', ['op:m:front'], ['op:m:enemy'], 3)],
+            ['op:m:front', 'op:m:sector_depth'],
+        );
+
+        const formations: Record<FormationId, FormationState> = {
+            brig_false: makeFormation({
+                id: 'brig_false',
+                corps_id: 'vrs_drina',
+                location_osid: 'op:m:wrong_rear',
+            }),
+        };
+
+        sector.assigned_brigade_ids = ['brig_false'];
+
+        const adjacency = new Map<Osid, Osid[]>([
+            ['op:m:front' as Osid, ['op:m:sector_depth' as Osid]],
+            ['op:m:sector_depth' as Osid, ['op:m:front' as Osid]],
+            ['op:m:wrong_rear' as Osid, []],
+        ]);
+        const friendlyOsids = new Set<string>(['op:m:front', 'op:m:sector_depth', 'op:m:wrong_rear']);
+
+        enforcePhysicalSectorOwnership([sector], formations, adjacency, friendlyOsids);
+
+        expect(sector.assigned_brigade_ids).not.toContain('brig_false');
+        expect(sector.reserve_brigade_ids).not.toContain('brig_false');
     });
 
     it('does emit a final unresolved warning for a loaned reserve brigade that still falls through', () => {

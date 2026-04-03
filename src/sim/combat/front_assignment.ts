@@ -8,9 +8,6 @@ export function buildFrontlineAssignedFormationSet(state: GameState): Set<Format
         for (const brigadeId of sector.assigned_brigade_ids ?? []) {
             assigned.add(brigadeId as FormationId);
         }
-        for (const brigadeId of sector.reserve_brigade_ids ?? []) {
-            assigned.add(brigadeId as FormationId);
-        }
     }
     return assigned;
 }

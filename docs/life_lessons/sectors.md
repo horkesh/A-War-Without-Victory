@@ -27,6 +27,18 @@
 - **Right approach**: Cross-corps rescue is only truthful when the brigade's current `location_osid` is already on that sector's frontline or inside its territory. Otherwise the brigade stays unresolved.
 - **Do instead**: Treat unresolved as honest. Let movement, loans, or future sector formation solve the problem instead of assigning the brigade to a foreign sector that does not physically own its position.
 
+### [Sectors] Sector rosters need one last physical-truth pass after all late writers (2026-04-03) – NEW
+- **Context**: Even after contiguity and enclave rescue were fixed, the final sector set could still contain brigades that late coverage/review passes had only assigned on paper. The sector builder produced honest fronts, then later phases quietly polluted the rosters again.
+- **Wrong approach**: Assuming a truthful early assignment pass stays truthful forever. Any late writer can reintroduce fake sector ownership.
+- **Right approach**: Before sectors leave the pipeline, strip every brigade whose `location_osid` is not on the sector front, in its territory, or one hop behind as reserve.
+- **Do instead**: Treat unresolved as preferable to paper truth. Put the final physical-ownership guard after every late assignment/rebalance pass and only then emit unresolved warnings.
+
+### [Sectors] Reserves are sector-owned, not frontline-owned (2026-04-03) – NEW
+- **Context**: `reserve_brigade_ids` were still being counted as frontline-assigned formations. That leaked reserve presence into fatigue recovery, officer-quality updates, and scenario reporting as if those brigades were physically holding the line.
+- **Wrong approach**: Using all sector roster membership as equivalent frontline truth.
+- **Right approach**: `assigned_brigade_ids` = frontline truth. `reserve_brigade_ids` = nearby reaction/recovery force, still sector-owned but not "on the line."
+- **Do instead**: When a helper answers "who is on the front?", use only assigned brigades. Keep reserves available to sector-specific logic without letting them masquerade as line holders.
+
 ### [Sectors] Sector merge guards must use front-edge adjacency, not OSID polygon contact (2026-04-01) — NEW
 - **Context**: `areSectorsTerritoryAdjacent` returned true for Herzegovina sectors (Drina Foča vs West Herzegovina) because `op:foca:donje_zesce` and `op:foca:izbisno` have min_dist=0 — genuine polygon neighbors. But they face completely different fronts. The merge guard was answering the wrong question: "do these territories touch?" instead of "do these front edges form a contiguous line?"
 - **Impact**: Sectors on opposite sides of the country were merging into a single sector via Step 4d and `mergeSmallAdjacentSectors`. Brigades from different fronts were pooled together, disrupting assignment logic.
