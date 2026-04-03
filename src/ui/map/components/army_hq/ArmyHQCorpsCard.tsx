@@ -108,7 +108,11 @@ export function ArmyHQCorpsCard({
             artyTotal: Math.round(rawEquip.artyTotal),
         };
 
-        return { totalPersonnel, avgCohesion, avgFatigue, eff, commander, stance, activeOp, corpsBattles, equipment };
+        const strain = corps.commandStrain ?? 0;
+        const strainLabel = corps.commandStrainLabel ?? 'healthy';
+        const frictionTypes = corps.activeFrictionTypes ?? [];
+
+        return { totalPersonnel, avgCohesion, avgFatigue, eff, commander, stance, activeOp, corpsBattles, equipment, strain, strainLabel, frictionTypes };
     }, [corps, brigades, sectors, operations, factionBattles, gameState]);
 
     const displayName = formatCorpsDisplayName(corps.name, corps.id);
@@ -241,6 +245,46 @@ export function ArmyHQCorpsCard({
                         </div>
                     </div>
                 )}
+
+                {/* Command Strain indicator — only when strain > 0 */}
+                {data.strain > 0 && (
+                    <div className="mt-2.5 flex flex-wrap gap-1.5">
+                        <div
+                            className={`px-2 py-0.5 text-[9px] font-bold tracking-widest border ${
+                                data.strainLabel === 'compromised'
+                                    ? 'bg-red-900/30 border-red-500/40 text-red-400'
+                                    : 'bg-amber-900/30 border-amber-500/40 text-amber-400'
+                            }`}
+                            title={
+                                data.strainLabel === 'compromised'
+                                    ? 'Repeated presidential intervention has severely undermined command cohesion.'
+                                    : 'Presidential overrides have strained this command relationship.'
+                            }
+                        >
+                            {data.strainLabel === 'compromised' ? '⚠ COMMAND COMPROMISED' : '⚠ COMMAND STRAINED'}
+                        </div>
+                        {/* Warlord friction active — only when unresolved events exist */}
+                        {data.frictionTypes.length > 0 && (
+                            <div
+                                className="px-2 py-0.5 text-[9px] font-bold tracking-widest border bg-amber-900/20 border-amber-600/40 text-amber-500"
+                                title="This commander is exhibiting warlord behaviour — ignoring orders or refusing to release brigades."
+                            >
+                                FRICTION ACTIVE
+                            </div>
+                        )}
+                    </div>
+                )}
+                {/* Warlord friction indicator — shown even when strain = 0 */}
+                {data.strain === 0 && data.frictionTypes.length > 0 && (
+                    <div className="mt-2.5">
+                        <div
+                            className="px-2 py-0.5 text-[9px] font-bold tracking-widest border bg-amber-900/20 border-amber-600/40 text-amber-500 inline-block"
+                            title="This commander is exhibiting warlord behaviour — ignoring orders or refusing to release brigades."
+                        >
+                            FRICTION ACTIVE
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Health stripe: cohesion (green/amber/red) + fatigue (blue) */}
@@ -298,6 +342,34 @@ export function ArmyHQCorpsCard({
                     </div>
                 </div>
             </div>
+
+            {/* Command Strain / Friction banner — back face */}
+            {(data.strain > 0 || data.frictionTypes.length > 0) && (
+                <div className="flex items-center gap-2 px-4 py-1.5 border-b border-panel-border bg-panel-bg/60 flex-wrap">
+                    {data.strain > 0 && (
+                        <span
+                            className={`text-[9px] font-bold tracking-widest uppercase ${
+                                data.strainLabel === 'compromised' ? 'text-red-400' : 'text-amber-400'
+                            }`}
+                            title={
+                                data.strainLabel === 'compromised'
+                                    ? 'Repeated presidential intervention has severely undermined command cohesion.'
+                                    : 'Presidential overrides have strained this command relationship.'
+                            }
+                        >
+                            Command Strain: {data.strainLabel === 'compromised' ? 'Compromised' : 'Strained'} [{data.strain}]
+                        </span>
+                    )}
+                    {data.frictionTypes.length > 0 && (
+                        <span
+                            className="text-[9px] font-bold tracking-widest uppercase text-amber-500"
+                            title="This commander is exhibiting warlord behaviour — ignoring orders or refusing to release brigades."
+                        >
+                            · Warlord Friction Active
+                        </span>
+                    )}
+                </div>
+            )}
 
             {/* Sections wrapper */}
             <div className="flex flex-col gap-[1px] bg-panel-bg">
