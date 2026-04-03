@@ -41,7 +41,7 @@
     "sim:scenario:sweep": "tsx tools/scenario_runner/run_scenario_sweep_h2_4.ts",
     "sim:scenario:phase0-repeat": "tsx tools/scenario_runner/run_phase0_repeat.ts",
     "test:baselines": "tsx tools/scenario_runner/run_baseline_regression.ts",
-    "recovery:check": "npm run typecheck && npm run desktop:map:build && node_modules\\.bin\\tsx.cmd --test tests\\bot_corps_ai_sector_contract.test.ts tests\\scenario_operation_diagnostics.test.ts tests\\scenario_control_change_attribution_contract.test.ts tests\\scenario_reporting_contracts.test.ts tests\\ui_map_fog_and_operation_contracts.test.ts tests\\scenario_bots_determinism_h2_4.test.ts tests\\scenario_vrs_operation_proof.test.ts && node_modules\\.bin\\vitest.cmd run tests\\sector_rearrangement.test.ts tests\\sector_contiguity_split.test.ts",
+    "recovery:check": "npm run typecheck && npm run desktop:map:build && tsx --test tests\\bot_corps_ai_sector_contract.test.ts tests\\scenario_operation_diagnostics.test.ts tests\\scenario_control_change_attribution_contract.test.ts tests\\scenario_reporting_contracts.test.ts tests\\ui_map_fog_and_operation_contracts.test.ts tests\\scenario_bots_determinism_h2_4.test.ts tests\\scenario_vrs_operation_proof.test.ts && vitest run tests\\sector_rearrangement.test.ts tests\\sector_contiguity_split.test.ts",
     "recovery:check:full": "npm run recovery:check && npm run sim:scenario:run:40w -- --scenario data/scenarios/apr1992_definitive_40w.json --unique --out runs",
     "sim:data:check": "tsx tools/data_prereq/check_data.ts",
     "sim:formation:derive-max-brigades": "tsx tools/formation/derive_max_brigades_per_mun.ts",

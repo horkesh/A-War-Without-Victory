@@ -22209,3 +22209,29 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\sector_rearrangement.test.ts tests\\ui_shell_navigation.test.ts`
 - `npx.cmd tsc --noEmit -p tsconfig.json`
 - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Activity truth and local tsx recovery
+
+### Summary
+- Restored Windows-safe local `tsx` / `vitest` execution without relying on missing `.bin` shims.
+- Removed the scenario preflight wrapper's fragile npm hop and invoked the local `tsx` CLI directly.
+- Fixed the sector-owned activity filter so canonical graph edges still match live OSID sector edges through the operational map.
+- Re-ran the canonical 40-week scenario on `main`; `activity_summary.json` is non-zero again and sector contiguity stays clean.
+
+### Files changed
+- `package.json`
+- `tools/scenario_runner/run_scenario_with_preflight.ts`
+- `src/sim/displacement_pipeline/displacement_triggers.ts`
+- `tests/displacement_pipeline_displacement_triggers.test.ts`
+- `tsx.cmd`
+- `vitest.cmd`
+- `docs/40_reports/implemented/20260403_ACTIVITY_TRUTH_AND_LOCAL_TSX_RECOVERY.md`
+
+### Why
+- Windows packaging truth matters: if the repo’s own scenario path depends on shell PATH luck, debugging starts with tooling fiction.
+- The bigger engine bug was an edge-universe mismatch: sectors owned OSID frontier edges, while displacement activity still filtered canonical graph edges against them directly, producing false all-zero activity summaries.
+
+### Verification
+- `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\displacement_pipeline_displacement_triggers.test.ts tests\\scenario_activity_truth.test.ts`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run sim:scenario:run:40w`

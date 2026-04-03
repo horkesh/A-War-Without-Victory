@@ -67,7 +67,16 @@ function getSectorOwnedEligiblePressureEdges(
 
     for (const edge of sortedEdges) {
         const edgeId = toEdgeId(edge.a, edge.b);
-        if (!liveEdgeIds.has(edgeId) || seen.has(edgeId)) continue;
+        const operationalA =
+            canonicalToOperational && !edge.a.startsWith('op:')
+                ? (canonicalToOperational[edge.a] ?? edge.a)
+                : edge.a;
+        const operationalB =
+            canonicalToOperational && !edge.b.startsWith('op:')
+                ? (canonicalToOperational[edge.b] ?? edge.b)
+                : edge.b;
+        const operationalEdgeId = toEdgeId(operationalA, operationalB);
+        if ((!liveEdgeIds.has(edgeId) && !liveEdgeIds.has(operationalEdgeId)) || seen.has(edgeId)) continue;
         seen.add(edgeId);
         if (!isPressureEligible(state, { a: edge.a, b: edge.b }, undefined, canonicalToOperational)) continue;
         eligible.push(strictCompare(edge.a, edge.b) <= 0 ? edge : { a: edge.b, b: edge.a });

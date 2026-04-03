@@ -415,3 +415,7 @@ After EVERY scenario run, the orchestrator:
    Do instead: If desktop IPC is available or the map is embedded, the mounted tactical toolbar must expose a visible `WARROOM` return affordance. A hidden bridge method in legacy code is not enough.
 4. **[2026-04-03] Missing roadmap priorities must become plans before code**
    Do instead: If sector/frontline truth, UI density, shell cohesion, or product architecture simplification becomes a near-term priority, make sure there is an execution-grade Pyrrhic plan in `docs/plans/` before implementation starts.
+5. **[2026-04-03] Canonical and operational edge universes must be bridged explicitly**
+   Do instead: When sector/frontline code consumes canonical settlement edges but sectors own OSID frontier edges, normalize edge IDs at the boundary. Never let mismatched geometry silently collapse activity or pressure to zero.
+6. **[2026-04-03] Windows-safe local CLIs are part of the repo contract**
+   Do instead: Critical scripts should invoke local package entrypoints directly or provide repo-local wrappers like `tsx.cmd` / `vitest.cmd`. Do not rely on `.bin` shims or PATH luck inside nested npm/shell hops.

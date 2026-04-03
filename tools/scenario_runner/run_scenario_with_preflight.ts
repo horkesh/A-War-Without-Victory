@@ -8,6 +8,7 @@
  */
 
 import { spawn } from 'node:child_process';
+import { join } from 'node:path';
 
 import { checkDataPrereqs, formatMissingRemediation } from '../../src/data_prereq/check_data_prereqs.js';
 
@@ -19,11 +20,15 @@ if (!prereqResult.ok) {
 }
 
 const args = process.argv.slice(2);
-const child = spawn('npm', ['run', 'sim:scenario:harness', '--', ...args], {
-  stdio: 'inherit',
-  shell: process.platform === 'win32',
-  cwd: process.cwd()
-});
+const repoRoot = process.cwd();
+const child = spawn(
+  process.execPath,
+  [join(repoRoot, 'node_modules', 'tsx', 'dist', 'cli.mjs'), join(repoRoot, 'tools', 'scenario_runner', 'run_scenario.ts'), ...args],
+  {
+    stdio: 'inherit',
+    cwd: repoRoot
+  }
+);
 
 child.on('error', (err) => {
   console.error('run_scenario_with_preflight: harness spawn failed', err);

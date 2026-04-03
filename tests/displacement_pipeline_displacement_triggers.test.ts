@@ -108,3 +108,37 @@ test('evaluateDisplacementTriggers: prefers sector-owned edge scope when live se
     assert.strictEqual(report.front_active_set_size, 2);
     assert.strictEqual(report.displacement_trigger_eligible_size, 2);
 });
+
+test('evaluateDisplacementTriggers: matches live sector OSID edges against canonical graph edges via operational mapping', () => {
+    const state = minimalPhaseIIState({ 'op:s1': 'RBiH', 'op:s2': 'RS', 'op:s3': 'RBiH', 'op:s4': 'RS' });
+    state.military.corps_front_sectors = {
+        'sector:rbih': {
+            sector_id: 'sector:rbih',
+            corps_id: 'arbih_1st_corps',
+            faction: 'RBiH',
+            opposing_factions: ['RS'],
+            edge_ids: ['op:s1__op:s2'],
+            sub_segments: [],
+            territory_osids: [],
+            assigned_brigade_ids: [],
+            reserve_brigade_ids: [],
+            length_edges: 1,
+        },
+    } as any;
+
+    const edges: EdgeRecord[] = [
+        { a: 'S1', b: 'S2' },
+        { a: 'S3', b: 'S4' },
+    ];
+
+    const { deltas, report } = evaluateDisplacementTriggers(
+        state,
+        edges,
+        { S1: 'op:s1', S2: 'op:s2', S3: 'op:s3', S4: 'op:s4' }
+    );
+
+    assert.deepStrictEqual(Object.keys(deltas).sort(), ['S1', 'S2']);
+    assert.strictEqual(report.pressure_eligible_size, 1);
+    assert.strictEqual(report.front_active_set_size, 2);
+    assert.strictEqual(report.displacement_trigger_eligible_size, 2);
+});
