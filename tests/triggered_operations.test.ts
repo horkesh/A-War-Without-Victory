@@ -2,13 +2,14 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { checkTriggeredOperations, _TRIGGERED_OPS } from '../src/sim/combat/triggered_operations.js';
+import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import type {
     CorpsCommandState,
-    CorpsFrontSector,
     FactionId,
     FormationState,
     GameState,
 } from '../src/state/game_state.js';
+import { makeSector } from './test_factories.js';
 
 function makeFormation(id: string, corpsId: string, overrides: Partial<FormationState> = {}): FormationState {
     return {
@@ -40,19 +41,22 @@ function makeCorpsCmd(overrides: Partial<CorpsCommandState> = {}): CorpsCommandS
 function makeState(turn: number): GameState {
     const formations: Record<string, FormationState> = {};
     const corpsCommand: Record<string, CorpsCommandState> = {};
-    const corpsFrontSectors: Record<string, CorpsFrontSector> = {};
+    const corpsFrontSectors: Record<string, ReturnType<typeof makeSector>> = {};
 
     const allCorpsIds = [...new Set(_TRIGGERED_OPS.flatMap((def) => [def.primary_corps, ...def.axes.map((axis) => axis.corps)]))];
     for (const corpsId of allCorpsIds) {
         corpsCommand[corpsId] = makeCorpsCmd();
-        corpsFrontSectors[`sector:${corpsId}:0`] = {
+        corpsFrontSectors[`sector:${corpsId}:0`] = makeSector({
             sector_id: `sector:${corpsId}:0`,
             corps_id: corpsId,
+            faction: 'RS' as FactionId,
+            opposing_factions: ['RBiH' as FactionId],
+            edge_ids: [],
             assigned_brigade_ids: [],
             reserve_brigade_ids: [],
             length_edges: 1,
             territory_osids: [],
-        } as CorpsFrontSector;
+        });
     }
 
     for (const def of _TRIGGERED_OPS) {
@@ -78,6 +82,7 @@ function makeState(turn: number): GameState {
     }
 
     return {
+        schema_version: CURRENT_SCHEMA_VERSION,
         meta: {
             turn,
             phase: 'war',
@@ -89,10 +94,14 @@ function makeState(turn: number): GameState {
             formations,
             corps_command: corpsCommand,
             corps_front_sectors: corpsFrontSectors,
+            front_segments: {},
+            front_posture: {},
+            front_pressure: {},
         } as any,
         political: {
             political_controllers: politicalControllers,
         } as any,
+        displacement: {} as any,
     } as unknown as GameState;
 }
 

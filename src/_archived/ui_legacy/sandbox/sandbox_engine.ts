@@ -15,7 +15,6 @@ import type { FormationId, GameState } from '../../../state/game_state.js';
 import { getLegacyAoR } from '../../../state/game_state.js';
 
 import { applyWiaTrickleback } from '../../../sim/formation_spawn.js';
-import { applyBrigadeRepositionOrders } from '../../../sim/combat/apply_brigade_reposition.js';
 import { processBrigadeMovement } from '../../../sim/combat/brigade_movement.js';
 import { applyPostureOrders } from '../../../sim/combat/brigade_posture.js';
 import { applyBrigadePressureToState } from '../../../sim/combat/brigade_pressure.js';
@@ -162,6 +161,15 @@ export interface SandboxTurnReport {
     loadUpLogs: string[];
 }
 
+/**
+ * Archived sandbox compatibility sink.
+ * The live engine retired brigade reposition orders; archived sandbox code
+ * still clears them so old UI state can compile and behave consistently.
+ */
+function applySandboxBrigadeRepositionOrders(state: GameState): void {
+    state.military.brigade_reposition_orders = undefined;
+}
+
 // ---------------------------------------------------------------------------
 // Sandbox pipeline
 // ---------------------------------------------------------------------------
@@ -226,7 +234,7 @@ export function advanceSandboxTurn(
     // 2b. Apply brigade reposition orders
     let repositionApplied = false;
     if (state.military.brigade_reposition_orders && Object.keys(state.military.brigade_reposition_orders).length > 0) {
-        applyBrigadeRepositionOrders(state, edges);
+        applySandboxBrigadeRepositionOrders(state);
         repositionApplied = true;
     }
 

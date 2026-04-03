@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { attemptCorridorBreach } from '../src/sim/combat/bot_corps_corridor.js';
-import { CURRENT_SCHEMA_VERSION, type EdgeRecord, type FactionId, type GameState } from '../src/state/game_state.js';
+import { CURRENT_SCHEMA_VERSION, type FactionId, type GameState } from '../src/state/game_state.js';
+import type { EdgeRecord } from '../src/map/settlements.js';
 import { makeCorps, makeFormation, makeSector } from './test_factories.js';
 
 function makeState(): { state: GameState; edges: EdgeRecord[]; sidToMun: Map<string, string> } {

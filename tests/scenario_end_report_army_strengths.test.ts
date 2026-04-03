@@ -13,7 +13,6 @@ function makeState(): GameState {
             { id: 'RBiH' },
             { id: 'RS' },
         ] as any,
-        brigade_aor: {},
         political: {} as any,
         military: {
             formations: {
@@ -76,13 +75,14 @@ function makeState(): GameState {
                 },
             },
         } as any,
-    } as GameState;
+        displacement: {} as any,
+    } as unknown as GameState;
 }
 
-test('computeArmyStrengthsSummary counts frontline brigades from sectors first with legacy fallback', () => {
+test('computeArmyStrengthsSummary counts frontline brigades from live sector assignments only', () => {
     const summary = computeArmyStrengthsSummary(makeState());
     assert.deepEqual(summary.front_assignment_counts_by_faction, [
         { faction: 'RBiH', assigned_brigades: 2 },
-        { faction: 'RS', assigned_brigades: 1 },
+        { faction: 'RS', assigned_brigades: 0 },
     ]);
 });

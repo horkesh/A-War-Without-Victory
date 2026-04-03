@@ -52,6 +52,8 @@ export function OperationsPanel() {
   const setArmyHQTab = useGameStore((s) => s.setArmyHQTab);
   const setArmyHQRecordsSubTab = useGameStore((s) => s.setArmyHQRecordsSubTab);
   const setArmyHQExpandedCorpsId = useGameStore((s) => s.setArmyHQExpandedCorpsId);
+  const setCodexOpen = useGameStore((s) => s.setCodexOpen);
+  const setChronicleOpen = useGameStore((s) => s.setChronicleOpen);
   const lastAutoFocusOperationKeyRef = useRef<string | null>(null);
   const operationCardRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const objectiveButtonRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -218,6 +220,8 @@ export function OperationsPanel() {
       setArmyHQTab,
       setArmyHQRecordsSubTab,
       setArmyHQExpandedCorpsId,
+      setCodexOpen,
+      setChronicleOpen,
     }, selectedOperation?.corps_id ?? null);
   };
 

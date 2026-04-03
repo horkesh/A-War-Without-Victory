@@ -30,6 +30,8 @@ function makeLoadedGameState(): LoadedGameState {
     movementsByOsid: {},
     supplyTransitionsByOsid: {},
     historicalEventsByTurn: [],
+    latestTurnSummary: null,
+    turnSummaries: [],
     casualtyLedger: {
       RBiH: { killed: 100, wounded: 250, missing_captured: 0 },
       RS: { killed: 300, wounded: 500, missing_captured: 0 },
@@ -42,7 +44,7 @@ function makeLoadedGameState(): LoadedGameState {
     },
     pressureWarning: false,
     player_faction: 'RBiH',
-  } as LoadedGameState;
+  } as unknown as LoadedGameState;
 }
 
 describe('ui army hq war summary visibility', () => {

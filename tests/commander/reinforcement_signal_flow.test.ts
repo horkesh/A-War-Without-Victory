@@ -1,15 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import type { GameState } from '../../src/state/game_state.js';
-import type { CommanderOutput, CommanderState } from '../../src/sim/combat/commander/commander_state.js';
+import { CURRENT_SCHEMA_VERSION, type GameState } from '../../src/state/game_state.js';
+import type { CommanderOutput, CommanderState, ZoneId } from '../../src/sim/combat/commander/commander_state.js';
 import { applyCommanderOutput } from '../../src/sim/combat/commander/commander_loop.js';
 
 function makeState(): GameState {
     return {
+        schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 12 } as GameState['meta'],
         military: {
             formations: {},
             front_segments: {},
             front_posture: {},
+            front_pressure: {},
             corps_command: {
                 vrs_1st_krajina: {
                     command_span: 3,
@@ -25,7 +27,7 @@ function makeState(): GameState {
         political: {} as GameState['political'],
         factions: {} as GameState['factions'],
         displacement: {} as GameState['displacement'],
-    };
+    } as unknown as GameState;
 }
 
 function makeOutput(): CommanderOutput {
@@ -37,7 +39,7 @@ function makeOutput(): CommanderOutput {
             avoid_osids: [],
             max_attackers_per_target: 3,
             reserve_fraction: 0.2,
-            min_attack_outcome: 'risky',
+            min_attack_outcome: 'repulsed',
             aggression_modifier: 0,
         },
         operations: [],
@@ -45,8 +47,8 @@ function makeOutput(): CommanderOutput {
         updated_state: {} as CommanderState,
         garrison_locks: [],
         reinforcement_requests: [
-            { zone_id: 'zone:vrs_1st_krajina:ozren', brigades_needed: 2, priority: 'critical' },
-            { zone_id: 'zone:vrs_1st_krajina:doboj', brigades_needed: 1, priority: 'medium' },
+            { zone_id: 'zone:vrs_1st_krajina:ozren' as ZoneId, brigades_needed: 2, priority: 'critical' },
+            { zone_id: 'zone:vrs_1st_krajina:doboj' as ZoneId, brigades_needed: 1, priority: 'medium' },
         ],
         plan_updates: [],
     };

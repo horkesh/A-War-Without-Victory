@@ -105,7 +105,7 @@ function FactionTag({ faction }: { faction: string }) {
     );
 }
 
-function DefenderBreakdown({ contributions, onSelectFormation }: {
+function DefenderBreakdown({ contributions, onSelectFormation, formationNameById }: {
     contributions: NonNullable<TurnBattle['defender_contributions']>;
     onSelectFormation?: (id: string) => void;
     formationNameById: Map<string, string>;

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { GameState, FormationState, CorpsOperation } from '../src/state/game_state.js';
+import type { GameState, FormationState, CorpsOperation, CorpsCommandState } from '../src/state/game_state.js';
 import type { TheaterAssessment, CorpsAssessment } from '../src/sim/combat/army_hq_gathering_types.js';
 import {
     getGatheringCadence,
@@ -170,7 +170,7 @@ describe('canCorpsAttendGathering', () => {
 function makeTheaterState(overrides: {
     turn?: number;
     formations?: Record<string, Partial<FormationState>>;
-    corpsCommand?: Record<string, { corps_exhaustion?: number; active_operations?: unknown }>;
+    corpsCommand?: Record<string, Partial<CorpsCommandState>>;
     generalSupplyReserve?: Record<string, number>;
     controlEvents?: Array<{ turn: number; settlement_id: string; from: string | null; to: string | null; mechanism?: 'combat' | 'consolidation' | 'abandoned' | 'event' }>;
     corpsFrontSectors?: Record<string, unknown>;

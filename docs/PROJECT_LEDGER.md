@@ -21690,6 +21690,37 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_player_visibility.test.ts`
 - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
 
+## 2026-04-03 - Post-merge UI type cleanup on main
+
+### Summary
+- Fixed the leftover main-branch type regressions after the truth-ownership merge by aligning AAR and OperationsPanel with the new shell-navigation contract.
+- Retired one dead archived reposition import and deleted the invalid theatre test that still referenced the removed theatre runtime.
+- Updated stale test fixtures to the current `GameState` / `LoadedGameState` / sector-shape contracts so compiler truth matches the cleaned engine.
+
+### Files changed
+- `src/_archived/ui_legacy/sandbox/sandbox_engine.ts`
+- `src/ui/map/components/AARPanel.tsx`
+- `src/ui/map/components/OperationsPanel.tsx`
+- `tests/army_hq_gathering.test.ts`
+- `tests/bot_corps_corridor.test.ts`
+- `tests/commander/reinforcement_signal_flow.test.ts`
+- `tests/scenario_end_report_army_strengths.test.ts`
+- `tests/triggered_operations.test.ts`
+- `tests/ui_army_hq_war_summary_visibility.test.ts`
+- `tests/theatres.test.ts`
+- `docs/40_reports/implemented/20260403_POST_MERGE_UI_TYPE_CLEANUP.md`
+
+### Why
+- The merge retired real legacy/runtime authority paths, but a handful of UI and test surfaces were still shaped like the pre-cleanup repo.
+- This was compiler sludge, not a reason to back away from the shell/authority cleanup. Cleaning it immediately keeps `main` honest and safe for the next wave.
+
+### Verification
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\army_hq_gathering.test.ts tests\\bot_corps_corridor.test.ts tests\\ui_army_hq_war_summary_visibility.test.ts`
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\commander\\reinforcement_signal_flow.test.ts`
+- `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\scenario_end_report_army_strengths.test.ts tests\\triggered_operations.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
 ## 2026-04-03 - Local fronts schema residue retirement
 
 ### Summary
