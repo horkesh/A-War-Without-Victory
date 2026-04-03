@@ -81,10 +81,6 @@ import { checkAndApplyWashington } from '../early_war/washington_agreement.js';
 import { updateMixedMunicipalitiesList } from '../early_war/mixed_municipality.js';
 import { checkAndApplyOperationStorm } from '../combat/operation_storm.js';
 import { tickHvIntegration } from '../combat/hv_integration.js';
-import {
-    applyCorpsFrontAutoDistribution,
-    ensureDerivedCorpsFrontEdges
-} from '../combat/corps_front_assign.js';
 import { runCohesionDrift } from '../combat/cohesion_drift.js';
 import { runMoraleDrift } from '../combat/morale_drift.js';
 import { runOngoingMobilization } from '../combat/ongoing_mobilization.js';
@@ -1097,22 +1093,6 @@ export const warPhases: NamedPhase[] = [
                 context.report.bot_order_diagnostics = createBotOrderDiagnosticsSnapshot(context.state, botOrderDiagnostics);
             }
             // When operational data unavailable: no bot brigade orders (AoR path removed).
-        }
-    },
-    {
-        name: 'ensure-derived-corps-front-edges',
-        run: async (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            const { edges } = await getGraphAndEdges(context);
-            ensureDerivedCorpsFrontEdges(context.state, edges);
-        }
-    },
-    {
-        name: 'apply-corps-front-orders',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            if (!context.state.military.corps_front_edges) return;
-            applyCorpsFrontAutoDistribution(context.state);
         }
     },
     {

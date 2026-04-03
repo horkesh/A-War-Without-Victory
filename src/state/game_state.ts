@@ -1710,13 +1710,6 @@ brigade_front_assignment?: Record<FormationId, string | null>;
 theatres?: Record<string, TheatreState>;
 /** Legacy theatre compatibility assignment. Preserved only for old saves/tools. */
 army_theatre_assignment?: Record<FormationId, string>;
-/**
-     * Corps front assignment (HoI-style): per-corps normalized edge_ids (e.g. "S1__S2").
-     * Army front is derived as the union of corps fronts.
-     */
-corps_front_edges?: Record<FormationId, string[]>;
-/** Optional fallback front lines for controlled withdrawal. */
-corps_fallback_front_edges?: Record<FormationId, string[]>;
 /** Legacy AoR tuning compatibility field. Do not expose in the live player shell and do not write new values. */
 brigade_desired_aor_cap?: Record<FormationId, number>;
 /** Pending brigade posture orders (consumed once per turn). */
@@ -1741,8 +1734,6 @@ declined_operations?: Record<string, { declined_turn: number; decline_count: num
 army_stance?: Record<FactionId, ArmyStance>;
 /** OG activation orders (consumed once per turn). */
 og_orders?: OGActivationOrder[];
-/** Optional OG subfront extent as front edge IDs (subset of parent corps front). */
-og_subfront_edges?: Record<FormationId, string[]>;
 /** Settlement holdout state (Peace phase settlement-level control). Key: SettlementId. */
 settlement_holdouts?: Record<SettlementId, SettlementHoldoutState>;
 /** Recruitment resources: capital pools, equipment pools, recruited brigade tracking. */

@@ -118,20 +118,10 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
   - Returns: `{ ok: boolean, error?: string }`
   - Behavior: adds or removes the sector from `state.opsec_sectors`, reserializes, and broadcasts the updated state. OPSEC affects sector-intel buildup; it is not a direct combat modifier.
 
-- `stage-corps-front-order` (invoke)
-    - Payload: `{ corpsId: string, edgeIds: string[] }`
-    - Returns: `{ ok: boolean, error?: string }`
-    - Behavior: validates and normalizes front edge IDs for the corps (`A__B` sorted), writes `state.corps_front_edges[corpsId] = sortedUnique(edgeIds)`, reserializes, sends state via `game-state-updated`.
-
 - `stage-corps-attack-axis-order` (invoke)
     - Payload: `{ corpsId: string, edgeIds: string[] }`
     - Returns: `{ ok: boolean, error?: string }`
     - Behavior: validates and normalizes edge IDs, writes `state.corps_attack_axis_orders[corpsId] = { edge_ids: sortedUnique(edgeIds), created_turn }`, reserializes, sends state via `game-state-updated`.
-
-- `stage-og-subfront-order` (invoke)
-    - Payload: `{ ogId: string, corpsId: string, edgeIds: string[] }`
-    - Returns: `{ ok: boolean, error?: string }`
-    - Behavior: validates OG/corps linkage and edge subset intent, writes `state.og_subfront_edges[ogId] = sortedUnique(edgeIds)` (derived against corps front in main), reserializes, sends state via `game-state-updated`.
 
 - `assign-commander` (invoke)
     - Payload: `{ officerId: string, corpsId: string }`

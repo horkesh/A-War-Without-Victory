@@ -214,6 +214,21 @@ describe('engine honesty legacy contracts', () => {
     expect(desktopSim).not.toContain('export function stageOgSubfrontOrder');
   });
 
+  it('does not keep dead corps-front runtime authority in the live war pipeline or state schema', () => {
+    const warPhases = readFileSync(join(process.cwd(), 'src', 'sim', 'turn_phases', 'war_phases.ts'), 'utf8');
+    const scenarioRunner = readFileSync(join(process.cwd(), 'src', 'scenario', 'scenario_runner.ts'), 'utf8');
+    const gameState = readFileSync(join(process.cwd(), 'src', 'state', 'game_state.ts'), 'utf8');
+
+    expect(warPhases).not.toContain('ensure-derived-corps-front-edges');
+    expect(warPhases).not.toContain('apply-corps-front-orders');
+    expect(warPhases).not.toContain('ensureDerivedCorpsFrontEdges');
+    expect(warPhases).not.toContain('applyCorpsFrontAutoDistribution');
+    expect(scenarioRunner).not.toContain('front_corps_tracking');
+    expect(gameState).not.toContain('corps_front_edges?:');
+    expect(gameState).not.toContain('corps_fallback_front_edges?:');
+    expect(gameState).not.toContain('og_subfront_edges?:');
+  });
+
   it('does not keep retired corps attack-axis bridge paths in live code', () => {
     const preload = readFileSync(join(process.cwd(), 'src', 'desktop', 'preload.cjs'), 'utf8');
     const electronMain = readFileSync(join(process.cwd(), 'src', 'desktop', 'electron-main.cjs'), 'utf8');

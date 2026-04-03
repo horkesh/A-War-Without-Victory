@@ -21739,6 +21739,37 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - `node .\\node_modules\\vite\\bin\\vite.js build --config src\\ui\\warroom\\vite.config.ts`
 - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
 
+## 2026-04-03 - Corps-front runtime authority retirement
+
+### Summary
+- Removed the dead `corps_front_assign.ts` lane from the live war pipeline.
+- Removed `front_corps_tracking` from scenario-run summaries.
+- Removed dead `corps_front_edges`, `corps_fallback_front_edges`, and `og_subfront_edges` fields from the core state schema.
+- Updated the active technical contracts so they no longer advertise corps-front edge staging as a live runtime/player authority.
+
+### Files changed
+- `src/sim/turn_phases/war_phases.ts`
+- `src/scenario/scenario_runner.ts`
+- `src/state/game_state.ts`
+- `tests/engine_honesty_legacy_contracts.test.ts`
+- `docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md`
+- `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`
+- `docs/40_reports/implemented/20260403_CORPS_FRONT_RUNTIME_AUTHORITY_RETIREMENT.md`
+- deleted:
+  - `src/sim/combat/corps_front_assign.ts`
+  - `tests/brigade_corps_front_assign.test.ts`
+
+### Why
+- The file had become a classic false-authority seam: no real derivation, no real distribution, but still a live war-phase presence and a run-summary footprint.
+- In this repo, dead paths that still run every turn are worse than obvious legacy files because they keep teaching future agents the wrong model.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\engine_honesty_legacy_contracts.test.ts tests\\front_assignment.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+### Notes
+- `npx.cmd tsc --noEmit -p tsconfig.json` still reports unrelated pre-existing type drift outside this slice; this checkpoint did not attempt a global TS cleanup.
+
 ## 2026-04-03 - Tactical top-shell density and label cleanup
 
 ### Summary

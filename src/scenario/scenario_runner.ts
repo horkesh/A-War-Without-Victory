@@ -2162,14 +2162,6 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             ...(attackResolutionSummary.weeks_at_war > 0 && state.displacement.civilian_casualties
                 ? { civilian_casualties: state.displacement.civilian_casualties }
                 : {}),
-            ...(attackResolutionSummary.weeks_at_war > 0
-                ? {
-                    front_corps_tracking: {
-                        corps_front_edges_present: !!(state.military.corps_front_edges && Object.keys(state.military.corps_front_edges).length > 0),
-                        corps_count: Object.keys(state.military.corps_front_edges ?? {}).length
-                    }
-                }
-                : {}),
             ...(botBenchmarkSummary ? { bot_benchmark_evaluation: botBenchmarkSummary } : {}),
             ...(victoryEvaluation ? { victory: victoryEvaluation } : {}),
             ...(breachDiagnostic ? { breach_diagnostic: breachDiagnostic } : {}),
