@@ -21718,3 +21718,25 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - `node .\\node_modules\\vite\\bin\\vite.js build --config src/ui/warroom/vite.config.ts`
 - `node .\\node_modules\\tsx\\dist\\cli.mjs tools\\ui\\warroom_stage_assets.ts`
 - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Operations and officer player-safe labels
+
+### Summary
+- Hardened Army HQ operations review, operation briefing, tactical operations panel, and officer replacement surfaces so they no longer trust raw corps or brigade naming.
+- Repointed Army HQ objective labels to canonical OSID display names instead of ad hoc `formatOsidLabel(...)`.
+
+### Files changed
+- `src/ui/map/components/army_hq/OperationsSection.tsx`
+- `src/ui/map/components/OperationBriefingModal.tsx`
+- `src/ui/map/components/OperationsPanel.tsx`
+- `src/ui/map/components/OfficerEventBadge.tsx`
+- `tests/ui_player_visibility.test.ts`
+- `docs/40_reports/implemented/20260403_OPERATIONS_AND_OFFICER_PLAYER_SAFE_LABELS.md`
+
+### Why
+- These are all high-trust command surfaces. If they leak raw `corps_name`, fallback brigade ids, or rough OSID formatting, the shell still reads like internal tooling.
+- Army HQ operations review is now the canonical operations shell, so its naming/display layer must be stricter than the older tactical prototypes.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_player_visibility.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`

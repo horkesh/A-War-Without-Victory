@@ -447,4 +447,30 @@ describe('player visibility helpers', () => {
     expect(source).not.toContain('title={order.targetOsid ?? order.postureName}');
     expect(source).toContain('title={orderTargetLabel(order, osidDisplayNames)}');
   });
+
+  it('keeps operations and officer shells on player-safe corps and brigade naming helpers', () => {
+    const operationsPanelSource = readFileSync(
+      new URL('../src/ui/map/components/OperationsPanel.tsx', import.meta.url),
+      'utf8',
+    );
+    const operationsSectionSource = readFileSync(
+      new URL('../src/ui/map/components/army_hq/OperationsSection.tsx', import.meta.url),
+      'utf8',
+    );
+    const briefingSource = readFileSync(
+      new URL('../src/ui/map/components/OperationBriefingModal.tsx', import.meta.url),
+      'utf8',
+    );
+    const officerSource = readFileSync(
+      new URL('../src/ui/map/components/OfficerEventBadge.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(operationsPanelSource).toContain('getPlayerSafeCorpsName');
+    expect(operationsPanelSource).toContain('getPlayerSafeBrigadeName');
+    expect(operationsSectionSource).toContain('getPlayerSafeBrigadeName');
+    expect(operationsSectionSource).toContain('getOsidDisplayName');
+    expect(briefingSource).toContain('getPlayerSafeCorpsName');
+    expect(officerSource).toContain('getPlayerSafeCorpsName');
+  });
 });
