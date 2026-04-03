@@ -7,6 +7,8 @@ export interface ShellNavigationState {
   setArmyHQTab: (tab: ArmyHQTab) => void;
   setArmyHQRecordsSubTab: (subTab: ArmyHQRecordsSubTab) => void;
   setArmyHQExpandedCorpsId: (id: string | null) => void;
+  setCodexOpen: (open: boolean) => void;
+  setChronicleOpen: (open: boolean) => void;
 }
 
 function getPlayerFaction(state: ShellNavigationState): string | null {
@@ -42,7 +44,14 @@ export function openArmyHQBriefingForCorps(state: ShellNavigationState, corpsId:
 }
 
 export function applyShellHandoffCommand(state: ShellNavigationState, command: ShellHandoffCommand): boolean {
-  if (command.kind === 'codex') return false;
+  if (command.kind === 'codex') {
+    state.setCodexOpen(true);
+    return true;
+  }
+  if (command.kind === 'chronicle') {
+    state.setChronicleOpen(true);
+    return true;
+  }
   if (command.tab === 'records' && command.recordsSubTab) {
     return openArmyHQRecordsSubTab(state, command.recordsSubTab);
   }

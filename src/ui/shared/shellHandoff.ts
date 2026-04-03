@@ -10,12 +10,15 @@ export type ShellHandoffCommand =
     }
   | {
       kind: 'codex';
+    }
+  | {
+      kind: 'chronicle';
     };
 
 export function isShellHandoffCommand(value: unknown): value is ShellHandoffCommand {
   if (!value || typeof value !== 'object') return false;
   const command = value as Partial<ShellHandoffCommand>;
-  if (command.kind === 'codex') return true;
+  if (command.kind === 'codex' || command.kind === 'chronicle') return true;
   if (command.kind !== 'army-hq') return false;
   if (
     command.tab !== 'briefing' &&

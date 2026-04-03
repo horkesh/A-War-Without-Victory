@@ -583,13 +583,6 @@ function App() {
       const command = event.data?.command;
       if (!isShellHandoffCommand(command)) return;
 
-      if (command.kind === 'codex') {
-        useGameStore.getState().setCodexOpen(true);
-        setSummaryOpen(false);
-        setEventLogOpen(false);
-        return;
-      }
-
       const handled = applyShellHandoffCommand(useGameStore.getState(), command);
       if (!handled) return;
       setSummaryOpen(false);
@@ -605,12 +598,7 @@ function App() {
     const params = new URLSearchParams(window.location.search);
     const command = decodeShellHandoffCommand(params.get('shellHandoff'));
     if (!command) return;
-
-    if (command.kind === 'codex') {
-      useGameStore.getState().setCodexOpen(true);
-    } else {
-      applyShellHandoffCommand(useGameStore.getState(), command);
-    }
+    applyShellHandoffCommand(useGameStore.getState(), command);
 
     params.delete('shellHandoff');
     const nextQuery = params.toString();

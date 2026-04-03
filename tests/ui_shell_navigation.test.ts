@@ -22,6 +22,8 @@ function createState(playerFaction: string | null = 'RBiH'): ShellNavigationStat
     setArmyHQTab: (tab) => { calls.push(['setArmyHQTab', tab]); },
     setArmyHQRecordsSubTab: (subTab) => { calls.push(['setArmyHQRecordsSubTab', subTab]); },
     setArmyHQExpandedCorpsId: (id) => { calls.push(['setArmyHQExpandedCorpsId', id]); },
+    setCodexOpen: (open) => { calls.push(['setCodexOpen', open]); },
+    setChronicleOpen: (open) => { calls.push(['setChronicleOpen', open]); },
   };
 }
 
@@ -81,6 +83,8 @@ describe('shellNavigation', () => {
     expect(applyShellHandoffCommand(state, { kind: 'army-hq', tab: 'summary' })).toBe(true);
     expect(applyShellHandoffCommand(state, { kind: 'army-hq', tab: 'records', recordsSubTab: 'ops' })).toBe(true);
     expect(applyShellHandoffCommand(state, { kind: 'army-hq', tab: 'briefing', corpsId: 'arbih_3rd_corps' })).toBe(true);
+    expect(applyShellHandoffCommand(state, { kind: 'chronicle' })).toBe(true);
+    expect(applyShellHandoffCommand(state, { kind: 'codex' })).toBe(true);
 
     expect(state.calls).toEqual([
       ['setSelectedArmyId', 'RBiH'],
@@ -93,6 +97,8 @@ describe('shellNavigation', () => {
       ['setArmyHQOpen', true],
       ['setArmyHQTab', 'briefing'],
       ['setArmyHQExpandedCorpsId', 'arbih_3rd_corps'],
+      ['setChronicleOpen', true],
+      ['setCodexOpen', true],
     ]);
   });
 
@@ -104,6 +110,8 @@ describe('shellNavigation', () => {
       tab: 'records',
       recordsSubTab: 'aar',
     });
+    expect(decodeShellHandoffCommand(encodeShellHandoffCommand({ kind: 'chronicle' }))).toEqual({ kind: 'chronicle' });
+    expect(decodeShellHandoffCommand(encodeShellHandoffCommand({ kind: 'codex' }))).toEqual({ kind: 'codex' });
     expect(decodeShellHandoffCommand('not-json')).toBeNull();
   });
 
@@ -183,6 +191,7 @@ describe('shellNavigation', () => {
     );
 
     expect(warroomSource).toContain("this.tacticalShellHandoffHandler({ kind: 'army-hq', tab: 'summary' })");
+    expect(warroomSource).toContain("this.tacticalShellHandoffHandler({ kind: 'chronicle' })");
     expect(warroomSource).toContain("this.tacticalShellHandoffHandler({ kind: 'army-hq', tab: 'briefing' })");
     expect(warroomSource).toContain("this.tacticalShellHandoffHandler({ kind: 'army-hq', tab: 'records', recordsSubTab: 'ops' })");
     expect(warroomAppSource).toContain('shellHandoff=');

@@ -547,6 +547,10 @@ export class ClickableRegionManager {
     }
 
     private openNewspaperModal(gameState: unknown): void {
+        if (this.tacticalShellHandoffHandler) {
+            this.tacticalShellHandoffHandler({ kind: 'chronicle' });
+            return;
+        }
         if (!this.modalManager) {
             console.warn('ModalManager not set');
             return;

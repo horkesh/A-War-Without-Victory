@@ -21714,6 +21714,30 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 ### Verification
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\engine_honesty_legacy_contracts.test.ts`
 
+## 2026-04-03 - Chronicle shell handoff canonicalization
+
+### Summary
+- Added `chronicle` to the shared shell-handoff contract and removed another special-case branch from the tactical-map app shell.
+- Warroom newspaper now hands off to Chronicle when the tactical shell is present, instead of pretending to own campaign memory locally.
+- Updated the shell hierarchy contract so Chronicle is explicitly named as the campaign-memory shell, separate from Army HQ records and Codex reference material.
+
+### Files changed
+- `src/ui/shared/shellHandoff.ts`
+- `src/ui/map/utils/shellNavigation.ts`
+- `src/ui/map/App.tsx`
+- `src/ui/warroom/ClickableRegionManager.ts`
+- `tests/ui_shell_navigation.test.ts`
+- `docs/20_engineering/PRODUCT_SHELL_HIERARCHY.md`
+- `docs/40_reports/implemented/20260403_CHRONICLE_SHELL_HANDOFF_CANONICALIZATION.md`
+
+### Why
+- AAA shell cohesion depends on one owner per concept. Campaign memory is not the same thing as records or essays.
+- Removing app-level special cases from handoff handling keeps the shell contract easier to trust and harder to fork accidentally.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_shell_navigation.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
 ## 2026-04-03 - Warroom to Army HQ shell handoff
 
 ### Summary
