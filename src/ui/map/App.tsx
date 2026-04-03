@@ -543,8 +543,8 @@ function App() {
         e.preventDefault();
         const gs = useGameStore.getState();
         if (gs.armyHQOpen) { gs.setArmyHQTab('summary'); return; }
-        const pf = gs.loadedGameState?.player_faction;
-        if (pf) { gs.setSelectedArmyId(pf); gs.setArmyHQOpen(true); gs.setArmyHQTab('summary'); }
+        // Map-first: open WarSummaryModal on the tactical map instead of Army HQ
+        openSummary();
       } else if (e.key === 'e' || e.key === 'E') {
         e.preventDefault();
         setEventLogOpen(prev => !prev);
@@ -643,7 +643,7 @@ function App() {
         pendingOfficerEvents={Boolean(loadedGameState?.pendingOfficerEvents?.length)}
         onOpenSummary={openSummary}
         onOpenRecords={() => openArmyHQRecords('aar')}
-        onOpenOpsHistory={() => openArmyHQRecords('ops')}
+        onOpenOpsHistory={() => useGameStore.getState().setIsOperationsPanelOpen(true)}
         onOpenCodex={() => useGameStore.getState().setCodexOpen(true)}
         onOpenEventLog={() => setEventLogOpen(true)}
       />

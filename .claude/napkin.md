@@ -144,6 +144,8 @@ After EVERY scenario run, the orchestrator:
     Do instead: When adding Electron handlers to `electron-main.cjs` and `preload.cjs`, you MUST update the `WindowAwwv` interface and hook in `src/ui/map/desktop/useIPC.ts` immediately. Do not use legacy `bridge.ts` or standalone IPC calls.
 7. **[2026-03-27] Decommissioned 1991: April 1992 is the sole entry baseline**
     Do instead: Use April 1992 (`apr_1992`) as the starting scenario for all campaign work. `sep_1991` is decommissioned and should not be referenced in new code or scenarios.
+8. **[2026-04-03] Map-first principle: toolbar/shortcut affordances open map-local surfaces when they exist**
+   Do instead: Route toolbar buttons and keyboard shortcuts to map-local panels (OperationsPanel, WarSummaryModal) for quick-glance interactions. Route to Army HQ only when no map surface owns that concept (AAR, personnel, briefing drill-down). The map-local surface should always provide an explicit "HQ Review" handoff for deeper investigation.
 8. **[2026-03-20] G-2 prediction — DONE (WS5)**
    Do instead: Engine returns `OperationPredictionResponse` (`axes`, `totalEstimatedCasualties`, commander `sections` as `{enemy, ownForces, assessment}`). UI expects `PredictionResult` — normalize in `usePrediction` (`normalizeOperationPredictionResponse`). G-2 phase fully wired in ops modal flow.
 9. **[2026-03-26] Browser-driven UI walkthrough: ESC can open Pause overlay**

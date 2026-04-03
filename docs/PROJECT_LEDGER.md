@@ -1,3 +1,25 @@
+## 2026-04-03 - Map-first usability restoration (OPS + S shortcut)
+
+### Summary
+- Rerouted the OPS toolbar button from Army HQ Records/Ops to the map-local OperationsPanel (which already has an "HQ Review" handoff for deep drill-down).
+- Rerouted the S keyboard shortcut from Army HQ Summary to the map-local WarSummaryModal when Army HQ is not already open. When Army HQ is open, S still switches to its Summary tab.
+
+### Files changed
+- `src/ui/map/App.tsx`
+- `docs/40_reports/implemented/20260403_MAP_FIRST_USABILITY_RESTORATION.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+- `docs/40_reports/GUI_MASTER.md`
+- `.claude/napkin.md`
+
+### Why
+- The 2026-04-02 shell ownership pass over-centralized two high-frequency affordances into Army HQ, making the tactical map feel stripped. Map-local surfaces (OperationsPanel, WarSummaryModal) already existed and are better suited for quick field-level glances. Army HQ remains the canonical deep-review owner.
+
+### Verification
+- `npx tsc --noEmit` — clean
+- `npm run test:vitest` — 1862 passed (20 pre-existing failures unrelated to UI)
+- `vite build` — built successfully
+- OPS opens OperationsPanel; S opens WarSummaryModal; H and RECORDS unchanged
+
 ## 2026-04-03 - Final unresolved warning ownership and stale sub-segment clearing
 
 ### Summary
