@@ -62,6 +62,7 @@ import {
     assignCrossCorpsEnclaveDefenders,
     ensureMinimumSectorCoverage,
     reclassifyRearBrigades,
+    warnUnresolvedSectorAssignments,
     deduplicateBrigadesAcrossSectors,
     recomputeSectorPowerAndThreat,
     syncSectorAssignmentsToFormations,
@@ -531,6 +532,9 @@ function buildFactionSectors(
 
     // Step 7: Ensure every sector with front edges has at least one assigned brigade.
     ensureMinimumSectorCoverage(sectors, formations, adjacency, friendlyOsids, componentOf);
+
+    // Step 7b: only now is it truthful to declare a brigade unresolved.
+    warnUnresolvedSectorAssignments(sectors, formations, faction);
 
     // Step 8: Reclassify brigades by frontline proximity.
     reclassifyRearBrigades(sectors, formations, adjacency, friendlyOsids);

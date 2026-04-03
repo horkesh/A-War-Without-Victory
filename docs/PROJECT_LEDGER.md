@@ -21432,3 +21432,24 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 
 ### Verification
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_opord_player_safe_labels.test.ts tests\\ui_player_visibility.test.ts tests\\ui_map_render_smoke.test.ts`
+
+## 2026-04-03 - Enclave rescue warning ownership fix
+
+### Summary
+- Moved the final sector-pipeline unresolved warning to the true end of the assignment chain, after cross-corps enclave rescue and minimum coverage have both run.
+- Added a `PENDING_ENCLAVE_REVIEW` warning for brigades that cannot reach a same-corps sector but do sit inside a same-faction connected component that enclave rescue may truthfully absorb.
+- Kept final unresolved reporting active for loaned reserve brigades so on-loan army-HQ units are still judged like real field brigades.
+
+### Files changed
+- `src/sim/combat/brigade_assignment.ts`
+- `src/sim/combat/corps_front_sectors.ts`
+- `tests/brigade_territory_reconciliation.test.ts`
+- `docs/40_reports/implemented/20260403_ENCLAVE_RESCUE_WARNING_OWNERSHIP_FIX.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- The engine was still able to say a brigade had "fallen through the sector pipeline" before the later enclave-rescue pass assigned it correctly.
+- That made the warning stream lie about the final authority chain and turned later debugging into ghost hunting.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\brigade_territory_reconciliation.test.ts tests\\commander_driven_brigade_assignment.test.ts`

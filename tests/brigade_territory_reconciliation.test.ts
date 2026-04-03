@@ -5,10 +5,12 @@
  * sector territory_osids BEFORE Phase 2's BFS-based distribution kicks in.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
     classifyBrigadesByTerritory,
     ensureMinimumSectorCoverage,
+    assignCrossCorpsEnclaveDefenders,
+    warnUnresolvedSectorAssignments,
 } from '../src/sim/combat/brigade_assignment.js';
 import type {
     CorpsFrontSector,
@@ -749,5 +751,174 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
         expect(sector2.assigned_brigade_ids).not.toContain('brig_trapped');
         expect(sector1.reserve_brigade_ids).not.toContain('brig_trapped');
         expect(sector2.reserve_brigade_ids).not.toContain('brig_trapped');
+    });
+
+    it('assigns an enclave defender when its corps has no sector in the brigade component', () => {
+        const homeCorpsSector = makeSector(
+            'sector:vrs_drina:0',
+            'vrs_drina',
+            [makeSubSeg('home', ['op:m:front_home'], ['op:m:enemy_home'], 3)],
+            ['op:m:front_home'],
+        );
+        const enclaveSector = makeSector(
+            'sector:vrs_herzegovina:0',
+            'vrs_herzegovina',
+            [makeSubSeg('enclave', ['op:m:front_enclave'], ['op:m:enemy_enclave'], 3)],
+            ['op:m:front_enclave', 'op:m:enclave_rear'],
+        );
+
+        const enclaveBrigade = makeFormation({
+            id: 'brig_enclave',
+            corps_id: 'vrs_drina',
+            location_osid: 'op:m:enclave_rear',
+        });
+
+        const formations: Record<FormationId, FormationState> = {
+            brig_enclave: enclaveBrigade,
+        };
+
+        const componentOf = makeComponentOf({
+            'op:m:front_home': 0,
+            'op:m:front_enclave': 1,
+            'op:m:enclave_rear': 1,
+        });
+
+        assignCrossCorpsEnclaveDefenders(
+            [homeCorpsSector, enclaveSector],
+            formations,
+            'RS' as FactionId,
+            componentOf,
+        );
+
+        expect(enclaveSector.assigned_brigade_ids).toContain('brig_enclave');
+        expect(homeCorpsSector.assigned_brigade_ids).not.toContain('brig_enclave');
+    });
+
+    it('assigns an enclave defender to a same-component faction sector even when its current OSID is not already in sector territory', () => {
+        const homeCorpsSector = makeSector(
+            'sector:vrs_drina:0',
+            'vrs_drina',
+            [makeSubSeg('home', ['op:m:front_home'], ['op:m:enemy_home'], 3)],
+            ['op:m:front_home'],
+        );
+        const localFactionSector = makeSector(
+            'sector:vrs_herzegovina:0',
+            'vrs_herzegovina',
+            [makeSubSeg('local', ['op:m:front_local'], ['op:m:enemy_local'], 3)],
+            ['op:m:front_local'],
+        );
+
+        const enclaveBrigade = makeFormation({
+            id: 'brig_component_only',
+            corps_id: 'vrs_drina',
+            location_osid: 'op:m:rear_local',
+        });
+
+        const formations: Record<FormationId, FormationState> = {
+            brig_component_only: enclaveBrigade,
+        };
+
+        const componentOf = makeComponentOf({
+            'op:m:front_home': 0,
+            'op:m:front_local': 1,
+            'op:m:rear_local': 1,
+        });
+
+        assignCrossCorpsEnclaveDefenders(
+            [homeCorpsSector, localFactionSector],
+            formations,
+            'RS' as FactionId,
+            componentOf,
+        );
+
+        expect(localFactionSector.assigned_brigade_ids).toContain('brig_component_only');
+        expect(homeCorpsSector.assigned_brigade_ids).not.toContain('brig_component_only');
+    });
+
+    it('does not emit a final unresolved warning when enclave rescue assigns the brigade', () => {
+        const homeCorpsSector = makeSector(
+            'sector:vrs_drina:0',
+            'vrs_drina',
+            [makeSubSeg('home', ['op:m:front_home'], ['op:m:enemy_home'], 3)],
+            ['op:m:front_home'],
+        );
+        const localFactionSector = makeSector(
+            'sector:vrs_herzegovina:0',
+            'vrs_herzegovina',
+            [makeSubSeg('local', ['op:m:front_local'], ['op:m:enemy_local'], 3)],
+            ['op:m:front_local'],
+        );
+
+        const enclaveBrigade = makeFormation({
+            id: 'brig_rescued_enclave',
+            corps_id: 'vrs_drina',
+            location_osid: 'op:m:rear_local',
+        });
+
+        const formations: Record<FormationId, FormationState> = {
+            brig_rescued_enclave: enclaveBrigade,
+        };
+
+        const componentOf = makeComponentOf({
+            'op:m:front_home': 0,
+            'op:m:front_local': 1,
+            'op:m:rear_local': 1,
+        });
+
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+        let emittedUnresolved = false;
+
+        try {
+            assignCrossCorpsEnclaveDefenders(
+                [homeCorpsSector, localFactionSector],
+                formations,
+                'RS' as FactionId,
+                componentOf,
+            );
+
+            warnUnresolvedSectorAssignments(
+                [homeCorpsSector, localFactionSector],
+                formations,
+                'RS' as FactionId,
+            );
+            emittedUnresolved = warnSpy.mock.calls.some(([message]) =>
+                String(message).includes('UNRESOLVED brig_rescued_enclave'),
+            );
+        } finally {
+            warnSpy.mockRestore();
+        }
+
+        expect(localFactionSector.assigned_brigade_ids).toContain('brig_rescued_enclave');
+        expect(emittedUnresolved).toBe(false);
+    });
+
+    it('does emit a final unresolved warning for a loaned reserve brigade that still falls through', () => {
+        const loanedReserve = makeFormation({
+            id: 'brig_loaned_unresolved_final',
+            corps_id: 'vrs_main_staff',
+            location_osid: 'op:m:isolated_reserve',
+        });
+        (loanedReserve as any).elite_loan_state = {
+            on_loan: true,
+            loaned_to_corps: 'vrs_drina',
+        };
+
+        const formations: Record<FormationId, FormationState> = {
+            brig_loaned_unresolved_final: loanedReserve,
+        };
+
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+        let emittedUnresolved = false;
+
+        try {
+            warnUnresolvedSectorAssignments([], formations, 'RS' as FactionId);
+            emittedUnresolved = warnSpy.mock.calls.some(([message]) =>
+                String(message).includes('UNRESOLVED brig_loaned_unresolved_final'),
+            );
+        } finally {
+            warnSpy.mockRestore();
+        }
+
+        expect(emittedUnresolved).toBe(true);
     });
 });
