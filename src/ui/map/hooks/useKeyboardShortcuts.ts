@@ -29,9 +29,8 @@ export function useKeyboardShortcuts(): void {
       // Ctrl+S → quick-save
       if ((event.ctrlKey || event.metaKey) && event.key === 's') {
         event.preventDefault();
-        const awwv = (window as unknown as { awwv?: { quickSave: () => Promise<unknown> } }).awwv;
-        if (awwv?.quickSave) {
-          awwv.quickSave().catch(() => { /* swallow */ });
+        if (ipc.isAvailable) {
+          ipc.quickSave().catch(() => { /* swallow */ });
         }
         return;
       }

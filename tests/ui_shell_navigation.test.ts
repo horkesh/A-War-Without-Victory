@@ -103,4 +103,14 @@ describe('shellNavigation', () => {
     expect(source).not.toContain("document.querySelectorAll('button')");
     expect(source).not.toContain("b.textContent?.includes('ADVANCE TURN')");
   });
+
+  it('routes Ctrl+S through canonical IPC instead of raw window bridge access', () => {
+    const source = readFileSync(
+      new URL('../src/ui/map/hooks/useKeyboardShortcuts.ts', import.meta.url),
+      'utf8',
+    );
+
+    expect(source).toContain('ipc.quickSave()');
+    expect(source).not.toContain("window as unknown as { awwv?: { quickSave: () => Promise<unknown> } }");
+  });
 });

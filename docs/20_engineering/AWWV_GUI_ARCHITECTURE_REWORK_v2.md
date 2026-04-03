@@ -9,6 +9,8 @@
 
 **Source of truth:** The **React + MapLibre map app** in `src/ui/map/` (Vite, React, Tailwind, Zustand, MapContainer) is the **canonical GUI**. All GUI work must be applied to this app. Run it via `npm run dev:map`. The legacy HoI 3D stack (`map_hoi.html`), tactical map (`tactical_map.html`), and other archived renderers are **not** targets for new work.
 
+> **2026-04-03 shell authority note:** This document remains a useful rework/history reference, but it is no longer the canonical owner of live shell hierarchy. For current top-level shell authority, use [PRODUCT_SHELL_HIERARCHY.md](PRODUCT_SHELL_HIERARCHY.md) and [UI_OWNERSHIP_MATRIX.md](UI_OWNERSHIP_MATRIX.md). In live runtime, `PresidentialToolbar.tsx` is the mounted tactical-map top shell; `TopToolbar.tsx` is legacy/reference only.
+
 ---
 
 ## 0. Implementation Status (vs this document)

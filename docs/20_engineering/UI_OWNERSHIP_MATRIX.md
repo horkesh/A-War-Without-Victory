@@ -89,6 +89,9 @@ Other surfaces may summarize or link to it, but they do not become co-owners of 
 
 - `Codex access`
   - canonical owner: Codex panel/system
+  - primary entrypoint: Tactical Map `PresidentialToolbar`
+  - secondary/contextual entrypoint: Army HQ `Records`
+  - convenience entrypoint: tactical-map keyboard shortcut
   - Army HQ and Warroom may link to it, but must not hide it behind obscure flows
 
 - `threat assessment`

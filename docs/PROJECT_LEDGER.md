@@ -21740,3 +21740,26 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 ### Verification
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_player_visibility.test.ts`
 - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Shell authority docs and shortcut canonicalization
+
+### Summary
+- Routed tactical-map quick-save through canonical IPC instead of direct `window.awwv` access.
+- Updated older engineering shell docs so they stop presenting `TopToolbar` as live authority.
+- Clarified Codex primary versus secondary entrypoints in the ownership matrix.
+
+### Files changed
+- `src/ui/map/hooks/useKeyboardShortcuts.ts`
+- `tests/ui_shell_navigation.test.ts`
+- `docs/20_engineering/MAP_UI_MASTER.md`
+- `docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md`
+- `docs/20_engineering/UI_OWNERSHIP_MATRIX.md`
+- `docs/40_reports/implemented/20260403_SHELL_AUTHORITY_DOCS_AND_SHORTCUT_CANONICALIZATION.md`
+
+### Why
+- Small shortcut bypasses are still shell-authority bugs when the rest of the product has already centralized on `useIPC()`.
+- In this repo, stale polished architecture docs are one of the easiest ways to resurrect dead shell paths in later work.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_shell_navigation.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
