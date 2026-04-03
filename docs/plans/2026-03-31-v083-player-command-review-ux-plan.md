@@ -40,6 +40,14 @@ Without this, `v0.8.3` becomes input mystery instead of command friction.
 - override-cost presentation rules
 - review-surface placement in Army HQ / notifications / command panels
 - QA rubric for legibility and truthfulness
+- Primary file families this plan must touch or explicitly classify:
+  - `src/ui/map/components/army_hq/*`
+  - `src/ui/map/components/OperationsPanel.tsx`
+  - `src/ui/map/components/SelectionPanel.tsx`
+  - `src/ui/map/components/CommanderSelectionModal.tsx`
+  - `src/ui/map/components/OperationBriefingModal.tsx`
+  - notification / shell handoff utilities
+  - tests for order diff, override legibility, and review discoverability
 
 ---
 
@@ -143,3 +151,13 @@ Without this, `v0.8.3` becomes input mystery instead of command friction.
 - [ ] A player can tell what they asked for, what changed, and why
 - [ ] Override decisions are legible before and after the click
 - [ ] Command friction feels intentional rather than buggy
+
+---
+
+## 6. Feature Done Means
+
+**Canonical owner:** Army HQ command review flow  
+**Demoted path:** scattered modal prompts, hidden shell-local overrides, ad hoc friction widgets  
+**Player-visible truth:** the player sees the issued order, how the command chain changed it, why, and what override cost/consequence is being proposed  
+**Canonical UI surface:** Army HQ is the canonical review surface; notifications and map panels summarize only  
+**Done means:** the player can reliably review, understand, and override command friction, and QA scenarios prove delay/modification/refusal flows are legible

@@ -22091,6 +22091,33 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_shell_navigation.test.ts`
 - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
 
+## 2026-04-03 - Plan hardening and missing execution-plan coverage
+
+### Summary
+- Added the three missing execution-grade plans for the next real repo priorities: sector/frontline truth, UI density + shell cohesion, and product architecture simplification.
+- Retrofitted the weaker existing UI ownership, commander explanation, and player command review plans so they now carry explicit file-family targets and the repo's five-line done-means contract.
+- Updated `MASTER_ROADMAP.md` so these lanes are now first-class roadmap work instead of chat-only intent.
+
+### Files changed
+- Added:
+  - `docs/plans/2026-04-03-v080x-sector-frontline-truth-plan.md`
+  - `docs/plans/2026-04-03-v08to09-ui-density-and-shell-cohesion-plan.md`
+  - `docs/plans/2026-04-03-v08to09-product-architecture-simplification-plan.md`
+- Updated:
+  - `docs/plans/2026-03-31-v08to09-ui-surface-ownership-plan.md`
+  - `docs/plans/2026-03-31-v08to09-commander-explanation-surfaces-plan.md`
+  - `docs/plans/2026-03-31-v083-player-command-review-ux-plan.md`
+  - `docs/plans/MASTER_ROADMAP.md`
+  - `docs/PROJECT_LEDGER.md`
+
+### Why
+- The roadmap had become honest about the next priorities, but not all of them had execution-grade Pyrrhic plans.
+- That gap is dangerous in this repo because future agents will either improvise or overfit to whichever stale doc looks most authoritative.
+- Hardening the plans now keeps the next wave aligned with the studio truth-governance rules already landed in the repo.
+
+### Verification
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
 ## 2026-04-03 - Settlement, Army HQ, and tooltip player-safe boundary pass
 
 ### Summary

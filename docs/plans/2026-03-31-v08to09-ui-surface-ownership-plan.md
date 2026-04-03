@@ -35,6 +35,17 @@ This plan defines which surface is canonical for which job.
 - canonical-vs-secondary rules for Army HQ / Warroom / map panels / modal flows
 - anti-duplication rules for future features
 - roadmap integration so later milestone plans stop assuming the UI will sort itself out
+- Primary file families this plan must touch or explicitly classify:
+  - `src/ui/warroom/*`
+  - `src/ui/map/App.tsx`
+  - `src/ui/map/components/PresidentialToolbar.tsx`
+  - `src/ui/map/components/TopToolbar.tsx`
+  - `src/ui/map/components/OperationsPanel.tsx`
+  - `src/ui/map/components/army_hq/*`
+  - `src/ui/map/components/chronicle/*`
+  - `src/ui/map/components/CodexPanel.tsx`
+  - `docs/20_engineering/PRODUCT_SHELL_HIERARCHY.md`
+  - `docs/20_engineering/UI_OWNERSHIP_MATRIX.md`
 
 ---
 
@@ -101,3 +112,13 @@ This plan defines which surface is canonical for which job.
 
 - [ ] no major command concept is owned by multiple UIs without an explicit hierarchy
 - [ ] later UX plans can point to a canonical surface instead of inventing one
+
+---
+
+## 6. Feature Done Means
+
+**Canonical owner:** `docs/20_engineering/UI_OWNERSHIP_MATRIX.md` plus canonical shell/product docs  
+**Demoted path:** duplicate half-owners, summary surfaces acting like primary owners, hidden shell-local review flows  
+**Player-visible truth:** the player can tell which screen owns campaign shell, battlespace, command review, records, memory, and reference  
+**Canonical UI surface:** Warroom, Tactical Map, Army HQ, Chronicle, and Codex each keep one explicit owned role  
+**Done means:** every major concept names one canonical surface, linked docs agree, and later feature plans can point to one owner instead of inventing one

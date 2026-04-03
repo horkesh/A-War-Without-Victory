@@ -1,6 +1,6 @@
 # AWWV Master Roadmap — Pyrrhic Games
 
-**Last Updated:** 2026-03-31
+**Last Updated:** 2026-04-03
 **Current Version:** 0.8.0 (Command Chain)
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."
@@ -99,6 +99,7 @@ PERCEIVE-DECIDE-EXECUTE per-corps loop. 10 files in `src/sim/combat/commander/` 
 - v0.7.0.1: Author 13 missing 1992 foundation essays (barracks seizures, Sarajevo siege, JNA withdrawal, Drina cleansing, etc.). Spec: `docs/plans/2026-03-25-letter-home-and-essay-authoring-spec.md`. Assign to `/historian` + `/narrative-designer` — completely independent of engine work.
 
 **Execution plan:** `docs/plans/2026-03-31-v080x-1992-foundation-essays-plan.md`
+**Immediate engine-health lane:** Sector/frontline truth hardening, truthful reachability, and reporting alignment. Plan: `docs/plans/2026-04-03-v080x-sector-frontline-truth-plan.md`
 
 ### v0.8.1 — Commander Maturity
 
@@ -216,8 +217,10 @@ No version bump — engineering milestone between feature releases. Stabilizatio
 | Canon docs | Systems Manual and Game Bible reference pre-v0.8 architecture | Updated for v0.8 command chain |
 | Save/load + replay hardening | Desktop save/load still partial while later milestones depend on replay/log truth | Explicit save/load, replay, and migration hardening. Plan: `docs/plans/2026-03-31-v08to09-save-load-and-replay-hardening-plan.md` |
 | UI surface ownership | Army HQ, Warroom, map panels, ops modal, and future command-review surfaces can drift into duplicate half-owners | One clear ownership matrix for command, ops, review, and explanation surfaces. Plan: `docs/plans/2026-03-31-v08to09-ui-surface-ownership-plan.md` |
+| UI density + shell cohesion | Warroom, Tactical Map, Army HQ, Chronicle, and Codex still carry dead air, spacing waste, and shell seams that make the product feel like tools rather than one game | Tightened spacing, clearer hierarchy, and shell-level cohesion across the live player journey. Plan: `docs/plans/2026-04-03-v08to09-ui-density-and-shell-cohesion-plan.md` |
 | Player knowledge integrity | Desktop / tactical map still trends toward omniscient renderer payloads plus fog visuals | Player-facing state boundary, leak classifications, display-name discipline, and desktop knowledge integrity contract. Primary plan: `docs/plans/2026-04-01-v08x-player-knowledge-integrity-plan.md` |
 | Studio truth governance | Cross-cutting product rules were living in chat and reviewer instinct instead of hard repo contracts | Use `PLAYER_VISIBLE_STATE.md`, `UI_OWNERSHIP_MATRIX.md`, `DEBUG_SURFACE_POLICY.md`, and `FEATURE_DONE_MEANS.md` as permanent studio governance docs for product truth and review language |
+| Product architecture simplification | Entry points, adapters, and hotspot files still let transitional paths look co-equal to canonical ones | Simplify entrypoints, adapter ownership, and product shell boundaries the way a strong strategy studio would. Plan: `docs/plans/2026-04-03-v08to09-product-architecture-simplification-plan.md` |
 | Army-command maturity | Army layer is serviceable but still undernamed and too implicit as a real command substrate | Explicit army-command maturity and responsibility model. Plan: `docs/plans/2026-03-31-v08to09-army-command-maturity-plan.md` |
 | Army ↔ corps command coherence | Assumed rather than owned; handshake and authority boundaries are still undernamed | Named handshake rules, ownership comments, and explicit authority boundaries. Plan: `docs/plans/2026-03-31-v08to09-army-corps-authority-coherence-plan.md` |
 | Commander explanation surfaces | Traces are becoming real, but staff/player-facing surfaces are still implicit | Build truthful explanation surfaces from real traces, not theater. Plan: `docs/plans/2026-03-31-v08to09-commander-explanation-surfaces-plan.md` |
@@ -463,6 +466,7 @@ Patch bumps (0.X.1, 0.X.2) are for significant fixes within a milestone — not 
 | `docs/plans/2026-03-30-v080-corps-commander-intelligence-architecture.md` | v0.8.0 commander system architecture |
 | `docs/plans/2026-03-30-p0-combat-drought-fix.md` | v0.8.0 P0 fix plan |
 | `docs/plans/2026-03-31-v080x-1992-foundation-essays-plan.md` | v0.8.0.x missing 1992 essays execution plan |
+| `docs/plans/2026-04-03-v080x-sector-frontline-truth-plan.md` | v0.8.0.x sector/frontline truth hardening |
 | `docs/plans/2026-03-25-command-chain-architecture.md` | v0.8 full architecture |
 | `docs/plans/2026-03-31-v081-commander-maturity-plan.md` | v0.8.1 commander maturity implementation plan |
 | `docs/plans/2026-03-31-v081-intelligence-assurance-harness-plan.md` | v0.8.1 anti-theater proof harness |
@@ -470,6 +474,8 @@ Patch bumps (0.X.1, 0.X.2) are for significant fixes within a milestone — not 
 | `docs/plans/2026-03-31-v08x-command-authority-cleanup-plan.md` | v0.8.x-final overarching command authority cleanup plan |
 | `docs/plans/2026-03-31-v08to09-save-load-and-replay-hardening-plan.md` | v0.8-to-v0.9 save/load, replay, and migration hardening |
 | `docs/plans/2026-03-31-v08to09-ui-surface-ownership-plan.md` | v0.8-to-v0.9 UI surface ownership matrix |
+| `docs/plans/2026-04-03-v08to09-ui-density-and-shell-cohesion-plan.md` | v0.8-to-v0.9 UI density and shell cohesion |
+| `docs/plans/2026-04-03-v08to09-product-architecture-simplification-plan.md` | v0.8-to-v0.9 product architecture simplification |
 | `docs/plans/2026-03-31-v08to09-army-command-maturity-plan.md` | v0.8-to-v0.9 army-command maturity |
 | `docs/plans/2026-03-31-v08to09-army-corps-authority-coherence-plan.md` | v0.8-to-v0.9 army/corps handshake and authority coherence |
 | `docs/plans/2026-03-31-v08to09-commander-explanation-surfaces-plan.md` | v0.8-to-v0.9 truthful explanation surfaces |

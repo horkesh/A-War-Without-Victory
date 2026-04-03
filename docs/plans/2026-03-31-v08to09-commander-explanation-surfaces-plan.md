@@ -41,6 +41,14 @@ The goal is player-visible reasons grounded in real structured traces.
 - Army HQ / Warroom explanation surface specs
 - QA checks for explanation truthfulness
 - roadmap-ready bridge into order-interpretation and autonomy review UX
+- Primary file families this plan must touch or explicitly classify:
+  - `src/sim/combat/commander/briefing.ts`
+  - `src/sim/combat/commander/emit.ts`
+  - `src/ui/map/components/army_hq/*`
+  - `src/ui/warroom/*`
+  - `src/ui/map/components/chronicle/*`
+  - `src/ui/map/utils/shellNavigation.ts`
+  - tests for player-facing explanation truth
 
 ---
 
@@ -142,3 +150,13 @@ The goal is player-visible reasons grounded in real structured traces.
 - [ ] A player-facing surface can explain commander behavior without inventing new logic
 - [ ] QA can prove a surface reflects backend truth
 - [ ] Explanation is informative without becoming theatrical
+
+---
+
+## 6. Feature Done Means
+
+**Canonical owner:** real commander traces and the explanation payload contract they feed  
+**Demoted path:** prose-only smart-sounding explanations, shell-local guesses, and debug truth patched straight into player UI  
+**Player-visible truth:** the player sees reasons, blockers, confidence, and tradeoffs derived from real traces rather than invented prose  
+**Canonical UI surface:** Army HQ owns command explanation; Warroom may summarize; debug views stay separate  
+**Done means:** player-facing explanation surfaces can be verified against backend traces, and QA can prove the UI is not claiming more certainty than the engine has

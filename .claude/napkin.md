@@ -405,3 +405,5 @@ After EVERY scenario run, the orchestrator:
    Do instead: Warroom may summarize command posture, but detailed formations, personnel rosters, reserve handling, and commander reassignment belong to Army HQ. If Warroom starts doing those things again, it is stealing ownership from the command shell.
 3. **[2026-04-02] Tactical map must always show the way back to Warroom**
    Do instead: If desktop IPC is available or the map is embedded, the mounted tactical toolbar must expose a visible `WARROOM` return affordance. A hidden bridge method in legacy code is not enough.
+4. **[2026-04-03] Missing roadmap priorities must become plans before code**
+   Do instead: If sector/frontline truth, UI density, shell cohesion, or product architecture simplification becomes a near-term priority, make sure there is an execution-grade Pyrrhic plan in `docs/plans/` before implementation starts.
