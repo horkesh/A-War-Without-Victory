@@ -92,4 +92,15 @@ describe('shellNavigation', () => {
     expect(source).not.toContain('stageOperationForceLaunch');
     expect(source).not.toContain('stageOperationHalt');
   });
+
+  it('routes Space through canonical advance-turn action instead of shell DOM scans', () => {
+    const source = readFileSync(
+      new URL('../src/ui/map/hooks/useKeyboardShortcuts.ts', import.meta.url),
+      'utf8',
+    );
+
+    expect(source).toContain('advanceTurnAndSync');
+    expect(source).not.toContain("document.querySelectorAll('button')");
+    expect(source).not.toContain("b.textContent?.includes('ADVANCE TURN')");
+  });
 });

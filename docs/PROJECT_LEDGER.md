@@ -21626,3 +21626,8 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 ### Verification
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\army_reserve_system.test.ts tests\\elite_loan_recall.test.ts`
 - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+## 2026-04-03 — Shell shortcut and legacy toolbar authority cleanup
+
+- Explicitly demoted `src/ui/map/components/TopToolbar.tsx` to legacy/non-canonical status and retitled its Storybook entry to `Legacy/TopToolbar` so it no longer reads like a live shell peer to `PresidentialToolbar`.
+- Replaced the tactical-map `Space` shortcut DOM scan in `src/ui/map/hooks/useKeyboardShortcuts.ts` with direct canonical routing through `advanceTurnAndSync(...)` and the live IPC bridge.
+- Added a regression assertion in `tests/ui_shell_navigation.test.ts` to keep the shortcut layer from regressing back to button-text scanning.
