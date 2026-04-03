@@ -22730,3 +22730,11 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - 5 new regression tests in command_authority.test.ts (24/24 pass)
 - Report: `docs/40_reports/implemented/20260403_COMMAND_AUTHORITY_PROVENANCE.md`
 - Verified: Slack: SENT (user env) on smoke test run when process env was unset
+
+## [2026-04-03] warroom-react-shell-entry
+- Wired live product entry path for WarroomShellLayer — React shell now activated on campaign start, not only when ?view=warroom is manually set.
+- warroom.ts: added REACT_SHELL_ENABLED=true flag; extended showTacticalMapScene to 'warroom' mode (loads iframe with ?embedded=1&view=warroom); applyGameStateFromJson calls warroom mode instead of legacy showScreen('none') when flag is on; awwv-back-to-hq posts awwv-shell:show-warroom to iframe instead of swapping canvas scenes; openTacticalShellHandoff fast-path posts handoff directly to already-loaded warroom-mode iframe without reload.
+- App.tsx: handleShellHandoff useEffect now handles awwv-shell:show-warroom (setAppScreen('warroom')) and adds setAppScreen('game') on awwv-shell:handoff receipt.
+- tests/warroom_shell_layer.test.ts: 6 new tests (14 total) — message type contracts, onNavigate callback contract, all mapped regions valid.
+- tsc clean, 14/14 focused tests pass, vite build clean, governance OK.
+- Report: docs/40_reports/implemented/20260403_WARROOM_REACT_SHELL_ENTRY.md

@@ -34,6 +34,13 @@ import scnApr1992Url from './assets/scenarios/apr1992_briefing.webp?url';
 import gameStartBgUrl from './assets/game start.webp?url';
 import { encodeShellHandoffCommand, type ShellHandoffCommand } from '../shared/shellHandoff.js';
 
+/**
+ * REACT_SHELL_ENABLED: when true, the tactical-map iframe loads with ?view=warroom
+ * so the React shell owns Warroom navigation. Set false to revert to the legacy canvas path.
+ * This flag exists for migration safety — remove once the React path is canonical.
+ */
+const REACT_SHELL_ENABLED = true;
+
 type CampaignScenarioKey = 'apr_1992';
 
 /** Display resolution for runtime: half of authoring (2752×1536) to reduce decode and canvas memory. Region JSON stays 2752×1536; hit-test scales automatically. */
@@ -107,6 +114,8 @@ class WarroomApp {
     /** Tactical map iframe (lazily created on first open). */
     private tacticalMapIframe: HTMLIFrameElement | null = null;
     private tacticalMapReady = false;
+    /** True when the iframe was loaded with ?view=warroom (React shell owns room navigation). */
+    private tacticalMapInWarroomMode = false;
     /** HTTP base URL for the tactical map server (set at init from Electron IPC). */
     private mapServerUrl: string | null = null;
     /** Embedded iframe subscribers keyed by event name. */
@@ -192,7 +201,16 @@ class WarroomApp {
         // Listen for "back to HQ" messages from the embedded tactical map iframe
         window.addEventListener('message', (e) => {
             if (e.data?.type === 'awwv-back-to-hq') {
-                this.showWarroomScene();
+                if (REACT_SHELL_ENABLED && this.tacticalMapInWarroomMode && this.tacticalMapIframe?.contentWindow) {
+                    // React owns the warroom view — tell the iframe to switch back to warroom screen.
+                    // Keep the tactical scene visible (iframe stays loaded, React handles the swap).
+                    this.tacticalMapIframe.contentWindow.postMessage(
+                        { type: 'awwv-shell:show-warroom' },
+                        '*',
+                    );
+                } else {
+                    this.showWarroomScene();
+                }
                 return;
             }
             if (e.data?.type === 'awwv-bridge:subscribe-event') {
@@ -382,7 +400,13 @@ class WarroomApp {
                 const isViewingTacticalMap = tacticalScene && !tacticalScene.classList.contains('tactical-map-scene-hidden');
                 const isViewingWarPlanningMap = mapScene && !mapScene.classList.contains('map-scene-hidden');
                 if (!isViewingTacticalMap && !isViewingWarPlanningMap) {
-                    this.showScreen('none');
+                    if (REACT_SHELL_ENABLED) {
+                        // React shell owns room navigation — load iframe with warroom view instead of
+                        // showing the legacy canvas desk. The iframe stays loaded for the session.
+                        void this.showTacticalMapScene('warroom');
+                    } else {
+                        this.showScreen('none');
+                    }
                 }
             }, 0);
         } catch (error) {
@@ -975,10 +999,11 @@ class WarroomApp {
      * In Electron: embeds the React tactical map via HTTP map server (MapLibre requires http://).
      * In dev/browser: opens the tactical map in a new tab.
      */
-    private async showTacticalMapScene(mode: 'operational' | 'sandbox' = 'operational'): Promise<void> {
+    private async showTacticalMapScene(mode: 'operational' | 'sandbox' | 'warroom' = 'operational'): Promise<void> {
         const isElectron = !!(window as unknown as { awwv?: unknown }).awwv;
         if (!isElectron) {
-            // Dev/browser: cross-origin prevents meaningful iframe interaction
+            // Dev/browser: cross-origin prevents meaningful iframe interaction.
+            // warroom mode not reachable in dev (warroom.ts runs in Electron only).
             const handoffQuery = this.pendingShellHandoff
                 ? `?shellHandoff=${encodeShellHandoffCommand(this.pendingShellHandoff)}`
                 : '';
@@ -1007,9 +1032,18 @@ class WarroomApp {
         mapBaseUrl = mapBaseUrl || 'awwv://warroom/tactical-map';
 
         const cacheBuster = `v=${Date.now()}`;
-        const targetSrc = mode === 'sandbox'
-            ? `${mapBaseUrl}/tactical_sandbox.html?embedded=1&${cacheBuster}`
-            : `${mapBaseUrl}/index.html?embedded=1&${cacheBuster}`;
+        let targetSrc: string;
+        if (mode === 'sandbox') {
+            targetSrc = `${mapBaseUrl}/tactical_sandbox.html?embedded=1&${cacheBuster}`;
+        } else if (mode === 'warroom') {
+            // React shell owns room navigation — load with view=warroom so React renders WarroomShellLayer.
+            targetSrc = `${mapBaseUrl}/index.html?embedded=1&view=warroom&${cacheBuster}`;
+        } else {
+            targetSrc = `${mapBaseUrl}/index.html?embedded=1&${cacheBuster}`;
+        }
+
+        // Track whether the iframe is currently in React warroom mode.
+        const nextWarroomMode = mode === 'warroom';
 
         // Lazily create iframe on first open
         if (!this.tacticalMapIframe) {
@@ -1017,6 +1051,7 @@ class WarroomApp {
             iframe.id = 'tactical-map-iframe';
             iframe.setAttribute('allowfullscreen', '');
             iframe.src = targetSrc;
+            this.tacticalMapInWarroomMode = nextWarroomMode;
 
             iframe.onload = () => {
                 this.tacticalMapReady = true;
@@ -1028,6 +1063,7 @@ class WarroomApp {
             this.tacticalMapIframe = iframe;
         } else if (this.tacticalMapIframe.src !== targetSrc) {
             this.tacticalMapReady = false;
+            this.tacticalMapInWarroomMode = nextWarroomMode;
             this.tacticalMapIframe.src = targetSrc;
         } else if (this.tacticalMapReady) {
             // Push latest game state to existing iframe
@@ -1111,6 +1147,15 @@ class WarroomApp {
     }
 
     private async openTacticalShellHandoff(command: ShellHandoffCommand): Promise<void> {
+        if (REACT_SHELL_ENABLED && this.tacticalMapInWarroomMode && this.tacticalMapReady && this.tacticalMapIframe?.contentWindow) {
+            // React is showing the warroom view inside the already-loaded iframe.
+            // Send the handoff directly — React will switch to game view without an iframe reload.
+            this.tacticalMapIframe.contentWindow.postMessage(
+                { type: 'awwv-shell:handoff', command },
+                '*',
+            );
+            return;
+        }
         this.pendingShellHandoff = command;
         await this.showTacticalMapScene('operational');
         this.flushPendingShellHandoff();

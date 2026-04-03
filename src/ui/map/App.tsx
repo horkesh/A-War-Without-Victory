@@ -587,12 +587,21 @@ function App() {
 
   useEffect(() => {
     const handleShellHandoff = (event: MessageEvent) => {
+      // warroom.ts posts this when REACT_SHELL_ENABLED and the player clicks "back to HQ"
+      // from the game view — React switches back to the warroom screen without an iframe reload.
+      if (event.data?.type === 'awwv-shell:show-warroom') {
+        setAppScreen('warroom');
+        return;
+      }
+
       if (event.data?.type !== 'awwv-shell:handoff') return;
       const command = event.data?.command;
       if (!isShellHandoffCommand(command)) return;
 
       const handled = applyShellHandoffCommand(useGameStore.getState(), command);
       if (!handled) return;
+      // Transition from warroom view to game view when a shell handoff arrives.
+      setAppScreen('game');
       setSummaryOpen(false);
       setEventLogOpen(false);
     };

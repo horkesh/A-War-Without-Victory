@@ -47,7 +47,8 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 1. Finish behavior-level shell ownership so Warroom, Army HQ, and Tactical Map feel like one coherent presidential product.
    - React WarroomShellLayer foundation is in place (2026-04-03): scene plate + hotspot overlays + regionToShellHandoff mapping, activated by `?view=warroom`. warroom.ts canvas still active.
-   - NEXT: runtime wiring — pass `?view=warroom` from warroom.ts iframe URL or change Electron entry, so React owns the room navigation. Then progressively deprecate warroom.ts canvas rendering.
+   - Runtime wiring DONE (2026-04-03): `REACT_SHELL_ENABLED=true` in warroom.ts — on campaign start, iframe loads with `?embedded=1&view=warroom`; React WarroomShellLayer is now the active room-navigation surface. Hotspot click sends handoff directly to iframe (no reload). Back-to-HQ posts `awwv-shell:show-warroom` to iframe; React sets `appScreen='warroom'` without scene swap. Legacy canvas path preserved under `REACT_SHELL_ENABLED=false`. Report: `docs/40_reports/implemented/20260403_WARROOM_REACT_SHELL_ENTRY.md`.
+   - NEXT: progressively deprecate warroom.ts canvas room rendering — canvas render loop, scene plate assets, and hotspot click system can be removed once React path is validated in Electron. Main menu / side picker / scenario picker stay in warroom.ts HTML.
 2. Canonicalize live runtime assets to `webp` where intended; remove/archive duplicate PNG twins from live UI paths and keep PNG only for raw/archive/generated/docs contexts unless explicitly justified.
 
 ## Closed Lanes
