@@ -21893,6 +21893,35 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_player_visibility.test.ts`
 - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
 
+## 2026-04-03 - Warroom dead modal and theatre residue retirement
+
+### Summary
+- Removed the unused `OperationalSituationModal` path from Warroom.
+- Deleted the dead `src/state/theatres.ts` compatibility helper module.
+- Updated Warroom help copy so it now describes Army HQ handoffs instead of older local packet ownership.
+- Hardened the legacy-honesty suite so dead theatre imports and the dead Warroom operational-situation path cannot quietly return.
+
+### Files changed
+- Deleted:
+  - `src/ui/warroom/components/OperationalSituationModal.ts`
+  - `src/state/theatres.ts`
+- Updated:
+  - `src/ui/warroom/ClickableRegionManager.ts`
+  - `src/ui/warroom/warroom.ts`
+  - `tests/engine_honesty_legacy_contracts.test.ts`
+  - `docs/40_reports/implemented/20260403_WARROOM_DEAD_MODAL_AND_THEATRE_RESIDUE_RETIREMENT.md`
+  - `docs/40_reports/GUI_MASTER.md`
+  - `docs/40_reports/WARROOM_MASTER.md`
+  - `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- Both files were classic swamp artifacts: coherent enough to look authoritative, but no longer part of the live product/runtime story.
+- Removing them is higher-value than polishing around them, because they were exactly the kind of dead rails future agents would be tempted to reuse.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\engine_honesty_legacy_contracts.test.ts tests\\ui_shell_navigation.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
 ## 2026-04-03 - Shell authority docs and shortcut canonicalization
 
 ### Summary

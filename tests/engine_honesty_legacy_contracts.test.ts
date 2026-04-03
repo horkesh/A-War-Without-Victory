@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import { validateBrigadeRepositionOrder } from '../src/desktop/desktop_sim.js';
 import { parseGameState } from '../src/ui/map/data/GameStateAdapter.js';
@@ -211,6 +211,30 @@ describe('engine honesty legacy contracts', () => {
     expect(gameState).not.toContain('og_subfront_edges?:');
   });
 
+  it('does not keep dead theatre compatibility helpers or the unused operational-situation modal path', () => {
+    const clickableRegionManager = readFileSync(join(process.cwd(), 'src', 'ui', 'warroom', 'ClickableRegionManager.ts'), 'utf8');
+    const warroom = readFileSync(join(process.cwd(), 'src', 'ui', 'warroom', 'warroom.ts'), 'utf8');
+
+    expect(clickableRegionManager).not.toContain('OperationalSituationModal');
+    expect(clickableRegionManager).not.toContain('openOperationalSituationModal');
+    expect(warroom).toContain('Army HQ operations record');
+    expect(warroom).toContain('Army HQ records handoff');
+
+    const srcRoot = join(process.cwd(), 'src');
+    const files = collectTsFiles(srcRoot);
+    const theatreImportOffenders: string[] = [];
+    for (const file of files) {
+      const rel = relative(srcRoot, file).split(sep).join('/');
+      if (rel.startsWith('_archived/')) continue;
+      const text = readFileSync(file, 'utf8');
+      if (text.includes("from './theatres.js'") || text.includes("from '../state/theatres.js'") || text.includes("from \"./theatres.js\"") || text.includes("from \"../state/theatres.js\"")) {
+        theatreImportOffenders.push(rel);
+      }
+    }
+
+    expect(theatreImportOffenders).toEqual([]);
+  });
+
   it('does not keep retired corps attack-axis bridge paths in live code', () => {
     const preload = readFileSync(join(process.cwd(), 'src', 'desktop', 'preload.cjs'), 'utf8');
     const electronMain = readFileSync(join(process.cwd(), 'src', 'desktop', 'electron-main.cjs'), 'utf8');
@@ -318,13 +342,12 @@ describe('engine honesty legacy contracts', () => {
   it('does not keep theatre tagging in the live turn pipelines', () => {
     const warPhases = readFileSync(join(process.cwd(), 'src', 'sim', 'turn_phases', 'war_phases.ts'), 'utf8');
     const turnPipeline = readFileSync(join(process.cwd(), 'src', 'sim', 'turn_pipeline.ts'), 'utf8');
-    const theatres = readFileSync(join(process.cwd(), 'src', 'state', 'theatres.ts'), 'utf8');
 
     expect(warPhases).not.toContain('assignFrontSegmentTheatres');
     expect(warPhases).not.toContain('ensureDefaultTheatres');
     expect(turnPipeline).not.toContain('assignFrontSegmentTheatres');
     expect(turnPipeline).not.toContain('ensureDefaultTheatres');
-    expect(theatres).toContain('Legacy theatre compatibility helpers.');
+    expect(existsSync(join(process.cwd(), 'src', 'state', 'theatres.ts'))).toBe(false);
   });
 
   it('does not seed dead front or theatre shell state in browser fallback campaign loading', () => {

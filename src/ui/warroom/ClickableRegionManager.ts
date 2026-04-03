@@ -44,7 +44,6 @@ import { NewspaperModal } from './components/NewspaperModal.js';
 import { NewsTicker } from './components/NewsTicker.js';
 import { ReportsModal } from './components/ReportsModal.js';
 import { CommandBriefingModal } from './components/CommandBriefingModal.js';
-import { OperationalSituationModal } from './components/OperationalSituationModal.js';
 import { TacticalMap } from './components/TacticalMap.js';
 import { WarPlanningMap } from './components/WarPlanningMap.js';
 import { extractWarData } from './data/war_data_extractor.js';
@@ -607,18 +606,6 @@ export class ClickableRegionManager {
     /** Opens IVP Diplomatic Press Briefing modal (warroom). */
     private showIvpBreakdown(state: GameState): void {
         this.modalManager?.showModal(new IvpBreakdownModal(state).render());
-    }
-
-    private openOperationalSituationModal(gameState: unknown): void {
-        if (!this.modalManager) {
-            console.warn('ModalManager not set');
-            return;
-        }
-
-        const modal = new OperationalSituationModal(gameState as GameState, () => {
-            this.openPrimaryMap(gameState);
-        });
-        this.modalManager.showModal(modal.render());
     }
 
     private openReportsModal(gameState: unknown): void {

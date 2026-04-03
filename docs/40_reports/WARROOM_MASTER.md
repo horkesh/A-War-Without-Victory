@@ -88,7 +88,7 @@
 - **Command-shell truth (2026-04-02):** Reports now use generic player-safe headquarters authorship instead of fake-specific section names, and Command Briefing derives its warnings from the extracted Warroom snapshot instead of hardcoded enclave/convoy claims.
 - **Density direction (2026-04-02):** Warroom modal chrome has been tightened to better match the tactical shell. The intended direction is command-console density, not roomy dashboard spacing.
 - **Commander assignment:** **Warroom only** — Faction Overview (wall flag) → COMMAND section → CHANGE → ASSIGN COMMANDER modal. Map UI displays only; no assignment there. IPC: `assign-commander`.
-- **Shell relationship:** Tactical-map top-shell history access now routes through Army HQ / Codex instead of orphan top-level history modals; Warroom remains the strategic shell and return destination, not a second owner of Army HQ records.
+- **Shell relationship:** Tactical-map top-shell history access now routes through Army HQ / Codex instead of orphan top-level history modals; Warroom remains the strategic shell and return destination, not a second owner of Army HQ records. The old desk-map `OperationalSituationModal` has been retired; the desk map now goes straight to the tactical shell.
 
 ---
 
@@ -100,7 +100,7 @@
 |-------|------------|--------------------|
 | Newspaper | newspaper_stack | Faction newspaper, T-1 events; start brief on load |
 | Magazine (Intelligence Journal) | intelligence_journal | Monthly operational review, game stats |
-| Reports (Command Briefing) | command_briefing_folio | Situation reports; pre-war mun intel, war-phase operational briefs |
+| Reports (Command Briefing) | command_briefing_folio | Warroom summary / shell handoff; detailed ops review belongs to Army HQ |
 | Diplomacy | diplomatic_telephone | Belgrade/Zagreb/Alliance channels; war only (peace → “Line dead”) |
 | Faction Overview | wall_flag_area | Faction stats, COMMAND (officers + CHANGE → ASSIGN COMMANDER) |
 | Advance turn | wall_calendar_area | Confirmation, staged investments, preview |
@@ -111,7 +111,6 @@
 | Settings | toolbar | Audio/Video settings dialog |
 | Help | toolbar | Warroom controls list |
 | Command Briefing | command_briefing_folio | “What matters now”: urgent decisions, front alarms, convoy questions, enclave warnings; when IVP ≥60% or consequences active, footer button opens IVP breakdown |
-| Operational Situation | desk_map | Op health, sector stress, logistics, routes to tactical map |
 | Diplomatic Press Briefing (IVP) | diplomatic_telephone (footer button) | Composite IVP + four weighted components (Sarajevo siege, enclave pressure, displacement visibility, negotiation momentum), thresholds 30/60/80%, active consequences; war only |
 | Commander Selection | command_briefing_folio (via OpsPlanningModal) | Officer roster with competence/aggressiveness ratings, regional fit, prep-time estimates; triggered from OpsPlanningModal submission |
 | Operation Briefing | command_briefing_folio (via CorpsFrontPanel) | Readiness gauges, commander assessment, Launch/Probe/Postpone/Abort actions; triggered from CorpsFrontPanel assessment-ready button |
