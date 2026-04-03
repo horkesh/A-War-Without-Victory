@@ -9,7 +9,6 @@
 
 import { computeFrontEdges } from '../map/front_edges.js';
 import { EdgeRecord, loadSettlementGraph } from '../map/settlements.js';
-import { deriveAssignableFrontSegments } from '../state/assignable_front_segments.js';
 import { cloneGameState } from '../state/clone.js';
 import { GameState } from '../state/game_state.js';
 import { earlyWarPhases } from './turn_phases/early_war_phases.js';
@@ -152,11 +151,6 @@ async function refreshFrontEdgeSnapshot(state: GameState, input: TurnInput): Pro
     const edges = await getEdgesForTurn(input);
     const derivedFrontEdges = computeFrontEdges(state, edges);
     state.military.front_edges = derivedFrontEdges;
-    const frontEdgesForSegments =
-        state.meta.phase === 'war' && state.military.war_front_edges_osid?.length
-            ? state.military.war_front_edges_osid
-            : derivedFrontEdges;
-    state.military.assignable_front_segments = deriveAssignableFrontSegments(frontEdgesForSegments);
 }
 
 function createRng(seed: string | number): Rng {

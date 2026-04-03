@@ -346,10 +346,16 @@ describe('engine honesty legacy contracts', () => {
   it('does not keep dead corps-front mapping helpers wired to compatibility segment snapshots', () => {
     const directives = readFileSync(join(process.cwd(), 'src', 'sim', 'combat', 'bot_corps_directives.ts'), 'utf8');
     const corpsAi = readFileSync(join(process.cwd(), 'src', 'sim', 'combat', 'bot_corps_ai.ts'), 'utf8');
+    const warPhases = readFileSync(join(process.cwd(), 'src', 'sim', 'turn_phases', 'war_phases.ts'), 'utf8');
+    const turnPipeline = readFileSync(join(process.cwd(), 'src', 'sim', 'turn_pipeline.ts'), 'utf8');
 
     expect(directives).not.toContain('deriveCorpsFrontMapping');
     expect(directives).not.toContain('state.military.assignable_front_segments ?? []');
     expect(corpsAi).not.toContain('deriveCorpsFrontMapping');
+    expect(warPhases).not.toContain('deriveAssignableFrontSegments');
+    expect(warPhases).not.toContain('assignable_front_segments =');
+    expect(turnPipeline).not.toContain('deriveAssignableFrontSegments');
+    expect(turnPipeline).not.toContain('assignable_front_segments =');
   });
 
   it('does not keep theatre tagging in the live turn pipelines', () => {

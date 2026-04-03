@@ -31,7 +31,6 @@ import { applyFormationCommitment } from '../../state/front_posture_commitment.j
 import { expandRegionPostureToEdges } from '../../state/front_posture_regions.js';
 import { accumulateFrontPressure } from '../../state/front_pressure.js';
 import { syncFrontSegments } from '../../state/front_segments.js';
-import { deriveAssignableFrontSegments } from '../../state/assignable_front_segments.js';
 import { GameState, type FactionId, type LegacyBrigadeAoRState, type EffectivePostureExposureState } from '../../state/game_state.js';
 import { updateHeavyEquipmentState } from '../../state/heavy_equipment.js';
 import { updateLegitimacyState } from '../../state/legitimacy.js';
@@ -261,11 +260,6 @@ export const warPhases: NamedPhase[] = [
             // In war phase, prefer OSID front edges (from previous turn's refreshFrontEdgeSnapshot)
             // for segment derivation. Canonical SID edges produce front_ids that can't be matched
             // against OSID-keyed political_controllers and brigade location_osid.
-            const frontEdgesForSegments =
-                context.state.meta.phase === 'war' && context.state.military.war_front_edges_osid?.length
-                    ? context.state.military.war_front_edges_osid
-                    : derivedFrontEdges;
-            context.state.military.assignable_front_segments = deriveAssignableFrontSegments(frontEdgesForSegments);
         }
     },
     {

@@ -1684,7 +1684,7 @@ heavy_munitions_reserve?: Record<FactionId, number>;
 front_edges?: FrontEdgeState[];
 /** OSID front-edge snapshot (War phase operational view) for HoI/OSID consumers. */
 war_front_edges_osid?: FrontEdgeState[];
-/** Legacy compatibility snapshot derived from canonical front_edges for old front-assignment consumers. */
+/** Legacy compatibility snapshot for old saves/tests only. No live turn-pipeline step should rebuild or consume it as frontline truth. */
 assignable_front_segments?: AssignableFrontSegmentState[];
 /** Legacy compatibility fallback only. Null = reserve; sectors/front edges are the live frontline truth. */
 brigade_front_assignment?: Record<FormationId, string | null>;

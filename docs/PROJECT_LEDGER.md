@@ -21738,6 +21738,27 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_shell_navigation.test.ts`
 - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
 
+## 2026-04-03 - Assignable front segment runtime demotion
+
+### Summary
+- Stopped the live turn pipeline from rebuilding `assignable_front_segments`.
+- Tightened the honesty regression so canonical runtime files can no longer quietly bless that compatibility field as frontline truth.
+- Updated schema comments so the field is described as old-save/test baggage instead of a current runtime product.
+
+### Files changed
+- `src/sim/turn_phases/war_phases.ts`
+- `src/sim/turn_pipeline.ts`
+- `src/state/game_state.ts`
+- `tests/engine_honesty_legacy_contracts.test.ts`
+- `docs/40_reports/implemented/20260403_ASSIGNABLE_FRONT_SEGMENT_RUNTIME_DEMOTION.md`
+
+### Why
+- A dead field with a live writer is more dangerous than a dead field with a comment.
+- `assignable_front_segments` had already lost its live readers; keeping the writer would only preserve false authority for later work.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\engine_honesty_legacy_contracts.test.ts`
+
 ## 2026-04-03 - Warroom to Army HQ shell handoff
 
 ### Summary
