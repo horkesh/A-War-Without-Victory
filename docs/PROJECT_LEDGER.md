@@ -21569,6 +21569,20 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
   - [F:\A-War-Without-Victory\docs\20_engineering\ROADMAP_GOVERNANCE.md](F:/A-War-Without-Victory/docs/20_engineering/ROADMAP_GOVERNANCE.md)
 - This is intended as the compact “how Claude behaves here” rail so future agents stop depending on memory, vibes, or partial prompt residue.
 
+## 2026-04-03 - Repo-local orchestrator made dispatch-first
+
+- Added repo-local orchestrator command surface:
+  - [F:\A-War-Without-Victory\.claude\commands\orchestrator.md](F:/A-War-Without-Victory/.claude/commands/orchestrator.md)
+- Added repo-local brief:
+  - [F:\A-War-Without-Victory\.claude\agents\orchestrator-dispatcher.md](F:/A-War-Without-Victory/.claude/agents/orchestrator-dispatcher.md)
+- Updated:
+  - [F:\A-War-Without-Victory\.claude\AGENT_TEAM_ROSTER.md](F:/A-War-Without-Victory/.claude/AGENT_TEAM_ROSTER.md)
+  - [F:\A-War-Without-Victory\.claude\agents\README.md](F:/A-War-Without-Victory/.claude/agents/README.md)
+- Purpose:
+  - make repo-local Claude orchestration dispatch-first
+  - stop cross-system work from defaulting to solo investigation
+  - add an explicit repo-level path for orchestrator mode instead of relying only on personal skills
+
 ## 2026-04-03 - Frontline sector-mandatory invariant refinement
 
 - Refined the final sector unresolved rule so only brigades that truthfully *should* have a frontline sector owner are flagged.

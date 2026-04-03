@@ -21,6 +21,10 @@ For operations work, swap in or add:
 
 5. `operations-reality-checker.md`
 
+For orchestration / cross-role synthesis, also use:
+
+6. `orchestrator-dispatcher.md`
+
 ## Core rule
 
 Every agent brief in this folder assumes the same owner-level standard:
@@ -46,6 +50,11 @@ For roadmap work:
 For operations work:
 
 - "Also use `.claude/agents/operations-reality-checker.md`"
+
+For dispatch-first coordination:
+
+- "Use `.claude/commands/orchestrator.md`"
+- "Pair it with `.claude/agents/orchestrator-dispatcher.md`"
 
 ## Expected outputs
 

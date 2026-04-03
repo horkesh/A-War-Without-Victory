@@ -10,6 +10,8 @@
 
 **For every non-trivial task:** Consult this Pyrrhic roster; invoke the listed skill(s) for the relevant role(s) by reading and following the corresponding `.claude/skills/<name>/SKILL.md`. Use clarification-first for high-risk items; document handoffs when passing between roles.
 
+**Dispatch-first rule:** When the task spans 2+ domains, the Orchestrator should dispatch specialists before synthesizing. Use `.claude/commands/orchestrator.md` or pair with `.claude/agents/orchestrator-dispatcher.md` to keep the role from sliding into solo investigation.
+
 ---
 
 ## Role → skill mapping
@@ -18,7 +20,7 @@
 
 | Role | Skill path | When to invoke |
 |------|------------|----------------|
-| Orchestrator | orchestrator | Big-picture direction, team coordination, strategic priority, convening Pyrrhic, aligning roadmap and ledger; resolves cross-role conflicts. **Deputy:** Product Manager. |
+| Orchestrator | orchestrator | Big-picture direction, team coordination, strategic priority, convening Pyrrhic, aligning roadmap and ledger; resolves cross-role conflicts. **Deputy:** Product Manager. **Default mode:** dispatch-first, synthesis second. |
 | Product Manager | product-manager | Roadmap, MVP, sequencing work, handoff to dev; reports to Orchestrator for big-picture alignment. References awwv-plan-change, awwv-make-cursor-prompt. |
 
 ### Planning
