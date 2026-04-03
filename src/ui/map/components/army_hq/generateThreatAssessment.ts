@@ -1,4 +1,5 @@
 import type { LoadedGameState } from '../../data/types';
+import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
 
 interface SectorIntelRecordView {
     friendly_sector_id: string;
@@ -48,7 +49,11 @@ export function generateThreatAssessment(
         if (sector.faction !== faction) continue;
         sectorToCorps.set(sector.sector_id, {
             corpsId: sector.corps_id,
-            corpsName: formationById.get(sector.corps_id)?.name ?? 'Field Command',
+            corpsName: getPlayerSafeCorpsName(
+                formationById.get(sector.corps_id)?.name,
+                sector.corps_id,
+                'Field Command',
+            ),
         });
     }
 

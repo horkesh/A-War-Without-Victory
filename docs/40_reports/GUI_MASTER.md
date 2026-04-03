@@ -346,3 +346,8 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - DiplomacyModal.ts now uses player-facing political faction names in visible diplomatic checklist/outlook copy instead of raw shorthand like `RS` or `HRHB`.
 - See `docs/40_reports/implemented/20260402_DIPLOMACY_SHELL_PLAYER_LANGUAGE.md`.
 
+## 2026-04-03 - Army HQ threat labels player-safe
+
+- Army HQ threat assessment titles now route corps-front naming through the shared player-safe text helpers instead of trusting raw formation names.
+- See `docs/40_reports/implemented/20260403_ARMY_HQ_THREAT_PLAYER_SAFE_LABELS.md`.
+

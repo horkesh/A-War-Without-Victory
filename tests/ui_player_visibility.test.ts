@@ -24,6 +24,7 @@ import {
 import { parseGameState } from '../src/ui/map/data/GameStateAdapter.js';
 import { buildOperationArrowsGeoJSON } from '../src/ui/map/map/builders/buildOperationArrowsGeoJSON.js';
 import { buildFormationsGeoJSON } from '../src/ui/map/map/builders/buildFormationsGeoJSON.js';
+import { generateThreatAssessment } from '../src/ui/map/components/army_hq/generateThreatAssessment.js';
 
 describe('player visibility helpers', () => {
   it('normalizes player faction and rejects unknown values', () => {
@@ -301,6 +302,25 @@ describe('player visibility helpers', () => {
     expect(parsed.pendingOfficerEvents?.[0]?.officer_name).toBe('An officer');
     expect(parsed.pendingOfficerEvents?.[0]?.current_commander_name).toBe('An officer');
     expect(parsed.pendingOfficerEvents?.[0]?.corps_name).toBe('3rd Corps');
+  });
+
+  it('keeps Army HQ threat assessment titles player-safe when corps names fall back to ids', () => {
+    const state = {
+      formations: [
+        { id: 'arbih_3rd_corps', faction: 'RBiH', name: 'arbih_3rd_corps', kind: 'corps' },
+      ],
+      corpsFrontSectors: [
+        { sector_id: 'sector:arbih_3rd:0', corps_id: 'arbih_3rd_corps', faction: 'RBiH' },
+      ],
+      sectorIntel: [
+        { friendly_sector_id: 'sector:arbih_3rd:0', offensive_signs: true, confidence: 0.8, strength_category: 'dense' },
+      ],
+    } as any;
+
+    const [item] = generateThreatAssessment(state, 'RBiH');
+
+    expect(item?.title).toContain('3rd Corps front');
+    expect(item?.title).not.toContain('arbih_3rd_corps');
   });
 
   it('keeps the bottom status strip player-safe instead of acting as an all-faction territory scoreboard', () => {

@@ -21670,3 +21670,22 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\displacement_pipeline_displacement_triggers.test.ts`
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\engine_honesty_legacy_contracts.test.ts tests\\brigade_corps_front_assign.test.ts`
 - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Army HQ threat labels player-safe
+
+### Summary
+- Hardened Army HQ threat-assessment title generation so corps-front labels use player-safe corps names even when raw formation names fall back to internal ids.
+- Added a regression to the player-visibility suite so threat titles cannot quietly leak `arbih_3rd_corps`-style strings.
+
+### Files changed
+- `src/ui/map/components/army_hq/generateThreatAssessment.ts`
+- `tests/ui_player_visibility.test.ts`
+- `docs/40_reports/implemented/20260403_ARMY_HQ_THREAT_PLAYER_SAFE_LABELS.md`
+
+### Why
+- Army HQ threat assessment is a player-trust surface. If it emits raw corps ids, the shell stops feeling like a command interface and starts reading like a debug report.
+- This was a classic summary-generator leak: most shells were already player-safe, but one title builder still trusted raw formation names.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_player_visibility.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
