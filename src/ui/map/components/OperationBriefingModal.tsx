@@ -68,10 +68,12 @@ function ForceLaunchBadge({ caCost }: { caCost: number }) {
 
 /** Command Record — canonical four-part presidential decision surface.
  *  Shown on executing/recovery ops when commander_assessment_at_launch is available. */
-function CommandRecord({ assessmentAtLaunch, wasForce, caCost }: {
+function CommandRecord({ assessmentAtLaunch, wasForce, caCost, corpsStrain, corpsStrainLabel }: {
     assessmentAtLaunch: 'launch' | 'postpone' | 'abort';
     wasForce: boolean;
     caCost: number;
+    corpsStrain: number;
+    corpsStrainLabel: 'healthy' | 'strained' | 'compromised';
 }) {
     return (
         <div className="mx-4 mt-3 mb-1 border border-neutral-300 bg-neutral-50">
@@ -99,6 +101,15 @@ function CommandRecord({ assessmentAtLaunch, wasForce, caCost }: {
                     <div className="flex items-center gap-2">
                         <span className="text-[9px] uppercase font-bold text-neutral-500 w-36 shrink-0">Command Authority Spent</span>
                         <span className="text-[10px] font-mono text-amber-700">{caCost} CA</span>
+                    </div>
+                )}
+                {/* Institutional strain follow-through — only when force-launched AND strain > 0 */}
+                {wasForce && corpsStrain > 0 && (
+                    <div className="flex items-center gap-2 pt-1 border-t border-neutral-200 mt-1">
+                        <span className="text-[9px] uppercase font-bold text-neutral-500 w-36 shrink-0">Command Strain</span>
+                        <span className={`text-[10px] font-mono ${corpsStrainLabel === 'compromised' ? 'text-red-700' : 'text-amber-700'}`}>
+                            {corpsStrainLabel === 'compromised' ? 'Compromised' : 'Strained'} — direct interventions have damaged this command relationship
+                        </span>
                     </div>
                 )}
             </div>
@@ -148,7 +159,7 @@ function DirectInterventionSection({ assessment, currentAuth, onForceLaunch }: {
                     }
                 >
                     {canAfford
-                        ? `Force Launch — Override Command Chain`
+                        ? `Direct Intervention — Override Command Chain`
                         : `Insufficient Command Authority (${currentAuth}/${FORCE_LAUNCH_COST})`
                     }
                 </button>
@@ -161,8 +172,8 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const context = useGameStore((s) => s.operationBriefingContext);
 
-    const { operation, commander } = useMemo(() => {
-        if (!loadedGameState || !context) return { operation: null, commander: null };
+    const { operation, commander, corpsStrain, corpsStrainLabel } = useMemo(() => {
+        if (!loadedGameState || !context) return { operation: null, commander: null, corpsStrain: 0, corpsStrainLabel: 'healthy' as const };
         const op = findPlayerFacingOperationByKey(
             loadedGameState,
             `${context.corpsId}|${context.operationName}`,
@@ -171,7 +182,11 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
         if (op?.commander_officer_id && loadedGameState.namedOfficerData) {
             cdr = loadedGameState.namedOfficerData.find((o) => o.id === op.commander_officer_id) ?? null;
         }
-        return { operation: op, commander: cdr };
+        // Look up command strain from the corps formation (derived on-read by adapter)
+        const corpsFormation = loadedGameState.formations?.find(f => f.id === context.corpsId);
+        const strain = corpsFormation?.commandStrain ?? 0;
+        const strainLabel = corpsFormation?.commandStrainLabel ?? 'healthy';
+        return { operation: op, commander: cdr, corpsStrain: strain, corpsStrainLabel: strainLabel };
     }, [loadedGameState, context]);
 
     if (!isOpen || !context || !operation) return null;
@@ -206,6 +221,8 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                         assessmentAtLaunch={operation.commander_assessment_at_launch}
                         wasForce={operation.was_force_launched === true}
                         caCost={FORCE_LAUNCH_COST}
+                        corpsStrain={corpsStrain}
+                        corpsStrainLabel={corpsStrainLabel}
                     />
                 ) : (
                     /* Legacy fallback: force-launched ops without a snapshot (pre-feature) */

@@ -231,6 +231,12 @@ function CompletedOpCard({
                             )}
                         </div>
                     )}
+                    {/* Institutional strain note — only for force-launched ops */}
+                    {op.force_launched && (
+                        <div className="text-[9px] text-amber-500/80 italic">
+                            Note: Presidential override contributed to command strain on this corps.
+                        </div>
+                    )}
 
                     {/* Objectives */}
                     {op.objectives_targeted.length > 0 && (
