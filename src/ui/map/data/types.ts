@@ -20,15 +20,6 @@ export interface FrontPressureView {
     last_updated_turn: number;
 }
 
-export interface AssignableFrontSegmentView {
-    front_id: string;
-    edge_ids: string[];
-    side_a: string | null;
-    side_b: string | null;
-    length_edges: number;
-    name?: string;
-}
-
 /** Officer mutable state for UI (from GameState.named_officers). */
 export interface NamedOfficerStateView {
     officer_id: string;
@@ -505,7 +496,6 @@ export interface LoadedGameState {
     brigadeAorByFormationId: Record<string, string[]>;
     frontEdges?: FrontEdgeView[];
     frontEdgesOsid?: FrontEdgeView[];
-    assignableFrontSegments?: AssignableFrontSegmentView[];
     frontPressureByEdge?: Record<string, FrontPressureView>;
     attackOrders: AttackOrderView[];
     aorOrders: AoROrderView[];

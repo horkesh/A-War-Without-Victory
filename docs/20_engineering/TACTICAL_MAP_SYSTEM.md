@@ -421,7 +421,7 @@ There is no front between RBiH and HRHB until they are at war. The map does not 
 **Front-related state:** Persisted in `GameState` and used by both views, but not all persisted front-era metadata remains a live player-shell concept:
 
 - **`front_edges`** — Hostile-boundary edges (where two hostile settlements meet); derived each turn in the pipeline and persisted; 2D front-line layer and 3D front mesh use this when present (with identical fallback when absent).
-- **`assignable_front_segments`** — Compatibility-era contiguous hostile-boundary segments derived from `front_edges`. They still exist in raw state and are still used for certain fallback computations and front-edge tooltip grouping, but they are no longer a primary live player-shell command concept.
+- **`assignable_front_segments`** — Compatibility-era contiguous hostile-boundary segments derived from `front_edges`. They still exist in raw state and still support certain compatibility fallbacks in the engine, but the live tactical-map `LoadedGameState` no longer carries them as a player-shell DTO surface.
 - **`brigade_front_assignment`** — Compatibility fallback mapping from brigade → `front_id`/reserve. The modern engine uses corps sectors as frontline authority once they exist; legacy front assignment survives for old-save/repair paths and selected fallback logic only.
 - **`theatres`** and **`army_theatre_assignment`** — Still present in raw state for compatibility/sim lineage, but no current tactical-map `LoadedGameState` surface treats them as active player-facing UI ownership.
 

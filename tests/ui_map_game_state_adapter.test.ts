@@ -68,10 +68,7 @@ test('parseGameState extracts canonical front edge and pressure views', () => {
     brigade_front_assignment: {
             b1: 'RBiH__RS__S1__S2',
             b2: null,
-        },
-    assignable_front_segments: [
-            { front_id: 'RBiH__RS__S1__S2', edge_ids: ['S1__S2'], side_a: 'RBiH', side_b: 'RS', length_edges: 1 }
-        ]
+        }
   } as any,
   political: {
     political_controllers: {}
@@ -82,8 +79,6 @@ test('parseGameState extracts canonical front edge and pressure views', () => {
     assert.ok(parsed.frontEdgesOsid && parsed.frontEdgesOsid.length === 1);
     assert.strictEqual(parsed.frontEdgesOsid?.[0]?.edge_id, 'op:a__op:b');
     assert.strictEqual(parsed.frontPressureByEdge?.S1__S2?.value, -3);
-    assert.ok(parsed.assignableFrontSegments && parsed.assignableFrontSegments.length === 1);
-    assert.strictEqual(parsed.assignableFrontSegments?.[0]?.front_id, 'RBiH__RS__S1__S2');
     assert.strictEqual((parsed as any).brigadeFrontAssignment, undefined);
 });
 

@@ -1547,25 +1547,6 @@ export function parseGameState(json: unknown): LoadedGameState {
             .sort((a, b) => a.edge_id.localeCompare(b.edge_id))
         : undefined;
 
-    let assignableFrontSegments: LoadedGameState['assignableFrontSegments'] | undefined;
-    if (Array.isArray(state.military.assignable_front_segments)) {
-        const out: NonNullable<LoadedGameState['assignableFrontSegments']> = [];
-        for (const segment of state.military.assignable_front_segments as Array<Record<string, unknown>>) {
-            const frontId = typeof segment.front_id === 'string' ? segment.front_id : '';
-            const edgeIds = (Array.isArray(segment.edge_ids) ? segment.edge_ids : [])
-                .map((id) => (typeof id === 'string' ? id : '')).filter((id) => id.length > 0).sort((a, b) => a.localeCompare(b));
-            if (!frontId || edgeIds.length === 0) continue;
-            const sideA = segment.side_a === 'RS' || segment.side_a === 'RBiH' || segment.side_a === 'HRHB' ? segment.side_a : null;
-            const sideB = segment.side_b === 'RS' || segment.side_b === 'RBiH' || segment.side_b === 'HRHB' ? segment.side_b : null;
-            const lengthEdges = Number.isFinite(Number(segment.length_edges)) && Number(segment.length_edges) > 0 ? Math.floor(Number(segment.length_edges)) : edgeIds.length;
-            const entry: NonNullable<LoadedGameState['assignableFrontSegments']>[number] = { front_id: frontId, edge_ids: edgeIds, side_a: sideA, side_b: sideB, length_edges: lengthEdges };
-            if (typeof segment.name === 'string' && segment.name.length > 0) entry.name = segment.name;
-            out.push(entry);
-        }
-        out.sort((a, b) => a.front_id.localeCompare(b.front_id));
-        if (out.length > 0) assignableFrontSegments = out;
-    }
-
     let frontPressureByEdge: LoadedGameState['frontPressureByEdge'] | undefined;
     const rawFrontPressure = state.military.front_pressure as Record<string, Record<string, unknown>> | undefined;
     if (rawFrontPressure && typeof rawFrontPressure === 'object' && !Array.isArray(rawFrontPressure)) {
@@ -1782,7 +1763,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         war_alliance_rbih_hrhb: war_alliance_rbih_hrhb ?? null,
         frontEdges: frontEdges && frontEdges.length > 0 ? frontEdges : undefined,
         frontEdgesOsid: frontEdgesOsid && frontEdgesOsid.length > 0 ? frontEdgesOsid : undefined,
-        assignableFrontSegments, frontPressureByEdge,
+        frontPressureByEdge,
         displacementByMun: Object.keys(displacementByMun).length > 0 ? displacementByMun : undefined,
         departedByOsid: departedByOsid && Object.keys(departedByOsid).length > 0 ? departedByOsid : undefined,
         departedByMun: departedByMun && Object.keys(departedByMun).length > 0 ? departedByMun : undefined,

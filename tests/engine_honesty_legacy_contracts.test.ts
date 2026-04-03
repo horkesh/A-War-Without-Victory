@@ -339,6 +339,13 @@ describe('engine honesty legacy contracts', () => {
     expect(gameState).toContain('Legacy compatibility cache only. No longer rebuilt in the live war pipeline.');
   });
 
+  it('does not keep dead corps-front mapping helpers wired to compatibility segment snapshots', () => {
+    const directives = readFileSync(join(process.cwd(), 'src', 'sim', 'combat', 'bot_corps_directives.ts'), 'utf8');
+
+    expect(directives).not.toContain('deriveCorpsFrontMapping');
+    expect(directives).not.toContain('state.military.assignable_front_segments ?? []');
+  });
+
   it('does not keep theatre tagging in the live turn pipelines', () => {
     const warPhases = readFileSync(join(process.cwd(), 'src', 'sim', 'turn_phases', 'war_phases.ts'), 'utf8');
     const turnPipeline = readFileSync(join(process.cwd(), 'src', 'sim', 'turn_pipeline.ts'), 'utf8');

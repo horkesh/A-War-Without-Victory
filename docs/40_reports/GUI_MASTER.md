@@ -357,6 +357,11 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - Desktop state delivery now fans out through bridge subscriptions instead of singleton callback ownership, and embedded tactical map receives turn-report events through the same event contract.
 - See `docs/40_reports/implemented/20260403_DESKTOP_BRIDGE_SUBSCRIPTION_CANONICALIZATION.md`.
 
+## 2026-04-03 - Assignable front segment DTO retirement
+
+- `LoadedGameState` no longer carries `assignableFrontSegments`; the live tactical shell now treats `assignable_front_segments` as raw compatibility residue instead of a player-shell data contract.
+- See `docs/40_reports/implemented/20260403_ASSIGNABLE_FRONT_SEGMENT_DTO_RETIREMENT.md`.
+
 ## 2026-04-03 - Operations and officer player-safe labels
 
 - Army HQ operations review, operation briefing, tactical operations detail, and officer replacement prompts now route corps/brigade/place labels through the shared player-safe helpers instead of trusting raw engine naming.

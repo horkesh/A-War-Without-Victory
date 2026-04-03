@@ -21922,6 +21922,52 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\engine_honesty_legacy_contracts.test.ts tests\\ui_shell_navigation.test.ts`
 - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
 
+## 2026-04-03 - Assignable front segment DTO retirement
+
+### Summary
+- Removed `assignableFrontSegments` from the live tactical-map `LoadedGameState` contract.
+- Stopped `GameStateAdapter` from deriving the compatibility-era front snapshot into the player shell.
+- Updated the adapter regression test and propagated the contract change into tactical-map/system docs and repo memory.
+
+### Files changed
+- `src/ui/map/data/types.ts`
+- `src/ui/map/data/GameStateAdapter.ts`
+- `tests/ui_map_game_state_adapter.test.ts`
+- `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`
+- `docs/40_reports/GUI_MASTER.md`
+- `docs/40_reports/implemented/20260403_ASSIGNABLE_FRONT_SEGMENT_DTO_RETIREMENT.md`
+- `docs/PROJECT_LEDGER.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- `assignable_front_segments` still exists as raw compatibility state, but no active non-archived player shell consumes it anymore.
+- Keeping it in `LoadedGameState` made the tactical shell imply a second front-truth owner after sectors and front-pressure summaries had already become canonical.
+
+### Verification
+- `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\ui_map_game_state_adapter.test.ts`
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_player_visibility.test.ts`
+- `node .\\node_modules\\typescript\\bin\\tsc --noEmit -p tsconfig.json`
+
+## 2026-04-03 - Corps front mapping helper retirement
+
+### Summary
+- Removed the dead `deriveCorpsFrontMapping(...)` helper from `bot_corps_directives.ts`.
+- Added an honesty regression so the live corps directives module no longer carries a direct compatibility read from `assignable_front_segments`.
+
+### Files changed
+- `src/sim/combat/bot_corps_directives.ts`
+- `tests/engine_honesty_legacy_contracts.test.ts`
+- `docs/40_reports/implemented/20260403_CORPS_FRONT_MAPPING_HELPER_RETIREMENT.md`
+- `docs/PROJECT_LEDGER.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- The helper had no live non-archived callers left, but it still lived in a core AI directives file and read the old front-segment compatibility state.
+- That is exactly the kind of “looks alive” code that teaches future implementers the wrong authority model.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\engine_honesty_legacy_contracts.test.ts`
+
 ## 2026-04-03 - Shell authority docs and shortcut canonicalization
 
 ### Summary
