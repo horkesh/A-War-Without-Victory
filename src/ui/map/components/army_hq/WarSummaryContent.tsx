@@ -2,7 +2,7 @@
  * War Summary content — extracted from WarSummaryModal for inline rendering
  * inside Army HQ SUMMARY tab. Same data, no modal wrapper.
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { SummaryFocusSection } from '../../data/types';
 import { useGameStore } from '../../store/gameStore';
 import { formatTurnLabel, fmtK, fmtPct } from '../../utils/formatters';
@@ -22,9 +22,17 @@ const SUMMARY_SECTIONS: Array<[SummaryFocusSection, string]> = [
     ['capital', 'Capital'],
 ];
 
-export function WarSummaryContent() {
+interface WarSummaryContentProps {
+    focusSection?: SummaryFocusSection;
+}
+
+export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryContentProps) {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
-    const [activeSection, setActiveSection] = useState<SummaryFocusSection>('overview');
+    const [activeSection, setActiveSection] = useState<SummaryFocusSection>(focusSection);
+
+    useEffect(() => {
+        setActiveSection(focusSection);
+    }, [focusSection]);
 
     if (!loadedGameState) return <div className="text-text-secondary italic text-[12px] py-8 text-center">No game state loaded</div>;
 

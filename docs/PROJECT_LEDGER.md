@@ -21519,3 +21519,22 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 ### Verification
 - `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\officer_quality.test.ts`
 - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - War Summary shell ownership unification
+
+### Summary
+- Collapsed the duplicate War Summary owners so `WarSummaryContent` is now the only deep summary owner.
+- Turned `WarSummaryModal` into a thin tactical-shell wrapper around the Army HQ summary content instead of a second independent summary model.
+
+### Files changed
+- `src/ui/map/components/WarSummaryModal.tsx`
+- `src/ui/map/components/army_hq/WarSummaryContent.tsx`
+- `docs/40_reports/implemented/20260403_WAR_SUMMARY_SHELL_OWNERSHIP_UNIFICATION.md`
+
+### Why
+- The tactical map still had its own War Summary implementation with different truth standards, including exact all-faction strategic totals that Army HQ had already started to replace with player-safe asymmetry.
+- Duplicate shell owners are exactly how player-truth regressions keep coming back.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_army_hq_war_summary_visibility.test.ts tests\\ui_player_visibility.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
