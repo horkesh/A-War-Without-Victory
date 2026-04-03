@@ -1,5 +1,4 @@
 import type {
-  AssignableFrontSegmentView,
   CorpsFrontSectorView,
   FormationView,
   FrontEdgeView,
@@ -137,7 +136,6 @@ export function buildPlayerSafeFrontTooltipModel(args: {
   frontPressureByEdge: Record<string, { value: number; max_abs: number; last_updated_turn?: number }> | undefined;
   formations: FormationView[] | undefined;
   fogOfWar: LoadedGameState['fogOfWar'] | undefined;
-  assignableFrontSegments: Array<Pick<AssignableFrontSegmentView, 'front_id' | 'edge_ids' | 'side_a' | 'side_b'>> | undefined;
   corpsFrontSectors: CorpsFrontSectorView[] | undefined;
   playerFaction: string | null;
 }): PlayerSafeFrontTooltipModel {

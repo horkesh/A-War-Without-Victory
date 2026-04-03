@@ -21585,3 +21585,23 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 ### Verification
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_player_visibility.test.ts tests\\ui_map_render_smoke.test.ts tests\\warroom_player_visibility.test.ts`
 - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Front tooltip sector authority alignment
+
+### Summary
+- Removed the player-facing front-tooltip dependency on `assignableFrontSegments`.
+- Front tooltip persistence and sector context now come from `corpsFrontSectors`, aligning the tooltip with canonical sector/frontline ownership.
+
+### Files changed
+- `src/ui/map/components/Tooltip.tsx`
+- `src/ui/map/components/tooltipPlayerSafe.ts`
+- `tests/ui_map_tooltip_player_visibility.test.ts`
+- `docs/40_reports/implemented/20260403_FRONT_TOOLTIP_SECTOR_AUTHORITY_ALIGNMENT.md`
+
+### Why
+- The tooltip was still able to reconstruct front persistence from compatibility front-segment data after the rest of the shell had moved to sector truth.
+- That left a quiet player-facing seam where compatibility data could still outrank the canonical sector model.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_map_tooltip_player_visibility.test.ts tests\\ui_player_visibility.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`

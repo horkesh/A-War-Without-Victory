@@ -178,20 +178,19 @@ function FrontTooltipContent({
   frontEdgesOsid,
   frontPressureByEdge,
   formations,
-  assignableFrontSegments,
   corpsFrontSectors,
 }: {
   edgeId: string;
   frontEdgesOsid: { edge_id: string; a: string; b: string; side_a: string | null; side_b: string | null }[] | undefined;
   frontPressureByEdge: Record<string, { value: number; max_abs: number }> | undefined;
   formations: FormationView[] | undefined;
-  assignableFrontSegments: { front_id: string; edge_ids: string[]; side_a: string | null; side_b: string | null }[] | undefined;
   corpsFrontSectors?: CorpsFrontSectorView[];
 }) {
   // Strip faction suffix from composite hover ID to match canonical edge IDs
   const baseEdgeId = stripFactionSuffix(edgeId);
 
   const edge = frontEdgesOsid?.find((e) => e.edge_id === baseEdgeId);
+  const sector = corpsFrontSectors?.find((entry) => entry.edge_ids.includes(baseEdgeId));
   const playerFaction = getPlayerFacingFaction(useGameStore.getState().loadedGameState);
   const model = buildPlayerSafeFrontTooltipModel({
     edgeId: baseEdgeId,
@@ -199,12 +198,10 @@ function FrontTooltipContent({
     frontPressureByEdge,
     formations,
     fogOfWar: useGameStore.getState().loadedGameState?.fogOfWar,
-    assignableFrontSegments,
     corpsFrontSectors,
     playerFaction,
   });
-  const segment = assignableFrontSegments?.find((s) => s.edge_ids.includes(baseEdgeId));
-  const persistenceLine = segment ? `${segment.edge_ids.length} edges` : '—';
+  const persistenceLine = sector ? `${sector.edge_ids.length} edges` : '—';
 
   return (
     <div className="min-w-[220px] max-w-[300px]">
@@ -410,7 +407,6 @@ export const Tooltip = React.memo(function Tooltip() {
           frontEdgesOsid={loadedGameState?.frontEdgesOsid}
           frontPressureByEdge={loadedGameState?.frontPressureByEdge}
           formations={loadedGameState?.formations}
-          assignableFrontSegments={loadedGameState?.assignableFrontSegments}
           corpsFrontSectors={loadedGameState?.corpsFrontSectors}
         />
       )}
