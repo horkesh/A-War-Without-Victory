@@ -14,7 +14,7 @@ function getNameFromSource(id: string | null | undefined, source: IdNameSource):
   if (Array.isArray(source)) {
     return source.find((entry) => entry.id === id)?.name ?? null;
   }
-  return source[id] ?? null;
+  return (source as Record<string, string | undefined>)[id] ?? null;
 }
 
 export function getPlayerFacingCorpsName(

@@ -321,6 +321,7 @@ describe('player visibility helpers', () => {
     );
     expect(situationTabSource).toContain('Alliance Gauge (Bosniak-Croat)');
     expect(situationTabSource).toContain('getPlayerSafeMilitaryFactionName');
+    expect(situationTabSource).not.toContain('assignableFrontSegments?.length');
 
     const warSummarySource = readFileSync(
       new URL('../src/ui/map/components/army_hq/WarSummaryContent.tsx', import.meta.url),
@@ -404,6 +405,17 @@ describe('player visibility helpers', () => {
     expect(source).not.toContain('title={`RBiH: ${plan.proposedSplit.RBiH}%`}');
     expect(source).not.toContain('title={`RS: ${plan.proposedSplit.RS}%`}');
     expect(source).not.toContain('title={`HRHB: ${plan.proposedSplit.HRHB}%`}');
+  });
+
+  it('keeps Codex as a shell handoff instead of a fake Army HQ records subtab', () => {
+    const source = readFileSync(
+      new URL('../src/ui/map/components/army_hq/RecordsContent.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(source).toContain('Open Codex');
+    expect(source).toContain('separate Codex shell');
+    expect(source).not.toContain("{ id: 'codex' as const, label: 'CODEX' }");
   });
 
   it('keeps staged-order hover labels player-safe instead of exposing raw target ids', () => {

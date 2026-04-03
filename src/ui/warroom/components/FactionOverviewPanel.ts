@@ -452,9 +452,7 @@ export class FactionOverviewPanel {
         const onDutyOfficers = (snap.officersByFaction?.[snap.playerFaction] ?? [])
             .filter((officer) => officer.status === 'active').length;
         const corpsInField = snap.ownForces.formationDetails.filter((formation) => formation.kind === 'corps').length;
-        const activeBrigades = snap.ownForces.formationDetails.filter(
-            (formation) => formation.kind === 'brigade' && formation.status === 'active',
-        ).length;
+        const activeBrigades = snap.ownForces.activeBrigades;
         const inTransitCount = snap.brigadeMovement.inTransit.length;
 
         section.innerHTML = `

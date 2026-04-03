@@ -9,7 +9,6 @@ import { useGameStore } from '../../store/gameStore';
 const SUB_TABS = [
     { id: 'aar' as const, label: 'AFTER-ACTION REPORT' },
     { id: 'ops' as const, label: 'OPERATION HISTORY' },
-    { id: 'codex' as const, label: 'CODEX' },
 ];
 
 export function RecordsContent() {
@@ -25,15 +24,9 @@ export function RecordsContent() {
                     <button
                         key={id}
                         type="button"
-                        onClick={() => {
-                            if (id === 'codex') {
-                                setCodexOpen(true);
-                            } else {
-                                setSubTab(id);
-                            }
-                        }}
+                        onClick={() => setSubTab(id)}
                         className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] rounded-md border transition-all ${
-                            subTab === id && id !== 'codex'
+                            subTab === id
                                 ? 'bg-amber-400/15 border-amber-400/30 text-amber-400'
                                 : 'bg-panel-card border-panel-border text-text-secondary hover:text-text-primary hover:bg-white/5'
                         }`}
@@ -41,6 +34,20 @@ export function RecordsContent() {
                         {label}
                     </button>
                 ))}
+            </div>
+
+            <div className="mb-4 rounded-md border border-panel-border bg-panel-card px-3 py-2">
+                <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-text-secondary">Codex</div>
+                <div className="mt-1 text-[11px] text-text-secondary">
+                    Historical essays and reference material live in the separate Codex shell.
+                </div>
+                <button
+                    type="button"
+                    onClick={() => setCodexOpen(true)}
+                    className="mt-2 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] rounded-md border border-panel-border bg-panel-card text-text-secondary transition-all hover:text-text-primary hover:bg-white/5"
+                >
+                    Open Codex
+                </button>
             </div>
 
             {/* Content */}

@@ -21,6 +21,8 @@ import {
     sortIvpConsequenceIds,
 } from '../../../state/patron_pressure.js';
 
+const FACTIONS: Array<'RS' | 'RBiH' | 'HRHB'> = ['RS', 'RBiH', 'HRHB'];
+
 interface OsidAreasFile {
   total_area_km2: number;
   areas: Record<string, number>;
@@ -83,8 +85,7 @@ function computeTerritoryPercentages(
 function computeFrontSummary(state: LoadedGameState): { static: number; fluid: number; oscillating: number } {
   const pressureEntries = Object.values(state.frontPressureByEdge ?? {});
   if (pressureEntries.length === 0) {
-    const fallback = state.assignableFrontSegments?.length ?? 0;
-    return { static: fallback, fluid: 0, oscillating: 0 };
+    return { static: 0, fluid: 0, oscillating: 0 };
   }
   let stat = 0;
   let fluid = 0;

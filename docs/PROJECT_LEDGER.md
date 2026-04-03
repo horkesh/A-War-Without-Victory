@@ -21561,3 +21561,27 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 ### Verification
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_map_panel_rail.test.ts tests\\ui_opord_player_safe_labels.test.ts tests\\ui_shell_navigation.test.ts`
 - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Summary and Codex shell integrity pass
+
+### Summary
+- Removed the `SituationTab` front-summary fallback that was reconstructing front-state counts from compatibility `assignableFrontSegments`.
+- Reworked Army HQ Records so Codex is presented as a handoff to its own shell instead of a fake records subtab.
+- Tightened shell consistency by using canonical `activeBrigades` in Warroom and making the shared player-facing label helper type-safe.
+
+### Files changed
+- `src/ui/map/components/SituationTab.tsx`
+- `src/ui/map/components/army_hq/RecordsContent.tsx`
+- `src/ui/shared/playerFacingLabels.ts`
+- `src/ui/warroom/components/FactionOverviewPanel.ts`
+- `tests/ui_player_visibility.test.ts`
+- `docs/40_reports/implemented/20260403_SUMMARY_AND_CODEX_SHELL_INTEGRITY_PASS.md`
+
+### Why
+- Summary shells should not invent front-state from compatibility leftovers once canonical pressure data exists.
+- Codex is its own shell; presenting it as a records subtab was a shell-hierarchy lie that would keep duplicating entrypoint behavior.
+- Warroom and shared label helpers need to consume canonical counts and name sources instead of recomputing or leaning on brittle shortcuts.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_player_visibility.test.ts tests\\ui_map_render_smoke.test.ts tests\\warroom_player_visibility.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
