@@ -192,6 +192,21 @@ export interface FormationView {
         total_equipment_destroyed?: { tanks: number; artillery: number; aa_systems: number };
         total_equipment_captured?: { tanks: number; artillery: number; aa_systems: number };
     };
+    /**
+     * Command strain score for this corps (derived on-read, never stored on GameState).
+     * Accumulates from force-launched ops (+3) and unresolved warlord friction (+2).
+     * Decays -1/turn. 0 = healthy, 1-5 = strained, 6+ = compromised.
+     * Only populated for corps/corps_asset formations.
+     */
+    commandStrain?: number;
+    /** Player-facing label derived from commandStrain. */
+    commandStrainLabel?: 'healthy' | 'strained' | 'compromised';
+    /**
+     * Unresolved warlord friction event types for this corps's active commander.
+     * Derived on-read from state.military.friction_events. Empty array = no friction.
+     * Only populated for corps/corps_asset formations.
+     */
+    activeFrictionTypes?: string[];
 }
 
 export interface MilitiaPoolView {

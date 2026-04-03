@@ -23,6 +23,8 @@ import { getMunicipalitySupportLabel } from '../../../sim/combat/municipality_su
 import { strictCompare } from '../../../state/validateGameState.js';
 import { computeFullVerdict } from '../../../sim/negotiation/scoring.js';
 import type { GameVerdict } from '../../../state/negotiation_types.js';
+import { computeCorpsCommandStrain, getCommandStrainLabel } from './command_strain.js';
+import type { GameState } from '../../../state/game_state.js';
 
 function pointsByFaction(rec: Record<string, { points?: number }>): Record<string, number> {
     const out: Record<string, number> = {};
@@ -841,6 +843,26 @@ export function parseGameState(json: unknown): LoadedGameState {
                     .filter((sub) => sub.corps_id === fv.id && sub.id !== fv.id)
                     .map((sub) => sub.id)
                     .sort();
+
+                // ── Command Strain (derived on-read, not stored on GameState) ──────
+                const strain = computeCorpsCommandStrain(fv.id, state as unknown as GameState);
+                fv.commandStrain = strain;
+                fv.commandStrainLabel = getCommandStrainLabel(strain);
+
+                // ── Active friction events for this corps's commander ─────────────
+                const frictionEvents = (state.military.friction_events as Array<{ officer_id: string; turn: number; type: string; resolved: boolean }> | undefined) ?? [];
+                const namedOfficers = state.military.named_officers as Record<string, { status?: string; assigned_corps_id?: string | null }> | undefined;
+                const corpsCommanderIds = namedOfficers
+                    ? Object.keys(namedOfficers).sort().filter(oid => {
+                        const os = namedOfficers[oid];
+                        return os?.status === 'active' && os?.assigned_corps_id === fv.id;
+                    })
+                    : [];
+                const unresolvedTypes = frictionEvents
+                    .filter(e => !e.resolved && corpsCommanderIds.includes(e.officer_id))
+                    .map(e => e.type)
+                    .sort();
+                fv.activeFrictionTypes = unresolvedTypes;
             }
         }
     }
