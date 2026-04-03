@@ -21690,6 +21690,34 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_player_visibility.test.ts`
 - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
 
+## 2026-04-03 - Tactical top-shell density and label cleanup
+
+### Summary
+- Reduced tactical-shell top clearance so rails and detail panels reclaim vertical space instead of paying for oversized crest chrome.
+- Shrunk the presidential crest footprint and its reserved spacer in the mounted toolbar.
+- Removed rough geography fallback paths from Army HQ operations review, Chronicle entry generation, and ops-planning hover tooltips.
+- Humanized ops-planning hover controller labels through player-safe political faction naming.
+
+### Files changed
+- `src/ui/map/App.tsx`
+- `src/ui/map/components/panelRail.ts`
+- `src/ui/map/components/OOBSidebar.tsx`
+- `src/ui/map/components/PresidentialToolbar.tsx`
+- `src/ui/map/components/army_hq/OperationsSection.tsx`
+- `src/ui/map/components/chronicle/generateChronicleEntries.ts`
+- `src/ui/map/components/ops_modal/OpsMap.tsx`
+- `tests/ui_shell_navigation.test.ts`
+- `tests/ui_player_visibility.test.ts`
+- `docs/40_reports/implemented/20260403_TACTICAL_TOP_SHELL_DENSITY_AND_LABEL_CLEANUP.md`
+
+### Why
+- The tactical shell should not carry a permanent dead-air tax just to accommodate decorative chrome.
+- Chronicle and ops-planning hover are still player-facing shells; rough OSID or raw faction fallback there makes the overall product feel inconsistent.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_shell_navigation.test.ts tests\\ui_player_visibility.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
 ## 2026-04-03 - AAR and reserve player-safe labels
 
 ### Summary

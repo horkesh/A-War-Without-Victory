@@ -373,3 +373,9 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - `ArmyReservePanel` now resolves reserve base locations through the canonical display-name map as well.
 - See `docs/40_reports/implemented/20260403_AAR_AND_RESERVE_PLAYER_SAFE_LABELS.md`.
 
+## 2026-04-03 - Tactical top-shell density and label cleanup
+
+- Tactical-map shell clearance is tighter now, so OOB and detail rails reclaim vertical space instead of paying for oversized crest chrome.
+- Chronicle and ops-planning hover labels now stay on the player-safe geography/faction helpers too.
+- See `docs/40_reports/implemented/20260403_TACTICAL_TOP_SHELL_DENSITY_AND_LABEL_CLEANUP.md`.
+

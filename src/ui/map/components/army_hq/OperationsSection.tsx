@@ -7,7 +7,7 @@ import { useMemo, useState } from 'react';
 import type { OperationView, FormationView, LoadedGameState, NamedOfficerView } from '../../data/types';
 import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
-import { formatOsidLabel, turnToDateString } from '../../utils/formatters';
+import { turnToDateString } from '../../utils/formatters';
 import { getOsidDisplayName } from '../../utils/osidDisplayName';
 import { getPlayerSafeBrigadeName } from '../../utils/playerSafeText';
 import { CollapsibleSection } from './CollapsibleSection';
@@ -222,7 +222,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
         );
     }, [gameState.operationHistory, op.name, op.corps_id]);
     const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
-    const resolveObjectiveLabel = (osid: string) => getOsidDisplayName(osid, osidDisplayNames) || formatOsidLabel(osid);
+    const resolveObjectiveLabel = (osid: string) => getOsidDisplayName(osid, osidDisplayNames);
 
     return (
         <div className="px-4 py-3 space-y-4 text-[11px] border-t border-panel-border/50 bg-panel-card font-mono">

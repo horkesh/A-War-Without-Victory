@@ -22,7 +22,7 @@ import { rewritePmtilesUrls } from '../../map/rewritePmtilesUrls';
 import styleJson from '../../map/awwv_map_style.json';
 import { ModalMapSource } from '../../utils/ModalMapSource';
 import type { AxisState } from './types';
-import { humanizeOsid } from '../../utils/osidDisplayName';
+import { getPlayerSafePoliticalFactionName, getPlayerSafeSettlementName } from '../../utils/playerSafeText';
 
 // Faction-colored axis palettes
 const AXIS_PALETTES: Record<string, string[]> = {
@@ -334,16 +334,19 @@ export function OpsMap({
 
                     // Build terrain tooltip content
                     const sid = props.sid as string | undefined;
-                    const name = (props.settlement_name as string | undefined) ?? humanizeOsid(hoveredOsid);
+                    const name = (props.settlement_name as string | undefined) ?? getPlayerSafeSettlementName(hoveredOsid, 'Selected settlement');
                     const terrain = sid ? terrainDataRef.current.get(sid) : undefined;
                     const controller = controlDataRef.current[hoveredOsid] ?? '—';
+                    const controllerLabel = controller === '—'
+                        ? controller
+                        : getPlayerSafePoliticalFactionName(controller, 'Unknown authority');
                     const selLabel = isSelectable
                         ? '<span style="color:#56d364">selectable</span>'
                         : '<span style="color:#f47068">out of range</span>';
 
                     let html = `<div style="font-size:12px;line-height:1.5;">`;
                     html += `<strong>${name}</strong> ${selLabel}<br>`;
-                    html += `<span style="color:#8b9bb0">Held by: </span>${controller}<br>`;
+                    html += `<span style="color:#8b9bb0">Held by: </span>${controllerLabel}<br>`;
                     if (terrain) {
                         const elev = Math.round(terrain.elevation_mean_m);
                         const slope = Math.round(terrain.slope_index * 100);

@@ -544,4 +544,27 @@ describe('player visibility helpers', () => {
     expect(reserveSource).toContain('getOsidDisplayName');
     expect(reserveSource).not.toContain('humanizeOsid');
   });
+
+  it('keeps chronicle and ops-planning geography on player-safe helpers', () => {
+    const chronicleSource = readFileSync(
+      new URL('../src/ui/map/components/chronicle/generateChronicleEntries.ts', import.meta.url),
+      'utf8',
+    );
+    const operationsSectionSource = readFileSync(
+      new URL('../src/ui/map/components/army_hq/OperationsSection.tsx', import.meta.url),
+      'utf8',
+    );
+    const opsMapSource = readFileSync(
+      new URL('../src/ui/map/components/ops_modal/OpsMap.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(chronicleSource).toContain('getPlayerSafeSettlementName');
+    expect(chronicleSource).not.toContain('humanizeOsid');
+    expect(operationsSectionSource).not.toContain('formatOsidLabel');
+    expect(operationsSectionSource).toContain('getOsidDisplayName');
+    expect(opsMapSource).toContain('getPlayerSafeSettlementName');
+    expect(opsMapSource).toContain('getPlayerSafePoliticalFactionName');
+    expect(opsMapSource).not.toContain('humanizeOsid');
+  });
 });

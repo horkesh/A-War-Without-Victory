@@ -113,4 +113,24 @@ describe('shellNavigation', () => {
     expect(source).toContain('ipc.quickSave()');
     expect(source).not.toContain("window as unknown as { awwv?: { quickSave: () => Promise<unknown> } }");
   });
+
+  it('keeps tactical shell top clearance tight enough that the crest does not tax every rail', () => {
+    const appSource = readFileSync(
+      new URL('../src/ui/map/App.tsx', import.meta.url),
+      'utf8',
+    );
+    const toolbarSource = readFileSync(
+      new URL('../src/ui/map/components/PresidentialToolbar.tsx', import.meta.url),
+      'utf8',
+    );
+    const railSource = readFileSync(
+      new URL('../src/ui/map/components/panelRail.ts', import.meta.url),
+      'utf8',
+    );
+
+    expect(appSource).toContain("devMode ? '6.5rem' : '5.5rem'");
+    expect(toolbarSource).toContain("className=\"w-[84px] h-[84px]");
+    expect(railSource).toContain("var(--awwv-toolbar-clearance, 5.5rem)");
+    expect(railSource).not.toContain("var(--awwv-toolbar-clearance, 7.5rem)");
+  });
 });
