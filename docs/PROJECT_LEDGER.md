@@ -22145,3 +22145,21 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 ### Verification
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_player_visibility.test.ts`
 - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Canon docs frontline authority clarification pass
+
+### Summary
+- Rewrote the remaining canon/engineering docs that still made compatibility-era front segments, brigade front assignment, theatres, or old toolbar ownership read like live authority.
+
+### Files changed
+- `docs/10_canon/Systems_Manual_v0_7_0.md`
+- `docs/10_canon/context.md`
+- `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`
+
+### Why
+- The recent engine and shell cleanup demoted front-assignment and theatre lineage to compatibility residue, but some high-trust docs still described them as if they were current player-shell truth.
+- That mismatch is exactly how future agents drift back into false authority paths.
+- The canon layer now says the same thing the repo says: corps sectors are the live frontline shell, Warroom/Tactical Map/Army HQ/Chronicle/Codex have explicit ownership, and old front/theatre references are historical unless revived by roadmap/governance.
+
+### Verification
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
