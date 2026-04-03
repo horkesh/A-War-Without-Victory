@@ -133,6 +133,8 @@ class WarroomApp {
     private thumbnailDirty = true;
     /** OSID-based thumbnail renderer for the cork board staff map. */
     private osidThumbnail = new OsidThumbnailRenderer();
+    /** True while the canvas render loop is scheduled (controls requestAnimationFrame). */
+    private renderLoopRunning = false;
 
     constructor() {
         this.canvas = document.getElementById('warroom-canvas') as HTMLCanvasElement;
@@ -163,11 +165,12 @@ class WarroomApp {
         this.wireScenarioPickerButtons();
 
         // Load scene-plate, component assets, and runtime overlays in parallel.
+        // LEGACY FALLBACK: Scene plates and flags are loaded by React's static imports when REACT_SHELL_ENABLED.
         await Promise.all([
-            this.loadScenePlateAssets(),
+            REACT_SHELL_ENABLED ? Promise.resolve() : this.loadScenePlateAssets(),
             this.calendar.loadAssets(),
             this.map.loadAssets(),
-            this.loadFlagAssets(),
+            REACT_SHELL_ENABLED ? Promise.resolve() : this.loadFlagAssets(),
             this.osidThumbnail.load()
         ]);
 
@@ -195,8 +198,16 @@ class WarroomApp {
             this.warPlanningMap.setCloseCallback(() => this.showWarroomScene());
         }
         this.wireToolbar();
-        this.canvas.addEventListener('mousemove', (e) => this.onMouseMove(e));
-        this.canvas.addEventListener('click', (e) => this.onClick(e));
+        this.canvas.addEventListener('mousemove', (e) => {
+            // LEGACY ROOM CANVAS: React owns hotspot interaction when REACT_SHELL_ENABLED.
+            if (REACT_SHELL_ENABLED && this.tacticalMapInWarroomMode) return;
+            this.onMouseMove(e);
+        });
+        this.canvas.addEventListener('click', (e) => {
+            // LEGACY ROOM CANVAS: React owns hotspot interaction when REACT_SHELL_ENABLED.
+            if (REACT_SHELL_ENABLED && this.tacticalMapInWarroomMode) return;
+            this.onClick(e);
+        });
 
         // Listen for "back to HQ" messages from the embedded tactical map iframe
         window.addEventListener('message', (e) => {
@@ -260,7 +271,9 @@ class WarroomApp {
             this.showMainMenu();
         }
 
-        this.renderLoop();
+        // LEGACY ROOM CANVAS: start the canvas render loop only when not in React warroom mode.
+        // When REACT_SHELL_ENABLED, the loop will self-stop on the first frame after warroom mode activates.
+        this.startRenderLoop();
     }
 
     /** Load scene plates for a single faction (or all if none specified). */
@@ -700,7 +713,29 @@ class WarroomApp {
         }
     }
 
+    // LEGACY ROOM CANVAS: Only active when REACT_SHELL_ENABLED=false (or during legacy fallback).
+    // When the React shell is the live path, the render loop is stopped.
+    // Delete this block when REACT_SHELL_ENABLED is permanently true.
+    private startRenderLoop(): void {
+        if (this.renderLoopRunning) return;
+        this.renderLoopRunning = true;
+        this.renderLoop();
+    }
+
+    private stopRenderLoop(): void {
+        this.renderLoopRunning = false;
+        // The current in-flight requestAnimationFrame will fire once more but will
+        // check renderLoopRunning and not reschedule.
+    }
+
     renderLoop() {
+        if (!this.renderLoopRunning) return; // stopped — do not reschedule
+        // LEGACY ROOM CANVAS: React owns room rendering when REACT_SHELL_ENABLED and warroom mode active.
+        if (REACT_SHELL_ENABLED && this.tacticalMapInWarroomMode) {
+            // Stop the loop — React iframe owns the room surface.
+            this.renderLoopRunning = false;
+            return;
+        }
         this.render();
         requestAnimationFrame(() => this.renderLoop());
     }
@@ -978,6 +1013,10 @@ class WarroomApp {
             warroomScene.classList.remove('warroom-scene-hidden');
             warroomScene.setAttribute('aria-hidden', 'false');
         }
+        // LEGACY ROOM CANVAS: if falling back from warroom mode (e.g. REACT_SHELL_ENABLED=false
+        // or an explicit legacy reversion), restart the canvas render loop so the desk redraws.
+        this.tacticalMapInWarroomMode = false;
+        this.startRenderLoop();
         this.pullLatestGameState();
     }
 

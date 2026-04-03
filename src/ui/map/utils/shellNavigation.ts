@@ -19,6 +19,8 @@ export interface ShellNavigationState {
   setArmyHQExpandedCorpsId: (id: string | null) => void;
   setCodexOpen: (open: boolean) => void;
   setChronicleOpen: (open: boolean) => void;
+  /** Optional: set by gameStore when advance-turn handoff is received from the Warroom shell. */
+  setAdvanceTurnPending?: (v: boolean) => void;
 }
 
 function getPlayerFaction(state: ShellNavigationState): string | null {
@@ -60,6 +62,12 @@ export function applyShellHandoffCommand(state: ShellNavigationState, command: S
   }
   if (command.kind === 'chronicle') {
     state.setChronicleOpen(true);
+    return true;
+  }
+  if (command.kind === 'advance-turn') {
+    // Warroom wall calendar hotspot — show the React advance-turn confirmation modal.
+    // setAdvanceTurnPending is optional on ShellNavigationState; gameStore always provides it.
+    state.setAdvanceTurnPending?.(true);
     return true;
   }
   if (command.tab === 'records' && command.recordsSubTab) {

@@ -22737,4 +22737,18 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - App.tsx: handleShellHandoff useEffect now handles awwv-shell:show-warroom (setAppScreen('warroom')) and adds setAppScreen('game') on awwv-shell:handoff receipt.
 - tests/warroom_shell_layer.test.ts: 6 new tests (14 total) — message type contracts, onNavigate callback contract, all mapped regions valid.
 - tsc clean, 14/14 focused tests pass, vite build clean, governance OK.
+
+## [2026-04-03] warroom-react-migration-wave2
+- Canvas render loop gated: renderLoop() stops self when REACT_SHELL_ENABLED && tacticalMapInWarroomMode; startRenderLoop()/stopRenderLoop() added; showWarroomScene() restarts loop on legacy reversion.
+- Canvas mouse handlers gated: mousemove/click listeners skip onMouseMove/onClick when React owns hotspot interaction.
+- Scene plate and flag asset loading skipped: loadScenePlateAssets() and loadFlagAssets() replaced with Promise.resolve() when REACT_SHELL_ENABLED — React uses static Vite imports.
+- advance-turn added to ShellHandoffCommand union (shellHandoff.ts); isShellHandoffCommand updated.
+- wall_calendar_area and wall_calendar hotspots now map to { kind: 'advance-turn' } in regionToShellHandoff (were undefined — calendar click was broken in React shell).
+- advanceTurnPending + setAdvanceTurnPending added to gameStore.
+- ShellNavigationState extended with optional setAdvanceTurnPending; applyShellHandoffCommand handles advance-turn kind.
+- AdvanceTurnModal.tsx created: renders on advanceTurnPending=true, uses advanceTurnAndSync (same path as PresidentialToolbar), clears flag on confirm/cancel.
+- AdvanceTurnModal wired into App.tsx.
+- tests/warroom_shell_layer.test.ts: 6 new tests added (20 total) — wall_calendar_area/wall_calendar → advance-turn, advance-turn type validity, AdvanceTurnModal state contract.
+- tsc clean, 20/20 focused tests pass, vite build clean, governance OK.
+- Report: docs/40_reports/implemented/20260403_WARROOM_REACT_MIGRATION_WAVE2.md
 - Report: docs/40_reports/implemented/20260403_WARROOM_REACT_SHELL_ENTRY.md

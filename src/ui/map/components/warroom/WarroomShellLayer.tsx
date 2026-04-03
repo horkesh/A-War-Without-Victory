@@ -60,6 +60,10 @@ export function regionToShellHandoff(regionId: string): ShellHandoffCommand | un
       return { kind: 'chronicle' };
     case 'intelligence_journal':
       return { kind: 'army-hq', tab: 'records', recordsSubTab: 'aar' };
+    case 'wall_calendar_area':
+    case 'wall_calendar':
+      // Most-used Warroom hotspot: clicking the wall calendar advances the turn.
+      return { kind: 'advance-turn' };
     default:
       return undefined;
   }

@@ -144,6 +144,9 @@ export interface GameStore {
   armyHQExpandedSections: Record<string, boolean>;
   armyHQOfficerSelectionCorpsId: string | null;
   pauseMenuOpen: boolean;
+  /** True when the player clicked the Warroom wall calendar — triggers AdvanceTurnModal. */
+  advanceTurnPending: boolean;
+  setAdvanceTurnPending: (v: boolean) => void;
   setArmyHQOpen: (open: boolean) => void;
   setArmyHQTab: (tab: 'briefing' | 'summary' | 'records' | 'personnel') => void;
   setArmyHQRecordsSubTab: (subTab: 'aar' | 'ops') => void;
@@ -343,6 +346,8 @@ export const useGameStore = create<GameStore>((set) => ({
   armyHQExpandedSections: {},
   armyHQOfficerSelectionCorpsId: null,
   pauseMenuOpen: false,
+  advanceTurnPending: false,
+  setAdvanceTurnPending: (v) => set({ advanceTurnPending: v }),
   setArmyHQOpen: (open) => set({
     armyHQOpen: open,
     ...(open ? {} : {

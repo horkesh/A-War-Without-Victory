@@ -47,6 +47,7 @@ import { CodexPanel } from './components/CodexPanel';
 import { VerdictScreen } from './components/VerdictScreen';
 import { StrategicDashboard } from './components/StrategicDashboard';
 import { WarroomShellLayer } from './components/warroom/WarroomShellLayer';
+import { AdvanceTurnModal } from './components/warroom/AdvanceTurnModal';
 import { derivePanelRailState } from './components/panelRail';
 import { useGameStore, isDevMode } from './store/gameStore';
 import { loadLatestRunSaveAsText, loadEventDefinitions } from './data/DataLoader';
@@ -790,6 +791,8 @@ function App() {
       )}
       <PeaceWarTransitionOverlay />
       <VerdictScreen />
+      {/* Warroom shell: advance-turn confirmation modal — triggered by wall_calendar_area hotspot */}
+      <AdvanceTurnModal />
       <MapModeLegend />
       <Minimap />
       <BottomStatusStrip />

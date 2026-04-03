@@ -13,12 +13,17 @@ export type ShellHandoffCommand =
     }
   | {
       kind: 'chronicle';
+    }
+  | {
+      /** Advance-turn: player clicked the wall calendar hotspot in the React Warroom shell.
+       *  Handled by AdvanceTurnModal in App.tsx — sets advanceTurnPending in gameStore. */
+      kind: 'advance-turn';
     };
 
 export function isShellHandoffCommand(value: unknown): value is ShellHandoffCommand {
   if (!value || typeof value !== 'object') return false;
   const command = value as Partial<ShellHandoffCommand>;
-  if (command.kind === 'codex' || command.kind === 'chronicle') return true;
+  if (command.kind === 'codex' || command.kind === 'chronicle' || command.kind === 'advance-turn') return true;
   if (command.kind !== 'army-hq') return false;
   if (
     command.tab !== 'briefing' &&
