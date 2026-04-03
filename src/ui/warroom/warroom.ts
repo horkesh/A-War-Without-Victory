@@ -76,7 +76,8 @@ function getPlateYear(faction: FactionId, calendarYear: number): number {
 
 interface DesktopBridge {
     startNewCampaign?: (payload: { playerFaction: FactionId; scenarioKey: CampaignScenarioKey }) => Promise<{ ok: boolean; error?: string; stateJson?: string }>;
-    setGameStateUpdatedCallback?: (cb: (stateJson: string) => void) => void;
+    subscribeGameStateUpdated?: (cb: (stateJson: string) => void) => (() => void);
+    subscribeTurnReportUpdated?: (cb: (report: unknown) => void) => (() => void);
     getCurrentGameState?: () => Promise<string | null>;
     loadStateDialog?: () => Promise<{ ok: boolean; error?: string; stateJson?: string }>;
     openTacticalMapWindow?: (payload?: { mode?: 'operational' | 'sandbox' }) => Promise<unknown>;
@@ -107,8 +108,10 @@ class WarroomApp {
     private tacticalMapReady = false;
     /** HTTP base URL for the tactical map server (set at init from Electron IPC). */
     private mapServerUrl: string | null = null;
-    /** Embedded iframe subscribers to game-state-updated bridge events. */
-    private embeddedBridgeSubscribers = new Map<WindowProxy, string>();
+    /** Embedded iframe subscribers keyed by event name. */
+    private embeddedBridgeSubscribers = new Map<WindowProxy, { origin: string; events: Set<string> }>();
+    private unsubscribeDesktopGameState: (() => void) | null = null;
+    private unsubscribeDesktopTurnReport: (() => void) | null = null;
     /** True once the user has navigated away from the initial main menu (prevents init race). */
     private userNavigatedFromMenu = false;
     /** Faction for which we last loaded region data (so we only reload when faction changes). */
@@ -187,7 +190,7 @@ class WarroomApp {
                 this.showWarroomScene();
                 return;
             }
-            if (e.data?.type === 'awwv-bridge:subscribe-game-state') {
+            if (e.data?.type === 'awwv-bridge:subscribe-event') {
                 this.handleEmbeddedBridgeSubscription(e);
                 return;
             }
@@ -206,10 +209,15 @@ class WarroomApp {
                 if (url) this.mapServerUrl = url.replace(/\/+$/, '');
             } catch (_) { /* not available — fallback to awwv:// */ }
         }
-        if (this.desktopBridge?.setGameStateUpdatedCallback) {
-            this.desktopBridge.setGameStateUpdatedCallback((stateJson: string) => {
+        if (this.desktopBridge?.subscribeGameStateUpdated) {
+            this.unsubscribeDesktopGameState = this.desktopBridge.subscribeGameStateUpdated((stateJson: string) => {
                 this.applyGameStateFromJson(stateJson);
                 this.broadcastEmbeddedBridgeEvent('game-state-updated', stateJson);
+            });
+        }
+        if (this.desktopBridge?.subscribeTurnReportUpdated) {
+            this.unsubscribeDesktopTurnReport = this.desktopBridge.subscribeTurnReportUpdated((report: unknown) => {
+                this.broadcastEmbeddedBridgeEvent('turn-report-updated', report);
             });
         }
 
@@ -941,7 +949,6 @@ class WarroomApp {
             warroomScene.classList.remove('warroom-scene-hidden');
             warroomScene.setAttribute('aria-hidden', 'false');
         }
-        this.reRegisterWarroomCallback();
         this.pullLatestGameState();
     }
 
@@ -1069,28 +1076,26 @@ class WarroomApp {
         }
     }
 
-    /**
-     * When returning from tactical map to warroom, re-register the warroom's
-     * own game state callback (the iframe may have overwritten it).
-     */
-    private reRegisterWarroomCallback(): void {
-        if (this.desktopBridge?.setGameStateUpdatedCallback) {
-            this.desktopBridge.setGameStateUpdatedCallback((stateJson: string) => {
-                this.applyGameStateFromJson(stateJson);
-                this.broadcastEmbeddedBridgeEvent('game-state-updated', stateJson);
-            });
-        }
-    }
-
     private handleEmbeddedBridgeSubscription(event: MessageEvent): void {
         const source = event.source;
         if (!source || typeof (source as WindowProxy).postMessage !== 'function') return;
-        const enabled = Boolean((event.data as { enabled?: boolean })?.enabled);
+        const data = event.data as { enabled?: boolean; eventName?: string } | null;
+        const enabled = Boolean(data?.enabled);
+        const eventName = data?.eventName;
+        if (eventName !== 'game-state-updated' && eventName !== 'turn-report-updated') return;
         const origin = typeof event.origin === 'string' ? event.origin : '*';
+        const existing = this.embeddedBridgeSubscribers.get(source as WindowProxy) ?? { origin, events: new Set<string>() };
+        existing.origin = origin;
         if (enabled) {
-            this.embeddedBridgeSubscribers.set(source as WindowProxy, origin);
+            existing.events.add(eventName);
+            this.embeddedBridgeSubscribers.set(source as WindowProxy, existing);
         } else {
-            this.embeddedBridgeSubscribers.delete(source as WindowProxy);
+            existing.events.delete(eventName);
+            if (existing.events.size === 0) {
+                this.embeddedBridgeSubscribers.delete(source as WindowProxy);
+            } else {
+                this.embeddedBridgeSubscribers.set(source as WindowProxy, existing);
+            }
         }
     }
 
@@ -1118,9 +1123,13 @@ class WarroomApp {
     }
 
     private broadcastEmbeddedBridgeEvent(eventName: string, payload: unknown): void {
-        for (const [target, origin] of this.embeddedBridgeSubscribers.entries()) {
+        for (const [target, subscription] of this.embeddedBridgeSubscribers.entries()) {
+            if (!subscription.events.has(eventName)) continue;
             try {
-                target.postMessage({ type: 'awwv-bridge:event', eventName, payload }, origin === 'null' ? '*' : origin);
+                target.postMessage(
+                    { type: 'awwv-bridge:event', eventName, payload },
+                    subscription.origin === 'null' ? '*' : subscription.origin,
+                );
             } catch {
                 this.embeddedBridgeSubscribers.delete(target);
             }

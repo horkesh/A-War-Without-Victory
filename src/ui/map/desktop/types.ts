@@ -46,7 +46,8 @@ export interface AwwvBridge {
     stageAttackOrder?(brigadeId: string, targetSettlementId: string): Promise<DesktopOkError>;
     queryCombatEstimate?(brigadeId: string, targetSettlementId: string): Promise<CombatEstimateResult>;
     getCurrentGameState?(): Promise<unknown | null>;
-    setGameStateUpdatedCallback?(callback: ((stateJson: unknown) => void) | null): void;
+    subscribeGameStateUpdated?(callback: (stateJson: unknown) => void): () => void;
+    subscribeTurnReportUpdated?(callback: (report: unknown) => void): () => void;
     advanceTurn?(payload?: unknown): Promise<AdvanceTurnResult>;
     startNewCampaign?(payload: StartNewCampaignPayload): Promise<StartNewCampaignResult>;
     stagePostureOrder?(brigadeId: string, posture: string): Promise<DesktopOkError>;
@@ -61,7 +62,8 @@ export interface DesktopBridgeClient {
     stageAttackOrder(brigadeId: string, targetSettlementId: string): Promise<DesktopOkError>;
     queryCombatEstimate(brigadeId: string, targetSettlementId: string): Promise<CombatEstimateResult>;
     getCurrentGameState(): Promise<unknown | null>;
-    setGameStateUpdatedCallback(callback: ((stateJson: unknown) => void) | null): void;
+    subscribeGameStateUpdated(callback: (stateJson: unknown) => void): () => void;
+    subscribeTurnReportUpdated(callback: (report: unknown) => void): () => void;
     advanceTurn(payload?: unknown): Promise<AdvanceTurnResult>;
     startNewCampaign(payload: StartNewCampaignPayload): Promise<StartNewCampaignResult>;
     stagePostureOrder(brigadeId: string, posture: string): Promise<DesktopOkError>;

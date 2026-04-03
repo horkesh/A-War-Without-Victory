@@ -21689,3 +21689,32 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 ### Verification
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_player_visibility.test.ts`
 - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Desktop bridge subscription canonicalization
+
+### Summary
+- Replaced the preload bridge's singleton `set*Callback` model with subscription fanout for game-state and turn-report updates.
+- Repointed tactical-map desktop session wiring to subscribe/unsubscribe cleanly.
+- Reworked embedded tactical-map bridge subscriptions to be event-based and removed Warroom's callback re-registration workaround.
+
+### Files changed
+- `src/desktop/preload.cjs`
+- `src/ui/map/hooks/useDesktopSession.ts`
+- `src/ui/map/desktop/useIPC.ts`
+- `src/ui/map/desktop/types.ts`
+- `src/ui/map/desktop/bridge.ts`
+- `src/ui/map/index.html`
+- `src/ui/warroom/warroom.ts`
+- `tests/engine_honesty_legacy_contracts.test.ts`
+- `docs/40_reports/implemented/20260403_DESKTOP_BRIDGE_SUBSCRIPTION_CANONICALIZATION.md`
+
+### Why
+- The old bridge assumed a single desktop callback owner, which forced Warroom and tactical map into a hidden ownership fight over who received updates.
+- That made Warroom compensate by acting like a transport broker instead of just a shell.
+- Embedded tactical map also had weaker bridge semantics because only game-state updates were mirrored there.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\engine_honesty_legacy_contracts.test.ts tests\\ui_shell_navigation.test.ts`
+- `node .\\node_modules\\vite\\bin\\vite.js build --config src/ui/warroom/vite.config.ts`
+- `node .\\node_modules\\tsx\\dist\\cli.mjs tools\\ui\\warroom_stage_assets.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`

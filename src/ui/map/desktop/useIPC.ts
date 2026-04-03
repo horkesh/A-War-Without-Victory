@@ -38,8 +38,8 @@ interface WindowAwwv {
     startNewCampaign: (payload: StartNewCampaignPayload) => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
     advanceTurn: (payload?: { phase0Directives?: unknown[] }) => Promise<{ ok: boolean; stateJson?: string; report?: unknown; error?: string }>;
     getCurrentGameState: () => Promise<string | null>;
-    setGameStateUpdatedCallback: (cb: ((stateJson: string) => void) | null) => void;
-    setTurnReportUpdatedCallback: (cb: ((report: unknown) => void) | null) => void;
+    subscribeGameStateUpdated: (cb: (stateJson: string) => void) => () => void;
+    subscribeTurnReportUpdated: (cb: (report: unknown) => void) => () => void;
     getRecruitmentCatalog: () => Promise<{ brigades?: unknown[]; error?: string }>;
     applyRecruitment: (brigadeId: string, equipmentClass: string) => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
     getSettings: () => Promise<{ ok: boolean; settings?: unknown; error?: string }>;
@@ -133,13 +133,13 @@ export function useIPC() {
                 ? () => awwv.getCurrentGameState()
                 : (): Promise<string | null> => Promise.resolve(null),
 
-            setGameStateUpdatedCallback: awwv
-                ? (cb: ((stateJson: string) => void) | null) => awwv.setGameStateUpdatedCallback(cb)
-                : (_cb: ((stateJson: string) => void) | null) => { /* noop */ },
+            subscribeGameStateUpdated: awwv
+                ? (cb: (stateJson: string) => void) => awwv.subscribeGameStateUpdated(cb)
+                : (_cb: (stateJson: string) => void) => () => { /* noop */ },
 
-            setTurnReportUpdatedCallback: awwv
-                ? (cb: ((report: unknown) => void) | null) => awwv.setTurnReportUpdatedCallback(cb)
-                : (_cb: ((report: unknown) => void) | null) => { /* noop */ },
+            subscribeTurnReportUpdated: awwv
+                ? (cb: (report: unknown) => void) => awwv.subscribeTurnReportUpdated(cb)
+                : (_cb: (report: unknown) => void) => () => { /* noop */ },
 
             getRecruitmentCatalog: awwv
                 ? () => awwv.getRecruitmentCatalog()

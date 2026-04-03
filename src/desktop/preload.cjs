@@ -1,12 +1,34 @@
 'use strict';
 const { contextBridge, ipcRenderer } = require('electron');
-let gameStateUpdatedCallback = null;
-let turnReportUpdatedCallback = null;
+
+const gameStateUpdatedListeners = new Set();
+const turnReportUpdatedListeners = new Set();
+
+function emitToListeners(listeners, payload) {
+  for (const listener of Array.from(listeners)) {
+    try {
+      listener(payload);
+    } catch (error) {
+      console.error('[awwv preload] desktop bridge listener failed', error);
+    }
+  }
+}
+
+function subscribe(listeners, cb) {
+  if (typeof cb !== 'function') {
+    return () => {};
+  }
+  listeners.add(cb);
+  return () => {
+    listeners.delete(cb);
+  };
+}
+
 ipcRenderer.on('game-state-updated', (_event, stateJson) => {
-  if (gameStateUpdatedCallback) gameStateUpdatedCallback(stateJson);
+  emitToListeners(gameStateUpdatedListeners, stateJson);
 });
 ipcRenderer.on('turn-report-updated', (_event, report) => {
-  if (turnReportUpdatedCallback) turnReportUpdatedCallback(report);
+  emitToListeners(turnReportUpdatedListeners, report);
 });
 contextBridge.exposeInMainWorld('awwv', {
   loadScenarioDialog: () => ipcRenderer.invoke('load-scenario-dialog'),
@@ -15,8 +37,8 @@ contextBridge.exposeInMainWorld('awwv', {
   saveGame: (payload) => ipcRenderer.invoke('save-game', payload),
   quickSave: () => ipcRenderer.invoke('quick-save'),
   advanceTurn: (payload) => ipcRenderer.invoke('advance-turn', payload),
-  setGameStateUpdatedCallback: (cb) => { gameStateUpdatedCallback = typeof cb === 'function' ? cb : null; },
-  setTurnReportUpdatedCallback: (cb) => { turnReportUpdatedCallback = typeof cb === 'function' ? cb : null; },
+  subscribeGameStateUpdated: (cb) => subscribe(gameStateUpdatedListeners, cb),
+  subscribeTurnReportUpdated: (cb) => subscribe(turnReportUpdatedListeners, cb),
   getCurrentGameState: () => ipcRenderer.invoke('get-current-game-state'),
   openTacticalMapWindow: (payload) => ipcRenderer.invoke('open-tactical-map-window', payload),
   getRecruitmentCatalog: () => ipcRenderer.invoke('get-recruitment-catalog'),

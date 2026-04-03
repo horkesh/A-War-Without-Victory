@@ -208,6 +208,40 @@ describe('engine honesty legacy contracts', () => {
     expect(gameState).not.toContain('corps_attack_axis_orders?:');
   });
 
+  it('uses subscription-based desktop bridge fanout instead of singleton callback slots', () => {
+    const preload = readFileSync(join(process.cwd(), 'src', 'desktop', 'preload.cjs'), 'utf8');
+    const useIpc = readFileSync(join(process.cwd(), 'src', 'ui', 'map', 'desktop', 'useIPC.ts'), 'utf8');
+    const useDesktopSession = readFileSync(join(process.cwd(), 'src', 'ui', 'map', 'hooks', 'useDesktopSession.ts'), 'utf8');
+    const warroom = readFileSync(join(process.cwd(), 'src', 'ui', 'warroom', 'warroom.ts'), 'utf8');
+    const embeddedMap = readFileSync(join(process.cwd(), 'src', 'ui', 'map', 'index.html'), 'utf8');
+
+    expect(preload).toContain('subscribeGameStateUpdated');
+    expect(preload).toContain('subscribeTurnReportUpdated');
+    expect(preload).not.toContain('let gameStateUpdatedCallback');
+    expect(preload).not.toContain('let turnReportUpdatedCallback');
+    expect(preload).not.toContain('setGameStateUpdatedCallback');
+    expect(preload).not.toContain('setTurnReportUpdatedCallback');
+
+    expect(useIpc).toContain('subscribeGameStateUpdated');
+    expect(useIpc).toContain('subscribeTurnReportUpdated');
+    expect(useIpc).not.toContain('setGameStateUpdatedCallback');
+    expect(useIpc).not.toContain('setTurnReportUpdatedCallback');
+
+    expect(useDesktopSession).toContain('subscribeGameStateUpdated');
+    expect(useDesktopSession).toContain('subscribeTurnReportUpdated');
+    expect(useDesktopSession).not.toContain('setGameStateUpdatedCallback');
+    expect(useDesktopSession).not.toContain('setTurnReportUpdatedCallback');
+
+    expect(warroom).toContain('awwv-bridge:subscribe-event');
+    expect(warroom).not.toContain('awwv-bridge:subscribe-game-state');
+    expect(warroom).not.toContain('reRegisterWarroomCallback');
+
+    expect(embeddedMap).toContain('subscribeGameStateUpdated');
+    expect(embeddedMap).toContain('subscribeTurnReportUpdated');
+    expect(embeddedMap).toContain('turn-report-updated');
+    expect(embeddedMap).not.toContain('setGameStateUpdatedCallback');
+  });
+
   it('does not advertise unused front/theatre renaming bridges in live code', () => {
     const preload = readFileSync(join(process.cwd(), 'src', 'desktop', 'preload.cjs'), 'utf8');
     const electronMain = readFileSync(join(process.cwd(), 'src', 'desktop', 'electron-main.cjs'), 'utf8');

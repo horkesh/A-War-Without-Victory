@@ -3,7 +3,7 @@ import { useGameStore, type LastTurnReport } from '../store/gameStore';
 import { useIPC } from '../desktop/useIPC';
 
 /**
- * Subscribes to Electron preload callbacks (game-state-updated, turn-report-updated)
+ * Subscribes to Electron preload bridge events (game-state-updated, turn-report-updated)
  * and fetches the initial game state when running in desktop mode.
  *
  * Replaces the inline useEffect in the Phase 3 App.tsx.
@@ -30,11 +30,11 @@ export function useDesktopSession(): void {
             }
         };
 
-        ipc.setGameStateUpdatedCallback((stateJson: string) => {
+        const unsubscribeGameState = ipc.subscribeGameStateUpdated((stateJson: string) => {
             void applyStateJson(stateJson);
         });
 
-        ipc.setTurnReportUpdatedCallback((report: unknown) => {
+        const unsubscribeTurnReport = ipc.subscribeTurnReportUpdated((report: unknown) => {
             if (active && report != null && typeof report === 'object') {
                 setLastTurnReport(report as LastTurnReport);
             }
@@ -49,8 +49,8 @@ export function useDesktopSession(): void {
 
         return () => {
             active = false;
-            ipc.setGameStateUpdatedCallback(null);
-            ipc.setTurnReportUpdatedCallback(null);
+            unsubscribeGameState();
+            unsubscribeTurnReport();
         };
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // stable: ipc never changes, store slices are stable setters

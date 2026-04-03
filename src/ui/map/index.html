@@ -14,7 +14,7 @@
 
         const pending = new Map();
         let nextId = 1;
-        let gameStateUpdatedCallback = null;
+        const eventListeners = new Map();
 
         const postToParent = (payload) => {
           window.parent.postMessage(payload, '*');
@@ -54,20 +54,50 @@
             return;
           }
 
-          if (data.type === 'awwv-bridge:event' && data.eventName === 'game-state-updated') {
-            if (typeof gameStateUpdatedCallback === 'function') {
-              gameStateUpdatedCallback(data.payload);
+          if (data.type === 'awwv-bridge:event' && typeof data.eventName === 'string') {
+            const listeners = eventListeners.get(data.eventName);
+            if (listeners instanceof Set) {
+              for (const listener of Array.from(listeners)) {
+                listener(data.payload);
+              }
             }
           }
         });
 
-        const baseBridge = {
-          setGameStateUpdatedCallback(cb) {
-            gameStateUpdatedCallback = typeof cb === 'function' ? cb : null;
+        const subscribe = (eventName, cb) => {
+          if (typeof cb !== 'function') return () => {};
+          const listeners = eventListeners.get(eventName) ?? new Set();
+          const wasEmpty = listeners.size === 0;
+          listeners.add(cb);
+          eventListeners.set(eventName, listeners);
+          if (wasEmpty) {
             postToParent({
-              type: 'awwv-bridge:subscribe-game-state',
-              enabled: !!gameStateUpdatedCallback,
+              type: 'awwv-bridge:subscribe-event',
+              eventName,
+              enabled: true,
             });
+          }
+          return () => {
+            const active = eventListeners.get(eventName);
+            if (!(active instanceof Set)) return;
+            active.delete(cb);
+            if (active.size === 0) {
+              eventListeners.delete(eventName);
+              postToParent({
+                type: 'awwv-bridge:subscribe-event',
+                eventName,
+                enabled: false,
+              });
+            }
+          };
+        };
+
+        const baseBridge = {
+          subscribeGameStateUpdated(cb) {
+            return subscribe('game-state-updated', cb);
+          },
+          subscribeTurnReportUpdated(cb) {
+            return subscribe('turn-report-updated', cb);
           },
         };
 

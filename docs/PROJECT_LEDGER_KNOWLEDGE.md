@@ -1737,3 +1737,4 @@ In AWWV, a shell can look player-safe overall while one modal still reaches into
 - 2026-04-03: Supply pressure and war exhaustion rule — when `corps_front_sectors` exists, it is the frontline authority for frontage/exposure mechanics. Legacy front-edge/front-descriptor inputs survive only as compatibility fallback.
 
 - 2026-04-03: Summary-generator naming rule - helper builders like `generateThreatAssessment(...)` are part of the player shell and must route visible names through `playerSafeText` helpers. Do not trust raw formation names in report/title generators just because they are not mounted React panels.
+- 2026-04-03: Desktop bridge rule - preload owns fanout, shells only subscribe. If Warroom or tactical map ever needs to "re-register" for state updates, the bridge contract is wrong. Embedded shells must mirror the same event model, including turn reports, instead of inventing a weaker parallel callback path.

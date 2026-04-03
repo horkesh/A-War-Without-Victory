@@ -351,3 +351,8 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - Army HQ threat assessment titles now route corps-front naming through the shared player-safe text helpers instead of trusting raw formation names.
 - See `docs/40_reports/implemented/20260403_ARMY_HQ_THREAT_PLAYER_SAFE_LABELS.md`.
 
+## 2026-04-03 - Desktop bridge subscription canonicalization
+
+- Desktop state delivery now fans out through bridge subscriptions instead of singleton callback ownership, and embedded tactical map receives turn-report events through the same event contract.
+- See `docs/40_reports/implemented/20260403_DESKTOP_BRIDGE_SUBSCRIPTION_CANONICALIZATION.md`.
+
