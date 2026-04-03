@@ -21,6 +21,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { buildCorpsFrontSectors } from '../src/sim/combat/corps_front_sectors.js';
+import { commanderReviewAssignment, type CorpsCommanderProfile } from '../src/sim/combat/commander_override.js';
 import {
     CURRENT_SCHEMA_VERSION,
     type FactionId,
@@ -530,5 +531,95 @@ describe('n696: Determinism', () => {
         ];
         // Brigade should be assigned by Phase 2c BFS (1 hop from front)
         expect(allBrigs).toContain('brig_rear');
+    });
+});
+
+describe('frontline truth: commander review must not paper-transfer anchored frontline brigades', () => {
+    it('keeps a brigade on its current frontline sector instead of reassigning it to a safer paper sector', () => {
+        const sectorA = {
+            sector_id: 'sector:corps_a:0',
+            corps_id: 'corps_a',
+            faction: 'RS' as FactionId,
+            sub_segments: [{
+                sub_segment_id: 'subseg:corps_a:0',
+                edge_ids: ['a__ae'],
+                friendly_osids: ['op:test:a1'],
+                enemy_osids: ['op:test:ae1'],
+                length_edges: 1,
+                primary_brigade_ids: ['brig_exposed'],
+                gap: false,
+            }],
+            assigned_brigade_ids: ['brig_exposed'],
+            reserve_brigade_ids: [],
+            territory_osids: ['op:test:a1'],
+            length_edges: 1,
+            density: 1,
+            defensive_power: 100,
+            threat_ratio: 10,
+            sector_stance: 'defend',
+        } as any;
+
+        const sectorB = {
+            sector_id: 'sector:corps_a:1',
+            corps_id: 'corps_a',
+            faction: 'RS' as FactionId,
+            sub_segments: [{
+                sub_segment_id: 'subseg:corps_a:1',
+                edge_ids: ['b__be'],
+                friendly_osids: ['op:test:b1'],
+                enemy_osids: ['op:test:be1'],
+                length_edges: 1,
+                primary_brigade_ids: ['brig_safe'],
+                gap: false,
+            }],
+            assigned_brigade_ids: ['brig_safe'],
+            reserve_brigade_ids: [],
+            territory_osids: ['op:test:b1'],
+            length_edges: 1,
+            density: 1,
+            defensive_power: 100,
+            threat_ratio: 1,
+            sector_stance: 'defend',
+        } as any;
+
+        const formations: Record<string, FormationState> = {
+            brig_exposed: makeFormation('brig_exposed', {
+                corps_id: 'corps_a',
+                location_osid: 'op:test:a1',
+                home_osid: 'op:test:a1',
+                personnel: 800,
+            }),
+            brig_safe: makeFormation('brig_safe', {
+                corps_id: 'corps_a',
+                location_osid: 'op:test:b1',
+                home_osid: 'op:test:b1',
+                personnel: 1200,
+            }),
+        };
+
+        const commanderProfile: CorpsCommanderProfile = {
+            competence: 1,
+            aggressiveness: 0.8,
+            preStagingSectorWeights: new Map(),
+        };
+
+        const overrides = commanderReviewAssignment(
+            'corps_a',
+            [sectorA, sectorB],
+            formations,
+            [],
+            commanderProfile,
+            new Map([
+                ['op:test:a1', 0],
+                ['op:test:b1', 0],
+            ]),
+            new Map(),
+            new Set(['op:test:a1', 'op:test:b1']),
+            new Set(),
+        );
+
+        expect(overrides).toEqual([]);
+        expect(sectorA.assigned_brigade_ids).toContain('brig_exposed');
+        expect(sectorB.assigned_brigade_ids).not.toContain('brig_exposed');
     });
 });

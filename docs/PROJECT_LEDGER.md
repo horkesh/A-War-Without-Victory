@@ -22235,3 +22235,24 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\displacement_pipeline_displacement_triggers.test.ts tests\\scenario_activity_truth.test.ts`
 - `npx.cmd tsc --noEmit -p tsconfig.json`
 - `npm.cmd run sim:scenario:run:40w`
+
+## 2026-04-03 - Frontline-anchored commander reassignment guard
+
+### Summary
+- Prevented commander review from paper-transferring brigades away from the frontline sector they are physically anchoring.
+- Fixed the concrete Drina truth leak where `rs_skelani_battalion` could stand on one frontline but be rostered into another sector after commander override review.
+- Re-verified the fix against both the deterministic rebuild of `n1306` and a fresh 40-week run `n1307`.
+
+### Files changed
+- `src/sim/combat/commander_override.ts`
+- `tests/commander_driven_brigade_assignment.test.ts`
+- `docs/40_reports/implemented/20260403_FRONTLINE_ANCHORED_COMMANDER_REASSIGNMENT_GUARD.md`
+
+### Why
+- Sectors are frontlines. A brigade physically occupying one sector's front must not be silently re-rostered into another sector just because commander heuristics think the second sector is safer or more efficient on paper.
+- The remaining leak after the contiguity fix was not in persistence or map rendering; it was a post-assignment commander override path still allowed to mutate sector truth without movement.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\commander_driven_brigade_assignment.test.ts`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run sim:scenario:run:40w`

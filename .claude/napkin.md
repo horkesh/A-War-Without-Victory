@@ -405,6 +405,8 @@ After EVERY scenario run, the orchestrator:
 
 5. **[2026-04-03] Sector invariant — one sector = one frontline**
    Do instead: Treat sectors as commanded frontline slices, not OSID/sub-segment buckets. If a saved sector still carries multiple sub-segments, that is invalid state to rebuild or split, not a tolerated variant.
+6. **[2026-04-03] Commander review may not rewrite frontline truth without movement**
+   Do instead: If a brigade's current `location_osid` is on a sector frontline, treat that sector as anchored truth. Commander review may stage reserves and rear units, but it must not paper-transfer a physically front-anchored brigade into another sector roster.
 
 ## Player Shell Discipline
 1. **[2026-04-02] Player-facing operation documents must never print raw OSIDs**

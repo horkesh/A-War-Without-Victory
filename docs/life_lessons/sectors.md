@@ -9,11 +9,17 @@
 - **Right approach**: If ANY edge in a connected component has a brigade from the minority corps, protect ALL edges of that corps in the component. Brigade presence = corps has a physical claim to the entire local front, not just the specific OSID.
 - **Do instead**: When debugging "corps X has 0 sectors despite brigades at front", trace through: (1) does the corps exist as a formation? (2) does `mapOsidsToCorps` assign its home OSIDs? (3) does `partitionFrontEdges` give it edges? (4) does consolidation steal them? Use debug logging at each step boundary.
 
-### [Sectors] A sector is one frontline, not a bag of sub-segments (2026-04-03) — NEW
+### [Sectors] A sector is one frontline, not a bag of sub-segments (2026-04-03) – NEW
 - **Context**: Drina Corps produced a saved sector that still carried multiple sub-segments under one sector label. Even when the corps bucket looked plausible, the product rule was broken: one sector no longer described one commanded frontline slice.
 - **Wrong approach**: Treating same-corps territory or shared friendly-side geometry as enough to preserve one sector. That keeps bookkeeping tidy while frontline truth rots.
 - **Right approach**: Treat sector state as a frontline invariant. If a sector resolves to multiple sub-segments, rebuild or split it until one sector equals one frontline.
 - **Do instead**: When auditing sectors, ask "does this sector describe one commanded line?" before asking whether the territory set or brigade roster looks neat.
+
+### [Sectors] Commander review must not paper-transfer a brigade off the frontline it is physically holding (2026-04-03) – NEW
+- **Context**: After the contiguity fix, `rs_skelani_battalion` still ended up rostered into the wrong Drina sector. The builder had already produced the right frontline ownership; the leak happened later when commander review decided the brigade belonged in a safer sector on paper.
+- **Wrong approach**: Letting strategic review rewrite `assigned_brigade_ids` for a brigade that is currently standing on another sector's frontline. That turns sector truth back into a preference map.
+- **Right approach**: If a brigade's current `location_osid` is on sector A's frontline, sector A owns it until movement changes that fact. Commander review may plan or stage future transfers, but it may not instantly rewrite frontline ownership.
+- **Do instead**: Before any late rebalance pass moves a brigade between sectors, ask whether the brigade is physically front-anchored right now. If yes, do not transfer it on paper.
 
 ### [Sectors] Sector merge guards must use front-edge adjacency, not OSID polygon contact (2026-04-01) — NEW
 - **Context**: `areSectorsTerritoryAdjacent` returned true for Herzegovina sectors (Drina Foča vs West Herzegovina) because `op:foca:donje_zesce` and `op:foca:izbisno` have min_dist=0 — genuine polygon neighbors. But they face completely different fronts. The merge guard was answering the wrong question: "do these territories touch?" instead of "do these front edges form a contiguous line?"

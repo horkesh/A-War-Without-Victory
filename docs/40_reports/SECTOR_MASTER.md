@@ -412,6 +412,25 @@ Rule:
 - shared friendly-side geometry alone is never enough
 - a saved sector carrying multiple sub-segments is invalid under the current rule set; sectors are frontlines, not sub-segment bags
 
+### Frontline-anchored commander reassignment leak (2026-04-03)
+
+Follow-up root cause after contiguity hardening: sector truth could still be corrupted after build time by commander review. The builder produced the correct frontline sector, but `commander_override.ts` could immediately paper-transfer a brigade into a different sector if the target looked safer or more efficient, even while the brigade's `location_osid` still sat on the original sector's frontline.
+
+Concrete repro from run `n1306`:
+- `rs_skelani_battalion`
+- location: `op:sekovici:sekovici_2`
+- rostered to: `sector:vrs_drina:0`
+- truthful physical owner: `sector:vrs_drina:2` (the location existed in both its `territory_osids` and frontline `friendly_osids`)
+
+Fix:
+- commander transfer/viability passes now treat any brigade whose current `location_osid` is on a corps sector frontline as anchored to that sector
+- such brigades cannot be re-rostered into another sector until movement changes the physical truth
+
+Rule:
+- commander review may rebalance reserves and rear-area brigades
+- it may not rewrite frontline ownership without movement
+- sectors remain frontlines, not command preference buckets
+
 ---
 
 ## Diagnostic Tools

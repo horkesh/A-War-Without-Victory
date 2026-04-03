@@ -137,6 +137,18 @@ function transferBrigadesBetweenSectors(
     adjacency?: Map<string, string[]>,
     friendlyOsids?: Set<string>,
 ): void {
+    const findFrontAnchoredSectorId = (locationOsid: string, corpsId: string): string | null => {
+        for (const sector of [...deficits.map(d => d.sector), ...donors]
+            .filter((sector, index, arr) => arr.findIndex(other => other.sector_id === sector.sector_id) === index)
+            .sort((a, b) => strictCompare(a.sector_id, b.sector_id))) {
+            if (sector.corps_id !== corpsId) continue;
+            for (const seg of sector.sub_segments) {
+                if (seg.friendly_osids.includes(locationOsid)) return sector.sector_id;
+            }
+        }
+        return null;
+    };
+
     const takenFromSector = new Map<string, number>();
     for (const { sector: deficit, need: initialNeed } of deficits) {
         let need = initialNeed;
@@ -161,6 +173,8 @@ function transferBrigadesBetweenSectors(
                     const f = formations[bid];
                     if (!f) return false;
                     if (!f.location_osid) return false;
+                    const anchoredSectorId = findFrontAnchoredSectorId(f.location_osid, donor.corps_id);
+                    if (anchoredSectorId) return false;
                     const brigComp = componentOf.get(f.location_osid) ?? -2;
                     if (!(deficitComp < 0 || brigComp === deficitComp)) return false;
                     if (
@@ -498,6 +512,16 @@ function applyPositionViability(
     adjacency: Map<string, string[]>,
     friendlyOsids: Set<string>,
 ): void {
+    const findFrontAnchoredSectorId = (locationOsid: string, corpsId: string): string | null => {
+        for (const sector of corpsSectors) {
+            if (sector.corps_id !== corpsId) continue;
+            for (const seg of sector.sub_segments) {
+                if (seg.friendly_osids.includes(locationOsid)) return sector.sector_id;
+            }
+        }
+        return null;
+    };
+
     // Aggressive commanders (>=0.6) only withdraw when fully encircled (0 friendly neighbors)
     // Balanced/defensive withdraw when nearly encircled (<=1 friendly neighbor)
     const withdrawThreshold = commanderProfile.aggressiveness >= 0.6 ? 0 : 1;
@@ -524,6 +548,8 @@ function applyPositionViability(
             if (overriddenBrigadeIds.has(bid)) continue;
             const f = formations[bid];
             if (!f?.location_osid) continue;
+            const anchoredSectorId = findFrontAnchoredSectorId(f.location_osid, sector.corps_id);
+            if (anchoredSectorId) continue;
 
             // Count friendly neighbors
             const neighbors = adjacency.get(f.location_osid) ?? [];
