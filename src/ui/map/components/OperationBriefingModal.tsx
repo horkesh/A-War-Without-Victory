@@ -9,6 +9,9 @@ import { formatRank, getArchetype, formatPips, getRatingColor } from '../utils/o
 import { getPlayerSafeCorpsName, getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { findPlayerFacingOperationByKey } from '../../shared/playerVisibility';
 
+const FORCE_LAUNCH_COST = 15;
+const RECOVERY_PER_TURN = 2;
+
 interface OperationBriefingModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -17,6 +20,8 @@ interface OperationBriefingModalProps {
     onPostpone?: () => void;
     onAbort?: () => void;
     onOrderProbe?: () => void;
+    /** Level 3 Direct Intervention — force-launch overriding the commander's recommendation. */
+    onForceLaunch?: () => void;
 }
 
 function ReadinessBar({ label, value, thresholdLabel }: { label: string; value: number; thresholdLabel?: string }) {
@@ -48,7 +53,58 @@ function AssessmentBadge({ assessment }: { assessment?: string }) {
     }
 }
 
-export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, onAbort, onOrderProbe }: OperationBriefingModalProps) {
+/** Direct Intervention section — shown when the commander does NOT recommend launch. */
+function DirectInterventionSection({ assessment, currentAuth, onForceLaunch }: {
+    assessment: string;
+    currentAuth: number;
+    onForceLaunch?: () => void;
+}) {
+    const canAfford = currentAuth >= FORCE_LAUNCH_COST;
+    const remaining = currentAuth - FORCE_LAUNCH_COST;
+
+    const explanation = assessment === 'abort'
+        ? 'The commander recommends aborting. Forcing launch overrides that assessment.'
+        : 'The commander recommends waiting. Forcing launch overrides that judgment.';
+
+    return (
+        <div className="mx-4 my-3 border border-amber-400/40 bg-amber-50">
+            <div className="px-3 py-2 border-b border-amber-300/60 bg-amber-100/60 flex items-center justify-between">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-amber-800">Direct Intervention</span>
+                <span className="text-[9px] uppercase font-bold tracking-wider text-amber-600">Level 3</span>
+            </div>
+            <div className="px-3 py-2 space-y-2">
+                <p className="text-[10px] text-amber-900 leading-relaxed">{explanation}</p>
+                <div className="flex items-center gap-4 text-[10px] font-mono tabular-nums">
+                    <span className="text-neutral-600">
+                        Command Authority: <b className="text-neutral-800">{currentAuth}</b> → <b className={canAfford ? 'text-amber-700' : 'text-red-600'}>{canAfford ? remaining : currentAuth}</b> after
+                    </span>
+                    <span className="text-neutral-500">Cost: {FORCE_LAUNCH_COST} | Recovery: +{RECOVERY_PER_TURN}/turn</span>
+                </div>
+                <button
+                    type="button"
+                    onClick={onForceLaunch}
+                    disabled={!canAfford}
+                    className={`w-full mt-1 px-3 py-1.5 text-[10px] uppercase font-bold tracking-wider border transition-colors ${
+                        canAfford
+                            ? 'bg-amber-100 hover:bg-amber-200 text-amber-800 border-amber-400 cursor-pointer'
+                            : 'bg-neutral-100 text-neutral-400 border-neutral-300 cursor-not-allowed'
+                    }`}
+                    title={canAfford
+                        ? `Spend ${FORCE_LAUNCH_COST} Command Authority to override the command chain`
+                        : `Insufficient Command Authority (${currentAuth}/${FORCE_LAUNCH_COST})`
+                    }
+                >
+                    {canAfford
+                        ? `Force Launch — Override Command Chain`
+                        : `Insufficient Command Authority (${currentAuth}/${FORCE_LAUNCH_COST})`
+                    }
+                </button>
+            </div>
+        </div>
+    );
+}
+
+export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, onAbort, onOrderProbe, onForceLaunch }: OperationBriefingModalProps) {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const context = useGameStore((s) => s.operationBriefingContext);
 
@@ -137,6 +193,15 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                         <span className="text-[8px] text-neutral-400">({postponements} prior postponement{postponements > 1 ? 's' : ''})</span>
                     )}
                 </div>
+
+                {/* Direct Intervention — only when commander does NOT recommend launch */}
+                {assessment !== 'launch' && onForceLaunch && (
+                    <DirectInterventionSection
+                        assessment={assessment ?? 'postpone'}
+                        currentAuth={loadedGameState?.commandAuthority?.current ?? 0}
+                        onForceLaunch={onForceLaunch}
+                    />
+                )}
 
                 {/* Action buttons */}
                 <div className="px-4 py-3 border-t-2 border-neutral-300 bg-neutral-50 flex gap-2 flex-wrap">

@@ -109,6 +109,12 @@ function OperationBriefingModalWrapper() {
     close(null);
   };
 
+  const handleForceLaunch = async () => {
+    const result = await ipc.stageOperationForceLaunch({ corpsId: ctx.corpsId, operationName: ctx.operationName });
+    if (!result.ok) useGameStore.getState().setLoadError(result.error ?? 'Failed to force-launch operation.');
+    close(null);
+  };
+
   return (
     <OperationBriefingModal
       isOpen
@@ -117,6 +123,7 @@ function OperationBriefingModalWrapper() {
       onPostpone={() => handleDecision('postpone')}
       onAbort={() => handleDecision('abort')}
       onOrderProbe={() => handleDecision('probe')}
+      onForceLaunch={() => void handleForceLaunch()}
     />
   );
 }

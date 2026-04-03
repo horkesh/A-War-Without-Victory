@@ -95,6 +95,65 @@ describe('command authority', () => {
         });
     });
 
+    describe('review layer logic', () => {
+        const FORCE_LAUNCH_COST = 15;
+
+        /** Determines whether the Direct Intervention section should be visible. */
+        function shouldShowDirectIntervention(assessment: string | undefined, hasForceLaunchCallback: boolean): boolean {
+            return assessment !== 'launch' && hasForceLaunchCallback;
+        }
+
+        /** Computes the CA context displayed in the review section. */
+        function computeCAContext(currentAuth: number, cost: number): { canAfford: boolean; remaining: number } {
+            return { canAfford: currentAuth >= cost, remaining: currentAuth - cost };
+        }
+
+        it('shows Direct Intervention when commander recommends postpone', () => {
+            expect(shouldShowDirectIntervention('postpone', true)).toBe(true);
+        });
+
+        it('shows Direct Intervention when commander recommends abort', () => {
+            expect(shouldShowDirectIntervention('abort', true)).toBe(true);
+        });
+
+        it('hides Direct Intervention when commander recommends launch', () => {
+            expect(shouldShowDirectIntervention('launch', true)).toBe(false);
+        });
+
+        it('hides Direct Intervention when no force-launch callback', () => {
+            expect(shouldShowDirectIntervention('postpone', false)).toBe(false);
+        });
+
+        it('computes correct CA context (current=85, cost=15)', () => {
+            const ctx = computeCAContext(85, FORCE_LAUNCH_COST);
+            expect(ctx.canAfford).toBe(true);
+            expect(ctx.remaining).toBe(70);
+        });
+
+        it('computes correct CA context (current=100, cost=15)', () => {
+            const ctx = computeCAContext(100, FORCE_LAUNCH_COST);
+            expect(ctx.canAfford).toBe(true);
+            expect(ctx.remaining).toBe(85);
+        });
+
+        it('force-launch button disabled when CA < cost', () => {
+            const ctx = computeCAContext(10, FORCE_LAUNCH_COST);
+            expect(ctx.canAfford).toBe(false);
+            expect(ctx.remaining).toBe(-5); // negative = cannot afford
+        });
+
+        it('force-launch button enabled at exact cost', () => {
+            const ctx = computeCAContext(15, FORCE_LAUNCH_COST);
+            expect(ctx.canAfford).toBe(true);
+            expect(ctx.remaining).toBe(0);
+        });
+
+        it('force-launch button disabled at zero CA', () => {
+            const ctx = computeCAContext(0, FORCE_LAUNCH_COST);
+            expect(ctx.canAfford).toBe(false);
+        });
+    });
+
     describe('full cycle: deduct then recover', () => {
         it('deduct 15, recover 2 per turn, takes 8 turns to fully recover', () => {
             const auth = makeAuth();

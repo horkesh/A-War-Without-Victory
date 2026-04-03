@@ -22637,3 +22637,11 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - Renamed `$args` → `$claudeArgs` to avoid PowerShell automatic variable conflict
 - Verified end-to-end: completion_signal.json (hook_source: Stop), architect_review.json with session_id + summary, inbox copy, list_handoffs, show_handoff paste block all correct
 - Governance: passes
+
+## [2026-04-03] command-authority-review-layer
+- Added DirectInterventionSection to OperationBriefingModal — appears only when assessment != 'launch'
+- Shows: Level 3 label, plain-language explanation (postpone/abort variants), CA current→remaining display, cost + recovery rate, force-launch button (amber, disabled when CA < 15)
+- Wired onForceLaunch in App.tsx OperationBriefingModalWrapper → stageOperationForceLaunch IPC
+- CA deduction stays in electron-main.cjs (unchanged)
+- 9 new tests in command_authority.test.ts (review layer logic suite)
+- tsc clean, build clean, governance OK, no regressions
