@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
+  applyShellHandoffCommand,
   openArmyHQBriefingForCorps,
   openArmyHQRecordsSubTab,
   openArmyHQTab,
@@ -73,6 +74,27 @@ describe('shellNavigation', () => {
     expect(state.calls).toEqual([]);
   });
 
+  it('applies Warroom shell handoff commands through canonical Army HQ navigation', () => {
+    const state = createState('RBiH');
+
+    expect(applyShellHandoffCommand(state, { kind: 'army-hq', tab: 'summary' })).toBe(true);
+    expect(applyShellHandoffCommand(state, { kind: 'army-hq', tab: 'records', recordsSubTab: 'ops' })).toBe(true);
+    expect(applyShellHandoffCommand(state, { kind: 'army-hq', tab: 'briefing', corpsId: 'arbih_3rd_corps' })).toBe(true);
+
+    expect(state.calls).toEqual([
+      ['setSelectedArmyId', 'RBiH'],
+      ['setArmyHQOpen', true],
+      ['setArmyHQTab', 'summary'],
+      ['setSelectedArmyId', 'RBiH'],
+      ['setArmyHQOpen', true],
+      ['setArmyHQRecordsSubTab', 'ops'],
+      ['setSelectedArmyId', 'RBiH'],
+      ['setArmyHQOpen', true],
+      ['setArmyHQTab', 'briefing'],
+      ['setArmyHQExpandedCorpsId', 'arbih_3rd_corps'],
+    ]);
+  });
+
   it('shows a Warroom return affordance for standalone desktop and embedded tactical shells', () => {
     expect(isEmbeddedTacticalMap('?embedded=1')).toBe(true);
     expect(shouldShowWarroomReturn('?embedded=1', false)).toBe(true);
@@ -132,5 +154,22 @@ describe('shellNavigation', () => {
     expect(toolbarSource).toContain("className=\"w-[84px] h-[84px]");
     expect(railSource).toContain("var(--awwv-toolbar-clearance, 5.5rem)");
     expect(railSource).not.toContain("var(--awwv-toolbar-clearance, 7.5rem)");
+  });
+
+  it('routes Warroom staff props through shell handoff instead of opening duplicate local packets', () => {
+    const warroomSource = readFileSync(
+      new URL('../src/ui/warroom/ClickableRegionManager.ts', import.meta.url),
+      'utf8',
+    );
+    const appSource = readFileSync(
+      new URL('../src/ui/map/App.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(warroomSource).toContain("this.tacticalShellHandoffHandler({ kind: 'army-hq', tab: 'summary' })");
+    expect(warroomSource).toContain("this.tacticalShellHandoffHandler({ kind: 'army-hq', tab: 'briefing' })");
+    expect(warroomSource).toContain("this.tacticalShellHandoffHandler({ kind: 'army-hq', tab: 'records', recordsSubTab: 'ops' })");
+    expect(appSource).toContain("event.data?.type !== 'awwv-shell:handoff'");
+    expect(appSource).toContain('applyShellHandoffCommand');
   });
 });

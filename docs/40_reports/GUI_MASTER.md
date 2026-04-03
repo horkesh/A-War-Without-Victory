@@ -379,3 +379,9 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - Chronicle and ops-planning hover labels now stay on the player-safe geography/faction helpers too.
 - See `docs/40_reports/implemented/20260403_TACTICAL_TOP_SHELL_DENSITY_AND_LABEL_CLEANUP.md`.
 
+## 2026-04-03 - Warroom to Army HQ shell handoff
+
+- Warroom desk props for faction overview, command briefing, and report review now hand off into the embedded tactical shell instead of opening parallel Warroom-local staff packets.
+- Tactical-shell receipt is handled through `awwv-shell:handoff` plus the canonical Army HQ navigation helpers in `src/ui/map/utils/shellNavigation.ts`.
+- See `docs/40_reports/implemented/20260403_WARROOM_ARMYHQ_SHELL_HANDOFF.md`.
+

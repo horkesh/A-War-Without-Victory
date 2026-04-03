@@ -32,6 +32,7 @@ import flagRsUrl from './assets/flag_RS.webp?url';
 import scnApr1992Url from './assets/scenarios/apr1992_briefing.webp?url';
 // Main menu background (game start screen)
 import gameStartBgUrl from './assets/game start.webp?url';
+import type { ShellHandoffCommand } from '../shared/shellHandoff.js';
 
 type CampaignScenarioKey = 'apr_1992';
 
@@ -112,6 +113,7 @@ class WarroomApp {
     private embeddedBridgeSubscribers = new Map<WindowProxy, { origin: string; events: Set<string> }>();
     private unsubscribeDesktopGameState: (() => void) | null = null;
     private unsubscribeDesktopTurnReport: (() => void) | null = null;
+    private pendingShellHandoff: ShellHandoffCommand | null = null;
     /** True once the user has navigated away from the initial main menu (prevents init race). */
     private userNavigatedFromMenu = false;
     /** Faction for which we last loaded region data (so we only reload when faction changes). */
@@ -167,6 +169,9 @@ class WarroomApp {
         this.regionManager.setWarPlanningMap(this.warPlanningMap);
         this.regionManager.setMapSceneOpenHandler(() => this.showMapScene());
         this.regionManager.setTacticalMapOpenHandler(() => this.showTacticalMapScene());
+        this.regionManager.setTacticalShellHandoffHandler((command) => {
+            void this.openTacticalShellHandoff(command);
+        });
 
         this.regionManager.setOnGameStateChange((newState) => {
             this.gameState = newState;
@@ -1012,6 +1017,7 @@ class WarroomApp {
             iframe.onload = () => {
                 this.tacticalMapReady = true;
                 this.injectBridgeIntoTacticalMap(iframe);
+                this.flushPendingShellHandoff();
             };
 
             tacticalScene.appendChild(iframe);
@@ -1022,6 +1028,7 @@ class WarroomApp {
         } else if (this.tacticalMapReady) {
             // Push latest game state to existing iframe
             this.injectBridgeIntoTacticalMap(this.tacticalMapIframe);
+            this.flushPendingShellHandoff();
         }
 
         // Scene swap: hide desk only so warroom-scene stays visible and tactical map can show
@@ -1096,6 +1103,25 @@ class WarroomApp {
             } else {
                 this.embeddedBridgeSubscribers.set(source as WindowProxy, existing);
             }
+        }
+    }
+
+    private async openTacticalShellHandoff(command: ShellHandoffCommand): Promise<void> {
+        this.pendingShellHandoff = command;
+        await this.showTacticalMapScene('operational');
+        this.flushPendingShellHandoff();
+    }
+
+    private flushPendingShellHandoff(): void {
+        if (!this.pendingShellHandoff || !this.tacticalMapReady || !this.tacticalMapIframe?.contentWindow) return;
+        try {
+            this.tacticalMapIframe.contentWindow.postMessage(
+                { type: 'awwv-shell:handoff', command: this.pendingShellHandoff },
+                '*',
+            );
+            this.pendingShellHandoff = null;
+        } catch (e) {
+            console.warn('[warroom] Failed to hand off shell command to tactical map:', e);
         }
     }
 

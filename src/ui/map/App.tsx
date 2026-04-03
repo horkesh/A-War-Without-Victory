@@ -57,7 +57,8 @@ import { useDesktopSession } from './hooks/useDesktopSession';
 import { useIPC } from './desktop/useIPC';
 import type { RecruitmentCatalogBrigade, StartNewCampaignPayload } from './desktop/types';
 import type { SummaryFocusSection } from './data/types';
-import { openArmyHQRecordsSubTab } from './utils/shellNavigation';
+import { applyShellHandoffCommand, openArmyHQRecordsSubTab } from './utils/shellNavigation';
+import { isShellHandoffCommand } from '../shared/shellHandoff';
 import {
   applyRecruitmentAndSync,
   fetchRecruitmentCatalog,
@@ -574,6 +575,29 @@ function App() {
     setSummaryOpen(false);
     setEventLogOpen(false);
   };
+
+  useEffect(() => {
+    const handleShellHandoff = (event: MessageEvent) => {
+      if (event.data?.type !== 'awwv-shell:handoff') return;
+      const command = event.data?.command;
+      if (!isShellHandoffCommand(command)) return;
+
+      if (command.kind === 'codex') {
+        useGameStore.getState().setCodexOpen(true);
+        setSummaryOpen(false);
+        setEventLogOpen(false);
+        return;
+      }
+
+      const handled = applyShellHandoffCommand(useGameStore.getState(), command);
+      if (!handled) return;
+      setSummaryOpen(false);
+      setEventLogOpen(false);
+    };
+
+    window.addEventListener('message', handleShellHandoff);
+    return () => window.removeEventListener('message', handleShellHandoff);
+  }, []);
 
   const selectPrimaryArmy = () => {
     if (!loadedGameState) return;

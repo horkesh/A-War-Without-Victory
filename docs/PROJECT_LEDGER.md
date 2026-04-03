@@ -21690,6 +21690,31 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_player_visibility.test.ts`
 - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
 
+## 2026-04-03 - Warroom to Army HQ shell handoff
+
+### Summary
+- Warroom desk props no longer own live command-review packets when the tactical shell is available.
+- Added a small shared shell-handoff command so Warroom can open the embedded tactical map directly into canonical Army HQ tabs/subtabs instead of opening duplicate Warroom-local staff modals.
+
+### Files changed
+- `src/ui/shared/shellHandoff.ts`
+- `src/ui/map/utils/shellNavigation.ts`
+- `src/ui/map/App.tsx`
+- `src/ui/warroom/ClickableRegionManager.ts`
+- `src/ui/warroom/warroom.ts`
+- `tests/ui_shell_navigation.test.ts`
+- `docs/40_reports/implemented/20260403_WARROOM_ARMYHQ_SHELL_HANDOFF.md`
+
+### Why
+- Warroom had become a second staff shell through `FactionOverviewPanel`, `CommandBriefingModal`, `ReportsModal`, and `MagazineModal`.
+- Army HQ already owns detailed command review in the tactical shell, so live Warroom prop clicks should hand off there instead of maintaining a parallel truth surface.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_shell_navigation.test.ts`
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_player_visibility.test.ts`
+- `node .\\node_modules\\vite\\bin\\vite.js build --config src\\ui\\warroom\\vite.config.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
 ## 2026-04-03 - Tactical top-shell density and label cleanup
 
 ### Summary

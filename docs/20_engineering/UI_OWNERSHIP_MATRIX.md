@@ -27,6 +27,7 @@ Other surfaces may summarize or link to it, but they do not become co-owners of 
 - high-level strategic overview
 
 **May summarize but not own:**
+- staff packets, command briefings, and report-review depth
 - detailed operations internals
 - low-level formation debugging
 
@@ -82,6 +83,10 @@ Other surfaces may summarize or link to it, but they do not become co-owners of 
 - `AAR / operation history`
   - canonical owner: Army HQ `RECORDS`
   - other shells may link into it, but should not reopen orphan history ownership elsewhere
+
+- `Warroom desk props for command review`
+  - canonical owner: Army HQ / Codex depending on destination
+  - Warroom anchors may hand off into those shells, but should not revive their own local packet owners
 
 - `return from standalone tactical map`
   - canonical owner: Warroom shell
