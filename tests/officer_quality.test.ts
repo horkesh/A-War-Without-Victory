@@ -44,7 +44,10 @@ function makeFormation(overrides: Partial<FormationState> = {}): FormationState 
 function makeState(formations: Record<string, FormationState>, turn: number = 0): GameState {
     return {
         meta: { turn, phase: 'war' },
-        formations,
+        military: {
+            formations,
+            corps_front_sectors: {},
+        },
         factions: [{ id: 'RBiH' }, { id: 'RS' }, { id: 'HRHB' }],
     } as unknown as GameState;
 }
@@ -156,6 +159,57 @@ describe('updateBrigadeOfficerQuality', () => {
         const engaged = new Set<string>();
         updateBrigadeOfficerQuality(state, engaged);
         assert.ok(f.officer_quality! > 0.10, `Expected frontline growth, got ${f.officer_quality}`);
+    });
+
+    it('uses sector frontline truth instead of posture when live sectors exist', () => {
+        const rearBrigade = makeFormation({
+            id: 'rear_brigade',
+            faction: 'RBiH',
+            officer_quality: 0.10,
+            kind: 'brigade',
+            posture: 'attack',
+        });
+        const frontlineBrigade = makeFormation({
+            id: 'frontline_brigade',
+            faction: 'RBiH',
+            officer_quality: 0.10,
+            kind: 'brigade',
+            posture: 'defend',
+        });
+        const state = makeState(
+            {
+                rear_brigade: rearBrigade,
+                frontline_brigade: frontlineBrigade,
+            },
+            5,
+        );
+        state.military.corps_front_sectors = {
+            'sector:rbih:0': {
+                id: 'sector:rbih:0',
+                assigned_brigade_ids: ['frontline_brigade'],
+                reserve_brigade_ids: [],
+            },
+        } as unknown as GameState['military']['corps_front_sectors'];
+
+        updateBrigadeOfficerQuality(state, new Set());
+
+        assert.equal(rearBrigade.officer_quality, 0.10);
+        assert.ok(frontlineBrigade.officer_quality! > 0.10, `Expected frontline growth, got ${frontlineBrigade.officer_quality}`);
+    });
+
+    it('falls back to posture only when no live sector truth exists', () => {
+        const f = makeFormation({
+            faction: 'RBiH',
+            officer_quality: 0.10,
+            kind: 'brigade',
+            posture: 'attack',
+        });
+        const state = makeState({ test_brigade_1: f }, 5);
+        state.military.corps_front_sectors = undefined as unknown as GameState['military']['corps_front_sectors'];
+
+        updateBrigadeOfficerQuality(state, new Set());
+
+        assert.ok(f.officer_quality! > 0.10, `Expected posture fallback growth, got ${f.officer_quality}`);
     });
 
     it('RBiH learns faster than RS', () => {

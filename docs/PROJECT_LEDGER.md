@@ -21499,3 +21499,23 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\scenario_activity_truth.test.ts`
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\brigade_territory_reconciliation.test.ts tests\\commander_driven_brigade_assignment.test.ts`
 - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Officer quality frontline truth alignment
+
+### Summary
+- Replaced the brigade-posture frontline proxy in `updateBrigadeOfficerQuality(...)` with canonical sector-frontline truth whenever live sectors exist.
+- Kept a narrow posture fallback only for compatibility states where no live sector truth exists at all.
+
+### Files changed
+- `src/sim/combat/officer_quality_update.ts`
+- `tests/officer_quality.test.ts`
+- `docs/40_reports/implemented/20260403_OFFICER_QUALITY_FRONTLINE_TRUTH_ALIGNMENT.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- Officer growth runs every war turn, so letting it infer "frontline" from brigade posture kept a second frontline authority alive inside a real mechanic.
+- Sector assignment is already the runtime owner of frontline truth; progression has to obey that same contract.
+
+### Verification
+- `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\officer_quality.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
