@@ -367,3 +367,9 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - Army HQ ORBAT, Army HQ sectors, operation history, tooltip battle labels, and Warroom settlement control wording now stay on player-safe naming/language helpers instead of rough OSID or raw enum fallbacks.
 - See `docs/40_reports/implemented/20260403_SETTLEMENT_ARMYHQ_AND_TOOLTIP_PLAYER_SAFE_BOUNDARY.md`.
 
+## 2026-04-03 - AAR and reserve player-safe labels
+
+- `AARPanel` now uses player-safe faction, brigade, and geography labels instead of raw brigade ids or rough OSID humanization.
+- `ArmyReservePanel` now resolves reserve base locations through the canonical display-name map as well.
+- See `docs/40_reports/implemented/20260403_AAR_AND_RESERVE_PLAYER_SAFE_LABELS.md`.
+

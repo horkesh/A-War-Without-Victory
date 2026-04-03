@@ -526,4 +526,22 @@ describe('player visibility helpers', () => {
     expect(settlementInfoSource).toContain('formatControlStatusLabel');
     expect(settlementInfoSource).toContain('const controlStatus = formatControlStatusLabel(');
   });
+
+  it('keeps AAR and reserve shells on player-safe geography and brigade labels', () => {
+    const aarSource = readFileSync(
+      new URL('../src/ui/map/components/AARPanel.tsx', import.meta.url),
+      'utf8',
+    );
+    const reserveSource = readFileSync(
+      new URL('../src/ui/map/components/ArmyReservePanel.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(aarSource).toContain('getOsidDisplayName');
+    expect(aarSource).toContain('getPlayerSafeBrigadeName');
+    expect(aarSource).toContain('getPlayerSafeMilitaryFactionName');
+    expect(aarSource).not.toContain('humanizeOsid');
+    expect(reserveSource).toContain('getOsidDisplayName');
+    expect(reserveSource).not.toContain('humanizeOsid');
+  });
 });

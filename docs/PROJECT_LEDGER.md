@@ -21690,6 +21690,26 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_player_visibility.test.ts`
 - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
 
+## 2026-04-03 - AAR and reserve player-safe labels
+
+### Summary
+- Reworked `AARPanel` to use player-safe faction, brigade, and geography labels instead of hard-coded military shorthand, `humanizeOsid(...)`, or raw brigade ids.
+- Reworked `ArmyReservePanel` base-location display to use canonical OSID display names.
+
+### Files changed
+- `src/ui/map/components/AARPanel.tsx`
+- `src/ui/map/components/ArmyReservePanel.tsx`
+- `tests/ui_player_visibility.test.ts`
+- `docs/40_reports/implemented/20260403_AAR_AND_RESERVE_PLAYER_SAFE_LABELS.md`
+
+### Why
+- AAR is a high-trust report surface; if it leaks engine ids or rough fallback geography, the player experience still feels like internal tooling.
+- Reserve review is a secondary shell, but base locations should still use the same canonical display path as the rest of the product.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_player_visibility.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
 ## 2026-04-03 - Desktop bridge subscription canonicalization
 
 ### Summary

@@ -7,19 +7,17 @@ import { useState } from 'react';
 import type { TurnSummary, TurnBattle, ArcTransition, DecorationAward, TurnNotableEvent } from '../../../state/turn_summary.js';
 import { useGameStore } from '../store/gameStore';
 import { formatTurnLabel, toTitleCase } from '../utils/formatters';
-import { humanizeOsid } from '../utils/osidDisplayName';
+import { getOsidDisplayName } from '../utils/osidDisplayName';
+import {
+    getPlayerSafeBrigadeName,
+    getPlayerSafeMilitaryFactionName,
+} from '../utils/playerSafeText';
 
 // --- Faction colors ---
 const FACTION_COLOR: Record<string, string> = {
     RS: '#c04040',
     RBiH: '#4a9a55',
     HRHB: '#4080b8',
-};
-
-const FACTION_LABEL: Record<string, string> = {
-    RS: 'VRS',
-    RBiH: 'ARBiH',
-    HRHB: 'HVO',
 };
 
 // --- Arc display ---
@@ -102,7 +100,7 @@ function FactionTag({ faction }: { faction: string }) {
             className="text-[9px] font-mono px-1 rounded border"
             style={{ color: FACTION_COLOR[faction] ?? '#aaa', borderColor: `${FACTION_COLOR[faction] ?? '#555'}44` }}
         >
-            {FACTION_LABEL[faction] ?? faction}
+            {getPlayerSafeMilitaryFactionName(faction)}
         </span>
     );
 }
@@ -110,6 +108,7 @@ function FactionTag({ faction }: { faction: string }) {
 function DefenderBreakdown({ contributions, onSelectFormation }: {
     contributions: NonNullable<TurnBattle['defender_contributions']>;
     onSelectFormation?: (id: string) => void;
+    formationNameById: Map<string, string>;
 }) {
     const [expanded, setExpanded] = useState(false);
     const sorted = [...contributions].sort((a, b) => b.reactive_weight - a.reactive_weight);
@@ -124,7 +123,9 @@ function DefenderBreakdown({ contributions, onSelectFormation }: {
             </button>
             {expanded && (
                 <div className="mt-0.5 space-y-px">
-                    {sorted.map((c) => (
+                    {sorted.map((c) => {
+                        const brigadeLabel = getPlayerSafeBrigadeName(formationNameById.get(c.brigade_id));
+                        return (
                         <div key={c.brigade_id} className="text-[9px] text-text-muted tabular-nums flex items-center gap-1">
                             <span className="text-text-secondary w-3 text-right">{c.distance_hops === 0 ? '⊕' : `${c.distance_hops}↷`}</span>
                             {c.is_home_municipality && <span title="Home municipality">⌂</span>}
@@ -134,27 +135,41 @@ function DefenderBreakdown({ contributions, onSelectFormation }: {
                                     className="hover:text-interactive transition-colors truncate"
                                     onClick={() => onSelectFormation(c.brigade_id)}
                                 >
-                                    {c.brigade_id}
+                                    {brigadeLabel}
                                 </button>
                             ) : (
-                                <span className="truncate">{c.brigade_id}</span>
+                                <span className="truncate">{brigadeLabel}</span>
                             )}
                             <span className="ml-auto shrink-0">
                                 {c.casualties_taken > 0 ? `−${c.casualties_taken}` : '—'}
                             </span>
                         </div>
-                    ))}
+                    )})}
                 </div>
             )}
         </div>
     );
 }
 
-function BattleRow({ battle, onSelectFormation }: { battle: TurnBattle; onSelectFormation?: (id: string) => void }) {
-    const label = humanizeOsid(battle.osid);
+function BattleRow({
+    battle,
+    onSelectFormation,
+    osidDisplayNames,
+    formationNameById,
+}: {
+    battle: TurnBattle;
+    onSelectFormation?: (id: string) => void;
+    osidDisplayNames: Record<string, string> | null;
+    formationNameById: Map<string, string>;
+}) {
+    const label = getOsidDisplayName(battle.osid, osidDisplayNames);
     const outcomeLabel = OUTCOME_LABEL[battle.outcome] ?? battle.outcome;
     const outcomeColor = OUTCOME_COLOR[battle.outcome] ?? 'text-text-secondary';
     const countLabel = battle.was_concentrated ? `${battle.all_attacker_ids.length}×` : null;
+    const primaryAttackerLabel = getPlayerSafeBrigadeName(formationNameById.get(battle.primary_attacker_id));
+    const primaryDefenderLabel = battle.primary_defender_id
+        ? getPlayerSafeBrigadeName(formationNameById.get(battle.primary_defender_id))
+        : null;
 
     return (
         <div className="text-[11px] py-1 border-b border-panel-border/30 last:border-0">
@@ -181,7 +196,7 @@ function BattleRow({ battle, onSelectFormation }: { battle: TurnBattle; onSelect
                         className="hover:text-interactive transition-colors"
                         onClick={() => onSelectFormation(battle.primary_attacker_id)}
                     >
-                        {battle.primary_attacker_id}
+                        {primaryAttackerLabel}
                     </button>
                     {battle.primary_defender_id && (
                         <>
@@ -191,14 +206,18 @@ function BattleRow({ battle, onSelectFormation }: { battle: TurnBattle; onSelect
                                 className="hover:text-interactive transition-colors"
                                 onClick={() => onSelectFormation(battle.primary_defender_id!)}
                             >
-                                {battle.primary_defender_id}
+                                {primaryDefenderLabel}
                             </button>
                         </>
                     )}
                 </div>
             )}
             {battle.defender_contributions && battle.defender_contributions.length > 1 && (
-                <DefenderBreakdown contributions={battle.defender_contributions} onSelectFormation={onSelectFormation} />
+                <DefenderBreakdown
+                    contributions={battle.defender_contributions}
+                    onSelectFormation={onSelectFormation}
+                    formationNameById={formationNameById}
+                />
             )}
         </div>
     );
@@ -256,11 +275,15 @@ interface AARPanelProps {
 
 export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
+    const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
     const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
 
     if (!isOpen || !loadedGameState) return null;
 
     const summary: TurnSummary | null = loadedGameState.latestTurnSummary;
+    const formationNameById = new Map(
+        (loadedGameState.formations ?? []).map((formation) => [formation.id, formation.name] as const),
+    );
 
     const body = (
                 <div className={embedded ? "text-[11px]" : "p-3 overflow-auto text-[11px] flex-1"}>
@@ -278,6 +301,8 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
                                             key={b.osid}
                                             battle={b}
                                             onSelectFormation={setSelectedFormationId}
+                                            osidDisplayNames={osidDisplayNames}
+                                            formationNameById={formationNameById}
                                         />
                                     ))}
                                 </Section>
@@ -290,9 +315,9 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
                                         <TerritoryNet net={summary.territory_net} />
                                     </div>
                                     {summary.notable_flips.length > 0 && (
-                                        <div className="space-y-0.5">
+                                    <div className="space-y-0.5">
                                             {summary.notable_flips.map((flip) => {
-                                                const label = humanizeOsid(flip.osid);
+                                                const label = getOsidDisplayName(flip.osid, osidDisplayNames);
                                                 return (
                                                     <div key={flip.osid} className="text-[10px] flex gap-1.5 items-center">
                                                         <span className="text-text-muted">⬡</span>
