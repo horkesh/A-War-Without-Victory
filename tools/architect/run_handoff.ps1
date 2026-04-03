@@ -104,6 +104,10 @@ if ($Worktree) {
     $args += "--worktree"
 }
 
+# Set handoff env vars so Stop/Notification hooks can scope themselves
+$env:AWWV_HANDOFF_RUN_ID     = $runId
+$env:AWWV_HANDOFF_RESULT_DIR = $resultDir
+
 Write-Host "Executing claude..." -ForegroundColor Yellow
 $startTime = Get-Date
 
@@ -155,6 +159,23 @@ $meta.exit_code = $exitCode
 if ($sessionId) { $meta.session_id = $sessionId }
 $meta | ConvertTo-Json -Depth 4 | Set-Content (Join-Path $resultDir "meta.json")
 
+# Generate inbox artifact if Stop hook didn't already do it (fallback)
+$reviewFile = Join-Path $resultDir "architect_review.json"
+if (-not (Test-Path $reviewFile)) {
+    $writeReviewScript = Join-Path $PSScriptRoot "hooks\write_review.ps1"
+    if (Test-Path $writeReviewScript) {
+        try {
+            & powershell -ExecutionPolicy Bypass -File $writeReviewScript -ResultDir $resultDir
+        } catch {
+            Write-Warning "Could not generate architect_review.json: $_"
+        }
+    }
+}
+
+# Clear handoff env vars (scope cleanup)
+$env:AWWV_HANDOFF_RUN_ID     = $null
+$env:AWWV_HANDOFF_RESULT_DIR = $null
+
 # Summary
 Write-Host ""
 Write-Host "=== Run Complete ===" -ForegroundColor $(if ($exitCode -eq 0) { "Green" } else { "Red" })
@@ -164,6 +185,10 @@ Write-Host "Results:    $resultDir"
 if ($sessionId) {
     Write-Host "Session ID: $sessionId" -ForegroundColor Cyan
     Write-Host "Resume:     claude -r $sessionId"
+}
+if (Test-Path $reviewFile) {
+    Write-Host "Review:     $reviewFile" -ForegroundColor Cyan
+    Write-Host "Inbox:      .\tools\architect\show_handoff.ps1" -ForegroundColor DarkGray
 }
 Write-Host ""
 

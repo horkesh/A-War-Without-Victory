@@ -48,6 +48,9 @@ tools/tmp_*.cjs
 # Repo cleanup 2026: run outputs and temp dirs (do not track)
 runs/
 .tmp_*/
+
+# Handoff inbox artifacts — ephemeral, generated per run (keep .gitkeep)
+handoffs/inbox/*.json
 runs_ops_compare/
 runs_probe/
 data/derived/scenario/_baseline_tmp/

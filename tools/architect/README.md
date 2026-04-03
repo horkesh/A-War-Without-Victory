@@ -113,3 +113,79 @@ Session IDs enable resume if a run is interrupted or needs follow-up.
 - Automatic ledger/napkin check on handoff completion
 - Handoff chaining (output of one becomes input to next)
 - Budget tracking across runs
+
+---
+
+## v2 — Hook-driven completion + Architect inbox
+
+v2 adds automatic signaling, inbox artifact generation, Windows notifications, and review helpers. v1 workflow is unchanged; v2 features activate only inside handoff runs.
+
+### What's new
+
+```
+tools/architect/
+  hooks/
+    on_stop.ps1         # Stop hook — fires when Claude finishes
+    on_notification.ps1 # Notification hook — fires on Claude notifications
+    write_review.ps1    # Generates architect_review.json + inbox copy
+    notify.ps1          # Windows notification (BurntToast / msg * / bell)
+  list_handoffs.ps1     # List pending inbox items
+  show_handoff.ps1      # Show a handoff result + paste-ready summary
+handoffs/
+  inbox/                # architect_review.json per completed run (gitignored)
+    .gitkeep
+```
+
+### How v2 works
+
+1. `run_handoff.ps1` sets `AWWV_HANDOFF_RUN_ID` and `AWWV_HANDOFF_RESULT_DIR` before calling claude.
+2. When claude exits, the `Stop` hook fires `on_stop.ps1`:
+   - Writes `completion_signal.json` to the result dir.
+   - Calls `write_review.ps1` → generates `architect_review.json` + copies to `handoffs/inbox/<run_id>.json`.
+   - Fires a Windows notification via `notify.ps1`.
+3. If the Stop hook didn't fire (edge case), `run_handoff.ps1` calls `write_review.ps1` directly as a fallback.
+4. `Notification` hook fires `on_notification.ps1` for mid-run events (appends to `notifications.log`, rings bell, writes `status.txt` if input needed).
+
+All hooks are **silent no-ops** outside of handoff runs (env var absent = exit 0).
+
+### Reviewing results
+
+```powershell
+# List all inbox items (needs_review highlighted in yellow)
+.\tools\architect\list_handoffs.ps1
+
+# Show most recent item + paste-ready architect summary
+.\tools\architect\show_handoff.ps1
+
+# Show a specific run
+.\tools\architect\show_handoff.ps1 -RunId 20260403_190000_sector-cleanup
+```
+
+### architect_review.json fields
+
+| Field | Description |
+|-------|-------------|
+| `task_name` | Human label from the run |
+| `run_id` | Timestamped run identifier |
+| `session_id` | Claude session ID (for resume) |
+| `branch` | Git branch at completion |
+| `commit_hash` | HEAD commit at completion |
+| `summary` | First 500 chars of response.md |
+| `files_changed` | From `git diff --name-only HEAD` + `git status` |
+| `tests_run` | Always `false` for now (future: parse test output) |
+| `completion_block` | Text after `## Done` or `Done means:` in response |
+| `status` | `needs_review` on creation |
+| `generated_at` | ISO 8601 timestamp |
+
+### Windows notification fallback chain
+
+1. BurntToast module (best UX — install once with `Install-Module BurntToast`)
+2. `msg * /TIME:5 "AWWV: ..."` (built-in Windows, no deps)
+3. Terminal bell `[console]::beep(800, 300)` + colored `Write-Host`
+
+### Constraints
+
+- Hook scripts are idempotent — safe to call multiple times.
+- Hook failures are non-fatal — they never break the handoff run itself.
+- Inbox JSON files are gitignored; `.gitkeep` tracks the directory.
+- Env vars `AWWV_HANDOFF_RUN_ID` / `AWWV_HANDOFF_RESULT_DIR` are cleared after each run.
