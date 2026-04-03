@@ -58,7 +58,7 @@ import { useIPC } from './desktop/useIPC';
 import type { RecruitmentCatalogBrigade, StartNewCampaignPayload } from './desktop/types';
 import type { SummaryFocusSection } from './data/types';
 import { applyShellHandoffCommand, openArmyHQRecordsSubTab } from './utils/shellNavigation';
-import { isShellHandoffCommand } from '../shared/shellHandoff';
+import { decodeShellHandoffCommand, isShellHandoffCommand } from '../shared/shellHandoff';
 import {
   applyRecruitmentAndSync,
   fetchRecruitmentCatalog,
@@ -208,6 +208,7 @@ function App() {
   const [recruitmentApplying, setRecruitmentApplying] = useState(false);
   const [recruitmentCatalog, setRecruitmentCatalog] = useState<RecruitmentCatalogBrigade[]>([]);
   const recruitmentCatalogRequestId = useRef(0);
+  const initialShellHandoffApplied = useRef(false);
 
   // C4.3: Combat odds — call existing query-combat-estimate when modal opens; show "—" if unavailable.
   // Phase 5 could add a dedicated combat-estimate IPC if needed; we use existing query-combat-estimate only.
@@ -598,6 +599,25 @@ function App() {
     window.addEventListener('message', handleShellHandoff);
     return () => window.removeEventListener('message', handleShellHandoff);
   }, []);
+
+  useEffect(() => {
+    if (initialShellHandoffApplied.current || !loadedGameState) return;
+    const params = new URLSearchParams(window.location.search);
+    const command = decodeShellHandoffCommand(params.get('shellHandoff'));
+    if (!command) return;
+
+    if (command.kind === 'codex') {
+      useGameStore.getState().setCodexOpen(true);
+    } else {
+      applyShellHandoffCommand(useGameStore.getState(), command);
+    }
+
+    params.delete('shellHandoff');
+    const nextQuery = params.toString();
+    const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ''}${window.location.hash}`;
+    window.history.replaceState(null, '', nextUrl);
+    initialShellHandoffApplied.current = true;
+  }, [loadedGameState]);
 
   const selectPrimaryArmy = () => {
     if (!loadedGameState) return;

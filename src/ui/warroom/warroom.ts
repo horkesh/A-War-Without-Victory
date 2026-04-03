@@ -32,7 +32,7 @@ import flagRsUrl from './assets/flag_RS.webp?url';
 import scnApr1992Url from './assets/scenarios/apr1992_briefing.webp?url';
 // Main menu background (game start screen)
 import gameStartBgUrl from './assets/game start.webp?url';
-import type { ShellHandoffCommand } from '../shared/shellHandoff.js';
+import { encodeShellHandoffCommand, type ShellHandoffCommand } from '../shared/shellHandoff.js';
 
 type CampaignScenarioKey = 'apr_1992';
 
@@ -979,10 +979,14 @@ class WarroomApp {
         const isElectron = !!(window as unknown as { awwv?: unknown }).awwv;
         if (!isElectron) {
             // Dev/browser: cross-origin prevents meaningful iframe interaction
+            const handoffQuery = this.pendingShellHandoff
+                ? `?shellHandoff=${encodeShellHandoffCommand(this.pendingShellHandoff)}`
+                : '';
             const devUrl = mode === 'sandbox'
-                ? 'http://localhost:3002/tactical_sandbox.html'
-                : 'http://localhost:3002/';
+                ? `http://localhost:3002/tactical_sandbox.html${handoffQuery}`
+                : `http://localhost:3002/${handoffQuery}`;
             window.open(devUrl, '_blank');
+            this.pendingShellHandoff = null;
             return;
         }
 

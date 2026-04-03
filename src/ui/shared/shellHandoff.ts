@@ -33,3 +33,17 @@ export function isShellHandoffCommand(value: unknown): value is ShellHandoffComm
   }
   return true;
 }
+
+export function encodeShellHandoffCommand(command: ShellHandoffCommand): string {
+  return encodeURIComponent(JSON.stringify(command));
+}
+
+export function decodeShellHandoffCommand(raw: string | null | undefined): ShellHandoffCommand | null {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(decodeURIComponent(raw));
+    return isShellHandoffCommand(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}

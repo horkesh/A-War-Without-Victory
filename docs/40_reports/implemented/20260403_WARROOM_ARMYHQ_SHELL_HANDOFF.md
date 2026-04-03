@@ -4,6 +4,7 @@
 
 - Demoted Warroom's live staff-packet props so they hand off into the embedded tactical shell instead of opening a second command-review stack.
 - Added one shared shell-handoff command contract used by Warroom and the tactical shell.
+- Made the same handoff survive browser/dev new-tab tactical-map launches through a query-param round-trip, not just the embedded Electron iframe path.
 - Kept the old Warroom modal implementations on disk as fallback/reference, but stopped treating them as the live owner when the tactical shell is available.
 
 ## What changed
@@ -23,6 +24,7 @@
   - listens for `awwv-shell:handoff`
   - routes Warroom-originated handoffs into canonical Army HQ navigation
   - keeps Codex as a distinct shell handoff instead of forcing it into Army HQ tabs
+  - consumes one-time `shellHandoff` query params for browser/dev launches and clears them from the URL after application
 
 ### Warroom sender
 
@@ -35,6 +37,7 @@
   - stores pending shell-handoff commands
   - ensures the embedded tactical map opens first
   - flushes the pending handoff into the iframe once it is ready
+  - encodes the same handoff into the tactical-map URL for browser/dev launches where Warroom opens a new tab instead of an embedded iframe
 
 ## Why
 

@@ -21695,6 +21695,7 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 ### Summary
 - Warroom desk props no longer own live command-review packets when the tactical shell is available.
 - Added a small shared shell-handoff command so Warroom can open the embedded tactical map directly into canonical Army HQ tabs/subtabs instead of opening duplicate Warroom-local staff modals.
+- Browser/dev Warroom launches now carry that same shell handoff into the new-tab tactical map through a one-shot query parameter, so the canonical path does not silently regress outside Electron.
 
 ### Files changed
 - `src/ui/shared/shellHandoff.ts`

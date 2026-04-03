@@ -7,6 +7,7 @@ import {
   openArmyHQTab,
   type ShellNavigationState,
 } from '../src/ui/map/utils/shellNavigation.js';
+import { decodeShellHandoffCommand, encodeShellHandoffCommand } from '../src/ui/shared/shellHandoff.js';
 import { isEmbeddedTacticalMap, shouldShowWarroomReturn } from '../src/ui/map/utils/warroomReturn.js';
 
 function createState(playerFaction: string | null = 'RBiH'): ShellNavigationState & {
@@ -95,6 +96,17 @@ describe('shellNavigation', () => {
     ]);
   });
 
+  it('round-trips shared shell handoff commands for cross-shell navigation', () => {
+    const encoded = encodeShellHandoffCommand({ kind: 'army-hq', tab: 'records', recordsSubTab: 'aar' });
+
+    expect(decodeShellHandoffCommand(encoded)).toEqual({
+      kind: 'army-hq',
+      tab: 'records',
+      recordsSubTab: 'aar',
+    });
+    expect(decodeShellHandoffCommand('not-json')).toBeNull();
+  });
+
   it('shows a Warroom return affordance for standalone desktop and embedded tactical shells', () => {
     expect(isEmbeddedTacticalMap('?embedded=1')).toBe(true);
     expect(shouldShowWarroomReturn('?embedded=1', false)).toBe(true);
@@ -161,6 +173,10 @@ describe('shellNavigation', () => {
       new URL('../src/ui/warroom/ClickableRegionManager.ts', import.meta.url),
       'utf8',
     );
+    const warroomAppSource = readFileSync(
+      new URL('../src/ui/warroom/warroom.ts', import.meta.url),
+      'utf8',
+    );
     const appSource = readFileSync(
       new URL('../src/ui/map/App.tsx', import.meta.url),
       'utf8',
@@ -169,7 +185,9 @@ describe('shellNavigation', () => {
     expect(warroomSource).toContain("this.tacticalShellHandoffHandler({ kind: 'army-hq', tab: 'summary' })");
     expect(warroomSource).toContain("this.tacticalShellHandoffHandler({ kind: 'army-hq', tab: 'briefing' })");
     expect(warroomSource).toContain("this.tacticalShellHandoffHandler({ kind: 'army-hq', tab: 'records', recordsSubTab: 'ops' })");
+    expect(warroomAppSource).toContain('shellHandoff=');
     expect(appSource).toContain("event.data?.type !== 'awwv-shell:handoff'");
     expect(appSource).toContain('applyShellHandoffCommand');
+    expect(appSource).toContain("params.get('shellHandoff')");
   });
 });
