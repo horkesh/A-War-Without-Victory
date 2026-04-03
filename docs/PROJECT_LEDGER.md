@@ -21555,6 +21555,25 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\brigade_territory_reconciliation.test.ts tests\\commander_driven_brigade_assignment.test.ts`
 - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
 
+## 2026-04-03 - Frontline sector-mandatory invariant refinement
+
+- Refined the final sector unresolved rule so only brigades that truthfully *should* have a frontline sector owner are flagged.
+- Added `brigadeRequiresSectorAssignment(...)` in `src/sim/combat/brigade_assignment.ts`.
+- `collectUnresolvedSectorBrigades(...)` in `src/sim/combat/corps_front_sectors.ts` now requires frontline relevance instead of blanket active-brigade status.
+- This resolves the last false-positive residue exposed by `hrhb_travnik_brigade` at `op:novi_travnik:rat_2`: the brigade had real operational adjacency, but no hostile frontier in `war_front_edges_osid` because the active `RBiH`-`HRHB` alliance gate still suppressed that border, so no sector was supposed to exist there.
+- Added regression coverage for:
+  - allied/interior brigade with no hostile frontier is not sector-mandatory
+  - one-hop-behind hostile frontier brigade is still sector-mandatory
+- Verification:
+  - `node .\node_modules\vitest\vitest.mjs run tests\brigade_territory_reconciliation.test.ts tests\commander_driven_brigade_assignment.test.ts`
+  - `node .\node_modules\tsx\dist\cli.mjs --test tests\front_assignment.test.ts tests\formation_fatigue_frontline_assignment.test.ts`
+  - `npx.cmd tsc --noEmit -p tsconfig.json`
+  - `npm.cmd run sim:scenario:run:40w`
+- Fresh run: `runs/apr1992_definitive_40w__d452d2a10f3d69af__w40_n1311`
+  - final hash: `8d6e15e371bf8b7d`
+  - final `unresolved_sector_brigades = 0`
+  - `run_summary.anomalies = {}`
+
 ## 2026-04-03 - Officer quality frontline truth alignment
 
 ### Summary

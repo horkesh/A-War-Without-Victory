@@ -44,6 +44,14 @@ export const DRIFT_RECALL_SECTOR_SKIP_HOPS = 6;
 const FEINT_THREAT_MULTIPLIER = 1.5;
 const TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS = 30;
 
+type FrontEdgeSnapshot = {
+    edge_id?: string;
+    a?: string;
+    b?: string;
+    side_a?: string | null;
+    side_b?: string | null;
+};
+
 function operationObjectives(op: { axes?: Array<{ objectives?: string[] }>; objectives?: string[] }): string[] {
     if (op.axes && op.axes.length > 0) {
         return op.axes.flatMap((axis) => axis.objectives ?? []);
@@ -1013,6 +1021,135 @@ export function enforcePhysicalSectorOwnership(
 }
 
 /**
+ * Final canonical repair: if a brigade still has no sector after the late
+ * writers have run, but some sector truthfully owns its current location,
+ * attach it back to that sector.
+ *
+ * This is not a permissive fallback. Candidates must already own the brigade's
+ * current position by frontline, territory, or one-hop reserve truth.
+ */
+export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
+    sectors: CorpsFrontSector[],
+    formations: Record<FormationId, FormationState>,
+    faction: FactionId,
+    adjacency: Map<Osid, Osid[]>,
+    friendlyOsids: Set<string>,
+): void {
+    const assigned = new Set<FormationId>();
+    for (const sector of sectors) {
+        for (const bid of sector.assigned_brigade_ids) assigned.add(bid);
+        for (const bid of sector.reserve_brigade_ids) assigned.add(bid);
+    }
+
+    const sectorClaims = sectors.map((sector) => {
+        const frontSet = getSectorFrontOsids(sector);
+        const territorySet = new Set(sector.territory_osids);
+        const oneHopBehind = new Set<string>();
+        for (const fo of frontSet) {
+            for (const n of (adjacency.get(fo as Osid) ?? [])) {
+                if (frontSet.has(n)) continue;
+                if (!friendlyOsids.has(n)) continue;
+                oneHopBehind.add(n);
+            }
+        }
+        return { sector, frontSet, territorySet, oneHopBehind };
+    });
+
+    const formIds = Object.keys(formations).sort(strictCompare);
+    for (const fid of formIds) {
+        if (assigned.has(fid)) continue;
+        const formation = formations[fid];
+        if (!formation || formation.faction !== faction || formation.status !== 'active') continue;
+        if (formation.kind !== 'brigade' && formation.kind !== 'og' && formation.kind !== 'operational_group') continue;
+        const corpsId = getFormationCorpsId(formation);
+        const isLoaned = !!formation.elite_loan_state?.on_loan && !!formation.elite_loan_state?.loaned_to_corps;
+        if (isSectorAssignmentExemptCorpsId(corpsId) && !isLoaned) continue;
+        const locationOsid = formation.location_osid;
+        if (!locationOsid) continue;
+
+        const candidates = sectorClaims
+            .map(({ sector, frontSet, territorySet, oneHopBehind }) => {
+                let claim: 'front' | 'territory' | 'reserve' | null = null;
+                if (frontSet.has(locationOsid)) claim = 'front';
+                else if (territorySet.has(locationOsid)) claim = 'territory';
+                else if (oneHopBehind.has(locationOsid)) claim = 'reserve';
+                if (!claim) return null;
+                const claimRank = claim === 'front' ? 0 : claim === 'territory' ? 1 : 2;
+                const sameCorps = sector.corps_id === corpsId ? 0 : 1;
+                const load = sector.assigned_brigade_ids.length + sector.reserve_brigade_ids.length;
+                return { sector, claim, claimRank, sameCorps, load };
+            })
+            .filter((x): x is { sector: CorpsFrontSector; claim: 'front' | 'territory' | 'reserve'; claimRank: number; sameCorps: number; load: number } => x != null)
+            .sort((a, b) =>
+                a.sameCorps - b.sameCorps
+                || a.claimRank - b.claimRank
+                || a.load - b.load
+                || strictCompare(a.sector.sector_id, b.sector.sector_id)
+            );
+
+        if (candidates.length === 0) continue;
+        const best = candidates[0]!;
+        if (best.claim === 'reserve') {
+            best.sector.reserve_brigade_ids.push(fid);
+        } else {
+            best.sector.assigned_brigade_ids.push(fid);
+        }
+        assigned.add(fid);
+        console.warn(`[brigade_assignment] Rehomed ${fid} into truthful sector owner ${best.sector.sector_id} (${best.claim})`);
+    }
+}
+
+function isAtOrOneHopFromAny(
+    startOsid: string,
+    targets: Set<string>,
+    adjacency: Map<Osid, Osid[]>,
+): boolean {
+    if (!startOsid || targets.size === 0) return false;
+    if (targets.has(startOsid)) return true;
+    for (const neighbor of adjacency.get(startOsid as Osid) ?? []) {
+        if (targets.has(neighbor)) return true;
+    }
+    return false;
+}
+
+function frontOsidsForFaction(
+    frontEdges: FrontEdgeSnapshot[],
+    faction: FactionId,
+): Set<string> {
+    const result = new Set<string>();
+    for (const edge of frontEdges) {
+        if (edge.side_a === faction && edge.a) result.add(edge.a);
+        if (edge.side_b === faction && edge.b) result.add(edge.b);
+    }
+    return result;
+}
+
+export function brigadeRequiresSectorAssignment(
+    formation: FormationState,
+    sectors: CorpsFrontSector[],
+    adjacency: Map<Osid, Osid[]>,
+    frontEdges: FrontEdgeSnapshot[],
+): boolean {
+    const loc = formation.location_osid;
+    if (!loc) return false;
+
+    const effectiveCorpsId =
+        (formation.elite_loan_state?.on_loan && formation.elite_loan_state.loaned_to_corps)
+            ? formation.elite_loan_state.loaned_to_corps
+            : getFormationCorpsId(formation);
+    if (!effectiveCorpsId) return false;
+
+    const sameCorpsSectors = sectors.filter((sector) => sector.corps_id === effectiveCorpsId);
+    for (const sector of sameCorpsSectors) {
+        if (sector.territory_osids.includes(loc)) return true;
+        if (isAtOrOneHopFromAny(loc, getSectorFrontOsids(sector), adjacency)) return true;
+    }
+
+    const factionFrontOsids = frontOsidsForFaction(frontEdges, formation.faction);
+    return isAtOrOneHopFromAny(loc, factionFrontOsids, adjacency);
+}
+
+/**
  * Surface any brigades that truly fell through the full sector pipeline.
  *
  * Call this only after same-corps assignment, enclave rescue, and minimum
@@ -1022,6 +1159,8 @@ export function warnUnresolvedSectorAssignments(
     sectors: CorpsFrontSector[],
     formations: Record<FormationId, FormationState>,
     faction: FactionId,
+    adjacency?: Map<Osid, Osid[]>,
+    frontEdges: FrontEdgeSnapshot[] = [],
 ): void {
     const allAssigned = new Set<string>();
     for (const s of sectors) {
@@ -1038,6 +1177,7 @@ export function warnUnresolvedSectorAssignments(
         const fCorpsId = getFormationCorpsId(f);
         const isLoaned = !!f.elite_loan_state?.on_loan && !!f.elite_loan_state?.loaned_to_corps;
         if (isSectorAssignmentExemptCorpsId(fCorpsId) && !isLoaned) continue;
+        if (adjacency && !brigadeRequiresSectorAssignment(f, sectors, adjacency, frontEdges)) continue;
         console.warn(`[brigade_assignment] UNRESOLVED ${fid} (${f.personnel ?? 0} pers): fell through sector pipeline, corps=${fCorpsId}`);
     }
 }

@@ -10,7 +10,9 @@ import {
     classifyBrigadesByTerritory,
     ensureMinimumSectorCoverage,
     assignCrossCorpsEnclaveDefenders,
+    brigadeRequiresSectorAssignment,
     enforcePhysicalSectorOwnership,
+    rehomeUnassignedBrigadesToPhysicalSectorOwners,
     syncSectorAssignmentsToFormations,
     warnUnresolvedSectorAssignments,
 } from '../src/sim/combat/brigade_assignment.js';
@@ -925,6 +927,37 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
         expect(sector.reserve_brigade_ids).not.toContain('brig_false');
     });
 
+    it('rehomes an unassigned brigade back into the truthful same-corps sector owner of its current location', () => {
+        const sector = makeSector(
+            'sector:vrs_drina:1',
+            'vrs_drina',
+            [makeSubSeg('front', ['op:m:front'], ['op:m:enemy'], 3)],
+            ['op:m:front', 'op:m:depth'],
+        );
+        const formations: Record<FormationId, FormationState> = {
+            brig_rehome_final: makeFormation({
+                id: 'brig_rehome_final',
+                corps_id: 'vrs_drina',
+                location_osid: 'op:m:front',
+            }),
+        };
+        const adjacency = new Map<Osid, Osid[]>([
+            ['op:m:front' as Osid, ['op:m:depth' as Osid]],
+            ['op:m:depth' as Osid, ['op:m:front' as Osid]],
+        ]);
+        const friendlyOsids = new Set<string>(['op:m:front', 'op:m:depth']);
+
+        rehomeUnassignedBrigadesToPhysicalSectorOwners(
+            [sector],
+            formations,
+            'RS' as FactionId,
+            adjacency,
+            friendlyOsids,
+        );
+
+        expect(sector.assigned_brigade_ids).toContain('brig_rehome_final');
+    });
+
     it('does emit a final unresolved warning for a loaned reserve brigade that still falls through', () => {
         const loanedReserve = makeFormation({
             id: 'brig_loaned_unresolved_final',
@@ -953,6 +986,63 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
         }
 
         expect(emittedUnresolved).toBe(true);
+    });
+
+    it('does not treat an allied interior brigade as sector-mandatory when no hostile frontline exists there', () => {
+        const sector = makeSector(
+            'sector:hvo_central_bosnia:0',
+            'hvo_central_bosnia',
+            [makeSubSeg('front', ['op:m:bugojno_front'], ['op:m:bugojno_enemy'], 3)],
+            ['op:m:bugojno_front', 'op:m:bugojno_depth'],
+        );
+        const brigade = makeFormation({
+            id: 'hrhb_travnik_brigade',
+            faction: 'HRHB' as FactionId,
+            corps_id: 'hvo_central_bosnia',
+            location_osid: 'op:m:rat_2',
+        });
+        const adjacency = makeAdjacency([
+            ['op:m:rat_2', 'op:m:orasac_2'],
+            ['op:m:rat_2', 'op:m:zdrimci'],
+        ]);
+
+        const requiresSector = brigadeRequiresSectorAssignment(
+            brigade,
+            [sector],
+            adjacency,
+            [],
+        );
+
+        expect(requiresSector).toBe(false);
+    });
+
+    it('still treats a brigade on or one hop behind a hostile frontier as sector-mandatory even before sector assignment exists', () => {
+        const brigade = makeFormation({
+            id: 'brig_front_gap',
+            location_osid: 'op:m:depth_behind_front',
+            corps_id: 'vrs_drina',
+        });
+        const adjacency = makeAdjacency([
+            ['op:m:depth_behind_front', 'op:m:front'],
+            ['op:m:front', 'op:m:rear'],
+        ]);
+
+        const requiresSector = brigadeRequiresSectorAssignment(
+            brigade,
+            [],
+            adjacency,
+            [
+                {
+                    edge_id: 'op:m:front__op:m:enemy',
+                    a: 'op:m:front',
+                    b: 'op:m:enemy',
+                    side_a: 'RS',
+                    side_b: 'RBiH',
+                },
+            ],
+        );
+
+        expect(requiresSector).toBe(true);
     });
 
     it('clears stale assigned_sub_segment_id when a brigade is no longer sector-owned', () => {

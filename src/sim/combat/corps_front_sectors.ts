@@ -63,7 +63,9 @@ import {
     assignCrossCorpsEnclaveDefenders,
     ensureMinimumSectorCoverage,
     reclassifyRearBrigades,
+    brigadeRequiresSectorAssignment,
     enforcePhysicalSectorOwnership,
+    rehomeUnassignedBrigadesToPhysicalSectorOwners,
     deduplicateBrigadesAcrossSectors,
     recomputeSectorPowerAndThreat,
     syncSectorAssignmentsToFormations,
@@ -159,17 +161,21 @@ export function buildCorpsFrontSectors(
 
     // Sync sector assignments back to formation.assignment
     syncSectorAssignmentsToFormations(result, formations);
-    state.military.unresolved_sector_brigades = collectUnresolvedSectorBrigades(result, formations);
+    state.military.unresolved_sector_brigades = collectUnresolvedSectorBrigades(state, result, formations, adjacency);
     emitFinalUnresolvedSectorWarnings(state.military.unresolved_sector_brigades, formations);
 
     return result;
 }
 
 function collectUnresolvedSectorBrigades(
+    state: GameState,
     sectors: Record<string, CorpsFrontSector>,
     formations: Record<FormationId, FormationState>,
+    adjacency: Map<Osid, Osid[]>,
 ): FormationId[] {
     const assigned = new Set<FormationId>();
+    const sectorList = Object.values(sectors);
+    const frontEdges = state.military.war_front_edges_osid ?? [];
     for (const sector of Object.values(sectors)) {
         if (!sector) continue;
         for (const brigadeId of sector.assigned_brigade_ids ?? []) assigned.add(brigadeId);
@@ -185,6 +191,7 @@ function collectUnresolvedSectorBrigades(
             const corpsId = getFormationCorpsId(formation);
             const loaned = !!formation.elite_loan_state?.on_loan;
             if (isSectorAssignmentExemptCorpsId(corpsId) && !loaned) return false;
+            if (!brigadeRequiresSectorAssignment(formation, sectorList, adjacency, frontEdges)) return false;
             return !assigned.has(formationId);
         });
 }
@@ -560,7 +567,14 @@ function buildFactionSectors(
     // Step 8c: Strip any residual paper assignments that do not physically belong to the sector.
     enforcePhysicalSectorOwnership(sectors, formations, adjacency, friendlyOsids);
 
-    // Step 8d: Recompute defensive_power and threat_ratio from final brigade sets.
+    // Step 8d: Reattach any now-unassigned brigades whose current locations are still
+    // truthfully owned by an existing sector.
+    rehomeUnassignedBrigadesToPhysicalSectorOwners(sectors, formations, faction, adjacency, friendlyOsids);
+
+    // Step 8e: Re-normalize reserve/frontline roles after truthful rehome.
+    reclassifyRearBrigades(sectors, formations, adjacency, friendlyOsids);
+
+    // Step 8f: Recompute defensive_power and threat_ratio from final brigade sets.
     recomputeSectorPowerAndThreat(sectors, formations, faction, state);
 
     // Final prune: remove ghost artifact sectors

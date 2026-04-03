@@ -92,3 +92,9 @@
 - **Wrong approach**: Treating alphabetical tiebreak as "safe" because it's deterministic. It is deterministic but highly sensitive — a 0.01 score delta for one brigade reshuffles all downstream assignments.
 - **Right approach**: Before committing any sub-segment scoring change, test cross-sector effects by checking whether other brigades' assignments change. If they do, that change is not isolated.
 - **Do instead**: When modifying sub-segment assignment scoring, diff the brigade-to-subsegment mapping before and after. If assignments change for brigades NOT in the targeted sector, the change has architectural cascade risk and must be analyzed before proceeding.
+
+### [Sectors] "Sector-mandatory" means "frontline-mandatory", not "all active brigades everywhere" (2026-04-03) â€” NEW
+- **Context**: After truthful rehome and physical-ownership stripping, the only remaining unresolved brigade in `n1310` was `hrhb_travnik_brigade` at `op:novi_travnik:rat_2`. Investigation showed the location had real operational neighbors but no hostile frontier in `war_front_edges_osid` because the `RBiH`-`HRHB` alliance gate still suppressed that border. No frontline sector was supposed to exist there.
+- **Wrong approach**: Treating every active non-exempt field brigade as sector-mandatory even when its current location has no hostile frontline. That turns allied/interior brigades into fake sector bugs.
+- **Right approach**: A brigade is sector-mandatory only when it is on, inside, or one hop behind a real hostile frontline that a truthful sector can own.
+- **Do instead**: When collecting `unresolved_sector_brigades`, first ask whether the brigade's current location is actually frontline-relevant. If there is no hostile frontier there after alliance/truce filtering, do not accuse the sector system of failing.

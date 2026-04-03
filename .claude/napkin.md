@@ -34,6 +34,8 @@ Commander Intelligence Overhaul (n1294–1301): must_hold 1.5× garrison (Brcko/
 
 **[KNOWN INVARIANT] Army HQ reserve brigades may have no sector_id while idle.** Treat `vrs_main_staff`, `arbih_general_staff`, and `hvo_main_staff` elite reserve brigades as legitimate sectorless exceptions until loaned. Only active non-exempt field-corps brigades are sector-mandatory.
 
+**Sector-mandatory means frontline-mandatory (2026-04-03):** Do not speak as if every active non-exempt field brigade must always sit in a sector. The stricter truth is narrower: if a brigade is not on, inside, or one hop behind a real hostile frontline, it is not a sector failure merely because it is active. `collectUnresolvedSectorBrigades(...)` must accuse only missing frontline owners, not allied/interior formations.
+
 **Sector truth after late writers (2026-04-03):** Contiguity and enclave rescue are not enough by themselves. `corps_front_sectors` must finish with a final physical-ownership pass that strips brigades not physically on the sector front, in sector territory, or one hop behind as reserve. Emit unresolved warnings only after that pass.
 
 **Frontline truth excludes reserves (2026-04-03):** `buildFrontlineAssignedFormationSet(...)` should use only `assigned_brigade_ids`. `reserve_brigade_ids` remain sector-owned but must not leak into fatigue, officer-quality, or reporting as if they are holding the line.

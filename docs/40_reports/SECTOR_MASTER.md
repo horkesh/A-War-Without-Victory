@@ -1,7 +1,7 @@
 # SECTOR_MASTER — Corps Front Sector System
 
 **Owner:** Gameplay Programmer / Technical Architect
-**Updated:** 2026-04-03 (physical sector ownership and reserve/frontline truth hardened)
+**Updated:** 2026-04-03 (frontline sector-mandatory invariant refined)
 **Diagnostic:** `tools/sector_deep_exam.cjs`, `tools/check_sector_split.cjs`, `tools/check_sector_split2.cjs`, `tools/check_sector_contiguity_all.cjs`
 
 ---
@@ -20,6 +20,24 @@
 **Run evidence:** Fresh run `n1309` kept `cross_corps_sector_assignment = 0` and sharply reduced false final-sector ownership. The remaining unresolved brigades are now largely exposed honestly instead of being paper-washed into sectors.
 
 **Report:** [implemented/20260403_PHYSICAL_SECTOR_OWNERSHIP_AND_FRONTLINE_RESERVE_SPLIT.md](implemented/20260403_PHYSICAL_SECTOR_OWNERSHIP_AND_FRONTLINE_RESERVE_SPLIT.md)
+
+## 2026-04-03: Sector-mandatory means frontline-mandatory, not active-brigade-mandatory
+
+**Change:** Final unresolved-sector collection now only flags brigades that should truthfully have a frontline sector owner.
+
+**Rule:** A brigade is sector-mandatory only when at least one of these is true:
+- it stands inside same-corps sector territory,
+- it stands on or one hop behind a same-corps sector frontline,
+- or it stands on / one hop behind a real hostile faction frontline from `war_front_edges_osid`.
+
+**Why:** `hrhb_travnik_brigade` at `op:novi_travnik:rat_2` exposed the last bad invariant. The brigade had real operational neighbors, but its `HRHB`-`RBiH` contacts were filtered from `war_front_edges_osid` because the alliance gate still treated that local border as allied. No hostile frontline existed there, so no sector was supposed to exist there either. The bug was the collector accusing the engine of being wrong anyway.
+
+**Run evidence:** Fresh run `n1311` finished with:
+- `unresolved_sector_brigades = 0`
+- no run-summary anomalies
+- final hash `8d6e15e371bf8b7d`
+
+**Report:** [implemented/20260403_FRONTLINE_SECTOR_MANDATORY_INVARIANT_REFINEMENT.md](implemented/20260403_FRONTLINE_SECTOR_MANDATORY_INVARIANT_REFINEMENT.md)
 
 ## Current State (n842)
 
