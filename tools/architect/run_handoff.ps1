@@ -65,6 +65,9 @@ $runId = "${timestamp}_${Name}"
 $resultDir = Join-Path $repoRoot "handoffs\results\$runId"
 New-Item -ItemType Directory -Path $resultDir -Force | Out-Null
 
+# Detect template smoke-test runs
+$isSmokTest = ([System.IO.Path]::GetFileNameWithoutExtension($promptPath.Path) -ieq "TEMPLATE")
+
 # Log metadata
 $meta = @{
     run_id = $runId
@@ -76,6 +79,7 @@ $meta = @{
     worktree = $Worktree.IsPresent
     started_at = (Get-Date -Format "o")
     status = "running"
+    is_smoke_test = $isSmokTest
 }
 $meta | ConvertTo-Json -Depth 4 | Set-Content (Join-Path $resultDir "meta.json")
 

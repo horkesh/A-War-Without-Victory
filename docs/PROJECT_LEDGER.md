@@ -22653,3 +22653,8 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - CA deduction stays in electron-main.cjs (unchanged)
 - 9 new tests in command_authority.test.ts (review layer logic suite)
 - tsc clean, build clean, governance OK, no regressions
+
+## [2026-04-03] handoff-template-smoke-test
+- TEMPLATE.md: added HTML comment smoke test instruction — unfilled template returns structured TEMPLATE_SMOKE_TEST result instead of conversational "what do you want me to do?"
+- run_handoff.ps1: detects TEMPLATE filename, sets is_smoke_test=true in meta.json
+- Verified: template run produces clean structured response + correct meta tag

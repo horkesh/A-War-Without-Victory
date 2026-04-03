@@ -1,5 +1,22 @@
 # Handoff: [TITLE]
 
+<!--
+SMOKE TEST INSTRUCTION (read this first):
+If [TITLE] is still "[TITLE]" and the Mission section below is blank or contains only
+placeholder text, this is an unfilled template — most likely a pipeline smoke test.
+Do NOT ask what to do. Instead, respond with exactly this format:
+
+## Handoff pipeline smoke test — OK
+- Model: <model name>
+- Session: <session id>
+- Timestamp: <ISO timestamp>
+- Status: TEMPLATE_SMOKE_TEST
+
+The handoff pipeline is functional. No work was requested.
+
+Then stop. Do not read files, run tools, or ask questions.
+-->
+
 ## Context
 <!-- What the executor needs to know. Link to relevant docs, plans, or prior work. -->
 
