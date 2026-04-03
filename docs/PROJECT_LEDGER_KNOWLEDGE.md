@@ -1427,9 +1427,9 @@ Feints can look “implemented” because they exist in types, intel, and UI lan
 
 In AWWV, the most dangerous legacy combat files are not dead sinks but older creator paths that still birth real operations while skipping newer required fields. Corridor-breach operations were one such case: still live, still side-effecting, and still creating ops without `sector_id` until explicitly repaired. Treat every permitted operation creator as part of the same canonical contract surface.
 
-### Hard-coded test allowlists are authority surfaces too
+### Test discovery rules are authority surfaces too
 
-If the repo uses an explicit test include list, a new regression file is not protected until that list includes it. That means the test runner can report green while silently omitting the very guard a fix depends on. In this repo, update the allowlist in the same slice as any new Vitest regression or the test is theater.
+If test discovery is manual, the config becomes a silent second owner of correctness: a regression file can exist in `tests/` and still never run. As of 2026-04-03, this repo's Vitest harness uses automatic discovery via `tools/test/discover_test_files.mjs`, and the `node:test` chunk runner uses the same helper. Future work should preserve that single discovery authority instead of reintroducing manual include lists or separate scanners.
 
 ### Player-facing sector orders must not secretly write the older front-assignment lane
 

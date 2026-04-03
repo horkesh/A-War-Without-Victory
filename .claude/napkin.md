@@ -363,6 +363,8 @@ After EVERY scenario run, the orchestrator:
    Do instead: Only generate replay with `--video` flag.
 8. **[2026-02-28] Canonical map is React+MapLibre**
    Do instead: `npm run dev:map`. Legacy map_hoi.html / tactical_map.html are archived.
+9. **[2026-04-03] Test discovery must be automatic**
+   Do instead: Treat `tools/test/discover_test_files.mjs` as the single authority for classifying Vitest vs `node:test` files. Do not reintroduce hand-maintained Vitest include lists; new regression files should become runnable by convention.
 
 ## Calibration
 1. **[2026-03-08] NEVER override initial OSIDs — not an option**

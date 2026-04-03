@@ -1,28 +1,10 @@
-import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
-import { join, extname, basename } from 'node:path';
+import { existsSync } from 'node:fs';
+import { join, basename } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { discoverTests } from './discover_test_files.mjs';
 
 const ROOT = process.cwd();
-const TEST_DIR = join(ROOT, 'tests');
 const DEFAULT_CHUNK_SIZE = 20;
-
-function listTsFiles(dir) {
-  const out = [];
-  for (const entry of readdirSync(dir)) {
-    const full = join(dir, entry);
-    const st = statSync(full);
-    if (st.isDirectory()) {
-      out.push(...listTsFiles(full));
-      continue;
-    }
-    if (extname(full) === '.ts') out.push(full);
-  }
-  return out;
-}
-
-function isVitestFile(path) {
-  return /from\s+['"]vitest['"]/.test(readFileSync(path, 'utf8'));
-}
 
 function parseChunkSize(value) {
   if (value == null || value === '') return DEFAULT_CHUNK_SIZE;
@@ -78,9 +60,7 @@ if (cli.help) {
   process.exit(0);
 }
 
-const files = listTsFiles(TEST_DIR)
-  .filter((f) => !isVitestFile(f))
-  .sort((a, b) => a.localeCompare(b));
+const files = discoverTests(ROOT).nodeTestFiles;
 
 if (files.length === 0) {
   console.error('No node:test files found in tests/');

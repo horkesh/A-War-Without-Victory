@@ -22185,3 +22185,27 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - `node .\\node_modules\\tsx\\dist\\cli.mjs --test --test-name-pattern "does not merge separate frontline pockets" tests\\sector_frontline_contiguity_repro.test.ts`
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\sector_rearrangement.test.ts`
 - `npx.cmd tsc --noEmit -p tsconfig.json`
+
+## 2026-04-03 - Vitest discovery automation
+
+### Summary
+- Replaced the hard-coded Vitest include list with automatic discovery so new Vitest regressions cannot be silently skipped until someone edits `vitest.config.ts`.
+- Unified Vitest and `node:test` file classification through one shared helper and added clear `npm run test:engine`, `test:ui`, and `test:all` entrypoints.
+
+### Files changed
+- `vitest.config.ts`
+- `tools/test/discover_test_files.mjs`
+- `tools/test/run_node_tests.mjs`
+- `package.json`
+- `README.md`
+- `docs/40_reports/implemented/20260403_VITEST_DISCOVERY_AUTOMATION.md`
+
+### Why
+- The old allowlist model made the test config itself an authority surface: a regression could be present in `tests/` and still never execute.
+- Dual runners are acceptable here, but dual discovery logic plus manual registration was not.
+
+### Verification
+- `node tools/test/run_node_tests.mjs --help`
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\sector_rearrangement.test.ts tests\\ui_shell_navigation.test.ts`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`

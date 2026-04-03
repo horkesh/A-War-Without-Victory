@@ -22,7 +22,9 @@ Deterministic strategic-political simulation of the 1992-1995 Bosnian War.
 ## Core Commands
 
 ```powershell
-npm run test:vitest
+npm run test:engine
+npm run test:ui
+npm run test:all
 npx tsc --noEmit
 npm run sim:scenario:run:40w
 npm run sim:scenario:run:default
@@ -34,3 +36,4 @@ npm run desktop
 
 - Root-level handoff and report artifacts may exist for historical context, but they are not architecture authority unless the docs above point back to them explicitly.
 - Archived root session artifacts now live under [`docs/70_archive/root_session_artifacts/`](docs/70_archive/root_session_artifacts/).
+- Test discovery is now convention-based rather than manually allowlisted. New Vitest files are picked up automatically, and files that declare `@vitest-environment jsdom` or use the `.browser.test.ts` suffix run under jsdom.
