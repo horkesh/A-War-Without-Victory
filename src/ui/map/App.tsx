@@ -46,6 +46,7 @@ import { WrappedOverlay } from './components/chronicle/WrappedOverlay';
 import { CodexPanel } from './components/CodexPanel';
 import { VerdictScreen } from './components/VerdictScreen';
 import { StrategicDashboard } from './components/StrategicDashboard';
+import { WarroomShellLayer } from './components/warroom/WarroomShellLayer';
 import { derivePanelRailState } from './components/panelRail';
 import { useGameStore, isDevMode } from './store/gameStore';
 import { loadLatestRunSaveAsText, loadEventDefinitions } from './data/DataLoader';
@@ -190,7 +191,7 @@ function App() {
     selectedOrbatCorpsId,
   });
 
-  const [appScreen, setAppScreen] = useState<'game' | 'mainMenu'>('game');
+  const [appScreen, setAppScreen] = useState<'game' | 'mainMenu' | 'warroom'>('game');
   const pauseOpen = useGameStore((s) => s.pauseMenuOpen);
   const setPauseOpen = (v: boolean) => useGameStore.setState({ pauseMenuOpen: v });
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -614,6 +615,16 @@ function App() {
     initialShellHandoffApplied.current = true;
   }, [loadedGameState]);
 
+  // Activate Warroom React shell when ?view=warroom is present in the URL.
+  // warroom.ts canvas rendering remains the active runtime path; this is
+  // the foundation component for progressive React shell ownership.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('view') === 'warroom') {
+      setAppScreen('warroom');
+    }
+  }, []);
+
   const selectPrimaryArmy = () => {
     if (!loadedGameState) return;
     const army = loadedGameState.formations.find(f => f.kind === 'army_hq' && f.faction === playerFaction);
@@ -773,6 +784,20 @@ function App() {
       <MapModeLegend />
       <Minimap />
       <BottomStatusStrip />
+
+      {/* Warroom React shell — foundation layer, activated by ?view=warroom */}
+      {appScreen === 'warroom' && (
+        <div className="fixed inset-0 z-50 bg-black">
+          <WarroomShellLayer
+            onNavigate={(command) => {
+              if (command) {
+                applyShellHandoffCommand(useGameStore.getState(), command);
+              }
+              setAppScreen('game');
+            }}
+          />
+        </div>
+      )}
 
       {/* v0.5.1: Menu system overlays */}
       {appScreen === 'mainMenu' && (

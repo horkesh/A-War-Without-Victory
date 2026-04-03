@@ -21,7 +21,6 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 - Command abstraction is still not fully singular across engine, UI, and reports.
 - Sector semantics still need finishing: sectors must remain frontlines, not slide back into territory buckets.
-- Player-visible truth still needs additional tightening beyond adapter wave 1.
 - Reporting/activity truth still has proxy-driven surfaces that can drift from canonical phase outputs.
 - Warroom / Army HQ / Tactical Map shell ownership is improved but not finished.
 
@@ -40,23 +39,45 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 - `1ae662de` presidential shell language + roadmap reminder
 - `a8c982c9` army HQ presidential shell behavior
 - `992328de` command authority vertical slice
+- `dcdc5156` first full presidential command-review loop
+- `c0e3eea8` first playable between-ops presidential decisions
+- `37698eb5` + `f4cfe051` player-knowledge integrity wave 2
 
 ## Next Priority Lanes
 
-1. ~~Make Command Authority legible inside command review / override flow, not just as toolbar gauge + button tax.~~ **CLOSED 2026-04-03** — `CommandRecord` section in `OperationBriefingModal` is the canonical four-part surface (commander recommendation + presidential decision + CA cost + op state). `commander_assessment_at_launch` snapshot field flows game_state → electron-main → OperationAAR → adapter → both modal and history panel. `ForceLaunchBadge` demoted to legacy fallback. See `docs/40_reports/implemented/20260403_PRESIDENTIAL_COMMAND_REVIEW_LOOP.md`.
-2. ~~Continue player-knowledge integrity beyond adapter wave 1 where live shell still overstates staff certainty.~~ **CLOSED 2026-04-03** `37698eb5` — RawIntelTab demoted (exact force ratio/casualties/defense strength removed from normal play); generateThreatAssessment uses uncertainty-qualified language (STRENGTH_DISPLAY map + describeConfidence bucketing); 6 regression tests added to player_knowledge_integrity.test.ts. Remaining candidate: ThreatBadge ratio.toFixed(2) in CorpsFrontPanel (own-sector force balance — wave 3). See `docs/40_reports/implemented/20260403_PLAYER_KNOWLEDGE_INTEGRITY_WAVE2.md`.
-3. Finish behavior-level shell ownership so Warroom, Army HQ, and Tactical Map feel like one coherent presidential product.
-4. ~~Use event-layer presidential decisions to fill between-operation dead zones.~~ **CLOSED 2026-04-03** — Strategic Posture Review + Visit to the Front shipped for all 3 factions (6 recurring events, war_1993.json). Pressure-driven, `turn_min: 84`, escalating options on 3rd+ fire. Fills 29-turn and 20-turn gaps. EventModal label was already correct. See `docs/40_reports/implemented/20260403_PRESIDENTIAL_BETWEEN_OPS_EVENTS.md`.
+1. Finish behavior-level shell ownership so Warroom, Army HQ, and Tactical Map feel like one coherent presidential product.
+   - React WarroomShellLayer foundation is in place (2026-04-03): scene plate + hotspot overlays + regionToShellHandoff mapping, activated by `?view=warroom`. warroom.ts canvas still active.
+   - NEXT: runtime wiring — pass `?view=warroom` from warroom.ts iframe URL or change Electron entry, so React owns the room navigation. Then progressively deprecate warroom.ts canvas rendering.
+2. Canonicalize live runtime assets to `webp` where intended; remove/archive duplicate PNG twins from live UI paths and keep PNG only for raw/archive/generated/docs contexts unless explicitly justified.
+
+## Closed Lanes
+
+- Make Command Authority legible inside command review / override flow: CLOSED 2026-04-03.
+  - `CommandRecord` in `OperationBriefingModal` is the canonical four-part surface.
+  - `commander_assessment_at_launch` is the permanent decision-time snapshot.
+  - `ForceLaunchBadge` is demoted to legacy fallback.
+  - See `docs/40_reports/implemented/20260403_PRESIDENTIAL_COMMAND_REVIEW_LOOP.md`.
+
+- Continue player-knowledge integrity beyond adapter wave 1: CLOSED 2026-04-03.
+  - RawIntelTab removed from normal play.
+  - Threat assessment now uses uncertainty-qualified language and bucketed confidence.
+  - Remaining candidate later: own-sector force-balance precision in `CorpsFrontPanel`.
+  - See `docs/40_reports/implemented/20260403_PLAYER_KNOWLEDGE_INTEGRITY_WAVE2.md`.
+
+- Use event-layer presidential decisions to fill between-operation dead zones: CLOSED 2026-04-03.
+  - Strategic Posture Review + Visit to the Front shipped for all 3 factions.
+  - EventModal already had correct presidential wording.
+  - See `docs/40_reports/implemented/20260403_PRESIDENTIAL_BETWEEN_OPS_EVENTS.md`.
 
 ## Infrastructure / Process Watchlist
 
-- `tools/architect/` exists locally and is currently untracked. Verify whether Claude is building the repo-local architect→executor handoff system there and land or discard it intentionally.
+- `tools/architect/` is now landed and usable as the canonical repo-local architect-to-executor handoff system. Future cleanup should focus on ergonomics and reliability, not whether the system exists.
 - Do not rely on chat memory for accepted findings or next lanes; update this file when major architect decisions change.
 - Bundle roadmap-memory follow-ups into Claude prompts when they are part of the same lane.
 - Explorer findings should be summarized here after review instead of staying only in chat.
+- Live Warroom/runtime asset rule: current runtime already imports `.webp` for backgrounds, crests, flags, scenario plates, and wall-map frame. Cleanup target is residue and tooling drift, not a runtime panic. Check `src/ui/warroom/assets` duplicate `.png` twins, `src/ui/warroom/vite.config.ts` MIME handling, and PNG-centric Warroom tooling/docs before claiming the asset pipeline is clean.
 
 ## Open Questions
 
-- ~~What is the next smallest truthful command-review slice after Command Authority?~~ Answered: `commander_assessment_at_launch` snapshot + `CommandRecord` UI section. Closed 2026-04-03.
 - Which remaining player-facing surfaces still leak staff certainty or internal jargon?
-- ~~Which between-ops presidential events should ship first as pure content with zero engine risk?~~ Answered 2026-04-03: Strategic Posture Review + Visit to the Front. Patron Pressure Response → v0.8.2. Commander Confidence Crisis → v0.8.1.
+- Which Warroom behaviors should move under React shell ownership first while preserving the authored room and hotspot map?

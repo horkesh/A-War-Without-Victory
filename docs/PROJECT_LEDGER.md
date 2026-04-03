@@ -1,3 +1,16 @@
+## 2026-04-03 - Warroom React Shell Foundation
+
+- `WarroomShellLayer` React component (`src/ui/map/components/warroom/WarroomShellLayer.tsx`) renders faction-appropriate scene plate webp + hotspot region overlays
+- `warroom-asset-urls.ts` static Vite imports for all 15 scene plates (3 factions × 5 years 1991–1995) — bundled into React map build
+- Regions JSON imported statically for all 3 factions from `src/ui/warroom/assets/`
+- Hotspot overlays: percentage-based bounds (2752×1536 authoring space), amber hover highlight, title from tooltip/id
+- `regionToShellHandoff` maps 5 region IDs to ShellHandoffCommand; exported for testing
+- App.tsx: `appScreen` state gains `'warroom'` variant; `?view=warroom` URL param activates component on mount
+- onNavigate: fires applyShellHandoffCommand if command present, returns to game screen
+- 8 unit tests pass; tsc clean; Vite build clean (15 webps in dist/tactical-map/assets/); governance OK
+- TRANSITIONAL: warroom.ts canvas rendering still active runtime path; this is the foundation for progressive React shell ownership
+- Report: `docs/40_reports/implemented/20260403_WARROOM_REACT_SHELL_FOUNDATION.md`
+
 ## 2026-04-03 - Player-Knowledge Integrity Wave 2
 - RawIntelTab demoted: removed "Raw Intel" tab from G2Phase ops clipboard — tab exposed exact engine integers (casualty count, 2-decimal force ratio, raw defense strength) in normal play; file preserved with debug-only doc comment
 - `G2Tab` type narrowed from 3 values to 2 (`assessment` | `map_legend`); RawIntelTab import removed from G2Phase.tsx
