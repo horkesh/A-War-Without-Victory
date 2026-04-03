@@ -146,12 +146,12 @@ export function PresidentialToolbar({
                         CHRONICLE
                     </button>
                     {loadedGameState ? (
-                        <button
-                            onClick={() => useGameStore.getState().setChronicleOpen(true)}
-                            className="font-mono text-[12px] text-text-primary tracking-wider uppercase hover:text-amber-400 transition-colors cursor-pointer bg-transparent border-none p-0"
+                        <span
+                            className="font-mono text-[12px] text-text-primary tracking-wider uppercase"
+                            title="Current date — use CHRONICLE to review timeline"
                         >
                             {formatTurnLabel(loadedGameState.label)}
-                        </button>
+                        </span>
                     ) : (
                         <div className="font-mono text-[10px] text-text-secondary italic uppercase">
                             No state loaded
