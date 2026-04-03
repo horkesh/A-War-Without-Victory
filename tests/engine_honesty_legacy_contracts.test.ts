@@ -327,23 +327,29 @@ describe('engine honesty legacy contracts', () => {
     expect(desktopSim).not.toContain('export function renameTheatre');
   });
 
-  it('does not keep a dead local-front constructor pretending to be live runtime authority', () => {
+  it('does not keep a dead local-front constructor or schema field pretending to be live runtime authority', () => {
     const localFrontDefense = readFileSync(join(process.cwd(), 'src', 'sim', 'combat', 'local_front_defense.ts'), 'utf8');
     const frontAssignment = readFileSync(join(process.cwd(), 'src', 'sim', 'combat', 'front_assignment.ts'), 'utf8');
     const warPhases = readFileSync(join(process.cwd(), 'src', 'sim', 'turn_phases', 'war_phases.ts'), 'utf8');
     const gameState = readFileSync(join(process.cwd(), 'src', 'state', 'game_state.ts'), 'utf8');
+    const turnPipeline = readFileSync(join(process.cwd(), 'src', 'sim', 'turn_pipeline.ts'), 'utf8');
 
     expect(localFrontDefense).not.toContain('export function buildLocalFronts');
     expect(frontAssignment).not.toContain('ensureBrigadeFrontAssignments');
     expect(warPhases).not.toContain('ensure-brigade-front-assignment');
-    expect(gameState).toContain('Legacy compatibility cache only. No longer rebuilt in the live war pipeline.');
+    expect(warPhases).not.toContain('compute-local-fronts');
+    expect(turnPipeline).not.toContain('local_fronts = undefined');
+    expect(gameState).not.toContain('export interface LocalFront');
+    expect(gameState).not.toContain('local_fronts?:');
   });
 
   it('does not keep dead corps-front mapping helpers wired to compatibility segment snapshots', () => {
     const directives = readFileSync(join(process.cwd(), 'src', 'sim', 'combat', 'bot_corps_directives.ts'), 'utf8');
+    const corpsAi = readFileSync(join(process.cwd(), 'src', 'sim', 'combat', 'bot_corps_ai.ts'), 'utf8');
 
     expect(directives).not.toContain('deriveCorpsFrontMapping');
     expect(directives).not.toContain('state.military.assignable_front_segments ?? []');
+    expect(corpsAi).not.toContain('deriveCorpsFrontMapping');
   });
 
   it('does not keep theatre tagging in the live turn pipelines', () => {

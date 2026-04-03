@@ -86,7 +86,6 @@ export {
 // From bot_corps_directives
 export {
     AGGRESSION_FLOOR,
-    deriveCorpsFrontMapping,
     collectSectorFriendlyOsids,
     collectSectorEnemyOsids,
     areDirectiveSectorsAdjacent,

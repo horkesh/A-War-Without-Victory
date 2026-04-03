@@ -269,13 +269,6 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
-        name: 'compute-local-fronts',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            context.state.military.local_fronts = undefined;
-        }
-    },
-    {
         name: 'normalize-front-posture',
         run: (context) => {
             normalizeFrontPosture(context.state);

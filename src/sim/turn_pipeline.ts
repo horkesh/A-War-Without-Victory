@@ -157,9 +157,6 @@ async function refreshFrontEdgeSnapshot(state: GameState, input: TurnInput): Pro
             ? state.military.war_front_edges_osid
             : derivedFrontEdges;
     state.military.assignable_front_segments = deriveAssignableFrontSegments(frontEdgesForSegments);
-    if (state.meta.phase === 'war') {
-        state.military.local_fronts = undefined;
-    }
 }
 
 function createRng(seed: string | number): Rng {

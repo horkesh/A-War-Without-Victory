@@ -21690,6 +21690,30 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_player_visibility.test.ts`
 - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
 
+## 2026-04-03 - Local fronts schema residue retirement
+
+### Summary
+- Finished the `local_fronts` cleanup by removing the dead schema/runtime residue, not just the rebuild path.
+- Removed the stale `deriveCorpsFrontMapping(...)` re-export from the live corps AI hub so the compatibility lane no longer looks canonical.
+- Synced active canon docs so they no longer claim `local_fronts` is a live derived cache.
+
+### Files changed
+- `src/state/game_state.ts`
+- `src/sim/turn_pipeline.ts`
+- `src/sim/turn_phases/war_phases.ts`
+- `src/sim/combat/bot_corps_ai.ts`
+- `tests/engine_honesty_legacy_contracts.test.ts`
+- `docs/10_canon/context.md`
+- `docs/10_canon/Systems_Manual_v0_7_0.md`
+- `docs/40_reports/implemented/20260403_LOCAL_FRONTS_SCHEMA_RESIDUE_RETIREMENT.md`
+
+### Why
+- Half-dead schema fields are future bugs because they teach later work that the old lane still matters.
+- In this repo, leaving `local_fronts` in `GameState` after the runtime stopped using it would have been a stronger false authority signal than a stale comment.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\engine_honesty_legacy_contracts.test.ts`
+
 ## 2026-04-03 - Warroom to Army HQ shell handoff
 
 ### Summary

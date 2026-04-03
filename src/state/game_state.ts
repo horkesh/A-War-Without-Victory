@@ -1567,24 +1567,6 @@ export interface GameState {
 }
 
 /**
- * Legacy local-front compatibility shape.
- *
- * Historical saves may still carry this cache, but the live engine no longer
- * rebuilds or relies on a `local_fronts` runtime layer. Corps-front sectors are
- * the active frontline authority.
- */
-export interface LocalFront {
-    id: string;                       // e.g. "front_rs_drina_north"
-    faction: FactionId;
-    name: string;
-    created_turn: number;
-    assigned_brigade_ids: string[];   // brigades covering this front
-    edge_ids: string[];               // front edges composing this sector
-    coverage_length: number;          // number of edges (proxy for front width)
-    defensive_power: number;          // computed: f(brigades, terrain, coverage)
-}
-
-/**
  * Corps front sector: a corps' managed slice of hostile boundary.
  * Derived each turn (Engine Invariants §13: no serialization of derived state).
  * Deterministic: sorted iteration via strictCompare.
@@ -1741,7 +1723,6 @@ recruitment_state?: RecruitmentResourceState;
 /** Cumulative casualty ledger (killed, wounded, missing/captured) per faction and formation. */
 casualty_ledger?: CasualtyLedger;
 /** Legacy compatibility cache only. No longer rebuilt in the live war pipeline. */
-local_fronts?: Record<string, LocalFront>;
 /** Corps front sectors: per-corps slices of hostile boundary. Derived each turn (Engine Invariants §13). */
 corps_front_sectors?: Record<string, CorpsFrontSector>;
 /** Active non-exempt field brigades that could not be placed truthfully into any sector this turn. Derived each turn. */
