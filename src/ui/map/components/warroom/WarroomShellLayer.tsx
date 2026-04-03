@@ -64,6 +64,13 @@ export function regionToShellHandoff(regionId: string): ShellHandoffCommand | un
     case 'wall_calendar':
       // Most-used Warroom hotspot: clicking the wall calendar advances the turn.
       return { kind: 'advance-turn' };
+    case 'wall_cork_board':
+      return { kind: 'strategic-overview' };
+    case 'desk_radio':
+      return { kind: 'event-log' };
+    case 'diplomatic_telephone':
+      // Diplomacy routes to Army HQ summary until a dedicated diplomacy surface exists.
+      return { kind: 'army-hq', tab: 'summary' };
     default:
       return undefined;
   }

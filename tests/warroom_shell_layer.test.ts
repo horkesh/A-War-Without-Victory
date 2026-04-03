@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { regionToShellHandoff } from '../src/ui/map/components/warroom/WarroomShellLayer';
 import { isShellHandoffCommand, type ShellHandoffCommand } from '../src/ui/shared/shellHandoff';
+import { warroomCommandStaysInRoom } from '../src/ui/map/utils/shellNavigation';
 
 describe('regionToShellHandoff', () => {
   it('wall_flag_area → army-hq summary', () => {
@@ -31,8 +32,16 @@ describe('regionToShellHandoff', () => {
     expect(regionToShellHandoff('unknown_region')).toBeUndefined();
   });
 
-  it('wall_cork_board (strategic map, no React equivalent) → undefined', () => {
-    expect(regionToShellHandoff('wall_cork_board')).toBeUndefined();
+  it('wall_cork_board → strategic-overview', () => {
+    expect(regionToShellHandoff('wall_cork_board')).toEqual({ kind: 'strategic-overview' });
+  });
+
+  it('desk_radio → event-log', () => {
+    expect(regionToShellHandoff('desk_radio')).toEqual({ kind: 'event-log' });
+  });
+
+  it('diplomatic_telephone → army-hq summary', () => {
+    expect(regionToShellHandoff('diplomatic_telephone')).toEqual({ kind: 'army-hq', tab: 'summary' });
   });
 
   it('wall_calendar_area → advance-turn', () => {
@@ -72,27 +81,46 @@ describe('warroom React shell entry path — message type contracts', () => {
 });
 
 // ── onNavigate callback contract ───────────────────────────────────────────────
-// WarroomShellLayer.onNavigate must: apply the command (if any) AND signal
-// transition to game view. App.tsx wires this as:
-//   onNavigate={(command) => { if (command) applyShellHandoffCommand(...); setAppScreen('game'); }}
-// The following tests verify the contract at the callback boundary.
+// WarroomShellLayer.onNavigate must: apply the command (if any), then transition
+// to game view ONLY for commands that do not stay in room.
+// App.tsx wires this as (Wave 3):
+//   onNavigate={(command) => {
+//     if (command) applyShellHandoffCommand({ ...store, setEventLogOpen }, command);
+//     if (!warroomCommandStaysInRoom(command)) setAppScreen('game');
+//   }}
 
 describe('WarroomShellLayer onNavigate contract', () => {
-  it('when called with a mapped command, applies the command and transitions to game', () => {
+  it('navigating command (army-hq) applies command and transitions to game', () => {
     const applySpy = vi.fn().mockReturnValue(true);
     const setAppScreen = vi.fn();
 
-    // Simulate exactly what App.tsx wires as onNavigate
+    // Simulate the Wave 3 App.tsx onNavigate
     const onNavigate = (command?: ReturnType<typeof regionToShellHandoff>) => {
       if (command) applySpy(command);
-      setAppScreen('game');
+      if (!warroomCommandStaysInRoom(command)) setAppScreen('game');
     };
 
-    const command = regionToShellHandoff('wall_flag_area');
+    const command = regionToShellHandoff('wall_flag_area'); // → army-hq, navigates away
     onNavigate(command);
 
     expect(applySpy).toHaveBeenCalledWith({ kind: 'army-hq', tab: 'summary' });
     expect(setAppScreen).toHaveBeenCalledWith('game');
+  });
+
+  it('in-room command (strategic-overview) applies command but does NOT transition to game', () => {
+    const applySpy = vi.fn().mockReturnValue(true);
+    const setAppScreen = vi.fn();
+
+    const onNavigate = (command?: ReturnType<typeof regionToShellHandoff>) => {
+      if (command) applySpy(command);
+      if (!warroomCommandStaysInRoom(command)) setAppScreen('game');
+    };
+
+    const command = regionToShellHandoff('wall_cork_board'); // → strategic-overview, stays in room
+    onNavigate(command);
+
+    expect(applySpy).toHaveBeenCalledWith({ kind: 'strategic-overview' });
+    expect(setAppScreen).not.toHaveBeenCalled();
   });
 
   it('when called with undefined (unmapped region), transitions to game without applying a command', () => {
@@ -101,7 +129,7 @@ describe('WarroomShellLayer onNavigate contract', () => {
 
     const onNavigate = (command?: ReturnType<typeof regionToShellHandoff>) => {
       if (command) applySpy(command);
-      setAppScreen('game');
+      if (!warroomCommandStaysInRoom(command)) setAppScreen('game');
     };
 
     onNavigate(undefined);
@@ -119,12 +147,53 @@ describe('WarroomShellLayer onNavigate contract', () => {
       'intelligence_journal',
       'wall_calendar_area',
       'wall_calendar',
+      'wall_cork_board',
+      'desk_radio',
+      'diplomatic_telephone',
     ];
     for (const regionId of mappedRegions) {
       const command = regionToShellHandoff(regionId);
       expect(command).toBeDefined();
       expect(isShellHandoffCommand(command)).toBe(true);
     }
+  });
+});
+
+// ── Wave 3: new ShellHandoffCommand kinds ────────────────────────────────────
+
+describe('isShellHandoffCommand — Wave 3 kinds', () => {
+  it('{ kind: strategic-overview } is a valid ShellHandoffCommand', () => {
+    const cmd: ShellHandoffCommand = { kind: 'strategic-overview' };
+    expect(isShellHandoffCommand(cmd)).toBe(true);
+  });
+
+  it('{ kind: event-log } is a valid ShellHandoffCommand', () => {
+    const cmd: ShellHandoffCommand = { kind: 'event-log' };
+    expect(isShellHandoffCommand(cmd)).toBe(true);
+  });
+});
+
+// ── warroomCommandStaysInRoom ─────────────────────────────────────────────────
+
+describe('warroomCommandStaysInRoom', () => {
+  it('strategic-overview stays in room', () => {
+    expect(warroomCommandStaysInRoom({ kind: 'strategic-overview' })).toBe(true);
+  });
+
+  it('event-log stays in room', () => {
+    expect(warroomCommandStaysInRoom({ kind: 'event-log' })).toBe(true);
+  });
+
+  it('advance-turn stays in room', () => {
+    expect(warroomCommandStaysInRoom({ kind: 'advance-turn' })).toBe(true);
+  });
+
+  it('army-hq navigates away (does not stay in room)', () => {
+    expect(warroomCommandStaysInRoom({ kind: 'army-hq', tab: 'summary' })).toBe(false);
+  });
+
+  it('undefined returns false', () => {
+    expect(warroomCommandStaysInRoom(undefined)).toBe(false);
   });
 });
 

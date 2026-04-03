@@ -48,6 +48,7 @@ import { VerdictScreen } from './components/VerdictScreen';
 import { StrategicDashboard } from './components/StrategicDashboard';
 import { WarroomShellLayer } from './components/warroom/WarroomShellLayer';
 import { AdvanceTurnModal } from './components/warroom/AdvanceTurnModal';
+import { WarroomStatusBar } from './components/warroom/WarroomStatusBar';
 import { derivePanelRailState } from './components/panelRail';
 import { useGameStore, isDevMode } from './store/gameStore';
 import { loadLatestRunSaveAsText, loadEventDefinitions } from './data/DataLoader';
@@ -59,7 +60,7 @@ import { useDesktopSession } from './hooks/useDesktopSession';
 import { useIPC } from './desktop/useIPC';
 import type { RecruitmentCatalogBrigade, StartNewCampaignPayload } from './desktop/types';
 import type { SummaryFocusSection } from './data/types';
-import { applyShellHandoffCommand, openArmyHQRecordsSubTab } from './utils/shellNavigation';
+import { applyShellHandoffCommand, openArmyHQRecordsSubTab, warroomCommandStaysInRoom } from './utils/shellNavigation';
 import { decodeShellHandoffCommand, isShellHandoffCommand } from '../shared/shellHandoff';
 import {
   applyRecruitmentAndSync,
@@ -803,11 +804,17 @@ function App() {
           <WarroomShellLayer
             onNavigate={(command) => {
               if (command) {
-                applyShellHandoffCommand(useGameStore.getState(), command);
+                applyShellHandoffCommand(
+                  { ...useGameStore.getState(), setEventLogOpen },
+                  command,
+                );
               }
-              setAppScreen('game');
+              if (!warroomCommandStaysInRoom(command)) {
+                setAppScreen('game');
+              }
             }}
           />
+          <WarroomStatusBar />
         </div>
       )}
 

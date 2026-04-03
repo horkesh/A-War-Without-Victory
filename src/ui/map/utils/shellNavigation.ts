@@ -21,6 +21,10 @@ export interface ShellNavigationState {
   setChronicleOpen: (open: boolean) => void;
   /** Optional: set by gameStore when advance-turn handoff is received from the Warroom shell. */
   setAdvanceTurnPending?: (v: boolean) => void;
+  /** Optional: opens StrategicDashboard overlay without leaving warroom. */
+  setStrategicDashboardOpen?: (open: boolean) => void;
+  /** Optional: opens EventLogPanel without leaving warroom. */
+  setEventLogOpen?: (open: boolean) => void;
 }
 
 function getPlayerFaction(state: ShellNavigationState): string | null {
@@ -70,6 +74,14 @@ export function applyShellHandoffCommand(state: ShellNavigationState, command: S
     state.setAdvanceTurnPending?.(true);
     return true;
   }
+  if (command.kind === 'strategic-overview') {
+    state.setStrategicDashboardOpen?.(true);
+    return true;
+  }
+  if (command.kind === 'event-log') {
+    state.setEventLogOpen?.(true);
+    return true;
+  }
   if (command.tab === 'records' && command.recordsSubTab) {
     return openArmyHQRecordsSubTab(state, command.recordsSubTab);
   }
@@ -77,4 +89,16 @@ export function applyShellHandoffCommand(state: ShellNavigationState, command: S
     return openArmyHQBriefingForCorps(state, command.corpsId ?? null);
   }
   return openArmyHQTab(state, command.tab);
+}
+
+/**
+ * Returns true for ShellHandoffCommands that are handled entirely within the warroom
+ * (no screen transition required). Returns false for commands that navigate away to
+ * the game view (army-hq, codex, chronicle).
+ *
+ * Used by App.tsx onNavigate to gate the `setAppScreen('game')` call.
+ */
+export function warroomCommandStaysInRoom(command: ShellHandoffCommand | undefined): boolean {
+  if (!command) return false;
+  return command.kind === 'advance-turn' || command.kind === 'strategic-overview' || command.kind === 'event-log';
 }
