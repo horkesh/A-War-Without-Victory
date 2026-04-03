@@ -1671,7 +1671,7 @@ militia_garrison?: Record<SettlementId, number>;
 brigade_movement_state?: Record<FormationId, BrigadeMovementState>;
 /** War phase (Brigade AoR Redesign Phase C): Pending movement orders (consumed each turn). destination_sids = 1–4 contiguous faction-controlled settlements. */
 brigade_movement_orders?: Record<FormationId, { destination_sids: SettlementId[] }>;
-/** War phase: Pending reposition orders (consumed each turn). Set brigade AoR to exactly these 1–4 contiguous faction-controlled settlements; no physical move. */
+/** Retired compatibility residue from older saves/tools. Live runtime no longer consumes brigade reposition orders. */
 brigade_reposition_orders?: Record<FormationId, { settlement_ids: SettlementId[] }>;
 /** War phase tactical deploy/undeploy staging (consumed each turn). */
 brigade_deploy_orders?: Record<FormationId, BrigadeDeployAction>;

@@ -100,7 +100,6 @@ import { applySettlementDisplacementDeltas } from '../displacement_pipeline/disp
 import { buildDisplacementCapacityReport } from '../displacement_pipeline/displacement_capacity_hooks.js';
 import { aggregateSettlementDisplacementToMunicipalities } from '../displacement_pipeline/displacement_municipality_aggregation.js';
 import { evaluateDisplacementTriggers } from '../displacement_pipeline/displacement_triggers.js';
-import { applyBrigadeRepositionOrders } from '../combat/apply_brigade_reposition.js';
 import { generateAllBotOrdersOsid, computeOsidEthnicComposition, type OsidBotContext } from '../combat/bot_brigade_ai_osid.js';
 import { generateAllCorpsOrders, extractCorpsAiReport, type CorpsAiReportEntry } from '../combat/bot_corps_ai.js';
 import { checkAndFireGrazAccords, recordTruceBroken } from '../local_truces.js';
@@ -1093,18 +1092,6 @@ export const warPhases: NamedPhase[] = [
                 context.report.bot_order_diagnostics = createBotOrderDiagnosticsSnapshot(context.state, botOrderDiagnostics);
             }
             // When operational data unavailable: no bot brigade orders (AoR path removed).
-        }
-    },
-    {
-        name: 'apply-brigade-reposition',
-        run: async (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            if (!context.state.military.brigade_reposition_orders || Object.keys(context.state.military.brigade_reposition_orders).length === 0) return;
-            const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
-            const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
-                ? context.input.settlementEdges
-                : graph.edges;
-            applyBrigadeRepositionOrders(context.state, edges);
         }
     },
     {

@@ -21770,6 +21770,30 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 ### Notes
 - `npx.cmd tsc --noEmit -p tsconfig.json` still reports unrelated pre-existing type drift outside this slice; this checkpoint did not attempt a global TS cleanup.
 
+## 2026-04-03 - Brigade reposition runtime retirement
+
+### Summary
+- Removed the dead `apply-brigade-reposition` step from the live war pipeline.
+- Deleted `src/sim/combat/apply_brigade_reposition.ts`.
+- Kept `brigade_reposition_orders` only as explicit retired compatibility residue in the schema.
+- Hardened the legacy-contract suite so this runtime sink cannot be quietly reintroduced.
+
+### Files changed
+- `src/sim/turn_phases/war_phases.ts`
+- `src/state/game_state.ts`
+- `tests/engine_honesty_legacy_contracts.test.ts`
+- `docs/40_reports/implemented/20260403_BRIGADE_REPOSITION_RUNTIME_RETIREMENT.md`
+- deleted:
+  - `src/sim/combat/apply_brigade_reposition.ts`
+
+### Why
+- The shell already rejected new brigade reposition staging and the player-facing adapter already hid the old field.
+- Leaving a no-op consumer in the canonical war pipeline was pure false authority.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\engine_honesty_legacy_contracts.test.ts tests\\front_assignment.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
 ## 2026-04-03 - Tactical top-shell density and label cleanup
 
 ### Summary
