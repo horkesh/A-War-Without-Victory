@@ -178,13 +178,17 @@ if (Test-Path $notifySlack) {
     $review = $null
     try { $review = Get-Content $reviewFile -Raw | ConvertFrom-Json } catch { }
     if ($review) {
+        $slackMsg    = if ($review.summary)    { $review.summary }    else { '' }
+        $slackStatus = if ($review.status)     { $review.status }     else { 'needs_review' }
+        $slackSid    = if ($review.session_id) { $review.session_id } else { '' }
+        $slackCommit = if ($review.commit_hash){ $review.commit_hash } else { '' }
         & powershell -ExecutionPolicy Bypass -File $notifySlack `
             -Title "AWWV Handoff" `
-            -Message ($review.summary ?? '') `
-            -Status ($review.status ?? 'needs_review') `
+            -Message $slackMsg `
+            -Status $slackStatus `
             -RunId $runId `
-            -SessionId ($review.session_id ?? '') `
-            -CommitHash ($review.commit_hash ?? '') `
+            -SessionId $slackSid `
+            -CommitHash $slackCommit `
             -ResultPath $resultDir
     }
 }

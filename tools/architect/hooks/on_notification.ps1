@@ -51,8 +51,8 @@ if ($needsInput) {
                 -Title "AWWV Handoff" `
                 -Message $message `
                 -Status "needs_input" `
-                -RunId ($runId ?? '') `
-                -SessionId ($sessionId ?? '') `
+                -RunId (if ($runId) { $runId } else { '' }) `
+                -SessionId (if ($sessionId) { $sessionId } else { '' }) `
                 -ResultPath $resultDir
         } catch { }
     }
