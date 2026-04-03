@@ -1,0 +1,4 @@
+# Handoff results are ephemeral run artifacts — do not commit.
+# The prompts in handoffs/*.md and the tooling in tools/architect/ are committed.
+*
+!.gitignore

@@ -1,3 +1,27 @@
+## 2026-04-03 - Architect handoff system — file-backed CLI execution pipeline
+
+### Summary
+- Built `tools/architect/run_handoff.ps1` — executes handoff prompts via `claude -p --output-format json`, captures results/session IDs
+- Built `tools/architect/resume_handoff.ps1` — resumes sessions by result dir or session ID
+- Built `tools/architect/new_handoff.ps1` — creates handoffs from standard template
+- Created `handoffs/TEMPLATE.md` — standard handoff prompt structure
+- Verified with dry-run: sonnet execution, 172s, session ID captured, response extracted
+
+### Files changed
+- `tools/architect/run_handoff.ps1` (new)
+- `tools/architect/resume_handoff.ps1` (new)
+- `tools/architect/new_handoff.ps1` (new)
+- `tools/architect/README.md` (new)
+- `handoffs/TEMPLATE.md` (new)
+- `handoffs/example-smoke-test.md` (new)
+- `handoffs/results/.gitignore` (new)
+- `docs/40_reports/implemented/20260403_ARCHITECT_HANDOFF_SYSTEM.md` (new)
+
+### Why
+- Architect produces prompt files; executor runs them via CLI without manual chat relay. File-backed audit trail (prompt + result + session ID) enables resume and review.
+
+---
+
 ## 2026-04-03 - Command Authority vertical slice — first playable delegation/override mechanic
 
 ### Summary
