@@ -24,6 +24,25 @@ import { formatTurnLabel } from '../utils/formatters';
 import { shouldShowWarroomReturn, isEmbeddedTacticalMap } from '../utils/warroomReturn';
 import { OfficerEventBadge } from './OfficerEventBadge';
 
+/** Command Authority gauge — shows the president's override resource. Level 3 actions deplete this. */
+function CommandAuthorityGauge({ current, max }: { current: number; max: number }) {
+    const pct = max > 0 ? Math.round((current / max) * 100) : 0;
+    const color = pct >= 60 ? 'text-emerald-400' : pct >= 30 ? 'text-amber-400' : 'text-red-400';
+    const barColor = pct >= 60 ? 'bg-emerald-400/70' : pct >= 30 ? 'bg-amber-400/70' : 'bg-red-400/70';
+    return (
+        <div
+            className="flex items-center gap-1.5"
+            title={`Command Authority: ${current}/${max}\nSpent on Level 3 overrides (force-launch, manual orders).\nRecovers +2 per turn.`}
+        >
+            <span className="text-[8px] font-mono font-bold uppercase tracking-[0.12em] text-text-secondary">AUTH</span>
+            <div className="w-14 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                <div className={`h-full ${barColor} transition-all duration-500`} style={{ width: `${pct}%` }} />
+            </div>
+            <span className={`text-[9px] font-mono font-bold ${color}`}>{current}</span>
+        </div>
+    );
+}
+
 interface PresidentialToolbarProps {
     /** Pending event decisions count (from loadedGameState). */
     pendingDecisions: number;
@@ -237,8 +256,14 @@ export function PresidentialToolbar({
                     )}
                 </div>
 
-                {/* RIGHT: Advance Turn */}
+                {/* RIGHT: Command Authority + Advance Turn */}
                 <div className="flex items-center gap-3 min-w-[180px] justify-end">
+                    {loadedGameState?.commandAuthority && (
+                        <CommandAuthorityGauge
+                            current={loadedGameState.commandAuthority.current}
+                            max={loadedGameState.commandAuthority.max}
+                        />
+                    )}
                     <button
                         onClick={handleAdvanceTurn}
                         disabled={advancing || !loadedGameState || !ipc.isAvailable}

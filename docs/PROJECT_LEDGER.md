@@ -1,3 +1,37 @@
+## 2026-04-03 - Command Authority vertical slice — first playable delegation/override mechanic
+
+### Summary
+- Added `CommandAuthority` type and field to `MilitaryState` (current/max/spent_this_turn/lifetime_spent)
+- Force-launching an operation now costs 15 Command Authority (Level 3 Direct Intervention)
+- Authority gauge visible on PresidentialToolbar (color-coded: green/amber/red)
+- Force-launch button in Army HQ shows cost and disables when insufficient
+- Recovery: +2/turn via new `recover-command-authority` war pipeline step
+- EventModal wording: "Commander's Decision Required" → "Presidential Decision Required"
+
+### Files changed
+- `src/state/game_state.ts` (CommandAuthority type + field)
+- `src/scenario/scenario_runner.ts` (initialization)
+- `src/sim/turn_phases/war_phases.ts` (recover-command-authority step)
+- `src/desktop/electron-main.cjs` (force-launch cost deduction)
+- `src/ui/map/components/PresidentialToolbar.tsx` (CommandAuthorityGauge)
+- `src/ui/map/components/army_hq/OperationsSection.tsx` (cost preview + guard)
+- `src/ui/map/data/GameStateAdapter.ts` (adapter wiring)
+- `src/ui/map/data/types.ts` (LoadedGameState field)
+- `src/ui/map/components/EventModal.tsx` (wording fix)
+- `tests/command_authority.test.ts` (10 tests, new)
+- `docs/40_reports/implemented/20260403_COMMAND_AUTHORITY_VERTICAL_SLICE.md` (new)
+
+### Why
+- The presidential command doctrine defined three command levels but nothing in the codebase distinguished or constrained Level 3 actions. Force-launch was free. This is the first real cost on a presidential override.
+
+### Verification
+- `npx tsc --noEmit` — clean
+- `vitest run tests/command_authority.test.ts` — 10/10 pass
+- `vite build` — success
+- `check_claude_governance.ps1` — OK
+
+---
+
 ## 2026-04-03 - Presidential play package (overnight bundle: shell alignment + delegation foundations + decision events)
 
 ### Summary

@@ -209,7 +209,7 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge, on
                                 className="text-[10px] uppercase tracking-[0.15em] mb-2 font-bold"
                                 style={{ color: '#8a7e68' }}
                             >
-                                Commander's Decision Required
+                                Presidential Decision Required
                             </div>
                             {event.responseOptions.map(opt => (
                                 <button

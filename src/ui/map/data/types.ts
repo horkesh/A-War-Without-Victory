@@ -540,6 +540,8 @@ export interface LoadedGameState {
     departedByMun?: Record<string, Record<string, number>>;
     /** Per-OSID displacement totals from event log (exact out/lost/in so numbers add up). */
     displacementByOsid?: Record<string, { out: number; lost: number; in: number }>;
+    /** Presidential command authority (Level 3 override resource). */
+    commandAuthority?: { current: number; max: number; spentThisTurn: number; lifetimeSpent: number };
     fogOfWar?: FogOfWarView;
     /** Sector intelligence records for the player faction — per friendly sector, what we know about enemy sectors. */
     sectorIntel?: SectorIntelRecordView[];

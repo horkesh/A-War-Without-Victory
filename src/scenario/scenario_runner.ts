@@ -245,6 +245,8 @@ export async function createInitialGameState(
     if (controlPath || initOptions?.init_control_mode) {
         seedOrganizationalPenetrationFromControl(state, graph.settlements, options?.organizationalPenetrationSeed);
     }
+    // Initialize presidential command authority (Level 3 override resource)
+    state.military.command_authority = { current: 100, max: 100, spent_this_turn: 0, lifetime_spent: 0 };
     return state;
 }
 

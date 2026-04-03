@@ -460,8 +460,16 @@ export function OperationsSection({ corpsId, operations, gameState }: Operations
     const ipc = useIPC();
     const setLoadError = useGameStore((s) => s.setLoadError);
 
+    const FORCE_LAUNCH_COST = 15;
+    const authCurrent = gameState.commandAuthority?.current ?? 100;
+    const canForceLaunch = authCurrent >= FORCE_LAUNCH_COST;
+
     const handleForceLaunch = async (opName: string) => {
         if (!ipc.isAvailable) return;
+        if (!canForceLaunch) {
+            setLoadError(`Insufficient command authority (${authCurrent}/${FORCE_LAUNCH_COST} needed)`);
+            return;
+        }
         const result = await ipc.stageOperationForceLaunch({ corpsId, operationName: opName });
         if (!result.ok) setLoadError(result.error ?? 'Failed to force-launch operation.');
     };
@@ -541,8 +549,12 @@ export function OperationsSection({ corpsId, operations, gameState }: Operations
                                             {(op.preparation_sub_phase === 'assessment' || op.preparation_sub_phase === 'ready') && (
                                                 <button type="button"
                                                     onClick={(e) => { e.stopPropagation(); void handleForceLaunch(op.name); }}
-                                                    className="text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 border border-panel-border text-text-primary hover:bg-panel-bg transition-all font-mono">
-                                                    [ FORCE LAUNCH ]
+                                                    disabled={!canForceLaunch}
+                                                    className={`text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 border font-mono transition-all ${canForceLaunch ? 'border-panel-border text-text-primary hover:bg-panel-bg' : 'border-panel-border/30 text-text-secondary/40 cursor-not-allowed'}`}
+                                                    title={canForceLaunch
+                                                        ? `Level 3 Direct Intervention — costs ${FORCE_LAUNCH_COST} Command Authority (current: ${authCurrent})`
+                                                        : `Insufficient Command Authority (${authCurrent}/${FORCE_LAUNCH_COST} needed)`}>
+                                                    [ FORCE LAUNCH — {FORCE_LAUNCH_COST} AUTH ]
                                                 </button>
                                             )}
                                             {op.phase === 'execution' && (

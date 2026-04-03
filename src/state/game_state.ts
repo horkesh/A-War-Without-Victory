@@ -1813,6 +1813,22 @@ narrative_queue?: import('../sim/ai_commander/aar_narrative.js').NarrativeQueueE
 last_briefing?: import('../sim/briefing/collect_briefing.js').CommandBriefing;
 /** Per-enclave state tracking (fallen status, resilience, etc). Key: enclave name. */
 enclave_state?: Record<string, { fallen?: boolean; status?: string; [key: string]: unknown }>;
+/** Presidential command authority resource. Spent on Level 3 (Direct Intervention) actions; recovers +2/turn.
+ *  See docs/20_engineering/PRESIDENTIAL_COMMAND_DOCTRINE.md §Level 3. */
+command_authority?: CommandAuthority;
+}
+
+/** Presidential command authority — the player's resource for overriding the command chain.
+ *  Distinct from political_capital (PoliticalLeaderState), which is the non-player bot's resource. */
+export interface CommandAuthority {
+    /** Current authority [0, max]. */
+    current: number;
+    /** Maximum authority (default 100). */
+    max: number;
+    /** Authority spent this turn (reset each turn start). */
+    spent_this_turn: number;
+    /** Lifetime total authority spent. */
+    lifetime_spent: number;
 }
 
 export interface PoliticalState {

@@ -1790,6 +1790,12 @@ export function parseGameState(json: unknown): LoadedGameState {
         enclaveResilience,
         sectorEntrenchmentSummary,
         mobilizationSummary,
+        commandAuthority: state.military.command_authority ? {
+            current: finiteNumber(state.military.command_authority.current),
+            max: finiteNumber(state.military.command_authority.max, 100),
+            spentThisTurn: finiteNumber(state.military.command_authority.spent_this_turn),
+            lifetimeSpent: finiteNumber(state.military.command_authority.lifetime_spent),
+        } : undefined,
         commandBriefing,
         battlesByOsid: deriveBattlesByOsid(state),
         movementsByOsid: deriveMovementsByOsid(state),

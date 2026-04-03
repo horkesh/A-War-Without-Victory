@@ -1096,6 +1096,17 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'recover-command-authority',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const auth = context.state.military.command_authority;
+            if (!auth) return;
+            // Reset per-turn spend counter, then recover +2 (base rate)
+            auth.spent_this_turn = 0;
+            auth.current = Math.min(auth.max, auth.current + 2);
+        }
+    },
+    {
         name: 'update-corps-effects',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;

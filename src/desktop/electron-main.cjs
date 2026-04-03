@@ -1056,6 +1056,17 @@ app.whenReady().then(() => {
       if (!op) {
         return { ok: false, error: 'Operation not found' };
       }
+      // Level 3 Direct Intervention: deduct command authority (cost 15)
+      const FORCE_LAUNCH_COST = 15;
+      const auth = state.military.command_authority;
+      if (auth) {
+        if (auth.current < FORCE_LAUNCH_COST) {
+          return { ok: false, error: `Insufficient command authority (${auth.current}/${FORCE_LAUNCH_COST} needed)` };
+        }
+        auth.current -= FORCE_LAUNCH_COST;
+        auth.spent_this_turn += FORCE_LAUNCH_COST;
+        auth.lifetime_spent += FORCE_LAUNCH_COST;
+      }
       op.force_launch = true;
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);
