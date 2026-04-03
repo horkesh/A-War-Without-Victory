@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import type { CommandAuthority, CorpsOperation } from '../src/state/game_state.js';
 import type { OperationAAR } from '../src/sim/combat/operation_aar.js';
+import { computeCorpsCommandStrain, getCommandStrainLabel } from '../src/ui/map/data/command_strain.js';
 
 function makeAuth(overrides?: Partial<CommandAuthority>): CommandAuthority {
     return { current: 100, max: 100, spent_this_turn: 0, lifetime_spent: 0, ...overrides };
@@ -379,5 +380,201 @@ describe('command authority', () => {
             // 85 + 8*2 = 101 → capped at 100
             expect(auth.current).toBe(100);
         });
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Command Strain
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Build a minimal GameState stub for strain computation. */
+function makeStrainState(overrides: {
+    turn?: number;
+    activeOps?: Array<{ name: string; was_force_launched?: boolean; started_turn?: number }>;
+    frictionEvents?: Array<{ officer_id: string; turn: number; type: string; resolved: boolean }>;
+    officerCorpsId?: string; // corps the officer is assigned to
+    officerId?: string;
+} = {}): any {
+    const turn = overrides.turn ?? 5;
+    const corpsId = 'test-corps';
+    const officerId = overrides.officerId ?? 'officer-1';
+    const officerCorpsId = overrides.officerCorpsId ?? corpsId;
+
+    return {
+        meta: { turn },
+        military: {
+            corps_command: {
+                [corpsId]: {
+                    active_operations: (overrides.activeOps ?? []).map(op => ({
+                        name: op.name,
+                        was_force_launched: op.was_force_launched,
+                        started_turn: op.started_turn ?? turn,
+                    })),
+                },
+            },
+            friction_events: overrides.frictionEvents ?? [],
+            named_officers: overrides.frictionEvents?.length || overrides.officerCorpsId
+                ? {
+                    [officerId]: {
+                        status: 'active',
+                        assigned_corps_id: officerCorpsId,
+                    },
+                }
+                : {},
+        },
+    };
+}
+
+describe('computeCorpsCommandStrain', () => {
+    it('returns 0 for a corps with no overrides and no friction', () => {
+        const state = makeStrainState();
+        expect(computeCorpsCommandStrain('test-corps', state)).toBe(0);
+    });
+
+    it('accumulates +3 per force-launched op on that corps (same turn, no decay)', () => {
+        const state = makeStrainState({
+            turn: 5,
+            activeOps: [
+                { name: 'Op Alpha', was_force_launched: true, started_turn: 5 },
+            ],
+        });
+        // +3, age=0, decay 0 → contribution 3
+        expect(computeCorpsCommandStrain('test-corps', state)).toBe(3);
+    });
+
+    it('accumulates +3 per force-launched op — two ops on same turn', () => {
+        const state = makeStrainState({
+            turn: 5,
+            activeOps: [
+                { name: 'Op Alpha', was_force_launched: true, started_turn: 5 },
+                { name: 'Op Beta', was_force_launched: true, started_turn: 5 },
+            ],
+        });
+        // 2 × 3 = 6
+        expect(computeCorpsCommandStrain('test-corps', state)).toBe(6);
+    });
+
+    it('does NOT count non-force-launched ops', () => {
+        const state = makeStrainState({
+            turn: 5,
+            activeOps: [
+                { name: 'Op Normal', was_force_launched: false, started_turn: 5 },
+            ],
+        });
+        expect(computeCorpsCommandStrain('test-corps', state)).toBe(0);
+    });
+
+    it('accumulates +2 per unresolved warlord friction event for this corps commander', () => {
+        const state = makeStrainState({
+            turn: 5,
+            officerId: 'officer-1',
+            officerCorpsId: 'test-corps',
+            frictionEvents: [
+                { officer_id: 'officer-1', turn: 5, type: 'ignored_stance', resolved: false },
+            ],
+        });
+        // +2, age=0 → 2
+        expect(computeCorpsCommandStrain('test-corps', state)).toBe(2);
+    });
+
+    it('does NOT count resolved friction events', () => {
+        const state = makeStrainState({
+            turn: 5,
+            officerId: 'officer-1',
+            officerCorpsId: 'test-corps',
+            frictionEvents: [
+                { officer_id: 'officer-1', turn: 5, type: 'ignored_stance', resolved: true },
+            ],
+        });
+        expect(computeCorpsCommandStrain('test-corps', state)).toBe(0);
+    });
+
+    it('does NOT count friction events for officers assigned to a different corps', () => {
+        const state = makeStrainState({
+            turn: 5,
+            officerId: 'officer-1',
+            officerCorpsId: 'other-corps',  // assigned elsewhere
+            frictionEvents: [
+                { officer_id: 'officer-1', turn: 5, type: 'ignored_stance', resolved: false },
+            ],
+        });
+        expect(computeCorpsCommandStrain('test-corps', state)).toBe(0);
+    });
+
+    it('applies decay correctly — force-launch 2 turns ago contributes 1 (3 − 2)', () => {
+        const state = makeStrainState({
+            turn: 7,
+            activeOps: [
+                { name: 'Op Alpha', was_force_launched: true, started_turn: 5 },
+            ],
+        });
+        // turn 7, started 5, age=2; 3 − 2 = 1
+        expect(computeCorpsCommandStrain('test-corps', state)).toBe(1);
+    });
+
+    it('applies decay correctly — force-launch 3+ turns ago contributes 0 (floor at 0)', () => {
+        const state = makeStrainState({
+            turn: 10,
+            activeOps: [
+                { name: 'Op Alpha', was_force_launched: true, started_turn: 5 },
+            ],
+        });
+        // age=5; 3 − 5 = -2 → floored at 0
+        expect(computeCorpsCommandStrain('test-corps', state)).toBe(0);
+    });
+
+    it('friction event decays — 2 turns ago contributes 0 (2 − 2 = 0)', () => {
+        const state = makeStrainState({
+            turn: 7,
+            officerId: 'officer-1',
+            officerCorpsId: 'test-corps',
+            frictionEvents: [
+                { officer_id: 'officer-1', turn: 5, type: 'ignored_stance', resolved: false },
+            ],
+        });
+        // age=2; 2 − 2 = 0
+        expect(computeCorpsCommandStrain('test-corps', state)).toBe(0);
+    });
+
+    it('combines force-launch strain and friction strain', () => {
+        const state = makeStrainState({
+            turn: 5,
+            activeOps: [
+                { name: 'Op Alpha', was_force_launched: true, started_turn: 5 },
+            ],
+            officerId: 'officer-1',
+            officerCorpsId: 'test-corps',
+            frictionEvents: [
+                { officer_id: 'officer-1', turn: 5, type: 'ignored_stance', resolved: false },
+            ],
+        });
+        // +3 (force-launch, age=0) + +2 (friction, age=0) = 5
+        expect(computeCorpsCommandStrain('test-corps', state)).toBe(5);
+    });
+});
+
+describe('getCommandStrainLabel', () => {
+    it('returns healthy for score 0', () => {
+        expect(getCommandStrainLabel(0)).toBe('healthy');
+    });
+
+    it('returns strained for score 1', () => {
+        expect(getCommandStrainLabel(1)).toBe('strained');
+    });
+
+    it('returns strained for score 3', () => {
+        expect(getCommandStrainLabel(3)).toBe('strained');
+    });
+
+    it('returns strained for score 5', () => {
+        expect(getCommandStrainLabel(5)).toBe('strained');
+    });
+
+    it('returns compromised for score 6', () => {
+        expect(getCommandStrainLabel(6)).toBe('compromised');
+    });
+
+    it('returns compromised for score 10', () => {
+        expect(getCommandStrainLabel(10)).toBe('compromised');
     });
 });
