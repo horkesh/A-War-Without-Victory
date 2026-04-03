@@ -5,14 +5,17 @@
  * Panel variant uses horizontal tabs (Overview | Municipality | Timeline).
  */
 import { useState, useMemo } from 'react';
-import { useGameStore } from '../store/gameStore';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getByOsid } from '../utils/osidLookup';
 import { FACTION_COLORS_SUBTLE } from '../utils/theme';
 import { toTitleCase } from '../utils/formatters';
 import { SettlementTimeline } from './SettlementTimeline';
 import { buildSettlementTimeline } from '../utils/buildSettlementTimeline';
-import { getPlayerSafeBrigadeName, getPlayerSafeMunicipalityName } from '../utils/playerSafeText';
+import {
+  getPlayerSafeBrigadeName,
+  getPlayerSafeMilitaryFactionName,
+  getPlayerSafeMunicipalityName,
+} from '../utils/playerSafeText';
 
 function num(v: unknown): number {
   return typeof v === 'number' && Number.isFinite(v) ? v : 0;
@@ -119,6 +122,10 @@ export interface SettlementDetailContentProps {
   brigadeCountByFaction?: Record<string, number>;
   /** When set (panel), formation rows call this with formation id to open formation detail. */
   onFormationClick?: (formationId: string) => void;
+  /** Optional shell callback for front-sector drilldown. */
+  onSectorClick?: (sectorId: string) => void;
+  /** Optional shell callback for operation drilldown. */
+  onOperationClick?: (operationKey: string) => void;
   /** Raw displacement event log for timeline. */
   displacementEventLog?: Array<{ turn: number; origin_osid?: string; dest_osid?: string; origin_mun?: string; ethnicity?: string; displaced: number; killed: number; fled_abroad: number; settled: number; caused_by?: string }>;
   /** All control events (full history, not just recent). */
@@ -157,6 +164,8 @@ export function SettlementDetailContent({
   pendingOrders,
   militiaPools,
   onFormationClick,
+  onSectorClick,
+  onOperationClick,
   displacementEventLog,
   allControlEvents,
   operationHistory,
@@ -287,9 +296,7 @@ export function SettlementDetailContent({
   const restCount = formationsAtOsid.length - maxShow;
 
   const isPanel = variant === 'panel';
-
-  const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
-  const setSelectedOperationKey = useGameStore((s) => s.setSelectedOperationKey);
+  const sectorFactionLabel = getPlayerSafeMilitaryFactionName(sectorFaction, '');
 
   type SettlementTabId = 'overview' | 'municipality' | 'timeline';
   const [activeTab, setActiveTab] = useState<SettlementTabId>('overview');
@@ -369,16 +376,16 @@ export function SettlementDetailContent({
             {sectorId ? (
               <button
                 type="button"
-                onClick={() => setSelectedCorpsFrontSectorId(sectorId)}
+                onClick={() => onSectorClick?.(sectorId)}
                 className={`font-semibold text-left hover:underline focus:outline-none focus:ring-1 focus:ring-accent-gold/50 rounded kbd-focus ${sectorFaction ? (FACTION_COLORS_SUBTLE[sectorFaction] ?? 'text-text-primary') : 'text-text-primary'}`}
               >
                 {sectorName}
-                {sectorFaction ? ` (${sectorFaction})` : ''}
+                {sectorFactionLabel ? ` (${sectorFactionLabel})` : ''}
               </button>
             ) : (
               <span className={`font-semibold ${sectorFaction ? (FACTION_COLORS_SUBTLE[sectorFaction] ?? 'text-text-primary') : 'text-text-primary'}`}>
                 {sectorName}
-                {sectorFaction ? ` (${sectorFaction})` : ''}
+                {sectorFactionLabel ? ` (${sectorFactionLabel})` : ''}
               </span>
             )}
           </div>
@@ -402,7 +409,7 @@ export function SettlementDetailContent({
                     {isClickable ? (
                       <button
                         type="button"
-                        onClick={() => setSelectedOperationKey(op.operationKey!)}
+                        onClick={() => onOperationClick?.(op.operationKey!)}
                         className="w-full flex items-center gap-2 text-left hover:underline focus:outline-none focus:ring-1 focus:ring-accent-gold/50 rounded px-0.5 -mx-0.5 py-0.5 kbd-focus"
                       >
                         {content}

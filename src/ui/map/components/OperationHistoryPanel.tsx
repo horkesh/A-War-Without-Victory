@@ -4,25 +4,20 @@
  */
 import { useMemo, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
-import { humanizeOsid } from '../utils/osidDisplayName';
+import { getOsidDisplayName } from '../utils/osidDisplayName';
 import type { LoadedGameState } from '../data/types';
 import {
     filterPlayerFacingActiveOperations,
     filterPlayerFacingFormations,
     filterPlayerFacingOperationHistory,
 } from '../../shared/playerVisibility';
+import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 
 // --- Faction styling ---
 const FACTION_COLOR: Record<string, string> = {
     RS: '#c04040',
     RBiH: '#4a9a55',
     HRHB: '#4080b8',
-};
-
-const FACTION_LABEL: Record<string, string> = {
-    RS: 'VRS',
-    RBiH: 'ARBiH',
-    HRHB: 'HVO',
 };
 
 const OUTCOME_COLOR: Record<string, string> = {
@@ -77,7 +72,7 @@ function FactionTag({ faction }: { faction: string }) {
             className="text-[9px] font-mono px-1 rounded border"
             style={{ color: FACTION_COLOR[faction] ?? '#aaa', borderColor: `${FACTION_COLOR[faction] ?? '#555'}44` }}
         >
-            {FACTION_LABEL[faction] ?? faction}
+            {getPlayerSafeMilitaryFactionName(faction, 'Unknown force')}
         </span>
     );
 }
@@ -119,7 +114,15 @@ function ExchangeRatio({ suffered, inflicted }: { suffered: { killed: number; wo
 
 // --- Completed operation card ---
 
-function CompletedOpCard({ op, corpsName }: { op: CompletedOp; corpsName: string }) {
+function CompletedOpCard({
+    op,
+    corpsName,
+    osidDisplayNames,
+}: {
+    op: CompletedOp;
+    corpsName: string;
+    osidDisplayNames: Record<string, string> | null;
+}) {
     const [expanded, setExpanded] = useState(false);
     const objRate = op.objectives_targeted.length > 0
         ? `${op.objectives_captured.length}/${op.objectives_targeted.length}`
@@ -208,7 +211,7 @@ function CompletedOpCard({ op, corpsName }: { op: CompletedOp; corpsName: string
                                     return (
                                         <div key={osid} className="text-[10px] flex items-center gap-1.5">
                                             <span className={captured ? 'text-green-400' : 'text-red-400'}>{captured ? '\u2713' : '\u2717'}</span>
-                                            <span className="text-text-primary capitalize">{humanizeOsid(osid)}</span>
+                                            <span className="text-text-primary capitalize">{getOsidDisplayName(osid, osidDisplayNames)}</span>
                                         </div>
                                     );
                                 })}
@@ -253,7 +256,7 @@ function CompletedOpCard({ op, corpsName }: { op: CompletedOp; corpsName: string
                                                     <span className="text-text-secondary">{entry.attacks_this_turn} atk </span>
                                                 )}
                                                 {hasCaptures && entry.objectives_captured_this_turn.map(osid => (
-                                                    <span key={osid} className="text-green-400 capitalize">{humanizeOsid(osid)} </span>
+                                                    <span key={osid} className="text-green-400 capitalize">{getOsidDisplayName(osid, osidDisplayNames)} </span>
                                                 ))}
                                                 {hasCas && (
                                                     <span className="text-text-muted">
@@ -321,6 +324,7 @@ interface OperationHistoryPanelProps {
 
 export function OperationHistoryPanel({ isOpen, onClose, embedded }: OperationHistoryPanelProps) {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
+    const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
     const [tab, setTab] = useState<Tab>('active');
     const corpsNameById = useMemo(
         () =>
@@ -378,6 +382,7 @@ export function OperationHistoryPanel({ isOpen, onClose, embedded }: OperationHi
                                 key={op.operation_id}
                                 op={op}
                                 corpsName={getCorpsDisplayName(corpsNameById, op.corps_id)}
+                                osidDisplayNames={osidDisplayNames}
                             />
                         ))
                     )

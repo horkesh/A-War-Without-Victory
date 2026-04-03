@@ -473,4 +473,57 @@ describe('player visibility helpers', () => {
     expect(briefingSource).toContain('getPlayerSafeCorpsName');
     expect(officerSource).toContain('getPlayerSafeCorpsName');
   });
+
+  it('keeps settlement detail player-safe and renderer-only', () => {
+    const settlementDetailSource = readFileSync(
+      new URL('../src/ui/map/components/SettlementDetailContent.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(settlementDetailSource).toContain('getPlayerSafeMilitaryFactionName');
+    expect(settlementDetailSource).toContain('onSectorClick');
+    expect(settlementDetailSource).toContain('onOperationClick');
+    expect(settlementDetailSource).not.toContain('useGameStore');
+    expect(settlementDetailSource).not.toContain(' (${sectorFaction})');
+  });
+
+  it('keeps Army HQ and operation history geography on curated display-name helpers', () => {
+    const orbatSource = readFileSync(
+      new URL('../src/ui/map/components/army_hq/OrbatSection.tsx', import.meta.url),
+      'utf8',
+    );
+    const sectorsSource = readFileSync(
+      new URL('../src/ui/map/components/army_hq/SectorsSection.tsx', import.meta.url),
+      'utf8',
+    );
+    const operationHistorySource = readFileSync(
+      new URL('../src/ui/map/components/OperationHistoryPanel.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(orbatSource).toContain('getOsidDisplayName');
+    expect(orbatSource).not.toContain('formatOsidLabel');
+    expect(sectorsSource).toContain('getOsidDisplayName');
+    expect(sectorsSource).not.toContain('formatOsidLabel');
+    expect(operationHistorySource).toContain('getOsidDisplayName');
+    expect(operationHistorySource).toContain('getPlayerSafeMilitaryFactionName');
+    expect(operationHistorySource).not.toContain('humanizeOsid');
+  });
+
+  it('keeps tooltip and warroom settlement control language player-safe', () => {
+    const tooltipSource = readFileSync(
+      new URL('../src/ui/map/components/Tooltip.tsx', import.meta.url),
+      'utf8',
+    );
+    const settlementInfoSource = readFileSync(
+      new URL('../src/ui/warroom/components/SettlementInfoPanel.ts', import.meta.url),
+      'utf8',
+    );
+
+    expect(tooltipSource).toContain('getPlayerSafeMilitaryFactionName');
+    expect(tooltipSource).toContain('getPlayerSafeSettlementName');
+    expect(tooltipSource).not.toContain('humanizeOsid');
+    expect(settlementInfoSource).toContain('formatControlStatusLabel');
+    expect(settlementInfoSource).toContain('const controlStatus = formatControlStatusLabel(');
+  });
 });

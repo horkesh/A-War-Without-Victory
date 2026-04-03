@@ -361,3 +361,9 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - Army HQ operations review, operation briefing, tactical operations detail, and officer replacement prompts now route corps/brigade/place labels through the shared player-safe helpers instead of trusting raw engine naming.
 - See `docs/40_reports/implemented/20260403_OPERATIONS_AND_OFFICER_PLAYER_SAFE_LABELS.md`.
 
+## 2026-04-03 - Settlement, Army HQ, and tooltip player-safe boundary pass
+
+- `SettlementDetailContent` no longer mutates shell selection state directly; selection shells now pass explicit callbacks.
+- Army HQ ORBAT, Army HQ sectors, operation history, tooltip battle labels, and Warroom settlement control wording now stay on player-safe naming/language helpers instead of rough OSID or raw enum fallbacks.
+- See `docs/40_reports/implemented/20260403_SETTLEMENT_ARMYHQ_AND_TOOLTIP_PLAYER_SAFE_BOUNDARY.md`.
+

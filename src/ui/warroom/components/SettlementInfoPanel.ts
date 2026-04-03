@@ -36,6 +36,16 @@ type PoliticalControlData = {
     control_status_by_settlement_id?: Record<string, string>;
 };
 
+function formatControlStatusLabel(status: string | null | undefined): string {
+    const safeStatus = (status ?? '').trim();
+    if (!safeStatus) return 'Consolidated';
+    return safeStatus
+        .toLowerCase()
+        .split(/[_\s]+/)
+        .map((part) => (part ? part.charAt(0).toUpperCase() + part.slice(1) : ''))
+        .join(' ');
+}
+
 type SettlementNamesData = {
     by_census_id?: Record<string, { name: string; mun_code: string }>;
 };
@@ -149,7 +159,9 @@ export class SettlementInfoPanel {
         const censusId = getCensusId(sid);
 
         const controller = masterSid ? (controlData.by_settlement_id?.[masterSid] ?? 'null') : 'null';
-        const controlStatus = masterSid ? (controlData.control_status_by_settlement_id?.[masterSid] ?? 'CONSOLIDATED') : 'CONSOLIDATED';
+        const controlStatus = formatControlStatusLabel(
+            masterSid ? (controlData.control_status_by_settlement_id?.[masterSid] ?? 'CONSOLIDATED') : 'CONSOLIDATED',
+        );
         const factionColor = SIDE_COLORS[controller] ?? SIDE_COLORS['null'];
         const factionLabel = SIDE_LABELS[controller] ?? 'Neutral';
 

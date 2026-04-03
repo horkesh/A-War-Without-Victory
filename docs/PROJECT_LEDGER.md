@@ -21763,3 +21763,31 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 ### Verification
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_shell_navigation.test.ts`
 - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Settlement, Army HQ, and tooltip player-safe boundary pass
+
+### Summary
+- Made `SettlementDetailContent` renderer-only by replacing direct store writes with explicit shell callbacks for sector and operation drilldown.
+- Replaced raw faction-code rendering in settlement front-sector labels with player-safe military names.
+- Swapped rough OSID formatting out of Army HQ ORBAT, Army HQ sector detail, and operation history review surfaces in favor of canonical OSID display names.
+- Humanized Warroom settlement control-status language and cleaned battle tooltip fallback naming.
+
+### Files changed
+- `src/ui/map/components/SettlementDetailContent.tsx`
+- `src/ui/map/components/SelectionPanel.tsx`
+- `src/ui/map/components/army_hq/OrbatSection.tsx`
+- `src/ui/map/components/army_hq/SectorsSection.tsx`
+- `src/ui/map/components/OperationHistoryPanel.tsx`
+- `src/ui/map/components/Tooltip.tsx`
+- `src/ui/warroom/components/SettlementInfoPanel.ts`
+- `tests/ui_player_visibility.test.ts`
+- `docs/40_reports/implemented/20260403_SETTLEMENT_ARMYHQ_AND_TOOLTIP_PLAYER_SAFE_BOUNDARY.md`
+
+### Why
+- Shared render-boundary components are a common place for false shell ownership to regrow. Moving routing back into the owning shell keeps renderers honest.
+- Army HQ and operations-review panels are high-trust player surfaces; rough OSID formatting there makes the game feel like internal tooling.
+- Warroom control wording should be player-facing prose, not raw simulation enum style.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_player_visibility.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`

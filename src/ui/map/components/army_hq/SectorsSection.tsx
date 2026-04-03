@@ -7,8 +7,9 @@ import type { CorpsFrontSectorView, FormationView } from '../../data/types';
 import type { TurnBattle } from '../../../../state/turn_summary';
 import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
+import { getOsidDisplayName } from '../../utils/osidDisplayName';
 import { OUTCOME_COLORS } from '../../utils/theme';
-import { formatPersonnel, formatOsidLabel } from '../../utils/formatters';
+import { formatPersonnel } from '../../utils/formatters';
 import { CollapsibleSection } from './CollapsibleSection';
 
 interface SectorsSectionProps {
@@ -41,6 +42,7 @@ const STRENGTH_CLASS_COLORS: Record<string, string> = {
 };
 
 function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector: CorpsFrontSectorView; sectorBattles: TurnBattle[]; formationMap: Map<string, FormationView> }) {
+    const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
     const frontIds = sector.assigned_brigade_ids;
     const reserveIds = sector.reserve_brigade_ids;
 
@@ -106,7 +108,7 @@ function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector:
                                     </div>
                                     {b.location_osid && (
                                         <div className="text-[9px] text-text-secondary/40 ml-4 mt-0.5 truncate">
-                                            @ {formatOsidLabel(b.location_osid)}
+                                            @ {getOsidDisplayName(b.location_osid, osidDisplayNames)}
                                         </div>
                                     )}
                                 </div>
@@ -132,7 +134,7 @@ function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector:
                                     </span>
                                     {b.location_osid && (
                                         <span className="text-[9px] text-text-secondary/40 truncate max-w-[120px]">
-                                            @ {formatOsidLabel(b.location_osid)}
+                                            @ {getOsidDisplayName(b.location_osid, osidDisplayNames)}
                                         </span>
                                     )}
                                 </div>
@@ -154,7 +156,7 @@ function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector:
                                     {battle.outcome.replace(/_/g, ' ')}
                                 </span>
                                 <span className="text-text-secondary truncate flex-1">
-                                    {formatOsidLabel(battle.osid)}
+                                    {getOsidDisplayName(battle.osid, osidDisplayNames)}
                                 </span>
                                 <span className="text-red-500 font-bold shrink-0">-{battle.attacker_casualties + battle.defender_casualties} PERS</span>
                             </div>
