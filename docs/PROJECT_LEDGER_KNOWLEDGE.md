@@ -4,6 +4,10 @@
 
 **Dormant compatibility layers must say they are dormant (2026-04-02):** `brigade_pressure.ts` and `apply_brigade_reposition.ts` are dangerous not because they exist, but because they still look alive. When a legacy path is intentionally inert, comments should say so plainly or future work will route authority back into it by mistake.
 
+**Phase F displacement-trigger eligibility must follow sector-owned edge scope when sectors are live (2026-04-03):** Once `corps_front_sectors` exists, displacement triggers should not rediscover front activity through the generic pressure/emergence edge scan. Build the eligible edge scope from sector `edge_ids`, then fall back to the old scan only when sector frontline truth is absent.
+
+**`corps_attack_axis_orders` is retired live authority (2026-04-03):** The desktop/preload bridge and war-phase translation from corps attack axes into `brigade_attack_orders` are gone. Offensive truth must come from canonical brigade AI and operation paths, not a parallel corps-axis order surface that looks plausible but no live shell actually owns.
+
 ## 2026-04-02 - Player-facing operation documents must never print raw OSIDs
 
 - OPORDs, objective lists, and HQ roster/history hover titles are player-facing surfaces.

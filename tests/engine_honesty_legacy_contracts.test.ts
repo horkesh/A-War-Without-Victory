@@ -190,6 +190,24 @@ describe('engine honesty legacy contracts', () => {
     expect(useIpc).not.toContain('assignBrigadeToFront');
   });
 
+  it('does not keep retired corps attack-axis bridge paths in live code', () => {
+    const preload = readFileSync(join(process.cwd(), 'src', 'desktop', 'preload.cjs'), 'utf8');
+    const electronMain = readFileSync(join(process.cwd(), 'src', 'desktop', 'electron-main.cjs'), 'utf8');
+    const useIpc = readFileSync(join(process.cwd(), 'src', 'ui', 'map', 'desktop', 'useIPC.ts'), 'utf8');
+    const desktopSim = readFileSync(join(process.cwd(), 'src', 'desktop', 'desktop_sim.ts'), 'utf8');
+    const warPhases = readFileSync(join(process.cwd(), 'src', 'sim', 'turn_phases', 'war_phases.ts'), 'utf8');
+    const gameState = readFileSync(join(process.cwd(), 'src', 'state', 'game_state.ts'), 'utf8');
+
+    expect(preload).not.toContain('stageCorpsAttackAxisOrder');
+    expect(preload).not.toContain('stage-corps-attack-axis-order');
+    expect(electronMain).not.toContain('stage-corps-attack-axis-order');
+    expect(useIpc).not.toContain('stageCorpsAttackAxisOrder');
+    expect(desktopSim).not.toContain('export function stageCorpsAttackAxisOrder');
+    expect(warPhases).not.toContain('apply-corps-attack-axis-orders');
+    expect(warPhases).not.toContain('applyCorpsAttackAxisOrders');
+    expect(gameState).not.toContain('corps_attack_axis_orders?:');
+  });
+
   it('does not advertise unused front/theatre renaming bridges in live code', () => {
     const preload = readFileSync(join(process.cwd(), 'src', 'desktop', 'preload.cjs'), 'utf8');
     const electronMain = readFileSync(join(process.cwd(), 'src', 'desktop', 'electron-main.cjs'), 'utf8');

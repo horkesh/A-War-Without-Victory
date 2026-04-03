@@ -21641,3 +21641,32 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - Repointed `src/sim/combat/supply_pressure.ts` so live frontage pressure now prefers `corps_front_sectors` edge ownership instead of legacy front-edge counting when sector truth exists.
 - Repointed `src/sim/combat/exhaustion.ts` so frontline exhaustion now prefers sector-owned frontline exposure (non-cold sectors by faction) instead of legacy `detectFronts(...)` output when sector truth exists.
 - Added dedicated precedence checks in `tests/combat_supply_pressure.test.ts` and `tests/combat_exhaustion.test.ts`.
+
+## 2026-04-03 - Displacement trigger and attack-axis authority cleanup
+
+### Summary
+- Repointed Phase F displacement-trigger eligibility to prefer `corps_front_sectors[*].edge_ids` whenever live sector truth exists.
+- Retired the dead `corps_attack_axis_orders -> brigade_attack_orders` bridge from the war pipeline and desktop/player shell.
+
+### Files changed
+- `src/sim/displacement_pipeline/displacement_triggers.ts`
+- `src/sim/combat/corps_front_assign.ts`
+- `src/sim/turn_phases/war_phases.ts`
+- `src/desktop/desktop_sim.ts`
+- `src/desktop/electron-main.cjs`
+- `src/desktop/preload.cjs`
+- `src/ui/map/desktop/useIPC.ts`
+- `src/state/game_state.ts`
+- `tests/displacement_pipeline_displacement_triggers.test.ts`
+- `tests/brigade_corps_front_assign.test.ts`
+- `tests/engine_honesty_legacy_contracts.test.ts`
+- `docs/40_reports/implemented/20260403_DISPLACEMENT_AND_ATTACK_AXIS_AUTHORITY_CLEANUP.md`
+
+### Why
+- Front/displacement activity must not keep rediscovering the front through old pressure-emergence helpers once sectors are the canonical frontline owner.
+- `corps_attack_axis_orders` was still a live false-authority seam: desktop exposed it and the war pipeline translated it into real brigade attack orders even though no live shell legitimately owned that path.
+
+### Verification
+- `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\displacement_pipeline_displacement_triggers.test.ts`
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\engine_honesty_legacy_contracts.test.ts tests\\brigade_corps_front_assign.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`

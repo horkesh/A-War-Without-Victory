@@ -587,49 +587,6 @@ export async function stageCorpsFrontOrder(
     return { ok: true };
 }
 
-/** Stage corps attack axis and project it to deterministic per-brigade attack orders. */
-export function stageCorpsAttackAxisOrder(
-    state: GameState,
-    corpsId: string,
-    edgeIds: string[]
-): { ok: true } | { ok: false; error: string } {
-    const corps = state.military.formations?.[corpsId];
-    const kind = corps?.kind ?? 'corps';
-    const isCorpsLike = kind === 'corps' || kind === 'corps_asset' || kind === 'army_hq';
-    if (!corps || !corps.faction || !isCorpsLike) return { ok: false, error: 'Invalid corps formation' };
-    const normalized = edgeIds
-        .map((id) => normalizeEdgeId(id))
-        .filter((id): id is string => id !== null)
-        .sort(strictCompare);
-    if (normalized.length === 0) return { ok: false, error: 'At least one valid edge_id is required' };
-    if (!state.military.corps_attack_axis_orders) state.military.corps_attack_axis_orders = {};
-    state.military.corps_attack_axis_orders[corpsId] = { edge_ids: [...new Set(normalized)].sort(strictCompare), created_turn: state.meta?.turn ?? 0 };
-    const pc = state.political.political_controllers ?? {};
-    const enemyTargets = new Set<string>();
-    for (const eid of normalized) {
-        const parts = eid.split('__');
-        if (parts.length !== 2) continue;
-        const a = parts[0];
-        const b = parts[1];
-        if (pc[a] && pc[a] !== corps.faction) enemyTargets.add(a);
-        if (pc[b] && pc[b] !== corps.faction) enemyTargets.add(b);
-    }
-    const targets = [...enemyTargets].sort(strictCompare);
-    if (targets.length === 0) return { ok: true };
-    const brigades = Object.keys(state.military.formations ?? {})
-        .filter((id) => {
-            const f = state.military.formations?.[id];
-            return !!f && (f.kind ?? 'brigade') === 'brigade' && f.corps_id === corpsId && f.faction === corps.faction;
-        })
-        .sort(strictCompare);
-    if (brigades.length === 0) return { ok: true };
-    if (!state.military.brigade_attack_orders) state.military.brigade_attack_orders = {};
-    for (let i = 0; i < brigades.length; i++) {
-        state.military.brigade_attack_orders[brigades[i]] = targets[i % targets.length];
-    }
-    return { ok: true };
-}
-
 /** Stage OG subfront edges; must be subset of parent corps front edge set. */
 export function stageOgSubfrontOrder(
     state: GameState,

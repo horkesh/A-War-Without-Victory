@@ -1727,7 +1727,6 @@ brigade_attack_orders?: Record<FormationId, SettlementId | null>;
      * Corps-level attack axis orders: target geometry compressed as ordered edge_ids.
      * Intent-only order surface; translated to brigade orders by deterministic assignment.
      */
-corps_attack_axis_orders?: Record<FormationId, { edge_ids: string[]; created_turn?: number }>;
 /** Corps command state. Key: corps FormationId. */
 corps_command?: Record<FormationId, CorpsCommandState>;
 /** Equipment reserve per corps: excess from JNA phantom withdrawals. Drawn during brigade reinforcement. */

@@ -29,7 +29,6 @@ contextBridge.exposeInMainWorld('awwv', {
   assignBrigadeToSector: (brigadeId, sectorId) => ipcRenderer.invoke('assign-brigade-to-sector', { brigadeId, sectorId }),
   stageBrigadeAoROrder: (settlementId, fromBrigadeId, toBrigadeId) => ipcRenderer.invoke('stage-brigade-aor-order', { settlementId, fromBrigadeId, toBrigadeId }),
   stageCorpsFrontOrder: (corpsId, edgeIds) => ipcRenderer.invoke('stage-corps-front-order', { corpsId, edgeIds }),
-  stageCorpsAttackAxisOrder: (corpsId, edgeIds) => ipcRenderer.invoke('stage-corps-attack-axis-order', { corpsId, edgeIds }),
   stageOgSubfrontOrder: (ogId, corpsId, edgeIds) => ipcRenderer.invoke('stage-og-subfront-order', { ogId, corpsId, edgeIds }),
   stageBrigadeMovementOrder: (brigadeId, targetSettlementIds) => ipcRenderer.invoke('stage-brigade-movement-order', { brigadeId, targetSettlementIds }),
   queryMovementRange: (brigadeId) => ipcRenderer.invoke('query-movement-range', { brigadeId }),

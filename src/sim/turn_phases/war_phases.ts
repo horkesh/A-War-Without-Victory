@@ -82,7 +82,6 @@ import { updateMixedMunicipalitiesList } from '../early_war/mixed_municipality.j
 import { checkAndApplyOperationStorm } from '../combat/operation_storm.js';
 import { tickHvIntegration } from '../combat/hv_integration.js';
 import {
-    applyCorpsAttackAxisOrders,
     applyCorpsFrontAutoDistribution,
     ensureDerivedCorpsFrontEdges
 } from '../combat/corps_front_assign.js';
@@ -1114,14 +1113,6 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             if (!context.state.military.corps_front_edges) return;
             applyCorpsFrontAutoDistribution(context.state);
-        }
-    },
-    {
-        name: 'apply-corps-attack-axis-orders',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            if (!context.state.military.corps_attack_axis_orders) return;
-            applyCorpsAttackAxisOrders(context.state);
         }
     },
     {

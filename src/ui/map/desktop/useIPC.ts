@@ -55,7 +55,6 @@ interface WindowAwwv {
     stageBrigadeMovementOrder: (brigadeId: string, targetSettlementIds: string[]) => Promise<{ ok: boolean; error?: string }>;
     stageBrigadeAoROrder: (settlementId: string, fromBrigadeId: string, toBrigadeId: string) => Promise<{ ok: boolean; error?: string }>;
     stageCorpsFrontOrder: (corpsId: string, edgeIds: string[]) => Promise<{ ok: boolean; error?: string }>;
-    stageCorpsAttackAxisOrder: (corpsId: string, edgeIds: string[]) => Promise<{ ok: boolean; error?: string }>;
     stageOgSubfrontOrder: (ogId: string, corpsId: string, edgeIds: string[]) => Promise<{ ok: boolean; error?: string }>;
     stageCorpsStanceOrder: (corpsId: string, stance: string) => Promise<{ ok: boolean; error?: string }>;
     stageSectorStanceOrder: (sectorId: string, stance: string) => Promise<{ ok: boolean; error?: string }>;
@@ -200,10 +199,6 @@ export function useIPC() {
 
             stageCorpsFrontOrder: awwv
                 ? (corpsId: string, edgeIds: string[]) => awwv.stageCorpsFrontOrder(corpsId, edgeIds)
-                : makeNoop<{ ok: boolean; error?: string }>(),
-
-            stageCorpsAttackAxisOrder: awwv
-                ? (corpsId: string, edgeIds: string[]) => awwv.stageCorpsAttackAxisOrder(corpsId, edgeIds)
                 : makeNoop<{ ok: boolean; error?: string }>(),
 
             stageOgSubfrontOrder: awwv

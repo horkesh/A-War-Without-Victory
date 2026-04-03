@@ -814,25 +814,6 @@ app.whenReady().then(() => {
     }
   });
 
-  ipcMain.handle('stage-corps-attack-axis-order', async (_event, payload) => {
-    const { corpsId, edgeIds } = payload || {};
-    if (!currentGameStateJson || typeof corpsId !== 'string' || !Array.isArray(edgeIds)) {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      const ids = edgeIds.filter((id) => typeof id === 'string');
-      const result = sim.stageCorpsAttackAxisOrder(state, corpsId, ids);
-      if (!result.ok) return result;
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
-  });
-
   ipcMain.handle('stage-og-subfront-order', async (_event, payload) => {
     const { ogId, corpsId, edgeIds } = payload || {};
     if (!currentGameStateJson || typeof ogId !== 'string' || typeof corpsId !== 'string' || !Array.isArray(edgeIds)) {

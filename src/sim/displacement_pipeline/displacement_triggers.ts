@@ -14,7 +14,8 @@ import type { GameState, SettlementId } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getFrontActiveSettlements } from '../emergence/aor_instantiation.js';
 import type { CanonicalToOperationalMap } from '../../data/operational_data.js';
-import { getEligiblePressureEdges, toEdgeId } from '../emergence/pressure_eligibility.js';
+import { getEligiblePressureEdges, isPressureEligible, toEdgeId } from '../emergence/pressure_eligibility.js';
+import { hasLiveSectorFrontlineTruth } from '../combat/front_assignment.js';
 
 /** Maximum displacement delta per settlement per turn [0, 1]. Conservative cap. */
 export const PHASE_F_MAX_DELTA_PER_TURN = 0.05;
@@ -41,6 +42,38 @@ export interface DisplacementTriggerReport {
     front_active_set_size: number;
     /** Phase H1.7: Count of settlements eligible for displacement trigger (same as front_active_set_size when in war phase). */
     displacement_trigger_eligible_size: number;
+}
+
+function getSectorOwnedEligiblePressureEdges(
+    state: GameState,
+    edges: ReadonlyArray<EdgeRecord>,
+    canonicalToOperational?: CanonicalToOperationalMap
+): EdgeRecord[] {
+    const sectors = state.military.corps_front_sectors ?? {};
+    const liveEdgeIds = new Set<string>();
+    for (const sector of Object.values(sectors)) {
+        if (!sector) continue;
+        for (const edgeId of sector.edge_ids ?? []) {
+            if (edgeId) liveEdgeIds.add(edgeId);
+        }
+    }
+    if (liveEdgeIds.size === 0) return [];
+
+    const eligible: EdgeRecord[] = [];
+    const seen = new Set<string>();
+    const sortedEdges = [...edges].sort((left, right) =>
+        strictCompare(toEdgeId(left.a, left.b), toEdgeId(right.a, right.b))
+    );
+
+    for (const edge of sortedEdges) {
+        const edgeId = toEdgeId(edge.a, edge.b);
+        if (!liveEdgeIds.has(edgeId) || seen.has(edgeId)) continue;
+        seen.add(edgeId);
+        if (!isPressureEligible(state, { a: edge.a, b: edge.b }, undefined, canonicalToOperational)) continue;
+        eligible.push(strictCompare(edge.a, edge.b) <= 0 ? edge : { a: edge.b, b: edge.a });
+    }
+
+    return eligible;
 }
 
 /**
@@ -77,7 +110,9 @@ export function evaluateDisplacementTriggers(
         return { deltas, report: emptyReport };
     }
 
-    const eligible = getEligiblePressureEdges(state, edges, undefined, canonicalToOperational);
+    const eligible = hasLiveSectorFrontlineTruth(state)
+        ? getSectorOwnedEligiblePressureEdges(state, edges, canonicalToOperational)
+        : getEligiblePressureEdges(state, edges, undefined, canonicalToOperational);
     if (eligible.length === 0) {
         return { deltas, report: emptyReport };
     }

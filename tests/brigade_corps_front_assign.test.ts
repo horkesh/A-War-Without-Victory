@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import {
-    applyCorpsAttackAxisOrders,
     applyCorpsFrontAutoDistributionForCorps,
     deriveCorpsFrontEdgesFromBrigadeAoR,
 } from '../src/sim/combat/corps_front_assign.js';
@@ -83,23 +82,5 @@ describe('corps_front_assign', () => {
         expect(aor.S3).toBe('b2');
     });
 
-    it('translates corps attack axis into per-brigade attack targets', () => {
-        const state = makeState({
-  military: {
-    formations: {
-                corps_rbih: { id: 'corps_rbih', faction: 'RBiH', kind: 'corps', status: 'active', name: 'Corps', created_turn: 1, assignment: null },
-                b1: { id: 'b1', faction: 'RBiH', kind: 'brigade', status: 'active', name: 'B1', created_turn: 1, assignment: null, corps_id: 'corps_rbih' },
-                b2: { id: 'b2', faction: 'RBiH', kind: 'brigade', status: 'active', name: 'B2', created_turn: 1, assignment: null, corps_id: 'corps_rbih' },
-            } as any,
-    corps_attack_axis_orders: { corps_rbih: { edge_ids: ['S1__S2', 'S3__S4'] } }
-  } as any,
-  political: {
-    political_controllers: { S1: 'RBiH', S2: 'RS', S3: 'RBiH', S4: 'RS' },
-  } as any,
-});
-        applyCorpsAttackAxisOrders(state);
-        expect(state.military.brigade_attack_orders?.b1).toBe('S2');
-        expect(state.military.brigade_attack_orders?.b2).toBe('S4');
-    });
 });
 
