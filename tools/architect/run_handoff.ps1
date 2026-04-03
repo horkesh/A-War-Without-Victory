@@ -172,6 +172,23 @@ if (Test-Path $writeReviewScript) {
     }
 }
 
+# Slack notification (no-op if AWWV_SLACK_WEBHOOK_URL not set)
+$notifySlack = Join-Path $PSScriptRoot "hooks\notify_slack.ps1"
+if (Test-Path $notifySlack) {
+    $review = $null
+    try { $review = Get-Content $reviewFile -Raw | ConvertFrom-Json } catch { }
+    if ($review) {
+        & powershell -ExecutionPolicy Bypass -File $notifySlack `
+            -Title "AWWV Handoff" `
+            -Message ($review.summary ?? '') `
+            -Status ($review.status ?? 'needs_review') `
+            -RunId $runId `
+            -SessionId ($review.session_id ?? '') `
+            -CommitHash ($review.commit_hash ?? '') `
+            -ResultPath $resultDir
+    }
+}
+
 # Clear handoff env vars (scope cleanup)
 $env:AWWV_HANDOFF_RUN_ID     = $null
 $env:AWWV_HANDOFF_RESULT_DIR = $null

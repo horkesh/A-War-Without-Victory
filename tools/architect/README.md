@@ -183,6 +183,36 @@ All hooks are **silent no-ops** outside of handoff runs (env var absent = exit 0
 2. `msg * /TIME:5 "AWWV: ..."` (built-in Windows, no deps)
 3. Terminal bell `[console]::beep(800, 300)` + colored `Write-Host`
 
+### Slack notifications
+
+Optional Slack notifications fire when a handoff completes, is blocked, or needs input. Zero dependencies — pure PowerShell `Invoke-RestMethod`.
+
+**Setup:**
+
+1. Create a Slack app at [api.slack.com/apps](https://api.slack.com/apps) → Incoming Webhooks → Activate → Add to channel.
+2. Copy the webhook URL (`https://hooks.slack.com/services/T.../B.../...`).
+3. Set the env var in your shell profile (PowerShell `$PROFILE` or `.bashrc`):
+   ```powershell
+   $env:AWWV_SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/T.../B.../..."
+   ```
+4. **Never commit the webhook URL.** It is the only secret.
+
+**Behavior:**
+
+- If `AWWV_SLACK_WEBHOOK_URL` is not set → silent no-op (exit 0).
+- Fires after `write_review.ps1` in `run_handoff.ps1` (completion/review).
+- Fires from `on_notification.ps1` when Claude needs input mid-run.
+- Status emoji: 📋 `needs_review` | 🚨 `blocked` | ✋ `needs_input` | ✅ `completed`.
+- All calls wrapped in try/catch — never blocks the handoff pipeline.
+
+**Dry run (test without Slack):**
+
+```powershell
+.\tools\architect\hooks\notify_slack.ps1 -Title "Test" -Message "hello" -Status needs_review -RunId "test_run" -DryRun
+```
+
+**Script:** `tools/architect/hooks/notify_slack.ps1`
+
 ### Constraints
 
 - Hook scripts are idempotent — safe to call multiple times.

@@ -41,6 +41,21 @@ try { [console]::beep(800, 300) } catch { }
 $needsInput = $message -imatch '(waiting|input|permission|confirm|proceed)'
 if ($needsInput) {
     "needs_input" | Set-Content (Join-Path $resultDir "status.txt") -Encoding UTF8
+
+    # Slack ping for needs_input
+    $notifySlack = Join-Path $PSScriptRoot "notify_slack.ps1"
+    if (Test-Path $notifySlack) {
+        $runId = $env:AWWV_HANDOFF_RUN_ID
+        try {
+            & powershell -ExecutionPolicy Bypass -File $notifySlack `
+                -Title "AWWV Handoff" `
+                -Message $message `
+                -Status "needs_input" `
+                -RunId ($runId ?? '') `
+                -SessionId ($sessionId ?? '') `
+                -ResultPath $resultDir
+        } catch { }
+    }
 }
 
 exit 0
