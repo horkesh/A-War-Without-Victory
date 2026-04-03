@@ -46,7 +46,7 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 1. ~~Make Command Authority legible inside command review / override flow, not just as toolbar gauge + button tax.~~ **CLOSED 2026-04-03** — `CommandRecord` section in `OperationBriefingModal` is the canonical four-part surface (commander recommendation + presidential decision + CA cost + op state). `commander_assessment_at_launch` snapshot field flows game_state → electron-main → OperationAAR → adapter → both modal and history panel. `ForceLaunchBadge` demoted to legacy fallback. See `docs/40_reports/implemented/20260403_PRESIDENTIAL_COMMAND_REVIEW_LOOP.md`.
 2. Continue player-knowledge integrity beyond adapter wave 1 where live shell still overstates staff certainty.
 3. Finish behavior-level shell ownership so Warroom, Army HQ, and Tactical Map feel like one coherent presidential product.
-4. Use event-layer presidential decisions to fill between-operation dead zones.
+4. ~~Use event-layer presidential decisions to fill between-operation dead zones.~~ **CLOSED 2026-04-03** — Strategic Posture Review + Visit to the Front shipped for all 3 factions (6 recurring events, war_1993.json). Pressure-driven, `turn_min: 84`, escalating options on 3rd+ fire. Fills 29-turn and 20-turn gaps. EventModal label was already correct. See `docs/40_reports/implemented/20260403_PRESIDENTIAL_BETWEEN_OPS_EVENTS.md`.
 
 ## Infrastructure / Process Watchlist
 
@@ -59,4 +59,4 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 - ~~What is the next smallest truthful command-review slice after Command Authority?~~ Answered: `commander_assessment_at_launch` snapshot + `CommandRecord` UI section. Closed 2026-04-03.
 - Which remaining player-facing surfaces still leak staff certainty or internal jargon?
-- Which between-ops presidential events should ship first as pure content with zero engine risk?
+- ~~Which between-ops presidential events should ship first as pure content with zero engine risk?~~ Answered 2026-04-03: Strategic Posture Review + Visit to the Front. Patron Pressure Response → v0.8.2. Commander Confidence Crisis → v0.8.1.

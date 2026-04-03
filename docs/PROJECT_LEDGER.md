@@ -1,3 +1,13 @@
+## 2026-04-03 - Presidential Between-Ops Events: Strategic Posture Review + Visit to the Front
+- Authored 6 recurring presidential decision events in `data/scenarios/events/war_1993.json` (48 total, was 42)
+- Strategic Posture Review × 3 factions: fires every ~11 turns via pressure system; 3 standard options + war-weariness escalation on 3rd+ fire; covers mid-1993 through late-1994 decision gaps
+- Visit to the Front × 3 factions: fires every ~13 turns; 3 destination choices + stay-in-capital + press-visit escalation on 3rd+ fire; faction-specific theaters (RBiH: Sarajevo/Tuzla/Bihac; RS: Posavina/SRK/Drina; HRHB: Mostar/Central Bosnia/Posavina)
+- EventModal label already correct ("Presidential Decision Required") — no change needed
+- Humanitarian Crisis Response skipped: `corridor_severed` returns false when edges not passed; confirmed at event_types.ts:447
+- `tests/event_timeline_integrity.test.ts`: count assertion updated 95→101; all 17 tests pass
+- tsc clean, vitest 0 new failures (pre-existing unchanged), vite build clean, governance clean
+- See `docs/40_reports/implemented/20260403_PRESIDENTIAL_BETWEEN_OPS_EVENTS.md`
+
 ## 2026-04-03 - Presidential Command-Review Loop: commander_assessment_at_launch
 - Added `commander_assessment_at_launch?: CommanderAssessment` to `CorpsOperation` (game_state.ts) — snapshot set once at presidential decision time, never recomputed
 - electron-main.cjs: force-launch handler snapshots `op.commander_assessment`; normal-launch handler snapshots `op.commander_assessment ?? 'launch'`
