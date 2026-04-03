@@ -1068,6 +1068,7 @@ app.whenReady().then(() => {
         auth.lifetime_spent += FORCE_LAUNCH_COST;
       }
       op.force_launch = true;
+      op.was_force_launched = true;
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);
       return { ok: true };

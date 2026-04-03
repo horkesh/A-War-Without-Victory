@@ -318,6 +318,8 @@ export interface CorpsOperation {
     artillery_preparation?: boolean;
     /** Launch immediately from planning when set. */
     force_launch?: boolean;
+    /** True if this operation was ever force-launched by the player. Permanent — not cleared on recovery. */
+    was_force_launched?: boolean;
     /** Internal consumption flag for artillery preparation. */
     artillery_preparation_consumed?: boolean;
     /** Dig in participating brigades when manually halted. */

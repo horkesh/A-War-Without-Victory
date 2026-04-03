@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import type { CommandAuthority } from '../src/state/game_state.js';
+import type { CommandAuthority, CorpsOperation } from '../src/state/game_state.js';
+import type { OperationAAR } from '../src/sim/combat/operation_aar.js';
 
 function makeAuth(overrides?: Partial<CommandAuthority>): CommandAuthority {
     return { current: 100, max: 100, spent_this_turn: 0, lifetime_spent: 0, ...overrides };
@@ -151,6 +152,138 @@ describe('command authority', () => {
         it('force-launch button disabled at zero CA', () => {
             const ctx = computeCAContext(0, FORCE_LAUNCH_COST);
             expect(ctx.canAfford).toBe(false);
+        });
+    });
+
+    describe('post-override provenance', () => {
+        /** Simulate the electron-main force-launch handler setting both flags. */
+        function simulateForceLaunch(op: Partial<CorpsOperation>): void {
+            op.force_launch = true;
+            op.was_force_launched = true;
+        }
+
+        /** Simulate sector_offensive.ts clearing force_launch on recovery. */
+        function simulateRecoveryReset(op: Partial<CorpsOperation>): void {
+            op.force_launch = false;
+        }
+
+        /** Simulate AAR compilation reading was_force_launched from the operation. */
+        function buildAARProvenance(op: Partial<CorpsOperation>): Pick<OperationAAR, 'force_launched' | 'ca_cost_at_launch'> {
+            return {
+                force_launched: op.was_force_launched ?? false,
+                ca_cost_at_launch: op.was_force_launched ? 15 : undefined,
+            };
+        }
+
+        it('was_force_launched is set on CorpsOperation when force-launched', () => {
+            const op: Partial<CorpsOperation> = { force_launch: false };
+            simulateForceLaunch(op);
+            expect(op.was_force_launched).toBe(true);
+            expect(op.force_launch).toBe(true);
+        });
+
+        it('was_force_launched survives recovery reset (force_launch does not)', () => {
+            const op: Partial<CorpsOperation> = {};
+            simulateForceLaunch(op);
+            simulateRecoveryReset(op);
+            expect(op.force_launch).toBe(false);
+            expect(op.was_force_launched).toBe(true);
+        });
+
+        it('AAR carries force_launched and ca_cost_at_launch when was_force_launched is true', () => {
+            const op: Partial<CorpsOperation> = { was_force_launched: true };
+            const aar = buildAARProvenance(op);
+            expect(aar.force_launched).toBe(true);
+            expect(aar.ca_cost_at_launch).toBe(15);
+        });
+
+        it('AAR force_launched is false for normal non-overridden operations', () => {
+            const op: Partial<CorpsOperation> = {};
+            const aar = buildAARProvenance(op);
+            expect(aar.force_launched).toBe(false);
+            expect(aar.ca_cost_at_launch).toBeUndefined();
+        });
+
+        it('AAR force_launched is false when was_force_launched is explicitly false', () => {
+            const op: Partial<CorpsOperation> = { was_force_launched: false };
+            const aar = buildAARProvenance(op);
+            expect(aar.force_launched).toBe(false);
+            expect(aar.ca_cost_at_launch).toBeUndefined();
+        });
+    });
+
+    describe('operation history adapter pipeline', () => {
+        /** Minimal AAR for adapter testing. */
+        function makeMinimalAAR(overrides?: Partial<OperationAAR>): Record<string, unknown> {
+            return {
+                operation_id: 'op-test-1',
+                operation_name: 'Test Op',
+                corps_id: 'corps-1',
+                faction: 'RBiH',
+                type: 'offensive',
+                started_turn: 5,
+                ended_turn: 10,
+                outcome: 'success',
+                objectives_targeted: [],
+                objectives_captured: [],
+                duration_turns: 5,
+                total_attacks: 3,
+                casualties_suffered: { killed: 10, wounded: 20 },
+                casualties_inflicted: { killed: 5, wounded: 15 },
+                equipment_lost: { tanks: 0, artillery: 0 },
+                equipment_destroyed: { tanks: 0, artillery: 0 },
+                equipment_captured: { tanks: 0, artillery: 0 },
+                grade: { stars: 3, verdict: 'Adequate', factors: {} },
+                weekly_log: [],
+                participating_brigades: [],
+                initial_strength: 1000,
+                final_strength: 970,
+                ...overrides,
+            };
+        }
+
+        /**
+         * Simulate the adapter's extraction logic for force_launched/ca_cost_at_launch.
+         * Mirrors the exact logic in GameStateAdapter.deriveOperationHistory().
+         */
+        function extractProvenance(aar: Record<string, unknown>): { force_launched?: boolean; ca_cost_at_launch?: number } {
+            return {
+                force_launched: aar.force_launched === true ? true : undefined,
+                ca_cost_at_launch: typeof aar.ca_cost_at_launch === 'number' ? aar.ca_cost_at_launch : undefined,
+            };
+        }
+
+        it('includes force_launched: true when AAR has it', () => {
+            const aar = makeMinimalAAR({ force_launched: true, ca_cost_at_launch: 15 });
+            const result = extractProvenance(aar);
+            expect(result.force_launched).toBe(true);
+            expect(result.ca_cost_at_launch).toBe(15);
+        });
+
+        it('includes ca_cost_at_launch when set to a number', () => {
+            const aar = makeMinimalAAR({ force_launched: true, ca_cost_at_launch: 15 });
+            const result = extractProvenance(aar);
+            expect(result.ca_cost_at_launch).toBe(15);
+        });
+
+        it('does NOT include force_launched when AAR has it unset', () => {
+            const aar = makeMinimalAAR();
+            const result = extractProvenance(aar);
+            expect(result.force_launched).toBeUndefined();
+            expect(result.ca_cost_at_launch).toBeUndefined();
+        });
+
+        it('does NOT include force_launched when AAR has it explicitly false', () => {
+            const aar = makeMinimalAAR({ force_launched: false });
+            const result = extractProvenance(aar);
+            expect(result.force_launched).toBeUndefined();
+        });
+
+        it('does NOT include ca_cost_at_launch when not a number', () => {
+            const aar = makeMinimalAAR({ force_launched: true });
+            const result = extractProvenance(aar);
+            expect(result.force_launched).toBe(true);
+            expect(result.ca_cost_at_launch).toBeUndefined();
         });
     });
 

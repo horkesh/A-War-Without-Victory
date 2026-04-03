@@ -113,6 +113,10 @@ export interface OperationAAR {
     grade: OperationGrade;
     weekly_log: OperationWeeklyEntry[];
     axis_summaries?: AxisAAR[];
+    /** True if the player force-launched this operation against command recommendation. */
+    force_launched?: boolean;
+    /** CA cost paid at time of force-launch. Always 15 when force_launched is true. */
+    ca_cost_at_launch?: number;
 }
 
 // ─── Pending accumulator (lives on CorpsOperation during lifecycle) ─────────
@@ -643,6 +647,10 @@ export function finalizeOperationAAR(
     if (commanderName) aar.commander_name = commanderName;
     if (commanderRank) aar.commander_rank = commanderRank;
     if (axisSummaries) aar.axis_summaries = axisSummaries;
+    if (op.was_force_launched) {
+        aar.force_launched = true;
+        aar.ca_cost_at_launch = 15;
+    }
 
     if (!state.operation_history) state.operation_history = [];
     state.operation_history.push(aar);

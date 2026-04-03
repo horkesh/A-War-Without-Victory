@@ -160,6 +160,14 @@ function CompletedOpCard({
                                 {RECOVERY_REASON_BADGE[op.recovery_reason].label}
                             </span>
                         )}
+                        {op.force_launched && (
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase bg-amber-700/60 text-amber-200 border border-amber-400/40">
+                                <span>⚠ Override</span>
+                                {op.ca_cost_at_launch != null && (
+                                    <span className="text-amber-300/70 font-normal normal-case">{op.ca_cost_at_launch} CA</span>
+                                )}
+                            </span>
+                        )}
                     </div>
                 </div>
             </button>

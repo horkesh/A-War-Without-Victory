@@ -53,6 +53,16 @@ function AssessmentBadge({ assessment }: { assessment?: string }) {
     }
 }
 
+/** Shown on operations in execution/recovery that were force-launched. */
+function ForceLaunchBadge({ caCost }: { caCost: number }) {
+    return (
+        <div className="mx-4 mt-3 mb-1 px-3 py-1.5 border border-amber-400/40 bg-amber-50 flex items-center gap-2">
+            <span className="text-[10px] uppercase font-bold tracking-wider text-amber-800">⚠ Presidential Override — Direct Intervention</span>
+            <span className="text-[9px] text-amber-600" style={{ opacity: 0.7 }}>Cost: {caCost} CA</span>
+        </div>
+    );
+}
+
 /** Direct Intervention section — shown when the commander does NOT recommend launch. */
 function DirectInterventionSection({ assessment, currentAuth, onForceLaunch }: {
     assessment: string;
@@ -146,6 +156,11 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                     <div className="text-sm font-bold mt-0.5">{operation.name}</div>
                     <div className="text-[10px] text-neutral-500">{corpsLabel} / {getPlayerSafeMilitaryFactionName(operation.faction)}</div>
                 </div>
+
+                {/* Presidential Override badge — only on executing/recovery ops that were force-launched */}
+                {operation.was_force_launched && operation.phase !== 'planning' && (
+                    <ForceLaunchBadge caCost={FORCE_LAUNCH_COST} />
+                )}
 
                 {/* Commander info */}
                 {commander && (

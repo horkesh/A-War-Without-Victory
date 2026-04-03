@@ -430,6 +430,7 @@ export interface OperationView {
     schwerpunkt_osid?: string;
     artillery_preparation?: boolean;
     force_launch?: boolean;
+    was_force_launched?: boolean;
     recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination';
     axes?: Array<{
         axis_id: string;
@@ -607,6 +608,10 @@ export interface LoadedGameState {
             casualties_inflicted: { killed: number; wounded: number };
         }>;
         recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination';
+        /** True when the player force-launched this operation against command recommendation. */
+        force_launched?: boolean;
+        /** CA cost paid at time of force-launch (always 15 when force_launched is true). */
+        ca_cost_at_launch?: number;
     }>;
     /** Player-issued permanent sector assignments (brigade_sector_override). */
     brigadeSectorOverride?: Record<string, string>;

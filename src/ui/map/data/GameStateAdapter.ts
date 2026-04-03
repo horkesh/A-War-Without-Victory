@@ -926,6 +926,7 @@ export function parseGameState(json: unknown): LoadedGameState {
                     schwerpunkt_osid: typeof op.schwerpunkt_osid === 'string' ? op.schwerpunkt_osid : undefined,
                     artillery_preparation: op.artillery_preparation === true ? true : undefined,
                     force_launch: op.force_launch === true ? true : undefined,
+                    was_force_launched: op.was_force_launched === true ? true : undefined,
                     recovery_reason: typeof op.recovery_reason === 'string' ? op.recovery_reason as OperationView['recovery_reason'] : undefined,
                     axes: Array.isArray(op.axes) ? (op.axes as Array<Record<string, unknown>>).map(a => ({
                         axis_id: String(a.axis_id ?? ''),
@@ -2012,6 +2013,8 @@ function deriveOperationHistory(state: any): LoadedGameState['operationHistory']
                 casualties_suffered: ax.casualties_suffered as { killed: number; wounded: number } ?? { killed: 0, wounded: 0 },
                 casualties_inflicted: ax.casualties_inflicted as { killed: number; wounded: number } ?? { killed: 0, wounded: 0 },
             })),
+            force_launched: aar.force_launched === true ? true : undefined,
+            ca_cost_at_launch: typeof aar.ca_cost_at_launch === 'number' ? aar.ca_cost_at_launch : undefined,
         };
     });
 }

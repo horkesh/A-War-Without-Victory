@@ -1,3 +1,10 @@
+## 2026-04-03 - Command Authority override badge in Operation History Panel
+- Wired `force_launched` and `ca_cost_at_launch` from `OperationAAR` through `GameStateAdapter.deriveOperationHistory()` → `types.ts` → `OperationHistoryPanel.tsx`
+- Amber "⚠ Override" badge renders in CompletedOpCard compact header (visible without expanding)
+- 5 new tests in `tests/command_authority.test.ts` covering adapter extraction pipeline
+- Smoke triad clean: tsc + vitest (29 pass) + vite build
+- Report: `docs/40_reports/implemented/20260403_COMMAND_AUTHORITY_HISTORY_PANEL.md`
+
 ## 2026-04-03 - Slack notifications for handoff system
 - `tools/architect/hooks/notify_slack.ps1`: Slack webhook notification (pure PowerShell, zero deps)
 - Wired into `run_handoff.ps1` (after review generation) and `on_notification.ps1` (needs_input)
@@ -22669,4 +22676,13 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - run_handoff.ps1: added user-level env fallback — if AWWV_SLACK_WEBHOOK_URL missing from process env, reads [System.Environment]::GetEnvironmentVariable(...,'User') automatically
 - Runner now logs "Slack: SENT (process env)" / "Slack: SENT (user env)" / "Slack: SKIPPED" so source is always visible
 - README: updated setup instructions — SetEnvironmentVariable 'User' scope is the recommended setup; profile editing no longer needed
+
+## [2026-04-03] command-authority-post-override-provenance
+- Added `was_force_launched?: boolean` to CorpsOperation — permanent flag (unlike `force_launch` which is cleared on recovery)
+- electron-main.cjs sets `was_force_launched = true` alongside `force_launch` on Level 3 Direct Intervention
+- OperationAAR gains `force_launched` + `ca_cost_at_launch` fields, populated from `was_force_launched` in `finalizeOperationAAR`
+- ForceLaunchBadge component in OperationBriefingModal — amber "Presidential Override — Direct Intervention" badge shown on executing/recovery ops that were force-launched
+- UI plumbing: `was_force_launched` flows through GameStateAdapter → OperationView → modal
+- 5 new regression tests in command_authority.test.ts (24/24 pass)
+- Report: `docs/40_reports/implemented/20260403_COMMAND_AUTHORITY_PROVENANCE.md`
 - Verified: Slack: SENT (user env) on smoke test run when process env was unset
