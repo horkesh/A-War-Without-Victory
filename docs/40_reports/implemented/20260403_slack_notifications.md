@@ -64,12 +64,22 @@ Status emoji: 📋 needs_review | 🚨 blocked | ✋ needs_input | ✅ completed
 - Pure PowerShell — no npm/Node.js/Python dependencies.
 - `-DryRun` switch prints payload without sending.
 
+## Reliability fix (2026-04-03)
+
+Two bugs found during live verification:
+
+1. **Empty-string named-arg drop**: When `AWWV_SLACK_WEBHOOK_URL` is unset, `$slackWebhookUrl` is `$null`. Passing `-WebhookUrl "$slackWebhookUrl"` to `powershell.exe -File` caused PowerShell to receive `-WebhookUrl` with no value (empty string coerced to missing arg), producing a fatal parse error. **Fix**: conditional array splatting — `-WebhookUrl` is only included in the argument list when the URL is actually set.
+
+2. **`??` PS7-only operator**: `on_notification.ps1` used `??` null-coalescing, which is PowerShell 7+ only. Windows ships PS 5.x. **Fix** (prior pass): replaced with `if ($x) { $x } else { '' }` throughout.
+
+Post-fix verified: `Slack: SKIPPED` output (no error, no dropped arg) when webhook unset.
+
 ## Completion block
 
 ```
-Canonical owner: tools/architect/hooks/notify_slack.ps1
+Canonical owner: tools/architect/hooks/notify_slack.ps1 + run_handoff.ps1
 Demoted path: none (new capability)
 Player-visible truth: n/a (dev tooling)
 Canonical UI surface: Slack channel (configured by webhook URL)
-Done means: Slack message arrives when handoff completes or needs input; silent no-op when unconfigured
+Done means: Slack: SENT when webhook set; Slack: SKIPPED (no error) when unset; no pipeline errors in either state
 ```

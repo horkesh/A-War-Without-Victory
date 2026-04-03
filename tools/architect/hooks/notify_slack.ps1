@@ -1,7 +1,12 @@
 <#
 .SYNOPSIS
-    Send a Slack notification for handoff events. No-op if AWWV_SLACK_WEBHOOK_URL is not set.
+    Send a Slack notification for handoff events.
+    No-op (prints SKIPPED) if no webhook URL is available.
+    Prints SENT on success, ERROR:<msg> on failure.
 
+.PARAMETER WebhookUrl
+    Explicit webhook URL. Takes precedence over AWWV_SLACK_WEBHOOK_URL env var.
+    Pass from the caller to avoid relying on env var inheritance into subprocesses.
 .PARAMETER Title
     Notification title.
 .PARAMETER Message
@@ -20,6 +25,7 @@
     Print payload without sending.
 #>
 param(
+    [string]$WebhookUrl = "",
     [string]$Title   = "AWWV Handoff",
     [string]$Message = "",
     [string]$Status  = "needs_review",
@@ -69,15 +75,21 @@ if ($DryRun) {
     exit 0
 }
 
-# Webhook URL from env — silent exit if not set
-$webhookUrl = $env:AWWV_SLACK_WEBHOOK_URL
-if (-not $webhookUrl) { exit 0 }
+# Resolve webhook URL: explicit parameter takes precedence over env var.
+# Caller should pass -WebhookUrl to avoid relying on env var inheritance
+# across powershell subprocess boundaries.
+$resolvedUrl = if ($WebhookUrl) { $WebhookUrl } else { $env:AWWV_SLACK_WEBHOOK_URL }
+if (-not $resolvedUrl) {
+    Write-Output "SKIPPED"
+    exit 0
+}
 
-# Send — never fail
+# Send — emit status word so caller can log it; never throw.
 try {
-    Invoke-RestMethod -Uri $webhookUrl -Method Post -ContentType "application/json" -Body $payload | Out-Null
+    Invoke-RestMethod -Uri $resolvedUrl -Method Post -ContentType "application/json" -Body $payload -ErrorAction Stop | Out-Null
+    Write-Output "SENT"
 } catch {
-    # Silently swallow — never block the handoff pipeline
+    Write-Output "ERROR:$($_.Exception.Message)"
 }
 
 exit 0

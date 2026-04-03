@@ -22658,3 +22658,9 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - TEMPLATE.md: added HTML comment smoke test instruction — unfilled template returns structured TEMPLATE_SMOKE_TEST result instead of conversational "what do you want me to do?"
 - run_handoff.ps1: detects TEMPLATE filename, sets is_smoke_test=true in meta.json
 - Verified: template run produces clean structured response + correct meta tag
+
+## [2026-04-03] handoff-slack-reliability-fix
+- run_handoff.ps1: fixed empty-string named-arg drop — `$null` WebhookUrl caused `-WebhookUrl` with no value in powershell.exe subprocess, producing fatal parse error. Fix: conditional array splatting, only pass `-WebhookUrl` when URL is set.
+- notify_slack.ps1: added `-WebhookUrl` parameter for explicit passthrough; emits SKIPPED/SENT/ERROR to stdout for caller logging
+- on_notification.ps1: replaced `??` PS7-only null-coalescing with PS5-compatible `if/else`
+- Verified: `Slack: SKIPPED` (no error) when webhook unset; `Slack: SENT` when webhook set

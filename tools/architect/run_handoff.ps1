@@ -176,8 +176,10 @@ if (Test-Path $writeReviewScript) {
     }
 }
 
-# Slack notification (no-op if AWWV_SLACK_WEBHOOK_URL not set)
-$notifySlack = Join-Path $PSScriptRoot "hooks\notify_slack.ps1"
+# Slack notification — read webhook URL here (parent process, user env guaranteed),
+# pass explicitly to avoid env-var inheritance issues in powershell subprocesses.
+$slackWebhookUrl = $env:AWWV_SLACK_WEBHOOK_URL
+$notifySlack     = Join-Path $PSScriptRoot "hooks\notify_slack.ps1"
 if (Test-Path $notifySlack) {
     $review = $null
     try { $review = Get-Content $reviewFile -Raw | ConvertFrom-Json } catch { }
@@ -186,7 +188,10 @@ if (Test-Path $notifySlack) {
         $slackStatus = if ($review.status)     { $review.status }     else { 'needs_review' }
         $slackSid    = if ($review.session_id) { $review.session_id } else { '' }
         $slackCommit = if ($review.commit_hash){ $review.commit_hash } else { '' }
-        & powershell -ExecutionPolicy Bypass -File $notifySlack `
+        # Only pass -WebhookUrl when set — empty-string named args drop the flag
+        # in powershell.exe -File invocations, causing a parse error.
+        $webhookArgs = if ($slackWebhookUrl) { @('-WebhookUrl', $slackWebhookUrl) } else { @() }
+        $slackResult = & powershell -ExecutionPolicy Bypass -File $notifySlack @webhookArgs `
             -Title "AWWV Handoff" `
             -Message $slackMsg `
             -Status $slackStatus `
@@ -194,7 +199,12 @@ if (Test-Path $notifySlack) {
             -SessionId $slackSid `
             -CommitHash $slackCommit `
             -ResultPath $resultDir
+        $slackLabel = ($slackResult | Out-String).Trim()
+    } else {
+        $slackLabel = "SKIPPED (no review)"
     }
+} else {
+    $slackLabel = "SKIPPED (script missing)"
 }
 
 # Clear handoff env vars (scope cleanup)
@@ -215,6 +225,8 @@ if (Test-Path $reviewFile) {
     Write-Host "Review:     $reviewFile" -ForegroundColor Cyan
     Write-Host "Inbox:      .\tools\architect\show_handoff.ps1" -ForegroundColor DarkGray
 }
+$slackColor = if ($slackLabel -eq "SENT") { "Green" } elseif ($slackLabel -like "ERROR*") { "Red" } else { "DarkGray" }
+Write-Host "Slack:      $slackLabel" -ForegroundColor $slackColor
 Write-Host ""
 
 # Return result dir for scripting
