@@ -21538,3 +21538,26 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 ### Verification
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_army_hq_war_summary_visibility.test.ts tests\\ui_player_visibility.test.ts`
 - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Tactical operations surface consolidation
+
+### Summary
+- Removed the old rail-mounted `OperationDetail` surface so Tactical Map no longer owns operations in two different panel systems.
+- Made direct operation selection open the canonical tactical `OperationsPanel` instead of silently creating a second rail detail owner.
+
+### Files changed
+- `src/ui/map/App.tsx`
+- `src/ui/map/components/panelRail.ts`
+- `src/ui/map/store/gameStore.ts`
+- `tests/ui_map_panel_rail.test.ts`
+- `tests/ui_opord_player_safe_labels.test.ts`
+- `docs/40_reports/implemented/20260403_TACTICAL_OPERATIONS_SURFACE_CONSOLIDATION.md`
+- deleted `src/ui/map/components/OperationDetail.tsx`
+
+### Why
+- The tactical shell still had both `OperationsPanel` and `OperationDetail`, which created duplicate operations ownership before Army HQ was even considered.
+- A single map-facing tactical surface is easier to keep truthful and stops future work from drifting into another parallel operations shell.
+
+### Verification
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\ui_map_panel_rail.test.ts tests\\ui_opord_player_safe_labels.test.ts tests\\ui_shell_navigation.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`

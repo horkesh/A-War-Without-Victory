@@ -110,15 +110,6 @@ export function derivePanelRailState(state: PanelRailSelectionState): PanelRailS
     return { primary: 'formation', secondary: null };
   }
 
-  if (state.selectedOperationKey) {
-    if (state.selectedCorpsFrontSectorId) return { primary: 'sector', secondary: 'operation' };
-    if (state.selectedCorpsId) return { primary: 'corps', secondary: 'operation' };
-
-    // Operation + Settlement
-    if (state.selectedOsid) return { primary: 'operation', secondary: 'settlement' };
-    return { primary: 'operation', secondary: null };
-  }
-
   if (state.selectedCorpsFrontSectorId) {
     if (state.selectedCorpsId) return { primary: 'corps', secondary: 'sector' };
 

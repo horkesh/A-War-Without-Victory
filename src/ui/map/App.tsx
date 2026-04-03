@@ -12,7 +12,6 @@ import { Minimap } from './components/Minimap';
 import { BottomStatusStrip } from './components/BottomStatusStrip';
 import { OOBSidebar } from './components/OOBSidebar';
 import { OperationsPanel } from './components/OperationsPanel';
-import { OperationDetail } from './components/OperationDetail';
 import { OrbatPanel } from './components/OrbatPanel';
 import { OrderQueue } from './components/OrderQueue';
 import { Tooltip } from './components/Tooltip';
@@ -630,14 +629,12 @@ function App() {
       {/* ArmyDetail retired — faction click opens Army HQ modal */}
       {railState.primary === 'army_reserve' && <ArmyReservePanel railSlot="primary" />}
       {railState.primary === 'formation' && <FormationDetail railSlot="primary" />}
-      {railState.primary === 'operation' && <OperationDetail railSlot="primary" />}
       {railState.primary === 'orbat' && <OrbatPanel />}
 
       {railState.secondary === 'settlement' && <SelectionPanel railSlot="secondary" />}
       {railState.secondary === 'sector' && <CorpsFrontPanel railSlot="secondary" />}
       {railState.secondary === 'corps' && <CorpsDetail railSlot="secondary" />}
       {railState.secondary === 'formation' && <FormationDetail railSlot="secondary" />}
-      {railState.secondary === 'operation' && <OperationDetail railSlot="secondary" />}
       <Tooltip />
       {pendingAttackConfirmation && attackerFormation && (
         <AttackConfirmation

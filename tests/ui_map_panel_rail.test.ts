@@ -47,7 +47,7 @@ test('derivePanelRailState keeps army as primary when corps drills in from it', 
     assert.deepStrictEqual(rail, { primary: 'army', secondary: 'corps' });
 });
 
-test('derivePanelRailState treats direct operation selection as a primary panel', () => {
+test('derivePanelRailState keeps direct operation selection off the panel rail', () => {
     const rail = (panelRail as typeof panelRail & {
         derivePanelRailState?: (state: {
             selectedOsid: string | null;
@@ -66,5 +66,5 @@ test('derivePanelRailState treats direct operation selection as a primary panel'
         selectedOperationKey: 'rbih_corps|Operation Drina',
     });
 
-    assert.deepStrictEqual(rail, { primary: 'operation', secondary: null });
+    assert.deepStrictEqual(rail, { primary: null, secondary: null });
 });
