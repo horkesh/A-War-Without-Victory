@@ -398,6 +398,12 @@ After EVERY scenario run, the orchestrator:
 3. **[2026-03-08] Deep merging test mocks with nested state**
    Do instead: Standard `...overrides` overwrites nested structures entirely. Manually deep merge or spread inside the nested object literal.
 
+4. **[2026-04-03] Sector merge rule â€” shared friendly-side OSIDs are not enough**
+   Do instead: A sector merge is legal only if the merged edge set still forms one contiguous frontline. Never short-circuit adjacency just because sectors share a friendly-side OSID; that is how separate hostile pockets get re-glued into one fake sector.
+
+5. **[2026-04-03] Sector invariant — one sector = one frontline**
+   Do instead: Treat sectors as commanded frontline slices, not OSID/sub-segment buckets. If a saved sector still carries multiple sub-segments, that is invalid state to rebuild or split, not a tolerated variant.
+
 ## Player Shell Discipline
 1. **[2026-04-02] Player-facing operation documents must never print raw OSIDs**
    Do instead: OPORDs, objective lists, and HQ roster/history hover rows must resolve settlement labels through player-safe helpers. Exact internal identifiers belong only in debug-only surfaces.

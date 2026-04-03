@@ -22163,3 +22163,25 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 
 ### Verification
 - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
+
+## 2026-04-03 - Sector frontline contiguity guard hardening
+
+### Summary
+- Hardened the late sector merge passes so they can no longer merge two hostile pockets into one sector merely because they share friendly-side OSIDs.
+- Normalized sector merges to rebuild a single merged frontline component instead of preserving appended multi-sub-segment residue.
+
+### Files changed
+- `src/sim/combat/corps_front_sectors.ts`
+- `src/sim/combat/sector_rearrangement.ts`
+- `tests/sector_frontline_contiguity_repro.test.ts`
+- `docs/40_reports/implemented/20260403_SECTOR_FRONTLINE_CONTIGUITY_GUARD_HARDENING.md`
+
+### Why
+- The strict product rule is that a sector is a frontline, not a territory bucket.
+- The late merge guards still had a loophole: shared friendly-side OSIDs were being treated as proof of frontline adjacency.
+- That let later passes re-glue fronts that the earlier splitter had correctly separated.
+
+### Verification
+- `node .\\node_modules\\tsx\\dist\\cli.mjs --test --test-name-pattern "does not merge separate frontline pockets" tests\\sector_frontline_contiguity_repro.test.ts`
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\sector_rearrangement.test.ts`
+- `npx.cmd tsc --noEmit -p tsconfig.json`

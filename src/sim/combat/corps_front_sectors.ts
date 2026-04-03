@@ -57,6 +57,7 @@ import {
     consolidateIsolatedCorpsPockets,
 } from './sector_territory.js';
 import { buildMultiSectorsForCorps } from './sector_building.js';
+import { mergeSectors } from './sector_splitting.js';
 import {
     classifyBrigadesByTerritory,
     assignCrossCorpsEnclaveDefenders,
@@ -231,17 +232,16 @@ function mergeSmallAdjacentSectors(
                 // but whose front-line edge sets are geographically disconnected.
                 if (!areSectorsFrontEdgeAdjacent(a, b, edgeMeta, sharedBoundaryAdj, centroids)) continue;
 
-                // Merge b into a
-                a.edge_ids = [...new Set([...a.edge_ids, ...b.edge_ids])].sort(strictCompare);
-                a.territory_osids = [...new Set([...a.territory_osids, ...b.territory_osids])].sort(strictCompare);
-                a.assigned_brigade_ids = [...new Set([...a.assigned_brigade_ids, ...b.assigned_brigade_ids])].sort(strictCompare);
-                a.reserve_brigade_ids = [...new Set([...a.reserve_brigade_ids, ...b.reserve_brigade_ids])].sort(strictCompare);
-                a.opposing_factions = [...new Set([...a.opposing_factions, ...b.opposing_factions])].sort(strictCompare);
-                a.length_edges = a.edge_ids.length;
-                a.density = a.length_edges > 0 ? a.assigned_brigade_ids.length / a.length_edges : 0;
-
-                // Merge sub-segments
-                a.sub_segments = [...a.sub_segments, ...b.sub_segments];
+                // Merge b into a as one contiguous frontline sector.
+                const mergedSector = mergeSectors(a.corps_id, a, b, 0);
+                a.edge_ids = mergedSector.edge_ids;
+                a.territory_osids = mergedSector.territory_osids;
+                a.assigned_brigade_ids = mergedSector.assigned_brigade_ids;
+                a.reserve_brigade_ids = mergedSector.reserve_brigade_ids;
+                a.opposing_factions = mergedSector.opposing_factions;
+                a.length_edges = mergedSector.length_edges;
+                a.density = mergedSector.density;
+                a.sub_segments = mergedSector.sub_segments;
 
                 // Remove b
                 delete sectors[sectorIds[j]];
@@ -296,29 +296,6 @@ function areSectorsFrontEdgeAdjacent(
 
     // Determine faction from sector — needed to orient friendly/hostile sides in buildEdgeAdjacency.
     const faction = a.faction;
-
-    // Fast path: if any edge in A and any edge in B share the same friendly OSID,
-    // they are on the same polygon face of the front line and are trivially adjacent.
-    // This handles cases where hostile OSIDs are not linked in sharedBoundaryAdj
-    // (e.g. test environments with minimal edge metadata, or sub-segments split
-    // along the same friendly OSID). Triple-junction Cases A/B would eventually
-    // connect them, but only if the hostile OSIDs are mutually adjacent — which
-    // they may not be when edge metadata is incomplete.
-    {
-        const aFriendly = new Set<string>();
-        for (const eid of aEdges) {
-            const meta = edgeMeta.get(eid);
-            if (!meta) continue;
-            const friendly = meta.side_a === faction ? meta.a : meta.side_b === faction ? meta.b : null;
-            if (friendly) aFriendly.add(friendly);
-        }
-        for (const eid of bEdges) {
-            const meta = edgeMeta.get(eid);
-            if (!meta) continue;
-            const friendly = meta.side_a === faction ? meta.a : meta.side_b === faction ? meta.b : null;
-            if (friendly && aFriendly.has(friendly)) return true;
-        }
-    }
 
     // Build edge adjacency for the combined edge set using triple-junction (Cases A/B).
     const combined = [...aEdges, ...bEdges];
@@ -494,14 +471,16 @@ function buildFactionSectors(
                 const targetMainIdx = sectors.indexOf(target);
                 if (mergedIdx === -1 || targetMainIdx === -1) break;
 
-                // Merge in-place (following mergeSmallAdjacentSectors pattern)
-                neighbor.edge_ids = [...new Set([...neighbor.edge_ids, ...target.edge_ids])].sort(strictCompare);
-                neighbor.territory_osids = [...new Set([...neighbor.territory_osids, ...target.territory_osids])].sort(strictCompare);
-                neighbor.assigned_brigade_ids = [...new Set([...neighbor.assigned_brigade_ids, ...target.assigned_brigade_ids])].sort(strictCompare);
-                neighbor.reserve_brigade_ids = [...new Set([...neighbor.reserve_brigade_ids, ...target.reserve_brigade_ids])].sort(strictCompare);
-                neighbor.opposing_factions = [...new Set([...neighbor.opposing_factions, ...target.opposing_factions])].sort(strictCompare);
-                neighbor.length_edges = neighbor.edge_ids.length;
-                neighbor.sub_segments = [...neighbor.sub_segments, ...target.sub_segments];
+                // Merge in-place as one contiguous frontline sector.
+                const mergedSector = mergeSectors(cid, neighbor, target, 0);
+                neighbor.edge_ids = mergedSector.edge_ids;
+                neighbor.territory_osids = mergedSector.territory_osids;
+                neighbor.assigned_brigade_ids = mergedSector.assigned_brigade_ids;
+                neighbor.reserve_brigade_ids = mergedSector.reserve_brigade_ids;
+                neighbor.opposing_factions = mergedSector.opposing_factions;
+                neighbor.length_edges = mergedSector.length_edges;
+                neighbor.sub_segments = mergedSector.sub_segments;
+                neighbor.density = mergedSector.density;
 
                 // Remove the target sector
                 sectors.splice(targetMainIdx, 1);

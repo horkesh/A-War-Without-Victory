@@ -59,7 +59,20 @@ function mergeSectorInto(into: CorpsFrontSector, from: CorpsFrontSector): void {
     into.edge_ids.sort(strictCompare);
     into.length_edges = into.edge_ids.length;
 
-    into.sub_segments.push(...from.sub_segments);
+    into.sub_segments = [{
+        sub_segment_id: `${into.sector_id}:merged`,
+        edge_ids: into.edge_ids,
+        friendly_osids: [...new Set([
+            ...into.sub_segments.flatMap((segment) => segment.friendly_osids),
+            ...from.sub_segments.flatMap((segment) => segment.friendly_osids),
+        ])].sort(strictCompare),
+        enemy_osids: [...new Set([
+            ...into.sub_segments.flatMap((segment) => segment.enemy_osids),
+            ...from.sub_segments.flatMap((segment) => segment.enemy_osids),
+        ])].sort(strictCompare),
+        length_edges: into.edge_ids.length,
+        primary_brigade_ids: [],
+    }];
 
     // Merge territory_osids
     const territorySet = new Set(into.territory_osids);

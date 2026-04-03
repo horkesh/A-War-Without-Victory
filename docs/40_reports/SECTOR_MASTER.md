@@ -392,6 +392,26 @@ Guard inserted in both merge paths — after `areSectorsTerritoryAdjacent` passe
 
 **Verification:** `npx tsc --noEmit` passes clean.
 
+### Shared friendly-side merge regression hardening (2026-04-03)
+
+Follow-up root cause: even after the front-edge adjacency guard existed, the merge helper still had a loophole. `areSectorsFrontEdgeAdjacent(...)` short-circuited to `true` when two sectors shared any friendly-side OSID. That is not a valid frontage rule. Two hostile pockets can face the same friendly-side line and still be separate frontlines.
+
+Concrete repro:
+- friendly line: `f1/f2`
+- hostile pocket A: `e1`
+- hostile pocket B: `e2`
+- each pocket correctly splits into its own sector during initial sector construction
+- the later merge pass re-glued them into one sector because both sectors shared `f1/f2`
+
+Fix:
+- removed the shared-friendly fast path from `areSectorsFrontEdgeAdjacent(...)`
+- normalized late sector merges so they rebuild one merged frontline component instead of appending sub-segments together
+
+Rule:
+- sectors may merge only when the merged edge set is still one contiguous frontline component under the same edge-adjacency rules used for splitting
+- shared friendly-side geometry alone is never enough
+- a saved sector carrying multiple sub-segments is invalid under the current rule set; sectors are frontlines, not sub-segment bags
+
 ---
 
 ## Diagnostic Tools
