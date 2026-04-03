@@ -9,6 +9,7 @@ import type { EdgeRecord } from '../../map/settlements.js';
 import type { FactionId, GameState } from '../../state/game_state.js';
 import type { SupplyStateByOsidReport, SupplyStateDerivationReport } from '../../state/supply_state_derivation.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { hasLiveSectorFrontlineTruth } from './front_assignment.js';
 
 /** Pressure per front edge (overextension). */
 const PRESSURE_PER_FRONT_EDGE = 3;
@@ -41,21 +42,40 @@ export function updateSupplyPressure(
         return;
     }
 
-    // Use OSID front edges when available (more accurate in OSID mode);
-    // fall back to settlement-level front edges otherwise.
-    const osidFrontEdges = state.military.war_front_edges_osid;
-    const frontEdges = osidFrontEdges && osidFrontEdges.length > 0
-        ? osidFrontEdges
-        : computeFrontEdges(state, settlementEdges);
     const factionIds = (state.factions ?? []).map((f) => f.id).sort(strictCompare);
 
     const frontEdgeCountByFaction = new Map<FactionId, number>();
     for (const fid of factionIds) {
         frontEdgeCountByFaction.set(fid, 0);
     }
-    for (const fe of frontEdges) {
-        if (fe.side_a) frontEdgeCountByFaction.set(fe.side_a, (frontEdgeCountByFaction.get(fe.side_a) ?? 0) + 1);
-        if (fe.side_b) frontEdgeCountByFaction.set(fe.side_b, (frontEdgeCountByFaction.get(fe.side_b) ?? 0) + 1);
+
+    if (hasLiveSectorFrontlineTruth(state)) {
+        const sectorEdgeIdsByFaction = new Map<FactionId, Set<string>>();
+        for (const fid of factionIds) {
+            sectorEdgeIdsByFaction.set(fid, new Set<string>());
+        }
+        for (const sector of Object.values(state.military.corps_front_sectors ?? {})) {
+            if (!sector) continue;
+            const edgeSet = sectorEdgeIdsByFaction.get(sector.faction) ?? new Set<string>();
+            for (const edgeId of sector.edge_ids ?? []) {
+                edgeSet.add(edgeId);
+            }
+            sectorEdgeIdsByFaction.set(sector.faction, edgeSet);
+        }
+        for (const fid of factionIds) {
+            frontEdgeCountByFaction.set(fid, sectorEdgeIdsByFaction.get(fid)?.size ?? 0);
+        }
+    } else {
+        // Use OSID front edges when available (more accurate in OSID mode);
+        // fall back to settlement-level front edges otherwise.
+        const osidFrontEdges = state.military.war_front_edges_osid;
+        const frontEdges = osidFrontEdges && osidFrontEdges.length > 0
+            ? osidFrontEdges
+            : computeFrontEdges(state, settlementEdges);
+        for (const fe of frontEdges) {
+            if (fe.side_a) frontEdgeCountByFaction.set(fe.side_a, (frontEdgeCountByFaction.get(fe.side_a) ?? 0) + 1);
+            if (fe.side_b) frontEdgeCountByFaction.set(fe.side_b, (frontEdgeCountByFaction.get(fe.side_b) ?? 0) + 1);
+        }
     }
 
     const criticalByFaction = new Map<FactionId, number>();

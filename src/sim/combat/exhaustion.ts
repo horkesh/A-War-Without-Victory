@@ -10,6 +10,8 @@ import { getExhaustionExternalModifier } from '../../state/patron_pressure.js';
 import { RESILIENCE_EFFECT_SCALE } from '../../state/supply_reserve_constants.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getMaxEnclaveResilienceForFaction } from './enclave_resilience.js';
+import { hasLiveSectorFrontlineTruth } from './front_assignment.js';
+import { isSectorColdFront } from './sector_utils.js';
 
 /** Exhaustion per static front (Engine Invariants §6, §8). */
 const EXHAUSTION_PER_STATIC_FRONT = 2;
@@ -21,7 +23,7 @@ const EXHAUSTION_PER_SUPPLY_PRESSURE_POINT = 0.1;
 const MAX_DELTA_PER_TURN = 10;
 
 /**
- * Update war_exhaustion from static fronts and supply pressure.
+ * Update war_exhaustion from sector-owned frontline exposure and supply pressure.
  * Only runs when meta.phase === 'war'.
  * Exhaustion is monotonic (never decreased) — Engine Invariants §8.
  * Does not modify political_controllers.
@@ -38,10 +40,30 @@ export function updateExhaustion(
     }
 
     const factionIds = (state.factions ?? []).map((f) => f.id).sort(strictCompare);
-    const staticFrontCount = fronts.filter((f) => f.stability === 'static').length;
     const supplyPressure = state.political.war_supply_pressure ?? {};
     const legitimacyByFaction = getFactionLegitimacyAverages(state);
     const sarajevo = state.political.sarajevo_state;
+    const staticFrontCountByFaction = new Map<FactionId, number>();
+    for (const fid of factionIds) {
+        staticFrontCountByFaction.set(fid, 0);
+    }
+
+    if (hasLiveSectorFrontlineTruth(state)) {
+        for (const sector of Object.values(state.military.corps_front_sectors ?? {})) {
+            if (!sector) continue;
+            if ((sector.edge_ids?.length ?? 0) === 0) continue;
+            if (isSectorColdFront(state, sector)) continue;
+            staticFrontCountByFaction.set(
+                sector.faction,
+                (staticFrontCountByFaction.get(sector.faction) ?? 0) + 1,
+            );
+        }
+    } else {
+        const staticFrontCount = fronts.filter((f) => f.stability === 'static').length;
+        for (const fid of factionIds) {
+            staticFrontCountByFaction.set(fid, staticFrontCount);
+        }
+    }
 
     if (!state.political.war_exhaustion) {
         (state as GameState & { war_exhaustion: Record<FactionId, number> }).political.war_exhaustion = {};
@@ -51,7 +73,7 @@ export function updateExhaustion(
     for (const fid of factionIds) {
         const current = typeof exhaustion[fid] === 'number' ? exhaustion[fid]! : 0;
         const supplyContrib = (supplyPressure[fid] ?? 0) * EXHAUSTION_PER_SUPPLY_PRESSURE_POINT;
-        const staticContrib = staticFrontCount * EXHAUSTION_PER_STATIC_FRONT;
+        const staticContrib = (staticFrontCountByFaction.get(fid) ?? 0) * EXHAUSTION_PER_STATIC_FRONT;
         const delta = Math.min(MAX_DELTA_PER_TURN, supplyContrib + staticContrib);
         const multiplier = frictionMultipliers?.[fid] ?? 1;
         const faction = state.factions.find((f) => f.id === fid);

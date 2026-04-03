@@ -69,6 +69,44 @@ test('exhaustion does not flip control directly', () => {
     assert.deepStrictEqual(state.political.political_controllers, controllersBefore);
 });
 
+test('exhaustion prefers sector-owned frontline exposure when live sector truth exists', () => {
+    const state = minimalPhaseIIState();
+    state.political.war_exhaustion = { RBiH: 0, RS: 0, HRHB: 0 };
+    state.political.war_supply_pressure = { RBiH: 0, RS: 0, HRHB: 0 };
+    state.military.corps_front_sectors = {
+        'sector:rbih': {
+            sector_id: 'sector:rbih',
+            corps_id: 'arbih_1st_corps',
+            faction: 'RBiH',
+            opposing_factions: ['RS'],
+            edge_ids: ['e1'],
+            sub_segments: [],
+            territory_osids: [],
+            assigned_brigade_ids: [],
+            reserve_brigade_ids: [],
+            length_edges: 1,
+        },
+        'sector:rs': {
+            sector_id: 'sector:rs',
+            corps_id: 'vrs_romanija',
+            faction: 'RS',
+            opposing_factions: ['RBiH'],
+            edge_ids: ['e1'],
+            sub_segments: [],
+            territory_osids: [],
+            assigned_brigade_ids: [],
+            reserve_brigade_ids: [],
+            length_edges: 1,
+        },
+    } as any;
+
+    updateExhaustion(state, []);
+
+    assert.ok((state.political.war_exhaustion?.RBiH ?? 0) >= 2);
+    assert.ok((state.political.war_exhaustion?.RS ?? 0) >= 2);
+    assert.strictEqual(state.political.war_exhaustion?.HRHB, 0);
+});
+
 test('updateExhaustion does nothing when meta.phase is peace', () => {
     const state = minimalPhaseIIState();
     state.meta.phase = 'war';

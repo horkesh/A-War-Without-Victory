@@ -21636,3 +21636,8 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - Removed the `scenario_runner.ts` synthetic frontier writer under `postureAllPushAndApplyBreaches`: the harness no longer seeds `front_posture`, synthetic brigade edge assignments, `front_segments`, or `front_pressure` just to force breaches.
 - Added a regression check in `tests/engine_honesty_legacy_contracts.test.ts` so the harness cannot quietly drift back into manufacturing frontier truth.
 - Repo rule reinforced: scenario tooling may observe and summarize real frontier/breach state, but it must not invent live canonical preconditions for it.
+## 2026-04-03 — Sector truth now drives supply pressure and exhaustion
+
+- Repointed `src/sim/combat/supply_pressure.ts` so live frontage pressure now prefers `corps_front_sectors` edge ownership instead of legacy front-edge counting when sector truth exists.
+- Repointed `src/sim/combat/exhaustion.ts` so frontline exhaustion now prefers sector-owned frontline exposure (non-cold sectors by faction) instead of legacy `detectFronts(...)` output when sector truth exists.
+- Added dedicated precedence checks in `tests/combat_supply_pressure.test.ts` and `tests/combat_exhaustion.test.ts`.
