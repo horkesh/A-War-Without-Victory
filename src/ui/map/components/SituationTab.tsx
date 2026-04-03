@@ -99,8 +99,12 @@ function computeFrontSummary(state: LoadedGameState): { static: number; fluid: n
   return { static: stat, fluid, oscillating };
 }
 
-function computeSupplySummary(state: LoadedGameState): { open: number; strained: number; cut: number } {
-  const values = Object.values(state.warPhaseSupplyPressure ?? {});
+function computeSupplySummary(state: LoadedGameState, playerFaction: string | null): { open: number; strained: number; cut: number } {
+  const pressure = state.warPhaseSupplyPressure ?? {};
+  // Only count the player faction's supply pressure when a player faction exists
+  const values = playerFaction
+    ? (pressure[playerFaction] !== undefined ? [pressure[playerFaction]] : [])
+    : Object.values(pressure);
   let open = 0;
   let strained = 0;
   let cut = 0;
@@ -127,9 +131,9 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
   const osidAreas = useOsidAreas();
   const territoryPct = computeTerritoryPercentages(state.controlBySettlement, osidAreas ?? undefined);
   const front = computeFrontSummary(state);
-  const supply = computeSupplySummary(state);
-  const ivpScore = computeIvpScore(state);
   const playerFaction = getPlayerFacingFaction(state);
+  const supply = computeSupplySummary(state, playerFaction);
+  const ivpScore = computeIvpScore(state);
   const playerMilitaryLabel = playerFaction ? getPlayerSafeMilitaryFactionName(playerFaction) : null;
   const playerPoliticalLabel = playerFaction ? getPlayerSafePoliticalFactionName(playerFaction) : null;
   const activeMunicipalitySupport = playerFaction

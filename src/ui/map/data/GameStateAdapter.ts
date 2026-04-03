@@ -33,6 +33,13 @@ function pointsByFaction(rec: Record<string, { points?: number }>): Record<strin
     return out;
 }
 
+/** Filter a faction-keyed record to only the player's faction (defense-in-depth). */
+function scopeToPlayerFaction<T>(record: Record<string, T> | undefined, playerFaction: string | null | undefined): Record<string, T> | undefined {
+    if (!record || !playerFaction) return record;
+    const entry = record[playerFaction];
+    return entry !== undefined ? { [playerFaction]: entry } : undefined;
+}
+
 const ATTACKER_WIN_OUTCOMES = ['decisive_victory', 'victory', 'costly_victory'];
 const ATTACKER_LOSS_OUTCOMES = ['repulsed', 'catastrophic'];
 
@@ -1756,8 +1763,8 @@ export function parseGameState(json: unknown): LoadedGameState {
         formations, militiaPools, controlBySettlement, statusBySettlement,
         brigadeAorByFormationId,
         attackOrders, aorOrders, recentControlEvents, allControlEvents: recentControlEvents, displacementEventLog: displacementEventLogRaw, recruitment,
-        armyStance, casualtyLedger, civilianCasualties, internationalVisibilityPressure, ivpConsequencesActive, pendingConvoyDecisions, municipalitySupportOrders,
-        sarajevoTunnelOperational: Boolean(state.military.sarajevo_tunnel_operational), warPhaseSupplyPressure, warPhaseExhaustion,
+        armyStance, casualtyLedger: scopeToPlayerFaction(casualtyLedger, playerFaction), civilianCasualties, internationalVisibilityPressure, ivpConsequencesActive, pendingConvoyDecisions, municipalitySupportOrders,
+        sarajevoTunnelOperational: Boolean(state.military.sarajevo_tunnel_operational), warPhaseSupplyPressure: scopeToPlayerFaction(warPhaseSupplyPressure, playerFaction), warPhaseExhaustion: scopeToPlayerFaction(warPhaseExhaustion, playerFaction),
         player_faction: playerFaction ?? undefined,
         rbih_hrhb_war_earliest_turn: rbih_hrhb_war_earliest_turn ?? null,
         war_alliance_rbih_hrhb: war_alliance_rbih_hrhb ?? null,
@@ -1776,7 +1783,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         operations: filterPlayerFacingEntriesByFaction(operations, playerFaction),
         namedOfficerData,
         namedOfficerStateById,
-        factionReserves,
+        factionReserves: scopeToPlayerFaction(factionReserves, playerFaction),
         productionFacilities,
         smugglingRoutes,
         embargoStatus,

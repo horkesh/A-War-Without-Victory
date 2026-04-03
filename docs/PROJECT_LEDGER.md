@@ -1,3 +1,29 @@
+## 2026-04-03 - Adapter defense-in-depth: player-faction scoping
+
+### Summary
+- Added `scopeToPlayerFaction()` helper to `GameStateAdapter` that filters faction-keyed records to the player's faction at adapter output (defense-in-depth).
+- Applied to four previously-unfiltered families: `casualtyLedger`, `factionReserves`, `warPhaseSupplyPressure`, `warPhaseExhaustion`.
+- Fixed `SituationTab.computeSupplySummary()` which aggregated supply pressure across ALL factions instead of only the player's.
+- Added 6 regression tests in `player_knowledge_integrity.test.ts`.
+- Three parallel audits confirmed raw ID leaks, Codex visibility, Warroom return, and debug gating are already clean from prior 2026-04-02/03 work.
+
+### Files changed
+- `src/ui/map/data/GameStateAdapter.ts`
+- `src/ui/map/components/SituationTab.tsx`
+- `tests/player_knowledge_integrity.test.ts`
+- `docs/40_reports/implemented/20260403_ADAPTER_DEFENSE_IN_DEPTH_PLAYER_SCOPING.md`
+- `docs/PROJECT_LEDGER.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- The adapter was architecturally omniscient for these four families — components gated correctly, but any future component that forgot to filter would leak enemy truth. Defense-in-depth at the adapter prevents this class of mistake.
+
+### Verification
+- `npx tsc --noEmit` — clean
+- `vitest run tests/player_knowledge_integrity.test.ts` — 6/6 pass
+- `vite build` — success
+- `check_claude_governance.ps1` — OK
+
 ## 2026-04-03 - Map-first usability restoration (OPS + S shortcut)
 
 ### Summary
