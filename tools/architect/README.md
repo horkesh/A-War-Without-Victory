@@ -191,7 +191,11 @@ Optional Slack notifications fire when a handoff completes, is blocked, or needs
 
 1. Create a Slack app at [api.slack.com/apps](https://api.slack.com/apps) → Incoming Webhooks → Activate → Add to channel.
 2. Copy the webhook URL (`https://hooks.slack.com/services/T.../B.../...`).
-3. Set the env var in your shell profile (PowerShell `$PROFILE` or `.bashrc`):
+3. Set it as a **persistent user-level env var** (survives new shells, no profile editing needed):
+   ```powershell
+   [System.Environment]::SetEnvironmentVariable('AWWV_SLACK_WEBHOOK_URL', 'https://hooks.slack.com/services/T.../B.../...', 'User')
+   ```
+   Or set it in the current process only (lost when shell closes):
    ```powershell
    $env:AWWV_SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/T.../B.../..."
    ```
@@ -199,7 +203,10 @@ Optional Slack notifications fire when a handoff completes, is blocked, or needs
 
 **Behavior:**
 
-- If `AWWV_SLACK_WEBHOOK_URL` is not set → silent no-op (exit 0).
+- `run_handoff.ps1` checks process env first, then user-level env automatically.
+- If found in process env → `Slack: SENT (process env)`.
+- If found in user env only → `Slack: SENT (user env)`.
+- If absent everywhere → `Slack: SKIPPED` (silent no-op).
 - Fires after `write_review.ps1` in `run_handoff.ps1` (completion/review).
 - Fires from `on_notification.ps1` when Claude needs input mid-run.
 - Status emoji: 📋 `needs_review` | 🚨 `blocked` | ✋ `needs_input` | ✅ `completed`.

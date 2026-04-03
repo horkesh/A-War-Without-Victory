@@ -178,7 +178,15 @@ if (Test-Path $writeReviewScript) {
 
 # Slack notification — read webhook URL here (parent process, user env guaranteed),
 # pass explicitly to avoid env-var inheritance issues in powershell subprocesses.
+# Fall back to user-level env var so Slack works without manual shell setup.
 $slackWebhookUrl = $env:AWWV_SLACK_WEBHOOK_URL
+$slackWebhookSource = ""
+if ($slackWebhookUrl) {
+    $slackWebhookSource = " (process env)"
+} else {
+    $slackWebhookUrl = [System.Environment]::GetEnvironmentVariable('AWWV_SLACK_WEBHOOK_URL', 'User')
+    if ($slackWebhookUrl) { $slackWebhookSource = " (user env)" }
+}
 $notifySlack     = Join-Path $PSScriptRoot "hooks\notify_slack.ps1"
 if (Test-Path $notifySlack) {
     $review = $null
@@ -226,7 +234,8 @@ if (Test-Path $reviewFile) {
     Write-Host "Inbox:      .\tools\architect\show_handoff.ps1" -ForegroundColor DarkGray
 }
 $slackColor = if ($slackLabel -eq "SENT") { "Green" } elseif ($slackLabel -like "ERROR*") { "Red" } else { "DarkGray" }
-Write-Host "Slack:      $slackLabel" -ForegroundColor $slackColor
+$slackDisplay = if ($slackLabel -eq "SENT" -or $slackLabel -like "ERROR*") { "$slackLabel$slackWebhookSource" } else { $slackLabel }
+Write-Host "Slack:      $slackDisplay" -ForegroundColor $slackColor
 Write-Host ""
 
 # Return result dir for scripting

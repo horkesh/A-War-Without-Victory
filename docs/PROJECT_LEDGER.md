@@ -22664,3 +22664,9 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - notify_slack.ps1: added `-WebhookUrl` parameter for explicit passthrough; emits SKIPPED/SENT/ERROR to stdout for caller logging
 - on_notification.ps1: replaced `??` PS7-only null-coalescing with PS5-compatible `if/else`
 - Verified: `Slack: SKIPPED` (no error) when webhook unset; `Slack: SENT` when webhook set
+
+## [2026-04-03] handoff-slack-user-env-fallback
+- run_handoff.ps1: added user-level env fallback — if AWWV_SLACK_WEBHOOK_URL missing from process env, reads [System.Environment]::GetEnvironmentVariable(...,'User') automatically
+- Runner now logs "Slack: SENT (process env)" / "Slack: SENT (user env)" / "Slack: SKIPPED" so source is always visible
+- README: updated setup instructions — SetEnvironmentVariable 'User' scope is the recommended setup; profile editing no longer needed
+- Verified: Slack: SENT (user env) on smoke test run when process env was unset
