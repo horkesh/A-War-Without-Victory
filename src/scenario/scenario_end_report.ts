@@ -583,9 +583,9 @@ export interface FormatEndReportParams {
     botBenchmarkSummary?: BotBenchmarkSummary | null;
     /** Optional per-turn bot diagnostics. */
     botWeeklyDiagnostics?: BotWeeklyDiagnosticsRow[] | null;
-    /** Optional aggregate summary of resolve_attack_orders across run weeks. */
+    /** Optional aggregate summary of the legacy SID combat fallback across run weeks. */
     attackResolutionSummary?: AttackResolutionSummary | null;
-    /** Optional per-week rollup of resolve_attack_orders diagnostics. */
+    /** Optional per-week rollup of legacy SID combat fallback diagnostics. */
     attackResolutionWeekly?: AttackResolutionWeekRollup[] | null;
     /** Optional initial/final/delta historical-alignment diagnostics by faction. */
     historicalAlignmentDiagnostics?: HistoricalAlignmentDiagnostics | null;

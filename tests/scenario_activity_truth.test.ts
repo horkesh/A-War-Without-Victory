@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { deriveWeeklyActivityCounts } from '../src/scenario/scenario_runner.js';
+import {
+    deriveWeeklyActivityCounts,
+    selectCanonicalAttackResolutionSummary,
+} from '../src/scenario/scenario_runner.js';
 import type { GameState } from '../src/state/game_state.js';
 import type { TurnReport } from '../src/sim/turn_pipeline_types.js';
 
@@ -66,5 +69,43 @@ describe('scenario activity truth sourcing', () => {
             pressure_eligible_size: 0,
             displacement_trigger_eligible_size: 0,
         });
+    });
+
+    it('prefers canonical OSID attack resolution when both combat summaries exist', () => {
+        const turnReport = {
+            resolve_attack_orders: {
+                orders_processed: 2,
+                battle_report: {
+                    battles: [{ defender_brigade: 'legacy_defender' }],
+                },
+            },
+            attack_resolution_osid: {
+                orders_processed: 5,
+                unique_attack_targets: 3,
+                battles: [{ defender_brigade: 'canonical_defender' }, {}],
+            },
+        } as unknown as TurnReport;
+
+        const selected = selectCanonicalAttackResolutionSummary(turnReport);
+
+        assert.equal(selected.summary?.orders_processed, 5);
+        assert.equal(selected.summary?.unique_attack_targets, 3);
+        assert.deepEqual(selected.battles, [{ defender_brigade: 'canonical_defender' }, {}]);
+    });
+
+    it('falls back to legacy SID attack resolution only when canonical OSID summary is absent', () => {
+        const turnReport = {
+            resolve_attack_orders: {
+                orders_processed: 4,
+                battle_report: {
+                    battles: [{ defender_brigade: 'legacy_only' }, {}],
+                },
+            },
+        } as unknown as TurnReport;
+
+        const selected = selectCanonicalAttackResolutionSummary(turnReport);
+
+        assert.equal(selected.summary?.orders_processed, 4);
+        assert.deepEqual(selected.battles, [{ defender_brigade: 'legacy_only' }, {}]);
     });
 });

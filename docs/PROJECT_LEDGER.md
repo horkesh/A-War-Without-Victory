@@ -21473,3 +21473,29 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 ### Verification
 - `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\scenario_activity_truth.test.ts`
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\brigade_territory_reconciliation.test.ts tests\\commander_driven_brigade_assignment.test.ts`
+
+## 2026-04-03 - Legacy SID combat authority demotion
+
+### Summary
+- Demoted the SID combat path to explicit compatibility-only status in code comments and reporting surfaces.
+- Hardened the scenario harness so weekly combat aggregation prefers canonical `attack_resolution_osid` output whenever both OSID and legacy SID summaries are present.
+
+### Files changed
+- `src/scenario/scenario_runner.ts`
+- `src/scenario/scenario_end_report.ts`
+- `src/sim/combat/battle_resolution.ts`
+- `src/sim/combat/resolve_attack_orders.ts`
+- `src/sim/turn_phases/war_phases.ts`
+- `src/sim/turn_pipeline_types.ts`
+- `tests/scenario_activity_truth.test.ts`
+- `docs/40_reports/implemented/20260403_LEGACY_SID_COMBAT_AUTHORITY_DEMOTION.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- OSID combat is already the canonical war-phase resolver, but the scenario harness still had a live seam where the legacy SID summary could outrank it in weekly rollups.
+- That kept a false-authority reporting path alive and made compatibility code look more real than it is.
+
+### Verification
+- `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\scenario_activity_truth.test.ts`
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\brigade_territory_reconciliation.test.ts tests\\commander_driven_brigade_assignment.test.ts`
+- `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`

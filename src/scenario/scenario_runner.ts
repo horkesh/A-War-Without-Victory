@@ -328,6 +328,38 @@ export function deriveWeeklyActivityCounts(
     };
 }
 
+type AttackResolutionSummaryLike = {
+    orders_processed?: number;
+    unique_attack_targets?: number;
+    flips_applied?: number;
+    casualty_attacker?: number;
+    casualty_defender?: number;
+    orders_by_faction?: Record<string, number>;
+    battles?: Array<{ defender_brigade?: string | null }>;
+};
+
+export function selectCanonicalAttackResolutionSummary(
+    turnReport: Pick<Partial<TurnReport>, 'resolve_attack_orders' | 'attack_resolution_osid'>,
+): {
+    summary?: AttackResolutionSummaryLike;
+    battles: Array<{ defender_brigade?: string | null }>;
+} {
+    const legacyResolution = turnReport.resolve_attack_orders;
+    const osidResolution = turnReport.attack_resolution_osid as AttackResolutionSummaryLike | undefined;
+
+    if (osidResolution) {
+        return {
+            summary: osidResolution,
+            battles: osidResolution.battles ?? [],
+        };
+    }
+
+    return {
+        summary: legacyResolution,
+        battles: legacyResolution?.battle_report?.battles ?? [],
+    };
+}
+
 function computeControlShareByFaction(state: GameState): Array<{ faction: string; control_share: number }> {
     const controllers = state.political.political_controllers ?? {};
     const totalSettlements = Object.keys(controllers).length;
@@ -1750,19 +1782,10 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     recovery_without_logged_attempt_count: weeklyCombatCausality.recovery_without_logged_attempt_count,
                     invalidation_reasons: weeklyCombatCausality.invalidation_reasons
                 };
-                const attackResolution = turnReport.resolve_attack_orders;
-                // OSID attack resolution writes to a different report key
-                const osidResolution = (turnReport as unknown as Record<string, unknown>).attack_resolution_osid as {
-                    orders_processed?: number; unique_attack_targets?: number; flips_applied?: number;
-                    casualty_attacker?: number; casualty_defender?: number; orders_by_faction?: Record<string, number>;
-                    battles?: Array<{ defender_brigade?: string | null }>;
-                } | undefined;
-                // Use whichever report is available (legacy or OSID)
-                const res = attackResolution ?? osidResolution;
+                const { summary: res, battles: battleList } = selectCanonicalAttackResolutionSummary(turnReport);
                 let weeklyDefenderPresentBattles = 0;
                 let weeklyDefenderAbsentBattles = 0;
-                // Count defender-present battles from either format
-                const battleList = attackResolution?.battle_report?.battles ?? osidResolution?.battles ?? [];
+                // Count defender-present battles from the canonical combat summary for this turn.
                 for (const battle of battleList) {
                     if (battle.defender_brigade != null) weeklyDefenderPresentBattles += 1;
                     else weeklyDefenderAbsentBattles += 1;

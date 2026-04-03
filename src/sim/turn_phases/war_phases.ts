@@ -1297,6 +1297,8 @@ export const warPhases: NamedPhase[] = [
                 terrainData = { by_sid: {} };
             }
 
+            // Compatibility-only SID fallback. The canonical war-phase combat
+            // resolver is `resolveAttackOrdersOsid(...)` above.
             context.report.resolve_attack_orders = resolveAttackOrders(
                 context.state, edges, terrainData, settlementToMun
             );

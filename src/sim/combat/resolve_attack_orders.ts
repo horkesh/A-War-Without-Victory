@@ -1,12 +1,14 @@
 /**
- * War phase: Resolve brigade attack orders (one target per brigade per turn).
+ * Legacy SID-based brigade attack resolution.
  *
- * Delegates to battle_resolution.ts for multi-factor combat with terrain,
- * equipment, experience, corps command, and snap events.
+ * The live war-phase authority is `resolveAttackOrdersOsid(...)` in
+ * `attack_resolution_osid.ts`. This module survives only as a compatibility
+ * fallback when operational data is unavailable, plus for older tests/report
+ * consumers that still read `resolve_attack_orders`.
  *
- * Backward-compatible: ResolveAttackOrdersReport retains the flat
- * casualty_attacker/casualty_defender fields; new battle_report field
- * provides full BattleResolutionReport with per-battle details.
+ * Backward-compatible: `ResolveAttackOrdersReport` retains the flat
+ * casualty_attacker/casualty_defender fields while exposing the underlying
+ * `battle_report`.
  *
  * Deterministic: orders processed in sorted formation ID order; orders consumed after resolution.
  */
@@ -31,11 +33,11 @@ export interface ResolveAttackOrdersReport {
 }
 
 /**
- * Resolve brigade_attack_orders via the multi-factor battle resolution engine.
- * Mutates state (political_controllers, formations, casualty_ledger, clears brigade_attack_orders).
+ * Resolve `brigade_attack_orders` through the legacy SID combat path.
  *
- * When terrainData and settlementToMun are provided, uses full terrain-aware combat.
- * When omitted, uses empty terrain (backward compat for tests not yet wired).
+ * This should only run when the OSID operational-data path is unavailable.
+ * If both paths appear live in a debugging session, treat the OSID resolver as
+ * canonical and this file as compatibility-only.
  */
 export function resolveAttackOrders(
     state: GameState,

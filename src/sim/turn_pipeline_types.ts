@@ -172,6 +172,7 @@ export interface TurnReport {
     phase_e_pressure_update?: PhaseEPressureDiffusionReport;
     front_emergence_report?: FrontDescriptor[];
     bot_order_diagnostics?: BotOrderDiagnosticsSnapshot;
+    /** Legacy SID combat fallback; canonical war-phase combat lives in attack_resolution_osid. */
     resolve_attack_orders?: ResolveAttackOrdersReport;
     attack_resolution_osid?: AttackResolutionOsidReport;
     cohesion_drift_report?: CohesionDriftReport;
