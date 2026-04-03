@@ -1,3 +1,36 @@
+## 2026-04-04 - Runtime Asset Canonicalization
+
+- Deleted 11 dead PNG twins from `src/ui/warroom/assets/` (crest_*, flag_*, game start.png, wall_map_frame_v1.png) — zero live code references; WebP twins are the live imports
+- `src/ui/warroom/vite.config.ts`: added `.webp → image/webp` to dev server static MIME map (previously sent `application/octet-stream` for WebP files)
+- `tools/ui/warroom_resize_assets.ts`: header updated — clarified art-pipeline-only scope, live runtime format is `.webp`, usage updated to `node_modules/.bin/tsx`
+- `_old/` and `raw_sora/` untouched; `src/ui/map/assets/crests/` already clean
+- `VISUAL_ASSET_STRATEGY.md` already WebP-aware — no amendment needed
+- tsc: clean; vitest: 20 pre-existing failures unchanged; grep for deleted names in `src/`: 0 live results
+- Report: `docs/40_reports/implemented/20260404_RUNTIME_ASSET_CANONICALIZATION.md`
+
+## 2026-04-04 - Warroom React Migration Final Deletion Pass — Legacy Canvas Removed
+
+- `REACT_SHELL_ENABLED` constant deleted; all canvas room code removed from `warroom.ts`
+- Deleted: 12 HQ scene plate URL imports, `HoverRenderer`, `WallCalendar`, `TacticalMap`, `OsidThumbnailRenderer`, `ClickableRegionManager` usage
+- Deleted: `render()`, `renderLoop()`, `startRenderLoop()`, `stopRenderLoop()`, `renderCorkBoardMap()`, `drawPushPin()`, `renderWhiteboardDate()`, `onMouseMove()`, `onClick()`, `loadScenePlateAssets()`, `loadImage()`, `loadFlagAssets()`, `loadInitialRegions()`, `ensureRegionsLoadedForFaction()`, `showMapScene()`
+- Deleted: canvas field, ctx field, all thumbnail/region/plate image fields
+- Simplified: `init()`, `applyGameStateFromJson()`, `updateUIOverlay()`, `showWarroomScene()`, `openTacticalShellHandoff()` — REACT_SHELL_ENABLED branches inlined as the live path
+- `ClickableRegionManager` class file retained; note added to warroom_smoke.test.ts
+- warroom.ts is now a pure launcher: main menu, side picker, scenario picker, iframe bridge. -483 lines.
+- tsc clean; vitest 1941 pass (20 pre-existing failures unrelated); vite build clean; governance OK
+- Commit: `8346e869`; report: `docs/40_reports/implemented/20260404_WARROOM_LEGACY_CANVAS_DELETION.md`
+
+## 2026-04-03 - Warroom React Migration Wave 3 — Presidential Presence
+
+- 3 previously-unmapped hotspots wired: `wall_cork_board` → strategic-overview (StrategicDashboard in-room), `desk_radio` → event-log (EventLogPanel in-room), `diplomatic_telephone` → army-hq:summary
+- All 5 warroom hotspot groups now have React-owned behavior — no silent fall-through
+- `warroomCommandStaysInRoom()` exported from shellNavigation.ts — classifies advance-turn, strategic-overview, event-log as in-room; army-hq/codex/chronicle as navigating
+- `onNavigate` in App.tsx gated by `warroomCommandStaysInRoom` — in-room commands no longer accidentally exit the warroom
+- 2 new ShellHandoffCommand kinds: `strategic-overview` and `event-log`
+- `WarroomStatusBar` component: thin fixed strip showing turn/date, WAR/PEACE badge, pending-events dot, ADVANCE button
+- 30/30 tests in warroom_shell_layer.test.ts (+13 new); tsc clean; vite build clean; governance OK
+- Commit: `0670e592` (agent); impl report: `docs/40_reports/implemented/20260403_WARROOM_REACT_MIGRATION_WAVE3.md`
+
 ## 2026-04-03 - Warroom React Shell Foundation
 
 - `WarroomShellLayer` React component (`src/ui/map/components/warroom/WarroomShellLayer.tsx`) renders faction-appropriate scene plate webp + hotspot region overlays

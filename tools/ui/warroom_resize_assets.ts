@@ -1,17 +1,22 @@
 /**
- * Resize warroom scene plates to the canonical 2752×1536 contract and emit display-size (1376×768) for runtime.
+ * Resize warroom scene plates to the canonical 2752×1536 contract.
  *
- * Use when new assets (e.g. hq_rbih_*.png) are too large (dimensions or file size).
- * - Full size: 2752×1536 (fit + letterbox), for authoring and region JSON.
- * - Display size: 1376×768 (_display.png), for game runtime to avoid large decode/canvas memory.
+ * NOTE: Live runtime scene plates are `.webp` files.
+ * This tool is for the ART PIPELINE only — it resizes source `.png` files to
+ * the canonical 2752×1536 authoring dimension. Convert output PNGs to `.webp`
+ * separately before committing as live assets.
+ *
+ * Use when new source art (e.g. hq_rbih_*.png) arrives at non-standard dimensions.
+ * - Full size: 2752×1536 (fit + letterbox), for authoring and region JSON alignment.
+ * - Display size: 1376×768 (_display.png), for intermediate review only.
  *
  * See docs/40_reports/handovers/20260311_WARROOM_EXTERNAL_MASTER_HANDOVER.md §2.1, §6.4.
  *
  * Usage:
- *   npx tsx tools/ui/warroom_resize_assets.ts [options] [files...]
- *   npx tsx tools/ui/warroom_resize_assets.ts                    # all hq_rbih_*.png in assets
- *   npx tsx tools/ui/warroom_resize_assets.ts --dry-run
- *   npx tsx tools/ui/warroom_resize_assets.ts --no-display       # skip _display.png output
+ *   node_modules/.bin/tsx tools/ui/warroom_resize_assets.ts [options] [files...]
+ *   node_modules/.bin/tsx tools/ui/warroom_resize_assets.ts                    # all hq_rbih_*.png in assets
+ *   node_modules/.bin/tsx tools/ui/warroom_resize_assets.ts --dry-run
+ *   node_modules/.bin/tsx tools/ui/warroom_resize_assets.ts --no-display       # skip _display.png output
  */
 
 import { readdirSync, statSync, renameSync, unlinkSync } from 'node:fs';

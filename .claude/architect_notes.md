@@ -45,12 +45,19 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Next Priority Lanes
 
-1. Finish behavior-level shell ownership so Warroom, Army HQ, and Tactical Map feel like one coherent presidential product.
-   - React WarroomShellLayer foundation is in place (2026-04-03): scene plate + hotspot overlays + regionToShellHandoff mapping, activated by `?view=warroom`. warroom.ts canvas still active.
-   - Runtime wiring DONE (2026-04-03): `REACT_SHELL_ENABLED=true` in warroom.ts — on campaign start, iframe loads with `?embedded=1&view=warroom`; React WarroomShellLayer is now the active room-navigation surface. Hotspot click sends handoff directly to iframe (no reload). Back-to-HQ posts `awwv-shell:show-warroom` to iframe; React sets `appScreen='warroom'` without scene swap. Legacy canvas path preserved under `REACT_SHELL_ENABLED=false`. Report: `docs/40_reports/implemented/20260403_WARROOM_REACT_SHELL_ENTRY.md`.
-   - Wave 2 consolidation DONE (2026-04-03): canvas render loop gated (self-stops when React owns room, restarts on legacy reversion); canvas mouse handlers gated (no dual hotspot ownership); scene plate + flag HTMLImageElement loading skipped (React uses static Vite imports); `wall_calendar_area` hotspot wired to `advance-turn` ShellHandoffCommand; `AdvanceTurnModal` created and wired into App.tsx; `advanceTurnPending` in gameStore. Report: `docs/40_reports/implemented/20260403_WARROOM_REACT_MIGRATION_WAVE2.md`.
-   - NEXT (final deletion pass): once React path is validated in Electron production, delete `renderLoop()`, `loadScenePlateAssets()`, `loadFlagAssets()`, `onMouseMove()`, `onClick()` canvas methods from warroom.ts, and remove `REACT_SHELL_ENABLED` flag entirely. Main menu / side picker / scenario picker stay in warroom.ts HTML.
-2. Canonicalize live runtime assets to `webp` where intended; remove/archive duplicate PNG twins from live UI paths and keep PNG only for raw/archive/generated/docs contexts unless explicitly justified.
+1. **CLOSED 2026-04-04** — Warroom React migration complete.
+   - Wave 1 (2026-04-03): React WarroomShellLayer foundation, scene plate + hotspot overlays, `?view=warroom` activation. Report: `docs/40_reports/implemented/20260403_WARROOM_REACT_SHELL_FOUNDATION.md`.
+   - Wave 1b runtime wiring (2026-04-03): `REACT_SHELL_ENABLED=true`, iframe loads with `?embedded=1&view=warroom`, live room navigation is React. Report: `docs/40_reports/implemented/20260403_WARROOM_REACT_SHELL_ENTRY.md`.
+   - Wave 2 (2026-04-03): canvas render loop gated, mouse handlers gated, `advance-turn` wired, `AdvanceTurnModal`. Report: `docs/40_reports/implemented/20260403_WARROOM_REACT_MIGRATION_WAVE2.md`.
+   - Wave 3 (2026-04-03): all 5 hotspot groups React-owned, `warroomCommandStaysInRoom()`, `WarroomStatusBar`. Report: `docs/40_reports/implemented/20260403_WARROOM_REACT_MIGRATION_WAVE3.md`.
+   - Final deletion (2026-04-04): `REACT_SHELL_ENABLED` deleted, 483 lines of canvas room code removed, 15 methods / 13 fields / 12 imports gone. `warroom.ts` retains only launch/picker/iframe/bridge responsibilities. Report: `docs/40_reports/implemented/20260404_WARROOM_LEGACY_CANVAS_DELETION.md`.
+   - **Current state**: React (`src/ui/map/components/warroom/`) is the sole owner of live room rendering, hotspot interaction, and room-level flow. `warroom.ts` owns main menu, side picker, scenario picker, Electron bridge, and iframe lifecycle.
+2. **CLOSED 2026-04-04** — Canonicalize live runtime assets to `webp`.
+   - 11 dead PNG twins deleted from `src/ui/warroom/assets/` (crest_*, flag_*, game start, wall_map_frame_v1)
+   - `vite.config.ts`: `.webp → image/webp` added to dev server MIME map
+   - `warroom_resize_assets.ts`: header clarified — art-pipeline only, not live format
+   - `_old/` and `raw_sora/` untouched; `src/ui/map/assets/crests/` already clean
+   - Report: `docs/40_reports/implemented/20260404_RUNTIME_ASSET_CANONICALIZATION.md`
 
 ## Closed Lanes
 
@@ -82,4 +89,4 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 ## Open Questions
 
 - Which remaining player-facing surfaces still leak staff certainty or internal jargon?
-- Which Warroom behaviors should move under React shell ownership first while preserving the authored room and hotspot map?
+- RESOLVED (wave 3): all warroom hotspot groups now have React-owned behavior. Next open question: which in-room overlays should expand (e.g. WarroomStatusBar → richer campaign pulse) vs which should remain pure handoffs.

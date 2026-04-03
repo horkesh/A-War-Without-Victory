@@ -67,6 +67,7 @@ function serveWarroomPublic(): Plugin {
                 }
                 const ext = pathname.slice(pathname.lastIndexOf('.'));
                 const types: Record<string, string> = {
+                    '.webp': 'image/webp',
                     '.png': 'image/png',
                     '.json': 'application/json',
                     '.geojson': 'application/geo+json'
