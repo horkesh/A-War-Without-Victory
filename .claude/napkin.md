@@ -38,6 +38,8 @@ Commander Intelligence Overhaul (n1294–1301): must_hold 1.5× garrison (Brcko/
 
 **Frontline truth excludes reserves (2026-04-03):** `buildFrontlineAssignedFormationSet(...)` should use only `assigned_brigade_ids`. `reserve_brigade_ids` remain sector-owned but must not leak into fatigue, officer-quality, or reporting as if they are holding the line.
 
+**`assigned_sub_segment_id` is live authority, not harmless residue (2026-04-03):** `commander_march_correction.ts` consumes `assigned_sub_segment_id` as a real command rail. When a brigade loses sector ownership, clear that field during sector sync so recalled reserves and unresolved brigades do not keep stale frontline destiny.
+
 ## Integration Test Suites (9 suites, WS6)
 1. `tests/integration_deployment_health.test.ts` — app bootstrap, Electron readiness
 2. `tests/integration_run_diagnostics.test.ts` — diagnose_run.cjs output validation

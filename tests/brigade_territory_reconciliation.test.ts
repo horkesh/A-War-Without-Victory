@@ -11,6 +11,7 @@ import {
     ensureMinimumSectorCoverage,
     assignCrossCorpsEnclaveDefenders,
     enforcePhysicalSectorOwnership,
+    syncSectorAssignmentsToFormations,
     warnUnresolvedSectorAssignments,
 } from '../src/sim/combat/brigade_assignment.js';
 import type {
@@ -952,5 +953,45 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
         }
 
         expect(emittedUnresolved).toBe(true);
+    });
+
+    it('clears stale assigned_sub_segment_id when a brigade is no longer sector-owned', () => {
+        const dropped = makeFormation({
+            id: 'brig_dropped',
+            corps_id: 'vrs_drina',
+            location_osid: 'op:m:rear_local',
+        });
+        dropped.assignment = { kind: 'sector', sector_id: 'sector:vrs_drina:0', role: 'front' } as any;
+        dropped.assigned_sub_segment_id = 'subseg:sector:vrs_drina:0:0';
+
+        const kept = makeFormation({
+            id: 'brig_kept',
+            corps_id: 'vrs_drina',
+            location_osid: 'op:m:front',
+        });
+        kept.assigned_sub_segment_id = 'subseg:old';
+
+        const formations: Record<FormationId, FormationState> = {
+            brig_dropped: dropped,
+            brig_kept: kept,
+        };
+
+        const sector = makeSector(
+            'sector:vrs_drina:0',
+            'vrs_drina',
+            [makeSubSeg('front', ['op:m:front'], ['op:m:enemy'], 3)],
+            ['op:m:front'],
+        );
+        sector.assigned_brigade_ids = ['brig_kept'];
+
+        syncSectorAssignmentsToFormations(
+            { [sector.sector_id]: sector },
+            formations,
+        );
+
+        expect(formations.brig_dropped.assignment).toBeNull();
+        expect(formations.brig_dropped.assigned_sub_segment_id).toBeUndefined();
+        expect(formations.brig_kept.assignment).toEqual({ kind: 'sector', sector_id: sector.sector_id, role: 'front' });
+        expect(formations.brig_kept.assigned_sub_segment_id).toBeUndefined();
     });
 });

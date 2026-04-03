@@ -1,3 +1,27 @@
+## 2026-04-03 - Final unresolved warning ownership and stale sub-segment clearing
+
+### Summary
+- Moved unresolved-sector warning ownership to the final canonical unresolved set in `buildCorpsFrontSectors(...)`.
+- Removed the early `PENDING_ENCLAVE_REVIEW` warning from classification-stage logic.
+- Cleared stale `assigned_sub_segment_id` when sector sync rebuilds formation assignments.
+
+### Files changed
+- `src/sim/combat/brigade_assignment.ts`
+- `src/sim/combat/corps_front_sectors.ts`
+- `tests/brigade_territory_reconciliation.test.ts`
+- `docs/40_reports/implemented/20260403_FINAL_UNRESOLVED_WARNING_OWNERSHIP_AND_STALE_SUBSEGMENT_CLEARING.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+- `.claude/napkin.md`
+
+### Why
+- The engine had one canonical final unresolved set but still emitted unresolved-style warnings from earlier classification state.
+- Brigades that were no longer sector-owned could keep stale frontline sub-segment residue, which muddied later diagnosis and made recalled reserves look half-frontline.
+
+### Verification
+- `node .\node_modules\vitest\vitest.mjs run tests\brigade_territory_reconciliation.test.ts tests\commander_driven_brigade_assignment.test.ts`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `powershell -ExecutionPolicy Bypass -File scripts\repo\check_claude_governance.ps1`
+
 ## 2026-04-03 - Physical sector ownership and frontline reserve split
 
 ### Summary

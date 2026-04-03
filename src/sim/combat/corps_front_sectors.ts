@@ -64,7 +64,6 @@ import {
     ensureMinimumSectorCoverage,
     reclassifyRearBrigades,
     enforcePhysicalSectorOwnership,
-    warnUnresolvedSectorAssignments,
     deduplicateBrigadesAcrossSectors,
     recomputeSectorPowerAndThreat,
     syncSectorAssignmentsToFormations,
@@ -161,6 +160,7 @@ export function buildCorpsFrontSectors(
     // Sync sector assignments back to formation.assignment
     syncSectorAssignmentsToFormations(result, formations);
     state.military.unresolved_sector_brigades = collectUnresolvedSectorBrigades(result, formations);
+    emitFinalUnresolvedSectorWarnings(state.military.unresolved_sector_brigades, formations);
 
     return result;
 }
@@ -187,6 +187,20 @@ function collectUnresolvedSectorBrigades(
             if (isSectorAssignmentExemptCorpsId(corpsId) && !loaned) return false;
             return !assigned.has(formationId);
         });
+}
+
+function emitFinalUnresolvedSectorWarnings(
+    unresolved: FormationId[],
+    formations: Record<FormationId, FormationState>,
+): void {
+    for (const formationId of unresolved) {
+        const formation = formations[formationId];
+        if (!formation) continue;
+        console.warn(
+            `[brigade_assignment] UNRESOLVED ${formationId} (${formation.personnel ?? 0} pers): ` +
+            `fell through sector pipeline, corps=${getFormationCorpsId(formation)}`
+        );
+    }
 }
 
 /** Maximum combined brigades for a merge candidate pair. */
@@ -546,10 +560,7 @@ function buildFactionSectors(
     // Step 8c: Strip any residual paper assignments that do not physically belong to the sector.
     enforcePhysicalSectorOwnership(sectors, formations, adjacency, friendlyOsids);
 
-    // Step 8d: only now is it truthful to declare a brigade unresolved.
-    warnUnresolvedSectorAssignments(sectors, formations, faction);
-
-    // Step 8e: Recompute defensive_power and threat_ratio from final brigade sets.
+    // Step 8d: Recompute defensive_power and threat_ratio from final brigade sets.
     recomputeSectorPowerAndThreat(sectors, formations, faction, state);
 
     // Final prune: remove ghost artifact sectors

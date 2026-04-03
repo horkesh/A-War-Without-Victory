@@ -605,7 +605,6 @@ export function classifyBrigadesByTerritory(
                     && getSectorComponent(s, componentOf) === brigComp
                 );
                 if (hasFactionSectorInComponent) {
-                    console.warn(`[brigade_assignment] PENDING_ENCLAVE_REVIEW ${bid}: no same-corps sector reachable from ${f.location_osid}, awaiting cross-corps enclave review`);
                     continue;
                 }
                 // Brigade is in a disconnected component with no matching sector.
@@ -1399,6 +1398,9 @@ export function syncSectorAssignmentsToFormations(
         if (f.assignment && f.assignment.kind === 'sector') {
             f.assignment = null;
         }
+        // Sub-segment ownership is derived from current frontline sector truth.
+        // If a brigade is no longer sector-owned, stale residue must not survive.
+        f.assigned_sub_segment_id = undefined;
     }
 
     // Step 2: Set assignment from sector data
