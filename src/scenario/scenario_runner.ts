@@ -309,7 +309,7 @@ export interface RunScenarioResult {
 }
 
 export function deriveWeeklyActivityCounts(
-    state: GameState,
+    _state: GameState,
     turnReport: Pick<Partial<TurnReport>, 'phase_f_displacement' | 'front_pressure' | 'displacement'>,
 ): WeeklyActivityCounts {
     const triggerReport = turnReport.phase_f_displacement?.trigger_report;
@@ -321,29 +321,10 @@ export function deriveWeeklyActivityCounts(
         };
     }
 
-    let front_active_set_size = 0;
-    if (state.military.front_segments) {
-        for (const seg of Object.values(state.military.front_segments)) {
-            if ((seg as { active?: boolean }).active) front_active_set_size++;
-        }
-    }
-
-    let pressure_eligible_size = 0;
-    if (turnReport.front_pressure?.pressure_deltas) {
-        pressure_eligible_size = Object.keys(turnReport.front_pressure.pressure_deltas).length;
-    }
-
-    let displacement_trigger_eligible_size = 0;
-    if (turnReport.displacement?.by_municipality) {
-        displacement_trigger_eligible_size = turnReport.displacement.by_municipality.filter(
-            (row: { displacement_this_turn?: number }) => (row.displacement_this_turn ?? 0) > 0
-        ).length;
-    }
-
     return {
-        front_active_set_size,
-        pressure_eligible_size,
-        displacement_trigger_eligible_size,
+        front_active_set_size: 0,
+        pressure_eligible_size: 0,
+        displacement_trigger_eligible_size: 0,
     };
 }
 

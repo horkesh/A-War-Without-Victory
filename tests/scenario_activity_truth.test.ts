@@ -48,7 +48,7 @@ describe('scenario activity truth sourcing', () => {
         });
     });
 
-    it('falls back to legacy proxies only when canonical trigger metrics are absent', () => {
+    it('returns zero activity when canonical trigger metrics are absent instead of re-deriving from proxy fields', () => {
         const state = makeStateWithLegacyFrontSegments(3);
         const turnReport = {
             front_pressure: { pressure_deltas: { a: 1, b: -1 } },
@@ -62,9 +62,9 @@ describe('scenario activity truth sourcing', () => {
         } as unknown as TurnReport;
 
         assert.deepEqual(deriveWeeklyActivityCounts(state, turnReport), {
-            front_active_set_size: 3,
-            pressure_eligible_size: 2,
-            displacement_trigger_eligible_size: 2,
+            front_active_set_size: 0,
+            pressure_eligible_size: 0,
+            displacement_trigger_eligible_size: 0,
         });
     });
 });

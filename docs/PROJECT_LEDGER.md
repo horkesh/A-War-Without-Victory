@@ -21453,3 +21453,23 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 
 ### Verification
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\brigade_territory_reconciliation.test.ts tests\\commander_driven_brigade_assignment.test.ts`
+
+## 2026-04-03 - Activity report truth hardening
+
+### Summary
+- Removed the legacy proxy fallback from `deriveWeeklyActivityCounts(...)`.
+- Weekly activity stats now come only from the canonical Phase F trigger report; when that report is absent, the runner records zeros instead of inventing replacement counts from stale proxy fields.
+
+### Files changed
+- `src/scenario/scenario_runner.ts`
+- `tests/scenario_activity_truth.test.ts`
+- `docs/40_reports/implemented/20260403_ACTIVITY_REPORT_TRUTH_HARDENING.md`
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+
+### Why
+- The old fallback re-derived "activity" from `front_segments`, `pressure_deltas`, and realized displacement rows even though Phase F already owns the real eligibility counts.
+- That made stale or mixed-era artifacts look like live engine contradictions and kept a false-authority reporting path alive.
+
+### Verification
+- `node .\\node_modules\\tsx\\dist\\cli.mjs --test tests\\scenario_activity_truth.test.ts`
+- `node .\\node_modules\\vitest\\vitest.mjs run tests\\brigade_territory_reconciliation.test.ts tests\\commander_driven_brigade_assignment.test.ts`
