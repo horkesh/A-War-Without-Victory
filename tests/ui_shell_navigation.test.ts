@@ -176,6 +176,24 @@ describe('shellNavigation', () => {
     expect(railSource).not.toContain("var(--awwv-toolbar-clearance, 7.5rem)");
   });
 
+  it('Army HQ back button says FIELD (not MAP) and has a WARROOM return affordance', () => {
+    const source = readFileSync(
+      new URL('../src/ui/map/components/army_hq/ArmyHQModal.tsx', import.meta.url),
+      'utf8',
+    );
+
+    // Back button uses "FIELD" not "MAP" — the president returns to field observation, not "the map"
+    expect(source).toContain("'← FIELD'");
+    expect(source).not.toContain("'← MAP'");
+
+    // WARROOM return affordance exists in Army HQ header
+    expect(source).toContain('shouldShowWarroomReturn');
+    expect(source).toContain('focusWarroom');
+    expect(source).toContain("type: 'awwv-back-to-hq'");
+    expect(source).toContain('WARROOM');
+    expect(source).toContain("title=\"Return to president's desk\"");
+  });
+
   it('routes Warroom staff props through shell handoff instead of opening duplicate local packets', () => {
     const warroomSource = readFileSync(
       new URL('../src/ui/warroom/ClickableRegionManager.ts', import.meta.url),

@@ -11,6 +11,7 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { useIPC } from '../../desktop/useIPC';
+import { shouldShowWarroomReturn, isEmbeddedTacticalMap } from '../../utils/warroomReturn';
 import { getFactionArmyCommander } from '../../utils/officerUtils';
 import { OfficerProfile } from '../OfficerProfile';
 import { ArmyHQCorpsCard } from './ArmyHQCorpsCard';
@@ -167,7 +168,7 @@ export function ArmyHQModal() {
             <div className="relative flex-1 flex flex-col h-full overflow-hidden bg-panel-bg text-text-primary">
 
                 <div className="flex items-center justify-between px-3 py-1 shrink-0 border-b border-panel-border bg-panel-card">
-                    {/* Left: back/close + crest + title */}
+                    {/* Left: back/close + warroom return + crest + title */}
                     <div className="flex items-center gap-2">
                         <button
                             type="button"
@@ -179,9 +180,30 @@ export function ArmyHQModal() {
                                 }
                             }}
                             className="flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-text-secondary border border-panel-border rounded-md hover:bg-panel-hover hover:text-text-primary transition-colors"
+                            title={expandedCorpsId ? 'Back to army overview' : 'Return to field observation'}
                         >
-                            {expandedCorpsId ? '← BACK' : '← MAP'}
+                            {expandedCorpsId ? '← BACK' : '← FIELD'}
                         </button>
+                        {!expandedCorpsId && shouldShowWarroomReturn(
+                            typeof window !== 'undefined' ? window.location.search : '',
+                            ipc.isAvailable,
+                        ) && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setOpen(false);
+                                    if (isEmbeddedTacticalMap(window.location.search)) {
+                                        window.parent.postMessage({ type: 'awwv-back-to-hq' }, '*');
+                                    } else {
+                                        void ipc.focusWarroom();
+                                    }
+                                }}
+                                className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-amber-400/70 border border-amber-400/20 rounded-md hover:bg-amber-400/10 hover:text-amber-400 transition-colors"
+                                title="Return to president's desk"
+                            >
+                                WARROOM
+                            </button>
+                        )}
                         {crestSrc && (
                             <img src={crestSrc} alt="" className="w-8 h-8 object-contain opacity-80" draggable={false} />
                         )}

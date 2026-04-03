@@ -1,3 +1,25 @@
+## 2026-04-03 - Army HQ presidential shell behavior (WARROOM return + FIELD label)
+
+### Summary
+- Added WARROOM return button to Army HQ header so the president can go directly from command center to desk without detouring through the Tactical Map.
+- Renamed "← MAP" to "← FIELD" to communicate the presidential relationship (returning to field observation, not "the map").
+- Added regression test verifying both behavioral changes.
+
+### Files changed
+- `src/ui/map/components/army_hq/ArmyHQModal.tsx`
+- `tests/ui_shell_navigation.test.ts`
+- `docs/40_reports/implemented/20260403_ARMY_HQ_PRESIDENTIAL_SHELL_BEHAVIOR.md`
+- `docs/PROJECT_LEDGER.md`
+
+### Why
+- Army HQ had only one exit ("← MAP" to Tactical Map). The president could not return to the Warroom without a two-step detour. This broke the presidential model where Army HQ and Warroom are peer destinations.
+
+### Verification
+- `npx tsc --noEmit` — clean
+- `vitest run tests/ui_shell_navigation.test.ts` — 13/13 pass
+- `vite build` — success
+- `check_claude_governance.ps1` — OK
+
 ## 2026-04-03 - Presidential shell alignment (tooltips + docstring framing)
 
 ### Summary
