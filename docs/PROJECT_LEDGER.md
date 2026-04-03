@@ -21555,6 +21555,20 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\brigade_territory_reconciliation.test.ts tests\\commander_driven_brigade_assignment.test.ts`
 - `powershell -ExecutionPolicy Bypass -File scripts\\repo\\check_claude_governance.ps1`
 
+## 2026-04-03 - Claude execution standard added
+
+- Added [CLAUDE_EXECUTION_STANDARD.md](F:/A-War-Without-Victory/docs/20_engineering/CLAUDE_EXECUTION_STANDARD.md) as the repo's short-form house standard for future Claude work.
+- Purpose:
+  - force read-first discipline
+  - require correct skill use before implementation
+  - keep ownership, player-truth, and UI authority explicit
+  - standardize required outputs and merge expectations
+- Wired the standard into:
+  - [F:\A-War-Without-Victory\.claude\commands\taskforce.md](F:/A-War-Without-Victory/.claude/commands/taskforce.md)
+  - [F:\A-War-Without-Victory\.claude\commands\governance-review.md](F:/A-War-Without-Victory/.claude/commands/governance-review.md)
+  - [F:\A-War-Without-Victory\docs\20_engineering\ROADMAP_GOVERNANCE.md](F:/A-War-Without-Victory/docs/20_engineering/ROADMAP_GOVERNANCE.md)
+- This is intended as the compact “how Claude behaves here” rail so future agents stop depending on memory, vibes, or partial prompt residue.
+
 ## 2026-04-03 - Frontline sector-mandatory invariant refinement
 
 - Refined the final sector unresolved rule so only brigades that truthfully *should* have a frontline sector owner are flagged.

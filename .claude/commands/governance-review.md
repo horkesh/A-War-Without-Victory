@@ -4,12 +4,13 @@ Run a governance review on the current work, not a general code review.
 
 1. `docs/20_engineering/COMMAND_AUTHORITY_GATES.md`
 2. `docs/20_engineering/ROADMAP_GOVERNANCE.md`
-3. `docs/20_engineering/PLAYER_VISIBLE_STATE.md`
-4. `docs/20_engineering/UI_OWNERSHIP_MATRIX.md`
-5. `docs/20_engineering/DEBUG_SURFACE_POLICY.md`
-6. `docs/20_engineering/FEATURE_DONE_MEANS.md`
-7. `docs/30_planning/_task_artifacts/ACTIVE_TASK_GOVERNANCE.md`
-8. `docs/40_reports/audits/20260330_REPO_HEALTH_CONSOLIDATED.md`
+3. `docs/20_engineering/CLAUDE_EXECUTION_STANDARD.md`
+4. `docs/20_engineering/PLAYER_VISIBLE_STATE.md`
+5. `docs/20_engineering/UI_OWNERSHIP_MATRIX.md`
+6. `docs/20_engineering/DEBUG_SURFACE_POLICY.md`
+7. `docs/20_engineering/FEATURE_DONE_MEANS.md`
+8. `docs/30_planning/_task_artifacts/ACTIVE_TASK_GOVERNANCE.md`
+9. `docs/40_reports/audits/20260330_REPO_HEALTH_CONSOLIDATED.md`
 
 ## Review only for these failures
 

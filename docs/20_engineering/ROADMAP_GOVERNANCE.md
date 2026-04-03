@@ -2,6 +2,10 @@
 
 This file exists to stop roadmap drift, milestone inflation, and AI-theater sequencing mistakes.
 
+Companion short-form execution rail:
+
+- [CLAUDE_EXECUTION_STANDARD.md](F:/A-War-Without-Victory/docs/20_engineering/CLAUDE_EXECUTION_STANDARD.md)
+
 ## Purpose
 
 The roadmap is not a wish list.
