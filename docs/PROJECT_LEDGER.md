@@ -22629,3 +22629,11 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - `node .\\node_modules\\vitest\\vitest.mjs run tests\\brigade_territory_reconciliation.test.ts tests\\commander_driven_brigade_assignment.test.ts`
 - `npx.cmd tsc --noEmit -p tsconfig.json`
 - `npm.cmd run sim:scenario:run:40w`
+
+## [2026-04-03] handoff-v2 repair pass
+- Fixed Stop hook path: backslashes in settings.json hook command paths were stripped by bash (`\A`→`A` etc.); replaced with forward slashes (`F:/A-War-Without-Victory/...`)
+- Fixed locale bug: `$MaxBudget.ToString()` on `bs-Latn-BA` locale produced `"0,5"` (comma decimal); claude rejected it instantly. Fixed with `InvariantCulture`
+- Fixed Stop hook timing: hook fires before run_handoff.ps1 writes response.md/meta.json; moved `write_review.ps1` call to run_handoff.ps1 (unconditional, after all files committed); hook now only writes completion_signal.json + notification
+- Renamed `$args` → `$claudeArgs` to avoid PowerShell automatic variable conflict
+- Verified end-to-end: completion_signal.json (hook_source: Stop), architect_review.json with session_id + summary, inbox copy, list_handoffs, show_handoff paste block all correct
+- Governance: passes

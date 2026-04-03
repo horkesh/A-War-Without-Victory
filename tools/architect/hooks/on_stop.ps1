@@ -38,16 +38,13 @@ $signal = [ordered]@{
 $signalFile = Join-Path $resultDir "completion_signal.json"
 $signal | ConvertTo-Json -Depth 4 | Set-Content $signalFile -Encoding UTF8
 
-# Generate architect_review.json (inbox artifact)
-$scriptRoot = $PSScriptRoot
-$writeReview = Join-Path $scriptRoot "write_review.ps1"
-if (Test-Path $writeReview) {
-    try {
-        & powershell -ExecutionPolicy Bypass -File $writeReview -ResultDir $resultDir 2>$null
-    } catch { }
-}
+# NOTE: write_review.ps1 is NOT called here.
+# The Stop hook fires before run_handoff.ps1 writes response.md and updates meta.json,
+# so the review would have empty summary and no session_id.
+# run_handoff.ps1 calls write_review.ps1 unconditionally after all files are committed.
 
 # Fire Windows notification
+$scriptRoot = $PSScriptRoot
 $notify = Join-Path $scriptRoot "notify.ps1"
 if (Test-Path $notify) {
     try {

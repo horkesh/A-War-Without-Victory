@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -ExecutionPolicy Bypass -File F:\\A-War-Without-Victory\\tools\\architect\\hooks\\on_stop.ps1",
+            "command": "powershell -ExecutionPolicy Bypass -File F:/A-War-Without-Victory/tools/architect/hooks/on_stop.ps1",
             "timeout": 30
           }
         ]
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -ExecutionPolicy Bypass -File F:\\A-War-Without-Victory\\tools\\architect\\hooks\\on_notification.ps1",
+            "command": "powershell -ExecutionPolicy Bypass -File F:/A-War-Without-Victory/tools/architect/hooks/on_notification.ps1",
             "timeout": 10
           }
         ]

@@ -91,17 +91,18 @@ Write-Host "Worktree: $($Worktree.IsPresent)"
 Write-Host ""
 
 # Build claude command
-$args = @(
+# NOTE: $args is a reserved automatic variable in PowerShell; use $claudeArgs to avoid splatting issues.
+$claudeArgs = @(
     "-p"
     "--output-format", "json"
     "--model", $Model
     "--permission-mode", $PermissionMode
-    "--max-budget-usd", $MaxBudget.ToString()
+    "--max-budget-usd", $MaxBudget.ToString([System.Globalization.CultureInfo]::InvariantCulture)
     "--name", "handoff:$Name"
 )
 
 if ($Worktree) {
-    $args += "--worktree"
+    $claudeArgs += "--worktree"
 }
 
 # Set handoff env vars so Stop/Notification hooks can scope themselves
@@ -113,7 +114,7 @@ $startTime = Get-Date
 
 try {
     # Pipe prompt content to claude via stdin
-    $rawResult = $promptContent | claude @args 2>&1
+    $rawResult = $promptContent | claude @claudeArgs 2>&1
     $exitCode = $LASTEXITCODE
 } catch {
     $rawResult = $_.Exception.Message
@@ -159,16 +160,15 @@ $meta.exit_code = $exitCode
 if ($sessionId) { $meta.session_id = $sessionId }
 $meta | ConvertTo-Json -Depth 4 | Set-Content (Join-Path $resultDir "meta.json")
 
-# Generate inbox artifact if Stop hook didn't already do it (fallback)
+# Generate inbox artifact unconditionally — Stop hook fires before response.md/meta.json
+# are written, so we always regenerate here with complete data.
 $reviewFile = Join-Path $resultDir "architect_review.json"
-if (-not (Test-Path $reviewFile)) {
-    $writeReviewScript = Join-Path $PSScriptRoot "hooks\write_review.ps1"
-    if (Test-Path $writeReviewScript) {
-        try {
-            & powershell -ExecutionPolicy Bypass -File $writeReviewScript -ResultDir $resultDir
-        } catch {
-            Write-Warning "Could not generate architect_review.json: $_"
-        }
+$writeReviewScript = Join-Path $PSScriptRoot "hooks\write_review.ps1"
+if (Test-Path $writeReviewScript) {
+    try {
+        & powershell -ExecutionPolicy Bypass -File $writeReviewScript -ResultDir $resultDir
+    } catch {
+        Write-Warning "Could not generate architect_review.json: $_"
     }
 }
 
