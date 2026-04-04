@@ -18,6 +18,10 @@ interface OperationsSectionProps {
     corpsId: string;
     operations: OperationView[];
     gameState: LoadedGameState;
+    /** Command strain score for this corps (derived by adapter, passed from ArmyHQCorpsCard). */
+    commandStrain?: number;
+    /** Player-facing label for commandStrain. */
+    commandStrainLabel?: 'healthy' | 'strained' | 'compromised';
 }
 
 const PHASE_BADGE: Record<string, { bg: string; text: string; border: string }> = {
@@ -455,7 +459,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
     );
 }
 
-export function OperationsSection({ corpsId, operations, gameState }: OperationsSectionProps) {
+export function OperationsSection({ corpsId, operations, gameState, commandStrain = 0, commandStrainLabel = 'healthy' }: OperationsSectionProps) {
     const [expandedOp, setExpandedOp] = useState<string | null>(null);
     const ipc = useIPC();
     const setLoadError = useGameStore((s) => s.setLoadError);
@@ -486,6 +490,20 @@ export function OperationsSection({ corpsId, operations, gameState }: Operations
                 <div className="text-[11px] text-text-secondary/60 italic py-2 font-mono uppercase">NO ACTIVE OPERATIONS DETECTED</div>
             ) : (
                 <div className="space-y-3">
+                    {/* Command-risk notice — shown when this corps carries strain AND has active ops.
+                        Silence = healthy: no notice at strain 0. */}
+                    {commandStrain > 0 && (
+                        <div className={`border-l-2 pl-2 py-1 text-[10px] font-mono ${
+                            commandStrainLabel === 'compromised'
+                                ? 'border-red-500/60 bg-red-500/5 text-red-400'
+                                : 'border-amber-500/60 bg-amber-500/5 text-amber-400'
+                        }`}>
+                            {commandStrainLabel === 'compromised'
+                                ? 'Command Compromised — high-risk operating conditions. Presidential interventions have damaged command cohesion.'
+                                : `Command Strain: ${commandStrainLabel.charAt(0).toUpperCase() + commandStrainLabel.slice(1)} — operations proceeding under strained command conditions.`
+                            }
+                        </div>
+                    )}
                     {operations.map((op) => {
                         const opKey = `${op.corps_id}|${op.name}`;
                         const badge = PHASE_BADGE[op.phase] ?? PHASE_BADGE.planning;

@@ -375,7 +375,7 @@ export function ArmyHQCorpsCard({
             <div className="flex flex-col gap-[1px] bg-panel-bg">
                 <CommanderSection corps={corps} gameState={gameState} />
                 <SectorsSection corpsId={corps.id} sectors={sectors} factionBattles={factionBattles} />
-                <OperationsSection corpsId={corps.id} operations={operations} gameState={gameState} />
+                <OperationsSection corpsId={corps.id} operations={operations} gameState={gameState} commandStrain={data.strain} commandStrainLabel={data.strainLabel} />
                 <OrbatSection corpsId={corps.id} brigades={brigades} />
                 <CombatRecordSection corpsId={corps.id} corps={corps} />
             </div>
