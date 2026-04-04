@@ -357,6 +357,131 @@ export function deriveRecoveryForecast(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Readiness Trend — Commander Explanation Surfaces Wave 6
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Direction of an operation's readiness at the decision point.
+ * Derived from existing persisted fields — no new persistence needed.
+ *
+ * The key insight: postponement_count is a truthful record of prior 'postpone'
+ * assessments, because only 'postpone' increments it and resets to intel_gathering.
+ * 'launch' ends the cycle (stays in 'ready'). 'abort' ends the operation.
+ *
+ * So: postponement_count=0 → first assessment (no prior to compare).
+ *     postponement_count≥1 + current 'launch' → was postpone, now launch (improving).
+ *     postponement_count≥1 + current 'postpone' → still postpone (stagnating).
+ *     postponement_count≥1 + current 'abort' → was postpone, now abort (deteriorating).
+ */
+export type ReadinessTrendDirection =
+    | 'nearing_launch'   // First assessment is launch — ready on first try
+    | 'improving'        // Was postpone, now launch — conditions recovered
+    | 'building'         // First assessment is postpone — still assembling
+    | 'stagnating'       // Postponed before, still postpone — no progress
+    | 'deteriorating'    // Was postpone, now abort — conditions worsened
+    | 'not_viable';      // First assessment is abort — bad from start
+
+export interface ReadinessTrend {
+    /** Directional classification. */
+    direction: ReadinessTrendDirection;
+    /** Player-facing one-line label. Null = silence (launch on first try, healthy). */
+    label: string | null;
+    /** Timeline urgency — fraction of max preparation time elapsed (0-1). Null if no timeline data. */
+    timelineFraction: number | null;
+    /** Player-facing timeline urgency string. Null = no urgency or no data. */
+    timelineLabel: string | null;
+}
+
+/**
+ * Derive the readiness trend for an operation at the decision point.
+ *
+ * Pure function — no GameState, no side effects.
+ * Uses only fields already persisted on CorpsOperation.
+ *
+ * Silence = healthy: label is null when direction is 'nearing_launch' (ready on first try).
+ *
+ * @param assessment        - Current commander_assessment ('launch' | 'postpone' | 'abort')
+ * @param postponements     - postponement_count (0, 1, or 2)
+ * @param turnsElapsed      - preparation_turns_elapsed (may be undefined)
+ * @param maxTurns          - preparation_max_turns (may be undefined)
+ */
+export function deriveReadinessTrend(
+    assessment: 'launch' | 'postpone' | 'abort' | null | undefined,
+    postponements: number,
+    turnsElapsed?: number,
+    maxTurns?: number,
+): ReadinessTrend {
+    // No assessment yet → no trend to show
+    if (!assessment) {
+        return { direction: 'building', label: null, timelineFraction: null, timelineLabel: null };
+    }
+
+    // ── Timeline urgency ────────────────────────────────────────────────
+    let timelineFraction: number | null = null;
+    let timelineLabel: string | null = null;
+    if (turnsElapsed != null && maxTurns != null && maxTurns > 0) {
+        timelineFraction = Math.min(1, turnsElapsed / maxTurns);
+        const remaining = Math.max(0, maxTurns - turnsElapsed);
+        if (remaining <= 1 && assessment !== 'launch') {
+            timelineLabel = `Final turn of preparation — decision forced next turn`;
+        } else if (timelineFraction >= 0.75 && assessment !== 'launch') {
+            timelineLabel = `Turn ${turnsElapsed} of ${maxTurns} in preparation — time running short`;
+        } else if (turnsElapsed > 0) {
+            timelineLabel = `Turn ${turnsElapsed} of ${maxTurns} in preparation`;
+        }
+    }
+
+    // ── Directional classification ──────────────────────────────────────
+    const hasPriorPostponement = postponements > 0;
+
+    if (assessment === 'launch') {
+        if (hasPriorPostponement) {
+            return {
+                direction: 'improving',
+                label: `Readiness recovered after ${postponements} postponement${postponements > 1 ? 's' : ''} — now recommends launch`,
+                timelineFraction,
+                timelineLabel,
+            };
+        }
+        // First assessment is launch — silence=healthy (nothing remarkable)
+        return { direction: 'nearing_launch', label: null, timelineFraction, timelineLabel };
+    }
+
+    if (assessment === 'postpone') {
+        if (hasPriorPostponement) {
+            return {
+                direction: 'stagnating',
+                label: `Postponed ${postponements} time${postponements > 1 ? 's' : ''} — conditions have not improved sufficiently`,
+                timelineFraction,
+                timelineLabel,
+            };
+        }
+        return {
+            direction: 'building',
+            label: 'First assessment — conditions not yet sufficient for launch',
+            timelineFraction,
+            timelineLabel,
+        };
+    }
+
+    // assessment === 'abort'
+    if (hasPriorPostponement) {
+        return {
+            direction: 'deteriorating',
+            label: `Conditions deteriorated after ${postponements} postponement${postponements > 1 ? 's' : ''} — recommends abort`,
+            timelineFraction,
+            timelineLabel,
+        };
+    }
+    return {
+        direction: 'not_viable',
+        label: 'Conditions too poor for this operation from the outset',
+        timelineFraction,
+        timelineLabel,
+    };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Corps Situation Assessment — Commander Explanation Surfaces Wave 1 + Wave 2
 // ═══════════════════════════════════════════════════════════════════════════
 

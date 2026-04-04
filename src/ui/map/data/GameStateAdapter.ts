@@ -23,7 +23,7 @@ import { getMunicipalitySupportLabel } from '../../../sim/combat/municipality_su
 import { strictCompare } from '../../../state/validateGameState.js';
 import { computeFullVerdict } from '../../../sim/negotiation/scoring.js';
 import type { GameVerdict } from '../../../state/negotiation_types.js';
-import { computeCorpsCommandStrain, getCommandStrainLabel, projectStrainDecay, deriveRecoveryForecast, deriveCorpsSituationAssessment } from './command_strain.js';
+import { computeCorpsCommandStrain, getCommandStrainLabel, projectStrainDecay, deriveRecoveryForecast, deriveCorpsSituationAssessment, deriveReadinessTrend } from './command_strain.js';
 import type { GameState } from '../../../state/game_state.js';
 
 function pointsByFaction(rec: Record<string, { points?: number }>): Record<string, number> {
@@ -1059,6 +1059,13 @@ export function parseGameState(json: unknown): LoadedGameState {
                     supply_readiness_at_assessment: typeof op.supply_readiness_at_assessment === 'number' ? op.supply_readiness_at_assessment : undefined,
                     force_ratio_estimate: typeof op.force_ratio_estimate === 'number' ? op.force_ratio_estimate : undefined,
                     postponement_count: typeof op.postponement_count === 'number' ? op.postponement_count : undefined,
+                    // Wave 6: Readiness trend — derived on-read from existing persisted fields
+                    readinessTrend: op.phase === 'planning' ? deriveReadinessTrend(
+                        typeof op.commander_assessment === 'string' ? op.commander_assessment as 'launch' | 'postpone' | 'abort' : undefined,
+                        typeof op.postponement_count === 'number' ? op.postponement_count : 0,
+                        typeof op.preparation_turns_elapsed === 'number' ? op.preparation_turns_elapsed : undefined,
+                        typeof op.preparation_max_turns === 'number' ? op.preparation_max_turns : undefined,
+                    ) : undefined,
                     has_active_probe: op.active_probe != null && typeof op.active_probe === 'object' ? true : undefined,
                     supporting_sector_ids: Array.isArray(op.supporting_sector_ids) ? (op.supporting_sector_ids as string[]).filter(id => typeof id === 'string').sort(strictCompare) : undefined,
                     primary_sector_brigades: Array.isArray(op.primary_sector_brigades) ? (op.primary_sector_brigades as string[]).filter(id => typeof id === 'string').sort(strictCompare) : undefined,

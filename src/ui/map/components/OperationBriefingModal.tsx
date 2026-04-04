@@ -10,7 +10,7 @@ import { getPlayerSafeCorpsName, getPlayerSafeMilitaryFactionName } from '../uti
 import { findPlayerFacingOperationByKey } from '../../shared/playerVisibility';
 import { OrderInterpretationSection } from './army_hq/OrderInterpretationSection';
 import { deriveOperationOutcomeCategory, deriveRecommendationExplanation } from '../data/command_strain';
-import type { RecommendationExplanation } from '../data/command_strain';
+import type { RecommendationExplanation, ReadinessTrend } from '../data/command_strain';
 
 const FORCE_LAUNCH_COST = 15;
 const RECOVERY_PER_TURN = 2;
@@ -133,6 +133,53 @@ function CommandRecord({ assessmentAtLaunch, wasForce, caCost, corpsStrain, corp
                     </div>
                 )}
             </div>
+        </div>
+    );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Wave 6: Readiness Trend Indicator — directional signal for the player.
+// Shows whether the operation is improving, stagnating, or deteriorating.
+// Canonical owner of decision-time readiness trend explanation.
+// Silence = healthy: renders null when direction is 'nearing_launch' (first-try launch).
+// ═══════════════════════════════════════════════════════════════════════════
+
+const TREND_CONFIG: Record<string, { arrow: string; color: string } | null> = {
+    nearing_launch: null,  // Silence = healthy
+    improving: { arrow: '↑', color: 'text-green-700' },
+    building: { arrow: '→', color: 'text-neutral-500' },
+    stagnating: { arrow: '→', color: 'text-amber-700' },
+    deteriorating: { arrow: '↓', color: 'text-red-700' },
+    not_viable: { arrow: '↓', color: 'text-red-700' },
+};
+
+/** Compact readiness trend indicator — one line showing direction + optional timeline. */
+function ReadinessTrendIndicator({ trend }: { trend: ReadinessTrend | undefined }) {
+    if (!trend || !trend.label) return null;
+
+    const config = TREND_CONFIG[trend.direction];
+    if (!config) return null;
+
+    return (
+        <div className="mx-4 my-1 px-3 py-1.5 border border-neutral-200 bg-neutral-50/50">
+            <div className="flex items-start gap-2">
+                <span className={`shrink-0 font-bold text-[11px] mt-px ${config.color}`}>{config.arrow}</span>
+                <span className="text-[10px] text-neutral-600 leading-snug">{trend.label}</span>
+            </div>
+            {trend.timelineLabel && (
+                <div className="flex items-center gap-2 mt-1">
+                    <span className="text-[9px] text-neutral-400 shrink-0">⏱</span>
+                    <span className="text-[9px] text-neutral-500">{trend.timelineLabel}</span>
+                    {trend.timelineFraction != null && (
+                        <div className="flex-1 h-1 bg-neutral-200 rounded-sm overflow-hidden max-w-[80px]">
+                            <div
+                                className={`h-full transition-all ${trend.timelineFraction >= 0.75 ? 'bg-amber-500' : 'bg-neutral-400'}`}
+                                style={{ width: `${Math.round(trend.timelineFraction * 100)}%` }}
+                            />
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 }
@@ -419,6 +466,11 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                         <span className="text-[8px] text-neutral-400">({postponements} prior postponement{postponements > 1 ? 's' : ''})</span>
                     )}
                 </div>
+
+                {/* Wave 6: Readiness Trend — directional signal showing whether conditions
+                    are improving, stagnating, or deteriorating since last assessment.
+                    Silence = healthy: renders null when first-try launch. */}
+                <ReadinessTrendIndicator trend={operation.readinessTrend} />
 
                 {/* Wave 5: Recommendation Driver — shows WHY the commander recommends
                     postpone/abort based on real assessment factors (intel, force ratio, supply).

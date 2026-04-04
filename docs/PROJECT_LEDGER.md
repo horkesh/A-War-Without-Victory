@@ -1,3 +1,16 @@
+## 2026-04-04 — Commander Explanation Surfaces Wave 6 (Readiness Trend)
+
+- `command_strain.ts`: +`deriveReadinessTrend()` — pure derivation classifying operation readiness direction from existing persisted fields (postponement_count + commander_assessment + preparation timeline). Six directions: nearing_launch (silence), improving, building, stagnating, deteriorating, not_viable. Timeline urgency from preparation_turns_elapsed / preparation_max_turns.
+- `OperationBriefingModal.tsx`: +`ReadinessTrendIndicator` component between Assessment Badge and Recommendation Driver. Shows directional arrow (↑/→/↓) with semantic color + one-line label + optional timeline bar with urgency warning at ≥75% elapsed.
+- `types.ts`: +`readinessTrend` on OperationView — { direction, label, timelineFraction, timelineLabel }.
+- `GameStateAdapter.ts`: wires derivation for planning-phase operations only.
+- No engine changes, no new persisted fields — derivation-only from existing CorpsOperation fields.
+- Decision-time hierarchy now: badge → **readiness trend** → recommendation driver → constraint context → order interpretation → direct intervention
+- 15 new Wave 16 tests in `tests/command_authority.test.ts` — 252/252 pass
+- Orchestrator: 3 parallel audit subagents (provenance, UI density, trend classification), central implementation
+- Verification: tsc clean, **2206/2206 vitest (0 failures)**, vite build clean, governance OK
+- Report: `docs/40_reports/implemented/20260404_COMMANDER_EXPLANATION_SURFACES_WAVE6.md`
+
 ## 2026-04-04 — Commander Explanation Surfaces Wave 5 (Recommendation Driver)
 
 - `command_strain.ts`: +`deriveRecommendationExplanation()` — pure UI-side derivation mirroring engine's 3-factor assessment formula (intel 40%, force ratio 30%, supply 30%). Identifies main blocker factor and produces recommendation reason + would-improve-if text. Silence=healthy for launch.

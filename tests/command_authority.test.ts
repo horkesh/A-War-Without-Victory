@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import type { CommandAuthority, CorpsOperation } from '../src/state/game_state.js';
 import type { OperationAAR } from '../src/sim/combat/operation_aar.js';
-import { computeCorpsCommandStrain, getCommandStrainLabel, deriveOrderInterpretation, deriveStanceInterpretation, deriveOperationOutcomeCategory, buildOperationTrendSummary, projectStrainDecay, deriveRecoveryForecast, deriveCorpsSituationAssessment, deriveRecommendationExplanation } from '../src/ui/map/data/command_strain.js';
-import type { OperationOutcomeCategory, OperationTrendSummary, PrimaryConstraint } from '../src/ui/map/data/command_strain.js';
+import { computeCorpsCommandStrain, getCommandStrainLabel, deriveOrderInterpretation, deriveStanceInterpretation, deriveOperationOutcomeCategory, buildOperationTrendSummary, projectStrainDecay, deriveRecoveryForecast, deriveCorpsSituationAssessment, deriveRecommendationExplanation, deriveReadinessTrend } from '../src/ui/map/data/command_strain.js';
+import type { OperationOutcomeCategory, OperationTrendSummary, PrimaryConstraint, ReadinessTrendDirection } from '../src/ui/map/data/command_strain.js';
 
 function makeAuth(overrides?: Partial<CommandAuthority>): CommandAuthority {
     return { current: 100, max: 100, spent_this_turn: 0, lifetime_spent: 0, ...overrides };
@@ -2473,6 +2473,104 @@ describe('Wave 10: Command Relationship Standing', () => {
             const result = deriveRecommendationExplanation(0.3, 0.3, 0.9, 1, 0.5, 'postpone', 0);
             expect(result.mainBlocker).not.toBeNull();
             expect(result.recommendationReason).not.toBeNull();
+        });
+    });
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // Wave 16: Readiness Trend (Commander Explanation Surfaces Wave 6)
+    // Tests that deriveReadinessTrend correctly classifies operation direction
+    // from existing persisted fields — no new persistence needed.
+    // ═══════════════════════════════════════════════════════════════════════
+
+    describe('Wave 16: Readiness Trend', () => {
+        it('first assessment launch → nearing_launch, silence (null label)', () => {
+            const result = deriveReadinessTrend('launch', 0);
+            expect(result.direction).toBe('nearing_launch');
+            expect(result.label).toBeNull();
+        });
+
+        it('first assessment postpone → building with label', () => {
+            const result = deriveReadinessTrend('postpone', 0);
+            expect(result.direction).toBe('building');
+            expect(result.label).toContain('First assessment');
+        });
+
+        it('first assessment abort → not_viable with label', () => {
+            const result = deriveReadinessTrend('abort', 0);
+            expect(result.direction).toBe('not_viable');
+            expect(result.label).toContain('too poor');
+        });
+
+        it('postponed once, now launch → improving', () => {
+            const result = deriveReadinessTrend('launch', 1);
+            expect(result.direction).toBe('improving');
+            expect(result.label).toContain('recovered');
+            expect(result.label).toContain('1 postponement');
+        });
+
+        it('postponed twice, now launch → improving (mentions count)', () => {
+            const result = deriveReadinessTrend('launch', 2);
+            expect(result.direction).toBe('improving');
+            expect(result.label).toContain('2 postponements');
+        });
+
+        it('postponed once, still postpone → stagnating', () => {
+            const result = deriveReadinessTrend('postpone', 1);
+            expect(result.direction).toBe('stagnating');
+            expect(result.label).toContain('1 time');
+            expect(result.label).toContain('not improved');
+        });
+
+        it('postponed once, now abort → deteriorating', () => {
+            const result = deriveReadinessTrend('abort', 1);
+            expect(result.direction).toBe('deteriorating');
+            expect(result.label).toContain('deteriorated');
+        });
+
+        it('null assessment → building with no label (silence)', () => {
+            const result = deriveReadinessTrend(null, 0);
+            expect(result.direction).toBe('building');
+            expect(result.label).toBeNull();
+        });
+
+        it('undefined assessment → building with no label (silence)', () => {
+            const result = deriveReadinessTrend(undefined, 0);
+            expect(result.direction).toBe('building');
+            expect(result.label).toBeNull();
+        });
+
+        // Timeline urgency tests
+        it('timeline fraction computed from turnsElapsed / maxTurns', () => {
+            const result = deriveReadinessTrend('postpone', 0, 3, 5);
+            expect(result.timelineFraction).toBeCloseTo(0.6);
+            expect(result.timelineLabel).toContain('Turn 3 of 5');
+        });
+
+        it('timeline urgency warning when >= 75% elapsed', () => {
+            // 6 of 8 = 75%, remaining=2 so not final-turn
+            const result = deriveReadinessTrend('postpone', 1, 6, 8);
+            expect(result.timelineFraction).toBeCloseTo(0.75);
+            expect(result.timelineLabel).toContain('running short');
+        });
+
+        it('final turn warning when remaining <= 1', () => {
+            const result = deriveReadinessTrend('postpone', 1, 5, 5);
+            expect(result.timelineFraction).toBe(1);
+            expect(result.timelineLabel).toContain('Final turn');
+        });
+
+        it('no timeline when turnsElapsed/maxTurns not provided', () => {
+            const result = deriveReadinessTrend('postpone', 1);
+            expect(result.timelineFraction).toBeNull();
+            expect(result.timelineLabel).toBeNull();
+        });
+
+        it('launch suppresses timeline urgency warnings', () => {
+            const result = deriveReadinessTrend('launch', 1, 4, 5);
+            // Timeline fraction still computed but urgency label should not warn
+            expect(result.timelineFraction).toBeCloseTo(0.8);
+            // Launch doesn't need "running short" warning
+            expect(result.timelineLabel).not.toContain('running short');
         });
     });
 });

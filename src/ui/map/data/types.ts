@@ -527,6 +527,13 @@ export interface OperationView {
     force_ratio_estimate?: number;
     /** Number of postponements so far. */
     postponement_count?: number;
+    /** Wave 6: Readiness trend — directional classification derived from assessment + postponements + timeline. */
+    readinessTrend?: {
+        direction: 'nearing_launch' | 'improving' | 'building' | 'stagnating' | 'deteriorating' | 'not_viable';
+        label: string | null;
+        timelineFraction: number | null;
+        timelineLabel: string | null;
+    };
     /** Whether an active probe is in progress. */
     has_active_probe?: boolean;
     /** Other sectors that contributed attached brigades to this operation. */
