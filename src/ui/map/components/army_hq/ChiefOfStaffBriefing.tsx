@@ -11,6 +11,8 @@ import { turnToDateString } from '../../utils/formatters';
 import { generateLetterHome } from '../../../../sim/letter_home.js';
 import type { LetterHomeInput } from '../../../../sim/letter_home.js';
 import letterHomeData from '../../../../../data/templates/letter_home_templates.json';
+import { computeCorpsCommandStrain, getCommandStrainLabel } from '../../data/command_strain.js';
+import type { GameState } from '../../../../state/game_state.js';
 
 // ── CoS identity ────────────────────────────────────────────────────
 
@@ -95,6 +97,48 @@ const TERRITORY_PHRASES: Record<CoSProfile['tone'], (gained: number, lost: numbe
         return '';
     },
 };
+
+// ── Strain paragraph phrases ─────────────────────────────────────────
+
+const STRAIN_PHRASES: Record<CoSProfile['tone'], Record<'strained' | 'compromised', (corpsName: string) => string>> = {
+    cautious: {
+        strained: (n) => `I must note that command relations with ${n} remain under strain following recent presidential interventions. The staff are compliant but the relationship requires careful management.`,
+        compromised: (n) => `I am deeply concerned about the command relationship with ${n}. Repeated direct interventions have created serious institutional friction. The staff are executing orders, but their confidence in the chain of command has been damaged.`,
+    },
+    precise: {
+        strained: (n) => `Command Authority Status: ${n} command relationship is under strain. Recent direct interventions have introduced friction into the planning cycle. Staff cohesion remains functional.`,
+        compromised: (n) => `Command Authority Status: ${n} command relationship is compromised. Repeated direct interventions have created institutional friction. Recommend restoring delegated command before further operations.`,
+    },
+    aggressive: {
+        strained: (n) => `${n} staff are still with us, but the overrides have left a mark. They'll execute, but we've spent some goodwill. Worth keeping in mind before the next intervention.`,
+        compromised: (n) => `The situation with ${n} is serious. Too many overrides have damaged the command relationship. The staff are carrying out orders but operating under pressure. We need to let them run their own operations for a while.`,
+    },
+};
+
+/**
+ * Build strain paragraph segments for any player-faction corps with commandStrain > 0.
+ * Returns a paragraph per strained corps, placed after the main operational summary.
+ * No paragraph if all corps are healthy (silence = healthy).
+ */
+function buildStrainParagraphs(state: LoadedGameState, faction: string, tone: CoSProfile['tone']): Paragraph[] {
+    const paragraphs: Paragraph[] = [];
+    const playerCorps = state.formations.filter(
+        f => f.faction === faction && (f.kind === 'corps' || f.kind === 'corps_asset'),
+    );
+    // Deterministic: sort by id
+    const sorted = [...playerCorps].sort((a, b) => a.id.localeCompare(b.id));
+    for (const corps of sorted) {
+        const strain = computeCorpsCommandStrain(corps.id, state as unknown as GameState);
+        if (strain <= 0) continue;
+        const label = getCommandStrainLabel(strain);
+        if (label === 'healthy') continue;
+        const phraseKey = label as 'strained' | 'compromised';
+        const corpsName = corps.name ?? corps.id;
+        const phrase = STRAIN_PHRASES[tone][phraseKey](corpsName);
+        paragraphs.push([text(phrase)]);
+    }
+    return paragraphs;
+}
 
 export function generateCoSBriefing(
     briefingItems: BriefingItem[],
@@ -224,6 +268,10 @@ export function generateCoSBriefing(
 
         paragraphs.push(segments);
     }
+
+    // § 3 — Command strain institutional signal (silence = healthy)
+    const strainParagraphs = buildStrainParagraphs(state, faction, tone);
+    for (const p of strainParagraphs) paragraphs.push(p);
 
     return paragraphs;
 }
