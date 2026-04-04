@@ -11,6 +11,7 @@ import { turnToDateString } from '../../utils/formatters';
 import { getOsidDisplayName } from '../../utils/osidDisplayName';
 import { getPlayerSafeBrigadeName } from '../../utils/playerSafeText';
 import { CollapsibleSection } from './CollapsibleSection';
+import { deriveOperationOutcomeCategory } from '../../data/command_strain';
 
 type CompletedOp = NonNullable<LoadedGameState['operationHistory']>[number];
 
@@ -22,6 +23,37 @@ interface OperationsSectionProps {
     commandStrain?: number;
     /** Player-facing label for commandStrain. */
     commandStrainLabel?: 'healthy' | 'strained' | 'compromised';
+}
+
+/**
+ * Inline outcome category badge for executing/recovery op-cards.
+ * Silence = healthy: ordinary_compliance returns null (no badge).
+ * Only shown when commander_assessment_at_launch snapshot exists (post-feature ops).
+ */
+function OutcomeCategoryBadge({ assessmentAtLaunch, wasForce }: {
+    assessmentAtLaunch: 'launch' | 'postpone' | 'abort' | null | undefined;
+    wasForce: boolean;
+}) {
+    // No snapshot means pre-feature op — no badge
+    if (assessmentAtLaunch == null && !wasForce) return null;
+
+    const category = deriveOperationOutcomeCategory(assessmentAtLaunch, wasForce);
+
+    if (category === 'ordinary_compliance') return null; // silence = healthy
+
+    if (category === 'direct_intervention') {
+        return (
+            <span className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 border border-amber-500/60 bg-amber-500/10 text-amber-400">
+                ⚠ Direct Intervention
+            </span>
+        );
+    }
+    // reluctant_compliance
+    return (
+        <span className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 border border-amber-400/40 bg-amber-400/5 text-amber-500/80">
+            Approved Against Recommendation
+        </span>
+    );
 }
 
 const PHASE_BADGE: Record<string, { bg: string; text: string; border: string }> = {
@@ -463,6 +495,7 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
     const [expandedOp, setExpandedOp] = useState<string | null>(null);
     const ipc = useIPC();
     const setLoadError = useGameStore((s) => s.setLoadError);
+    const setOperationBriefingContext = useGameStore((s) => s.setOperationBriefingContext);
 
     const FORCE_LAUNCH_COST = 15;
     const authCurrent = gameState.commandAuthority?.current ?? 100;
@@ -541,9 +574,19 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                                                 {op.name}
                                             </span>
                                         </div>
-                                        <span className={`text-[9px] font-bold uppercase px-2 py-0.5 border leading-none tracking-widest ${badge.bg} ${badge.border} ${badge.text}`}>
-                                            {op.phase}
-                                        </span>
+                                        <div className="flex items-center gap-2">
+                                            {/* Outcome category badge — only for executing/recovery ops with a launch snapshot.
+                                                Silence = healthy: ordinary_compliance shows no badge. */}
+                                            {(op.phase === 'execution' || op.phase === 'recovery') && (
+                                                <OutcomeCategoryBadge
+                                                    assessmentAtLaunch={op.commander_assessment_at_launch}
+                                                    wasForce={op.was_force_launched ?? false}
+                                                />
+                                            )}
+                                            <span className={`text-[9px] font-bold uppercase px-2 py-0.5 border leading-none tracking-widest ${badge.bg} ${badge.border} ${badge.text}`}>
+                                                {op.phase}
+                                            </span>
+                                        </div>
                                     </div>
                                     <div className="text-[10px] tabular-nums font-mono flex flex-wrap gap-x-6 gap-y-1 ml-5 uppercase tracking-tighter">
                                         <span className="text-text-secondary">UNITS: <b className="text-text-secondary">{op.participating_brigade_count}</b></span>
@@ -572,7 +615,16 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                                                     title={canForceLaunch
                                                         ? `Level 3 Direct Intervention — costs ${FORCE_LAUNCH_COST} Command Authority (current: ${authCurrent})`
                                                         : `Insufficient Command Authority (${authCurrent}/${FORCE_LAUNCH_COST} needed)`}>
-                                                    [ FORCE LAUNCH — {FORCE_LAUNCH_COST} AUTH ]
+                                                    [ DIRECT INTERVENTION — {FORCE_LAUNCH_COST} AUTH ]
+                                                </button>
+                                            )}
+                                            {/* Review Command Decision — opens OperationBriefingModal for executing/recovery ops.
+                                                Only shown when a launch snapshot exists (commander_assessment_at_launch set). */}
+                                            {(op.phase === 'execution' || op.phase === 'recovery') && op.commander_assessment_at_launch != null && (
+                                                <button type="button"
+                                                    onClick={(e) => { e.stopPropagation(); setOperationBriefingContext({ corpsId: op.corps_id, operationName: op.name }); }}
+                                                    className="text-[10px] font-bold uppercase tracking-widest px-4 py-1.5 border border-panel-border/40 text-text-secondary/70 hover:bg-panel-bg hover:text-text-secondary transition-all font-mono">
+                                                    [ REVIEW COMMAND DECISION ]
                                                 </button>
                                             )}
                                             {op.phase === 'execution' && (

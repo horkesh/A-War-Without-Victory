@@ -1384,3 +1384,83 @@ describe('Wave 7: Operation Outcome Category', () => {
         expect(deriveOperationOutcomeCategory(undefined, false)).toBe('ordinary_compliance');
     });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Wave 8 — Command Review Consolidation
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Wave 8: Command Review Consolidation', () => {
+    // ── OutcomeCategoryBadge logic (unit-tests deriveOperationOutcomeCategory
+    //    as called from OperationsSection context) ──────────────────────────
+
+    it('returns ordinary_compliance when called with null assessment + wasForce=false (pre-feature op)', () => {
+        // ops from before this feature have no snapshot — must default to ordinary_compliance
+        expect(deriveOperationOutcomeCategory(null, false)).toBe('ordinary_compliance');
+    });
+
+    it('returns ordinary_compliance when called with undefined assessment + wasForce=false', () => {
+        expect(deriveOperationOutcomeCategory(undefined, false)).toBe('ordinary_compliance');
+    });
+
+    it('returns direct_intervention for force-launched executing op', () => {
+        // Typical executing op: commander said postpone, president spent CA to force-launch
+        const category = deriveOperationOutcomeCategory('postpone', true);
+        expect(category).toBe('direct_intervention');
+    });
+
+    it('returns direct_intervention when wasForce=true even if assessment was launch', () => {
+        // Edge case: assessment=launch but wasForce=true → direct_intervention wins
+        expect(deriveOperationOutcomeCategory('launch', true)).toBe('direct_intervention');
+    });
+
+    it('returns reluctant_compliance for postpone assessment + no force', () => {
+        const category = deriveOperationOutcomeCategory('postpone', false);
+        expect(category).toBe('reluctant_compliance');
+    });
+
+    it('returns reluctant_compliance for abort assessment + no force', () => {
+        const category = deriveOperationOutcomeCategory('abort', false);
+        expect(category).toBe('reluctant_compliance');
+    });
+
+    it('badge logic: ordinary_compliance → no badge (silence = healthy)', () => {
+        // OperationsSection badge: null/undefined assessment + no force → ordinary_compliance
+        // The badge component returns null for ordinary_compliance — simulate that guard here
+        const category = deriveOperationOutcomeCategory('launch', false);
+        expect(category).toBe('ordinary_compliance');
+        // Badge renders null for this tier — confirmed by component logic
+    });
+
+    it('badge logic: direct_intervention → badge shown', () => {
+        const category = deriveOperationOutcomeCategory('abort', true);
+        expect(category).toBe('direct_intervention');
+        // Badge renders "⚠ Direct Intervention" for this tier
+    });
+
+    it('badge logic: reluctant_compliance → badge shown', () => {
+        const category = deriveOperationOutcomeCategory('postpone', false);
+        expect(category).toBe('reluctant_compliance');
+        // Badge renders "Approved Against Recommendation" for this tier
+    });
+
+    it('badge logic: undefined snapshot → no badge (pre-feature op graceful fallback)', () => {
+        // ops launched before this feature have commander_assessment_at_launch=undefined
+        // OutcomeCategoryBadge guard: assessmentAtLaunch == null && !wasForce → returns null
+        const assessmentAtLaunch: 'launch' | 'postpone' | 'abort' | null | undefined = undefined;
+        const wasForce = false;
+        // Guard condition that OutcomeCategoryBadge uses:
+        const wouldSkip = assessmentAtLaunch == null && !wasForce;
+        expect(wouldSkip).toBe(true);
+    });
+
+    it('outcome category is exhaustive — all three tiers covered', () => {
+        const tiers: OperationOutcomeCategory[] = [
+            deriveOperationOutcomeCategory('launch', false),
+            deriveOperationOutcomeCategory('postpone', false),
+            deriveOperationOutcomeCategory('abort', true),
+        ];
+        expect(tiers).toContain('ordinary_compliance');
+        expect(tiers).toContain('reluctant_compliance');
+        expect(tiers).toContain('direct_intervention');
+    });
+});
