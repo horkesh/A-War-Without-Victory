@@ -136,13 +136,52 @@ Uses `CollapsibleSection` — defaults open when compromised, closed when strain
 
 ## Phase D — Desktop Notification Verification
 
-`notify.ps1` fires correctly. The script chain:
-1. BurntToast — not installed (skipped silently)
-2. `msg *` — runs (may not produce visible popup in some Windows 11 + bash context configurations)
-3. **New (Wave 4)**: Native Windows toast API via `Windows.UI.Notifications.ToastNotificationManager` — no dependencies
-4. Terminal bell + colored `Write-Host` — confirmed producing output
+**Delivery reliability fix (post-Wave 4, 2026-04-04):**
 
-Native toast (fallback 3) added per spec. Governance check passed. Script is non-fatal throughout.
+All six candidate notification methods were tested in isolation on this machine (Windows 11 Pro 10.0.26200):
+
+| Method | Result |
+|--------|--------|
+| BurntToast | NOT INSTALLED — skipped |
+| `msg *` | Exits 0, no visible popup (Windows 11 without terminal services) |
+| `Add-Type -AssemblyName Windows.UI.Notifications` | FAILED — assembly not found |
+| `Add-Type -AssemblyName Windows.Data.Xml.Dom` | FAILED — assembly not found |
+| `Add-Type -TypeDefinition` with ContentType=WindowsRuntime | FAILED — C# compiler rejects `[void]` keyword |
+| **WScript.Shell Popup** | **CONFIRMED WORKING** — modal dialog, auto-dismisses after timeout |
+
+**Canonical method: WScript.Shell Popup.** Creates a real modal dialog. Always visible regardless of Focus Assist. Auto-dismisses after 8 seconds (`result=-1`) or on user OK (`result=1`). No dependencies beyond COM automation (available everywhere on Windows).
+
+**`notify.ps1` rewritten** with explicit `[notify]` log lines per attempt:
+1. BurntToast — attempt 1 (skips if not installed, promotes if available)
+2. WScript.Shell Popup — **canonical attempt 2** (sets `$notified = $true`)
+3. `msg *` — attempt 3 (does NOT set `$notified`; silently fails on Windows 11)
+4. Audio fallback (`[console]::beep`) if all visual methods fail
+
+**`run_handoff.ps1` updated:** notify call now captures output, filters for `[notify]` line, and prints it in the runner summary:
+```
+Notify:     [notify] WScript.Shell Popup: delivered (result=-1)
+```
+
+Smoke test output:
+```
+[notify] BurntToast: not installed -- skipped
+[notify] WScript.Shell Popup: delivered (result=-1)
+```
+
+Governance check: clean. Script is non-fatal throughout.
+
+## Phase D (Repair) — Desktop Notification Contract Repair
+
+**What was wrong:** `on_stop.ps1` (lines 47–53) fired the desktop popup from the Claude Stop hook. The Stop hook fires as soon as the `claude` subprocess exits — before `run_handoff.ps1` has written `response.md`, updated `meta.json` to `"completed"`, generated `architect_review.json`, or sent Slack. The popup was announcing completion of work that had not yet been recorded.
+
+**Root cause acknowledged in on_stop.ps1 itself:** The file's own comment (lines 42–44) noted that `write_review.ps1` was intentionally excluded for the same reason — artifacts are not yet written when the Stop hook fires. The notification call below that comment was inconsistent with that documented constraint.
+
+**What was fixed:**
+- `tools/architect/hooks/on_stop.ps1`: notification block removed. Replaced with a comment explaining the contract. `completion_signal.json` write retained (still useful for diagnostics). The hook now: read stdin → scope guard → write `completion_signal.json` → exit 0.
+- `tools/architect/run_handoff.ps1`: desktop notification call added at the end of the script, after the Slack notification block and the "=== Run Complete ===" summary, immediately before `return $resultDir`. At that point all artifacts are committed: `response.md` written, `meta.json` status = completed/failed, `architect_review.json` generated, Slack sent.
+- Completion state contract comment block added above the notification call in `run_handoff.ps1` documenting all four states (running / needs_input / failed / completed) and asserting that desktop popup fires ONLY from that location.
+
+**Canonical notification trigger:** `tools/architect/run_handoff.ps1` end block (sole owner). Stop hook is silent on notification.
 
 ## Phase E — Simplification Verification
 

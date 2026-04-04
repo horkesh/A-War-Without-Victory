@@ -3,6 +3,12 @@
 
 ---
 
+### [Process] Phased migration with flag-gate → final-deletion-pass is the correct pattern for large UI refactors (2026-04-04) — NEW
+- **Context**: Warroom React migration shipped across 4 commits: implement behind `REACT_SHELL_ENABLED` flag (waves 1–3, each independently testable) → final deletion pass removes 483 lines of canvas room code + deletes the flag itself. Zero flag residue. Each wave was a safe checkpoint; the final pass was atomic closure.
+- **Wrong approach**: Big-bang replacement (a single commit swapping the entire rendering path risks breaking prod if anything is wrong); or permanent dual-path (flag lives forever, both paths need maintenance, tech debt accumulates silently).
+- **Right approach**: Flag-gate → verify across N waves → delete flag + legacy code in a single atomic final commit. The final commit message contains "deletion pass" to signal clean closure. The lane is not closed until the flag is gone from the codebase.
+- **Do instead**: For any large UI refactor: (1) land new path behind a flag, (2) verify across multiple waves until the new path is proven, (3) write one final commit that deletes the flag AND all legacy code in the same change. If the flag still exists, the lane is still open.
+
 ### [Process] Decisions without traces are undebuggable — instrument before investigating (2026-03-31) — NEW
 - **Context**: The commander pipeline (briefing→plan→decide→emit) emits ops or it doesn't. No log entry, no skip reason, no per-corps per-turn record of why an op was blocked. Two full sessions (n1217→n1225, ~8 calibration runs) diagnosed root causes entirely from static code reading — both diagnoses were wrong. The actual cause remains unknown because we cannot observe what the system decided at runtime.
 - **Wrong approach**: Reading source code to theorize why a system makes no-op decisions. Code reading shows what CAN happen; it cannot tell you what IS happening on a specific run with specific state.

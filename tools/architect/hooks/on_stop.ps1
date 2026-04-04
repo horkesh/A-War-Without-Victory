@@ -43,14 +43,8 @@ $signal | ConvertTo-Json -Depth 4 | Set-Content $signalFile -Encoding UTF8
 # so the review would have empty summary and no session_id.
 # run_handoff.ps1 calls write_review.ps1 unconditionally after all files are committed.
 
-# Fire Windows notification
-$scriptRoot = $PSScriptRoot
-$notify = Join-Path $scriptRoot "notify.ps1"
-if (Test-Path $notify) {
-    try {
-        $taskName = if ($runId) { $runId -replace '^\d{8}_\d{6}_','' } else { "task" }
-        & powershell -ExecutionPolicy Bypass -File $notify -Title "AWWV Handoff Complete" -Message "Run finished: $taskName" 2>$null
-    } catch { }
-}
+# Desktop notification NOT fired here — Stop hook fires before run_handoff.ps1
+# writes response.md, meta.json (completed), architect_review.json, and Slack.
+# True completion notification is fired at the end of run_handoff.ps1 instead.
 
 exit 0

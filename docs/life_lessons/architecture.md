@@ -3,6 +3,18 @@
 
 ---
 
+### [Architecture] Engine-written data with no UI consumer is invisible infrastructure debt (2026-04-04) — NEW
+- **Context**: `friction_events[]` was populated every turn by `checkWarlordFriction()` since v0.4.4. Zero UI consumers existed before Friction Wave 1 (2026-04-04). The player had zero visibility into warlord friction despite it running every single turn. Discovered only during the Phase A audit of Friction Wave 1 — the lane that was supposed to *surface* existing data found the data had never been read at all.
+- **Wrong approach**: Closing a mechanic lane after implementing the write path without verifying the read path. "Warlord friction implemented" — yes, the engine fires it. No, the player never sees it.
+- **Right approach**: A mechanic is not implemented until it has BOTH a write path AND a read path that reaches the player. Writing data to GameState is the first half. Surfacing it through the adapter to a UI component is the second half. Both are equally mandatory.
+- **Do instead**: When landing a new engine mechanic that produces GameState data, before closing the lane: (1) grep for UI consumers of the new field, (2) verify it flows through the adapter to a component the player sees. If no to either, mark the mechanic PARTIAL in the ledger and keep the lane open.
+
+### [Architecture] Derive gameplay display signals on-read — never add computed fields to GameState (2026-04-04) — NEW
+- **Context**: `command_strain` (per-corps integer derived from override history) was deliberately computed in a pure utility `command_strain.ts` → wired through `GameStateAdapter` → `FormationView`. The alternative — adding `command_strain` to `GameState.military` — would have added serialization burden, save/load schema migration, and tight coupling between the display layer and the canonical state schema.
+- **Wrong approach**: Adding a derived/computed field to GameState because "it's needed in the UI." GameState serializes to disk and crosses the IPC boundary; every new field adds migration risk and ownership ambiguity.
+- **Right approach**: GameState holds canonical facts (events fired, ops launched, overrides made, friction events). The adapter derives display signals (strain score, label, indicator color). Pure functions in `src/ui/map/data/` are the correct home for derivations from canonical state. Single-ownership principle: GameState owns facts; adapter owns display signals.
+- **Do instead**: When a new display concept needs a derived number, first ask: "Can I compute this from existing canonical fields?" If yes, create a pure function and wire through the adapter. Only add to GameState if the value must survive a save/load round-trip AND cannot be recomputed cheaply from existing fields.
+
 ### [Architecture] Always check what's already running before building a new detection system (2026-04-01) — NEW
 - **Context**: Designed a full "authored corridor" system (chokepoint_osids, zone anchors, width thresholds) to detect strategically vital sectors. Investigation revealed `osid_graph_analysis.ts` already had articulation point detection (`isChokepoint`, `FactionGraphAnalysis.chokepoints[]`) running every turn. The entire detection layer was superseded by finding existing infrastructure. Only display labels (~10 entries) were actually needed.
 - **Wrong approach**: Jumping to a new system design without grepping for the core algorithm first. "We need chokepoint detection" → design doc → implementation plan → code, without checking whether the game already computes chokepoints.

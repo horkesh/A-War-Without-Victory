@@ -1,8 +1,24 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-02. 204 lessons across 9 topic files.
+> Last restructured: 2026-04-04. 207 lessons across 9 topic files.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
+
+## New Lessons (2026-04-04)
+
+### [Architecture] Engine-written data with no UI consumer is invisible infrastructure debt — see `docs/life_lessons/architecture.md`
+- `friction_events[]` fired every turn since v0.4.4 — zero UI consumers — player had zero visibility. A mechanic is not implemented until it has BOTH a write path AND a read path that reaches the player. Mark PARTIAL in ledger if either is missing.
+
+### [Architecture] Derive gameplay display signals on-read — never add computed fields to GameState — see `docs/life_lessons/architecture.md`
+- `command_strain` computed in pure `command_strain.ts` → adapter → `FormationView`. GameState holds canonical facts; adapter derives display signals. Only add to GameState if the value must survive save/load AND cannot be recomputed.
+
+### [Process] Phased migration with flag-gate → final-deletion-pass is the correct pattern for large UI refactors — see `docs/life_lessons/process.md`
+- Warroom React migration: implement behind flag → verify across N waves → delete flag + legacy in one atomic final commit. Lane is not closed until the flag is gone.
+
+### [Calibration] Implementing a feedback write without a feedback read is half-done — VALIDATED 2026-04-04 — see `docs/life_lessons/calibration.md`
+- Canonical evidence: `friction_events[]` written every turn since v0.4.4, never read until Friction Wave 1. When writing a feedback mechanism, immediately verify the reader exists and is reachable. If not, mark PARTIAL.
+
+---
 
 ## New Lessons (2026-04-02)
 
@@ -38,14 +54,9 @@
 
 ## Recently Violated (always read these)
 
-### [Calibration] Slot cap must exclude recovery-phase ops — AND verify every caller uses the function you fixed (2026-03-30, EXTENDED 2026-03-31)
-- See `docs/life_lessons/calibration.md` for full entry.
-- **Original lesson**: `briefing.active_operations.filter(op => op.phase !== 'recovery')` for the slot cap check in emit.ts.
-- **Extension (2026-03-31)**: Even fixing emit.ts AND `hasAvailableSlot()` may be insufficient — `commander/emit.ts` has its own inline guard and never calls `hasAvailableSlot()`. Fixing a utility function that your actual code path doesn't call is an inert no-op. Before declaring any fix complete: (1) grep for all callers, (2) verify the code path you care about actually reaches the function you changed.
-
-### [Calibration] Implementing a feedback write without a feedback read is half-done (2026-03-30) — NEW
-- See `docs/life_lessons/calibration.md` for full entry.
-- **Do instead**: When writing a feedback mechanism, immediately verify the reader exists and is reachable. If not, mark the fix PARTIAL in the ledger.
+### [Calibration] Slot cap must exclude recovery-phase ops — AND verify every caller uses the function you fixed (2026-03-30, RESOLVED 2026-04-04)
+- **RESOLVED** — fix confirmed committed, no longer an active threat. See `docs/life_lessons/calibration.md` for full entry.
+- Core rule: `briefing.active_operations.filter(op => op.phase !== 'recovery')`. Extension: fix the actual code path, not just the utility — grep all callers before claiming done.
 
 ### [Data] Data pipeline scripts that transform edges must preserve ALL fields — min_dist/type loss silently broke sector splitting (2026-03-23) — NEW
 - **Context**: `merge_micro_osids.cjs` remapped edges with `return { a, b }` — stripping `type` and `min_dist` fields. The `derive_operational_settlements.ts` script computed `min_dist` from polygon geometry, but the merge step (run after derivation) discarded it. The operational contact graph had 0/2047 edges with `min_dist`, making ALL adjacency threshold filters (`frontEdgeAdj` at 33m, `strictAdj` at 5.5m, `caseBSplitAdj` at 16.6m) identical to full unfiltered adjacency.
@@ -280,10 +291,10 @@
 |------|--------|---------|-------------|
 | [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Bot AI | 48 | Running calibration scenarios, tuning parameters, OOB changes |
 | [combat.md](life_lessons/combat.md) | Combat, Brigade Distribution, March System | 4 | Combat resolution, brigade movement, march/distribution system |
-| [architecture.md](life_lessons/architecture.md) | Architecture, Engine, Scaling, Defaults, Data Integrity | 55 | Changing engine structure, state, pipeline, adding systems |
+| [architecture.md](life_lessons/architecture.md) | Architecture, Engine, Scaling, Defaults, Data Integrity | 57 | Changing engine structure, state, pipeline, adding systems |
 | [data_pipeline.md](life_lessons/data_pipeline.md) | Data, Pipeline, Geometry | 10 | Modifying derived data, running data scripts, geometry work |
 | [ui_map.md](life_lessons/ui_map.md) | UI, GUI, MapLibre, Rendering, React | 13 | Frontend, map, tactical overlay, modal work |
-| [process.md](life_lessons/process.md) | Process, Planning, QA, Quality, Night Shift, Debugging | 54 | General development process (skim at session start) |
+| [process.md](life_lessons/process.md) | Process, Planning, QA, Quality, Night Shift, Debugging | 55 | General development process (skim at session start) |
 | [sectors.md](life_lessons/sectors.md) | Sectors, Design | 9 | Sector system, front lines, territory assignment, sub-segments |
 | [platform.md](life_lessons/platform.md) | Platform, Tooling | 4 | Build issues, platform-specific bugs, tooling |
 | [events.md](life_lessons/events.md) | Events | 1 | Event system, flag gates, triggers |

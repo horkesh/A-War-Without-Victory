@@ -180,8 +180,11 @@ All hooks are **silent no-ops** outside of handoff runs (env var absent = exit 0
 ### Windows notification fallback chain
 
 1. BurntToast module (best UX — install once with `Install-Module BurntToast`)
-2. `msg * /TIME:5 "AWWV: ..."` (built-in Windows, no deps)
-3. Terminal bell `[console]::beep(800, 300)` + colored `Write-Host`
+2. **WScript.Shell Popup** — canonical fallback; modal dialog, always visible, auto-dismisses after 8s. Confirmed working on Windows 11 Pro 10.0.26200. Sets `$notified = $true`.
+3. `msg * /TIME:5 "AWWV: ..."` — attempt only; exits 0 but no visible popup on Windows 11 without terminal services. Does NOT set `$notified`.
+4. Terminal bell `[console]::beep(800, 300)` — audio-only last resort if all visual methods fail.
+
+Each attempt emits one `[notify] method: delivered/failed` line to stdout. `run_handoff.ps1` captures this and prints `Notify: [notify] ...` in the runner summary alongside the `Slack:` line.
 
 ### Slack notifications
 

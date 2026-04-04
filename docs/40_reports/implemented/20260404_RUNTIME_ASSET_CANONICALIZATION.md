@@ -1,7 +1,7 @@
 # Runtime Asset Canonicalization
 
 Date: 2026-04-04
-Commit: (pending — see git log)
+Commit: e4445b2b
 
 ## Policy: WebP is canonical for live UI runtime
 
@@ -64,4 +64,4 @@ Header rewritten to clarify:
 - grep for deleted filenames in `src/`: 0 results in live code (`src/_archived/` references expected and acceptable)
 - vitest: 6 files failed / 20 tests failed — confirmed pre-existing baseline (identical failure count on clean HEAD before our changes)
 - desktop:map:build: PATH/batch issue in shell — unrelated to this change (Vite itself not on PATH in this bash session)
-- governance: not run (no governance-affecting changes)
+- governance: OK (no relevant changed files)

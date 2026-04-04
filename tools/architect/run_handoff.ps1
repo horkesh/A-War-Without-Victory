@@ -238,5 +238,27 @@ $slackDisplay = if ($slackLabel -eq "SENT" -or $slackLabel -like "ERROR*") { "$s
 Write-Host "Slack:      $slackDisplay" -ForegroundColor $slackColor
 Write-Host ""
 
+# COMPLETION STATE CONTRACT:
+# - running      : claude is executing, no notification
+# - needs_input  : Notification hook → on_notification.ps1 → Slack ping only
+# - failed       : run_handoff.ps1 end → desktop popup (title: "AWWV Handoff Failed") + Slack
+# - completed    : run_handoff.ps1 end → desktop popup (title: "AWWV Handoff Complete") + Slack
+# Desktop popup fires ONLY from this location, after all artifacts are written.
+$notifyScript = Join-Path $PSScriptRoot "hooks\notify.ps1"
+if (Test-Path $notifyScript) {
+    $notifyStatus = if ($exitCode -eq 0) { "Complete" } else { "Failed" }
+    $notifyTitle  = "AWWV Handoff $notifyStatus"
+    $notifyMsg    = "$Name — $($meta.status) in $([math]::Round($duration, 0))s"
+    try {
+        $notifyOutput = & powershell -ExecutionPolicy Bypass -File $notifyScript -Title $notifyTitle -Message $notifyMsg 2>&1
+        $notifyResult = ($notifyOutput | Where-Object { $_ -match '\[notify\]' } | Select-Object -Last 1)
+        if (-not $notifyResult) { $notifyResult = "no output" }
+    } catch {
+        $notifyResult = "invoke failed — $_"
+    }
+    $notifyColor = if ($notifyResult -match 'delivered') { 'Green' } else { 'DarkGray' }
+    Write-Host "Notify:     $notifyResult" -ForegroundColor $notifyColor
+}
+
 # Return result dir for scripting
 return $resultDir
