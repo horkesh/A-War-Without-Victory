@@ -33,6 +33,7 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Active / Recent Accepted Lanes
 
+- `36bb32c0`+`831778ea`+`1cb68fc8` Presidential Command Friction Wave 3 — friction resolution loop closed: IPC handler acknowledge-friction-event sets resolved:true; adapter exposes FrictionEventView[]; ArmyHQCorpsCard back face shows per-event Acknowledge buttons; front face FRICTION ACTIVE badge demoted to dot indicator; back face is canonical friction detail surface; 90 tests pass
 - `c689ba74`+`387da70b`+`45feea0d`+`7d8006ac` Presidential Command Friction Wave 2 — strain-shaped CoS briefing paragraph, OperationsSection command-risk notice, OperationBriefingModal compound warning; silence=healthy at all three surfaces
 - `44356235`+`59b9f2f7`+`16a0726b`+`37668647` Presidential Command Friction Wave 1 — command strain visibility + warlord friction surfaced + institutional story in ops review
 - `3a80f60a` map-first usability restoration
@@ -47,12 +48,11 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Next Priority Lanes
 
-1. **ACTIVE 2026-04-04** — Presidential Command Friction Wave 2 complete. Wave 3 candidates:
-   - Wire friction resolution flow (player can acknowledge/accept a warlord friction event — sets `resolved: true`)
-   - Add `command_strain` decay visualization (show how strain will decay next turn)
-   - Expand strain sources: corps exhaustion above threshold, consecutive failed ops
-   - Connect strain to commander competence penalty (Wave 1 deferred this intentionally)
-   - Supply CA recovery rate from strain label (compromised corps recover CA slower)
+1. **ACTIVE 2026-04-04** — Presidential Command Friction Wave 3 complete. Wave 4 candidates:
+   - Strain decay visualization on back face (show how strain will reduce next turn — decay math is already in command_strain.ts)
+   - Expand strain sources: corps exhaustion above threshold, consecutive failed ops (grounded in CorpsState.exhaustion if it exists)
+   - Connect strain to commander competence penalty (Wave 1 deferred this; needs a real competence field to write to)
+   - Supply CA recovery rate from strain label (compromised corps recover CA slower — needs recovery modifier in war_phases.ts)
 
 2. **CLOSED 2026-04-04** — Warroom React migration complete.
    - Wave 1 (2026-04-03): React WarroomShellLayer foundation, scene plate + hotspot overlays, `?view=warroom` activation. Report: `docs/40_reports/implemented/20260403_WARROOM_REACT_SHELL_FOUNDATION.md`.
@@ -98,6 +98,8 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 ## Open Questions
 
 - Which remaining player-facing surfaces still leak staff certainty or internal jargon?
-- RESOLVED (wave 3): all warroom hotspot groups now have React-owned behavior. Next open question: which in-room overlays should expand (e.g. WarroomStatusBar → richer campaign pulse) vs which should remain pure handoffs.
-- Wave 2 friction: should warlord friction resolution require a player action (acknowledge event → sets resolved: true), or auto-resolve after N turns? Auto-resolve keeps it lightweight; player acknowledgement gives it more weight. Unresolved events currently accumulate indefinitely — need a decay or resolution path.
-- Should command strain affect anything mechanically in Wave 2 (e.g. compromised corps gets -5% attack modifier), or remain purely informational? Wave 1 deliberately avoids fake penalties — Wave 2 should only add real ones grounded in existing data.
+- RESOLVED (wave 3 Warroom): all warroom hotspot groups now have React-owned behavior. Next open question: which in-room overlays should expand (e.g. WarroomStatusBar → richer campaign pulse) vs which should remain pure handoffs.
+- RESOLVED (Wave 3 friction): warlord friction resolution now requires player acknowledgement — sets resolved: true via IPC. Unresolved events accumulate until acknowledged; decay already reduces their strain contribution to 0 after 2 turns but they remain visible until acknowledged. Auto-resolve path would conflict with the visible loop.
+- RESOLVED (Wave 3 mechanics): command strain remains purely informational through Wave 3. Wave 4 can add a real mechanical consequence (e.g. CA recovery rate reduction for compromised corps) only if grounded in an existing field. No fake modifiers.
+- Wave 4 open: should the back face show a "strain will drop to X next turn" preview? Decay math is already in command_strain.ts — trivial to add. Useful signal for the player deciding whether to acknowledge now vs wait.
+- Wave 4 open: what is the right scope for strain sources beyond force-launch and warlord friction? Corps exhaustion (CorpsState.corps_exhaustion) could contribute — needs calibration.

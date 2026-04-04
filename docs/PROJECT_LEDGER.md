@@ -1,3 +1,16 @@
+## 2026-04-04 - Presidential Command Friction Wave 3
+
+- Friction Resolution Loop: player can now acknowledge warlord friction events on the corps card back face → sets `resolved: true` on the matching `FrictionEvent` → `computeCorpsCommandStrain()` excludes it next read → command strain drops. Loop is now closed end-to-end.
+- `electron-main.cjs`: new `acknowledge-friction-event` IPC handler. Payload: `{ corpsId, officerId, eventTurn, eventType }`. Lookup by composite key `officer_id + turn + type + resolved===false`. Sets `resolved: true`, serializes, broadcasts.
+- `preload.cjs`: bridge entry for `acknowledgeFrictionEvent`.
+- `useIPC.ts`: `acknowledgeFrictionEvent(payload)` added to `WindowAwwv` interface and hook return.
+- `types.ts`: `FrictionEventView` interface (`compositeKey`, `officerId`, `typeLabel`, `turn`, `resolved`). `frictionEvents?: FrictionEventView[]` added to `FormationView`.
+- `GameStateAdapter.ts`: corps loop now populates `frictionEvents` — full event list (resolved+unresolved) for the corps's active commander, sorted oldest-first, with humanized type labels.
+- `ArmyHQCorpsCard.tsx` back face: friction banner replaced with resolution panel — unresolved events shown as rows (typeLabel + turn + Acknowledge button). Resolved events hidden (silence=healthy). Explainer: "Acknowledging friction events reduces command strain over time."
+- Phase D simplify: front face `FRICTION ACTIVE` badge demoted to dot indicator `● FRICTION` — back face now owns the full friction detail list (singular ownership).
+- +20 Wave 3 tests; 90/90 pass in command_authority.test.ts. tsc clean. Governance OK.
+- Report: `docs/40_reports/implemented/20260404_PRESIDENTIAL_COMMAND_FRICTION_WAVE3.md`
+
 ## 2026-04-04 - Presidential Command Friction Wave 2
 
 - `ChiefOfStaffBriefing.tsx`: adds §3 strain paragraph when any player-faction corps has commandStrain > 0. Six phrase variants (3 tones × strained/compromised), names the specific corps. Silence = healthy. No new props — computed from existing gameState via `computeCorpsCommandStrain`.
