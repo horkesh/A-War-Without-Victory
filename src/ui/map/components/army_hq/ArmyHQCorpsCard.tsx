@@ -3,7 +3,7 @@
  * Uses FlipCard for front (summary) / back (detail) with 3D flip animation.
  * Compressed mode stays as a single-line mini card when another card is flipped.
  */
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import type { FormationView, FrictionEventView, CorpsFrontSectorView, OperationView, LoadedGameState } from '../../data/types';
 import type { TurnBattle } from '../../../../state/turn_summary';
 import { formatCorpsDisplayName } from '../../utils/formatters';
@@ -19,6 +19,7 @@ import { OperationsSection } from './OperationsSection';
 import { OrbatSection } from './OrbatSection';
 import { CombatRecordSection } from './CombatRecordSection';
 import { FlipCard } from './FlipCard';
+import { deriveStanceInterpretation } from '../../data/command_strain';
 
 import type { ReadinessGrade } from './ForceReadiness';
 
@@ -70,6 +71,7 @@ export function ArmyHQCorpsCard({
 }: ArmyHQCorpsCardProps) {
     const ipc = useIPC();
     const setLoadError = useGameStore((s) => s.setLoadError);
+    const [pendingStance, setPendingStance] = useState<string | null>(null);
 
     const data = useMemo(() => {
         const totalPersonnel = brigades.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
@@ -154,10 +156,29 @@ export function ArmyHQCorpsCard({
         );
     }
 
-    const handleStanceChange = async (newStance: string) => {
-        if (!ipc.isAvailable) return;
-        const result = await ipc.stageCorpsStanceOrder(corps.id, newStance);
+    const handleStanceChange = (newStance: string) => {
+        const { severity } = deriveStanceInterpretation(data.strain, data.strainLabel, newStance);
+        if (severity === 'normal') {
+            // Immediate commit — silence = healthy
+            if (!ipc.isAvailable) return;
+            void ipc.stageCorpsStanceOrder(corps.id, newStance).then((result) => {
+                if (!result.ok) setLoadError(result.error ?? 'Failed to stage corps stance.');
+            });
+        } else {
+            // Show preview panel — player must confirm (or cancel for constrained)
+            setPendingStance(newStance);
+        }
+    };
+
+    const handleConfirmStance = async () => {
+        if (!pendingStance || !ipc.isAvailable) return;
+        const result = await ipc.stageCorpsStanceOrder(corps.id, pendingStance);
         if (!result.ok) setLoadError(result.error ?? 'Failed to stage corps stance.');
+        setPendingStance(null);
+    };
+
+    const handleCancelStance = () => {
+        setPendingStance(null);
     };
 
     const handleAcknowledgeFriction = async (event: FrictionEventView) => {
@@ -348,8 +369,8 @@ export function ArmyHQCorpsCard({
                     <div className="flex items-center gap-2">
                         <span className="text-[10px] text-text-secondary/60 uppercase tracking-widest">Stance:</span>
                         <select
-                            value={data.stance}
-                            onChange={(e) => { void handleStanceChange(e.target.value); }}
+                            value={pendingStance ?? data.stance}
+                            onChange={(e) => { handleStanceChange(e.target.value); }}
                             onClick={(e) => e.stopPropagation()}
                             className="text-[11px] font-bold uppercase bg-panel-bg text-text-primary border border-panel-border rounded px-2 py-1 cursor-pointer focus:outline-none focus:border-amber-400"
                         >
@@ -367,6 +388,47 @@ export function ArmyHQCorpsCard({
                     </div>
                 </div>
             </div>
+            {/* Stance interpretation preview — Wave 6. Shown when pendingStance requires confirmation. */}
+            {pendingStance !== null && pendingStance !== data.stance && (() => {
+                const { severity, notice, isBlocked } = deriveStanceInterpretation(data.strain, data.strainLabel, pendingStance);
+                if (severity === 'normal') return null;
+                const isConstrained = severity === 'constrained';
+                return (
+                    <div className={`px-4 py-2 border-b ${isConstrained ? 'border-red-500/20 bg-red-900/10' : 'border-amber-500/20 bg-amber-900/10'}`}>
+                        <div className="flex items-center gap-2">
+                            <span className={`text-[9px] uppercase font-bold tracking-wider opacity-80 shrink-0 ${isConstrained ? 'text-red-400' : 'text-amber-400'}`}>
+                                Army HQ Interpretation
+                            </span>
+                        </div>
+                        <p className={`text-[10px] leading-snug mt-1 mb-1.5 ${isConstrained ? 'text-red-300' : 'text-amber-300'}`}>
+                            {notice}
+                        </p>
+                        {!isBlocked && (
+                            <div className="flex gap-2">
+                                <button
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); void handleConfirmStance(); }}
+                                    className="text-[9px] font-bold uppercase tracking-wider px-2 py-1 border border-amber-600/50 text-amber-400 bg-amber-900/20 hover:bg-amber-900/40 transition-colors"
+                                >
+                                    Confirm Stance Order
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); handleCancelStance(); }}
+                                    className="text-[9px] font-bold uppercase tracking-wider px-2 py-1 border border-panel-border text-text-secondary hover:border-panel-border/80 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        )}
+                        {isBlocked && (
+                            <p className="text-[9px] text-text-secondary/60 italic">
+                                Restore the command relationship to unlock this option.
+                            </p>
+                        )}
+                    </div>
+                );
+            })()}
 
             {/* Command Strain / Friction panel — back face (Wave 3: full resolution surface) */}
             {(data.strain > 0 || data.frictionEvents.length > 0) && (

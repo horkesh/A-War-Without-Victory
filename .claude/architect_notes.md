@@ -33,6 +33,7 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Active / Recent Accepted Lanes
 
+- **Command Chain Truth Wave 2** — GAP 1: demotion loop in `corps_front_sectors.ts` now clears `formation.assigned_sub_segment_id` on demoted brigades; GAP 2: `GameStateAdapter` builds reverse map from `corps_front_sectors` sub_segments before formations loop — canonical sector truth drives UI, formation field is fallback only. 6 regression tests in `sector_frontline_truth_wave2.test.ts`. Report: `docs/40_reports/implemented/20260404_COMMAND_CHAIN_TRUTH_WAVE2.md`.
 - `063ddaca`+`4a129b9b` **Command Chain Truth Wave 1** — Phase 1.5 front-adjacency guard (territory match alone insufficient; BFS ≤30 hops required before assigned); assertBrigadeReachability returns actionable string[] (caller demotes unreachable to reserve); brigade_front_assignment dead-writer comment (canonical block + preserved JSDoc contract text); ensureMinimumSectorCoverage hop-ceiling comment; generateThreatAssessment intel-fog comment; 9 regression tests. Pre-existing failures confirmed unchanged. Report: `docs/40_reports/implemented/20260404_COMMAND_CHAIN_TRUTH_WAVE1.md`.
 - Wave 4 Presidential Command Friction — Stabilize Command Relationship action (pay CA, resolve all friction at once, 3-turn cooldown); strain-gated stance (offensive blocked when compromised ≥6); CommandManagementSection new collapsible component; IPC-side stance gate enforced in stage-corps-stance-order; 119/119 tests pass; tsc clean; governance OK
 - Notification delivery fix (post-Wave 4) — notify.ps1 rewritten; canonical method is WScript.Shell Popup (confirmed working on Windows 11 Pro 10.0.26200); BurntToast/msg*/WinRT all fail on this machine; run_handoff.ps1 captures [notify] output and prints Notify log line in runner summary
@@ -52,12 +53,15 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Next Priority Lanes
 
-1. **ACTIVE 2026-04-04** — Command Chain Truth Package (v0.8.0.x stabilization lane).
-   - Wave 1 complete (2026-04-04): Phase 1.5 guard, assertBrigadeReachability actionable, dead-field docs, displacement guard verified.
-   - Wave 2 pending: Frontline consumer alignment (exhaustion.ts, officer_quality_update.ts, supply_pressure.ts).
-   - Wave 3 pending: Activity/reporting truth (scenario_runner.ts, scenario_reporting.ts alignment to canonical phase outputs).
-   - Wave 4 pending: Regression gates expansion + canon/roadmap propagation.
-   - Wave 5 friction candidates: still pending (see item 2 below).
+1. **CLOSED 2026-04-04** — Command Chain Truth Package (v0.8.0.x stabilization lane). All 6 plan phases landed across Waves 1–4.
+   - Canonical owner: `corps_front_sectors` and its truthful downstream consumers.
+   - Demoted path: legacy proxy/fallback paths removed or explicitly annotated compatibility-only.
+   - Test count: 29 regression tests across `sector_frontline_truth_wave1–4.test.ts` lock all invariants I1–I9.
+   - Wave 1 (2026-04-04): Phase 1.5 front-adjacency guard (BFS ≤30 hops), assertBrigadeReachability actionable return, dead brigade_front_assignment write confirmed, displacement double-count guard verified.
+   - Wave 2 (2026-04-04): GAP 1 demotion clears assigned_sub_segment_id; GAP 2 adapter canonical-first sub-segment derivation. 6 regression tests.
+   - Wave 3 (2026-04-04): Displacement trigger proxy-fork observable (console.warn); activity zero-fill; activity summary fidelity. 7 regression tests.
+   - Wave 4 (2026-04-04): 3 gap-filler regression tests (assertBrigadeReachability topology stress, adapter re-assignment fidelity, proxy/canonical pressure_eligible_size parity); MASTER_ROADMAP, plan doc, SECTOR_MASTER, architect_notes all updated. Lane closed.
+   - Wave 5 CI-integration candidates noted as minor future hardening (not a lane re-open).
    - Plan: `docs/plans/2026-04-03-v080x-sector-frontline-truth-plan.md`
 
 2. **CLOSED 2026-04-04** — Presidential Command Friction Wave 4 complete.
@@ -66,8 +70,26 @@ Purpose: repo-local architect board for active findings, accepted direction, and
    - CommandManagementSection: new collapsible component, silence=healthy
    - notify.ps1: native Windows toast fallback added
 
-2. **Wave 5 candidates (post-Wave 4):**
+- **CLOSED 2026-04-04** — **Order Interpretation Preview Loop (Wave 5)**
+   - Gap: clean-approval launches showed no strain context. `DirectInterventionSection` only fires on override path.
+   - `deriveOrderInterpretation` added to `command_strain.ts`: severity (normal/caution/alarm), cautionNotice (null=healthy), interventionStrength.
+   - `OrderInterpretationSection` (new): amber/red bordered notice, staff-briefing prose, silence=healthy, no buttons.
+   - Wired into `OperationBriefingModal` after CommandRecord, before DirectInterventionSection, planning phase only.
+   - 12 tests in `Wave 5: Order Interpretation Preview` block in `command_authority.test.ts`.
+   - Report: `docs/40_reports/implemented/20260404_ORDER_INTERPRETATION_PREVIEW_LOOP.md`
+
+- **CLOSED 2026-04-04** — **Stance Interpretation Preview (Order Interpretation Preview Loop Wave 2 / Command Friction Wave 6)**
+   - Gap: stance dropdown committed immediately with zero preview even when corps was strained + requesting offensive.
+   - `deriveStanceInterpretation` added to `command_strain.ts`: severity (normal/caution/constrained), notice (null=healthy), isBlocked.
+   - Two-step flow in `ArmyHQCorpsCard`: `pendingStance` state; normal→immediate commit; caution/constrained→show inline panel.
+   - Caution (strained+offensive): notice + Confirm/Cancel buttons. Constrained (compromised+offensive): notice + restore message, no confirm.
+   - `StanceInterpretationSection` exported from `OrderInterpretationSection.tsx` as pure display scaffolding.
+   - 11 tests in `Wave 6: Stance Interpretation Preview` block in `command_authority.test.ts`.
+   - Report: `docs/40_reports/implemented/20260404_STANCE_INTERPRETATION_PREVIEW_WAVE2.md`
+
+2. **Wave 6 candidates (post-Wave 5):**
    - Strain decay preview on back face ("strain will drop to X next turn" — decay math already in command_strain.ts, trivial to add)
+   - Stance-change interpretation: show strain context when player changes a compromised corps's stance
    - Expand strain sources: corps exhaustion above threshold (grounded in `CorpsState.corps_exhaustion`)
    - Connect strain to CA recovery rate reduction (compromised corps recover CA slower — needs recovery modifier in war_phases.ts)
    - Commander competence penalty from strain (Wave 1 deferred; needs a real competence field to write to cleanly)

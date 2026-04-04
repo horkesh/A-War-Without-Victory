@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import type { CommandAuthority, CorpsOperation } from '../src/state/game_state.js';
 import type { OperationAAR } from '../src/sim/combat/operation_aar.js';
-import { computeCorpsCommandStrain, getCommandStrainLabel } from '../src/ui/map/data/command_strain.js';
+import { computeCorpsCommandStrain, getCommandStrainLabel, deriveOrderInterpretation, deriveStanceInterpretation } from '../src/ui/map/data/command_strain.js';
 
 function makeAuth(overrides?: Partial<CommandAuthority>): CommandAuthority {
     return { current: 100, max: 100, spent_this_turn: 0, lifetime_spent: 0, ...overrides };
@@ -1204,5 +1204,146 @@ describe('Wave 4: CommandManagementSection visibility conditions', () => {
 
     it('stance constraint notice shown when compromised', () => {
         expect(shouldShowStanceConstraintNotice('compromised')).toBe(true);
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Wave 5 — Order Interpretation Preview Loop
+// ─────────────────────────────────────────────────────────────────────────────
+
+// The preview loop closes the gap: when a corps commander recommends LAUNCH but
+// the corps carries command strain > 0, the player now sees institutional context
+// BEFORE committing to go/no-go — not only when overriding a reluctant commander.
+//
+// Silence = healthy: severity === 'normal' and cautionNotice === null at strain 0.
+
+describe('Wave 5: Order Interpretation Preview', () => {
+    it('deriveOrderInterpretation: returns normal/null when strain=0', () => {
+        const result = deriveOrderInterpretation(0, 'launch');
+        expect(result.severity).toBe('normal');
+        expect(result.cautionNotice).toBeNull();
+    });
+
+    it('deriveOrderInterpretation: returns normal/null when strain=0 regardless of assessment', () => {
+        const result = deriveOrderInterpretation(0, 'postpone');
+        expect(result.severity).toBe('normal');
+        expect(result.cautionNotice).toBeNull();
+    });
+
+    it('deriveOrderInterpretation: returns caution when strain 1-5', () => {
+        const result = deriveOrderInterpretation(3, 'launch');
+        expect(result.severity).toBe('caution');
+        expect(result.cautionNotice).not.toBeNull();
+        expect(result.cautionNotice!.length).toBeGreaterThan(0);
+        expect(result.interventionStrength).toBe('ordinary_approval');
+    });
+
+    it('deriveOrderInterpretation: returns alarm when strain >= 6', () => {
+        const result = deriveOrderInterpretation(6, 'launch');
+        expect(result.severity).toBe('alarm');
+        expect(result.cautionNotice).not.toBeNull();
+        expect(result.cautionNotice!.length).toBeGreaterThan(0);
+    });
+
+    it('deriveOrderInterpretation: interventionStrength is direct_intervention when commander says postpone', () => {
+        const result = deriveOrderInterpretation(3, 'postpone');
+        expect(result.interventionStrength).toBe('direct_intervention');
+    });
+
+    it('deriveOrderInterpretation: interventionStrength is ordinary_approval when commander says launch', () => {
+        const result = deriveOrderInterpretation(5, 'launch');
+        expect(result.interventionStrength).toBe('ordinary_approval');
+    });
+
+    it('deriveOrderInterpretation: interventionStrength is direct_intervention when commander says abort', () => {
+        const result = deriveOrderInterpretation(3, 'abort');
+        expect(result.interventionStrength).toBe('direct_intervention');
+    });
+
+    it('deriveOrderInterpretation: interventionStrength is ordinary_approval when assessment is null', () => {
+        const result = deriveOrderInterpretation(3, null);
+        expect(result.interventionStrength).toBe('ordinary_approval');
+    });
+
+    it('deriveOrderInterpretation: interventionStrength is ordinary_approval when assessment is undefined', () => {
+        const result = deriveOrderInterpretation(3, undefined);
+        expect(result.interventionStrength).toBe('ordinary_approval');
+    });
+
+    it('deriveOrderInterpretation: alarm text differs from caution text', () => {
+        const caution = deriveOrderInterpretation(3, 'launch');
+        const alarm = deriveOrderInterpretation(6, 'launch');
+        expect(caution.cautionNotice).not.toBe(alarm.cautionNotice);
+    });
+
+    it('deriveOrderInterpretation: strain=5 is caution (boundary — not yet alarm)', () => {
+        const result = deriveOrderInterpretation(5, 'launch');
+        expect(result.severity).toBe('caution');
+    });
+
+    it('deriveOrderInterpretation: strain=6 is alarm (boundary)', () => {
+        const result = deriveOrderInterpretation(6, 'launch');
+        expect(result.severity).toBe('alarm');
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Wave 6 — Stance Interpretation Preview
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Wave 6: Stance Interpretation Preview', () => {
+    it('returns normal/null when strain=0, offensive', () => {
+        const r = deriveStanceInterpretation(0, 'healthy', 'offensive');
+        expect(r.severity).toBe('normal');
+        expect(r.notice).toBeNull();
+        expect(r.isBlocked).toBe(false);
+    });
+    it('returns caution when strained + offensive', () => {
+        const r = deriveStanceInterpretation(3, 'strained', 'offensive');
+        expect(r.severity).toBe('caution');
+        expect(r.notice).not.toBeNull();
+        expect(r.isBlocked).toBe(false);
+    });
+    it('returns constrained when compromised + offensive', () => {
+        const r = deriveStanceInterpretation(6, 'compromised', 'offensive');
+        expect(r.severity).toBe('constrained');
+        expect(r.notice).not.toBeNull();
+        expect(r.isBlocked).toBe(true);
+    });
+    it('returns normal when strained + defensive', () => {
+        const r = deriveStanceInterpretation(3, 'strained', 'defensive');
+        expect(r.severity).toBe('normal');
+        expect(r.notice).toBeNull();
+    });
+    it('returns normal when strained + balanced', () => {
+        const r = deriveStanceInterpretation(3, 'strained', 'balanced');
+        expect(r.severity).toBe('normal');
+    });
+    it('returns normal when strained + reorganize', () => {
+        const r = deriveStanceInterpretation(3, 'strained', 'reorganize');
+        expect(r.severity).toBe('normal');
+    });
+    it('isBlocked only for constrained, not caution', () => {
+        const caution = deriveStanceInterpretation(3, 'strained', 'offensive');
+        const constrained = deriveStanceInterpretation(6, 'compromised', 'offensive');
+        expect(caution.isBlocked).toBe(false);
+        expect(constrained.isBlocked).toBe(true);
+    });
+    it('notice is non-null for caution and constrained', () => {
+        expect(deriveStanceInterpretation(1, 'strained', 'offensive').notice).not.toBeNull();
+        expect(deriveStanceInterpretation(6, 'compromised', 'offensive').notice).not.toBeNull();
+    });
+    it('boundary: strain=5 + offensive = caution (not constrained)', () => {
+        const r = deriveStanceInterpretation(5, 'strained', 'offensive');
+        expect(r.severity).toBe('caution');
+    });
+    it('boundary: strain=6 + offensive = constrained', () => {
+        const r = deriveStanceInterpretation(6, 'compromised', 'offensive');
+        expect(r.severity).toBe('constrained');
+    });
+    it('caution text differs from constrained text', () => {
+        const caution = deriveStanceInterpretation(3, 'strained', 'offensive');
+        const constrained = deriveStanceInterpretation(6, 'compromised', 'offensive');
+        expect(caution.notice).not.toBe(constrained.notice);
     });
 });

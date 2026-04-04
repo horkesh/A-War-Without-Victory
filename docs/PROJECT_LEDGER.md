@@ -1,3 +1,48 @@
+## 2026-04-04 — Stance Interpretation Preview — Wave 2 (Command Friction Wave 6)
+
+- Added `deriveStanceInterpretation()` + `StanceInterpretation` interface to `src/ui/map/data/command_strain.ts` (Wave 6 block)
+- Back-face stance dropdown now shows interpretation preview (caution/constrained) before commitment for offensive posture when strained/compromised
+- Two-step flow in `ArmyHQCorpsCard`: `pendingStance` state + `handleConfirmStance` / `handleCancelStance`; dropdown value reflects pending selection
+- Immediate commit preserved for silence=healthy cases (defensive/balanced/reorganize, or strain=0 + offensive)
+- `StanceInterpretationSection` exported from `OrderInterpretationSection.tsx` as pure display scaffolding (inline version active in ArmyHQCorpsCard)
+- 11 new tests in `Wave 6: Stance Interpretation Preview` describe block in `tests/command_authority.test.ts`
+- Verification: tsc clean, 142/142 command_authority tests pass, governance OK
+- Report: `docs/40_reports/implemented/20260404_STANCE_INTERPRETATION_PREVIEW_WAVE2.md`
+
+## 2026-04-04 — Order Interpretation Preview Loop (Wave 5)
+
+- **Gap closed**: `OperationBriefingModal` previously showed no strain context on clean approval paths (commander says `launch`). Player could commit to an operation with a strained or compromised corps and see nothing. `DirectInterventionSection` only fires when overriding — the new section fires on any planning-phase open when strain > 0.
+- **`deriveOrderInterpretation`** added to `src/ui/map/data/command_strain.ts`: pure derivation, `severity` (normal/caution/alarm), `cautionNotice` (null = healthy), `interventionStrength` (ordinary_approval / direct_intervention).
+- **`OrderInterpretationSection`** (new component, `src/ui/map/components/army_hq/OrderInterpretationSection.tsx`): silence=healthy at strain=0, amber notice at strain 1–5, red notice at strain ≥6. Staff-briefing prose. No buttons, no actions.
+- **Wired** into `OperationBriefingModal` after `CommandRecord`, before `DirectInterventionSection`, only when `phase === 'planning'`. `DirectInterventionSection` unchanged — two sections answer different questions.
+- **12 tests** in `tests/command_authority.test.ts` `describe('Wave 5: Order Interpretation Preview')`.
+- Verification: tsc clean, 12/12 Wave 5 pass, desktop:map:build clean, governance OK.
+- Report: `docs/40_reports/implemented/20260404_ORDER_INTERPRETATION_PREVIEW_LOOP.md`
+
+## 2026-04-04 — Command Chain Truth Wave 4 (Lane Closure)
+
+- **3 regression tests** in `tests/sector_frontline_truth_wave4.test.ts`: assertBrigadeReachability topology stress (3 disconnected components, only cross-component brigades flagged), adapter re-assignment fidelity (canonical sub-segment wins over stale formation field after move; fallback and cleared-field cases covered), proxy/canonical `pressure_eligible_size` parity (`console.warn` fires on proxy path only; proxy >= canonical for identical contact graph).
+- **Doc propagation**: MASTER_ROADMAP immediate engine-health lane marked COMPLETE 2026-04-04; plan doc status updated and all 6 phase checkboxes marked; SECTOR_MASTER new section with 7-bullet summary; architect_notes lane 1 marked CLOSED.
+- **Command Chain Truth lane: CLOSED** — all 6 plan phases landed across Waves 1–4.
+- **29 regression tests total** across wave files 1–4 lock all invariants I1–I9.
+- Report: `docs/40_reports/implemented/20260404_COMMAND_CHAIN_TRUTH_WAVE4.md`
+
+## 2026-04-04 — Command Chain Truth Wave 3
+
+- **Displacement trigger fork made observable**: `evaluateDisplacementTriggers` now emits `console.warn` when `hasLiveSectorFrontlineTruth()` is false (proxy path chosen). Added comment block documenting Path A (canonical: `corps_front_sectors.edge_ids`) and Path B (legacy: `political_controllers` contact graph). Fork logic unchanged — proxy path is valid safety valve.
+- **Threat severity vocabulary collision fixed**: renamed `ThreatItem.severity` value `'active'` → `'offensive'` in `generateThreatAssessment.ts` and `ThreatAssessment.tsx`. Eliminates collision with brigade `status === 'active'`. Display label updated to "OFFENSIVE THREATS". No brigade formation code touched.
+- **7 regression tests** in `tests/sector_frontline_truth_wave3.test.ts`: Test A (proxy fork warns when sectors absent; canonical path silent), Test B (zero-fill when trigger_report absent; types are `number` not `undefined`), Test C (`computeActivitySummary` min/max/mean/nonzero_weeks correctness, empty list, zero week).
+- Verification: tsc clean, 7/7 Wave 3 pass, 15/15 Wave 1+2 pass, governance OK.
+- Report: `docs/40_reports/implemented/20260404_COMMAND_CHAIN_TRUTH_WAVE3.md`
+
+## 2026-04-04 — Command Chain Truth Wave 2
+
+- **GAP 1 demotion clearing**: `corps_front_sectors.ts` demotion loop now clears `formation.assigned_sub_segment_id = undefined` for each brigade demoted from `assigned_brigade_ids` → `reserve_brigade_ids`. Previously the stale field persisted, causing the UI adapter to show demoted brigades as still holding a sub-segment.
+- **GAP 2 adapter canonical derivation**: `GameStateAdapter.ts` now builds a reverse map `brigadeId → sub_segment_id` from `state.military.corps_front_sectors[*].sub_segments[*].primary_brigade_ids` before the formations loop. `assigned_sub_segment_id` is derived from this map first; formation field is fallback only. Canonical sector truth now drives the UI display.
+- **6 regression tests** in `tests/sector_frontline_truth_wave2.test.ts` lock GAP 1 demotion clearing, GAP 2 adapter derivation (canonical wins, fallback, undefined), and Wave 1 displacement guard regression.
+- Verification: tsc clean, 6/6 Wave 2 tests pass, governance OK.
+- Report: `docs/40_reports/implemented/20260404_COMMAND_CHAIN_TRUTH_WAVE2.md`
+
 ## 2026-04-04 — Command Chain Truth Wave 1
 
 - **B1 Phase 1.5 guard**: `classifyBrigadesByTerritory` Phase 1.5 now requires front-adjacency (≤30 friendly hops via `friendlyDistanceToAny`) before placing a brigade in `assigned_brigade_ids`. Brigades that match territory+component but cannot reach sector front go to `remaining` (not false reserve). Prevents deep-rear brigades appearing as sector-assigned.

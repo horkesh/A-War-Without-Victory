@@ -115,3 +115,105 @@ export function getCommandStrainLabel(score: number): CommandStrainLabel {
     if (score >= STRAINED_THRESHOLD) return 'strained';
     return 'healthy';
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Order Interpretation Preview — Wave 5
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Describes how Army HQ is reading a presidential launch order given current
+ * command strain context. Used to surface institutional context before the
+ * player commits to a go/no-go decision — even on clean (non-overriding) approvals.
+ *
+ * Silence = healthy: cautionNotice is null when severity === 'normal'.
+ */
+export interface OrderInterpretation {
+    severity: 'normal' | 'caution' | 'alarm';
+    /** null when severity === 'normal' (silence = healthy). */
+    cautionNotice: string | null;
+    /** 'direct_intervention' when player would be overriding a reluctant commander. */
+    interventionStrength: 'ordinary_approval' | 'direct_intervention';
+}
+
+/**
+ * Derive how Army HQ interprets an incoming launch order given the corps's
+ * current command strain and the commander's standing assessment.
+ *
+ * @param strain               - Current command strain score for this corps.
+ * @param commanderAssessment  - The commander's standing assessment ('launch', 'postpone', 'abort', or absent).
+ * @returns OrderInterpretation — pure derivation, no side effects.
+ */
+export function deriveOrderInterpretation(
+    strain: number,
+    commanderAssessment: 'launch' | 'postpone' | 'abort' | null | undefined,
+): OrderInterpretation {
+    // Severity tier
+    const severity: 'normal' | 'caution' | 'alarm' =
+        strain === 0 ? 'normal'
+        : strain >= COMPROMISED_THRESHOLD ? 'alarm'
+        : 'caution';
+
+    // Caution notice — silence = healthy
+    const cautionNotice: string | null =
+        severity === 'normal' ? null
+        : severity === 'caution'
+            ? 'This corps is carrying command strain from recent presidential interventions. Operations proceed, but at elevated institutional friction.'
+            : 'Command cohesion is compromised. Institutional damage is severe. Further operations risk command breakdown.';
+
+    // Intervention strength
+    const interventionStrength: 'ordinary_approval' | 'direct_intervention' =
+        commanderAssessment === 'postpone' || commanderAssessment === 'abort'
+            ? 'direct_intervention'
+            : 'ordinary_approval';
+
+    return { severity, cautionNotice, interventionStrength };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Stance Interpretation Preview — Wave 6
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface StanceInterpretation {
+    severity: 'normal' | 'caution' | 'constrained';
+    /** null when severity === 'normal' (silence = healthy). */
+    notice: string | null;
+    /** true when the stance is blocked by command state (compromised + offensive). */
+    isBlocked: boolean;
+}
+
+/**
+ * Derive how Army HQ interprets an incoming stance-change order given current
+ * command strain. Used to surface institutional context before the player
+ * commits to a stance change — or to explain why a stance is unavailable.
+ *
+ * Silence = healthy: notice is null when severity === 'normal'.
+ *
+ * @param strain          - Current command strain score for this corps.
+ * @param strainLabel     - Derived strain label ('healthy' | 'strained' | 'compromised').
+ * @param requestedStance - The stance the player is about to request.
+ * @returns StanceInterpretation — pure derivation, no side effects.
+ */
+export function deriveStanceInterpretation(
+    strain: number,
+    strainLabel: CommandStrainLabel,
+    requestedStance: string,
+): StanceInterpretation {
+    // Compromised + offensive → constrained (IPC also blocks this)
+    if (requestedStance === 'offensive' && strainLabel === 'compromised') {
+        return {
+            severity: 'constrained',
+            notice: 'Offensive posture is unavailable. Command cohesion is compromised — restore the command relationship first.',
+            isBlocked: true,
+        };
+    }
+    // Strained + offensive → caution
+    if (requestedStance === 'offensive' && strain > 0) {
+        return {
+            severity: 'caution',
+            notice: 'Requesting aggressive posture while command relationship is strained. This stance is available but operations proceed at elevated institutional friction.',
+            isBlocked: false,
+        };
+    }
+    // All other: silence = healthy
+    return { severity: 'normal', notice: null, isBlocked: false };
+}
