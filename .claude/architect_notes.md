@@ -88,9 +88,18 @@ Purpose: repo-local architect board for active findings, accepted direction, and
    - 8 tests in `Wave 7: Operation Outcome Category` block; 150/150 command_authority tests pass.
    - Report: `docs/40_reports/implemented/20260404_OPERATION_OUTCOME_CATEGORY_WAVE3.md`
 
-- **Wave 8 candidates (post-Wave 7):**
-   - Outcome category surfaced in operation history / AAR review panel (CommandRecord covers live ops; history tab shows completed ops but may still use two-tier display)
-   - Reluctant compliance frequency counter: if a president repeatedly launches against commander recommendations without CA, surface a cumulative "command relationship pressure" indicator
+- **CLOSED 2026-04-04** — **Command Review Consolidation Wave 8 (Command Review Consolidation Wave 1)**
+   - Gap: OperationsSection showed execution status but not the command-decision story — player had to navigate to OperationBriefingModal separately to see outcome category.
+   - `OutcomeCategoryBadge` added to `OperationsSection.tsx` executing/recovery op-card headers: silence=healthy for `ordinary_compliance`; amber dim for `reluctant_compliance`; amber bold `⚠ Direct Intervention` for `direct_intervention`. Reuses `deriveOperationOutcomeCategory` from `command_strain.ts`.
+   - `[ REVIEW COMMAND DECISION ]` button added to executing/recovery cards where `commander_assessment_at_launch` snapshot exists — opens `OperationBriefingModal` directly from the list via `setOperationBriefingContext`.
+   - Button label fix: `[ FORCE LAUNCH — N AUTH ]` → `[ DIRECT INTERVENTION — N AUTH ]` (canonical terminology).
+   - 11 tests in `Wave 8: Command Review Consolidation` block; 161 total in `command_authority.test.ts`.
+   - Canonical owner: `OperationBriefingModal` (full review via `CommandRecord`). `OperationsSection` = summary surface (outcome badge + modal entry point).
+   - Report: `docs/40_reports/implemented/20260404_COMMAND_REVIEW_CONSOLIDATION_WAVE8.md`
+
+- **Wave 9 candidates (post-Wave 8):**
+   - Outcome category in operation history / AAR review panel (completed ops may still use two-tier display)
+   - Reluctant compliance frequency counter: cumulative "command relationship pressure" indicator
    - Strain decay preview on back face ("strain will drop to X next turn" — decay math already in command_strain.ts)
    - Expand strain sources: corps exhaustion above threshold (grounded in `CorpsState.corps_exhaustion`)
    - Connect strain to CA recovery rate reduction (compromised corps recover CA slower — needs recovery modifier in war_phases.ts)
