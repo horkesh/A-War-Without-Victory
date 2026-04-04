@@ -33,6 +33,7 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Active / Recent Accepted Lanes
 
+- **Commander Explanation Surfaces Wave 1** — CLOSED 2026-04-04. Corps situation assessment derived on-read from CommanderState. Canonical surface: `CorpsSituationSection` in Army HQ corps card. Plan reasons now persisted via `last_plan_action`/`last_plan_reason`. 13 tests. Report: `docs/40_reports/implemented/20260404_COMMANDER_EXPLANATION_SURFACES_WAVE1.md`.
 - **Command Review Consolidation Wave 2 (Wave 9)** — CLOSED 2026-04-04. Trend summary + three-tier outcome badge on history ops. Report: `docs/40_reports/implemented/20260404_COMMAND_REVIEW_CONSOLIDATION_WAVE2.md`.
 - **Command Review Consolidation Wave 1 (Wave 8)** — CLOSED 2026-04-04. Outcome badge on live ops + modal entry point. Report: `docs/40_reports/implemented/20260404_COMMAND_REVIEW_CONSOLIDATION_WAVE8.md`.
 - **Command Friction Wave 5 / Wave 10 (Standing + CA Consequence)** — CLOSED 2026-04-04. Recovery forecast, standing indicator, CA recovery penalty. 10 tests.
@@ -40,6 +41,9 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 - **Warroom React Migration** — CLOSED 2026-04-04. 4 waves + final canvas deletion. Report: `docs/40_reports/implemented/20260404_WARROOM_LEGACY_CANVAS_DELETION.md`.
 
 ## Closed Lanes
+
+**Closed: Commander Explanation Surfaces Wave 1**
+Corps situation assessment derived on-read from `CommanderState` via `deriveCorpsSituationAssessment()`. Persists `last_plan_action`/`last_plan_reason` in `CommanderState` (2 fields in `emit.ts`). Canonical surface: `CorpsSituationSection` in Army HQ corps card (between Command Standing and Commander). Distinguishes military conditions, institutional constraints, plan lifecycle with reasons, threat context. Silence=healthy. 13 tests in Wave 11 describe block. Wave 2 candidates: campaign role explanation (persisting `campaign_role` from briefing), brigade tier explanation, stance change justification.
 
 **Closed: Presidential Command Friction (Waves 1-5) + Order Interpretation Preview (Waves 5-7)**
 Wave 1 surfaced command strain and warlord friction in ops review. Wave 2 added strain-shaped CoS briefing and compound warnings. Wave 3 closed the friction resolution loop (per-event acknowledge buttons, IPC handler). Wave 4 added Stabilize Command Relationship action (pay CA, resolve all friction, 3-turn cooldown) and strain-gated stance (offensive blocked when compromised). Wave 5/10 added standing indicator with recovery forecast and CA recovery penalty. Order interpretation preview loop added pre-launch context (deriveOrderInterpretation), stance-change preview (deriveStanceInterpretation), and three-tier operation outcome category (ordinary/reluctant/direct intervention). Reports in `docs/40_reports/implemented/20260404_PRESIDENTIAL_COMMAND_FRICTION_WAVE4.md` and `docs/40_reports/implemented/20260404_ORDER_INTERPRETATION_PREVIEW_LOOP.md`.

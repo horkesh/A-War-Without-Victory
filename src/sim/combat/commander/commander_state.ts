@@ -262,6 +262,10 @@ export interface CommanderState {
     /** Min brigades per zone. */
     garrison_budget: Record<string, number>;
     last_assessment_turn: number;
+    /** Last plan lifecycle action taken this turn. 'none' = no plan change. */
+    last_plan_action?: 'created' | 'advanced' | 'suspended' | 'abandoned' | 'launched' | 'none';
+    /** Reason string for the last plan action. Player-safe explanation of why. */
+    last_plan_reason?: string;
 }
 
 // ---------------------------------------------------------------------------

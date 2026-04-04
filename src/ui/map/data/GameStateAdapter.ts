@@ -23,7 +23,7 @@ import { getMunicipalitySupportLabel } from '../../../sim/combat/municipality_su
 import { strictCompare } from '../../../state/validateGameState.js';
 import { computeFullVerdict } from '../../../sim/negotiation/scoring.js';
 import type { GameVerdict } from '../../../state/negotiation_types.js';
-import { computeCorpsCommandStrain, getCommandStrainLabel, projectStrainDecay, deriveRecoveryForecast } from './command_strain.js';
+import { computeCorpsCommandStrain, getCommandStrainLabel, projectStrainDecay, deriveRecoveryForecast, deriveCorpsSituationAssessment } from './command_strain.js';
 import type { GameState } from '../../../state/game_state.js';
 
 function pointsByFaction(rec: Record<string, { points?: number }>): Record<string, number> {
@@ -882,6 +882,30 @@ export function parseGameState(json: unknown): LoadedGameState {
                 const projections = projectStrainDecay(fv.id, state as unknown as GameState, 5);
                 fv.projectedStrainNextTurn = projections.length > 1 ? projections[1].projectedStrain : strain;
                 fv.recoveryForecast = deriveRecoveryForecast(projections);
+
+                // ── Corps Situation Assessment (Commander Explanation Surfaces Wave 1) ──
+                const cmdState = cc?.commander_state as {
+                    zone_assessments?: Array<{
+                        posture: string; deficit: number;
+                        surplus_brigades: readonly string[];
+                        front_edge_count: number;
+                        is_must_hold?: boolean; corridor_width?: number;
+                    }>;
+                    threat_assessment?: { overall_pressure: string; enemy_concentration_zones?: readonly string[] };
+                    force_assessment?: {
+                        total_brigades: number; combat_effective: number; total_surplus: number;
+                        tier_counts?: { main_effort: number; active_defense: number; garrison: number };
+                    };
+                    current_plan?: {
+                        objective_description: string; status: string;
+                        concentration_progress?: number; suspension_reason?: string;
+                    } | null;
+                    last_plan_action?: string;
+                    last_plan_reason?: string;
+                } | null | undefined;
+                fv.situationAssessment = deriveCorpsSituationAssessment(
+                    cmdState, fv.corpsStance, fv.corpsExhaustion, strain,
+                );
 
                 // ── Active friction events for this corps's commander ─────────────
                 const frictionEvents = (state.military.friction_events as Array<{ officer_id: string; turn: number; type: string; resolved: boolean }> | undefined) ?? [];

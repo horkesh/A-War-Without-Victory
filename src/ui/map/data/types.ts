@@ -224,6 +224,18 @@ export interface FormationView {
     projectedStrainNextTurn?: number;
     /** Player-facing recovery forecast string. null = healthy (silence=healthy). */
     recoveryForecast?: string | null;
+    /**
+     * Corps situation assessment — explains why the commander is leaning a certain way.
+     * Derived on-read from CommanderState. Null fields = healthy (silence).
+     * Only populated for corps/corps_asset formations.
+     */
+    situationAssessment?: {
+        postureSummary: string | null;
+        militaryFactors: string[];
+        institutionalFactors: string[];
+        planExplanation: string | null;
+        threatContext: string | null;
+    };
 }
 
 /**

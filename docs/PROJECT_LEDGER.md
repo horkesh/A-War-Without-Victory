@@ -1,3 +1,16 @@
+## 2026-04-04 — Commander Explanation Surfaces Wave 1 (Corps Situation Assessment)
+
+- `commander_state.ts`: `last_plan_action` + `last_plan_reason` added to CommanderState — persists transient PlanDecision reason
+- `emit.ts`: `buildUpdatedState()` now writes plan action/reason into persistent state
+- `command_strain.ts`: `deriveCorpsSituationAssessment()` — pure derivation from CommanderState. Produces postureSummary, militaryFactors (exhaustion, deficit, siege, must-hold), institutionalFactors (stance, strain), planExplanation (lifecycle + reasons), threatContext. Silence=healthy.
+- `types.ts`: `situationAssessment` added to FormationView
+- `GameStateAdapter.ts`: reads `commander_state` from `corps_command[id]`, calls derivation, places on FormationView
+- `CorpsSituationSection.tsx`: NEW component — canonical Army HQ explanation surface. Collapsible, silence=healthy, military (amber) + institutional (blue) + threat (red) + plan factors
+- `ArmyHQCorpsCard.tsx`: wires CorpsSituationSection between CommandRelationshipSection and CommanderSection
+- 13 new Wave 11 tests in `tests/command_authority.test.ts` — 192/192 pass
+- Verification: tsc clean, 2126/2146 pass (20 pre-existing), vite build clean, governance OK
+- Report: `docs/40_reports/implemented/20260404_COMMANDER_EXPLANATION_SURFACES_WAVE1.md`
+
 ## 2026-04-04 — Presidential Command Friction Wave 5 (Standing + Decay Preview + CA Consequence)
 
 - `command_strain.ts`: `projectStrainDecay()` projects strain over future turns via shallow state copies; `deriveRecoveryForecast()` derives player-facing string (null when healthy)

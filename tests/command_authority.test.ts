@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import type { CommandAuthority, CorpsOperation } from '../src/state/game_state.js';
 import type { OperationAAR } from '../src/sim/combat/operation_aar.js';
-import { computeCorpsCommandStrain, getCommandStrainLabel, deriveOrderInterpretation, deriveStanceInterpretation, deriveOperationOutcomeCategory, buildOperationTrendSummary, projectStrainDecay, deriveRecoveryForecast } from '../src/ui/map/data/command_strain.js';
+import { computeCorpsCommandStrain, getCommandStrainLabel, deriveOrderInterpretation, deriveStanceInterpretation, deriveOperationOutcomeCategory, buildOperationTrendSummary, projectStrainDecay, deriveRecoveryForecast, deriveCorpsSituationAssessment } from '../src/ui/map/data/command_strain.js';
 import type { OperationOutcomeCategory, OperationTrendSummary } from '../src/ui/map/data/command_strain.js';
 
 function makeAuth(overrides?: Partial<CommandAuthority>): CommandAuthority {
@@ -1659,6 +1659,223 @@ describe('Wave 10: Command Relationship Standing', () => {
             const penalty = Math.min(2, (recentInterventions + unresolvedFriction) * 0.5);
             const recovery = Math.max(0, 2 - penalty);
             expect(recovery).toBe(2);
+        });
+    });
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // Wave 11: Corps Situation Assessment (Commander Explanation Surfaces)
+    // ═══════════════════════════════════════════════════════════════════════
+
+    describe('Wave 11: Corps Situation Assessment', () => {
+        it('returns null postureSummary when healthy projecting corps', () => {
+            const result = deriveCorpsSituationAssessment(
+                {
+                    zone_assessments: [{ posture: 'projecting', deficit: 0, surplus_brigades: ['b1', 'b2'], front_edge_count: 5 }],
+                    threat_assessment: { overall_pressure: 'low' },
+                    force_assessment: { total_brigades: 8, combat_effective: 8, total_surplus: 3 },
+                    current_plan: null,
+                },
+                'balanced',
+                10, // low exhaustion
+                0,  // no strain
+            );
+            expect(result.postureSummary).toBeNull();
+            expect(result.militaryFactors).toHaveLength(0);
+            expect(result.institutionalFactors).toHaveLength(0);
+            expect(result.planExplanation).toBeNull();
+            expect(result.threatContext).toBeNull();
+        });
+
+        it('returns posture explanation for defending corps with deficit', () => {
+            const result = deriveCorpsSituationAssessment(
+                {
+                    zone_assessments: [{ posture: 'defending', deficit: 3, surplus_brigades: [], front_edge_count: 12 }],
+                    threat_assessment: { overall_pressure: 'moderate' },
+                    force_assessment: { total_brigades: 5, combat_effective: 5, total_surplus: 0 },
+                    current_plan: null,
+                },
+                'defensive',
+                20,
+                0,
+            );
+            expect(result.postureSummary).toContain('Garrison requirements exceed');
+            expect(result.militaryFactors).toContain('No surplus brigades — all forces committed to garrison duties');
+            expect(result.institutionalFactors).toContain('Corps directed to defensive posture — no offensive planning');
+        });
+
+        it('reports exhaustion as military factor', () => {
+            const result = deriveCorpsSituationAssessment(
+                {
+                    zone_assessments: [{ posture: 'balanced', deficit: 0, surplus_brigades: ['b1'], front_edge_count: 6 }],
+                    threat_assessment: { overall_pressure: 'low' },
+                    force_assessment: { total_brigades: 6, combat_effective: 6, total_surplus: 1 },
+                    current_plan: null,
+                },
+                'balanced',
+                65, // heavy exhaustion
+                0,
+            );
+            expect(result.militaryFactors.some(f => f.includes('heavily exhausted'))).toBe(true);
+        });
+
+        it('reports command strain as institutional factor', () => {
+            const result = deriveCorpsSituationAssessment(
+                {
+                    zone_assessments: [{ posture: 'projecting', deficit: 0, surplus_brigades: ['b1', 'b2'], front_edge_count: 5 }],
+                    threat_assessment: { overall_pressure: 'low' },
+                    force_assessment: { total_brigades: 8, combat_effective: 8, total_surplus: 2 },
+                    current_plan: null,
+                },
+                'balanced',
+                10,
+                7, // compromised
+            );
+            expect(result.institutionalFactors.some(f => f.includes('compromised'))).toBe(true);
+        });
+
+        it('explains concentrating plan with progress', () => {
+            const result = deriveCorpsSituationAssessment(
+                {
+                    zone_assessments: [{ posture: 'projecting', deficit: 0, surplus_brigades: ['b1', 'b2', 'b3'], front_edge_count: 5 }],
+                    threat_assessment: { overall_pressure: 'low' },
+                    force_assessment: { total_brigades: 8, combat_effective: 8, total_surplus: 3 },
+                    current_plan: {
+                        objective_description: 'Op Corridor',
+                        status: 'concentrating',
+                        concentration_progress: 0.6,
+                    },
+                },
+                'offensive',
+                10,
+                0,
+            );
+            expect(result.planExplanation).toContain('Concentrating forces for Op Corridor');
+            expect(result.planExplanation).toContain('60%');
+        });
+
+        it('explains suspended plan with reason', () => {
+            const result = deriveCorpsSituationAssessment(
+                {
+                    zone_assessments: [{ posture: 'defending', deficit: 1, surplus_brigades: [], front_edge_count: 8 }],
+                    threat_assessment: { overall_pressure: 'heavy' },
+                    force_assessment: { total_brigades: 6, combat_effective: 5, total_surplus: 0 },
+                    current_plan: {
+                        objective_description: 'Op Thunder',
+                        status: 'suspended',
+                        suspension_reason: 'threat on flank increased',
+                    },
+                },
+                'balanced',
+                30,
+                0,
+            );
+            expect(result.planExplanation).toContain('Op Thunder suspended');
+            expect(result.planExplanation).toContain('threat on flank');
+        });
+
+        it('explains abandoned plan from last_plan_reason', () => {
+            const result = deriveCorpsSituationAssessment(
+                {
+                    zone_assessments: [{ posture: 'balanced', deficit: 0, surplus_brigades: ['b1'], front_edge_count: 6 }],
+                    threat_assessment: { overall_pressure: 'low' },
+                    force_assessment: { total_brigades: 6, combat_effective: 6, total_surplus: 1 },
+                    current_plan: null,
+                    last_plan_action: 'abandoned',
+                    last_plan_reason: 'viability dropped to 0.15',
+                },
+                'balanced',
+                20,
+                0,
+            );
+            expect(result.planExplanation).toContain('abandoned');
+            expect(result.planExplanation).toContain('viability');
+        });
+
+        it('reports critical threat context', () => {
+            const result = deriveCorpsSituationAssessment(
+                {
+                    zone_assessments: [{ posture: 'defending', deficit: 2, surplus_brigades: [], front_edge_count: 15 }],
+                    threat_assessment: { overall_pressure: 'critical' },
+                    force_assessment: { total_brigades: 5, combat_effective: 4, total_surplus: 0 },
+                    current_plan: null,
+                },
+                'defensive',
+                30,
+                0,
+            );
+            expect(result.threatContext).toContain('critical pressure');
+        });
+
+        it('reports besieged posture summary', () => {
+            const result = deriveCorpsSituationAssessment(
+                {
+                    zone_assessments: [{ posture: 'besieged', deficit: 3, surplus_brigades: [], front_edge_count: 20, corridor_width: 1 }],
+                    threat_assessment: { overall_pressure: 'heavy' },
+                    force_assessment: { total_brigades: 4, combat_effective: 3, total_surplus: 0 },
+                    current_plan: null,
+                },
+                'defensive',
+                50,
+                0,
+            );
+            expect(result.postureSummary).toContain('siege');
+            expect(result.militaryFactors.some(f => f.includes('siege'))).toBe(true);
+        });
+
+        it('returns all-null for null commanderState', () => {
+            const result = deriveCorpsSituationAssessment(null, 'balanced', 10, 0);
+            expect(result.postureSummary).toBeNull();
+            expect(result.militaryFactors).toHaveLength(0);
+            expect(result.institutionalFactors).toHaveLength(0);
+            expect(result.planExplanation).toBeNull();
+            expect(result.threatContext).toBeNull();
+        });
+
+        it('shows no-plan reason for defensive stance', () => {
+            const result = deriveCorpsSituationAssessment(
+                {
+                    zone_assessments: [{ posture: 'balanced', deficit: 0, surplus_brigades: ['b1'], front_edge_count: 6 }],
+                    threat_assessment: { overall_pressure: 'low' },
+                    force_assessment: { total_brigades: 6, combat_effective: 6, total_surplus: 1 },
+                    current_plan: null,
+                    last_plan_action: 'none',
+                    last_plan_reason: 'corps in defensive stance — no new plans',
+                },
+                'defensive',
+                10,
+                0,
+            );
+            expect(result.planExplanation).toContain('defensive stance');
+        });
+
+        it('reports low combat effectiveness as military factor', () => {
+            const result = deriveCorpsSituationAssessment(
+                {
+                    zone_assessments: [{ posture: 'defending', deficit: 1, surplus_brigades: [], front_edge_count: 10 }],
+                    threat_assessment: { overall_pressure: 'moderate' },
+                    force_assessment: { total_brigades: 10, combat_effective: 4, total_surplus: 0 },
+                    current_plan: null,
+                },
+                'balanced',
+                20,
+                0,
+            );
+            expect(result.militaryFactors.some(f => f.includes('4 of 10'))).toBe(true);
+        });
+
+        it('reports enemy concentration as threat context', () => {
+            const result = deriveCorpsSituationAssessment(
+                {
+                    zone_assessments: [{ posture: 'balanced', deficit: 0, surplus_brigades: ['b1'], front_edge_count: 8 }],
+                    threat_assessment: { overall_pressure: 'moderate', enemy_concentration_zones: ['zone_1'] },
+                    force_assessment: { total_brigades: 6, combat_effective: 6, total_surplus: 1 },
+                    current_plan: null,
+                },
+                'balanced',
+                20,
+                0,
+            );
+            expect(result.threatContext).toContain('concentration detected');
         });
     });
 });

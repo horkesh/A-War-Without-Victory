@@ -877,6 +877,8 @@ function buildUpdatedState(
         intel_picture: decisions.intel_picture,
         garrison_budget: garrisonBudget,
         last_assessment_turn: briefing.turn,
+        last_plan_action: planDecision.action,
+        last_plan_reason: planDecision.reason,
     };
 }
 

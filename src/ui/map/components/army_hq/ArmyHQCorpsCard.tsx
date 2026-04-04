@@ -15,6 +15,7 @@ import { Icon } from '../icons/Icon';
 import { CommanderSection } from './CommanderSection';
 import { CommandManagementSection } from './CommandManagementSection';
 import { CommandRelationshipSection } from './CommandRelationshipSection';
+import { CorpsSituationSection } from './CorpsSituationSection';
 import { SectorsSection } from './SectorsSection';
 import { OperationsSection } from './OperationsSection';
 import { OrbatSection } from './OrbatSection';
@@ -492,6 +493,8 @@ export function ArmyHQCorpsCard({
                     recoveryForecast={data.recoveryForecast}
                     unresolvedFrictionCount={data.unresolvedFrictionCount}
                 />
+                {/* Corps Situation Assessment — Commander Explanation Surfaces Wave 1 */}
+                <CorpsSituationSection assessment={corps.situationAssessment} />
                 <CommanderSection corps={corps} gameState={gameState} />
                 <SectorsSection corpsId={corps.id} sectors={sectors} factionBattles={factionBattles} />
                 <OperationsSection corpsId={corps.id} operations={operations} gameState={gameState} commandStrain={data.strain} commandStrainLabel={data.strainLabel} />

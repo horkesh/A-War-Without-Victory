@@ -355,3 +355,251 @@ export function deriveRecoveryForecast(
     }
     return `Strain persisting at ${currentStrain}`;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Corps Situation Assessment — Commander Explanation Surfaces Wave 1
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * A player-safe explanation of why a corps commander is leaning a certain way.
+ * Derived on-read from CommanderState — never stored on GameState.
+ *
+ * Silence = healthy: when the corps is projecting with surplus and no constraints,
+ * the assessment is null (nothing to explain).
+ *
+ * The explanation distinguishes:
+ *   - military conditions (force balance, threat, exhaustion, fatigue)
+ *   - institutional constraints (campaign role, sync role, stance ceiling)
+ *   - plan status (what the commander is doing and why)
+ */
+export interface CorpsSituationAssessment {
+    /** Overall posture summary — one-line explanation. Null = healthy (silence). */
+    postureSummary: string | null;
+    /** Active military constraints. Empty = no constraints. */
+    militaryFactors: string[];
+    /** Active institutional constraints from Army HQ. Empty = none. */
+    institutionalFactors: string[];
+    /** Current plan status explanation. Null = no plan. */
+    planExplanation: string | null;
+    /** Threat context. Null = low threat / nothing notable. */
+    threatContext: string | null;
+}
+
+/**
+ * Derive a player-safe situation assessment for a corps.
+ *
+ * Pure function — no GameState mutation, no side effects.
+ * Consumes only the persisted CommanderState fields plus a few corps-level
+ * fields already on FormationView.
+ *
+ * @param commanderState  - The persisted CommanderState for this corps (from corps_command[id].commander_state).
+ * @param corpsStance     - Current corps stance ('offensive' | 'balanced' | 'defensive' | 'reorganize').
+ * @param corpsExhaustion - Current corps exhaustion (0-100).
+ * @param commandStrain   - Current command strain score (derived).
+ * @returns CorpsSituationAssessment — postureSummary is null when healthy.
+ */
+export function deriveCorpsSituationAssessment(
+    commanderState: {
+        zone_assessments?: Array<{
+            posture: string;
+            deficit: number;
+            surplus_brigades: readonly string[];
+            front_edge_count: number;
+            is_must_hold?: boolean;
+            corridor_width?: number;
+        }>;
+        threat_assessment?: {
+            overall_pressure: string;
+            enemy_concentration_zones?: readonly string[];
+        };
+        force_assessment?: {
+            total_brigades: number;
+            combat_effective: number;
+            total_surplus: number;
+            tier_counts?: { main_effort: number; active_defense: number; garrison: number };
+        };
+        current_plan?: {
+            objective_description: string;
+            status: string;
+            concentration_progress?: number;
+            suspension_reason?: string;
+        } | null;
+        last_plan_action?: string;
+        last_plan_reason?: string;
+    } | null | undefined,
+    corpsStance: string | undefined,
+    corpsExhaustion: number | undefined,
+    commandStrain: number | undefined,
+): CorpsSituationAssessment {
+    // No commander state → no assessment (pre-commander era saves)
+    if (!commanderState) {
+        return { postureSummary: null, militaryFactors: [], institutionalFactors: [], planExplanation: null, threatContext: null };
+    }
+
+    const zones = commanderState.zone_assessments ?? [];
+    const threat = commanderState.threat_assessment;
+    const forces = commanderState.force_assessment;
+    const plan = commanderState.current_plan;
+
+    // ── Military factors ─────────────────────────────────────────────────
+    const militaryFactors: string[] = [];
+
+    // Exhaustion
+    const exhaustion = corpsExhaustion ?? 0;
+    if (exhaustion >= 60) {
+        militaryFactors.push('Corps is heavily exhausted — offensive capacity severely limited');
+    } else if (exhaustion >= 40) {
+        militaryFactors.push('Significant corps exhaustion — operations will be cautious');
+    }
+
+    // Force balance
+    const totalSurplus = forces?.total_surplus ?? 0;
+    const totalBrigades = forces?.total_brigades ?? 0;
+    const combatEffective = forces?.combat_effective ?? 0;
+    if (totalBrigades > 0 && combatEffective < totalBrigades * 0.5) {
+        militaryFactors.push(`Only ${combatEffective} of ${totalBrigades} brigades combat-effective`);
+    }
+    if (totalSurplus === 0 && totalBrigades > 0) {
+        militaryFactors.push('No surplus brigades — all forces committed to garrison duties');
+    }
+
+    // Zone deficits
+    const totalDeficit = zones.reduce((sum, z) => sum + z.deficit, 0);
+    if (totalDeficit > 2) {
+        militaryFactors.push(`Garrison shortfall of ${totalDeficit} brigades across defended zones`);
+    }
+
+    // Besieged zones
+    const besiegedZones = zones.filter(z => z.posture === 'besieged');
+    if (besiegedZones.length > 0) {
+        militaryFactors.push(`${besiegedZones.length} zone${besiegedZones.length > 1 ? 's' : ''} under siege — limited operational freedom`);
+    }
+
+    // Must-hold pressure
+    const mustHoldZones = zones.filter(z => z.is_must_hold);
+    if (mustHoldZones.length > 0) {
+        const mustHoldDeficit = mustHoldZones.reduce((sum, z) => sum + z.deficit, 0);
+        if (mustHoldDeficit > 0) {
+            militaryFactors.push(`Critical positions require reinforcement — ${mustHoldDeficit} brigade${mustHoldDeficit > 1 ? 's' : ''} short`);
+        }
+    }
+
+    // ── Institutional factors ────────────────────────────────────────────
+    const institutionalFactors: string[] = [];
+
+    if (corpsStance === 'defensive') {
+        institutionalFactors.push('Corps directed to defensive posture — no offensive planning');
+    } else if (corpsStance === 'reorganize') {
+        institutionalFactors.push('Corps in reorganization — all operations suspended');
+    }
+
+    if ((commandStrain ?? 0) >= COMPROMISED_THRESHOLD) {
+        institutionalFactors.push('Command relationship compromised — offensive options restricted');
+    } else if ((commandStrain ?? 0) >= STRAINED_THRESHOLD) {
+        institutionalFactors.push('Command relationship under strain from recent interventions');
+    }
+
+    // ── Plan explanation ─────────────────────────────────────────────────
+    let planExplanation: string | null = null;
+    if (plan) {
+        const planStatus = plan.status;
+        const planName = plan.objective_description || 'current operation';
+        if (planStatus === 'concentrating') {
+            const progress = plan.concentration_progress != null
+                ? `${Math.round(plan.concentration_progress * 100)}%`
+                : 'unknown';
+            planExplanation = `Concentrating forces for ${planName} — ${progress} assembled`;
+        } else if (planStatus === 'ready') {
+            planExplanation = `Ready to launch ${planName} — awaiting execution window`;
+        } else if (planStatus === 'executing') {
+            planExplanation = `Executing ${planName}`;
+        } else if (planStatus === 'suspended') {
+            const suspendReason = plan.suspension_reason || commanderState.last_plan_reason || 'conditions deteriorated';
+            planExplanation = `${planName} suspended — ${suspendReason}`;
+        } else if (planStatus === 'abandoned') {
+            const abandonReason = commanderState.last_plan_reason || 'no longer viable';
+            planExplanation = `${planName} abandoned — ${abandonReason}`;
+        }
+    } else if (commanderState.last_plan_action === 'abandoned' && commanderState.last_plan_reason) {
+        // Plan was abandoned this turn — show the reason even though plan is now null
+        planExplanation = `Recent plan abandoned — ${commanderState.last_plan_reason}`;
+    } else if (commanderState.last_plan_action === 'none' && commanderState.last_plan_reason) {
+        // No plan — show the reason why (e.g., "corps in defensive stance", "no viable plan available")
+        const reason = commanderState.last_plan_reason;
+        // Only show non-trivial reasons (skip "clearing abandoned plan", "plan handed to execution pipeline")
+        if (!reason.includes('clearing') && !reason.includes('handed to execution')) {
+            planExplanation = `No active plan — ${reason}`;
+        }
+    }
+
+    // ── Threat context ───────────────────────────────────────────────────
+    let threatContext: string | null = null;
+    const pressure = threat?.overall_pressure;
+    if (pressure === 'critical') {
+        threatContext = 'Under critical pressure — enemy offensive threatens corps integrity';
+    } else if (pressure === 'heavy') {
+        threatContext = 'Heavy enemy pressure across the front';
+    } else if (pressure === 'moderate' && (threat?.enemy_concentration_zones?.length ?? 0) > 0) {
+        threatContext = 'Enemy concentration detected — defensive readiness elevated';
+    }
+
+    // ── Posture summary (one-line) ───────────────────────────────────────
+    // Silence = healthy: projecting corps with surplus and no constraints = null
+    let postureSummary: string | null = null;
+
+    const dominantPosture = getDominantPosture(zones);
+    const hasConstraints = militaryFactors.length > 0 || institutionalFactors.length > 0;
+    const hasNotableThreat = threatContext !== null;
+
+    if (dominantPosture === 'besieged') {
+        postureSummary = 'Corps area under siege — operational capacity severely constrained';
+    } else if (dominantPosture === 'defending' && totalDeficit > 0) {
+        postureSummary = 'Garrison requirements exceed available forces — holding the line';
+    } else if (dominantPosture === 'balanced' && hasConstraints) {
+        postureSummary = 'Forces balanced but constrained — limited offensive potential';
+    } else if (dominantPosture === 'projecting' && !hasConstraints && !hasNotableThreat) {
+        postureSummary = null; // Silence = healthy
+    } else if (hasConstraints || hasNotableThreat) {
+        // Fallback for projecting but constrained, or balanced with notable threat
+        if (exhaustion >= 40) {
+            postureSummary = 'Corps exhaustion limiting operational tempo';
+        } else if (totalSurplus === 0) {
+            postureSummary = 'All brigades committed — no surplus for new operations';
+        } else if (hasNotableThreat) {
+            postureSummary = 'Forces available but threat conditions demand caution';
+        }
+    }
+
+    return {
+        postureSummary,
+        militaryFactors,
+        institutionalFactors,
+        planExplanation,
+        threatContext,
+    };
+}
+
+/**
+ * Get the dominant (worst) posture across all zones.
+ * Besieged > defending > balanced > projecting.
+ */
+function getDominantPosture(
+    zones: Array<{ posture: string }>,
+): string {
+    const priority: Record<string, number> = {
+        besieged: 0,
+        defending: 1,
+        balanced: 2,
+        projecting: 3,
+    };
+    let worst = 'projecting';
+    let worstPriority = 3;
+    for (const zone of zones) {
+        const p = priority[zone.posture] ?? 3;
+        if (p < worstPriority) {
+            worstPriority = p;
+            worst = zone.posture;
+        }
+    }
+    return worst;
+}
