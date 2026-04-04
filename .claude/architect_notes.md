@@ -84,11 +84,36 @@ Player knowledge wave 2: RawIntelTab removed, threat assessment uses uncertainty
 **Closed: Desktop Notification Contract**
 notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delivery moved from on_stop.ps1 to run_handoff.ps1 end. Lane closed.
 
+## Active / Open Lanes (Engine)
+
+### Lane A — CLOSED 2026-04-04: Cross-corps drifted brigade assignment
+- **Fix:** `assignCrossCorpsEnclaveDefenders` in `src/sim/combat/brigade_assignment.ts` now gates on `home_osid` coverage before assigning a brigade to a foreign-corps sector. If the brigade's `home_osid` is still in an own-corps sector's `territory_osids`, it is drifted — skip it. Only brigades with no own-corps home coverage are genuine enclave defenders.
+- **Verified:** tsc PASS, build PASS, governance PASS, full suite 2300/2300, plus explicit drifted-vs-genuine-enclave regression coverage in `tests/brigade_territory_reconciliation.test.ts`.
+- **Done means:** cross-corps assignment warning in next 40w end_report drops from 6 to ≤1.
+- **Report:** `docs/40_reports/implemented/20260404_SECTOR_OWNERSHIP_ZERO_ATTACK_TRIAGE.md`
+
+### Lane B — OPEN: Empty child sectors after contiguity split
+- **Symptom:** `splitNonContiguousSectors` produces child sectors with correct front edges but zero brigades. The parent's brigades were concentrated in one geographic sub-region; the other child gets front edges with no defenders. 5 empty sectors + 6 undefended sub-segments confirmed in n1312 Drina Corps area.
+- **Target files:** `src/sim/combat/sector_splitting.ts` (can splitter refuse a zero-brigade child?) + `src/sim/combat/brigade_assignment.ts` (can assignment pipeline equalize post-split within own corps?)
+- **Key question:** Fix in splitter (refuse zero-brigade child) OR post-split equalization pass (borrow from sibling/adjacent own-corps sector with surplus)?
+- **Diagnostic entry point:** Filter end_report sectors by ID suffix `splitN`, cross-reference with `assigned_brigade_count: 0`.
+- **Secondary:** Confirm whether `brka_2` holding by inertia (no defending brigade assigned) constitutes a calibration risk or is historically appropriate.
+- **Specialist required:** systems-programmer + gameplay-programmer + scenario-creator-runner-tester.
+
+### AAR Provenance Lane - OPEN
+- **Symptom:** `Operation Prijedor` and `Operation Visegrad` in `n1312` finalize as `success` with `total_attacks = 0`.
+- **Finding:** not a clean "not a bug." `operation_aar.ts` attributes objective-control changes to the active operation without tracking whether the capture came from combat, consolidation, or another control event.
+- **Scope:** AAR/export truth, not necessarily combat-logic truth.
+- **Owner:** `src/sim/combat/operation_aar.ts`
+- **Priority:** below Lane B, but explicitly tracked â€” do not dismiss these cases as rear-pocket consolidation by default.
+
 ## Next Priority Lanes
 
-1. **gradacac_2 P0 investigation:** roadmap item 1 remains the next real engine/calibration lane.
-2. **v0.8.1 Commander Maturity gate check:** full two-tier post-run panel go/no-go on commander system.
-3. **ZEA / calibration side anomalies:** separate investigation bucket only after roadmap item 1; not part of the command-system validation gate.
+1. **Lane B (empty child sectors from contiguity split):** sector/frontline investigation in `sector_splitting.ts` + `brigade_assignment.ts`.
+2. **AAR provenance follow-up:** zero-attack-success operations must distinguish combat capture from passive/external control changes.
+3. **Residual ZEA attribution pass:** only after Lane B, and only on current `HEAD`; `P14` hardening is already landed.
+4. **gradacac_2 P0 investigation:** roadmap item 1 once current engine-truth defects are no longer masking front behavior.
+5. **v0.8.1 Commander Maturity gate check:** full two-tier post-run panel go/no-go on commander system.
 
 ## Validation Gate Note
 

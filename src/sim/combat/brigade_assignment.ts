@@ -886,6 +886,19 @@ export function assignCrossCorpsEnclaveDefenders(
         const ownCorpsHasSectorInComponent = ownCorpsSectors.some((s) => getSectorComponent(s, componentOf) === brigComp);
         if (ownCorpsHasSectorInComponent) continue;
 
+        // Drifted-brigade gate: if the brigade's home_osid is still claimed by
+        // any own-corps sector (territory_osids), its home municipality hasn't
+        // been lost — it has merely drifted away from home. Assigning it to a
+        // foreign corps sector corrupts that sector's density and AI data.
+        // Let the normal recall mechanisms (evaluateHomeReturn,
+        // recall-drifted-brigades) pull it back instead.
+        if (f.home_osid) {
+            const homeStillOwnCorps = ownCorpsSectors.some((s) =>
+                s.territory_osids.includes(f.home_osid!)
+            );
+            if (homeStillOwnCorps) continue;
+        }
+
         let sectorIndices = frontOsidToSectors.get(loc);
         if (!sectorIndices || sectorIndices.length === 0) {
             sectorIndices = territoryOsidToSectors.get(loc);

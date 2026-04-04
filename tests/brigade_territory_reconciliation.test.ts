@@ -775,6 +775,7 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
             id: 'brig_enclave',
             corps_id: 'vrs_drina',
             location_osid: 'op:m:enclave_rear',
+            home_osid: 'op:m:lost_home',
         });
 
         const formations: Record<FormationId, FormationState> = {
@@ -796,6 +797,49 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
 
         expect(enclaveSector.assigned_brigade_ids).toContain('brig_enclave');
         expect(homeCorpsSector.assigned_brigade_ids).not.toContain('brig_enclave');
+    });
+
+    it('does not assign a drifted brigade cross-corps when its home municipality is still covered by own-corps territory', () => {
+        const homeCorpsSector = makeSector(
+            'sector:vrs_drina:0',
+            'vrs_drina',
+            [makeSubSeg('home', ['op:m:front_home'], ['op:m:enemy_home'], 3)],
+            ['op:m:front_home', 'op:m:home_still_owned'],
+        );
+        const enclaveSector = makeSector(
+            'sector:vrs_herzegovina:0',
+            'vrs_herzegovina',
+            [makeSubSeg('enclave', ['op:m:front_enclave'], ['op:m:enemy_enclave'], 3)],
+            ['op:m:front_enclave', 'op:m:enclave_rear'],
+        );
+
+        const driftedBrigade = makeFormation({
+            id: 'brig_drifted',
+            corps_id: 'vrs_drina',
+            location_osid: 'op:m:enclave_rear',
+            home_osid: 'op:m:home_still_owned',
+        });
+
+        const formations: Record<FormationId, FormationState> = {
+            brig_drifted: driftedBrigade,
+        };
+
+        const componentOf = makeComponentOf({
+            'op:m:front_home': 0,
+            'op:m:home_still_owned': 0,
+            'op:m:front_enclave': 1,
+            'op:m:enclave_rear': 1,
+        });
+
+        assignCrossCorpsEnclaveDefenders(
+            [homeCorpsSector, enclaveSector],
+            formations,
+            'RS' as FactionId,
+            componentOf,
+        );
+
+        expect(enclaveSector.assigned_brigade_ids).not.toContain('brig_drifted');
+        expect(homeCorpsSector.assigned_brigade_ids).not.toContain('brig_drifted');
     });
 
     it('does not assign an enclave defender to a same-component faction sector when its current OSID is not on that sector front or in its territory', () => {

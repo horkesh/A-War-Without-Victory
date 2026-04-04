@@ -23169,3 +23169,29 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - feasibility_constrained: "structurally blocked / override does not resolve constraint"; strain_shaped alarm: "cohesion compromised / deepen damage"; tempo_resistant: "premature / before conditions set"; caution_driven: differentiated by abort vs postpone
 - 9 new Wave 3 tests (56 total in command_strain_interpretation.test.ts); full suite 2300/2300; tsc clean; vite build clean; governance OK
 - Report: `docs/40_reports/implemented/20260404_ORDER_INTERPRETATION_SYSTEM_WAVE3.md`
+
+## n1313 — 2026-04-04 — fix(brigade-assignment): Drifted-brigade gate in assignCrossCorpsEnclaveDefenders
+
+### What changed
+- `src/sim/combat/brigade_assignment.ts`: Added `home_osid` ownership check immediately after the existing `ownCorpsHasSectorInComponent` gate in `assignCrossCorpsEnclaveDefenders`. If the brigade's `home_osid` is still covered by an own-corps sector's `territory_osids`, the brigade is classified as drifted (physically displaced by foreign ops/marches) rather than genuinely isolated, and is skipped. Only brigades whose home municipality has no own-corps sector coverage proceed to foreign-corps enclave assignment.
+- `tests/brigade_territory_reconciliation.test.ts`: added explicit regression coverage for both branches:
+  - drifted brigade with `home_osid` still covered by own-corps territory must not be cross-corps assigned
+  - genuine enclave brigade whose `home_osid` is no longer covered remains eligible for rescue
+
+### Why
+- In n1312, 6 brigades whose `location_osid` had been captured by foreign-corps operations were mis-assigned to foreign-corps sectors via the enclave-defender repair pass. Corrupted sector density metrics and AI force evaluation for both foreign corps (over-counted) and own corps (under-counted). The discriminator is `home_osid` coverage: genuine enclave defenders have no own-corps territory covering their home municipality; drifted brigades do.
+
+### Verified
+- `tsc --noEmit`: PASS
+- `vitest`: PASS — 2300/2300
+- `npm run build`: PASS
+- governance: PASS
+
+### Status
+- Lane A (cross-corps drifted brigade assignment): CLOSED
+- Lane B (empty child sectors from contiguity split): OPEN — sector/frontline investigation required
+- Zero-attack-success operations: corrected from "not a bug" to AAR/export provenance defect; operation success currently tracks held objectives, not capture causality
+- Residual ZEA attribution should be re-measured after Lane B on current `HEAD`; `P14` hardening is already landed and should not be tracked as future work
+
+### Report
+`docs/40_reports/implemented/20260404_SECTOR_OWNERSHIP_ZERO_ATTACK_TRIAGE.md`
