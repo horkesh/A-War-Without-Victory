@@ -82,7 +82,7 @@ The `cautionNotice` field on `OrderInterpretation` remains. It is now a fallback
 |---|---|---|
 | A: Derivation | gameplay-programmer | `DragSource`, `DragFactor`, `dragFactors` field, `postponementCount` param, factor derivation per category |
 | B: UI | ui-ux-developer | Section `postponementCount` prop, bullet list rendering, fallback to `cautionNotice` |
-| C: Tests + Verification | qa-engineer | Wave 21 test plan (~15 tests), regression surface, full-suite verification |
+| C: Tests + Verification | qa-engineer | Wave 21 drag-factor test plan (14 new tests), regression surface, full-suite verification |
 | D: Documentation | documentation-specialist | Report, ledger, knowledge, architect notes |
 
 ---
@@ -119,9 +119,10 @@ The prose `cautionNotice` is demoted to fallback. The structured `dragFactors` b
 
 ## Verification
 
-- `npx.cmd vitest run tests/ui/command_strain_interpretation.test.ts`: ~15 new tests (Wave 21) pass
-- Full suite: [QA to confirm final count]
+- `npx.cmd vitest run tests/ui/command_strain_interpretation.test.ts tests/command_authority.test.ts`: **337/337**
+- `npx.cmd vitest run`: **2291/2291**
 - `npx.cmd tsc --noEmit -p tsconfig.json`: clean
+- `npm.cmd run build`: clean
 - Governance: OK
 
 ---

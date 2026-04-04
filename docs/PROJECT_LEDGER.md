@@ -12,7 +12,7 @@ Interpretation panel shows structured drag factor bullets. Player sees dominant 
 OrderInterpretationSection (UI), deriveOrderInterpretation (derivation).
 
 ### Test count
-~15 new dragFactors tests (Wave 21). Full suite: [QA to confirm].
+14 new Wave 21 drag-factor tests in `tests/ui/command_strain_interpretation.test.ts`; targeted interpretation coverage now `337/337` across `tests/ui/command_strain_interpretation.test.ts` and `tests/command_authority.test.ts`. Full suite: `2291/2291`.
 
 ### Orchestration
 Parallel: gameplay-programmer (derivation), ui-ux-developer (UI), qa-engineer (tests+verification), documentation-specialist (docs).
