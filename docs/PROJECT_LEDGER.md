@@ -1,3 +1,17 @@
+## 2026-04-04 — Delegation Visibility Wave 1
+
+- `command_strain.ts`: +`deriveDelegationContext()` — pre-decision delegation path classification (normal_delegation / strained_delegation / presidential_direction). Inputs: commander_assessment + strain. Silence = healthy for normal delegation.
+- `command_strain.ts`: +`deriveCorpsDelegationSummary()` — standing delegation health from active ops. Counts delegated / directed / overridden. Silence = healthy when all ordinary compliance.
+- `OperationBriefingModal.tsx`: +`DelegationPathIndicator` component between Assessment Badge and Readiness Trend. Shows decision bearer and delegation path for planning-phase ops. Silence = healthy.
+- `CommandRelationshipSection.tsx`: +`delegationSummary` prop with delegation notice line ("Active operations: N under Direct Intervention"). Extends silence = healthy to include delegation notice.
+- `ArmyHQCorpsCard.tsx`: wires `deriveCorpsDelegationSummary(operations)` → CommandRelationshipSection.
+- No engine changes, no new persisted fields — derivation-only from existing CorpsOperation fields.
+- Decision-time hierarchy now: badge → **delegation path** → readiness trend → recommendation driver → constraint context → order interpretation → direct intervention
+- 12 new Wave 19 tests in `tests/command_authority.test.ts` — 290/290 pass
+- Orchestrator: 4 parallel audit subagents (truth, UI, derivation, verification), central implementation
+- Verification: tsc clean, **2244/2244 vitest (0 failures)**, vite build clean, governance OK
+- Report: `docs/40_reports/implemented/20260404_DELEGATION_VISIBILITY_WAVE1.md`
+
 ## 2026-04-04 — Presidential Command Friction Wave 6 (Exhaustion Strain Source)
 
 - `command_strain.ts`: +Source 3 in `computeCorpsCommandStrain()` — corps exhaustion ≥50 → +1 strain, ≥75 → +2 strain. No decay (condition-based, persists while exhaustion is high). Stabilization does not resolve exhaustion-driven strain.

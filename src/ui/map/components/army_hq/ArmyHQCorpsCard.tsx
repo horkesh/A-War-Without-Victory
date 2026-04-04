@@ -20,7 +20,7 @@ import { OperationsSection } from './OperationsSection';
 import { OrbatSection } from './OrbatSection';
 import { CombatRecordSection } from './CombatRecordSection';
 import { FlipCard } from './FlipCard';
-import { deriveStanceInterpretation } from '../../data/command_strain';
+import { deriveStanceInterpretation, deriveCorpsDelegationSummary } from '../../data/command_strain';
 
 import type { ReadinessGrade } from './ForceReadiness';
 
@@ -122,7 +122,9 @@ export function ArmyHQCorpsCard({
         const currentTurn = gameState.turn ?? 0;
 
         const recoveryForecast = corps.recoveryForecast ?? null;
-        return { totalPersonnel, avgCohesion, avgFatigue, eff, commander, stance, activeOp, corpsBattles, equipment, strain, strainLabel, frictionTypes, frictionEvents, stabilizationAvailable, stabilizationCooldownUntil, stabilizationCostCA, currentTurn, recoveryForecast };
+        // Delegation Visibility Wave 1: standing delegation summary from active ops
+        const delegationSummary = deriveCorpsDelegationSummary(operations);
+        return { totalPersonnel, avgCohesion, avgFatigue, eff, commander, stance, activeOp, corpsBattles, equipment, strain, strainLabel, frictionTypes, frictionEvents, stabilizationAvailable, stabilizationCooldownUntil, stabilizationCostCA, currentTurn, recoveryForecast, delegationSummary };
     }, [corps, brigades, sectors, operations, factionBattles, gameState]);
 
     const displayName = formatCorpsDisplayName(corps.name, corps.id);
@@ -431,6 +433,7 @@ export function ArmyHQCorpsCard({
                     recoveryForecast={data.recoveryForecast}
                     frictionEvents={data.frictionEvents}
                     corpsExhaustion={corps.corpsExhaustion ?? 0}
+                    delegationSummary={data.delegationSummary}
                     stabilizationAvailable={data.stabilizationAvailable}
                     stabilizationCooldownUntil={data.stabilizationCooldownUntil}
                     stabilizationCostCA={data.stabilizationCostCA}

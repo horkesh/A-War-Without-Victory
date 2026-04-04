@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import type { CommandAuthority, CorpsOperation } from '../src/state/game_state.js';
 import type { OperationAAR } from '../src/sim/combat/operation_aar.js';
-import { computeCorpsCommandStrain, getCommandStrainLabel, deriveOrderInterpretation, deriveStanceInterpretation, deriveOperationOutcomeCategory, buildOperationTrendSummary, projectStrainDecay, deriveRecoveryForecast, deriveCorpsSituationAssessment, deriveRecommendationExplanation, deriveReadinessTrend, isExhaustionContributingToStrain, EXHAUSTION_STRAIN_THRESHOLD, EXHAUSTION_STRAIN_SEVERE_THRESHOLD } from '../src/ui/map/data/command_strain.js';
-import type { OperationOutcomeCategory, OperationTrendSummary, PrimaryConstraint, ReadinessTrendDirection } from '../src/ui/map/data/command_strain.js';
+import { computeCorpsCommandStrain, getCommandStrainLabel, deriveOrderInterpretation, deriveStanceInterpretation, deriveOperationOutcomeCategory, buildOperationTrendSummary, projectStrainDecay, deriveRecoveryForecast, deriveCorpsSituationAssessment, deriveRecommendationExplanation, deriveReadinessTrend, isExhaustionContributingToStrain, EXHAUSTION_STRAIN_THRESHOLD, EXHAUSTION_STRAIN_SEVERE_THRESHOLD, deriveDelegationContext, deriveCorpsDelegationSummary } from '../src/ui/map/data/command_strain.js';
+import type { OperationOutcomeCategory, OperationTrendSummary, PrimaryConstraint, ReadinessTrendDirection, DelegationPath } from '../src/ui/map/data/command_strain.js';
 
 function makeAuth(overrides?: Partial<CommandAuthority>): CommandAuthority {
     return { current: 100, max: 100, spent_this_turn: 0, lifetime_spent: 0, ...overrides };
@@ -2761,6 +2761,124 @@ describe('Wave 10: Command Relationship Standing', () => {
 
             expect(text).toContain('stabilize');
             expect(text).toContain('reduce operational tempo');
+        });
+    });
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // Wave 19: Delegation Visibility — pre-decision delegation path +
+    // standing delegation summary
+    // ═══════════════════════════════════════════════════════════════════════
+
+    describe('deriveDelegationContext (Wave 19)', () => {
+        it('returns normal_delegation (silence) when commander recommends launch and strain = 0', () => {
+            const ctx = deriveDelegationContext('launch', 0);
+            expect(ctx.path).toBe('normal_delegation');
+            expect(ctx.label).toBeNull();
+            expect(ctx.decisionBearer).toBeNull();
+        });
+
+        it('returns normal_delegation (silence) when no assessment yet', () => {
+            const ctx = deriveDelegationContext(null, 0);
+            expect(ctx.path).toBe('normal_delegation');
+            expect(ctx.label).toBeNull();
+        });
+
+        it('returns normal_delegation (silence) when undefined assessment', () => {
+            const ctx = deriveDelegationContext(undefined, 3);
+            expect(ctx.path).toBe('normal_delegation');
+            expect(ctx.label).toBeNull();
+        });
+
+        it('returns strained_delegation when commander recommends launch but strain > 0', () => {
+            const ctx = deriveDelegationContext('launch', 3);
+            expect(ctx.path).toBe('strained_delegation');
+            expect(ctx.label).not.toBeNull();
+            expect(ctx.label).toContain('delegated authority');
+            expect(ctx.label).toContain('strained');
+            expect(ctx.decisionBearer).toBe('commander');
+        });
+
+        it('returns presidential_direction when commander recommends postpone', () => {
+            const ctx = deriveDelegationContext('postpone', 0);
+            expect(ctx.path).toBe('presidential_direction');
+            expect(ctx.label).not.toBeNull();
+            expect(ctx.label).toContain('Presidency');
+            expect(ctx.label).toContain('postponement');
+            expect(ctx.decisionBearer).toBe('presidency');
+        });
+
+        it('returns presidential_direction when commander recommends abort', () => {
+            const ctx = deriveDelegationContext('abort', 0);
+            expect(ctx.path).toBe('presidential_direction');
+            expect(ctx.label).toContain('abort');
+            expect(ctx.label).toContain('Presidency');
+            expect(ctx.decisionBearer).toBe('presidency');
+        });
+
+        it('returns presidential_direction regardless of strain when commander recommends against', () => {
+            const ctx = deriveDelegationContext('postpone', 6);
+            expect(ctx.path).toBe('presidential_direction');
+            expect(ctx.decisionBearer).toBe('presidency');
+        });
+    });
+
+    describe('deriveCorpsDelegationSummary (Wave 19)', () => {
+        it('returns silence when no active ops', () => {
+            const summary = deriveCorpsDelegationSummary([]);
+            expect(summary.totalActive).toBe(0);
+            expect(summary.summaryLabel).toBeNull();
+        });
+
+        it('returns silence when all ops are ordinary compliance', () => {
+            const summary = deriveCorpsDelegationSummary([
+                { was_force_launched: false, commander_assessment_at_launch: 'launch', phase: 'execution' },
+                { was_force_launched: false, commander_assessment_at_launch: 'launch', phase: 'recovery' },
+            ]);
+            expect(summary.totalActive).toBe(2);
+            expect(summary.delegatedCount).toBe(2);
+            expect(summary.directedCount).toBe(0);
+            expect(summary.overriddenCount).toBe(0);
+            expect(summary.summaryLabel).toBeNull();
+        });
+
+        it('reports direct intervention count', () => {
+            const summary = deriveCorpsDelegationSummary([
+                { was_force_launched: true, commander_assessment_at_launch: 'postpone', phase: 'execution' },
+                { was_force_launched: false, commander_assessment_at_launch: 'launch', phase: 'execution' },
+            ]);
+            expect(summary.overriddenCount).toBe(1);
+            expect(summary.delegatedCount).toBe(1);
+            expect(summary.summaryLabel).toContain('Direct Intervention');
+        });
+
+        it('reports reluctant compliance as presidential direction', () => {
+            const summary = deriveCorpsDelegationSummary([
+                { was_force_launched: false, commander_assessment_at_launch: 'postpone', phase: 'execution' },
+            ]);
+            expect(summary.directedCount).toBe(1);
+            expect(summary.summaryLabel).toContain('presidential direction');
+        });
+
+        it('skips planning-phase ops (no launch snapshot yet)', () => {
+            const summary = deriveCorpsDelegationSummary([
+                { was_force_launched: false, commander_assessment_at_launch: undefined, phase: 'planning' },
+                { was_force_launched: true, commander_assessment_at_launch: 'abort', phase: 'execution' },
+            ]);
+            expect(summary.totalActive).toBe(1);
+            expect(summary.overriddenCount).toBe(1);
+        });
+
+        it('reports both override types when mixed', () => {
+            const summary = deriveCorpsDelegationSummary([
+                { was_force_launched: true, commander_assessment_at_launch: 'postpone', phase: 'execution' },
+                { was_force_launched: false, commander_assessment_at_launch: 'abort', phase: 'recovery' },
+                { was_force_launched: false, commander_assessment_at_launch: 'launch', phase: 'execution' },
+            ]);
+            expect(summary.overriddenCount).toBe(1);
+            expect(summary.directedCount).toBe(1);
+            expect(summary.delegatedCount).toBe(1);
+            expect(summary.summaryLabel).toContain('Direct Intervention');
+            expect(summary.summaryLabel).toContain('presidential direction');
         });
     });
 });

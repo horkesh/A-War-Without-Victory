@@ -1103,3 +1103,135 @@ export function deriveRecommendationExplanation(
         wouldImproveIf: null,  // Abort = not viable; no honest "would improve" to offer
     };
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Delegation Context — Delegation Visibility Wave 1
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Classification of the pre-decision delegation path for a planning-phase operation.
+ *
+ * - normal_delegation:     Commander is carrying the decision burden within delegated authority.
+ *                          Silence = healthy — no label needed.
+ * - strained_delegation:   Commander recommends launch despite institutional strain.
+ *                          The delegation is functioning, but the relationship is damaged.
+ * - presidential_direction: Commander recommends against; the decision burden has shifted
+ *                           to the presidency. Launching would override the recommendation.
+ */
+export type DelegationPath = 'normal_delegation' | 'strained_delegation' | 'presidential_direction';
+
+/**
+ * Pre-decision delegation context for a planning-phase operation.
+ * Derived from commander assessment + command strain. No new persisted fields.
+ */
+export interface DelegationContext {
+    /** Classification of the current delegation path. */
+    path: DelegationPath;
+    /** Player-facing label. null = silence (healthy normal delegation). */
+    label: string | null;
+    /** Who currently bears the decision burden. null = silence (commander, default). */
+    decisionBearer: 'commander' | 'presidency' | null;
+}
+
+/**
+ * Derive the pre-decision delegation context for a planning-phase operation.
+ *
+ * Pure function — no GameState, no side effects.
+ * Silence = healthy: label is null for normal_delegation (commander recommends launch, strain = 0).
+ *
+ * @param commanderAssessment - The commander's current standing assessment.
+ * @param strain              - Current command strain score for this corps.
+ * @returns DelegationContext — pure derivation.
+ */
+export function deriveDelegationContext(
+    commanderAssessment: 'launch' | 'postpone' | 'abort' | null | undefined,
+    strain: number,
+): DelegationContext {
+    // No assessment yet — still in early preparation, delegation is normal
+    if (!commanderAssessment) {
+        return { path: 'normal_delegation', label: null, decisionBearer: null };
+    }
+
+    // Commander recommends launch — they are carrying the decision burden
+    if (commanderAssessment === 'launch') {
+        if (strain === 0) {
+            // Silence = healthy — normal delegation, no noise
+            return { path: 'normal_delegation', label: null, decisionBearer: null };
+        }
+        // Commander still recommends launch despite institutional strain
+        return {
+            path: 'strained_delegation',
+            label: 'Commander recommends launch within delegated authority — command relationship is strained',
+            decisionBearer: 'commander',
+        };
+    }
+
+    // Commander recommends against — decision burden has shifted to the presidency
+    const verb = commanderAssessment === 'abort' ? 'abort' : 'postponement';
+    return {
+        path: 'presidential_direction',
+        label: `Commander recommends ${verb} — decision authority rests with the Presidency`,
+        decisionBearer: 'presidency',
+    };
+}
+
+/**
+ * Standing delegation summary for a corps — aggregates active operations
+ * to show the balance between delegated and presidentially directed command.
+ *
+ * Pure function — no GameState, no side effects.
+ * Silence = healthy: summaryLabel is null when all active ops are ordinary compliance.
+ *
+ * @param activeOps - Active operations for this corps (minimal subset of OperationView).
+ * @returns Delegation summary with counts and optional label.
+ */
+export interface CorpsDelegationSummary {
+    /** Total active operations counted. */
+    totalActive: number;
+    /** Operations under normal delegation (ordinary_compliance). */
+    delegatedCount: number;
+    /** Operations launched against recommendation (reluctant_compliance). */
+    directedCount: number;
+    /** Operations launched via Direct Intervention (direct_intervention). */
+    overriddenCount: number;
+    /** Player-facing summary. null when all are ordinary compliance (silence = healthy). */
+    summaryLabel: string | null;
+}
+
+export function deriveCorpsDelegationSummary(
+    activeOps: Array<{
+        was_force_launched?: boolean;
+        commander_assessment_at_launch?: 'launch' | 'postpone' | 'abort';
+        phase?: string;
+    }>,
+): CorpsDelegationSummary {
+    // Only count executing/recovery ops that have a launch snapshot
+    const launchedOps = activeOps.filter(op =>
+        op.phase !== 'planning' && (op.commander_assessment_at_launch != null || op.was_force_launched),
+    );
+    let delegated = 0;
+    let directed = 0;
+    let overridden = 0;
+    for (const op of launchedOps) {
+        const cat = deriveOperationOutcomeCategory(
+            op.commander_assessment_at_launch,
+            op.was_force_launched ?? false,
+        );
+        if (cat === 'direct_intervention') overridden++;
+        else if (cat === 'reluctant_compliance') directed++;
+        else delegated++;
+    }
+
+    // Silence = healthy
+    const nonDelegated = directed + overridden;
+    if (nonDelegated === 0) {
+        return { totalActive: launchedOps.length, delegatedCount: delegated, directedCount: directed, overriddenCount: overridden, summaryLabel: null };
+    }
+
+    const parts: string[] = [];
+    if (overridden > 0) parts.push(`${overridden} under Direct Intervention`);
+    if (directed > 0) parts.push(`${directed} under presidential direction`);
+    const summaryLabel = parts.join(', ');
+
+    return { totalActive: launchedOps.length, delegatedCount: delegated, directedCount: directed, overriddenCount: overridden, summaryLabel };
+}

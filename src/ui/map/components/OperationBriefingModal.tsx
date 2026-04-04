@@ -9,8 +9,8 @@ import { formatRank, getArchetype, formatPips, getRatingColor } from '../utils/o
 import { getPlayerSafeCorpsName, getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { findPlayerFacingOperationByKey } from '../../shared/playerVisibility';
 import { OrderInterpretationSection } from './army_hq/OrderInterpretationSection';
-import { deriveOperationOutcomeCategory, deriveRecommendationExplanation } from '../data/command_strain';
-import type { RecommendationExplanation, ReadinessTrend } from '../data/command_strain';
+import { deriveOperationOutcomeCategory, deriveRecommendationExplanation, deriveDelegationContext } from '../data/command_strain';
+import type { RecommendationExplanation, ReadinessTrend, DelegationContext } from '../data/command_strain';
 
 const FORCE_LAUNCH_COST = 15;
 const RECOVERY_PER_TURN = 2;
@@ -132,6 +132,38 @@ function CommandRecord({ assessmentAtLaunch, wasForce, caCost, corpsStrain, corp
                         </span>
                     </div>
                 )}
+            </div>
+        </div>
+    );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Delegation Visibility Wave 1: Decision Authority Path — pre-decision
+// delegation context for planning-phase operations.
+// Canonical owner of pre-decision delegation path explanation.
+// Silence = healthy: renders null for normal_delegation (commander recommends
+// launch, strain = 0). Only fires when delegation status is non-obvious.
+// ═══════════════════════════════════════════════════════════════════════════
+
+const DELEGATION_CONFIG: Record<string, { icon: string; borderClass: string; textClass: string } | null> = {
+    normal_delegation: null,     // Silence = healthy
+    strained_delegation: { icon: '⚡', borderClass: 'border-amber-300/40', textClass: 'text-amber-700' },
+    presidential_direction: { icon: '◆', borderClass: 'border-blue-400/40', textClass: 'text-blue-800' },
+};
+
+/** Compact delegation path indicator — one line showing who bears the decision burden.
+ *  Silence = healthy: renders null for normal delegation (commander carrying burden, no strain). */
+function DelegationPathIndicator({ delegation }: { delegation: DelegationContext | undefined }) {
+    if (!delegation || !delegation.label) return null;
+
+    const config = DELEGATION_CONFIG[delegation.path];
+    if (!config) return null;
+
+    return (
+        <div className={`mx-4 my-1 px-3 py-1.5 border ${config.borderClass} bg-neutral-50/50`}>
+            <div className="flex items-start gap-2">
+                <span className={`shrink-0 text-[10px] mt-px ${config.textClass}`}>{config.icon}</span>
+                <span className={`text-[10px] leading-snug ${config.textClass}`}>{delegation.label}</span>
             </div>
         </div>
     );
@@ -377,6 +409,15 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
         'This corps',
     );
 
+    // Delegation Visibility Wave 1: Derive pre-decision delegation context (planning phase only)
+    const delegationContext = useMemo(() => {
+        if (operation.phase !== 'planning' || !assessment) return undefined;
+        return deriveDelegationContext(
+            assessment as 'launch' | 'postpone' | 'abort',
+            corpsStrain,
+        );
+    }, [operation.phase, assessment, corpsStrain]);
+
     // Wave 5: Derive recommendation explanation from assessment snapshot + commander personality
     const recommendationExplanation = useMemo(() => {
         if (!assessment || assessment === 'launch') return null;
@@ -466,6 +507,11 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                         <span className="text-[8px] text-neutral-400">({postponements} prior postponement{postponements > 1 ? 's' : ''})</span>
                     )}
                 </div>
+
+                {/* Delegation Visibility Wave 1: Decision Authority Path — shows who bears the
+                    decision burden. Silence = healthy: renders null for normal delegation.
+                    Only fires for planning-phase operations. */}
+                <DelegationPathIndicator delegation={delegationContext} />
 
                 {/* Wave 6: Readiness Trend — directional signal showing whether conditions
                     are improving, stagnating, or deteriorating since last assessment.

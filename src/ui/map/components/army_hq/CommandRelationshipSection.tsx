@@ -30,6 +30,7 @@ import { CollapsibleSection } from './CollapsibleSection';
 import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
 import { isExhaustionContributingToStrain } from '../../data/command_strain';
+import type { CorpsDelegationSummary } from '../../data/command_strain';
 import type { FrictionEventView } from '../../data/types';
 
 const COMPROMISED_THRESHOLD = 6;
@@ -42,6 +43,8 @@ interface CommandRelationshipSectionProps {
     frictionEvents: FrictionEventView[];
     /** Corps exhaustion (0-100) — Wave 6: exhaustion above threshold contributes to strain. */
     corpsExhaustion: number;
+    /** Delegation Visibility Wave 1: standing delegation summary for active operations. */
+    delegationSummary?: CorpsDelegationSummary | null;
     // Stabilization fields
     stabilizationAvailable: boolean;
     stabilizationCooldownUntil?: number;
@@ -56,6 +59,7 @@ export function CommandRelationshipSection({
     recoveryForecast,
     frictionEvents,
     corpsExhaustion,
+    delegationSummary,
     stabilizationAvailable,
     stabilizationCooldownUntil,
     stabilizationCostCA,
@@ -68,8 +72,10 @@ export function CommandRelationshipSection({
     const unresolvedCount = unresolvedEvents.length;
     const exhaustionContributing = isExhaustionContributingToStrain(corpsExhaustion);
 
-    // Silence = healthy: nothing to show when strain is 0 and no unresolved friction
-    if (commandStrain === 0 && unresolvedCount === 0) return null;
+    const hasDelegationNotice = delegationSummary?.summaryLabel != null;
+
+    // Silence = healthy: nothing to show when strain is 0, no unresolved friction, and no delegation notice
+    if (commandStrain === 0 && unresolvedCount === 0 && !hasDelegationNotice) return null;
 
     const isCompromised = commandStrain >= COMPROMISED_THRESHOLD;
     const strainColor = isCompromised ? 'text-red-400' : 'text-amber-400';
@@ -127,6 +133,17 @@ export function CommandRelationshipSection({
                         </span>
                         <span className={`text-[10px] font-bold tabular-nums font-mono px-1.5 py-0.5 border ${strainBg} ${strainColor}`}>
                             {commandStrain}
+                        </span>
+                    </div>
+                )}
+
+                {/* 1b. Delegation summary — Delegation Visibility Wave 1: standing delegation health.
+                    Silence = healthy: hidden when all active ops are ordinary compliance. */}
+                {hasDelegationNotice && (
+                    <div className="flex items-center gap-1.5">
+                        <span className="text-[9px] text-blue-400/70 shrink-0">◆</span>
+                        <span className="text-[10px] text-text-secondary font-mono">
+                            Active operations: {delegationSummary!.summaryLabel}
                         </span>
                     </div>
                 )}
