@@ -95,6 +95,8 @@ interface WindowAwwv {
     resolveDayton: (proposal: { territorial_demands: string[]; territorial_concessions: string[]; institutional_choices: Record<string, 'centralized' | 'decentralized'> }) => Promise<{ ok: boolean; result?: Record<string, unknown>; error?: string }>;
     /** Level 2: Presidential acknowledgement of a warlord friction event. Sets resolved: true, reducing command strain. */
     acknowledgeFrictionEvent: (payload: { corpsId: string; officerId: string; eventTurn: number; eventType: string }) => Promise<{ ok: boolean; error?: string }>;
+    /** Level 2: Resolve ALL unresolved friction events for a corps at once. Costs CA (10 if strained, 15 if compromised). 3-turn cooldown. */
+    stabilizeCommandRelationship: (payload: { corpsId: string }) => Promise<{ ok: boolean; resolvedCount?: number; caCost?: number; error?: string }>;
 }
 
 const NOOP_RESULT = Promise.resolve({ ok: false, error: 'Desktop IPC not available' });
@@ -356,6 +358,10 @@ export function useIPC() {
             acknowledgeFrictionEvent: awwv
                 ? (payload: { corpsId: string; officerId: string; eventTurn: number; eventType: string }) => awwv.acknowledgeFrictionEvent(payload)
                 : makeNoop<{ ok: boolean; error?: string }>(),
+
+            stabilizeCommandRelationship: awwv
+                ? (payload: { corpsId: string }) => awwv.stabilizeCommandRelationship(payload)
+                : makeNoop<{ ok: boolean; resolvedCount?: number; caCost?: number; error?: string }>(),
         };
     }, []); // stable — never changes reference
 }

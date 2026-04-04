@@ -856,6 +856,41 @@ app.whenReady().then(() => {
     try {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
+
+      // Wave 4 stance gate: reject offensive stance when command is compromised (strain >= 6).
+      // Inline strain computation (mirrors command_strain.ts).
+      if (stance === 'offensive') {
+        const FORCE_LAUNCH_STRAIN = 3;
+        const FRICTION_EVENT_STRAIN = 2;
+        const COMPROMISED_THRESHOLD = 6;
+        const currentTurn = state.meta?.turn ?? 0;
+        let totalStrain = 0;
+        const corpsCmd = state.corps_command?.[corpsId];
+        if (corpsCmd) {
+          const activeOps = [...(corpsCmd.active_operations ?? [])].sort((a, b) => a.name.localeCompare(b.name));
+          for (const op of activeOps) {
+            if (op.was_force_launched !== true) continue;
+            const turnAge = Math.max(0, currentTurn - (op.started_turn ?? currentTurn));
+            totalStrain += Math.max(0, FORCE_LAUNCH_STRAIN - turnAge);
+          }
+        }
+        const frictionEvents = state.military?.friction_events ?? [];
+        const namedOfficers = state.military?.named_officers ?? {};
+        for (const officerId of Object.keys(namedOfficers).sort()) {
+          const os = namedOfficers[officerId];
+          if (!os || os.status !== 'active' || os.assigned_corps_id !== corpsId) continue;
+          for (const event of frictionEvents) {
+            if (event.officer_id === officerId && !event.resolved) {
+              const turnAge = Math.max(0, currentTurn - event.turn);
+              totalStrain += Math.max(0, FRICTION_EVENT_STRAIN - turnAge);
+            }
+          }
+        }
+        if (Math.max(0, Math.round(totalStrain)) >= COMPROMISED_THRESHOLD) {
+          return { ok: false, reason: 'compromised', error: 'Cannot set aggressive stance — command is compromised. Stabilize the command relationship first.' };
+        }
+      }
+
       const corpsCommand = ensureCorpsCommandEntry(state, corpsId, stance);
       corpsCommand.stance = stance;
       currentGameStateJson = sim.serializeState(state);
@@ -1112,6 +1147,105 @@ app.whenReady().then(() => {
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);
       return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  // Level 2 — Presidential stabilization of command relationship.
+  // Resolves ALL unresolved friction events for the corps at once (vs one-by-one acknowledge).
+  // Costs CA: 10 if strained (1–5), 15 if compromised (6+).
+  // 3-turn cooldown enforced to prevent spam.
+  // Payload: { corpsId }
+  ipcMain.handle('stabilize-command-relationship', async (_event, payload) => {
+    const { corpsId } = payload || {};
+    if (!currentGameStateJson || typeof corpsId !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const currentTurn = state.meta?.turn ?? 0;
+
+      // ── Inline strain computation (mirrors command_strain.ts, CJS context) ─
+      const FORCE_LAUNCH_STRAIN = 3;
+      const FRICTION_EVENT_STRAIN = 2;
+      const DECAY_PER_TURN = 1;
+      const COMPROMISED_THRESHOLD = 6;
+      let totalStrain = 0;
+      const corpsCmd = state.corps_command?.[corpsId];
+      if (corpsCmd) {
+        const activeOps = [...(corpsCmd.active_operations ?? [])].sort((a, b) => a.name.localeCompare(b.name));
+        for (const op of activeOps) {
+          if (op.was_force_launched !== true) continue;
+          const launchTurn = op.started_turn ?? currentTurn;
+          const turnAge = Math.max(0, currentTurn - launchTurn);
+          totalStrain += Math.max(0, FORCE_LAUNCH_STRAIN - turnAge * DECAY_PER_TURN);
+        }
+      }
+      const frictionEvents = state.military?.friction_events ?? [];
+      const namedOfficers = state.military?.named_officers ?? {};
+      const officerIds = Object.keys(namedOfficers).sort();
+      for (const officerId of officerIds) {
+        const os = namedOfficers[officerId];
+        if (!os || os.status !== 'active' || os.assigned_corps_id !== corpsId) continue;
+        const officerEvents = frictionEvents
+          .filter(e => e.officer_id === officerId && !e.resolved)
+          .sort((a, b) => a.turn - b.turn);
+        for (const event of officerEvents) {
+          const turnAge = Math.max(0, currentTurn - event.turn);
+          totalStrain += Math.max(0, FRICTION_EVENT_STRAIN - turnAge * DECAY_PER_TURN);
+        }
+      }
+      const strain = Math.max(0, Math.round(totalStrain));
+
+      // Require at least some strain to stabilize
+      if (strain === 0) {
+        return { ok: false, error: 'Command relationship is already healthy — no stabilization needed.' };
+      }
+
+      // ── Cooldown check ───────────────────────────────────────────────────
+      const cooldownUntil = corpsCmd?.stabilization_cooldown_until ?? 0;
+      if (currentTurn < cooldownUntil) {
+        return { ok: false, error: `Stabilization on cooldown until turn ${cooldownUntil}.` };
+      }
+
+      // ── CA cost ──────────────────────────────────────────────────────────
+      const isCompromised = strain >= COMPROMISED_THRESHOLD;
+      const STABILIZE_COST = isCompromised ? 15 : 10;
+      const auth = state.military.command_authority;
+      if (auth) {
+        if (auth.current < STABILIZE_COST) {
+          return { ok: false, error: `Insufficient command authority (${auth.current}/${STABILIZE_COST} needed)` };
+        }
+        auth.current -= STABILIZE_COST;
+        auth.spent_this_turn = (auth.spent_this_turn ?? 0) + STABILIZE_COST;
+        auth.lifetime_spent = (auth.lifetime_spent ?? 0) + STABILIZE_COST;
+      }
+
+      // ── Resolve all unresolved friction events for this corps ────────────
+      let resolved = 0;
+      for (const officerId of officerIds) {
+        const os = namedOfficers[officerId];
+        if (!os || os.status !== 'active' || os.assigned_corps_id !== corpsId) continue;
+        for (const event of frictionEvents) {
+          if (event.officer_id === officerId && !event.resolved) {
+            event.resolved = true;
+            resolved++;
+          }
+        }
+      }
+
+      // ── Set stabilization cooldown (3 turns) ────────────────────────────
+      if (!state.corps_command) state.corps_command = {};
+      if (!state.corps_command[corpsId]) {
+        state.corps_command[corpsId] = ensureCorpsCommandEntry(state, corpsId);
+      }
+      state.corps_command[corpsId].stabilization_cooldown_until = currentTurn + 3;
+
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true, resolvedCount: resolved, caCost: auth ? STABILIZE_COST : 0 };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
     }

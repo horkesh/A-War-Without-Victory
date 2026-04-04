@@ -507,6 +507,8 @@ export interface CorpsCommandState {
     }>;
     /** Persistent commander state for v0.8 intelligent corps AI. */
     commander_state?: CommanderState;
+    /** Turn number when command stabilization cooldown expires (Wave 4). Set after Stabilize action. */
+    stabilization_cooldown_until?: number;
 }
 
 /** Operational group activation order. */

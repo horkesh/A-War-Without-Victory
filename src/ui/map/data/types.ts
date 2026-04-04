@@ -214,6 +214,12 @@ export interface FormationView {
      * Only populated for corps/corps_asset formations.
      */
     frictionEvents?: FrictionEventView[];
+    /** True when Stabilize Command Relationship action is available (strain > 0, cooldown not active). */
+    stabilizationAvailable?: boolean;
+    /** Turn when stabilization cooldown expires. Undefined = no cooldown active. */
+    stabilizationCooldownUntil?: number;
+    /** CA cost for Stabilize action: 15 if compromised, 10 if strained, 0 if no CA system. */
+    stabilizationCostCA?: number;
 }
 
 /**

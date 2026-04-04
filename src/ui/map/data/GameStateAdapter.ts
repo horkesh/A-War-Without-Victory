@@ -882,6 +882,18 @@ export function parseGameState(json: unknown): LoadedGameState {
                         turn: e.turn,
                         resolved: e.resolved,
                     }));
+
+                // ── Wave 4: stabilization availability ───────────────────────────
+                const currentTurn = (state.meta as { turn?: number } | undefined)?.turn ?? 0;
+                const rawCorpsCmd = (state.corps_command as Record<string, { stabilization_cooldown_until?: number }> | undefined)?.[fv.id];
+                const cooldownUntil = rawCorpsCmd?.stabilization_cooldown_until ?? 0;
+                const cooldownActive = currentTurn < cooldownUntil;
+                fv.stabilizationAvailable = strain > 0 && !cooldownActive;
+                fv.stabilizationCooldownUntil = cooldownActive ? cooldownUntil : undefined;
+                const COMPROMISED_THRESHOLD_ADAPTER = 6;
+                fv.stabilizationCostCA = state.military.command_authority
+                    ? (strain >= COMPROMISED_THRESHOLD_ADAPTER ? 15 : 10)
+                    : 0;
             }
         }
     }
