@@ -1386,3 +1386,44 @@ export function deriveCorpsDelegationSummary(
 
     return { totalActive: launchedOps.length, delegatedCount: delegated, directedCount: directed, overriddenCount: overridden, summaryLabel };
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Intervention Risk — Wave 3
+// Category-differentiated consequence copy for the DirectInterventionSection.
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Derive a category-differentiated consequence sentence for the Direct
+ * Intervention decision surface. Tells the player WHY overriding this
+ * particular kind of institutional drag is different from overriding another.
+ *
+ * Pure derivation — no side effects, no new persisted state.
+ * Silence = healthy: returns null when category === 'normal'.
+ *
+ * @param category            - From deriveOrderInterpretation().category.
+ * @param commanderAssessment - The commander's recommendation ('postpone' | 'abort').
+ * @param severity            - From deriveOrderInterpretation().severity.
+ * @returns A short player-facing consequence sentence, or null for normal category.
+ */
+export function deriveInterventionRisk(
+    category: OrderInterpretationCategory,
+    commanderAssessment: 'postpone' | 'abort',
+    severity: 'normal' | 'caution' | 'alarm',
+): string | null {
+    switch (category) {
+        case 'strain_shaped':
+            return severity === 'alarm'
+                ? 'Command cohesion is already compromised. Another intervention will deepen institutional damage.'
+                : 'This corps carries active command strain. Forcing launch adds further institutional friction.';
+        case 'feasibility_constrained':
+            return 'Command reads this as structurally blocked. Override does not resolve the constraint.';
+        case 'tempo_resistant':
+            return 'The commander judges timing is premature. Forcing launch proceeds before conditions are fully set.';
+        case 'caution_driven':
+            return commanderAssessment === 'abort'
+                ? 'The commander judges this operation is not viable. Overriding that carries full institutional cost.'
+                : 'The commander recommends waiting for better conditions. Override launches against that professional judgment.';
+        default:
+            return null;
+    }
+}

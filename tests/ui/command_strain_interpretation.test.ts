@@ -9,7 +9,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { deriveOrderInterpretation } from '../../src/ui/map/data/command_strain.js';
+import { deriveOrderInterpretation, deriveInterventionRisk } from '../../src/ui/map/data/command_strain.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Category classification
@@ -397,6 +397,84 @@ describe('Wave 2: deriveOrderInterpretation — dragFactors', () => {
         expect(Array.isArray(r.dragFactors)).toBe(true);
         expect(r.dragFactors).toHaveLength(1);
         expect(r.dragFactors[0].source).toBe('command_strain');
+    });
+
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Wave 3: deriveInterventionRisk — category-differentiated consequence copy
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Wave 3: deriveInterventionRisk — intervention risk copy', () => {
+
+    it('normal → returns null (silence = healthy)', () => {
+        expect(deriveInterventionRisk('normal', 'postpone', 'normal')).toBeNull();
+    });
+
+    it('strain_shaped / alarm → non-null and references compound/damage', () => {
+        const r = deriveInterventionRisk('strain_shaped', 'postpone', 'alarm');
+        expect(r).not.toBeNull();
+        expect(r!.toLowerCase()).toMatch(/comprom|damage|deepen/);
+    });
+
+    it('strain_shaped / caution → non-null and differs from alarm', () => {
+        const alarm = deriveInterventionRisk('strain_shaped', 'postpone', 'alarm');
+        const caution = deriveInterventionRisk('strain_shaped', 'postpone', 'caution');
+        expect(caution).not.toBeNull();
+        expect(caution).not.toBe(alarm);
+    });
+
+    it('feasibility_constrained → non-null and references structural block', () => {
+        const r = deriveInterventionRisk('feasibility_constrained', 'postpone', 'caution');
+        expect(r).not.toBeNull();
+        expect(r!.toLowerCase()).toMatch(/structur|block|constraint/);
+    });
+
+    it('tempo_resistant → non-null and references timing/premature', () => {
+        const r = deriveInterventionRisk('tempo_resistant', 'postpone', 'caution');
+        expect(r).not.toBeNull();
+        expect(r!.toLowerCase()).toMatch(/premature|timing|condition/);
+    });
+
+    it('caution_driven / postpone → non-null and references judgment/recommendation', () => {
+        const r = deriveInterventionRisk('caution_driven', 'postpone', 'caution');
+        expect(r).not.toBeNull();
+        expect(r!.toLowerCase()).toMatch(/judgment|recommends|professional/);
+    });
+
+    it('caution_driven / abort → non-null and differs from postpone', () => {
+        const postpone = deriveInterventionRisk('caution_driven', 'postpone', 'caution');
+        const abort = deriveInterventionRisk('caution_driven', 'abort', 'caution');
+        expect(abort).not.toBeNull();
+        expect(abort).not.toBe(postpone);
+    });
+
+    it('all non-null returns are under 35 words', () => {
+        const cases: Parameters<typeof deriveInterventionRisk>[] = [
+            ['strain_shaped', 'postpone', 'alarm'],
+            ['strain_shaped', 'postpone', 'caution'],
+            ['feasibility_constrained', 'postpone', 'caution'],
+            ['tempo_resistant', 'postpone', 'caution'],
+            ['caution_driven', 'postpone', 'caution'],
+            ['caution_driven', 'abort', 'caution'],
+        ];
+        for (const args of cases) {
+            const r = deriveInterventionRisk(...args);
+            expect(r).not.toBeNull();
+            expect(r!.split(/\s+/).length).toBeLessThanOrEqual(35);
+        }
+    });
+
+    it('all six non-normal cases produce pairwise distinct strings', () => {
+        const results = [
+            deriveInterventionRisk('strain_shaped', 'postpone', 'alarm'),
+            deriveInterventionRisk('strain_shaped', 'postpone', 'caution'),
+            deriveInterventionRisk('feasibility_constrained', 'postpone', 'caution'),
+            deriveInterventionRisk('tempo_resistant', 'postpone', 'caution'),
+            deriveInterventionRisk('caution_driven', 'postpone', 'caution'),
+            deriveInterventionRisk('caution_driven', 'abort', 'caution'),
+        ];
+        expect(new Set(results).size).toBe(6);
     });
 
 });

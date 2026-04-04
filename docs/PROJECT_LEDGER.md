@@ -23124,3 +23124,11 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
   - Warroom React Migration lane (4 waves + canvas deletion + asset canonicalization)
   - Command Chain Truth lane (4 waves + 29 regression tests)
 - Micro-reports preserved as traceability artifacts; consolidated reports reference them
+
+## [2026-04-04] order-interpretation-system-wave3
+- Added `deriveInterventionRisk(category, commanderAssessment, severity): string | null` to `command_strain.ts` — pure helper returning category-differentiated consequence copy for DirectInterventionSection
+- `DirectInterventionSection` in `OperationBriefingModal` gains `interventionRisk?: string | null` prop; explanation line is now `interventionRisk ?? generic_fallback`
+- Modal-level `useMemo` derives `{ category, severity }` from `deriveOrderInterpretation` then calls `deriveInterventionRisk` — same derivation pattern as readiness trend and recommendation explanation
+- feasibility_constrained: "structurally blocked / override does not resolve constraint"; strain_shaped alarm: "cohesion compromised / deepen damage"; tempo_resistant: "premature / before conditions set"; caution_driven: differentiated by abort vs postpone
+- 9 new Wave 3 tests (56 total in command_strain_interpretation.test.ts); full suite 2300/2300; tsc clean; vite build clean; governance OK
+- Report: `docs/40_reports/implemented/20260404_ORDER_INTERPRETATION_SYSTEM_WAVE3.md`

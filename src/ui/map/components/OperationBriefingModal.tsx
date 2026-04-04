@@ -9,7 +9,7 @@ import { formatRank, getArchetype, formatPips, getRatingColor } from '../utils/o
 import { getPlayerSafeCorpsName, getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { findPlayerFacingOperationByKey } from '../../shared/playerVisibility';
 import { OrderInterpretationSection } from './army_hq/OrderInterpretationSection';
-import { deriveOperationOutcomeCategory, deriveRecommendationExplanation, deriveDelegationContext } from '../data/command_strain';
+import { deriveOperationOutcomeCategory, deriveRecommendationExplanation, deriveDelegationContext, deriveOrderInterpretation, deriveInterventionRisk } from '../data/command_strain';
 import type { RecommendationExplanation, ReadinessTrend, DelegationContext } from '../data/command_strain';
 
 const FORCE_LAUNCH_COST = 15;
@@ -315,20 +315,24 @@ function OperationConstraintContext({ assessment }: {
 }
 
 /** Direct Intervention section — shown when the commander does NOT recommend launch. */
-function DirectInterventionSection({ assessment, currentAuth, corpsStrain, corpsStrainLabel, onForceLaunch }: {
+function DirectInterventionSection({ assessment, currentAuth, corpsStrain, corpsStrainLabel, interventionRisk, onForceLaunch }: {
     assessment: string;
     currentAuth: number;
     /** Existing command strain on this corps — triggers compound-risk notice when > 0. */
     corpsStrain: number;
     corpsStrainLabel: 'healthy' | 'strained' | 'compromised';
+    /** Category-aware consequence sentence from deriveInterventionRisk(). null = use generic fallback. */
+    interventionRisk?: string | null;
     onForceLaunch?: () => void;
 }) {
     const canAfford = currentAuth >= FORCE_LAUNCH_COST;
     const remaining = currentAuth - FORCE_LAUNCH_COST;
 
-    const explanation = assessment === 'abort'
-        ? 'The commander recommends aborting. Forcing launch overrides that assessment.'
-        : 'The commander recommends waiting. Forcing launch overrides that judgment.';
+    // Wave 3: category-differentiated copy; falls back to generic when null.
+    const explanation = interventionRisk
+        ?? (assessment === 'abort'
+            ? 'The commander recommends aborting. Forcing launch overrides that assessment.'
+            : 'The commander recommends waiting. Forcing launch overrides that judgment.');
 
     return (
         <div className="mx-4 my-3 border border-amber-400/40 bg-amber-50">
@@ -417,6 +421,22 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
             corpsStrain,
         );
     }, [operation.phase, assessment, corpsStrain]);
+
+    // Wave 3: Derive category-aware intervention risk copy for DirectInterventionSection.
+    // deriveOrderInterpretation is called here (not inside OrderInterpretationSection) so
+    // the category is available at modal level. Only meaningful in planning phase when the
+    // player is about to override a reluctant commander.
+    const interventionRisk = useMemo(() => {
+        if (operation.phase !== 'planning' || !assessment || assessment === 'launch') return null;
+        const { category, severity } = deriveOrderInterpretation(
+            corpsStrain,
+            assessment as 'launch' | 'postpone' | 'abort',
+            situationAssessment?.primaryConstraint,
+            operation.readinessTrend?.direction,
+            postponements,
+        );
+        return deriveInterventionRisk(category, assessment as 'postpone' | 'abort', severity);
+    }, [operation.phase, assessment, corpsStrain, situationAssessment, operation.readinessTrend?.direction, postponements]);
 
     // Wave 5: Derive recommendation explanation from assessment snapshot + commander personality
     const recommendationExplanation = useMemo(() => {
@@ -548,6 +568,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                         currentAuth={loadedGameState?.commandAuthority?.current ?? 0}
                         corpsStrain={corpsStrain}
                         corpsStrainLabel={corpsStrainLabel}
+                        interventionRisk={interventionRisk}
                         onForceLaunch={onForceLaunch}
                     />
                 )}
