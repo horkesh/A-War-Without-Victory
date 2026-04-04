@@ -1,3 +1,32 @@
+## 2026-04-04 — Command Chain Truth Wave 1
+
+- **B1 Phase 1.5 guard**: `classifyBrigadesByTerritory` Phase 1.5 now requires front-adjacency (≤30 friendly hops via `friendlyDistanceToAny`) before placing a brigade in `assigned_brigade_ids`. Brigades that match territory+component but cannot reach sector front go to `remaining` (not false reserve). Prevents deep-rear brigades appearing as sector-assigned.
+- **B2 assertBrigadeReachability actionable**: changed return type `void → string[]` (unreachable brigade IDs). Caller in `corps_front_sectors.ts` demotes detected brigades from `assigned_brigade_ids` to `reserve_brigade_ids`. Does not throw — save safety preserved. Log retained as diagnostic.
+- **B3 brigade_front_assignment dead-writer comment**: dual comment added at `game_state.ts:1697` — expanded COMPATIBILITY-ONLY block + original JSDoc text preserved for engine-honesty contract test.
+- **B4 ensureMinimumSectorCoverage hop comment**: documents intentional unbounded BFS and why understaffed sectors stay understaffed across disconnected components.
+- **E3 intel-fog comment**: `generateThreatAssessment.ts` sectorIntel source documented as observation records, not live engine activity.
+- **Displacement double-count (Phase C)**: audit finding NOT a live bug — guard at `scenario_reporting.ts:216` already prevents System A from firing when System C has data. Documented, no code change.
+- **9 regression tests** in `tests/sector_frontline_truth_wave1.test.ts` lock all Wave 1 invariants.
+- Pre-existing test failures (brigade_posture, commander_override, corps_front_sector_corps_ownership, engine_honesty_legacy_contracts, desktop_pmtiles_protocol_route, war_phase_step_order): confirmed pre-existing, not introduced by this wave.
+
+## 2026-04-04 - Notification Delivery Reliability Fix
+
+- Tested all Windows notification methods on this machine (Windows 11 Pro 10.0.26200).
+- BurntToast: not installed. `msg *`: exits 0 but no visible popup. `Windows.UI.Notifications` via `Add-Type -AssemblyName`: assembly not found. ContentType=WindowsRuntime `Add-Type`: C# compiler rejects `[void]` keyword syntax.
+- **WScript.Shell Popup: CONFIRMED WORKING** -- modal dialog, always visible, auto-dismisses after 8s. Returns -1 on timeout, 1 on user OK.
+- `tools/architect/hooks/notify.ps1` rewritten: BurntToast as optional attempt 1 (skipped if not installed), WScript.Shell Popup as canonical attempt 2, `msg *` as attempt 3 (does not set `$notified`), audio fallback if all visual methods fail. Each attempt emits one `[notify] method: delivered/failed` line.
+- `tools/architect/run_handoff.ps1`: notify call now captures output, filters for `[notify]` line, and prints `Notify:     [notify] WScript.Shell Popup: delivered (result=-1)` in runner summary alongside Slack line.
+- Smoke test confirmed: `[notify] WScript.Shell Popup: delivered (result=-1)`.
+- Governance: clean.
+
+## 2026-04-04 - Desktop Notification Contract Repair
+
+- Repair desktop notification contract — popup moved from Stop hook (`on_stop.ps1`) to `run_handoff.ps1` end.
+- Root cause: Stop hook fires before `response.md`, `meta.json` (completed), `architect_review.json`, and Slack are written — popup was announcing completion before any artifacts existed.
+- `on_stop.ps1`: removed `notify.ps1` call; added contract comment; `completion_signal.json` write retained.
+- `run_handoff.ps1`: added `notify.ps1` call after summary block with completion state contract comment. Sole canonical trigger.
+- Report: `docs/40_reports/implemented/20260404_PRESIDENTIAL_COMMAND_FRICTION_WAVE4.md` (Phase D Repair section)
+
 ## 2026-04-04 - Presidential Command Friction Wave 4
 
 - **Stabilize Command Relationship**: new presidential action on ArmyHQCorpsCard back face. Resolves ALL unresolved friction events for the corps at once (vs. one-by-one in Wave 3). Costs CA: 10 if strained (1–5), 15 if compromised (6+). 3-turn cooldown (`stabilization_cooldown_until` on `CorpsCommandState`).

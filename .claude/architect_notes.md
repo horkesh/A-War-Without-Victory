@@ -33,7 +33,10 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Active / Recent Accepted Lanes
 
-- Wave 4 Presidential Command Friction — Stabilize Command Relationship action (pay CA, resolve all friction at once, 3-turn cooldown); strain-gated stance (offensive blocked when compromised ≥6); CommandManagementSection new collapsible component; IPC-side stance gate enforced in stage-corps-stance-order; notify.ps1 native Windows toast as fallback 3; 119/119 tests pass; tsc clean; governance OK
+- `063ddaca`+`4a129b9b` **Command Chain Truth Wave 1** — Phase 1.5 front-adjacency guard (territory match alone insufficient; BFS ≤30 hops required before assigned); assertBrigadeReachability returns actionable string[] (caller demotes unreachable to reserve); brigade_front_assignment dead-writer comment (canonical block + preserved JSDoc contract text); ensureMinimumSectorCoverage hop-ceiling comment; generateThreatAssessment intel-fog comment; 9 regression tests. Pre-existing failures confirmed unchanged. Report: `docs/40_reports/implemented/20260404_COMMAND_CHAIN_TRUTH_WAVE1.md`.
+- Wave 4 Presidential Command Friction — Stabilize Command Relationship action (pay CA, resolve all friction at once, 3-turn cooldown); strain-gated stance (offensive blocked when compromised ≥6); CommandManagementSection new collapsible component; IPC-side stance gate enforced in stage-corps-stance-order; 119/119 tests pass; tsc clean; governance OK
+- Notification delivery fix (post-Wave 4) — notify.ps1 rewritten; canonical method is WScript.Shell Popup (confirmed working on Windows 11 Pro 10.0.26200); BurntToast/msg*/WinRT all fail on this machine; run_handoff.ps1 captures [notify] output and prints Notify log line in runner summary
+- Desktop notification contract repair — popup moved from Stop hook (on_stop.ps1) to run_handoff.ps1 end. Stop hook fires before artifacts are written; sole canonical trigger is now run_handoff.ps1 after response.md + meta.json + architect_review.json + Slack are all committed. completion_signal.json write retained in on_stop.ps1 for diagnostics. Notification lane: CLOSED.
 - `36bb32c0`+`831778ea`+`1cb68fc8` Presidential Command Friction Wave 3 — friction resolution loop closed: IPC handler acknowledge-friction-event sets resolved:true; adapter exposes FrictionEventView[]; ArmyHQCorpsCard back face shows per-event Acknowledge buttons; front face FRICTION ACTIVE badge demoted to dot indicator; back face is canonical friction detail surface; 90 tests pass
 - `c689ba74`+`387da70b`+`45feea0d`+`7d8006ac` Presidential Command Friction Wave 2 — strain-shaped CoS briefing paragraph, OperationsSection command-risk notice, OperationBriefingModal compound warning; silence=healthy at all three surfaces
 - `44356235`+`59b9f2f7`+`16a0726b`+`37668647` Presidential Command Friction Wave 1 — command strain visibility + warlord friction surfaced + institutional story in ops review
@@ -49,7 +52,15 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Next Priority Lanes
 
-1. **CLOSED 2026-04-04** — Presidential Command Friction Wave 4 complete.
+1. **ACTIVE 2026-04-04** — Command Chain Truth Package (v0.8.0.x stabilization lane).
+   - Wave 1 complete (2026-04-04): Phase 1.5 guard, assertBrigadeReachability actionable, dead-field docs, displacement guard verified.
+   - Wave 2 pending: Frontline consumer alignment (exhaustion.ts, officer_quality_update.ts, supply_pressure.ts).
+   - Wave 3 pending: Activity/reporting truth (scenario_runner.ts, scenario_reporting.ts alignment to canonical phase outputs).
+   - Wave 4 pending: Regression gates expansion + canon/roadmap propagation.
+   - Wave 5 friction candidates: still pending (see item 2 below).
+   - Plan: `docs/plans/2026-04-03-v080x-sector-frontline-truth-plan.md`
+
+2. **CLOSED 2026-04-04** — Presidential Command Friction Wave 4 complete.
    - Stabilize Command Relationship: pay CA (10/15), resolve all friction at once, 3-turn cooldown
    - Strain-gated stance: offensive locked when compromised, IPC-side enforcement
    - CommandManagementSection: new collapsible component, silence=healthy
