@@ -22955,3 +22955,13 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 - tsc clean, 20/20 focused tests pass, vite build clean, governance OK.
 - Report: docs/40_reports/implemented/20260403_WARROOM_REACT_MIGRATION_WAVE2.md
 - Report: docs/40_reports/implemented/20260403_WARROOM_REACT_SHELL_ENTRY.md
+
+## 2026-04-04 — Docs / State Consolidation Pass
+
+- Roadmap refreshed: v0.8.0 status updated to reflect 2-day sprint (calibration ATH, command friction/review/truth lanes, Warroom migration, player knowledge)
+- Architect board cleaned: stale "Wrong Now" items updated, 15+ wave entries collapsed into grouped closed-lane summaries, resolved open questions removed, next-lane candidates sharpened
+- 3 consolidated lane summary reports created:
+  - Presidential Command lane (friction + review + interpretation + standing indicator)
+  - Warroom React Migration lane (4 waves + canvas deletion + asset canonicalization)
+  - Command Chain Truth lane (4 waves + 29 regression tests)
+- Micro-reports preserved as traceability artifacts; consolidated reports reference them
