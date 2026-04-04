@@ -1,3 +1,17 @@
+## 2026-04-04 — Army HQ Command Relationship Surface Consolidation
+
+- Consolidated 3 separate command-relationship renders into single `CommandRelationshipSection`: inline friction panel + `CommandManagementSection` + old `CommandRelationshipSection`.
+- `CommandRelationshipSection.tsx`: rewritten — absorbs friction events with Acknowledge buttons, Stabilize action with CA cost/cooldown, strain status, recovery forecast, stance constraint. Owns both IPC handlers.
+- `ArmyHQCorpsCard.tsx`: removed inline friction panel (~30 lines), removed CommandManagementSection render, removed handler/import/computation dead code.
+- `CommandManagementSection.tsx`: DELETED — logic absorbed into consolidated section.
+- Section title includes strain label: "Command Relationship — Strained/Compromised". Reading order: strain status → recovery → constraint → friction events → stabilize button.
+- Silence = healthy expanded: renders null when strain=0 AND no unresolved friction. Friction visible even at strain=0 (correct — friction precedes strain accumulation).
+- CorpsSituationSection stays separate (disjoint derivation: CommanderState vs command strain).
+- 11 new Wave 17 tests — 263/263 pass in command_authority.test.ts
+- Orchestrator: 3 parallel audit subagents (ownership, density, provenance), central implementation
+- Verification: tsc clean, **2217/2217 vitest (0 failures)**, vite build clean, governance OK
+- Report: `docs/40_reports/implemented/20260404_ARMY_HQ_COMMAND_RELATIONSHIP_CONSOLIDATION.md`
+
 ## 2026-04-04 — Commander Explanation Surfaces Wave 6 (Readiness Trend)
 
 - `command_strain.ts`: +`deriveReadinessTrend()` — pure derivation classifying operation readiness direction from existing persisted fields (postponement_count + commander_assessment + preparation timeline). Six directions: nearing_launch (silence), improving, building, stagnating, deteriorating, not_viable. Timeline urgency from preparation_turns_elapsed / preparation_max_turns.

@@ -1176,9 +1176,9 @@ describe('Wave 4: adapter stabilizationAvailable derivation', () => {
     });
 });
 
-describe('Wave 4: CommandManagementSection visibility conditions', () => {
-    /** Simulate the render condition: show section only when strain > 0. */
-    function shouldShowCommandManagement(strain: number): boolean {
+describe('Wave 4: Command Relationship visibility conditions (consolidated)', () => {
+    /** Simulate the original consolidated render condition from Wave 4. */
+    function shouldShowCommandRelationship(strain: number): boolean {
         return strain > 0;
     }
 
@@ -1188,15 +1188,15 @@ describe('Wave 4: CommandManagementSection visibility conditions', () => {
     }
 
     it('section hidden when strain = 0 (silence = healthy)', () => {
-        expect(shouldShowCommandManagement(0)).toBe(false);
+        expect(shouldShowCommandRelationship(0)).toBe(false);
     });
 
     it('section shown when strain = 1', () => {
-        expect(shouldShowCommandManagement(1)).toBe(true);
+        expect(shouldShowCommandRelationship(1)).toBe(true);
     });
 
     it('section shown when compromised', () => {
-        expect(shouldShowCommandManagement(7)).toBe(true);
+        expect(shouldShowCommandRelationship(7)).toBe(true);
     });
 
     it('stance constraint notice hidden when strained (not yet compromised)', () => {
@@ -2571,6 +2571,85 @@ describe('Wave 10: Command Relationship Standing', () => {
             expect(result.timelineFraction).toBeCloseTo(0.8);
             // Launch doesn't need "running short" warning
             expect(result.timelineLabel).not.toContain('running short');
+        });
+    });
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // Wave 17: Command Relationship Surface Consolidation
+    // Tests that the consolidated CommandRelationshipSection's visibility
+    // and content rules are correct after merging friction + management + standing.
+    // ═══════════════════════════════════════════════════════════════════════
+
+    describe('Wave 17: Command Relationship Consolidation', () => {
+        /** Simulate the consolidated section's render condition. */
+        function shouldShowConsolidated(strain: number, unresolvedFrictionCount: number): boolean {
+            return strain > 0 || unresolvedFrictionCount > 0;
+        }
+
+        /** Simulate strain status visibility within the section. */
+        function shouldShowStrainStatus(strain: number): boolean {
+            return strain > 0;
+        }
+
+        /** Simulate recovery forecast visibility. */
+        function shouldShowRecoveryForecast(strain: number, forecast: string | null): boolean {
+            return strain > 0 && forecast !== null;
+        }
+
+        /** Simulate stabilize button visibility. */
+        function shouldShowStabilizeButton(strain: number): boolean {
+            return strain > 0;
+        }
+
+        /** Simulate stance constraint visibility. */
+        function shouldShowStanceConstraint(strain: number): boolean {
+            return strain >= 6; // COMPROMISED_THRESHOLD
+        }
+
+        it('silence = healthy: hidden when strain=0 and no friction', () => {
+            expect(shouldShowConsolidated(0, 0)).toBe(false);
+        });
+
+        it('shown when strain > 0 even with no friction', () => {
+            expect(shouldShowConsolidated(3, 0)).toBe(true);
+        });
+
+        it('shown when friction exists even with strain = 0', () => {
+            expect(shouldShowConsolidated(0, 2)).toBe(true);
+        });
+
+        it('strain status hidden when strain = 0', () => {
+            expect(shouldShowStrainStatus(0)).toBe(false);
+        });
+
+        it('strain status shown when strain > 0', () => {
+            expect(shouldShowStrainStatus(4)).toBe(true);
+        });
+
+        it('recovery forecast hidden when strain = 0', () => {
+            expect(shouldShowRecoveryForecast(0, 'Strain resolving in 2 turns')).toBe(false);
+        });
+
+        it('recovery forecast shown when strain > 0 and forecast present', () => {
+            expect(shouldShowRecoveryForecast(4, 'Strain resolving in 2 turns')).toBe(true);
+        });
+
+        it('recovery forecast hidden when forecast is null', () => {
+            expect(shouldShowRecoveryForecast(4, null)).toBe(false);
+        });
+
+        it('stabilize button shown when strain > 0', () => {
+            expect(shouldShowStabilizeButton(3)).toBe(true);
+        });
+
+        it('stabilize button hidden when strain = 0', () => {
+            expect(shouldShowStabilizeButton(0)).toBe(false);
+        });
+
+        it('stance constraint shown only when compromised (strain >= 6)', () => {
+            expect(shouldShowStanceConstraint(5)).toBe(false);
+            expect(shouldShowStanceConstraint(6)).toBe(true);
+            expect(shouldShowStanceConstraint(10)).toBe(true);
         });
     });
 });
