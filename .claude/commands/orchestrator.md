@@ -48,15 +48,16 @@ For non-trivial work, pick:
 2. one critic / blindspot role
 3. one product or architecture role when sequencing matters
 
-Preferred blindspot role:
+Blindspot role:
 
-- `gap-finder` if available
+- do not name a fictional or unavailable role
 
-Fallbacks:
+Recommended options:
 
 - `architect`
 - `technical-architect`
 - `product-manager`
+- `quality-assurance-process`
 
 ## Default dispatch matrix
 
@@ -65,7 +66,11 @@ Fallbacks:
 - `systems-programmer`
 - `gameplay-programmer`
 - `scenario-creator-runner-tester`
-- add `historian`, `war-or-game`, `formation-expert`, or `operations-expert` as needed
+- add `formation-expert` for militia / formation / pool / lifecycle work
+- add `scenario-harness-engineer` when runner, diagnostics, or artifact integrity is in question
+- add `map-geometry-integrity-reviewer` when geometry or front segmentation may be implicated
+- add `.claude/agents/operations-reality-checker.md` when sector / frontline / operation-behavior sanity needs an explicit challenger
+- add `historian` only when historical plausibility is actually in question
 
 ### UI / UX / shell / player-truth
 
@@ -73,12 +78,25 @@ Fallbacks:
 - `architect`
 - `technical-architect`
 - add `modern-wargame-expert` or `canon-compliance-reviewer` as needed
+- add `.claude/agents/ui-truth-keeper.md` or `.claude/agents/authority-auditor.md` when truth ownership or shell drift is the core issue
 
 ### Roadmap / plans / sequencing
 
 - `product-manager`
 - `technical-architect`
 - add `documentation-specialist` or `reports-custodian` as needed
+- add `.claude/agents/roadmap-slotter.md` when the task is mainly about prioritization, phasing, or lane selection
+
+## Repo taskforce briefs
+
+When the task benefits from a repo-specific challenge or coordination brief, read and use the relevant `.claude/agents/` file alongside the domain specialists:
+
+- `orchestrator-dispatcher.md`
+- `operations-reality-checker.md`
+- `ui-truth-keeper.md`
+- `authority-auditor.md`
+- `roadmap-slotter.md`
+- `self-correcting-implementer.md`
 
 ## Required output modes
 

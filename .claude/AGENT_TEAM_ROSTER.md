@@ -38,6 +38,7 @@
 |------|------------|----------------|
 | Gameplay Programmer | gameplay-programmer | Implementing or changing phase/sim logic, state, simulation behavior. |
 | Systems Programmer | systems-programmer | Engine core, ordering, serialization, invariants, determinism. |
+| Formation Expert | formation-expert | Militia spawning, brigade formation, militia pools, formation lifecycle, formation-driven availability questions. |
 | UI/UX Developer | ui-ux-developer | UI components, flows, UX changes, accessibility. |
 | Graphics Programmer | graphics-programmer | Rendering, shaders, map visuals, map rendering pipeline. |
 | Lua Scripting | lua-scripting | Lua APIs, scriptable behavior, bindings. |
@@ -92,6 +93,36 @@
 - **After major milestone** → Retrospective Analyst (retrospective-analyst).
 
 Document handoffs when passing between roles (e.g. "Handoff: Orchestrator → Product Manager for Phase 4 sequencing"; "Handoff: Product Manager → Gameplay Programmer for Phase X implementation").
+
+---
+
+## Specialist bench for recurring AWWV problem shapes
+
+Use the formal roster above as the base authority, then fit dispatch to the actual problem shape instead of reusing a generic fixed team block.
+
+### Common dispatch patterns
+
+| Problem shape | Primary specialists | Add when needed |
+|------|------------|----------------|
+| Formation spawning, militia pools, formation lifecycle | Formation Expert, Gameplay Programmer, Scenario Creator / Runner / Tester | Systems Programmer for invariants; Historian when historical plausibility is contested |
+| Sector / frontline truth, brigade-to-sector ownership, reachability, front segmentation | Systems Programmer, Gameplay Programmer, Scenario Creator / Runner / Tester, operations-reality-checker | Map / geometry when spatial integrity is implicated; Historian only when historical plausibility is actually in question |
+| Live operation behavior, dead fronts, zero-attack patterns | Scenario Creator / Runner / Tester, Gameplay Programmer, operations-reality-checker | Technical Architect for root-cause framing; Historian when the question is "bug or plausible quiet?" |
+| Player-facing command truth, shell ownership drift, duplicate UI authority | UI/UX Developer, Architect, Technical Architect, ui-truth-keeper, authority-auditor | Modern Wargame Expert for comparative UX; Code Review (canon/specs) when mechanics meaning may drift |
+| Roadmap slotting, phase sequencing, report placement | Product Manager, Technical Architect, roadmap-slotter, Documentation Specialist | Reports Custodian when report structure/retirement is part of the work |
+| Cross-role implementation with built-in challenge loop | self-correcting-implementer plus the actual domain owner | Process QA before merge or handoff |
+
+### Repo taskforce briefs
+
+The repo also ships task-focused coordination briefs in `.claude/agents/`. These are combinators and challenge roles, not replacements for domain ownership:
+
+- `authority-auditor.md`
+- `operations-reality-checker.md`
+- `orchestrator-dispatcher.md`
+- `roadmap-slotter.md`
+- `self-correcting-implementer.md`
+- `ui-truth-keeper.md`
+
+Use them to sharpen dispatch and synthesis, but keep a real domain owner on every task.
 
 ---
 

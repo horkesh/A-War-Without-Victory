@@ -1,3 +1,22 @@
+## Orchestration Roster Correction - 2026-04-04
+
+### What changed
+- `.claude/AGENT_TEAM_ROSTER.md` now includes a specialist bench for recurring AWWV problem shapes instead of relying only on the formal top-level roster.
+- `.claude/commands/orchestrator.md` now routes dispatch by real available specialists and repo taskforce briefs.
+- Removed the implied use of fictional or unavailable blindspot roles; orchestration now falls back to real roles such as `architect`, `technical-architect`, `product-manager`, and `quality-assurance-process`.
+
+### Why
+- Recent prompts were overusing a generic repeated team block instead of fitting dispatch to the actual task.
+- Formation, sector/frontline, live-run, and shell-truth work all need different specialist mixes.
+- Repo-owned orchestration guidance needed to reflect the real bench already available in this project.
+
+### Player-visible truth
+- None. This is process and orchestration guidance only.
+
+### Canonical owner
+- `.claude/AGENT_TEAM_ROSTER.md`
+- `.claude/commands/orchestrator.md`
+
 ## Order Interpretation System Wave 2 — 2026-04-04
 
 ### What changed
