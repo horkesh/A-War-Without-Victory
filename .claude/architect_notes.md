@@ -33,6 +33,7 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Active / Recent Accepted Lanes
 
+- Wave 4 Presidential Command Friction — Stabilize Command Relationship action (pay CA, resolve all friction at once, 3-turn cooldown); strain-gated stance (offensive blocked when compromised ≥6); CommandManagementSection new collapsible component; IPC-side stance gate enforced in stage-corps-stance-order; notify.ps1 native Windows toast as fallback 3; 119/119 tests pass; tsc clean; governance OK
 - `36bb32c0`+`831778ea`+`1cb68fc8` Presidential Command Friction Wave 3 — friction resolution loop closed: IPC handler acknowledge-friction-event sets resolved:true; adapter exposes FrictionEventView[]; ArmyHQCorpsCard back face shows per-event Acknowledge buttons; front face FRICTION ACTIVE badge demoted to dot indicator; back face is canonical friction detail surface; 90 tests pass
 - `c689ba74`+`387da70b`+`45feea0d`+`7d8006ac` Presidential Command Friction Wave 2 — strain-shaped CoS briefing paragraph, OperationsSection command-risk notice, OperationBriefingModal compound warning; silence=healthy at all three surfaces
 - `44356235`+`59b9f2f7`+`16a0726b`+`37668647` Presidential Command Friction Wave 1 — command strain visibility + warlord friction surfaced + institutional story in ops review
@@ -48,11 +49,17 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Next Priority Lanes
 
-1. **ACTIVE 2026-04-04** — Presidential Command Friction Wave 3 complete. Wave 4 candidates:
-   - Strain decay visualization on back face (show how strain will reduce next turn — decay math is already in command_strain.ts)
-   - Expand strain sources: corps exhaustion above threshold, consecutive failed ops (grounded in CorpsState.exhaustion if it exists)
-   - Connect strain to commander competence penalty (Wave 1 deferred this; needs a real competence field to write to)
-   - Supply CA recovery rate from strain label (compromised corps recover CA slower — needs recovery modifier in war_phases.ts)
+1. **CLOSED 2026-04-04** — Presidential Command Friction Wave 4 complete.
+   - Stabilize Command Relationship: pay CA (10/15), resolve all friction at once, 3-turn cooldown
+   - Strain-gated stance: offensive locked when compromised, IPC-side enforcement
+   - CommandManagementSection: new collapsible component, silence=healthy
+   - notify.ps1: native Windows toast fallback added
+
+2. **Wave 5 candidates (post-Wave 4):**
+   - Strain decay preview on back face ("strain will drop to X next turn" — decay math already in command_strain.ts, trivial to add)
+   - Expand strain sources: corps exhaustion above threshold (grounded in `CorpsState.corps_exhaustion`)
+   - Connect strain to CA recovery rate reduction (compromised corps recover CA slower — needs recovery modifier in war_phases.ts)
+   - Commander competence penalty from strain (Wave 1 deferred; needs a real competence field to write to cleanly)
 
 2. **CLOSED 2026-04-04** — Warroom React migration complete.
    - Wave 1 (2026-04-03): React WarroomShellLayer foundation, scene plate + hotspot overlays, `?view=warroom` activation. Report: `docs/40_reports/implemented/20260403_WARROOM_REACT_SHELL_FOUNDATION.md`.
@@ -101,5 +108,6 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 - RESOLVED (wave 3 Warroom): all warroom hotspot groups now have React-owned behavior. Next open question: which in-room overlays should expand (e.g. WarroomStatusBar → richer campaign pulse) vs which should remain pure handoffs.
 - RESOLVED (Wave 3 friction): warlord friction resolution now requires player acknowledgement — sets resolved: true via IPC. Unresolved events accumulate until acknowledged; decay already reduces their strain contribution to 0 after 2 turns but they remain visible until acknowledged. Auto-resolve path would conflict with the visible loop.
 - RESOLVED (Wave 3 mechanics): command strain remains purely informational through Wave 3. Wave 4 can add a real mechanical consequence (e.g. CA recovery rate reduction for compromised corps) only if grounded in an existing field. No fake modifiers.
-- Wave 4 open: should the back face show a "strain will drop to X next turn" preview? Decay math is already in command_strain.ts — trivial to add. Useful signal for the player deciding whether to acknowledge now vs wait.
-- Wave 4 open: what is the right scope for strain sources beyond force-launch and warlord friction? Corps exhaustion (CorpsState.corps_exhaustion) could contribute — needs calibration.
+- RESOLVED (Wave 4): Stabilize Command Relationship action wired. Player can pay CA to resolve all friction at once with 3-turn cooldown. Stance gate blocks offensive when compromised (strain ≥ 6).
+- Wave 5 open: should the back face show "strain will drop to X next turn" preview? Decay math is in command_strain.ts — trivial to add. Useful signal for player deciding whether to stabilize now vs wait one turn.
+- Wave 5 open: what is the right scope for strain sources beyond force-launch and warlord friction? Corps exhaustion (`corps_exhaustion` on CorpsCommandState) could contribute — needs calibration study before adding.

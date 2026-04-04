@@ -1,3 +1,19 @@
+## 2026-04-04 - Presidential Command Friction Wave 4
+
+- **Stabilize Command Relationship**: new presidential action on ArmyHQCorpsCard back face. Resolves ALL unresolved friction events for the corps at once (vs. one-by-one in Wave 3). Costs CA: 10 if strained (1–5), 15 if compromised (6+). 3-turn cooldown (`stabilization_cooldown_until` on `CorpsCommandState`).
+- **Strain-gated stance**: `stage-corps-stance-order` IPC handler now rejects `offensive` when corps strain ≥ 6. Returns `{ ok: false, reason: 'compromised' }`. UI mirrors this: stance dropdown disables offensive option with `[LOCKED]` label and tooltip.
+- `game_state.ts`: `stabilization_cooldown_until?: number` added to `CorpsCommandState`.
+- `electron-main.cjs`: `stabilize-command-relationship` IPC handler (+~75 lines); stance gate inline strain computation in `stage-corps-stance-order` (+~35 lines).
+- `preload.cjs`: bridge entry for `stabilizeCommandRelationship`.
+- `useIPC.ts`: `stabilizeCommandRelationship` in `WindowAwwv` interface + hook return.
+- `types.ts`: `stabilizationAvailable`, `stabilizationCooldownUntil`, `stabilizationCostCA` added to `FormationView`.
+- `GameStateAdapter.ts`: corps loop populates the 3 new stabilization fields from `CorpsCommandState` + CA presence.
+- `CommandManagementSection.tsx` (NEW): collapsible back-face section. Silence = healthy (renders null at strain=0). Opens by default when compromised. Shows stance constraint notice (compromised only) + Stabilize button + cooldown state + footer explainer.
+- `ArmyHQCorpsCard.tsx`: imports + wires `CommandManagementSection`; stance dropdown disables offensive when compromised.
+- `tools/architect/hooks/notify.ps1`: native Windows toast API added as fallback 3 (no dependencies). Terminal bell promoted to fallback 4.
+- +29 Wave 4 tests; 119/119 pass in command_authority.test.ts. tsc clean. Governance OK.
+- Report: `docs/40_reports/implemented/20260404_PRESIDENTIAL_COMMAND_FRICTION_WAVE4.md`
+
 ## 2026-04-04 - Presidential Command Friction Wave 3
 
 - Friction Resolution Loop: player can now acknowledge warlord friction events on the corps card back face → sets `resolved: true` on the matching `FrictionEvent` → `computeCorpsCommandStrain()` excludes it next read → command strain drops. Loop is now closed end-to-end.

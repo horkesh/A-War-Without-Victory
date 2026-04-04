@@ -30,7 +30,19 @@ try {
 } catch { }
 
 try {
-    # Attempt 3: Terminal bell + colored Write-Host
+    # Attempt 3: Native Windows toast API (no extra dependencies required)
+    Add-Type -AssemblyName Windows.UI.Notifications -ErrorAction SilentlyContinue
+    Add-Type -AssemblyName Windows.Data.Xml.Dom -ErrorAction SilentlyContinue
+    $template = [Windows.UI.Notifications.ToastTemplateType]::ToastText02
+    $xml = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent($template)
+    $xml.GetElementsByTagName("text")[0].AppendChild($xml.CreateTextNode($Title)) | Out-Null
+    $xml.GetElementsByTagName("text")[1].AppendChild($xml.CreateTextNode($Message)) | Out-Null
+    $toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
+    [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("AWWV").Show($toast)
+} catch { }
+
+try {
+    # Attempt 4: Terminal bell (always-available audio signal)
     [console]::beep(800, 300)
 } catch { }
 

@@ -930,3 +930,279 @@ describe('Wave 3: silence=healthy on back face', () => {
         expect(shouldShowAcknowledgeList(1)).toBe(true);
     });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Wave 4 — Stabilize Command Relationship + Strain-gated Stance
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Wave 4 model:
+//   - Stabilize action: resolves ALL unresolved friction events for corps at once
+//   - Costs CA: 10 if strained (1–5), 15 if compromised (6+)
+//   - 3-turn cooldown after stabilize (stabilization_cooldown_until = currentTurn + 3)
+//   - Stance gate: offensive stance rejected when strain >= COMPROMISED_THRESHOLD (6)
+//   - Adapter: stabilizationAvailable = strain > 0 && !cooldownActive
+
+const COMPROMISED_THRESHOLD = 6;
+const STABILIZE_COST_STRAINED = 10;
+const STABILIZE_COST_COMPROMISED = 15;
+const STABILIZE_COOLDOWN_TURNS = 3;
+
+/** Simulate the stabilize-command-relationship IPC handler (mirrors electron-main.cjs). */
+function simulateStabilize(
+    state: {
+        currentTurn: number;
+        corpsId: string;
+        strain: number;
+        cooldownUntil: number;
+        frictionEvents: Array<{ officer_id: string; assigned_corps_id: string; resolved: boolean }>;
+        commandAuthority?: { current: number; max: number; spent_this_turn: number; lifetime_spent: number } | null;
+    }
+): { ok: boolean; resolvedCount?: number; caCost?: number; error?: string; newCooldown?: number } {
+    if (state.strain === 0) {
+        return { ok: false, error: 'Command relationship is already healthy — no stabilization needed.' };
+    }
+    if (state.currentTurn < state.cooldownUntil) {
+        return { ok: false, error: `Stabilization on cooldown until turn ${state.cooldownUntil}.` };
+    }
+    const isCompromised = state.strain >= COMPROMISED_THRESHOLD;
+    const cost = isCompromised ? STABILIZE_COST_COMPROMISED : STABILIZE_COST_STRAINED;
+    if (state.commandAuthority) {
+        if (state.commandAuthority.current < cost) {
+            return { ok: false, error: `Insufficient command authority (${state.commandAuthority.current}/${cost} needed)` };
+        }
+        state.commandAuthority.current -= cost;
+        state.commandAuthority.spent_this_turn += cost;
+        state.commandAuthority.lifetime_spent += cost;
+    }
+    let resolved = 0;
+    for (const e of state.frictionEvents) {
+        if (e.assigned_corps_id === state.corpsId && !e.resolved) {
+            e.resolved = true;
+            resolved++;
+        }
+    }
+    const newCooldown = state.currentTurn + STABILIZE_COOLDOWN_TURNS;
+    return { ok: true, resolvedCount: resolved, caCost: state.commandAuthority ? cost : 0, newCooldown };
+}
+
+/** Simulate adapter stabilizationAvailable derivation. */
+function deriveStabilizationAvailable(strain: number, currentTurn: number, cooldownUntil: number): boolean {
+    return strain > 0 && currentTurn >= cooldownUntil;
+}
+
+/** Simulate adapter stabilizationCostCA derivation. */
+function deriveStabilizationCostCA(strain: number, hasCA: boolean): number {
+    if (!hasCA) return 0;
+    return strain >= COMPROMISED_THRESHOLD ? STABILIZE_COST_COMPROMISED : STABILIZE_COST_STRAINED;
+}
+
+/** Simulate stance gate — returns rejection reason or null if allowed. */
+function simulateStanceGate(newStance: string, strain: number): { ok: boolean; reason?: string; error?: string } {
+    if (newStance === 'offensive' && strain >= COMPROMISED_THRESHOLD) {
+        return { ok: false, reason: 'compromised', error: 'Cannot set aggressive stance — command is compromised. Stabilize the command relationship first.' };
+    }
+    return { ok: true };
+}
+
+describe('Wave 4: stabilize command relationship IPC handler', () => {
+    it('resolves all unresolved friction events for the corps at once', () => {
+        const events = [
+            { officer_id: 'o1', assigned_corps_id: 'corps-1', resolved: false },
+            { officer_id: 'o1', assigned_corps_id: 'corps-1', resolved: false },
+            { officer_id: 'o2', assigned_corps_id: 'corps-2', resolved: false }, // different corps
+        ];
+        const result = simulateStabilize({
+            currentTurn: 5, corpsId: 'corps-1', strain: 3, cooldownUntil: 0,
+            frictionEvents: events, commandAuthority: makeAuth(),
+        });
+        expect(result.ok).toBe(true);
+        expect(result.resolvedCount).toBe(2);
+        expect(events[0]!.resolved).toBe(true);
+        expect(events[1]!.resolved).toBe(true);
+        expect(events[2]!.resolved).toBe(false); // other corps untouched
+    });
+
+    it('costs 10 CA when strained (strain 1–5)', () => {
+        const auth = makeAuth({ current: 50 });
+        const result = simulateStabilize({
+            currentTurn: 5, corpsId: 'corps-1', strain: 3, cooldownUntil: 0,
+            frictionEvents: [], commandAuthority: auth,
+        });
+        expect(result.ok).toBe(true);
+        expect(result.caCost).toBe(10);
+        expect(auth.current).toBe(40);
+        expect(auth.spent_this_turn).toBe(10);
+        expect(auth.lifetime_spent).toBe(10);
+    });
+
+    it('costs 15 CA when compromised (strain >= 6)', () => {
+        const auth = makeAuth({ current: 50 });
+        const result = simulateStabilize({
+            currentTurn: 5, corpsId: 'corps-1', strain: 7, cooldownUntil: 0,
+            frictionEvents: [], commandAuthority: auth,
+        });
+        expect(result.ok).toBe(true);
+        expect(result.caCost).toBe(15);
+        expect(auth.current).toBe(35);
+    });
+
+    it('rejects when strain is 0 (no stabilization needed)', () => {
+        const result = simulateStabilize({
+            currentTurn: 5, corpsId: 'corps-1', strain: 0, cooldownUntil: 0,
+            frictionEvents: [], commandAuthority: makeAuth(),
+        });
+        expect(result.ok).toBe(false);
+        expect(result.error).toContain('already healthy');
+    });
+
+    it('rejects when cooldown is active', () => {
+        const result = simulateStabilize({
+            currentTurn: 5, corpsId: 'corps-1', strain: 3, cooldownUntil: 7, // cooldown until turn 7
+            frictionEvents: [], commandAuthority: makeAuth(),
+        });
+        expect(result.ok).toBe(false);
+        expect(result.error).toContain('cooldown');
+        expect(result.error).toContain('7');
+    });
+
+    it('allows stabilize on the exact turn cooldown expires', () => {
+        const result = simulateStabilize({
+            currentTurn: 7, corpsId: 'corps-1', strain: 3, cooldownUntil: 7, // currentTurn === cooldownUntil → allowed
+            frictionEvents: [], commandAuthority: makeAuth(),
+        });
+        expect(result.ok).toBe(true);
+    });
+
+    it('rejects when insufficient CA', () => {
+        const auth = makeAuth({ current: 5 }); // below strained cost of 10
+        const result = simulateStabilize({
+            currentTurn: 5, corpsId: 'corps-1', strain: 3, cooldownUntil: 0,
+            frictionEvents: [], commandAuthority: auth,
+        });
+        expect(result.ok).toBe(false);
+        expect(result.error).toContain('Insufficient');
+        expect(auth.current).toBe(5); // unchanged
+    });
+
+    it('sets stabilization cooldown to currentTurn + 3', () => {
+        const result = simulateStabilize({
+            currentTurn: 10, corpsId: 'corps-1', strain: 3, cooldownUntil: 0,
+            frictionEvents: [], commandAuthority: makeAuth(),
+        });
+        expect(result.ok).toBe(true);
+        expect(result.newCooldown).toBe(13);
+    });
+
+    it('works without CA system (caCost = 0, still resolves events)', () => {
+        const events = [
+            { officer_id: 'o1', assigned_corps_id: 'corps-1', resolved: false },
+        ];
+        const result = simulateStabilize({
+            currentTurn: 5, corpsId: 'corps-1', strain: 3, cooldownUntil: 0,
+            frictionEvents: events, commandAuthority: null,
+        });
+        expect(result.ok).toBe(true);
+        expect(result.caCost).toBe(0);
+        expect(events[0]!.resolved).toBe(true);
+    });
+});
+
+describe('Wave 4: strain-gated stance (compromised blocks offensive)', () => {
+    it('allows offensive stance when strain is healthy (0)', () => {
+        expect(simulateStanceGate('offensive', 0).ok).toBe(true);
+    });
+
+    it('allows offensive stance when strained (strain 1–5)', () => {
+        expect(simulateStanceGate('offensive', 5).ok).toBe(true);
+    });
+
+    it('blocks offensive stance when compromised (strain = 6)', () => {
+        const result = simulateStanceGate('offensive', 6);
+        expect(result.ok).toBe(false);
+        expect(result.reason).toBe('compromised');
+    });
+
+    it('blocks offensive stance when severely compromised (strain = 10)', () => {
+        expect(simulateStanceGate('offensive', 10).ok).toBe(false);
+    });
+
+    it('allows defensive stance when compromised', () => {
+        expect(simulateStanceGate('defensive', 8).ok).toBe(true);
+    });
+
+    it('allows balanced stance when compromised', () => {
+        expect(simulateStanceGate('balanced', 8).ok).toBe(true);
+    });
+
+    it('allows reorganize stance when compromised', () => {
+        expect(simulateStanceGate('reorganize', 8).ok).toBe(true);
+    });
+
+    it('error message mentions compromised and stabilize', () => {
+        const result = simulateStanceGate('offensive', 7);
+        expect(result.error).toContain('compromised');
+        expect(result.error).toContain('Stabilize');
+    });
+});
+
+describe('Wave 4: adapter stabilizationAvailable derivation', () => {
+    it('available when strain > 0 and no cooldown', () => {
+        expect(deriveStabilizationAvailable(3, 5, 0)).toBe(true);
+    });
+
+    it('not available when strain = 0', () => {
+        expect(deriveStabilizationAvailable(0, 5, 0)).toBe(false);
+    });
+
+    it('not available when cooldown is active (currentTurn < cooldownUntil)', () => {
+        expect(deriveStabilizationAvailable(3, 5, 7)).toBe(false);
+    });
+
+    it('available when currentTurn equals cooldownUntil (cooldown just expired)', () => {
+        expect(deriveStabilizationAvailable(3, 7, 7)).toBe(true);
+    });
+
+    it('stabilizationCostCA = 10 when strained', () => {
+        expect(deriveStabilizationCostCA(3, true)).toBe(10);
+    });
+
+    it('stabilizationCostCA = 15 when compromised', () => {
+        expect(deriveStabilizationCostCA(6, true)).toBe(15);
+    });
+
+    it('stabilizationCostCA = 0 when no CA system', () => {
+        expect(deriveStabilizationCostCA(6, false)).toBe(0);
+    });
+});
+
+describe('Wave 4: CommandManagementSection visibility conditions', () => {
+    /** Simulate the render condition: show section only when strain > 0. */
+    function shouldShowCommandManagement(strain: number): boolean {
+        return strain > 0;
+    }
+
+    /** Simulate stance constraint notice: show when compromised. */
+    function shouldShowStanceConstraintNotice(strainLabel: string): boolean {
+        return strainLabel === 'compromised';
+    }
+
+    it('section hidden when strain = 0 (silence = healthy)', () => {
+        expect(shouldShowCommandManagement(0)).toBe(false);
+    });
+
+    it('section shown when strain = 1', () => {
+        expect(shouldShowCommandManagement(1)).toBe(true);
+    });
+
+    it('section shown when compromised', () => {
+        expect(shouldShowCommandManagement(7)).toBe(true);
+    });
+
+    it('stance constraint notice hidden when strained (not yet compromised)', () => {
+        expect(shouldShowStanceConstraintNotice('strained')).toBe(false);
+    });
+
+    it('stance constraint notice shown when compromised', () => {
+        expect(shouldShowStanceConstraintNotice('compromised')).toBe(true);
+    });
+});
