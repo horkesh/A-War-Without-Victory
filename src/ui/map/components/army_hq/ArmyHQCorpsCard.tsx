@@ -430,6 +430,7 @@ export function ArmyHQCorpsCard({
                     commandStrainLabel={data.strainLabel}
                     recoveryForecast={data.recoveryForecast}
                     frictionEvents={data.frictionEvents}
+                    corpsExhaustion={corps.corpsExhaustion ?? 0}
                     stabilizationAvailable={data.stabilizationAvailable}
                     stabilizationCooldownUntil={data.stabilizationCooldownUntil}
                     stabilizationCostCA={data.stabilizationCostCA}

@@ -1,3 +1,16 @@
+## 2026-04-04 — Presidential Command Friction Wave 6 (Exhaustion Strain Source)
+
+- `command_strain.ts`: +Source 3 in `computeCorpsCommandStrain()` — corps exhaustion ≥50 → +1 strain, ≥75 → +2 strain. No decay (condition-based, persists while exhaustion is high). Stabilization does not resolve exhaustion-driven strain.
+- `command_strain.ts`: +`isExhaustionContributingToStrain()` helper, exported thresholds (50, 75).
+- `CommandRelationshipSection.tsx`: +`corpsExhaustion` prop, +exhaustion pressure note ("Corps exhaustion X% is straining the command relationship"). Stabilize button now hidden when no friction events exist (can't stabilize away exhaustion). Compromised stance copy is now source-aware: friction-only says stabilize, exhaustion-only says reduce tempo/recover, mixed states name both.
+- `ArmyHQCorpsCard.tsx`: wires `corpsExhaustion` to CommandRelationshipSection.
+- No engine changes, no new persisted fields — reads existing `corps_command[id].corps_exhaustion`.
+- Interaction: force-launch (+3 decay) + friction (+2 decay) + exhaustion (+1/+2 condition) compose additively. Exhaustion is the first condition-based (non-decaying) strain source.
+- 14 new Wave 18 tests in `tests/command_authority.test.ts` — 277/277 pass
+- Orchestrator: 2 parallel audit subagents (source audit, UI audit), central implementation
+- Verification: tsc clean, **2231/2231 vitest (0 failures)**, vite build clean, governance OK
+- Report: `docs/40_reports/implemented/20260404_PRESIDENTIAL_COMMAND_FRICTION_WAVE6.md`
+
 ## 2026-04-04 — Army HQ Command Relationship Surface Consolidation
 
 - Consolidated 3 separate command-relationship renders into single `CommandRelationshipSection`: inline friction panel + `CommandManagementSection` + old `CommandRelationshipSection`.

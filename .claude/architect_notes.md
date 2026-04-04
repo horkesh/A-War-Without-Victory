@@ -33,6 +33,7 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Active / Recent Accepted Lanes
 
+- **Presidential Command Friction Wave 6 (Exhaustion Strain)** — CLOSED 2026-04-04. Corps exhaustion ≥50 → +1 strain, ≥75 → +2 strain. First condition-based (non-decaying) strain source. Stabilization doesn't resolve it (no friction to clear). Exhaustion pressure note in CommandRelationshipSection. Compromised stance guidance now distinguishes friction-only vs exhaustion-only vs mixed recovery paths. Stabilize button hidden when no friction events. 14 tests (Wave 18). Full suite: 2231/2231. Report: `docs/40_reports/implemented/20260404_PRESIDENTIAL_COMMAND_FRICTION_WAVE6.md`.
 - **Army HQ Command Relationship Surface Consolidation** — CLOSED 2026-04-04. Merged inline friction panel + CommandManagementSection + CommandRelationshipSection into single "Command Relationship" section. CommandManagementSection.tsx deleted. Reading order: strain status → recovery forecast → stance constraint → friction events with Acknowledge → Stabilize button. Silence=healthy when strain=0 AND no friction. CorpsSituationSection stays separate (disjoint derivation). 11 tests (Wave 17). Full suite: 2217/2217. Report: `docs/40_reports/implemented/20260404_ARMY_HQ_COMMAND_RELATIONSHIP_CONSOLIDATION.md`.
 - **Commander Explanation Surfaces Wave 6** — CLOSED 2026-04-04. Readiness trend: `deriveReadinessTrend()` — derivation-only from existing persisted fields (postponement_count + commander_assessment + preparation timeline). `ReadinessTrendIndicator` in OperationBriefingModal between assessment badge and recommendation driver. Six directions: nearing_launch (silence), improving, building, stagnating, deteriorating, not_viable. Timeline urgency bar. No engine changes, no new persisted fields. 15 tests (Wave 16). Full suite: 2206/2206. Report: `docs/40_reports/implemented/20260404_COMMANDER_EXPLANATION_SURFACES_WAVE6.md`.
 - **Commander Explanation Surfaces Wave 5** — CLOSED 2026-04-04. Recommendation driver: `deriveRecommendationExplanation()` mirrors engine's 3-factor assessment formula on UI side (intel 40%, force ratio 30%, supply 30%). `RecommendationDriverSection` in OperationBriefingModal shows main blocker + improvement path for postpone/abort. No engine changes. 10 tests (Wave 15). Full suite: 2192/2192. Report: `docs/40_reports/implemented/20260404_COMMANDER_EXPLANATION_SURFACES_WAVE5.md`.
@@ -78,7 +79,7 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 
 ## Next Priority Lanes
 
-1. **Expand strain sources:** corps exhaustion above threshold (grounded in `CorpsState.corps_exhaustion`) contributing to command strain
+1. ~~**Expand strain sources:**~~ DONE (Wave 6). Corps exhaustion ≥50/≥75 now contributes to strain.
 2. **Commander competence penalty from strain:** needs a real competence field to write to cleanly (deferred from Wave 1)
 3. **gradacac_2 P0 investigation:** RS overperforming on newly-covered fronts — pre-existing
 4. **vrs_east_bosnian zero-attack ops:** all non-Koridor total_attacks=0 — BFS reachability or stale objective filter (part of 39% ZEA anomaly)

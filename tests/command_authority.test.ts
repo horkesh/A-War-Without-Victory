@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import type { CommandAuthority, CorpsOperation } from '../src/state/game_state.js';
 import type { OperationAAR } from '../src/sim/combat/operation_aar.js';
-import { computeCorpsCommandStrain, getCommandStrainLabel, deriveOrderInterpretation, deriveStanceInterpretation, deriveOperationOutcomeCategory, buildOperationTrendSummary, projectStrainDecay, deriveRecoveryForecast, deriveCorpsSituationAssessment, deriveRecommendationExplanation, deriveReadinessTrend } from '../src/ui/map/data/command_strain.js';
+import { computeCorpsCommandStrain, getCommandStrainLabel, deriveOrderInterpretation, deriveStanceInterpretation, deriveOperationOutcomeCategory, buildOperationTrendSummary, projectStrainDecay, deriveRecoveryForecast, deriveCorpsSituationAssessment, deriveRecommendationExplanation, deriveReadinessTrend, isExhaustionContributingToStrain, EXHAUSTION_STRAIN_THRESHOLD, EXHAUSTION_STRAIN_SEVERE_THRESHOLD } from '../src/ui/map/data/command_strain.js';
 import type { OperationOutcomeCategory, OperationTrendSummary, PrimaryConstraint, ReadinessTrendDirection } from '../src/ui/map/data/command_strain.js';
 
 function makeAuth(overrides?: Partial<CommandAuthority>): CommandAuthority {
@@ -395,6 +395,7 @@ function makeStrainState(overrides: {
     frictionEvents?: Array<{ officer_id: string; turn: number; type: string; resolved: boolean }>;
     officerCorpsId?: string; // corps the officer is assigned to
     officerId?: string;
+    corpsExhaustion?: number; // Wave 6: corps exhaustion (0-100)
 } = {}): any {
     const turn = overrides.turn ?? 5;
     const corpsId = 'test-corps';
@@ -411,6 +412,7 @@ function makeStrainState(overrides: {
                         was_force_launched: op.was_force_launched,
                         started_turn: op.started_turn ?? turn,
                     })),
+                    corps_exhaustion: overrides.corpsExhaustion ?? 0,
                 },
             },
             friction_events: overrides.frictionEvents ?? [],
@@ -2650,6 +2652,115 @@ describe('Wave 10: Command Relationship Standing', () => {
             expect(shouldShowStanceConstraint(5)).toBe(false);
             expect(shouldShowStanceConstraint(6)).toBe(true);
             expect(shouldShowStanceConstraint(10)).toBe(true);
+        });
+    });
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // Wave 18: Exhaustion Strain Source (Presidential Command Friction Wave 6)
+    // Tests that corps exhaustion above threshold contributes to command strain.
+    // ═══════════════════════════════════════════════════════════════════════
+
+    describe('Wave 18: Exhaustion Strain Source', () => {
+        it('no strain from exhaustion below threshold', () => {
+            const state = makeStrainState({ corpsExhaustion: 49 });
+            expect(computeCorpsCommandStrain('test-corps', state)).toBe(0);
+        });
+
+        it('+1 strain at exhaustion threshold (50)', () => {
+            const state = makeStrainState({ corpsExhaustion: 50 });
+            expect(computeCorpsCommandStrain('test-corps', state)).toBe(1);
+        });
+
+        it('+1 strain at exhaustion between thresholds (60)', () => {
+            const state = makeStrainState({ corpsExhaustion: 60 });
+            expect(computeCorpsCommandStrain('test-corps', state)).toBe(1);
+        });
+
+        it('+2 strain at severe exhaustion threshold (75)', () => {
+            const state = makeStrainState({ corpsExhaustion: 75 });
+            expect(computeCorpsCommandStrain('test-corps', state)).toBe(2);
+        });
+
+        it('+2 strain at maximum exhaustion (100)', () => {
+            const state = makeStrainState({ corpsExhaustion: 100 });
+            expect(computeCorpsCommandStrain('test-corps', state)).toBe(2);
+        });
+
+        it('exhaustion strain composes with force-launch strain', () => {
+            const state = makeStrainState({
+                corpsExhaustion: 50,
+                activeOps: [{ name: 'Op Forced', was_force_launched: true, started_turn: 5 }],
+            });
+            // +3 from force launch + 1 from exhaustion = 4
+            expect(computeCorpsCommandStrain('test-corps', state)).toBe(4);
+        });
+
+        it('exhaustion strain composes with friction strain', () => {
+            const state = makeStrainState({
+                corpsExhaustion: 75,
+                frictionEvents: [{ officer_id: 'officer-1', turn: 5, type: 'warlord', resolved: false }],
+            });
+            // +2 from friction + 2 from exhaustion = 4
+            expect(computeCorpsCommandStrain('test-corps', state)).toBe(4);
+        });
+
+        it('exhaustion + force + friction all compose', () => {
+            const state = makeStrainState({
+                corpsExhaustion: 75,
+                activeOps: [{ name: 'Op Forced', was_force_launched: true, started_turn: 5 }],
+                frictionEvents: [{ officer_id: 'officer-1', turn: 5, type: 'warlord', resolved: false }],
+            });
+            // +3 force + 2 friction + 2 exhaustion = 7
+            expect(computeCorpsCommandStrain('test-corps', state)).toBe(7);
+        });
+
+        it('isExhaustionContributingToStrain returns false below threshold', () => {
+            expect(isExhaustionContributingToStrain(49)).toBe(false);
+        });
+
+        it('isExhaustionContributingToStrain returns true at threshold', () => {
+            expect(isExhaustionContributingToStrain(50)).toBe(true);
+        });
+
+        it('isExhaustionContributingToStrain returns true above severe threshold', () => {
+            expect(isExhaustionContributingToStrain(80)).toBe(true);
+        });
+
+        it('exported thresholds match expected values', () => {
+            expect(EXHAUSTION_STRAIN_THRESHOLD).toBe(50);
+            expect(EXHAUSTION_STRAIN_SEVERE_THRESHOLD).toBe(75);
+        });
+
+        it('exhaustion-only compromised guidance should not imply stabilization fixes it', () => {
+            const unresolvedFrictionCount = 0;
+            const exhaustionContributing = true;
+            const text =
+                unresolvedFrictionCount > 0 && exhaustionContributing
+                    ? 'Offensive posture unavailable — stabilize the command relationship and reduce operational tempo first.'
+                    : unresolvedFrictionCount > 0
+                        ? 'Offensive posture unavailable — stabilize the command relationship first.'
+                        : exhaustionContributing
+                            ? 'Offensive posture unavailable — reduce operational tempo and let the corps recover first.'
+                            : 'Offensive posture unavailable — command conditions are not yet stable enough.';
+
+            expect(text).toContain('reduce operational tempo');
+            expect(text).not.toContain('stabilize the command relationship first.');
+        });
+
+        it('mixed friction + exhaustion guidance should mention both recovery paths', () => {
+            const unresolvedFrictionCount = 2;
+            const exhaustionContributing = true;
+            const text =
+                unresolvedFrictionCount > 0 && exhaustionContributing
+                    ? 'Offensive posture unavailable — stabilize the command relationship and reduce operational tempo first.'
+                    : unresolvedFrictionCount > 0
+                        ? 'Offensive posture unavailable — stabilize the command relationship first.'
+                        : exhaustionContributing
+                            ? 'Offensive posture unavailable — reduce operational tempo and let the corps recover first.'
+                            : 'Offensive posture unavailable — command conditions are not yet stable enough.';
+
+            expect(text).toContain('stabilize');
+            expect(text).toContain('reduce operational tempo');
         });
     });
 });

@@ -29,6 +29,7 @@
 import { CollapsibleSection } from './CollapsibleSection';
 import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
+import { isExhaustionContributingToStrain } from '../../data/command_strain';
 import type { FrictionEventView } from '../../data/types';
 
 const COMPROMISED_THRESHOLD = 6;
@@ -39,6 +40,8 @@ interface CommandRelationshipSectionProps {
     commandStrainLabel: 'healthy' | 'strained' | 'compromised';
     recoveryForecast?: string | null;
     frictionEvents: FrictionEventView[];
+    /** Corps exhaustion (0-100) — Wave 6: exhaustion above threshold contributes to strain. */
+    corpsExhaustion: number;
     // Stabilization fields
     stabilizationAvailable: boolean;
     stabilizationCooldownUntil?: number;
@@ -52,6 +55,7 @@ export function CommandRelationshipSection({
     commandStrainLabel,
     recoveryForecast,
     frictionEvents,
+    corpsExhaustion,
     stabilizationAvailable,
     stabilizationCooldownUntil,
     stabilizationCostCA,
@@ -62,6 +66,7 @@ export function CommandRelationshipSection({
 
     const unresolvedEvents = frictionEvents.filter(e => !e.resolved);
     const unresolvedCount = unresolvedEvents.length;
+    const exhaustionContributing = isExhaustionContributingToStrain(corpsExhaustion);
 
     // Silence = healthy: nothing to show when strain is 0 and no unresolved friction
     if (commandStrain === 0 && unresolvedCount === 0) return null;
@@ -75,6 +80,14 @@ export function CommandRelationshipSection({
     const costLabel = stabilizationCostCA != null && stabilizationCostCA > 0
         ? ` [−${stabilizationCostCA} CA]`
         : '';
+    const stanceConstraintText =
+        unresolvedCount > 0 && exhaustionContributing
+            ? 'Offensive posture unavailable — stabilize the command relationship and reduce operational tempo first.'
+            : unresolvedCount > 0
+                ? 'Offensive posture unavailable — stabilize the command relationship first.'
+                : exhaustionContributing
+                    ? 'Offensive posture unavailable — reduce operational tempo and let the corps recover first.'
+                    : 'Offensive posture unavailable — command conditions are not yet stable enough.';
 
     // ── IPC handlers ────────────────────────────────────────────────────
     const handleAcknowledgeFriction = async (event: FrictionEventView) => {
@@ -128,12 +141,22 @@ export function CommandRelationshipSection({
                     </div>
                 )}
 
+                {/* 2b. Exhaustion pressure note — Wave 6: when corps exhaustion contributes to strain */}
+                {commandStrain > 0 && exhaustionContributing && (
+                    <div className="flex items-center gap-1.5">
+                        <span className="text-[9px] text-amber-500/70 shrink-0">▲</span>
+                        <span className="text-[10px] text-text-secondary font-mono">
+                            Corps exhaustion ({Math.round(corpsExhaustion)}%) is straining the command relationship
+                        </span>
+                    </div>
+                )}
+
                 {/* 3. Stance constraint — only when compromised */}
                 {isCompromised && (
                     <div className="flex items-start gap-1.5 px-2 py-1.5 bg-red-900/20 border border-red-500/30">
                         <span className="text-red-400 text-[9px] mt-0.5 shrink-0">!</span>
                         <p className="text-[10px] text-red-300 leading-snug">
-                            Offensive posture unavailable — stabilize the command relationship first.
+                            {stanceConstraintText}
                         </p>
                     </div>
                 )}
@@ -171,8 +194,8 @@ export function CommandRelationshipSection({
                     </div>
                 )}
 
-                {/* 5. Stabilize button — big action at bottom (context-first, then action) */}
-                {commandStrain > 0 && (
+                {/* 5. Stabilize button — only when friction events exist (stabilization resolves friction, not exhaustion) */}
+                {commandStrain > 0 && unresolvedCount > 0 && (
                     <div className="flex flex-col gap-1 pt-1 border-t border-panel-border/50">
                         <button
                             type="button"

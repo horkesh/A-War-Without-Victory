@@ -2,9 +2,9 @@
  * Command Strain — derived per-corps metric.
  *
  * Computes a command strain score for a given corps from existing data:
- *   - active operations with was_force_launched=true (+3 each)
- *   - unresolved warlord friction events for that corps's commander (+2 each)
- *   - turn-based decay (−1 per turn elapsed since the event, floor 0)
+ *   - Source 1: active operations with was_force_launched=true (+3 each, decayed -1/turn)
+ *   - Source 2: unresolved warlord friction events for that corps's commander (+2 each, decayed -1/turn)
+ *   - Source 3: corps exhaustion above threshold (+1 at ≥50, +2 at ≥75; no decay — persists while condition persists)
  *
  * This is a DERIVED value — NOT stored on GameState. Computed on-read.
  * Deterministic: all inputs are sorted, no Math.random(), no Date.now().
@@ -28,6 +28,18 @@ const FRICTION_EVENT_STRAIN = 2;
 /** Strain decay per turn (applied to turn-age of each contributing event). */
 const DECAY_PER_TURN = 1;
 
+/** Corps exhaustion threshold for mild strain contribution. */
+const EXHAUSTION_STRAIN_THRESHOLD = 50;
+
+/** Corps exhaustion threshold for severe strain contribution. */
+const EXHAUSTION_STRAIN_SEVERE_THRESHOLD = 75;
+
+/** Strain added when corps exhaustion >= EXHAUSTION_STRAIN_THRESHOLD. */
+const EXHAUSTION_STRAIN_MILD = 1;
+
+/** Strain added when corps exhaustion >= EXHAUSTION_STRAIN_SEVERE_THRESHOLD (replaces mild). */
+const EXHAUSTION_STRAIN_SEVERE = 2;
+
 /** Strain threshold for 'strained' label. */
 const STRAINED_THRESHOLD = 1;
 
@@ -40,6 +52,17 @@ const COMPROMISED_THRESHOLD = 6;
 
 export type CommandStrainLabel = 'healthy' | 'strained' | 'compromised';
 
+/** Exported for tests and UI: threshold at which exhaustion starts contributing to strain. */
+export { EXHAUSTION_STRAIN_THRESHOLD, EXHAUSTION_STRAIN_SEVERE_THRESHOLD };
+
+/**
+ * Check whether corps exhaustion is contributing to command strain.
+ * Pure function — for UI display only (e.g., explaining strain sources).
+ */
+export function isExhaustionContributingToStrain(corpsExhaustion: number): boolean {
+    return corpsExhaustion >= EXHAUSTION_STRAIN_THRESHOLD;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Core
 // ═══════════════════════════════════════════════════════════════════════════
@@ -47,9 +70,10 @@ export type CommandStrainLabel = 'healthy' | 'strained' | 'compromised';
 /**
  * Compute the command strain score for a specific corps.
  *
- * Strain sources (each decayed by 1 per turn since they occurred):
- *  - Each force-launched active operation on this corps: +3
- *  - Each unresolved warlord friction event for this corps's active commander: +2
+ * Strain sources:
+ *  - Each force-launched active operation on this corps: +3 (decayed -1/turn)
+ *  - Each unresolved warlord friction event for this corps's active commander: +2 (decayed -1/turn)
+ *  - Corps exhaustion ≥50: +1; ≥75: +2 (no decay — persists while condition persists)
  *
  * Decay: each source contributes Math.max(0, rawStrain − turnAge).
  * Total is summed and floored at 0.
@@ -98,6 +122,18 @@ export function computeCorpsCommandStrain(corpsId: string, state: GameState): nu
                 const rawStrain = FRICTION_EVENT_STRAIN;
                 totalStrain += Math.max(0, rawStrain - turnAge);
             }
+        }
+    }
+
+    // ── Source 3: corps exhaustion above threshold ────────────────────────
+    // No decay — strain persists while the underlying condition persists.
+    // Stabilization does not resolve exhaustion-driven strain.
+    if (corps) {
+        const exhaustion = typeof corps.corps_exhaustion === 'number' ? corps.corps_exhaustion : 0;
+        if (exhaustion >= EXHAUSTION_STRAIN_SEVERE_THRESHOLD) {
+            totalStrain += EXHAUSTION_STRAIN_SEVERE;
+        } else if (exhaustion >= EXHAUSTION_STRAIN_THRESHOLD) {
+            totalStrain += EXHAUSTION_STRAIN_MILD;
         }
     }
 
