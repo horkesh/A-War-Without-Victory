@@ -1,3 +1,27 @@
+## [2026-04-04] desktop-vite-script-hardening
+
+### What changed
+- `package.json` Vite-backed scripts now call the repo-local Vite entrypoint directly via `node .\\node_modules\\vite\\bin\\vite.js` instead of relying on the bare `vite` command.
+- Updated scripts:
+  - `dev:map`
+  - `desktop:map:build`
+  - `dev:warroom`
+  - `warroom:build`
+  - `warroom:preview`
+  - `viewer:settlements:only1990`
+
+### Why
+- In this Windows checkout, `vite` is installed (`vite@5.4.21`) and runnable through Node, but the npm Windows shim resolution is not working consistently.
+- `npm run desktop` was failing at `desktop:map:build` with `'vite' is not recognized...` even though the package existed in `node_modules`.
+- Calling the local Vite entrypoint directly removes dependence on missing/broken shell shims and makes the build scripts deterministic.
+
+### Verified
+- `npm run desktop:map:build`: PASS
+- `npm run warroom:build`: PASS
+
+### Canonical owner
+- `package.json`
+
 ## Roadmap Validation Gate 1 - 2026-04-04
 
 ### What changed
