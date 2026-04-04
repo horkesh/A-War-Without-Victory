@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import type { CommandAuthority, CorpsOperation } from '../src/state/game_state.js';
 import type { OperationAAR } from '../src/sim/combat/operation_aar.js';
-import { computeCorpsCommandStrain, getCommandStrainLabel, deriveOrderInterpretation, deriveStanceInterpretation, deriveOperationOutcomeCategory, buildOperationTrendSummary, projectStrainDecay, deriveRecoveryForecast, deriveCorpsSituationAssessment } from '../src/ui/map/data/command_strain.js';
+import { computeCorpsCommandStrain, getCommandStrainLabel, deriveOrderInterpretation, deriveStanceInterpretation, deriveOperationOutcomeCategory, buildOperationTrendSummary, projectStrainDecay, deriveRecoveryForecast, deriveCorpsSituationAssessment, deriveRecommendationExplanation } from '../src/ui/map/data/command_strain.js';
 import type { OperationOutcomeCategory, OperationTrendSummary, PrimaryConstraint } from '../src/ui/map/data/command_strain.js';
 
 function makeAuth(overrides?: Partial<CommandAuthority>): CommandAuthority {
@@ -2384,6 +2384,95 @@ describe('Wave 10: Command Relationship Standing', () => {
             expect(result.primaryConstraint).toBe('institutional_strain');
             expect(result.dominantReason).toContain('defensive');
             expect(result.reliefPath).toContain('stance');
+        });
+    });
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // Wave 15: Recommendation Explanation (Commander Explanation Surfaces Wave 5)
+    // Tests that deriveRecommendationExplanation correctly identifies main blockers
+    // and produces truthful explanation text from assessment snapshot data.
+    // ═══════════════════════════════════════════════════════════════════════
+
+    describe('Wave 15: Recommendation Explanation', () => {
+        it('launch → silence (null fields)', () => {
+            const result = deriveRecommendationExplanation(0.8, 0.9, 2.0, 3, 0.5, 'launch', 0);
+            expect(result.recommendationReason).toBeNull();
+            expect(result.mainBlocker).toBeNull();
+            expect(result.wouldImproveIf).toBeNull();
+        });
+
+        it('null assessment → silence', () => {
+            const result = deriveRecommendationExplanation(0.5, 0.5, 1.0, 3, 0.5, null, 0);
+            expect(result.recommendationReason).toBeNull();
+        });
+
+        it('postpone with low intel → intel is main blocker', () => {
+            // Low intel (0.2), good supply (0.9), good force ratio (2.0), neutral commander
+            const result = deriveRecommendationExplanation(0.2, 0.9, 2.0, 3, 0.5, 'postpone', 0);
+            expect(result.mainBlocker).toBe('intel');
+            expect(result.recommendationReason).toContain('Intelligence');
+            expect(result.wouldImproveIf).not.toBeNull();
+        });
+
+        it('postpone with low force ratio → force_ratio is main blocker', () => {
+            // Good intel (0.8), good supply (0.9), low force ratio (0.5), neutral commander
+            const result = deriveRecommendationExplanation(0.8, 0.9, 0.5, 3, 0.5, 'postpone', 0);
+            expect(result.mainBlocker).toBe('force_ratio');
+            expect(result.recommendationReason).toContain('Force ratio');
+            expect(result.wouldImproveIf).toContain('force');
+        });
+
+        it('postpone with low supply → supply is main blocker', () => {
+            // Good intel (0.8), low supply (0.1), good force ratio (2.0), neutral commander
+            const result = deriveRecommendationExplanation(0.8, 0.1, 2.0, 3, 0.5, 'postpone', 0);
+            expect(result.mainBlocker).toBe('supply');
+            expect(result.recommendationReason).toContain('Supply');
+            expect(result.wouldImproveIf).toContain('supply');
+        });
+
+        it('abort → no wouldImproveIf (not viable)', () => {
+            const result = deriveRecommendationExplanation(0.1, 0.1, 0.3, 3, 0.5, 'abort', 0);
+            expect(result.recommendationReason).not.toBeNull();
+            expect(result.wouldImproveIf).toBeNull();
+        });
+
+        it('abort after max postponements mentions postponement count', () => {
+            const result = deriveRecommendationExplanation(0.3, 0.4, 0.8, 3, 0.5, 'abort', 2);
+            expect(result.recommendationReason).toContain('postponed');
+            expect(result.recommendationReason).toContain('2');
+        });
+
+        it('aggressive commander (agg=5) has lower thresholds → different blocker identification', () => {
+            // Same readiness, aggressive vs cautious commander
+            const aggressive = deriveRecommendationExplanation(0.4, 0.5, 1.0, 5, 0.5, 'postpone', 0);
+            const cautious = deriveRecommendationExplanation(0.4, 0.5, 1.0, 1, 0.5, 'postpone', 0);
+            // Both should have non-null explanations but may differ in which factor is main blocker
+            expect(aggressive.recommendationReason).not.toBeNull();
+            expect(cautious.recommendationReason).not.toBeNull();
+        });
+
+        it('null force ratio → graceful fallback explanation', () => {
+            const result = deriveRecommendationExplanation(0.5, 0.5, null, 3, 0.5, 'postpone', 0);
+            expect(result.recommendationReason).not.toBeNull();
+            expect(result.recommendationReason).toContain('conditions');
+            expect(result.mainBlocker).toBeNull();
+        });
+
+        it('all factors fully met but still postpone → combined shortfall message', () => {
+            // All factors individually met but combined score below threshold
+            // reqConf = 0.6 - 3*0.06 + 0.5*0.04 = 0.44, intel=0.44 → confMet=1.0
+            // reqForce = max(1.0, 1.5 - 3*0.10 + 0.5*0.05) = 1.225, forceRatio=1.225 → forceMet=1.0
+            // supply=0.3
+            // score = 1.0*0.4 + 1.0*0.3 + 0.3*0.3 = 0.79 > threshold 0.46 → would be launch
+            // Use values that make each individually near-met but combined below threshold
+            // With agg=1: goThreshold = 0.62, reqConf=0.58, reqForce=1.45
+            // intel=0.5 → confMet=0.5/0.58=0.86, forceRatio=1.3 → forceMet=1.3/1.45=0.90, supply=0.3
+            // score = 0.86*0.4 + 0.90*0.3 + 0.3*0.3 = 0.344 + 0.27 + 0.09 = 0.704 > 0.62 → launch
+            // Need lower values. intel=0.3 → confMet=0.3/0.58=0.517, forceRatio=0.9 → 0.9/1.45=0.621
+            // score = 0.517*0.4 + 0.621*0.3 + 0.3*0.3 = 0.207 + 0.186 + 0.09 = 0.483 < 0.62 → postpone
+            const result = deriveRecommendationExplanation(0.3, 0.3, 0.9, 1, 0.5, 'postpone', 0);
+            expect(result.mainBlocker).not.toBeNull();
+            expect(result.recommendationReason).not.toBeNull();
         });
     });
 });

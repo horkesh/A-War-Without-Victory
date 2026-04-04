@@ -1,3 +1,14 @@
+## 2026-04-04 — Commander Explanation Surfaces Wave 5 (Recommendation Driver)
+
+- `command_strain.ts`: +`deriveRecommendationExplanation()` — pure UI-side derivation mirroring engine's 3-factor assessment formula (intel 40%, force ratio 30%, supply 30%). Identifies main blocker factor and produces recommendation reason + would-improve-if text. Silence=healthy for launch.
+- `OperationBriefingModal.tsx`: +`RecommendationDriverSection` component between Assessment Badge and Corps Constraint Context. Shows main blocker with icon + recommendation reason + improvement path for postpone; abort shows factor shortfalls without fake improvement advice.
+- No engine changes — derives from existing OperationView snapshots (intel_confidence_at_assessment, supply_readiness_at_assessment, force_ratio_estimate) + commander personality (aggressiveness, competence from NamedOfficerView).
+- Decision-time hierarchy: badge → recommendation driver (tactical) → constraint context (strategic) → order interpretation → direct intervention
+- 10 new Wave 15 tests in `tests/command_authority.test.ts` — 238/238 pass
+- Orchestrator: 2 parallel audit subagents (provenance, surface fit), central implementation
+- Verification: tsc clean, **2192/2192 vitest (0 failures)**, vite build clean, governance OK
+- Report: `docs/40_reports/implemented/20260404_COMMANDER_EXPLANATION_SURFACES_WAVE5.md`
+
 ## 2026-04-04 — Acceptance Suite Stabilization Wave 1
 
 - **20 → 0 failures**. Full suite: 2182/2182 pass (was 2162/2182).

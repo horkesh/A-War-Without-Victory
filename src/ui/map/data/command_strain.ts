@@ -799,3 +799,146 @@ function getDominantPosture(
     }
     return worst;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Recommendation Explanation — Commander Explanation Surfaces Wave 5
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Why the commander recommends launch, postpone, or abort.
+ * Derived on-read from the operation's assessment snapshot + commander personality.
+ * Silence = healthy: null fields when assessment is 'launch' and no caution worth surfacing.
+ */
+export interface RecommendationExplanation {
+    /** One-sentence reason for the recommendation. Null = launch with no caution (silence). */
+    recommendationReason: string | null;
+    /** Which readiness factor is the main blocker. Null when launch or all factors met. */
+    mainBlocker: 'intel' | 'force_ratio' | 'supply' | null;
+    /** What would need to change for the recommendation to improve. Null when launch. */
+    wouldImproveIf: string | null;
+}
+
+/**
+ * Derive a recommendation explanation from the operation's assessment snapshot.
+ *
+ * Mirrors the engine's assessment formula (operation_preparation.ts lines 527-553)
+ * using snapshot values already stored on OperationView + commander personality.
+ *
+ * Pure function — no GameState, no side effects.
+ *
+ * @param intel        - intel_confidence_at_assessment (0-1)
+ * @param supply       - supply_readiness_at_assessment (0-1)
+ * @param forceRatio   - force_ratio_estimate (>0)
+ * @param aggressiveness - commander aggressiveness (1-5)
+ * @param competence   - commander competence (0-1)
+ * @param assessment   - the recommendation itself ('launch' | 'postpone' | 'abort')
+ * @param postponements - postponement_count
+ */
+export function deriveRecommendationExplanation(
+    intel: number,
+    supply: number,
+    forceRatio: number | null | undefined,
+    aggressiveness: number,
+    competence: number,
+    assessment: 'launch' | 'postpone' | 'abort' | null | undefined,
+    postponements: number,
+): RecommendationExplanation {
+    // Silence when no assessment or launch (nothing to explain)
+    if (!assessment || assessment === 'launch') {
+        return { recommendationReason: null, mainBlocker: null, wouldImproveIf: null };
+    }
+
+    // If force ratio is missing, we can't compute the full formula
+    if (forceRatio == null) {
+        if (assessment === 'postpone') {
+            return {
+                recommendationReason: 'The commander judges conditions are not yet sufficient to launch',
+                mainBlocker: null,
+                wouldImproveIf: 'Continue preparation to improve readiness',
+            };
+        }
+        return {
+            recommendationReason: 'The commander judges this operation is not viable under current conditions',
+            mainBlocker: null,
+            wouldImproveIf: null,
+        };
+    }
+
+    // ── Reconstruct the engine's assessment formula ──────────────────────
+    const reqConf = Math.max(0, Math.min(1, 0.6 - aggressiveness * 0.06 + competence * 0.04));
+    const reqForce = Math.max(1.0, 1.5 - aggressiveness * 0.10 + competence * 0.05);
+    const goThreshold = 0.7 - aggressiveness * 0.08;
+
+    const confMet = intel >= reqConf ? 1.0 : intel / reqConf;
+    const forceMet = forceRatio >= reqForce ? 1.0 : forceRatio / reqForce;
+
+    // Weighted contributions
+    const confContrib = confMet * 0.4;
+    const forceContrib = forceMet * 0.3;
+    const supplyContrib = supply * 0.3;
+
+    // ── Identify main blocker (lowest factor as % of its weight) ────────
+    // Factor "fullness" = contribution / weight — 1.0 means fully met
+    const factors: Array<{ name: 'intel' | 'force_ratio' | 'supply'; fullness: number; contrib: number; detail: string }> = [
+        {
+            name: 'intel',
+            fullness: confMet,
+            contrib: confContrib,
+            detail: `Intelligence at ${Math.round(intel * 100)}%${reqConf > 0 ? ` (commander needs ${Math.round(reqConf * 100)}%)` : ''}`,
+        },
+        {
+            name: 'force_ratio',
+            fullness: forceMet,
+            contrib: forceContrib,
+            detail: `Force ratio at ${forceRatio.toFixed(1)}:1 (commander needs ${reqForce.toFixed(1)}:1)`,
+        },
+        {
+            name: 'supply',
+            fullness: supply,
+            contrib: supplyContrib,
+            detail: `Supply readiness at ${Math.round(supply * 100)}%`,
+        },
+    ];
+
+    // Sort by fullness ascending — worst factor first
+    const sorted = [...factors].sort((a, b) => a.fullness - b.fullness);
+    const worstFactor = sorted[0];
+
+    // ── Build explanation ────────────────────────────────────────────────
+    if (assessment === 'postpone') {
+        const reason = worstFactor.fullness < 1.0
+            ? `${worstFactor.detail} — the main factor short of launch standard`
+            : 'Combined readiness falls slightly short of the launch threshold';
+
+        const improve = worstFactor.fullness < 1.0
+            ? worstFactor.name === 'intel'
+                ? 'Improve intelligence gathering; more time in preparation raises confidence'
+                : worstFactor.name === 'force_ratio'
+                    ? 'Increase participating force strength or wait for reinforcement'
+                    : 'Improve supply lines to forward brigades'
+            : 'Continue preparation — marginal improvement across factors may reach threshold';
+
+        return {
+            recommendationReason: reason,
+            mainBlocker: worstFactor.fullness < 1.0 ? worstFactor.name : null,
+            wouldImproveIf: improve,
+        };
+    }
+
+    // assessment === 'abort'
+    const abortDetail = sorted
+        .filter(f => f.fullness < 1.0)
+        .slice(0, 2)
+        .map(f => f.detail)
+        .join('; ');
+
+    const reason = postponements >= 2
+        ? `Operation has been postponed ${postponements} times without improvement — ${abortDetail}`
+        : `Readiness far below launch standard — ${abortDetail}`;
+
+    return {
+        recommendationReason: reason,
+        mainBlocker: worstFactor.fullness < 1.0 ? worstFactor.name : null,
+        wouldImproveIf: null,  // Abort = not viable; no honest "would improve" to offer
+    };
+}

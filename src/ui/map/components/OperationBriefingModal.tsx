@@ -9,7 +9,8 @@ import { formatRank, getArchetype, formatPips, getRatingColor } from '../utils/o
 import { getPlayerSafeCorpsName, getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { findPlayerFacingOperationByKey } from '../../shared/playerVisibility';
 import { OrderInterpretationSection } from './army_hq/OrderInterpretationSection';
-import { deriveOperationOutcomeCategory } from '../data/command_strain';
+import { deriveOperationOutcomeCategory, deriveRecommendationExplanation } from '../data/command_strain';
+import type { RecommendationExplanation } from '../data/command_strain';
 
 const FORCE_LAUNCH_COST = 15;
 const RECOVERY_PER_TURN = 2;
@@ -132,6 +133,47 @@ function CommandRecord({ assessmentAtLaunch, wasForce, caCost, corpsStrain, corp
                     </div>
                 )}
             </div>
+        </div>
+    );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Wave 5: Recommendation Driver — explains WHY the commander recommends
+// launch/postpone/abort based on the assessment formula's real inputs.
+// Canonical owner of decision-time recommendation explanation.
+// Silence = healthy: renders null when assessment is 'launch'.
+// ═══════════════════════════════════════════════════════════════════════════
+
+const BLOCKER_ICON: Record<string, string> = {
+    intel: '🔍',
+    force_ratio: '⚔',
+    supply: '📦',
+};
+
+/** Compact recommendation explanation for the operation decision surface.
+ *  Shows WHY the commander recommends postpone/abort and what the main blocker is. */
+function RecommendationDriverSection({ explanation }: {
+    explanation: RecommendationExplanation | null;
+}) {
+    if (!explanation || !explanation.recommendationReason) return null;
+
+    return (
+        <div className="mx-4 my-2 px-3 py-2 border border-neutral-200 bg-neutral-50">
+            <div className="text-[9px] uppercase font-bold text-neutral-500 tracking-wider mb-1">Recommendation Driver</div>
+            <div className="flex items-start gap-2">
+                {explanation.mainBlocker && (
+                    <span className="shrink-0 text-[11px] mt-px" aria-hidden="true">
+                        {BLOCKER_ICON[explanation.mainBlocker] ?? '•'}
+                    </span>
+                )}
+                <span className="text-[10px] text-neutral-700 leading-snug">{explanation.recommendationReason}</span>
+            </div>
+            {explanation.wouldImproveIf && (
+                <div className="flex items-start gap-1.5 mt-1 pl-0.5">
+                    <span className="text-neutral-400 shrink-0 mt-px text-[10px]">&rarr;</span>
+                    <span className="text-[9px] text-neutral-500 leading-snug">{explanation.wouldImproveIf}</span>
+                </div>
+            )}
         </div>
     );
 }
@@ -288,6 +330,20 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
         'This corps',
     );
 
+    // Wave 5: Derive recommendation explanation from assessment snapshot + commander personality
+    const recommendationExplanation = useMemo(() => {
+        if (!assessment || assessment === 'launch') return null;
+        return deriveRecommendationExplanation(
+            intelConf,
+            supplyReady,
+            forceRatio,
+            commander?.aggressiveness ?? 3,
+            commander?.competence ?? 0.5,
+            assessment as 'launch' | 'postpone' | 'abort',
+            postponements,
+        );
+    }, [intelConf, supplyReady, forceRatio, assessment, postponements, commander]);
+
     return (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60">
             <div className="bg-white border-2 border-neutral-400 shadow-xl max-w-lg w-full">
@@ -363,6 +419,11 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                         <span className="text-[8px] text-neutral-400">({postponements} prior postponement{postponements > 1 ? 's' : ''})</span>
                     )}
                 </div>
+
+                {/* Wave 5: Recommendation Driver — shows WHY the commander recommends
+                    postpone/abort based on real assessment factors (intel, force ratio, supply).
+                    Silence = healthy: renders null when assessment is 'launch'. */}
+                <RecommendationDriverSection explanation={recommendationExplanation} />
 
                 {/* Wave 4: Corps Constraint Context — shows WHY the commander leans this way.
                     Derived from the same situationAssessment as CorpsSituationSection (Army HQ).
