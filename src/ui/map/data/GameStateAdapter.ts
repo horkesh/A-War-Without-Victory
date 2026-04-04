@@ -8,7 +8,7 @@
 
 import type {
     AoROrderView, AttackOrderView, CommandBriefingItemView, CommandBriefingSeverity, CommandBriefingView,
-    CorpsFrontSectorView, EnclaveResilienceView, FactionId, FogOfWarView, FormationView, LoadedGameState,
+    CorpsFrontSectorView, EnclaveResilienceView, FactionId, FogOfWarView, FormationView, FrictionEventView, LoadedGameState,
     MilitiaPoolView, MobilizationSummaryView, MovementOrderSettlementView, NamedOfficerStateView, NamedOfficerView,
     OperationView, RepositionOrderView, RecruitmentView,
 } from './types';
@@ -863,6 +863,25 @@ export function parseGameState(json: unknown): LoadedGameState {
                     .map(e => e.type)
                     .sort();
                 fv.activeFrictionTypes = unresolvedTypes;
+
+                // ── Full friction event list for Wave 3 resolution UI ─────────
+                // Includes only events for this corps's active commander.
+                // Sorted by turn (oldest first) for stable rendering.
+                const FRICTION_TYPE_LABELS: Record<string, string> = {
+                    ignored_stance: 'Ignored Stance Order',
+                    unauthorized_op: 'Unauthorized Operation',
+                    refused_release: 'Refused Brigade Release',
+                };
+                fv.frictionEvents = frictionEvents
+                    .filter(e => corpsCommanderIds.includes(e.officer_id))
+                    .sort((a, b) => a.turn - b.turn || a.officer_id.localeCompare(b.officer_id) || a.type.localeCompare(b.type))
+                    .map((e): FrictionEventView => ({
+                        compositeKey: `${e.officer_id}:${e.turn}:${e.type}`,
+                        officerId: e.officer_id,
+                        typeLabel: FRICTION_TYPE_LABELS[e.type] ?? e.type,
+                        turn: e.turn,
+                        resolved: e.resolved,
+                    }));
             }
         }
     }

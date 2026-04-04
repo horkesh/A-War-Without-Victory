@@ -4,7 +4,7 @@
  * Compressed mode stays as a single-line mini card when another card is flipped.
  */
 import { useMemo } from 'react';
-import type { FormationView, CorpsFrontSectorView, OperationView, LoadedGameState } from '../../data/types';
+import type { FormationView, FrictionEventView, CorpsFrontSectorView, OperationView, LoadedGameState } from '../../data/types';
 import type { TurnBattle } from '../../../../state/turn_summary';
 import { formatCorpsDisplayName } from '../../utils/formatters';
 import { aggregateEffectiveness } from '../../utils/combatEffectiveness';
@@ -111,8 +111,9 @@ export function ArmyHQCorpsCard({
         const strain = corps.commandStrain ?? 0;
         const strainLabel = corps.commandStrainLabel ?? 'healthy';
         const frictionTypes = corps.activeFrictionTypes ?? [];
+        const frictionEvents = corps.frictionEvents ?? [];
 
-        return { totalPersonnel, avgCohesion, avgFatigue, eff, commander, stance, activeOp, corpsBattles, equipment, strain, strainLabel, frictionTypes };
+        return { totalPersonnel, avgCohesion, avgFatigue, eff, commander, stance, activeOp, corpsBattles, equipment, strain, strainLabel, frictionTypes, frictionEvents };
     }, [corps, brigades, sectors, operations, factionBattles, gameState]);
 
     const displayName = formatCorpsDisplayName(corps.name, corps.id);
@@ -152,6 +153,17 @@ export function ArmyHQCorpsCard({
         if (!ipc.isAvailable) return;
         const result = await ipc.stageCorpsStanceOrder(corps.id, newStance);
         if (!result.ok) setLoadError(result.error ?? 'Failed to stage corps stance.');
+    };
+
+    const handleAcknowledgeFriction = async (event: FrictionEventView) => {
+        if (!ipc.isAvailable) return;
+        const result = await ipc.acknowledgeFrictionEvent({
+            corpsId: corps.id,
+            officerId: event.officerId,
+            eventTurn: event.turn,
+            eventType: event.compositeKey.split(':')[2] ?? '',
+        });
+        if (!result.ok) setLoadError(result.error ?? 'Failed to acknowledge friction event.');
     };
 
     // Front face: summary card (clickable to flip)
@@ -257,31 +269,33 @@ export function ArmyHQCorpsCard({
                             }`}
                             title={
                                 data.strainLabel === 'compromised'
-                                    ? 'Repeated presidential intervention has severely undermined command cohesion.'
-                                    : 'Presidential overrides have strained this command relationship.'
+                                    ? 'Repeated presidential intervention has severely undermined command cohesion. Flip card to review and acknowledge friction events.'
+                                    : 'Presidential overrides have strained this command relationship. Flip card to review and acknowledge friction events.'
                             }
                         >
                             {data.strainLabel === 'compromised' ? '⚠ COMMAND COMPROMISED' : '⚠ COMMAND STRAINED'}
                         </div>
-                        {/* Warlord friction active — only when unresolved events exist */}
+                        {/* Friction dot — demoted from badge to dot indicator (back face owns the detail list) */}
                         {data.frictionTypes.length > 0 && (
                             <div
-                                className="px-2 py-0.5 text-[9px] font-bold tracking-widest border bg-amber-900/20 border-amber-600/40 text-amber-500"
-                                title="This commander is exhibiting warlord behaviour — ignoring orders or refusing to release brigades."
+                                className="flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold tracking-widest border bg-amber-900/20 border-amber-600/40 text-amber-500"
+                                title="Warlord friction active — flip card to review and acknowledge."
                             >
-                                FRICTION ACTIVE
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block" />
+                                FRICTION
                             </div>
                         )}
                     </div>
                 )}
-                {/* Warlord friction indicator — shown even when strain = 0 */}
+                {/* Warlord friction dot — shown even when strain = 0, signals "flip to see" */}
                 {data.strain === 0 && data.frictionTypes.length > 0 && (
                     <div className="mt-2.5">
                         <div
-                            className="px-2 py-0.5 text-[9px] font-bold tracking-widest border bg-amber-900/20 border-amber-600/40 text-amber-500 inline-block"
-                            title="This commander is exhibiting warlord behaviour — ignoring orders or refusing to release brigades."
+                            className="flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold tracking-widest border bg-amber-900/20 border-amber-600/40 text-amber-500 inline-flex"
+                            title="Warlord friction active — flip card to review and acknowledge."
                         >
-                            FRICTION ACTIVE
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block" />
+                            FRICTION
                         </div>
                     </div>
                 )}
@@ -343,30 +357,57 @@ export function ArmyHQCorpsCard({
                 </div>
             </div>
 
-            {/* Command Strain / Friction banner — back face */}
-            {(data.strain > 0 || data.frictionTypes.length > 0) && (
-                <div className="flex items-center gap-2 px-4 py-1.5 border-b border-panel-border bg-panel-bg/60 flex-wrap">
+            {/* Command Strain / Friction panel — back face (Wave 3: full resolution surface) */}
+            {(data.strain > 0 || data.frictionEvents.length > 0) && (
+                <div className="px-4 py-2 border-b border-panel-border bg-panel-bg/60 flex flex-col gap-1.5">
+                    {/* Strain score row */}
                     {data.strain > 0 && (
-                        <span
-                            className={`text-[9px] font-bold tracking-widest uppercase ${
-                                data.strainLabel === 'compromised' ? 'text-red-400' : 'text-amber-400'
-                            }`}
-                            title={
-                                data.strainLabel === 'compromised'
-                                    ? 'Repeated presidential intervention has severely undermined command cohesion.'
-                                    : 'Presidential overrides have strained this command relationship.'
-                            }
-                        >
-                            Command Strain: {data.strainLabel === 'compromised' ? 'Compromised' : 'Strained'} [{data.strain}]
-                        </span>
+                        <div className="flex items-center gap-2">
+                            <span
+                                className={`text-[9px] font-bold tracking-widest uppercase ${
+                                    data.strainLabel === 'compromised' ? 'text-red-400' : 'text-amber-400'
+                                }`}
+                                title={
+                                    data.strainLabel === 'compromised'
+                                        ? 'Repeated presidential intervention has severely undermined command cohesion.'
+                                        : 'Presidential overrides have strained this command relationship.'
+                                }
+                            >
+                                Command Strain: {data.strainLabel === 'compromised' ? 'Compromised' : 'Strained'} [{data.strain}]
+                            </span>
+                        </div>
                     )}
-                    {data.frictionTypes.length > 0 && (
-                        <span
-                            className="text-[9px] font-bold tracking-widest uppercase text-amber-500"
-                            title="This commander is exhibiting warlord behaviour — ignoring orders or refusing to release brigades."
-                        >
-                            · Warlord Friction Active
-                        </span>
+                    {/* Friction event list — unresolved events with Acknowledge buttons */}
+                    {data.frictionEvents.filter(e => !e.resolved).length > 0 && (
+                        <div className="flex flex-col gap-1">
+                            {data.frictionEvents.filter(e => !e.resolved).map(event => (
+                                <div
+                                    key={event.compositeKey}
+                                    className="flex items-center justify-between gap-2 py-0.5"
+                                >
+                                    <div className="flex items-center gap-1.5 min-w-0">
+                                        <span className="text-amber-500 text-[9px]">·</span>
+                                        <span className="text-[10px] text-amber-400 font-mono truncate">
+                                            {event.typeLabel}
+                                        </span>
+                                        <span className="text-[9px] text-text-secondary/60 font-mono shrink-0">
+                                            Wk {event.turn}
+                                        </span>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={(e) => { e.stopPropagation(); void handleAcknowledgeFriction(event); }}
+                                        className="shrink-0 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 border border-amber-600/40 text-amber-500 bg-amber-900/20 hover:bg-amber-900/40 hover:border-amber-500/60 transition-colors"
+                                        title="Acknowledge this friction event to reduce command strain over time."
+                                    >
+                                        Acknowledge
+                                    </button>
+                                </div>
+                            ))}
+                            <p className="text-[9px] text-text-secondary/50 italic mt-0.5">
+                                Acknowledging friction events reduces command strain over time.
+                            </p>
+                        </div>
                     )}
                 </div>
             )}
