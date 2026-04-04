@@ -6,7 +6,7 @@ import type { ThreatItem } from './generateThreatAssessment';
 export { generateThreatAssessment } from './generateThreatAssessment';
 
 const SEVERITY_STYLES = {
-    active: { border: 'border-red-500/60', label: 'ACTIVE THREATS', labelColor: 'text-red-400' },
+    offensive: { border: 'border-red-500/60', label: 'OFFENSIVE THREATS', labelColor: 'text-red-400' },
     hardened: { border: 'border-emerald-500/40', label: 'HARDENED POSITIONS', labelColor: 'text-emerald-400' },
     gap: { border: 'border-amber-500/40', label: 'INTELLIGENCE GAPS', labelColor: 'text-amber-400' },
 } as const;
@@ -19,7 +19,7 @@ interface ThreatAssessmentProps {
 export function ThreatAssessment({ items, onCorpsClick }: ThreatAssessmentProps) {
     if (items.length === 0) return null;
 
-    const activeItems = items.filter((i) => i.severity === 'active');
+    const activeItems = items.filter((i) => i.severity === 'offensive');
     const hardenedItems = items.filter((i) => i.severity === 'hardened');
     const gapItems = items.filter((i) => i.severity === 'gap');
 
@@ -29,7 +29,7 @@ export function ThreatAssessment({ items, onCorpsClick }: ThreatAssessmentProps)
                 THREAT ASSESSMENT
             </div>
             <div className="space-y-3">
-                {activeItems.length > 0 && <ThreatSection severity="active" items={activeItems} onCorpsClick={onCorpsClick} />}
+                {activeItems.length > 0 && <ThreatSection severity="offensive" items={activeItems} onCorpsClick={onCorpsClick} />}
                 {hardenedItems.length > 0 && <ThreatSection severity="hardened" items={hardenedItems} onCorpsClick={onCorpsClick} />}
                 {gapItems.length > 0 && <ThreatSection severity="gap" items={gapItems} onCorpsClick={onCorpsClick} />}
             </div>
@@ -42,7 +42,7 @@ function ThreatSection({
     items,
     onCorpsClick,
 }: {
-    severity: 'active' | 'hardened' | 'gap';
+    severity: 'offensive' | 'hardened' | 'gap';
     items: ThreatItem[];
     onCorpsClick?: (corpsId: string) => void;
 }) {

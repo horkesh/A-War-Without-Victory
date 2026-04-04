@@ -1,7 +1,7 @@
 # v0.8.0.x - Sector / Frontline Truth - Implementation Plan
 
 **Date:** 2026-04-03  
-**Status:** PLAN - READY FOR EXECUTION  
+**Status:** COMPLETE — all 6 phases landed (Waves 1–4, 2026-04-04)  
 **Roadmap slot:** v0.8.0.x (immediate engine-health stabilization lane)  
 **Overseer:** Orchestrator  
 **Architect:** Systems Programmer / Technical Architect - may define canonical frontline-truth boundaries, but any cross-system ownership change must be flagged for user review  
@@ -79,17 +79,17 @@ By the end of this lane:
 
 ## 4. Pyrrhic Execution Plan
 
-### Phase 1. Frontline Writer / Consumer Census (~1 session)
+### Phase 1. Frontline Writer / Consumer Census (~1 session) ✅ COMPLETE (Wave 1, 2026-04-04)
 **Assigned to:** Systems Programmer + Documentation Specialist
 
-- [ ] inventory every live writer and consumer touching:
+- [x] inventory every live writer and consumer touching:
   - `corps_front_sectors`
   - `assigned_brigade_ids`
   - `reserve_brigade_ids`
   - `brigade_front_assignment`
   - activity/frontline summary fields
-- [ ] classify each as canonical, compatibility-only, or dead
-- [ ] record exact files and exact state fields touched
+- [x] classify each as canonical, compatibility-only, or dead
+- [x] record exact files and exact state fields touched
 
 **Primary target files:**
 - `src/sim/combat/brigade_assignment.ts`
@@ -106,13 +106,13 @@ By the end of this lane:
 
 → `/simplify` → commit
 
-### Phase 2. Truthful Sector Assignment (~1-2 sessions)
+### Phase 2. Truthful Sector Assignment (~1-2 sessions) ✅ COMPLETE (Wave 1, 2026-04-04)
 **Assigned to:** Systems Programmer + Gameplay Programmer
 
-- [ ] isolate the exact late/post-classification path that can still produce dishonest sector assignment
-- [ ] make unresolved assignment remain unresolved rather than forcing fake sector ownership
-- [ ] ensure any fallback or repair path respects connected components and sector territory truth
-- [ ] verify army-HQ reserve brigades remain the only intentional no-sector exception class
+- [x] isolate the exact late/post-classification path that can still produce dishonest sector assignment
+- [x] make unresolved assignment remain unresolved rather than forcing fake sector ownership
+- [x] ensure any fallback or repair path respects connected components and sector territory truth
+- [x] verify army-HQ reserve brigades remain the only intentional no-sector exception class
 
 **Primary target files:**
 - `src/sim/combat/brigade_assignment.ts`
@@ -124,12 +124,12 @@ By the end of this lane:
 
 → `/simplify` → commit
 
-### Phase 3. Frontline Consumer Alignment (~1-2 sessions)
+### Phase 3. Frontline Consumer Alignment (~1-2 sessions) ✅ COMPLETE (Wave 2, 2026-04-04)
 **Assigned to:** Gameplay Programmer + Systems Programmer
 
-- [ ] align all frontline mechanics to canonical sector truth
-- [ ] demote or remove legacy frontline fallback reads where sector data exists
-- [ ] explicitly annotate any compatibility read that must remain
+- [x] align all frontline mechanics to canonical sector truth
+- [x] demote or remove legacy frontline fallback reads where sector data exists
+- [x] explicitly annotate any compatibility read that must remain
 
 **Primary target files:**
 - `src/sim/combat/exhaustion.ts`
@@ -142,12 +142,12 @@ By the end of this lane:
 
 → `/simplify` → commit
 
-### Phase 4. Activity / Reporting Truth (~1 session)
+### Phase 4. Activity / Reporting Truth (~1 session) ✅ COMPLETE (Wave 3, 2026-04-04)
 **Assigned to:** Scenario Harness Engineer + Systems Programmer
 
-- [ ] make `activity_summary` consume canonical phase outputs instead of stale proxies
-- [ ] align displacement-trigger reporting with the same truth used at runtime
-- [ ] remove or demote report fields that imply a false inactivity story
+- [x] make `activity_summary` consume canonical phase outputs instead of stale proxies
+- [x] align displacement-trigger reporting with the same truth used at runtime
+- [x] remove or demote report fields that imply a false inactivity story
 
 **Primary target files:**
 - `src/scenario/scenario_runner.ts`
@@ -159,13 +159,13 @@ By the end of this lane:
 
 → `/simplify` → commit
 
-### Phase 5. Regression Gates (~1 session)
+### Phase 5. Regression Gates (~1 session) ✅ COMPLETE (Wave 4, 2026-04-04)
 **Assigned to:** QA Engineer + Determinism Auditor
 
-- [ ] add tests proving sector-assigned brigades are truthful
-- [ ] add tests proving frontline mechanics consume sectors first
-- [ ] add tests proving scenario activity summaries use canonical truth
-- [ ] add one run-harness check that flags false-assignment regression loudly
+- [x] add tests proving sector-assigned brigades are truthful
+- [x] add tests proving frontline mechanics consume sectors first
+- [x] add tests proving scenario activity summaries use canonical truth
+- [x] add one run-harness check that flags false-assignment regression loudly
 
 **Primary target tests:**
 - `tests/brigade_territory_reconciliation.test.ts`
@@ -177,12 +177,12 @@ By the end of this lane:
 
 → `/simplify` → commit
 
-### Phase 6. Canon / Roadmap Propagation (~1 session)
+### Phase 6. Canon / Roadmap Propagation (~1 session) ✅ COMPLETE (Wave 4, 2026-04-04)
 **Assigned to:** Documentation Specialist + Product Manager
 
-- [ ] propagate the canonical frontline truth rule into runtime docs and master docs
-- [ ] update roadmap wording so this lane is clearly named as a current stabilization prerequisite
-- [ ] preserve the army-HQ reserve brigade exception rule in repo memory
+- [x] propagate the canonical frontline truth rule into runtime docs and master docs
+- [x] update roadmap wording so this lane is clearly named as a current stabilization prerequisite
+- [x] preserve the army-HQ reserve brigade exception rule in repo memory
 
 **Gate:** docs no longer overclaim “all brigades always have sectors” without the explicit reserve exception.
 

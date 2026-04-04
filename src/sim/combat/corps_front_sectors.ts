@@ -604,6 +604,12 @@ function buildFactionSectors(
                 if (!sec.reserve_brigade_ids.includes(bid)) {
                     sec.reserve_brigade_ids.push(bid);
                 }
+                // GAP 1 fix: clear stale sub-segment assignment on demoted brigades.
+                // A demoted brigade no longer holds a frontline sub-segment — leaving
+                // assigned_sub_segment_id set would cause the UI adapter to show it as
+                // still assigned to a sub-segment it no longer defends.
+                const f = formations[bid];
+                if (f) f.assigned_sub_segment_id = undefined;
             }
         }
     }

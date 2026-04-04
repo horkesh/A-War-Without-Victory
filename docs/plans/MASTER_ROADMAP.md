@@ -102,6 +102,7 @@ PERCEIVE-DECIDE-EXECUTE per-corps loop. 10 files in `src/sim/combat/commander/` 
 
 **Execution plan:** `docs/plans/2026-03-31-v080x-1992-foundation-essays-plan.md`
 **Immediate engine-health lane:** Sector/frontline truth hardening, truthful reachability, and reporting alignment. Plan: `docs/plans/2026-04-03-v080x-sector-frontline-truth-plan.md`
+- **COMPLETE 2026-04-04 (Waves 1–4).** All 6 plan phases landed. Phase 1.5 front-adjacency guard, assertBrigadeReachability actionable return, assigned_sub_segment_id cleared on demotion, adapter canonical-first sub-segment derivation, displacement trigger proxy-fork observable (console.warn), activity zero-fill, activity summary fidelity. 29 regression tests across 4 wave files lock all invariants. Lane: CLOSED.
 - **Presidential decision events (Phase C):** 3 recurring event types (Strategic Posture Review, Visit to the Front, Humanitarian Crisis Response) — pure JSON content, zero engine changes. Fills 29-turn and 20-turn decision gaps in 1993-1994. Design: `docs/40_reports/implemented/20260403_PRESIDENTIAL_DECISIONS_BETWEEN_OPS.md`. Assign to `/narrative-designer` + `/game-designer`.
 
 ### v0.8.1 — Commander Maturity

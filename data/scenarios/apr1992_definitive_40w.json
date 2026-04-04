@@ -796,6 +796,7 @@
   "init_officers": "apr1992",
   "must_hold_osids_by_corps": {
     "vrs_posavina": ["op:brcko:brcko_2"],
-    "vrs_east_bosnian": ["op:doboj:doboj_2", "op:doboj:boljanic_2"]
+    "vrs_east_bosnian": ["op:doboj:doboj_2", "op:doboj:boljanic_2"],
+    "vrs_1st_krajina": ["op:gracanica:petrovo_2", "op:lukavac:brijesnica_donja_2"]
   }
 }

@@ -119,7 +119,26 @@ export function evaluateDisplacementTriggers(
         return { deltas, report: emptyReport };
     }
 
-    const eligible = hasLiveSectorFrontlineTruth(state)
+    // ── Pressure-edge fork ────────────────────────────────────────────────────
+    // Path A (canonical): reads `corps_front_sectors.edge_ids` — hardened sector truth.
+    //   Fires when sectors have been built and at least one live edge is registered.
+    //   This is the authoritative path in the war phase once sector construction completes.
+    //
+    // Path B (legacy fallback): reads `political_controllers` contact graph — proxy.
+    //   Fires when sectors are unavailable (peace phase, very early war turns before
+    //   sector construction, or any state where hasLiveSectorFrontlineTruth() is false).
+    //   Activity counts (front_active_set_size, pressure_eligible_size) will differ from
+    //   canonical sector truth when this path fires — activity summary data should be
+    //   treated as approximate in those turns.
+    // ─────────────────────────────────────────────────────────────────────────
+    const hasSectorTruth = hasLiveSectorFrontlineTruth(state);
+    if (!hasSectorTruth) {
+        console.warn(
+            '[displacement_triggers] hasLiveSectorFrontlineTruth=false — using legacy pressure eligibility fallback. ' +
+            'Activity counts may differ from canonical sector truth.'
+        );
+    }
+    const eligible = hasSectorTruth
         ? getSectorOwnedEligiblePressureEdges(state, edges, canonicalToOperational)
         : getEligiblePressureEdges(state, edges, undefined, canonicalToOperational);
     if (eligible.length === 0) {

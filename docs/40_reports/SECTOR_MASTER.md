@@ -39,6 +39,20 @@
 
 **Report:** [implemented/20260403_FRONTLINE_SECTOR_MANDATORY_INVARIANT_REFINEMENT.md](implemented/20260403_FRONTLINE_SECTOR_MANDATORY_INVARIANT_REFINEMENT.md)
 
+## 2026-04-04 — Command Chain Truth Hardening (Waves 1–4)
+
+**Lane:** CLOSED. All 6 plan phases delivered across Waves 1–4 (2026-04-04).
+
+- **Phase 1.5 front-adjacency guard**: BFS ≤30 hops from front required before a brigade enters `assigned_brigade_ids`. Territory match alone is no longer sufficient — disconnected rear brigades stay unresolved rather than getting false sector ownership.
+- **assertBrigadeReachability actionable**: returns `string[]` of unreachable brigade IDs; caller demotes them from `assigned_brigade_ids` to `reserve_brigade_ids`. Not a silent logger — a diagnostic contract.
+- **assigned_sub_segment_id cleared on demotion**: `corps_front_sectors.ts` demotion loop explicitly sets `formation.assigned_sub_segment_id = undefined` when a brigade is demoted. Stale sub-segment assignments cannot persist after a brigade loses sector membership.
+- **Adapter canonical-first sub-segment derivation**: `GameStateAdapter.ts` builds a reverse map from `corps_front_sectors` sub_segments before iterating formations. Canonical sector truth drives the UI sub-segment field; formation field is fallback only.
+- **Displacement trigger proxy-fork observable**: `displacement_triggers.ts` emits `console.warn` when `hasLiveSectorFrontlineTruth()` is false and the legacy proxy path fires. Silent fallback is banned — proxy activity is now always surfaced in diagnostics.
+- **Activity truth**: `deriveWeeklyActivityCounts` returns explicit zeros (not undefined) when `phase_f_displacement` trigger report is absent. `computeActivitySummary` aggregates min/max/mean/nonzero_weeks correctly.
+- **Regression gates**: 29 tests across 4 wave files (`sector_frontline_truth_wave1–4.test.ts`) lock all invariants. Future regressions fail automatically.
+
+**Report:** `docs/40_reports/implemented/20260404_COMMAND_CHAIN_TRUTH_WAVE4.md`
+
 ## Current State (n842)
 
 | Metric | Value |

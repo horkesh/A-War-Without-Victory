@@ -543,6 +543,8 @@ const HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992: Array<{ osid: string; expected
     // boljanic_2 = Doboj city (27k pop); kopcic_2 = Bugojno city (22k pop)
     { osid: 'op:doboj:boljanic_2', expected_controller: 'RS' },           // Doboj city (named boljanic_2) — VRS from May 1992
     { osid: 'op:bugojno:kopcic_2', expected_controller: 'RBiH' },         // Bugojno city (named kopcic_2) — ARBiH/HVO held Apr 1992
+    { osid: 'op:gracanica:petrovo_2', expected_controller: 'RS' },        // Petrovo — VRS held (Ozren pocket), adjacent to Doboj
+    { osid: 'op:lukavac:brijesnica_donja_2', expected_controller: 'RS' }, // Brijesnica Donja — VRS held (Ozren pocket south flank)
 ];
 
 function countControllers(snapshot: ControlKey[]): Map<string, number> {

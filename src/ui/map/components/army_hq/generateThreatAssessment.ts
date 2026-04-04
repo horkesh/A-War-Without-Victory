@@ -13,7 +13,7 @@ interface SectorIntelRecordView {
 
 export interface ThreatItem {
     id: string;
-    severity: 'active' | 'hardened' | 'gap';
+    severity: 'offensive' | 'hardened' | 'gap';
     title: string;
     detail: string;
     confidence?: number;
@@ -98,7 +98,7 @@ export function generateThreatAssessment(
 
         items.push({
             id: tid(),
-            severity: 'active',
+            severity: 'offensive',
             title: `${frontLabel(corpsInfo?.corpsName)} - hostile offensive preparation`,
             detail: `Strength estimate: ${describeStrength(strengthCategories)}. ${describeConfidence(bestConf)}. ${records.length} sector${records.length > 1 ? 's' : ''} reporting preparation signs.`,
             confidence: bestConf,

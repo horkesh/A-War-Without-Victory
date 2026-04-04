@@ -555,6 +555,29 @@ export function parseGameState(json: unknown): LoadedGameState {
             ? brigadeSectorOverrideRaw
             : undefined;
 
+    // GAP 2 fix: build a reverse map from brigade ID → canonical sub_segment_id from
+    // corps_front_sectors sub_segment truth. This ensures the adapter reads canonical
+    // sector truth rather than the stale formation field, which can lag after demotion.
+    // Built once here (O(sectors × sub_segments × brigades)), used O(1) per formation below.
+    const brigadeSubSegmentFromSectors = new Map<string, string>();
+    {
+        const rawCfs = state.military.corps_front_sectors as Record<string, Record<string, unknown>> | undefined;
+        if (rawCfs && typeof rawCfs === 'object') {
+            for (const sector of Object.values(rawCfs)) {
+                if (!sector || typeof sector !== 'object') continue;
+                const subSegs = Array.isArray(sector.sub_segments) ? sector.sub_segments as Array<Record<string, unknown>> : [];
+                for (const ss of subSegs) {
+                    const ssId = typeof ss.sub_segment_id === 'string' ? ss.sub_segment_id : undefined;
+                    if (!ssId) continue;
+                    const primaries = Array.isArray(ss.primary_brigade_ids) ? ss.primary_brigade_ids as unknown[] : [];
+                    for (const bid of primaries) {
+                        if (typeof bid === 'string' && bid) brigadeSubSegmentFromSectors.set(bid, ssId);
+                    }
+                }
+            }
+        }
+    }
+
     const formations: FormationView[] = [];
     if (Object.keys(formationsRecord).length > 0) {
         const sortedIds = Object.keys(formationsRecord).sort();
@@ -604,8 +627,14 @@ export function parseGameState(json: unknown): LoadedGameState {
                 const ov = brigadeSectorOverride?.[id];
                 if (typeof ov === 'string' && ov) sectorOverrideId = ov;
             }
-            const assigned_sub_segment_id = typeof f.assigned_sub_segment_id === 'string' && f.assigned_sub_segment_id
-                ? f.assigned_sub_segment_id : undefined;
+            // GAP 2: prefer canonical sub_segment truth from corps_front_sectors over
+            // the stale formation field. The reverse map was built above from sector
+            // sub_segments[].primary_brigade_ids — authoritative post-sync source.
+            // Fallback to formation field only if not present in any sector sub_segment.
+            const assigned_sub_segment_id: string | undefined =
+                brigadeSubSegmentFromSectors.get(id) ??
+                (typeof f.assigned_sub_segment_id === 'string' && f.assigned_sub_segment_id
+                    ? f.assigned_sub_segment_id : undefined);
             const movementState = rawMovementState?.[id] as { status?: string; stance?: string } | undefined;
             const movementStatus = (movementState?.status === 'packing' || movementState?.status === 'in_transit' || movementState?.status === 'unpacking')
                 ? (movementState.status as 'packing' | 'in_transit' | 'unpacking')
