@@ -92,13 +92,12 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - **Done means:** cross-corps assignment warning in next 40w end_report drops from 6 to ≤1.
 - **Report:** `docs/40_reports/implemented/20260404_SECTOR_OWNERSHIP_ZERO_ATTACK_TRIAGE.md`
 
-### Lane B — OPEN: Empty child sectors after contiguity split
-- **Symptom:** `splitNonContiguousSectors` produces child sectors with correct front edges but zero brigades. The parent's brigades were concentrated in one geographic sub-region; the other child gets front edges with no defenders. 5 empty sectors + 6 undefended sub-segments confirmed in n1312 Drina Corps area.
-- **Target files:** `src/sim/combat/sector_splitting.ts` (can splitter refuse a zero-brigade child?) + `src/sim/combat/brigade_assignment.ts` (can assignment pipeline equalize post-split within own corps?)
-- **Key question:** Fix in splitter (refuse zero-brigade child) OR post-split equalization pass (borrow from sibling/adjacent own-corps sector with surplus)?
-- **Diagnostic entry point:** Filter end_report sectors by ID suffix `splitN`, cross-reference with `assigned_brigade_count: 0`.
-- **Secondary:** Confirm whether `brka_2` holding by inertia (no defending brigade assigned) constitutes a calibration risk or is historically appropriate.
-- **Specialist required:** systems-programmer + gameplay-programmer + scenario-creator-runner-tester.
+### Lane B — CLOSED 2026-04-04: Empty child sectors after contiguity split
+- **Fix:** Territory-membership pre-pass added to `ensureMinimumSectorCoverage` in `src/sim/combat/brigade_assignment.ts`. For zero-brigade sectors with front edges, finds brigades in sibling same-corps sectors whose `location_osid` is in the zero-sector's `territory_osids`, not on the donor's frontline, and whose donor retains ≥ 1 after transfer. Moves one brigade. No BFS — territory membership is authoritative. Rejected: Option A (splitter refusal breaks geographic split contract); Option B1 (cross-component filter blocks regardless of `> 1` guard).
+- **Tests:** `tests/sector_split_brigade_assignment.test.ts` — 6 regression tests (fill, move-not-copy, donor floor, skip-if-already-assigned, skip-if-no-front-edges, non-split zero-brigade left for Step 1/2).
+- **Verified:** tsc PASS, build PASS, governance PASS, 2307/2307.
+- **Done means:** empty_contested_sector count from splitN child sectors drops to 0 in next 40w run; undefended_front_subsegments anomaly count reduces from 6.
+- **Report:** `docs/40_reports/implemented/20260404_LANE_B_EMPTY_CHILD_SECTORS_FIX.md`
 
 ### AAR Provenance Lane - OPEN
 - **Symptom:** `Operation Prijedor` and `Operation Visegrad` in `n1312` finalize as `success` with `total_attacks = 0`.
@@ -109,11 +108,10 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 
 ## Next Priority Lanes
 
-1. **Lane B (empty child sectors from contiguity split):** sector/frontline investigation in `sector_splitting.ts` + `brigade_assignment.ts`.
-2. **AAR provenance follow-up:** zero-attack-success operations must distinguish combat capture from passive/external control changes.
-3. **Residual ZEA attribution pass:** only after Lane B, and only on current `HEAD`; `P14` hardening is already landed.
-4. **gradacac_2 P0 investigation:** roadmap item 1 once current engine-truth defects are no longer masking front behavior.
-5. **v0.8.1 Commander Maturity gate check:** full two-tier post-run panel go/no-go on commander system.
+1. **Residual ZEA attribution pass:** re-measure on current `HEAD` now that Lane B is closed. `P14` hardening is already landed — do not reopen. Start from fresh 40w run evidence.
+2. **AAR provenance follow-up:** zero-attack-success operations must distinguish combat capture from passive/external control changes. Owner: `src/sim/combat/operation_aar.ts`.
+3. **gradacac_2 P0 investigation:** roadmap item 1 once current engine-truth defects are no longer masking front behavior.
+4. **v0.8.1 Commander Maturity gate check:** full two-tier post-run panel go/no-go on commander system.
 
 ## Validation Gate Note
 

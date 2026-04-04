@@ -23195,3 +23195,25 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 
 ### Report
 `docs/40_reports/implemented/20260404_SECTOR_OWNERSHIP_ZERO_ATTACK_TRIAGE.md`
+
+## n1314 — 2026-04-04 — fix(brigade-assignment): Territory-membership pre-pass fills zero-brigade split children (Lane B)
+
+### What changed
+- `src/sim/combat/brigade_assignment.ts`: Added territory-membership pre-pass at the start of `ensureMinimumSectorCoverage`. For zero-brigade sectors with front edges, finds brigades in sibling same-corps sectors whose `location_osid` is in the zero-sector's `territory_osids`, not on the donor's frontline, and whose donor retains ≥ 1 brigade after transfer. Moves one brigade (not a copy). No BFS required — territory membership is authoritative.
+- `tests/sector_split_brigade_assignment.test.ts`: 6 new regression tests covering fill, move (not copy), donor floor, pre-pass skip when sector already has brigades, skip when no front edges, and non-split zero-brigade sectors left for existing Step 1/2.
+
+### Why
+- `splitNonContiguousSectors` emits child sectors with correct front edges but zero brigades when the parent's brigades are concentrated in one geographic sub-region. `ensureMinimumSectorCoverage` Step 2 was double-blocked: `> 1` donor guard + cross-component BFS filter (split products are disconnected by definition). No existing repair path could fill the orphan children. Confirmed in n1312: 5 empty contested sectors, 6 undefended front sub-segments, Drina Corps area.
+
+### Verified
+- `tsc --noEmit`: PASS
+- `vitest`: PASS — 2307/2307
+- `npm run build`: PASS
+- governance: PASS
+
+### Status
+- Lane B (empty child sectors from contiguity split): CLOSED
+- Next: residual ZEA attribution pass on current HEAD; AAR provenance lane (zero-attack-success ops) separately tracked
+
+### Report
+`docs/40_reports/implemented/20260404_LANE_B_EMPTY_CHILD_SECTORS_FIX.md`

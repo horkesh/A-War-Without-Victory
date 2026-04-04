@@ -1249,6 +1249,60 @@ export function ensureMinimumSectorCoverage(
         sectorsByCorps.set(s.corps_id, list);
     }
 
+    // ── Pre-pass: territory-claim rescue for zero-brigade split children ──────────
+    // splitNonContiguousSectors intentionally emits non-largest children with empty
+    // brigade lists, relying on classifyBrigadesByTerritory to fill them. That fill
+    // fails when Phase 1 exhausts all brigades into the largest child and the
+    // cross-component filter in Step 2 prevents donation across the disconnected
+    // front. This pass resolves it by treating physical territory membership as
+    // authoritative: if a brigade's location_osid is in the zero-child's
+    // territory_osids, it belongs there regardless of component boundaries.
+    // No BFS required — the brigade is already there.
+    for (const [, corpsSectors] of [...sectorsByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+        const zeroFrontSectors = corpsSectors
+            .filter(s => s.assigned_brigade_ids.length === 0 && s.length_edges > 0)
+            .sort((a, b) => strictCompare(a.sector_id, b.sector_id));
+
+        for (const zero of zeroFrontSectors) {
+            const zeroTerritory = new Set(zero.territory_osids);
+            if (zeroTerritory.size === 0) continue;
+
+            // Collect (donor sector, brigade id) candidates: brigades physically in
+            // the zero-child's territory that can be spared (donor retains ≥ 1).
+            const candidates: Array<{ donor: CorpsFrontSector; bid: FormationId }> = [];
+            for (const s of corpsSectors) {
+                if (s.sector_id === zero.sector_id) continue;
+                if (s.corps_id !== zero.corps_id) continue;
+                if (s.assigned_brigade_ids.length <= 1) continue; // donor must retain ≥ 1
+
+                const donorFrontOsids = getSectorFrontOsids(s);
+                for (const bid of [...s.assigned_brigade_ids].sort(strictCompare)) {
+                    const f = formations[bid];
+                    if (!f?.location_osid) continue;
+                    if (!zeroTerritory.has(f.location_osid)) continue;  // not in zero-child territory
+                    if (donorFrontOsids.has(f.location_osid)) continue; // frontline-essential — skip
+                    candidates.push({ donor: s, bid });
+                }
+            }
+
+            if (candidates.length === 0) continue;
+
+            // Best candidate: donor with most surplus (most brigades), ties by sector_id then bid.
+            candidates.sort((a, b) =>
+                b.donor.assigned_brigade_ids.length - a.donor.assigned_brigade_ids.length
+                || strictCompare(a.donor.sector_id, b.donor.sector_id)
+                || strictCompare(a.bid, b.bid)
+            );
+
+            const { donor, bid } = candidates[0]!;
+            const idx = donor.assigned_brigade_ids.indexOf(bid);
+            if (idx >= 0) {
+                donor.assigned_brigade_ids.splice(idx, 1);
+                zero.assigned_brigade_ids.push(bid);
+            }
+        }
+    }
+
     for (const [, corpsSectors] of [...sectorsByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
         for (const sector of corpsSectors) {
             if (sector.assigned_brigade_ids.length > 0) continue;
