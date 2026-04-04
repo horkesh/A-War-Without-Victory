@@ -1,3 +1,13 @@
+## 2026-04-04 - Presidential Command Friction Wave 2
+
+- `ChiefOfStaffBriefing.tsx`: adds §3 strain paragraph when any player-faction corps has commandStrain > 0. Six phrase variants (3 tones × strained/compromised), names the specific corps. Silence = healthy. No new props — computed from existing gameState via `computeCorpsCommandStrain`.
+- `OperationsSection.tsx`: new optional `commandStrain?` / `commandStrainLabel?` props. When strain > 0 AND active ops exist, shows compact amber/red border-left notice at ops list top. Silence at strain=0 or empty ops list.
+- `ArmyHQCorpsCard.tsx`: passes `data.strain` / `data.strainLabel` into OperationsSection (already derived by adapter).
+- `OperationBriefingModal.tsx`: `DirectInterventionSection` shows compound-risk notice above cost display when corpsStrain > 0 — "⚠ This corps already carries command strain ([label]). A further Direct Intervention will compound institutional damage." No new GameState fields, no new prop drilling from parent.
+- Phase D: no "Force Launch" UI text found (already canonicalized in Wave 1). Strain badge wording consistent. No duplicate notices across surfaces.
+- +21 Wave 2 tests; 70/70 pass in command_authority.test.ts. tsc clean. Governance OK.
+- Report: `docs/40_reports/implemented/20260404_PRESIDENTIAL_COMMAND_FRICTION_WAVE2.md`
+
 ## 2026-04-04 - Presidential Command Friction Wave 1
 
 - New `src/ui/map/data/command_strain.ts`: `computeCorpsCommandStrain()` derives per-corps strain from `was_force_launched` active ops (+3/op) and unresolved `FrictionEvent` entries for the corps commander (+2/event), each decayed -1/turn. Never stored on GameState — computed on-read. `getCommandStrainLabel()` buckets 0=healthy, 1-5=strained, 6+=compromised.

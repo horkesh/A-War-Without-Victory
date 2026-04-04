@@ -33,6 +33,7 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Active / Recent Accepted Lanes
 
+- `c689ba74`+`387da70b`+`45feea0d`+`7d8006ac` Presidential Command Friction Wave 2 — strain-shaped CoS briefing paragraph, OperationsSection command-risk notice, OperationBriefingModal compound warning; silence=healthy at all three surfaces
 - `44356235`+`59b9f2f7`+`16a0726b`+`37668647` Presidential Command Friction Wave 1 — command strain visibility + warlord friction surfaced + institutional story in ops review
 - `3a80f60a` map-first usability restoration
 - `962414fc` player-knowledge integrity wave 1
@@ -46,7 +47,7 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Next Priority Lanes
 
-1. **ACTIVE 2026-04-04** — Presidential Command Friction Wave 1 complete. Wave 2 candidates:
+1. **ACTIVE 2026-04-04** — Presidential Command Friction Wave 2 complete. Wave 3 candidates:
    - Wire friction resolution flow (player can acknowledge/accept a warlord friction event — sets `resolved: true`)
    - Add `command_strain` decay visualization (show how strain will decay next turn)
    - Expand strain sources: corps exhaustion above threshold, consecutive failed ops
