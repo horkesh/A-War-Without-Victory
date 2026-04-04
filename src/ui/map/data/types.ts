@@ -235,6 +235,10 @@ export interface FormationView {
         institutionalFactors: string[];
         planExplanation: string | null;
         threatContext: string | null;
+        /** Wave 2: The dominant reason this corps is constrained. Null = healthy. */
+        dominantReason: string | null;
+        /** Wave 2: Classification of the primary constraint type. 'none' = healthy. */
+        primaryConstraint: 'siege' | 'threat_pressure' | 'defensive_duty' | 'force_condition' | 'institutional_strain' | 'plan_lifecycle' | 'none';
     };
 }
 

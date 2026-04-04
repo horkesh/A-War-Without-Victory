@@ -1,3 +1,12 @@
+## 2026-04-04 — Commander Explanation Surfaces Wave 2 (Decision-Useful Constraint Classification)
+
+- `command_strain.ts`: `PrimaryConstraint` type (7-value enum) + `classifyPrimaryConstraint()` — priority-ordered classification: siege > threat > defensive_duty > force_condition > institutional > plan > none. `dominantReason` + `primaryConstraint` added to `CorpsSituationAssessment`
+- `types.ts`: `dominantReason` + `primaryConstraint` added to FormationView.situationAssessment shape
+- `CorpsSituationSection.tsx`: rewritten — dominant reason banner with constraint-type badge (SIEGE/THREAT/GARRISON/READINESS/INSTITUTIONAL/PLANNING), detail factors below in secondary text
+- 18 new Wave 12 tests in `tests/command_authority.test.ts` — 210/210 pass
+- Verification: tsc clean, 2144/2164 (20 pre-existing), vite build clean, governance OK
+- Report: `docs/40_reports/implemented/20260404_COMMANDER_EXPLANATION_SURFACES_WAVE2.md`
+
 ## 2026-04-04 — Commander Explanation Surfaces Wave 1 (Corps Situation Assessment)
 
 - `commander_state.ts`: `last_plan_action` + `last_plan_reason` added to CommanderState — persists transient PlanDecision reason

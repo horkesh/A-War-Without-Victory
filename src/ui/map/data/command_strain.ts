@@ -357,8 +357,22 @@ export function deriveRecoveryForecast(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Corps Situation Assessment — Commander Explanation Surfaces Wave 1
+// Corps Situation Assessment — Commander Explanation Surfaces Wave 1 + Wave 2
 // ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Classification of the primary constraint holding back or driving a corps.
+ * Priority order (highest first): siege > threat > defensive_duty > force_condition > institutional > plan > none.
+ * Derived from the same real factors Wave 1 already computes.
+ */
+export type PrimaryConstraint =
+    | 'siege'               // besieged zone — existential
+    | 'threat_pressure'     // critical/heavy pressure or enemy concentration
+    | 'defensive_duty'      // garrison deficit, must-hold shortfall, no surplus
+    | 'force_condition'     // exhaustion, low combat effectiveness
+    | 'institutional_strain' // command compromised, defensive/reorganize stance
+    | 'plan_lifecycle'      // plan suspended, abandoned, or concentrating
+    | 'none';               // healthy — silence
 
 /**
  * A player-safe explanation of why a corps commander is leaning a certain way.
@@ -367,10 +381,8 @@ export function deriveRecoveryForecast(
  * Silence = healthy: when the corps is projecting with surplus and no constraints,
  * the assessment is null (nothing to explain).
  *
- * The explanation distinguishes:
- *   - military conditions (force balance, threat, exhaustion, fatigue)
- *   - institutional constraints (campaign role, sync role, stance ceiling)
- *   - plan status (what the commander is doing and why)
+ * Wave 1: descriptive factors (what conditions exist)
+ * Wave 2: decision-useful hierarchy (what is THE dominant reason + constraint type)
  */
 export interface CorpsSituationAssessment {
     /** Overall posture summary — one-line explanation. Null = healthy (silence). */
@@ -383,6 +395,16 @@ export interface CorpsSituationAssessment {
     planExplanation: string | null;
     /** Threat context. Null = low threat / nothing notable. */
     threatContext: string | null;
+    /**
+     * Wave 2: The single dominant reason this corps is constrained.
+     * One sentence naming THE main factor. Null = healthy (silence).
+     */
+    dominantReason: string | null;
+    /**
+     * Wave 2: Classification of the primary constraint type.
+     * 'none' = healthy. Used for UI badge coloring and decision routing.
+     */
+    primaryConstraint: PrimaryConstraint;
 }
 
 /**
@@ -433,7 +455,7 @@ export function deriveCorpsSituationAssessment(
 ): CorpsSituationAssessment {
     // No commander state → no assessment (pre-commander era saves)
     if (!commanderState) {
-        return { postureSummary: null, militaryFactors: [], institutionalFactors: [], planExplanation: null, threatContext: null };
+        return { postureSummary: null, militaryFactors: [], institutionalFactors: [], planExplanation: null, threatContext: null, dominantReason: null, primaryConstraint: 'none' };
     }
 
     const zones = commanderState.zone_assessments ?? [];
@@ -570,13 +592,164 @@ export function deriveCorpsSituationAssessment(
         }
     }
 
+    // ── Wave 2: Dominant reason + primary constraint classification ────────
+    // Priority order (highest = most urgent): siege > threat > defensive_duty > force_condition > institutional > plan > none
+    const { dominantReason, primaryConstraint } = classifyPrimaryConstraint(
+        zones, threat, forces, plan, commanderState,
+        corpsStance, exhaustion, commandStrain ?? 0, totalDeficit, totalSurplus,
+        combatEffective, totalBrigades, besiegedZones, mustHoldZones,
+    );
+
     return {
         postureSummary,
         militaryFactors,
         institutionalFactors,
         planExplanation,
         threatContext,
+        dominantReason,
+        primaryConstraint,
     };
+}
+
+/**
+ * Classify the primary constraint and derive a dominant reason sentence.
+ * Priority order matches real urgency: existential threats first, then force/institutional.
+ * Pure function — no side effects.
+ */
+function classifyPrimaryConstraint(
+    zones: Array<{ posture: string; deficit: number; surplus_brigades: readonly string[]; front_edge_count: number; is_must_hold?: boolean }>,
+    threat: { overall_pressure: string; enemy_concentration_zones?: readonly string[] } | undefined,
+    forces: { total_brigades: number; combat_effective: number; total_surplus: number } | undefined,
+    plan: { status: string; objective_description: string; suspension_reason?: string } | null | undefined,
+    commanderState: { last_plan_action?: string; last_plan_reason?: string },
+    corpsStance: string | undefined,
+    exhaustion: number,
+    commandStrain: number,
+    totalDeficit: number,
+    totalSurplus: number,
+    combatEffective: number,
+    totalBrigades: number,
+    besiegedZones: Array<{ posture: string }>,
+    mustHoldZones: Array<{ posture: string; deficit: number }>,
+): { dominantReason: string | null; primaryConstraint: PrimaryConstraint } {
+
+    // 1. Siege — existential
+    if (besiegedZones.length > 0) {
+        return {
+            primaryConstraint: 'siege',
+            dominantReason: 'Corps area is under siege — survival takes priority over offensive planning',
+        };
+    }
+
+    // 2. Threat pressure — critical/heavy enemy pressure
+    const pressure = threat?.overall_pressure;
+    if (pressure === 'critical') {
+        return {
+            primaryConstraint: 'threat_pressure',
+            dominantReason: 'Enemy offensive threatens corps integrity — all resources committed to defense',
+        };
+    }
+    if (pressure === 'heavy') {
+        return {
+            primaryConstraint: 'threat_pressure',
+            dominantReason: 'Heavy enemy pressure demands defensive priority across the front',
+        };
+    }
+
+    // 3. Defensive duty — garrison deficit, must-hold shortfall, no surplus
+    const mustHoldDeficit = mustHoldZones.reduce((sum, z) => sum + z.deficit, 0);
+    if (mustHoldDeficit > 0) {
+        return {
+            primaryConstraint: 'defensive_duty',
+            dominantReason: `Critical positions are undermanned — ${mustHoldDeficit} brigade${mustHoldDeficit > 1 ? 's' : ''} short of minimum hold requirements`,
+        };
+    }
+    if (totalDeficit > 2) {
+        return {
+            primaryConstraint: 'defensive_duty',
+            dominantReason: `Garrison requirements exceed available forces by ${totalDeficit} brigades`,
+        };
+    }
+    if (totalSurplus === 0 && totalBrigades > 0) {
+        return {
+            primaryConstraint: 'defensive_duty',
+            dominantReason: 'All brigades committed to garrison — no surplus available for operations',
+        };
+    }
+
+    // 4. Force condition — exhaustion, low combat effectiveness
+    if (exhaustion >= 60) {
+        return {
+            primaryConstraint: 'force_condition',
+            dominantReason: 'Corps is heavily exhausted — offensive capacity severely limited',
+        };
+    }
+    if (totalBrigades > 0 && combatEffective < totalBrigades * 0.5) {
+        return {
+            primaryConstraint: 'force_condition',
+            dominantReason: `Only ${combatEffective} of ${totalBrigades} brigades are combat-effective`,
+        };
+    }
+    if (exhaustion >= 40) {
+        return {
+            primaryConstraint: 'force_condition',
+            dominantReason: 'Significant corps exhaustion is limiting operational tempo',
+        };
+    }
+
+    // 5. Institutional strain — command compromised, defensive/reorganize stance
+    if (corpsStance === 'reorganize') {
+        return {
+            primaryConstraint: 'institutional_strain',
+            dominantReason: 'Corps is reorganizing — all operations suspended by directive',
+        };
+    }
+    if (commandStrain >= COMPROMISED_THRESHOLD) {
+        return {
+            primaryConstraint: 'institutional_strain',
+            dominantReason: 'Command relationship is compromised — offensive options restricted until stabilized',
+        };
+    }
+    if (corpsStance === 'defensive') {
+        return {
+            primaryConstraint: 'institutional_strain',
+            dominantReason: 'Corps directed to hold defensive posture — no offensive planning authorized',
+        };
+    }
+
+    // 6. Plan lifecycle — suspended/abandoned/concentrating (non-urgent but notable)
+    if (plan?.status === 'suspended') {
+        const reason = plan.suspension_reason || commanderState.last_plan_reason || 'conditions deteriorated';
+        return {
+            primaryConstraint: 'plan_lifecycle',
+            dominantReason: `Operation plan suspended — ${reason}`,
+        };
+    }
+    if (commanderState.last_plan_action === 'abandoned' && commanderState.last_plan_reason) {
+        return {
+            primaryConstraint: 'plan_lifecycle',
+            dominantReason: `Recent operation plan abandoned — ${commanderState.last_plan_reason}`,
+        };
+    }
+
+    // 7. Moderate threat with concentration signs (lower priority than direct pressure)
+    if (pressure === 'moderate' && (threat?.enemy_concentration_zones?.length ?? 0) > 0) {
+        return {
+            primaryConstraint: 'threat_pressure',
+            dominantReason: 'Enemy concentration detected — defensive readiness elevated',
+        };
+    }
+
+    // 8. Strained command (lower than compromised — notable but not blocking)
+    if (commandStrain >= STRAINED_THRESHOLD) {
+        return {
+            primaryConstraint: 'institutional_strain',
+            dominantReason: 'Command relationship under strain from recent presidential interventions',
+        };
+    }
+
+    // 9. None — healthy
+    return { primaryConstraint: 'none', dominantReason: null };
 }
 
 /**
