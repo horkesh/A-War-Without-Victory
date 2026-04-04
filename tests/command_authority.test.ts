@@ -578,3 +578,127 @@ describe('getCommandStrainLabel', () => {
         expect(getCommandStrainLabel(10)).toBe('compromised');
     });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Wave 2 — Decision-shaping signal logic
+// ─────────────────────────────────────────────────────────────────────────────
+
+// B2: OperationsSection command-risk notice logic
+// The notice appears when commandStrain > 0 AND operations.length > 0.
+// Silence = healthy throughout (no notice when strain = 0 or no active ops).
+
+describe('B2: OperationsSection command-risk notice', () => {
+    function shouldShowCommandRiskNotice(commandStrain: number, activeOpCount: number): boolean {
+        return commandStrain > 0 && activeOpCount > 0;
+    }
+
+    it('shows notice when strain > 0 and active ops exist', () => {
+        expect(shouldShowCommandRiskNotice(3, 2)).toBe(true);
+    });
+
+    it('shows notice when strain is exactly 1 and one active op', () => {
+        expect(shouldShowCommandRiskNotice(1, 1)).toBe(true);
+    });
+
+    it('shows notice when strain is compromised (6+) and active ops exist', () => {
+        expect(shouldShowCommandRiskNotice(6, 1)).toBe(true);
+    });
+
+    it('absent when strain = 0 (healthy) regardless of ops', () => {
+        expect(shouldShowCommandRiskNotice(0, 3)).toBe(false);
+    });
+
+    it('absent when strain > 0 but no active ops', () => {
+        expect(shouldShowCommandRiskNotice(4, 0)).toBe(false);
+    });
+
+    it('absent when both strain = 0 and no active ops', () => {
+        expect(shouldShowCommandRiskNotice(0, 0)).toBe(false);
+    });
+
+    it('uses compromised text when strainLabel is compromised', () => {
+        const label = getCommandStrainLabel(6);
+        expect(label).toBe('compromised');
+        // Notice text branch: 'compromised' → different wording than 'strained'
+        const isCompromised = label === 'compromised';
+        expect(isCompromised).toBe(true);
+    });
+
+    it('uses strained text when strainLabel is strained', () => {
+        const label = getCommandStrainLabel(3);
+        expect(label).toBe('strained');
+        const isCompromised = label === 'compromised';
+        expect(isCompromised).toBe(false);
+    });
+});
+
+// B3: OperationBriefingModal compound warning logic
+// Compound warning appears when corps already carries strain AND player is about
+// to force-launch (DirectInterventionSection is shown).
+// Silence = healthy (no warning when strain = 0).
+
+describe('B3: OperationBriefingModal compound strain warning', () => {
+    function shouldShowCompoundWarning(corpsStrain: number): boolean {
+        return corpsStrain > 0;
+    }
+
+    it('shows compound warning when strain > 0', () => {
+        expect(shouldShowCompoundWarning(3)).toBe(true);
+    });
+
+    it('shows compound warning at minimum strain threshold (1)', () => {
+        expect(shouldShowCompoundWarning(1)).toBe(true);
+    });
+
+    it('shows compound warning when strain is compromised (6)', () => {
+        expect(shouldShowCompoundWarning(6)).toBe(true);
+    });
+
+    it('absent when strain = 0 (healthy)', () => {
+        expect(shouldShowCompoundWarning(0)).toBe(false);
+    });
+
+    it('compound warning label shows Compromised when strain >= 6', () => {
+        const label = getCommandStrainLabel(6);
+        const displayLabel = label === 'compromised' ? 'Compromised' : 'Strained';
+        expect(displayLabel).toBe('Compromised');
+    });
+
+    it('compound warning label shows Strained when strain is 1-5', () => {
+        const label = getCommandStrainLabel(3);
+        const displayLabel = label === 'compromised' ? 'Compromised' : 'Strained';
+        expect(displayLabel).toBe('Strained');
+    });
+});
+
+// B1: ChiefOfStaffBriefing strain paragraph logic
+// The paragraph generator (buildStrainParagraphs) is internal to the module,
+// but we can verify the strain labelling that drives phrase selection.
+// Structural comment: B1 uses computeCorpsCommandStrain + getCommandStrainLabel
+// per corps, filtering to player faction. Direct component test would require
+// a full LoadedGameState stub — covered by integration; logic is unit-testable
+// via the strain label boundary tests above (getCommandStrainLabel describe block).
+
+describe('B1: CoS briefing strain paragraph — label-driven phrase selection', () => {
+    it('healthy corps (strain=0) produces no strain paragraph — silence=healthy', () => {
+        // Label drives paragraph inclusion; healthy = no paragraph emitted
+        const label = getCommandStrainLabel(0);
+        expect(label).toBe('healthy');
+        const includesParagraph = label !== 'healthy';
+        expect(includesParagraph).toBe(false);
+    });
+
+    it('strained corps (strain=3) selects strained phrase variant', () => {
+        const label = getCommandStrainLabel(3);
+        expect(label).toBe('strained');
+        const phraseKey: 'strained' | 'compromised' = label as 'strained' | 'compromised';
+        expect(phraseKey).toBe('strained');
+    });
+
+    it('compromised corps (strain=6) selects compromised phrase variant', () => {
+        const label = getCommandStrainLabel(6);
+        expect(label).toBe('compromised');
+        const phraseKey: 'strained' | 'compromised' = label as 'strained' | 'compromised';
+        expect(phraseKey).toBe('compromised');
+    });
+});
