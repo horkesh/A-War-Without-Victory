@@ -33,7 +33,8 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Active / Recent Accepted Lanes
 
-- **Commander Explanation Surfaces Wave 2** — CLOSED 2026-04-04. Decision-useful constraint classification: `PrimaryConstraint` 7-value enum + `classifyPrimaryConstraint()` priority ordering. `dominantReason` banner with constraint badge in `CorpsSituationSection`. 18 tests. Report: `docs/40_reports/implemented/20260404_COMMANDER_EXPLANATION_SURFACES_WAVE2.md`.
+- **Commander Explanation Surfaces Wave 3** — CLOSED 2026-04-04. Relief path: `reliefPath` on `classifyPrimaryConstraint()` return — grounded "what would need to change" per constraint (deficit counts, exhaustion %, stance change, stabilization). Arrow subtitle in CorpsSituationSection. 9 tests. Orchestrated with 4 parallel subagents. Report: `docs/40_reports/implemented/20260404_COMMANDER_EXPLANATION_SURFACES_WAVE3.md`.
+- **Commander Explanation Surfaces Wave 2** — CLOSED 2026-04-04. Decision-useful constraint classification. 18 tests.
 - **Commander Explanation Surfaces Wave 1** — CLOSED 2026-04-04. Corps situation assessment derived on-read from CommanderState. Canonical surface: `CorpsSituationSection` in Army HQ corps card. Plan reasons now persisted via `last_plan_action`/`last_plan_reason`. 13 tests. Report: `docs/40_reports/implemented/20260404_COMMANDER_EXPLANATION_SURFACES_WAVE1.md`.
 - **Command Review Consolidation Wave 2 (Wave 9)** — CLOSED 2026-04-04. Trend summary + three-tier outcome badge on history ops. Report: `docs/40_reports/implemented/20260404_COMMAND_REVIEW_CONSOLIDATION_WAVE2.md`.
 - **Command Review Consolidation Wave 1 (Wave 8)** — CLOSED 2026-04-04. Outcome badge on live ops + modal entry point. Report: `docs/40_reports/implemented/20260404_COMMAND_REVIEW_CONSOLIDATION_WAVE8.md`.
@@ -43,9 +44,11 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Closed Lanes
 
-**Closed: Commander Explanation Surfaces Wave 1 + Wave 2**
-Wave 1: Corps situation assessment derived on-read from `CommanderState` via `deriveCorpsSituationAssessment()`. Persists `last_plan_action`/`last_plan_reason` in `CommanderState`. Canonical surface: `CorpsSituationSection` in Army HQ corps card. Distinguishes military conditions, institutional constraints, plan lifecycle with reasons, threat context. 13 tests in Wave 11.
-Wave 2: Decision-useful hierarchy via `classifyPrimaryConstraint()`. `PrimaryConstraint` 7-value enum with priority ordering (siege > threat > defensive_duty > force_condition > institutional > plan > none). `dominantReason` one-sentence banner with constraint-type badge. Detail factors in secondary text below. 18 tests in Wave 12. Total: 31 explanation surface tests.
+**Closed: Commander Explanation Surfaces Waves 1–3**
+Wave 1: Corps situation assessment via `deriveCorpsSituationAssessment()`. Persists `last_plan_action`/`last_plan_reason`. Canonical surface: `CorpsSituationSection`. 13 tests (Wave 11).
+Wave 2: `classifyPrimaryConstraint()` with priority ordering. `dominantReason` banner + constraint badge. 18 tests (Wave 12).
+Wave 3: `reliefPath` — grounded "what would need to change" per constraint (deficit counts, exhaustion %, stance, stabilization). Arrow subtitle in UI. 9 tests (Wave 13). 4 parallel subagents used (architect, UI/UX, gameplay, QA).
+Total: 40 explanation surface tests across 3 waves. Hierarchy: badge+reason → relief path → detail factors. Silence=healthy.
 
 **Closed: Presidential Command Friction (Waves 1-5) + Order Interpretation Preview (Waves 5-7)**
 Wave 1 surfaced command strain and warlord friction in ops review. Wave 2 added strain-shaped CoS briefing and compound warnings. Wave 3 closed the friction resolution loop (per-event acknowledge buttons, IPC handler). Wave 4 added Stabilize Command Relationship action (pay CA, resolve all friction, 3-turn cooldown) and strain-gated stance (offensive blocked when compromised). Wave 5/10 added standing indicator with recovery forecast and CA recovery penalty. Order interpretation preview loop added pre-launch context (deriveOrderInterpretation), stance-change preview (deriveStanceInterpretation), and three-tier operation outcome category (ordinary/reluctant/direct intervention). Reports in `docs/40_reports/implemented/20260404_PRESIDENTIAL_COMMAND_FRICTION_WAVE4.md` and `docs/40_reports/implemented/20260404_ORDER_INTERPRETATION_PREVIEW_LOOP.md`.

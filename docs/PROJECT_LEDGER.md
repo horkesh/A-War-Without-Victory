@@ -1,3 +1,13 @@
+## 2026-04-04 — Commander Explanation Surfaces Wave 3 (Relief Path)
+
+- `command_strain.ts`: `reliefPath` added to `CorpsSituationAssessment` + `classifyPrimaryConstraint()` return type. 17 grounded relief strings per constraint sub-case (deficit counts, exhaustion %, stance changes, stabilization, plan causes). No fake forecasting.
+- `types.ts`: +reliefPath on FormationView.situationAssessment
+- `CorpsSituationSection.tsx`: relief path rendered as arrow (→) subtitle between dominant reason banner and detail factors
+- 9 new Wave 13 tests in `tests/command_authority.test.ts` — 219/219 pass
+- Orchestrator: 4 parallel subagents (architect, UI/UX, gameplay, QA) — all findings accepted
+- Verification: tsc clean, 2153/2173 (20 pre-existing), vite build clean, governance OK
+- Report: `docs/40_reports/implemented/20260404_COMMANDER_EXPLANATION_SURFACES_WAVE3.md`
+
 ## 2026-04-04 — Commander Explanation Surfaces Wave 2 (Decision-Useful Constraint Classification)
 
 - `command_strain.ts`: `PrimaryConstraint` type (7-value enum) + `classifyPrimaryConstraint()` — priority-ordered classification: siege > threat > defensive_duty > force_condition > institutional > plan > none. `dominantReason` + `primaryConstraint` added to `CorpsSituationAssessment`

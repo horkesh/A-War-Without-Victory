@@ -1,11 +1,14 @@
 /**
- * CorpsSituationSection — Commander Explanation Surfaces Wave 1 + Wave 2.
+ * CorpsSituationSection — Commander Explanation Surfaces Wave 1 + 2 + 3.
  *
  * Canonical surface for "why is this corps leaning this way?"
  * Derived from CommanderState on-read — no engine mutation.
  *
  * Wave 1: descriptive factors (military, institutional, threat, plan)
- * Wave 2: dominant reason banner with constraint-type badge + detail factors below
+ * Wave 2: dominant reason banner with constraint-type badge
+ * Wave 3: relief path — what would need to change for the constraint to ease
+ *
+ * Hierarchy: badge+reason → relief path → detail factors
  *
  * Silence = healthy: renders null when all fields are empty/null.
  * Presidential language: institutional explanation, not brigade-level diagnostics.
@@ -24,6 +27,7 @@ interface CorpsSituationSectionProps {
         threatContext: string | null;
         dominantReason: string | null;
         primaryConstraint: PrimaryConstraint;
+        reliefPath: string | null;
     } | undefined;
 }
 
@@ -43,6 +47,7 @@ export function CorpsSituationSection({ assessment }: CorpsSituationSectionProps
     const {
         dominantReason,
         primaryConstraint,
+        reliefPath,
         militaryFactors,
         institutionalFactors,
         planExplanation,
@@ -69,7 +74,7 @@ export function CorpsSituationSection({ assessment }: CorpsSituationSectionProps
 
     return (
         <CollapsibleSection sectionKey="situation-assessment" title="Situation Assessment" defaultOpen>
-            <div className="px-3 py-2 space-y-2 text-xs">
+            <div className="px-3 py-2 space-y-1.5 text-xs">
                 {/* Wave 2: Dominant reason banner with constraint badge */}
                 {dominantReason && (
                     <div className="flex items-start gap-2">
@@ -82,46 +87,46 @@ export function CorpsSituationSection({ assessment }: CorpsSituationSectionProps
                     </div>
                 )}
 
-                {/* Detail factors — secondary to the dominant reason */}
+                {/* Wave 3: Relief path — what would need to change */}
+                {reliefPath && (
+                    <div className="flex items-start gap-1.5 pl-0.5">
+                        <span className="text-neutral-500 shrink-0 mt-px">&rarr;</span>
+                        <span className="text-neutral-400 leading-snug">{reliefPath}</span>
+                    </div>
+                )}
+
+                {/* Detail factors — secondary to the dominant reason + relief path */}
                 {showDetail && (
-                    <div className="space-y-1.5 border-t border-neutral-700/50 pt-1.5">
+                    <div className="space-y-1 border-t border-neutral-700/50 pt-1.5">
                         {/* Threat context */}
                         {threatContext && primaryConstraint !== 'threat_pressure' && primaryConstraint !== 'siege' && (
                             <div className="flex items-start gap-1.5">
-                                <span className="text-red-400 shrink-0 mt-px">&#9650;</span>
-                                <span className="text-red-300/80">{threatContext}</span>
+                                <span className="text-red-400/70 shrink-0 mt-px">&#9650;</span>
+                                <span className="text-neutral-400">{threatContext}</span>
                             </div>
                         )}
 
                         {/* Military factors */}
-                        {militaryFactors.length > 0 && (
-                            <div className="space-y-0.5">
-                                {militaryFactors.map((factor, i) => (
-                                    <div key={i} className="flex items-start gap-1.5">
-                                        <span className="text-amber-500/70 shrink-0 mt-px">&bull;</span>
-                                        <span className="text-neutral-400">{factor}</span>
-                                    </div>
-                                ))}
+                        {militaryFactors.length > 0 && militaryFactors.map((factor, i) => (
+                            <div key={i} className="flex items-start gap-1.5">
+                                <span className="text-amber-500/60 shrink-0 mt-px">&bull;</span>
+                                <span className="text-neutral-500">{factor}</span>
                             </div>
-                        )}
+                        ))}
 
                         {/* Institutional factors */}
-                        {institutionalFactors.length > 0 && (
-                            <div className="space-y-0.5">
-                                {institutionalFactors.map((factor, i) => (
-                                    <div key={i} className="flex items-start gap-1.5">
-                                        <span className="text-blue-400/70 shrink-0 mt-px">&bull;</span>
-                                        <span className="text-neutral-400">{factor}</span>
-                                    </div>
-                                ))}
+                        {institutionalFactors.length > 0 && institutionalFactors.map((factor, i) => (
+                            <div key={i} className="flex items-start gap-1.5">
+                                <span className="text-blue-400/60 shrink-0 mt-px">&bull;</span>
+                                <span className="text-neutral-500">{factor}</span>
                             </div>
-                        )}
+                        ))}
 
                         {/* Plan explanation */}
                         {planExplanation && (
                             <div className="flex items-start gap-1.5">
-                                <span className="text-neutral-500 shrink-0 mt-px">&#9654;</span>
-                                <span className="text-neutral-400">{planExplanation}</span>
+                                <span className="text-neutral-600 shrink-0 mt-px">&#9654;</span>
+                                <span className="text-neutral-500">{planExplanation}</span>
                             </div>
                         )}
                     </div>

@@ -405,6 +405,12 @@ export interface CorpsSituationAssessment {
      * 'none' = healthy. Used for UI badge coloring and decision routing.
      */
     primaryConstraint: PrimaryConstraint;
+    /**
+     * Wave 3: What would need to change for the constraint to ease.
+     * One concise sentence naming the bottleneck's inverse. Null = healthy (silence).
+     * Grounded in real state — no fake forecasting or advisory theater.
+     */
+    reliefPath: string | null;
 }
 
 /**
@@ -455,7 +461,7 @@ export function deriveCorpsSituationAssessment(
 ): CorpsSituationAssessment {
     // No commander state → no assessment (pre-commander era saves)
     if (!commanderState) {
-        return { postureSummary: null, militaryFactors: [], institutionalFactors: [], planExplanation: null, threatContext: null, dominantReason: null, primaryConstraint: 'none' };
+        return { postureSummary: null, militaryFactors: [], institutionalFactors: [], planExplanation: null, threatContext: null, dominantReason: null, primaryConstraint: 'none', reliefPath: null };
     }
 
     const zones = commanderState.zone_assessments ?? [];
@@ -592,9 +598,9 @@ export function deriveCorpsSituationAssessment(
         }
     }
 
-    // ── Wave 2: Dominant reason + primary constraint classification ────────
+    // ── Wave 2+3: Dominant reason + primary constraint + relief path ────────
     // Priority order (highest = most urgent): siege > threat > defensive_duty > force_condition > institutional > plan > none
-    const { dominantReason, primaryConstraint } = classifyPrimaryConstraint(
+    const { dominantReason, primaryConstraint, reliefPath } = classifyPrimaryConstraint(
         zones, threat, forces, plan, commanderState,
         corpsStance, exhaustion, commandStrain ?? 0, totalDeficit, totalSurplus,
         combatEffective, totalBrigades, besiegedZones, mustHoldZones,
@@ -608,6 +614,7 @@ export function deriveCorpsSituationAssessment(
         threatContext,
         dominantReason,
         primaryConstraint,
+        reliefPath,
     };
 }
 
@@ -631,13 +638,14 @@ function classifyPrimaryConstraint(
     totalBrigades: number,
     besiegedZones: Array<{ posture: string }>,
     mustHoldZones: Array<{ posture: string; deficit: number }>,
-): { dominantReason: string | null; primaryConstraint: PrimaryConstraint } {
+): { dominantReason: string | null; primaryConstraint: PrimaryConstraint; reliefPath: string | null } {
 
     // 1. Siege — existential
     if (besiegedZones.length > 0) {
         return {
             primaryConstraint: 'siege',
             dominantReason: 'Corps area is under siege — survival takes priority over offensive planning',
+            reliefPath: 'Requires breaking the encirclement or widening the corridor to restore movement freedom',
         };
     }
 
@@ -647,12 +655,14 @@ function classifyPrimaryConstraint(
         return {
             primaryConstraint: 'threat_pressure',
             dominantReason: 'Enemy offensive threatens corps integrity — all resources committed to defense',
+            reliefPath: 'Hold defensive positions and absorb the offensive; request reinforcement from Army HQ',
         };
     }
     if (pressure === 'heavy') {
         return {
             primaryConstraint: 'threat_pressure',
             dominantReason: 'Heavy enemy pressure demands defensive priority across the front',
+            reliefPath: 'Stabilize the front through sustained defense; pressure eases as enemy offensive culminates',
         };
     }
 
@@ -662,18 +672,21 @@ function classifyPrimaryConstraint(
         return {
             primaryConstraint: 'defensive_duty',
             dominantReason: `Critical positions are undermanned — ${mustHoldDeficit} brigade${mustHoldDeficit > 1 ? 's' : ''} short of minimum hold requirements`,
+            reliefPath: `Requires ${mustHoldDeficit} additional brigade${mustHoldDeficit > 1 ? 's' : ''} or consolidation of defensive positions`,
         };
     }
     if (totalDeficit > 2) {
         return {
             primaryConstraint: 'defensive_duty',
             dominantReason: `Garrison requirements exceed available forces by ${totalDeficit} brigades`,
+            reliefPath: `Requires ${totalDeficit} additional brigades or reduced garrison burden through consolidation`,
         };
     }
     if (totalSurplus === 0 && totalBrigades > 0) {
         return {
             primaryConstraint: 'defensive_duty',
             dominantReason: 'All brigades committed to garrison — no surplus available for operations',
+            reliefPath: 'Free surplus by receiving reinforcement or consolidating defended positions',
         };
     }
 
@@ -682,18 +695,21 @@ function classifyPrimaryConstraint(
         return {
             primaryConstraint: 'force_condition',
             dominantReason: 'Corps is heavily exhausted — offensive capacity severely limited',
+            reliefPath: `Exhaustion at ${Math.round(exhaustion)}% — requires reduced operational tempo to recover`,
         };
     }
     if (totalBrigades > 0 && combatEffective < totalBrigades * 0.5) {
         return {
             primaryConstraint: 'force_condition',
             dominantReason: `Only ${combatEffective} of ${totalBrigades} brigades are combat-effective`,
+            reliefPath: 'Rotate depleted brigades to rear for refit; bring replacements forward',
         };
     }
     if (exhaustion >= 40) {
         return {
             primaryConstraint: 'force_condition',
             dominantReason: 'Significant corps exhaustion is limiting operational tempo',
+            reliefPath: `Exhaustion at ${Math.round(exhaustion)}% �� limit operations to allow gradual recovery`,
         };
     }
 
@@ -702,18 +718,21 @@ function classifyPrimaryConstraint(
         return {
             primaryConstraint: 'institutional_strain',
             dominantReason: 'Corps is reorganizing — all operations suspended by directive',
+            reliefPath: 'Change corps stance to balanced or defensive when reorganization is complete',
         };
     }
     if (commandStrain >= COMPROMISED_THRESHOLD) {
         return {
             primaryConstraint: 'institutional_strain',
             dominantReason: 'Command relationship is compromised — offensive options restricted until stabilized',
+            reliefPath: 'Stabilize the command relationship or allow natural strain decay over time',
         };
     }
     if (corpsStance === 'defensive') {
         return {
             primaryConstraint: 'institutional_strain',
             dominantReason: 'Corps directed to hold defensive posture — no offensive planning authorized',
+            reliefPath: 'Change corps stance to balanced or offensive to authorize new operations',
         };
     }
 
@@ -723,12 +742,14 @@ function classifyPrimaryConstraint(
         return {
             primaryConstraint: 'plan_lifecycle',
             dominantReason: `Operation plan suspended — ${reason}`,
+            reliefPath: 'Address the suspension cause; plan resumes automatically when conditions improve',
         };
     }
     if (commanderState.last_plan_action === 'abandoned' && commanderState.last_plan_reason) {
         return {
             primaryConstraint: 'plan_lifecycle',
             dominantReason: `Recent operation plan abandoned — ${commanderState.last_plan_reason}`,
+            reliefPath: 'Commander will evaluate new objectives when surplus and conditions permit',
         };
     }
 
@@ -737,6 +758,7 @@ function classifyPrimaryConstraint(
         return {
             primaryConstraint: 'threat_pressure',
             dominantReason: 'Enemy concentration detected — defensive readiness elevated',
+            reliefPath: 'Reinforce threatened sectors; concentration may dissipate if enemy commits elsewhere',
         };
     }
 
@@ -745,11 +767,12 @@ function classifyPrimaryConstraint(
         return {
             primaryConstraint: 'institutional_strain',
             dominantReason: 'Command relationship under strain from recent presidential interventions',
+            reliefPath: 'Avoid further direct interventions; strain decays naturally over time',
         };
     }
 
     // 9. None — healthy
-    return { primaryConstraint: 'none', dominantReason: null };
+    return { primaryConstraint: 'none', dominantReason: null, reliefPath: null };
 }
 
 /**

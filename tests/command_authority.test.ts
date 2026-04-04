@@ -2131,4 +2131,128 @@ describe('Wave 10: Command Relationship Standing', () => {
             expect(result.dominantReason).toBeNull();
         });
     });
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // Wave 13: Relief Path (Commander Explanation Surfaces Wave 3)
+    // ═══════════════════════════════════════════════════════════════════════
+
+    describe('Wave 13: Relief Path', () => {
+        it('siege → relief path mentions encirclement or corridor', () => {
+            const result = deriveCorpsSituationAssessment(
+                {
+                    zone_assessments: [{ posture: 'besieged', deficit: 3, surplus_brigades: [], front_edge_count: 20 }],
+                    threat_assessment: { overall_pressure: 'heavy' },
+                    force_assessment: { total_brigades: 4, combat_effective: 3, total_surplus: 0 },
+                    current_plan: null,
+                },
+                'defensive', 50, 0,
+            );
+            expect(result.reliefPath).not.toBeNull();
+            expect(result.reliefPath).toContain('encirclement');
+        });
+
+        it('threat_pressure (critical) → relief path mentions defense or reinforcement', () => {
+            const result = deriveCorpsSituationAssessment(
+                {
+                    zone_assessments: [{ posture: 'defending', deficit: 2, surplus_brigades: [], front_edge_count: 15 }],
+                    threat_assessment: { overall_pressure: 'critical' },
+                    force_assessment: { total_brigades: 6, combat_effective: 5, total_surplus: 0 },
+                    current_plan: null,
+                },
+                'balanced', 30, 0,
+            );
+            expect(result.reliefPath).not.toBeNull();
+            expect(result.reliefPath).toContain('reinforcement');
+        });
+
+        it('defensive_duty (deficit) → relief path mentions brigade count needed', () => {
+            const result = deriveCorpsSituationAssessment(
+                {
+                    zone_assessments: [{ posture: 'defending', deficit: 4, surplus_brigades: [], front_edge_count: 12 }],
+                    threat_assessment: { overall_pressure: 'moderate' },
+                    force_assessment: { total_brigades: 5, combat_effective: 5, total_surplus: 0 },
+                    current_plan: null,
+                },
+                'balanced', 20, 0,
+            );
+            expect(result.reliefPath).not.toBeNull();
+            expect(result.reliefPath).toContain('4');
+            expect(result.reliefPath).toContain('brigade');
+        });
+
+        it('force_condition (heavy exhaustion) → relief path mentions exhaustion % and recovery', () => {
+            const result = deriveCorpsSituationAssessment(
+                {
+                    zone_assessments: [{ posture: 'balanced', deficit: 0, surplus_brigades: ['b1'], front_edge_count: 6 }],
+                    threat_assessment: { overall_pressure: 'low' },
+                    force_assessment: { total_brigades: 6, combat_effective: 6, total_surplus: 1 },
+                    current_plan: null,
+                },
+                'balanced', 65, 0,
+            );
+            expect(result.reliefPath).not.toBeNull();
+            expect(result.reliefPath).toContain('65%');
+            expect(result.reliefPath).toContain('recover');
+        });
+
+        it('institutional_strain (compromised) → relief path mentions stabilize or decay', () => {
+            const result = deriveCorpsSituationAssessment(
+                {
+                    zone_assessments: [{ posture: 'projecting', deficit: 0, surplus_brigades: ['b1', 'b2'], front_edge_count: 5 }],
+                    threat_assessment: { overall_pressure: 'low' },
+                    force_assessment: { total_brigades: 8, combat_effective: 8, total_surplus: 2 },
+                    current_plan: null,
+                },
+                'balanced', 10, 7,
+            );
+            expect(result.reliefPath).not.toBeNull();
+            expect(result.reliefPath!.toLowerCase()).toMatch(/stabilize|decay/);
+        });
+
+        it('institutional_strain (defensive stance) → relief path mentions stance change', () => {
+            const result = deriveCorpsSituationAssessment(
+                {
+                    zone_assessments: [{ posture: 'balanced', deficit: 0, surplus_brigades: ['b1'], front_edge_count: 6 }],
+                    threat_assessment: { overall_pressure: 'low' },
+                    force_assessment: { total_brigades: 6, combat_effective: 6, total_surplus: 1 },
+                    current_plan: null,
+                },
+                'defensive', 10, 0,
+            );
+            expect(result.reliefPath).not.toBeNull();
+            expect(result.reliefPath).toContain('stance');
+        });
+
+        it('plan_lifecycle (suspended) → relief path mentions suspension cause', () => {
+            const result = deriveCorpsSituationAssessment(
+                {
+                    zone_assessments: [{ posture: 'balanced', deficit: 0, surplus_brigades: ['b1'], front_edge_count: 6 }],
+                    threat_assessment: { overall_pressure: 'low' },
+                    force_assessment: { total_brigades: 6, combat_effective: 6, total_surplus: 1 },
+                    current_plan: { objective_description: 'Op Vrbas', status: 'suspended', suspension_reason: 'threat on flank' },
+                },
+                'balanced', 10, 0,
+            );
+            expect(result.reliefPath).not.toBeNull();
+            expect(result.reliefPath).toContain('suspension');
+        });
+
+        it('none (healthy) → relief path is null', () => {
+            const result = deriveCorpsSituationAssessment(
+                {
+                    zone_assessments: [{ posture: 'projecting', deficit: 0, surplus_brigades: ['b1', 'b2'], front_edge_count: 5 }],
+                    threat_assessment: { overall_pressure: 'low' },
+                    force_assessment: { total_brigades: 8, combat_effective: 8, total_surplus: 3 },
+                    current_plan: null,
+                },
+                'balanced', 10, 0,
+            );
+            expect(result.reliefPath).toBeNull();
+        });
+
+        it('null commanderState → relief path is null', () => {
+            const result = deriveCorpsSituationAssessment(null, 'balanced', 10, 0);
+            expect(result.reliefPath).toBeNull();
+        });
+    });
 });
