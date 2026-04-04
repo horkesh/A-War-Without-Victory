@@ -1,3 +1,13 @@
+## 2026-04-04 — Command Review Consolidation Wave 8
+
+- `OperationsSection.tsx`: `OutcomeCategoryBadge` added to executing/recovery op-card header row — three-tier (ordinary_compliance = silence, reluctant_compliance = amber dim, direct_intervention = amber bold); matches `CommandRecord` terminology from OperationBriefingModal
+- `OperationsSection.tsx`: `[ REVIEW COMMAND DECISION ]` button on executing/recovery cards where `commander_assessment_at_launch` snapshot exists — opens `OperationBriefingModal` from list context via `setOperationBriefingContext`
+- Button label fix: `[ FORCE LAUNCH — N AUTH ]` → `[ DIRECT INTERVENTION — N AUTH ]` (canonical doctrine terminology)
+- 11 new Wave 8 tests in `tests/command_authority.test.ts` (2095/2115 full suite pass, 20 pre-existing failures unchanged)
+- Verification: tsc clean, build clean, governance OK
+- Report: `docs/40_reports/implemented/20260404_COMMAND_REVIEW_CONSOLIDATION_WAVE8.md`
+- Commits: c70986cf (Waves 2-4), e26a0227 (docs/tools), 235dd14f (Wave 8)
+
 ## 2026-04-04 — Operation Outcome Category (Order Interpretation Preview Loop Wave 3 / Command Friction Wave 7)
 
 - Added `deriveOperationOutcomeCategory()` + `OperationOutcomeCategory` type to `src/ui/map/data/command_strain.ts` (Wave 7 block)
