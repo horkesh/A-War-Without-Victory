@@ -2,11 +2,13 @@
  * Order Interpretation Section — Wave 5 pre-decision context surface.
  * Stance Interpretation Section — Wave 6 stance-change preview.
  *
- * Fires even on clean (non-overriding) approvals when corps strain > 0.
+ * Fires on clean approvals when corps strain > 0, and on reluctant assessments
+ * even when strain is 0 if the institutional drag is caution/feasibility/tempo.
  * The DirectInterventionSection owns the override-cost display; this section
  * owns the institutional context visible BEFORE the player commits.
  *
- * Silence = healthy: renders null when strain === 0 (ops) or pendingStance === currentStance (stance).
+ * Silence = healthy: renders null when interpretation severity === 'normal'
+ * (ops) or pendingStance === currentStance (stance).
  *
  * See docs/20_engineering/PRESIDENTIAL_COMMAND_DOCTRINE.md §Order Interpretation.
  */

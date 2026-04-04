@@ -12,7 +12,7 @@ Operation Briefing Modal (planning phase) shows the interpretation category badg
 `OrderInterpretationSection` in `OperationBriefingModal`. Derivation: `deriveOrderInterpretation` in `command_strain.ts`.
 
 ### Test count
-~12 focused tests (Wave 20). Full suite: [QA to confirm].
+33 focused tests in `tests/ui/command_strain_interpretation.test.ts`, plus the updated `tests/command_authority.test.ts` coverage (`290/290`). Full suite: `2277/2277`.
 
 ### Orchestration
 Parallel workstreams: gameplay-programmer (derivation), ui-ux-developer (UI), qa-engineer (tests+verification), documentation-specialist (docs).
