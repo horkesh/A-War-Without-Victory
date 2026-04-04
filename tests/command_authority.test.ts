@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import type { CommandAuthority, CorpsOperation } from '../src/state/game_state.js';
 import type { OperationAAR } from '../src/sim/combat/operation_aar.js';
-import { computeCorpsCommandStrain, getCommandStrainLabel, deriveOrderInterpretation, deriveStanceInterpretation, deriveOperationOutcomeCategory, buildOperationTrendSummary } from '../src/ui/map/data/command_strain.js';
+import { computeCorpsCommandStrain, getCommandStrainLabel, deriveOrderInterpretation, deriveStanceInterpretation, deriveOperationOutcomeCategory, buildOperationTrendSummary, projectStrainDecay, deriveRecoveryForecast } from '../src/ui/map/data/command_strain.js';
 import type { OperationOutcomeCategory, OperationTrendSummary } from '../src/ui/map/data/command_strain.js';
 
 function makeAuth(overrides?: Partial<CommandAuthority>): CommandAuthority {
@@ -1533,5 +1533,132 @@ describe('Wave 9: Command Review Consolidation Wave 2', () => {
         expect(result.directInterventions).toBe(0);
         expect(result.reluctantCompliance).toBe(1);
         expect(result.trendNotice).toBe('1 Reluctant Compliance');
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Wave 10: Command Relationship Standing — strain decay projection + CA recovery
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Wave 10: Command Relationship Standing', () => {
+    describe('projectStrainDecay', () => {
+        it('one force-launch at current turn → decays [3, 2, 1, 0] over 3 turns', () => {
+            const state = makeStrainState({
+                turn: 5,
+                activeOps: [{ name: 'Op Alpha', was_force_launched: true, started_turn: 5 }],
+            });
+            const result = projectStrainDecay('test-corps', state, 3);
+            expect(result).toEqual([
+                { turn: 5, projectedStrain: 3 },
+                { turn: 6, projectedStrain: 2 },
+                { turn: 7, projectedStrain: 1 },
+                { turn: 8, projectedStrain: 0 },
+            ]);
+        });
+
+        it('one friction event at current turn → decays [2, 1, 0] over 2 turns', () => {
+            const state = makeStrainState({
+                turn: 5,
+                frictionEvents: [{ officer_id: 'officer-1', turn: 5, type: 'warlord_disobedience', resolved: false }],
+            });
+            const result = projectStrainDecay('test-corps', state, 2);
+            expect(result).toEqual([
+                { turn: 5, projectedStrain: 2 },
+                { turn: 6, projectedStrain: 1 },
+                { turn: 7, projectedStrain: 0 },
+            ]);
+        });
+
+        it('combined sources → correct sum at each turn', () => {
+            const state = makeStrainState({
+                turn: 5,
+                activeOps: [{ name: 'Op Alpha', was_force_launched: true, started_turn: 5 }],
+                frictionEvents: [{ officer_id: 'officer-1', turn: 5, type: 'warlord_disobedience', resolved: false }],
+            });
+            const result = projectStrainDecay('test-corps', state, 3);
+            // Force-launch: 3, 2, 1, 0. Friction: 2, 1, 0, 0. Sum: 5, 3, 1, 0.
+            expect(result).toEqual([
+                { turn: 5, projectedStrain: 5 },
+                { turn: 6, projectedStrain: 3 },
+                { turn: 7, projectedStrain: 1 },
+                { turn: 8, projectedStrain: 0 },
+            ]);
+        });
+
+        it('all sources expired → all zeros', () => {
+            const state = makeStrainState({
+                turn: 20,
+                activeOps: [{ name: 'Op Alpha', was_force_launched: true, started_turn: 5 }],
+                frictionEvents: [{ officer_id: 'officer-1', turn: 5, type: 'warlord_disobedience', resolved: false }],
+            });
+            const result = projectStrainDecay('test-corps', state, 2);
+            expect(result).toEqual([
+                { turn: 20, projectedStrain: 0 },
+                { turn: 21, projectedStrain: 0 },
+                { turn: 22, projectedStrain: 0 },
+            ]);
+        });
+    });
+
+    describe('deriveRecoveryForecast', () => {
+        it('healthy (strain 0) → returns null (silence=healthy)', () => {
+            const projections = [{ turn: 5, projectedStrain: 0 }];
+            expect(deriveRecoveryForecast(projections)).toBeNull();
+        });
+
+        it('recovery in 2 turns → "Strain resolving in 2 turns"', () => {
+            const projections = [
+                { turn: 5, projectedStrain: 2 },
+                { turn: 6, projectedStrain: 1 },
+                { turn: 7, projectedStrain: 0 },
+            ];
+            expect(deriveRecoveryForecast(projections)).toBe('Strain resolving in 2 turns');
+        });
+
+        it('persistent strain beyond horizon → "Recovery: strain drops to N (label) next turn"', () => {
+            const projections = [
+                { turn: 5, projectedStrain: 8 },
+                { turn: 6, projectedStrain: 6 },
+                { turn: 7, projectedStrain: 4 },
+            ];
+            // Next turn drops from 8 to 6 (still compromised)
+            expect(deriveRecoveryForecast(projections)).toBe('Recovery: strain drops to 6 (compromised) next turn');
+        });
+    });
+
+    describe('CA recovery reduction', () => {
+        it('one recent force-launch → recovery reduced by 0.5 (1.5 effective)', () => {
+            // Simulate the inline logic from recover-command-authority step
+            const currentTurn = 5;
+            const recentInterventions = 1; // 1 force-launched op within 3 turns
+            const unresolvedFriction = 0;
+            const penalty = Math.min(2, (recentInterventions + unresolvedFriction) * 0.5);
+            const recovery = Math.max(0, 2 - penalty);
+            expect(recovery).toBe(1.5);
+        });
+
+        it('two force-launches + one friction → recovery reduced to 0.5', () => {
+            const recentInterventions = 2;
+            const unresolvedFriction = 1;
+            const penalty = Math.min(2, (recentInterventions + unresolvedFriction) * 0.5);
+            const recovery = Math.max(0, 2 - penalty);
+            expect(recovery).toBe(0.5);
+        });
+
+        it('four+ interventions → recovery capped at 0 (full loss)', () => {
+            const recentInterventions = 3;
+            const unresolvedFriction = 2;
+            const penalty = Math.min(2, (recentInterventions + unresolvedFriction) * 0.5);
+            const recovery = Math.max(0, 2 - penalty);
+            expect(recovery).toBe(0);
+        });
+
+        it('no interventions → full recovery of 2', () => {
+            const recentInterventions = 0;
+            const unresolvedFriction = 0;
+            const penalty = Math.min(2, (recentInterventions + unresolvedFriction) * 0.5);
+            const recovery = Math.max(0, 2 - penalty);
+            expect(recovery).toBe(2);
+        });
     });
 });

@@ -14,6 +14,7 @@ import { useGameStore } from '../../store/gameStore';
 import { Icon } from '../icons/Icon';
 import { CommanderSection } from './CommanderSection';
 import { CommandManagementSection } from './CommandManagementSection';
+import { CommandRelationshipSection } from './CommandRelationshipSection';
 import { SectorsSection } from './SectorsSection';
 import { OperationsSection } from './OperationsSection';
 import { OrbatSection } from './OrbatSection';
@@ -120,7 +121,10 @@ export function ArmyHQCorpsCard({
         const stabilizationCostCA = corps.stabilizationCostCA ?? 0;
         const currentTurn = gameState.turn ?? 0;
 
-        return { totalPersonnel, avgCohesion, avgFatigue, eff, commander, stance, activeOp, corpsBattles, equipment, strain, strainLabel, frictionTypes, frictionEvents, stabilizationAvailable, stabilizationCooldownUntil, stabilizationCostCA, currentTurn };
+        const recoveryForecast = corps.recoveryForecast ?? null;
+        const unresolvedFrictionCount = frictionEvents.filter(e => !e.resolved).length;
+
+        return { totalPersonnel, avgCohesion, avgFatigue, eff, commander, stance, activeOp, corpsBattles, equipment, strain, strainLabel, frictionTypes, frictionEvents, stabilizationAvailable, stabilizationCooldownUntil, stabilizationCostCA, currentTurn, recoveryForecast, unresolvedFrictionCount };
     }, [corps, brigades, sectors, operations, factionBattles, gameState]);
 
     const displayName = formatCorpsDisplayName(corps.name, corps.id);
@@ -430,64 +434,45 @@ export function ArmyHQCorpsCard({
                 );
             })()}
 
-            {/* Command Strain / Friction panel — back face (Wave 3: full resolution surface) */}
-            {(data.strain > 0 || data.frictionEvents.length > 0) && (
+            {/* Friction panel — back face (Wave 3: resolution surface, Wave 10: strain row moved to Standing section) */}
+            {data.frictionEvents.filter(e => !e.resolved).length > 0 && (
                 <div className="px-4 py-2 border-b border-panel-border bg-panel-bg/60 flex flex-col gap-1.5">
-                    {/* Strain score row */}
-                    {data.strain > 0 && (
-                        <div className="flex items-center gap-2">
-                            <span
-                                className={`text-[9px] font-bold tracking-widest uppercase ${
-                                    data.strainLabel === 'compromised' ? 'text-red-400' : 'text-amber-400'
-                                }`}
-                                title={
-                                    data.strainLabel === 'compromised'
-                                        ? 'Repeated presidential intervention has severely undermined command cohesion.'
-                                        : 'Presidential overrides have strained this command relationship.'
-                                }
-                            >
-                                Command Strain: {data.strainLabel === 'compromised' ? 'Compromised' : 'Strained'} [{data.strain}]
-                            </span>
-                        </div>
-                    )}
                     {/* Friction event list — unresolved events with Acknowledge buttons */}
-                    {data.frictionEvents.filter(e => !e.resolved).length > 0 && (
-                        <div className="flex flex-col gap-1">
-                            {data.frictionEvents.filter(e => !e.resolved).map(event => (
-                                <div
-                                    key={event.compositeKey}
-                                    className="flex items-center justify-between gap-2 py-0.5"
-                                >
-                                    <div className="flex items-center gap-1.5 min-w-0">
-                                        <span className="text-amber-500 text-[9px]">·</span>
-                                        <span className="text-[10px] text-amber-400 font-mono truncate">
-                                            {event.typeLabel}
-                                        </span>
-                                        <span className="text-[9px] text-text-secondary/60 font-mono shrink-0">
-                                            Wk {event.turn}
-                                        </span>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        onClick={(e) => { e.stopPropagation(); void handleAcknowledgeFriction(event); }}
-                                        className="shrink-0 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 border border-amber-600/40 text-amber-500 bg-amber-900/20 hover:bg-amber-900/40 hover:border-amber-500/60 transition-colors"
-                                        title="Acknowledge this friction event to reduce command strain over time."
-                                    >
-                                        Acknowledge
-                                    </button>
+                    <div className="flex flex-col gap-1">
+                        {data.frictionEvents.filter(e => !e.resolved).map(event => (
+                            <div
+                                key={event.compositeKey}
+                                className="flex items-center justify-between gap-2 py-0.5"
+                            >
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                    <span className="text-amber-500 text-[9px]">·</span>
+                                    <span className="text-[10px] text-amber-400 font-mono truncate">
+                                        {event.typeLabel}
+                                    </span>
+                                    <span className="text-[9px] text-text-secondary/60 font-mono shrink-0">
+                                        Wk {event.turn}
+                                    </span>
                                 </div>
-                            ))}
-                            <p className="text-[9px] text-text-secondary/50 italic mt-0.5">
-                                Acknowledging friction events reduces command strain over time.
-                            </p>
-                        </div>
-                    )}
+                                <button
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); void handleAcknowledgeFriction(event); }}
+                                    className="shrink-0 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 border border-amber-600/40 text-amber-500 bg-amber-900/20 hover:bg-amber-900/40 hover:border-amber-500/60 transition-colors"
+                                    title="Acknowledge this friction event to reduce command strain over time."
+                                >
+                                    Acknowledge
+                                </button>
+                            </div>
+                        ))}
+                        <p className="text-[9px] text-text-secondary/50 italic mt-0.5">
+                            Acknowledging friction events reduces command strain over time.
+                        </p>
+                    </div>
                 </div>
             )}
 
             {/* Sections wrapper */}
             <div className="flex flex-col gap-[1px] bg-panel-bg">
-                {/* Command Management — Wave 4: stabilize action + stance constraint notice */}
+                {/* Command Management — Wave 4: stabilize action */}
                 {data.strain > 0 && (
                     <CommandManagementSection
                         corpsId={corps.id}
@@ -499,6 +484,14 @@ export function ArmyHQCorpsCard({
                         currentTurn={data.currentTurn}
                     />
                 )}
+                {/* Command Relationship Standing — Wave 10: strain status, forecast, friction summary */}
+                <CommandRelationshipSection
+                    corpsId={corps.id}
+                    commandStrain={data.strain}
+                    commandStrainLabel={data.strainLabel}
+                    recoveryForecast={data.recoveryForecast}
+                    unresolvedFrictionCount={data.unresolvedFrictionCount}
+                />
                 <CommanderSection corps={corps} gameState={gameState} />
                 <SectorsSection corpsId={corps.id} sectors={sectors} factionBattles={factionBattles} />
                 <OperationsSection corpsId={corps.id} operations={operations} gameState={gameState} commandStrain={data.strain} commandStrainLabel={data.strainLabel} />

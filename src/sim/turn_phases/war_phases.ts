@@ -1101,9 +1101,32 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             const auth = context.state.military.command_authority;
             if (!auth) return;
-            // Reset per-turn spend counter, then recover +2 (base rate)
+            // Reset per-turn spend counter
             auth.spent_this_turn = 0;
-            auth.current = Math.min(auth.max, auth.current + 2);
+
+            // Wave 10: CA recovery penalty for recent presidential interventions.
+            // Each recent force-launched op (within 3 turns) or unresolved friction
+            // event (within 2 turns) reduces recovery by 0.5, capped at full loss.
+            // No UI imports — inline approximation of strain sources.
+            const currentTurn = context.state.meta?.turn ?? 0;
+            let recentInterventions = 0;
+            const corpsCommand = context.state.military.corps_command;
+            if (corpsCommand) {
+                for (const corpsId of Object.keys(corpsCommand).sort()) {
+                    const corps = corpsCommand[corpsId];
+                    for (const op of (corps.active_operations ?? [])) {
+                        if (op.was_force_launched && (currentTurn - (op.started_turn ?? currentTurn)) < 3) {
+                            recentInterventions++;
+                        }
+                    }
+                }
+            }
+            const unresolvedFriction = (context.state.military.friction_events ?? [])
+                .filter((e: { resolved: boolean; turn: number }) => !e.resolved && (currentTurn - e.turn) < 2).length;
+
+            const penalty = Math.min(2, (recentInterventions + unresolvedFriction) * 0.5);
+            const recovery = Math.max(0, 2 - penalty);
+            auth.current = Math.min(auth.max, auth.current + recovery);
         }
     },
     {

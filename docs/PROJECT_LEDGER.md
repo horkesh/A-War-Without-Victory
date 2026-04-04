@@ -1,3 +1,17 @@
+## 2026-04-04 — Presidential Command Friction Wave 5 (Standing + Decay Preview + CA Consequence)
+
+- `command_strain.ts`: `projectStrainDecay()` projects strain over future turns via shallow state copies; `deriveRecoveryForecast()` derives player-facing string (null when healthy)
+- `types.ts`: `projectedStrainNextTurn` + `recoveryForecast` added to FormationView
+- `GameStateAdapter.ts`: wires projection computation after existing strain fields
+- `CommandRelationshipSection.tsx`: NEW component — consolidated strain status, recovery forecast, friction count, stance constraint notice. Silence=healthy. Placed between CommandManagement and Commander sections
+- `CommandManagementSection.tsx`: stance constraint notice removed (moved to Standing section); retains Stabilize button only
+- `OperationsSection.tsx`: command-risk warning demoted to single inline line
+- `ArmyHQCorpsCard.tsx`: inline strain score row removed from friction panel (Standing section owns it); friction panel now only renders when unresolved events exist
+- `war_phases.ts`: `recover-command-authority` step now applies CA recovery penalty for recent force-launched ops and unresolved friction (0.5 per source, capped at full recovery loss). No UI imports — inline approximation
+- 10 new Wave 10 tests in `tests/command_authority.test.ts` — 179/179 pass
+- Verification: tsc clean, 179/179 pass, build clean
+- Report: `docs/40_reports/implemented/20260404_PRESIDENTIAL_COMMAND_FRICTION_WAVE5.md`
+
 ## 2026-04-04 — Command Review Consolidation Wave 2 (test Wave 9)
 
 - `OperationHistoryPanel.tsx`: generic `⚠ Override` badge replaced with three-tier `OutcomeCategoryBadge` (ordinary_compliance = silence, reluctant_compliance = amber dim, direct_intervention = amber bold) — same tier logic as Wave 8 / OperationsSection

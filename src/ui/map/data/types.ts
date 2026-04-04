@@ -220,6 +220,10 @@ export interface FormationView {
     stabilizationCooldownUntil?: number;
     /** CA cost for Stabilize action: 15 if compromised, 10 if strained, 0 if no CA system. */
     stabilizationCostCA?: number;
+    /** Projected command strain for turn+1 (derived on-read). */
+    projectedStrainNextTurn?: number;
+    /** Player-facing recovery forecast string. null = healthy (silence=healthy). */
+    recoveryForecast?: string | null;
 }
 
 /**

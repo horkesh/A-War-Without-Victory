@@ -71,6 +71,13 @@ Purpose: repo-local architect board for active findings, accepted direction, and
    - CommandManagementSection: new collapsible component, silence=healthy
    - notify.ps1: native Windows toast fallback added
 
+3. **CLOSED 2026-04-04** — Presidential Command Friction Wave 5 / Wave 10 (Standing + Decay Preview + CA Consequence).
+   - `projectStrainDecay` + `deriveRecoveryForecast` in command_strain.ts — strain projection over future turns
+   - `CommandRelationshipSection` (new): consolidated standing indicator with strain status, recovery forecast, friction count, stance constraint notice. Silence=healthy.
+   - CA recovery penalty in `recover-command-authority` step: 0.5 per recent intervention/friction, capped at full recovery loss. Inline approximation (no UI imports).
+   - CommandManagementSection: stance constraint notice removed (Standing section owns it). OperationsSection: command-risk demoted to inline.
+   - 10 Wave 10 tests; 179/179 pass.
+
 - **CLOSED 2026-04-04** — **Order Interpretation Preview Loop (Wave 5)**
    - Gap: clean-approval launches showed no strain context. `DirectInterventionSection` only fires on override path.
    - `deriveOrderInterpretation` added to `command_strain.ts`: severity (normal/caution/alarm), cautionNotice (null=healthy), interventionStrength.
@@ -169,5 +176,5 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 - RESOLVED (Wave 3 friction): warlord friction resolution now requires player acknowledgement — sets resolved: true via IPC. Unresolved events accumulate until acknowledged; decay already reduces their strain contribution to 0 after 2 turns but they remain visible until acknowledged. Auto-resolve path would conflict with the visible loop.
 - RESOLVED (Wave 3 mechanics): command strain remains purely informational through Wave 3. Wave 4 can add a real mechanical consequence (e.g. CA recovery rate reduction for compromised corps) only if grounded in an existing field. No fake modifiers.
 - RESOLVED (Wave 4): Stabilize Command Relationship action wired. Player can pay CA to resolve all friction at once with 3-turn cooldown. Stance gate blocks offensive when compromised (strain ≥ 6).
-- Wave 5 open: should the back face show "strain will drop to X next turn" preview? Decay math is in command_strain.ts — trivial to add. Useful signal for player deciding whether to stabilize now vs wait one turn.
+- RESOLVED (Wave 5/10): back face now shows recovery forecast via `projectStrainDecay` + `deriveRecoveryForecast`. CommandRelationshipSection displays "Strain resolving in N turns" or "Recovery: strain drops to N (label) next turn". CA recovery penalty also landed.
 - Wave 5 open: what is the right scope for strain sources beyond force-launch and warlord friction? Corps exhaustion (`corps_exhaustion` on CorpsCommandState) could contribute — needs calibration study before adding.

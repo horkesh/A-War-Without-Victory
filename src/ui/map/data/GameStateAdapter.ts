@@ -23,7 +23,7 @@ import { getMunicipalitySupportLabel } from '../../../sim/combat/municipality_su
 import { strictCompare } from '../../../state/validateGameState.js';
 import { computeFullVerdict } from '../../../sim/negotiation/scoring.js';
 import type { GameVerdict } from '../../../state/negotiation_types.js';
-import { computeCorpsCommandStrain, getCommandStrainLabel } from './command_strain.js';
+import { computeCorpsCommandStrain, getCommandStrainLabel, projectStrainDecay, deriveRecoveryForecast } from './command_strain.js';
 import type { GameState } from '../../../state/game_state.js';
 
 function pointsByFaction(rec: Record<string, { points?: number }>): Record<string, number> {
@@ -877,6 +877,11 @@ export function parseGameState(json: unknown): LoadedGameState {
                 const strain = computeCorpsCommandStrain(fv.id, state as unknown as GameState);
                 fv.commandStrain = strain;
                 fv.commandStrainLabel = getCommandStrainLabel(strain);
+
+                // ── Strain decay projection (Wave 10) ────────────────────────────
+                const projections = projectStrainDecay(fv.id, state as unknown as GameState, 5);
+                fv.projectedStrainNextTurn = projections.length > 1 ? projections[1].projectedStrain : strain;
+                fv.recoveryForecast = deriveRecoveryForecast(projections);
 
                 // ── Active friction events for this corps's commander ─────────────
                 const frictionEvents = (state.military.friction_events as Array<{ officer_id: string; turn: number; type: string; resolved: boolean }> | undefined) ?? [];

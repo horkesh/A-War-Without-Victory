@@ -523,19 +523,14 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                 <div className="text-[11px] text-text-secondary/60 italic py-2 font-mono uppercase">NO ACTIVE OPERATIONS DETECTED</div>
             ) : (
                 <div className="space-y-3">
-                    {/* Command-risk notice — shown when this corps carries strain AND has active ops.
+                    {/* Command-risk inline reminder — demoted in Wave 10 (Standing section owns detail).
                         Silence = healthy: no notice at strain 0. */}
                     {commandStrain > 0 && (
-                        <div className={`border-l-2 pl-2 py-1 text-[10px] font-mono ${
-                            commandStrainLabel === 'compromised'
-                                ? 'border-red-500/60 bg-red-500/5 text-red-400'
-                                : 'border-amber-500/60 bg-amber-500/5 text-amber-400'
+                        <p className={`text-[9px] font-mono italic ${
+                            commandStrainLabel === 'compromised' ? 'text-red-400/70' : 'text-amber-400/70'
                         }`}>
-                            {commandStrainLabel === 'compromised'
-                                ? 'Command Compromised — high-risk operating conditions. Presidential interventions have damaged command cohesion.'
-                                : `Command Strain: ${commandStrainLabel.charAt(0).toUpperCase() + commandStrainLabel.slice(1)} — operations proceeding under strained command conditions.`
-                            }
-                        </div>
+                            Operating under command strain
+                        </p>
                     )}
                     {operations.map((op) => {
                         const opKey = `${op.corps_id}|${op.name}`;

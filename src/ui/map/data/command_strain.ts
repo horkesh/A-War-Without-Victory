@@ -302,3 +302,56 @@ export function buildOperationTrendSummary(
     }
     return { totalCompleted: total, directInterventions, reluctantCompliance, trendNotice };
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Strain Decay Projection — Wave 10
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Project strain decay timeline for a corps.
+ * Returns an array of { turn, projectedStrain } for the next N turns.
+ * Pure derivation — calls computeCorpsCommandStrain with projected turn values.
+ */
+export function projectStrainDecay(
+    corpsId: string,
+    state: GameState,
+    turnsAhead: number = 3,
+): Array<{ turn: number; projectedStrain: number }> {
+    const currentTurn = state.meta?.turn ?? 0;
+    const projections: Array<{ turn: number; projectedStrain: number }> = [];
+    for (let offset = 0; offset <= turnsAhead; offset++) {
+        const projTurn = currentTurn + offset;
+        // Create a shallow copy with projected turn
+        const projectedState = { ...state, meta: { ...state.meta, turn: projTurn } } as GameState;
+        const strain = computeCorpsCommandStrain(corpsId, projectedState);
+        projections.push({ turn: projTurn, projectedStrain: strain });
+    }
+    return projections;
+}
+
+/**
+ * Derive a recovery forecast string for player display.
+ * Returns null when healthy (silence=healthy).
+ */
+export function deriveRecoveryForecast(
+    projections: Array<{ turn: number; projectedStrain: number }>,
+): string | null {
+    if (projections.length === 0) return null;
+    const currentStrain = projections[0].projectedStrain;
+    if (currentStrain === 0) return null; // silence=healthy
+
+    // Find first turn where strain reaches 0
+    const recoveryEntry = projections.find(p => p.projectedStrain === 0);
+    if (recoveryEntry) {
+        const turnsUntilRecovery = recoveryEntry.turn - projections[0].turn;
+        return `Strain resolving in ${turnsUntilRecovery} turn${turnsUntilRecovery !== 1 ? 's' : ''}`;
+    }
+
+    // Still has strain at projection horizon
+    const nextTurnStrain = projections.length > 1 ? projections[1].projectedStrain : currentStrain;
+    const nextLabel = getCommandStrainLabel(nextTurnStrain);
+    if (nextTurnStrain < currentStrain) {
+        return `Recovery: strain drops to ${nextTurnStrain} (${nextLabel}) next turn`;
+    }
+    return `Strain persisting at ${currentStrain}`;
+}

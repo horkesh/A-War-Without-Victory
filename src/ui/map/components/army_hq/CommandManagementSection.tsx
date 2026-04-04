@@ -67,17 +67,6 @@ export function CommandManagementSection({
             defaultOpen={isCompromised}
         >
             <div className="flex flex-col gap-2.5">
-                {/* Stance constraint notice — only when compromised */}
-                {isCompromised && (
-                    <div className="flex items-start gap-1.5 px-2 py-1.5 bg-red-900/20 border border-red-500/30">
-                        <span className="text-red-400 text-[9px] mt-0.5 shrink-0">⚠</span>
-                        <p className="text-[10px] text-red-300 leading-snug">
-                            Aggressive stance unavailable while command is compromised.
-                            Stabilize the command relationship first.
-                        </p>
-                    </div>
-                )}
-
                 {/* Stabilize button */}
                 <div className="flex flex-col gap-1">
                     <button
