@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import type { CommandAuthority, CorpsOperation } from '../src/state/game_state.js';
 import type { OperationAAR } from '../src/sim/combat/operation_aar.js';
-import { computeCorpsCommandStrain, getCommandStrainLabel, deriveOrderInterpretation, deriveStanceInterpretation } from '../src/ui/map/data/command_strain.js';
+import { computeCorpsCommandStrain, getCommandStrainLabel, deriveOrderInterpretation, deriveStanceInterpretation, deriveOperationOutcomeCategory } from '../src/ui/map/data/command_strain.js';
+import type { OperationOutcomeCategory } from '../src/ui/map/data/command_strain.js';
 
 function makeAuth(overrides?: Partial<CommandAuthority>): CommandAuthority {
     return { current: 100, max: 100, spent_this_turn: 0, lifetime_spent: 0, ...overrides };
@@ -1345,5 +1346,41 @@ describe('Wave 6: Stance Interpretation Preview', () => {
         const caution = deriveStanceInterpretation(3, 'strained', 'offensive');
         const constrained = deriveStanceInterpretation(6, 'compromised', 'offensive');
         expect(caution.notice).not.toBe(constrained.notice);
+    });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Wave 7 — Operation Outcome Category
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Wave 7: Operation Outcome Category', () => {
+    it('returns ordinary_compliance when assessment=launch, wasForce=false', () => {
+        expect(deriveOperationOutcomeCategory('launch', false)).toBe('ordinary_compliance');
+    });
+    it('returns ordinary_compliance when assessment=null, wasForce=false', () => {
+        expect(deriveOperationOutcomeCategory(null, false)).toBe('ordinary_compliance');
+    });
+    it('returns ordinary_compliance when assessment=undefined, wasForce=false', () => {
+        expect(deriveOperationOutcomeCategory(undefined, false)).toBe('ordinary_compliance');
+    });
+    it('returns reluctant_compliance when assessment=postpone, wasForce=false', () => {
+        expect(deriveOperationOutcomeCategory('postpone', false)).toBe('reluctant_compliance');
+    });
+    it('returns reluctant_compliance when assessment=abort, wasForce=false', () => {
+        expect(deriveOperationOutcomeCategory('abort', false)).toBe('reluctant_compliance');
+    });
+    it('returns direct_intervention when wasForce=true regardless of assessment', () => {
+        expect(deriveOperationOutcomeCategory('launch', true)).toBe('direct_intervention');
+        expect(deriveOperationOutcomeCategory('postpone', true)).toBe('direct_intervention');
+        expect(deriveOperationOutcomeCategory('abort', true)).toBe('direct_intervention');
+        expect(deriveOperationOutcomeCategory(null, true)).toBe('direct_intervention');
+    });
+    it('direct_intervention takes priority over reluctant_compliance', () => {
+        // wasForce=true with postpone assessment → direct_intervention, not reluctant
+        expect(deriveOperationOutcomeCategory('postpone', true)).toBe('direct_intervention');
+    });
+    it('ordinary_compliance is the default when no snapshot exists', () => {
+        // No snapshot (undefined) + no force = ordinary default
+        expect(deriveOperationOutcomeCategory(undefined, false)).toBe('ordinary_compliance');
     });
 });

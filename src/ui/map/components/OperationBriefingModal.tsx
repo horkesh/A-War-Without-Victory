@@ -8,6 +8,8 @@ import { useGameStore } from '../store/gameStore';
 import { formatRank, getArchetype, formatPips, getRatingColor } from '../utils/officerCharacter';
 import { getPlayerSafeCorpsName, getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { findPlayerFacingOperationByKey } from '../../shared/playerVisibility';
+import { OrderInterpretationSection } from './army_hq/OrderInterpretationSection';
+import { deriveOperationOutcomeCategory } from '../data/command_strain';
 
 const FORCE_LAUNCH_COST = 15;
 const RECOVERY_PER_TURN = 2;
@@ -67,7 +69,8 @@ function ForceLaunchBadge({ caCost }: { caCost: number }) {
 }
 
 /** Command Record — canonical four-part presidential decision surface.
- *  Shown on executing/recovery ops when commander_assessment_at_launch is available. */
+ *  Shown on executing/recovery ops when commander_assessment_at_launch is available.
+ *  Three outcome tiers: ordinary_compliance / reluctant_compliance / direct_intervention. */
 function CommandRecord({ assessmentAtLaunch, wasForce, caCost, corpsStrain, corpsStrainLabel }: {
     assessmentAtLaunch: 'launch' | 'postpone' | 'abort';
     wasForce: boolean;
@@ -75,6 +78,8 @@ function CommandRecord({ assessmentAtLaunch, wasForce, caCost, corpsStrain, corp
     corpsStrain: number;
     corpsStrainLabel: 'healthy' | 'strained' | 'compromised';
 }) {
+    const outcomeCategory = deriveOperationOutcomeCategory(assessmentAtLaunch, wasForce);
+
     return (
         <div className="mx-4 mt-3 mb-1 border border-neutral-300 bg-neutral-50">
             <div className="px-3 py-1.5 border-b border-neutral-200 bg-neutral-100">
@@ -87,16 +92,30 @@ function CommandRecord({ assessmentAtLaunch, wasForce, caCost, corpsStrain, corp
                 </div>
                 <div className="flex items-center gap-2">
                     <span className="text-[9px] uppercase font-bold text-neutral-500 w-36 shrink-0">Presidential Decision</span>
-                    {wasForce ? (
+                    {outcomeCategory === 'direct_intervention' ? (
                         <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-amber-100 text-amber-800 border border-amber-400">
-                            ⚠ Overrode Command Chain
+                            ⚠ Direct Intervention
+                        </span>
+                    ) : outcomeCategory === 'reluctant_compliance' ? (
+                        <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-amber-50 text-amber-700 border border-amber-300">
+                            Approved Against Recommendation
                         </span>
                     ) : (
                         <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-green-100 text-green-800 border border-green-300">
-                            Approved
+                            Ordinary Compliance
                         </span>
                     )}
                 </div>
+                {/* Reluctant compliance explanation — command chain complied under presidential direction, no CA spent */}
+                {outcomeCategory === 'reluctant_compliance' && (
+                    <div className="flex items-start gap-2 pt-1 border-t border-neutral-200 mt-1">
+                        <span className="text-[9px] uppercase font-bold text-neutral-500 w-36 shrink-0 mt-0.5">Interpretation</span>
+                        <p className="text-[10px] text-amber-700 leading-snug">
+                            Launched against the commander's recommendation to {assessmentAtLaunch}. The command chain complied under presidential direction.
+                        </p>
+                    </div>
+                )}
+                {/* CA cost row — only when force-launched (Direct Intervention). Reluctant compliance does NOT show CA cost: no CA was spent. */}
                 {wasForce && (
                     <div className="flex items-center gap-2">
                         <span className="text-[9px] uppercase font-bold text-neutral-500 w-36 shrink-0">Command Authority Spent</span>
@@ -286,6 +305,16 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                         <span className="text-[8px] text-neutral-400">({postponements} prior postponement{postponements > 1 ? 's' : ''})</span>
                     )}
                 </div>
+
+                {/* Order Interpretation Preview — fires even on clean approvals when strain > 0.
+                    Only in planning phase (decision-ready). DirectInterventionSection owns
+                    the override-cost display; this section owns pre-decision institutional context. */}
+                {operation.phase === 'planning' && (
+                    <OrderInterpretationSection
+                        strain={corpsStrain}
+                        commanderAssessment={assessment as 'launch' | 'postpone' | 'abort' | null | undefined}
+                    />
+                )}
 
                 {/* Direct Intervention — only when commander does NOT recommend launch */}
                 {assessment !== 'launch' && onForceLaunch && (

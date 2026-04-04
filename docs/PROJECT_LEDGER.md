@@ -1,3 +1,15 @@
+## 2026-04-04 — Operation Outcome Category (Order Interpretation Preview Loop Wave 3 / Command Friction Wave 7)
+
+- Added `deriveOperationOutcomeCategory()` + `OperationOutcomeCategory` type to `src/ui/map/data/command_strain.ts` (Wave 7 block)
+- `CommandRecord` in `OperationBriefingModal.tsx` upgraded from two-tier (Approved / Overrode Command Chain) to three-tier: `ordinary_compliance` (green), `reluctant_compliance` (amber light + Interpretation row), `direct_intervention` (amber bold)
+- Reluctant compliance gap closed: president launching despite commander's postpone/abort recommendation — without spending CA — now produces a distinct "Approved Against Recommendation" badge and an interpretation row stating which recommendation was overridden
+- "⚠ Overrode Command Chain" badge text updated to "⚠ Direct Intervention" (canonical terminology)
+- CA cost row and institutional strain follow-through remain gated on `wasForce` only; reluctant_compliance shows no CA row (no CA spent)
+- `ForceLaunchBadge` legacy fallback unchanged; `OrderInterpretationSection` (Wave 5, planning phase) unchanged
+- 8 tests in `Wave 7: Operation Outcome Category` describe block in `tests/command_authority.test.ts`; 150/150 total in file pass
+- Verification: tsc clean, 8/8 Wave 7 pass, 2084/2104 full suite pass (20 pre-existing failures), governance OK
+- Report: `docs/40_reports/implemented/20260404_OPERATION_OUTCOME_CATEGORY_WAVE3.md`
+
 ## 2026-04-04 — Stance Interpretation Preview — Wave 2 (Command Friction Wave 6)
 
 - Added `deriveStanceInterpretation()` + `StanceInterpretation` interface to `src/ui/map/data/command_strain.ts` (Wave 6 block)

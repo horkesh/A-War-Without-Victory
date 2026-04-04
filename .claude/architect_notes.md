@@ -78,6 +78,23 @@ Purpose: repo-local architect board for active findings, accepted direction, and
    - 12 tests in `Wave 5: Order Interpretation Preview` block in `command_authority.test.ts`.
    - Report: `docs/40_reports/implemented/20260404_ORDER_INTERPRETATION_PREVIEW_LOOP.md`
 
+- **CLOSED 2026-04-04** — **Operation Outcome Category (Order Interpretation Preview Loop Wave 3 / Command Friction Wave 7)**
+   - Gap: `CommandRecord` collapsed ordinary approval and reluctant compliance into a single "Approved" badge, hiding the case where the president launched against the commander's recommendation without spending CA.
+   - `deriveOperationOutcomeCategory` + `OperationOutcomeCategory` type added to `command_strain.ts` (Wave 7 block): pure derivation, three tiers — `ordinary_compliance` / `reluctant_compliance` / `direct_intervention`.
+   - `CommandRecord` in `OperationBriefingModal.tsx` upgraded to three-tier display: green Ordinary Compliance, amber-light Approved Against Recommendation (+ Interpretation row), amber-bold Direct Intervention.
+   - "⚠ Overrode Command Chain" → "⚠ Direct Intervention" (canonical terminology).
+   - Silence = healthy: ordinary_compliance shows clean green badge, no explanation row.
+   - CA cost row and institutional strain follow-through remain gated on `wasForce` only.
+   - 8 tests in `Wave 7: Operation Outcome Category` block; 150/150 command_authority tests pass.
+   - Report: `docs/40_reports/implemented/20260404_OPERATION_OUTCOME_CATEGORY_WAVE3.md`
+
+- **Wave 8 candidates (post-Wave 7):**
+   - Outcome category surfaced in operation history / AAR review panel (CommandRecord covers live ops; history tab shows completed ops but may still use two-tier display)
+   - Reluctant compliance frequency counter: if a president repeatedly launches against commander recommendations without CA, surface a cumulative "command relationship pressure" indicator
+   - Strain decay preview on back face ("strain will drop to X next turn" — decay math already in command_strain.ts)
+   - Expand strain sources: corps exhaustion above threshold (grounded in `CorpsState.corps_exhaustion`)
+   - Connect strain to CA recovery rate reduction (compromised corps recover CA slower — needs recovery modifier in war_phases.ts)
+
 - **CLOSED 2026-04-04** — **Stance Interpretation Preview (Order Interpretation Preview Loop Wave 2 / Command Friction Wave 6)**
    - Gap: stance dropdown committed immediately with zero preview even when corps was strained + requesting offensive.
    - `deriveStanceInterpretation` added to `command_strain.ts`: severity (normal/caution/constrained), notice (null=healthy), isBlocked.

@@ -170,6 +170,40 @@ export function deriveOrderInterpretation(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Operation Outcome Category — Wave 7
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * The institutional outcome category of an operation launch decision.
+ *
+ * Derived from the launch snapshot — pure function, no side effects.
+ *
+ * - ordinary_compliance:  commander recommended launch; president approved. Normal channel.
+ * - reluctant_compliance: commander recommended postpone/abort; president launched via
+ *                         ordinary approval (no CA spent, no Direct Intervention flag).
+ *                         The command chain complied under presidential direction.
+ * - direct_intervention:  president force-launched against commander judgment; CA was spent.
+ *                         Sets was_force_launched=true in engine state.
+ */
+export type OperationOutcomeCategory = 'ordinary_compliance' | 'reluctant_compliance' | 'direct_intervention';
+
+/**
+ * Derive the outcome category for an operation launch.
+ *
+ * @param assessmentAtLaunch - Commander's recommendation at the moment of presidential decision.
+ * @param wasForce           - Whether the president used Direct Intervention (CA spent).
+ * @returns OperationOutcomeCategory — pure derivation, no side effects.
+ */
+export function deriveOperationOutcomeCategory(
+    assessmentAtLaunch: 'launch' | 'postpone' | 'abort' | null | undefined,
+    wasForce: boolean,
+): OperationOutcomeCategory {
+    if (wasForce) return 'direct_intervention';
+    if (assessmentAtLaunch === 'postpone' || assessmentAtLaunch === 'abort') return 'reluctant_compliance';
+    return 'ordinary_compliance';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Stance Interpretation Preview — Wave 6
 // ═══════════════════════════════════════════════════════════════════════════
 
