@@ -1,3 +1,21 @@
+## Roadmap Validation Gate 1 - 2026-04-04
+
+### What changed
+- Added `docs/40_reports/implemented/20260404_ROADMAP_VALIDATION_GATE_1_COMMAND_SYSTEM_REALITY_CHECK.md`.
+- Reviewed the recent command-system package against repo wiring and current run chronology.
+- Resolved the open `n941` question from repo evidence: `n941` is an older run artifact, not the current HEAD validation baseline.
+
+### Result
+- The command-system package is treated as validated enough to resume roadmap implementation.
+- The `92.4% vs 93.7%` comparison and `brcko` re-failure do not block this gate because they came from stale run `n941`, not the current calibration baseline `n1302`.
+- Remaining anomaly labels are split into:
+  - separate investigation items
+  - non-defects
+  - not gate blockers
+
+### Canonical owner
+- `docs/40_reports/implemented/20260404_ROADMAP_VALIDATION_GATE_1_COMMAND_SYSTEM_REALITY_CHECK.md`
+
 ## Orchestration Roster Correction - 2026-04-04
 
 ### What changed

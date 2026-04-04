@@ -86,11 +86,13 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 
 ## Next Priority Lanes
 
-1. ~~**Expand strain sources:**~~ DONE (Wave 6). Corps exhaustion ≥50/≥75 now contributes to strain.
-2. ~~**Order Interpretation System Wave 1:**~~ DONE (2026-04-04). ~~**Order Interpretation System Wave 2:**~~ DONE (2026-04-04). ~~**Order Interpretation System Wave 3:**~~ DONE (2026-04-04). Category-differentiated consequence copy in DirectInterventionSection. Order Interpretation System complete (Waves 1–3).
-3. **gradacac_2 P0 investigation:** RS overperforming on newly-covered fronts — pre-existing
-4. **vrs_east_bosnian zero-attack ops:** all non-Koridor total_attacks=0 — BFS reachability or stale objective filter (part of 39% ZEA anomaly)
-5. **v0.8.1 Commander Maturity gate check:** full two-tier post-run panel go/no-go on commander system
+1. **gradacac_2 P0 investigation:** roadmap item 1 remains the next real engine/calibration lane.
+2. **v0.8.1 Commander Maturity gate check:** full two-tier post-run panel go/no-go on commander system.
+3. **ZEA / calibration side anomalies:** separate investigation bucket only after roadmap item 1; not part of the command-system validation gate.
+
+## Validation Gate Note
+
+- **Roadmap Validation Gate 1 — CLOSED 2026-04-04.** Command-system package validated enough to resume roadmap work. The stale `n941` comparison was resolved from repo evidence: `n941` is an older run artifact, not the current HEAD baseline. `n1302` remains the calibration ATH reference for this phase. Report: `docs/40_reports/implemented/20260404_ROADMAP_VALIDATION_GATE_1_COMMAND_SYSTEM_REALITY_CHECK.md`.
 
 ## Open Questions
 
