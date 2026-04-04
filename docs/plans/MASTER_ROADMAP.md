@@ -1,6 +1,6 @@
 # AWWV Master Roadmap — Pyrrhic Games
 
-**Last Updated:** 2026-04-03
+**Last Updated:** 2026-04-04
 **Current Version:** 0.8.0 (Command Chain)
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."
@@ -85,7 +85,7 @@ Event flag wiring (25 flags), exhaustion overhaul, Codex QA (30 essay correction
 
 PERCEIVE-DECIDE-EXECUTE per-corps loop. 10 files in `src/sim/combat/commander/` (~3,800 lines). Zone detection, garrison allocation (Grigsby two-pass), multi-turn planning, intel-reactive stance, force fitness scoring. Replaces `generateCorpsDirectives` behind `USE_COMMANDER_LOOP` flag. Concurrent corps operations (multi-slot). Serializer Map/Set support.
 
-**Status:** n1289 = 93.2% area-weighted, 25/25 anchors (first ever), 6/6 benchmarks, 1685 tests. Combat factor overhaul complete (P1–P4, P7, P8, P10). Sector merge guard implemented. brcko P0 resolved. generateCorpsDirectives removed. USE_COMMANDER_LOOP flag removed.
+**Status:** n1302 = 93.7% area-weighted (ATH), 25/25 anchors, 6/6 benchmarks. Combat factor overhaul complete (P1–P4, P7, P8, P10). Sector merge guard implemented. brcko P0 resolved. generateCorpsDirectives removed. USE_COMMANDER_LOOP flag removed.
 
 **Open P0:** gradacac_2 (RS overperforming newly-covered fronts — pre-existing).
 
@@ -103,6 +103,18 @@ PERCEIVE-DECIDE-EXECUTE per-corps loop. 10 files in `src/sim/combat/commander/` 
 **Execution plan:** `docs/plans/2026-03-31-v080x-1992-foundation-essays-plan.md`
 **Immediate engine-health lane:** Sector/frontline truth hardening, truthful reachability, and reporting alignment. Plan: `docs/plans/2026-04-03-v080x-sector-frontline-truth-plan.md`
 - **COMPLETE 2026-04-04 (Waves 1–4).** All 6 plan phases landed. Phase 1.5 front-adjacency guard, assertBrigadeReachability actionable return, assigned_sub_segment_id cleared on demotion, adapter canonical-first sub-segment derivation, displacement trigger proxy-fork observable (console.warn), activity zero-fill, activity summary fidelity. 29 regression tests across 4 wave files lock all invariants. Lane: CLOSED.
+**Presidential Command / Friction / Review (v0.8.0.x UX lane):**
+- Command authority system: CA resource, force-launch costs, recovery mechanics, CA recovery penalty from friction/intervention
+- Command friction waves 1-5: strain visibility → friction resolution → stabilization action → standing indicator → CA recovery consequence
+- Order interpretation preview loop: pre-launch context (deriveOrderInterpretation), stance-change preview (deriveStanceInterpretation), operation outcome category (ordinary/reluctant/direct intervention)
+- Command review consolidation: outcome badge on live + history ops, trend summary with three-tier display
+- Player knowledge integrity: adapter wave (omniscient leak removal), intel fog (uncertainty-qualified language, bucketed confidence)
+- Presidential between-ops events: Strategic Posture Review, Visit to the Front (3 factions, JSON content)
+- Command chain truth: sector frontline hardening (4 waves, 29 regression tests, canonical sub-segment derivation)
+- Warroom React migration: 4 waves + final canvas deletion (483 lines removed). `src/ui/map/components/warroom/` sole owner.
+- Runtime asset canonicalization: webp migration, 11 dead PNG twins deleted.
+- **Status: COMPLETE 2026-04-04.** All shipped as v0.8.0.x UX/truth work.
+
 - **Presidential decision events (Phase C):** 3 recurring event types (Strategic Posture Review, Visit to the Front, Humanitarian Crisis Response) — pure JSON content, zero engine changes. Fills 29-turn and 20-turn decision gaps in 1993-1994. Design: `docs/40_reports/implemented/20260403_PRESIDENTIAL_DECISIONS_BETWEEN_OPS.md`. Assign to `/narrative-designer` + `/game-designer`.
 
 ### v0.8.1 — Commander Maturity
@@ -152,6 +164,8 @@ Order interpretation system: when the player issues a corps stance change, launc
 
 **Minimum viable command review surface owned here:** before finalizing this milestone, the player can inspect what order was issued, how the corps/army chain interpreted it, what was accepted or modified, why friction occurred, and what override cost is being proposed. This is the minimum truthful UX layer for command friction.
 
+**Partial advance (2026-04-04):** Command review surfaces, friction visibility, order interpretation preview, and outcome categorization now landed as v0.8.0.x UX work. v0.8.3 still owns the full order interpretation *system* (commander personality filter, delay/refusal logic, political capital for overrides) but the minimum viable review UX is no longer a v0.8.3 blocker.
+
 Plans: `docs/plans/2026-03-24-v081-order-interpretation-plan.md`, `docs/plans/2026-03-31-v083-player-command-review-ux-plan.md`, `docs/plans/2026-03-31-v08to09-army-corps-authority-coherence-plan.md`, `docs/plans/2026-03-31-v08to09-commander-explanation-surfaces-plan.md`, architecture section 2.
 
 ### v0.8.4 — Autonomy Depth + Claude API at Political Level
@@ -195,8 +209,9 @@ If the implementer cannot answer all five, the task is not ready to start.
 - Clean up hardcoded rails cataloged in `docs/40_reports/20260330_RAILROAD_HUNTER_REPORT.md`: doctrine phase constants that override commander judgment, corps name-checks, blitz phase exemptions
 - Operations ownership: one canonical operation object with one lifecycle ✅ (2026-04-01 — `sector_offensive.ts` owns all op-type lifecycle; `corps_operation_helpers.ts` owns creation factories; `bot_corps_operations.ts` demoted to permitted activation entry points only; `OperationView` + `GameStateAdapter` declared canonical UI path; `AuthorizePhase.tsx` commander identity fixed)
 - Operation launch contract: sector-anchored, corps-authorized, reinforcement-bounded — NOT YET IMPLEMENTED. Plan: `docs/plans/2026-04-01-v08x-sector-anchored-corps-operations-plan.md` (needs amendment before execution — sector_id naming, writer inventory, attachment thresholds, calibration gate)
-- Player knowledge integrity: renderer must stop receiving omniscient "full state plus fog" truth. Plan: `docs/plans/2026-04-01-v08x-player-knowledge-integrity-plan.md`. Immediate v0.8.0.x hotfixes allowed for worst live leaks (enemy ops/intel leakage, raw ids in player UI, missing Warroom return path, hidden Codex affordance).
-- Studio governance contracts for product truth: `docs/20_engineering/PLAYER_VISIBLE_STATE.md`, `docs/20_engineering/UI_OWNERSHIP_MATRIX.md`, `docs/20_engineering/DEBUG_SURFACE_POLICY.md`, `docs/20_engineering/FEATURE_DONE_MEANS.md`
+- Player knowledge integrity: renderer must stop receiving omniscient "full state plus fog" truth. Plan: `docs/plans/2026-04-01-v08x-player-knowledge-integrity-plan.md`. **Wave 2 landed (2026-04-04):** RawIntelTab removed, threat assessment uses uncertainty-qualified language + bucketed confidence. Remaining: own-sector force-balance precision in CorpsFrontPanel.
+- Studio governance contracts for product truth: `docs/20_engineering/PLAYER_VISIBLE_STATE.md`, `docs/20_engineering/UI_OWNERSHIP_MATRIX.md`, `docs/20_engineering/DEBUG_SURFACE_POLICY.md`, `docs/20_engineering/FEATURE_DONE_MEANS.md` — **All four docs landed and actively enforced (2026-04-03).**
+- Command authority / delegation substrate: **Partially built (2026-04-04).** CA resource with force-launch costs, friction visibility, stabilization action (pay CA to resolve friction, 3-turn cooldown), strain-gated stance (offensive blocked when compromised), CA recovery penalty from intervention/friction. Full delegation visibility remains v0.8.3+.
 - Movement ownership: reduce movement writers from ~7 competing sources to one intent owner + small execution stack
 - Boundary comments in all hotspot files naming what is canonical vs transitional
 
@@ -222,19 +237,19 @@ No version bump — engineering milestone between feature releases. Stabilizatio
 | Magic numbers | bot_constants.ts scattered thresholds | Domain-grouped constant files |
 | Canon docs | Systems Manual and Game Bible reference pre-v0.8 architecture | Updated for v0.8 command chain |
 | Save/load + replay hardening | Desktop save/load still partial while later milestones depend on replay/log truth | Explicit save/load, replay, and migration hardening. Plan: `docs/plans/2026-03-31-v08to09-save-load-and-replay-hardening-plan.md` |
-| UI surface ownership | Army HQ, Warroom, map panels, ops modal, and future command-review surfaces can drift into duplicate half-owners | One clear ownership matrix for command, ops, review, and explanation surfaces. Plan: `docs/plans/2026-03-31-v08to09-ui-surface-ownership-plan.md` |
+| UI surface ownership | Army HQ, Warroom, map panels, ops modal, and future command-review surfaces can drift into duplicate half-owners. **Warroom React migration complete (2026-04-04); Army HQ command-review ownership clarified.** | One clear ownership matrix for command, ops, review, and explanation surfaces. Plan: `docs/plans/2026-03-31-v08to09-ui-surface-ownership-plan.md` |
 | UI density + shell cohesion | Warroom, Tactical Map, Army HQ, Chronicle, and Codex still carry dead air, spacing waste, and shell seams that make the product feel like tools rather than one game | Tightened spacing, clearer hierarchy, and shell-level cohesion across the live player journey. Plan: `docs/plans/2026-04-03-v08to09-ui-density-and-shell-cohesion-plan.md` |
 | Player knowledge integrity | Desktop / tactical map still trends toward omniscient renderer payloads plus fog visuals | Player-facing state boundary, leak classifications, display-name discipline, and desktop knowledge integrity contract. Primary plan: `docs/plans/2026-04-01-v08x-player-knowledge-integrity-plan.md` |
-| Studio truth governance | Cross-cutting product rules were living in chat and reviewer instinct instead of hard repo contracts | Use `PLAYER_VISIBLE_STATE.md`, `UI_OWNERSHIP_MATRIX.md`, `DEBUG_SURFACE_POLICY.md`, and `FEATURE_DONE_MEANS.md` as permanent studio governance docs for product truth and review language |
+| Studio truth governance | **All four governance docs landed and actively enforced (2026-04-03).** Cross-cutting product rules now live in repo contracts, not chat memory. | `PLAYER_VISIBLE_STATE.md`, `UI_OWNERSHIP_MATRIX.md`, `DEBUG_SURFACE_POLICY.md`, `FEATURE_DONE_MEANS.md` — permanent studio governance docs for product truth and review language |
 | Product architecture simplification | Entry points, adapters, and hotspot files still let transitional paths look co-equal to canonical ones | Simplify entrypoints, adapter ownership, and product shell boundaries the way a strong strategy studio would. Plan: `docs/plans/2026-04-03-v08to09-product-architecture-simplification-plan.md` |
 | Army-command maturity | Army layer is serviceable but still undernamed and too implicit as a real command substrate | Explicit army-command maturity and responsibility model. Plan: `docs/plans/2026-03-31-v08to09-army-command-maturity-plan.md` |
 | Army ↔ corps command coherence | Assumed rather than owned; handshake and authority boundaries are still undernamed | Named handshake rules, ownership comments, and explicit authority boundaries. Plan: `docs/plans/2026-03-31-v08to09-army-corps-authority-coherence-plan.md` |
 | Commander explanation surfaces | Traces are becoming real, but staff/player-facing surfaces are still implicit | Build truthful explanation surfaces from real traces, not theater. Plan: `docs/plans/2026-03-31-v08to09-commander-explanation-surfaces-plan.md` |
-| Player command review UX | Order friction and later API autonomy assume preview/review/override surfaces that are not yet roadmap-owned strongly enough | Minimum viable review surface for order interpretation. Plan: `docs/plans/2026-03-31-v083-player-command-review-ux-plan.md` |
+| Player command review UX | **Significant advance (2026-04-04):** Command review surfaces now landed (v0.8.0.x) — outcome badge, trend summary, order interpretation preview, stance interpretation, three-tier outcome category. Full order interpretation *system* remains v0.8.3. | Minimum viable review UX satisfied. Full system plan: `docs/plans/2026-03-31-v083-player-command-review-ux-plan.md` |
 | Autonomy determinism and review | API-assisted autonomy can still be mistaken for readiness without hardened replay/fallback/review gates | Explicit determinism, fallback, and player-review contract. Plan: `docs/plans/2026-03-31-v084-autonomy-determinism-and-review-plan.md` |
 | Connectivity checks | Column march validates destination but not path; no enclave boundary check during transit | Full path validation |
 | **Essay template engine + Letter Home** | Not built — v0.7.1 debt. Required before v0.9.1 dynamic essays. | Build `dynamic_sections`, divergence notes, ghost entries; Letter Home vignettes in CoS briefing. Plans: `docs/plans/2026-03-23-essay-template-engine-plan.md`, `docs/plans/2026-03-25-letter-home-and-essay-authoring-spec.md` |
-| **Warroom React migration** | Vanilla TS + canvas — v0.7.2 debt. Refactor, not feature work. | Migrate to React. Plan: `docs/plans/2026-03-24-v072-warroom-react-migration-plan.md` |
+| **Warroom React migration** | **COMPLETE 2026-04-04.** React migration landed (4 waves + final canvas deletion). `src/ui/map/components/warroom/` is sole owner. `warroom.ts` retains launch/picker/iframe/bridge only. | Done. |
 | **Canon audit (v0.7.3)** | Sep 1991 start + peace phase refs still live in docs and code | Remove all references. Plan: `docs/plans/2026-03-23-canon-audit-checklist.md` |
 
 ---
@@ -399,10 +414,10 @@ These need design sessions before implementation. Preserved from the original ro
 | Equipment pipeline | Complete |
 | OOB (247 brigades, 166 active) | Complete |
 | Scenario runner | Complete |
-| Calibration pipeline | Complete (92.2% area-weighted, n1213) |
+| Calibration pipeline | Complete (93.7% area-weighted ATH, n1302, 25/25 anchors, 6/6 benchmarks) |
 | Desktop app (Electron v41) | Functional |
 | Tactical map (React + MapLibre + Deck.gl) | Functional |
-| Warroom (vanilla TS + canvas) | Functional (React migration reslotted → v0.8-to-v0.9) |
+| Warroom (React) | Complete — React migration landed 2026-04-04. `warroom.ts` retains launch/picker/iframe/bridge. |
 | Army HQ (4-tab command center) | Functional |
 | Events/decisions | Functional (94 events, pressure system, 14 condition types) |
 | Historical essays (Codex) | Complete (96 certified, 13 missing 1992 essays pending) |
@@ -428,7 +443,7 @@ These need design sessions before implementation. Preserved from the original ro
 | Victory conditions | Stub (roadmap-owned in v0.9.0) |
 | Diplomacy layer | Partial (patron pressure, alliance, IVP) |
 
-**Current:** 1661 tests, 98 suites. 92.2% area-weighted calibration (n1213, ties ATH). 712 OSIDs. 94 events. 96 certified essays.
+**Current:** 93.7% area-weighted calibration (n1302 ATH), 25/25 anchors, 6/6 benchmarks. 712 OSIDs. 94 events. 96 certified essays.
 
 ---
 
