@@ -118,9 +118,12 @@ function CommandRecord({ assessmentAtLaunch, wasForce, caCost, corpsStrain, corp
 }
 
 /** Direct Intervention section — shown when the commander does NOT recommend launch. */
-function DirectInterventionSection({ assessment, currentAuth, onForceLaunch }: {
+function DirectInterventionSection({ assessment, currentAuth, corpsStrain, corpsStrainLabel, onForceLaunch }: {
     assessment: string;
     currentAuth: number;
+    /** Existing command strain on this corps — triggers compound-risk notice when > 0. */
+    corpsStrain: number;
+    corpsStrainLabel: 'healthy' | 'strained' | 'compromised';
     onForceLaunch?: () => void;
 }) {
     const canAfford = currentAuth >= FORCE_LAUNCH_COST;
@@ -137,6 +140,12 @@ function DirectInterventionSection({ assessment, currentAuth, onForceLaunch }: {
                 <span className="text-[9px] uppercase font-bold tracking-wider text-amber-600">Level 3</span>
             </div>
             <div className="px-3 py-2 space-y-2">
+                {/* Compound-risk notice — silence = healthy (no notice at strain 0). */}
+                {corpsStrain > 0 && (
+                    <p className="text-[10px] text-amber-900 leading-relaxed border-l-2 border-amber-500/60 pl-2 bg-amber-100/60 py-1">
+                        ⚠ This corps already carries command strain ({corpsStrainLabel === 'compromised' ? 'Compromised' : 'Strained'}). A further Direct Intervention will compound institutional damage.
+                    </p>
+                )}
                 <p className="text-[10px] text-amber-900 leading-relaxed">{explanation}</p>
                 <div className="flex items-center gap-4 text-[10px] font-mono tabular-nums">
                     <span className="text-neutral-600">
@@ -283,6 +292,8 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                     <DirectInterventionSection
                         assessment={assessment ?? 'postpone'}
                         currentAuth={loadedGameState?.commandAuthority?.current ?? 0}
+                        corpsStrain={corpsStrain}
+                        corpsStrainLabel={corpsStrainLabel}
                         onForceLaunch={onForceLaunch}
                     />
                 )}
