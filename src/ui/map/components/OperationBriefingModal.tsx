@@ -535,6 +535,8 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                     <OrderInterpretationSection
                         strain={corpsStrain}
                         commanderAssessment={assessment as 'launch' | 'postpone' | 'abort' | null | undefined}
+                        primaryConstraint={situationAssessment?.primaryConstraint}
+                        trendDirection={operation.readinessTrend?.direction}
                     />
                 )}
 

@@ -1227,10 +1227,12 @@ describe('Wave 5: Order Interpretation Preview', () => {
         expect(result.cautionNotice).toBeNull();
     });
 
-    it('deriveOrderInterpretation: returns normal/null when strain=0 regardless of assessment', () => {
+    it('deriveOrderInterpretation: returns caution/caution_driven when strain=0 and assessment=postpone (Wave 1 update)', () => {
+        // Wave 1 extends classification: strain=0 + postpone → caution_driven, not normal
         const result = deriveOrderInterpretation(0, 'postpone');
-        expect(result.severity).toBe('normal');
-        expect(result.cautionNotice).toBeNull();
+        expect(result.severity).toBe('caution');
+        expect(result.category).toBe('caution_driven');
+        expect(result.cautionNotice).not.toBeNull();
     });
 
     it('deriveOrderInterpretation: returns caution when strain 1-5', () => {

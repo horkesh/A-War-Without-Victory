@@ -153,8 +153,19 @@ export function getCommandStrainLabel(score: number): CommandStrainLabel {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Order Interpretation Preview — Wave 5
+// Order Interpretation Preview — Wave 5 / Wave 1 Category Extension
 // ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Classifies the dominant institutional drag shaping how command reads a presidential directive.
+ * Used by OrderInterpretationSection for the interpretation category badge.
+ */
+export type OrderInterpretationCategory =
+    | 'strain_shaped'             // command strain is the primary institutional driver
+    | 'caution_driven'            // commander reads directive against professional judgment (readiness caution)
+    | 'feasibility_constrained'   // hard structural constraint is blocking compliance
+    | 'tempo_resistant'           // commander approaching readiness, reads directive as premature
+    | 'normal';                   // silence = healthy, no institutional drag
 
 /**
  * Describes how Army HQ is reading a presidential launch order given current
@@ -165,8 +176,12 @@ export function getCommandStrainLabel(score: number): CommandStrainLabel {
  */
 export interface OrderInterpretation {
     severity: 'normal' | 'caution' | 'alarm';
+    /** Dominant institutional drag category shaping this interpretation. */
+    category: OrderInterpretationCategory;
     /** null when severity === 'normal' (silence = healthy). */
     cautionNotice: string | null;
+    /** Compact badge label. null when category === 'normal'. */
+    categoryLabel: string | null;
     /** 'direct_intervention' when player would be overriding a reluctant commander. */
     interventionStrength: 'ordinary_approval' | 'direct_intervention';
 }
@@ -175,34 +190,93 @@ export interface OrderInterpretation {
  * Derive how Army HQ interprets an incoming launch order given the corps's
  * current command strain and the commander's standing assessment.
  *
+ * Priority order for category classification:
+ *  1. strain >= COMPROMISED_THRESHOLD → strain_shaped / alarm
+ *  2. strain > 0 → strain_shaped / caution
+ *  3. primaryConstraint in ['siege','threat_pressure','defensive_duty'] AND assessment postpone/abort → feasibility_constrained
+ *  4. assessment === 'postpone' AND trendDirection === 'improving' → tempo_resistant
+ *  5. assessment === 'postpone' || 'abort' → caution_driven
+ *  6. else → normal
+ *
  * @param strain               - Current command strain score for this corps.
  * @param commanderAssessment  - The commander's standing assessment ('launch', 'postpone', 'abort', or absent).
+ * @param primaryConstraint    - Optional: from classifyPrimaryConstraint() result.
+ * @param trendDirection       - Optional: from deriveReadinessTrend() result.
  * @returns OrderInterpretation — pure derivation, no side effects.
  */
 export function deriveOrderInterpretation(
     strain: number,
     commanderAssessment: 'launch' | 'postpone' | 'abort' | null | undefined,
+    primaryConstraint?: string | null,
+    trendDirection?: string | null,
 ): OrderInterpretation {
-    // Severity tier
-    const severity: 'normal' | 'caution' | 'alarm' =
-        strain === 0 ? 'normal'
-        : strain >= COMPROMISED_THRESHOLD ? 'alarm'
-        : 'caution';
+    // ── Category + severity classification (priority order) ────────────────
+    let category: OrderInterpretationCategory;
+    let severity: 'normal' | 'caution' | 'alarm';
 
-    // Caution notice — silence = healthy
-    const cautionNotice: string | null =
-        severity === 'normal' ? null
-        : severity === 'caution'
-            ? 'This corps is carrying command strain from recent presidential interventions. Operations proceed, but at elevated institutional friction.'
-            : 'Command cohesion is compromised. Institutional damage is severe. Further operations risk command breakdown.';
+    if (strain >= COMPROMISED_THRESHOLD) {
+        category = 'strain_shaped';
+        severity = 'alarm';
+    } else if (strain > 0) {
+        category = 'strain_shaped';
+        severity = 'caution';
+    } else if (
+        (primaryConstraint === 'siege' ||
+            primaryConstraint === 'threat_pressure' ||
+            primaryConstraint === 'defensive_duty') &&
+        (commanderAssessment === 'postpone' || commanderAssessment === 'abort')
+    ) {
+        category = 'feasibility_constrained';
+        severity = 'caution';
+    } else if (commanderAssessment === 'postpone' && trendDirection === 'improving') {
+        category = 'tempo_resistant';
+        severity = 'caution';
+    } else if (commanderAssessment === 'postpone' || commanderAssessment === 'abort') {
+        category = 'caution_driven';
+        severity = 'caution';
+    } else {
+        category = 'normal';
+        severity = 'normal';
+    }
 
-    // Intervention strength
+    // ── Caution notice — silence = healthy ─────────────────────────────────
+    let cautionNotice: string | null;
+    switch (category) {
+        case 'strain_shaped':
+            cautionNotice = severity === 'alarm'
+                ? 'Command cohesion is compromised. Institutional damage is severe. Further operations risk command breakdown.'
+                : 'This corps carries command strain from recent interventions. Operations proceed at elevated institutional friction.';
+            break;
+        case 'feasibility_constrained':
+            cautionNotice = 'Command is reading this directive as operationally blocked. Hard constraints prevent compliance regardless of presidential intent.';
+            break;
+        case 'tempo_resistant':
+            cautionNotice = 'Command is approaching readiness. The corps interprets this directive as premature — compliance will proceed but coordination is sub-optimal.';
+            break;
+        case 'caution_driven':
+            cautionNotice = 'Command is interpreting this directive against professional judgment. The corps recommends waiting but will comply under presidential direction.';
+            break;
+        default:
+            cautionNotice = null;
+    }
+
+    // ── Category label (compact badge) ────────────────────────────────────
+    let categoryLabel: string | null;
+    switch (category) {
+        case 'strain_shaped':         categoryLabel = 'STRAIN-SHAPED'; break;
+        case 'feasibility_constrained': categoryLabel = 'FEASIBILITY'; break;
+        case 'tempo_resistant':       categoryLabel = 'TEMPO'; break;
+        case 'caution_driven':        categoryLabel = 'CAUTION-DRIVEN'; break;
+        default:                      categoryLabel = null;
+    }
+
+    // ── Intervention strength ──────────────────────────────────────────────
     const interventionStrength: 'ordinary_approval' | 'direct_intervention' =
         commanderAssessment === 'postpone' || commanderAssessment === 'abort'
             ? 'direct_intervention'
             : 'ordinary_approval';
 
-    return { severity, cautionNotice, interventionStrength };
+    return { severity, category, cautionNotice, categoryLabel, interventionStrength };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

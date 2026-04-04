@@ -1,3 +1,22 @@
+## Order Interpretation System Wave 1 — 2026-04-04
+
+### What changed
+- `command_strain.ts`: New `OrderInterpretationCategory` type (strain_shaped | caution_driven | feasibility_constrained | tempo_resistant | normal). Extended `OrderInterpretation` interface with `category` + `categoryLabel`. Extended `deriveOrderInterpretation` signature with optional `primaryConstraint?` + `trendDirection?` params.
+- `OrderInterpretationSection.tsx`: New props forwarded to derivation. Category label badge in header. Now fires for all reluctant assessments (postpone/abort) even at strain=0.
+- `OperationBriefingModal.tsx`: Call site passes `situationAssessment?.primaryConstraint` and `operation.readinessTrend?.direction`.
+
+### Player-visible truth
+Operation Briefing Modal (planning phase) shows the interpretation category badge. Player can now answer: is command resistance strain-shaped, caution-driven, feasibility-constrained, or tempo-resistant?
+
+### Canonical owner
+`OrderInterpretationSection` in `OperationBriefingModal`. Derivation: `deriveOrderInterpretation` in `command_strain.ts`.
+
+### Test count
+~12 focused tests (Wave 20). Full suite: [QA to confirm].
+
+### Orchestration
+Parallel workstreams: gameplay-programmer (derivation), ui-ux-developer (UI), qa-engineer (tests+verification), documentation-specialist (docs).
+
 ## 2026-04-04 — Delegation Visibility Wave 1
 
 - `command_strain.ts`: +`deriveDelegationContext()` — pre-decision delegation path classification (normal_delegation / strained_delegation / presidential_direction). Inputs: commander_assessment + strain. Silence = healthy for normal delegation.

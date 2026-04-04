@@ -12,15 +12,17 @@
  */
 
 import { deriveOrderInterpretation, deriveStanceInterpretation } from '../../data/command_strain';
-import type { CommandStrainLabel } from '../../data/command_strain';
+import type { CommandStrainLabel, OrderInterpretationCategory } from '../../data/command_strain';
 
 interface OrderInterpretationSectionProps {
     strain: number;
     commanderAssessment: 'launch' | 'postpone' | 'abort' | null | undefined;
+    primaryConstraint?: string | null;
+    trendDirection?: string | null;
 }
 
-export function OrderInterpretationSection({ strain, commanderAssessment }: OrderInterpretationSectionProps) {
-    const { severity, cautionNotice, interventionStrength } = deriveOrderInterpretation(strain, commanderAssessment);
+export function OrderInterpretationSection({ strain, commanderAssessment, primaryConstraint, trendDirection }: OrderInterpretationSectionProps) {
+    const { severity, cautionNotice, interventionStrength, category, categoryLabel } = deriveOrderInterpretation(strain, commanderAssessment, primaryConstraint, trendDirection);
 
     // Silence = healthy
     if (severity === 'normal') return null;
@@ -29,10 +31,15 @@ export function OrderInterpretationSection({ strain, commanderAssessment }: Orde
 
     return (
         <div className={`mx-4 my-2 border ${isAlarm ? 'border-red-500/30 bg-red-900/10' : 'border-amber-500/30 bg-amber-900/10'}`}>
-            <div className={`px-3 py-1.5 border-b ${isAlarm ? 'border-red-500/20' : 'border-amber-500/20'}`}>
+            <div className={`px-3 py-1.5 border-b ${isAlarm ? 'border-red-500/20' : 'border-amber-500/20'} flex items-center justify-between`}>
                 <span className={`text-[9px] uppercase font-bold tracking-wider ${isAlarm ? 'text-red-400' : 'text-amber-400'} opacity-80`}>
                     Army HQ Interpretation
                 </span>
+                {categoryLabel && (
+                    <span className={`text-[8px] font-mono font-bold tracking-widest ${isAlarm ? 'text-red-400' : 'text-amber-400'} opacity-60`}>
+                        {categoryLabel}
+                    </span>
+                )}
             </div>
             <div className="px-3 py-2 space-y-1.5">
                 <p className={`text-[10px] leading-snug ${isAlarm ? 'text-red-300' : 'text-amber-300'}`}>
