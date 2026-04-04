@@ -12,6 +12,7 @@ import {
     filterPlayerFacingOperationHistory,
 } from '../../shared/playerVisibility';
 import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
+import { deriveOperationOutcomeCategory, buildOperationTrendSummary } from '../data/command_strain';
 
 // --- Faction styling ---
 const FACTION_COLOR: Record<string, string> = {
@@ -65,6 +66,37 @@ function getCorpsDisplayName(corpsNameById: Map<string, string>, corpsId: string
 }
 
 // --- Sub-components ---
+
+/**
+ * Three-tier outcome category badge for completed op cards.
+ * Silence = healthy: ordinary_compliance returns null (no badge).
+ * Only shown when commander_assessment_at_launch snapshot exists (post-feature ops).
+ */
+function OutcomeCategoryBadge({ assessmentAtLaunch, wasForce }: {
+    assessmentAtLaunch: 'launch' | 'postpone' | 'abort' | null | undefined;
+    wasForce: boolean;
+}) {
+    // No snapshot means pre-feature op — no badge
+    if (assessmentAtLaunch == null && !wasForce) return null;
+
+    const category = deriveOperationOutcomeCategory(assessmentAtLaunch, wasForce);
+
+    if (category === 'ordinary_compliance') return null; // silence = healthy
+
+    if (category === 'direct_intervention') {
+        return (
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/60">
+                ⚠ Direct Intervention
+            </span>
+        );
+    }
+    // reluctant_compliance
+    return (
+        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider bg-amber-400/5 text-amber-500/80 border border-amber-400/40">
+            Approved Against Recommendation
+        </span>
+    );
+}
 
 function FactionTag({ faction }: { faction: string }) {
     return (
@@ -160,13 +192,12 @@ function CompletedOpCard({
                                 {RECOVERY_REASON_BADGE[op.recovery_reason].label}
                             </span>
                         )}
-                        {op.force_launched && (
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase bg-amber-700/60 text-amber-200 border border-amber-400/40">
-                                <span>⚠ Override</span>
-                                {op.ca_cost_at_launch != null && (
-                                    <span className="text-amber-300/70 font-normal normal-case">{op.ca_cost_at_launch} CA</span>
-                                )}
-                            </span>
+                        <OutcomeCategoryBadge
+                            assessmentAtLaunch={op.commander_assessment_at_launch}
+                            wasForce={op.force_launched ?? false}
+                        />
+                        {op.force_launched && op.ca_cost_at_launch != null && (
+                            <span className="text-[9px] text-amber-300/70 font-mono tabular-nums">{op.ca_cost_at_launch} CA</span>
                         )}
                     </div>
                 </div>
@@ -210,31 +241,37 @@ function CompletedOpCard({
                     </div>
 
                     {/* Command Record — expanded provenance sentence */}
-                    {op.commander_assessment_at_launch != null && (
+                    {(op.commander_assessment_at_launch != null || op.force_launched) && (
                         <div className="text-[9px] text-text-muted border-t border-panel-border/30 pt-1.5">
                             <span className="uppercase font-bold text-text-secondary">Command Record: </span>
                             {op.force_launched ? (
                                 <>
+                                    Commander recommended <span className="font-semibold text-text-primary capitalize">{op.commander_assessment_at_launch ?? 'unknown'}</span>
+                                    {' — '}
+                                    <span className="text-amber-400 font-bold">Direct Intervention</span>
+                                    {op.ca_cost_at_launch != null && (
+                                        <span className="text-text-muted"> ({op.ca_cost_at_launch} CA spent)</span>
+                                    )}
+                                </>
+                            ) : op.commander_assessment_at_launch === 'postpone' || op.commander_assessment_at_launch === 'abort' ? (
+                                <>
                                     Commander recommended <span className="font-semibold text-text-primary capitalize">{op.commander_assessment_at_launch}</span>
                                     {' — '}
-                                    <span className="text-amber-400 font-semibold">President overrode command chain</span>
-                                    {op.ca_cost_at_launch != null && (
-                                        <span className="text-text-muted"> (cost: {op.ca_cost_at_launch} CA)</span>
-                                    )}
+                                    <span className="text-amber-500/80 font-semibold">Approved Against Recommendation</span>
                                 </>
                             ) : (
                                 <>
                                     Commander recommended <span className="font-semibold text-text-primary capitalize">{op.commander_assessment_at_launch}</span>
                                     {' — '}
-                                    <span className="text-green-400 font-semibold">President approved</span>
+                                    <span className="text-green-400 font-semibold">Approved</span>
                                 </>
                             )}
                         </div>
                     )}
-                    {/* Institutional strain note — only for force-launched ops */}
+                    {/* Institutional strain note — only for direct interventions */}
                     {op.force_launched && (
                         <div className="text-[9px] text-amber-500/80 italic">
-                            Note: Presidential override contributed to command strain on this corps.
+                            Note: Direct Intervention contributed to command strain on this corps.
                         </div>
                     )}
 
@@ -414,14 +451,24 @@ export function OperationHistoryPanel({ isOpen, onClose, embedded }: OperationHi
                     sortedHistory.length === 0 ? (
                         <div className="text-text-muted text-center py-8 text-[11px]">No completed operations yet.</div>
                     ) : (
-                        sortedHistory.map((op) => (
-                            <CompletedOpCard
-                                key={op.operation_id}
-                                op={op}
-                                corpsName={getCorpsDisplayName(corpsNameById, op.corps_id)}
-                                osidDisplayNames={osidDisplayNames}
-                            />
-                        ))
+                        <>
+                            {(() => {
+                                const trend = buildOperationTrendSummary(sortedHistory);
+                                return trend.trendNotice ? (
+                                    <div className="mb-2 px-2 py-1 rounded bg-amber-500/5 border border-amber-500/20 text-[9px] text-amber-400/80">
+                                        Command relationship: {trend.trendNotice}
+                                    </div>
+                                ) : null;
+                            })()}
+                            {sortedHistory.map((op) => (
+                                <CompletedOpCard
+                                    key={op.operation_id}
+                                    op={op}
+                                    corpsName={getCorpsDisplayName(corpsNameById, op.corps_id)}
+                                    osidDisplayNames={osidDisplayNames}
+                                />
+                            ))}
+                        </>
                     )
                 )}
             </div>

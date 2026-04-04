@@ -251,3 +251,54 @@ export function deriveStanceInterpretation(
     // All other: silence = healthy
     return { severity: 'normal', notice: null, isBlocked: false };
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Operation Trend Summary — Wave 9
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Aggregated command-relationship summary for a list of completed operations.
+ * Silence = healthy: trendNotice is null when all ops are ordinary compliance.
+ */
+export interface OperationTrendSummary {
+    totalCompleted: number;
+    directInterventions: number;
+    reluctantCompliance: number;
+    /** null when healthy — silence=healthy */
+    trendNotice: string | null;
+}
+
+/**
+ * Derive an aggregated command-relationship summary from a list of completed operations.
+ *
+ * Pure function — no GameState, no side effects. Accepts a minimal subset of
+ * CompletedOp fields so it can be called with any compatible array.
+ *
+ * @param completedOps - Array of completed ops (only force_launched + commander_assessment_at_launch used).
+ * @returns OperationTrendSummary — trendNotice is null when all ops are ordinary compliance.
+ */
+export function buildOperationTrendSummary(
+    completedOps: Array<{
+        force_launched?: boolean;
+        commander_assessment_at_launch?: 'launch' | 'postpone' | 'abort';
+    }>
+): OperationTrendSummary {
+    const total = completedOps.length;
+    let directInterventions = 0;
+    let reluctantCompliance = 0;
+    for (const op of completedOps) {
+        const cat = deriveOperationOutcomeCategory(op.commander_assessment_at_launch, op.force_launched ?? false);
+        if (cat === 'direct_intervention') directInterventions++;
+        else if (cat === 'reluctant_compliance') reluctantCompliance++;
+    }
+    // Silence = healthy: no notice if all ordinary compliance
+    const nonCompliant = directInterventions + reluctantCompliance;
+    let trendNotice: string | null = null;
+    if (total > 0 && nonCompliant > 0) {
+        const parts: string[] = [];
+        if (directInterventions > 0) parts.push(`${directInterventions} Direct Intervention${directInterventions > 1 ? 's' : ''}`);
+        if (reluctantCompliance > 0) parts.push(`${reluctantCompliance} Reluctant Compliance${reluctantCompliance > 1 ? 's' : ''}`);
+        trendNotice = parts.join(', ');
+    }
+    return { totalCompleted: total, directInterventions, reluctantCompliance, trendNotice };
+}

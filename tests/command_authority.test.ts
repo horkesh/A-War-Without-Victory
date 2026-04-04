@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import type { CommandAuthority, CorpsOperation } from '../src/state/game_state.js';
 import type { OperationAAR } from '../src/sim/combat/operation_aar.js';
-import { computeCorpsCommandStrain, getCommandStrainLabel, deriveOrderInterpretation, deriveStanceInterpretation, deriveOperationOutcomeCategory } from '../src/ui/map/data/command_strain.js';
-import type { OperationOutcomeCategory } from '../src/ui/map/data/command_strain.js';
+import { computeCorpsCommandStrain, getCommandStrainLabel, deriveOrderInterpretation, deriveStanceInterpretation, deriveOperationOutcomeCategory, buildOperationTrendSummary } from '../src/ui/map/data/command_strain.js';
+import type { OperationOutcomeCategory, OperationTrendSummary } from '../src/ui/map/data/command_strain.js';
 
 function makeAuth(overrides?: Partial<CommandAuthority>): CommandAuthority {
     return { current: 100, max: 100, spent_this_turn: 0, lifetime_spent: 0, ...overrides };
@@ -1462,5 +1462,76 @@ describe('Wave 8: Command Review Consolidation', () => {
         expect(tiers).toContain('ordinary_compliance');
         expect(tiers).toContain('reluctant_compliance');
         expect(tiers).toContain('direct_intervention');
+    });
+});
+
+describe('Wave 9: Command Review Consolidation Wave 2', () => {
+    it('empty input → zero counts, null trendNotice', () => {
+        const result: OperationTrendSummary = buildOperationTrendSummary([]);
+        expect(result).toEqual({ totalCompleted: 0, directInterventions: 0, reluctantCompliance: 0, trendNotice: null });
+    });
+
+    it('all ordinary compliance → trendNotice null (silence=healthy)', () => {
+        const ops = [
+            { force_launched: false, commander_assessment_at_launch: 'launch' as const },
+            { force_launched: false, commander_assessment_at_launch: 'launch' as const },
+            { force_launched: false, commander_assessment_at_launch: 'launch' as const },
+        ];
+        const result = buildOperationTrendSummary(ops);
+        expect(result.trendNotice).toBeNull();
+        expect(result.directInterventions).toBe(0);
+        expect(result.reluctantCompliance).toBe(0);
+    });
+
+    it('one direct_intervention → trendNotice "1 Direct Intervention"', () => {
+        const ops = [
+            { force_launched: true, commander_assessment_at_launch: 'abort' as const },
+        ];
+        const result = buildOperationTrendSummary(ops);
+        expect(result.directInterventions).toBe(1);
+        expect(result.reluctantCompliance).toBe(0);
+        expect(result.trendNotice).toBe('1 Direct Intervention');
+    });
+
+    it('two direct_interventions + one reluctant → trendNotice "2 Direct Interventions, 1 Reluctant Compliance"', () => {
+        const ops = [
+            { force_launched: true, commander_assessment_at_launch: 'abort' as const },
+            { force_launched: true, commander_assessment_at_launch: 'postpone' as const },
+            { force_launched: false, commander_assessment_at_launch: 'postpone' as const },
+        ];
+        const result = buildOperationTrendSummary(ops);
+        expect(result.directInterventions).toBe(2);
+        expect(result.reluctantCompliance).toBe(1);
+        expect(result.trendNotice).toBe('2 Direct Interventions, 1 Reluctant Compliance');
+    });
+
+    it('undefined force_launched + undefined assessment → graceful default (ordinary_compliance, no throw)', () => {
+        const ops = [
+            { force_launched: undefined, commander_assessment_at_launch: undefined },
+        ];
+        // Should not throw; undefined force_launched → ?? false → ordinary_compliance
+        expect(() => buildOperationTrendSummary(ops)).not.toThrow();
+        const result = buildOperationTrendSummary(ops);
+        expect(result.trendNotice).toBeNull();
+        expect(result.directInterventions).toBe(0);
+    });
+
+    it('force_launched true with assessmentAtLaunch "launch" → still direct_intervention (force overrides)', () => {
+        const ops = [
+            { force_launched: true, commander_assessment_at_launch: 'launch' as const },
+        ];
+        const result = buildOperationTrendSummary(ops);
+        expect(result.directInterventions).toBe(1);
+        expect(result.trendNotice).toBe('1 Direct Intervention');
+    });
+
+    it('one reluctant_compliance only → trendNotice "1 Reluctant Compliance", directInterventions 0', () => {
+        const ops = [
+            { force_launched: false, commander_assessment_at_launch: 'postpone' as const },
+        ];
+        const result = buildOperationTrendSummary(ops);
+        expect(result.directInterventions).toBe(0);
+        expect(result.reluctantCompliance).toBe(1);
+        expect(result.trendNotice).toBe('1 Reluctant Compliance');
     });
 });

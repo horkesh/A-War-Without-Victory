@@ -1,3 +1,13 @@
+## 2026-04-04 — Command Review Consolidation Wave 2 (test Wave 9)
+
+- `OperationHistoryPanel.tsx`: generic `⚠ Override` badge replaced with three-tier `OutcomeCategoryBadge` (ordinary_compliance = silence, reluctant_compliance = amber dim, direct_intervention = amber bold) — same tier logic as Wave 8 / OperationsSection
+- `OperationHistoryPanel.tsx`: Command Record expanded narrative tightened — distinguishes direct_intervention ("Direct Intervention"), reluctant_compliance ("Approved Against Recommendation"), ordinary_compliance ("Approved"); institutional strain note updated to "Direct Intervention" wording
+- `OperationHistoryPanel.tsx`: compact trend summary line added above op-card list in history tab — "Command relationship: N Direct Interventions, M Reluctant Compliances" — silence=healthy (renders nothing when all ordinary compliance)
+- `command_strain.ts`: `buildOperationTrendSummary()` + `OperationTrendSummary` interface added — pure derivation, no GameState, calls `deriveOperationOutcomeCategory` (no logic duplication)
+- 7 new Wave 9 tests in `tests/command_authority.test.ts` — 168/168 pass in file; 20 pre-existing failures in unrelated files unchanged
+- Verification: tsc clean, 168/168 Wave 9 pass, build clean
+- Report: `docs/40_reports/implemented/20260404_COMMAND_REVIEW_CONSOLIDATION_WAVE2.md`
+
 ## 2026-04-04 — Command Review Consolidation Wave 8
 
 - `OperationsSection.tsx`: `OutcomeCategoryBadge` added to executing/recovery op-card header row — three-tier (ordinary_compliance = silence, reluctant_compliance = amber dim, direct_intervention = amber bold); matches `CommandRecord` terminology from OperationBriefingModal
