@@ -1693,6 +1693,10 @@ front_edges?: FrontEdgeState[];
 war_front_edges_osid?: FrontEdgeState[];
 /** Legacy compatibility snapshot for old saves/tests only. No live turn-pipeline step should rebuild or consume it as frontline truth. */
 assignable_front_segments?: AssignableFrontSegmentState[];
+// COMPATIBILITY-ONLY: brigade_front_assignment is not written by any live runtime code.
+// It is retained for save/load backward compatibility with pre-v0.8 saves only.
+// Do NOT read this field for frontline truth. Use corps_front_sectors instead.
+// See: docs/40_reports/implemented/20260403_FRONTLINE_AUTHORITY_AND_PLAYER_SHELL_INTEL_REDUCTION.md
 /** Legacy compatibility fallback only. Null = reserve; sectors/front edges are the live frontline truth. */
 brigade_front_assignment?: Record<FormationId, string | null>;
 /** Legacy theatre compatibility state. Not a live player-shell or turn-pipeline authority. */

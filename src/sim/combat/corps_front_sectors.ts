@@ -588,7 +588,25 @@ function buildFactionSectors(
     pruned.sort((a, b) => strictCompare(a.sector_id, b.sector_id));
 
     // ── INVARIANT assertions ──
-    assertBrigadeReachability(pruned, formations, componentOf);
+    // assertBrigadeReachability returns unreachable brigade IDs; demote them from
+    // assigned_brigade_ids to reserve_brigade_ids so the pipeline does not write
+    // false frontline state. Does NOT throw — demotion is safer than hard-crash.
+    const unreachableIds = assertBrigadeReachability(pruned, formations, componentOf);
+    if (unreachableIds.length > 0) {
+        const unreachableSet = new Set(unreachableIds);
+        for (const sec of pruned) {
+            const demoted: string[] = [];
+            sec.assigned_brigade_ids = sec.assigned_brigade_ids.filter(bid => {
+                if (unreachableSet.has(bid)) { demoted.push(bid); return false; }
+                return true;
+            });
+            for (const bid of demoted) {
+                if (!sec.reserve_brigade_ids.includes(bid)) {
+                    sec.reserve_brigade_ids.push(bid);
+                }
+            }
+        }
+    }
     assertSectorBrigadesActive(pruned, formations);
 
     return pruned;

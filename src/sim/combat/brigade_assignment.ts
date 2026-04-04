@@ -371,14 +371,42 @@ export function classifyBrigadesByTerritory(
                         && (sectorComponentCache.get(s.sector_id) ?? -1) === brigComp;
                 });
 
-                if (matching.length === 1) {
-                    sectors[matching[0]!]!.assigned_brigade_ids.push(bid);
-                } else if (matching.length > 1) {
+                if (matching.length === 0) {
+                    remaining.push(bid);
+                    continue;
+                }
+
+                // Phase 1.5 guard: territory presence alone is insufficient; brigade must be
+                // within TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS of sector front to count as
+                // assigned. Brigades that pass territory but fail front-adjacency go to
+                // reserve_brigade_ids — they are real, just rear-stationed.
+                const frontReachableMatching = matching.filter(idx => {
+                    const s = sectors[idx]!;
+                    const frontSet = new Set<string>();
+                    for (const ss of s.sub_segments) for (const o of ss.friendly_osids) frontSet.add(o);
+                    if (frontSet.size === 0) return true; // no front yet — allow territory assignment
+                    const dist = friendlyDistanceToAny(loc, frontSet, adjacency, friendlyOsids, TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS);
+                    return dist !== null;
+                });
+
+                if (frontReachableMatching.length === 0) {
+                    // Brigade is in territory but cannot reach any sector front within
+                    // TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS hops. Do not assign or reserve
+                    // here — let Phase 2 and downstream repair passes handle placement.
+                    // Premature Phase 1.5 reserve insertion causes false state when the brigade
+                    // is in a disconnected or topologically ambiguous position.
+                    remaining.push(bid);
+                    continue;
+                }
+
+                if (frontReachableMatching.length === 1) {
+                    sectors[frontReachableMatching[0]!]!.assigned_brigade_ids.push(bid);
+                } else {
                     // Pick the most understaffed sector (highest deficit of edges vs assigned)
-                    let bestIdx = matching[0]!;
+                    let bestIdx = frontReachableMatching[0]!;
                     let bestNeed = sectors[bestIdx]!.length_edges - sectors[bestIdx]!.assigned_brigade_ids.length;
-                    for (let m = 1; m < matching.length; m++) {
-                        const idx = matching[m]!;
+                    for (let m = 1; m < frontReachableMatching.length; m++) {
+                        const idx = frontReachableMatching[m]!;
                         const s = sectors[idx]!;
                         const need = s.length_edges - s.assigned_brigade_ids.length;
                         if (need > bestNeed || (need === bestNeed && strictCompare(s.sector_id, sectors[bestIdx]!.sector_id) < 0)) {
@@ -387,8 +415,6 @@ export function classifyBrigadesByTerritory(
                         }
                     }
                     sectors[bestIdx]!.assigned_brigade_ids.push(bid);
-                } else {
-                    remaining.push(bid);
                 }
             }
             corpsPool.set(corpsId, remaining);
@@ -1242,6 +1268,11 @@ export function ensureMinimumSectorCoverage(
             // Step 2: transfer from surplus within the same connected component only.
             // If a component has no donor, the sector stays under-covered rather than
             // minting false cross-component sector truth.
+            // NOTE on hop ceiling: bfsToNearestSector used here has no explicit max-hop
+            // limit by design. If a brigade cannot reach the sector front through friendly
+            // territory at all (returns null), the transfer is skipped and the sector
+            // remains understaffed. This is intentional — pulling a physically unreachable
+            // brigade across a disconnected front would manufacture false assignment truth.
             {
                 let transferred = false;
 

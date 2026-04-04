@@ -53,6 +53,8 @@ export function generateThreatAssessment(
     let nextId = 0;
     const tid = () => `threat-${nextId++}`;
 
+    // NOTE: sources from sector_intel observation records, not live engine activity
+    // (intentional intel-fog — see docs/PROJECT_LEDGER_KNOWLEDGE.md)
     const sectorIntel: SectorIntelRecordView[] = (state as LoadedGameState & { sectorIntel?: SectorIntelRecordView[] }).sectorIntel ?? [];
     const sectors = state.corpsFrontSectors ?? [];
     const formations = state.formations ?? [];

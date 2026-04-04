@@ -19,18 +19,20 @@ import { getSectorComponent } from './sector_utils.js';
  *
  * This is the single diagnostic sink for the reachability invariant inside the
  * sector pipeline. All assignment paths should flow through here before sectors
- * are returned to consumers, but the function currently logs rather than throws.
+ * are returned to consumers.
  *
- * Logs violations as console.error. Sectors remain usable - the brigade still
- * cannot physically reach its sector, and downstream guards
- * (filterReachableReassignmentOrders) can catch the same mismatch for march orders.
+ * Returns the list of unreachable brigade IDs detected. The caller is responsible
+ * for demoting those brigades from assigned_brigade_ids to reserve_brigade_ids.
+ * Does NOT throw — hard-crash on corrupted saves is worse than a logged demotion.
+ *
+ * Logs violations as console.error so they remain surfaced in diagnostics.
  */
 export function assertBrigadeReachability(
     sectors: CorpsFrontSector[],
     formations: Record<FormationId, FormationState>,
     componentOf: Map<string, number>,
-): void {
-    const violations: string[] = [];
+): string[] {
+    const unreachableBrigadeIds: string[] = [];
     for (const sec of sectors) {
         const secComp = getSectorComponent(sec, componentOf);
         if (secComp === -1) continue; // sector has no mapped OSIDs - skip
@@ -43,17 +45,24 @@ export function assertBrigadeReachability(
             if (!f || !f.location_osid) continue;
             const brigComp = componentOf.get(f.location_osid) ?? -2;
             if (brigComp !== secComp) {
-                violations.push(
-                    `${bid} (at ${f.location_osid}, comp ${brigComp}) -> ${sec.sector_id} (comp ${secComp})`
-                );
+                unreachableBrigadeIds.push(bid);
             }
         }
     }
-    if (violations.length > 0) {
+    if (unreachableBrigadeIds.length > 0) {
+        const details = unreachableBrigadeIds.map(bid => {
+            const f = formations[bid];
+            const loc = f?.location_osid ?? '?';
+            const brigComp = f?.location_osid ? (componentOf.get(f.location_osid) ?? -2) : -2;
+            const sec = sectors.find(s => s.assigned_brigade_ids.includes(bid) || s.reserve_brigade_ids?.includes(bid));
+            const secComp = sec ? getSectorComponent(sec, componentOf) : -1;
+            return `${bid} (at ${loc}, comp ${brigComp}) -> ${sec?.sector_id ?? '?'} (comp ${secComp})`;
+        });
         console.error(
-            `SECTOR REACHABILITY INVARIANT VIOLATION: ${violations.length} brigade(s) assigned to unreachable sectors:\n  ${violations.join('\n  ')}`
+            `SECTOR REACHABILITY INVARIANT VIOLATION: ${unreachableBrigadeIds.length} brigade(s) assigned to unreachable sectors:\n  ${details.join('\n  ')}`
         );
     }
+    return unreachableBrigadeIds;
 }
 
 /**
