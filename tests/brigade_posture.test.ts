@@ -25,6 +25,11 @@ function makeFormation(id: string, faction: FactionId, hq: string, personnel: nu
 }
 
 function makePostureState(overrides?: Partial<{ formations: Record<string, FormationState> }>): GameState {
+    const formationEntries = overrides?.formations ?? {
+        'rs-brig-1': makeFormation('rs-brig-1', 'RS', 'S1')
+    };
+    // Build a minimal corps_front_sectors entry so isBrigadeAssignedToFront passes
+    const brigadeIds = Object.keys(formationEntries).filter(id => (formationEntries[id]?.kind ?? 'brigade') === 'brigade');
     return {
   schema_version: CURRENT_SCHEMA_VERSION,
   meta: { turn: 20, seed: 'posture-test', phase: 'war' } as any,
@@ -32,15 +37,25 @@ function makePostureState(overrides?: Partial<{ formations: Record<string, Forma
             { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
   military: {
-    formations: overrides?.formations ?? {
-            'rs-brig-1': makeFormation('rs-brig-1', 'RS', 'S1')
-        },
+    formations: formationEntries,
     front_segments: {},
     front_posture: {},
     front_posture_regions: {},
     front_pressure: {},
     militia_pools: {},
-    brigade_posture_orders: []
+    brigade_posture_orders: [],
+    corps_front_sectors: {
+        'test-sector': {
+            sector_id: 'test-sector',
+            corps_id: 'rs-corps',
+            faction: 'RS',
+            assigned_brigade_ids: brigadeIds,
+            reserve_brigade_ids: [],
+            edge_ids: ['e1'],
+            sub_segments: [],
+            territory_osids: ['S1'],
+        },
+    },
   } as any,
   political: {
     political_controllers: { S1: 'RS' }

@@ -54,7 +54,7 @@ function makeState(): GameState {
                 }),
                 brig_beta: makeFormation('brig_beta', {
                     corps_id: 'corps_beta',
-                    location_osid: 'op:alpha:front',
+                    location_osid: 'op:beta:front',
                     home_osid: 'op:beta:front',
                 }),
                 brig_beta2: makeFormation('brig_beta2', {

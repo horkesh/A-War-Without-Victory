@@ -1,3 +1,27 @@
+## 2026-04-04 — Acceptance Suite Stabilization Wave 1
+
+- **20 → 0 failures**. Full suite: 2182/2182 pass (was 2162/2182).
+- `tests/brigade_posture.test.ts` (12): added `corps_front_sectors` to test fixture — `isBrigadeAssignedToFront` guard was filtering all brigades
+- `tests/commander_override.test.ts` (4): populated `componentOf`, moved donor brigades to rear (non-anchored) locations, added `sub_segments` + BFS-reachable paths to receiving sectors
+- `tests/corps_front_sector_corps_ownership.test.ts` (1): moved `brig_beta` to beta territory (was in alpha territory — location-based assignment is correct)
+- `tests/war_phase_step_order.test.ts` (1): 153 → 148 step count (steps removed in v0.8)
+- `tests/desktop_pmtiles_protocol_route.test.ts` (1): `awwv://app` → `awwv://warroom` origin after Warroom React migration
+- `tests/engine_honesty_legacy_contracts.test.ts` (1): updated comment assertion to match current `game_state.ts` text
+- All fixes are stale-fixture/stale-expectation updates — no source code bugs found
+- Verification: tsc clean, 2182/2182 vitest, vite build clean, governance OK
+- Report: `docs/40_reports/implemented/20260404_ACCEPTANCE_SUITE_STABILIZATION_WAVE1.md`
+
+## 2026-04-04 — Commander Explanation Surfaces Wave 4 (Operation Constraint Context)
+
+- `OperationBriefingModal.tsx`: +`OperationConstraintContext` component — compact corps-level constraint summary at decision time. Shows constraint badge + dominant reason + relief path between Assessment Badge and OrderInterpretationSection. Silence=healthy when `primaryConstraint === 'none'`. Wires existing `situationAssessment` from corps formation (no new derivation).
+- Provenance audit: `commander_assessment` (operation readiness) and `classifyPrimaryConstraint` (corps strategic state) read disjoint state — divergence is correct (strategic context vs tactical readiness).
+- Ownership: Army HQ corps card = standing explanation (`CorpsSituationSection`), operation modal = decision-time explanation (`OperationConstraintContext`).
+- 9 new Wave 14 tests in `tests/command_authority.test.ts` — 228/228 pass
+- Orchestrator: 2 parallel audit subagents (provenance, surface), central implementation
+- Verification at time of implementation: tsc clean, 228/228 command_authority.test.ts, 2162/2182 full suite (20 failures in 6 files — all pre-existing: proven via git stash revert to a24aa5db showing identical 20 failures; zero file overlap between Wave 4 changes and failing test sources), vite build clean, governance OK
+- Later superseded by Acceptance Suite Stabilization Wave 1: full suite restored to 2182/2182 pass
+- Report: `docs/40_reports/implemented/20260404_COMMANDER_EXPLANATION_SURFACES_WAVE4.md`
+
 ## 2026-04-04 — Commander Explanation Surfaces Wave 3 (Relief Path)
 
 - `command_strain.ts`: `reliefPath` added to `CorpsSituationAssessment` + `classifyPrimaryConstraint()` return type. 17 grounded relief strings per constraint sub-case (deficit counts, exhaustion %, stance changes, stabilization, plan causes). No fake forecasting.

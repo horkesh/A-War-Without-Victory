@@ -380,7 +380,7 @@ describe('engine honesty legacy contracts', () => {
   it('marks legacy front and theatre schema fields honestly as compatibility-only', () => {
     const gameState = readFileSync(join(process.cwd(), 'src', 'state', 'game_state.ts'), 'utf8');
 
-    expect(gameState).toContain('Legacy compatibility snapshot derived from canonical front_edges');
+    expect(gameState).toContain('Legacy compatibility snapshot for old saves/tests only');
     expect(gameState).toContain('Legacy compatibility fallback only. Null = reserve; sectors/front edges are the live frontline truth.');
     expect(gameState).toContain('Legacy theatre compatibility state. Not a live player-shell or turn-pipeline authority.');
     expect(gameState).toContain('Legacy theatre compatibility assignment. Preserved only for old saves/tools.');

@@ -202,6 +202,8 @@ describe('commanderReviewAssignment', () => {
 
     describe('mission compliance', () => {
         it('concentrates brigades at mission-relevant sector', () => {
+            // s2 donor brigades are at a rear position NOT in any sub_segment.friendly_osids,
+            // so they are not front-anchored and can be transferred.
             const sectors: any[] = [
                 { ...makeSector('s1', 'vrs_2kk', ['b1'], 8, 1.0),
                   sub_segments: [{ friendly_osids: ['op:bihac:f1'], enemy_osids: ['op:bihac:h1'] }] },
@@ -210,9 +212,9 @@ describe('commanderReviewAssignment', () => {
             ];
             const formations: Record<string, any> = {
                 b1: makeFormation('b1', 'op:bihac:f1', 'vrs_2kk', 800),
-                b2: makeFormation('b2', 'op:livno:f1', 'vrs_2kk', 700),
-                b3: makeFormation('b3', 'op:livno:f1', 'vrs_2kk', 600),
-                b4: makeFormation('b4', 'op:livno:f1', 'vrs_2kk', 500),
+                b2: makeFormation('b2', 'op:livno:rear', 'vrs_2kk', 700),
+                b3: makeFormation('b3', 'op:livno:rear', 'vrs_2kk', 600),
+                b4: makeFormation('b4', 'op:livno:rear', 'vrs_2kk', 500),
             };
             const priorities = [{
                 name: 'Bihac Pocket', corps_id: 'vrs_2kk',
@@ -248,6 +250,7 @@ describe('commanderReviewAssignment', () => {
 
     describe('non-priority excess', () => {
         it('releases excess from non-priority sector', () => {
+            // Donor brigades at rear positions NOT in sub_segment.friendly_osids
             const sectors: any[] = [
                 { ...makeSector('s1', 'vrs_2kk', ['b1'], 8, 1.5),
                   sub_segments: [{ friendly_osids: ['op:bihac:f1'], enemy_osids: ['op:bihac:h1'] }] },
@@ -256,9 +259,9 @@ describe('commanderReviewAssignment', () => {
             ];
             const formations: Record<string, any> = {
                 b1: makeFormation('b1', 'op:bihac:f1', 'vrs_2kk', 800),
-                b2: makeFormation('b2', 'op:prozor:f1', 'vrs_2kk', 700),
-                b3: makeFormation('b3', 'op:prozor:f1', 'vrs_2kk', 600),
-                b4: makeFormation('b4', 'op:prozor:f1', 'vrs_2kk', 500),
+                b2: makeFormation('b2', 'op:prozor:rear', 'vrs_2kk', 700),
+                b3: makeFormation('b3', 'op:prozor:rear', 'vrs_2kk', 600),
+                b4: makeFormation('b4', 'op:prozor:rear', 'vrs_2kk', 500),
             };
             const priorities = [{
                 name: 'Bihac', corps_id: 'vrs_2kk',
@@ -340,24 +343,33 @@ describe('commanderReviewAssignment', () => {
                 makeSector('s2', 'vrs_drina', ['b2'], 4, 0.5),
             ];
             sectors[1].territory_osids = ['op:bijeljina:safe'];
+            // s2 needs sub_segments with friendly_osids so getSectorFrontOsids returns BFS targets
+            (sectors[1] as any).sub_segments = [{ friendly_osids: ['op:bijeljina:safe'], enemy_osids: [] }];
             const formations: Record<string, any> = {
                 b1: makeFormation('b1', 'op:srebrenik:tinja', 'vrs_drina', 800),
                 b2: makeFormation('b2', 'op:bijeljina:safe', 'vrs_drina', 800),
             };
             const { adjacency, friendlyOsids } = makeViabilityContext(
-                ['op:bijeljina:safe', 'op:bijeljina:n1', 'op:bijeljina:n2'],
+                // Include the exposed OSID as friendly so BFS can traverse from it
+                ['op:srebrenik:tinja', 'op:bijeljina:safe', 'op:bijeljina:n1', 'op:bijeljina:n2'],
                 [
                     ['op:srebrenik:tinja', 'op:enemy:e1'],
                     ['op:srebrenik:tinja', 'op:enemy:e2'],
                     ['op:srebrenik:tinja', 'op:enemy:e3'],
+                    ['op:srebrenik:tinja', 'op:bijeljina:safe'],
                     ['op:bijeljina:safe', 'op:bijeljina:n1'],
                     ['op:bijeljina:safe', 'op:bijeljina:n2'],
                 ],
             );
+            // componentOf must place both the brigade and the target sector in the same component
+            const componentOf = new Map<string, number>([
+                ['op:srebrenik:tinja', 0],
+                ['op:bijeljina:safe', 0],
+            ]);
             const profile = { competence: 0.6, aggressiveness: 0.5, preStagingSectorWeights: new Map() };
             const result = commanderReviewAssignment(
                 'vrs_drina', sectors, formations, [], profile,
-                new Map(), adjacency, friendlyOsids,
+                componentOf, adjacency, friendlyOsids,
             );
             expect(result.some(o => o.brigade_id === 'b1' && o.reason === 'position_viability')).toBe(true);
         });
@@ -368,6 +380,8 @@ describe('commanderReviewAssignment', () => {
                 makeSector('s2', 'vrs_drina', ['b2'], 4, 0.5),
             ];
             sectors[1].territory_osids = ['op:test:safe'];
+            // s2 needs sub_segments with friendly_osids so getSectorFrontOsids returns BFS targets
+            (sectors[1] as any).sub_segments = [{ friendly_osids: ['op:test:safe'], enemy_osids: [] }];
             const formations: Record<string, any> = {
                 b1: makeFormation('b1', 'op:test:exposed', 'vrs_drina', 800),
                 b2: makeFormation('b2', 'op:test:safe', 'vrs_drina', 800),
@@ -382,10 +396,15 @@ describe('commanderReviewAssignment', () => {
                     ['op:test:safe', 'op:test:n2'],
                 ],
             );
+            // componentOf must place both the brigade and the target sector in the same component
+            const componentOf = new Map<string, number>([
+                ['op:test:exposed', 0],
+                ['op:test:safe', 0],
+            ]);
             const profile = { competence: 0.6, aggressiveness: 0.5, preStagingSectorWeights: new Map() };
             const result = commanderReviewAssignment(
                 'vrs_drina', sectors, formations, [], profile,
-                new Map(), adjacency, friendlyOsids,
+                componentOf, adjacency, friendlyOsids,
             );
             expect(result.some(o => o.brigade_id === 'b1' && o.reason === 'position_viability')).toBe(true);
         });

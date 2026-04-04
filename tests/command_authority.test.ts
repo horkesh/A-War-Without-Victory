@@ -2255,4 +2255,135 @@ describe('Wave 10: Command Relationship Standing', () => {
             expect(result.reliefPath).toBeNull();
         });
     });
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // Wave 14: Operation Constraint Context (Commander Explanation Surfaces Wave 4)
+    // Tests that the existing situation assessment derivation produces the right
+    // data shape for the OperationBriefingModal constraint context surface.
+    // ═══════════════════════════════════════════════════════════════════════
+
+    describe('Wave 14: Operation Constraint Context', () => {
+        it('healthy corps → all three fields null/none (silence = healthy)', () => {
+            const result = deriveCorpsSituationAssessment(
+                {
+                    zone_assessments: [{ posture: 'projecting', deficit: 0, surplus_brigades: ['b1', 'b2'], front_edge_count: 5 }],
+                    threat_assessment: { overall_pressure: 'low' },
+                    force_assessment: { total_brigades: 8, combat_effective: 8, total_surplus: 3 },
+                    current_plan: null,
+                },
+                'balanced', 10, 0,
+            );
+            expect(result.primaryConstraint).toBe('none');
+            expect(result.dominantReason).toBeNull();
+            expect(result.reliefPath).toBeNull();
+        });
+
+        it('siege constraint propagates all three fields for operation context', () => {
+            const result = deriveCorpsSituationAssessment(
+                {
+                    zone_assessments: [{ posture: 'besieged', deficit: 3, surplus_brigades: [], front_edge_count: 20 }],
+                    threat_assessment: { overall_pressure: 'heavy' },
+                    force_assessment: { total_brigades: 4, combat_effective: 3, total_surplus: 0 },
+                    current_plan: null,
+                },
+                'defensive', 50, 0,
+            );
+            expect(result.primaryConstraint).toBe('siege');
+            expect(result.dominantReason).not.toBeNull();
+            expect(result.reliefPath).not.toBeNull();
+        });
+
+        it('garrison deficit propagates constraint + reason + relief for operation context', () => {
+            const result = deriveCorpsSituationAssessment(
+                {
+                    zone_assessments: [{ posture: 'defending', deficit: 4, surplus_brigades: [], front_edge_count: 12 }],
+                    threat_assessment: { overall_pressure: 'moderate' },
+                    force_assessment: { total_brigades: 5, combat_effective: 5, total_surplus: 0 },
+                    current_plan: null,
+                },
+                'balanced', 20, 0,
+            );
+            expect(result.primaryConstraint).toBe('defensive_duty');
+            expect(result.dominantReason).toContain('brigade');
+            expect(result.reliefPath).toContain('brigade');
+        });
+
+        it('exhaustion constraint includes percentage in dominant reason', () => {
+            const result = deriveCorpsSituationAssessment(
+                {
+                    zone_assessments: [{ posture: 'defending', deficit: 0, surplus_brigades: ['b1'], front_edge_count: 8 }],
+                    threat_assessment: { overall_pressure: 'low' },
+                    force_assessment: { total_brigades: 6, combat_effective: 6, total_surplus: 1 },
+                    current_plan: null,
+                },
+                'balanced', 65, 0,
+            );
+            expect(result.primaryConstraint).toBe('force_condition');
+            expect(result.dominantReason).toContain('exhaust');
+            expect(result.reliefPath).toContain('65');
+        });
+
+        it('compromised command strain propagates institutional constraint for operation context', () => {
+            const result = deriveCorpsSituationAssessment(
+                {
+                    zone_assessments: [{ posture: 'defending', deficit: 0, surplus_brigades: ['b1'], front_edge_count: 6 }],
+                    threat_assessment: { overall_pressure: 'low' },
+                    force_assessment: { total_brigades: 6, combat_effective: 6, total_surplus: 1 },
+                    current_plan: null,
+                },
+                'balanced', 10, 8,
+            );
+            expect(result.primaryConstraint).toBe('institutional_strain');
+            expect(result.dominantReason).toContain('compromised');
+            expect(result.reliefPath).toContain('Stabilize');
+        });
+
+        it('constraint priority: siege outranks exhaustion when both present', () => {
+            const result = deriveCorpsSituationAssessment(
+                {
+                    zone_assessments: [{ posture: 'besieged', deficit: 2, surplus_brigades: [], front_edge_count: 15 }],
+                    threat_assessment: { overall_pressure: 'heavy' },
+                    force_assessment: { total_brigades: 4, combat_effective: 2, total_surplus: 0 },
+                    current_plan: null,
+                },
+                'balanced', 70, 8,
+            );
+            expect(result.primaryConstraint).toBe('siege');
+        });
+
+        it('constraint priority: threat outranks garrison when both present', () => {
+            const result = deriveCorpsSituationAssessment(
+                {
+                    zone_assessments: [{ posture: 'defending', deficit: 4, surplus_brigades: [], front_edge_count: 10 }],
+                    threat_assessment: { overall_pressure: 'critical' },
+                    force_assessment: { total_brigades: 5, combat_effective: 5, total_surplus: 0 },
+                    current_plan: null,
+                },
+                'balanced', 20, 0,
+            );
+            expect(result.primaryConstraint).toBe('threat_pressure');
+        });
+
+        it('null commanderState → constraint none (no false positives in operation context)', () => {
+            const result = deriveCorpsSituationAssessment(null, 'balanced', 10, 0);
+            expect(result.primaryConstraint).toBe('none');
+            expect(result.dominantReason).toBeNull();
+            expect(result.reliefPath).toBeNull();
+        });
+
+        it('defensive stance → institutional constraint with relief mentioning stance change', () => {
+            const result = deriveCorpsSituationAssessment(
+                {
+                    zone_assessments: [{ posture: 'defending', deficit: 0, surplus_brigades: ['b1'], front_edge_count: 6 }],
+                    threat_assessment: { overall_pressure: 'low' },
+                    force_assessment: { total_brigades: 6, combat_effective: 6, total_surplus: 1 },
+                    current_plan: null,
+                },
+                'defensive', 10, 0,
+            );
+            expect(result.primaryConstraint).toBe('institutional_strain');
+            expect(result.dominantReason).toContain('defensive');
+            expect(result.reliefPath).toContain('stance');
+        });
+    });
 });

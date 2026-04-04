@@ -19,7 +19,7 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ### Wrong Now
 
-- **Command abstraction partially resolved.** Command review is now coherent across live ops, history, and standing state (outcome badge, trend summary, three-tier category). What remains: full order interpretation *system* (commander personality filter, delay/refusal logic, political capital for overrides — v0.8.3) and delegation visibility.
+- **Command abstraction partially resolved.** Command review is now coherent across live ops, history, and standing state (outcome badge, trend summary, three-tier category). Explanation surfaces propagated: standing (CorpsSituationSection) + decision-time (OperationConstraintContext). What remains: full order interpretation *system* (commander personality filter, delay/refusal logic, political capital for overrides — v0.8.3) and delegation visibility.
 - **Sector semantics still need finishing:** sectors must remain frontlines, not slide back into territory buckets. Command chain truth waves hardened the adapter and demotion paths, but the underlying sector-as-territory drift risk persists.
 - **Reporting/activity truth partially resolved.** Command chain truth waves 1-4 hardened sub-segment derivation, displacement trigger proxy-fork is now observable (console.warn), activity zero-fill landed. Remaining: any surface still reading formation.assigned_sub_segment_id as primary truth instead of corps_front_sectors canonical path.
 - **Warroom ownership resolved.** React migration complete (2026-04-04). `src/ui/map/components/warroom/` is sole owner of live room rendering. `warroom.ts` retains launch/picker/iframe/bridge. Army HQ has clear command-review ownership. Remaining shell work: UI density/cohesion pass (v0.8-to-v0.9).
@@ -33,6 +33,8 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Active / Recent Accepted Lanes
 
+- **Acceptance Suite Stabilization Wave 1** — CLOSED 2026-04-04. 20→0 failures. All 6 files fixed: brigade_posture (12, missing sector fixture), commander_override (4, stale component/anchor data), corps_ownership (1, wrong-territory location), step_order (1, count drift), pmtiles (1, warroom origin), legacy_contracts (1, comment text). Full suite: 2182/2182. Report: `docs/40_reports/implemented/20260404_ACCEPTANCE_SUITE_STABILIZATION_WAVE1.md`.
+- **Commander Explanation Surfaces Wave 4** — CLOSED 2026-04-04. Operation constraint context: `OperationConstraintContext` in OperationBriefingModal — compact corps constraint summary at decision time (badge + reason + relief). Wires existing `situationAssessment` from corps formation — no new derivation. Provenance audit confirmed commander_assessment and classifyPrimaryConstraint read disjoint state (correct). 9 tests (Wave 14). 2 parallel audit subagents + central implementation. Report: `docs/40_reports/implemented/20260404_COMMANDER_EXPLANATION_SURFACES_WAVE4.md`.
 - **Commander Explanation Surfaces Wave 3** — CLOSED 2026-04-04. Relief path: `reliefPath` on `classifyPrimaryConstraint()` return — grounded "what would need to change" per constraint (deficit counts, exhaustion %, stance change, stabilization). Arrow subtitle in CorpsSituationSection. 9 tests. Orchestrated with 4 parallel subagents. Report: `docs/40_reports/implemented/20260404_COMMANDER_EXPLANATION_SURFACES_WAVE3.md`.
 - **Commander Explanation Surfaces Wave 2** — CLOSED 2026-04-04. Decision-useful constraint classification. 18 tests.
 - **Commander Explanation Surfaces Wave 1** — CLOSED 2026-04-04. Corps situation assessment derived on-read from CommanderState. Canonical surface: `CorpsSituationSection` in Army HQ corps card. Plan reasons now persisted via `last_plan_action`/`last_plan_reason`. 13 tests. Report: `docs/40_reports/implemented/20260404_COMMANDER_EXPLANATION_SURFACES_WAVE1.md`.
@@ -44,11 +46,12 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Closed Lanes
 
-**Closed: Commander Explanation Surfaces Waves 1–3**
+**Closed: Commander Explanation Surfaces Waves 1–4**
 Wave 1: Corps situation assessment via `deriveCorpsSituationAssessment()`. Persists `last_plan_action`/`last_plan_reason`. Canonical surface: `CorpsSituationSection`. 13 tests (Wave 11).
 Wave 2: `classifyPrimaryConstraint()` with priority ordering. `dominantReason` banner + constraint badge. 18 tests (Wave 12).
 Wave 3: `reliefPath` — grounded "what would need to change" per constraint (deficit counts, exhaustion %, stance, stabilization). Arrow subtitle in UI. 9 tests (Wave 13). 4 parallel subagents used (architect, UI/UX, gameplay, QA).
-Total: 40 explanation surface tests across 3 waves. Hierarchy: badge+reason → relief path → detail factors. Silence=healthy.
+Wave 4: Operation constraint context — `OperationConstraintContext` in OperationBriefingModal. Compact badge+reason+relief at decision time. Wires existing situationAssessment. Provenance: assessment and constraint read disjoint state (correct). 9 tests (Wave 14). 2 audit subagents + central implementation.
+Total: 49 explanation surface tests across 4 waves. Ownership: CorpsSituationSection = standing, OperationConstraintContext = decision-time. Silence=healthy.
 
 **Closed: Presidential Command Friction (Waves 1-5) + Order Interpretation Preview (Waves 5-7)**
 Wave 1 surfaced command strain and warlord friction in ops review. Wave 2 added strain-shaped CoS briefing and compound warnings. Wave 3 closed the friction resolution loop (per-event acknowledge buttons, IPC handler). Wave 4 added Stabilize Command Relationship action (pay CA, resolve all friction, 3-turn cooldown) and strain-gated stance (offensive blocked when compromised). Wave 5/10 added standing indicator with recovery forecast and CA recovery penalty. Order interpretation preview loop added pre-launch context (deriveOrderInterpretation), stance-change preview (deriveStanceInterpretation), and three-tier operation outcome category (ordinary/reluctant/direct intervention). Reports in `docs/40_reports/implemented/20260404_PRESIDENTIAL_COMMAND_FRICTION_WAVE4.md` and `docs/40_reports/implemented/20260404_ORDER_INTERPRETATION_PREVIEW_LOOP.md`.

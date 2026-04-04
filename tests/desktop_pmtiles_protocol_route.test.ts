@@ -32,11 +32,12 @@ describe('desktop pmtiles protocol route rewriting', () => {
     expect(sources.osm.url).toBe('pmtiles://http://localhost:5173/data/derived/tiles/osm.pmtiles');
   });
 
-  it('rewrites desktop awwv origins to canonical app data route', () => {
+  it('rewrites desktop awwv origins to canonical warroom data route', () => {
     const rewritten = rewritePmtilesUrlsForRuntime(style, 'awwv://warroom');
     const sources = (rewritten.sources as Record<string, { url?: string }>);
-    expect(sources.hillshade.url).toBe('pmtiles://awwv://app/data/derived/tiles/hillshade.pmtiles');
-    expect(sources.osm.url).toBe('pmtiles://awwv://app/data/derived/tiles/osm.pmtiles');
+    // rewritePmtilesUrlsForRuntime uses the origin as-is: pmtiles://${origin}/path
+    expect(sources.hillshade.url).toBe('pmtiles://awwv://warroom/data/derived/tiles/hillshade.pmtiles');
+    expect(sources.osm.url).toBe('pmtiles://awwv://warroom/data/derived/tiles/osm.pmtiles');
   });
 
   it('serves range responses for derived PMTiles files', async () => {

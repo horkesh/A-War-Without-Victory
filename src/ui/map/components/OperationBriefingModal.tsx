@@ -136,6 +136,63 @@ function CommandRecord({ assessmentAtLaunch, wasForce, caCost, corpsStrain, corp
     );
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// Wave 4: Operation Constraint Context — compact corps-level constraint summary.
+// Canonical owner of operation-time constraint explanation.
+// Standing explanation lives on CorpsSituationSection (Army HQ corps card).
+// This surface shows the same truth at decision-time, more compact.
+// Silence = healthy: renders null when primaryConstraint === 'none'.
+// ═══════════════════════════════════════════════════════════════════════════
+
+type PrimaryConstraint = 'siege' | 'threat_pressure' | 'defensive_duty' | 'force_condition' | 'institutional_strain' | 'plan_lifecycle' | 'none';
+
+const CONSTRAINT_BADGE_MODAL: Record<PrimaryConstraint, { label: string; className: string } | null> = {
+    siege: { label: 'SIEGE', className: 'bg-red-100 text-red-800 border-red-300' },
+    threat_pressure: { label: 'THREAT', className: 'bg-red-50 text-red-700 border-red-200' },
+    defensive_duty: { label: 'GARRISON', className: 'bg-amber-100 text-amber-800 border-amber-300' },
+    force_condition: { label: 'READINESS', className: 'bg-amber-50 text-amber-700 border-amber-200' },
+    institutional_strain: { label: 'INSTITUTIONAL', className: 'bg-blue-50 text-blue-700 border-blue-200' },
+    plan_lifecycle: { label: 'PLANNING', className: 'bg-neutral-100 text-neutral-600 border-neutral-300' },
+    none: null,
+};
+
+/** Compact corps-level constraint context for the operation decision surface.
+ *  Shows WHY the commander is leaning a certain way — the operational constraint
+ *  that readiness gauges alone don't explain. */
+function OperationConstraintContext({ assessment }: {
+    assessment: {
+        dominantReason: string | null;
+        primaryConstraint: PrimaryConstraint;
+        reliefPath: string | null;
+    } | undefined;
+}) {
+    if (!assessment) return null;
+    const { dominantReason, primaryConstraint, reliefPath } = assessment;
+    if (primaryConstraint === 'none' || !dominantReason) return null;
+
+    const badge = CONSTRAINT_BADGE_MODAL[primaryConstraint];
+
+    return (
+        <div className="mx-4 my-2 px-3 py-2 border border-neutral-200 bg-neutral-50">
+            <div className="text-[9px] uppercase font-bold text-neutral-500 tracking-wider mb-1">Corps Constraint</div>
+            <div className="flex items-start gap-2">
+                {badge && (
+                    <span className={`shrink-0 text-[9px] font-bold tracking-wider uppercase px-1.5 py-0.5 border ${badge.className}`}>
+                        {badge.label}
+                    </span>
+                )}
+                <span className="text-[10px] text-neutral-700 leading-snug">{dominantReason}</span>
+            </div>
+            {reliefPath && (
+                <div className="flex items-start gap-1.5 mt-1 pl-0.5">
+                    <span className="text-neutral-400 shrink-0 mt-px text-[10px]">&rarr;</span>
+                    <span className="text-[9px] text-neutral-500 leading-snug">{reliefPath}</span>
+                </div>
+            )}
+        </div>
+    );
+}
+
 /** Direct Intervention section — shown when the commander does NOT recommend launch. */
 function DirectInterventionSection({ assessment, currentAuth, corpsStrain, corpsStrainLabel, onForceLaunch }: {
     assessment: string;
@@ -200,8 +257,8 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const context = useGameStore((s) => s.operationBriefingContext);
 
-    const { operation, commander, corpsStrain, corpsStrainLabel } = useMemo(() => {
-        if (!loadedGameState || !context) return { operation: null, commander: null, corpsStrain: 0, corpsStrainLabel: 'healthy' as const };
+    const { operation, commander, corpsStrain, corpsStrainLabel, situationAssessment } = useMemo(() => {
+        if (!loadedGameState || !context) return { operation: null, commander: null, corpsStrain: 0, corpsStrainLabel: 'healthy' as const, situationAssessment: undefined };
         const op = findPlayerFacingOperationByKey(
             loadedGameState,
             `${context.corpsId}|${context.operationName}`,
@@ -210,11 +267,12 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
         if (op?.commander_officer_id && loadedGameState.namedOfficerData) {
             cdr = loadedGameState.namedOfficerData.find((o) => o.id === op.commander_officer_id) ?? null;
         }
-        // Look up command strain from the corps formation (derived on-read by adapter)
+        // Look up command strain + situation assessment from the corps formation (derived on-read by adapter)
         const corpsFormation = loadedGameState.formations?.find(f => f.id === context.corpsId);
         const strain = corpsFormation?.commandStrain ?? 0;
         const strainLabel = corpsFormation?.commandStrainLabel ?? 'healthy';
-        return { operation: op, commander: cdr, corpsStrain: strain, corpsStrainLabel: strainLabel };
+        const sitAssessment = corpsFormation?.situationAssessment;
+        return { operation: op, commander: cdr, corpsStrain: strain, corpsStrainLabel: strainLabel, situationAssessment: sitAssessment };
     }, [loadedGameState, context]);
 
     if (!isOpen || !context || !operation) return null;
@@ -305,6 +363,11 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                         <span className="text-[8px] text-neutral-400">({postponements} prior postponement{postponements > 1 ? 's' : ''})</span>
                     )}
                 </div>
+
+                {/* Wave 4: Corps Constraint Context — shows WHY the commander leans this way.
+                    Derived from the same situationAssessment as CorpsSituationSection (Army HQ).
+                    Silence = healthy: renders null when primaryConstraint === 'none'. */}
+                <OperationConstraintContext assessment={situationAssessment} />
 
                 {/* Order Interpretation Preview — fires even on clean approvals when strain > 0.
                     Only in planning phase (decision-ready). DirectInterventionSection owns
