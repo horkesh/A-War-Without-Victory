@@ -537,6 +537,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                         commanderAssessment={assessment as 'launch' | 'postpone' | 'abort' | null | undefined}
                         primaryConstraint={situationAssessment?.primaryConstraint}
                         trendDirection={operation.readinessTrend?.direction}
+                        postponementCount={postponements}
                     />
                 )}
 

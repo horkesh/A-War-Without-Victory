@@ -1,3 +1,22 @@
+## Order Interpretation System Wave 2 — 2026-04-04
+
+### What changed
+- `command_strain.ts`: DragSource type + DragFactor interface. dragFactors: DragFactor[] added to OrderInterpretation. deriveOrderInterpretation extended with postponementCount? (5th param). Factor derivation per category: strain_shaped (command_strain primary + optional caution secondary), caution_driven (professional_caution with postponement modulation), feasibility_constrained (hard_constraint primary), tempo_resistant (timing_gap primary).
+- `OrderInterpretationSection.tsx`: postponementCount prop. Bullet list renders dragFactors (● primary, ○ secondary). Falls back to cautionNotice when empty.
+- `OperationBriefingModal.tsx`: postponementCount={postponements} passed to section.
+
+### Player-visible truth
+Interpretation panel shows structured drag factor bullets. Player sees dominant vs secondary drag sources with intensity labels — not just a category badge and generic prose.
+
+### Canonical owner
+OrderInterpretationSection (UI), deriveOrderInterpretation (derivation).
+
+### Test count
+~15 new dragFactors tests (Wave 21). Full suite: [QA to confirm].
+
+### Orchestration
+Parallel: gameplay-programmer (derivation), ui-ux-developer (UI), qa-engineer (tests+verification), documentation-specialist (docs).
+
 ## Order Interpretation System Wave 1 — 2026-04-04
 
 ### What changed

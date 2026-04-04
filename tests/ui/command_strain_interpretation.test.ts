@@ -250,3 +250,153 @@ describe('Wave 1: deriveOrderInterpretation — cautionNotice', () => {
     });
 
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Wave 2: dragFactors — new field, ordered drag factor list
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Wave 2: deriveOrderInterpretation — dragFactors', () => {
+
+    // ── strain_shaped primary factor ──────────────────────────────────────────
+
+    it('strain=7, assessment=launch → primary is command_strain/severe, label contains "severe"', () => {
+        const r = deriveOrderInterpretation(7, 'launch');
+        expect(r.dragFactors.length).toBeGreaterThanOrEqual(1);
+        const primary = r.dragFactors[0];
+        expect(primary.source).toBe('command_strain');
+        expect(primary.intensity).toBe('severe');
+        expect(primary.isPrimary).toBe(true);
+        expect(primary.label.toLowerCase()).toContain('severe');
+    });
+
+    it('strain=3, assessment=launch → primary is command_strain/moderate, label contains "moderate"', () => {
+        const r = deriveOrderInterpretation(3, 'launch');
+        expect(r.dragFactors.length).toBeGreaterThanOrEqual(1);
+        const primary = r.dragFactors[0];
+        expect(primary.source).toBe('command_strain');
+        expect(primary.intensity).toBe('moderate');
+        expect(primary.isPrimary).toBe(true);
+        expect(primary.label.toLowerCase()).toContain('moderate');
+    });
+
+    it('strain=1, assessment=launch → primary is command_strain/mild, label contains "mild"', () => {
+        const r = deriveOrderInterpretation(1, 'launch');
+        expect(r.dragFactors.length).toBeGreaterThanOrEqual(1);
+        const primary = r.dragFactors[0];
+        expect(primary.source).toBe('command_strain');
+        expect(primary.intensity).toBe('mild');
+        expect(primary.isPrimary).toBe(true);
+        expect(primary.label.toLowerCase()).toContain('mild');
+    });
+
+    // ── strain_shaped secondary factor ────────────────────────────────────────
+
+    it('strain=3, assessment=postpone → 2 dragFactors; second is professional_caution/mild', () => {
+        const r = deriveOrderInterpretation(3, 'postpone');
+        expect(r.dragFactors).toHaveLength(2);
+        const secondary = r.dragFactors[1];
+        expect(secondary.source).toBe('professional_caution');
+        expect(secondary.intensity).toBe('mild');
+        expect(secondary.isPrimary).toBe(false);
+    });
+
+    it('strain=3, assessment=launch → 1 dragFactor only (no caution secondary when launch)', () => {
+        const r = deriveOrderInterpretation(3, 'launch');
+        expect(r.dragFactors).toHaveLength(1);
+        expect(r.dragFactors[0].source).toBe('command_strain');
+    });
+
+    // ── caution_driven primary factor ─────────────────────────────────────────
+
+    it('caution_driven: postponementCount=0, assessment=postpone → primary professional_caution/mild, label contains "recommends waiting"', () => {
+        const r = deriveOrderInterpretation(0, 'postpone', undefined, undefined, 0);
+        expect(r.category).toBe('caution_driven');
+        expect(r.dragFactors).toHaveLength(1);
+        const primary = r.dragFactors[0];
+        expect(primary.source).toBe('professional_caution');
+        expect(primary.intensity).toBe('mild');
+        expect(primary.isPrimary).toBe(true);
+        expect(primary.label.toLowerCase()).toContain('recommends waiting');
+    });
+
+    it('caution_driven: postponementCount=0, assessment=abort → primary professional_caution/mild, label contains "recommends abort"', () => {
+        const r = deriveOrderInterpretation(0, 'abort', undefined, undefined, 0);
+        expect(r.category).toBe('caution_driven');
+        expect(r.dragFactors).toHaveLength(1);
+        const primary = r.dragFactors[0];
+        expect(primary.source).toBe('professional_caution');
+        expect(primary.intensity).toBe('mild');
+        expect(primary.isPrimary).toBe(true);
+        expect(primary.label.toLowerCase()).toContain('recommends abort');
+    });
+
+    it('caution_driven: postponementCount=2, assessment=postpone → primary professional_caution/moderate, label contains "2 prior delays"', () => {
+        const r = deriveOrderInterpretation(0, 'postpone', undefined, undefined, 2);
+        expect(r.category).toBe('caution_driven');
+        expect(r.dragFactors).toHaveLength(1);
+        const primary = r.dragFactors[0];
+        expect(primary.source).toBe('professional_caution');
+        expect(primary.intensity).toBe('moderate');
+        expect(primary.isPrimary).toBe(true);
+        expect(primary.label).toContain('2 prior delays');
+    });
+
+    it('caution_driven: postponementCount=1, assessment=postpone → primary professional_caution/mild, label contains "1 prior delay"', () => {
+        const r = deriveOrderInterpretation(0, 'postpone', undefined, undefined, 1);
+        expect(r.category).toBe('caution_driven');
+        expect(r.dragFactors).toHaveLength(1);
+        const primary = r.dragFactors[0];
+        expect(primary.source).toBe('professional_caution');
+        expect(primary.intensity).toBe('mild');
+        expect(primary.isPrimary).toBe(true);
+        expect(primary.label).toContain('1 prior delay');
+    });
+
+    // ── feasibility_constrained ───────────────────────────────────────────────
+
+    it('feasibility_constrained: strain=0, constraint=siege, assessment=postpone → 1 factor: hard_constraint/severe, isPrimary=true', () => {
+        const r = deriveOrderInterpretation(0, 'postpone', 'siege');
+        expect(r.category).toBe('feasibility_constrained');
+        expect(r.dragFactors).toHaveLength(1);
+        const factor = r.dragFactors[0];
+        expect(factor.source).toBe('hard_constraint');
+        expect(factor.intensity).toBe('severe');
+        expect(factor.isPrimary).toBe(true);
+    });
+
+    // ── tempo_resistant ───────────────────────────────────────────────────────
+
+    it('tempo_resistant: strain=0, assessment=postpone, trend=improving → 1 factor: timing_gap/mild', () => {
+        const r = deriveOrderInterpretation(0, 'postpone', undefined, 'improving');
+        expect(r.category).toBe('tempo_resistant');
+        expect(r.dragFactors).toHaveLength(1);
+        const factor = r.dragFactors[0];
+        expect(factor.source).toBe('timing_gap');
+        expect(factor.intensity).toBe('mild');
+        expect(factor.isPrimary).toBe(true);
+    });
+
+    // ── normal ────────────────────────────────────────────────────────────────
+
+    it('normal: strain=0, assessment=launch → dragFactors is empty array', () => {
+        const r = deriveOrderInterpretation(0, 'launch');
+        expect(r.category).toBe('normal');
+        expect(r.dragFactors).toEqual([]);
+    });
+
+    // ── backward compatibility (2-arg callers) ────────────────────────────────
+
+    it('backward compat: deriveOrderInterpretation(0, "launch") returns dragFactors=[]', () => {
+        const r = deriveOrderInterpretation(0, 'launch');
+        expect(Array.isArray(r.dragFactors)).toBe(true);
+        expect(r.dragFactors).toHaveLength(0);
+    });
+
+    it('backward compat: deriveOrderInterpretation(3, "launch") returns dragFactors with 1 item (strain_shaped, no caution secondary)', () => {
+        const r = deriveOrderInterpretation(3, 'launch');
+        expect(Array.isArray(r.dragFactors)).toBe(true);
+        expect(r.dragFactors).toHaveLength(1);
+        expect(r.dragFactors[0].source).toBe('command_strain');
+    });
+
+});

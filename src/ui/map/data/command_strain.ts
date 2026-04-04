@@ -157,6 +157,29 @@ export function getCommandStrainLabel(score: number): CommandStrainLabel {
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
+ * The institutional source of drag on a presidential directive.
+ * Used in DragFactor to classify what is creating resistance.
+ */
+export type DragSource =
+    | 'command_strain'       // institutional damage from force launches / friction / exhaustion
+    | 'professional_caution' // commander's professional judgment (postpone/abort recommendation)
+    | 'hard_constraint'      // structural operational constraint (siege, threat, garrison)
+    | 'timing_gap';          // tempo mismatch — approaching readiness, directive premature
+
+/**
+ * A single interpretable drag factor on a presidential directive.
+ * Ordered list: primary factor first, secondary (if any) second.
+ */
+export interface DragFactor {
+    source: DragSource;
+    intensity: 'mild' | 'moderate' | 'severe';
+    /** true for the dominant drag source; false for secondary/reinforcing */
+    isPrimary: boolean;
+    /** Compact player-facing label line (no period at end) */
+    label: string;
+}
+
+/**
  * Classifies the dominant institutional drag shaping how command reads a presidential directive.
  * Used by OrderInterpretationSection for the interpretation category badge.
  */
@@ -184,6 +207,8 @@ export interface OrderInterpretation {
     categoryLabel: string | null;
     /** 'direct_intervention' when player would be overriding a reluctant commander. */
     interventionStrength: 'ordinary_approval' | 'direct_intervention';
+    /** Ordered drag factors (primary first). Empty array when category === 'normal'. */
+    dragFactors: DragFactor[];
 }
 
 /**
@@ -209,6 +234,7 @@ export function deriveOrderInterpretation(
     commanderAssessment: 'launch' | 'postpone' | 'abort' | null | undefined,
     primaryConstraint?: string | null,
     trendDirection?: string | null,
+    postponementCount?: number,
 ): OrderInterpretation {
     // ── Category + severity classification (priority order) ────────────────
     let category: OrderInterpretationCategory;
@@ -260,6 +286,57 @@ export function deriveOrderInterpretation(
             cautionNotice = null;
     }
 
+    // ── Drag factors (ordered, primary first) ─────────────────────────────────
+    const dragFactors: DragFactor[] = [];
+
+    switch (category) {
+        case 'strain_shaped': {
+            // Primary: command strain with intensity from score
+            const strainIntensity: 'mild' | 'moderate' | 'severe' =
+                strain >= COMPROMISED_THRESHOLD ? 'severe'
+                : strain >= 3 ? 'moderate'
+                : 'mild';
+            const strainLabel =
+                strainIntensity === 'severe' ? 'Command strain — severe (institutional damage)'
+                : strainIntensity === 'moderate' ? 'Command strain — moderate (prior interventions)'
+                : 'Command strain — mild (recent intervention)';
+            dragFactors.push({ source: 'command_strain', intensity: strainIntensity, isPrimary: true, label: strainLabel });
+
+            // Secondary: professional caution if commander is reluctant
+            if (commanderAssessment === 'postpone' || commanderAssessment === 'abort') {
+                dragFactors.push({ source: 'professional_caution', intensity: 'mild', isPrimary: false, label: 'Commander also recommends waiting' });
+            }
+            break;
+        }
+        case 'caution_driven': {
+            // Primary: professional caution, intensity modulated by prior postponements
+            const count = postponementCount ?? 0;
+            const cautionIntensity: 'mild' | 'moderate' | 'severe' = count > 1 ? 'moderate' : 'mild';
+            const cautionLabel = count > 0
+                ? `Professional judgment (${count} prior delay${count > 1 ? 's' : ''})`
+                : commanderAssessment === 'abort'
+                    ? 'Professional judgment — recommends abort'
+                    : 'Professional judgment — recommends waiting';
+            dragFactors.push({ source: 'professional_caution', intensity: cautionIntensity, isPrimary: true, label: cautionLabel });
+            break;
+        }
+        case 'feasibility_constrained': {
+            // Primary: hard constraint (severe — blocks regardless of intent)
+            dragFactors.push({ source: 'hard_constraint', intensity: 'severe', isPrimary: true, label: 'Hard operational limit — blocks compliance' });
+            // Secondary: command strain if also present (strain=0 is the feasibility path, but guard anyway)
+            if (strain > 0) {
+                dragFactors.push({ source: 'command_strain', intensity: 'mild', isPrimary: false, label: 'Command strain also present' });
+            }
+            break;
+        }
+        case 'tempo_resistant': {
+            // Primary: timing gap (mild — approaching readiness, not a hard block)
+            dragFactors.push({ source: 'timing_gap', intensity: 'mild', isPrimary: true, label: 'Timing gap — approaching readiness, directive premature' });
+            break;
+        }
+        // 'normal': no factors
+    }
+
     // ── Category label (compact badge) ────────────────────────────────────
     let categoryLabel: string | null;
     switch (category) {
@@ -276,7 +353,7 @@ export function deriveOrderInterpretation(
             ? 'direct_intervention'
             : 'ordinary_approval';
 
-    return { severity, category, cautionNotice, categoryLabel, interventionStrength };
+    return { severity, category, cautionNotice, categoryLabel, interventionStrength, dragFactors };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

@@ -1,5 +1,6 @@
 /**
  * Order Interpretation Section — Wave 5 pre-decision context surface.
+ * Wave 2: Replaces prose cautionNotice with structured dragFactors bullet list.
  * Stance Interpretation Section — Wave 6 stance-change preview.
  *
  * Fires on clean approvals when corps strain > 0, and on reluctant assessments
@@ -14,17 +15,18 @@
  */
 
 import { deriveOrderInterpretation, deriveStanceInterpretation } from '../../data/command_strain';
-import type { CommandStrainLabel, OrderInterpretationCategory } from '../../data/command_strain';
+import type { CommandStrainLabel, DragFactor } from '../../data/command_strain';
 
 interface OrderInterpretationSectionProps {
     strain: number;
     commanderAssessment: 'launch' | 'postpone' | 'abort' | null | undefined;
     primaryConstraint?: string | null;
     trendDirection?: string | null;
+    postponementCount?: number;
 }
 
-export function OrderInterpretationSection({ strain, commanderAssessment, primaryConstraint, trendDirection }: OrderInterpretationSectionProps) {
-    const { severity, cautionNotice, interventionStrength, category, categoryLabel } = deriveOrderInterpretation(strain, commanderAssessment, primaryConstraint, trendDirection);
+export function OrderInterpretationSection({ strain, commanderAssessment, primaryConstraint, trendDirection, postponementCount }: OrderInterpretationSectionProps) {
+    const { severity, cautionNotice, interventionStrength, categoryLabel, dragFactors } = deriveOrderInterpretation(strain, commanderAssessment, primaryConstraint, trendDirection, postponementCount);
 
     // Silence = healthy
     if (severity === 'normal') return null;
@@ -44,9 +46,24 @@ export function OrderInterpretationSection({ strain, commanderAssessment, primar
                 )}
             </div>
             <div className="px-3 py-2 space-y-1.5">
-                <p className={`text-[10px] leading-snug ${isAlarm ? 'text-red-300' : 'text-amber-300'}`}>
-                    {cautionNotice}
-                </p>
+                {dragFactors.length > 0 ? (
+                    <div className="space-y-1">
+                        {dragFactors.map((factor, i) => (
+                            <div key={factor.source + i} className="flex items-start gap-1.5">
+                                <span className={`shrink-0 text-[10px] font-bold mt-px ${isAlarm ? 'text-red-400' : 'text-amber-400'} ${factor.isPrimary ? '' : 'opacity-60'}`}>
+                                    {factor.isPrimary ? '●' : '○'}
+                                </span>
+                                <span className={`text-[10px] leading-snug ${isAlarm ? 'text-red-300' : 'text-amber-300'} ${factor.isPrimary ? '' : 'opacity-80'}`}>
+                                    {factor.label}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <p className={`text-[10px] leading-snug ${isAlarm ? 'text-red-300' : 'text-amber-300'}`}>
+                        {cautionNotice}
+                    </p>
+                )}
                 {interventionStrength === 'direct_intervention' && (
                     <p className={`text-[10px] leading-snug font-semibold ${isAlarm ? 'text-red-200' : 'text-amber-200'}`}>
                         Approving this order would constitute Direct Intervention. Institutional damage will compound.
