@@ -207,6 +207,28 @@ export interface FormationView {
      * Only populated for corps/corps_asset formations.
      */
     activeFrictionTypes?: string[];
+    /**
+     * Full friction event list for this corps's active commander.
+     * Derived on-read. Includes resolved and unresolved events.
+     * Canonical source for Wave 3 friction resolution UI on the back face.
+     * Only populated for corps/corps_asset formations.
+     */
+    frictionEvents?: FrictionEventView[];
+}
+
+/**
+ * Player-safe view of a warlord friction event.
+ * Exposes what the player needs for the acknowledgement loop.
+ * compositeKey = `${officerId}:${turn}:${type}` — deterministic routing key.
+ */
+export interface FrictionEventView {
+    /** Routing key for IPC acknowledgement: `${officerId}:${turn}:${type}` */
+    compositeKey: string;
+    officerId: string;
+    /** Player-facing label for the friction type. */
+    typeLabel: string;
+    turn: number;
+    resolved: boolean;
 }
 
 export interface MilitiaPoolView {

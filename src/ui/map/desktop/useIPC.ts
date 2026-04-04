@@ -93,6 +93,8 @@ interface WindowAwwv {
     acceptOfficerReplacement: (payload: { eventId: string; corpsId: string; newOfficerId: string; currentOfficerId?: string }) => Promise<{ ok: boolean; error?: string }>;
     resolvePeacePlan: (planId: string, response: 'accepted' | 'rejected') => Promise<{ ok: boolean; all_accepted?: boolean; rejection_factions?: string[]; error?: string }>;
     resolveDayton: (proposal: { territorial_demands: string[]; territorial_concessions: string[]; institutional_choices: Record<string, 'centralized' | 'decentralized'> }) => Promise<{ ok: boolean; result?: Record<string, unknown>; error?: string }>;
+    /** Level 2: Presidential acknowledgement of a warlord friction event. Sets resolved: true, reducing command strain. */
+    acknowledgeFrictionEvent: (payload: { corpsId: string; officerId: string; eventTurn: number; eventType: string }) => Promise<{ ok: boolean; error?: string }>;
 }
 
 const NOOP_RESULT = Promise.resolve({ ok: false, error: 'Desktop IPC not available' });
@@ -350,6 +352,10 @@ export function useIPC() {
             resolveDayton: awwv
                 ? (proposal: { territorial_demands: string[]; territorial_concessions: string[]; institutional_choices: Record<string, 'centralized' | 'decentralized'> }) => awwv.resolveDayton(proposal)
                 : makeNoop<{ ok: boolean; result?: Record<string, unknown>; error?: string }>(),
+
+            acknowledgeFrictionEvent: awwv
+                ? (payload: { corpsId: string; officerId: string; eventTurn: number; eventType: string }) => awwv.acknowledgeFrictionEvent(payload)
+                : makeNoop<{ ok: boolean; error?: string }>(),
         };
     }, []); // stable — never changes reference
 }

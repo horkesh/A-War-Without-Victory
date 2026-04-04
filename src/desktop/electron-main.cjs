@@ -1078,6 +1078,45 @@ app.whenReady().then(() => {
     }
   });
 
+  // Level 2 — Presidential acknowledgement of a warlord friction event.
+  // Sets resolved: true on the matching friction event, reducing command strain over time.
+  // Payload: { corpsId, officerId, eventTurn, eventType }
+  // Composite key match: officer_id + turn + type (deterministic, no stored id needed).
+  ipcMain.handle('acknowledge-friction-event', async (_event, payload) => {
+    const { corpsId, officerId, eventTurn, eventType } = payload || {};
+    if (!currentGameStateJson
+      || typeof corpsId !== 'string'
+      || typeof officerId !== 'string'
+      || typeof eventTurn !== 'number'
+      || typeof eventType !== 'string') {
+      return { ok: false, error: 'No game loaded or invalid payload' };
+    }
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const frictionEvents = state.military?.friction_events;
+      if (!Array.isArray(frictionEvents)) {
+        return { ok: false, error: 'No friction events on state' };
+      }
+      // Find the matching unresolved event by composite key fields
+      const event = frictionEvents.find(
+        e => e.officer_id === officerId
+          && e.turn === eventTurn
+          && e.type === eventType
+          && e.resolved === false
+      );
+      if (!event) {
+        return { ok: false, error: 'Friction event not found or already resolved' };
+      }
+      event.resolved = true;
+      currentGameStateJson = sim.serializeState(state);
+      sendGameStateToRenderer(currentGameStateJson);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
   ipcMain.handle('stage-operation-decision', async (_event, payload) => {
     const { corpsId, operationName, decision } = payload || {};
     if (!currentGameStateJson || typeof corpsId !== 'string' || typeof operationName !== 'string' || typeof decision !== 'string') {

@@ -89,4 +89,5 @@ contextBridge.exposeInMainWorld('awwv', {
   saveSettings: (settings) => ipcRenderer.invoke('save-settings', settings),
   resolvePeacePlan: (planId, response) => ipcRenderer.invoke('resolve-peace-plan', { planId, response }),
   resolveDayton: (proposal) => ipcRenderer.invoke('resolve-dayton', proposal),
+  acknowledgeFrictionEvent: (payload) => ipcRenderer.invoke('acknowledge-friction-event', payload),
 });
