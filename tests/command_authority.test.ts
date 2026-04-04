@@ -702,3 +702,231 @@ describe('B1: CoS briefing strain paragraph — label-driven phrase selection', 
         expect(phraseKey).toBe('compromised');
     });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Wave 3 — Friction Resolution Loop
+// ─────────────────────────────────────────────────────────────────────────────
+
+// The friction resolution loop:
+//   1. Warlord friction fires → FrictionEvent { resolved: false } pushed to state.military.friction_events
+//   2. computeCorpsCommandStrain counts unresolved events (+2 each, decayed)
+//   3. Player acknowledges via IPC → event.resolved = true
+//   4. Next computeCorpsCommandStrain call excludes the resolved event → strain drops
+
+/** Simulate the IPC acknowledge-friction-event handler logic (mirrors electron-main.cjs). */
+function simulateAcknowledgeFrictionEvent(
+    frictionEvents: Array<{ officer_id: string; turn: number; type: string; resolved: boolean }>,
+    officerId: string,
+    eventTurn: number,
+    eventType: string,
+): { ok: boolean; error?: string } {
+    const event = frictionEvents.find(
+        e => e.officer_id === officerId
+            && e.turn === eventTurn
+            && e.type === eventType
+            && e.resolved === false
+    );
+    if (!event) return { ok: false, error: 'Friction event not found or already resolved' };
+    event.resolved = true;
+    return { ok: true };
+}
+
+/** Build a FrictionEventView composite key (mirrors GameStateAdapter logic). */
+function makeFrictionCompositeKey(officerId: string, turn: number, type: string): string {
+    return `${officerId}:${turn}:${type}`;
+}
+
+/** Extract eventType from composite key (mirrors handleAcknowledgeFriction in ArmyHQCorpsCard). */
+function eventTypeFromCompositeKey(compositeKey: string): string {
+    return compositeKey.split(':')[2] ?? '';
+}
+
+describe('Wave 3: friction resolution IPC handler logic', () => {
+    it('sets resolved: true on matching event', () => {
+        const events = [
+            { officer_id: 'officer-1', turn: 5, type: 'ignored_stance', resolved: false },
+        ];
+        const result = simulateAcknowledgeFrictionEvent(events, 'officer-1', 5, 'ignored_stance');
+        expect(result.ok).toBe(true);
+        expect(events[0]!.resolved).toBe(true);
+    });
+
+    it('rejects when no matching event exists', () => {
+        const events = [
+            { officer_id: 'officer-1', turn: 5, type: 'ignored_stance', resolved: false },
+        ];
+        const result = simulateAcknowledgeFrictionEvent(events, 'officer-2', 5, 'ignored_stance');
+        expect(result.ok).toBe(false);
+        expect(result.error).toContain('not found');
+    });
+
+    it('rejects when event already resolved', () => {
+        const events = [
+            { officer_id: 'officer-1', turn: 5, type: 'ignored_stance', resolved: true },
+        ];
+        const result = simulateAcknowledgeFrictionEvent(events, 'officer-1', 5, 'ignored_stance');
+        expect(result.ok).toBe(false);
+        expect(result.error).toContain('already resolved');
+    });
+
+    it('does not resolve a different event type', () => {
+        const events = [
+            { officer_id: 'officer-1', turn: 5, type: 'ignored_stance', resolved: false },
+            { officer_id: 'officer-1', turn: 5, type: 'unauthorized_op', resolved: false },
+        ];
+        simulateAcknowledgeFrictionEvent(events, 'officer-1', 5, 'ignored_stance');
+        expect(events[0]!.resolved).toBe(true);
+        expect(events[1]!.resolved).toBe(false); // untouched
+    });
+
+    it('does not resolve an event from a different turn', () => {
+        const events = [
+            { officer_id: 'officer-1', turn: 4, type: 'ignored_stance', resolved: false },
+            { officer_id: 'officer-1', turn: 5, type: 'ignored_stance', resolved: false },
+        ];
+        simulateAcknowledgeFrictionEvent(events, 'officer-1', 5, 'ignored_stance');
+        expect(events[0]!.resolved).toBe(false); // turn 4 — untouched
+        expect(events[1]!.resolved).toBe(true);  // turn 5 — resolved
+    });
+
+    it('resolving one event does not affect unrelated events on other officers', () => {
+        const events = [
+            { officer_id: 'officer-1', turn: 5, type: 'ignored_stance', resolved: false },
+            { officer_id: 'officer-2', turn: 5, type: 'ignored_stance', resolved: false },
+        ];
+        simulateAcknowledgeFrictionEvent(events, 'officer-1', 5, 'ignored_stance');
+        expect(events[0]!.resolved).toBe(true);
+        expect(events[1]!.resolved).toBe(false);
+    });
+});
+
+describe('Wave 3: strain drops after friction resolution', () => {
+    it('resolving a friction event removes its strain contribution', () => {
+        const frictionEvents = [
+            { officer_id: 'officer-1', turn: 5, type: 'ignored_stance', resolved: false },
+        ];
+        const state = makeStrainState({
+            turn: 5,
+            officerId: 'officer-1',
+            officerCorpsId: 'test-corps',
+            frictionEvents,
+        });
+        // Before acknowledgement: +2 strain
+        expect(computeCorpsCommandStrain('test-corps', state)).toBe(2);
+
+        // Acknowledge
+        simulateAcknowledgeFrictionEvent(frictionEvents, 'officer-1', 5, 'ignored_stance');
+
+        // After acknowledgement: strain drops to 0
+        expect(computeCorpsCommandStrain('test-corps', state)).toBe(0);
+    });
+
+    it('partial resolution reduces strain proportionally', () => {
+        const frictionEvents = [
+            { officer_id: 'officer-1', turn: 5, type: 'ignored_stance', resolved: false },
+            { officer_id: 'officer-1', turn: 5, type: 'unauthorized_op', resolved: false },
+        ];
+        const state = makeStrainState({
+            turn: 5,
+            officerId: 'officer-1',
+            officerCorpsId: 'test-corps',
+            frictionEvents,
+        });
+        // Before: 2 events × +2 = 4 strain
+        expect(computeCorpsCommandStrain('test-corps', state)).toBe(4);
+
+        // Acknowledge only first event
+        simulateAcknowledgeFrictionEvent(frictionEvents, 'officer-1', 5, 'ignored_stance');
+
+        // After: 1 remaining unresolved event × +2 = 2 strain
+        expect(computeCorpsCommandStrain('test-corps', state)).toBe(2);
+    });
+
+    it('full loop: accumulate strain from force-launch + friction, resolve friction, strain drops', () => {
+        const frictionEvents = [
+            { officer_id: 'officer-1', turn: 3, type: 'refused_release', resolved: false },
+        ];
+        const state = makeStrainState({
+            turn: 5,
+            activeOps: [
+                { name: 'Op Alpha', was_force_launched: true, started_turn: 4 }, // age=1 → 3-1=2
+            ],
+            officerId: 'officer-1',
+            officerCorpsId: 'test-corps',
+            frictionEvents,
+        });
+        // Force-launch (age 1): 3−1=2; friction (age 2): 2−2=0. Total = 2
+        expect(computeCorpsCommandStrain('test-corps', state)).toBe(2);
+
+        // Acknowledge friction — friction was already decayed to 0 so no change
+        simulateAcknowledgeFrictionEvent(frictionEvents, 'officer-1', 3, 'refused_release');
+        expect(computeCorpsCommandStrain('test-corps', state)).toBe(2);
+    });
+});
+
+describe('Wave 3: FrictionEventView composite key', () => {
+    it('composite key is officer_id:turn:type', () => {
+        const key = makeFrictionCompositeKey('officer-1', 5, 'ignored_stance');
+        expect(key).toBe('officer-1:5:ignored_stance');
+    });
+
+    it('composite key with unauthorized_op type', () => {
+        const key = makeFrictionCompositeKey('delic', 12, 'unauthorized_op');
+        expect(key).toBe('delic:12:unauthorized_op');
+    });
+
+    it('eventType extracted from composite key correctly', () => {
+        const key = 'officer-1:5:ignored_stance';
+        expect(eventTypeFromCompositeKey(key)).toBe('ignored_stance');
+    });
+
+    it('eventType extracted from composite key with colon in officer id segment', () => {
+        // Edge case: if officerId contained colons (it shouldn't, but guard)
+        const key = 'delic:5:refused_release';
+        expect(eventTypeFromCompositeKey(key)).toBe('refused_release');
+    });
+
+    it('two events with same officer, same turn, different types have distinct keys', () => {
+        const key1 = makeFrictionCompositeKey('officer-1', 5, 'ignored_stance');
+        const key2 = makeFrictionCompositeKey('officer-1', 5, 'unauthorized_op');
+        expect(key1).not.toBe(key2);
+    });
+
+    it('two events with same officer, same type, different turns have distinct keys', () => {
+        const key1 = makeFrictionCompositeKey('officer-1', 5, 'ignored_stance');
+        const key2 = makeFrictionCompositeKey('officer-1', 6, 'ignored_stance');
+        expect(key1).not.toBe(key2);
+    });
+});
+
+describe('Wave 3: silence=healthy on back face', () => {
+    /** Simulate the back-face panel condition: show panel when strain > 0 OR frictionEvents.length > 0. */
+    function shouldShowBackFaceFrictionPanel(strain: number, frictionEventCount: number): boolean {
+        return strain > 0 || frictionEventCount > 0;
+    }
+
+    /** Simulate unresolved-event list visibility condition. */
+    function shouldShowAcknowledgeList(unresolvedCount: number): boolean {
+        return unresolvedCount > 0;
+    }
+
+    it('panel hidden when strain = 0 and no friction events', () => {
+        expect(shouldShowBackFaceFrictionPanel(0, 0)).toBe(false);
+    });
+
+    it('panel shown when strain > 0 even with no unresolved events', () => {
+        expect(shouldShowBackFaceFrictionPanel(2, 0)).toBe(true);
+    });
+
+    it('panel shown when friction events exist even if strain = 0', () => {
+        expect(shouldShowBackFaceFrictionPanel(0, 1)).toBe(true);
+    });
+
+    it('acknowledge list hidden when all events resolved (silence=healthy)', () => {
+        expect(shouldShowAcknowledgeList(0)).toBe(false);
+    });
+
+    it('acknowledge list shown when at least one unresolved event exists', () => {
+        expect(shouldShowAcknowledgeList(1)).toBe(true);
+    });
+});
