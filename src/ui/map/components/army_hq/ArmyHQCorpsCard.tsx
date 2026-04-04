@@ -13,6 +13,7 @@ import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
 import { Icon } from '../icons/Icon';
 import { CommanderSection } from './CommanderSection';
+import { CommandManagementSection } from './CommandManagementSection';
 import { SectorsSection } from './SectorsSection';
 import { OperationsSection } from './OperationsSection';
 import { OrbatSection } from './OrbatSection';
@@ -112,8 +113,12 @@ export function ArmyHQCorpsCard({
         const strainLabel = corps.commandStrainLabel ?? 'healthy';
         const frictionTypes = corps.activeFrictionTypes ?? [];
         const frictionEvents = corps.frictionEvents ?? [];
+        const stabilizationAvailable = corps.stabilizationAvailable ?? false;
+        const stabilizationCooldownUntil = corps.stabilizationCooldownUntil;
+        const stabilizationCostCA = corps.stabilizationCostCA ?? 0;
+        const currentTurn = gameState.turn ?? 0;
 
-        return { totalPersonnel, avgCohesion, avgFatigue, eff, commander, stance, activeOp, corpsBattles, equipment, strain, strainLabel, frictionTypes, frictionEvents };
+        return { totalPersonnel, avgCohesion, avgFatigue, eff, commander, stance, activeOp, corpsBattles, equipment, strain, strainLabel, frictionTypes, frictionEvents, stabilizationAvailable, stabilizationCooldownUntil, stabilizationCostCA, currentTurn };
     }, [corps, brigades, sectors, operations, factionBattles, gameState]);
 
     const displayName = formatCorpsDisplayName(corps.name, corps.id);
@@ -339,7 +344,7 @@ export function ArmyHQCorpsCard({
                         <span><b className="text-text-primary">{brigades.length}</b> Brg</span>
                         <span><b className="text-text-primary">{sectors.length}</b> Sec</span>
                     </div>
-                    {/* Stance dropdown */}
+                    {/* Stance dropdown — offensive disabled when command is compromised (strain >= 6) */}
                     <div className="flex items-center gap-2">
                         <span className="text-[10px] text-text-secondary/60 uppercase tracking-widest">Stance:</span>
                         <select
@@ -348,7 +353,13 @@ export function ArmyHQCorpsCard({
                             onClick={(e) => e.stopPropagation()}
                             className="text-[11px] font-bold uppercase bg-panel-bg text-text-primary border border-panel-border rounded px-2 py-1 cursor-pointer focus:outline-none focus:border-amber-400"
                         >
-                            <option value="offensive">OFFENSIVE</option>
+                            <option
+                                value="offensive"
+                                disabled={data.strainLabel === 'compromised'}
+                                title={data.strainLabel === 'compromised' ? 'Not available — command is compromised. Stabilize the command relationship first.' : undefined}
+                            >
+                                OFFENSIVE{data.strainLabel === 'compromised' ? ' [LOCKED]' : ''}
+                            </option>
                             <option value="balanced">BALANCED</option>
                             <option value="defensive">DEFENSIVE</option>
                             <option value="reorganize">REORGANIZE</option>
@@ -414,6 +425,18 @@ export function ArmyHQCorpsCard({
 
             {/* Sections wrapper */}
             <div className="flex flex-col gap-[1px] bg-panel-bg">
+                {/* Command Management — Wave 4: stabilize action + stance constraint notice */}
+                {data.strain > 0 && (
+                    <CommandManagementSection
+                        corpsId={corps.id}
+                        commandStrain={data.strain}
+                        commandStrainLabel={data.strainLabel}
+                        stabilizationAvailable={data.stabilizationAvailable}
+                        stabilizationCooldownUntil={data.stabilizationCooldownUntil}
+                        stabilizationCostCA={data.stabilizationCostCA}
+                        currentTurn={data.currentTurn}
+                    />
+                )}
                 <CommanderSection corps={corps} gameState={gameState} />
                 <SectorsSection corpsId={corps.id} sectors={sectors} factionBattles={factionBattles} />
                 <OperationsSection corpsId={corps.id} operations={operations} gameState={gameState} commandStrain={data.strain} commandStrainLabel={data.strainLabel} />
