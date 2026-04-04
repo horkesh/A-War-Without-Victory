@@ -1,3 +1,25 @@
+## [2026-04-04] Army HQ Stability + Rear Brigade Investigation
+
+### What changed
+- **Army HQ crash fix:** `ChiefOfStaffBriefing.tsx` had an unsafe `as unknown as GameState` cast — `buildStrainParagraphs` called `computeCorpsCommandStrain` with `LoadedGameState`, which crashed reading `state.military.corps_command` (nonexistent on adapted state). Fix: use adapter-derived `FormationView.commandStrainLabel` directly. Removed dead imports.
+- **Render-path regression:** Added `generateCoSBriefing` smoke test to `ui_map_render_smoke.test.ts` — exercises the exact seam that crashed.
+
+### Brigade investigation results
+- `rs_1st_armored`: **No issue.** Active, correctly assigned to `sector:vrs_1st_krajina:0`, 2567 pers, defend posture.
+- `rs_2nd_banja_luka_light_infantry`: **Cross-corps misassignment** (vrs_1st_krajina brigade in vrs_2nd_krajina sector). Pre-existing P1.
+- `rs_4th_banja_luka_light_infantry`: **Cross-corps misassignment** (same). Pre-existing P1.
+- None are idle or unassigned. All defending on front.
+
+### Test count
+165 files, 2308 tests, 0 failures.
+
+### Canonical owner
+- `ChiefOfStaffBriefing.tsx` (CoS briefing strain paragraphs)
+- `GameStateAdapter.ts` (commandStrain derivation)
+
+### Report
+`docs/40_reports/implemented/20260404_ARMY_HQ_STABILITY_REAR_BRIGADE_INVESTIGATION.md`
+
 ## [2026-04-04] desktop-vite-script-hardening
 
 ### What changed
