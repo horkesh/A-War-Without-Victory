@@ -122,8 +122,26 @@ export function buildCommanderOperation(
         phase_started_turn: turn,
         participating_brigades: participatingBrigades,
         ...(sectorId ? { sector_id: sectorId } : {}),
+        // Keep flat objectives for backward compat (getAllAxisObjectives falls back to these).
         objectives,
         current_objective_index: 0,
+        // Wrap objectives + brigades into a single axis so the multi-axis execution
+        // path in sector_offensive picks them up — fixes zero-eligible-attacker (ZEA).
+        axes: [{
+            axis_id: `cmd_${corpsId}_main`,
+            name: 'Main Axis',
+            assigned_brigades: participatingBrigades as FormationId[],
+            objectives,
+            current_objective_index: 0,
+            status: 'executing' as const,
+            failure_count: 0,
+            consecutive_failures_on_current: 0,
+            momentum: 0,
+            attack_attempt_count: 0,
+            objective_capture_count: 0,
+            movement_only_execution_turns: 0,
+            idle_execution_turn_streak: 0,
+        }],
         planning_duration: 1,
         supply_readiness: 1.0,
         momentum: 0,
@@ -211,6 +229,7 @@ export function buildProbeOperation(
     turn: number,
     brigadeId: string,
     sectorId?: string,
+    objectives?: string[],
 ): CorpsOperation {
     return {
         name: `probe_${corpsId}_t${turn}`,
@@ -229,5 +248,24 @@ export function buildProbeOperation(
         objective_capture_count: 0,
         movement_only_execution_turns: 0,
         idle_execution_turn_streak: 0,
+        // If objectives provided, create axis so multi-axis execution path fires (ZEA fix).
+        ...(objectives && objectives.length > 0 ? {
+            objectives,
+            axes: [{
+                axis_id: `probe_${corpsId}_t${turn}`,
+                name: 'Probe',
+                assigned_brigades: [brigadeId] as FormationId[],
+                objectives,
+                current_objective_index: 0,
+                status: 'executing' as const,
+                failure_count: 0,
+                consecutive_failures_on_current: 0,
+                momentum: 0,
+                attack_attempt_count: 0,
+                objective_capture_count: 0,
+                movement_only_execution_turns: 0,
+                idle_execution_turn_streak: 0,
+            }],
+        } : {}),
     };
 }

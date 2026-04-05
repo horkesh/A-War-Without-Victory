@@ -365,6 +365,13 @@ export interface CommanderOutput {
         readonly action: 'advance' | 'suspend' | 'abandon';
         readonly reason: string;
     }>;
+    /** Main-effort brigade prepositioning: move unreachable high-value surplus
+     *  brigades toward the nearest front-adjacent friendly OSID in their sector.
+     *  Consumed by applyCommanderOutput → brigade_movement_orders. */
+    readonly prepositioning_orders: ReadonlyArray<{
+        readonly brigade_id: FormationId;
+        readonly destination_osid: string;
+    }>;
 }
 
 // ---------------------------------------------------------------------------

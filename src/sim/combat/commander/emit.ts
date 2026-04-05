@@ -16,7 +16,7 @@ import type {
     SectorStance,
 } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
-import { spatialFriendlyDistance } from '../../spatial_context.js';
+import { spatialFriendlyDistance, spatialSameComponent } from '../../spatial_context.js';
 import { buildCommanderOperation, buildProbeOperation, derivePrimarySectorForBrigades, getMaxOperationSlots } from '../corps_operation_helpers.js';
 import type {
     CommanderBriefing,
@@ -143,6 +143,9 @@ export function emitCommanderOutput(
     // 7. Plan updates from plan decision
     const planUpdates = buildPlanUpdates(planDecision);
 
+    // 8. Prepositioning: move unreachable main_effort surplus toward front
+    const prepositioningOrders = buildPrepositioningOrders(briefing, allocation);
+
     return {
         directive,
         operations,
@@ -151,6 +154,7 @@ export function emitCommanderOutput(
         garrison_locks: garrisonLocks,
         reinforcement_requests: reinforcementRequests,
         plan_updates: planUpdates,
+        prepositioning_orders: prepositioningOrders,
     };
 }
 
@@ -739,15 +743,61 @@ function buildOperations(
                 briefing.corps_id,
                 [probeBrigade.brigade_id],
             );
-            // PERMITTED CREATION ENTRY POINT — commander-generated operations only.
-            // All CorpsOperation objects must be built via the factory functions in corps_operation_helpers.ts.
-            const probeOp = buildProbeOperation(
-                briefing.corps_id,
-                briefing.turn,
-                probeBrigade.brigade_id,
-                probeSectorId,
-            );
-            ops.push(probeOp);
+
+            // Derive probe objective: first enemy-adjacent OSID in the probe sector.
+            // Without objectives the probe op has no axis targets and would be ZEA.
+            let probeObjectives: string[] = [];
+            if (probeSectorId) {
+                const sector = briefing.sectors.find(s => s.sector_id === probeSectorId);
+                if (sector) {
+                    const adjacency = briefing.spatial.adjacency;
+                    const friendlySet = briefing.spatial.friendlyOsidsByFaction?.get(briefing.faction);
+                    if (adjacency && friendlySet) {
+                        const enemyTargets = new Set<string>();
+                        for (const sub of sector.sub_segments ?? []) {
+                            for (const fOsid of sub.friendly_osids ?? []) {
+                                for (const neighbor of adjacency.get(fOsid) ?? []) {
+                                    if (!friendlySet.has(neighbor)) {
+                                        enemyTargets.add(neighbor);
+                                    }
+                                }
+                            }
+                        }
+                        probeObjectives = [...enemyTargets].sort(strictCompare).slice(0, 1);
+                    }
+                }
+            }
+
+            // Skip probe if no enemy-adjacent OSIDs found — empty objectives cause immediate ZEA.
+            if (probeObjectives.length > 0) {
+                // Reachability check: probe brigade must BFS-reach the target within MAX_REACHABILITY_HOPS.
+                const probeTarget = probeObjectives[0]!;
+                const probeAdj = briefing.spatial.adjacency;
+                const probeFriendly = briefing.spatial.friendlyOsidsByFaction?.get(briefing.faction);
+                const probeBrigLoc = briefing.brigades.find(b => b.id === probeBrigade.brigade_id)?.location_osid;
+                let probeReachable = false;
+                if (probeAdj && probeFriendly && probeBrigLoc) {
+                    const targetNeighbors = (probeAdj.get(probeTarget as any) ?? []) as readonly string[];
+                    const approachOsids = targetNeighbors.filter(n => probeFriendly.has(n)).sort(strictCompare);
+                    for (const approachOsid of approachOsids) {
+                        const dist = spatialFriendlyDistance(briefing.spatial, briefing.faction, probeBrigLoc, approachOsid, MAX_REACHABILITY_HOPS);
+                        if (dist >= 0) { probeReachable = true; break; }
+                    }
+                }
+
+                if (probeReachable) {
+                    // PERMITTED CREATION ENTRY POINT — commander-generated operations only.
+                    // All CorpsOperation objects must be built via the factory functions in corps_operation_helpers.ts.
+                    const probeOp = buildProbeOperation(
+                        briefing.corps_id,
+                        briefing.turn,
+                        probeBrigade.brigade_id,
+                        probeSectorId,
+                        probeObjectives,
+                    );
+                    ops.push(probeOp);
+                }
+            }
         }
     }
 
@@ -928,4 +978,100 @@ function deriveTargetsFromSectors(briefing: CommanderBriefing, maxTargets: numbe
     }
 
     return [...targets].sort(strictCompare).slice(0, Math.max(1, maxTargets));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// buildPrepositioningOrders — move unreachable main_effort surplus toward front
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Identifies main_effort surplus brigades that are too far from any sector
+ * front to participate in operations, and emits march orders toward the
+ * nearest front-adjacent friendly OSID in their sector.
+ *
+ * A real commander would preposition armor and elite assets near likely
+ * offensive axes, not leave them in deep rear garrisons. This mechanism
+ * applies only to main_effort-tier surplus — garrison-tier brigades stay
+ * where they are.
+ *
+ * One march order per turn per brigade. Column movement handles pathing.
+ * Deterministic: sorted iteration, spatialFriendlyDistance for BFS.
+ */
+/** @internal Exported for targeted testing only. */
+export function buildPrepositioningOrders(
+    briefing: CommanderBriefing,
+    allocation: AllocationResult,
+): Array<{ brigade_id: string; destination_osid: string }> {
+    const orders: Array<{ brigade_id: string; destination_osid: string }> = [];
+
+    // Only preposition when the corps has offensive posture and surplus
+    if (!allocation.can_launch_ops) return orders;
+
+    const adjacency = briefing.spatial.adjacency;
+    const fofMap = briefing.spatial.friendlyOsidsByFaction;
+    if (!adjacency || !fofMap) return orders;
+    const friendlyOsids = fofMap.get(briefing.faction);
+    if (!friendlyOsids) return orders;
+
+    // Collect front-adjacent friendly OSIDs from all corps sectors
+    const frontApproachOsids: string[] = [];
+    for (const sector of briefing.sectors) {
+        if (sector.corps_id !== briefing.corps_id) continue;
+        for (const sub of sector.sub_segments ?? []) {
+            for (const osid of sub.friendly_osids ?? []) {
+                frontApproachOsids.push(osid);
+            }
+        }
+    }
+    if (frontApproachOsids.length === 0) return orders;
+    const sortedFrontOsids = [...new Set(frontApproachOsids)].sort(strictCompare);
+
+    // Build brigade location map
+    const brigadeLocationMap = new Map<string, string>();
+    for (const b of briefing.brigades) {
+        if (b.location_osid) brigadeLocationMap.set(b.id, b.location_osid);
+    }
+
+    // Find main_effort surplus brigades that are unreachable from any front approach
+    const mainEffortSurplus = allocation.surplus_pool
+        .filter(ev => ev.tier === 'main_effort' && !ev.is_on_loan && !ev.is_disrupted)
+        .sort((a, b) => strictCompare(a.brigade_id, b.brigade_id));
+
+    for (const ev of mainEffortSurplus) {
+        const locationOsid = brigadeLocationMap.get(ev.brigade_id);
+        if (!locationOsid) continue;
+
+        // Check if already reachable — no prepositioning needed
+        let alreadyReachable = false;
+        for (const frontOsid of sortedFrontOsids) {
+            const dist = spatialFriendlyDistance(
+                briefing.spatial, briefing.faction,
+                locationOsid, frontOsid, MAX_REACHABILITY_HOPS,
+            );
+            if (dist >= 0) { alreadyReachable = true; break; }
+        }
+        if (alreadyReachable) continue;
+
+        // Find the nearest front approach OSID by BFS (use a larger hop limit
+        // for destination selection — we're pathfinding, not filtering).
+        let bestOsid: string | null = null;
+        let bestDist = Infinity;
+        for (const frontOsid of sortedFrontOsids) {
+            if (!spatialSameComponent(briefing.spatial, briefing.faction, locationOsid, frontOsid)) continue;
+            const dist = spatialFriendlyDistance(
+                briefing.spatial, briefing.faction,
+                locationOsid, frontOsid, 30, // wider search for destination
+            );
+            if (dist >= 0 && dist < bestDist) {
+                bestDist = dist;
+                bestOsid = frontOsid;
+            }
+        }
+
+        if (bestOsid) {
+            orders.push({ brigade_id: ev.brigade_id, destination_osid: bestOsid });
+        }
+    }
+
+    return orders;
 }

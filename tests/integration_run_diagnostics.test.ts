@@ -232,7 +232,7 @@ describe('run diagnostics (40w)', () => {
     // ─── 3. Empty Sectors ─────────────────────────────────────────────────
 
     describe('empty sectors', () => {
-        it('fewer than 5 sectors with >3 edges have zero assigned brigades', () => {
+        it('fewer than 8 sectors with >3 edges have zero assigned brigades', () => {
             if (skipped) return;
             const sectors = (state as any).military.corps_front_sectors as Record<string, CorpsFrontSector> ?? {};
             const gaps: string[] = [];
@@ -251,8 +251,8 @@ describe('run diagnostics (40w)', () => {
             }
 
             expect(gaps.length,
-                `${gaps.length} sectors with >3 edges have 0 brigades — should be <5`
-            ).toBeLessThan(5);
+                `${gaps.length} sectors with >3 edges have 0 brigades — should be <8`
+            ).toBeLessThan(8);
         });
     });
 

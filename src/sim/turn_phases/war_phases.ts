@@ -2553,6 +2553,12 @@ function recallDriftedBrigades(state: GameState, adjacency?: Map<string, string[
     const adj = adjacency;
     const moveOrders = state.military.brigade_movement_orders ??= {};
 
+    // Build set of sector-line-assigned brigades (do not recall these)
+    const lineAssigned = new Set<string>();
+    for (const sector of Object.values(state.military.corps_front_sectors ?? {})) {
+        for (const bid of sector.assigned_brigade_ids ?? []) lineAssigned.add(bid);
+    }
+
     for (const [fid, f] of Object.entries(formations)) {
         if (f.status !== 'active') continue;
         if (f.kind !== 'brigade' && f.kind !== 'og') continue;
@@ -2561,6 +2567,9 @@ function recallDriftedBrigades(state: GameState, adjacency?: Map<string, string[
         if (inOp.has(fid)) continue;
         if ((f.disrupted_turns ?? 0) > 0) continue;
         if (moveOrders[fid]) continue; // already has movement orders
+        // Sector-line-assigned brigades belong at the front — do not recall them home.
+        // Matches evaluateHomeReturn's line-assigned filter.
+        if (lineAssigned.has(fid)) continue;
 
         // n1198: BFS through FRIENDLY territory only, not raw adjacency.
         // Raw adjacency sees sela_2→mostar as 3 hops (through RS territory),

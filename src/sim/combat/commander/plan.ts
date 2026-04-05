@@ -521,10 +521,33 @@ function createOpportunityPlan(
     turn: number,
     isLocal: boolean,
 ): PlanDecision | null {
+    // ── Reachability-aware selection (Fix A) ───────────────────────────
+    // Pre-filter surplus to brigades that can actually reach at least one
+    // enemy objective approach OSID within MAX_REACHABILITY_HOPS.
+    // Without this, the planner picks the best-fitness brigades (often deep-rear
+    // main_effort), then rejects the plan when they fail the reachability check.
+    // That pattern starves corps with rear-positioned elite assets of all plans.
+    const reachableSurplus = filterSurplusByReachability(
+        briefing, surplusPool, stagingZone.enemy_adjacent_osids,
+    );
+
+    // Use the reachable pool if it can form a plan; otherwise the plan truly cannot form.
+    if (reachableSurplus.length < MIN_BRIGADES_FOR_PLAN) {
+        return null;
+    }
+
+    // Recompute main_effort cap among reachable brigades only.
+    // If main_effort units are unreachable (deep rear), the plan scales to
+    // what's available rather than sizing for absent assets.
+    const reachableMainEffort = reachableSurplus.filter(ev => ev.tier === 'main_effort').length;
+    const isFallback = reachableMainEffort === 0 && mainEffortCap > 0;
+
     // Cap by main_effort tier count (n1298) — corps deploys at most as many brigades as
-    // it has main_effort-capable brigades. Garrison-tier brigades don't belong in assaults.
-    const naturalRequired = Math.min(surplusPool.length, stagingZone.surplus_brigades.length);
-    const mainEffortLimit = mainEffortCap > 0 ? mainEffortCap : naturalRequired;
+    // it has reachable main_effort-capable brigades. When no main_effort are reachable,
+    // allow a bounded fallback at MIN_BRIGADES_FOR_PLAN scale only.
+    const effectiveMainEffortCap = reachableMainEffort > 0 ? reachableMainEffort : 0;
+    const naturalRequired = Math.min(reachableSurplus.length, stagingZone.surplus_brigades.length);
+    const mainEffortLimit = effectiveMainEffortCap > 0 ? effectiveMainEffortCap : MIN_BRIGADES_FOR_PLAN;
     const baseRequiredBrigades = Math.max(
         MIN_BRIGADES_FOR_PLAN,
         Math.min(mainEffortLimit, naturalRequired),
@@ -534,12 +557,9 @@ function createOpportunityPlan(
         return null;
     }
 
-    const assignedBrigades = selectBrigadesForPlan(surplusPool, requiredBrigades);
+    const assignedBrigades = selectBrigadesForPlan(reachableSurplus, requiredBrigades);
 
-    // Pre-filter enemy objectives to only those reachable by at least one assigned brigade.
-    // Mirrors the BFS reachability check in emit.ts (lines ~559-599) but applied at plan
-    // creation time, before the operation slot is consumed. Prevents vrs_herzegovina from
-    // assigning Čapljina/Mostar objectives to brigades stationed in Foča/Cajnice.
+    // Verify objectives are reachable from the selected (already-filtered) brigades.
     const reachableEnemyOsids = filterReachableObjectives(
         briefing,
         assignedBrigades,
@@ -580,7 +600,7 @@ function createOpportunityPlan(
         concentration_progress: requiredBrigades > 0
             ? Math.min(1.0, brigadesAlreadyAtStaging / requiredBrigades)
             : 0,
-        viability_score: 0.8,  // Opportunity plans start with lower viability than pre-planned
+        viability_score: isFallback ? 0.55 : 0.8,  // Fallback plans (no reachable main_effort) start weaker
         source: 'opportunity',
     };
 
@@ -634,6 +654,80 @@ function selectOpportunityTargets(
             return diff !== 0 ? diff : strictCompare(a, b);
         })
         .slice(0, maxObjectives);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Helper: filter surplus brigades to those that can reach enemy objectives
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Returns the subset of surplusPool whose brigade location can BFS-reach at
+ * least one friendly approach OSID adjacent to any candidateOsid (enemy target)
+ * within MAX_REACHABILITY_HOPS through friendly territory.
+ *
+ * This pre-filters the surplus pool BEFORE brigade selection so the planner
+ * picks from reachable units rather than selecting the best-fitness deep-rear
+ * brigades and then rejecting the entire plan on reachability.
+ */
+function filterSurplusByReachability(
+    briefing: CommanderBriefing,
+    surplusPool: readonly BrigadeEvaluation[],
+    candidateOsids: readonly string[],
+): BrigadeEvaluation[] {
+    if (candidateOsids.length === 0) return [];
+
+    const adjacency = briefing.spatial.adjacency;
+    const fofMap = briefing.spatial.friendlyOsidsByFaction;
+    if (!adjacency || !fofMap) return [...surplusPool]; // unit test fallback
+    const factionFriendlyOsids = fofMap.get(briefing.faction);
+    if (!factionFriendlyOsids) return [...surplusPool];
+
+    // Build all friendly approach OSIDs across all candidate enemy objectives.
+    // A brigade is reachable if it can BFS to ANY of these approach OSIDs.
+    const allApproachOsids = new Set<string>();
+    for (const candidateOsid of candidateOsids) {
+        const neighbors = adjacency.get(candidateOsid as any) ?? [];
+        for (const n of neighbors as readonly string[]) {
+            if (factionFriendlyOsids.has(n)) allApproachOsids.add(n);
+        }
+    }
+    if (allApproachOsids.size === 0) return [];
+
+    // Build location map from briefing brigades.
+    const brigadeLocationMap = new Map<string, string>();
+    for (const b of briefing.brigades) {
+        if (b.location_osid) brigadeLocationMap.set(b.id, b.location_osid);
+    }
+
+    const sortedApproaches = [...allApproachOsids].sort(strictCompare);
+
+    const reachable: BrigadeEvaluation[] = [];
+    for (const ev of surplusPool) {
+        const locationOsid = brigadeLocationMap.get(ev.brigade_id);
+        if (!locationOsid) continue;
+
+        // Component gate: brigade must be in the same connected component as at least one approach.
+        let inComponent = false;
+        for (const approachOsid of sortedApproaches) {
+            if (spatialSameComponent(briefing.spatial, briefing.faction, locationOsid, approachOsid)) {
+                inComponent = true;
+                break;
+            }
+        }
+        if (!inComponent) continue;
+
+        // BFS hop check: can this brigade reach any approach OSID within the hop limit?
+        let canReach = false;
+        for (const approachOsid of sortedApproaches) {
+            const dist = spatialFriendlyDistance(
+                briefing.spatial, briefing.faction,
+                locationOsid, approachOsid, MAX_REACHABILITY_HOPS,
+            );
+            if (dist >= 0) { canReach = true; break; }
+        }
+        if (canReach) reachable.push(ev);
+    }
+    return reachable;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

@@ -96,6 +96,8 @@ function makeMinimalBriefing(overrides: Partial<CommanderBriefing> = {}): Comman
             adjacency: new Map<string, string[]>([
                 ['op:enemy:priority', ['op:test:t1']],
                 ['op:enemy:other', ['op:test:t2']],
+                ['op:test:t1', ['op:test:t2', 'op:enemy:priority']],
+                ['op:test:t2', ['op:test:t1', 'op:enemy:other']],
             ]),
             friendlyOsidsByFaction: new Map<FactionId, Set<string>>([
                 ['RBiH' as FactionId, new Set(['op:test:t1', 'op:test:t2'])],

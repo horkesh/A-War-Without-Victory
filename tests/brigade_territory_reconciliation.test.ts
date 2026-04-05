@@ -1128,4 +1128,94 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
         expect(formations.brig_kept.assignment).toEqual({ kind: 'sector', sector_id: sector.sector_id, role: 'front' });
         expect(formations.brig_kept.assigned_sub_segment_id).toBeUndefined();
     });
+
+    // ─── Drifted-brigade gate in rehomeUnassignedBrigadesToPhysicalSectorOwners ──
+
+    it('rehome skips drifted brigade whose home_osid is still in own-corps territory', () => {
+        // Brigade at foreign-corps territory but home_osid is in own-corps sector
+        const ownCorpsSector = makeSector(
+            'sector:vrs_1st_krajina:0',
+            'vrs_1st_krajina',
+            [makeSubSeg('front_own', ['op:banja_luka:front'], ['op:enemy:a'], 3)],
+            ['op:banja_luka:front', 'op:banja_luka:melina_2'],
+        );
+        const foreignCorpsSector = makeSector(
+            'sector:vrs_2nd_krajina:0',
+            'vrs_2nd_krajina',
+            [makeSubSeg('front_foreign', ['op:kljuc:front'], ['op:enemy:b'], 3)],
+            ['op:kljuc:front', 'op:kljuc:donje_ratkovo_2'],
+        );
+
+        const driftedBrig = makeFormation({
+            id: 'brig_drifted',
+            corps_id: 'vrs_1st_krajina',
+            location_osid: 'op:kljuc:donje_ratkovo_2',  // in foreign-corps territory
+            home_osid: 'op:banja_luka:melina_2',         // still in own-corps territory
+        });
+
+        const formations: Record<FormationId, FormationState> = {
+            brig_drifted: driftedBrig,
+        };
+        const adjacency = new Map<Osid, Osid[]>([
+            ['op:banja_luka:front' as Osid, ['op:banja_luka:melina_2' as Osid]],
+            ['op:banja_luka:melina_2' as Osid, ['op:banja_luka:front' as Osid]],
+            ['op:kljuc:front' as Osid, ['op:kljuc:donje_ratkovo_2' as Osid]],
+            ['op:kljuc:donje_ratkovo_2' as Osid, ['op:kljuc:front' as Osid]],
+        ]);
+        const friendlyOsids = new Set<string>([
+            'op:banja_luka:front', 'op:banja_luka:melina_2',
+            'op:kljuc:front', 'op:kljuc:donje_ratkovo_2',
+        ]);
+
+        rehomeUnassignedBrigadesToPhysicalSectorOwners(
+            [ownCorpsSector, foreignCorpsSector],
+            formations,
+            'RS' as FactionId,
+            adjacency,
+            friendlyOsids,
+        );
+
+        // Should NOT be assigned to foreign corps sector
+        expect(foreignCorpsSector.assigned_brigade_ids).not.toContain('brig_drifted');
+        expect(foreignCorpsSector.reserve_brigade_ids).not.toContain('brig_drifted');
+        // Should NOT be assigned to own corps sector either (it's not physically there)
+        expect(ownCorpsSector.assigned_brigade_ids).not.toContain('brig_drifted');
+        expect(ownCorpsSector.reserve_brigade_ids).not.toContain('brig_drifted');
+    });
+
+    it('rehome DOES assign genuine enclave brigade whose home_osid is NOT in own-corps territory', () => {
+        const foreignCorpsSector = makeSector(
+            'sector:vrs_2nd_krajina:0',
+            'vrs_2nd_krajina',
+            [makeSubSeg('front_foreign', ['op:kljuc:front'], ['op:enemy:b'], 3)],
+            ['op:kljuc:front', 'op:kljuc:depth'],
+        );
+
+        const enclaveBrig = makeFormation({
+            id: 'brig_enclave',
+            corps_id: 'vrs_1st_krajina',
+            location_osid: 'op:kljuc:depth',     // in foreign-corps territory
+            home_osid: 'op:lost:gone',            // home NOT in any sector territory
+        });
+
+        const formations: Record<FormationId, FormationState> = {
+            brig_enclave: enclaveBrig,
+        };
+        const adjacency = new Map<Osid, Osid[]>([
+            ['op:kljuc:front' as Osid, ['op:kljuc:depth' as Osid]],
+            ['op:kljuc:depth' as Osid, ['op:kljuc:front' as Osid]],
+        ]);
+        const friendlyOsids = new Set<string>(['op:kljuc:front', 'op:kljuc:depth']);
+
+        rehomeUnassignedBrigadesToPhysicalSectorOwners(
+            [foreignCorpsSector],
+            formations,
+            'RS' as FactionId,
+            adjacency,
+            friendlyOsids,
+        );
+
+        // Genuine enclave brigade SHOULD be rehomed to the sector covering its location
+        expect(foreignCorpsSector.assigned_brigade_ids).toContain('brig_enclave');
+    });
 });

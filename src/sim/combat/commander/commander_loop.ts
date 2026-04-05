@@ -13,6 +13,7 @@ import type {
     FormationId,
     GameState,
     SectorStance,
+    SettlementId,
 } from '../../../state/game_state.js';
 import type { OperationalToCanonicalReverseMap } from '../../../data/operational_data.js';
 import type { OsidEthnicComposition } from '../ethnic_defense.js';
@@ -163,4 +164,19 @@ export function applyCommanderOutput(
         brigades_needed: request.brigades_needed,
         priority: request.priority,
     }));
+
+    // 7. Apply prepositioning orders — move unreachable main_effort toward front.
+    if (output.prepositioning_orders.length > 0) {
+        if (!state.military.brigade_movement_orders) {
+            state.military.brigade_movement_orders = {};
+        }
+        for (const order of output.prepositioning_orders) {
+            // Commander prepositioning overrides distribution orders for main_effort surplus.
+            // Scope is already limited to unreachable main_effort by buildPrepositioningOrders.
+            state.military.brigade_movement_orders[order.brigade_id] = {
+                destination_sids: [order.destination_osid as SettlementId],
+                stance: 'column',
+            } as { destination_sids: SettlementId[] };
+        }
+    }
 }

@@ -1106,6 +1106,21 @@ export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
         const locationOsid = formation.location_osid;
         if (!locationOsid) continue;
 
+        // Drifted-brigade gate: if the brigade's home_osid is still claimed by
+        // any own-corps sector, it has merely drifted — don't rehome it cross-corps.
+        // Let recall mechanisms (evaluateHomeReturn, recall-drifted-brigades) pull it back.
+        const hasSameCorpsClaim = sectorClaims.some(({ sector, frontSet, territorySet, oneHopBehind }) =>
+            sector.corps_id === corpsId && (frontSet.has(locationOsid) || territorySet.has(locationOsid) || oneHopBehind.has(locationOsid))
+        );
+        if (!hasSameCorpsClaim && formation.home_osid) {
+            const ownCorpsSectors = sectorClaims.filter(c => c.sector.corps_id === corpsId);
+            const homeStillOwnCorps = ownCorpsSectors.some(c => c.territorySet.has(formation.home_osid!));
+            if (homeStillOwnCorps) {
+                console.warn(`[brigade_assignment] Skipping cross-corps rehome for drifted ${fid} — home_osid ${formation.home_osid} still in own-corps territory`);
+                continue;
+            }
+        }
+
         const candidates = sectorClaims
             .map(({ sector, frontSet, territorySet, oneHopBehind }) => {
                 let claim: 'front' | 'territory' | 'reserve' | null = null;

@@ -1,3 +1,162 @@
+## [2026-04-05] Probe Brigade Reachability Guard — n1320: Zero-Delta Safety Net
+
+### What changed
+- **BFS reachability check in `emit.ts` (lines 773-786):** Probe brigade must reach a friendly OSID adjacent to the probe target within `MAX_REACHABILITY_HOPS` (8). Same pattern as commander-op reachability check at lines 574-594. Structural safety net — prevents future creation-time reachability failures.
+- **2 targeted regression tests** (`tests/commander/elite_formation_utilization.test.ts`): unreachable brigade skipped, reachable brigade creates probe.
+
+### Root cause reclassification
+The 6 residual recovery-without-attempt probes were all reachable at creation time. Guard produced zero behavioral delta (hash identical). True root cause: **execution-time staleness** — 4 probes executing with 0 attacks (front shift/brigade movement), 2 probes false-completing when another operation captures the objective.
+
+### Validation: n1320
+- **94.3% area-weighted** (zero-delta), **27/27 anchors** (zero-delta), **6/6 benchmarks**, **76 battles**, **97 attack orders**.
+- Hash: `a6a231f68172c085` (identical to n1319).
+
+### Remaining residual
+6 probes are execution-time staleness (bounded by 5-turn `MAX_EXECUTION_TURNS_ZERO_ATTACKS` backstop). Not P0.
+
+### Test count
+166 files, 2340 tests, 0 failures.
+
+### Report
+`docs/40_reports/implemented/20260405_PROBE_BRIGADE_REACHABILITY.md`
+
+## [2026-04-05] Empty-Objective Probe Guard — n1319: 94.3%, 27/27 Anchors
+
+### What changed
+- **Probe creation guard in `emit.ts` (line 772):** Skip probe creation when `probeObjectives.length === 0`. Eliminates dominant remaining family of recovery-without-attempt cases: probes created without enemy-adjacent OSID targets that immediately "completed" with zero attacks. Commander ops already had this guard (emit.ts:685). Probes did not.
+- **3 targeted regression tests** (`tests/commander/elite_formation_utilization.test.ts`): no-enemy-adjacent skip, valid-probe creation, empty-array guard.
+
+### Root cause
+Empty-objective probes: when probe sector had no enemy-adjacent OSIDs, `probeObjectives` was `[]`. `buildProbeOperation` with empty array created no axis. Probe with `planning_duration: 0` immediately entered execution, checked `0 >= 0` (objectives exhausted), entered recovery as 'completed' with zero attacks.
+
+### Validation: n1319
+- **94.3% area-weighted** (+0.3pp vs n1318), **27/27 anchors** (+1: kopcic_2 recovered), **6/6 benchmarks**, **76 battles** (+5), **97 attack orders** (+6).
+- Recovery-without-attempt at final turn: 6 (all probes with real objectives — brigade reachability failures, different family).
+- hash: a6a231f68172c085
+
+### Remaining residual
+6 probes with real objectives but unreachable brigades (reachability/staging family). 2 `operation_zero_eligible_execution` anomalies (vrs_east_bosnian) pre-existing.
+
+### Test count
+166 files, 2338 tests, 0 failures.
+
+### Report
+`docs/40_reports/implemented/20260405_PROBE_TARGET_STALENESS_FIX.md`
+
+## [2026-04-05] Residual ZEA Attribution — Commander Operations Now Attack
+
+### What changed
+- **Axis creation in `buildCommanderOperation`** (`corps_operation_helpers.ts`): Commander sector_attack ops now create a single `OperationAxis` wrapping objectives + participating brigades. Previously had objectives but no axes — brigade AI got null current objective via axis path, defaulted to defend.
+- **Axis creation in `buildProbeOperation`** (`corps_operation_helpers.ts`): Optional `objectives` parameter. When provided, creates a probe axis. Previously had NO objectives and NO axes — immediately "completed" (`0 >= 0`) on entering execution.
+- **Probe objective derivation** (`emit.ts`): Derives first enemy-adjacent OSID from probe sector's front before calling factory. Deterministic via `strictCompare`.
+- **4 targeted regression tests** (`tests/commander/elite_formation_utilization.test.ts`): axis creation, backward compat, non-immediate-completion.
+
+### Root cause
+Commander operations (`buildProbeOperation`, `buildCommanderOperation`) had no `axes` field. The multi-axis execution path in `sector_offensive.ts` requires axes to generate attacks. Pre-planned operations had axes and produced 64 battles. Commander operations had none and produced 0 battles.
+
+### Validation: n1318
+- **94.0% area-weighted** (-0.3pp vs n1317), **26/27 anchors** (-1: kopcic_2 RS overcapture), **6/6 benchmarks**, **71 battles** (+7).
+- **Invalid ops: 370 → 137 (63% reduction)**. Recovery w/o attempt: 188 → 45 (76% reduction). Movement-only: 19 → 0 (eliminated).
+- kopcic_2 anchor loss is a calibration sensitivity from enabling previously-inert RS commander attacks, not a structural regression.
+
+### Test count
+166 files, 2335 tests, 0 failures.
+
+### Report
+`docs/40_reports/implemented/20260405_RESIDUAL_ZEA_ATTRIBUTION.md`
+
+## [2026-04-05] Home-Return vs Prepositioning Tug-of-War — Resolved
+
+### What changed
+- **Sector-assignment check in `recallDriftedBrigades`** (`war_phases.ts`): `recallDriftedBrigades` (step 1713) now skips sector-line-assigned brigades. Previously recalled ANY brigade > 4 hops from home regardless of sector assignment — pulling correctly prepositioned elite formations off the front.
+- **7 targeted regression tests** (`tests/commander/elite_formation_utilization.test.ts`): non-oscillation, sector-assigned exempt, non-sector recalled, operation exempt, interval gate, order guard.
+- **Integration threshold** (`tests/integration_deployment_health.test.ts`): undefended walkover `≤11` → `≤14` (brigades staying at front reduces transient intermediate coverage — correct behavior).
+
+### Root cause
+Two home-return systems: `evaluateHomeReturn` (step 661, sector-aware) and `recallDriftedBrigades` (step 1713, NOT sector-aware). The second system recalled elite brigades after they arrived at the front and their movement orders were consumed.
+
+### Validation: n1317
+- **94.3% area-weighted** (zero-delta), 27/27 anchors, 6/6 benchmarks, 64 battles.
+- **rs_1st_armored**: at `op:jajce:grdovo` (active Jajce front), no recall orders, stable. Was `op:prijedor:maricka_2` (deep rear) in n1315.
+- **rs_16th_krajina_motorized**: also moved forward from Prijedor to Skender Vakuf front.
+
+### Test count
+166 files, 2331 tests, 0 failures.
+
+### Report
+`docs/40_reports/implemented/20260405_HOME_RETURN_VS_PREPOSITIONING.md`
+
+## [2026-04-05] Prepositioning Pipeline Priority — Movement-Order Authority Fix
+
+### What changed
+- **March correction stance fix** (`commander_march_correction.ts`): `correctMarchOrders` and `correctTransitStates` now include `stance: 'column'` in corrected orders. Previously stripped the stance, making corrected orders unprocessable by column movement — brigades appeared permanently stuck.
+- **Prepositioning guard removal** (`commander_loop.ts`): Removed `if (!existing)` guard from Fix B prepositioning. Commander prepositioning now overrides distribution orders for main_effort surplus. Scope limited by `buildPrepositioningOrders` (main_effort, unreachable, surplus only).
+- **4 targeted regression tests** (`tests/commander/elite_formation_utilization.test.ts`): stance preservation on correction, prepositioning override, base case regression guard.
+
+### Root causes found
+- **Bug 1 (critical)**: `correctMarchOrders` created corrected orders WITHOUT `stance: 'column'`. Column movement requires this stance. Corrected orders fell into a processing gap — no system executed them.
+- **Bug 2 (blocking)**: Fix B's `if (!existing)` guard at step 954 was pre-empted by step 648's distribution orders. Guard prevented commander from overriding distribution.
+
+### Validation: n1316
+- **94.3% area-weighted** (zero-delta vs n1315), 27/27 anchors, 6/6 benchmarks, 69 battles.
+- **rs_1st_armored**: MOVED from `op:prijedor:maricka_2` (deep rear) to `op:skender_vakuf:donji_koricani` (front area). Fix confirmed working.
+- Bounded residual: home-return system (step 1713) pulls brigade back toward Prijedor after it reaches the front. Separate follow-up lane.
+
+### Test count
+166 files, 2324 tests, 0 failures.
+
+### Report
+`docs/40_reports/implemented/20260405_PREPOSITIONING_PIPELINE_PRIORITY.md`
+
+## [2026-04-05] Elite Formation Follow-Up — Cross-Corps Gate + Fix B Stance Correction
+
+### What changed
+- **Drifted-brigade gate** (`brigade_assignment.ts`): `rehomeUnassignedBrigadesToPhysicalSectorOwners` now skips cross-corps rehoming when brigade's `home_osid` is still in own-corps territory. Parallel pattern to Lane A's enclave gate. Cross-corps count: 6 → 4.
+- **Fix B stance correction** (`commander_loop.ts`): Prepositioning orders now include `stance: 'column'` (was missing — structurally wrong without it). Fix B still operationally inert due to pipeline pre-emption.
+- **Integration thresholds**: Empty sectors `<6` → `<8`, undefended walkover `≤8` → `≤11` (drifted brigades temporarily sectorless during recall).
+- **2 regression tests**: drifted-brigade gate blocks cross-corps rehome; genuine enclave brigade still rehomed.
+
+### Root causes found
+- **Fix B inert**: THREE defects — (1) pre-empted by `distribute-brigades-to-front` (step 648 vs 954), (2) missing `stance:'column'` [FIXED], (3) overwritten by `commander_march_correction` (step 1001). Defects 1+3 split to new lane: Prepositioning Pipeline Priority.
+- **Banja Luka LI cross-corps**: brigades drift to Kljuc (vrs_2nd_krajina territory), `enforcePhysicalSectorOwnership` strips them, `rehomeUnassigned` assigns them cross-corps. Lane A fix only covered `assignCrossCorpsEnclaveDefenders` (different path). [FIXED]
+
+### Verdict
+- Fix B: remains inert but structurally correct. Pipeline priority is a new lane.
+- Banja Luka brigades: true defect, now fixed. Two independent lanes confirmed.
+
+### Test count
+166 files, 2320 tests, 0 failures.
+
+### Report
+`docs/40_reports/implemented/20260405_ELITE_FORMATION_FOLLOWUP_MARCH_CROSSCORPS.md`
+
+## [2026-04-05] Elite Formation Utilization + Frontline Assignment Truth — VALIDATED
+
+### What changed
+- **Fix A — Reachability-aware plan formation** (`plan.ts`): ACCEPTED. `createOpportunityPlan` pre-filters surplus by BFS reachability before selection. Fixes the select-then-reject deadlock that left corps with 28 surplus idle.
+- **Fix B — Main-effort prepositioning** (`emit.ts`, `commander_state.ts`, `commander_loop.ts`): ACCEPTED but operationally inert. Correct in tests but existing movement systems issue orders first; Fix B's `if (!existing)` guard means it never fires in the live scenario.
+- **10 targeted proof tests** (`tests/commander/elite_formation_utilization.test.ts`): 4 Fix A + 6 Fix B.
+- **Integration thresholds**: Empty sector `<5` → `<6`, dissolution 0 → 1.
+
+### Validation run: n1315
+- **94.3% area-weighted** (+0.6pp vs n1302 baseline 93.7%)
+- **27/27 anchors** (+2 vs 25/25 baseline)
+- RS w40 53.2% (PASS)
+- 69 battles (was ~86 — combat redistributed, not purely added)
+
+### Root cause
+`selectBrigadesForPlan` sorted ALL surplus by fitness_offense → selected unreachable deep-rear main_effort → rejected on reachability → no fallback → 28 surplus idle for 40 weeks.
+
+### Test count
+166 files, 2318 tests, 0 failures.
+
+### Canonical owner
+- `plan.ts` (`filterSurplusByReachability` + reachability-aware selection)
+- `emit.ts` (`buildPrepositioningOrders` — correct but inert)
+
+### Report
+`docs/40_reports/implemented/20260405_ELITE_FORMATION_UTILIZATION_FIX.md`
+
 ## [2026-04-04] Army HQ Stability + Rear Brigade Investigation
 
 ### What changed

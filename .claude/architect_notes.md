@@ -33,6 +33,20 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Active / Recent Accepted Lanes
 
+- **Elite Formation Utilization** — VALIDATED 2026-04-05, ALL FOLLOW-UPS CLOSED. Fix A: ACCEPTED (reachability-aware plan, n1315 +0.6pp +2 anchors). Fix B: NOW OPERATIONAL (pipeline priority lane closed). Cross-corps Banja Luka LI rehoming: FIXED. Reports: `docs/40_reports/implemented/20260405_ELITE_FORMATION_UTILIZATION_FIX.md`, `docs/40_reports/implemented/20260405_ELITE_FORMATION_FOLLOWUP_MARCH_CROSSCORPS.md`.
+
+- **Prepositioning Pipeline Priority** — CLOSED 2026-04-05. Two bugs: (1) `correctMarchOrders` stripped `stance:'column'`, (2) Fix B guard pre-empted. Both fixed. 4 targeted tests. Report: `docs/40_reports/implemented/20260405_PREPOSITIONING_PIPELINE_PRIORITY.md`.
+
+- **Home-Return vs Prepositioning Tug-of-War** — CLOSED 2026-04-05. `recallDriftedBrigades` sector-assignment check. n1317: 94.3%, 27/27, 64 battles. 7 targeted tests. Report: `docs/40_reports/implemented/20260405_HOME_RETURN_VS_PREPOSITIONING.md`.
+
+- **Residual ZEA Attribution** — CLOSED 2026-04-05. Commander operations (`buildProbeOperation`, `buildCommanderOperation`) had no `axes` — probes immediately "completed" (0 objectives = done), cmd ops got null objective from brigade AI. Fix: create single OperationAxis in both factories + derive probe objectives from sector front. n1318: 94.0% (-0.3pp), 26/27 (-1: kopcic_2), 6/6, 71 battles (+7). **Invalid ops 370→137 (63% reduction), recovery-without-attempt 188→45 (76%), movement-only 19→0.** kopcic_2 anchor loss is calibration sensitivity from enabling previously-inert RS commander attacks. 4 targeted tests. Report: `docs/40_reports/implemented/20260405_RESIDUAL_ZEA_ATTRIBUTION.md`.
+
+- **Empty-Objective Probe Guard** — CLOSED 2026-04-05. Guard added in `emit.ts` (line 772) to skip probe creation when `probeObjectives.length === 0`. Eliminates dominant remaining family of recovery-without-attempt: probes with no enemy-adjacent OSID targets that immediately "completed" with zero attacks. Commander ops already had this guard (emit.ts:685). n1319: 94.3% (+0.3pp), **27/27 anchors** (kopcic_2 recovered), 6/6, 76 battles (+5), 97 attack orders (+6). Residual: 6 probes with real objectives but unreachable brigades (different family). 3 targeted tests. Report: `docs/40_reports/implemented/20260405_PROBE_TARGET_STALENESS_FIX.md`.
+
+- **Probe Brigade Reachability Guard** — CLOSED 2026-04-05. BFS reachability check added in `emit.ts` (lines 773-786). Structural safety net — zero behavioral delta (hash identical to n1319: `a6a231f68172c085`). All 6 residual probes were reachable at creation time. Root cause reclassified from "creation-time unreachable" to "execution-time staleness" (4 executing-zero-attack + 2 false-completion). 2 targeted tests. Report: `docs/40_reports/implemented/20260405_PROBE_BRIGADE_REACHABILITY.md`.
+
+- **Army HQ Stability Package** — CLOSED 2026-04-04. `ChiefOfStaffBriefing.buildStrainParagraphs` had unsafe `as unknown as GameState` cast — crashed reading `state.military.corps_command` from `LoadedGameState`. Fix: use adapter-derived `FormationView.commandStrainLabel`. Integration test added. Brigade investigation: all 3 named RS brigades are active and sector-assigned (rs_1st_armored correct; rs_2nd/rs_4th cross-corps misassigned to vrs_2nd_krajina — pre-existing P1). None idle. Report: `docs/40_reports/implemented/20260404_ARMY_HQ_STABILITY_REAR_BRIGADE_INVESTIGATION.md`.
+
 - **Order Interpretation System Wave 3** — CLOSED 2026-04-04. `deriveInterventionRisk(category, commanderAssessment, severity): string | null` added to `command_strain.ts`. `DirectInterventionSection` gains `interventionRisk?: string | null` prop; explanation is now `interventionRisk ?? generic_fallback`. Modal-level useMemo derives category from `deriveOrderInterpretation` then calls `deriveInterventionRisk`. 9 focused Wave 3 tests; 56 total in interpretation suite; full suite 2300/2300. Report: `docs/40_reports/implemented/20260404_ORDER_INTERPRETATION_SYSTEM_WAVE3.md`.
 - **Order Interpretation System Wave 2** — CLOSED 2026-04-04. DragFactor model: DragSource + DragFactor interface + dragFactors: DragFactor[] on OrderInterpretation. `deriveOrderInterpretation` extended with `postponementCount?` param. Bullet list replaces prose in `OrderInterpretationSection` with dominant and supporting drag factors plus intensity labels. `postponementCount={postponements}` at call site. `cautionNotice` kept as fallback for backward compat. 14 focused Wave 21 drag-factor tests; targeted interpretation coverage 337/337; full suite 2291/2291. Report: `docs/40_reports/implemented/20260404_ORDER_INTERPRETATION_SYSTEM_WAVE2.md`.
 - **Order Interpretation System Wave 1** — CLOSED 2026-04-04 (Wave 1 of 2). Interpretation category system: `OrderInterpretationCategory` classifies institutional drag as strain_shaped / caution_driven / feasibility_constrained / tempo_resistant. `deriveOrderInterpretation` extended with `primaryConstraint?` + `trendDirection?` params. `OrderInterpretationSection` now fires for ALL reluctant assessments (not just strain>0), showing category label badge. No engine changes, no new persistence. 33 focused tests (Wave 20) plus updated command_authority coverage. Full suite: 2277/2277. Report: `docs/40_reports/implemented/20260404_ORDER_INTERPRETATION_SYSTEM_WAVE1.md`.
@@ -108,10 +122,12 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 
 ## Next Priority Lanes
 
-1. **Residual ZEA attribution pass:** re-measure on current `HEAD` now that Lane B is closed. `P14` hardening is already landed — do not reopen. Start from fresh 40w run evidence.
-2. **AAR provenance follow-up:** zero-attack-success operations must distinguish combat capture from passive/external control changes. Owner: `src/sim/combat/operation_aar.ts`.
-3. **gradacac_2 P0 investigation:** roadmap item 1 once current engine-truth defects are no longer masking front behavior.
-4. **v0.8.1 Commander Maturity gate check:** full two-tier post-run panel go/no-go on commander system.
+1. **Execution-time probe staleness:** 6 probes with valid objectives and reachable brigades at creation time still end with 0 attacks. Root cause: execution-time staleness (4 executing-zero-attack, 2 false-completion from objective captured by other ops). 5-turn `MAX_EXECUTION_TURNS_ZERO_ATTACKS` backstop limits damage. Bounded friction, not P0. Owner: Gameplay Programmer.
+2. **Residual ZEA (remaining after probe guard):** Recovery-without-attempt cases reduced to 6 at final turn (all execution-time staleness, NOT reachability). 2 `operation_zero_eligible_execution` anomalies (vrs_east_bosnian) pre-existing.
+3. **Formation Expert deferred recommendations:** Expand prepositioning tier to `active_defense`; relax `can_launch_ops` gate; exclude `is_home_defense`. Owner: Gameplay Programmer. File: `src/sim/combat/commander/emit.ts`.
+4. **AAR provenance follow-up:** zero-attack-success operations must distinguish combat capture from passive/external control changes. Owner: `src/sim/combat/operation_aar.ts`.
+5. **gradacac_2 P0 investigation:** roadmap item 1 once current engine-truth defects are no longer masking front behavior.
+6. **v0.8.1 Commander Maturity gate check:** full two-tier post-run panel go/no-go on commander system.
 
 ## Validation Gate Note
 

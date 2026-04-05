@@ -11,6 +11,7 @@ import { buildOperationArrowsGeoJSON } from '../src/ui/map/map/builders/buildOpe
 import { deriveUrbanTier } from '../src/ui/map/map/builders/urbanSettlementTiers.js';
 import { generateBriefing } from '../src/ui/map/components/army_hq/generateBriefing.js';
 import { generateThreatAssessment } from '../src/ui/map/components/army_hq/generateThreatAssessment.js';
+import { generateCoSBriefing } from '../src/ui/map/components/army_hq/ChiefOfStaffBriefing.js';
 import {
   getAssignedCommandLabel,
   getPlayerFacingCorpsName,
@@ -351,6 +352,52 @@ describe('Tactical map render smoke', () => {
 
     expect(names.some((name) => name.includes('Own Op'))).toBe(true);
     expect(names.some((name) => name.includes('Enemy Op'))).toBe(false);
+  });
+
+  it('generateCoSBriefing uses adapter-derived commandStrainLabel without raw GameState access', () => {
+    const state = {
+      turn: 10,
+      formations: [
+        {
+          id: 'vrs_1st_krajina',
+          faction: 'RS',
+          name: '1st Krajina Corps',
+          kind: 'corps',
+          status: 'active',
+          readiness: 'active',
+          cohesion: 70,
+          fatigue: 10,
+          createdTurn: 1,
+          tags: [],
+          commandStrain: 4,
+          commandStrainLabel: 'strained' as const,
+        },
+        {
+          id: 'vrs_east_bosnian',
+          faction: 'RS',
+          name: 'East Bosnia Corps',
+          kind: 'corps',
+          status: 'active',
+          readiness: 'active',
+          cohesion: 60,
+          fatigue: 20,
+          createdTurn: 1,
+          tags: [],
+          commandStrain: 0,
+          commandStrainLabel: 'healthy' as const,
+        },
+      ],
+      latestTurnSummary: { battles: [], territory_net: {} },
+    } as unknown as LoadedGameState;
+
+    // This would crash before the fix: computeCorpsCommandStrain tried to read
+    // state.military.corps_command from LoadedGameState via unsafe `as unknown as GameState` cast
+    const paragraphs = generateCoSBriefing([], state, 'RS');
+    expect(Array.isArray(paragraphs)).toBe(true);
+    // Should contain a strain paragraph for 1st Krajina (strained) but not East Bosnia (healthy)
+    const allText = paragraphs.flat().map(seg => 'value' in seg ? seg.value : seg.label).join(' ');
+    expect(allText).toContain('1st Krajina Corps');
+    expect(allText).not.toContain('East Bosnia Corps');
   });
 
   it('army hq briefing does not flag exempt reserve corps as missing sectors', () => {

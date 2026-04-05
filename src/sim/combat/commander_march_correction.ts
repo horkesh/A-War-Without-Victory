@@ -84,7 +84,8 @@ export function correctMarchOrders(state: GameState, adjacency: Map<string, stri
         if (!state.military.brigade_movement_orders) state.military.brigade_movement_orders = {};
         state.military.brigade_movement_orders[bid] = {
             destination_sids: [bestOsid as SettlementId],
-        };
+            stance: 'column',
+        } as { destination_sids: SettlementId[] };
     }
 }
 
@@ -167,6 +168,7 @@ export function correctTransitStates(state: GameState, adjacency: Map<string, st
         if (!state.military.brigade_movement_orders) state.military.brigade_movement_orders = {};
         state.military.brigade_movement_orders[bid] = {
             destination_sids: [bestOsid as SettlementId],
-        };
+            stance: 'column',
+        } as { destination_sids: SettlementId[] };
     }
 }

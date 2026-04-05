@@ -11,8 +11,7 @@ import { turnToDateString } from '../../utils/formatters';
 import { generateLetterHome } from '../../../../sim/letter_home.js';
 import type { LetterHomeInput } from '../../../../sim/letter_home.js';
 import letterHomeData from '../../../../../data/templates/letter_home_templates.json';
-import { computeCorpsCommandStrain, getCommandStrainLabel } from '../../data/command_strain.js';
-import type { GameState } from '../../../../state/game_state.js';
+import type { CommandStrainLabel } from '../../data/command_strain.js';
 
 // ── CoS identity ────────────────────────────────────────────────────
 
@@ -128,13 +127,11 @@ function buildStrainParagraphs(state: LoadedGameState, faction: string, tone: Co
     // Deterministic: sort by id
     const sorted = [...playerCorps].sort((a, b) => a.id.localeCompare(b.id));
     for (const corps of sorted) {
-        const strain = computeCorpsCommandStrain(corps.id, state as unknown as GameState);
-        if (strain <= 0) continue;
-        const label = getCommandStrainLabel(strain);
-        if (label === 'healthy') continue;
-        const phraseKey = label as 'strained' | 'compromised';
+        // Use adapter-derived commandStrainLabel — never cast LoadedGameState to raw GameState
+        const label: CommandStrainLabel | undefined = corps.commandStrainLabel;
+        if (!label || label === 'healthy') continue;
         const corpsName = corps.name ?? corps.id;
-        const phrase = STRAIN_PHRASES[tone][phraseKey](corpsName);
+        const phrase = STRAIN_PHRASES[tone][label](corpsName);
         paragraphs.push([text(phrase)]);
     }
     return paragraphs;

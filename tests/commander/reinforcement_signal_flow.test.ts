@@ -51,6 +51,7 @@ function makeOutput(): CommanderOutput {
             { zone_id: 'zone:vrs_1st_krajina:doboj' as ZoneId, brigades_needed: 1, priority: 'medium' },
         ],
         plan_updates: [],
+        prepositioning_orders: [],
     };
 }
 
