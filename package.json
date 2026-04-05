@@ -1,6 +1,6 @@
 {
   "name": "awwv",
-  "version": "0.6.1",
+  "version": "0.8.1",
   "description": "A War Without Victory (AWWV) simulation prototype",
   "main": "src/desktop/electron-main.cjs",
   "private": true,

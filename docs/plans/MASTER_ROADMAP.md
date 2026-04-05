@@ -1,6 +1,6 @@
 # AWWV Master Roadmap — Pyrrhic Games
 
-**Last Updated:** 2026-04-04
+**Last Updated:** 2026-04-05
 **Current Version:** 0.8.0 (Command Chain)
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."
@@ -117,9 +117,9 @@ PERCEIVE-DECIDE-EXECUTE per-corps loop. 10 files in `src/sim/combat/commander/` 
 
 - **Presidential decision events (Phase C):** 3 recurring event types (Strategic Posture Review, Visit to the Front, Humanitarian Crisis Response) — pure JSON content, zero engine changes. Fills 29-turn and 20-turn decision gaps in 1993-1994. Design: `docs/40_reports/implemented/20260403_PRESIDENTIAL_DECISIONS_BETWEEN_OPS.md`. Assign to `/narrative-designer` + `/game-designer`.
 
-### v0.8.1 — Commander Maturity
+### v0.8.1 — Commander Maturity — CLOSED 2026-04-05
 
-**Gate:** Only starts after the full two-tier post-run panel (7 Tier 1 investigators + 5 Tier 2 analysts) produces Orchestrator go/no-go on the commander system, P0 (combat drought) is confirmed fixed, and operations singularity is credible enough that the commander is reasoning through one real command object rather than a split ops model. War-or-Game is one Tier 1 investigator — its sign-off alone is not sufficient.
+**Status:** All 6 maturity conditions met. 6 phases shipped. tsc clean, 2484/2484 vitest. `package.json` → v0.8.1. Report: `docs/40_reports/implemented/20260405_V081_PHASE6_TRACE_QA.md`.
 
 **Theme:** Make the commander think structurally before adding personality. No LLM flavor, no political theater — real deterministic reasoning depth.
 
@@ -127,14 +127,13 @@ PERCEIVE-DECIDE-EXECUTE per-corps loop. 10 files in `src/sim/combat/commander/` 
 
 **Army-command note:** Army commanders are not getting a separate named maturity milestone inside early `v0.8.x`. During `v0.8.0` through `v0.8.2`, the existing army layer remains serviceable while corps command is made real first. If a dedicated army-commander maturity pass is needed, it belongs in `v0.8-to-v0.9` after corps maturity and command-authority cleanup, before any full corps/army LLM play.
 
-Done means for this milestone:
-- belief state exists separately from raw world state (not just reading `GameState` directly)
-- candidate intents compete against each other (not a single option evaluated in isolation)
-- memory from prior turns affects future scoring
-- constraints and preferences are structurally distinct from execution mechanics
-- reasoning traces exist (for debugging + later UI surface)
-- relationship model exists: commanders track trust/familiarity with the player, sibling corps, and patrons — prerequisite for order interpretation in v0.8.3
-- intelligence assurance harness exists: sampled corps traces, anti-theater checks, and explicit proof criteria for “this is intelligent, not just decorated rails”
+Completed maturity conditions:
+- belief state exists separately from raw world state — Phase 2
+- candidate intents compete against each other — Phase 3
+- memory from prior turns affects future scoring — Phase 4
+- constraints and preferences are structurally distinct from execution mechanics — Phase 5
+- reasoning traces exist (for debugging + later UI surface) — Phase 3 + 5 + 6
+- relationship model exists: commanders track trust/familiarity with the player, sibling corps, and patrons — Phase 1 + 5
 
 Primary targets: `src/sim/combat/commander/assess.ts`, `src/sim/combat/commander/allocate.ts`, `src/sim/combat/commander/plan.ts`, `src/sim/combat/commander/decide.ts`, `src/sim/combat/commander/briefing.ts`, `src/sim/combat/commander/emit.ts`
 

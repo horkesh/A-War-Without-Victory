@@ -866,6 +866,14 @@ function advanceExistingPlan(
                     action: 'abandoned',
                     reason: `suspended for ${suspendedTurns} turns: ${suspendReason}`,
                     concentration_orders: [],
+                    decision_trace: {
+                        turn,
+                        winning_intent_id: null,
+                        candidates: [],
+                        hard_constraints: ['plan_abandoned_suspension_timeout'],
+                        lessons_applied: [],
+                        relationships_applied: [],
+                    },
                 };
             }
         }
@@ -876,6 +884,14 @@ function advanceExistingPlan(
             action: 'suspended',
             reason: suspendReason,
             concentration_orders: [],
+            decision_trace: {
+                turn,
+                winning_intent_id: null,
+                candidates: [],
+                hard_constraints: [`plan_suspended_${suspendReason.replace(/\s+/g, '_').toLowerCase().slice(0, 40)}`],
+                lessons_applied: [],
+                relationships_applied: [],
+            },
         };
     }
 
@@ -910,6 +926,14 @@ function advanceExistingPlan(
             action: 'abandoned',
             reason: `viability dropped to ${viability.toFixed(2)}`,
             concentration_orders: [],
+            decision_trace: {
+                turn,
+                winning_intent_id: null,
+                candidates: [],
+                hard_constraints: ['plan_abandoned_viability'],
+                lessons_applied: [],
+                relationships_applied: [],
+            },
         };
     }
 
@@ -944,6 +968,14 @@ function advanceExistingPlan(
             action: 'launched',
             reason: 'plan ready, launching operation',
             concentration_orders: [],
+            decision_trace: {
+                turn,
+                winning_intent_id: plan.plan_id,
+                candidates: [],
+                hard_constraints: ['plan_ready_for_launch'],
+                lessons_applied: [],
+                relationships_applied: [],
+            },
         };
     }
 

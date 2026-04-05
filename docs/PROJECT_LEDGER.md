@@ -23751,3 +23751,11 @@ Commander `selectWinningIntent()` now wires `CommanderLesson[]` and `OfficerPers
 - `relationships_applied: readonly string[]` added to `CommanderDecisionTrace` (format: `'signal:candidate_type'`, sorted, non-zero deltas only).
 - All 6 `managePlan()` early returns now emit `decision_trace` stubs with canonical `hard_constraints` IDs (`no_briefing`, `corps_exempt`, `forced_defensive_stance`, `plan_active_no_replacement`, `suspension_limit_reached`, `no_eligible_candidates`) — every planning path is now traceable.
 - tsc clean, 2460/2460 vitest. Report: `docs/40_reports/implemented/20260405_V081_PHASE5_CONSTRAINT_PREFERENCE.md`
+
+## 2026-04-05 — v0.8.1 Phase 6 — Decision Traces and QA Surface (Milestone Closeout)
+
+- Lifecycle traces added to 4 `advanceExistingPlan()` paths: abandon-viability, abandon-suspension-timeout, new-suspension, launched. `CommanderState.decision_trace` now populated on all planning paths.
+- `commander_debug.ts` created: `formatDecisionTrace()` pure deterministic formatter with [WINNER]/[BLOCKED]/[LOSER] candidate annotations and [LAUNCHED]/[ABANDONED]/[SUSPENDED] lifecycle header annotations.
+- `package.json` version bumped to `0.8.1`.
+- **v0.8.1 milestone closed.** All 6 maturity conditions met: belief state, candidate competition, lesson memory, constraint/preference separation, reasoning traces, relationship model.
+- tsc clean, 2484/2484 vitest. Report: `docs/40_reports/implemented/20260405_V081_PHASE6_TRACE_QA.md`
