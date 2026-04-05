@@ -285,6 +285,7 @@ describe('v0.8.1 Phase 1 — type structures', () => {
             candidates: [],
             hard_constraints: ['insufficient_supply'],
             lessons_applied: ['lesson_1'],
+            relationships_applied: [],
         };
         expect(trace.winning_intent_id).toBe('intent_1');
         expect(trace.hard_constraints).toContain('insufficient_supply');
@@ -334,6 +335,7 @@ describe('v0.8.1 Phase 1 — CommanderState persistence', () => {
             candidates: [],
             hard_constraints: [],
             lessons_applied: [],
+            relationships_applied: [],
         };
 
         const state = makeMinimalState({
@@ -386,7 +388,7 @@ describe('v0.8.1 Phase 1 — CommanderState persistence', () => {
             },
             relationships: { player_trust: 0.5, sibling_corps_trust: {}, patron_alignment: 0.5 },
             lessons: [],
-            decision_trace: { turn: 0, winning_intent_id: null, candidates: [], hard_constraints: [], lessons_applied: [] },
+            decision_trace: { turn: 0, winning_intent_id: null, candidates: [], hard_constraints: [], lessons_applied: [], relationships_applied: [] },
         });
         const keys = Object.keys(state);
         expect(keys).toContain('belief_state');

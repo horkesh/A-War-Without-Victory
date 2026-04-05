@@ -63,6 +63,9 @@ export const PLAN_CONCENTRATION_RATE = 2;
 /** Viability score below which a plan is abandoned. */
 const VIABILITY_ABANDON_THRESHOLD = 0.2;
 
+/** Score penalty applied when supply belief is critically low (< 0.2). Strong preference, not hard block. */
+const CRITICAL_SUPPLY_PENALTY = 0.50;
+
 /** Enemy tanks/artillery at or above this threshold force an extra brigade in planning. */
 const HEAVY_ENEMY_TANK_THRESHOLD = 12;
 const HEAVY_ENEMY_ARTILLERY_THRESHOLD = 12;
@@ -364,6 +367,8 @@ export function selectWinningIntent(
 
     // appliedLessonIds accumulates across candidates via closure (set in lesson delta block).
     const appliedLessonIds = new Set<string>();
+    // appliedRelationshipIds accumulates across candidates via closure (set in relationship delta block).
+    const appliedRelationshipIds = new Set<string>();
 
     const allCandidates: CommanderIntentCandidate[] = selectedDefs.map(def => {
         const { type } = def;
@@ -407,6 +412,11 @@ export function selectWinningIntent(
                     fatigue_readiness: f,
                     campaign_alignment: c,
                 };
+                // Critical supply: strong soft penalty (reclassified from hard block in Phase 5)
+                if (isCriticalSupply) {
+                    score -= CRITICAL_SUPPLY_PENALTY;
+                    score_breakdown = { ...score_breakdown, critical_supply_penalty: -CRITICAL_SUPPLY_PENALTY };
+                }
                 break;
             }
             case 'launch_opportunity': {
@@ -423,6 +433,11 @@ export function selectWinningIntent(
                     exhaustion_penalty: e,
                     fatigue_readiness: f,
                 };
+                // Critical supply: strong soft penalty (reclassified from hard block in Phase 5)
+                if (isCriticalSupply) {
+                    score -= CRITICAL_SUPPLY_PENALTY;
+                    score_breakdown = { ...score_breakdown, critical_supply_penalty: -CRITICAL_SUPPLY_PENALTY };
+                }
                 break;
             }
             case 'thin_quiet_sector': {
@@ -512,6 +527,58 @@ export function selectWinningIntent(
             score_breakdown = { ...score_breakdown, lesson_delta: lessonDelta };
         }
 
+        // ─── Relationship modifiers (additive post-score) ───────────────────────
+        const relationships = briefing.previous_state?.relationships;
+        let relationshipDelta = 0;
+        const appliedRelationshipKeys: string[] = [];
+
+        if (relationships) {
+            const clamp = (v: number, lo: number, hi: number): number => Math.max(lo, Math.min(hi, v));
+
+            if (type === 'stage_operation' || type === 'launch_opportunity') {
+                // player_trust: player confidence in this commander boosts offensive willingness
+                const ptDelta = clamp((relationships.player_trust - 0.5) * 0.12, -0.06, 0.06);
+                if (ptDelta !== 0) {
+                    relationshipDelta += ptDelta;
+                    appliedRelationshipKeys.push(`player_trust:${type}`);
+                }
+            }
+
+            if (type === 'stage_operation') {
+                // patron_alignment × campaignAlignment: obedience to political authority
+                // Only fires when campaign has assigned a meaningful role
+                const paDelta = clamp((relationships.patron_alignment - 0.5) * campaignAlignment * 0.12, -0.06, 0.06);
+                if (paDelta !== 0) {
+                    relationshipDelta += paDelta;
+                    appliedRelationshipKeys.push(`patron_alignment:stage_operation`);
+                }
+            }
+
+            if (type === 'request_army_support') {
+                // sibling_corps_trust (avg): trust in neighbors affects willingness to request HQ support
+                const sibValues = Object.values(relationships.sibling_corps_trust);
+                const avgSiblingTrust = sibValues.length > 0
+                    ? sibValues.reduce((a, b) => a + b, 0) / sibValues.length
+                    : 0.5;
+                const stDelta = clamp((avgSiblingTrust - 0.5) * 0.12, -0.06, 0.06);
+                if (stDelta !== 0) {
+                    relationshipDelta += stDelta;
+                    appliedRelationshipKeys.push(`sibling_corps_trust:request_army_support`);
+                }
+            }
+
+            // Outer cap: ±0.15
+            const RELATIONSHIP_DELTA_CAP = 0.15;
+            relationshipDelta = Math.max(-RELATIONSHIP_DELTA_CAP, Math.min(RELATIONSHIP_DELTA_CAP, relationshipDelta));
+        }
+
+        if (relationshipDelta !== 0) {
+            score += relationshipDelta;
+            score_breakdown = { ...score_breakdown, relationship_delta: relationshipDelta };
+        }
+
+        for (const k of appliedRelationshipKeys) appliedRelationshipIds.add(k);
+
         // ─── Hard-block rules ─────────────────────────────────────────────
         const blockedBy: string[] = [];
         const isOffensive = type === 'stage_operation' || type === 'launch_opportunity';
@@ -529,8 +596,6 @@ export function selectWinningIntent(
                 blockedBy.push('corps_stance_forbids_offensive');
             if (isOffensiveBlockedByLiveMajorOp)
                 blockedBy.push('major_operation_already_active');
-            if (isCriticalSupply)
-                blockedBy.push('critical_supply_belief');
         }
 
         if (type === 'request_army_support' && forces.total_surplus > 0) {
@@ -576,6 +641,7 @@ export function selectWinningIntent(
         candidates: allCandidates,
         hard_constraints: [...new Set(allCandidates.flatMap(c => [...c.blocked_by]))].sort(strictCompare),
         lessons_applied: [...appliedLessonIds].sort(strictCompare),
+        relationships_applied: [...appliedRelationshipIds].sort(strictCompare),
     };
 
     return { winner, trace };
@@ -607,7 +673,20 @@ export function managePlan(
     // No existing plan — evaluate whether to create one.
     // Defensive / reorganizing corps do not initiate new offensive plans.
     if (briefing.corps_stance === 'defensive' || briefing.corps_stance === 'reorganize') {
-        return { plan: null, action: 'none', reason: `corps in ${briefing.corps_stance} stance — no new plans`, concentration_orders: [] };
+        return {
+            plan: null,
+            action: 'none',
+            reason: `corps in ${briefing.corps_stance} stance — no new plans`,
+            concentration_orders: [],
+            decision_trace: {
+                turn,
+                winning_intent_id: null,
+                candidates: [],
+                hard_constraints: ['corps_stance_forbids_offensive'],
+                lessons_applied: [],
+                relationships_applied: [],
+            },
+        };
     }
 
     if (briefing.corps_exhaustion > MAX_EXHAUSTION_FOR_OPERATION) {
@@ -616,6 +695,14 @@ export function managePlan(
             action: 'none',
             reason: `corps exhaustion ${briefing.corps_exhaustion} above operation threshold ${MAX_EXHAUSTION_FOR_OPERATION}`,
             concentration_orders: [],
+            decision_trace: {
+                turn,
+                winning_intent_id: null,
+                candidates: [],
+                hard_constraints: ['corps_exhaustion_exceeds_threshold'],
+                lessons_applied: [],
+                relationships_applied: [],
+            },
         };
     }
 
@@ -626,6 +713,14 @@ export function managePlan(
             action: 'none',
             reason: fatigueBlockReason,
             concentration_orders: [],
+            decision_trace: {
+                turn,
+                winning_intent_id: null,
+                candidates: [],
+                hard_constraints: ['average_fatigue_too_high'],
+                lessons_applied: [],
+                relationships_applied: [],
+            },
         };
     }
 
@@ -636,6 +731,14 @@ export function managePlan(
             action: 'none',
             reason: campaignRoleBlockReason,
             concentration_orders: [],
+            decision_trace: {
+                turn,
+                winning_intent_id: null,
+                candidates: [],
+                hard_constraints: ['campaign_role_forbids_offensive'],
+                lessons_applied: [],
+                relationships_applied: [],
+            },
         };
     }
 
@@ -646,6 +749,14 @@ export function managePlan(
             action: 'none',
             reason: syncRoleBlockReason,
             concentration_orders: [],
+            decision_trace: {
+                turn,
+                winning_intent_id: null,
+                candidates: [],
+                hard_constraints: ['sync_role_forbids_offensive'],
+                lessons_applied: [],
+                relationships_applied: [],
+            },
         };
     }
 
@@ -657,7 +768,20 @@ export function managePlan(
         op => op.phase !== 'recovery' && op.type !== 'probe'
     );
     if (hasLiveMajorOp) {
-        return { plan: null, action: 'none', reason: 'major operation already active for this corps', concentration_orders: [] };
+        return {
+            plan: null,
+            action: 'none',
+            reason: 'major operation already active for this corps',
+            concentration_orders: [],
+            decision_trace: {
+                turn,
+                winning_intent_id: null,
+                candidates: [],
+                hard_constraints: ['major_operation_already_active'],
+                lessons_applied: [],
+                relationships_applied: [],
+            },
+        };
     }
 
     // v0.8.1 Phase 3: Candidate intent competition.

@@ -434,7 +434,7 @@ describe('v0.8.1 Phase 3 — Hard-Block Rules', () => {
         expect(stageOp!.blocked_by.length).toBeGreaterThan(0);
     });
 
-    it('critical_supply_belief blocks offensive intents when supply_continuity_confidence < 0.2', () => {
+    it('critical_supply_belief applies soft penalty (not hard block) when supply_continuity_confidence < 0.2 (Phase 5)', () => {
         const surplusPool = makeSurplusPool(MIN_BRIGADES_FOR_PLAN);
         const belief: CommanderBeliefState = {
             zone_beliefs: [],
@@ -457,11 +457,14 @@ describe('v0.8.1 Phase 3 — Hard-Block Rules', () => {
         const stageOp = trace.candidates.find(c => c.type === 'stage_operation');
         const launchOp = trace.candidates.find(c => c.type === 'launch_opportunity');
 
+        // Phase 5: reclassified from hard block to soft penalty — must NOT appear in blocked_by
         if (stageOp) {
-            expect(stageOp.blocked_by).toContain('critical_supply_belief');
+            expect(stageOp.blocked_by).not.toContain('critical_supply_belief');
+            expect(stageOp.score_breakdown['critical_supply_penalty']).toBe(-0.50);
         }
         if (launchOp) {
-            expect(launchOp.blocked_by).toContain('critical_supply_belief');
+            expect(launchOp.blocked_by).not.toContain('critical_supply_belief');
+            expect(launchOp.score_breakdown['critical_supply_penalty']).toBe(-0.50);
         }
     });
 
@@ -871,6 +874,7 @@ describe('v0.8.1 Phase 3 — Continuity', () => {
             candidates: [],
             hard_constraints: [],
             lessons_applied: [] as string[],
+            relationships_applied: [] as string[],
         };
 
         const plan: CommanderPlan = {
@@ -931,8 +935,10 @@ describe('v0.8.1 Phase 3 — Continuity', () => {
 
         const result = managePlan(briefing, zones, forces, [], null, 10);
 
-        // Short-circuit path — no competition, no trace
-        expect(result.decision_trace).toBeUndefined();
+        // Phase 5: early-return paths now carry a stub trace with the blocking constraint
+        expect(result.decision_trace).toBeDefined();
+        expect(result.decision_trace?.hard_constraints).toContain('corps_stance_forbids_offensive');
+        expect(result.decision_trace?.candidates).toEqual([]);
     });
 });
 

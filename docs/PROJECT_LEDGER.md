@@ -23743,3 +23743,11 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 ## 2026-04-05 — v0.8.1 Phase 4 — Lesson Memory and Personality Weighting (ACCEPTED)
 
 Commander `selectWinningIntent()` now wires `CommanderLesson[]` and `OfficerPersonality` into candidate scoring. Abandoned plans create `offensive_failure` lessons (weight −0.20, expires +8 turns); successful ops create `success_pattern` (+0.12, expires +5 turns). Personality modifiers (aggression/caution ±0.20, initiative ±0.08) are additive post-score. `lessons_applied` in `CommanderDecisionTrace` is now populated. Hard guards: modifiers cannot override hard blocks; cap ±0.35 prevents lesson runaway; backward compatible with null lessons/personality. 25 targeted tests; 2460/2460 vitest (173 files). Files: `plan.ts`, `emit.ts`. Report: `docs/40_reports/implemented/20260405_V081_PHASE4_LESSON_PERSONALITY.md`.
+
+## 2026-04-05 — v0.8.1 Phase 5 — Constraint/Preference Separation and Relationship Effects (ACCEPTED)
+
+- `isCriticalSupply` reclassified from hard block to soft penalty (`CRITICAL_SUPPLY_PENALTY = 0.50`). Supply belief is inferred, not measured — commanders can accept risk. Penalty recorded in `score_breakdown['critical_supply_penalty']`.
+- `CommanderRelationships` wired into scoring: `player_trust` (±0.06, `stage_operation`+`launch_opportunity`), `patron_alignment × campaignAlignment` (±0.06, `stage_operation`), `sibling_corps_trust` avg (±0.06, `request_army_support`). Outer cap ±0.15. Delta recorded in `score_breakdown['relationship_delta']`.
+- `relationships_applied: readonly string[]` added to `CommanderDecisionTrace` (format: `'signal:candidate_type'`, sorted, non-zero deltas only).
+- All 6 `managePlan()` early returns now emit `decision_trace` stubs with canonical `hard_constraints` IDs (`no_briefing`, `corps_exempt`, `forced_defensive_stance`, `plan_active_no_replacement`, `suspension_limit_reached`, `no_eligible_candidates`) — every planning path is now traceable.
+- tsc clean, 2460/2460 vitest. Report: `docs/40_reports/implemented/20260405_V081_PHASE5_CONSTRAINT_PREFERENCE.md`

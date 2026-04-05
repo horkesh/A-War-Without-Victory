@@ -396,6 +396,8 @@ export interface CommanderDecisionTrace {
     readonly hard_constraints: readonly string[];
     /** Lesson IDs that influenced scoring this turn. */
     readonly lessons_applied: readonly string[];
+    /** Relationship modifiers applied this turn (e.g. 'player_trust:stage_operation'). Phase 5. */
+    readonly relationships_applied: readonly string[];
 }
 
 // ---------------------------------------------------------------------------
