@@ -117,6 +117,13 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - **Done means:** empty_contested_sector count from splitN child sectors drops to 0 in next 40w run; undefended_front_subsegments anomaly count reduces from 6.
 - **Report:** `docs/40_reports/implemented/20260404_LANE_B_EMPTY_CHILD_SECTORS_FIX.md`
 
+### Split-Child Sector Assignment Routing — OPEN
+- **Symptom:** `sector:vrs_1st_krajina:8` has 4 hostile edges, 0 brigades, but 6 brigades at its front OSIDs assigned to sibling sectors :2 and :3.
+- **Root cause:** `ensureMinimumSectorCoverage` territory-membership pre-pass (`brigade_assignment.ts` lines 1276-1319) blocks transfers of frontline-essential brigades even when donor sector has surplus and recipient has zero coverage with hostile exposure. Same class as closed Lane B but different trigger: front-OSID overlap between siblings, not simple zero-assignment after split.
+- **Fix direction:** Relax the frontline-essential guard when (a) donor has brigades > hostile_edges, (b) recipient has 0 brigades + hostile_edges > 0, (c) brigade location_osid is in both sectors' territory.
+- **Owner:** sector-expert + systems-programmer
+- **Report:** `docs/40_reports/implemented/20260405_FRONTLINE_OCCUPANCY_DENSITY_AUDIT.md`
+
 ### AAR Provenance Lane - OPEN
 - **Symptom:** `Operation Prijedor` and `Operation Visegrad` in `n1312` finalize as `success` with `total_attacks = 0`.
 - **Finding:** not a clean "not a bug." `operation_aar.ts` attributes objective-control changes to the active operation without tracking whether the capture came from combat, consolidation, or another control event.

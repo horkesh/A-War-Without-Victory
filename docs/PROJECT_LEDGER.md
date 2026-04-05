@@ -1,3 +1,17 @@
+## [2026-04-05] Frontline Occupancy / Density Audit
+
+### Finding
+Literal same-OSID brigade stacking is solved — Phase A/B redistribution works correctly. The live issue is under-coverage: 83/313 front OSIDs (26.5%) have zero brigades. VRS accounts for the majority (40.4% empty front OSIDs vs 21.4% RBiH). Split between: (1) genuine force-to-space mismatch in Drina and Herzegovina (historically accurate, no fix), and (2) one concrete defect in `ensureMinimumSectorCoverage` where split-child sectors with overlapping front OSIDs cannot receive transfers from surplus sibling sectors.
+
+### Concrete defect
+`sector:vrs_1st_krajina:8`: 4 hostile edges, 0 assigned brigades, but 6 brigades physically at its front OSIDs — all assigned to sibling sectors :2 and :3. Territory-membership pre-pass guard is too conservative: blocks frontline-essential transfers even when donor has surplus and recipient has zero coverage.
+
+### Next lane
+Split-child sector assignment routing fix in `ensureMinimumSectorCoverage` (`brigade_assignment.ts`). Allow transfer when donor has surplus above garrison budget and recipient has 0 brigades + hostile edges > 0. Owner: sector-expert + systems-programmer.
+
+### Report
+`docs/40_reports/implemented/20260405_FRONTLINE_OCCUPANCY_DENSITY_AUDIT.md`
+
 ## [2026-04-05] Rastosnica / Drina Coupling Resolution — n1329: 94.0%, 27/27 Anchors
 
 ### What changed
