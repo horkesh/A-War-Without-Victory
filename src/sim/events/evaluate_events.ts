@@ -15,6 +15,8 @@ import { triggerMatches } from './event_types.js';
 import { isEventReady } from './pressure_system.js';
 import { pickBotResponseV1 } from './bot_response.js';
 import { applyDimensionShift, type DimensionStore } from './strategic_dimensions.js';
+import { getPoliticalPersonality, computePoliticalAssessment } from '../political/political_personality.js';
+import { pickPoliticalResponse } from '../political/political_event_decision.js';
 
 /**
  * Maximum events that can fire in a single turn.
@@ -126,6 +128,13 @@ function recordEnabledEvents(state: GameState, enablesEvents: string[] | undefin
 const DEFAULT_BOT_COMMANDER = { aggressiveness: 3, competence: 3 };
 
 /**
+ * Logic types that route through the political personality engine (Phase 2).
+ * All other logic types fall back to pickBotResponseV1.
+ * Declared at module scope — constant, no need to recreate per event.
+ */
+const POLITICAL_LOGICS = new Set<string>(['strategic_weighted', 'capital_based', 'capital_weighted']);
+
+/**
  * Evaluate events for the current turn. Deterministic: same state, turn, and rng sequence -> same fired list.
  * Phase 1: Collect candidates (recurrence gating, trigger/pressure matching, probability roll).
  * Phase 2: Sort by priority (lower first), cap at MAX_EVENTS_PER_TURN.
@@ -217,8 +226,21 @@ export function evaluateEvents(
                     faction: playerFaction,
                 });
             } else {
-                // No player faction (headless/spectator): bot auto-responds once
-                const chosen = pickBotResponseV1(def.response_options, def.bot_response_logic, DEFAULT_BOT_COMMANDER);
+                // No player faction (headless/spectator): bot auto-responds once.
+                // Political personality path for dimension-weighted logic types.
+                // Faction derived from first dimension_shift (Phase 2 convention;
+                // Phase 3 will add EventDefinition.responding_faction for hardening).
+                const respondingFaction: FactionId | null =
+                    (def.response_options[0]?.dimension_shifts?.[0]?.faction as FactionId | undefined) ?? null;
+
+                let chosen: EventResponseOption;
+                if (POLITICAL_LOGICS.has(def.bot_response_logic ?? '') && respondingFaction !== null) {
+                    const personality = getPoliticalPersonality(respondingFaction);
+                    const assessment = computePoliticalAssessment(state, respondingFaction, personality);
+                    chosen = pickPoliticalResponse(def.response_options, respondingFaction, assessment, personality);
+                } else {
+                    chosen = pickBotResponseV1(def.response_options, def.bot_response_logic, DEFAULT_BOT_COMMANDER);
+                }
                 applyEventEffects(state, chosen.effects);
                 // Apply flags and dimension shifts from the chosen response option
                 applyDefinitionFlags(state, chosen.sets_flags);

@@ -23769,3 +23769,15 @@ Commander `selectWinningIntent()` now wires `CommanderLesson[]` and `OfficerPers
 - **Verification:** tsc clean, 2520/2520 vitest (176 files)
 - **Canon:** CONDITIONAL-GO — no blockers. Forward risks for Phase 2 documented in report (field contract, `political_leaders` wiring, `humanitarian_standing` dimension key).
 - **Report:** `docs/40_reports/implemented/20260405_V082_PHASE1_POLITICAL_PERSONALITY.md`
+
+## 2026-04-05 — v0.8.2 Phase 2: Political Event Decision Engine (ACCEPTED)
+
+- **Files created:** `src/sim/political/political_event_decision.ts` (~99 lines), `tests/sim/political/political_event_decision.test.ts` (22 tests)
+- **Files modified:** `src/sim/events/evaluate_events.ts` (political dispatch), `data/scenarios/events/war_1993.json` (srebrenica upgrade), `data/scenarios/events/war_1992.json` (camps upgrade)
+- **Engine added:** `scorePoliticalOption()` + `pickPoliticalResponse()` — pure functions, explicit PoliticalAssessment parameter, no hidden GameState reads
+- **Scope:** `strategic_weighted`, `capital_based`, `capital_weighted` logic types route through political personality scoring. All other types unchanged (`pickBotResponseV1` fallback preserved).
+- **Event upgrades:** `srebrenica_demilitarization_1993` → `strategic_weighted` (Historian-verified), `concentration_camps_revealed_1992` → `strategic_weighted` (Historian-verified)
+- **Historian gate:** hide_weapons military_credibility +3 REJECTED. RBiH posture inversion documented as known Phase 3 debt.
+- **Canon:** GO. All 10 checks pass.
+- **Verification:** tsc clean, 44/44 political suite, 2546/2546 full vitest
+- **Report:** `docs/40_reports/implemented/20260405_V082_PHASE2_POLITICAL_EVENT_DECISION.md`

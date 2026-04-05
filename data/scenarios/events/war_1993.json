@@ -884,7 +884,7 @@
     },
     "once": true,
     "requires_player_response": true,
-    "bot_response_logic": "historical",
+    "bot_response_logic": "strategic_weighted",
     "effect": {
       "kind": "narrative",
       "text": "The demilitarization agreement is signed. Srebrenica is technically disarmed — but both sides are already maneuvering around its terms."
@@ -894,6 +894,8 @@
         "id": "comply_fully",
         "label": "Comply fully with disarmament",
         "description": "Surrender all weapons as demanded. Gains international credibility but leaves the enclave defenseless.",
+        "aggression_affinity": -0.8,
+        "risk_level": 0.2,
         "effects": [
           {
             "kind": "morale_change",
@@ -923,6 +925,8 @@
         "id": "hide_weapons",
         "label": "Comply in appearance, hide weapons",
         "description": "Surrender visible stocks while concealing reserves. The historical choice — preserving minimum defense capability.",
+        "aggression_affinity": 0.3,
+        "risk_level": 0.6,
         "effects": [
           {
             "kind": "morale_change",
@@ -935,6 +939,8 @@
         "id": "refuse",
         "label": "Refuse disarmament",
         "description": "Publicly reject the agreement. Maintains military capability but draws international condemnation and increased VRS pressure.",
+        "aggression_affinity": 0.9,
+        "risk_level": 0.8,
         "effects": [
           {
             "kind": "morale_change",

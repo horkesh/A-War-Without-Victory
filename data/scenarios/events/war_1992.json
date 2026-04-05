@@ -529,7 +529,7 @@
       { "kind": "patron_pressure", "faction": "RS", "delta": 15 }
     ],
     "requires_player_response": true,
-    "bot_response_logic": "historical",
+    "bot_response_logic": "strategic_weighted",
     "enables_events": ["london_conference_1992"],
     "dimension_shifts": [
       { "faction": "RS", "dimension": "international_standing", "delta": -15 }
