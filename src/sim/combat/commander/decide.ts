@@ -11,6 +11,7 @@
 import type { FormationId, SectorStance, SectorIntelRecord, CorpsFrontSector } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import type {
+    CommanderBeliefState,
     CommanderBriefing,
     CommanderPlan,
     CommanderState,
@@ -20,6 +21,7 @@ import type {
     SectorActivityEntry,
     ThreatAssessment,
     ZoneAssessment,
+    ZoneBelief,
     ZoneId,
 } from './commander_state.js';
 
@@ -98,6 +100,7 @@ export function makeDecisions(
     surplusPool: BrigadeEvaluation[],
     currentPlan: CommanderPlan | null,
     previousState: CommanderState | null,
+    beliefState?: CommanderBeliefState | null,
 ): DecisionResult {
     const turn = briefing.turn;
     const personality = briefing.officer_personality;
@@ -111,11 +114,13 @@ export function makeDecisions(
     // 3. Reactive stance changes
     const stanceChanges = computeStanceChanges(
         zones, threats, intelPicture, activityEntries, previousState, personality, briefing.sectors,
+        beliefState ?? null,
     );
 
     // 4. Reserve shifting
     const reserveShifts = computeReserveShifts(
         zones, threats, surplusPool, previousState, personality,
+        beliefState ?? null,
     );
 
     // 5. Plan suspension check
@@ -355,6 +360,7 @@ function computeStanceChanges(
     previousState: CommanderState | null,
     personality: OfficerPersonality,
     sectors: readonly CorpsFrontSector[],
+    beliefState: CommanderBeliefState | null,
 ): Array<{ sector_id: string; new_stance: SectorStance; reason: string }> {
     const changes: Array<{ sector_id: string; new_stance: SectorStance; reason: string }> = [];
 
@@ -414,8 +420,14 @@ function computeStanceChanges(
         const prevQuietTurns = quietTurnsBySector.get(sectorId) ?? 0;
         const totalQuiet = activity.activity === 'quiet' ? prevQuietTurns + 1 : 0;
 
-        // Check if enemy concentration is detected on this sector
-        const enemyMassing = concentrationSectors.has(sectorId);
+        // Check enemy intent from belief layer (preferred) or raw intel (fallback)
+        let enemyMassing = false;
+        if (beliefState) {
+            const zoneBelief = findZoneBeliefForSector(sectorId, zones, beliefState, sectors);
+            enemyMassing = zoneBelief?.estimated_enemy_intent === 'mass';
+        } else {
+            enemyMassing = concentrationSectors.has(sectorId);
+        }
 
         // Determine the recommended stance
         let newStance: SectorStance | null = null;
@@ -489,6 +501,7 @@ function computeReserveShifts(
     surplusPool: BrigadeEvaluation[],
     previousState: CommanderState | null,
     personality: OfficerPersonality,
+    beliefState: CommanderBeliefState | null,
 ): Array<{ brigade_id: FormationId; from_zone: ZoneId; to_zone: ZoneId; reason: string }> {
     const shifts: Array<{ brigade_id: FormationId; from_zone: ZoneId; to_zone: ZoneId; reason: string }> = [];
 
@@ -520,6 +533,15 @@ function computeReserveShifts(
     }
 
     if (escalatedZones.length === 0) return shifts;
+
+    // Sort escalated zones by believed enemy strength (highest first) for priority
+    if (beliefState) {
+        escalatedZones.sort((a, b) => {
+            const beliefA = beliefState.zone_beliefs.find(zb => zb.zone_id === a.zone_id);
+            const beliefB = beliefState.zone_beliefs.find(zb => zb.zone_id === b.zone_id);
+            return (beliefB?.estimated_enemy_strength ?? 0) - (beliefA?.estimated_enemy_strength ?? 0);
+        });
+    }
 
     // Find donor zones: surplus > 0, not besieged
     const donorZones: ZoneAssessment[] = [];
@@ -705,4 +727,30 @@ function buildReinforcementRequests(
     }
 
     return requests;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Helpers — belief layer integration
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Find the zone belief covering a given sector by checking OSID overlap
+ * between the sector's territory_osids and each zone's OSIDs.
+ */
+function findZoneBeliefForSector(
+    sectorId: string,
+    zones: ZoneAssessment[],
+    beliefState: CommanderBeliefState,
+    sectors: readonly CorpsFrontSector[],
+): ZoneBelief | undefined {
+    const sector = sectors.find(s => s.sector_id === sectorId);
+    if (!sector) return undefined;
+
+    // Find the zone whose OSIDs overlap with this sector's territory
+    for (const zone of zones) {
+        if (zone.osids.some(osid => sector.territory_osids.includes(osid))) {
+            return beliefState.zone_beliefs.find(zb => zb.zone_id === zone.zone_id);
+        }
+    }
+    return undefined;
 }

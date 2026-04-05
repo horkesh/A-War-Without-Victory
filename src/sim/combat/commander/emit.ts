@@ -19,6 +19,7 @@ import { strictCompare } from '../../../state/validateGameState.js';
 import { spatialFriendlyDistance, spatialSameComponent } from '../../spatial_context.js';
 import { buildCommanderOperation, buildProbeOperation, derivePrimarySectorForBrigades, getMaxOperationSlots } from '../corps_operation_helpers.js';
 import type {
+    CommanderBeliefState,
     CommanderBriefing,
     CommanderOutput,
     CommanderPlanStatus,
@@ -99,6 +100,7 @@ export function emitCommanderOutput(
     planDecision: PlanDecision,
     decisions: DecisionResult,
     threats: ThreatAssessment,
+    beliefState?: CommanderBeliefState | null,
 ): CommanderOutput {
     const personality = briefing.officer_personality;
 
@@ -132,6 +134,7 @@ export function emitCommanderOutput(
         threats,
         planDecision,
         decisions,
+        beliefState ?? null,
     );
 
     // 5. Garrison locks directly from allocation (same shape, pass through)
@@ -848,6 +851,7 @@ function buildUpdatedState(
     threats: ThreatAssessment,
     planDecision: PlanDecision,
     decisions: DecisionResult,
+    beliefState: CommanderBeliefState | null,
 ): CommanderState {
     // Merge sector activity log: previous + new entries from DECIDE phase, cap at MAX_SECTOR_ACTIVITY_LOG turns
     const previousLog = briefing.previous_state?.sector_activity_log ?? [];
@@ -930,9 +934,8 @@ function buildUpdatedState(
         last_plan_action: planDecision.action,
         last_plan_reason: planDecision.reason,
 
-        // v0.8.1 fields — carry forward from previous state, or safe defaults.
-        // Phase 1: persistence wiring only; active population deferred to later phases.
-        belief_state: briefing.previous_state?.belief_state,
+        // v0.8.1 fields — belief_state actively assembled in Phase 2; others carry forward.
+        belief_state: beliefState ?? undefined,
         relationships: briefing.previous_state?.relationships,
         lessons: briefing.previous_state?.lessons,
         decision_trace: briefing.previous_state?.decision_trace,

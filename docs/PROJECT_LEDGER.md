@@ -1,3 +1,22 @@
+## [2026-04-05] v0.8.1 Phase 2 — Belief Layer (COMPLETE)
+
+### What changed
+- **New file `belief.ts`**: `assembleBeliefState()` — pure, deterministic function building `CommanderBeliefState` from raw intel, force assessments, and previous beliefs. Zone beliefs (enemy strength blended 0.7/0.3, enemy intent with 3-turn staleness decay), supply continuity confidence, per-brigade subordinate reliability (0.7/0.3 blend), per-neighbor support confidence (0.6/0.4 blend).
+- **Commander loop Step 3.5 "ASSEMBLE BELIEFS"** inserted between PLAN and DECIDE in `commander_loop.ts`. Belief state passed downstream to `makeDecisions` and `emitCommanderOutput`.
+- **Two decision seams rerouted through beliefs**: (1) `computeStanceChanges` uses `ZoneBelief.estimated_enemy_intent === 'mass'` instead of raw `concentrationSectors`, (2) `computeReserveShifts` sorts escalated zones by believed enemy strength (highest first). Raw fallback preserved when beliefState is null.
+- **Belief persistence**: `emitCommanderOutput` now actively persists assembled `belief_state` on `CommanderState`, replacing Phase 1's carry-forward-only wiring.
+- **14 new tests** in `commander_belief_layer.test.ts`: creation, persistence, stale decay, determinism, decision consumption. 2 Phase 1 tests updated for active assembly.
+- **Zero behavioral regression** — null/undefined fallback ensures all existing paths unchanged.
+
+### Verification
+2392/2392 tests (171 files), tsc clean, desktop:map:build clean.
+
+### Next lane
+v0.8.1 Phase 3: Candidate Intent Competition in `plan.ts`.
+
+### Report
+`docs/40_reports/implemented/20260405_V081_PHASE2_BELIEF_LAYER.md`
+
 ## [2026-04-05] v0.8.1 Phase 1 — State and Type Foundation (COMPLETE)
 
 ### What changed

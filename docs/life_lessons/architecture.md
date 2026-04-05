@@ -3,6 +3,29 @@
 
 ---
 
+### BFS spanning tree edges are NOT the graph — bridge detection on a tree is trivially 100% bridges (2026-04-05)
+- `runSupplyBfs` records only tree edges in `edges_used` (skips visited neighbors). `isBridgeInSubgraphOsid` then checks bridges within this tree — every edge is trivially a bridge. The OSID graph is a dense mesh (avg degree 5.75, cycle rank 1336) with abundant redundancy, but the bridge detector never saw it. When analyzing graph properties (bridges, connectivity, redundancy), always operate on the ACTUAL subgraph, not on the BFS/DFS traversal tree. The traversal tree is a spanning tree with zero cycles — it tells you about reachability, not about redundancy.
+
+---
+
+### [Architecture] When a guard is added to one pipeline path, audit ALL paths that produce the same outcome (2026-04-05) — NEW
+- **Context**: Lane A added a drifted-brigade `home_osid` gate to `assignCrossCorpsEnclaveDefenders` (Step 6b) to prevent cross-corps assignment of brigades that merely drifted. But `enforcePhysicalSectorOwnership` (Step 8c) strips brigades that aren't physically in their sector's territory, and `rehomeUnassignedBrigadesToPhysicalSectorOwners` (Step 8d) then re-assigns them cross-corps through a completely different code path — one that had no drifted-brigade gate at all. The Banja Luka light infantry brigades were protected at Step 6b but fell through at Step 8d.
+- **Wrong approach**: Adding a guard to one function in a multi-step pipeline without grepping for every other function that can produce the same outcome (cross-corps assignment).
+- **Right approach**: When adding a guard to prevent outcome X in function A, grep for every other function in the pipeline that can also produce outcome X. Apply the same guard or an equivalent one. The pipeline is a chain of fallbacks — a guard in one link is useless if the next link re-introduces the problem.
+- **Do instead**: After adding any guard/gate to `brigade_assignment.ts` or `corps_front_sectors.ts`, run `grep -n "assigned_brigade_ids.push\|reserve_brigade_ids.push" src/sim/combat/brigade_assignment.ts` and verify every push site respects the same invariant. Also check `rehomeUnassigned`, `ensureMinimumSectorCoverage`, `commanderReviewAssignment`, and `assignCrossCorpsEnclaveDefenders` — all five can add brigades to sectors.
+
+### [Architecture] Movement orders must declare stance explicitly — missing stance silently changes the processing system (2026-04-05) — NEW
+- **Context**: Fix B (prepositioning) wrote movement orders with `{ destination_sids }` but no `stance: 'column'`. The `osid_column_movement` step (546) only processes orders with `stance === 'column'`. Without it, `apply-brigade-movement` (step 569) attempts a single-hop adjacency move which silently fails for distant destinations — the brigade doesn't move and just increments entrenchment. There was no error, no warning, no trace of the silent failure.
+- **Wrong approach**: Assuming that writing `destination_sids` is sufficient for a movement order to work. The movement pipeline has two processing systems (column march for multi-hop, direct movement for adjacent), selected by `stance`. Omitting stance defaults to the wrong system for distant destinations.
+- **Right approach**: Movement orders must always include `stance: 'column'` for multi-hop destinations. Match the established pattern in `brigade_front_distribution.ts:296` which uses `as { destination_sids: SettlementId[] }` to satisfy TypeScript while including the runtime `stance` field.
+- **Do instead**: When writing to `brigade_movement_orders`, always check: is the destination adjacent (1 hop) or distant (>1 hop)? If distant, include `stance: 'column'`. Grep for `brigade_movement_orders[` to see all write sites and verify each one declares stance correctly.
+
+### [Architecture] Never cast LoadedGameState to raw GameState — the adapter boundary is the contract (2026-04-04) — NEW
+- **Context**: `ChiefOfStaffBriefing.buildStrainParagraphs` passed `state as unknown as GameState` to `computeCorpsCommandStrain`, which read `state.military.corps_command` — a nested path that exists on raw `GameState` but not on `LoadedGameState`. Crashed every time Army HQ opened. The adapter already computed `commandStrain`/`commandStrainLabel` on `FormationView`.
+- **Wrong approach**: Using `as unknown as GameState` double-cast to bypass TypeScript's type system and call a raw-state function from UI code that receives adapter-processed state.
+- **Right approach**: UI components receive `LoadedGameState` (flat, adapter-processed). If a derived value is needed, check whether the adapter already computes it on `FormationView`. If not, add the derivation to the adapter — never reach past it.
+- **Do instead**: When a UI component needs engine-derived data: (1) Check `FormationView` / `LoadedGameState` types for the field. (2) If present, use it. (3) If missing, add derivation in `GameStateAdapter.ts`. (4) NEVER `as unknown as GameState`. Grep for `as unknown as GameState` periodically to catch violations.
+
 ### [Architecture] Engine-written data with no UI consumer is invisible infrastructure debt (2026-04-04) — NEW
 - **Context**: `friction_events[]` was populated every turn by `checkWarlordFriction()` since v0.4.4. Zero UI consumers existed before Friction Wave 1 (2026-04-04). The player had zero visibility into warlord friction despite it running every single turn. Discovered only during the Phase A audit of Friction Wave 1 — the lane that was supposed to *surface* existing data found the data had never been read at all.
 - **Wrong approach**: Closing a mechanic lane after implementing the write path without verifying the read path. "Warlord friction implemented" — yes, the engine fires it. No, the player never sees it.

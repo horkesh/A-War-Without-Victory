@@ -434,18 +434,21 @@ describe('v0.8.1 Phase 1 — multi-turn continuity', () => {
         const commander = new BotCorpsCommander();
         const output = commander.decide(briefing, previousState);
 
-        // v0.8.1 fields should be carried forward in updated_state
-        expect(output.updated_state.belief_state).toEqual(belief);
+        // v0.8.1 fields: belief_state is now actively assembled (Phase 2), not carried forward.
+        // Other v0.8.1 fields still carry forward from previous state.
+        expect(output.updated_state.belief_state).toBeDefined();
         expect(output.updated_state.relationships).toEqual(relationships);
         expect(output.updated_state.lessons).toEqual(lessons);
     });
 
-    it('v0.8.1 fields remain undefined when not previously populated', () => {
+    it('v0.8.1 fields remain undefined when not previously populated (except belief_state)', () => {
         const briefing = makeMinimalBriefing({ turn: 11 });
         const commander = new BotCorpsCommander();
         const output = commander.decide(briefing, null);
 
-        expect(output.updated_state.belief_state).toBeUndefined();
+        // belief_state is now actively assembled in Phase 2 — always present
+        expect(output.updated_state.belief_state).toBeDefined();
+        // Other v0.8.1 fields remain undefined when not previously populated
         expect(output.updated_state.relationships).toBeUndefined();
         expect(output.updated_state.lessons).toBeUndefined();
         expect(output.updated_state.decision_trace).toBeUndefined();

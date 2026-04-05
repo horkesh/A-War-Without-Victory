@@ -1,10 +1,26 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-04. 207 lessons across 9 topic files.
+> Last restructured: 2026-04-05. 209 lessons across 9 topic files.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
+## New Lessons (2026-04-05)
+
+### [Architecture] BFS spanning tree edges are NOT the graph — bridge detection on a tree is trivially 100% bridges — see `docs/life_lessons/architecture.md`
+- `runSupplyBfs` records only tree edges in `edges_used`. Bridge detection on this tree classified 100% of edges as brittle, collapsing supply adequate-BFS to source nodes only. The OSID graph is a dense mesh (avg degree 5.75) with abundant redundancy. When analyzing graph properties (bridges, connectivity), always operate on the actual subgraph, not the BFS traversal tree.
+
+### [Architecture] When a guard is added to one pipeline path, audit ALL paths that produce the same outcome — see `docs/life_lessons/architecture.md`
+- Lane A added a drifted-brigade gate to `assignCrossCorpsEnclaveDefenders` (Step 6b) but NOT to `rehomeUnassignedBrigadesToPhysicalSectorOwners` (Step 8d). Banja Luka LI brigades were protected at 6b but fell through at 8d. When adding a guard to prevent outcome X, grep for EVERY function in the pipeline that can also produce X.
+
+### [Architecture] Movement orders must declare stance explicitly — missing stance silently changes the processing system — see `docs/life_lessons/architecture.md`
+- Fix B wrote `{ destination_sids }` without `stance: 'column'`. `osid_column_movement` requires `stance === 'column'`; without it, `apply-brigade-movement` attempts single-hop adjacency which silently fails for distant destinations. Always include `stance: 'column'` for multi-hop movement orders.
+
+---
+
 ## New Lessons (2026-04-04)
+
+### [Architecture] Never cast LoadedGameState to raw GameState — the adapter boundary is the contract — see `docs/life_lessons/architecture.md`
+- `ChiefOfStaffBriefing` used `as unknown as GameState` to call `computeCorpsCommandStrain` — crashed reading `state.military.corps_command` which doesn't exist on `LoadedGameState`. The adapter already had `commandStrain`/`commandStrainLabel` on `FormationView`. NEVER bypass the adapter boundary with double-casts.
 
 ### [Architecture] Engine-written data with no UI consumer is invisible infrastructure debt — see `docs/life_lessons/architecture.md`
 - `friction_events[]` fired every turn since v0.4.4 — zero UI consumers — player had zero visibility. A mechanic is not implemented until it has BOTH a write path AND a read path that reaches the player. Mark PARTIAL in ledger if either is missing.
@@ -54,9 +70,14 @@
 
 ## Recently Violated (always read these)
 
-### [Calibration] Slot cap must exclude recovery-phase ops — AND verify every caller uses the function you fixed (2026-03-30, RESOLVED 2026-04-04)
-- **RESOLVED** — fix confirmed committed, no longer an active threat. See `docs/life_lessons/calibration.md` for full entry.
-- Core rule: `briefing.active_operations.filter(op => op.phase !== 'recovery')`. Extension: fix the actual code path, not just the utility — grep all callers before claiming done.
+### [Architecture] When a guard is added to one pipeline path, audit ALL paths — VIOLATED 2026-04-05 (by Lane A on 2026-04-04)
+- Lane A added a drifted-brigade gate to Step 6b but not Step 8d. Both functions can produce cross-corps assignment. The gate at 6b was useless because 8d re-introduced the same outcome. Fixed 2026-04-05 — same gate pattern added to `rehomeUnassignedBrigadesToPhysicalSectorOwners`.
+
+### [Architecture] Movement orders must declare stance explicitly — VIOLATED 2026-04-05 (by Fix B)
+- Fix B wrote prepositioning orders without `stance: 'column'`. Even if the order had fired, it would have been processed by the wrong movement system (single-hop adjacency instead of column march). Fixed 2026-04-05.
+
+### [Calibration] Slot cap must exclude recovery-phase ops — AND verify every caller uses the function you fixed (2026-03-30, RESOLVED 2026-04-04) — ARCHIVED
+- **RESOLVED** — fix confirmed committed, no longer an active threat. Demoted from active violation to archive on 2026-04-05. See `docs/life_lessons/calibration.md` for full entry.
 
 ### [Data] Data pipeline scripts that transform edges must preserve ALL fields — min_dist/type loss silently broke sector splitting (2026-03-23) — NEW
 - **Context**: `merge_micro_osids.cjs` remapped edges with `return { a, b }` — stripping `type` and `min_dist` fields. The `derive_operational_settlements.ts` script computed `min_dist` from polygon geometry, but the merge step (run after derivation) discarded it. The operational contact graph had 0/2047 edges with `min_dist`, making ALL adjacency threshold filters (`frontEdgeAdj` at 33m, `strictAdj` at 5.5m, `caseBSplitAdj` at 16.6m) identical to full unfiltered adjacency.

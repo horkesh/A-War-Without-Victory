@@ -33,6 +33,7 @@ import { allocateBrigades } from './allocate.js';
 import { managePlan } from './plan.js';
 import { makeDecisions } from './decide.js';
 import { emitCommanderOutput } from './emit.js';
+import { assembleBeliefState } from './belief.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // BotCorpsCommander — deterministic bot implementation of ICorpsCommander
@@ -60,7 +61,13 @@ export class BotCorpsCommander implements ICorpsCommander {
             briefing.turn,
         );
 
-        // 4. DECIDE — reactive intel adjustments
+        // 3.5 ASSEMBLE BELIEFS — perception layer
+        const previousBeliefs = previousState?.belief_state ?? null;
+        const beliefState = assembleBeliefState(
+            briefing, allocation.zones, forces, previousBeliefs, briefing.turn,
+        );
+
+        // 4. DECIDE — reactive intel adjustments, now with beliefs
         const decisions = makeDecisions(
             briefing,
             allocation.zones,
@@ -68,6 +75,7 @@ export class BotCorpsCommander implements ICorpsCommander {
             allocation.surplus_pool,
             planDecision.plan,
             previousState,
+            beliefState,
         );
 
         // 5. EMIT — produce CorpsDirective + operations
@@ -79,6 +87,7 @@ export class BotCorpsCommander implements ICorpsCommander {
             planDecision,
             decisions,
             threats,
+            beliefState,
         );
     }
 }
