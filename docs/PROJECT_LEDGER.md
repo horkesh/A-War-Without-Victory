@@ -1,3 +1,45 @@
+## [2026-04-05] v0.8.1 Phase 4: Lesson Memory and Personality Weighting
+
+**Type:** Feature
+**Files:** `src/sim/combat/commander/plan.ts`, `src/sim/combat/commander/emit.ts`
+**Status:** ACCEPTED
+
+### Delivered
+
+**emit.ts — `buildUpdatedLessons()`** (new helper, called from `buildUpdatedState()`):
+- Step A: expiry filter — removes `CommanderLesson` entries where `expires_turn <= briefing.turn`
+- Step B: lesson extraction from `cappedHistory` entries closed this turn:
+  - `outcome === 'abandoned'` → `offensive_failure` lesson, weight −0.20, expires turn+8
+  - `outcome === 'success'` → `success_pattern` lesson, weight +0.12, expires turn+5
+  - `partial`/`stalemate`/`failure` → no lesson (Phase 5/6)
+  - Lesson IDs are deterministic: `lesson_<corps_id>_<abandon|success>_t<turn>`
+  - `zone_id` from `briefing.previous_state?.current_plan?.staging_zone` (optional spread)
+  - `relevant_osids` sorted via `strictCompare`
+- Step C: merge surviving + new lessons, sort by `created_turn` ascending (tie-break `lesson_id`), cap at 12 (oldest dropped)
+- Returns `undefined` when empty (preserves optional field semantics)
+
+**plan.ts — `selectWinningIntent()`** — 6th optional parameter `lessons?: readonly CommanderLesson[]`:
+- `appliedLessonIds: Set<string>` declared before `selectedDefs.map(...)` — populated via closure
+- **Personality delta block** (post switch-case, pre hard-blocks): `aggression`/`initiative` ±0.20/0.08 for offensive intents; `caution` ±0.20 for defensive intents — appended to `score_breakdown` as `personality_delta`
+- **Lesson delta block**: sorted by `lesson_id` (deterministic); zone-filtered; `offensive_failure` dampens, `success_pattern` boosts offensive intents; capped ±0.35; appended as `lesson_delta`
+- `lessons_applied` in trace: `[...appliedLessonIds].sort(strictCompare)` (was hardcoded `[]`)
+- Call site in `managePlan()` passes `briefing.previous_state?.lessons`
+
+### Determinism
+- No `Math.random()`, no `Date.now()`
+- All sorting via `strictCompare` or numeric `created_turn`
+- Lesson IDs are corpus+turn-keyed strings — stable across reruns
+
+### Backward compatibility
+- `lessons` and `previous_state` may be undefined → zero deltas, no crash
+- `buildUpdatedLessons` returns `undefined` when list is empty (not `[]`)
+
+### Verification
+- `npx tsc --noEmit`: clean
+- `npm run test:vitest`: 2435 tests pass, 172 suites
+
+---
+
 ## [2026-04-05] v0.8.1 Phase 3: Candidate Intent Competition
 
 **Type:** Feature
@@ -23697,3 +23739,7 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 
 ### Report
 `docs/40_reports/implemented/20260405_SETTLEMENT_TIMELINE_PROVENANCE.md`
+
+## 2026-04-05 — v0.8.1 Phase 4 — Lesson Memory and Personality Weighting (ACCEPTED)
+
+Commander `selectWinningIntent()` now wires `CommanderLesson[]` and `OfficerPersonality` into candidate scoring. Abandoned plans create `offensive_failure` lessons (weight −0.20, expires +8 turns); successful ops create `success_pattern` (+0.12, expires +5 turns). Personality modifiers (aggression/caution ±0.20, initiative ±0.08) are additive post-score. `lessons_applied` in `CommanderDecisionTrace` is now populated. Hard guards: modifiers cannot override hard blocks; cap ±0.35 prevents lesson runaway; backward compatible with null lessons/personality. 25 targeted tests; 2460/2460 vitest (173 files). Files: `plan.ts`, `emit.ts`. Report: `docs/40_reports/implemented/20260405_V081_PHASE4_LESSON_PERSONALITY.md`.

@@ -24,6 +24,7 @@ import type {
     CommanderDecisionTrace,
     CommanderIntentCandidate,
     CommanderIntentType,
+    CommanderLesson,
     CommanderPlan,
     CommanderPlanStatus,
     ZoneAssessment,
@@ -192,6 +193,7 @@ export function selectWinningIntent(
     forces: ForceAssessment,
     surplusPool: BrigadeEvaluation[],
     turn: number,
+    lessons?: readonly CommanderLesson[],
 ): {
     winner: CommanderIntentCandidate | null;
     trace: CommanderDecisionTrace;
@@ -360,6 +362,9 @@ export function selectWinningIntent(
 
     // ─── Build scored candidates ──────────────────────────────────────────
 
+    // appliedLessonIds accumulates across candidates via closure (set in lesson delta block).
+    const appliedLessonIds = new Set<string>();
+
     const allCandidates: CommanderIntentCandidate[] = selectedDefs.map(def => {
         const { type } = def;
         const targetZone = def.target_zone;
@@ -454,6 +459,59 @@ export function selectWinningIntent(
             }
         }
 
+        // ─── Personality modifiers (additive post-score) ──────────────────────────
+        const personality = briefing.officer_personality;
+        let personalityDelta = 0;
+        const isOffensiveIntent = type === 'stage_operation' || type === 'launch_opportunity';
+        const isDefensiveIntent = type === 'hold_line' || type === 'reinforce_zone';
+
+        if (isOffensiveIntent) {
+            personalityDelta += (personality.aggression - 0.5) * 0.20;
+            personalityDelta += (personality.initiative - 0.5) * 0.08;
+        }
+        if (isDefensiveIntent) {
+            personalityDelta += (personality.caution - 0.5) * 0.20;
+        }
+
+        if (personalityDelta !== 0) {
+            score += personalityDelta;
+            score_breakdown = { ...score_breakdown, personality_delta: personalityDelta };
+        }
+
+        // ─── Lesson modifiers (additive post-score) ───────────────────────────
+        let lessonDelta = 0;
+        const sortedLessons = [...(lessons ?? [])].sort((a, b) => strictCompare(a.lesson_id, b.lesson_id));
+
+        for (const lesson of sortedLessons) {
+            // Skip expired lessons (defensive; emit.ts should have filtered these)
+            if (lesson.expires_turn !== undefined && lesson.expires_turn <= turn) continue;
+
+            const isRelevantToZone = !lesson.zone_id || lesson.zone_id === (targetZone ?? null);
+            if (!isRelevantToZone) continue;
+
+            let delta = 0;
+            if (lesson.category === 'offensive_failure' && isOffensiveIntent) {
+                delta = lesson.weight; // negative weight dampens offensive
+            } else if (lesson.category === 'success_pattern' && isOffensiveIntent) {
+                delta = lesson.weight; // positive weight boosts offensive
+            }
+            // Other categories deferred to Phase 5/6
+
+            if (delta !== 0) {
+                lessonDelta += delta;
+                appliedLessonIds.add(lesson.lesson_id);
+            }
+        }
+
+        // Cap lesson delta to prevent runaway accumulation
+        const LESSON_DELTA_CAP = 0.35;
+        lessonDelta = Math.max(-LESSON_DELTA_CAP, Math.min(LESSON_DELTA_CAP, lessonDelta));
+
+        if (lessonDelta !== 0) {
+            score += lessonDelta;
+            score_breakdown = { ...score_breakdown, lesson_delta: lessonDelta };
+        }
+
         // ─── Hard-block rules ─────────────────────────────────────────────
         const blockedBy: string[] = [];
         const isOffensive = type === 'stage_operation' || type === 'launch_opportunity';
@@ -517,7 +575,7 @@ export function selectWinningIntent(
         winning_intent_id: winner?.intent_id ?? null,
         candidates: allCandidates,
         hard_constraints: [...new Set(allCandidates.flatMap(c => [...c.blocked_by]))].sort(strictCompare),
-        lessons_applied: [],
+        lessons_applied: [...appliedLessonIds].sort(strictCompare),
     };
 
     return { winner, trace };
@@ -607,7 +665,7 @@ export function managePlan(
     // The existing stance/exhaustion/fatigue/role guards above already enforce the same
     // hard-block conditions, so any `stage_operation` or `launch_opportunity` winner
     // here is already known-eligible for offensive planning.
-    const { winner, trace } = selectWinningIntent(briefing, zones, forces, surplusPool, turn);
+    const { winner, trace } = selectWinningIntent(briefing, zones, forces, surplusPool, turn, briefing.previous_state?.lessons);
 
     // Route based on winning intent type.
     // When competition selects an offensive intent, preserve original priority ordering:

@@ -21,6 +21,7 @@ import { buildCommanderOperation, buildProbeOperation, derivePrimarySectorForBri
 import type {
     CommanderBeliefState,
     CommanderBriefing,
+    CommanderLesson,
     CommanderOutput,
     CommanderPlanStatus,
     CommanderState,
@@ -841,6 +842,75 @@ function buildSectorStances(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// buildUpdatedLessons — extract, decay, and cap commander lesson memory
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Max lessons retained in commander memory (oldest dropped first). */
+const MAX_LESSON_MEMORY = 12;
+
+/**
+ * Assembles the updated lesson list for the new CommanderState:
+ *   Step A: filter expired lessons from previous state
+ *   Step B: extract new lessons from operations that closed this turn
+ *   Step C: merge, sort by created_turn ascending, cap at MAX_LESSON_MEMORY
+ *
+ * Deterministic: no Math.random(), no Date.now(). Sorted via strictCompare.
+ */
+function buildUpdatedLessons(
+    briefing: CommanderBriefing,
+    cappedHistory: OperationHistoryEntry[],
+    planDecision: PlanDecision,
+): readonly CommanderLesson[] | undefined {
+    // Step A: expiry filter — remove lessons that have passed their expires_turn
+    const surviving = (briefing.previous_state?.lessons ?? []).filter(
+        entry => entry.expires_turn === undefined || entry.expires_turn > briefing.turn,
+    );
+
+    // Step B: extract lessons from operations that ended this turn
+    const newLessons: CommanderLesson[] = [];
+    for (const entry of cappedHistory) {
+        if (entry.ended_turn !== briefing.turn) continue;
+
+        if (entry.outcome === 'abandoned') {
+            const stagingZone = briefing.previous_state?.current_plan?.staging_zone;
+            const lesson: CommanderLesson = {
+                lesson_id: `lesson_${briefing.corps_id}_abandon_t${briefing.turn}`,
+                category: 'offensive_failure',
+                ...(stagingZone !== undefined ? { zone_id: stagingZone } : {}),
+                relevant_osids: [...(planDecision.plan?.target_osids ?? [])].sort(strictCompare),
+                weight: -0.20,
+                created_turn: briefing.turn,
+                expires_turn: briefing.turn + 8,
+            };
+            newLessons.push(lesson);
+        } else if (entry.outcome === 'success') {
+            const stagingZone = briefing.previous_state?.current_plan?.staging_zone;
+            const lesson: CommanderLesson = {
+                lesson_id: `lesson_${briefing.corps_id}_success_t${briefing.turn}`,
+                category: 'success_pattern',
+                ...(stagingZone !== undefined ? { zone_id: stagingZone } : {}),
+                relevant_osids: [...entry.osids_captured].sort(strictCompare),
+                weight: 0.12,
+                created_turn: briefing.turn,
+                expires_turn: briefing.turn + 5,
+            };
+            newLessons.push(lesson);
+        }
+        // 'partial', 'stalemate', 'failure' → no lesson created in Phase 4
+    }
+
+    // Step C: merge, sort by created_turn ascending (deterministic), cap at MAX_LESSON_MEMORY
+    const merged = [...surviving, ...newLessons].sort((a, b) => {
+        const turnDiff = a.created_turn - b.created_turn;
+        if (turnDiff !== 0) return turnDiff;
+        return strictCompare(a.lesson_id, b.lesson_id);
+    });
+
+    const capped = merged.slice(-MAX_LESSON_MEMORY);
+    return capped.length > 0 ? capped : undefined;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // buildUpdatedState — assemble CommanderState from all phases
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -937,7 +1007,7 @@ function buildUpdatedState(
         // v0.8.1 fields — belief_state actively assembled in Phase 2; others carry forward.
         belief_state: beliefState ?? undefined,
         relationships: briefing.previous_state?.relationships,
-        lessons: briefing.previous_state?.lessons,
+        lessons: buildUpdatedLessons(briefing, cappedHistory, planDecision),
         decision_trace: planDecision.decision_trace ?? briefing.previous_state?.decision_trace,
     };
 }
