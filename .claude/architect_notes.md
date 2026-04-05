@@ -140,11 +140,12 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 5. **Formation Expert deferred recommendations:** Expand prepositioning tier to `active_defense`; relax `can_launch_ops` gate; exclude `is_home_defense`. Owner: Gameplay Programmer. File: `src/sim/combat/commander/emit.ts`.
 6. **AAR provenance follow-up:** zero-attack-success operations must distinguish combat capture from passive/external control changes. Owner: `src/sim/combat/operation_aar.ts`.
 7. **gradacac_2 P0 — RESOLVED 2026-04-05.** Stable RBiH control since n1289 (combat factor overhaul). Zero flips, zero RS ops targeting area in n1323. P0 closed. Report: `docs/40_reports/implemented/20260405_GRADACAC_2_P0_RESOLUTION.md`.
-8. **v0.8.1 Commander Maturity gate check:** full two-tier post-run panel go/no-go on commander system. n1323 (94.0%, 27/27, 6/6, 74 battles, ZEA residual 2 bounded cases) is a strong gate candidate.
+8. **v0.8.1 Commander Maturity gate check — GO 2026-04-05.** Seven-specialist panel (Technical Architect, Gameplay Programmer, Systems Programmer, Scenario Tester, UI/UX Developer, QA Engineer, Documentation Specialist) all converge: foundation is solid, zero hard blockers. All 6 v0.8.1 deliverables have existing scaffolding, all scope bounded. 6 soft conditions identified (estimateTurnsActive suspend counter, loose types, sector reassignment wiring, roadmap status update, Systems Manual v0.8.0 bump, multi-turn continuity test). Report: `docs/40_reports/implemented/20260405_V081_COMMANDER_MATURITY_GATE_CHECK.md`. **Next lane: v0.8.1 Phase 1 — State and Type Foundation.**
 
 ## Validation Gate Note
 
 - **Roadmap Validation Gate 1 — CLOSED 2026-04-04.** Command-system package validated enough to resume roadmap work. The stale `n941` comparison was resolved from repo evidence: `n941` is an older run artifact, not the current HEAD baseline. `n1302` remains the calibration ATH reference for this phase. Report: `docs/40_reports/implemented/20260404_ROADMAP_VALIDATION_GATE_1_COMMAND_SYSTEM_REALITY_CHECK.md`.
+- **v0.8.1 Commander Maturity Gate — GO 2026-04-05.** Seven-specialist panel unanimous: v0.8.0 foundation is mature, stable, and structurally ready. Zero hard blockers. All 6 deliverables have scaffolding. Calibration stable at 94.0%/27-27/6-6. 580+ commander tests. 11-layer player explanation hierarchy. Next lane: Phase 1 State and Type Foundation. Report: `docs/40_reports/implemented/20260405_V081_COMMANDER_MATURITY_GATE_CHECK.md`.
 
 ## Open Questions
 

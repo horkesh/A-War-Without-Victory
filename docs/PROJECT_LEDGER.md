@@ -1,3 +1,32 @@
+## [2026-04-05] v0.8.1 Commander Maturity Gate Check — GO
+
+### Verdict
+**GO** — seven-specialist panel (Technical Architect, Gameplay Programmer, Systems Programmer, Scenario Tester, UI/UX Developer, QA Engineer, Documentation Specialist) unanimous: v0.8.0 commander system is mature, stable, and structurally ready for v0.8.1 implementation. Zero hard blockers. All 6 v0.8.1 deliverables (belief state, candidate competition, memory, constraints/preferences, traces, relationships) have existing scaffolding in v0.8.0. All scope bounded (100-500 lines per deliverable).
+
+### Foundation evidence
+- n1323: 94.0%, 27/27 anchors, 6/6 benchmarks, 74 battles, 2353 tests
+- Pipeline: clean 5-stage ASSESS→ALLOCATE→PLAN→DECIDE→EMIT, no silent re-scoring
+- Command chain truth: STABLE (4 waves of hardening, 29 regression tests)
+- Sector truth: STABLE (one minor residual, non-cascading)
+- Determinism: LOW risk (strictCompare throughout, no Math.random)
+- Serialization: READY (optional fields, no migration needed)
+- Test coverage: 155 pipeline + 425 surface tests
+- Player surfaces: 11-layer decision hierarchy, silence=healthy principle
+
+### Soft conditions (not blockers)
+1. Fix `estimateTurnsActive` suspend counter (~30 lines)
+2. Tighten `supply_by_osid`/`intel_data` from `unknown` (~20 lines)
+3. Wire sector reassignment in emit.ts (~50 lines)
+4. Update MASTER_ROADMAP v0.8.0 status block (~15 min)
+5. Systems Manual v0.7.0→v0.8.0 bump (~1-2 hours)
+6. Add multi-turn commander state continuity test (~100 lines)
+
+### Next lane
+v0.8.1 Phase 1: State and Type Foundation — add `CommanderBeliefState`, `CommanderRelationships`, `CommanderLesson`, `CommanderIntentCandidate`, `CommanderDecisionTrace` to `commander_state.ts`.
+
+### Report
+`docs/40_reports/implemented/20260405_V081_COMMANDER_MATURITY_GATE_CHECK.md`
+
 ## [2026-04-05] Frontline Occupancy / Density Audit
 
 ### Finding
