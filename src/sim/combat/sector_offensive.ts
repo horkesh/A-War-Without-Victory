@@ -876,7 +876,7 @@ function resolveOperationSectorId(
 // Supply readiness
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Compute supply readiness as fraction of participating brigades with adequate supply. */
+/** Compute supply readiness as the mean graded readiness of participating brigades. */
 function computeSupplyReadiness(
     state: GameState,
     participatingBrigades: FormationId[],
@@ -895,7 +895,7 @@ function computeSupplyReadiness(
         ? ((state.military.general_supply_reserve as Record<string, number> | undefined)?.[faction] ?? 100)
         : 100;
 
-    let adequate = 0;
+    let score = 0;
     for (const bid of participatingBrigades) {
         const b = state.military.formations?.[bid];
         if (!b || b.status !== 'active') continue;
@@ -903,9 +903,11 @@ function computeSupplyReadiness(
         const st = state.meta?.supply_reserves_enabled
             ? getEffectiveSupplyState(rawSt, reserveLevel)
             : rawSt;
-        if (st === 'adequate') adequate++;
+        // Graduated scoring: aligns planner with resolver's getSupplyMult treatment.
+        // adequate=1.0 (full capability), strained=0.5 (degraded but functional), critical=0.0 (non-functional).
+        score += st === 'adequate' ? 1.0 : st === 'strained' ? 0.5 : 0.0;
     }
-    return participatingBrigades.length > 0 ? adequate / participatingBrigades.length : 1.0;
+    return participatingBrigades.length > 0 ? score / participatingBrigades.length : 1.0;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

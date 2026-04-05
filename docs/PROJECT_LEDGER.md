@@ -1,3 +1,26 @@
+## [2026-04-05] P9 Supply Readiness — Graduated Scoring Fix — n1322: 94.3%, 27/27 Anchors
+
+### What changed
+- **Graduated scoring in `computeSupplyReadiness`** (`sector_offensive.ts` lines 898-910): Changed from binary (adequate=1, else=0) to graduated (adequate=1.0, strained=0.5, critical=0.0). Aligns planner with resolver's `getSupplyMult` graduated treatment.
+
+### Root cause
+Dual threshold artifact — NOT real systemic starvation:
+1. BFS corridor reachability classifies 97-99% of OSIDs as "strained" (only 14 adequate OSIDs across all factions).
+2. `computeSupplyReadiness` counted only `adequate` brigades (binary). Strained = 0 contribution → readiness = 0 for 16/18 corps.
+3. RBiH embargo cap (45) < RESERVE_ADEQUATE_THRESHOLD (50) — RBiH structurally could NEVER achieve adequate readiness.
+4. Faction reserves were actually reasonable at w40 (RBiH=47.6, RS=74.0, HRHB=70.2). The reserves system worked; the readiness aggregation was broken.
+
+### Validation: n1322
+- **94.3% area-weighted** (+0.3pp), **27/27 anchors** (zero-delta), **6/6 benchmarks**, **76 battles** (+7), **97 attack orders** (+12).
+- Supply readiness: 18/20 active ops at 0.5, 2 at 1.0. No ops stuck at supply_check. Zero collapse eliminated for active operations.
+- `valid_for_combat_calibration` remains `false`, so accept this as an engine-truth fix with better top-line outcomes, not as a full operational-health clearance.
+
+### Recommended next lane
+BFS corridor reachability recalibration (P2) or continuous supply readiness interpolation (P2). estimateForceRatio supply awareness still blocked until within-tier differentiation exists.
+
+### Report
+`docs/40_reports/implemented/20260405_P9_SUPPLY_READINESS_GRADUATED_SCORING.md`
+
 ## [2026-04-05] estimateForceRatio Supply Investigation — Demoted (No Code Changes)
 
 ### What changed

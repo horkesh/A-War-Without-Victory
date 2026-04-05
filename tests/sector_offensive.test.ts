@@ -207,6 +207,34 @@ describe('Sector Offensive — Launch Evaluation', () => {
         assert.equal(op!.phase, 'planning');
         assert.equal(op!.supply_readiness, 0);
     });
+
+    it('scores strained brigades at partial readiness when reserves do not collapse them to critical', () => {
+        const state = makeMinimalState(5, {
+            'b1': { corps_id: 'corps_1' as any, location_osid: 'op:a:1' },
+            'b2': { corps_id: 'corps_1' as any, location_osid: 'op:a:2' },
+            'b3': { corps_id: 'corps_1' as any, location_osid: 'op:a:3' },
+        });
+        state.meta.supply_reserves_enabled = true;
+        state.military.general_supply_reserve = { RS: 45 } as any;
+
+        const supplyReport: SupplyStateByOsidReport = {
+            schema: 1, turn: 5,
+            factions: [{ faction_id: 'RS', by_osid: [
+                { osid: 'op:a:1', state: 'strained' },
+                { osid: 'op:a:2', state: 'strained' },
+                { osid: 'op:a:3', state: 'strained' },
+            ]}],
+        };
+
+        const op = evaluateSectorOffensiveLaunch(
+            state, 'corps_1', 'sector:corps_1:0', 'RS' as FactionId,
+            ['b1', 'b2', 'b3'], ['op:e:1', 'op:e:2', 'op:e:3'],
+            ['op:e:1', 'op:e:2', 'op:e:3'], supplyReport
+        );
+
+        assert.ok(op, 'Operation should still launch with mixed supply states');
+        assert.equal(op!.supply_readiness, 0.5);
+    });
 });
 
 describe('Sector Offensive — Lifecycle', () => {

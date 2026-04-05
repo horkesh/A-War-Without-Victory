@@ -10,6 +10,7 @@
 import { describe, it, expect } from 'vitest';
 import { evaluateCorpsOffensiveLaunch } from '../src/sim/combat/sector_offensive.js';
 import type { GameState, FactionId, FormationState, CorpsFrontSector, CorpsFrontSubSegment } from '../src/state/game_state.js';
+import type { SupplyStateByOsidReport } from '../src/state/supply_state_derivation.js';
 
 function makeState(
     turn: number,
@@ -253,6 +254,48 @@ describe('Corps-Level Operation Launch', () => {
 
         expect(op).not.toBeNull();
         expect(op!.sector_id).toBeUndefined();
+    });
+
+    it('scores strained brigades at partial readiness when reserves do not collapse them to critical', () => {
+        const state = makeState(5, {
+            'b1': { corps_id: 'corps_1' as any, location_osid: 'op:a:f1' },
+            'b2': { corps_id: 'corps_1' as any, location_osid: 'op:a:f2' },
+            'b3': { corps_id: 'corps_1' as any, location_osid: 'op:a:f3' },
+        }, {
+            'sector:corps_1:0': {
+                corps_id: 'corps_1',
+                sub_segments: [makeSub(['op:a:f1', 'op:a:f2', 'op:a:f3'], ['op:e:t1', 'op:e:t2'])],
+            },
+        }, [
+            { a: 'op:a:f1', b: 'op:e:t1' },
+            { a: 'op:a:f2', b: 'op:e:t2' },
+        ]);
+        state.meta.supply_reserves_enabled = true;
+        state.military.general_supply_reserve = { RS: 45 } as any;
+
+        const supplyReport: SupplyStateByOsidReport = {
+            schema: 1,
+            turn: 5,
+            factions: [{
+                faction_id: 'RS',
+                by_osid: [
+                    { osid: 'op:a:f2', state: 'strained' },
+                    { osid: 'op:a:f1', state: 'strained' },
+                    { osid: 'op:a:f3', state: 'strained' },
+                ],
+            }],
+        };
+
+        const op = evaluateCorpsOffensiveLaunch(
+            state, 'corps_1', 'RS' as FactionId,
+            ['b1', 'b2', 'b3'],
+            ['op:e:t1', 'op:e:t2'],
+            ['op:e:t1', 'op:e:t2'],
+            supplyReport, undefined, 'sector:corps_1:0',
+        );
+
+        expect(op).not.toBeNull();
+        expect(op!.supply_readiness).toBe(0.5);
     });
 
     it('rejects offensives that only look viable because defender bonuses are ignored', () => {
