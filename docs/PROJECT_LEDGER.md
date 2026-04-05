@@ -1,3 +1,38 @@
+## [2026-04-05] Rastosnica / Drina Coupling Resolution — n1329: 94.0%, 27/27 Anchors
+
+### What changed
+- **Engine: adjacent-defender projection** in `paramilitary_sweep.ts`: `detectOffensiveParamilitaryTargets()` now checks graph-adjacent OSIDs for same-controller brigades via `hasAdjacentDefender()`. OSIDs with adjacent defenders are skipped by offensive sweep.
+- **Data: rastosnica_2 initial control** RS→RBiH in `apr1992_definitive_40w.json` (historically correct).
+- **Data: Gorazde t0 defenders** — 5 enclave brigades (801st, 802nd, 808th, 843rd, 851st) available_from changed to 0 in `oob_brigades.json`.
+- **Removed: Op Teocak** (ahistorical ARBiH offensive) from `pre_planned_operations.ts`.
+- **Removed: Sapna Corridor Link-Up event** (superseded by initial control + engine fix).
+- **Tests:** +3 paramilitary sweep adjacent-defender tests, +6 Gorazde enclave contract tests.
+
+### Root cause
+Offensive paramilitary sweep checked only on-OSID defenders, treating any ungarrisoned OSID as vulnerable even when adjacent brigades would project force. Changing rastosnica_2 initial control exposed Drina coupling: VRS Drina Corps reallocated away from Gorazde, collapsing the enclave 200km away. Adjacent-defender projection + Gorazde t0 availability resolved both.
+
+### Validation: n1329
+- **94.0% area-weighted**, **27/27 anchors**, **6/6 benchmarks**. rastosnica_2=RBiH (never flipped), sapna=RBiH (never flipped), Gorazde 16/1. 2353/2353 tests, tsc clean.
+
+### Files changed
+- `src/sim/combat/paramilitary_sweep.ts` — `buildDefenderFactionMap()`, `hasAdjacentDefender()`
+- `src/sim/combat/pre_planned_operations.ts` — Op Teocak removed
+- `data/scenarios/apr1992_definitive_40w.json` — rastosnica_2 initial control
+- `data/source/oob_brigades.json` — 5 Gorazde brigade available_from
+- `tests/paramilitary_sweep.test.ts` — +3 tests
+- `tests/gorazde_enclave_contract.test.ts` — +6 tests
+
+### Report
+`docs/40_reports/implemented/20260405_RASTOSNICA_DRINA_COUPLING_RESOLUTION.md`
+
+## [2026-04-05] gradacac_2 P0 — Resolved (Already Fixed by n1289 Combat Factor Overhaul)
+
+### What changed
+- **Investigation only — no code changes.** gradacac_2 has been stable at RBiH control for all 40 weeks since n1289. Zero flips, zero RS operations targeting the area. The P0 from the n1280-n1288 sector overhaul period was resolved by the n1289 combat factor overhaul (defensive fire, urban terrain, graduated morale). P0 closed.
+
+### Report
+`docs/40_reports/implemented/20260405_GRADACAC_2_P0_RESOLUTION.md`
+
 ## [2026-04-05] COMBAT-P14 Feasibility / Estimator Gap Audit — Resolved (No Code Changes)
 
 ### What changed

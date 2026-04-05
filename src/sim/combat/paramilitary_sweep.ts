@@ -91,6 +91,37 @@ function buildDefendedOsids(state: GameState): Set<string> {
     return defended;
 }
 
+/** Build a map of OSID → defending faction for non-paramilitary brigades. */
+function buildDefenderFactionMap(state: GameState): Map<string, FactionId> {
+    const map = new Map<string, FactionId>();
+    const formations = state.military.formations ?? {};
+    for (const fid of Object.keys(formations).sort(strictCompare)) {
+        const f = formations[fid];
+        if (!f || f.status !== 'active' || f.kind === 'paramilitary') continue;
+        if (f.location_osid && !map.has(f.location_osid)) {
+            map.set(f.location_osid, f.faction as FactionId);
+        }
+    }
+    return map;
+}
+
+/** Check if an OSID has a same-controller brigade at any adjacent OSID.
+ *  Paramilitaries avoid villages adjacent to organized military presence. */
+function hasAdjacentDefender(
+    osid: string,
+    controller: string,
+    adjacency: Map<string, string[]>,
+    defenderFactionMap: Map<string, FactionId>
+): boolean {
+    const neighbors = adjacency.get(osid);
+    if (!neighbors) return false;
+    for (const n of neighbors) {
+        const defFaction = defenderFactionMap.get(n);
+        if (defFaction && defFaction === controller) return true;
+    }
+    return false;
+}
+
 /** Check if an OSID is defended by a formation from a different faction. */
 function isDefendedAgainst(defendedOsids: Set<string>, state: GameState, osid: string, attackerFaction: FactionId): boolean {
     if (!defendedOsids.has(osid)) return false;
@@ -302,6 +333,7 @@ export function detectOffensiveParamilitaryTargets(
     }
 
     const sortedOsids = [...allOsids].sort(strictCompare);
+    const defenderFactionMap = buildDefenderFactionMap(state);
 
     for (const faction of factions) {
         const baseRate = OFFENSIVE_PARA_SPAWN_RATE[faction] ?? 0;
@@ -333,6 +365,9 @@ export function detectOffensiveParamilitaryTargets(
                 }
             }
             if (!hasFriendlyNeighbor) continue;
+
+            // Adjacent defender projection — paramilitaries avoid areas near organized military
+            if (controller && hasAdjacentDefender(osid, controller, adjacency, defenderFactionMap)) continue;
 
             // Dedup
             if (existingTargets.has(`${faction}:${osid}`)) continue;

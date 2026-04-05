@@ -130,8 +130,8 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 4. **P9 supply recalibration — CLOSED 2026-04-05.** Graduated scoring in `computeSupplyReadiness` + BFS corridor reachability fix. n1322: graduated scoring (adequate=1.0, strained=0.5, critical=0.0). n1323: bridge detection on full subgraph (was operating on BFS spanning tree — 100% trivially brittle). Supply readiness now: 13/21 ops at 1.0, 8/21 at 0.5 (VRS heartland adequate, ARBiH/VRS-Drina strained). Reports: `docs/40_reports/implemented/20260405_P9_SUPPLY_READINESS_GRADUATED_SCORING.md`, `docs/40_reports/implemented/20260405_BFS_CORRIDOR_REACHABILITY_FIX.md`.
 5. **Formation Expert deferred recommendations:** Expand prepositioning tier to `active_defense`; relax `can_launch_ops` gate; exclude `is_home_defense`. Owner: Gameplay Programmer. File: `src/sim/combat/commander/emit.ts`.
 6. **AAR provenance follow-up:** zero-attack-success operations must distinguish combat capture from passive/external control changes. Owner: `src/sim/combat/operation_aar.ts`.
-7. **gradacac_2 P0 investigation:** roadmap item 1 once current engine-truth defects are no longer masking front behavior.
-8. **v0.8.1 Commander Maturity gate check:** full two-tier post-run panel go/no-go on commander system.
+7. **gradacac_2 P0 — RESOLVED 2026-04-05.** Stable RBiH control since n1289 (combat factor overhaul). Zero flips, zero RS ops targeting area in n1323. P0 closed. Report: `docs/40_reports/implemented/20260405_GRADACAC_2_P0_RESOLUTION.md`.
+8. **v0.8.1 Commander Maturity gate check:** full two-tier post-run panel go/no-go on commander system. n1323 (94.0%, 27/27, 6/6, 74 battles, ZEA residual 2 bounded cases) is a strong gate candidate.
 
 ## Validation Gate Note
 
@@ -149,3 +149,24 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - Do not rely on chat memory for accepted findings or next lanes; update this file when major architect decisions change.
 - Bundle roadmap-memory follow-ups into Claude prompts when they are part of the same lane.
 - Explorer findings should be summarized here after review instead of staying only in chat.
+
+## Backlog Additions
+
+- **Settlement Timeline Provenance / Turn-0 Control Truth:** the engine has first-class truth for current control and post-start `control_events`, but no first-class provenance model for "held at scenario start" vs "taken before scenario start." `src/ui/map/utils/buildSettlementTimeline.ts` currently falls back to `displacement_event_log` and can render takeover history like "VRS took control - inferred from displacement" for OSIDs that were already controlled at scenario start. This is engine/state-model debt, not just UI wording.
+
+### Drina Coupling Seam — Paramilitary Sweep Topology Sensitivity (RESOLVED 2026-04-05)
+
+**Problem discovered:** Changing rastosnica_2 initial control from RS to RBiH caused Gorazde enclave to collapse (0/17 RBiH OSIDs) despite being 200km away. The coupling path: initial control change shifts VRS Drina Corps force allocation, which changes paramilitary sweep eligibility across the entire Drina front, which cascades into Gorazde losing its garrison coverage.
+
+**Structural root cause:** `detectOffensiveParamilitaryTargets()` in `paramilitary_sweep.ts` checked only on-OSID defenders. Any OSID without a physically co-located brigade was treated as undefended, even when brigades at adjacent OSIDs would realistically contest a takeover. This made the sweep system extremely sensitive to small changes in brigade distribution — a single initial-control flip could cascade through force allocation to expose distant OSIDs.
+
+**Why adjacent-defender projection is the structural fix:** The real-world analog is that paramilitaries cannot seize territory next to an organized military formation. `hasAdjacentDefender()` checks all graph-adjacent OSIDs for same-controller brigades before marking a target as sweep-eligible. This is a local, topology-aware check that doesn't require global knowledge — it simply asks "is there a military unit close enough to contest this?" The fix breaks the cascade: even if force allocation shifts, adjacent defenders prevent sweep propagation into areas with nearby coverage.
+
+**Gorazde t0 availability as secondary hardening:** The 5 Gorazde enclave brigades (801st, 802nd, 808th, 843rd, 851st) had available_from values of 6-9 turns — leaving the enclave critically underdefended during early-war paramilitary sweeps. Changing them to t0 is historically correct (these units mobilized at war's start) and ensures the enclave has organic defenders before any cascade can reach it. This is defense-in-depth, not the primary fix.
+
+**Abandoned approaches and why:**
+- **Event-based flip (Sapna Corridor Link-Up at t3):** Events cannot survive aggressive sweep mechanics. The VRS immediately recaptured the flipped OSID. Events are narrative tools, not control-truth tools.
+- **Brigade repositioning (moving 246th to cover rastosnica_2):** Zero-sum within the Tuzla corridor — covering one OSID uncovered another. The problem was in the sweep system, not in brigade placement.
+- **Op Teocak retention:** The operation was ahistorical. The historian confirmed no such ARBiH offensive existed. Keeping it and tuning parameters would be a railroad.
+
+**Report:** `docs/40_reports/implemented/20260405_RASTOSNICA_DRINA_COUPLING_RESOLUTION.md`

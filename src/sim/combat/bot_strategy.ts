@@ -483,8 +483,9 @@ const RBIH_ARMY_PRIORITIES: ArmyOperationPriority[] = [
     // 1st Corps: Sarajevo counter-attacks — include RS-held suburbs from week 56
     { name: 'Sarajevo Counterattack', corps_id: 'arbih_1st_corps', target_municipalities: ['centar_sarajevo', 'novo_sarajevo', 'stari_grad_sarajevo', 'novi_grad_sarajevo', 'ilidza', 'hadzici', 'vogosca', 'ilijas'], start_week: 56, end_week: 9999, weight: 100, min_outcome: 'stalemate' },
     // 2nd Corps: Tuzla area defense + Brčko south (ARBiH held OSID just south of Brčko throughout war)
-    // Zvornik included: Sapna Finger/Teočak corridor was a 2nd Corps priority. Enables ARBiH
-    // to connect Teočak pocket via rastosnica_2.
+    // Zvornik included: Sapna Finger/Teočak corridor was a 2nd Corps priority.
+    // Teočak pocket continuity is now handled by truthful start-state control plus
+    // local defender-aware sweep behavior, not by corps operations.
     // 2nd Corps historically fought for Brčko corridor throughout 1992-93. The corridor
     // was the most contested area of the war — ARBiH constantly probed and counterattacked.
     { name: 'Tuzla Defense', corps_id: 'arbih_2nd_corps', target_municipalities: ['tuzla', 'kalesija', 'lukavac', 'zivinice', 'gradacac', 'srebrenik', 'kladanj', 'zvornik', 'brcko'], start_week: 0, end_week: 56, weight: 80, min_outcome: 'repulsed' },

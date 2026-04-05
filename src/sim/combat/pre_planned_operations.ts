@@ -632,32 +632,7 @@ const HRHB_PRE_PLANNED: PrePlannedOp[] = [
     },
 ];
 
-const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
-    {
-        corps: 'arbih_2nd_corps',
-        faction: 'RBiH',
-        name: 'Operation Teočak',
-        staging_osid: 'op:kalesija:kalesija_grad_2',
-        available_from: 15,
-        min_attack_outcome: 'repulsed',
-        planning_duration: 7, // 2nd Tuzla needs 3 hops from Tuzla + 2 prep sub-phases + buffer
-        axes: [
-            {
-                axis_id: 'kalesija_assault',
-                name: 'Kalesija Assault',
-                brigades: [
-                    'arbih_2nd_tuzla',
-                    'arbih_120th_liberation_black_swans',
-                    'arbih_241st_spreca_muslim_light_gazije',
-                    'arbih_242nd_zvornik_muslim_light',
-                    'arbih_245th_mountain',
-                ],
-                objectives: ['op:zvornik:rastosnica_2'],
-                staging_osid: 'op:kalesija:kalesija_grad_2',
-            },
-        ],
-    },
-];
+const ARBIH_PRE_PLANNED: PrePlannedOp[] = [];
 
 // v0.4.7: Mostar Hills axis removed from Op Jackal — vranjevici/kruzanj painted RS
 const ALL_PRE_PLANNED: PrePlannedOp[] = [...VRS_PRE_PLANNED, ...HRHB_PRE_PLANNED, ...ARBIH_PRE_PLANNED];
