@@ -126,11 +126,12 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 
 1. **Execution-time probe staleness:** 6 probes with valid objectives and reachable brigades at creation time still end with 0 attacks. Root cause: execution-time staleness (4 executing-zero-attack, 2 false-completion from objective captured by other ops). 5-turn `MAX_EXECUTION_TURNS_ZERO_ATTACKS` backstop limits damage. Bounded friction, not P0. Owner: Gameplay Programmer.
 2. **Residual ZEA (remaining after probe guard + supply gate):** Recovery-without-attempt reduced to 4 at final turn (execution-time staleness). vrs_east_bosnian zero-eligible anomalies eliminated by anti-paralysis supply gate (n1321).
-3. **estimateForceRatio supply awareness:** Planning-time force ratio estimator ignores supply entirely. Anti-paralysis fix (n1321) prevents worst case (zero supply), but marginal supply (0.3–0.5) may still inflate force estimates. Applying supply mult in `estimateForceRatio` would improve commander assessments. P1, not urgent. Owner: Gameplay Programmer.
-4. **Formation Expert deferred recommendations:** Expand prepositioning tier to `active_defense`; relax `can_launch_ops` gate; exclude `is_home_defense`. Owner: Gameplay Programmer. File: `src/sim/combat/commander/emit.ts`.
-5. **AAR provenance follow-up:** zero-attack-success operations must distinguish combat capture from passive/external control changes. Owner: `src/sim/combat/operation_aar.ts`.
-6. **gradacac_2 P0 investigation:** roadmap item 1 once current engine-truth defects are no longer masking front behavior.
-7. **v0.8.1 Commander Maturity gate check:** full two-tier post-run panel go/no-go on commander system.
+3. **estimateForceRatio supply awareness — DEMOTED 2026-04-05.** Investigated: `estimateForceRatio` IS supply-blind, but adding supply mult would cause total operational paralysis — `computeSupplyReadiness` returns 0 for 16/18 corps (systemic zero, not marginal). Supply blindness is load-bearing until P9 supply recalibration fixes the underlying model. Report: `docs/40_reports/implemented/20260405_ESTIMATE_FORCE_RATIO_SUPPLY_INVESTIGATION.md`.
+4. **P9 supply recalibration (actual blocker):** `computeSupplyReadiness` returns 0 for 16/18 corps across the full 40w run. Supply reserves classify nearly all brigades as critically supplied, making supply meaningless as a differentiator. Blocks: estimateForceRatio supply awareness, supply-aware planning, BRIEF-GAP-1 (hardcoded 0.8). P1, solo run. Owner: Gameplay Programmer.
+5. **Formation Expert deferred recommendations:** Expand prepositioning tier to `active_defense`; relax `can_launch_ops` gate; exclude `is_home_defense`. Owner: Gameplay Programmer. File: `src/sim/combat/commander/emit.ts`.
+6. **AAR provenance follow-up:** zero-attack-success operations must distinguish combat capture from passive/external control changes. Owner: `src/sim/combat/operation_aar.ts`.
+7. **gradacac_2 P0 investigation:** roadmap item 1 once current engine-truth defects are no longer masking front behavior.
+8. **v0.8.1 Commander Maturity gate check:** full two-tier post-run panel go/no-go on commander system.
 
 ## Validation Gate Note
 

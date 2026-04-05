@@ -1,3 +1,20 @@
+## [2026-04-05] estimateForceRatio Supply Investigation — Demoted (No Code Changes)
+
+### What changed
+- **Investigation only — no code changes.** `estimateForceRatio` in `operation_preparation.ts` (line 171) confirmed supply-blind: uses raw personnel headcounts with no supply multiplier.
+
+### Why demoted
+- `computeSupplyReadiness` returns 0 for 16/18 corps across the entire 40w run (systemic zero, not marginal 0.3-0.5 as hypothesized).
+- Adding supply mult would compute near-zero force ratios for ALL operations — total operational paralysis.
+- Supply blindness is **load-bearing** until P9 supply recalibration fixes the underlying model.
+- Existing safety nets (supply_check gate, assessment score, anti-paralysis supply floor) handle the supply reality check separately.
+
+### Recommended next lane
+P9 supply recalibration — `computeSupplyReadiness` systemic zero is the actual root cause. Until supply produces realistic values, supply-aware planning is impossible.
+
+### Report
+`docs/40_reports/implemented/20260405_ESTIMATE_FORCE_RATIO_SUPPLY_INVESTIGATION.md`
+
 ## [2026-04-05] Anti-Paralysis Supply Gate — n1321: VRS East Bosnian ZEA Eliminated
 
 ### What changed
