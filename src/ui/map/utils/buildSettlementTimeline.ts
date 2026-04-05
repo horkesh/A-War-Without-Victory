@@ -114,8 +114,20 @@ export function buildSettlementTimeline(
     supplyTransitions: Array<{ turn: number; from: string; to: string }>,
     historicalEvents: Array<{ turn: number; id: string; text: string }>,
     preWarEthnic: { bosniaks: number; serbs: number; croats: number; others: number } | null,
+    startController: string | null = null,
 ): SettlementTimelineEvent[] {
     const events: SettlementTimelineEvent[] = [];
+
+    // --- Turn-0 initial control (from scenario snapshot) ---
+    if (startController) {
+        events.push({
+            turn: 0,
+            type: 'control_flip',
+            faction: startController,
+            title: `Controlled by ${factionName(startController)} at scenario start`,
+            detail: 'initial control',
+        });
+    }
 
     // --- Control flips ---
     // 1. From persisted control_events (if any)
@@ -138,8 +150,16 @@ export function buildSettlementTimeline(
         const dispEventsForOsid = displacementEvents
             .filter(de => de.origin_osid === osid && de.caused_by)
             .sort((a, b) => a.turn - b.turn);
+        // Count persisted (non-inferred) control events for this OSID to gate displacement inference
+        const persistedFlipCount = controlEvents.filter(ce => ce.settlementId === osid).length;
         for (const de of dispEventsForOsid) {
             if (de.caused_by && de.caused_by !== lastCausedBy) {
+                // Don't infer "took control" from displacement when the faction already held
+                // this OSID at scenario start and no real control flip events exist
+                if (startController && de.caused_by === startController && persistedFlipCount === 0) {
+                    lastCausedBy = de.caused_by;
+                    continue;
+                }
                 // Don't duplicate if we already have a control_flip event at this turn
                 if (!controlFlipTurns.has(de.turn)) {
                     events.push({

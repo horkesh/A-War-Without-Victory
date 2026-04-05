@@ -1092,9 +1092,12 @@ export function parseGameState(json: unknown): LoadedGameState {
     }
 
     let controlBySettlement: Record<string, string | null> = {};
+    let initialControlBySettlement: Record<string, string | null> | undefined;
     let statusBySettlement: Record<string, string> = {};
     const pc = state.political.political_controllers as Record<string, string | null> | undefined;
     if (pc) controlBySettlement = buildControlLookup(pc);
+    const ipc = state.political.initial_political_controllers as Record<string, string | null> | undefined;
+    if (ipc) initialControlBySettlement = buildControlLookup(ipc);
     const contested = state.political.contested_control as Record<string, boolean> | undefined;
     if (contested) {
         for (const [sid, isContested] of Object.entries(contested)) {
@@ -1880,7 +1883,7 @@ export function parseGameState(json: unknown): LoadedGameState {
             turn,
             date: metadataDate,
         },
-        formations, militiaPools, controlBySettlement, statusBySettlement,
+        formations, militiaPools, controlBySettlement, initialControlBySettlement, statusBySettlement,
         brigadeAorByFormationId,
         attackOrders, aorOrders, recentControlEvents, allControlEvents: recentControlEvents, displacementEventLog: displacementEventLogRaw, recruitment,
         armyStance, casualtyLedger: scopeToPlayerFaction(casualtyLedger, playerFaction), civilianCasualties, internationalVisibilityPressure, ivpConsequencesActive, pendingConvoyDecisions, municipalitySupportOrders,

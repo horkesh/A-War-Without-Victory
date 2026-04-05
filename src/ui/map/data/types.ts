@@ -567,6 +567,8 @@ export interface LoadedGameState {
     formations: FormationView[];
     militiaPools: MilitiaPoolView[];
     controlBySettlement: Record<string, string | null>;
+    /** Initial political controllers at scenario start (for timeline provenance). */
+    initialControlBySettlement?: Record<string, string | null>;
     statusBySettlement: Record<string, string>;
     brigadeAorByFormationId: Record<string, string[]>;
     frontEdges?: FrontEdgeView[];

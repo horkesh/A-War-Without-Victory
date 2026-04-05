@@ -140,6 +140,8 @@ export interface SettlementDetailContentProps {
   supplyTransitionsByOsid?: Record<string, Array<{ turn: number; from: string; to: string }>>;
   /** Historical events fired, for timeline. */
   historicalEventsByTurn?: Array<{ turn: number; id: string; text: string }>;
+  /** Initial political controllers at scenario start (for timeline provenance). */
+  initialControlBySettlement?: Record<string, string | null> | null;
 }
 
 export function SettlementDetailContent({
@@ -173,6 +175,7 @@ export function SettlementDetailContent({
   movementsByOsid,
   supplyTransitionsByOsid,
   historicalEventsByTurn,
+  initialControlBySettlement,
 }: SettlementDetailContentProps) {
   const name = getOsidDisplayName(osid, osidDisplayNames);
   const props = osidPropertiesMap?.[osid] ?? {};
@@ -273,8 +276,9 @@ export function SettlementDetailContent({
         croats: num(props.population_croats),
         others: num(props.population_others),
       } : null,
+      initialControlBySettlement?.[osid] ?? null,
     );
-  }, [osid, munId, displacementEventLog, allControlEvents, operationHistory, variant, popOriginal, props.population_bosniaks, props.population_serbs, props.population_croats, props.population_others]);
+  }, [osid, munId, displacementEventLog, allControlEvents, operationHistory, variant, popOriginal, props.population_bosniaks, props.population_serbs, props.population_croats, props.population_others, initialControlBySettlement]);
   /** Settlement-level flows: exact per-OSID when available, else municipality share. */
   const settlementShare =
     disp && disp.originalPopulation > 0 && popOriginal > 0 ? popOriginal / disp.originalPopulation : 0;

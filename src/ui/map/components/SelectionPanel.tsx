@@ -268,6 +268,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
           movementsByOsid={playerFacingMovementsByOsid}
           supplyTransitionsByOsid={loadedGameState?.supplyTransitionsByOsid}
           historicalEventsByTurn={loadedGameState?.historicalEventsByTurn}
+          initialControlBySettlement={loadedGameState?.initialControlBySettlement}
         />
         {playerFaction && selectedMunId && (
           <div className="mt-3 rounded border border-panel-border bg-panel-card p-2.5 space-y-1.5">

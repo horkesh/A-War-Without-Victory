@@ -1154,6 +1154,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             }
         }
 
+        // Snapshot initial control for timeline provenance (before any sim turns mutate political_controllers).
+        state.political.initial_political_controllers = { ...state.political.political_controllers };
+
         // Peace→War phase edge cases: entrenchment init and stuck-in-Phase-I fallback (PHASE_I_II_EDGE_CASES.md)
         if (typeof scenario.war_entrenchment_init_turns === 'number') {
             state.meta.war_entrenchment_init_turns = scenario.war_entrenchment_init_turns;

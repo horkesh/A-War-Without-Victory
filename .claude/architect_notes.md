@@ -33,6 +33,8 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Active / Recent Accepted Lanes
 
+- **Settlement Timeline Provenance / Turn-0 Control Truth** — CLOSED 2026-04-05. Persisted `initial_political_controllers` snapshot at scenario init. Timeline builder emits turn-0 "Controlled by X at scenario start" entries; displacement-inferred takeover suppressed when inferred faction matches start controller. 8 files changed, 7 targeted tests. Report: `docs/40_reports/implemented/20260405_SETTLEMENT_TIMELINE_PROVENANCE.md`.
+
 - **Elite Formation Utilization** — VALIDATED 2026-04-05, ALL FOLLOW-UPS CLOSED. Fix A: ACCEPTED (reachability-aware plan, n1315 +0.6pp +2 anchors). Fix B: NOW OPERATIONAL (pipeline priority lane closed). Cross-corps Banja Luka LI rehoming: FIXED. Reports: `docs/40_reports/implemented/20260405_ELITE_FORMATION_UTILIZATION_FIX.md`, `docs/40_reports/implemented/20260405_ELITE_FORMATION_FOLLOWUP_MARCH_CROSSCORPS.md`.
 
 - **Prepositioning Pipeline Priority** — CLOSED 2026-04-05. Two bugs: (1) `correctMarchOrders` stripped `stance:'column'`, (2) Fix B guard pre-empted. Both fixed. 4 targeted tests. Report: `docs/40_reports/implemented/20260405_PREPOSITIONING_PIPELINE_PRIORITY.md`.
@@ -151,8 +153,6 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - Explorer findings should be summarized here after review instead of staying only in chat.
 
 ## Backlog Additions
-
-- **Settlement Timeline Provenance / Turn-0 Control Truth:** the engine has first-class truth for current control and post-start `control_events`, but no first-class provenance model for "held at scenario start" vs "taken before scenario start." `src/ui/map/utils/buildSettlementTimeline.ts` currently falls back to `displacement_event_log` and can render takeover history like "VRS took control - inferred from displacement" for OSIDs that were already controlled at scenario start. This is engine/state-model debt, not just UI wording.
 
 ### Drina Coupling Seam — Paramilitary Sweep Topology Sensitivity (RESOLVED 2026-04-05)
 

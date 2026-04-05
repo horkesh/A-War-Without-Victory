@@ -23569,3 +23569,25 @@ ode_modules\.bin\vitest.cmd run tests\ui_player_visibility.test.ts tests\warroom
 
 ### Report
 `docs/40_reports/implemented/20260404_LANE_B_EMPTY_CHILD_SECTORS_FIX.md`
+
+## 2026-04-05 — fix(ui): Settlement Timeline Provenance / Turn-0 Control Truth
+
+### What changed
+- `src/state/game_state.ts`: Added `initial_political_controllers?: Record<SettlementId, FactionId | null>` to GameState
+- `src/scenario/scenario_runner.ts`: Snapshots `{ ...political_controllers }` after all init_control applied
+- `src/ui/map/data/types.ts`, `GameStateAdapter.ts`: Wire initial controller snapshot into LoadedGameState
+- `src/ui/map/components/SelectionPanel.tsx`, `SettlementDetailContent.tsx`: Pass `startController` to timeline builder
+- `src/ui/map/utils/buildSettlementTimeline.ts`: Emit turn-0 "Controlled by X at scenario start" entry; suppress false displacement-inferred takeover when inferred faction matches start controller and no real control flips exist
+- `tests/settlement_timeline_provenance.test.ts`: 7 targeted tests
+
+### Why
+- `control_events` only keeps last 3 turns. `buildSettlementTimeline` inferred control from displacement events when control_events was empty, producing false "VRS took control — inferred from displacement" for OSIDs that were already VRS-controlled at scenario start. No initial controller truth was persisted.
+
+### Verified
+- `tsc --noEmit`: PASS
+- `vitest`: PASS — 2360/2360 (169 files)
+- `npm run build`: PASS
+- 7 targeted tests: all pass
+
+### Report
+`docs/40_reports/implemented/20260405_SETTLEMENT_TIMELINE_PROVENANCE.md`

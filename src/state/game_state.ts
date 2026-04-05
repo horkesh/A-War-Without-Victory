@@ -1864,6 +1864,8 @@ loss_of_control_trends?: LossOfControlTrendExposureState;
      * Initialized deterministically before fronts/AoR/pressure (Engine Invariants §9.2).
      */
 political_controllers?: Record<SettlementId, FactionId | null>;
+/** Snapshot of political_controllers at scenario initialization. Never mutated after init. Used by UI timeline to distinguish "held at start" from "taken during sim." */
+initial_political_controllers?: Record<SettlementId, FactionId | null>;
 /**
      * Political control contested flag (per settlement).
      * true => contested at initialization; false => uncontested.
