@@ -31,8 +31,8 @@ export function resolveEventDecision(state: GameState, eventId: string, response
         throw new Error(`No response option "${responseId}" for event "${eventId}"`);
     }
 
-    // Apply the chosen response's effects
-    applyEventEffects(state, chosen.effects);
+    // Apply the chosen response's effects (may be absent for dimension-shifts-only options)
+    applyEventEffects(state, chosen.effects ?? []);
 
     // Apply flags and dimension shifts from the chosen response option
     applyDefinitionFlags(state, chosen.sets_flags);

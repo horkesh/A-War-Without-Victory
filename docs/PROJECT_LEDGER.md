@@ -23806,3 +23806,35 @@ Yes. Peace plan bot now uses personality engine. RS hard-rejects plans proposing
 
 ### Report
 `docs/40_reports/implemented/20260406_V082_PHASE3_PEACE_PLAN_INTELLIGENCE.md`
+
+## [2026-04-06] v0.8.2 Phase 4: Patron Phone Calls and Negotiation Pressure (ACCEPTED)
+
+**Type:** Feature
+**Files modified:** `src/sim/political/political_event_decision.ts`, `data/scenarios/events/war_1992.json`, `data/scenarios/events/war_1993.json`, `data/scenarios/events/war_1994.json`, `src/sim/events/evaluate_events.ts`, `src/sim/events/resolve_decision.ts`, `tests/event_timeline_integrity.test.ts`
+**Files created:** `tests/sim/political/patron_calls_phase4.test.ts`
+**Status:** ACCEPTED
+
+### What changed
+
+- **`trendScore` (6th scoring component):** `territory_trend` was already computed in `PoliticalAssessment` from `turn_summaries` but never consumed. Now wired into `scorePoliticalOption` as a 6th additive component. Formula: `trendRaw * (option.aggression_affinity ?? 0)` where `trendRaw = +0.25` (gaining), `-0.25` (losing), or `0` (stable). Gaining factions press harder in negotiations; losing factions are nudged toward conciliation. RBiH `survivalScore` structural defiance verified to survive the friction.
+- **8 patron phone call events (ICTY-verified):** Belgrade/Zagreb/IC pressure calls across `war_1992.json` (1 RS event), `war_1993.json` (1 RBiH, 1 HRHB, 2 RS), `war_1994.json` (1 HRHB, 1 RBiH, 1 RS). All use `bot_response_logic: 'strategic_weighted'`. Two events are player-facing (`ic_pressure_vopp_engagement` w38 and `ic_rbih_restraint_post_washington` w106, both RBiH). Each event carries two options: `acknowledge_pressure` (patron +8, leverage -5, cohesion -3) and `resist_patron` (patron -10, leverage +6, credibility +3).
+- **Defensive guards:** `chosen.effects ?? []` added in `evaluate_events.ts` and `resolve_decision.ts` — supports response options carrying only `dimension_shifts` with no `effects` array (backward compatible).
+- **Event count:** 101 → 109.
+
+### Why
+
+`territory_trend` sitting unused in `PoliticalAssessment` meant factions negotiated as if frozen in time regardless of battlefield momentum — a known Phase 3 gap. Patron phone calls are the primary mechanism by which Belgrade and Zagreb constrained RS and HRHB respectively; without them the `patron_confidence` dimension was populated at scenario start but never updated by external pressure events, making the patron scoring component structurally inert.
+
+### Verified
+
+- `npx tsc --noEmit`: clean
+- `npm run test:vitest`: 2614/2614 (182 files)
+- 18 new tests, all pass
+
+### Status
+
+ACCEPTED. Phase 5 focus: Owen-Stoltenberg RBiH tactical-acceptance branch, RS territory floor calibration validation (40w run with peace plan events active), Holbrooke 1995 shuttle diplomacy events.
+
+### Report
+
+`docs/40_reports/implemented/20260406_V082_PHASE4_PATRON_PHONE_CALLS.md`

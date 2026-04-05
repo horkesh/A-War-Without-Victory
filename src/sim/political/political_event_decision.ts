@@ -73,7 +73,15 @@ export function scorePoliticalOption(
             ? defianceIntensity * intStandingWeight * 0.40
             : 0;
 
-    return dimensionScore + riskScore + aggressionScore + patronScore + survivalScore;
+    // trendScore: gaining territory → prefer aggressive options; losing → prefer defensive
+    const TREND_MAGNITUDE = 0.25;
+    const trendRaw =
+        assessment.territory_trend === 'gaining' ? TREND_MAGNITUDE
+        : assessment.territory_trend === 'losing' ? -TREND_MAGNITUDE
+        : 0;
+    const trendScore = trendRaw * (option.aggression_affinity ?? 0);
+
+    return dimensionScore + riskScore + aggressionScore + patronScore + survivalScore + trendScore;
 }
 
 /**

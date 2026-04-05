@@ -1,5 +1,81 @@
 [
   {
+    "id": "zagreb_orders_hrhb_ceasefire",
+    "title": "Zagreb Orders HVO Ceasefire With ARBiH",
+    "narrative": "Tuđman accepts a US-brokered ceasefire arrangement and orders Boban to stand down HVO operations against ARBiH. Croatia's EU trajectory and the threat of US sanctions leave Zagreb no choice — the Washington Agreement framework serves Croatian interests better than continued war.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 95,
+      "turn_max": 103,
+      "phase": "war"
+    },
+    "once": true,
+    "responding_faction": "HRHB",
+    "bot_response_logic": "strategic_weighted",
+    "requires_player_response": false,
+    "priority": 50,
+    "auto_resolve_turns": 2,
+    "effect": {
+      "kind": "narrative",
+      "text": "Tuđman orders Boban to stand down HVO operations against ARBiH under the Washington Agreement framework."
+    },
+    "dimension_shifts": [
+      {
+        "faction": "HRHB",
+        "dimension": "patron_confidence",
+        "delta": -5
+      }
+    ],
+    "response_options": [
+      {
+        "id": "acknowledge_pressure",
+        "label": "Acknowledge the message",
+        "aggression_affinity": -0.3,
+        "risk_level": 0.2,
+        "dimension_shifts": [
+          {
+            "faction": "HRHB",
+            "dimension": "patron_confidence",
+            "delta": 8
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "negotiating_leverage",
+            "delta": -5
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "delta": -3
+          }
+        ]
+      },
+      {
+        "id": "resist_patron",
+        "label": "Maintain our position",
+        "aggression_affinity": 0.5,
+        "risk_level": 0.7,
+        "dimension_shifts": [
+          {
+            "faction": "HRHB",
+            "dimension": "patron_confidence",
+            "delta": -10
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "negotiating_leverage",
+            "delta": 6
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "military_credibility",
+            "delta": 3
+          }
+        ]
+      }
+    ]
+  },
+  {
     "id": "markale_massacre_1994",
     "title": "First Markale Massacre",
     "narrative": "A mortar shell strikes the Markale marketplace in Sarajevo, killing 68 civilians and wounding over 140. The images of carnage broadcast worldwide provoke outrage and push NATO toward its first decisive action in the Bosnian war. The VRS denies responsibility, but the international community overwhelmingly attributes the attack to Serb forces.",
@@ -8,7 +84,11 @@
       "turn_min": 96,
       "turn_max": 96,
       "phase": "war",
-      "condition": { "type": "flag_equals", "flag": "sarajevo_siege_active", "value": true }
+      "condition": {
+        "type": "flag_equals",
+        "flag": "sarajevo_siege_active",
+        "value": true
+      }
     },
     "once": true,
     "effect": {
@@ -46,7 +126,11 @@
       "requires_events": [
         "markale_massacre_1994"
       ],
-      "condition": { "type": "flag_equals", "flag": "sarajevo_siege_active", "value": true }
+      "condition": {
+        "type": "flag_equals",
+        "flag": "sarajevo_siege_active",
+        "value": true
+      }
     },
     "once": true,
     "effect": {
@@ -73,7 +157,11 @@
       "requires_events": [
         "nato_ultimatum_sarajevo_1994"
       ],
-      "condition": { "type": "flag_equals", "flag": "sarajevo_siege_active", "value": true }
+      "condition": {
+        "type": "flag_equals",
+        "flag": "sarajevo_siege_active",
+        "value": true
+      }
     },
     "once": true,
     "effect": {
@@ -223,6 +311,158 @@
       {
         "kind": "narrative",
         "text": "The VRS attacks the Gorazde safe area. Limited NATO strikes fail to stop the offensive, exposing the fragility of safe area protection."
+      }
+    ]
+  },
+  {
+    "id": "ic_rbih_restraint_post_washington",
+    "title": "Washington to Sarajevo: Don't Exploit the Military Window",
+    "narrative": "Western capitals warn Izetbegović not to launch aggressive offensives in the wake of the Washington Agreement. Dramatic ARBiH advances would destabilize the federation, hand RS propaganda victories, and jeopardize the Contact Group process.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 106,
+      "turn_max": 114,
+      "phase": "war"
+    },
+    "once": true,
+    "responding_faction": "RBiH",
+    "bot_response_logic": "strategic_weighted",
+    "requires_player_response": true,
+    "priority": 50,
+    "auto_resolve_turns": 2,
+    "effect": {
+      "kind": "narrative",
+      "text": "Western capitals warn Sarajevo not to exploit the post-Washington military window with aggressive offensives."
+    },
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "patron_confidence",
+        "delta": -8
+      }
+    ],
+    "response_options": [
+      {
+        "id": "acknowledge_pressure",
+        "label": "Acknowledge the message",
+        "aggression_affinity": -0.3,
+        "risk_level": 0.2,
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "patron_confidence",
+            "delta": 8
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": -5
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": -3
+          }
+        ]
+      },
+      {
+        "id": "resist_patron",
+        "label": "Maintain our position",
+        "aggression_affinity": 0.5,
+        "risk_level": 0.7,
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "patron_confidence",
+            "delta": -10
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": 6
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "military_credibility",
+            "delta": 3
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "milosevic_drina_warning",
+    "title": "Milošević's Final Warning: Accept Contact Group or Lose the Drina",
+    "narrative": "Milošević warns Pale directly: if RS rejects the upcoming Contact Group Plan, Belgrade will close the Drina — cutting off fuel, ammunition, and the economic lifeline that sustains VRS operations. This is not a request.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 110,
+      "turn_max": 118,
+      "phase": "war"
+    },
+    "once": true,
+    "responding_faction": "RS",
+    "bot_response_logic": "strategic_weighted",
+    "requires_player_response": false,
+    "priority": 50,
+    "auto_resolve_turns": 2,
+    "effect": {
+      "kind": "narrative",
+      "text": "Milošević warns Pale that rejection of the Contact Group Plan means Belgrade will close the Drina."
+    },
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "patron_confidence",
+        "delta": -10
+      }
+    ],
+    "response_options": [
+      {
+        "id": "acknowledge_pressure",
+        "label": "Acknowledge the message",
+        "aggression_affinity": -0.3,
+        "risk_level": 0.2,
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": 8
+          },
+          {
+            "faction": "RS",
+            "dimension": "negotiating_leverage",
+            "delta": -5
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": -3
+          }
+        ]
+      },
+      {
+        "id": "resist_patron",
+        "label": "Maintain our position",
+        "aggression_affinity": 0.5,
+        "risk_level": 0.7,
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": -10
+          },
+          {
+            "faction": "RS",
+            "dimension": "negotiating_leverage",
+            "delta": 6
+          },
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": 3
+          }
+        ]
       }
     ]
   },
@@ -405,7 +645,11 @@
       "turn_min": 123,
       "turn_max": 123,
       "phase": "war",
-      "condition": { "type": "flag_equals", "flag": "sarajevo_siege_active", "value": true }
+      "condition": {
+        "type": "flag_equals",
+        "flag": "sarajevo_siege_active",
+        "value": true
+      }
     },
     "once": true,
     "effect": {
@@ -425,9 +669,18 @@
     },
     "once": true,
     "pressure": {
-      "base_rate": 3.0, "threshold": 3, "decay_rate": 0,
+      "base_rate": 3,
+      "threshold": 3,
+      "decay_rate": 0,
       "modifiers": [
-        { "condition": { "type": "flag_equals", "flag": "kupres_recaptured", "value": true }, "rate_bonus": 0.5 }
+        {
+          "condition": {
+            "type": "flag_equals",
+            "flag": "kupres_recaptured",
+            "value": true
+          },
+          "rate_bonus": 0.5
+        }
       ]
     },
     "effect": {
@@ -520,7 +773,11 @@
       "turn_min": 135,
       "turn_max": 135,
       "phase": "war",
-      "condition": { "type": "flag_equals", "flag": "bihac_breakout_occurred", "value": true }
+      "condition": {
+        "type": "flag_equals",
+        "flag": "bihac_breakout_occurred",
+        "value": true
+      }
     },
     "once": true,
     "effect": {

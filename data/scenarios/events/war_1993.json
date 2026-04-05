@@ -17,9 +17,18 @@
     "requires_player_response": true,
     "bot_response_logic": "capital_based",
     "pressure": {
-      "base_rate": 2.0, "threshold": 4, "decay_rate": 0.5,
+      "base_rate": 2,
+      "threshold": 4,
+      "decay_rate": 0.5,
       "modifiers": [
-        { "condition": { "type": "flag_equals", "flag": "hvo_arbih_tensions_rising", "value": true }, "rate_bonus": 1.0 }
+        {
+          "condition": {
+            "type": "flag_equals",
+            "flag": "hvo_arbih_tensions_rising",
+            "value": true
+          },
+          "rate_bonus": 1
+        }
       ]
     },
     "effect": {
@@ -68,6 +77,82 @@
     ]
   },
   {
+    "id": "ic_pressure_vopp_engagement",
+    "title": "Western Powers Press Sarajevo: Engage with Vance-Owen",
+    "narrative": "Western capitals make clear that continued international support depends on Sarajevo engaging seriously with the Vance-Owen Peace Plan. Lord Owen warns that Bosnian refusal risks isolating the government internationally.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 38,
+      "turn_max": 46,
+      "phase": "war"
+    },
+    "once": true,
+    "responding_faction": "RBiH",
+    "bot_response_logic": "strategic_weighted",
+    "requires_player_response": true,
+    "priority": 50,
+    "auto_resolve_turns": 2,
+    "effect": {
+      "kind": "narrative",
+      "text": "Western capitals press Sarajevo to engage seriously with the Vance-Owen Peace Plan or risk international isolation."
+    },
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "patron_confidence",
+        "delta": -5
+      }
+    ],
+    "response_options": [
+      {
+        "id": "acknowledge_pressure",
+        "label": "Acknowledge the message",
+        "aggression_affinity": -0.3,
+        "risk_level": 0.2,
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "patron_confidence",
+            "delta": 8
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": -5
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": -3
+          }
+        ]
+      },
+      {
+        "id": "resist_patron",
+        "label": "Maintain our position",
+        "aggression_affinity": 0.5,
+        "risk_level": 0.7,
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "patron_confidence",
+            "delta": -10
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": 6
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "military_credibility",
+            "delta": 3
+          }
+        ]
+      }
+    ]
+  },
+  {
     "id": "vance_owen_plan_1993",
     "title": "Vance-Owen Peace Plan Presented",
     "narrative": "The Vance-Owen Peace Plan proposes dividing Bosnia into ten semi-autonomous provinces based on ethnic and geographic criteria. The plan is endorsed by the Bosnian Croats and reluctantly by the Bosniaks, but the Bosnian Serb assembly in Pale rejects it, dooming the most comprehensive peace effort to date.",
@@ -81,9 +166,18 @@
     "requires_player_response": true,
     "bot_response_logic": "capital_based",
     "pressure": {
-      "base_rate": 3.0, "threshold": 3, "decay_rate": 0,
+      "base_rate": 3,
+      "threshold": 3,
+      "decay_rate": 0,
       "modifiers": [
-        { "condition": { "type": "flag_equals", "flag": "jajce_fell", "value": true }, "rate_bonus": 0.5 }
+        {
+          "condition": {
+            "type": "flag_equals",
+            "flag": "jajce_fell",
+            "value": true
+          },
+          "rate_bonus": 0.5
+        }
       ]
     },
     "effect": {
@@ -138,7 +232,11 @@
       "turn_min": 39,
       "turn_max": 41,
       "phase": "war",
-      "condition": { "type": "flag_equals", "flag": "srebrenica_enclave_formed", "value": true }
+      "condition": {
+        "type": "flag_equals",
+        "flag": "srebrenica_enclave_formed",
+        "value": true
+      }
     },
     "once": true,
     "effects": [
@@ -244,10 +342,26 @@
     },
     "once": true,
     "pressure": {
-      "base_rate": 1.5, "threshold": 5, "decay_rate": 0.3,
+      "base_rate": 1.5,
+      "threshold": 5,
+      "decay_rate": 0.3,
       "modifiers": [
-        { "condition": { "type": "flag_equals", "flag": "jajce_fell", "value": true }, "rate_bonus": 1.0 },
-        { "condition": { "type": "flag_equals", "flag": "hvo_arbih_tensions_rising", "value": true }, "rate_bonus": 0.5 }
+        {
+          "condition": {
+            "type": "flag_equals",
+            "flag": "jajce_fell",
+            "value": true
+          },
+          "rate_bonus": 1
+        },
+        {
+          "condition": {
+            "type": "flag_equals",
+            "flag": "hvo_arbih_tensions_rising",
+            "value": true
+          },
+          "rate_bonus": 0.5
+        }
       ]
     },
     "effect": {
@@ -278,10 +392,22 @@
       "requires_events": [
         "croat_bosniak_war_begins_1993"
       ],
-      "condition": { "type": "and", "conditions": [
-        { "type": "faction_controls_municipality", "faction": "HRHB", "municipality": "vitez", "threshold": 0.5 },
-        { "type": "flag_equals", "flag": "hvo_arbih_tensions_rising", "value": true }
-      ]}
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "faction_controls_municipality",
+            "faction": "HRHB",
+            "municipality": "vitez",
+            "threshold": 0.5
+          },
+          {
+            "type": "flag_equals",
+            "flag": "hvo_arbih_tensions_rising",
+            "value": true
+          }
+        ]
+      }
     },
     "once": true,
     "effect": {
@@ -417,7 +543,11 @@
       "requires_events": [
         "croat_bosniak_war_begins_1993"
       ],
-      "condition": { "type": "flag_equals", "flag": "mostar_liberated", "value": true }
+      "condition": {
+        "type": "flag_equals",
+        "flag": "mostar_liberated",
+        "value": true
+      }
     },
     "once": true,
     "effect": {
@@ -515,6 +645,82 @@
     ]
   },
   {
+    "id": "zagreb_restrains_boban_vopp",
+    "title": "Zagreb Restrains Boban: Hold Back During VOPP Window",
+    "narrative": "Tuđman quietly orders Boban to restrain HVO offensive operations. The Vance-Owen provincial map is favorable to Croat Herzegovina — Zagreb needs HRHB to accept the plan, not derail it through military escalation.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 46,
+      "turn_max": 54,
+      "phase": "war"
+    },
+    "once": true,
+    "responding_faction": "HRHB",
+    "bot_response_logic": "strategic_weighted",
+    "requires_player_response": false,
+    "priority": 50,
+    "auto_resolve_turns": 2,
+    "effect": {
+      "kind": "narrative",
+      "text": "Zagreb quietly orders Boban to hold back HVO offensive operations during the Vance-Owen window."
+    },
+    "dimension_shifts": [
+      {
+        "faction": "HRHB",
+        "dimension": "patron_confidence",
+        "delta": -8
+      }
+    ],
+    "response_options": [
+      {
+        "id": "acknowledge_pressure",
+        "label": "Acknowledge the message",
+        "aggression_affinity": -0.3,
+        "risk_level": 0.2,
+        "dimension_shifts": [
+          {
+            "faction": "HRHB",
+            "dimension": "patron_confidence",
+            "delta": 8
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "negotiating_leverage",
+            "delta": -5
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "delta": -3
+          }
+        ]
+      },
+      {
+        "id": "resist_patron",
+        "label": "Maintain our position",
+        "aggression_affinity": 0.5,
+        "risk_level": 0.7,
+        "dimension_shifts": [
+          {
+            "faction": "HRHB",
+            "dimension": "patron_confidence",
+            "delta": -10
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "negotiating_leverage",
+            "delta": 6
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "military_credibility",
+            "delta": 3
+          }
+        ]
+      }
+    ]
+  },
+  {
     "id": "morillon_enters_srebrenica_1993",
     "title": "General Morillon Enters Srebrenica",
     "narrative": "UNPROFOR Commander General Philippe Morillon reaches the besieged Srebrenica enclave after months of convoy blockades. Confronted by desperate civilians, he publicly declares 'You are now under the protection of the United Nations. I will never abandon you.' His personal guarantee raises hopes but lacks any enforcement mechanism.",
@@ -523,7 +729,11 @@
       "turn_min": 48,
       "turn_max": 50,
       "phase": "war",
-      "condition": { "type": "flag_equals", "flag": "srebrenica_enclave_formed", "value": true }
+      "condition": {
+        "type": "flag_equals",
+        "flag": "srebrenica_enclave_formed",
+        "value": true
+      }
     },
     "once": true,
     "effects": [
@@ -570,7 +780,11 @@
       "turn_min": 49,
       "turn_max": 49,
       "phase": "war",
-      "condition": { "type": "flag_equals", "flag": "srebrenica_enclave_formed", "value": true }
+      "condition": {
+        "type": "flag_equals",
+        "flag": "srebrenica_enclave_formed",
+        "value": true
+      }
     },
     "once": true,
     "effect": {
@@ -789,7 +1003,11 @@
       "turn_min": 54,
       "turn_max": 54,
       "phase": "war",
-      "condition": { "type": "flag_equals", "flag": "srebrenica_enclave_formed", "value": true }
+      "condition": {
+        "type": "flag_equals",
+        "flag": "srebrenica_enclave_formed",
+        "value": true
+      }
     },
     "once": true,
     "effects": [
@@ -880,7 +1098,11 @@
       "requires_events": [
         "srebrenica_shelling_1993"
       ],
-      "condition": { "type": "flag_equals", "flag": "srebrenica_enclave_formed", "value": true }
+      "condition": {
+        "type": "flag_equals",
+        "flag": "srebrenica_enclave_formed",
+        "value": true
+      }
     },
     "once": true,
     "requires_player_response": true,
@@ -992,6 +1214,82 @@
       {
         "kind": "narrative",
         "text": "Six UN safe areas are declared. The promise of protection raises hope among besieged populations, but no credible enforcement mechanism exists."
+      }
+    ]
+  },
+  {
+    "id": "milosevic_vopp_pressure",
+    "title": "Milošević Orders Karadžić: Accept Vance-Owen",
+    "narrative": "Milošević and Bulatović fly to Zvornik to personally demand that the Bosnian Serb Assembly accept the Vance-Owen Plan. Belgrade cannot sustain UN sanctions indefinitely — Pale's intransigence is destroying Serbia's economy.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 54,
+      "turn_max": 62,
+      "phase": "war"
+    },
+    "once": true,
+    "responding_faction": "RS",
+    "bot_response_logic": "strategic_weighted",
+    "requires_player_response": false,
+    "priority": 50,
+    "auto_resolve_turns": 2,
+    "effect": {
+      "kind": "narrative",
+      "text": "Milošević and Bulatović personally demand that the Bosnian Serb Assembly accept the Vance-Owen Plan."
+    },
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "patron_confidence",
+        "delta": -12
+      }
+    ],
+    "response_options": [
+      {
+        "id": "acknowledge_pressure",
+        "label": "Acknowledge the message",
+        "aggression_affinity": -0.3,
+        "risk_level": 0.2,
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": 8
+          },
+          {
+            "faction": "RS",
+            "dimension": "negotiating_leverage",
+            "delta": -5
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": -3
+          }
+        ]
+      },
+      {
+        "id": "resist_patron",
+        "label": "Maintain our position",
+        "aggression_affinity": 0.5,
+        "risk_level": 0.7,
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": -10
+          },
+          {
+            "faction": "RS",
+            "dimension": "negotiating_leverage",
+            "delta": 6
+          },
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": 3
+          }
+        ]
       }
     ]
   },
@@ -1254,7 +1552,11 @@
       "requires_events": [
         "croat_bosniak_war_begins_1993"
       ],
-      "condition": { "type": "flag_equals", "flag": "mostar_liberated", "value": true }
+      "condition": {
+        "type": "flag_equals",
+        "flag": "mostar_liberated",
+        "value": true
+      }
     },
     "once": true,
     "effect": {
@@ -1327,7 +1629,11 @@
       "turn_min": 63,
       "turn_max": 63,
       "phase": "war",
-      "condition": { "type": "flag_equals", "flag": "arms_embargo_active", "value": true }
+      "condition": {
+        "type": "flag_equals",
+        "flag": "arms_embargo_active",
+        "value": true
+      }
     },
     "once": true,
     "effects": [
@@ -1419,7 +1725,11 @@
       "turn_min": 64,
       "turn_max": 66,
       "phase": "war",
-      "condition": { "type": "flag_equals", "flag": "sarajevo_siege_active", "value": true }
+      "condition": {
+        "type": "flag_equals",
+        "flag": "sarajevo_siege_active",
+        "value": true
+      }
     },
     "once": true,
     "effects": [
@@ -1671,7 +1981,11 @@
       "turn_min": 68,
       "turn_max": 68,
       "phase": "war",
-      "condition": { "type": "flag_equals", "flag": "sarajevo_siege_active", "value": true }
+      "condition": {
+        "type": "flag_equals",
+        "flag": "sarajevo_siege_active",
+        "value": true
+      }
     },
     "once": true,
     "effect": {
@@ -1688,6 +2002,82 @@
       {
         "kind": "narrative",
         "text": "Artillery continues to target civilian areas in Sarajevo. International pressure for intervention builds steadily."
+      }
+    ]
+  },
+  {
+    "id": "milosevic_owen_stoltenberg_distancing",
+    "title": "Belgrade Grows Distant: Milošević Signals Exhaustion",
+    "narrative": "After the Owen-Stoltenberg plan collapses, Milošević signals through back-channels that Serbia's patience is exhausted. UN sanctions are cratering the Serbian economy — Pale's demands are no longer Belgrade's priority.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 68,
+      "turn_max": 76,
+      "phase": "war"
+    },
+    "once": true,
+    "responding_faction": "RS",
+    "bot_response_logic": "strategic_weighted",
+    "requires_player_response": false,
+    "priority": 50,
+    "auto_resolve_turns": 2,
+    "effect": {
+      "kind": "narrative",
+      "text": "Milošević signals through back-channels that Serbia's patience with Pale is exhausted."
+    },
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "patron_confidence",
+        "delta": -12
+      }
+    ],
+    "response_options": [
+      {
+        "id": "acknowledge_pressure",
+        "label": "Acknowledge the message",
+        "aggression_affinity": -0.3,
+        "risk_level": 0.2,
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": 8
+          },
+          {
+            "faction": "RS",
+            "dimension": "negotiating_leverage",
+            "delta": -5
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": -3
+          }
+        ]
+      },
+      {
+        "id": "resist_patron",
+        "label": "Maintain our position",
+        "aggression_affinity": 0.5,
+        "risk_level": 0.7,
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": -10
+          },
+          {
+            "faction": "RS",
+            "dimension": "negotiating_leverage",
+            "delta": 6
+          },
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": 3
+          }
+        ]
       }
     ]
   },
@@ -2037,7 +2427,11 @@
       "requires_events": [
         "east_mostar_siege_1993"
       ],
-      "condition": { "type": "flag_equals", "flag": "mostar_liberated", "value": true }
+      "condition": {
+        "type": "flag_equals",
+        "flag": "mostar_liberated",
+        "value": true
+      }
     },
     "once": true,
     "effect": {
@@ -2058,7 +2452,6 @@
       }
     ]
   },
-
   {
     "id": "strategic_posture_review_rbih",
     "title": "Strategic Posture Review",
@@ -2072,33 +2465,89 @@
     "requires_player_response": true,
     "bot_response_logic": "strategic_weighted",
     "pressure": {
-      "base_rate": 1.0,
+      "base_rate": 1,
       "threshold": 11,
       "decay_rate": 0,
       "modifiers": [
-        { "condition": { "type": "territory_percentage", "faction": "RBiH", "comparator": "below", "threshold": 0.30 }, "rate_bonus": 2.0 },
-        { "condition": { "type": "morale_average_below", "faction": "RBiH", "threshold": 40 }, "rate_bonus": 1.5 },
-        { "condition": { "type": "patron_pressure_above", "faction": "RBiH", "threshold": 50 }, "rate_bonus": 1.0 }
+        {
+          "condition": {
+            "type": "territory_percentage",
+            "faction": "RBiH",
+            "comparator": "below",
+            "threshold": 0.3
+          },
+          "rate_bonus": 2
+        },
+        {
+          "condition": {
+            "type": "morale_average_below",
+            "faction": "RBiH",
+            "threshold": 40
+          },
+          "rate_bonus": 1.5
+        },
+        {
+          "condition": {
+            "type": "patron_pressure_above",
+            "faction": "RBiH",
+            "threshold": 50
+          },
+          "rate_bonus": 1
+        }
       ]
     },
-    "recurrence": { "max_fires": 8, "cooldown_turns": 8, "escalation": "escalating" },
-    "effect": { "kind": "narrative", "text": "The presidency convenes to review the strategic situation." },
-    "tags": ["presidential", "recurring", "strategic_posture"],
+    "recurrence": {
+      "max_fires": 8,
+      "cooldown_turns": 8,
+      "escalation": "escalating"
+    },
+    "effect": {
+      "kind": "narrative",
+      "text": "The presidency convenes to review the strategic situation."
+    },
+    "tags": [
+      "presidential",
+      "recurring",
+      "strategic_posture"
+    ],
     "response_options": [
       {
         "id": "press_offensive",
         "label": "Press the offensive",
         "description": "Demand forward momentum from your corps commanders. The army attacks wherever it can. Supply costs rise, but morale soars and international attention focuses on Bosniak military capability.",
         "effects": [
-          { "kind": "morale_change", "faction": "RBiH", "delta": 3 },
-          { "kind": "supply_delta", "faction": "RBiH", "delta": -3 },
-          { "kind": "aggression_modifier", "faction": "RBiH", "delta": 0.1, "duration_turns": 8 }
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 3
+          },
+          {
+            "kind": "supply_delta",
+            "faction": "RBiH",
+            "delta": -3
+          },
+          {
+            "kind": "aggression_modifier",
+            "faction": "RBiH",
+            "delta": 0.1,
+            "duration_turns": 8
+          }
         ],
         "dimension_shifts": [
-          { "faction": "RBiH", "dimension": "military_credibility", "delta": 5 },
-          { "faction": "RBiH", "dimension": "patron_confidence", "delta": -5 }
+          {
+            "faction": "RBiH",
+            "dimension": "military_credibility",
+            "delta": 5
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "patron_confidence",
+            "delta": -5
+          }
         ],
-        "sets_flags": { "rbih_posture": "offensive" },
+        "sets_flags": {
+          "rbih_posture": "offensive"
+        },
         "aggression_affinity": 0.8,
         "risk_level": 0.6
       },
@@ -2107,14 +2556,32 @@
         "label": "Consolidate and defend",
         "description": "Halt costly attacks. Dig in on current lines, restore cohesion, and build reserves. The army that survives the winter can fight in the spring.",
         "effects": [
-          { "kind": "cohesion_change", "faction": "RBiH", "delta": 5 },
-          { "kind": "supply_delta", "faction": "RBiH", "delta": 3 }
+          {
+            "kind": "cohesion_change",
+            "faction": "RBiH",
+            "delta": 5
+          },
+          {
+            "kind": "supply_delta",
+            "faction": "RBiH",
+            "delta": 3
+          }
         ],
         "dimension_shifts": [
-          { "faction": "RBiH", "dimension": "territorial_legitimacy", "delta": 5 },
-          { "faction": "RBiH", "dimension": "military_credibility", "delta": -5 }
+          {
+            "faction": "RBiH",
+            "dimension": "territorial_legitimacy",
+            "delta": 5
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "military_credibility",
+            "delta": -5
+          }
         ],
-        "sets_flags": { "rbih_posture": "defensive" },
+        "sets_flags": {
+          "rbih_posture": "defensive"
+        },
         "aggression_affinity": -0.5,
         "risk_level": 0.2
       },
@@ -2123,14 +2590,32 @@
         "label": "Signal openness to negotiations",
         "description": "Engage the international community. Signal willingness to negotiate. International standing improves and patron pressure eases, but hardliners in your own government are furious.",
         "effects": [
-          { "kind": "patron_pressure", "faction": "RBiH", "delta": -5 }
+          {
+            "kind": "patron_pressure",
+            "faction": "RBiH",
+            "delta": -5
+          }
         ],
         "dimension_shifts": [
-          { "faction": "RBiH", "dimension": "international_standing", "delta": 10 },
-          { "faction": "RBiH", "dimension": "internal_cohesion", "delta": -10 },
-          { "faction": "RBiH", "dimension": "negotiating_leverage", "delta": 5 }
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": 10
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": -10
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": 5
+          }
         ],
-        "sets_flags": { "rbih_posture": "diplomatic" },
+        "sets_flags": {
+          "rbih_posture": "diplomatic"
+        },
         "aggression_affinity": -0.8,
         "risk_level": 0.3
       },
@@ -2139,23 +2624,49 @@
         "label": "Accept ceasefire terms to buy time",
         "description": "The war has ground your forces down. Accept international mediation and a temporary ceasefire. The army desperately needs to rest and rearm — but your hardliners will call it surrender.",
         "effects": [
-          { "kind": "supply_delta", "faction": "RBiH", "delta": 8 },
-          { "kind": "cohesion_change", "faction": "RBiH", "delta": -5 },
-          { "kind": "aggression_modifier", "faction": "RBiH", "delta": -0.1, "duration_turns": 12 }
+          {
+            "kind": "supply_delta",
+            "faction": "RBiH",
+            "delta": 8
+          },
+          {
+            "kind": "cohesion_change",
+            "faction": "RBiH",
+            "delta": -5
+          },
+          {
+            "kind": "aggression_modifier",
+            "faction": "RBiH",
+            "delta": -0.1,
+            "duration_turns": 12
+          }
         ],
         "dimension_shifts": [
-          { "faction": "RBiH", "dimension": "internal_cohesion", "delta": -15 },
-          { "faction": "RBiH", "dimension": "international_standing", "delta": 15 },
-          { "faction": "RBiH", "dimension": "negotiating_leverage", "delta": 8 }
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": -15
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": 15
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": 8
+          }
         ],
-        "sets_flags": { "rbih_posture": "ceasefire" },
+        "sets_flags": {
+          "rbih_posture": "ceasefire"
+        },
         "available_from_fire": 3,
-        "aggression_affinity": -1.0,
+        "aggression_affinity": -1,
         "risk_level": 0.5
       }
     ]
   },
-
   {
     "id": "strategic_posture_review_rs",
     "title": "Strategic Posture Review",
@@ -2169,34 +2680,94 @@
     "requires_player_response": true,
     "bot_response_logic": "strategic_weighted",
     "pressure": {
-      "base_rate": 1.0,
+      "base_rate": 1,
       "threshold": 11,
       "decay_rate": 0,
       "modifiers": [
-        { "condition": { "type": "patron_pressure_above", "faction": "RS", "threshold": 60 }, "rate_bonus": 2.0 },
-        { "condition": { "type": "morale_average_below", "faction": "RS", "threshold": 45 }, "rate_bonus": 1.5 },
-        { "condition": { "type": "territory_percentage", "faction": "RS", "comparator": "below", "threshold": 0.45 }, "rate_bonus": 1.0 }
+        {
+          "condition": {
+            "type": "patron_pressure_above",
+            "faction": "RS",
+            "threshold": 60
+          },
+          "rate_bonus": 2
+        },
+        {
+          "condition": {
+            "type": "morale_average_below",
+            "faction": "RS",
+            "threshold": 45
+          },
+          "rate_bonus": 1.5
+        },
+        {
+          "condition": {
+            "type": "territory_percentage",
+            "faction": "RS",
+            "comparator": "below",
+            "threshold": 0.45
+          },
+          "rate_bonus": 1
+        }
       ]
     },
-    "recurrence": { "max_fires": 8, "cooldown_turns": 8, "escalation": "escalating" },
-    "effect": { "kind": "narrative", "text": "The RS Assembly demands a presidential assessment of the strategic situation." },
-    "tags": ["presidential", "recurring", "strategic_posture"],
+    "recurrence": {
+      "max_fires": 8,
+      "cooldown_turns": 8,
+      "escalation": "escalating"
+    },
+    "effect": {
+      "kind": "narrative",
+      "text": "The RS Assembly demands a presidential assessment of the strategic situation."
+    },
+    "tags": [
+      "presidential",
+      "recurring",
+      "strategic_posture"
+    ],
     "response_options": [
       {
         "id": "press_gains",
         "label": "Press territorial gains",
         "description": "Push further. Consolidate the corridor, tighten the enclaves, expand the buffer zone. What the VRS holds today, the final map must recognize.",
         "effects": [
-          { "kind": "morale_change", "faction": "RS", "delta": 4 },
-          { "kind": "supply_delta", "faction": "RS", "delta": -3 },
-          { "kind": "aggression_modifier", "faction": "RS", "delta": 0.1, "duration_turns": 8 }
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": 4
+          },
+          {
+            "kind": "supply_delta",
+            "faction": "RS",
+            "delta": -3
+          },
+          {
+            "kind": "aggression_modifier",
+            "faction": "RS",
+            "delta": 0.1,
+            "duration_turns": 8
+          }
         ],
         "dimension_shifts": [
-          { "faction": "RS", "dimension": "military_credibility", "delta": 5 },
-          { "faction": "RS", "dimension": "patron_confidence", "delta": -8 },
-          { "faction": "RS", "dimension": "international_standing", "delta": -5 }
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": 5
+          },
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": -8
+          },
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": -5
+          }
         ],
-        "sets_flags": { "rs_posture": "offensive" },
+        "sets_flags": {
+          "rs_posture": "offensive"
+        },
         "aggression_affinity": 0.8,
         "risk_level": 0.7
       },
@@ -2205,14 +2776,32 @@
         "label": "Consolidate what we hold",
         "description": "Stop the costly advance and fortify current positions. Dig in on the Posavina corridor, on the Drina, on the approaches to Sarajevo. Hold what our soldiers have won.",
         "effects": [
-          { "kind": "cohesion_change", "faction": "RS", "delta": 5 },
-          { "kind": "supply_delta", "faction": "RS", "delta": 4 }
+          {
+            "kind": "cohesion_change",
+            "faction": "RS",
+            "delta": 5
+          },
+          {
+            "kind": "supply_delta",
+            "faction": "RS",
+            "delta": 4
+          }
         ],
         "dimension_shifts": [
-          { "faction": "RS", "dimension": "territorial_legitimacy", "delta": 8 },
-          { "faction": "RS", "dimension": "military_credibility", "delta": -3 }
+          {
+            "faction": "RS",
+            "dimension": "territorial_legitimacy",
+            "delta": 8
+          },
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": -3
+          }
         ],
-        "sets_flags": { "rs_posture": "consolidate" },
+        "sets_flags": {
+          "rs_posture": "consolidate"
+        },
         "aggression_affinity": -0.3,
         "risk_level": 0.2
       },
@@ -2221,14 +2810,32 @@
         "label": "Negotiate from strength",
         "description": "Engage the international mediators from a position of military advantage. Belgrade's pressure becomes manageable if you demonstrate willingness to talk — while holding every kilometer.",
         "effects": [
-          { "kind": "patron_pressure", "faction": "RS", "delta": -8 }
+          {
+            "kind": "patron_pressure",
+            "faction": "RS",
+            "delta": -8
+          }
         ],
         "dimension_shifts": [
-          { "faction": "RS", "dimension": "patron_confidence", "delta": 8 },
-          { "faction": "RS", "dimension": "negotiating_leverage", "delta": 5 },
-          { "faction": "RS", "dimension": "internal_cohesion", "delta": -8 }
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": 8
+          },
+          {
+            "faction": "RS",
+            "dimension": "negotiating_leverage",
+            "delta": 5
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": -8
+          }
         ],
-        "sets_flags": { "rs_posture": "diplomatic" },
+        "sets_flags": {
+          "rs_posture": "diplomatic"
+        },
         "aggression_affinity": -0.5,
         "risk_level": 0.4
       },
@@ -2237,23 +2844,48 @@
         "label": "Accept a partition framework",
         "description": "The war has cost more than our people can bear. Signal willingness to accept a territorial settlement in exchange for international recognition. The hardliners in the Assembly will revolt — but the alternative is permanent isolation.",
         "effects": [
-          { "kind": "supply_delta", "faction": "RS", "delta": 6 },
-          { "kind": "cohesion_change", "faction": "RS", "delta": -8 },
-          { "kind": "patron_pressure", "faction": "RS", "delta": -12 }
+          {
+            "kind": "supply_delta",
+            "faction": "RS",
+            "delta": 6
+          },
+          {
+            "kind": "cohesion_change",
+            "faction": "RS",
+            "delta": -8
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RS",
+            "delta": -12
+          }
         ],
         "dimension_shifts": [
-          { "faction": "RS", "dimension": "internal_cohesion", "delta": -20 },
-          { "faction": "RS", "dimension": "international_standing", "delta": 15 },
-          { "faction": "RS", "dimension": "patron_confidence", "delta": 15 }
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": -20
+          },
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": 15
+          },
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": 15
+          }
         ],
-        "sets_flags": { "rs_posture": "ceasefire" },
+        "sets_flags": {
+          "rs_posture": "ceasefire"
+        },
         "available_from_fire": 3,
-        "aggression_affinity": -1.0,
+        "aggression_affinity": -1,
         "risk_level": 0.6
       }
     ]
   },
-
   {
     "id": "strategic_posture_review_hrhb",
     "title": "Strategic Posture Review",
@@ -2267,33 +2899,87 @@
     "requires_player_response": true,
     "bot_response_logic": "strategic_weighted",
     "pressure": {
-      "base_rate": 1.0,
+      "base_rate": 1,
       "threshold": 11,
       "decay_rate": 0,
       "modifiers": [
-        { "condition": { "type": "patron_pressure_above", "faction": "HRHB", "threshold": 40 }, "rate_bonus": 2.0 },
-        { "condition": { "type": "morale_average_below", "faction": "HRHB", "threshold": 40 }, "rate_bonus": 1.5 },
-        { "condition": { "type": "alliance_below", "value": 0.3 }, "rate_bonus": 1.0 }
+        {
+          "condition": {
+            "type": "patron_pressure_above",
+            "faction": "HRHB",
+            "threshold": 40
+          },
+          "rate_bonus": 2
+        },
+        {
+          "condition": {
+            "type": "morale_average_below",
+            "faction": "HRHB",
+            "threshold": 40
+          },
+          "rate_bonus": 1.5
+        },
+        {
+          "condition": {
+            "type": "alliance_below",
+            "value": 0.3
+          },
+          "rate_bonus": 1
+        }
       ]
     },
-    "recurrence": { "max_fires": 8, "cooldown_turns": 8, "escalation": "escalating" },
-    "effect": { "kind": "narrative", "text": "The Croatian Community of Herceg-Bosna reviews its strategic direction." },
-    "tags": ["presidential", "recurring", "strategic_posture"],
+    "recurrence": {
+      "max_fires": 8,
+      "cooldown_turns": 8,
+      "escalation": "escalating"
+    },
+    "effect": {
+      "kind": "narrative",
+      "text": "The Croatian Community of Herceg-Bosna reviews its strategic direction."
+    },
+    "tags": [
+      "presidential",
+      "recurring",
+      "strategic_posture"
+    ],
     "response_options": [
       {
         "id": "press_croat_objectives",
         "label": "Press Bosnian Croat territorial objectives",
         "description": "Secure HVO holdings in Herzegovina and push for more. Morale rises among the faithful — but international pressure mounts and the Bosniak alliance, if it was ever real, is finished.",
         "effects": [
-          { "kind": "morale_change", "faction": "HRHB", "delta": 4 },
-          { "kind": "supply_delta", "faction": "HRHB", "delta": -2 },
-          { "kind": "aggression_modifier", "faction": "HRHB", "delta": 0.1, "duration_turns": 8 }
+          {
+            "kind": "morale_change",
+            "faction": "HRHB",
+            "delta": 4
+          },
+          {
+            "kind": "supply_delta",
+            "faction": "HRHB",
+            "delta": -2
+          },
+          {
+            "kind": "aggression_modifier",
+            "faction": "HRHB",
+            "delta": 0.1,
+            "duration_turns": 8
+          }
         ],
         "dimension_shifts": [
-          { "faction": "HRHB", "dimension": "military_credibility", "delta": 5 },
-          { "faction": "HRHB", "dimension": "international_standing", "delta": -8 }
+          {
+            "faction": "HRHB",
+            "dimension": "military_credibility",
+            "delta": 5
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "international_standing",
+            "delta": -8
+          }
         ],
-        "sets_flags": { "hrhb_posture": "offensive" },
+        "sets_flags": {
+          "hrhb_posture": "offensive"
+        },
         "aggression_affinity": 0.7,
         "risk_level": 0.6
       },
@@ -2302,15 +2988,36 @@
         "label": "Coordinate with the Bosniaks",
         "description": "Seek tactical coordination with ARBiH against the VRS. Zagreb may be displeased, but the Washington Agreement's logic is sound: a unified front is more powerful than two wars at once.",
         "effects": [
-          { "kind": "alliance_change", "delta": 0.08 },
-          { "kind": "supply_delta", "faction": "HRHB", "delta": 2 }
+          {
+            "kind": "alliance_change",
+            "delta": 0.08
+          },
+          {
+            "kind": "supply_delta",
+            "faction": "HRHB",
+            "delta": 2
+          }
         ],
         "dimension_shifts": [
-          { "faction": "HRHB", "dimension": "patron_confidence", "delta": -5 },
-          { "faction": "HRHB", "dimension": "international_standing", "delta": 8 },
-          { "faction": "HRHB", "dimension": "internal_cohesion", "delta": -5 }
+          {
+            "faction": "HRHB",
+            "dimension": "patron_confidence",
+            "delta": -5
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "international_standing",
+            "delta": 8
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "delta": -5
+          }
         ],
-        "sets_flags": { "hrhb_posture": "coalition" },
+        "sets_flags": {
+          "hrhb_posture": "coalition"
+        },
         "aggression_affinity": -0.4,
         "risk_level": 0.4
       },
@@ -2319,14 +3026,32 @@
         "label": "Consolidate and resupply",
         "description": "Pause offensive operations, secure the supply corridor from Croatia, and build up reserves for the spring. What we hold, we hold. What we need, we will take when we are ready.",
         "effects": [
-          { "kind": "supply_delta", "faction": "HRHB", "delta": 6 },
-          { "kind": "cohesion_change", "faction": "HRHB", "delta": 4 }
+          {
+            "kind": "supply_delta",
+            "faction": "HRHB",
+            "delta": 6
+          },
+          {
+            "kind": "cohesion_change",
+            "faction": "HRHB",
+            "delta": 4
+          }
         ],
         "dimension_shifts": [
-          { "faction": "HRHB", "dimension": "territorial_legitimacy", "delta": 5 },
-          { "faction": "HRHB", "dimension": "military_credibility", "delta": -3 }
+          {
+            "faction": "HRHB",
+            "dimension": "territorial_legitimacy",
+            "delta": 5
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "military_credibility",
+            "delta": -3
+          }
         ],
-        "sets_flags": { "hrhb_posture": "consolidate" },
+        "sets_flags": {
+          "hrhb_posture": "consolidate"
+        },
         "aggression_affinity": -0.3,
         "risk_level": 0.2
       },
@@ -2335,23 +3060,47 @@
         "label": "Accept the Federation framework",
         "description": "The war with the Bosniaks has cost Herceg-Bosna more than it can bear. The Federation of Bosnia and Herzegovina offers a path to coexistence — and to Croatian recognition in Europe. Zagreb presses for it. The hardliners in Mostar will never forgive you.",
         "effects": [
-          { "kind": "alliance_change", "delta": 0.25 },
-          { "kind": "cohesion_change", "faction": "HRHB", "delta": -10 },
-          { "kind": "patron_pressure", "faction": "HRHB", "delta": -10 }
+          {
+            "kind": "alliance_change",
+            "delta": 0.25
+          },
+          {
+            "kind": "cohesion_change",
+            "faction": "HRHB",
+            "delta": -10
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "HRHB",
+            "delta": -10
+          }
         ],
         "dimension_shifts": [
-          { "faction": "HRHB", "dimension": "internal_cohesion", "delta": -20 },
-          { "faction": "HRHB", "dimension": "international_standing", "delta": 15 },
-          { "faction": "HRHB", "dimension": "patron_confidence", "delta": 15 }
+          {
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "delta": -20
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "international_standing",
+            "delta": 15
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "patron_confidence",
+            "delta": 15
+          }
         ],
-        "sets_flags": { "hrhb_posture": "federation" },
+        "sets_flags": {
+          "hrhb_posture": "federation"
+        },
         "available_from_fire": 3,
-        "aggression_affinity": -1.0,
+        "aggression_affinity": -1,
         "risk_level": 0.5
       }
     ]
   },
-
   {
     "id": "visit_to_front_rbih",
     "title": "Visit to the Front",
@@ -2365,31 +3114,81 @@
     "requires_player_response": true,
     "bot_response_logic": "strategic_weighted",
     "pressure": {
-      "base_rate": 1.0,
+      "base_rate": 1,
       "threshold": 13,
       "decay_rate": 0,
       "modifiers": [
-        { "condition": { "type": "morale_average_below", "faction": "RBiH", "threshold": 40 }, "rate_bonus": 1.5 },
-        { "condition": { "type": "dimension_below", "faction": "RBiH", "dimension": "internal_cohesion", "threshold": 30 }, "rate_bonus": 1.0 }
+        {
+          "condition": {
+            "type": "morale_average_below",
+            "faction": "RBiH",
+            "threshold": 40
+          },
+          "rate_bonus": 1.5
+        },
+        {
+          "condition": {
+            "type": "dimension_below",
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "threshold": 30
+          },
+          "rate_bonus": 1
+        }
       ]
     },
-    "recurrence": { "max_fires": 5, "cooldown_turns": 10, "escalation": "static" },
-    "effect": { "kind": "narrative", "text": "Arrangements are made for the presidential visit." },
-    "tags": ["presidential", "recurring", "visit_to_front"],
+    "recurrence": {
+      "max_fires": 5,
+      "cooldown_turns": 10,
+      "escalation": "static"
+    },
+    "effect": {
+      "kind": "narrative",
+      "text": "Arrangements are made for the presidential visit."
+    },
+    "tags": [
+      "presidential",
+      "recurring",
+      "visit_to_front"
+    ],
     "response_options": [
       {
         "id": "visit_sarajevo",
         "label": "Visit the Sarajevo front",
         "description": "You travel through the Butmir tunnel into besieged Sarajevo. The troops of the 1st Corps see their president sharing their siege. The international press is watching.",
         "effects": [
-          { "kind": "morale_change", "faction": "RBiH", "delta": 5 },
-          { "kind": "cohesion_change", "faction": "RBiH", "delta": 3 },
-          { "kind": "patron_pressure", "faction": "RBiH", "delta": -3 }
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 5
+          },
+          {
+            "kind": "cohesion_change",
+            "faction": "RBiH",
+            "delta": 3
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RBiH",
+            "delta": -3
+          }
         ],
         "dimension_shifts": [
-          { "faction": "RBiH", "dimension": "military_credibility", "delta": 5 },
-          { "faction": "RBiH", "dimension": "internal_cohesion", "delta": 5 },
-          { "faction": "RBiH", "dimension": "international_standing", "delta": 5 }
+          {
+            "faction": "RBiH",
+            "dimension": "military_credibility",
+            "delta": 5
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": 5
+          }
         ],
         "aggression_affinity": 0.2,
         "risk_level": 0.4
@@ -2399,13 +3198,34 @@
         "label": "Visit the eastern front — Tuzla and the corridor",
         "description": "You visit 2nd Corps in Tuzla and the corridor towns. The commanders brief you on the Drina situation. Your presence in the northeast sends a message about what you are willing to defend.",
         "effects": [
-          { "kind": "morale_change", "faction": "RBiH", "delta": 4 },
-          { "kind": "aggression_modifier", "faction": "RBiH", "delta": 0.05, "duration_turns": 6 },
-          { "kind": "supply_delta", "faction": "RBiH", "delta": -1 }
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 4
+          },
+          {
+            "kind": "aggression_modifier",
+            "faction": "RBiH",
+            "delta": 0.05,
+            "duration_turns": 6
+          },
+          {
+            "kind": "supply_delta",
+            "faction": "RBiH",
+            "delta": -1
+          }
         ],
         "dimension_shifts": [
-          { "faction": "RBiH", "dimension": "military_credibility", "delta": 5 },
-          { "faction": "RBiH", "dimension": "internal_cohesion", "delta": 5 }
+          {
+            "faction": "RBiH",
+            "dimension": "military_credibility",
+            "delta": 5
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          }
         ],
         "aggression_affinity": 0.5,
         "risk_level": 0.3
@@ -2415,13 +3235,33 @@
         "label": "Visit the Bihac pocket — 5th Corps",
         "description": "You visit General Dudakovic's isolated command. His men have held the Bihac pocket without relief or recognition for months. The visit costs logistics resources — but the 5th Corps has earned a presidential handshake.",
         "effects": [
-          { "kind": "morale_change", "faction": "RBiH", "delta": 6 },
-          { "kind": "cohesion_change", "faction": "RBiH", "delta": 2 },
-          { "kind": "supply_delta", "faction": "RBiH", "delta": -2 }
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 6
+          },
+          {
+            "kind": "cohesion_change",
+            "faction": "RBiH",
+            "delta": 2
+          },
+          {
+            "kind": "supply_delta",
+            "faction": "RBiH",
+            "delta": -2
+          }
         ],
         "dimension_shifts": [
-          { "faction": "RBiH", "dimension": "military_credibility", "delta": 5 },
-          { "faction": "RBiH", "dimension": "internal_cohesion", "delta": 5 }
+          {
+            "faction": "RBiH",
+            "dimension": "military_credibility",
+            "delta": 5
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          }
         ],
         "aggression_affinity": 0.3,
         "risk_level": 0.5
@@ -2431,12 +3271,28 @@
         "label": "Stay in Sarajevo — too much to manage",
         "description": "The diplomatic calendar is full. The UN is negotiating. The army will understand. You remain at the Presidency and conduct the visit through your chief of staff.",
         "effects": [
-          { "kind": "patron_pressure", "faction": "RBiH", "delta": -2 },
-          { "kind": "morale_change", "faction": "RBiH", "delta": -2 }
+          {
+            "kind": "patron_pressure",
+            "faction": "RBiH",
+            "delta": -2
+          },
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": -2
+          }
         ],
         "dimension_shifts": [
-          { "faction": "RBiH", "dimension": "military_credibility", "delta": -5 },
-          { "faction": "RBiH", "dimension": "negotiating_leverage", "delta": 3 }
+          {
+            "faction": "RBiH",
+            "dimension": "military_credibility",
+            "delta": -5
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": 3
+          }
         ],
         "aggression_affinity": -0.5,
         "risk_level": 0.1
@@ -2446,12 +3302,28 @@
         "label": "Visit with international press",
         "description": "You invite foreign journalists to accompany you. The visit becomes a media event — less about command presence, more about demonstrating the human cost of the siege to the world.",
         "effects": [
-          { "kind": "morale_change", "faction": "RBiH", "delta": 3 },
-          { "kind": "patron_pressure", "faction": "RBiH", "delta": -8 }
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 3
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RBiH",
+            "delta": -8
+          }
         ],
         "dimension_shifts": [
-          { "faction": "RBiH", "dimension": "international_standing", "delta": 10 },
-          { "faction": "RBiH", "dimension": "military_credibility", "delta": -3 }
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": 10
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "military_credibility",
+            "delta": -3
+          }
         ],
         "available_from_fire": 3,
         "aggression_affinity": -0.3,
@@ -2459,7 +3331,6 @@
       }
     ]
   },
-
   {
     "id": "visit_to_front_rs",
     "title": "Visit to the Front",
@@ -2473,29 +3344,71 @@
     "requires_player_response": true,
     "bot_response_logic": "strategic_weighted",
     "pressure": {
-      "base_rate": 1.0,
+      "base_rate": 1,
       "threshold": 13,
       "decay_rate": 0,
       "modifiers": [
-        { "condition": { "type": "morale_average_below", "faction": "RS", "threshold": 45 }, "rate_bonus": 1.5 },
-        { "condition": { "type": "dimension_below", "faction": "RS", "dimension": "internal_cohesion", "threshold": 30 }, "rate_bonus": 1.0 }
+        {
+          "condition": {
+            "type": "morale_average_below",
+            "faction": "RS",
+            "threshold": 45
+          },
+          "rate_bonus": 1.5
+        },
+        {
+          "condition": {
+            "type": "dimension_below",
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "threshold": 30
+          },
+          "rate_bonus": 1
+        }
       ]
     },
-    "recurrence": { "max_fires": 5, "cooldown_turns": 10, "escalation": "static" },
-    "effect": { "kind": "narrative", "text": "The presidential convoy is arranged." },
-    "tags": ["presidential", "recurring", "visit_to_front"],
+    "recurrence": {
+      "max_fires": 5,
+      "cooldown_turns": 10,
+      "escalation": "static"
+    },
+    "effect": {
+      "kind": "narrative",
+      "text": "The presidential convoy is arranged."
+    },
+    "tags": [
+      "presidential",
+      "recurring",
+      "visit_to_front"
+    ],
     "response_options": [
       {
         "id": "visit_posavina",
         "label": "Visit the Posavina corridor",
         "description": "You travel to the corridor — the lifeline connecting eastern and western Republika Srpska. The soldiers who hold this land know that everything depends on them.",
         "effects": [
-          { "kind": "morale_change", "faction": "RS", "delta": 5 },
-          { "kind": "cohesion_change", "faction": "RS", "delta": 3 }
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": 5
+          },
+          {
+            "kind": "cohesion_change",
+            "faction": "RS",
+            "delta": 3
+          }
         ],
         "dimension_shifts": [
-          { "faction": "RS", "dimension": "military_credibility", "delta": 5 },
-          { "faction": "RS", "dimension": "internal_cohesion", "delta": 5 }
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": 5
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          }
         ],
         "aggression_affinity": 0.3,
         "risk_level": 0.3
@@ -2505,14 +3418,39 @@
         "label": "Visit the Sarajevo siege lines — SRK positions",
         "description": "You visit the SRK positions overlooking the city. The symbolism is not lost on anyone — president and army, watching the capital of a state they do not recognize.",
         "effects": [
-          { "kind": "morale_change", "faction": "RS", "delta": 4 },
-          { "kind": "aggression_modifier", "faction": "RS", "delta": 0.05, "duration_turns": 6 },
-          { "kind": "patron_pressure", "faction": "RS", "delta": 3 }
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": 4
+          },
+          {
+            "kind": "aggression_modifier",
+            "faction": "RS",
+            "delta": 0.05,
+            "duration_turns": 6
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RS",
+            "delta": 3
+          }
         ],
         "dimension_shifts": [
-          { "faction": "RS", "dimension": "military_credibility", "delta": 5 },
-          { "faction": "RS", "dimension": "internal_cohesion", "delta": 5 },
-          { "faction": "RS", "dimension": "international_standing", "delta": -5 }
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": 5
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          },
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": -5
+          }
         ],
         "aggression_affinity": 0.5,
         "risk_level": 0.4
@@ -2522,13 +3460,33 @@
         "label": "Visit the Drina Corps area",
         "description": "You travel east to the Drina Corps. General Zivanovic's men hold the eastern front — Zepa, Gorazde, the enclaves. Your presence there is noted internationally.",
         "effects": [
-          { "kind": "morale_change", "faction": "RS", "delta": 5 },
-          { "kind": "humanitarian_impact", "faction": "RS", "war_crimes_delta": 1 }
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": 5
+          },
+          {
+            "kind": "humanitarian_impact",
+            "faction": "RS",
+            "war_crimes_delta": 1
+          }
         ],
         "dimension_shifts": [
-          { "faction": "RS", "dimension": "military_credibility", "delta": 5 },
-          { "faction": "RS", "dimension": "internal_cohesion", "delta": 5 },
-          { "faction": "RS", "dimension": "international_standing", "delta": -8 }
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": 5
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          },
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": -8
+          }
         ],
         "aggression_affinity": 0.4,
         "risk_level": 0.5
@@ -2538,12 +3496,28 @@
         "label": "Stay in Pale — governance demands it",
         "description": "The Assembly is in session. International contacts require your attention. The front will see you another time. Your staff relays your greetings to the corps commanders.",
         "effects": [
-          { "kind": "patron_pressure", "faction": "RS", "delta": -2 },
-          { "kind": "morale_change", "faction": "RS", "delta": -2 }
+          {
+            "kind": "patron_pressure",
+            "faction": "RS",
+            "delta": -2
+          },
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": -2
+          }
         ],
         "dimension_shifts": [
-          { "faction": "RS", "dimension": "military_credibility", "delta": -5 },
-          { "faction": "RS", "dimension": "negotiating_leverage", "delta": 3 }
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": -5
+          },
+          {
+            "faction": "RS",
+            "dimension": "negotiating_leverage",
+            "delta": 3
+          }
         ],
         "aggression_affinity": -0.5,
         "risk_level": 0.1
@@ -2553,12 +3527,28 @@
         "label": "Visit with international press",
         "description": "You invite foreign journalists to accompany you. The tour becomes a media opportunity — demonstrating confidence, normalcy, and RS authority over its territory.",
         "effects": [
-          { "kind": "morale_change", "faction": "RS", "delta": 3 },
-          { "kind": "patron_pressure", "faction": "RS", "delta": -5 }
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": 3
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RS",
+            "delta": -5
+          }
         ],
         "dimension_shifts": [
-          { "faction": "RS", "dimension": "international_standing", "delta": 8 },
-          { "faction": "RS", "dimension": "military_credibility", "delta": -3 }
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": 8
+          },
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": -3
+          }
         ],
         "available_from_fire": 3,
         "aggression_affinity": -0.2,
@@ -2566,7 +3556,6 @@
       }
     ]
   },
-
   {
     "id": "visit_to_front_hrhb",
     "title": "Visit to the Front",
@@ -2580,31 +3569,81 @@
     "requires_player_response": true,
     "bot_response_logic": "strategic_weighted",
     "pressure": {
-      "base_rate": 1.0,
+      "base_rate": 1,
       "threshold": 13,
       "decay_rate": 0,
       "modifiers": [
-        { "condition": { "type": "morale_average_below", "faction": "HRHB", "threshold": 40 }, "rate_bonus": 1.5 },
-        { "condition": { "type": "dimension_below", "faction": "HRHB", "dimension": "internal_cohesion", "threshold": 30 }, "rate_bonus": 1.0 }
+        {
+          "condition": {
+            "type": "morale_average_below",
+            "faction": "HRHB",
+            "threshold": 40
+          },
+          "rate_bonus": 1.5
+        },
+        {
+          "condition": {
+            "type": "dimension_below",
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "threshold": 30
+          },
+          "rate_bonus": 1
+        }
       ]
     },
-    "recurrence": { "max_fires": 5, "cooldown_turns": 10, "escalation": "static" },
-    "effect": { "kind": "narrative", "text": "The presidential tour of HVO positions is arranged." },
-    "tags": ["presidential", "recurring", "visit_to_front"],
+    "recurrence": {
+      "max_fires": 5,
+      "cooldown_turns": 10,
+      "escalation": "static"
+    },
+    "effect": {
+      "kind": "narrative",
+      "text": "The presidential tour of HVO positions is arranged."
+    },
+    "tags": [
+      "presidential",
+      "recurring",
+      "visit_to_front"
+    ],
     "response_options": [
       {
         "id": "visit_mostar_front",
         "label": "Visit the Mostar front",
         "description": "You tour HVO positions around the city. East Mostar is under blockade and your soldiers hold the western bank. The international press watches every step you take here.",
         "effects": [
-          { "kind": "morale_change", "faction": "HRHB", "delta": 5 },
-          { "kind": "cohesion_change", "faction": "HRHB", "delta": 3 },
-          { "kind": "patron_pressure", "faction": "HRHB", "delta": 2 }
+          {
+            "kind": "morale_change",
+            "faction": "HRHB",
+            "delta": 5
+          },
+          {
+            "kind": "cohesion_change",
+            "faction": "HRHB",
+            "delta": 3
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "HRHB",
+            "delta": 2
+          }
         ],
         "dimension_shifts": [
-          { "faction": "HRHB", "dimension": "military_credibility", "delta": 5 },
-          { "faction": "HRHB", "dimension": "internal_cohesion", "delta": 5 },
-          { "faction": "HRHB", "dimension": "international_standing", "delta": -5 }
+          {
+            "faction": "HRHB",
+            "dimension": "military_credibility",
+            "delta": 5
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "international_standing",
+            "delta": -5
+          }
         ],
         "aggression_affinity": 0.4,
         "risk_level": 0.4
@@ -2614,13 +3653,33 @@
         "label": "Visit central Bosnia — the embattled garrisons",
         "description": "You travel to the Vitez-Busovaca pocket, to Blaskic's battered command. The men holding central Bosnia fight with desperation and dwindling supplies. Your presence tells them they have not been abandoned.",
         "effects": [
-          { "kind": "morale_change", "faction": "HRHB", "delta": 6 },
-          { "kind": "cohesion_change", "faction": "HRHB", "delta": 2 },
-          { "kind": "supply_delta", "faction": "HRHB", "delta": -2 }
+          {
+            "kind": "morale_change",
+            "faction": "HRHB",
+            "delta": 6
+          },
+          {
+            "kind": "cohesion_change",
+            "faction": "HRHB",
+            "delta": 2
+          },
+          {
+            "kind": "supply_delta",
+            "faction": "HRHB",
+            "delta": -2
+          }
         ],
         "dimension_shifts": [
-          { "faction": "HRHB", "dimension": "military_credibility", "delta": 5 },
-          { "faction": "HRHB", "dimension": "internal_cohesion", "delta": 8 }
+          {
+            "faction": "HRHB",
+            "dimension": "military_credibility",
+            "delta": 5
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "delta": 8
+          }
         ],
         "aggression_affinity": 0.3,
         "risk_level": 0.5
@@ -2630,12 +3689,29 @@
         "label": "Visit HVO positions on the Posavina front",
         "description": "You tour HVO positions in the north — Orasje, the Sava River line. These fighters hold the northernmost HVO territory, pressed between the VRS and the Sava. They need to know Mostar has not forgotten them.",
         "effects": [
-          { "kind": "morale_change", "faction": "HRHB", "delta": 4 },
-          { "kind": "aggression_modifier", "faction": "HRHB", "delta": 0.05, "duration_turns": 6 }
+          {
+            "kind": "morale_change",
+            "faction": "HRHB",
+            "delta": 4
+          },
+          {
+            "kind": "aggression_modifier",
+            "faction": "HRHB",
+            "delta": 0.05,
+            "duration_turns": 6
+          }
         ],
         "dimension_shifts": [
-          { "faction": "HRHB", "dimension": "military_credibility", "delta": 5 },
-          { "faction": "HRHB", "dimension": "internal_cohesion", "delta": 5 }
+          {
+            "faction": "HRHB",
+            "dimension": "military_credibility",
+            "delta": 5
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          }
         ],
         "aggression_affinity": 0.4,
         "risk_level": 0.3
@@ -2645,12 +3721,28 @@
         "label": "Stay in Mostar — diplomatic contacts are urgent",
         "description": "The Zagreb line is active. The European monitors want a meeting. You remain in the capital and conduct the visit through your deputy commander. The front will understand.",
         "effects": [
-          { "kind": "patron_pressure", "faction": "HRHB", "delta": -3 },
-          { "kind": "morale_change", "faction": "HRHB", "delta": -2 }
+          {
+            "kind": "patron_pressure",
+            "faction": "HRHB",
+            "delta": -3
+          },
+          {
+            "kind": "morale_change",
+            "faction": "HRHB",
+            "delta": -2
+          }
         ],
         "dimension_shifts": [
-          { "faction": "HRHB", "dimension": "military_credibility", "delta": -5 },
-          { "faction": "HRHB", "dimension": "negotiating_leverage", "delta": 3 }
+          {
+            "faction": "HRHB",
+            "dimension": "military_credibility",
+            "delta": -5
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "negotiating_leverage",
+            "delta": 3
+          }
         ],
         "aggression_affinity": -0.5,
         "risk_level": 0.1
@@ -2660,12 +3752,28 @@
         "label": "Visit with international press",
         "description": "You invite European and American journalists. The tour is managed: show the HVO as defenders, show civilians on the Croatian side, avoid the detention camps. It is politics dressed as a front-line visit.",
         "effects": [
-          { "kind": "morale_change", "faction": "HRHB", "delta": 3 },
-          { "kind": "patron_pressure", "faction": "HRHB", "delta": -6 }
+          {
+            "kind": "morale_change",
+            "faction": "HRHB",
+            "delta": 3
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "HRHB",
+            "delta": -6
+          }
         ],
         "dimension_shifts": [
-          { "faction": "HRHB", "dimension": "international_standing", "delta": 8 },
-          { "faction": "HRHB", "dimension": "military_credibility", "delta": -3 }
+          {
+            "faction": "HRHB",
+            "dimension": "international_standing",
+            "delta": 8
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "military_credibility",
+            "delta": -3
+          }
         ],
         "available_from_fire": 3,
         "aggression_affinity": -0.3,

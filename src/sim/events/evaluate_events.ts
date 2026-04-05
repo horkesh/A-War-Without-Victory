@@ -244,7 +244,7 @@ export function evaluateEvents(
                 } else {
                     chosen = pickBotResponseV1(def.response_options, def.bot_response_logic, DEFAULT_BOT_COMMANDER);
                 }
-                applyEventEffects(state, chosen.effects);
+                applyEventEffects(state, chosen.effects ?? []);
                 // Apply flags and dimension shifts from the chosen response option
                 applyDefinitionFlags(state, chosen.sets_flags);
                 applyDefinitionDimensionShifts(state, chosen.dimension_shifts);

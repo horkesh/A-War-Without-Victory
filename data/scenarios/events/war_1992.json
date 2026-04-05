@@ -2,12 +2,23 @@
   {
     "id": "rs_strategic_goals",
     "title": "The Assembly Speaks",
-    "narrative": "The National Assembly has convened. Six strategic goals for the Serb people in Bosnia have been drafted: state separation, the Posavina corridor, the Drina valley border, the Una-Neretva border, the division of Sarajevo, and access to the sea. Your army commander has reviewed them. He warns the Assembly plainly: pursuing these goals \u2014 particularly the Drina corridor and Sarajevo \u2014 will require actions that constitute genocide. The Assembly awaits your decision.",
+    "narrative": "The National Assembly has convened. Six strategic goals for the Serb people in Bosnia have been drafted: state separation, the Posavina corridor, the Drina valley border, the Una-Neretva border, the division of Sarajevo, and access to the sea. Your army commander has reviewed them. He warns the Assembly plainly: pursuing these goals — particularly the Drina corridor and Sarajevo — will require actions that constitute genocide. The Assembly awaits your decision.",
     "category": "political",
-    "trigger": { "turn_min": 1, "turn_max": 3, "phase": "war" },
-    "pressure": { "base_rate": 5.0, "threshold": 5, "decay_rate": 0 },
+    "trigger": {
+      "turn_min": 1,
+      "turn_max": 3,
+      "phase": "war"
+    },
+    "pressure": {
+      "base_rate": 5,
+      "threshold": 5,
+      "decay_rate": 0
+    },
     "once": true,
-    "effect": { "kind": "narrative", "text": "The strategic goals are presented to the Assembly." },
+    "effect": {
+      "kind": "narrative",
+      "text": "The strategic goals are presented to the Assembly."
+    },
     "requires_player_response": true,
     "bot_response_logic": "historical",
     "response_options": [
@@ -16,14 +27,37 @@
         "label": "Adopt all six goals",
         "description": "Full offensive doctrine. All axes active. The Drina valley will be cleared. Sarajevo will be divided. Your commander's warning is noted and disregarded.",
         "effects": [
-          { "kind": "morale_change", "faction": "RS", "delta": 5 },
-          { "kind": "aggression_modifier", "faction": "RS", "delta": 0.15, "duration_turns": 52 }
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": 5
+          },
+          {
+            "kind": "aggression_modifier",
+            "faction": "RS",
+            "delta": 0.15,
+            "duration_turns": 52
+          }
         ],
-        "sets_flags": { "rs_strategic_goals": "all_six" },
+        "sets_flags": {
+          "rs_strategic_goals": "all_six"
+        },
         "dimension_shifts": [
-          { "faction": "RS", "dimension": "military_credibility", "delta": 10 },
-          { "faction": "RS", "dimension": "internal_cohesion", "delta": 10 },
-          { "faction": "RS", "dimension": "international_standing", "delta": -5 }
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": 10
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": 10
+          },
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": -5
+          }
         ],
         "aggression_affinity": 0.6,
         "risk_level": 0.6
@@ -31,16 +65,38 @@
       {
         "id": "selective",
         "label": "Adopt goals selectively",
-        "description": "Secure the corridor and protect Serb communities. The Drina valley \u2014 restrain operations. Sarajevo \u2014 encircle but do not destroy. Your commander's warning shapes the strategy.",
+        "description": "Secure the corridor and protect Serb communities. The Drina valley — restrain operations. Sarajevo — encircle but do not destroy. Your commander's warning shapes the strategy.",
         "effects": [
-          { "kind": "morale_change", "faction": "RS", "delta": -3 }
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": -3
+          }
         ],
-        "sets_flags": { "rs_strategic_goals": "selective" },
+        "sets_flags": {
+          "rs_strategic_goals": "selective"
+        },
         "dimension_shifts": [
-          { "faction": "RS", "dimension": "military_credibility", "delta": -5 },
-          { "faction": "RS", "dimension": "internal_cohesion", "delta": -15 },
-          { "faction": "RS", "dimension": "international_standing", "delta": 15 },
-          { "faction": "RS", "dimension": "territorial_legitimacy", "delta": 10 }
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": -5
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": -15
+          },
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": 15
+          },
+          {
+            "faction": "RS",
+            "dimension": "territorial_legitimacy",
+            "delta": 10
+          }
         ],
         "aggression_affinity": -0.5,
         "risk_level": 0.3
@@ -48,19 +104,46 @@
       {
         "id": "aggressive",
         "label": "Pursue with maximum force",
-        "description": "All six goals at maximum intensity. Your commander warned of genocide. You heard him. Proceed anyway \u2014 and make it swift. The world will condemn you. But the world is not here.",
+        "description": "All six goals at maximum intensity. Your commander warned of genocide. You heard him. Proceed anyway — and make it swift. The world will condemn you. But the world is not here.",
         "effects": [
-          { "kind": "morale_change", "faction": "RS", "delta": 8 },
-          { "kind": "aggression_modifier", "faction": "RS", "delta": 0.25, "duration_turns": 26 },
-          { "kind": "humanitarian_impact", "faction": "RS", "war_crimes_delta": 2 }
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": 8
+          },
+          {
+            "kind": "aggression_modifier",
+            "faction": "RS",
+            "delta": 0.25,
+            "duration_turns": 26
+          },
+          {
+            "kind": "humanitarian_impact",
+            "faction": "RS",
+            "war_crimes_delta": 2
+          }
         ],
-        "sets_flags": { "rs_strategic_goals": "aggressive" },
+        "sets_flags": {
+          "rs_strategic_goals": "aggressive"
+        },
         "dimension_shifts": [
-          { "faction": "RS", "dimension": "military_credibility", "delta": 15 },
-          { "faction": "RS", "dimension": "internal_cohesion", "delta": 15 },
-          { "faction": "RS", "dimension": "international_standing", "delta": -15 }
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": 15
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": 15
+          },
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": -15
+          }
         ],
-        "aggression_affinity": 1.0,
+        "aggression_affinity": 1,
         "risk_level": 0.9
       }
     ],
@@ -69,12 +152,23 @@
   {
     "id": "rbih_state_identity",
     "title": "What Is Bosnia?",
-    "narrative": "Your Presidency must declare its vision for the state. The platform drafted in May declares a multi-ethnic, civic republic where all citizens are equal regardless of ethnicity. But the war is testing that ideal. Serb and Croat soldiers serve in your army \u2014 for now. Some in your party argue that this is a Bosniak struggle, not a civic one. The international community watches closely. Your declaration will shape who fights for you, who supports you, and what you are fighting for.",
+    "narrative": "Your Presidency must declare its vision for the state. The platform drafted in May declares a multi-ethnic, civic republic where all citizens are equal regardless of ethnicity. But the war is testing that ideal. Serb and Croat soldiers serve in your army — for now. Some in your party argue that this is a Bosniak struggle, not a civic one. The international community watches closely. Your declaration will shape who fights for you, who supports you, and what you are fighting for.",
     "category": "political",
-    "trigger": { "turn_min": 2, "turn_max": 5, "phase": "war" },
-    "pressure": { "base_rate": 3.0, "threshold": 6, "decay_rate": 0 },
+    "trigger": {
+      "turn_min": 2,
+      "turn_max": 5,
+      "phase": "war"
+    },
+    "pressure": {
+      "base_rate": 3,
+      "threshold": 6,
+      "decay_rate": 0
+    },
     "once": true,
-    "effect": { "kind": "narrative", "text": "The Presidency platform is debated." },
+    "effect": {
+      "kind": "narrative",
+      "text": "The Presidency platform is debated."
+    },
     "requires_player_response": true,
     "bot_response_logic": "historical",
     "response_options": [
@@ -83,13 +177,31 @@
         "label": "Civic multi-ethnic republic",
         "description": "One republic, all citizens equal. Serbs and Croats serve alongside Bosniaks. The world respects this. Your nationalists resent it.",
         "effects": [
-          { "kind": "morale_change", "faction": "RBiH", "delta": 3 }
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 3
+          }
         ],
-        "sets_flags": { "rbih_state_identity": "civic" },
+        "sets_flags": {
+          "rbih_state_identity": "civic"
+        },
         "dimension_shifts": [
-          { "faction": "RBiH", "dimension": "international_standing", "delta": 15 },
-          { "faction": "RBiH", "dimension": "internal_cohesion", "delta": -5 },
-          { "faction": "RBiH", "dimension": "negotiating_leverage", "delta": 10 }
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": 15
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": -5
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": 10
+          }
         ],
         "aggression_affinity": -0.3,
         "risk_level": 0.3
@@ -97,16 +209,37 @@
       {
         "id": "bosniak_national",
         "label": "Bosniak national state",
-        "description": "This is our land and our fight. Those who stand against us are not our citizens. Clear identity, clear purpose \u2014 but you lose minority soldiers and international sympathy.",
+        "description": "This is our land and our fight. Those who stand against us are not our citizens. Clear identity, clear purpose — but you lose minority soldiers and international sympathy.",
         "effects": [
-          { "kind": "morale_change", "faction": "RBiH", "delta": 5 },
-          { "kind": "alliance_change", "delta": -0.1 }
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 5
+          },
+          {
+            "kind": "alliance_change",
+            "delta": -0.1
+          }
         ],
-        "sets_flags": { "rbih_state_identity": "bosniak_national" },
+        "sets_flags": {
+          "rbih_state_identity": "bosniak_national"
+        },
         "dimension_shifts": [
-          { "faction": "RBiH", "dimension": "internal_cohesion", "delta": 15 },
-          { "faction": "RBiH", "dimension": "international_standing", "delta": -20 },
-          { "faction": "RBiH", "dimension": "negotiating_leverage", "delta": -10 }
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": 15
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": -20
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": -10
+          }
         ],
         "aggression_affinity": 0.5,
         "risk_level": 0.6
@@ -116,14 +249,28 @@
         "label": "Multi-ethnic in word, Bosniak in deed",
         "description": "Maintain the civic rhetoric for the cameras. Build Bosniak institutions quietly. If the gap between words and reality is ever exposed, the damage will be worse than honesty.",
         "effects": [
-          { "kind": "morale_change", "faction": "RBiH", "delta": 2 }
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 2
+          }
         ],
-        "sets_flags": { "rbih_state_identity": "pragmatic" },
+        "sets_flags": {
+          "rbih_state_identity": "pragmatic"
+        },
         "dimension_shifts": [
-          { "faction": "RBiH", "dimension": "internal_cohesion", "delta": 5 },
-          { "faction": "RBiH", "dimension": "international_standing", "delta": 5 }
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": 5
+          }
         ],
-        "aggression_affinity": 0.0,
+        "aggression_affinity": 0,
         "risk_level": 0.4
       }
     ],
@@ -132,12 +279,23 @@
   {
     "id": "hrhb_political_goal",
     "title": "What Is Herceg-Bosna?",
-    "narrative": "Zagreb is on the line. Your patron's directive is clear: Herceg-Bosna exists to secure Croat territory in Bosnia, with a view toward eventual unification with Croatia. But on the ground, your HVO fights alongside the ARBiH against Serb forces. Some of your commanders \u2014 notably Kljuic \u2014 argue the Croat future lies in a unified Bosnia, not a separate statelet. Your patron disagrees. Choose your path: it will define your alliances, your wars, and your fate at the negotiating table.",
+    "narrative": "Zagreb is on the line. Your patron's directive is clear: Herceg-Bosna exists to secure Croat territory in Bosnia, with a view toward eventual unification with Croatia. But on the ground, your HVO fights alongside the ARBiH against Serb forces. Some of your commanders — notably Kljuic — argue the Croat future lies in a unified Bosnia, not a separate statelet. Your patron disagrees. Choose your path: it will define your alliances, your wars, and your fate at the negotiating table.",
     "category": "political",
-    "trigger": { "turn_min": 3, "turn_max": 7, "phase": "war" },
-    "pressure": { "base_rate": 2.5, "threshold": 5, "decay_rate": 0 },
+    "trigger": {
+      "turn_min": 3,
+      "turn_max": 7,
+      "phase": "war"
+    },
+    "pressure": {
+      "base_rate": 2.5,
+      "threshold": 5,
+      "decay_rate": 0
+    },
     "once": true,
-    "effect": { "kind": "narrative", "text": "The political direction of Herceg-Bosna is debated." },
+    "effect": {
+      "kind": "narrative",
+      "text": "The political direction of Herceg-Bosna is debated."
+    },
     "requires_player_response": true,
     "bot_response_logic": "historical",
     "response_options": [
@@ -146,33 +304,83 @@
         "label": "United front with ARBiH",
         "description": "We are Croats and Bosnians. Our fight is against Greater Serbia, alongside our allies. Zagreb will be furious. Tudjman may cut support. But the combined front against the VRS will be formidable.",
         "effects": [
-          { "kind": "alliance_change", "delta": 0.15 },
-          { "kind": "morale_change", "faction": "HRHB", "delta": -3 }
+          {
+            "kind": "alliance_change",
+            "delta": 0.15
+          },
+          {
+            "kind": "morale_change",
+            "faction": "HRHB",
+            "delta": -3
+          }
         ],
-        "sets_flags": { "hrhb_political_goal": "united_front" },
+        "sets_flags": {
+          "hrhb_political_goal": "united_front"
+        },
         "dimension_shifts": [
-          { "faction": "HRHB", "dimension": "patron_confidence", "delta": -25 },
-          { "faction": "HRHB", "dimension": "international_standing", "delta": 15 },
-          { "faction": "HRHB", "dimension": "internal_cohesion", "delta": -10 },
-          { "faction": "RBiH", "dimension": "internal_cohesion", "delta": 5 }
+          {
+            "faction": "HRHB",
+            "dimension": "patron_confidence",
+            "delta": -25
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "international_standing",
+            "delta": 15
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "delta": -10
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          }
         ],
         "aggression_affinity": -0.7,
         "risk_level": 0.4
       },
       {
         "id": "croat_republic",
-        "label": "Croat republic \u2014 follow Zagreb",
+        "label": "Croat republic — follow Zagreb",
         "description": "Herceg-Bosna is a Croat political entity. We will control our territory along the old Banovina borders. Zagreb provides arms, officers, and purpose. The Bosniaks will become adversaries.",
         "effects": [
-          { "kind": "alliance_change", "delta": -0.15 },
-          { "kind": "morale_change", "faction": "HRHB", "delta": 5 }
+          {
+            "kind": "alliance_change",
+            "delta": -0.15
+          },
+          {
+            "kind": "morale_change",
+            "faction": "HRHB",
+            "delta": 5
+          }
         ],
-        "sets_flags": { "hrhb_political_goal": "croat_republic" },
+        "sets_flags": {
+          "hrhb_political_goal": "croat_republic"
+        },
         "dimension_shifts": [
-          { "faction": "HRHB", "dimension": "patron_confidence", "delta": 15 },
-          { "faction": "HRHB", "dimension": "international_standing", "delta": -10 },
-          { "faction": "HRHB", "dimension": "internal_cohesion", "delta": 10 },
-          { "faction": "HRHB", "dimension": "military_credibility", "delta": 5 }
+          {
+            "faction": "HRHB",
+            "dimension": "patron_confidence",
+            "delta": 15
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "international_standing",
+            "delta": -10
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "delta": 10
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "military_credibility",
+            "delta": 5
+          }
         ],
         "aggression_affinity": 0.7,
         "risk_level": 0.7
@@ -180,16 +388,30 @@
       {
         "id": "strategic_ambiguity",
         "label": "Cooperate publicly, prepare quietly",
-        "description": "Fight the Serbs together. Build Croat institutions behind the scenes. Zagreb tolerates it. The alliance holds \u2014 for now. When it breaks, and it will, the betrayal will cost you double.",
+        "description": "Fight the Serbs together. Build Croat institutions behind the scenes. Zagreb tolerates it. The alliance holds — for now. When it breaks, and it will, the betrayal will cost you double.",
         "effects": [
-          { "kind": "morale_change", "faction": "HRHB", "delta": 2 }
+          {
+            "kind": "morale_change",
+            "faction": "HRHB",
+            "delta": 2
+          }
         ],
-        "sets_flags": { "hrhb_political_goal": "strategic_ambiguity" },
+        "sets_flags": {
+          "hrhb_political_goal": "strategic_ambiguity"
+        },
         "dimension_shifts": [
-          { "faction": "HRHB", "dimension": "patron_confidence", "delta": 5 },
-          { "faction": "HRHB", "dimension": "internal_cohesion", "delta": 5 }
+          {
+            "faction": "HRHB",
+            "dimension": "patron_confidence",
+            "delta": 5
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          }
         ],
-        "aggression_affinity": 0.0,
+        "aggression_affinity": 0,
         "risk_level": 0.5
       }
     ],
@@ -200,101 +422,286 @@
     "title": "UN Arms Embargo Strangles Bosnia",
     "narrative": "The UN arms embargo, originally imposed on all of Yugoslavia, disproportionately impacts the fledgling Bosnian government. While the VRS inherits vast JNA stockpiles and the HVO receives supplies from Croatia, the ARBiH faces severe weapons shortages across all fronts.",
     "category": "military",
-    "trigger": { "turn_min": 3, "turn_max": 6, "phase": "war" },
+    "trigger": {
+      "turn_min": 3,
+      "turn_max": 6,
+      "phase": "war"
+    },
     "once": true,
-    "effect": { "kind": "supply_delta", "faction": "RBiH", "delta": -10 },
+    "effect": {
+      "kind": "supply_delta",
+      "faction": "RBiH",
+      "delta": -10
+    },
     "effects": [
-      { "kind": "narrative", "text": "The UN arms embargo leaves the ARBiH critically short of weapons and ammunition." }
+      {
+        "kind": "narrative",
+        "text": "The UN arms embargo leaves the ARBiH critically short of weapons and ammunition."
+      }
     ],
-    "pressure": { "base_rate": 3.0, "threshold": 3, "decay_rate": 0.5 },
+    "pressure": {
+      "base_rate": 3,
+      "threshold": 3,
+      "decay_rate": 0.5
+    },
     "dimension_shifts": [
-      { "faction": "RBiH", "dimension": "military_credibility", "delta": -10 },
-      { "faction": "RBiH", "dimension": "international_standing", "delta": 5 }
+      {
+        "faction": "RBiH",
+        "dimension": "military_credibility",
+        "delta": -10
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "international_standing",
+        "delta": 5
+      }
     ],
-    "sets_flags": { "arms_embargo_active": true }
+    "sets_flags": {
+      "arms_embargo_active": true
+    }
   },
   {
     "id": "battle_of_the_barracks_sarajevo",
-    "title": "Battle of the Barracks \u2014 Sarajevo",
-    "narrative": "TDF units and Green Berets storm JNA barracks across Sarajevo. The Mar\u0161al Tito barracks and Viktor Bubanj complex are seized after fierce fighting. Tanks, APCs, and artillery pieces are captured \u2014 the first heavy weapons in ARBiH hands. JNA soldiers are taken prisoner. Belgrade vows retaliation.",
+    "title": "Battle of the Barracks — Sarajevo",
+    "narrative": "TDF units and Green Berets storm JNA barracks across Sarajevo. The Maršal Tito barracks and Viktor Bubanj complex are seized after fierce fighting. Tanks, APCs, and artillery pieces are captured — the first heavy weapons in ARBiH hands. JNA soldiers are taken prisoner. Belgrade vows retaliation.",
     "category": "military",
     "trigger": {
-      "turn_min": 4, "turn_max": 6, "phase": "war",
-      "condition": { "type": "faction_controls_municipality", "faction": "RBiH", "municipality": "novo_sarajevo", "threshold": 0.3 }
+      "turn_min": 4,
+      "turn_max": 6,
+      "phase": "war",
+      "condition": {
+        "type": "faction_controls_municipality",
+        "faction": "RBiH",
+        "municipality": "novo_sarajevo",
+        "threshold": 0.3
+      }
     },
     "once": true,
-    "effect": { "kind": "equipment_grant", "faction": "RBiH", "tanks": 4, "artillery": 8, "target_municipality": "novo_sarajevo" },
+    "effect": {
+      "kind": "equipment_grant",
+      "faction": "RBiH",
+      "tanks": 4,
+      "artillery": 8,
+      "target_municipality": "novo_sarajevo"
+    },
     "effects": [
-      { "kind": "supply_delta", "faction": "RBiH", "delta": 10 },
-      { "kind": "morale_change", "faction": "RBiH", "delta": 5 },
-      { "kind": "aggression_modifier", "faction": "RS", "delta": 0.15, "duration_turns": 8 },
-      { "kind": "patron_pressure", "faction": "RBiH", "delta": 5 },
-      { "kind": "humanitarian_impact", "faction": "RBiH", "war_crimes_delta": 1 },
-      { "kind": "narrative", "text": "JNA soldiers killed during the seizure provoke international condemnation. VRS commanders vow to avenge the barracks." }
+      {
+        "kind": "supply_delta",
+        "faction": "RBiH",
+        "delta": 10
+      },
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 5
+      },
+      {
+        "kind": "aggression_modifier",
+        "faction": "RS",
+        "delta": 0.15,
+        "duration_turns": 8
+      },
+      {
+        "kind": "patron_pressure",
+        "faction": "RBiH",
+        "delta": 5
+      },
+      {
+        "kind": "humanitarian_impact",
+        "faction": "RBiH",
+        "war_crimes_delta": 1
+      },
+      {
+        "kind": "narrative",
+        "text": "JNA soldiers killed during the seizure provoke international condemnation. VRS commanders vow to avenge the barracks."
+      }
     ],
-    "dimension_shifts": [{ "faction": "RBiH", "dimension": "military_credibility", "delta": 5 }],
-    "sets_flags": { "barracks_sarajevo_seized": true }
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "military_credibility",
+        "delta": 5
+      }
+    ],
+    "sets_flags": {
+      "barracks_sarajevo_seized": true
+    }
   },
   {
     "id": "battle_of_the_barracks_tuzla",
-    "title": "Battle of the Barracks \u2014 Tuzla",
-    "narrative": "The Tuzla column incident: JNA's 92nd Motorized Brigade is ambushed on Br\u010danska Malta while withdrawing from the city. In the chaos, TDF forces seize the barracks complex with its armored vehicles and artillery depot. Over 50 JNA soldiers are killed \u2014 the bloodiest barracks seizure in Bosnia. The captured equipment transforms 2nd Corps capability.",
+    "title": "Battle of the Barracks — Tuzla",
+    "narrative": "The Tuzla column incident: JNA's 92nd Motorized Brigade is ambushed on Brčanska Malta while withdrawing from the city. In the chaos, TDF forces seize the barracks complex with its armored vehicles and artillery depot. Over 50 JNA soldiers are killed — the bloodiest barracks seizure in Bosnia. The captured equipment transforms 2nd Corps capability.",
     "category": "military",
     "trigger": {
-      "turn_min": 4, "turn_max": 6, "phase": "war",
-      "condition": { "type": "faction_controls_municipality", "faction": "RBiH", "municipality": "tuzla", "threshold": 0.3 }
+      "turn_min": 4,
+      "turn_max": 6,
+      "phase": "war",
+      "condition": {
+        "type": "faction_controls_municipality",
+        "faction": "RBiH",
+        "municipality": "tuzla",
+        "threshold": 0.3
+      }
     },
     "once": true,
-    "effect": { "kind": "equipment_grant", "faction": "RBiH", "tanks": 6, "artillery": 10, "target_municipality": "tuzla" },
+    "effect": {
+      "kind": "equipment_grant",
+      "faction": "RBiH",
+      "tanks": 6,
+      "artillery": 10,
+      "target_municipality": "tuzla"
+    },
     "effects": [
-      { "kind": "supply_delta", "faction": "RBiH", "delta": 15 },
-      { "kind": "morale_change", "faction": "RBiH", "delta": 8 },
-      { "kind": "aggression_modifier", "faction": "RS", "delta": 0.20, "duration_turns": 10 },
-      { "kind": "patron_pressure", "faction": "RBiH", "delta": 10 },
-      { "kind": "humanitarian_impact", "faction": "RBiH", "war_crimes_delta": 2 },
-      { "kind": "control_change", "faction": "RBiH", "osids": ["op:tuzla:simin_han_2"] },
-      { "kind": "narrative", "text": "The Br\u010danska Malta ambush kills over 50 JNA soldiers. Belgrade and the international community condemn the attack. TDF forces secure the Simin Han barracks complex. VRS high command redirects forces toward the Tuzla corridor." }
+      {
+        "kind": "supply_delta",
+        "faction": "RBiH",
+        "delta": 15
+      },
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 8
+      },
+      {
+        "kind": "aggression_modifier",
+        "faction": "RS",
+        "delta": 0.2,
+        "duration_turns": 10
+      },
+      {
+        "kind": "patron_pressure",
+        "faction": "RBiH",
+        "delta": 10
+      },
+      {
+        "kind": "humanitarian_impact",
+        "faction": "RBiH",
+        "war_crimes_delta": 2
+      },
+      {
+        "kind": "control_change",
+        "faction": "RBiH",
+        "osids": [
+          "op:tuzla:simin_han_2"
+        ]
+      },
+      {
+        "kind": "narrative",
+        "text": "The Brčanska Malta ambush kills over 50 JNA soldiers. Belgrade and the international community condemn the attack. TDF forces secure the Simin Han barracks complex. VRS high command redirects forces toward the Tuzla corridor."
+      }
     ],
-    "dimension_shifts": [{ "faction": "RBiH", "dimension": "military_credibility", "delta": 5 }],
-    "sets_flags": { "barracks_tuzla_seized": true }
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "military_credibility",
+        "delta": 5
+      }
+    ],
+    "sets_flags": {
+      "barracks_tuzla_seized": true
+    }
   },
   {
     "id": "battle_of_the_barracks_zenica",
-    "title": "Battle of the Barracks \u2014 Zenica",
+    "title": "Battle of the Barracks — Zenica",
     "narrative": "ARBiH forces seize the JNA barracks in Zenica, capturing artillery pieces and ammunition stores. The Zenica garrison, weakened by Bosniak desertions, offers limited resistance. The captured equipment is distributed to 3rd Corps formations defending central Bosnia.",
     "category": "military",
     "trigger": {
-      "turn_min": 4, "turn_max": 6, "phase": "war",
-      "condition": { "type": "faction_controls_municipality", "faction": "RBiH", "municipality": "zenica", "threshold": 0.3 }
+      "turn_min": 4,
+      "turn_max": 6,
+      "phase": "war",
+      "condition": {
+        "type": "faction_controls_municipality",
+        "faction": "RBiH",
+        "municipality": "zenica",
+        "threshold": 0.3
+      }
     },
     "once": true,
-    "effect": { "kind": "equipment_grant", "faction": "RBiH", "tanks": 2, "artillery": 5, "target_municipality": "zenica" },
+    "effect": {
+      "kind": "equipment_grant",
+      "faction": "RBiH",
+      "tanks": 2,
+      "artillery": 5,
+      "target_municipality": "zenica"
+    },
     "effects": [
-      { "kind": "supply_delta", "faction": "RBiH", "delta": 8 },
-      { "kind": "morale_change", "faction": "RBiH", "delta": 3 },
-      { "kind": "narrative", "text": "3rd Corps inherits JNA artillery from the Zenica garrison. Central Bosnia defenses are strengthened." }
+      {
+        "kind": "supply_delta",
+        "faction": "RBiH",
+        "delta": 8
+      },
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 3
+      },
+      {
+        "kind": "narrative",
+        "text": "3rd Corps inherits JNA artillery from the Zenica garrison. Central Bosnia defenses are strengthened."
+      }
     ],
-    "dimension_shifts": [{ "faction": "RBiH", "dimension": "military_credibility", "delta": 5 }],
-    "sets_flags": { "barracks_zenica_seized": true }
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "military_credibility",
+        "delta": 5
+      }
+    ],
+    "sets_flags": {
+      "barracks_zenica_seized": true
+    }
   },
   {
     "id": "battle_of_the_barracks_visoko",
-    "title": "Battle of the Barracks \u2014 Visoko",
+    "title": "Battle of the Barracks — Visoko",
     "narrative": "The small JNA depot at Visoko is overrun by local TDF. A handful of armored vehicles and mortar tubes are captured. The symbolic victory boosts morale among defenders of the Sarajevo approaches.",
     "category": "military",
     "trigger": {
-      "turn_min": 4, "turn_max": 6, "phase": "war",
-      "condition": { "type": "faction_controls_municipality", "faction": "RBiH", "municipality": "visoko", "threshold": 0.3 }
+      "turn_min": 4,
+      "turn_max": 6,
+      "phase": "war",
+      "condition": {
+        "type": "faction_controls_municipality",
+        "faction": "RBiH",
+        "municipality": "visoko",
+        "threshold": 0.3
+      }
     },
     "once": true,
-    "effect": { "kind": "equipment_grant", "faction": "RBiH", "tanks": 1, "artillery": 3, "target_municipality": "visoko" },
+    "effect": {
+      "kind": "equipment_grant",
+      "faction": "RBiH",
+      "tanks": 1,
+      "artillery": 3,
+      "target_municipality": "visoko"
+    },
     "effects": [
-      { "kind": "supply_delta", "faction": "RBiH", "delta": 5 },
-      { "kind": "morale_change", "faction": "RBiH", "delta": 2 },
-      { "kind": "narrative", "text": "Local TDF forces seize the Visoko depot. A few tanks and mortars join the defense of the Sarajevo corridor." }
+      {
+        "kind": "supply_delta",
+        "faction": "RBiH",
+        "delta": 5
+      },
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 2
+      },
+      {
+        "kind": "narrative",
+        "text": "Local TDF forces seize the Visoko depot. A few tanks and mortars join the defense of the Sarajevo corridor."
+      }
     ],
-    "dimension_shifts": [{ "faction": "RBiH", "dimension": "military_credibility", "delta": 5 }],
-    "sets_flags": { "barracks_visoko_seized": true }
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "military_credibility",
+        "delta": 5
+      }
+    ],
+    "sets_flags": {
+      "barracks_visoko_seized": true
+    }
   },
   {
     "id": "sarajevo_siege_begins_1992",
@@ -302,69 +709,183 @@
     "narrative": "The SRK tightens its grip around Sarajevo as artillery bombardment from surrounding hills intensifies. The city's 350,000 residents face daily shelling, sniper fire, and the severing of water and electricity supplies. The siege becomes the longest in modern European warfare.",
     "category": "military",
     "trigger": {
-      "turn_min": 4, "turn_max": 10, "phase": "war",
-      "condition": { "type": "territory_percentage", "faction": "RS", "comparator": "above", "threshold": 0.45 }
+      "turn_min": 4,
+      "turn_max": 10,
+      "phase": "war",
+      "condition": {
+        "type": "territory_percentage",
+        "faction": "RS",
+        "comparator": "above",
+        "threshold": 0.45
+      }
     },
     "once": true,
-    "effect": { "kind": "narrative", "text": "Sarajevo is encircled. The SRK begins systematic bombardment from positions on the surrounding hills." },
+    "effect": {
+      "kind": "narrative",
+      "text": "Sarajevo is encircled. The SRK begins systematic bombardment from positions on the surrounding hills."
+    },
     "effects": [
-      { "kind": "humanitarian_impact", "faction": "RS", "war_crimes_delta": 3 },
-      { "kind": "patron_pressure", "faction": "RS", "delta": 15 }
+      {
+        "kind": "humanitarian_impact",
+        "faction": "RS",
+        "war_crimes_delta": 3
+      },
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": 15
+      }
     ],
-    "pressure": { "base_rate": 2.0, "threshold": 4, "decay_rate": 0.3 },
+    "pressure": {
+      "base_rate": 2,
+      "threshold": 4,
+      "decay_rate": 0.3
+    },
     "dimension_shifts": [
-      { "faction": "RS", "dimension": "international_standing", "delta": -15 },
-      { "faction": "RBiH", "dimension": "international_standing", "delta": 10 }
+      {
+        "faction": "RS",
+        "dimension": "international_standing",
+        "delta": -15
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "international_standing",
+        "delta": 10
+      }
     ],
-    "sets_flags": { "sarajevo_siege_active": true }
+    "sets_flags": {
+      "sarajevo_siege_active": true
+    }
   },
   {
     "id": "jna_withdrawal_1992",
     "title": "JNA Forces Begin Withdrawal from Bosnia",
     "narrative": "The Yugoslav People's Army formally announces its withdrawal from Bosnia-Herzegovina. In practice, Bosnian Serb personnel simply change insignia, and massive quantities of heavy weapons, ammunition depots, and military infrastructure are transferred directly to the newly formed VRS.",
     "category": "military",
-    "trigger": { "turn_min": 5, "turn_max": 5, "phase": "war" },
+    "trigger": {
+      "turn_min": 5,
+      "turn_max": 5,
+      "phase": "war"
+    },
     "once": true,
-    "effect": { "kind": "supply_delta", "faction": "RS", "delta": 20 },
+    "effect": {
+      "kind": "supply_delta",
+      "faction": "RS",
+      "delta": 20
+    },
     "effects": [
-      { "kind": "morale_change", "faction": "RBiH", "delta": -5 },
-      { "kind": "narrative", "text": "The JNA formally withdraws from Bosnia. Equipment, bases, and ammunition stores are left to the VRS." }
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": -5
+      },
+      {
+        "kind": "narrative",
+        "text": "The JNA formally withdraws from Bosnia. Equipment, bases, and ammunition stores are left to the VRS."
+      }
     ],
     "pressure": {
-      "base_rate": 3.0, "threshold": 5, "decay_rate": 0,
+      "base_rate": 3,
+      "threshold": 5,
+      "decay_rate": 0,
       "modifiers": [
-        { "condition": { "type": "flag_equals", "flag": "barracks_sarajevo_seized", "value": true }, "rate_bonus": 1.0 },
-        { "condition": { "type": "flag_equals", "flag": "barracks_tuzla_seized", "value": true }, "rate_bonus": 1.0 },
-        { "condition": { "type": "flag_equals", "flag": "barracks_zenica_seized", "value": true }, "rate_bonus": 1.0 },
-        { "condition": { "type": "flag_equals", "flag": "barracks_visoko_seized", "value": true }, "rate_bonus": 1.0 }
+        {
+          "condition": {
+            "type": "flag_equals",
+            "flag": "barracks_sarajevo_seized",
+            "value": true
+          },
+          "rate_bonus": 1
+        },
+        {
+          "condition": {
+            "type": "flag_equals",
+            "flag": "barracks_tuzla_seized",
+            "value": true
+          },
+          "rate_bonus": 1
+        },
+        {
+          "condition": {
+            "type": "flag_equals",
+            "flag": "barracks_zenica_seized",
+            "value": true
+          },
+          "rate_bonus": 1
+        },
+        {
+          "condition": {
+            "type": "flag_equals",
+            "flag": "barracks_visoko_seized",
+            "value": true
+          },
+          "rate_bonus": 1
+        }
       ]
     },
-    "dimension_shifts": [{ "faction": "RS", "dimension": "military_credibility", "delta": 15 }],
-    "sets_flags": { "jna_withdrawn": true }
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "military_credibility",
+        "delta": 15
+      }
+    ],
+    "sets_flags": {
+      "jna_withdrawn": true
+    }
   },
   {
     "id": "mostar_liberation_1992",
     "title": "Mostar Liberated",
-    "narrative": "Joint HVO-ARBiH forces have pushed the JNA out of Mostar. The city is free \u2014 but the question of who controls it is already causing friction between your allies. The east bank is mostly Bosniak. The west bank is mostly Croat. The liberation was shared. The city may not be.",
+    "narrative": "Joint HVO-ARBiH forces have pushed the JNA out of Mostar. The city is free — but the question of who controls it is already causing friction between your allies. The east bank is mostly Bosniak. The west bank is mostly Croat. The liberation was shared. The city may not be.",
     "category": "territorial",
     "trigger": {
-      "turn_min": 6, "turn_max": 20, "phase": "war",
+      "turn_min": 6,
+      "turn_max": 20,
+      "phase": "war",
       "condition": {
         "type": "not",
-        "condition": { "type": "faction_controls_municipality", "faction": "RS", "municipality": "mostar", "threshold": 0.3 }
+        "condition": {
+          "type": "faction_controls_municipality",
+          "faction": "RS",
+          "municipality": "mostar",
+          "threshold": 0.3
+        }
       }
     },
-    "pressure": { "base_rate": 2.0, "threshold": 4, "decay_rate": 0.5 },
+    "pressure": {
+      "base_rate": 2,
+      "threshold": 4,
+      "decay_rate": 0.5
+    },
     "once": true,
-    "effect": { "kind": "morale_change", "faction": "RBiH", "delta": 3 },
+    "effect": {
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": 3
+    },
     "effects": [
-      { "kind": "morale_change", "faction": "HRHB", "delta": 5 }
+      {
+        "kind": "morale_change",
+        "faction": "HRHB",
+        "delta": 5
+      }
     ],
     "dimension_shifts": [
-      { "faction": "HRHB", "dimension": "territorial_legitimacy", "delta": 10 },
-      { "faction": "RBiH", "dimension": "military_credibility", "delta": 3 }
+      {
+        "faction": "HRHB",
+        "dimension": "territorial_legitimacy",
+        "delta": 10
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "military_credibility",
+        "delta": 3
+      }
     ],
-    "sets_flags": { "mostar_liberated": true },
+    "sets_flags": {
+      "mostar_liberated": true
+    },
     "historical_source": "BB Vol. I. Joint HVO-ARBiH operation against JNA, June 1992."
   },
   {
@@ -373,66 +894,143 @@
     "narrative": "Under the command of Naser Oric, Bosniak forces in the Drina Valley consolidate a defensive perimeter around Srebrenica. Despite being vastly outgunned, local TDF fighters and volunteers launch raids on surrounding VRS positions, establishing a tenuous enclave that shelters tens of thousands of displaced civilians.",
     "category": "military",
     "trigger": {
-      "turn_min": 6, "turn_max": 20, "phase": "war",
+      "turn_min": 6,
+      "turn_max": 20,
+      "phase": "war",
       "condition": {
         "type": "and",
         "conditions": [
-          { "type": "territory_percentage", "faction": "RS", "comparator": "above", "threshold": 0.48 },
-          { "type": "flag_equals", "flag": "jna_withdrawn", "value": true }
+          {
+            "type": "territory_percentage",
+            "faction": "RS",
+            "comparator": "above",
+            "threshold": 0.48
+          },
+          {
+            "type": "flag_equals",
+            "flag": "jna_withdrawn",
+            "value": true
+          }
         ]
       }
     },
     "once": true,
-    "effect": { "kind": "morale_change", "faction": "RBiH", "delta": 5 },
+    "effect": {
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": 5
+    },
     "effects": [
-      { "kind": "narrative", "text": "Bosniak forces consolidate around Srebrenica, forming a besieged enclave that becomes a symbol of resistance." }
+      {
+        "kind": "narrative",
+        "text": "Bosniak forces consolidate around Srebrenica, forming a besieged enclave that becomes a symbol of resistance."
+      }
     ],
     "pressure": {
-      "base_rate": 1.5, "threshold": 5, "decay_rate": 0.2,
+      "base_rate": 1.5,
+      "threshold": 5,
+      "decay_rate": 0.2,
       "modifiers": [
-        { "condition": { "type": "flag_equals", "flag": "drina_cleansing_occurred", "value": true }, "rate_bonus": 1.5 }
+        {
+          "condition": {
+            "type": "flag_equals",
+            "flag": "drina_cleansing_occurred",
+            "value": true
+          },
+          "rate_bonus": 1.5
+        }
       ]
     },
     "dimension_shifts": [
-      { "faction": "RBiH", "dimension": "international_standing", "delta": 5 },
-      { "faction": "RBiH", "dimension": "negotiating_leverage", "delta": 5 }
+      {
+        "faction": "RBiH",
+        "dimension": "international_standing",
+        "delta": 5
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "negotiating_leverage",
+        "delta": 5
+      }
     ],
-    "sets_flags": { "srebrenica_enclave_formed": true }
+    "sets_flags": {
+      "srebrenica_enclave_formed": true
+    }
   },
   {
     "id": "drina_cleansing_decision_1992",
     "title": "The Drina Valley Question",
-    "narrative": "Your forces control much of the Drina valley. Reports from the field describe paramilitary units conducting operations against the civilian population. Zvornik, Visegrad, Foca \u2014 the names are becoming synonymous with displacement and worse. Your commanders await guidance. How the Drina valley is secured will define how the world sees your cause.",
+    "narrative": "Your forces control much of the Drina valley. Reports from the field describe paramilitary units conducting operations against the civilian population. Zvornik, Visegrad, Foca — the names are becoming synonymous with displacement and worse. Your commanders await guidance. How the Drina valley is secured will define how the world sees your cause.",
     "category": "humanitarian",
     "trigger": {
-      "turn_min": 8, "turn_max": 30, "phase": "war",
+      "turn_min": 8,
+      "turn_max": 30,
+      "phase": "war",
       "condition": {
         "type": "and",
         "conditions": [
-          { "type": "territory_percentage", "faction": "RS", "comparator": "above", "threshold": 0.45 },
-          { "type": "flag_equals", "flag": "rs_strategic_goals", "value": "all_six" }
+          {
+            "type": "territory_percentage",
+            "faction": "RS",
+            "comparator": "above",
+            "threshold": 0.45
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "all_six"
+          }
         ]
       }
     },
-    "pressure": { "base_rate": 1.0, "threshold": 4, "decay_rate": 0.2 },
+    "pressure": {
+      "base_rate": 1,
+      "threshold": 4,
+      "decay_rate": 0.2
+    },
     "once": true,
-    "effect": { "kind": "narrative", "text": "The Drina valley campaign reaches its critical phase." },
+    "effect": {
+      "kind": "narrative",
+      "text": "The Drina valley campaign reaches its critical phase."
+    },
     "requires_player_response": true,
     "bot_response_logic": "historical",
     "response_options": [
       {
         "id": "systematic",
         "label": "Systematic cleansing",
-        "description": "Full territorial consolidation. Maximum displacement. The international community will condemn this. Your officers know what this means. Mladi\u0107 knows.",
+        "description": "Full territorial consolidation. Maximum displacement. The international community will condemn this. Your officers know what this means. Mladić knows.",
         "effects": [
-          { "kind": "humanitarian_impact", "faction": "RS", "war_crimes_delta": 5 },
-          { "kind": "morale_change", "faction": "RS", "delta": 3 }
+          {
+            "kind": "humanitarian_impact",
+            "faction": "RS",
+            "war_crimes_delta": 5
+          },
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": 3
+          }
         ],
-        "sets_flags": { "drina_cleansing_intensity": "systematic" },
+        "sets_flags": {
+          "drina_cleansing_intensity": "systematic"
+        },
         "dimension_shifts": [
-          { "faction": "RS", "dimension": "international_standing", "delta": -25 },
-          { "faction": "RS", "dimension": "internal_cohesion", "delta": 5 },
-          { "faction": "RS", "dimension": "territorial_legitimacy", "delta": -10 }
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": -25
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          },
+          {
+            "faction": "RS",
+            "dimension": "territorial_legitimacy",
+            "delta": -10
+          }
         ],
         "aggression_affinity": 0.8,
         "risk_level": 0.8
@@ -442,13 +1040,31 @@
         "label": "Military objectives only",
         "description": "Secure strategic positions. Protect Serb communities. Restrain the paramilitaries. Your hardliners will be furious. Your commander may ignore the order.",
         "effects": [
-          { "kind": "humanitarian_impact", "faction": "RS", "war_crimes_delta": 1 }
+          {
+            "kind": "humanitarian_impact",
+            "faction": "RS",
+            "war_crimes_delta": 1
+          }
         ],
-        "sets_flags": { "drina_cleansing_intensity": "restrained" },
+        "sets_flags": {
+          "drina_cleansing_intensity": "restrained"
+        },
         "dimension_shifts": [
-          { "faction": "RS", "dimension": "international_standing", "delta": -5 },
-          { "faction": "RS", "dimension": "internal_cohesion", "delta": -10 },
-          { "faction": "RS", "dimension": "military_credibility", "delta": -5 }
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": -5
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": -10
+          },
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": -5
+          }
         ],
         "aggression_affinity": -0.5,
         "risk_level": 0.3
@@ -462,45 +1078,123 @@
     "narrative": "VRS and paramilitary forces systematically expel the Bosniak population from towns along the Drina River valley. Visegrad, Foca, Zvornik, and Bratunac witness mass killings, forced deportations, and the destruction of mosques. The campaign aims to create a contiguous Serb-held corridor along the Serbian border.",
     "category": "humanitarian",
     "trigger": {
-      "turn_min": 8, "turn_max": 25, "phase": "war",
+      "turn_min": 8,
+      "turn_max": 25,
+      "phase": "war",
       "condition": {
         "type": "and",
         "conditions": [
-          { "type": "territory_percentage", "faction": "RS", "comparator": "above", "threshold": 0.45 },
-          { "type": "flag_equals", "flag": "jna_withdrawn", "value": true }
+          {
+            "type": "territory_percentage",
+            "faction": "RS",
+            "comparator": "above",
+            "threshold": 0.45
+          },
+          {
+            "type": "flag_equals",
+            "flag": "jna_withdrawn",
+            "value": true
+          }
         ]
       }
     },
     "once": true,
-    "effect": { "kind": "humanitarian_impact", "faction": "RS", "war_crimes_delta": 3 },
+    "effect": {
+      "kind": "humanitarian_impact",
+      "faction": "RS",
+      "war_crimes_delta": 3
+    },
     "effects": [
-      { "kind": "negotiation_capital", "faction": "RS", "dimension": "international_credibility", "delta": -20 },
-      { "kind": "narrative", "text": "Systematic ethnic cleansing sweeps through the Drina Valley. Tens of thousands of Bosniaks are expelled or killed." }
+      {
+        "kind": "negotiation_capital",
+        "faction": "RS",
+        "dimension": "international_credibility",
+        "delta": -20
+      },
+      {
+        "kind": "narrative",
+        "text": "Systematic ethnic cleansing sweeps through the Drina Valley. Tens of thousands of Bosniaks are expelled or killed."
+      }
     ],
-    "pressure": { "base_rate": 1.0, "threshold": 4, "decay_rate": 0.2 },
+    "pressure": {
+      "base_rate": 1,
+      "threshold": 4,
+      "decay_rate": 0.2
+    },
     "dimension_shifts": [
-      { "faction": "RS", "dimension": "international_standing", "delta": -20 },
-      { "faction": "RS", "dimension": "territorial_legitimacy", "delta": -5 }
+      {
+        "faction": "RS",
+        "dimension": "international_standing",
+        "delta": -20
+      },
+      {
+        "faction": "RS",
+        "dimension": "territorial_legitimacy",
+        "delta": -5
+      }
     ],
-    "sets_flags": { "drina_cleansing_occurred": true }
+    "sets_flags": {
+      "drina_cleansing_occurred": true
+    }
   },
   {
     "id": "operation_corridor_1992",
-    "title": "Operation Corridor \u2014 VRS Breaks Through at Brcko",
+    "title": "Operation Corridor — VRS Breaks Through at Brcko",
     "narrative": "The VRS launches Operation Corridor to link the Krajina region with Serbia proper through the narrow Posavina corridor near Brcko. Fierce fighting against HVO and ARBiH forces gradually widens the corridor, establishing a critical supply and communication link that sustains the western Bosnian Serb entity.",
     "category": "military",
-    "trigger": { "turn_min": 12, "turn_max": 22, "phase": "war", "condition": { "type": "and", "conditions": [ { "type": "faction_controls_municipality", "faction": "RS", "municipality": "brcko", "threshold": 0.5 }, { "type": "flag_equals", "flag": "jna_withdrawn", "value": true } ] } },
+    "trigger": {
+      "turn_min": 12,
+      "turn_max": 22,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "faction_controls_municipality",
+            "faction": "RS",
+            "municipality": "brcko",
+            "threshold": 0.5
+          },
+          {
+            "type": "flag_equals",
+            "flag": "jna_withdrawn",
+            "value": true
+          }
+        ]
+      }
+    },
     "once": true,
-    "effect": { "kind": "narrative", "text": "The VRS secures the Posavina Corridor near Brcko, linking Krajina with Serbia. A vital supply artery is established." },
+    "effect": {
+      "kind": "narrative",
+      "text": "The VRS secures the Posavina Corridor near Brcko, linking Krajina with Serbia. A vital supply artery is established."
+    },
     "effects": [
-      { "kind": "supply_delta", "faction": "RS", "delta": 5 },
-      { "kind": "morale_change", "faction": "RS", "delta": 3 }
+      {
+        "kind": "supply_delta",
+        "faction": "RS",
+        "delta": 5
+      },
+      {
+        "kind": "morale_change",
+        "faction": "RS",
+        "delta": 3
+      }
     ],
     "dimension_shifts": [
-      { "faction": "RS", "dimension": "territorial_legitimacy", "delta": 10 },
-      { "faction": "RS", "dimension": "military_credibility", "delta": 5 }
+      {
+        "faction": "RS",
+        "dimension": "territorial_legitimacy",
+        "delta": 10
+      },
+      {
+        "faction": "RS",
+        "dimension": "military_credibility",
+        "delta": 5
+      }
     ],
-    "sets_flags": { "corridor_secured": true }
+    "sets_flags": {
+      "corridor_secured": true
+    }
   },
   {
     "id": "concentration_camps_revealed_1992",
@@ -508,46 +1202,100 @@
     "narrative": "International journalists have reached Prijedor. Television cameras are broadcasting images from Omarska and Trnopolje to a horrified world. The emaciated faces behind barbed wire have become the defining image of this war. The international community demands an explanation. Your patrons in Belgrade are alarmed. How you respond will shape whether the world sees you as a legitimate state or a criminal enterprise.",
     "category": "humanitarian",
     "trigger": {
-      "turn_min": 14, "turn_max": 30, "phase": "war",
+      "turn_min": 14,
+      "turn_max": 30,
+      "phase": "war",
       "condition": {
         "type": "and",
         "conditions": [
-          { "type": "faction_controls_municipality", "faction": "RS", "municipality": "prijedor", "threshold": 0.5 },
-          { "type": "war_crimes_above", "faction": "RS", "threshold": 3 }
+          {
+            "type": "faction_controls_municipality",
+            "faction": "RS",
+            "municipality": "prijedor",
+            "threshold": 0.5
+          },
+          {
+            "type": "war_crimes_above",
+            "faction": "RS",
+            "threshold": 3
+          }
         ]
       }
     },
     "pressure": {
-      "base_rate": 1.5, "threshold": 5, "decay_rate": 0.3,
+      "base_rate": 1.5,
+      "threshold": 5,
+      "decay_rate": 0.3,
       "modifiers": [
-        { "condition": { "type": "flag_equals", "flag": "drina_cleansing_occurred", "value": true }, "rate_bonus": 2.0 }
+        {
+          "condition": {
+            "type": "flag_equals",
+            "flag": "drina_cleansing_occurred",
+            "value": true
+          },
+          "rate_bonus": 2
+        }
       ]
     },
     "once": true,
-    "effect": { "kind": "humanitarian_impact", "faction": "RS", "war_crimes_delta": 3 },
+    "effect": {
+      "kind": "humanitarian_impact",
+      "faction": "RS",
+      "war_crimes_delta": 3
+    },
     "effects": [
-      { "kind": "patron_pressure", "faction": "RS", "delta": 15 }
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": 15
+      }
     ],
     "requires_player_response": true,
     "bot_response_logic": "strategic_weighted",
-    "enables_events": ["london_conference_1992"],
-    "dimension_shifts": [
-      { "faction": "RS", "dimension": "international_standing", "delta": -15 }
+    "enables_events": [
+      "london_conference_1992"
     ],
-    "sets_flags": { "camps_revealed": true },
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "international_standing",
+        "delta": -15
+      }
+    ],
+    "sets_flags": {
+      "camps_revealed": true
+    },
     "response_options": [
       {
         "id": "deny",
         "label": "Deny everything",
         "description": "These are transit centers for voluntary relocation. The footage is Western propaganda. Refuse access to investigators.",
         "effects": [
-          { "kind": "patron_pressure", "faction": "RS", "delta": 10 }
+          {
+            "kind": "patron_pressure",
+            "faction": "RS",
+            "delta": 10
+          }
         ],
-        "sets_flags": { "camps_response": "deny" },
+        "sets_flags": {
+          "camps_response": "deny"
+        },
         "dimension_shifts": [
-          { "faction": "RS", "dimension": "international_standing", "delta": -15 },
-          { "faction": "RS", "dimension": "internal_cohesion", "delta": 5 },
-          { "faction": "RS", "dimension": "patron_confidence", "delta": -10 }
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": -15
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          },
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": -10
+          }
         ],
         "aggression_affinity": 0.3,
         "risk_level": 0.8
@@ -557,14 +1305,28 @@
         "label": "Controlled access",
         "description": "Allow limited Red Cross visits. Move the worst cases. Clean up what you can. Buy time.",
         "effects": [
-          { "kind": "patron_pressure", "faction": "RS", "delta": 5 }
+          {
+            "kind": "patron_pressure",
+            "faction": "RS",
+            "delta": 5
+          }
         ],
-        "sets_flags": { "camps_response": "obstruct" },
+        "sets_flags": {
+          "camps_response": "obstruct"
+        },
         "dimension_shifts": [
-          { "faction": "RS", "dimension": "international_standing", "delta": -10 },
-          { "faction": "RS", "dimension": "patron_confidence", "delta": -5 }
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": -10
+          },
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": -5
+          }
         ],
-        "aggression_affinity": 0.0,
+        "aggression_affinity": 0,
         "risk_level": 0.5
       },
       {
@@ -572,13 +1334,31 @@
         "label": "Full cooperation",
         "description": "Open all facilities. Release detainees. Cooperate with investigators. Your officers will see this as weakness. Your hardliners will rage. But the world may grant you a measure of credibility.",
         "effects": [
-          { "kind": "patron_pressure", "faction": "RS", "delta": 2 }
+          {
+            "kind": "patron_pressure",
+            "faction": "RS",
+            "delta": 2
+          }
         ],
-        "sets_flags": { "camps_response": "cooperate" },
+        "sets_flags": {
+          "camps_response": "cooperate"
+        },
         "dimension_shifts": [
-          { "faction": "RS", "dimension": "international_standing", "delta": -3 },
-          { "faction": "RS", "dimension": "military_credibility", "delta": -10 },
-          { "faction": "RS", "dimension": "internal_cohesion", "delta": -5 }
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": -3
+          },
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": -10
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": -5
+          }
         ],
         "aggression_affinity": -0.8,
         "risk_level": 0.2
@@ -592,69 +1372,225 @@
     "narrative": "The international community convenes in London to address the escalating Bosnian crisis. Western leaders demand an end to ethnic cleansing and the lifting of sieges. The conference produces declarations but no enforcement mechanism, establishing a pattern of diplomatic engagement without military commitment.",
     "category": "diplomatic",
     "trigger": {
-      "turn_min": 16, "turn_max": 30, "phase": "war",
+      "turn_min": 16,
+      "turn_max": 30,
+      "phase": "war",
       "condition": {
         "type": "and",
         "conditions": [
-          { "type": "war_crimes_above", "faction": "RS", "threshold": 2 },
-          { "type": "patron_pressure_above", "faction": "RS", "threshold": 15 }
+          {
+            "type": "war_crimes_above",
+            "faction": "RS",
+            "threshold": 2
+          },
+          {
+            "type": "patron_pressure_above",
+            "faction": "RS",
+            "threshold": 15
+          }
         ]
       }
     },
     "once": true,
     "requires_player_response": true,
     "bot_response_logic": "capital_based",
-    "effect": { "kind": "narrative", "text": "The London Conference demands ceasefire and end to ethnic cleansing. All parties face pressure to comply." },
+    "effect": {
+      "kind": "narrative",
+      "text": "The London Conference demands ceasefire and end to ethnic cleansing. All parties face pressure to comply."
+    },
     "response_options": [
       {
         "id": "accept",
         "label": "Accept Conference Terms",
         "description": "Signal willingness to negotiate. Improves international standing but may constrain military operations.",
         "effects": [
-          { "kind": "negotiation_capital", "faction": "RBiH", "dimension": "international_credibility", "delta": 10 },
-          { "kind": "patron_pressure", "faction": "RBiH", "delta": -5 }
+          {
+            "kind": "negotiation_capital",
+            "faction": "RBiH",
+            "dimension": "international_credibility",
+            "delta": 10
+          },
+          {
+            "kind": "patron_pressure",
+            "faction": "RBiH",
+            "delta": -5
+          }
         ],
-        "dimension_shifts": [{ "faction": "RBiH", "dimension": "international_standing", "delta": 10 }]
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": 10
+          }
+        ]
       },
       {
         "id": "reject",
         "label": "Reject Terms as Inadequate",
         "description": "Denounce the conference as rewarding aggression. Damages credibility but preserves freedom of action.",
         "effects": [
-          { "kind": "negotiation_capital", "faction": "RBiH", "dimension": "international_credibility", "delta": -5 },
-          { "kind": "morale_change", "faction": "RBiH", "delta": 3 }
+          {
+            "kind": "negotiation_capital",
+            "faction": "RBiH",
+            "dimension": "international_credibility",
+            "delta": -5
+          },
+          {
+            "kind": "morale_change",
+            "faction": "RBiH",
+            "delta": 3
+          }
         ],
         "dimension_shifts": [
-          { "faction": "RBiH", "dimension": "international_standing", "delta": -5 },
-          { "faction": "RBiH", "dimension": "military_credibility", "delta": 3 }
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": -5
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "military_credibility",
+            "delta": 3
+          }
         ]
       }
     ],
     "pressure": {
-      "base_rate": 1.5, "threshold": 6, "decay_rate": 0.3,
+      "base_rate": 1.5,
+      "threshold": 6,
+      "decay_rate": 0.3,
       "modifiers": [
-        { "condition": { "type": "flag_equals", "flag": "drina_cleansing_occurred", "value": true }, "rate_bonus": 1.0 }
+        {
+          "condition": {
+            "type": "flag_equals",
+            "flag": "drina_cleansing_occurred",
+            "value": true
+          },
+          "rate_bonus": 1
+        }
       ]
     },
-    "enables_events": ["vance_owen_plan_1993"]
+    "enables_events": [
+      "vance_owen_plan_1993"
+    ]
   },
   {
     "id": "gorazde_pocket_consolidation_1992",
     "title": "Operation Circle: The Gorazde Pocket Holds",
-    "narrative": "The 1st and 31st Drina Strike Brigades of the ARBiH launch Operation Circle, a counteroffensive to push VRS forces out of Gorazde's eastern approaches. After weeks of fighting through August, the operation succeeds in consolidating the enclave's perimeter, securing outlying settlements and establishing a defensible pocket. Gorazde \u2014 the largest Bosniak-held enclave in the Drina valley \u2014 will endure under siege for the remainder of the war, but it will not fall.",
+    "narrative": "The 1st and 31st Drina Strike Brigades of the ARBiH launch Operation Circle, a counteroffensive to push VRS forces out of Gorazde's eastern approaches. After weeks of fighting through August, the operation succeeds in consolidating the enclave's perimeter, securing outlying settlements and establishing a defensible pocket. Gorazde — the largest Bosniak-held enclave in the Drina valley — will endure under siege for the remainder of the war, but it will not fall.",
     "category": "military",
     "trigger": {
-      "turn_min": 18, "turn_max": 24, "phase": "war",
-      "condition": { "type": "faction_controls_municipality", "faction": "RBiH", "municipality": "gorazde", "threshold": 0.3 }
+      "turn_min": 18,
+      "turn_max": 24,
+      "phase": "war",
+      "condition": {
+        "type": "faction_controls_municipality",
+        "faction": "RBiH",
+        "municipality": "gorazde",
+        "threshold": 0.3
+      }
     },
     "once": true,
-    "effect": { "kind": "morale_change", "faction": "RBiH", "delta": 3 },
+    "effect": {
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": 3
+    },
     "effects": [
-      { "kind": "control_change", "faction": "RBiH", "osids": ["op:gorazde:glamoc", "op:gorazde:kamen", "op:gorazde:sopotnica"] },
-      { "kind": "narrative", "text": "Operation Circle consolidates the Gorazde pocket. ARBiH forces secure the enclave perimeter, pushing VRS from outlying settlements." }
+      {
+        "kind": "control_change",
+        "faction": "RBiH",
+        "osids": [
+          "op:gorazde:glamoc",
+          "op:gorazde:kamen",
+          "op:gorazde:sopotnica"
+        ]
+      },
+      {
+        "kind": "narrative",
+        "text": "Operation Circle consolidates the Gorazde pocket. ARBiH forces secure the enclave perimeter, pushing VRS from outlying settlements."
+      }
     ],
-    "sets_flags": { "gorazde_pocket_consolidated": true },
+    "sets_flags": {
+      "gorazde_pocket_consolidated": true
+    },
     "historical_source": "Wikipedia: Siege of Gorazde. Operation Krug (Circle), August 1992."
+  },
+  {
+    "id": "milosevic_isolation_warning_aug92",
+    "title": "Belgrade Warns Pale: International Isolation Is Growing",
+    "narrative": "Milošević privately warns Karadžić that the ITN footage of Omarska and Trnopolje has triggered international revulsion. Serbia cannot shield Pale indefinitely from consequences — the pace of events must slow.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 18,
+      "turn_max": 26,
+      "phase": "war"
+    },
+    "once": true,
+    "responding_faction": "RS",
+    "bot_response_logic": "strategic_weighted",
+    "requires_player_response": false,
+    "priority": 50,
+    "auto_resolve_turns": 2,
+    "effect": {
+      "kind": "narrative",
+      "text": "Belgrade privately signals to Pale that international pressure is mounting and the pace of events must slow."
+    },
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "patron_confidence",
+        "delta": -8
+      }
+    ],
+    "response_options": [
+      {
+        "id": "acknowledge_pressure",
+        "label": "Acknowledge the message",
+        "aggression_affinity": -0.3,
+        "risk_level": 0.2,
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": 8
+          },
+          {
+            "faction": "RS",
+            "dimension": "negotiating_leverage",
+            "delta": -5
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": -3
+          }
+        ]
+      },
+      {
+        "id": "resist_patron",
+        "label": "Maintain our position",
+        "aggression_affinity": 0.5,
+        "risk_level": 0.7,
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": -10
+          },
+          {
+            "faction": "RS",
+            "dimension": "negotiating_leverage",
+            "delta": 6
+          },
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": 3
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "hvo_arbih_tensions_rise_1992",
@@ -662,45 +1598,120 @@
     "narrative": "The fragile alliance between the HVO and ARBiH fractures openly at Prozor in central Bosnia. HVO forces attack Bosniak civilians and ARBiH positions in a calculated bid to assert Croat control over the town. Further clashes erupt near Novi Travnik. The incidents mark the first serious military confrontation between the two nominal allies.",
     "category": "political",
     "trigger": {
-      "turn_min": 20, "turn_max": 40, "phase": "war",
-      "condition": { "type": "alliance_below", "value": 0.7 }
+      "turn_min": 20,
+      "turn_max": 40,
+      "phase": "war",
+      "condition": {
+        "type": "alliance_below",
+        "value": 0.7
+      }
     },
     "once": true,
-    "effect": { "kind": "alliance_change", "delta": -0.1 },
+    "effect": {
+      "kind": "alliance_change",
+      "delta": -0.1
+    },
     "effects": [
-      { "kind": "narrative", "text": "HVO and ARBiH forces clash at Prozor and Novi Travnik. The fragile alliance between Croats and Bosniaks shows deepening cracks." }
+      {
+        "kind": "narrative",
+        "text": "HVO and ARBiH forces clash at Prozor and Novi Travnik. The fragile alliance between Croats and Bosniaks shows deepening cracks."
+      }
     ],
     "pressure": {
-      "base_rate": 1.0, "threshold": 5, "decay_rate": 0.5,
+      "base_rate": 1,
+      "threshold": 5,
+      "decay_rate": 0.5,
       "modifiers": [
-        { "condition": { "type": "flag_equals", "flag": "mostar_liberated", "value": true }, "rate_bonus": 0.5 },
-        { "condition": { "type": "flag_equals", "flag": "jajce_fell", "value": true }, "rate_bonus": 1.5 }
+        {
+          "condition": {
+            "type": "flag_equals",
+            "flag": "mostar_liberated",
+            "value": true
+          },
+          "rate_bonus": 0.5
+        },
+        {
+          "condition": {
+            "type": "flag_equals",
+            "flag": "jajce_fell",
+            "value": true
+          },
+          "rate_bonus": 1.5
+        }
       ]
     },
     "dimension_shifts": [
-      { "faction": "RBiH", "dimension": "internal_cohesion", "delta": -5 },
-      { "faction": "HRHB", "dimension": "internal_cohesion", "delta": -5 }
+      {
+        "faction": "RBiH",
+        "dimension": "internal_cohesion",
+        "delta": -5
+      },
+      {
+        "faction": "HRHB",
+        "dimension": "internal_cohesion",
+        "delta": -5
+      }
     ],
-    "sets_flags": { "hvo_arbih_tensions_rising": true }
+    "sets_flags": {
+      "hvo_arbih_tensions_rising": true
+    }
   },
   {
     "id": "jajce_falls_1992",
     "title": "Jajce Falls to VRS Forces",
     "narrative": "The strategic town of Jajce in central Bosnia falls to the VRS after a prolonged siege. The loss is a major blow to both the ARBiH and HVO, who blame each other for failing to coordinate the defense. Tens of thousands of civilians flee westward, and recriminations between the two forces deepen the growing rift.",
     "category": "territorial",
-    "trigger": { "turn_min": 40, "turn_max": 52, "phase": "war", "condition": { "type": "faction_controls_municipality", "faction": "RS", "municipality": "jajce", "threshold": 0.5 } },
+    "trigger": {
+      "turn_min": 40,
+      "turn_max": 52,
+      "phase": "war",
+      "condition": {
+        "type": "faction_controls_municipality",
+        "faction": "RS",
+        "municipality": "jajce",
+        "threshold": 0.5
+      }
+    },
     "once": true,
-    "effect": { "kind": "morale_change", "faction": "RBiH", "delta": -10 },
+    "effect": {
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": -10
+    },
     "effects": [
-      { "kind": "morale_change", "faction": "RS", "delta": 3 },
-      { "kind": "alliance_change", "delta": -0.05 },
-      { "kind": "narrative", "text": "Jajce falls to the VRS. Mutual blame between HVO and ARBiH accelerates the breakdown of their alliance." }
+      {
+        "kind": "morale_change",
+        "faction": "RS",
+        "delta": 3
+      },
+      {
+        "kind": "alliance_change",
+        "delta": -0.05
+      },
+      {
+        "kind": "narrative",
+        "text": "Jajce falls to the VRS. Mutual blame between HVO and ARBiH accelerates the breakdown of their alliance."
+      }
     ],
     "dimension_shifts": [
-      { "faction": "RBiH", "dimension": "internal_cohesion", "delta": -10 },
-      { "faction": "HRHB", "dimension": "internal_cohesion", "delta": -10 },
-      { "faction": "RS", "dimension": "military_credibility", "delta": 5 }
+      {
+        "faction": "RBiH",
+        "dimension": "internal_cohesion",
+        "delta": -10
+      },
+      {
+        "faction": "HRHB",
+        "dimension": "internal_cohesion",
+        "delta": -10
+      },
+      {
+        "faction": "RS",
+        "dimension": "military_credibility",
+        "delta": 5
+      }
     ],
-    "sets_flags": { "jajce_fell": true }
+    "sets_flags": {
+      "jajce_fell": true
+    }
   }
 ]
