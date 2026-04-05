@@ -938,7 +938,7 @@ function buildUpdatedState(
         belief_state: beliefState ?? undefined,
         relationships: briefing.previous_state?.relationships,
         lessons: briefing.previous_state?.lessons,
-        decision_trace: briefing.previous_state?.decision_trace,
+        decision_trace: planDecision.decision_trace ?? briefing.previous_state?.decision_trace,
     };
 }
 

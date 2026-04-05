@@ -1,3 +1,29 @@
+## [2026-04-05] v0.8.1 Phase 3: Candidate Intent Competition
+
+**Type:** Feature
+**Files:** src/sim/combat/commander/plan.ts, src/sim/combat/commander/emit.ts
+**Status:** ACCEPTED
+
+### Delivered
+- `selectWinningIntent()` in plan.ts — generates 2–5 intent candidates, scores with 7 factors, hard-blocks under 8 conditions, selects winner deterministically
+- `PlanDecision.decision_trace` — populated when competition runs, preserved across lifecycle turns via `?? previous_state?.decision_trace` carry-forward in emit.ts
+- Candidate families: hold_line (always, never blocked), reinforce_zone, stage_operation, launch_opportunity, thin_quiet_sector, recall_exposed_brigades, request_army_support
+- Non-offensive winners route early-return in `managePlan()` without entering plan-creation path
+- Phase 3 targeted tests in `tests/commander/commander_phase3_candidate_competition.test.ts`
+
+### Deferred
+- Personality weighting (Phase 4)
+- Lesson memory integration (Phase 4)
+- Relationship effects (Phase 4)
+- Formal constraint/preference separation (Phase 5)
+
+### Verification
+- tsc: clean
+- vitest: 2392 tests pass
+
+### Report
+`docs/40_reports/implemented/20260405_V081_PHASE3_CANDIDATE_INTENT_COMPETITION.md`
+
 ## [2026-04-05] v0.8.1 Phase 2 — Belief Layer (COMPLETE)
 
 ### What changed

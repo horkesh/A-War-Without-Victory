@@ -21,6 +21,9 @@ import { spatialFriendlyDistance, spatialSameComponent } from '../../spatial_con
 
 import type {
     CommanderBriefing,
+    CommanderDecisionTrace,
+    CommanderIntentCandidate,
+    CommanderIntentType,
     CommanderPlan,
     CommanderPlanStatus,
     ZoneAssessment,
@@ -154,6 +157,370 @@ export interface PlanDecision {
     reason: string;
     /** Brigades that should be concentrating toward staging zone. */
     concentration_orders: Array<{ brigade_id: FormationId; destination_zone: ZoneId }>;
+    /** v0.8.1: Candidate intent competition trace. Only present when a new plan decision was made. */
+    decision_trace?: CommanderDecisionTrace;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// selectWinningIntent — v0.8.1 candidate intent competition
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Priority order for tie-breaking intent competition. Lower index wins. */
+const INTENT_PRIORITY_ORDER: readonly CommanderIntentType[] = [
+    'reinforce_zone',
+    'recall_exposed_brigades',
+    'stage_operation',
+    'launch_opportunity',
+    'thin_quiet_sector',
+    'request_army_support',
+    'hold_line',
+];
+
+/**
+ * Generate, score, and select a winning intent from candidate competition.
+ * Returns the winning CommanderIntentCandidate (or null if all blocked) plus
+ * a full CommanderDecisionTrace for audit.
+ *
+ * All arithmetic is deterministic: no Math.random(), no Date.now().
+ * Tie-breaking uses INTENT_PRIORITY_ORDER then strictCompare on zone_id.
+ *
+ * v0.8.1 Phase 3.
+ */
+export function selectWinningIntent(
+    briefing: CommanderBriefing,
+    zones: ZoneAssessment[],
+    forces: ForceAssessment,
+    surplusPool: BrigadeEvaluation[],
+    turn: number,
+): {
+    winner: CommanderIntentCandidate | null;
+    trace: CommanderDecisionTrace;
+} {
+    // ─── Factor computations (all return [0, 1]) ──────────────────────────
+
+    const supplyReadiness: number =
+        briefing.previous_state?.belief_state?.supply_continuity_confidence ?? 0.5;
+
+    // Threat ratio: fraction of zones under heavy/critical threat.
+    // Use previous_state.threat_assessment if available; else proxy from zone posture.
+    const prevThreat = briefing.previous_state?.threat_assessment;
+    const threatRatio: number = (() => {
+        if (prevThreat) {
+            const pressure = prevThreat.overall_pressure;
+            if (pressure === 'critical') return 1.0;
+            if (pressure === 'heavy')    return 0.75;
+            if (pressure === 'moderate') return 0.45;
+            return 0.2; // 'low'
+        }
+        // Proxy: fraction of zones in defending/besieged posture
+        if (zones.length === 0) return 0.3;
+        const threatened = zones.filter(z => z.posture === 'defending' || z.posture === 'besieged').length;
+        return Math.min(1.0, threatened / zones.length);
+    })();
+
+    const surplusRatio: number = Math.min(
+        1.0,
+        forces.total_surplus / Math.max(1, forces.total_brigades * 0.3),
+    );
+
+    const exhaustionPenalty: number = Math.max(
+        0.0,
+        1.0 - briefing.corps_exhaustion / MAX_EXHAUSTION_FOR_OPERATION,
+    );
+
+    const fatigueReadiness: number = Math.max(
+        0.0,
+        1.0 - briefing.avg_fatigue_pct / HIGH_AVG_FATIGUE_PCT_FOR_NEW_PLAN,
+    );
+
+    const maxDeficit = zones.length > 0 ? Math.max(...zones.map(z => z.deficit), 0) : 0;
+    const deficitUrgency: number = Math.min(1.0, maxDeficit / 4.0);
+
+    const campaignAlignment: number = (() => {
+        // FrontPriority.role values: 'primary' | 'secondary' | 'economy' | 'contain'
+        const role = briefing.campaign_role;
+        if (role === 'primary')      return 1.0;
+        if (role === 'secondary')    return 0.75;
+        if (role === null || role === undefined) return 0.5;
+        if (role === 'contain')      return 0.25;
+        // 'economy' or any other
+        return 0.0;
+    })();
+
+    // ─── Hard-block flag helpers ──────────────────────────────────────────
+
+    const isOffensiveBlockedByExhaustion =
+        briefing.corps_exhaustion > MAX_EXHAUSTION_FOR_OPERATION;
+    const isOffensiveBlockedByFatigue =
+        briefing.avg_fatigue_pct >= HIGH_AVG_FATIGUE_PCT_FOR_NEW_PLAN;
+    const isOffensiveBlockedByCampaignRole =
+        briefing.campaign_role === 'economy' || briefing.campaign_role === 'contain';
+    const isOffensiveBlockedBySyncRole =
+        briefing.campaign_sync_role === 'feint' || briefing.campaign_sync_role === 'fixing';
+    const isOffensiveBlockedByStance =
+        briefing.corps_stance === 'defensive' || briefing.corps_stance === 'reorganize';
+    const isOffensiveBlockedByLiveMajorOp = briefing.active_operations.some(
+        op => op.phase !== 'recovery' && op.type !== 'probe',
+    );
+    const isCriticalSupply =
+        supplyReadiness < 0.2 && briefing.previous_state?.belief_state != null;
+
+    // ─── Candidate generation ─────────────────────────────────────────────
+
+    const isHeavyOrCriticalPressure =
+        prevThreat?.overall_pressure === 'heavy' ||
+        prevThreat?.overall_pressure === 'critical' ||
+        threatRatio >= 0.6;
+
+    type CandidateDef = {
+        type: CommanderIntentType;
+        target_zone?: string;
+        generate: boolean;
+    };
+
+    // "Quiet sector" proxy: a zone that is in balanced/projecting posture AND
+    // has surplus brigades AND is NOT at the front under heavy pressure.
+    // `is_quiet_for_screening` does not exist on ZoneAssessment; use low deficit +
+    // non-besieged + non-defending posture + surplus as the discriminator.
+    const hasQuietSector = zones.some(
+        z =>
+            (z.posture === 'balanced' || z.posture === 'projecting') &&
+            z.surplus_brigades.length > 0 &&
+            z.deficit === 0,
+    );
+
+    const hasExposedBrigade = surplusPool.some(
+        ev => ev.is_disrupted || ev.morale < CRITICAL_MORALE_THRESHOLD,
+    );
+
+    const candidateDefs: CandidateDef[] = [
+        // hold_line — always generated
+        { type: 'hold_line', generate: true },
+
+        // reinforce_zone — generated when there is a zone deficit or heavy pressure
+        {
+            type: 'reinforce_zone',
+            generate: zones.some(z => z.deficit > 0) || isHeavyOrCriticalPressure,
+        },
+
+        // stage_operation — pre-planned ops + sufficient surplus
+        {
+            type: 'stage_operation',
+            generate:
+                briefing.pre_planned_ops.length > 0 &&
+                surplusPool.length >= MIN_BRIGADES_FOR_PLAN,
+        },
+
+        // launch_opportunity — enough surplus AND a projecting/balanced zone
+        {
+            type: 'launch_opportunity',
+            generate:
+                surplusPool.length >= MIN_BRIGADES_FOR_PLAN &&
+                zones.some(z => z.posture === 'projecting' || z.posture === 'balanced'),
+        },
+
+        // thin_quiet_sector — quiet zone with extractable surplus
+        { type: 'thin_quiet_sector', generate: hasQuietSector },
+
+        // recall_exposed_brigades — disrupted or critically-low-morale brigades in surplus
+        { type: 'recall_exposed_brigades', generate: hasExposedBrigade },
+
+        // request_army_support — heavy/critical pressure AND no surplus to self-fix
+        {
+            type: 'request_army_support',
+            generate: isHeavyOrCriticalPressure && forces.total_surplus === 0,
+        },
+    ];
+
+    // Cap at 5: keep hold_line + stage_operation + launch_opportunity + reinforce_zone always,
+    // then fill remaining slots by priority: recall > thin > request.
+    const PRIORITY_ORDER_FOR_CAP: CommanderIntentType[] = [
+        'hold_line',
+        'stage_operation',
+        'launch_opportunity',
+        'reinforce_zone',
+        'recall_exposed_brigades',
+        'thin_quiet_sector',
+        'request_army_support',
+    ];
+    const MAX_CANDIDATES = 5;
+
+    const qualifiedDefs = candidateDefs.filter(d => d.generate);
+    let selectedDefs: CandidateDef[];
+    if (qualifiedDefs.length <= MAX_CANDIDATES) {
+        selectedDefs = qualifiedDefs;
+    } else {
+        // Sort by priority order, then slice to MAX_CANDIDATES
+        selectedDefs = [...qualifiedDefs].sort((a, b) => {
+            const ai = PRIORITY_ORDER_FOR_CAP.indexOf(a.type);
+            const bi = PRIORITY_ORDER_FOR_CAP.indexOf(b.type);
+            return ai - bi;
+        }).slice(0, MAX_CANDIDATES);
+    }
+
+    // ─── Build scored candidates ──────────────────────────────────────────
+
+    const allCandidates: CommanderIntentCandidate[] = selectedDefs.map(def => {
+        const { type } = def;
+        const targetZone = def.target_zone;
+        const intentId = `${type}:${turn}:${targetZone ?? 'corps'}`;
+
+        // Compute score and breakdown
+        let score: number;
+        let score_breakdown: Record<string, number>;
+
+        switch (type) {
+            case 'hold_line': {
+                const t = 0.4 * threatRatio;
+                const s = 0.3 * (1 - surplusRatio);
+                const r = 0.3 * (1 - supplyReadiness);
+                score = t + s + r;
+                score_breakdown = { threat_ratio: t, surplus_inverse: s, supply_inverse: r };
+                break;
+            }
+            case 'reinforce_zone': {
+                const d = 0.45 * deficitUrgency;
+                const t = 0.30 * threatRatio;
+                const s = 0.25 * (1 - surplusRatio);
+                score = d + t + s;
+                score_breakdown = { deficit_urgency: d, threat_ratio: t, surplus_inverse: s };
+                break;
+            }
+            case 'stage_operation': {
+                const r = 0.25 * supplyReadiness;
+                const s = 0.25 * surplusRatio;
+                const t = 0.20 * (1 - threatRatio);
+                const e = 0.15 * exhaustionPenalty;
+                const f = 0.10 * fatigueReadiness;
+                const c = 0.05 * campaignAlignment;
+                score = r + s + t + e + f + c;
+                score_breakdown = {
+                    supply_readiness: r,
+                    surplus_ratio: s,
+                    threat_inverse: t,
+                    exhaustion_penalty: e,
+                    fatigue_readiness: f,
+                    campaign_alignment: c,
+                };
+                break;
+            }
+            case 'launch_opportunity': {
+                const s = 0.30 * surplusRatio;
+                const r = 0.25 * supplyReadiness;
+                const t = 0.20 * (1 - threatRatio);
+                const e = 0.15 * exhaustionPenalty;
+                const f = 0.10 * fatigueReadiness;
+                score = s + r + t + e + f;
+                score_breakdown = {
+                    surplus_ratio: s,
+                    supply_readiness: r,
+                    threat_inverse: t,
+                    exhaustion_penalty: e,
+                    fatigue_readiness: f,
+                };
+                break;
+            }
+            case 'thin_quiet_sector': {
+                const s = 0.35 * (1 - surplusRatio);
+                const t = 0.40 * (1 - threatRatio);
+                const r = 0.25 * supplyReadiness;
+                score = s + t + r;
+                score_breakdown = { surplus_inverse: s, threat_inverse: t, supply_readiness: r };
+                break;
+            }
+            case 'recall_exposed_brigades': {
+                const disruptedCount = surplusPool.filter(
+                    ev => ev.is_disrupted || ev.morale < CRITICAL_MORALE_THRESHOLD,
+                ).length;
+                const disruptionRatio = disruptedCount / Math.max(1, surplusPool.length);
+                const d = 0.55 * disruptionRatio;
+                const t = 0.30 * threatRatio;
+                const r = 0.15 * (1 - supplyReadiness);
+                score = d + t + r;
+                score_breakdown = { disruption_ratio: d, threat_ratio: t, supply_inverse: r };
+                break;
+            }
+            case 'request_army_support': {
+                const t = 0.50 * threatRatio;
+                const d = 0.30 * deficitUrgency;
+                const r = 0.20 * (1 - supplyReadiness);
+                score = t + d + r;
+                score_breakdown = { threat_ratio: t, deficit_urgency: d, supply_inverse: r };
+                break;
+            }
+            default: {
+                score = 0;
+                score_breakdown = {};
+            }
+        }
+
+        // ─── Hard-block rules ─────────────────────────────────────────────
+        const blockedBy: string[] = [];
+        const isOffensive = type === 'stage_operation' || type === 'launch_opportunity';
+
+        if (isOffensive) {
+            if (isOffensiveBlockedByExhaustion)
+                blockedBy.push('corps_exhaustion_exceeds_threshold');
+            if (isOffensiveBlockedByFatigue)
+                blockedBy.push('average_fatigue_too_high');
+            if (isOffensiveBlockedByCampaignRole)
+                blockedBy.push('campaign_role_forbids_offensive');
+            if (isOffensiveBlockedBySyncRole)
+                blockedBy.push('sync_role_forbids_offensive');
+            if (isOffensiveBlockedByStance)
+                blockedBy.push('corps_stance_forbids_offensive');
+            if (isOffensiveBlockedByLiveMajorOp)
+                blockedBy.push('major_operation_already_active');
+            if (isCriticalSupply)
+                blockedBy.push('critical_supply_belief');
+        }
+
+        if (type === 'request_army_support' && forces.total_surplus > 0) {
+            blockedBy.push('surplus_available_no_hq_request');
+        }
+
+        return {
+            intent_id: intentId,
+            type,
+            // ZoneId is a branded string; cast is safe — values come from zone_id fields.
+            target_zone: targetZone as ZoneId | undefined,
+            score,
+            score_breakdown,
+            blocked_by: blockedBy,
+        } satisfies CommanderIntentCandidate;
+    });
+
+    // ─── Winner selection ─────────────────────────────────────────────────
+
+    const eligibleCandidates = allCandidates.filter(c => c.blocked_by.length === 0);
+
+    let winner: CommanderIntentCandidate | null = null;
+    if (eligibleCandidates.length > 0) {
+        const sorted = [...eligibleCandidates].sort((a, b) => {
+            // Primary: score descending
+            const scoreDiff = b.score - a.score;
+            if (Math.abs(scoreDiff) > 1e-9) return scoreDiff > 0 ? 1 : -1;
+            // Tie-break 1: intent type priority (lower index wins)
+            const ai = INTENT_PRIORITY_ORDER.indexOf(a.type);
+            const bi = INTENT_PRIORITY_ORDER.indexOf(b.type);
+            if (ai !== bi) return ai - bi;
+            // Tie-break 2: zone_id lexicographic
+            return strictCompare(a.target_zone ?? 'corps', b.target_zone ?? 'corps');
+        });
+        winner = sorted[0] ?? null;
+    }
+
+    // ─── Trace ────────────────────────────────────────────────────────────
+
+    const trace: CommanderDecisionTrace = {
+        turn,
+        winning_intent_id: winner?.intent_id ?? null,
+        candidates: allCandidates,
+        hard_constraints: [...new Set(allCandidates.flatMap(c => [...c.blocked_by]))].sort(strictCompare),
+        lessons_applied: [],
+    };
+
+    return { winner, trace };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -235,16 +602,43 @@ export function managePlan(
         return { plan: null, action: 'none', reason: 'major operation already active for this corps', concentration_orders: [] };
     }
 
-    // Priority 1: pre-planned operations
-    const prePlannedDecision = tryCreateFromPrePlanned(briefing, zones, surplusPool, forces.tier_counts.main_effort, turn);
-    if (prePlannedDecision) return prePlannedDecision;
+    // v0.8.1 Phase 3: Candidate intent competition.
+    // Run the competition to determine what the commander *wants* to do this turn.
+    // The existing stance/exhaustion/fatigue/role guards above already enforce the same
+    // hard-block conditions, so any `stage_operation` or `launch_opportunity` winner
+    // here is already known-eligible for offensive planning.
+    const { winner, trace } = selectWinningIntent(briefing, zones, forces, surplusPool, turn);
 
-    // Priority 2: opportunity (weak/undefended enemy zone adjacent to surplus)
-    const opportunityDecision = tryCreateFromOpportunity(briefing, zones, forces, surplusPool, turn);
-    if (opportunityDecision) return opportunityDecision;
+    // Route based on winning intent type.
+    // When competition selects an offensive intent, preserve original priority ordering:
+    // pre-planned ops take precedence over opportunity even when launch_opportunity scored higher.
+    const offensiveWinner =
+        winner?.type === 'stage_operation' || winner?.type === 'launch_opportunity';
 
-    // No plan created
-    return { plan: null, action: 'none', reason: 'no viable plan available', concentration_orders: [] };
+    if (offensiveWinner) {
+        // Priority 1: pre-planned operations (always attempted first when eligible)
+        const prePlannedDecision = tryCreateFromPrePlanned(briefing, zones, surplusPool, forces.tier_counts.main_effort, turn);
+        if (prePlannedDecision) return { ...prePlannedDecision, decision_trace: trace };
+
+        // Priority 2: opportunity (weak/undefended enemy zone adjacent to surplus)
+        const opportunityDecision = tryCreateFromOpportunity(briefing, zones, forces, surplusPool, turn);
+        if (opportunityDecision) return { ...opportunityDecision, decision_trace: trace };
+
+        // Offensive winner but underlying plan functions returned null (e.g. no reachable targets).
+        return { plan: null, action: 'none', reason: 'no viable plan available', concentration_orders: [], decision_trace: trace };
+    }
+
+    // Non-offensive intent won (hold_line, reinforce_zone, thin_quiet_sector,
+    // recall_exposed_brigades, request_army_support) or all candidates were blocked.
+    return {
+        plan: null,
+        action: 'none',
+        reason: winner
+            ? `intent competition selected ${winner.type}`
+            : 'all candidates blocked',
+        concentration_orders: [],
+        decision_trace: trace,
+    };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

@@ -441,17 +441,19 @@ describe('v0.8.1 Phase 1 — multi-turn continuity', () => {
         expect(output.updated_state.lessons).toEqual(lessons);
     });
 
-    it('v0.8.1 fields remain undefined when not previously populated (except belief_state)', () => {
+    it('v0.8.1 fields remain undefined when not previously populated (except belief_state and decision_trace)', () => {
         const briefing = makeMinimalBriefing({ turn: 11 });
         const commander = new BotCorpsCommander();
         const output = commander.decide(briefing, null);
 
         // belief_state is now actively assembled in Phase 2 — always present
         expect(output.updated_state.belief_state).toBeDefined();
+        // decision_trace is actively assembled by Phase 3 intent competition — always present
+        // when managePlan runs the competition (no existing plan, stance allows planning).
+        expect(output.updated_state.decision_trace).toBeDefined();
         // Other v0.8.1 fields remain undefined when not previously populated
         expect(output.updated_state.relationships).toBeUndefined();
         expect(output.updated_state.lessons).toBeUndefined();
-        expect(output.updated_state.decision_trace).toBeUndefined();
     });
 });
 
