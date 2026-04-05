@@ -56,6 +56,16 @@ export function computePoliticalPeacePlanResponse(
             : 'rejected';
     }
 
+    // RBiH Owen-Stoltenberg tactical acceptance branch.
+    // When RBiH is in a weak position (situation_score < 50) and evaluates O-S, it accepts for
+    // international optics: O-S is always evaluated when RS controls ~63%+ of territory (well above
+    // any RS accept threshold), so RS will hard-reject. Izetbegovic's initialing on HMS Invincible
+    // (August 1993) was precisely this calculation — accept knowing RS will refuse, isolating RS
+    // diplomatically. Sources: ICTY IT-95-5/18-T (Karadzic trial, O-S initialing); Owen "Balkan Odyssey".
+    if (faction === 'RBiH' && plan.id === 'owen_stoltenberg' && assessment.situation_score < 50) {
+        return 'accepted';
+    }
+
     // RS territory floor: gap > 18pp → hard reject (patron override cannot override this).
     // Historian: RS assembly voted 96-2 against VOPP (35pp gap), 96% referendum against Contact Group (21pp gap).
     if (faction === 'RS') {

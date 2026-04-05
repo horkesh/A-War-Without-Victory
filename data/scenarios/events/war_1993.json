@@ -2190,6 +2190,55 @@
     ]
   },
   {
+    "id": "os_rbih_tactical_acceptance_1993",
+    "title": "Owen-Stoltenberg: Accept or Resist?",
+    "narrative": "Owen and Stoltenberg present their Union of Three Republics plan. Intelligence suggests Karadzic will not accept the RS territorial allocation. Accepting may isolate RS diplomatically — at the cost of legitimizing partition.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 72,
+      "turn_max": 76,
+      "phase": "war",
+      "requires_events": [
+        "owen_stoltenberg_plan_1993"
+      ]
+    },
+    "once": true,
+    "responding_faction": "RBiH",
+    "bot_response_logic": "strategic_weighted",
+    "requires_player_response": true,
+    "priority": 50,
+    "historical_source": "ICTY IT-95-5/18-T (Karadzic trial, Izetbegovic O-S initialing, August 1993). Owen, David. Balkan Odyssey (1995).",
+    "effect": {
+      "kind": "narrative",
+      "text": "The Owen-Stoltenberg plan reaches the Bosnian government. Izetbegovic must decide whether to accept — knowing RS will reject it — or refuse partition on principle."
+    },
+    "dimension_shifts": [
+      { "faction": "RBiH", "dimension": "patron_confidence", "delta": -5 }
+    ],
+    "response_options": [
+      {
+        "id": "accept_for_optics",
+        "label": "Accept (RS will reject — international gain)",
+        "aggression_affinity": -0.2,
+        "dimension_shifts": [
+          { "faction": "RBiH", "dimension": "international_standing", "delta": 10 },
+          { "faction": "RBiH", "dimension": "patron_confidence", "delta": 8 }
+        ],
+        "effects": []
+      },
+      {
+        "id": "reject_sincerely",
+        "label": "Reject (refuse partition on principle)",
+        "aggression_affinity": 0.4,
+        "dimension_shifts": [
+          { "faction": "RBiH", "dimension": "international_standing", "delta": -8 },
+          { "faction": "RBiH", "dimension": "negotiating_leverage", "delta": 6 }
+        ],
+        "effects": []
+      }
+    ]
+  },
+  {
     "id": "grabovica_uzdol_massacres_1993",
     "title": "Grabovica and Uzdol Massacres",
     "narrative": "During Operation Neretva 93, ARBiH units from Sarajevo commit war crimes against Croat civilians: at least 13 villagers killed at Grabovica on September 8-9, and at least 29 civilians and one HVO POW killed at Uzdol on September 14. ICTY Chief of Staff Sefer Halilovic is indicted but acquitted due to insufficient evidence of effective command control over the perpetrators.",
