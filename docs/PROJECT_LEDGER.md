@@ -1,3 +1,17 @@
+## [2026-04-05] COMBAT-P14 Feasibility / Estimator Gap Audit — Resolved (No Code Changes)
+
+### What changed
+- **Investigation only — no code changes.** COMBAT-P14 from engine health audit (2026-04-02) is **stale**: `checkLaunchFeasibility` now includes defender artillery (`getDefensiveFireMult`), entrenchment, and terrain (urban+forest). All flagged modifiers present in current code.
+
+### Targeted commander zero-eligible trajectory this session
+The commander-operation zero-eligible family that motivated COMBAT-P14 has been reduced to 2 bounded residual cases: vrs_east_bosnian staging unreachability + arbih_1st_corps Sarajevo siege pressure. This is a narrower and more defensible claim than the global `zero_eligible_attacker_operation_count`, which still includes other bounded families.
+
+### Recommended next lane
+gradacac_2 P0 investigation or v0.8.1 Commander Maturity gate check.
+
+### Report
+`docs/40_reports/implemented/20260405_COMBAT_P14_FEASIBILITY_AUDIT.md`
+
 ## [2026-04-05] estimateForceRatio Supply Awareness — Demoted (No Code Changes)
 
 ### What changed
