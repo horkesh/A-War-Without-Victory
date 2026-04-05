@@ -23759,3 +23759,13 @@ Commander `selectWinningIntent()` now wires `CommanderLesson[]` and `OfficerPers
 - `package.json` version bumped to `0.8.1`.
 - **v0.8.1 milestone closed.** All 6 maturity conditions met: belief state, candidate competition, lesson memory, constraint/preference separation, reasoning traces, relationship model.
 - tsc clean, 2484/2484 vitest. Report: `docs/40_reports/implemented/20260405_V081_PHASE6_TRACE_QA.md`
+
+## 2026-04-05 — v0.8.2 Phase 1: Political Personality Framework (ACCEPTED)
+
+- **Files created:** `src/sim/political/political_personality.ts` (new, ~380 lines), `tests/sim/political/political_personality.test.ts` (22 tests)
+- **Types added:** `PoliticalPersonality`, `PoliticalAssessment`, `POLITICAL_PERSONALITIES` (RS/RBiH/HRHB), `getPoliticalPersonality`, `computeSituationWeight`, `computePoliticalAssessment`
+- **Behavioral change:** None — types and pure functions only. GameState wiring deferred to Phase 2.
+- **Historian corrections:** HRHB `war_crimes_tolerance` 0.40→0.55 (Prlic/Kordic ICTY — systematic HVO ethnic cleansing policy). RBiH hard floor 0.10 enforced in assessment (no leadership JCE). RS `patron_confidence` weight 0.20 (1992-accurate; post-1993 decay deferred).
+- **Verification:** tsc clean, 2520/2520 vitest (176 files)
+- **Canon:** CONDITIONAL-GO — no blockers. Forward risks for Phase 2 documented in report (field contract, `political_leaders` wiring, `humanitarian_standing` dimension key).
+- **Report:** `docs/40_reports/implemented/20260405_V082_PHASE1_POLITICAL_PERSONALITY.md`
