@@ -19,6 +19,7 @@ import {
 } from '../data/settlement_ethnicity.js';
 import type { OperationalToCanonicalReverseMap } from '../data/operational_data.js';
 import type { LoadedSettlementGraph } from '../map/settlements.js';
+import { shouldEmitRoutineConsoleDiagnostics } from '../utils/routine_console_diagnostics.js';
 import type { FactionId, GameState, SettlementId } from './game_state.js';
 import { isMunicipalityAlignedToRbih } from './rbih_aligned_municipalities.js';
 
@@ -134,6 +135,7 @@ export function migratePoliticalControllersToOsidIfNeeded(
  */
 function writeInitLog(message: string): void {
     try {
+        if (!shouldEmitRoutineConsoleDiagnostics()) return;
         if (typeof process === 'undefined' || !process.stdout || typeof process.stdout.write !== 'function') return;
         process.stdout.write(message);
     } catch (error) {

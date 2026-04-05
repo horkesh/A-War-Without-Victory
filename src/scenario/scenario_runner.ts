@@ -58,6 +58,11 @@ import { runOneTurn } from '../state/turn_pipeline.js';
 import { strictCompare } from '../state/validateGameState.js';
 import { stableStringify } from '../utils/stable_json.js';
 import {
+    emitRoutineConsoleDebug,
+    popRoutineConsoleDiagnosticsSuppressed,
+    pushRoutineConsoleDiagnosticsSuppressed,
+} from '../utils/routine_console_diagnostics.js';
+import {
     applyBaselineOpsDisplacement,
     applyBaselineOpsExhaustion,
     computeEngagementLevel
@@ -144,12 +149,7 @@ export function applyActionsToState(_state: GameState, _actions: ScenarioAction[
 }
 
 function safeDebugLog(...args: unknown[]): void {
-    try {
-        console.debug(...args);
-    } catch {
-        // Electron on Windows can lose its stdout/stderr pipe; debug logging must
-        // never be allowed to abort scenario initialization.
-    }
+    emitRoutineConsoleDebug(...args);
 }
 
 export function repairScenarioArtifactState(
@@ -281,6 +281,8 @@ export interface RunScenarioOptions {
     baseDir?: string;
     /** When true, build state and write initial_save only; skip week loop and end-of-run artifacts (faster for desktop New Campaign). */
     initialStateOnly?: boolean;
+    /** Emit routine init/sector console diagnostics during scenario runs. Defaults off under Vitest, on elsewhere. */
+    consoleDiagnostics?: boolean;
 }
 
 export interface RunScenarioResult {
@@ -877,8 +879,12 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         use_smart_bots = false,
         bot_diagnostics = false,
         baseDir: optionsBaseDir,
-        initialStateOnly = false
+        initialStateOnly = false,
+        consoleDiagnostics = process.env.VITEST !== 'true',
     } = options;
+    if (!consoleDiagnostics) {
+        pushRoutineConsoleDiagnosticsSuppressed();
+    }
     const effectiveEmitEvery = emitWeeklySavesForVideo ? Math.max(1, emitEvery) : emitEvery;
     let scenario = await loadScenario(scenarioPath);
     if (filterProbeIntent) {
@@ -2339,6 +2345,10 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             (err as Error & { run_id?: string; out_dir?: string }).out_dir = out_dir_relative;
         }
         throw err;
+    } finally {
+        if (!consoleDiagnostics) {
+            popRoutineConsoleDiagnosticsSuppressed();
+        }
     }
 }
 
@@ -2463,7 +2473,8 @@ export async function createStateFromScenario(
         outDirBase: join(baseDir, 'runs'),
         weeksOverride: 1,
         uniqueRunFolder: true,
-        initialStateOnly
+        initialStateOnly,
+        consoleDiagnostics: false,
     });
     const content = await readFile(result.paths.initial_save, 'utf8');
     return deserializeState(content);

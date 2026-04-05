@@ -38,6 +38,7 @@ import { buildOsidAdjacency, buildSharedBoundaryAdjacency, type Osid } from './o
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { emitRoutineConsoleWarn } from '../../utils/routine_console_diagnostics.js';
 import {
     isSectorAssignmentExemptCorpsId,
     MIN_SECTOR_BRIGADES,
@@ -203,7 +204,7 @@ function emitFinalUnresolvedSectorWarnings(
     for (const formationId of unresolved) {
         const formation = formations[formationId];
         if (!formation) continue;
-        console.warn(
+        emitRoutineConsoleWarn(
             `[brigade_assignment] UNRESOLVED ${formationId} (${formation.personnel ?? 0} pers): ` +
             `fell through sector pipeline, corps=${getFormationCorpsId(formation)}`
         );

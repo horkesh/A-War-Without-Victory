@@ -14,6 +14,7 @@ import { computeLocalFrontDefensivePower } from './local_front_defense.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 import { munFromOsid, type Osid } from './osid_adjacency.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { emitRoutineConsoleWarn } from '../../utils/routine_console_diagnostics.js';
 import {
     GARRISON_BUDGET_EDGES_PER_BRIGADE,
     isSectorAssignmentExemptCorpsId,
@@ -213,7 +214,7 @@ export function classifyBrigadesByTerritory(
             const brigComp = componentOf.get(f.location_osid) ?? -2;
             const sectorComp = getSectorComponent(sector, componentOf);
             if (sectorComp !== brigComp) {
-                console.warn(`[brigade_assignment] Ignored stale player override ${bid} -> ${sector.sector_id}: component ${brigComp} cannot reach component ${sectorComp}`);
+                emitRoutineConsoleWarn(`[brigade_assignment] Ignored stale player override ${bid} -> ${sector.sector_id}: component ${brigComp} cannot reach component ${sectorComp}`);
                 continue;
             }
             sector.assigned_brigade_ids.push(bid);
@@ -279,7 +280,7 @@ export function classifyBrigadesByTerritory(
         if (!f.location_osid) continue;
         if (state && POCKET_BRIGADE_FORCE_DISSOLUTION_IDS.has(fid)) {
             dissolvePocketDestroyableBrigade(state, formations, fid);
-            console.warn(`[brigade_assignment] Destroyed designated pocket brigade ${fid}`);
+            emitRoutineConsoleWarn(`[brigade_assignment] Destroyed designated pocket brigade ${fid}`);
             continue;
         }
 
@@ -438,7 +439,7 @@ export function classifyBrigadesByTerritory(
             for (const bid of pool) {
                 const f = formations[bid];
                 if (!f) continue;
-                console.warn(`[brigade_assignment] UNASSIGNED ${bid}: corps ${corpsId} has no sectors with edges`);
+                    emitRoutineConsoleWarn(`[brigade_assignment] UNASSIGNED ${bid}: corps ${corpsId} has no sectors with edges`);
             }
             continue;
         }
@@ -599,7 +600,7 @@ export function classifyBrigadesByTerritory(
         for (const bid of [...pool]) {
             const f = formations[bid];
             if (!f?.location_osid) {
-                console.warn(`[brigade_assignment] UNASSIGNED ${bid}: no location_osid`);
+                emitRoutineConsoleWarn(`[brigade_assignment] UNASSIGNED ${bid}: no location_osid`);
                 continue;
             }
             const brigComp = componentOf.get(f.location_osid) ?? -2;
@@ -631,7 +632,7 @@ export function classifyBrigadesByTerritory(
                 target.need = Math.max(0, target.need - 1);
             } else if (sectorNeed.length > 0) {
                 if (REAR_GUARD_CORPS.has(corpsId)) {
-                    console.warn(`[brigade_assignment] UNASSIGNED ${bid}: rear-guard corps brigade cannot reach any same-component sector`);
+                    emitRoutineConsoleWarn(`[brigade_assignment] UNASSIGNED ${bid}: rear-guard corps brigade cannot reach any same-component sector`);
                     continue;
                 }
                 const hasFactionSectorInComponent = sectors.some((s) =>
@@ -648,10 +649,10 @@ export function classifyBrigadesByTerritory(
                 // Historical: when the Posavina pocket fell, its brigades ceased to exist.
                 if (Array.isArray(f.tags) && f.tags.includes('pocket_destroyable') && state) {
                     dissolvePocketDestroyableBrigade(state, formations, bid);
-                    console.warn(`[brigade_assignment] Pocket brigade ${f.name ?? bid} destroyed: home pocket overrun`);
+                    emitRoutineConsoleWarn(`[brigade_assignment] Pocket brigade ${f.name ?? bid} destroyed: home pocket overrun`);
                     continue; // Skip force-assignment
                 }
-                console.warn(`[brigade_assignment] UNASSIGNED ${bid}: no reachable same-component sector from ${f.location_osid}`);
+                emitRoutineConsoleWarn(`[brigade_assignment] UNASSIGNED ${bid}: no reachable same-component sector from ${f.location_osid}`);
             }
         }
 
@@ -686,7 +687,7 @@ export function classifyBrigadesByTerritory(
         if (bestSector) {
             bestSector.assigned_brigade_ids.push(fid);
         } else {
-            console.warn(`[brigade_assignment] UNRESOLVED ${fid}: loaned to ${targetCorpsId} but no truthful same-component sector exists`);
+            emitRoutineConsoleWarn(`[brigade_assignment] UNRESOLVED ${fid}: loaned to ${targetCorpsId} but no truthful same-component sector exists`);
         }
     }
 
@@ -728,7 +729,7 @@ export function classifyBrigadesByTerritory(
                     const idx = sector.assigned_brigade_ids.indexOf(bid);
                     if (idx >= 0) sector.assigned_brigade_ids.splice(idx, 1);
                     territoryMatches[0]!.assigned_brigade_ids.push(bid);
-                    console.warn(`[brigade_assignment] Reassigned unreachable ${bid} from ${sector.sector_id} to territory-owning ${territoryMatches[0]!.sector_id}`);
+                    emitRoutineConsoleWarn(`[brigade_assignment] Reassigned unreachable ${bid} from ${sector.sector_id} to territory-owning ${territoryMatches[0]!.sector_id}`);
                     continue;
                 }
                 const sameCorps = sectors
@@ -753,19 +754,19 @@ export function classifyBrigadesByTerritory(
                     const idx = sector.assigned_brigade_ids.indexOf(bid);
                     if (idx >= 0) sector.assigned_brigade_ids.splice(idx, 1);
                     sameCorps[0]!.sector.assigned_brigade_ids.push(bid);
-                    console.warn(`[brigade_assignment] Reassigned unreachable ${bid} from ${sector.sector_id} to ${sameCorps[0]!.sector.sector_id}`);
+                    emitRoutineConsoleWarn(`[brigade_assignment] Reassigned unreachable ${bid} from ${sector.sector_id} to ${sameCorps[0]!.sector.sector_id}`);
                     continue;
                 }
                 if (Array.isArray(f.tags) && f.tags.includes('pocket_destroyable')) {
                     const idx = sector.assigned_brigade_ids.indexOf(bid);
                     if (idx >= 0) sector.assigned_brigade_ids.splice(idx, 1);
                     dissolvePocketDestroyableBrigade(state, formations, bid);
-                    console.warn(`[brigade_assignment] Destroyed unreachable pocket brigade ${bid} (no reachable same-corps sector)`);
+                    emitRoutineConsoleWarn(`[brigade_assignment] Destroyed unreachable pocket brigade ${bid} (no reachable same-corps sector)`);
                     continue;
                 }
                 const idx = sector.assigned_brigade_ids.indexOf(bid);
                 if (idx >= 0) sector.assigned_brigade_ids.splice(idx, 1);
-                console.warn(`[brigade_assignment] UNRESOLVED ${bid}: assigned sector ${sector.sector_id} became unreachable and no same-corps sector could absorb it`);
+                emitRoutineConsoleWarn(`[brigade_assignment] UNRESOLVED ${bid}: assigned sector ${sector.sector_id} became unreachable and no same-corps sector could absorb it`);
             }
         }
 
@@ -817,7 +818,7 @@ export function classifyBrigadesByTerritory(
                 const idx = sector.assigned_brigade_ids.indexOf(bid);
                 if (idx >= 0) sector.assigned_brigade_ids.splice(idx, 1);
                 best.sector.assigned_brigade_ids.push(bid);
-                console.warn(
+                emitRoutineConsoleWarn(
                     `[brigade_assignment] rear-guard rebalance ${bid}: ${sector.sector_id} (dist ${ownDist}) -> ${best.sector.sector_id} (dist ${best.dist})`
                 );
             }
@@ -1116,7 +1117,7 @@ export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
             const ownCorpsSectors = sectorClaims.filter(c => c.sector.corps_id === corpsId);
             const homeStillOwnCorps = ownCorpsSectors.some(c => c.territorySet.has(formation.home_osid!));
             if (homeStillOwnCorps) {
-                console.warn(`[brigade_assignment] Skipping cross-corps rehome for drifted ${fid} — home_osid ${formation.home_osid} still in own-corps territory`);
+                emitRoutineConsoleWarn(`[brigade_assignment] Skipping cross-corps rehome for drifted ${fid} — home_osid ${formation.home_osid} still in own-corps territory`);
                 continue;
             }
         }
@@ -1149,7 +1150,7 @@ export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
             best.sector.assigned_brigade_ids.push(fid);
         }
         assigned.add(fid);
-        console.warn(`[brigade_assignment] Rehomed ${fid} into truthful sector owner ${best.sector.sector_id} (${best.claim})`);
+        emitRoutineConsoleWarn(`[brigade_assignment] Rehomed ${fid} into truthful sector owner ${best.sector.sector_id} (${best.claim})`);
     }
 }
 
@@ -1232,7 +1233,7 @@ export function warnUnresolvedSectorAssignments(
         const isLoaned = !!f.elite_loan_state?.on_loan && !!f.elite_loan_state?.loaned_to_corps;
         if (isSectorAssignmentExemptCorpsId(fCorpsId) && !isLoaned) continue;
         if (adjacency && !brigadeRequiresSectorAssignment(f, sectors, adjacency, frontEdges)) continue;
-        console.warn(`[brigade_assignment] UNRESOLVED ${fid} (${f.personnel ?? 0} pers): fell through sector pipeline, corps=${fCorpsId}`);
+        emitRoutineConsoleWarn(`[brigade_assignment] UNRESOLVED ${fid} (${f.personnel ?? 0} pers): fell through sector pipeline, corps=${fCorpsId}`);
     }
 }
 
