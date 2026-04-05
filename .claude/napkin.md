@@ -10,8 +10,17 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-04-02, v0.8.0 Commander Intelligence Overhaul on main)
-**n1302 ATH: 93.7% area-weighted, 25/25 anchors, 6/6 benchmarks. hash: 0cf989330bd36cc8.**
+## Current State (2026-04-05, v0.8.0 Commander Intelligence Overhaul on main)
+**n1318: 94.0% area-weighted, 26/27 anchors, 6/6 benchmarks, 71 battles. hash: c1354a4bd3318d3b.**
+Four engine-truth lanes closed in one session:
+1. Fix A: reachability-aware plan formation (n1315 +0.6pp +2 anchors)
+2. Pipeline priority: stance preservation + guard removal (n1316 zero-delta)
+3. Home-return tug-of-war: `recallDriftedBrigades` sector-assignment check (n1317 zero-delta)
+4. ZEA attribution: commander ops get axes → **invalid ops 370→137 (63%), battles 64→71 (+7)**
+rs_1st_armored: Prijedor (stuck) → **Jajce front (stable)**. Commander ops now attack.
+kopcic_2 anchor lost: RS commander ops now attack in Bugojno — calibration sensitivity, not regression.
+2335 tests, 0 failures.
+Previous ATH: n1315: 94.3%, 27/27. Previous: n1302: 93.7%, 25/25.
 Commander Intelligence Overhaul (n1294–1301): must_hold 1.5× garrison (Brcko/Doboj), org readiness gate (zero main_effort → defensive), op scale cap by main_effort_count, enemy_concentration_zones from intel picture, coordination ±4%/pt officer competence, strength-based opportunity target ranking.
 
 **ATH BASELINE: n1256 — 94.2%, 23/23 anchors, 6/6 benchmarks, 73 battles. hash: 5fa01bbdecc43f5f.**
@@ -83,6 +92,8 @@ After EVERY scenario run, the orchestrator:
 5. **Record**: Update CALIBRATION_MASTER with the run entry.
 
 ## Execution & Validation
+1. **[2026-04-05] Claude report handoff protocol: treat report as claims, not truth**
+   Do instead: When the user pastes a Claude/subagent report, do not synthesize from the pasted text alone. Inspect the actual repo changes, verify the claimed files and behavior locally, run the relevant checks yourself, correct overclaims, and if the lane is truly accepted, stage/commit it before replying. Always include the next prompt automatically after the verdict.
 1. **[2026-03-27] Brigade front-lock investigations need both placement and history validation**
    Do instead: After any line-assignment/march fix, verify the target brigade in final_save has (a) `onSectorFront=true`, (b) no deep-rear friction OSIDs in `brigade_history.engagements`, and (c) fresh 40w run evidence recorded in PROJECT_LEDGER.
 1. **[2026-03-11] NEVER claim a fix works without running the scenario and verifying the output**
