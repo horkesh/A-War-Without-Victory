@@ -384,9 +384,13 @@ export function deriveCorridorsOsid(
 
     for (const fac of supplyReport.factions) {
         const controlledSet = new Set(fac.controlled);
-        const edgesUsed = new Set(fac.edges_used ?? []);
         const reachableSet = new Set(fac.reachable_osids);
 
+        // Build full set of edges between reachable controlled OSIDs.
+        // Bridge detection must operate on the actual subgraph topology, not the
+        // BFS spanning tree (edges_used). The BFS tree has zero cycles, so every
+        // edge is trivially a bridge — producing 100% brittle, 0% open.
+        const reachableEdges = new Set<string>();
         const potentialEdges = new Set<string>();
         for (const osid of fac.controlled) {
             const neighbors = adjacency.get(osid) ?? [];
@@ -394,15 +398,18 @@ export function deriveCorridorsOsid(
                 if (!controlledSet.has(n)) continue;
                 const eid = osid < n ? `${osid}__${n}` : `${n}__${osid}`;
                 potentialEdges.add(eid);
+                if (reachableSet.has(osid) && reachableSet.has(n)) {
+                    reachableEdges.add(eid);
+                }
             }
         }
 
-        for (const edgeId of edgesUsed) {
-            const isBridge = isBridgeInSubgraphOsid(edgeId, edgesUsed, reachableSet, adjacency);
+        for (const edgeId of reachableEdges) {
+            const isBridge = isBridgeInSubgraphOsid(edgeId, reachableEdges, reachableSet, adjacency);
             corridors.push({ edge_id: edgeId, faction_id: fac.faction_id, state: isBridge ? 'brittle' : 'open' });
         }
         for (const edgeId of potentialEdges) {
-            if (edgesUsed.has(edgeId)) continue;
+            if (reachableEdges.has(edgeId)) continue;
             corridors.push({ edge_id: edgeId, faction_id: fac.faction_id, state: 'cut' });
         }
     }
@@ -480,11 +487,20 @@ export function deriveSupplyStateByOsid(
     for (const fac of supplyReport.factions) {
         const reachableSet = new Set(fac.reachable_osids);
         const isolatedSet = new Set(fac.isolated_osids);
-        const edgesUsed = new Set(fac.edges_used ?? []);
+        const controlledSet = new Set(fac.controlled);
+        // Build open edges from ALL edges between reachable controlled OSIDs
+        // (not just BFS tree edges). The corridor report now classifies these
+        // correctly against the full subgraph topology.
         const openEdges = new Set<string>();
-        for (const edgeId of edgesUsed) {
-            const st = corridorByFactionEdge.get(`${fac.faction_id}:${edgeId}`);
-            if (st === 'open') openEdges.add(edgeId);
+        for (const osid of fac.controlled) {
+            if (!reachableSet.has(osid)) continue;
+            const neighbors = adjacency.get(osid) ?? [];
+            for (const n of neighbors) {
+                if (!controlledSet.has(n) || !reachableSet.has(n)) continue;
+                const eid = osid < n ? `${osid}__${n}` : `${n}__${osid}`;
+                const st = corridorByFactionEdge.get(`${fac.faction_id}:${eid}`);
+                if (st === 'open') openEdges.add(eid);
+            }
         }
 
         // Isolated source detection: only seed adequate BFS from sources in

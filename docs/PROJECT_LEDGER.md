@@ -1,3 +1,21 @@
+## [2026-04-05] BFS Corridor Reachability Fix — n1323: 94.0%, 27/27 Anchors
+
+### What changed
+- **Bridge detection on full subgraph** in `supply_state_derivation.ts`: `deriveCorridorsOsid` now tests bridge-ness against all edges between reachable controlled OSIDs, not the BFS spanning tree. `deriveSupplyStateByOsid` builds `openEdges` from the same full subgraph.
+
+### Root cause
+`runSupplyBfs` records only BFS tree edges in `edges_used` (skips already-visited neighbors). In a spanning tree, every edge is trivially a bridge. `isBridgeInSubgraphOsid` therefore classified 100% of edges as brittle, 0% as open. The adequate-BFS could only reach source nodes themselves (~5-6 per faction). The OSID graph is actually a dense mesh (712 nodes, 2047 edges, avg degree 5.75, cycle rank 1336) — true bridges are rare.
+
+### Validation: n1323
+- **94.0% area-weighted** (-0.3pp from calibration shift), **27/27 anchors** (zero-delta), **6/6 benchmarks**, **74 battles** (-2), **90 attack orders** (-7).
+- Supply readiness: 13/21 ops at 1.0, 8/21 at 0.5 (vs n1322: 2/20 at 1.0, 18/20 at 0.5). VRS 6/7 at 1.0 (Drina at 0.5), HRHB 3/3 at 1.0, ARBiH 4/9 at 1.0 and 5/9 at 0.5.
+
+### Recommended next lane
+estimateForceRatio supply awareness (P1) — now unblocked by meaningful supply differentiation.
+
+### Report
+`docs/40_reports/implemented/20260405_BFS_CORRIDOR_REACHABILITY_FIX.md`
+
 ## [2026-04-05] P9 Supply Readiness — Graduated Scoring Fix — n1322: 94.3%, 27/27 Anchors
 
 ### What changed
