@@ -965,7 +965,8 @@ describe('plan', () => {
         }));
         const forces = makeForces(evals, zones);
 
-        // Plan created at turn 5, now turn 15 — way past target_ready_turn
+        // Plan created at turn 5, suspended since turn 8, now turn 15
+        // suspended for 7 turns >= MAX_SUSPENSION_TURNS (4) → should abandon
         const plan: CommanderPlan = {
             plan_id: 'plan_test',
             objective_description: 'Test Op',
@@ -980,6 +981,7 @@ describe('plan', () => {
             viability_score: 0.6,
             source: 'pre_planned',
             suspension_reason: 'threat escalation',
+            suspended_since_turn: 8,
         };
 
         // Still under critical threat -> triggers suspend check, and suspended duration >= MAX_SUSPENSION_TURNS

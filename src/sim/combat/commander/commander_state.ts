@@ -15,6 +15,7 @@ import type {
     CorpsDirective,
     SectorStance,
     CorpsFrontSector,
+    SectorIntelRecord,
 } from '../../../state/game_state.js';
 
 import type { SpatialContext } from '../../spatial_context.js';
@@ -25,6 +26,7 @@ import type {
     FrontPriority,
     SyncOpParticipant,
 } from '../army_hq_gathering_types.js';
+import type { SupplyStateByOsidReport } from '../../../state/supply_state_derivation.js';
 
 // ---------------------------------------------------------------------------
 // 1. ZoneId — branded string for zone identification
@@ -183,6 +185,8 @@ export interface CommanderPlan {
     /** Re-evaluated each turn. */
     readonly viability_score: number;
     readonly suspension_reason?: string;
+    /** Turn when the plan was first suspended. Used for MAX_SUSPENSION_TURNS timeout. */
+    readonly suspended_since_turn?: number;
     readonly source: 'pre_planned' | 'reactive' | 'opportunity';
 }
 
@@ -248,6 +252,153 @@ export interface AdjacentCorpsSummary {
 }
 
 // ---------------------------------------------------------------------------
+// 11c. CommanderIntelData — typed intel payload for briefing
+// ---------------------------------------------------------------------------
+
+/**
+ * Structured intel data assembled from sector_intel records and opsec state.
+ * Replaces the previous `unknown` typing on CommanderBriefing.intel_data.
+ */
+export interface CommanderIntelData {
+    readonly sector_intel: Readonly<Record<string, readonly SectorIntelRecord[]>>;
+    readonly opsec_active_sectors: readonly string[];
+}
+
+// ---------------------------------------------------------------------------
+// 12a. CommanderBeliefState — v0.8.1: perception layer, distinct from raw truth
+// ---------------------------------------------------------------------------
+
+/**
+ * Belief about a specific zone's enemy posture.
+ * Diverges from raw state as intel degrades or concentrates.
+ */
+export interface ZoneBelief {
+    readonly zone_id: ZoneId;
+    /** Estimated total enemy headcount adjacent to this zone. */
+    readonly estimated_enemy_strength: number;
+    /** Inferred enemy intent from observed signals. */
+    readonly estimated_enemy_intent: 'hold' | 'probe' | 'attack' | 'mass' | 'unknown';
+    /** 0-1, composite confidence in this belief. */
+    readonly confidence: number;
+    /** Last turn this belief was confirmed by direct observation. */
+    readonly last_confirmed_turn: number;
+}
+
+/**
+ * Commander's perception of the world — not raw GameState truth.
+ * Built from intel, sector activity, and prior beliefs. Decays without confirmation.
+ */
+export interface CommanderBeliefState {
+    readonly zone_beliefs: readonly ZoneBelief[];
+    /** Composite confidence in supply continuity for this corps area. 0-1. */
+    readonly supply_continuity_confidence: number;
+    /** Per-subordinate reliability score (brigade_id -> 0-1). */
+    readonly subordinate_reliability: Readonly<Record<string, number>>;
+    /** Per-neighboring-corps cooperation confidence (corps_id -> 0-1). */
+    readonly neighbor_support_confidence: Readonly<Record<string, number>>;
+}
+
+// ---------------------------------------------------------------------------
+// 12b. CommanderRelationships — v0.8.1: trust model for order interpretation
+// ---------------------------------------------------------------------------
+
+/**
+ * Functional relationship model — directly supports future order interpretation,
+ * trust-sensitive compliance, sibling cooperation, and patron dependence.
+ */
+export interface CommanderRelationships {
+    /** Player trust in this commander. 0-1, starts at faction default. */
+    readonly player_trust: number;
+    /** Trust toward sibling corps commanders. corps_id -> 0-1. */
+    readonly sibling_corps_trust: Readonly<Record<string, number>>;
+    /** Alignment with faction patron/political authority. 0-1. */
+    readonly patron_alignment: number;
+}
+
+// ---------------------------------------------------------------------------
+// 12c. CommanderLesson — v0.8.1: outcome memory affecting future scoring
+// ---------------------------------------------------------------------------
+
+/** Categories of operational lessons extracted from history. */
+export type CommanderLessonCategory =
+    | 'offensive_failure'
+    | 'defensive_failure'
+    | 'reserve_misuse'
+    | 'intel_surprise'
+    | 'staging_delay'
+    | 'success_pattern';
+
+/**
+ * A structured lesson extracted from operational history.
+ * Lessons decay over time and influence candidate intent scoring.
+ */
+export interface CommanderLesson {
+    readonly lesson_id: string;
+    readonly category: CommanderLessonCategory;
+    /** Zone where the lesson was learned, if zone-specific. */
+    readonly zone_id?: ZoneId;
+    /** OSIDs involved in the original event, for cooldown matching. */
+    readonly relevant_osids?: readonly string[];
+    /** Scoring weight: positive reinforces, negative inhibits. */
+    readonly weight: number;
+    /** Turn this lesson was created. */
+    readonly created_turn: number;
+    /** Turn after which this lesson is discarded. Undefined = permanent. */
+    readonly expires_turn?: number;
+}
+
+// ---------------------------------------------------------------------------
+// 12d. CommanderIntentCandidate — v0.8.1: competing intent types
+// ---------------------------------------------------------------------------
+
+/** The types of strategic intent a commander can pursue. */
+export type CommanderIntentType =
+    | 'hold_line'
+    | 'reinforce_zone'
+    | 'stage_operation'
+    | 'launch_opportunity'
+    | 'thin_quiet_sector'
+    | 'recall_exposed_brigades'
+    | 'request_army_support';
+
+/**
+ * A scored candidate intent. Multiple candidates are generated per turn;
+ * the winner becomes the active plan or action.
+ */
+export interface CommanderIntentCandidate {
+    readonly intent_id: string;
+    readonly type: CommanderIntentType;
+    /** Target zone, if zone-specific. */
+    readonly target_zone?: ZoneId;
+    /** Composite score — higher wins. */
+    readonly score: number;
+    /** Factor-by-factor score breakdown for trace inspection. */
+    readonly score_breakdown: Readonly<Record<string, number>>;
+    /** Hard constraints that block this candidate. Empty = eligible. */
+    readonly blocked_by: readonly string[];
+}
+
+// ---------------------------------------------------------------------------
+// 12e. CommanderDecisionTrace — v0.8.1: structured reasoning audit trail
+// ---------------------------------------------------------------------------
+
+/**
+ * Per-turn structured decision trace.
+ * Records what the commander considered, what won, and why.
+ */
+export interface CommanderDecisionTrace {
+    readonly turn: number;
+    /** ID of the winning intent, or null if no action taken. */
+    readonly winning_intent_id: string | null;
+    /** All candidates evaluated this turn. */
+    readonly candidates: readonly CommanderIntentCandidate[];
+    /** Hard constraints that applied this turn (e.g. 'insufficient_supply'). */
+    readonly hard_constraints: readonly string[];
+    /** Lesson IDs that influenced scoring this turn. */
+    readonly lessons_applied: readonly string[];
+}
+
+// ---------------------------------------------------------------------------
 // 12. CommanderState — persistent per corps, lives on CorpsCommandState
 // ---------------------------------------------------------------------------
 
@@ -266,6 +417,17 @@ export interface CommanderState {
     last_plan_action?: 'created' | 'advanced' | 'suspended' | 'abandoned' | 'launched' | 'none';
     /** Reason string for the last plan action. Player-safe explanation of why. */
     last_plan_reason?: string;
+
+    // ── v0.8.1 Commander Maturity fields (Phase 1: defaults only) ──
+
+    /** Perception layer — diverges from raw state as intel degrades. */
+    belief_state?: CommanderBeliefState;
+    /** Functional trust model for order interpretation. */
+    relationships?: CommanderRelationships;
+    /** Lessons extracted from operational history. */
+    lessons?: readonly CommanderLesson[];
+    /** Last turn's decision trace (most recent only; history in operation_history). */
+    decision_trace?: CommanderDecisionTrace;
 }
 
 // ---------------------------------------------------------------------------
@@ -294,13 +456,11 @@ export interface CommanderBriefing {
     readonly spatial: SpatialContext;
     readonly sectors: readonly CorpsFrontSector[];
     readonly brigades: readonly FormationState[];
-    /** Keep loose for now, tighten later. */
-    readonly supply_by_osid: unknown;
+    readonly supply_by_osid: SupplyStateByOsidReport | null;
     readonly ethnic_map: OsidEthnicComposition | null;
     readonly graph_analysis: FactionGraphAnalysis | null;
     readonly front_geometry: FrontGeometryAssessment | null;
-    /** Keep loose for now, tighten later. */
-    readonly intel_data: unknown;
+    readonly intel_data: CommanderIntelData | null;
     /** From bot_strategy doctrine phase. */
     readonly doctrine_stance: string;
     /** Current corps stance. */

@@ -154,13 +154,7 @@ function updateIntelPicture(
     const prevIntel = previousState?.intel_picture ?? null;
     const prevZoneConfidence: Readonly<Record<string, number>> = prevIntel?.zone_confidence ?? {};
 
-    // Parse intel_data (loosely typed for now)
-    const intelData = briefing.intel_data as {
-        sector_intel?: Record<string, SectorIntelRecord[]>;
-        opsec_active_sectors?: string[];
-    } | null;
-
-    const sectorIntel = intelData?.sector_intel ?? {};
+    const sectorIntel = briefing.intel_data?.sector_intel ?? {};
 
     // Build offensive_signs and concentration_detected from sector intel records
     const offensiveSigns: Record<string, number> = {};
@@ -253,11 +247,7 @@ function classifySectorActivity(
 ): SectorActivityEntry[] {
     const entries: SectorActivityEntry[] = [];
 
-    // Parse intel data for enemy strength estimates
-    const intelData = briefing.intel_data as {
-        sector_intel?: Record<string, SectorIntelRecord[]>;
-    } | null;
-    const sectorIntel = intelData?.sector_intel ?? {};
+    const sectorIntel = briefing.intel_data?.sector_intel ?? {};
 
     // Process sectors deterministically
     const sectors = [...briefing.sectors].sort((a, b) => strictCompare(a.sector_id, b.sector_id));

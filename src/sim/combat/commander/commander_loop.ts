@@ -16,6 +16,7 @@ import type {
     SettlementId,
 } from '../../../state/game_state.js';
 import type { OperationalToCanonicalReverseMap } from '../../../data/operational_data.js';
+import type { SupplyStateByOsidReport } from '../../../state/supply_state_derivation.js';
 import type { OsidEthnicComposition } from '../ethnic_defense.js';
 import type { FactionGraphAnalysis } from '../osid_graph_analysis.js';
 import type { SpatialContext } from '../../spatial_context.js';
@@ -98,7 +99,7 @@ export function runCommanderForCorps(
     edges: EdgeRecord[],
     reverseMap: OperationalToCanonicalReverseMap | null,
     graphAnalysis: FactionGraphAnalysis | null,
-    supplyByOsid: unknown,
+    supplyByOsid: SupplyStateByOsidReport | null,
     ethnicMap: OsidEthnicComposition | null,
 ): CommanderOutput {
     const briefing = buildBriefing(

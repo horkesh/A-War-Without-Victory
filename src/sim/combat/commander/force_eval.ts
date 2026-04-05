@@ -61,13 +61,12 @@ function supplyMult(supplyStatus: string | undefined): number {
 
 function getBrigadeSupplyState(
     brigade: FormationState,
-    supplyByOsid: unknown,
+    supplyByOsid: SupplyStateByOsidReport | null | undefined,
 ): SupplyStateLevel | undefined {
-    if (!brigade.location_osid || !brigade.faction || !supplyByOsid || typeof supplyByOsid !== 'object') {
+    if (!brigade.location_osid || !brigade.faction || !supplyByOsid) {
         return undefined;
     }
-    const report = supplyByOsid as Partial<SupplyStateByOsidReport>;
-    const factions = Array.isArray(report.factions) ? report.factions : [];
+    const factions = supplyByOsid.factions ?? [];
     const factionEntry = factions.find(entry => entry?.faction_id === brigade.faction);
     if (!factionEntry || !Array.isArray(factionEntry.by_osid)) return undefined;
     const osidEntry = factionEntry.by_osid.find(entry => entry?.osid === brigade.location_osid);
@@ -185,7 +184,7 @@ export function assignBrigadeToZone(
 export function evaluateCorpsForces(
     brigades: readonly FormationState[],
     zoneAssessments: ZoneAssessment[],
-    supplyByOsid?: unknown,
+    supplyByOsid?: SupplyStateByOsidReport | null,
 ): ForceAssessment {
     // Build a fast lookup: OSID -> ZoneId
     const osidToZone = new Map<string, ZoneId>();

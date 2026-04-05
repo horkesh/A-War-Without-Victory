@@ -280,9 +280,10 @@ function advanceExistingPlan(
     // Check for suspend conditions
     const suspendReason = checkSuspendConditions(plan, zones, surplusPool, briefing);
     if (suspendReason) {
-        // If already suspended, check duration
+        // If already suspended, check duration using suspended_since_turn
         if (plan.status === 'suspended') {
-            const suspendedTurns = turn - (plan.created_turn + estimateTurnsActive(plan, turn));
+            const suspendedSince = plan.suspended_since_turn ?? turn;
+            const suspendedTurns = turn - suspendedSince;
             if (suspendedTurns >= MAX_SUSPENSION_TURNS) {
                 return {
                     plan: { ...plan, status: 'abandoned' },
@@ -292,8 +293,10 @@ function advanceExistingPlan(
                 };
             }
         }
+        // Record the turn suspension started (preserve existing value if already suspended)
+        const suspendedSince = plan.status === 'suspended' ? plan.suspended_since_turn : turn;
         return {
-            plan: { ...plan, status: 'suspended', suspension_reason: suspendReason },
+            plan: { ...plan, status: 'suspended', suspension_reason: suspendReason, suspended_since_turn: suspendedSince },
             action: 'suspended',
             reason: suspendReason,
             concentration_orders: [],
@@ -341,6 +344,7 @@ function advanceExistingPlan(
             status: 'ready',
             concentration_progress: concentrationProgress,
             viability_score: viability,
+            suspended_since_turn: undefined,
         };
         return {
             plan: readyPlan,
@@ -357,6 +361,7 @@ function advanceExistingPlan(
             status: 'executing',
             concentration_progress: concentrationProgress,
             viability_score: viability,
+            suspended_since_turn: undefined,
         };
         return {
             plan: launchPlan,
@@ -1100,13 +1105,3 @@ function computeViabilityScore(
     return Math.max(0, Math.min(1, score));
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Helper: estimate turns a plan has been actively concentrating
-// ═══════════════════════════════════════════════════════════════════════════
-
-function estimateTurnsActive(plan: CommanderPlan, currentTurn: number): number {
-    // Simple estimate: total turns minus expected concentration time
-    const totalTurns = currentTurn - plan.created_turn;
-    const expectedConcentration = plan.target_ready_turn - plan.created_turn;
-    return Math.min(totalTurns, expectedConcentration);
-}

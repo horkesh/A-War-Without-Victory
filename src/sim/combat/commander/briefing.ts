@@ -15,16 +15,19 @@ import type {
     GameState,
     CorpsFrontSector,
     CorpsOperation,
+    SectorIntelRecord,
 } from '../../../state/game_state.js';
 import type { OperationalToCanonicalReverseMap } from '../../../data/operational_data_types.js';
 import type { OsidEthnicComposition } from '../ethnic_defense.js';
 import type { FactionGraphAnalysis } from '../osid_graph_analysis.js';
+import type { SupplyStateByOsidReport } from '../../../state/supply_state_derivation.js';
 import type { SpatialContext } from '../../spatial_context.js';
 import type { CampaignPlan, SyncOpParticipant } from '../army_hq_gathering_types.js';
 
 import type {
     AdjacentCorpsSummary,
     CommanderBriefing,
+    CommanderIntelData,
     EnemyEquipmentSummary,
     OfficerPersonality,
 } from './commander_state.js';
@@ -233,12 +236,12 @@ function collectIntelData(
     state: GameState,
     corpsId: FormationId,
     sectors: readonly CorpsFrontSector[],
-): unknown {
+): CommanderIntelData {
     const sectorIntel = state.military.sector_intel ?? {};
     const opsecSectors = new Set(state.military.opsec_sectors ?? []);
 
     // Gather sector intel records for this corps's sectors
-    const intelBySector: Record<string, unknown> = {};
+    const intelBySector: Record<string, readonly SectorIntelRecord[]> = {};
     for (const sector of sectors) {
         const records = sectorIntel[sector.sector_id];
         if (records) {
@@ -397,7 +400,7 @@ export function buildBriefing(
     edges: EdgeRecord[],
     reverseMap: OperationalToCanonicalReverseMap | null,
     graphAnalysis: FactionGraphAnalysis | null,
-    supplyByOsid: unknown,
+    supplyByOsid: SupplyStateByOsidReport | null,
     ethnicMap: OsidEthnicComposition | null,
 ): CommanderBriefing {
     const turn = state.meta?.turn ?? 0;

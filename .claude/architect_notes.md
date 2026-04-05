@@ -33,6 +33,8 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Active / Recent Accepted Lanes
 
+- **v0.8.1 Phase 1: State and Type Foundation** — CLOSED 2026-04-05. Five new type structures (`CommanderBeliefState`, `CommanderRelationships`, `CommanderLesson`, `CommanderIntentCandidate`, `CommanderDecisionTrace`) added to `CommanderState` as optional carry-forward fields. Fixed `estimateTurnsActive` suspend counter (`suspended_since_turn` on `CommanderPlan`). Tightened `supply_by_osid` and `intel_data` from `unknown` to concrete types. 18 new tests, 2378/2378 pass. Zero behavioral change from type additions. Report: `docs/40_reports/implemented/20260405_V081_PHASE1_STATE_TYPE_FOUNDATION.md`.
+
 - **Settlement Timeline Provenance / Turn-0 Control Truth** — CLOSED 2026-04-05. Persisted `initial_political_controllers` snapshot at scenario init. Timeline builder emits turn-0 "Controlled by X at scenario start" entries; displacement-inferred takeover suppressed when inferred faction matches start controller. 8 files changed, 7 targeted tests. Report: `docs/40_reports/implemented/20260405_SETTLEMENT_TIMELINE_PROVENANCE.md`.
 
 - **Elite Formation Utilization** — VALIDATED 2026-04-05, ALL FOLLOW-UPS CLOSED. Fix A: ACCEPTED (reachability-aware plan, n1315 +0.6pp +2 anchors). Fix B: NOW OPERATIONAL (pipeline priority lane closed). Cross-corps Banja Luka LI rehoming: FIXED. Reports: `docs/40_reports/implemented/20260405_ELITE_FORMATION_UTILIZATION_FIX.md`, `docs/40_reports/implemented/20260405_ELITE_FORMATION_FOLLOWUP_MARCH_CROSSCORPS.md`.

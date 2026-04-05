@@ -929,6 +929,13 @@ function buildUpdatedState(
         last_assessment_turn: briefing.turn,
         last_plan_action: planDecision.action,
         last_plan_reason: planDecision.reason,
+
+        // v0.8.1 fields — carry forward from previous state, or safe defaults.
+        // Phase 1: persistence wiring only; active population deferred to later phases.
+        belief_state: briefing.previous_state?.belief_state,
+        relationships: briefing.previous_state?.relationships,
+        lessons: briefing.previous_state?.lessons,
+        decision_trace: briefing.previous_state?.decision_trace,
     };
 }
 

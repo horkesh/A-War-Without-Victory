@@ -1,3 +1,21 @@
+## [2026-04-05] v0.8.1 Phase 1 — State and Type Foundation (COMPLETE)
+
+### What changed
+- **5 new type structures** in `commander_state.ts`: `CommanderBeliefState`, `CommanderRelationships`, `CommanderLesson`, `CommanderIntentCandidate`, `CommanderDecisionTrace` — all optional on `CommanderState`, carry-forward defaults, JSON-serializable.
+- **Fixed `estimateTurnsActive` suspend counter** in `plan.ts`: added `suspended_since_turn` to `CommanderPlan`, removed broken estimator. Plans now correctly time out after `MAX_SUSPENSION_TURNS`.
+- **Tightened loose types**: `supply_by_osid` and `intel_data` from `unknown` to `SupplyStateByOsidReport | null` and `CommanderIntelData | null`. Removed 3 `as` casts.
+- **18 new tests** in `commander_maturity_phase1.test.ts`: type shapes, persistence, JSON round-trip, old save compat, multi-turn continuity, suspension fix, tightened types.
+- **Zero behavioral change** from type additions. Suspension timeout fix is the only behavioral change.
+
+### Verification
+2378/2378 tests, tsc clean, desktop:map:build clean.
+
+### Next lane
+v0.8.1 Phase 2: Belief Layer in `briefing.ts` and `decide.ts`.
+
+### Report
+`docs/40_reports/implemented/20260405_V081_PHASE1_STATE_TYPE_FOUNDATION.md`
+
 ## [2026-04-05] v0.8.1 Commander Maturity Gate Check — GO
 
 ### Verdict

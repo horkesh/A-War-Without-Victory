@@ -239,7 +239,7 @@ export function generateAllCorpsOrders(
                 effectiveOsidEdges,
                 reverseMap ?? null,
                 graphAnalysis,
-                supplyByOsid,
+                supplyByOsid ?? null,
                 ethnicMap ?? null,
             );
             applyCommanderOutput(state, corps.id, output);
