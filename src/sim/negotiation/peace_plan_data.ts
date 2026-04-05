@@ -79,15 +79,20 @@ const VANCE_OWEN_PLAN: PeacePlanDefinition = {
  * Owen-Stoltenberg Plan, August 1993.
  * Union of three ethnically-defined republics within BiH.
  * Trigger: week ~70 (roughly August 1993).
+ *
+ * Historical split: Bosniaks ~33%, Serbs ~52%, Croats ~15%.
+ * Sources: Owen "Balkan Odyssey" (1995), pp. 214-219; HMS Invincible talks, September 1993.
+ * The previous values (RBiH:53, RS:30, HRHB:17) were Vance-Owen's numbers — incorrect for O-S.
+ * Note: trigger_week=70 is the proposal date; O-S talks concluded ~week 72 (August 1993).
  */
 const OWEN_STOLTENBERG_PLAN: PeacePlanDefinition = {
     id: 'owen_stoltenberg',
     name: 'Owen-Stoltenberg Plan',
     trigger_week: 70,
     proposed_split: {
-        RBiH: 53,
-        RS: 30,
-        HRHB: 17,
+        RBiH: 33,
+        RS: 52,
+        HRHB: 15,
     },
     institutional_model: 'union_3_republics',
     override_change_on_reject: {
