@@ -4,6 +4,7 @@ import { getFactionFlag, getArmyName } from '../utils/factionAssets';
 interface SidePickerOverlayProps {
   isOpen: boolean;
   starting: boolean;
+  errorMessage?: string | null;
   onClose: () => void;
   onSelectFaction: (faction: StartNewCampaignPayload['playerFaction']) => void;
 }
@@ -13,6 +14,7 @@ const FACTIONS: StartNewCampaignPayload['playerFaction'][] = ['RBiH', 'RS', 'HRH
 export function SidePickerOverlay({
   isOpen,
   starting,
+  errorMessage,
   onClose,
   onSelectFaction,
 }: SidePickerOverlayProps) {
@@ -33,6 +35,11 @@ export function SidePickerOverlay({
           </h2>
         </div>
         <div className="p-4 space-y-2">
+          {errorMessage && (
+            <div className="rounded border border-red-500/40 bg-red-950/40 px-3 py-2 text-xs text-red-200">
+              {errorMessage}
+            </div>
+          )}
           {FACTIONS.map((faction) => (
             <button
               key={faction}

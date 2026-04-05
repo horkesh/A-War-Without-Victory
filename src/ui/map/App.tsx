@@ -180,6 +180,7 @@ function App() {
   const setConfirmPrimaryAction = useGameStore((s) => s.setConfirmPrimaryAction);
   const loadSave = useGameStore((s) => s.loadSave);
   const setLoadError = useGameStore((s) => s.setLoadError);
+  const loadError = useGameStore((s) => s.loadError);
   const playerFaction = loadedGameState?.player_faction ?? 'RBiH';
   const mapMode = useGameStore((s) => s.mapMode);
   const railState = derivePanelRailState({
@@ -710,8 +711,9 @@ function App() {
         />
       )}
       <SidePickerOverlay
-        isOpen={sidePickerOpen}
+        isOpen={sidePickerOpen && !loadedGameState}
         starting={campaignStarting}
+        errorMessage={loadError}
         onClose={() => {
           setSidePickerOpen(false);
           setSidePickerDismissed(true);

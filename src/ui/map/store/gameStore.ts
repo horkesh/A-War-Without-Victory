@@ -472,10 +472,25 @@ export const useGameStore = create<GameStore>((set) => ({
   loadSave: (jsonOrText: unknown | string) => {
     return new Promise<void>((resolve, reject) => {
       set({ loadError: null });
-      // Yield to the browser so "Loading..." can paint, then parse in idle (or after short timeout).
-      const schedule = typeof requestIdleCallback !== 'undefined'
-        ? (fn: () => void) => requestIdleCallback(fn, { timeout: 150 })
-        : (fn: () => void) => setTimeout(fn, 0);
+      // Yield once so "Loading..." can paint, but do not rely exclusively on
+      // requestIdleCallback: Electron can starve idle work during scenario init.
+      const schedule = (fn: () => void) => {
+        let fired = false;
+        const run = () => {
+          if (fired) return;
+          fired = true;
+          fn();
+        };
+
+        const fallbackTimer = setTimeout(run, 0);
+        if (typeof requestIdleCallback !== 'undefined') {
+          requestIdleCallback(() => {
+            clearTimeout(fallbackTimer);
+            run();
+          }, { timeout: 150 });
+          return;
+        }
+      };
 
       schedule(() => {
         const fingerprint = buildStateFingerprint(jsonOrText);

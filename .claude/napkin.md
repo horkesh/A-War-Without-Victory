@@ -11,13 +11,9 @@
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
 ## Current State (2026-04-05, v0.8.0 Commander Intelligence Overhaul on main)
-**n1318: 94.0% area-weighted, 26/27 anchors, 6/6 benchmarks, 71 battles. hash: c1354a4bd3318d3b.**
-Four engine-truth lanes closed in one session:
-1. Fix A: reachability-aware plan formation (n1315 +0.6pp +2 anchors)
-2. Pipeline priority: stance preservation + guard removal (n1316 zero-delta)
-3. Home-return tug-of-war: `recallDriftedBrigades` sector-assignment check (n1317 zero-delta)
-4. ZEA attribution: commander ops get axes → **invalid ops 370→137 (63%), battles 64→71 (+7)**
-rs_1st_armored: Prijedor (stuck) → **Jajce front (stable)**. Commander ops now attack.
+**n1323: 94.0% area-weighted, 27/27 anchors, 6/6 benchmarks, 74 battles. hash: b3355614a82d13d7.**
+Two supply-truth fixes in sequence: (1) n1322: graduated scoring (adequate=1.0, strained=0.5, critical=0.0), eliminated 16/18 corps zero-readiness collapse. (2) n1323: BFS corridor fix — bridge detection was operating on BFS spanning tree (100% trivially brittle) instead of full reachable subgraph. Supply readiness now: 13/21 ops at 1.0, 8/21 at 0.5. VRS heartland adequate, ARBiH/VRS-Drina strained. estimateForceRatio supply awareness NOW UNBLOCKED.
+Previous: n1321 (anti-paralysis supply gate), n1319 (empty-objective probe guard), n1318 (ZEA attribution).
 kopcic_2 anchor lost: RS commander ops now attack in Bugojno — calibration sensitivity, not regression.
 2335 tests, 0 failures.
 Previous ATH: n1315: 94.3%, 27/27. Previous: n1302: 93.7%, 25/25.
@@ -31,7 +27,8 @@ Commander Intelligence Overhaul (n1294–1301): must_hold 1.5× garrison (Brcko/
 - **Ozren pocket** (petrovo_2, brijesnica_donja_2, vozuca_2): all flip RBiH w31–40 (historical fall: Sep 1995). Fix: add hold_osids to Ozren brigades; add petrovo_2 + brijesnica_donja_2 as RS anchors in scenario_runner.ts.
 - **Casualty ratio discrepancy**: attack_resolution reports 0.814, anomaly_detection reports 0.63 — data source mismatch.
 - **ZEA rate 47%** (up from 39%): op-scale cap narrowing eligible attacker pools.
-- vrs_east_bosnian zero-attack ops; estimateTurnsActive broken suspend counter; jajce_falls turn_min 40→28; 3 stale ssid refs; P5 NATO air; P6 breakthrough; P9 supply recalibration.
+- vrs_east_bosnian zero-attack ops (bounded: 2 ZEA ops at 6.7%, down from 47% — staging unreachability + Sarajevo siege); estimateTurnsActive broken suspend counter; jajce_falls turn_min 40→28; 3 stale ssid refs; P5 NATO air; P6 breakthrough.
+- **RESOLVED this session:** P9 supply recalibration (graduated scoring + BFS corridor fix), estimateForceRatio supply awareness (demoted — practically inert), COMBAT-P14 (stale — feasibility check now includes defender modifiers).
 
 **TWO OP SYSTEMS (architecture — do not confuse):**
 1. **Legacy** `injectQueuedOperation` (`inject-queued-operations` step, BEFORE commander): consumes queued_operations for corps with pre-planned ops. `tryCreateFromPrePlanned` = dead code (queue already consumed).

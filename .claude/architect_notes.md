@@ -166,6 +166,21 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 
 ## Backlog Additions
 
+### Desktop New Game Start Snapshot — OPEN
+
+- **Problem:** `New Game` still runs full scenario-source initialization on every desktop launch. The user sees startup derivation logs such as political control init (`[E5] Political control initialized ...`), recruitment seeding (`[Recruitment] Mandatory ...`), and front spread (`[Placement] Spread ...`) every time a campaign starts.
+- **Why it matters:** This is dev-bootstrap behavior leaking into the shipped desktop path. It adds startup latency, noisy logs, and unnecessary runtime derivation for a fixed April 1992 start state.
+- **Likely direction:** Bake a canonical campaign-start snapshot for the desktop `apr_1992` entrypoint, load that snapshot for `New Game`, then apply only minimal per-session overlays such as `player_faction` and desktop-only session state. Keep full scenario-source boot for dev/regeneration paths.
+- **Non-goal:** Do not special-case engine truth away in the core sim. The goal is to move fixed start-state work out of the normal desktop launch path, not to remove scenario initialization capabilities from tooling.
+
+### Warroom React Shell Recovery / Feature Parity — OPEN
+
+- **Problem:** The rebuilt React-owned Warroom shell is functional enough to launch and hand off correctly, but it remains materially behind the older corktable-era experience.
+- **Observed gaps:** modal behavior is still messy, layout/panel flow needs polish, and the interactive map/corktable affordance that previously anchored the room experience is no longer present in a satisfying way.
+- **Why it matters:** This is now the main desktop entry surface. Even with the command system maturing underneath, the player's first-contact room still feels transitional rather than intentional.
+- **Likely direction:** Run a dedicated Warroom parity/polish lane covering modal layering, interaction flow, and restoration or redesign of the room's interactive map surface. Treat this as product-facing UX debt, not just implementation cleanup.
+- **Non-goal:** Do not reopen the completed React migration itself. This is about feature parity, coherence, and experience quality on top of the accepted shell ownership change.
+
 ### Drina Coupling Seam — Paramilitary Sweep Topology Sensitivity (RESOLVED 2026-04-05)
 
 **Problem discovered:** Changing rastosnica_2 initial control from RS to RBiH caused Gorazde enclave to collapse (0/17 RBiH OSIDs) despite being 200km away. The coupling path: initial control change shifts VRS Drina Corps force allocation, which changes paramilitary sweep eligibility across the entire Drina front, which cascades into Gorazde losing its garrison coverage.

@@ -344,6 +344,7 @@ class WarroomApp {
                         const result = await this.desktopBridge.loadStateDialog();
                         if (result?.ok && result.stateJson) {
                             this.applyGameStateFromJson(result.stateJson);
+                            this.showScreen('none');
                         }
                     } catch (error) {
                         console.error('[warroom] Failed to load state through desktop bridge:', error);
@@ -359,7 +360,10 @@ class WarroomApp {
                 const reader = new FileReader();
                 reader.onload = (re) => {
                     const text = re.target?.result as string;
-                    if (text) this.applyGameStateFromJson(text);
+                    if (text) {
+                        this.applyGameStateFromJson(text);
+                        this.showScreen('none');
+                    }
                 };
                 reader.readAsText(file);
             };
@@ -428,6 +432,7 @@ class WarroomApp {
                     }
                     if (result.stateJson) {
                         this.applyGameStateFromJson(result.stateJson);
+                        this.showScreen('none');
                     }
                 } catch (error) {
                     showError(error instanceof Error ? error.message : String(error));
