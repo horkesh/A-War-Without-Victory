@@ -197,6 +197,10 @@ export interface EventDefinition {
     once?: boolean;
     /** Player choice options. When present, each affected faction must respond. */
     response_options?: EventResponseOption[];
+    /** Canonical faction that must respond to this event (bot auto-respond path).
+     *  Explicit over soft convention. When absent, fallback chain in evaluate_events.ts applies.
+     *  Phase 3 hardening: author new events with this field set. */
+    responding_faction?: FactionId;
     /** When true, blocks turn advance until the player responds. */
     requires_player_response?: boolean;
     /** How bot factions auto-respond. */

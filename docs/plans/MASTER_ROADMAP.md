@@ -153,6 +153,13 @@ Plans: `docs/plans/2026-03-24-v080-political-leader-bot-plan.md`, `docs/plans/20
 
 **Estimated scope:** ~1,660 new lines, ~105 new tests, 7 phases.
 
+**Phase status (2026-04-06):**
+- Phase 1 — Political Personality Framework: CLOSED 2026-04-05. Report: `docs/40_reports/implemented/20260405_V082_PHASE1_POLITICAL_PERSONALITY.md`
+- Phase 2 — Political Event Decision Engine: CLOSED 2026-04-05. Report: `docs/40_reports/implemented/20260405_V082_PHASE2_POLITICAL_EVENT_DECISION.md`
+- Phase 3 — Peace Plan & Negotiation Intelligence: CLOSED 2026-04-06. Report: `docs/40_reports/implemented/20260406_V082_PHASE3_PEACE_PLAN_INTELLIGENCE.md`
+- Phase 4 — Patron Phone Calls & Territory Trend: pending
+- Phases 5–7: pending
+
 ### v0.8.3 — Order Interpretation + Warlord Problem
 
 **Gate:** Requires v0.8.2. Corps and army systems must be explicit enough that order interpretation is not hiding ownership confusion. The player must have a minimum viable command review surface for preview / understand / accept / override before “disobedience” is treated as a feature rather than backend ambiguity.
@@ -423,8 +430,8 @@ These need design sessions before implementation. Preserved from the original ro
 | Strategic dimensions | Functional (6 dimensions, Dayton merge) |
 | Scenarios (40w/52w/56w) | Complete |
 | AI Commander infrastructure | Functional (14 modules, multi-model routing) |
-| Commander Maturity (belief state, motive stack, traces) | Not started (v0.8.1) |
-| Political Leader Bot | Not started (v0.8.2) |
+| Commander Maturity (belief state, motive stack, traces) | Complete (v0.8.1, closed 2026-04-05) |
+| Political Leader Bot | Active — Phases 1–3 complete (v0.8.2, Phase 4+ pending) |
 | Order Interpretation | Not started (v0.8.3) |
 | Consequence system | Not started (v0.9.0) |
 | Cost Ledger | Not started (v0.9.0) |

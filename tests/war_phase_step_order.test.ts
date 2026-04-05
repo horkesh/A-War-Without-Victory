@@ -88,6 +88,7 @@ describe('war-phase step ordering', () => {
         // +1 from check-brigade-dissolution-post-combat (second pass after morale-drift catches post-combat threshold crossings)
         // +1 from commander-correct-march-orders (override wrong-destination march orders after bot corps orders)
         // 153 → 148: steps removed during v0.8 commander intelligence + sector truth overhaul
-        expect(stepNames.length).toBe(148);
+        // +1 from compute-combat-effective-brigades (v0.8.2 Phase 3 hardening, before evaluate-peace-plans)
+        expect(stepNames.length).toBe(149);
     });
 });

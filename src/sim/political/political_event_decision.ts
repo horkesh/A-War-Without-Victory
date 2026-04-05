@@ -59,7 +59,21 @@ export function scorePoliticalOption(
         * personality.patron_sensitivity
         * ((option.aggression_affinity ?? 0) < 0 ? 0.5 : -0.5);
 
-    return dimensionScore + riskScore + aggressionScore + patronScore;
+    // survivalScore: survival-internationalist factions (RBiH) favor defiant options when weak,
+    // because international legitimacy substitutes for military strength.
+    // Historian-verified: Izetbegovic rejected Cutileiro, Owen-Stoltenberg from weakness via
+    // international_standing, not military position (ICTY IT-95-5/18 paras. 54-56).
+    const defianceIntensity =
+        personality.archetype === 'survival_internationalist' && assessment.situation_score < 50
+            ? Math.max(0, (50 - assessment.situation_score) / 50)
+            : 0;
+    const intStandingWeight = personality.dimension_weights['international_standing'] ?? 0;
+    const survivalScore =
+        (option.aggression_affinity ?? 0) > 0
+            ? defianceIntensity * intStandingWeight * 0.40
+            : 0;
+
+    return dimensionScore + riskScore + aggressionScore + patronScore + survivalScore;
 }
 
 /**

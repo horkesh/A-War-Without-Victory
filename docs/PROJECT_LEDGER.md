@@ -23781,3 +23781,28 @@ Commander `selectWinningIntent()` now wires `CommanderLesson[]` and `OfficerPers
 - **Canon:** GO. All 10 checks pass.
 - **Verification:** tsc clean, 44/44 political suite, 2546/2546 full vitest
 - **Report:** `docs/40_reports/implemented/20260405_V082_PHASE2_POLITICAL_EVENT_DECISION.md`
+
+## [2026-04-06] v0.8.2 Phase 3: Peace Plan & Negotiation Intelligence (ACCEPTED)
+
+**Type:** Feature
+**Files created:** `src/sim/negotiation/compute_combat_effective.ts`, `src/sim/political/political_peace_plan.ts`, `tests/sim/political/political_peace_plan.test.ts`, `tests/sim/negotiation/compute_combat_effective.test.ts`, `tests/sim/political/survivalScore.test.ts`
+**Files modified:** `src/sim/events/event_types.ts`, `src/sim/events/evaluate_events.ts`, `src/state/negotiation_types.ts`, `src/sim/turn_phases/war_phases.ts`, `tests/war_phase_step_order.test.ts`, `src/sim/political/political_event_decision.ts`, `src/sim/negotiation/peace_plans.ts`
+**Status:** ACCEPTED
+
+### Delivered
+
+- **`EventDefinition.responding_faction` schema hardening:** Explicit optional `responding_faction?: FactionId` field on `EventDefinition`. `evaluate_events.ts` now uses a 3-tier fallback chain: `def.responding_faction` → `dimension_shifts[0].faction` → `response_options[0].dimension_shifts[0].faction` → null. New events should set the field explicitly; existing events backward compatible.
+- **`compute-combat-effective-brigades` pipeline step:** New `computeCombatEffectiveBrigades()` pure function counts active brigades with personnel ≥ 200 and morale ≥ 40 per faction. Written to `NegotiationBreakdown.combat_effective_brigades` each turn via new pipeline step before `evaluate-peace-plans`. Pipeline step count: 148→149. `computePoliticalAssessment` now reads a real force-readiness signal instead of the hardcoded 0.5 fallback.
+- **`survivalScore` (5th scoring component):** Fires for `archetype === 'survival_internationalist'` when `situation_score < 50`. Formula: `(50 - situation_score) / 50 × international_standing_weight × 0.40`. Smooth gradient — zero at situation_score 50, full strength at 0. Boosts defiant/hold-out options; penalises conciliatory options. Historian-verified: Izetbegovic resisted partition from weakness via international legitimacy (ICTY IT-95-5/18 paras. 54-56). Corrects the RBiH posture inversion documented in Phase 2.
+- **`computePoliticalPeacePlanResponse()`:** Replaces territory-% + patron-override-50 dumb bot in `peace_plans.ts`. Dispatch chain: (1) Cutileiro excluded — pre-war non-genuine dynamics; (2) RS territory floor: gap > 18pp → hard reject bypassing patron override (ICTY-sourced: VOPP ~27pp rejected, O-S ~18pp partially engaged, CG ~21pp rejected); (3) Patron hard override: `patron_confidence >= 80` → forced accept; (4) Normal scoring via `scorePoliticalOption` with territory bias modifier (±0.3 cap on accept option `aggression_affinity`).
+
+### Behavioral change
+Yes. Peace plan bot now uses personality engine. RS hard-rejects plans proposing > 18pp territorial reduction regardless of patron pressure. RBiH now resists partition from weakness via international legitimacy (`survivalScore`). HRHB accepts under peak patron authority.
+
+### Verification
+- `npx tsc --noEmit`: clean
+- `npm run test:vitest`: 2596/2596 (181 files)
+- 50 new tests (14 survivalScore + 14 compute_combat_effective + 22 political_peace_plan)
+
+### Report
+`docs/40_reports/implemented/20260406_V082_PHASE3_PEACE_PLAN_INTELLIGENCE.md`

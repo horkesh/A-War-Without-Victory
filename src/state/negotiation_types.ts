@@ -31,6 +31,10 @@ export interface NegotiationBreakdown {
     operations_launched: number;
     operations_successful: number;
     war_crimes_events: number;
+    /** Count of brigades meeting combat effectiveness threshold this turn.
+     *  Written by compute-combat-effective-brigades pipeline step.
+     *  Sentinel -1 = not yet computed. Fallback in computePoliticalAssessment uses 0.5. */
+    combat_effective_brigades?: number;
 }
 
 // CAPITAL_WEIGHTS removed — replaced by DIMENSION_WEIGHTS in strategic_dimensions.ts

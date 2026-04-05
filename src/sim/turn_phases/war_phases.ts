@@ -152,6 +152,7 @@ import { computeHomeDefenseActive } from '../compute_home_defense.js';
 import { createBotOrderDiagnosticsSnapshot } from '../../scenario/combat_causality.js';
 import { checkWarTermination, applyWarTermination } from '../war_termination.js';
 import { computeNegotiationBreakdown } from '../negotiation/compute_capital.js';
+import { computeCombatEffectiveBrigades } from '../negotiation/compute_combat_effective.js';
 import { evaluatePeacePlans } from '../negotiation/peace_plans.js';
 import { updatePatronPressure } from '../negotiation/patron_pressure.js';
 import { evaluatePatronEvents } from '../negotiation/patron_events.js';
@@ -2453,6 +2454,13 @@ export const warPhases: NamedPhase[] = [
             const snapshot = getPoliticalControlSnapshot(context);
             if (snapshot) assertControlEventConsistency(context.state, snapshot);
         }
+    },
+    {
+        name: 'compute-combat-effective-brigades',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            computeCombatEffectiveBrigades(context.state);
+        },
     },
     {
         name: 'evaluate-peace-plans',

@@ -12,6 +12,8 @@ import type { PeacePlanDefinition, PeacePlanResponse, NegotiationState } from '.
 import { createEmptyCapital, createDefaultPatronRelationship } from '../../state/negotiation_types.js';
 import { PEACE_PLANS, getPeacePlanById } from './peace_plan_data.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { getPoliticalPersonality, computePoliticalAssessment } from '../political/political_personality.js';
+import { computePoliticalPeacePlanResponse } from '../political/political_peace_plan.js';
 
 const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
 
@@ -75,36 +77,36 @@ function getFactionTerritoryPct(state: GameState, faction: FactionId): number {
 /**
  * Determine whether a bot faction accepts or rejects a peace plan.
  *
- * Bot accepts if:
- *   (a) patron override_authority > 50 (patron forces acceptance), OR
- *   (b) the plan's proposed split gives them >= their current territory percentage.
+ * Phase 3: routes through the political personality engine for Vance-Owen,
+ * Owen-Stoltenberg, and Contact Group. Cutileiro uses legacy fallback in
+ * computePoliticalPeacePlanResponse.
  *
- * Otherwise the bot rejects.
+ * Historian-verified design:
+ * - RS territory floor (gap > 18pp) → hard reject; patron override bypassed.
+ * - RBiH defiance from weakness via survivalScore in scorePoliticalOption.
+ * - HRHB patron_sensitivity = 0.80 (confirmed correct for all plans).
+ * - Patron hard override at >= 80 override_authority (raised from legacy 50).
  */
 function computeBotResponse(
     state: GameState,
     plan: PeacePlanDefinition,
     faction: FactionId
 ): 'accepted' | 'rejected' {
+    const personality = getPoliticalPersonality(faction);
+    const assessment = computePoliticalAssessment(state, faction, personality);
+    const currentTerritoryPct = getFactionTerritoryPct(state, faction);
+
     const neg = state.military.negotiation;
+    const patronOverrideAuthority = neg?.patron_relationships[faction]?.override_authority ?? 0;
 
-    // Check patron override authority
-    if (neg) {
-        const patronRel = neg.patron_relationships[faction];
-        if (patronRel && patronRel.override_authority > 50) {
-            return 'accepted';
-        }
-    }
-
-    // Check territory: accept if plan gives >= current holdings
-    const currentTerritory = getFactionTerritoryPct(state, faction);
-    const proposedTerritory = plan.proposed_split[faction] ?? 0;
-
-    if (proposedTerritory >= currentTerritory) {
-        return 'accepted';
-    }
-
-    return 'rejected';
+    return computePoliticalPeacePlanResponse(
+        plan,
+        faction,
+        currentTerritoryPct,
+        patronOverrideAuthority,
+        assessment,
+        personality,
+    );
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

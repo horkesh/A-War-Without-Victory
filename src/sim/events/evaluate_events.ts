@@ -228,10 +228,13 @@ export function evaluateEvents(
             } else {
                 // No player faction (headless/spectator): bot auto-responds once.
                 // Political personality path for dimension-weighted logic types.
-                // Faction derived from first dimension_shift (Phase 2 convention;
-                // Phase 3 will add EventDefinition.responding_faction for hardening).
+                // Phase 3: Explicit responding_faction field → top-level dimension_shifts → first option's shifts → null.
+                // New events should author responding_faction directly; legacy events fall back gracefully.
                 const respondingFaction: FactionId | null =
-                    (def.response_options[0]?.dimension_shifts?.[0]?.faction as FactionId | undefined) ?? null;
+                    (def.responding_faction as FactionId | undefined)
+                    ?? (def.dimension_shifts?.[0]?.faction as FactionId | undefined)
+                    ?? (def.response_options?.[0]?.dimension_shifts?.[0]?.faction as FactionId | undefined)
+                    ?? null;
 
                 let chosen: EventResponseOption;
                 if (POLITICAL_LOGICS.has(def.bot_response_logic ?? '') && respondingFaction !== null) {
