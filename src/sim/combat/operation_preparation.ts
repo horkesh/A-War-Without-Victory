@@ -420,8 +420,8 @@ export function tickPreparation(
 
     // Anti-paralysis: forced decision when max turns exceeded
     if ((op.preparation_turns_elapsed ?? 0) >= (op.preparation_max_turns ?? 5)) {
-        if (aggressiveness >= 3) {
-            // Aggressive commanders auto-launch
+        if (aggressiveness >= 3 && supplyReadiness >= 0.3) {
+            // Anti-paralysis respects supply floor — launching at critical supply guarantees ZEA
             op.preparation_sub_phase = 'ready';
             result.sub_phase = 'ready';
             result.ready = true;

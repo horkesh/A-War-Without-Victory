@@ -1,3 +1,29 @@
+## [2026-04-05] Anti-Paralysis Supply Gate — n1321: VRS East Bosnian ZEA Eliminated
+
+### What changed
+- **Supply floor on anti-paralysis override in `operation_preparation.ts` (line 423):** Changed `if (aggressiveness >= 3)` to `if (aggressiveness >= 3 && supplyReadiness >= 0.3)`. Operations stuck at `supply_check` with critical supply are now aborted instead of force-launched into guaranteed ZEA.
+- **3 targeted regression tests** (`tests/commander/anti_paralysis_supply_gate.test.ts`): critical supply aborts, adequate supply launches, cautious commanders still abort.
+
+### Root cause
+Two-step failure chain in `vrs_east_bosnian`: (1) anti-paralysis bypassed supply gate entirely — after 5 prep turns stuck at supply_check (needs 0.7, has 0), force-launched if aggressiveness >= 3; (2) execution-time `computeAttackerPower` applies `getSupplyMult(0.45)` for critical supply, predicted outcome fails `isOutcomeSufficientForAttack`, brigades idle 5+ turns, triggering recovery-without-attempt. Planner and predictor disagreed on supply.
+
+### Validation: n1321
+- **94.0% area-weighted** (-0.3pp), **27/27 anchors** (zero-delta), **6/6 benchmarks**, **69 battles** (-7), **85 attack orders** (-12), **4 recovery-without-attempt** (-2).
+- vrs_east_bosnian ZEA: **eliminated**. Both previous zero-eligible operations correctly abort.
+- -0.3pp is cascade from different operation scheduling (fewer wasted slots). No anchor or benchmark regression.
+
+### Remaining residual
+4 probes with execution-time staleness (bounded by `MAX_EXECUTION_TURNS_ZERO_ATTACKS` backstop). Not P0.
+
+### Recommended next lane
+estimateForceRatio supply awareness — planning-time force ratio ignores supply. Anti-paralysis fix prevents worst case, but marginal supply (0.3-0.5) may inflate estimates. P1, not urgent.
+
+### Test count
+166 files, 2343 tests, 0 failures.
+
+### Report
+`docs/40_reports/implemented/20260405_VRS_EAST_BOSNIAN_ZEA_FIX.md`
+
 ## [2026-04-05] Probe Brigade Reachability Guard — n1320: Zero-Delta Safety Net
 
 ### What changed

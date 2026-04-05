@@ -41,6 +41,8 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 - **Residual ZEA Attribution** — CLOSED 2026-04-05. Commander operations (`buildProbeOperation`, `buildCommanderOperation`) had no `axes` — probes immediately "completed" (0 objectives = done), cmd ops got null objective from brigade AI. Fix: create single OperationAxis in both factories + derive probe objectives from sector front. n1318: 94.0% (-0.3pp), 26/27 (-1: kopcic_2), 6/6, 71 battles (+7). **Invalid ops 370→137 (63% reduction), recovery-without-attempt 188→45 (76%), movement-only 19→0.** kopcic_2 anchor loss is calibration sensitivity from enabling previously-inert RS commander attacks. 4 targeted tests. Report: `docs/40_reports/implemented/20260405_RESIDUAL_ZEA_ATTRIBUTION.md`.
 
+- **VRS East Bosnian ZEA Fix (Anti-Paralysis Supply Gate)** — CLOSED 2026-04-05. Supply floor added to anti-paralysis override in `operation_preparation.ts` (line 423): `aggressiveness >= 3 && supplyReadiness >= 0.3`. Operations at critical supply now abort instead of force-launching into guaranteed ZEA. vrs_east_bosnian ZEA eliminated. n1321: 94.0%, 27/27, 6/6, 69 battles. 3 targeted tests. Report: `docs/40_reports/implemented/20260405_VRS_EAST_BOSNIAN_ZEA_FIX.md`.
+
 - **Empty-Objective Probe Guard** — CLOSED 2026-04-05. Guard added in `emit.ts` (line 772) to skip probe creation when `probeObjectives.length === 0`. Eliminates dominant remaining family of recovery-without-attempt: probes with no enemy-adjacent OSID targets that immediately "completed" with zero attacks. Commander ops already had this guard (emit.ts:685). n1319: 94.3% (+0.3pp), **27/27 anchors** (kopcic_2 recovered), 6/6, 76 battles (+5), 97 attack orders (+6). Residual: 6 probes with real objectives but unreachable brigades (different family). 3 targeted tests. Report: `docs/40_reports/implemented/20260405_PROBE_TARGET_STALENESS_FIX.md`.
 
 - **Probe Brigade Reachability Guard** — CLOSED 2026-04-05. BFS reachability check added in `emit.ts` (lines 773-786). Structural safety net — zero behavioral delta (hash identical to n1319: `a6a231f68172c085`). All 6 residual probes were reachable at creation time. Root cause reclassified from "creation-time unreachable" to "execution-time staleness" (4 executing-zero-attack + 2 false-completion). 2 targeted tests. Report: `docs/40_reports/implemented/20260405_PROBE_BRIGADE_REACHABILITY.md`.
@@ -123,11 +125,12 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 ## Next Priority Lanes
 
 1. **Execution-time probe staleness:** 6 probes with valid objectives and reachable brigades at creation time still end with 0 attacks. Root cause: execution-time staleness (4 executing-zero-attack, 2 false-completion from objective captured by other ops). 5-turn `MAX_EXECUTION_TURNS_ZERO_ATTACKS` backstop limits damage. Bounded friction, not P0. Owner: Gameplay Programmer.
-2. **Residual ZEA (remaining after probe guard):** Recovery-without-attempt cases reduced to 6 at final turn (all execution-time staleness, NOT reachability). 2 `operation_zero_eligible_execution` anomalies (vrs_east_bosnian) pre-existing.
-3. **Formation Expert deferred recommendations:** Expand prepositioning tier to `active_defense`; relax `can_launch_ops` gate; exclude `is_home_defense`. Owner: Gameplay Programmer. File: `src/sim/combat/commander/emit.ts`.
-4. **AAR provenance follow-up:** zero-attack-success operations must distinguish combat capture from passive/external control changes. Owner: `src/sim/combat/operation_aar.ts`.
-5. **gradacac_2 P0 investigation:** roadmap item 1 once current engine-truth defects are no longer masking front behavior.
-6. **v0.8.1 Commander Maturity gate check:** full two-tier post-run panel go/no-go on commander system.
+2. **Residual ZEA (remaining after probe guard + supply gate):** Recovery-without-attempt reduced to 4 at final turn (execution-time staleness). vrs_east_bosnian zero-eligible anomalies eliminated by anti-paralysis supply gate (n1321).
+3. **estimateForceRatio supply awareness:** Planning-time force ratio estimator ignores supply entirely. Anti-paralysis fix (n1321) prevents worst case (zero supply), but marginal supply (0.3–0.5) may still inflate force estimates. Applying supply mult in `estimateForceRatio` would improve commander assessments. P1, not urgent. Owner: Gameplay Programmer.
+4. **Formation Expert deferred recommendations:** Expand prepositioning tier to `active_defense`; relax `can_launch_ops` gate; exclude `is_home_defense`. Owner: Gameplay Programmer. File: `src/sim/combat/commander/emit.ts`.
+5. **AAR provenance follow-up:** zero-attack-success operations must distinguish combat capture from passive/external control changes. Owner: `src/sim/combat/operation_aar.ts`.
+6. **gradacac_2 P0 investigation:** roadmap item 1 once current engine-truth defects are no longer masking front behavior.
+7. **v0.8.1 Commander Maturity gate check:** full two-tier post-run panel go/no-go on commander system.
 
 ## Validation Gate Note
 
