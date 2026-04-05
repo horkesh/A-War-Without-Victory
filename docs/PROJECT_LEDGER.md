@@ -1,3 +1,17 @@
+## [2026-04-05] estimateForceRatio Supply Awareness — Demoted (No Code Changes)
+
+### What changed
+- **Investigation only — no code changes.** `estimateForceRatio` supply blindness confirmed (uses raw headcounts, no supply mult). But the assessment pipeline has defense in depth: supply_check hard gate (0.7/0.5), 30% supply weight in assessment, anti-paralysis floor (0.3). The 25% force ratio overestimate for strained corps translates to only about a ~0.07 assessment score swing under current weights and was not observed to be the proximate decision-flipping factor on current HEAD.
+
+### Why demoted
+- Supply blindness is real but practically inert on current HEAD (n1323)
+- Strained-corps failures in n1323 are from ZEA/staging, not estimator optimism
+- The estimator also ignores 10+ other multipliers — fixing supply alone creates false precision
+- Revisit when estimator is upgraded to full combat power estimate (COMBAT-P14)
+
+### Report
+`docs/40_reports/implemented/20260405_ESTIMATE_FORCE_RATIO_SUPPLY_AWARENESS_DEMOTION.md`
+
 ## [2026-04-05] BFS Corridor Reachability Fix — n1323: 94.0%, 27/27 Anchors
 
 ### What changed
