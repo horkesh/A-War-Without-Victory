@@ -516,6 +516,8 @@ export interface CorpsCommandState {
     stabilization_cooldown_until?: number;
     /** Player's raw ordered stance before officer interpretation. Set when player issues stance order. Cleared at turn end. */
     player_ordered_stance?: string | null;
+    /** Formula bot's recommended stance computed this turn. Set by generateCorpsStanceOrders; read by Level 1 proposal generation. */
+    ai_recommended_stance?: CorpsStance;
 }
 
 /** Operational group activation order. */
@@ -1121,6 +1123,10 @@ export interface PendingProposalReview {
     accepted?: boolean;
     /** Turn when player responded. */
     resolved_turn?: number;
+    /** The value currently active (e.g. current corps stance). */
+    current_value?: string;
+    /** The value the AI is proposing (e.g. proposed corps stance). */
+    proposed_value?: string;
 }
 
 /**

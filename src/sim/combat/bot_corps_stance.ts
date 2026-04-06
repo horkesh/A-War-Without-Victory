@@ -287,6 +287,10 @@ export function generateCorpsStanceOrders(
             }
         }
 
+        // Always record the formula AI's recommendation for Level 1 proposal generation.
+        // Set before the player guard so proposals can surface even when player has an order.
+        cmd.ai_recommended_stance = stance;
+
         // Player stance order guard: if player has issued a standing stance order,
         // the bot formula does not override it. The IPC layer has already applied
         // order interpretation and written the effective stance.

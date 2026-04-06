@@ -146,6 +146,8 @@ import { computeSectorCombatRatings } from '../combat/sector_combat_rating.js';
 import { detectParamilitaryTargets, advanceParamilitaries, detectOffensiveParamilitaryTargets } from '../combat/paramilitary_sweep.js';
 import { consolidateRearPockets } from '../combat/rear_pocket_consolidation.js';
 import { PARAMILITARY_FADE_WEEK, OFFENSIVE_PARA_FADE_WEEK } from '../../state/formation_constants.js';
+import { generateLevel1StanceProposals } from '../ai_commander/proposal_generation.js';
+import { generateCorpsStanceOrders } from '../combat/bot_corps_stance.js';
 import { accrueRecruitmentResources, runOngoingRecruitment } from '../recruitment_turn.js';
 import { reroutePoolSurplus } from '../recruitment_engine.js';
 import { computeHomeDefenseActive } from '../compute_home_defense.js';
@@ -882,6 +884,12 @@ export const warPhases: NamedPhase[] = [
                 meta.autonomy_level_pending = undefined;
             }
             meta.autonomy_overrides = undefined;
+            // Expire unresolved proposals from previous turns (silently discard — player missed them).
+            if (meta.pending_proposal_reviews) {
+                meta.pending_proposal_reviews = meta.pending_proposal_reviews.filter(
+                    p => !(p.turn < meta.turn && p.accepted === undefined)
+                );
+            }
         }
     },
     {
@@ -1050,6 +1058,51 @@ export const warPhases: NamedPhase[] = [
                 context.report.corps_ai_report = corpsReport;
             }
         }
+    },
+    {
+        // v0.8.4 Phase C: Compute formula AI stance recommendations for the player faction.
+        // generate-bot-corps-orders skips playerFaction — this step fills in ai_recommended_stance
+        // so that generate-level1-proposals can surface meaningful proposals.
+        // Runs AFTER bot corps orders so the same pass sees current sector/commander state.
+        name: 'generate-player-stance-recommendations',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const playerFaction = context.state.meta.player_faction;
+            if (!playerFaction) return;
+            if (context.state.meta.autonomy_level !== 1) return;
+            const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
+            const edges = context.input.settlementEdges && context.input.settlementEdges.length > 0
+                ? context.input.settlementEdges
+                : graph.edges;
+            const sidToMun = new Map<string, string>();
+            for (const [sid, rec] of graph.settlements.entries()) {
+                const munId = rec.mun1990_id ?? rec.mun_code;
+                if (munId) sidToMun.set(sid, munId);
+            }
+            // generateCorpsStanceOrders sets ai_recommended_stance on each corps cmd
+            // and respects player_ordered_stance guard (will not overwrite cmd.stance).
+            generateCorpsStanceOrders(context.state, playerFaction as FactionId, edges, sidToMun);
+        },
+    },
+    {
+        // v0.8.4 Phase C: Generate Level 1 Assisted stance proposals for player review.
+        // Reads ai_recommended_stance set by generate-player-stance-recommendations above.
+        name: 'generate-level1-proposals',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const playerFaction = context.state.meta.player_faction;
+            if (!playerFaction) return;
+            if (context.state.meta.autonomy_level !== 1) return;
+            const proposals = generateLevel1StanceProposals(context.state, playerFaction as FactionId);
+            if (proposals.length === 0) return;
+            if (!context.state.meta.pending_proposal_reviews) {
+                context.state.meta.pending_proposal_reviews = [];
+            }
+            // Remove any stale proposals from this same turn (defensive guard against double-run).
+            context.state.meta.pending_proposal_reviews = context.state.meta.pending_proposal_reviews
+                .filter(p => p.turn !== context.state.meta.turn);
+            context.state.meta.pending_proposal_reviews.push(...proposals);
+        },
     },
     {
         name: 'commander-correct-march-orders',

@@ -1,3 +1,38 @@
+## [2026-04-06] v0.8.4 Phase C — Level 1 Proposals, Review UI, and Level 2+ Unlock
+
+**Type:** Feature (proposal generation + accept/reject IPC + UI surface + Level 2+ gate removal)
+**Files modified:** `src/state/game_state.ts`, `src/sim/combat/bot_corps_stance.ts`, `src/sim/turn_phases/war_phases.ts`, `src/desktop/electron-main.cjs`, `src/desktop/preload.cjs`, `src/ui/map/App.tsx`, `src/ui/map/desktop/useIPC.ts`, `tests/war_phase_step_order.test.ts`
+**Files created:** `src/sim/ai_commander/proposal_generation.ts`, `src/ui/map/components/AutonomyPanel.tsx`, `tests/sim/autonomy/autonomy_phase_c.test.ts`
+**Status:** ACCEPTED
+
+### What changed
+
+- `game_state.ts`: `PendingProposalReview` extended with `current_value?: string` and `proposed_value?: string` (human-readable before/after for UI). `CorpsCommandState` extended with `ai_recommended_stance?: CorpsStance` — records formula AI recommendation before `player_ordered_stance` guard executes.
+- `bot_corps_stance.ts`: sets `cmd.ai_recommended_stance = stance` before `player_ordered_stance` guard — always records formula recommendation regardless of whether it is applied.
+- `proposal_generation.ts` (new): `generateLevel1StanceProposals(state, playerFaction)` — pure deterministic function. Iterates player corps sorted by `strictCompare`; skips corps with no recommendation, no-change corps, and player-ordered corps; emits `PendingProposalReview[]` with deterministic `PROP_<turn>_military_<seq>` IDs. `proposed_action` format: `SET_STANCE:<corps_id>:<stance>`.
+- `war_phases.ts`: `apply-autonomy-transition` extended to expire prior-turn proposals. Two new steps added: `generate-player-stance-recommendations` (runs stance logic for player faction) and `generate-level1-proposals` (calls proposal generation, writes to `state.meta.pending_proposal_reviews`). Step count 151→153.
+- `electron-main.cjs`: Level 2+ feature gate removed from `set-autonomy-level` (all levels 0–3 now settable). Two new IPC handlers: `accept-proposal` (parses `SET_STANCE:<corps_id>:<stance>`, writes to `corps_command[id].stance` and `player_ordered_stance`, marks resolved) and `reject-proposal` (marks resolved, writes current stance as `player_ordered_stance` for one turn to suppress immediate re-proposal).
+- `preload.cjs`: 2 new bridge entries — `acceptProposal(proposalId)`, `rejectProposal(proposalId)`.
+- `AutonomyPanel.tsx` (new React component): autonomy level selector 0–3 + proposal review panel rendering one accept/reject card per pending proposal. Uses `GlassPanel`, local state, calls `window.awwv.*`.
+- `App.tsx`: imports `AutonomyPanel`, adds `autonomyPanelOpen` state, mounts panel conditionally.
+- `useIPC.ts`: `WindowAwwv` extended with full Phase B+C bridge (`getAutonomyState`, `setAutonomyLevel`, `overrideAiDecision`, `acceptProposal`, `rejectProposal`).
+
+### Fallback contract (updated)
+
+Level 0: unchanged. Level 1: end-to-end live — formula AI generates stance proposals, `accept-proposal`/`reject-proposal` IPC live, `AutonomyPanel` surfaces proposals. No API calls at Level 1; pure formula recommendations. Level 2: gate removed — formula AI runs all player-faction military decisions via Phase 1 `botFactions` path. Level 3: unchanged from Phase B (`requires_player_response` gate live; high-stakes events always queue to player).
+
+### Verification
+
+- tsc: clean
+- vitest: 2813/2813 (195 files, +32 new Phase C tests; was 2781/2781)
+- build: pass (6.49s; 3 pre-existing accepted debt warnings)
+
+### Report
+
+`docs/40_reports/implemented/20260406_V084_PHASEC_LEVEL1_PROPOSALS.md`
+
+---
+
 ## [2026-04-06] v0.8.4 Phase B — IPC Wiring, Review Surface, and Fallback Discipline
 
 **Type:** Feature (IPC wiring + state schema + Level 3 gate)

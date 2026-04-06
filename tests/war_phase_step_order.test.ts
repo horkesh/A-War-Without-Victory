@@ -91,6 +91,8 @@ describe('war-phase step ordering', () => {
         // +1 from compute-combat-effective-brigades (v0.8.2 Phase 3 hardening, before evaluate-peace-plans)
         // +1 from decay-officer-interpretation-state (v0.8.3 Phase 3: cowed expiry + event cleanup)
         // +1 from apply-autonomy-transition (v0.8.4 Phase A: autonomy state + pending level commit)
-        expect(stepNames.length).toBe(151);
+        // +1 from generate-player-stance-recommendations (v0.8.4 Phase C: formula AI stance for player faction)
+        // +1 from generate-level1-proposals (v0.8.4 Phase C: Level 1 Assisted stance proposals)
+        expect(stepNames.length).toBe(153);
     });
 });

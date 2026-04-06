@@ -29,6 +29,7 @@ import { EventModal } from './components/EventModal';
 import { EventLogPanel } from './components/EventLogPanel';
 import { AiAdvisorPanel } from './components/AiAdvisorPanel';
 import { AiSettingsPanel } from './components/AiSettingsPanel';
+import { AutonomyPanel } from './components/AutonomyPanel';
 import type { EventDisplayData } from './components/EventModal';
 import type { EventLogEntry } from './components/EventLogPanel';
 import { CommandBriefingLayer } from './components/CommandBriefingLayer';
@@ -209,6 +210,7 @@ function App() {
   const [eventLogOpen, setEventLogOpen] = useState(false);
   const [economyOpen, setEconomyOpen] = useState(false);
   const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
+  const [autonomyPanelOpen, setAutonomyPanelOpen] = useState(false);
   const [aiAdvisorOpen, setAiAdvisorOpen] = useState(false);
   const [aiAdvisorResponse, setAiAdvisorResponse] = useState<any>(null);
   const [eventQueue, setEventQueue] = useState<EventDisplayData[]>([]);
@@ -758,6 +760,10 @@ function App() {
       )}
       {aiSettingsOpen && (
         <AiSettingsPanel onClose={() => setAiSettingsOpen(false)} />
+      )}
+      {/* v0.8.4 Phase C: Command Autonomy panel */}
+      {autonomyPanelOpen && (
+        <AutonomyPanel onClose={() => setAutonomyPanelOpen(false)} />
       )}
       {aiAdvisorOpen && (
         <AiAdvisorPanel

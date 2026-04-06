@@ -97,6 +97,12 @@ interface WindowAwwv {
     acknowledgeFrictionEvent: (payload: { corpsId: string; officerId: string; eventTurn: number; eventType: string }) => Promise<{ ok: boolean; error?: string }>;
     /** Level 2: Resolve ALL unresolved friction events for a corps at once. Costs CA (10 if strained, 15 if compromised). 3-turn cooldown. */
     stabilizeCommandRelationship: (payload: { corpsId: string }) => Promise<{ ok: boolean; resolvedCount?: number; caCost?: number; error?: string }>;
+    // v0.8.4 Phase B+C: Autonomy bridge
+    getAutonomyState: () => Promise<{ autonomy_level: number; autonomy_level_pending?: number; autonomy_overrides?: Record<string, unknown>; pending_proposal_reviews?: unknown[] }>;
+    setAutonomyLevel: (level: number) => Promise<{ ok: boolean; error?: string }>;
+    overrideAiDecision: (level: number, targetId: string, faction: string) => Promise<{ ok: boolean; error?: string }>;
+    acceptProposal: (proposalId: string) => Promise<{ ok: boolean; error?: string }>;
+    rejectProposal: (proposalId: string) => Promise<{ ok: boolean; error?: string }>;
 }
 
 const NOOP_RESULT = Promise.resolve({ ok: false, error: 'Desktop IPC not available' });
@@ -362,6 +368,27 @@ export function useIPC() {
             stabilizeCommandRelationship: awwv
                 ? (payload: { corpsId: string }) => awwv.stabilizeCommandRelationship(payload)
                 : makeNoop<{ ok: boolean; resolvedCount?: number; caCost?: number; error?: string }>(),
+
+            // v0.8.4 Phase B+C: Autonomy bridge
+            getAutonomyState: awwv
+                ? () => awwv.getAutonomyState()
+                : () => Promise.resolve({ autonomy_level: 0 }),
+
+            setAutonomyLevel: awwv
+                ? (level: number) => awwv.setAutonomyLevel(level)
+                : makeNoop<{ ok: boolean; error?: string }>(),
+
+            overrideAiDecision: awwv
+                ? (level: number, targetId: string, faction: string) => awwv.overrideAiDecision(level, targetId, faction)
+                : makeNoop<{ ok: boolean; error?: string }>(),
+
+            acceptProposal: awwv
+                ? (proposalId: string) => awwv.acceptProposal(proposalId)
+                : makeNoop<{ ok: boolean; error?: string }>(),
+
+            rejectProposal: awwv
+                ? (proposalId: string) => awwv.rejectProposal(proposalId)
+                : makeNoop<{ ok: boolean; error?: string }>(),
         };
     }, []); // stable — never changes reference
 }

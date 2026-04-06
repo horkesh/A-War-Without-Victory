@@ -1978,10 +1978,6 @@ app.whenReady().then(() => {
     if (typeof level !== 'number' || level < 0 || level > 3 || !Number.isInteger(level)) {
       return { ok: false, error: 'invalid_level' };
     }
-    // Feature gate: Level 2+ requires explicit opt-in (Phase B guard)
-    if (level >= 2) {
-      return { ok: false, error: 'level_2_plus_not_yet_enabled' };
-    }
     if (!currentGameStateJson) return { ok: false, error: 'no_state' };
     const state = JSON.parse(currentGameStateJson);
     const current = state.meta?.autonomy_level ?? 0;
@@ -2017,6 +2013,62 @@ app.whenReady().then(() => {
       target_id,
       faction,
     });
+    currentGameStateJson = JSON.stringify(state);
+    sendGameStateToRenderer(currentGameStateJson);
+    return { ok: true };
+  });
+
+  // v0.8.4 Phase C: Proposal accept/reject handlers
+  ipcMain.handle('accept-proposal', async (event, proposalId) => {
+    if (!currentGameStateJson) return { ok: false, error: 'no_state' };
+    const state = JSON.parse(currentGameStateJson);
+    const proposals = state.meta?.pending_proposal_reviews ?? [];
+    const idx = proposals.findIndex(p => p.id === proposalId);
+    if (idx === -1) return { ok: false, error: 'proposal_not_found' };
+    const proposal = proposals[idx];
+    if (proposal.accepted !== undefined) return { ok: false, error: 'already_resolved' };
+
+    // Mark accepted
+    proposal.accepted = true;
+    proposal.resolved_turn = state.meta.turn;
+
+    // Apply the proposed action
+    if (proposal.proposed_action.startsWith('SET_STANCE:')) {
+      const [, corpsId, stanceValue] = proposal.proposed_action.split(':');
+      if (state.military?.corps_command?.[corpsId]) {
+        state.military.corps_command[corpsId].stance = stanceValue;
+        state.military.corps_command[corpsId].player_ordered_stance = stanceValue;
+      }
+    }
+
+    currentGameStateJson = JSON.stringify(state);
+    sendGameStateToRenderer(currentGameStateJson);
+    return { ok: true };
+  });
+
+  ipcMain.handle('reject-proposal', async (event, proposalId) => {
+    if (!currentGameStateJson) return { ok: false, error: 'no_state' };
+    const state = JSON.parse(currentGameStateJson);
+    const proposals = state.meta?.pending_proposal_reviews ?? [];
+    const idx = proposals.findIndex(p => p.id === proposalId);
+    if (idx === -1) return { ok: false, error: 'proposal_not_found' };
+    const proposal = proposals[idx];
+    if (proposal.accepted !== undefined) return { ok: false, error: 'already_resolved' };
+
+    // Mark rejected
+    proposal.accepted = false;
+    proposal.resolved_turn = state.meta.turn;
+
+    // Lock current stance as player order for one turn (rejection = explicit "hold current stance").
+    // Prevents bot from applying the proposed stance this turn.
+    if (proposal.proposed_action.startsWith('SET_STANCE:')) {
+      const [, corpsId] = proposal.proposed_action.split(':');
+      if (state.military?.corps_command?.[corpsId]) {
+        const currentStance = proposal.current_value ?? state.military.corps_command[corpsId].stance;
+        state.military.corps_command[corpsId].player_ordered_stance = currentStance;
+      }
+    }
+
     currentGameStateJson = JSON.stringify(state);
     sendGameStateToRenderer(currentGameStateJson);
     return { ok: true };
