@@ -11,7 +11,7 @@
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
 ## Current State (2026-04-06, v0.8.4 Phase B CLOSED)
-**2781/2781 vitest (194 files). v0.8.4 Phase B CLOSED.**
+**2781/2781 vitest (194 files). v0.8.4 Phase B CLOSED. Commit: 0d729a55.**
 v0.8.4 Phase B delivered: `autonomy_overrides.ts` (applyAutonomyOverride/clearAutonomyOverride/getAutonomyOverride, pure deterministic); `PendingProposalReview` interface + `pending_proposal_reviews?` on StateMeta (stub, no write path yet); Level 3 `requires_player_response` gate in `evaluate_events.ts`; 3 IPC handlers (`get-autonomy-state`, `set-autonomy-level` w/ Level 2+ feature gate, `override-ai-decision`); 3 preload bridge entries. 9 new tests (1 file). tsc clean, build clean.
 **v0.8.4 Phase C next:** Level 1 proposal generation (formula AI populates `pending_proposal_reviews`), `accept-proposal`/`reject-proposal` IPC handlers, autonomy slider UI surface, Level 2+ unlock (remove feature gate).
 **Phase C design constraints:** (1) direction convention unchanged — level increase = delegation = one-turn delay, decrease = reclaim = immediate. (2) Level 3 `requires_player_response` gate already wired; Phase C must author high-stakes events with this flag. (3) Level 2+ only unlocked when full-delegation path is validated end-to-end.
