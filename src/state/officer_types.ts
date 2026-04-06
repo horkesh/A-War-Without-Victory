@@ -110,6 +110,12 @@ export interface NamedOfficerState {
     initial_aggressiveness?: number;
     /** Consecutive operation failures (reset on success). Drives defeatism check. */
     consecutive_op_failures?: number;
+    /** Number of times this officer's interpretation was overridden by the player. */
+    override_count?: number;
+    /** Turn when last overridden (tracks consecutive override window). */
+    last_override_turn?: number;
+    /** If set, officer is "cowed" — complies fully without deviation until this turn. */
+    cowed_until_turn?: number;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -120,7 +126,30 @@ export interface NamedOfficerState {
 // Pending officer events (player notification system)
 // ═══════════════════════════════════════════════════════════════════════════
 
-export type OfficerEventType = 'officer_available' | 'replacement_suggested';
+export type OfficerEventType =
+    | 'officer_available'
+    | 'replacement_suggested'
+    | 'order_pushback'    // officer objects to an order but will partially comply
+    | 'order_modified'    // officer silently modified order parameters
+    | 'order_refused'     // officer refuses order entirely, reverts to preferred
+    | 'order_exceeded'    // officer expanded beyond order scope (aggressive officers)
+    | 'officer_relieved'; // player relieved (fired) the officer
+
+/**
+ * Snapshot of an order for before/after interpretation comparison.
+ * Used in PendingOfficerEvent to show player what changed.
+ */
+export interface OrderSnapshot {
+    order_type: 'stance_change' | 'operation_launch' | 'operation_halt' | 'brigade_reassign';
+    corps_id: string;
+    /** For stance changes */
+    stance?: string;
+    /** For operations */
+    operation_name?: string;
+    objectives?: string[];
+    /** For halts */
+    delay_turns?: number;
+}
 
 export interface PendingOfficerEvent {
     /** Unique event key for deduplication. */
@@ -136,6 +165,16 @@ export interface PendingOfficerEvent {
     corps_id?: string;
     /** Whether the player has acknowledged this event. */
     acknowledged: boolean;
+    /** The original order the player issued. Null if not an interpretation event. */
+    original_order?: OrderSnapshot;
+    /** What the officer actually did / proposes to do. */
+    interpreted_order?: OrderSnapshot;
+    /** Human-readable explanation of why the officer deviated. */
+    reason?: string;
+    /** Whether the player can override this interpretation via IPC. */
+    overridable?: boolean;
+    /** IPC action string to call to force original order (wired in Phase 2). */
+    override_action?: string;
 }
 
 export interface FactionOfficerConfig {

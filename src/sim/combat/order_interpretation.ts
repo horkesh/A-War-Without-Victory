@@ -1,0 +1,587 @@
+/**
+ * v0.8.3 Phase 1 — Order Interpretation Engine (Stance)
+ *
+ * Deterministic personality-based filtering of player stance orders through
+ * corps commander traits (competence, aggressiveness). Officers may comply fully,
+ * modify the effective stance one step toward their preferred posture, or refuse.
+ *
+ * Phase 1 scope: stance interpretation only.
+ * Phase 2 will add: interpretOperationLaunch, interpretOperationHalt, IPC wiring.
+ * Phase 3 will add: decay pipeline step, reliabilityModifier population from political_reliability.
+ *
+ * Deterministic: no Math.random(), no Date.now(). All scoring is pure functions of
+ * officer traits and order parameters. Tie-breaks are lexicographic on stance names.
+ *
+ * Design reference: docs/plans/2026-03-24-v081-order-interpretation-plan.md
+ */
+
+import type { GameState } from '../../state/game_state.js';
+import type { FactionId } from '../../state/game_state.js';
+import type {
+    NamedOfficerState,
+    PendingOfficerEvent,
+    OrderSnapshot,
+    OfficerEventType,
+} from '../../state/officer_types.js';
+import { getCorpsCommander } from './officer_system.js';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Constants
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Compliance score thresholds
+const FULL_COMPLIANCE_THRESHOLD = 0.80;
+const MODIFIED_COMPLIANCE_THRESHOLD = 0.50;
+const PARTIAL_COMPLIANCE_THRESHOLD = 0.25;
+// Below PARTIAL_COMPLIANCE_THRESHOLD = refusal
+
+// Maximum stance shift from interpretation (1 step)
+const MAX_STANCE_SHIFT = 1;
+
+// Extra preparation turns for cautious officers (by aggressiveness 0-5 index)
+// Phase 2 will use these; defined here to document the system's eventual bounds
+const CAUTIOUS_EXTRA_PREP_TURNS = [0, 3, 2, 0, 0, 0];
+
+// Max bonus objectives aggressive officers can add (Phase 2)
+const MAX_BONUS_OBJECTIVES = 2;
+
+// Turns of delayed halt for aggressive officers (Phase 2)
+const AGGRESSIVE_HALT_DELAY = 2;
+
+// Momentum threshold to trigger halt delay (Phase 2)
+const HALT_DELAY_MOMENTUM_THRESHOLD = 2;
+
+// Consecutive overrides before officer becomes cowed
+const COWED_OVERRIDE_THRESHOLD = 2;
+// Override window (turns) for counting consecutive overrides
+const COWED_OVERRIDE_WINDOW = 8;
+// Turns officer is cowed after threshold
+const COWED_DURATION = 8;
+// Competence modifier while cowed (applied to effective compliance)
+const COWED_COMPETENCE_BONUS = 0.30; // cowed officers over-comply: +0.30 to score
+
+// Morale hit when relieving an officer (passed to caller; this module reports it)
+export const RELIEF_MORALE_PENALTY = -10;
+// Acting commander duration after relief
+export const RELIEF_ACTING_DURATION = 4;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Stance rank mapping
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Stance numeric rank for gap calculation. Higher = more aggressive. */
+const STANCE_RANKS: Record<string, number> = {
+    defensive:  0,
+    reorganize: 0.5,
+    balanced:   1,
+    offensive:  2,
+};
+
+/** All stances in rank order (low to high) */
+const STANCE_ORDER: string[] = ['defensive', 'reorganize', 'balanced', 'offensive'];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Internal helpers
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Derive the officer's preferred stance from aggressiveness.
+ * agg >= 4 → offensive, agg === 3 → balanced, agg <= 2 → defensive
+ */
+function computePreferredStance(aggressiveness: number): string {
+    if (aggressiveness >= 4) return 'offensive';
+    if (aggressiveness === 3) return 'balanced';
+    return 'defensive';
+}
+
+/**
+ * Compute compliance score in [0, 1].
+ * gap = abs(orderedRank - preferredRank)
+ * if gap === 0: return 1.0 (always comply with aligned orders)
+ * baseCompliance = 0.45 + competence * 0.10  (comp 5 = 0.95, comp 1 = 0.55)
+ * gapPenalty = gap * 0.25
+ * score = clamp(0.0, 1.0, baseCompliance - gapPenalty + reliabilityModifier)
+ */
+function computeComplianceScore(
+    competence: number,
+    aggressiveness: number,
+    orderedStanceRank: number,
+    preferredStanceRank: number,
+    reliabilityModifier = 0,
+): number {
+    const gap = Math.abs(orderedStanceRank - preferredStanceRank);
+    if (gap === 0) return 1.0;
+    const baseCompliance = 0.45 + competence * 0.10;
+    const gapPenalty = gap * 0.25;
+    const raw = baseCompliance - gapPenalty + reliabilityModifier;
+    return Math.max(0.0, Math.min(1.0, raw));
+}
+
+/**
+ * Determine the effective stance after officer interpretation.
+ * >= FULL_COMPLIANCE_THRESHOLD: orderedStance (full compliance)
+ * >= MODIFIED_COMPLIANCE_THRESHOLD: orderedStance (modified — same stance, officer grumbles)
+ * >= PARTIAL_COMPLIANCE_THRESHOLD: shift one step toward preferred
+ * < PARTIAL_COMPLIANCE_THRESHOLD: return officerPreferredStance (refusal)
+ */
+function determineEffectiveStance(
+    orderedStance: string,
+    officerPreferredStance: string,
+    complianceScore: number,
+): string {
+    if (complianceScore >= MODIFIED_COMPLIANCE_THRESHOLD) {
+        return orderedStance;
+    }
+
+    if (complianceScore >= PARTIAL_COMPLIANCE_THRESHOLD) {
+        // Shift one step toward preferred
+        const orderedIdx = STANCE_ORDER.indexOf(orderedStance);
+        const preferredIdx = STANCE_ORDER.indexOf(officerPreferredStance);
+        if (orderedIdx === -1 || preferredIdx === -1) return orderedStance;
+        const direction = preferredIdx > orderedIdx ? 1 : -1;
+        const shiftedIdx = Math.max(0, Math.min(STANCE_ORDER.length - 1, orderedIdx + direction * MAX_STANCE_SHIFT));
+        return STANCE_ORDER[shiftedIdx]!;
+    }
+
+    return officerPreferredStance;
+}
+
+/**
+ * Build a human-readable reason string for the interpretation event.
+ */
+function buildInterpretationReason(
+    officerName: string,
+    orderedStance: string,
+    effectiveStance: string,
+    complianceScore: number,
+): string {
+    const displayName = officerName || 'The commander';
+
+    if (complianceScore >= FULL_COMPLIANCE_THRESHOLD) {
+        return '';
+    }
+
+    if (complianceScore >= MODIFIED_COMPLIANCE_THRESHOLD) {
+        const isDowngrade = (STANCE_RANKS[orderedStance] ?? 1) < (STANCE_RANKS[effectiveStance] ?? 1);
+        const direction = isDowngrade ? 'the aggressive posture' : 'the defensive posture';
+        return `${displayName} acknowledges the order with reservations about ${direction}.`;
+    }
+
+    if (complianceScore >= PARTIAL_COMPLIANCE_THRESHOLD) {
+        return `${displayName} considers ${orderedStance} untenable and will advance to ${effectiveStance}.`;
+    }
+
+    return `${displayName} refuses to comply with ${orderedStance}, maintaining ${effectiveStance}.`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Public types
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface InterpretationResult {
+    compliance: 'full' | 'modified' | 'partial' | 'refused';
+    effective_stance: string;
+    event?: PendingOfficerEvent;
+    reason?: string;
+}
+
+export interface InterpretationPreview {
+    predicted_compliance: 'full' | 'modified' | 'partial' | 'refused';
+    effective_stance: string;
+    reason: string;
+    officer_name: string;
+    officer_competence: number;
+    officer_aggressiveness: number;
+}
+
+export interface ReliefResult {
+    relieved_officer_id: string;
+    replacement_officer_id: string | null;
+    transition_penalty_turns: number;
+    morale_hit: number;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Core computation (shared by interpretStanceOrder and previewInterpretation)
+// ═══════════════════════════════════════════════════════════════════════════
+
+interface InterpretationComputation {
+    compliance: 'full' | 'modified' | 'partial' | 'refused';
+    effective_stance: string;
+    reason: string;
+    officer_name: string;
+    officer_competence: number;
+    officer_aggressiveness: number;
+    officer_id: string;
+    officer_state: NamedOfficerState;
+    faction: FactionId;
+    complianceScore: number;
+}
+
+function computeInterpretation(
+    state: GameState,
+    corpsId: string,
+    orderedStance: string,
+): InterpretationComputation | null {
+    const commander = getCorpsCommander(corpsId, state);
+    if (!commander) return null;
+
+    const { data, state: officerState } = commander;
+
+    // Acting commanders always comply
+    if (officerState.acting_commander) return null;
+
+    // Cowed officers comply fully
+    if (
+        officerState.cowed_until_turn !== undefined &&
+        state.meta.turn <= officerState.cowed_until_turn
+    ) {
+        return null;
+    }
+
+    const competence = data.competence;
+    const aggressiveness = data.aggressiveness;
+    const preferredStance = computePreferredStance(aggressiveness);
+
+    const orderedRank = STANCE_RANKS[orderedStance] ?? 1;
+    const preferredRank = STANCE_RANKS[preferredStance] ?? 1;
+
+    let score = computeComplianceScore(competence, aggressiveness, orderedRank, preferredRank, 0);
+
+    // Check PatronDirective stance_ceiling (cap effective stance if needed)
+    // patron_directives lives on war_timeline as Record<string, PatronDirective[]>
+    type PatronDirectiveRaw = { start_week: number; end_week: number; stance_ceiling: string };
+    const timeline = state.military.war_timeline as (typeof state.military.war_timeline & {
+        patron_directives?: Record<string, PatronDirectiveRaw[]>;
+    }) | undefined;
+    const turn = state.meta.turn;
+    const factionDirectives = timeline?.patron_directives?.[data.faction];
+    let stanceCeiling: string | null = null;
+    if (factionDirectives) {
+        const activeDirective = factionDirectives.find(d => turn >= d.start_week && turn < d.end_week);
+        if (activeDirective) {
+            stanceCeiling = activeDirective.stance_ceiling;
+        }
+    }
+
+    let effectiveStance = determineEffectiveStance(orderedStance, preferredStance, score);
+
+    // Apply patron ceiling: if effective stance exceeds ceiling, cap it
+    if (stanceCeiling !== null) {
+        const ceilingRank = STANCE_RANKS[stanceCeiling] ?? 2;
+        if ((STANCE_RANKS[effectiveStance] ?? 0) > ceilingRank) {
+            effectiveStance = stanceCeiling;
+        }
+    }
+
+    // Determine compliance category
+    let compliance: 'full' | 'modified' | 'partial' | 'refused';
+    if (effectiveStance === orderedStance) {
+        compliance = score >= FULL_COMPLIANCE_THRESHOLD ? 'full' : 'modified';
+    } else if (effectiveStance === preferredStance) {
+        compliance = 'refused';
+    } else {
+        compliance = 'partial';
+    }
+
+    const reason = buildInterpretationReason(data.name, orderedStance, effectiveStance, score);
+
+    return {
+        compliance,
+        effective_stance: effectiveStance,
+        reason,
+        officer_name: data.name,
+        officer_competence: competence,
+        officer_aggressiveness: aggressiveness,
+        officer_id: data.id,
+        officer_state: officerState,
+        faction: data.faction,
+        complianceScore: score,
+    };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Main exports
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Interpret a player-issued stance order through the corps commander's personality.
+ * May emit a PendingOfficerEvent if the officer deviates.
+ * Mutates state.military.pending_officer_events on non-full compliance.
+ */
+export function interpretStanceOrder(
+    state: GameState,
+    corpsId: string,
+    orderedStance: string,
+): InterpretationResult {
+    const computation = computeInterpretation(state, corpsId, orderedStance);
+
+    // No commander, acting commander, or cowed → full compliance, no event
+    if (!computation) {
+        return { compliance: 'full', effective_stance: orderedStance };
+    }
+
+    const { compliance, effective_stance, reason, officer_id, officer_state, faction } = computation;
+
+    if (compliance === 'full') {
+        return { compliance: 'full', effective_stance, reason };
+    }
+
+    // Build event for non-full compliance
+    const eventTypeMap: Record<'modified' | 'partial' | 'refused', OfficerEventType> = {
+        modified: 'order_modified',
+        partial: 'order_pushback',
+        refused: 'order_refused',
+    };
+    const eventType = eventTypeMap[compliance as 'modified' | 'partial' | 'refused'];
+
+    const originalOrder: OrderSnapshot = {
+        order_type: 'stance_change',
+        corps_id: corpsId,
+        stance: orderedStance,
+    };
+    const interpretedOrder: OrderSnapshot = {
+        order_type: 'stance_change',
+        corps_id: corpsId,
+        stance: effective_stance,
+    };
+
+    const event: PendingOfficerEvent = {
+        event_id: `${corpsId}:stance:${state.meta.turn}`,
+        type: eventType,
+        faction,
+        turn: state.meta.turn,
+        officer_id,
+        corps_id: corpsId,
+        acknowledged: false,
+        original_order: originalOrder,
+        interpreted_order: interpretedOrder,
+        reason,
+        overridable: true,
+        override_action: 'override-officer-interpretation',
+    };
+
+    // Ensure pending_officer_events array exists
+    if (!state.military.pending_officer_events) {
+        state.military.pending_officer_events = [];
+    }
+    state.military.pending_officer_events.push(event);
+
+    return { compliance, effective_stance, event, reason };
+}
+
+/**
+ * Preview what interpretStanceOrder would produce without mutating state.
+ * Read-only: does NOT push any event to state.
+ */
+export function previewInterpretation(
+    state: GameState,
+    corpsId: string,
+    orderedStance: string,
+): InterpretationPreview {
+    const computation = computeInterpretation(state, corpsId, orderedStance);
+
+    if (!computation) {
+        // No commander or always-comply case
+        const commander = getCorpsCommander(corpsId, state);
+        return {
+            predicted_compliance: 'full',
+            effective_stance: orderedStance,
+            reason: '',
+            officer_name: commander?.data.name ?? '',
+            officer_competence: commander?.data.competence ?? 0,
+            officer_aggressiveness: commander?.data.aggressiveness ?? 0,
+        };
+    }
+
+    return {
+        predicted_compliance: computation.compliance,
+        effective_stance: computation.effective_stance,
+        reason: computation.reason,
+        officer_name: computation.officer_name,
+        officer_competence: computation.officer_competence,
+        officer_aggressiveness: computation.officer_aggressiveness,
+    };
+}
+
+/**
+ * Handle player override of an officer interpretation event.
+ * Increments override_count, checks for cowed condition.
+ * NOTE: Applying original_order.stance back to CorpsCommandState is an IPC concern (Phase 2).
+ * This function only handles officer state mutation and event acknowledgment.
+ */
+export function overrideInterpretation(
+    state: GameState,
+    corpsId: string,
+    eventId: string,
+): void {
+    if (!state.military.pending_officer_events) return;
+
+    const event = state.military.pending_officer_events.find(e => e.event_id === eventId);
+    if (!event || !event.overridable) return;
+
+    const officers = state.military.named_officers;
+    if (!officers) return;
+
+    // Find the officer for this corps
+    const commander = getCorpsCommander(corpsId, state);
+    if (!commander) return;
+
+    const officerState = commander.state;
+    const currentTurn = state.meta.turn;
+
+    const prevLastOverrideTurn = officerState.last_override_turn;
+
+    // Increment override count
+    officerState.override_count = (officerState.override_count ?? 0) + 1;
+    officerState.last_override_turn = currentTurn;
+
+    // Check cowed condition:
+    // If previous last_override_turn was within COWED_OVERRIDE_WINDOW AND
+    // override_count has reached COWED_OVERRIDE_THRESHOLD → cow the officer
+    const withinWindow =
+        prevLastOverrideTurn !== undefined &&
+        currentTurn - prevLastOverrideTurn <= COWED_OVERRIDE_WINDOW;
+
+    if (withinWindow && officerState.override_count >= COWED_OVERRIDE_THRESHOLD) {
+        officerState.cowed_until_turn = currentTurn + COWED_DURATION;
+        officerState.override_count = 0;
+    }
+
+    // Mark event acknowledged
+    event.acknowledged = true;
+}
+
+/**
+ * Relieve (fire) a named officer from their corps command.
+ * Finds a replacement, sets acting commander flag, applies morale penalty.
+ * Emits an officer_relieved PendingOfficerEvent.
+ *
+ * NOTE: Morale application to brigades is documented as TODO — no brigade morale field
+ * is directly accessible here without iterating formations. The penalty is returned
+ * in ReliefResult for the caller to apply as appropriate.
+ */
+export function relieveOfficer(
+    state: GameState,
+    officerId: string,
+    corpsId: string,
+): ReliefResult {
+    const noOp: ReliefResult = {
+        relieved_officer_id: officerId,
+        replacement_officer_id: null,
+        transition_penalty_turns: 0,
+        morale_hit: 0,
+    };
+
+    const officers = state.military.named_officers;
+    const officerData = state.military.named_officer_data;
+    if (!officers || !officerData) return noOp;
+
+    const officerState = officers[officerId];
+    if (!officerState || officerState.status !== 'active') return noOp;
+    if (officerState.assigned_corps_id !== corpsId) return noOp;
+
+    const data = officerData.find(o => o.id === officerId);
+    if (!data) return noOp;
+
+    // Mark officer as retired and unassign from corps
+    officerState.status = 'retired';
+    officerState.assigned_corps_id = null;
+
+    // Find best available replacement from reserve pool
+    type ReplacementCandidate = { id: string; competence: number; pool_tier: string };
+    const TIER_PRIORITY: Record<string, number> = { starter: 0, tier_a: 1, tier_b: 2, tier_c: 3 };
+    const candidates = officerData
+        .filter(o =>
+            o.faction === data.faction &&
+            o.rank === 'corps_commander' &&
+            o.id !== officerId &&
+            officers[o.id]?.status === 'reserve'
+        )
+        .sort((a, b) => {
+            const aHome = a.home_corps_id === corpsId ? 0 : 1;
+            const bHome = b.home_corps_id === corpsId ? 0 : 1;
+            if (aHome !== bHome) return aHome - bHome;
+            const aTier = TIER_PRIORITY[a.pool_tier] ?? 99;
+            const bTier = TIER_PRIORITY[b.pool_tier] ?? 99;
+            if (aTier !== bTier) return aTier - bTier;
+            if (a.competence !== b.competence) return b.competence - a.competence;
+            return a.id.localeCompare(b.id);
+        });
+
+    let replacementId: string | null = null;
+
+    if (candidates.length > 0) {
+        const replacement = candidates[0]!;
+        replacementId = replacement.id;
+        const repState = officers[replacementId]!;
+        repState.status = 'active';
+        repState.assigned_corps_id = corpsId;
+        repState.turns_in_command = 0;
+        repState.acting_commander = true; // Acting for RELIEF_ACTING_DURATION turns
+    } else {
+        // Create generic acting commander
+        const turn = state.meta.turn;
+        const genericId = `generic_relief_${data.faction}_${corpsId}_t${turn}`;
+        const factionConfig = state.military.war_timeline?.officer_config?.[data.faction];
+        const genericComp = factionConfig?.generic_replacement_competence ?? 2;
+
+        const genericData = {
+            id: genericId,
+            name: `Acting Commander (${corpsId})`,
+            faction: data.faction,
+            rank: 'corps_commander' as const,
+            competence: genericComp,
+            aggressiveness: 3,
+            defensive_skill: 2,
+            political_reliability: 3,
+            home_corps_id: corpsId,
+            available_from_turn: turn,
+            origin: 'military' as const,
+            casualty_vulnerability: 0.15,
+            can_improve: true,
+            improvement_rate: 0.06,
+            pool_tier: 'tier_c' as const,
+        };
+        officerData.push(genericData);
+        officers[genericId] = {
+            officer_id: genericId,
+            status: 'active',
+            assigned_corps_id: corpsId,
+            turns_in_command: 0,
+            battles: 0,
+            victories: 0,
+            effective_competence_penalty: 0,
+            penalty_turns_remaining: 0,
+            acting_commander: true,
+        };
+        replacementId = genericId;
+    }
+
+    // TODO: Apply RELIEF_MORALE_PENALTY to brigades assigned to this corps.
+    // Iterating formations here would create a dependency; returned in ReliefResult
+    // so the caller (IPC handler, Phase 2) can apply it to relevant formations.
+
+    // Emit officer_relieved event
+    if (!state.military.pending_officer_events) {
+        state.military.pending_officer_events = [];
+    }
+    const event: PendingOfficerEvent = {
+        event_id: `${corpsId}:relieved:${state.meta.turn}`,
+        type: 'officer_relieved',
+        faction: data.faction,
+        turn: state.meta.turn,
+        officer_id: officerId,
+        corps_id: corpsId,
+        acknowledged: false,
+        reason: `Officer ${data.name} was relieved of command.`,
+    };
+    state.military.pending_officer_events.push(event);
+
+    return {
+        relieved_officer_id: officerId,
+        replacement_officer_id: replacementId,
+        transition_penalty_turns: RELIEF_ACTING_DURATION,
+        morale_hit: RELIEF_MORALE_PENALTY,
+    };
+}

@@ -3,7 +3,7 @@
  *
  * Low political reliability corps commanders may ignore army stance
  * or launch unauthorized operations. Models the ARBiH warlord problem
- * (Caco, Cerić, etc.) and VRS corps-level autonomy.
+ * (Caco, Čelo (Ramiz Dedić), etc.) and VRS corps-level autonomy.
  *
  * Deterministic: uses deterministicRandom, no Math.random().
  */

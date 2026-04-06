@@ -509,6 +509,8 @@ export interface CorpsCommandState {
     commander_state?: CommanderState;
     /** Turn number when command stabilization cooldown expires (Wave 4). Set after Stabilize action. */
     stabilization_cooldown_until?: number;
+    /** Player's raw ordered stance before officer interpretation. Set when player issues stance order. Cleared at turn end. */
+    player_ordered_stance?: string | null;
 }
 
 /** Operational group activation order. */

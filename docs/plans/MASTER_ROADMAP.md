@@ -178,6 +178,12 @@ Order interpretation system: when the player issues a corps stance change, launc
 
 Plans: `docs/plans/2026-03-24-v081-order-interpretation-plan.md`, `docs/plans/2026-03-31-v083-player-command-review-ux-plan.md`, `docs/plans/2026-03-31-v08to09-army-corps-authority-coherence-plan.md`, `docs/plans/2026-03-31-v08to09-commander-explanation-surfaces-plan.md`, architecture section 2.
 
+**Phase status (2026-04-06):**
+- Phase 1 — Order Interpretation Engine (Stance): CLOSED 2026-04-06. Report: `docs/40_reports/implemented/20260406_V083_PHASE1_ORDER_INTERPRETATION.md`
+- Phase 2: IPC wiring + interpretOperationLaunch: pending
+- Phase 3: decay step + reliabilityModifier population: pending
+- Phase 4: UI (OrderInterpretationPanel, OOB tooltip): pending
+
 ### v0.8.4 — Autonomy Depth + Claude API at Political Level
 
 **Gate:** Requires v0.8.3. LLM integration sits on top of cleaned command ownership, not underneath it. Replay/log determinism, decision auditability, fallback behavior, and player review surfaces must be explicit before any API-assisted autonomy is treated as roadmap-ready.

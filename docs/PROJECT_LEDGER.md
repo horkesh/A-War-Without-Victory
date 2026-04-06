@@ -23914,3 +23914,18 @@ ACCEPTED. Phase 5 focus: Owen-Stoltenberg RBiH tactical-acceptance branch, RS te
 **Verification:** tsc clean. 2684/2684 vitest (186 files). Canon compliance: GO.
 
 **Status:** v0.8.2 CLOSED — all 7 phases complete.
+
+## v0.8.3 Phase 1 — Order Interpretation Engine (Stance) [2026-04-06]
+
+**Purpose:** Lay the deterministic foundation for order interpretation — the personality filter between player intent and corps execution.
+
+**Changes:**
+- `officer_types.ts`: Extended OfficerEventType (+5 values), added OrderSnapshot interface, extended PendingOfficerEvent (+5 fields), extended NamedOfficerState (+3 fields for override/cowed state).
+- `game_state.ts`: `player_ordered_stance?` on CorpsCommandState.
+- `order_interpretation.ts` (NEW): Deterministic compliance score engine for stance orders. Score formula: base=0.45+comp×0.10, gapPenalty=gap×0.25, reliabilityModifier slot (0.0 in Phase 1 — warlord foundations seam). Thresholds: full≥0.80, modified≥0.50, partial≥0.25, refused<0.25. Cowed mechanic: 2 overrides in 8 turns → complies for 8 turns. Acting commander fast-path. Patron directive ceiling check. No Math.random().
+- `apr1992_officers.json`: Dudakovic aggressiveness 5→4 (Historian-verified; Bihac encirclement is structural, not max personality aggression).
+- `warlord_friction.ts`: Comment fix "Cerić" → "Čelo (Ramiz Dedić)".
+
+**Verification:** tsc clean. 2696/2696 vitest (187 files). 12 new tests. Canon compliance GO. QA 13/13.
+
+**Deferred:** IPC wiring, halt_delay field, interpretOperationLaunch/Halt, decay pipeline step, reliabilityModifier population, all UI — all Phase 2+.
