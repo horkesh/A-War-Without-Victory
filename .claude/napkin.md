@@ -10,12 +10,12 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-04-05, v0.8.0 Commander Intelligence Overhaul on main)
-**n1323: 94.0% area-weighted, 27/27 anchors, 6/6 benchmarks, 74 battles. hash: b3355614a82d13d7.**
-Two supply-truth fixes in sequence: (1) n1322: graduated scoring (adequate=1.0, strained=0.5, critical=0.0), eliminated 16/18 corps zero-readiness collapse. (2) n1323: BFS corridor fix — bridge detection was operating on BFS spanning tree (100% trivially brittle) instead of full reachable subgraph. Supply readiness now: 13/21 ops at 1.0, 8/21 at 0.5. VRS heartland adequate, ARBiH/VRS-Drina strained. estimateForceRatio supply awareness NOW UNBLOCKED.
-Previous: n1321 (anti-paralysis supply gate), n1319 (empty-objective probe guard), n1318 (ZEA attribution).
-kopcic_2 anchor lost: RS commander ops now attack in Bugojno — calibration sensitivity, not regression.
-2335 tests, 0 failures.
+## Current State (2026-04-06, v0.8.3 Phase 1 on main)
+**2696/2696 vitest (187 files). v0.8.3 Phase 1 CLOSED. Commit: 86bac2e4.**
+v0.8.3 Phase 1 delivered: `order_interpretation.ts` — deterministic compliance score engine (comp/agg/gap, reliabilityModifier=0 slot), 4 thresholds (full≥0.80/modified≥0.50/partial≥0.25/refused<0.25), cowed mechanic, acting_commander fast-path, patron ceiling. Type additions: OrderSnapshot, OfficerEventType+5, PendingOfficerEvent+5, NamedOfficerState+3. Dudakovic agg 5→4 (Historian). 12 new tests. Scope: stance only. Deferred: IPC wiring (Phase 2), operation interpretation (Phase 2), decay step (Phase 3), reliabilityModifier population (Phase 3), UI (Phase 4).
+**v0.8.2 CLOSED (all 7 phases). v0.8.3 Phase 1 CLOSED. Next: v0.8.3 Phase 2 — IPC wiring + interpretOperationLaunch.**
+Last combat calibration: n1344 93.3%, hash: 0e2fe6333394649a. n1323: 94.0%, 27/27, 6/6, 74 battles.
+n1323 last combat-calibration baseline: 94.0%, 27/27 anchors, 6/6 benchmarks, 74 battles. hash: b3355614a82d13d7.
 Previous ATH: n1315: 94.3%, 27/27. Previous: n1302: 93.7%, 25/25.
 Commander Intelligence Overhaul (n1294–1301): must_hold 1.5× garrison (Brcko/Doboj), org readiness gate (zero main_effort → defensive), op scale cap by main_effort_count, enemy_concentration_zones from intel picture, coordination ±4%/pt officer competence, strength-based opportunity target ranking.
 

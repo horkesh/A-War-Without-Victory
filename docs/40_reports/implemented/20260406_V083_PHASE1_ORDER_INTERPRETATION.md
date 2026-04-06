@@ -214,6 +214,7 @@ Comment corrected: `"Cerić"` → `"Čelo (Ramiz Dedić)"`. The previous comment
 
 - `npx tsc --noEmit`: clean
 - `npm run test:vitest`: 2696/2696 (187 files, 12 new tests pass)
+- `npm run desktop:map:build`: clean (✓ built in 8.05s; chunk size warning is pre-existing)
 
 ---
 
