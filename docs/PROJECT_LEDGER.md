@@ -4,6 +4,7 @@
 **Files modified:** `src/sim/combat/order_interpretation.ts`, `src/ui/map/components/army_hq/OrderInterpretationPanel.tsx`, `src/ui/map/data/types.ts`, `src/ui/map/utils/officerCharacter.ts`, `src/ui/map/data/GameStateAdapter.ts`, `src/ui/map/components/OfficerProfile.tsx`
 **Files created:** `tests/sim/command/phase5_interpretation_ux.test.ts`
 **Status:** ACCEPTED
+**Commits:** ebb18660 (impl), d4a2263c (docs)
 
 ### What changed
 

@@ -1,6 +1,7 @@
 # v0.8.3 Phase 5 — Interpretation UX Completion
 
 **Date:** 2026-04-06
+**Commits:** ebb18660 (impl), d4a2263c (docs)
 **Status:** ACCEPTED
 **Baseline:** 2740/2740 vitest, tsc clean (Phase 4 / v0.8.3)
 **Verification:** tsc clean, 2765/2765 vitest (191 files, 25 new tests), build pass (6.41s)
