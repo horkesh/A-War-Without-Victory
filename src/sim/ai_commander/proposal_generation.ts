@@ -11,8 +11,88 @@
  */
 
 import type { FactionId, GameState, PendingProposalReview } from '../../state/game_state.js';
+import type { CommanderState } from '../combat/commander/commander_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getFactionCorps } from '../combat/bot_corps_helpers.js';
+
+// ---------------------------------------------------------------------------
+// Description enrichment helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Formats a zone/staging_zone ID into a human-readable name.
+ * Replaces underscores with spaces and title-cases each word.
+ * Pure — no side effects, no randomness.
+ */
+function formatZoneName(zoneId: string): string {
+    return zoneId
+        .split('_')
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
+}
+
+/**
+ * Maps ThreatAssessment.overall_pressure to a display label.
+ * The type is already 'low' | 'moderate' | 'heavy' | 'critical' —
+ * we normalise 'heavy' to 'High' for player-facing copy.
+ */
+function formatThreatLabel(pressure: string): string {
+    switch (pressure) {
+        case 'low':      return 'Low';
+        case 'moderate': return 'Moderate';
+        case 'heavy':    return 'High';
+        case 'critical': return 'Critical';
+        default:         return pressure;
+    }
+}
+
+/**
+ * Builds an enriched single-string description for an op proposal.
+ *
+ * Format (omits any segment where data is unavailable):
+ *   "Zone: <name>. Force: <N> brigades. Threat: <label>. Plan: <objectiveDesc>"
+ *
+ * Graceful fallback: if no enrichment data is available at all, returns
+ * objectiveDesc unchanged. Never returns an empty string.
+ */
+export function buildOpProposalDescription(
+    corpsName: string,
+    cs: CommanderState,
+    objectiveDesc: string,
+): string {
+    const parts: string[] = [];
+
+    // Zone: derive from current_plan.staging_zone (ZoneId branded string).
+    const stagingZone = cs.current_plan?.staging_zone;
+    if (stagingZone) {
+        parts.push(`Zone: ${formatZoneName(stagingZone)}`);
+    }
+
+    // Force: count assigned brigades on the current plan.
+    const assignedBrigades = cs.current_plan?.assigned_brigades;
+    if (assignedBrigades != null && assignedBrigades.length > 0) {
+        const n = assignedBrigades.length;
+        parts.push(`Force: ${n} ${n === 1 ? 'brigade' : 'brigades'}`);
+    }
+
+    // Threat: use ThreatAssessment.overall_pressure (already a string label).
+    const pressure = cs.threat_assessment?.overall_pressure;
+    if (pressure) {
+        parts.push(`Threat: ${formatThreatLabel(pressure)}`);
+    }
+
+    // Existing objective description always appended last.
+    if (objectiveDesc) {
+        parts.push(`Plan: ${objectiveDesc}`);
+    }
+
+    // If enrichment added nothing and objectiveDesc is empty, fall back to corps name.
+    if (parts.length === 0) {
+        return `${corpsName} offensive operation`;
+    }
+
+    return parts.join('. ');
+}
 
 /**
  * Generates Level 1 Assisted stance proposals for the player faction.
@@ -137,7 +217,7 @@ export function generateLevel1OpProposals(
         const planId = plan?.plan_id ?? `opportunity_${corpsId}_t${state.meta.turn}`;
         const objectiveDesc = plan?.objective_description ?? 'offensive operation';
 
-        const description = `Formula AI: ${corpsName} ready to launch offensive — ${objectiveDesc}`;
+        const description = buildOpProposalDescription(corpsName, cs, objectiveDesc);
 
         const seq = proposals.length;
         proposals.push({

@@ -22,7 +22,7 @@ export interface PendingProposalReview {
     id: string;
     turn: number;
     faction: string;
-    domain: 'military' | 'political' | 'events';
+    domain: 'military' | 'political' | 'events' | 'ops';
     description: string;
     proposed_action: string;
     current_value?: string;
@@ -81,11 +81,14 @@ interface ProposalCardProps {
 function ProposalCard({ proposal, onAccept, onReject, busy }: ProposalCardProps) {
     const resolved = proposal.accepted !== undefined;
 
-    // Parse a readable corps label from proposed_action ("SET_STANCE:corps_id:stance")
-    // or fall back to description first line.
+    // Parse a readable corps label from proposed_action.
+    // Supported formats:
+    //   SET_STANCE:<corps_id>:<stance>  → domain 'military'
+    //   APPROVE_OP:<corps_id>:<plan_id> → domain 'ops'
     let corpsLabel = '';
     const parts = proposal.proposed_action.split(':');
-    if (parts[0] === 'SET_STANCE' && parts[1]) {
+    const isOp = parts[0] === 'APPROVE_OP';
+    if ((parts[0] === 'SET_STANCE' || isOp) && parts[1]) {
         // e.g. "2nd_corps" → "2nd Corps"
         corpsLabel = parts[1]
             .replace(/_/g, ' ')
@@ -111,10 +114,10 @@ function ProposalCard({ proposal, onAccept, onReject, busy }: ProposalCardProps)
             {/* Corps / domain header */}
             <div className="flex items-center justify-between gap-2">
                 <span className="text-[11px] font-mono text-[#c4a04a] font-semibold tracking-wide truncate">
-                    {corpsLabel}
+                    {isOp ? `Op Order — ${corpsLabel}` : corpsLabel}
                 </span>
                 <span className="text-[9px] font-mono text-[#8a8578] uppercase tracking-[0.15em] shrink-0">
-                    {proposal.domain}
+                    {proposal.domain === 'ops' ? 'OP ORDER' : proposal.domain}
                 </span>
             </div>
 
@@ -144,14 +147,14 @@ function ProposalCard({ proposal, onAccept, onReject, busy }: ProposalCardProps)
                         disabled={busy}
                         className="flex-1 py-1 text-[9px] font-mono uppercase tracking-[0.15em] rounded border border-green-500/25 bg-green-900/15 text-green-300 hover:bg-green-900/30 hover:border-green-500/40 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                     >
-                        Accept
+                        {isOp ? 'Authorize' : 'Accept'}
                     </button>
                     <button
                         onClick={() => onReject(proposal.id)}
                         disabled={busy}
                         className="flex-1 py-1 text-[9px] font-mono uppercase tracking-[0.15em] rounded border border-red-500/25 bg-red-900/10 text-red-400 hover:bg-red-900/25 hover:border-red-500/40 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                     >
-                        Reject
+                        {isOp ? 'Abort' : 'Reject'}
                     </button>
                 </div>
             )}

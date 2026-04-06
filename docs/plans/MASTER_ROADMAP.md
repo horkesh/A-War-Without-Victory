@@ -198,10 +198,7 @@ Plans: `docs/plans/2026-03-24-v081-order-interpretation-plan.md`, `docs/plans/20
 
 - Phase D — Op Proposals, High-Stakes Event Gate, Roadmap Truth: CLOSED 2026-04-06. `generateLevel1OpProposals()` in `proposal_generation.ts` (domain `'ops'`, `APPROVE_OP:<corpsId>:<planId>` action). Plan-launch guard in `applyCommanderOutput` (Level 1: no response → hold at ready, rejected → abandon). `player_op_response` field on `CorpsCommandState`, cleared by `apply-autonomy-transition`. `APPROVE_OP:` branches in accept/reject IPC. Step 154 `generate-level1-op-proposals`. `nato_ultimatum_sarajevo_1994` upgraded with `requires_player_response:true` + `response_options`. Turn-advance block for `pending_event_decisions` confirmed absent (Phase E). 33 new tests, 2846/2846 vitest. Report: `docs/40_reports/implemented/20260406_V084_PHASED_OPPROPOSALS_HIGHSTAKES.md`
 
-**Phase E must deliver:**
-- Turn-advance block in `advance-turn` IPC: block turn advance when any `pending_event_decisions` entry has `requires_player_response: true` and has not been resolved
-- AutonomyPanel UI for op proposals: domain-specific card rendering for `domain: 'ops'` proposals (vs current stance cards)
-- Op proposal description enrichment: zone name, estimated force strength, enemy threat rating from commander briefing
+- Phase E — Turn-Advance Block, Ops Card UI, Description Enrichment: CLOSED 2026-04-06. Turn-advance block in `advance-turn` IPC (`electron-main.cjs` lines 617–632): blocks when `pending_event_decisions` contains any entry with `requires_player_response:true` unresolved; `requires_player_response?` added to `PendingEventDecision` in `event_types.ts`; stamped at push time in `evaluate_events.ts`. `AutonomyPanel.tsx` extended: `'ops'` domain union, `APPROVE_OP:` card parsing, "Op Order" header, "OP ORDER" badge, "Authorize"/"Abort" buttons. `buildOpProposalDescription()` in `proposal_generation.ts`: zone name from `staging_zone`, force count from `assigned_brigades.length`, threat label from `overall_pressure`, fallback to corps name. 31 new tests in `autonomy_phase_e_block.test.ts` + `autonomy_phase_e_enrichment.test.ts`, 2877/2877 vitest (198 files). tsc clean, build clean. **v0.8.4 CLOSED — all phases A–E complete.**
 
 LLM integration sits on top of cleaned command ownership, not underneath it. Replay/log determinism, decision auditability, fallback behavior, and player review surfaces must be explicit before any API-assisted autonomy is treated as roadmap-ready.
 
@@ -469,7 +466,7 @@ These need design sessions before implementation. Preserved from the original ro
 | Commander Maturity (belief state, motive stack, traces) | Complete (v0.8.1, closed 2026-04-05) |
 | Political Leader Bot | Complete (v0.8.2 closed 2026-04-06) |
 | Order Interpretation | Complete (v0.8.3 closed 2026-04-06) |
-| Autonomy Depth + Claude API | Phase C closed (v0.8.4, 2026-04-06) |
+| Autonomy Depth + Claude API | Complete (v0.8.4 CLOSED 2026-04-06 — all phases A–E) |
 | Consequence system | Not started (v0.9.0) |
 | Cost Ledger | Not started (v0.9.0) |
 | Ghost Map | Not started (v0.9.1) |

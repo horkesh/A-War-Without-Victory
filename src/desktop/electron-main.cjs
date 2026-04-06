@@ -617,6 +617,23 @@ app.whenReady().then(() => {
     try {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
+
+      // Block turn advance if any high-stakes decision awaits player response.
+      // The block clears when resolve-decision IPC removes the entry from pending_event_decisions.
+      const pending = state.military.pending_event_decisions ?? [];
+      const blocked = pending.filter(d => d.requires_player_response === true);
+      if (blocked.length > 0) {
+        return {
+          ok: false,
+          error: 'pending_required_decisions',
+          blocked_decisions: blocked.map(d => ({
+            event_id: d.event_id,
+            event_title: d.event_title,
+            faction: d.faction,
+          })),
+        };
+      }
+
       const result = await sim.advanceTurn(state, getBaseDir());
       if (result.error) return { ok: false, error: result.error };
       currentGameStateJson = sim.serializeState(result.state);

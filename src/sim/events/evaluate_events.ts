@@ -226,6 +226,7 @@ export function evaluateEvents(
                     turn_fired: currentTurn,
                     response_options: def.response_options,
                     faction: playerFaction,
+                    requires_player_response: def.requires_player_response,
                 });
             } else {
                 // No player faction (headless/spectator) OR Observer (level 3) for non-required events: bot auto-responds.

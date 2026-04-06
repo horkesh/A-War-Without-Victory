@@ -1,3 +1,29 @@
+## [2026-04-06] v0.8.4 Phase E — Turn-Advance Block, Ops Card UI, Description Enrichment
+
+**Type:** Feature (turn-gate + UI + description enrichment)
+**Files modified:** `src/desktop/electron-main.cjs`, `src/state/event_types.ts`, `src/sim/events/evaluate_events.ts`, `src/ui/map/components/AutonomyPanel.tsx`, `src/sim/ai_commander/proposal_generation.ts`
+**Files created:** `tests/sim/autonomy/autonomy_phase_e_block.test.ts`, `tests/sim/autonomy/autonomy_phase_e_enrichment.test.ts`
+**Status:** ACCEPTED
+**Verification:** tsc clean, 2877/2877 vitest (198 files), build clean, zero new warnings
+
+### What changed
+
+- **Turn-advance block** in `advance-turn` IPC (`electron-main.cjs` lines 617–632): blocks turn advance when `pending_event_decisions` contains any entry with `requires_player_response: true` that has not been resolved. `requires_player_response?` added to `PendingEventDecision` in `event_types.ts`; stamped at push time in `evaluate_events.ts`.
+- **Ops card UI** in `AutonomyPanel.tsx`: `'ops'` domain added to `PendingProposalReview` union; `APPROVE_OP:` card parsing with "Op Order" header, "OP ORDER" badge, and "Authorize"/"Abort" buttons distinct from stance "Accept"/"Reject" cards.
+- **Description enrichment** in `proposal_generation.ts`: `buildOpProposalDescription()` builds human-readable op proposal text from `staging_zone` (zone name), `assigned_brigades.length` (force count), `overall_pressure` (threat label), with fallback to corps name when all are absent.
+
+### Verification
+
+- tsc: clean
+- vitest: 2877/2877 (198 files, +31 new Phase E tests across 2 files; was 2846/2846)
+- build: clean (pre-existing chunk-size and dynamic-import warnings confirmed accepted debt)
+
+### Recommended next lane
+
+v0.8.5 or repo-health pass per MASTER_ROADMAP.md. Open P0s to resolve before v0.9: warlord_friction enclave-lock guard (Historian-flagged), gradacac_2 RS overperformance, vrs_east_bosnian zero-attack ops. See napkin §Open P1s.
+
+---
+
 ## [2026-04-06] v0.8.4 Phase D — Op Proposals, High-Stakes Event Gate, Roadmap Truth
 
 **Type:** Feature (op proposal domain 2 + high-stakes event + plan-launch guard)

@@ -241,6 +241,8 @@ export interface PendingEventDecision {
     response_options: EventResponseOption[];
     /** Which faction must respond. */
     faction: FactionId;
+    /** If true, the player must resolve this decision before advancing the turn. */
+    requires_player_response?: boolean;
 }
 
 export interface FiredEvent {
