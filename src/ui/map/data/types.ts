@@ -71,6 +71,10 @@ export interface NamedOfficerView {
     operations_commanded?: number;
     /** Competence at first experience event (baseline). */
     initial_competence?: number;
+    /** True when officer is currently cowed (override threshold reached, complies fully). */
+    is_cowed?: boolean;
+    /** Turn when cowed status expires (turn > this → no longer cowed). */
+    cowed_until_turn?: number;
 }
 
 export interface FormationView {
@@ -729,10 +733,10 @@ export interface LoadedGameState {
             osids_captured: number;
         }>;
     }>;
-    /** Pending officer personnel events (new arrivals, suggested replacements). */
+    /** Pending officer personnel events (new arrivals, suggested replacements, Phase 3 interpretation events). */
     pendingOfficerEvents?: Array<{
         event_id: string;
-        type: 'officer_available' | 'replacement_suggested';
+        type: 'officer_available' | 'replacement_suggested' | 'order_modified' | 'order_pushback' | 'order_refused' | 'officer_relieved';
         faction: string;
         turn: number;
         officer_id: string;
@@ -762,6 +766,12 @@ export interface LoadedGameState {
             charges?: string;
             summary: string;
         };
+        /** Human-readable reason the officer deviated (Phase 3 interpretation events). */
+        reason?: string;
+        /** Whether the player can override this interpretation. */
+        overridable?: boolean;
+        /** IPC action string to call on override. */
+        override_action?: string;
     }>;
     // ═══════════════════════════════════════════════════════════════════
     // Peace Phase (Phase 0) — only populated when meta.phase === 'peace'

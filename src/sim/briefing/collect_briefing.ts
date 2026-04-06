@@ -12,7 +12,7 @@
  */
 
 import type { GameState, FactionId, FormationState, CorpsCommandState, EnclaveResilienceEntry } from '../../state/game_state.js';
-import type { PendingOfficerEvent } from '../../state/officer_types.js';
+import type { PendingOfficerEvent, OfficerEventType } from '../../state/officer_types.js';
 import type { PatronRelationship } from '../../state/negotiation_types.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
@@ -250,13 +250,33 @@ registerBriefingCollector('command', (state, faction) => {
     const items: BriefingItem[] = [];
     const pending = state.military?.pending_officer_events;
     if (Array.isArray(pending)) {
-        const factionEvents = pending.filter((e: PendingOfficerEvent) => e.faction === faction);
-        if (factionEvents.length > 0) {
+        const factionEvents = (pending as PendingOfficerEvent[]).filter(e => e.faction === faction && !e.acknowledged);
+
+        // Phase 3 interpretation events (order deviations)
+        const INTERP_TYPES = new Set<OfficerEventType>(['order_modified', 'order_pushback', 'order_refused']);
+        const interpEvents = factionEvents.filter(e => INTERP_TYPES.has(e.type));
+        if (interpEvents.length > 0) {
+            const hasRefusal = interpEvents.some(e => e.type === 'order_refused');
+            items.push({
+                id: 'cmd-order-interpretations',
+                section: 'command',
+                severity: hasRefusal ? 'critical' : 'warning',
+                title: `${interpEvents.length} order interpretation${interpEvents.length > 1 ? 's' : ''} pending`,
+                detail: hasRefusal
+                    ? 'One or more officers have refused orders. Review required.'
+                    : 'Officers have modified or pushed back on orders.',
+                actionLabel: 'Review Interpretations',
+            });
+        }
+
+        // Personnel events (officer available, replacement suggested, or unknown type)
+        const personnelEvents = factionEvents.filter(e => !INTERP_TYPES.has(e.type));
+        if (personnelEvents.length > 0) {
             items.push({
                 id: 'cmd-officer-events',
                 section: 'command',
                 severity: 'warning',
-                title: `${factionEvents.length} officer event${factionEvents.length > 1 ? 's' : ''} pending`,
+                title: `${personnelEvents.length} officer event${personnelEvents.length > 1 ? 's' : ''} pending`,
                 detail: 'Officer replacement or succession events require your attention.',
                 actionLabel: 'Review Officers',
             });

@@ -1489,6 +1489,10 @@ export function parseGameState(json: unknown): LoadedGameState {
                 experience_points: finiteNumber(os?.experience_points, undefined) as number | undefined,
                 operations_commanded: finiteNumber(os?.operations_commanded, undefined) as number | undefined,
                 initial_competence: finiteNumber(os?.initial_competence, undefined) as number | undefined,
+                is_cowed: os?.cowed_until_turn !== undefined &&
+                    typeof state.meta?.turn === 'number' &&
+                    Number(state.meta.turn) <= Number(os.cowed_until_turn),
+                cowed_until_turn: typeof os?.cowed_until_turn === 'number' ? os.cowed_until_turn : undefined,
             });
         }
         if (officerList.length > 0) namedOfficerData = officerList;
@@ -2256,7 +2260,7 @@ function derivePendingOfficerEvents(state: any): LoadedGameState['pendingOfficer
             const stats = getOfficerStats(e.officer_id);
             return {
                 event_id: String(e.event_id),
-                type: e.type as 'officer_available' | 'replacement_suggested',
+                type: e.type as 'officer_available' | 'replacement_suggested' | 'order_modified' | 'order_pushback' | 'order_refused' | 'officer_relieved',
                 faction: String(e.faction),
                 turn: Number(e.turn),
                 officer_id: String(e.officer_id),
@@ -2279,6 +2283,10 @@ function derivePendingOfficerEvents(state: any): LoadedGameState['pendingOfficer
                 corps_name: e.corps_id ? getCorpsName(e.corps_id) : undefined,
                 acknowledged: Boolean(e.acknowledged),
                 war_crimes_record: stats.war_crimes_record,
+                // Phase 3 interpretation event fields
+                reason: typeof e.reason === 'string' ? e.reason : undefined,
+                overridable: Boolean(e.overridable),
+                override_action: typeof e.override_action === 'string' ? e.override_action : undefined,
             };
         });
 }

@@ -70,6 +70,16 @@ export function CommanderSection({ corps, gameState }: CommanderSectionProps) {
                             [!] ACTING COMMANDER // NO PERMANENT DEPLOYMENT
                         </div>
                     )}
+                    {commander.is_cowed && (
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-blue-400 bg-blue-500/5 px-3 py-1.5 border border-blue-500/20">
+                            [✓] DEFERRED COMPLIANCE // FULL COOPERATION ASSURED
+                        </div>
+                    )}
+                    {!isActing && !commander.is_cowed && commander.political_reliability <= 2 && (
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-amber-500 bg-amber-500/5 px-3 py-1.5 border border-amber-500/20">
+                            [!] LOW LOYALTY // ORDER FRICTION ELEVATED
+                        </div>
+                    )}
                     <OfficerProfile officer={commander} label="" compact={false} />
                     <div className="flex gap-3 pt-2">
                         <button

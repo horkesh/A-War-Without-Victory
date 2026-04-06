@@ -4,6 +4,7 @@ import {
     getCompetenceLabel,
     getAggressionLabel,
     getDefenseLabel,
+    getReliabilityLabel,
     getOriginDisplay,
     formatRank,
     getRatingColor,
@@ -66,6 +67,9 @@ export function OfficerProfile({ officer, label, compact = false, emphasis = 'ag
                 )}
                 {(!compact || emphasis === 'defense') && (
                     <StatRow label="Defense" value={officer.defensive_skill} descriptor={getDefenseLabel(officer.defensive_skill)} />
+                )}
+                {!compact && (
+                    <StatRow label="Loyalty" value={officer.political_reliability} descriptor={getReliabilityLabel(officer.political_reliability)} />
                 )}
             </div>
 

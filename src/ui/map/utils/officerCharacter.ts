@@ -198,6 +198,29 @@ export function formatTenure(turnsInCommand: number): string {
     return `${months}mo in command`;
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// Political reliability display
+// ═══════════════════════════════════════════════════════════════════════════
+
+const RELIABILITY_LABELS: Record<number, string> = {
+    1: 'Defiant',
+    2: 'Unreliable',
+    3: 'Neutral',
+    4: 'Loyal',
+    5: 'Steadfast',
+};
+
+export function getReliabilityLabel(value: number): string {
+    return RELIABILITY_LABELS[Math.round(Math.max(1, Math.min(5, value)))] ?? 'Unknown';
+}
+
+/** Formatted compliance modifier: e.g. '−0.20', '+0.10', '±0.00' */
+export function getComplianceModifierText(politicalReliability: number): string {
+    const mod = (politicalReliability - 3) * 0.10;
+    if (Math.abs(mod) < 0.001) return '±0.00';
+    return mod > 0 ? `+${mod.toFixed(2)}` : `−${Math.abs(mod).toFixed(2)}`;
+}
+
 /** One-line personality summary from competence x aggressiveness quadrant. */
 export function getPersonalitySummary(comp: number, agg: number): string {
     if (comp >= 4 && agg >= 4) return 'Fast prep, accepts risk';
