@@ -1,3 +1,27 @@
+## [2026-04-06] Frontline-Truth Fix — Isolated Brigade Guards (444th + 16th Krajina)
+
+**Type:** Engine fix (behavioral guard)
+**Files modified:** `src/sim/combat/brigade_front_distribution.ts`, `src/sim/combat/commander_march_correction.ts`, `src/sim/combat/commander/plan.ts`, `src/scenario/scenario_runner.ts`, `src/sim/combat/attack_resolution_osid.ts`, `src/sim/combat/operational_groups.ts`
+**Files created:** `tests/seam_a_isolation_guard.test.ts`, `tests/seam_b_isolation_guard.test.ts`, `tests/destroyed_brigade_tracking.test.ts`, `docs/40_reports/implemented/20260406_FRONTLINE_TRUTH_444TH_16TH_KRAJINA.md`
+**Status:** ACCEPTED
+**Verification:** tsc clean, 2905/2905 vitest (201 files), build clean, 93.3% area-weighted (+0.1pp vs n1289 baseline), 66/66 anchors
+
+### What changed
+
+**Seam A** (`brigade_front_distribution.ts` + `commander_march_correction.ts`): Phase B march-order issuance now filters candidate front OSIDs to exclude any with zero friendly-controlled neighbors (single-node islands). If all candidates are islands, Phase B skips the brigade entirely. `correctTransitStates` also cancels transit to destinations that became isolated after corridor collapse.
+
+**Seam B** (`plan.ts selectOpportunityTargets`): Corps commander opportunity-target selection now excludes enemy OSIDs where post-capture the attacker would have zero friendly-controlled neighbors. Prevents futile cukle_2-pattern probes from being planned.
+
+**Destroyed brigade tracking** (`scenario_runner.ts`, `attack_resolution_osid.ts`, `operational_groups.ts`): `destruction_turn` stamped at two previously-missing write paths (dispersal + OG dissolution). `destroyed_brigades.json` written per run with brigade_id, faction, turn_destroyed, lifecycle_status, battles_fought, total_casualties_taken, sorted by brigade_id.
+
+### Mistake guard
+frontline truth isolated brigade isolation guard 444th 16th krajina seam A B
+
+### FORAWWV note
+None — behavioral guard only, no canon changes.
+
+---
+
 ## [2026-04-06] Studio Health / Repo Truth planning package
 
 **Type:** Docs/Governance

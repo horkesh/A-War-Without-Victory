@@ -301,6 +301,8 @@ export interface RunScenarioResult {
         activity_summary: string;
         /** Phase H2.2: formation delta (initial vs final). */
         formation_delta: string;
+        /** Destroyed named brigades reconstructed at summary time. */
+        destroyed_brigades: string;
         /** Operation AARs (completed operations). */
         operation_aars: string;
         /** Optional list of deterministic weekly save paths (save_w1..save_wN). */
@@ -1456,6 +1458,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     end_report: join(outDir, 'end_report.md'),
                     activity_summary: join(outDir, 'activity_summary.json'),
                     formation_delta: join(outDir, 'formation_delta.json'),
+                    destroyed_brigades: join(outDir, 'destroyed_brigades.json'),
                     operation_aars: join(outDir, 'operation_aars.json')
                 }
             };
@@ -2102,6 +2105,32 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         const battlelessWeeks = combatCausalityWeekly
             .filter((row) => row.total_battles === 0)
             .map((row) => row.week_index);
+        // Phase H2.2: formation delta (initial vs final formations) — hoisted so destroyedBrigades
+        // is available for inclusion in runSummary before the summary is written.
+        const finalFormations = state.military.formations ?? {};
+        // Reconstruct destroyed brigades from final formations (deterministic, no new state).
+        // Only named brigades (kind === 'brigade'); paramilitaries excluded.
+        const destroyedBrigades = Object.entries(finalFormations)
+            .filter(([, f]) =>
+                f.status === 'inactive' &&
+                f.lifecycle_status != null &&
+                f.kind === 'brigade' &&
+                !f.id.startsWith('para_') &&
+                !f.id.startsWith('opara_')
+            )
+            .map(([id, f]) => ({
+                brigade_id: id,
+                faction: (f as { faction?: string }).faction ?? null,
+                name: (f as { name?: string }).name ?? id,
+                corps_id: (f as { corps_id?: string }).corps_id ?? null,
+                turn_destroyed: f.destruction_turn ?? null,
+                location_osid: (f as { location_osid?: string }).location_osid ?? null,
+                lifecycle_status: f.lifecycle_status,
+                battles_fought: (f as { brigade_history?: { battles_fought?: number } }).brigade_history?.battles_fought ?? 0,
+                total_casualties_taken: (f as { brigade_history?: { total_casualties_taken?: number } }).brigade_history?.total_casualties_taken ?? 0,
+            }))
+            .sort((a, b) => strictCompare(a.brigade_id, b.brigade_id));
+
         const runSummary = {
             scenario_id: scenario.scenario_id,
             weeks,
@@ -2202,7 +2231,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     warnings: state.military.op_injection_warnings.filter(w => w.severity === 'warning').length,
                     issues: state.military.op_injection_warnings,
                 }
-            } : {})
+            } : {}),
+            destroyed_brigades: destroyedBrigades
         };
         const runSummaryPath = join(outDir, 'run_summary.json');
         const runSummaryForWrite = integerizeRunSummaryCounts(runSummary);
@@ -2230,10 +2260,13 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         }
 
         // Phase H2.2: formation delta (initial vs final formations).
-        const finalFormations = state.military.formations ?? {};
+        // finalFormations and destroyedBrigades are hoisted above runSummary.
         const formationDelta = computeFormationDelta(initialFormationsSnapshot, finalFormations);
         const formationDeltaPath = join(outDir, 'formation_delta.json');
         await writeFile(formationDeltaPath, stableStringify(formationDelta, 2), 'utf8');
+
+        const destroyedBrigadesPath = join(outDir, 'destroyed_brigades.json');
+        await writeFile(destroyedBrigadesPath, stableStringify(destroyedBrigades, 2), 'utf8');
 
         // Operation AARs artifact
         const operationAars = state.operation_history ?? [];
@@ -2332,6 +2365,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 end_report: endReportPath,
                 activity_summary: activitySummaryPath,
             formation_delta: formationDeltaPath,
+                destroyed_brigades: destroyedBrigadesPath,
                 operation_aars: operationAarsPath,
             ...(weeklySavePaths.length > 0 ? { weekly_saves: weeklySavePaths } : {}),
             ...(replayTimelinePath ? { replay_timeline: replayTimelinePath } : {}),

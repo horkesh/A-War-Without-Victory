@@ -543,6 +543,7 @@ function forceRetreatWithPenalties(
         f.location_osid = undefined;
         removeFromActiveOperation(state, formation.id, formation.corps_id);
         formation.status = 'inactive';
+        formation.destruction_turn = state.meta?.turn ?? 0;
     }
 }
 

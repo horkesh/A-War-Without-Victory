@@ -1259,7 +1259,21 @@ function selectOpportunityTargets(
         return (neighbors as readonly string[]).filter(n => zoneOsidSet.has(n)).length;
     };
 
+    // Isolation guard: skip OSIDs where capture would leave attacker with zero friendly
+    // neighbors post-capture. Such a garrison has no supply line and can never be relieved.
+    // Example: cukle_2 surrounded by RBiH/HRHB from turn 0 — any RS probe is futile.
+    // Guard: adjacency may be absent in unit tests — fall back to allowing all (adjacency
+    // is already checked above; reuse the same reference).
+    const factionFriendlyOsids = briefing.spatial?.friendlyOsidsByFaction?.get(briefing.faction);
+    const isIsolatedCapture = (osid: string): boolean => {
+        if (!adjacency || !factionFriendlyOsids) return false; // no data → allow
+        const neighbors = adjacency.get(osid as any) ?? [];
+        if ((neighbors as readonly string[]).length === 0) return false; // no neighbors → allow
+        return !(neighbors as readonly string[]).some(n => factionFriendlyOsids.has(n));
+    };
+
     return [...enemyOsids]
+        .filter(osid => !isIsolatedCapture(osid))
         .sort((a, b) => {
             const campaignDiff = Number(campaignTargetSet.has(b)) - Number(campaignTargetSet.has(a));
             if (campaignDiff !== 0) return campaignDiff;
@@ -1390,7 +1404,7 @@ function filterReachableObjectives(
         // OSID (a friendly OSID neighboring the objective) instead of the objective itself.
         const neighbors = adjacency.get(candidateOsid as any) ?? [];
         const approachOsids = (neighbors as readonly string[]).filter(n => factionFriendlyOsids.has(n));
-        if (approachOsids.length === 0) continue; // objective has no friendly approach
+        if (approachOsids.length === 0) continue; // isolation guard: no friendly neighbors → capture would be isolated garrison
 
         // Component-sameness gate: reject objectives whose approach OSIDs are in a different
         // connected component from ALL assigned brigades. This prevents enclave corps

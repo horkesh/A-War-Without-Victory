@@ -260,13 +260,24 @@ export function distributeBrigadesToFront(
                     ? sortedFrontOsids.filter(o => corpsAllowed.has(o))
                     : sortedFrontOsids;
                 // If all targets are outside corps territory, fall back to full set
-                const effectiveFrontOsids = candidateFrontOsids.length > 0 ? candidateFrontOsids : sortedFrontOsids;
+                const resolvedFrontOsids = candidateFrontOsids.length > 0 ? candidateFrontOsids : sortedFrontOsids;
+
+                // Island guard: exclude OSIDs with zero friendly-controlled neighbors.
+                // A 0-neighbor OSID is a single-node island — marching there strands the brigade.
+                // Uses friendlyByFaction (already built above) so the guard is a no-op when
+                // political_controllers is empty (friendlySet undefined → every OSID passes).
+                const friendlySet = friendlyByFaction.get(sector.faction);
+                const effectiveFrontOsids = friendlySet
+                    ? resolvedFrontOsids.filter(osid =>
+                        (adjacency.get(osid) ?? []).some(n => friendlySet.has(n)))
+                    : resolvedFrontOsids;
+                // If every candidate is an isolated island, skip Phase B for this brigade.
+                if (effectiveFrontOsids.length === 0) continue;
 
                 // BFS friendly set: intersect with corps boundary when available
-                const factionFriendly = friendlyByFaction.get(sector.faction);
-                const bfsFriendly = (useCorpsBoundary && factionFriendly)
-                    ? new Set([...factionFriendly].filter(o => corpsAllowed.has(o)))
-                    : factionFriendly;
+                const bfsFriendly = (useCorpsBoundary && friendlySet)
+                    ? new Set([...friendlySet].filter(o => corpsAllowed.has(o)))
+                    : friendlySet;
 
                 // Pre-compute distances to all candidates so target selection is distance-aware
                 const distToTarget = new Map<string, number>();

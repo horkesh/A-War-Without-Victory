@@ -143,7 +143,15 @@ export function correctTransitStates(state: GameState, adjacency: Map<string, st
 
         const transitDest = transitState.destination_sids?.[0];
         if (!transitDest) continue;
-        if (frontOsids.includes(transitDest)) continue; // Transit destination already correct
+        if (frontOsids.includes(transitDest)) {
+            // Destination is in assigned front OSIDs, but check if it is now an isolated island.
+            // A corridor collapse can leave the destination with 0 friendly-controlled neighbors;
+            // continuing transit would strand the brigade on an unreachable island.
+            const destNeighbors = adjacency.get(transitDest) ?? [];
+            const destIsIsolated = !destNeighbors.some(n => pc[n] === f.faction);
+            if (!destIsIsolated) continue; // Destination is reachable — leave transit intact
+            // Destination became isolated — fall through to cancel + re-route below
+        }
 
         // Wrong transit destination — cancel transit state first, then issue corrected order
         delete state.military.brigade_movement_state![bid];

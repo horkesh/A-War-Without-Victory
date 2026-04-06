@@ -284,6 +284,7 @@ export function updateOGLifecycle(state: GameState): FormationId[] {
 
         if (shouldDissolve) {
             f.status = 'inactive';
+            f.destruction_turn = state.meta.turn;
             dissolved.push(fid);
 
             // Return remaining personnel to donor brigades
