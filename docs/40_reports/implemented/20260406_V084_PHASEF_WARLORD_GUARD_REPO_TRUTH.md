@@ -1,8 +1,8 @@
 # v0.8.4 Phase F — Warlord Guard, DRINA Investigation, and v0.8.x Repo-Truth Pass
 
 **Date:** 2026-04-06
-**Status:** PARTIALLY CLOSED — enclave-lock guard and roadmap truth complete; DRINA investigation inconclusive
-**Commit:** (pending)
+**Status:** PARTIALLY CLOSED — enclave-lock guard and repo-truth sync complete; DRINA investigation still blocks full Phase F closure
+**Commit:** f5959ad6
 **vitest:** 2881/2881 (198 files)
 **tsc:** clean
 **build:** clean (pre-existing chunk-size/dynamic-import warnings accepted debt)
@@ -96,7 +96,7 @@ Dispatched a Systems Programmer agent to investigate via `latest_run_final_save.
 - `vrs_drina` in `latest_run_final_save.json` shows `current_stance: None` — contradicts agent's "projecting" claim
 - Op Podrinje Sweep DOES exist in `pre_planned_operations.ts` (line 154) targeting `vlasenica:cerska_2`
 
-**Conclusion: The agent's root cause was fabricated.** The investigation is inconclusive.
+**Conclusion: The agent's root cause was fabricated. Op Teočak was not deleted.** The investigation remains inconclusive.
 
 ### What Is Known
 
@@ -113,7 +113,7 @@ A dedicated calibration session with:
 3. Historian consultation on which eastern BiH OSIDs VRS actually held by January 1993
 4. Compare against painted targets to identify which mismatches are engine bugs vs calibration data issues
 
-**This is NOT a Phase F blocker** — the enclave-lock guard and roadmap pass are complete and independent.
+**This remains the blocker to full Phase F closure.** The enclave-lock guard and repo-truth sync are complete and independent, but the DRINA half of the lane is still open until the real cause is identified.
 
 ---
 
@@ -124,7 +124,8 @@ A dedicated calibration session with:
 **`docs/plans/MASTER_ROADMAP.md`:**
 - `Current Version: 0.8.3` → `0.8.4` (was stale since Phase D claimed "Roadmap Truth" but never bumped version)
 - Phase E closing text scoped to "Phases A–E CLOSED"
-- Phase F IN PROGRESS bullet added at line 205
+- Phase F IN PROGRESS bullet added
+- Contradictory "v0.8.4 CLOSED" top-level status removed; roadmap now reflects that Phases 1/B/C/D/E are closed while Phase F remains open
 
 **Note:** `MASTER_ROADMAP.md` already had the complete v0.8.4 phase status entries from prior commits (Phases 1, B, C, D, E). The only missing items were the version number and the Phase F entry.
 
@@ -138,7 +139,7 @@ A dedicated calibration session with:
 | `vitest run` | ✅ 2881/2881 (198 files) |
 | `desktop:map:build` | ✅ clean (pre-existing warnings accepted) |
 | 4 new enclave-lock tests | ✅ all pass |
-| DRINA fix | ⚠️ inconclusive — deferred |
+| DRINA fix | ⚠️ inconclusive — still open blocker for full Phase F closure |
 | Roadmap version | ✅ 0.8.4 |
 | Phase F ledger entry | ✅ |
 

@@ -24245,14 +24245,14 @@ ACCEPTED. Phase 5 focus: Owen-Stoltenberg RBiH tactical-acceptance branch, RS te
 **Type:** Engine correctness + Documentation sync
 **Files modified:** `src/sim/combat/warlord_friction.ts`, `tests/officer_experience.test.ts`, `docs/plans/MASTER_ROADMAP.md`
 **Files created:** `docs/40_reports/implemented/20260406_V084_PHASEF_WARLORD_GUARD_REPO_TRUTH.md`
-**Status:** Enclave-lock guard CLOSED; DRINA investigation INCONCLUSIVE (deferred); Roadmap truth CLOSED
+**Status:** Enclave-lock guard CLOSED; DRINA investigation INCONCLUSIVE (still open); repo-truth sync CLOSED
 **vitest:** 2881/2881 (198 files). tsc clean. build clean.
 
 ### What changed
 
 - **Enclave-lock guard in `checkWarlordFriction`** (`src/sim/combat/warlord_friction.ts`): when `frictionType === 'refused_release'` and officer has an active `enclave_lock` (field already existed in `NamedOfficer` type and officer JSON), the event is suppressed via `continue`. Guard respects `locked_until_turn` — after expiry, refused_release fires normally. Other types (ignored_stance, unauthorized_op) unaffected. No live bug today (all named enclave commanders have pol_rel ≥ 3); guard is a correctness contract for future officer additions. Historian-flagged 2026-04-06.
 - **4 new tests** in `tests/officer_experience.test.ts` (`checkWarlordFriction` describe): permanent lock suppression, lock expiry boundary, non-enclave can emit refused_release, type selectivity. Officer IDs 't1'/'c1' selected for known djb2 hash distribution (verified by Node.js hash inspection — djb2 % 10000 has poor uniformity for many ID strings).
-- **MASTER_ROADMAP.md**: `Current Version: 0.8.3` → `0.8.4`. Phase F IN PROGRESS bullet added. Version was stale since Phase D's "Roadmap Truth" claim did not actually bump the header.
+- **MASTER_ROADMAP.md**: `Current Version: 0.8.3` → `0.8.4`. Phase F IN PROGRESS bullet added. Subsequent contradiction corrected so the roadmap no longer says both "Phase F in progress" and "v0.8.4 closed" at the same time. Version was stale since Phase D's "Roadmap Truth" claim did not actually bump the header.
 - **DRINA investigation**: dispatched Systems Programmer agent. Agent's root cause claim (Op Teočak deletion) was verified as incorrect — Op Teočak is NOT deleted (present at `apr1992_definitive_40w.json:720`). Investigation is inconclusive; real root cause unknown without a fresh 40w diagnostic run + Historian consultation on eastern BiH territorial reality at January 1993.
 
 ### Napkin update

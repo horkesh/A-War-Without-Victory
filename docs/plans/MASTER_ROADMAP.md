@@ -213,7 +213,7 @@ Plans: `docs/plans/2026-03-24-v081-order-interpretation-plan.md`, `docs/plans/20
 
 - Phase E — Turn-Advance Block, Ops Card UI, Description Enrichment: CLOSED 2026-04-06. Turn-advance block in `advance-turn` IPC (`electron-main.cjs` lines 617–632): blocks when `pending_event_decisions` contains any entry with `requires_player_response:true` unresolved; `requires_player_response?` added to `PendingEventDecision` in `event_types.ts`; stamped at push time in `evaluate_events.ts`. `AutonomyPanel.tsx` extended: `'ops'` domain union, `APPROVE_OP:` card parsing, "Op Order" header, "OP ORDER" badge, "Authorize"/"Abort" buttons. `buildOpProposalDescription()` in `proposal_generation.ts`: zone name from `staging_zone`, force count from `assigned_brigades.length`, threat label from `overall_pressure`, fallback to corps name. 31 new tests in `autonomy_phase_e_block.test.ts` + `autonomy_phase_e_enrichment.test.ts`, 2877/2877 vitest (198 files). tsc clean, build clean. **v0.8.4 Phases A–E CLOSED.**
 
-- Phase F — Warlord Guard, DRINA Regression, and v0.8.x Final Repo-Truth Pass: IN PROGRESS 2026-04-06. Enclave-lock guard added to `checkWarlordFriction` in `src/sim/combat/warlord_friction.ts`: when `frictionType === 'refused_release'` and officer has an active `enclave_lock`, the event is suppressed (prevents Orić/Srebrenica, Palić/Žepa, Imamović/Goražde from being treated as insubordinate for not releasing brigades they cannot release). 4 new tests in `tests/officer_experience.test.ts` (permanent lock suppression, lock expiry, non-enclave can emit, type selectivity). 2881/2881 vitest, tsc clean. DRINA regression investigation pending. Final repo-truth documentation pass pending.
+- Phase F — Warlord Guard, DRINA Regression, and v0.8.x Final Repo-Truth Pass: IN PROGRESS 2026-04-06. Enclave-lock guard added to `checkWarlordFriction` in `src/sim/combat/warlord_friction.ts`: when `frictionType === 'refused_release'` and officer has an active `enclave_lock`, the event is suppressed (prevents Orić/Srebrenica, Palić/Žepa, Imamović/Goražde from being treated as insubordinate for not releasing brigades they cannot release). 4 new tests in `tests/officer_experience.test.ts` (permanent lock suppression, lock expiry, non-enclave can emit, type selectivity). 2881/2881 vitest, tsc clean. Repo-truth surfaces corrected. DRINA regression investigation remains open: the prior subagent hypothesis was rejected, and Op Teočak was not deleted.
 
 LLM integration sits on top of cleaned command ownership, not underneath it. Replay/log determinism, decision auditability, fallback behavior, and player review surfaces must be explicit before any API-assisted autonomy is treated as roadmap-ready.
 
@@ -223,7 +223,7 @@ Player political posture IPC (set war-crimes-policy, set alliance-posture, set p
 
 Plans: `docs/plans/2026-03-24-v082-autonomy-api-plan.md`, `docs/plans/2026-03-31-v084-autonomy-determinism-and-review-plan.md`, `docs/plans/2026-03-31-v08to09-commander-explanation-surfaces-plan.md`.
 
-**Status: v0.8.4 CLOSED 2026-04-06. Next broad work is split between `v0.8.x-final` command-authority cleanup and the `v0.8-to-v0.9` simplification band before `v0.9.0`.**
+**Status: v0.8.4 ACTIVE 2026-04-06. Phases 1, B, C, D, and E are closed; Phase F remains open for DRINA investigation before the band can be called closed.**
 
 ## Active Side Lanes (Non-Milestone)
 
@@ -496,7 +496,7 @@ These need design sessions before implementation. Preserved from the original ro
 | Commander Maturity (belief state, motive stack, traces) | Complete (v0.8.1, closed 2026-04-05) |
 | Political Leader Bot | Complete (v0.8.2 closed 2026-04-06) |
 | Order Interpretation | Complete (v0.8.3 closed 2026-04-06) |
-| Autonomy Depth + Claude API | Complete (v0.8.4 CLOSED 2026-04-06 — all phases A–E) |
+| Autonomy Depth + Claude API | Active (Phases 1, B, C, D, and E closed; Phase F DRINA/repo-truth closeout still open) |
 | Consequence system | Not started (v0.9.0) |
 | Cost Ledger | Not started (v0.9.0) |
 | Ghost Map | Implemented (live on tactical map; roadmap-owned cleanup/polish only if needed) |
@@ -513,7 +513,7 @@ These need design sessions before implementation. Preserved from the original ro
 | Victory conditions | Stub (roadmap-owned in v0.9.0) |
 | Diplomacy layer | Partial (patron pressure, alliance, IVP) |
 
-**Current:** 93.7% area-weighted calibration (n1302 ATH), 25/25 anchors, 6/6 benchmarks. 712 OSIDs. Political bot complete through Dayton branches (`v0.8.2`). Order interpretation complete through player-legible UX (`v0.8.3`). Autonomy review loop complete through high-stakes event gating (`v0.8.4`). Next broad work: `v0.8.x-final` + `v0.8-to-v0.9`, then `v0.9.0`. Active governance focus: keep roadmap truth, board truth, reports, and retained calibration evidence aligned through the permanent `Studio Health / Repo Truth` lane.
+**Current:** 93.7% area-weighted calibration (n1302 ATH), 25/25 anchors, 6/6 benchmarks. 712 OSIDs. Political bot complete through Dayton branches (`v0.8.2`). Order interpretation complete through player-legible UX (`v0.8.3`). Autonomy review loop is feature-complete through high-stakes event gating, but `v0.8.4` remains open while Phase F resolves the DRINA investigation and final repo-truth closeout. Next broad work after that remains `v0.8.x-final` + `v0.8-to-v0.9`, then `v0.9.0`. Active governance focus: keep roadmap truth, board truth, reports, and retained calibration evidence aligned through the permanent `Studio Health / Repo Truth` lane.
 
 ---
 
