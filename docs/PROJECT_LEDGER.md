@@ -1,3 +1,36 @@
+## [2026-04-06] v0.8.3 Phase 2 — IPC Wiring and Operation Interpretation
+
+**Type:** Feature
+**Files modified:** `src/sim/combat/order_interpretation.ts`, `src/desktop/electron-main.cjs`, `src/sim/combat/bot_corps_stance.ts`, `src/sim/combat/sector_offensive.ts`, `src/state/game_state.ts`
+**Files created:** `tests/sim/command/phase2_operation_interpretation.test.ts`
+**Status:** ACCEPTED
+**Commits:** bc88eed3 (implementation), e764491a (tests)
+
+### What changed
+
+- `interpretOperationLaunch`: orderedRank=2.0; cautious (agg ≤ 2) → extends `planning_duration` by `CAUTIOUS_EXTRA_PREP_TURNS[agg]`; aggressive (agg ≥ 4) → trims last objective; refused → `recovery_reason = 'manual_termination'`, IPC returns early
+- `interpretOperationHalt`: orderedRank=0.0; modified → `halt_delay_turns_remaining = 1`; partial/refused → `halt_delay_turns_remaining = AGGRESSIVE_HALT_DELAY (2)` when momentum threshold met
+- `halt_delay_turns_remaining` on `CorpsOperation`: countdown field decremented per-turn in `advanceSectorOffensives`; at zero writes `recovery_reason = 'manual_termination'`
+- Bot stance guard in `bot_corps_stance.ts`: `generateCorpsStanceOrders` skips corps with `player_ordered_stance != null` — player-ordered effective stance is not clobbered by next bot cycle
+- All 4 IPC handlers wired: `stage-corps-stance-order` → `interpretStanceOrder`; `stage-operation-halt` → `interpretOperationHalt`; `stage-operation-force-launch` → `interpretOperationLaunch`; `acknowledge-officer-event` → `overrideInterpretation` when `override_action === 'override-officer-interpretation'`
+
+### Verification
+
+- tsc: clean
+- vitest: 2716/2716
+- 20 new tests in `tests/sim/command/phase2_operation_interpretation.test.ts`
+
+### Deferred
+
+- Phase 3: `reliabilityModifier` population from `political_reliability`, decay pipeline step ownership, warlord supersession
+- Phase 4: UI panels (`OrderInterpretationPanel`, OOB tooltip, personality icons)
+
+### Report
+
+`docs/40_reports/implemented/20260406_V083_PHASE2_IPC_OPERATION_INTERPRETATION.md`
+
+---
+
 ## [2026-04-06] v0.8.2 Phase 5a: O-S Data Fix + RBiH Tactical Acceptance Branch
 
 **Type:** Fix + Feature

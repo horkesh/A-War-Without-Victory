@@ -180,7 +180,7 @@ Plans: `docs/plans/2026-03-24-v081-order-interpretation-plan.md`, `docs/plans/20
 
 **Phase status (2026-04-06):**
 - Phase 1 — Order Interpretation Engine (Stance): CLOSED 2026-04-06. Report: `docs/40_reports/implemented/20260406_V083_PHASE1_ORDER_INTERPRETATION.md`
-- Phase 2: IPC wiring + interpretOperationLaunch: pending
+- Phase 2 — IPC Wiring and Operation Interpretation: CLOSED 2026-04-06. Commit: bc88eed3. Report: `docs/40_reports/implemented/20260406_V083_PHASE2_IPC_OPERATION_INTERPRETATION.md`
 - Phase 3: decay step + reliabilityModifier population: pending
 - Phase 4: UI (OrderInterpretationPanel, OOB tooltip): pending
 
