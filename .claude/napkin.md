@@ -11,7 +11,7 @@
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
 ## Current State (2026-04-06, v0.8.4 Phase E CLOSED)
-**2877/2877 vitest (198 files). v0.8.4 Phase E CLOSED. Commit: <TBD>.**
+**2877/2877 vitest (198 files). v0.8.4 Phase E CLOSED. Commit: 691f4409.**
 v0.8.4 Phase E delivered: turn-advance block in `advance-turn` IPC (`electron-main.cjs` lines 617–632, `requires_player_response?` on `PendingEventDecision`, stamped in `evaluate_events.ts`); `AutonomyPanel.tsx` `'ops'` domain card ("Op Order" header, "OP ORDER" badge, "Authorize"/"Abort"); `buildOpProposalDescription()` in `proposal_generation.ts` (zone name, force count, threat label); 31 new tests in 2 files. tsc clean, build clean.
 **v0.8.4 Phase E CLOSED. v0.8.4 CLOSED — all phases A–E complete. Next: v0.9 per MASTER_ROADMAP.md.**
 **v0.8.3 was CLOSED through Phase 5 before this session.**
