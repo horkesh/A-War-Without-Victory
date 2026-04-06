@@ -1,5 +1,5 @@
 /**
- * v0.8.2 Phase 6 — Political Peace Plan Response (per-plan RS floors + patron immunity + HRHB alignment)
+ * v0.8.2 Phase 7 — Political Peace Plan Response (Dayton plan + CG RBiH bonus)
  *
  * Computes personality-weighted accept/reject response for bot factions on peace plan events.
  *
@@ -10,10 +10,17 @@
  *     vance_owen: 18pp floor (96-2 Bosnian Serb Assembly, May 1993 — ICTY IT-95-5/18-T §3526-3530)
  *     owen_stoltenberg: 18pp floor (51% assembly, Sep 1993 — routes to scoring when gap ~13pp)
  *     contact_group: 10pp floor (96% RS referendum, Aug 1994 — ICTY IT-95-5/18-T §3587)
+ *     dayton: 3pp floor (post-Krajina post-Deliberate Force — RS held ~52%, proposed ~49%)
  *     default: 18pp (all other plans)
  * - Patron override immunity: vance_owen and contact_group are referendum-based — patron cannot override.
- * - HRHB Contact Group alignment: post-Washington Agreement (w102), patron ≥ 60 → accepts CG.
- *   Sources: ICTY Prlic et al. IT-04-74-T Vol. 3 §480-520; Washington Agreement (1 March 1994).
+ *   Dayton is NOT immune — patron can override at >= 80.
+ * - HRHB CG + Dayton alignment: post-Washington Agreement (w102), patron ≥ 60 → accepts CG and Dayton.
+ *   Sources: ICTY Prlic et al. IT-04-74-T Vol. 3 §480-520; Washington Agreement (1 March 1994);
+ *   Dayton GFAP (December 1995).
+ * - RBiH Dayton endgame acceptance: warWeek >= 180 + patron >= 50 → accepts Dayton.
+ *   Source: Holbrooke To End a War pp. 298-305; ICTY IT-95-5/18-T Vol. 4.
+ * - RBiH CG acceptance bonus: +8 international_standing delta pushed into accept option.
+ *   Source: UNSCR 942 (23 September 1994); Holbrooke p. 44; Burg & Shoup pp. 311-315.
  * - RBiH defiance modifier fires in scorePoliticalOption (survivalScore component)
  * - HRHB patron_sensitivity = 0.80 confirmed correct across all plans
  * - Cutileiro (plan.id === 'cutileiro') excluded from personality scoring; use legacy bot
@@ -39,6 +46,9 @@ const RS_PLAN_FLOOR_GAPS: Record<string, number> = {
     vance_owen:        18,  // gap ~22pp >> 18pp floor → hard-reject
     owen_stoltenberg:  18,  // gap ~13pp < 18pp floor → routes to scoring
     contact_group:     10,  // gap ~14pp >> 10pp floor → hard-reject (96% referendum)
+    dayton:             3,  // Gap ~3pp at w185 post-Krajina post-Deliberate Force. RS held ~52%, proposed ~49%.
+                            // Source: Dayton Annex 2; Holbrooke To End a War pp. 217-221; ICTY IT-04-81-T §§1480-1510.
+                            // Calibration note: if RS holds 60%+ at w185 (Operation Storm not modelled), raise to 10pp.
 };
 const RS_FLOOR_GAP_DEFAULT = 18;
 
@@ -99,6 +109,16 @@ export function computePoliticalPeacePlanResponse(
         return 'accepted';
     }
 
+    // RBiH Dayton endgame acceptance branch.
+    // By November 1995 (w185), Izetbegovic accepted Dayton under US pressure and war exhaustion.
+    // Not a weakness acceptance (unlike O-S tactical branch) — acceptance from constrained leverage
+    // with US patron actively pressing. Gate: warWeek >= 180 (Dayton proximity talks)
+    // and patron >= 50 (requires credible US/IC backing).
+    // Source: Holbrooke To End a War pp. 298-305; ICTY IT-95-5/18-T Vol. 4.
+    if (faction === 'RBiH' && plan.id === 'dayton' && warWeek >= 180 && patronOverrideAuthority >= 50) {
+        return 'accepted';
+    }
+
     // RS territory floor: per-plan gap threshold → hard reject.
     // Uses per-plan floor from RS_PLAN_FLOOR_GAPS; defaults to RS_FLOOR_GAP_DEFAULT (18pp).
     if (faction === 'RS') {
@@ -116,13 +136,17 @@ export function computePoliticalPeacePlanResponse(
         ? Infinity  // patron cannot override; hard-reject fires on floor or scoring
         : PATRON_HARD_OVERRIDE_THRESHOLD; // 80 — unchanged for all other cases
 
-    // HRHB Contact Group alignment — Washington Agreement structural bonus.
+    // HRHB CG + Dayton alignment — Washington Agreement structural bonus.
     // Post-Washington (w102), Zagreb-aligned HRHB accepts CG at lower patron threshold (60).
+    // HRHB CG + Dayton alignment: Washington Agreement (March 1994, ~w102) created institutional
+    // pressure on HRHB to accept both the Contact Group plan and Dayton (which ratified the same
+    // territorial framework). Zagreb fully aligned with Western diplomatic track post-Washington.
+    // Source: Prlic IT-04-74-T Vol. 3 paras. 480-520; Dayton GFAP (December 1995).
     // This block is completely separate from RS immunity above.
     const isPostWashington = warWeek > WASHINGTON_AGREEMENT_WEEK;
     const isHrhbCgAlignment =
         faction === 'HRHB'
-        && plan.id === 'contact_group'
+        && (plan.id === 'contact_group' || plan.id === 'dayton')
         && isPostWashington;
 
     if (isHrhbCgAlignment && patronOverrideAuthority >= HRHB_CG_ALIGNMENT_THRESHOLD) {
@@ -180,6 +204,22 @@ export function computePoliticalPeacePlanResponse(
             },
         ],
     };
+
+    // Contact Group asymmetric acceptance bonus for RBiH.
+    // RBiH accepted CG (July 1994) while RS rejected by 96% referendum (August 1994).
+    // This produced documented asymmetric diplomatic capital: UNSCR 942 imposed specific RS sanctions,
+    // arms embargo discussion activated, international standing of RBiH as cooperative party established.
+    // Bonus is unconditional (structural): evaluation order (HRHB→RBiH→RS) means RS decision is
+    // unavailable at RBiH evaluation time; bonus is warranted whenever RBiH accepts CG.
+    // Source: UNSCR 942 (23 September 1994); Holbrooke To End a War p. 44; Burg & Shoup pp. 311-315.
+    if (faction === 'RBiH' && plan.id === 'contact_group') {
+        // dimension_shifts is initialised as an array in the acceptOption literal above.
+        acceptOption.dimension_shifts!.push({
+            faction: 'RBiH',
+            dimension: 'international_standing',
+            delta: 8,
+        });
+    }
 
     const acceptScore = scorePoliticalOption(acceptOption, faction, assessment, personality);
     const rejectScore = scorePoliticalOption(rejectOption, faction, assessment, personality);

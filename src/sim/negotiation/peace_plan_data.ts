@@ -149,12 +149,43 @@ const CONTACT_GROUP_PLAN: PeacePlanDefinition = {
         + 'rupture between patron and client that will fundamentally alter the strategic balance.',
 };
 
+// Dayton Peace Agreement (General Framework Agreement for Peace, Annex 2)
+// Initialed Dayton, Ohio, 21 November 1995; signed Paris, 14 December 1995.
+// proposed_split: RS=49% from Dayton Annex 2 IEBL (51/49 entity split).
+//   Within Federation: RBiH=33%, HRHB=18% — consistent with Contact Group framework
+//   which Dayton ratified (Washington Agreement canton geography; Burg & Shoup 1999 Ch. 8).
+// credibility_change_on_reject: RS=-30 (highest in sequence; rejecting Dayton post-Krajina
+//   post-Deliberate Force was diplomatic self-destruction; ICTY IT-95-5/18-T Vol. 4 §§4900–4940).
+export const DAYTON_PLAN: PeacePlanDefinition = {
+    id: 'dayton',
+    name: 'Dayton Peace Agreement',
+    trigger_week: 185,
+    proposed_split: {
+        RBiH: 33,
+        RS: 49,
+        HRHB: 18,
+    },
+    institutional_model: 'two_entities',
+    override_change_on_reject: {
+        RBiH: -5,
+        RS: -20,
+        HRHB: -5,
+    },
+    credibility_change_on_reject: {
+        RBiH: -15,
+        RS: -30,
+        HRHB: -15,
+    },
+    narrative: 'The Dayton Peace Agreement (November 1995) establishes two entities — Republika Srpska (49%) and the Bosnian-Croat Federation (51%) — with IFOR enforcing the ceasefire. The territorial allocation ratifies the Contact Group framework that RS rejected by referendum in 1994.',
+};
+
 /** All historical peace plans in chronological order. */
 export const PEACE_PLANS: readonly PeacePlanDefinition[] = [
     CUTILEIRO_PLAN,
     VANCE_OWEN_PLAN,
     OWEN_STOLTENBERG_PLAN,
     CONTACT_GROUP_PLAN,
+    DAYTON_PLAN,
 ];
 
 /** Look up a peace plan by ID. */

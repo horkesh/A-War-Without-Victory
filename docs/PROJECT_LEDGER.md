@@ -1,3 +1,26 @@
+## [2026-04-06] v0.8.2 Phase 5a: O-S Data Fix + RBiH Tactical Acceptance Branch
+
+**Type:** Fix + Feature
+**Files:** `src/sim/negotiation/peace_plan_data.ts`, `src/sim/political/political_peace_plan.ts`, `data/scenarios/events/war_1993.json`, `tests/sim/political/phase5a_os_tactical_acceptance.test.ts`
+**Status:** ACCEPTED
+**Commits:** `679a0aaa` (fix), `8198fc05` (feat)
+
+### Delivered
+
+**Commit 1 — fix(negotiation): correct Owen-Stoltenberg proposed territorial split**
+- O-S `proposed_split` corrected from `{RBiH:53, RS:30, HRHB:17}` (Vance-Owen's numbers) to `{RBiH:33, RS:52, HRHB:15}` (historical O-S: Owen "Balkan Odyssey" pp.214-219; HMS Invincible talks Sep 1993)
+- `trigger_week=70` noted as proposal date; talks concluded ~week 72 — unchanged per scope discipline
+- RS floor gap for O-S now correctly 13pp (65%-52%) — below 18pp hard-reject threshold
+
+**Commit 2 — feat(political): RBiH O-S tactical acceptance branch**
+- Branch added in `computePoliticalPeacePlanResponse()` after Cutileiro exclusion, before RS floor gate
+- Fires when: `faction==='RBiH' && plan.id==='owen_stoltenberg' && assessment.situation_score < 50`
+- Returns `'accepted'` directly, bypassing scoring; historically accurate (Izetbegovic's HMS Invincible initialing was a calculated bet RS would reject, isolating them diplomatically)
+- Player event `os_rbih_tactical_acceptance_1993` added to `war_1993.json` at turn_min=72, with two response options: accept-for-optics (+international_standing) vs reject-sincerely (+negotiating_leverage)
+- 13 new Phase 5a tests; event timeline count updated 109→110
+
+**Verification:** tsc clean, 2632/2632 vitest pass (183 suites, +18 vs baseline 2614)
+
 ## [2026-04-05] v0.8.1 Phase 4: Lesson Memory and Personality Weighting
 
 **Type:** Feature
@@ -23838,3 +23861,56 @@ ACCEPTED. Phase 5 focus: Owen-Stoltenberg RBiH tactical-acceptance branch, RS te
 ### Report
 
 `docs/40_reports/implemented/20260406_V082_PHASE4_PATRON_PHONE_CALLS.md`
+
+## [2026-04-06] v0.8.2 Phase 5: Holbrooke Pressure, RBiH Tactical Acceptance, and RS Floor Calibration (ACCEPTED)
+
+**Type:** Feature + Data Fix
+**Files created:** `data/scenarios/events/war_1995.json`, `tests/sim/political/phase5a_os_tactical_acceptance.test.ts`, `tests/sim/political/phase5c_holbrooke_events.test.ts`
+**Files modified:** `src/sim/negotiation/peace_plan_data.ts`, `src/sim/political/political_peace_plan.ts`, `data/scenarios/events/war_1993.json`, `tests/event_timeline_integrity.test.ts`
+**Status:** ACCEPTED
+**Commits:** 679a0aaa (data fix), 8198fc05 (O-S branch + player event), 5335e766 (Holbrooke events)
+
+### What changed
+
+- **O-S proposed_split corrected:** `OWEN_STOLTENBERG_PLAN.proposed_split` fixed from `{RBiH:53, RS:30}` (erroneously Vance-Owen values) to `{RBiH:33, RS:52, HRHB:15}` (historical O-S allocation). Side effect: RS floor gap for O-S is now 13pp (below 18pp threshold) — RS correctly routes to personality scoring for O-S rather than auto-rejecting, matching the historical Bosnian Serb Assembly pattern.
+- **RBiH tactical acceptance branch:** `computePoliticalPeacePlanResponse` now short-circuits to `'accepted'` when `faction='RBiH' && plan.id='owen_stoltenberg' && situation_score < 50`. Models Izetbegovic's provisional initiation on HMS Invincible (August 1993) — acceptance from weakness for international optics, knowing RS would not ultimately comply. Source: Owen *Balkan Odyssey*; ICTY IT-95-5/18-T.
+- **Player event `os_rbih_tactical_acceptance_1993`:** turn_min=72, player-facing, two options (accept-for-optics vs reject-sincerely). International_standing and patron_confidence dimension_shifts.
+- **Holbrooke 1995 events (3):** `war_1995.json` created. RS bot events at turns 176, 178 (Holbrooke's Belgrade channel + NATO Deliberate Force coercion). RBiH player event at turn 183 (pre-Dayton ceasefire demand). All ICTY/memoir verified.
+- **Calibration validation:** 40w run post-changes = 93.3% (−0.7pp from 94.0% baseline). Investigation confirmed Phase 5 changes are inert before week 40 (O-S fires at week 70 only; `trigger_week === warWeek` gate). Delta is pre-existing P1 noise in DRINA/Central Bosnia fringe. No fix required.
+- **27 new tests.** Event count: 109 → 113. vitest: 2646/2646 (184 files).
+
+### Report
+`docs/40_reports/implemented/20260406_V082_PHASE5_HOLBROOKE_TACTICAL_ACCEPTANCE.md`
+
+## [2026-04-06] v0.8.2 Phase 6: Per-Plan Threshold Specialization and Contact Group Branches (ACCEPTED)
+
+**Type:** Feature + Data Fix
+**Files modified:** `src/sim/negotiation/peace_plan_data.ts`, `src/sim/political/political_peace_plan.ts`, `src/sim/negotiation/peace_plans.ts`, `tests/sim/political/political_peace_plan.test.ts`
+**Files created:** `tests/sim/political/phase6_per_plan_floors.test.ts`
+**Status:** ACCEPTED
+**Commits:** 92bc67ad (VOPP data fix), 2e5f35b7 (per-plan floors + patron immunity + HRHB alignment), 0a9b47aa (tests)
+
+### What changed
+
+- **VOPP proposed_split corrected:** RS:30→43, RBiH:53→39, HRHB:17→18. VOPP now correctly shows ~43% for Serb-majority provinces (Owen *Balkan Odyssey* pp.98-105). Sim gap 22pp > 18pp floor → still hard-rejects.
+- **Per-plan RS floor map:** Replaced single `RS_TERRITORY_FLOOR_GAP = 18` with `RS_PLAN_FLOOR_GAPS` lookup. CG floor lowered to 10pp → CG sim gap 14pp > 10pp → **hard-rejects** (critical fix: was routing to scoring). VOPP and O-S floors both remain 18pp.
+- **Patron override immunity:** RS cannot accept VOPP or CG regardless of patron_confidence (96-2 Assembly vote; 96% referendum are patron-proof). O-S remains patron-overrideable (51% Assembly, plausible counterfactual).
+- **HRHB Washington alignment:** Post-Washington (warWeek > 102), HRHB evaluating Contact Group with patron_confidence ≥ 60 auto-accepts. Models Zagreb's institutional alignment with CG following the March 1994 Washington Agreement. Source: Prlic IT-04-74-T Vol. 3 paras. 480-520.
+- **15 new tests.** vitest: 2661/2661 (185 files).
+
+### Report
+`docs/40_reports/implemented/20260406_V082_PHASE6_PER_PLAN_FLOORS.md`
+
+## v0.8.2 Phase 7 — Dayton Plan, CG RBiH Bonus, trendScore Boundary Tests [2026-04-06]
+
+**Purpose:** Close the 1994–1995 negotiation arc by adding Dayton plan definition and branches, correcting the Contact Group RBiH acceptance asymmetry, and adding trendScore boundary coverage.
+
+**Changes:**
+- `peace_plan_data.ts`: DAYTON_PLAN added — `{RBiH:33, RS:49, HRHB:18}`, trigger_week=185, credibility_change_on_reject RS=-30 (highest in sequence). Sources: Dayton Annex 2, ICTY IT-95-5/18-T Vol. 4.
+- `political_peace_plan.ts`: (1) `RS_PLAN_FLOOR_GAPS['dayton'] = 3` — 3pp floor matches post-Krajina territorial position. (2) RBiH Dayton endgame branch: `warWeek >= 180 && patron >= 50 → 'accepted'`. (3) HRHB alignment extended to Dayton: `plan.id === 'contact_group' || plan.id === 'dayton'`. (4) CG RBiH acceptance bonus: `+8 international_standing` delta for `RBiH × contact_group` (UNSCR 942 asymmetric diplomatic capital; Holbrooke p. 44). Dayton NOT patron-immune — Milosevic bypassed RS Assembly and signed for RS.
+- `political_event_decision.test.ts`: 4 new trendScore tests (gaining/losing/stable/zero-affinity) — previously zero coverage for this component.
+- `phase7_dayton_plan.test.ts` (NEW): 18 tests covering Dayton plan definition, RS floor boundaries, patron non-immunity, RBiH endgame branch, HRHB alignment extension, CG RBiH bonus, and HRHB Washington boundary at exactly warWeek=102/103.
+
+**Verification:** tsc clean. 2684/2684 vitest (186 files). Canon compliance: GO.
+
+**Status:** v0.8.2 CLOSED — all 7 phases complete.

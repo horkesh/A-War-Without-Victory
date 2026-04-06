@@ -554,6 +554,101 @@ describe('Group 6: Srebrenica demilitarization scenario', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Group 6b: scorePoliticalOption — trendScore component
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('Group 6b: scorePoliticalOption — trendScore component', () => {
+    // TREND_MAGNITUDE = 0.25 (from political_event_decision.ts)
+    // trendScore = trendRaw * (option.aggression_affinity ?? 0)
+    // where trendRaw = +0.25 (gaining) | -0.25 (losing) | 0 (stable)
+
+    it('23. territory_trend=gaining + aggression_affinity=1.0 → trendScore = +0.25 vs stable baseline', () => {
+        // Two assessments differing only in territory_trend; same aggressive option.
+        // Score difference = TREND_MAGNITUDE * aggression_affinity = 0.25 * 1.0 = +0.25.
+        const option = makeOption({
+            aggression_affinity: 1.0,
+            risk_level: 0.65, // RS risk_tolerance=0.65 → riskScore=0
+        });
+        const rsPersonality = getPoliticalPersonality('RS');
+
+        const scoreGaining = scorePoliticalOption(
+            option, 'RS',
+            makeAssessment({ blended_score: 50, patron_pressure: 0, territory_trend: 'gaining' }),
+            rsPersonality,
+        );
+        const scoreStable = scorePoliticalOption(
+            option, 'RS',
+            makeAssessment({ blended_score: 50, patron_pressure: 0, territory_trend: 'stable' }),
+            rsPersonality,
+        );
+
+        expect(scoreGaining - scoreStable).toBeCloseTo(0.25, 5);
+    });
+
+    it('24. territory_trend=losing + aggression_affinity=1.0 → trendScore = -0.25 vs stable baseline', () => {
+        // trendRaw = -0.25; trendScore = -0.25 * 1.0 = -0.25
+        const option = makeOption({
+            aggression_affinity: 1.0,
+            risk_level: 0.65,
+        });
+        const rsPersonality = getPoliticalPersonality('RS');
+
+        const scoreLosing = scorePoliticalOption(
+            option, 'RS',
+            makeAssessment({ blended_score: 50, patron_pressure: 0, territory_trend: 'losing' }),
+            rsPersonality,
+        );
+        const scoreStable = scorePoliticalOption(
+            option, 'RS',
+            makeAssessment({ blended_score: 50, patron_pressure: 0, territory_trend: 'stable' }),
+            rsPersonality,
+        );
+
+        expect(scoreLosing - scoreStable).toBeCloseTo(-0.25, 5);
+    });
+
+    it('25. territory_trend=stable → trendScore = 0 regardless of aggression_affinity', () => {
+        // trendRaw = 0 for stable → trendScore = 0 * aggression_affinity = 0 for any aggression
+        const optionHigh = makeOption({ aggression_affinity: 1.0, risk_level: 0.65 });
+        const optionLow  = makeOption({ aggression_affinity: -1.0, risk_level: 0.65 });
+        const rsPersonality = getPoliticalPersonality('RS');
+        const assessment = makeAssessment({ blended_score: 50, patron_pressure: 0, territory_trend: 'stable' });
+
+        const scoreHigh = scorePoliticalOption(optionHigh, 'RS', assessment, rsPersonality);
+        const scoreLow  = scorePoliticalOption(optionLow,  'RS', assessment, rsPersonality);
+
+        // trendScore contributes 0 in both cases; the only difference is aggressionScore.
+        // With blended=50: aggressionScore = affinity * (0.5 - 0.5) * 1.5 = 0 as well.
+        // So riskScore dominates: both options have risk_level=0.65 → riskScore=0.
+        // Result: scoreHigh == scoreLow (both = 0).
+        expect(scoreHigh).toBeCloseTo(scoreLow, 5);
+    });
+
+    it('26. territory_trend=gaining + aggression_affinity=0.0 → trendScore = 0 (affinity zeroes it)', () => {
+        // trendScore = trendRaw * aggression_affinity = 0.25 * 0.0 = 0
+        // Score with gaining trend must equal score with stable trend when affinity=0.
+        const option = makeOption({
+            aggression_affinity: 0.0,
+            risk_level: 0.65,
+        });
+        const rsPersonality = getPoliticalPersonality('RS');
+
+        const scoreGaining = scorePoliticalOption(
+            option, 'RS',
+            makeAssessment({ blended_score: 50, patron_pressure: 0, territory_trend: 'gaining' }),
+            rsPersonality,
+        );
+        const scoreStable = scorePoliticalOption(
+            option, 'RS',
+            makeAssessment({ blended_score: 50, patron_pressure: 0, territory_trend: 'stable' }),
+            rsPersonality,
+        );
+
+        expect(scoreGaining).toBeCloseTo(scoreStable, 5);
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Group 7: Fallback and contract
 // ═══════════════════════════════════════════════════════════════════════════
 

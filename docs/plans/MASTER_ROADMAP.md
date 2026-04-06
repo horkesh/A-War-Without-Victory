@@ -157,8 +157,12 @@ Plans: `docs/plans/2026-03-24-v080-political-leader-bot-plan.md`, `docs/plans/20
 - Phase 1 — Political Personality Framework: CLOSED 2026-04-05. Report: `docs/40_reports/implemented/20260405_V082_PHASE1_POLITICAL_PERSONALITY.md`
 - Phase 2 — Political Event Decision Engine: CLOSED 2026-04-05. Report: `docs/40_reports/implemented/20260405_V082_PHASE2_POLITICAL_EVENT_DECISION.md`
 - Phase 3 — Peace Plan & Negotiation Intelligence: CLOSED 2026-04-06. Report: `docs/40_reports/implemented/20260406_V082_PHASE3_PEACE_PLAN_INTELLIGENCE.md`
-- Phase 4 — Patron Phone Calls & Territory Trend: pending
-- Phases 5–7: pending
+- Phase 4 — Patron Phone Calls & Territory Trend: CLOSED 2026-04-06. Report: `docs/40_reports/implemented/20260406_V082_PHASE4_PATRON_PHONE_CALLS.md`
+- Phase 5 — Holbrooke Pressure, RBiH Tactical Acceptance, RS Floor Calibration: CLOSED 2026-04-06. Report: `docs/40_reports/implemented/20260406_V082_PHASE5_HOLBROOKE_TACTICAL_ACCEPTANCE.md`
+- Phase 6 — Per-Plan Threshold Specialization and Contact Group Branches: CLOSED 2026-04-06. Report: `docs/40_reports/implemented/20260406_V082_PHASE6_PER_PLAN_FLOORS.md`
+- Phase 7 — Dayton Plan & CG RBiH Bonus: CLOSED 2026-04-06. Report: `docs/40_reports/implemented/20260406_V082_PHASE7_DAYTON_BRANCHES.md`
+
+**Status: v0.8.2 CLOSED 2026-04-06 — all 7 phases complete. Total: 23 new tests (phase7), tsc clean, 2684/2684 vitest.**
 
 ### v0.8.3 — Order Interpretation + Warlord Problem
 

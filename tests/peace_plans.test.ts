@@ -79,8 +79,8 @@ function makeNegotiationState(overrides: {
 }
 
 describe('Peace Plan Data', () => {
-    it('defines 4 historical peace plans', () => {
-        expect(PEACE_PLANS).toHaveLength(4);
+    it('defines 5 historical peace plans', () => {
+        expect(PEACE_PLANS).toHaveLength(5);
     });
 
     it('plans are in chronological order', () => {
