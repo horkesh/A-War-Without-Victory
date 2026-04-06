@@ -114,6 +114,16 @@ export function checkWarlordFriction(state: GameState): WarlordFrictionReport {
             frictionType = 'refused_release';
         }
 
+        // Enclave-lock guard: physically isolated commanders cannot refuse to
+        // release brigades — they have no connection to army reserve.
+        // Their non-compliance is structural isolation, not insubordination.
+        // (Orić/Srebrenica, Palić/Žepa, Imamović/Goražde — Historian-flagged 2026-04-06)
+        if (frictionType === 'refused_release' && data.enclave_lock) {
+            const lock = data.enclave_lock;
+            const lockActive = lock.locked_until_turn === undefined || turn < lock.locked_until_turn;
+            if (lockActive) continue;
+        }
+
         const event: FrictionEvent = {
             officer_id: id,
             turn,

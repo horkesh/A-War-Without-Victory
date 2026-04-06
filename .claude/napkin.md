@@ -10,8 +10,8 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-04-06, v0.8.4 Phase E CLOSED)
-**2877/2877 vitest (198 files). v0.8.4 Phase E CLOSED. Commit: 691f4409.**
+## Current State (2026-04-06, v0.8.4 Phase F IN PROGRESS)
+**2881/2881 vitest (198 files). Phase F: enclave-lock guard CLOSED + roadmap truth CLOSED. DRINA investigation inconclusive (deferred). Commit: (pending).**
 v0.8.4 Phase E delivered: turn-advance block in `advance-turn` IPC (`electron-main.cjs` lines 617–632, `requires_player_response?` on `PendingEventDecision`, stamped in `evaluate_events.ts`); `AutonomyPanel.tsx` `'ops'` domain card ("Op Order" header, "OP ORDER" badge, "Authorize"/"Abort"); `buildOpProposalDescription()` in `proposal_generation.ts` (zone name, force count, threat label); 31 new tests in 2 files. tsc clean, build clean.
 **v0.8.4 Phase E CLOSED. v0.8.4 CLOSED — all phases A–E complete. Next: v0.9 per MASTER_ROADMAP.md.**
 **v0.8.3 was CLOSED through Phase 5 before this session.**
@@ -23,13 +23,13 @@ Commander Intelligence Overhaul (n1294–1301): must_hold 1.5× garrison (Brcko/
 **ATH BASELINE: n1256 — 94.2%, 23/23 anchors, 6/6 benchmarks, 73 battles. hash: 5fa01bbdecc43f5f.**
 
 **Open P1s:**
-- **DRINA regression (~1.5pp)**: must_hold freed Drina brigades → eastern OSID overcapture. Investigate Drina Corps freed brigades → where they go.
+- **DRINA regression (~0.7pp overall)**: original hypothesis ("must_hold freed Drina brigades") unverified. Op Teočak NOT deleted (confirmed present in scenario). Op Podrinje Sweep exists (`pre_planned_operations.ts:154`). Root cause unknown — requires fresh 40w diagnostic run + Historian consultation on eastern BiH territory at January 1993. Do NOT apply speculative fix.
 - **boljanic_2 (Doboj)**: arbih_3rd_corps auto-generates ops from petrovo_2 adjacency; vrs_1st_krajina has no hold_osids for Doboj. rs_2nd_armored displaced to petrovo_2 (856 pers, morale 35). Fix: add boljanic_2 + adjacent Doboj OSIDs to vrs_1st_krajina hold_osids.
 - **Ozren pocket** (petrovo_2, brijesnica_donja_2, vozuca_2): all flip RBiH w31–40 (historical fall: Sep 1995). Fix: add hold_osids to Ozren brigades; add petrovo_2 + brijesnica_donja_2 as RS anchors in scenario_runner.ts.
 - **Casualty ratio discrepancy**: attack_resolution reports 0.814, anomaly_detection reports 0.63 — data source mismatch.
 - **ZEA rate 47%** (up from 39%): op-scale cap narrowing eligible attacker pools.
 - vrs_east_bosnian zero-attack ops (bounded: 2 ZEA ops at 6.7%, down from 47% — staging unreachability + Sarajevo siege); estimateTurnsActive broken suspend counter; jajce_falls turn_min 40→28; 3 stale ssid refs; P5 NATO air; P6 breakthrough.
-- **[warlord_friction.ts] Enclave-locked commanders must be excluded from `refused_release` friction type** (Orić/Srebrenica, Palić/Žepa, Imamović/Goražde). Their non-compliance is physical isolation, not insubordination. Phase 3 not affected (Orić pol_rel=3 → no WARLORD_MODIFIER). Fix: add `enclave_lock` guard in `checkWarlordFriction` before emitting refused_release. Historian-flagged 2026-04-06.
+- **[RESOLVED 2026-04-06] warlord_friction enclave-lock guard**: `checkWarlordFriction` now skips `refused_release` for officers with active `enclave_lock`. 4 tests. 2881 vitest.
 - **RESOLVED this session:** P9 supply recalibration (graduated scoring + BFS corridor fix), estimateForceRatio supply awareness (demoted — practically inert), COMBAT-P14 (stale — feasibility check now includes defender modifiers).
 
 **TWO OP SYSTEMS (architecture — do not confuse):**

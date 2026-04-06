@@ -281,4 +281,77 @@ describe('checkWarlordFriction', () => {
         checkWarlordFriction(state);
         expect(state.military.friction_events).toBeDefined();
     });
+
+    // ── Enclave-lock guard (Historian-flagged 2026-04-06) ──────────────────
+    // Officer IDs are chosen for specific djb2 % 10000 hash behaviour (verified
+    // by Node.js hash inspection before writing these tests):
+    //   't1': ALL 100 friction events in turns 0-999 are refused_release
+    //   'c1': ign_stance at turns 10–14+, unauth_op at 400–404, refused at 413–417+
+    //         (all three types present — suitable for mixed-type assertions)
+
+    it('enclave-locked officer never emits refused_release (permanent lock)', () => {
+        // 'c1' produces all three friction types; permanent lock must suppress
+        // refused_release while leaving ignored_stance and unauthorized_op intact.
+        const allEvents: import('../src/sim/combat/warlord_friction.js').FrictionEvent[] = [];
+        for (let turn = 0; turn < 1000; turn++) {
+            const state = makeMinimalState({ meta: { turn, phase: 'war', scenario_id: 'test', player_faction: 'RBiH' } as any });
+            addOfficer(state, 'c1', 'RBiH', 3.0, {
+                political_reliability: 1,
+                enclave_lock: { enclave_id: 'srebrenica' },
+            } as any);
+            const report = checkWarlordFriction(state);
+            allEvents.push(...report.events);
+        }
+        expect(allEvents.filter(e => e.type === 'refused_release').length).toBe(0);
+        // Other friction types still fire — guard is refused_release-only
+        expect(allEvents.filter(e => e.type !== 'refused_release').length).toBeGreaterThan(0);
+    });
+
+    it('enclave-locked officer emits refused_release after lock expires', () => {
+        // 'c1' fires first refused_release at turn 413.
+        // locked_until_turn=413 → turns [0,413) locked, turns [413,∞) free.
+        const allEvents: import('../src/sim/combat/warlord_friction.js').FrictionEvent[] = [];
+        for (let turn = 0; turn < 1000; turn++) {
+            const state = makeMinimalState({ meta: { turn, phase: 'war', scenario_id: 'test', player_faction: 'RBiH' } as any });
+            addOfficer(state, 'c1', 'RBiH', 3.0, {
+                political_reliability: 1,
+                enclave_lock: { enclave_id: 'zepa', locked_until_turn: 413 },
+            } as any);
+            const report = checkWarlordFriction(state);
+            allEvents.push(...report.events);
+        }
+        expect(allEvents.filter(e => e.type === 'refused_release' && e.turn < 413).length).toBe(0);
+        expect(allEvents.filter(e => e.type === 'refused_release' && e.turn >= 413).length).toBeGreaterThan(0);
+    });
+
+    it('non-enclave officer at pol_rel=1 can emit refused_release', () => {
+        // 't1' has 100% refused_release distribution — all 100 friction events
+        // in turns 0-999 produce refused_release when no enclave_lock is present.
+        const allEvents: import('../src/sim/combat/warlord_friction.js').FrictionEvent[] = [];
+        for (let turn = 0; turn < 1000; turn++) {
+            const state = makeMinimalState({ meta: { turn, phase: 'war', scenario_id: 'test', player_faction: 'RBiH' } as any });
+            addOfficer(state, 't1', 'RBiH', 3.0, { political_reliability: 1 });
+            const report = checkWarlordFriction(state);
+            allEvents.push(...report.events);
+        }
+        expect(allEvents.filter(e => e.type === 'refused_release').length).toBeGreaterThan(0);
+    });
+
+    it('enclave lock only blocks refused_release — ignored_stance and unauthorized_op still fire', () => {
+        // 'c1' with permanent enclave_lock: refused events (turns 413+) suppressed,
+        // ignored_stance (turns 10+) and unauthorized_op (turns 400+) still emit.
+        const allEvents: import('../src/sim/combat/warlord_friction.js').FrictionEvent[] = [];
+        for (let turn = 0; turn < 1000; turn++) {
+            const state = makeMinimalState({ meta: { turn, phase: 'war', scenario_id: 'test', player_faction: 'RBiH' } as any });
+            addOfficer(state, 'c1', 'RBiH', 3.0, {
+                political_reliability: 1,
+                enclave_lock: { enclave_id: 'gorazde' },
+            } as any);
+            const report = checkWarlordFriction(state);
+            allEvents.push(...report.events);
+        }
+        expect(allEvents.some(e => e.type === 'ignored_stance')).toBe(true);
+        expect(allEvents.some(e => e.type === 'unauthorized_op')).toBe(true);
+        expect(allEvents.every(e => e.type !== 'refused_release')).toBe(true);
+    });
 });
