@@ -18,6 +18,7 @@
 import type { GameState } from '../../state/game_state.js';
 import type { FactionId } from '../../state/game_state.js';
 import type {
+    NamedOfficer,
     NamedOfficerState,
     PendingOfficerEvent,
     OrderSnapshot,
@@ -60,6 +61,13 @@ const COWED_DURATION = 8;
 // Competence modifier while cowed (applied to effective compliance)
 const COWED_COMPETENCE_BONUS = 0.30; // cowed officers over-comply: +0.30 to score
 
+// Per-point reliability modifier (political_reliability range 1-5, centred on 3)
+// modifier: -0.20 (pol_rel=1) to +0.20 (pol_rel=5)
+const RELIABILITY_STEP = 0.10;
+
+// Extra compliance penalty for early-war RBiH warlords (pol_rel <= 2, before warlord_friction_end_week)
+const WARLORD_MODIFIER = -0.15;
+
 // Morale hit when relieving an officer (passed to caller; this module reports it)
 export const RELIEF_MORALE_PENALTY = -10;
 // Acting commander duration after relief
@@ -92,6 +100,40 @@ function computePreferredStance(aggressiveness: number): string {
     if (aggressiveness >= 4) return 'offensive';
     if (aggressiveness === 3) return 'balanced';
     return 'defensive';
+}
+
+/**
+ * Compute the base reliability modifier from political_reliability (1-5, centred on 3).
+ * Returns -0.20 at reliability=1, 0.00 at reliability=3, +0.20 at reliability=5.
+ */
+function computeReliabilityModifier(politicalReliability: number): number {
+    return (politicalReliability - 3) * RELIABILITY_STEP;
+}
+
+/**
+ * Compute the effective reliability modifier, including warlord supersession bonus.
+ * Warlord supersession applies an extra -0.15 penalty when ALL of:
+ *   - faction === 'RBiH'
+ *   - political_reliability <= 2
+ *   - current turn < warlord_friction_end_week (from war_timeline officer_config)
+ * Iteration-order-safe: pure function of officer data + state.
+ */
+function computeEffectiveReliabilityModifier(
+    data: NamedOfficer,
+    state: GameState,
+): number {
+    const base = computeReliabilityModifier(data.political_reliability);
+    const timeline = state.military.war_timeline;
+    const warlordEndWeek = timeline?.officer_config?.['RBiH']?.warlord_friction_end_week;
+    if (
+        data.faction === 'RBiH' &&
+        data.political_reliability <= 2 &&
+        warlordEndWeek !== undefined &&
+        state.meta.turn < warlordEndWeek
+    ) {
+        return base + WARLORD_MODIFIER;
+    }
+    return base;
 }
 
 /**
@@ -246,7 +288,8 @@ function computeInterpretation(
     const orderedRank = STANCE_RANKS[orderedStance] ?? 1;
     const preferredRank = STANCE_RANKS[preferredStance] ?? 1;
 
-    let score = computeComplianceScore(competence, aggressiveness, orderedRank, preferredRank, 0);
+    const reliabilityModifier = computeEffectiveReliabilityModifier(data, state);
+    let score = computeComplianceScore(competence, aggressiveness, orderedRank, preferredRank, reliabilityModifier);
 
     // Check PatronDirective stance_ceiling (cap effective stance if needed)
     // patron_directives lives on war_timeline as Record<string, PatronDirective[]>
@@ -510,8 +553,7 @@ export function interpretOperationLaunch(
     const preferredStance = computePreferredStance(aggressiveness);
     const orderedRank = 2.0; // launch = full offensive intent
     const preferredRank = STANCE_RANKS[preferredStance] ?? 1;
-    // Phase 3: reliabilityModifier = namedOfficer.political_reliability modifier
-    const reliabilityModifier = 0.0;
+    const reliabilityModifier = computeEffectiveReliabilityModifier(data, state);
 
     const score = computeComplianceScore(data.competence, aggressiveness, orderedRank, preferredRank, reliabilityModifier);
 
@@ -643,8 +685,7 @@ export function interpretOperationHalt(
     const preferredStance = computePreferredStance(aggressiveness);
     const orderedRank = 0.0; // halt = full defensive intent
     const preferredRank = STANCE_RANKS[preferredStance] ?? 1;
-    // Phase 3: reliabilityModifier = namedOfficer.political_reliability modifier
-    const reliabilityModifier = 0.0;
+    const reliabilityModifier = computeEffectiveReliabilityModifier(data, state);
 
     const score = computeComplianceScore(data.competence, aggressiveness, orderedRank, preferredRank, reliabilityModifier);
 

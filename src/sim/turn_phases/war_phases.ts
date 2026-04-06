@@ -806,6 +806,37 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'decay-officer-interpretation-state',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const { state } = context;
+            const turn = state.meta.turn;
+
+            // 1. Expire cowed_until_turn for officers whose cowing period has ended.
+            // Iteration-order-safe: each officer is mutated independently; no cross-officer ordering dependency.
+            const officers = state.military.named_officers;
+            if (officers) {
+                for (const [, officerState] of Object.entries(officers)) {
+                    if (
+                        officerState.cowed_until_turn !== undefined &&
+                        turn > officerState.cowed_until_turn
+                    ) {
+                        delete officerState.cowed_until_turn;
+                        officerState.override_count = 0;
+                    }
+                }
+            }
+
+            // 2. Clean stale acknowledged officer events (acknowledged + older than 8 turns).
+            // NOTE: halt_delay_turns_remaining countdown stays in sector_offensive.ts (must run pre-combat).
+            if (state.military.pending_officer_events) {
+                state.military.pending_officer_events = state.military.pending_officer_events.filter(
+                    evt => !(evt.acknowledged && evt.turn < turn - 8)
+                );
+            }
+        }
+    },
+    {
         name: 'inject-queued-operations',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
