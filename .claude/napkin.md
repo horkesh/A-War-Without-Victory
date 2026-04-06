@@ -10,10 +10,10 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-04-06, v0.8.4 Phase C CLOSED)
-**2813/2813 vitest (195 files). v0.8.4 Phase C CLOSED. Commit: e9997f1a.**
-v0.8.4 Phase C delivered: `proposal_generation.ts` (generateLevel1StanceProposals — deterministic PROP_<turn>_military_<seq> IDs, strictCompare sort, SET_STANCE:<corpsId>:<stance> actions); CorpsCommandState +ai_recommended_stance; PendingProposalReview +current_value/proposed_value; `generate-player-stance-recommendations` + `generate-level1-proposals` pipeline steps (war_phases step count 151→153); apply-autonomy-transition now expires stale proposals; `accept-proposal`/`reject-proposal` IPC handlers + preload bridge; Level 2+ gate REMOVED from set-autonomy-level; `AutonomyPanel.tsx` (autonomy slider 0–3 + proposal review with per-card accept/reject). 32 new tests. tsc clean, build clean.
-**v0.8.4 Phase D next:** Op planning proposals (which corps should launch offensive — second proposal domain). High-stakes event authoring: Sarajevo UNPROFOR ultimatum with `requires_player_response: true` (validates Level 3 gate end-to-end). Level 1 is live; Level 2+ is unlocked in backend but needs full-delegation UX validation before surfacing.
+## Current State (2026-04-06, v0.8.4 Phase D CLOSED)
+**2846/2846 vitest (196 files). v0.8.4 Phase D CLOSED. Commit: 6cd2e998.**
+v0.8.4 Phase D delivered: `generateLevel1OpProposals()` (domain `'ops'`, `APPROVE_OP:<corpsId>:<planId>` action — reads `current_plan.status==='ready'` or `decision_trace.winning_intent_id` in stage_operation/launch_opportunity); `player_op_response` field on `CorpsCommandState`; plan-launch guard in `applyCommanderOutput` (Level 1: no response → hold, rejected → abandon); `APPROVE_OP:` branches in accept/reject IPC; step 154 `generate-level1-op-proposals`; `apply-autonomy-transition` clears `player_op_response` each turn; `nato_ultimatum_sarajevo_1994` upgraded with `requires_player_response:true` + `response_options` (comply/defy for RS); 33 new tests. tsc clean, build clean.
+**v0.8.4 Phase E next:** Turn-advance block in `advance-turn` IPC when `pending_event_decisions` contains a `requires_player_response:true` unresolved entry. AutonomyPanel `domain:'ops'` card rendering. Op proposal description enrichment (zone name, force strength, threat rating from briefing).
 **v0.8.3 was CLOSED through Phase 5 before this session.**
 Last combat calibration: n1344 93.3%, hash: 0e2fe6333394649a. n1323: 94.0%, 27/27, 6/6, 74 battles.
 n1323 last combat-calibration baseline: 94.0%, 27/27 anchors, 6/6 benchmarks, 74 battles. hash: b3355614a82d13d7.
