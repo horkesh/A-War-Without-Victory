@@ -822,6 +822,166 @@
     "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T). Mladic Judgment (IT-09-92-T). ICTY witness testimony."
   },
   {
+    "id": "holbrooke_us_belgrade_channel_1995",
+    "title": "Holbrooke Routes Pressure Through Belgrade",
+    "narrative": "Holbrooke has arrived in Belgrade. Milosevic, not Karadzic, is now America's contact for Republika Srpska. The message is clear: accept the US framework or face combined diplomatic and military pressure.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 176,
+      "turn_max": 178,
+      "phase": "war"
+    },
+    "once": true,
+    "responding_faction": "RS",
+    "requires_player_response": false,
+    "bot_response_logic": "strategic_weighted",
+    "effect": {
+      "kind": "narrative",
+      "text": "Holbrooke bypasses Pale and deals with Milosevic as RS proxy. Belgrade now controls the channel to the international community."
+    },
+    "effects": [],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "patron_confidence",
+        "delta": -12
+      }
+    ],
+    "response_options": [
+      {
+        "id": "comply_with_belgrade",
+        "label": "Accept the Belgrade channel -- work through Milosevic",
+        "description": "Acknowledge that Milosevic now speaks for RS in Washington's eyes. Patron confidence recovers, but RS loses direct access to the peace process.",
+        "effects": [],
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": 10
+          },
+          {
+            "faction": "RS",
+            "dimension": "negotiating_leverage",
+            "delta": -8
+          }
+        ],
+        "aggression_affinity": -0.3,
+        "risk_level": 0.3
+      },
+      {
+        "id": "defy_us_framework",
+        "label": "Reject the US framework -- Pale speaks for Republika Srpska",
+        "description": "Refuse to be sidelined. Karadzic insists on direct representation. International standing suffers, but RS asserts its political identity.",
+        "effects": [],
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": -12
+          },
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": 4
+          },
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": -6
+          }
+        ],
+        "aggression_affinity": 0.5,
+        "risk_level": 0.7
+      }
+    ],
+    "historical_source": "Holbrooke, 'To End a War' (1998) ch. 4-5. ICTY Karadzic Judgment (IT-95-5/18-T)."
+  },
+  {
+    "id": "deliberate_force_rs_compliance_1995",
+    "title": "NATO Airstrikes: Comply or Escalate?",
+    "narrative": "NATO aircraft are striking VRS positions across Bosnia. Holbrooke holds the pause button. Milosevic urges Pale to withdraw heavy weapons from Sarajevo and open supply routes. Defiance means the bombing continues.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 178,
+      "turn_max": 180,
+      "phase": "war"
+    },
+    "once": true,
+    "responding_faction": "RS",
+    "requires_player_response": false,
+    "bot_response_logic": "strategic_weighted",
+    "effect": {
+      "kind": "narrative",
+      "text": "NATO's Operation Deliberate Force strikes VRS artillery, ammunition dumps, and command nodes. The question is whether Pale complies or absorbs the punishment."
+    },
+    "effects": [],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "patron_confidence",
+        "delta": -15
+      },
+      {
+        "faction": "RS",
+        "dimension": "international_standing",
+        "delta": -10
+      }
+    ],
+    "response_options": [
+      {
+        "id": "withdraw_heavy_weapons",
+        "label": "Withdraw heavy weapons from Sarajevo exclusion zone",
+        "description": "Comply with NATO demands. The bombing pauses. VRS commanders resist, and internal cohesion suffers, but patron confidence partially recovers.",
+        "effects": [],
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": 12
+          },
+          {
+            "faction": "RS",
+            "dimension": "negotiating_leverage",
+            "delta": -5
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": -5
+          }
+        ],
+        "aggression_affinity": -0.5,
+        "risk_level": 0.4
+      },
+      {
+        "id": "absorb_strikes_hold_position",
+        "label": "Absorb the strikes -- hold every position",
+        "description": "Defy NATO. The bombing continues. Military credibility with hardliners rises briefly, but the sustained strikes degrade VRS combat power.",
+        "effects": [],
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": -15
+          },
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": -8
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": 3
+          }
+        ],
+        "aggression_affinity": 0.6,
+        "risk_level": 0.9
+      }
+    ],
+    "historical_source": "NATO ODF records (Aug 30-Sep 14 1995). Holbrooke, 'To End a War' (1998). ICTY Karadzic Judgment (IT-95-5/18-T)."
+  },
+  {
     "id": "operation_mistral_2_1995",
     "title": "Operation Mistral 2 -- Jajce Recaptured",
     "narrative": "The Croatian war machine rolls north from Grahovo. Operation Mistral 2 sends the 4th and 7th Guards Brigades -- the same elite formations that took Knin -- into the heart of VRS-held western Bosnia. Sipovo falls. Mrkonjic Grad falls. And on September 13, Jajce -- the symbolic prize lost in October 1992 amid mutual HVO-ARBiH recriminations -- is liberated. Two thousand square kilometers change hands in eight days. The VRS line in western Bosnia is disintegrating.",
@@ -1094,6 +1254,89 @@
       "advance_halted": true
     },
     "historical_source": "Holbrooke, 'To End a War' (1998). BB Vol. II, Ch. 15. US State Dept. chronology."
+  },
+  {
+    "id": "holbrooke_ceasefire_demand_oct95",
+    "title": "Holbrooke: Agree to the Ceasefire",
+    "narrative": "Holbrooke demands a two-month ceasefire to create space for Dayton negotiations. ARBiH is advancing in northwestern Bosnia. Complying sacrifices military momentum; refusing risks losing US air support and international legitimacy.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 183,
+      "turn_max": 185,
+      "phase": "war"
+    },
+    "once": true,
+    "responding_faction": "RBiH",
+    "requires_player_response": true,
+    "bot_response_logic": "strategic_weighted",
+    "effect": {
+      "kind": "narrative",
+      "text": "Holbrooke demands ARBiH halt its northwestern offensive and accept a ceasefire to open the path to Dayton."
+    },
+    "effects": [],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "patron_confidence",
+        "delta": -8
+      }
+    ],
+    "response_options": [
+      {
+        "id": "accept_ceasefire",
+        "label": "Accept the ceasefire -- go to Dayton",
+        "description": "Halt the advance and agree to a two-month ceasefire. US support is preserved, international standing rises, and the path to Dayton opens.",
+        "effects": [],
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "patron_confidence",
+            "delta": 12
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": 8
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "negotiating_leverage",
+            "delta": 5
+          }
+        ],
+        "aggression_affinity": -0.4,
+        "risk_level": 0.2
+      },
+      {
+        "id": "continue_offensive",
+        "label": "Continue the offensive -- maximum territory before Dayton",
+        "description": "Defy Holbrooke. Push further gains before the ceasefire is forced. Military credibility rises, but US support and international standing take serious damage.",
+        "effects": [],
+        "dimension_shifts": [
+          {
+            "faction": "RBiH",
+            "dimension": "patron_confidence",
+            "delta": -15
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "delta": -10
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "military_credibility",
+            "delta": 6
+          }
+        ],
+        "aggression_affinity": 0.5,
+        "risk_level": 0.8
+      }
+    ],
+    "sets_flags": {
+      "holbrooke_ceasefire_demanded": true
+    },
+    "historical_source": "Holbrooke, 'To End a War' (1998). US State Dept. records Oct 5-12, 1995."
   },
   {
     "id": "dayton_talks_begin_1995",
