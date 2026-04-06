@@ -1,13 +1,19 @@
 /**
- * v0.8.2 Phase 3 — Political Peace Plan Response
+ * v0.8.2 Phase 6 — Political Peace Plan Response (per-plan RS floors + patron immunity + HRHB alignment)
  *
  * Computes personality-weighted accept/reject response for bot factions on peace plan events.
  *
  * Replaces the dumb territory-percentage + patron-override logic in peace_plans.ts.
  *
  * Historian-verified design:
- * - RS has a territory floor: gap > 18pp → hard reject regardless of patron pressure
- *   (ICTY: Vance-Owen 35pp gap = 96-2 assembly rejection; Contact Group 21pp gap = 96% referendum)
+ * - RS has per-plan territory floors (replaces single RS_TERRITORY_FLOOR_GAP=18 constant):
+ *     vance_owen: 18pp floor (96-2 Bosnian Serb Assembly, May 1993 — ICTY IT-95-5/18-T §3526-3530)
+ *     owen_stoltenberg: 18pp floor (51% assembly, Sep 1993 — routes to scoring when gap ~13pp)
+ *     contact_group: 10pp floor (96% RS referendum, Aug 1994 — ICTY IT-95-5/18-T §3587)
+ *     default: 18pp (all other plans)
+ * - Patron override immunity: vance_owen and contact_group are referendum-based — patron cannot override.
+ * - HRHB Contact Group alignment: post-Washington Agreement (w102), patron ≥ 60 → accepts CG.
+ *   Sources: ICTY Prlic et al. IT-04-74-T Vol. 3 §480-520; Washington Agreement (1 March 1994).
  * - RBiH defiance modifier fires in scorePoliticalOption (survivalScore component)
  * - HRHB patron_sensitivity = 0.80 confirmed correct across all plans
  * - Cutileiro (plan.id === 'cutileiro') excluded from personality scoring; use legacy bot
@@ -22,8 +28,34 @@ import type { PoliticalAssessment, PoliticalPersonality } from './political_pers
 import { scorePoliticalOption } from './political_event_decision.js';
 import type { EventResponseOption } from '../events/event_types.js';
 
-const RS_TERRITORY_FLOOR_GAP = 18; // pp gap above which RS hard-rejects (Historian: VOPP=35pp, CG=21pp, O-S=13pp)
+// RS TERRITORY FLOOR — CANONICAL CONSTRAINTS
+// Calibrated to documented RS legislative/referendum acts, not tuning.
+// VOPP: 96–2 Bosnian Serb Assembly (May 1993) — ICTY IT-95-5/18-T paras. 3526-3530
+//   Sim gap ~22pp (RS ~65%, VOPP proposes ~43%). Floor 18pp → 22 > 18 → hard-reject.
+// O-S: 51% Bosnian Serb Assembly (September 1993) — PLAUSIBLE; gap ~13pp < 18pp → routes to scoring (correct)
+// CG: 96% RS referendum (August 1994) — ICTY IT-95-5/18-T §3587 period
+//   Sim gap ~14pp (RS ~63%, CG proposes 49%). Floor 10pp → 14 > 10 → hard-reject.
+const RS_PLAN_FLOOR_GAPS: Record<string, number> = {
+    vance_owen:        18,  // gap ~22pp >> 18pp floor → hard-reject
+    owen_stoltenberg:  18,  // gap ~13pp < 18pp floor → routes to scoring
+    contact_group:     10,  // gap ~14pp >> 10pp floor → hard-reject (96% referendum)
+};
+const RS_FLOOR_GAP_DEFAULT = 18;
+
 const PATRON_HARD_OVERRIDE_THRESHOLD = 80; // override_authority >= this → always accept
+
+// PATRON OVERRIDE IMMUNITY
+// Plans where the RS constitutional act was referendum-based — patron pressure cannot override.
+// 96-2 Bosnian Serb Assembly (VOPP) and 96% referendum (CG) are patron-proof.
+// Source: ICTY IT-95-5/18-T; Owen Balkan Odyssey
+const RS_PATRON_OVERRIDE_IMMUNE = new Set(['vance_owen', 'contact_group']);
+
+// HRHB WASHINGTON AGREEMENT ALIGNMENT
+// Washington Agreement (March 1994, ~w102) created institutional alignment pressure on HRHB
+// to accept the Contact Group plan alongside RBiH. Zagreb fully aligned with CG acceptance.
+// Source: ICTY Prlic et al. IT-04-74-T Vol. 3 paras. 480-520; Washington Agreement (1 March 1994)
+const WASHINGTON_AGREEMENT_WEEK = 102;
+const HRHB_CG_ALIGNMENT_THRESHOLD = 60; // lowered from 80: post-Washington, patron confidence ≥ 60 → override
 
 /**
  * Compute a bot faction's accept/reject response to a peace plan using political personality scoring.
@@ -45,6 +77,7 @@ export function computePoliticalPeacePlanResponse(
     patronOverrideAuthority: number,
     assessment: PoliticalAssessment,
     personality: PoliticalPersonality,
+    warWeek: number = 0,
 ): 'accepted' | 'rejected' {
     // Cutileiro exclusion: pre-war plan with non-genuine acceptance dynamics.
     // Use legacy bot (caller should handle this before calling here, but guard defensively).
@@ -66,19 +99,40 @@ export function computePoliticalPeacePlanResponse(
         return 'accepted';
     }
 
-    // RS territory floor: gap > 18pp → hard reject (patron override cannot override this).
-    // Historian: RS assembly voted 96-2 against VOPP (35pp gap), 96% referendum against Contact Group (21pp gap).
+    // RS territory floor: per-plan gap threshold → hard reject.
+    // Uses per-plan floor from RS_PLAN_FLOOR_GAPS; defaults to RS_FLOOR_GAP_DEFAULT (18pp).
     if (faction === 'RS') {
         const proposedPct = plan.proposed_split['RS'] ?? 0;
         const territoryGap = currentTerritoryPct - proposedPct;
-        if (territoryGap > RS_TERRITORY_FLOOR_GAP) {
-            return 'rejected';
+        const planFloor = RS_PLAN_FLOOR_GAPS[plan.id] ?? RS_FLOOR_GAP_DEFAULT;
+        if (territoryGap > planFloor) {
+            return 'rejected'; // RS territory floor — canonical constraint
         }
+    }
+
+    // Patron override immunity (RS only): referendum-based rejections are patron-proof.
+    // vance_owen and contact_group cannot be overridden by patron pressure.
+    const effectiveOverrideThreshold = (faction === 'RS' && RS_PATRON_OVERRIDE_IMMUNE.has(plan.id))
+        ? Infinity  // patron cannot override; hard-reject fires on floor or scoring
+        : PATRON_HARD_OVERRIDE_THRESHOLD; // 80 — unchanged for all other cases
+
+    // HRHB Contact Group alignment — Washington Agreement structural bonus.
+    // Post-Washington (w102), Zagreb-aligned HRHB accepts CG at lower patron threshold (60).
+    // This block is completely separate from RS immunity above.
+    const isPostWashington = warWeek > WASHINGTON_AGREEMENT_WEEK;
+    const isHrhbCgAlignment =
+        faction === 'HRHB'
+        && plan.id === 'contact_group'
+        && isPostWashington;
+
+    if (isHrhbCgAlignment && patronOverrideAuthority >= HRHB_CG_ALIGNMENT_THRESHOLD) {
+        return 'accepted'; // Zagreb-aligned acceptance under Washington Agreement terms
     }
 
     // Patron hard override: extreme patron authority forces acceptance.
     // Only fires when territory floor has NOT already forced rejection (checked above).
-    if (patronOverrideAuthority >= PATRON_HARD_OVERRIDE_THRESHOLD) {
+    // For RS immune plans, effectiveOverrideThreshold = Infinity → never fires.
+    if (patronOverrideAuthority >= effectiveOverrideThreshold) {
         return 'accepted';
     }
 

@@ -139,10 +139,12 @@ describe('Group 2: RS territory floor', () => {
     });
 
     it('9. RS: gap = 15pp (current 70%, proposed 55%) → passes floor, patron override 80 → accept', () => {
-        const plan = makePlan({ id: 'contact_group', proposed_split: { RS: 55 } });
+        // Use a non-immune plan id (unknown → default 18pp floor) so patron override can fire.
+        // contact_group would hard-reject at 15pp (floor=10) and is patron-immune; use generic id.
+        const plan = makePlan({ id: 'os_plan', proposed_split: { RS: 55 } });
         const personality = getPoliticalPersonality('RS');
         const assessment = makeAssessment();
-        // gap = 15pp < 18pp → floor not triggered; patron override >= 80 → accept
+        // gap = 15pp < 18pp default floor → floor not triggered; patron override >= 80 → accept
         const result = computePoliticalPeacePlanResponse(plan, 'RS', 70, 80, assessment, personality);
         expect(result).toBe('accepted');
     });

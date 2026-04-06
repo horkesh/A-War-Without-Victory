@@ -99,6 +99,8 @@ function computeBotResponse(
     const neg = state.military.negotiation;
     const patronOverrideAuthority = neg?.patron_relationships[faction]?.override_authority ?? 0;
 
+    const warWeek = getWarWeek(state);
+
     return computePoliticalPeacePlanResponse(
         plan,
         faction,
@@ -106,6 +108,7 @@ function computeBotResponse(
         patronOverrideAuthority,
         assessment,
         personality,
+        warWeek,
     );
 }
 
