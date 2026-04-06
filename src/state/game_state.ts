@@ -369,6 +369,11 @@ export interface CorpsOperation {
     /** True when this is an emergency defensive operation (bypasses slot limit, max 1). */
     is_emergency?: boolean;
 
+    /** Turns remaining before a player-ordered halt takes effect.
+     *  Set by interpretOperationHalt. Decremented per-turn in Phase 3 decay step.
+     *  When it reaches 0, recovery_reason = 'manual_termination' is written. */
+    halt_delay_turns_remaining?: number;
+
     // --- Synchronized operation fields (Army HQ Gathering v0.4.7) ---
     /** If part of a synchronized operation, the sync op name */
     sync_operation_name?: string;

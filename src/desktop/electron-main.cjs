@@ -892,7 +892,14 @@ app.whenReady().then(() => {
       }
 
       const corpsCommand = ensureCorpsCommandEntry(state, corpsId, stance);
-      corpsCommand.stance = stance;
+      // Record the raw player-ordered stance before interpretation
+      corpsCommand.player_ordered_stance = stance;
+      // Run order interpretation through the corps commander's personality
+      const { interpretStanceOrder } = await import('../sim/combat/order_interpretation.js');
+      const result = interpretStanceOrder(state, corpsId, stance);
+      // Apply effective stance (may differ from ordered if officer deviates)
+      // Event (if any) is already pushed to state.military.pending_officer_events by interpretStanceOrder
+      corpsCommand.stance = result.effective_stance ?? stance;
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);
       return { ok: true };
@@ -1069,8 +1076,20 @@ app.whenReady().then(() => {
       if (!op) {
         return { ok: false, error: 'Operation not found' };
       }
-      op.recovery_reason = 'manual_termination';
       op.dig_in_on_halt = digInOnHalt === true;
+      const { interpretOperationHalt } = await import('../sim/combat/order_interpretation.js');
+      const haltResult = interpretOperationHalt(state, corpsId, operationName);
+      // Event (if any) is already pushed to state.military.pending_officer_events by interpretOperationHalt
+      if (haltResult.compliance === 'full') {
+        // Immediate halt
+        op.recovery_reason = 'manual_termination';
+      } else if (haltResult.compliance === 'modified' || haltResult.compliance === 'partial') {
+        // Delayed halt — op continues until countdown expires
+        op.halt_delay_turns_remaining = haltResult.halt_delay_turns;
+      } else {
+        // Refused — op continues; delay still applied so the order has some effect
+        op.halt_delay_turns_remaining = haltResult.halt_delay_turns;
+      }
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);
       return { ok: true };
@@ -1101,6 +1120,23 @@ app.whenReady().then(() => {
         auth.current -= FORCE_LAUNCH_COST;
         auth.spent_this_turn += FORCE_LAUNCH_COST;
         auth.lifetime_spent += FORCE_LAUNCH_COST;
+      }
+      const { interpretOperationLaunch } = await import('../sim/combat/order_interpretation.js');
+      const launchResult = interpretOperationLaunch(state, corpsId, op.name);
+      // Event (if any) already pushed to state.military.pending_officer_events by interpretOperationLaunch
+      if (launchResult.compliance === 'refused') {
+        // Officer aborted the operation — do not force-launch
+        // recovery_reason is already set to 'manual_termination' by interpretOperationLaunch
+        currentGameStateJson = sim.serializeState(state);
+        sendGameStateToRenderer(currentGameStateJson);
+        return { ok: true };
+      }
+      // full / modified / partial: apply any modifications then force-launch
+      if (launchResult.effective_planning_duration != null) {
+        op.planning_duration = launchResult.effective_planning_duration;
+      }
+      if (launchResult.effective_objectives != null) {
+        op.objectives = launchResult.effective_objectives;
       }
       op.force_launch = true;
       op.was_force_launched = true;
@@ -1811,7 +1847,22 @@ app.whenReady().then(() => {
       const events = state.military?.pending_officer_events;
       if (events) {
         const evt = events.find(e => e.event_id === eventId);
-        if (evt) evt.acknowledged = true;
+        if (evt) {
+          evt.acknowledged = true;
+          if (evt.override_action === 'override-officer-interpretation') {
+            // Look up the corps_id from the event (set by interpretStanceOrder / interpretOperationLaunch / interpretOperationHalt)
+            const corpsId = evt.corps_id;
+            if (corpsId) {
+              const { overrideInterpretation } = await import('../sim/combat/order_interpretation.js');
+              overrideInterpretation(state, corpsId, eventId);
+              // Restore the original ordered stance if this was a stance interpretation event
+              const corpsCommand = state.military?.corps_command?.[corpsId];
+              if (corpsCommand && evt.original_order?.stance) {
+                corpsCommand.stance = evt.original_order.stance;
+              }
+            }
+          }
+        }
       }
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);

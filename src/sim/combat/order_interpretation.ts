@@ -452,6 +452,294 @@ export function overrideInterpretation(
     event.acknowledged = true;
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// Phase 2: Operation Interpretation
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface LaunchInterpretationResult {
+    compliance: 'full' | 'modified' | 'partial' | 'refused';
+    effective_planning_duration?: number; // undefined = no change
+    effective_objectives?: string[];      // undefined = no change (trimmed subset)
+    event?: PendingOfficerEvent;
+    reason?: string;
+}
+
+export interface HaltInterpretationResult {
+    compliance: 'full' | 'modified' | 'partial' | 'refused';
+    halt_delay_turns?: number; // turns before halt takes effect
+    event?: PendingOfficerEvent;
+    reason?: string;
+}
+
+/**
+ * Interpret a player-issued operation launch order through the corps commander's personality.
+ * Cautious officers may delay planning; aggressive officers may trim objectives.
+ * Refused officers abort the operation outright.
+ *
+ * Phase 3 seam: reliabilityModifier is 0.0 until political_reliability is wired.
+ */
+export function interpretOperationLaunch(
+    state: GameState,
+    corpsId: string,
+    operationName: string,
+): LaunchInterpretationResult {
+    const corpsCommand = state.military.corps_command?.[corpsId];
+
+    // Fast-path: no corps command entry
+    if (!corpsCommand) return { compliance: 'full' };
+
+    const op = corpsCommand.active_operations?.find(o => o.name === operationName);
+
+    // Fast-path: operation not found or not in planning phase
+    if (!op || op.phase !== 'planning') return { compliance: 'full' };
+
+    const commander = getCorpsCommander(corpsId, state);
+
+    // Fast-path: no named commander
+    if (!commander) return { compliance: 'full' };
+
+    const { data, state: officerState } = commander;
+
+    // Fast-path: acting commander always complies
+    if (officerState.acting_commander) return { compliance: 'full' };
+
+    // Fast-path: cowed officer always complies
+    if ((officerState.cowed_until_turn ?? 0) >= state.meta.turn) return { compliance: 'full' };
+
+    const aggressiveness = data.aggressiveness;
+    const preferredStance = computePreferredStance(aggressiveness);
+    const orderedRank = 2.0; // launch = full offensive intent
+    const preferredRank = STANCE_RANKS[preferredStance] ?? 1;
+    // Phase 3: reliabilityModifier = namedOfficer.political_reliability modifier
+    const reliabilityModifier = 0.0;
+
+    const score = computeComplianceScore(data.competence, aggressiveness, orderedRank, preferredRank, reliabilityModifier);
+
+    const eventIdBase = `${corpsId}:launch:${operationName}:${state.meta.turn}`;
+
+    if (score >= FULL_COMPLIANCE_THRESHOLD) {
+        return { compliance: 'full' };
+    }
+
+    if (score >= MODIFIED_COMPLIANCE_THRESHOLD) {
+        // Balanced officers (agg 3) comply on launch without side effects
+        if (aggressiveness === 3) {
+            return { compliance: 'full' };
+        }
+
+        let effectivePlanningDuration: number | undefined;
+        let effectiveObjectives: string[] | undefined;
+
+        if (aggressiveness <= 2) {
+            // Cautious: extend planning duration
+            const extra = CAUTIOUS_EXTRA_PREP_TURNS[aggressiveness] ?? 0;
+            const current = op.planning_duration ?? 0;
+            effectivePlanningDuration = current + extra;
+            op.planning_duration = effectivePlanningDuration;
+        } else {
+            // Aggressive (agg >= 4): trim last objective
+            if (op.objectives && op.objectives.length > 1) {
+                effectiveObjectives = op.objectives.slice(0, -1);
+                op.objectives = effectiveObjectives;
+            }
+        }
+
+        const reason = `${data.name} modifies the operation plan before launch.`;
+        const event = buildOperationEvent(
+            'order_modified',
+            eventIdBase,
+            corpsId,
+            data,
+            operationName,
+            reason,
+            state,
+        );
+        pushOfficerEvent(state, event);
+        return { compliance: 'modified', effective_planning_duration: effectivePlanningDuration, effective_objectives: effectiveObjectives, event, reason };
+    }
+
+    if (score >= PARTIAL_COMPLIANCE_THRESHOLD) {
+        // Partial: extend planning duration AND trim one objective
+        let effectivePlanningDuration: number | undefined;
+        let effectiveObjectives: string[] | undefined;
+
+        const extra = CAUTIOUS_EXTRA_PREP_TURNS[Math.min(aggressiveness, CAUTIOUS_EXTRA_PREP_TURNS.length - 1)] ?? 0;
+        if (extra > 0) {
+            const current = op.planning_duration ?? 0;
+            effectivePlanningDuration = current + extra;
+            op.planning_duration = effectivePlanningDuration;
+        }
+
+        if (op.objectives && op.objectives.length > 1) {
+            effectiveObjectives = op.objectives.slice(0, -1);
+            op.objectives = effectiveObjectives;
+        }
+
+        const reason = `${data.name} pushes back on the operation scope before launch.`;
+        const event = buildOperationEvent(
+            'order_pushback',
+            eventIdBase,
+            corpsId,
+            data,
+            operationName,
+            reason,
+            state,
+        );
+        pushOfficerEvent(state, event);
+        return { compliance: 'partial', effective_planning_duration: effectivePlanningDuration, effective_objectives: effectiveObjectives, event, reason };
+    }
+
+    // Refused: abort the operation
+    op.recovery_reason = 'manual_termination';
+    const reason = `${data.name} refuses to launch the operation.`;
+    const event = buildOperationEvent(
+        'order_refused',
+        eventIdBase,
+        corpsId,
+        data,
+        operationName,
+        reason,
+        state,
+    );
+    pushOfficerEvent(state, event);
+    return { compliance: 'refused', event, reason };
+}
+
+/**
+ * Interpret a player-issued operation halt order through the corps commander's personality.
+ * Aggressive officers in momentum may delay the halt or refuse outright.
+ *
+ * Phase 3 seam: reliabilityModifier is 0.0 until political_reliability is wired.
+ */
+export function interpretOperationHalt(
+    state: GameState,
+    corpsId: string,
+    operationName: string,
+): HaltInterpretationResult {
+    const corpsCommand = state.military.corps_command?.[corpsId];
+
+    // Fast-path: no corps command entry
+    if (!corpsCommand) return { compliance: 'full', halt_delay_turns: 0 };
+
+    const op = corpsCommand.active_operations?.find(o => o.name === operationName);
+
+    // Fast-path: operation not found or not active
+    if (!op || op.phase !== 'execution') return { compliance: 'full', halt_delay_turns: 0 };
+
+    const commander = getCorpsCommander(corpsId, state);
+
+    // Fast-path: no named commander
+    if (!commander) return { compliance: 'full', halt_delay_turns: 0 };
+
+    const { data, state: officerState } = commander;
+
+    // Fast-path: acting commander always complies
+    if (officerState.acting_commander) return { compliance: 'full', halt_delay_turns: 0 };
+
+    // Fast-path: cowed officer always complies
+    if ((officerState.cowed_until_turn ?? 0) >= state.meta.turn) return { compliance: 'full', halt_delay_turns: 0 };
+
+    const aggressiveness = data.aggressiveness;
+    const preferredStance = computePreferredStance(aggressiveness);
+    const orderedRank = 0.0; // halt = full defensive intent
+    const preferredRank = STANCE_RANKS[preferredStance] ?? 1;
+    // Phase 3: reliabilityModifier = namedOfficer.political_reliability modifier
+    const reliabilityModifier = 0.0;
+
+    const score = computeComplianceScore(data.competence, aggressiveness, orderedRank, preferredRank, reliabilityModifier);
+
+    const eventIdBase = `${corpsId}:halt:${operationName}:${state.meta.turn}`;
+
+    if (score >= FULL_COMPLIANCE_THRESHOLD) {
+        return { compliance: 'full', halt_delay_turns: 0 };
+    }
+
+    if (score >= MODIFIED_COMPLIANCE_THRESHOLD) {
+        const reason = `${data.name} acknowledges the halt order but needs one turn to disengage.`;
+        const event = buildOperationEvent(
+            'order_modified',
+            eventIdBase,
+            corpsId,
+            data,
+            operationName,
+            reason,
+            state,
+        );
+        pushOfficerEvent(state, event);
+        return { compliance: 'modified', halt_delay_turns: 1, event, reason };
+    }
+
+    if (score >= PARTIAL_COMPLIANCE_THRESHOLD) {
+        // Aggressive officer with momentum resists halt
+        const hasMomentum = (op.momentum ?? 0) >= HALT_DELAY_MOMENTUM_THRESHOLD;
+        const delay = hasMomentum ? AGGRESSIVE_HALT_DELAY : 1;
+        const reason = `${data.name} pushes back on halting while the operation has momentum.`;
+        const event = buildOperationEvent(
+            'order_pushback',
+            eventIdBase,
+            corpsId,
+            data,
+            operationName,
+            reason,
+            state,
+        );
+        pushOfficerEvent(state, event);
+        return { compliance: 'partial', halt_delay_turns: delay, event, reason };
+    }
+
+    // Refused: op continues, delay applied
+    const reason = `${data.name} refuses to halt the operation.`;
+    const event = buildOperationEvent(
+        'order_refused',
+        eventIdBase,
+        corpsId,
+        data,
+        operationName,
+        reason,
+        state,
+    );
+    pushOfficerEvent(state, event);
+    return { compliance: 'refused', halt_delay_turns: AGGRESSIVE_HALT_DELAY, event, reason };
+}
+
+// ─── Phase 2 internal helpers ────────────────────────────────────────────────
+
+function buildOperationEvent(
+    type: OfficerEventType,
+    eventId: string,
+    corpsId: string,
+    data: { id: string; name: string; faction: FactionId },
+    operationName: string,
+    reason: string,
+    state: GameState,
+): PendingOfficerEvent {
+    const originalOrder: OrderSnapshot = {
+        order_type: 'operation_launch',
+        corps_id: corpsId,
+        operation_name: operationName,
+    };
+    return {
+        event_id: eventId,
+        type,
+        faction: data.faction,
+        turn: state.meta.turn,
+        officer_id: data.id,
+        corps_id: corpsId,
+        acknowledged: false,
+        original_order: originalOrder,
+        reason,
+        overridable: true,
+        override_action: 'override-officer-interpretation',
+    };
+}
+
+function pushOfficerEvent(state: GameState, event: PendingOfficerEvent): void {
+    if (!state.military.pending_officer_events) {
+        state.military.pending_officer_events = [];
+    }
+    state.military.pending_officer_events.push(event);
+}
+
 /**
  * Relieve (fire) a named officer from their corps command.
  * Finds a replacement, sets acting commander flag, applies morale penalty.

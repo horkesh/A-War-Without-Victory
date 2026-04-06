@@ -287,6 +287,13 @@ export function generateCorpsStanceOrders(
             }
         }
 
+        // Player stance order guard: if player has issued a standing stance order,
+        // the bot formula does not override it. The IPC layer has already applied
+        // order interpretation and written the effective stance.
+        if (cmd.player_ordered_stance != null) {
+            continue;
+        }
+
         cmd.stance = stance;
     }
 }
