@@ -1104,6 +1104,26 @@ export interface AutonomyOverride {
 }
 
 /**
+ * v0.8.4 Phase B: An AI-generated proposal waiting for player review at Level 1 (Assisted).
+ * Created by the formula AI when autonomy_level === 1. Player must accept/reject via IPC.
+ */
+export interface PendingProposalReview {
+    /** Deterministic: "PROP_<turn>_<domain>_<seq>" */
+    id: string;
+    turn: number;
+    faction: FactionId;
+    domain: 'military' | 'political' | 'events';
+    /** Human-readable summary of the proposal. */
+    description: string;
+    /** Canonical action identifier. */
+    proposed_action: string;
+    /** Set when player responds; absent = pending. */
+    accepted?: boolean;
+    /** Turn when player responded. */
+    resolved_turn?: number;
+}
+
+/**
  * World-level deterministic bookkeeping (Engine Invariants §11).
  * Conceptually "WorldState": current_turn (weeks), phase, seed.
  * No timestamps; no randomness. Turn is integer weeks only.
@@ -1182,6 +1202,8 @@ export interface StateMeta {
     autonomy_level_pending?: 0 | 1 | 2 | 3;
     /** v0.8.4: Per-decision player overrides this turn. Cleared each turn by apply-autonomy-transition. */
     autonomy_overrides?: AutonomyOverride[];
+    /** v0.8.4 Phase B: Pending AI proposal reviews at Level 1 (Assisted). Player must accept or reject before they take effect. */
+    pending_proposal_reviews?: PendingProposalReview[];
 }
 
 export interface NegotiationLedgerEntry {

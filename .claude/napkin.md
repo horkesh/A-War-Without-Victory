@@ -10,10 +10,12 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-04-06, v0.8.3 Phase 5 CLOSED)
-**2765/2765 vitest (191 files). v0.8.3 Phase 5 CLOSED.**
-v0.8.3 Phase 5 delivered: warlord narrative strings in `buildInterpretationReason()` (generic warlord + Halilović-specific, ICTY-sourced); override cost label (`RELIEF_MORALE_PENALTY` imported, rendered below OVERRIDE on `order_refused`); `effective_compliance_modifier` adapter-derived + Modifier stat row in `OfficerProfile`; corps name enrichment already complete in Phase 4. 25 new tests. No engine state added.
-**v0.8.3 Phase 5 CLOSED. All four Phase 4 deferred items resolved. v0.8.3 milestone closure is next.**
+## Current State (2026-04-06, v0.8.4 Phase B CLOSED)
+**2781/2781 vitest (194 files). v0.8.4 Phase B CLOSED.**
+v0.8.4 Phase B delivered: `autonomy_overrides.ts` (applyAutonomyOverride/clearAutonomyOverride/getAutonomyOverride, pure deterministic); `PendingProposalReview` interface + `pending_proposal_reviews?` on StateMeta (stub, no write path yet); Level 3 `requires_player_response` gate in `evaluate_events.ts`; 3 IPC handlers (`get-autonomy-state`, `set-autonomy-level` w/ Level 2+ feature gate, `override-ai-decision`); 3 preload bridge entries. 9 new tests (1 file). tsc clean, build clean.
+**v0.8.4 Phase C next:** Level 1 proposal generation (formula AI populates `pending_proposal_reviews`), `accept-proposal`/`reject-proposal` IPC handlers, autonomy slider UI surface, Level 2+ unlock (remove feature gate).
+**Phase C design constraints:** (1) direction convention unchanged — level increase = delegation = one-turn delay, decrease = reclaim = immediate. (2) Level 3 `requires_player_response` gate already wired; Phase C must author high-stakes events with this flag. (3) Level 2+ only unlocked when full-delegation path is validated end-to-end.
+**v0.8.3 was CLOSED through Phase 5 before this session.**
 Last combat calibration: n1344 93.3%, hash: 0e2fe6333394649a. n1323: 94.0%, 27/27, 6/6, 74 battles.
 n1323 last combat-calibration baseline: 94.0%, 27/27 anchors, 6/6 benchmarks, 74 battles. hash: b3355614a82d13d7.
 Previous ATH: n1315: 94.3%, 27/27. Previous: n1302: 93.7%, 25/25.

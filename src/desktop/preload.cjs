@@ -91,4 +91,8 @@ contextBridge.exposeInMainWorld('awwv', {
   resolveDayton: (proposal) => ipcRenderer.invoke('resolve-dayton', proposal),
   acknowledgeFrictionEvent: (payload) => ipcRenderer.invoke('acknowledge-friction-event', payload),
   stabilizeCommandRelationship: (payload) => ipcRenderer.invoke('stabilize-command-relationship', payload),
+  // v0.8.4 Phase B: Autonomy bridge
+  getAutonomyState: () => ipcRenderer.invoke('get-autonomy-state'),
+  setAutonomyLevel: (level) => ipcRenderer.invoke('set-autonomy-level', { level }),
+  overrideAiDecision: (level, targetId, faction) => ipcRenderer.invoke('override-ai-decision', { level, target_id: targetId, faction }),
 });

@@ -1,3 +1,35 @@
+## [2026-04-06] v0.8.4 Phase B — IPC Wiring, Review Surface, and Fallback Discipline
+
+**Type:** Feature (IPC wiring + state schema + Level 3 gate)
+**Files modified:** `src/state/game_state.ts`, `src/sim/events/evaluate_events.ts`, `src/desktop/electron-main.cjs`, `src/desktop/preload.cjs`
+**Files created:** `src/sim/ai_commander/autonomy_overrides.ts`, `tests/sim/autonomy/autonomy_phase_b.test.ts`
+**Status:** ACCEPTED
+
+### What changed
+
+- `autonomy_overrides.ts` (new): three pure deterministic helpers — `applyAutonomyOverride`, `clearAutonomyOverride`, `getAutonomyOverride` — operate directly on `GameState.meta.autonomy_overrides[]`. No `Math.random()`, no `Date.now()`.
+- `game_state.ts`: `PendingProposalReview` interface added (`id`, `faction`, `domain`, `proposed_action`, `rationale?`, `expires_turn?`). `StateMeta` extended with `pending_proposal_reviews?: PendingProposalReview[]` — optional, backward-compatible. Phase B stub: no AI path populates it yet (Phase C adds proposal generation).
+- `evaluate_events.ts`: Level 3 `requires_player_response` gate — `mustShowPlayer = playerFaction && (autonomyLevel < 3 || def.requires_player_response === true)`. High-stakes events now queue to the player even at Level 3 Observer. Routine events without the flag continue to auto-resolve via bot personality path. Closes Phase 1 open gap (Design Note 2).
+- `electron-main.cjs`: 3 new IPC handlers — `get-autonomy-state` (reads autonomy fields from current save), `set-autonomy-level` (Level 2+ feature-gated: returns `{ ok: false, error: 'level_2_plus_not_yet_enabled' }` for level ≥ 2; Level 0–1 writes `autonomy_level_pending`), `override-ai-decision` (calls `applyAutonomyOverride`, persists save).
+- `preload.cjs`: 3 new bridge entries — `getAutonomyState`, `setAutonomyLevel`, `overrideAiDecision`.
+- Direction convention: level increase (more delegation) = one-turn delay via `apply-autonomy-transition`; level decrease (reclaiming control) = immediate. Level 2+ feature-gated until Phase C unlocks it.
+
+### Fallback contract (updated)
+
+Level 0: unchanged (formula bot for enemy factions only). Level 1: IPC wiring live; `PendingProposalReview` schema present but no AI proposals generated yet (Phase C stub). Level 2+: feature-gated — `set-autonomy-level` returns structured error; formula bot covers all decisions via Phase 1 `botFactions` path. Level 3: `requires_player_response` gate now live; high-stakes events always queue to player.
+
+### Verification
+
+- tsc: clean
+- vitest: 2781/2781 (194 files, +9 new Phase B tests; was 2772/2772)
+- build: pass
+
+### Report
+
+`docs/40_reports/implemented/20260406_V084_PHASEB_IPC_REVIEW_SURFACE.md`
+
+---
+
 ## [2026-04-06] v0.8.4 Phase 1 — Autonomy State and Review Foundation
 
 **Type:** Feature (state schema + pipeline skeleton)

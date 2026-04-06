@@ -1961,6 +1961,67 @@ app.whenReady().then(() => {
     }
   });
 
+  // v0.8.4 Phase B: Autonomy IPC handlers
+  ipcMain.handle('get-autonomy-state', async () => {
+    if (!currentGameStateJson) return null;
+    const state = JSON.parse(currentGameStateJson);
+    return {
+      autonomy_level: state.meta?.autonomy_level ?? 0,
+      autonomy_level_pending: state.meta?.autonomy_level_pending ?? null,
+      autonomy_overrides: state.meta?.autonomy_overrides ?? [],
+      pending_proposal_reviews: state.meta?.pending_proposal_reviews ?? [],
+    };
+  });
+
+  ipcMain.handle('set-autonomy-level', async (_event, payload) => {
+    const { level } = payload ?? {};
+    if (typeof level !== 'number' || level < 0 || level > 3 || !Number.isInteger(level)) {
+      return { ok: false, error: 'invalid_level' };
+    }
+    // Feature gate: Level 2+ requires explicit opt-in (Phase B guard)
+    if (level >= 2) {
+      return { ok: false, error: 'level_2_plus_not_yet_enabled' };
+    }
+    if (!currentGameStateJson) return { ok: false, error: 'no_state' };
+    const state = JSON.parse(currentGameStateJson);
+    const current = state.meta?.autonomy_level ?? 0;
+    if (level === current) {
+      // No change — clear any stale pending
+      state.meta.autonomy_level_pending = undefined;
+    } else if (level < current) {
+      // Downward numeric change = reclaiming control (e.g. 1→0): immediate
+      state.meta.autonomy_level = level;
+      state.meta.autonomy_level_pending = undefined;
+    } else {
+      // Upward numeric change = more delegation (e.g. 0→1): one-turn delay
+      state.meta.autonomy_level_pending = level;
+    }
+    currentGameStateJson = JSON.stringify(state);
+    sendGameStateToRenderer(currentGameStateJson);
+    return { ok: true, new_level: state.meta.autonomy_level, pending: state.meta.autonomy_level_pending ?? null };
+  });
+
+  ipcMain.handle('override-ai-decision', async (_event, payload) => {
+    const { level, target_id, faction } = payload ?? {};
+    if (!target_id || !faction || !['army', 'corps', 'event'].includes(level)) {
+      return { ok: false, error: 'invalid_payload' };
+    }
+    if (!currentGameStateJson) return { ok: false, error: 'no_state' };
+    const state = JSON.parse(currentGameStateJson);
+    // Inline idempotent upsert — mirrors autonomy_overrides.ts logic (no ESM require from CJS)
+    if (!state.meta.autonomy_overrides) state.meta.autonomy_overrides = [];
+    state.meta.autonomy_overrides = state.meta.autonomy_overrides.filter(o => o.target_id !== target_id);
+    state.meta.autonomy_overrides.push({
+      turn: state.meta.turn,
+      level,
+      target_id,
+      faction,
+    });
+    currentGameStateJson = JSON.stringify(state);
+    sendGameStateToRenderer(currentGameStateJson);
+    return { ok: true };
+  });
+
   // Start the tactical map HTTP server (required because MapLibre's Web Workers
   // don't function under Electron custom protocol schemes), then create the window.
   startMapServer().then(() => {

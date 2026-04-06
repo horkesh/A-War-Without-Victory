@@ -193,6 +193,13 @@ Plans: `docs/plans/2026-03-24-v081-order-interpretation-plan.md`, `docs/plans/20
 
 **Phase status (2026-04-06):**
 - Phase 1 — Autonomy State and Review Foundation: CLOSED 2026-04-06. Report: `docs/40_reports/implemented/20260406_V084_PHASE1_AUTONOMY_STATE_FOUNDATION.md`
+- Phase B — IPC Wiring, Review Surface, and Fallback Discipline: CLOSED 2026-04-06. Delivered: `autonomy_overrides.ts` (pure deterministic helpers), `PendingProposalReview` schema on `StateMeta`, Level 3 `requires_player_response` gate, 3 IPC handlers (`get-autonomy-state`, `set-autonomy-level`, `override-ai-decision`), 3 preload bridge entries, Level 2+ feature gate. Report: `docs/40_reports/implemented/20260406_V084_PHASEB_IPC_REVIEW_SURFACE.md`
+
+**Phase C must deliver:**
+- Level 1 proposal generation — formula AI populates `pending_proposal_reviews[]` (stub is live, no write path yet)
+- `accept-proposal` / `reject-proposal` IPC handlers
+- React UI component: autonomy slider + proposal review panel consuming `getAutonomyState` / `setAutonomyLevel`
+- Level 2+ feature gate unlock (remove guard once proposal review surface validated)
 
 LLM integration sits on top of cleaned command ownership, not underneath it. Replay/log determinism, decision auditability, fallback behavior, and player review surfaces must be explicit before any API-assisted autonomy is treated as roadmap-ready.
 
@@ -460,7 +467,7 @@ These need design sessions before implementation. Preserved from the original ro
 | Commander Maturity (belief state, motive stack, traces) | Complete (v0.8.1, closed 2026-04-05) |
 | Political Leader Bot | Complete (v0.8.2 closed 2026-04-06) |
 | Order Interpretation | Complete (v0.8.3 closed 2026-04-06) |
-| Autonomy Depth + Claude API | Phase 1 closed (v0.8.4, 2026-04-06) |
+| Autonomy Depth + Claude API | Phase B closed (v0.8.4, 2026-04-06) |
 | Consequence system | Not started (v0.9.0) |
 | Cost Ledger | Not started (v0.9.0) |
 | Ghost Map | Not started (v0.9.1) |
