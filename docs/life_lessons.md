@@ -1,8 +1,24 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-05. 209 lessons across 9 topic files.
+> Last restructured: 2026-04-06. 213 lessons across 9 topic files.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
+
+## New Lessons (2026-04-06)
+
+### [Data] Peace plan proposed_split constants are historical claims AND routing parameters — historian gate before commit — see `docs/life_lessons/data_pipeline.md`
+- O-S RS:30→52 flipped routing from auto-reject to scoring (gap 35pp→13pp). VOPP RS:30→43 changed floor calibration. Wrong constant = wrong faction behavior, not just wrong display. Add `// Source: [citation]` to every `proposed_split` entry; absence = unverified.
+
+### [Data] Sim territory is OSID-count; historical sources are area-weighted — design floor thresholds in sim units — see `docs/life_lessons/data_pipeline.md`
+- VOPP floor: area-weighted gap = 27pp, sim OSID-count gap = 22pp. A 27pp floor would never trigger. Always compute `sim_gap = RS_osid_count_pct − proposed_RS_pct` before finalizing any threshold.
+
+### [Architecture] A single floor threshold across structurally different peace plans silently fails — per-plan map required — see `docs/life_lessons/architecture.md`
+- CG: 14pp sim gap < 18pp single floor → silently routed to scoring for 3 phases. 96% referendum was ignored by engine. Per-plan `RS_PLAN_FLOOR_GAPS` with explicit entry and OSID-count gap for every plan.
+
+### [Architecture] Political engine changes gated on specific trigger_weeks are calibration-safe by construction — see `docs/life_lessons/architecture.md`
+- All Phase 5+6 political changes showed 0.0pp calibration delta. Root cause: `peace_plans.ts:139` gates on `trigger_week === warWeek`. If all trigger weeks exceed scenario duration, state "calibration-inert by construction" — the unchanged calibration is a correctness property.
+
+---
 
 ## New Lessons (2026-04-05)
 
@@ -70,7 +86,7 @@
 
 ## Recently Violated (always read these)
 
-### [Architecture] When a guard is added to one pipeline path, audit ALL paths — VIOLATED 2026-04-05 (by Lane A on 2026-04-04)
+### [Architecture] When a guard is added to one pipeline path, audit ALL paths — VIOLATED 2026-04-05, COMPLIED 2026-04-06 → VALIDATED PATTERN
 - Lane A added a drifted-brigade gate to Step 6b but not Step 8d. Both functions can produce cross-corps assignment. The gate at 6b was useless because 8d re-introduced the same outcome. Fixed 2026-04-05 — same gate pattern added to `rehomeUnassignedBrigadesToPhysicalSectorOwners`.
 
 ### [Architecture] Movement orders must declare stance explicitly — VIOLATED 2026-04-05 (by Fix B)
@@ -108,7 +124,7 @@
 - **Right approach**: Use a hybrid stack. MapLibre GL JS for the base map (roads, terrain, static labels) and Deck.gl for the tactical overlay (map counters, unit status, movement previews).
 - **Do instead**: For complex game-state-driven visuals, leverage Deck.gl's interleaved layers or synchronized overlay. Use Deck.gl for anything that requires high-frequency updates, interpolation, or advanced shader effects (glows).
 
-### [MapLibre] Never use setData() on dynamic sources in modal maps — VIOLATED 2026-03-19
+### [MapLibre] Never use setData() on dynamic sources in modal maps — VIOLATED 2026-03-19 — ARCHIVED 2026-04-06 (no MapLibre code touched in 6 phases; restore when UI work resumes)
 - **Violation evidence**: Marked GUI_MASTER section 4 as "RESOLVED" after the ops modal redesign, claiming `setData()` worked. It worked for the initial render only. When the user changed staging OSID, arrows silently stopped updating. Spent 3 fix cycles on wrong theories (distance scaling, empty centroid lookup, stale deps) before recognizing the same bug documented since 2026-03-11.
 - **Cost**: 3 wasted fix iterations. User saw broken arrows across multiple test cycles.
 - **Root cause**: `setData()` on `map.addSource()`-created GeoJSON sources works for initial data but silently fails on updates in modal/secondary MapLibre instances. Sources defined in base style JSON work fine.

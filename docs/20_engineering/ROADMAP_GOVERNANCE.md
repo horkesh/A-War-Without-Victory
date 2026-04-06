@@ -105,6 +105,29 @@ Before changing `MASTER_ROADMAP.md`, the editor must list:
 
 Then and only then should the roadmap be edited.
 
+## Mandatory milestone close ritual
+
+Every milestone close must include a short docs/governance pass before the next milestone prompt is issued.
+
+Required closeout steps:
+
+1. update `docs/plans/MASTER_ROADMAP.md`
+2. confirm the closed milestone/phase list is accurate
+3. name the next milestone explicitly
+4. review and update non-milestone blindspots / side lanes
+5. ensure repo truth and roadmap truth still match
+
+Short names for this ritual:
+
+- `Roadmap Sync Pass`
+- `Blindspot Review`
+
+Rule:
+
+**repo closeout first, next prompt second**
+
+Do not leave milestone truth only in reports, architect notes, or chat memory.
+
 ## Required prose in roadmap updates
 
 Roadmap updates should explicitly preserve these truths:

@@ -3,6 +3,18 @@
 
 ---
 
+### [Architecture] A single floor threshold across structurally different peace plans silently fails for plans with different rejection bases (2026-04-06) — NEW
+- **Context**: `RS_TERRITORY_FLOOR_GAP = 18` (Phase 3) applied uniformly to all peace plans. The Contact Group had only ~14pp sim gap (OSID-count: RS≈65%, CG proposes 49%) — less than the 18pp floor — so RS silently routed to personality scoring instead of hard-rejecting. The 96% referendum rejection was being ignored for 3 consecutive phases (Ph.3→Ph.6). Required Phase 6 per-plan map to fix.
+- **Wrong approach**: One threshold for all plans when the plans have structurally different rejection bases. VOPP = Assembly vote (96–2); O-S = Karadzic signed, Assembly rejected; CG = 96% referendum. These are qualitatively different events requiring calibrated thresholds.
+- **Right approach**: Per-plan floor map keyed by `plan.id` with a default fallback for unknown plans. Each plan's floor calibrated to its actual sim gap in OSID-count units.
+- **Do instead**: When adding a new peace plan, compute `sim_gap = RS_osid_count_pct − proposed_RS_pct` in OSID-count units and add an explicit entry to `RS_PLAN_FLOOR_GAPS`. If the gap is not computed and documented, the floor is guesswork.
+
+### [Architecture] Political engine changes gated on specific trigger_weeks are calibration-safe by construction (2026-04-06) — NEW
+- **Context**: Phases 5 and 6 significantly modified `computePoliticalPeacePlanResponse` (O-S tactical branch, per-plan floors, patron immunity, HRHB Washington alignment). 40w calibration run showed 0.0pp delta. Root cause: `peace_plans.ts:139` gates on `trigger_week === warWeek` — plans only fire at their design week. All trigger weeks (O-S w72, CG w78+, Holbrooke w176–183) exceed the 40w scenario duration.
+- **Wrong approach**: Running a 40w calibration run to validate political engine changes and worrying when the result is unchanged, or interpreting unchanged calibration as lack of impact.
+- **Right approach**: Document trigger weeks explicitly in every phase report. If all trigger weeks exceed scenario duration, state "calibration-inert by construction" and skip calibration validation — the 0.0pp delta is a correctness property, not a gap.
+- **Do instead**: When authoring peace plan events, check `trigger_week` values against scenario duration. The inertness is a feature — it means the political engine fires at historically correct moments, not whenever a 40w test happens to run.
+
 ### BFS spanning tree edges are NOT the graph — bridge detection on a tree is trivially 100% bridges (2026-04-05)
 - `runSupplyBfs` records only tree edges in `edges_used` (skips visited neighbors). `isBridgeInSubgraphOsid` then checks bridges within this tree — every edge is trivially a bridge. The OSID graph is a dense mesh (avg degree 5.75, cycle rank 1336) with abundant redundancy, but the bridge detector never saw it. When analyzing graph properties (bridges, connectivity, redundancy), always operate on the ACTUAL subgraph, not on the BFS/DFS traversal tree. The traversal tree is a spanning tree with zero cycles — it tells you about reachability, not about redundancy.
 
