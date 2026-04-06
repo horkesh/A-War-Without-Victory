@@ -1,3 +1,34 @@
+## [2026-04-06] v0.8.3 Phase 3 — Reliability Modifier, Decay Pipeline, Warlord Supersession
+
+**Type:** Feature
+**Files modified:** `src/sim/combat/order_interpretation.ts`, `src/sim/turn_phases/war_phases.ts`
+**Files created:** `tests/sim/combat/phase3_reliability_decay.test.ts`
+**Status:** ACCEPTED
+**Commits:** [pending]
+
+### What changed
+
+- `computeReliabilityModifier(pol_rel)`: pure formula `(pol_rel − 3) × 0.10`; maps pol_rel 1→−0.20, 3→0.00, 5→+0.20
+- `computeEffectiveReliabilityModifier(data, state)`: applies base modifier + `WARLORD_MODIFIER (−0.15)` when faction=RBiH, pol_rel≤2, turn < warlord_friction_end_week; replaces three hardcoded `reliabilityModifier = 0.0` seams in `computeInterpretation` (stance), `interpretOperationLaunch`, and `interpretOperationHalt`
+- Warlord supersession active for `arbih_halilovic` (pol_rel=2, turns 0–60) and `arbih_knez` (pol_rel=2, turns 0–44); combined modifier −0.25 makes modified/partial/refused outcomes more probable
+- `decay-officer-interpretation-state` pipeline step added in `war_phases.ts` (step 149→150, between `assert-operation-lifecycle` and `inject-queued-operations`): expires `cowed_until_turn` (clears + resets override_count=0 when turn > threshold), removes stale acknowledged events older than 8 turns; deliberately does NOT own `halt_delay_turns_remaining` (stays in `sector_offensive.ts` by design)
+
+### Verification
+
+- tsc: clean
+- vitest: 2729/2729 (189 files)
+- 13 new tests in `tests/sim/combat/phase3_reliability_decay.test.ts` (5 suites: reliability wiring, warlord supersession, cowed expiry, stale event cleanup, halt_delay scope guard)
+
+### Deferred
+
+- Phase 4: UI panels (`OrderInterpretationPanel`, OOB tooltip, personality icons)
+
+### Report
+
+`docs/40_reports/implemented/20260406_V083_PHASE3_RELIABILITY_DECAY.md`
+
+---
+
 ## [2026-04-06] v0.8.3 Phase 2 — IPC Wiring and Operation Interpretation
 
 **Type:** Feature

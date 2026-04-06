@@ -10,11 +10,10 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-04-06, v0.8.3 Phase 2 on main)
-**2716/2716 vitest (188 files). v0.8.3 Phase 2 CLOSED. Commits: bc88eed3 (impl), e764491a (tests), 6a773428 (docs).**
-v0.8.3 Phase 2 delivered: `interpretOperationLaunch` + `interpretOperationHalt` in `order_interpretation.ts`; `halt_delay_turns_remaining` on CorpsOperation; bot stance guard in `bot_corps_stance.ts`; halt countdown in `sector_offensive.ts`; all 4 IPC handlers wired (stance/launch/halt/override). 20 new tests. reliabilityModifier=0.0 seam intact. Deferred: reliabilityModifier population (Phase 3), decay pipeline step (Phase 3), warlord supersession (Phase 3), UI panels (Phase 4).
-**v0.8.3 Phase 2 CLOSED. Next: v0.8.3 Phase 3 — Reliability Modifier + Decay Pipeline.**
-Phase 3 deliverables: (1) wire `political_reliability` → `reliabilityModifier` in both launch/halt/stance functions; (2) `decay-officer-interpretation-state` step in `war_phases.ts` (owns cowed expiry, stale event cleanup, halt_delay countdown); (3) warlord supersession via low reliability early-war commanders.
+## Current State (2026-04-06, v0.8.3 Phase 3 CLOSED)
+**2729/2729 vitest (189 files). v0.8.3 Phase 3 CLOSED. Commit: [pending].**
+v0.8.3 Phase 3 delivered: `computeReliabilityModifier` + `computeEffectiveReliabilityModifier` in `order_interpretation.ts`; three hardcoded `reliabilityModifier=0.0` seams replaced in stance/launch/halt; warlord supersession (RBiH, pol_rel≤2, early war: Halilović turns 0–60, Knez turns 0–44, combined modifier −0.25); `decay-officer-interpretation-state` step in `war_phases.ts` (step 149→150, owns cowed expiry + stale event cleanup; halt_delay stays in sector_offensive.ts by design). 13 new tests.
+**v0.8.3 Phase 3 CLOSED. Next: v0.8.3 Phase 4 — UI panels (OrderInterpretationPanel, OOB tooltip, personality icons).**
 Last combat calibration: n1344 93.3%, hash: 0e2fe6333394649a. n1323: 94.0%, 27/27, 6/6, 74 battles.
 n1323 last combat-calibration baseline: 94.0%, 27/27 anchors, 6/6 benchmarks, 74 battles. hash: b3355614a82d13d7.
 Previous ATH: n1315: 94.3%, 27/27. Previous: n1302: 93.7%, 25/25.
