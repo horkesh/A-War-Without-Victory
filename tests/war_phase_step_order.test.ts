@@ -89,6 +89,7 @@ describe('war-phase step ordering', () => {
         // +1 from commander-correct-march-orders (override wrong-destination march orders after bot corps orders)
         // 153 → 148: steps removed during v0.8 commander intelligence + sector truth overhaul
         // +1 from compute-combat-effective-brigades (v0.8.2 Phase 3 hardening, before evaluate-peace-plans)
-        expect(stepNames.length).toBe(149);
+        // +1 from decay-officer-interpretation-state (v0.8.3 Phase 3: cowed expiry + event cleanup)
+        expect(stepNames.length).toBe(150);
     });
 });
