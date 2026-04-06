@@ -146,7 +146,7 @@ import { computeSectorCombatRatings } from '../combat/sector_combat_rating.js';
 import { detectParamilitaryTargets, advanceParamilitaries, detectOffensiveParamilitaryTargets } from '../combat/paramilitary_sweep.js';
 import { consolidateRearPockets } from '../combat/rear_pocket_consolidation.js';
 import { PARAMILITARY_FADE_WEEK, OFFENSIVE_PARA_FADE_WEEK } from '../../state/formation_constants.js';
-import { generateLevel1StanceProposals } from '../ai_commander/proposal_generation.js';
+import { generateLevel1StanceProposals, generateLevel1OpProposals } from '../ai_commander/proposal_generation.js';
 import { generateCorpsStanceOrders } from '../combat/bot_corps_stance.js';
 import { accrueRecruitmentResources, runOngoingRecruitment } from '../recruitment_turn.js';
 import { reroutePoolSurplus } from '../recruitment_engine.js';
@@ -890,6 +890,16 @@ export const warPhases: NamedPhase[] = [
                     p => !(p.turn < meta.turn && p.accepted === undefined)
                 );
             }
+            // v0.8.4 Phase D: Clear per-corps player_op_response each turn so stale responses
+            // from prior turns do not block or spuriously approve next-turn plans.
+            const corpsCmd = context.state.military.corps_command;
+            if (corpsCmd) {
+                for (const corpsId of Object.keys(corpsCmd)) {
+                    if (corpsCmd[corpsId].player_op_response !== undefined) {
+                        corpsCmd[corpsId].player_op_response = undefined;
+                    }
+                }
+            }
         }
     },
     {
@@ -1101,6 +1111,24 @@ export const warPhases: NamedPhase[] = [
             // Remove any stale proposals from this same turn (defensive guard against double-run).
             context.state.meta.pending_proposal_reviews = context.state.meta.pending_proposal_reviews
                 .filter(p => p.turn !== context.state.meta.turn);
+            context.state.meta.pending_proposal_reviews.push(...proposals);
+        },
+    },
+    {
+        // v0.8.4 Phase D: Generate Level 1 Assisted op-planning proposals for player review.
+        // Reads commander_state.current_plan and decision_trace set by the commander loop above.
+        // Appends to pending_proposal_reviews without removing stance proposals from this turn.
+        name: 'generate-level1-op-proposals',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const playerFaction = context.state.meta.player_faction;
+            if (!playerFaction) return;
+            if (context.state.meta.autonomy_level !== 1) return;
+            const proposals = generateLevel1OpProposals(context.state, playerFaction as FactionId);
+            if (proposals.length === 0) return;
+            if (!context.state.meta.pending_proposal_reviews) {
+                context.state.meta.pending_proposal_reviews = [];
+            }
             context.state.meta.pending_proposal_reviews.push(...proposals);
         },
     },

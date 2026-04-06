@@ -117,7 +117,7 @@
   {
     "id": "nato_ultimatum_sarajevo_1994",
     "title": "NATO Issues Ultimatum on Sarajevo",
-    "narrative": "In the aftermath of Markale, NATO issues an ultimatum demanding the withdrawal of all VRS heavy weapons from a 20-kilometer exclusion zone around Sarajevo within ten days, or face air strikes. The ultimatum marks NATO's first credible threat of force and fundamentally changes the calculation for the VRS around the capital.",
+    "narrative": "In the aftermath of Markale, NATO issues an ultimatum demanding the withdrawal of all VRS heavy weapons from a 20-kilometer exclusion zone around Sarajevo within ten days, or face air strikes. The ultimatum marks NATO's first credible threat of force and fundamentally changes the calculation for the VRS around the capital. This is a pivotal moment — compliance eases international pressure, defiance risks becoming the first belligerent to face NATO bombing.",
     "category": "diplomatic",
     "trigger": {
       "turn_min": 96,
@@ -133,6 +133,10 @@
       }
     },
     "once": true,
+    "requires_player_response": true,
+    "responding_faction": "RS",
+    "priority": 50,
+    "bot_response_logic": "strategic_weighted",
     "effect": {
       "kind": "patron_pressure",
       "faction": "RS",
@@ -142,6 +146,56 @@
       {
         "kind": "narrative",
         "text": "NATO demands VRS withdrawal of heavy weapons from around Sarajevo. The threat of air strikes becomes credible for the first time."
+      }
+    ],
+    "response_options": [
+      {
+        "id": "comply_withdraw_hwez",
+        "label": "Comply — withdraw heavy weapons from the exclusion zone",
+        "aggression_affinity": -0.4,
+        "risk_level": 0.2,
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": 8
+          },
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": -5
+          },
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": -4
+          }
+        ],
+        "sets_flags": { "sarajevo_hwez_complied": true }
+      },
+      {
+        "id": "defy_ultimatum_hwez",
+        "label": "Defy — maintain all positions around Sarajevo",
+        "aggression_affinity": 0.6,
+        "risk_level": 0.8,
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": -12
+          },
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": 4
+          },
+          {
+            "faction": "RS",
+            "dimension": "military_credibility",
+            "delta": 5
+          }
+        ],
+        "sets_flags": { "sarajevo_hwez_defied": true }
       }
     ]
   },

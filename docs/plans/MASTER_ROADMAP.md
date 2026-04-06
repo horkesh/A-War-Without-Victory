@@ -196,9 +196,12 @@ Plans: `docs/plans/2026-03-24-v081-order-interpretation-plan.md`, `docs/plans/20
 - Phase B — IPC Wiring, Review Surface, and Fallback Discipline: CLOSED 2026-04-06. Delivered: `autonomy_overrides.ts` (pure deterministic helpers), `PendingProposalReview` schema on `StateMeta`, Level 3 `requires_player_response` gate, 3 IPC handlers (`get-autonomy-state`, `set-autonomy-level`, `override-ai-decision`), 3 preload bridge entries, Level 2+ feature gate. Report: `docs/40_reports/implemented/20260406_V084_PHASEB_IPC_REVIEW_SURFACE.md`
 - Phase C — Level 1 Proposals, Review UI, and Level 2+ Unlock: CLOSED 2026-04-06. Delivered: `generateLevel1StanceProposals()` in `proposal_generation.ts` (new), `ai_recommended_stance` on `CorpsCommandState`, `accept-proposal`/`reject-proposal` IPC handlers, `AutonomyPanel.tsx` (new React component — slider 0–3 + per-proposal accept/reject cards), Level 2+ feature gate removed, war phase step count 151→153. 32 new tests, 2813/2813 vitest. Report: `docs/40_reports/implemented/20260406_V084_PHASEC_LEVEL1_PROPOSALS.md`
 
-**Phase D must deliver:**
-- Op planning proposals — Level 1 Assisted surfaces recommendations for which corps should launch an offensive, consuming `CampaignPlan` / `CommanderIntent` output
-- High-stakes event authoring — Sarajevo UNPROFOR ultimatum event authored with `requires_player_response: true`; exercises Level 3 gate closed in Phase B
+- Phase D — Op Proposals, High-Stakes Event Gate, Roadmap Truth: CLOSED 2026-04-06. `generateLevel1OpProposals()` in `proposal_generation.ts` (domain `'ops'`, `APPROVE_OP:<corpsId>:<planId>` action). Plan-launch guard in `applyCommanderOutput` (Level 1: no response → hold at ready, rejected → abandon). `player_op_response` field on `CorpsCommandState`, cleared by `apply-autonomy-transition`. `APPROVE_OP:` branches in accept/reject IPC. Step 154 `generate-level1-op-proposals`. `nato_ultimatum_sarajevo_1994` upgraded with `requires_player_response:true` + `response_options`. Turn-advance block for `pending_event_decisions` confirmed absent (Phase E). 33 new tests, 2846/2846 vitest. Report: `docs/40_reports/implemented/20260406_V084_PHASED_OPPROPOSALS_HIGHSTAKES.md`
+
+**Phase E must deliver:**
+- Turn-advance block in `advance-turn` IPC: block turn advance when any `pending_event_decisions` entry has `requires_player_response: true` and has not been resolved
+- AutonomyPanel UI for op proposals: domain-specific card rendering for `domain: 'ops'` proposals (vs current stance cards)
+- Op proposal description enrichment: zone name, estimated force strength, enemy threat rating from commander briefing
 
 LLM integration sits on top of cleaned command ownership, not underneath it. Replay/log determinism, decision auditability, fallback behavior, and player review surfaces must be explicit before any API-assisted autonomy is treated as roadmap-ready.
 

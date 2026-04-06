@@ -165,7 +165,42 @@ export function applyCommanderOutput(
         }
     }
 
-    // 5. Persist commander state for next turn's continuity
+    // 5. Persist commander state for next turn's continuity.
+    //    v0.8.4 Phase D — Level 1 plan-launch guard:
+    //    If autonomy_level === 1, block plan from advancing to 'executing' unless
+    //    player_op_response exists and approved === true for this plan.
+    //    If player rejected → abandon the plan (set to null in updated_state).
+    //    If no response yet → hold the plan at 'ready' (do not emit the operation).
+    //    Guard against headless/test states where meta may be absent.
+    const autonomyLevel = state.meta?.autonomy_level ?? 0;
+    if (autonomyLevel === 1) {
+        const updatedPlan = output.updated_state.current_plan;
+        const playerOpResp = corps.player_op_response;
+        if (updatedPlan && updatedPlan.status === 'executing') {
+            const planApproved =
+                playerOpResp !== undefined &&
+                playerOpResp.plan_id === updatedPlan.plan_id &&
+                playerOpResp.approved === true;
+            const planRejected =
+                playerOpResp !== undefined &&
+                playerOpResp.plan_id === updatedPlan.plan_id &&
+                playerOpResp.approved === false;
+
+            if (planRejected) {
+                // Player rejected — abandon plan, emit no new operations from it this turn.
+                corps.commander_state = { ...output.updated_state, current_plan: null };
+                corps.status_reason = 'plan abandoned: player rejected op proposal at Level 1';
+                return;
+            } else if (!planApproved) {
+                // No player response yet — hold plan at 'ready', emit no new operations.
+                const heldPlan = { ...updatedPlan, status: 'ready' as const };
+                corps.commander_state = { ...output.updated_state, current_plan: heldPlan };
+                corps.status_reason = 'plan held at ready: awaiting player approval at Level 1';
+                return;
+            }
+            // planApproved === true → fall through, apply output normally.
+        }
+    }
     corps.commander_state = output.updated_state;
 
     // 6. Persist commander reinforcement pressure so Army HQ can consume it next turn.

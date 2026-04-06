@@ -93,6 +93,7 @@ describe('war-phase step ordering', () => {
         // +1 from apply-autonomy-transition (v0.8.4 Phase A: autonomy state + pending level commit)
         // +1 from generate-player-stance-recommendations (v0.8.4 Phase C: formula AI stance for player faction)
         // +1 from generate-level1-proposals (v0.8.4 Phase C: Level 1 Assisted stance proposals)
-        expect(stepNames.length).toBe(153);
+        // +1 from generate-level1-op-proposals (v0.8.4 Phase D: Level 1 Assisted op-planning proposals)
+        expect(stepNames.length).toBe(154);
     });
 });

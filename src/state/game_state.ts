@@ -518,6 +518,8 @@ export interface CorpsCommandState {
     player_ordered_stance?: string | null;
     /** Formula bot's recommended stance computed this turn. Set by generateCorpsStanceOrders; read by Level 1 proposal generation. */
     ai_recommended_stance?: CorpsStance;
+    /** v0.8.4 Phase D: Player response to op proposal at Level 1. Cleared each turn by apply-autonomy-transition. */
+    player_op_response?: { plan_id: string; approved: boolean; turn: number };
 }
 
 /** Operational group activation order. */
@@ -1114,7 +1116,7 @@ export interface PendingProposalReview {
     id: string;
     turn: number;
     faction: FactionId;
-    domain: 'military' | 'political' | 'events';
+    domain: 'military' | 'political' | 'events' | 'ops';
     /** Human-readable summary of the proposal. */
     description: string;
     /** Canonical action identifier. */

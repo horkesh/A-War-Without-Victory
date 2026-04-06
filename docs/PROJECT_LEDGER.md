@@ -1,3 +1,25 @@
+## [2026-04-06] v0.8.4 Phase D — Op Proposals, High-Stakes Event Gate, Roadmap Truth
+
+**Type:** Feature (op proposal domain 2 + high-stakes event + plan-launch guard)
+**Files modified:** `src/state/game_state.ts`, `src/sim/ai_commander/proposal_generation.ts`, `src/sim/combat/commander/commander_loop.ts`, `src/sim/turn_phases/war_phases.ts`, `src/desktop/electron-main.cjs`, `data/scenarios/events/war_1994.json`, `tests/war_phase_step_order.test.ts`, `docs/plans/MASTER_ROADMAP.md`, `.claude/architect_notes.md`
+**Files created:** `tests/sim/autonomy/autonomy_phase_d.test.ts`, `docs/40_reports/implemented/20260406_V084_PHASED_OPPROPOSALS_HIGHSTAKES.md`
+**Status:** ACCEPTED
+**Verification:** tsc clean, 2846/2846 vitest (196 files), build clean
+
+### What changed
+
+- **`generateLevel1OpProposals()`** added to `proposal_generation.ts`: generates `APPROVE_OP:<corpsId>:<planId>` proposals at Level 1 when a corps has `current_plan.status === 'ready'` or `decision_trace.winning_intent_id` contains `stage_operation`/`launch_opportunity`. Domain `'ops'` added to `PendingProposalReview` union.
+- **`player_op_response`** optional field added to `CorpsCommandState` — stores player accept/reject per plan per turn. Cleared by `apply-autonomy-transition` each turn.
+- **Plan-launch guard** in `applyCommanderOutput` (commander_loop.ts): at Level 1, blocks plan advancing to `executing` unless `player_op_response.approved === true`. Rejection abandons the plan; no response holds it at `ready`.
+- **`APPROVE_OP:` IPC branches** added to `accept-proposal` and `reject-proposal` handlers in electron-main.cjs.
+- **`generate-level1-op-proposals`** pipeline step added (step 154) after `generate-level1-proposals`.
+- **`nato_ultimatum_sarajevo_1994`** event upgraded with `requires_player_response: true`, `response_options` (comply/defy), `responding_faction: RS`, `bot_response_logic: strategic_weighted`. Exercises Level 3 gate from Phase B.
+- **Turn-advance block**: no block exists for `pending_event_decisions` — confirmed absent, noted as Phase E work.
+- **33 new tests** in `autonomy_phase_d.test.ts`.
+
+### Report
+`docs/40_reports/implemented/20260406_V084_PHASED_OPPROPOSALS_HIGHSTAKES.md`
+
 ## [2026-04-06] v0.8.4 Phase C — Level 1 Proposals, Review UI, and Level 2+ Unlock
 
 **Type:** Feature (proposal generation + accept/reject IPC + UI surface + Level 2+ gate removal)

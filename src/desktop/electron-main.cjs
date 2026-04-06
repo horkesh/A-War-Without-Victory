@@ -2039,6 +2039,16 @@ app.whenReady().then(() => {
         state.military.corps_command[corpsId].stance = stanceValue;
         state.military.corps_command[corpsId].player_ordered_stance = stanceValue;
       }
+    } else if (proposal.proposed_action.startsWith('APPROVE_OP:')) {
+      // v0.8.4 Phase D: Player approves a Level 1 op proposal.
+      // Sets player_op_response so the plan guard in applyCommanderOutput allows launch.
+      const parts = proposal.proposed_action.split(':');
+      const corpsId = parts[1];
+      const planId = parts[2];
+      const cc = state.military?.corps_command?.[corpsId];
+      if (cc) {
+        cc.player_op_response = { plan_id: planId, approved: true, turn: state.meta.turn };
+      }
     }
 
     currentGameStateJson = JSON.stringify(state);
@@ -2066,6 +2076,16 @@ app.whenReady().then(() => {
       if (state.military?.corps_command?.[corpsId]) {
         const currentStance = proposal.current_value ?? state.military.corps_command[corpsId].stance;
         state.military.corps_command[corpsId].player_ordered_stance = currentStance;
+      }
+    } else if (proposal.proposed_action.startsWith('APPROVE_OP:')) {
+      // v0.8.4 Phase D: Player rejects a Level 1 op proposal.
+      // Sets player_op_response so the plan guard in applyCommanderOutput abandons the plan.
+      const parts = proposal.proposed_action.split(':');
+      const corpsId = parts[1];
+      const planId = parts[2];
+      const cc = state.military?.corps_command?.[corpsId];
+      if (cc) {
+        cc.player_op_response = { plan_id: planId, approved: false, turn: state.meta.turn };
       }
     }
 
