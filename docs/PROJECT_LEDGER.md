@@ -4,7 +4,7 @@
 **Files modified:** `src/ui/map/data/types.ts`, `src/ui/map/data/GameStateAdapter.ts`, `src/ui/map/utils/officerCharacter.ts`, `src/ui/map/components/army_hq/CommanderSection.tsx`, `src/ui/map/components/OfficerProfile.tsx`, `src/sim/briefing/collect_briefing.ts`
 **Files created:** `src/ui/map/components/army_hq/OrderInterpretationPanel.tsx`, `tests/sim/command/phase4_ui_data_layer.test.ts`
 **Status:** ACCEPTED
-**Commits:** [pending]
+**Commits:** 86b5bbd0 (impl), 4ccc6d3d (tests), 0709482e (docs)
 
 ### What changed
 

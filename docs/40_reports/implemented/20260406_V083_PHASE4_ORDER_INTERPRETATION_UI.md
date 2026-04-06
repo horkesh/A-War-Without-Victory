@@ -1,7 +1,7 @@
 # v0.8.3 Phase 4 — Order Interpretation UI Panels
 
 **Date:** 2026-04-06
-**Commits:** [pending]
+**Commits:** 86b5bbd0 (impl), 4ccc6d3d (tests), 0709482e (docs)
 **Status:** ACCEPTED
 **Baseline:** 2729/2729 vitest, tsc clean (Phase 3 / v0.8.3)
 **Verification:** tsc clean, 2740/2740 vitest (190 files, 11 new tests)
