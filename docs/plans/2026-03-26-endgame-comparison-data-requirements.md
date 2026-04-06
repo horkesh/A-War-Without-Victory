@@ -1,5 +1,7 @@
 # Endgame Comparison Data Requirements — Design Doc
 
+> **PLANNING STATUS NOTE (2026-04-06):** Superseded as the milestone execution plan by `docs/plans/2026-04-06-v091-dynamic-essay-endgame-comparison-plan.md`. This document remains a requirements/source-gaps input.
+
 **Date:** 2026-03-26
 **Status:** PLACEHOLDER — awaiting daytime review
 **Author:** /technical-architect (nightshift scaffold)

@@ -1,7 +1,7 @@
 # AWWV Master Roadmap — Pyrrhic Games
 
 **Last Updated:** 2026-04-06
-**Current Version:** 0.8.3 (Order Interpretation + Warlord Problem)
+**Current Version:** 0.8.4 (Autonomy Depth + Claude API)
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."
 
@@ -60,9 +60,11 @@ Event flag wiring (25 flags), exhaustion overhaul, Codex QA (30 essay correction
 **v0.7 sub-milestones reslotted (2026-03-30):** The following items were open when v0.8 started. They have been moved to their logical homes rather than left as floating "can parallel" debt:
 
 - v0.7.0.1 (13 missing 1992 essays) → **v0.8.0.x parallel track** — pure content, no engine risk
-- v0.7.1 (essay template engine + Letter Home) → **v0.8-to-v0.9** — prerequisite for v0.9.1 dynamic essays
+- v0.7.1 essay template engine → **v0.9.1** — still required for dynamic Codex divergence and ghost entries
+- v0.7.1 Letter Home → **IMPLEMENTED 2026-04-04 in v0.8.0.x** — no longer a future milestone driver
 - v0.7.2 Warroom React migration → **v0.8-to-v0.9** — tech refactor, belongs with simplification
-- v0.7.2 Ops Modal UX Overhaul + Ghost Map + Exhaustion Clock → **v0.9.1** — UI refinement after ops authority is real
+- v0.7.2 Ops Modal UX Overhaul → **v0.9.1** — UI refinement after ops authority is real
+- v0.7.2 Ghost Map + Exhaustion Clock → **IMPLEMENTED** — no longer future roadmap deliverables
 - v0.7.3 (canon audit) → **v0.8-to-v0.9** — doc/code sync, matches that phase's goals
 
 ---
@@ -208,6 +210,8 @@ Player political posture IPC (set war-crimes-policy, set alliance-posture, set p
 
 Plans: `docs/plans/2026-03-24-v082-autonomy-api-plan.md`, `docs/plans/2026-03-31-v084-autonomy-determinism-and-review-plan.md`, `docs/plans/2026-03-31-v08to09-commander-explanation-surfaces-plan.md`.
 
+**Status: v0.8.4 CLOSED 2026-04-06. Next broad work is split between `v0.8.x-final` command-authority cleanup and the `v0.8-to-v0.9` simplification band before `v0.9.0`.**
+
 ## Active Side Lanes (Non-Milestone)
 
 These lanes matter to product truth or engine health, but they are not the current milestone driver. Keep them visible so they do not vanish into chat memory.
@@ -287,7 +291,7 @@ No version bump — engineering milestone between feature releases. Stabilizatio
 | Player command review UX | **Significant advance (2026-04-04):** Command review surfaces now landed (v0.8.0.x) — outcome badge, trend summary, order interpretation preview, stance interpretation, three-tier outcome category. Full order interpretation *system* remains v0.8.3. | Minimum viable review UX satisfied. Full system plan: `docs/plans/2026-03-31-v083-player-command-review-ux-plan.md` |
 | Autonomy determinism and review | API-assisted autonomy can still be mistaken for readiness without hardened replay/fallback/review gates | Explicit determinism, fallback, and player-review contract. Plan: `docs/plans/2026-03-31-v084-autonomy-determinism-and-review-plan.md` |
 | Connectivity checks | Column march validates destination but not path; no enclave boundary check during transit | Full path validation |
-| **Essay template engine + Letter Home** | Not built — v0.7.1 debt. Required before v0.9.1 dynamic essays. | Build `dynamic_sections`, divergence notes, ghost entries; Letter Home vignettes in CoS briefing. Plans: `docs/plans/2026-03-23-essay-template-engine-plan.md`, `docs/plans/2026-03-25-letter-home-and-essay-authoring-spec.md` |
+| **Essay template engine + dynamic Codex divergence** | Partially advanced. Letter Home is shipped; dynamic sections / divergence notes / ghost entries are still open. | Build `dynamic_sections`, divergence notes, ghost entries, historical ghost entries, and endgame comparison glue. Plans: `docs/plans/2026-04-06-v091-dynamic-essay-endgame-comparison-plan.md`, `docs/plans/2026-03-23-essay-template-engine-plan.md`, `docs/plans/2026-03-25-letter-home-and-essay-authoring-spec.md` |
 | **Warroom React migration** | **COMPLETE 2026-04-04.** React migration landed (4 waves + final canvas deletion). `src/ui/map/components/warroom/` is sole owner. `warroom.ts` retains launch/picker/iframe/bridge only. | Done. |
 | **Canon audit (v0.7.3)** | Sep 1991 start + peace phase refs still live in docs and code | Remove all references. Plan: `docs/plans/2026-03-23-canon-audit-checklist.md` |
 
@@ -311,19 +315,21 @@ Spec: `docs/plans/2026-03-26-cost-ledger-template-format.md`.
 
 ### v0.9.1 — Dynamic Essay Content + Endgame Comparison
 
-~30 Tier 3 dynamic sections + ~15 Tier 4 ahistorical essay templates. The Codex morphs based on player decisions — essays gain divergence notes, ghost entries for paths not taken.
+The Codex becomes reactive to the player's war. This milestone now focuses only on the still-open work: dynamic essay sections, divergence notes, ghost entries for paths not taken, and endgame comparison. Already-shipped features such as Ghost Map, Exhaustion Clock, and Letter Home are inputs, not milestone deliverables.
 
 **+ Endgame Comparison** (Legendary Feature): Split-screen your-war-vs-real-war at milestone weeks. Territory, casualties, displacement side by side. "Could I have done better? Could anyone?"
 
-Spec: `docs/plans/2026-03-26-endgame-comparison-data-requirements.md`.
+Plan: `docs/plans/2026-04-06-v091-dynamic-essay-endgame-comparison-plan.md`
+Supporting inputs: `docs/plans/2026-03-23-essay-template-engine-plan.md`, `docs/plans/2026-03-26-endgame-comparison-data-requirements.md`, `docs/plans/2026-03-25-letter-home-and-essay-authoring-spec.md`
 
-**Gate:** Requires essay template engine (v0.8-to-v0.9) to be complete — dynamic sections and divergence notes depend on it.
+**Gate:** Requires dynamic essay engine and historical baseline comparison data to be implemented. Ghost Map, Exhaustion Clock, and Letter Home are already available for integration and polish if needed.
 
-**+ Ghost Map** (Legendary Feature, reslotted from v0.7.2): 1991 census demographics overlay beneath current military situation. Shows what the land looked like before the war. Low effort, high interpretive power.
+**Already live (not core scope):**
+- Ghost Map — implemented on tactical map
+- Exhaustion Clock — implemented in Army HQ
+- Letter Home — implemented in Chief of Staff briefing
 
-**+ Exhaustion Clock** (Legendary Feature, reslotted from v0.7.2): Visual depletion indicator (candle metaphor) in Army HQ. Shows faction-level exhaustion at a glance.
-
-**+ Ops Modal UX Overhaul** (reslotted from v0.7.2): Redesign the operations panel to reflect the canonical operation object established in v0.8.x-final. Must follow ops authority cleanup — do not build UI on top of split ops state. Spec: `docs/40_reports/PROMPT_OPS_MODAL_UX_OVERHAUL.md`
+**Adjacent carry-in item:** Ops Modal UX Overhaul still belongs after `v0.8.x-final` authority cleanup, but it is not part of the core dynamic-Codex/endgame-comparison work.
 
 ### v0.9.2 — External Playtesting + Balance
 
@@ -339,11 +345,12 @@ Plan: `docs/plans/2026-03-31-v092-tutorial-and-onboarding-plan.md`.
 
 **Accessibility:** Colorblind modes (deuteranopia/protanopia/tritanopia). Keyboard navigation (full game playable without mouse). Screen reader support (ARIA labels). Rebindable keys. Text scaling.
 
-Plan: `docs/plans/2026-03-16-v0.7.0-performance.md`, `docs/plans/2026-03-16-v0.7.1-accessibility.md`.
+Plan: `docs/plans/2026-04-06-v093-performance-accessibility-plan.md`
+Supporting inputs: `docs/plans/2026-03-16-v0.7.0-performance.md`, `docs/plans/2026-03-16-v0.7.1-accessibility.md`
 
 ### v0.9.4 — Visual Polish + Legendary Map Features
 
-Loading screens, transitions, warroom art finalization, icon polish.
+Loading screens, transitions, shell polish, warroom art finalization, icon polish, and the remaining late visual systems that are not already live.
 
 **+ Map That Scars** (Legendary Feature): The tactical map visually degrades as the war progresses. Fought-over settlements show damage. Depopulated settlements fade. Corridors under pressure pulse. Week 1: clean and colorful. Week 120: a wound. Visual degradation keyed to per-OSID population, displacement, control flips, combat events.
 
@@ -355,13 +362,15 @@ Loading screens, transitions, warroom art finalization, icon polish.
 
 **+ Elevation Profile on Ops Axes:** SVG chart along axis of advance.
 
-Plan: `docs/plans/2026-03-16-v0.7.3-visual-polish.md`.
+Plan: `docs/plans/2026-04-06-v094-visual-polish-legendary-map-features-plan.md`
+Supporting inputs: `docs/plans/2026-03-16-v0.7.3-visual-polish.md`, `docs/plans/2026-03-25-ghost-map-exhaustion-clock-spec.md`
 
 ### v0.9.5 — Platform Packaging + Store
 
 Windows installer (Electron-builder, auto-update). Mac build (notarized, universal binary). Linux build (AppImage or Flatpak). Steam integration (Steamworks SDK, achievements, cloud saves). Store page, press kit, community setup.
 
-Plan: `docs/plans/2026-03-16-v0.8.2-platform-packaging.md`.
+Plan: `docs/plans/2026-04-06-v095-platform-packaging-store-plan.md`
+Supporting input: `docs/plans/2026-03-16-v0.8.2-platform-packaging.md`
 
 ---
 
@@ -445,9 +454,9 @@ These need design sessions before implementation. Preserved from the original ro
 | Core simulation | Complete |
 | War phase combat | Complete |
 | Bot AI (3-tier: army/corps/brigade) | Complete |
-| Corps Commander Intelligence (v0.8) | Active — on main, P0 fix in progress |
+| Corps Commander Intelligence (v0.8) | Complete through v0.8.4; authority cleanup and simplification follow-on remain |
 | Corps sectors | Complete |
-| Operations + preparation | Functional, but authority cleanup and ops singularity still pending |
+| Operations + preparation | Functional; core ops singularity landed, remaining authority cleanup continues in v0.8.x-final |
 | Named officers + succession | Complete |
 | Supply reserves | Complete |
 | Equipment pipeline | Complete |
@@ -469,9 +478,9 @@ These need design sessions before implementation. Preserved from the original ro
 | Autonomy Depth + Claude API | Complete (v0.8.4 CLOSED 2026-04-06 — all phases A–E) |
 | Consequence system | Not started (v0.9.0) |
 | Cost Ledger | Not started (v0.9.0) |
-| Ghost Map | Not started (v0.9.1) |
+| Ghost Map | Implemented (live on tactical map; roadmap-owned cleanup/polish only if needed) |
 | Map That Scars | Not started (v0.9.4) |
-| Letter Home | Not started (v0.8-to-v0.9) |
+| Letter Home | Implemented (Chief of Staff briefing) |
 | Refugee Column | Not started (v0.9.4) |
 | Corridor Heartbeat | Not started (v0.9.4) |
 | Endgame Comparison | Not started (v0.9.1) |
@@ -483,7 +492,7 @@ These need design sessions before implementation. Preserved from the original ro
 | Victory conditions | Stub (roadmap-owned in v0.9.0) |
 | Diplomacy layer | Partial (patron pressure, alliance, IVP) |
 
-**Current:** 93.7% area-weighted calibration (n1302 ATH), 25/25 anchors, 6/6 benchmarks. 712 OSIDs. Political bot complete through Dayton branches (`v0.8.2`). Order interpretation complete through player-legible UX (`v0.8.3`).
+**Current:** 93.7% area-weighted calibration (n1302 ATH), 25/25 anchors, 6/6 benchmarks. 712 OSIDs. Political bot complete through Dayton branches (`v0.8.2`). Order interpretation complete through player-legible UX (`v0.8.3`). Autonomy review loop complete through high-stakes event gating (`v0.8.4`). Next broad work: `v0.8.x-final` + `v0.8-to-v0.9`, then `v0.9.0`.
 
 ---
 
@@ -493,9 +502,9 @@ Features that make AWWV 10x more powerful, assigned to specific versions. Source
 
 | Feature | Version | Effort | Description |
 |---------|---------|--------|-------------|
-| **Ghost Map** | v0.9.1 | Low | 1991 census demographics overlay beneath current military situation |
-| **Exhaustion Clock** | v0.9.1 | Low | Visual depletion indicator (candle metaphor) in Army HQ |
-| **Letter Home** | v0.8-to-v0.9 | Low | Procedural casualty vignettes in CoS briefing |
+| **Ghost Map** | Implemented | Low | 1991 census demographics overlay beneath current military situation |
+| **Exhaustion Clock** | Implemented | Low | Visual depletion indicator (candle metaphor) in Army HQ |
+| **Letter Home** | Implemented | Low | Procedural casualty vignettes in CoS briefing |
 | **Patron Phone Call** | v0.8.2 | Medium | 8-12 dramatic patron pressure events with ICTY-sourced dialogue |
 | **Command Chain That Disobeys** | v0.8.3 | High | Officers interpret, delay, refuse orders |
 | **Cost Ledger** | v0.9.0 | Medium | ICTY-style prosecutorial endgame narrative |
@@ -546,8 +555,12 @@ Patch bumps (0.X.1, 0.X.2) are for significant fixes within a milestone — not 
 | `docs/plans/2026-03-24-v081-order-interpretation-plan.md` | v0.8.3 order interpretation |
 | `docs/plans/2026-03-24-v082-autonomy-api-plan.md` | v0.8.4 autonomy + Claude API |
 | `docs/plans/2026-03-24-v090-consequence-system-plan.md` | v0.9.0 consequence system |
+| `docs/plans/2026-04-06-v091-dynamic-essay-endgame-comparison-plan.md` | v0.9.1 dynamic Codex divergence + endgame comparison |
 | `docs/plans/2026-03-31-v090-victory-conditions-and-pyrrhic-scoring-plan.md` | v0.9.0 victory conditions and Pyrrhic score |
 | `docs/plans/2026-03-31-v090-sensitive-history-design-gate-plan.md` | v0.9.0 sensitive-history / atrocity representation gate |
+| `docs/plans/2026-04-06-v093-performance-accessibility-plan.md` | v0.9.3 performance + accessibility |
+| `docs/plans/2026-04-06-v094-visual-polish-legendary-map-features-plan.md` | v0.9.4 visual polish + legendary map features |
+| `docs/plans/2026-04-06-v095-platform-packaging-store-plan.md` | v0.9.5 platform packaging + store |
 | `docs/plans/2026-03-31-v092-tutorial-and-onboarding-plan.md` | v0.9.2 tutorial and onboarding |
 | `docs/plans/2026-03-29-concurrent-corps-operations.md` | v0.8.0 concurrent corps ops design |
 | `docs/40_reports/20260330_RAILROAD_HUNTER_REPORT.md` | Simplification hit list |

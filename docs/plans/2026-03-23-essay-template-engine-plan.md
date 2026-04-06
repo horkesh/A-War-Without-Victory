@@ -1,5 +1,7 @@
 # Essay Template Engine — v0.7.1 Implementation Plan
 
+> **PLANNING STATUS NOTE (2026-04-06):** Superseded as the milestone execution plan by `docs/plans/2026-04-06-v091-dynamic-essay-endgame-comparison-plan.md`. This document remains a schema/reference input for dynamic essay implementation.
+
 **Date:** 2026-03-23
 **Status:** Draft
 **Depends on:** Essay Codex (complete, 96 essays), Event System (v0.6.0 metagame fields)
