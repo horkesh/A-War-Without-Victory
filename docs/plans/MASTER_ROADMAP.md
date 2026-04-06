@@ -15,7 +15,7 @@ This document is the **single source of truth** for AWWV's development roadmap. 
 - `docs/30_planning/_legacy/ROADMAP_TO_1_0.md` — original v0.1-v1.0 roadmap with AI commander design and open design questions
 - `docs/20_engineering/VERSIONING.md` — retains version scheme and protocol only; roadmap content now here
 
-Individual milestone plan files (dated `2026-03-*.md` in `docs/plans/`) remain active as implementation specs referenced from this roadmap.
+Individual dated roadmap plan files in `docs/plans/` remain active as implementation specs referenced from this roadmap.
 
 ---
 
@@ -82,6 +82,17 @@ Event flag wiring (25 flags), exhaustion overhaul, Codex QA (30 essay correction
 2. Commander maturity (belief state, competing options, decision traces) happens before political-bot and LLM expansion. Building political personality on top of a threshold machine produces sophisticated illusion, not real command.
 3. Cleanup work is feature-enabling, not optional polish. Overlapping ownership directly blocks believable commander behavior, future political bots, and any LLM layer.
 4. UI refinement follows backend authority. A richer ops panel does not prove the underlying operation object is coherent.
+
+### Studio Health / Repo Truth (Permanent Side Lane)
+
+This is not optional admin overhead. It is the studio discipline that keeps roadmap truth, board truth, report truth, and repo truth aligned as the command-chain stack grows.
+
+- Every lane or milestone close must leave one coherent story across code, roadmap, architect board, report, and ledger.
+- Build warnings, generated artifacts, and calibration claims must have explicit disposition or retention rules.
+- Reports are evidence, not competing planning authorities.
+- Chat-memory-only decisions are not durable decisions; they must be promoted into roadmap, architect board, ledger knowledge, or governed engineering docs.
+
+Plan: `docs/plans/2026-04-06-studio-health-repo-truth-plan.md`
 
 ### v0.8.0 — Corps Commander Intelligence (ON MAIN)
 
@@ -264,11 +275,19 @@ Done means: `generateCorpsDirectives` is deleted ✅ (2026-04-01). `apply_brigad
 
 ---
 
-## Planned: v0.8-to-v0.9 — Repo-Wide Simplification
+## Planned: v0.8-to-v0.9 — Repo-Wide Simplification + Studio Health / Repo Truth
 
 No version bump — engineering milestone between feature releases. Stabilization and technical debt cleanup after Command Chain ships.
 
 **Gate requirement — same 5-question rule as v0.8.x-final applies to every task here:** canonical owner after change / old path removed or demoted / done-means proof / UI or doc surface that reflects the new truth / future milestone unblocked.
+
+**Repo-truth governance inside this band is mandatory, not trailing cleanup:**
+
+- roadmap, architect board, and reports must agree on what is live, what is partial, and what is accepted debt
+- every recurring build warning must be classified as fix now / accepted debt until milestone / tool noise
+- generated artifacts must be explicitly retained or explicitly disposable
+- calibration claims are not accepted without a recoverable evidence trail
+- stale "next lane" language must be removed when repo evidence changes
 
 **Hit list** (from Railroad Hunter Report):
 
@@ -285,7 +304,7 @@ No version bump — engineering milestone between feature releases. Stabilizatio
 | UI surface ownership | Army HQ, Warroom, map panels, ops modal, and future command-review surfaces can drift into duplicate half-owners. **Warroom React migration complete (2026-04-04); Army HQ command-review ownership clarified.** | One clear ownership matrix for command, ops, review, and explanation surfaces. Plan: `docs/plans/2026-03-31-v08to09-ui-surface-ownership-plan.md` |
 | UI density + shell cohesion | Warroom, Tactical Map, Army HQ, Chronicle, and Codex still carry dead air, spacing waste, and shell seams that make the product feel like tools rather than one game | Tightened spacing, clearer hierarchy, and shell-level cohesion across the live player journey. Plan: `docs/plans/2026-04-03-v08to09-ui-density-and-shell-cohesion-plan.md` |
 | Player knowledge integrity | Desktop / tactical map still trends toward omniscient renderer payloads plus fog visuals | Player-facing state boundary, leak classifications, display-name discipline, and desktop knowledge integrity contract. Primary plan: `docs/plans/2026-04-01-v08x-player-knowledge-integrity-plan.md` |
-| Studio truth governance | **All four governance docs landed and actively enforced (2026-04-03).** Cross-cutting product rules now live in repo contracts, not chat memory. | `PLAYER_VISIBLE_STATE.md`, `UI_OWNERSHIP_MATRIX.md`, `DEBUG_SURFACE_POLICY.md`, `FEATURE_DONE_MEANS.md` — permanent studio governance docs for product truth and review language |
+| Studio Health / Repo Truth governance | **Contracts landed; operating lane now explicit.** Cross-cutting product rules live in repo docs, but recurring sync, warning disposition, artifact policy, and evidence retention must stay active as a permanent lane. | `PLAYER_VISIBLE_STATE.md`, `UI_OWNERSHIP_MATRIX.md`, `DEBUG_SURFACE_POLICY.md`, `FEATURE_DONE_MEANS.md`, and `docs/plans/2026-04-06-studio-health-repo-truth-plan.md` |
 | Product architecture simplification | Entry points, adapters, and hotspot files still let transitional paths look co-equal to canonical ones | Simplify entrypoints, adapter ownership, and product shell boundaries the way a strong strategy studio would. Plan: `docs/plans/2026-04-03-v08to09-product-architecture-simplification-plan.md` |
 | Army-command maturity | Army layer is serviceable but still undernamed and too implicit as a real command substrate | Explicit army-command maturity and responsibility model. Plan: `docs/plans/2026-03-31-v08to09-army-command-maturity-plan.md` |
 | Army ↔ corps command coherence | Assumed rather than owned; handshake and authority boundaries are still undernamed | Named handshake rules, ownership comments, and explicit authority boundaries. Plan: `docs/plans/2026-03-31-v08to09-army-corps-authority-coherence-plan.md` |
@@ -470,7 +489,7 @@ These need design sessions before implementation. Preserved from the original ro
 | Warroom (React) | Complete — React migration landed 2026-04-04. `warroom.ts` retains launch/picker/iframe/bridge. |
 | Army HQ (4-tab command center) | Functional |
 | Events/decisions | Functional (94 events, pressure system, 14 condition types) |
-| Historical essays (Codex) | Complete (96 certified, 13 missing 1992 essays pending) |
+| Historical essays (Codex) | Partial (96 certified; 13 missing 1992 foundation essays still tracked) |
 | Strategic dimensions | Functional (6 dimensions, Dayton merge) |
 | Scenarios (40w/52w/56w) | Complete |
 | AI Commander infrastructure | Functional (14 modules, multi-model routing) |
@@ -494,7 +513,7 @@ These need design sessions before implementation. Preserved from the original ro
 | Victory conditions | Stub (roadmap-owned in v0.9.0) |
 | Diplomacy layer | Partial (patron pressure, alliance, IVP) |
 
-**Current:** 93.7% area-weighted calibration (n1302 ATH), 25/25 anchors, 6/6 benchmarks. 712 OSIDs. Political bot complete through Dayton branches (`v0.8.2`). Order interpretation complete through player-legible UX (`v0.8.3`). Autonomy review loop complete through high-stakes event gating (`v0.8.4`). Next broad work: `v0.8.x-final` + `v0.8-to-v0.9`, then `v0.9.0`.
+**Current:** 93.7% area-weighted calibration (n1302 ATH), 25/25 anchors, 6/6 benchmarks. 712 OSIDs. Political bot complete through Dayton branches (`v0.8.2`). Order interpretation complete through player-legible UX (`v0.8.3`). Autonomy review loop complete through high-stakes event gating (`v0.8.4`). Next broad work: `v0.8.x-final` + `v0.8-to-v0.9`, then `v0.9.0`. Active governance focus: keep roadmap truth, board truth, reports, and retained calibration evidence aligned through the permanent `Studio Health / Repo Truth` lane.
 
 ---
 
@@ -544,6 +563,7 @@ Patch bumps (0.X.1, 0.X.2) are for significant fixes within a milestone — not 
 | `docs/plans/2026-03-31-v081-intelligence-assurance-harness-plan.md` | v0.8.1 anti-theater proof harness |
 | `docs/plans/2026-03-31-v08x-operations-singularity-plan.md` | v0.8.x operations singularity implementation plan |
 | `docs/plans/2026-03-31-v08x-command-authority-cleanup-plan.md` | v0.8.x-final overarching command authority cleanup plan |
+| `docs/plans/2026-04-06-studio-health-repo-truth-plan.md` | Permanent side lane for repo-truth gates, roadmap/board sync, warning disposition, artifact policy, and calibration evidence retention |
 | `docs/plans/2026-03-31-v08to09-save-load-and-replay-hardening-plan.md` | v0.8-to-v0.9 save/load, replay, and migration hardening |
 | `docs/plans/2026-03-31-v08to09-ui-surface-ownership-plan.md` | v0.8-to-v0.9 UI surface ownership matrix |
 | `docs/plans/2026-04-03-v08to09-ui-density-and-shell-cohesion-plan.md` | v0.8-to-v0.9 UI density and shell cohesion |
@@ -556,6 +576,10 @@ Patch bumps (0.X.1, 0.X.2) are for significant fixes within a milestone — not 
 | `docs/plans/2026-03-24-v080-political-leader-bot-plan.md` | v0.8.2 political bot (38 tasks) |
 | `docs/plans/2026-03-24-v081-order-interpretation-plan.md` | v0.8.3 order interpretation |
 | `docs/plans/2026-03-24-v082-autonomy-api-plan.md` | v0.8.4 autonomy + Claude API |
+| `docs/20_engineering/PLAYER_VISIBLE_STATE.md` | Canonical player-visible truth boundary and knowledge-integrity contract |
+| `docs/20_engineering/UI_OWNERSHIP_MATRIX.md` | Surface ownership matrix for Warroom, Army HQ, map panels, ops, review, and future shells |
+| `docs/20_engineering/DEBUG_SURFACE_POLICY.md` | Debug-vs-player surface contract and leak-prevention rules |
+| `docs/20_engineering/FEATURE_DONE_MEANS.md` | Studio closeout contract for truth, verification, and visible ownership |
 | `docs/plans/2026-03-24-v090-consequence-system-plan.md` | v0.9.0 consequence system |
 | `docs/plans/2026-04-06-v091-dynamic-essay-endgame-comparison-plan.md` | v0.9.1 dynamic Codex divergence + endgame comparison |
 | `docs/plans/2026-03-31-v090-victory-conditions-and-pyrrhic-scoring-plan.md` | v0.9.0 victory conditions and Pyrrhic score |

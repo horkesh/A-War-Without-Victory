@@ -148,8 +148,11 @@
 
 # AWWV Project Ledger — Thematic Knowledge Base
 
-**Last Updated:** 2026-03-27
+**Last Updated:** 2026-04-06
 **Purpose:** Knowledge accumulation by theme.
+
+**Repo truth must be treated as product architecture, not clerical cleanup (2026-04-06):** AWWV now carries enough cross-system truth that roadmap drift, architect-board drift, stale reports, and unclassified warnings are product risks, not documentation nits. Permanent rule: every lane or milestone close must leave one coherent artifact set across code verification, roadmap status, architect board, report, and ledger. Reports are evidence, not planning authority; chat memory is not durable governance. Keep `MASTER_ROADMAP.md` as milestone truth, `.claude/architect_notes.md` as active direction + open risks, `PROJECT_LEDGER.md` as dated change log, and reports as supporting evidence. When those disagree, the lane is not truly closed. Linked: `[2026-04-06] Studio Health / Repo Truth planning package`.
+
 
 **Commander Intelligence Architecture — must_hold two-track system (2026-04-02, n1294–n1301):** The v0.8 commander system implements must_hold via two independent tracks in `zone_detection.ts`. Track 1 (scenario-authored): `must_hold_osids_by_corps` flows from scenario JSON → `Scenario` type → `MilitaryState` → `CommanderBriefing.must_hold_osids` → `detectZones(mustHoldOsids)` → `scenarioMustHold` flag → `ZoneAssessment.is_must_hold = true` → `computeGarrisonBudget()` 1.5× multiplier in `allocate.ts`. Track 2 (engine-derived chokepoints): coded via articulation-point detection from `FactionGraphAnalysis`, permanently disabled with `false &&` pending calibration. Root cause of disable: `MUST_HOLD_MIN_ISOLATED_FRACTION = 0.05` can't separate RS Brcko (~9% RS faction territory) from ARBiH Central Bosnia valley passes (~8% ARBiH faction territory) — any threshold either over-garrisons ARBiH 4th Corps or misses Brcko. Fix needs corps-boundary discriminator: only trigger if isolated cluster spans a different corps jurisdiction than the chokepoint. The `briefing.ts` → `buildBriefing()` populates `must_hold_osids` from `state.military.must_hold_osids_by_corps?.[corpsId] ?? []`.
 

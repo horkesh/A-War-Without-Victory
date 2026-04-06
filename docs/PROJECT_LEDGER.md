@@ -1,3 +1,24 @@
+## [2026-04-06] Studio Health / Repo Truth planning package
+
+**Type:** Docs/Governance
+**Files modified:** `docs/plans/MASTER_ROADMAP.md`, `.claude/architect_notes.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+**Files created:** `docs/plans/2026-04-06-studio-health-repo-truth-plan.md`
+**Status:** ACCEPTED
+
+### What changed
+
+- Added a new permanent side-lane plan: `docs/plans/2026-04-06-studio-health-repo-truth-plan.md`.
+- Updated `MASTER_ROADMAP.md` to treat `Studio Health / Repo Truth` as an explicit governing side lane and as part of the `v0.8-to-v0.9` simplification band.
+- Synced `.claude/architect_notes.md` so the architect board now treats repo truth as part of product architecture, not optional cleanup, and cleaned the stale `Next Priority Lanes` list.
+- Clarified roadmap wording where it was internally inconsistent or too soft for studio governance, including historical-essays status and key governance references.
+
+### Why it matters
+
+- The repo now has a canonical planning home for roadmap sync, architect-board sync, blindspot review, build-warning disposition, generated-artifact policy, calibration evidence retention, and report-authority rules.
+- This reduces drift between code truth, roadmap truth, board truth, and report truth as `v0.8.x-final` and `v0.8-to-v0.9` proceed.
+
+---
+
 ## [2026-04-06] v0.8.4 Phase E — Turn-Advance Block, Ops Card UI, Description Enrichment
 
 **Type:** Feature (turn-gate + UI + description enrichment)

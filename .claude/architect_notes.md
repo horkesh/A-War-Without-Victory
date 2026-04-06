@@ -14,6 +14,9 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 - Direct brigade-level control is exceptional override, not baseline fantasy.
 - Operations are the spikes of excitement.
 - Events, delegation, reserve decisions, and command review are the tension between spikes.
+- Studio Health / Repo Truth is part of product architecture, not admin overhead.
+- Roadmap, architect board, reports, and accepted lane status must describe shipped truth, accepted debt, and real ownership boundaries — not aspiration.
+- No architecturally important decision should live only in chat memory once accepted.
 
 ## Accepted Findings
 
@@ -33,7 +36,7 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Active / Recent Accepted Lanes
 
-- **v0.8.4 Phase F: Warlord Guard, DRINA Investigation, Repo-Truth Pass** — IN PROGRESS 2026-04-06. Enclave-lock guard in `checkWarlordFriction` (`warlord_friction.ts`): `refused_release` suppressed when `enclave_lock` active. 4 tests, 2881/2881, tsc clean. DRINA investigation inconclusive (subagent hallucinated root cause; Op Teočak NOT deleted; requires dedicated calibration session + Historian). `MASTER_ROADMAP.md` version bumped 0.8.3→0.8.4. Report: `docs/40_reports/implemented/20260406_V084_PHASEF_WARLORD_GUARD_REPO_TRUTH.md`.
+- **v0.8.4 Phase F: Warlord Guard, DRINA Investigation, Repo-Truth Pass** — IN PROGRESS 2026-04-06. Enclave-lock guard in `checkWarlordFriction` (`warlord_friction.ts`): `refused_release` suppressed when `enclave_lock` active. 4 tests, 2881/2881, tsc clean. DRINA investigation inconclusive (subagent hallucinated root cause; Op Teočak NOT deleted; requires dedicated calibration session + Historian). `MASTER_ROADMAP.md` version bumped 0.8.3→0.8.4. Cross-cutting sub-lane: reconcile roadmap, architect board, report trail, warning disposition, and retained evidence into one repo-truth story before declaring the band clean. Report: `docs/40_reports/implemented/20260406_V084_PHASEF_WARLORD_GUARD_REPO_TRUTH.md`.
 
 - **v0.8.4 Phase E: Turn-Advance Block, Ops Card UI, Description Enrichment** — CLOSED 2026-04-06. Turn-advance block in `advance-turn` IPC (`electron-main.cjs` lines 617–632): blocks when any `pending_event_decisions` entry has `requires_player_response:true` unresolved; `requires_player_response?` added to `PendingEventDecision` (`event_types.ts`), stamped at push time in `evaluate_events.ts`. `AutonomyPanel.tsx`: `'ops'` domain union added to `PendingProposalReview`, `APPROVE_OP:` card parsing, "Op Order" header, "OP ORDER" badge, "Authorize"/"Abort" buttons (distinct from stance "Accept"/"Reject" cards). `buildOpProposalDescription()` in `proposal_generation.ts`: zone name from `staging_zone`, force count from `assigned_brigades.length`, threat label from `overall_pressure`, fallback to corps name. 31 new tests in `autonomy_phase_e_block.test.ts` + `autonomy_phase_e_enrichment.test.ts`, 2877/2877 vitest (198 files), tsc clean, build clean, zero new warnings (pre-existing chunk-size/dynamic-import warnings confirmed accepted debt). Phase E CLOSED. v0.8.4 CLOSED — all phases A–E complete. Next: v0.8.5 or repo-health pass per MASTER_ROADMAP.
 
@@ -165,6 +168,13 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - **Done means:** empty_contested_sector count from splitN child sectors drops to 0 in next 40w run; undefended_front_subsegments anomaly count reduces from 6.
 - **Report:** `docs/40_reports/implemented/20260404_LANE_B_EMPTY_CHILD_SECTORS_FIX.md`
 
+### Studio Health / Repo Truth — OPEN
+- **Symptom:** roadmap, architect board, reports, and accepted lane summaries can drift apart even when code truth is good.
+- **Scope:** repo-truth closeout gate, roadmap sync, architect-board sync, blindspot review, build-warning disposition, generated-artifact policy, calibration evidence retention, and report authority rules.
+- **Owner:** Orchestrator + Technical Architect + Documentation Specialist + Process QA.
+- **Done means:** roadmap, architect board, and report trail agree on milestone status, next live lanes, accepted debt, and retained evidence; no lane is marked closed while those sources disagree.
+- **Plan:** `docs/plans/2026-04-06-studio-health-repo-truth-plan.md`
+
 ### Split-Child Sector Assignment Routing — OPEN
 - **Symptom:** `sector:vrs_1st_krajina:8` has 4 hostile edges, 0 brigades, but 6 brigades at its front OSIDs assigned to sibling sectors :2 and :3.
 - **Root cause:** `ensureMinimumSectorCoverage` territory-membership pre-pass (`brigade_assignment.ts` lines 1276-1319) blocks transfers of frontline-essential brigades even when donor sector has surplus and recipient has zero coverage with hostile exposure. Same class as closed Lane B but different trigger: front-OSID overlap between siblings, not simple zero-assignment after split.
@@ -181,14 +191,11 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 
 ## Next Priority Lanes
 
-1. **COMBAT-P14 — RESOLVED 2026-04-05.** Engine health audit finding is stale. `checkLaunchFeasibility` now includes defender artillery, entrenchment, terrain. The commander-operation zero-eligible family targeted by this audit is reduced to 2 bounded residual cases (vrs_east_bosnian staging + arbih_1st_corps Sarajevo siege pressure). Two-tier architecture (optimistic feasibility → realistic predictor) validated as correct by design. Report: `docs/40_reports/implemented/20260405_COMBAT_P14_FEASIBILITY_AUDIT.md`.
-2. **estimateForceRatio supply awareness — RE-DEMOTED 2026-04-05.** Supply blindness is real but practically inert — defense-in-depth compensates. Revisit as part of full combat power estimator overhaul. Report: `docs/40_reports/implemented/20260405_ESTIMATE_FORCE_RATIO_SUPPLY_AWARENESS_DEMOTION.md`.
-3. **Residual ZEA — BOUNDED 2026-04-05.** 2 remaining ZEA ops (6.7%): vrs_east_bosnian staging unreachability + arbih_1st_corps Sarajevo siege. Both structurally constrained corps. Backstopped by MAX_EXECUTION_TURNS_ZERO_ATTACKS. Not P0.
-4. **P9 supply recalibration — CLOSED 2026-04-05.** Graduated scoring in `computeSupplyReadiness` + BFS corridor reachability fix. n1322: graduated scoring (adequate=1.0, strained=0.5, critical=0.0). n1323: bridge detection on full subgraph (was operating on BFS spanning tree — 100% trivially brittle). Supply readiness now: 13/21 ops at 1.0, 8/21 at 0.5 (VRS heartland adequate, ARBiH/VRS-Drina strained). Reports: `docs/40_reports/implemented/20260405_P9_SUPPLY_READINESS_GRADUATED_SCORING.md`, `docs/40_reports/implemented/20260405_BFS_CORRIDOR_REACHABILITY_FIX.md`.
-5. **Formation Expert deferred recommendations:** Expand prepositioning tier to `active_defense`; relax `can_launch_ops` gate; exclude `is_home_defense`. Owner: Gameplay Programmer. File: `src/sim/combat/commander/emit.ts`.
-6. **AAR provenance follow-up:** zero-attack-success operations must distinguish combat capture from passive/external control changes. Owner: `src/sim/combat/operation_aar.ts`.
-7. **gradacac_2 P0 — RESOLVED 2026-04-05.** Stable RBiH control since n1289 (combat factor overhaul). Zero flips, zero RS ops targeting area in n1323. P0 closed. Report: `docs/40_reports/implemented/20260405_GRADACAC_2_P0_RESOLUTION.md`.
-8. **v0.8.1 Commander Maturity gate check — GO 2026-04-05.** Seven-specialist panel (Technical Architect, Gameplay Programmer, Systems Programmer, Scenario Tester, UI/UX Developer, QA Engineer, Documentation Specialist) all converge: foundation is solid, zero hard blockers. All 6 v0.8.1 deliverables have existing scaffolding, all scope bounded. 6 soft conditions identified (estimateTurnsActive suspend counter, loose types, sector reassignment wiring, roadmap status update, Systems Manual v0.8.0 bump, multi-turn continuity test). Report: `docs/40_reports/implemented/20260405_V081_COMMANDER_MATURITY_GATE_CHECK.md`. **Next lane: v0.8.1 Phase 1 — State and Type Foundation.**
+1. **v0.8.4 Phase F closeout:** finish the DRINA regression investigation with real calibration evidence, then close the repo-truth pass cleanly across roadmap, board, and report trail.
+2. **Studio Health / Repo Truth:** make the permanent lane real in operating practice — closeout gate, blindspot review, warning disposition, artifact policy, and evidence retention.
+3. **Split-child sector assignment routing:** bounded frontline coverage defect remains open; owner: sector-expert + systems-programmer.
+4. **AAR provenance follow-up:** zero-attack-success operations must distinguish combat capture from passive/external control changes. Owner: `src/sim/combat/operation_aar.ts`.
+5. **v0.8.x-final command authority cleanup:** operations singularity follow-through, movement ownership cleanup, and remaining canonical-owner retirements before `v0.9`.
 
 ## Validation Gate Note
 
@@ -207,6 +214,9 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - Do not rely on chat memory for accepted findings or next lanes; update this file when major architect decisions change.
 - Bundle roadmap-memory follow-ups into Claude prompts when they are part of the same lane.
 - Explorer findings should be summarized here after review instead of staying only in chat.
+- `Studio Health / Repo Truth` owns reconciliation across `MASTER_ROADMAP.md`, this board, accepted reports, and retained evidence.
+- Every closed lane must leave one truth artifact set: code verification state, roadmap status, architect-board status, and report/ledger linkage.
+- When repo evidence changes, stale "next lane" or "open gap" wording must be demoted or removed instead of lingering as historical clutter.
 
 ## Backlog Additions
 
