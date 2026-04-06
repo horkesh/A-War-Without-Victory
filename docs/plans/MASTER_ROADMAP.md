@@ -1,7 +1,7 @@
 # AWWV Master Roadmap — Pyrrhic Games
 
-**Last Updated:** 2026-04-05
-**Current Version:** 0.8.0 (Command Chain)
+**Last Updated:** 2026-04-06
+**Current Version:** 0.8.3 (Order Interpretation + Warlord Problem)
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."
 
@@ -183,16 +183,33 @@ Plans: `docs/plans/2026-03-24-v081-order-interpretation-plan.md`, `docs/plans/20
 - Phase 2 — IPC Wiring and Operation Interpretation: CLOSED 2026-04-06. Commit: bc88eed3. Report: `docs/40_reports/implemented/20260406_V083_PHASE2_IPC_OPERATION_INTERPRETATION.md`
 - Phase 3 — Reliability Modifier, Decay Pipeline, Warlord Supersession: CLOSED 2026-04-06. Report: `docs/40_reports/implemented/20260406_V083_PHASE3_RELIABILITY_DECAY.md`
 - Phase 4 — Order Interpretation UI Panels: CLOSED 2026-04-06. Report: `docs/40_reports/implemented/20260406_V083_PHASE4_ORDER_INTERPRETATION_UI.md`
+- Phase 5 — Interpretation UX Completion: CLOSED 2026-04-06. Report: `docs/40_reports/implemented/20260406_V083_PHASE5_INTERPRETATION_UX.md`
+
+**Status: v0.8.3 CLOSED 2026-04-06 — all 5 phases complete. Order interpretation is now live in engine and legible in UI.**
 
 ### v0.8.4 — Autonomy Depth + Claude API at Political Level
 
-**Gate:** Requires v0.8.3. LLM integration sits on top of cleaned command ownership, not underneath it. Replay/log determinism, decision auditability, fallback behavior, and player review surfaces must be explicit before any API-assisted autonomy is treated as roadmap-ready.
+**Gate:** Requires v0.8.3 ✓
+
+**Phase status (2026-04-06):**
+- Phase 1 — Autonomy State and Review Foundation: CLOSED 2026-04-06. Report: `docs/40_reports/implemented/20260406_V084_PHASE1_AUTONOMY_STATE_FOUNDATION.md`
+
+LLM integration sits on top of cleaned command ownership, not underneath it. Replay/log determinism, decision auditability, fallback behavior, and player review surfaces must be explicit before any API-assisted autonomy is treated as roadmap-ready.
 
 Player political posture IPC (set war-crimes-policy, set alliance-posture, set political priorities). Optional LLM-assisted political leader decisions extending existing AI Commander architecture. Personality drift: leader personality changes based on war outcome.
 
 **Determinism and review requirement:** every API-assisted action must be reviewable as a structured decision with deterministic replay semantics, fallback behavior if the API is unavailable, and a player-facing surface for understanding or rejecting the result.
 
 Plans: `docs/plans/2026-03-24-v082-autonomy-api-plan.md`, `docs/plans/2026-03-31-v084-autonomy-determinism-and-review-plan.md`, `docs/plans/2026-03-31-v08to09-commander-explanation-surfaces-plan.md`.
+
+## Active Side Lanes (Non-Milestone)
+
+These lanes matter to product truth or engine health, but they are not the current milestone driver. Keep them visible so they do not vanish into chat memory.
+
+- **AAR provenance** — `src/sim/combat/operation_aar.ts` still needs clearer attribution of combat capture vs passive/external control change.
+- **Split-child sector assignment routing** — bounded brigade assignment defect for zero-covered child sectors with hostile edges.
+- **Desktop New Game Start Snapshot** — desktop `New Game` still boots from full scenario-source init instead of a baked campaign-start snapshot.
+- **Warroom React Shell Recovery / Feature Parity** — main desktop entry surface still needs parity/polish (modal behavior, shell cohesion, interactive room/map affordance).
 
 ### v0.8.x-final — Command Authority Cleanup + Old Code Removal
 
@@ -441,8 +458,9 @@ These need design sessions before implementation. Preserved from the original ro
 | Scenarios (40w/52w/56w) | Complete |
 | AI Commander infrastructure | Functional (14 modules, multi-model routing) |
 | Commander Maturity (belief state, motive stack, traces) | Complete (v0.8.1, closed 2026-04-05) |
-| Political Leader Bot | Active — Phases 1–3 complete (v0.8.2, Phase 4+ pending) |
-| Order Interpretation | Not started (v0.8.3) |
+| Political Leader Bot | Complete (v0.8.2 closed 2026-04-06) |
+| Order Interpretation | Complete (v0.8.3 closed 2026-04-06) |
+| Autonomy Depth + Claude API | Phase 1 closed (v0.8.4, 2026-04-06) |
 | Consequence system | Not started (v0.9.0) |
 | Cost Ledger | Not started (v0.9.0) |
 | Ghost Map | Not started (v0.9.1) |
@@ -459,7 +477,7 @@ These need design sessions before implementation. Preserved from the original ro
 | Victory conditions | Stub (roadmap-owned in v0.9.0) |
 | Diplomacy layer | Partial (patron pressure, alliance, IVP) |
 
-**Current:** 93.7% area-weighted calibration (n1302 ATH), 25/25 anchors, 6/6 benchmarks. 712 OSIDs. 94 events. 96 certified essays.
+**Current:** 93.7% area-weighted calibration (n1302 ATH), 25/25 anchors, 6/6 benchmarks. 712 OSIDs. Political bot complete through Dayton branches (`v0.8.2`). Order interpretation complete through player-legible UX (`v0.8.3`).
 
 ---
 

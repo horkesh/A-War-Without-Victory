@@ -50,13 +50,23 @@ export interface CorpsDecision {
     assessment: string;
 }
 
+/** v0.8.4: Political/event decision logged for replay and audit. API integration in Phase C. */
+export interface PoliticalDecision {
+    faction: FactionId;
+    turn: number;
+    event_responses: Record<string, { choice: string; reasoning: string }>;
+    peace_plan_response?: 'accept' | 'reject' | null;
+    alliance_posture?: 'maintain' | 'distance' | 'break';
+    reasoning: string;
+}
+
 /** Logged decision for replay determinism. */
 export interface CommandDecisionLogEntry {
     turn: number;
-    level: 'army' | 'corps' | 'advisor';
+    level: 'army' | 'corps' | 'advisor' | 'political' | 'event';
     faction: FactionId;
     corps_id?: string;
-    decision: ArmyDecision | CorpsDecision | AdvisorResponse;
+    decision: ArmyDecision | CorpsDecision | AdvisorResponse | PoliticalDecision;
     model_used: string;
     prompt_tokens?: number;
     completion_tokens?: number;

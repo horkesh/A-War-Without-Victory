@@ -873,6 +873,18 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'apply-autonomy-transition',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const meta = context.state.meta;
+            if (meta.autonomy_level_pending !== undefined) {
+                meta.autonomy_level = meta.autonomy_level_pending;
+                meta.autonomy_level_pending = undefined;
+            }
+            meta.autonomy_overrides = undefined;
+        }
+    },
+    {
         name: 'ai-army-decisions',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
@@ -888,9 +900,14 @@ export const warPhases: NamedPhase[] = [
             if (!client) return;
 
             const playerFaction = context.state.meta.player_faction ?? null;
+            const autonomyLevel = context.state.meta.autonomy_level ?? 0;
             const botFactions = (context.state.factions ?? [])
                 .map((f) => f.id)
-                .filter((fid: string) => playerFaction == null || fid !== playerFaction);
+                .filter((fid: string) => {
+                    if (playerFaction == null) return true;
+                    if (fid === playerFaction) return autonomyLevel >= 2;
+                    return true;
+                });
 
             const results = await Promise.allSettled(
                 botFactions.map(async (faction: string) => {
@@ -919,9 +936,14 @@ export const warPhases: NamedPhase[] = [
             if (!client) return;
 
             const playerFaction = context.state.meta.player_faction ?? null;
+            const autonomyLevel = context.state.meta.autonomy_level ?? 0;
             const botFactions = (context.state.factions ?? [])
                 .map((f) => f.id)
-                .filter((fid: string) => playerFaction == null || fid !== playerFaction);
+                .filter((fid: string) => {
+                    if (playerFaction == null) return true;
+                    if (fid === playerFaction) return autonomyLevel >= 2;
+                    return true;
+                });
 
             for (const faction of botFactions) {
                 const armyDecision = context.state.military.ai_army_decisions?.[faction] ?? null;

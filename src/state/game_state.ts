@@ -1092,6 +1092,18 @@ export interface CeasefireFreezeEntry {
 }
 
 /**
+ * v0.8.4: Records a player override of a specific AI-proposed decision.
+ * Stored on state.meta.autonomy_overrides for the current turn.
+ * Cleared by apply-autonomy-transition at the start of each turn.
+ */
+export interface AutonomyOverride {
+    turn: number;
+    level: 'army' | 'corps' | 'event';
+    target_id: string;
+    faction: FactionId;
+}
+
+/**
  * World-level deterministic bookkeeping (Engine Invariants §11).
  * Conceptually "WorldState": current_turn (weeks), phase, seed.
  * No timestamps; no randomness. Turn is integer weeks only.
@@ -1164,6 +1176,12 @@ export interface StateMeta {
     ai_commander_config?: import('../sim/ai_commander/ai_config.js').AiCommanderConfig;
     /** Calendar date string for current turn (set at runtime in saves, not always present). */
     date?: string;
+    /** v0.8.4: Current autonomy level. 0 = Full Control (default). 1 = Strategic. 2 = Political. 3 = Observer. */
+    autonomy_level?: 0 | 1 | 2 | 3;
+    /** v0.8.4: Queued autonomy change; takes effect at the start of the next turn via apply-autonomy-transition. */
+    autonomy_level_pending?: 0 | 1 | 2 | 3;
+    /** v0.8.4: Per-decision player overrides this turn. Cleared each turn by apply-autonomy-transition. */
+    autonomy_overrides?: AutonomyOverride[];
 }
 
 export interface NegotiationLedgerEntry {

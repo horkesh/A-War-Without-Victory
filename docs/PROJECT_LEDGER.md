@@ -1,3 +1,38 @@
+## [2026-04-06] v0.8.4 Phase 1 — Autonomy State and Review Foundation
+
+**Type:** Feature (state schema + pipeline skeleton)
+**Files modified:** `src/state/game_state.ts`, `src/sim/ai_commander/ai_types.ts`, `src/sim/ai_commander/decision_log.ts`, `src/sim/turn_phases/war_phases.ts`, `src/sim/events/evaluate_events.ts`, `tests/war_phase_step_order.test.ts`
+**Files created:** `tests/sim/autonomy/autonomy_state.test.ts`, `tests/sim/autonomy/autonomy_event_routing.test.ts`
+**Status:** ACCEPTED
+
+### What changed
+
+- `game_state.ts`: `AutonomyOverride` interface added (`faction`, `domain`, `level`, `expires_turn?`). Three optional fields on `StateMeta`: `autonomy_level?: 0|1|2|3` (active delegation level), `autonomy_level_pending?: 0|1|2|3` (requested level, committed next turn), `autonomy_overrides?: AutonomyOverride[]` (per-domain transient overrides). All optional; absent = Level 0 (full presidential control).
+- `ai_types.ts`: `PoliticalDecision` interface added to `decision` discriminated union. `CommandDecisionLogEntry.level` extended with `'political' | 'event'` — enables briefing/trace consumers to receive political-level log entries without type error.
+- `decision_log.ts`: `getLoggedDecision()` level parameter extended to match new union. Pure type-safe extension; no behavioral change.
+- `war_phases.ts`: `apply-autonomy-transition` added as 151st step (after `decay-officer-interpretation-state`). Owns: commit `autonomy_level_pending` → `autonomy_level` (downward changes delayed one turn; upward changes immediate per Game Designer directive), prune expired `autonomy_overrides`. `botFactions` filter in `ai-army-decisions` and `ai-corps-decisions` extended to include player faction when `autonomy_level >= 2` — formula AI runs all military decisions for player faction at delegation levels 2–3.
+- `evaluate_events.ts`: Level 3 (Observer) auto-resolves events via existing `pickPoliticalResponse()`/`pickBotResponseV1` bot personality path. Level 0–2 queues `PendingEventDecision` as before.
+
+### Fallback contract
+
+Level 0: formula bot for enemy factions only, player faction excluded — unchanged. Level 1: identical to Level 0 in Phase A; Phase B adds AI proposal review surface. Level 2–3: no API calls in Phase A; formula bot covers all decisions (cadet guard fires first in Phase B). Level 3 event routing uses existing bot personality path (`pickPoliticalResponse`/`pickBotResponseV1`), no API needed in Phase A.
+
+### Design notes / open gaps
+
+Three Game Designer notes carried to Phase B: (1) one-turn delay applies only to downward changes — already implemented correctly; (2) Level 3 Observer must surface `requires_player_response` / high-stakes events to player instead of auto-resolving — deferred to Phase B/C (Medium gap, not blocking); (3) Level 2 IPC handler must add feature gate before writing `autonomy_level_pending = 2` — no IPC handler exists yet in Phase A, low actual risk.
+
+### Verification
+
+- tsc: clean
+- vitest: 2772/2772 (193 files, +7 new tests; was 2765/2765)
+- build: pass
+
+### Report
+
+`docs/40_reports/implemented/20260406_V084_PHASE1_AUTONOMY_STATE_FOUNDATION.md`
+
+---
+
 ## [2026-04-06] v0.8.3 Phase 5 — Interpretation UX Completion
 
 **Type:** Feature (UI polish + engine narrative enrichment)

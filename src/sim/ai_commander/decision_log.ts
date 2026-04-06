@@ -5,7 +5,7 @@
  */
 
 import type { GameState, FactionId } from '../../state/game_state.js';
-import type { CommandDecisionLogEntry, ArmyDecision, CorpsDecision, AdvisorResponse } from './ai_types.js';
+import type { CommandDecisionLogEntry, ArmyDecision, CorpsDecision, AdvisorResponse, PoliticalDecision } from './ai_types.js';
 
 export function logDecision(state: GameState, entry: CommandDecisionLogEntry): void {
     if (!state.military.ai_decision_log) {
@@ -17,10 +17,10 @@ export function logDecision(state: GameState, entry: CommandDecisionLogEntry): v
 export function getLoggedDecision(
     state: GameState,
     turn: number,
-    level: 'army' | 'corps' | 'advisor',
+    level: 'army' | 'corps' | 'advisor' | 'political' | 'event',
     faction: FactionId,
     corpsId?: string
-): ArmyDecision | CorpsDecision | AdvisorResponse | null {
+): ArmyDecision | CorpsDecision | AdvisorResponse | PoliticalDecision | null {
     const log = state.military.ai_decision_log;
     if (!log) return null;
 

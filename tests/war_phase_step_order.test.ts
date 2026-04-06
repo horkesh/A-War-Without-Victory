@@ -90,6 +90,7 @@ describe('war-phase step ordering', () => {
         // 153 → 148: steps removed during v0.8 commander intelligence + sector truth overhaul
         // +1 from compute-combat-effective-brigades (v0.8.2 Phase 3 hardening, before evaluate-peace-plans)
         // +1 from decay-officer-interpretation-state (v0.8.3 Phase 3: cowed expiry + event cleanup)
-        expect(stepNames.length).toBe(150);
+        // +1 from apply-autonomy-transition (v0.8.4 Phase A: autonomy state + pending level commit)
+        expect(stepNames.length).toBe(151);
     });
 });

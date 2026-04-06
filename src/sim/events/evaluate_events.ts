@@ -213,8 +213,9 @@ export function evaluateEvents(
         // Handle decision events (response_options present)
         // Diplomatic events fire once globally. Player gets a decision; bots auto-respond once.
         if (def.response_options && def.response_options.length > 0) {
-            if (playerFaction) {
-                // Player faction: queue as pending decision
+            const autonomyLevel = state.meta.autonomy_level ?? 0;
+            if (playerFaction && autonomyLevel < 3) {
+                // Player faction (levels 0-2): queue as pending decision
                 if (!state.military.pending_event_decisions) {
                     state.military.pending_event_decisions = [];
                 }
@@ -226,7 +227,7 @@ export function evaluateEvents(
                     faction: playerFaction,
                 });
             } else {
-                // No player faction (headless/spectator): bot auto-responds once.
+                // No player faction (headless/spectator) OR Observer (level 3): bot auto-responds once.
                 // Political personality path for dimension-weighted logic types.
                 // Phase 3: Explicit responding_faction field → top-level dimension_shifts → first option's shifts → null.
                 // New events should author responding_faction directly; legacy events fall back gracefully.
@@ -234,7 +235,7 @@ export function evaluateEvents(
                     (def.responding_faction as FactionId | undefined)
                     ?? (def.dimension_shifts?.[0]?.faction as FactionId | undefined)
                     ?? (def.response_options?.[0]?.dimension_shifts?.[0]?.faction as FactionId | undefined)
-                    ?? null;
+                    ?? (playerFaction ?? null);
 
                 let chosen: EventResponseOption;
                 if (POLITICAL_LOGICS.has(def.bot_response_logic ?? '') && respondingFaction !== null) {
