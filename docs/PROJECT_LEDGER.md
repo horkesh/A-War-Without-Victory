@@ -4,7 +4,7 @@
 **Files modified:** `src/sim/combat/order_interpretation.ts`, `src/sim/turn_phases/war_phases.ts`
 **Files created:** `tests/sim/combat/phase3_reliability_decay.test.ts`
 **Status:** ACCEPTED
-**Commits:** [pending]
+**Commits:** 7e487a40 (impl), 6841123b (tests), b20dc3a9 (docs)
 
 ### What changed
 

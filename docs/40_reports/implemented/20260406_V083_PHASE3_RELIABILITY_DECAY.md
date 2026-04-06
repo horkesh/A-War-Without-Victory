@@ -1,7 +1,7 @@
 # v0.8.3 Phase 3 — Reliability Modifier, Decay Pipeline, Warlord Supersession
 
 **Date:** 2026-04-06
-**Commit:** [pending commit]
+**Commits:** 7e487a40 (impl), 6841123b (tests), b20dc3a9 (docs)
 **Status:** ACCEPTED
 **Baseline:** 2716/2716 vitest, tsc clean (Phase 2 / v0.8.3)
 **Verification:** tsc clean, 2729/2729 vitest (189 files, 13 new tests)
