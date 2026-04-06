@@ -1,3 +1,37 @@
+## [2026-04-06] v0.8.3 Phase 4 — Order Interpretation UI Panels
+
+**Type:** Feature
+**Files modified:** `src/ui/map/data/types.ts`, `src/ui/map/data/GameStateAdapter.ts`, `src/ui/map/utils/officerCharacter.ts`, `src/ui/map/components/army_hq/CommanderSection.tsx`, `src/ui/map/components/OfficerProfile.tsx`, `src/sim/briefing/collect_briefing.ts`
+**Files created:** `src/ui/map/components/army_hq/OrderInterpretationPanel.tsx`, `tests/sim/command/phase4_ui_data_layer.test.ts`
+**Status:** ACCEPTED
+**Commits:** [pending]
+
+### What changed
+
+- `types.ts`: `NamedOfficerView` extended with `is_cowed?` and `cowed_until_turn?`; `pendingOfficerEvents` item type extended to include `order_modified | order_pushback | order_refused | officer_relieved` with `reason?`, `overridable?`, `override_action?`
+- `GameStateAdapter.ts`: officer construction now sets `is_cowed` (true when `cowed_until_turn >= state.meta.turn`) and passes through `cowed_until_turn`; `derivePendingOfficerEvents` maps Phase 3 event types with `reason`, `overridable`, `override_action`
+- `officerCharacter.ts`: `getReliabilityLabel()` (1=Defiant…5=Steadfast); `getComplianceModifierText()` (formatted ±X.XX)
+- `OrderInterpretationPanel.tsx` (new): pure display, silence=healthy; shows `order_modified/pushback/refused` events per faction; amber/orange/red compliance badges; ACCEPT + OVERRIDE both call `ipc.acknowledgeOfficerEvent`
+- `CommanderSection.tsx`: `[✓] DEFERRED COMPLIANCE` badge when `commander.is_cowed`; `[!] LOW LOYALTY` warning when `political_reliability <= 2` (not acting, not cowed)
+- `OfficerProfile.tsx`: `Loyalty` stat row (getReliabilityLabel) in non-compact mode, below Defense
+- `collect_briefing.ts`: interpretation events (`order_modified/pushback/refused`) → `cmd-order-interpretations` briefing item (critical if refusal); personnel events → `cmd-officer-events` item (label unchanged); previously merged, now separated
+
+### Verification
+
+- tsc: clean
+- vitest: 2740/2740 (190 files)
+- 11 new tests in `tests/sim/command/phase4_ui_data_layer.test.ts`
+
+### Deferred
+
+- Phase 5: warlord narrative events (ICTY-sourced friction text), override cost display, corps name enrichment in panel, OOB tooltip
+
+### Report
+
+`docs/40_reports/implemented/20260406_V083_PHASE4_ORDER_INTERPRETATION_UI.md`
+
+---
+
 ## [2026-04-06] v0.8.3 Phase 3 — Reliability Modifier, Decay Pipeline, Warlord Supersession
 
 **Type:** Feature

@@ -10,10 +10,10 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-04-06, v0.8.3 Phase 3 CLOSED)
-**2729/2729 vitest (189 files). v0.8.3 Phase 3 CLOSED. Commit: [pending].**
-v0.8.3 Phase 3 delivered: `computeReliabilityModifier` + `computeEffectiveReliabilityModifier` in `order_interpretation.ts`; three hardcoded `reliabilityModifier=0.0` seams replaced in stance/launch/halt; warlord supersession (RBiH, pol_rel≤2, early war: Halilović turns 0–60, Knez turns 0–44, combined modifier −0.25); `decay-officer-interpretation-state` step in `war_phases.ts` (step 149→150, owns cowed expiry + stale event cleanup; halt_delay stays in sector_offensive.ts by design). 13 new tests.
-**v0.8.3 Phase 3 CLOSED. Next: v0.8.3 Phase 4 — UI panels (OrderInterpretationPanel, OOB tooltip, personality icons).**
+## Current State (2026-04-06, v0.8.3 Phase 4 CLOSED)
+**2740/2740 vitest (190 files). v0.8.3 Phase 4 CLOSED. Commit: [pending].**
+v0.8.3 Phase 4 delivered: `OrderInterpretationPanel` (silence=healthy, amber/orange/red badges, ACCEPT+OVERRIDE via Phase 2 IPC); `CommanderSection` cowed + LOW LOYALTY badges; `OfficerProfile` Loyalty stat row (getReliabilityLabel); `collect_briefing.ts` interpretation events separated into `cmd-order-interpretations` item; adapter extended with `is_cowed` derivation + Phase 3 event mapping. 11 new tests. No engine logic added.
+**v0.8.3 Phase 4 CLOSED. Next: v0.8.3 Phase 5 — UI polish, warlord narrative events, override cost display.**
 Last combat calibration: n1344 93.3%, hash: 0e2fe6333394649a. n1323: 94.0%, 27/27, 6/6, 74 battles.
 n1323 last combat-calibration baseline: 94.0%, 27/27 anchors, 6/6 benchmarks, 74 battles. hash: b3355614a82d13d7.
 Previous ATH: n1315: 94.3%, 27/27. Previous: n1302: 93.7%, 25/25.
@@ -28,6 +28,7 @@ Commander Intelligence Overhaul (n1294–1301): must_hold 1.5× garrison (Brcko/
 - **Casualty ratio discrepancy**: attack_resolution reports 0.814, anomaly_detection reports 0.63 — data source mismatch.
 - **ZEA rate 47%** (up from 39%): op-scale cap narrowing eligible attacker pools.
 - vrs_east_bosnian zero-attack ops (bounded: 2 ZEA ops at 6.7%, down from 47% — staging unreachability + Sarajevo siege); estimateTurnsActive broken suspend counter; jajce_falls turn_min 40→28; 3 stale ssid refs; P5 NATO air; P6 breakthrough.
+- **[warlord_friction.ts] Enclave-locked commanders must be excluded from `refused_release` friction type** (Orić/Srebrenica, Palić/Žepa, Imamović/Goražde). Their non-compliance is physical isolation, not insubordination. Phase 3 not affected (Orić pol_rel=3 → no WARLORD_MODIFIER). Fix: add `enclave_lock` guard in `checkWarlordFriction` before emitting refused_release. Historian-flagged 2026-04-06.
 - **RESOLVED this session:** P9 supply recalibration (graduated scoring + BFS corridor fix), estimateForceRatio supply awareness (demoted — practically inert), COMBAT-P14 (stale — feasibility check now includes defender modifiers).
 
 **TWO OP SYSTEMS (architecture — do not confuse):**
