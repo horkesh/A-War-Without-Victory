@@ -1493,6 +1493,17 @@ export function parseGameState(json: unknown): LoadedGameState {
                     typeof state.meta?.turn === 'number' &&
                     Number(state.meta.turn) <= Number(os.cowed_until_turn),
                 cowed_until_turn: typeof os?.cowed_until_turn === 'number' ? os.cowed_until_turn : undefined,
+                effective_compliance_modifier: (() => {
+                    const pol_rel = Number(data.political_reliability ?? 3);
+                    const baseMod = (pol_rel - 3) * 0.10;
+                    const warlordEndWeek = (state.military?.war_timeline as any)?.officer_config?.['RBiH']?.warlord_friction_end_week;
+                    const isWarlordActive =
+                        String(data.faction ?? '') === 'RBiH' &&
+                        pol_rel <= 2 &&
+                        warlordEndWeek !== undefined &&
+                        Number(state.meta?.turn ?? 0) < Number(warlordEndWeek);
+                    return isWarlordActive ? baseMod - 0.15 : baseMod;
+                })(),
             });
         }
         if (officerList.length > 0) namedOfficerData = officerList;

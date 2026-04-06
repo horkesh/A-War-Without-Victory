@@ -75,6 +75,8 @@ export interface NamedOfficerView {
     is_cowed?: boolean;
     /** Turn when cowed status expires (turn > this → no longer cowed). */
     cowed_until_turn?: number;
+    /** Pre-computed effective compliance modifier (base reliability ± warlord modifier). */
+    effective_compliance_modifier?: number;
 }
 
 export interface FormationView {

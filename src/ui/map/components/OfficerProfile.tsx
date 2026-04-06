@@ -15,6 +15,8 @@ import {
     getRankHasBar,
     getRankDisplayName,
     getRankInsigniaColor,
+    getComplianceModifierTextFromValue,
+    getComplianceModifierColor,
 } from '../utils/officerCharacter';
 import { WarCrimesBadge } from './WarCrimesBadge';
 
@@ -70,6 +72,15 @@ export function OfficerProfile({ officer, label, compact = false, emphasis = 'ag
                 )}
                 {!compact && (
                     <StatRow label="Loyalty" value={officer.political_reliability} descriptor={getReliabilityLabel(officer.political_reliability)} />
+                )}
+                {!compact && officer.effective_compliance_modifier !== undefined && (
+                    <div className="flex items-center gap-2 text-[9px]">
+                        <span className="text-text-secondary w-[62px] shrink-0">Modifier</span>
+                        <span className={`font-mono tracking-tight ${getComplianceModifierColor(officer.effective_compliance_modifier)}`}>
+                            {getComplianceModifierTextFromValue(officer.effective_compliance_modifier)}
+                        </span>
+                        <span className="text-text-secondary/60">compliance</span>
+                    </div>
                 )}
             </div>
 

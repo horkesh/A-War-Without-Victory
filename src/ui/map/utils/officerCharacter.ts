@@ -221,6 +221,25 @@ export function getComplianceModifierText(politicalReliability: number): string 
     return mod > 0 ? `+${mod.toFixed(2)}` : `−${Math.abs(mod).toFixed(2)}`;
 }
 
+/**
+ * Format a pre-computed effective compliance modifier as a signed string.
+ * e.g., +0.20, -0.25, 0.00
+ */
+export function getComplianceModifierTextFromValue(modifier: number): string {
+    const sign = modifier >= 0 ? '+' : '';
+    return `${sign}${modifier.toFixed(2)}`;
+}
+
+/**
+ * Color class for an effective compliance modifier value.
+ * Positive → green (officer reliable), negative → red (warlord friction), zero → neutral.
+ */
+export function getComplianceModifierColor(modifier: number): string {
+    if (modifier > 0) return 'text-green-400';
+    if (modifier < 0) return 'text-red-400';
+    return 'text-text-secondary';
+}
+
 /** One-line personality summary from competence x aggressiveness quadrant. */
 export function getPersonalitySummary(comp: number, agg: number): string {
     if (comp >= 4 && agg >= 4) return 'Fast prep, accepts risk';

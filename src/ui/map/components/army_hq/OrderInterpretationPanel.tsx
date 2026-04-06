@@ -11,6 +11,7 @@
 import type { LoadedGameState } from '../../data/types';
 import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
+import { RELIEF_MORALE_PENALTY } from '../../../../sim/combat/order_interpretation.js';
 
 // Phase 3 interpretation event types only (not personnel events)
 const INTERPRETATION_TYPES = new Set(['order_modified', 'order_pushback', 'order_refused']);
@@ -118,6 +119,11 @@ export function OrderInterpretationPanel({ gameState, playerFaction }: OrderInte
                                 </button>
                             )}
                         </div>
+                        {event.type === 'order_refused' && event.overridable && (
+                            <div className="text-[9px] text-text-secondary/60 italic">
+                                Officer morale {RELIEF_MORALE_PENALTY} if relieved
+                            </div>
+                        )}
                     </div>
                 );
             })}

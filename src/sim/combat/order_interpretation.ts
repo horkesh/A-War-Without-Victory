@@ -190,12 +190,21 @@ function determineEffectiveStance(
 
 /**
  * Build a human-readable reason string for the interpretation event.
+ *
+ * @param officerName - Display name of the officer
+ * @param orderedStance - The stance the player ordered
+ * @param effectiveStance - The stance the officer will actually execute
+ * @param complianceScore - Raw compliance score [0, 1]
+ * @param isWarlordModifierActive - True when the warlord supersession penalty was applied
+ * @param officerId - Optional officer ID for Halilović-specific strings
  */
 function buildInterpretationReason(
     officerName: string,
     orderedStance: string,
     effectiveStance: string,
     complianceScore: number,
+    isWarlordModifierActive = false,
+    officerId?: string,
 ): string {
     const displayName = officerName || 'The commander';
 
@@ -203,14 +212,36 @@ function buildInterpretationReason(
         return '';
     }
 
+    const isHaliovic = officerId === 'arbih_halilovic';
+
     if (complianceScore >= MODIFIED_COMPLIANCE_THRESHOLD) {
+        if (isWarlordModifierActive) {
+            if (isHaliovic) {
+                return `Halilović acknowledges the order but has amended the operational guidance before passing it to corps commanders.`;
+            }
+            return `${displayName} acknowledges the order but routes it through his own staff before passing it to subordinates.`;
+        }
         const isDowngrade = (STANCE_RANKS[orderedStance] ?? 1) < (STANCE_RANKS[effectiveStance] ?? 1);
         const direction = isDowngrade ? 'the aggressive posture' : 'the defensive posture';
         return `${displayName} acknowledges the order with reservations about ${direction}.`;
     }
 
     if (complianceScore >= PARTIAL_COMPLIANCE_THRESHOLD) {
+        if (isWarlordModifierActive) {
+            if (isHaliovic) {
+                return `Halilović considers ${orderedStance} a political directive, not a military one, and will advance to ${effectiveStance}.`;
+            }
+            return `${displayName} considers the order incompatible with local conditions and will advance to ${effectiveStance}.`;
+        }
         return `${displayName} considers ${orderedStance} untenable and will advance to ${effectiveStance}.`;
+    }
+
+    // Refused
+    if (isWarlordModifierActive) {
+        if (isHaliovic) {
+            return `Halilović has not forwarded the order. The Supreme Command Staff's authority over operational matters remains contested.`;
+        }
+        return `${displayName} has not transmitted the order. His formation continues under independent command.`;
     }
 
     return `${displayName} refuses to comply with ${orderedStance}, maintaining ${effectiveStance}.`;
@@ -289,6 +320,8 @@ function computeInterpretation(
     const preferredRank = STANCE_RANKS[preferredStance] ?? 1;
 
     const reliabilityModifier = computeEffectiveReliabilityModifier(data, state);
+    const baseReliabilityModifier = computeReliabilityModifier(data.political_reliability);
+    const isWarlordModifierActive = reliabilityModifier !== baseReliabilityModifier;
     let score = computeComplianceScore(competence, aggressiveness, orderedRank, preferredRank, reliabilityModifier);
 
     // Check PatronDirective stance_ceiling (cap effective stance if needed)
@@ -327,7 +360,7 @@ function computeInterpretation(
         compliance = 'partial';
     }
 
-    const reason = buildInterpretationReason(data.name, orderedStance, effectiveStance, score);
+    const reason = buildInterpretationReason(data.name, orderedStance, effectiveStance, score, isWarlordModifierActive, data.id);
 
     return {
         compliance,
