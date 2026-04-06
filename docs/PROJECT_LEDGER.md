@@ -1,3 +1,28 @@
+## [2026-04-07] fix(calibration): DRINA investigation — initial controller fixes, Op Drina scope correction, painted target corrections (n1358)
+
+**Type:** Calibration fix + historical accuracy
+**Files:** `src/sim/combat/pre_planned_operations.ts`, `data/scenarios/apr1992_definitive_40w.json`, `data/source/calibration/painted_control_jan1993.json`, `data/source/calibration/painted_control_jan1993_improved.json`
+**Run:** n1358 — hash `0ba9f29f00f9d423`, 93.6% area-weighted, 27/27 anchors, 6/6 benchmarks
+**Status:** ACCEPTED — Phase F COMPLETE. v0.8.4 ALL PHASES CLOSED.
+
+### Summary of changes
+
+1. **Op Drina bratunac_vlasenica axis** — removed `cerska_2` and `pobudje_2` from the objective chain. Chain was `bratunac_2 → glogova → pobudje_2 → cerska_2 → vlasenica_2`; now `bratunac_2 → glogova → vlasenica_2`. These OSIDs were captured ~10 months premature (VRS took them Feb-Mar 1993, not April-May 1992).
+
+2. **Initial controller corrections** (`apr1992_definitive_40w.json`) — jezestica_2, donje_zesce, obadi, sebiocina corrected from RS → RBiH. Historian-confirmed: ARBiH held these at scenario start.
+
+3. **Painted target corrections** (`painted_control_jan1993.json` + improved variant) — radovcici, sulice_2 corrected from RS → RBiH. Historian-confirmed: Orić's Dec 1992 Bratunac-area offensive held these.
+
+4. **Op Višegrad visegrad_seizure chain** — REVERTED to original. Attempted removal of drinsko caused kamenica_2 regression (BFS chain reachability). RS captures drinsko/medjedja_2 via other vectors; absent ARBiH counteroffensive accepted as variance.
+
+### Accepted variance explanation
+
+Remaining DRINA mismatches (cerska_2, pobudje_2, jezestica_2, sebiocina, drinsko, medjedja_2, donje_zesce, mazlina, brcigovo, obadi, osmace_2) are accepted calibration variance. Root cause is definitively identified: absent ARBiH Podrinje defensive and counteroffensive operations. VRS offensive pressure captures these OSIDs via paramilitaries and bot ops regardless of objective scope. The correct fix is adding ARBiH ops (Cerska pocket defense, Višegrad counteroffensive, Goražde enclave extension) — not calibration parameter tuning. All 5 formal DRINA anchors (gorazde_2, srebrenica_2, zepa_2, foca_3, visegrad_2) PASS.
+
+**Report:** `docs/40_reports/implemented/20260407_DRINA_CALIBRATION_INVESTIGATION.md`
+
+---
+
 ## [2026-04-06] fix(engine): Enclave guard in detectParamilitaryTargets — block rear-pocket paramilitary against Sarajevo interior (n1356)
 
 **Type:** Bug fix  

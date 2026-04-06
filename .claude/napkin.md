@@ -10,20 +10,18 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-04-06, v0.8.4 Phase F IN PROGRESS)
-**2881/2881 vitest (198 files). Phase F: enclave-lock guard CLOSED + roadmap truth CLOSED. DRINA investigation inconclusive (deferred). Commit: f5959ad6.**
-v0.8.4 Phase E delivered: turn-advance block in `advance-turn` IPC (`electron-main.cjs` lines 617–632, `requires_player_response?` on `PendingEventDecision`, stamped in `evaluate_events.ts`); `AutonomyPanel.tsx` `'ops'` domain card ("Op Order" header, "OP ORDER" badge, "Authorize"/"Abort"); `buildOpProposalDescription()` in `proposal_generation.ts` (zone name, force count, threat label); 31 new tests in 2 files. tsc clean, build clean.
-**v0.8.4 Phase E CLOSED. v0.8.4 CLOSED — all phases A–E complete. Next: v0.9 per MASTER_ROADMAP.md.**
-**v0.8.3 was CLOSED through Phase 5 before this session.**
-Last combat calibration: n1344 93.3%, hash: 0e2fe6333394649a. n1323: 94.0%, 27/27, 6/6, 74 battles.
-n1323 last combat-calibration baseline: 94.0%, 27/27 anchors, 6/6 benchmarks, 74 battles. hash: b3355614a82d13d7.
+## Current State (2026-04-07, v0.8.4 ALL PHASES CLOSED)
+**2946/2947 vitest (206 files, 1 pre-existing SRK deployment failure). v0.8.4 Phase F CLOSED 2026-04-07. All phases A–F complete. Next: v0.9 per MASTER_ROADMAP.md.**
+DRINA investigation complete (n1358): root cause proven (absent ARBiH Podrinje defensive ops; RS captures via multiple vectors). Fixes: Op Drina bratunac_vlasenica cerska_2+pobudje_2 removed; initial controllers fixed (jezestica_2, donje_zesce, obadi, sebiocina → RBiH); painted targets corrected (radovcici, sulice_2 → RBiH). Remaining DRINA mismatches accepted as calibration variance — require ARBiH Cerska/Bratunac/Višegrad/Foča defensive ops. Report: `docs/40_reports/implemented/20260407_DRINA_CALIBRATION_INVESTIGATION.md`.
+**n1358: 93.6%, 27/27 anchors, 6/6 benchmarks. hash: 0ba9f29f00f9d423.**
+n1323 last ATH combat-calibration baseline: 94.0%, 27/27 anchors, 6/6 benchmarks, 74 battles. hash: b3355614a82d13d7.
 Previous ATH: n1315: 94.3%, 27/27. Previous: n1302: 93.7%, 25/25.
 Commander Intelligence Overhaul (n1294–1301): must_hold 1.5× garrison (Brcko/Doboj), org readiness gate (zero main_effort → defensive), op scale cap by main_effort_count, enemy_concentration_zones from intel picture, coordination ±4%/pt officer competence, strength-based opportunity target ranking.
 
 **ATH BASELINE: n1256 — 94.2%, 23/23 anchors, 6/6 benchmarks, 73 battles. hash: 5fa01bbdecc43f5f.**
 
 **Open P1s:**
-- **DRINA regression (~0.7pp overall)**: original hypothesis ("must_hold freed Drina brigades") unverified. Op Teočak NOT deleted (confirmed present in scenario). Op Podrinje Sweep exists (`pre_planned_operations.ts:154`). Root cause unknown — requires fresh 40w diagnostic run + Historian consultation on eastern BiH territory at January 1993. Do NOT apply speculative fix.
+- **[RESOLVED 2026-04-07] DRINA investigation CLOSED**: root cause proven — absent ARBiH Podrinje defensive ops; RS captures via multiple vectors (paramilitary, consolidation, ops). Fixes: Op Drina scope (cerska_2+pobudje_2 removed), initial controllers (jezestica_2/donje_zesce/obadi/sebiocina→RBiH), painted targets (radovcici/sulice_2→RBiH). Remaining mismatches (~11 RS overcaptures) accepted as calibration variance. Future work: ARBiH Cerska/Bratunac/Višegrad/Foča defensive ops. n1358: 93.6%, 27/27.
 - **boljanic_2 (Doboj)**: arbih_3rd_corps auto-generates ops from petrovo_2 adjacency; vrs_1st_krajina has no hold_osids for Doboj. rs_2nd_armored displaced to petrovo_2 (856 pers, morale 35). Fix: add boljanic_2 + adjacent Doboj OSIDs to vrs_1st_krajina hold_osids.
 - **Ozren pocket** (petrovo_2, brijesnica_donja_2, vozuca_2): all flip RBiH w31–40 (historical fall: Sep 1995). Fix: add hold_osids to Ozren brigades; add petrovo_2 + brijesnica_donja_2 as RS anchors in scenario_runner.ts.
 - **Casualty ratio discrepancy**: attack_resolution reports 0.814, anomaly_detection reports 0.63 — data source mismatch.

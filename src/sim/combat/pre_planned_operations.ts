@@ -140,9 +140,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 objectives: [
                     'op:bratunac:bratunac_2',
                     'op:bratunac:glogova',
-                    'op:bratunac:pobudje_2',
                     'op:vlasenica:vlasenica_2',
-                    'op:vlasenica:cerska_2',
                 ],
                 staging_osid: 'op:bratunac:slapasnica',
             },
