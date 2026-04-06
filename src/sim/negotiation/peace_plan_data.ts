@@ -51,10 +51,13 @@ const VANCE_OWEN_PLAN: PeacePlanDefinition = {
     id: 'vance_owen',
     name: 'Vance-Owen Peace Plan',
     trigger_week: 40,
+    // VOPP: Serb-majority provinces ~43% of BiH territory. Source: Owen Balkan Odyssey pp. 98-105
+    // RBiH 39% = ~33% Bosniak-majority provinces + ~6% Sarajevo special district (majority Bosniak/mixed).
+    // RS 43% = three Serb-majority provinces. HRHB 18% = three Croat-majority provinces.
     proposed_split: {
-        RBiH: 53,
-        RS: 30,
-        HRHB: 17,
+        RBiH: 39,
+        RS: 43,
+        HRHB: 18,
     },
     institutional_model: '10_provinces',
     override_change_on_reject: {
