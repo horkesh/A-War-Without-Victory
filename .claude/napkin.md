@@ -10,10 +10,10 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-04-06, v0.8.3 Phase 4 CLOSED)
-**2740/2740 vitest (190 files). v0.8.3 Phase 4 CLOSED. Commit: [pending].**
-v0.8.3 Phase 4 delivered: `OrderInterpretationPanel` (silence=healthy, amber/orange/red badges, ACCEPT+OVERRIDE via Phase 2 IPC); `CommanderSection` cowed + LOW LOYALTY badges; `OfficerProfile` Loyalty stat row (getReliabilityLabel); `collect_briefing.ts` interpretation events separated into `cmd-order-interpretations` item; adapter extended with `is_cowed` derivation + Phase 3 event mapping. 11 new tests. No engine logic added.
-**v0.8.3 Phase 4 CLOSED. Next: v0.8.3 Phase 5 — UI polish, warlord narrative events, override cost display.**
+## Current State (2026-04-06, v0.8.3 Phase 5 CLOSED)
+**2765/2765 vitest (191 files). v0.8.3 Phase 5 CLOSED.**
+v0.8.3 Phase 5 delivered: warlord narrative strings in `buildInterpretationReason()` (generic warlord + Halilović-specific, ICTY-sourced); override cost label (`RELIEF_MORALE_PENALTY` imported, rendered below OVERRIDE on `order_refused`); `effective_compliance_modifier` adapter-derived + Modifier stat row in `OfficerProfile`; corps name enrichment already complete in Phase 4. 25 new tests. No engine state added.
+**v0.8.3 Phase 5 CLOSED. All four Phase 4 deferred items resolved. v0.8.3 milestone closure is next.**
 Last combat calibration: n1344 93.3%, hash: 0e2fe6333394649a. n1323: 94.0%, 27/27, 6/6, 74 battles.
 n1323 last combat-calibration baseline: 94.0%, 27/27 anchors, 6/6 benchmarks, 74 battles. hash: b3355614a82d13d7.
 Previous ATH: n1315: 94.3%, 27/27. Previous: n1302: 93.7%, 25/25.

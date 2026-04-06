@@ -1,3 +1,43 @@
+## [2026-04-06] v0.8.3 Phase 5 — Interpretation UX Completion
+
+**Type:** Feature (UI polish + engine narrative enrichment)
+**Files modified:** `src/sim/combat/order_interpretation.ts`, `src/ui/map/components/army_hq/OrderInterpretationPanel.tsx`, `src/ui/map/data/types.ts`, `src/ui/map/utils/officerCharacter.ts`, `src/ui/map/data/GameStateAdapter.ts`, `src/ui/map/components/OfficerProfile.tsx`
+**Files created:** `tests/sim/command/phase5_interpretation_ux.test.ts`
+**Status:** ACCEPTED
+
+### What changed
+
+- `order_interpretation.ts`: `buildInterpretationReason()` extended with `isWarlordModifierActive` (5th param) and `officerId?` (6th param). When warlord modifier is active, uses ICTY-sourced warlord-specific strings for modified/partial/refused compliance tiers. When `officerId === 'arbih_halilovic'`, uses Halilović-specific strings referencing the Supreme Command Staff's contested authority. `computeInterpretation()` now derives `isWarlordModifierActive = reliabilityModifier !== baseReliabilityModifier` and passes it + `data.id` to `buildInterpretationReason()`.
+- `OrderInterpretationPanel.tsx`: imports `RELIEF_MORALE_PENALTY` from `order_interpretation.ts`. Adds cost label `"Officer morale {RELIEF_MORALE_PENALTY} if relieved"` (text-[9px] italic) below action buttons, only when `event.type === 'order_refused' && event.overridable`.
+- `types.ts`: `NamedOfficerView` extended with `effective_compliance_modifier?: number`.
+- `officerCharacter.ts`: two new exports — `getComplianceModifierTextFromValue(modifier)` (signed string, e.g. +0.20, -0.25) and `getComplianceModifierColor(modifier)` (green/red/neutral).
+- `GameStateAdapter.ts`: officer construction block computes `effective_compliance_modifier` — base reliability modifier ± warlord term when RBiH + pol_rel≤2 + inside warlord window.
+- `OfficerProfile.tsx`: imports two new helpers; adds Modifier row after Loyalty in non-compact mode — shows `effective_compliance_modifier` as signed decimal with color coding.
+
+### Strings used (ICTY-sourced, Historian-approved)
+
+Generic warlord (any warlord-active officer, not Halilović):
+- modified: "[Name] acknowledges the order but routes it through his own staff before passing it to subordinates."
+- partial: "[Name] considers the order incompatible with local conditions and will advance to [effectiveStance]."
+- refused: "[Name] has not transmitted the order. His formation continues under independent command."
+
+Halilović-specific (`officerId === 'arbih_halilovic'`):
+- modified: "Halilović acknowledges the order but has amended the operational guidance before passing it to corps commanders."
+- partial: "Halilović considers [orderedStance] a political directive, not a military one, and will advance to [effectiveStance]."
+- refused: "Halilović has not forwarded the order. The Supreme Command Staff's authority over operational matters remains contested."
+
+### Verification
+
+- tsc: clean
+- vitest: 2765/2765 (191 files, +25 new tests)
+- build: pass (6.41s)
+
+### Report
+
+`docs/40_reports/implemented/20260406_V083_PHASE5_INTERPRETATION_UX.md`
+
+---
+
 ## [2026-04-06] v0.8.3 Phase 4 — Order Interpretation UI Panels
 
 **Type:** Feature
