@@ -123,16 +123,31 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                     }
                     const dest = findNearestFriendlyOsidDestination(state, faction, loc, adjacency, reverseMap, frontSet);
                     if (dest) {
-                        // No home-distance cap: destination is always chosen from **this sector's**
-                        // front OSIDs. Corps assignment already binds the brigade to this sector;
-                        // capping by home↔front distance stranded line units in the rear (see
-                        // brigade rear audits 2026-03-27). Reserve / enclave carve-outs above.
-                        result.column_march_orders[brigade.id] = dest;
-                        result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
-                        return true;
+                        // "Do not garrison the tooth" guard:
+                        // A single-OSID sub-segment has no lateral support — if the tooth is risky
+                        // (salient: ≥3 enemy neighbors, or cut-off risk: ≤1 friendly neighbor),
+                        // the brigade should not march there. Fall through to corps-wide rerouting.
+                        const isToothDest = assignedSector.sub_segments.some(
+                            ss => ss.friendly_osids.length === 1 && ss.friendly_osids[0] === dest
+                        );
+                        if (isToothDest && graphAnalysis && isMovementDestinationRisky(dest as Osid, graphAnalysis)) {
+                            // Don't issue march order — fall through to trap remediation below
+                        } else {
+                            // No home-distance cap: destination is always chosen from **this sector's**
+                            // front OSIDs. Corps assignment already binds the brigade to this sector;
+                            // capping by home↔front distance stranded line units in the rear (see
+                            // brigade rear audits 2026-03-27). Reserve / enclave carve-outs above.
+                            result.column_march_orders[brigade.id] = dest;
+                            result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                            return true;
+                        }
                     }
                     // Trap remediation: assigned sector front may be disconnected from brigade location.
                     // Re-route within corps to nearest reachable sector-front OSID to avoid rear lock-in.
+                    // Risky single-OSID sub-segment teeth are excluded from the rerouting set —
+                    // picking the same tooth as the previous guard just blocked achieves nothing.
+                    // If the entire corps front is teeth with no safe alternative, suppress the march
+                    // (brigade holds at current depth position — reactive defense).
                     const corpsId = brigade.corps_id;
                     if (corpsId && state.military.corps_front_sectors) {
                         const reachableCorpsFront = new Set<string>();
@@ -140,7 +155,13 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                             const sec = state.military.corps_front_sectors[sid]!;
                             if (sec.corps_id !== corpsId) continue;
                             for (const ss of sec.sub_segments) {
-                                for (const o of ss.friendly_osids) reachableCorpsFront.add(o);
+                                const isTooth = ss.friendly_osids.length === 1;
+                                for (const o of ss.friendly_osids) {
+                                    if (isTooth && graphAnalysis && isMovementDestinationRisky(o as Osid, graphAnalysis)) {
+                                        continue; // exclude risky tooth from rerouting candidates
+                                    }
+                                    reachableCorpsFront.add(o);
+                                }
                             }
                         }
                         if (reachableCorpsFront.size > 0) {
@@ -153,6 +174,7 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                                 return true;
                             }
                         }
+                        // No safe corps front available — suppress march (hold at current depth position).
                     }
                 }
             } else {
@@ -165,6 +187,76 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                         delete state.military.brigade_movement_orders?.[brigade.id];
                     }
                 }
+                // ── Retroactive-tooth eviction guard ─────────────────────────────────
+                // A brigade can arrive at a sub-segment that was multi-OSID at the time
+                // (safe), but the enemy then captures the adjacent OSIDs leaving it as a
+                // sole-OSID sub-segment retroactively. No eviction happens automatically,
+                // so the brigade is stuck on a tooth indefinitely.
+                //
+                // Conditions to evict:
+                //   1. The brigade's sub-segment has exactly one friendly_osid (the tooth).
+                //   2. That OSID is flagged risky by isMovementDestinationRisky.
+                //   3. No column march is already in flight (pendingMove is falsy).
+                //   4. The OSID is NOT in must_hold_osids_by_corps for this brigade's corps.
+                //   5. The brigade is not disrupted (disrupted_turns > 0).
+                if (!pendingMove && graphAnalysis) {
+                    const corpsIdEvict = brigade.corps_id;
+                    // Find the sub-segment the brigade belongs to (via its current sector).
+                    let isRetroactiveTooth = false;
+                    if (state.military.corps_front_sectors) {
+                        outer: for (const sid of Object.keys(state.military.corps_front_sectors).sort(strictCompare)) {
+                            const sec = state.military.corps_front_sectors[sid]!;
+                            if (!sec.assigned_brigade_ids.includes(brigade.id)) continue;
+                            for (const ss of sec.sub_segments) {
+                                if (ss.friendly_osids.includes(loc)) {
+                                    isRetroactiveTooth = ss.friendly_osids.length === 1;
+                                    break outer;
+                                }
+                            }
+                        }
+                    }
+                    if (isRetroactiveTooth && isMovementDestinationRisky(loc as Osid, graphAnalysis)) {
+                        // Check must_hold override
+                        const mustHoldOsids: string[] =
+                            (corpsIdEvict ? (state.military.must_hold_osids_by_corps?.[corpsIdEvict] ?? []) : []);
+                        const isMustHold = mustHoldOsids.includes(loc);
+                        // Check disruption
+                        const isDisrupted = (brigade.disrupted_turns ?? 0) > 0;
+                        if (!isMustHold && !isDisrupted) {
+                            // Build safe destination set: all corps front OSIDs excluding the
+                            // current tooth and any other risky sole-OSID teeth.
+                            const safeFront = new Set<string>();
+                            if (corpsIdEvict && state.military.corps_front_sectors) {
+                                for (const sid of Object.keys(state.military.corps_front_sectors).sort(strictCompare)) {
+                                    const sec = state.military.corps_front_sectors[sid]!;
+                                    if (sec.corps_id !== corpsIdEvict) continue;
+                                    for (const ss of sec.sub_segments) {
+                                        const ssIsTooth = ss.friendly_osids.length === 1;
+                                        for (const o of ss.friendly_osids) {
+                                            if (o === loc) continue; // exclude current tooth
+                                            if (ssIsTooth && isMovementDestinationRisky(o as Osid, graphAnalysis)) {
+                                                continue; // exclude other risky teeth
+                                            }
+                                            safeFront.add(o);
+                                        }
+                                    }
+                                }
+                            }
+                            if (safeFront.size > 0) {
+                                const evictDest = findNearestFriendlyOsidDestination(
+                                    state, faction, loc, adjacency, reverseMap, safeFront
+                                );
+                                if (evictDest) {
+                                    result.column_march_orders[brigade.id] = evictDest;
+                                    result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                                    return true;
+                                }
+                            }
+                            // No safe destination found — brigade is fully trapped; hold in place.
+                        }
+                    }
+                }
+                // ── End retroactive-tooth eviction guard ─────────────────────────────
                 // Brigade IS on a sector front OSID. Check if this position is overstacked
                 // while other front OSIDs in the same sector are under-covered.
                 // This prevents brigades from piling into a corner front OSID (e.g. a single RS

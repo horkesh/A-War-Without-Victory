@@ -46,7 +46,7 @@ import {
 import { getCorpsArmyPriorities } from './bot_strategy.js';
 
 // ── Imported from extracted modules ──────────────────────────────────────
-import { buildFriendlyComponents, getSectorComponent, getCorpsForFaction, getFactions, isSectorColdFront } from './sector_utils.js';
+import { buildFriendlyComponents, getSectorComponent, getSectorUniqueFrontOsids, canAnyBrigadeReachAny, getCorpsForFaction, getFactions, isSectorColdFront } from './sector_utils.js';
 import { buildEdgeAdjacency as _buildEdgeAdjacency } from './sector_edge_adjacency.js';
 import { assertBrigadeReachability, assertSectorBrigadesActive } from './sector_assertions.js';
 import {
@@ -70,6 +70,7 @@ import {
     deduplicateBrigadesAcrossSectors,
     recomputeSectorPowerAndThreat,
     syncSectorAssignmentsToFormations,
+    TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS,
 } from './brigade_assignment.js';
 import {
     buildCorpsCommanderProfiles,
@@ -417,10 +418,45 @@ function buildFactionSectors(
             state, corpsId, faction, edgeIds, osidFrontEdges,
             adjacency, sharedBoundaryAdj, strictAdj, caseBSplitAdj, formations, reverseMap, centroids, friendlyOsids
         );
+
+        // Collect sorted brigade locations for reachability BFS (deterministic: sorted by formation ID).
+        const corpsBrigadeLocations: string[] = [];
+        for (const fid of Object.keys(formations).sort(strictCompare)) {
+            const f = formations[fid];
+            if (!f || f.faction !== faction || f.status !== 'active') continue;
+            if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+            if (getFormationCorpsId(f) !== corpsId) continue;
+            if (f.location_osid) corpsBrigadeLocations.push(f.location_osid);
+        }
+
         for (const sector of corpsMultiSectors) {
-            // FIX 1: Skip unstaffable sectors — no corps brigade in same component.
-            const sectorComp = getSectorComponent(sector, preComponentOf);
-            if (sectorComp !== -1 && !corpsBrigadeComponents.has(sectorComp)) continue;
+            // FIX 1 (Option Y): Strengthened unstaffable-sector guard.
+            //
+            // Original check: if no corps brigade shares the same friendly connected
+            // component as the sector, skip it. Bug: getSectorComponent returns the
+            // component of the FIRST territory OSID found in componentOf, which may
+            // be a shared junction OSID (kijevo_2) that IS in the main component —
+            // causing a ghost sector (golubici_2 is unreachable) to pass the guard.
+            //
+            // New check: compute the sector's UNIQUE front OSIDs (front OSIDs not
+            // shared with any sibling sector for this corps). If unique OSIDs exist
+            // and NO corps brigade can reach any of them within
+            // TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS hops through friendly territory,
+            // the sector is an unstaffable ghost — skip it early.
+            //
+            // Falls back to the original component check when all front OSIDs are
+            // shared (no unique ones), so junction-only sectors are still handled.
+            const uniqueFrontOsids = getSectorUniqueFrontOsids(sector, corpsMultiSectors);
+            if (uniqueFrontOsids.size > 0) {
+                // Unique front OSIDs exist — check brigade reachability.
+                if (!canAnyBrigadeReachAny(corpsBrigadeLocations, uniqueFrontOsids, adjacency, friendlyOsids, TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS)) {
+                    continue; // No brigade can reach the sector's unique front — skip.
+                }
+            } else {
+                // All front OSIDs are shared — fall back to original component check.
+                const sectorComp = getSectorComponent(sector, preComponentOf);
+                if (sectorComp !== -1 && !corpsBrigadeComponents.has(sectorComp)) continue;
+            }
             sectors.push(sector);
         }
     }
@@ -584,6 +620,10 @@ function buildFactionSectors(
         if (s.territory_osids.length === 0
             && s.assigned_brigade_ids.length === 0
             && s.reserve_brigade_ids.length === 0) return false;
+        // Prune zero-brigade isolated sectors — ensureMinimumSectorCoverage already
+        // exhausted all rescue attempts; no brigade can reach this sector.
+        // Undefended territory will be captured by VRS via normal combat mechanics.
+        if (s.assigned_brigade_ids.length === 0 && s.reserve_brigade_ids.length === 0) return false;
         return true;
     });
     pruned.sort((a, b) => strictCompare(a.sector_id, b.sector_id));

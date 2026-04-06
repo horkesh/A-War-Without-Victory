@@ -161,6 +161,68 @@ describe('paramilitary_sweep', () => {
             expect(report.spawned.filter(s => s.target_osid === 'op:d')).toHaveLength(0);
         });
 
+        it('skips rear-pocket targets with adjacent organized defenders', () => {
+            const edges = makeEdges([
+                ['op:a', 'op:b'],
+                ['op:a', 'op:d'],
+                ['op:b', 'op:d'],
+                ['op:d', 'op:e'],
+            ]);
+            const reverseMap = makeReverseMap(['op:a', 'op:b', 'op:d', 'op:e']);
+            const state = makeBaseState({
+                military: {
+                    formations: {
+                        'rbih_bde_adjacent': {
+                            id: 'rbih_bde_adjacent', faction: 'RBiH', name: 'Adjacent Defense', created_turn: 0,
+                            status: 'active', assignment: null, kind: 'brigade',
+                            location_osid: 'op:e', personnel: 1200,
+                        } as FormationState,
+                    },
+                } as any,
+                political: {
+                    political_controllers: { 'op:a': 'RS', 'op:b': 'RS', 'op:d': 'RBiH', 'op:e': 'RBiH' },
+                } as any,
+            });
+
+            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            expect(report.spawned.filter(s => s.target_osid === 'op:d')).toHaveLength(0);
+            expect(report.pending_player_requests).toBe(0);
+        });
+
+        it('does not classify an enclosed cluster as a rear pocket when a brigade exists anywhere inside it', () => {
+            const edges = makeEdges([
+                ['op:a', 'op:d'],
+                ['op:a', 'op:e'],
+                ['op:b', 'op:d'],
+                ['op:b', 'op:e'],
+                ['op:d', 'op:e'],
+            ]);
+            const reverseMap = makeReverseMap(['op:a', 'op:b', 'op:d', 'op:e']);
+            const state = makeBaseState({
+                military: {
+                    formations: {
+                        'rbih_cluster_defender': {
+                            id: 'rbih_cluster_defender', faction: 'RBiH', name: 'Pocket Defender', created_turn: 0,
+                            status: 'active', assignment: null, kind: 'brigade',
+                            location_osid: 'op:e', personnel: 1000,
+                        } as FormationState,
+                    },
+                } as any,
+                political: {
+                    political_controllers: {
+                        'op:a': 'RS',
+                        'op:b': 'RS',
+                        'op:d': 'RBiH',
+                        'op:e': 'RBiH',
+                    },
+                } as any,
+            });
+
+            const report = detectParamilitaryTargets(state, edges, reverseMap);
+            expect(report.spawned.filter(s => s.faction === 'RS')).toHaveLength(0);
+            expect(report.pending_player_requests).toBe(0);
+        });
+
         it('does not duplicate targets already being swept', () => {
             const edges = makeEdges([['op:a', 'op:b'], ['op:a', 'op:c'], ['op:a', 'op:d'], ['op:b', 'op:d'], ['op:c', 'op:d']]);
             const reverseMap = makeReverseMap(['op:a', 'op:b', 'op:c', 'op:d']);
@@ -203,7 +265,7 @@ describe('paramilitary_sweep', () => {
   } as any,
 });
 
-            const report = advanceParamilitaries(state, reverseMap);
+            const report = advanceParamilitaries(state, [], reverseMap);
 
             // ETA was 1, decremented to 0 → capture
             expect(report.captured).toHaveLength(1);
@@ -231,7 +293,7 @@ describe('paramilitary_sweep', () => {
   } as any,
 });
 
-            const report = advanceParamilitaries(state, reverseMap);
+            const report = advanceParamilitaries(state, [], reverseMap);
 
             expect(report.captured).toHaveLength(0);
             expect(state.political.political_controllers!['D']).toBe('RBiH');
@@ -255,7 +317,7 @@ describe('paramilitary_sweep', () => {
   } as any,
 });
 
-            advanceParamilitaries(state, reverseMap);
+            advanceParamilitaries(state, [], reverseMap);
 
             // Check RS casualties recorded
             const rsLedger = state.military.casualty_ledger!['RS'];
@@ -282,11 +344,45 @@ describe('paramilitary_sweep', () => {
   } as any,
 });
 
-            const report = advanceParamilitaries(state, reverseMap);
+            const report = advanceParamilitaries(state, [], reverseMap);
 
             // Should dissolve without capturing (no casualties)
             expect(report.dissolved).toContain('para_rs_t3_0');
             expect(report.captured).toHaveLength(0);
+        });
+
+        it('rear-pocket paramilitary retreats if adjacent organized defenders are present at arrival', () => {
+            const edges = makeEdges([
+                ['A', 'D'],
+                ['B', 'D'],
+            ]);
+            const reverseMap = makeReverseMap(['A', 'B', 'D']);
+            const state = makeBaseState({
+                military: {
+                    formations: {
+                        'para_rs_t3_0': {
+                            id: 'para_rs_t3_0', faction: 'RS', name: 'Para', created_turn: 3,
+                            status: 'active', assignment: null, kind: 'paramilitary',
+                            paramilitary_target: 'D', paramilitary_eta: 1, personnel: 150,
+                        } as FormationState,
+                        'rbih_adjacent': {
+                            id: 'rbih_adjacent', faction: 'RBiH', name: 'Adjacent Brigade', created_turn: 0,
+                            status: 'active', assignment: null, kind: 'brigade',
+                            location_osid: 'B', personnel: 1200,
+                        } as FormationState,
+                    },
+                } as any,
+                political: {
+                    political_controllers: { A: 'RS', B: 'RBiH', D: 'RBiH' },
+                } as any,
+            });
+
+            const report = advanceParamilitaries(state, edges, reverseMap);
+
+            // Should dissolve without capturing (no casualties)
+            expect(report.dissolved).toContain('para_rs_t3_0');
+            expect(report.captured).toHaveLength(0);
+            expect(state.political.political_controllers!['D']).toBe('RBiH');
         });
     });
 
@@ -503,7 +599,7 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const report = advanceParamilitaries(state, reverseMap);
+            const report = advanceParamilitaries(state, [], reverseMap);
 
             expect(report.captured).toHaveLength(1);
             expect(report.captured[0].osid).toBe('op:zvornik:b');
@@ -545,7 +641,7 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const report = advanceParamilitaries(state, reverseMap);
+            const report = advanceParamilitaries(state, [], reverseMap);
 
             // Should capture — defender has 300 pers, below 500 threshold
             expect(report.captured).toHaveLength(1);
@@ -578,7 +674,7 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            const report = advanceParamilitaries(state, reverseMap);
+            const report = advanceParamilitaries(state, [], reverseMap);
 
             // Should NOT capture — defender has 1500 pers, above 500 threshold
             expect(report.captured).toHaveLength(0);
@@ -605,7 +701,7 @@ describe('paramilitary_sweep', () => {
                 } as any,
             });
 
-            advanceParamilitaries(state, reverseMap);
+            advanceParamilitaries(state, [], reverseMap);
 
             // Offensive rate: 0.05 * 5000 = 250 civilian casualties
             expect(state.displacement.civilian_casualties!['RBiH'].killed).toBe(250);

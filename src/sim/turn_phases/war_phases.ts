@@ -741,9 +741,9 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             const od = getOperationalData(context);
-            if (!od?.opData?.operationalToCanonical) return;
+            if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
             const report = advanceParamilitaries(
-                context.state, od.opData.operationalToCanonical
+                context.state, od.edges, od.opData.operationalToCanonical
             );
             if (report.captured.length > 0 || report.dissolved.length > 0) {
                 const existing = context.report.paramilitary_sweep as import('../combat/paramilitary_sweep.js').ParamilitarySweepReport | undefined;

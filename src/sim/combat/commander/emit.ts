@@ -754,7 +754,7 @@ function buildOperations(
             if (probeSectorId) {
                 const sector = briefing.sectors.find(s => s.sector_id === probeSectorId);
                 if (sector) {
-                    const adjacency = briefing.spatial.adjacency;
+                    const adjacency = briefing.spatial.sharedBoundaryAdjacency ?? briefing.spatial.adjacency;
                     const friendlySet = briefing.spatial.friendlyOsidsByFaction?.get(briefing.faction);
                     if (adjacency && friendlySet) {
                         const enemyTargets = new Set<string>();
@@ -776,7 +776,7 @@ function buildOperations(
             if (probeObjectives.length > 0) {
                 // Reachability check: probe brigade must BFS-reach the target within MAX_REACHABILITY_HOPS.
                 const probeTarget = probeObjectives[0]!;
-                const probeAdj = briefing.spatial.adjacency;
+                const probeAdj = briefing.spatial.sharedBoundaryAdjacency ?? briefing.spatial.adjacency;
                 const probeFriendly = briefing.spatial.friendlyOsidsByFaction?.get(briefing.faction);
                 const probeBrigLoc = briefing.brigades.find(b => b.id === probeBrigade.brigade_id)?.location_osid;
                 let probeReachable = false;

@@ -171,6 +171,82 @@ export function bfsToNearestSector(
 }
 
 /**
+ * Returns the set of "unique" front OSIDs for `sector` — those that do NOT appear
+ * in any other sector's sub_segments.friendly_osids.  Used by FIX 1 in
+ * buildFactionSectors to distinguish OSIDs that only this sector would staff vs
+ * junction OSIDs that are already covered by a sibling sector.
+ *
+ * If the returned set is empty, all front OSIDs are shared — fall back to the
+ * original component check.
+ */
+export function getSectorUniqueFrontOsids(
+    sector: CorpsFrontSector,
+    otherSectors: CorpsFrontSector[],
+): Set<string> {
+    // Collect all front OSIDs that appear in OTHER sectors under construction
+    const sharedPool = new Set<string>();
+    for (const other of otherSectors) {
+        if (other === sector) continue;
+        for (const ss of other.sub_segments) {
+            for (const o of ss.friendly_osids) sharedPool.add(o);
+        }
+    }
+
+    // Front OSIDs of this sector not present in the shared pool are "unique"
+    const unique = new Set<string>();
+    for (const ss of sector.sub_segments) {
+        for (const o of ss.friendly_osids) {
+            if (!sharedPool.has(o)) unique.add(o);
+        }
+    }
+    return unique;
+}
+
+/**
+ * Returns true iff at least one corps brigade (identified by formation ID) can
+ * reach any OSID in `targets` within `maxHops` BFS hops through `friendlyOsids`.
+ *
+ * Deterministic: brigade IDs are iterated in the order supplied (caller must
+ * sort by strictCompare before passing).  BFS expansion is through the
+ * adjacency list which is pre-sorted by buildOsidAdjacency.
+ *
+ * Used by FIX 1 in buildFactionSectors: if a sector's unique front OSIDs are
+ * unreachable from ALL corps brigades, the sector is an unstaffable ghost and
+ * should be skipped before it enters the pipeline.
+ */
+export function canAnyBrigadeReachAny(
+    brigadeLocations: string[],
+    targets: Set<string>,
+    adjacency: Map<Osid, Osid[]>,
+    friendlyOsids: Set<string>,
+    maxHops: number,
+): boolean {
+    if (targets.size === 0 || brigadeLocations.length === 0) return false;
+    for (const startOsid of brigadeLocations) {
+        if (!startOsid) continue;
+        if (targets.has(startOsid)) return true;
+        const visited = new Set<string>([startOsid]);
+        let frontier: string[] = [startOsid];
+        for (let hop = 1; hop <= maxHops; hop++) {
+            const next: string[] = [];
+            for (const osid of frontier) {
+                for (const nb of adjacency.get(osid as Osid) ?? []) {
+                    if (visited.has(nb)) continue;
+                    visited.add(nb);
+                    // Only traverse through friendly territory
+                    if (!friendlyOsids.has(nb)) continue;
+                    if (targets.has(nb)) return true;
+                    next.push(nb);
+                }
+            }
+            if (next.length === 0) break;
+            frontier = next;
+        }
+    }
+    return false;
+}
+
+/**
  * Simple BFS distance between two OSIDs through adjacency graph.
  * When `friendlyOsids` is provided, BFS only expands through OSIDs in that set
  * (the `from` and `to` nodes are always allowed regardless).

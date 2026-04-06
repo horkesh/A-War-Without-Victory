@@ -28,6 +28,13 @@ const CORPS_EXCLUDED_MUNICIPALITIES: ReadonlyMap<string, ReadonlySet<string>> = 
         'gorazde', 'rogatica', 'cajnice', 'kalinovik', 'foca', 'visegrad', 'rudo',
         'han_pijesak', 'vlasenica', 'bratunac', 'srebrenica', 'zvornik', 'sekovici',
     ])],
+    // Kalinovik municipality was 4th Corps operational area throughout the war.
+    // 1st Corps never deployed brigades to Kalinovik — all op:kalinovik:* OSIDs
+    // are 4th Corps responsibility (443rd/444th Mountain). Without this exclusion,
+    // 1st Corps BFS from Hadzici/Trnovo wins the race to golubici_2 (geographically
+    // closer than Jablanica), creating an unstaffable ghost sector:arbih_1st_corps:3.
+    // Confirmed by Historian: canonical 1st/4th Corps boundary excludes Kalinovik from 1st.
+    ['arbih_1st_corps', new Set(['kalinovik'])],
 ]);
 
 /**
@@ -389,11 +396,29 @@ export function assignTerritoryVoronoi(
     for (const [osid, sectorIdx] of claimed) {
         perSector[sectorIdx]!.add(osid);
     }
-    // 2. Shared front-edge OSIDs → all claiming sectors
+    // 2. Shared front-edge OSIDs → exclusive ownership to primary sector
+    // When multiple sectors claim the same front-edge OSID (split children),
+    // assign exclusively to the sector with the most front edges (length_edges).
+    // Tiebreaker: lower sector_id in strictCompare order for determinism.
     for (const [osid, sectorIndices] of sharedClaims) {
-        for (const si of sectorIndices) {
-            perSector[si]!.add(osid);
+        if (sectorIndices.length === 1) {
+            perSector[sectorIndices[0]!]!.add(osid);
+            continue;
         }
+        let winnerId = sectorIndices[0]!;
+        for (let k = 1; k < sectorIndices.length; k++) {
+            const si = sectorIndices[k]!;
+            const candidateEdges = sectors[si]!.length_edges;
+            const winnerEdges = sectors[winnerId]!.length_edges;
+            if (
+                candidateEdges > winnerEdges ||
+                (candidateEdges === winnerEdges &&
+                    strictCompare(sectors[si]!.sector_id, sectors[winnerId]!.sector_id) < 0)
+            ) {
+                winnerId = si;
+            }
+        }
+        perSector[winnerId]!.add(osid);
     }
     for (let i = 0; i < sectors.length; i++) {
         sectors[i]!.territory_osids = [...perSector[i]!].sort(strictCompare);

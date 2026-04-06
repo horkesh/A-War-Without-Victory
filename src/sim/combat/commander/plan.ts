@@ -1264,10 +1264,11 @@ function selectOpportunityTargets(
     // Example: cukle_2 surrounded by RBiH/HRHB from turn 0 — any RS probe is futile.
     // Guard: adjacency may be absent in unit tests — fall back to allowing all (adjacency
     // is already checked above; reuse the same reference).
+    const sbAdjacency = briefing.spatial?.sharedBoundaryAdjacency;
     const factionFriendlyOsids = briefing.spatial?.friendlyOsidsByFaction?.get(briefing.faction);
     const isIsolatedCapture = (osid: string): boolean => {
-        if (!adjacency || !factionFriendlyOsids) return false; // no data → allow
-        const neighbors = adjacency.get(osid as any) ?? [];
+        if (!sbAdjacency || !factionFriendlyOsids) return false; // no data → allow
+        const neighbors = sbAdjacency.get(osid as any) ?? [];
         if ((neighbors as readonly string[]).length === 0) return false; // no neighbors → allow
         return !(neighbors as readonly string[]).some(n => factionFriendlyOsids.has(n));
     };

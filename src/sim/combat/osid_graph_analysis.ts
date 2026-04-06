@@ -384,6 +384,18 @@ export function analyzeFactionGraph(
             for (const c of clusterSet) pocketChecked.add(c);
             if (tooLarge) continue;
 
+            // A defended enclave is not a rear pocket. Rear-pocket cleanup is only for
+            // abandoned clusters with no organized military present anywhere inside.
+            let hasOrganizedDefense = false;
+            for (const c of cluster) {
+                const { totalPower } = getBrigadePowerAtOsid(state, c, enemyController);
+                if (totalPower > 0) {
+                    hasOrganizedDefense = true;
+                    break;
+                }
+            }
+            if (hasOrganizedDefense) continue;
+
             // Check: ALL external op: neighbors of the cluster must be faction-controlled
             // Skip canonical SID nodes (S:-prefixed) — they have no political_controllers entry
             let allSurrounded = true;

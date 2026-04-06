@@ -19,6 +19,7 @@ import { buildOsidAdjacency, type Osid } from './osid_adjacency.js';
 import type { EdgeRecord } from '../../map/settlements.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { seedDisplacementTimerOnFlip } from '../../state/displacement_takeover.js';
+import { osidBelongsToEnclave, ENCLAVE_DEFINITIONS } from './enclave_resilience.js';
 
 /** Max cluster size for auto-flip. Clusters > 3 are too large to flip without military action. */
 const MAX_POCKET_CLUSTER = 6;
@@ -128,6 +129,25 @@ export function consolidateRearPockets(
         }
 
         if (!allSurrounded || !surroundingFaction || surroundingFaction === controller) continue;
+
+        // Enclave guard: siege geometry produces topologically surrounded clusters.
+        // Interior enclave OSIDs (e.g. Sarajevo city fragments, Srebrenica pocket) may
+        // have all-RS neighbors because they sit inside a defended enclave ring — this is
+        // correct siege geometry, NOT an abandoned pocket. Consolidation must not
+        // auto-flip enclave-interior OSIDs based on topology alone.
+        if (surroundingFaction) {
+            let enclaveProtected = false;
+            outer: for (const clusterOsid of cluster) {
+                for (const enclave of ENCLAVE_DEFINITIONS) {
+                    if (enclave.faction === surroundingFaction) continue; // don't protect attacker's own enclaves
+                    if (osidBelongsToEnclave(clusterOsid, enclave)) {
+                        enclaveProtected = true;
+                        break outer;
+                    }
+                }
+            }
+            if (enclaveProtected) continue;
+        }
 
         // Auto-flip entire cluster
         if (!state.political.political_controllers) state.political.political_controllers = {};

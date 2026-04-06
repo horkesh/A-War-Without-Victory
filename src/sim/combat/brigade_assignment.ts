@@ -43,7 +43,13 @@ const VRS_1K_LINE_DISTANCE_MAX_HOPS = 6;
  */
 export const DRIFT_RECALL_SECTOR_SKIP_HOPS = 6;
 const FEINT_THREAT_MULTIPLIER = 1.5;
-const TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS = 30;
+/**
+ * Maximum BFS hops for truthful sector reachability checks.
+ * A brigade beyond this many hops from a sector's unique front OSIDs cannot
+ * truthfully staff it — the sector is unstaffable and should be skipped.
+ * Exported for use in corps_front_sectors.ts FIX 1 unique-front-OSID guard.
+ */
+export const TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS = 30;
 
 type FrontEdgeSnapshot = {
     edge_id?: string;

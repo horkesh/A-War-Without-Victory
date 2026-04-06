@@ -170,6 +170,7 @@ export function detectParamilitaryTargets(
     const playerFaction = state.meta?.player_faction ?? null;
     const factions = (state.factions ?? []).map(f => f.id).sort(strictCompare);
     const defendedOsids = buildDefendedOsids(state);
+    const defenderFactionMap = buildDefenderFactionMap(state);
 
     // Existing paramilitary targets — avoid duplicates
     const existingTargets = new Set<string>();
@@ -194,6 +195,10 @@ export function detectParamilitaryTargets(
 
         for (const pocketOsid of pockets) {
             if (existingTargets.has(`${faction}:${pocketOsid}`)) continue;
+            // Skip enclave OSIDs — surrounded topology is correct siege geometry, not abandoned pocket
+            if (ENCLAVE_DEFINITIONS.some(enc => enc.faction !== faction && osidBelongsToEnclave(pocketOsid, enc))) continue;
+            const currentController = getPoliticalControllerOSID(state, pocketOsid, reverseMap);
+            if (currentController && hasAdjacentDefender(pocketOsid, currentController, adjacency, defenderFactionMap)) continue;
             if (isDefendedAgainst(defendedOsids, state, pocketOsid, faction)) continue;
 
             const hashVal = deterministicHash(pocketOsid, turn) / 100;
@@ -438,12 +443,15 @@ function recordWarCrime(state: GameState, faction: FactionId): void {
  */
 export function advanceParamilitaries(
     state: GameState,
+    edges: EdgeRecord[],
     reverseMap: OperationalToCanonicalReverseMap
 ): ParamilitarySweepReport {
     const report = emptyReport();
     const formations = state.military.formations ?? {};
     const turn = state.meta?.turn ?? 0;
     const defendedOsids = buildDefendedOsids(state);
+    const adjacency = buildOsidAdjacency(edges);
+    const defenderFactionMap = buildDefenderFactionMap(state);
 
     const paraIds = Object.keys(formations)
         .filter(fid => formations[fid]?.kind === 'paramilitary' && formations[fid]?.status === 'active')
@@ -470,8 +478,11 @@ export function advanceParamilitaries(
         // Defense check — compute once before any mutations
         const defended = isDefendedAgainst(defendedOsids, state, targetOsid, f.faction);
         const defenderPers = defended ? getDefenderPersonnel(state, targetOsid, f.faction) : 0;
+        const hasAdjacentOrganizedDefense = currentController
+            ? hasAdjacentDefender(targetOsid, currentController, adjacency, defenderFactionMap)
+            : false;
 
-        if (defended) {
+        if (defended || (!isOffensive && hasAdjacentOrganizedDefense)) {
             if (isOffensive && defenderPers <= OFFENSIVE_PARA_LIGHT_DEFENSE_THRESHOLD) {
                 // Offensive mode vs light defense: overwhelm — capture proceeds below with extra casualties
             } else if (isOffensive) {
@@ -483,7 +494,7 @@ export function advanceParamilitaries(
                 dissolveParamilitary(state, fid, report);
                 continue;
             } else {
-                // Rear pocket mode: any defense → retreat with heavy casualties
+                // Rear pocket mode: exact-tile or adjacent organized defense blocks silent cleanup capture
                 const casualties = Math.ceil(f.personnel! * PARAMILITARY_CASUALTY_RATE * DEFENDED_RETREAT_CASUALTY_MULT);
                 if (state.military.casualty_ledger) {
                     recordBattleCasualties(state.military.casualty_ledger, f.faction, fid, splitCasualties(casualties));

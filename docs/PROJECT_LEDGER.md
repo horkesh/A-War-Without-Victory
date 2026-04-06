@@ -1,3 +1,196 @@
+## [2026-04-06] fix(engine): Enclave guard in detectParamilitaryTargets — block rear-pocket paramilitary against Sarajevo interior (n1356)
+
+**Type:** Bug fix  
+**Files:** `src/sim/combat/paramilitary_sweep.ts`  
+**Run:** n1356 — 93.5% area-weighted, 27/27 anchors  
+**Status:** VERIFIED — tsc clean, 2944/2944 tests, both Sarajevo OSIDs RBiH at w40
+
+### Root cause
+
+`detectParamilitaryTargets` identified Sarajevo interior OSIDs as RS `enemy_pockets` (topologically correct siege geometry — all neighbors are RS). It spawned rear-pocket paramilitaries against them with no enclave exclusion check. After `PARAMILITARY_MARCH_TURNS`, `advanceParamilitaries` captured them, recording `mechanism: 'combat'` with no `battle_id` or `attacker_brigade` — matching the observed control events exactly. No `brigade_history.engagement` is created by paramilitaries, so the flip was invisible in the weekly battles array.
+
+The offensive paramilitary scheduling function (`scheduleMilitiaAndParamilitaries`) already had an enclave exclusion. The rear-pocket function (`detectParamilitaryTargets`) did not.
+
+### Fix
+
+Added one line inside the `for (const pocketOsid of pockets)` loop in `detectParamilitaryTargets`:
+
+```typescript
+if (ENCLAVE_DEFINITIONS.some(enc => enc.faction !== faction && osidBelongsToEnclave(pocketOsid, enc))) continue;
+```
+
+`ENCLAVE_DEFINITIONS` and `osidBelongsToEnclave` were already imported. No new imports.
+
+### Defence layers now in place
+
+| Path | Guard |
+|---|---|
+| `detectParamilitaryTargets` (rear-pocket scheduling) | **NEW** — enclave exclusion added |
+| `scheduleMilitiaAndParamilitaries` (offensive scheduling) | Existing — `enclaveOsids.has(osid)` |
+| `consolidateRearPockets` (auto-flip clusters) | Existing — enclave guard added earlier this session |
+
+---
+
+## [2026-04-06] fix(engine): Enclave guard in consolidateRearPockets — suppress Sarajevo/Srebrenica consolidation auto-flip
+
+**Type:** Bug fix (defence layer — not the root cause of the observed flips)  
+**Files:** `src/sim/combat/rear_pocket_consolidation.ts`, `tests/sarajevo_core_defense.test.ts` (new), `tests/enclave_perimeter_guard.test.ts` (deleted)  
+**Status:** ACCEPTED — tsc clean, 206 files / 2944 tests passing
+
+### What this fixes
+
+`consolidateRearPockets` auto-flips clusters of same-controller OSIDs completely surrounded by a single enemy faction. Enclave interior OSIDs can be topologically surrounded (correct siege geometry) — the consolidation guard prevents them from being auto-flipped via this separate path.
+
+### Fix
+
+Added enclave guard in `rear_pocket_consolidation.ts` after `allSurrounded` is confirmed and before the flip loop. Checks all cluster OSIDs against `ENCLAVE_DEFINITIONS`. If any belongs to an enclave whose faction is NOT the surrounding faction, skips the entire cluster.
+
+### Tests
+
+`tests/sarajevo_core_defense.test.ts` (5 tests) — covers the consolidation guard path.
+
+---
+
+## [2026-04-06] Trnovo/Kalinovik Frontier Design Fix — Systemic Sector Viability Gate
+
+**Type:** Fix (systemic)
+**Files:** `src/sim/combat/sector_utils.ts`, `src/sim/combat/corps_front_sectors.ts`, `src/sim/combat/brigade_assignment.ts`, `src/sim/combat/sector_territory.ts`, `tests/trnovo_kalinovik_sector_fix.test.ts`
+**Status:** ACCEPTED — n1352 verified, smoke test triad clean
+**Run:** n1352, hash `c5f1aca6e6e42cc9`, 93.6%, 27/27 anchors, 6/6 benchmarks, 61 battles
+**Smoke tests:** tsc clean · 2939/2939 vitest · desktop:map:build clean
+
+### What changed
+
+**Option Y — FIX 1 strengthening (`sector_utils.ts`, `corps_front_sectors.ts`, `brigade_assignment.ts`):**
+
+The original FIX 1 viability check in `buildFactionSectors` called `getSectorComponent`, which returned the first reachable component it could find by trying each of a sector's front OSIDs in sequence. For `sector:arbih_1st_corps:3`, this meant `golubici_2` (isolated, no path back to main ARBiH network) was silently skipped and `kijevo_2` (main Sarajevo component, trivially reachable by every 1st Corps brigade) was used instead. The sector was stamped viable even though its unique duty OSID — `golubici_2` — was unreachable from any 1st Corps brigade.
+
+Three additions close this:
+
+- `getSectorUniqueFrontOsids(sector, otherSectors) → Set<string>` (`sector_utils.ts`): computes the set of front OSIDs in a sector's `sub_segments.friendly_osids` that do not appear in any sibling sector's front OSIDs. These are the OSIDs only this sector can defend.
+- `canAnyBrigadeReachAny(brigadeLocations, targets, adjacency, friendlyOsids, maxHops) → boolean` (`sector_utils.ts`): BFS from each brigade location within `maxHops` hops on friendly-controlled OSIDs; returns true if any brigade reaches any target OSID within the bound.
+- `TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS` exported from `brigade_assignment.ts` so the FIX 1 path uses the same hop constant as march assignment.
+
+FIX 1 now: if unique front OSIDs exist, verify at least one corps brigade can reach them within the hop bound; if not, prune the sector. Falls back to the original component check when no unique front OSIDs exist (shared-junction sectors remain backward compatible).
+
+**kalinovik exclusion (`sector_territory.ts`):**
+
+Added `['arbih_1st_corps', new Set(['kalinovik'])]` to `CORPS_EXCLUDED_MUNICIPALITIES`. Kalinovik was 4th Corps (Konjic axis) operational area throughout 1992–1995; no 1st Corps brigade deployed there. Confirmed by Historian against ICTY IT-98-29 (SRK verdicts). The exclusion routes `golubici_2` and surrounding OSIDs to 4th Corps BFS, where the 443rd/444th Mountain naturally claim and defend them.
+
+### Why this is systemic
+
+Option Y references no brigade names, OSID names, or scenario constants. It works from the structural relationship between sector split geometry, sibling sector front sets, and the adjacency graph. Any future sector split that produces a child with isolated unique frontage is caught by the same gate.
+
+### Verification
+
+- `op:kalinovik:golubici_2` = RS by w40 — phantom ARBiH defense eliminated
+- No ghost sector with zero brigades — n1350 prune intact
+- No kalinovik territory in any `arbih_1st_corps` sector — exclusion effective
+- 444th Mountain at `op:konjic:bradina` — 4th Corps home area, historically correct
+- 9 new tests (Groups C/D/E in `tests/trnovo_kalinovik_sector_fix.test.ts`), 2939/2939 pass (205 suites)
+
+### Residual risks
+
+- **Pocket-claim bypass (P2 — tracked):** Post-BFS pocket-claim in `sector_territory.ts` can reclaim kalinovik OSIDs if a 1st Corps brigade is physically present there. No current scenario triggers this.
+- **`delijas` = RS in sim (painted RBiH, pre-existing P1):** Pre-existing calibration delta in SARAJEVO region, not caused or worsened by this fix.
+- **SARAJEVO region at 76.7% (pre-existing P1):** Separate calibration lane.
+
+### Report
+
+`docs/40_reports/implemented/20260406_TRNOVO_KALINOVIK_FRONTIER_DESIGN_FIX.md`
+
+---
+
+## [2026-04-06] Trnovo/Kalinovik Sector Ghost and Territory Overlap Fix
+
+**Type:** Bug fix
+**Files:** `src/sim/combat/sector_territory.ts`, `src/sim/combat/corps_front_sectors.ts`
+**Tests:** `tests/trnovo_kalinovik_sector_fix.test.ts` (7 tests)
+**Status:** CLOSED
+
+### Root Causes (3 bugs)
+
+**Bug 1 — Ghost sector survival:** `splitNonContiguousSectors` creates split children with zero brigades. Lane B pre-pass in `ensureMinimumSectorCoverage` blocked (102nd/17th at `trnovo` are frontline-essential in their donor sector). Ghost sector:arbih_1st_corps:3 had 9 edges (> MIN_SECTOR_EDGES=5 → no merge) and 4 territory OSIDs (→ old prune didn't fire). Sector survived all rescue and prune paths.
+
+**Bug 2 — Territory overlap:** `assignTerritoryVoronoi` `sharedClaims` assigned `kijevo_2`, `trnovo`, `tusila` to BOTH sector:2 and sector:3 (both had these OSIDs in `sub_segments.friendly_osids`).
+
+**Bug 3 — Artifact-driven frontage durability:** Sector:2 brigades appearing to defend trnovo/kijevo_2/tusila via the overlap → ARBiH Trnovo frontage too durable.
+
+### Fixes
+
+**Fix 1 (`assignTerritoryVoronoi`):** Shared front-edge OSIDs now assigned exclusively to the sector with most `length_edges`. Tiebreaker: lower `sector_id` via `strictCompare`.
+
+**Fix 2 (final prune):** Added `if (s.assigned_brigade_ids.length === 0 && s.reserve_brigade_ids.length === 0) return false;` — prunes zero-brigade sectors after all rescue attempts.
+
+### Verification
+
+- n1350: 93.6% area-weighted (-0.4pp within noise), 27/27 anchors PASS
+- `sector:arbih_1st_corps:3`: 6 brigades, 19 edges, 11 territory OSIDs — healthy
+- `op:kalinovik:golubici_2`: RS by w40 (correctly captured by VRS)
+- No territory duplication
+- hash: 242d63cb30b1d1b8
+
+---
+
+## [2026-04-06] Investigation: Trnovo-Kalinovik Sector Ownership — Phase 1 Complete
+
+**Type:** Investigation (read-only)  
+**Files created:** `docs/40_reports/20260406_TRNOVO_KALINOVIK_SECTOR_INVESTIGATION.md`  
+**Status:** AWAITING ARCHITECT DECISION — fix seam identified, no code changes yet
+
+### Findings summary
+
+`sector:arbih_1st_corps:3` exists every run with 9 undefended front edges and zero brigades. Root cause is a five-layer failure:
+
+1. **Territorial misassignment**: `op:kalinovik:golubici_2` is claimed by 1st Corps BFS (Hadzici seeds reach Kalinovik first) but all actual defenders of `golubici_2` are **4th Corps** (443rd Mountain, 444th Mountain). No 1st Corps brigade has a home in Trnovo or Kalinovik municipality.
+2. **FIX 1 bypass**: `getSectorComponent(sector:3)` falls through `golubici_2` (not in componentOf — isolated) to `kijevo_2` (main Sarajevo component) → sector passes the staffability check.
+3. **All donors front-essential**: All 6 sector:2 brigades are at front-essential OSIDs at end of run — pre-pass and Step 2 find no transferable brigades.
+4. **Merge guard blocks fusion**: `mergeSmallAdjacentSectors` guard `if (a.assigned_brigade_ids.length === 0) continue` explicitly skips empty sectors.
+5. **Final prune doesn't remove it**: sector:3 has `territory_osids.length > 0`.
+
+`sector:arbih_4th_corps:0` (444th at `delijas`) is a **transient artifact** — created because 444th was physically there, self-corrects as 444th marches to `dzepi_2` (already ordered).
+
+### Fix seam options
+
+- **Option A (preferred)**: Add `kalinovik` to `CORPS_EXCLUDED_MUNICIPALITIES` for `arbih_1st_corps` in `sector_territory.ts:26-31`. Routes `golubici_2` to 4th Corps BFS → 443rd fills sector naturally. Requires Historian validation of 1st/4th Corps Kalinovik boundary.
+- **Option B**: Relax `mergeSmallAdjacentSectors` empty-sector guard → sector:3 merges into sector:2. Assigns Kalinovik front to Hadzici-homed 1st Corps brigades — historically questionable.
+- **Option C**: Extend ghost prune to zero-brigade sectors with no unique front OSIDs. Hides underlying bug.
+
+### Mistake guard
+trnovo kalinovik sector ghost golubici_2 arbih_1st_corps:3 zero brigade territorial exclusion CORPS_EXCLUDED_MUNICIPALITIES
+
+---
+
+## [2026-04-06] Retroactive Tooth Eviction Guard — 444th Mountain forward-hold discipline
+
+**Type:** Engine fix (behavioral guard)
+**Files modified:** `src/sim/combat/bot_brigade_eval_front.ts`
+**Files created:** `tests/retroactive_tooth_eviction.test.ts`, `docs/40_reports/implemented/20260406_RETROACTIVE_TOOTH_EVICTION.md`
+**Status:** ACCEPTED
+**Verification:** tsc clean, 2923/2923 vitest (204 files), 94.0% area-weighted (+0.4pp vs n1348), 27/27 anchors, 6/6 benchmarks, 59 battles (n1349)
+
+### What changed
+
+**Retroactive-tooth eviction guard** (`bot_brigade_eval_front.ts` `evaluateSectorMarch` else-branch): When a brigade is already on a sector front OSID and that OSID is the sole `friendly_osid` in its sub-segment (retroactive tooth), AND `isMovementDestinationRisky` returns true, AND no column march is in flight, AND the OSID is not in `must_hold_osids_by_corps`, AND the brigade is not disrupted — the guard issues a retrograde march to the nearest safe corps-wide front OSID. If no safe destination exists (fully trapped), march is suppressed and brigade holds in place.
+
+**Tooth guard trap-remediation fix** (same file, pre-march path): The existing trap-remediation block (for brigades not yet on front) now excludes risky single-OSID sub-segment teeth from its rerouting candidate set, preventing it from re-selecting the same tooth it just blocked.
+
+### Why this was needed
+
+444th Mountain Brigade marched to `op:kalinovik:sela_2` while it was part of a 9-OSID sector sub-segment. RS subsequently captured adjacent OSIDs, leaving sela_2 as a sole-OSID retroactive tooth with 8 RS-facing front edges and no reserve. The prior tooth guard only fired on incoming march decisions (pre-formed teeth). No "brigade already there, position became untenable" path existed.
+
+### Outcome (n1349)
+
+444th Mountain retrograded from sela_2 to `op:trnovo:delijas`. sela_2 is RS-controlled at end of run. Calibration improved to 94.0% (ATH for this session). Residual P1: corps-level reserve allocation for isolated sectors — separate lane.
+
+### Mistake guard
+retroactive tooth eviction guard forward-hold discipline 444th mountain sela_2 evaluateSectorMarch else-branch isRetroactiveTooth isMovementDestinationRisky
+
+### FORAWWV note
+None — behavioral guard only, no canon changes.
+
+---
+
 ## [2026-04-06] Frontline-Truth Fix — Isolated Brigade Guards (444th + 16th Krajina)
 
 **Type:** Engine fix (behavioral guard)
@@ -24287,3 +24480,56 @@ ACCEPTED. Phase 5 focus: Owen-Stoltenberg RBiH tactical-acceptance branch, RS te
 ### Report
 
 `docs/40_reports/implemented/20260406_V084_PHASEF_WARLORD_GUARD_REPO_TRUTH.md`
+
+## [2026-04-06] Brigade Trapping — Corridor-Quality Guard (Architect Re-investigation)
+
+**Type:** Engine correctness — command quality
+**Files modified:** `src/sim/combat/commander/plan.ts`, `src/sim/combat/commander/emit.ts`
+**Files created:** `docs/40_reports/implemented/20260406_BRIGADE_TRAPPING_CORRIDOR_QUALITY_GUARD.md`, `tests/commander/corridor_quality_guard.test.ts`
+**Status:** IMPLEMENTED — scenario run pending
+**vitest:** 2911/2911 (202 files). tsc clean.
+
+### What changed
+
+Prior Seam B closeout (20260406_FRONTLINE_TRUTH_444TH_16TH_KRAJINA) used the wrong adjacency map for `isIsolatedCapture`. The guard asked "does this OSID have ANY friendly neighbor in the full adjacency?" — which includes 48 near-miss point-touch edges (`shared_segments=0`). The `cukle_2` bug was enabled by one such edge: RS `donji_koricani` appears as a neighbor in the full map but shares only a 0.079 km polygon corner with `cukle_2`. Not a real corridor. Architect escalation rejected the prior "near-miss edge exists therefore acceptable" reasoning.
+
+**Fix:** Three locations upgraded to use `sharedBoundaryAdjacency` (already on `SpatialContext`, excludes `shared_segments=0` and `min_dist > 0.00005`):
+- `plan.ts:1267` — `isIsolatedCapture` in `selectOpportunityTargets`: `sbAdjacency = briefing.spatial?.sharedBoundaryAdjacency`
+- `emit.ts:757` — probe enemy-target discovery: `sharedBoundaryAdjacency ?? adjacency`  
+- `emit.ts:779` — probe approach-OSID reachability: `sharedBoundaryAdjacency ?? adjacency`
+
+**Data confirmed:** `cukle_2` has zero RS neighbors in `sharedBoundaryAdjacency`. `donji_koricani` (the only RS neighbor) is excluded on both criteria. The guard now correctly blocks cukle_2-pattern isolated probes.
+
+**Missing from prior fix:** The probe op path in `emit.ts:751-804` was explicitly noted as NOT fixed in prior residual risks. This fix closes that gap.
+
+**6 new tests** in `tests/commander/corridor_quality_guard.test.ts`: isolation filter (with/without sbAdj, real-border pass), probe path (blocked/allowed/fallback).
+
+**n1346 verification (corridor-quality guard):** 93.4% area-weighted (+0.1pp vs n1345 93.3%). 26/27 anchors (boljanic_2 pre-existing). 6/6 benchmarks. 65 battles. 16th Krajina at op:teslic:vitkovci — no Travnik probe. cukle_2 = RBiH all 40 turns. 444th at sela_2 holding. 4 destroyed brigades (same as n1345). Lane CLOSED.
+## [2026-04-06] fix(engine): Rear-pocket military-truth guard — topology alone cannot define an abandoned pocket
+
+**Type:** Bug fix  
+**Files:** `src/sim/combat/osid_graph_analysis.ts`, `src/sim/combat/paramilitary_sweep.ts`, `src/sim/turn_phases/war_phases.ts`, `tests/paramilitary_sweep.test.ts`  
+**Status:** VERIFIED — tsc clean, 2947/2947 tests, desktop:map:build clean except pre-existing warnings
+
+### Root cause
+
+The Sarajevo interior bug exposed a broader engine invariant failure. Rear-pocket cleanup was treating a topologically enclosed cluster as an abandoned military pocket. `analyzeFactionGraph()` classified small enclosed enemy clusters as `enemy_pockets` from topology alone, and `detectParamilitaryTargets()` scheduled rear-pocket paramilitaries against them even when organized defenders still existed inside or immediately adjacent to the cluster. `advanceParamilitaries()` then flipped control with `mechanism: 'combat'` but no `battle_id`, bypassing normal battle/reactive-defense semantics and making weekly summaries look wrong.
+
+This meant Sarajevo interior tiles could be attacked by a cleanup path that never asked the real military question: are there still organized defenders here or right next to here?
+
+### Fix
+
+Three coordinated guards now enforce military truth:
+
+1. `osid_graph_analysis.ts`: a cluster is **not** an `enemy_pocket` if any organized brigade of the enclosed faction exists anywhere inside the cluster.
+2. `paramilitary_sweep.ts`: rear-pocket scheduling now skips targets that still have adjacent organized defenders, and rear-pocket advance re-checks adjacent organized defense at arrival before capture.
+3. `war_phases.ts`: `advanceParamilitaries()` now receives live `edges`, so arrival-time defense checks use real adjacency instead of stale/local topology shortcuts.
+
+### Lessons learned
+
+- Topological enclosure is not military abandonment.
+- A silent cleanup/capture path must not bypass defended-line semantics.
+- Sarajevo exposed a general engine rule, not a Sarajevo-only exception.
+- Rear-pocket logic must respect both defenders inside the cluster and defenders adjacent to it.
+
+---
