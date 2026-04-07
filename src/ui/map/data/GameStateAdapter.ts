@@ -32,7 +32,7 @@
  */
 
 import type {
-    AoROrderView, AttackOrderView, CommandBriefingItemView, CommandBriefingSeverity, CommandBriefingView,
+    AoROrderView, AttackOrderView,
     CorpsFrontSectorView, EnclaveResilienceView, FactionId, FogOfWarView, FormationView, FrictionEventView, LoadedGameState,
     MilitiaPoolView, MobilizationSummaryView, MovementOrderSettlementView, NamedOfficerStateView, NamedOfficerView,
     OperationView, RepositionOrderView, RecruitmentView,
@@ -50,6 +50,8 @@ import { computeFullVerdict } from '../../../sim/negotiation/scoring.js';
 import type { GameVerdict } from '../../../state/negotiation_types.js';
 import { computeCorpsCommandStrain, getCommandStrainLabel, projectStrainDecay, deriveRecoveryForecast, deriveCorpsSituationAssessment, deriveReadinessTrend } from './command_strain.js';
 import type { GameState } from '../../../state/game_state.js';
+import { toCommandBriefingView } from '../../shared/command_briefing_views.js';
+import { getOperationalSitrepView } from '../../shared/operational_sitrep_views.js';
 
 function pointsByFaction(rec: Record<string, { points?: number }>): Record<string, number> {
     const out: Record<string, number> = {};
@@ -113,48 +115,6 @@ const MUNICIPALITY_DISPLAY_NAMES: Record<string, string> = {
 function humanizeMunicipalitySlug(slug: string): string {
     return MUNICIPALITY_DISPLAY_NAMES[slug]
         ?? slug.split(/[-_]/).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-}
-
-function operationKeyFromView(operation: OperationView): string {
-    return `${operation.corps_id}|${operation.name}`;
-}
-
-function compareCommandSeverity(a: CommandBriefingSeverity, b: CommandBriefingSeverity): number {
-    const rank: Record<CommandBriefingSeverity, number> = {
-        critical: 0,
-        warning: 1,
-        info: 2,
-    };
-    return rank[a] - rank[b];
-}
-
-function compareCommandItems(a: CommandBriefingItemView, b: CommandBriefingItemView): number {
-    const kindOrder: Record<CommandBriefingItemView['kind'], number> = {
-        convoy: 0,
-        enclave: 1,
-        operation: 2,
-        ivp: 3,
-        sector: 4,
-        opsec: 5,
-        support: 6,
-    };
-    return compareCommandSeverity(a.severity, b.severity)
-        || kindOrder[a.kind] - kindOrder[b.kind]
-        || a.id.localeCompare(b.id);
-}
-
-function buildCommandHeadline(criticalCount: number, pendingCount: number): string {
-    if (criticalCount > 0) {
-        return criticalCount === 1
-            ? '1 critical command matter requires attention'
-            : `${criticalCount} critical command matters require attention`;
-    }
-    if (pendingCount > 0) {
-        return pendingCount === 1
-            ? '1 command update available'
-            : `${pendingCount} command updates available`;
-    }
-    return 'Command situation stable';
 }
 
 function getAirdropAllocationValue(state: any, enclaveId: string): number {
@@ -244,221 +204,6 @@ function deriveEnclaveSupplyState(
     if (fallbackIsolationTurns <= 0) return 'adequate';
     if (fallbackHardening || fallbackResilience >= 8) return 'critical';
     return 'strained';
-}
-
-function buildCommandBriefing(params: {
-    playerFaction: string | null;
-    turn: number;
-    pendingConvoyDecisions?: LoadedGameState['pendingConvoyDecisions'];
-    enclaveResilience?: LoadedGameState['enclaveResilience'];
-    operations: OperationView[];
-    corpsFrontSectors?: LoadedGameState['corpsFrontSectors'];
-    internationalVisibilityPressure?: LoadedGameState['internationalVisibilityPressure'];
-    ivpConsequencesActive?: LoadedGameState['ivpConsequencesActive'];
-    municipalitySupportOrders?: LoadedGameState['municipalitySupportOrders'];
-    formations?: FormationView[];
-    pendingOfficerEvents?: LoadedGameState['pendingOfficerEvents'];
-}): CommandBriefingView | undefined {
-    const {
-        playerFaction,
-        turn,
-        pendingConvoyDecisions,
-        enclaveResilience,
-        operations,
-        corpsFrontSectors,
-        internationalVisibilityPressure,
-        ivpConsequencesActive,
-        municipalitySupportOrders,
-        formations,
-        pendingOfficerEvents,
-    } = params;
-
-    if (playerFaction !== 'RS' && playerFaction !== 'RBiH' && playerFaction !== 'HRHB') {
-        return undefined;
-    }
-
-    const items: CommandBriefingItemView[] = [];
-
-    if (pendingConvoyDecisions && pendingConvoyDecisions.length > 0) {
-        const firstConvoy = [...pendingConvoyDecisions].sort((a, b) => a.id.localeCompare(b.id))[0];
-        items.push({
-            id: `convoy:${firstConvoy.id}`,
-            kind: 'convoy',
-            severity: 'critical',
-            title: pendingConvoyDecisions.length === 1 ? 'Convoy decision pending' : `${pendingConvoyDecisions.length} convoy decisions pending`,
-            detail: `${humanizeMunicipalitySlug(firstConvoy.target_enclave.replace(/_/g, '-'))} requires corridor authorization.`,
-            actionLabel: 'Review convoys',
-            target: { type: 'summary', summaryFocus: 'convoys', enclaveId: firstConvoy.target_enclave },
-        });
-    }
-
-    const playerEnclaves = Object.entries(enclaveResilience ?? {})
-        .filter(([, enclave]) => enclave.faction === playerFaction)
-        .sort((a, b) => (a[1].display_name ?? a[0]).localeCompare(b[1].display_name ?? b[0]));
-    const highestRiskEnclave = playerEnclaves
-        .filter(([, enclave]) => enclave.supply_state === 'critical' || enclave.resilience <= 8 || enclave.isolation_turns >= 4)
-        .sort((a, b) => {
-            const aScore = (a[1].supply_state === 'critical' ? 100 : 0) + (a[1].isolation_turns * 2) + (30 - a[1].resilience);
-            const bScore = (b[1].supply_state === 'critical' ? 100 : 0) + (b[1].isolation_turns * 2) + (30 - b[1].resilience);
-            return bScore - aScore || (a[1].display_name ?? a[0]).localeCompare(b[1].display_name ?? b[0]);
-        })[0];
-    if (highestRiskEnclave) {
-        const [enclaveId, enclave] = highestRiskEnclave;
-        items.push({
-            id: `enclave:${enclaveId}`,
-            kind: 'enclave',
-            severity: enclave.supply_state === 'critical' || enclave.resilience <= 8 ? 'critical' : 'warning',
-            title: `${enclave.display_name ?? humanizeMunicipalitySlug(enclaveId.replace(/_/g, '-'))} under severe strain`,
-            detail: `${enclave.isolation_turns} isolated turn(s), resilience ${enclave.resilience.toFixed(1)}.`,
-            actionLabel: 'Open enclaves',
-            target: { type: 'enclaves', enclaveId },
-        });
-    }
-
-    const playerOperations = operations
-        .filter((operation) => operation.faction === playerFaction)
-        .sort((a, b) => operationKeyFromView(a).localeCompare(operationKeyFromView(b)));
-    const mostFragileOperation = playerOperations
-        .filter((operation) => (
-            (operation.supply_readiness ?? 1) < 0.5
-            || (operation.avg_cohesion ?? 100) < 65
-            || (operation.failure_count ?? 0) >= 2
-            || (operation.consecutive_failures_on_current ?? 0) >= 2
-        ))
-        .sort((a, b) => {
-            const aScore = ((a.supply_readiness ?? 1) < 0.4 ? 100 : 0) + ((a.failure_count ?? 0) * 10) + ((a.consecutive_failures_on_current ?? 0) * 5);
-            const bScore = ((b.supply_readiness ?? 1) < 0.4 ? 100 : 0) + ((b.failure_count ?? 0) * 10) + ((b.consecutive_failures_on_current ?? 0) * 5);
-            return bScore - aScore || operationKeyFromView(a).localeCompare(operationKeyFromView(b));
-        })[0];
-    if (mostFragileOperation) {
-        items.push({
-            id: `operation:${operationKeyFromView(mostFragileOperation)}`,
-            kind: 'operation',
-            severity: (mostFragileOperation.supply_readiness ?? 1) < 0.4 || (mostFragileOperation.failure_count ?? 0) >= 2 ? 'critical' : 'warning',
-            title: `${mostFragileOperation.name} losing momentum`,
-            detail: `Supply ${Math.round((mostFragileOperation.supply_readiness ?? 0) * 100)}%, failures ${mostFragileOperation.failure_count ?? 0}.`,
-            actionLabel: 'Open operation',
-            target: { type: 'operation', operationKey: operationKeyFromView(mostFragileOperation) },
-        });
-    }
-
-    const compositeIvp = internationalVisibilityPressure?.composite_ivp ?? 0;
-    if (compositeIvp >= 0.6 || (ivpConsequencesActive?.length ?? 0) > 0) {
-        items.push({
-            id: 'ivp:composite',
-            kind: 'ivp',
-            severity: 'warning',
-            title: `International pressure at ${Math.round(compositeIvp * 100)}%`,
-            detail: (ivpConsequencesActive?.length ?? 0) > 0
-                ? `Consequences active: ${ivpConsequencesActive?.join(', ')}.`
-                : [
-                    internationalVisibilityPressure?.sarajevo_siege_visibility ? `Sarajevo ${Math.round(internationalVisibilityPressure.sarajevo_siege_visibility * 100)}%` : null,
-                    internationalVisibilityPressure?.enclave_humanitarian_pressure ? `Enclaves ${Math.round(internationalVisibilityPressure.enclave_humanitarian_pressure * 100)}%` : null,
-                    internationalVisibilityPressure?.atrocity_visibility ? `Atrocities ${Math.round(internationalVisibilityPressure.atrocity_visibility * 100)}%` : null,
-                ].filter((value): value is string => value != null).join(', ') || 'Pressure is elevated across the current war posture.',
-            actionLabel: 'Review IVP',
-            target: { type: 'summary', summaryFocus: 'ivp' },
-        });
-    }
-
-    const mostThreatenedSector = [...(corpsFrontSectors ?? [])]
-        .filter((sector) => sector.faction === playerFaction)
-        .filter((sector) => sector.offensive_signs || sector.threat_ratio >= 1.2 || sector.intel_confidence < 0.5)
-        .sort((a, b) => {
-            const aScore = (a.offensive_signs ? 100 : 0) + (a.threat_ratio * 10) + ((1 - a.intel_confidence) * 10);
-            const bScore = (b.offensive_signs ? 100 : 0) + (b.threat_ratio * 10) + ((1 - b.intel_confidence) * 10);
-            return bScore - aScore || a.sector_id.localeCompare(b.sector_id);
-        })[0];
-    if (mostThreatenedSector) {
-        items.push({
-            id: `sector:${mostThreatenedSector.sector_id}`,
-            kind: 'sector',
-            severity: 'warning',
-            title: `${mostThreatenedSector.display_name} needs attention`,
-            detail: `Threat ${mostThreatenedSector.threat_ratio.toFixed(2)}, intel ${(mostThreatenedSector.intel_confidence * 100).toFixed(0)}%.`,
-            actionLabel: 'Open sector',
-            target: { type: 'sector', sectorId: mostThreatenedSector.sector_id },
-        });
-    }
-
-    const activeOpsecSector = [...(corpsFrontSectors ?? [])]
-        .filter((sector) => sector.faction === playerFaction && sector.opsec_active)
-        .sort((a, b) => {
-            const aScore = (a.offensive_signs ? 100 : 0) + (a.threat_ratio * 10);
-            const bScore = (b.offensive_signs ? 100 : 0) + (b.threat_ratio * 10);
-            return bScore - aScore || a.sector_id.localeCompare(b.sector_id);
-        })[0];
-    if (activeOpsecSector) {
-        items.push({
-            id: `opsec:${activeOpsecSector.sector_id}`,
-            kind: 'opsec',
-            severity: activeOpsecSector.offensive_signs || activeOpsecSector.threat_ratio >= 1.2 ? 'warning' : 'info',
-            title: `${activeOpsecSector.display_name} running under OPSEC`,
-            detail: `Masking active while threat sits at ${activeOpsecSector.threat_ratio.toFixed(2)} and intel reads ${(activeOpsecSector.intel_confidence * 100).toFixed(0)}%.`,
-            actionLabel: 'Review OPSEC',
-            target: { type: 'summary', summaryFocus: 'opsec', sectorId: activeOpsecSector.sector_id },
-        });
-    }
-
-    const activeSupportOrder = municipalitySupportOrders?.[playerFaction];
-    if (activeSupportOrder && activeSupportOrder.staged_turn === turn) {
-        items.push({
-            id: `support:${playerFaction}`,
-            kind: 'support',
-            severity: 'info',
-            title: `${activeSupportOrder.label} staged`,
-            detail: `${humanizeMunicipalitySlug(activeSupportOrder.mun_id.replace(/_/g, '-'))} is the current municipality support focus.`,
-            actionLabel: 'Review support',
-            target: { type: 'summary', summaryFocus: 'support' },
-        });
-    }
-
-    // Corps at critical cohesion
-    const playerCorps = (formations ?? [])
-        .filter((f) => f.faction === playerFaction && (f.kind === 'corps' || f.kind === 'corps_asset'));
-    const playerBrigades = (formations ?? [])
-        .filter((f) => f.faction === playerFaction && f.kind === 'brigade' && f.status === 'active');
-    for (const corps of playerCorps) {
-        const corpsBrigades = playerBrigades.filter((b) => b.corps_id === corps.id);
-        if (corpsBrigades.length === 0) continue;
-        const avgCohesion = corpsBrigades.reduce((s, b) => s + (b.cohesion ?? 0), 0) / corpsBrigades.length;
-        if (avgCohesion < 40) {
-            items.push({
-                id: `corps:${corps.id}`,
-                kind: 'sector',
-                severity: avgCohesion < 25 ? 'critical' : 'warning',
-                title: `${corps.name} at ${Math.round(avgCohesion)}% cohesion`,
-                detail: `${corpsBrigades.length} brigades, average cohesion critically low.`,
-                actionLabel: 'Open in HQ',
-                target: { type: 'corps', corpsId: corps.id },
-            });
-            break; // Only show worst corps
-        }
-    }
-
-    // Pending officer events
-    const unacknowledged = (pendingOfficerEvents ?? []).filter((e) => !e.acknowledged);
-    if (unacknowledged.length > 0) {
-        items.push({
-            id: 'officers:pending',
-            kind: 'support',
-            severity: 'warning',
-            title: `${unacknowledged.length} officer${unacknowledged.length !== 1 ? 's' : ''} awaiting decision`,
-            detail: 'Review pending officer replacements and assignments.',
-            actionLabel: 'Open HQ',
-            target: { type: 'officer_events' },
-        });
-    }
-
-    const sortedItems = items.sort(compareCommandItems);
-    if (sortedItems.length === 0) return undefined;
-    const criticalCount = sortedItems.filter((item) => item.severity === 'critical').length;
-    return {
-        headline: buildCommandHeadline(criticalCount, sortedItems.length),
-        criticalCount,
-        pendingCount: sortedItems.length,
-        items: sortedItems,
-    };
 }
 
 /**
@@ -1903,19 +1648,16 @@ export function parseGameState(json: unknown): LoadedGameState {
         if (Object.keys(out).length > 0) enclaveResilience = out;
     }
 
-    const commandBriefing = buildCommandBriefing({
-        playerFaction,
-        turn,
-        pendingConvoyDecisions,
-        enclaveResilience,
-        operations,
-        corpsFrontSectors,
-        internationalVisibilityPressure,
-        ivpConsequencesActive,
-        municipalitySupportOrders,
-        formations,
-        pendingOfficerEvents: state.military?.pending_officer_events as LoadedGameState['pendingOfficerEvents'],
-    });
+    const rawCommandBriefing = state.military?.last_briefing;
+    const commandBriefing = rawCommandBriefing
+        && (!playerFaction || rawCommandBriefing.faction === playerFaction)
+        ? toCommandBriefingView(rawCommandBriefing)
+        : undefined;
+    const operationalSitrep = (phase === 'war' || phase === 'phase_ii')
+        && state.displacement && typeof state.displacement === 'object'
+        && Array.isArray((state as any).factions)
+        ? getOperationalSitrepView(state as GameState, playerFaction as any)
+        : undefined;
 
     return {
         label, turn, phase,
@@ -1970,6 +1712,7 @@ export function parseGameState(json: unknown): LoadedGameState {
             lifetimeSpent: finiteNumber(state.military.command_authority.lifetime_spent),
         } : undefined,
         commandBriefing,
+        operationalSitrep,
         battlesByOsid: deriveBattlesByOsid(state),
         movementsByOsid: deriveMovementsByOsid(state),
         supplyTransitionsByOsid: deriveSupplyTransitionsByOsid(state),

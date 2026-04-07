@@ -250,6 +250,20 @@ export async function createInitialGameState(
     return state;
 }
 
+/**
+ * Canonicalize a freshly built campaign-start state onto the same save contract
+ * desktop/load paths consume. This prevents "birth state" from being weaker or
+ * differently shaped than the first loaded save.
+ */
+export function canonicalizeStartupState(state: GameState): { state: GameState; serializedState: string } {
+    const initialSerialized = serializeState(state);
+    const canonicalState = deserializeState(initialSerialized);
+    return {
+        state: canonicalState,
+        serializedState: serializeState(canonicalState)
+    };
+}
+
 /** H1.11: Scope for baseline_ops displacement (derived-only; no new mechanics). */
 export type BaselineOpsScopeMode = 'all_front_active' | 'static_front_only' | 'fluid_front_only';
 
@@ -1439,10 +1453,12 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             }
         }
 
+        const canonicalStartup = canonicalizeStartupState(state);
+        state = canonicalStartup.state;
+        const serializedState = canonicalStartup.serializedState;
         const historicalMetricsInitial = captureHistoricalFactionMetrics(state);
 
         const initialSavePath = join(outDir, 'initial_save.json');
-        const serializedState = serializeState(state);
         await writeFile(initialSavePath, serializedState, 'utf8');
         const initialControlSnapshot = extractSettlementControlSnapshot(state, graph);
 

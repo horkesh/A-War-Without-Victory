@@ -41,17 +41,14 @@ describe('UI Adapter Boundary Discipline', () => {
     // Type-only imports are allowed; runtime (value) imports from sim/combat are not.
     //
     // KNOWN AUDITED EXCEPTIONS (Phase 5 — 2026-04-07):
-    // These 7 imports are pure constants, predicates, or display helpers that have no
+    // These 6 imports are pure constants, predicates, or display helpers that have no
     // GameState access and cause no state mutation. They are documented here so any
     // FUTURE addition still triggers a failure requiring explicit review.
     const KNOWN_EXCEPTIONS = new Set([
-      // Pure constant predicate — no state access
-      `\\army_hq\\generateBriefing.ts:  import { isSectorAssignmentExemptCorpsId } from '../../../../sim/combat/corps_front_sectors_constants.js';`,
       // Constant value used for display-only
       `\\army_hq\\OrderInterpretationPanel.tsx:  import { RELIEF_MORALE_PENALTY } from '../../../../sim/combat/order_interpretation.js';`,
       // Pure computation helper — no state
       `\\CommanderSelectionModal.tsx:  import { getPreparationMaxTurns } from '../../../sim/combat/operation_preparation';`,
-      // Pure constant predicate — no state access
       `\\OOBSidebar.tsx:  import { isSectorAssignmentExemptCorpsId } from '../../../sim/combat/corps_front_sectors_constants.js';`,
       // Pure computation helper — no state
       `\\ops_modal\\CommanderPhase.tsx:  import { getPreparationMaxTurns } from '../../../../sim/combat/operation_preparation';`,
@@ -106,4 +103,10 @@ describe('UI Adapter Boundary Discipline', () => {
     const typesSrc = readFile(join(SRC_ROOT, 'ui/map/data/types.ts'));
     expect(typesSrc).toMatch(/unresolvedSectorBrigades/);
   });
+
+  it('operationalSitrep is declared in LoadedGameState as the shared reporting packet', () => {
+    const typesSrc = readFile(join(SRC_ROOT, 'ui/map/data/types.ts'));
+    expect(typesSrc).toMatch(/operationalSitrep/);
+  });
 });
+

@@ -3,6 +3,8 @@
  * Migrated from legacy types.ts — only game-state and map-relevant types.
  */
 
+import type { OperationalSitrepView } from '../../shared/operational_sitrep_views.js';
+
 export type FactionId = 'RS' | 'RBiH' | 'HRHB' | null;
 
 export interface FrontEdgeView {
@@ -353,7 +355,7 @@ export type CommandBriefingSeverity = 'critical' | 'warning' | 'info';
 export type SummaryFocusSection = 'overview' | 'ivp' | 'convoys' | 'casualties' | 'support' | 'opsec' | 'capital';
 
 export interface CommandBriefingTargetView {
-    type: 'summary' | 'enclaves' | 'operation' | 'sector' | 'settlement' | 'corps' | 'officer_events';
+    type: 'summary' | 'enclaves' | 'operation' | 'sector' | 'settlement' | 'corps' | 'officer_events' | 'none';
     summaryFocus?: SummaryFocusSection;
     operationKey?: string;
     sectorId?: string;
@@ -364,11 +366,13 @@ export interface CommandBriefingTargetView {
 
 export interface CommandBriefingItemView {
     id: string;
-    kind: 'convoy' | 'enclave' | 'operation' | 'ivp' | 'sector' | 'support' | 'opsec';
+    kind: 'military' | 'diplomatic' | 'humanitarian' | 'field_reports' | 'command';
+    category?: string;
     severity: CommandBriefingSeverity;
     title: string;
     detail: string;
-    actionLabel: string;
+    actionLabel?: string;
+    corpsId?: string;
     target: CommandBriefingTargetView;
 }
 
@@ -657,6 +661,8 @@ export interface LoadedGameState {
     mobilizationSummary?: Record<string, MobilizationSummaryView>;
     /** Top-level command-routing summary for urgent player-facing matters. */
     commandBriefing?: CommandBriefingView;
+    /** Canonical operational SITREP packet shared with Warroom reporting surfaces. */
+    operationalSitrep?: OperationalSitrepView;
     /** Most recent turn after-action report (null before first turn is advanced). */
     latestTurnSummary: import('../../../state/turn_summary.js').TurnSummary | null;
     /** All turn summaries (for Chronicle timeline). */

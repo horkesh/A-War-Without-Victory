@@ -24614,3 +24614,70 @@ Main Staff HQ was Han Pijesak, not Rogatica. Tracked for OOB correction pass.
 - **Deferred to v0.8-to-v0.9:** Phase 5 diagnostics/SITREP unification; brigade_assignment.ts annotation (pending Codex branch merge).
 - **Files modified:** src/state/war_timeline.ts, src/sim/combat/bot_strategy.ts, src/sim/combat/bot_corps_directives.ts, src/sim/combat/sector_offensive.ts, src/scenario/scenario_types.ts, src/sim/combat/army_hq_gathering.ts, data/scenarios/apr1992_definitive_40w.json, src/ui/map/components/CorpsFrontPanel.tsx, tests/intel_gated_operations.test.ts, tests/army_hq_gathering.test.ts, + 28 annotation-only files + 3 new test files + docs/20_engineering/MOVEMENT_AUTHORITY.md.
 - **FORAWWV note:** None.
+
+**[2026-04-07] v0.8-to-v0.9 Command Briefing / SITREP Truth Unification COMPLETE**
+
+- **Summary:** Removed the repo's parallel command briefing narrators and made `state.military.last_briefing` the single player-facing command briefing source. Army HQ, Warroom command modal, and map command strip now consume the same canonical packet rather than rebuilding local SITREP truth.
+- **Truth seam removed:** Deleted `src/ui/map/components/army_hq/generateBriefing.ts`; removed heuristic `buildCommandBriefing(...)` from `src/ui/map/data/GameStateAdapter.ts`; retired Warroom's `extractWarData(...)`-driven command briefing prose in favor of direct `last_briefing` rendering.
+- **Ownership after change:** engine owns command briefing truth (`collect_briefing.ts` -> `war_phases.ts` -> `military.last_briefing`), `GameStateAdapter` maps it, UI surfaces present it. `WarroomStatusBar` pending dot now reflects `pendingEventDecisions`, not generic `firedEvents`.
+- **Hardening:** added explicit `serializeState -> deserializeState -> serializeState` proof for `military.last_briefing` in `tests/state.test.ts`; adapter mapping covered in `tests/ui_map_game_state_adapter.test.ts`; Warroom canonical rendering covered in `tests/warroom_player_visibility.test.ts`.
+- **Verification:** targeted seam tests passed; full Vitest 2962/2962; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run build` clean.
+- **Report:** `docs/40_reports/implemented/20260407_V08TO09_COMMAND_BRIEFING_TRUTH_UNIFICATION.md`
+
+**[2026-04-07] v0.8-to-v0.9 Diagnostics / SITREP Phase 2 — Operational Packet Unification COMPLETE**
+
+- **Summary:** Removed the next live reporting-truth seam after command briefing unification. Warroom reports, Army HQ SUMMARY, and `SituationTab` now share one canonical operational SITREP packet instead of narrating overlapping front / readiness / sustainment / corps-ops truth from separate local builders.
+- **Truth seam removed:** Introduced shared `operationalSitrep` mapping in `src/ui/shared/operational_sitrep_views.ts`, fed from canonical `extractWarData(...)`. `GameStateAdapter` now maps that packet into `loadedGameState.operationalSitrep`. `ReportsModal` renders from the same shared packet instead of its own war-report summary path; Army HQ summary surfaces consume the packet instead of rebuilding overlapping operational status locally.
+- **Ownership after change:** `extractWarData(...)` owns player-safe operational reporting truth, `operational_sitrep_views.ts` owns the shared presentation-safe transform, `GameStateAdapter` owns UI mapping, and Army HQ / Warroom / sidebar surfaces are presentation-only consumers.
+- **Hardening:** Added deterministic transform coverage in `tests/operational_sitrep_views.test.ts`; adapter parity coverage in `tests/ui_map_game_state_adapter.test.ts`; source-boundary regression in `tests/ui_player_visibility.test.ts`; Warroom report coverage in `tests/warroom_player_visibility.test.ts`.
+- **Live doc correction:** Removed stale `generateBriefing()` narration from `docs/20_engineering/MAP_UI_MASTER.md` and `docs/40_reports/GUI_MASTER.md`, and documented the real operational SITREP owner.
+- **Verification:** targeted reporting seam tests passed; full Vitest, typecheck, and build clean. See report for exact commands/results.
+- **Report:** `docs/40_reports/implemented/20260407_V08TO09_OPERATIONAL_SITREP_TRUTH_UNIFICATION.md`
+
+**[2026-04-07] v0.8-to-v0.9 Commander Explanation Surfaces Phase 2 - Staff / Advisory Reporting Unification COMPLETE**
+
+- **Summary:** Closed the remaining reporting-truth seam left by the operational SITREP lane. Warroom `ReportsModal` no longer rebuilds its own operational SITREP packet locally; it now consumes the same canonical mapped packet as the adapter and Army HQ summary surfaces.
+- **Truth seam removed:** Added a canonical read path in `src/ui/shared/operational_sitrep_views.ts` (`getOperationalSitrepView(...)`) so the shared module owns both the SITREP transform and the raw-GameState read path. `GameStateAdapter` and `ReportsModal` now call that same function instead of separately wiring `extractWarData(...)` into local packet assembly.
+- **Ownership after change:** `extractWarData(...)` owns raw player-safe operational snapshot truth; `getOperationalSitrepView(...)` owns the canonical mapped operational packet; `GameStateAdapter`, Army HQ SUMMARY, `SituationTab`, and Warroom `ReportsModal` are consumers. Warroom may still read snapshot-only enemy-contact lines, but it no longer rebuilds the SITREP packet itself.
+- **Hardening:** Added shared read-path coverage in `tests/operational_sitrep_views.test.ts`; updated adapter parity test in `tests/ui_map_game_state_adapter.test.ts`; added Warroom source-boundary regression in `tests/warroom_player_visibility.test.ts`.
+- **Live doc correction:** Updated `docs/20_engineering/MAP_UI_MASTER.md`, `docs/40_reports/GUI_MASTER.md`, `.claude/architect_notes.md`, and `docs/plans/MASTER_ROADMAP.md` so they describe the final post-cleanup ownership line instead of overclaiming a purely adapter-owned Warroom path.
+- **Verification:** targeted reporting seam tests passed; full Vitest, typecheck, and build clean. See report for exact commands/results.
+- **Report:** `docs/40_reports/implemented/20260407_V08TO09_STAFF_ADVISORY_REPORTING_UNIFICATION.md`
+
+**[2026-04-07] v0.8-to-v0.9 Commander Explanation Surfaces Phase 3 - Warroom Narrative Surface Narrowing COMPLETE**
+
+- **Summary:** Narrowed the last soft-duplicate Warroom explanation seam after packet unification. `FactionOverviewPanel` no longer owns its own strategic-warning model; its warning band now renders the shared `operationalSitrep.alerts` packet.
+- **Truth seam removed:** Deleted `generateWarPhaseWarnings(...)` from `src/ui/warroom/components/FactionOverviewPanel.ts` and moved the remaining Warroom warning conditions into the canonical `operationalSitrep` alert contract in `src/ui/shared/operational_sitrep_views.ts`.
+- **Ownership after change:** `extractWarData(...)` owns raw player-safe operational facts; `getOperationalSitrepView(...)` owns the canonical mapped operational packet and alert list; Army HQ, `SituationTab`, Warroom reports, and Warroom `FactionOverviewPanel` are consumers. `FactionOverviewPanel` keeps only shell-summary / Army HQ handoff copy. `MagazineModal` remains a flavor wrapper over snapshot facts rather than an alert owner.
+- **Hardening:** Extended `ExhaustionSnapshot` in `src/ui/warroom/data/war_data_extractor.ts` with `increasing` / `collapseEligible` so the shared packet can carry those warnings without reaching back into raw state heuristics. Added deterministic alert-order coverage in `tests/operational_sitrep_views.test.ts` and a Warroom source-boundary regression in `tests/warroom_player_visibility.test.ts`.
+- **Live doc correction:** Updated `docs/20_engineering/MAP_UI_MASTER.md`, `docs/40_reports/GUI_MASTER.md`, `.claude/architect_notes.md`, and `docs/plans/MASTER_ROADMAP.md` so they describe the final boundary truthfully: canonical packet truth, shell-only handoff, and flavor wrappers that no longer compete with alert ownership.
+- **Verification:** targeted reporting seam tests, full Vitest, typecheck, and build clean. See report for exact commands/results.
+- **Report:** `docs/40_reports/implemented/20260407_V08TO09_WARROOM_NARRATIVE_SURFACE_NARROWING.md`
+
+**[2026-04-07] v0.8-to-v0.9 Save/Load and Replay Deep Hardening COMPLETE**
+
+- **Summary:** Closed the strongest remaining persistence seam before `v0.9`. Desktop autonomy/proposal IPC writes now keep the in-memory save blob on the canonical serializer path, and `deserializeState(...)` no longer silently wipes `military.front_segments` on load.
+- **Persistence seam removed:** `src/desktop/electron-main.cjs` had four late handlers (`set-autonomy-level`, `override-ai-decision`, `accept-proposal`, `reject-proposal`) that wrote `currentGameStateJson = JSON.stringify(state)`. Those handlers now read through `deserializeState(...)` and write through `serializeState(...)` via canonical helper functions. `get-autonomy-state` also reads through canonical deserialization now.
+- **Silent-loss fix:** `src/state/serialize.ts` had a bad migration/default check for `front_segments` (`'front_segments' in candidate` on the top-level state object), which reset `military.front_segments` to `{}` during deserialize. The check now correctly targets the nested `military` block and fails loudly if that block is missing.
+- **Hardening proof:** `tests/state.test.ts` now proves a desktop-style autonomy/proposal mutation cycle preserves `military.last_briefing`, preserves `military.front_segments`, reconstructs `getOperationalSitrepView(...)` identically after load, and remains byte-identical under `serialize -> deserialize -> serialize`. `tests/desktop_persistence_contract.test.ts` guards against future raw `JSON.stringify(state)` regression in desktop save ownership. `tests/turn_pipeline_determinism_smoke.test.ts` was refreshed so replay/determinism smoke coverage is live against the current canonical state shape again.
+- **Live doc correction:** `docs/20_engineering/TACTICAL_MAP_SYSTEM.md` and `docs/20_engineering/GUI_PLAYBOOK_DESKTOP.md` no longer advertise a current desktop `Load Replay` / replay-scrubber flow. Replay timelines are documented as harness artifacts only, matching the actual IPC/map runtime.
+- **Verification:** targeted save/load + determinism tests passed; full Vitest 211/211 files and 2969/2969 tests passed; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run build` clean.
+- **Report:** `docs/40_reports/implemented/20260407_V08TO09_SAVELOAD_REPLAY_DEEP_HARDENING.md`
+
+**[2026-04-07] v0.8-to-v0.9 Migration Compatibility Audit - Nested Defaults and Legacy Save Guarantees COMPLETE**
+
+- **Summary:** Closed the next migration-truth seam after the `front_segments` fix. `migrateState(...)` no longer depends on top-level aliases for several nested owner defaults/canonicalizations, and stray top-level legacy residue is now rescued into `military` / `political` / `displacement` before defaults run.
+- **Migration seam removed:** `src/state/serialize.ts` still had several top-level-vs-nested ownership drifts: `militia_pools`, `front_posture`, `front_posture_regions`, `negotiation_ledger`, `supply_rights`, `municipalities`, Phase I partial-save defaults, and Phase F displacement defaults all relied partly on top-level `candidate.*` paths. That made partial nested saves under-defaulted and could let legacy top-level residue be silently overwritten by empty nested defaults.
+- **Ownership after change:** migration/default logic now operates at the canonical owner boundaries: `military.*`, `political.*`, and `displacement.*`. A new `rescueLegacyTopLevelFields(...)` step moves stray top-level residue into the correct nested owner before any defaults run; the later sweep remains a compatibility backstop instead of the main migration mechanism.
+- **Hardening:** added `tests/migration_nested_ownership.test.ts` covering four explicit cases: nested owner canonicalization, partial Phase I sibling defaults, partial Phase F sibling defaults, and rescue of stray top-level residue into nested owners. Existing `tests/state.test.ts`, `tests/save_migration.test.ts`, and `tests/desktop_persistence_contract.test.ts` remained green.
+- **Verification:** targeted migration/save-load tests passed; full Vitest 211/211 files and 2969/2969 tests passed; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run build` clean.
+- **Report:** `docs/40_reports/implemented/20260407_V08TO09_MIGRATION_COMPATIBILITY_AUDIT.md`
+
+**[2026-04-07] v0.8-to-v0.9 Desktop Campaign-Start Snapshot + Save Contract Cleanup COMPLETE**
+
+- **Summary:** Closed the next persistence-contract seam after the migration audit. Campaign birth state is now canonicalized onto the same save/load contract the desktop and harness consume, so `initial_save.json` is no longer weaker than the first loaded save.
+- **Startup/save seam removed:** `src/scenario/scenario_runner.ts` used to write `initial_save.json` directly from the freshly built startup state, while desktop `createStateFromScenario(...)` immediately re-read that file through `deserializeState(...)`. That meant campaign birth and first load could differ in shape. Added `canonicalizeStartupState(...)` and made `runScenario(...)` canonicalize startup state before writing `initial_save.json` or continuing into week execution.
+- **Desktop contract hardening:** `src/desktop/desktop_sim.ts` now canonicalizes the state after `startNewCampaign(...)` applies desktop-only overlays (`player_faction`, recruitment seed), so the returned state is already in manual-save/load form before the player's first action.
+- **Hardening proof:** new `tests/desktop_campaign_start_contract.test.ts` proves (1) `initial_save.json` is already in canonical loaded-save form at campaign birth, (2) `createStateFromScenario(...)` matches that canonical initial save exactly, and (3) `startNewCampaign(...)` returns canonicalized state before the first manual save.
+- **Verification:** targeted startup/save contract tests passed; full Vitest, `npx.cmd tsc --noEmit -p tsconfig.json`, and `npm.cmd run build` passed.
+- **Report:** `docs/40_reports/implemented/20260407_V08TO09_DESKTOP_CAMPAIGN_START_CONTRACT_CLEANUP.md`

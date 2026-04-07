@@ -85,6 +85,8 @@ export interface DisplacementSnapshot {
 export interface ExhaustionSnapshot {
     level: number;
     trend: TrendDirection;
+    increasing: boolean;
+    collapseEligible: boolean;
 }
 
 export interface SupplySnapshot {
@@ -490,6 +492,8 @@ function extractExhaustion(state: GameState, pf: FactionId): ExhaustionSnapshot 
     return {
         level,
         trend: trends?.exhaustion_trend ?? 'flat',
+        increasing: trends?.exhaustion_increasing ?? false,
+        collapseEligible: trends?.collapse_eligible ?? false,
     };
 }
 

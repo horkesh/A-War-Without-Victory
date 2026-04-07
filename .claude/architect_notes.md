@@ -240,8 +240,9 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 
 ### Desktop New Game Start Snapshot — OPEN
 
-- **Problem:** `New Game` still runs full scenario-source initialization on every desktop launch. The user sees startup derivation logs such as political control init (`[E5] Political control initialized ...`), recruitment seeding (`[Recruitment] Mandatory ...`), and front spread (`[Placement] Spread ...`) every time a campaign starts.
-- **Why it matters:** This is dev-bootstrap behavior leaking into the shipped desktop path. It adds startup latency, noisy logs, and unnecessary runtime derivation for a fixed April 1992 start state.
+- **Problem:** `New Game` still runs full scenario-source initialization on every desktop launch instead of loading a baked April 1992 startup artifact.
+- **What is already fixed:** campaign birth is now canonicalized before `initial_save.json` is written or desktop state is returned, so the first save/load contract is honest even though the startup path still derives state at runtime.
+- **Why it matters:** Remaining pain is now startup cost / ownership clarity, not a birth-vs-load contract mismatch.
 - **Likely direction:** Bake a canonical campaign-start snapshot for the desktop `apr_1992` entrypoint, load that snapshot for `New Game`, then apply only minimal per-session overlays such as `player_faction` and desktop-only session state. Keep full scenario-source boot for dev/regeneration paths.
 - **Non-goal:** Do not special-case engine truth away in the core sim. The goal is to move fixed start-state work out of the normal desktop launch path, not to remove scenario initialization capabilities from tooling.
 
@@ -269,3 +270,44 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - **Op Teocak retention:** The operation was ahistorical. The historian confirmed no such ARBiH offensive existed. Keeping it and tuning parameters would be a railroad.
 
 **Report:** `docs/40_reports/implemented/20260405_RASTOSNICA_DRINA_COUPLING_RESOLUTION.md`
+
+**Closed: Command Briefing / SITREP Truth Unification (2026-04-07)**
+- Canonical owner is now explicit: `src/sim/briefing/collect_briefing.ts` produces `state.military.last_briefing`, `src/sim/turn_phases/war_phases.ts` persists it, `src/ui/map/data/GameStateAdapter.ts` maps it, and UI surfaces present it.
+- Do not let Army HQ, Warroom, or shell strips generate parallel command narratives from local heuristics when a sim-owned packet already exists.
+- If a player-facing command/SITREP surface needs new content, extend the sim briefing collectors first and keep UI code presentation-only.
+- Save/load hardening for player-facing summaries should be proven with explicit round-trip tests, not assumed because the field is nested inside `GameState`.
+- Pending-decision affordances must reflect actual player decisions (`pendingEventDecisions`), not broader event-history proxies like `firedEvents`.
+
+**Closed: Operational SITREP Packet Unification (2026-04-07)**
+- Canonical owner for operational reporting is now explicit: `src/ui/warroom/data/war_data_extractor.ts` (`extractWarData(...)`) produces the player-safe war snapshot; `src/ui/shared/operational_sitrep_views.ts` owns both the shared operational SITREP transform and the canonical read path from raw `GameState`; `src/ui/map/data/GameStateAdapter.ts` maps that view into `loadedGameState.operationalSitrep`.
+- Warroom reports, Army HQ SUMMARY, and `SituationTab` must consume the shared `operationalSitrep` packet rather than recomputing overlapping front / sustainment / operations stories from local heuristics.
+- If a reporting surface needs a new operational fact, extend `extractWarData(...)` or the shared SITREP view first. Do not add a second local reporting builder in Army HQ or the Warroom shell.
+- Live docs are part of the truth boundary. `MAP_UI_MASTER.md` and `GUI_MASTER.md` must not narrate deleted owners such as `generateBriefing()` after the code has moved on.
+
+**Closed: Commander Explanation Surfaces Phase 2 - Staff / Advisory Reporting Unification (2026-04-07)**
+- The remaining staff-report seam was Warroom `ReportsModal`: it still called `extractWarData(...)` and rebuilt its own SITREP packet locally even after Army HQ and `SituationTab` had been unified.
+- Accepted ownership line: `extractWarData(...)` owns the raw player-safe operational snapshot; `getOperationalSitrepView(...)` in `src/ui/shared/operational_sitrep_views.ts` owns the canonical mapped packet; `GameStateAdapter` and Warroom `ReportsModal` both consume that same packet.
+
+**Closed: Commander Explanation Surfaces Phase 3 - Warroom Narrative Surface Narrowing (2026-04-07)**
+- The remaining soft-duplicate narrative seam was Warroom `FactionOverviewPanel`: it no longer rebuilt the SITREP packet, but it still owned its own strategic-warning model on top of overlapping operational state.
+- Accepted boundary after cleanup: canonical warning/alert truth lives in `getOperationalSitrepView(...)` and its `alerts` list; Warroom `FactionOverviewPanel` may render those alerts and maintain shell-handoff copy (`COMMAND SHELL`), but it should not own a separate warning brain.
+- `MagazineModal` remains intentionally distinct as a flavor/periodical wrapper over player-safe snapshot facts. That is acceptable because it does not define a second operational alert model or compete with Army HQ / SITREP packet truth.
+- Presentation rule: advisory/reporting shells may still read extra snapshot-only facts that are outside the SITREP packet contract (for example enemy-contact lines), but they must not rebuild the packet itself in place.
+
+**Closed: Save/Load and Replay Deep Hardening (2026-04-07)**
+- Canonical desktop persistence rule: if `currentGameStateJson` is treated as the live authoritative save blob, every mutation path must round-trip through `deserializeState(...)` and `serializeState(...)`. Raw `JSON.parse(...)` / `JSON.stringify(...)` on write paths is not an acceptable shortcut because it bypasses canonical ordering, validation, and migration/default behavior.
+- Persisted-vs-derived rule sharpened: `military.last_briefing` is explicit persisted packet truth; `operational SITREP` remains derived packet truth and must be proven by identical reconstruction after load, not by persisting a second copy.
+- Migration lesson: nested defaulting checks must target the real owner block, not the top-level `GameState` object. The `front_segments` bug proved that one misplaced ownership check can silently zero replay-visible state during deserialize.
+- Test rule: save/load hardening should include both behavior tests (`serialize -> deserialize -> serialize`, packet preservation, derived-view parity) and source-boundary tests when a desktop/IPC seam is vulnerable to future ad hoc JSON rewrites.
+- Docs rule: persistence/replay docs must be validated against current desktop IPC and map-shell entrypoints. Do not let engineering docs advertise a `Load Replay` or replay-scrubber UX unless the runtime actually exposes that path.
+
+**Closed: Migration Compatibility Audit - Nested Defaults and Legacy Save Guarantees (2026-04-07)**
+- Migration/default logic must normalize state at the canonical nested owner boundary first: `military.*`, `political.*`, `displacement.*`. Top-level `candidate.*` probes are only acceptable for explicit legacy-residue rescue, never as the primary owner path.
+- Legacy save rescue must run before owner defaults. If empty nested defaults are created first, stray top-level legacy fields can be silently overwritten and then deleted. Rescue-first, default-second, cleanup-sweep last is the safer migration order.
+- Partial nested saves need sibling defaults at the same owner boundary. If one Phase I or Phase F field exists under its canonical parent, the missing sibling defaults should be materialized there too so old saves do not depend on lucky top-level aliases.
+- Test rule sharpened: migration audits should prove both halves of compatibility. One test family should cover canonical nested saves and another should cover explicit rescue of stray legacy residue.
+
+**Closed: Desktop Campaign-Start Snapshot + Save Contract Cleanup (2026-04-07)**
+- Freshly built campaign-start state must be normalized onto the canonical save/load contract before it is treated as `initial_save.json` or returned to the desktop shell. Otherwise campaign birth can be weaker than the first loaded save.
+- Accepted startup rule: desktop-only overlays such as `player_faction` and recruitment seeding may still be applied after scenario build, but the result must be canonicalized before the UI receives it.
+- This lane did not ship a baked April 1992 snapshot. Snapshot productization remains a separate optimization/ownership lane. What closed here was the birth-vs-load contract mismatch.

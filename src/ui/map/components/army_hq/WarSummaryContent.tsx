@@ -39,6 +39,7 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
     const { label, casualtyLedger, civilianCasualties } = loadedGameState;
 
     const data = useMemo(() => buildWarSummaryOverviewModel(loadedGameState), [loadedGameState]);
+    const sitrep = loadedGameState.operationalSitrep;
 
     const { playerFaction, areaPct, personnelByFaction, totalDisplaced, displacedByFaction } = data;
 
@@ -122,6 +123,31 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                                     </div>
                                 </div>
                             </SummarySection>
+
+                            {sitrep && (
+                                <SummarySection title="Operational SITREP">
+                                    <div className="space-y-1 text-[12px]">
+                                        <div className="text-text-secondary leading-snug">{sitrep.headline}</div>
+                                        <div className="flex items-center justify-between gap-3">
+                                            <span className="text-text-secondary">Fronts</span>
+                                            <span className="text-text-primary tabular-nums">{sitrep.front.engagedCount} engaged / {sitrep.front.exposedCount} exposed</span>
+                                        </div>
+                                        <div className="flex items-center justify-between gap-3">
+                                            <span className="text-text-secondary">Sustainment</span>
+                                            <span className="text-text-primary tabular-nums">{sitrep.sustainment.criticalCount} critical / {sitrep.sustainment.strainedCount} strained</span>
+                                        </div>
+                                        <div className="flex items-center justify-between gap-3">
+                                            <span className="text-text-secondary">Active operations</span>
+                                            <span className="text-text-primary tabular-nums">{sitrep.operations.activeCount}</span>
+                                        </div>
+                                        {sitrep.alerts.length > 0 && (
+                                            <div className="text-[10px] text-text-secondary leading-snug">
+                                                {sitrep.alerts.slice(0, 2).map((alert) => alert.text).join(' ')}
+                                            </div>
+                                        )}
+                                    </div>
+                                </SummarySection>
+                            )}
                         </>
                     ) : (
                         <>

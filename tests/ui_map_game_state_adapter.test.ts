@@ -2,6 +2,8 @@ import assert from 'node:assert';
 import { test } from 'node:test';
 
 import { parseGameState } from '../src/ui/map/data/GameStateAdapter.js';
+import { extractWarData } from '../src/ui/warroom/data/war_data_extractor.js';
+import { getOperationalSitrepView } from '../src/ui/shared/operational_sitrep_views.js';
 
 test('parseGameState extracts deterministic order lists and events', () => {
     const parsed = parseGameState({
@@ -380,92 +382,98 @@ test('parseGameState exposes municipality support orders for the player faction 
     assert.equal(parsed.municipalitySupportOrders?.RBiH?.label, 'Weapons shipment');
 });
 
-test('parseGameState derives command briefing items in deterministic priority order', () => {
+test('parseGameState maps sim-owned command briefing without rebuilding it in the adapter', () => {
     const parsed = parseGameState({
   meta: { turn: 24, phase: 'war', player_faction: 'RBiH' },
-  supply_state_by_osid: {
-            factions: [
+  military: {
+    formations: {},
+    last_briefing: {
+            turn: 24,
+            faction: 'RBiH',
+            headline: '2 items for your review.',
+            criticalCount: 1,
+            warningCount: 1,
+            items: [
                 {
-                    faction_id: 'RBiH',
-                    by_osid: [
-                        { osid: 'op:gorazde:gorazde_2', state: 'critical' },
-                        { osid: 'op:gorazde:gorazde_3', state: 'critical' },
-                    ],
+                    id: 'cmd-1',
+                    section: 'command',
+                    severity: 'critical',
+                    title: 'Commander requests acknowledgement',
+                    detail: 'Pending officer decision remains unresolved.',
+                    target: { corpsId: 'rbih_corps' },
+                },
+                {
+                    id: 'hum-1',
+                    section: 'humanitarian',
+                    severity: 'warning',
+                    title: 'Gorazde under prolonged siege',
+                    detail: 'Isolation is now affecting resilience.',
+                    target: { enclaveId: 'gorazde' },
                 },
             ],
         },
-  military: {
-    formations: {
-            rbih_corps: { id: 'rbih_corps', faction: 'RBiH', name: '1st Corps', kind: 'corps', tags: [] },
-            b1: { id: 'b1', faction: 'RBiH', corps_id: 'rbih_corps', name: '1st Brigade', kind: 'brigade', cohesion: 68, personnel: 1800, tags: [] },
-            b2: { id: 'b2', faction: 'RBiH', corps_id: 'rbih_corps', name: '2nd Brigade', kind: 'brigade', cohesion: 62, personnel: 1400, tags: [] },
-        },
-    corps_front_sectors: {
-            rbih_sector_1: {
-                sector_id: 'rbih_sector_1',
-                corps_id: 'rbih_corps',
-                faction: 'RBiH',
-                opposing_factions: ['RS'],
-                edge_ids: ['edge-1'],
-                sub_segments: [{ friendly_osids: ['op:gorazde:gorazde_2'], enemy_osids: ['op:rs:foe_1'] }],
-                assigned_brigade_ids: ['b1', 'b2'],
-                reserve_brigade_ids: [],
-                density: 1.1,
-                threat_ratio: 1.32,
-                defensive_power: 400,
-                intel_confidence: 0.42,
-                offensive_signs: true,
-                opsec_active: true,
-            },
-        },
-    opsec_sectors: ['rbih_sector_1'],
-    sector_intel: {
-            rbih_sector_1: [
-                { enemy_sector_id: 'rs_sector_1', confidence: 0.42, offensive_signs: true, visible_brigade_ids: [] },
-            ],
-        },
-    corps_command: {
-            rbih_corps: {
-                active_operations: [{
-                    name: 'Operation Drina',
-                    type: 'sector_attack',
-                    phase: 'execution',
-                    sector_id: 'rbih_sector_1',
-                    objectives: ['op:rs:foe_1'],
-                    participating_brigades: ['b1', 'b2'],
-                    supply_readiness: 0.35,
-                    consecutive_failures_on_current: 2,
-                    failure_count: 2,
-                    started_turn: 22,
-                    phase_started_turn: 23,
-                }],
-            },
-        },
-    pending_convoy_decisions: [
-            { id: 'convoy_gorazde', target_enclave: 'gorazde', route_faction: 'RS', supply_amount: 15 },
-        ],
-    municipality_support_orders: {
-            RBiH: { mun_id: 'gorazde', type: 'weapons_shipment', staged_turn: 24 },
-        }
   } as any,
   political: {
-    political_controllers: {
-            'op:gorazde:gorazde_2': 'RBiH',
-            'op:gorazde:gorazde_3': 'RBiH',
-        },
-    international_visibility_pressure: {
-            atrocity_visibility: 0.4,
-            enclave_humanitarian_pressure: 0.8,
-            sarajevo_siege_visibility: 0.7,
-            negotiation_momentum: 0.2,
-            composite_ivp: 0.72,
-            last_major_shift: 24,
-        },
-    ivp_consequences_active: ['sanctions'],
-    enclave_resilience: {
-            gorazde: { resilience: 7, isolation_turns: 5, hardening_active: false },
-        }
+    political_controllers: {}
   } as any,
+});
+
+test('parseGameState maps the canonical operational SITREP packet from extractWarData', () => {
+    const rawState = {
+        meta: { turn: 9, phase: 'war', player_faction: 'RBiH' },
+        factions: [
+            { id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
+            { id: 'RS', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
+        ],
+        military: {
+            formations: {
+                arbih_3rd_corps: { id: 'arbih_3rd_corps', faction: 'RBiH', kind: 'corps', status: 'active', name: 'arbih_3rd_corps', personnel: 0 },
+                arbih_b1: { id: 'arbih_b1', faction: 'RBiH', kind: 'brigade', status: 'active', name: '', personnel: 450, cohesion: 41, corps_id: 'arbih_3rd_corps' },
+            },
+            casualty_ledger: {},
+            front_edges: [
+                { edge_id: 'edge_1', a: 'op:tuzla:centar', b: 'op:bijeljina:center', side_a: 'RBiH', side_b: 'RS' },
+            ],
+            front_pressure: { edge_1: { value: 0.9, max_abs: 1, last_updated_turn: 9 } },
+            front_segments: { edge_1: { friction: 0.5 } },
+            militia_garrison: {},
+            brigade_movement_state: {},
+            brigade_encircled: { arbih_b1: true },
+            corps_command: {
+                arbih_3rd_corps: {
+                    stance: 'balanced',
+                    active_operations: [{ type: 'sector_attack', phase: 'execution', started_turn: 8 }],
+                },
+            },
+        },
+        political: {
+            political_controllers: {
+                'op:tuzla:centar': 'RBiH',
+                'op:bijeljina:center': 'RS',
+            },
+            war_exhaustion: { RBiH: 0.2 },
+            loss_of_control_trends: { by_faction: { RBiH: { exhaustion_trend: 'flat' } } },
+        },
+        displacement: {
+            displacement_state: {},
+            displacement_camp_state: { camp_1: {} },
+            hostile_takeover_timers: { timer_1: {} },
+            civilian_casualties: {},
+            sustainability_state: {
+                tuzla: { mun_id: 'tuzla', collapsed: false, sustainability_score: 20 },
+            },
+        },
+    } as any;
+
+    const parsed = parseGameState(rawState);
+    const expected = getOperationalSitrepView(rawState, 'RBiH');
+
+    assert.deepStrictEqual(parsed.operationalSitrep?.front, expected.front);
+    assert.deepStrictEqual(parsed.operationalSitrep?.readiness, expected.readiness);
+    assert.deepStrictEqual(parsed.operationalSitrep?.sustainment, expected.sustainment);
+    assert.deepStrictEqual(parsed.operationalSitrep?.operations, expected.operations);
+    assert.deepStrictEqual(parsed.operationalSitrep?.alerts, expected.alerts);
+    assert.strictEqual(parsed.operationalSitrep?.headline, expected.headline);
 });
 
     const briefing = (parsed as typeof parsed & {
@@ -475,26 +483,22 @@ test('parseGameState derives command briefing items in deterministic priority or
             pendingCount: number;
             items: Array<{
                 id: string;
+                kind: string;
                 severity: string;
-                target: { type: string; summaryFocus?: string };
+                target: { type: string };
             }>;
         };
     }).commandBriefing;
 
     assert.ok(briefing);
-    assert.equal(briefing?.criticalCount, 3);
-    assert.equal(briefing?.pendingCount, 7);
-    assert.equal(briefing?.headline, '3 critical command matters require attention');
+    assert.equal(briefing?.criticalCount, 1);
+    assert.equal(briefing?.pendingCount, 2);
+    assert.equal(briefing?.headline, '2 items for your review.');
     assert.deepStrictEqual(
-        briefing?.items.map((item) => `${item.id}:${item.severity}:${item.target.type}:${item.target.summaryFocus ?? '-'}`),
+        briefing?.items.map((item) => `${item.id}:${item.kind}:${item.severity}:${item.target.type}`),
         [
-            'convoy:convoy_gorazde:critical:summary:convoys',
-            'enclave:gorazde:critical:enclaves:-',
-            'operation:rbih_corps|Operation Drina:critical:operation:-',
-            'ivp:composite:warning:summary:ivp',
-            'sector:rbih_sector_1:warning:sector:-',
-            'opsec:rbih_sector_1:warning:summary:opsec',
-            'support:RBiH:info:summary:support',
+            'cmd-1:command:critical:corps',
+            'hum-1:humanitarian:warning:enclaves',
         ]
     );
 });

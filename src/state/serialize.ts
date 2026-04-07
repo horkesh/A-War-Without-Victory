@@ -166,6 +166,22 @@ function structuredClonePolyfill<T>(input: T): T {
     return JSON.parse(JSON.stringify(input)) as T;
 }
 
+function rescueLegacyTopLevelFields(
+    candidate: Record<string, any>,
+    parent: Record<string, any> | undefined,
+    keys: readonly string[]
+): void {
+    if (!parent || typeof parent !== 'object') return;
+
+    for (const key of keys) {
+        if (!(key in candidate)) continue;
+        if (parent[key] === undefined) {
+            parent[key] = candidate[key];
+        }
+        delete candidate[key];
+    }
+}
+
 function migrateState(raw: unknown): GameState {
     if (!raw || typeof raw !== 'object') {
         throw new Error('Cannot migrate: state is not an object');
@@ -178,21 +194,22 @@ function migrateState(raw: unknown): GameState {
         case undefined:
         case CURRENT_SCHEMA_VERSION: {
             // Default new fields for older saves.
-            if (!('front_segments' in candidate) || (candidate as any).military.front_segments === undefined) {
-                (candidate as any).military.front_segments = {};
-            }
             const mil = (candidate as any).military;
-            if (mil) {
-                if (mil.theatres === undefined) mil.theatres = {};
-                if (mil.army_theatre_assignment === undefined) mil.army_theatre_assignment = {};
-                if (mil.formations === undefined) mil.formations = {};
-                if (mil.front_posture === undefined) mil.front_posture = {};
-                if (mil.front_posture_regions === undefined) mil.front_posture_regions = {};
-                if (mil.front_pressure === undefined) mil.front_pressure = {};
-                if (mil.assignable_front_segments === undefined) mil.assignable_front_segments = [];
-                if (mil.brigade_front_assignment === undefined) mil.brigade_front_assignment = {};
-                if (mil.militia_pools === undefined) mil.militia_pools = {};
+            if (!mil || typeof mil !== 'object') {
+                throw new Error('Cannot migrate: missing military block');
             }
+            if (!('front_segments' in mil) || mil.front_segments === undefined) {
+                mil.front_segments = {};
+            }
+            if (mil.theatres === undefined) mil.theatres = {};
+            if (mil.army_theatre_assignment === undefined) mil.army_theatre_assignment = {};
+            if (mil.formations === undefined) mil.formations = {};
+            if (mil.front_posture === undefined) mil.front_posture = {};
+            if (mil.front_posture_regions === undefined) mil.front_posture_regions = {};
+            if (mil.front_pressure === undefined) mil.front_pressure = {};
+            if (mil.assignable_front_segments === undefined) mil.assignable_front_segments = [];
+            if (mil.brigade_front_assignment === undefined) mil.brigade_front_assignment = {};
+            if (mil.militia_pools === undefined) mil.militia_pools = {};
             // Phase 0: Default meta referendum/war-start fields for older saves
             const meta = candidate.meta as any | undefined;
             if (meta && typeof meta === 'object') {
@@ -210,6 +227,45 @@ function migrateState(raw: unknown): GameState {
             }
             // Phase 11B: Default negotiation_status and ceasefire on political
             const pol = (candidate as any).political;
+            const disp = (candidate as any).displacement;
+
+            // Rescue legacy top-level residue into the canonical nested owner before any defaults run.
+            // This preserves old-save compatibility without depending on later sweep cleanup.
+            rescueLegacyTopLevelFields(candidate, mil, [
+                'theatres',
+                'army_theatre_assignment',
+                'formations',
+                'front_posture',
+                'front_posture_regions',
+                'front_pressure',
+                'assignable_front_segments',
+                'brigade_front_assignment',
+                'militia_pools',
+                'war_militia_strength',
+                'war_jna',
+            ]);
+            rescueLegacyTopLevelFields(candidate, pol, [
+                'negotiation_status',
+                'ceasefire',
+                'negotiation_ledger',
+                'supply_rights',
+                'war_consolidation_until',
+                'war_control_strain',
+                'war_alliance_rbih_hrhb',
+                'municipalities',
+                'war_supply_pressure',
+                'war_exhaustion',
+                'war_exhaustion_local',
+            ]);
+            rescueLegacyTopLevelFields(candidate, disp, [
+                'war_displacement_initiated',
+                'settlement_displacement_started_turn',
+                'municipality_displacement',
+                'hostile_takeover_timers',
+                'displacement_camp_state',
+                'settlement_displacement',
+            ]);
+
             if (pol) {
                 if (!pol.negotiation_status || typeof pol.negotiation_status !== 'object') {
                     pol.negotiation_status = { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null };
@@ -385,7 +441,7 @@ function migrateState(raw: unknown): GameState {
 
             // Phase 10: Ensure deterministic defaulting for MilitiaPoolState fatigue field.
             // Also canonicalize militia pool faction IDs.
-            const militiaPools = candidate.militia_pools as unknown;
+            const militiaPools = mil.militia_pools as unknown;
             if (militiaPools && typeof militiaPools === 'object') {
                 const poolRec = militiaPools as Record<string, any>;
                 const keysSorted = Object.keys(poolRec).sort();
@@ -401,27 +457,30 @@ function migrateState(raw: unknown): GameState {
             }
 
             // Phase 12A: Default negotiation_ledger and canonicalize faction_id in entries
-            if (!('negotiation_ledger' in candidate) || candidate.negotiation_ledger === undefined) {
-                candidate.negotiation_ledger = [];
-            } else if (!Array.isArray(candidate.negotiation_ledger)) {
-                candidate.negotiation_ledger = [];
-            } else {
+            if (pol) {
+                if (!('negotiation_ledger' in pol) || pol.negotiation_ledger === undefined) {
+                    pol.negotiation_ledger = [];
+                } else if (!Array.isArray(pol.negotiation_ledger)) {
+                    pol.negotiation_ledger = [];
+                } else {
                 // Canonicalize faction_id in ledger entries
-                const ledger = candidate.negotiation_ledger as any[];
-                for (const entry of ledger) {
-                    if (entry && typeof entry === 'object' && typeof entry.faction_id === 'string') {
-                        entry.faction_id = canonicalizePoliticalSideId(entry.faction_id);
+                    const ledger = pol.negotiation_ledger as any[];
+                    for (const entry of ledger) {
+                        if (entry && typeof entry === 'object' && typeof entry.faction_id === 'string') {
+                            entry.faction_id = canonicalizePoliticalSideId(entry.faction_id);
+                        }
                     }
                 }
             }
 
             // Phase 12C.3: Default supply_rights
-            if (!('supply_rights' in candidate) || candidate.supply_rights === undefined) {
-                candidate.supply_rights = { corridors: [] };
-            } else {
-                const supplyRights = candidate.supply_rights as any;
+            if (pol) {
+                if (!('supply_rights' in pol) || pol.supply_rights === undefined) {
+                    pol.supply_rights = { corridors: [] };
+                } else {
+                    const supplyRights = pol.supply_rights as any;
                 if (!supplyRights || typeof supplyRights !== 'object') {
-                    candidate.supply_rights = { corridors: [] };
+                        pol.supply_rights = { corridors: [] };
                 } else {
                     if (!Array.isArray(supplyRights.corridors)) {
                         supplyRights.corridors = [];
@@ -442,33 +501,34 @@ function migrateState(raw: unknown): GameState {
                     }
                 }
             }
+            }
 
             // Canonicalize faction IDs in front_posture and front_posture_regions keys
-            if (candidate.front_posture && typeof candidate.front_posture === 'object') {
-                const posture = candidate.front_posture as Record<string, any>;
+            if (mil.front_posture && typeof mil.front_posture === 'object') {
+                const posture = mil.front_posture as Record<string, any>;
                 const oldKeys = Object.keys(posture).sort();
                 const newPosture: Record<string, any> = {};
                 for (const oldKey of oldKeys) {
                     const canonicalKey = canonicalizePoliticalSideId(oldKey);
                     newPosture[canonicalKey] = posture[oldKey];
                 }
-                candidate.front_posture = newPosture;
+                mil.front_posture = newPosture;
             }
 
-            if (candidate.front_posture_regions && typeof candidate.front_posture_regions === 'object') {
-                const postureRegions = candidate.front_posture_regions as Record<string, any>;
+            if (mil.front_posture_regions && typeof mil.front_posture_regions === 'object') {
+                const postureRegions = mil.front_posture_regions as Record<string, any>;
                 const oldKeys = Object.keys(postureRegions).sort();
                 const newPostureRegions: Record<string, any> = {};
                 for (const oldKey of oldKeys) {
                     const canonicalKey = canonicalizePoliticalSideId(oldKey);
                     newPostureRegions[canonicalKey] = postureRegions[oldKey];
                 }
-                candidate.front_posture_regions = newPostureRegions;
+                mil.front_posture_regions = newPostureRegions;
             }
 
             // Phase 0: Default municipalities for older saves
-            if (!('municipalities' in candidate) || candidate.municipalities === undefined) {
-                candidate.municipalities = {};
+            if (pol && (!('municipalities' in pol) || pol.municipalities === undefined)) {
+                pol.municipalities = {};
             }
 
             // Phase 0: Default event log and relationships for older saves (do not inject if absent)
@@ -477,26 +537,26 @@ function migrateState(raw: unknown): GameState {
             // Peace phase: Default Peace phase optional state for determinism when present (do not inject for old saves).
             // When any peace-phase key exists, ensure others have deterministic defaults for round-trip.
             const hasAnyPhaseI =
-                (candidate.war_consolidation_until !== undefined) ||
-                (candidate.war_militia_strength !== undefined) ||
-                (candidate.war_control_strain !== undefined) ||
-                (candidate.war_jna !== undefined) ||
-                (candidate.war_alliance_rbih_hrhb !== undefined) ||
-                (candidate.war_displacement_initiated !== undefined);
+                (pol && pol.war_consolidation_until !== undefined) ||
+                (mil && mil.war_militia_strength !== undefined) ||
+                (pol && pol.war_control_strain !== undefined) ||
+                (mil && mil.war_jna !== undefined) ||
+                (pol && pol.war_alliance_rbih_hrhb !== undefined) ||
+                (disp && disp.war_displacement_initiated !== undefined);
             if (hasAnyPhaseI) {
-                if (!('war_consolidation_until' in candidate) || candidate.war_consolidation_until === undefined) {
-                    candidate.war_consolidation_until = {};
+                if (pol && (!('war_consolidation_until' in pol) || pol.war_consolidation_until === undefined)) {
+                    pol.war_consolidation_until = {};
                 }
-                if (!('war_militia_strength' in candidate) || candidate.war_militia_strength === undefined) {
-                    candidate.war_militia_strength = {};
+                if (!('war_militia_strength' in mil) || mil.war_militia_strength === undefined) {
+                    mil.war_militia_strength = {};
                 }
-                if (!('war_control_strain' in candidate) || candidate.war_control_strain === undefined) {
-                    candidate.war_control_strain = {};
+                if (pol && (!('war_control_strain' in pol) || pol.war_control_strain === undefined)) {
+                    pol.war_control_strain = {};
                 }
-                if (!('war_jna' in candidate) || candidate.war_jna === undefined) {
-                    candidate.war_jna = { transition_begun: false, withdrawal_progress: 0, asset_transfer_rs: 0 };
+                if (!('war_jna' in mil) || mil.war_jna === undefined) {
+                    mil.war_jna = { transition_begun: false, withdrawal_progress: 0, asset_transfer_rs: 0 };
                 } else {
-                    const jna = candidate.war_jna as any;
+                    const jna = mil.war_jna as any;
                     if (typeof jna.transition_begun !== 'boolean') jna.transition_begun = false;
                     if (typeof jna.withdrawal_progress !== 'number' || jna.withdrawal_progress < 0 || jna.withdrawal_progress > 1) {
                         jna.withdrawal_progress = 0;
@@ -506,15 +566,15 @@ function migrateState(raw: unknown): GameState {
                     }
                 }
                 // war_alliance_rbih_hrhb: leave undefined if absent; valid range [-1, 1]
-                if (!('war_displacement_initiated' in candidate) || candidate.war_displacement_initiated === undefined) {
-                    candidate.war_displacement_initiated = {};
+                if (disp && (!('war_displacement_initiated' in disp) || disp.war_displacement_initiated === undefined)) {
+                    disp.war_displacement_initiated = {};
                 }
             }
 
             // War phase: Default War phase optional state for determinism when present (do not inject for old saves).
-            // Fields are nested under `political` or `displacement` — check and write to the correct parent.
-            const polWar = (candidate as any).political;
-            const dispWar = (candidate as any).displacement;
+            // Fields are nested under `political` or `displacement` – check and write to the correct parent.
+            const polWar = pol;
+            const dispWar = disp;
             const hasAnyPhaseII =
                 (polWar && polWar.war_supply_pressure !== undefined) ||
                 (polWar && polWar.war_exhaustion !== undefined) ||
@@ -535,24 +595,24 @@ function migrateState(raw: unknown): GameState {
 
             // Phase F: Default Phase F displacement state when present (missing maps = empty).
             const hasAnyPhaseF =
-                (candidate as any).settlement_displacement !== undefined ||
-                (candidate as any).settlement_displacement_started_turn !== undefined ||
-                (candidate as any).municipality_displacement !== undefined;
+                (disp && disp.settlement_displacement !== undefined) ||
+                (disp && disp.settlement_displacement_started_turn !== undefined) ||
+                (disp && disp.municipality_displacement !== undefined);
             if (hasAnyPhaseF) {
-                if (!('settlement_displacement' in candidate) || (candidate as any).settlement_displacement === undefined) {
-                    (candidate as any).settlement_displacement = {};
+                if (disp && (!('settlement_displacement' in disp) || disp.settlement_displacement === undefined)) {
+                    disp.settlement_displacement = {};
                 }
-                if (!('settlement_displacement_started_turn' in candidate) || (candidate as any).settlement_displacement_started_turn === undefined) {
-                    (candidate as any).settlement_displacement_started_turn = {};
+                if (disp && (!('settlement_displacement_started_turn' in disp) || disp.settlement_displacement_started_turn === undefined)) {
+                    disp.settlement_displacement_started_turn = {};
                 }
-                if (!('municipality_displacement' in candidate) || (candidate as any).municipality_displacement === undefined) {
-                    (candidate as any).municipality_displacement = {};
+                if (disp && (!('municipality_displacement' in disp) || disp.municipality_displacement === undefined)) {
+                    disp.municipality_displacement = {};
                 }
             }
 
             // Displacement event log: default to empty array
-            if (!(candidate as any).displacement.displacement_event_log) {
-                (candidate as any).displacement.displacement_event_log = [];
+            if (disp && !Array.isArray(disp.displacement_event_log)) {
+                disp.displacement_event_log = [];
             }
 
             // Migrate corps_command active_operation → active_operations

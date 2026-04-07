@@ -86,6 +86,7 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves }: CommandB
         if (faction) setSelectedArmyId(faction);
         return;
       }
+      case 'none':
       default:
         return;
     }

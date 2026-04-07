@@ -1,0 +1,60 @@
+import assert from 'node:assert';
+import { existsSync } from 'node:fs';
+import { readFile, rm } from 'node:fs/promises';
+import { join } from 'node:path';
+import test from 'node:test';
+
+import { startNewCampaign } from '../src/desktop/desktop_sim.js';
+import { createStateFromScenario, runScenario } from '../src/scenario/scenario_runner.js';
+import { deserializeState, serializeState } from '../src/state/serialize.js';
+
+async function ensureRemoved(dir: string): Promise<void> {
+    if (existsSync(dir)) {
+        await rm(dir, { recursive: true, force: true });
+    }
+}
+
+test('initial_save is already in canonical loaded-save form at campaign birth', { timeout: 120_000 }, async () => {
+    const baseDir = process.cwd();
+    const scenarioPath = join(baseDir, 'data', 'scenarios', 'apr1992_definitive_52w.json');
+    const outDir = join(baseDir, '.tmp_desktop_campaign_start_contract');
+
+    await ensureRemoved(outDir);
+    const result = await runScenario({
+        scenarioPath,
+        baseDir,
+        outDirBase: outDir,
+        initialStateOnly: true,
+    });
+
+    const initialSave = await readFile(result.paths.initial_save, 'utf8');
+    const hydrated = deserializeState(initialSave);
+    const inMemoryState = await createStateFromScenario(scenarioPath, baseDir, { initialStateOnly: true });
+
+    assert.strictEqual(
+        serializeState(hydrated),
+        initialSave,
+        'initial_save.json should already match the canonical loaded-save contract',
+    );
+    assert.strictEqual(
+        serializeState(inMemoryState),
+        initialSave,
+        'desktop in-memory startup state should match the canonical initial_save exactly',
+    );
+
+    await ensureRemoved(outDir);
+});
+
+test('startNewCampaign returns canonicalized state before the first manual save', { timeout: 120_000 }, async () => {
+    const { state } = await startNewCampaign(process.cwd(), 'RBiH', 'apr_1992');
+    const payload = serializeState(state);
+    const hydrated = deserializeState(payload);
+
+    assert.strictEqual(hydrated.meta.player_faction, 'RBiH');
+    assert.ok(hydrated.military.recruitment_state, 'desktop new campaign should include recruitment_state at birth');
+    assert.strictEqual(
+        serializeState(hydrated),
+        payload,
+        'desktop new-campaign state should already be in canonical save/load form',
+    );
+});

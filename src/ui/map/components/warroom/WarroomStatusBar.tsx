@@ -22,8 +22,8 @@ export function WarroomStatusBar() {
   const displayLabel = formatTurnLabel(rawLabel);
   const phase = loadedGameState.phase ?? '';
   const isWar = phase.toLowerCase().includes('war');
-  const hasPendingEvents =
-    loadedGameState.firedEvents != null && loadedGameState.firedEvents.length > 0;
+  const pendingDecisionCount = loadedGameState.pendingEventDecisions?.length ?? 0;
+  const hasPendingEvents = pendingDecisionCount > 0;
 
   return (
     <div
@@ -48,7 +48,7 @@ export function WarroomStatusBar() {
       {hasPendingEvents && (
         <span
           className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"
-          title="Pending events"
+          title={`${pendingDecisionCount} pending decision${pendingDecisionCount === 1 ? '' : 's'}`}
         />
       )}
 

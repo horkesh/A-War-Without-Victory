@@ -266,14 +266,12 @@ Usage: `style={getPanelRailStyle(railSlot, '24rem')}`.
 #### Army HQ Modal (`army_hq/`)
 - **Opens:** `armyHQOpen` store flag, keyboard shortcut `H`
 - **Full-screen** command center modal with dark warroom aesthetic
-- **Top row:** Commander (left), faction army crest 180px (center), Strategic Situation stats (right)
-- **Intelligence panels (v2, 2026-03-22):**
-  - **Threat Assessment** (`ThreatAssessment.tsx`) — three categories: ACTIVE THREATS (offensive_signs + enemy operations from `sectorIntel`), HARDENED POSITIONS, INTELLIGENCE GAPS. Pre-indexed formations via `formationById` Map. Enemy-to-friendly corps mapping via `enemyCorpsToFriendlyCorps` Map.
-  - **Force Readiness** (`ForceReadiness.tsx`) — per-corps grade (COMBAT READY / ADEQUATE / STRAINED / DEGRADED / INEFFECTIVE) from ineffective %, fatigue, cohesion, disrupted count. Recommendation text per corps.
-  - **Supply Intelligence** (`SupplyIntelligence.tsx`) — supply breakdown from canonical `supply_reserve_constants.ts`. Enclave resilience bars. Mobilization summary. Supply runway projection.
-- **Situation Briefing** (`SituationBriefing.tsx`) — `generateBriefing()` pure function produces prioritized CRITICAL/WARNING/INFO alerts. Click alert flips relevant corps card.
+- **Top row:** Commander card, Chief of Staff briefing, faction crest, Exhaustion Clock, Strategic Position
+- **Situation Briefing** (`SituationBriefing.tsx`) — presentation-only renderer over `loadedGameState.commandBriefing.items`. Canonical command briefing owner is sim-side `state.military.last_briefing` (`collect_briefing.ts` -> `war_phases.ts` -> `GameStateAdapter`).
+- **Operational SITREP / Summary truth:** `extractWarData(...)` is the canonical raw operational snapshot owner; `getOperationalSitrepView(...)` in `src/ui/shared/operational_sitrep_views.ts` is the canonical mapped packet read path; `GameStateAdapter` maps that packet into `LoadedGameState`, and Army HQ SUMMARY / `SituationTab` render it rather than rebuilding separate front-supply-ops summaries locally. Warroom `ReportsModal` consumes that same packet for staff reporting and only reads extra contact lines from the raw snapshot. Warroom `FactionOverviewPanel` now renders its warning band from `operationalSitrep.alerts`, while its `COMMAND SHELL` block remains a shell-only handoff back to Army HQ rather than a second command analysis surface.
+- **Legacy Army HQ reporting helpers still present in repo:** `ThreatAssessment.tsx`, `ForceReadiness.tsx`, and `SupplyIntelligence.tsx` remain implementation files but are not the live top-row Army HQ owners as of the v0.8-to-v0.9 hardening pass.
 - **Corps cards** (`ArmyHQCorpsCard.tsx`) — FlipCard animation. Front: summary with equipment icons, readiness-driven left border color, incoming threat badge from sectorIntel, health stripe (cohesion + fatigue dual bar). Back: 5 collapsible sections (Commander, Sectors, Operations, ORBAT, Combat Record).
-- **Data:** `loadedGameState.sectorIntel` (v2), `loadedGameState.formations`, `loadedGameState.operations`, `loadedGameState.factionReserves`, `loadedGameState.corpsFrontSectors`
+- **Data:** `loadedGameState.commandBriefing`, `loadedGameState.operationalSitrep`, `loadedGameState.formations`, `loadedGameState.operations`, `loadedGameState.factionReserves`, `loadedGameState.corpsFrontSectors`
 - **Store:** `armyHQOpen`, `armyHQExpandedCorpsId`, `armyHQExpandedSections`, `armyHQOfficerSelectionCorpsId`
 
 #### OperationsPanel

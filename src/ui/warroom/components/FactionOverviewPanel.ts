@@ -14,6 +14,7 @@ const PREWAR_CAPITAL_INITIAL: Record<string, number> = {};
 import type { FactionId, GameState } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { extractWarData, type OfficerListEntry, type WarDataSnapshot } from '../data/war_data_extractor.js';
+import { getOperationalSitrepView } from '../../shared/operational_sitrep_views.js';
 import {
     FACTION_COLORS,
     FACTION_DISPLAY_NAMES,
@@ -357,6 +358,7 @@ export class FactionOverviewPanel {
         const pf = getPlayerFaction(this.gameState);
         const identity = getWarroomFactionIdentity(pf);
         const snap = extractWarData(this.gameState, pf);
+        const sitrep = getOperationalSitrepView(this.gameState, pf);
         const fc = FACTION_COLORS[pf] ?? FACTION_COLORS['RBiH'];
 
         const panel = document.createElement('div');
@@ -430,7 +432,9 @@ export class FactionOverviewPanel {
         panel.appendChild(this.renderCommandShellHandoff(snap));
 
         // Strategic Warnings — data-driven from real state
-        const warnings = this.generateWarPhaseWarnings(snap);
+        const warnings = sitrep.alerts.length > 0
+            ? sitrep.alerts.map((alert) => alert.text)
+            : ['No strategic warnings at this time'];
         const warningsDiv = document.createElement('div');
         warningsDiv.className = 'faction-overview-warnings';
         warningsDiv.innerHTML = `
@@ -467,59 +471,6 @@ export class FactionOverviewPanel {
         `;
 
         return section;
-    }
-
-    /**
-     * Generate war-phase strategic warnings from real state data.
-     */
-    private generateWarPhaseWarnings(snap: WarDataSnapshot): string[] {
-        const warnings: string[] = [];
-        const state = this.gameState;
-        const pf = snap.playerFaction;
-
-        // Sustainability collapses
-        if (snap.ownSupply.collapsedMunicipalities.length > 0) {
-            warnings.push(`Sustainability collapsed in ${snap.ownSupply.collapsedMunicipalities.length} municipality(s)`);
-        }
-
-        // Exhaustion worsening
-        const trends = state.political.loss_of_control_trends?.by_faction?.[pf];
-        if (trends?.exhaustion_increasing) {
-            warnings.push('Exhaustion trend worsening');
-        }
-        if (trends?.collapse_eligible) {
-            warnings.push('Faction is collapse-eligible');
-        }
-
-        // Authority critically low
-        if (snap.ownAuthority.authority < 0.30) {
-            warnings.push('Central authority critically low');
-        }
-
-        // Alliance strained (RBiH/HRHB only)
-        if ((pf === 'RBiH' || pf === 'HRHB') && snap.ownDiplomacy.rbihHrhbState) {
-            if (snap.ownDiplomacy.rbihHrhbState.allianceValue < 0.20) {
-                warnings.push('Alliance with partner faction severely strained');
-            }
-        }
-
-        // Exposed front gaps
-        if (snap.exposedFrontSettlements.length > 0) {
-            warnings.push(`EXPOSED FRONT: ${snap.exposedFrontSettlements.length} settlement(s) undefended`);
-        }
-
-        // Encircled brigades
-        if (snap.brigadeMovement.encircled.length > 0) {
-            warnings.push(`${snap.brigadeMovement.encircled.length} brigade(s) encircled`);
-        }
-
-        // Brigades in transit (front gaps opening)
-        if (snap.brigadeMovement.packing.length > 0) {
-            warnings.push(`${snap.brigadeMovement.packing.length} brigade(s) packing \u2014 front gaps opening`);
-        }
-
-        if (warnings.length === 0) warnings.push('No strategic warnings at this time');
-        return warnings;
     }
 
     /**

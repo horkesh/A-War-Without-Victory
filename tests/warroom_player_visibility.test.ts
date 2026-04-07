@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { extractWarData } from '../src/ui/warroom/data/war_data_extractor.js';
+import { getOperationalSitrepView } from '../src/ui/shared/operational_sitrep_views.js';
 import { ReportsModal } from '../src/ui/warroom/components/ReportsModal.js';
 import { MagazineModal } from '../src/ui/warroom/components/MagazineModal.js';
 import { CommandBriefingModal } from '../src/ui/warroom/components/CommandBriefingModal.js';
@@ -62,37 +63,67 @@ describe('warroom player visibility', () => {
   });
 
   it('warroom report and magazine surfaces do not print raw enemy formation names', () => {
-    const snap = {
-      engagedFrontEdges: [
-        { settlementA: 'op:sarajevo:centar', settlementB: 'op:grbavica:south', pressure: 0.8, friction: 0.4, tier: 'exposed' },
-      ],
-      ownForces: {
-        formationDetails: [],
+    const sitrep = getOperationalSitrepView({
+      meta: { turn: 4, phase: 'war' },
+      factions: [{ id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } }, { id: 'RS', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } }],
+      military: {
+        formations: {},
+        casualty_ledger: {},
+        front_edges: [
+          { edge_id: 'edge_1', a: 'op:sarajevo:centar', b: 'op:grbavica:south', side_a: 'RBiH', side_b: 'RS' },
+        ],
+        front_pressure: { edge_1: { value: 0.8, max_abs: 1, last_updated_turn: 4 } },
+        front_segments: { edge_1: { friction: 0.4 } },
+        militia_garrison: {},
+        brigade_movement_state: {},
+        brigade_encircled: {},
+        corps_command: {},
       },
-      contactedEnemyFormations: [
-        { label: 'Enemy contact', strengthCategory: 'regimental', contactSettlement: 'sarajevo_1', detectedTurn: 4 },
-      ],
-      brigadeMovement: { encircled: [] },
-      ownDisplacement: { activeHostileTakeoverTimers: 0, activeCamps: 0 },
-      ownSupply: { criticalCount: 0, strainedCount: 0, collapsedMunicipalities: ['bijeljina_center'] },
-      ownCorpsOps: [],
-    } as any;
+      political: {
+        political_controllers: {},
+        war_exhaustion: { RBiH: 0.2 },
+        loss_of_control_trends: { by_faction: { RBiH: { exhaustion_trend: 'flat' } } },
+      },
+      displacement: {
+        displacement_state: {},
+        displacement_camp_state: {},
+        hostile_takeover_timers: {},
+        civilian_casualties: {},
+        sustainability_state: { bijeljina_center: { mun_id: 'bijeljina_center', collapsed: true, sustainability_score: 0 } },
+      },
+    } as any, 'RBiH');
 
-    const reportBody = (new ReportsModal({} as any) as any).generateWarReportBody(snap, 4);
+    const reportBody = (new ReportsModal({} as any) as any).generateWarReportBody(sitrep, [
+      { label: 'Enemy contact', strengthCategory: 'regimental', contactSettlement: 'sarajevo_1', detectedTurn: 4 },
+    ], 4);
     expect(reportBody).toContain('Enemy contact');
     expect(reportBody).not.toContain('Enemy Shock Brigade');
     expect(reportBody).toContain('Sarajevo Centar');
     expect(reportBody).toContain('Grbavica South');
     expect(reportBody).toContain('Sarajevo 1');
-    expect(reportBody).toContain('Bijeljina Center');
     expect(reportBody).not.toContain('op:sarajevo:centar');
     expect(reportBody).not.toContain('op:grbavica:south');
     expect(reportBody).not.toContain('sarajevo_1');
     expect(reportBody).not.toContain('bijeljina_center');
 
-    const section = (new MagazineModal({} as any) as any).renderEnemyAssessmentSection(snap);
+    const magazineSnap = {
+      contactedEnemyFormations: [
+        { label: 'Enemy contact', strengthCategory: 'regimental', contactSettlement: 'sarajevo_1', detectedTurn: 4 },
+      ],
+    } as any;
+    const section = (new MagazineModal({} as any) as any).renderEnemyAssessmentSection(magazineSnap);
     expect(section.textContent).toContain('Enemy contact');
     expect(section.textContent).not.toContain('Enemy Shock Brigade');
+  });
+
+  it('warroom reports consume the shared operational packet instead of rebuilding it locally', () => {
+    const reportsSource = readFileSync(
+      resolve(process.cwd(), 'src/ui/warroom/components/ReportsModal.ts'),
+      'utf8',
+    );
+
+    expect(reportsSource).toContain('getOperationalSitrepView(this.gameState, factionId)');
+    expect(reportsSource).not.toContain('toOperationalSitrepView(snap)');
   });
 
   it('extractWarData scopes supply summaries to player-controlled municipalities', () => {
@@ -236,7 +267,7 @@ describe('warroom player visibility', () => {
     expect(snap.ownCorpsOps[0]?.operation).not.toHaveProperty('objectives');
   });
 
-  it('warroom command briefing uses derived command-shell warnings instead of hardcoded certainty', () => {
+  it('warroom command briefing renders the canonical sim-owned briefing packet', () => {
     const state = {
       meta: { turn: 9, phase: 'war' },
       factions: [
@@ -244,20 +275,39 @@ describe('warroom player visibility', () => {
         { id: 'RS', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
       ],
       military: {
-        formations: {
-          own_1: { faction: 'RBiH', kind: 'brigade', status: 'active', personnel: 900, posture: 'routed', name: 'Own Brigade' },
-        },
+        formations: {},
         casualty_ledger: {},
-        front_edges: [
-          { edge_id: 'edge_1', settlement_a: 'op:sarajevo:centar', settlement_b: 'op:grbavica:south', side_a: 'RBiH', side_b: 'RS', pressure: 0.7, friction: 0.3, tier: 'exposed' },
-        ],
+        front_edges: [],
         front_pressure: {},
         front_segments: {},
         militia_garrison: {},
         brigade_movement_state: {},
-        brigade_encircled: { own_1: true },
-        corps_command: {
-          arbih_3rd_corps: { stance: 'balanced', active_operations: [{ type: 'sector_attack', phase: 'preparing', started_turn: 8 }] },
+        brigade_encircled: {},
+        corps_command: {},
+        last_briefing: {
+          turn: 9,
+          faction: 'RBiH',
+          headline: '2 items for your review.',
+          criticalCount: 1,
+          warningCount: 1,
+          items: [
+            {
+              id: 'cmd-1',
+              section: 'command',
+              severity: 'critical',
+              title: 'Commander requests acknowledgement',
+              detail: 'Pending officer decision remains unresolved.',
+              target: { corpsId: 'arbih_3rd_corps' },
+            },
+            {
+              id: 'hum-1',
+              section: 'humanitarian',
+              severity: 'warning',
+              title: 'Gorazde under prolonged siege',
+              detail: 'Isolation is now affecting resilience.',
+              target: { enclaveId: 'gorazde' },
+            },
+          ],
         },
       },
       political: {
@@ -277,11 +327,11 @@ describe('warroom player visibility', () => {
     const panel = new CommandBriefingModal(state).render();
     const text = panel.textContent ?? '';
 
-    expect(text).toContain('brigade routed in recent fighting');
-    expect(text).toContain('front edge');
-    expect(text).toContain('hostile population-pressure timer');
-    expect(text).not.toContain('UNHCR humanitarian convoys are moving with minimal disruption.');
-    expect(text).not.toContain('No critical enclaves nearing collapse this week.');
+    expect(text).toContain('2 items for your review.');
+    expect(text).toContain('Commander requests acknowledgement');
+    expect(text).toContain('Pending officer decision remains unresolved.');
+    expect(text).toContain('Gorazde under prolonged siege');
+    expect(text).not.toContain('No command briefing packet is available yet.');
   });
 
   it('warroom reports use generic player-safe authorship instead of fake specific headquarters', () => {
@@ -460,5 +510,16 @@ describe('warroom player visibility', () => {
 
     expect(source).toContain('${getFactionMilitaryLabel(pf)}');
     expect(source).not.toContain('${pf}</div>');
+  });
+
+  it('warroom faction overview warnings consume the shared operational packet instead of a local warning builder', () => {
+    const source = readFileSync(
+      resolve('src/ui/warroom/components/FactionOverviewPanel.ts'),
+      'utf8',
+    );
+
+    expect(source).toContain('getOperationalSitrepView(this.gameState, pf)');
+    expect(source).toContain("sitrep.alerts.map((alert) => alert.text)");
+    expect(source).not.toContain('generateWarPhaseWarnings(');
   });
 });

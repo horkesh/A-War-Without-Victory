@@ -27,9 +27,13 @@ const baseState: GameState = {
     negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
     ceasefire: {},
     negotiation_ledger: [],
-    supply_rights: { corridors: [] }
+    supply_rights: { corridors: [] },
+    political_controllers: {},
+    municipalities: {}
   } as any,
-    displacement: {} as any
+    displacement: {
+      displacement_event_log: []
+    } as any
 };
 
 test('same state + same inputs yields identical output', () => {

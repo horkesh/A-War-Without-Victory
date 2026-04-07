@@ -67,7 +67,6 @@ The tactical map is a standalone Canvas 2D application that renders ~5,800 settl
 - **Formation markers** — horizontal box with army crest + NATO symbol (corps/army_hq: XX/XXX); posture badge (D/P/A/E) when game state loaded; sizes by zoom (strategic 44×30, operational 54×38, tactical 66×46); readiness-colored inner glow; personnel strength (or ×N for corps) below symbol; name labels at tactical zoom only; AABB hit-test (marker dim + 4px margin); non-selected formations dimmed when one selected. Co-located markers stacked vertically. See [IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md §20](../40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md).
 - **3D formation counter modes** — `D` cycles deterministic data modes (`strength`, `cohesion`, `supply proxy`, `posture`, `fatigue`) for 3D counters; corps tinting is deterministic from `(faction, corps_id)` hash and includes a soft-factor status triangle.
 - **Order arrows** — attack (red solid), municipality move (dashed faction color), and settlement move (`brigade_movement_orders`, dashed faction color). **Retired order type:** brigade reposition orders are no longer a live player command; old save data may still carry `brigade_reposition_orders`, but desktop rejects new staging and the tactical-map adapter no longer surfaces amber reposition arrows. **Target selection mode:** Attack uses two-step confirmation (candidate + confirm), while Move uses settlement-selection mode with inline Confirm/Cancel and keyboard Enter/Esc shortcuts.
-- **Replay timeline playback** — week-by-week animation from `replay_timeline.json` with settlement flip highlights; **replay scrubber** for direct week jump
 - **Interactive settlement panel** — 5-tab detail view (OVERVIEW, CONTROL, MILITARY, ORDERS/EVENTS, HISTORY). Overview merges identification and admin; no SID/ID/provenance; type in sentence case; includes `Population (1991)` and `Population (Current)` when game state displacement data is available; Military formation rows clickable. See §13.2, [GUI_POLISH_PASS_AND_REFACTOR_2026_02_14.md](../40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md).
 - **Ops Planning Modal** — corps-level 4-phase flow (`src/ui/map/components/ops_modal/`, 16 files). Launched from CorpsDetail "Plan Operation" or CorpsFrontPanel "Draft New Directive". Phase 1: commander selection (officer cards with personality pips, prep time). Phase 2: plan (map-click objectives, auto-proposed brigades, pill-button parameters for type/tempo/tolerance/artillery). Phase 3: G2 assessment (clipboard with narrative military doc + raw intel tabs, live IPC predictions via `usePrediction`). Phase 4: authorize (formal OPORD with ODOBRENO stamp animation, IPC submission). **3D terrain** (pitch 30, DEM extrusion 2.5x from `terrain.pmtiles`). **Deck.gl animated arrows** (PathLayer with PathStyleExtension marching dashes, PolygonLayer arrowheads, TextLayer labels on `MapboxOverlay`). **Staging/objective selectability constraints** (front-edge adjacency: staging→adjacent enemies only, objective→adjacent friendlies only; non-selectable dimmed 45%). **Terrain-aware camera** (bearing from friendly→enemy centroid). **Terrain tooltip** on hover (elevation, terrain type, defense bonus, river/road warnings, selectable indicator). No checkboxes — all card/pill selection. Intel gate at <40% offers probe alternative.
 - **Formation panel** — clicking a formation opens **Army Reserve Panel** (`ArmyReservePanel.tsx`) for `army_hq` formations, **corps panel** (personnel, **combat effectiveness** total + letter grade A-F + weak/disrupted counts, brigades, sectors, equipment aggregate; Sectors tab shows per-sector effectiveness + personnel; Ops tab; ORBAT tab), or **brigade panel** (Chain of Command, Statistics with **combat effectiveness** number + worst-modifier callout, AoR, **Front Assignment**, SET POSTURE, ATTACK/MOVE). **Army panel** shows whole-army combat effectiveness aggregate + grade. Combat effectiveness: `combatEffectiveness.ts` computes `base (personnel × equipment × experience × cohesion × honor) × fatigue × officer × homeDistance × morale × disruption × supply`. Grade: A (≥85% avg modifier), B (≥70%), C (≥55%), D (≥40%), F (<40%). Personnel always visible alongside.
@@ -75,12 +74,11 @@ The tactical map is a standalone Canvas 2D application that renders ~5,800 settl
 - **Staff Map (4th zoom)** — press `4` to enter drag-to-define region mode; draw a rectangle (minimum 5 settlements) to open a procedural paper-map overlay at 8× zoom (parchment background, terrain hatching, serif labels, full-detail formation counters, front lines, cartographic decorations). Exit button top-left; single player-faction crest as faded ink stamp (top-left, when player_faction set); faction stripe on counters, barbed-wire front lines, AoR crosshatch, contour lines, river labels, fold creases, contested overlay, coffee stain, margin annotations, irregular vignette. See [IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md §17, §18, §19](../40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md).
 - **Settlement rendering** — main map draws settlement polygon **fills** only; inter-settlement border strokes are not drawn (removed 2026-02-17 per §17).
 - **OOB sidebar** — WAR STATUS block (territory %, personnel, flips, pending orders, faction overview, alerts) plus full formation roster grouped by faction
-- **Replay export** — in-browser WebM export via `MediaRecorder` from the tactical map canvas
 - **Minimap** — overview with viewport rectangle
 - **Search** — diacritic-insensitive fuzzy settlement search
-- **Dataset switching** — Baseline (Apr 1992), September 1992, or any loaded game state; state is loaded via main menu (Load Save / Load Replay), desktop IPC (`game-state-updated`), or replay; no load-state controls on the map surface (layers are a bottom floating toolbar only).
+- **Dataset switching** — Baseline (Apr 1992), September 1992, or any loaded game state; state is loaded via main menu (New Campaign / Load Save) or desktop IPC (`game-state-updated`). Replay timelines remain harness-side artifacts, not a live canonical map-loading path; no load-state controls exist on the map surface (layers are a bottom floating toolbar only).
 - **Recruitment UI** — when loaded game state has recruitment and **player_faction** (e.g. after New Campaign): toolbar shows **Recruit** button; **R** hotkey opens a modal that lists only the player's side and only brigades recruitable right now, with cost legend (C = Capital, E = Equipment, M = Manpower); confirm applies recruitment and map shows placement feedback (new formation selected for 4s). See §13.8 and [RECRUITMENT_UI_FROM_MAP_2026_02_14.md](../40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md).
-- **Desktop (Electron)** — when run as `npm run desktop`: main menu overlay (New Campaign / Load Save / Load Replay), Load scenario/state and Advance turn from main process, AAR modal after turn advance when control events occur, Settings/Help modals (pruned: Settings shows "coming soon", Help shows shortcuts), replay scrubber; recruitment catalog and apply via IPC. In browser (no desktop): "New Campaign" appears as "Load Scenario"; Continue dimmed until state loaded. **New Game:** New Campaign opens a side-selection overlay (RBiH, RS, HRHB with flags); choosing a side invokes `start-new-campaign` IPC, loads the fixed April 1992 scenario, sets `meta.player_faction`, and injects recruitment state for the toolbar/Recruit modal (§13.6, [DESKTOP_GUI_IPC_CONTRACT.md](DESKTOP_GUI_IPC_CONTRACT.md), [GUI_DESIGN_BLUEPRINT.md](GUI_DESIGN_BLUEPRINT.md) §19.2).
+- **Desktop (Electron)** — when run as `npm run desktop`: main menu overlay (New Campaign / Load Save), load scenario/state and Advance turn from main process, AAR modal after turn advance when control events occur, Settings/Help modals (pruned: Settings shows "coming soon", Help shows shortcuts), and recruitment catalog/apply via IPC. In browser (no desktop): "New Campaign" appears as "Load Scenario"; Continue dimmed until state loaded. **New Game:** New Campaign opens a side-selection overlay (RBiH, RS, HRHB with flags); choosing a side invokes `start-new-campaign` IPC, loads the fixed April 1992 scenario, sets `meta.player_faction`, and injects recruitment state for the toolbar/Recruit modal (§13.6, [DESKTOP_GUI_IPC_CONTRACT.md](DESKTOP_GUI_IPC_CONTRACT.md), [GUI_DESIGN_BLUEPRINT.md](GUI_DESIGN_BLUEPRINT.md) §19.2). Replay timelines are still scenario-harness outputs, not a current desktop loading flow.
 - **Accessibility & discoverability** — Canvas has `aria-describedby` pointing to a live region that announces selected/hovered settlement. When the map has focus, Arrow keys move selection between settlements (deterministic sorted SID order), Enter opens the settlement panel; in Move settlement-selection mode, Enter confirms the staged selection and Esc cancels. Toolbar buttons, zoom controls, and layer toggles have `title` tooltips (with shortcuts where applicable).
 - **Operational 3D map modes** — `F1/F2/F3/F4` switch `operations/supply/displacement/command` overlays in `map_operational_3d.ts`; overlays are fed by read-only IPC queries (`query-supply-paths`, `query-corps-sectors`) and deterministic state projections (`settlement_displacement`).
 - **Operational 3D warmap visual & UX (2026-02-21)** — Two-tier formation counters (brigade: 128×72 light background; corps: 256×160 CRT-style with green name, strength/posture colors); stem lines from counters to terrain with radial-gradient dots; enhanced AoR (per-polygon hatch, perpendicular contact-edge segments), polygon-fill movement range, settlement highlight rings (HQ/move/attack); right-side panel stack (Selection with posture/deploy, Orders queue, Battle log, Forces summary); SELECT/ATTACK/MOVE mode toolbar (1/2/3, Escape). See [WARMAP_SANDBOX_VISUAL_UX_PORT_2026_02_21.md](../40_reports/implemented/WARMAP_SANDBOX_VISUAL_UX_PORT_2026_02_21.md).
@@ -107,7 +105,7 @@ All source files live under `src/ui/map/` (13 files, ~2,600+ total lines):
 
 | File | Lines | Role |
 |------|------:|------|
-| `tactical_map.html` | ~200 | HTML entry point — toolbar, canvas, panels, overlays, main menu, AAR/settings/help modals, replay scrubber |
+| `tactical_map.html` | ~200 | HTML entry point — toolbar, canvas, panels, overlays, main menu, AAR/settings/help modals |
 | `main.ts` | 17 | Bootstrap — `DOMContentLoaded` → `new MapApp('map-root').init()` |
 | `MapApp.ts` | ~2640 | **Main orchestrator** — rendering, interaction, all UI wiring, order arrows, war status, tabs, desktop flow |
 | `types.ts` | ~260 | Shared TypeScript interfaces; LoadedGameState includes attackOrders, movementOrders, recentControlEvents |
@@ -175,7 +173,6 @@ Crest and flag images are loaded from `/assets/sources/crests/` (see `assets/sou
 |------|---------|----------|
 | `political_control_data_sep1992.json` | Dataset dropdown → "September 1992" | Alternate control data |
 | User-selected `final_save.json` | Main menu → Load Save, or desktop IPC | Game state with formations, militia pools, dynamic control |
-| User-selected `replay_timeline.json` | "Load Replay..." button | Ordered weekly game-state frames + control events for map playback/animation |
 
 ### 5.4 Processing Pipeline
 
@@ -512,9 +509,9 @@ The `SpatialIndex` is a 50x50 uniform grid over the data bounds. For ~6,000 sett
 | `/` or `Ctrl+F` | Open search |
 | `Escape` | Cancel targeting mode (first priority) → close radial menu → close search → deselect settlement → close overlay/modal (cascade) |
 | `O` | Toggle OOB sidebar |
-| `Space` | (Desktop) Advance turn or play/pause replay |
+| `Space` | (Desktop) Advance turn |
 | `M` | (Desktop) Toggle main menu overlay |
-| `R` | (Desktop) Open Recruitment modal when state has recruitment; otherwise focus replay scrubber |
+| `R` | (Desktop) Open Recruitment modal when state has recruitment |
 
 ### 12.5 Right-Click Radial Context Menu (2026-03-19)
 
@@ -543,11 +540,11 @@ When cursor is near a front line, both OSID and front-edge hover handlers fire. 
 
 ## 13. UI Components
 
-### 13.0 War Status and Replay Scrubber
+### 13.0 War Status and Replay Artifacts
 
 **War Status** — Block in the OOB sidebar (or dedicated area when OOB closed): territory share by faction, personnel, flip counts, pending orders summary, faction overview, and alerts. Updated on state load and after advance-turn (desktop).
 
-**Replay scrubber** — Slider + week label for jumping to a specific week in a loaded replay timeline. Visible when a replay is loaded; keyboard shortcut `R` focuses it (desktop).
+**Replay artifacts** — Scenario harnesses can still emit ordered weekly save sequences for offline analysis/video, but the canonical desktop/map UI does not currently expose replay loading or a replay scrubber.
 
 **Toolbar date** — Top-right label shows deterministic campaign date derived from `meta.turn` with April 1992 anchor. This replaces turn/capital/army summary text in the toolbar.
 
@@ -556,7 +553,7 @@ When cursor is near a front line, both OSID and front-edge hover handlers fire. 
 A **bottom floating toolbar** (`.tm-layer-toolbar`) centred above the status area provides layer toggles only:
 
 - **Checkboxes:** Political control, Front lines, Municipality borders, Minimap, Formations (OOB). Labels and Brigade AoR toggles removed (2026-02-17): labels always on; AoR highlight automatic when a formation is selected. Same element IDs for remaining layers (`layer-control`, `layer-frontlines`, etc.). IMPLEMENTED_WORK_CONSOLIDATED §22. **React+MapLibre app (canonical GUI, 2026-03-02):** MapModeToolbar layer toggles: Fronts, Formations, Labels, Sectors. Map modes: Political, Ethnic, Supply, Pressure, Density.
-- **No load/dataset controls on map:** Load State, Load Run, Load Replay, dataset dropdown, and replay controls are not on the map surface; loading is via **main menu** (Menu → Load Save / Load Replay) or desktop IPC (`game-state-updated`). Replay scrubber still appears when a replay is loaded (e.g. via File → Open replay or IPC).
+- **No load/dataset controls on map:** Load State/Save selection and dataset switching are not on the map surface; loading is via **main menu** (Menu → New Campaign / Load Save) or desktop IPC (`game-state-updated`). Replay timelines are not loaded through the canonical map UI.
 
 Settlement fill mode (political control vs ethnic majority 1991) is toggled by the **Ethnic 1991** toolbar button only; legend and tooltip reflect the current mode.
 
@@ -613,7 +610,7 @@ Centered top overlay with text input and results dropdown. Max 12 results. Diacr
 
 ### 13.6 Main Menu and Modals
 
-**Main menu overlay** — (Desktop) Full-screen overlay with New Campaign / Load Save / Load Replay. Toggle with toolbar "Menu" or `M`. Escape closes. **New Campaign** (desktop only): closes the menu and shows a **side-picker overlay** (three options with faction flags: RBiH, RS, HRHB). Choosing a side calls `start-new-campaign` IPC; the app loads the canon April 1992 scenario (`apr1992_definitive_52w.json`), sets `meta.player_faction`, injects `recruitment_state`, and applies the state to the map. In browser (no desktop IPC), New Campaign falls back to triggering "Load scenario…" (file picker).
+**Main menu overlay** — (Desktop) Full-screen overlay with New Campaign / Load Save. Toggle with toolbar "Menu" or `M`. Escape closes. **New Campaign** (desktop only): closes the menu and shows a **side-picker overlay** (three options with faction flags: RBiH, RS, HRHB). Choosing a side calls `start-new-campaign` IPC; the app loads the canon April 1992 scenario (`apr1992_definitive_52w.json`), sets `meta.player_faction`, injects `recruitment_state`, and applies the state to the map. In browser (no desktop IPC), New Campaign falls back to triggering "Load scenario…" (file picker).
 
 **Modals** — AAR (after turn advance when control events occur), **War Summary** (per-faction: formation count, personnel, attack/move order counts, control gained/lost; BATTLES THIS TURN section with settlement-level control changes and faction colors; ALL CONTROL EVENTS total), Settings ("Settings coming soon."), Help (title "Help", intro paragraph, KEYBOARD SHORTCUTS subsection). Each modal has a backdrop and close button; Escape closes the topmost. See [TACTICAL_MAP_SEVEN_UI_SIM_FIXES_2026_02_15.md](../40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md).
 
@@ -672,9 +669,9 @@ User loads state via main menu (Load Save) or desktop IPC (e.g. after New Campai
 - **recruitment** — when `state.recruitment_state` exists: `capitalByFaction`, `equipmentByFaction` (via `pointsByFaction()` with sorted keys), and `recruitedBrigadeIds` (sorted); used by the Recruitment modal (§13.8).
 - **player_faction** — from `state.meta.player_faction` when set (desktop New Game); indicates which side the human plays (RBiH, RS, or HRHB). Used by the Recruitment modal to show only the player's brigades and only those recruitable at the moment (§13.8).
 
-### 14.3 Replay Timeline Loading
+### 14.3 Harness Replay Artifacts
 
-`Load Replay...` expects `replay_timeline.json` produced by `runScenario(..., emitWeeklySavesForVideo: true)` (`--video` in harness CLI). The file shape:
+`replay_timeline.json` can still be emitted by `runScenario(..., emitWeeklySavesForVideo: true)` (`--video` in harness CLI) for offline analysis/video workflows. It is not currently loaded by the canonical desktop/map UI. The file shape:
 
 - `meta` — optional run metadata (`run_id`, `scenario_id`, `weeks`)
 - `frames[]` — sorted by `week_index`; each frame stores a serialized game state

@@ -348,7 +348,10 @@ describe('player visibility helpers', () => {
       'utf8',
     );
     expect(warSummarySource).toContain('const { playerFaction, areaPct, personnelByFaction, totalDisplaced, displacedByFaction } = data;');
+    expect(warSummarySource).toContain('const sitrep = loadedGameState.operationalSitrep;');
     expect(warSummarySource).toContain('getPlayerSafeMilitaryFactionName');
+
+    expect(situationTabSource).toContain('const sitrep = state.operationalSitrep;');
   });
 
   it('keeps the strategic dashboard player-safe when opened from the live bottom strip', () => {

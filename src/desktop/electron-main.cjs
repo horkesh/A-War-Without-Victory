@@ -56,6 +56,19 @@ function sendTurnReportToRenderer(report) {
   }
 }
 
+function readCanonicalCurrentState(sim) {
+  if (!currentGameStateJson) {
+    throw new Error('No game loaded');
+  }
+  return sim.deserializeState(currentGameStateJson);
+}
+
+function writeCanonicalCurrentState(sim, state, excludeSender) {
+  currentGameStateJson = sim.serializeState(state);
+  sendGameStateToRenderer(currentGameStateJson, excludeSender);
+  return currentGameStateJson;
+}
+
 function ensureCorpsCommandEntry(state, corpsId, stance = 'balanced') {
   if (!state.corps_command) state.corps_command = {};
   if (!state.corps_command[corpsId]) {
@@ -1981,7 +1994,8 @@ app.whenReady().then(() => {
   // v0.8.4 Phase B: Autonomy IPC handlers
   ipcMain.handle('get-autonomy-state', async () => {
     if (!currentGameStateJson) return null;
-    const state = JSON.parse(currentGameStateJson);
+    const sim = getDesktopSim();
+    const state = readCanonicalCurrentState(sim);
     return {
       autonomy_level: state.meta?.autonomy_level ?? 0,
       autonomy_level_pending: state.meta?.autonomy_level_pending ?? null,
@@ -1996,7 +2010,8 @@ app.whenReady().then(() => {
       return { ok: false, error: 'invalid_level' };
     }
     if (!currentGameStateJson) return { ok: false, error: 'no_state' };
-    const state = JSON.parse(currentGameStateJson);
+    const sim = getDesktopSim();
+    const state = readCanonicalCurrentState(sim);
     const current = state.meta?.autonomy_level ?? 0;
     if (level === current) {
       // No change — clear any stale pending
@@ -2009,8 +2024,7 @@ app.whenReady().then(() => {
       // Upward numeric change = more delegation (e.g. 0→1): one-turn delay
       state.meta.autonomy_level_pending = level;
     }
-    currentGameStateJson = JSON.stringify(state);
-    sendGameStateToRenderer(currentGameStateJson);
+    writeCanonicalCurrentState(sim, state);
     return { ok: true, new_level: state.meta.autonomy_level, pending: state.meta.autonomy_level_pending ?? null };
   });
 
@@ -2020,7 +2034,8 @@ app.whenReady().then(() => {
       return { ok: false, error: 'invalid_payload' };
     }
     if (!currentGameStateJson) return { ok: false, error: 'no_state' };
-    const state = JSON.parse(currentGameStateJson);
+    const sim = getDesktopSim();
+    const state = readCanonicalCurrentState(sim);
     // Inline idempotent upsert — mirrors autonomy_overrides.ts logic (no ESM require from CJS)
     if (!state.meta.autonomy_overrides) state.meta.autonomy_overrides = [];
     state.meta.autonomy_overrides = state.meta.autonomy_overrides.filter(o => o.target_id !== target_id);
@@ -2030,15 +2045,15 @@ app.whenReady().then(() => {
       target_id,
       faction,
     });
-    currentGameStateJson = JSON.stringify(state);
-    sendGameStateToRenderer(currentGameStateJson);
+    writeCanonicalCurrentState(sim, state);
     return { ok: true };
   });
 
   // v0.8.4 Phase C: Proposal accept/reject handlers
   ipcMain.handle('accept-proposal', async (event, proposalId) => {
     if (!currentGameStateJson) return { ok: false, error: 'no_state' };
-    const state = JSON.parse(currentGameStateJson);
+    const sim = getDesktopSim();
+    const state = readCanonicalCurrentState(sim);
     const proposals = state.meta?.pending_proposal_reviews ?? [];
     const idx = proposals.findIndex(p => p.id === proposalId);
     if (idx === -1) return { ok: false, error: 'proposal_not_found' };
@@ -2068,14 +2083,14 @@ app.whenReady().then(() => {
       }
     }
 
-    currentGameStateJson = JSON.stringify(state);
-    sendGameStateToRenderer(currentGameStateJson);
+    writeCanonicalCurrentState(sim, state, event.sender);
     return { ok: true };
   });
 
   ipcMain.handle('reject-proposal', async (event, proposalId) => {
     if (!currentGameStateJson) return { ok: false, error: 'no_state' };
-    const state = JSON.parse(currentGameStateJson);
+    const sim = getDesktopSim();
+    const state = readCanonicalCurrentState(sim);
     const proposals = state.meta?.pending_proposal_reviews ?? [];
     const idx = proposals.findIndex(p => p.id === proposalId);
     if (idx === -1) return { ok: false, error: 'proposal_not_found' };
@@ -2106,8 +2121,7 @@ app.whenReady().then(() => {
       }
     }
 
-    currentGameStateJson = JSON.stringify(state);
-    sendGameStateToRenderer(currentGameStateJson);
+    writeCanonicalCurrentState(sim, state, event.sender);
     return { ok: true };
   });
 

@@ -1,17 +1,19 @@
-import type { BriefingItem, BriefingTarget } from './generateBriefing';
+import type { CommandBriefingItemView, CommandBriefingTargetView } from '../../data/types.js';
 
-export { generateBriefing, type BriefingItem, type BriefingTarget } from './generateBriefing';
+export type BriefingItem = CommandBriefingItemView;
+export type BriefingTarget = CommandBriefingTargetView;
 
 export interface SituationBriefingProps {
     items: BriefingItem[];
     onNavigate?: (target: BriefingTarget) => void;
 }
 
-const TARGET_LABELS: Record<BriefingTarget['type'], string> = {
-    corps: '→ CORPS',
-    sector: '→ SECTOR',
-    operation: '→ OP',
-    none: '',
+const TARGET_LABELS: Partial<Record<BriefingTarget['type'], string>> = {
+    corps: '-> CORPS',
+    sector: '-> SECTOR',
+    operation: '-> OP',
+    enclaves: '-> ENCLAVES',
+    settlement: '-> MAP',
 };
 
 export function SituationBriefing({ items, onNavigate }: SituationBriefingProps) {
@@ -22,7 +24,7 @@ export function SituationBriefing({ items, onNavigate }: SituationBriefingProps)
                     SITUATION BRIEFING
                 </div>
                 <div className="text-[11px] text-text-secondary italic py-1">
-                    No alerts — situation nominal
+                    No alerts - situation nominal
                 </div>
             </div>
         );
@@ -40,15 +42,16 @@ export function SituationBriefing({ items, onNavigate }: SituationBriefingProps)
                         item.severity === 'critical'
                             ? 'bg-red-500'
                             : item.severity === 'warning'
-                              ? 'bg-amber-400'
-                              : 'bg-sky-400';
+                                ? 'bg-amber-400'
+                                : 'bg-sky-400';
                     const borderColor =
                         item.severity === 'critical'
                             ? 'border-red-500/30 hover:border-red-500/50'
                             : item.severity === 'warning'
-                              ? 'border-amber-500/30 hover:border-amber-500/50'
-                              : 'border-panel-border hover:border-panel-border';
+                                ? 'border-amber-500/30 hover:border-amber-500/50'
+                                : 'border-panel-border hover:border-panel-border';
                     const hasTarget = item.target.type !== 'none';
+                    const targetLabel = TARGET_LABELS[item.target.type];
 
                     return (
                         <button
@@ -70,9 +73,9 @@ export function SituationBriefing({ items, onNavigate }: SituationBriefingProps)
                                         </div>
                                     )}
                                 </div>
-                                {hasTarget && onNavigate && (
+                                {hasTarget && onNavigate && targetLabel && (
                                     <span className="text-amber-400/50 group-hover:text-amber-400 text-[9px] font-mono font-bold shrink-0 transition-colors">
-                                        {TARGET_LABELS[item.target.type]}
+                                        {targetLabel}
                                     </span>
                                 )}
                             </div>

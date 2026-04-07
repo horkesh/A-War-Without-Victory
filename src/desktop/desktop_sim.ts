@@ -11,7 +11,7 @@ import { loadTerrainScalars } from '../map/terrain_scalars_node.js';
 import type { LoadedSettlementGraph } from '../map/settlements_parse.js';
 import { loadMunicipalityHqSettlement, loadOobBrigades } from '../scenario/oob_loader.js';
 import { buildSidToMunFromSettlements } from '../scenario/oob_early_war_entry.js';
-import { createStateFromScenario } from '../scenario/scenario_runner.js';
+import { canonicalizeStartupState, createStateFromScenario } from '../scenario/scenario_runner.js';
 import { shortestPathThroughFriendly } from '../sim/combat/brigade_movement.js';
 import { buildAdjacencyFromEdges, isSettlementSetContiguous } from '../sim/combat/war_adjacency.js';
 import { estimateAttackCost, type AttackEstimate } from '../sim/combat/combat_estimate.js';
@@ -113,7 +113,7 @@ export async function startNewCampaign(
     }
 
     if (state.meta) state.meta.player_faction = playerFaction;
-    return { state };
+    return { state: canonicalizeStartupState(state).state };
 }
 
 /** Load a saved state file (final_save.json or any GameState JSON). */

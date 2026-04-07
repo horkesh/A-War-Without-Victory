@@ -9,9 +9,9 @@ import { buildFogOfWarGeoJSON } from '../src/ui/map/map/builders/buildFogOfWarGe
 import { buildFormationsGeoJSON } from '../src/ui/map/map/builders/buildFormationsGeoJSON.js';
 import { buildOperationArrowsGeoJSON } from '../src/ui/map/map/builders/buildOperationArrowsGeoJSON.js';
 import { deriveUrbanTier } from '../src/ui/map/map/builders/urbanSettlementTiers.js';
-import { generateBriefing } from '../src/ui/map/components/army_hq/generateBriefing.js';
 import { generateThreatAssessment } from '../src/ui/map/components/army_hq/generateThreatAssessment.js';
 import { generateCoSBriefing } from '../src/ui/map/components/army_hq/ChiefOfStaffBriefing.js';
+import { toCommandBriefingView } from '../src/ui/shared/command_briefing_views.js';
 import {
   getAssignedCommandLabel,
   getPlayerFacingCorpsName,
@@ -400,52 +400,39 @@ describe('Tactical map render smoke', () => {
     expect(allText).not.toContain('East Bosnia Corps');
   });
 
-  it('army hq briefing does not flag exempt reserve corps as missing sectors', () => {
-    const state = {
+  it('canonical command briefing view preserves sim-owned items without UI reinvention', () => {
+    const briefing = toCommandBriefingView({
       turn: 12,
-      formations: [
+      faction: 'RBiH',
+      headline: '2 items for your review.',
+      criticalCount: 1,
+      warningCount: 1,
+      items: [
         {
-          id: 'arbih_general_staff',
-          faction: 'RBiH',
-          name: 'General Staff ARBiH',
-          kind: 'corps',
-          status: 'active',
-          readiness: 'active',
-          cohesion: 80,
-          fatigue: 0,
-          createdTurn: 1,
-          tags: [],
+          id: 'cmd-1',
+          section: 'command',
+          severity: 'critical',
+          title: 'Corps commander requests attention',
+          detail: 'Pending acknowledgement in the command chain.',
+          target: { corpsId: 'arbih_1st_corps' },
         },
         {
-          id: 'arbih_guards_brigade',
-          faction: 'RBiH',
-          name: 'Guards Brigade',
-          kind: 'brigade',
-          status: 'active',
-          readiness: 'active',
-          cohesion: 80,
-          fatigue: 0,
-          createdTurn: 1,
-          tags: [],
-          corps_id: 'arbih_general_staff',
-          personnel: 1800,
+          id: 'hum-1',
+          section: 'humanitarian',
+          severity: 'warning',
+          title: 'Gorazde under prolonged siege',
+          detail: 'Isolation is now affecting resilience.',
+          target: { enclaveId: 'gorazde' },
         },
       ],
-      corpsFrontSectors: [],
-      operations: [],
-      pendingOfficerEvents: [],
-      pendingEventDecisions: [],
-      enclaveResilience: {},
-      warPhaseExhaustion: { RBiH: 0 },
-      factionReserves: { RBiH: { generalSupply: 100, heavyMunitions: 10 } },
-      latestTurnSummary: { battles: [] },
-      war_alliance_rbih_hrhb: 1,
-    } as unknown as LoadedGameState;
+    });
 
-    const items = generateBriefing(state, 'RBiH');
-    const rendered = items.map((item) => `${item.title} ${item.detail}`).join(' || ');
-
-    expect(rendered).not.toContain('General Staff ARBiH has no front sectors assigned');
-    expect(rendered).not.toContain('brigades without sector assignment');
+    expect(briefing?.headline).toBe('2 items for your review.');
+    expect(briefing?.items.map((item) => item.title)).toEqual([
+      'Corps commander requests attention',
+      'Gorazde under prolonged siege',
+    ]);
+    expect(briefing?.items[0]?.target).toEqual({ type: 'corps', corpsId: 'arbih_1st_corps' });
+    expect(briefing?.items[1]?.target).toEqual({ type: 'enclaves', enclaveId: 'gorazde' });
   });
 });

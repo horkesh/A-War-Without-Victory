@@ -15,7 +15,7 @@ import { shouldShowWarroomReturn, isEmbeddedTacticalMap } from '../../utils/warr
 import { getFactionArmyCommander } from '../../utils/officerUtils';
 import { OfficerProfile } from '../OfficerProfile';
 import { ArmyHQCorpsCard } from './ArmyHQCorpsCard';
-import { SituationBriefing, generateBriefing, type BriefingTarget } from './SituationBriefing';
+import { SituationBriefing, type BriefingTarget } from './SituationBriefing';
 import { StrategicPosition } from './StrategicPosition';
 import { ChiefOfStaffBriefing } from './ChiefOfStaffBriefing';
 import { ExhaustionClock } from './ExhaustionClock';
@@ -99,7 +99,7 @@ export function ArmyHQModal() {
 
         const commander = getFactionArmyCommander(faction, state);
 
-        const briefingItems = generateBriefing(state, faction as 'RS' | 'RBiH' | 'HRHB');
+        const briefingItems = state.commandBriefing?.items ?? [];
 
         const sectorsByCorps = new Map<string, typeof sectors>();
         for (const s of sectors) {
@@ -140,16 +140,20 @@ export function ArmyHQModal() {
     const handleBriefingNavigate = useCallback((target: BriefingTarget) => {
         switch (target.type) {
             case 'corps':
-                navigateToCorps(target.corpsId);
+                if (target.corpsId) navigateToCorps(target.corpsId);
+                break;
+            case 'enclaves':
+            case 'officer_events':
+            case 'summary':
+            case 'settlement':
+            case 'none':
                 break;
             case 'sector': {
-                // Find which corps owns this sector and expand it
-                const sector = data?.sectors.find(s => s.sector_id === target.sectorId);
+                const sector = data?.sectors.find((entry) => entry.sector_id === target.sectorId);
                 if (sector) navigateToCorps(sector.corps_id);
                 break;
             }
             case 'operation': {
-                // operationKey is "corpsId|opName" — extract corps
                 const corpsId = target.operationKey?.split('|')[0];
                 if (corpsId) navigateToCorps(corpsId);
                 break;
@@ -420,3 +424,5 @@ export function ArmyHQModal() {
         </div>
     );
 }
+
+

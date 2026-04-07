@@ -15,6 +15,7 @@
 import type { FactionId, GameState, MunicipalityId } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { extractWarData, type WarDataSnapshot } from '../data/war_data_extractor.js';
+import { getOperationalSitrepView, type OperationalSitrepView } from '../../shared/operational_sitrep_views.js';
 import { controlStatusLabel, FACTION_COLORS, factionCssClass, getFactionPartyPen, getPlayerFaction, hasFactionParamilitary, turnToDateString } from './warroom_utils.js';
 import { getWarroomFactionIdentity } from './warroom_identity.js';
 
@@ -235,33 +236,28 @@ export class ReportsModal {
     /**
      * Generate the war-phase report body from a WarDataSnapshot.
      */
-    private generateWarReportBody(snap: WarDataSnapshot, reportTurn: number): string {
+    private generateWarReportBody(
+        sitrep: OperationalSitrepView,
+        contactedEnemyFormations: WarDataSnapshot['contactedEnemyFormations'],
+        reportTurn: number,
+    ): string {
         const lines: string[] = [];
         const divider = '\u2500'.repeat(45);
 
         // 1. FRONT STATUS
         lines.push('FRONT STATUS');
         lines.push(divider);
+        lines.push(`  ${sitrep.headline}`);
 
-        const frontEdges = snap.engagedFrontEdges;
-        if (frontEdges.length === 0) {
+        if (sitrep.front.edges.length === 0) {
             lines.push('  No active front edges this period.');
         } else {
-            // Show EXPOSED entries first with warning
-            const exposed = frontEdges.filter(e => e.tier === 'exposed');
-            const nonExposed = frontEdges.filter(e => e.tier !== 'exposed');
-
-            if (exposed.length > 0) {
+            if (sitrep.front.exposedCount > 0) {
                 lines.push(`  [!! URGENT: EXPOSED FRONT !!]`);
             }
-
-            // Combine: exposed first, then rest, take top 5
-            const ordered = [...exposed, ...nonExposed].slice(0, 5);
-            for (const e of ordered) {
-                const tierLabel = e.tier.toUpperCase();
-                const prefix = e.tier === 'exposed' ? '  ' : '  ';
-                lines.push(`${prefix}${this.formatSettlementLabel(e.settlementA)} \u2194 ${this.formatSettlementLabel(e.settlementB)}`);
-                lines.push(`${prefix}Pressure: ${e.pressure} | Friction: ${e.friction} | ${tierLabel}`);
+            for (const edge of sitrep.front.edges.slice(0, 5)) {
+                lines.push(`  ${edge.label}`);
+                lines.push(`  Pressure: ${edge.pressure} | Friction: ${edge.friction} | ${edge.tier.toUpperCase()}`);
             }
         }
 
@@ -271,16 +267,11 @@ export class ReportsModal {
         lines.push('FORMATION READINESS (5 WEAKEST)');
         lines.push(divider);
 
-        const brigades = snap.ownForces.formationDetails
-            .filter(f => f.kind === 'brigade')
-            .sort((a, b) => a.personnel - b.personnel)
-            .slice(0, 5);
-
-        if (brigades.length === 0) {
+        if (sitrep.readiness.weakestBrigades.length === 0) {
             lines.push('  No brigade formations available.');
         } else {
-            for (const b of brigades) {
-                lines.push(`  ${b.name} | ${b.personnel} pers | Cohesion: ${b.cohesion} | ${b.posture} | ${b.movementStatus}`);
+            for (const brigade of sitrep.readiness.weakestBrigades) {
+                lines.push(`  ${brigade.label} | ${brigade.personnel} pers | Cohesion: ${brigade.cohesion} | ${brigade.posture} | ${brigade.movementStatus}`);
             }
         }
 
@@ -290,10 +281,10 @@ export class ReportsModal {
         lines.push('ENEMY CONTACT (TIER 2 - CONTACT REVEALED)');
         lines.push(divider);
 
-        if (snap.contactedEnemyFormations.length === 0) {
+        if (contactedEnemyFormations.length === 0) {
             lines.push('  No enemy formations engaged this period.');
         } else {
-            for (const cf of snap.contactedEnemyFormations) {
+            for (const cf of contactedEnemyFormations) {
                 const contactLoc = this.formatSettlementLabel(cf.contactSettlement);
                 lines.push(`  ${cf.label} | Strength: ${cf.strengthCategory} | Last contact: ${contactLoc}`);
             }
@@ -304,11 +295,11 @@ export class ReportsModal {
         // 4. DISPLACEMENT ALERTS
         lines.push('DISPLACEMENT ALERTS');
         lines.push(divider);
-        if (snap.brigadeMovement.encircled.length > 0) {
-            lines.push(`  [!! URGENT: ${snap.brigadeMovement.encircled.length} BRIGADE(S) ENCIRCLED !!]`);
+        if (sitrep.readiness.encircledCount > 0) {
+            lines.push(`  [!! URGENT: ${sitrep.readiness.encircledCount} BRIGADE(S) ENCIRCLED !!]`);
         }
-        lines.push(`  Active hostile takeover timers: ${snap.ownDisplacement.activeHostileTakeoverTimers}`);
-        lines.push(`  Active displacement camps: ${snap.ownDisplacement.activeCamps}`);
+        lines.push(`  Active hostile takeover timers: ${sitrep.sustainment.activeHostileTakeoverTimers}`);
+        lines.push(`  Active displacement camps: ${sitrep.sustainment.activeCamps}`);
 
         lines.push('');
 
@@ -316,12 +307,12 @@ export class ReportsModal {
         lines.push('SUSTAINABILITY WARNINGS');
         lines.push(divider);
 
-        const collapsedList = snap.ownSupply.collapsedMunicipalities.length > 0
-            ? snap.ownSupply.collapsedMunicipalities.map((municipalityId) => this.formatSettlementLabel(municipalityId)).join(', ')
+        const collapsedList = sitrep.sustainment.collapsedMunicipalities.length > 0
+            ? sitrep.sustainment.collapsedMunicipalities.join(', ')
             : 'None';
         lines.push(`  Collapsed: ${collapsedList}`);
-        lines.push(`  Critical: ${snap.ownSupply.criticalCount}`);
-        lines.push(`  Strained: ${snap.ownSupply.strainedCount}`);
+        lines.push(`  Critical: ${sitrep.sustainment.criticalCount}`);
+        lines.push(`  Strained: ${sitrep.sustainment.strainedCount}`);
 
         lines.push('');
 
@@ -329,14 +320,11 @@ export class ReportsModal {
         lines.push('CORPS OPERATIONS');
         lines.push(divider);
 
-        if (snap.ownCorpsOps.length === 0) {
+        if (sitrep.operations.corps.length === 0) {
             lines.push('  No corps commands active.');
         } else {
-            for (const co of snap.ownCorpsOps) {
-                const opInfo = co.operation
-                    ? `Op: ${co.operation.type} | Phase: ${co.operation.phase} (since T${co.operation.started_turn})`
-                    : 'No active operation';
-                lines.push(`  ${co.corpsName} | Stance: ${co.stance} | ${opInfo}`);
+            for (const operation of sitrep.operations.corps) {
+                lines.push(`  ${operation.corpsName} | Stance: ${operation.stance} | ${operation.summary}`);
             }
         }
 
@@ -427,10 +415,11 @@ export class ReportsModal {
         const reportTurn = Math.max(0, turn - 1);
         const factionId = getPlayerFaction(this.gameState);
         const snap = extractWarData(this.gameState, factionId);
+        const sitrep = getOperationalSitrepView(this.gameState, factionId);
 
         const headers = WAR_REPORT_HEADERS[factionId] ?? WAR_REPORT_HEADERS['RBiH'];
         const identity = getWarroomFactionIdentity(factionId);
-        const reportBody = this.generateWarReportBody(snap, reportTurn);
+        const reportBody = this.generateWarReportBody(sitrep, snap.contactedEnemyFormations, reportTurn);
 
         const report = this.createShell(factionId, 'CONFIDENTIAL');
 

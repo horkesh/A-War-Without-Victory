@@ -82,40 +82,6 @@ function computeTerritoryPercentages(
   return totals;
 }
 
-function computeFrontSummary(state: LoadedGameState): { static: number; fluid: number; oscillating: number } {
-  const pressureEntries = Object.values(state.frontPressureByEdge ?? {});
-  if (pressureEntries.length === 0) {
-    return { static: 0, fluid: 0, oscillating: 0 };
-  }
-  let stat = 0;
-  let fluid = 0;
-  let oscillating = 0;
-  for (const edge of pressureEntries) {
-    const intensity = Math.abs(edge.value) / Math.max(1, edge.max_abs);
-    if (intensity <= 0.33) stat += 1;
-    else if (intensity <= 0.66) fluid += 1;
-    else oscillating += 1;
-  }
-  return { static: stat, fluid, oscillating };
-}
-
-function computeSupplySummary(state: LoadedGameState, playerFaction: string | null): { open: number; strained: number; cut: number } {
-  const pressure = state.warPhaseSupplyPressure ?? {};
-  // Only count the player faction's supply pressure when a player faction exists
-  const values = playerFaction
-    ? (pressure[playerFaction] !== undefined ? [pressure[playerFaction]] : [])
-    : Object.values(pressure);
-  let open = 0;
-  let strained = 0;
-  let cut = 0;
-  for (const value of values) {
-    if (value >= 80) open += 1;
-    else if (value >= 50) strained += 1;
-    else cut += 1;
-  }
-  return { open, strained, cut };
-}
-
 function computeIvpScore(state: LoadedGameState): number {
   const ivp = state.internationalVisibilityPressure;
   if (!ivp) return 0;
@@ -129,10 +95,9 @@ function computeIvpScore(state: LoadedGameState): number {
 export function SituationTab({ state, focusSection }: { state: LoadedGameState; focusSection?: SummaryFocusSection }) {
   const ipc = useIPC();
   const osidAreas = useOsidAreas();
-  const territoryPct = computeTerritoryPercentages(state.controlBySettlement, osidAreas ?? undefined);
-  const front = computeFrontSummary(state);
   const playerFaction = getPlayerFacingFaction(state);
-  const supply = computeSupplySummary(state, playerFaction);
+  const territoryPct = computeTerritoryPercentages(state.controlBySettlement, osidAreas ?? undefined);
+  const sitrep = state.operationalSitrep;
   const ivpScore = computeIvpScore(state);
   const playerMilitaryLabel = playerFaction ? getPlayerSafeMilitaryFactionName(playerFaction) : null;
   const playerPoliticalLabel = playerFaction ? getPlayerSafePoliticalFactionName(playerFaction) : null;
@@ -159,7 +124,6 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
   const focusedMode = !!focusSection && focusSection !== 'overview';
   const showSection = (section: SummaryFocusSection): boolean => !focusedMode || focusSection === section;
 
-  if (supply.cut > 0) alerts.push(`${supply.cut} supply channel(s) cut`);
   if (alliance < -0.25) alerts.push('Bosniak-Croat alliance under strain');
   if (ivpScore >= 60) alerts.push('International visibility pressure elevated');
 
@@ -182,7 +146,9 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
         {playerFaction ? (
           <div className="flex items-center justify-between">
             <span className={FACTION_COLORS[playerFaction]}>{playerMilitaryLabel}</span>
-            <span className="text-text-secondary tabular-nums">{territoryPct[playerFaction].toFixed(1)}%</span>
+            <span className="text-text-secondary tabular-nums">
+              {(sitrep?.territory.territoryPercent ?? territoryPct[playerFaction]).toFixed(1)}%
+            </span>
           </div>
         ) : (
           <div className="text-text-secondary">Territory summary unavailable.</div>
@@ -190,12 +156,30 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
       </section>
       )}
 
-      {!focusedMode && (
+      {!focusedMode && sitrep && (
       <section className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
-        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">War Snapshot</div>
-        <div className="text-text-secondary">Fronts: {front.static} static, {front.fluid} fluid, {front.oscillating} oscillating</div>
-        <div className="text-text-secondary">Supply: {supply.open} open, {supply.strained} strained, {supply.cut} cut</div>
-        <div className="text-text-secondary">IVP: {ivpScore.toFixed(0)}</div>
+        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Operational SITREP</div>
+        <div className="text-text-secondary">{sitrep.headline}</div>
+        <div className="text-text-secondary">
+          Fronts: {sitrep.front.engagedCount} engaged, {sitrep.front.exposedCount} exposed
+        </div>
+        <div className="text-text-secondary">
+          Sustainment: {sitrep.sustainment.criticalCount} critical, {sitrep.sustainment.strainedCount} strained
+          {sitrep.sustainment.collapsedMunicipalities.length > 0 ? `, ${sitrep.sustainment.collapsedMunicipalities.length} collapsed` : ''}
+        </div>
+        <div className="text-text-secondary">
+          Operations: {sitrep.operations.activeCount} active command{sitrep.operations.activeCount === 1 ? '' : 's'}
+        </div>
+        {sitrep.front.edges.length > 0 && (
+          <div className="text-text-secondary text-[10px]">
+            Priority fronts: {sitrep.front.edges.slice(0, 2).map((edge) => edge.label).join('; ')}
+          </div>
+        )}
+        {sitrep.readiness.weakestBrigades.length > 0 && (
+          <div className="text-text-secondary text-[10px]">
+            Weakest brigades: {sitrep.readiness.weakestBrigades.slice(0, 2).map((brigade) => brigade.label).join('; ')}
+          </div>
+        )}
       </section>
       )}
 
@@ -360,12 +344,17 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
       {!focusedMode && (
       <section className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
         <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">Alerts</div>
-        {alerts.length === 0 ? (
-          <div className="text-text-secondary">No critical alerts.</div>
+        {((sitrep?.alerts.length ?? 0) === 0) && alerts.length === 0 ? (
+          <div className="text-text-secondary">No active alerts.</div>
         ) : (
-          alerts.sort((a, b) => a.localeCompare(b)).map((alert) => (
-            <div key={alert} className="text-text-secondary">- {alert}</div>
-          ))
+          <>
+            {(sitrep?.alerts ?? []).map((alert) => (
+              <div key={alert.id} className="text-text-secondary">- {alert.text}</div>
+            ))}
+            {alerts.sort((a, b) => a.localeCompare(b)).map((alert) => (
+              <div key={alert} className="text-text-secondary">- {alert}</div>
+            ))}
+          </>
         )}
       </section>
       )}
