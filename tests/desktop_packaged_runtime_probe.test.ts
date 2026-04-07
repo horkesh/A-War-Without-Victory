@@ -83,6 +83,31 @@ test('electron main exposes a packaged runtime probe mode instead of a second la
         /desktop_window=sandbox/,
         'tactical sandbox probe should use a deterministic sandbox route marker',
     );
+    assert.match(
+        source,
+        /waitForTacticalMapInteraction\(/,
+        'packaged runtime probe should prove a minimal tactical-map interaction contract, not just route load',
+    );
+    assert.match(
+        source,
+        /getMapServerUrl !== 'function' \|\| typeof bridge\.getCurrentGameState !== 'function'/,
+        'packaged tactical-map probe should require the real preload bridge functions',
+    );
+    assert.match(
+        source,
+        /tactical_interactions:\s*\[/,
+        'packaged runtime probe manifest should record tactical interaction proofs',
+    );
+    assert.match(
+        source,
+        /tacticalWindowInteraction\.location_path[\s\S]*tacticalWindowInteraction\.map_server_url[\s\S]*tacticalWindowInteraction\.player_faction[\s\S]*tacticalWindowInteraction\.route_mode[\s\S]*tacticalWindowInteraction\.turn/s,
+        'packaged runtime probe should record deterministic operational interaction details',
+    );
+    assert.match(
+        source,
+        /tacticalSandboxInteraction\.location_path[\s\S]*tacticalSandboxInteraction\.map_server_url[\s\S]*tacticalSandboxInteraction\.player_faction[\s\S]*tacticalSandboxInteraction\.route_mode[\s\S]*tacticalSandboxInteraction\.turn/s,
+        'packaged runtime probe should record deterministic sandbox interaction details',
+    );
 });
 
 test('probe tool launches the unpacked packaged executable with the runtime probe env', async () => {
@@ -117,6 +142,16 @@ test('probe tool launches the unpacked packaged executable with the runtime prob
         source,
         /window_checks[\s\S]*tactical_sandbox\.html\?desktop_window=sandbox[\s\S]*did-finish-load/s,
         'probe tool should fail if the packaged manifest omits the tactical sandbox route proof',
+    );
+    assert.match(
+        source,
+        /tactical_interactions[\s\S]*route_mode === 'operational'[\s\S]*location_path === '\/'[\s\S]*player_faction === 'RBiH'[\s\S]*turn === 0/s,
+        'probe tool should fail if the packaged manifest omits the tactical operational interaction proof',
+    );
+    assert.match(
+        source,
+        /tactical_interactions[\s\S]*route_mode === 'sandbox'[\s\S]*location_path === '\/tactical_sandbox\.html'[\s\S]*player_faction === 'RBiH'[\s\S]*turn === 0/s,
+        'probe tool should fail if the packaged manifest omits the tactical sandbox interaction proof',
     );
     assert.match(
         source,

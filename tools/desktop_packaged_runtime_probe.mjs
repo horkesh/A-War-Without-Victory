@@ -63,6 +63,22 @@ const tacticalMapWindowCheck = manifest?.window_checks?.find?.(
 const tacticalSandboxWindowCheck = manifest?.window_checks?.find?.(
   (entry) => entry?.route?.endsWith?.('/tactical_sandbox.html?desktop_window=sandbox') && entry?.status === 'did-finish-load',
 );
+const operationalInteractionCheck = manifest?.tactical_interactions?.find?.(
+  (entry) =>
+    entry?.route_mode === 'operational' &&
+    entry?.location_path === '/' &&
+    entry?.map_server_url &&
+    entry?.player_faction === 'RBiH' &&
+    entry?.turn === 0,
+);
+const sandboxInteractionCheck = manifest?.tactical_interactions?.find?.(
+  (entry) =>
+    entry?.route_mode === 'sandbox' &&
+    entry?.location_path === '/tactical_sandbox.html' &&
+    entry?.map_server_url &&
+    entry?.player_faction === 'RBiH' &&
+    entry?.turn === 0,
+);
 
 if (!windowCheck) {
   throw new Error(
@@ -79,6 +95,18 @@ if (!tacticalMapWindowCheck || tacticalMapWindowCheck.status !== 'did-finish-loa
 if (!tacticalSandboxWindowCheck || tacticalSandboxWindowCheck.status !== 'did-finish-load') {
   throw new Error(
     `Packaged desktop runtime probe manifest is missing the tactical sandbox route proof.\n${JSON.stringify(manifest, null, 2)}`,
+  );
+}
+
+if (!operationalInteractionCheck) {
+  throw new Error(
+    `Packaged desktop runtime probe manifest is missing the tactical operational interaction proof.\n${JSON.stringify(manifest, null, 2)}`,
+  );
+}
+
+if (!sandboxInteractionCheck) {
+  throw new Error(
+    `Packaged desktop runtime probe manifest is missing the tactical sandbox interaction proof.\n${JSON.stringify(manifest, null, 2)}`,
   );
 }
 

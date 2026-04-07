@@ -221,6 +221,48 @@ function waitForWindowLoad(win, expectedUrl, label) {
   });
 }
 
+function waitForTacticalMapInteraction(win, expectedMode, expectedMapServerBaseUrl, label) {
+  return win.webContents.executeJavaScript(
+    `
+      (async () => {
+        const bridge = window.awwv;
+        if (!bridge || typeof bridge.getMapServerUrl !== 'function' || typeof bridge.getCurrentGameState !== 'function') {
+          throw new Error('desktop bridge unavailable');
+        }
+
+        const stateJson = await bridge.getCurrentGameState();
+        const mapServerUrl = await bridge.getMapServerUrl();
+        const state = JSON.parse(stateJson);
+
+        return {
+          route_mode: window.location.search.includes('desktop_window=sandbox') ? 'sandbox' : 'operational',
+          location_path: window.location.pathname,
+          map_server_url: mapServerUrl,
+          player_faction: state?.meta?.player_faction ?? null,
+          turn: state?.meta?.turn ?? null,
+        };
+      })();
+    `,
+    true,
+  ).then((interaction) => {
+    if (interaction.route_mode !== expectedMode) {
+      throw new Error(`${label} reported unexpected route mode ${interaction.route_mode}; expected ${expectedMode}`);
+    }
+    if (interaction.map_server_url !== expectedMapServerBaseUrl) {
+      throw new Error(
+        `${label} reported unexpected map server URL ${interaction.map_server_url}; expected ${expectedMapServerBaseUrl}`,
+      );
+    }
+    if (interaction.player_faction !== 'RBiH') {
+      throw new Error(`${label} reported unexpected player faction ${interaction.player_faction}; expected RBiH`);
+    }
+    if (interaction.turn !== 0) {
+      throw new Error(`${label} reported unexpected turn ${interaction.turn}; expected 0`);
+    }
+    return interaction;
+  });
+}
+
 function getTacticalMapWindowUrl(mode = 'operational') {
   const targetPath = mode === 'sandbox' ? '/tactical_sandbox.html' : '/';
   const query = mode === 'sandbox' ? '?desktop_window=sandbox' : '?desktop_window=operational';
@@ -345,11 +387,13 @@ async function runPackagedRuntimeProbe() {
 
   const sim = getDesktopSim();
   const { state } = await sim.startNewCampaign(getBaseDir(), 'RBiH');
+  currentGameStateJson = sim.serializeState(state);
   if ((state?.meta?.player_faction ?? null) !== 'RBiH') {
     throw new Error(`startup probe expected player_faction=RBiH, got ${state?.meta?.player_faction ?? 'null'}`);
   }
 
   await startMapServer();
+  const expectedMapServerBaseUrl = await resolveMapServerBaseUrl();
   const [mapIndexResponse, snapshotResponse] = await Promise.all([
     fetchLocalText(getMapServerUrl('/')),
     fetchLocalText(getMapServerUrl('/data/derived/startup/apr_1992_initial_save.json')),
@@ -374,6 +418,12 @@ async function runPackagedRuntimeProbe() {
     tacticalMapUrl,
     'packaged tactical map window',
   );
+  const tacticalWindowInteraction = await waitForTacticalMapInteraction(
+    mapProbeWindow,
+    'operational',
+    expectedMapServerBaseUrl,
+    'packaged tactical map window',
+  );
   mapProbeWindow.destroy();
 
   const { win: sandboxProbeWindow, targetUrl: tacticalSandboxUrl } = createTacticalMapWindow({
@@ -383,6 +433,12 @@ async function runPackagedRuntimeProbe() {
   const tacticalSandboxWindowLoad = await waitForWindowLoad(
     sandboxProbeWindow,
     tacticalSandboxUrl,
+    'packaged tactical sandbox window',
+  );
+  const tacticalSandboxInteraction = await waitForTacticalMapInteraction(
+    sandboxProbeWindow,
+    'sandbox',
+    expectedMapServerBaseUrl,
     'packaged tactical sandbox window',
   );
   sandboxProbeWindow.destroy();
@@ -416,6 +472,22 @@ async function runPackagedRuntimeProbe() {
         route: tacticalSandboxUrl,
         status: 'did-finish-load',
         title: tacticalSandboxWindowLoad.title,
+      },
+    ],
+    tactical_interactions: [
+      {
+        location_path: tacticalWindowInteraction.location_path,
+        map_server_url: tacticalWindowInteraction.map_server_url,
+        player_faction: tacticalWindowInteraction.player_faction,
+        route_mode: tacticalWindowInteraction.route_mode,
+        turn: tacticalWindowInteraction.turn,
+      },
+      {
+        location_path: tacticalSandboxInteraction.location_path,
+        map_server_url: tacticalSandboxInteraction.map_server_url,
+        player_faction: tacticalSandboxInteraction.player_faction,
+        route_mode: tacticalSandboxInteraction.route_mode,
+        turn: tacticalSandboxInteraction.turn,
       },
     ],
   };
