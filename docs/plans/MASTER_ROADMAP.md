@@ -1,6 +1,6 @@
 # AWWV Master Roadmap — Pyrrhic Games
 
-**Last Updated:** 2026-04-06
+**Last Updated:** 2026-04-07
 **Current Version:** 0.8.4 (Autonomy Depth + Claude API)
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."
@@ -302,7 +302,7 @@ No version bump — engineering milestone between feature releases. Stabilizatio
 | Execution entrypoints | `src/turn/pipeline.ts` + `src/sim/run_combat_browser.ts` are live variants adding cognitive overhead alongside canonical `src/sim/turn_pipeline.ts` | Consolidate or explicitly mark non-authoritative with ownership comment |
 | Magic numbers | bot_constants.ts scattered thresholds | Domain-grouped constant files |
 | Canon docs | Systems Manual and Game Bible reference pre-v0.8 architecture | Updated for v0.8 command chain |
-| Save/load + replay hardening | Command briefing round-trip, desktop canonical save-string ownership, `front_segments` deserialize preservation, nested-owner migration/default rescue, campaign-birth save-contract canonicalization, desktop startup artifact decoupling, and baked April 1992 startup snapshot productization are now hardened; broader validation-contract and packaging guardrail cleanup still remain | Explicit save/load, replay, and migration hardening. Plan: `docs/plans/2026-03-31-v08to09-save-load-and-replay-hardening-plan.md` |
+| Save/load + replay hardening | Command briefing round-trip, desktop canonical save-string ownership, `front_segments` deserialize preservation, nested-owner migration/default rescue, campaign-birth save-contract canonicalization, desktop startup artifact decoupling, baked April 1992 startup snapshot productization, and desktop startup packaging guardrails are now hardened; broader validation-contract and CI/release enforcement still remain | Explicit save/load, replay, and migration hardening. Plan: `docs/plans/2026-03-31-v08to09-save-load-and-replay-hardening-plan.md` |
 | UI surface ownership | Army HQ, Warroom, map panels, ops modal, and future command-review surfaces can drift into duplicate half-owners. **Warroom React migration complete (2026-04-04); Army HQ command-review ownership clarified.** | One clear ownership matrix for command, ops, review, and explanation surfaces. Plan: `docs/plans/2026-03-31-v08to09-ui-surface-ownership-plan.md` |
 | UI density + shell cohesion | Warroom, Tactical Map, Army HQ, Chronicle, and Codex still carry dead air, spacing waste, and shell seams that make the product feel like tools rather than one game | Tightened spacing, clearer hierarchy, and shell-level cohesion across the live player journey. Plan: `docs/plans/2026-04-03-v08to09-ui-density-and-shell-cohesion-plan.md` |
 | Player knowledge integrity | Desktop / tactical map still trends toward omniscient renderer payloads plus fog visuals | Player-facing state boundary, leak classifications, display-name discipline, and desktop knowledge integrity contract. Primary plan: `docs/plans/2026-04-01-v08x-player-knowledge-integrity-plan.md` |
@@ -523,7 +523,7 @@ These need design sessions before implementation. Preserved from the original ro
 | Victory conditions | Stub (roadmap-owned in v0.9.0) |
 | Diplomacy layer | Partial (patron pressure, alliance, IVP) |
 
-**Current:** 93.6% area-weighted calibration (n1358), 27/27 anchors, 6/6 benchmarks. 712 OSIDs. Political bot complete through Dayton branches (`v0.8.2`). Order interpretation complete through player-legible UX (`v0.8.3`). Autonomy review loop complete through high-stakes event gating and DRINA investigation (`v0.8.4` CLOSED 2026-04-07 — all phases 1, B, C, D, E, F complete). `v0.8.x-final` command authority cleanup and the major startup/save-load confidence lanes are now closed through baked April 1992 startup snapshot productization. Next broad work: remaining `v0.8-to-v0.9` packaging/guardrail cleanup, Warroom parity debt, then `v0.9.0`. Active governance focus: keep roadmap truth, board truth, reports, and retained calibration evidence aligned through the permanent `Studio Health / Repo Truth` lane.
+**Current:** 93.6% area-weighted calibration (n1358), 27/27 anchors, 6/6 benchmarks. 712 OSIDs. Political bot complete through Dayton branches (`v0.8.2`). Order interpretation complete through player-legible UX (`v0.8.3`). Autonomy review loop complete through high-stakes event gating and DRINA investigation (`v0.8.4` CLOSED 2026-04-07 — all phases 1, B, C, D, E, F complete). `v0.8.x-final` command authority cleanup and the major startup/save-load confidence lanes are now closed through desktop startup packaging guardrails plus snapshot drift gating. Next broad work: remaining `v0.8-to-v0.9` CI/release startup artifact enforcement, Warroom parity debt, then `v0.9.0`. Active governance focus: keep roadmap truth, board truth, reports, and retained calibration evidence aligned through the permanent `Studio Health / Repo Truth` lane.
 
 ---
 

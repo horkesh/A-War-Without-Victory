@@ -4,6 +4,7 @@
  */
 
 import * as esbuild from 'esbuild';
+import { spawnSync } from 'node:child_process';
 import { mkdir } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,6 +13,21 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
 const outDir = join(root, 'dist', 'desktop');
 const outFile = join(outDir, 'desktop_sim.cjs');
+const tsxCli = join(root, 'node_modules', 'tsx', 'dist', 'cli.mjs');
+const startupSnapshotCheckScript = join(root, 'tools', 'scenario_runner', 'build_startup_snapshot.ts');
+
+const startupSnapshotCheck = spawnSync(
+  process.execPath,
+  [tsxCli, startupSnapshotCheckScript, '--check'],
+  {
+    cwd: root,
+    stdio: 'inherit',
+  },
+);
+
+if (startupSnapshotCheck.status !== 0) {
+  throw new Error('desktop:sim:build aborted because the baked startup snapshot is missing or stale. Run `npm run desktop:startup-snapshot:build` and commit the updated artifact.');
+}
 
 await mkdir(outDir, { recursive: true });
 

@@ -24699,3 +24699,12 @@ Main Staff HQ was Han Pijesak, not Rogatica. Tracked for OOB correction pass.
 - **Hardening:** added `tools/scenario_runner/build_startup_snapshot.ts` with explicit `--write` / `--check` modes and package scripts `desktop:startup-snapshot:build` / `desktop:startup-snapshot:check`; added `tests/startup_snapshot_contract.test.ts` covering byte-for-byte parity against builder truth, canonical loaded-save shape, source-boundary consumption in `startNewCampaign(...)`, and post-overlay save/load parity.
 - **Verification:** targeted startup snapshot contract tests passed; `npm.cmd run desktop:startup-snapshot:check` passed; full Vitest, typecheck, and build clean.
 - **Report:** `docs/40_reports/implemented/20260407_V08TO09_BAKED_STARTUP_SNAPSHOT_PRODUCTIZATION.md`
+
+**[2026-04-07] v0.8-to-v0.9 Desktop Startup Packaging Guardrails + Snapshot Drift Gate COMPLETE**
+
+- **Summary:** Tightened the baked April 1992 startup artifact from a manual check into an enforced desktop build contract. The authoritative desktop sim bundle path now refuses to ship when the baked startup snapshot is missing or stale.
+- **Guardrail seam removed:** `tools/desktop_bundle_sim.mjs` previously bundled `src/desktop/desktop_sim.ts` directly through esbuild without validating `data/derived/startup/apr_1992_initial_save.json`. It now runs `tools/scenario_runner/build_startup_snapshot.ts --check` before bundling and aborts with an explicit remediation message if the snapshot has drifted.
+- **Ownership after change:** scenario authoring truth still lives in `data/scenarios/`; `buildScenarioStartupState(...)` remains the canonical startup builder; `src/scenario/startup_snapshot.ts` remains the one-way derived artifact contract; `tools/desktop_bundle_sim.mjs` is now the authoritative desktop packaging guard for that artifact; desktop `startNewCampaign(...)` remains the consumer.
+- **Hardening:** added `tests/desktop_startup_snapshot_guardrails.test.ts` covering the guarded build source boundary, missing-snapshot failure, and stale-snapshot failure. Updated `src/desktop/README.md` so the desktop build flow truthfully documents the enforced snapshot gate and regeneration command.
+- **Verification:** targeted snapshot/build guardrail tests passed; `npm.cmd run desktop:startup-snapshot:check` passed; `npm.cmd run desktop:sim:build` passed with a valid artifact; full Vitest, typecheck, and build clean.
+- **Report:** `docs/40_reports/implemented/20260407_V08TO09_STARTUP_PACKAGING_GUARDRAILS.md`

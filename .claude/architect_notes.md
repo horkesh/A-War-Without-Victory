@@ -244,6 +244,12 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - Desktop startup is now easier to explain: load `data/derived/startup/apr_1992_initial_save.json`, apply minimal per-session overlays such as `player_faction` / recruitment state, then canonicalize before the UI receives the state.
 - The remaining startup-artifact debt is packaging/guardrails, not artifact ownership. Future work should focus on release/build validation of the snapshot rather than reintroducing mixed harness/product startup paths.
 
+**Closed: Desktop Startup Packaging Guardrails + Snapshot Drift Gate (2026-04-07)**
+- Accepted enforcement line: the baked April 1992 startup artifact remains a one-way derived product artifact, but the authoritative desktop sim bundle path now validates it before bundling. Stale or missing startup data is a hard build failure, not a manual cleanup suggestion.
+- Builder truth remains primary. `tools/desktop_bundle_sim.mjs` may validate the artifact through `build_startup_snapshot.ts --check`, but it must not regenerate or silently rewrite the artifact during build. Guarded failure is safer than hidden mutation.
+- Packaging/build rule: if a desktop build can ship startup data, that build path must either validate the baked snapshot directly or transitively call a guarded step that does. Artifact presence alone is not enough.
+- Workflow rule: keep regeneration explicit (`npm run desktop:startup-snapshot:build`) and keep enforcement automatic (`npm run desktop:sim:build`). That preserves developer ergonomics without weakening the truth gate.
+
 ### Warroom React Shell Recovery / Feature Parity — OPEN
 
 - **Problem:** The rebuilt React-owned Warroom shell is functional enough to launch and hand off correctly, but it remains materially behind the older corktable-era experience.
