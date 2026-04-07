@@ -1,4 +1,27 @@
 /**
+ * ═══════════════════════════════════════════════════════════════
+ * OWNERSHIP: Repair
+ * DOMAIN:    March correction — fixes invalid march destinations post-decision
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * DECIDES:   Whether a brigade's current march destination is outside its assigned sub-segment
+ * WRITES:    brigade_movement_orders (recomputed BFS path), deletes invalid movement_state
+ * READS:     assigned_sub_segment_id → sub-segment friendly_osids, current march destination
+ * MUST NOT:  issue new strategic intent — only fix march destinations that violate T1 assignment
+ *
+ * UPSTREAM:  commander_loop.ts (T1 sets assigned_sub_segment_id as authority)
+ * DOWNSTREAM: osid_column_movement.ts (executes corrected march), brigade_movement_orders.ts
+ *
+ * TRUTH INVARIANTS:
+ * - assigned_sub_segment_id is live authority, not harmless residue (napkin 2026-04-03)
+ * - Respects connected-component boundaries (principle #2 — no cross-component correction)
+ * - Runs after generate-bot-corps-orders and Phase B (distribute-brigades-to-front)
+ *
+ * MOVEMENT TIER: T6 — Repair (March Correction) (see MOVEMENT_AUTHORITY.md)
+ * ═══════════════════════════════════════════════════════════════
+ */
+
+/**
  * Commander march correction — overrides wrong-destination march orders.
  *
  * The corps commander is the authority on where brigades should be.

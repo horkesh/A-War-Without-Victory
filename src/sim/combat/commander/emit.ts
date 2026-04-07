@@ -10,6 +10,29 @@
  * Deterministic: sorted iteration via strictCompare, no Math.random(), no Date.now().
  */
 
+/**
+ * ═══════════════════════════════════════════════════════════════
+ * OWNERSHIP: Canonical
+ * DOMAIN:    Directive emission — converts commander decisions to engine outputs
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * DECIDES:   Which ready plans become CorpsOperations; what CorpsDirective is issued
+ * WRITES:    active_operations (creates CorpsOperation from ready plan), CorpsDirective, SectorStance
+ * READS:     PlanDecision (ready plans), AllocationResult (surplus pool), DecideOutput (stance)
+ * MUST NOT:  write brigade_movement_orders — only emits directives that T2 routing executes
+ *
+ * UPSTREAM:  plan.ts (ready plans), allocate.ts (surplus pool), decide.ts (stance adjustments)
+ * DOWNSTREAM: sector_offensive.ts (operation lifecycle), bot_brigade_ai_osid.ts (directive execution)
+ *
+ * TRUTH INVARIANTS:
+ * - Bridge between new commander intelligence and existing execution pipeline
+ * - Only emit.ts creates CorpsOperations from commander plans (not bot_corps_operations.ts)
+ * - Deterministic: sorted iteration via strictCompare, no Math.random(), no Date.now()
+ *
+ * MOVEMENT TIER: T1 — Strategic Intent Owner (issues directives; no movement applied here)
+ * ═══════════════════════════════════════════════════════════════
+ */
+
 import type {
     CorpsDirective,
     CorpsOperation,

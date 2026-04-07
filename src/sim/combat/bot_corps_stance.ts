@@ -4,6 +4,26 @@
  * Deterministic: sorted iteration via strictCompare, no Math.random().
  */
 
+/**
+ * ═══════════════════════════════════════════════════════════════
+ * OWNERSHIP: Canonical
+ * DOMAIN:    Corps stance computation — attack/defend/hold posture selection
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * DECIDES:   Corps-level stance (attack/defend/hold) and army standing orders per turn
+ * WRITES:    CorpsStance output (consumed by directive generation and brigade AI)
+ * READS:     GameState (military, operations, sectors), faction doctrine, war timeline
+ * MUST NOT:  issue movement orders; assign brigades to sectors; create operations
+ *
+ * UPSTREAM:  bot_strategy.ts (faction doctrine phases), war_timeline (DoctrinePhase)
+ * DOWNSTREAM: bot_corps_directives.ts (stance informs directive), bot_brigade_ai_osid.ts
+ *
+ * TRUTH INVARIANTS:
+ * - Stance is corps-level posture only — brigade-level execution is T2 responsibility
+ * - Deterministic: sorted iteration via strictCompare, no Math.random()
+ * ═══════════════════════════════════════════════════════════════
+ */
+
 import type { EdgeRecord } from '../../map/settlements.js';
 import type {
     FactionId,

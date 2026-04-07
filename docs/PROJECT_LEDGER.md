@@ -24577,3 +24577,40 @@ with historian rationale. Kept >80% threshold unchanged.
 **Secondary finding (P2 backlog)**: `rs_1st_guards_motorized` has wrong OOB home_osid
 (`op:rogatica:stara_gora` → should be `op:hanpijesak:han_pijesak_2` per sr.wiki/historical record).
 Main Staff HQ was Han Pijesak, not Rogatica. Tracked for OOB correction pass.
+
+---
+
+## n1359 — Phase 3 Hardcoded Rail Cleanup (2026-04-07)
+
+**Change**: Replaced `faction === 'RS' && turn <= RS_BLITZ_PHASE_END_WEEK` hardcoded rails with data-driven `DoctrinePhase.probe_exempt` field. Moved Sarajevo comms override to scenario JSON.
+
+**Files modified**:
+- `src/state/war_timeline.ts` — `probe_exempt?: boolean` on `DoctrinePhase` (was already present)
+- `src/sim/combat/bot_strategy.ts` — `probe_exempt: true` on RS blitz phase 0–12 (was already present)
+- `src/sim/combat/bot_corps_directives.ts` — `shouldLaunchProbeInstead` uses `getActiveDoctrinePhase` + `probe_exempt` (was already present)
+- `src/sim/combat/sector_offensive.ts` — `isPrePlannedBlitz` reads `activePhase?.probe_exempt` (was already present)
+- `src/scenario/scenario_types.ts` — `comms_override_by_corps` field (was already present)
+- `src/sim/combat/army_hq_gathering.ts` — Sarajevo comms reads `state.military.comms_override_by_corps` (was already present)
+- `data/scenarios/apr1992_definitive_40w.json` — `comms_override_by_corps: { arbih_1st_corps: { before_turn: 18, mode: 'radio' } }` (was already present)
+- `src/sim/combat/bot_constants.ts` — `RS_BLITZ_PHASE_END_WEEK` deleted, replaced with comment
+- `src/ui/map/components/CorpsFrontPanel.tsx` — Fixed `f.assigned_corps_id` → `f.corps_id` (FormationView type fix)
+- `tests/hardcoded_rail_audit.test.ts` — New audit test (4 assertions); rewrote glob import to use fs-based walker (glob v7 installed, no globSync)
+- `tests/intel_gated_operations.test.ts` — Updated RS probe tests to pass `turn=20` (post-blitz) for non-blitz intel-threshold cases
+- `tests/army_hq_gathering.test.ts` — Updated comms test to supply `comms_override_by_corps` in state; adjusted turn bounds to match `before_turn: 18`
+
+**Verification**: 2962/2962 vitest (209 suites), tsc clean.
+
+**Calibration (n1359)**: 92.7% area-weighted. **27/27 anchors** (no regression). 6/6 benchmarks. hash: e6460f9a1f615e82.
+
+---
+
+**[2026-04-07] v0.8.x-final Command Authority Cleanup — Phases 2, 3, 4, 5 COMPLETE**
+
+- **Summary:** Command authority cleanup lane complete. 28 hotspot files annotated with T1-T6 movement authority tiers and canonical/transitional ownership blocks. MOVEMENT_AUTHORITY.md created. Hardcoded RS blitz faction checks replaced with data-driven DoctrinePhase.probe_exempt. RS_BLITZ_PHASE_END_WEEK constant deleted. Sarajevo comms override moved to scenario JSON. 3 new test suites (movement_authority_tiers, hardcoded_rail_audit, ui_adapter_boundary — 15 tests total). 6 UI surfaces verified clean against engine truth.
+- **Architectural finding:** commander_loop.ts has a bounded T1 exception — writes brigade_movement_orders for prepositioning surplus brigades unreachable from their sector front. Documented in annotation; not a violation.
+- **Bug fixes:** CorpsFrontPanel.tsx f.assigned_corps_id → f.corps_id; intel_gated_operations.test.ts RS probe tests updated (turn=20 post-blitz); army_hq_gathering.test.ts updated for scenario-driven comms lookup.
+- **Calibration:** n1359 — 92.7% area-weighted, 27/27 anchors, 6/6 benchmarks (baseline held).
+- **Verification:** tsc clean, 2962/2962 vitest, build clean.
+- **Deferred to v0.8-to-v0.9:** Phase 5 diagnostics/SITREP unification; brigade_assignment.ts annotation (pending Codex branch merge).
+- **Files modified:** src/state/war_timeline.ts, src/sim/combat/bot_strategy.ts, src/sim/combat/bot_corps_directives.ts, src/sim/combat/sector_offensive.ts, src/scenario/scenario_types.ts, src/sim/combat/army_hq_gathering.ts, data/scenarios/apr1992_definitive_40w.json, src/ui/map/components/CorpsFrontPanel.tsx, tests/intel_gated_operations.test.ts, tests/army_hq_gathering.test.ts, + 28 annotation-only files + 3 new test files + docs/20_engineering/MOVEMENT_AUTHORITY.md.
+- **FORAWWV note:** None.

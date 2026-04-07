@@ -1,4 +1,27 @@
 /**
+ * ═══════════════════════════════════════════════════════════════
+ * OWNERSHIP: Repair
+ * DOMAIN:    Home return — recalls idle displaced brigades toward home municipality
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * DECIDES:   Whether an idle displaced brigade should column-march home this turn
+ * WRITES:    brigade_movement_orders (column march home)
+ * READS:     brigade home_osid, current location, hop distance, active operation status
+ * MUST NOT:  override active operation participation — only recall idle displaced brigades
+ *
+ * UPSTREAM:  GameState brigade state (home_osid, location_osid, operation participation)
+ * DOWNSTREAM: osid_column_movement.ts (executes the column march home)
+ *
+ * TRUTH INVARIANTS:
+ * - Rate limited: RETURN_MAX_PER_CORPS=2 simultaneous, RETURN_CHECK_INTERVAL=4 turns
+ * - Never pulls a brigade out of an active operation
+ * - Deterministic: sorted iteration via strictCompare, no Math.random(), no timestamps
+ *
+ * MOVEMENT TIER: T6 — Repair (Home Return) (see MOVEMENT_AUTHORITY.md)
+ * ═══════════════════════════════════════════════════════════════
+ */
+
+/**
  * Periodic return-to-home mechanism for displaced brigades.
  * Identifies brigades far from home municipality with no active operation,
  * and issues column march orders toward home.

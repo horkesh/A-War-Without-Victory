@@ -38,6 +38,8 @@ export interface DoctrinePhase {
     default_corps_stance: 'defensive' | 'balanced' | 'offensive';
     max_attack_share_override: number;
     aggression_modifier: number;
+    /** When true, corps may commit to operations without probing first (e.g. RS blitz phase). */
+    probe_exempt?: boolean;
 }
 
 /**

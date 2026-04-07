@@ -5,6 +5,28 @@
  * Deterministic: sorted iteration, no randomness, no timestamps.
  */
 
+/**
+ * ═══════════════════════════════════════════════════════════════
+ * OWNERSHIP: Canonical
+ * DOMAIN:    Offensive movement logic — BFS pathfinding and column march targeting
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * DECIDES:   Column march targets for operation participants; BFS paths toward objectives
+ * WRITES:    column march targets (consumed by osid_column_movement.ts for execution)
+ * READS:     operation objectives, attack orders, sector front state
+ * MUST NOT:  override T1 operation objectives — only compute paths toward them
+ *
+ * UPSTREAM:  commander_loop.ts operation plan → bot_brigade_ai_osid.ts (orchestrator)
+ * DOWNSTREAM: osid_column_movement.ts (executes multi-hop column march)
+ *
+ * TRUTH INVARIANTS:
+ * - BFS operates only within friendly OSID space (no hostile-territory pathfinding)
+ * - Does not modify GameState directly — returns computed targets to orchestrator
+ *
+ * MOVEMENT TIER: T2 — Tactical Routing (Offensive Movement) (see MOVEMENT_AUTHORITY.md)
+ * ═══════════════════════════════════════════════════════════════
+ */
+
 import type {
     BrigadePosture,
     FactionId,

@@ -40,6 +40,11 @@
  * should be treated as a contract violation.
  *
  * Deterministic: sorted iteration, no randomness, no timestamps.
+ *
+ * MOVEMENT TIER: T4 — Combat Consequence (Operation March)
+ * Writes brigade_movement_orders during operation preparation/execution.
+ * Must not override commander's operation plan — only marches participants to objectives.
+ * (see MOVEMENT_AUTHORITY.md)
  */
 
 import type {
@@ -67,7 +72,6 @@ import { isFriendlyFaction as isFriendlyFactionCtrl } from '../early_war/allianc
 import { isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
 import { tickPreparation, hasUnresolvedProbe, autoResolveProbe } from './operation_preparation.js';
 import {
-    RS_BLITZ_PHASE_END_WEEK,
     BRIGADE_LOSS_THRESHOLD,
     COHESION_HEALTHY_THRESHOLD,
     EXECUTION_MAX_DURATION,
@@ -77,6 +81,7 @@ import {
     RECOVERY_DURATION,
     PERSONNEL_HEALTHY_THRESHOLD,
 } from './bot_constants.js';
+import { getActiveDoctrinePhase } from './bot_strategy.js';
 import { getFactionCorps, getCorpsSubordinates, sortByPersonnelDesc } from './bot_corps_helpers.js';
 import {
     ENTRENCHMENT_PER_TURN,
@@ -1021,7 +1026,8 @@ export function advanceSectorOffensives(
             // Probes and feints skip preparation — they are too small/fast.
             // force_launch bypasses preparation entirely (player override).
             // RS blitz phase (w0-12): pre-planned JNA-style ops skip preparation.
-            const isPrePlannedBlitz = faction === 'RS' && turn <= RS_BLITZ_PHASE_END_WEEK;
+            const activePhase = getActiveDoctrinePhase(faction, turn, state.military.war_timeline);
+            const isPrePlannedBlitz = activePhase?.probe_exempt === true;
             if (op.type === 'sector_attack' && op.force_launch !== true && !isPrePlannedBlitz) {
                 // Auto-resolve any pending probes that didn't trigger combat
                 if (hasUnresolvedProbe(op) && (turn - (op.active_probe!.started_turn)) >= 1) {

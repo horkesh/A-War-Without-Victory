@@ -33,10 +33,9 @@ const ARBIH_RADIO_CORPS = new Set([
     'arbih_5th_corps',  // Bihać pocket, isolated throughout war
 ]);
 
-// Sarajevo (1st Corps) is radio-only until roughly turn 60 (Igman trail / tunnel)
-const SARAJEVO_TUNNEL_TURN = 60;
-
 // HVO Posavina pocket — radio only
+// Note: Sarajevo (arbih_1st_corps) comms constraint is now scenario-driven via
+// comms_override_by_corps in scenario JSON → state.military.comms_override_by_corps.
 const HVO_RADIO_CORPS = new Set([
     'hvo_northwest_bosnia',  // Orašje pocket, isolated
 ]);
@@ -112,9 +111,10 @@ export function canCorpsAttendGathering(
     if (faction === 'RBiH') {
         if (ARBIH_EXCLUDED_CORPS.has(corpsId)) return 'excluded';
         if (ARBIH_RADIO_CORPS.has(corpsId)) return 'radio';
-        // Sarajevo: radio before tunnel, full after
-        if (corpsId === 'arbih_1st_corps') {
-            return turn < SARAJEVO_TUNNEL_TURN ? 'radio' : 'full';
+        // Sarajevo: radio before tunnel (scenario-driven override)
+        const commsOverride = state.military.comms_override_by_corps?.[corpsId];
+        if (commsOverride && turn < commsOverride.before_turn) {
+            return commsOverride.mode;
         }
     }
 

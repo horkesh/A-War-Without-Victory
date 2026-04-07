@@ -7,6 +7,27 @@
  * Deterministic: no Math.random(), no Date.now(), no timestamps.
  */
 
+/**
+ * ═══════════════════════════════════════════════════════════════
+ * OWNERSHIP: Canonical
+ * DOMAIN:    Commander situational awareness — world-state assembly
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * DECIDES:   Nothing — pure data assembly, no mutations
+ * WRITES:    Nothing in GameState — returns CommanderBriefing struct only
+ * READS:     GameState (military, supply, ops), spatial context, ethnic composition
+ * MUST NOT:  mutate GameState; make decisions; introduce randomness or timestamps
+ *
+ * UPSTREAM:  GameState (military.corps_front_sectors, supply, operations), SpatialContext
+ * DOWNSTREAM: commander_loop.ts (briefing → ASSESS → ALLOCATE → PLAN → DECIDE → EMIT)
+ *
+ * TRUTH INVARIANTS:
+ * - Pure function: same GameState + context always yields same briefing
+ * - Does not filter or editorialize world state — honest representation only
+ * - Deterministic: no Math.random(), no Date.now(), no timestamps
+ * ═══════════════════════════════════════════════════════════════
+ */
+
 import type { EdgeRecord } from '../../../map/settlements.js';
 import type {
     FactionId,

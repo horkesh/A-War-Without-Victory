@@ -10,6 +10,28 @@ import type { Osid } from './osid_adjacency.js';
 import type { FormationState, GameState, SettlementId } from '../../state/game_state.js';
 
 /**
+ * ═══════════════════════════════════════════════════════════════
+ * OWNERSHIP: Canonical
+ * DOMAIN:    Sector march evaluation — brigade-to-front positioning
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * DECIDES:   Whether a brigade should column-march to its assigned sector front
+ * WRITES:    brigade_movement_orders (column march to sector front)
+ * READS:     sector sub_segments.friendly_osids, directive.sector_reassignment_orders
+ * MUST NOT:  reassign a brigade to a different corps sector
+ *
+ * UPSTREAM:  commander_loop.ts sector assignment
+ * DOWNSTREAM: osid_column_movement.ts (executes the column march)
+ *
+ * TRUTH INVARIANTS:
+ * - Only marches within the brigade's already-assigned sector (T1 assignment is authoritative)
+ * - Enclave brigades respect enclave lock (isEnclaveBrigade check)
+ *
+ * MOVEMENT TIER: T2 — Tactical Routing (Sector March) (see MOVEMENT_AUTHORITY.md)
+ * ═══════════════════════════════════════════════════════════════
+ */
+
+/**
  * True if this brigade is in a corps sector's **assigned** line (not reserve) roster but its
  * `location_osid` is not one of that sector's front OSIDs (`sub_segments[].friendly_osids`).
  * Used to bypass defend-only gates so line units can column-march to the sector front first.

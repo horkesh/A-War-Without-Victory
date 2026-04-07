@@ -14,6 +14,28 @@
  * Deterministic: no randomness.
  */
 
+/**
+ * ═══════════════════════════════════════════════════════════════
+ * OWNERSHIP: Canonical
+ * DOMAIN:    Faction strategy profiles and doctrine phases
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * DECIDES:   Per-faction behavioral parameters: posture thresholds, attack/defense balance,
+ *            corridor priorities, strategic target scoring weights, doctrine phase transitions
+ * WRITES:    Nothing in GameState — returns strategy profile structs and scoring functions
+ * READS:     FactionId, DoctrinePhase, WarTimeline
+ * MUST NOT:  issue movement orders; create operations; hardcode brigade-to-OSID assignments
+ *
+ * UPSTREAM:  war_timeline.ts (DoctrinePhase, WarTimeline)
+ * DOWNSTREAM: bot_corps_stance.ts, bot_corps_directives.ts, bot_brigade_ai_osid.ts
+ *
+ * TRUTH INVARIANTS:
+ * - Faction behavior must emerge from doctrine parameters, not hardcoded name-checks
+ * - Strategic objectives grounded in historical patterns (RS corridor, RBiH enclave, HRHB Herzegovina)
+ * - Deterministic: no Math.random(), no timestamps
+ * ═══════════════════════════════════════════════════════════════
+ */
+
 import type { BrigadePosture, FactionId } from '../../state/game_state.js';
 import type { DoctrinePhase, StandingOrder, WarTimeline } from '../../state/war_timeline.js';
 import {
@@ -220,7 +242,7 @@ export const FACTION_DOCTRINE_PHASES: Record<FactionId, DoctrinePhase[]> = {
     RS: [
         // Three-phase RS doctrine: blitz (Apr-Jun), sustained (Jul-Oct), consolidation (Nov+).
         // Validated against both broken (n579) and correct (n583) force assignment models.
-        { start_week: 0, end_week: 12, default_corps_stance: 'offensive', max_attack_share_override: 0.35, aggression_modifier: 0.15 },
+        { start_week: 0, end_week: 12, default_corps_stance: 'offensive', max_attack_share_override: 0.35, aggression_modifier: 0.15, probe_exempt: true },
         { start_week: 12, end_week: RS_EARLY_WAR_END_WEEK, default_corps_stance: 'offensive', max_attack_share_override: 0.25, aggression_modifier: 0.08 },
         { start_week: RS_EARLY_WAR_END_WEEK, end_week: 9999, default_corps_stance: 'offensive', max_attack_share_override: 0.20, aggression_modifier: 0.05 },
     ],

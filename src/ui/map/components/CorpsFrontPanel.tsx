@@ -219,6 +219,11 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
     .map((id) => loadedGameState.formations.find((f) => f.id === id))
     .filter((f): f is NonNullable<typeof f> => f != null);
 
+  // Unresolved brigades: could not be placed into any sector for this corps this turn (Codex #6: unresolved is honest)
+  const unresolvedFormations = (loadedGameState.unresolvedSectorBrigades ?? [])
+    .map((id) => loadedGameState.formations.find((f) => f.id === id))
+    .filter((f): f is NonNullable<typeof f> => f != null && f.corps_id === sector.corps_id);
+
   const assignedPersonnel = assignedFormations.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
   const reservePersonnel = reserveFormations.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
   const totalSectorPersonnel = assignedPersonnel + reservePersonnel;
@@ -624,6 +629,39 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                           <span className="text-neutral-400 text-[9px] tabular-nums shrink-0 leading-none">
                             {sector.intel_confidence < 0.6 ? <span className="bg-black text-black select-none px-1">RED</span> : (f.personnel != null ? `${f.personnel.toLocaleString()} PAX` : '—')}
                           </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {/* Codex principle #6: unresolved is honest — show brigades the engine could not place in any sector */}
+                {unresolvedFormations.length > 0 && (
+                  <div className="pt-2">
+                    <div className="text-[9px] uppercase font-bold text-red-600 mb-1 border-b border-red-200 pb-1 flex items-center gap-1">
+                      <span>Unassigned ({unresolvedFormations.length})</span>
+                      <span className="normal-case font-normal text-red-500 text-[8px]">— not placed in any sector this turn</span>
+                    </div>
+                    <div className="space-y-[1px] max-h-[100px] overflow-auto">
+                      {unresolvedFormations.map((f) => (
+                        <button
+                          key={f.id}
+                          type="button"
+                          aria-label={`Unassigned brigade ${f.name} — not placed in any sector`}
+                          className="kbd-focus w-full flex justify-between items-center hover:bg-red-50 transition-colors text-left px-1 py-0.5 rounded border border-red-200/60"
+                          onClick={() => useGameStore.setState({
+                            selectedCorpsId,
+                            selectedCorpsFrontSectorId: selectedSectorId,
+                            selectedFormationId: f.id,
+                            selectedOperationKey: null,
+                            selectedOsid: null,
+                          })}
+                          onMouseEnter={() => {
+                            if (f.location_osid) setHoveredOsids([f.location_osid]);
+                          }}
+                          onMouseLeave={() => { setHoveredOsids([]); }}
+                        >
+                          <span className="truncate mr-2 text-red-700 leading-none">{f.name}</span>
+                          <span className="text-red-400 text-[9px] tabular-nums shrink-0 leading-none">UNASSIGNED</span>
                         </button>
                       ))}
                     </div>

@@ -35,6 +35,31 @@ import { makeDecisions } from './decide.js';
 import { emitCommanderOutput } from './emit.js';
 import { assembleBeliefState } from './belief.js';
 
+/**
+ * ═══════════════════════════════════════════════════════════════
+ * OWNERSHIP: Canonical
+ * DOMAIN:    Corps commander decision cycle
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * DECIDES:   Sector stance, brigade allocation, operation planning, directive emission
+ * WRITES:    directive (sector_stance, sector_assignment), active_operations
+ * READS:     briefing (world state summary), previous commander state
+ * MUST NOT:  write location_osid directly; write brigade_movement_orders except for
+ *             prepositioning orders (main_effort surplus brigades unreachable from front —
+ *             a bounded T1 exception; all other brigade_movement_orders flow through T2)
+ *
+ * UPSTREAM:  buildBriefing (world state), GameState (military/supply/ops)
+ * DOWNSTREAM: allocate.ts → emit.ts → bot_brigade_ai_osid.ts
+ *
+ * TRUTH INVARIANTS:
+ * - Single strategic intent authority: all brigade positioning flows from this loop
+ * - Brigades NEVER attack independently; all attacks flow through CorpsOperation
+ * - Determinism: sorted iteration via strictCompare, no Math.random(), no Date.now()
+ *
+ * MOVEMENT TIER: T1 — Strategic Intent Owner (see MOVEMENT_AUTHORITY.md)
+ * ═══════════════════════════════════════════════════════════════
+ */
+
 // ═══════════════════════════════════════════════════════════════════════════
 // BotCorpsCommander — deterministic bot implementation of ICorpsCommander
 // ═══════════════════════════════════════════════════════════════════════════

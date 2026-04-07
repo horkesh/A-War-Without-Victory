@@ -7,6 +7,26 @@
  * Deterministic: sorted iteration via strictCompare, no Math.random(), no Date.now().
  */
 
+/**
+ * ═══════════════════════════════════════════════════════════════
+ * OWNERSHIP: Canonical
+ * DOMAIN:    Threat and opportunity assessment — zone/force/threat evaluation
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * DECIDES:   Zone threat levels, force evaluations, enemy concentration zones
+ * WRITES:    Nothing in GameState — returns ZoneAssessment / ForceEvaluation structs
+ * READS:     CommanderBriefing (zones, sectors, intel, supply), previous CommanderState
+ * MUST NOT:  mutate GameState; issue orders; apply any side effects
+ *
+ * UPSTREAM:  briefing.ts (CommanderBriefing)
+ * DOWNSTREAM: allocate.ts (garrison sizing), plan.ts (opportunity detection), decide.ts
+ *
+ * TRUTH INVARIANTS:
+ * - Pure function — no mutations; same briefing always yields same assessment
+ * - Deterministic: sorted iteration via strictCompare, no Math.random(), no Date.now()
+ * ═══════════════════════════════════════════════════════════════
+ */
+
 import { strictCompare } from '../../../state/validateGameState.js';
 import type {
     CommanderBriefing,

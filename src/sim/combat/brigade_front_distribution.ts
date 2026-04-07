@@ -1,4 +1,28 @@
 /**
+ * ═══════════════════════════════════════════════════════════════
+ * OWNERSHIP: Repair
+ * DOMAIN:    Front distribution — unstacking and march-to-front repair
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * DECIDES:   Whether brigades are stacked or far from front, and how to spread them
+ * WRITES:    location_osid (Phase A: unstack to adjacent empty front OSID),
+ *            brigade_movement_orders (Phase B: column march for brigades not at any front OSID)
+ * READS:     sector sub_segments, brigade locations, stacking state
+ * MUST NOT:  override sector assignment — only spread brigades within their already-assigned sector
+ *
+ * UPSTREAM:  sector system (sub_segment assignments), T1 sector assignment (authoritative)
+ * DOWNSTREAM: osid_column_movement.ts (executes Phase B column march)
+ *
+ * TRUTH INVARIANTS:
+ * - Unresolved-is-honest (Codex principle #6) — never force-assigns cross-component
+ * - Does not reassign brigades between sectors; only redistributes within assigned sector
+ * - Deterministic: sorted iteration via strictCompare, no Math.random(), no timestamps
+ *
+ * MOVEMENT TIER: T6 — Repair (Front Distribution) (see MOVEMENT_AUTHORITY.md)
+ * ═══════════════════════════════════════════════════════════════
+ */
+
+/**
  * Brigade front distribution — spreads brigades across sector sub-segment front OSIDs.
  *
  * Problem: Brigades get assigned to sector sub-segments (paper assignment), but no code

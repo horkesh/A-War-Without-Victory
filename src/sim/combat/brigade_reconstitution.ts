@@ -1,4 +1,27 @@
 /**
+ * ═══════════════════════════════════════════════════════════════
+ * OWNERSHIP: Execution-Only
+ * DOMAIN:    Brigade lifecycle — reconstitution of destroyed formations
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * DECIDES:   Whether a destroyed brigade is eligible for reconstitution this turn
+ * WRITES:    location_osid (spawn placement at home municipality)
+ * READS:     lifecycle_status='destroyed', home_osid, municipality militia pool
+ * MUST NOT:  move existing brigades — only place newly reconstituted formations
+ *
+ * UPSTREAM:  GameState brigade lifecycle (lifecycle_status), municipality manpower pools
+ * DOWNSTREAM: sector assignment (brigade re-enters sector system after spawn)
+ *
+ * TRUTH INVARIANTS:
+ * - Max 1 reconstitution per corps per turn (logistics constraint)
+ * - Home municipality must remain faction-controlled for reconstitution to proceed
+ * - Spawn at 40% max_personnel, cohesion 30, faction baseline morale
+ *
+ * MOVEMENT TIER: T5 — Lifecycle (Brigade Reconstitution) (see MOVEMENT_AUTHORITY.md)
+ * ═══════════════════════════════════════════════════════════════
+ */
+
+/**
  * Brigade reconstitution — reform destroyed brigades from municipality manpower.
  *
  * Historical: ARBiH brigades that were mauled didn't permanently vanish if their

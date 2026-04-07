@@ -23,6 +23,7 @@ function makeMinimalState(overrides: {
     lastGathering?: Record<string, number>;
     formations?: Record<string, Partial<FormationState>>;
     firedEventIds?: string[];
+    commsOverrideByCorps?: Record<string, { before_turn: number; mode: 'radio' | 'full' }>;
 } = {}): GameState {
     const formations: Record<string, FormationState> = {};
     if (overrides.formations) {
@@ -49,6 +50,7 @@ function makeMinimalState(overrides: {
             front_posture: {},
             last_gathering_turn: overrides.lastGathering,
             fired_event_ids: overrides.firedEventIds ?? [],
+            comms_override_by_corps: overrides.commsOverrideByCorps,
         } as unknown as GameState['military'],
         political: {} as unknown as GameState['political'],
         factions: {} as GameState['factions'],
@@ -144,10 +146,13 @@ describe('shouldGather', () => {
 
 describe('canCorpsAttendGathering', () => {
     it('ARBiH 1st Corps returns radio early, full after tunnel', () => {
-        const stateEarly = makeMinimalState({ turn: 30 });
+        // Comms constraint is now scenario-driven via state.military.comms_override_by_corps.
+        // before_turn: 18 matches the scenario JSON (apr1992_definitive_40w.json).
+        const commsOverride = { arbih_1st_corps: { before_turn: 18, mode: 'radio' as const } };
+        const stateEarly = makeMinimalState({ turn: 10, commsOverrideByCorps: commsOverride });
         expect(canCorpsAttendGathering('arbih_1st_corps', 'RBiH', stateEarly)).toBe('radio');
 
-        const stateLate = makeMinimalState({ turn: 70 });
+        const stateLate = makeMinimalState({ turn: 20, commsOverrideByCorps: commsOverride });
         expect(canCorpsAttendGathering('arbih_1st_corps', 'RBiH', stateLate)).toBe('full');
     });
 

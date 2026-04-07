@@ -631,6 +631,11 @@ export interface LoadedGameState {
     movementOrdersSettlement?: MovementOrderSettlementView[];
     repositionOrders?: RepositionOrderView[];
     corpsFrontSectors?: CorpsFrontSectorView[];
+    /**
+     * Brigade IDs that could not be assigned to any sector this turn (engine truth: military.unresolved_sector_brigades).
+     * Filtered to the player's faction in the adapter. Codex principle #6: unresolved is honest — do not hide these.
+     */
+    unresolvedSectorBrigades?: string[];
     operations?: OperationView[];
     /** Officer data for Phase E GUI (sorted by id). Present when state has named_officers. */
     namedOfficerData?: NamedOfficerView[];

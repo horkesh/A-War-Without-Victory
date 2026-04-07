@@ -20,6 +20,27 @@
  * before the existing planning → execution transition check.
  *
  * Deterministic: no randomness, sorted iteration, all derived from state.
+ *
+ * ═══════════════════════════════════════════════════════════════
+ * OWNERSHIP: Canonical
+ * DOMAIN:    Operation preparation sub-phase state machine
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * DECIDES:   Preparation sub-phase transitions: intel_gathering → force_staging →
+ *            supply_check → assessment → ready
+ * WRITES:    CorpsOperation preparation sub-state (via sector_offensive.ts caller)
+ * READS:     CorpsOperation, GameState (supply, brigades, intel), officer personality
+ * MUST NOT:  advance operation beyond planning phase; be called directly from pipeline
+ *            (all entry points must flow through sector_offensive.ts)
+ *
+ * UPSTREAM:  sector_offensive.ts (advanceSectorOffensives calls this sub-phase)
+ * DOWNSTREAM: sector_offensive.ts (reads ready state → planning → execution transition)
+ *
+ * TRUTH INVARIANTS:
+ * - Sub-phase owner only — does NOT own the broader operation lifecycle
+ * - Commander personality (competence × aggressiveness) shapes thresholds, not hardcoded values
+ * - Deterministic: no randomness, sorted iteration, all derived from state
+ * ═══════════════════════════════════════════════════════════════
  */
 
 import type {

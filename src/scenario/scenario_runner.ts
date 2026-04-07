@@ -1357,6 +1357,10 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             state.military.must_hold_osids_by_corps = scenario.must_hold_osids_by_corps;
         }
 
+        if (scenario.comms_override_by_corps && Object.keys(scenario.comms_override_by_corps).length > 0) {
+            state.military.comms_override_by_corps = scenario.comms_override_by_corps;
+        }
+
         if (scenario.coercion_pressure_by_municipality && Object.keys(scenario.coercion_pressure_by_municipality).length > 0) {
             const keys = Object.keys(scenario.coercion_pressure_by_municipality).sort(strictCompare);
             state.political.coercion_pressure_by_municipality = {};

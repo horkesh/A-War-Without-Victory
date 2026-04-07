@@ -1,4 +1,27 @@
 /**
+ * ═══════════════════════════════════════════════════════════════
+ * OWNERSHIP: Execution-Only
+ * DOMAIN:    Combat resolution — attack outcomes, retreats, advances
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * DECIDES:   Nothing strategic — resolves combat-forced position changes only
+ * WRITES:    location_osid (defender retreat, attacker advance, displacement)
+ * READS:     combat outcome, fallback destinations, terrain/supply modifiers
+ * MUST NOT:  issue march orders — only resolve positions forced by battle outcome
+ *
+ * UPSTREAM:  sector_offensive.ts (attack orders), bot_brigade_ai_osid.ts (attack posture)
+ * DOWNSTREAM: political_controllers (OSID flip), brigade history recorder
+ *
+ * TRUTH INVARIANTS:
+ * - One attack resolution = at most one OSID control flip (Engine Invariants §6)
+ * - Deterministic: sorted formation IDs and target OSIDs; no Math.random()
+ * - Never writes brigade_movement_orders — only location_osid and retreat/advance state
+ *
+ * MOVEMENT TIER: T4 — Combat Consequence (see MOVEMENT_AUTHORITY.md)
+ * ═══════════════════════════════════════════════════════════════
+ */
+
+/**
  * War phase: OSID-based attack resolution per Attack Resolution Formula Spec.
  *
  * Formulas: §2–§5, §9 state, §10 constants (docs/30_planning/20260222_ATTACK_RESOLUTION_FORMULA_SPEC.md).

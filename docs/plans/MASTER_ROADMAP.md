@@ -273,6 +273,8 @@ If the implementer cannot answer all five, the task is not ready to start.
 
 Done means: `generateCorpsDirectives` is deleted ✅ (2026-04-01). `apply_brigade_reposition.ts` is **NOT dead ballast** — it is live player infrastructure wired at `war_phases.ts:1147`; roadmap label was wrong, do not delete. Every hotspot file has an ownership comment at its top.
 
+**Status: COMPLETE 2026-04-07.** Phases 2–5 complete. 28 files annotated with T1-T6 movement authority tiers and canonical/transitional ownership blocks. `docs/20_engineering/MOVEMENT_AUTHORITY.md` created. RS blitz data-driven (`probe_exempt`). `RS_BLITZ_PHASE_END_WEEK` deleted. Comms override scenario-driven. 3 new test suites (15 tests). 6 UI surfaces clean. tsc/vitest/build clean. Calibration: n1359 27/27 anchors held. Deferred to v0.8-to-v0.9: `brigade_assignment.ts` annotation (Codex branch conflict), Phase 5 diagnostics/SITREP unification. Report: `docs/40_reports/implemented/20260407_V08X_FINAL_COMMAND_AUTHORITY_CLEANUP.md`.
+
 ---
 
 ## Planned: v0.8-to-v0.9 — Repo-Wide Simplification + Studio Health / Repo Truth

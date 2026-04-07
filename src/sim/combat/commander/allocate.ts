@@ -11,6 +11,29 @@
  * Deterministic: sorted iteration via strictCompare, no Math.random(), no Date.now().
  */
 
+/**
+ * ═══════════════════════════════════════════════════════════════
+ * OWNERSHIP: Canonical
+ * DOMAIN:    Brigade-to-sector allocation — garrison first, surplus for ops
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * DECIDES:   How many brigades garrison each zone vs. enter the surplus pool for operations
+ * WRITES:    Nothing in GameState — returns AllocationResult struct to commander_loop
+ * READS:     ZoneAssessment (threat levels, zone widths), officer personality, briefing
+ * MUST NOT:  move brigades — only assigns to sectors (T1 intent; execution via T2/T3)
+ *
+ * UPSTREAM:  assess.ts (ZoneAssessment, ForceEvaluation), officer personality
+ * DOWNSTREAM: plan.ts (surplus pool sizing), emit.ts (directive sector_assignment)
+ *
+ * TRUTH INVARIANTS:
+ * - must_hold zones always receive garrison_budget regardless of surplus pressure
+ * - Besieged corps (SRK) lock all brigades to garrison — zero surplus
+ * - Deterministic: sorted iteration via strictCompare, no Math.random(), no Date.now()
+ *
+ * MOVEMENT TIER: T1 — Strategic Intent Owner (assignment only; no movement issued here)
+ * ═══════════════════════════════════════════════════════════════
+ */
+
 import type { FormationId } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import type {

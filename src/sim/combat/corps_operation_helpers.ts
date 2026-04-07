@@ -1,3 +1,25 @@
+/**
+ * ═══════════════════════════════════════════════════════════════
+ * OWNERSHIP: Canonical
+ * DOMAIN:    Operation factory functions — CorpsOperation construction
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * DECIDES:   Nothing — pure factory functions, no decision logic
+ * WRITES:    Nothing in GameState — returns constructed CorpsOperation objects
+ * READS:     Pre-planned op definitions, sector data, corps command state
+ * MUST NOT:  add to active_operations directly; make planning decisions
+ *
+ * UPSTREAM:  emit.ts (commander-generated ops), bot_corps_operations.ts (emergency/OG ops)
+ * DOWNSTREAM: sector_offensive.ts (canonical lifecycle owner receives created ops)
+ *
+ * TRUTH INVARIANTS:
+ * - Four canonical factories: buildCorpsOperation, buildCommanderOperation,
+ *   buildEmergencyDefenseOperation, buildProbeOperation
+ * - All CorpsOperation creation must flow through one of these factories
+ * - Deterministic: sorted via strictCompare; no Math.random(), no Date.now()
+ * ═══════════════════════════════════════════════════════════════
+ */
+
 import type { CorpsCommandState, CorpsFrontSector, CorpsOperation, FormationId, OperationAxis } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 

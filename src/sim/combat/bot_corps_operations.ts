@@ -15,6 +15,28 @@
  * Do NOT add new operation lifecycle logic here.
  */
 
+/**
+ * ═══════════════════════════════════════════════════════════════
+ * OWNERSHIP: Transitional — legacy/compatibility operation creation
+ * DOMAIN:    Emergency defense + OG activation entry points only
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * DECIDES:   Whether an emergency defensive op or OG activation is warranted
+ * WRITES:    active_operations (emergency/OG ops only — no other op types)
+ * READS:     corps threat state, operation slot availability, sector assignments
+ * MUST NOT:  create operations outside emergency defense + OG activation;
+ *            advance operation lifecycle (owned by sector_offensive.ts)
+ *
+ * UPSTREAM:  war_phases.ts pipeline (inject-queued-operations step, before commander)
+ * DOWNSTREAM: sector_offensive.ts (canonical lifecycle takes over after creation)
+ *
+ * TRUTH INVARIANTS:
+ * - This file's creation paths will be folded into commander/emit.ts in a future version
+ * - TWO OP SYSTEMS exist: legacy injectQueuedOperation (this file's consumer) runs BEFORE
+ *   commander; commander tryCreateFromOpportunity runs AFTER for corps with no pre-planned ops
+ * ═══════════════════════════════════════════════════════════════
+ */
+
 import type { EdgeRecord } from '../../map/settlements.js';
 import { MAX_BRIGADE_PERSONNEL } from '../../state/formation_constants.js';
 import type {

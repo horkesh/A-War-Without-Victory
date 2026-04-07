@@ -13,6 +13,25 @@
  * ops within 2 hops of zone boundary, but cannot plan distant offensives.
  *
  * Deterministic: strictCompare for all sorting, no Math.random(), no Date.now().
+ *
+ * ═══════════════════════════════════════════════════════════════
+ * OWNERSHIP: Canonical
+ * DOMAIN:    Operation planning — multi-turn commander intentions
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * DECIDES:   Whether to create, advance, suspend, or abandon an operational plan
+ * WRITES:    Nothing in GameState directly — returns PlanDecision struct to commander_loop
+ * READS:     ZoneAssessment, ForceEvaluation, surplus pool, previous plan state
+ * MUST NOT:  create CorpsOperations directly — only intends; EMIT phase converts ready plans
+ *
+ * UPSTREAM:  assess.ts (zone assessment), allocate.ts (surplus pool)
+ * DOWNSTREAM: emit.ts (converts ready plan → CorpsOperation)
+ *
+ * TRUTH INVARIANTS:
+ * - Plans are intentions, not orders — no brigade movement or combat initiated here
+ * - Besieged corps restricted to local ops within 2 hops of zone boundary
+ * - Deterministic: strictCompare for all sorting, no Math.random(), no Date.now()
+ * ═══════════════════════════════════════════════════════════════
  */
 
 import type { FormationId } from '../../../state/game_state.js';

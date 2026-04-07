@@ -8,6 +8,26 @@
  * Deterministic: sorted iteration via strictCompare, no Math.random(), no Date.now().
  */
 
+/**
+ * ═══════════════════════════════════════════════════════════════
+ * OWNERSHIP: Canonical
+ * DOMAIN:    Commander decision routing — stance adjustment and reserve shifting
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * DECIDES:   Sector stance adjustments, reserve shifts in response to battlefield intel
+ * WRITES:    Nothing in GameState — returns DecideOutput struct to commander_loop
+ * READS:     SectorIntelRecord, BeliefState, ZoneAssessment, current sector stances
+ * MUST NOT:  mutate GameState; issue movement orders; create operations
+ *
+ * UPSTREAM:  assess.ts (threats), briefing.ts (intel records), belief.ts (belief state)
+ * DOWNSTREAM: emit.ts (applies stance decisions to CorpsDirective / SectorStance)
+ *
+ * TRUTH INVARIANTS:
+ * - Pure function — no side effects; same inputs always yield same DecideOutput
+ * - Deterministic: sorted iteration via strictCompare, no Math.random(), no Date.now()
+ * ═══════════════════════════════════════════════════════════════
+ */
+
 import type { FormationId, SectorStance, SectorIntelRecord, CorpsFrontSector } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import type {

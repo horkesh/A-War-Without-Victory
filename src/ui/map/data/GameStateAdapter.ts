@@ -1,4 +1,29 @@
 /**
+ * ═══════════════════════════════════════════════════════════════
+ * OWNERSHIP: Canonical — UI Read Path
+ * DOMAIN:    Single source of game state for all UI components
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * DECIDES:   Nothing — read-only transformation layer
+ * WRITES:    Nothing in game state — only derives UI-safe views
+ * READS:     GameState (raw engine truth)
+ * MUST NOT:  Mutate game state, cache stale state, expose raw
+ *            engine internals directly to player-facing components,
+ *            or bypass player-visible-state boundaries.
+ *
+ * UPSTREAM:  GameState (authoritative engine source)
+ * DOWNSTREAM: All UI components in src/ui/map/components/
+ *
+ * TRUTH INVARIANTS:
+ * - Player-visible state boundary: only expose what the player
+ *   would plausibly know given their role as faction president
+ * - OperationView is the CANONICAL UI-FACING OPERATION MODEL
+ * - All operation phase labels must match sector_offensive.ts lifecycle
+ *   (valid phases: 'planning' | 'execution' | 'recovery')
+ * - Commander identity must resolve via commander_officer_id
+ * - unresolvedSectorBrigades reflects engine truth (military.unresolved_sector_brigades)
+ *   and must NEVER be suppressed — Codex principle #6: unresolved is honest
+ *
  * Adapter for loading and extracting data from a saved GameState (final_save.json).
  * Converts the rich GameState structure into the flat LoadedGameState view
  * needed by the map application.
@@ -1918,6 +1943,16 @@ export function parseGameState(json: unknown): LoadedGameState {
         movementOrdersSettlement: movementOrdersSettlement.length > 0 ? movementOrdersSettlement : undefined,
         repositionOrders: repositionOrders.length > 0 ? repositionOrders : undefined,
         corpsFrontSectors,
+        unresolvedSectorBrigades: (() => {
+            const raw = state.military?.unresolved_sector_brigades as string[] | undefined;
+            if (!Array.isArray(raw) || raw.length === 0) return undefined;
+            if (!playerFaction) return raw;
+            // Filter to player faction only — formations keyed by formation id
+            const formationFactionMap = new Map<string, string>();
+            for (const f of formations) formationFactionMap.set(f.id, f.faction ?? '');
+            const filtered = raw.filter((id) => formationFactionMap.get(id) === playerFaction);
+            return filtered.length > 0 ? filtered : undefined;
+        })(),
         operations: filterPlayerFacingEntriesByFaction(operations, playerFaction),
         namedOfficerData,
         namedOfficerStateById,

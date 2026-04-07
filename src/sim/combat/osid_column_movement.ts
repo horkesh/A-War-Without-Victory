@@ -1,4 +1,26 @@
 /**
+ * ═══════════════════════════════════════════════════════════════
+ * OWNERSHIP: Execution-Only
+ * DOMAIN:    Column march engine — multi-hop terrain-weighted movement
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * DECIDES:   Nothing — executes Dijkstra path from T2-issued orders only
+ * WRITES:    brigade_movement_state (init/update/clear), location_osid (incremental advance)
+ * READS:     brigade_movement_orders with stance='column'
+ * MUST NOT:  decide destination — only execute the path computed by T2 routing
+ *
+ * UPSTREAM:  bot_brigade_eval_front.ts / bot_brigade_movement_ai.ts (T2 column march orders)
+ * DOWNSTREAM: apply-brigade-movement step (T3 single-hop), brigade deployment state
+ *
+ * TRUTH INVARIANTS:
+ * - Path computation is pure Dijkstra over friendly OSIDs — no strategic inference
+ * - Arrival resets entrenchment_turns and marks brigade as deployed
+ *
+ * MOVEMENT TIER: T3 — Execution (Column March Engine) (see MOVEMENT_AUTHORITY.md)
+ * ═══════════════════════════════════════════════════════════════
+ */
+
+/**
  * War phase: OSID-native column (undeployed) movement.
  *
  * Terrain-weighted multi-hop movement for brigades redeploying through rear areas.

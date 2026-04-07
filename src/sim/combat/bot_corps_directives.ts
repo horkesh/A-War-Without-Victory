@@ -5,6 +5,27 @@
  * Deterministic: sorted iteration via strictCompare, no Math.random().
  */
 
+/**
+ * ═══════════════════════════════════════════════════════════════
+ * OWNERSHIP: Transitional — bot directive generation (pre-commander-loop path)
+ * DOMAIN:    Corps directive generation — offensive targets, hold OSIDs, patrol
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * DECIDES:   What targets, hold positions, and patrol zones each corps assigns to brigades
+ * WRITES:    CorpsDirective (offensive_targets, hold_osids, patrol_osids, reserve_fraction)
+ * READS:     GameState (operations, sectors, stance), bot_strategy profiles, ethnic composition
+ * MUST NOT:  issue movement orders; assign brigades to sectors (T1 authority)
+ *
+ * UPSTREAM:  bot_strategy.ts (faction doctrine), commander_loop.ts emit (sector stance)
+ * DOWNSTREAM: bot_brigade_ai_osid.ts (T2 reads directive to generate brigade orders)
+ *
+ * TRUTH INVARIANTS:
+ * - Faction personality expressed through CorpsDirective parameters, not hardcoded brigade logic
+ * - Directive is guidance, not orders — brigades execute within it via T2 routing
+ * - Deterministic: sorted iteration via strictCompare, no Math.random()
+ * ═══════════════════════════════════════════════════════════════
+ */
+
 import type { EdgeRecord } from '../../map/settlements.js';
 import { getEnclaveIdForOsid } from './enclave_resilience.js';
 import type { OsidEthnicComposition } from './ethnic_defense.js';
@@ -35,7 +56,8 @@ import { getSeasonalModifiers } from './seasonal_effects.js';
 import { evaluateCorpsOffensiveLaunch, evaluateSectorOffensiveLaunch, getEquipmentOffensivePriority, resolveEquipmentClass } from './sector_offensive.js';
 import { CONFIDENCE_ROUGH_STRENGTH, INTEL_GATE_LAUNCH_THRESHOLD, MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT } from './sector_intel_constants.js';
 import { getSectorIntelConfidence, getStalestSectorIntelConfidence } from './sector_intel.js';
-import { RS_BLITZ_PHASE_END_WEEK, MAX_EXHAUSTION_FOR_OPERATION } from './bot_constants.js';
+import { MAX_EXHAUSTION_FOR_OPERATION } from './bot_constants.js';
+import type { WarTimeline } from '../../state/war_timeline.js';
 import {
     getTruceBreakAggressionBonus,
     shouldGrazBlockAttack,
@@ -218,9 +240,11 @@ export function shouldLaunchProbeInstead(
     sectorIntelConfidence: number,
     consecutiveProbes: number,
     turn?: number,
+    timeline?: WarTimeline,
 ): boolean {
-    // RS blitz phase exemption: JNA-trained forces attack without probing
-    if (faction === 'RS' && (turn ?? 999) <= RS_BLITZ_PHASE_END_WEEK) return false;
+    // Doctrine phase exemption: some phases (e.g. RS blitz) bypass probe requirement
+    const doctrinePhase = getActiveDoctrinePhase(faction, turn ?? 0, timeline);
+    if (doctrinePhase?.probe_exempt) return false;
 
     // n1194: Removed forced commitment after MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT.
     // If intel says enemy is stronger, correct response is "defend," not "attack

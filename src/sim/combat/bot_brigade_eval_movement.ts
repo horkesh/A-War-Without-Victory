@@ -4,6 +4,28 @@ import { issueInteriorMovement, findNearestOffensiveTarget } from './bot_brigade
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { Osid } from './osid_adjacency.js';
 
+/**
+ * ═══════════════════════════════════════════════════════════════
+ * OWNERSHIP: Canonical
+ * DOMAIN:    Interior reposition evaluation — rear-area brigade movement
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * DECIDES:   Whether a rear-area brigade should move toward the front or a priority sector
+ * WRITES:    brigade_movement_orders (rear-area repositioning)
+ * READS:     brigade location, sector assignment, front state, directive.priority_sector_id
+ * MUST NOT:  move a brigade cross-component (Codex principle #2 — connected-component boundary)
+ *
+ * UPSTREAM:  commander_loop.ts directive (priority_sector_id)
+ * DOWNSTREAM: osid_column_movement.ts (column march), brigade_movement_orders.ts (single-hop)
+ *
+ * TRUTH INVARIANTS:
+ * - Respects connected-component boundaries (no cross-faction-graph movement)
+ * - Only moves brigades already inside their assigned sector's component
+ *
+ * MOVEMENT TIER: T2 — Tactical Routing (Interior Reposition) (see MOVEMENT_AUTHORITY.md)
+ * ═══════════════════════════════════════════════════════════════
+ */
+
 export function evaluateInteriorMovement(ctx: BrigadeEvaluationContext): boolean {
     const { brigade, loc, faction, adjacency, state, reverseMap, graphAnalysis, directive, result, columnAssignments } = ctx;
 

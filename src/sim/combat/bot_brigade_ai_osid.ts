@@ -68,6 +68,29 @@ import type { BrigadeEvaluationContext } from './bot_brigade_eval_types.js';
 import type { OsidEthnicComposition } from './ethnic_defense.js';
 import { COUNTER_ATTACK_RETREAT_WINDOW } from './bot_constants.js';
 
+/**
+ * ═══════════════════════════════════════════════════════════════
+ * OWNERSHIP: Canonical
+ * DOMAIN:    Bot brigade order generation — directive-based execution
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * DECIDES:   Which order (attack/hold/march/cover/reorg) each brigade executes this turn
+ * WRITES:    brigade_movement_orders (merged from all bot evaluations)
+ * READS:     T1 directive (sector_assignment, stance, offensive_targets), sector sub-segments
+ * MUST NOT:  override T1 sector assignment or reassign a brigade to a different corps
+ *
+ * UPSTREAM:  commander_loop.ts directive → bot_corps_directives.ts
+ * DOWNSTREAM: osid_column_movement.ts (column march), brigade_movement_orders.ts (single-hop)
+ *
+ * TRUTH INVARIANTS:
+ * - Respects connected-component boundaries (no cross-component movement)
+ * - Faction personality expressed through CorpsDirective, not hardcoded brigade logic
+ * - Brigades NEVER attack independently; attack orders require valid CorpsOperation
+ *
+ * MOVEMENT TIER: T2 — Tactical Routing (Bot Brigade AI) (see MOVEMENT_AUTHORITY.md)
+ * ═══════════════════════════════════════════════════════════════
+ */
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Submodule imports
 // ═══════════════════════════════════════════════════════════════════════════

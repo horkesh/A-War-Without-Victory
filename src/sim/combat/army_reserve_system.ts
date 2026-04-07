@@ -1,4 +1,27 @@
 /**
+ * ═══════════════════════════════════════════════════════════════
+ * OWNERSHIP: Canonical
+ * DOMAIN:    Army-level elite brigade loan management
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * DECIDES:   Which corps receives elite brigade loans; when loans are recalled
+ * WRITES:    location_osid (reserve recall), clears movement orders/state on recall
+ * READS:     corps requests, geographic feasibility, request priority, loan episodes
+ * MUST NOT:  override active operation participation — only loan/recall idle elite brigades
+ *
+ * UPSTREAM:  Corps commander requests (per-turn), elite_brigade_tracker loan episodes
+ * DOWNSTREAM: sector assignment (loaned brigade enters receiving corps sector system)
+ *
+ * TRUTH INVARIANTS:
+ * - Loan lifecycle: op-tied (no hard timer); ends on op_complete/need_expired/player_recall/force-recall
+ * - Force-recall conditions: casualty_threshold | morale_collapse | permanent_degradation
+ * - Deterministic: all iteration sorted via strictCompare; no Math.random(), no Date.now()
+ *
+ * MOVEMENT TIER: T5 — Lifecycle (Army Reserve) (see MOVEMENT_AUTHORITY.md)
+ * ═══════════════════════════════════════════════════════════════
+ */
+
+/**
  * Army Reserve System — elite brigade loan management.
  *
  * Corps commanders request army-level elite brigades each turn.

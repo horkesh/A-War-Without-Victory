@@ -1,4 +1,27 @@
 /**
+ * ═══════════════════════════════════════════════════════════════
+ * OWNERSHIP: Execution-Only
+ * DOMAIN:    Single-hop movement application — adjacent OSID moves
+ * ═══════════════════════════════════════════════════════════════
+ *
+ * DECIDES:   Nothing — validates adjacency and applies the order only
+ * WRITES:    location_osid (adjacent OSID move), clears brigade_movement_orders on move
+ * READS:     brigade_movement_orders (no stance / non-column orders)
+ * MUST NOT:  decide destination — only validate adjacency and apply
+ *
+ * UPSTREAM:  bot_brigade_ai_osid.ts (T2 issues orders), commander_march_correction.ts (T6 fixes)
+ * DOWNSTREAM: entrenchment state, sector coverage checks
+ *
+ * TRUTH INVARIANTS:
+ * - Only moves to adjacent OSIDs with a political controller (no teleportation)
+ * - Resets entrenchment_turns on move; increments for stationary deployed brigades
+ * - Never imports from commander/ — execution must not depend on strategic intent
+ *
+ * MOVEMENT TIER: T3 — Execution (Single-Hop Movement) (see MOVEMENT_AUTHORITY.md)
+ * ═══════════════════════════════════════════════════════════════
+ */
+
+/**
  * War phase: Apply brigade movement orders (OSID model).
  *
  * Valid moves: (a) stay; (b) move to adjacent OSID with a controller.

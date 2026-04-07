@@ -156,5 +156,7 @@ export interface Scenario {
      * Keys: corps_id (e.g. "vrs_posavina"). Values: OSID list.
      */
     must_hold_osids_by_corps?: Record<string, string[]>;
+    /** Per-corps comms quality override for scenarios with specific radio/comms constraints. */
+    comms_override_by_corps?: Record<string, { before_turn: number; mode: 'radio' | 'full' }>;
 }
 
