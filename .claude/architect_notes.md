@@ -260,6 +260,11 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - Packaging rule: when runtime already assumes a packaged `resources/` layout, codify that exact layout under one guarded builder contract instead of leaving future installer work to guess the file-copy story. `package.json` now owns that layout explicitly.
 - Scope discipline matters: this lane productized an unsigned Windows `dir` target and made packaged mode real without pretending installer signing, publishing, or cross-platform packaging are already solved.
 
+**Closed: Packaged Desktop Runtime Smoke + Unpacked Launch Probe (2026-04-07)**
+- Once a packaged artifact contract exists, the next confidence step is to probe the packaged executable itself in packaged mode rather than inferring runtime truth from file layout or a successful `electron-builder` run.
+- Accepted runtime line: `desktop:package:probe` now sits on top of `desktop:package:dir` and launches the unpacked packaged executable in a dedicated probe mode. The probe verifies packaged resource resolution, baked startup snapshot loading through `startNewCampaign(...)`, and packaged map-server routing.
+- Probe rule: success output should stay deterministic and machine-readable. Runtime probes must emit one stable manifest and avoid relying on random-port chatter or incidental logs as the success signal.
+
 ### Warroom React Shell Recovery / Feature Parity — OPEN
 
 - **Problem:** The rebuilt React-owned Warroom shell is functional enough to launch and hand off correctly, but it remains materially behind the older corktable-era experience.
@@ -317,6 +322,11 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - The live seam was narrower than the earlier reporting lanes but still real: `DiplomacyModal.renderWashingtonTracker()` computed RS territory share by reading `gameState.political.political_controllers` directly inside the modal.
 - Accepted boundary after cleanup: live diplomatic/Warroom data should enter through `extractWarData(...)` first, with only documented narrow exceptions for shell entry points (`meta.*`, `getPlayerFaction()`) and the HRHB own-faction `capability_profile` read. Exceptions must be called out inline with a "do not expand" guard.
 - Reusable lesson: if a Warroom shell needs another publicly observable fact that is not sensitive to fog-of-war, extend `WarDataSnapshot` with a player-safe extractor (here `observedEnemyTerritoryPct`) instead of adding another ad hoc raw-state loop to the modal.
+
+**Closed: Commander Explanation Surfaces Phase 6 - IVP Boundary Seam (2026-04-07)**
+- The remaining IVP seam was architectural, not visual: `ClickableRegionManager.openCommandBriefingModal()` was still interpreting `political.*` directly, and `IvpBreakdownModal` still read `political.*` / `military.*` without a declared boundary.
+- Accepted boundary after cleanup: IVP data now enters Warroom through `extractWarData(...).ivpState`, and war-phase modals must either be snapshot-first with a `DATA BOUNDARY:` contract or carry an explicit documented exception. `CommandBriefingModal` keeps the narrow `military.last_briefing` exception and now explains why.
+- Reusable lesson: shell coordinators are part of the truth boundary too. If a footer button or modal handoff depends on live state, route it through the same player-safe snapshot contract instead of letting coordinator code peek into deep `GameState`.
 
 **Closed: Save/Load and Replay Deep Hardening (2026-04-07)**
 - Canonical desktop persistence rule: if `currentGameStateJson` is treated as the live authoritative save blob, every mutation path must round-trip through `deserializeState(...)` and `serializeState(...)`. Raw `JSON.parse(...)` / `JSON.stringify(...)` on write paths is not an acceptable shortcut because it bypasses canonical ordering, validation, and migration/default behavior.

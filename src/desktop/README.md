@@ -25,6 +25,11 @@ npm run desktop:release:check
 # Build the unpacked packaged-desktop artifact through the canonical guard path.
 npm run desktop:package:dir
 
+# Build the unpacked package and launch a headless runtime probe against the
+# packaged executable. This proves packaged boot/resource resolution without
+# opening the full UI.
+npm run desktop:package:probe
+
 # Run the desktop app (runs desktop:sim:build then Electron)
 npm run desktop
 ```
@@ -53,6 +58,11 @@ Sim runs in the main process via `dist/desktop/desktop_sim.cjs` (built by `npm r
 - `npm run desktop:sim:build` validates that artifact against canonical builder truth before bundling `dist/desktop/desktop_sim.cjs`.
 - `npm run desktop:release:check` is now the canonical shipped-build verification path. It runs the guarded desktop sim build plus the required map and Warroom bundles.
 - `npm run desktop:package:dir` is the canonical packaged-desktop contract. It cannot bypass `desktop:release:check`, and it packages the runtime files into the `resources/` layout that `electron-main.cjs` already expects.
+- `npm run desktop:package:probe` is the canonical packaged-runtime smoke. It first runs `desktop:package:dir`, then launches the unpacked packaged executable in a dedicated probe mode that verifies:
+  - packaged resource files exist at the expected `resources/` paths
+  - the packaged main process can load `dist/desktop/desktop_sim.cjs`
+  - the baked `apr_1992` startup snapshot can be consumed from packaged resources
+  - the packaged tactical-map HTTP server can serve `/` and the startup snapshot route
 - The current package productization target is an unsigned Windows `dir` build. Installer publishing, code signing, and store/distribution flow are still intentionally deferred.
 - If the artifact is stale or missing, the build aborts and instructs the user to run `npm run desktop:startup-snapshot:build`.
 - The builder remains the primary truth source; the baked startup snapshot is a one-way derived product artifact.

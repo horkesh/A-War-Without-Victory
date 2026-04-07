@@ -14,6 +14,7 @@ const { app, BrowserWindow, protocol, ipcMain, dialog, Menu } = _electronModule;
 const path = require('path');
 const fs = require('fs');
 const http = require('http');
+const RUNTIME_PROBE_MODE = process.env.AWWV_DESKTOP_RUNTIME_PROBE === '1';
 
 /** Project root (dev) or resources root (packaged). Used for data paths and desktop sim. */
 function getBaseDir() {
@@ -125,6 +126,95 @@ function getRunsDir() {
   return resourcePath('runs');
 }
 
+function assertReadableFile(filePath, label) {
+  let stat;
+  try {
+    stat = fs.statSync(filePath);
+  } catch (error) {
+    throw new Error(`${label} missing at ${filePath}: ${error.message || String(error)}`);
+  }
+  if (!stat.isFile()) {
+    throw new Error(`${label} is not a file at ${filePath}`);
+  }
+  return stat.size;
+}
+
+function fetchLocalText(url) {
+  return new Promise((resolve, reject) => {
+    const req = http.get(url, (res) => {
+      let body = '';
+      res.setEncoding('utf8');
+      res.on('data', (chunk) => {
+        if (body.length < 2048) body += chunk;
+      });
+      res.on('end', () => {
+        resolve({
+          statusCode: res.statusCode ?? 0,
+          body,
+        });
+      });
+    });
+    req.on('error', reject);
+    req.setTimeout(5000, () => {
+      req.destroy(new Error(`timeout fetching ${url}`));
+    });
+  });
+}
+
+async function runPackagedRuntimeProbe() {
+  if (!app.isPackaged) {
+    throw new Error('runtime probe must run against the packaged desktop artifact');
+  }
+
+  const requiredFiles = [
+    ['desktopSimBundle', path.join(getBaseDir(), 'dist', 'desktop', 'desktop_sim.cjs')],
+    ['mapIndex', path.join(getMapAppDir(), 'index.html')],
+    ['warroomIndex', path.join(getWarroomAppDir(), 'index.html')],
+    ['startupSnapshot', path.join(getDataDerivedDir(), 'startup', 'apr_1992_initial_save.json')],
+  ].map(([key, filePath]) => ({
+    key,
+    relative_path: path.relative(getBaseDir(), filePath).replace(/\\/g, '/'),
+    size_bytes: assertReadableFile(filePath, key),
+  })).sort((a, b) => a.key.localeCompare(b.key));
+
+  const sim = getDesktopSim();
+  const { state } = await sim.startNewCampaign(getBaseDir(), 'RBiH');
+  if ((state?.meta?.player_faction ?? null) !== 'RBiH') {
+    throw new Error(`startup probe expected player_faction=RBiH, got ${state?.meta?.player_faction ?? 'null'}`);
+  }
+
+  await startMapServer();
+  const [mapIndexResponse, snapshotResponse] = await Promise.all([
+    fetchLocalText(getMapServerUrl('/')),
+    fetchLocalText(getMapServerUrl('/data/derived/startup/apr_1992_initial_save.json')),
+  ]);
+
+  if (mapIndexResponse.statusCode !== 200) {
+    throw new Error(`packaged tactical map server returned ${mapIndexResponse.statusCode} for /`);
+  }
+  if (snapshotResponse.statusCode !== 200) {
+    throw new Error(`packaged tactical map server returned ${snapshotResponse.statusCode} for startup snapshot`);
+  }
+
+  const manifest = {
+    probe: 'awwv_desktop_runtime_probe',
+    mode: 'packaged',
+    files: requiredFiles,
+    map_server_checks: [
+      { route: '/', status: mapIndexResponse.statusCode },
+      { route: '/data/derived/startup/apr_1992_initial_save.json', status: snapshotResponse.statusCode },
+    ],
+    startup: {
+      phase: state?.meta?.phase ?? null,
+      player_faction: state?.meta?.player_faction ?? null,
+      recruitment_ready: Boolean(state?.military?.recruitment_state),
+      turn: state?.meta?.turn ?? null,
+    },
+  };
+
+  process.stdout.write(`AWWV_DESKTOP_RUNTIME_PROBE_OK ${JSON.stringify(manifest)}\n`);
+}
+
 /**
  * Local HTTP server for the tactical map.
  *
@@ -227,7 +317,9 @@ function startMapServer() {
   return new Promise((resolve) => {
     server.listen(0, '127.0.0.1', () => {
       mapServerPort = server.address().port;
-      console.log(`Tactical map server: http://127.0.0.1:${mapServerPort}`);
+      if (!RUNTIME_PROBE_MODE) {
+        console.log(`Tactical map server: http://127.0.0.1:${mapServerPort}`);
+      }
       resolve(mapServerPort);
     });
   });
@@ -572,6 +664,18 @@ function registerProtocol() {
 }
 
 app.whenReady().then(() => {
+  if (RUNTIME_PROBE_MODE) {
+    runPackagedRuntimeProbe()
+      .then(() => {
+        app.exit(0);
+      })
+      .catch((error) => {
+        process.stderr.write(`AWWV_DESKTOP_RUNTIME_PROBE_FAIL ${error.message || String(error)}\n`);
+        app.exit(1);
+      });
+    return;
+  }
+
   registerProtocol();
 
   // Phase 3: Play myself — load scenario, load state, advance turn

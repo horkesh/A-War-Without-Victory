@@ -24727,6 +24727,15 @@ Main Staff HQ was Han Pijesak, not Rogatica. Tracked for OOB correction pass.
 - **Verification:** targeted packaging/guardrail tests passed; `npm.cmd run desktop:startup-snapshot:check` passed; `npm.cmd run desktop:release:check` passed; `npm.cmd run desktop:package:dir` successfully produced `dist-packaged/win-unpacked`; full Vitest, typecheck, and build clean.
 - **Report:** `docs/40_reports/implemented/20260407_V08TO09_DESKTOP_PACKAGING_CONTRACT_PRODUCTIZATION.md`
 
+**[2026-04-07] v0.8-to-v0.9 Packaged Desktop Runtime Smoke + Unpacked Launch Probe COMPLETE**
+
+- **Summary:** Added a real packaged-runtime proof on top of the unpacked Windows packaging contract. `desktop:package:probe` now launches the unpacked packaged executable itself in packaged mode and verifies packaged resource resolution, baked April 1992 startup loading through `startNewCampaign(...)`, and tactical-map server routing from packaged resources.
+- **Runtime seam removed:** added `desktop:package:probe` in `package.json`; added dedicated probe mode to `src/desktop/electron-main.cjs` gated by `AWWV_DESKTOP_RUNTIME_PROBE=1`; added `tools/desktop_packaged_runtime_probe.mjs` to launch `dist-packaged/win-unpacked/A War Without Victory.exe`, require a stable success manifest, and fail loudly otherwise.
+- **Ownership after change:** `desktop:release:check` remains the shipped-build input gate; `desktop:package:dir` remains the canonical unpacked packaged-desktop assembly path; `desktop:package:probe` is now the canonical packaged-runtime smoke layered on top of that path. No second packaging or launch path was introduced.
+- **Hardening:** added `tests/desktop_packaged_runtime_probe.test.ts` covering package-script ownership, probe-mode ownership in `electron-main.cjs`, and the dedicated probe-runner contract. Successful probe manifest now proves `app.isPackaged`, packaged file presence, map-server HTTP 200 for `/` and the startup snapshot route, and canonical startup facts (`phase=war`, `player_faction=RBiH`, `turn=0`, `recruitment_ready=true`).
+- **Verification:** targeted probe/packaging tests passed; `npm.cmd run desktop:startup-snapshot:check` passed; `npm.cmd run desktop:release:check` passed; `npm.cmd run desktop:package:probe` passed with a valid packaged-runtime manifest; full Vitest reached 214/214 files and 2990/2990 tests; `npx.cmd tsc --noEmit -p tsconfig.json` and `npm.cmd run build` clean.
+- **Report:** `docs/40_reports/implemented/20260407_V08TO09_PACKAGED_DESKTOP_RUNTIME_SMOKE.md`
+
 **[2026-04-07] v0.8-to-v0.9 Commander Explanation Surfaces Phase 4 - MagazineModal Narrative Narrowing COMPLETE**
 
 - **Summary:** Closed the last raw-state bypass in Warroom reporting surfaces. `MagazineModal.ts` no longer reads `gameState.political.*` directly during its Phase 0 branch; the modal is now uniformly bounded by the player-safe snapshot contract.
@@ -24744,3 +24753,12 @@ Main Staff HQ was Han Pijesak, not Rogatica. Tracked for OOB correction pass.
 - **Hardening:** added a class-level `DATA BOUNDARY:` contract comment plus an inline "do not expand" guard on the accepted HRHB exception; added `tests/diplomacy_modal_boundary.test.ts` covering boundary comments, forbidden imports, absence of the W5 raw-state seam, exception documentation, functional render, snapshot fraction correctness, and empty-state behavior.
 - **Verification:** targeted `DiplomacyModal` boundary tests passed; full Vitest reached 213/213 files and 2980/2980 tests; `npx.cmd tsc --noEmit -p tsconfig.json` and `npm.cmd run build` clean.
 - **Report:** `docs/40_reports/implemented/20260407_V08TO09_DIPLOMACY_MODAL_BOUNDARY_AUDIT.md`
+
+**[2026-04-07] v0.8-to-v0.9 Commander Explanation Surfaces Phase 6 - IVP Boundary Seam COMPLETE**
+
+- **Summary:** Closed the IVP shell/modal boundary seam. `extractWarData()` now owns `ivpState: IvpStateSnapshot`, `ClickableRegionManager.openCommandBriefingModal()` no longer reads `political.*` directly to decide whether to decorate the command briefing handoff, and `IvpBreakdownModal` now consumes IVP data exclusively through the player-safe snapshot contract.
+- **Boundary seam removed:** added `extractIvpState()` and `ivpState` to `src/ui/warroom/data/war_data_extractor.ts`; replaced raw `political.international_visibility_pressure` / `political.ivp_consequences_active` reads in `src/ui/warroom/ClickableRegionManager.ts` with `snap.ivpState.*`; removed three undocumented direct `political.*` / `military.*` reads from `src/ui/warroom/components/IvpBreakdownModal.ts`; documented the accepted `military.last_briefing` exception in `src/ui/warroom/components/CommandBriefingModal.ts`.
+- **Ownership after change:** IVP data now enters war-phase Warroom surfaces through `extractWarData(...).ivpState`, and war-phase shell/modal surfaces are either snapshot-first with `DATA BOUNDARY:` comments or carry an explicit documented exception. `CommandBriefingModal` keeps the narrow pre-computed packet exception; no undocumented raw `political.*` or `military.*` reads remain in war-phase Warroom surfaces.
+- **Hardening:** added `tests/ivp_breakdown_modal_boundary.test.ts` with 10 tests covering source-boundary rules, forbidden raw reads, `ivpState` correctness, and null-safe defaults.
+- **Verification:** full Vitest reached 214/214 files and 2990/2990 tests; `npx.cmd tsc --noEmit -p tsconfig.json` and `npm.cmd run build` clean.
+- **Report:** `docs/40_reports/implemented/20260407_V08TO09_IVP_BOUNDARY_SEAM.md`
