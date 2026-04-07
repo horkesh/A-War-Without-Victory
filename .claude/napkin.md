@@ -10,10 +10,12 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-04-07, v0.8.4 ALL PHASES CLOSED)
-**2946/2947 vitest (206 files, 1 pre-existing SRK deployment failure). v0.8.4 Phase F CLOSED 2026-04-07. All phases A–F complete. Next: v0.9 per MASTER_ROADMAP.md.**
+## Current State (2026-04-07, v0.8.x-final CLOSED)
+**2962/2962 vitest (209 files). v0.8.4 ALL PHASES CLOSED. v0.8.x-final Command Authority Cleanup CLOSED 2026-04-07 (commit b932a3e7). Next: v0.8-to-v0.9 simplification lane or v0.9 per MASTER_ROADMAP.md.**
+v0.8.x-final: 28 files annotated (T1-T6 movement authority tiers + canonical/transitional ownership blocks). MOVEMENT_AUTHORITY.md created. RS_BLITZ_PHASE_END_WEEK deleted; probe_exempt data-driven. comms_override_by_corps in scenario JSON. unresolvedSectorBrigades wired end-to-end (Codex #6). 3 new test suites (movement_authority_tiers/hardcoded_rail_audit/ui_adapter_boundary — 15 tests). Calibration n1359: 92.7%, 27/27 anchors, 6/6 benchmarks. Report: `docs/40_reports/implemented/20260407_V08X_FINAL_COMMAND_AUTHORITY_CLEANUP.md`. Deferred to v0.8-to-v0.9: Phase 5 diagnostics/SITREP unification; brigade_assignment.ts annotation (Codex branch conflict).
+**Architectural finding (v0.8.x-final):** commander_loop.ts has bounded T1 exception — writes brigade_movement_orders for surplus prepositioning. Documented in annotation; not a violation.
 DRINA investigation complete (n1358): root cause proven (absent ARBiH Podrinje defensive ops; RS captures via multiple vectors). Fixes: Op Drina bratunac_vlasenica cerska_2+pobudje_2 removed; initial controllers fixed (jezestica_2, donje_zesce, obadi, sebiocina → RBiH); painted targets corrected (radovcici, sulice_2 → RBiH). Remaining DRINA mismatches accepted as calibration variance — require ARBiH Cerska/Bratunac/Višegrad/Foča defensive ops. Report: `docs/40_reports/implemented/20260407_DRINA_CALIBRATION_INVESTIGATION.md`.
-**n1358: 93.6%, 27/27 anchors, 6/6 benchmarks. hash: 0ba9f29f00f9d423.**
+**n1359: 92.7%, 27/27 anchors, 6/6 benchmarks.** (n1358: 93.6%, 27/27, hash: 0ba9f29f00f9d423)
 n1323 last ATH combat-calibration baseline: 94.0%, 27/27 anchors, 6/6 benchmarks, 74 battles. hash: b3355614a82d13d7.
 Previous ATH: n1315: 94.3%, 27/27. Previous: n1302: 93.7%, 25/25.
 Commander Intelligence Overhaul (n1294–1301): must_hold 1.5× garrison (Brcko/Doboj), org readiness gate (zero main_effort → defensive), op scale cap by main_effort_count, enemy_concentration_zones from intel picture, coordination ±4%/pt officer competence, strength-based opportunity target ranking.
