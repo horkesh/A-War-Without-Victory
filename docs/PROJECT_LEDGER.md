@@ -24798,3 +24798,20 @@ Main Staff HQ was Han Pijesak, not Rogatica. Tracked for OOB correction pass.
 - **Hardening:** added `tests/newspaper_modal_officer_boundary.test.ts` with 13 tests covering forbidden raw military reads, boundary comments, `officerNamesById` correctness, and null-safe snapshot behavior.
 - **Verification:** full Vitest reached 216/216 files and 3016/3016 tests; `npx.cmd tsc --noEmit -p tsconfig.json` and `npm.cmd run build` clean.
 - **Report:** `docs/40_reports/implemented/20260407_V08TO09_NEWSPAPER_MODAL_OFFICER_BOUNDARY.md`
+
+**[2026-04-08] v0.8-to-v0.9 Packaged Desktop Multi-Window / Secondary Route Smoke COMPLETE**
+
+- **Summary:** Strengthened the canonical packaged-runtime probe from single-window proof to real multi-window proof. `desktop:package:probe` now requires the packaged tactical-map secondary `BrowserWindow` to reach `did-finish-load` on a deterministic operational route in addition to the initial Warroom window.
+- **Secondary-window seam removed:** `src/desktop/electron-main.cjs` now owns deterministic tactical-map route construction via `getTacticalMapWindowUrl(mode)`, removes the old `Date.now()` cache-buster from the tactical-map window path, and extends the packaged-runtime probe to open the real secondary tactical-map window. Probe mode now also owns the minimal IPC needed by packaged tactical-map preload (`get-current-game-state`, `get-map-server-url`) and persists success through a deterministic packaged manifest fallback instead of relying only on GUI stdout timing.
+- **Ownership after change:** `desktop:package:probe` remains the sole packaged-runtime smoke path. It now proves packaged resources, startup snapshot loading, map serving, the initial Warroom window, and the deterministic secondary tactical-map operational route under one contract.
+- **Hardening:** extended `tools/desktop_packaged_runtime_probe.mjs` and `tests/desktop_packaged_runtime_probe.test.ts` so the probe must prove the secondary tactical-map window and manifest fallback. Updated `src/desktop/README.md` so the packaged-runtime contract truthfully documents the stronger multi-window proof.
+- **Verification:** `node --check src/desktop/electron-main.cjs`, targeted packaged-probe tests, `npm.cmd run desktop:startup-snapshot:check`, `npm.cmd run desktop:release:check`, `npm.cmd run desktop:package:probe`, full Vitest (216/216 files, 3018/3018 tests), `npx.cmd tsc --noEmit -p tsconfig.json`, and `npm.cmd run build` all passed.
+- **Report:** `docs/40_reports/implemented/20260407_V08TO09_PACKAGED_DESKTOP_MULTI_WINDOW_SECONDARY_ROUTE_SMOKE.md`
+
+**[2026-04-08] fix(ui): WarroomShellLayer desk_map shell handoff contract clarified**
+
+- **Summary:** Closed a real Warroom shell-cohesion seam in `src/ui/map/components/warroom/WarroomShellLayer.tsx`. The `regionToShellHandoff()` comment no longer falsely claims several explicitly mapped hotspots are "unmapped"; it now documents `desk_map` as the one intentionally unmapped region and explains the implicit `undefined -> warroomCommandStaysInRoom(undefined) -> false -> setAppScreen('game')` map-entry contract.
+- **Shell hardening:** added two tests to `tests/warroom_shell_layer.test.ts` proving `desk_map` intentionally returns `undefined` and that the full `onNavigate` path enters game view without applying a shell command. No new truth-owner or data-source path was introduced.
+- **Residual note:** `App.tsx`'s postMessage `handleShellHandoff` path still deserves a future gate before wiring `event-log` / `strategic-overview` into that channel, but it remains dormant today.
+- **Verification:** full Vitest reached 216/216 files and 3018/3018 tests; `npx.cmd tsc --noEmit -p tsconfig.json` and `npm.cmd run build` clean.
+- **Report:** `docs/40_reports/implemented/20260408_WARROOM_SHELL_DESK_MAP_CONTRACT.md`

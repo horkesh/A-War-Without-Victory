@@ -275,6 +275,11 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - Accepted window-load line: `desktop:package:probe` now requires the real initial Warroom route (`awwv://warroom/index.html`) to reach `did-finish-load` in packaged mode and records that proof under deterministic `window_checks`.
 - Keep the path singular: do not add a second UI-smoke command for packaged desktop if the existing packaged-runtime probe can be truthfully strengthened instead.
 
+**Closed: Packaged Desktop Multi-Window / Secondary Route Smoke (2026-04-08)**
+- Once packaged probing covers the initial window, the next confidence step is to prove a real secondary `BrowserWindow` path under that same canonical probe instead of inventing a separate tactical-map smoke command.
+- Accepted multi-window line: `desktop:package:probe` now proves the packaged tactical-map secondary window reaches `did-finish-load` on the deterministic operational route `/?desktop_window=operational`. The old `Date.now()` cache-buster is gone; tactical-map window URLs now come from one deterministic helper.
+- Multi-window probe rule: when packaged probing spans multiple real windows, the probe should own the minimal preload IPC contract explicitly and persist success via a deterministic manifest fallback rather than relying only on GUI stdout timing.
+
 ### Warroom React Shell Recovery / Feature Parity — OPEN
 
 - **Problem:** The rebuilt React-owned Warroom shell is functional enough to launch and hand off correctly, but it remains materially behind the older corktable-era experience.
@@ -347,6 +352,12 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - The remaining named war-phase modal seam was `NewspaperModal.getOfficerSuccessionLines()`: it still read `military.named_officer_data` and `military.formations` directly for officer and corps names even though the modal was otherwise a presentation surface.
 - Accepted boundary after cleanup: war-phase `NewspaperModal` now follows the same snapshot-first rule as the other Warroom modals. `extractWarData(...).officerNamesById` owns officer name lookup, and corps names are resolved through snapshot formation details rather than direct military-state reads.
 - `WarDataSnapshot.officerNamesById` is now the canonical player-safe officer-name lookup for Warroom display surfaces. If another surface needs officer names, extend and consume the snapshot rather than reopening `named_officer_data` directly.
+
+### Warroom shell cohesion note — desk_map contract (2026-04-08)
+
+- `regionToShellHandoff()` in `src/ui/map/components/warroom/WarroomShellLayer.tsx` now truthfully documents `desk_map` as the one intentionally unmapped region. Returning `undefined` there is load-bearing: it drives `warroomCommandStaysInRoom(undefined) -> false -> setAppScreen('game')`, which is the map-entry transition.
+- Do not add a synthetic `{ kind: 'game-view' }` command unless "show map with no panel" becomes meaningfully distinct from today's implicit desk-map handoff.
+- Residual shell seam: `App.tsx`'s postMessage `handleShellHandoff` path still needs a gate before `event-log` or `strategic-overview` are wired into that channel. It is safe today only because `warroom.ts` does not post those command kinds.
 
 **Closed: Save/Load and Replay Deep Hardening (2026-04-07)**
 - Canonical desktop persistence rule: if `currentGameStateJson` is treated as the live authoritative save blob, every mutation path must round-trip through `deserializeState(...)` and `serializeState(...)`. Raw `JSON.parse(...)` / `JSON.stringify(...)` on write paths is not an acceptable shortcut because it bypasses canonical ordering, validation, and migration/default behavior.

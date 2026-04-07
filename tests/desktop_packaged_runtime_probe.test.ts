@@ -53,6 +53,26 @@ test('electron main exposes a packaged runtime probe mode instead of a second la
         /app\.whenReady\(\)\.then\(\s*\(\)\s*=>\s*\{\s*registerProtocol\(\);[\s\S]*if \(RUNTIME_PROBE_MODE\)/,
         'probe mode must register the awwv protocol before trying to load the packaged main window',
     );
+    assert.match(
+        source,
+        /getTacticalMapWindowUrl\(/,
+        'secondary tactical-map window URLs should be built through one deterministic helper',
+    );
+    assert.doesNotMatch(
+        source,
+        /Date\.now\(/,
+        'desktop tactical-map window routing should not depend on a timestamp cache buster',
+    );
+    assert.match(
+        source,
+        /packaged tactical map window/,
+        'packaged runtime probe should exercise the real secondary tactical-map window path',
+    );
+    assert.match(
+        source,
+        /desktop_window=operational/,
+        'secondary tactical-map probe should use a deterministic operational route marker',
+    );
 });
 
 test('probe tool launches the unpacked packaged executable with the runtime probe env', async () => {
@@ -77,5 +97,15 @@ test('probe tool launches the unpacked packaged executable with the runtime prob
         source,
         /window_checks[\s\S]*awwv:\/\/warroom\/index\.html[\s\S]*did-finish-load/s,
         'probe tool should fail if the packaged manifest omits the initial main-window load proof',
+    );
+    assert.match(
+        source,
+        /window_checks[\s\S]*desktop_window=operational[\s\S]*did-finish-load/s,
+        'probe tool should fail if the packaged manifest omits the tactical-map secondary window proof',
+    );
+    assert.match(
+        source,
+        /awwv_desktop_runtime_probe_manifest\.json/,
+        'probe tool should have a deterministic packaged-manifest fallback instead of relying only on GUI stdout',
     );
 });

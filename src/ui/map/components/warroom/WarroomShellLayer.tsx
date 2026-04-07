@@ -44,8 +44,15 @@ const CANVAS_H = 1536;
 
 /**
  * Maps a Warroom region ID to the corresponding ShellHandoffCommand.
- * Returns undefined for regions without a React shell equivalent
- * (e.g. calendar, strategic map, diplomacy, radio — handled by warroom.ts).
+ * Returns undefined for regions that intentionally navigate to the game view
+ * (tactical map) without opening a specific panel — the undefined return value
+ * propagates to onNavigate, which calls warroomCommandStaysInRoom(undefined) → false
+ * → setAppScreen('game'), showing the map.
+ *
+ * Unmapped regions (intentional — navigate to game/map view):
+ *   desk_map — clicking the desk map shows the tactical map (game screen).
+ *
+ * All other known hotspots are explicitly mapped below.
  *
  * Exported for unit testing.
  */

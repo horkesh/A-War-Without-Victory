@@ -126,6 +126,11 @@ function getRunsDir() {
   return resourcePath('runs');
 }
 
+function getRuntimeProbeManifestPath() {
+  const probeDir = app.isPackaged ? path.dirname(process.execPath) : getBaseDir();
+  return path.join(probeDir, 'awwv_desktop_runtime_probe_manifest.json');
+}
+
 function assertReadableFile(filePath, label) {
   let stat;
   try {
@@ -216,6 +221,12 @@ function waitForWindowLoad(win, expectedUrl, label) {
   });
 }
 
+function getTacticalMapWindowUrl(mode = 'operational') {
+  const targetPath = mode === 'sandbox' ? '/tactical_sandbox.html' : '/';
+  const query = mode === 'sandbox' ? '?desktop_window=sandbox' : '?desktop_window=operational';
+  return `${getMapServerUrl(targetPath)}${query}`;
+}
+
 function createMainWindow(options = {}) {
   const { show = true, openDevTools = true } = options;
   const warroomUrl = 'awwv://warroom/index.html';
@@ -289,6 +300,32 @@ function createMainWindow(options = {}) {
   return win;
 }
 
+function createTacticalMapWindow(options = {}) {
+  const { mode = 'operational', show = true } = options;
+  const targetUrl = getTacticalMapWindowUrl(mode);
+
+  const win = new BrowserWindow({
+    width: 1400,
+    height: 900,
+    show,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.cjs'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+  win.loadURL(targetUrl);
+  win.on('closed', () => {
+    if (tacticalMapWindow === win) tacticalMapWindow = null;
+  });
+  win.webContents.on('did-finish-load', () => {
+    if (currentGameStateJson) {
+      win.webContents.send('game-state-updated', currentGameStateJson);
+    }
+  });
+  return { win, targetUrl };
+}
+
 async function runPackagedRuntimeProbe() {
   const warroomUrl = 'awwv://warroom/index.html';
   if (!app.isPackaged) {
@@ -327,7 +364,17 @@ async function runPackagedRuntimeProbe() {
 
   const probeWindow = createMainWindow({ show: false, openDevTools: false });
   const windowLoad = await waitForWindowLoad(probeWindow, warroomUrl, 'packaged main window');
-  probeWindow.destroy();
+
+  const { win: mapProbeWindow, targetUrl: tacticalMapUrl } = createTacticalMapWindow({
+    mode: 'operational',
+    show: false,
+  });
+  const tacticalWindowLoad = await waitForWindowLoad(
+    mapProbeWindow,
+    tacticalMapUrl,
+    'packaged tactical map window',
+  );
+  mapProbeWindow.destroy();
 
   const manifest = {
     probe: 'awwv_desktop_runtime_probe',
@@ -349,10 +396,18 @@ async function runPackagedRuntimeProbe() {
         status: 'did-finish-load',
         title: windowLoad.title,
       },
+      {
+        route: tacticalMapUrl,
+        status: 'did-finish-load',
+        title: tacticalWindowLoad.title,
+      },
     ],
   };
 
-  process.stdout.write(`AWWV_DESKTOP_RUNTIME_PROBE_OK ${JSON.stringify(manifest)}\n`);
+  fs.writeFileSync(getRuntimeProbeManifestPath(), `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
+  console.log(`AWWV_DESKTOP_RUNTIME_PROBE_OK ${JSON.stringify(manifest)}`);
+  mapProbeWindow.destroy();
+  probeWindow.destroy();
 }
 
 /**
@@ -469,6 +524,49 @@ function getMapServerUrl(extraPath) {
   return `http://127.0.0.1:${mapServerPort}${extraPath || '/'}`;
 }
 
+function registerIpcHandler(channel, handler) {
+  ipcMain.removeHandler(channel);
+  ipcMain.handle(channel, handler);
+}
+
+async function resolveMapServerBaseUrl() {
+  // Prefer Vite dev map when running. Vite may use 3003, 3004... if 3002 is in use.
+  // Skip the port our built server uses so we never mistake it for dev.
+  const portsToTry = [3002, 3003, 3004, 3005];
+  for (const port of portsToTry) {
+    if (port === mapServerPort) continue; // built server is on this port
+    const devMapBase = `http://127.0.0.1:${port}`;
+    try {
+      const res = await new Promise((resolve, reject) => {
+        const req = http.get(`${devMapBase}/index.html`, (r) => {
+          let body = '';
+          r.on('data', (chunk) => { if (body.length < 500) body += chunk.toString(); });
+          r.on('end', () => resolve({ statusCode: r.statusCode, body }));
+          r.on('error', reject);
+        });
+        req.on('error', reject);
+        req.setTimeout(2000, () => { req.destroy(); reject(new Error('timeout')); });
+      });
+      // Vite dev serves raw index.html with script src="/main.tsx"; built serves hashed /assets/
+      const isViteDev = res && res.statusCode === 200 && res.body && res.body.includes('main.tsx');
+      if (isViteDev) {
+        if (!RUNTIME_PROBE_MODE) {
+          console.log(`[AWWV] Map: using dev server at ${devMapBase}`);
+        }
+        return devMapBase;
+      }
+    } catch (_) { /* try next port */ }
+  }
+  const built = mapServerPort ? getMapServerUrl('/') : null;
+  if (built && !RUNTIME_PROBE_MODE) console.log(`[AWWV] Map: using built server at ${built}`);
+  return built;
+}
+
+function registerProbeSafeIpcHandlers() {
+  registerIpcHandler('get-current-game-state', async () => currentGameStateJson);
+  registerIpcHandler('get-map-server-url', async () => resolveMapServerBaseUrl());
+}
+
 function showScenarioDialog(win) {
   return dialog.showOpenDialog(win || null, {
     title: 'Load scenario',
@@ -513,9 +611,7 @@ function createWindow() {
 }
 
 function openTacticalMapWindow(mode = 'operational') {
-  const targetPath = mode === 'sandbox' ? '/tactical_sandbox.html' : '/';
-  const cacheBuster = `v=${Date.now()}`;
-  const targetUrl = `${getMapServerUrl(targetPath)}${targetPath.includes('?') ? '&' : '?'}${cacheBuster}`;
+  const targetUrl = getTacticalMapWindowUrl(mode);
   if (tacticalMapWindow && !tacticalMapWindow.isDestroyed()) {
     if (tacticalMapWindow.webContents.getURL() !== targetUrl) {
       tacticalMapWindow.loadURL(targetUrl);
@@ -524,23 +620,8 @@ function openTacticalMapWindow(mode = 'operational') {
     return tacticalMapWindow;
   }
 
-  const win = new BrowserWindow({
-    width: 1400,
-    height: 900,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.cjs'),
-      contextIsolation: true,
-      nodeIntegration: false,
-    },
-  });
-  win.loadURL(targetUrl);
+  const { win } = createTacticalMapWindow({ mode, show: true });
   tacticalMapWindow = win;
-  win.on('closed', () => { tacticalMapWindow = null; });
-  win.webContents.on('did-finish-load', () => {
-    if (currentGameStateJson) {
-      win.webContents.send('game-state-updated', currentGameStateJson);
-    }
-  });
   return win;
 }
 
@@ -743,6 +824,7 @@ function registerProtocol() {
 
 app.whenReady().then(() => {
   registerProtocol();
+  registerProbeSafeIpcHandlers();
 
   if (RUNTIME_PROBE_MODE) {
     runPackagedRuntimeProbe()
@@ -1932,7 +2014,7 @@ app.whenReady().then(() => {
     return { ok: false, error: 'Warroom window not available' };
   });
 
-  ipcMain.handle('get-current-game-state', async () => currentGameStateJson);
+  registerIpcHandler('get-current-game-state', async () => currentGameStateJson);
 
   ipcMain.handle('open-tactical-map-window', async (_event, payload) => {
     try {
@@ -1944,36 +2026,7 @@ app.whenReady().then(() => {
     }
   });
 
-  ipcMain.handle('get-map-server-url', async () => {
-    // Prefer Vite dev map when running. Vite may use 3003, 3004... if 3002 is in use.
-    // Skip the port our built server uses so we never mistake it for dev.
-    const portsToTry = [3002, 3003, 3004, 3005];
-    for (const port of portsToTry) {
-      if (port === mapServerPort) continue; // built server is on this port
-      const devMapBase = `http://127.0.0.1:${port}`;
-      try {
-        const res = await new Promise((resolve, reject) => {
-          const req = http.get(`${devMapBase}/index.html`, (r) => {
-            let body = '';
-            r.on('data', (chunk) => { if (body.length < 500) body += chunk.toString(); });
-            r.on('end', () => resolve({ statusCode: r.statusCode, body }));
-            r.on('error', reject);
-          });
-          req.on('error', reject);
-          req.setTimeout(2000, () => { req.destroy(); reject(new Error('timeout')); });
-        });
-        // Vite dev serves raw index.html with script src="/main.tsx"; built serves hashed /assets/
-        const isViteDev = res && res.statusCode === 200 && res.body && res.body.includes('main.tsx');
-        if (isViteDev) {
-          console.log(`[AWWV] Map: using dev server at ${devMapBase}`);
-          return devMapBase;
-        }
-      } catch (_) { /* try next port */ }
-    }
-    const built = mapServerPort ? getMapServerUrl('/') : null;
-    if (built) console.log(`[AWWV] Map: using built server at ${built}`);
-    return built;
-  });
+  registerIpcHandler('get-map-server-url', async () => resolveMapServerBaseUrl());
 
   // --- Army Reserve IPC handlers ---
   ipcMain.handle('approve-reserve-request', async (_event, payload) => {
@@ -2315,6 +2368,7 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
+  if (RUNTIME_PROBE_MODE) return;
   app.quit();
 });
 

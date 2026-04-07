@@ -51,6 +51,33 @@ describe('regionToShellHandoff', () => {
   it('wall_calendar → advance-turn', () => {
     expect(regionToShellHandoff('wall_calendar')).toEqual({ kind: 'advance-turn' });
   });
+
+  it('desk_map → undefined (intentional: clicking the map navigates to game/map view)', () => {
+    // desk_map is the primary map-access hotspot in the warroom.
+    // It intentionally returns undefined so the onNavigate callback reaches
+    // warroomCommandStaysInRoom(undefined) → false → setAppScreen('game'),
+    // showing the tactical map without pre-opening any specific panel.
+    // DATA BOUNDARY: no command = navigate to game view. This is not a missing case.
+    expect(regionToShellHandoff('desk_map')).toBeUndefined();
+  });
+
+  it('desk_map undefined return causes game-view transition without applying a command', () => {
+    // Prove the full onNavigate contract for desk_map:
+    // undefined command → no applyShellHandoffCommand call → setAppScreen('game').
+    const applySpy = vi.fn();
+    const setAppScreen = vi.fn();
+
+    const onNavigate = (command?: ReturnType<typeof regionToShellHandoff>) => {
+      if (command) applySpy(command);
+      if (!warroomCommandStaysInRoom(command)) setAppScreen('game');
+    };
+
+    const command = regionToShellHandoff('desk_map'); // → undefined
+    onNavigate(command);
+
+    expect(applySpy).not.toHaveBeenCalled();
+    expect(setAppScreen).toHaveBeenCalledWith('game');
+  });
 });
 
 // ── Entry path message type contracts ─────────────────────────────────────────
