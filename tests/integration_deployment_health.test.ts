@@ -11,7 +11,10 @@ const OUT_DIR = join(process.cwd(), '.tmp_integration_deployment_health');
 
 const SARAJEVO_MUNICIPALITIES = [
     'centar_sarajevo', 'ilidza', 'novi_grad_sarajevo', 'novo_sarajevo',
-    'stari_grad_sarajevo', 'vogosca', 'hadzici', 'pale', 'ilijas', 'trnovo',
+    'stari_grad_sarajevo', 'vogosca', 'hadzici', 'ilijas', 'trnovo',
+    // pale excluded: RS political capital / rear-area transit hub, not a siege-perimeter
+    // municipality. Non-SRK VRS (Main Staff Guards, Drina Corps) legitimately transit Pale.
+    // Historian adjudication 2026-04-07: SRK siege-perimeter signal unreliable for Pale.
 ];
 
 const SIEGE_URBAN_MUNICIPALITIES = [

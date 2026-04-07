@@ -3,6 +3,31 @@
 
 ---
 
+### [Testing] Integration test geographic boundaries are historical claims — apply historian gate (2026-04-07) — NEW
+- **Context**: `SARAJEVO_MUNICIPALITIES` in `integration_deployment_health.test.ts` listed `'pale'` as a siege-perimeter municipality. Pale is the RS political capital, 15–20 km east of the siege perimeter. Non-SRK VRS units (Main Staff Guards, Drina Corps) legitimately transit Pale. The test had been wrong since creation; brigade drift into Pale OSIDs exposed it. Fix: removed `'pale'` from the list; kept the >80% SRK threshold unchanged. Historian adjudication (sr.wiki OOB source) made the decision provable.
+- **Wrong approach**: Adding `'pale'` to the Sarajevo siege list because it is "near Sarajevo." Any geographic intuition that hasn't been verified against sources is a guess.
+- **Right approach**: Before committing any municipality/OSID list in a test, ask: "Is every entry unambiguously part of the phenomenon being tested?" If unsure, route to the Historian role (ICTY-first source hierarchy).
+- **Do instead**: Treat test geographic boundary lists the same as OOB constants and peace plan splits — they are historical claims. Any list that hasn't been historian-reviewed is unverified.
+
+### [Process] "Pre-existing and unrelated" is NOT a lane-close condition (2026-04-07) — NEW
+- **Context**: DRINA commit `aa30dac8` documented "2946/2947 vitest (1 pre-existing SRK deployment failure unrelated to this change)" in its verification line and marked v0.8.4 Phase F CLOSED. The test remained failing. A dedicated correction session was required the next day to fix it. The "unrelated" judgment was also partially wrong — the test's geographic boundary was the root issue.
+- **Wrong approach**: Documenting a known failure as "pre-existing" in the commit message and closing the lane. Record-keeping is not resolution. The repo had 1 failing test and a CLOSED milestone at the same time — that is repo-truth drift.
+- **Right approach**: A lane is closed when and only when the test suite is 100% green. Options: (a) fix the failure in the same commit before closing, or (b) explicitly open a named follow-up ticket and do NOT mark the lane closed until green.
+- **Do instead**: If a test is failing at closeout, stop. Either fix it now or note "Lane remains OPEN until [ticket] is resolved." The cost of one extra fix is always less than the cost of a correction session.
+
+### [Testing] When a ratio test fails at the margin, check the denominator set before adjusting the threshold (2026-04-07) — NEW
+- **Context**: The test ">80% of VRS brigades in Sarajevo area belong to SRK" produced 6/8 = 0.75. First instinct was to lower the threshold to ≥0.70. Correct action: inspect what was in the 8-brigade set. Two brigades were in `pale` municipality — wrong boundary definition, not a wrong threshold. Removing `pale` from the list produced 6/6 = 1.0; threshold unchanged, test now meaningfully correct.
+- **Wrong approach**: Adjusting the threshold to accommodate the observed ratio. The threshold encodes a historical/design claim; lowering it to pass a failing test destroys the signal.
+- **Right approach**: When a percentage/ratio test fails within ~10pp of its threshold: (1) enumerate who is in the denominator set, (2) verify each member belongs there, (3) only then consider whether the threshold itself needs adjustment.
+- **Do instead**: Add a `console.log` to the test (or read it — the test already logs non-SRK members) and inspect the denominator before touching the threshold. The set is more likely wrong than the threshold.
+
+### [Process] Historian adjudication is the right tool for test boundary disputes (2026-04-07) — NEW
+- **Context**: After finding that `rs_1st_guards_motorized` (vrs_main_staff) and `rs_visegrad_brigade` (vrs_drina) were in Pale OSIDs, the question was: is this a test bug or an engine bug? The Historian role (ICTY-first source hierarchy) adjudicated using sr.wiki brigade location data: the 1st Guards Motorized Brigade's base was Han Pijesak → Kalinovik, not Pale and not Rogatica. Pale is the RS political capital with legitimate non-SRK military traffic. Decision was provable, not intuitive.
+- **Side yield**: Historian also found a pre-existing OOB error — `rs_1st_guards_motorized` has `home_osid: op:rogatica:stara_gora` but should be `op:hanpijesak:han_pijesak_2`. Tagged P2 backlog.
+- **Wrong approach**: Resolving a geographic boundary dispute by intuition ("Pale is near Sarajevo") or by lowering the threshold.
+- **Right approach**: When a test encodes geography or OOB, route disputes to the Historian role. Provide the specific claim being tested and the specific units/locations involved. The Historian checks ICTY verdicts first, then sr.wiki brigade reports, then other sources.
+- **Do instead**: Before deciding whether a test failure is "test wrong" or "engine wrong" for any geographic/OOB assertion, dispatch the Historian with the specific disputed claim. The Historian's answer is authoritative and often surfaces secondary findings (OOB errors, wrong home_osid assignments) as a bonus.
+
 ### [Process] Phased migration with flag-gate → final-deletion-pass is the correct pattern for large UI refactors (2026-04-04) — NEW
 - **Context**: Warroom React migration shipped across 4 commits: implement behind `REACT_SHELL_ENABLED` flag (waves 1–3, each independently testable) → final deletion pass removes 483 lines of canvas room code + deletes the flag itself. Zero flag residue. Each wave was a safe checkpoint; the final pass was atomic closure.
 - **Wrong approach**: Big-bang replacement (a single commit swapping the entire rendering path risks breaking prod if anything is wrong); or permanent dual-path (flag lives forever, both paths need maintenance, tech debt accumulates silently).

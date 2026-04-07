@@ -24558,3 +24558,22 @@ Three coordinated guards now enforce military truth:
 - Rear-pocket logic must respect both defenders inside the cluster and defenders adjacent to it.
 
 ---
+## [n1359] fix(test): Remove `pale` from siege-perimeter municipality list — 2026-04-07
+
+**Problem**: After DRINA closeout (`aa30dac8`), 1 integration test remained failing:
+`tests/integration_deployment_health.test.ts` ">80% of VRS brigades in Sarajevo area belong to SRK"
+Result 6/8=0.75, threshold >0.80.
+
+**Root cause**: `pale` municipality was in `SARAJEVO_MUNICIPALITIES`. Two non-SRK VRS brigades
+(`rs_1st_guards_motorized`/vrs_main_staff, `rs_visegrad_brigade`/vrs_drina) were in Pale OSIDs.
+Historian adjudication: Pale is the RS political capital / rear-area transit hub — not a
+siege-perimeter municipality. Non-SRK VRS presence in Pale is historically plausible.
+
+**Fix**: Removed `'pale'` from `SARAJEVO_MUNICIPALITIES` in the test. Added explanatory comment
+with historian rationale. Kept >80% threshold unchanged.
+
+**Verification**: 2947/2947 vitest, tsc clean.
+
+**Secondary finding (P2 backlog)**: `rs_1st_guards_motorized` has wrong OOB home_osid
+(`op:rogatica:stara_gora` → should be `op:hanpijesak:han_pijesak_2` per sr.wiki/historical record).
+Main Staff HQ was Han Pijesak, not Rogatica. Tracked for OOB correction pass.

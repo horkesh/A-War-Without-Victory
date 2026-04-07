@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pyrrhic Standup · 2026-04-06 · AWWV War Room</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Azeret+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:           #0c1018;
+  --bg2:          #101520;
+  --surface:      #161d2b;
+  --surface-hi:   #1d2840;
+  --surface-hi2:  #243050;
+  --border:       rgba(255,255,255,0.065);
+  --border-hi:    rgba(255,255,255,0.13);
+
+  --text:         #b8c8dc;
+  --text-bright:  #dce8f4;
+  --text-dim:     #4a5870;
+
+  --amber:        #c89830;
+  --amber-bright: #e0b040;
+  --amber-dim:    rgba(200,152,48,0.14);
+  --amber-border: rgba(200,152,48,0.35);
+
+  --green:        #46a868;
+  --green-bright: #5dc47c;
+  --green-dim:    rgba(70,168,104,0.13);
+  --green-border: rgba(70,168,104,0.32);
+
+  --red:          #c24040;
+  --red-bright:   #e05050;
+  --red-dim:      rgba(194,64,64,0.13);
+  --red-border:   rgba(194,64,64,0.32);
+
+  --blue:         #4080c4;
+  --blue-bright:  #5a9ae0;
+  --blue-dim:     rgba(64,128,196,0.13);
+  --blue-border:  rgba(64,128,196,0.32);
+
+  --orange:       #c47038;
+  --orange-dim:   rgba(196,112,56,0.13);
+  --orange-border:rgba(196,112,56,0.32);
+
+  --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-mono: 'Azeret Mono', 'Cascadia Code', Consolas, monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 13px; scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  background-image:
+    radial-gradient(ellipse 100% 50% at 50% 0%, rgba(200,152,48,0.05) 0%, transparent 55%),
+    radial-gradient(circle, rgba(255,255,255,0.018) 1px, transparent 1px);
+  background-size: 100% 100%, 28px 28px;
+  color: var(--text);
+  line-height: 1.6;
+  padding: 32px 40px 80px;
+}
+
+/* ─── LAYOUT ─── */
+.wrap {
+  max-width: 1380px; margin: 0 auto;
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 0 44px;
+}
+.main { min-width: 0; }
+
+/* ─── TOC ─── */
+.toc {
+  position: sticky; top: 32px; align-self: start;
+  padding: 14px 0;
+  grid-row: 1 / -1;
+  max-height: calc(100dvh - 64px);
+  overflow-y: auto;
+}
+.toc::-webkit-scrollbar { width: 2px; }
+.toc::-webkit-scrollbar-thumb { background: var(--surface-hi); }
+.toc-title {
+  font-family: var(--font-mono);
+  font-size: 0.62rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.15em;
+  color: var(--text-dim); padding-bottom: 10px; margin-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.toc a {
+  display: block; font-size: 0.75rem; color: var(--text-dim);
+  text-decoration: none; padding: 4px 8px;
+  border-radius: 4px; border-left: 2px solid transparent;
+  transition: all 0.15s; line-height: 1.4; margin-bottom: 1px;
+}
+.toc a:hover { color: var(--text); background: var(--surface); }
+.toc a.active { color: var(--amber-bright); border-left-color: var(--amber); }
+.toc-group { margin-top: 14px; }
+.toc-group-label {
+  font-family: var(--font-mono);
+  font-size: 0.58rem; color: var(--text-dim); letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 0 8px; margin-bottom: 4px;
+}
+
+/* ─── HEADER ─── */
+.page-hdr {
+  display: flex; align-items: baseline; justify-content: space-between;
+  flex-wrap: wrap; gap: 8px;
+  border-bottom: 1px solid var(--border-hi);
+  padding-bottom: 16px; margin-bottom: 28px;
+  animation: fadeUp 0.3s ease both;
+}
+.page-hdr-title {
+  font-family: var(--font-mono); font-size: 1.0rem; font-weight: 600;
+  color: var(--text-bright); letter-spacing: 0.04em;
+}
+.page-hdr-title .accent { color: var(--amber-bright); }
+.page-hdr-meta { font-size: 0.75rem; color: var(--text-dim); font-family: var(--font-mono); }
+.page-hdr-meta b { color: var(--text); }
+
+/* ─── KPI BAR ─── */
+.kpi-bar {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  gap: 10px; margin-bottom: 36px;
+}
+.kpi {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 6px; padding: 16px 16px 12px;
+  position: relative; overflow: hidden;
+  animation: fadeUp 0.35s ease both;
+}
+.kpi::after {
+  content: ''; position: absolute; inset: 0 0 auto 0;
+  height: 2px; border-radius: 1px;
+}
+.kpi.k-pass::after   { background: var(--green); }
+.kpi.k-warn::after   { background: var(--amber); }
+.kpi.k-crit::after   { background: var(--red); }
+.kpi.k-info::after   { background: var(--blue); }
+.kpi.k-orange::after { background: var(--orange); }
+.kpi-label { font-family: var(--font-mono); font-size: 0.62rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 7px; }
+.kpi-val {
+  font-family: var(--font-mono); font-size: 2.0rem; font-weight: 600;
+  line-height: 1; margin-bottom: 4px;
+}
+.kpi.k-pass   .kpi-val { color: var(--green-bright); }
+.kpi.k-warn   .kpi-val { color: var(--amber-bright); }
+.kpi.k-crit   .kpi-val { color: var(--red-bright); }
+.kpi.k-info   .kpi-val { color: var(--blue-bright); }
+.kpi.k-orange .kpi-val { color: var(--orange); }
+.kpi-sub { font-size: 0.70rem; color: var(--text-dim); }
+
+/* ─── SECTION HEADER ─── */
+.sec-hdr {
+  display: flex; align-items: center; gap: 10px;
+  margin: 40px 0 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-hi);
+  animation: fadeUp 0.4s ease both;
+}
+.sec-hdr:first-of-type { margin-top: 0; }
+.sec-num {
+  font-family: var(--font-mono); font-size: 0.65rem; font-weight: 600;
+  color: var(--amber); border: 1px solid var(--amber-border);
+  background: var(--amber-dim); padding: 2px 7px; border-radius: 3px;
+  letter-spacing: 0.08em;
+}
+.sec-title {
+  font-size: 0.85rem; font-weight: 700; color: var(--text-bright);
+  text-transform: uppercase; letter-spacing: 0.08em;
+}
+.sec-tag {
+  font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-dim); margin-left: auto;
+}
+
+/* ─── GRID HELPERS ─── */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.g4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+.mb16 { margin-bottom: 16px; }
+.mb24 { margin-bottom: 24px; }
+
+/* ─── CARDS ─── */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 6px; padding: 18px;
+  animation: fadeUp 0.4s ease both;
+}
+.card.c-green  { border-left: 3px solid var(--green); }
+.card.c-amber  { border-left: 3px solid var(--amber); }
+.card.c-red    { border-left: 3px solid var(--red); }
+.card.c-blue   { border-left: 3px solid var(--blue); }
+.card.c-orange { border-left: 3px solid var(--orange); }
+.card.c-hi     { background: var(--surface-hi); }
+
+.card-title {
+  font-size: 0.82rem; font-weight: 700; color: var(--text-bright);
+  margin-bottom: 10px; line-height: 1.4;
+}
+.card-body { font-size: 0.76rem; color: var(--text-dim); line-height: 1.7; }
+.card-body strong { color: var(--text); font-weight: 600; }
+.card-body code {
+  font-family: var(--font-mono); font-size: 0.70rem;
+  background: var(--surface-hi); padding: 1px 4px; border-radius: 3px;
+  color: var(--text-bright); white-space: nowrap;
+}
+.card-body ul { padding-left: 14px; }
+.card-body li { margin-bottom: 6px; }
+.card-body li::marker { color: var(--amber); }
+
+/* ─── PILLS / BADGES ─── */
+.pill {
+  display: inline-block; font-family: var(--font-mono);
+  font-size: 0.60rem; font-weight: 600;
+  padding: 2px 7px; border-radius: 20px;
+  text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;
+}
+.pill-green  { background: var(--green-dim);  color: var(--green-bright);  border: 1px solid var(--green-border); }
+.pill-amber  { background: var(--amber-dim);  color: var(--amber-bright);  border: 1px solid var(--amber-border); }
+.pill-red    { background: var(--red-dim);    color: var(--red-bright);    border: 1px solid var(--red-border); }
+.pill-blue   { background: var(--blue-dim);   color: var(--blue-bright);   border: 1px solid var(--blue-border); }
+.pill-orange { background: var(--orange-dim); color: var(--orange);        border: 1px solid var(--orange-border); }
+.pill-muted  { background: var(--surface-hi); color: var(--text-dim);      border: 1px solid var(--border-hi); }
+
+/* ─── GOOD / BAD / UGLY CALLOUT BARS ─── */
+.gbu-label {
+  font-family: var(--font-mono); font-size: 0.62rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 3px; display: inline-block; margin-bottom: 10px;
+}
+.label-good { background: var(--green-dim); color: var(--green-bright); border: 1px solid var(--green-border); }
+.label-bad  { background: var(--amber-dim); color: var(--amber-bright); border: 1px solid var(--amber-border); }
+.label-ugly { background: var(--red-dim);   color: var(--red-bright);   border: 1px solid var(--red-border); }
+
+/* ─── COMMIT TABLE ─── */
+.commit-list { display: flex; flex-direction: column; gap: 0; }
+.commit-row {
+  display: grid; grid-template-columns: 66px 1fr 90px;
+  gap: 10px; align-items: center;
+  padding: 6px 10px; border-bottom: 1px solid var(--border);
+  font-size: 0.73rem;
+  transition: background 0.12s;
+}
+.commit-row:hover { background: var(--surface-hi); }
+.commit-hash { font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-dim); }
+.commit-msg  { color: var(--text); overflow-wrap: break-word; min-width: 0; line-height: 1.4; }
+.commit-type { text-align: right; }
+
+/* ─── BULLET LIST ─── */
+.blist { list-style: none; padding: 0; }
+.blist li {
+  display: grid; grid-template-columns: 18px 1fr;
+  gap: 0 8px;
+  padding: 5px 0; border-bottom: 1px solid var(--border);
+  font-size: 0.76rem; line-height: 1.5;
+}
+.blist li:last-child { border-bottom: none; }
+.blist-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  margin-top: 5px; flex-shrink: 0;
+}
+.blist-content { color: var(--text); min-width: 0; overflow-wrap: break-word; }
+.blist-content .dim { color: var(--text-dim); font-size: 0.70rem; display: block; margin-top: 1px; }
+
+/* ─── PRIORITY CARDS ─── */
+.priority-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 20px;
+  animation: fadeUp 0.4s ease both;
+  position: relative; overflow: hidden;
+}
+.priority-card::before {
+  content: attr(data-num);
+  position: absolute; top: 12px; right: 14px;
+  font-family: var(--font-mono); font-size: 2.5rem; font-weight: 700;
+  color: rgba(255,255,255,0.04); line-height: 1;
+  pointer-events: none; user-select: none;
+}
+.priority-card.p-p0 { border-top: 3px solid var(--red); }
+.priority-card.p-p1 { border-top: 3px solid var(--amber); }
+.priority-card.p-p2 { border-top: 3px solid var(--green); }
+
+.pc-meta {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.pc-title { font-size: 0.88rem; font-weight: 700; color: var(--text-bright); margin-bottom: 10px; line-height: 1.4; }
+.pc-body  { font-size: 0.75rem; color: var(--text-dim); line-height: 1.7; }
+.pc-body strong { color: var(--text); font-weight: 600; }
+.pc-body code {
+  font-family: var(--font-mono); font-size: 0.68rem;
+  background: var(--surface-hi); padding: 1px 4px; border-radius: 3px; color: var(--text-bright);
+}
+.pc-footer {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border);
+}
+.pc-footer-label { font-family: var(--font-mono); font-size: 0.62rem; color: var(--text-dim); }
+.pc-footer-val   { font-family: var(--font-mono); font-size: 0.68rem; color: var(--text); }
+
+/* ─── WAR-OR-GAME SECTION ─── */
+.wog-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 14px; margin-bottom: 14px;
+}
+.wog-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 16px;
+  animation: fadeUp 0.4s ease both;
+}
+.wog-verdict {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: 0.70rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  margin-bottom: 10px;
+}
+.wog-verdict::before {
+  content: ''; width: 8px; height: 8px; border-radius: 50;
+  border-radius: 2px; display: inline-block;
+}
+.v-partial { color: var(--amber); }
+.v-partial::before { background: var(--amber); }
+.v-pass    { color: var(--green); }
+.v-pass::before    { background: var(--green); }
+.v-fail    { color: var(--red); }
+.v-fail::before    { background: var(--red); }
+.wog-title { font-size: 0.80rem; font-weight: 700; color: var(--text-bright); margin-bottom: 8px; line-height: 1.3; }
+.wog-body  { font-size: 0.73rem; color: var(--text-dim); line-height: 1.65; }
+.wog-body strong { color: var(--text); }
+
+/* ─── CALIBRATION SNAPSHOT ─── */
+.calib-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;
+}
+.snapshot-box {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 16px;
+  animation: fadeUp 0.4s ease both;
+}
+.snapshot-title { font-family: var(--font-mono); font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 12px; }
+.snap-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 5px 0; border-bottom: 1px solid var(--border);
+  font-size: 0.74rem;
+}
+.snap-row:last-child { border-bottom: none; }
+.snap-key { color: var(--text-dim); }
+.snap-val { font-family: var(--font-mono); font-weight: 600; }
+.snap-val.good  { color: var(--green-bright); }
+.snap-val.warn  { color: var(--amber-bright); }
+.snap-val.crit  { color: var(--red-bright); }
+.snap-val.info  { color: var(--blue-bright); }
+
+/* ─── TABLE ─── */
+.tbl { width: 100%; border-collapse: collapse; font-size: 0.74rem; }
+.tbl thead tr { background: var(--surface-hi); border-bottom: 1px solid var(--border-hi); }
+.tbl thead th { text-align: left; padding: 8px 12px; font-family: var(--font-mono); font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); white-space: nowrap; font-weight: 600; }
+.tbl tbody tr { border-bottom: 1px solid var(--border); }
+.tbl tbody tr:hover { background: var(--surface-hi); }
+.tbl tbody td { padding: 8px 12px; color: var(--text); vertical-align: top; line-height: 1.5; }
+.tbl tbody td:first-child { font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-dim); }
+
+/* ─── REAL WAR GAPS ─── */
+.gap-item {
+  display: grid; grid-template-columns: 32px 1fr;
+  gap: 0 12px; padding: 12px 0; border-bottom: 1px solid var(--border);
+}
+.gap-item:last-child { border-bottom: none; }
+.gap-num {
+  font-family: var(--font-mono); font-size: 0.65rem; font-weight: 700;
+  color: var(--amber); background: var(--amber-dim); border: 1px solid var(--amber-border);
+  border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.gap-content-title { font-size: 0.78rem; font-weight: 700; color: var(--text-bright); margin-bottom: 4px; }
+.gap-content-body  { font-size: 0.72rem; color: var(--text-dim); line-height: 1.6; }
+.gap-content-body strong { color: var(--text); }
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(7px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* Stagger */
+.kpi:nth-child(1){animation-delay:0.04s} .kpi:nth-child(2){animation-delay:0.08s}
+.kpi:nth-child(3){animation-delay:0.12s} .kpi:nth-child(4){animation-delay:0.16s}
+.kpi:nth-child(5){animation-delay:0.20s}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 1000px) {
+  body { padding: 0 0 60px; }
+  .wrap { grid-template-columns: 1fr; padding-top: 0; }
+  .toc {
+    position: sticky; top: 0; z-index: 200; max-height: none;
+    display: flex; gap: 4px; align-items: center; overflow-x: auto;
+    background: var(--bg2); border-bottom: 1px solid var(--border);
+    padding: 10px 20px; margin-bottom: 0; grid-row: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .toc::-webkit-scrollbar { display: none; }
+  .toc-title { display: none; }
+  .toc-group { display: contents; }
+  .toc-group-label { display: none; }
+  .toc a { white-space: nowrap; flex-shrink: 0; border-left: none; border-bottom: 2px solid transparent; border-radius: 4px 4px 0 0; padding: 6px 10px; font-size: 0.70rem; }
+  .main { padding: 20px 20px 0; }
+  .g3 { grid-template-columns: 1fr; }
+  .g2 { grid-template-columns: 1fr; }
+  .kpi-bar { grid-template-columns: 1fr 1fr 1fr; }
+  .calib-grid { grid-template-columns: 1fr; }
+  .wog-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .kpi-bar { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- TOC -->
+<nav class="toc" id="toc">
+  <div class="toc-title">Briefing</div>
+  <div class="toc-group">
+    <div class="toc-group-label">Phases</div>
+    <a href="#retro">01 — Retro</a>
+    <a href="#analysis">02 — Analysis</a>
+    <a href="#priorities">03 — Today</a>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-label">Retro</div>
+    <a href="#commits">Commits</a>
+    <a href="#gbu">Good/Bad/Ugly</a>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-label">Analysis</div>
+    <a href="#calib">Calibration</a>
+    <a href="#realwar">Real-War Gaps</a>
+    <a href="#wog">War-or-Game</a>
+  </div>
+  <div class="toc-group">
+    <div class="toc-group-label">Today</div>
+    <a href="#p1">P1 Catastrophe</a>
+    <a href="#p2">P2 Trend</a>
+    <a href="#p3">P3 Exhaustion</a>
+    <a href="#p4">P4 Contracts</a>
+    <a href="#p5">P5 Boljanic</a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- PAGE HEADER -->
+<div class="page-hdr">
+  <div class="page-hdr-title">
+    PYRRHIC WAR ROOM · <span class="accent">2026-04-06</span> · Daily Standup
+  </div>
+  <div class="page-hdr-meta">
+    v0.8.2 · n1344 · hash: <b>0e2fe633</b> · branch: <b>main</b>
+  </div>
+</div>
+
+<!-- KPI BAR -->
+<div class="kpi-bar">
+  <div class="kpi k-pass">
+    <div class="kpi-label">Calibration</div>
+    <div class="kpi-val">94.0%</div>
+    <div class="kpi-sub">n1323 · 27/27 anchors</div>
+  </div>
+  <div class="kpi k-pass">
+    <div class="kpi-label">Tests</div>
+    <div class="kpi-val">2661</div>
+    <div class="kpi-sub">2661/2661 · 185 files</div>
+  </div>
+  <div class="kpi k-info">
+    <div class="kpi-label">Phases Closed</div>
+    <div class="kpi-val">8</div>
+    <div class="kpi-sub">v0.8.1 ×6 + v0.8.2 ×6 (48h)</div>
+  </div>
+  <div class="kpi k-warn">
+    <div class="kpi-label">Open P1s</div>
+    <div class="kpi-val">9</div>
+    <div class="kpi-sub">ZEA · suspend · stale ssids</div>
+  </div>
+  <div class="kpi k-crit">
+    <div class="kpi-label">DRINA Drift</div>
+    <div class="kpi-val">−1.5pp</div>
+    <div class="kpi-sub">vs ATH · corridor freed brigades</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 1 — RETRO                                  -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div id="retro" class="sec-hdr">
+  <span class="sec-num">01</span>
+  <span class="sec-title">Yesterday's Retrospective</span>
+  <span class="sec-tag">48h · 30 commits · 2 milestones</span>
+</div>
+
+<!-- COMMITS -->
+<div id="commits" class="card mb24">
+  <div class="card-title" style="margin-bottom:14px">Commit Log — 48h Window</div>
+  <div class="commit-list">
+    <div class="commit-row" style="background:var(--surface-hi);border-radius:4px 4px 0 0">
+      <span style="font-family:var(--font-mono);font-size:0.60rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em">Hash</span>
+      <span style="font-size:0.60rem;color:var(--text-dim);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.08em">Message</span>
+      <span style="font-size:0.60rem;color:var(--text-dim);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.08em;text-align:right">Type</span>
+    </div>
+    <!-- feats -->
+    <div class="commit-row"><span class="commit-hash">30477ce6</span><span class="commit-msg">v0.8.2 phase 1 — political personality framework</span><span class="commit-type"><span class="pill pill-blue">feat</span></span></div>
+    <div class="commit-row"><span class="commit-hash">a7925d4c</span><span class="commit-msg">v0.8.2 phase 2 — political event decision engine</span><span class="commit-type"><span class="pill pill-blue">feat</span></span></div>
+    <div class="commit-row"><span class="commit-hash">7ec1c846</span><span class="commit-msg">v0.8.2 phase 3 — peace plan &amp; negotiation intelligence</span><span class="commit-type"><span class="pill pill-blue">feat</span></span></div>
+    <div class="commit-row"><span class="commit-hash">c36b4f9d</span><span class="commit-msg">v0.8.2 phase 4 — patron phone calls + territory_trend</span><span class="commit-type"><span class="pill pill-blue">feat</span></span></div>
+    <div class="commit-row"><span class="commit-hash">8198fc05</span><span class="commit-msg">v0.8.2 phase 5a — RBiH O-S tactical acceptance branch</span><span class="commit-type"><span class="pill pill-blue">feat</span></span></div>
+    <div class="commit-row"><span class="commit-hash">5335e766</span><span class="commit-msg">v0.8.2 phase 5c — Holbrooke 1995 shuttle diplomacy events</span><span class="commit-type"><span class="pill pill-blue">feat</span></span></div>
+    <div class="commit-row"><span class="commit-hash">2e5f35b7</span><span class="commit-msg">v0.8.2 phase 6 — per-plan RS floors, patron immunity, HRHB Washington</span><span class="commit-type"><span class="pill pill-blue">feat</span></span></div>
+    <div class="commit-row"><span class="commit-hash">dfebfdd9–83190aa7</span><span class="commit-msg">v0.8.1 commander intelligence — phases 1–6 (milestone closeout)</span><span class="commit-type"><span class="pill pill-blue">feat</span></span></div>
+    <!-- fixes -->
+    <div class="commit-row"><span class="commit-hash">679a0aaa</span><span class="commit-msg">fix: correct O-S proposed territorial split (RS 30 → 52)</span><span class="commit-type"><span class="pill pill-amber">fix</span></span></div>
+    <div class="commit-row"><span class="commit-hash">92bc67ad</span><span class="commit-msg">fix: correct VOPP proposed territorial split (RS 30 → 43)</span><span class="commit-type"><span class="pill pill-amber">fix</span></span></div>
+    <div class="commit-row"><span class="commit-hash">be9e89df</span><span class="commit-msg">fix: resolve drina corridor coupling (hasAdjacentDefender)</span><span class="commit-type"><span class="pill pill-amber">fix</span></span></div>
+    <div class="commit-row"><span class="commit-hash">43e3a9b3</span><span class="commit-msg">fix: use full corridor subgraph for bridge checks</span><span class="commit-type"><span class="pill pill-amber">fix</span></span></div>
+    <div class="commit-row"><span class="commit-hash">6d8d6bb1</span><span class="commit-msg">fix: graduate supply readiness scoring</span><span class="commit-type"><span class="pill pill-amber">fix</span></span></div>
+    <div class="commit-row"><span class="commit-hash">3c91be46</span><span class="commit-msg">fix: gate anti-paralysis launch by supply</span><span class="commit-type"><span class="pill pill-amber">fix</span></span></div>
+    <div class="commit-row"><span class="commit-hash">0a9b47aa</span><span class="commit-msg">test: v0.8.2 phase 6 per-plan floor and patron immunity tests</span><span class="commit-type"><span class="pill pill-green">test</span></span></div>
+  </div>
+</div>
+
+<!-- GOOD / BAD / UGLY -->
+<div id="gbu" class="g3 mb24">
+
+  <div class="card c-green">
+    <div class="gbu-label label-good">The Good</div>
+    <ul class="blist">
+      <li>
+        <div class="blist-dot" style="background:var(--green)"></div>
+        <div class="blist-content"><strong>Two milestones closed in one session.</strong> v0.8.1 (Commander, 6 phases) + v0.8.2 Phases 1–6 (political system). No phase rework, no mid-cycle rollback.
+        </div>
+      </li>
+      <li>
+        <div class="blist-dot" style="background:var(--green)"></div>
+        <div class="blist-content"><strong>Historian gate held across all 6 phases.</strong> Every event description, plan split, and data constant ships with ICTY/Owen citations. 14 events, 3 plan splits.
+        </div>
+      </li>
+      <li>
+        <div class="blist-dot" style="background:var(--green)"></div>
+        <div class="blist-content"><strong>Multi-path guard lesson followed.</strong> <code>effects ?? []</code> added to both pipeline paths simultaneously. First compliance since the 2026-04-05 violation.
+        </div>
+      </li>
+      <li>
+        <div class="blist-dot" style="background:var(--green)"></div>
+        <div class="blist-content"><strong>4 new life lessons captured same-session.</strong> Lesson loop is functioning — errors discovered → lessons written → index updated.
+        </div>
+      </li>
+      <li>
+        <div class="blist-dot" style="background:var(--green)"></div>
+        <div class="blist-content"><strong>Drina coupling fixed structurally.</strong> <code>hasAdjacentDefender()</code> check, topology-aware, no railroad — event-based approaches correctly rejected.
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="card c-amber">
+    <div class="gbu-label label-bad">The Bad</div>
+    <ul class="blist">
+      <li>
+        <div class="blist-dot" style="background:var(--amber)"></div>
+        <div class="blist-content"><strong>O-S and VOPP splits shipped wrong in Phase 3.</strong> Two fix commits for <code>peace_plan_data.ts</code> within hours = historian gate didn't fire before initial commit.
+        </div>
+      </li>
+      <li>
+        <div class="blist-dot" style="background:var(--amber)"></div>
+        <div class="blist-content"><strong>Wrong constant had mechanical (not just display) consequences.</strong> RS:30 → routing from auto-reject to scoring — live in committed code before caught in follow-up review.
+        </div>
+      </li>
+      <li>
+        <div class="blist-dot" style="background:var(--amber)"></div>
+        <div class="blist-content"><strong>Movement order stance violation caught after the fact.</strong> <code>{ destination_sids }</code> without <code>stance: 'column'</code> — no static check catches this class of silent failure.
+        </div>
+      </li>
+      <li>
+        <div class="blist-dot" style="background:var(--amber)"></div>
+        <div class="blist-content"><strong>Warroom React shell remains open UX debt.</strong> Modal behavior, layout, corktable surface — flagged as "transitional rather than intentional" in architect notes. No fix this cycle.
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="card c-red">
+    <div class="gbu-label label-ugly">The Ugly</div>
+    <ul class="blist">
+      <li>
+        <div class="blist-dot" style="background:var(--red)"></div>
+        <div class="blist-content"><strong>Both O-S and VOPP had RS:30 simultaneously.</strong> Same placeholder, different wrong sources. No pre-commit contract check would have caught either.
+        </div>
+      </li>
+      <li>
+        <div class="blist-dot" style="background:var(--red)"></div>
+        <div class="blist-content"><strong>CG plan silently misfired for 3 phases.</strong> 96% referendum ignored because single 18pp floor exceeded 14pp CG gap. No test caught the routing error — discovery was architectural.
+        </div>
+      </li>
+      <li>
+        <div class="blist-dot" style="background:var(--red)"></div>
+        <div class="blist-content"><strong>No contract tests for <code>proposed_split</code> values.</strong> New lesson prescribes citation comment; machine-checkable assertion would be stronger. Class of error will recur.
+        </div>
+      </li>
+      <li>
+        <div class="blist-dot" style="background:var(--red)"></div>
+        <div class="blist-content"><strong>Exhaustion = 0 all 40 weeks.</strong> Political engine reads <code>situation_score</code> off a broken input. O-S RBiH tactical acceptance branch may never fire historically if exhaustion stays zero.
+        </div>
+      </li>
+    </ul>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 2 — GAME ANALYSIS                          -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div id="analysis" class="sec-hdr">
+  <span class="sec-num">02</span>
+  <span class="sec-title">Fresh Game Analysis</span>
+  <span class="sec-tag">Calibration · Real War · War-or-Game</span>
+</div>
+
+<!-- CALIBRATION SNAPSHOT -->
+<div id="calib" class="calib-grid mb24">
+
+  <div class="snapshot-box">
+    <div class="snapshot-title">Calibration Snapshot — n1323</div>
+    <div class="snap-row"><span class="snap-key">Area-weighted %</span><span class="snap-val good">94.0%</span></div>
+    <div class="snap-row"><span class="snap-key">ATH</span><span class="snap-val good">94.3% (n1315)</span></div>
+    <div class="snap-row"><span class="snap-key">Anchors</span><span class="snap-val good">27 / 27</span></div>
+    <div class="snap-row"><span class="snap-key">Benchmarks</span><span class="snap-val good">6 / 6</span></div>
+    <div class="snap-row"><span class="snap-key">Combat hash</span><span class="snap-val info">b3355614a82d13d7</span></div>
+    <div class="snap-row"><span class="snap-key">Political delta (n1344)</span><span class="snap-val good">0.0pp — inert by construction</span></div>
+    <div class="snap-row"><span class="snap-key">Open P0s</span><span class="snap-val warn">2 (DRINA, vrs_east ZEA)</span></div>
+    <div class="snap-row"><span class="snap-key">Open P1s</span><span class="snap-val warn">9</span></div>
+  </div>
+
+  <div class="snapshot-box">
+    <div class="snapshot-title">Top Calibration Risks</div>
+    <ul class="blist">
+      <li>
+        <div class="blist-dot" style="background:var(--red)"></div>
+        <div class="blist-content"><strong>DRINA −1.5pp unresolved.</strong> Freed Drina Corps brigades from corridor must_hold changes over-capture eastern OSIDs. No fix on board. Any corridor-adjacent change could deepen it.
+          <span class="dim">Latent since n1302 · no targeted fix committed</span>
+        </div>
+      </li>
+      <li>
+        <div class="blist-dot" style="background:var(--amber)"></div>
+        <div class="blist-content"><strong>Boljanic/Ozren pocket invisible to anchors.</strong> <code>petrovo_2</code> + <code>brijesnica_donja_2</code> not in anchor array — pocket collapses by w31 while 27/27 score looks clean. Adding anchors would expose active failure.
+          <span class="dim">Silent failure · would show on next anchor array refresh</span>
+        </div>
+      </li>
+      <li>
+        <div class="blist-dot" style="background:var(--amber)"></div>
+        <div class="blist-content"><strong>47% ZEA rate is structural fragility.</strong> Half of all ops fire with zero eligible attackers. Calibration partially reflects which ops fail silently. Any brigade availability change could shift the ghost-op distribution.
+          <span class="dim">COMBAT_MASTER P14 · op-scale cap compound failure</span>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- REAL WAR GAPS -->
+<div id="realwar" class="card c-orange mb24">
+  <div class="card-title">REAL_WAR_MASTER — Top 5 Unmodeled Historical Behaviors</div>
+  <div style="padding-top:4px">
+
+    <div class="gap-item">
+      <div class="gap-num">P0</div>
+      <div>
+        <div class="gap-content-title">HIST-GAP-1 — UNPROFOR absent as a mechanical entity</div>
+        <div class="gap-content-body">No UNPROFOR entity exists. Enclave supply computed from geographic connectivity only. 38,000 UN troops in BiH by 1993 were the <strong>primary supply route</strong> into all major enclaves. <strong>"Enclave dynamics are structurally wrong. Srebrenica in the sim is a pure military siege."</strong> Critical for any 52w+ run.</div>
+      </div>
+    </div>
+
+    <div class="gap-item">
+      <div class="gap-num">P0</div>
+      <div>
+        <div class="gap-content-title">HIST-GAP-2 — VRS "strangle not capture" enclave strategy absent</div>
+        <div class="gap-content-body">Bot always attacks when force ratio is positive. <strong>No <code>contain</code> directive type exists.</strong> VRS deliberately maintained Srebrenica/Goražde/Žepa/Bihać as unresolved for diplomatic bargaining leverage. If VRS has the numbers, it takes Srebrenica every time — destroying 1993–1994 strategic picture entirely. A historian would put the game down over this.</div>
+      </div>
+    </div>
+
+    <div class="gap-item">
+      <div class="gap-num">P1</div>
+      <div>
+        <div class="gap-content-title">Issue #46 — ARBiH has no catastrophe memory (P0 War-or-Game)</div>
+        <div class="gap-content-body">Seven different ARBiH brigades attack Doboj across w21–w40 at PR 0.24–0.40. <strong>503rd Brigade self-destructs at Bihać three weeks running.</strong> No per-OSID catastrophe gate. Drives consolidation att:def ratio to <strong>1.664</strong> (attackers taking 67% more casualties than defenders).</div>
+      </div>
+    </div>
+
+    <div class="gap-item">
+      <div class="gap-num">P1</div>
+      <div>
+        <div class="gap-content-title">Issue #47 — Faction exhaustion = 0 for all factions, all 40 weeks</div>
+        <div class="gap-content-body"><strong>"A 40-week war producing zero faction exhaustion at any point is not a war."</strong> No political collapse pressure, no attrition-driven behavior change. AWWV's design identity is "exhaustion, political collapse" — if exhaustion is broken, the core mechanic is broken. Also corrupts <code>situation_score</code> input to political engine.</div>
+      </div>
+    </div>
+
+    <div class="gap-item">
+      <div class="gap-num">P0</div>
+      <div>
+        <div class="gap-content-title">HIST-GAP-3 — Communications quality asymmetry absent</div>
+        <div class="gap-content-body">All three factions have identical information access. ARBiH communicated on captured JNA radios; VRS had JNA-inherited secure comms. <strong>No comms asymmetry exists anywhere in the engine.</strong> Partially addressed by BRIEF-GAP-5 (adjacent corps posture absent) but root structural issue unresolved.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- WAR-OR-GAME ASSESSMENT -->
+<div id="wog">
+  <div style="font-family:var(--font-mono);font-size:0.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);margin-bottom:14px">War-or-Game Assessment — Political Bot + Combat Engine</div>
+  <div class="wog-grid mb24">
+
+    <div class="wog-card" style="border-top:2px solid var(--amber)">
+      <div class="wog-verdict v-partial">Partial — Political Bot</div>
+      <div class="wog-title">Peace Plan Response Logic</div>
+      <div class="wog-body">Per-plan floors + patron immunity + Washington alignment branch are correctly modeled against ICTY records. A real diplomat would not find this absurd. <strong>Critical gap:</strong> patron calls are scalar (<code>patronOverrideAuthority</code>) with no mechanism for RS domestic blowback — the Pale faction's immunity to Milosevic is unrepresented. Patron model correct in direction, simplified in texture.</div>
+    </div>
+
+    <div class="wog-card" style="border-top:2px solid var(--red)">
+      <div class="wog-verdict v-fail">P0 — Combat Engine</div>
+      <div class="wog-title">ARBiH Meat-Grinder (Issue #46)</div>
+      <div class="wog-body">503rd Brigade attacks Bihać 3 weeks running, 1,774 men lost. Seven brigades attack Doboj at PR 0.24–0.40 across 19 weeks. <strong>"No real corps commander sends a fresh brigade against a known impenetrable position week after week."</strong> Most egregious behavioral failure in the sim. Inverts late-war casualty ratios to 1.664 att:def. Fix: per-OSID catastrophe gate in corps operation loop.</div>
+    </div>
+
+    <div class="wog-card" style="border-top:2px solid var(--red)">
+      <div class="wog-verdict v-fail">Most Dangerous Absence</div>
+      <div class="wog-title">VRS "Strangle Not Capture"</div>
+      <div class="wog-body">VRS deliberately did NOT capture Srebrenica/Goražde/Žepa when militarily capable. Enclaves were held as bargaining chips. <strong>Sim models a war of conquest when the actual war was partly a war of engineered hostage situations.</strong> Bot has no <code>contain</code> directive. This distinction becomes P0-blocking the moment any scenario extends past mid-1993.</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SECTION 3 — TODAY'S PRIORITIES                     -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div id="priorities" class="sec-hdr">
+  <span class="sec-num">03</span>
+  <span class="sec-title">Today's Priorities</span>
+  <span class="sec-tag">5 items · realism-first ordering</span>
+</div>
+
+<!-- PRIORITY CARDS -->
+<div class="g2 mb16">
+
+  <div id="p1" class="priority-card p-p0" data-num="01" style="animation-delay:.05s">
+    <div class="pc-meta">
+      <span class="pill pill-red">P0 · WAR-OR-GAME</span>
+      <span class="pill pill-muted">Combat Engine</span>
+    </div>
+    <div class="pc-title">Issue #46 — Per-OSID Catastrophe Memory Gate</div>
+    <div class="pc-body">
+      Add per-OSID catastrophe threshold to the corps operation loop. If N consecutive catastrophic outcomes at an OSID without intervening capture, suspend that objective.<br><br>
+      <strong>Why now:</strong> War-or-Game flags this as the single most egregious behavior. 503rd Brigade self-destructs at Bihać three consecutive weeks; seven brigades attack Doboj at PR 0.24–0.40 across 19 weeks. Directly inverts consolidation att:def ratio to <strong>1.664</strong>.<br><br>
+      <strong>Expected outcome:</strong> ARBiH stops burning manpower at known impenetrable positions. Consolidation-phase casualty ratios recover toward historical 0.55–0.70 range. DRINA regression may partially recover as freed ARBiH brigades redeploy.
+    </div>
+    <div class="pc-footer">
+      <span class="pc-footer-label">Owner:</span><span class="pc-footer-val">Gameplay Programmer</span>
+      <span class="pc-footer-label" style="margin-left:8px">Complexity:</span><span class="pc-footer-val">Moderate (adds state to op tracking, threshold calibration needed)</span>
+      <span class="pc-footer-label" style="margin-left:8px">Gate:</span><span class="pc-footer-val">tsc + vitest + 40w run + War-or-Game sign-off</span>
+    </div>
+  </div>
+
+  <div id="p2" class="priority-card p-p1" data-num="02" style="animation-delay:.10s">
+    <div class="pc-meta">
+      <span class="pill pill-amber">P1 · QUICK WIN</span>
+      <span class="pill pill-muted">~20 lines</span>
+    </div>
+    <div class="pc-title">BRIEF-GAP-6 — Wire recent_territory_change in assessCorps()</div>
+    <div class="pc-body">
+      Un-hardcode <code>recent_territory_change = 0</code> in <code>assessCorps()</code>. Read actual territory delta from <code>turn_summaries</code> or equivalent state field.<br><br>
+      <strong>Why now:</strong> Every corps CO is currently blind to whether they're advancing or retreating. A VRS corps losing OSIDs looks identical to one holding its line — same intel picture, same willingness to generate offensive ops. Root structural cause of the DRINA regression: Drina Corps cannot see it's been over-advancing.<br><br>
+      <strong>Expected outcome:</strong> Corps commanders consolidate when losing ground, press when gaining. DRINA ~1.5pp regression likely partially recovers. Highest behavioral return per line of code in the engine. Quick win with immediate calibration verification.
+    </div>
+    <div class="pc-footer">
+      <span class="pc-footer-label">Owner:</span><span class="pc-footer-val">Systems Programmer</span>
+      <span class="pc-footer-label" style="margin-left:8px">Complexity:</span><span class="pc-footer-val">Low (~20 lines, assess.ts)</span>
+      <span class="pc-footer-label" style="margin-left:8px">Gate:</span><span class="pc-footer-val">tsc + vitest + 40w run (DRINA delta primary benchmark)</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="g2 mb16">
+
+  <div id="p3" class="priority-card p-p1" data-num="03" style="animation-delay:.14s">
+    <div class="pc-meta">
+      <span class="pill pill-amber">P1 · DIAGNOSTIC FIRST</span>
+      <span class="pill pill-muted">Core Mechanic</span>
+    </div>
+    <div class="pc-title">Issue #47 — Diagnose and Repair Exhaustion = 0</div>
+    <div class="pc-body">
+      Diagnostic pass: determine whether exhaustion is (a) not computing, (b) computing but not writing to the weekly report field, or (c) calculating below threshold due to the known accounting bug. Then implement the targeted fix.<br><br>
+      <strong>Why now:</strong> The game's design identity is "exhaustion, political collapse, constrained agency." If exhaustion is perpetually zero, the political engine (v0.8.2 all 6 phases) reads <code>situation_score</code> off a broken input. The O-S RBiH tactical acceptance branch (<code>situation_score &lt; 50</code>) may never fire historically. A diagnostic to confirm root cause, then a bounded fix.<br><br>
+      <strong>Expected outcome:</strong> Exhaustion accumulates meaningfully by w20+. Faction behavior responds to attrition pressure. Political engine inputs reflect actual war state.
+    </div>
+    <div class="pc-footer">
+      <span class="pc-footer-label">Owner:</span><span class="pc-footer-val">Systems Programmer + Game Designer</span>
+      <span class="pc-footer-label" style="margin-left:8px">Complexity:</span><span class="pc-footer-val">Unknown until diagnostic — dispatch /systematic-debugging first</span>
+      <span class="pc-footer-label" style="margin-left:8px">Gate:</span><span class="pc-footer-val">tsc + vitest + 40w run with exhaustion metrics in output</span>
+    </div>
+  </div>
+
+  <div id="p4" class="priority-card p-p2" data-num="04" style="animation-delay:.18s">
+    <div class="pc-meta">
+      <span class="pill pill-green">P2 · DATA INTEGRITY</span>
+      <span class="pill pill-muted">~1 test file</span>
+    </div>
+    <div class="pc-title">Contract Tests for proposed_split Historical Values</div>
+    <div class="pc-body">
+      Add a test file asserting that every <code>proposed_split</code> entry in <code>peace_plan_data.ts</code> matches its cited historical value within ±2pp, and that a <code>// Source:</code> citation comment is present above each entry.<br><br>
+      <strong>Why now:</strong> Two incorrect constants shipped in Phase 3 and were discovered in Phases 5 and 6 respectively — both RS:30 placeholders. The new life lesson prescribes citation comments; a machine-checkable assertion would prevent recurrence. The class of error (constant that drives control-flow branch) is high-severity and currently unguarded.<br><br>
+      <strong>Expected outcome:</strong> Any future <code>proposed_split</code> change that would silently change routing behavior fails CI immediately. Citation comment requirement enforced at test time.
+    </div>
+    <div class="pc-footer">
+      <span class="pc-footer-label">Owner:</span><span class="pc-footer-val">QA Engineer</span>
+      <span class="pc-footer-label" style="margin-left:8px">Complexity:</span><span class="pc-footer-val">Low (test file, no production code changes)</span>
+      <span class="pc-footer-label" style="margin-left:8px">Gate:</span><span class="pc-footer-val">tsc + vitest (new test file must pass)</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="g2">
+
+  <div id="p5" class="priority-card p-p1" data-num="05" style="animation-delay:.22s">
+    <div class="pc-meta">
+      <span class="pill pill-amber">P1 · ANCHOR GAP</span>
+      <span class="pill pill-muted">Calibration Health</span>
+    </div>
+    <div class="pc-title">Boljanic/Ozren Pocket — Anchor Registration + Hold Directive</div>
+    <div class="pc-body">
+      Add <code>petrovo_2</code> and <code>brijesnica_donja_2</code> to <code>HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992</code>. Add <code>hold_osids</code> for Doboj to <code>vrs_1st_krajina</code> directive. Verify <code>arbih_3rd_corps</code> adjacency auto-generate from <code>petrovo_2</code> is constrained.<br><br>
+      <strong>Why now:</strong> The 27/27 anchor score is misleading — two Ozren pocket OSIDs that should be RS-held through w40 are not anchored. Pocket collapses to RBiH by w31 in current runs (historical: September 1995). Adding anchors will expose an active failure, but it's better to see it than to have a falsely clean scorecard.<br><br>
+      <strong>Expected outcome:</strong> Anchor score may drop from 27/27 to 25/27 (exposes the real state). Ozren pocket hold behavior becomes a visible benchmark. vrs_1st_krajina stops donating brigades to Doboj offensive operations.
+    </div>
+    <div class="pc-footer">
+      <span class="pc-footer-label">Owner:</span><span class="pc-footer-val">Scenario Creator</span>
+      <span class="pc-footer-label" style="margin-left:8px">Complexity:</span><span class="pc-footer-val">Low (data + scenario config, no engine changes)</span>
+      <span class="pc-footer-label" style="margin-left:8px">Gate:</span><span class="pc-footer-val">40w run with updated anchor array; accept score drop as truth signal</span>
+    </div>
+  </div>
+
+  <!-- Horizon item -->
+  <div class="card c-blue" style="animation-delay:.26s">
+    <div class="card-title" style="color:var(--blue-bright)">Horizon — Not Today, But Soon</div>
+    <div class="card-body">
+      <ul style="padding-left:14px">
+        <li style="margin-bottom:10px"><strong>VRS "strangle not capture" directive type</strong> — the most dangerous historical absence. Requires <code>contain</code> directive + enclave classification. Scope: 1–2 sprint lanes. Prerequisite for any scenario extending past mid-1993.</li>
+        <li style="margin-bottom:10px"><strong>UNPROFOR mechanical entity</strong> — supply route + mandate enforcement. Large scope. Required before 52w campaign is historically meaningful.</li>
+        <li style="margin-bottom:10px"><strong>v0.8.2 Phase 7 (Dayton)</strong> — plan definition, RS compliance under US military guarantee, RBiH acceptance under exhaustion. Gated on Phase 6 (now closed).</li>
+        <li><strong>Warroom React shell feature parity</strong> — corktable, modal behavior, campaign handoff. UX debt accumulating.</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+</div><!-- /main -->
+</div><!-- /wrap -->
+
+<script>
+// Active TOC link on scroll
+const sections = document.querySelectorAll('[id]');
+const tocLinks = document.querySelectorAll('.toc a');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      tocLinks.forEach(a => a.classList.remove('active'));
+      const active = document.querySelector(`.toc a[href="#${e.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

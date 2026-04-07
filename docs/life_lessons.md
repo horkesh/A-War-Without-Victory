@@ -1,8 +1,24 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-06. 213 lessons across 9 topic files.
+> Last restructured: 2026-04-07. 217 lessons across 9 topic files.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
+
+## New Lessons (2026-04-07)
+
+### [Testing] Integration test geographic boundaries are historical claims — apply historian gate — see `docs/life_lessons/process.md`
+- `SARAJEVO_MUNICIPALITIES` included `'pale'` (RS political capital, 20 km east of siege perimeter) without historian review. Non-SRK VRS transit through Pale is historically plausible. Test had been wrong since creation. Fix: remove `pale`; keep >80% threshold. Rule: any municipality/OSID list in a test is a historical claim — run it past the Historian role before committing.
+
+### [Process] "Pre-existing and unrelated" is NOT a lane-close condition — see `docs/life_lessons/process.md`
+- DRINA commit (`aa30dac8`) documented "1 pre-existing SRK deployment failure" and still closed Phase F. Required an unplanned correction session. Rule: repo truth = 100% green. Either fix in the same commit, or open a named ticket — do NOT mark the lane closed until green. "Pre-existing" is record-keeping, not resolution.
+
+### [Testing] When a ratio test fails at the margin, check the denominator set before adjusting the threshold — see `docs/life_lessons/process.md`
+- 6/8 = 0.75 failed >0.80. First instinct: lower threshold. Correct action: inspect the 8-brigade set. Two were in `pale` — wrong boundary, not wrong threshold. Rule: when a percentage test fails within 10pp of threshold, the set is more likely wrong than the threshold.
+
+### [Process] Historian adjudication is the right tool for test boundary disputes — see `docs/life_lessons/process.md`
+- When a test encodes geography or OOB, the Historian (ICTY-first source hierarchy) is the correct arbiter — not intuition or threshold-lowering. Used 2026-04-07: sr.wiki brigade data proved Guards Brigade base = Han Pijesak, not Rogatica. Also exposed a secondary OOB error (`rs_1st_guards_motorized` wrong `home_osid`).
+
+---
 
 ## New Lessons (2026-04-06)
 
@@ -86,11 +102,14 @@
 
 ## Recently Violated (always read these)
 
-### [Architecture] When a guard is added to one pipeline path, audit ALL paths — VIOLATED 2026-04-05, COMPLIED 2026-04-06 → VALIDATED PATTERN
-- Lane A added a drifted-brigade gate to Step 6b but not Step 8d. Both functions can produce cross-corps assignment. The gate at 6b was useless because 8d re-introduced the same outcome. Fixed 2026-04-05 — same gate pattern added to `rehomeUnassignedBrigadesToPhysicalSectorOwners`.
+### [Process] Validate expert diagnosis against run data BEFORE implementing the fix — VIOLATED 2026-04-07 (second instance) — see `docs/life_lessons/process.md`
+- Phase F DRINA investigation: subagent claimed "Op Teočak deleted" as the root cause — Op Teočak had NOT been deleted. Claim was deferred rather than immediately verified in code. Also violated in 2026-03-31 (trimming diagnosis). Two instances in two weeks: this pattern is an active threat. Require mechanistic verification ("what diagnostic field would change if this fix is correct?") before accepting any subagent root-cause claim.
 
-### [Architecture] Movement orders must declare stance explicitly — VIOLATED 2026-04-05 (by Fix B)
-- Fix B wrote prepositioning orders without `stance: 'column'`. Even if the order had fired, it would have been processed by the wrong movement system (single-hop adjacency instead of column march). Fixed 2026-04-05.
+### [Architecture] When a guard is added to one pipeline path, audit ALL paths — VALIDATED PATTERN (moved from Recently Violated 2026-04-07) — see `docs/life_lessons/architecture.md`
+- Violated 2026-04-05 (Step 6b guard without Step 8d), complied 2026-04-06, validated. No new violations in 72h window. Pattern confirmed: when adding a guard to prevent outcome X, grep for every function in the pipeline that can also produce X.
+
+### [Architecture] Movement orders must declare stance explicitly — ARCHIVED 2026-04-07 (no new violations)
+- Fixed 2026-04-05. No new violations. `stance: 'column'` required for multi-hop movement orders. Archived from active watch.
 
 ### [Calibration] Slot cap must exclude recovery-phase ops — AND verify every caller uses the function you fixed (2026-03-30, RESOLVED 2026-04-04) — ARCHIVED
 - **RESOLVED** — fix confirmed committed, no longer an active threat. Demoted from active violation to archive on 2026-04-05. See `docs/life_lessons/calibration.md` for full entry.
