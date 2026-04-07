@@ -1,7 +1,12 @@
 /**
- * IvpBreakdownModal — Diplomatic Press Briefing (IVP).
- * War-only. Read-only breakdown of composite_ivp from existing state; no new mechanics.
- * Fixed iteration order — deterministic display.
+ * IvpBreakdownModal — Diplomatic Press Briefing surface.
+ *
+ * DATA BOUNDARY: all live data enters through extractWarData().ivpState.
+ * Direct gameState reads are permitted ONLY for:
+ *   - meta.turn (timeline display — not operational data)
+ *   - getPlayerFaction() (player-safe entry point)
+ *   - extractWarData() (the sole permitted data entry point)
+ * This file must NOT read gameState.political.* or gameState.military.* directly.
  */
 
 import type { FactionId, GameState } from '../../../state/game_state.js';
@@ -9,11 +14,10 @@ import {
     DRINA_BLOCKADE_THRESHOLD,
     INTERNATIONAL_SANCTIONS_THRESHOLD,
     NATO_INTERVENTION_THRESHOLD,
-    getIvpComponentContributions,
     formatIvpConsequenceLabel,
     ivpComponentLabel,
-    sortIvpConsequenceIds,
 } from '../../../state/patron_pressure.js';
+import { extractWarData } from '../data/war_data_extractor.js';
 import { FACTION_COLORS, factionCssClass, getPlayerFaction, turnToWeekString } from './warroom_utils.js';
 
 function pct(v: number): string {
@@ -29,11 +33,10 @@ export class IvpBreakdownModal {
 
     render(): HTMLElement {
         const pf = getPlayerFaction(this.gameState) as FactionId;
-        const ivp = this.gameState.political.international_visibility_pressure;
-        const composite = ivp?.composite_ivp ?? 0;
-        const active = Array.isArray(this.gameState.political.ivp_consequences_active)
-            ? sortIvpConsequenceIds(this.gameState.political.ivp_consequences_active)
-            : [];
+        const snap = extractWarData(this.gameState, pf);
+        const ivpSnap = snap.ivpState;
+        const composite = ivpSnap.composite;
+        const active = ivpSnap.activeConsequenceIds;
 
         const modal = document.createElement('div');
         modal.className = `diplomacy-modal weathered-panel faction-${factionCssClass(pf)}`;
@@ -65,7 +68,7 @@ export class IvpBreakdownModal {
         const section = document.createElement('div');
         section.className = 'faction-overview-section';
         section.innerHTML = '<h3 class="text-accent-gold">COMPONENT BREAKDOWN</h3>';
-        const rows = getIvpComponentContributions(ivp);
+        const rows = ivpSnap.components;
         for (const row of rows) {
             const rowEl = document.createElement('div');
             rowEl.className = 'fo-stat-row';
@@ -112,17 +115,17 @@ export class IvpBreakdownModal {
         }
         modal.appendChild(cons);
 
-        if (this.gameState.military.sarajevo_tunnel_operational) {
+        if (ivpSnap.sarajevoTunnelOperational) {
             const note = document.createElement('div');
             note.style.cssText = 'margin-top:12px;font-size:11px;color:#555570;';
             note.textContent = 'Sarajevo tunnel operational — siege visibility modifier applied in engine.';
             modal.appendChild(note);
         }
 
-        if (ivp?.last_major_shift != null) {
+        if (ivpSnap.lastMajorShift != null) {
             const shift = document.createElement('div');
             shift.style.cssText = 'margin-top:8px;font-size:11px;color:#555570;';
-            shift.textContent = `Last major IVP shift: turn ${ivp.last_major_shift}.`;
+            shift.textContent = `Last major IVP shift: turn ${ivpSnap.lastMajorShift}.`;
             modal.appendChild(shift);
         }
 

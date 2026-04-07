@@ -18,11 +18,17 @@ import type {
     FrontEdgeState,
     FrontPressureState,
     GameState,
+    InternationalVisibilityPressure,
     PatronState,
     RbihHrhbState,
     SettlementId,
     TrendDirection,
 } from '../../../state/game_state.js';
+import {
+    IvpComponentContribution,
+    getIvpComponentContributions,
+    sortIvpConsequenceIds,
+} from '../../../state/patron_pressure.js';
 import {
     getPlayerSafeBrigadeName,
     getPlayerSafeCorpsName,
@@ -148,6 +154,22 @@ export interface OfficerListEntry {
     competence: number;
 }
 
+/**
+ * Tier 2: IVP is publicly visible diplomatic pressure — all sides observe international reactions.
+ */
+export interface IvpStateSnapshot {
+    /** Composite IVP score, 0..1. */
+    composite: number;
+    /** Sorted active consequence IDs (e.g. 'drina_blockade', 'international_sanctions'). */
+    activeConsequenceIds: string[];
+    /** Turn index of last major IVP shift, or null. */
+    lastMajorShift: number | null;
+    /** Component breakdown in deterministic order. */
+    components: IvpComponentContribution[];
+    /** Whether Sarajevo tunnel is operational — affects siege visibility modifier display. */
+    sarajevoTunnelOperational: boolean;
+}
+
 // Faction-specific diplomacy snapshots
 export interface RSPatronSnapshot {
     patronCommitment: number;
@@ -214,6 +236,27 @@ export interface WarDataSnapshot {
      * Example: { RS: 0.62, RBiH: 0.28, HRHB: 0.10 }
      */
     observedEnemyTerritoryPct: Partial<Record<FactionId, number>>;
+
+    /** IVP diplomatic pressure summary (Tier 2: publicly observable). */
+    ivpState: IvpStateSnapshot;
+}
+
+// ---------------------------------------------------------------------------
+// IVP sub-extractor
+// ---------------------------------------------------------------------------
+
+function extractIvpState(state: GameState): IvpStateSnapshot {
+    const ivp = state.political.international_visibility_pressure;
+    const active = Array.isArray(state.political.ivp_consequences_active)
+        ? sortIvpConsequenceIds(state.political.ivp_consequences_active)
+        : [];
+    return {
+        composite: ivp?.composite_ivp ?? 0,
+        activeConsequenceIds: active,
+        lastMajorShift: ivp?.last_major_shift ?? null,
+        components: getIvpComponentContributions(ivp),
+        sarajevoTunnelOperational: state.military.sarajevo_tunnel_operational ?? false,
+    };
 }
 
 // ---------------------------------------------------------------------------
@@ -310,6 +353,9 @@ export function extractWarData(
     // --- Observed enemy territory % (Tier 2: publicly visible to all sides) ---
     const observedEnemyTerritoryPct = extractObservedTerritoryPct(gameState);
 
+    // --- IVP state (Tier 2: publicly observable diplomatic pressure) ---
+    const ivpState = extractIvpState(gameState);
+
     return {
         playerFaction,
         turn,
@@ -329,6 +375,7 @@ export function extractWarData(
         exposedFrontSettlements,
         officersByFaction: Object.keys(officersByFaction).length > 0 ? officersByFaction : undefined,
         observedEnemyTerritoryPct,
+        ivpState,
     };
 }
 

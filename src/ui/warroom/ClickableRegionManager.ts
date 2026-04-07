@@ -35,6 +35,7 @@ import { GameState } from '../../state/game_state.js';
 import { INTERNATIONAL_SANCTIONS_THRESHOLD } from '../../state/patron_pressure.js';
 import { deserializeState } from '../../state/serialize.js';
 import { checkWarTransition, findCriticalEvent, findWarMilestoneEvent, showDeclarationModal, showWarBeginsModal } from './components/DeclarationEventModal.js';
+import { getPlayerFaction } from './components/warroom_utils.js';
 import { DiplomacyModal } from './components/DiplomacyModal.js';
 import { IvpBreakdownModal } from './components/IvpBreakdownModal.js';
 import { FactionOverviewPanel } from './components/FactionOverviewPanel.js';
@@ -586,9 +587,9 @@ export class ClickableRegionManager {
 
         const state = gameState as GameState;
         const briefingRoot = new CommandBriefingModal(state).render();
-        const ivp = state.political.international_visibility_pressure;
-        const composite = ivp?.composite_ivp ?? 0;
-        const hasConsequences = Array.isArray(state.political.ivp_consequences_active) && state.political.ivp_consequences_active.length > 0;
+        const snap = extractWarData(state, getPlayerFaction(state) as FactionId);
+        const composite = snap.ivpState.composite;
+        const hasConsequences = snap.ivpState.activeConsequenceIds.length > 0;
         if (state.meta.phase === 'war' && (composite >= INTERNATIONAL_SANCTIONS_THRESHOLD || hasConsequences)) {
             const wrapper = document.createElement('div');
             wrapper.appendChild(briefingRoot);

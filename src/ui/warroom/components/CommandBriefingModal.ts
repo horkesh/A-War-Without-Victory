@@ -12,6 +12,14 @@ function escapeHtml(value: string): string {
         .replaceAll("'", '&#39;');
 }
 
+/**
+ * CommandBriefingModal — Warroom command briefing surface.
+ *
+ * DATA BOUNDARY: the only permitted direct gameState read beyond meta.* fields is
+ * military.last_briefing (line ~55). This is acceptable: last_briefing is a pre-computed
+ * engine message packet, not raw operational data. Do not add further military.* or
+ * political.* reads.
+ */
 export class CommandBriefingModal {
     private gameState: GameState;
 
