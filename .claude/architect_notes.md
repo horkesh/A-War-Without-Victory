@@ -280,6 +280,11 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - Accepted multi-window line: `desktop:package:probe` now proves the packaged tactical-map secondary window reaches `did-finish-load` on the deterministic operational route `/?desktop_window=operational`. The old `Date.now()` cache-buster is gone; tactical-map window URLs now come from one deterministic helper.
 - Multi-window probe rule: when packaged probing spans multiple real windows, the probe should own the minimal preload IPC contract explicitly and persist success via a deterministic manifest fallback rather than relying only on GUI stdout timing.
 
+**Closed: Packaged Desktop Tactical Sandbox Route Smoke (2026-04-08)**
+- Once the packaged probe covers the initial window and the operational tactical-map window, route completeness should expand inside that same manifest contract instead of spawning a parallel smoke command for the sandbox path.
+- Accepted sandbox line: `desktop:package:probe` now also proves the real packaged tactical sandbox window reaches `did-finish-load` on `/tactical_sandbox.html?desktop_window=sandbox`, so all real product-owned tactical-map routes now sit under one packaged-runtime proof path.
+- Probe-completeness rule: when a packaged probe already owns multi-window truth, extend `window_checks` in stable order and keep route assertions deterministic rather than adding one-off probes for each route.
+
 ### Warroom React Shell Recovery / Feature Parity — OPEN
 
 - **Problem:** The rebuilt React-owned Warroom shell is functional enough to launch and hand off correctly, but it remains materially behind the older corktable-era experience.

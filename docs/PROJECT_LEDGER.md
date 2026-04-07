@@ -24808,6 +24808,15 @@ Main Staff HQ was Han Pijesak, not Rogatica. Tracked for OOB correction pass.
 - **Verification:** `node --check src/desktop/electron-main.cjs`, targeted packaged-probe tests, `npm.cmd run desktop:startup-snapshot:check`, `npm.cmd run desktop:release:check`, `npm.cmd run desktop:package:probe`, full Vitest (216/216 files, 3018/3018 tests), `npx.cmd tsc --noEmit -p tsconfig.json`, and `npm.cmd run build` all passed.
 - **Report:** `docs/40_reports/implemented/20260407_V08TO09_PACKAGED_DESKTOP_MULTI_WINDOW_SECONDARY_ROUTE_SMOKE.md`
 
+**[2026-04-08] v0.8-to-v0.9 Packaged Desktop Tactical Sandbox Route Smoke COMPLETE**
+
+- **Summary:** Strengthened `desktop:package:probe` again so the canonical packaged-runtime path now proves the real packaged tactical sandbox `BrowserWindow` reaches `did-finish-load` on `/tactical_sandbox.html?desktop_window=sandbox` in addition to the initial Warroom window and the operational tactical-map window.
+- **Sandbox-route seam removed:** `src/desktop/electron-main.cjs` now extends `runPackagedRuntimeProbe()` to open the real tactical sandbox window through the same tactical-map window path family, and `tools/desktop_packaged_runtime_probe.mjs` now hard-fails unless the probe manifest includes sandbox-route success.
+- **Ownership after change:** `desktop:package:probe` remains the sole packaged-runtime smoke path. It now owns packaged resource checks, startup snapshot loading, map-server routing, initial Warroom window proof, operational tactical-map window proof, and tactical sandbox window proof under one deterministic contract.
+- **Hardening:** extended `tests/desktop_packaged_runtime_probe.test.ts` to guard sandbox-route proof enforcement and updated `src/desktop/README.md` so the packaged-runtime contract truthfully documents all three real packaged window routes. No second smoke command or hidden regeneration path was added.
+- **Verification:** `node --check src/desktop/electron-main.cjs`, targeted packaged-probe tests, `npm.cmd run desktop:startup-snapshot:check`, `npm.cmd run desktop:release:check`, `npm.cmd run desktop:package:probe`, full Vitest (216/216 files, 3018/3018 tests), `npx.cmd tsc --noEmit -p tsconfig.json`, and `npm.cmd run build` all passed.
+- **Report:** `docs/40_reports/implemented/20260408_V08TO09_PACKAGED_DESKTOP_TACTICAL_SANDBOX_ROUTE_SMOKE.md`
+
 **[2026-04-08] fix(ui): WarroomShellLayer desk_map shell handoff contract clarified**
 
 - **Summary:** Closed a real Warroom shell-cohesion seam in `src/ui/map/components/warroom/WarroomShellLayer.tsx`. The `regionToShellHandoff()` comment no longer falsely claims several explicitly mapped hotspots are "unmapped"; it now documents `desk_map` as the one intentionally unmapped region and explains the implicit `undefined -> warroomCommandStaysInRoom(undefined) -> false -> setAppScreen('game')` map-entry contract.

@@ -60,6 +60,9 @@ const windowCheck = manifest?.window_checks?.find?.(
 const tacticalMapWindowCheck = manifest?.window_checks?.find?.(
   (entry) => entry?.route?.endsWith?.('/?desktop_window=operational') && entry?.status === 'did-finish-load',
 );
+const tacticalSandboxWindowCheck = manifest?.window_checks?.find?.(
+  (entry) => entry?.route?.endsWith?.('/tactical_sandbox.html?desktop_window=sandbox') && entry?.status === 'did-finish-load',
+);
 
 if (!windowCheck) {
   throw new Error(
@@ -70,6 +73,12 @@ if (!windowCheck) {
 if (!tacticalMapWindowCheck || tacticalMapWindowCheck.status !== 'did-finish-load') {
   throw new Error(
     `Packaged desktop runtime probe manifest is missing the tactical-map secondary window proof.\n${JSON.stringify(manifest, null, 2)}`,
+  );
+}
+
+if (!tacticalSandboxWindowCheck || tacticalSandboxWindowCheck.status !== 'did-finish-load') {
+  throw new Error(
+    `Packaged desktop runtime probe manifest is missing the tactical sandbox route proof.\n${JSON.stringify(manifest, null, 2)}`,
   );
 }
 

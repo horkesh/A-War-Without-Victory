@@ -376,6 +376,17 @@ async function runPackagedRuntimeProbe() {
   );
   mapProbeWindow.destroy();
 
+  const { win: sandboxProbeWindow, targetUrl: tacticalSandboxUrl } = createTacticalMapWindow({
+    mode: 'sandbox',
+    show: false,
+  });
+  const tacticalSandboxWindowLoad = await waitForWindowLoad(
+    sandboxProbeWindow,
+    tacticalSandboxUrl,
+    'packaged tactical sandbox window',
+  );
+  sandboxProbeWindow.destroy();
+
   const manifest = {
     probe: 'awwv_desktop_runtime_probe',
     mode: 'packaged',
@@ -400,6 +411,11 @@ async function runPackagedRuntimeProbe() {
         route: tacticalMapUrl,
         status: 'did-finish-load',
         title: tacticalWindowLoad.title,
+      },
+      {
+        route: tacticalSandboxUrl,
+        status: 'did-finish-load',
+        title: tacticalSandboxWindowLoad.title,
       },
     ],
   };

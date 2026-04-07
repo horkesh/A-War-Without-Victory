@@ -65,6 +65,7 @@ Sim runs in the main process via `dist/desktop/desktop_sim.cjs` (built by `npm r
   - the packaged tactical-map HTTP server can serve `/` and the startup snapshot route
   - the real initial packaged BrowserWindow reaches `did-finish-load` for `awwv://warroom/index.html`
   - the real secondary packaged tactical-map window reaches `did-finish-load` for the deterministic operational map route `/?desktop_window=operational`
+  - the real packaged tactical sandbox window reaches `did-finish-load` for the deterministic sandbox route `/tactical_sandbox.html?desktop_window=sandbox`
   - packaged probe success is recorded in a deterministic manifest beside the unpacked executable so GUI runtime proof does not depend solely on stdout capture
 - `.github/workflows/desktop-release-guard.yml` now enforces that same packaged-runtime probe on `windows-latest` after the canonical Ubuntu `desktop:release:check` job. CI shipped-build truth now covers both build inputs and packaged runtime boot/resource resolution.
 - The current package productization target is an unsigned Windows `dir` build. Installer publishing, code signing, and store/distribution flow are still intentionally deferred.

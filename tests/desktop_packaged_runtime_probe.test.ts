@@ -73,6 +73,16 @@ test('electron main exposes a packaged runtime probe mode instead of a second la
         /desktop_window=operational/,
         'secondary tactical-map probe should use a deterministic operational route marker',
     );
+    assert.match(
+        source,
+        /packaged tactical sandbox window/,
+        'packaged runtime probe should exercise the real tactical sandbox window path',
+    );
+    assert.match(
+        source,
+        /desktop_window=sandbox/,
+        'tactical sandbox probe should use a deterministic sandbox route marker',
+    );
 });
 
 test('probe tool launches the unpacked packaged executable with the runtime probe env', async () => {
@@ -102,6 +112,11 @@ test('probe tool launches the unpacked packaged executable with the runtime prob
         source,
         /window_checks[\s\S]*desktop_window=operational[\s\S]*did-finish-load/s,
         'probe tool should fail if the packaged manifest omits the tactical-map secondary window proof',
+    );
+    assert.match(
+        source,
+        /window_checks[\s\S]*tactical_sandbox\.html\?desktop_window=sandbox[\s\S]*did-finish-load/s,
+        'probe tool should fail if the packaged manifest omits the tactical sandbox route proof',
     );
     assert.match(
         source,
