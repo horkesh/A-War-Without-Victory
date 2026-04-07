@@ -24762,3 +24762,21 @@ Main Staff HQ was Han Pijesak, not Rogatica. Tracked for OOB correction pass.
 - **Hardening:** added `tests/ivp_breakdown_modal_boundary.test.ts` with 10 tests covering source-boundary rules, forbidden raw reads, `ivpState` correctness, and null-safe defaults.
 - **Verification:** full Vitest reached 214/214 files and 2990/2990 tests; `npx.cmd tsc --noEmit -p tsconfig.json` and `npm.cmd run build` clean.
 - **Report:** `docs/40_reports/implemented/20260407_V08TO09_IVP_BOUNDARY_SEAM.md`
+
+**[2026-04-07] v0.8-to-v0.9 Packaged Desktop CI Runtime Probe Enforcement COMPLETE**
+
+- **Summary:** Extended shipped-build CI from build-input verification to real packaged-runtime proof. GitHub Actions now runs the canonical Windows packaged-runtime probe after the existing Ubuntu `desktop:release:check` job instead of stopping at build-input validation.
+- **Shipped-runtime seam removed:** `.github/workflows/desktop-release-guard.yml` now includes a dependent `desktop-packaged-runtime-probe` job on `windows-latest` that runs `npm run desktop:package:probe`. CI can no longer stay green without launching the unpacked packaged executable in packaged mode and verifying packaged resource resolution.
+- **Ownership after change:** `desktop:release:check` remains the shipped-build input gate; `desktop:package:probe` remains the single packaged-runtime smoke path; GitHub Actions now invokes that same local truth path rather than a lighter CI-only substitute.
+- **Hardening:** extended `tests/desktop_release_ci_guardrails.test.ts` to guard the Windows packaged-runtime job, its runner, and its `desktop:package:probe` invocation. Updated `src/desktop/README.md` so the desktop contract truthfully documents CI packaged-runtime enforcement.
+- **Verification:** targeted workflow/probe tests passed; `npm.cmd run desktop:startup-snapshot:check`, `npm.cmd run desktop:release:check`, `npm.cmd run desktop:package:probe`, full Vitest (215/215 files, 3003/3003 tests), `npx.cmd tsc --noEmit -p tsconfig.json`, and `npm.cmd run build` all passed.
+- **Report:** `docs/40_reports/implemented/20260407_V08TO09_PACKAGED_DESKTOP_CI_RUNTIME_PROBE_ENFORCEMENT.md`
+
+**[2026-04-07] v0.8-to-v0.9 Commander Explanation Surfaces Phase 7 - ClickableRegionManager Turn-Preview Boundary Seam COMPLETE**
+
+- **Summary:** Closed the last war-phase turn-advance shell bypass in Warroom. `ClickableRegionManager.generateThisWeekPreview()` no longer loops over raw `state.military.formations` to derive WIA-returning formations; it now consumes the canonical `extractWarData(...)` snapshot field.
+- **Boundary seam removed:** added `wiaFormationCount` to `OwnForcesSnapshot` in `src/ui/warroom/data/war_data_extractor.ts`, populated deterministically during own-forces extraction, and replaced the direct `state.military.formations` loop in `src/ui/warroom/ClickableRegionManager.ts` with `snap.ownForces.wiaFormationCount`.
+- **Ownership after change:** `ClickableRegionManager` now carries an explicit `DATA BOUNDARY:` contract and war-phase turn-preview display data must flow through `extractWarData(...)`. Accepted structural exceptions remain `state.meta.*` shell metadata and faction identity reads only.
+- **Hardening:** added `tests/warroom_turn_preview_boundary.test.ts` with 13 tests covering the source boundary, WIA count correctness, null safety, faction isolation, and the new file-level boundary contract.
+- **Verification:** full Vitest reached 215/215 files and 3003/3003 tests; `npx.cmd tsc --noEmit -p tsconfig.json` and `npm.cmd run build` clean.
+- **Report:** `docs/40_reports/implemented/20260407_V08TO09_WARROOM_TURN_PREVIEW_BOUNDARY.md`

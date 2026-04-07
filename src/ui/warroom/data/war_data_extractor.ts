@@ -60,6 +60,8 @@ export interface OwnForcesSnapshot {
     corpsCount: number;
     avgCohesion: number;
     formationDetails: FormationDetail[];
+    /** Count of player-faction formations that have wounded_pending > 0 (WIA returning next turn). */
+    wiaFormationCount: number;
 }
 
 export interface CasualtiesSnapshot {
@@ -394,6 +396,7 @@ function extractOwnForces(state: GameState, pf: FactionId): OwnForcesSnapshot {
     let corpsCount = 0;
     let cohesionSum = 0;
     let cohesionCount = 0;
+    let wiaFormationCount = 0;
 
     const sortedIds = Object.keys(formations).sort(sc);
     for (const fid of sortedIds) {
@@ -414,6 +417,11 @@ function extractOwnForces(state: GameState, pf: FactionId): OwnForcesSnapshot {
             }
         }
         if (kind === 'corps') corpsCount++;
+
+        // Count formations with WIA returning (wounded_pending > 0)
+        if ((f.wounded_pending ?? 0) > 0) {
+            wiaFormationCount++;
+        }
 
         const ms = movementState[fid];
         details.push({
@@ -440,6 +448,7 @@ function extractOwnForces(state: GameState, pf: FactionId): OwnForcesSnapshot {
         corpsCount,
         avgCohesion: cohesionCount > 0 ? cohesionSum / cohesionCount : 0,
         formationDetails: details,
+        wiaFormationCount,
     };
 }
 

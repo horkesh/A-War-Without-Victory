@@ -1,3 +1,12 @@
+/**
+ * DATA BOUNDARY: ClickableRegionManager is a war-phase shell coordinator.
+ * All live GameState reads for display purposes MUST flow through extractWarData().
+ * Direct reads of state.political.* or state.military.* in display paths are forbidden.
+ * Exceptions:
+ *   - state.meta.* reads (turn, phase, player_faction, seed) — structural shell metadata, not display data.
+ *   - state.factions[*].id — faction identity only, consumed before snapshot is taken.
+ * The advanceTurn() method reads state.meta.* before calling extractWarData(); this is intentional.
+ */
 export type RegionBounds = { x: number; y: number; width: number; height: number };
 
 export type Region = {
@@ -495,15 +504,8 @@ export class ClickableRegionManager {
             lines.push(`<div class="wr-dialog-row"><span class="wr-label">Movements</span><span class="wr-value">${parts.join(', ')}</span></div>`);
         }
 
-        // INCOMING: WIA returning
-        let wiaReturning = 0;
-        const formations = state.military.formations ?? {};
-        for (const fid of Object.keys(formations).sort()) {
-            const f = formations[fid];
-            if (f?.faction === pf && f.wounded_pending && f.wounded_pending > 0) {
-                wiaReturning++;
-            }
-        }
+        // INCOMING: WIA returning — consumed from snapshot (DATA BOUNDARY: no direct state.military.formations read)
+        const wiaReturning = snap.ownForces.wiaFormationCount;
         if (wiaReturning > 0) {
             lines.push(`<div class="wr-dialog-row"><span class="wr-label">WIA returning</span><span class="wr-value">${wiaReturning} formations</span></div>`);
         }

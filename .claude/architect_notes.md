@@ -265,6 +265,11 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - Accepted runtime line: `desktop:package:probe` now sits on top of `desktop:package:dir` and launches the unpacked packaged executable in a dedicated probe mode. The probe verifies packaged resource resolution, baked startup snapshot loading through `startNewCampaign(...)`, and packaged map-server routing.
 - Probe rule: success output should stay deterministic and machine-readable. Runtime probes must emit one stable manifest and avoid relying on random-port chatter or incidental logs as the success signal.
 
+**Closed: Packaged Desktop CI Runtime Probe Enforcement (2026-04-07)**
+- Once a local packaged-runtime probe exists, shipped-truth CI should invoke that exact probe on the platform that actually runs the packaged artifact instead of inventing a lighter-weight substitute.
+- Accepted CI line: `.github/workflows/desktop-release-guard.yml` now keeps Ubuntu on `desktop:release:check` and adds a dependent Windows packaged-runtime job that runs `desktop:package:probe`. CI now proves packaged boot/resource truth instead of stopping at build-input validation.
+- Keep the truth chain singular: no hidden snapshot regeneration in CI, no second packaged-runtime path, and no CI-only substitute probe. Windows CI should execute the same packaged-runtime contract developers run locally.
+
 ### Warroom React Shell Recovery / Feature Parity — OPEN
 
 - **Problem:** The rebuilt React-owned Warroom shell is functional enough to launch and hand off correctly, but it remains materially behind the older corktable-era experience.
@@ -327,6 +332,11 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - The remaining IVP seam was architectural, not visual: `ClickableRegionManager.openCommandBriefingModal()` was still interpreting `political.*` directly, and `IvpBreakdownModal` still read `political.*` / `military.*` without a declared boundary.
 - Accepted boundary after cleanup: IVP data now enters Warroom through `extractWarData(...).ivpState`, and war-phase modals must either be snapshot-first with a `DATA BOUNDARY:` contract or carry an explicit documented exception. `CommandBriefingModal` keeps the narrow `military.last_briefing` exception and now explains why.
 - Reusable lesson: shell coordinators are part of the truth boundary too. If a footer button or modal handoff depends on live state, route it through the same player-safe snapshot contract instead of letting coordinator code peek into deep `GameState`.
+
+**Closed: Commander Explanation Surfaces Phase 7 - ClickableRegionManager Turn-Preview Boundary Seam (2026-04-07)**
+- The remaining turn-advance shell seam was in `ClickableRegionManager.generateThisWeekPreview()`: the coordinator already had `extractWarData(...)` in scope but still re-derived "formations with WIA returning" from raw `state.military.formations`.
+- Accepted boundary after cleanup: war-phase turn-preview display data in `ClickableRegionManager` must flow through `extractWarData(...)`. `state.meta.*` shell metadata and faction identity reads remain the only accepted structural exceptions inside the coordinator.
+- `OwnForcesSnapshot.wiaFormationCount` is now the canonical field for "formations with WIA returning." Do not reintroduce raw formation loops for that display fact elsewhere; extend the snapshot first and keep the shell coordinator presentation-only.
 
 **Closed: Save/Load and Replay Deep Hardening (2026-04-07)**
 - Canonical desktop persistence rule: if `currentGameStateJson` is treated as the live authoritative save blob, every mutation path must round-trip through `deserializeState(...)` and `serializeState(...)`. Raw `JSON.parse(...)` / `JSON.stringify(...)` on write paths is not an acceptable shortcut because it bypasses canonical ordering, validation, and migration/default behavior.

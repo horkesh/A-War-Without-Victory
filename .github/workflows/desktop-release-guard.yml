@@ -21,3 +21,19 @@ jobs:
 
       - name: Verify baked startup snapshot and desktop build artifacts
         run: npm run desktop:release:check
+
+  desktop-packaged-runtime-probe:
+    needs: desktop-release-check
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm install --legacy-peer-deps
+
+      - name: Probe packaged desktop runtime contract
+        run: npm run desktop:package:probe

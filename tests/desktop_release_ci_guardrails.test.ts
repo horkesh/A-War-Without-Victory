@@ -42,3 +42,26 @@ test('ci workflow enforces the canonical desktop release check on main and pull 
         'desktop release guard should invoke the canonical shipped-build verification path',
     );
 });
+
+test('desktop release workflow enforces packaged runtime probe on windows', async () => {
+    const workflow = await readFile(
+        join(process.cwd(), '.github', 'workflows', 'desktop-release-guard.yml'),
+        'utf8',
+    );
+
+    assert.match(
+        workflow,
+        /desktop-packaged-runtime-probe:/,
+        'desktop release guard should define a dedicated packaged runtime probe job',
+    );
+    assert.match(
+        workflow,
+        /runs-on:\s*windows-latest/,
+        'packaged runtime probe should run on a Windows runner because it launches the packaged executable',
+    );
+    assert.match(
+        workflow,
+        /npm run desktop:package:probe/,
+        'desktop release guard should invoke the canonical packaged runtime probe command',
+    );
+});
