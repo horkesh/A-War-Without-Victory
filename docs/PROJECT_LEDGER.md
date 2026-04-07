@@ -24708,3 +24708,21 @@ Main Staff HQ was Han Pijesak, not Rogatica. Tracked for OOB correction pass.
 - **Hardening:** added `tests/desktop_startup_snapshot_guardrails.test.ts` covering the guarded build source boundary, missing-snapshot failure, and stale-snapshot failure. Updated `src/desktop/README.md` so the desktop build flow truthfully documents the enforced snapshot gate and regeneration command.
 - **Verification:** targeted snapshot/build guardrail tests passed; `npm.cmd run desktop:startup-snapshot:check` passed; `npm.cmd run desktop:sim:build` passed with a valid artifact; full Vitest, typecheck, and build clean.
 - **Report:** `docs/40_reports/implemented/20260407_V08TO09_STARTUP_PACKAGING_GUARDRAILS.md`
+
+**[2026-04-07] v0.8-to-v0.9 Release/CI Startup Snapshot Enforcement COMPLETE**
+
+- **Summary:** Extended startup snapshot enforcement from the guarded local desktop bundle path into the repo's actual shipped-build contract. PRs and `main` can no longer stay green without running the desktop release-check path that transitively validates the baked April 1992 startup artifact.
+- **Shipped-artifact seam removed:** before this lane, `tools/desktop_bundle_sim.mjs` guarded local `desktop:sim:build`, but GitHub Actions did not run any desktop build path. Added `desktop:release:check` in `package.json` (`desktop:map:build && desktop:sim:build && warroom:build`), changed `npm run desktop` to launch through that command, and added `.github/workflows/desktop-release-guard.yml` so PRs and pushes to `main` run the same shipped-build contract.
+- **Ownership after change:** builder truth remains `buildScenarioStartupState(...)`; baked snapshot truth remains owned by `src/scenario/startup_snapshot.ts`; local stale/missing snapshot failure remains owned by `tools/desktop_bundle_sim.mjs`; repo-level shipped-build enforcement is now owned by `desktop:release:check` plus `.github/workflows/desktop-release-guard.yml`.
+- **Hardening:** added `tests/desktop_release_ci_guardrails.test.ts` covering package-script ownership and CI workflow enforcement; updated `src/desktop/README.md` so the desktop workflow docs describe `desktop:release:check` as the canonical shipped-build verification path.
+- **Verification:** targeted release/guardrail tests passed; `npm.cmd run desktop:startup-snapshot:check` passed; `npm.cmd run desktop:release:check` passed; full Vitest, typecheck, and build clean.
+- **Report:** `docs/40_reports/implemented/20260407_V08TO09_RELEASE_CI_STARTUP_SNAPSHOT_ENFORCEMENT.md`
+
+**[2026-04-07] v0.8-to-v0.9 Commander Explanation Surfaces Phase 4 - MagazineModal Narrative Narrowing COMPLETE**
+
+- **Summary:** Closed the last raw-state bypass in Warroom reporting surfaces. `MagazineModal.ts` no longer reads `gameState.political.*` directly during its Phase 0 branch; the modal is now uniformly bounded by the player-safe snapshot contract.
+- **Narrative seam removed:** deleted five Phase 0 data-reading helpers in `src/ui/warroom/components/MagazineModal.ts` (`generateContent`, `countInvestedMunicipalities`, `countControlledMunicipalities`, `computeAvgStability`, `countByControlStatus`) that directly read `gameState.political.municipalities` / `gameState.political.political_controllers`. `renderPhase0()` remains only as a minimal "Field reports are not available before the war." stub with no live data reads.
+- **Ownership after change:** War-phase `MagazineModal` remains an intentional flavor wrapper over `extractWarData(...)`; Phase 0 no longer has a competing raw-state path. The accepted boundary is now consistent across Warroom surfaces: live operational data enters through `extractWarData(...)` or the canonical packet, not through ad hoc `gameState.political.*` reads.
+- **Hardening:** removed dead Phase 0-only helpers/imports and added `tests/magazine_modal_boundary.test.ts` covering the Phase 0 stub, forbidden imports, forbidden direct political reads, and the source-level boundary comment.
+- **Verification:** targeted `MagazineModal` boundary test passed under Vitest; combined A+B worktree verification passed with full Vitest 212/212 files and 2973/2973 tests, `npx.cmd tsc --noEmit -p tsconfig.json`, and `npm.cmd run build`.
+- **Report:** `docs/40_reports/implemented/20260407_V08TO09_MAGAZINE_MODAL_NARRATIVE_NARROWING.md`

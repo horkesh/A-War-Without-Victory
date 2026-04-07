@@ -19,6 +19,9 @@ npm run desktop:sim:build
 # Regenerate the baked startup snapshot if the guarded desktop build reports drift.
 npm run desktop:startup-snapshot:build
 
+# Run the canonical desktop release/build verification path used by CI.
+npm run desktop:release:check
+
 # Run the desktop app (runs desktop:sim:build then Electron)
 npm run desktop
 ```
@@ -40,5 +43,6 @@ Sim runs in the main process via `dist/desktop/desktop_sim.cjs` (built by `npm r
 
 - `apr_1992` desktop `New Campaign` startup now consumes the baked artifact at `data/derived/startup/apr_1992_initial_save.json`.
 - `npm run desktop:sim:build` validates that artifact against canonical builder truth before bundling `dist/desktop/desktop_sim.cjs`.
+- `npm run desktop:release:check` is now the canonical shipped-build verification path. It runs the guarded desktop sim build plus the required map and Warroom bundles.
 - If the artifact is stale or missing, the build aborts and instructs the user to run `npm run desktop:startup-snapshot:build`.
 - The builder remains the primary truth source; the baked startup snapshot is a one-way derived product artifact.

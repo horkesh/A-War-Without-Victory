@@ -250,6 +250,11 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - Packaging/build rule: if a desktop build can ship startup data, that build path must either validate the baked snapshot directly or transitively call a guarded step that does. Artifact presence alone is not enough.
 - Workflow rule: keep regeneration explicit (`npm run desktop:startup-snapshot:build`) and keep enforcement automatic (`npm run desktop:sim:build`). That preserves developer ergonomics without weakening the truth gate.
 
+**Closed: Release/CI Startup Snapshot Enforcement (2026-04-07)**
+- Accepted shipped-build contract: `desktop:release:check` is now the canonical desktop release/build verification path. It owns the repo-level guarantee that map bundle, guarded sim bundle, and Warroom bundle still compose cleanly for shipping.
+- CI rule: if the repo has a GitHub Actions path that represents branch health for desktop shipping, that workflow must run `desktop:release:check` on PRs and `main`. Local-only guarding is not enough once a baked startup artifact becomes part of product truth.
+- Keep regeneration explicit and enforcement automatic. CI may validate and fail, but it should not silently regenerate the baked startup snapshot during branch-health checks.
+
 ### Warroom React Shell Recovery / Feature Parity — OPEN
 
 - **Problem:** The rebuilt React-owned Warroom shell is functional enough to launch and hand off correctly, but it remains materially behind the older corktable-era experience.
@@ -297,6 +302,11 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - Accepted boundary after cleanup: canonical warning/alert truth lives in `getOperationalSitrepView(...)` and its `alerts` list; Warroom `FactionOverviewPanel` may render those alerts and maintain shell-handoff copy (`COMMAND SHELL`), but it should not own a separate warning brain.
 - `MagazineModal` remains intentionally distinct as a flavor/periodical wrapper over player-safe snapshot facts. That is acceptable because it does not define a second operational alert model or compete with Army HQ / SITREP packet truth.
 - Presentation rule: advisory/reporting shells may still read extra snapshot-only facts that are outside the SITREP packet contract (for example enemy-contact lines), but they must not rebuild the packet itself in place.
+
+**Closed: Commander Explanation Surfaces Phase 4 - MagazineModal Narrative Narrowing (2026-04-07)**
+- `MagazineModal` was the last Warroom surface with a direct `gameState.political.*` read path. That bypass is now gone: five Phase 0 helper functions were deleted and `renderPhase0()` is a no-data stub.
+- Accepted boundary: war phase remains a flavor wrapper over `extractWarData(...)`; pre-war phase must not read live political state directly. `MagazineModal` is not a second intelligence surface, not a SITREP owner, and not a special exception to the player-safe entry rule.
+- Wording discipline: do not overclaim this as "all narrative drift is gone." The true reusable lesson is narrower: Warroom live-data entry is now uniformly bounded; flavor wrappers may still exist, but they must sit on top of player-safe facts instead of bypassing them.
 
 **Closed: Save/Load and Replay Deep Hardening (2026-04-07)**
 - Canonical desktop persistence rule: if `currentGameStateJson` is treated as the live authoritative save blob, every mutation path must round-trip through `deserializeState(...)` and `serializeState(...)`. Raw `JSON.parse(...)` / `JSON.stringify(...)` on write paths is not an acceptable shortcut because it bypasses canonical ordering, validation, and migration/default behavior.
