@@ -24718,6 +24718,15 @@ Main Staff HQ was Han Pijesak, not Rogatica. Tracked for OOB correction pass.
 - **Verification:** targeted release/guardrail tests passed; `npm.cmd run desktop:startup-snapshot:check` passed; `npm.cmd run desktop:release:check` passed; full Vitest, typecheck, and build clean.
 - **Report:** `docs/40_reports/implemented/20260407_V08TO09_RELEASE_CI_STARTUP_SNAPSHOT_ENFORCEMENT.md`
 
+**[2026-04-07] v0.8-to-v0.9 Desktop Packaging / electron-builder Contract Productization COMPLETE**
+
+- **Summary:** Productized the first explicit packaged-desktop contract without pretending the repo already owns a finished installer or release-upload system. `desktop:package:dir` is now the one canonical packaged-desktop command, and it inherits `desktop:release:check` before Electron packaging runs.
+- **Packaging seam removed:** before this lane, `electron-builder` existed only as a dependency and packaged mode was still a future-path idea. `package.json` now owns an explicit `build` contract for the `resources/` layout that `src/desktop/electron-main.cjs` already expects, plus a bounded unsigned Windows `dir` target.
+- **Ownership after change:** `buildScenarioStartupState(...)` remains the canonical startup builder; `src/scenario/startup_snapshot.ts` remains the baked startup artifact contract; `desktop:release:check` remains the primary shipped-build truth gate; `desktop:package:dir` is now the canonical packaged-desktop consumer path layered on top of that gate.
+- **Hardening:** added `tests/desktop_packaging_contract.test.ts` covering package-script ownership, inheritance from `desktop:release:check`, and the packaged resource layout contract; updated `src/desktop/README.md` so packaged mode is documented as a real bounded contract rather than a placeholder.
+- **Verification:** targeted packaging/guardrail tests passed; `npm.cmd run desktop:startup-snapshot:check` passed; `npm.cmd run desktop:release:check` passed; `npm.cmd run desktop:package:dir` successfully produced `dist-packaged/win-unpacked`; full Vitest, typecheck, and build clean.
+- **Report:** `docs/40_reports/implemented/20260407_V08TO09_DESKTOP_PACKAGING_CONTRACT_PRODUCTIZATION.md`
+
 **[2026-04-07] v0.8-to-v0.9 Commander Explanation Surfaces Phase 4 - MagazineModal Narrative Narrowing COMPLETE**
 
 - **Summary:** Closed the last raw-state bypass in Warroom reporting surfaces. `MagazineModal.ts` no longer reads `gameState.political.*` directly during its Phase 0 branch; the modal is now uniformly bounded by the player-safe snapshot contract.
@@ -24726,3 +24735,12 @@ Main Staff HQ was Han Pijesak, not Rogatica. Tracked for OOB correction pass.
 - **Hardening:** removed dead Phase 0-only helpers/imports and added `tests/magazine_modal_boundary.test.ts` covering the Phase 0 stub, forbidden imports, forbidden direct political reads, and the source-level boundary comment.
 - **Verification:** targeted `MagazineModal` boundary test passed under Vitest; combined A+B worktree verification passed with full Vitest 212/212 files and 2973/2973 tests, `npx.cmd tsc --noEmit -p tsconfig.json`, and `npm.cmd run build`.
 - **Report:** `docs/40_reports/implemented/20260407_V08TO09_MAGAZINE_MODAL_NARRATIVE_NARROWING.md`
+
+**[2026-04-07] v0.8-to-v0.9 Commander Explanation Surfaces Phase 5 - DiplomacyModal Boundary Audit and Narrowing COMPLETE**
+
+- **Summary:** Audited `DiplomacyModal` against the Warroom snapshot-first rule and found one real remaining bypass. `renderWashingtonTracker()` no longer reads `gameState.political.political_controllers` directly to compute RS territory share; it now consumes `observedEnemyTerritoryPct` from the player-safe snapshot.
+- **Boundary seam removed:** extended `src/ui/warroom/data/war_data_extractor.ts` with `observedEnemyTerritoryPct: Partial<Record<FactionId, number>>` and the deterministic `extractObservedTerritoryPct()` helper, then rewired the W5 territory condition in `src/ui/warroom/components/DiplomacyModal.ts` to read `snap.observedEnemyTerritoryPct['RS'] ?? 0` instead of a raw-state loop.
+- **Ownership after change:** live Warroom diplomatic data now enters through `extractWarData(...)` first, with only documented narrow exceptions for shell entry/meta reads and the HRHB own-faction `capability_profile` check. `DiplomacyModal` still does not import operational briefing/SITREP packet builders, and it does not own a competing operational truth model.
+- **Hardening:** added a class-level `DATA BOUNDARY:` contract comment plus an inline "do not expand" guard on the accepted HRHB exception; added `tests/diplomacy_modal_boundary.test.ts` covering boundary comments, forbidden imports, absence of the W5 raw-state seam, exception documentation, functional render, snapshot fraction correctness, and empty-state behavior.
+- **Verification:** targeted `DiplomacyModal` boundary tests passed; full Vitest reached 213/213 files and 2980/2980 tests; `npx.cmd tsc --noEmit -p tsconfig.json` and `npm.cmd run build` clean.
+- **Report:** `docs/40_reports/implemented/20260407_V08TO09_DIPLOMACY_MODAL_BOUNDARY_AUDIT.md`

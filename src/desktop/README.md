@@ -22,6 +22,9 @@ npm run desktop:startup-snapshot:build
 # Run the canonical desktop release/build verification path used by CI.
 npm run desktop:release:check
 
+# Build the unpacked packaged-desktop artifact through the canonical guard path.
+npm run desktop:package:dir
+
 # Run the desktop app (runs desktop:sim:build then Electron)
 npm run desktop
 ```
@@ -29,7 +32,12 @@ npm run desktop
 ## Data paths
 
 - **Dev (unpackaged):** Map app is served from `dist/tactical-map/`. Data and assets are read from project root `data/derived/` and `assets/` (protocol resolves `/data/derived/*` and `/assets/*` to repo).
-- **Packaged:** App and data are under `resources/` (see electron-builder config in package.json if added).
+- **Packaged:** The unpacked packaged build is produced by `npm run desktop:package:dir`. It first runs `desktop:release:check`, then packages Electron with `electron-builder`. Runtime assets live under `resources/` with this explicit contract:
+  - `resources/app/` <- `dist/tactical-map/`
+  - `resources/app/warroom/` <- `dist/warroom/`
+  - `resources/dist/desktop/desktop_sim.cjs`
+  - `resources/data/derived/`, `resources/data/source/`, `resources/data/ui/`
+  - `resources/assets/`
 
 ## Phase 2: Play myself
 
@@ -44,5 +52,7 @@ Sim runs in the main process via `dist/desktop/desktop_sim.cjs` (built by `npm r
 - `apr_1992` desktop `New Campaign` startup now consumes the baked artifact at `data/derived/startup/apr_1992_initial_save.json`.
 - `npm run desktop:sim:build` validates that artifact against canonical builder truth before bundling `dist/desktop/desktop_sim.cjs`.
 - `npm run desktop:release:check` is now the canonical shipped-build verification path. It runs the guarded desktop sim build plus the required map and Warroom bundles.
+- `npm run desktop:package:dir` is the canonical packaged-desktop contract. It cannot bypass `desktop:release:check`, and it packages the runtime files into the `resources/` layout that `electron-main.cjs` already expects.
+- The current package productization target is an unsigned Windows `dir` build. Installer publishing, code signing, and store/distribution flow are still intentionally deferred.
 - If the artifact is stale or missing, the build aborts and instructs the user to run `npm run desktop:startup-snapshot:build`.
 - The builder remains the primary truth source; the baked startup snapshot is a one-way derived product artifact.

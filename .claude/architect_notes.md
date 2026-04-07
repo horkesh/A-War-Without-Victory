@@ -255,6 +255,11 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - CI rule: if the repo has a GitHub Actions path that represents branch health for desktop shipping, that workflow must run `desktop:release:check` on PRs and `main`. Local-only guarding is not enough once a baked startup artifact becomes part of product truth.
 - Keep regeneration explicit and enforcement automatic. CI may validate and fail, but it should not silently regenerate the baked startup snapshot during branch-health checks.
 
+**Closed: Desktop Packaging / electron-builder Contract Productization (2026-04-07)**
+- Accepted packaging line: `desktop:package:dir` is now the one canonical packaged-desktop command, and it must inherit `desktop:release:check` before `electron-builder` runs. Packaging may not invent a second startup/build path.
+- Packaging rule: when runtime already assumes a packaged `resources/` layout, codify that exact layout under one guarded builder contract instead of leaving future installer work to guess the file-copy story. `package.json` now owns that layout explicitly.
+- Scope discipline matters: this lane productized an unsigned Windows `dir` target and made packaged mode real without pretending installer signing, publishing, or cross-platform packaging are already solved.
+
 ### Warroom React Shell Recovery / Feature Parity — OPEN
 
 - **Problem:** The rebuilt React-owned Warroom shell is functional enough to launch and hand off correctly, but it remains materially behind the older corktable-era experience.
@@ -307,6 +312,11 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - `MagazineModal` was the last Warroom surface with a direct `gameState.political.*` read path. That bypass is now gone: five Phase 0 helper functions were deleted and `renderPhase0()` is a no-data stub.
 - Accepted boundary: war phase remains a flavor wrapper over `extractWarData(...)`; pre-war phase must not read live political state directly. `MagazineModal` is not a second intelligence surface, not a SITREP owner, and not a special exception to the player-safe entry rule.
 - Wording discipline: do not overclaim this as "all narrative drift is gone." The true reusable lesson is narrower: Warroom live-data entry is now uniformly bounded; flavor wrappers may still exist, but they must sit on top of player-safe facts instead of bypassing them.
+
+**Closed: Commander Explanation Surfaces Phase 5 - DiplomacyModal Boundary Audit and Narrowing (2026-04-07)**
+- The live seam was narrower than the earlier reporting lanes but still real: `DiplomacyModal.renderWashingtonTracker()` computed RS territory share by reading `gameState.political.political_controllers` directly inside the modal.
+- Accepted boundary after cleanup: live diplomatic/Warroom data should enter through `extractWarData(...)` first, with only documented narrow exceptions for shell entry points (`meta.*`, `getPlayerFaction()`) and the HRHB own-faction `capability_profile` read. Exceptions must be called out inline with a "do not expand" guard.
+- Reusable lesson: if a Warroom shell needs another publicly observable fact that is not sensitive to fog-of-war, extend `WarDataSnapshot` with a player-safe extractor (here `observedEnemyTerritoryPct`) instead of adding another ad hoc raw-state loop to the modal.
 
 **Closed: Save/Load and Replay Deep Hardening (2026-04-07)**
 - Canonical desktop persistence rule: if `currentGameStateJson` is treated as the live authoritative save blob, every mutation path must round-trip through `deserializeState(...)` and `serializeState(...)`. Raw `JSON.parse(...)` / `JSON.stringify(...)` on write paths is not an acceptable shortcut because it bypasses canonical ordering, validation, and migration/default behavior.

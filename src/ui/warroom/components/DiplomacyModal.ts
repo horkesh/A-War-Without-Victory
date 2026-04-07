@@ -74,6 +74,14 @@ function conditionRow(
 // DiplomacyModal
 // ---------------------------------------------------------------------------
 
+/**
+ * DATA BOUNDARY: extractWarData() is the primary data source for this file.
+ * Direct gameState reads are permitted ONLY for:
+ *   - meta.* fields (turn, phase — not operational data)
+ *   - getPlayerFaction() and extractWarData() entry points
+ *   - HRHB capability_profile (own-faction only when player is HRHB — see comment in renderHRHB)
+ * This file must NOT import from operational_sitrep_views.ts or command_briefing_views.ts.
+ */
 export class DiplomacyModal {
     private gameState: GameState;
     private readonly factionPoliticalLabels = {
@@ -266,6 +274,10 @@ export class DiplomacyModal {
         modal.appendChild(this.renderWashingtonTracker(snap, 'HRHB'));
 
         // CAPABILITY OUTLOOK
+        // BOUNDARY EXCEPTION: reads own-faction capability profile directly from gameState.
+        // Intentional: player is HRHB at this branch, so no cross-faction visibility;
+        // capability_profile is not part of the WarDataSnapshot contract.
+        // Do not expand this exception to other factions or other raw-state fields.
         const capProfile = this.gameState.factions.find(f => f.id === 'HRHB')?.capability_profile;
         const currentEquipAccess = capProfile?.equipment_access ?? 0;
         const currentCroatianSupport = capProfile?.croatian_support ?? 0;
@@ -403,16 +415,9 @@ export class DiplomacyModal {
             w4Detail = 'UNKNOWN';
         }
 
-        // W5: RS territory > 40% (Tier 2)
-        // We compute RS territory from political_controllers
-        const controllers = this.gameState.political.political_controllers ?? {};
-        const sids = Object.keys(controllers).sort();
-        const total = sids.length || 1;
-        let rsCount = 0;
-        for (const sid of sids) {
-            if (controllers[sid] === 'RS') rsCount++;
-        }
-        const rsTerrPct = (rsCount / total) * 100;
+        // W5: RS territory > 40% (Tier 2 — publicly observable; read from player-safe snapshot)
+        const rsFraction = snap.observedEnemyTerritoryPct['RS'] ?? 0;
+        const rsTerrPct = rsFraction * 100;
         const w5Met = rsTerrPct > 40;
         const w5Detail = `~${rsTerrPct.toFixed(0)}%`;
 

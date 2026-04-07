@@ -82,6 +82,7 @@
     "desktop:startup-snapshot:build": "tsx tools/scenario_runner/build_startup_snapshot.ts --write",
     "desktop:startup-snapshot:check": "tsx tools/scenario_runner/build_startup_snapshot.ts --check",
     "desktop:release:check": "npm run desktop:map:build && npm run desktop:sim:build && npm run warroom:build",
+    "desktop:package:dir": "npm run desktop:release:check && node .\\node_modules\\electron-builder\\cli.js --dir --publish never",
     "desktop": "npm run desktop:release:check && node .\\node_modules\\electron\\cli.js .",
     "dev:warroom": "node .\\node_modules\\vite\\bin\\vite.js --config src/ui/warroom/vite.config.ts",
     "warroom:build": "node .\\node_modules\\vite\\bin\\vite.js build --config src/ui/warroom/vite.config.ts && tsx tools/ui/warroom_stage_assets.ts",
@@ -283,6 +284,76 @@
     "map:geo:g1:overlay": "tsx scripts/map/geo/phase_g1_overlay_pack.ts",
     "map:geo:g1:serve": "npx http-server -p 8081 -c-1",
     "prepare": "husky"
+  },
+  "build": {
+    "appId": "com.awwv.desktop",
+    "productName": "A War Without Victory",
+    "npmRebuild": false,
+    "directories": {
+      "output": "dist-packaged"
+    },
+    "files": [
+      "package.json",
+      "src/desktop/electron-main.cjs",
+      "src/desktop/preload.cjs"
+    ],
+    "extraResources": [
+      {
+        "from": "dist/desktop",
+        "to": "dist/desktop",
+        "filter": [
+          "desktop_sim.cjs"
+        ]
+      },
+      {
+        "from": "dist/tactical-map",
+        "to": "app",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "dist/warroom",
+        "to": "app/warroom",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "data/derived",
+        "to": "data/derived",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "data/source",
+        "to": "data/source",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "data/ui",
+        "to": "data/ui",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "assets",
+        "to": "assets",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "signAndEditExecutable": false,
+      "target": [
+        "dir"
+      ]
+    }
   },
   "ts-node": {
     "esm": true,

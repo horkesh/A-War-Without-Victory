@@ -207,6 +207,13 @@ export interface WarDataSnapshot {
     exposedFrontSettlements: SettlementId[];
     /** Officers by faction (fog of war: only player faction populated). Phase E. */
     officersByFaction?: Partial<Record<FactionId, OfficerListEntry[]>>;
+
+    /**
+     * Tier 2 observation: each faction's share of total political_controllers OSIDs.
+     * Publicly visible — territory control is observable by all sides.
+     * Example: { RS: 0.62, RBiH: 0.28, HRHB: 0.10 }
+     */
+    observedEnemyTerritoryPct: Partial<Record<FactionId, number>>;
 }
 
 // ---------------------------------------------------------------------------
@@ -300,6 +307,9 @@ export function extractWarData(
     // --- Officers by faction (fog of war: player faction only) ---
     const officersByFaction = extractOfficersByFaction(gameState, playerFaction);
 
+    // --- Observed enemy territory % (Tier 2: publicly visible to all sides) ---
+    const observedEnemyTerritoryPct = extractObservedTerritoryPct(gameState);
+
     return {
         playerFaction,
         turn,
@@ -318,6 +328,7 @@ export function extractWarData(
         brigadeMovement,
         exposedFrontSettlements,
         officersByFaction: Object.keys(officersByFaction).length > 0 ? officersByFaction : undefined,
+        observedEnemyTerritoryPct,
     };
 }
 
@@ -739,6 +750,31 @@ function extractOfficersByFaction(
     }
     list.sort((a, b) => sc(a.id, b.id));
     return list.length > 0 ? { [playerFaction]: list } : {};
+}
+
+/**
+ * Tier 2 observation: compute each faction's share of total political_controllers OSIDs.
+ * Territory control is publicly visible — no fog guard needed.
+ * Returns {} if political_controllers is absent or empty.
+ */
+function extractObservedTerritoryPct(state: GameState): Partial<Record<FactionId, number>> {
+    const controllers = state.political.political_controllers ?? {};
+    const keys = Object.keys(controllers);
+    const total = keys.length;
+    if (total === 0) return {};
+
+    const counts = new Map<FactionId, number>();
+    for (const key of keys) {
+        const faction = controllers[key] as FactionId | null | undefined;
+        if (!faction) continue;
+        counts.set(faction, (counts.get(faction) ?? 0) + 1);
+    }
+
+    const result: Partial<Record<FactionId, number>> = {};
+    for (const [factionId, count] of Array.from(counts.entries()).sort(([a], [b]) => sc(a, b))) {
+        result[factionId] = count / total;
+    }
+    return result;
 }
 
 function extractExposedFront(state: GameState, pf: FactionId): SettlementId[] {
