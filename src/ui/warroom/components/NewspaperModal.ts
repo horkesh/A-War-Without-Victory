@@ -12,9 +12,10 @@ import { PHASE0_TICKER_EVENTS } from '../content/ticker_events.js';
 import { fallbackWarHeadline, pickBestWarHeadline } from '../content/war_headline_templates.js';
 import { generateTurnEvents } from '../data/turn_event_generator.js';
 import { getPreviousSnapshot, getLastTurnReport } from '../data/warroom_state.js';
+import { extractWarData } from '../data/war_data_extractor.js';
 import { FACTION_COLORS, factionCssClass, getPlayerFaction, toTickerTurn, turnToDateString } from './warroom_utils.js';
 import { getWarroomFactionIdentity } from './warroom_identity.js';
-import { getPlayerSafeCorpsName, getPlayerSafeOfficerName } from '../../map/utils/playerSafeText.js';
+import { getPlayerSafeOfficerName } from '../../map/utils/playerSafeText.js';
 
 interface NewspaperContent {
     factionId: string;
@@ -31,6 +32,19 @@ interface NewspaperModalOptions {
     startBrief?: boolean;
 }
 
+/**
+ * DATA BOUNDARY: NewspaperModal permitted/forbidden reads.
+ *
+ * PERMITTED:
+ *   - this.gameState.meta.*                          — phase gate, turn display (meta.* always permitted)
+ *   - this.gameState.political.phase0_events_log     — Phase 0 only, peace-phase gated (accepted Phase 0 exception)
+ *   - this.gameState.factions[*].declaration_pressure — Phase 0 / peace only (accepted Phase 0 exception)
+ *   - extractWarData(this.gameState, playerFaction)  — sole war-phase live data entry point
+ *
+ * FORBIDDEN:
+ *   - Direct this.gameState.military.* reads in war-phase display paths
+ *   - Direct this.gameState.political.* reads in war-phase display paths
+ */
 export class NewspaperModal {
     private gameState: GameState;
     private options: NewspaperModalOptions;
@@ -145,13 +159,10 @@ export class NewspaperModal {
         const succession = report?.details?.officer_succession;
         if (!succession) return [];
 
-        const nameById = new Map<string, string>();
-        const data = this.gameState.military.named_officer_data ?? [];
-        for (const o of data) {
-            nameById.set(o.id, getPlayerSafeOfficerName(o.name));
-        }
+        const snap = extractWarData(this.gameState, playerFaction as FactionId);
+        const nameById = new Map<string, string>(Object.entries(snap.officerNamesById));
         const corpsName = (corpsId: string): string =>
-            getPlayerSafeCorpsName(this.gameState.military.formations?.[corpsId]?.name ?? null, corpsId);
+            snap.ownForces.formationDetails.find(fd => fd.id === corpsId)?.name ?? corpsId;
 
         const lines: string[] = [];
         const replacements = succession.replacements ?? [];

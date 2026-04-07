@@ -161,7 +161,136 @@ function fetchLocalText(url) {
   });
 }
 
+function waitForWindowLoad(win, expectedUrl, label) {
+  return new Promise((resolve, reject) => {
+    let settled = false;
+
+    const cleanup = () => {
+      win.webContents.removeListener('did-fail-load', onFail);
+      win.webContents.removeListener('did-finish-load', onFinish);
+      win.removeListener('closed', onClosed);
+      clearTimeout(timeoutId);
+    };
+
+    const finish = (result) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      resolve(result);
+    };
+
+    const fail = (error) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      reject(error);
+    };
+
+    const onFail = (_event, errorCode, errorDescription, validatedURL) => {
+      fail(new Error(`${label} failed to load ${validatedURL || expectedUrl}: [${errorCode}] ${errorDescription}`));
+    };
+
+    const onFinish = () => {
+      const loadedUrl = win.webContents.getURL();
+      if (loadedUrl !== expectedUrl) {
+        fail(new Error(`${label} loaded unexpected URL ${loadedUrl}; expected ${expectedUrl}`));
+        return;
+      }
+      finish({
+        loaded_url: loadedUrl,
+        title: win.getTitle() || null,
+      });
+    };
+
+    const onClosed = () => {
+      fail(new Error(`${label} closed before finishing load`));
+    };
+
+    const timeoutId = setTimeout(() => {
+      fail(new Error(`${label} timed out waiting for did-finish-load at ${expectedUrl}`));
+    }, 15000);
+
+    win.webContents.on('did-fail-load', onFail);
+    win.webContents.on('did-finish-load', onFinish);
+    win.on('closed', onClosed);
+  });
+}
+
+function createMainWindow(options = {}) {
+  const { show = true, openDevTools = true } = options;
+  const warroomUrl = 'awwv://warroom/index.html';
+
+  const win = new BrowserWindow({
+    width: 1400,
+    height: 900,
+    show,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.cjs'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+
+  win.loadURL(warroomUrl);
+
+  // Clear HTTP cache so the tactical map iframe always loads the latest bundle from the map server.
+  win.webContents.session.clearCache().catch(() => { });
+
+  if (openDevTools) {
+    const devToolsPromise = win.webContents.openDevTools({ mode: 'detach' });
+    if (devToolsPromise && typeof devToolsPromise.catch === 'function') {
+      devToolsPromise.catch(() => { });
+    }
+  }
+
+  const template = [
+    {
+      label: 'File',
+      submenu: [
+        {
+          label: 'Load scenario...', click: async () => {
+            try {
+              const result = await showScenarioDialog(win);
+              if (result.canceled || !result.filePaths.length) return;
+              const sim = getDesktopSim();
+              const { state } = await sim.loadScenarioFromPath(result.filePaths[0], getBaseDir());
+              currentGameStateJson = sim.serializeState(state);
+              sendGameStateToRenderer(currentGameStateJson);
+            } catch (e) { console.error('Load scenario failed:', e); }
+          }
+        },
+        {
+          label: 'Load state file...', click: async () => {
+            try {
+              const result = await showStateFileDialog(win);
+              if (result.canceled || !result.filePaths.length) return;
+              const sim = getDesktopSim();
+              const { state } = await sim.loadStateFromPath(result.filePaths[0]);
+              currentGameStateJson = sim.serializeState(state);
+              sendGameStateToRenderer(currentGameStateJson);
+            } catch (e) { console.error('Load state failed:', e); }
+          }
+        },
+        { type: 'separator' },
+        {
+          label: 'Open tactical map window', click: () => {
+            openTacticalMapWindow();
+          }
+        },
+        { type: 'separator' },
+        { label: 'Quit', role: 'quit' },
+      ],
+    },
+  ];
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
+  mainWindow = win;
+  win.on('closed', () => { mainWindow = null; });
+  return win;
+}
+
 async function runPackagedRuntimeProbe() {
+  const warroomUrl = 'awwv://warroom/index.html';
   if (!app.isPackaged) {
     throw new Error('runtime probe must run against the packaged desktop artifact');
   }
@@ -169,8 +298,8 @@ async function runPackagedRuntimeProbe() {
   const requiredFiles = [
     ['desktopSimBundle', path.join(getBaseDir(), 'dist', 'desktop', 'desktop_sim.cjs')],
     ['mapIndex', path.join(getMapAppDir(), 'index.html')],
-    ['warroomIndex', path.join(getWarroomAppDir(), 'index.html')],
     ['startupSnapshot', path.join(getDataDerivedDir(), 'startup', 'apr_1992_initial_save.json')],
+    ['warroomIndex', path.join(getWarroomAppDir(), 'index.html')],
   ].map(([key, filePath]) => ({
     key,
     relative_path: path.relative(getBaseDir(), filePath).replace(/\\/g, '/'),
@@ -196,6 +325,10 @@ async function runPackagedRuntimeProbe() {
     throw new Error(`packaged tactical map server returned ${snapshotResponse.statusCode} for startup snapshot`);
   }
 
+  const probeWindow = createMainWindow({ show: false, openDevTools: false });
+  const windowLoad = await waitForWindowLoad(probeWindow, warroomUrl, 'packaged main window');
+  probeWindow.destroy();
+
   const manifest = {
     probe: 'awwv_desktop_runtime_probe',
     mode: 'packaged',
@@ -210,6 +343,13 @@ async function runPackagedRuntimeProbe() {
       recruitment_ready: Boolean(state?.military?.recruitment_state),
       turn: state?.meta?.turn ?? null,
     },
+    window_checks: [
+      {
+        route: warroomUrl,
+        status: 'did-finish-load',
+        title: windowLoad.title,
+      },
+    ],
   };
 
   process.stdout.write(`AWWV_DESKTOP_RUNTIME_PROBE_OK ${JSON.stringify(manifest)}\n`);
@@ -369,69 +509,7 @@ function autoSave() {
 }
 
 function createWindow() {
-  const win = new BrowserWindow({
-    width: 1400,
-    height: 900,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.cjs'),
-      contextIsolation: true,
-      nodeIntegration: false,
-    },
-  });
-
-  win.loadURL('awwv://warroom/index.html');
-
-  // Clear HTTP cache so the tactical map iframe always loads the latest bundle from the map server.
-  win.webContents.session.clearCache().catch(() => { });
-
-  const devToolsPromise = win.webContents.openDevTools({ mode: 'detach' });
-  if (devToolsPromise && typeof devToolsPromise.catch === 'function') {
-    devToolsPromise.catch(() => { });
-  }
-
-  const template = [
-    {
-      label: 'File',
-      submenu: [
-        {
-          label: 'Load scenario...', click: async () => {
-            try {
-              const result = await showScenarioDialog(win);
-              if (result.canceled || !result.filePaths.length) return;
-              const sim = getDesktopSim();
-              const { state } = await sim.loadScenarioFromPath(result.filePaths[0], getBaseDir());
-              currentGameStateJson = sim.serializeState(state);
-              sendGameStateToRenderer(currentGameStateJson);
-            } catch (e) { console.error('Load scenario failed:', e); }
-          }
-        },
-        {
-          label: 'Load state file...', click: async () => {
-            try {
-              const result = await showStateFileDialog(win);
-              if (result.canceled || !result.filePaths.length) return;
-              const sim = getDesktopSim();
-              const { state } = await sim.loadStateFromPath(result.filePaths[0]);
-              currentGameStateJson = sim.serializeState(state);
-              sendGameStateToRenderer(currentGameStateJson);
-            } catch (e) { console.error('Load state failed:', e); }
-          }
-        },
-        { type: 'separator' },
-        {
-          label: 'Open tactical map window', click: () => {
-            openTacticalMapWindow();
-          }
-        },
-        { type: 'separator' },
-        { label: 'Quit', role: 'quit' },
-      ],
-    },
-  ];
-  const menu = Menu.buildFromTemplate(template);
-  Menu.setApplicationMenu(menu);
-  mainWindow = win;
-  win.on('closed', () => { mainWindow = null; });
+  createMainWindow({ show: true, openDevTools: true });
 }
 
 function openTacticalMapWindow(mode = 'operational') {
@@ -664,6 +742,8 @@ function registerProtocol() {
 }
 
 app.whenReady().then(() => {
+  registerProtocol();
+
   if (RUNTIME_PROBE_MODE) {
     runPackagedRuntimeProbe()
       .then(() => {
@@ -675,8 +755,6 @@ app.whenReady().then(() => {
       });
     return;
   }
-
-  registerProtocol();
 
   // Phase 3: Play myself — load scenario, load state, advance turn
   ipcMain.handle('load-scenario-dialog', async (_event) => {

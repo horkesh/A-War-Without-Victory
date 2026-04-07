@@ -270,6 +270,11 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - Accepted CI line: `.github/workflows/desktop-release-guard.yml` now keeps Ubuntu on `desktop:release:check` and adds a dependent Windows packaged-runtime job that runs `desktop:package:probe`. CI now proves packaged boot/resource truth instead of stopping at build-input validation.
 - Keep the truth chain singular: no hidden snapshot regeneration in CI, no second packaged-runtime path, and no CI-only substitute probe. Windows CI should execute the same packaged-runtime contract developers run locally.
 
+**Closed: Packaged Desktop UI Smoke + Window Load Contract (2026-04-07)**
+- Once packaged-runtime smoke exists, the next confidence step is to promote the real initial `BrowserWindow` load into that same canonical probe. Process boot plus resource existence is weaker than proving protocol registration and window-load order actually work together in packaged mode.
+- Accepted window-load line: `desktop:package:probe` now requires the real initial Warroom route (`awwv://warroom/index.html`) to reach `did-finish-load` in packaged mode and records that proof under deterministic `window_checks`.
+- Keep the path singular: do not add a second UI-smoke command for packaged desktop if the existing packaged-runtime probe can be truthfully strengthened instead.
+
 ### Warroom React Shell Recovery / Feature Parity — OPEN
 
 - **Problem:** The rebuilt React-owned Warroom shell is functional enough to launch and hand off correctly, but it remains materially behind the older corktable-era experience.
@@ -337,6 +342,11 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - The remaining turn-advance shell seam was in `ClickableRegionManager.generateThisWeekPreview()`: the coordinator already had `extractWarData(...)` in scope but still re-derived "formations with WIA returning" from raw `state.military.formations`.
 - Accepted boundary after cleanup: war-phase turn-preview display data in `ClickableRegionManager` must flow through `extractWarData(...)`. `state.meta.*` shell metadata and faction identity reads remain the only accepted structural exceptions inside the coordinator.
 - `OwnForcesSnapshot.wiaFormationCount` is now the canonical field for "formations with WIA returning." Do not reintroduce raw formation loops for that display fact elsewhere; extend the snapshot first and keep the shell coordinator presentation-only.
+
+**Closed: Commander Explanation Surfaces Phase 8 - NewspaperModal Officer Boundary (2026-04-07)**
+- The remaining named war-phase modal seam was `NewspaperModal.getOfficerSuccessionLines()`: it still read `military.named_officer_data` and `military.formations` directly for officer and corps names even though the modal was otherwise a presentation surface.
+- Accepted boundary after cleanup: war-phase `NewspaperModal` now follows the same snapshot-first rule as the other Warroom modals. `extractWarData(...).officerNamesById` owns officer name lookup, and corps names are resolved through snapshot formation details rather than direct military-state reads.
+- `WarDataSnapshot.officerNamesById` is now the canonical player-safe officer-name lookup for Warroom display surfaces. If another surface needs officer names, extend and consume the snapshot rather than reopening `named_officer_data` directly.
 
 **Closed: Save/Load and Replay Deep Hardening (2026-04-07)**
 - Canonical desktop persistence rule: if `currentGameStateJson` is treated as the live authoritative save blob, every mutation path must round-trip through `deserializeState(...)` and `serializeState(...)`. Raw `JSON.parse(...)` / `JSON.stringify(...)` on write paths is not an acceptable shortcut because it bypasses canonical ordering, validation, and migration/default behavior.

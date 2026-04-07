@@ -24780,3 +24780,21 @@ Main Staff HQ was Han Pijesak, not Rogatica. Tracked for OOB correction pass.
 - **Hardening:** added `tests/warroom_turn_preview_boundary.test.ts` with 13 tests covering the source boundary, WIA count correctness, null safety, faction isolation, and the new file-level boundary contract.
 - **Verification:** full Vitest reached 215/215 files and 3003/3003 tests; `npx.cmd tsc --noEmit -p tsconfig.json` and `npm.cmd run build` clean.
 - **Report:** `docs/40_reports/implemented/20260407_V08TO09_WARROOM_TURN_PREVIEW_BOUNDARY.md`
+
+**[2026-04-07] v0.8-to-v0.9 Packaged Desktop UI Smoke + Window Load Contract COMPLETE**
+
+- **Summary:** Strengthened the canonical packaged-runtime smoke so success now requires the real initial packaged `BrowserWindow` to reach `did-finish-load` on `awwv://warroom/index.html`, not just process boot, file existence, and startup/resource checks.
+- **Packaged window seam removed:** `src/desktop/electron-main.cjs` now exposes `createMainWindow(...)` plus deterministic `waitForWindowLoad(...)`, and the packaged-runtime probe path records explicit `window_checks` proof for the actual initial Warroom route. This also fixed a stale duplicate block that caused a packaged main-process parse error and moved protocol registration ahead of the probe branch so packaged window resolution works in probe mode.
+- **Ownership after change:** `desktop:package:probe` remains the sole packaged-runtime smoke path. It still layers on top of `desktop:package:dir`, but now owns the initial packaged-window load contract as part of the same canonical probe.
+- **Hardening:** extended `tools/desktop_packaged_runtime_probe.mjs` to require the `window_checks` manifest entry and updated `tests/desktop_packaged_runtime_probe.test.ts` to guard the real initial window-load contract. Updated `src/desktop/README.md` so the packaged-runtime contract truthfully documents this stronger probe.
+- **Verification:** `node --check src/desktop/electron-main.cjs`, targeted packaged-probe tests, `npm.cmd run desktop:startup-snapshot:check`, `npm.cmd run desktop:release:check`, `npm.cmd run desktop:package:probe`, full Vitest (216/216 files, 3016/3016 tests), `npx.cmd tsc --noEmit -p tsconfig.json`, and `npm.cmd run build` all passed.
+- **Report:** `docs/40_reports/implemented/20260407_V08TO09_PACKAGED_DESKTOP_UI_WINDOW_LOAD_CONTRACT.md`
+
+**[2026-04-07] v0.8-to-v0.9 Commander Explanation Surfaces Phase 8 - NewspaperModal Officer Boundary COMPLETE**
+
+- **Summary:** Closed the last named war-phase modal raw-state seam in Warroom. `NewspaperModal.getOfficerSuccessionLines()` no longer reads `military.named_officer_data` or `military.formations` directly; officer and corps names now come from the canonical war snapshot.
+- **Boundary seam removed:** added `officerNamesById: Record<string, string>` plus deterministic `extractOfficerNamesById()` to `src/ui/warroom/data/war_data_extractor.ts`, then rewired `src/ui/warroom/components/NewspaperModal.ts` so war-phase officer-succession lines consume `extractWarData(...)` for officer and corps-name lookup. Added a class-level `DATA BOUNDARY:` contract comment and removed the unused `getPlayerSafeCorpsName` dependency.
+- **Ownership after change:** war-phase `NewspaperModal` now follows the same rule as the other Warroom modal/shell surfaces: live display data enters through `extractWarData(...)`, while the accepted direct state reads are limited to `meta.*` and the existing peace/Phase 0 exceptions.
+- **Hardening:** added `tests/newspaper_modal_officer_boundary.test.ts` with 13 tests covering forbidden raw military reads, boundary comments, `officerNamesById` correctness, and null-safe snapshot behavior.
+- **Verification:** full Vitest reached 216/216 files and 3016/3016 tests; `npx.cmd tsc --noEmit -p tsconfig.json` and `npm.cmd run build` clean.
+- **Report:** `docs/40_reports/implemented/20260407_V08TO09_NEWSPAPER_MODAL_OFFICER_BOUNDARY.md`

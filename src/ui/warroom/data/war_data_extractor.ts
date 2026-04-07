@@ -241,6 +241,33 @@ export interface WarDataSnapshot {
 
     /** IVP diplomatic pressure summary (Tier 2: publicly observable). */
     ivpState: IvpStateSnapshot;
+
+    /** Officer name lookup: maps officer ID → player-safe display name.
+     *  Sourced from military.named_officer_data (Tier 2 — own faction names visible to player).
+     *  Returns empty record when named_officer_data is absent or empty. */
+    officerNamesById: Record<string, string>;
+}
+
+// ---------------------------------------------------------------------------
+// Officer name sub-extractor
+// ---------------------------------------------------------------------------
+
+function extractOfficerNamesById(state: GameState): Record<string, string> {
+    const data = state.military?.named_officer_data ?? [];
+    const result: Record<string, string> = {};
+    const sorted = [...data].sort((a, b) => {
+        const aId = typeof (a as { id?: string }).id === 'string' ? (a as { id: string }).id : '';
+        const bId = typeof (b as { id?: string }).id === 'string' ? (b as { id: string }).id : '';
+        return aId < bId ? -1 : aId > bId ? 1 : 0;
+    });
+    for (const o of sorted) {
+        const id = typeof (o as { id?: string }).id === 'string' ? (o as { id: string }).id : '';
+        if (!id) continue;
+        result[id] = getPlayerSafeOfficerName(
+            typeof (o as { name?: string }).name === 'string' ? (o as { name: string }).name : null,
+        );
+    }
+    return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -358,6 +385,9 @@ export function extractWarData(
     // --- IVP state (Tier 2: publicly observable diplomatic pressure) ---
     const ivpState = extractIvpState(gameState);
 
+    // --- Officer name lookup (Tier 2 — own faction names, used by NewspaperModal succession lines) ---
+    const officerNamesById = extractOfficerNamesById(gameState);
+
     return {
         playerFaction,
         turn,
@@ -378,6 +408,7 @@ export function extractWarData(
         officersByFaction: Object.keys(officersByFaction).length > 0 ? officersByFaction : undefined,
         observedEnemyTerritoryPct,
         ivpState,
+        officerNamesById,
     };
 }
 

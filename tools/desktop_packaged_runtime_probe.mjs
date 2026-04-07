@@ -51,4 +51,14 @@ if (!match) {
 }
 
 const manifest = JSON.parse(match[1]);
+const windowCheck = manifest?.window_checks?.find?.(
+  (entry) => entry?.route === 'awwv://warroom/index.html' && entry?.status === 'did-finish-load',
+);
+
+if (!windowCheck) {
+  throw new Error(
+    `Packaged desktop runtime probe manifest is missing the initial window-load proof.\n${JSON.stringify(manifest, null, 2)}`,
+  );
+}
+
 process.stdout.write(`${JSON.stringify(manifest, null, 2)}\n`);
