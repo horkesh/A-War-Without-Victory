@@ -12,6 +12,7 @@ import type { LoadedSettlementGraph } from '../map/settlements_parse.js';
 import { loadMunicipalityHqSettlement, loadOobBrigades } from '../scenario/oob_loader.js';
 import { buildSidToMunFromSettlements } from '../scenario/oob_early_war_entry.js';
 import { canonicalizeStartupState, createStateFromScenario } from '../scenario/scenario_runner.js';
+import { loadStartupSnapshotState } from '../scenario/startup_snapshot.js';
 import { shortestPathThroughFriendly } from '../sim/combat/brigade_movement.js';
 import { buildAdjacencyFromEdges, isSettlementSetContiguous } from '../sim/combat/war_adjacency.js';
 import { estimateAttackCost, type AttackEstimate } from '../sim/combat/combat_estimate.js';
@@ -94,7 +95,9 @@ export async function startNewCampaign(
 ): Promise<{ state: GameState }> {
     const key = scenarioKey in SCENARIO_KEY_TO_PATH ? scenarioKey : DEFAULT_DESKTOP_SCENARIO_KEY;
     const scenarioPath = join(baseDir, SCENARIO_KEY_TO_PATH[key]);
-    const state = await createStateFromScenario(scenarioPath, baseDir);
+    const state = key === 'apr_1992'
+        ? await loadStartupSnapshotState(baseDir, key)
+        : await createStateFromScenario(scenarioPath, baseDir);
 
     const factionIds = (state.factions ?? []).map((f) => f.id).sort();
     if (factionIds.length === 0) {

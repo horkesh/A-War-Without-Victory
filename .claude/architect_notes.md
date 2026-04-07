@@ -238,13 +238,11 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 
 ## Backlog Additions
 
-### Desktop New Game Start Snapshot — OPEN
-
-- **Problem:** `New Game` still runs full scenario-source initialization on every desktop launch instead of loading a baked April 1992 startup artifact.
-- **What is already fixed:** campaign birth is now canonicalized before `initial_save.json` is written or desktop state is returned, so the first save/load contract is honest even though the startup path still derives state at runtime.
-- **Why it matters:** Remaining pain is now startup cost / ownership clarity, not a birth-vs-load contract mismatch.
-- **Likely direction:** Bake a canonical campaign-start snapshot for the desktop `apr_1992` entrypoint, load that snapshot for `New Game`, then apply only minimal per-session overlays such as `player_faction` and desktop-only session state. Keep full scenario-source boot for dev/regeneration paths.
-- **Non-goal:** Do not special-case engine truth away in the core sim. The goal is to move fixed start-state work out of the normal desktop launch path, not to remove scenario initialization capabilities from tooling.
+**Closed: Baked April 1992 Startup Snapshot Productization (2026-04-07)**
+- Accepted ownership line: scenario authoring stays primary, `buildScenarioStartupState(...)` stays the canonical startup builder, and the baked April 1992 startup snapshot is a one-way derived product artifact that desktop consumes for `apr_1992`.
+- Product rule: the baked artifact must never become a competing truth source. Generation and drift checks both derive from the canonical builder; desktop consumes the artifact, but the builder remains the only authoritative producer.
+- Desktop startup is now easier to explain: load `data/derived/startup/apr_1992_initial_save.json`, apply minimal per-session overlays such as `player_faction` / recruitment state, then canonicalize before the UI receives the state.
+- The remaining startup-artifact debt is packaging/guardrails, not artifact ownership. Future work should focus on release/build validation of the snapshot rather than reintroducing mixed harness/product startup paths.
 
 ### Warroom React Shell Recovery / Feature Parity — OPEN
 
@@ -311,3 +309,9 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - Freshly built campaign-start state must be normalized onto the canonical save/load contract before it is treated as `initial_save.json` or returned to the desktop shell. Otherwise campaign birth can be weaker than the first loaded save.
 - Accepted startup rule: desktop-only overlays such as `player_faction` and recruitment seeding may still be applied after scenario build, but the result must be canonicalized before the UI receives it.
 - This lane did not ship a baked April 1992 snapshot. Snapshot productization remains a separate optimization/ownership lane. What closed here was the birth-vs-load contract mismatch.
+
+**Closed: Desktop Startup Artifact Decoupling via Canonical In-Memory Builder (2026-04-07)**
+- Accepted startup ownership line: `scenario_runner.ts` now has one canonical in-memory startup builder for scenario birth state, and `runScenario(...)` is the harness-only owner of `run_meta.json`, `initial_save.json`, and run-directory artifacts.
+- `createStateFromScenario(...)` default desktop path now consumes that shared builder directly instead of going through `runScenario(...)` and re-reading harness artifacts. This keeps desktop/harness startup truth aligned while removing product dependence on harness artifact generation.
+- This lane was the builder-boundary prerequisite for later snapshot productization. It removed the harness dependency first, then left the repo ready for a product-owned baked startup artifact on top of that boundary.
+

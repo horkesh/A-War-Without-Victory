@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { existsSync } from 'node:fs';
 import { readFile, rm } from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import test from 'node:test';
 
 import { startNewCampaign } from '../src/desktop/desktop_sim.js';
@@ -56,5 +56,27 @@ test('startNewCampaign returns canonicalized state before the first manual save'
         serializeState(hydrated),
         payload,
         'desktop new-campaign state should already be in canonical save/load form',
+    );
+});
+
+test('desktop startup path uses the in-memory startup builder instead of harness artifacts by default', async () => {
+    const source = await readFile(
+        resolve(process.cwd(), 'src', 'scenario', 'scenario_runner.ts'),
+        'utf8',
+    );
+    const createStateStart = source.indexOf('export async function createStateFromScenario(');
+    const createStateEnd = source.indexOf('export async function loadScenarioFromPath', createStateStart);
+    const createStateBody = source.slice(createStateStart, createStateEnd === -1 ? undefined : createStateEnd);
+
+    assert.ok(createStateStart >= 0, 'createStateFromScenario should exist');
+    assert.match(
+        createStateBody,
+        /const \{ state \} = await buildScenarioStartupState\(scenario, baseDir\);/,
+        'desktop initialStateOnly path should use the shared in-memory startup builder',
+    );
+    assert.match(
+        createStateBody,
+        /if \(!initialStateOnly\) \{\s*const result = await runScenario\(/s,
+        'harness artifact generation should remain the explicit non-default compatibility path',
     );
 });

@@ -24681,3 +24681,21 @@ Main Staff HQ was Han Pijesak, not Rogatica. Tracked for OOB correction pass.
 - **Hardening proof:** new `tests/desktop_campaign_start_contract.test.ts` proves (1) `initial_save.json` is already in canonical loaded-save form at campaign birth, (2) `createStateFromScenario(...)` matches that canonical initial save exactly, and (3) `startNewCampaign(...)` returns canonicalized state before the first manual save.
 - **Verification:** targeted startup/save contract tests passed; full Vitest, `npx.cmd tsc --noEmit -p tsconfig.json`, and `npm.cmd run build` passed.
 - **Report:** `docs/40_reports/implemented/20260407_V08TO09_DESKTOP_CAMPAIGN_START_CONTRACT_CLEANUP.md`
+
+**[2026-04-07] v0.8-to-v0.9 Startup Artifact Decoupling via Canonical In-Memory Builder COMPLETE**
+
+- **Summary:** Closed the next startup-architecture seam after campaign-birth save-contract hardening. Desktop `New Campaign` no longer depends on harness run-artifact generation to obtain canonical April 1992 birth state.
+- **Startup seam removed:** `src/scenario/scenario_runner.ts` now owns one canonical in-memory startup builder (`buildScenarioStartupState(...)`) for scenario birth state. `createStateFromScenario(...)` default desktop path consumes that builder directly instead of calling `runScenario(...)`, generating `run_meta.json` / `initial_save.json`, and re-reading the artifact.
+- **Ownership after change:** `runScenario(...)` remains the harness-only owner of run directories and artifacts; desktop startup now reuses the same startup truth without depending on harness-shaped artifact creation.
+- **Hardening proof:** `tests/desktop_campaign_start_contract.test.ts` now additionally guards the source boundary: desktop `initialStateOnly` startup must use `buildScenarioStartupState(...)`, while the harness artifact path remains explicit and non-default.
+- **Verification:** targeted startup/save contract tests passed; targeted persistence/migration Vitest passed; full Vitest, `npx.cmd tsc --noEmit -p tsconfig.json`, and `npm.cmd run build` passed.
+- **Report:** `docs/40_reports/implemented/20260407_V08TO09_STARTUP_ARTIFACT_DECOUPLING.md`
+
+**[2026-04-07] v0.8-to-v0.9 Baked April 1992 Startup Snapshot Productization COMPLETE**
+
+- **Summary:** Productized a real desktop-owned April 1992 startup artifact on top of the canonical startup builder. Desktop `New Campaign` for `apr_1992` now loads a committed baked startup snapshot instead of recomputing scenario-source startup state on every launch.
+- **Startup seam removed:** Added `src/scenario/startup_snapshot.ts` as the shared startup-artifact contract module and generated `data/derived/startup/apr_1992_initial_save.json` from the canonical builder. `src/desktop/desktop_sim.ts` now consumes that baked artifact for the `apr_1992` desktop entrypoint while leaving the builder as primary truth for regeneration and validation.
+- **Ownership after change:** scenario authoring truth stays in `data/scenarios/apr1992_definitive_52w.json`; `buildScenarioStartupState(...)` remains the canonical startup builder; the baked startup artifact is a one-way derived product artifact; desktop `startNewCampaign(...)` is the artifact consumer plus minimal overlay layer.
+- **Hardening:** added `tools/scenario_runner/build_startup_snapshot.ts` with explicit `--write` / `--check` modes and package scripts `desktop:startup-snapshot:build` / `desktop:startup-snapshot:check`; added `tests/startup_snapshot_contract.test.ts` covering byte-for-byte parity against builder truth, canonical loaded-save shape, source-boundary consumption in `startNewCampaign(...)`, and post-overlay save/load parity.
+- **Verification:** targeted startup snapshot contract tests passed; `npm.cmd run desktop:startup-snapshot:check` passed; full Vitest, typecheck, and build clean.
+- **Report:** `docs/40_reports/implemented/20260407_V08TO09_BAKED_STARTUP_SNAPSHOT_PRODUCTIZATION.md`

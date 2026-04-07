@@ -878,6 +878,518 @@ function collectActiveOperations(state: GameState): ActiveOperationSummary[] {
     return results;
 }
 
+type HistoricalNameLookup = (faction: string, mun_id: string, ordinal: number) => string | null;
+
+interface ScenarioStartupBuildResult {
+    state: GameState;
+    graph: Awaited<ReturnType<typeof loadSettlementGraph>>;
+    municipalityPopulation1991: MunicipalityPopulation1991 | undefined;
+    settlementPopulationBySid: Record<string, number> | undefined;
+    settlementDataRaw: Array<{ sid: string; ethnicity?: { composition?: Record<string, number> }; population?: number }> | undefined;
+    oobBrigades: OobBrigade[];
+    oobCorps: OobCorps[];
+    municipalityHqSettlement: Record<string, string>;
+    operationalData: Awaited<ReturnType<typeof loadOperationalData>> | null;
+    historicalNameLookup?: HistoricalNameLookup;
+    sidToMun: Map<string, string>;
+    initOverrideChangeCount: number;
+}
+
+export async function buildScenarioStartupState(
+    scenario: Awaited<ReturnType<typeof loadScenario>>,
+    baseDir: string
+): Promise<ScenarioStartupBuildResult> {
+    const controlPath = scenario.init_control ? resolveInitControlPath(scenario.init_control, baseDir) : undefined;
+    const formationsPath = scenario.init_formations ? resolveInitFormationsPath(scenario.init_formations, baseDir) : undefined;
+
+    // Use canonical graph for init and run so control keys match recruitment (sidToMun / factionHasPresenceInMun).
+    const graph = await loadSettlementGraph({
+        settlementsPath: join(baseDir, 'data/source/settlements_initial_master.json'),
+        edgesPath: join(baseDir, 'data/derived/settlement_edges.json')
+    });
+
+    let municipalityPopulation1991: MunicipalityPopulation1991 | undefined;
+    let settlementPopulationBySid: Record<string, number> | undefined;
+    try {
+        const popPath = join(baseDir, 'data/derived/municipality_population_1991.json');
+        const popRaw = JSON.parse(await readFile(popPath, 'utf8')) as {
+            by_mun1990_id?: Record<string, { total: number; breakdown?: { bosniak: number; serb: number; croat: number; other: number } }>;
+            by_municipality_id?: Record<string, { total: number; breakdown?: { bosniak: number; serb: number; croat: number; other: number }; mun1990_id?: string }>;
+        };
+        // Support both keying schemes: by_mun1990_id (kebab-case keys) or by_municipality_id (numeric keys with mun1990_id field)
+        const byMunDirect = popRaw.by_mun1990_id;
+        const byNumericId = popRaw.by_municipality_id;
+        const flat: MunicipalityPopulation1991 = {};
+        const addEntry = (munId: string, v: { total: number; breakdown?: { bosniak: number; serb: number; croat: number; other: number } }) => {
+            const b = v?.breakdown;
+            flat[munId] = { total: v?.total ?? 0, bosniak: b?.bosniak ?? 0, serb: b?.serb ?? 0, croat: b?.croat ?? 0, other: b?.other ?? 0 };
+        };
+        if (byMunDirect && Object.keys(byMunDirect).length > 0) {
+            for (const [munId, v] of Object.entries(byMunDirect)) addEntry(munId, v);
+        } else if (byNumericId) {
+            for (const [_numId, v] of Object.entries(byNumericId)) {
+                if (v?.mun1990_id) addEntry(v.mun1990_id, v);
+            }
+        }
+        municipalityPopulation1991 = flat;
+    } catch {
+        municipalityPopulation1991 = undefined;
+    }
+    try {
+        const censusPath = join(baseDir, 'data/derived/census_rolled_up_wgs84.json');
+        const censusRaw = JSON.parse(await readFile(censusPath, 'utf8')) as {
+            by_sid?: Record<string, { p?: number[] }>;
+        };
+        const bySid = censusRaw.by_sid ?? {};
+        const popBySid: Record<string, number> = {};
+        for (const [sid, v] of Object.entries(bySid)) {
+            const p = v?.p;
+            if (Array.isArray(p) && p.length > 0 && typeof p[0] === 'number' && p[0] > 0) {
+                popBySid[sid] = p[0];
+            }
+        }
+        settlementPopulationBySid = Object.keys(popBySid).length > 0 ? popBySid : undefined;
+    } catch {
+        settlementPopulationBySid = undefined;
+    }
+    let settlementDataRaw: Array<{ sid: string; ethnicity?: { composition?: Record<string, number> }; population?: number }> | undefined;
+    try {
+        const ethnicityData = await loadSettlementEthnicityData(join(baseDir, 'data/derived/settlement_ethnicity_data.json'));
+        const sids = Array.from(graph.settlements.keys()).sort((a, b) => a.localeCompare(b));
+        const raw: Array<{ sid: string; ethnicity?: { composition?: Record<string, number> }; population?: number }> = [];
+        for (const sid of sids) {
+            const entry = ethnicityData.by_settlement_id?.[sid];
+            const pop = settlementPopulationBySid?.[sid];
+            raw.push({
+                sid,
+                ...(entry?.composition ? { ethnicity: { composition: entry.composition } } : {}),
+                ...(pop != null ? { population: pop } : {})
+            });
+        }
+        settlementDataRaw = raw.length > 0 ? raw : undefined;
+    } catch {
+        settlementDataRaw = undefined;
+    }
+    let oobBrigades: OobBrigade[] = [];
+    let oobCorps: OobCorps[] = [];
+    let municipalityHqSettlement: Record<string, string> = {};
+    let operationalData: Awaited<ReturnType<typeof loadOperationalData>> | null = null;
+    try {
+        operationalData = await loadOperationalData(baseDir);
+    } catch {
+        // canonical_to_operational_map.json may be missing; location_osid will not be set
+    }
+    // Initialize data-driven terrain classification sets before combat runs.
+    // Keep Node-only file loading out of combat_math so browser map bundles can
+    // safely import the combat helpers without pulling in fs/path.
+    setUrbanOsidSet(loadUrbanOsidSet());
+    setForestOsidSet(loadForestOsidSet());
+    if (scenario.init_formations_oob || scenario.recruitment_mode === 'player_choice') {
+        oobBrigades = await loadOobBrigades(baseDir);
+        oobCorps = await loadOobCorps(baseDir);
+        municipalityHqSettlement = await loadMunicipalityHqSettlement(baseDir);
+    } else if (scenario.formation_spawn_directive) {
+        oobBrigades = await loadOobBrigades(baseDir);
+    }
+    /** Historical names for emergent brigades: (faction, home_mun) -> names[] in deterministic order. */
+    const oobNamesByFactionMun = new Map<string, string[]>();
+    for (const b of oobBrigades) {
+        const key = `${b.faction}:${b.home_mun}`;
+        const list = oobNamesByFactionMun.get(key) ?? [];
+        list.push(b.name);
+        oobNamesByFactionMun.set(key, list);
+    }
+    for (const list of oobNamesByFactionMun.values()) {
+        list.sort((a, b) => a.localeCompare(b));
+    }
+    const historicalNameLookup =
+        oobNamesByFactionMun.size > 0
+            ? (faction: string, mun_id: string, ordinal: number): string | null => {
+                const list = oobNamesByFactionMun.get(`${faction}:${mun_id}`);
+                const name = list != null && ordinal >= 1 && ordinal <= list.length ? list[ordinal - 1] : null;
+                return name ?? null;
+            }
+            : undefined;
+    let sidToMun = buildSidToMunFromSettlements(graph.settlements);
+    let initOverrideChangeCount = 0;
+    const canonicalSidToMun = sidToMun; // Preserve original canonical SID→mun map for later rebuilds
+    const warStartTurnForOrgPenSeeding =
+        scenario.start_lifecycle_phase === 'peace'
+            ? (scenario.peace_war_start_turn ?? (scenario.peace_referendum_turn ?? 0) + 4)
+            : 0;
+    const plannedWarStartBrigadeByMun = buildPlannedWarStartBrigadePresenceByMunicipality(
+        oobBrigades,
+        warStartTurnForOrgPenSeeding
+    );
+    let municipalityControllerByMun: Record<string, FactionId | null> | undefined;
+    if (controlPath) {
+        try {
+            municipalityControllerByMun = await loadInitialMunicipalityControllers1990(controlPath);
+        } catch {
+            municipalityControllerByMun = undefined;
+        }
+    }
+    const organizationalPenetrationSeed: OrganizationalPenetrationSeedOptions = {
+        ...(municipalityControllerByMun ? { municipality_controller_by_mun: municipalityControllerByMun } : {}),
+        ...(municipalityPopulation1991 ? { population_1991_by_mun: municipalityPopulation1991 } : {}),
+        ...(plannedWarStartBrigadeByMun ? { planned_war_start_brigade_by_mun: plannedWarStartBrigadeByMun } : {})
+    };
+
+    const initOptions =
+        scenario.init_control_mode
+            ? {
+                init_control_mode: scenario.init_control_mode,
+                ethnic_override_threshold: scenario.ethnic_override_threshold,
+                ...(baseDir ? { ethnicity_data_path: join(baseDir, 'data/derived/settlement_ethnicity_data.json') } : {})
+            }
+            : undefined;
+    let state = await createInitialGameState('harness-seed', controlPath, initOptions, {
+        baseDir,
+        organizationalPenetrationSeed,
+        settlementGraph: graph,
+        operationalData: operationalData ?? undefined
+    });
+
+    // After state creation, political_controllers may have been promoted to OSID keys
+    // (OSID-as-base-layer). Rebuild sidToMun as OSID→mun so factionHasPresenceInMun,
+    // resolveValidHqSid, and other consumers match the pc keying scheme.
+    if (operationalData?.operationalToCanonical) {
+        const pc = state.political.political_controllers ?? {};
+        const firstKey = Object.keys(pc)[0];
+        if (firstKey?.startsWith('op:')) {
+            sidToMun = buildOsidToMunFromReverseMap(
+                operationalData.operationalToCanonical,
+                canonicalSidToMun
+            );
+        }
+    }
+
+    // Apply ethnic-majority OSID control from derived data.
+    if (operationalData?.operationalToCanonical) {
+        try {
+            let bySettlementId: Record<string, string> | undefined;
+            if (scenario.initial_osid_controllers && Object.keys(scenario.initial_osid_controllers).length > 0) {
+                bySettlementId = scenario.initial_osid_controllers;
+            } else {
+                const opControlPath = join(baseDir ?? '', 'data/derived/operational/operational_political_control.json');
+                const opControlRaw = JSON.parse(await readFile(opControlPath, 'utf8')) as {
+                    by_settlement_id?: Record<string, string>;
+                };
+                bySettlementId = opControlRaw.by_settlement_id;
+            }
+            if (bySettlementId) {
+                const pc = state.political.political_controllers ?? {};
+                const sortedOsids = Object.keys(bySettlementId).sort((a, b) => a.localeCompare(b));
+                for (const osid of sortedOsids) {
+                    const faction = bySettlementId[osid];
+                    if (faction) pc[osid] = faction as FactionId;
+                }
+                state.political.political_controllers = pc;
+                // Reset contested_control to match (ethnic-based start = no contested)
+                if (state.political.contested_control) {
+                    for (const osid of sortedOsids) {
+                        state.political.contested_control[osid] = false;
+                    }
+                }
+            }
+        } catch {
+            // Non-fatal: fall through to existing municipality-based control
+        }
+        // Rebuild sidToMun after ethnic control override (always use original canonical map as base)
+        sidToMun = buildOsidToMunFromReverseMap(
+            operationalData.operationalToCanonical,
+            canonicalSidToMun
+        );
+    }
+
+    // Apply per-OSID political control overrides from scenario config (after ethnic control, before OOB).
+    if (!scenario.initial_osid_controllers && scenario.osid_control_overrides && Object.keys(scenario.osid_control_overrides).length > 0) {
+        const beforeOverrideControllers = { ...(state.political.political_controllers ?? {}) };
+        applyOsidControlOverrides(state, scenario.osid_control_overrides);
+        initOverrideChangeCount = countInitOverrideChanges(
+            beforeOverrideControllers,
+            state.political.political_controllers ?? {},
+            scenario.osid_control_overrides
+        );
+        if (operationalData?.operationalToCanonical) {
+            sidToMun = buildOsidToMunFromReverseMap(
+                operationalData.operationalToCanonical,
+                canonicalSidToMun
+            );
+        }
+    }
+
+    // Snapshot initial control for timeline provenance (before any sim turns mutate political_controllers).
+    state.political.initial_political_controllers = { ...state.political.political_controllers };
+
+    if (typeof scenario.war_entrenchment_init_turns === 'number') {
+        state.meta.war_entrenchment_init_turns = scenario.war_entrenchment_init_turns;
+    }
+    if (typeof scenario.war_force_transition_after_turns === 'number') {
+        state.meta.war_force_transition_after_turns = scenario.war_force_transition_after_turns;
+    } else if (scenario.start_lifecycle_phase === 'war' || scenario.start_lifecycle_phase === 'peace') {
+        state.meta.war_force_transition_after_turns = 52;
+    }
+
+    if (scenario.recruitment_mode === 'bottom_up' || scenario.recruitment_mode === 'player_choice') {
+        state.meta.recruitment_mode = scenario.recruitment_mode;
+    }
+
+    if (typeof (scenario as any).max_turns === 'number') {
+        state.meta.max_turns = (scenario as any).max_turns;
+    }
+    if (scenario.victory_conditions) {
+        state.meta.victory_conditions = scenario.victory_conditions;
+    }
+
+    if (scenario.supply_reserves_enabled) {
+        state.meta.supply_reserves_enabled = true;
+        ensureSupplyReserves(state);
+        applyJnaInheritanceBonus(state);
+    }
+
+    if (scenario.war_timeline) {
+        const { validateWarTimeline } = await import('../state/war_timeline.js');
+        const timelinePath = join(baseDir, `data/scenarios/timelines/${scenario.war_timeline}.json`);
+        let timelineRaw: unknown;
+        try {
+            timelineRaw = JSON.parse(await readFile(timelinePath, 'utf8'));
+        } catch (err) {
+            throw new Error(`Failed to load war timeline "${scenario.war_timeline}" from ${timelinePath}: ${err instanceof Error ? err.message : err}`);
+        }
+        state.military.war_timeline = validateWarTimeline(timelineRaw);
+    }
+
+    if (scenario.init_officers) {
+        const { validateOfficerData, initializeNamedOfficers } = await import('../sim/combat/officer_system.js');
+        const officerPath = join(baseDir, `data/scenarios/officers/${scenario.init_officers}_officers.json`);
+        let officerRaw: unknown;
+        try {
+            officerRaw = JSON.parse(await readFile(officerPath, 'utf8'));
+        } catch (err) {
+            throw new Error(`Failed to load officers "${scenario.init_officers}" from ${officerPath}: ${err instanceof Error ? err.message : err}`);
+        }
+        const officerData = validateOfficerData(officerRaw);
+        initializeNamedOfficers(state, officerData);
+    }
+
+    if (scenario.avoided_osids_by_faction && Object.keys(scenario.avoided_osids_by_faction).length > 0) {
+        state.meta.avoided_osids_by_faction = scenario.avoided_osids_by_faction;
+    }
+
+    if (formationsPath && !scenario.init_formations_oob) {
+        const initialFormations = await loadInitialFormations(formationsPath);
+        if (!state.military.formations) state.military.formations = {};
+        for (const f of initialFormations) {
+            state.military.formations[f.id] = f;
+        }
+    }
+
+    if (scenario.start_lifecycle_phase === 'peace') {
+        const referendumHeldAtStart = scenario.peace_referendum_held_at_start ?? true;
+        const refTurn = scenario.peace_referendum_turn ?? 0;
+        const warTurn = scenario.peace_war_start_turn ?? refTurn + 4;
+        const warStartControlPath = scenario.peace_war_start_control
+            ? resolveInitControlPath(scenario.peace_war_start_control, baseDir)
+            : undefined;
+        state.meta.phase = 'peace';
+        state.meta.turn = 0;
+        state.meta.referendum_held = referendumHeldAtStart;
+        state.meta.referendum_turn = referendumHeldAtStart ? refTurn : null;
+        state.meta.war_start_turn = referendumHeldAtStart ? warTurn : null;
+        state.meta.peace_scheduled_referendum_turn = referendumHeldAtStart ? null : refTurn;
+        state.meta.peace_scheduled_war_start_turn = referendumHeldAtStart ? null : warTurn;
+        state.meta.peace_war_start_control_path = warStartControlPath ?? null;
+        state.meta.referendum_eligible_turn = null;
+        state.meta.referendum_deadline_turn = null;
+        state.meta.game_over = false;
+        state.meta.outcome = undefined;
+        const rsDeclaredAtStart = scenario.peace_rs_declared_at_start ?? true;
+        const hrhbDeclaredAtStart = scenario.peace_hrhb_declared_at_start ?? true;
+        for (const f of state.factions ?? []) {
+            if (f.id === 'RS') (f as { prewar_capital?: number }).prewar_capital = 100;
+            if (f.id === 'RBiH') (f as { prewar_capital?: number }).prewar_capital = 70;
+            if (f.id === 'HRHB') (f as { prewar_capital?: number }).prewar_capital = 40;
+            (f as { declaration_pressure?: number }).declaration_pressure = 0;
+            if (f.id === 'RS') {
+                (f as { declared?: boolean }).declared = rsDeclaredAtStart;
+                (f as { declaration_turn?: number | null }).declaration_turn = rsDeclaredAtStart ? 0 : null;
+            }
+            if (f.id === 'HRHB') {
+                (f as { declared?: boolean }).declared = hrhbDeclaredAtStart;
+                (f as { declaration_turn?: number | null }).declaration_turn = hrhbDeclaredAtStart ? 0 : null;
+            }
+        }
+    }
+
+    if (scenario.start_lifecycle_phase === 'war') {
+        state.meta.phase = 'war';
+        state.meta.turn = 0;
+        state.meta.referendum_held = true;
+        state.meta.referendum_turn = 0;
+        state.meta.war_start_turn = 0;
+        state.meta.peace_scheduled_referendum_turn = null;
+        state.meta.peace_scheduled_war_start_turn = null;
+        state.meta.peace_war_start_control_path = null;
+        state.meta.rbih_hrhb_war_earliest_turn = scenario.rbih_hrhb_war_earliest_week ?? 26;
+        if (scenario.enable_rbih_hrhb_dynamics === false) {
+            state.meta.enable_rbih_hrhb_dynamics = false;
+        }
+        ensureRbihHrhbState(state, scenario.init_alliance_rbih_hrhb, scenario.init_mixed_municipalities);
+        for (const f of state.factions ?? []) {
+            if (f.id === 'RS') (f as { prewar_capital?: number }).prewar_capital = 100;
+            if (f.id === 'RBiH') (f as { prewar_capital?: number }).prewar_capital = 70;
+            if (f.id === 'HRHB') (f as { prewar_capital?: number }).prewar_capital = 40;
+            (f as { declaration_pressure?: number }).declaration_pressure = 0;
+            if (f.id === 'RS' || f.id === 'HRHB') {
+                (f as { declared?: boolean }).declared = true;
+                (f as { declaration_turn?: number | null }).declaration_turn = 0;
+            }
+            (f as { areasOfResponsibility?: string[] }).areasOfResponsibility = [];
+        }
+    }
+
+    if (scenario.start_lifecycle_phase === 'war') {
+        if (scenario.recruitment_mode === 'player_choice' || scenario.recruitment_mode === 'bottom_up' || scenario.init_formations_oob) {
+            if (!state.military.war_militia_strength || Object.keys(state.military.war_militia_strength).length === 0) {
+                updateMilitiaEmergence(state);
+            }
+            if (!state.military.militia_pools || Object.keys(state.military.militia_pools).length === 0) {
+                runPoolPopulation(state, graph.settlements, municipalityPopulation1991);
+                applyRsJnaInheritanceBonus(state, municipalityPopulation1991);
+            }
+        }
+    }
+
+    if (scenario.start_lifecycle_phase === 'peace') {
+        state.meta.scenario_start_date = { year: 1991, month: 8, day: 1 };
+    } else {
+        state.meta.scenario_start_date = { year: 1992, month: 3, day: 6 };
+    }
+
+    if (
+        scenario.start_lifecycle_phase === 'war' &&
+        municipalityPopulation1991 &&
+        Object.keys(municipalityPopulation1991).length > 0
+    ) {
+        if (!state.displacement.displacement_state) state.displacement.displacement_state = {};
+        const turn = state.meta.turn;
+        for (const munId of Object.keys(municipalityPopulation1991).sort(strictCompare)) {
+            const entry = municipalityPopulation1991[munId];
+            if (!entry || typeof entry.total !== 'number' || !Number.isFinite(entry.total)) continue;
+            if (state.displacement.displacement_state[munId]) continue;
+            state.displacement.displacement_state[munId] = {
+                mun_id: munId as MunicipalityId,
+                original_population: entry.total,
+                displaced_out: 0,
+                displaced_in: 0,
+                lost_population: 0,
+                last_updated_turn: turn
+            };
+        }
+    }
+
+    if (scenario.formation_spawn_directive) {
+        state.military.formation_spawn_directive = scenario.formation_spawn_directive;
+    }
+
+    if (scenario.must_hold_osids_by_corps && Object.keys(scenario.must_hold_osids_by_corps).length > 0) {
+        state.military.must_hold_osids_by_corps = scenario.must_hold_osids_by_corps;
+    }
+
+    if (scenario.comms_override_by_corps && Object.keys(scenario.comms_override_by_corps).length > 0) {
+        state.military.comms_override_by_corps = scenario.comms_override_by_corps;
+    }
+
+    if (scenario.coercion_pressure_by_municipality && Object.keys(scenario.coercion_pressure_by_municipality).length > 0) {
+        const keys = Object.keys(scenario.coercion_pressure_by_municipality).sort(strictCompare);
+        state.political.coercion_pressure_by_municipality = {};
+        for (const munId of keys) {
+            state.political.coercion_pressure_by_municipality![munId] = scenario.coercion_pressure_by_municipality[munId]!;
+        }
+    }
+
+    let oobCreated = false;
+    if (!scenario.init_formations_oob && scenario.recruitment_mode !== 'player_choice') oobCreated = true;
+
+    if (scenario.start_lifecycle_phase === 'war' && !oobCreated) {
+        await createOobFormations(
+            state,
+            scenario,
+            oobCorps,
+            oobBrigades,
+            graph.settlements,
+            municipalityHqSettlement,
+            sidToMun,
+            municipalityPopulation1991,
+            operationalData?.canonicalToOperational,
+            operationalData,
+            baseDir
+        );
+        oobCreated = true;
+    }
+
+    if (scenario.start_lifecycle_phase === 'war') {
+        initializeCorpsCommand(state);
+        spawnJnaPhantomBrigades(state);
+        initializeCorpsCommand(state);
+        let prePlannedAdjacency;
+        try {
+            const preEdges = await loadOperationalEdges(baseDir);
+            if (preEdges?.length) prePlannedAdjacency = buildOsidAdjacency(preEdges);
+        } catch {
+            // Operational edges may be missing in niche harness contexts.
+        }
+        injectPrePlannedOperations(state, prePlannedAdjacency);
+    }
+    if (operationalData?.canonicalToOperational) {
+        backfillFormationLocationOsid(state, operationalData.canonicalToOperational);
+    }
+    if (state.meta.phase === 'war' && operationalData?.operationalToCanonical) {
+        try {
+            const edges = await loadOperationalEdges(baseDir);
+            if (edges?.length) {
+                displaceFormationsInEnemyTerritory(state, edges, operationalData.operationalToCanonical);
+            }
+        } catch {
+            // Edges may be missing; skip displacement
+        }
+    }
+    if (state.meta.phase === 'war' && operationalData?.operationalToCanonical) {
+        try {
+            const preEdges = await loadOperationalEdges(baseDir);
+            if (preEdges?.length) {
+                const { computeFrontEdgesOsid } = await import('../map/front_edges.js');
+                const { buildCorpsFrontSectors } = await import('../sim/combat/corps_front_sectors.js');
+                state.military.war_front_edges_osid = computeFrontEdgesOsid(
+                    state, preEdges, operationalData.operationalToCanonical
+                );
+                state.military.corps_front_sectors = buildCorpsFrontSectors(
+                    state, preEdges, operationalData.operationalToCanonical
+                );
+            }
+        } catch {
+            // Edges may be missing; sectors will compute on first turn
+        }
+    }
+
+    state = canonicalizeStartupState(state).state;
+    return {
+        state,
+        graph,
+        municipalityPopulation1991,
+        settlementPopulationBySid,
+        settlementDataRaw,
+        oobBrigades,
+        oobCorps,
+        municipalityHqSettlement,
+        operationalData,
+        historicalNameLookup,
+        sidToMun,
+        initOverrideChangeCount
+    };
+}
+
 export async function runScenario(options: RunScenarioOptions): Promise<RunScenarioResult> {
     const {
         scenarioPath,
@@ -935,527 +1447,28 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     await writeFile(runMetaPath, stableStringify(run_meta, 2), 'utf8');
 
     const baseDir = optionsBaseDir ?? process.cwd();
-    const controlPath = scenario.init_control ? resolveInitControlPath(scenario.init_control, baseDir) : undefined;
-    const formationsPath = scenario.init_formations ? resolveInitFormationsPath(scenario.init_formations, baseDir) : undefined;
 
     try {
         if (injectFailureAfterRunMeta) {
             injectFailureAfterRunMeta();
         }
-        // Use canonical graph for init and run so control keys match recruitment (sidToMun / factionHasPresenceInMun).
-        const graph = baseDir
-            ? await loadSettlementGraph({
-                settlementsPath: join(baseDir, 'data/source/settlements_initial_master.json'),
-                edgesPath: join(baseDir, 'data/derived/settlement_edges.json')
-            })
-            : await loadSettlementGraph();
-
-        // Initialize Bots if requested
-        // (moved to inside loop or handled by checking scenario.use_smart_bots later)
-
-        let municipalityPopulation1991: MunicipalityPopulation1991 | undefined;
-        let settlementPopulationBySid: Record<string, number> | undefined;
-        try {
-            const popPath = join(baseDir, 'data/derived/municipality_population_1991.json');
-            const popRaw = JSON.parse(await readFile(popPath, 'utf8')) as {
-                by_mun1990_id?: Record<string, { total: number; breakdown?: { bosniak: number; serb: number; croat: number; other: number } }>;
-                by_municipality_id?: Record<string, { total: number; breakdown?: { bosniak: number; serb: number; croat: number; other: number }; mun1990_id?: string }>;
-            };
-            // Support both keying schemes: by_mun1990_id (kebab-case keys) or by_municipality_id (numeric keys with mun1990_id field)
-            const byMunDirect = popRaw.by_mun1990_id;
-            const byNumericId = popRaw.by_municipality_id;
-            const flat: MunicipalityPopulation1991 = {};
-            const addEntry = (munId: string, v: { total: number; breakdown?: { bosniak: number; serb: number; croat: number; other: number } }) => {
-                const b = v?.breakdown;
-                flat[munId] = { total: v?.total ?? 0, bosniak: b?.bosniak ?? 0, serb: b?.serb ?? 0, croat: b?.croat ?? 0, other: b?.other ?? 0 };
-            };
-            if (byMunDirect && Object.keys(byMunDirect).length > 0) {
-                for (const [munId, v] of Object.entries(byMunDirect)) addEntry(munId, v);
-            } else if (byNumericId) {
-                for (const [_numId, v] of Object.entries(byNumericId)) {
-                    if (v?.mun1990_id) addEntry(v.mun1990_id, v);
-                }
-            }
-            municipalityPopulation1991 = flat;
-        } catch {
-            municipalityPopulation1991 = undefined;
-        }
-        try {
-            const censusPath = join(baseDir, 'data/derived/census_rolled_up_wgs84.json');
-            const censusRaw = JSON.parse(await readFile(censusPath, 'utf8')) as {
-                by_sid?: Record<string, { p?: number[] }>;
-            };
-            const bySid = censusRaw.by_sid ?? {};
-            const popBySid: Record<string, number> = {};
-            for (const [sid, v] of Object.entries(bySid)) {
-                const p = v?.p;
-                if (Array.isArray(p) && p.length > 0 && typeof p[0] === 'number' && p[0] > 0) {
-                    popBySid[sid] = p[0];
-                }
-            }
-            settlementPopulationBySid = Object.keys(popBySid).length > 0 ? popBySid : undefined;
-        } catch {
-            settlementPopulationBySid = undefined;
-        }
-        let settlementDataRaw: Array<{ sid: string; ethnicity?: { composition?: Record<string, number> }; population?: number }> | undefined;
-        try {
-            const ethnicityData = await loadSettlementEthnicityData(join(baseDir, 'data/derived/settlement_ethnicity_data.json'));
-            const sids = Array.from(graph.settlements.keys()).sort((a, b) => a.localeCompare(b));
-            const raw: Array<{ sid: string; ethnicity?: { composition?: Record<string, number> }; population?: number }> = [];
-            for (const sid of sids) {
-                const entry = ethnicityData.by_settlement_id?.[sid];
-                const pop = settlementPopulationBySid?.[sid];
-                raw.push({
-                    sid,
-                    ...(entry?.composition ? { ethnicity: { composition: entry.composition } } : {}),
-                    ...(pop != null ? { population: pop } : {})
-                });
-            }
-            settlementDataRaw = raw.length > 0 ? raw : undefined;
-        } catch {
-            settlementDataRaw = undefined;
-        }
-        let oobBrigades: OobBrigade[] = [];
-        let oobCorps: OobCorps[] = [];
-        let municipalityHqSettlement: Record<string, string> = {};
-        let operationalData: Awaited<ReturnType<typeof loadOperationalData>> | null = null;
-        try {
-            operationalData = await loadOperationalData(baseDir);
-        } catch {
-            // canonical_to_operational_map.json may be missing; location_osid will not be set
-        }
-        // Initialize data-driven terrain classification sets before combat runs.
-        // Keep Node-only file loading out of combat_math so browser map bundles can
-        // safely import the combat helpers without pulling in fs/path.
-        setUrbanOsidSet(loadUrbanOsidSet());
-        setForestOsidSet(loadForestOsidSet());
-        if (scenario.init_formations_oob || scenario.recruitment_mode === 'player_choice') {
-            oobBrigades = await loadOobBrigades(baseDir);
-            oobCorps = await loadOobCorps(baseDir);
-            municipalityHqSettlement = await loadMunicipalityHqSettlement(baseDir);
-        } else if (scenario.formation_spawn_directive) {
-            oobBrigades = await loadOobBrigades(baseDir);
-        }
-        /** Historical names for emergent brigades: (faction, home_mun) -> names[] in deterministic order. */
-        const oobNamesByFactionMun = new Map<string, string[]>();
-        for (const b of oobBrigades) {
-            const key = `${b.faction}:${b.home_mun}`;
-            const list = oobNamesByFactionMun.get(key) ?? [];
-            list.push(b.name);
-            oobNamesByFactionMun.set(key, list);
-        }
-        for (const list of oobNamesByFactionMun.values()) {
-            list.sort((a, b) => a.localeCompare(b));
-        }
-        const historicalNameLookup =
-            oobNamesByFactionMun.size > 0
-                ? (faction: string, mun_id: string, ordinal: number): string | null => {
-                    const list = oobNamesByFactionMun.get(`${faction}:${mun_id}`);
-                    const name = list != null && ordinal >= 1 && ordinal <= list.length ? list[ordinal - 1] : null;
-                    return name ?? null;
-                }
-                : undefined;
-        let sidToMun = buildSidToMunFromSettlements(graph.settlements);
-        let initOverrideChangeCount = 0;
-        const canonicalSidToMun = sidToMun; // Preserve original canonical SID→mun map for later rebuilds
-        const warStartTurnForOrgPenSeeding =
-            scenario.start_lifecycle_phase === 'peace'
-                ? (scenario.peace_war_start_turn ?? (scenario.peace_referendum_turn ?? 0) + 4)
-                : 0;
-        const plannedWarStartBrigadeByMun = buildPlannedWarStartBrigadePresenceByMunicipality(
+        const startup = await buildScenarioStartupState(scenario, baseDir);
+        let {
+            state,
+            graph,
+            municipalityPopulation1991,
+            settlementPopulationBySid,
+            settlementDataRaw,
             oobBrigades,
-            warStartTurnForOrgPenSeeding
-        );
-        let municipalityControllerByMun: Record<string, FactionId | null> | undefined;
-        if (controlPath) {
-            try {
-                municipalityControllerByMun = await loadInitialMunicipalityControllers1990(controlPath);
-            } catch {
-                municipalityControllerByMun = undefined;
-            }
-        }
-        const organizationalPenetrationSeed: OrganizationalPenetrationSeedOptions = {
-            ...(municipalityControllerByMun ? { municipality_controller_by_mun: municipalityControllerByMun } : {}),
-            ...(municipalityPopulation1991 ? { population_1991_by_mun: municipalityPopulation1991 } : {}),
-            ...(plannedWarStartBrigadeByMun ? { planned_war_start_brigade_by_mun: plannedWarStartBrigadeByMun } : {})
-        };
-
-        const initOptions =
-            scenario.init_control_mode
-                ? {
-                    init_control_mode: scenario.init_control_mode,
-                    ethnic_override_threshold: scenario.ethnic_override_threshold,
-                    ...(baseDir ? { ethnicity_data_path: join(baseDir, 'data/derived/settlement_ethnicity_data.json') } : {})
-                }
-                : undefined;
-        let state = await createInitialGameState('harness-seed', controlPath, initOptions, {
-            baseDir,
-            organizationalPenetrationSeed,
-            settlementGraph: graph,
-            operationalData: operationalData ?? undefined
-        });
-
-        // After state creation, political_controllers may have been promoted to OSID keys
-        // (OSID-as-base-layer). Rebuild sidToMun as OSID→mun so factionHasPresenceInMun,
-        // resolveValidHqSid, and other consumers match the pc keying scheme.
-        if (operationalData?.operationalToCanonical) {
-            const pc = state.political.political_controllers ?? {};
-            const firstKey = Object.keys(pc)[0];
-            if (firstKey?.startsWith('op:')) {
-                sidToMun = buildOsidToMunFromReverseMap(
-                    operationalData.operationalToCanonical,
-                    canonicalSidToMun
-                );
-            }
-        }
-
-        // Apply ethnic-majority OSID control from derived data.
-        // When scenario.initial_osid_controllers is present, use it directly (already includes
-        // osid_control_overrides) instead of loading operational_political_control.json.
-        // The hybrid_1992 init mode's ethnic lookup fails for OSID keys (looks up
-        // "op:mun:slug" in data keyed by "S123456"). This step loads the pre-derived
-        // operational_political_control.json (40% ethnic majority threshold, HRHB→RBiH
-        // aligned municipality overrides) and overwrites political_controllers.
-        // Historical: April 1992 control followed ethnic concentrations, not municipality admin.
-        if (operationalData?.operationalToCanonical) {
-            try {
-                let bySettlementId: Record<string, string> | undefined;
-                if (scenario.initial_osid_controllers && Object.keys(scenario.initial_osid_controllers).length > 0) {
-                    bySettlementId = scenario.initial_osid_controllers;
-                } else {
-                    const opControlPath = join(baseDir ?? '', 'data/derived/operational/operational_political_control.json');
-                    const opControlRaw = JSON.parse(await readFile(opControlPath, 'utf8')) as {
-                        by_settlement_id?: Record<string, string>;
-                    };
-                    bySettlementId = opControlRaw.by_settlement_id;
-                }
-                if (bySettlementId) {
-                    const pc = state.political.political_controllers ?? {};
-                    const sortedOsids = Object.keys(bySettlementId).sort((a, b) => a.localeCompare(b));
-                    for (const osid of sortedOsids) {
-                        const faction = bySettlementId[osid];
-                        if (faction) pc[osid] = faction as FactionId;
-                    }
-                    state.political.political_controllers = pc;
-                    // Reset contested_control to match (ethnic-based start = no contested)
-                    if (state.political.contested_control) {
-                        for (const osid of sortedOsids) {
-                            state.political.contested_control[osid] = false;
-                        }
-                    }
-                }
-            } catch {
-                // Non-fatal: fall through to existing municipality-based control
-            }
-            // Rebuild sidToMun after ethnic control override (always use original canonical map as base)
-            sidToMun = buildOsidToMunFromReverseMap(
-                operationalData.operationalToCanonical,
-                canonicalSidToMun
-            );
-        }
-
-        // Apply per-OSID political control overrides from scenario config (after ethnic control, before OOB).
-        // Historical accuracy: some OSIDs need different controllers than ethnic majority.
-        // E.g. Brčko city held by VRS despite Bosniak municipality majority.
-        // Skip when initial_osid_controllers is present — overrides are already baked into it.
-        if (!scenario.initial_osid_controllers && scenario.osid_control_overrides && Object.keys(scenario.osid_control_overrides).length > 0) {
-            const beforeOverrideControllers = { ...(state.political.political_controllers ?? {}) };
-            applyOsidControlOverrides(state, scenario.osid_control_overrides);
-            initOverrideChangeCount = countInitOverrideChanges(
-                beforeOverrideControllers,
-                state.political.political_controllers ?? {},
-                scenario.osid_control_overrides
-            );
-            // Rebuild sidToMun after overrides so factionHasPresenceInMun sees updated controllers
-            // (control overrides don't change mun mapping, but rebuild ensures consistency)
-            if (operationalData?.operationalToCanonical) {
-                sidToMun = buildOsidToMunFromReverseMap(
-                    operationalData.operationalToCanonical,
-                    canonicalSidToMun
-                );
-            }
-        }
-
-        // Snapshot initial control for timeline provenance (before any sim turns mutate political_controllers).
-        state.political.initial_political_controllers = { ...state.political.political_controllers };
-
-        // Peace→War phase edge cases: entrenchment init and stuck-in-Phase-I fallback (PHASE_I_II_EDGE_CASES.md)
-        if (typeof scenario.war_entrenchment_init_turns === 'number') {
-            state.meta.war_entrenchment_init_turns = scenario.war_entrenchment_init_turns;
-        }
-        if (typeof scenario.war_force_transition_after_turns === 'number') {
-            state.meta.war_force_transition_after_turns = scenario.war_force_transition_after_turns;
-        } else if (scenario.start_lifecycle_phase === 'war' || scenario.start_lifecycle_phase === 'peace') {
-            state.meta.war_force_transition_after_turns = 52;
-        }
-
-        // Peace-phase Overhaul: store recruitment_mode in state.meta so turn pipeline can access it.
-        if (scenario.recruitment_mode === 'bottom_up' || scenario.recruitment_mode === 'player_choice') {
-            state.meta.recruitment_mode = scenario.recruitment_mode;
-        }
-
-        // War termination: store max_turns and victory_conditions on state.meta for pipeline evaluation.
-        // max_turns is a gameplay mechanic (when does stalemate trigger), NOT the harness run length.
-        // Only set from explicit scenario.max_turns field; default 208 (4 years) handled by war_termination.ts.
-        if (typeof (scenario as any).max_turns === 'number') {
-            state.meta.max_turns = (scenario as any).max_turns;
-        }
-        if (scenario.victory_conditions) {
-            state.meta.victory_conditions = scenario.victory_conditions;
-        }
-
-        // Phase A: Supply reserves system flag → state.meta for pipeline gating.
-        if (scenario.supply_reserves_enabled) {
-            state.meta.supply_reserves_enabled = true;
-            ensureSupplyReserves(state);
-            applyJnaInheritanceBonus(state);
-        }
-
-        // War timeline: load externalized faction temporal profiles from JSON.
-        if (scenario.war_timeline) {
-            const { validateWarTimeline } = await import('../state/war_timeline.js');
-            const timelinePath = join(baseDir, `data/scenarios/timelines/${scenario.war_timeline}.json`);
-            let timelineRaw: unknown;
-            try {
-                timelineRaw = JSON.parse(await readFile(timelinePath, 'utf8'));
-            } catch (err) {
-                throw new Error(`Failed to load war timeline "${scenario.war_timeline}" from ${timelinePath}: ${err instanceof Error ? err.message : err}`);
-            }
-            state.military.war_timeline = validateWarTimeline(timelineRaw);
-        }
-
-        // Named officers: load historical officer data from JSON.
-        if (scenario.init_officers) {
-            const { validateOfficerData, initializeNamedOfficers } = await import('../sim/combat/officer_system.js');
-            const officerPath = join(baseDir, `data/scenarios/officers/${scenario.init_officers}_officers.json`);
-            let officerRaw: unknown;
-            try {
-                officerRaw = JSON.parse(await readFile(officerPath, 'utf8'));
-            } catch (err) {
-                throw new Error(`Failed to load officers "${scenario.init_officers}" from ${officerPath}: ${err instanceof Error ? err.message : err}`);
-            }
-            const officerData = validateOfficerData(officerRaw);
-            initializeNamedOfficers(state, officerData);
-        }
-
-        // Store per-faction OSID avoidance list in meta so bot corps AI can inject into directives.
-        if (scenario.avoided_osids_by_faction && Object.keys(scenario.avoided_osids_by_faction).length > 0) {
-            state.meta.avoided_osids_by_faction = scenario.avoided_osids_by_faction;
-        }
-
-        // When init_formations_oob is true, OOB creates formations at Peace phase entry; do not load placeholder init_formations.
-        if (formationsPath && !scenario.init_formations_oob) {
-            const initialFormations = await loadInitialFormations(formationsPath);
-            if (!state.military.formations) state.military.formations = {};
-            for (const f of initialFormations) {
-                state.military.formations[f.id] = f;
-            }
-        }
-
-        // AoR phase-out: no populateFactionAoRFromControl; War phase uses location_osid / OSID fronts.
-
-        if (scenario.start_lifecycle_phase === 'peace') {
-            const referendumHeldAtStart = scenario.peace_referendum_held_at_start ?? true;
-            const refTurn = scenario.peace_referendum_turn ?? 0;
-            const warTurn = scenario.peace_war_start_turn ?? refTurn + 4;
-            const warStartControlPath = scenario.peace_war_start_control
-                ? resolveInitControlPath(scenario.peace_war_start_control, baseDir)
-                : undefined;
-            state.meta.phase = 'peace';
-            state.meta.turn = 0;
-            state.meta.referendum_held = referendumHeldAtStart;
-            state.meta.referendum_turn = referendumHeldAtStart ? refTurn : null;
-            state.meta.war_start_turn = referendumHeldAtStart ? warTurn : null;
-            state.meta.peace_scheduled_referendum_turn = referendumHeldAtStart ? null : refTurn;
-            state.meta.peace_scheduled_war_start_turn = referendumHeldAtStart ? null : warTurn;
-            state.meta.peace_war_start_control_path = warStartControlPath ?? null;
-            state.meta.referendum_eligible_turn = null;
-            state.meta.referendum_deadline_turn = null;
-            state.meta.game_over = false;
-            state.meta.outcome = undefined;
-            const rsDeclaredAtStart = scenario.peace_rs_declared_at_start ?? true;
-            const hrhbDeclaredAtStart = scenario.peace_hrhb_declared_at_start ?? true;
-            for (const f of state.factions ?? []) {
-                if (f.id === 'RS') (f as { prewar_capital?: number }).prewar_capital = 100;
-                if (f.id === 'RBiH') (f as { prewar_capital?: number }).prewar_capital = 70;
-                if (f.id === 'HRHB') (f as { prewar_capital?: number }).prewar_capital = 40;
-                (f as { declaration_pressure?: number }).declaration_pressure = 0;
-                if (f.id === 'RS') {
-                    (f as { declared?: boolean }).declared = rsDeclaredAtStart;
-                    (f as { declaration_turn?: number | null }).declaration_turn = rsDeclaredAtStart ? 0 : null;
-                }
-                if (f.id === 'HRHB') {
-                    (f as { declared?: boolean }).declared = hrhbDeclaredAtStart;
-                    (f as { declaration_turn?: number | null }).declaration_turn = hrhbDeclaredAtStart ? 0 : null;
-                }
-            }
-        }
-
-        if (scenario.start_lifecycle_phase === 'war') {
-            state.meta.phase = 'war';
-            state.meta.turn = 0;
-            state.meta.referendum_held = true;
-            state.meta.referendum_turn = 0;
-            state.meta.war_start_turn = 0;
-            state.meta.peace_scheduled_referendum_turn = null;
-            state.meta.peace_scheduled_war_start_turn = null;
-            state.meta.peace_war_start_control_path = null;
-            // Peace-phase §4.8 (historical fidelity): no RBiH–HRHB open war before this turn (e.g. 26 = October 1992 for April 1992 start).
-            state.meta.rbih_hrhb_war_earliest_turn = scenario.rbih_hrhb_war_earliest_week ?? 26;
-            if (scenario.enable_rbih_hrhb_dynamics === false) {
-                state.meta.enable_rbih_hrhb_dynamics = false;
-            }
-            ensureRbihHrhbState(state, scenario.init_alliance_rbih_hrhb, scenario.init_mixed_municipalities);
-            for (const f of state.factions ?? []) {
-                if (f.id === 'RS') (f as { prewar_capital?: number }).prewar_capital = 100;
-                if (f.id === 'RBiH') (f as { prewar_capital?: number }).prewar_capital = 70;
-                if (f.id === 'HRHB') (f as { prewar_capital?: number }).prewar_capital = 40;
-                (f as { declaration_pressure?: number }).declaration_pressure = 0;
-                if (f.id === 'RS' || f.id === 'HRHB') {
-                    (f as { declared?: boolean }).declared = true;
-                    (f as { declaration_turn?: number | null }).declaration_turn = 0;
-                }
-                (f as { areasOfResponsibility?: string[] }).areasOfResponsibility = [];
-            }
-        }
-
-        if (scenario.start_lifecycle_phase === 'war') {
-            if (scenario.recruitment_mode === 'player_choice' || scenario.recruitment_mode === 'bottom_up' || scenario.init_formations_oob) {
-                // War-start scenarios need deterministic manpower pools for reinforcement/spawn.
-                if (!state.military.war_militia_strength || Object.keys(state.military.war_militia_strength).length === 0) {
-                    updateMilitiaEmergence(state);
-                }
-                if (!state.military.militia_pools || Object.keys(state.military.militia_pools).length === 0) {
-                    runPoolPopulation(state, graph.settlements, municipalityPopulation1991);
-                    applyRsJnaInheritanceBonus(state, municipalityPopulation1991);
-                }
-            }
-        }
-
-        // Calendar start date for UI display (non-normative).
-        // Phase 0 scenarios start 1 September 1991; war-start scenarios start 6 April 1992.
-        if (scenario.start_lifecycle_phase === 'peace') {
-            state.meta.scenario_start_date = { year: 1991, month: 8, day: 1 };
-        } else {
-            state.meta.scenario_start_date = { year: 1992, month: 3, day: 6 };
-        }
-
-        // Seed displacement_state from 1991 census when available (Peace/War phase only) so receiving capacity and map population scale by real mun size.
-        if (
-            scenario.start_lifecycle_phase === 'war' &&
-            municipalityPopulation1991 &&
-            Object.keys(municipalityPopulation1991).length > 0
-        ) {
-            if (!state.displacement.displacement_state) state.displacement.displacement_state = {};
-            const turn = state.meta.turn;
-            for (const munId of Object.keys(municipalityPopulation1991).sort(strictCompare)) {
-                const entry = municipalityPopulation1991[munId];
-                if (!entry || typeof entry.total !== 'number' || !Number.isFinite(entry.total)) continue;
-                if (state.displacement.displacement_state[munId]) continue;
-                state.displacement.displacement_state[munId] = {
-                    mun_id: munId as MunicipalityId,
-                    original_population: entry.total,
-                    displaced_out: 0,
-                    displaced_in: 0,
-                    lost_population: 0,
-                    last_updated_turn: turn
-                };
-            }
-        }
-
-        if (scenario.formation_spawn_directive) {
-            state.military.formation_spawn_directive = scenario.formation_spawn_directive;
-        }
-
-        if (scenario.must_hold_osids_by_corps && Object.keys(scenario.must_hold_osids_by_corps).length > 0) {
-            state.military.must_hold_osids_by_corps = scenario.must_hold_osids_by_corps;
-        }
-
-        if (scenario.comms_override_by_corps && Object.keys(scenario.comms_override_by_corps).length > 0) {
-            state.military.comms_override_by_corps = scenario.comms_override_by_corps;
-        }
-
-        if (scenario.coercion_pressure_by_municipality && Object.keys(scenario.coercion_pressure_by_municipality).length > 0) {
-            const keys = Object.keys(scenario.coercion_pressure_by_municipality).sort(strictCompare);
-            state.political.coercion_pressure_by_municipality = {};
-            for (const munId of keys) {
-                state.political.coercion_pressure_by_municipality![munId] = scenario.coercion_pressure_by_municipality[munId]!;
-            }
-        }
-
-        let oobCreated = false;
-        if (!scenario.init_formations_oob && scenario.recruitment_mode !== 'player_choice') oobCreated = true;
-
-        // Create OOB formations at Peace phase or War phase start (recruitment or legacy auto-spawn)
-        if (scenario.start_lifecycle_phase === 'war' && !oobCreated) {
-            await createOobFormations(
-                state,
-                scenario,
-                oobCorps,
-                oobBrigades,
-                graph.settlements,
-                municipalityHqSettlement,
-                sidToMun,
-                municipalityPopulation1991,
-                operationalData?.canonicalToOperational,
-                operationalData,
-                baseDir
-            );
-            oobCreated = true;
-        }
-
-        // War phase entry: initialize corps command; location_osid via backfill (AoR phase-out).
-        if (scenario.start_lifecycle_phase === 'war') {
-            initializeCorpsCommand(state);
-            spawnJnaPhantomBrigades(state);
-            initializeCorpsCommand(state); // re-init after JNA spawn to pick up synthetic JNA corps
-            let prePlannedAdjacency;
-            try {
-                const preEdges = await loadOperationalEdges(baseDir);
-                if (preEdges?.length) prePlannedAdjacency = buildOsidAdjacency(preEdges);
-            } catch {
-                // Operational edges may be missing in niche harness contexts.
-            }
-            injectPrePlannedOperations(state, prePlannedAdjacency);
-        }
-        if (operationalData?.canonicalToOperational) {
-            backfillFormationLocationOsid(state, operationalData.canonicalToOperational);
-        }
-        // Ensure no formation remains in an OSID controlled by another faction (initial or after backfill).
-        if (state.meta.phase === 'war' && operationalData?.operationalToCanonical) {
-            try {
-                const edges = await loadOperationalEdges(baseDir);
-                if (edges?.length) {
-                    displaceFormationsInEnemyTerritory(state, edges, operationalData.operationalToCanonical);
-                }
-            } catch {
-                // Edges may be missing; skip displacement
-            }
-        }
-        // Pre-compute front edges and sectors so reactive defense is active from turn 1.
-        // Without this, the initial state has zero sectors and the first turn's attacks
-        // bypass sector defense entirely (Brcko anchor failure root cause).
-        if (state.meta.phase === 'war' && operationalData?.operationalToCanonical) {
-            try {
-                const preEdges = await loadOperationalEdges(baseDir);
-                if (preEdges?.length) {
-                    const { computeFrontEdgesOsid } = await import('../map/front_edges.js');
-                    const { buildCorpsFrontSectors } = await import('../sim/combat/corps_front_sectors.js');
-                    state.military.war_front_edges_osid = computeFrontEdgesOsid(
-                        state, preEdges, operationalData.operationalToCanonical
-                    );
-                    state.military.corps_front_sectors = buildCorpsFrontSectors(
-                        state, preEdges, operationalData.operationalToCanonical
-                    );
-                }
-            } catch {
-                // Edges may be missing; sectors will compute on first turn
-            }
-        }
-
-        const canonicalStartup = canonicalizeStartupState(state);
-        state = canonicalStartup.state;
-        const serializedState = canonicalStartup.serializedState;
+            oobCorps,
+            municipalityHqSettlement,
+            operationalData,
+            historicalNameLookup,
+            sidToMun,
+            initOverrideChangeCount
+        } = startup;
+        let oobCreated = !scenario.init_formations_oob && scenario.recruitment_mode !== 'player_choice';
+        const serializedState = serializeState(state);
         const historicalMetricsInitial = captureHistoricalFactionMetrics(state);
 
         const initialSavePath = join(outDir, 'initial_save.json');
@@ -2512,8 +2525,10 @@ export async function runOpsCompare(options: RunOpsCompareOptions): Promise<RunO
 
 /**
  * Create initial GameState from a scenario file (for desktop "Load scenario" / "New Campaign").
- * When initialStateOnly is true (default for desktop), builds state and writes initial_save only—no week loop or end-of-run artifacts (faster).
- * When false, runs one week then returns initial state (harness/backward compatible).
+ * When initialStateOnly is true (default for desktop), builds canonical startup state in memory
+ * without creating harness run artifacts.
+ * When false, uses the harness path for backward compatibility and returns the initial state
+ * from the generated initial_save artifact.
  */
 export async function createStateFromScenario(
     scenarioPath: string,
@@ -2521,15 +2536,20 @@ export async function createStateFromScenario(
     options?: { initialStateOnly?: boolean }
 ): Promise<GameState> {
     const initialStateOnly = options?.initialStateOnly !== false;
-    const result = await runScenario({
-        scenarioPath,
-        baseDir,
-        outDirBase: join(baseDir, 'runs'),
-        weeksOverride: 1,
-        uniqueRunFolder: true,
-        initialStateOnly,
-        consoleDiagnostics: false,
-    });
-    const content = await readFile(result.paths.initial_save, 'utf8');
-    return deserializeState(content);
+    const scenario = await loadScenario(scenarioPath);
+    if (!initialStateOnly) {
+        const result = await runScenario({
+            scenarioPath,
+            baseDir,
+            outDirBase: join(baseDir, 'runs'),
+            weeksOverride: 1,
+            uniqueRunFolder: true,
+            initialStateOnly: false,
+            consoleDiagnostics: false,
+        });
+        const content = await readFile(result.paths.initial_save, 'utf8');
+        return deserializeState(content);
+    }
+    const { state } = await buildScenarioStartupState(scenario, baseDir);
+    return state;
 }
