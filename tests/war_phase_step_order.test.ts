@@ -44,6 +44,13 @@ describe('war-phase step ordering', () => {
         assertBefore('compute-spatial-context-pre-combat', 'update-siege-counters');
         assertBefore('resolve-attack-orders', 'compute-spatial-context-post-combat');
         assertBefore('compute-spatial-context-post-combat', 'attribute-operation-casualties');
+
+        // Final sector truth must be rebuilt after late writers and final front refresh
+        assertBefore('recruitment', 'reconcile-final-sector-truth');
+        assertBefore('ongoing-mobilization', 'reconcile-final-sector-truth');
+        assertBefore('tick-elite-loans', 'reconcile-final-sector-truth');
+        assertBefore('rederive-osid-front-segments', 'reconcile-final-sector-truth');
+        assertBefore('reconcile-final-sector-truth', 'assert-formations-in-friendly-territory');
     });
 
     it('has no duplicate step names', () => {
@@ -94,6 +101,9 @@ describe('war-phase step ordering', () => {
         // +1 from generate-player-stance-recommendations (v0.8.4 Phase C: formula AI stance for player faction)
         // +1 from generate-level1-proposals (v0.8.4 Phase C: Level 1 Assisted stance proposals)
         // +1 from generate-level1-op-proposals (v0.8.4 Phase D: Level 1 Assisted op-planning proposals)
-        expect(stepNames.length).toBe(154);
+        // +1 from reconcile-final-sector-truth (final end-of-turn sector authority rebuild)
+        // +1 from reconcile-final-operation-truth (final end-of-turn operation authority rebuild)
+        // +1 from assert-final-operation-lifecycle (late lifecycle seal after final reconciliation)
+        expect(stepNames.length).toBe(157);
     });
 });

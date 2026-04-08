@@ -2215,6 +2215,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 : {}),
             ...(attackResolutionSummary.weeks_at_war > 0
                 ? {
+                    phase_ii_attack_resolution: attackResolutionSummary,
                     attack_resolution: attackResolutionSummary,
                     attack_resolution_weekly: attackResolutionWeekly,
                     combat_causality: combatCausalityForSummary,

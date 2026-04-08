@@ -143,6 +143,8 @@ import type { Osid } from '../combat/osid_adjacency.js';
 import { generateArmyReserveRequests, evaluateArmyReserveAssignments, tickEliteLoans } from '../combat/army_reserve_system.js';
 import { buildHomeDistanceCache } from '../combat/home_distance.js';
 import { computeSectorCombatRatings } from '../combat/sector_combat_rating.js';
+import { reconcileFinalSectorTruth } from '../combat/final_sector_truth_reconciliation.js';
+import { reconcileFinalOperationTruth } from '../combat/final_operation_truth_reconciliation.js';
 import { detectParamilitaryTargets, advanceParamilitaries, detectOffensiveParamilitaryTargets } from '../combat/paramilitary_sweep.js';
 import { consolidateRearPockets } from '../combat/rear_pocket_consolidation.js';
 import { PARAMILITARY_FADE_WEEK, OFFENSIVE_PARA_FADE_WEEK } from '../../state/formation_constants.js';
@@ -2572,6 +2574,38 @@ export const warPhases: NamedPhase[] = [
             }
             const osidFrontEdges = computeFrontEdgesOsid(context.state, od.edges, od.opData.operationalToCanonical);
             context.state.military.war_front_edges_osid = osidFrontEdges;
+        }
+    },
+    {
+        name: 'reconcile-final-sector-truth',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const od = getOperationalData(context);
+            if (!od?.edges?.length) return;
+            const spatial = getSpatialContextCache(context);
+            const finalSpatial = spatial?.postCombat ?? spatial?.preCombat;
+            reconcileFinalSectorTruth(
+                context.state,
+                od.edges,
+                od.opData?.operationalToCanonical ?? null,
+                od.centroids,
+                finalSpatial,
+                context.report?.supply_resolution?.supply_state_by_osid ?? null,
+            );
+        }
+    },
+    {
+        name: 'reconcile-final-operation-truth',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            reconcileFinalOperationTruth(context.state);
+        }
+    },
+    {
+        name: 'assert-final-operation-lifecycle',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            assertOperationLifecycle(context.state);
         }
     },
     {

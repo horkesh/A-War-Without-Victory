@@ -11,6 +11,7 @@ import {
     getPrimaryOperation,
     removeOperation,
 } from '../src/sim/combat/corps_operation_helpers.js';
+import { makeFormation, makeSector } from './test_factories.js';
 
 describe('getMaxOperationSlots', () => {
     it('returns 1 for small corps (8 brigades)', () => {
@@ -184,5 +185,81 @@ describe('emergency defense sector anchoring', () => {
         expect(operation.type).toBe('probe');
         expect(operation.sector_id).toBe('sector:arbih_3rd:ozren');
         expect(operation.participating_brigades).toEqual(['b1']);
+    });
+});
+
+describe('derivePrimarySectorForBrigades', () => {
+    it('prefers sectors that physically own brigade locations over stale roster overlap', () => {
+        const sectors = [
+            makeSector({
+                sector_id: 'sector:corps:stale',
+                corps_id: 'test_corps',
+                assigned_brigade_ids: ['b1', 'b2'],
+                territory_osids: ['rear_a'],
+                friendly_osids: ['rear_a'],
+                edge_ids: ['rear_a__enemy_a'],
+            }),
+            makeSector({
+                sector_id: 'sector:corps:truth',
+                corps_id: 'test_corps',
+                assigned_brigade_ids: ['b3'],
+                territory_osids: ['front_b1', 'front_b2'],
+                friendly_osids: ['front_b1', 'front_b2'],
+                edge_ids: ['front_b1__enemy_b', 'front_b2__enemy_b'],
+            }),
+        ];
+
+        const formations = {
+            b1: makeFormation({ id: 'b1', faction: 'RS', corps_id: 'test_corps', location_osid: 'front_b1', home_osid: 'front_b1' }),
+            b2: makeFormation({ id: 'b2', faction: 'RS', corps_id: 'test_corps', location_osid: 'front_b2', home_osid: 'front_b2' }),
+        };
+
+        expect(
+            derivePrimarySectorForBrigades(sectors, 'test_corps', ['b1', 'b2'], formations),
+        ).toBe('sector:corps:truth');
+    });
+
+    it('can anchor to a sector from physical truth even when roster overlap is zero', () => {
+        const sectors = [
+            makeSector({
+                sector_id: 'sector:corps:front',
+                corps_id: 'test_corps',
+                assigned_brigade_ids: ['b9'],
+                territory_osids: ['front_c'],
+                friendly_osids: ['front_c'],
+                edge_ids: ['front_c__enemy_c'],
+            }),
+        ];
+
+        const formations = {
+            b1: makeFormation({ id: 'b1', faction: 'RS', corps_id: 'test_corps', location_osid: 'front_c', home_osid: 'front_c' }),
+        };
+
+        expect(
+            derivePrimarySectorForBrigades(sectors, 'test_corps', ['b1'], formations),
+        ).toBe('sector:corps:front');
+    });
+
+    it('falls back to roster overlap when live formation locations are unavailable', () => {
+        const sectors = [
+            makeSector({
+                sector_id: 'sector:corps:a',
+                corps_id: 'test_corps',
+                assigned_brigade_ids: ['b1', 'b2'],
+                edge_ids: ['a__enemy'],
+                friendly_osids: ['a'],
+            }),
+            makeSector({
+                sector_id: 'sector:corps:b',
+                corps_id: 'test_corps',
+                assigned_brigade_ids: ['b3'],
+                edge_ids: ['b__enemy'],
+                friendly_osids: ['b'],
+            }),
+        ];
+
+        expect(
+            derivePrimarySectorForBrigades(sectors, 'test_corps', ['b1', 'b2']),
+        ).toBe('sector:corps:a');
     });
 });

@@ -3,7 +3,8 @@
  *
  * Covers activity/reporting truth alignment:
  * A. Proxy-fork observability: displacement triggers emit a console.warn when
- *    hasLiveSectorFrontlineTruth() is false (P0 — silent fallback is banned).
+ *    hasLiveSectorFrontlineTruth() is false in an operational-context run.
+ *    Settlement-only compatibility runs stay quiet.
  * B. Zero-activity integrity: deriveWeeklyActivityCounts returns explicit zeros
  *    (not undefined) when phase_f_displacement trigger_report is absent.
  * C. Activity summary fidelity: computeActivitySummary aggregates weekly counts
@@ -21,7 +22,21 @@ import type { TurnReport } from '../src/sim/turn_pipeline_types.js';
 // ── Fixture helpers ────────────────────────────────────────────────────────────
 
 /** Minimal war-phase GameState with empty corps_front_sectors (no sector truth). */
-function makeStateNoSectors(): GameState {
+function makeStateNoSectors(withActiveBrigade = false): GameState {
+    const formations = withActiveBrigade
+        ? {
+            'brig_test': {
+                id: 'brig_test',
+                name: 'brig_test',
+                faction: 'RS' as FactionId,
+                kind: 'brigade',
+                status: 'active',
+                personnel: 1000,
+                corps_id: 'vrs_drina',
+                location_osid: 'op:mun:test',
+            },
+        }
+        : {};
     return {
         meta: { turn: 3, phase: 'war', seed: 'wave3-test' },
         factions: [
@@ -30,7 +45,7 @@ function makeStateNoSectors(): GameState {
             { id: 'HRHB' as FactionId },
         ],
         military: {
-            formations: {},
+            formations,
             corps_front_sectors: {}, // empty — hasLiveSectorFrontlineTruth() returns false
         },
         political: {
@@ -60,13 +75,13 @@ describe('Wave 3 Test A: displacement triggers proxy path observability', () => 
         vi.restoreAllMocks();
     });
 
-    it('displacement triggers: proxy path emits diagnostic warning when sectors unavailable', () => {
-        const state = makeStateNoSectors();
+    it('displacement triggers: proxy path emits diagnostic warning when sectors unavailable in operational-context runs', () => {
+        const state = makeStateNoSectors(true);
         const edges: import('../src/map/settlements.js').EdgeRecord[] = [];
 
         const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-        evaluateDisplacementTriggers(state, edges, undefined);
+        evaluateDisplacementTriggers(state, edges, { sid_a: 'op:mun:a' });
 
         expect(warnSpy).toHaveBeenCalled();
         const calls = warnSpy.mock.calls;
@@ -74,6 +89,20 @@ describe('Wave 3 Test A: displacement triggers proxy path observability', () => 
         expect(allMessages).toMatch(
             /legacy.*fallback|proxy.*path|hasLiveSectorFrontlineTruth.*false/i
         );
+    });
+
+    it('displacement triggers: settlement-only compatibility path stays quiet when sectors are unavailable', () => {
+        const state = makeStateNoSectors();
+        const edges: import('../src/map/settlements.js').EdgeRecord[] = [];
+
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+        evaluateDisplacementTriggers(state, edges, undefined);
+
+        const legacyWarnings = warnSpy.mock.calls.filter((c) =>
+            /legacy.*fallback|proxy.*path|hasLiveSectorFrontlineTruth.*false/i.test(String(c[0]))
+        );
+        expect(legacyWarnings).toHaveLength(0);
     });
 
     it('displacement triggers: canonical path does NOT emit a warning when sectors are present', () => {

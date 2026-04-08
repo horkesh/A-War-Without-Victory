@@ -157,6 +157,16 @@ describe('checkTriggeredOperations', () => {
 
     it('injects Herzegovina Consolidation once the corps finishes its earlier chain', () => {
         const state = makeState(12);
+        state.operation_history = [
+            {
+                corps_id: 'vrs_herzegovina',
+                operation_name: 'Operation Visegrad',
+            } as any,
+            {
+                corps_id: 'vrs_herzegovina',
+                operation_name: 'Operation Foca',
+            } as any,
+        ];
         const injected = checkTriggeredOperations(state);
         assert.ok(injected.includes('Operation Herzegovina Consolidation'));
 
@@ -164,6 +174,15 @@ describe('checkTriggeredOperations', () => {
         assert.equal(op?.name, 'Operation Herzegovina Consolidation');
         assert.equal(op?.sector_id, 'sector:vrs_herzegovina:0');
         assert.equal(op?.axes?.length, 2);
+    });
+
+    it('does not inject Herzegovina Consolidation before Visegrad and Foca are recorded complete', () => {
+        const state = makeState(12);
+
+        const injected = checkTriggeredOperations(state);
+
+        assert.ok(!injected.includes('Operation Herzegovina Consolidation'));
+        assert.equal(state.military.corps_command!['vrs_herzegovina']!.active_operations.length, 0);
     });
 
     it('injects Kotor Varos at turn 10', () => {

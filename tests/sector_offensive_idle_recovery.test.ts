@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { updateSectorOffensiveResults, getEquipmentOffensivePriority } from '../src/sim/combat/sector_offensive.js';
+import { advanceSectorOffensives, updateSectorOffensiveResults, getEquipmentOffensivePriority } from '../src/sim/combat/sector_offensive.js';
 import type { CorpsFrontSector, FormationState, GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
@@ -66,6 +66,75 @@ describe('equipment offensive priority', () => {
 });
 
 describe('sector offensive idle recovery', () => {
+    it('records failed objective cooldowns for no-attempt probes when recovery completes', () => {
+        const state = {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 12, phase: 'war', seed: 'probe-failure-cooldown' } as any,
+  military: {
+    formations: {
+                rs_corps: {
+                    id: 'rs_corps',
+                    faction: 'RS',
+                    name: 'Corps',
+                    created_turn: 1,
+                    status: 'active',
+                    assignment: null,
+                    kind: 'corps',
+                    personnel: 50,
+                    cohesion: 80,
+                    hq_sid: 'S1',
+                    tags: [],
+                },
+                b1: makeBrigade('b1', 'op:front:approach'),
+            },
+    corps_front_sectors: {
+                rs_sector: makeSector('rs_sector', 'rs_corps', 'RS', ['e1'], ['op:front:approach'], ['op:target:objective']),
+            },
+    corps_command: {
+                rs_corps: {
+                    command_span: 5,
+                    subordinate_count: 1,
+                    og_slots: 1,
+                    active_ogs: [],
+                    corps_exhaustion: 0,
+                    stance: 'offensive',
+                    active_operations: [{
+                        name: 'Failed Probe',
+                        type: 'probe',
+                        phase: 'recovery',
+                        started_turn: 10,
+                        phase_started_turn: 11,
+                        participating_brigades: ['b1'],
+                        objectives: ['op:target:objective'],
+                        current_objective_index: 0,
+                        attack_attempt_count: 0,
+                        objective_capture_count: 0,
+                        movement_only_execution_turns: 0,
+                        idle_execution_turn_streak: 1,
+                        failure_count: 1,
+                        consecutive_failures_on_current: 1,
+                        recovery_reason: 'no_logged_attempt',
+                        sector_id: 'rs_sector',
+                    }],
+                },
+            }
+  } as any,
+  political: {
+    political_controllers: {
+                'op:target:objective': 'RBiH',
+                'op:front:approach': 'RS',
+            }
+  } as any,
+} as unknown as GameState;
+
+        advanceSectorOffensives(state, null);
+
+        const failed = state.military.corps_command?.rs_corps?.failed_offensive_objectives?.['op:target:objective'];
+        expect(failed?.failure_count).toBe(1);
+        expect(failed?.cooldown_until_turn ?? 0).toBe(0);
+        expect(state.military.corps_command?.rs_corps?.active_operations).toHaveLength(0);
+    });
+
     it('moves a zero-eligibility execution operation into recovery after four consecutive idle turns', () => {
         const state = {
   schema_version: CURRENT_SCHEMA_VERSION,
@@ -133,5 +202,95 @@ describe('sector offensive idle recovery', () => {
         expect(op?.phase).toBe('recovery');
         expect(op?.recovery_reason).toBe('no_logged_attempt');
         expect(op?.movement_only_execution_turns).toBe(1);
+    });
+
+    it('moves a truce-blocked execution probe into one-turn political recovery instead of stalling in execution', () => {
+        const state = {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 9, phase: 'war', seed: 'political-blocked-probe' } as any,
+  military: {
+    formations: {
+                hvo_southeast_herzegovina: {
+                    id: 'hvo_southeast_herzegovina',
+                    faction: 'HRHB',
+                    name: 'Corps',
+                    created_turn: 1,
+                    status: 'active',
+                    assignment: null,
+                    kind: 'corps',
+                    personnel: 50,
+                    cohesion: 80,
+                    hq_sid: 'S1',
+                    tags: [],
+                },
+                b1: {
+                    ...makeBrigade('b1', 'op:front:approach'),
+                    faction: 'HRHB',
+                    corps_id: 'hvo_southeast_herzegovina',
+                },
+            },
+    corps_front_sectors: {
+                hvo_sector: makeSector('hvo_sector', 'hvo_southeast_herzegovina', 'RBiH' as any, ['e1'], ['op:front:approach'], ['op:target:objective']) as any,
+            },
+    corps_command: {
+                hvo_southeast_herzegovina: {
+                    command_span: 5,
+                    subordinate_count: 1,
+                    og_slots: 1,
+                    active_ogs: [],
+                    corps_exhaustion: 0,
+                    stance: 'offensive',
+                    active_operations: [{
+                        name: 'Blocked Probe',
+                        type: 'probe',
+                        phase: 'execution',
+                        started_turn: 8,
+                        phase_started_turn: 8,
+                        participating_brigades: ['b1'],
+                        objectives: ['op:target:objective'],
+                        current_objective_index: 0,
+                        axes: [{
+                            axis_id: 'probe_axis',
+                            name: 'Probe',
+                            assigned_brigades: ['b1'],
+                            objectives: ['op:target:objective'],
+                            current_objective_index: 0,
+                            status: 'executing',
+                            failure_count: 0,
+                            consecutive_failures_on_current: 0,
+                            momentum: 0,
+                            attack_attempt_count: 0,
+                            objective_capture_count: 0,
+                            movement_only_execution_turns: 0,
+                            idle_execution_turn_streak: 0,
+                        }],
+                        attack_attempt_count: 0,
+                        objective_capture_count: 0,
+                        movement_only_execution_turns: 0,
+                        idle_execution_turn_streak: 0,
+                        failure_count: 0,
+                        consecutive_failures_on_current: 0,
+                        sector_id: 'hvo_sector',
+                    }],
+                },
+            }
+  } as any,
+  political: {
+    political_controllers: {
+                'op:target:objective': 'RS',
+                'op:front:approach': 'HRHB',
+            },
+            vienna_declaration_turn: 4,
+            vienna_accepted: { RS: true, HRHB: true },
+            vienna_herzegovina_broken_by: null,
+            graz_east_herzegovina_active_turn: 8,
+} as any,
+} as unknown as GameState;
+
+        advanceSectorOffensives(state, null);
+
+        const op = state.military.corps_command?.hvo_southeast_herzegovina?.active_operations[0];
+        expect(op?.phase).toBe('recovery');
+        expect(op?.recovery_reason).toBe('political_blocked');
     });
 });

@@ -61,6 +61,7 @@ import { computeOsidGraphDistance } from './home_distance.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getPrimaryOperation } from './corps_operation_helpers.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
+import { removeFromActiveOperation } from './brigade_dissolution.js';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -238,6 +239,28 @@ function appendReserveDecision(
 ): void {
     if (!state.military.reserve_request_history) state.military.reserve_request_history = [];
     state.military.reserve_request_history.push(entry);
+}
+
+function attachEliteToOperation(operation: { participating_brigades: FormationId[]; axes?: Array<{ axis_id: string; status?: string; assigned_brigades: FormationId[] }> }, brigadeId: FormationId): void {
+    if (!operation.participating_brigades.includes(brigadeId)) {
+        operation.participating_brigades.push(brigadeId);
+        operation.participating_brigades.sort(strictCompare);
+    }
+
+    if (!Array.isArray(operation.axes) || operation.axes.length === 0) return;
+
+    const eligibleAxes = operation.axes
+        .filter((axis) => axis.status !== 'complete')
+        .sort((a, b) =>
+            a.assigned_brigades.length - b.assigned_brigades.length
+            || strictCompare(a.axis_id, b.axis_id)
+        );
+    const targetAxis = eligibleAxes[0] ?? null;
+    if (!targetAxis) return;
+    if (targetAxis.assigned_brigades.includes(brigadeId)) return;
+
+    targetAxis.assigned_brigades.push(brigadeId);
+    targetAxis.assigned_brigades.sort(strictCompare);
 }
 
 const COMMANDER_REQUEST_PRIORITY_SCORE: Record<'critical' | 'high' | 'medium' | 'low', number> = {
@@ -509,9 +532,8 @@ export function deployEliteLoan(
     if (reason === 'offensive_support' || reason === 'exploitation') {
         const cmd = state.military.corps_command?.[corpsId];
         const activeOp = cmd?.active_operations?.find(op => op.phase === 'execution') ?? null;
-        if (activeOp && !activeOp.participating_brigades.includes(brigadeId)) {
-            activeOp.participating_brigades.push(brigadeId);
-            activeOp.participating_brigades.sort(strictCompare);
+        if (activeOp) {
+            attachEliteToOperation(activeOp, brigadeId);
         }
     }
 }
@@ -531,6 +553,7 @@ export function recallEliteLoan(
 
     const ls = f.elite_loan_state;
     if (!ls.on_loan) return;
+    const receivingCorpsId = ls.loaned_to_corps;
 
     const tracker = state.military.elite_brigade_tracker?.[brigadeId];
     if (tracker && ls.current_episode_id != null) {
@@ -549,6 +572,11 @@ export function recallEliteLoan(
             tracker.total_osids_captured += episode.osids_captured;
         }
     }
+
+    // Loan recall must also remove the elite from the receiving corps's live
+    // operation rosters, or execution/AAR/reporting truth will keep a ghost
+    // participant after the brigade has already been teleported back to base.
+    removeFromActiveOperation(state, brigadeId, receivingCorpsId);
 
     ls.on_loan = false;
     ls.loaned_to_corps = null;
@@ -727,17 +755,7 @@ export function tickEliteLoans(state: GameState, turn: number, adjacency?: Map<O
         if (targetCmd) {
             for (const activeOp of targetCmd.active_operations ?? []) {
                 if (activeOp.phase !== 'execution') continue;
-                if (activeOp.participating_brigades.includes(bid)) continue;
-                if (activeOp.axes) {
-                    const inAxis = activeOp.axes.some(a => a.assigned_brigades.includes(bid));
-                    if (!inAxis) {
-                        activeOp.participating_brigades.push(bid);
-                        activeOp.participating_brigades.sort(strictCompare);
-                    }
-                } else {
-                    activeOp.participating_brigades.push(bid);
-                    activeOp.participating_brigades.sort(strictCompare);
-                }
+                attachEliteToOperation(activeOp, bid);
                 break; // Join the first execution-phase op found
             }
         }

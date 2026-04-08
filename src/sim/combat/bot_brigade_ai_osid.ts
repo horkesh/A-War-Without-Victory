@@ -536,10 +536,6 @@ export function generateAllBotOrdersOsid(
             terrainCache, graphAnalysis,
             ctx.supplyStateByOsid, ctx.ethnicCompositionByOsid, ctx.osidPopulationMap
         );
-        for (const corpsId of Object.keys(result.eligible_attackers_by_corps).sort(strictCompare)) {
-            allEligibleAttackersByCorps[corpsId] =
-                (allEligibleAttackersByCorps[corpsId] ?? 0) + result.eligible_attackers_by_corps[corpsId]!;
-        }
 
         // Per-corps attack share cap: each corps gets attack slots proportional to its size.
         // This prevents large corps (1KK with 28 brigades) from monopolizing all attack slots
@@ -611,6 +607,13 @@ export function generateAllBotOrdersOsid(
         }
 
         // Accumulate results
+        const finalEligibleAttackersByCorps: Record<FormationId, number> = {};
+        for (const bid of Object.keys(result.attack_orders).sort(strictCompare)) {
+            const brig = state.military.formations?.[bid as FormationId];
+            const corpsId = brig?.corps_id;
+            if (!corpsId) continue;
+            finalEligibleAttackersByCorps[corpsId] = (finalEligibleAttackersByCorps[corpsId] ?? 0) + 1;
+        }
         allPostureOrders.push(...result.posture_orders);
         for (const [bid, target] of Object.entries(result.attack_orders)) {
             if (target != null) allAttackOrders[bid as FormationId] = target;
@@ -620,6 +623,10 @@ export function generateAllBotOrdersOsid(
         }
         for (const [bid, dest] of Object.entries(result.column_march_orders)) {
             if (dest != null) allColumnMarchOrders[bid as FormationId] = dest;
+        }
+        for (const corpsId of Object.keys(finalEligibleAttackersByCorps).sort(strictCompare)) {
+            allEligibleAttackersByCorps[corpsId] =
+                (allEligibleAttackersByCorps[corpsId] ?? 0) + finalEligibleAttackersByCorps[corpsId]!;
         }
     }
 

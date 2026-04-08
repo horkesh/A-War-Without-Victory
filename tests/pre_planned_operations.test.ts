@@ -11,7 +11,6 @@ import type {
     FormationState,
     GameState,
 } from '../src/state/game_state.js';
-import type { Osid } from '../src/sim/combat/osid_adjacency.js';
 
 function makeMinimalState(): GameState {
     const formations: Record<string, FormationState> = {};
@@ -94,7 +93,7 @@ function makeMinimalState(): GameState {
 
 describe('pre-planned operations', () => {
     it('defines the current pre-planned operation catalog', () => {
-        assert.equal(_ALL_PRE_PLANNED.length, 14);
+        assert.equal(_ALL_PRE_PLANNED.length, 13);
         assert.deepEqual(
             _ALL_PRE_PLANNED.map((def) => def.name),
             [
@@ -111,7 +110,6 @@ describe('pre-planned operations', () => {
                 'Operation Donji Vakuf',
                 'Operation Bosanski Novi',
                 'Operation Jackal',
-                'Operation Teočak',
             ],
         );
     });
@@ -133,7 +131,6 @@ describe('pre-planned operations', () => {
         assert.deepEqual(state.military.corps_command?.vrs_drina?.queued_operations, ['Operation Podrinje Sweep']);
 
         assert.equal(state.military.corps_command?.hvo_southeast_herzegovina?.queued_operations?.[0], 'Operation Jackal');
-        assert.equal(state.military.corps_command?.arbih_2nd_corps?.queued_operations?.[0], 'Operation Teočak');
     });
 
     it('anchors injected operations to the primary sector of their participating brigades', () => {
@@ -181,15 +178,26 @@ describe('pre-planned operations', () => {
 
     it('does not emit brigade-missing warnings for deferred operations before available_from', () => {
         const state = makeMinimalState();
-        delete state.military.formations['arbih_120th_liberation_black_swans'];
+        delete state.military.formations['hvo_stola_brigade'];
 
         injectPrePlannedOperations(state);
 
         const warnings = state.military.op_injection_warnings ?? [];
         assert.ok(
-            !warnings.some((warning) => warning.op_name === 'Operation Teočak'),
-            'deferred Teočak warnings should not be emitted before available_from'
+            !warnings.some((warning) => warning.op_name === 'Operation Jackal'),
+            'deferred Operation Jackal warnings should not be emitted before available_from'
         );
+    });
+
+    it('skips pre-planned injection entirely when the state has no active brigades', () => {
+        const state = makeMinimalState();
+        state.military.formations = {};
+
+        injectPrePlannedOperations(state);
+
+        const commands = Object.values(state.military.corps_command ?? {});
+        assert.ok(commands.every((cmd) => (cmd.active_operations?.length ?? 0) === 0));
+        assert.equal(state.military.op_injection_warnings?.length ?? 0, 0);
     });
 
     it('still validates queued operations at runtime when brigades are truly missing', () => {
@@ -212,49 +220,17 @@ describe('pre-planned operations', () => {
         );
     });
 
-    it('does not inject unreachable exempt-corps elites into queued operations', () => {
+    it('keeps deferred Operation Jackal queued until its available_from turn', () => {
         const state = makeMinimalState();
-        const opDef = _ALL_PRE_PLANNED.find((def) => def.corps === 'arbih_2nd_corps');
-        assert.ok(opDef, 'ARBiH 2nd Corps pre-planned op must exist');
-        state.meta.turn = opDef!.available_from ?? 15;
+        const jackal = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Jackal');
+        assert.ok(jackal, 'Operation Jackal must exist in the pre-planned catalog');
 
-        const elite = state.military.formations!['arbih_120th_liberation_black_swans']!;
-        elite.corps_id = 'arbih_general_staff';
-        elite.location_osid = 'op:mun:o0';
-        elite.home_osid = 'op:mun:o0';
-        elite.elite_loan_state = {
-            on_loan: false,
-            loaned_to_corps: null,
-            loan_start_turn: null,
-            last_recall_turn: null,
-            loan_start_personnel: null,
-            permanently_degraded: false,
-            current_episode_id: null,
-        } as any;
-        state.military.corps_front_sectors!['sector:arbih_2nd_corps:0']!.territory_osids = ['op:mun:o2'];
-        state.military.corps_front_sectors!['sector:arbih_2nd_corps:0']!.assigned_brigade_ids =
-            state.military.corps_front_sectors!['sector:arbih_2nd_corps:0']!.assigned_brigade_ids.filter((id) => id !== 'arbih_120th_liberation_black_swans');
-        state.political.political_controllers = {
-            ...state.political.political_controllers,
-            'op:mun:o0': 'RBiH',
-            'op:mun:o1': 'RS',
-            'op:mun:o2': 'RBiH',
-        } as any;
-        state.military.corps_command!.arbih_2nd_corps!.active_operations = [];
-        state.military.corps_command!.arbih_2nd_corps!.queued_operations = [opDef!.name];
+        state.meta.turn = (jackal!.available_from ?? 8) - 1;
+        injectPrePlannedOperations(state);
 
-        const adjacency = new Map<Osid, Osid[]>([
-            ['op:mun:o0' as Osid, ['op:mun:o1' as Osid]],
-            ['op:mun:o1' as Osid, ['op:mun:o0' as Osid, 'op:mun:o2' as Osid]],
-            ['op:mun:o2' as Osid, ['op:mun:o1' as Osid]],
-        ]);
-
-        const injected = injectQueuedOperation(state, 'arbih_2nd_corps', adjacency);
-
-        assert.equal(injected, true);
-        const op = state.military.corps_command!.arbih_2nd_corps!.active_operations[0]!;
-        assert.ok(!op.participating_brigades.includes('arbih_120th_liberation_black_swans'));
-        assert.equal(elite.elite_loan_state!.on_loan, false);
+        const command = state.military.corps_command!.hvo_southeast_herzegovina!;
+        assert.equal(command.active_operations.length, 0);
+        assert.deepEqual(command.queued_operations ?? [], ['Operation Jackal']);
     });
 
     it('does not pin queued Operation Foca to a phantom that predictably withdraws before queue time', () => {

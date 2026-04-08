@@ -150,6 +150,33 @@ describe('deployEliteLoan', () => {
         expect(state.military.brigade_movement_orders?.arbih_guards).toBeUndefined();
         expect(state.military.brigade_movement_state?.arbih_guards).toBeUndefined();
     });
+
+    it('adds offensive loan elites to a live execution axis, not just the flat participant list', () => {
+        const brigade = makeElite('arbih_guards', 'RBiH', 'op:bihac:bihac_1');
+        const state = makeState({
+            formations: { arbih_guards: brigade },
+            corps_command: {
+                arbih_1st_corps: {
+                    active_operations: [{
+                        name: 'Operation Test',
+                        phase: 'execution',
+                        participating_brigades: ['arbih_line_1'],
+                        axes: [
+                            { axis_id: 'axis:a', assigned_brigades: ['arbih_line_1'], objectives: ['enemy_a'], current_objective_index: 0, status: 'executing', failure_count: 0, consecutive_failures_on_current: 0, momentum: 0, attack_attempt_count: 0, objective_capture_count: 0, movement_only_execution_turns: 0, idle_execution_turn_streak: 0 },
+                            { axis_id: 'axis:b', assigned_brigades: [], objectives: ['enemy_b'], current_objective_index: 0, status: 'executing', failure_count: 0, consecutive_failures_on_current: 0, momentum: 0, attack_attempt_count: 0, objective_capture_count: 0, movement_only_execution_turns: 0, idle_execution_turn_streak: 0 },
+                        ],
+                    }],
+                },
+            },
+            turn: 5,
+        });
+
+        deployEliteLoan(state, 'arbih_guards', 'arbih_1st_corps', 'offensive_support', 2, 5);
+
+        const activeOp = state.military.corps_command!.arbih_1st_corps.active_operations[0];
+        expect(activeOp.participating_brigades).toEqual(['arbih_guards', 'arbih_line_1']);
+        expect(activeOp.axes?.[1]?.assigned_brigades).toEqual(['arbih_guards']);
+    });
 });
 
 // ── recallEliteLoan ───────────────────────────────────────────────────────────
@@ -176,6 +203,35 @@ describe('recallEliteLoan', () => {
         expect(ep.loan_end_turn).toBe(12);
         expect(ep.recall_reason).toBe('op_complete');
         expect(ep.casualties_taken).toBe(200);
+    });
+
+    it('removes the recalled elite from the receiving corps active operation and axes', () => {
+        const brigade = makeElite('arbih_guards', 'RBiH', 'op:bihac:bihac_1');
+        const state = makeState({
+            formations: { arbih_guards: brigade },
+            corps_command: {
+                arbih_1st_corps: {
+                    active_operations: [{
+                        name: 'Operation Test',
+                        phase: 'execution',
+                        participating_brigades: ['arbih_guards', 'arbih_line_1'],
+                        axes: [
+                            { assigned_brigades: ['arbih_guards'] },
+                            { assigned_brigades: ['arbih_line_1', 'arbih_guards'] },
+                        ],
+                    }],
+                },
+            },
+            turn: 5,
+        });
+
+        deployEliteLoan(state, 'arbih_guards', 'arbih_1st_corps', 'offensive_support', 2, 5);
+        recallEliteLoan(state, 'arbih_guards', 'op_complete', 12);
+
+        const activeOp = state.military.corps_command!.arbih_1st_corps.active_operations[0];
+        expect(activeOp.participating_brigades).toEqual(['arbih_line_1']);
+        expect(activeOp.axes?.[0]?.assigned_brigades).toEqual([]);
+        expect(activeOp.axes?.[1]?.assigned_brigades).toEqual(['arbih_line_1']);
     });
 });
 
@@ -320,6 +376,36 @@ describe('tickEliteLoans', () => {
         tickEliteLoans(state, 10, chainAdj(3));
 
         expect(brigade.elite_loan_state!.on_loan).toBe(false);
+    });
+
+    it('auto-joins a newly launched execution operation through axis membership as well', () => {
+        const brigade = makeOnLoanBrigade('rs_1st_guards', { loanStartTurn: 0 });
+        const state = makeState({
+            formations: { rs_1st_guards: brigade },
+            corps_command: {
+                vrs_drina: {
+                    active_operations: [{
+                        name: 'Operation New',
+                        phase: 'execution',
+                        participating_brigades: ['rs_line_1'],
+                        axes: [
+                            { axis_id: 'axis:a', assigned_brigades: ['rs_line_1'], objectives: ['enemy_a'], current_objective_index: 0, status: 'executing', failure_count: 0, consecutive_failures_on_current: 0, momentum: 0, attack_attempt_count: 0, objective_capture_count: 0, movement_only_execution_turns: 0, idle_execution_turn_streak: 0 },
+                            { axis_id: 'axis:b', assigned_brigades: [], objectives: ['enemy_b'], current_objective_index: 0, status: 'executing', failure_count: 0, consecutive_failures_on_current: 0, momentum: 0, attack_attempt_count: 0, objective_capture_count: 0, movement_only_execution_turns: 0, idle_execution_turn_streak: 0 },
+                        ],
+                    }],
+                },
+            },
+            turn: 10,
+        });
+        brigade.elite_loan_state!.on_loan = true;
+        brigade.elite_loan_state!.loaned_to_corps = 'vrs_drina';
+        brigade.elite_loan_state!.loan_start_turn = 0;
+
+        tickEliteLoans(state, 10);
+
+        const activeOp = state.military.corps_command!.vrs_drina.active_operations[0];
+        expect(activeOp.participating_brigades).toEqual(['rs_1st_guards', 'rs_line_1']);
+        expect(activeOp.axes?.[1]?.assigned_brigades).toEqual(['rs_1st_guards']);
     });
 });
 

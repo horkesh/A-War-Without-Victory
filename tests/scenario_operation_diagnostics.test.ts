@@ -413,6 +413,31 @@ describe('combat causality diagnostics', () => {
         assert.ok(!diagnostics[0]!.invalidation_reasons.includes('recovery_without_logged_attempt'));
     });
 
+    it('does not flag politically blocked recovery as recovery without logged attempt', () => {
+        const state = makeState();
+        state.meta.turn = 5 as any;
+        state.military.corps_command!['corps_1']!.active_operations = [{
+            ...state.military.corps_command!['corps_1']!.active_operations[0],
+            phase: 'recovery',
+            phase_started_turn: 5,
+            attack_attempt_count: 0,
+            objective_capture_count: 0,
+            movement_only_execution_turns: 0,
+            idle_execution_turn_streak: 0,
+            recovery_reason: 'political_blocked',
+        }] as any;
+
+        const diagnostics = buildOperationCombatDiagnostics(
+            state,
+            makeOrderSnapshot({}),
+            makeOsidReport([])
+        );
+
+        assert.equal(diagnostics.length, 1);
+        assert.ok(!diagnostics[0]!.invalidation_reasons.includes('recovery_without_logged_attempt'));
+        assert.equal(diagnostics[0]!.invalid_for_combat_calibration, false);
+    });
+
     it('surfaces persisted operation counters in diagnostics and summary', () => {
         const state = makeState();
         state.military.corps_command!['corps_1']!.active_operations = [{

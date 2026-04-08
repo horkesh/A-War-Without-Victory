@@ -67,7 +67,7 @@ import type { OperationalToCanonicalReverseMap } from '../../data/operational_da
 import { releaseOperationCommander } from './officer_system.js';
 import { finalizeOperationAAR } from './operation_aar.js';
 import { applyOperationExperience, gradeStarsToOutcome, checkDefeatism } from './officer_experience.js';
-import { isEastHerzegovinaPair, isGrazAccordsActive } from '../local_truces.js';
+import { isEastHerzegovinaPair, isGrazAccordsActive, shouldGrazBlockAttack } from '../local_truces.js';
 import { isFriendlyFaction as isFriendlyFactionCtrl } from '../early_war/alliance_update.js';
 import { isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
 import { tickPreparation, hasUnresolvedProbe, autoResolveProbe } from './operation_preparation.js';
@@ -727,6 +727,7 @@ function areParticipantsReadyForExecution(
 function recordFailedObjectives(cmd: CorpsCommandState, op: CorpsOperation, turn: number): void {
     if (op.recovery_reason === 'completed') return; // Success — no failure to record
     if (op.recovery_reason === 'probe_complete') return; // Probes gather intel — not a failure
+    if (op.recovery_reason === 'political_blocked') return; // Truce/political block is not a failed assault
 
     const failedOsids: string[] = [];
     if (isMultiAxis(op) && op.axes) {
@@ -770,6 +771,7 @@ function getRecoveryDuration(op: CorpsOperation): number {
         case 'manual_termination':
         case 'probe_complete':
         case 'brigade_attrition':
+        case 'political_blocked':
             return 1;
         case 'completed':
             return Math.max(1, Math.ceil(objectiveCount / 2));
@@ -787,6 +789,28 @@ function getNoAttemptRecoveryReason(op: CorpsOperation): CorpsOperation['recover
     return (op.attack_attempt_count ?? 0) > 0 ? 'max_failures' : 'no_logged_attempt';
 }
 
+function getTotalObjectiveCount(op: CorpsOperation): number {
+    if (isMultiAxis(op)) {
+        return op.axes!.reduce((count, axis) => count + axis.objectives.length, 0);
+    }
+    return op.objectives?.length ?? 0;
+}
+
+function hasCapturedAllObjectives(op: CorpsOperation): boolean {
+    const totalObjectives = getTotalObjectiveCount(op);
+    if (totalObjectives <= 0) return false;
+    return (op.objective_capture_count ?? 0) >= totalObjectives;
+}
+
+function getCompletedObjectiveRecoveryReason(op: CorpsOperation): CorpsOperation['recovery_reason'] {
+    if (op.type === 'probe') {
+        if (hasCapturedAllObjectives(op)) return 'completed';
+        return getNoAttemptRecoveryReason(op) === 'no_logged_attempt' ? 'no_logged_attempt' : 'probe_complete';
+    }
+    if (hasCapturedAllObjectives(op)) return 'completed';
+    return getNoAttemptRecoveryReason(op);
+}
+
 function getMultiAxisRecoveryDuration(op: CorpsOperation): number {
     let maxLen = 0;
     for (const axis of op.axes ?? []) {
@@ -796,6 +820,7 @@ function getMultiAxisRecoveryDuration(op: CorpsOperation): number {
         case 'no_logged_attempt':
         case 'manual_termination':
         case 'probe_complete':
+        case 'political_blocked':
             return 1;
         case 'completed':
             return Math.max(1, Math.ceil(maxLen / 2));
@@ -1118,6 +1143,10 @@ export function advanceSectorOffensives(
             //
             const preparationReady = op.type === 'sector_attack' && op.preparation_sub_phase === 'ready';
             if (preparationReady || elapsed > planDuration || stagedEarly || forcedLaunch) {
+                if (hasOnlyPoliticallyBlockedCurrentObjectives(state, corpsId, faction, op)) {
+                    beginRecovery(op, turn, 'political_blocked', state);
+                    continue;
+                }
                 op.phase = 'execution';
                 op.phase_started_turn = turn;
                 op.recovery_reason = undefined;
@@ -1145,6 +1174,10 @@ export function advanceSectorOffensives(
                 applyArtilleryPreparation(state, faction, op);
             }
         } else if (op.phase === 'execution') {
+            if (hasOnlyPoliticallyBlockedCurrentObjectives(state, corpsId, faction, op)) {
+                beginRecovery(op, turn, 'political_blocked', state);
+                continue;
+            }
             if (op.tempo === 'all_out') {
                 applyCohesionDelta(state, allBrigades, -ALL_OUT_EXTRA_COHESION_COST);
             }
@@ -1152,15 +1185,14 @@ export function advanceSectorOffensives(
             if (multiAxis) {
                 // Multi-axis: check if all axes are terminal
                 if (allAxesTerminal(op.axes!)) {
-                    const allComplete = op.axes!.every(a => a.status === 'complete');
-                    beginRecovery(op, turn, allComplete ? 'completed' : 'max_failures', state);
+                    beginRecovery(op, turn, getCompletedObjectiveRecoveryReason(op), state);
                     continue;
                 }
             } else {
                 // Legacy flat: check completion and failures
                 const objectives = op.objectives ?? [];
                 if ((op.current_objective_index ?? 0) >= objectives.length) {
-                    beginRecovery(op, turn, 'completed', state);
+                    beginRecovery(op, turn, getCompletedObjectiveRecoveryReason(op), state);
                     continue;
                 }
                 if ((op.failure_count ?? 0) >= MAX_TOTAL_FAILURES) {
@@ -1197,9 +1229,11 @@ export function advanceSectorOffensives(
             if (elapsed >= recoveryDuration) {
                 const exhaustionCost = op.type === 'feint' || op.type === 'probe' ? 5 : 15;
                 cmd.corps_exhaustion = Math.min(100, (cmd.corps_exhaustion ?? 0) + exhaustionCost);
+                if (op.type === 'sector_attack' || op.type === 'probe') {
+                    recordFailedObjectives(cmd, op, turn);
+                }
                 if (op.type === 'sector_attack') {
                     finalizeOperationAAR(state, corpsId, op);
-                    recordFailedObjectives(cmd, op, turn);
                     // Apply experience gain to operation commander based on AAR grade
                     if (op.commander_officer_id && state.operation_history?.length) {
                         const latestAAR = state.operation_history[state.operation_history.length - 1];
@@ -1453,7 +1487,8 @@ function updateMultiAxisResults(
                 // Threshold = 4 to give brigades time to march from staging to objectives
                 // via regular movement (1 hop/turn). Column-marching brigades are already
                 // detected via anyMoved (in_transit) and use the movement-only stall instead.
-                if (!anyMoved && axis.attack_attempt_count === 0 && axis.idle_execution_turn_streak >= 4) {
+                const idleStallThreshold = op.type === 'probe' ? 1 : 4;
+                if (!anyMoved && axis.attack_attempt_count === 0 && axis.idle_execution_turn_streak >= idleStallThreshold) {
                     axis.movement_only_execution_turns = Math.max(1, axis.movement_only_execution_turns);
                     axis.status = 'stalled';
                     continue;
@@ -1515,9 +1550,31 @@ function updateMultiAxisResults(
 
     // Check if all axes terminal → operation enters recovery
     if (allAxesTerminal(axes)) {
-        const allComplete = axes.every(a => a.status === 'complete');
-        beginRecovery(op, turn, allComplete ? 'completed' : 'max_failures', state);
+        beginRecovery(op, turn, getCompletedObjectiveRecoveryReason(op), state);
     }
+}
+
+function hasOnlyPoliticallyBlockedCurrentObjectives(
+    state: GameState,
+    corpsId: FormationId,
+    faction: FactionId,
+    op: CorpsOperation,
+): boolean {
+    const politicalControllers = state.political.political_controllers ?? {};
+    if (isMultiAxis(op) && op.axes) {
+        const activeAxes = op.axes.filter((axis) => axis.status === 'executing');
+        if (activeAxes.length === 0) return false;
+        return activeAxes.every((axis) => {
+            const objective = axis.objectives[axis.current_objective_index ?? 0];
+            if (!objective) return false;
+            const controller = politicalControllers[objective] ?? '';
+            return shouldGrazBlockAttack(state, corpsId, faction, objective, controller);
+        });
+    }
+    const objective = op.objectives?.[op.current_objective_index ?? 0];
+    if (!objective) return false;
+    const controller = politicalControllers[objective] ?? '';
+    return shouldGrazBlockAttack(state, corpsId, faction, objective, controller);
 }
 
 /** Collect friendly OSIDs adjacent to a target objective for attack detection. */
@@ -1546,7 +1603,10 @@ function updateLegacyFlatResults(
 ): void {
     const objectives = op.objectives ?? [];
     const currentIdx = op.current_objective_index ?? 0;
-    if (currentIdx >= objectives.length) return;
+    if (currentIdx >= objectives.length) {
+        beginRecovery(op, turn, getCompletedObjectiveRecoveryReason(op), state);
+        return;
+    }
 
     const currentObjective = objectives[currentIdx]!;
     let effectiveController = getPoliticalControllerOSID(state, currentObjective, reverseMap ?? undefined);
@@ -1637,7 +1697,8 @@ function updateLegacyFlatResults(
 
             // Idle stall: 4-turn threshold (matching multi-axis path) to give brigades
             // time to march from staging to objectives via regular movement (1 hop/turn).
-            if (!anyMoved && (op.attack_attempt_count ?? 0) === 0 && (op.idle_execution_turn_streak ?? 0) >= 4) {
+            const idleStallThreshold = op.type === 'probe' ? 1 : 4;
+            if (!anyMoved && (op.attack_attempt_count ?? 0) === 0 && (op.idle_execution_turn_streak ?? 0) >= idleStallThreshold) {
                 op.movement_only_execution_turns = Math.max(1, op.movement_only_execution_turns ?? 0);
                 beginRecovery(op, turn, 'no_logged_attempt', state);
                 return;
@@ -1659,7 +1720,7 @@ function updateLegacyFlatResults(
     }
 
     if ((op.current_objective_index ?? 0) >= objectives.length) {
-        beginRecovery(op, turn, 'completed', state);
+        beginRecovery(op, turn, getCompletedObjectiveRecoveryReason(op), state);
     }
     if ((op.failure_count ?? 0) >= MAX_TOTAL_FAILURES) {
         beginRecovery(op, turn, getNoAttemptRecoveryReason(op), state);
@@ -2096,7 +2157,7 @@ export function reevaluateWeakenedOperations(state: GameState): void {
                 abortReason = anyComplete ? null : 'all_axes_stalled';
                 if (anyComplete) {
                     // Some axes completed, treat as partial success — enter recovery normally
-                    beginRecovery(op, turn, 'completed');
+                    beginRecovery(op, turn, getCompletedObjectiveRecoveryReason(op));
                     appendReevaluationLog(op, turn, 'abort', activeBrigadeCount, totalPersonnel,
                         'all_axes_terminal_partial_success');
                     continue;
@@ -2213,6 +2274,7 @@ export function evaluateOperationProgress(
 
                 // Replace heavily damaged brigades
                 const updatedParticipants: FormationId[] = [];
+                const replacementMap = new Map<FormationId, FormationId>();
                 for (const brigId of op.participating_brigades) {
                     const brig = formations[brigId];
                     if (!brig || brig.status !== 'active') continue;
@@ -2229,12 +2291,20 @@ export function evaluateOperationProgress(
                         );
                         if (replacement) {
                             updatedParticipants.push(replacement.id);
+                            replacementMap.set(brigId, replacement.id);
                             continue;
                         }
                     }
                     updatedParticipants.push(brigId);
                 }
                 op.participating_brigades = updatedParticipants;
+                if (replacementMap.size > 0 && Array.isArray(op.axes)) {
+                    for (const axis of op.axes) {
+                        axis.assigned_brigades = axis.assigned_brigades
+                            .map((brigadeId) => replacementMap.get(brigadeId) ?? brigadeId)
+                            .filter((brigadeId, index, ids) => ids.indexOf(brigadeId) === index);
+                    }
+                }
             } else if (op.phase === 'recovery') {
                 // Clear operation after recovery duration
                 if (turnsInPhase >= RECOVERY_DURATION) {

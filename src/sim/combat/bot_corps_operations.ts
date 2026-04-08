@@ -220,6 +220,7 @@ export function generateEmergencyDefensiveOperations(
             Object.values(state.military.corps_front_sectors ?? {}),
             corps.id,
             participantIds,
+            state.military.formations ?? {},
         );
         const operation = buildEmergencyDefenseOperation(
             corps.id,

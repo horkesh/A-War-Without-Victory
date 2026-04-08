@@ -41,6 +41,10 @@ import type {
 import { strictCompare } from '../../../state/validateGameState.js';
 import { spatialFriendlyDistance, spatialSameComponent } from '../../spatial_context.js';
 import { buildCommanderOperation, buildProbeOperation, derivePrimarySectorForBrigades, getMaxOperationSlots } from '../corps_operation_helpers.js';
+import { buildTerrainCache, predictAllAdjacentTargets } from '../combat_predictor.js';
+import { isOutcomeSufficientForAttack } from '../bot_brigade_targeting.js';
+import { getPoliticalControllerOSID } from '../../../state/settlement_control.js';
+import { shouldGrazBlockAttack } from '../../local_truces.js';
 import type {
     CommanderBeliefState,
     CommanderBriefing,
@@ -769,6 +773,7 @@ function buildOperations(
                 briefing.sectors.filter((sector) => sector.corps_id === briefing.corps_id),
                 briefing.corps_id,
                 [probeBrigade.brigade_id],
+                Object.fromEntries(briefing.brigades.map((brigade) => [brigade.id, brigade])),
             );
 
             // Derive probe objective: first enemy-adjacent OSID in the probe sector.
@@ -777,9 +782,25 @@ function buildOperations(
             if (probeSectorId) {
                 const sector = briefing.sectors.find(s => s.sector_id === probeSectorId);
                 if (sector) {
-                    const adjacency = briefing.spatial.sharedBoundaryAdjacency ?? briefing.spatial.adjacency;
+                    const adjacency = briefing.spatial.adjacency;
                     const friendlySet = briefing.spatial.friendlyOsidsByFaction?.get(briefing.faction);
-                    if (adjacency && friendlySet) {
+                    const probeBrigLoc = briefing.brigades.find(b => b.id === probeBrigade.brigade_id)?.location_osid;
+                    const terrainCache = briefing.reverse_map ? buildTerrainCache(briefing.reverse_map) : null;
+                    if (adjacency && friendlySet && probeBrigLoc) {
+                        const predictedTargets = briefing.state_ref && briefing.reverse_map
+                            ? predictAllAdjacentTargets(
+                                briefing.state_ref,
+                                probeBrigade.brigade_id,
+                                adjacency as Map<any, any>,
+                                briefing.reverse_map,
+                                terrainCache ?? {},
+                                'attack',
+                                briefing.supply_by_osid ?? undefined,
+                                undefined,
+                                undefined,
+                                briefing.ethnic_map ?? undefined,
+                            )
+                            : [];
                         const enemyTargets = new Set<string>();
                         for (const sub of sector.sub_segments ?? []) {
                             for (const fOsid of sub.friendly_osids ?? []) {
@@ -790,7 +811,64 @@ function buildOperations(
                                 }
                             }
                         }
-                        probeObjectives = [...enemyTargets].sort(strictCompare).slice(0, 1);
+                        const rankedTargets = [...enemyTargets]
+                            .map((target) => {
+                                const cooldown = briefing.failed_offensive_objectives?.[target];
+                                const targetController = briefing.reverse_map && briefing.state_ref
+                                    ? getPoliticalControllerOSID(briefing.state_ref, target, briefing.reverse_map)
+                                    : null;
+                                const targetNeighbors = (adjacency.get(target as any) ?? []) as readonly string[];
+                                const direct = targetNeighbors.includes(probeBrigLoc);
+                                const directPrediction = predictedTargets.find((candidate) => candidate.osid === target);
+                                let bestApproachDistance = direct ? 0 : Number.POSITIVE_INFINITY;
+                                for (const approachOsid of targetNeighbors.filter(n => friendlySet.has(n)).sort(strictCompare)) {
+                                    const dist = spatialFriendlyDistance(
+                                        briefing.spatial,
+                                        briefing.faction,
+                                        probeBrigLoc,
+                                        approachOsid,
+                                        MAX_REACHABILITY_HOPS,
+                                    );
+                                    if (dist >= 0 && dist < bestApproachDistance) {
+                                        bestApproachDistance = dist;
+                                    }
+                                }
+                                return {
+                                    target,
+                                    onCooldown: (cooldown?.cooldown_until_turn ?? 0) > briefing.turn,
+                                    direct,
+                                    politicallyBlocked: briefing.state_ref != null
+                                        && targetController != null
+                                        && shouldGrazBlockAttack(
+                                            briefing.state_ref,
+                                            briefing.corps_id,
+                                            briefing.faction,
+                                            target,
+                                            targetController,
+                                        ),
+                                    predictedViable: directPrediction == null
+                                        ? true
+                                        : isOutcomeSufficientForAttack(
+                                            directPrediction.prediction.predicted_outcome,
+                                            'stalemate',
+                                        ),
+                                    reachable: Number.isFinite(bestApproachDistance),
+                                    approachDistance: bestApproachDistance,
+                                };
+                            })
+                            .filter((candidate) => !candidate.onCooldown)
+                            .filter((candidate) => !candidate.politicallyBlocked)
+                            // Probe ops are one-brigade recon-by-force, not small marches.
+                            // Only launch when the chosen brigade is already on a valid
+                            // approach node for the target this turn and the brigade can
+                            // already clear the probe threshold on that exact target.
+                            .filter((candidate) => candidate.direct && candidate.reachable && candidate.predictedViable)
+                            .sort((a, b) =>
+                                Number(b.direct) - Number(a.direct)
+                                || a.approachDistance - b.approachDistance
+                                || strictCompare(a.target, b.target)
+                            );
+                        probeObjectives = rankedTargets.slice(0, 1).map((candidate) => candidate.target);
                     }
                 }
             }

@@ -693,7 +693,10 @@ export function classifyBrigadesByTerritory(
         if (bestSector) {
             bestSector.assigned_brigade_ids.push(fid);
         } else {
-            emitRoutineConsoleWarn(`[brigade_assignment] UNRESOLVED ${fid}: loaned to ${targetCorpsId} but no truthful same-component sector exists`);
+            // Intermediate loan placement can legitimately miss here and still be
+            // repaired later by physical-truth rehome/final unresolved collection.
+            // Only the end-of-build unresolved snapshot should emit a canonical
+            // warning, otherwise scenario logs fill with false alarms.
         }
     }
 
@@ -978,12 +981,9 @@ export function reclassifyRearBrigades(
             }
         }
 
-        // Zero-assigned guard for SRK fortress sectors
-        if (
-            sector.corps_id === 'vrs_sarajevo_romanija' &&
-            keepAssigned.length === 0 &&
-            reserveCandidates.length > 0
-        ) {
+        // Final sector truth must never serialize a live front as reserve-only when
+        // the sector still has a truthful one-hop line holder available.
+        if (keepAssigned.length === 0 && reserveCandidates.length > 0) {
             reserveCandidates.sort((a, b) => b.personnel - a.personnel || strictCompare(a.bid, b.bid));
             keepAssigned.push(reserveCandidates[0]!.bid);
             reserveCandidates = reserveCandidates.slice(1);
@@ -1264,6 +1264,27 @@ export function ensureMinimumSectorCoverage(
         ) !== null;
     };
 
+    const claimTypeForSector = (
+        sector: CorpsFrontSector,
+        brigadeId: FormationId,
+    ): 'front' | 'territory' | 'reserve' | null => {
+        const formation = formations[brigadeId];
+        const locationOsid = formation?.location_osid;
+        if (!locationOsid) return null;
+        const frontSet = getSectorFrontOsids(sector);
+        if (frontSet.has(locationOsid)) return 'front';
+        if (sector.territory_osids.includes(locationOsid)) return 'territory';
+        const oneHopBehind = new Set<string>();
+        for (const frontOsid of frontSet) {
+            for (const neighbor of adjacency.get(frontOsid as Osid) ?? []) {
+                if (frontSet.has(neighbor)) continue;
+                if (!friendlyOsids.has(neighbor)) continue;
+                oneHopBehind.add(neighbor);
+            }
+        }
+        return oneHopBehind.has(locationOsid) ? 'reserve' : null;
+    };
+
     const sectorsByCorps = new Map<FormationId, CorpsFrontSector[]>();
     for (const s of allSectors) {
         const list = sectorsByCorps.get(s.corps_id) ?? [];
@@ -1378,6 +1399,7 @@ export function ensureMinimumSectorCoverage(
                         const f = formations[bid];
                         if (!f?.location_osid) continue;
                         if (donorFront.has(f.location_osid)) continue;
+                        if (claimTypeForSector(donor, bid) !== null) continue;
                         if (!canReachSectorFront(bid, sector)) continue;
                         const idx = donor.assigned_brigade_ids.indexOf(bid);
                         if (idx >= 0) donor.assigned_brigade_ids.splice(idx, 1);
@@ -1390,9 +1412,14 @@ export function ensureMinimumSectorCoverage(
                 if (!transferred) {
                     for (const donor of sameCompSectors) {
                         if (donor.assigned_brigade_ids.length <= 1) continue;
-                        const bid = donor.assigned_brigade_ids[donor.assigned_brigade_ids.length - 1]!;
+                        const bid = [...donor.assigned_brigade_ids]
+                            .sort(strictCompare)
+                            .reverse()
+                            .find((candidateBid) => claimTypeForSector(donor, candidateBid) === null);
+                        if (!bid) continue;
                         if (!canReachSectorFront(bid, sector)) continue;
-                        donor.assigned_brigade_ids.pop();
+                        const idx = donor.assigned_brigade_ids.indexOf(bid);
+                        if (idx >= 0) donor.assigned_brigade_ids.splice(idx, 1);
                         sector.assigned_brigade_ids.push(bid);
                         transferred = true;
                         break;
@@ -1442,9 +1469,13 @@ export function ensureMinimumSectorCoverage(
                     if (f?.location_osid && !donorFront.has(f.location_osid)) { bid = b; break; }
                 }
                 if (!bid && donor.assigned_brigade_ids.length > needed(donor)) {
-                    bid = donor.assigned_brigade_ids[donor.assigned_brigade_ids.length - 1];
+                    bid = [...donor.assigned_brigade_ids]
+                        .sort(strictCompare)
+                        .reverse()
+                        .find((candidateBid) => claimTypeForSector(donor, candidateBid) === null);
                 }
                 if (!bid) continue;
+                if (claimTypeForSector(donor, bid) !== null) continue;
                 if (!canReachSectorFront(bid, recipient)) continue;
 
                 const idx = donor.assigned_brigade_ids.indexOf(bid);
@@ -1499,9 +1530,13 @@ export function ensureMinimumSectorCoverage(
                 let bid: string | undefined;
                 for (const b of [...donor.assigned_brigade_ids].sort(strictCompare)) {
                     const f = formations[b];
-                    if (f?.location_osid && !donorFront.has(f.location_osid)) { bid = b; break; }
+                    if (!f?.location_osid || donorFront.has(f.location_osid)) continue;
+                    if (claimTypeForSector(donor, b) !== null) continue;
+                    bid = b;
+                    break;
                 }
                 if (!bid) continue;
+                if (claimTypeForSector(donor, bid) !== null) continue;
                 if (!canReachSectorFront(bid, recipient)) continue;
 
                 const idx = donor.assigned_brigade_ids.indexOf(bid);
@@ -1556,9 +1591,13 @@ export function ensureMinimumSectorCoverage(
                 let bid: string | undefined;
                 for (const b of [...donor.assigned_brigade_ids].sort(strictCompare)) {
                     const f = formations[b];
-                    if (f?.location_osid && !donorFront.has(f.location_osid)) { bid = b; break; }
+                    if (!f?.location_osid || donorFront.has(f.location_osid)) continue;
+                    if (claimTypeForSector(donor, b) !== null) continue;
+                    bid = b;
+                    break;
                 }
                 if (!bid) continue;
+                if (claimTypeForSector(donor, bid) !== null) continue;
                 if (!canReachSectorFront(bid, recipient)) continue;
 
                 const idx = donor.assigned_brigade_ids.indexOf(bid);

@@ -20,7 +20,7 @@
  * ═══════════════════════════════════════════════════════════════
  */
 
-import type { CorpsCommandState, CorpsFrontSector, CorpsOperation, FormationId, OperationAxis } from '../../state/game_state.js';
+import type { CorpsCommandState, CorpsFrontSector, CorpsOperation, FormationId, FormationState, OperationAxis } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 // ─── Minimal type for pre-planned op fields consumed by buildCorpsOperation ──
@@ -217,6 +217,7 @@ export function derivePrimarySectorForBrigades(
     sectors: ReadonlyArray<CorpsFrontSector> | null | undefined,
     corpsId: string,
     brigadeIds: ReadonlyArray<string>,
+    formations?: Readonly<Record<string, FormationState | undefined>> | null,
 ): string | undefined {
     if (!sectors || brigadeIds.length === 0) return undefined;
     const brigadeIdSet = new Set(brigadeIds);
@@ -224,19 +225,28 @@ export function derivePrimarySectorForBrigades(
     const candidates = sectors
         .filter((sector) => sector.corps_id === corpsId)
         .map((sector) => {
+            const physicalMatches = brigadeIds.reduce((count, brigadeId) => {
+                const locationOsid = formations?.[brigadeId]?.location_osid;
+                if (!locationOsid) return count;
+                const onTerritory = (sector.territory_osids ?? []).includes(locationOsid);
+                const onFront = (sector.sub_segments ?? []).some((subSegment) => (subSegment.friendly_osids ?? []).includes(locationOsid));
+                return count + (onTerritory || onFront ? 1 : 0);
+            }, 0);
             const assignedMatches = sector.assigned_brigade_ids.filter((bid) => brigadeIdSet.has(bid)).length;
             const reserveMatches = (sector.reserve_brigade_ids ?? []).filter((bid) => brigadeIdSet.has(bid)).length;
             return {
                 sectorId: sector.sector_id,
+                physicalMatches,
                 assignedMatches,
                 reserveMatches,
-                totalMatches: assignedMatches + reserveMatches,
+                totalMatches: physicalMatches + assignedMatches + reserveMatches,
                 lengthEdges: sector.length_edges,
             };
         })
         .filter((candidate) => candidate.totalMatches > 0)
         .sort((a, b) =>
-            b.totalMatches - a.totalMatches
+            b.physicalMatches - a.physicalMatches
+            || b.totalMatches - a.totalMatches
             || b.assignedMatches - a.assignedMatches
             || a.lengthEdges - b.lengthEdges
             || strictCompare(a.sectorId, b.sectorId)
@@ -270,6 +280,10 @@ export function buildProbeOperation(
         objective_capture_count: 0,
         movement_only_execution_turns: 0,
         idle_execution_turn_streak: 0,
+        // Probes are recon-by-force, not full offensive commitments.
+        // Give them an explicit threshold so execution does not silently fall
+        // back to the harsher costly_victory default intended for generic ops.
+        min_attack_outcome: 'stalemate',
         // If objectives provided, create axis so multi-axis execution path fires (ZEA fix).
         ...(objectives && objectives.length > 0 ? {
             objectives,

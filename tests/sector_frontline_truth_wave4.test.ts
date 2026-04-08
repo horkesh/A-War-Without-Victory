@@ -8,7 +8,7 @@
  *    stale formation field after a brigade moves from seg_old to seg_new.
  * C. Displacement proxy/canonical pressure_eligible_size parity: proxy path (no sectors) vs
  *    canonical path (live sector) produce consistent counts for identical contact graph, and
- *    console.warn fires on proxy path only.
+ *    console.warn fires only when the proxy path appears inside an operational-context run.
  *
  * Lane: Command Chain Truth — CLOSED 2026-04-04 (Waves 1–4 complete, 22+ tests).
  */
@@ -326,7 +326,7 @@ describe('Wave 4 Test C: displacement proxy fallback vs canonical produce consis
         vi.restoreAllMocks();
     });
 
-    it('proxy path emits console.warn; canonical path does not, for identical contact graph', () => {
+    it('proxy path emits console.warn only in operational-context runs; canonical path does not, for identical contact graph', () => {
         // Both states have the same contact graph:
         //   edges: [{a: 'op:mun:osid_a', b: 'op:mun:osid_b'}]
         //   political_controllers: { 'op:mun:osid_a': 'RBiH', 'op:mun:osid_b': 'RS' }
@@ -347,7 +347,9 @@ describe('Wave 4 Test C: displacement proxy fallback vs canonical produce consis
                 { id: 'HRHB' as FactionId },
             ],
             military: {
-                formations: {},
+                formations: {
+                    brig_test: makeFormation({ id: 'brig_test', location_osid: 'op:mun:osid_b' }),
+                },
                 corps_front_sectors: {},  // empty → hasLiveSectorFrontlineTruth() = false
             },
             political: {
@@ -411,7 +413,7 @@ describe('Wave 4 Test C: displacement proxy fallback vs canonical produce consis
 
         const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-        const resultA = evaluateDisplacementTriggers(stateA, edges, undefined);
+        const resultA = evaluateDisplacementTriggers(stateA, edges, { 'op:mun:osid_a': 'op:mun:osid_a' });
         const resultB = evaluateDisplacementTriggers(stateB, edges, undefined);
 
         // Proxy path (A) must have emitted a console.warn about the legacy fallback
@@ -453,7 +455,9 @@ describe('Wave 4 Test C: displacement proxy fallback vs canonical produce consis
                 { id: 'HRHB' as FactionId },
             ],
             military: {
-                formations: {},
+                formations: {
+                    brig_test: makeFormation({ id: 'brig_test', location_osid: 'op:mun:y' }),
+                },
                 corps_front_sectors: {},  // proxy path
             },
             political: {
@@ -475,7 +479,7 @@ describe('Wave 4 Test C: displacement proxy fallback vs canonical produce consis
             { a: 'op:mun:x', b: 'op:mun:y' },
         ];
 
-        const { report } = evaluateDisplacementTriggers(state, edges, undefined);
+        const { report } = evaluateDisplacementTriggers(state, edges, { 'op:mun:x': 'op:mun:x' });
 
         // Proxy path must detect the one eligible edge
         expect(report.pressure_eligible_size).toBe(1);

@@ -23,6 +23,114 @@ Remaining DRINA mismatches (cerska_2, pobudje_2, jezestica_2, sebiocina, drinsko
 
 ---
 
+## [2026-04-08] fix(engine): Seal sector builder and rebuild final sector truth after late writers
+
+**Type:** Engine hardening
+**Files:** `src/sim/combat/brigade_assignment.ts`, `src/sim/combat/corps_front_sectors.ts`, `src/sim/combat/final_sector_truth_reconciliation.ts`, `src/sim/turn_phases/war_phases.ts`, `tests/sector_builder_sealing.test.ts`, `tests/final_sector_truth_reconciliation.test.ts`, `tests/war_phase_step_order.test.ts`
+**Status:** VERIFIED — typecheck clean, targeted sector suite clean
+
+### Summary of changes
+
+1. **Builder sealing** — generalized the zero-assigned guard in `reclassifyRearBrigades()` so any live sector with a truthful one-hop reserve candidate promotes one line holder instead of serializing as reserve-only. Added a final post-demotion seal in `buildFactionSectors()` that reruns `ensureMinimumSectorCoverage()`, `reclassifyRearBrigades()`, and `recomputeSectorPowerAndThreat()` before returning sectors.
+
+2. **Metric lifecycle repair** — after `mergeSmallAdjacentSectors()` and post-merge contiguity repair, `buildCorpsFrontSectors()` now recomputes density/threat/defensive power by faction before syncing assignments back to formations, preventing merged sectors from keeping `density=0` or stale combat values.
+
+3. **Final authority rebuild** — added `reconcileFinalSectorTruth()` and wired a new `reconcile-final-sector-truth` war-phase step immediately after `rederive-osid-front-segments`. This rebuilds final `corps_front_sectors`, refreshes unresolved brigades through the builder, reassigns brigades to subsegments, and recomputes `sector_combat_ratings` after late writers such as recruitment, mobilization, and elite-loan recall.
+
+4. **Deterministic save audit utility** — added `sector_truth_audit.ts` plus `tools/scenario_runner/audit_sector_truth.ts` so real saves can be checked directly for reserve-only sectors, stale metrics, overlap, and geometry mismatches without relying on anomaly reports.
+
+### Determinism / scope
+
+- Determinism impact: **controlled and deterministic**. All new logic reuses existing sorted builders and deterministic recompute passes; no new randomness, timestamps, or unordered iteration were introduced.
+- Scope: war-phase sector truth, brigade-sector assignment truth, and final-save sector serialization authority.
+
+### Verification
+
+- `cmd /c npx tsc --noEmit`
+- `cmd /c npx vitest run tests/sector_builder_sealing.test.ts tests/final_sector_truth_reconciliation.test.ts tests/sector_power_threat_recompute.test.ts tests/war_phase_step_order.test.ts`
+- `cmd /c npx vitest run tests/corps_front_sector_corps_ownership.test.ts tests/hvo_central_bosnia_sectors.test.ts`
+- `cmd /c npx vitest run tests/sector_builder_sealing.test.ts tests/final_sector_truth_reconciliation.test.ts tests/sector_frontline_truth_wave1.test.ts tests/commander_driven_brigade_assignment.test.ts tests/hvo_central_bosnia_sectors.test.ts tests/corps_front_sector_corps_ownership.test.ts tests/war_phase_step_order.test.ts`
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260408_SECTOR_TRUTH_RECONCILIATION_HARDENING.md`
+- Real-save rebuild audit target: `runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1367/final_save.json`
+
+---
+
+## [2026-04-08] fix(engine): Make sector overlap cleanup edge-truth-safe and block late truth-violating transfers
+
+**Type:** Engine hardening
+**Files:** `src/sim/combat/brigade_assignment.ts`, `src/sim/combat/corps_front_sectors.ts`, `tests/sector_coverage_truth_preservation.test.ts`, `tests/sector_front_overlap_canonicalization.test.ts`, `docs/40_reports/implemented/20260408_SECTOR_TRUTH_RECONCILIATION_HARDENING.md`
+**Status:** VERIFIED — typecheck clean, targeted sector suite clean, real-save rebuild clean on truth metrics
+
+### Summary of changes
+
+1. **Late transfer truth guard** — the low-threat equalization and moderate-pressure reinforcement passes in `ensureMinimumSectorCoverage()` now refuse to move brigades that donor sectors already truthfully own by frontline, territory, or one-hop reserve claim. This closes the last path that could reintroduce false sector ownership after earlier repair passes rehomed brigades correctly.
+
+2. **Edge-aware sibling de-overlap** — `canonicalizeSiblingFrontOwnership()` no longer deletes a shared `friendly_osids` label in isolation. It now transfers the corresponding incident `edge_ids` to the canonical owner, rebuilds both sectors’ subsegment geometry from edge truth, and absorbs sectors that collapse into pure overlap artifacts.
+
+3. **Hidden geometry consistency restored** — overlap cleanup now preserves the invariant that every sector edge whose friendly endpoint belongs to that faction is actually represented in the sector’s `sub_segments[*].friendly_osids`. This removed the silent `edge_ids` / `friendly_osids` contradiction that still existed after the first de-overlap pass.
+
+### Determinism / scope
+
+- Determinism impact: **controlled and deterministic**. Canonical overlap ownership still uses deterministic ranking and sorted transfers; subsegment rebuilds are derived from sorted `edge_ids`.
+- Scope: same-corps sector overlap repair, late brigade balancing inside the builder, and hidden sector geometry integrity.
+
+### Verification
+
+- `cmd /c npx tsc --noEmit`
+- `cmd /c npx vitest run tests/sector_front_overlap_canonicalization.test.ts tests/sector_coverage_truth_preservation.test.ts tests/sector_misassignment_relocation.test.ts tests/sector_builder_sealing.test.ts tests/final_sector_truth_reconciliation.test.ts tests/war_phase_step_order.test.ts`
+- Real-save rebuild audit of `runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1367/final_save.json` now reports:
+  - `reserveOnly=0`
+  - `staleDensity=0`
+  - `sameCorpsOverlaps=0`
+  - `untruthfulAssigned=0`
+  - `edgeMismatch=0`
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260408_SECTOR_TRUTH_RECONCILIATION_HARDENING.md`
+
+---
+
+## [2026-04-08] fix(engine): Close dead-on-arrival probe birth and align combat-causality diagnostics with final attack truth
+
+**Type:** Engine hardening
+**Files:** `src/sim/combat/commander/commander_state.ts`, `src/sim/combat/commander/briefing.ts`, `src/sim/combat/commander/emit.ts`, `src/sim/combat/sector_offensive.ts`, `src/sim/combat/bot_brigade_ai_osid.ts`, `src/scenario/combat_causality.ts`, `src/state/game_state.ts`, `tests/commander/elite_formation_utilization.test.ts`, `tests/sector_offensive_idle_recovery.test.ts`, `tests/scenario_operation_diagnostics.test.ts`
+**Status:** VERIFIED — targeted tests, typecheck, deterministic 40-week reruns, and recovery clean
+
+### Summary of changes
+
+1. **Exact probe launch gating** — probe birth in `commander/emit.ts` now uses live state plus reverse-map context to reject candidate objectives that are politically blocked, on failed-objective cooldown, below the exact brigade-side probe threshold, or not immediately reachable through current adjacency.
+
+2. **Political blockage becomes explicit lifecycle truth** — `sector_offensive.ts` now routes operations whose live objectives are all Graz/truce-blocked into one-turn `political_blocked` recovery instead of leaving them to fake an execution turn with no legal attacks.
+
+3. **Diagnostics now read final post-trim order truth** — `bot_brigade_ai_osid.ts` recomputes eligible attackers from final surviving `attack_orders`, and `combat_causality.ts` only emits `recovery_without_logged_attempt` when the actual `recovery_reason` is `no_logged_attempt`.
+
+### Determinism / scope
+
+- Determinism impact: **controlled and deterministic**. All new checks consume existing state, adjacency, and deterministic prediction helpers; no new randomness or unordered iteration introduced.
+- Scope: operation launch quality, execution-to-recovery honesty, and scenario combat-causality diagnostics.
+
+### Verification
+
+- `cmd /c npx vitest run tests\commander\elite_formation_utilization.test.ts tests\sector_offensive_idle_recovery.test.ts tests\scenario_operation_diagnostics.test.ts`
+- `cmd /c npx tsc --noEmit`
+- `cmd /c npm run sim:scenario:run:40w` → `n1377`
+- `cmd /c npm run sim:scenario:run:40w` → `n1378`
+- `cmd /c npm run recovery:check`
+
+### Artifacts
+
+- Runs:
+  - `runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1377`
+  - `runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1378`
+- Final deterministic hash: `54e1820f5728e841`
+- Report: `docs/40_reports/implemented/20260408_OPERATION_TRUTH_RECONCILIATION_AND_AXIS_INTEGRITY_HARDENING.md`
+
+---
+
 ## [2026-04-06] fix(engine): Enclave guard in detectParamilitaryTargets — block rear-pocket paramilitary against Sarajevo interior (n1356)
 
 **Type:** Bug fix  
@@ -24896,3 +25004,25 @@ Main Staff HQ was Han Pijesak, not Rogatica. Tracked for OOB correction pass.
 - **Hardening:** added `tests/army_reserve_severity_legibility.test.ts`, extended `tests/ui_map_game_state_adapter.test.ts` with severity-band coverage, and extended `tests/army_hq_presidential_review_coherence.test.ts` so reserve criticality framing stays separate from presidential review math.
 - **Verification:** targeted reserve-severity tests passed (6/6 Vitest, then 10/10 combined reserve/HQ Vitest + 16/16 Node tests), full Vitest passed (218/218 files, 3030/3030 tests), `npx.cmd tsc --noEmit -p tsconfig.json` passed, and `npm.cmd run build` passed. Existing unrelated integration stderr/anomaly warnings remained non-blocking and unchanged.
 - **Report:** `docs/40_reports/implemented/20260408_V08TO09_ARMY_RESERVE_SEVERITY_LEGIBILITY_CRITICAL_REQUEST_FRAMING.md`
+
+**[2026-04-08] fix(engine): Operation / harness contract hardening after sector-truth rebuild**
+
+- **Summary:** Closed the remaining adjacent seams around the now-hardened sector engine. Scenario run summaries once again publish the legacy `phase_ii_attack_resolution` block for backward compatibility, pre-planned operations now skip empty-roster harness states entirely, `Operation Herzegovina Consolidation` now requires completed-history proof for both `Operation Visegrad` and `Operation Foca`, and displacement fallback warnings now fire only when a live brigade force exists and sector truth truly should have been built.
+- **Harness contract:** `recovery:check` now runs the Vitest-owned operation diagnostics test under Vitest instead of `tsx --test`, and the VRS proof scenario now reads completed-operation progress from `operation_aars.json`, the real archival authority, rather than stale `active_operations` assumptions in final saves.
+- **Verification:** `tests/pre_planned_operations.test.ts`, `tests/triggered_operations.test.ts`, `tests/sector_frontline_truth_wave3.test.ts`, `tests/sector_frontline_truth_wave4.test.ts`, `tests/scenario_activity_diagnostics_h1_7.test.ts`, and `npm run recovery:check` all passed.
+- **Report:** `docs/40_reports/implemented/20260408_OPERATION_AND_HARNESS_CONTRACT_HARDENING.md`
+
+**[2026-04-08] plan(engine): Operations system A+ hardening campaign opened**
+
+- **Summary:** With sector/frontline/brigade-assignment truth now judged `A+`, the next major engine lane is the operations / execution / combat-causality stack. This plan treats pre-planned ops, triggered ops, queued injection, active execution, completion/AAR export, and scenario proof/reporting as one authority surface and will not stop at local bugfixes.
+- **Standard:** The lane is only considered closed when active ops have truthful participants and anchors, triggered/queued ops require real prerequisites, completion proof reads archival authority, combat-causality and AAR history remain coherent, and noop/reduced harness runs stay quiet unless a real invariant is broken.
+- **Plan file:** `docs/plans/2026-04-08-operations-system-a-plus-plan.md`
+
+**[2026-04-08] fix(engine): Final operation truth reconciliation and axis-integrity hardening**
+
+- **Summary:** Added a final end-of-turn operation-truth reconciliation pass and closed the largest remaining live-roster seams around active operations. Live operations now end the turn with active-only participant lists, active-only axis rosters, truthful sector anchors derived from final sector truth plus live brigade locations, and deterministic `brigade_attrition` recovery when execution operations lose all real participants.
+- **Runtime hardening:** `army_reserve_system.ts` now attaches elite loans to both the flat participant list and a deterministic live axis, and loan recall now removes the brigade from the receiving corps's active operation before clearing the loan state. `sector_offensive.ts` now remaps axis rosters when damaged participants are replaced. `corps_operation_helpers.ts` now prefers physical sector ownership over stale roster overlap when deriving an operation anchor.
+- **Pipeline ownership:** `war_phases.ts` now runs `reconcile-final-operation-truth` immediately after final sector reconciliation and before the final operation lifecycle assertion, making the saved operation roster/anchor state a late-turn authority rather than a stale mid-turn snapshot.
+- **Verification:** targeted operation-truth regressions, `npm run typecheck`, `tests/scenario_operation_diagnostics.test.ts`, `tests/scenario_vrs_operation_proof.test.ts`, `npm run recovery:check`, and a fresh `npm run sim:scenario:run:40w` all passed.
+- **Residual note:** the fresh `n1371` scenario still shows dead-on-arrival or no-attempt operations in live play; that is now an execution-quality / launch-quality seam, not the older participant-truth seam.
+- **Report:** `docs/40_reports/implemented/20260408_OPERATION_TRUTH_RECONCILIATION_AND_AXIS_INTEGRITY_HARDENING.md`

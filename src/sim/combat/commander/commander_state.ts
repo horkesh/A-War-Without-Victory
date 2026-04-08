@@ -8,6 +8,7 @@
  */
 
 import type {
+    GameState,
     FactionId,
     FormationId,
     FormationState,
@@ -17,6 +18,7 @@ import type {
     CorpsFrontSector,
     SectorIntelRecord,
 } from '../../../state/game_state.js';
+import type { OperationalToCanonicalReverseMap } from '../../../data/operational_data.js';
 
 import type { SpatialContext } from '../../spatial_context.js';
 import type { FactionGraphAnalysis } from '../osid_graph_analysis.js';
@@ -458,6 +460,10 @@ export interface CommanderBriefing {
     readonly spatial: SpatialContext;
     readonly sectors: readonly CorpsFrontSector[];
     readonly brigades: readonly FormationState[];
+    /** Optional readonly state snapshot for exact launch-time feasibility filters. */
+    readonly state_ref?: GameState;
+    /** Optional reverse map for OSID combat prediction at emit time. */
+    readonly reverse_map?: OperationalToCanonicalReverseMap | null;
     readonly supply_by_osid: SupplyStateByOsidReport | null;
     readonly ethnic_map: OsidEthnicComposition | null;
     readonly graph_analysis: FactionGraphAnalysis | null;
@@ -484,6 +490,8 @@ export interface CommanderBriefing {
     readonly previous_state: CommanderState | null;
     /** Active operations currently running for this corps (from CorpsCommandState). */
     readonly active_operations: readonly CorpsOperation[];
+    /** Objective cooldowns recorded by the operation lifecycle after repeated failures. */
+    readonly failed_offensive_objectives?: Readonly<Record<string, { failure_count: number; cooldown_until_turn: number }>>;
     /** Scenario-authored must-hold OSIDs for this corps. Zones containing these get 1.5× garrison budget. */
     readonly must_hold_osids: readonly string[];
     /** Army HQ campaign front role for this corps, if a current gathering plan exists. */

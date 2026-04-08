@@ -151,7 +151,9 @@ const TRIGGERED_OPS: TriggeredOpDef[] = [
         planning_duration: 3,
         min_attack_outcome: 'repulsed' as const,
         trigger: (state, _turn) => {
-            return corpsOpFinished(state, 'vrs_herzegovina');
+            return corpsCompletedOp(state, 'vrs_herzegovina', 'Operation Visegrad')
+                && corpsCompletedOp(state, 'vrs_herzegovina', 'Operation Foca')
+                && corpsOpFinished(state, 'vrs_herzegovina');
         },
         axes: [
             {
@@ -325,6 +327,7 @@ function buildOperation(
         Object.values(state.military.corps_front_sectors ?? {}),
         def.primary_corps,
         allParticipating,
+        state.military.formations ?? {},
     );
     // PERMITTED CREATION ENTRY POINT — triggered (condition/time-gated) operations.
     // Not pre-planned (no is_pre_planned flag) — does not occupy the slot-0 queue.

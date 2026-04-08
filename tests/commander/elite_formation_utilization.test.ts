@@ -168,6 +168,8 @@ function makeBriefing(overrides: Partial<CommanderBriefing> = {}): CommanderBrie
             stance_source: 'bot',
         }] as any[],
         brigades: [],
+        state_ref: undefined,
+        reverse_map: undefined,
         supply_by_osid: null,
         ethnic_map: null,
         graph_analysis: null,
@@ -1006,6 +1008,7 @@ describe('commander operation axis creation (ZEA fix)', () => {
         expect(op.axes!.length).toBe(1);
         expect(op.axes![0]!.objectives).toEqual(['target_osid']);
         expect(op.axes![0]!.assigned_brigades).toContain('brig_1');
+        expect(op.min_attack_outcome).toBe('stalemate');
     });
 
     it('buildProbeOperation without objectives falls back to no-axis', () => {
@@ -1395,11 +1398,12 @@ describe('probe brigade reachability', () => {
         expect(probeOps.length).toBe(0);
     });
 
-    it('probe IS created when brigade can reach target', () => {
+    it('probe is skipped when the brigade is not already on a valid probe approach node', () => {
         // Graph: single connected component.
         //   op:rear:a ←→ op:front:b ←→ op:enemy:target
-        // Brigade is at op:rear:a — 1 hop to op:front:b (friendly neighbor of target).
-        // Well within MAX_REACHABILITY_HOPS (8).
+        // Brigade is at op:rear:a — it can friendly-BFS to op:front:b, but it is not
+        // already on the approach node this turn. Probes are local recon-by-force and
+        // should not be born as miniature marches.
         const adj = new Map<string, string[]>([
             ['op:rear:a', ['op:front:b']],
             ['op:front:b', ['op:rear:a', 'op:enemy:target']],
@@ -1481,12 +1485,401 @@ describe('probe brigade reachability', () => {
             makeNoThreats(),
         );
 
-        // Brigade at op:rear:a can BFS-reach op:front:b (1 hop, same component).
-        // Probe must be created with op:enemy:target as objective.
+        // No probe should be created: the brigade is not already at the probe frontage.
+        const probeOps = output.operations.filter(op => op.type === 'probe');
+        expect(probeOps.length).toBe(0);
+    });
+
+    it('probe objective selection prefers a brigade-reachable target over the first lexicographic sector target', () => {
+        const adj = new Map<string, string[]>([
+            ['op:front:b', ['op:enemy:target_z']],
+            ['op:front:c', ['op:enemy:target_a']],
+            ['op:enemy:target_a', ['op:front:c']],
+            ['op:enemy:target_z', ['op:front:b']],
+        ]);
+        const friendlySet = new Set(['op:front:b', 'op:front:c']);
+        const componentMap = new Map<string, number>([
+            ['op:front:b', 0],
+            ['op:front:c', 1],
+        ]);
+
+        const briefing = makeBriefing({
+            officer_personality: { aggression: 0.6, caution: 0.3, initiative: 0.5, competence: 0.7 },
+            active_operations: [],
+            sectors: [{
+                sector_id: 'sector:test_corps:0',
+                corps_id: 'test_corps' as FormationId,
+                faction: 'RS' as FactionId,
+                sub_segments: [{
+                    sub_segment_id: 'subseg:test:0',
+                    edge_ids: ['e1'],
+                    friendly_osids: ['op:front:b', 'op:front:c'],
+                    enemy_osids: ['op:enemy:target_a', 'op:enemy:target_z'],
+                    length_edges: 1,
+                    primary_brigade_ids: [],
+                }],
+                edge_ids: ['e1'],
+                territory_osids: ['op:front:b', 'op:front:c'],
+                length_edges: 1,
+                assigned_brigade_ids: ['reachable_1'],
+                reserve_brigade_ids: [],
+                opposing_factions: ['RBiH' as FactionId],
+                density: 1,
+                defensive_power: 100,
+                threat_ratio: 1.0,
+                sector_stance: 'balanced',
+                stance_source: 'bot',
+            }] as any[],
+            brigades: [
+                { id: 'reachable_1' as FormationId, location_osid: 'op:front:b' },
+            ] as any[],
+            spatial: {
+                adjacency: adj,
+                friendlyOsidsByFaction: new Map<FactionId, Set<string>>([
+                    ['RS' as FactionId, friendlySet],
+                ]),
+                componentsByFaction: new Map<FactionId, Map<string, number>>([
+                    ['RS' as FactionId, componentMap],
+                ]),
+            } as any,
+        });
+
+        const surplusBrigade = makeEval({
+            brigade_id: 'reachable_1' as FormationId,
+            tier: 'garrison',
+            is_combat_effective: true,
+            is_disrupted: false,
+            fitness_offense: 0.5,
+        });
+
+        const allocation: AllocationResult = {
+            zones: [],
+            garrison_locks: [],
+            surplus_pool: [surplusBrigade],
+            total_garrison_budget: 1,
+            can_launch_ops: true,
+        };
+
+        const forces = makeForces([surplusBrigade]);
+        const zone = makeZone({ enemy_adjacent_osids: ['op:enemy:target_a', 'op:enemy:target_z'] });
+
+        const output = emitCommanderOutput(
+            briefing,
+            [zone],
+            forces,
+            allocation,
+            makeNullPlanDecision(),
+            makePassiveDecisions(),
+            makeNoThreats(),
+        );
+
         const probeOps = output.operations.filter(op => op.type === 'probe');
         expect(probeOps.length).toBe(1);
-        expect(probeOps[0]!.axes).toBeDefined();
-        expect(probeOps[0]!.axes!.length).toBe(1);
-        expect(probeOps[0]!.axes![0]!.objectives).toContain('op:enemy:target');
+        expect(probeOps[0]!.axes?.[0]?.objectives).toEqual(['op:enemy:target_z']);
+    });
+
+    it('probe launch skips objectives still on failed-objective cooldown', () => {
+        const briefing = makeBriefing({
+            turn: 12,
+            officer_personality: { aggression: 0.6, caution: 0.3, initiative: 0.5, competence: 0.7 },
+            active_operations: [],
+            failed_offensive_objectives: {
+                'op:enemy:target': { failure_count: 2, cooldown_until_turn: 16 },
+            },
+            sectors: [{
+                sector_id: 'sector:test_corps:0',
+                corps_id: 'test_corps' as FormationId,
+                faction: 'RS' as FactionId,
+                sub_segments: [{
+                    sub_segment_id: 'subseg:test:0',
+                    edge_ids: ['e1'],
+                    friendly_osids: ['op:near:b'],
+                    enemy_osids: ['op:enemy:target'],
+                    length_edges: 1,
+                    primary_brigade_ids: [],
+                }],
+                edge_ids: ['e1'],
+                territory_osids: ['op:near:b'],
+                length_edges: 1,
+                assigned_brigade_ids: ['surplus_1'],
+                reserve_brigade_ids: [],
+                opposing_factions: ['RBiH' as FactionId],
+                density: 1,
+                defensive_power: 100,
+                threat_ratio: 1.0,
+                sector_stance: 'balanced',
+                stance_source: 'bot',
+            }] as any[],
+            brigades: [
+                { id: 'surplus_1' as FormationId, location_osid: 'op:near:b' },
+            ] as any[],
+        });
+
+        const surplusBrigade = makeEval({
+            brigade_id: 'surplus_1' as FormationId,
+            tier: 'garrison',
+            is_combat_effective: true,
+            is_disrupted: false,
+            fitness_offense: 0.5,
+        });
+
+        const allocation: AllocationResult = {
+            zones: [],
+            garrison_locks: [],
+            surplus_pool: [surplusBrigade],
+            total_garrison_budget: 1,
+            can_launch_ops: true,
+        };
+
+        const forces = makeForces([surplusBrigade]);
+        const zone = makeZone();
+
+        const output = emitCommanderOutput(
+            briefing,
+            [zone],
+            forces,
+            allocation,
+            makeNullPlanDecision(),
+            makePassiveDecisions(),
+            makeNoThreats(),
+        );
+
+        const probeOps = output.operations.filter(op => op.type === 'probe');
+        expect(probeOps.length).toBe(0);
+    });
+
+    it('probe launch skips truce-blocked targets even when directly adjacent', () => {
+        const spatial = makeSpatial();
+        spatial.friendlyOsidsByFaction = new Map<FactionId, Set<string>>([
+            ['HRHB' as FactionId, new Set(['op:near:a', 'op:near:b', 'op:far:deep'])],
+        ]) as any;
+        spatial.componentsByFaction = new Map<FactionId, Map<string, number>>([
+            ['HRHB' as FactionId, new Map([
+                ['op:near:a', 0],
+                ['op:near:b', 0],
+                ['op:far:deep', 0],
+            ])],
+        ]) as any;
+
+        const briefing = makeBriefing({
+            corps_id: 'hvo_southeast_herzegovina' as FormationId,
+            faction: 'HRHB' as FactionId,
+            turn: 12,
+            spatial,
+            sectors: [{
+                sector_id: 'sector:hvo_southeast_herzegovina:0',
+                corps_id: 'hvo_southeast_herzegovina' as FormationId,
+                faction: 'HRHB' as FactionId,
+                sub_segments: [{
+                    sub_segment_id: 'subseg:test:0',
+                    edge_ids: ['e1'],
+                    friendly_osids: ['op:near:b'],
+                    enemy_osids: ['op:enemy:target'],
+                    length_edges: 1,
+                    primary_brigade_ids: [],
+                }],
+                edge_ids: ['e1'],
+                territory_osids: ['op:near:b'],
+                length_edges: 1,
+                assigned_brigade_ids: ['surplus_1'],
+                reserve_brigade_ids: [],
+                opposing_factions: ['RS' as FactionId],
+                density: 1,
+                defensive_power: 100,
+                threat_ratio: 1.0,
+                sector_stance: 'balanced',
+                stance_source: 'bot',
+            }] as any[],
+            brigades: [
+                {
+                    id: 'surplus_1' as FormationId,
+                    faction: 'HRHB' as FactionId,
+                    corps_id: 'hvo_southeast_herzegovina' as FormationId,
+                    kind: 'brigade',
+                    status: 'active',
+                    personnel: 1200,
+                    cohesion: 80,
+                    name: 'Probe Brigade',
+                    created_turn: 1,
+                    location_osid: 'op:near:b',
+                    hq_sid: 'S1',
+                    tags: [],
+                } as any,
+            ],
+            state_ref: {
+                meta: { turn: 12, phase: 'war', seed: 'probe-truce' },
+                political: {
+                    political_controllers: {
+                        'op:near:b': 'HRHB',
+                        'op:enemy:target': 'RS',
+                    },
+                    vienna_declaration_turn: 4,
+                    vienna_accepted: { RS: true, HRHB: true },
+                    vienna_herzegovina_broken_by: null,
+                    graz_east_herzegovina_active_turn: 8,
+                },
+                military: {
+                    formations: {
+                        surplus_1: {
+                            id: 'surplus_1',
+                            faction: 'HRHB',
+                            corps_id: 'hvo_southeast_herzegovina',
+                            kind: 'brigade',
+                            status: 'active',
+                            personnel: 1200,
+                            cohesion: 80,
+                            name: 'Probe Brigade',
+                            created_turn: 1,
+                            location_osid: 'op:near:b',
+                            hq_sid: 'S1',
+                            tags: [],
+                        },
+                    },
+                },
+            } as unknown as GameState,
+            reverse_map: new Map([
+                ['op:near:a', ['S1']],
+                ['op:near:b', ['S2']],
+                ['op:enemy:target', ['S3']],
+            ]),
+        });
+
+        const surplusBrigade = makeEval({
+            brigade_id: 'surplus_1' as FormationId,
+            tier: 'garrison',
+            is_combat_effective: true,
+            is_disrupted: false,
+            fitness_offense: 0.5,
+        });
+
+        const output = emitCommanderOutput(
+            briefing,
+            [makeZone({ corps_id: 'hvo_southeast_herzegovina' as FormationId, faction: 'HRHB' as FactionId })],
+            makeForces([surplusBrigade]),
+            {
+                zones: [],
+                garrison_locks: [],
+                surplus_pool: [surplusBrigade],
+                total_garrison_budget: 1,
+                can_launch_ops: true,
+            },
+            makeNullPlanDecision(),
+            makePassiveDecisions(),
+            makeNoThreats(),
+        );
+
+        expect(output.operations.filter(op => op.type === 'probe')).toHaveLength(0);
+    });
+
+    it('probe launch skips targets that are directly adjacent but below the probe attack threshold', () => {
+        const briefing = makeBriefing({
+            brigades: [
+                {
+                    id: 'surplus_1' as FormationId,
+                    faction: 'RS' as FactionId,
+                    corps_id: 'test_corps' as FormationId,
+                    kind: 'brigade',
+                    status: 'active',
+                    personnel: 500,
+                    cohesion: 35,
+                    experience: 0,
+                    name: 'Weak Probe Brigade',
+                    created_turn: 1,
+                    location_osid: 'op:near:b',
+                    hq_sid: 'S1',
+                    tags: [],
+                } as any,
+                {
+                    id: 'enemy_guard' as FormationId,
+                    faction: 'RBiH' as FactionId,
+                    corps_id: 'enemy_corps' as FormationId,
+                    kind: 'brigade',
+                    status: 'active',
+                    personnel: 6000,
+                    cohesion: 95,
+                    experience: 3,
+                    name: 'Enemy Guard',
+                    created_turn: 1,
+                    location_osid: 'op:enemy:target',
+                    hq_sid: 'S9',
+                    tags: ['equip:mechanized'],
+                } as any,
+            ],
+            state_ref: {
+                meta: { turn: 10, phase: 'war', seed: 'probe-threshold' },
+                political: {
+                    political_controllers: {
+                        'op:near:a': 'RS',
+                        'op:near:b': 'RS',
+                        'op:enemy:target': 'RBiH',
+                    },
+                },
+                military: {
+                    formations: {
+                        surplus_1: {
+                            id: 'surplus_1',
+                            faction: 'RS',
+                            corps_id: 'test_corps',
+                            kind: 'brigade',
+                            status: 'active',
+                            personnel: 500,
+                            cohesion: 35,
+                            experience: 0,
+                            name: 'Weak Probe Brigade',
+                            created_turn: 1,
+                            location_osid: 'op:near:b',
+                            hq_sid: 'S1',
+                            tags: [],
+                        },
+                        enemy_guard: {
+                            id: 'enemy_guard',
+                            faction: 'RBiH',
+                            corps_id: 'enemy_corps',
+                            kind: 'brigade',
+                            status: 'active',
+                            personnel: 6000,
+                            cohesion: 95,
+                            experience: 3,
+                            name: 'Enemy Guard',
+                            created_turn: 1,
+                            location_osid: 'op:enemy:target',
+                            hq_sid: 'S9',
+                            tags: ['equip:mechanized'],
+                        },
+                    },
+                },
+            } as unknown as GameState,
+            reverse_map: new Map([
+                ['op:near:a', ['S1']],
+                ['op:near:b', ['S2']],
+                ['op:enemy:target', ['S3']],
+            ]),
+        });
+
+        const surplusBrigade = makeEval({
+            brigade_id: 'surplus_1' as FormationId,
+            tier: 'garrison',
+            is_combat_effective: true,
+            is_disrupted: false,
+            fitness_offense: 0.5,
+        });
+
+        const output = emitCommanderOutput(
+            briefing,
+            [makeZone()],
+            makeForces([surplusBrigade]),
+            {
+                zones: [],
+                garrison_locks: [],
+                surplus_pool: [surplusBrigade],
+                total_garrison_budget: 1,
+                can_launch_ops: true,
+            },
+            makeNullPlanDecision(),
+            makePassiveDecisions(),
+            makeNoThreats(),
+        );
+
+        expect(output.operations.filter(op => op.type === 'probe')).toHaveLength(0);
     });
 });

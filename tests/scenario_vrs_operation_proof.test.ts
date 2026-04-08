@@ -25,28 +25,18 @@ type ProofRunSummary = {
     };
 };
 
-type ProofOperationState = {
-    name?: string;
-    attack_attempt_count?: number;
-    objective_capture_count?: number;
-    current_objective_index?: number;
+type ProofOperationAar = {
+    faction?: string;
+    total_attacks?: number;
+    objectives_captured?: string[];
 };
 
-type ProofFinalState = {
-    corps_command?: Record<string, { active_operations?: ProofOperationState[] }>;
-};
-
-function getProgressedOperationIds(state: ProofFinalState): string[] {
-    const corpsCommand = state.corps_command ?? {};
-    return Object.keys(corpsCommand)
-        .sort((a, b) => a.localeCompare(b))
-        .filter((corpsId) => {
-            const op = corpsCommand[corpsId]?.active_operations?.[0];
-            if (!op) return false;
-            return (op.attack_attempt_count ?? 0) > 0
-                && (op.objective_capture_count ?? 0) > 0
-                && (op.current_objective_index ?? 0) > 0;
-        });
+function getProgressedOperationAars(aars: ProofOperationAar[]): ProofOperationAar[] {
+    return aars.filter((aar) =>
+        aar.faction === 'RS'
+        && (aar.total_attacks ?? 0) > 0
+        && (aar.objectives_captured?.length ?? 0) > 0
+    );
 }
 
 test('proof scenario: VRS operation produces combat, progress, and deterministic final state', async () => {
@@ -62,7 +52,7 @@ test('proof scenario: VRS operation produces combat, progress, and deterministic
     const resultB = await runScenario({ scenarioPath: SCENARIO_PATH, outDirBase: BASE_B });
 
     const runSummary = JSON.parse(await readFile(resultA.paths.run_summary, 'utf8')) as ProofRunSummary;
-    const finalStateA = JSON.parse(await readFile(resultA.paths.final_save, 'utf8')) as ProofFinalState;
+    const operationAarsA = JSON.parse(await readFile(resultA.paths.operation_aars, 'utf8')) as ProofOperationAar[];
     const finalSaveA = await readFile(resultA.paths.final_save, 'utf8');
     const finalSaveB = await readFile(resultB.paths.final_save, 'utf8');
 
@@ -70,8 +60,8 @@ test('proof scenario: VRS operation produces combat, progress, and deterministic
     assert.ok((runSummary.phase_ii_attack_resolution?.orders_processed ?? 0) > 0, 'proof scenario should resolve at least one attack order');
     assert.ok((runSummary.phase_ii_attack_resolution?.weeks_with_orders ?? 0) > 0, 'proof scenario should have at least one combat week');
 
-    const progressedOperations = getProgressedOperationIds(finalStateA);
-    assert.ok(progressedOperations.length > 0, 'at least one VRS operation should record both attack attempts and objective progress');
+    const progressedOperations = getProgressedOperationAars(operationAarsA);
+    assert.ok(progressedOperations.length > 0, 'at least one VRS operation AAR should record both attacks and captured objectives');
 
     assert.strictEqual(finalSaveA, finalSaveB, 'proof scenario final_save.json must be byte-identical across two runs');
 

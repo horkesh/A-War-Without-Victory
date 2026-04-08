@@ -154,6 +154,7 @@ export function attemptCorridorBreach(
                 Object.values(state.military.corps_front_sectors ?? {}),
                 corps.id,
                 participants.map((brigade) => brigade.id),
+                state.military.formations ?? {},
             );
 
             // PERMITTED CREATION ENTRY POINT — corridor breach operations.

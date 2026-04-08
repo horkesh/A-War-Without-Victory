@@ -635,6 +635,17 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [];
 // v0.4.7: Mostar Hills axis removed from Op Jackal — vranjevici/kruzanj painted RS
 const ALL_PRE_PLANNED: PrePlannedOp[] = [...VRS_PRE_PLANNED, ...HRHB_PRE_PLANNED, ...ARBIH_PRE_PLANNED];
 
+function hasInjectableBrigadeRoster(state: GameState): boolean {
+    const formations = state.military.formations ?? {};
+    for (const formation of Object.values(formations)) {
+        if (!formation) continue;
+        if ((formation.kind ?? 'brigade') !== 'brigade') continue;
+        if (formation.status !== 'active') continue;
+        return true;
+    }
+    return false;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Injection
 // ═══════════════════════════════════════════════════════════════════════════
@@ -756,6 +767,7 @@ function deployPrePlannedEliteLoans(
 export function injectPrePlannedOperations(state: GameState, adjacency?: Map<Osid, Osid[]>): void {
     const corpsCommand = state.military.corps_command;
     if (!corpsCommand) return;
+    if (!hasInjectableBrigadeRoster(state)) return;
 
     const formations = state.military.formations ?? {};
     const turn = state.meta?.turn ?? 0;
@@ -795,6 +807,7 @@ export function injectPrePlannedOperations(state: GameState, adjacency?: Map<Osi
             Object.values(state.military.corps_front_sectors ?? {}),
             def.corps,
             result.participating,
+            state.military.formations ?? {},
         );
         const op = buildCorpsOperation(def, result.axes, result.participating, turn, true, primarySectorId);
         cmd.active_operations.push(op);
@@ -903,6 +916,7 @@ export function injectQueuedOperation(state: GameState, corpsId: string, adjacen
         Object.values(state.military.corps_front_sectors ?? {}),
         corpsId,
         result.participating,
+        state.military.formations ?? {},
     );
     const op = buildCorpsOperation(def, result.axes, result.participating, turn, true, primarySectorId);
     cmd.active_operations.push(op);

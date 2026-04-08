@@ -212,6 +212,7 @@ export function buildOperationCombatDiagnostics(
             operation.phase_started_turn === currentTurn;
         if (
             enteredRecoveryThisTurn &&
+            recoveryReason === 'no_logged_attempt' &&
             objectiveAttemptCount === 0 &&
             attackAttemptCount === 0 &&
             battleCount === 0 &&

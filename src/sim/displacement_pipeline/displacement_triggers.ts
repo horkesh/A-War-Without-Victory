@@ -44,6 +44,17 @@ export interface DisplacementTriggerReport {
     displacement_trigger_eligible_size: number;
 }
 
+function hasAnyActiveBrigades(state: GameState): boolean {
+    const formations = state.military.formations ?? {};
+    for (const formation of Object.values(formations)) {
+        if (!formation) continue;
+        if ((formation.kind ?? 'brigade') !== 'brigade') continue;
+        if (formation.status !== 'active') continue;
+        return true;
+    }
+    return false;
+}
+
 function getSectorOwnedEligiblePressureEdges(
     state: GameState,
     edges: ReadonlyArray<EdgeRecord>,
@@ -132,7 +143,8 @@ export function evaluateDisplacementTriggers(
     //   treated as approximate in those turns.
     // ─────────────────────────────────────────────────────────────────────────
     const hasSectorTruth = hasLiveSectorFrontlineTruth(state);
-    if (!hasSectorTruth) {
+    const shouldWarnOnFallback = canonicalToOperational != null && hasAnyActiveBrigades(state);
+    if (!hasSectorTruth && shouldWarnOnFallback) {
         console.warn(
             '[displacement_triggers] hasLiveSectorFrontlineTruth=false — using legacy pressure eligibility fallback. ' +
             'Activity counts may differ from canonical sector truth.'

@@ -32,7 +32,7 @@ export function removeFromActiveOperation(state: GameState, brigadeId: Formation
     if (!corpsId) return;
     const cmd = state.military.corps_command?.[corpsId];
     if (!cmd) return;
-    for (const op of cmd.active_operations) {
+    for (const op of cmd.active_operations ?? []) {
         if (!op.participating_brigades.includes(brigadeId)) continue;
         op.participating_brigades = op.participating_brigades.filter(id => id !== brigadeId);
         if (Array.isArray(op.axes)) {
