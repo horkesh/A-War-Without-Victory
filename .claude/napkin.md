@@ -66,8 +66,8 @@ Commander Intelligence Overhaul (n1294–1301): must_hold 1.5× garrison (Brcko/
    Do instead: Run `CronList` at session start. Crons are session-only and auto-expire after 3 days. **Re-schedule every session.** Two required crons:
    **(A) Daily Pyrrhic Standup** — cron `27 6 * * *`. Invokes /orchestrator to convene Pyrrhic team. Three phases: (1) Yesterday's retrospective (good/bad/ugly from `git log --since=24h`, ledger, life lessons), (2) Fresh game analysis (CALIBRATION_MASTER, REAL_WAR_MASTER, War-or-Game assessment), (3) Today's priorities — plan big and ambitious (3-5 items a team of AI agents can accomplish). Present everything via /visual-explainer as a war room briefing board. Full prompt stored in `memory/cron_daily_standup.md`.
    **(B) Life-lessons review** — cron `3 6 * * *`. Gather 24h git activity, detect life-lesson violations, synthesize new lessons, promote/demote, generate visual report via `/visual-explainer`.
-3. **[2026-03-30] Write working-on.md at session START — ALWAYS**
-   Do instead: Before writing any code, create `working-on.md` at project root capturing: what you're working on, current state, open tasks. Update it at each commit. Delete only at session closeout. This is a crash-recovery artifact — if the session dies, the next session reads it first. Do NOT wait until session end to write it.
+3. **[2026-03-30 VIOLATED 2026-04-08] Write working-on.md at session START — AND update at each commit**
+   Do instead: Before writing any code, create `working-on.md` at project root capturing: what you're working on, current state, open tasks. **Update it at each commit** — treat it as a mandatory commit checklist step, not an optional afterthought. Delete only at session closeout. This is a crash-recovery artifact — if the session dies, the next session reads it first. 2026-04-08 violation: file covered first 3 lanes only; 6 subsequent packaged-desktop commits left it stale for 3+ hours.
 
 ## Post-Run Analysis Protocol (MANDATORY — orchestrator must not analyze directly)
 After EVERY scenario run, the orchestrator:
