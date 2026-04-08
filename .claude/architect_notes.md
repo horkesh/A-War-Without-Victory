@@ -305,6 +305,11 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - Accepted review line: `LoadedGameState.presidentialReviewQueue` is now the canonical summary derived from the actual pending military work owners (`pendingEventDecisions` plus the relevant `pendingOfficerEvents` categories), while Army HQ BRIEFING owns the sustained review desk through `PresidentialAttentionPanel`.
 - Shell rule: advertise one urgency signal for military review and route it into the surface that owns the actions. Keep `commandBriefing` as context, and keep event decisions, command reactions, and personnel directives on their existing action paths rather than inventing a second review/action layer.
 
+**Closed: Army Reserve Request / Presidential Review Boundary (2026-04-08)**
+- When a command shell contains urgent work that belongs to different institutions, do not flatten it into one review queue.
+- Accepted reserve line: in AWWV, reserve requests are army-level reserve management, not presidential review. Keep `presidentialReviewQueue` derived from the actual presidential work owners, derive a separate `armyReserveQueue` from pending reserve requests, and make the handoff explicit in Army HQ instead of implying one blended action surface.
+- Shell rule: Army HQ may advertise reserve pressure and hand the player into the reserve owner surface, but Presidential Toolbar and Presidential Attention must not misrepresent reserve management as presidential queue work.
+
 **Closed: Packaged Desktop Turn-Report Push Contract (2026-04-08)**
 - After proving packaged preload pull interaction and pushed game-state delivery, the next bounded runtime contract is the other real desktop push channel tactical-map windows consume after load.
 - Accepted turn-report line: `desktop:package:probe` now requires the packaged operational and sandbox tactical-map windows to receive a deterministic `turn-report-updated` payload through the real desktop subscription bridge, and it records that proof in deterministic `turn_report_push_checks`.

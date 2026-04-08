@@ -404,6 +404,64 @@ test('parseGameState derives presidential review queue counts from pending milit
     });
 });
 
+test('parseGameState derives an army-owned reserve queue summary without folding it into presidential review', () => {
+    const parsed = parseGameState({
+        meta: { turn: 14, phase: 'war', player_faction: 'RBiH' },
+        military: {
+            formations: {
+                arbih_main_staff: { id: 'arbih_main_staff', faction: 'RBiH', kind: 'army_hq', status: 'active', name: 'Main Staff', personnel: 0 },
+            },
+            pending_reserve_requests: [
+                {
+                    request_id: 'reserve-critical-defense',
+                    corps_id: 'arbih_1st_corps',
+                    faction: 'RBiH',
+                    reason: 'defensive_gap',
+                    purpose: 'defensive',
+                    priority: 85,
+                    description: 'Line in danger of collapse',
+                    turn_requested: 14,
+                },
+                {
+                    request_id: 'reserve-offensive',
+                    corps_id: 'arbih_5th_corps',
+                    faction: 'RBiH',
+                    reason: 'offensive_support',
+                    purpose: 'offensive',
+                    priority: 55,
+                    description: 'Exploit local breakthrough',
+                    turn_requested: 14,
+                },
+                {
+                    request_id: 'reserve-enemy',
+                    corps_id: 'vrs_drina',
+                    faction: 'RS',
+                    reason: 'defensive_gap',
+                    purpose: 'defensive',
+                    priority: 99,
+                    description: 'Enemy request should stay hidden',
+                    turn_requested: 14,
+                },
+            ],
+        } as any,
+        political: {
+            political_controllers: {},
+        } as any,
+    });
+
+    assert.deepEqual(parsed.pendingReserveRequests?.map((request) => request.request_id), [
+        'reserve-critical-defense',
+        'reserve-offensive',
+    ]);
+    assert.deepEqual(parsed.armyReserveQueue, {
+        pendingCount: 2,
+        criticalCount: 1,
+        offensiveCount: 1,
+        defensiveCount: 1,
+    });
+    assert.equal(parsed.presidentialReviewQueue, undefined);
+});
+
 test('parseGameState derives legacy AAR provenance when new provenance fields are absent', () => {
     const parsed = parseGameState({
         meta: { turn: 9, phase: 'war', player_faction: 'RBiH' },

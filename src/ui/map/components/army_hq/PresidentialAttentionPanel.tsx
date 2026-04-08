@@ -8,6 +8,7 @@ import { OrderInterpretationPanel } from './OrderInterpretationPanel';
 interface PresidentialAttentionPanelProps {
     gameState: LoadedGameState;
     playerFaction: string;
+    onOpenArmyReserve?: () => void;
 }
 
 function CountCard({ label, value, tone = 'neutral' }: { label: string; value: number; tone?: 'neutral' | 'critical' | 'warning' }) {
@@ -26,10 +27,11 @@ function CountCard({ label, value, tone = 'neutral' }: { label: string; value: n
     );
 }
 
-export function PresidentialAttentionPanel({ gameState, playerFaction }: PresidentialAttentionPanelProps) {
+export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArmyReserve }: PresidentialAttentionPanelProps) {
     const ipc = useIPC();
     const setLoadError = useGameStore((s) => s.setLoadError);
     const reviewQueue = gameState.presidentialReviewQueue;
+    const armyReserveQueue = gameState.armyReserveQueue;
 
     const pendingDecisions = useMemo(
         () =>
@@ -78,7 +80,7 @@ export function PresidentialAttentionPanel({ gameState, playerFaction }: Preside
         }
     };
 
-    if (!reviewQueue || reviewQueue.pendingCount === 0) {
+    if ((!reviewQueue || reviewQueue.pendingCount === 0) && !armyReserveQueue) {
         return (
             <div className="bg-panel-card border border-panel-border rounded-lg p-4 mb-4">
                 <div className="text-[9px] uppercase tracking-[0.25em] font-bold text-text-secondary mb-2 pb-1.5 border-b border-panel-border">
@@ -93,24 +95,63 @@ export function PresidentialAttentionPanel({ gameState, playerFaction }: Preside
 
     return (
         <div className="bg-panel-card border border-panel-border rounded-lg p-4 mb-4 space-y-4">
-            <div className="flex items-start justify-between gap-4">
-                <div>
-                    <div className="text-[9px] uppercase tracking-[0.25em] font-bold text-text-secondary mb-1">
-                        PRESIDENTIAL ATTENTION
+            <div className="space-y-4">
+                <div className="flex items-start justify-between gap-4">
+                    <div>
+                        <div className="text-[9px] uppercase tracking-[0.25em] font-bold text-text-secondary mb-1">
+                            PRESIDENTIAL ATTENTION
+                        </div>
+                        <div className="text-[12px] font-bold text-text-primary">
+                            {reviewQueue && reviewQueue.pendingCount > 0
+                                ? `${reviewQueue.pendingCount} matter${reviewQueue.pendingCount === 1 ? '' : 's'} await command review`
+                                : 'No presidential military reviews pending'}
+                        </div>
+                        <div className="text-[10px] text-text-secondary mt-1">
+                            This queue owns live military review work. Situation briefing below is context, not the action queue.
+                        </div>
                     </div>
-                    <div className="text-[12px] font-bold text-text-primary">
-                        {reviewQueue.pendingCount} matter{reviewQueue.pendingCount === 1 ? '' : 's'} await command review
-                    </div>
-                    <div className="text-[10px] text-text-secondary mt-1">
-                        This queue owns live military review work. Situation briefing below is context, not the action queue.
-                    </div>
+                    {reviewQueue && reviewQueue.pendingCount > 0 && (
+                        <div className="grid grid-cols-2 gap-2 min-w-[15rem]">
+                            <CountCard label="Critical" value={reviewQueue.criticalCount} tone="critical" />
+                            <CountCard label="Event Decisions" value={reviewQueue.eventDecisionCount} tone={reviewQueue.eventDecisionCount > 0 ? 'critical' : 'neutral'} />
+                            <CountCard label="Command Reactions" value={reviewQueue.commandInterpretationCount} tone={reviewQueue.commandInterpretationCount > 0 ? 'warning' : 'neutral'} />
+                            <CountCard label="Personnel Directives" value={reviewQueue.personnelDirectiveCount} tone={reviewQueue.personnelDirectiveCount > 0 ? 'warning' : 'neutral'} />
+                        </div>
+                    )}
                 </div>
-                <div className="grid grid-cols-2 gap-2 min-w-[15rem]">
-                    <CountCard label="Critical" value={reviewQueue.criticalCount} tone="critical" />
-                    <CountCard label="Event Decisions" value={reviewQueue.eventDecisionCount} tone={reviewQueue.eventDecisionCount > 0 ? 'critical' : 'neutral'} />
-                    <CountCard label="Command Reactions" value={reviewQueue.commandInterpretationCount} tone={reviewQueue.commandInterpretationCount > 0 ? 'warning' : 'neutral'} />
-                    <CountCard label="Personnel Directives" value={reviewQueue.personnelDirectiveCount} tone={reviewQueue.personnelDirectiveCount > 0 ? 'warning' : 'neutral'} />
-                </div>
+
+                {armyReserveQueue && (
+                    <section className="rounded border border-panel-border bg-panel-bg p-3 space-y-2">
+                        <div className="flex items-start justify-between gap-3">
+                            <div>
+                                <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-text-secondary/70">
+                                    Army Reserve Requests
+                                </div>
+                                <div className="text-[10px] text-text-secondary mt-1">
+                                    Reserve requests are army-level reserve management, not presidential review.
+                                    Handle them in the Army Reserve desk.
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 min-w-[11rem]">
+                                <CountCard label="Pending" value={armyReserveQueue.pendingCount} tone={armyReserveQueue.criticalCount > 0 ? 'warning' : 'neutral'} />
+                                <CountCard label="Critical" value={armyReserveQueue.criticalCount} tone="critical" />
+                                <CountCard label="Defensive" value={armyReserveQueue.defensiveCount} />
+                                <CountCard label="Offensive" value={armyReserveQueue.offensiveCount} />
+                            </div>
+                        </div>
+                        {onOpenArmyReserve && (
+                            <div className="flex justify-end">
+                                <button
+                                    type="button"
+                                    onClick={onOpenArmyReserve}
+                                    className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] rounded border border-panel-border bg-panel-bg text-text-primary transition-colors hover:bg-white/5"
+                                >
+                                    Open Reserve Desk
+                                </button>
+                            </div>
+                        )}
+                    </section>
+                )}
             </div>
 
             {pendingDecisions.length > 0 && (
@@ -146,7 +187,7 @@ export function PresidentialAttentionPanel({ gameState, playerFaction }: Preside
                 </section>
             )}
 
-            {reviewQueue.commandInterpretationCount > 0 && (
+            {reviewQueue && reviewQueue.commandInterpretationCount > 0 && (
                 <section className="space-y-2">
                     <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-text-secondary/70 border-b border-panel-border pb-1">
                         Command Reactions

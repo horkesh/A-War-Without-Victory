@@ -10,6 +10,7 @@ describe('Army HQ / presidential review coherence', () => {
 
     expect(source).toContain('pendingReviews: number;');
     expect(source).toContain("{pendingReviews} {pendingReviews === 1 ? 'REVIEW' : 'REVIEWS'}");
+    expect(source).not.toContain('armyReserveQueue');
     expect(source).not.toContain('OfficerEventBadge');
     expect(source).not.toContain('pendingOfficerEvents: boolean;');
     expect(source).not.toContain('pendingDecisions: number;');
@@ -31,5 +32,26 @@ describe('Army HQ / presidential review coherence', () => {
     expect(panelSource).toContain('Presidential Decisions');
     expect(panelSource).toContain('Command Reactions');
     expect(panelSource).toContain('Personnel Directives');
+  });
+
+  it('keeps reserve requests outside presidential review and makes the handoff explicit', () => {
+    const modalSource = readFileSync(
+      new URL('../src/ui/map/components/army_hq/ArmyHQModal.tsx', import.meta.url),
+      'utf8',
+    );
+    const panelSource = readFileSync(
+      new URL('../src/ui/map/components/army_hq/PresidentialAttentionPanel.tsx', import.meta.url),
+      'utf8',
+    );
+    const adapterSource = readFileSync(
+      new URL('../src/ui/map/data/GameStateAdapter.ts', import.meta.url),
+      'utf8',
+    );
+
+    expect(adapterSource).toContain('deriveArmyReserveQueue');
+    expect(panelSource).toContain('Army Reserve Requests');
+    expect(panelSource).toContain('Reserve requests are army-level reserve management, not presidential review.');
+    expect(panelSource).toContain('Open Reserve Desk');
+    expect(modalSource).toContain('setSelectedArmyHqId');
   });
 });

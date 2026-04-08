@@ -48,6 +48,7 @@ export function ArmyHQModal() {
     const open = useGameStore((s) => s.armyHQOpen);
     const setOpen = useGameStore((s) => s.setArmyHQOpen);
     const faction = useGameStore((s) => s.selectedArmyId);
+    const setSelectedArmyHqId = useGameStore((s) => s.setSelectedArmyHqId);
     const state = useGameStore((s) => s.loadedGameState);
     const activeTab = useGameStore((s) => s.armyHQTab);
     const setActiveTab = useGameStore((s) => s.setArmyHQTab);
@@ -161,6 +162,16 @@ export function ArmyHQModal() {
             }
         }
     }, [data, navigateToCorps]);
+
+    const handleOpenArmyReserve = useCallback(() => {
+        if (!data) return;
+        const armyReserveFormation = data.formations.find((formation) =>
+            formation.faction === faction && formation.kind === 'army_hq',
+        );
+        if (!armyReserveFormation) return;
+        setSelectedArmyHqId(armyReserveFormation.id);
+        setOpen(false);
+    }, [data, faction, setOpen, setSelectedArmyHqId]);
 
     if (!open || !faction || !state || !data) return null;
 
@@ -373,6 +384,7 @@ export function ArmyHQModal() {
                                 <PresidentialAttentionPanel
                                     gameState={state}
                                     playerFaction={faction}
+                                    onOpenArmyReserve={handleOpenArmyReserve}
                                 />
                             )}
 

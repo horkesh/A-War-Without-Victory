@@ -1664,6 +1664,10 @@ export function parseGameState(json: unknown): LoadedGameState {
         pendingOfficerEvents,
         pendingEventDecisions,
     });
+    const pendingReserveRequests = derivePendingReserveRequests(state, playerFaction);
+    const armyReserveQueue = deriveArmyReserveQueue({
+        pendingReserveRequests,
+    });
 
     return {
         label, turn, phase,
@@ -1728,22 +1732,8 @@ export function parseGameState(json: unknown): LoadedGameState {
         operationHistory: filterPlayerFacingEntriesByFaction(deriveOperationHistory(state), playerFaction),
         activeOperations: filterPlayerFacingEntriesByFaction(deriveActiveOperations(state), playerFaction),
         brigadeSectorOverride: brigadeSectorOverride && Object.keys(brigadeSectorOverride).length > 0 ? brigadeSectorOverride : undefined,
-        pendingReserveRequests: Array.isArray(state.military?.pending_reserve_requests) && state.military.pending_reserve_requests.length > 0
-            ? ((state.military.pending_reserve_requests as any[]).map(r => ({
-                request_id: String(r.request_id ?? `req:${Number(r.turn_requested ?? 0)}:${String(r.corps_id ?? '')}:${String(r.reason ?? '')}`),
-                corps_id: String(r.corps_id ?? ''),
-                faction: String(r.faction ?? ''),
-                reason: String(r.reason ?? ''),
-                purpose: (r.purpose === 'offensive' || r.purpose === 'defensive') ? r.purpose : undefined,
-                why_needed: typeof r.why_needed === 'string' ? r.why_needed : undefined,
-                how_to_use: typeof r.how_to_use === 'string' ? r.how_to_use : undefined,
-                priority: Number(r.priority ?? 0),
-                travel_hops: Number(r.travel_hops ?? 0),
-                description: String(r.description ?? ''),
-                suggested_brigade_id: r.suggested_brigade_id ? String(r.suggested_brigade_id) : null,
-                turn_requested: Number(r.turn_requested ?? 0),
-            })).filter((request) => !playerFaction || request.faction === playerFaction))
-            : undefined,
+        pendingReserveRequests,
+        armyReserveQueue,
         eliteBrigadeTracker: deriveEliteBrigadeTracker(state),
         pendingOfficerEvents,
         // Event system (v0.4.1 Phase 5)
@@ -2260,6 +2250,60 @@ function derivePresidentialReviewQueue({
         eventDecisionCount,
         commandInterpretationCount,
         personnelDirectiveCount,
+    };
+}
+
+function derivePendingReserveRequests(
+    state: any,
+    playerFaction: string | null | undefined,
+): LoadedGameState['pendingReserveRequests'] {
+    const requests = Array.isArray(state.military?.pending_reserve_requests)
+        ? (state.military.pending_reserve_requests as any[])
+            .map((request) => ({
+                request_id: String(request.request_id ?? `req:${Number(request.turn_requested ?? 0)}:${String(request.corps_id ?? '')}:${String(request.reason ?? '')}`),
+                corps_id: String(request.corps_id ?? ''),
+                faction: String(request.faction ?? ''),
+                reason: String(request.reason ?? ''),
+                purpose: request.purpose === 'offensive' || request.purpose === 'defensive' ? request.purpose : undefined,
+                why_needed: typeof request.why_needed === 'string' ? request.why_needed : undefined,
+                how_to_use: typeof request.how_to_use === 'string' ? request.how_to_use : undefined,
+                priority: Number(request.priority ?? 0),
+                travel_hops: Number(request.travel_hops ?? 0),
+                description: String(request.description ?? ''),
+                suggested_brigade_id: request.suggested_brigade_id ? String(request.suggested_brigade_id) : null,
+                turn_requested: Number(request.turn_requested ?? 0),
+            }))
+            .filter((request) => !playerFaction || request.faction === playerFaction)
+            .sort((a, b) =>
+                b.priority - a.priority
+                || a.turn_requested - b.turn_requested
+                || a.corps_id.localeCompare(b.corps_id)
+                || a.request_id.localeCompare(b.request_id),
+            )
+        : [];
+
+    return requests.length > 0 ? requests : undefined;
+}
+
+function deriveArmyReserveQueue({
+    pendingReserveRequests,
+}: {
+    pendingReserveRequests: LoadedGameState['pendingReserveRequests'];
+}): LoadedGameState['armyReserveQueue'] {
+    const requests = pendingReserveRequests ?? [];
+    if (requests.length === 0) return undefined;
+
+    const criticalCount = requests.filter((request) => request.priority >= 75).length;
+    const defensiveCount = requests.filter((request) =>
+        request.purpose === 'defensive' || request.reason === 'defensive_gap',
+    ).length;
+    const offensiveCount = requests.length - defensiveCount;
+
+    return {
+        pendingCount: requests.length,
+        criticalCount,
+        offensiveCount,
+        defensiveCount,
     };
 }
 

@@ -391,6 +391,13 @@ export interface PresidentialReviewQueueView {
     personnelDirectiveCount: number;
 }
 
+export interface ArmyReserveQueueView {
+    pendingCount: number;
+    criticalCount: number;
+    offensiveCount: number;
+    defensiveCount: number;
+}
+
 export interface AttackOrderView {
     brigadeId: string;
     targetSettlementId: string;
@@ -673,6 +680,8 @@ export interface LoadedGameState {
     operationalSitrep?: OperationalSitrepView;
     /** Canonical Army HQ / presidential military review queue summary derived from pending review owners. */
     presidentialReviewQueue?: PresidentialReviewQueueView;
+    /** Canonical Army Reserve management queue summary derived from pending reserve requests. */
+    armyReserveQueue?: ArmyReserveQueueView;
     /** Most recent turn after-action report (null before first turn is advanced). */
     latestTurnSummary: import('../../../state/turn_summary.js').TurnSummary | null;
     /** All turn summaries (for Chronicle timeline). */
