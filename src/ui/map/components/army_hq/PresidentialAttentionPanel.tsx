@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import type { LoadedGameState } from '../../data/types';
 import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
+import { getArmyReserveAttentionSummary } from '../../utils/armyReserveSeverity';
 import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
 import { OrderInterpretationPanel } from './OrderInterpretationPanel';
 
@@ -32,6 +33,7 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
     const setLoadError = useGameStore((s) => s.setLoadError);
     const reviewQueue = gameState.presidentialReviewQueue;
     const armyReserveQueue = gameState.armyReserveQueue;
+    const reserveSummary = armyReserveQueue ? getArmyReserveAttentionSummary(armyReserveQueue) : null;
 
     const pendingDecisions = useMemo(
         () =>
@@ -127,9 +129,11 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                                 <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-text-secondary/70">
                                     Army Reserve Requests
                                 </div>
+                                <div className={`text-[11px] mt-1 font-semibold ${reserveSummary?.tone === 'critical' ? 'text-amber-400' : 'text-text-primary'}`}>
+                                    {reserveSummary?.heading}
+                                </div>
                                 <div className="text-[10px] text-text-secondary mt-1">
-                                    Reserve requests are army-level reserve management, not presidential review.
-                                    Handle them in the Army Reserve desk.
+                                    {reserveSummary?.detail}
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-2 min-w-[11rem]">

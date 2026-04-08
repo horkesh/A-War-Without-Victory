@@ -43,6 +43,7 @@ import {
     getPlayerSafeDisplayLabel,
     getPlayerSafeOfficerName,
 } from '../utils/playerSafeText.js';
+import { classifyArmyReserveSeverity } from '../utils/armyReserveSeverity.js';
 import { buildControlLookup, buildStatusLookup } from './ControlLookup.js';
 import { getMunicipalitySupportLabel } from '../../../sim/combat/municipality_support.js';
 import { strictCompare } from '../../../state/validateGameState.js';
@@ -2268,6 +2269,7 @@ function derivePendingReserveRequests(
                 why_needed: typeof request.why_needed === 'string' ? request.why_needed : undefined,
                 how_to_use: typeof request.how_to_use === 'string' ? request.how_to_use : undefined,
                 priority: Number(request.priority ?? 0),
+                severityBand: classifyArmyReserveSeverity(Number(request.priority ?? 0)),
                 travel_hops: Number(request.travel_hops ?? 0),
                 description: String(request.description ?? ''),
                 suggested_brigade_id: request.suggested_brigade_id ? String(request.suggested_brigade_id) : null,

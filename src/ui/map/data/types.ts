@@ -742,6 +742,7 @@ export interface LoadedGameState {
         why_needed?: string;
         how_to_use?: string;
         priority: number;
+        severityBand: 'critical' | 'routine';
         travel_hops: number;
         description: string;
         suggested_brigade_id: string | null;

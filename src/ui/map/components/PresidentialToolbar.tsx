@@ -21,6 +21,7 @@ import { advanceTurnAndSync } from '../desktop/orderActions';
 import { loadLatestRunSaveAsText, loadRunFinalSaveAsText } from '../data/DataLoader';
 import { getArmyCrest, getArmyName } from '../utils/factionAssets';
 import { formatTurnLabel } from '../utils/formatters';
+import { getArmyReserveToolbarSignal } from '../utils/armyReserveSeverity';
 import { shouldShowWarroomReturn, isEmbeddedTacticalMap } from '../utils/warroomReturn';
 
 /** Command Authority gauge — shows the president's override resource. Level 3 actions deplete this. */
@@ -83,6 +84,7 @@ export function PresidentialToolbar({
     const armyName = getArmyName(playerFaction);
     const embedded = typeof window !== 'undefined' && isEmbeddedTacticalMap(window.location.search);
     const showWarroomReturn = typeof window !== 'undefined' && shouldShowWarroomReturn(window.location.search, ipc.isAvailable);
+    const reserveSignal = reserveAttention ? getArmyReserveToolbarSignal(reserveAttention) : null;
 
     const handleAdvanceTurn = useCallback(async () => {
         if (!ipc.isAvailable || advancing) return;
@@ -249,18 +251,18 @@ export function PresidentialToolbar({
                         </button>
                     )}
 
-                    {reserveAttention && reserveAttention.pendingCount > 0 && (
+                    {reserveAttention && reserveAttention.pendingCount > 0 && reserveSignal && (
                         <button
                             onClick={handleOpenArmyReserve}
                             className={`flex items-center gap-1.5 px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-wide border rounded transition-colors ${
-                                reserveAttention.criticalCount > 0
+                                reserveSignal.tone === 'critical'
                                     ? 'bg-amber-900/30 text-amber-400 border-amber-500/30 hover:bg-amber-900/50'
                                     : 'bg-sky-900/30 text-sky-300 border-sky-400/30 hover:bg-sky-900/50'
                             }`}
-                            title="Open Army Reserve desk"
+                            title={reserveSignal.title}
                         >
-                            <span className={`w-2 h-2 rounded-full ${reserveAttention.criticalCount > 0 ? 'bg-amber-500' : 'bg-sky-300'}`} />
-                            {reserveAttention.pendingCount} {reserveAttention.pendingCount === 1 ? 'RESERVE REQUEST' : 'RESERVE REQUESTS'}
+                            <span className={`w-2 h-2 rounded-full ${reserveSignal.tone === 'critical' ? 'bg-amber-500' : 'bg-sky-300'}`} />
+                            {reserveSignal.label}
                         </button>
                     )}
 

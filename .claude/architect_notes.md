@@ -315,6 +315,11 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - Accepted signaling line: in AWWV, `presidentialReviewQueue` owns presidential military review and `armyReserveQueue` owns reserve-management pressure; the field toolbar may advertise both, but it must not merge their counts or route reserve pressure through the presidential queue.
 - Shell rule: reserve pressure may be visible before Army HQ opens, but it must route directly into the Army Reserve desk and remain institutionally separate from the `REVIEW` / `REVIEWS` presidential military review signal.
 
+**Closed: Army Reserve Severity Legibility / Critical Request Framing (2026-04-08)**
+- When an urgency source is already owned by one queue, improve legibility by centralizing its presentation rule rather than adding more badges or alternate summaries.
+- Accepted severity line: in AWWV, reserve request priority remains the sole severity input, `armyReserveQueue` remains the summary owner, and one helper-driven framing contract now controls how toolbar signals, Army HQ handoffs, and reserve-desk request cards describe critical versus routine reserve pressure.
+- Shell rule: make critical reserve pressure explicit in language, not just color, while keeping presidential review separate and avoiding broad alert-hierarchy redesign.
+
 **Closed: Packaged Desktop Turn-Report Push Contract (2026-04-08)**
 - After proving packaged preload pull interaction and pushed game-state delivery, the next bounded runtime contract is the other real desktop push channel tactical-map windows consume after load.
 - Accepted turn-report line: `desktop:package:probe` now requires the packaged operational and sandbox tactical-map windows to receive a deterministic `turn-report-updated` payload through the real desktop subscription bridge, and it records that proof in deterministic `turn_report_push_checks`.

@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { useIPC } from '../desktop/useIPC';
 import { getPanelRailStyle } from './panelRail';
+import { getArmyReserveAttentionSummary, getArmyReserveRequestSeverityCopy } from '../utils/armyReserveSeverity';
 import { getPlayerFacingCorpsName } from '../../shared/playerFacingLabels';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getPlayerSafeBrigadeName } from '../utils/playerSafeText';
@@ -60,6 +61,12 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
     const pendingRequests = (loadedGameState.pendingReserveRequests ?? []).filter(
         r => r.faction === faction
     );
+    const reserveAttentionSummary = pendingRequests.length > 0
+        ? getArmyReserveAttentionSummary({
+            pendingCount: pendingRequests.length,
+            criticalCount: pendingRequests.filter((request) => request.severityBand === 'critical').length,
+        })
+        : null;
 
     // Tracker data
     const tracker = loadedGameState.eliteBrigadeTracker ?? {};
@@ -234,6 +241,16 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                         <div className="text-[10px] text-accent-gold uppercase tracking-widest font-bold opacity-70 mb-2">
                             Pending Requests ({pendingRequests.length})
                         </div>
+                        {reserveAttentionSummary && (
+                            <div className="mb-2 rounded border border-panel-border/40 bg-black/20 px-2 py-1.5">
+                                <div className={`text-[10px] font-semibold ${reserveAttentionSummary.tone === 'critical' ? 'text-amber-400' : 'text-text-primary'}`}>
+                                    {reserveAttentionSummary.heading}
+                                </div>
+                                <div className="text-[10px] text-text-secondary mt-0.5">
+                                    {reserveAttentionSummary.detail}
+                                </div>
+                            </div>
+                        )}
                         <div className="space-y-1.5">
                             {pendingRequests.map((req, idx) => (
                                 <div key={idx} className="bg-black/20 border border-panel-border/40 rounded p-2 space-y-2">
@@ -241,6 +258,9 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                         <div>
                                             <div className="text-text-primary font-semibold">{getCorpsName(req.corps_id)}</div>
                                             <div className="text-text-secondary text-[10px]">{req.description}</div>
+                                            <div className="text-[10px] text-text-secondary mt-1">
+                                                {getArmyReserveRequestSeverityCopy(req.priority).detail}
+                                            </div>
                                         </div>
                                         <div className="flex flex-col items-end gap-1 shrink-0">
                                             <span
@@ -252,6 +272,13 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                                 }}
                                             >
                                                 {REASON_LABELS[req.reason] ?? req.reason}
+                                            </span>
+                                            <span className={`px-1.5 py-0.5 text-[9px] font-bold rounded border uppercase ${
+                                                req.severityBand === 'critical'
+                                                    ? 'text-amber-400 border-amber-500/40 bg-amber-500/10'
+                                                    : 'text-sky-300 border-sky-400/40 bg-sky-400/10'
+                                            }`}>
+                                                {getArmyReserveRequestSeverityCopy(req.priority).label}
                                             </span>
                                             <span className="text-[10px] text-text-secondary">
                                                 ~{req.travel_hops <= 1 ? '&lt;1' : Math.ceil(req.travel_hops / 2)}w travel

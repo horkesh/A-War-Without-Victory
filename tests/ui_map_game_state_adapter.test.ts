@@ -453,6 +453,13 @@ test('parseGameState derives an army-owned reserve queue summary without folding
         'reserve-critical-defense',
         'reserve-offensive',
     ]);
+    assert.deepEqual(parsed.pendingReserveRequests?.map((request) => ({
+        request_id: request.request_id,
+        severityBand: request.severityBand,
+    })), [
+        { request_id: 'reserve-critical-defense', severityBand: 'critical' },
+        { request_id: 'reserve-offensive', severityBand: 'routine' },
+    ]);
     assert.deepEqual(parsed.armyReserveQueue, {
         pendingCount: 2,
         criticalCount: 1,

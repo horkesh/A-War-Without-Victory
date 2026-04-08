@@ -23,8 +23,8 @@ describe('Army HQ / presidential review coherence', () => {
     );
 
     expect(source).toContain('reserveAttention?: { pendingCount: number; criticalCount: number } | null;');
-    expect(source).toContain('Open Army Reserve desk');
-    expect(source).toContain("RESERVE REQUEST");
+    expect(source).toContain('getArmyReserveToolbarSignal');
+    expect(source).toContain('reserveSignal.label');
     expect(source).not.toContain("{pendingReviews +");
   });
 
@@ -62,7 +62,7 @@ describe('Army HQ / presidential review coherence', () => {
 
     expect(adapterSource).toContain('deriveArmyReserveQueue');
     expect(panelSource).toContain('Army Reserve Requests');
-    expect(panelSource).toContain('Reserve requests are army-level reserve management, not presidential review.');
+    expect(panelSource).toContain('getArmyReserveAttentionSummary');
     expect(panelSource).toContain('Open Reserve Desk');
     expect(modalSource).toContain('setSelectedArmyHqId');
   });
