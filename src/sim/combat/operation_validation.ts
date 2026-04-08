@@ -2,9 +2,9 @@
  * Operation injection validation gate.
  *
  * Validates pre-planned and triggered operation definitions BEFORE they are
- * injected into the live game. The gate WARNS but never BLOCKS — existing
- * graceful degradation in buildAxesFromDef/buildOperation handles actual
- * behavior. This makes silent failures VISIBLE.
+ * injected into the live game. Warning-level findings remain visible-only,
+ * but error-level findings now block injection so stale or impossible
+ * historical operation content dies honestly before buildOperation runs.
  *
  * Six checks:
  *   A. all_objectives_owned  — every objective on an axis is already faction-controlled

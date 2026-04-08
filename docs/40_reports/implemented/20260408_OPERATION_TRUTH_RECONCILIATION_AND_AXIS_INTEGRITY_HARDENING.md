@@ -129,7 +129,7 @@ The final wave closed the remaining gap between structurally truthful operations
 The post-reconciliation audit of run `n1376` showed that the remaining invalid operations were no longer caused by stale participants, stale anchors, or axis drift. The residual failure family was narrower:
 - probes could still launch from a geometric or coarse objective signal even when the specific brigade could not issue a viable attack this turn
 - politically blocked objectives could leave operations alive in `execution` even though Graz/truce rules prevented any legal attack from happening
-- `eligible_attacker_count` diagnostics were counted before the final attack-order trim and political blocking filters, so the metric could disagree with the actual surviving attack orders
+- legacy `eligible_attacker_count` diagnostics were counted before the final attack-order trim and political blocking filters, so the compatibility metric could disagree with the actual surviving attack orders
 
 ### Additional changes made
 

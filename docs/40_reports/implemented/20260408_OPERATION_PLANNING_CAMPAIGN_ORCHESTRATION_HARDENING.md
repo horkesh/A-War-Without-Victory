@@ -24,7 +24,7 @@ Those failures were no longer about stale runtime truth. They were about operati
 
 ### Combat-causality now reads operation-local final truth
 - [src/scenario/combat_causality.ts](/F:/A-War-Without-Victory/src/scenario/combat_causality.ts)
-  - `eligible_attacker_count` is now derived from the operation's own participating brigade attack attempts rather than corps-wide `eligible_attackers_by_corps`.
+  - Legacy `eligible_attacker_count` compatibility is now bound to the operation's own surviving participant attack orders rather than corps-wide `eligible_attackers_by_corps`.
   - `execution_without_attack_orders` and `execution_without_eligible_attackers` now only invalidate an operation when it has never logged prior objective attempts or captures, which prevents cleanup/bookkeeping turns from being mislabeled as fake execution.
 
 ### Active operation attackers are protected from generic trimming

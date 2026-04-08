@@ -129,7 +129,7 @@ The execution core reached `A+`, but the adjacent planning/orchestration layer s
 
 ### Phase 3 implementation
 1. `combat_causality.ts`
-   - made `eligible_attacker_count` operation-local
+   - kept legacy `eligible_attacker_count` compatibility, but made it operation-local final-order truth instead of a corps snapshot
    - limited execution invalidations to operations with no prior attempts/captures
 2. `bot_brigade_ai_osid.ts`
    - pinned active operation attackers so generic trim/faction-friction passes cannot starve them

@@ -106,7 +106,7 @@ Remaining DRINA mismatches (cerska_2, pobudje_2, jezestica_2, sebiocina, drinsko
 
 2. **Political blockage becomes explicit lifecycle truth** — `sector_offensive.ts` now routes operations whose live objectives are all Graz/truce-blocked into one-turn `political_blocked` recovery instead of leaving them to fake an execution turn with no legal attacks.
 
-3. **Diagnostics now read final post-trim order truth** — `bot_brigade_ai_osid.ts` recomputes eligible attackers from final surviving `attack_orders`, and `combat_causality.ts` only emits `recovery_without_logged_attempt` when the actual `recovery_reason` is `no_logged_attempt`.
+3. **Diagnostics now read final post-trim order truth** — `bot_brigade_ai_osid.ts` recomputes final surviving attack-order truth, the legacy `eligible_attacker_count` compatibility field is now bound to that post-trim operation-local result instead of a corps snapshot, and `combat_causality.ts` only emits `recovery_without_logged_attempt` when the actual `recovery_reason` is `no_logged_attempt`.
 
 ### Determinism / scope
 
@@ -25109,7 +25109,7 @@ Main Staff HQ was Han Pijesak, not Rogatica. Tracked for OOB correction pass.
 
 ### Summary of changes
 
-1. **Operation-local causality authority** - `combat_causality.ts` now counts eligible attackers from the operation's own participating brigades and only invalidates execution-without-orders / execution-without-eligible cases when the operation has never logged prior objective attempts or captures. Cleanup turns are no longer misclassified as fake execution.
+1. **Operation-local causality authority** - `combat_causality.ts` now binds the legacy `eligible_attacker_count` compatibility field to the operation's own final surviving participant attack orders and only invalidates execution-without-orders / execution-without-eligible cases when the operation has never logged prior objective attempts or captures. Cleanup turns are no longer misclassified as fake execution.
 
 2. **Planner/executor anti-conflict guard** - `bot_brigade_ai_osid.ts` now protects active execution-phase operation attackers from generic corps attack-share trimming and from RBiH warlord-friction shedding. Live operations are no longer silently starved by broad corps-level caps after they were legitimately born.
 

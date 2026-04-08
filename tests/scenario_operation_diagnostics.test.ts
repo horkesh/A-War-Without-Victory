@@ -130,7 +130,7 @@ describe('combat causality diagnostics', () => {
         assert.ok(diagnostics[0]!.invalidation_reasons.includes('execution_without_attack_orders'));
     });
 
-    it('flags execution-phase operation with participants but zero eligible attackers', () => {
+    it('flags execution-phase operation with participants but zero final surviving attack orders', () => {
         const diagnostics = buildOperationCombatDiagnostics(
             makeState(),
             makeOrderSnapshot({}, {}, { corps_1: 0 }),
@@ -150,7 +150,7 @@ describe('combat causality diagnostics', () => {
         assert.ok(summary.invalidation_reasons.includes('operation_execution_without_eligible_attackers'));
     });
 
-    it('does not flag zero eligible attackers when the operation is still maneuvering', () => {
+    it('does not flag zero final surviving attack orders when the operation is still maneuvering', () => {
         const diagnostics = buildOperationCombatDiagnostics(
             makeState(),
             makeOrderSnapshot({}, { b1: 'op:rs:approach' }, { corps_1: 0 }),
@@ -280,7 +280,7 @@ describe('combat causality diagnostics', () => {
         assert.deepEqual(diagnostics[0]!.invalidation_reasons, []);
     });
 
-    it('counts eligible attackers only from the operation participants, not the whole corps', () => {
+    it('keeps the legacy eligible-attacker metric bound to operation-local final attack orders, not the whole corps', () => {
         const state = makeState();
         const diagnostics = buildOperationCombatDiagnostics(
             state,

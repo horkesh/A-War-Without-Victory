@@ -24,6 +24,8 @@ export interface OperationCombatDiagnostic {
     operation_phase: CorpsOperation['phase'];
     current_objective: string | null;
     participating_brigades: FormationId[];
+    // Legacy compatibility field: now derived from final surviving participant
+    // attack orders, not from pre-trim eligibility snapshots.
     eligible_attacker_count: number;
     attack_attempt_count: number;
     objective_attempt_count: number;
@@ -180,7 +182,9 @@ export function buildOperationCombatDiagnostics(
             }
             battleCount += battleCountsByBrigade.get(brigadeId) ?? 0;
         }
-        const eligibleAttackerCount = attackAttemptCount;
+        // Keep the legacy field name stable for downstream consumers, but bind it
+        // to the post-trim operation-local order truth the invalidation logic uses.
+        const finalOrderedAttackerCount = attackAttemptCount;
         const currentObjectiveBattleCount = currentObjective !== null
             ? (battleCountsByTarget.get(currentObjective) ?? 0)
             : 0;
@@ -199,7 +203,7 @@ export function buildOperationCombatDiagnostics(
             operation.phase === 'execution' &&
             !hadResolvedAttackThisTurn &&
             brigades.length > 0 &&
-            eligibleAttackerCount === 0 &&
+            finalOrderedAttackerCount === 0 &&
             movementOrderCount === 0 &&
             objectiveAttemptCount === 0 &&
             objectiveCaptureCount === 0
@@ -233,7 +237,7 @@ export function buildOperationCombatDiagnostics(
             operation_phase: operation.phase,
             current_objective: currentObjective,
             participating_brigades: brigades,
-            eligible_attacker_count: eligibleAttackerCount,
+            eligible_attacker_count: finalOrderedAttackerCount,
             attack_attempt_count: attackAttemptCount,
             objective_attempt_count: objectiveAttemptCount,
             objective_capture_count: objectiveCaptureCount,
