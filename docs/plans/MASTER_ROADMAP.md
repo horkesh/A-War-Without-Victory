@@ -1,6 +1,6 @@
 # AWWV Master Roadmap — Pyrrhic Games
 
-**Last Updated:** 2026-04-07
+**Last Updated:** 2026-04-08
 **Current Version:** 0.8.4 (Autonomy Depth + Claude API)
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."
@@ -346,6 +346,8 @@ No version bump — engineering milestone between feature releases. Stabilizatio
 
 **Status update 2026-04-08:** packaged desktop runtime smoke now proves the real tactical-map pushed state channel too. `desktop:package:probe` remains the same canonical packaged-runtime path, but success now also requires the packaged operational and sandbox tactical-map windows to receive a deterministic `game-state-updated` push through the real desktop subscription bridge. Scope remains truthful: pushed-state delivery proof only; renderer reaction semantics, broader packaged UI automation, and installer/publish flow are still deferred. Report: `docs/40_reports/implemented/20260408_V08TO09_PACKAGED_DESKTOP_TACTICAL_MAP_STATE_PUSH_CONTRACT.md`.
 
+**Status update 2026-04-08:** packaged desktop runtime smoke now proves the real turn-report push channel too. `desktop:package:probe` remains the same canonical packaged-runtime path, but success now also requires the packaged operational and sandbox tactical-map windows to receive a deterministic `turn-report-updated` push through the real desktop subscription bridge. Scope remains truthful: pushed turn-report delivery proof only; renderer reaction semantics, broader packaged UI automation, and installer/publish flow are still deferred. Report: `docs/40_reports/implemented/20260408_V08TO09_PACKAGED_DESKTOP_TURN_REPORT_PUSH_CONTRACT.md`.
+
 **Status update 2026-04-07:** the last named war-phase Warroom modal seam is now closed in the truthful bounded sense. `NewspaperModal.getOfficerSuccessionLines()` no longer reads raw `military.named_officer_data` or `military.formations`; `extractWarData(...).officerNamesById` now owns officer name lookup and the modal resolves corps names through snapshot formation details instead of direct military-state reads. Report: `docs/40_reports/implemented/20260407_V08TO09_NEWSPAPER_MODAL_OFFICER_BOUNDARY.md`.
 
 ---
@@ -545,7 +547,7 @@ These need design sessions before implementation. Preserved from the original ro
 | Victory conditions | Stub (roadmap-owned in v0.9.0) |
 | Diplomacy layer | Partial (patron pressure, alliance, IVP) |
 
-**Current:** 93.6% area-weighted calibration (n1358), 27/27 anchors, 6/6 benchmarks. 712 OSIDs. Political bot complete through Dayton branches (`v0.8.2`). Order interpretation complete through player-legible UX (`v0.8.3`). Autonomy review loop complete through high-stakes event gating and DRINA investigation (`v0.8.4` CLOSED 2026-04-07 — all phases 1, B, C, D, E, F complete). `v0.8.x-final` command authority cleanup plus the major startup/save-load, packaged-desktop, and Warroom explanation-boundary confidence lanes are now closed through packaged tactical-map push proof and the last named war-phase Warroom modal seam. Next broad work: packaged desktop turn-report push contract, Warroom shell parity debt outside truth ownership, then `v0.9.0`. Active governance focus: keep roadmap truth, board truth, reports, and retained calibration evidence aligned through the permanent `Studio Health / Repo Truth` lane.
+**Current:** 93.6% area-weighted calibration (n1358), 27/27 anchors, 6/6 benchmarks. 712 OSIDs. Political bot complete through Dayton branches (`v0.8.2`). Order interpretation complete through player-legible UX (`v0.8.3`). Autonomy review loop complete through high-stakes event gating and DRINA investigation (`v0.8.4` CLOSED 2026-04-07 — all phases 1, B, C, D, E, F complete). `v0.8.x-final` command authority cleanup plus the major startup/save-load, packaged-desktop, and Warroom explanation-boundary confidence lanes are now closed through packaged turn-report push proof and the last named war-phase Warroom modal seam. Next broad work: packaged desktop renderer-reaction confidence beyond bridge delivery, Warroom shell parity debt outside truth ownership, then `v0.9.0`. Active governance focus: keep roadmap truth, board truth, reports, and retained calibration evidence aligned through the permanent `Studio Health / Repo Truth` lane.
 
 ---
 

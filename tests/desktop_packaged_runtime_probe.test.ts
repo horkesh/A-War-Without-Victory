@@ -125,6 +125,31 @@ test('electron main exposes a packaged runtime probe mode instead of a second la
     );
     assert.match(
         source,
+        /armTurnReportPushProbe\(/,
+        'packaged runtime probe should prove the real turn-report push path',
+    );
+    assert.match(
+        source,
+        /collectTurnReportPushProbe\(/,
+        'packaged runtime probe should collect the armed turn-report push proof deterministically',
+    );
+    assert.match(
+        source,
+        /subscribeTurnReportUpdated !== 'function'/,
+        'packaged turn-report push proof should require the real preload subscription bridge',
+    );
+    assert.match(
+        source,
+        /turn_report_push_checks:\s*\[/,
+        'packaged runtime probe manifest should record turn-report push proofs',
+    );
+    assert.match(
+        source,
+        /sendTurnReportToRenderer\(probeTurnReport\)/,
+        'packaged runtime probe should trigger the real desktop turn-report push channel',
+    );
+    assert.match(
+        source,
         /tacticalWindowInteraction\.location_path[\s\S]*tacticalWindowInteraction\.map_server_url[\s\S]*tacticalWindowInteraction\.player_faction[\s\S]*tacticalWindowInteraction\.route_mode[\s\S]*tacticalWindowInteraction\.turn/s,
         'packaged runtime probe should record deterministic operational interaction details',
     );
@@ -187,6 +212,16 @@ test('probe tool launches the unpacked packaged executable with the runtime prob
         source,
         /tactical_push_checks[\s\S]*route_mode === 'sandbox'[\s\S]*player_faction === 'RBiH'[\s\S]*turn === 0/s,
         'probe tool should fail if the packaged manifest omits the tactical sandbox state-push proof',
+    );
+    assert.match(
+        source,
+        /turn_report_push_checks[\s\S]*route_mode === 'operational'[\s\S]*player_faction === 'RBiH'[\s\S]*turn === 0[\s\S]*probe === 'awwv_turn_report_probe'/s,
+        'probe tool should fail if the packaged manifest omits the tactical operational turn-report push proof',
+    );
+    assert.match(
+        source,
+        /turn_report_push_checks[\s\S]*route_mode === 'sandbox'[\s\S]*player_faction === 'RBiH'[\s\S]*turn === 0[\s\S]*probe === 'awwv_turn_report_probe'/s,
+        'probe tool should fail if the packaged manifest omits the tactical sandbox turn-report push proof',
     );
     assert.match(
         source,

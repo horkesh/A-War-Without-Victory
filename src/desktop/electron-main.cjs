@@ -321,6 +321,67 @@ function collectGameStatePushProbe(win, expectedMode, label) {
   });
 }
 
+function armTurnReportPushProbe(win) {
+  return win.webContents.executeJavaScript(
+    `
+      (() => {
+        const bridge = window.awwv;
+        if (!bridge || typeof bridge.subscribeTurnReportUpdated !== 'function') {
+          throw new Error('turn-report-updated bridge unavailable');
+        }
+
+        window.__awwvProbeTurnReportPush = new Promise((resolve, reject) => {
+          const timeoutId = setTimeout(() => {
+            reject(new Error('timed out waiting for turn-report-updated'));
+          }, 5000);
+
+          const unsubscribe = bridge.subscribeTurnReportUpdated((report) => {
+            try {
+              clearTimeout(timeoutId);
+              if (typeof unsubscribe === 'function') {
+                unsubscribe();
+              }
+              resolve({
+                route_mode: window.location.search.includes('desktop_window=sandbox') ? 'sandbox' : 'operational',
+                player_faction: report?.player_faction ?? null,
+                turn: report?.turn ?? null,
+                probe: report?.probe ?? null,
+              });
+            } catch (error) {
+              reject(error);
+            }
+          });
+        });
+        return true;
+      })();
+    `,
+    true,
+  );
+}
+
+function collectTurnReportPushProbe(win, expectedMode, label) {
+  return win.webContents.executeJavaScript(
+    `
+      window.__awwvProbeTurnReportPush;
+    `,
+    true,
+  ).then((push) => {
+    if (push.route_mode !== expectedMode) {
+      throw new Error(`${label} received turn report for unexpected route mode ${push.route_mode}; expected ${expectedMode}`);
+    }
+    if (push.player_faction !== 'RBiH') {
+      throw new Error(`${label} received turn report with unexpected player faction ${push.player_faction}; expected RBiH`);
+    }
+    if (push.turn !== 0) {
+      throw new Error(`${label} received turn report with unexpected turn ${push.turn}; expected 0`);
+    }
+    if (push.probe !== 'awwv_turn_report_probe') {
+      throw new Error(`${label} received unexpected turn report probe marker ${push.probe}; expected awwv_turn_report_probe`);
+    }
+    return push;
+  });
+}
+
 function getTacticalMapWindowUrl(mode = 'operational') {
   const targetPath = mode === 'sandbox' ? '/tactical_sandbox.html' : '/';
   const query = mode === 'sandbox' ? '?desktop_window=sandbox' : '?desktop_window=operational';
@@ -446,6 +507,11 @@ async function runPackagedRuntimeProbe() {
   const sim = getDesktopSim();
   const { state } = await sim.startNewCampaign(getBaseDir(), 'RBiH');
   currentGameStateJson = sim.serializeState(state);
+  const probeTurnReport = {
+    probe: 'awwv_turn_report_probe',
+    player_faction: state?.meta?.player_faction ?? null,
+    turn: state?.meta?.turn ?? null,
+  };
   if ((state?.meta?.player_faction ?? null) !== 'RBiH') {
     throw new Error(`startup probe expected player_faction=RBiH, got ${state?.meta?.player_faction ?? 'null'}`);
   }
@@ -507,12 +573,26 @@ async function runPackagedRuntimeProbe() {
     'operational',
     'packaged tactical map window',
   );
+  await armTurnReportPushProbe(mapProbeWindow);
+  sendTurnReportToRenderer(probeTurnReport);
+  const operationalTurnReportPush = await collectTurnReportPushProbe(
+    mapProbeWindow,
+    'operational',
+    'packaged tactical map window',
+  );
 
   mapProbeWindow.destroy();
   tacticalMapWindow = sandboxProbeWindow;
   await armGameStatePushProbe(sandboxProbeWindow);
   sendGameStateToRenderer(currentGameStateJson);
   const sandboxPush = await collectGameStatePushProbe(
+    sandboxProbeWindow,
+    'sandbox',
+    'packaged tactical sandbox window',
+  );
+  await armTurnReportPushProbe(sandboxProbeWindow);
+  sendTurnReportToRenderer(probeTurnReport);
+  const sandboxTurnReportPush = await collectTurnReportPushProbe(
     sandboxProbeWindow,
     'sandbox',
     'packaged tactical sandbox window',
@@ -577,6 +657,20 @@ async function runPackagedRuntimeProbe() {
         player_faction: sandboxPush.player_faction,
         route_mode: sandboxPush.route_mode,
         turn: sandboxPush.turn,
+      },
+    ],
+    turn_report_push_checks: [
+      {
+        player_faction: operationalTurnReportPush.player_faction,
+        probe: operationalTurnReportPush.probe,
+        route_mode: operationalTurnReportPush.route_mode,
+        turn: operationalTurnReportPush.turn,
+      },
+      {
+        player_faction: sandboxTurnReportPush.player_faction,
+        probe: sandboxTurnReportPush.probe,
+        route_mode: sandboxTurnReportPush.route_mode,
+        turn: sandboxTurnReportPush.turn,
       },
     ],
   };

@@ -91,6 +91,20 @@ const sandboxPushCheck = manifest?.tactical_push_checks?.find?.(
     entry?.player_faction === 'RBiH' &&
     entry?.turn === 0,
 );
+const operationalTurnReportPushCheck = manifest?.turn_report_push_checks?.find?.(
+  (entry) =>
+    entry?.route_mode === 'operational' &&
+    entry?.player_faction === 'RBiH' &&
+    entry?.turn === 0 &&
+    entry?.probe === 'awwv_turn_report_probe',
+);
+const sandboxTurnReportPushCheck = manifest?.turn_report_push_checks?.find?.(
+  (entry) =>
+    entry?.route_mode === 'sandbox' &&
+    entry?.player_faction === 'RBiH' &&
+    entry?.turn === 0 &&
+    entry?.probe === 'awwv_turn_report_probe',
+);
 
 if (!windowCheck) {
   throw new Error(
@@ -131,6 +145,18 @@ if (!operationalPushCheck) {
 if (!sandboxPushCheck) {
   throw new Error(
     `Packaged desktop runtime probe manifest is missing the tactical sandbox state-push proof.\n${JSON.stringify(manifest, null, 2)}`,
+  );
+}
+
+if (!operationalTurnReportPushCheck) {
+  throw new Error(
+    `Packaged desktop runtime probe manifest is missing the tactical operational turn-report push proof.\n${JSON.stringify(manifest, null, 2)}`,
+  );
+}
+
+if (!sandboxTurnReportPushCheck) {
+  throw new Error(
+    `Packaged desktop runtime probe manifest is missing the tactical sandbox turn-report push proof.\n${JSON.stringify(manifest, null, 2)}`,
   );
 }
 

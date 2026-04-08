@@ -295,6 +295,11 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - Accepted push line: `desktop:package:probe` now requires the packaged operational and sandbox tactical-map windows to receive a deterministic `game-state-updated` payload through the real desktop subscription bridge, and it records that proof in deterministic `tactical_push_checks`.
 - Push-proof rule: arm subscriptions inside the real tracked tactical-map windows, then trigger the existing main-process broadcaster (`sendGameStateToRenderer(currentGameStateJson)`) rather than inventing a synthetic side channel. Probe accuracy depends on using the same window-ownership model the real broadcaster targets.
 
+**Closed: Packaged Desktop Turn-Report Push Contract (2026-04-08)**
+- After proving packaged preload pull interaction and pushed game-state delivery, the next bounded runtime contract is the other real desktop push channel tactical-map windows consume after load.
+- Accepted turn-report line: `desktop:package:probe` now requires the packaged operational and sandbox tactical-map windows to receive a deterministic `turn-report-updated` payload through the real desktop subscription bridge, and it records that proof in deterministic `turn_report_push_checks`.
+- Turn-report rule: arm the actual in-window preload subscription and trigger the existing main-process broadcaster (`sendTurnReportToRenderer(...)`) so the probe validates the same channel the product uses instead of inventing a separate smoke path or synthetic turn-report source.
+
 ### Warroom React Shell Recovery / Feature Parity — OPEN
 
 - **Problem:** The rebuilt React-owned Warroom shell is functional enough to launch and hand off correctly, but it remains materially behind the older corktable-era experience.
