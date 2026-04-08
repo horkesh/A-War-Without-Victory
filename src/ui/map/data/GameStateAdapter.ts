@@ -1878,6 +1878,31 @@ function deriveSupplyTransitionsByOsid(state: any): LoadedGameState['supplyTrans
     return result;
 }
 
+function deriveOperationCaptureProvenance(aar: Record<string, unknown>): NonNullable<NonNullable<LoadedGameState['operationHistory']>[number]['capture_provenance']> {
+    if (typeof aar.capture_provenance === 'string') {
+        return aar.capture_provenance as NonNullable<NonNullable<LoadedGameState['operationHistory']>[number]['capture_provenance']>;
+    }
+
+    const objectivesTargeted = Array.isArray(aar.objectives_targeted) ? aar.objectives_targeted as string[] : [];
+    const objectivesCaptured = Array.isArray(aar.objectives_captured) ? aar.objectives_captured as string[] : [];
+    const loggedCaptureSet = new Set<string>();
+    for (const entry of Array.isArray(aar.weekly_log) ? aar.weekly_log as Array<Record<string, unknown>> : []) {
+        for (const osid of Array.isArray(entry.objectives_captured_this_turn) ? entry.objectives_captured_this_turn as string[] : []) {
+            if (objectivesTargeted.includes(osid)) {
+                loggedCaptureSet.add(osid);
+            }
+        }
+    }
+    const objectivesLoggedCaptured = objectivesTargeted.filter((osid) => loggedCaptureSet.has(osid));
+    const objectivesHeldWithoutLoggedCapture = objectivesCaptured.filter((osid) => !loggedCaptureSet.has(osid));
+    const totalAttacks = typeof aar.total_attacks === 'number' ? aar.total_attacks : 0;
+
+    if (objectivesCaptured.length === 0) return 'no_objectives_held';
+    if (objectivesHeldWithoutLoggedCapture.length === 0) return 'logged_capture';
+    if (objectivesLoggedCaptured.length === 0) return totalAttacks === 0 ? 'held_without_logged_attack' : 'held_without_logged_capture';
+    return 'mixed';
+}
+
 function deriveOperationHistory(state: any): LoadedGameState['operationHistory'] {
     const history = state.operation_history as Array<Record<string, unknown>> | undefined;
     if (!history || !Array.isArray(history) || history.length === 0) return undefined;
@@ -1888,6 +1913,14 @@ function deriveOperationHistory(state: any): LoadedGameState['operationHistory']
         const ed = aar.equipment_destroyed as { tanks: number; artillery: number } ?? { tanks: 0, artillery: 0 };
         const ec = aar.equipment_captured as { tanks: number; artillery: number } ?? { tanks: 0, artillery: 0 };
         const grade = aar.grade as { stars: number; verdict: string; factors: Record<string, number> } ?? { stars: 1, verdict: 'Unknown', factors: {} };
+        const objectivesTargeted = (aar.objectives_targeted ?? []) as string[];
+        const objectivesCaptured = (aar.objectives_captured ?? []) as string[];
+        const objectivesLoggedCaptured = Array.isArray(aar.objectives_logged_captured)
+            ? aar.objectives_logged_captured as string[]
+            : [];
+        const objectivesHeldWithoutLoggedCapture = Array.isArray(aar.objectives_held_without_logged_capture)
+            ? aar.objectives_held_without_logged_capture as string[]
+            : objectivesCaptured.filter((osid) => !objectivesLoggedCaptured.includes(osid));
         const weeklyLog = (aar.weekly_log as Array<Record<string, unknown>> ?? []).map((entry: Record<string, unknown>) => ({
             turn: entry.turn as number,
             phase: entry.phase as string,
@@ -1908,8 +1941,11 @@ function deriveOperationHistory(state: any): LoadedGameState['operationHistory']
             outcome: aar.outcome as string,
             commander_name: aar.commander_name as string | undefined,
             commander_rank: aar.commander_rank as string | undefined,
-            objectives_targeted: (aar.objectives_targeted ?? []) as string[],
-            objectives_captured: (aar.objectives_captured ?? []) as string[],
+            objectives_targeted: objectivesTargeted,
+            objectives_logged_captured: objectivesLoggedCaptured,
+            objectives_held_without_logged_capture: objectivesHeldWithoutLoggedCapture,
+            capture_provenance: deriveOperationCaptureProvenance(aar),
+            objectives_captured: objectivesCaptured,
             total_attacks: aar.total_attacks as number,
             casualties_suffered: cs,
             casualties_inflicted: ci,

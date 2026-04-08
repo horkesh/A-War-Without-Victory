@@ -56,6 +56,14 @@ const NOTABLE_EVENT_LABEL: Record<string, string> = {
     heavy_losses: 'Heavy Losses',
 };
 
+const CAPTURE_PROVENANCE_LABEL: Record<string, string | null> = {
+    no_objectives_held: null,
+    logged_capture: null,
+    held_without_logged_capture: 'Objectives were held at finalization but never logged as captured during this operation.',
+    held_without_logged_attack: 'Objectives were held at finalization without any logged attacks. This record shows final control, not confirmed combat capture.',
+    mixed: 'Some objectives were logged during the operation; others were only held at finalization.',
+};
+
 // --- Types ---
 type CompletedOp = NonNullable<LoadedGameState['operationHistory']>[number];
 type ActiveOp = NonNullable<LoadedGameState['activeOperations']>[number];
@@ -159,6 +167,7 @@ function CompletedOpCard({
     const objRate = op.objectives_targeted.length > 0
         ? `${op.objectives_captured.length}/${op.objectives_targeted.length}`
         : '0/0';
+    const captureProvenanceNotice = CAPTURE_PROVENANCE_LABEL[op.capture_provenance ?? 'no_objectives_held'];
 
     return (
         <div className="border border-panel-border/50 rounded bg-panel-card/50 mb-2">
@@ -179,7 +188,7 @@ function CompletedOpCard({
                             </div>
                         )}
                         <div className="text-[9px] text-text-muted">
-                            {corpsName} | W{op.started_turn}-W{op.ended_turn} ({op.duration_turns}w) | Obj {objRate}
+                            {corpsName} | W{op.started_turn}-W{op.ended_turn} ({op.duration_turns}w) | Held at end {objRate}
                         </div>
                     </div>
                     <div className="flex flex-col items-end shrink-0 gap-0.5">
@@ -275,21 +284,39 @@ function CompletedOpCard({
                         </div>
                     )}
 
+                    {captureProvenanceNotice && (
+                        <div className="text-[9px] text-amber-300/80 border-t border-panel-border/30 pt-1.5">
+                            <span className="uppercase font-bold text-amber-300">AAR provenance: </span>
+                            {captureProvenanceNotice}
+                        </div>
+                    )}
+
                     {/* Objectives */}
                     {op.objectives_targeted.length > 0 && (
                         <div>
-                            <div className="text-[9px] uppercase tracking-wide text-text-secondary mb-0.5">Objectives</div>
+                            <div className="text-[9px] uppercase tracking-wide text-text-secondary mb-0.5">Objectives Held at End</div>
                             <div className="space-y-0.5">
                                 {op.objectives_targeted.map(osid => {
-                                    const captured = op.objectives_captured.includes(osid);
+                                    const heldAtEnd = op.objectives_captured.includes(osid);
+                                    const loggedDuringOperation = op.objectives_logged_captured?.includes(osid) ?? false;
                                     return (
                                         <div key={osid} className="text-[10px] flex items-center gap-1.5">
-                                            <span className={captured ? 'text-green-400' : 'text-red-400'}>{captured ? '\u2713' : '\u2717'}</span>
+                                            <span className={heldAtEnd ? (loggedDuringOperation ? 'text-green-400' : 'text-amber-300') : 'text-red-400'}>
+                                                {heldAtEnd ? (loggedDuringOperation ? '\u2713' : '\u25cf') : '\u2717'}
+                                            </span>
                                             <span className="text-text-primary capitalize">{getOsidDisplayName(osid, osidDisplayNames)}</span>
+                                            {heldAtEnd && !loggedDuringOperation && (
+                                                <span className="text-[9px] text-amber-300/80 uppercase tracking-wide">Held at end</span>
+                                            )}
                                         </div>
                                     );
                                 })}
                             </div>
+                            {(op.objectives_logged_captured?.length ?? 0) > 0 && (
+                                <div className="mt-1 text-[9px] text-text-muted">
+                                    Logged during operation: {op.objectives_logged_captured!.map((osid) => getOsidDisplayName(osid, osidDisplayNames)).join(', ')}
+                                </div>
+                            )}
                         </div>
                     )}
 

@@ -510,6 +510,8 @@ describe('player visibility helpers', () => {
     expect(sectorsSource).not.toContain('formatOsidLabel');
     expect(operationHistorySource).toContain('getOsidDisplayName');
     expect(operationHistorySource).toContain('getPlayerSafeMilitaryFactionName');
+    expect(operationHistorySource).toContain('capture_provenance');
+    expect(operationHistorySource).toContain('Held at end');
     expect(operationHistorySource).not.toContain('humanizeOsid');
   });
 

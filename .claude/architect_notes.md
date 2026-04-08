@@ -295,6 +295,11 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - Accepted push line: `desktop:package:probe` now requires the packaged operational and sandbox tactical-map windows to receive a deterministic `game-state-updated` payload through the real desktop subscription bridge, and it records that proof in deterministic `tactical_push_checks`.
 - Push-proof rule: arm subscriptions inside the real tracked tactical-map windows, then trigger the existing main-process broadcaster (`sendGameStateToRenderer(currentGameStateJson)`) rather than inventing a synthetic side channel. Probe accuracy depends on using the same window-ownership model the real broadcaster targets.
 
+**Closed: Operation AAR Provenance / Final-Control Honesty (2026-04-08)**
+- When a player-facing history surface summarizes outcomes from live control state, `held at finalization` must not masquerade as `captured by this operation`.
+- Accepted provenance line: `src/sim/combat/operation_aar.ts` now exports a narrower deterministic contract — what was logged during the operation (`objectives_logged_captured`), what was only held at the end (`objectives_held_without_logged_capture`), and a minimal `capture_provenance` summary the UI can speak honestly.
+- UI rule: completed-operation history may summarize final control, but when direct combat causality is unavailable it must label the outcome as `Held at end` and surface provenance notes rather than implying a direct capture claim.
+
 **Closed: Packaged Desktop Turn-Report Push Contract (2026-04-08)**
 - After proving packaged preload pull interaction and pushed game-state delivery, the next bounded runtime contract is the other real desktop push channel tactical-map windows consume after load.
 - Accepted turn-report line: `desktop:package:probe` now requires the packaged operational and sandbox tactical-map windows to receive a deterministic `turn-report-updated` payload through the real desktop subscription bridge, and it records that proof in deterministic `turn_report_push_checks`.

@@ -679,6 +679,9 @@ export interface LoadedGameState {
         commander_name?: string;
         commander_rank?: string;
         objectives_targeted: string[];
+        objectives_logged_captured?: string[];
+        objectives_held_without_logged_capture?: string[];
+        capture_provenance?: 'no_objectives_held' | 'logged_capture' | 'held_without_logged_capture' | 'held_without_logged_attack' | 'mixed';
         objectives_captured: string[];
         total_attacks: number;
         casualties_suffered: { killed: number; wounded: number };

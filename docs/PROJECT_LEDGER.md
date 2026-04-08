@@ -24851,3 +24851,12 @@ Main Staff HQ was Han Pijesak, not Rogatica. Tracked for OOB correction pass.
 - **Residual note:** `App.tsx`'s postMessage `handleShellHandoff` path still deserves a future gate before wiring `event-log` / `strategic-overview` into that channel, but it remains dormant today.
 - **Verification:** full Vitest reached 216/216 files and 3018/3018 tests; `npx.cmd tsc --noEmit -p tsconfig.json` and `npm.cmd run build` clean.
 - **Report:** `docs/40_reports/implemented/20260408_WARROOM_SHELL_DESK_MAP_CONTRACT.md`
+
+**[2026-04-08] v0.8-to-v0.9 Operation AAR Provenance / Final-Control Honesty COMPLETE**
+
+- **Summary:** Strengthened the completed-operation AAR contract so operation history now distinguishes objectives logged as captured during the operation from objectives merely held at finalization. `finalizeOperationAAR()` now persists `objectives_logged_captured`, `objectives_held_without_logged_capture`, and a deterministic `capture_provenance` summary.
+- **Truth seam removed:** `src/sim/combat/operation_aar.ts` now exports the narrower provenance split directly from the sim owner, `src/ui/map/data/GameStateAdapter.ts` preserves those fields for new saves and derives a backward-compatible fallback for older AAR blobs, and `src/ui/map/components/OperationHistoryPanel.tsx` now labels objective status as `Held at end` instead of implying that all final control was produced by direct operation capture.
+- **Ownership after change:** the sim-owned AAR export remains the canonical owner of completed-operation provenance truth; the adapter is a carrier with compatibility fallback; the history panel is presentation-only. No new combat-causality claim or duplicate UI heuristic was introduced.
+- **Hardening:** added targeted coverage in `tests/operation_aar.test.ts`, `tests/ui_map_game_state_adapter.test.ts`, and `tests/ui_player_visibility.test.ts` locking the held-vs-logged split, legacy fallback derivation, and player-facing visibility contract.
+- **Verification:** targeted AAR/UI tests passed (68/68 Vitest + 14/14 Node tests), full Vitest passed (216/216 files, 3020/3020 tests), `npx.cmd tsc --noEmit -p tsconfig.json` passed, and `npm.cmd run build` passed. Existing unrelated integration stderr/anomaly warnings remained non-blocking and unchanged.
+- **Report:** `docs/40_reports/implemented/20260408_V08TO09_OPERATION_AAR_PROVENANCE_FINAL_CONTROL_HONESTY.md`

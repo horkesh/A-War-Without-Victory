@@ -99,6 +99,12 @@ export interface OperationAAR {
     commander_name?: string;
     commander_rank?: string;
     objectives_targeted: string[];
+    /** Objectives explicitly logged as captured while the operation was active. */
+    objectives_logged_captured?: string[];
+    /** Objectives held at finalization that were never logged as captured during the operation. */
+    objectives_held_without_logged_capture?: string[];
+    /** Provenance summary for final objective control vs operation-time capture logs. */
+    capture_provenance?: 'no_objectives_held' | 'logged_capture' | 'held_without_logged_capture' | 'held_without_logged_attack' | 'mixed';
     objectives_captured: string[];
     duration_turns: number;
     total_attacks: number;
@@ -523,6 +529,25 @@ export function finalizeOperationAAR(
         totalEqCaptured.artillery += entry.equipment_captured.artillery;
     }
 
+    const loggedCaptureSet = new Set<string>();
+    for (const entry of log) {
+        for (const osid of entry.objectives_captured_this_turn ?? []) {
+            if (objectives.includes(osid)) {
+                loggedCaptureSet.add(osid);
+            }
+        }
+    }
+    const objectivesLoggedCaptured = objectives.filter((osid) => loggedCaptureSet.has(osid));
+    const objectivesHeldWithoutLoggedCapture = capturedObjectives.filter((osid) => !loggedCaptureSet.has(osid));
+    const captureProvenance: NonNullable<OperationAAR['capture_provenance']> =
+        capturedObjectives.length === 0
+            ? 'no_objectives_held'
+            : objectivesHeldWithoutLoggedCapture.length === 0
+                ? 'logged_capture'
+                : objectivesLoggedCaptured.length === 0
+                    ? (totalAttacks === 0 ? 'held_without_logged_attack' : 'held_without_logged_capture')
+                    : 'mixed';
+
     // 6. Compute final_strength from participating brigades' current personnel
     let finalStrength = 0;
     for (const bdeId of op.participating_brigades) {
@@ -628,6 +653,9 @@ export function finalizeOperationAAR(
         ended_turn: state.meta.turn,
         outcome,
         objectives_targeted: objectives,
+        objectives_logged_captured: objectivesLoggedCaptured,
+        objectives_held_without_logged_capture: objectivesHeldWithoutLoggedCapture,
+        capture_provenance: captureProvenance,
         objectives_captured: capturedObjectives,
         duration_turns: durationTurns,
         total_attacks: totalAttacks,

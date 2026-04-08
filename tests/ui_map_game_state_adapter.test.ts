@@ -332,8 +332,8 @@ test('parseGameState scopes player-facing operations, operation history, active 
         ],
   } as any,
   operation_history: [
-        { operation_id: 'own_hist', operation_name: 'Own Historic Op', corps_id: 'arbih_3rd_corps', faction: 'RBiH', started_turn: 1, ended_turn: 2, outcome: 'success', objectives_targeted: [], objectives_captured: [], total_attacks: 1, casualties_suffered: { killed: 0, wounded: 0 }, casualties_inflicted: { killed: 0, wounded: 0 }, equipment_lost: { tanks: 0, artillery: 0 }, equipment_destroyed: { tanks: 0, artillery: 0 }, equipment_captured: { tanks: 0, artillery: 0 }, grade: { stars: 2, verdict: 'solid', factors: {} }, duration_turns: 1, weekly_log: [] },
-        { operation_id: 'enemy_hist', operation_name: 'Enemy Historic Op', corps_id: 'vrs_1st_krajina', faction: 'RS', started_turn: 1, ended_turn: 2, outcome: 'success', objectives_targeted: [], objectives_captured: [], total_attacks: 1, casualties_suffered: { killed: 0, wounded: 0 }, casualties_inflicted: { killed: 0, wounded: 0 }, equipment_lost: { tanks: 0, artillery: 0 }, equipment_destroyed: { tanks: 0, artillery: 0 }, equipment_captured: { tanks: 0, artillery: 0 }, grade: { stars: 2, verdict: 'solid', factors: {} }, duration_turns: 1, weekly_log: [] },
+        { operation_id: 'own_hist', operation_name: 'Own Historic Op', corps_id: 'arbih_3rd_corps', faction: 'RBiH', started_turn: 1, ended_turn: 2, outcome: 'success', objectives_targeted: [], objectives_captured: [], objectives_logged_captured: [], objectives_held_without_logged_capture: [], capture_provenance: 'no_objectives_held', total_attacks: 1, casualties_suffered: { killed: 0, wounded: 0 }, casualties_inflicted: { killed: 0, wounded: 0 }, equipment_lost: { tanks: 0, artillery: 0 }, equipment_destroyed: { tanks: 0, artillery: 0 }, equipment_captured: { tanks: 0, artillery: 0 }, grade: { stars: 2, verdict: 'solid', factors: {} }, duration_turns: 1, weekly_log: [] },
+        { operation_id: 'enemy_hist', operation_name: 'Enemy Historic Op', corps_id: 'vrs_1st_krajina', faction: 'RS', started_turn: 1, ended_turn: 2, outcome: 'success', objectives_targeted: [], objectives_captured: [], objectives_logged_captured: [], objectives_held_without_logged_capture: [], capture_provenance: 'no_objectives_held', total_attacks: 1, casualties_suffered: { killed: 0, wounded: 0 }, casualties_inflicted: { killed: 0, wounded: 0 }, equipment_lost: { tanks: 0, artillery: 0 }, equipment_destroyed: { tanks: 0, artillery: 0 }, equipment_captured: { tanks: 0, artillery: 0 }, grade: { stars: 2, verdict: 'solid', factors: {} }, duration_turns: 1, weekly_log: [] },
     ] as any,
   political: {
     political_controllers: {}
@@ -344,6 +344,42 @@ test('parseGameState scopes player-facing operations, operation history, active 
     assert.deepEqual(parsed.activeOperations?.map((operation) => operation.operation_name), ['Own Op']);
     assert.deepEqual(parsed.operationHistory?.map((operation) => operation.operation_name), ['Own Historic Op']);
     assert.deepEqual(parsed.pendingReserveRequests?.map((request) => request.request_id), ['req_own']);
+    assert.equal(parsed.operationHistory?.[0]?.capture_provenance, 'no_objectives_held');
+});
+
+test('parseGameState derives legacy AAR provenance when new provenance fields are absent', () => {
+    const parsed = parseGameState({
+        meta: { turn: 9, phase: 'war', player_faction: 'RBiH' },
+        military: { formations: {} } as any,
+        operation_history: [
+            {
+                operation_id: 'legacy_hist',
+                operation_name: 'Legacy Historic Op',
+                corps_id: 'arbih_3rd_corps',
+                faction: 'RBiH',
+                started_turn: 1,
+                ended_turn: 2,
+                outcome: 'success',
+                objectives_targeted: ['osid_a', 'osid_b'],
+                objectives_captured: ['osid_a', 'osid_b'],
+                total_attacks: 0,
+                casualties_suffered: { killed: 0, wounded: 0 },
+                casualties_inflicted: { killed: 0, wounded: 0 },
+                equipment_lost: { tanks: 0, artillery: 0 },
+                equipment_destroyed: { tanks: 0, artillery: 0 },
+                equipment_captured: { tanks: 0, artillery: 0 },
+                grade: { stars: 2, verdict: 'solid', factors: {} },
+                duration_turns: 1,
+                weekly_log: [],
+            },
+        ] as any,
+        political: {
+            political_controllers: {},
+        } as any,
+    });
+
+    assert.equal(parsed.operationHistory?.[0]?.capture_provenance, 'held_without_logged_attack');
+    assert.deepEqual(parsed.operationHistory?.[0]?.objectives_held_without_logged_capture, ['osid_a', 'osid_b']);
 });
 
     const operation = parsed.operations?.[0];

@@ -1097,6 +1097,84 @@ describe('finalizeOperationAAR', () => {
         expect(aar.equipment_captured.artillery).toBe(0);
     });
 
+    it('records logged capture provenance separately from final held objectives', () => {
+        const op = makeFinalizableOp({
+            objectives: ['op:brcko:brcko_1', 'op:brcko:brcko_2'],
+            weekly_log: [
+                {
+                    turn: 6,
+                    phase: 'execution',
+                    attacks_this_turn: 2,
+                    objectives_captured_this_turn: ['op:brcko:brcko_1'],
+                    objectives_lost_this_turn: [],
+                    casualties_suffered: { killed: 0, wounded: 0 },
+                    casualties_inflicted: { killed: 0, wounded: 0 },
+                    equipment_lost: { tanks: 0, artillery: 0 },
+                    equipment_destroyed: { tanks: 0, artillery: 0 },
+                    equipment_captured: { tanks: 0, artillery: 0 },
+                    brigade_count: 2,
+                    momentum: 1,
+                    notable_events: [],
+                },
+            ],
+        });
+        const state = makeFinalizeState(
+            { corps_1kr: op },
+            {
+                bde_1: { personnel: 1300, faction: 'RS', status: 'active' },
+                bde_2: { personnel: 1200, faction: 'RS', status: 'active' },
+            },
+            { 'op:brcko:brcko_1': 'RS', 'op:brcko:brcko_2': 'RS' },
+        );
+
+        finalizeOperationAAR(state, 'corps_1kr', op);
+
+        const aar: OperationAAR = state.operation_history[0];
+        expect(aar.objectives_captured).toEqual(['op:brcko:brcko_1', 'op:brcko:brcko_2']);
+        expect(aar.objectives_logged_captured).toEqual(['op:brcko:brcko_1']);
+        expect(aar.objectives_held_without_logged_capture).toEqual(['op:brcko:brcko_2']);
+        expect(aar.capture_provenance).toBe('mixed');
+    });
+
+    it('marks held objectives with zero logged attacks as held_without_logged_attack provenance', () => {
+        const op = makeFinalizableOp({
+            objectives: ['op:visegrad:center'],
+            weekly_log: [
+                {
+                    turn: 6,
+                    phase: 'planning',
+                    attacks_this_turn: 0,
+                    objectives_captured_this_turn: [],
+                    objectives_lost_this_turn: [],
+                    casualties_suffered: { killed: 0, wounded: 0 },
+                    casualties_inflicted: { killed: 0, wounded: 0 },
+                    equipment_lost: { tanks: 0, artillery: 0 },
+                    equipment_destroyed: { tanks: 0, artillery: 0 },
+                    equipment_captured: { tanks: 0, artillery: 0 },
+                    brigade_count: 2,
+                    momentum: 0,
+                    notable_events: [],
+                },
+            ],
+        });
+        const state = makeFinalizeState(
+            { corps_1kr: op },
+            {
+                bde_1: { personnel: 1300, faction: 'RS', status: 'active' },
+                bde_2: { personnel: 1200, faction: 'RS', status: 'active' },
+            },
+            { 'op:visegrad:center': 'RS' },
+        );
+
+        finalizeOperationAAR(state, 'corps_1kr', op);
+
+        const aar: OperationAAR = state.operation_history[0];
+        expect(aar.total_attacks).toBe(0);
+        expect(aar.objectives_logged_captured).toEqual([]);
+        expect(aar.objectives_held_without_logged_capture).toEqual(['op:visegrad:center']);
+        expect(aar.capture_provenance).toBe('held_without_logged_attack');
+    });
+
     it('builds axis_summaries for multi-axis ops', () => {
         const op = makeFinalizableOp({
             objectives: undefined,
