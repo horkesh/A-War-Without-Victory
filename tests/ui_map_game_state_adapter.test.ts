@@ -347,6 +347,63 @@ test('parseGameState scopes player-facing operations, operation history, active 
     assert.equal(parsed.operationHistory?.[0]?.capture_provenance, 'no_objectives_held');
 });
 
+test('parseGameState derives presidential review queue counts from pending military review owners', () => {
+    const parsed = parseGameState({
+        meta: { turn: 12, phase: 'war', player_faction: 'RBiH' },
+        military: {
+            formations: {
+                arbih_3rd_corps: { id: 'arbih_3rd_corps', faction: 'RBiH', kind: 'corps', status: 'active', name: '3rd Corps', personnel: 0 },
+            },
+            named_officer_data: [
+                { id: 'officer_new', name: 'New Officer', competence: 3, aggressiveness: 2, defensive_skill: 4 },
+                { id: 'officer_current', name: 'Current Commander', competence: 2, aggressiveness: 3, defensive_skill: 2 },
+            ],
+            pending_officer_events: [
+                {
+                    event_id: 'evt-new',
+                    type: 'officer_available',
+                    faction: 'RBiH',
+                    turn: 12,
+                    officer_id: 'officer_new',
+                    acknowledged: false,
+                },
+                {
+                    event_id: 'evt-refused',
+                    type: 'order_refused',
+                    faction: 'RBiH',
+                    turn: 12,
+                    officer_id: 'officer_current',
+                    corps_id: 'arbih_3rd_corps',
+                    acknowledged: false,
+                    overridable: true,
+                },
+            ],
+            pending_event_decisions: [
+                {
+                    event_id: 'decision-1',
+                    event_title: 'Foreign envoy demands response',
+                    turn_fired: 12,
+                    faction: 'RBiH',
+                    response_options: [
+                        { id: 'accept', label: 'Accept', effects: [] },
+                    ],
+                },
+            ],
+        } as any,
+        political: {
+            political_controllers: {},
+        } as any,
+    });
+
+    assert.deepEqual(parsed.presidentialReviewQueue, {
+        pendingCount: 3,
+        criticalCount: 2,
+        eventDecisionCount: 1,
+        commandInterpretationCount: 1,
+        personnelDirectiveCount: 1,
+    });
+});
+
 test('parseGameState derives legacy AAR provenance when new provenance fields are absent', () => {
     const parsed = parseGameState({
         meta: { turn: 9, phase: 'war', player_faction: 'RBiH' },

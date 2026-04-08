@@ -670,9 +670,8 @@ function App() {
     >
       <MapContainer />
       <PresidentialToolbar
-        pendingDecisions={loadedGameState?.pendingEventDecisions?.length ?? 0}
+        pendingReviews={loadedGameState?.presidentialReviewQueue?.pendingCount ?? 0}
         pressureWarning={loadedGameState?.pressureWarning ?? false}
-        pendingOfficerEvents={Boolean(loadedGameState?.pendingOfficerEvents?.length)}
         onOpenSummary={openSummary}
         onOpenRecords={() => openArmyHQRecords('aar')}
         onOpenOpsHistory={() => useGameStore.getState().setIsOperationsPanelOpen(true)}

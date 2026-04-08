@@ -383,6 +383,14 @@ export interface CommandBriefingView {
     items: CommandBriefingItemView[];
 }
 
+export interface PresidentialReviewQueueView {
+    pendingCount: number;
+    criticalCount: number;
+    eventDecisionCount: number;
+    commandInterpretationCount: number;
+    personnelDirectiveCount: number;
+}
+
 export interface AttackOrderView {
     brigadeId: string;
     targetSettlementId: string;
@@ -663,6 +671,8 @@ export interface LoadedGameState {
     commandBriefing?: CommandBriefingView;
     /** Canonical operational SITREP packet shared with Warroom reporting surfaces. */
     operationalSitrep?: OperationalSitrepView;
+    /** Canonical Army HQ / presidential military review queue summary derived from pending review owners. */
+    presidentialReviewQueue?: PresidentialReviewQueueView;
     /** Most recent turn after-action report (null before first turn is advanced). */
     latestTurnSummary: import('../../../state/turn_summary.js').TurnSummary | null;
     /** All turn summaries (for Chronicle timeline). */

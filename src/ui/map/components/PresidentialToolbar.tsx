@@ -22,7 +22,6 @@ import { loadLatestRunSaveAsText, loadRunFinalSaveAsText } from '../data/DataLoa
 import { getArmyCrest, getArmyName } from '../utils/factionAssets';
 import { formatTurnLabel } from '../utils/formatters';
 import { shouldShowWarroomReturn, isEmbeddedTacticalMap } from '../utils/warroomReturn';
-import { OfficerEventBadge } from './OfficerEventBadge';
 
 /** Command Authority gauge — shows the president's override resource. Level 3 actions deplete this. */
 function CommandAuthorityGauge({ current, max }: { current: number; max: number }) {
@@ -44,12 +43,10 @@ function CommandAuthorityGauge({ current, max }: { current: number; max: number 
 }
 
 interface PresidentialToolbarProps {
-    /** Pending event decisions count (from loadedGameState). */
-    pendingDecisions: number;
+    /** Canonical pending military review count (from presidentialReviewQueue). */
+    pendingReviews: number;
     /** Whether any event has readiness > 50% of threshold. */
     pressureWarning: boolean;
-    /** Pending officer events. */
-    pendingOfficerEvents: boolean;
     onOpenSummary?: () => void;
     onOpenRecords?: () => void;
     onOpenOpsHistory?: () => void;
@@ -58,9 +55,8 @@ interface PresidentialToolbarProps {
 }
 
 export function PresidentialToolbar({
-    pendingDecisions,
+    pendingReviews,
     pressureWarning,
-    pendingOfficerEvents,
     onOpenSummary,
     onOpenRecords,
     onOpenOpsHistory,
@@ -100,7 +96,7 @@ export function PresidentialToolbar({
         setArmyHQOpen(true);
     }, [playerFaction, setSelectedArmyId, setArmyHQOpen]);
 
-    const hasAlerts = pendingDecisions > 0 || pressureWarning || pendingOfficerEvents;
+    const hasAlerts = pendingReviews > 0 || pressureWarning;
 
     // Dev tools state
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -228,18 +224,16 @@ export function PresidentialToolbar({
                 {/* CENTER: Alert badges (crest is separate floating element below) */}
                 <div className="flex items-center gap-4">
                     {/* Left alert: Pending decisions */}
-                    {pendingDecisions > 0 && (
+                    {pendingReviews > 0 && (
                         <button
                             onClick={handleOpenHQ}
                             className="flex items-center gap-1.5 px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-wide bg-red-900/30 text-red-400 border border-red-500/30 rounded animate-pulse hover:bg-red-900/50 transition-colors"
+                            title="Open Army HQ presidential attention queue"
                         >
                             <span className="w-2 h-2 rounded-full bg-red-500" />
-                            {pendingDecisions} {pendingDecisions === 1 ? 'DECISION' : 'DECISIONS'}
+                            {pendingReviews} {pendingReviews === 1 ? 'REVIEW' : 'REVIEWS'}
                         </button>
                     )}
-
-                    {/* Officer badge */}
-                    {pendingOfficerEvents && <OfficerEventBadge />}
 
                     {/* Spacer for crest area */}
                     <div className="w-24" />

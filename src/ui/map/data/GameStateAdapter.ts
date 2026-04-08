@@ -1658,6 +1658,12 @@ export function parseGameState(json: unknown): LoadedGameState {
         && Array.isArray((state as any).factions)
         ? getOperationalSitrepView(state as GameState, playerFaction as any)
         : undefined;
+    const pendingOfficerEvents = derivePendingOfficerEvents(state);
+    const pendingEventDecisions = derivePendingEventDecisions(state);
+    const presidentialReviewQueue = derivePresidentialReviewQueue({
+        pendingOfficerEvents,
+        pendingEventDecisions,
+    });
 
     return {
         label, turn, phase,
@@ -1739,10 +1745,11 @@ export function parseGameState(json: unknown): LoadedGameState {
             })).filter((request) => !playerFaction || request.faction === playerFaction))
             : undefined,
         eliteBrigadeTracker: deriveEliteBrigadeTracker(state),
-        pendingOfficerEvents: derivePendingOfficerEvents(state),
+        pendingOfficerEvents,
         // Event system (v0.4.1 Phase 5)
         firedEvents: deriveFiredEvents(state),
-        pendingEventDecisions: derivePendingEventDecisions(state),
+        pendingEventDecisions,
+        presidentialReviewQueue,
         pendingPeacePlan: derivePendingPeacePlan(state),
         pendingDayton: derivePendingDayton(state),
         negotiationCapital: deriveNegotiationCapital(state),
@@ -2223,6 +2230,37 @@ function derivePendingEventDecisions(state: any): LoadedGameState['pendingEventD
             }))
             : [],
     }));
+}
+
+function derivePresidentialReviewQueue({
+    pendingOfficerEvents,
+    pendingEventDecisions,
+}: {
+    pendingOfficerEvents: LoadedGameState['pendingOfficerEvents'];
+    pendingEventDecisions: LoadedGameState['pendingEventDecisions'];
+}): LoadedGameState['presidentialReviewQueue'] {
+    const eventDecisionCount = pendingEventDecisions?.length ?? 0;
+    const commandInterpretationCount = (pendingOfficerEvents ?? []).filter((event) =>
+        event.type === 'order_modified' || event.type === 'order_pushback' || event.type === 'order_refused',
+    ).length;
+    const personnelDirectiveCount = (pendingOfficerEvents ?? []).filter((event) =>
+        event.type === 'officer_available' || event.type === 'replacement_suggested' || event.type === 'officer_relieved',
+    ).length;
+    const pendingCount = eventDecisionCount + commandInterpretationCount + personnelDirectiveCount;
+
+    if (pendingCount === 0) return undefined;
+
+    const criticalCount =
+        eventDecisionCount +
+        (pendingOfficerEvents ?? []).filter((event) => event.type === 'order_refused').length;
+
+    return {
+        pendingCount,
+        criticalCount,
+        eventDecisionCount,
+        commandInterpretationCount,
+        personnelDirectiveCount,
+    };
 }
 
 function deriveNegotiationCapital(state: any): LoadedGameState['negotiationCapital'] {

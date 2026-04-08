@@ -16,6 +16,7 @@ import { getFactionArmyCommander } from '../../utils/officerUtils';
 import { OfficerProfile } from '../OfficerProfile';
 import { ArmyHQCorpsCard } from './ArmyHQCorpsCard';
 import { SituationBriefing, type BriefingTarget } from './SituationBriefing';
+import { PresidentialAttentionPanel } from './PresidentialAttentionPanel';
 import { StrategicPosition } from './StrategicPosition';
 import { ChiefOfStaffBriefing } from './ChiefOfStaffBriefing';
 import { ExhaustionClock } from './ExhaustionClock';
@@ -368,8 +369,15 @@ export function ArmyHQModal() {
                                 </div>
                             )}
 
+                            {!expandedCorpsId && (
+                                <PresidentialAttentionPanel
+                                    gameState={state}
+                                    playerFaction={faction}
+                                />
+                            )}
+
                             {/* Situation Briefing */}
-                            {!expandedCorpsId && data.briefingItems.length > 0 && (
+                            {!expandedCorpsId && (
                                 <SituationBriefing
                                     items={data.briefingItems}
                                     onNavigate={handleBriefingNavigate}
