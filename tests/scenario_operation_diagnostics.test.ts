@@ -258,6 +258,41 @@ describe('combat causality diagnostics', () => {
         assert.equal(diagnostics[0]!.invalid_for_combat_calibration, false);
     });
 
+    it('does not flag an execution lull after the operation already logged earlier attempts', () => {
+        const state = makeState();
+        state.military.corps_command!['corps_1']!.active_operations = [{
+            ...state.military.corps_command!['corps_1']!.active_operations[0],
+            attack_attempt_count: 3,
+            objective_capture_count: 2,
+            current_objective_index: 2,
+            objectives: ['op:enemy:obj0', 'op:enemy:obj1', 'op:enemy:obj2'],
+        }] as any;
+
+        const diagnostics = buildOperationCombatDiagnostics(
+            state,
+            makeOrderSnapshot({}),
+            makeOsidReport([])
+        );
+
+        assert.equal(diagnostics.length, 1);
+        assert.equal(diagnostics[0]!.attack_attempt_count, 0);
+        assert.equal(diagnostics[0]!.objective_attempt_count, 3);
+        assert.deepEqual(diagnostics[0]!.invalidation_reasons, []);
+    });
+
+    it('counts eligible attackers only from the operation participants, not the whole corps', () => {
+        const state = makeState();
+        const diagnostics = buildOperationCombatDiagnostics(
+            state,
+            makeOrderSnapshot({ stray: 'op:enemy:obj1' }, {}, { corps_1: 1 }),
+            makeOsidReport([])
+        );
+
+        assert.equal(diagnostics.length, 1);
+        assert.equal(diagnostics[0]!.eligible_attacker_count, 0);
+        assert.ok(diagnostics[0]!.invalidation_reasons.includes('execution_without_eligible_attackers'));
+    });
+
     it('invalidates summary when attack orders resolve to zero battles', () => {
         const diagnostics = buildOperationCombatDiagnostics(
             makeState(),

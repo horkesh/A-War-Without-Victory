@@ -25088,3 +25088,46 @@ Main Staff HQ was Han Pijesak, not Rogatica. Tracked for OOB correction pass.
 - **Verification:** targeted operation-truth regressions, `npm run typecheck`, `tests/scenario_operation_diagnostics.test.ts`, `tests/scenario_vrs_operation_proof.test.ts`, `npm run recovery:check`, and a fresh `npm run sim:scenario:run:40w` all passed.
 - **Residual note:** the fresh `n1371` scenario still shows dead-on-arrival or no-attempt operations in live play; that is now an execution-quality / launch-quality seam, not the older participant-truth seam.
 - **Report:** `docs/40_reports/implemented/20260408_OPERATION_TRUTH_RECONCILIATION_AND_AXIS_INTEGRITY_HARDENING.md`
+## [2026-04-08] fix(engine): Harden operation planning, campaign orchestration, and historical-op injection to A+
+
+**Type:** Engine hardening
+**Files:** `src/scenario/combat_causality.ts`, `src/sim/combat/bot_brigade_ai_osid.ts`, `src/sim/combat/sector_offensive.ts`, `src/sim/combat/triggered_operations.ts`, `tests/scenario_operation_diagnostics.test.ts`, `tests/sector_offensive_idle_recovery.test.ts`, `tests/triggered_operations.test.ts`
+**Status:** VERIFIED - targeted tests, fresh 52-week + 56-week runs, and recovery clean
+
+### Summary of changes
+
+1. **Operation-local causality authority** - `combat_causality.ts` now counts eligible attackers from the operation's own participating brigades and only invalidates execution-without-orders / execution-without-eligible cases when the operation has never logged prior objective attempts or captures. Cleanup turns are no longer misclassified as fake execution.
+
+2. **Planner/executor anti-conflict guard** - `bot_brigade_ai_osid.ts` now protects active execution-phase operation attackers from generic corps attack-share trimming and from RBiH warlord-friction shedding. Live operations are no longer silently starved by broad corps-level caps after they were legitimately born.
+
+3. **Probe birth honesty** - `sector_offensive.ts` now treats probes that miss their immediate launch window as `planning_invalidated` instead of letting them age into `no_logged_attempt`. Probe no-attempt exits are now classified as planning failures, not fake combat failures, and they no longer contaminate failed-objective history.
+
+4. **Triggered historical-op relevance** - `triggered_operations.ts` now skips triggered operations with no remaining enemy objectives before validation/injection, corrects Herzegovina Consolidation's stale brigade reference to `rs_bilea_brigade`, and requires Kotor Varos to have a live enemy objective instead of firing on a pure time gate.
+
+### Verification
+
+- `cmd /c npx tsx --test tests\\triggered_operations.test.ts`
+- `cmd /c npx vitest run tests\\scenario_operation_diagnostics.test.ts tests\\sector_offensive_idle_recovery.test.ts tests\\commander\\operation_emit_overlap_guards.test.ts`
+- `cmd /c npx tsc --noEmit`
+- `cmd /c npm run sim:scenario:run:default` -> `n1394`
+- `cmd /c npm run sim:scenario:run:56w` -> `n1393`
+- `cmd /c npm run recovery:check`
+
+### Final evidence
+
+- Fresh 52-week run `n1394`:
+  - `invalid_operation_count: 0`
+  - `zero_eligible_attacker_operation_count: 0`
+  - `recovery_without_logged_attempt_count: 0`
+  - `op_injection_warning_count: 0`
+- Fresh 56-week run `n1393`:
+  - `invalid_operation_count: 0`
+  - `zero_eligible_attacker_operation_count: 0`
+  - `recovery_without_logged_attempt_count: 0`
+  - no startup `[op-validation]` warnings in the captured run log
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260408_OPERATION_PLANNING_CAMPAIGN_ORCHESTRATION_HARDENING.md`
+
+---

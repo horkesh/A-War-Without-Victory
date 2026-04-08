@@ -23,8 +23,12 @@ import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 import { assignOperationCommander } from './officer_system.js';
-import { isEligibleOperationFormation } from '../../state/formation_constants.js';
-import { validateOpAtInjection, collectOpInjectionWarnings } from './operation_validation.js';
+import { isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
+import {
+    validateOpAtInjection,
+    collectOpInjectionWarnings,
+    hasBlockingOpInjectionWarnings,
+} from './operation_validation.js';
 import type { ValidatableOpDef } from './operation_validation.js';
 import {
     buildCorpsOperation,
@@ -32,6 +36,8 @@ import {
     hasActiveOperation,
     hasAvailableSlot,
 } from './corps_operation_helpers.js';
+
+const MIN_OPERATION_PARTICIPANTS = 2;
 
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -79,6 +85,21 @@ function corpsCompletedOp(state: GameState, corpsId: string, opName: string): bo
     const history = state.operation_history;
     if (!history) return false;
     return history.some(aar => aar.corps_id === corpsId && aar.operation_name === opName);
+}
+
+function hasEnemyObjective(
+    state: GameState,
+    faction: FactionId,
+    objectives: readonly string[],
+): boolean {
+    return objectives.some((osid) => {
+        const controller = getPoliticalControllerOSID(state, osid, undefined);
+        return controller !== null && controller !== faction;
+    });
+}
+
+function opStillHasEnemyObjectives(state: GameState, def: TriggeredOpDef): boolean {
+    return def.axes.some((axis) => hasEnemyObjective(state, def.faction, axis.objectives));
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -147,7 +168,7 @@ const TRIGGERED_OPS: TriggeredOpDef[] = [
         // planning_duration=3: rs_nevesinje_brigade (home krekovi_2, 1 hop from sopilja) needs
         // time to disengage from sector duties and march to staging. Previous value of 1 was
         // too tight — the brigade was often still at the front when execution began.
-        // rs_2nd_herzegovina_light_infantry (home korita/bileca) needs 3+ hops to reach sopilja.
+        // rs_bilea_brigade (home bileca_2) needs time to disengage and march into the southern Konjic staging area.
         planning_duration: 3,
         min_attack_outcome: 'repulsed' as const,
         trigger: (state, _turn) => {
@@ -184,7 +205,7 @@ const TRIGGERED_OPS: TriggeredOpDef[] = [
                 // glavaticevo_2 and ljuta are RS from turn 0 so stripped at execution.
                 // Historical: VRS Herzegovina maintained pressure on southern Konjic throughout 1992-93.
                 brigades: [
-                    'rs_2nd_herzegovina_light_infantry' as FormationId,
+                    'rs_bilea_brigade' as FormationId,
                 ],
                 objectives: [
                     'op:konjic:glavaticevo_2',  // RS waypoint (bijela_2-adjacent); stripped at execution
@@ -201,7 +222,11 @@ const TRIGGERED_OPS: TriggeredOpDef[] = [
         primary_corps: 'vrs_1st_krajina',
         staging_osid: 'op:kotor_varos:kotor_varos_2',
         planning_duration: 2,
-        trigger: (_state, turn) => turn >= 10,
+        trigger: (state, turn) => turn >= 10 && hasEnemyObjective(state, 'RS', [
+            'op:kotor_varos:kotor_varos_2',
+            'op:kotor_varos:vrbanjci_2',
+            'op:kotor_varos:prisocka_2',
+        ]),
         axes: [
             {
                 axis_id: 'kotor_varos_siege',
@@ -281,6 +306,7 @@ function buildOperation(
     turn: number,
 ): { op: CorpsOperation; corpsAxes: Map<string, OperationAxis[]> } | null {
     const formations = state.military.formations ?? {};
+    const movementState = state.military.brigade_movement_state ?? {};
 
     const builtAxes: OperationAxis[] = [];
     const allParticipating: FormationId[] = [];
@@ -290,7 +316,11 @@ function buildOperation(
         const axisBrigades = axisDef.brigades.filter((fid) => {
             const formation = formations[fid];
             if (!formation || getFormationCorpsId(formation) !== axisDef.corps) return false;
-            return isEligibleOperationFormation(formation);
+            if (!isEligibleOperationFormation(formation)) return false;
+            if ((formation.personnel ?? 0) < MIN_ATTACK_PERSONNEL) return false;
+            if ((formation.disrupted_turns ?? 0) > 0) return false;
+            if (movementState[fid]?.status === 'in_transit') return false;
+            return true;
         }).sort(strictCompare);
 
         if (axisBrigades.length === 0) continue;
@@ -320,6 +350,7 @@ function buildOperation(
     }
 
     if (builtAxes.length === 0) return null;
+    if (allParticipating.length < MIN_OPERATION_PARTICIPANTS) return null;
 
     const allObjectives = builtAxes.flatMap(a => a.objectives);
 
@@ -378,6 +409,11 @@ export function checkTriggeredOperations(state: GameState): string[] {
         }
         if (secondaryBlocked) continue;
 
+        // Skip stale offers that no longer have any enemy objectives to pursue.
+        // This keeps historical-op orchestration honest when the map state has
+        // already made an offer moot before its trigger date.
+        if (!opStillHasEnemyObjectives(state, def)) continue;
+
         // Validate before building
         const validatable: ValidatableOpDef = {
             name: def.name,
@@ -387,6 +423,7 @@ export function checkTriggeredOperations(state: GameState): string[] {
         };
         const trigWarnings = validateOpAtInjection(validatable, state, undefined, primaryCmd);
         collectOpInjectionWarnings(state, trigWarnings);
+        if (hasBlockingOpInjectionWarnings(trigWarnings)) continue;
 
         // Bot auto-accept: build and inject the operation
         const result = buildOperation(def, state, turn);

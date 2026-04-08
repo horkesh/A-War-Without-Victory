@@ -166,6 +166,7 @@ export function checkOrphanOperationBrigades(state: GameState): AnomalyReport[] 
     const reports: AnomalyReport[] = [];
     const formations = state.military.formations;
     const corpsCommand = state.military.corps_command ?? {};
+    const sectors = state.military.corps_front_sectors ?? {};
     const politicalControllers = state.political.political_controllers ?? {};
 
     // Load OSID adjacency graph
@@ -190,6 +191,9 @@ export function checkOrphanOperationBrigades(state: GameState): AnomalyReport[] 
     }
 
     // BFS through friendly territory from source to any target in targetSet.
+    // The final hop into the target may enter enemy-controlled territory because
+    // offensive objectives are expected to be enemy-held; only intermediate hops
+    // must remain in friendly territory.
     // Returns hop count or -1 if unreachable within MAX_ORPHAN_DISTANCE.
     function bfsFriendlyDistance(
         source: string,
@@ -211,13 +215,13 @@ export function checkOrphanOperationBrigades(state: GameState): AnomalyReport[] 
                     if (visited.has(n)) continue;
                     visited.add(n);
 
-                    // Only traverse friendly territory
-                    const controller = politicalControllers[n];
-                    if (controller !== friendlyFaction) continue;
-
                     if (targetSet.has(n)) {
                         return { distance: depth + 1, nearest: n };
                     }
+
+                    // Only traverse friendly territory
+                    const controller = politicalControllers[n];
+                    if (controller !== friendlyFaction) continue;
                     nextQueue.push({ osid: n, depth: depth + 1 });
                 }
             }
@@ -243,6 +247,15 @@ export function checkOrphanOperationBrigades(state: GameState): AnomalyReport[] 
             for (const axis of op.axes) {
                 if (axis.staging_osid) targetOsids.add(axis.staging_osid);
                 for (const obj of axis.objectives) targetOsids.add(obj);
+            }
+        }
+        if (op.sector_id) {
+            const anchoredSector = sectors[op.sector_id];
+            if (anchoredSector) {
+                for (const osid of anchoredSector.territory_osids ?? []) targetOsids.add(osid);
+                for (const subSegment of anchoredSector.sub_segments ?? []) {
+                    for (const osid of subSegment.friendly_osids ?? []) targetOsids.add(osid);
+                }
             }
         }
 

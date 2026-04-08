@@ -393,6 +393,7 @@ const EARLY_LAUNCH_COHESION_PENALTY = 15;
 const ALL_OUT_EXTRA_COHESION_COST = 1;
 const BOMBARDMENT_PREP_COST = 2;
 const FEINT_PLANNING_TURNS = 2;
+const PLANNING_INVALIDATION_GRACE_TURNS = 2;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Post-operation brigade release
@@ -496,6 +497,23 @@ export function getAllAxisBrigades(op: CorpsOperation): FormationId[] {
         }
     }
     return result.sort(strictCompare);
+}
+
+function getCurrentLaunchObjectives(op: CorpsOperation): string[] {
+    if (!isMultiAxis(op)) {
+        const currentObjective = op.objectives?.[op.current_objective_index ?? 0];
+        return currentObjective ? [currentObjective] : [];
+    }
+
+    const seen = new Set<string>();
+    const objectives: string[] = [];
+    for (const axis of op.axes!) {
+        const currentObjective = axis.objectives[axis.current_objective_index ?? 0];
+        if (!currentObjective || seen.has(currentObjective)) continue;
+        seen.add(currentObjective);
+        objectives.push(currentObjective);
+    }
+    return objectives;
 }
 
 /** Check if all axes are terminal (complete or stalled). */
@@ -701,22 +719,25 @@ function areParticipantsReadyForExecution(
     state: GameState,
     corpsId: FormationId,
     participatingBrigades: FormationId[],
-    stagingOsid: string | undefined,
+    _stagingOsid: string | undefined,
     objectives: string[]
 ): boolean {
     const objectiveApproachOsids = collectObjectiveApproachOsids(state, corpsId, objectives);
-    let activeParticipantCount = 0;
+    let eligibleParticipantCount = 0;
     for (const brigadeId of participatingBrigades) {
         const brigade = state.military.formations?.[brigadeId];
         if (!brigade || brigade.status !== 'active') continue;
+        if ((brigade.personnel ?? 0) < MIN_ATTACK_PERSONNEL) continue;
+        if ((brigade.disrupted_turns ?? 0) > 0) continue;
+        const movementState = state.military.brigade_movement_state?.[brigadeId];
+        if (movementState?.status === 'in_transit') continue;
         const location = brigade.location_osid;
         if (typeof location !== 'string' || location.length === 0) return false;
-        activeParticipantCount += 1;
-        if (location === stagingOsid) continue;
+        eligibleParticipantCount += 1;
         if (objectiveApproachOsids.has(location)) continue;
         return false;
     }
-    return activeParticipantCount > 0;
+    return eligibleParticipantCount > 0;
 }
 
 /**
@@ -728,6 +749,7 @@ function recordFailedObjectives(cmd: CorpsCommandState, op: CorpsOperation, turn
     if (op.recovery_reason === 'completed') return; // Success — no failure to record
     if (op.recovery_reason === 'probe_complete') return; // Probes gather intel — not a failure
     if (op.recovery_reason === 'political_blocked') return; // Truce/political block is not a failed assault
+    if (op.recovery_reason === 'planning_invalidated') return; // Never became an executable assault
 
     const failedOsids: string[] = [];
     if (isMultiAxis(op) && op.axes) {
@@ -764,6 +786,55 @@ function beginRecovery(op: CorpsOperation, turn: number, reason: CorpsOperation[
     }
 }
 
+function filterAxisPlanningObjectives(
+    state: GameState,
+    axis: OperationAxis,
+    faction: FactionId,
+): string[] {
+    return (axis.objectives ?? []).filter((osid) => {
+        const controller = getPoliticalControllerOSID(state, osid, undefined);
+        return controller !== null && controller !== faction;
+    });
+}
+
+function reconcilePlanningObjectives(
+    state: GameState,
+    corpsId: FormationId,
+    op: CorpsOperation,
+    faction: FactionId,
+): 'completed' | 'valid' | 'invalidated' {
+    if (isMultiAxis(op) && op.axes) {
+        const retainedAxes: OperationAxis[] = [];
+        const retainedObjectives: string[] = [];
+        for (const axis of op.axes) {
+            const filteredObjectives = filterAxisPlanningObjectives(state, axis, faction);
+            if (filteredObjectives.length === 0) continue;
+            axis.objectives = filteredObjectives;
+            axis.current_objective_index = Math.min(axis.current_objective_index ?? 0, filteredObjectives.length - 1);
+            retainedAxes.push(axis);
+            retainedObjectives.push(...filteredObjectives);
+        }
+        if (retainedAxes.length === 0) {
+            return (op.objectives ?? []).length > 0 ? 'completed' : 'invalidated';
+        }
+        op.axes = retainedAxes;
+        op.objectives = [...new Set(retainedObjectives)].sort(strictCompare);
+    } else {
+        const filteredObjectives = (op.objectives ?? []).filter((osid) => {
+            const controller = getPoliticalControllerOSID(state, osid, undefined);
+            return controller !== null && controller !== faction;
+        });
+        if (filteredObjectives.length === 0) {
+            return (op.objectives ?? []).length > 0 ? 'completed' : 'invalidated';
+        }
+        op.objectives = filteredObjectives;
+        op.current_objective_index = Math.min(op.current_objective_index ?? 0, filteredObjectives.length - 1);
+    }
+
+    const approachOsids = collectObjectiveApproachOsids(state, corpsId, getAllAxisObjectives(op));
+    return approachOsids.size > 0 ? 'valid' : 'invalidated';
+}
+
 function getRecoveryDuration(op: CorpsOperation): number {
     const objectiveCount = op.objectives?.length ?? 2;
     switch (op.recovery_reason) {
@@ -772,6 +843,7 @@ function getRecoveryDuration(op: CorpsOperation): number {
         case 'probe_complete':
         case 'brigade_attrition':
         case 'political_blocked':
+        case 'planning_invalidated':
             return 1;
         case 'completed':
             return Math.max(1, Math.ceil(objectiveCount / 2));
@@ -783,6 +855,9 @@ function getRecoveryDuration(op: CorpsOperation): number {
 }
 
 function getNoAttemptRecoveryReason(op: CorpsOperation): CorpsOperation['recovery_reason'] {
+    if (op.type === 'probe') {
+        return 'planning_invalidated';
+    }
     if (isMultiAxis(op)) {
         return sumAxesField(op.axes!, 'attack_attempt_count') > 0 ? 'max_failures' : 'no_logged_attempt';
     }
@@ -821,6 +896,7 @@ function getMultiAxisRecoveryDuration(op: CorpsOperation): number {
         case 'manual_termination':
         case 'probe_complete':
         case 'political_blocked':
+        case 'planning_invalidated':
             return 1;
         case 'completed':
             return Math.max(1, Math.ceil(maxLen / 2));
@@ -1002,7 +1078,7 @@ export function advanceSectorOffensives(
                     const anyAttempts = multiAxis
                         ? sumAxesField(op.axes!, 'attack_attempt_count') > 0
                         : (op.attack_attempt_count ?? 0) > 0;
-                    beginRecovery(op, turn, anyAttempts ? 'orphaned_sector' : 'no_logged_attempt', state);
+                    beginRecovery(op, turn, anyAttempts ? 'orphaned_sector' : getNoAttemptRecoveryReason(op), state);
                     continue;
                 }
             }
@@ -1120,14 +1196,35 @@ export function advanceSectorOffensives(
             const elapsed = turn - op.phase_started_turn;
             const planDuration = op.planning_duration
                 ?? (multiAxis ? computeMultiAxisPlanningDuration(op.axes!) : 1);
+            const planningObjectiveState = reconcilePlanningObjectives(state, corpsId, op, faction);
+            if (planningObjectiveState === 'completed') {
+                beginRecovery(op, turn, 'completed', state);
+                continue;
+            }
+            if (
+                planningObjectiveState === 'invalidated' &&
+                elapsed > planDuration + PLANNING_INVALIDATION_GRACE_TURNS
+            ) {
+                beginRecovery(op, turn, 'planning_invalidated', state);
+                continue;
+            }
             const stagedEarly = elapsed >= 1 && areParticipantsReadyForExecution(
                 state,
                 corpsId,
                 allBrigades,
                 op.staging_osid,
-                allObjectives
+                getCurrentLaunchObjectives(op),
             );
             const forcedLaunch = op.force_launch === true && elapsed >= 1;
+
+            // Probes are opportunistic recon-by-force, not queued mini-offensives.
+            // If the launch window closes and the brigade is still not execution-ready
+            // after one full planning turn, invalidate the plan instead of letting it
+            // drift into an execution/recovery no-attempt artifact.
+            if (op.type === 'probe' && elapsed >= 1 && !stagedEarly && !forcedLaunch) {
+                beginRecovery(op, turn, 'planning_invalidated', state);
+                continue;
+            }
 
             if (op.type === 'feint' && elapsed >= FEINT_PLANNING_TURNS) {
                 applyCohesionDelta(state, allBrigades, -5);
@@ -1145,6 +1242,19 @@ export function advanceSectorOffensives(
             if (preparationReady || elapsed > planDuration || stagedEarly || forcedLaunch) {
                 if (hasOnlyPoliticallyBlockedCurrentObjectives(state, corpsId, faction, op)) {
                     beginRecovery(op, turn, 'political_blocked', state);
+                    continue;
+                }
+                if (!forcedLaunch && !areParticipantsReadyForExecution(
+                    state,
+                    corpsId,
+                    allBrigades,
+                    op.staging_osid,
+                    getCurrentLaunchObjectives(op),
+                )) {
+                    if (elapsed <= planDuration + PLANNING_INVALIDATION_GRACE_TURNS) {
+                        continue;
+                    }
+                    beginRecovery(op, turn, 'planning_invalidated', state);
                     continue;
                 }
                 op.phase = 'execution';
@@ -1212,7 +1322,7 @@ export function advanceSectorOffensives(
             if ((op.attack_attempt_count ?? 0) === 0) {
                 const executionTurnsElapsed = turn - (op.phase_started_turn ?? turn);
                 if (executionTurnsElapsed >= MAX_EXECUTION_TURNS_ZERO_ATTACKS) {
-                    beginRecovery(op, turn, 'no_logged_attempt', state);
+                    beginRecovery(op, turn, getNoAttemptRecoveryReason(op), state);
                     continue;
                 }
             }
@@ -1700,7 +1810,7 @@ function updateLegacyFlatResults(
             const idleStallThreshold = op.type === 'probe' ? 1 : 4;
             if (!anyMoved && (op.attack_attempt_count ?? 0) === 0 && (op.idle_execution_turn_streak ?? 0) >= idleStallThreshold) {
                 op.movement_only_execution_turns = Math.max(1, op.movement_only_execution_turns ?? 0);
-                beginRecovery(op, turn, 'no_logged_attempt', state);
+                beginRecovery(op, turn, getNoAttemptRecoveryReason(op), state);
                 return;
             }
 
@@ -1708,7 +1818,7 @@ function updateLegacyFlatResults(
             // Happens when brigades can't reach objectives or fail probe thresholds.
             // Abort before wasting the entire command cycle.
             if ((op.movement_only_execution_turns ?? 0) >= MAX_MOVEMENT_ONLY_EXECUTION_TURNS) {
-                beginRecovery(op, turn, 'no_logged_attempt', state);
+                beginRecovery(op, turn, getNoAttemptRecoveryReason(op), state);
                 return;
             }
 

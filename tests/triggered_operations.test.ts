@@ -191,6 +191,19 @@ describe('checkTriggeredOperations', () => {
         assert.ok(injected.includes('Operation Kotor Varos'));
     });
 
+    it('does not inject Kotor Varos once every objective is already RS-controlled', () => {
+        const state = makeState(10);
+        state.political.political_controllers!['op:kotor_varos:kotor_varos_2'] = 'RS';
+        state.political.political_controllers!['op:kotor_varos:vrbanjci_2'] = 'RS';
+        state.political.political_controllers!['op:kotor_varos:prisocka_2'] = 'RS';
+
+        const injected = checkTriggeredOperations(state);
+
+        assert.ok(!injected.includes('Operation Kotor Varos'));
+        assert.equal(state.military.corps_command!['vrs_1st_krajina']!.active_operations.length, 0);
+        assert.deepEqual(state.military.op_injection_warnings ?? [], []);
+    });
+
     it('does not inject Kotor Varos before turn 10', () => {
         const state = makeState(9);
         const injected = checkTriggeredOperations(state);
@@ -251,5 +264,19 @@ describe('checkTriggeredOperations', () => {
         assert.ok(cerskaAxis);
         assert.ok(!cerskaAxis!.objectives.includes('op:srebrenica:brezovice_2'));
         assert.ok(cerskaAxis!.objectives.length > 0);
+    });
+
+    it('injects Herzegovina Consolidation without brigade-missing warnings once its chain is complete', () => {
+        const state = makeState(12);
+        state.operation_history = [
+            { corps_id: 'vrs_herzegovina', operation_name: 'Operation Visegrad' } as any,
+            { corps_id: 'vrs_herzegovina', operation_name: 'Operation Foca' } as any,
+        ];
+
+        const injected = checkTriggeredOperations(state);
+
+        assert.ok(injected.includes('Operation Herzegovina Consolidation'));
+        const warnings = state.military.op_injection_warnings ?? [];
+        assert.equal(warnings.some((warning: any) => warning.op_name === 'Operation Herzegovina Consolidation' && warning.check === 'brigade_missing'), false);
     });
 });

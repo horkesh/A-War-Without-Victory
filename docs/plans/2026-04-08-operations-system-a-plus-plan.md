@@ -117,3 +117,41 @@ Completed on 2026-04-08.
 
 ### Final judgment
 The operations / execution / combat-causality lane reached `A+` under this plan's success standard.
+
+## Phase 3: Upstream Planning / Orchestration Closure
+The execution core reached `A+`, but the adjacent planning/orchestration layer still needed one more pass so upstream content could not quietly degrade the clean runtime.
+
+### Remaining gap identified after Phase 2
+- dead-on-arrival probes could still be born from coarse geometry and then recover with misleading `no_logged_attempt`
+- active operation attackers could still be removed by generic corps-level trimming after launch
+- combat-causality still read corps-level approximations in places where operation-local truth was required
+- triggered historical operations could still emit startup validation noise when the scenario state had already made them moot or when a stale brigade reference survived in a definition
+
+### Phase 3 implementation
+1. `combat_causality.ts`
+   - made `eligible_attacker_count` operation-local
+   - limited execution invalidations to operations with no prior attempts/captures
+2. `bot_brigade_ai_osid.ts`
+   - pinned active operation attackers so generic trim/faction-friction passes cannot starve them
+3. `sector_offensive.ts`
+   - converted dead-on-arrival probes into `planning_invalidated`
+   - kept those planning collapses out of failed-objective history
+4. `triggered_operations.ts`
+   - corrected Herzegovina Consolidation to use `rs_bilea_brigade`
+   - required live enemy objectives before triggered historical operations inject or even validate
+
+### Final verification evidence for the upstream layer
+- `cmd /c npx tsx --test tests\triggered_operations.test.ts`
+- `cmd /c npx vitest run tests\scenario_operation_diagnostics.test.ts tests\sector_offensive_idle_recovery.test.ts tests\commander\operation_emit_overlap_guards.test.ts`
+- `cmd /c npx tsc --noEmit`
+- `cmd /c npm run sim:scenario:run:default` -> `n1394`
+- `cmd /c npm run sim:scenario:run:56w` -> `n1393`
+- `cmd /c npm run recovery:check`
+
+### Final upstream outcome
+- `n1394`: `invalid_operation_count: 0`, `zero_eligible_attacker_operation_count: 0`, `recovery_without_logged_attempt_count: 0`, `op_injection_warning_count: 0`
+- `n1393`: `invalid_operation_count: 0`, `zero_eligible_attacker_operation_count: 0`, `recovery_without_logged_attempt_count: 0`
+- captured 56-week run log contains no startup `[op-validation]` noise
+
+## Final overall judgment
+With the upstream planning/orchestration closure complete, the broader operations system reached `A+` end to end: birth, trigger relevance, execution, recovery semantics, archival truth, diagnostics, and scenario proof now tell one coherent story.

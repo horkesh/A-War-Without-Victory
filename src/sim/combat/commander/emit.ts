@@ -38,6 +38,7 @@ import type {
     CorpsOperation,
     SectorStance,
 } from '../../../state/game_state.js';
+import { isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../../state/formation_constants.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { spatialFriendlyDistance, spatialSameComponent } from '../../spatial_context.js';
 import { buildCommanderOperation, buildProbeOperation, derivePrimarySectorForBrigades, getMaxOperationSlots } from '../corps_operation_helpers.js';
@@ -103,6 +104,35 @@ const ACTIVE_PLAN_STATUSES: ReadonlySet<CommanderPlanStatus> = new Set([
     'executing',
     'ready',
 ]);
+
+function isCombatReadyParticipant(
+    briefing: CommanderBriefing,
+    brigadeId: string,
+): boolean {
+    const brigade = briefing.brigades.find((candidate) => candidate.id === brigadeId);
+    if (!brigade) return false;
+    if (!isEligibleOperationFormation(brigade)) return false;
+    if ((brigade.personnel ?? 0) < MIN_ATTACK_PERSONNEL) return false;
+    if ((brigade.disrupted_turns ?? 0) > 0) return false;
+    const movementState = briefing.state_ref?.military?.brigade_movement_state?.[brigadeId];
+    if (movementState?.status === 'in_transit') return false;
+    return true;
+}
+
+function operationsOverlap(
+    left: Pick<CorpsOperation, 'sector_id' | 'objectives' | 'participating_brigades'>,
+    right: Pick<CorpsOperation, 'sector_id' | 'objectives' | 'participating_brigades'>,
+): boolean {
+    if (left.sector_id && right.sector_id && left.sector_id === right.sector_id) {
+        return true;
+    }
+    const leftObjectives = new Set(left.objectives ?? []);
+    if ((right.objectives ?? []).some((objective) => leftObjectives.has(objective))) {
+        return true;
+    }
+    const leftBrigades = new Set(left.participating_brigades ?? []);
+    return (right.participating_brigades ?? []).some((brigadeId) => leftBrigades.has(brigadeId));
+}
 
 /** Plan action → plan_updates action mapping (plan.ts uses past tense). */
 const PLAN_ACTION_MAP: Record<string, 'advance' | 'suspend' | 'abandon' | undefined> = {
@@ -627,7 +657,7 @@ function buildOperations(
         // Primary pool: brigades assigned to the primary sector that are surplus + reachable.
         const primaryPool: string[] = primarySector
             ? primarySector.assigned_brigade_ids
-                .filter(id => surplusSet.has(id) && canReach(id))
+                .filter(id => surplusSet.has(id) && canReach(id) && isCombatReadyParticipant(briefing, id))
                 .sort(strictCompare)
             : [];
 
@@ -662,7 +692,7 @@ function buildOperations(
                 if (maxAttachable <= 0) continue;
 
                 const eligibleFromSector = adjSector.assigned_brigade_ids
-                    .filter(id => surplusSet.has(id) && canReach(id))
+                    .filter(id => surplusSet.has(id) && canReach(id) && isCombatReadyParticipant(briefing, id))
                     .sort(strictCompare)
                     .slice(0, maxAttachable);
 
@@ -746,6 +776,11 @@ function buildOperations(
             op.supporting_sector_ids = [...attachmentSectorIds].sort(strictCompare);
         }
 
+        const conflictingOp = briefing.active_operations.find((existing) => operationsOverlap(existing, op));
+        if (conflictingOp) {
+            return ops;
+        }
+
         ops.push(op);
     }
 
@@ -762,6 +797,7 @@ function buildOperations(
         // we just create the shell operation so the pipeline knows to attempt it.
         const probeBrigade = allocation.surplus_pool
             .filter(ev => ev.is_combat_effective && !ev.is_disrupted)
+            .filter(ev => isCombatReadyParticipant(briefing, ev.brigade_id))
             .sort((a, b) => {
                 const fitDiff = b.fitness_offense - a.fitness_offense;
                 if (fitDiff !== 0) return fitDiff;
@@ -900,7 +936,10 @@ function buildOperations(
                         probeSectorId,
                         probeObjectives,
                     );
-                    ops.push(probeOp);
+                    const conflictingOp = briefing.active_operations.find((existing) => operationsOverlap(existing, probeOp));
+                    if (!conflictingOp) {
+                        ops.push(probeOp);
+                    }
                 }
             }
         }

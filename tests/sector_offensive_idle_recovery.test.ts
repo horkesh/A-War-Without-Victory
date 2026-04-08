@@ -293,4 +293,386 @@ describe('sector offensive idle recovery', () => {
         expect(op?.phase).toBe('recovery');
         expect(op?.recovery_reason).toBe('political_blocked');
     });
+
+    it('never promotes a planning operation into execution when participants never reach staging', () => {
+        const state = {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 8, phase: 'war', seed: 'planning-invalidated' } as any,
+  military: {
+    formations: {
+                rs_corps: {
+                    id: 'rs_corps',
+                    faction: 'RS',
+                    name: 'Corps',
+                    created_turn: 1,
+                    status: 'active',
+                    assignment: null,
+                    kind: 'corps',
+                    personnel: 50,
+                    cohesion: 80,
+                    hq_sid: 'S1',
+                    tags: [],
+                },
+                b1: makeBrigade('b1', 'op:rear:staging'),
+                b2: makeBrigade('b2', 'op:rear:staging'),
+            },
+    corps_front_sectors: {
+                rs_sector: makeSector('rs_sector', 'rs_corps', 'RS', ['e1'], ['op:front:approach'], ['op:target:objective']),
+            },
+    corps_command: {
+                rs_corps: {
+                    command_span: 5,
+                    subordinate_count: 2,
+                    og_slots: 1,
+                    active_ogs: [],
+                    corps_exhaustion: 0,
+                    stance: 'offensive',
+                    active_operations: [{
+                        name: 'Never Staged',
+                        type: 'sector_attack',
+                        phase: 'planning',
+                        started_turn: 4,
+                        phase_started_turn: 4,
+                        participating_brigades: ['b1', 'b2'],
+                        objectives: ['op:target:objective'],
+                        current_objective_index: 0,
+                        planning_duration: 1,
+                        attack_attempt_count: 0,
+                        objective_capture_count: 0,
+                        movement_only_execution_turns: 0,
+                        idle_execution_turn_streak: 0,
+                        failure_count: 0,
+                        consecutive_failures_on_current: 0,
+                        sector_id: 'rs_sector',
+                        staging_osid: 'op:front:approach',
+                    }],
+                },
+            }
+  } as any,
+  political: {
+    political_controllers: {
+                'op:target:objective': 'RBiH',
+                'op:rear:staging': 'RS',
+                'op:front:approach': 'RS',
+            }
+  } as any,
+} as unknown as GameState;
+
+        advanceSectorOffensives(state, null);
+
+        const op = state.military.corps_command?.rs_corps?.active_operations[0];
+        expect(op?.phase).toBe('recovery');
+        expect(op?.recovery_reason).toBe('planning_invalidated');
+    });
+
+    it('invalidates probes that miss their immediate launch window instead of aging into no-attempt recovery', () => {
+        const state = {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 8, phase: 'war', seed: 'probe-planning-invalidation' } as any,
+  military: {
+    formations: {
+                rs_corps: {
+                    id: 'rs_corps',
+                    faction: 'RS',
+                    name: 'Corps',
+                    created_turn: 1,
+                    status: 'active',
+                    assignment: null,
+                    kind: 'corps',
+                    personnel: 50,
+                    cohesion: 80,
+                    hq_sid: 'S1',
+                    tags: [],
+                },
+                b1: makeBrigade('b1', 'op:rear:staging'),
+            },
+    corps_front_sectors: {
+                rs_sector: makeSector('rs_sector', 'rs_corps', 'RS', ['e1'], ['op:front:approach'], ['op:target:objective']),
+            },
+    corps_command: {
+                rs_corps: {
+                    command_span: 5,
+                    subordinate_count: 1,
+                    og_slots: 1,
+                    active_ogs: [],
+                    corps_exhaustion: 0,
+                    stance: 'offensive',
+                    active_operations: [{
+                        name: 'Missed Probe',
+                        type: 'probe',
+                        phase: 'planning',
+                        started_turn: 7,
+                        phase_started_turn: 7,
+                        participating_brigades: ['b1'],
+                        objectives: ['op:target:objective'],
+                        current_objective_index: 0,
+                        planning_duration: 0,
+                        attack_attempt_count: 0,
+                        objective_capture_count: 0,
+                        movement_only_execution_turns: 0,
+                        idle_execution_turn_streak: 0,
+                        failure_count: 0,
+                        consecutive_failures_on_current: 0,
+                        sector_id: 'rs_sector',
+                    }],
+                },
+            }
+  } as any,
+  political: {
+    political_controllers: {
+                'op:target:objective': 'RBiH',
+                'op:rear:staging': 'RS',
+            }
+  } as any,
+} as unknown as GameState;
+
+        advanceSectorOffensives(state, null);
+
+        const op = state.military.corps_command?.rs_corps?.active_operations[0];
+        expect(op?.phase).toBe('recovery');
+        expect(op?.recovery_reason).toBe('planning_invalidated');
+    });
+
+    it('never promotes a planning operation into execution when positioned participants are combat-ineffective', () => {
+        const state = {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 8, phase: 'war', seed: 'planning-zero-eligible' } as any,
+  military: {
+    formations: {
+                rs_corps: {
+                    id: 'rs_corps',
+                    faction: 'RS',
+                    name: 'Corps',
+                    created_turn: 1,
+                    status: 'active',
+                    assignment: null,
+                    kind: 'corps',
+                    personnel: 50,
+                    cohesion: 80,
+                    hq_sid: 'S1',
+                    tags: [],
+                },
+                b1: {
+                    ...makeBrigade('b1', 'op:front:approach'),
+                    personnel: 300,
+                },
+                b2: {
+                    ...makeBrigade('b2', 'op:front:approach'),
+                    disrupted_turns: 2,
+                },
+            },
+    corps_front_sectors: {
+                rs_sector: makeSector('rs_sector', 'rs_corps', 'RS', ['e1'], ['op:front:approach'], ['op:target:objective']),
+            },
+    corps_command: {
+                rs_corps: {
+                    command_span: 5,
+                    subordinate_count: 2,
+                    og_slots: 1,
+                    active_ogs: [],
+                    corps_exhaustion: 0,
+                    stance: 'offensive',
+                    active_operations: [{
+                        name: 'Positioned But Spent',
+                        type: 'sector_attack',
+                        phase: 'planning',
+                        started_turn: 4,
+                        phase_started_turn: 4,
+                        participating_brigades: ['b1', 'b2'],
+                        objectives: ['op:target:objective'],
+                        current_objective_index: 0,
+                        planning_duration: 1,
+                        attack_attempt_count: 0,
+                        objective_capture_count: 0,
+                        movement_only_execution_turns: 0,
+                        idle_execution_turn_streak: 0,
+                        failure_count: 0,
+                        consecutive_failures_on_current: 0,
+                        sector_id: 'rs_sector',
+                        staging_osid: 'op:front:approach',
+                    }],
+                },
+            },
+    brigade_movement_state: {},
+  } as any,
+  political: {
+    political_controllers: {
+                'op:target:objective': 'RBiH',
+                'op:front:approach': 'RS',
+            }
+  } as any,
+} as unknown as GameState;
+
+        advanceSectorOffensives(state, null);
+
+        const op = state.military.corps_command?.rs_corps?.active_operations[0];
+        expect(op?.phase).toBe('recovery');
+        expect(op?.recovery_reason).toBe('planning_invalidated');
+    });
+
+    it('never promotes a planning operation when brigades only sit on a later-objective approach', () => {
+        const state = {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 8, phase: 'war', seed: 'planning-wrong-objective' } as any,
+  military: {
+    formations: {
+                rs_corps: {
+                    id: 'rs_corps',
+                    faction: 'RS',
+                    name: 'Corps',
+                    created_turn: 1,
+                    status: 'active',
+                    assignment: null,
+                    kind: 'corps',
+                    personnel: 50,
+                    cohesion: 80,
+                    hq_sid: 'S1',
+                    tags: [],
+                },
+                b1: makeBrigade('b1', 'op:front:later_approach'),
+                b2: makeBrigade('b2', 'op:front:later_approach'),
+            },
+    corps_front_sectors: {
+                rs_sector: {
+                    ...makeSector('rs_sector', 'rs_corps', 'RS', ['e1', 'e2'], ['op:front:first_approach', 'op:front:later_approach'], ['op:target:first', 'op:target:later']),
+                    sub_segments: [
+                        {
+                            sub_segment_id: 'subseg:first',
+                            edge_ids: ['e1'],
+                            friendly_osids: ['op:front:first_approach'],
+                            enemy_osids: ['op:target:first'],
+                            primary_brigade_ids: [],
+                            length_edges: 1,
+                        },
+                        {
+                            sub_segment_id: 'subseg:later',
+                            edge_ids: ['e2'],
+                            friendly_osids: ['op:front:later_approach'],
+                            enemy_osids: ['op:target:later'],
+                            primary_brigade_ids: [],
+                            length_edges: 1,
+                        },
+                    ],
+                },
+            },
+    corps_command: {
+                rs_corps: {
+                    command_span: 5,
+                    subordinate_count: 2,
+                    og_slots: 1,
+                    active_ogs: [],
+                    corps_exhaustion: 0,
+                    stance: 'offensive',
+                    active_operations: [{
+                        name: 'Wrong Opening Axis',
+                        type: 'sector_attack',
+                        phase: 'planning',
+                        started_turn: 4,
+                        phase_started_turn: 4,
+                        participating_brigades: ['b1', 'b2'],
+                        objectives: ['op:target:first', 'op:target:later'],
+                        current_objective_index: 0,
+                        planning_duration: 1,
+                        attack_attempt_count: 0,
+                        objective_capture_count: 0,
+                        movement_only_execution_turns: 0,
+                        idle_execution_turn_streak: 0,
+                        failure_count: 0,
+                        consecutive_failures_on_current: 0,
+                        sector_id: 'rs_sector',
+                        staging_osid: 'op:front:first_approach',
+                    }],
+                },
+            },
+    brigade_movement_state: {},
+  } as any,
+  political: {
+    political_controllers: {
+                'op:target:first': 'RBiH',
+                'op:target:later': 'RBiH',
+                'op:front:first_approach': 'RS',
+                'op:front:later_approach': 'RS',
+            }
+  } as any,
+} as unknown as GameState;
+
+        advanceSectorOffensives(state, null);
+
+        const op = state.military.corps_command?.rs_corps?.active_operations[0];
+        expect(op?.phase).toBe('recovery');
+        expect(op?.recovery_reason).toBe('planning_invalidated');
+    });
+
+    it('never promotes a planning operation when brigades are only assembled at rear staging', () => {
+        const state = {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 8, phase: 'war', seed: 'planning-rear-staging' } as any,
+  military: {
+    formations: {
+                rs_corps: {
+                    id: 'rs_corps',
+                    faction: 'RS',
+                    name: 'Corps',
+                    created_turn: 1,
+                    status: 'active',
+                    assignment: null,
+                    kind: 'corps',
+                    personnel: 50,
+                    cohesion: 80,
+                    hq_sid: 'S1',
+                    tags: [],
+                },
+                b1: makeBrigade('b1', 'op:rear:staging'),
+                b2: makeBrigade('b2', 'op:rear:staging'),
+            },
+    corps_front_sectors: {
+                rs_sector: makeSector('rs_sector', 'rs_corps', 'RS', ['e1'], ['op:front:approach'], ['op:target:objective']),
+            },
+    corps_command: {
+                rs_corps: {
+                    command_span: 5,
+                    subordinate_count: 2,
+                    og_slots: 1,
+                    active_ogs: [],
+                    corps_exhaustion: 0,
+                    stance: 'offensive',
+                    active_operations: [{
+                        name: 'Rear Assembly Only',
+                        type: 'sector_attack',
+                        phase: 'planning',
+                        started_turn: 4,
+                        phase_started_turn: 4,
+                        participating_brigades: ['b1', 'b2'],
+                        objectives: ['op:target:objective'],
+                        current_objective_index: 0,
+                        planning_duration: 1,
+                        preparation_sub_phase: 'ready',
+                        attack_attempt_count: 0,
+                        objective_capture_count: 0,
+                        movement_only_execution_turns: 0,
+                        idle_execution_turn_streak: 0,
+                        failure_count: 0,
+                        consecutive_failures_on_current: 0,
+                        sector_id: 'rs_sector',
+                        staging_osid: 'op:rear:staging',
+                    }],
+                },
+            },
+    brigade_movement_state: {},
+  } as any,
+  political: {
+    political_controllers: {
+                'op:target:objective': 'RBiH',
+                'op:front:approach': 'RS',
+                'op:rear:staging': 'RS',
+            }
+  } as any,
+} as unknown as GameState;
+
+        advanceSectorOffensives(state, null);
+
+        const op = state.military.corps_command?.rs_corps?.active_operations[0];
+        expect(op?.phase).toBe('recovery');
+        expect(op?.recovery_reason).toBe('planning_invalidated');
+    });
 });

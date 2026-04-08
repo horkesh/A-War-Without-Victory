@@ -34,6 +34,19 @@ import { managePlan } from './plan.js';
 import { makeDecisions } from './decide.js';
 import { emitCommanderOutput } from './emit.js';
 import { assembleBeliefState } from './belief.js';
+import type { CorpsOperation } from '../../../state/game_state.js';
+
+function operationsConflict(
+    left: Pick<CorpsOperation, 'name' | 'sector_id' | 'objectives' | 'participating_brigades'>,
+    right: Pick<CorpsOperation, 'name' | 'sector_id' | 'objectives' | 'participating_brigades'>,
+): boolean {
+    if (left.name === right.name) return true;
+    if (left.sector_id && right.sector_id && left.sector_id === right.sector_id) return true;
+    const leftObjectives = new Set(left.objectives ?? []);
+    if ((right.objectives ?? []).some((objective) => leftObjectives.has(objective))) return true;
+    const leftBrigades = new Set(left.participating_brigades ?? []);
+    return (right.participating_brigades ?? []).some((brigadeId) => leftBrigades.has(brigadeId));
+}
 
 /**
  * ═══════════════════════════════════════════════════════════════
@@ -171,8 +184,9 @@ export function applyCommanderOutput(
 
     // 3. Add new operations (don't replace existing active ones)
     for (const op of output.operations) {
-        // Check if this operation already exists (by name)
-        const existing = corps.active_operations.find(ao => ao.name === op.name);
+        // Reject duplicate commander emissions that target the same theater or reuse the
+        // same brigades, even when the generated name differs by turn suffix.
+        const existing = corps.active_operations.find(ao => operationsConflict(ao, op));
         if (!existing) {
             corps.active_operations.push(op as typeof corps.active_operations[number]);
         }

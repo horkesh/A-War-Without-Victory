@@ -26,7 +26,11 @@ import { isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../state/
 import { isSectorAssignmentExemptCorpsId } from './corps_front_sectors_constants.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 import { canEliteLoanReachCorpsTerritory, deployEliteLoan } from './army_reserve_system.js';
-import { validateOpAtInjection, collectOpInjectionWarnings } from './operation_validation.js';
+import {
+    validateOpAtInjection,
+    collectOpInjectionWarnings,
+    hasBlockingOpInjectionWarnings,
+} from './operation_validation.js';
 import type { OpInjectionWarning } from './operation_validation.js';
 import {
     buildCorpsOperation,
@@ -63,6 +67,8 @@ interface PrePlannedOp {
     /** Planning duration override — gives brigades time to march to staging. */
     planning_duration?: number;
 }
+
+const MIN_OPERATION_PARTICIPANTS = 2;
 
 const VRS_PRE_PLANNED: PrePlannedOp[] = [
     {
@@ -797,9 +803,14 @@ export function injectPrePlannedOperations(state: GameState, adjacency?: Map<Osi
         if (hasActiveOperation(cmd)) continue;
         if (injectedCorps.has(def.corps)) continue;
 
+        const warnings = validateOpAtInjection(def, state, undefined, cmd);
+        collectOpInjectionWarnings(state, warnings);
+        if (hasBlockingOpInjectionWarnings(warnings)) continue;
+
         // Build axes with validated brigades and objectives
         const result = buildAxesFromDef(def, state, adjacency);
         if (!result) continue;
+        if (result.participating.length < MIN_OPERATION_PARTICIPANTS) continue;
 
         deployPrePlannedEliteLoans(state, result.eliteLoans, def, turn, adjacency);
 
@@ -901,10 +912,12 @@ export function injectQueuedOperation(state: GameState, corpsId: string, adjacen
     // Validate before building
     const queueWarnings = validateOpAtInjection(def, state, undefined, cmd);
     collectOpInjectionWarnings(state, queueWarnings);
+    if (hasBlockingOpInjectionWarnings(queueWarnings)) return false;
 
     // Build axes — brigades may not exist yet; keep queue entry for retry
     const result = buildAxesFromDef(def, state, adjacency);
     if (!result) return false;
+    if (result.participating.length < MIN_OPERATION_PARTICIPANTS) return false;
 
     deployPrePlannedEliteLoans(state, result.eliteLoans, def, turn, adjacency);
 

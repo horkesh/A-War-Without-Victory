@@ -220,6 +220,48 @@ describe('pre-planned operations', () => {
         );
     });
 
+    it('keeps a queued operation queued when fatal validation detects an objective overlap', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 8;
+        state.military.corps_command!.vrs_herzegovina!.queued_operations = ['Operation Foca'];
+        state.military.corps_command!.vrs_herzegovina!.active_operations = [{
+            name: 'Blocking Op',
+            type: 'sector_attack',
+            phase: 'planning',
+            participating_brigades: ['rs_foa_brigade'],
+            objectives: ['op:gorazde:kolovarice'],
+            current_objective_index: 0,
+        } as any];
+
+        const injected = injectQueuedOperation(state, 'vrs_herzegovina');
+
+        assert.equal(injected, false);
+        assert.deepEqual(state.military.corps_command!.vrs_herzegovina!.queued_operations, ['Operation Foca']);
+        assert.equal(
+            state.military.corps_command!.vrs_herzegovina!.active_operations.filter((op) => op.name === 'Operation Foca').length,
+            0,
+        );
+    });
+
+    it('does not inject a queued operation when fewer than two viable participants remain', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 8;
+        state.military.corps_command!.vrs_herzegovina!.queued_operations = ['Operation Foca'];
+        state.military.formations['rs_bilea_brigade']!.personnel = 300;
+        state.military.formations['rs_gacko_brigade']!.personnel = 300;
+        state.military.formations['rs_kalinovik_brigade']!.personnel = 300;
+        state.military.formations['jna_kalinovik_to_tg']!.status = 'inactive';
+
+        const injected = injectQueuedOperation(state, 'vrs_herzegovina');
+
+        assert.equal(injected, false);
+        assert.deepEqual(state.military.corps_command!.vrs_herzegovina!.queued_operations, ['Operation Foca']);
+        assert.equal(
+            state.military.corps_command!.vrs_herzegovina!.active_operations.filter((op) => op.name === 'Operation Foca').length,
+            0,
+        );
+    });
+
     it('keeps deferred Operation Jackal queued until its available_from turn', () => {
         const state = makeMinimalState();
         const jackal = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Jackal');

@@ -153,7 +153,6 @@ export function buildOperationCombatDiagnostics(
         const factionId = (corpsFormation?.faction ?? 'unknown') as FactionId;
         const brigades = sortedFormationIds(operation.participating_brigades ?? []);
         const currentObjective = getCurrentObjective(operation);
-        const eligibleAttackerCount = orderSnapshot?.eligible_attackers_by_corps?.[corpsId] ?? 0;
         const objectiveAttemptCount = operation.attack_attempt_count ?? 0;
         const objectiveCaptureCount = operation.objective_capture_count ?? 0;
         const movementOnlyExecutionTurns = operation.movement_only_execution_turns ?? 0;
@@ -181,6 +180,7 @@ export function buildOperationCombatDiagnostics(
             }
             battleCount += battleCountsByBrigade.get(brigadeId) ?? 0;
         }
+        const eligibleAttackerCount = attackAttemptCount;
         const currentObjectiveBattleCount = currentObjective !== null
             ? (battleCountsByTarget.get(currentObjective) ?? 0)
             : 0;
@@ -189,7 +189,9 @@ export function buildOperationCombatDiagnostics(
             operation.phase === 'execution' &&
             !hadResolvedAttackThisTurn &&
             attackAttemptCount === 0 &&
-            movementOrderCount === 0
+            movementOrderCount === 0 &&
+            objectiveAttemptCount === 0 &&
+            objectiveCaptureCount === 0
         ) {
             invalidationReasons.push('execution_without_attack_orders');
         }
@@ -198,7 +200,9 @@ export function buildOperationCombatDiagnostics(
             !hadResolvedAttackThisTurn &&
             brigades.length > 0 &&
             eligibleAttackerCount === 0 &&
-            movementOrderCount === 0
+            movementOrderCount === 0 &&
+            objectiveAttemptCount === 0 &&
+            objectiveCaptureCount === 0
         ) {
             invalidationReasons.push('execution_without_eligible_attackers');
         }

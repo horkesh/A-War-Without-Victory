@@ -230,6 +230,19 @@ export function isOperationParticipant(op: CorpsOperation, brigadeId: FormationI
     return op.participating_brigades.includes(brigadeId);
 }
 
+function isPinnedActiveOperationAttacker(state: GameState, brigadeId: FormationId): boolean {
+    const brigade = state.military.formations?.[brigadeId];
+    const corpsId = brigade?.corps_id;
+    if (!corpsId) return false;
+    const cmd = state.military.corps_command?.[corpsId];
+    if (!cmd) return false;
+    const activeOp = findBrigadeOperation(cmd, brigadeId);
+    if (!activeOp) return false;
+    if (activeOp.phase !== 'execution') return false;
+    if (activeOp.type !== 'sector_attack' && activeOp.type !== 'probe') return false;
+    return isOperationParticipant(activeOp, brigadeId);
+}
+
 export function applySectorOffensiveDirectiveOverride(
     directive: import('../../state/game_state.js').CorpsDirective,
     activeOp: import('../../state/game_state.js').CorpsOperation,
@@ -578,8 +591,10 @@ export function generateAllBotOrdersOsid(
                 if (b.score !== a.score) return b.score - a.score;
                 return strictCompare(a.bid, b.bid);
             });
-            // Trim lowest-scoring attacks beyond the corps budget
-            const trimmed = attacks.slice(maxCorpsAttacks);
+            const pinned = attacks.filter((entry) => isPinnedActiveOperationAttacker(state, entry.bid));
+            const trimmable = attacks.filter((entry) => !isPinnedActiveOperationAttacker(state, entry.bid));
+            const keepTrimmable = Math.max(0, maxCorpsAttacks - pinned.length);
+            const trimmed = trimmable.slice(keepTrimmable);
             for (const entry of trimmed) {
                 delete result.attack_orders[entry.bid];
                 delete result.attack_scores[entry.bid];
@@ -594,9 +609,10 @@ export function generateAllBotOrdersOsid(
         const warlordFrictionEndWeek = state.military.war_timeline?.officer_config?.RBiH?.warlord_friction_end_week ?? 78;
         if (faction === 'RBiH' && turn < warlordFrictionEndWeek) {
             for (const [cid, attacks] of [...attacksByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
-                if (attacks.length <= 1) continue; // Need at least 2 attackers for friction
+                const trimmable = attacks.filter((entry) => !isPinnedActiveOperationAttacker(state, entry.bid));
+                if (trimmable.length <= 1) continue; // Need at least 2 non-operation attackers for friction
                 // Sort by bid for deterministic selection
-                const sorted = [...attacks].sort((a, b) => strictCompare(a.bid, b.bid));
+                const sorted = [...trimmable].sort((a, b) => strictCompare(a.bid, b.bid));
                 const frictionIndex = turn % sorted.length;
                 const frictionTarget = sorted[frictionIndex]!;
                 // Remove from attack orders, force hold (warlord friction: unit refuses orders)

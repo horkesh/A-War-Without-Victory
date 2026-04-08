@@ -45,6 +45,10 @@ export interface OpInjectionWarning {
     turn: number;
 }
 
+export function hasBlockingOpInjectionWarnings(warnings: readonly OpInjectionWarning[]): boolean {
+    return warnings.some((warning) => warning.severity === 'error');
+}
+
 /** Minimal axis definition accepted by the validator (common subset of AxisDef / TriggeredAxisDef). */
 interface ValidatableAxisDef {
     axis_id: string;
@@ -246,9 +250,9 @@ export function logOpInjectionWarnings(warnings: OpInjectionWarning[]): void {
 /** Log + append warnings to state, deduplicating by op_name + axis_id + check. */
 export function collectOpInjectionWarnings(state: GameState, warnings: OpInjectionWarning[]): void {
     if (warnings.length === 0) return;
-    logOpInjectionWarnings(warnings);
     if (!state.military.op_injection_warnings) state.military.op_injection_warnings = [];
     const existing = state.military.op_injection_warnings;
+    const novel: OpInjectionWarning[] = [];
     for (const w of warnings) {
         const isDupe = existing.some((e) =>
             e.op_name === w.op_name &&
@@ -256,6 +260,9 @@ export function collectOpInjectionWarnings(state: GameState, warnings: OpInjecti
             e.check === w.check &&
             e.detail === w.detail
         );
-        if (!isDupe) existing.push(w);
+        if (isDupe) continue;
+        existing.push(w);
+        novel.push(w);
     }
+    if (novel.length > 0) logOpInjectionWarnings(novel);
 }
