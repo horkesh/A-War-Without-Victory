@@ -100,6 +100,31 @@ test('electron main exposes a packaged runtime probe mode instead of a second la
     );
     assert.match(
         source,
+        /armGameStatePushProbe\(/,
+        'packaged runtime probe should prove the real tactical-map game-state push path',
+    );
+    assert.match(
+        source,
+        /collectGameStatePushProbe\(/,
+        'packaged runtime probe should collect the armed tactical-map game-state push proof deterministically',
+    );
+    assert.match(
+        source,
+        /subscribeGameStateUpdated !== 'function'/,
+        'packaged tactical-map push proof should require the real preload subscription bridge',
+    );
+    assert.match(
+        source,
+        /tactical_push_checks:\s*\[/,
+        'packaged runtime probe manifest should record tactical state-push proofs',
+    );
+    assert.match(
+        source,
+        /sendGameStateToRenderer\(currentGameStateJson\)/,
+        'packaged runtime probe should trigger the real desktop game-state push channel',
+    );
+    assert.match(
+        source,
         /tacticalWindowInteraction\.location_path[\s\S]*tacticalWindowInteraction\.map_server_url[\s\S]*tacticalWindowInteraction\.player_faction[\s\S]*tacticalWindowInteraction\.route_mode[\s\S]*tacticalWindowInteraction\.turn/s,
         'packaged runtime probe should record deterministic operational interaction details',
     );
@@ -152,6 +177,16 @@ test('probe tool launches the unpacked packaged executable with the runtime prob
         source,
         /tactical_interactions[\s\S]*route_mode === 'sandbox'[\s\S]*location_path === '\/tactical_sandbox\.html'[\s\S]*player_faction === 'RBiH'[\s\S]*turn === 0/s,
         'probe tool should fail if the packaged manifest omits the tactical sandbox interaction proof',
+    );
+    assert.match(
+        source,
+        /tactical_push_checks[\s\S]*route_mode === 'operational'[\s\S]*player_faction === 'RBiH'[\s\S]*turn === 0/s,
+        'probe tool should fail if the packaged manifest omits the tactical operational state-push proof',
+    );
+    assert.match(
+        source,
+        /tactical_push_checks[\s\S]*route_mode === 'sandbox'[\s\S]*player_faction === 'RBiH'[\s\S]*turn === 0/s,
+        'probe tool should fail if the packaged manifest omits the tactical sandbox state-push proof',
     );
     assert.match(
         source,

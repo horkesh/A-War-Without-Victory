@@ -24826,6 +24826,15 @@ Main Staff HQ was Han Pijesak, not Rogatica. Tracked for OOB correction pass.
 - **Verification:** `node --check src/desktop/electron-main.cjs`, targeted packaged-probe tests, `npm.cmd run desktop:startup-snapshot:check`, `npm.cmd run desktop:release:check`, `npm.cmd run desktop:package:probe`, full Vitest (216/216 files, 3018/3018 tests), `npx.cmd tsc --noEmit -p tsconfig.json`, and `npm.cmd run build` all passed.
 - **Report:** `docs/40_reports/implemented/20260408_V08TO09_PACKAGED_DESKTOP_TACTICAL_MAP_INTERACTION_CONTRACT.md`
 
+**[2026-04-08] v0.8-to-v0.9 Packaged Desktop Tactical-Map State Push Contract COMPLETE**
+
+- **Summary:** Strengthened `desktop:package:probe` so packaged tactical-map operational and sandbox windows must successfully receive a deterministic `game-state-updated` push through the real desktop subscription bridge after load.
+- **State-push seam removed:** `src/desktop/electron-main.cjs` now arms in-window push listeners during `runPackagedRuntimeProbe()`, triggers the existing main-process broadcaster via `sendGameStateToRenderer(currentGameStateJson)`, and records deterministic `tactical_push_checks` for both tactical-map windows.
+- **Ownership after change:** `desktop:package:probe` remains the sole packaged-runtime smoke path. It now proves packaged route-load, preload pull interaction, and the real pushed game-state channel under one canonical runtime contract. No second probe command or synthetic push path was introduced.
+- **Hardening:** extended `tools/desktop_packaged_runtime_probe.mjs` and `tests/desktop_packaged_runtime_probe.test.ts` so the packaged probe fails if either tactical-map window is missing its pushed-state proof. Updated `src/desktop/README.md` so the desktop runtime contract truthfully documents both tactical-map pull and push bridge proofs.
+- **Verification:** `node --check src/desktop/electron-main.cjs`, targeted packaged-probe tests, `npm.cmd run desktop:startup-snapshot:check`, `npm.cmd run desktop:release:check`, `npm.cmd run desktop:package:probe`, full Vitest (216/216 files, 3018/3018 tests), `npx.cmd tsc --noEmit -p tsconfig.json`, and `npm.cmd run build` all passed.
+- **Report:** `docs/40_reports/implemented/20260408_V08TO09_PACKAGED_DESKTOP_TACTICAL_MAP_STATE_PUSH_CONTRACT.md`
+
 **[2026-04-08] fix(ui): WarroomShellLayer desk_map shell handoff contract clarified**
 
 - **Summary:** Closed a real Warroom shell-cohesion seam in `src/ui/map/components/warroom/WarroomShellLayer.tsx`. The `regionToShellHandoff()` comment no longer falsely claims several explicitly mapped hotspots are "unmapped"; it now documents `desk_map` as the one intentionally unmapped region and explains the implicit `undefined -> warroomCommandStaysInRoom(undefined) -> false -> setAppScreen('game')` map-entry contract.

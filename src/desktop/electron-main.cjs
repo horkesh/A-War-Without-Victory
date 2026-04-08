@@ -263,6 +263,64 @@ function waitForTacticalMapInteraction(win, expectedMode, expectedMapServerBaseU
   });
 }
 
+function armGameStatePushProbe(win) {
+  return win.webContents.executeJavaScript(
+    `
+      (() => {
+        const bridge = window.awwv;
+        if (!bridge || typeof bridge.subscribeGameStateUpdated !== 'function') {
+          throw new Error('game-state-updated bridge unavailable');
+        }
+
+        window.__awwvProbeGameStatePush = new Promise((resolve, reject) => {
+          const timeoutId = setTimeout(() => {
+            reject(new Error('timed out waiting for game-state-updated'));
+          }, 5000);
+
+          const unsubscribe = bridge.subscribeGameStateUpdated((stateJson) => {
+            try {
+              clearTimeout(timeoutId);
+              if (typeof unsubscribe === 'function') {
+                unsubscribe();
+              }
+              const state = JSON.parse(stateJson);
+              resolve({
+                route_mode: window.location.search.includes('desktop_window=sandbox') ? 'sandbox' : 'operational',
+                player_faction: state?.meta?.player_faction ?? null,
+                turn: state?.meta?.turn ?? null,
+              });
+            } catch (error) {
+              reject(error);
+            }
+          });
+        });
+        return true;
+      })();
+    `,
+    true,
+  );
+}
+
+function collectGameStatePushProbe(win, expectedMode, label) {
+  return win.webContents.executeJavaScript(
+    `
+      window.__awwvProbeGameStatePush;
+    `,
+    true,
+  ).then((push) => {
+    if (push.route_mode !== expectedMode) {
+      throw new Error(`${label} received push for unexpected route mode ${push.route_mode}; expected ${expectedMode}`);
+    }
+    if (push.player_faction !== 'RBiH') {
+      throw new Error(`${label} received push with unexpected player faction ${push.player_faction}; expected RBiH`);
+    }
+    if (push.turn !== 0) {
+      throw new Error(`${label} received push with unexpected turn ${push.turn}; expected 0`);
+    }
+    return push;
+  });
+}
+
 function getTacticalMapWindowUrl(mode = 'operational') {
   const targetPath = mode === 'sandbox' ? '/tactical_sandbox.html' : '/';
   const query = mode === 'sandbox' ? '?desktop_window=sandbox' : '?desktop_window=operational';
@@ -424,7 +482,6 @@ async function runPackagedRuntimeProbe() {
     expectedMapServerBaseUrl,
     'packaged tactical map window',
   );
-  mapProbeWindow.destroy();
 
   const { win: sandboxProbeWindow, targetUrl: tacticalSandboxUrl } = createTacticalMapWindow({
     mode: 'sandbox',
@@ -441,7 +498,27 @@ async function runPackagedRuntimeProbe() {
     expectedMapServerBaseUrl,
     'packaged tactical sandbox window',
   );
+
+  tacticalMapWindow = mapProbeWindow;
+  await armGameStatePushProbe(mapProbeWindow);
+  sendGameStateToRenderer(currentGameStateJson);
+  const operationalPush = await collectGameStatePushProbe(
+    mapProbeWindow,
+    'operational',
+    'packaged tactical map window',
+  );
+
+  mapProbeWindow.destroy();
+  tacticalMapWindow = sandboxProbeWindow;
+  await armGameStatePushProbe(sandboxProbeWindow);
+  sendGameStateToRenderer(currentGameStateJson);
+  const sandboxPush = await collectGameStatePushProbe(
+    sandboxProbeWindow,
+    'sandbox',
+    'packaged tactical sandbox window',
+  );
   sandboxProbeWindow.destroy();
+  tacticalMapWindow = null;
 
   const manifest = {
     probe: 'awwv_desktop_runtime_probe',
@@ -488,6 +565,18 @@ async function runPackagedRuntimeProbe() {
         player_faction: tacticalSandboxInteraction.player_faction,
         route_mode: tacticalSandboxInteraction.route_mode,
         turn: tacticalSandboxInteraction.turn,
+      },
+    ],
+    tactical_push_checks: [
+      {
+        player_faction: operationalPush.player_faction,
+        route_mode: operationalPush.route_mode,
+        turn: operationalPush.turn,
+      },
+      {
+        player_faction: sandboxPush.player_faction,
+        route_mode: sandboxPush.route_mode,
+        turn: sandboxPush.turn,
       },
     ],
   };

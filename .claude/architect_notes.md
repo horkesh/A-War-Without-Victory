@@ -290,6 +290,11 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - Accepted interaction line: `desktop:package:probe` now requires the packaged operational and sandbox tactical-map windows to resolve `getMapServerUrl()` and `getCurrentGameState()` through the real desktop preload bridge, and it records those results in deterministic `tactical_interactions`.
 - Probe-state rule: in desktop probe modes, publish canonical current state into the same bridge-visible channel the real windows read (`currentGameStateJson`) rather than validating against a probe-only side copy or null state.
 
+**Closed: Packaged Desktop Tactical-Map State Push Contract (2026-04-08)**
+- After proving packaged route-load and preload pull interaction, the next bounded runtime contract is the real pushed state channel those windows rely on after load.
+- Accepted push line: `desktop:package:probe` now requires the packaged operational and sandbox tactical-map windows to receive a deterministic `game-state-updated` payload through the real desktop subscription bridge, and it records that proof in deterministic `tactical_push_checks`.
+- Push-proof rule: arm subscriptions inside the real tracked tactical-map windows, then trigger the existing main-process broadcaster (`sendGameStateToRenderer(currentGameStateJson)`) rather than inventing a synthetic side channel. Probe accuracy depends on using the same window-ownership model the real broadcaster targets.
+
 ### Warroom React Shell Recovery / Feature Parity — OPEN
 
 - **Problem:** The rebuilt React-owned Warroom shell is functional enough to launch and hand off correctly, but it remains materially behind the older corktable-era experience.

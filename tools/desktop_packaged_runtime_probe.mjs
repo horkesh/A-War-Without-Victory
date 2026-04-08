@@ -79,6 +79,18 @@ const sandboxInteractionCheck = manifest?.tactical_interactions?.find?.(
     entry?.player_faction === 'RBiH' &&
     entry?.turn === 0,
 );
+const operationalPushCheck = manifest?.tactical_push_checks?.find?.(
+  (entry) =>
+    entry?.route_mode === 'operational' &&
+    entry?.player_faction === 'RBiH' &&
+    entry?.turn === 0,
+);
+const sandboxPushCheck = manifest?.tactical_push_checks?.find?.(
+  (entry) =>
+    entry?.route_mode === 'sandbox' &&
+    entry?.player_faction === 'RBiH' &&
+    entry?.turn === 0,
+);
 
 if (!windowCheck) {
   throw new Error(
@@ -107,6 +119,18 @@ if (!operationalInteractionCheck) {
 if (!sandboxInteractionCheck) {
   throw new Error(
     `Packaged desktop runtime probe manifest is missing the tactical sandbox interaction proof.\n${JSON.stringify(manifest, null, 2)}`,
+  );
+}
+
+if (!operationalPushCheck) {
+  throw new Error(
+    `Packaged desktop runtime probe manifest is missing the tactical operational state-push proof.\n${JSON.stringify(manifest, null, 2)}`,
+  );
+}
+
+if (!sandboxPushCheck) {
+  throw new Error(
+    `Packaged desktop runtime probe manifest is missing the tactical sandbox state-push proof.\n${JSON.stringify(manifest, null, 2)}`,
   );
 }
 
