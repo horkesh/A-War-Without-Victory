@@ -1,8 +1,27 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-07. 217 lessons across 9 topic files.
+> Last restructured: 2026-04-08. 222 lessons across 9 topic files.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
+
+## New Lessons (2026-04-08)
+
+### [Desktop] Extend the probe manifest — never add parallel probe commands — see `docs/life_lessons/platform.md`
+- 6 desktop routes proved by extending one `desktop:package:probe` manifest, not by creating parallel probe commands. Parallel commands fragment the CI contract. Add new routes as `window_checks[]` entries; only create a new probe command if the route requires a fundamentally different launch environment.
+
+### [Desktop] Unit tests cannot prove packaged-mode behavior — CI needs a separate packaged probe job — see `docs/life_lessons/platform.md`
+- `desktop-release-guard.yml` added after recognizing tsc+vitest+build passes even when packaged asar resolution or window routing is broken. `desktop:package:probe` must be a mandatory CI gate before any release artifact ships.
+
+### [Architecture] Warroom boundary law: `extractWarData()` is the only raw-state reader — see `docs/life_lessons/architecture.md`
+- 6 boundary cleanups found the same violation: warroom components reading `state.political.*`/`state.military.*` directly. Fix pattern: extend `WarDataSnapshot`, consume from snapshot. Grep audit: `state\.political\.|state\.military\.` inside `src/ui/warroom/components/`.
+
+### [Architecture] Explicit undefined beats implicit missing-case in navigation maps — see `docs/life_lessons/architecture.md`
+- `mapRegionToShellCommand()` returning `undefined` for `desk_map` meant "navigate to map" but looked like a missing case. Fix: explicit JSDoc block naming the intentional unmapped region and its downstream effect.
+
+### [Architecture] Territory observability determines fog-gate requirement — classify snapshot fields before adding — see `docs/life_lessons/architecture.md`
+- Before adding to `WarDataSnapshot`: classify Tier 1 (player-only, fog-gated), Tier 2 (publicly observable), or Tier 3 (derived from player actions). Document the tier in JSDoc. Missing classification defaults to implicit Tier 1 — wrong for territory control, exhaustion, and other observable facts.
+
+---
 
 ## New Lessons (2026-04-07)
 

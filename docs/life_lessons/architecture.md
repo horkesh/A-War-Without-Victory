@@ -3,6 +3,24 @@
 
 ---
 
+### [Architecture] Warroom boundary law: extractWarData() is the only raw-state reader (2026-04-08) — NEW
+- **Context**: Six warroom boundary cleanups in one session (IvpBreakdownModal, DiplomacyModal, MagazineModal, NewspaperModal, TurnPreview, WarroomShellLayer) each found the same violation: a component reading `state.political.*` or `state.military.*` directly — even just for routing logic. Every fix followed the same pattern: extend `WarDataSnapshot` with a typed field, consume from the snapshot, zero raw reads in the component.
+- **Wrong approach**: Treating raw-state reads inside warroom components as "just for routing" or "just a small check." Every direct `state.*` read in `src/ui/warroom/` is a boundary violation regardless of how minor it seems. The boundary exists to prevent the warroom from drifting into a parallel truth model of game state.
+- **Right approach**: `extractWarData()` in `war_data_extractor.ts` is the sole permitted raw-state entry point in the entire warroom subsystem. If a warroom component needs any value from `GameState`, extend the snapshot — never reach past it.
+- **Do instead**: Grep for `state\.political\.|state\.military\.` inside `src/ui/warroom/components/` as a standing audit. Any match is a violation. If adding a new field, document its observability tier in the JSDoc.
+
+### [Architecture] Explicit undefined beats implicit missing-case in navigation maps (2026-04-08) — NEW
+- **Context**: `mapRegionToShellCommand()` in `WarroomShellLayer.tsx` returned `undefined` for `desk_map` to signal "navigate to game/map view." The JSDoc said "Returns undefined for regions without a React shell equivalent." These are two different things: an intentional navigation target vs. an unhandled case. A future reader seeing `undefined` would assume it was a gap, not a design decision. The fix added an explicit "Unmapped regions (intentional — navigate to game/map view): desk_map" block in the JSDoc and code.
+- **Wrong approach**: Relying on `undefined` as an implicit signal in a handler map when `undefined` has deliberate semantic meaning. It reads identically to a missing or forgotten case.
+- **Right approach**: When `undefined` carries semantic intent in a handler or map (not "nothing matched" but "this means navigate/dismiss/close"), document it as an explicit intentional case with a named comment block separate from the unhandled-case documentation.
+- **Do instead**: When writing navigation maps or handler dispatchers, add a comment: "Intentionally unmapped: [region] — [reason]. Returns undefined → [downstream effect]." This makes the design decision traceable and prevents incorrect "fix" attempts.
+
+### [Architecture] Territory observability determines fog-gate requirement — classify before adding to snapshot (2026-04-08) — NEW
+- **Context**: `extractObservedTerritoryPct` was added to `WarDataSnapshot` without a fog gate, with explicit comment "Territory control is publicly visible — no fog guard needed." This was a deliberate classification decision. Without it, the default assumption for new snapshot fields is Tier 1 (player-only, fog-gated), which would have been wrong and would have either withheld useful information from the AI or required a retroactive fix.
+- **Wrong approach**: Adding a field to `WarDataSnapshot` without classifying its observability tier. The default assumption (player-only, fog-gated) is wrong for many fields and silently restricts what the AI or the player can see.
+- **Right approach**: Before adding any field to `WarDataSnapshot`, explicitly classify it: Tier 1 = player-only, fog-gated (e.g. officer lists, own logistics); Tier 2 = publicly observable, no fog (e.g. territory control, faction exhaustion); Tier 3 = derived from player actions, no fog. Document the tier in the JSDoc. Missing classification = implicit Tier 1.
+- **Do instead**: Add `/** Tier 2 — publicly observable: [reason] */` or `/** Tier 1 — fog-gated: player faction only */` to every field added to `WarDataSnapshot`. Review existing undocumented fields periodically.
+
 ### [Architecture] A single floor threshold across structurally different peace plans silently fails for plans with different rejection bases (2026-04-06) — NEW
 - **Context**: `RS_TERRITORY_FLOOR_GAP = 18` (Phase 3) applied uniformly to all peace plans. The Contact Group had only ~14pp sim gap (OSID-count: RS≈65%, CG proposes 49%) — less than the 18pp floor — so RS silently routed to personality scoring instead of hard-rejecting. The 96% referendum rejection was being ignored for 3 consecutive phases (Ph.3→Ph.6). Required Phase 6 per-plan map to fix.
 - **Wrong approach**: One threshold for all plans when the plans have structurally different rejection bases. VOPP = Assembly vote (96–2); O-S = Karadzic signed, Assembly rejected; CG = 96% referendum. These are qualitatively different events requiring calibrated thresholds.

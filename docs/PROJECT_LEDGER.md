@@ -131,6 +131,68 @@ Remaining DRINA mismatches (cerska_2, pobudje_2, jezestica_2, sebiocina, drinsko
 
 ---
 
+## [2026-04-08] fix(desktop): Prove packaged operational tactical-map renderer reaction through the real session/store path
+
+**Type:** Platform/runtime hardening
+**Files:** `src/desktop/electron-main.cjs`, `src/ui/map/hooks/useDesktopSession.ts`, `src/ui/map/store/gameStore.ts`, `tools/desktop_packaged_runtime_probe.mjs`, `tests/desktop_packaged_runtime_probe.test.ts`, `src/desktop/README.md`, `docs/40_reports/implemented/20260408_V08TO09_PACKAGED_DESKTOP_TACTICAL_MAP_RENDERER_REACTION_CONTRACT.md`
+**Status:** VERIFIED — targeted probe tests, packaged runtime probe, full vitest, typecheck, and build clean
+
+### Summary of changes
+
+1. **Real renderer-reaction proof** — `desktop:package:probe` now waits for the operational tactical-map `useDesktopSession()` hook to declare readiness, then proves that real `game-state-updated` and `turn-report-updated` bridge traffic reaches the renderer-owned store path.
+
+2. **Probe-safe renderer observation** — `useDesktopSession()` records deterministic renderer reactions onto a DOM dataset only when `__AWWV_RUNTIME_PROBE_ACTIVE` is present, and `gameStore.loadSave()` switches to `queueMicrotask(...)` under probe mode so hidden packaged windows do not starve the real store update path.
+
+3. **Manifest contract strengthened without adding a second probe** — the canonical packaged runtime manifest now includes `renderer_reaction_checks`, and the external probe tool hard-fails if the operational renderer reaction proof is missing.
+
+### Verification
+
+- `node --check src\\desktop\\electron-main.cjs`
+- `npx.cmd tsx --test tests\\desktop_packaged_runtime_probe.test.ts`
+- `npm.cmd run desktop:startup-snapshot:check`
+- `npm.cmd run desktop:release:check`
+- `npm.cmd run desktop:package:probe`
+- `npm.cmd run test:vitest`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run build`
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260408_V08TO09_PACKAGED_DESKTOP_TACTICAL_MAP_RENDERER_REACTION_CONTRACT.md`
+
+---
+
+## [2026-04-08] fix(desktop): Require packaged tactical-map renderer freshness and exact pushed-payload identity
+
+**Type:** Platform/runtime hardening
+**Files:** `src/desktop/electron-main.cjs`, `src/ui/map/hooks/useDesktopSession.ts`, `src/ui/map/store/gameStore.ts`, `tools/desktop_packaged_runtime_probe.mjs`, `tests/desktop_packaged_runtime_probe.test.ts`, `src/desktop/README.md`, `docs/40_reports/implemented/20260408_V08TO09_PACKAGED_DESKTOP_TACTICAL_MAP_RENDERER_FRESHNESS_CONTRACT.md`
+**Status:** VERIFIED — targeted probe tests, packaged runtime probe, full vitest, typecheck, and build clean
+
+### Summary of changes
+
+1. **Payload identity freshness** — the operational renderer proof now validates that the store fingerprint equals the exact pushed `game-state-updated` payload and that the pushed turn-report probe marker survives intact in renderer state.
+
+2. **Stronger manifest authority** — `renderer_reaction_checks` now record `fingerprint_matches_payload`, `payload_length`, and `payload_matches_probe`, so the packaged runtime proof is about exact pushed data, not merely “some valid-looking state.”
+
+3. **Bounded scope preserved** — freshness proof stays within the single canonical `desktop:package:probe` path and remains scoped to the operational React tactical-map renderer rather than widening into broad UI automation.
+
+### Verification
+
+- `node --check src\\desktop\\electron-main.cjs`
+- `npx.cmd tsx --test tests\\desktop_packaged_runtime_probe.test.ts`
+- `npm.cmd run desktop:startup-snapshot:check`
+- `npm.cmd run desktop:release:check`
+- `npm.cmd run desktop:package:probe`
+- `npm.cmd run test:vitest`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run build`
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260408_V08TO09_PACKAGED_DESKTOP_TACTICAL_MAP_RENDERER_FRESHNESS_CONTRACT.md`
+
+---
+
 ## [2026-04-06] fix(engine): Enclave guard in detectParamilitaryTargets — block rear-pocket paramilitary against Sarajevo interior (n1356)
 
 **Type:** Bug fix  

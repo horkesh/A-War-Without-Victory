@@ -105,6 +105,21 @@ const sandboxTurnReportPushCheck = manifest?.turn_report_push_checks?.find?.(
     entry?.turn === 0 &&
     entry?.probe === 'awwv_turn_report_probe',
 );
+const operationalRendererReactionCheck = manifest?.renderer_reaction_checks?.find?.(
+  (entry) =>
+    entry?.route_mode === 'operational' &&
+    entry?.game_state_updated?.fingerprint_matches_payload === true &&
+    entry?.game_state_updated?.route_mode === 'operational' &&
+    entry?.game_state_updated?.location_path === '/' &&
+    entry?.game_state_updated?.payload_length > 0 &&
+    entry?.game_state_updated?.player_faction === 'RBiH' &&
+    entry?.game_state_updated?.turn === 0 &&
+    entry?.turn_report_updated?.payload_matches_probe === true &&
+    entry?.turn_report_updated?.player_faction === 'RBiH' &&
+    entry?.turn_report_updated?.route_mode === 'operational' &&
+    entry?.turn_report_updated?.probe === 'awwv_turn_report_probe' &&
+    entry?.turn_report_updated?.turn === 0,
+);
 
 if (!windowCheck) {
   throw new Error(
@@ -157,6 +172,12 @@ if (!operationalTurnReportPushCheck) {
 if (!sandboxTurnReportPushCheck) {
   throw new Error(
     `Packaged desktop runtime probe manifest is missing the tactical sandbox turn-report push proof.\n${JSON.stringify(manifest, null, 2)}`,
+  );
+}
+
+if (!operationalRendererReactionCheck) {
+  throw new Error(
+    `Packaged desktop runtime probe manifest is missing the tactical operational renderer-reaction proof.\n${JSON.stringify(manifest, null, 2)}`,
   );
 }
 

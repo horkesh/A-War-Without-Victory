@@ -263,6 +263,33 @@ function waitForTacticalMapInteraction(win, expectedMode, expectedMapServerBaseU
   });
 }
 
+function waitForDesktopSessionReady(win, label) {
+  return win.webContents.executeJavaScript(
+    `
+      new Promise((resolve, reject) => {
+        let attemptsRemaining = 200;
+        const tick = () => {
+          const ready = document.documentElement?.dataset?.awwvDesktopSessionReady === '1';
+          if (ready) {
+            resolve(true);
+            return;
+          }
+          attemptsRemaining -= 1;
+          if (attemptsRemaining <= 0) {
+            reject(new Error('timed out waiting for desktop session readiness'));
+            return;
+          }
+          setTimeout(tick, 25);
+        };
+        tick();
+      });
+    `,
+    true,
+  ).catch((error) => {
+    throw new Error(`${label} did not expose desktop session readiness: ${error.message || String(error)}`);
+  });
+}
+
 function armGameStatePushProbe(win) {
   return win.webContents.executeJavaScript(
     `
@@ -379,6 +406,149 @@ function collectTurnReportPushProbe(win, expectedMode, label) {
       throw new Error(`${label} received unexpected turn report probe marker ${push.probe}; expected awwv_turn_report_probe`);
     }
     return push;
+  });
+}
+
+function armRendererReactionProbe(win) {
+  return win.webContents.executeJavaScript(
+    `
+      (() => {
+        window.__AWWV_RUNTIME_PROBE_ACTIVE = true;
+        const root = document.documentElement;
+        const keys = [
+          'awwvProbeGameStateFingerprintMatchesPayload',
+          'awwvProbeGameStateLocationPath',
+          'awwvProbeGameStatePayloadLength',
+          'awwvProbeGameStatePlayerFaction',
+          'awwvProbeGameStateRouteMode',
+          'awwvProbeGameStateTurn',
+          'awwvProbeTurnReportLocationPath',
+          'awwvProbeTurnReportPayloadMatchesProbe',
+          'awwvProbeTurnReportPlayerFaction',
+          'awwvProbeTurnReportProbe',
+          'awwvProbeTurnReportRouteMode',
+          'awwvProbeTurnReportTurn',
+        ];
+        for (const key of keys) {
+          delete root.dataset[key];
+        }
+        window.__awwvProbeRendererReaction = new Promise((resolve, reject) => {
+          let attemptsRemaining = 200;
+          const tick = () => {
+            const dataset = root.dataset;
+            if (
+              dataset.awwvProbeGameStateFingerprintMatchesPayload &&
+              dataset.awwvProbeGameStateLocationPath &&
+              dataset.awwvProbeGameStatePayloadLength &&
+              dataset.awwvProbeGameStatePlayerFaction &&
+              dataset.awwvProbeGameStateRouteMode &&
+              dataset.awwvProbeGameStateTurn &&
+              dataset.awwvProbeTurnReportLocationPath &&
+              dataset.awwvProbeTurnReportPayloadMatchesProbe &&
+              dataset.awwvProbeTurnReportPlayerFaction &&
+              dataset.awwvProbeTurnReportProbe &&
+              dataset.awwvProbeTurnReportRouteMode &&
+              dataset.awwvProbeTurnReportTurn
+            ) {
+              resolve({
+                game_state_updated: {
+                  fingerprint_matches_payload: dataset.awwvProbeGameStateFingerprintMatchesPayload === 'true',
+                  location_path: dataset.awwvProbeGameStateLocationPath,
+                  payload_length: Number(dataset.awwvProbeGameStatePayloadLength),
+                  player_faction: dataset.awwvProbeGameStatePlayerFaction,
+                  route_mode: dataset.awwvProbeGameStateRouteMode,
+                  turn: Number(dataset.awwvProbeGameStateTurn),
+                },
+                turn_report_updated: {
+                  location_path: dataset.awwvProbeTurnReportLocationPath,
+                  payload_matches_probe: dataset.awwvProbeTurnReportPayloadMatchesProbe === 'true',
+                  player_faction: dataset.awwvProbeTurnReportPlayerFaction,
+                  probe: dataset.awwvProbeTurnReportProbe,
+                  route_mode: dataset.awwvProbeTurnReportRouteMode,
+                  turn: Number(dataset.awwvProbeTurnReportTurn),
+                },
+              });
+              return;
+            }
+            attemptsRemaining -= 1;
+            if (attemptsRemaining <= 0) {
+              reject(new Error('timed out waiting for renderer reactions'));
+              return;
+            }
+            setTimeout(tick, 25);
+          };
+          tick();
+        });
+        return true;
+      })();
+    `,
+    true,
+  );
+}
+
+function collectRendererReactionProbe(win, expectedMode, label) {
+  const expectedPayloadLength = currentGameStateJson ? currentGameStateJson.length : null;
+  return win.webContents.executeJavaScript(
+    `
+      window.__awwvProbeRendererReaction;
+    `,
+    true,
+  ).then((reaction) => {
+    const gameStateReaction = reaction?.game_state_updated;
+    const turnReportReaction = reaction?.turn_report_updated;
+
+    if (!gameStateReaction || !turnReportReaction) {
+      throw new Error(`${label} did not record both renderer reactions`);
+    }
+    if (gameStateReaction.route_mode !== expectedMode) {
+      throw new Error(`${label} renderer game-state reaction reported unexpected route mode ${gameStateReaction.route_mode}; expected ${expectedMode}`);
+    }
+    if (gameStateReaction.fingerprint_matches_payload !== true) {
+      throw new Error(`${label} renderer game-state reaction did not preserve the exact pushed payload identity`);
+    }
+    if (gameStateReaction.payload_length !== expectedPayloadLength) {
+      throw new Error(`${label} renderer game-state reaction reported unexpected payload length ${gameStateReaction.payload_length}; expected ${expectedPayloadLength}`);
+    }
+    if (gameStateReaction.player_faction !== 'RBiH') {
+      throw new Error(`${label} renderer game-state reaction reported unexpected player faction ${gameStateReaction.player_faction}; expected RBiH`);
+    }
+    if (gameStateReaction.turn !== 0) {
+      throw new Error(`${label} renderer game-state reaction reported unexpected turn ${gameStateReaction.turn}; expected 0`);
+    }
+    if (turnReportReaction.route_mode !== expectedMode) {
+      throw new Error(`${label} renderer turn-report reaction reported unexpected route mode ${turnReportReaction.route_mode}; expected ${expectedMode}`);
+    }
+    if (turnReportReaction.payload_matches_probe !== true) {
+      throw new Error(`${label} renderer turn-report reaction did not preserve the exact pushed probe marker`);
+    }
+    if (turnReportReaction.player_faction !== 'RBiH') {
+      throw new Error(`${label} renderer turn-report reaction reported unexpected player faction ${turnReportReaction.player_faction}; expected RBiH`);
+    }
+    if (turnReportReaction.turn !== 0) {
+      throw new Error(`${label} renderer turn-report reaction reported unexpected turn ${turnReportReaction.turn}; expected 0`);
+    }
+    if (turnReportReaction.probe !== 'awwv_turn_report_probe') {
+      throw new Error(`${label} renderer turn-report reaction reported unexpected probe marker ${turnReportReaction.probe}; expected awwv_turn_report_probe`);
+    }
+
+    return {
+      game_state_updated: {
+        fingerprint_matches_payload: gameStateReaction.fingerprint_matches_payload,
+        location_path: gameStateReaction.location_path,
+        payload_length: gameStateReaction.payload_length,
+        player_faction: gameStateReaction.player_faction,
+        route_mode: gameStateReaction.route_mode,
+        turn: gameStateReaction.turn,
+      },
+      turn_report_updated: {
+        location_path: turnReportReaction.location_path,
+        payload_matches_probe: turnReportReaction.payload_matches_probe,
+        player_faction: turnReportReaction.player_faction,
+        probe: turnReportReaction.probe,
+        route_mode: turnReportReaction.route_mode,
+        turn: turnReportReaction.turn,
+      },
+    };
   });
 }
 
@@ -548,6 +718,7 @@ async function runPackagedRuntimeProbe() {
     expectedMapServerBaseUrl,
     'packaged tactical map window',
   );
+  await waitForDesktopSessionReady(mapProbeWindow, 'packaged tactical map window');
 
   const { win: sandboxProbeWindow, targetUrl: tacticalSandboxUrl } = createTacticalMapWindow({
     mode: 'sandbox',
@@ -567,6 +738,7 @@ async function runPackagedRuntimeProbe() {
 
   tacticalMapWindow = mapProbeWindow;
   await armGameStatePushProbe(mapProbeWindow);
+  await armRendererReactionProbe(mapProbeWindow);
   sendGameStateToRenderer(currentGameStateJson);
   const operationalPush = await collectGameStatePushProbe(
     mapProbeWindow,
@@ -576,6 +748,11 @@ async function runPackagedRuntimeProbe() {
   await armTurnReportPushProbe(mapProbeWindow);
   sendTurnReportToRenderer(probeTurnReport);
   const operationalTurnReportPush = await collectTurnReportPushProbe(
+    mapProbeWindow,
+    'operational',
+    'packaged tactical map window',
+  );
+  const operationalRendererReaction = await collectRendererReactionProbe(
     mapProbeWindow,
     'operational',
     'packaged tactical map window',
@@ -671,6 +848,13 @@ async function runPackagedRuntimeProbe() {
         probe: sandboxTurnReportPush.probe,
         route_mode: sandboxTurnReportPush.route_mode,
         turn: sandboxTurnReportPush.turn,
+      },
+    ],
+    renderer_reaction_checks: [
+      {
+        game_state_updated: operationalRendererReaction.game_state_updated,
+        route_mode: 'operational',
+        turn_report_updated: operationalRendererReaction.turn_report_updated,
       },
     ],
   };

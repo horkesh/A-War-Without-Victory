@@ -6,6 +6,8 @@ import { parseGameState } from '../data/GameStateAdapter';
 export interface LastTurnReport {
   phase?: string;
   turn?: number;
+  player_faction?: string | null;
+  probe?: string | null;
   details?: {
     officer_succession?: {
       replacements?: Array<{ corps_id: string; old_officer: string; new_officer: string }>;
@@ -22,6 +24,11 @@ function buildStateFingerprint(jsonOrText: unknown | string): string | null {
   } catch {
     return null;
   }
+}
+
+function isRuntimeProbeActive(): boolean {
+  if (typeof window === 'undefined') return false;
+  return Boolean((window as Window & { __AWWV_RUNTIME_PROBE_ACTIVE?: boolean }).__AWWV_RUNTIME_PROBE_ACTIVE);
 }
 
 /** Map overlay mode (HOI §3.1, §6). */
@@ -475,6 +482,10 @@ export const useGameStore = create<GameStore>((set) => ({
       // Yield once so "Loading..." can paint, but do not rely exclusively on
       // requestIdleCallback: Electron can starve idle work during scenario init.
       const schedule = (fn: () => void) => {
+        if (isRuntimeProbeActive()) {
+          queueMicrotask(fn);
+          return;
+        }
         let fired = false;
         const run = () => {
           if (fired) return;

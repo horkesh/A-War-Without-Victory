@@ -69,6 +69,7 @@ Sim runs in the main process via `dist/desktop/desktop_sim.cjs` (built by `npm r
   - both packaged tactical-map windows successfully use the real preload bridge to resolve `getMapServerUrl()` and `getCurrentGameState()` with deterministic `route_mode`, `player_faction`, and `turn` assertions
   - both packaged tactical-map windows successfully receive a deterministic `game-state-updated` push through the real desktop subscription bridge after load
   - both packaged tactical-map windows successfully receive a deterministic `turn-report-updated` push through the real desktop subscription bridge after load
+  - the real packaged operational tactical-map renderer deterministically reacts on the renderer side by updating its tactical-map store state from `game-state-updated` and `turn-report-updated` traffic under a probe-only observation hook, and proves that those store updates preserve the exact current pushed payload identity
   - packaged probe success is recorded in a deterministic manifest beside the unpacked executable so GUI runtime proof does not depend solely on stdout capture
 - `.github/workflows/desktop-release-guard.yml` now enforces that same packaged-runtime probe on `windows-latest` after the canonical Ubuntu `desktop:release:check` job. CI shipped-build truth now covers both build inputs and packaged runtime boot/resource resolution.
 - The current package productization target is an unsigned Windows `dir` build. Installer publishing, code signing, and store/distribution flow are still intentionally deferred.

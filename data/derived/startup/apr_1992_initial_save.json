@@ -1864,31 +1864,27 @@
           "arbih_102nd_motorized",
           "arbih_109th_mountain",
           "arbih_17th_muslim_light",
-          "arbih_1st_mountain",
-          "arbih_2nd_mountain",
-          "arbih_hvo_kralj_tvrtko"
+          "arbih_1st_mountain"
         ],
         "corps_id": "arbih_1st_corps",
-        "defensive_power": 72.9,
-        "density": 0,
+        "defensive_power": 57.59,
+        "density": 0.3333333333333333,
         "edge_ids": [
-          "op:centar_sarajevo:radava__op:centar_sarajevo:sarajevo_dio_centar_sajarevo",
-          "op:centar_sarajevo:radava__op:novo_sarajevo:sarajevo_dio_novo_sarajevo",
-          "op:centar_sarajevo:radava__op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
           "op:centar_sarajevo:radava__op:vogosca:hotonj",
           "op:hadzici:binjezevo__op:hadzici:misevici_2",
           "op:hadzici:hadzici__op:hadzici:misevici_2",
           "op:hadzici:misevici_2__op:hadzici:tarcin_2",
           "op:hadzici:misevici_2__op:ilidza:rakovica_2",
+          "op:ilidza:kasindo__op:ilidza:sarajevo_dio_ilidza_2",
           "op:ilidza:rakovica_2__op:ilidza:rudnik_2",
           "op:ilidza:rudnik_2__op:ilidza:sarajevo_dio_ilidza_2",
+          "op:ilidza:sarajevo_dio_ilidza_2__op:ilidza:sarajevo_dio_novi_grad_sarajevo",
           "op:ilidza:sarajevo_dio_ilidza_2__op:novi_grad_sarajevo:recica",
-          "op:novi_grad_sarajevo:recica__op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo",
-          "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo__op:vogosca:vogosca_3",
+          "op:ilidza:sarajevo_dio_ilidza_2__op:trnovo:gornja_presjenica",
           "op:vogosca:hotonj__op:vogosca:vogosca_3"
         ],
         "faction": "RBiH",
-        "length_edges": 14,
+        "length_edges": 12,
         "opposing_factions": [
           "RS"
         ],
@@ -1901,41 +1897,38 @@
         "sub_segments": [
           {
             "edge_ids": [
-              "op:centar_sarajevo:radava__op:centar_sarajevo:sarajevo_dio_centar_sajarevo",
-              "op:centar_sarajevo:radava__op:novo_sarajevo:sarajevo_dio_novo_sarajevo",
-              "op:centar_sarajevo:radava__op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
               "op:centar_sarajevo:radava__op:vogosca:hotonj",
               "op:hadzici:binjezevo__op:hadzici:misevici_2",
               "op:hadzici:hadzici__op:hadzici:misevici_2",
               "op:hadzici:misevici_2__op:hadzici:tarcin_2",
               "op:hadzici:misevici_2__op:ilidza:rakovica_2",
+              "op:ilidza:kasindo__op:ilidza:sarajevo_dio_ilidza_2",
               "op:ilidza:rakovica_2__op:ilidza:rudnik_2",
               "op:ilidza:rudnik_2__op:ilidza:sarajevo_dio_ilidza_2",
+              "op:ilidza:sarajevo_dio_ilidza_2__op:ilidza:sarajevo_dio_novi_grad_sarajevo",
               "op:ilidza:sarajevo_dio_ilidza_2__op:novi_grad_sarajevo:recica",
-              "op:novi_grad_sarajevo:recica__op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo",
-              "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo__op:vogosca:vogosca_3",
+              "op:ilidza:sarajevo_dio_ilidza_2__op:trnovo:gornja_presjenica",
               "op:vogosca:hotonj__op:vogosca:vogosca_3"
             ],
             "enemy_osids": [
               "op:centar_sarajevo:radava",
               "op:hadzici:misevici_2",
+              "op:ilidza:kasindo",
               "op:ilidza:rudnik_2",
+              "op:ilidza:sarajevo_dio_novi_grad_sarajevo",
               "op:novi_grad_sarajevo:recica",
+              "op:trnovo:gornja_presjenica",
               "op:vogosca:vogosca_3"
             ],
             "friendly_osids": [
-              "op:centar_sarajevo:sarajevo_dio_centar_sajarevo",
               "op:hadzici:binjezevo",
               "op:hadzici:hadzici",
               "op:hadzici:tarcin_2",
               "op:ilidza:rakovica_2",
               "op:ilidza:sarajevo_dio_ilidza_2",
-              "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo",
-              "op:novo_sarajevo:sarajevo_dio_novo_sarajevo",
-              "op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
               "op:vogosca:hotonj"
             ],
-            "length_edges": 14,
+            "length_edges": 12,
             "primary_brigade_ids": [],
             "sub_segment_id": "subseg:sector:arbih_1st_corps:10:merged0"
           }
@@ -1955,7 +1948,7 @@
           "op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
           "op:vogosca:hotonj"
         ],
-        "threat_ratio": 16.46090534979424
+        "threat_ratio": 67.72009029345372
       },
       "sector:arbih_1st_corps:12": {
         "assigned_brigade_ids": [
@@ -1969,22 +1962,28 @@
           "arbih_141st_light",
           "arbih_143rd_light",
           "arbih_152nd_mountain",
-          "arbih_155th_motorized"
+          "arbih_155th_motorized",
+          "arbih_2nd_mountain",
+          "arbih_hvo_kralj_tvrtko"
         ],
         "corps_id": "arbih_1st_corps",
-        "defensive_power": 387.91836734693874,
-        "density": 1.5714285714285714,
+        "defensive_power": 266.8760330578512,
+        "density": 1.1818181818181819,
         "edge_ids": [
+          "op:centar_sarajevo:radava__op:centar_sarajevo:sarajevo_dio_centar_sajarevo",
+          "op:centar_sarajevo:radava__op:novo_sarajevo:sarajevo_dio_novo_sarajevo",
+          "op:centar_sarajevo:radava__op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
           "op:centar_sarajevo:sarajevo_dio_centar_sajarevo__op:novo_sarajevo:lukavica",
-          "op:ilidza:sarajevo_dio_ilidza_2__op:ilidza:sarajevo_dio_novi_grad_sarajevo",
           "op:ilidza:sarajevo_dio_novi_grad_sarajevo__op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo",
+          "op:novi_grad_sarajevo:recica__op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo",
           "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo__op:novo_sarajevo:lukavica",
+          "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo__op:vogosca:vogosca_3",
           "op:novo_sarajevo:lukavica__op:novo_sarajevo:sarajevo_dio_novo_sarajevo",
           "op:novo_sarajevo:lukavica__op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
           "op:stari_grad_sarajevo:faletici__op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo"
         ],
         "faction": "RBiH",
-        "length_edges": 7,
+        "length_edges": 11,
         "opposing_factions": [
           "RS"
         ],
@@ -1995,51 +1994,55 @@
         "sub_segments": [
           {
             "edge_ids": [
+              "op:centar_sarajevo:radava__op:centar_sarajevo:sarajevo_dio_centar_sajarevo",
+              "op:centar_sarajevo:radava__op:novo_sarajevo:sarajevo_dio_novo_sarajevo",
+              "op:centar_sarajevo:radava__op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
               "op:centar_sarajevo:sarajevo_dio_centar_sajarevo__op:novo_sarajevo:lukavica",
-              "op:ilidza:sarajevo_dio_ilidza_2__op:ilidza:sarajevo_dio_novi_grad_sarajevo",
               "op:ilidza:sarajevo_dio_novi_grad_sarajevo__op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo",
+              "op:novi_grad_sarajevo:recica__op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo",
               "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo__op:novo_sarajevo:lukavica",
+              "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo__op:vogosca:vogosca_3",
               "op:novo_sarajevo:lukavica__op:novo_sarajevo:sarajevo_dio_novo_sarajevo",
               "op:novo_sarajevo:lukavica__op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
               "op:stari_grad_sarajevo:faletici__op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo"
             ],
             "enemy_osids": [
+              "op:centar_sarajevo:radava",
               "op:ilidza:sarajevo_dio_novi_grad_sarajevo",
+              "op:novi_grad_sarajevo:recica",
               "op:novo_sarajevo:lukavica",
-              "op:stari_grad_sarajevo:faletici"
+              "op:stari_grad_sarajevo:faletici",
+              "op:vogosca:vogosca_3"
             ],
             "friendly_osids": [
               "op:centar_sarajevo:sarajevo_dio_centar_sajarevo",
-              "op:ilidza:sarajevo_dio_ilidza_2",
               "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo",
               "op:novo_sarajevo:sarajevo_dio_novo_sarajevo",
               "op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo"
             ],
-            "length_edges": 7,
+            "length_edges": 11,
             "primary_brigade_ids": [],
             "sub_segment_id": "subseg:sector:arbih_1st_corps:27:merged25"
           }
         ],
         "territory_osids": [],
-        "threat_ratio": 3.8667929292929295
+        "threat_ratio": 10.117056856187292
       },
       "sector:arbih_1st_corps:14": {
         "assigned_brigade_ids": [
           "arbih_802nd_light"
         ],
         "corps_id": "arbih_1st_corps",
-        "defensive_power": 21.119999999999997,
-        "density": 0.16666666666666666,
+        "defensive_power": 34.559999999999995,
+        "density": 0.25,
         "edge_ids": [
-          "op:gorazde:osjecani_2__op:pale:bulozi",
-          "op:gorazde:osjecani_2__op:pale:vrazalice",
+          "op:foca:donje_zesce__op:pale:podgrab",
           "op:pale:bulozi__op:pale:podgrab",
           "op:pale:bulozi__op:rogatica:kramer_selo_2",
-          "op:pale:vrazalice__op:rogatica:kramer_selo_2",
-          "op:pale:vrazalice__op:rogatica:varosiste_2"
+          "op:pale:vrazalice__op:rogatica:kramer_selo_2"
         ],
         "faction": "RBiH",
-        "length_edges": 6,
+        "length_edges": 4,
         "opposing_factions": [
           "RS"
         ],
@@ -2050,24 +2053,21 @@
         "sub_segments": [
           {
             "edge_ids": [
-              "op:gorazde:osjecani_2__op:pale:bulozi",
-              "op:gorazde:osjecani_2__op:pale:vrazalice",
+              "op:foca:donje_zesce__op:pale:podgrab",
               "op:pale:bulozi__op:pale:podgrab",
               "op:pale:bulozi__op:rogatica:kramer_selo_2",
-              "op:pale:vrazalice__op:rogatica:kramer_selo_2",
-              "op:pale:vrazalice__op:rogatica:varosiste_2"
+              "op:pale:vrazalice__op:rogatica:kramer_selo_2"
             ],
             "enemy_osids": [
+              "op:foca:donje_zesce",
               "op:pale:bulozi",
               "op:pale:vrazalice"
             ],
             "friendly_osids": [
-              "op:gorazde:osjecani_2",
               "op:pale:podgrab",
-              "op:rogatica:kramer_selo_2",
-              "op:rogatica:varosiste_2"
+              "op:rogatica:kramer_selo_2"
             ],
-            "length_edges": 6,
+            "length_edges": 4,
             "primary_brigade_ids": [],
             "sub_segment_id": "subseg:sector:arbih_1st_corps:29:merged26"
           }
@@ -2078,7 +2078,7 @@
           "op:rogatica:kramer_selo_2",
           "op:rogatica:varosiste_2"
         ],
-        "threat_ratio": 56.81818181818183
+        "threat_ratio": 34.72222222222223
       },
       "sector:arbih_1st_corps:15": {
         "assigned_brigade_ids": [
@@ -2086,19 +2086,17 @@
           "arbih_808th_liberation"
         ],
         "corps_id": "arbih_1st_corps",
-        "defensive_power": 51.134693877551015,
-        "density": 0.2857142857142857,
+        "defensive_power": 79.488,
+        "density": 0.4,
         "edge_ids": [
           "op:cajnice:batotici__op:gorazde:podkozara_donja_2",
           "op:cajnice:miljeno_2__op:gorazde:podkozara_donja_2",
-          "op:gorazde:bacci__op:gorazde:podkozara_donja_2",
-          "op:gorazde:gorazde_2__op:gorazde:podkozara_donja_2",
           "op:gorazde:kolovarice__op:gorazde:podkozara_donja_2",
-          "op:gorazde:podkozara_donja_2__op:gorazde:slatina_2",
-          "op:gorazde:podkozara_donja_2__op:gorazde:ustipraca_2"
+          "op:gorazde:podkozara_donja_2__op:gorazde:ustipraca_2",
+          "op:gorazde:sopotnica__op:gorazde:ustipraca_2"
         ],
         "faction": "RBiH",
-        "length_edges": 7,
+        "length_edges": 5,
         "opposing_factions": [
           "RS"
         ],
@@ -2111,25 +2109,21 @@
             "edge_ids": [
               "op:cajnice:batotici__op:gorazde:podkozara_donja_2",
               "op:cajnice:miljeno_2__op:gorazde:podkozara_donja_2",
-              "op:gorazde:bacci__op:gorazde:podkozara_donja_2",
-              "op:gorazde:gorazde_2__op:gorazde:podkozara_donja_2",
               "op:gorazde:kolovarice__op:gorazde:podkozara_donja_2",
-              "op:gorazde:podkozara_donja_2__op:gorazde:slatina_2",
-              "op:gorazde:podkozara_donja_2__op:gorazde:ustipraca_2"
+              "op:gorazde:podkozara_donja_2__op:gorazde:ustipraca_2",
+              "op:gorazde:sopotnica__op:gorazde:ustipraca_2"
             ],
             "enemy_osids": [
-              "op:gorazde:podkozara_donja_2"
+              "op:gorazde:podkozara_donja_2",
+              "op:gorazde:sopotnica"
             ],
             "friendly_osids": [
               "op:cajnice:batotici",
               "op:cajnice:miljeno_2",
-              "op:gorazde:bacci",
-              "op:gorazde:gorazde_2",
               "op:gorazde:kolovarice",
-              "op:gorazde:slatina_2",
               "op:gorazde:ustipraca_2"
             ],
-            "length_edges": 7,
+            "length_edges": 5,
             "primary_brigade_ids": [],
             "sub_segment_id": "subseg:arbih_1st_corps:7"
           }
@@ -2148,18 +2142,17 @@
           "arbih_843rd_light"
         ],
         "corps_id": "arbih_1st_corps",
-        "defensive_power": 31.679999999999996,
-        "density": 0.16666666666666666,
+        "defensive_power": 39.398399999999995,
+        "density": 0.2,
         "edge_ids": [
           "op:foca:donje_zesce__op:foca:izbisno",
           "op:foca:donje_zesce__op:foca:patkovina",
           "op:foca:donje_zesce__op:foca:ustikolina",
           "op:foca:donje_zesce__op:gorazde:faocici_2",
-          "op:foca:donje_zesce__op:gorazde:hrancici",
-          "op:foca:donje_zesce__op:pale:podgrab"
+          "op:foca:donje_zesce__op:gorazde:hrancici"
         ],
         "faction": "RBiH",
-        "length_edges": 6,
+        "length_edges": 5,
         "opposing_factions": [
           "RS"
         ],
@@ -2174,8 +2167,7 @@
               "op:foca:donje_zesce__op:foca:patkovina",
               "op:foca:donje_zesce__op:foca:ustikolina",
               "op:foca:donje_zesce__op:gorazde:faocici_2",
-              "op:foca:donje_zesce__op:gorazde:hrancici",
-              "op:foca:donje_zesce__op:pale:podgrab"
+              "op:foca:donje_zesce__op:gorazde:hrancici"
             ],
             "enemy_osids": [
               "op:foca:donje_zesce"
@@ -2185,10 +2177,9 @@
               "op:foca:patkovina",
               "op:foca:ustikolina",
               "op:gorazde:faocici_2",
-              "op:gorazde:hrancici",
-              "op:pale:podgrab"
+              "op:gorazde:hrancici"
             ],
-            "length_edges": 6,
+            "length_edges": 5,
             "primary_brigade_ids": [],
             "sub_segment_id": "subseg:arbih_1st_corps:9"
           }
@@ -2201,24 +2192,24 @@
         "threat_ratio": 0
       },
       "sector:arbih_1st_corps:19": {
-        "assigned_brigade_ids": [],
+        "assigned_brigade_ids": [
+          "arbih_165th_mountain"
+        ],
         "corps_id": "arbih_1st_corps",
-        "defensive_power": 0,
-        "density": 0,
+        "defensive_power": 60,
+        "density": 0.25,
         "edge_ids": [
           "op:ilidza:rudnik_2__op:kiseljak:drazevici",
-          "op:ilidza:rudnik_2__op:visoko:rajcici_2",
           "op:ilidza:rudnik_2__op:visoko:stuparici_2",
-          "op:ilijas:podlugovi__op:visoko:stuparici_2"
+          "op:ilijas:podlugovi__op:visoko:stuparici_2",
+          "op:visoko:gornja_vratnica_2__op:visoko:stuparici_2"
         ],
         "faction": "RBiH",
         "length_edges": 4,
         "opposing_factions": [
           "RS"
         ],
-        "reserve_brigade_ids": [
-          "arbih_165th_mountain"
-        ],
+        "reserve_brigade_ids": [],
         "sector_id": "sector:arbih_1st_corps:19",
         "sector_stance": "defend",
         "stance_source": "bot",
@@ -2226,17 +2217,17 @@
           {
             "edge_ids": [
               "op:ilidza:rudnik_2__op:kiseljak:drazevici",
-              "op:ilidza:rudnik_2__op:visoko:rajcici_2",
               "op:ilidza:rudnik_2__op:visoko:stuparici_2",
-              "op:ilijas:podlugovi__op:visoko:stuparici_2"
+              "op:ilijas:podlugovi__op:visoko:stuparici_2",
+              "op:visoko:gornja_vratnica_2__op:visoko:stuparici_2"
             ],
             "enemy_osids": [
               "op:ilidza:rudnik_2",
-              "op:ilijas:podlugovi"
+              "op:ilijas:podlugovi",
+              "op:visoko:gornja_vratnica_2"
             ],
             "friendly_osids": [
               "op:kiseljak:drazevici",
-              "op:visoko:rajcici_2",
               "op:visoko:stuparici_2"
             ],
             "length_edges": 4,
@@ -2361,33 +2352,38 @@
         "threat_ratio": 210.0840336134454
       },
       "sector:arbih_1st_corps:5": {
-        "assigned_brigade_ids": [],
+        "assigned_brigade_ids": [
+          "arbih_851st_vitezka_liberation"
+        ],
         "corps_id": "arbih_1st_corps",
-        "defensive_power": 0,
-        "density": 0,
+        "defensive_power": 6.186666666666665,
+        "density": 0.05555555555555555,
         "edge_ids": [
           "op:gorazde:bacci__op:gorazde:glamoc",
           "op:gorazde:bacci__op:gorazde:kamen",
+          "op:gorazde:bacci__op:gorazde:podkozara_donja_2",
           "op:gorazde:citluk_2__op:gorazde:kamen",
           "op:gorazde:glamoc__op:gorazde:gorazde_2",
           "op:gorazde:glamoc__op:gorazde:osjecani_2",
+          "op:gorazde:gorazde_2__op:gorazde:podkozara_donja_2",
           "op:gorazde:gorazde_2__op:gorazde:sopotnica",
           "op:gorazde:kamen__op:gorazde:mravinjac_2",
           "op:gorazde:kamen__op:gorazde:osjecani_2",
           "op:gorazde:osjecani_2__op:gorazde:sopotnica",
+          "op:gorazde:osjecani_2__op:pale:bulozi",
+          "op:gorazde:osjecani_2__op:pale:vrazalice",
+          "op:gorazde:podkozara_donja_2__op:gorazde:slatina_2",
           "op:gorazde:slatina_2__op:gorazde:sopotnica",
-          "op:gorazde:sopotnica__op:gorazde:ustipraca_2",
           "op:gorazde:sopotnica__op:rogatica:brcigovo",
-          "op:gorazde:sopotnica__op:rogatica:varosiste_2"
+          "op:gorazde:sopotnica__op:rogatica:varosiste_2",
+          "op:pale:vrazalice__op:rogatica:varosiste_2"
         ],
         "faction": "RBiH",
-        "length_edges": 13,
+        "length_edges": 18,
         "opposing_factions": [
           "RS"
         ],
-        "reserve_brigade_ids": [
-          "arbih_851st_vitezka_liberation"
-        ],
+        "reserve_brigade_ids": [],
         "sector_id": "sector:arbih_1st_corps:5",
         "sector_stance": "defend",
         "stance_source": "bot",
@@ -2396,22 +2392,30 @@
             "edge_ids": [
               "op:gorazde:bacci__op:gorazde:glamoc",
               "op:gorazde:bacci__op:gorazde:kamen",
+              "op:gorazde:bacci__op:gorazde:podkozara_donja_2",
               "op:gorazde:citluk_2__op:gorazde:kamen",
               "op:gorazde:glamoc__op:gorazde:gorazde_2",
               "op:gorazde:glamoc__op:gorazde:osjecani_2",
+              "op:gorazde:gorazde_2__op:gorazde:podkozara_donja_2",
               "op:gorazde:gorazde_2__op:gorazde:sopotnica",
               "op:gorazde:kamen__op:gorazde:mravinjac_2",
               "op:gorazde:kamen__op:gorazde:osjecani_2",
               "op:gorazde:osjecani_2__op:gorazde:sopotnica",
+              "op:gorazde:osjecani_2__op:pale:bulozi",
+              "op:gorazde:osjecani_2__op:pale:vrazalice",
+              "op:gorazde:podkozara_donja_2__op:gorazde:slatina_2",
               "op:gorazde:slatina_2__op:gorazde:sopotnica",
-              "op:gorazde:sopotnica__op:gorazde:ustipraca_2",
               "op:gorazde:sopotnica__op:rogatica:brcigovo",
-              "op:gorazde:sopotnica__op:rogatica:varosiste_2"
+              "op:gorazde:sopotnica__op:rogatica:varosiste_2",
+              "op:pale:vrazalice__op:rogatica:varosiste_2"
             ],
             "enemy_osids": [
               "op:gorazde:glamoc",
               "op:gorazde:kamen",
-              "op:gorazde:sopotnica"
+              "op:gorazde:podkozara_donja_2",
+              "op:gorazde:sopotnica",
+              "op:pale:bulozi",
+              "op:pale:vrazalice"
             ],
             "friendly_osids": [
               "op:gorazde:bacci",
@@ -2420,11 +2424,10 @@
               "op:gorazde:mravinjac_2",
               "op:gorazde:osjecani_2",
               "op:gorazde:slatina_2",
-              "op:gorazde:ustipraca_2",
               "op:rogatica:brcigovo",
               "op:rogatica:varosiste_2"
             ],
-            "length_edges": 13,
+            "length_edges": 18,
             "primary_brigade_ids": [],
             "sub_segment_id": "subseg:arbih_1st_corps:10"
           }
@@ -2441,24 +2444,22 @@
           "op:rogatica:brcigovo",
           "op:rogatica:varosiste_2"
         ],
-        "threat_ratio": 0
+        "threat_ratio": 193.96551724137936
       },
       "sector:arbih_1st_corps:7": {
         "assigned_brigade_ids": [
           "arbih_181st_mountain"
         ],
         "corps_id": "arbih_1st_corps",
-        "defensive_power": 20.52,
-        "density": 0.2,
+        "defensive_power": 39,
+        "density": 0.3333333333333333,
         "edge_ids": [
           "op:hadzici:lokve__op:trnovo:gornja_presjenica",
-          "op:ilidza:kasindo__op:ilidza:sarajevo_dio_ilidza_2",
-          "op:ilidza:sarajevo_dio_ilidza_2__op:trnovo:gornja_presjenica",
           "op:trnovo:gornja_presjenica__op:trnovo:trnovo",
           "op:trnovo:gornja_presjenica__op:trnovo:tusila"
         ],
         "faction": "RBiH",
-        "length_edges": 5,
+        "length_edges": 3,
         "opposing_factions": [
           "RS"
         ],
@@ -2472,22 +2473,18 @@
           {
             "edge_ids": [
               "op:hadzici:lokve__op:trnovo:gornja_presjenica",
-              "op:ilidza:kasindo__op:ilidza:sarajevo_dio_ilidza_2",
-              "op:ilidza:sarajevo_dio_ilidza_2__op:trnovo:gornja_presjenica",
               "op:trnovo:gornja_presjenica__op:trnovo:trnovo",
               "op:trnovo:gornja_presjenica__op:trnovo:tusila"
             ],
             "enemy_osids": [
-              "op:ilidza:kasindo",
               "op:trnovo:gornja_presjenica"
             ],
             "friendly_osids": [
               "op:hadzici:lokve",
-              "op:ilidza:sarajevo_dio_ilidza_2",
               "op:trnovo:trnovo",
               "op:trnovo:tusila"
             ],
-            "length_edges": 5,
+            "length_edges": 3,
             "primary_brigade_ids": [],
             "sub_segment_id": "subseg:sector:arbih_1st_corps:23:split1"
           }
@@ -2498,7 +2495,7 @@
           "op:trnovo:trnovo",
           "op:trnovo:tusila"
         ],
-        "threat_ratio": 58.47953216374269
+        "threat_ratio": 0
       },
       "sector:arbih_1st_corps:8": {
         "assigned_brigade_ids": [
@@ -2507,18 +2504,19 @@
           "arbih_146th_light"
         ],
         "corps_id": "arbih_1st_corps",
-        "defensive_power": 42,
-        "density": 0.5,
+        "defensive_power": 33.94285714285714,
+        "density": 0.42857142857142855,
         "edge_ids": [
           "op:breza:mahala__op:visoko:gornja_vratnica_2",
+          "op:breza:zupca_2__op:ilijas:podlugovi",
           "op:breza:zupca_2__op:visoko:gornja_vratnica_2",
+          "op:ilidza:rudnik_2__op:visoko:rajcici_2",
           "op:visoko:gornja_vratnica_2__op:visoko:podvinjci_2",
           "op:visoko:gornja_vratnica_2__op:visoko:rajcici_2",
-          "op:visoko:gornja_vratnica_2__op:visoko:stuparici_2",
           "op:visoko:gornja_vratnica_2__op:visoko:visoko_2"
         ],
         "faction": "RBiH",
-        "length_edges": 6,
+        "length_edges": 7,
         "opposing_factions": [
           "RS"
         ],
@@ -2532,13 +2530,16 @@
           {
             "edge_ids": [
               "op:breza:mahala__op:visoko:gornja_vratnica_2",
+              "op:breza:zupca_2__op:ilijas:podlugovi",
               "op:breza:zupca_2__op:visoko:gornja_vratnica_2",
+              "op:ilidza:rudnik_2__op:visoko:rajcici_2",
               "op:visoko:gornja_vratnica_2__op:visoko:podvinjci_2",
               "op:visoko:gornja_vratnica_2__op:visoko:rajcici_2",
-              "op:visoko:gornja_vratnica_2__op:visoko:stuparici_2",
               "op:visoko:gornja_vratnica_2__op:visoko:visoko_2"
             ],
             "enemy_osids": [
+              "op:ilidza:rudnik_2",
+              "op:ilijas:podlugovi",
               "op:visoko:gornja_vratnica_2"
             ],
             "friendly_osids": [
@@ -2546,10 +2547,9 @@
               "op:breza:zupca_2",
               "op:visoko:podvinjci_2",
               "op:visoko:rajcici_2",
-              "op:visoko:stuparici_2",
               "op:visoko:visoko_2"
             ],
-            "length_edges": 6,
+            "length_edges": 7,
             "primary_brigade_ids": [],
             "sub_segment_id": "subseg:arbih_1st_corps:3"
           }
@@ -2585,17 +2585,16 @@
           "arbih_185th_light"
         ],
         "corps_id": "arbih_1st_corps",
-        "defensive_power": 30.912,
-        "density": 0.4,
+        "defensive_power": 42,
+        "density": 0.5,
         "edge_ids": [
           "op:breza:podgora__op:ilijas:podlugovi",
           "op:breza:podgora__op:ilijas:srednje",
-          "op:breza:zupca_2__op:ilijas:podlugovi",
           "op:ilijas:srednje__op:vares:budozelje_2",
           "op:vares:budozelje_2__op:vares:toljenak"
         ],
         "faction": "RBiH",
-        "length_edges": 5,
+        "length_edges": 4,
         "opposing_factions": [
           "RS"
         ],
@@ -2608,7 +2607,6 @@
             "edge_ids": [
               "op:breza:podgora__op:ilijas:podlugovi",
               "op:breza:podgora__op:ilijas:srednje",
-              "op:breza:zupca_2__op:ilijas:podlugovi",
               "op:ilijas:srednje__op:vares:budozelje_2",
               "op:vares:budozelje_2__op:vares:toljenak"
             ],
@@ -2619,10 +2617,9 @@
             ],
             "friendly_osids": [
               "op:breza:podgora",
-              "op:breza:zupca_2",
               "op:vares:budozelje_2"
             ],
-            "length_edges": 5,
+            "length_edges": 4,
             "primary_brigade_ids": [],
             "sub_segment_id": "subseg:arbih_1st_corps:4"
           }
@@ -2638,17 +2635,16 @@
           "arbih_280th_east_bosnian_light"
         ],
         "corps_id": "arbih_2nd_corps",
-        "defensive_power": 25.536,
-        "density": 0.2,
+        "defensive_power": 33.6,
+        "density": 0.25,
         "edge_ids": [
-          "op:srebrenica:donji_potocari_2__op:srebrenica:obadi",
           "op:srebrenica:ljeskovik_2__op:srebrenica:obadi",
           "op:srebrenica:obadi__op:srebrenica:osmace_2",
           "op:srebrenica:obadi__op:srebrenica:srebrenica_2",
           "op:srebrenica:obadi__op:srebrenica:sulice_2"
         ],
         "faction": "RBiH",
-        "length_edges": 5,
+        "length_edges": 4,
         "opposing_factions": [
           "RS"
         ],
@@ -2659,7 +2655,6 @@
         "sub_segments": [
           {
             "edge_ids": [
-              "op:srebrenica:donji_potocari_2__op:srebrenica:obadi",
               "op:srebrenica:ljeskovik_2__op:srebrenica:obadi",
               "op:srebrenica:obadi__op:srebrenica:osmace_2",
               "op:srebrenica:obadi__op:srebrenica:srebrenica_2",
@@ -2669,13 +2664,12 @@
               "op:srebrenica:obadi"
             ],
             "friendly_osids": [
-              "op:srebrenica:donji_potocari_2",
               "op:srebrenica:ljeskovik_2",
               "op:srebrenica:osmace_2",
               "op:srebrenica:srebrenica_2",
               "op:srebrenica:sulice_2"
             ],
-            "length_edges": 5,
+            "length_edges": 4,
             "primary_brigade_ids": [],
             "sub_segment_id": "subseg:arbih_2nd_corps:13"
           }
@@ -2762,8 +2756,8 @@
           "arbih_285th_light"
         ],
         "corps_id": "arbih_2nd_corps",
-        "defensive_power": 16.442906574394463,
-        "density": 0.058823529411764705,
+        "defensive_power": 15.466666666666665,
+        "density": 0.05555555555555555,
         "edge_ids": [
           "op:bratunac:glogova__op:bratunac:jezestica_2",
           "op:bratunac:glogova__op:bratunac:polom",
@@ -2779,12 +2773,13 @@
           "op:rogatica:stara_gora__op:visegrad:kamenica_2",
           "op:rogatica:stara_gora__op:visegrad:prelovo_2",
           "op:srebrenica:bostahovine_2__op:vlasenica:sebiocina",
+          "op:srebrenica:donji_potocari_2__op:srebrenica:obadi",
           "op:srebrenica:luka_2__op:vlasenica:sebiocina",
           "op:vlasenica:bacici__op:vlasenica:pomol_2",
           "op:vlasenica:pomol_2__op:vlasenica:sebiocina"
         ],
         "faction": "RBiH",
-        "length_edges": 17,
+        "length_edges": 18,
         "opposing_factions": [
           "RS"
         ],
@@ -2809,6 +2804,7 @@
               "op:rogatica:stara_gora__op:visegrad:kamenica_2",
               "op:rogatica:stara_gora__op:visegrad:prelovo_2",
               "op:srebrenica:bostahovine_2__op:vlasenica:sebiocina",
+              "op:srebrenica:donji_potocari_2__op:srebrenica:obadi",
               "op:srebrenica:luka_2__op:vlasenica:sebiocina",
               "op:vlasenica:bacici__op:vlasenica:pomol_2",
               "op:vlasenica:pomol_2__op:vlasenica:sebiocina"
@@ -2820,6 +2816,7 @@
               "op:hanpijesak:han_pijesak_2",
               "op:rogatica:pljesevica",
               "op:rogatica:stara_gora",
+              "op:srebrenica:obadi",
               "op:vlasenica:bacici",
               "op:vlasenica:sebiocina"
             ],
@@ -2835,7 +2832,7 @@
               "op:visegrad:prelovo_2",
               "op:vlasenica:pomol_2"
             ],
-            "length_edges": 17,
+            "length_edges": 18,
             "primary_brigade_ids": [],
             "sub_segment_id": "subseg:arbih_2nd_corps:3"
           }
@@ -2853,24 +2850,22 @@
           "op:visegrad:prelovo_2",
           "op:vlasenica:pomol_2"
         ],
-        "threat_ratio": 510.85858585858585
+        "threat_ratio": 543.1034482758621
       },
       "sector:arbih_2nd_corps:4": {
         "assigned_brigade_ids": [
           "arbih_215th_vitezka_mountain"
         ],
         "corps_id": "arbih_2nd_corps",
-        "defensive_power": 36.480000000000004,
-        "density": 0.2,
+        "defensive_power": 69.33333333333333,
+        "density": 0.3333333333333333,
         "edge_ids": [
           "op:brcko:bijela_2__op:brcko:bukvik_gornji_2",
           "op:brcko:bukvik_gornji_2__op:brcko:gornji_rahic_2",
-          "op:brcko:bukvik_gornji_2__op:brcko:maoca_2",
-          "op:brcko:bukvik_gornji_2__op:brcko:palanka",
-          "op:brcko:bukvik_gornji_2__op:brcko:skakava_donja"
+          "op:brcko:bukvik_gornji_2__op:brcko:maoca_2"
         ],
         "faction": "RBiH",
-        "length_edges": 5,
+        "length_edges": 3,
         "opposing_factions": [
           "RS"
         ],
@@ -2883,9 +2878,7 @@
             "edge_ids": [
               "op:brcko:bijela_2__op:brcko:bukvik_gornji_2",
               "op:brcko:bukvik_gornji_2__op:brcko:gornji_rahic_2",
-              "op:brcko:bukvik_gornji_2__op:brcko:maoca_2",
-              "op:brcko:bukvik_gornji_2__op:brcko:palanka",
-              "op:brcko:bukvik_gornji_2__op:brcko:skakava_donja"
+              "op:brcko:bukvik_gornji_2__op:brcko:maoca_2"
             ],
             "enemy_osids": [
               "op:brcko:bukvik_gornji_2"
@@ -2893,11 +2886,9 @@
             "friendly_osids": [
               "op:brcko:bijela_2",
               "op:brcko:gornji_rahic_2",
-              "op:brcko:maoca_2",
-              "op:brcko:palanka",
-              "op:brcko:skakava_donja"
+              "op:brcko:maoca_2"
             ],
-            "length_edges": 5,
+            "length_edges": 3,
             "primary_brigade_ids": [],
             "sub_segment_id": "subseg:arbih_2nd_corps:6"
           }
@@ -2921,27 +2912,30 @@
           "hrhb_108th_brko_brigade"
         ],
         "corps_id": "arbih_2nd_corps",
-        "defensive_power": 18.34506666666667,
-        "density": 0.13333333333333333,
+        "defensive_power": 14.902962962962963,
+        "density": 0.1111111111111111,
         "edge_ids": [
           "op:brcko:boce_2__op:brcko:potocari_2",
           "op:brcko:boce_2__op:lopare:mrtvica_2",
           "op:brcko:brcko__op:brcko:brka_2",
           "op:brcko:brka_2__op:brcko:donji_rahic",
           "op:brcko:brka_2__op:brcko:potocari_2",
+          "op:brcko:bukvik_gornji_2__op:brcko:palanka",
+          "op:brcko:bukvik_gornji_2__op:brcko:skakava_donja",
           "op:brcko:donji_rahic__op:brcko:krepsic",
           "op:brcko:donji_rahic__op:brcko:palanka",
           "op:brcko:donji_rahic__op:brcko:skakava_donja",
+          "op:brcko:krepsic__op:gradacac:pelagicevo",
+          "op:brcko:skakava_donja__op:gradacac:pelagicevo",
           "op:lopare:celic_3__op:lopare:koraj_4",
           "op:lopare:celic_3__op:lopare:mrtvica_2",
           "op:lopare:jablanica_2__op:lopare:nahvioci",
-          "op:lopare:jablanica_2__op:tuzla:gornja_tuzla",
           "op:lopare:jablanica_2__op:tuzla:obodnica_donja_2",
           "op:lopare:koraj_4__op:lopare:nahvioci",
           "op:lopare:lopare_2__op:lopare:nahvioci"
         ],
         "faction": "RBiH",
-        "length_edges": 15,
+        "length_edges": 18,
         "opposing_factions": [
           "RS"
         ],
@@ -2959,21 +2953,26 @@
               "op:brcko:brcko__op:brcko:brka_2",
               "op:brcko:brka_2__op:brcko:donji_rahic",
               "op:brcko:brka_2__op:brcko:potocari_2",
+              "op:brcko:bukvik_gornji_2__op:brcko:palanka",
+              "op:brcko:bukvik_gornji_2__op:brcko:skakava_donja",
               "op:brcko:donji_rahic__op:brcko:krepsic",
               "op:brcko:donji_rahic__op:brcko:palanka",
               "op:brcko:donji_rahic__op:brcko:skakava_donja",
+              "op:brcko:krepsic__op:gradacac:pelagicevo",
+              "op:brcko:skakava_donja__op:gradacac:pelagicevo",
               "op:lopare:celic_3__op:lopare:koraj_4",
               "op:lopare:celic_3__op:lopare:mrtvica_2",
               "op:lopare:jablanica_2__op:lopare:nahvioci",
-              "op:lopare:jablanica_2__op:tuzla:gornja_tuzla",
               "op:lopare:jablanica_2__op:tuzla:obodnica_donja_2",
               "op:lopare:koraj_4__op:lopare:nahvioci",
               "op:lopare:lopare_2__op:lopare:nahvioci"
             ],
             "enemy_osids": [
               "op:brcko:brcko",
+              "op:brcko:bukvik_gornji_2",
               "op:brcko:donji_rahic",
               "op:brcko:potocari_2",
+              "op:gradacac:pelagicevo",
               "op:lopare:jablanica_2",
               "op:lopare:koraj_4",
               "op:lopare:lopare_2",
@@ -2987,10 +2986,9 @@
               "op:brcko:skakava_donja",
               "op:lopare:celic_3",
               "op:lopare:nahvioci",
-              "op:tuzla:gornja_tuzla",
               "op:tuzla:obodnica_donja_2"
             ],
-            "length_edges": 15,
+            "length_edges": 18,
             "primary_brigade_ids": [],
             "sub_segment_id": "subseg:arbih_2nd_corps:7"
           }
@@ -3009,24 +3007,21 @@
           "op:tuzla:lipnica_gornja_2",
           "op:tuzla:obodnica_donja_2"
         ],
-        "threat_ratio": 54.510567782074006
+        "threat_ratio": 117.42631343506139
       },
       "sector:arbih_2nd_corps:6": {
         "assigned_brigade_ids": [
           "arbih_213th_vitezka_mountain"
         ],
         "corps_id": "arbih_2nd_corps",
-        "defensive_power": 47.424,
-        "density": 0.2,
+        "defensive_power": 156,
+        "density": 0.5,
         "edge_ids": [
-          "op:brcko:krepsic__op:gradacac:pelagicevo",
-          "op:brcko:skakava_donja__op:gradacac:pelagicevo",
           "op:gradacac:donja_tramosnica_2__op:gradacac:pelagicevo",
-          "op:gradacac:gradacac_2__op:gradacac:pelagicevo",
           "op:gradacac:mionica__op:gradacac:pelagicevo"
         ],
         "faction": "RBiH",
-        "length_edges": 5,
+        "length_edges": 2,
         "opposing_factions": [
           "RS"
         ],
@@ -3037,23 +3032,17 @@
         "sub_segments": [
           {
             "edge_ids": [
-              "op:brcko:krepsic__op:gradacac:pelagicevo",
-              "op:brcko:skakava_donja__op:gradacac:pelagicevo",
               "op:gradacac:donja_tramosnica_2__op:gradacac:pelagicevo",
-              "op:gradacac:gradacac_2__op:gradacac:pelagicevo",
               "op:gradacac:mionica__op:gradacac:pelagicevo"
             ],
             "enemy_osids": [
               "op:gradacac:pelagicevo"
             ],
             "friendly_osids": [
-              "op:brcko:krepsic",
-              "op:brcko:skakava_donja",
               "op:gradacac:donja_tramosnica_2",
-              "op:gradacac:gradacac_2",
               "op:gradacac:mionica"
             ],
-            "length_edges": 5,
+            "length_edges": 2,
             "primary_brigade_ids": [],
             "sub_segment_id": "subseg:arbih_2nd_corps:8"
           }
@@ -3063,21 +3052,22 @@
           "op:gradacac:gradacac_2",
           "op:gradacac:mionica"
         ],
-        "threat_ratio": 15.814777327935223
+        "threat_ratio": 4.8076923076923075
       },
       "sector:arbih_2nd_corps:7": {
         "assigned_brigade_ids": [
           "arbih_217th_vitezka_mountain"
         ],
         "corps_id": "arbih_2nd_corps",
-        "defensive_power": 120,
-        "density": 0.5,
+        "defensive_power": 69.33333333333333,
+        "density": 0.3333333333333333,
         "edge_ids": [
+          "op:gradacac:gradacac_2__op:gradacac:pelagicevo",
           "op:gradacac:gradacac_2__op:modrica:skugric_gornji_2",
           "op:gradacac:zelinja_donja_2__op:modrica:skugric_gornji_2"
         ],
         "faction": "RBiH",
-        "length_edges": 2,
+        "length_edges": 3,
         "opposing_factions": [
           "RS"
         ],
@@ -3088,17 +3078,19 @@
         "sub_segments": [
           {
             "edge_ids": [
+              "op:gradacac:gradacac_2__op:gradacac:pelagicevo",
               "op:gradacac:gradacac_2__op:modrica:skugric_gornji_2",
               "op:gradacac:zelinja_donja_2__op:modrica:skugric_gornji_2"
             ],
             "enemy_osids": [
+              "op:gradacac:pelagicevo",
               "op:modrica:skugric_gornji_2"
             ],
             "friendly_osids": [
               "op:gradacac:gradacac_2",
               "op:gradacac:zelinja_donja_2"
             ],
-            "length_edges": 2,
+            "length_edges": 3,
             "primary_brigade_ids": [],
             "sub_segment_id": "subseg:arbih_2nd_corps:9"
           }
@@ -3106,7 +3098,7 @@
         "territory_osids": [
           "op:gradacac:zelinja_donja_2"
         ],
-        "threat_ratio": 8.333333333333334
+        "threat_ratio": 25.240384615384617
       },
       "sector:arbih_2nd_corps:9": {
         "assigned_brigade_ids": [
@@ -3114,8 +3106,8 @@
           "arbih_250th_liberation"
         ],
         "corps_id": "arbih_2nd_corps",
-        "defensive_power": 16.897959183673468,
-        "density": 0.14285714285714285,
+        "defensive_power": 15.6032,
+        "density": 0.13333333333333333,
         "edge_ids": [
           "op:kalesija:kalesija_grad_2__op:zvornik:rastosnica_2",
           "op:kalesija:kalesija_selo__op:zvornik:rastosnica_2",
@@ -3123,6 +3115,7 @@
           "op:kalesija:kikaci__op:tuzla:simin_han_2",
           "op:kalesija:kikaci__op:zvornik:rastosnica_2",
           "op:kalesija:tojsici_2__op:tuzla:simin_han_2",
+          "op:lopare:jablanica_2__op:tuzla:gornja_tuzla",
           "op:lopare:lopare_selo_2__op:tuzla:gornja_tuzla",
           "op:tuzla:gornja_tuzla__op:tuzla:simin_han_2",
           "op:tuzla:simin_han_2__op:tuzla:tuzla_2",
@@ -3133,7 +3126,7 @@
           "op:zvornik:rastosnica_2__op:zvornik:sapna"
         ],
         "faction": "RBiH",
-        "length_edges": 14,
+        "length_edges": 15,
         "opposing_factions": [
           "RS"
         ],
@@ -3152,6 +3145,7 @@
               "op:kalesija:kikaci__op:tuzla:simin_han_2",
               "op:kalesija:kikaci__op:zvornik:rastosnica_2",
               "op:kalesija:tojsici_2__op:tuzla:simin_han_2",
+              "op:lopare:jablanica_2__op:tuzla:gornja_tuzla",
               "op:lopare:lopare_selo_2__op:tuzla:gornja_tuzla",
               "op:tuzla:gornja_tuzla__op:tuzla:simin_han_2",
               "op:tuzla:simin_han_2__op:tuzla:tuzla_2",
@@ -3162,6 +3156,7 @@
               "op:zvornik:rastosnica_2__op:zvornik:sapna"
             ],
             "enemy_osids": [
+              "op:lopare:jablanica_2",
               "op:lopare:lopare_selo_2",
               "op:tuzla:simin_han_2",
               "op:zvornik:kozluk_2",
@@ -3179,7 +3174,7 @@
               "op:zvornik:sapna",
               "op:zvornik:zvornik"
             ],
-            "length_edges": 14,
+            "length_edges": 15,
             "primary_brigade_ids": [],
             "sub_segment_id": "subseg:arbih_2nd_corps:11"
           }
@@ -3190,7 +3185,7 @@
           "op:zivinice:dubrave_gornje",
           "op:zivinice:zivinice_gornje_2"
         ],
-        "threat_ratio": 118.35748792270533
+        "threat_ratio": 192.2682526661198
       },
       "sector:arbih_3rd_corps:15": {
         "assigned_brigade_ids": [
@@ -3232,7 +3227,7 @@
       },
       "sector:arbih_3rd_corps:16": {
         "assigned_brigade_ids": [
-          "arbih_707th_slavna_mountain"
+          "arbih_705th_slavna_mountain"
         ],
         "corps_id": "arbih_3rd_corps",
         "defensive_power": 10.236734693877551,
@@ -3252,7 +3247,7 @@
           "RS"
         ],
         "reserve_brigade_ids": [
-          "arbih_705th_slavna_mountain"
+          "arbih_707th_slavna_mountain"
         ],
         "sector_id": "sector:arbih_3rd_corps:16",
         "sector_stance": "defend",
@@ -3308,18 +3303,19 @@
           "arbih_706th_muslim_mountain"
         ],
         "corps_id": "arbih_3rd_corps",
-        "defensive_power": 12.261333333333333,
-        "density": 0.16666666666666666,
+        "defensive_power": 10.236734693877551,
+        "density": 0.14285714285714285,
         "edge_ids": [
           "op:donji_vakuf:komar_2__op:travnik:gornje_krcevine",
           "op:donji_vakuf:komar_2__op:travnik:turbe_2",
           "op:jajce:grdovo__op:travnik:gornje_krcevine",
+          "op:kotor_varos:krusevo_brdo_i__op:travnik:paklarevo",
           "op:travnik:gornje_krcevine__op:travnik:varosluk",
           "op:travnik:paklarevo__op:travnik:varosluk",
           "op:travnik:turbe_2__op:travnik:varosluk"
         ],
         "faction": "RBiH",
-        "length_edges": 6,
+        "length_edges": 7,
         "opposing_factions": [
           "RS"
         ],
@@ -3333,6 +3329,7 @@
               "op:donji_vakuf:komar_2__op:travnik:gornje_krcevine",
               "op:donji_vakuf:komar_2__op:travnik:turbe_2",
               "op:jajce:grdovo__op:travnik:gornje_krcevine",
+              "op:kotor_varos:krusevo_brdo_i__op:travnik:paklarevo",
               "op:travnik:gornje_krcevine__op:travnik:varosluk",
               "op:travnik:paklarevo__op:travnik:varosluk",
               "op:travnik:turbe_2__op:travnik:varosluk"
@@ -3340,6 +3337,7 @@
             "enemy_osids": [
               "op:donji_vakuf:komar_2",
               "op:jajce:grdovo",
+              "op:kotor_varos:krusevo_brdo_i",
               "op:travnik:varosluk"
             ],
             "friendly_osids": [
@@ -3347,7 +3345,7 @@
               "op:travnik:paklarevo",
               "op:travnik:turbe_2"
             ],
-            "length_edges": 6,
+            "length_edges": 7,
             "primary_brigade_ids": [],
             "sub_segment_id": "subseg:arbih_3rd_corps:12"
           }
@@ -3357,7 +3355,7 @@
           "op:travnik:paklarevo",
           "op:travnik:turbe_2"
         ],
-        "threat_ratio": 81.55719878207917
+        "threat_ratio": 195.37480063795854
       },
       "sector:arbih_3rd_corps:18": {
         "assigned_brigade_ids": [
@@ -3580,16 +3578,15 @@
           "arbih_737th_muslim_light"
         ],
         "corps_id": "arbih_3rd_corps",
-        "defensive_power": 50.160000000000004,
-        "density": 0.5,
+        "defensive_power": 66.88000000000001,
+        "density": 0.6666666666666666,
         "edge_ids": [
           "op:kotor_varos:krusevo_brdo_i__op:travnik:gluha_bukovica",
-          "op:kotor_varos:krusevo_brdo_i__op:travnik:paklarevo",
           "op:teslic:blatnica_2__op:travnik:gluha_bukovica",
           "op:teslic:blatnica_2__op:zenica:serici_2"
         ],
         "faction": "RBiH",
-        "length_edges": 4,
+        "length_edges": 3,
         "opposing_factions": [
           "RS"
         ],
@@ -3603,7 +3600,6 @@
           {
             "edge_ids": [
               "op:kotor_varos:krusevo_brdo_i__op:travnik:gluha_bukovica",
-              "op:kotor_varos:krusevo_brdo_i__op:travnik:paklarevo",
               "op:teslic:blatnica_2__op:travnik:gluha_bukovica",
               "op:teslic:blatnica_2__op:zenica:serici_2"
             ],
@@ -3613,10 +3609,9 @@
             ],
             "friendly_osids": [
               "op:travnik:gluha_bukovica",
-              "op:travnik:paklarevo",
               "op:zenica:serici_2"
             ],
-            "length_edges": 4,
+            "length_edges": 3,
             "primary_brigade_ids": [],
             "sub_segment_id": "subseg:arbih_3rd_corps:20"
           }
@@ -3627,7 +3622,7 @@
           "op:travnik:travnik_2",
           "op:zenica:serici_2"
         ],
-        "threat_ratio": 39.87240829346092
+        "threat_ratio": 29.90430622009569
       },
       "sector:arbih_4th_corps:3": {
         "assigned_brigade_ids": [
@@ -3820,10 +3815,12 @@
         "threat_ratio": 0
       },
       "sector:hvo_central_bosnia:17": {
-        "assigned_brigade_ids": [],
+        "assigned_brigade_ids": [
+          "hrhb_111th_brigade"
+        ],
         "corps_id": "hvo_central_bosnia",
-        "defensive_power": 0,
-        "density": 0,
+        "defensive_power": 231.00000000000003,
+        "density": 1,
         "edge_ids": [
           "op:zavidovici:cardak_2__op:zepce:viniste_2"
         ],
@@ -3832,9 +3829,7 @@
         "opposing_factions": [
           "RS"
         ],
-        "reserve_brigade_ids": [
-          "hrhb_111th_brigade"
-        ],
+        "reserve_brigade_ids": [],
         "sector_id": "sector:hvo_central_bosnia:17",
         "sector_stance": "defend",
         "stance_source": "bot",
@@ -4172,8 +4167,8 @@
           "vrs_1st_laktasi"
         ],
         "corps_id": "vrs_1st_krajina",
-        "defensive_power": 176.0826446280992,
-        "density": 0.45454545454545453,
+        "defensive_power": 140.34319526627218,
+        "density": 0.38461538461538464,
         "edge_ids": [
           "op:banja_luka:banja_luka_2__op:banja_luka:dragocaj",
           "op:banja_luka:dragocaj__op:banja_luka:motike",
@@ -4185,10 +4180,12 @@
           "op:banja_luka:potkozarje_3__op:bosanska_gradiska:gornji_podgradci",
           "op:banja_luka:potkozarje_3__op:bosanska_gradiska:masici_2",
           "op:banja_luka:potkozarje_3__op:prijedor:maricka_2",
-          "op:banja_luka:potkozarje_3__op:prijedor:omarska_2"
+          "op:banja_luka:potkozarje_3__op:prijedor:omarska_2",
+          "op:bosanska_gradiska:gornji_podgradci__op:bosanska_gradiska:orahova",
+          "op:prijedor:maricka_2__op:sanski_most:ilidza_2"
         ],
         "faction": "RS",
-        "length_edges": 11,
+        "length_edges": 13,
         "opposing_factions": [
           "HRHB"
         ],
@@ -4211,11 +4208,15 @@
               "op:banja_luka:potkozarje_3__op:bosanska_gradiska:gornji_podgradci",
               "op:banja_luka:potkozarje_3__op:bosanska_gradiska:masici_2",
               "op:banja_luka:potkozarje_3__op:prijedor:maricka_2",
-              "op:banja_luka:potkozarje_3__op:prijedor:omarska_2"
+              "op:banja_luka:potkozarje_3__op:prijedor:omarska_2",
+              "op:bosanska_gradiska:gornji_podgradci__op:bosanska_gradiska:orahova",
+              "op:prijedor:maricka_2__op:sanski_most:ilidza_2"
             ],
             "enemy_osids": [
               "op:banja_luka:dragocaj",
-              "op:banja_luka:potkozarje_3"
+              "op:banja_luka:potkozarje_3",
+              "op:bosanska_gradiska:orahova",
+              "op:sanski_most:ilidza_2"
             ],
             "friendly_osids": [
               "op:banja_luka:banja_luka_2",
@@ -4228,7 +4229,7 @@
               "op:prijedor:maricka_2",
               "op:prijedor:omarska_2"
             ],
-            "length_edges": 11,
+            "length_edges": 13,
             "primary_brigade_ids": [],
             "sub_segment_id": "subseg:vrs_1st_krajina:0"
           }
@@ -4303,24 +4304,20 @@
       },
       "sector:vrs_1st_krajina:12": {
         "assigned_brigade_ids": [
-          "rs_1st_celinac_light_infantry",
-          "rs_2nd_tesli_light_infantry"
+          "rs_1st_celinac_light_infantry"
         ],
         "corps_id": "vrs_1st_krajina",
-        "defensive_power": 80.4,
-        "density": 0.25,
+        "defensive_power": 61.104,
+        "density": 0.2,
         "edge_ids": [
           "op:celinac:celinac_2__op:kotor_varos:kotor_varos_2",
           "op:celinac:josavka_donja_2__op:kotor_varos:kotor_varos_2",
           "op:celinac:snjegotina_srednja__op:kotor_varos:kotor_varos_2",
           "op:kotor_varos:kotor_varos_2__op:kotor_varos:vagani_2",
-          "op:kotor_varos:kotor_varos_2__op:kotor_varos:vrbanjci_2",
-          "op:kotor_varos:kotor_varos_2__op:skender_vakuf:imljani_2",
-          "op:kotor_varos:kotor_varos_2__op:skender_vakuf:knezevo_2",
-          "op:kotor_varos:kotor_varos_2__op:teslic:buletic_2"
+          "op:kotor_varos:kotor_varos_2__op:kotor_varos:vrbanjci_2"
         ],
         "faction": "RS",
-        "length_edges": 8,
+        "length_edges": 5,
         "opposing_factions": [
           "HRHB"
         ],
@@ -4335,10 +4332,7 @@
               "op:celinac:josavka_donja_2__op:kotor_varos:kotor_varos_2",
               "op:celinac:snjegotina_srednja__op:kotor_varos:kotor_varos_2",
               "op:kotor_varos:kotor_varos_2__op:kotor_varos:vagani_2",
-              "op:kotor_varos:kotor_varos_2__op:kotor_varos:vrbanjci_2",
-              "op:kotor_varos:kotor_varos_2__op:skender_vakuf:imljani_2",
-              "op:kotor_varos:kotor_varos_2__op:skender_vakuf:knezevo_2",
-              "op:kotor_varos:kotor_varos_2__op:teslic:buletic_2"
+              "op:kotor_varos:kotor_varos_2__op:kotor_varos:vrbanjci_2"
             ],
             "enemy_osids": [
               "op:kotor_varos:kotor_varos_2"
@@ -4348,12 +4342,9 @@
               "op:celinac:josavka_donja_2",
               "op:celinac:snjegotina_srednja",
               "op:kotor_varos:vagani_2",
-              "op:kotor_varos:vrbanjci_2",
-              "op:skender_vakuf:imljani_2",
-              "op:skender_vakuf:knezevo_2",
-              "op:teslic:buletic_2"
+              "op:kotor_varos:vrbanjci_2"
             ],
-            "length_edges": 8,
+            "length_edges": 5,
             "primary_brigade_ids": [],
             "sub_segment_id": "subseg:vrs_1st_krajina:10"
           }
@@ -4376,16 +4367,15 @@
           "rs_11th_dubica_infantry"
         ],
         "corps_id": "vrs_1st_krajina",
-        "defensive_power": 80.4,
-        "density": 0.25,
+        "defensive_power": 116.13333333333334,
+        "density": 0.3333333333333333,
         "edge_ids": [
           "op:bosanska_dubica:vojskova__op:bosanska_gradiska:orahova",
-          "op:bosanska_gradiska:gornji_podgradci__op:bosanska_gradiska:orahova",
           "op:bosanska_gradiska:grbavci__op:bosanska_gradiska:orahova",
           "op:bosanska_gradiska:kruskik_2__op:bosanska_gradiska:orahova"
         ],
         "faction": "RS",
-        "length_edges": 4,
+        "length_edges": 3,
         "opposing_factions": [
           "RBiH"
         ],
@@ -4397,7 +4387,6 @@
           {
             "edge_ids": [
               "op:bosanska_dubica:vojskova__op:bosanska_gradiska:orahova",
-              "op:bosanska_gradiska:gornji_podgradci__op:bosanska_gradiska:orahova",
               "op:bosanska_gradiska:grbavci__op:bosanska_gradiska:orahova",
               "op:bosanska_gradiska:kruskik_2__op:bosanska_gradiska:orahova"
             ],
@@ -4406,11 +4395,10 @@
             ],
             "friendly_osids": [
               "op:bosanska_dubica:vojskova",
-              "op:bosanska_gradiska:gornji_podgradci",
               "op:bosanska_gradiska:grbavci",
               "op:bosanska_gradiska:kruskik_2"
             ],
-            "length_edges": 4,
+            "length_edges": 3,
             "primary_brigade_ids": [],
             "sub_segment_id": "subseg:vrs_1st_krajina:5"
           }
@@ -4428,8 +4416,8 @@
           "rs_3rd_ozren_light_infantry"
         ],
         "corps_id": "vrs_1st_krajina",
-        "defensive_power": 57.654809688581324,
-        "density": 0.17647058823529413,
+        "defensive_power": 61.987500000000004,
+        "density": 0.1875,
         "edge_ids": [
           "op:bosanski_brod:brod__op:bosanski_brod:donja_vrela",
           "op:bosanski_brod:brod__op:bosanski_brod:lijesce_2",
@@ -4442,7 +4430,6 @@
           "op:derventa:luzani_bosanski__op:derventa:misinci_2",
           "op:derventa:luzani_bosanski__op:derventa:zivinice",
           "op:derventa:misinci_2__op:derventa:velika_socanica_2",
-          "op:derventa:misinci_2__op:doboj:bukovica_velika_2",
           "op:derventa:misinci_2__op:doboj:civcije_bukovicke",
           "op:derventa:misinci_2__op:doboj:kozuhe_2",
           "op:derventa:velika_socanica_2__op:derventa:zivinice",
@@ -4450,7 +4437,7 @@
           "op:doboj:kotorsko_2__op:doboj:kozuhe_2"
         ],
         "faction": "RS",
-        "length_edges": 17,
+        "length_edges": 16,
         "opposing_factions": [
           "HRHB"
         ],
@@ -4474,7 +4461,6 @@
               "op:derventa:luzani_bosanski__op:derventa:misinci_2",
               "op:derventa:luzani_bosanski__op:derventa:zivinice",
               "op:derventa:misinci_2__op:derventa:velika_socanica_2",
-              "op:derventa:misinci_2__op:doboj:bukovica_velika_2",
               "op:derventa:misinci_2__op:doboj:civcije_bukovicke",
               "op:derventa:misinci_2__op:doboj:kozuhe_2",
               "op:derventa:velika_socanica_2__op:derventa:zivinice",
@@ -4496,11 +4482,10 @@
               "op:derventa:lug",
               "op:derventa:luzani_bosanski",
               "op:derventa:velika_socanica_2",
-              "op:doboj:bukovica_velika_2",
               "op:doboj:civcije_bukovicke",
               "op:doboj:kozuhe_2"
             ],
-            "length_edges": 17,
+            "length_edges": 16,
             "primary_brigade_ids": [],
             "sub_segment_id": "subseg:vrs_1st_krajina:9"
           }
@@ -4591,15 +4576,14 @@
         "assigned_brigade_ids": [
           "rs_16th_krajina_motorized",
           "rs_1st_novigrad_infantry",
-          "rs_2nd_banja_luka_light_infantry",
           "rs_43rd_prijedor_motorized",
-          "rs_4th_banja_luka_light_infantry"
+          "rs_5th_kozara_light_infantry",
+          "rs_6th_sanske_infantry"
         ],
         "corps_id": "vrs_1st_krajina",
-        "defensive_power": 51.7968,
-        "density": 0,
+        "defensive_power": 93.792,
+        "density": 0.25,
         "edge_ids": [
-          "op:banja_luka:melina_2__op:sanski_most:ilidza_2",
           "op:bosanski_novi:blagaj_japra__op:bosanski_novi:dobrljin_2",
           "op:bosanski_novi:blagaj_japra__op:bosanski_novi:poljavnice",
           "op:bosanski_novi:blagaj_japra__op:bosanski_novi:svodna_2",
@@ -4610,6 +4594,106 @@
           "op:bosanski_novi:suhaca_4__op:bosanski_novi:svodna_2",
           "op:bosanski_novi:suhaca_4__op:sanski_most:budimlic_japra_2",
           "op:bosanski_novi:svodna_2__op:prijedor:raljas",
+          "op:prijedor:brezicani__op:prijedor:ljubija_2",
+          "op:prijedor:brezicani__op:prijedor:raljas",
+          "op:prijedor:ljubija_2__op:prijedor:prijedor_2",
+          "op:prijedor:ljubija_2__op:prijedor:rasavci_2",
+          "op:prijedor:ljubija_2__op:sanski_most:ostra_luka",
+          "op:prijedor:raljas__op:sanski_most:budimlic_japra_2",
+          "op:sanski_most:budimlic_japra_2__op:sanski_most:skucani_vakuf_2",
+          "op:sanski_most:budimlic_japra_2__op:sanski_most:stari_majdan",
+          "op:sanski_most:lusci_palanka_2__op:sanski_most:skucani_vakuf_2",
+          "op:sanski_most:ostra_luka__op:sanski_most:stari_majdan"
+        ],
+        "faction": "RS",
+        "length_edges": 20,
+        "opposing_factions": [
+          "HRHB",
+          "RBiH"
+        ],
+        "reserve_brigade_ids": [],
+        "sector_id": "sector:vrs_1st_krajina:2",
+        "sector_stance": "defend",
+        "stance_source": "bot",
+        "sub_segments": [
+          {
+            "edge_ids": [
+              "op:bosanski_novi:blagaj_japra__op:bosanski_novi:dobrljin_2",
+              "op:bosanski_novi:blagaj_japra__op:bosanski_novi:poljavnice",
+              "op:bosanski_novi:blagaj_japra__op:bosanski_novi:svodna_2",
+              "op:bosanski_novi:krslje_2__op:bosanski_novi:novi_grad_3",
+              "op:bosanski_novi:krslje_2__op:bosanski_novi:suhaca_4",
+              "op:bosanski_novi:matavazi_2__op:bosanski_novi:novi_grad_3",
+              "op:bosanski_novi:novi_grad_3__op:bosanski_novi:poljavnice",
+              "op:bosanski_novi:suhaca_4__op:bosanski_novi:svodna_2",
+              "op:bosanski_novi:suhaca_4__op:sanski_most:budimlic_japra_2",
+              "op:bosanski_novi:svodna_2__op:prijedor:raljas",
+              "op:prijedor:brezicani__op:prijedor:ljubija_2",
+              "op:prijedor:brezicani__op:prijedor:raljas",
+              "op:prijedor:ljubija_2__op:prijedor:prijedor_2",
+              "op:prijedor:ljubija_2__op:prijedor:rasavci_2",
+              "op:prijedor:ljubija_2__op:sanski_most:ostra_luka",
+              "op:prijedor:raljas__op:sanski_most:budimlic_japra_2",
+              "op:sanski_most:budimlic_japra_2__op:sanski_most:skucani_vakuf_2",
+              "op:sanski_most:budimlic_japra_2__op:sanski_most:stari_majdan",
+              "op:sanski_most:lusci_palanka_2__op:sanski_most:skucani_vakuf_2",
+              "op:sanski_most:ostra_luka__op:sanski_most:stari_majdan"
+            ],
+            "enemy_osids": [
+              "op:bosanski_novi:blagaj_japra",
+              "op:bosanski_novi:novi_grad_3",
+              "op:bosanski_novi:suhaca_4",
+              "op:prijedor:ljubija_2",
+              "op:prijedor:raljas",
+              "op:sanski_most:skucani_vakuf_2",
+              "op:sanski_most:stari_majdan"
+            ],
+            "friendly_osids": [
+              "op:bosanski_novi:dobrljin_2",
+              "op:bosanski_novi:krslje_2",
+              "op:bosanski_novi:matavazi_2",
+              "op:bosanski_novi:poljavnice",
+              "op:bosanski_novi:svodna_2",
+              "op:prijedor:brezicani",
+              "op:prijedor:prijedor_2",
+              "op:prijedor:rasavci_2",
+              "op:sanski_most:budimlic_japra_2",
+              "op:sanski_most:lusci_palanka_2",
+              "op:sanski_most:ostra_luka"
+            ],
+            "length_edges": 20,
+            "primary_brigade_ids": [],
+            "sub_segment_id": "subseg:vrs_1st_krajina:17"
+          }
+        ],
+        "territory_osids": [
+          "op:bosanska_kostajnica:kostajnica",
+          "op:bosanska_kostajnica:petrinja",
+          "op:bosanski_novi:dobrljin_2",
+          "op:bosanski_novi:krslje_2",
+          "op:bosanski_novi:matavazi_2",
+          "op:bosanski_novi:poljavnice",
+          "op:bosanski_novi:svodna_2",
+          "op:prijedor:brezicani",
+          "op:prijedor:cejreci",
+          "op:prijedor:prijedor_2",
+          "op:prijedor:rasavci_2",
+          "op:sanski_most:budimlic_japra_2",
+          "op:sanski_most:lusci_palanka_2",
+          "op:sanski_most:ostra_luka"
+        ],
+        "threat_ratio": 0
+      },
+      "sector:vrs_1st_krajina:23": {
+        "assigned_brigade_ids": [
+          "rs_2nd_banja_luka_light_infantry",
+          "rs_4th_banja_luka_light_infantry"
+        ],
+        "corps_id": "vrs_1st_krajina",
+        "defensive_power": 32.82768166089965,
+        "density": 0.11764705882352941,
+        "edge_ids": [
+          "op:banja_luka:melina_2__op:sanski_most:ilidza_2",
           "op:bosanski_petrovac:jasenovac_2__op:kljuc:hadzici",
           "op:kljuc:donje_ratkovo_2__op:kljuc:kljuc_2",
           "op:kljuc:donje_ratkovo_2__op:kljuc:krasulje_2",
@@ -4621,49 +4705,27 @@
           "op:kljuc:krasulje_2__op:sanski_most:donja_kozica",
           "op:kljuc:krasulje_2__op:sanski_most:kljevci",
           "op:kljuc:sanica_2__op:sanski_most:ilidza_2",
-          "op:prijedor:brezicani__op:prijedor:ljubija_2",
-          "op:prijedor:brezicani__op:prijedor:raljas",
-          "op:prijedor:ljubija_2__op:prijedor:prijedor_2",
-          "op:prijedor:ljubija_2__op:prijedor:rasavci_2",
-          "op:prijedor:ljubija_2__op:sanski_most:ostra_luka",
-          "op:prijedor:maricka_2__op:sanski_most:ilidza_2",
-          "op:prijedor:raljas__op:sanski_most:budimlic_japra_2",
-          "op:sanski_most:budimlic_japra_2__op:sanski_most:skucani_vakuf_2",
-          "op:sanski_most:budimlic_japra_2__op:sanski_most:stari_majdan",
           "op:sanski_most:donja_kozica__op:sanski_most:ilidza_2",
           "op:sanski_most:ilidza_2__op:sanski_most:kljevci",
           "op:sanski_most:jelasinovci__op:sanski_most:sanski_most_2",
           "op:sanski_most:jelasinovci__op:sanski_most:skucani_vakuf_2",
-          "op:sanski_most:kljevci__op:sanski_most:sanski_most_2",
-          "op:sanski_most:lusci_palanka_2__op:sanski_most:skucani_vakuf_2",
-          "op:sanski_most:ostra_luka__op:sanski_most:stari_majdan"
+          "op:sanski_most:kljevci__op:sanski_most:sanski_most_2"
         ],
         "faction": "RS",
-        "length_edges": 38,
+        "length_edges": 17,
         "opposing_factions": [
-          "HRHB",
           "RBiH"
         ],
         "reserve_brigade_ids": [
           "rs_17th_klju_light_infantry"
         ],
-        "sector_id": "sector:vrs_1st_krajina:2",
+        "sector_id": "sector:vrs_1st_krajina:23",
         "sector_stance": "defend",
         "stance_source": "bot",
         "sub_segments": [
           {
             "edge_ids": [
               "op:banja_luka:melina_2__op:sanski_most:ilidza_2",
-              "op:bosanski_novi:blagaj_japra__op:bosanski_novi:dobrljin_2",
-              "op:bosanski_novi:blagaj_japra__op:bosanski_novi:poljavnice",
-              "op:bosanski_novi:blagaj_japra__op:bosanski_novi:svodna_2",
-              "op:bosanski_novi:krslje_2__op:bosanski_novi:novi_grad_3",
-              "op:bosanski_novi:krslje_2__op:bosanski_novi:suhaca_4",
-              "op:bosanski_novi:matavazi_2__op:bosanski_novi:novi_grad_3",
-              "op:bosanski_novi:novi_grad_3__op:bosanski_novi:poljavnice",
-              "op:bosanski_novi:suhaca_4__op:bosanski_novi:svodna_2",
-              "op:bosanski_novi:suhaca_4__op:sanski_most:budimlic_japra_2",
-              "op:bosanski_novi:svodna_2__op:prijedor:raljas",
               "op:bosanski_petrovac:jasenovac_2__op:kljuc:hadzici",
               "op:kljuc:donje_ratkovo_2__op:kljuc:kljuc_2",
               "op:kljuc:donje_ratkovo_2__op:kljuc:krasulje_2",
@@ -4675,75 +4737,39 @@
               "op:kljuc:krasulje_2__op:sanski_most:donja_kozica",
               "op:kljuc:krasulje_2__op:sanski_most:kljevci",
               "op:kljuc:sanica_2__op:sanski_most:ilidza_2",
-              "op:prijedor:brezicani__op:prijedor:ljubija_2",
-              "op:prijedor:brezicani__op:prijedor:raljas",
-              "op:prijedor:ljubija_2__op:prijedor:prijedor_2",
-              "op:prijedor:ljubija_2__op:prijedor:rasavci_2",
-              "op:prijedor:ljubija_2__op:sanski_most:ostra_luka",
-              "op:prijedor:maricka_2__op:sanski_most:ilidza_2",
-              "op:prijedor:raljas__op:sanski_most:budimlic_japra_2",
-              "op:sanski_most:budimlic_japra_2__op:sanski_most:skucani_vakuf_2",
-              "op:sanski_most:budimlic_japra_2__op:sanski_most:stari_majdan",
               "op:sanski_most:donja_kozica__op:sanski_most:ilidza_2",
               "op:sanski_most:ilidza_2__op:sanski_most:kljevci",
               "op:sanski_most:jelasinovci__op:sanski_most:sanski_most_2",
               "op:sanski_most:jelasinovci__op:sanski_most:skucani_vakuf_2",
-              "op:sanski_most:kljevci__op:sanski_most:sanski_most_2",
-              "op:sanski_most:lusci_palanka_2__op:sanski_most:skucani_vakuf_2",
-              "op:sanski_most:ostra_luka__op:sanski_most:stari_majdan"
+              "op:sanski_most:kljevci__op:sanski_most:sanski_most_2"
             ],
             "enemy_osids": [
-              "op:bosanski_novi:blagaj_japra",
-              "op:bosanski_novi:novi_grad_3",
-              "op:bosanski_novi:suhaca_4",
               "op:kljuc:hadzici",
               "op:kljuc:kljuc_2",
               "op:kljuc:krasulje_2",
-              "op:prijedor:ljubija_2",
-              "op:prijedor:raljas",
               "op:sanski_most:ilidza_2",
               "op:sanski_most:sanski_most_2",
-              "op:sanski_most:skucani_vakuf_2",
-              "op:sanski_most:stari_majdan"
+              "op:sanski_most:skucani_vakuf_2"
             ],
             "friendly_osids": [
               "op:banja_luka:melina_2",
-              "op:bosanski_novi:dobrljin_2",
-              "op:bosanski_novi:krslje_2",
-              "op:bosanski_novi:matavazi_2",
-              "op:bosanski_novi:poljavnice",
-              "op:bosanski_novi:svodna_2",
               "op:bosanski_petrovac:jasenovac_2",
               "op:kljuc:donje_ratkovo_2",
               "op:kljuc:donji_vrbljani_2",
               "op:kljuc:sanica_2",
-              "op:prijedor:brezicani",
-              "op:prijedor:maricka_2",
-              "op:prijedor:prijedor_2",
-              "op:prijedor:rasavci_2",
-              "op:sanski_most:budimlic_japra_2",
               "op:sanski_most:donja_kozica",
               "op:sanski_most:jelasinovci",
               "op:sanski_most:kljevci",
-              "op:sanski_most:lusci_palanka_2",
-              "op:sanski_most:ostra_luka",
               "op:titov_drvar:prekaja_2"
             ],
-            "length_edges": 38,
+            "length_edges": 17,
             "primary_brigade_ids": [],
-            "sub_segment_id": "subseg:sector:vrs_1st_krajina:2:merged0"
+            "sub_segment_id": "subseg:sector:vrs_1st_krajina:16:split0"
           }
         ],
         "territory_osids": [
           "op:banja_luka:melina_2",
           "op:banja_luka:pavici_2",
-          "op:bosanska_kostajnica:kostajnica",
-          "op:bosanska_kostajnica:petrinja",
-          "op:bosanski_novi:dobrljin_2",
-          "op:bosanski_novi:krslje_2",
-          "op:bosanski_novi:matavazi_2",
-          "op:bosanski_novi:poljavnice",
-          "op:bosanski_novi:svodna_2",
           "op:bosanski_petrovac:jasenovac_2",
           "op:kljuc:donje_ratkovo_2",
           "op:kljuc:donji_vrbljani_2",
@@ -4751,109 +4777,12 @@
           "op:mrkonjic_grad:gerzovo_2",
           "op:mrkonjic_grad:mrkonjic_grad_2",
           "op:mrkonjic_grad:podrasnica_2",
-          "op:prijedor:brezicani",
-          "op:prijedor:cejreci",
           "op:prijedor:maricka_2",
-          "op:prijedor:prijedor_2",
-          "op:prijedor:rasavci_2",
-          "op:sanski_most:budimlic_japra_2",
           "op:sanski_most:donja_kozica",
           "op:sanski_most:jelasinovci",
           "op:sanski_most:kljevci",
-          "op:sanski_most:lusci_palanka_2",
-          "op:sanski_most:ostra_luka",
           "op:titov_drvar:prekaja_2"
         ],
-        "threat_ratio": 0
-      },
-      "sector:vrs_1st_krajina:22": {
-        "assigned_brigade_ids": [
-          "rs_5th_kozara_light_infantry"
-        ],
-        "corps_id": "vrs_1st_krajina",
-        "defensive_power": 61.59999999999999,
-        "density": 0.16666666666666666,
-        "edge_ids": [
-          "op:prijedor:kamicani__op:prijedor:maricka_2",
-          "op:prijedor:kamicani__op:prijedor:omarska_2",
-          "op:prijedor:kozarac_2__op:prijedor:maricka_2",
-          "op:prijedor:kozarac_2__op:prijedor:omarska_2",
-          "op:prijedor:kozarac_2__op:prijedor:prijedor_2",
-          "op:prijedor:kozarac_2__op:prijedor:rasavci_2"
-        ],
-        "faction": "RS",
-        "length_edges": 6,
-        "opposing_factions": [
-          "RBiH"
-        ],
-        "reserve_brigade_ids": [],
-        "sector_id": "sector:vrs_1st_krajina:22",
-        "sector_stance": "defend",
-        "stance_source": "bot",
-        "sub_segments": [
-          {
-            "edge_ids": [
-              "op:prijedor:kamicani__op:prijedor:maricka_2",
-              "op:prijedor:kamicani__op:prijedor:omarska_2",
-              "op:prijedor:kozarac_2__op:prijedor:maricka_2",
-              "op:prijedor:kozarac_2__op:prijedor:omarska_2",
-              "op:prijedor:kozarac_2__op:prijedor:prijedor_2",
-              "op:prijedor:kozarac_2__op:prijedor:rasavci_2"
-            ],
-            "enemy_osids": [
-              "op:prijedor:kamicani",
-              "op:prijedor:kozarac_2"
-            ],
-            "friendly_osids": [
-              "op:prijedor:maricka_2",
-              "op:prijedor:omarska_2",
-              "op:prijedor:prijedor_2",
-              "op:prijedor:rasavci_2"
-            ],
-            "length_edges": 6,
-            "primary_brigade_ids": [],
-            "sub_segment_id": "subseg:vrs_1st_krajina:15"
-          }
-        ],
-        "territory_osids": [],
-        "threat_ratio": 0
-      },
-      "sector:vrs_1st_krajina:24": {
-        "assigned_brigade_ids": [
-          "rs_6th_sanske_infantry"
-        ],
-        "corps_id": "vrs_1st_krajina",
-        "defensive_power": 402,
-        "density": 1,
-        "edge_ids": [
-          "op:sanski_most:ostra_luka__op:sanski_most:sanski_most_2"
-        ],
-        "faction": "RS",
-        "length_edges": 1,
-        "opposing_factions": [
-          "RBiH"
-        ],
-        "reserve_brigade_ids": [],
-        "sector_id": "sector:vrs_1st_krajina:24",
-        "sector_stance": "defend",
-        "stance_source": "bot",
-        "sub_segments": [
-          {
-            "edge_ids": [
-              "op:sanski_most:ostra_luka__op:sanski_most:sanski_most_2"
-            ],
-            "enemy_osids": [
-              "op:sanski_most:sanski_most_2"
-            ],
-            "friendly_osids": [
-              "op:sanski_most:ostra_luka"
-            ],
-            "length_edges": 1,
-            "primary_brigade_ids": [],
-            "sub_segment_id": "subseg:sector:vrs_1st_krajina:16:split1"
-          }
-        ],
-        "territory_osids": [],
         "threat_ratio": 0
       },
       "sector:vrs_1st_krajina:3": {
@@ -4863,9 +4792,10 @@
           "rs_2nd_armored"
         ],
         "corps_id": "vrs_1st_krajina",
-        "defensive_power": 66.45306122448979,
-        "density": 0.21428571428571427,
+        "defensive_power": 56.53125,
+        "density": 0.1875,
         "edge_ids": [
+          "op:derventa:misinci_2__op:doboj:bukovica_velika_2",
           "op:doboj:boljanic_2__op:doboj:makljenovac",
           "op:doboj:boljanic_2__op:doboj:matuzici_2",
           "op:doboj:boljanic_2__op:tesanj:lepenica",
@@ -4879,10 +4809,11 @@
           "op:maglaj:jablanica__op:maglaj:kosova_2",
           "op:tesanj:kalosevic_2__op:teslic:vitkovci",
           "op:tesanj:novi_miljanovci_2__op:teslic:vitkovci",
-          "op:tesanj:radusa_2__op:teslic:vitkovci"
+          "op:tesanj:radusa_2__op:teslic:vitkovci",
+          "op:teslic:kamenica_2__op:teslic:vitkovci"
         ],
         "faction": "RS",
-        "length_edges": 14,
+        "length_edges": 16,
         "opposing_factions": [
           "RBiH"
         ],
@@ -4893,6 +4824,7 @@
         "sub_segments": [
           {
             "edge_ids": [
+              "op:derventa:misinci_2__op:doboj:bukovica_velika_2",
               "op:doboj:boljanic_2__op:doboj:makljenovac",
               "op:doboj:boljanic_2__op:doboj:matuzici_2",
               "op:doboj:boljanic_2__op:tesanj:lepenica",
@@ -4906,9 +4838,11 @@
               "op:maglaj:jablanica__op:maglaj:kosova_2",
               "op:tesanj:kalosevic_2__op:teslic:vitkovci",
               "op:tesanj:novi_miljanovci_2__op:teslic:vitkovci",
-              "op:tesanj:radusa_2__op:teslic:vitkovci"
+              "op:tesanj:radusa_2__op:teslic:vitkovci",
+              "op:teslic:kamenica_2__op:teslic:vitkovci"
             ],
             "enemy_osids": [
+              "op:derventa:misinci_2",
               "op:doboj:makljenovac",
               "op:doboj:matuzici_2",
               "op:maglaj:cobe_2",
@@ -4918,7 +4852,8 @@
               "op:tesanj:novi_miljanovci_2",
               "op:tesanj:radusa_2",
               "op:tesanj:sije_2",
-              "op:tesanj:ularice_2"
+              "op:tesanj:ularice_2",
+              "op:teslic:kamenica_2"
             ],
             "friendly_osids": [
               "op:doboj:boljanic_2",
@@ -4927,7 +4862,7 @@
               "op:maglaj:jablanica",
               "op:teslic:vitkovci"
             ],
-            "length_edges": 14,
+            "length_edges": 16,
             "primary_brigade_ids": [],
             "sub_segment_id": "subseg:vrs_1st_krajina:18"
           }
@@ -4937,18 +4872,22 @@
           "op:gracanica:petrovo_2",
           "op:maglaj:jablanica"
         ],
-        "threat_ratio": 6.6212149130888776
+        "threat_ratio": 7.783305693753455
       },
       "sector:vrs_1st_krajina:4": {
         "assigned_brigade_ids": [
           "rs_12th_kotorsko_light_infantry",
           "rs_1st_tesli_infantry",
-          "rs_22nd_krajina_infantry"
+          "rs_22nd_krajina_infantry",
+          "rs_2nd_tesli_light_infantry"
         ],
         "corps_id": "vrs_1st_krajina",
-        "defensive_power": 61.104000000000006,
-        "density": 0.2,
+        "defensive_power": 74.55778546712803,
+        "density": 0.23529411764705882,
         "edge_ids": [
+          "op:kotor_varos:kotor_varos_2__op:skender_vakuf:imljani_2",
+          "op:kotor_varos:kotor_varos_2__op:skender_vakuf:knezevo_2",
+          "op:kotor_varos:kotor_varos_2__op:teslic:buletic_2",
           "op:kotor_varos:krusevo_brdo_i__op:skender_vakuf:donji_koricani",
           "op:kotor_varos:krusevo_brdo_i__op:travnik:gluha_bukovica",
           "op:kotor_varos:krusevo_brdo_i__op:travnik:paklarevo",
@@ -4962,11 +4901,10 @@
           "op:teslic:buletic_2__op:teslic:donji_ruzevic",
           "op:teslic:cecava_2__op:teslic:donji_ruzevic",
           "op:teslic:donji_ruzevic__op:teslic:teslic_2",
-          "op:teslic:kamenica_2__op:teslic:teslic_2",
-          "op:teslic:kamenica_2__op:teslic:vitkovci"
+          "op:teslic:kamenica_2__op:teslic:teslic_2"
         ],
         "faction": "RS",
-        "length_edges": 15,
+        "length_edges": 17,
         "opposing_factions": [
           "HRHB",
           "RBiH"
@@ -4980,6 +4918,9 @@
         "sub_segments": [
           {
             "edge_ids": [
+              "op:kotor_varos:kotor_varos_2__op:skender_vakuf:imljani_2",
+              "op:kotor_varos:kotor_varos_2__op:skender_vakuf:knezevo_2",
+              "op:kotor_varos:kotor_varos_2__op:teslic:buletic_2",
               "op:kotor_varos:krusevo_brdo_i__op:skender_vakuf:donji_koricani",
               "op:kotor_varos:krusevo_brdo_i__op:travnik:gluha_bukovica",
               "op:kotor_varos:krusevo_brdo_i__op:travnik:paklarevo",
@@ -4993,10 +4934,10 @@
               "op:teslic:buletic_2__op:teslic:donji_ruzevic",
               "op:teslic:cecava_2__op:teslic:donji_ruzevic",
               "op:teslic:donji_ruzevic__op:teslic:teslic_2",
-              "op:teslic:kamenica_2__op:teslic:teslic_2",
-              "op:teslic:kamenica_2__op:teslic:vitkovci"
+              "op:teslic:kamenica_2__op:teslic:teslic_2"
             ],
             "enemy_osids": [
+              "op:kotor_varos:kotor_varos_2",
               "op:skender_vakuf:donji_koricani",
               "op:teslic:donji_ruzevic",
               "op:teslic:kamenica_2",
@@ -5012,10 +4953,9 @@
               "op:teslic:blatnica_2",
               "op:teslic:buletic_2",
               "op:teslic:cecava_2",
-              "op:teslic:teslic_2",
-              "op:teslic:vitkovci"
+              "op:teslic:teslic_2"
             ],
-            "length_edges": 15,
+            "length_edges": 17,
             "primary_brigade_ids": [],
             "sub_segment_id": "subseg:vrs_1st_krajina:19"
           }
@@ -5032,7 +4972,7 @@
           "op:teslic:teslic_2",
           "op:teslic:vitkovci"
         ],
-        "threat_ratio": 7.200837915684733
+        "threat_ratio": 5.901462835078339
       },
       "sector:vrs_1st_krajina:6": {
         "assigned_brigade_ids": [
@@ -5041,8 +4981,8 @@
           "rs_31st_light_infantry"
         ],
         "corps_id": "vrs_1st_krajina",
-        "defensive_power": 16.33125,
-        "density": 0,
+        "defensive_power": 24.58512396694215,
+        "density": 0.09090909090909091,
         "edge_ids": [
           "op:banja_luka:rekavice_2__op:mrkonjic_grad:baljvine_2",
           "op:bugojno:medini__op:donji_vakuf:komar_2",
@@ -5180,7 +5120,7 @@
           "op:skender_vakuf:javorani_2",
           "op:travnik:varosluk"
         ],
-        "threat_ratio": 0
+        "threat_ratio": 17.89700147909103
       },
       "sector:vrs_1st_krajina:8": {
         "assigned_brigade_ids": [
@@ -5572,96 +5512,6 @@
         ],
         "threat_ratio": 0
       },
-      "sector:vrs_drina:10": {
-        "assigned_brigade_ids": [
-          "rs_1st_vlasenica",
-          "rs_5th_podrinje"
-        ],
-        "corps_id": "vrs_drina",
-        "defensive_power": 51.13440000000001,
-        "density": 0.13333333333333333,
-        "edge_ids": [
-          "op:bratunac:jezestica_2__op:bratunac:pobudje_2",
-          "op:bratunac:pobudje_2__op:bratunac:polom",
-          "op:bratunac:pobudje_2__op:vlasenica:milici_2",
-          "op:bratunac:pobudje_2__op:vlasenica:sebiocina",
-          "op:bratunac:polom__op:zvornik:novo_selo",
-          "op:kalesija:gojcin_2__op:kalesija:seher_2",
-          "op:kalesija:seher_2__op:sekovici:sekovici_2",
-          "op:kalesija:seher_2__op:sekovici:udbina_2",
-          "op:sekovici:udbina_2__op:vlasenica:cerska_2",
-          "op:sekovici:udbina_2__op:zvornik:krizevici",
-          "op:vlasenica:bacici__op:vlasenica:vlasenica_2",
-          "op:vlasenica:cerska_2__op:vlasenica:grabovica",
-          "op:vlasenica:cerska_2__op:vlasenica:milici_2",
-          "op:vlasenica:grabovica__op:vlasenica:vlasenica_2",
-          "op:vlasenica:milici_2__op:vlasenica:vlasenica_2"
-        ],
-        "faction": "RS",
-        "length_edges": 15,
-        "opposing_factions": [
-          "RBiH"
-        ],
-        "reserve_brigade_ids": [],
-        "sector_id": "sector:vrs_drina:10",
-        "sector_stance": "defend",
-        "stance_source": "bot",
-        "sub_segments": [
-          {
-            "edge_ids": [
-              "op:bratunac:jezestica_2__op:bratunac:pobudje_2",
-              "op:bratunac:pobudje_2__op:bratunac:polom",
-              "op:bratunac:pobudje_2__op:vlasenica:milici_2",
-              "op:bratunac:pobudje_2__op:vlasenica:sebiocina",
-              "op:bratunac:polom__op:zvornik:novo_selo",
-              "op:kalesija:gojcin_2__op:kalesija:seher_2",
-              "op:kalesija:seher_2__op:sekovici:sekovici_2",
-              "op:kalesija:seher_2__op:sekovici:udbina_2",
-              "op:sekovici:udbina_2__op:vlasenica:cerska_2",
-              "op:sekovici:udbina_2__op:zvornik:krizevici",
-              "op:vlasenica:bacici__op:vlasenica:vlasenica_2",
-              "op:vlasenica:cerska_2__op:vlasenica:grabovica",
-              "op:vlasenica:cerska_2__op:vlasenica:milici_2",
-              "op:vlasenica:grabovica__op:vlasenica:vlasenica_2",
-              "op:vlasenica:milici_2__op:vlasenica:vlasenica_2"
-            ],
-            "enemy_osids": [
-              "op:bratunac:pobudje_2",
-              "op:kalesija:seher_2",
-              "op:vlasenica:cerska_2",
-              "op:vlasenica:vlasenica_2",
-              "op:zvornik:krizevici",
-              "op:zvornik:novo_selo"
-            ],
-            "friendly_osids": [
-              "op:bratunac:jezestica_2",
-              "op:bratunac:polom",
-              "op:kalesija:gojcin_2",
-              "op:sekovici:sekovici_2",
-              "op:sekovici:udbina_2",
-              "op:vlasenica:bacici",
-              "op:vlasenica:grabovica",
-              "op:vlasenica:milici_2",
-              "op:vlasenica:sebiocina"
-            ],
-            "length_edges": 15,
-            "primary_brigade_ids": [],
-            "sub_segment_id": "subseg:sector:vrs_drina:9:split0"
-          }
-        ],
-        "territory_osids": [
-          "op:bratunac:jezestica_2",
-          "op:bratunac:polom",
-          "op:kalesija:gojcin_2",
-          "op:sekovici:sekovici_2",
-          "op:sekovici:udbina_2",
-          "op:vlasenica:bacici",
-          "op:vlasenica:grabovica",
-          "op:vlasenica:milici_2",
-          "op:vlasenica:sebiocina"
-        ],
-        "threat_ratio": 0
-      },
       "sector:vrs_drina:12": {
         "assigned_brigade_ids": [
           "rs_visegrad_brigade"
@@ -5862,11 +5712,13 @@
       },
       "sector:vrs_drina:7": {
         "assigned_brigade_ids": [
-          "rs_1st_bratunac"
+          "rs_1st_bratunac",
+          "rs_1st_vlasenica",
+          "rs_5th_podrinje"
         ],
         "corps_id": "vrs_drina",
-        "defensive_power": 44.25322314049587,
-        "density": 0.09090909090909091,
+        "defensive_power": 134.55371900826447,
+        "density": 0.2727272727272727,
         "edge_ids": [
           "op:bratunac:bratunac_2__op:bratunac:slapasnica",
           "op:bratunac:glogova__op:bratunac:jezestica_2",
@@ -5928,7 +5780,7 @@
         "territory_osids": [
           "op:bratunac:slapasnica"
         ],
-        "threat_ratio": 5.96566715969701
+        "threat_ratio": 1.9620416436336834
       },
       "sector:vrs_drina:9": {
         "assigned_brigade_ids": [
@@ -6333,17 +6185,19 @@
           "rs_bilea_brigade"
         ],
         "corps_id": "vrs_herzegovina",
-        "defensive_power": 61.104,
-        "density": 0.2,
+        "defensive_power": 41.02040816326531,
+        "density": 0.14285714285714285,
         "edge_ids": [
           "op:bileca:bileca_2__op:bileca:zausje",
           "op:bileca:korita__op:bileca:zausje",
+          "op:bileca:korita__op:gacko:gacko_2",
           "op:bileca:mirilovici__op:bileca:zausje",
           "op:bileca:vranjska__op:bileca:zausje",
-          "op:bileca:zausje__op:nevesinje:zovi_do"
+          "op:bileca:zausje__op:nevesinje:zovi_do",
+          "op:gacko:gacko_2__op:nevesinje:zovi_do"
         ],
         "faction": "RS",
-        "length_edges": 5,
+        "length_edges": 7,
         "opposing_factions": [
           "RBiH"
         ],
@@ -6356,12 +6210,15 @@
             "edge_ids": [
               "op:bileca:bileca_2__op:bileca:zausje",
               "op:bileca:korita__op:bileca:zausje",
+              "op:bileca:korita__op:gacko:gacko_2",
               "op:bileca:mirilovici__op:bileca:zausje",
               "op:bileca:vranjska__op:bileca:zausje",
-              "op:bileca:zausje__op:nevesinje:zovi_do"
+              "op:bileca:zausje__op:nevesinje:zovi_do",
+              "op:gacko:gacko_2__op:nevesinje:zovi_do"
             ],
             "enemy_osids": [
-              "op:bileca:zausje"
+              "op:bileca:zausje",
+              "op:gacko:gacko_2"
             ],
             "friendly_osids": [
               "op:bileca:bileca_2",
@@ -6370,7 +6227,7 @@
               "op:bileca:vranjska",
               "op:nevesinje:zovi_do"
             ],
-            "length_edges": 5,
+            "length_edges": 7,
             "primary_brigade_ids": [],
             "sub_segment_id": "subseg:vrs_herzegovina:0"
           }
@@ -6393,17 +6250,15 @@
           "rs_gacko_brigade"
         ],
         "corps_id": "vrs_herzegovina",
-        "defensive_power": 61.104,
-        "density": 0.2,
+        "defensive_power": 116.13333333333334,
+        "density": 0.3333333333333333,
         "edge_ids": [
-          "op:bileca:korita__op:gacko:gacko_2",
           "op:gacko:avtovac_2__op:gacko:gacko_2",
-          "op:gacko:gacko_2__op:gacko:gradina",
-          "op:gacko:gacko_2__op:gacko:nadinici",
-          "op:gacko:gacko_2__op:nevesinje:zovi_do"
+          "op:gacko:bahori__op:gacko:nadinici",
+          "op:gacko:gacko_2__op:gacko:nadinici"
         ],
         "faction": "RS",
-        "length_edges": 5,
+        "length_edges": 3,
         "opposing_factions": [
           "RBiH"
         ],
@@ -6414,23 +6269,19 @@
         "sub_segments": [
           {
             "edge_ids": [
-              "op:bileca:korita__op:gacko:gacko_2",
               "op:gacko:avtovac_2__op:gacko:gacko_2",
-              "op:gacko:gacko_2__op:gacko:gradina",
-              "op:gacko:gacko_2__op:gacko:nadinici",
-              "op:gacko:gacko_2__op:nevesinje:zovi_do"
+              "op:gacko:bahori__op:gacko:nadinici",
+              "op:gacko:gacko_2__op:gacko:nadinici"
             ],
             "enemy_osids": [
+              "op:gacko:bahori",
               "op:gacko:gacko_2"
             ],
             "friendly_osids": [
-              "op:bileca:korita",
               "op:gacko:avtovac_2",
-              "op:gacko:gradina",
-              "op:gacko:nadinici",
-              "op:nevesinje:zovi_do"
+              "op:gacko:nadinici"
             ],
-            "length_edges": 5,
+            "length_edges": 3,
             "primary_brigade_ids": [],
             "sub_segment_id": "subseg:vrs_herzegovina:1"
           }
@@ -6582,10 +6433,12 @@
         "threat_ratio": 0
       },
       "sector:vrs_herzegovina:5": {
-        "assigned_brigade_ids": [],
+        "assigned_brigade_ids": [
+          "rs_trebinje_brigade"
+        ],
         "corps_id": "vrs_herzegovina",
-        "defensive_power": 0,
-        "density": 0,
+        "defensive_power": 116.13333333333334,
+        "density": 0.3333333333333333,
         "edge_ids": [
           "op:trebinje:ivanica__op:trebinje:trebimlja_2",
           "op:trebinje:trebimlja_2__op:trebinje:velicani",
@@ -6596,9 +6449,7 @@
         "opposing_factions": [
           "HRHB"
         ],
-        "reserve_brigade_ids": [
-          "rs_trebinje_brigade"
-        ],
+        "reserve_brigade_ids": [],
         "sector_id": "sector:vrs_herzegovina:5",
         "sector_stance": "defend",
         "stance_source": "bot",
@@ -6643,10 +6494,10 @@
           "op:foca:miljevina_2__op:kalinovik:tomislja",
           "op:foca:miljevina_2__op:kalinovik:vlaholje",
           "op:foca:tjentiste_2__op:gacko:izgori",
-          "op:gacko:bahori__op:gacko:gradina",
           "op:gacko:bahori__op:gacko:izgori",
-          "op:gacko:bahori__op:gacko:nadinici",
           "op:gacko:bahori__op:kalinovik:tomislja",
+          "op:kalinovik:golubici_2__op:kalinovik:vlaholje",
+          "op:kalinovik:sela_2__op:kalinovik:tomislja",
           "op:kalinovik:varos_2__op:kalinovik:vlaholje"
         ],
         "faction": "RS",
@@ -6666,10 +6517,10 @@
               "op:foca:miljevina_2__op:kalinovik:tomislja",
               "op:foca:miljevina_2__op:kalinovik:vlaholje",
               "op:foca:tjentiste_2__op:gacko:izgori",
-              "op:gacko:bahori__op:gacko:gradina",
               "op:gacko:bahori__op:gacko:izgori",
-              "op:gacko:bahori__op:gacko:nadinici",
               "op:gacko:bahori__op:kalinovik:tomislja",
+              "op:kalinovik:golubici_2__op:kalinovik:vlaholje",
+              "op:kalinovik:sela_2__op:kalinovik:tomislja",
               "op:kalinovik:varos_2__op:kalinovik:vlaholje"
             ],
             "enemy_osids": [
@@ -6677,12 +6528,12 @@
               "op:foca:miljevina_2",
               "op:foca:tjentiste_2",
               "op:gacko:bahori",
+              "op:kalinovik:golubici_2",
+              "op:kalinovik:sela_2",
               "op:kalinovik:varos_2"
             ],
             "friendly_osids": [
-              "op:gacko:gradina",
               "op:gacko:izgori",
-              "op:gacko:nadinici",
               "op:kalinovik:kalinovik_2",
               "op:kalinovik:tomislja",
               "op:kalinovik:vlaholje"
@@ -6707,12 +6558,12 @@
         "defensive_power": 22.333333333333332,
         "density": 0.08333333333333333,
         "edge_ids": [
+          "op:gacko:bahori__op:gacko:gradina",
+          "op:gacko:gacko_2__op:gacko:gradina",
           "op:gacko:gradina__op:kalinovik:sela_2",
           "op:kalinovik:golubici_2__op:kalinovik:obalj",
-          "op:kalinovik:golubici_2__op:kalinovik:vlaholje",
           "op:kalinovik:obalj__op:kalinovik:sela_2",
           "op:kalinovik:obalj__op:konjic:ljuta",
-          "op:kalinovik:sela_2__op:kalinovik:tomislja",
           "op:kalinovik:sela_2__op:konjic:sitnik",
           "op:kalinovik:sela_2__op:nevesinje:hrusta_2",
           "op:kalinovik:sela_2__op:nevesinje:krekovi_2",
@@ -6732,12 +6583,12 @@
         "sub_segments": [
           {
             "edge_ids": [
+              "op:gacko:bahori__op:gacko:gradina",
+              "op:gacko:gacko_2__op:gacko:gradina",
               "op:gacko:gradina__op:kalinovik:sela_2",
               "op:kalinovik:golubici_2__op:kalinovik:obalj",
-              "op:kalinovik:golubici_2__op:kalinovik:vlaholje",
               "op:kalinovik:obalj__op:kalinovik:sela_2",
               "op:kalinovik:obalj__op:konjic:ljuta",
-              "op:kalinovik:sela_2__op:kalinovik:tomislja",
               "op:kalinovik:sela_2__op:konjic:sitnik",
               "op:kalinovik:sela_2__op:nevesinje:hrusta_2",
               "op:kalinovik:sela_2__op:nevesinje:krekovi_2",
@@ -6746,6 +6597,8 @@
               "op:konjic:ljuta__op:konjic:sitnik"
             ],
             "enemy_osids": [
+              "op:gacko:bahori",
+              "op:gacko:gacko_2",
               "op:kalinovik:golubici_2",
               "op:kalinovik:sela_2",
               "op:konjic:glavaticevo_2",
@@ -6754,8 +6607,6 @@
             "friendly_osids": [
               "op:gacko:gradina",
               "op:kalinovik:obalj",
-              "op:kalinovik:tomislja",
-              "op:kalinovik:vlaholje",
               "op:konjic:sitnik",
               "op:nevesinje:hrusta_2",
               "op:nevesinje:krekovi_2",
@@ -6783,24 +6634,21 @@
       },
       "sector:vrs_sarajevo_romanija:10": {
         "assigned_brigade_ids": [
-          "rs_1st_romanija_infantry",
           "rs_1st_sarajevo_mechanized",
           "rs_2nd_sarajevo_light_infantry",
           "rs_3rd_sarajevo_infantry"
         ],
         "corps_id": "vrs_sarajevo_romanija",
-        "defensive_power": 31.70380165289256,
-        "density": 0,
+        "defensive_power": 69.74,
+        "density": 0.16666666666666666,
         "edge_ids": [
           "op:centar_sarajevo:radava__op:centar_sarajevo:sarajevo_dio_centar_sajarevo",
           "op:centar_sarajevo:radava__op:novo_sarajevo:sarajevo_dio_novo_sarajevo",
           "op:centar_sarajevo:radava__op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
           "op:centar_sarajevo:radava__op:vogosca:hotonj",
           "op:centar_sarajevo:sarajevo_dio_centar_sajarevo__op:novo_sarajevo:lukavica",
-          "op:foca:mazlina__op:pale:gornje_pale",
           "op:hadzici:lokve__op:trnovo:gornja_presjenica",
           "op:ilidza:kasindo__op:ilidza:sarajevo_dio_ilidza_2",
-          "op:ilidza:kasindo__op:trnovo:kijevo_2",
           "op:ilidza:sarajevo_dio_ilidza_2__op:ilidza:sarajevo_dio_novi_grad_sarajevo",
           "op:ilidza:sarajevo_dio_ilidza_2__op:trnovo:gornja_presjenica",
           "op:ilidza:sarajevo_dio_novi_grad_sarajevo__op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo",
@@ -6810,20 +6658,11 @@
           "op:novo_sarajevo:lukavica__op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
           "op:novo_sarajevo:lukavica__op:trnovo:delijas",
           "op:novo_sarajevo:lukavica__op:trnovo:kijevo_2",
-          "op:pale:gornje_pale__op:pale:podgrab",
-          "op:pale:gornje_pale__op:pale:praca",
-          "op:pale:gornje_pale__op:trnovo:delijas",
-          "op:pale:hotocina__op:pale:praca",
-          "op:pale:hotocina__op:rogatica:kramer_selo_2",
-          "op:rogatica:kramer_selo_2__op:sokolac:sokolac_2",
           "op:stari_grad_sarajevo:faletici__op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
-          "op:trnovo:gornja_presjenica__op:trnovo:kijevo_2",
-          "op:trnovo:gornja_presjenica__op:trnovo:trnovo",
-          "op:trnovo:gornja_presjenica__op:trnovo:tusila",
           "op:vogosca:hotonj__op:vogosca:vogosca_3"
         ],
         "faction": "RS",
-        "length_edges": 29,
+        "length_edges": 18,
         "opposing_factions": [
           "HRHB",
           "RBiH"
@@ -6840,10 +6679,8 @@
               "op:centar_sarajevo:radava__op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
               "op:centar_sarajevo:radava__op:vogosca:hotonj",
               "op:centar_sarajevo:sarajevo_dio_centar_sajarevo__op:novo_sarajevo:lukavica",
-              "op:foca:mazlina__op:pale:gornje_pale",
               "op:hadzici:lokve__op:trnovo:gornja_presjenica",
               "op:ilidza:kasindo__op:ilidza:sarajevo_dio_ilidza_2",
-              "op:ilidza:kasindo__op:trnovo:kijevo_2",
               "op:ilidza:sarajevo_dio_ilidza_2__op:ilidza:sarajevo_dio_novi_grad_sarajevo",
               "op:ilidza:sarajevo_dio_ilidza_2__op:trnovo:gornja_presjenica",
               "op:ilidza:sarajevo_dio_novi_grad_sarajevo__op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo",
@@ -6853,33 +6690,18 @@
               "op:novo_sarajevo:lukavica__op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
               "op:novo_sarajevo:lukavica__op:trnovo:delijas",
               "op:novo_sarajevo:lukavica__op:trnovo:kijevo_2",
-              "op:pale:gornje_pale__op:pale:podgrab",
-              "op:pale:gornje_pale__op:pale:praca",
-              "op:pale:gornje_pale__op:trnovo:delijas",
-              "op:pale:hotocina__op:pale:praca",
-              "op:pale:hotocina__op:rogatica:kramer_selo_2",
-              "op:rogatica:kramer_selo_2__op:sokolac:sokolac_2",
               "op:stari_grad_sarajevo:faletici__op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
-              "op:trnovo:gornja_presjenica__op:trnovo:kijevo_2",
-              "op:trnovo:gornja_presjenica__op:trnovo:trnovo",
-              "op:trnovo:gornja_presjenica__op:trnovo:tusila",
               "op:vogosca:hotonj__op:vogosca:vogosca_3"
             ],
             "enemy_osids": [
               "op:centar_sarajevo:sarajevo_dio_centar_sajarevo",
-              "op:foca:mazlina",
               "op:hadzici:lokve",
               "op:ilidza:sarajevo_dio_ilidza_2",
               "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo",
               "op:novo_sarajevo:sarajevo_dio_novo_sarajevo",
-              "op:pale:podgrab",
-              "op:pale:praca",
-              "op:rogatica:kramer_selo_2",
               "op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
               "op:trnovo:delijas",
               "op:trnovo:kijevo_2",
-              "op:trnovo:trnovo",
-              "op:trnovo:tusila",
               "op:vogosca:hotonj"
             ],
             "friendly_osids": [
@@ -6887,14 +6709,11 @@
               "op:ilidza:kasindo",
               "op:ilidza:sarajevo_dio_novi_grad_sarajevo",
               "op:novo_sarajevo:lukavica",
-              "op:pale:gornje_pale",
-              "op:pale:hotocina",
-              "op:sokolac:sokolac_2",
               "op:stari_grad_sarajevo:faletici",
               "op:trnovo:gornja_presjenica",
               "op:vogosca:vogosca_3"
             ],
-            "length_edges": 29,
+            "length_edges": 18,
             "primary_brigade_ids": [],
             "sub_segment_id": "subseg:sector:vrs_sarajevo_romanija:10:merged0"
           }
@@ -6904,17 +6723,74 @@
           "op:ilidza:kasindo",
           "op:ilidza:sarajevo_dio_novi_grad_sarajevo",
           "op:novo_sarajevo:lukavica",
+          "op:stari_grad_sarajevo:faletici",
+          "op:trnovo:gornja_presjenica",
+          "op:vogosca:vogosca_3"
+        ],
+        "threat_ratio": 167.7659879552624
+      },
+      "sector:vrs_sarajevo_romanija:11": {
+        "assigned_brigade_ids": [
+          "rs_1st_romanija_infantry"
+        ],
+        "corps_id": "vrs_sarajevo_romanija",
+        "defensive_power": 52.89795918367347,
+        "density": 0.14285714285714285,
+        "edge_ids": [
+          "op:foca:mazlina__op:pale:gornje_pale",
+          "op:pale:gornje_pale__op:pale:podgrab",
+          "op:pale:gornje_pale__op:pale:praca",
+          "op:pale:gornje_pale__op:trnovo:delijas",
+          "op:pale:hotocina__op:pale:praca",
+          "op:pale:hotocina__op:rogatica:kramer_selo_2",
+          "op:rogatica:kramer_selo_2__op:sokolac:sokolac_2"
+        ],
+        "faction": "RS",
+        "length_edges": 7,
+        "opposing_factions": [
+          "RBiH"
+        ],
+        "reserve_brigade_ids": [],
+        "sector_id": "sector:vrs_sarajevo_romanija:11",
+        "sector_stance": "defend",
+        "stance_source": "bot",
+        "sub_segments": [
+          {
+            "edge_ids": [
+              "op:foca:mazlina__op:pale:gornje_pale",
+              "op:pale:gornje_pale__op:pale:podgrab",
+              "op:pale:gornje_pale__op:pale:praca",
+              "op:pale:gornje_pale__op:trnovo:delijas",
+              "op:pale:hotocina__op:pale:praca",
+              "op:pale:hotocina__op:rogatica:kramer_selo_2",
+              "op:rogatica:kramer_selo_2__op:sokolac:sokolac_2"
+            ],
+            "enemy_osids": [
+              "op:foca:mazlina",
+              "op:pale:podgrab",
+              "op:pale:praca",
+              "op:rogatica:kramer_selo_2",
+              "op:trnovo:delijas"
+            ],
+            "friendly_osids": [
+              "op:pale:gornje_pale",
+              "op:pale:hotocina",
+              "op:sokolac:sokolac_2"
+            ],
+            "length_edges": 7,
+            "primary_brigade_ids": [],
+            "sub_segment_id": "subseg:sector:vrs_sarajevo_romanija:11:split1"
+          }
+        ],
+        "territory_osids": [
           "op:pale:gornje_pale",
           "op:pale:hotocina",
           "op:pale:mokro",
           "op:pale:pale",
           "op:sokolac:sahbegovici",
-          "op:sokolac:sokolac_2",
-          "op:stari_grad_sarajevo:faletici",
-          "op:trnovo:gornja_presjenica",
-          "op:vogosca:vogosca_3"
+          "op:sokolac:sokolac_2"
         ],
-        "threat_ratio": 353.2699366032699
+        "threat_ratio": 0
       },
       "sector:vrs_sarajevo_romanija:7": {
         "assigned_brigade_ids": [
@@ -8117,7 +7993,7 @@
         "activation_turn": null,
         "assignment": {
           "kind": "sector",
-          "role": "reserve",
+          "role": "front",
           "sector_id": "sector:arbih_1st_corps:19"
         },
         "cohesion": 50,
@@ -9095,7 +8971,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:arbih_1st_corps:10"
+          "sector_id": "sector:arbih_1st_corps:12"
         },
         "cohesion": 45,
         "composition": {
@@ -10468,7 +10344,7 @@
         "activation_turn": null,
         "assignment": {
           "kind": "sector",
-          "role": "reserve",
+          "role": "front",
           "sector_id": "sector:arbih_3rd_corps:16"
         },
         "cohesion": 38,
@@ -10576,7 +10452,7 @@
         "activation_turn": null,
         "assignment": {
           "kind": "sector",
-          "role": "front",
+          "role": "reserve",
           "sector_id": "sector:arbih_3rd_corps:16"
         },
         "cohesion": 38,
@@ -11077,7 +10953,7 @@
         "activation_turn": null,
         "assignment": {
           "kind": "sector",
-          "role": "reserve",
+          "role": "front",
           "sector_id": "sector:arbih_1st_corps:5"
         },
         "cohesion": 72,
@@ -11158,7 +11034,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:arbih_1st_corps:10"
+          "sector_id": "sector:arbih_1st_corps:12"
         },
         "cohesion": 45,
         "composition": {
@@ -11267,7 +11143,7 @@
         "activation_turn": null,
         "assignment": {
           "kind": "sector",
-          "role": "reserve",
+          "role": "front",
           "sector_id": "sector:hvo_central_bosnia:17"
         },
         "cohesion": 55,
@@ -14189,7 +14065,7 @@
         "assignment": {
           "kind": "sector",
           "role": "reserve",
-          "sector_id": "sector:vrs_1st_krajina:2"
+          "sector_id": "sector:vrs_1st_krajina:23"
         },
         "cohesion": 67,
         "composition": {
@@ -15331,7 +15207,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_sarajevo_romanija:10"
+          "sector_id": "sector:vrs_sarajevo_romanija:11"
         },
         "cohesion": 72,
         "composition": {
@@ -15709,7 +15585,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_drina:10"
+          "sector_id": "sector:vrs_drina:7"
         },
         "cohesion": 67,
         "composition": {
@@ -16033,7 +15909,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_1st_krajina:2"
+          "sector_id": "sector:vrs_1st_krajina:23"
         },
         "cohesion": 67,
         "composition": {
@@ -16411,7 +16287,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_1st_krajina:12"
+          "sector_id": "sector:vrs_1st_krajina:4"
         },
         "cohesion": 67,
         "composition": {
@@ -16951,7 +16827,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_1st_krajina:2"
+          "sector_id": "sector:vrs_1st_krajina:23"
         },
         "cohesion": 67,
         "composition": {
@@ -17167,7 +17043,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_1st_krajina:22"
+          "sector_id": "sector:vrs_1st_krajina:2"
         },
         "cohesion": 70,
         "composition": {
@@ -17221,7 +17097,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_drina:10"
+          "sector_id": "sector:vrs_drina:7"
         },
         "cohesion": 67,
         "composition": {
@@ -17333,7 +17209,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_1st_krajina:24"
+          "sector_id": "sector:vrs_1st_krajina:2"
         },
         "cohesion": 67,
         "composition": {
@@ -17873,7 +17749,7 @@
         "activation_turn": null,
         "assignment": {
           "kind": "sector",
-          "role": "reserve",
+          "role": "front",
           "sector_id": "sector:vrs_herzegovina:5"
         },
         "cohesion": 67,

@@ -85,6 +85,16 @@ test('electron main exposes a packaged runtime probe mode instead of a second la
     );
     assert.match(
         source,
+        /waitForDesktopSessionReady\(/,
+        'packaged runtime probe should wait for the real tactical-map desktop session hook before sending probe traffic',
+    );
+    assert.match(
+        source,
+        /awwvDesktopSessionReady/,
+        'packaged runtime probe should require an explicit renderer-ready marker from the operational tactical-map session hook',
+    );
+    assert.match(
+        source,
         /waitForTacticalMapInteraction\(/,
         'packaged runtime probe should prove a minimal tactical-map interaction contract, not just route load',
     );
@@ -150,13 +160,63 @@ test('electron main exposes a packaged runtime probe mode instead of a second la
     );
     assert.match(
         source,
-        /tacticalWindowInteraction\.location_path[\s\S]*tacticalWindowInteraction\.map_server_url[\s\S]*tacticalWindowInteraction\.player_faction[\s\S]*tacticalWindowInteraction\.route_mode[\s\S]*tacticalWindowInteraction\.turn/s,
-        'packaged runtime probe should record deterministic operational interaction details',
+        /armRendererReactionProbe\(/,
+        'packaged runtime probe should arm a probe-safe renderer reaction contract on the real tactical-map windows',
     );
     assert.match(
         source,
-        /tacticalSandboxInteraction\.location_path[\s\S]*tacticalSandboxInteraction\.map_server_url[\s\S]*tacticalSandboxInteraction\.player_faction[\s\S]*tacticalSandboxInteraction\.route_mode[\s\S]*tacticalSandboxInteraction\.turn/s,
-        'packaged runtime probe should record deterministic sandbox interaction details',
+        /collectRendererReactionProbe\(/,
+        'packaged runtime probe should collect the renderer-side reaction proof deterministically',
+    );
+    assert.match(
+        source,
+        /renderer_reaction_checks:\s*\[/,
+        'packaged runtime probe manifest should record renderer-side reaction proofs',
+    );
+    assert.match(
+        source,
+        /document\.documentElement/,
+        'packaged runtime probe should observe a renderer-owned DOM surface for reaction proof',
+    );
+    assert.match(
+        source,
+        /awwvProbeGameStateRouteMode/,
+        'packaged runtime probe should require deterministic game-state reaction dataset fields',
+    );
+    assert.match(
+        source,
+        /awwvProbeGameStateFingerprintMatchesPayload/,
+        'packaged runtime probe should require a renderer-side exact payload identity proof for game-state reactions',
+    );
+    assert.match(
+        source,
+        /awwvProbeGameStatePayloadLength/,
+        'packaged runtime probe should require a deterministic payload-length proof for game-state reactions',
+    );
+    assert.match(
+        source,
+        /awwvProbeTurnReportProbe/,
+        'packaged runtime probe should require deterministic turn-report reaction dataset fields',
+    );
+    assert.match(
+        source,
+        /awwvProbeTurnReportPayloadMatchesProbe/,
+        'packaged runtime probe should require a renderer-side exact payload identity proof for turn-report reactions',
+    );
+    assert.match(
+        source,
+        /awwvProbeTurnReportPlayerFaction/,
+        'packaged runtime probe should require deterministic turn-report player-faction reaction fields',
+    );
+    assert.doesNotMatch(
+        source,
+        /Date\.now\(/,
+        'renderer reaction probing should not depend on timestamps',
+    );
+    assert.match(
+        source,
+        /tacticalWindowInteraction\.location_path[\s\S]*tacticalWindowInteraction\.map_server_url[\s\S]*tacticalWindowInteraction\.player_faction[\s\S]*tacticalWindowInteraction\.route_mode[\s\S]*tacticalWindowInteraction\.turn/s,
+        'packaged runtime probe should record deterministic operational interaction details',
     );
 });
 
@@ -225,7 +285,63 @@ test('probe tool launches the unpacked packaged executable with the runtime prob
     );
     assert.match(
         source,
+        /renderer_reaction_checks[\s\S]*route_mode === 'operational'[\s\S]*game_state_updated\?\.fingerprint_matches_payload === true[\s\S]*game_state_updated\?\.route_mode === 'operational'[\s\S]*game_state_updated\?\.location_path === '\/'[\s\S]*game_state_updated\?\.payload_length > 0[\s\S]*turn_report_updated\?\.payload_matches_probe === true[\s\S]*turn_report_updated\?\.player_faction === 'RBiH'[\s\S]*turn_report_updated\?\.probe === 'awwv_turn_report_probe'/s,
+        'probe tool should fail if the packaged manifest omits the tactical operational renderer freshness proof',
+    );
+    assert.match(
+        source,
         /awwv_desktop_runtime_probe_manifest\.json/,
         'probe tool should have a deterministic packaged-manifest fallback instead of relying only on GUI stdout',
+    );
+});
+
+test('renderer reaction proof instruments the real tactical-map session/store path in probe-safe form', async () => {
+    const useDesktopSession = await readFile(join(process.cwd(), 'src', 'ui', 'map', 'hooks', 'useDesktopSession.ts'), 'utf8');
+    const gameStore = await readFile(join(process.cwd(), 'src', 'ui', 'map', 'store', 'gameStore.ts'), 'utf8');
+
+    assert.match(
+        useDesktopSession,
+        /recordDesktopProbeReaction\(/,
+        'renderer reaction proof should instrument the existing tactical-map session hook, not a parallel probe-only renderer',
+    );
+    assert.match(
+        useDesktopSession,
+        /awwvDesktopSessionReady/,
+        'renderer reaction proof should expose a deterministic tactical-map session readiness marker',
+    );
+    assert.match(
+        useDesktopSession,
+        /document\.documentElement/,
+        'renderer reaction proof should write to a renderer-owned DOM surface that the packaged window probe can observe deterministically',
+    );
+    assert.match(
+        useDesktopSession,
+        /awwvProbeGameState/,
+        'renderer reaction proof should record the store-backed game-state reaction',
+    );
+    assert.match(
+        useDesktopSession,
+        /fingerprint_matches_payload:\s*storeState\.lastLoadedStateFingerprint === stateJson/s,
+        'renderer reaction proof should confirm the store preserved the exact pushed game-state payload',
+    );
+    assert.match(
+        useDesktopSession,
+        /awwvProbeTurnReport/,
+        'renderer reaction proof should record the store-backed turn-report reaction',
+    );
+    assert.match(
+        useDesktopSession,
+        /payload_matches_probe:\s*lastTurnReport\?\.probe ===/s,
+        'renderer reaction proof should confirm the store preserved the exact pushed turn-report marker',
+    );
+    assert.match(
+        gameStore,
+        /isRuntimeProbeActive\(/,
+        'packaged renderer reaction proof should have an explicit probe-safe store scheduling gate',
+    );
+    assert.match(
+        gameStore,
+        /if \(isRuntimeProbeActive\(\)\) \{\s*queueMicrotask\(fn\);/s,
+        'probe-safe renderer reaction scheduling should avoid hidden-window timer starvation without changing normal runtime flow',
     );
 });
