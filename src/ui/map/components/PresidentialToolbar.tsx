@@ -45,6 +45,8 @@ function CommandAuthorityGauge({ current, max }: { current: number; max: number 
 interface PresidentialToolbarProps {
     /** Canonical pending military review count (from presidentialReviewQueue). */
     pendingReviews: number;
+    /** Canonical army-level reserve pressure summary (from armyReserveQueue). */
+    reserveAttention?: { pendingCount: number; criticalCount: number } | null;
     /** Whether any event has readiness > 50% of threshold. */
     pressureWarning: boolean;
     onOpenSummary?: () => void;
@@ -56,6 +58,7 @@ interface PresidentialToolbarProps {
 
 export function PresidentialToolbar({
     pendingReviews,
+    reserveAttention,
     pressureWarning,
     onOpenSummary,
     onOpenRecords,
@@ -69,6 +72,7 @@ export function PresidentialToolbar({
     const clearStagedOrders = useGameStore((s) => s.clearStagedOrders);
     const setArmyHQOpen = useGameStore((s) => s.setArmyHQOpen);
     const setSelectedArmyId = useGameStore((s) => s.setSelectedArmyId);
+    const setSelectedArmyHqId = useGameStore((s) => s.setSelectedArmyHqId);
     const loadError = useGameStore((s) => s.loadError);
     const setLoadError = useGameStore((s) => s.setLoadError);
     const devMode = useGameStore((s) => s.devMode);
@@ -96,7 +100,17 @@ export function PresidentialToolbar({
         setArmyHQOpen(true);
     }, [playerFaction, setSelectedArmyId, setArmyHQOpen]);
 
-    const hasAlerts = pendingReviews > 0 || pressureWarning;
+    const handleOpenArmyReserve = useCallback(() => {
+        if (!playerFaction || !loadedGameState) return;
+        const armyReserveFormation = loadedGameState.formations.find((formation) =>
+            formation.faction === playerFaction && formation.kind === 'army_hq',
+        );
+        if (!armyReserveFormation) return;
+        setArmyHQOpen(false);
+        setSelectedArmyHqId(armyReserveFormation.id);
+    }, [loadedGameState, playerFaction, setArmyHQOpen, setSelectedArmyHqId]);
+
+    const hasAlerts = pendingReviews > 0 || pressureWarning || (reserveAttention?.pendingCount ?? 0) > 0;
 
     // Dev tools state
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -232,6 +246,21 @@ export function PresidentialToolbar({
                         >
                             <span className="w-2 h-2 rounded-full bg-red-500" />
                             {pendingReviews} {pendingReviews === 1 ? 'REVIEW' : 'REVIEWS'}
+                        </button>
+                    )}
+
+                    {reserveAttention && reserveAttention.pendingCount > 0 && (
+                        <button
+                            onClick={handleOpenArmyReserve}
+                            className={`flex items-center gap-1.5 px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-wide border rounded transition-colors ${
+                                reserveAttention.criticalCount > 0
+                                    ? 'bg-amber-900/30 text-amber-400 border-amber-500/30 hover:bg-amber-900/50'
+                                    : 'bg-sky-900/30 text-sky-300 border-sky-400/30 hover:bg-sky-900/50'
+                            }`}
+                            title="Open Army Reserve desk"
+                        >
+                            <span className={`w-2 h-2 rounded-full ${reserveAttention.criticalCount > 0 ? 'bg-amber-500' : 'bg-sky-300'}`} />
+                            {reserveAttention.pendingCount} {reserveAttention.pendingCount === 1 ? 'RESERVE REQUEST' : 'RESERVE REQUESTS'}
                         </button>
                     )}
 

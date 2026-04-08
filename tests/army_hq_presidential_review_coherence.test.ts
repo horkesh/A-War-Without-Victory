@@ -10,10 +10,22 @@ describe('Army HQ / presidential review coherence', () => {
 
     expect(source).toContain('pendingReviews: number;');
     expect(source).toContain("{pendingReviews} {pendingReviews === 1 ? 'REVIEW' : 'REVIEWS'}");
-    expect(source).not.toContain('armyReserveQueue');
+    expect(source).not.toContain("{pendingReviews +");
     expect(source).not.toContain('OfficerEventBadge');
     expect(source).not.toContain('pendingOfficerEvents: boolean;');
     expect(source).not.toContain('pendingDecisions: number;');
+  });
+
+  it('gives reserve pressure one distinct army-level toolbar signal without folding it into presidential review', () => {
+    const source = readFileSync(
+      new URL('../src/ui/map/components/PresidentialToolbar.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(source).toContain('reserveAttention?: { pendingCount: number; criticalCount: number } | null;');
+    expect(source).toContain('Open Army Reserve desk');
+    expect(source).toContain("RESERVE REQUEST");
+    expect(source).not.toContain("{pendingReviews +");
   });
 
   it('makes Army HQ briefing explicitly own the live military review queue', () => {

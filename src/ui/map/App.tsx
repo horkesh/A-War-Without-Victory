@@ -671,6 +671,12 @@ function App() {
       <MapContainer />
       <PresidentialToolbar
         pendingReviews={loadedGameState?.presidentialReviewQueue?.pendingCount ?? 0}
+        reserveAttention={loadedGameState?.armyReserveQueue
+          ? {
+            pendingCount: loadedGameState.armyReserveQueue.pendingCount,
+            criticalCount: loadedGameState.armyReserveQueue.criticalCount,
+          }
+          : null}
         pressureWarning={loadedGameState?.pressureWarning ?? false}
         onOpenSummary={openSummary}
         onOpenRecords={() => openArmyHQRecords('aar')}
