@@ -25088,6 +25088,19 @@ Main Staff HQ was Han Pijesak, not Rogatica. Tracked for OOB correction pass.
 - **Verification:** targeted operation-truth regressions, `npm run typecheck`, `tests/scenario_operation_diagnostics.test.ts`, `tests/scenario_vrs_operation_proof.test.ts`, `npm run recovery:check`, and a fresh `npm run sim:scenario:run:40w` all passed.
 - **Residual note:** the fresh `n1371` scenario still shows dead-on-arrival or no-attempt operations in live play; that is now an execution-quality / launch-quality seam, not the older participant-truth seam.
 - **Report:** `docs/40_reports/implemented/20260408_OPERATION_TRUTH_RECONCILIATION_AND_AXIS_INTEGRITY_HARDENING.md`
+## [2026-04-09] docs(engine): close out operation planning orchestration A+ hardening
+
+**Type:** Documentation closeout
+**Files:** `docs/PROJECT_LEDGER.md`, `docs/40_reports/implemented/20260408_OPERATION_PLANNING_CAMPAIGN_ORCHESTRATION_HARDENING.md`, `docs/plans/2026-04-08-operations-system-a-plus-plan.md`
+**Status:** CLOSED - local-date ledger closeout added after the verified A+ operation-planning/orchestration wave commit
+
+### Closeout note
+
+- The broader operation planning / campaign orchestration / historical-op injection lane is now closed as an `A+` system under fresh 52-week (`n1394`), fresh 56-week (`n1393`), and `recovery:check` verification.
+- This ledger note exists to align the daily documentation boundary with the local close-of-session date after the implementation and evidence were already written into the 2026-04-08 report and plan documents.
+
+---
+
 ## [2026-04-08] fix(engine): Harden operation planning, campaign orchestration, and historical-op injection to A+
 
 **Type:** Engine hardening
