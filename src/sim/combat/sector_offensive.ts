@@ -92,6 +92,8 @@ import {
     getForestMult,
     getUrbanMult,
 } from './combat_math.js';
+import { predictAllAdjacentTargets, type PredictedOutcome } from './combat_predictor.js';
+import { estimateConcentratedOutcome, isOutcomeSufficientForAttack } from './bot_brigade_targeting.js';
 import { findSectorForEnemyOsid } from './corps_front_sectors.js';
 import { seedDisplacementTimerOnFlip } from '../../state/displacement_takeover.js';
 import type { PreparationEvent } from '../turn_pipeline_types.js';
@@ -769,6 +771,91 @@ function areParticipantsReadyForExecution(
     return eligibleParticipantCount > 0;
 }
 
+function getPlanningAttackThreshold(op: CorpsOperation): PredictedOutcome {
+    return op.min_attack_outcome ?? 'costly_victory';
+}
+
+function axisHasExecutableOpeningAttack(
+    state: GameState,
+    faction: FactionId,
+    objective: string | undefined,
+    brigadeIds: FormationId[],
+    adjacency: Map<string, string[]>,
+    threshold: PredictedOutcome,
+): boolean {
+    if (typeof objective !== 'string' || objective.length === 0) return false;
+
+    const adjacentParticipants = brigadeIds.filter((brigadeId) => {
+        const brigade = state.military.formations?.[brigadeId];
+        if (!brigade?.location_osid || brigade.status !== 'active') return false;
+        return (adjacency.get(brigade.location_osid) ?? []).includes(objective);
+    }).length;
+    if (adjacentParticipants <= 0) return false;
+
+    for (const brigadeId of brigadeIds) {
+        const brigade = state.military.formations?.[brigadeId];
+        if (!brigade || brigade.faction !== faction || brigade.status !== 'active') continue;
+        if ((brigade.personnel ?? 0) < MIN_ATTACK_PERSONNEL) continue;
+        if ((brigade.disrupted_turns ?? 0) > 0) continue;
+
+        const directObjectiveAttack = predictAllAdjacentTargets(
+            state,
+            brigadeId,
+            adjacency,
+            undefined as unknown as OperationalToCanonicalReverseMap,
+            {},
+            'attack',
+        ).find((target) => target.osid === objective);
+        if (!directObjectiveAttack) continue;
+
+        const concentratedOutcome = adjacentParticipants > 1
+            ? estimateConcentratedOutcome(directObjectiveAttack.prediction.power_ratio, adjacentParticipants - 1)
+            : null;
+        if (
+            isOutcomeSufficientForAttack(directObjectiveAttack.prediction.predicted_outcome, threshold)
+            || (concentratedOutcome != null && isOutcomeSufficientForAttack(concentratedOutcome, threshold))
+        ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function hasExecutableOpeningAttack(
+    state: GameState,
+    faction: FactionId,
+    op: CorpsOperation,
+): boolean {
+    const adjacency = buildOsidAdjacencyFromFrontEdges(state);
+    if (adjacency.size === 0) {
+        // Sparse test/save states without front-edge adjacency cannot support
+        // predictor-faithful attack validation. Fall back to readiness truth only.
+        return true;
+    }
+    const threshold = getPlanningAttackThreshold(op);
+
+    if (isMultiAxis(op) && op.axes) {
+        return op.axes.some((axis) => axisHasExecutableOpeningAttack(
+            state,
+            faction,
+            axis.objectives[axis.current_objective_index ?? 0],
+            axis.assigned_brigades,
+            adjacency,
+            threshold,
+        ));
+    }
+
+    return axisHasExecutableOpeningAttack(
+        state,
+        faction,
+        op.objectives?.[op.current_objective_index ?? 0],
+        op.participating_brigades ?? [],
+        adjacency,
+        threshold,
+    );
+}
+
 /**
  * Record failed objectives for a corps when an operation ends without success.
  * After OBJECTIVE_FAILURE_THRESHOLD failures, the objective enters a cooldown period.
@@ -1285,6 +1372,10 @@ export function advanceSectorOffensives(
                     if (elapsed <= planDuration + PLANNING_INVALIDATION_GRACE_TURNS) {
                         continue;
                     }
+                    beginRecovery(op, turn, 'planning_invalidated', state);
+                    continue;
+                }
+                if (!forcedLaunch && !hasExecutableOpeningAttack(state, faction, op)) {
                     beginRecovery(op, turn, 'planning_invalidated', state);
                     continue;
                 }

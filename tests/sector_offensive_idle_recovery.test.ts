@@ -56,6 +56,25 @@ function makeBrigade(id: string, locationOsid: string): FormationState {
     };
 }
 
+function makeEnemyBrigade(id: string, locationOsid: string, personnel = 1000): FormationState {
+    return {
+        id,
+        faction: 'RBiH',
+        corps_id: 'rbih_corps',
+        name: id,
+        created_turn: 1,
+        status: 'active',
+        assignment: null,
+        kind: 'brigade',
+        personnel,
+        cohesion: 80,
+        hq_sid: 'S2',
+        location_osid: locationOsid,
+        posture: 'hold',
+        tags: [],
+    };
+}
+
 describe('equipment offensive priority', () => {
     it('mechanized > motorized > mountain > light_infantry priority', () => {
         expect(getEquipmentOffensivePriority('mechanized')).toBeGreaterThan(getEquipmentOffensivePriority('motorized'));
@@ -750,6 +769,112 @@ describe('sector offensive idle recovery', () => {
                 'op:target:objective': 'RBiH',
                 'op:front:approach': 'RS',
                 'op:rear:staging': 'RS',
+            }
+  } as any,
+} as unknown as GameState;
+
+        advanceSectorOffensives(state, null);
+
+        const op = state.military.corps_command?.rs_corps?.active_operations[0];
+        expect(op?.phase).toBe('recovery');
+        expect(op?.recovery_reason).toBe('planning_invalidated');
+    });
+
+    it('invalidates planning when objective approaches are occupied but the predictor still rejects every opening attack', () => {
+        const enemySector = makeSector(
+            'rbih_sector',
+            'rbih_corps',
+            'RBiH',
+            ['e2'],
+            ['op:target:objective'],
+            ['op:front:approach'],
+        );
+        enemySector.assigned_brigade_ids = ['d1', 'd2'];
+
+        const state = {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 8, phase: 'war', seed: 'planning-predictor-infeasible' } as any,
+  military: {
+    formations: {
+                rs_corps: {
+                    id: 'rs_corps',
+                    faction: 'RS',
+                    name: 'Corps',
+                    created_turn: 1,
+                    status: 'active',
+                    assignment: null,
+                    kind: 'corps',
+                    personnel: 50,
+                    cohesion: 80,
+                    hq_sid: 'S1',
+                    tags: [],
+                },
+                rbih_corps: {
+                    id: 'rbih_corps',
+                    faction: 'RBiH',
+                    name: 'Enemy Corps',
+                    created_turn: 1,
+                    status: 'active',
+                    assignment: null,
+                    kind: 'corps',
+                    personnel: 50,
+                    cohesion: 80,
+                    hq_sid: 'S2',
+                    tags: [],
+                },
+                b1: {
+                    ...makeBrigade('b1', 'op:front:approach'),
+                    personnel: 900,
+                },
+                b2: {
+                    ...makeBrigade('b2', 'op:front:approach'),
+                    personnel: 850,
+                },
+                d1: makeEnemyBrigade('d1', 'op:target:objective', 4000),
+                d2: makeEnemyBrigade('d2', 'op:target:objective', 3500),
+            },
+    corps_front_sectors: {
+                rs_sector: makeSector('rs_sector', 'rs_corps', 'RS', ['e1'], ['op:front:approach'], ['op:target:objective']),
+                rbih_sector: enemySector,
+            },
+    war_front_edges_osid: [
+                { edge_id: 'front:1', a: 'op:front:approach', b: 'op:target:objective' },
+            ],
+    corps_command: {
+                rs_corps: {
+                    command_span: 5,
+                    subordinate_count: 2,
+                    og_slots: 1,
+                    active_ogs: [],
+                    corps_exhaustion: 0,
+                    stance: 'offensive',
+                    active_operations: [{
+                        name: 'Ready But Hopeless',
+                        type: 'sector_attack',
+                        phase: 'planning',
+                        started_turn: 4,
+                        phase_started_turn: 4,
+                        participating_brigades: ['b1', 'b2'],
+                        objectives: ['op:target:objective'],
+                        current_objective_index: 0,
+                        planning_duration: 1,
+                        attack_attempt_count: 0,
+                        objective_capture_count: 0,
+                        movement_only_execution_turns: 0,
+                        idle_execution_turn_streak: 0,
+                        failure_count: 0,
+                        consecutive_failures_on_current: 0,
+                        sector_id: 'rs_sector',
+                        staging_osid: 'op:front:approach',
+                    }],
+                },
+            },
+    brigade_movement_state: {},
+  } as any,
+  political: {
+    political_controllers: {
+                'op:front:approach': 'RS',
+                'op:target:objective': 'RBiH',
             }
   } as any,
 } as unknown as GameState;
