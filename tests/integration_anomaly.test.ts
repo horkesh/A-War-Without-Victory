@@ -19,6 +19,7 @@ const OUT_DIR = join(process.cwd(), '.tmp_integration_anomaly');
 
 describe('post-run anomaly detection (40w)', () => {
     let anomalies: AnomalyReport[] = [];
+    let state: GameState | null = null;
     let skipped = false;
 
     beforeAll(async () => {
@@ -31,7 +32,7 @@ describe('post-run anomaly detection (40w)', () => {
 
         const result = await runScenario({ scenarioPath: SCENARIO_40W, outDirBase: OUT_DIR });
         const json = await readFile(result.paths.final_save, 'utf8');
-        const state: GameState = JSON.parse(json);
+        state = JSON.parse(json) as GameState;
 
         anomalies = runAnomalyDetection(state);
 
@@ -49,14 +50,18 @@ describe('post-run anomaly detection (40w)', () => {
     it('has no unexpected critical anomalies', () => {
         if (skipped) return;
         const criticals = anomalies.filter(a => a.severity === 'critical');
-        const allowedCriticals = new Set([
-            'unassigned_frontline_brigades',
-        ]);
-        const unexpected = criticals.filter((report) => !allowedCriticals.has(report.type));
         expect(
-            unexpected.length,
-            `Unexpected critical anomalies (${unexpected.length}):\n${unexpected.map(c => `  ${c.type}: ${c.description}`).join('\n')}`
+            criticals.length,
+            `Unexpected critical anomalies (${criticals.length}):\n${criticals.map(c => `  ${c.type}: ${c.description}`).join('\n')}`
         ).toBe(0);
+    });
+
+    it('unassigned_frontline_brigades follows canonical unresolved_sector_brigades truth', () => {
+        if (skipped) return;
+        const canonicalUnresolved = [...(state?.military.unresolved_sector_brigades ?? [])].sort();
+        const report = anomalies.find((a) => a.type === 'unassigned_frontline_brigades');
+        const reported = [...(report?.entities ?? [])].sort();
+        expect(reported).toEqual(canonicalUnresolved);
     });
 
     it('anomaly detector produces results', () => {

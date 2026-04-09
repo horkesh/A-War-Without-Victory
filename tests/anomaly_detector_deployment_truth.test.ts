@@ -19,7 +19,7 @@ function makeAdjacency(pairs: Array<[string, string]>): Map<string, string[]> {
 }
 
 describe('anomaly detector deployment truth', () => {
-    it('does not let placement:fixed_home_osid suppress unassigned frontline brigades', () => {
+    it('does not let placement:fixed_home_osid suppress canonically unresolved sector brigades', () => {
         const state = {
             meta: { turn: 8, phase: 'war' },
             military: {
@@ -37,12 +37,40 @@ describe('anomaly detector deployment truth', () => {
                         tags: ['placement:fixed_home_osid'],
                     },
                 },
+                unresolved_sector_brigades: ['brig_fixed'],
+            },
+        } as unknown as GameState;
+
+        const anomalies = detectUnassignedFrontlineBrigades(state);
+        expect(anomalies).toHaveLength(1);
+        expect(anomalies[0]?.type).toBe('unassigned_frontline_brigades');
+        expect(anomalies[0]?.entities).toContain('brig_fixed');
+    });
+
+    it('does not reconstruct unassigned frontline failures when canonical unresolved list is empty', () => {
+        const state = {
+            meta: { turn: 8, phase: 'war' },
+            military: {
+                formations: {
+                    brig_fixed: {
+                        id: 'brig_fixed',
+                        faction: 'HRHB',
+                        kind: 'brigade',
+                        status: 'active',
+                        corps_id: 'hvo_central_bosnia',
+                        location_osid: 'op:test:rear',
+                        home_osid: 'op:test:home',
+                        disrupted_turns: 0,
+                        assignment: null,
+                        tags: ['placement:fixed_home_osid'],
+                    },
+                },
                 corps_front_sectors: {
-                    'sector:arbih_1st_corps:0': {
-                        sector_id: 'sector:arbih_1st_corps:0',
-                        corps_id: 'arbih_1st_corps',
-                        faction: 'RBiH',
-                        assigned_brigade_ids: [],
+                    'sector:hvo_central_bosnia:0': {
+                        sector_id: 'sector:hvo_central_bosnia:0',
+                        corps_id: 'hvo_central_bosnia',
+                        faction: 'HRHB',
+                        assigned_brigade_ids: ['other_brig'],
                         reserve_brigade_ids: [],
                         sub_segments: [],
                         edge_ids: ['edge:1'],
@@ -56,26 +84,15 @@ describe('anomaly detector deployment truth', () => {
                     },
                 },
                 corps_command: {
-                    arbih_1st_corps: {
+                    hvo_central_bosnia: {
                         active_operations: [],
                     },
                 },
-                brigade_movement_state: {},
-                brigade_movement_orders: {},
-            },
-            political: {
-                political_controllers: {
-                    'op:test:rear': 'RBiH',
-                    'op:test:front': 'RBiH',
-                    'op:test:home': 'RBiH',
-                },
+                unresolved_sector_brigades: [],
             },
         } as unknown as GameState;
 
-        const anomalies = detectUnassignedFrontlineBrigades(state);
-        expect(anomalies).toHaveLength(1);
-        expect(anomalies[0]?.type).toBe('unassigned_frontline_brigades');
-        expect(anomalies[0]?.entities).toContain('brig_fixed');
+        expect(detectUnassignedFrontlineBrigades(state)).toEqual([]);
     });
 
     it('separates far-from-home redeployments from idle unassigned drift', () => {

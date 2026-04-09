@@ -1,3 +1,47 @@
+## [2026-04-09] fix(harness): align unassigned_frontline_brigades with canonical unresolved sector truth (n1402)
+
+**Type:** Harness / anomaly truth hardening
+**Files:** `src/scenario/anomaly_detector.ts`, `tests/anomaly_detector_deployment_truth.test.ts`, `tests/integration_anomaly.test.ts`
+**Run:** n1402 — hash `701d14d32566c5b5` (unchanged from n1401)
+**Status:** VERIFIED — targeted anomaly suites, 40-week rerun, consistency audit, recovery bar, full vitest, typecheck, and build clean
+
+### Summary of changes
+
+1. **Duplicate owner removed** — `detectUnassignedFrontlineBrigades(...)` now reads `state.military.unresolved_sector_brigades` instead of reconstructing its own “corps has sectors, brigade unassigned” doctrine.
+
+2. **Regression contract aligned** — targeted anomaly tests now prove canonically unresolved brigades still report even with `placement:fixed_home_osid`, while HVO-style fixed-home brigades with an empty unresolved list do not trigger the critical merely because their corps has sectors elsewhere.
+
+3. **Integration check tightened** — the post-run anomaly integration suite now asserts that `unassigned_frontline_brigades` exactly matches `unresolved_sector_brigades`, so the detector cannot drift away from final sector truth again.
+
+### Scenario proof
+
+- Baseline: `runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1401`
+  - `final_save.json` had `military.unresolved_sector_brigades = []`
+  - `end_report.md` still contained `[unassigned_frontline_brigades] 8 active brigade(s)...` including the six HVO Central Bosnia home brigades plus `rs_1st_podrinje` / `rs_5th_podrinje`
+  - The anomaly surface contradicted the canonical unresolved-sector owner.
+
+- Post-fix: `runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1402`
+  - `final_save.json` still has `military.unresolved_sector_brigades = []`
+  - `end_report.md` no longer contains `unassigned_frontline_brigades`
+  - `run_summary.json` still contains `[brigade_far_from_home_unassigned] 2/213 ... rs_1st_podrinje ... rs_5th_podrinje`
+  - Final hash stayed `701d14d32566c5b5`, proving this lane clarified ownership without changing sim behavior.
+
+### Verification
+
+- `npx.cmd vitest run tests/anomaly_detector_deployment_truth.test.ts tests/integration_anomaly.test.ts`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run sim:scenario:run:40w`
+- `node tools/validate_run_consistency.cjs runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1402`
+- `npm.cmd run recovery:check`
+- `npm.cmd run test:vitest`
+- `npm.cmd run build`
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260409_UNRESOLVED_SECTOR_ANOMALY_OWNER_ALIGNMENT.md`
+
+---
+
 ## [2026-04-09] fix(harness): classify far-from-home brigades by live owner truth (n1401)
 
 **Type:** Harness / anomaly truth hardening

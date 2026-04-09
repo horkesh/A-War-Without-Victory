@@ -565,49 +565,22 @@ function detectDisconnectedSectorTerritory(state: GameState, adjacency: Map<stri
 
 /**
  * 14. unassigned_frontline_brigades (critical)
- * Active brigades that SHOULD be in a sector but aren't assigned to any.
- * n1195: Raised to critical — full-strength brigades sitting idle while
- * sectors have unmanned front edges is a brigade_assignment.ts pipeline failure.
+ * Final-sector unresolved brigades that truly fell through the sector pipeline.
+ * Canonical owner is `military.unresolved_sector_brigades`, populated by the
+ * final sector truth builder/reconciliation pass.
  */
 export function detectUnassignedFrontlineBrigades(state: GameState): AnomalyReport[] {
     const reports: AnomalyReport[] = [];
     const formations = state.military.formations;
-    const sectors = state.military.corps_front_sectors ?? {};
-    const corpsCommand = state.military.corps_command ?? {};
-
-    // Collect all brigade IDs assigned to ANY sector
-    const assignedSet = new Set<string>();
-    for (const sectorId of sortedKeys(sectors as Record<string, unknown>)) {
-        const sector = sectors[sectorId];
-        for (const bid of sector.assigned_brigade_ids) assignedSet.add(bid);
-        for (const bid of sector.reserve_brigade_ids) assignedSet.add(bid);
-    }
-
-    // Identify corps that HAVE sectors
-    const corpsWithSectors = new Set<string>();
-    for (const sectorId of sortedKeys(sectors as Record<string, unknown>)) {
-        corpsWithSectors.add(sectors[sectorId].corps_id);
-    }
-
-    // Collect brigades participating in active operations
-    const opParticipants = new Set<string>();
-    for (const corpsId of sortedKeys(corpsCommand as Record<string, unknown>)) {
-        const cc = corpsCommand[corpsId];
-        for (const op of cc.active_operations) {
-            for (const bid of op.participating_brigades) opParticipants.add(bid);
-        }
-    }
+    const canonicalUnresolved = state.military.unresolved_sector_brigades ?? [];
 
     const unassigned: Array<{ id: string; corps: string; location: string }> = [];
-    for (const fid of sortedKeys(formations as Record<string, unknown>)) {
+    for (const fid of [...canonicalUnresolved].sort(strictCompare)) {
         const f = formations[fid];
+        if (!f) continue;
         if (f.status !== 'active') continue;
         if (!isBrigadeKind(f.kind)) continue;
         if (!f.corps_id) continue;
-        if (!corpsWithSectors.has(f.corps_id)) continue;
-        if (assignedSet.has(fid)) continue;
-        if (opParticipants.has(fid)) continue;
-        if ((f.disrupted_turns ?? 0) > 0) continue;
         unassigned.push({ id: fid, corps: f.corps_id, location: f.location_osid ?? 'none' });
     }
 
