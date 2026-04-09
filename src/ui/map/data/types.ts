@@ -403,6 +403,10 @@ export interface ArmyReserveQueueView {
     leadCriticalFocusZoneId?: string;
     leadCriticalThreatRatio?: number;
     leadCriticalAssignedBrigadeCount?: number;
+    leadCriticalOperationName?: string;
+    leadCriticalOperationPhase?: string;
+    leadCriticalOperationPreparationSubPhase?: string;
+    leadCriticalOperationMomentum?: number;
     leadCriticalPurpose?: 'offensive' | 'defensive';
     leadCriticalWhyNeeded?: string;
     leadCriticalDescription?: string;
@@ -754,6 +758,10 @@ export interface LoadedGameState {
         commander_focus_zone_id?: string;
         sector_threat_ratio?: number;
         sector_assigned_brigade_count?: number;
+        operation_name?: string;
+        operation_phase?: string;
+        operation_preparation_sub_phase?: string;
+        operation_momentum?: number;
         purpose?: 'offensive' | 'defensive';
         why_needed?: string;
         how_to_use?: string;

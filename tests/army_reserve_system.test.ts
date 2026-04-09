@@ -536,6 +536,144 @@ describe('evaluateArmyReserveAssignments', () => {
 });
 
 describe('generateArmyReserveRequests', () => {
+    it('preserves active-operation execution evidence when a live offensive drives a reserve request', () => {
+        const adj = chainAdj(6);
+        const elite = makeElite('arbih_guards', 'RBiH', 'op:mun:o1');
+        const frontline = {
+            id: 'arbih_1st_corps_bde_1',
+            faction: 'RBiH',
+            name: '1st Corps Brigade',
+            created_turn: 0,
+            status: 'active',
+            assignment: null,
+            personnel: 1200,
+            morale: 65,
+            cohesion: 55,
+            corps_id: 'arbih_1st_corps',
+            location_osid: 'op:mun:o3',
+            home_osid: 'op:mun:o3',
+        } as unknown as FormationState;
+
+        const state = makeState({
+            formations: {
+                arbih_guards: elite,
+                arbih_1st_corps_bde_1: frontline,
+            },
+            corps_command: {
+                arbih_1st_corps: {
+                    commander_reinforcement_requests: [],
+                    active_operations: [{
+                        name: 'Operation Drina Spear',
+                        phase: 'execution',
+                        momentum: 2,
+                        participating_brigades: ['arbih_1st_corps_bde_1'],
+                        objectives: ['op:enemy:ridge'],
+                        current_objective_index: 0,
+                        axes: [{
+                            axis_id: 'axis:main',
+                            assigned_brigades: ['arbih_1st_corps_bde_1'],
+                            objectives: ['op:enemy:ridge'],
+                            current_objective_index: 0,
+                            status: 'executing',
+                            failure_count: 0,
+                            consecutive_failures_on_current: 0,
+                            momentum: 2,
+                            attack_attempt_count: 1,
+                            objective_capture_count: 0,
+                            movement_only_execution_turns: 0,
+                            idle_execution_turn_streak: 0,
+                        }],
+                    }],
+                },
+            },
+            corps_front_sectors: {
+                sec_a: {
+                    corps_id: 'arbih_1st_corps',
+                    threat_ratio: 1.2,
+                    assigned_brigade_ids: ['arbih_1st_corps_bde_1'],
+                },
+            },
+            player_faction: 'RBiH',
+            turn: 10,
+        });
+
+        generateArmyReserveRequests(state, adj);
+
+        expect(state.military.pending_reserve_requests).toHaveLength(1);
+        expect(state.military.pending_reserve_requests?.[0]).toMatchObject({
+            corps_id: 'arbih_1st_corps',
+            faction: 'RBiH',
+            reason: 'offensive_support',
+            provenance_driver: 'active_operation',
+            operation_name: 'Operation Drina Spear',
+            operation_phase: 'execution',
+            operation_momentum: 2,
+            suggested_brigade_id: 'arbih_guards',
+        });
+    });
+
+    it('preserves preparation-sub-phase evidence when a staged operation drives a reserve request', () => {
+        const adj = chainAdj(6);
+        const elite = makeElite('arbih_guards', 'RBiH', 'op:mun:o1');
+        const frontline = {
+            id: 'arbih_2nd_corps_bde_1',
+            faction: 'RBiH',
+            name: '2nd Corps Brigade',
+            created_turn: 0,
+            status: 'active',
+            assignment: null,
+            personnel: 1200,
+            morale: 65,
+            cohesion: 55,
+            corps_id: 'arbih_2nd_corps',
+            location_osid: 'op:mun:o3',
+            home_osid: 'op:mun:o3',
+        } as unknown as FormationState;
+
+        const state = makeState({
+            formations: {
+                arbih_guards: elite,
+                arbih_2nd_corps_bde_1: frontline,
+            },
+            corps_command: {
+                arbih_2nd_corps: {
+                    commander_reinforcement_requests: [],
+                    active_operations: [{
+                        name: 'Operation Shield',
+                        phase: 'planning',
+                        preparation_sub_phase: 'ready',
+                        participating_brigades: ['arbih_2nd_corps_bde_1'],
+                        objectives: ['op:enemy:line'],
+                        current_objective_index: 0,
+                    }],
+                },
+            },
+            corps_front_sectors: {
+                sec_a: {
+                    corps_id: 'arbih_2nd_corps',
+                    threat_ratio: 1.2,
+                    assigned_brigade_ids: ['arbih_2nd_corps_bde_1'],
+                },
+            },
+            player_faction: 'RBiH',
+            turn: 10,
+        });
+
+        generateArmyReserveRequests(state, adj);
+
+        expect(state.military.pending_reserve_requests).toHaveLength(1);
+        expect(state.military.pending_reserve_requests?.[0]).toMatchObject({
+            corps_id: 'arbih_2nd_corps',
+            faction: 'RBiH',
+            reason: 'offensive_support',
+            provenance_driver: 'active_operation',
+            operation_name: 'Operation Shield',
+            operation_phase: 'planning',
+            operation_preparation_sub_phase: 'ready',
+            suggested_brigade_id: 'arbih_guards',
+        });
+    });
+
     it('preserves concrete sector-threat evidence when a thin front triggers a reserve request', () => {
         const adj = chainAdj(6);
         const elite = makeElite('arbih_guards', 'RBiH', 'op:mun:o1');

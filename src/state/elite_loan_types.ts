@@ -96,6 +96,14 @@ export interface ArmyReserveRequest {
     sector_threat_ratio?: number;
     /** Number of brigades assigned to the threatened sector when the request fired. */
     sector_assigned_brigade_count?: number;
+    /** Active operation name when reserve support is being driven by a live operation. */
+    operation_name?: string;
+    /** Active operation phase when reserve support is being driven by a live operation. */
+    operation_phase?: string;
+    /** Planning sub-phase when an operation is driving pre-execution reserve staging. */
+    operation_preparation_sub_phase?: string;
+    /** Operation momentum when an execution-phase offensive is driving reserve support. */
+    operation_momentum?: number;
     /** High-level purpose for Army CO review and player readability. */
     purpose?: ReserveRequestPurpose;
     /** Corps CO statement: why this loan is needed right now. */

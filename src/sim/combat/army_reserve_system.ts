@@ -344,6 +344,10 @@ export function generateArmyReserveRequests(
         let bestCommanderFocusZoneId: string | undefined;
         let bestSectorThreatRatio: number | undefined;
         let bestSectorAssignedBrigadeCount: number | undefined;
+        let bestOperationName: string | undefined;
+        let bestOperationPhase: string | undefined;
+        let bestOperationPreparationSubPhase: string | undefined;
+        let bestOperationMomentum: number | undefined;
 
         // 1. Offensive support — active op in any committed phase (force_staging through execution)
         // Elites create momentum — they don't wait for it. Deploy during preparation so they arrive by execution.
@@ -366,6 +370,10 @@ export function generateArmyReserveRequests(
                 bestDescription = `Op "${op.name}" (${op.phase === 'execution' ? 'execution' : op.preparation_sub_phase}) — elite deployment for offensive`;
                 bestSectorThreatRatio = undefined;
                 bestSectorAssignedBrigadeCount = undefined;
+                bestOperationName = op.name;
+                bestOperationPhase = op.phase;
+                bestOperationPreparationSubPhase = op.phase === 'planning' ? op.preparation_sub_phase : undefined;
+                bestOperationMomentum = op.phase === 'execution' && typeof momentum === 'number' ? momentum : undefined;
             }
         }
 
@@ -379,6 +387,10 @@ export function generateArmyReserveRequests(
                 bestDescription = `Sector threat ratio ${sector.threat_ratio.toFixed(1)} with only ${sector.assigned_brigade_ids.length} brigade(s) — line is thin`;
                 bestSectorThreatRatio = sector.threat_ratio;
                 bestSectorAssignedBrigadeCount = sector.assigned_brigade_ids.length;
+                bestOperationName = undefined;
+                bestOperationPhase = undefined;
+                bestOperationPreparationSubPhase = undefined;
+                bestOperationMomentum = undefined;
             }
         }
 
@@ -394,6 +406,10 @@ export function generateArmyReserveRequests(
                     bestDescription = `Op "${op.name}" captured objectives — elite needed to exploit gains`;
                     bestSectorThreatRatio = undefined;
                     bestSectorAssignedBrigadeCount = undefined;
+                    bestOperationName = undefined;
+                    bestOperationPhase = undefined;
+                    bestOperationPreparationSubPhase = undefined;
+                    bestOperationMomentum = undefined;
                 }
             }
         }
@@ -421,6 +437,10 @@ export function generateArmyReserveRequests(
                 bestCommanderFocusZoneId = commanderNeed.focusZoneId;
                 bestSectorThreatRatio = undefined;
                 bestSectorAssignedBrigadeCount = undefined;
+                bestOperationName = undefined;
+                bestOperationPhase = undefined;
+                bestOperationPreparationSubPhase = undefined;
+                bestOperationMomentum = undefined;
             }
         }
 
@@ -463,6 +483,10 @@ export function generateArmyReserveRequests(
             commander_focus_zone_id: bestCommanderFocusZoneId,
             sector_threat_ratio: bestSectorThreatRatio,
             sector_assigned_brigade_count: bestSectorAssignedBrigadeCount,
+            operation_name: bestOperationName,
+            operation_phase: bestOperationPhase,
+            operation_preparation_sub_phase: bestOperationPreparationSubPhase,
+            operation_momentum: bestOperationMomentum,
             purpose: describeCorpsNeed(bestReason, corpsId, bestDescription).purpose,
             why_needed: describeCorpsNeed(bestReason, corpsId, bestDescription).whyNeeded,
             how_to_use: describeCorpsNeed(bestReason, corpsId, bestDescription).howToUse,

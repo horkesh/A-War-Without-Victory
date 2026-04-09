@@ -493,11 +493,84 @@ test('parseGameState derives an army-owned reserve queue summary without folding
         leadCriticalFocusZoneId: 'zone:arbih_1st_corps:sarajevo',
         leadCriticalThreatRatio: 2.6,
         leadCriticalAssignedBrigadeCount: 1,
+        leadCriticalOperationName: undefined,
+        leadCriticalOperationPhase: undefined,
+        leadCriticalOperationPreparationSubPhase: undefined,
+        leadCriticalOperationMomentum: undefined,
         leadCriticalPurpose: 'defensive',
         leadCriticalWhyNeeded: undefined,
         leadCriticalDescription: 'Line in danger of collapse',
     });
     assert.equal(parsed.presidentialReviewQueue, undefined);
+});
+
+test('parseGameState preserves active-operation reserve evidence in pending requests and lead-critical reserve summaries', () => {
+    const parsed = parseGameState({
+        meta: { turn: 15, phase: 'war', player_faction: 'RBiH' },
+        military: {
+            formations: {
+                arbih_main_staff: { id: 'arbih_main_staff', faction: 'RBiH', kind: 'army_hq', status: 'active', name: 'Main Staff', personnel: 0 },
+            },
+            pending_reserve_requests: [
+                {
+                    request_id: 'reserve-operation-critical',
+                    corps_id: 'arbih_1st_corps',
+                    faction: 'RBiH',
+                    reason: 'offensive_support',
+                    provenance_driver: 'active_operation',
+                    operation_name: 'Operation Drina Spear',
+                    operation_phase: 'execution',
+                    operation_momentum: 2,
+                    purpose: 'offensive',
+                    priority: 88,
+                    description: 'Main offensive needs elite support now',
+                    turn_requested: 15,
+                },
+            ],
+        } as any,
+        political: {
+            political_controllers: {},
+        } as any,
+    });
+
+    assert.deepEqual(parsed.pendingReserveRequests?.map((request) => ({
+        request_id: request.request_id,
+        provenance_driver: request.provenance_driver,
+        operation_name: request.operation_name,
+        operation_phase: request.operation_phase,
+        operation_preparation_sub_phase: request.operation_preparation_sub_phase,
+        operation_momentum: request.operation_momentum,
+    })), [
+        {
+            request_id: 'reserve-operation-critical',
+            provenance_driver: 'active_operation',
+            operation_name: 'Operation Drina Spear',
+            operation_phase: 'execution',
+            operation_preparation_sub_phase: undefined,
+            operation_momentum: 2,
+        },
+    ]);
+
+    assert.deepEqual(parsed.armyReserveQueue, {
+        pendingCount: 1,
+        criticalCount: 1,
+        offensiveCount: 1,
+        defensiveCount: 0,
+        leadCriticalReason: 'offensive_support',
+        leadCriticalProvenanceDriver: 'active_operation',
+        leadCriticalCommanderPriority: undefined,
+        leadCriticalCommanderBrigadesNeeded: undefined,
+        leadCriticalFocusZoneId: undefined,
+        leadCriticalThreatRatio: undefined,
+        leadCriticalAssignedBrigadeCount: undefined,
+        leadCriticalOperationName: 'Operation Drina Spear',
+        leadCriticalOperationPhase: 'execution',
+        leadCriticalOperationPreparationSubPhase: undefined,
+        leadCriticalOperationMomentum: 2,
+        leadCriticalPurpose: 'offensive',
+        leadCriticalWhyNeeded: undefined,
+        leadCriticalDescription: 'Main offensive needs elite support now',
+    });
 });
 
 test('parseGameState derives legacy AAR provenance when new provenance fields are absent', () => {
