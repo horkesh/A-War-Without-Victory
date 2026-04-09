@@ -122,7 +122,7 @@ function makeStateWithOperation(operation: Record<string, unknown>): GameState {
 }
 
 describe('operation completion truth', () => {
-    it('aborts a probe that enters execution and immediately spends the turn fully idle', () => {
+    it('classifies an idle execution-phase probe as probe_complete instead of no_logged_attempt', () => {
         const state = makeStateWithOperation({
             name: 'probe_corps_1_t40',
             type: 'probe',
@@ -155,10 +155,10 @@ describe('operation completion truth', () => {
 
         const op = state.military.corps_command?.corps_1?.active_operations[0];
         expect(op?.phase).toBe('recovery');
-        expect(op?.recovery_reason).toBe('no_logged_attempt');
+        expect(op?.recovery_reason).toBe('probe_complete');
     });
 
-    it('does not mark a multi-axis probe completed when failures merely skipped past the objective list', () => {
+    it('uses probe_complete when a multi-axis probe skips past its objective list without a logged attack', () => {
         const state = makeStateWithOperation({
             name: 'probe_corps_1_t39',
             type: 'probe',
@@ -192,7 +192,7 @@ describe('operation completion truth', () => {
 
         const op = state.military.corps_command?.corps_1?.active_operations[0];
         expect(op?.phase).toBe('recovery');
-        expect(op?.recovery_reason).toBe('no_logged_attempt');
+        expect(op?.recovery_reason).toBe('probe_complete');
     });
 
     it('does not mark a legacy operation completed when failures merely skipped past the objective list', () => {

@@ -1207,7 +1207,13 @@ describe('empty-objective probe guard', () => {
                 stance_source: 'bot',
             }] as any[],
             brigades: [
-                { id: 'surplus_1' as FormationId, location_osid: 'op:near:b' },
+                {
+                    id: 'surplus_1' as FormationId,
+                    kind: 'brigade',
+                    status: 'active',
+                    personnel: 1200,
+                    location_osid: 'op:near:b',
+                },
             ] as any[],
         });
 
@@ -1531,7 +1537,13 @@ describe('probe brigade reachability', () => {
                 stance_source: 'bot',
             }] as any[],
             brigades: [
-                { id: 'reachable_1' as FormationId, location_osid: 'op:front:b' },
+                {
+                    id: 'reachable_1' as FormationId,
+                    kind: 'brigade',
+                    status: 'active',
+                    personnel: 1200,
+                    location_osid: 'op:front:b',
+                },
             ] as any[],
             spatial: {
                 adjacency: adj,
