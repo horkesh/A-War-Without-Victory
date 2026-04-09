@@ -676,6 +676,22 @@ function detectBrigadeStacking(state: GameState): AnomalyReport[] {
     const reports: AnomalyReport[] = [];
     const formations = state.military.formations;
     const corpsCommand = state.military.corps_command ?? {};
+    const sectors = state.military.corps_front_sectors ?? {};
+
+    const osidSectorCoverage = new Map<string, Set<string>>();
+    for (const sectorId of sortedKeys(sectors as Record<string, unknown>)) {
+        const sector = sectors[sectorId];
+        const coveredOsids = new Set<string>();
+        for (const osid of sector.territory_osids ?? []) coveredOsids.add(osid);
+        for (const subSegment of sector.sub_segments ?? []) {
+            for (const osid of subSegment.friendly_osids ?? []) coveredOsids.add(osid);
+        }
+        for (const osid of [...coveredOsids].sort(strictCompare)) {
+            const coveringSectors = osidSectorCoverage.get(osid) ?? new Set<string>();
+            coveringSectors.add(sectorId);
+            osidSectorCoverage.set(osid, coveringSectors);
+        }
+    }
 
     // Build OSID → brigade ID list
     const osidBrigades = new Map<string, string[]>();
@@ -720,6 +736,22 @@ function detectBrigadeStacking(state: GameState): AnomalyReport[] {
         // Exempt: all brigades at this OSID are in the same active operation
         const allInSameOp = brigades.every(bid => opBrigades.has(bid));
         if (allInSameOp && brigades.length > 0) continue;
+
+        // Exempt: all brigades at this OSID are frontline brigades of the same sector,
+        // and that sector canonically covers this OSID.
+        const assignments = brigades.map((bid) => formations[bid]?.assignment ?? null);
+        const sameSectorFrontStack = assignments.length > 0
+            && assignments.every((assignment) =>
+                assignment?.kind === 'sector'
+                && assignment.role === 'front'
+                && typeof assignment.sector_id === 'string')
+            && new Set(assignments.map((assignment) => assignment!.sector_id)).size === 1;
+        if (sameSectorFrontStack) {
+            const sectorId = assignments[0]?.sector_id;
+            if (typeof sectorId === 'string' && osidSectorCoverage.get(osid)?.has(sectorId)) {
+                continue;
+            }
+        }
 
         stacked.push({ osid, brigades: brigades.slice().sort(strictCompare) });
     }

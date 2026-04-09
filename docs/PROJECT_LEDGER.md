@@ -124,6 +124,44 @@
 - Report: `docs/40_reports/implemented/20260409_OPERATION_CAUSALITY_BATTLE_OWNERSHIP_HARDENING.md`
 
 ---
+## [2026-04-09] fix(harness): align brigade stacking with sector truth
+
+**Type:** Harness / anomaly truth hardening  
+**Files:** `src/scenario/anomaly_detector.ts`, `tests/brigade_stacking_sector_truth.test.ts`, `docs/40_reports/implemented/20260409_BRIGADE_STACKING_SECTOR_TRUTH_HARDENING.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/architect_notes.md`  
+**Run:** `n1412` — hash `bde31c0aab141f42` (baseline `n1410`, same hash)  
+**Status:** VERIFIED — targeted regression, 40-week rerun, consistency audit, recovery bar, full vitest, typecheck, and build all clean
+
+### Summary of changes
+
+1. **Stacking now consumes canonical sector coverage truth** — `detectBrigadeStacking(...)` no longer treats every 2+ brigade co-location as suspicious. It now exempts stacks only when every brigade is a same-sector frontline brigade and that sector canonically covers the OSID through `territory_osids` / `sub_segments[*].friendly_osids`.
+2. **The residual warning stays narrow and honest** — ownerless co-location still reports. The only remaining `brigade_stacking` warning after the fix is `op:banja_luka:banja_luka_2` with `rs_1st_podrinje` / `rs_5th_podrinje`.
+3. **Regression coverage added** — `tests/brigade_stacking_sector_truth.test.ts` proves both sides of the contract: covered same-sector front stacks are suppressed, and ownerless co-location is still visible.
+
+### Scenario proof
+
+- Baseline: `runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1410`
+  - final hash `bde31c0aab141f42`
+  - `brigade_stacking`: `26 OSID(s) have 2+ brigades stacked (non-exempt)...`
+- Post-fix: `runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1412`
+  - final hash stayed `bde31c0aab141f42`
+  - `brigade_stacking`: `1 OSID(s) have 2+ brigades stacked (non-exempt): op:banja_luka:banja_luka_2(2: rs_1st_podrinje,rs_5th_podrinje).`
+- The lane reduced false stack warnings without changing simulation behavior.
+
+### Verification
+
+- `npx.cmd vitest run tests/brigade_stacking_sector_truth.test.ts`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run build`
+- `npm.cmd run sim:scenario:run:40w`
+- `node tools/validate_run_consistency.cjs runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1412`
+- `npm.cmd run recovery:check`
+- `npm.cmd run test:vitest`
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260409_BRIGADE_STACKING_SECTOR_TRUTH_HARDENING.md`
+
+---
 ## [2026-04-09] fix(engine): prevent hopeless ready offensives from entering execution
 
 **Type:** Engine hardening

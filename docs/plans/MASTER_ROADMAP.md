@@ -639,4 +639,19 @@ Patch bumps (0.X.1, 0.X.2) are for significant fixes within a milestone â€”
 | `docs/30_planning/design/LEGENDARY_FEATURES_BRAINSTORM.md` | Legendary features catalog |
 | `docs/30_planning/design/ENDGAME_AND_NEGOTIATION_DESIGN.md` | Endgame, negotiation and scoring design |
 
+---
+
+## 2026-04-09 hardening board note
+
+- Closed this wave:
+  - `zero_combat_corps` now respects Graz cold-front truth (`n1409`)
+  - territorial warnings now respect canonical sector coverage (`n1410`)
+  - `brigade_stacking` now respects same-sector frontline coverage truth (`n1412`)
+- Still active:
+  - residual anomaly certainty / wording hardening around `frontline_density_imbalance`, territorial residuals, and `brigade_never_fights`
+- Demoted / redesign-blocked:
+  - same-faction ownerless unreachable brigades (`rs_1st_podrinje`, `rs_5th_podrinje`)
+- Investigated and demoted to realism/doctrine:
+  - `arbih_444th_mountain` salient overextension near Konjic is not a cutoff/ownership bug; it belongs in doctrine / target-selection work
+
 
