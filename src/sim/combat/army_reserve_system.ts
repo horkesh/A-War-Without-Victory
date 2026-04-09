@@ -53,6 +53,7 @@ import {
     type ArmyReserveRequest,
     type ArmyReserveDecisionRecord,
     type ReserveRequestReason,
+    type ReserveRequestProvenanceDriver,
     type ReserveRequestPurpose,
     type EliteRecallReason,
 } from '../../state/elite_loan_types.js';
@@ -335,8 +336,12 @@ export function generateArmyReserveRequests(
         const commanderNeed = summarizeCommanderReserveNeed(cmd?.commander_reinforcement_requests);
 
         let bestReason: ReserveRequestReason | null = null;
+        let bestProvenanceDriver: ReserveRequestProvenanceDriver | null = null;
         let bestRawPriority = 0;
         let bestDescription = '';
+        let bestCommanderPriority: 'critical' | 'high' | 'medium' | 'low' | undefined;
+        let bestCommanderBrigadesNeeded: number | undefined;
+        let bestCommanderFocusZoneId: string | undefined;
 
         // 1. Offensive support — active op in any committed phase (force_staging through execution)
         // Elites create momentum — they don't wait for it. Deploy during preparation so they arrive by execution.
@@ -354,6 +359,7 @@ export function generateArmyReserveRequests(
             const rawPriority = Math.min(100, phaseBase);
             if (rawPriority > bestRawPriority) {
                 bestReason = 'offensive_support';
+                bestProvenanceDriver = 'active_operation';
                 bestRawPriority = rawPriority;
                 bestDescription = `Op "${op.name}" (${op.phase === 'execution' ? 'execution' : op.preparation_sub_phase}) — elite deployment for offensive`;
             }
@@ -364,6 +370,7 @@ export function generateArmyReserveRequests(
             const rawPriority = Math.min(85, 50 + (sector.threat_ratio - 2.0) * 10);
             if (rawPriority > bestRawPriority) {
                 bestReason = 'defensive_gap';
+                bestProvenanceDriver = 'sector_threat';
                 bestRawPriority = rawPriority;
                 bestDescription = `Sector threat ratio ${sector.threat_ratio.toFixed(1)} with only ${sector.assigned_brigade_ids.length} brigade(s) — line is thin`;
             }
@@ -376,6 +383,7 @@ export function generateArmyReserveRequests(
                 const rawPriority = 65;
                 if (rawPriority > bestRawPriority) {
                     bestReason = 'exploitation';
+                    bestProvenanceDriver = 'captured_objectives';
                     bestRawPriority = rawPriority;
                     bestDescription = `Op "${op.name}" captured objectives — elite needed to exploit gains`;
                 }
@@ -395,14 +403,18 @@ export function generateArmyReserveRequests(
             );
             if (rawPriority > bestRawPriority) {
                 bestReason = inferredReason;
+                bestProvenanceDriver = 'commander_request';
                 bestRawPriority = rawPriority;
                 bestDescription =
                     `Commander requested ${commanderNeed.brigadesNeeded} brigade(s) for ${commanderNeed.focusZoneId} ` +
                     `(${commanderNeed.priority} priority)`;
+                bestCommanderPriority = commanderNeed.priority;
+                bestCommanderBrigadesNeeded = commanderNeed.brigadesNeeded;
+                bestCommanderFocusZoneId = commanderNeed.focusZoneId;
             }
         }
 
-        if (!bestReason) continue;
+        if (!bestReason || !bestProvenanceDriver) continue;
 
         // Find best available elite brigade (same faction, nearest)
         const availableElites = getAvailableElites(state, corpsFaction, turn);
@@ -435,6 +447,10 @@ export function generateArmyReserveRequests(
             corps_id: corpsId,
             faction: corpsFaction,
             reason: bestReason,
+            provenance_driver: bestProvenanceDriver,
+            commander_request_priority: bestCommanderPriority,
+            commander_request_brigades_needed: bestCommanderBrigadesNeeded,
+            commander_focus_zone_id: bestCommanderFocusZoneId,
             purpose: describeCorpsNeed(bestReason, corpsId, bestDescription).purpose,
             why_needed: describeCorpsNeed(bestReason, corpsId, bestDescription).whyNeeded,
             how_to_use: describeCorpsNeed(bestReason, corpsId, bestDescription).howToUse,

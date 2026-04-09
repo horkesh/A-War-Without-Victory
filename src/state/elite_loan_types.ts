@@ -60,6 +60,12 @@ export type ReserveRequestReason =
     | 'exploitation'        // corps just captured territory, wants to exploit
     | 'enclave_relief';     // enclave under siege, resilience falling
 
+export type ReserveRequestProvenanceDriver =
+    | 'active_operation'
+    | 'sector_threat'
+    | 'captured_objectives'
+    | 'commander_request';
+
 export type ReserveRequestPurpose = 'offensive' | 'defensive';
 export type ReserveDecisionOutcome = 'accepted' | 'declined' | 'terminated';
 
@@ -78,6 +84,14 @@ export interface ArmyReserveRequest {
     corps_id: string;
     faction: string;
     reason: ReserveRequestReason;
+    /** Canonical source that produced this request in army reserve generation. */
+    provenance_driver?: ReserveRequestProvenanceDriver;
+    /** Explicit commander escalation priority when provenance_driver is commander_request. */
+    commander_request_priority?: 'critical' | 'high' | 'medium' | 'low';
+    /** Total brigades requested across commander reinforcement signals. */
+    commander_request_brigades_needed?: number;
+    /** Zone ID at the head of the commander reinforcement request queue. */
+    commander_focus_zone_id?: string;
     /** High-level purpose for Army CO review and player readability. */
     purpose?: ReserveRequestPurpose;
     /** Corps CO statement: why this loan is needed right now. */

@@ -13,6 +13,7 @@ import { getPanelRailStyle } from './panelRail';
 import {
     getArmyReserveAttentionSummary,
     getArmyReserveRequestCauseCopy,
+    getArmyReserveRequestProvenanceCopy,
     getArmyReserveRequestSeverityCopy,
 } from '../utils/armyReserveSeverity';
 import { getPlayerFacingCorpsName } from '../../shared/playerFacingLabels';
@@ -256,6 +257,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                             {pendingRequests.map((req, idx) => {
                                 const severityCopy = getArmyReserveRequestSeverityCopy(req.priority);
                                 const causeCopy = getArmyReserveRequestCauseCopy(req);
+                                const provenanceCopy = getArmyReserveRequestProvenanceCopy(req);
                                 return (
                                     <div key={idx} className="bg-black/20 border border-panel-border/40 rounded p-2 space-y-2">
                                     <div className="flex items-start justify-between gap-2">
@@ -299,6 +301,18 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                         </div>
                                         <div className="text-[10px] text-text-secondary mt-0.5">
                                             {causeCopy.detail}
+                                        </div>
+                                    </div>
+
+                                    <div className="rounded border border-panel-border/30 bg-black/10 px-2 py-1.5">
+                                        <div className="text-[10px] font-semibold text-text-primary">
+                                            {provenanceCopy.label}
+                                        </div>
+                                        <div className="text-[10px] text-text-primary mt-0.5">
+                                            {provenanceCopy.summary}
+                                        </div>
+                                        <div className="text-[10px] text-text-secondary mt-0.5">
+                                            {provenanceCopy.detail}
                                         </div>
                                     </div>
 

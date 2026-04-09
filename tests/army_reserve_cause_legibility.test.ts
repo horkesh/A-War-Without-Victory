@@ -47,13 +47,17 @@ describe('Army reserve cause legibility', () => {
         pendingCount: 3,
         criticalCount: 1,
         leadCriticalReason: 'enclave_relief',
+        leadCriticalProvenanceDriver: 'commander_request',
+        leadCriticalCommanderPriority: 'critical',
+        leadCriticalCommanderBrigadesNeeded: 2,
+        leadCriticalFocusZoneId: 'zone:arbih_5th_corps:bihac',
         leadCriticalPurpose: 'defensive',
         leadCriticalDescription: 'Enclave corridor is under pressure.',
       }),
     ).toEqual({
       label: '1 CRITICAL RESERVE REQUEST',
       title:
-        '1 critical reserve request needs immediate army attention. Lead cause: An enclave relief effort needs reinforcement to keep or open a corridor. 3 reserve requests are pending in total.',
+        '1 critical reserve request needs immediate army attention. Lead cause: An enclave relief effort needs reinforcement to keep or open a corridor. Lead driver: This request was produced by an explicit corps commander reinforcement escalation. 3 reserve requests are pending in total.',
       tone: 'critical',
     });
   });
@@ -64,13 +68,17 @@ describe('Army reserve cause legibility', () => {
         pendingCount: 4,
         criticalCount: 2,
         leadCriticalReason: 'defensive_gap',
+        leadCriticalProvenanceDriver: 'commander_request',
+        leadCriticalCommanderPriority: 'critical',
+        leadCriticalCommanderBrigadesNeeded: 2,
+        leadCriticalFocusZoneId: 'zone:arbih_1st_corps:sarajevo',
         leadCriticalPurpose: 'defensive',
         leadCriticalWhyNeeded: 'Corps arbih_1st_corps requests elite reinforcement due to critical defensive weakness.',
       }),
     ).toEqual({
       heading: '2 critical reserve requests need immediate army attention.',
       detail:
-        'Lead cause: A corps is reporting a thin defensive sector that needs immediate reinforcement. Reserve requests are army-level reserve management, not presidential review. Routine requests remain in the Army Reserve desk.',
+        'Lead cause: A corps is reporting a thin defensive sector that needs immediate reinforcement. Lead driver: This request was produced by an explicit corps commander reinforcement escalation. Reserve requests are army-level reserve management, not presidential review. Routine requests remain in the Army Reserve desk.',
       tone: 'critical',
     });
   });
@@ -94,8 +102,11 @@ describe('Army reserve cause legibility', () => {
     );
 
     expect(toolbarSource).toContain('leadCriticalReason?: string;');
+    expect(toolbarSource).toContain('leadCriticalProvenanceDriver?:');
     expect(attentionSource).toContain('getArmyReserveAttentionSummary');
     expect(reservePanelSource).toContain('getArmyReserveRequestCauseCopy');
+    expect(reservePanelSource).toContain('getArmyReserveRequestProvenanceCopy');
     expect(adapterSource).toContain('leadCriticalReason: leadCriticalRequest?.reason');
+    expect(adapterSource).toContain('leadCriticalProvenanceDriver: leadCriticalRequest?.provenance_driver');
   });
 });

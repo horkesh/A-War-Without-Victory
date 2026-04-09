@@ -2265,6 +2265,27 @@ function derivePendingReserveRequests(
                 corps_id: String(request.corps_id ?? ''),
                 faction: String(request.faction ?? ''),
                 reason: String(request.reason ?? ''),
+                provenance_driver:
+                    request.provenance_driver === 'active_operation'
+                    || request.provenance_driver === 'sector_threat'
+                    || request.provenance_driver === 'captured_objectives'
+                    || request.provenance_driver === 'commander_request'
+                        ? request.provenance_driver
+                        : undefined,
+                commander_request_priority:
+                    request.commander_request_priority === 'critical'
+                    || request.commander_request_priority === 'high'
+                    || request.commander_request_priority === 'medium'
+                    || request.commander_request_priority === 'low'
+                        ? request.commander_request_priority
+                        : undefined,
+                commander_request_brigades_needed:
+                    typeof request.commander_request_brigades_needed === 'number'
+                    && Number.isFinite(request.commander_request_brigades_needed)
+                        ? request.commander_request_brigades_needed
+                        : undefined,
+                commander_focus_zone_id:
+                    typeof request.commander_focus_zone_id === 'string' ? request.commander_focus_zone_id : undefined,
                 purpose: request.purpose === 'offensive' || request.purpose === 'defensive' ? request.purpose : undefined,
                 why_needed: typeof request.why_needed === 'string' ? request.why_needed : undefined,
                 how_to_use: typeof request.how_to_use === 'string' ? request.how_to_use : undefined,
@@ -2308,6 +2329,10 @@ function deriveArmyReserveQueue({
         offensiveCount,
         defensiveCount,
         leadCriticalReason: leadCriticalRequest?.reason,
+        leadCriticalProvenanceDriver: leadCriticalRequest?.provenance_driver,
+        leadCriticalCommanderPriority: leadCriticalRequest?.commander_request_priority,
+        leadCriticalCommanderBrigadesNeeded: leadCriticalRequest?.commander_request_brigades_needed,
+        leadCriticalFocusZoneId: leadCriticalRequest?.commander_focus_zone_id,
         leadCriticalPurpose: leadCriticalRequest?.purpose,
         leadCriticalWhyNeeded: leadCriticalRequest?.why_needed,
         leadCriticalDescription: leadCriticalRequest?.description,

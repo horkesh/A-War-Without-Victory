@@ -586,6 +586,10 @@ describe('generateArmyReserveRequests', () => {
             corps_id: 'vrs_2nd_krajina',
             faction: 'RS',
             reason: 'defensive_gap',
+            provenance_driver: 'commander_request',
+            commander_request_priority: 'critical',
+            commander_request_brigades_needed: 3,
+            commander_focus_zone_id: 'zone:vrs_2nd_krajina:ozren',
             suggested_brigade_id: 'rs_1st_guards',
         });
         expect(state.military.pending_reserve_requests?.[0].description).toContain('Commander requested 3 brigade(s)');

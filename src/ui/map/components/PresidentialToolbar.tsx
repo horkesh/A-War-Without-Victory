@@ -51,6 +51,10 @@ interface PresidentialToolbarProps {
         pendingCount: number;
         criticalCount: number;
         leadCriticalReason?: string;
+        leadCriticalProvenanceDriver?: 'active_operation' | 'sector_threat' | 'captured_objectives' | 'commander_request';
+        leadCriticalCommanderPriority?: 'critical' | 'high' | 'medium' | 'low';
+        leadCriticalCommanderBrigadesNeeded?: number;
+        leadCriticalFocusZoneId?: string;
         leadCriticalPurpose?: 'offensive' | 'defensive';
         leadCriticalWhyNeeded?: string;
         leadCriticalDescription?: string;

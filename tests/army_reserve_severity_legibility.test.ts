@@ -18,7 +18,7 @@ describe('Army reserve severity legibility', () => {
     expect(getArmyReserveToolbarSignal({ pendingCount: 3, criticalCount: 1 })).toEqual({
       label: '1 CRITICAL RESERVE REQUEST',
       title:
-        '1 critical reserve request needs immediate army attention. Lead cause: A corps is reporting urgent reserve pressure on the line. 3 reserve requests are pending in total.',
+        '1 critical reserve request needs immediate army attention. Lead cause: A corps is reporting urgent reserve pressure on the line. Lead driver: This request was produced by current army reserve pressure. 3 reserve requests are pending in total.',
       tone: 'critical',
     });
   });
@@ -35,7 +35,7 @@ describe('Army reserve severity legibility', () => {
     expect(getArmyReserveAttentionSummary({ pendingCount: 4, criticalCount: 2 })).toEqual({
       heading: '2 critical reserve requests need immediate army attention.',
       detail:
-        'Lead cause: A corps is reporting urgent reserve pressure on the line. Reserve requests are army-level reserve management, not presidential review. Routine requests remain in the Army Reserve desk.',
+        'Lead cause: A corps is reporting urgent reserve pressure on the line. Lead driver: This request was produced by current army reserve pressure. Reserve requests are army-level reserve management, not presidential review. Routine requests remain in the Army Reserve desk.',
       tone: 'critical',
     });
   });

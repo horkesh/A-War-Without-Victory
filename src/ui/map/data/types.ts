@@ -397,6 +397,10 @@ export interface ArmyReserveQueueView {
     offensiveCount: number;
     defensiveCount: number;
     leadCriticalReason?: string;
+    leadCriticalProvenanceDriver?: 'active_operation' | 'sector_threat' | 'captured_objectives' | 'commander_request';
+    leadCriticalCommanderPriority?: 'critical' | 'high' | 'medium' | 'low';
+    leadCriticalCommanderBrigadesNeeded?: number;
+    leadCriticalFocusZoneId?: string;
     leadCriticalPurpose?: 'offensive' | 'defensive';
     leadCriticalWhyNeeded?: string;
     leadCriticalDescription?: string;
@@ -742,6 +746,10 @@ export interface LoadedGameState {
         corps_id: string;
         faction: string;
         reason: string;
+        provenance_driver?: 'active_operation' | 'sector_threat' | 'captured_objectives' | 'commander_request';
+        commander_request_priority?: 'critical' | 'high' | 'medium' | 'low';
+        commander_request_brigades_needed?: number;
+        commander_focus_zone_id?: string;
         purpose?: 'offensive' | 'defensive';
         why_needed?: string;
         how_to_use?: string;
