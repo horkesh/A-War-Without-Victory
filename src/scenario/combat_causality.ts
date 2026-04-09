@@ -138,12 +138,25 @@ export function buildOperationCombatDiagnostics(
 ): OperationCombatDiagnostic[] {
     const corpsCommand = state.military.corps_command ?? {};
     const battleCountsByBrigade = new Map<FormationId, number>();
+    const battleCountsByOperation = new Map<string, number>();
+    const battleCountsByOperationObjective = new Map<string, number>();
     const battleCountsByTarget = new Map<string, number>();
     for (const battle of osidResolution?.battles ?? []) {
         battleCountsByBrigade.set(
             battle.attacker_brigade,
             (battleCountsByBrigade.get(battle.attacker_brigade) ?? 0) + 1
         );
+        if (typeof battle.operation_id === 'string' && battle.operation_id.length > 0) {
+            battleCountsByOperation.set(
+                battle.operation_id,
+                (battleCountsByOperation.get(battle.operation_id) ?? 0) + 1
+            );
+            const objectiveKey = `${battle.operation_id}|${battle.target_osid}`;
+            battleCountsByOperationObjective.set(
+                objectiveKey,
+                (battleCountsByOperationObjective.get(objectiveKey) ?? 0) + 1
+            );
+        }
         battleCountsByTarget.set(battle.target_osid, (battleCountsByTarget.get(battle.target_osid) ?? 0) + 1);
     }
 
@@ -159,6 +172,7 @@ export function buildOperationCombatDiagnostics(
         const objectiveCaptureCount = operation.objective_capture_count ?? 0;
         const movementOnlyExecutionTurns = operation.movement_only_execution_turns ?? 0;
         const idleExecutionTurnStreak = operation.idle_execution_turn_streak ?? 0;
+        const operationId = `${corpsId}:${operation.name}:t${operation.started_turn}`;
         const recoveryReason = typeof operation.recovery_reason === 'string'
             ? operation.recovery_reason
             : null;
@@ -167,7 +181,7 @@ export function buildOperationCombatDiagnostics(
         let attackAttemptCount = 0;
         let movementOrderCount = 0;
         let currentObjectiveAttackCount = 0;
-        let battleCount = 0;
+        let participantBattleCount = 0;
         for (const brigadeId of brigades) {
             const target = orderSnapshot?.attack_orders_by_brigade?.[brigadeId];
             if (typeof target === 'string' && target.length > 0) {
@@ -180,13 +194,19 @@ export function buildOperationCombatDiagnostics(
             if (typeof movementTarget === 'string' && movementTarget.length > 0) {
                 movementOrderCount += 1;
             }
-            battleCount += battleCountsByBrigade.get(brigadeId) ?? 0;
+            participantBattleCount += battleCountsByBrigade.get(brigadeId) ?? 0;
         }
+        const operationBattleCount = battleCountsByOperation.get(operationId) ?? 0;
+        const battleCount = operationBattleCount > 0 ? operationBattleCount : participantBattleCount;
         // Keep the legacy field name stable for downstream consumers, but bind it
         // to the post-trim operation-local order truth the invalidation logic uses.
         const finalOrderedAttackerCount = attackAttemptCount;
         const currentObjectiveBattleCount = currentObjective !== null
-            ? (battleCountsByTarget.get(currentObjective) ?? 0)
+            ? (
+                battleCountsByOperationObjective.get(`${operationId}|${currentObjective}`)
+                ?? battleCountsByTarget.get(currentObjective)
+                ?? 0
+            )
             : 0;
         const invalidationReasons: OperationCombatInvalidationReason[] = [];
         if (

@@ -682,6 +682,10 @@ export interface AttackResolutionOsidReport {
             captured_artillery: number;
             captured_by?: string;
         };
+        /** Deterministic operation join key: {corps_id}:{op_name}:t{started_turn}. */
+        operation_id?: string;
+        /** Human-readable operation name. */
+        operation_name?: string;
     }>;
 }
 
@@ -1448,6 +1452,15 @@ export function resolveAttackOrdersOsid(
             }
         }
 
+        const attackerCorpsId = firstAttacker.corps_id;
+        const attackerCmd = attackerCorpsId && state.military.corps_command
+            ? state.military.corps_command[attackerCorpsId]
+            : null;
+        const activeOp = attackerCmd ? findBrigadeOperation(attackerCmd, firstAttacker.id) : null;
+        const activeOperationId = activeOp && activeOp.phase === 'execution'
+            ? `${attackerCorpsId}:${activeOp.name}:t${activeOp.started_turn}`
+            : undefined;
+
         // Compute deterministic battle_id join key
         const battleId = `${currentTurn}:${targetOsid}:${firstAttacker.id}:${defenderFormation?.id ?? 'null'}`;
 
@@ -1479,6 +1492,10 @@ export function resolveAttackOrdersOsid(
                 captured_artillery: battleEquipCapturedArt,
                 captured_by: battleEquipCapturedBy || undefined,
             },
+            ...(activeOperationId ? {
+                operation_id: activeOperationId,
+                operation_name: activeOp!.name,
+            } : {}),
         });
 
         const ammoCrisis = attackerLost && getSupplyMult(firstAttacker, state, 'attack', supplyStateByOsid) < 0.5;
@@ -1676,17 +1693,12 @@ export function resolveAttackOrdersOsid(
         // ── Increment operation combat feedback counters ──────────────
         // Find the attacker's active corps operation (if any) and update
         // per-turn and cumulative battle/territory counters.
-        const attackerCorpsId = firstAttacker.corps_id;
-        if (attackerCorpsId && state.military.corps_command) {
-            const attackerCmd = state.military.corps_command[attackerCorpsId];
-            const activeOp = attackerCmd ? findBrigadeOperation(attackerCmd, firstAttacker.id) : null;
-            if (activeOp && activeOp.phase === 'execution') {
-                activeOp.battles_this_turn = (activeOp.battles_this_turn ?? 0) + 1;
-                activeOp.total_battles = (activeOp.total_battles ?? 0) + 1;
-                if (flip) {
-                    activeOp.territory_gained_this_turn = (activeOp.territory_gained_this_turn ?? 0) + 1;
-                    activeOp.total_territory_gained = (activeOp.total_territory_gained ?? 0) + 1;
-                }
+        if (activeOp && activeOp.phase === 'execution') {
+            activeOp.battles_this_turn = (activeOp.battles_this_turn ?? 0) + 1;
+            activeOp.total_battles = (activeOp.total_battles ?? 0) + 1;
+            if (flip) {
+                activeOp.territory_gained_this_turn = (activeOp.territory_gained_this_turn ?? 0) + 1;
+                activeOp.total_territory_gained = (activeOp.total_territory_gained ?? 0) + 1;
             }
         }
 

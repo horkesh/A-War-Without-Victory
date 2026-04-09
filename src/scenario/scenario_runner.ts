@@ -1958,17 +1958,20 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             // Extract per-battle results from attack resolution report
             const weeklyBattles: WeeklyBattleEntry[] | undefined =
                 turnReport.attack_resolution_osid?.battles?.map(b => {
-                    // Derive operation_id from the attacker's active corps operation
-                    let operation_id: string | undefined;
-                    let operation_name: string | undefined;
-                    const attackerFmt = state.military.formations?.[b.attacker_brigade];
-                    const attackerCorpsId = attackerFmt?.corps_id;
-                    if (attackerCorpsId && state.military.corps_command) {
-                        const cmd = state.military.corps_command[attackerCorpsId];
-                        const op = findBrigadeOperation(cmd, b.attacker_brigade);
-                        if (op && op.phase === 'execution') {
-                            operation_id = `${attackerCorpsId}:${op.name}:t${op.started_turn}`;
-                            operation_name = op.name;
+                    // Preserve the sim-owned battle-to-operation truth when available.
+                    // Fallback to legacy derivation only for older reports/tests that omit it.
+                    let operation_id = b.operation_id;
+                    let operation_name = b.operation_name;
+                    if (!operation_id || !operation_name) {
+                        const attackerFmt = state.military.formations?.[b.attacker_brigade];
+                        const attackerCorpsId = attackerFmt?.corps_id;
+                        if (attackerCorpsId && state.military.corps_command) {
+                            const cmd = state.military.corps_command[attackerCorpsId];
+                            const op = findBrigadeOperation(cmd, b.attacker_brigade);
+                            if (op && op.phase === 'execution') {
+                                operation_id = `${attackerCorpsId}:${op.name}:t${op.started_turn}`;
+                                operation_name = op.name;
+                            }
                         }
                     }
                     return {

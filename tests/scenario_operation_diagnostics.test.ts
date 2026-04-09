@@ -236,6 +236,44 @@ describe('combat causality diagnostics', () => {
         assert.deepEqual(summary.total_orders_by_faction, { RS: 1 });
     });
 
+    it('keeps operation-local battle ownership when the attacking brigade is trimmed from surviving participants', () => {
+        const state = makeState();
+        state.military.corps_command!['corps_1']!.active_operations = [{
+            ...state.military.corps_command!['corps_1']!.active_operations[0],
+            started_turn: 1,
+            participating_brigades: ['b2'] as any,
+            attack_attempt_count: 1,
+            objective_capture_count: 0,
+        }] as any;
+
+        const diagnostics = buildOperationCombatDiagnostics(
+            state,
+            makeOrderSnapshot({ b2: 'op:enemy:obj1' }, {}, { corps_1: 1 }),
+            makeOsidReport([{
+                attacker_brigade: 'b1' as any,
+                attacker_faction: 'RS',
+                defender_faction: 'RBiH',
+                target_osid: 'op:enemy:obj1' as any,
+                outcome: 'catastrophic' as any,
+                power_ratio: 0.5,
+                attacker_won: false,
+                defender_brigade: 'enemy_1' as any,
+                snap_events: [],
+                attacker_casualties: 0,
+                defender_casualties: 0,
+                operation_id: 'corps_1:Operacija Test:t1',
+                operation_name: 'Operacija Test',
+            }])
+        );
+
+        assert.equal(diagnostics.length, 1);
+        assert.equal(diagnostics[0]!.attack_attempt_count, 1);
+        assert.equal(diagnostics[0]!.battle_count, 1);
+        assert.equal(diagnostics[0]!.current_objective_battle_count, 1);
+        assert.equal(diagnostics[0]!.invalid_for_combat_calibration, false);
+        assert.ok(!diagnostics[0]!.invalidation_reasons.includes('attack_orders_without_battles'));
+    });
+
     it('does not flag execution stall when the operation already resolved a capture this turn', () => {
         const state = makeState();
         state.military.corps_command!['corps_1']!.active_operations = [{

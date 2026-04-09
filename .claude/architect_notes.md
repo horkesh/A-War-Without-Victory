@@ -483,3 +483,8 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - Accepted boundary after cleanup: planning-to-execution promotion must prove at least one concrete, above-threshold opening attack under the same graph-valid objective attackability surface that brigade-side order issuance will face. Positional readiness alone is not execution authority.
 - Compatibility rule: sparse tests that omit `war_front_edges_osid` need an explicit narrow fallback instead of being treated as negative predictor truth. Missing adjacency authority is different from proven non-attackability.
 - Scenario proof: `n1406` still emitted `operation_zero_eligible_execution` for `cmd_vrs_east_bosnian_t29` with `0` total attacks; `n1407` removes that operation from final reports/AARs entirely by invalidating the hopeless launch window during planning.
+
+**Closed: Operation Causality Battle Ownership (2026-04-09)**
+- Battle-to-operation attribution must be stamped at battle resolution time, not reconstructed later from the operation's surviving brigade list. Post-turn survivor trimming can legitimately diverge from the brigade that actually fought.
+- Accepted boundary after cleanup: `attack_resolution_osid` owns raw `operation_id` / `operation_name` on battle records, and downstream scenario diagnostics should prefer that canonical owner over late roster inference. Fallback inference is only for sparse compatibility cases that lack battle metadata.
+- Reporting rule: when a downstream diagnostic and a same-turn battle log disagree, preserve the sim-owned source identifier and propagate it outward. Do not "fix" the disagreement by weakening the diagnostic to a target-only heuristic.

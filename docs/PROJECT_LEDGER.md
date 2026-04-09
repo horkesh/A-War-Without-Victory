@@ -1,3 +1,46 @@
+## [2026-04-09] fix(harness): preserve canonical battle-to-operation ownership in combat causality (n1408)
+
+**Type:** Harness / anomaly truth hardening
+**Files:** `src/sim/combat/attack_resolution_osid.ts`, `src/scenario/combat_causality.ts`, `src/scenario/scenario_runner.ts`, `tests/scenario_operation_diagnostics.test.ts`, `docs/40_reports/implemented/20260409_OPERATION_CAUSALITY_BATTLE_OWNERSHIP_HARDENING.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/architect_notes.md`
+**Run:** n1408 - hash `bde31c0aab141f42` (baseline `n1407`, same final hash)
+**Status:** VERIFIED - targeted regression, fresh 40-week rerun, validator, recovery bar, full vitest, typecheck, and build all green
+
+### Summary of changes
+
+1. **Battle records now keep their operation owner at resolution time** - `src/sim/combat/attack_resolution_osid.ts` now stamps `operation_id` / `operation_name` onto raw battle entries whenever the attacker belongs to an execution-phase active operation.
+2. **Combat causality now prefers the sim-owned battle owner** - `src/scenario/combat_causality.ts` now counts operation-local battles from canonical battle ownership first, and only falls back to post-turn brigade inference for sparse compatibility cases.
+3. **Weekly reporting now preserves source truth instead of re-deriving it late** - `src/scenario/scenario_runner.ts` now forwards the stamped battle operation metadata into `weekly_report.jsonl` and only performs legacy re-derivation when the source battle record lacks it.
+4. **Regression locked for survivor-trim drift** - `tests/scenario_operation_diagnostics.test.ts` now proves that an operation remains valid when the brigade that actually fought is trimmed from the surviving `participating_brigades` before diagnostics run.
+
+### Scenario proof
+
+- Baseline: `runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1407`
+  - `run_summary.json` reported `invalid_operation_count: 1`, `invalidation_reasons: ["operation_attack_orders_without_battles"]`, and `valid_for_combat_calibration: false`
+  - week 29 `operation_diagnostics` for `cmd_vrs_east_bosnian_t24` showed `attack_attempt_count: 1`, `battle_count: 0`, `current_objective_battle_count: 1`
+  - the same week's battle list still contained the real `op:brcko:boce_2` fight by `rs_2nd_semberija_light_infantry`
+- Post-fix: `runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1408`
+  - final hash stayed `bde31c0aab141f42`
+  - `run_summary.json` now reports `invalid_operation_count: 0`, `invalidation_reasons: []`, and `valid_for_combat_calibration: true`
+  - `end_report.md` still truthfully shows `cmd_vrs_east_bosnian_t24` as a failed operation, but the false no-battle invalidation is gone
+  - `brigade_far_from_home_unassigned` remains for `rs_1st_podrinje` / `rs_5th_podrinje`, proving the lane clarified attribution truth without changing the remaining stranded-brigade seam
+
+### Verification
+
+- `npx.cmd vitest run tests/scenario_operation_diagnostics.test.ts -t "trimmed from surviving participants"`
+- `npx.cmd vitest run tests/scenario_operation_diagnostics.test.ts -t "attack orders and battles exist"`
+- `npx.cmd vitest run tests/scenario_operation_diagnostics.test.ts tests/operation_birth_anomaly_contract.test.ts`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run sim:scenario:run:40w`
+- `node tools/validate_run_consistency.cjs runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1408`
+- `npm.cmd run recovery:check`
+- `npm.cmd run test:vitest`
+- `npm.cmd run build`
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260409_OPERATION_CAUSALITY_BATTLE_OWNERSHIP_HARDENING.md`
+
+---
 ## [2026-04-09] fix(engine): prevent hopeless ready offensives from entering execution
 
 **Type:** Engine hardening
