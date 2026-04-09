@@ -215,11 +215,19 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - **Owner:** `src/sim/combat/sector_offensive.ts`
 - **Report:** `docs/40_reports/implemented/20260409_OPERATION_READINESS_APPROACH_TRUTH_HARDENING.md`
 
+### Military Review Shell Coherence - CLOSED 2026-04-09
+- **Why this lane won:** after the readiness fix, the suspected East Bosnian follow-up case (`cmd_vrs_east_bosnian_t29`) no longer read like false runtime truth. It logged one real attack, recovered as `max_failures`, and did not reintroduce invalid combat-causality counters. That demoted it to realism/tuning audit territory and moved the duplicate shell owner seam to the top.
+- **Fix:** `src/ui/map/App.tsx` no longer mounts live presidential decisions from `pendingEventDecisions` into the tactical EventModal queue and no longer answers them via `ipc.respondToEventDecision(...)`. `src/ui/map/components/warroom/WarroomStatusBar.tsx` now summarizes pending review pressure from `loadedGameState.presidentialReviewQueue?.pendingCount`.
+- **Tests:** `tests/army_hq_presidential_review_coherence.test.ts` and `tests/ui_shell_navigation.test.ts` now lock both boundaries: Warroom status must read `presidentialReviewQueue`, and `App.tsx` must not retain direct `pendingEventDecisions` / `respondToEventDecision` ownership.
+- **Proof:** no scenario rerun was required because this lane did not change sim or save truth. The strongest proof was failing-then-passing source-boundary regressions plus full verification (`test:vitest`, `tsc`, `build`) all green.
+- **Owner:** Army HQ / `presidentialReviewQueue` summary path
+- **Report:** `docs/40_reports/implemented/20260409_MILITARY_REVIEW_SHELL_COHERENCE_HARDENING.md`
+
 ## Next Priority Lanes
 
 1. **v0.8.4 Phase F — CLOSED 2026-04-07.** DRINA investigation complete: root cause proven (absent ARBiH Podrinje defensive ops), fixes applied (initial controllers, Op Drina scope, painted targets), remaining variance accepted with evidence (27/27 anchors, 93.6%). v0.8.4 ALL PHASES CLOSED. Next: v0.8.x-final command authority cleanup or v0.9 per MASTER_ROADMAP.
-2. **Operation execution-quality follow-up:** fresh 40-week proof `n1398` clears `cmd_arbih_1st_corps_t18`; remaining top runtime seam is now `cmd_vrs_east_bosnian_t29`. Owner: operation execution / combat-causality stack.
-3. **Military review shell coherence:** toolbar and Army HQ already key from `presidentialReviewQueue`, but `App.tsx` still owns a second live decision-response path through `pendingEventDecisions`. Owner: UI/read-model shell boundary.
+2. **Cross-corps sector assignment runtime truth:** fresh `n1398` still reports `cross_corps_sector_assignment` anomalies for `arbih_717th_slavna_mountain` and `rs_5th_podrinje`. Owner: sector assignment / final sector truth pipeline.
+3. **East Bosnian runtime audit:** `cmd_vrs_east_bosnian_t29` is no longer an obvious false-execution seam, but it still needs explicit classification as either legitimate failure, bounded hardening, or realism/tuning follow-up. Owner: operation execution / scenario realism boundary.
 4. **Studio Health / Repo Truth:** keep the permanent lane real in operating practice — closeout gate, blindspot review, warning disposition, artifact policy, and evidence retention.
 5. **v0.8.x-final command authority cleanup:** operations singularity follow-through, movement ownership cleanup, and remaining canonical-owner retirements before `v0.9`.
 

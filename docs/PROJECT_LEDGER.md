@@ -25249,3 +25249,36 @@ Main Staff HQ was Han Pijesak, not Rogatica. Tracked for OOB correction pass.
 - Report: `docs/40_reports/implemented/20260409_OPERATION_READINESS_APPROACH_TRUTH_HARDENING.md`
 
 ---
+
+## [2026-04-09] fix(ui): unify military review shell ownership
+
+**Type:** UI/read-model hardening
+**Files:** `src/ui/map/App.tsx`, `src/ui/map/components/warroom/WarroomStatusBar.tsx`, `tests/army_hq_presidential_review_coherence.test.ts`, `tests/ui_shell_navigation.test.ts`, `docs/40_reports/implemented/20260409_MILITARY_REVIEW_SHELL_COHERENCE_HARDENING.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/architect_notes.md`
+**Status:** VERIFIED - targeted coherence regressions, full Vitest, tsc, and build all green
+
+### Summary of changes
+
+1. **Army HQ now fully owns live military review action flow** - `src/ui/map/App.tsx` no longer builds modal queue items from `pendingEventDecisions` and no longer submits `ipc.respondToEventDecision(...)` directly from the tactical shell. EventModal at the app root is now limited to non-decision fired events.
+
+2. **Warroom summary now reads the canonical queue owner** - `src/ui/map/components/warroom/WarroomStatusBar.tsx` switched from `loadedGameState.pendingEventDecisions?.length` to `loadedGameState.presidentialReviewQueue?.pendingCount`, so Warroom signaling matches Army HQ and the tactical toolbar.
+
+3. **Boundary regressions added before closeout** - `tests/army_hq_presidential_review_coherence.test.ts` and `tests/ui_shell_navigation.test.ts` now lock the contract: Warroom summary must read `presidentialReviewQueue`, and `App.tsx` must not retain a direct `pendingEventDecisions` / `respondToEventDecision` ownership path.
+
+### Verification
+
+- `npx.cmd vitest run tests/army_hq_presidential_review_coherence.test.ts tests/ui_shell_navigation.test.ts`
+- `npm.cmd run test:vitest`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run build`
+
+### Proof
+
+- Baseline: the new targeted tests failed because `WarroomStatusBar.tsx` still read `pendingEventDecisions?.length`, and `App.tsx` still contained both `loadedGameState.pendingEventDecisions` and `ipc.respondToEventDecision`.
+- Post-fix: the targeted regressions passed (`19` tests), and the full repo verification bar stayed green (`232` files / `3091` tests, plus `tsc` and `build`).
+- No scenario rerun was required because this lane did not alter simulation output or persisted state truth. The hardening was a shell/read-model ownership cleanup on top of existing derived queue data.
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260409_MILITARY_REVIEW_SHELL_COHERENCE_HARDENING.md`
+
+---

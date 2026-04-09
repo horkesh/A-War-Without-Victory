@@ -67,4 +67,14 @@ describe('Army HQ / presidential review coherence', () => {
     expect(panelSource).toContain('Open Reserve Desk');
     expect(modalSource).toContain('setSelectedArmyHqId');
   });
+
+  it('keys Warroom review signaling from the canonical presidential review queue', () => {
+    const source = readFileSync(
+      new URL('../src/ui/map/components/warroom/WarroomStatusBar.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(source).toContain('loadedGameState.presidentialReviewQueue?.pendingCount');
+    expect(source).not.toContain('loadedGameState.pendingEventDecisions?.length');
+  });
 });

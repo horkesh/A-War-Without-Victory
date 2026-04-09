@@ -318,7 +318,7 @@ function App() {
     if (!fired || fired.length === 0) return;
 
     // Find events not yet acknowledged
-    const newEvents = fired.filter(e => !acknowledgedEventIds.has(e.id));
+    const newEvents = fired.filter(e => !acknowledgedEventIds.has(e.id) && !e.isDecision);
     if (newEvents.length === 0) return;
 
     // Load full definitions to enrich title/narrative/category
@@ -336,8 +336,7 @@ function App() {
             kind: eff.kind,
             description: eff.text ?? (eff.faction ? `${getPlayerSafeMilitaryFactionName(eff.faction)} ${eff.kind} ${(eff.delta ?? 0) > 0 ? '+' : ''}${eff.delta ?? ''}` : eff.kind),
           })) ?? e.effects,
-          isDecision: e.isDecision,
-          responseOptions: e.responseOptions,
+          isDecision: false,
         };
       });
 
@@ -349,34 +348,6 @@ function App() {
     });
     return () => { stale = true; };
   }, [loadedGameState?.turn, loadedGameState?.firedEvents?.length]);
-
-  // v0.4.1 Phase 5: also check pending event decisions (live only)
-  useEffect(() => {
-    if (!ipc.isAvailable) return;
-    if (!loadedGameState) return;
-    const pending = loadedGameState.pendingEventDecisions;
-    if (!pending || pending.length === 0) return;
-
-    // Convert pending decisions to EventDisplayData for modal display
-    const decisionEvents: EventDisplayData[] = pending.map(d => ({
-      id: d.event_id,
-      title: d.event_title,
-      narrative: '',
-      category: 'political',
-      effects: [],
-      isDecision: true,
-      responseOptions: d.response_options.map(opt => ({
-        id: opt.id,
-        label: opt.label,
-        description: opt.description,
-      })),
-    }));
-
-    if (decisionEvents.length > 0 && eventQueue.length === 0) {
-      setEventQueue(decisionEvents);
-      setEventQueueIndex(0);
-    }
-  }, [loadedGameState?.pendingEventDecisions?.length]);
 
   // Auto-dismiss non-decision events after 4 seconds
   useEffect(() => {
@@ -399,25 +370,6 @@ function App() {
   const handleEventAcknowledge = () => {
     const current = eventQueue[eventQueueIndex];
     if (current) {
-      setAcknowledgedEventIds(prev => new Set(prev).add(current.id));
-    }
-    if (eventQueueIndex < eventQueue.length - 1) {
-      setEventQueueIndex(eventQueueIndex + 1);
-    } else {
-      setEventQueue([]);
-      setEventQueueIndex(0);
-    }
-  };
-
-  const handleEventDecisionResponse = async (responseId: string) => {
-    const current = eventQueue[eventQueueIndex];
-    if (current) {
-      if (ipc.isAvailable) {
-        const result = await ipc.respondToEventDecision(current.id, responseId);
-        if (!result.ok) {
-          console.error('[EventModal] Decision response failed:', result.error);
-        }
-      }
       setAcknowledgedEventIds(prev => new Set(prev).add(current.id));
     }
     if (eventQueueIndex < eventQueue.length - 1) {
@@ -789,7 +741,6 @@ function App() {
           queuePosition={eventQueueIndex + 1}
           queueTotal={eventQueue.length}
           onAcknowledge={handleEventAcknowledge}
-          onDecisionResponse={handleEventDecisionResponse}
         />
       )}
       {/* v0.5.0: Peace Plan Modal — blocks turn progression until player responds */}

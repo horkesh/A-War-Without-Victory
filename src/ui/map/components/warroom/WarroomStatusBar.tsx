@@ -2,7 +2,7 @@
  * WarroomStatusBar — live campaign context strip inside the warroom.
  *
  * Renders a thin fixed strip at the bottom-right of the warroom overlay
- * (z-[60]) showing current turn/date, phase badge, pending events indicator,
+ * (z-[60]) showing current turn/date, phase badge, pending review indicator,
  * and an advance-turn affordance.
  *
  * Reads directly from useGameStore — no prop drilling required.
@@ -22,8 +22,8 @@ export function WarroomStatusBar() {
   const displayLabel = formatTurnLabel(rawLabel);
   const phase = loadedGameState.phase ?? '';
   const isWar = phase.toLowerCase().includes('war');
-  const pendingDecisionCount = loadedGameState.pendingEventDecisions?.length ?? 0;
-  const hasPendingEvents = pendingDecisionCount > 0;
+  const pendingReviewCount = loadedGameState.presidentialReviewQueue?.pendingCount ?? 0;
+  const hasPendingReviews = pendingReviewCount > 0;
 
   return (
     <div
@@ -44,11 +44,11 @@ export function WarroomStatusBar() {
         {isWar ? 'WAR' : 'PEACE'}
       </span>
 
-      {/* Pending events indicator */}
-      {hasPendingEvents && (
+      {/* Pending review indicator */}
+      {hasPendingReviews && (
         <span
           className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"
-          title={`${pendingDecisionCount} pending decision${pendingDecisionCount === 1 ? '' : 's'}`}
+          title={`${pendingReviewCount} pending review${pendingReviewCount === 1 ? '' : 's'}`}
         />
       )}
 

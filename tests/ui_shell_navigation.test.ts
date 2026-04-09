@@ -217,4 +217,14 @@ describe('shellNavigation', () => {
     expect(appSource).toContain('applyShellHandoffCommand');
     expect(appSource).toContain("params.get('shellHandoff')");
   });
+
+  it('keeps live military review action ownership out of the tactical shell app root', () => {
+    const appSource = readFileSync(
+      new URL('../src/ui/map/App.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(appSource).not.toContain('loadedGameState.pendingEventDecisions');
+    expect(appSource).not.toContain('ipc.respondToEventDecision');
+  });
 });
