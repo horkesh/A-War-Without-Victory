@@ -36,6 +36,11 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Active / Recent Accepted Lanes
 
+- **Territorial anomaly sector-coverage alignment** — CLOSED 2026-04-09. `checkUndefendedPaintedMismatch(...)` and `checkAdjacentUncontestedTerritory(...)` were still treating covered-but-empty OSIDs as undefended because they only read physical on-tile brigade presence. The detector now consults canonical sector coverage from `corps_front_sectors` before declaring a tile undefended, and `tests/territorial_anomaly_sector_coverage_truth.test.ts` locks the contract. Scenario proof: `n1409` kept final hash `bde31c0aab141f42` but still showed `undefended_painted_mismatch = 56` and `adjacent_uncontested_territory = 111`; `n1410` keeps the same final hash while dropping those to `2` and `9`. Report: `docs/40_reports/implemented/20260409_TERRITORIAL_ANOMALY_SECTOR_COVERAGE_HARDENING.md`.
+  - **Canonical owner after cleanup:** sector coverage truth via `corps_front_sectors` with active assigned/reserve brigades.
+  - **Demoted path:** physical on-tile brigade presence as the only definition of "defended."
+  - **Residual board after lane:** `brigade_stacking` remains the clearest bounded anomaly-contract candidate; Podrinje and 444th remain redesign / doctrine seams.
+
 - **Graz cold-front zero-combat anomaly alignment** — CLOSED 2026-04-09. `checkZeroCombatCorps(...)` still emitted `zero_combat_corps` for `hvo_tomislavgrad` in `n1408` even though the sim already owned that RS-HRHB frontage as a Graz cold front. The detector now consults `isSectorColdFront(...)` before declaring a dead front, and `tests/zero_combat_corps_cold_front.test.ts` locks the exact contract. Scenario proof: `n1408` had anomaly count `15` including `zero_combat_corps`; `n1409` keeps the same final hash `bde31c0aab141f42` and drops the count to `14` with only that warning removed. Report: `docs/40_reports/implemented/20260409_GRAZ_COLD_FRONT_ZERO_COMBAT_CORPS_HARDENING.md`.
   - **Canonical owner after cleanup:** Graz truce / cold-front truth via `isSectorColdFront(...)`.
   - **Demoted path:** anomaly-local `front sectors + zero battles = dead front` inference.

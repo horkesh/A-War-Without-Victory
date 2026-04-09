@@ -26,6 +26,67 @@ function isBrigadeKind(kind: string | undefined): boolean {
     return kind === undefined || kind === 'brigade' || kind === 'operational_group';
 }
 
+function buildPhysicallyPresentFactions(state: GameState): Map<string, Set<string>> {
+    const formations = state.military.formations;
+    const osidBrigadeFactions = new Map<string, Set<string>>();
+    for (const fid of sortedKeys(formations as Record<string, unknown>)) {
+        const f = formations[fid];
+        if (f.status !== 'active') continue;
+        if (!isBrigadeKind(f.kind)) continue;
+        const loc = f.location_osid;
+        if (!loc) continue;
+        const set = osidBrigadeFactions.get(loc) ?? new Set<string>();
+        set.add(f.faction);
+        osidBrigadeFactions.set(loc, set);
+    }
+    return osidBrigadeFactions;
+}
+
+function buildSectorCoverageFactions(state: GameState): Map<string, Set<string>> {
+    const formations = state.military.formations;
+    const sectors = state.military.corps_front_sectors ?? {};
+    const coveredOsidFactions = new Map<string, Set<string>>();
+
+    for (const sectorId of sortedKeys(sectors as Record<string, unknown>)) {
+        const sector = sectors[sectorId];
+        const brigadeIds = [
+            ...(sector.assigned_brigade_ids ?? []),
+            ...(sector.reserve_brigade_ids ?? []),
+        ].slice().sort(strictCompare);
+        const hasActiveCoverage = brigadeIds.some((bid) => {
+            const brigade = formations[bid];
+            return brigade?.status === 'active' && isBrigadeKind(brigade.kind);
+        });
+        if (!hasActiveCoverage) continue;
+
+        const coveredOsids = new Set<string>();
+        for (const osid of sector.territory_osids ?? []) coveredOsids.add(osid);
+        for (const subSegment of sector.sub_segments ?? []) {
+            for (const osid of subSegment.friendly_osids ?? []) coveredOsids.add(osid);
+        }
+
+        for (const osid of [...coveredOsids].sort(strictCompare)) {
+            const set = coveredOsidFactions.get(osid) ?? new Set<string>();
+            set.add(sector.faction);
+            coveredOsidFactions.set(osid, set);
+        }
+    }
+
+    return coveredOsidFactions;
+}
+
+function hasCanonicalDefense(
+    controller: string,
+    osid: string,
+    physicallyPresentFactions: Map<string, Set<string>>,
+    sectorCoverageFactions: Map<string, Set<string>>,
+): boolean {
+    const factionsPresent = physicallyPresentFactions.get(osid);
+    if (factionsPresent?.has(controller)) return true;
+    const coverage = sectorCoverageFactions.get(osid);
+    return coverage?.has(controller) ?? false;
+}
+
 // ── Check #21: morale_collapse_cluster ─────────────────────────────────
 
 const CRITICAL_MORALE_THRESHOLD = 15;
@@ -512,19 +573,8 @@ export function checkUndefendedPaintedMismatch(state: GameState): AnomalyReport[
         return reports;
     }
 
-    // Build OSID → set of factions with active brigades present
-    const formations = state.military.formations;
-    const osidBrigadeFactions = new Map<string, Set<string>>();
-    for (const fid of sortedKeys(formations as Record<string, unknown>)) {
-        const f = formations[fid];
-        if (f.status !== 'active') continue;
-        if (!isBrigadeKind(f.kind)) continue;
-        const loc = f.location_osid;
-        if (!loc) continue;
-        const set = osidBrigadeFactions.get(loc) ?? new Set<string>();
-        set.add(f.faction);
-        osidBrigadeFactions.set(loc, set);
-    }
+    const osidBrigadeFactions = buildPhysicallyPresentFactions(state);
+    const sectorCoverageFactions = buildSectorCoverageFactions(state);
 
     const undefended: Array<{ osid: string; simFaction: string; paintedFaction: string }> = [];
 
@@ -535,8 +585,7 @@ export function checkUndefendedPaintedMismatch(state: GameState): AnomalyReport[
         if (sim === painted) continue;
 
         // Mismatch: check if the sim-controlling faction has any brigade here
-        const factionsPresent = osidBrigadeFactions.get(osid);
-        const hasDefender = factionsPresent != null && factionsPresent.has(sim);
+        const hasDefender = hasCanonicalDefense(sim, osid, osidBrigadeFactions, sectorCoverageFactions);
         if (!hasDefender) {
             undefended.push({ osid, simFaction: sim, paintedFaction: painted });
         }
@@ -572,7 +621,6 @@ export function checkUndefendedPaintedMismatch(state: GameState): AnomalyReport[
 export function checkAdjacentUncontestedTerritory(state: GameState): AnomalyReport[] {
     const reports: AnomalyReport[] = [];
     const politicalControllers = state.political.political_controllers ?? {};
-    const formations = state.military.formations;
     const grazActive = isGrazAccordsActive(state);
 
     // Load OSID adjacency graph
@@ -599,17 +647,8 @@ export function checkAdjacentUncontestedTerritory(state: GameState): AnomalyRepo
     }
 
     // Build OSID → set of factions with active brigades present
-    const osidBrigadeFactions = new Map<string, Set<string>>();
-    for (const fid of sortedKeys(formations as Record<string, unknown>)) {
-        const f = formations[fid];
-        if (f.status !== 'active') continue;
-        if (!isBrigadeKind(f.kind)) continue;
-        const loc = f.location_osid;
-        if (!loc) continue;
-        const set = osidBrigadeFactions.get(loc) ?? new Set<string>();
-        set.add(f.faction);
-        osidBrigadeFactions.set(loc, set);
-    }
+    const osidBrigadeFactions = buildPhysicallyPresentFactions(state);
+    const sectorCoverageFactions = buildSectorCoverageFactions(state);
 
     const uncontested: Array<{ osid: string; controller: string; adjacentFaction: string; adjacentOsid: string }> = [];
 
@@ -618,8 +657,7 @@ export function checkAdjacentUncontestedTerritory(state: GameState): AnomalyRepo
         if (!controller) continue;
 
         // Skip if the controller has brigades here — it's defended
-        const factionsHere = osidBrigadeFactions.get(osid);
-        if (factionsHere && factionsHere.has(controller)) continue;
+        if (hasCanonicalDefense(controller, osid, osidBrigadeFactions, sectorCoverageFactions)) continue;
 
         // Check adjacent OSIDs for enemy brigades
         const neighbors = adjacency.get(osid) ?? [];

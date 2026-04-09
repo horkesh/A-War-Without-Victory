@@ -1,3 +1,45 @@
+## [2026-04-09] fix(harness): align territorial warnings with sector coverage truth (n1410)
+
+**Type:** Harness / anomaly truth hardening
+**Files:** `src/scenario/anomaly_checks_extended.ts`, `tests/territorial_anomaly_sector_coverage_truth.test.ts`, `docs/40_reports/implemented/20260409_TERRITORIAL_ANOMALY_SECTOR_COVERAGE_HARDENING.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/architect_notes.md`
+**Run:** n1410 - hash `bde31c0aab141f42` (baseline `n1409`, same final hash)
+**Status:** VERIFIED - targeted regressions, integration anomaly coverage, fresh 40-week rerun, consistency audit, recovery bar, full vitest, typecheck, and build all green
+
+### Summary of changes
+
+1. **Territorial warnings now honor canonical sector defense** - `checkUndefendedPaintedMismatch(...)` and `checkAdjacentUncontestedTerritory(...)` now treat sector-owned coverage with active assigned/reserve brigades as defending truth instead of requiring a brigade to stand on the exact OSID.
+2. **Regression boundary locked** - `tests/territorial_anomaly_sector_coverage_truth.test.ts` proves covered-empty OSIDs are suppressed while truly uncovered OSIDs still emit the same warning families.
+3. **No gameplay drift introduced** - the same 40-week scenario rerun kept the exact final hash while collapsing false territorial warnings to the genuinely uncovered subset.
+
+### Scenario proof
+
+- Baseline: `runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1409`
+  - final hash `bde31c0aab141f42`
+  - `undefended_painted_mismatch = 56`
+  - `adjacent_uncontested_territory = 111`
+- Post-fix: `runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1410`
+  - final hash stayed `bde31c0aab141f42`
+  - `undefended_painted_mismatch = 2`
+  - `adjacent_uncontested_territory = 9`
+  - remaining residuals are limited to genuinely uncovered live edges rather than sector-covered empty tiles
+
+### Verification
+
+- `npx.cmd vitest run tests/territorial_anomaly_sector_coverage_truth.test.ts`
+- `npx.cmd vitest run tests/anomaly_detector_deployment_truth.test.ts tests/integration_anomaly.test.ts`
+- `npm.cmd run sim:scenario:run:40w`
+- `node tools/validate_run_consistency.cjs runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1410`
+- `npm.cmd run recovery:check`
+- `npm.cmd run test:vitest`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run build`
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260409_TERRITORIAL_ANOMALY_SECTOR_COVERAGE_HARDENING.md`
+
+---
+
 ## [2026-04-09] fix(harness): align zero-combat corps with Graz cold-front truth (n1409)
 
 **Type:** Harness / anomaly truth hardening
