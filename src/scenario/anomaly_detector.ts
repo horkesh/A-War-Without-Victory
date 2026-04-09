@@ -13,6 +13,7 @@ import type { GameState, FormationId } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
 import type { AnomalyReport } from './anomaly_types.js';
 import { checkMoraleCollapseCluster, checkZeroCombatCorps, checkOrphanOperationBrigades, checkGhostParamilitaryPersonnel, checkOffensiveIntelBlindness, checkWeakerFactionAttackImbalance, checkUndefendedPaintedMismatch, checkAdjacentUncontestedTerritory } from './anomaly_checks_extended.js';
+import { isSectorAssignmentExemptCorpsId } from '../sim/combat/corps_front_sectors_constants.js';
 
 // ── Helpers ────────────────────────────────────────────────────────────
 
@@ -568,7 +569,7 @@ function detectDisconnectedSectorTerritory(state: GameState, adjacency: Map<stri
  * n1195: Raised to critical — full-strength brigades sitting idle while
  * sectors have unmanned front edges is a brigade_assignment.ts pipeline failure.
  */
-function detectUnassignedFrontlineBrigades(state: GameState): AnomalyReport[] {
+export function detectUnassignedFrontlineBrigades(state: GameState): AnomalyReport[] {
     const reports: AnomalyReport[] = [];
     const formations = state.military.formations;
     const sectors = state.military.corps_front_sectors ?? {};
@@ -607,11 +608,6 @@ function detectUnassignedFrontlineBrigades(state: GameState): AnomalyReport[] {
         if (assignedSet.has(fid)) continue;
         if (opParticipants.has(fid)) continue;
         if ((f.disrupted_turns ?? 0) > 0) continue;
-        // Exempt fixed-placement enclave brigades: tagged 'placement:fixed_home_osid' means
-        // the brigade is pinned to its home OSID in a disconnected enclave. The sector
-        // assignment pipeline handles these separately; drop-through here is a known gap,
-        // not a critical deployment failure.
-        if (Array.isArray(f.tags) && f.tags.includes('placement:fixed_home_osid')) continue;
         unassigned.push({ id: fid, corps: f.corps_id, location: f.location_osid ?? 'none' });
     }
 
@@ -775,7 +771,7 @@ function detectBrigadeStacking(state: GameState): AnomalyReport[] {
  * Active brigades far from their home_osid via friendly-territory BFS.
  * The drift problem that killed the Sarajevo siege.
  */
-function detectBrigadeFarFromHome(state: GameState, adjacency: Map<string, string[]>): AnomalyReport[] {
+export function detectBrigadeFarFromHome(state: GameState, adjacency: Map<string, string[]>): AnomalyReport[] {
     const reports: AnomalyReport[] = [];
     const formations = state.military.formations;
     const controllers = state.political?.political_controllers ?? {};
@@ -794,6 +790,7 @@ function detectBrigadeFarFromHome(state: GameState, adjacency: Map<string, strin
     const DRIFT_THRESHOLD = 6;
 
     let eligible = 0;
+    const redeployed: Array<{ id: string; home: string; location: string; distance: number; owner: string }> = [];
     const drifted: Array<{ id: string; home: string; location: string; distance: number }> = [];
 
     for (const fid of sortedKeys(formations as Record<string, unknown>)) {
@@ -839,12 +836,47 @@ function detectBrigadeFarFromHome(state: GameState, adjacency: Map<string, strin
         }
 
         const effectiveDistance = found ? distance : MAX_BFS_HOPS + 1;
-        if (effectiveDistance > DRIFT_THRESHOLD) {
-            drifted.push({ id: fid, home: target, location: start, distance: effectiveDistance });
+        if (effectiveDistance <= DRIFT_THRESHOLD) continue;
+
+        const assignment = f.assignment;
+        const hasLiveSectorOwner = assignment?.kind === 'sector'
+            && typeof assignment.sector_id === 'string'
+            && (assignment.role === 'front' || assignment.role === 'reserve');
+        const onLoan = !!f.elite_loan_state?.on_loan && typeof f.elite_loan_state.loaned_to_corps === 'string';
+        const sectorlessReserve = isSectorAssignmentExemptCorpsId(f.corps_id) && !onLoan;
+
+        if (hasLiveSectorOwner || onLoan) {
+            redeployed.push({
+                id: fid,
+                home: target,
+                location: start,
+                distance: effectiveDistance,
+                owner: onLoan ? 'elite loan' : `sector ${assignment?.role ?? 'owned'}`,
+            });
+            continue;
         }
+
+        if (sectorlessReserve) continue;
+        drifted.push({ id: fid, home: target, location: start, distance: effectiveDistance });
     }
 
-    if (eligible > 0 && drifted.length / eligible > 0.10) {
+    if (redeployed.length > 0) {
+        redeployed.sort((a, b) => strictCompare(a.id, b.id));
+        const pct = (redeployed.length / eligible * 100).toFixed(1);
+        const detail = redeployed.slice(0, 10).map(d =>
+            `${d.id} (${d.owner}, home=${d.home}, loc=${d.location}, dist=${d.distance > MAX_BFS_HOPS ? 'unreachable' : d.distance})`
+        ).join(', ');
+        const suffix = redeployed.length > 10 ? `, ... +${redeployed.length - 10} more` : '';
+        reports.push({
+            category: 'deployment',
+            severity: 'info',
+            type: 'brigade_far_from_home_redeployed',
+            description: `${redeployed.length}/${eligible} (${pct}%) eligible brigades are >6 hops from home_osid but still have live sector/loan ownership: ${detail}${suffix}.`,
+            entities: redeployed.map(d => d.id),
+        });
+    }
+
+    if (drifted.length > 0) {
         drifted.sort((a, b) => strictCompare(a.id, b.id));
         const pct = (drifted.length / eligible * 100).toFixed(1);
         const detail = drifted.slice(0, 10).map(d =>
@@ -854,8 +886,8 @@ function detectBrigadeFarFromHome(state: GameState, adjacency: Map<string, strin
         reports.push({
             category: 'deployment',
             severity: 'warning',
-            type: 'brigade_far_from_home',
-            description: `${drifted.length}/${eligible} (${pct}%) eligible brigades are >6 hops from home_osid: ${detail}${suffix}.`,
+            type: 'brigade_far_from_home_unassigned',
+            description: `${drifted.length}/${eligible} (${pct}%) eligible brigades are >6 hops from home_osid with no live sector/loan owner: ${detail}${suffix}.`,
             entities: drifted.map(d => d.id),
         });
     }

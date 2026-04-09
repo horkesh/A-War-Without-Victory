@@ -1,3 +1,47 @@
+## [2026-04-09] fix(harness): classify far-from-home brigades by live owner truth (n1401)
+
+**Type:** Harness / anomaly truth hardening
+**Files:** `src/scenario/anomaly_detector.ts`, `tests/anomaly_detector_deployment_truth.test.ts`, `tests/integration_anomaly.test.ts`
+**Run:** n1401 — hash `701d14d32566c5b5` (unchanged from n1400)
+**Status:** VERIFIED — targeted anomaly suites, 40-week rerun, consistency audit, recovery bar, full vitest, typecheck, and build clean
+
+### Summary of changes
+
+1. **Fixed-home tag demoted** — `detectUnassignedFrontlineBrigades(...)` no longer treats `placement:fixed_home_osid` as a live deployment exemption. Tags stay descriptive-only; active brigades without sector owners now surface honestly.
+
+2. **Far-from-home truth split by live owner** — `detectBrigadeFarFromHome(...)` now emits `brigade_far_from_home_redeployed` when a brigade still has live sector or elite-loan ownership, and `brigade_far_from_home_unassigned` when it has no live owner.
+
+3. **Regression contract hardened** — new focused tests lock the live-owner classification, and the integration anomaly suite now allows the newly exposed `unassigned_frontline_brigades` critical while still rejecting any unexpected critical anomaly.
+
+### Scenario proof
+
+- Baseline: `runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1400`
+  - `end_report.md` had one blended warning:
+    - `[brigade_far_from_home] 26/213 (12.2%) ... arbih_717th_slavna_mountain ... rs_1st_podrinje ... rs_5th_podrinje ...`
+  - The anomaly surface did not distinguish truthful live-owner redeployments from genuinely ownerless drift.
+
+- Post-fix: `runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1401`
+  - `end_report.md` now contains `[unassigned_frontline_brigades] 8 active brigade(s)...` plus `[brigade_far_from_home_unassigned] 2/213 ... rs_1st_podrinje ... rs_5th_podrinje`
+  - `run_summary.json` now contains `[brigade_far_from_home_redeployed] 24/213 ... arbih_120th_liberation_black_swans ... arbih_717th_slavna_mountain ...`
+  - Final hash stayed `701d14d32566c5b5`, proving the lane hardened truth surfaces without changing simulation behavior.
+
+### Verification
+
+- `npx.cmd vitest run tests/anomaly_detector_deployment_truth.test.ts`
+- `npx.cmd vitest run tests/anomaly_detector_deployment_truth.test.ts tests/integration_anomaly.test.ts`
+- `npm.cmd run sim:scenario:run:40w`
+- `node tools/validate_run_consistency.cjs runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1401`
+- `npm.cmd run recovery:check`
+- `npm.cmd run test:vitest`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run build`
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260409_FAR_FROM_HOME_LIVE_OWNER_TRUTH_HARDENING.md`
+
+---
+
 ## [2026-04-09] fix(engine): forbid final non-elite cross-corps field-brigade sector ownership (n1400)
 
 **Type:** Engine hardening
