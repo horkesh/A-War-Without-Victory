@@ -13,6 +13,7 @@ import type { GameState, FormationId } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
 import type { AnomalyReport } from './anomaly_types.js';
 import { isGrazAccordsActive } from '../sim/local_truces.js';
+import { isSectorColdFront } from '../sim/combat/sector_utils.js';
 
 // ── Helpers ────────────────────────────────────────────────────────────
 
@@ -96,15 +97,16 @@ export function checkZeroCombatCorps(state: GameState): AnomalyReport[] {
     const sectors = state.military.corps_front_sectors ?? {};
 
     // Identify corps that have sectors with front edges
-    const corpsWithFronts: Record<string, { sectorCount: number; edgeCount: number }> = {};
+    const corpsWithFronts: Record<string, { sectorCount: number; edgeCount: number; sectorIds: string[] }> = {};
     const corpsOpposingFactions: Record<string, Set<string>> = {};
     for (const sectorId of sortedKeys(sectors as Record<string, unknown>)) {
         const sector = sectors[sectorId];
         if (sector.edge_ids.length === 0) continue;
         const cid = sector.corps_id;
-        if (!corpsWithFronts[cid]) corpsWithFronts[cid] = { sectorCount: 0, edgeCount: 0 };
+        if (!corpsWithFronts[cid]) corpsWithFronts[cid] = { sectorCount: 0, edgeCount: 0, sectorIds: [] };
         corpsWithFronts[cid].sectorCount++;
         corpsWithFronts[cid].edgeCount += sector.edge_ids.length;
+        corpsWithFronts[cid].sectorIds.push(sectorId);
         if (!corpsOpposingFactions[cid]) corpsOpposingFactions[cid] = new Set();
         for (const f of (sector.opposing_factions ?? [])) corpsOpposingFactions[cid].add(f);
     }
@@ -128,6 +130,20 @@ export function checkZeroCombatCorps(state: GameState): AnomalyReport[] {
         }
 
         if (totalBrigades > 0 && totalBattles === 0) {
+            const info = corpsWithFronts[corpsId];
+
+            // Suppress true Graz cold fronts. The sim already canonically owns these
+            // as no-combat truce sectors, so reporting them as a broken "dead front"
+            // would duplicate and contradict the existing cold-front owner.
+            const allFrontSectorsCold = info.sectorIds.length > 0
+                && info.sectorIds.every((sectorId) => {
+                    const sector = sectors[sectorId];
+                    return sector != null && isSectorColdFront(state, sector);
+                });
+            if (allFrontSectorsCold) {
+                continue;
+            }
+
             // Suppress for HRHB corps facing only RBiH before the HRHB-RBiH war starts.
             // The ARBiH-HVO war begins April 1993 (~w52 from April 1992 start). In the 40w
             // scenario HVO Central Bosnia / Tomislavgrad silence is historically correct.
@@ -139,7 +155,6 @@ export function checkZeroCombatCorps(state: GameState): AnomalyReport[] {
                 }
             }
 
-            const info = corpsWithFronts[corpsId];
             reports.push({
                 category: 'combat',
                 severity: 'warning',

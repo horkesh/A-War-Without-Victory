@@ -1,3 +1,44 @@
+## [2026-04-09] fix(harness): align zero-combat corps with Graz cold-front truth (n1409)
+
+**Type:** Harness / anomaly truth hardening
+**Files:** `src/scenario/anomaly_checks_extended.ts`, `tests/zero_combat_corps_cold_front.test.ts`, `docs/40_reports/implemented/20260409_GRAZ_COLD_FRONT_ZERO_COMBAT_CORPS_HARDENING.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/architect_notes.md`
+**Run:** n1409 - hash `bde31c0aab141f42` (baseline `n1408`, same final hash)
+**Status:** VERIFIED - targeted regressions, fresh 40-week rerun, validator, recovery bar, full vitest, typecheck, and build all green
+
+### Summary of changes
+
+1. **Dead-front warnings now respect canonical cold-front truth** - `checkZeroCombatCorps(...)` in `src/scenario/anomaly_checks_extended.ts` now suppresses corps whose front sectors are all Graz cold fronts according to `isSectorColdFront(...)`.
+2. **Regression contract added at the detector boundary** - `tests/zero_combat_corps_cold_front.test.ts` proves that `hvo_tomislavgrad`-style Graz fronts no longer emit `zero_combat_corps`, while a non-cold RS-HRHB front still does.
+3. **No gameplay drift introduced** - the same 40-week scenario rerun kept the exact final hash while removing only the false warning.
+
+### Scenario proof
+
+- Baseline: `runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1408`
+  - anomaly count = `15`
+  - `end_report.md` included `[zero_combat_corps] Corps hvo_tomislavgrad (HRHB) has 1 sector(s) with 11 front edges and 3 brigades, but 0 battles fought after 40 turns. Dead front.`
+  - final state already showed a true Graz cold front: one `hvo_tomislavgrad` RS-facing sector, three assigned brigades, no operations, and Graz still active/unbroken
+- Post-fix: `runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1409`
+  - final hash stayed `bde31c0aab141f42`
+  - anomaly count dropped to `14`
+  - `zero_combat_corps` disappeared
+  - all other visible anomaly families remained unchanged
+
+### Verification
+
+- `npx.cmd vitest run tests/zero_combat_corps_cold_front.test.ts tests/cold_front_sector_suppression.test.ts`
+- `npx.cmd vitest run tests/integration_anomaly.test.ts tests/anomaly_detector_deployment_truth.test.ts`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run sim:scenario:run:40w`
+- `node tools/validate_run_consistency.cjs runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1409`
+- `npm.cmd run recovery:check`
+- `npm.cmd run test:vitest`
+- `npm.cmd run build`
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260409_GRAZ_COLD_FRONT_ZERO_COMBAT_CORPS_HARDENING.md`
+
+---
 ## [2026-04-09] fix(harness): preserve canonical battle-to-operation ownership in combat causality (n1408)
 
 **Type:** Harness / anomaly truth hardening
