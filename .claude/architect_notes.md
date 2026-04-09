@@ -468,3 +468,8 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - Accepted boundary after cleanup: late T6 repair (`recallDriftedBrigades(...)`) owns the final movement packet for an ownerless brigade that is outside same-corps sector space, not in an active operation, and not already marching home.
 - Narrowness rule: do not turn repair into a universal movement override. Same-corps brigades, active-operation brigades, and already-home recalls keep their existing owner. The override exists only where generic movement authority is already proven false.
 
+**Closed: Unreachable Drift Recall Owner Cleanup (2026-04-09)**
+- The next residual seam was narrower: `n1403` still serialized home-recall packets for the Podrinje pair even though no friendly path home existed. Sector ownership, operation ownership, and generic movement ownership were already gone, but the final save still implied a movement owner that the graph could never satisfy.
+- Accepted boundary after cleanup: once `recallDriftedBrigades(...)` becomes the final movement owner for an ownerless brigade, it must prove home reachability before preserving or writing a recall order. If no friendly path exists, the repair must clear the packet and leave the unresolved stranded brigade visible.
+- Persistence rule: impossible orders are a lie even when they point at the "right" conceptual destination. Final-state movement truth must describe executable authority, not aspiration.
+

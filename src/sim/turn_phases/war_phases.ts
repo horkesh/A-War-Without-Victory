@@ -2796,15 +2796,32 @@ export function recallDriftedBrigades(state: GameState, adjacency?: Map<string, 
         const faction = f.faction;
         const dist = bfsFriendlyDistance(f.home_osid, f.location_osid, adj, pc, faction ?? '', DRIFT_RECALL_MAX_HOPS + 1);
         if (dist <= DRIFT_RECALL_MAX_HOPS) continue;
+        const homeReachable = bfsFriendlyDistance(
+            f.home_osid,
+            f.location_osid,
+            adj,
+            pc,
+            faction ?? '',
+            Math.max(DRIFT_RECALL_MAX_HOPS + 1, adj.size),
+        ) <= adj.size;
 
         const existingOrder = moveOrders[fid];
         if (existingOrder) {
             const existingDest = existingOrder.destination_sids?.[0];
             const isOwnerless = (f.assignment ?? null) == null;
             const outsideOwnCorpsSpace = !isWithinSameCorpsSectorSpace(f, state, adj, pc);
-            if (!isOwnerless || !outsideOwnCorpsSpace || existingDest === f.home_osid) {
+            if (!isOwnerless || !outsideOwnCorpsSpace) {
                 continue;
             }
+            if (existingDest === f.home_osid) {
+                if (!homeReachable) delete moveOrders[fid];
+                continue;
+            }
+        }
+
+        if (!homeReachable) {
+            delete moveOrders[fid];
+            continue;
         }
 
         // Brigade is too far from home — recall

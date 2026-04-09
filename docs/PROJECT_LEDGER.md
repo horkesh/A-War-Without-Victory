@@ -25485,3 +25485,39 @@ Main Staff HQ was Han Pijesak, not Rogatica. Tracked for OOB correction pass.
 - Report: `docs/40_reports/implemented/20260409_DRIFT_RECALL_OWNERSHIP_PRECEDENCE_HARDENING.md`
 
 ---
+
+## [2026-04-09] fix(engine): clear unreachable ownerless drift recall orders
+
+**Type:** Engine hardening
+**Files:** `src/sim/turn_phases/war_phases.ts`, `tests/drift_recall_precedence.test.ts`, `docs/40_reports/implemented/20260409_UNREACHABLE_DRIFT_RECALL_OWNER_CLEANUP.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/architect_notes.md`
+**Status:** VERIFIED - targeted regressions, fresh 40-week rerun, validator, recovery check, full Vitest, tsc, and build all green
+
+### Summary of changes
+
+1. **Late drift repair no longer preserves impossible movement ownership** - `src/sim/turn_phases/war_phases.ts` now checks whether an ownerless brigade outside same-corps sector space has any friendly path home before keeping or writing a recall order. If no path exists, the stale movement packet is cleared instead of being serialized as false authority.
+
+2. **The unreachable-order boundary is narrow and deterministic** - same-corps brigades, active-operation brigades, and reachable home recalls keep their existing movement owner. The cleanup only applies where generic movement is already wrong and even the home recall is provably impossible.
+
+3. **Regression coverage now names the unreachable seam explicitly** - `tests/drift_recall_precedence.test.ts` now proves both unreachable stale-generic orders and unreachable stale-home-recall orders are cleared rather than preserved.
+
+### Verification
+
+- `npx.cmd vitest run tests/drift_recall_precedence.test.ts tests/brigade_home_return.test.ts tests/elite_loan_return_to_corps.test.ts`
+- `npm.cmd run sim:scenario:run:40w` -> baseline `n1403`, post-fix `n1404`
+- `node tools/validate_run_consistency.cjs runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1404`
+- `npm.cmd run recovery:check`
+- `npm.cmd run test:vitest`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run build`
+
+### Proof
+
+- Baseline run `n1403` (`3e73da751bd457d9`): `rs_1st_podrinje` and `rs_5th_podrinje` both finished at `op:banja_luka:banja_luka_2` with `assignment = null`, but both still carried live movement orders toward home even though no friendly path home existed.
+- Post-fix run `n1404` (`dbd50f6e5aaacb95`): the same two brigades still finish at `op:banja_luka:banja_luka_2` and still truthfully report under `brigade_far_from_home_unassigned`, but they no longer serialize any movement order or movement state.
+- The hardening is therefore real and scoped: this lane removed a false movement owner from the final save while leaving the genuine strandedness visible for the next bounded lane.
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260409_UNREACHABLE_DRIFT_RECALL_OWNER_CLEANUP.md`
+
+---

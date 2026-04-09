@@ -161,4 +161,30 @@ describe('recallDriftedBrigades', () => {
             stance: 'column',
         });
     });
+
+    it('clears a stale move order when the brigade is ownerless but has no friendly path home', () => {
+        const state = makeState({ movementOrder: 'op:donji_vakuf:pribraca_2' });
+        const controllers = state.political.political_controllers as Record<string, string>;
+        controllers['op:doboj:doboj_2'] = 'RBiH';
+        controllers['op:tuzla:tuzla_2'] = 'RBiH';
+        controllers['op:zvornik:zvornik_2'] = 'RBiH';
+        controllers['op:rogatica:pljesevica'] = 'RBiH';
+
+        recallDriftedBrigades(state, makeAdjacency());
+
+        expect(state.military.brigade_movement_orders?.rs_1st_podrinje).toBeUndefined();
+    });
+
+    it('clears an impossible home-recall order when the brigade is ownerless and the route is unreachable', () => {
+        const state = makeState({ movementOrder: 'op:rogatica:rogatica_2' });
+        const controllers = state.political.political_controllers as Record<string, string>;
+        controllers['op:doboj:doboj_2'] = 'RBiH';
+        controllers['op:tuzla:tuzla_2'] = 'RBiH';
+        controllers['op:zvornik:zvornik_2'] = 'RBiH';
+        controllers['op:rogatica:pljesevica'] = 'RBiH';
+
+        recallDriftedBrigades(state, makeAdjacency());
+
+        expect(state.military.brigade_movement_orders?.rs_1st_podrinje).toBeUndefined();
+    });
 });
