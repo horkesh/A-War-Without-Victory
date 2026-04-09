@@ -463,3 +463,8 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - Accepted boundary after cleanup: live sector ownership from `corps_front_sectors` outranks stale operation membership. If a brigade has live sector claims and none belong to the operation corps, both `participating_brigades` and `axis.assigned_brigades` must drop it.
 - Pipeline rule: when operation truth needs to protect live execution, run that reconciliation before sector offensives advance, not only at final serialization. End-of-turn repair is too late if the live pipeline can still read stale rosters.
 
+**Closed: Drift Recall Ownership Precedence (2026-04-09)**
+- The residual seam after the cross-corps cleanup was no longer sector assignment; it was movement authority. `rs_1st_podrinje` and `rs_5th_podrinje` were already ownerless and outside truthful same-corps space, but stale generic movement orders still pointed them toward `op:donji_vakuf:pribraca_2`.
+- Accepted boundary after cleanup: late T6 repair (`recallDriftedBrigades(...)`) owns the final movement packet for an ownerless brigade that is outside same-corps sector space, not in an active operation, and not already marching home.
+- Narrowness rule: do not turn repair into a universal movement override. Same-corps brigades, active-operation brigades, and already-home recalls keep their existing owner. The override exists only where generic movement authority is already proven false.
+

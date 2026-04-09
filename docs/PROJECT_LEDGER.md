@@ -25449,3 +25449,39 @@ Main Staff HQ was Han Pijesak, not Rogatica. Tracked for OOB correction pass.
 - Report: `docs/40_reports/implemented/20260409_OPERATION_ROSTER_FOREIGN_SECTOR_TRUTH_HARDENING.md`
 
 ---
+
+## [2026-04-09] fix(engine): prioritize drift recall over generic ownerless movement
+
+**Type:** Engine hardening
+**Files:** `src/sim/turn_phases/war_phases.ts`, `tests/drift_recall_precedence.test.ts`, `docs/40_reports/implemented/20260409_DRIFT_RECALL_OWNERSHIP_PRECEDENCE_HARDENING.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/architect_notes.md`
+**Status:** VERIFIED - targeted regressions, fresh 40-week rerun, validator, recovery check, full Vitest, tsc, and build all green
+
+### Summary of changes
+
+1. **Late drift repair now owns stranded brigade movement when the brigade is truly ownerless** - `src/sim/turn_phases/war_phases.ts` adds `isWithinSameCorpsSectorSpace(...)` and lets `recallDriftedBrigades(...)` override stale generic move orders when a brigade is outside same-corps sector truth, has `assignment = null`, and is not already heading home.
+
+2. **The repair boundary is narrow instead of globally aggressive** - same-corps sector-space brigades, already-home recalls, and active-operation brigades keep their existing movement authority. This lane only reclaims movement packets for the specific ownerless-drift shape exposed by the Podrinje pair.
+
+3. **Movement-authority regressions are now explicit** - `tests/drift_recall_precedence.test.ts` locks the three-way contract: ownerless severe drift gets a home recall, same-corps brigades keep their move, and active-operation brigades stay under operation-owned movement.
+
+### Verification
+
+- `npx.cmd vitest run tests/drift_recall_precedence.test.ts tests/brigade_home_return.test.ts tests/elite_loan_return_to_corps.test.ts`
+- `npm.cmd run sim:scenario:run:40w` -> baseline `n1402`, post-fix `n1403`
+- `node tools/validate_run_consistency.cjs runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1403`
+- `npm.cmd run recovery:check`
+- `npm.cmd run test:vitest`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run build`
+
+### Scenario proof
+
+- Baseline run `n1402` (`701d14d32566c5b5`): `rs_1st_podrinje` and `rs_5th_podrinje` both finished at `op:banja_luka:banja_luka_2` with `assignment = null`, but their live movement orders still targeted `op:donji_vakuf:pribraca_2`. `brigade_far_from_home_unassigned` reported both brigades.
+- Post-fix run `n1403` (`3e73da751bd457d9`): the same two brigades still finish at `op:banja_luka:banja_luka_2` and still truthfully report under `brigade_far_from_home_unassigned`, but their live movement orders now point to their real homes (`op:rogatica:rogatica_2` and `op:vlasenica:sebiocina`).
+- The hardening is therefore real but scoped: the lane fixed movement ownership and removed the false generic destination, while honestly leaving the stranded final-state seam visible for the next lane.
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260409_DRIFT_RECALL_OWNERSHIP_PRECEDENCE_HARDENING.md`
+
+---

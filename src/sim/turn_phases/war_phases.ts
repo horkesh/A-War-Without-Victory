@@ -31,7 +31,7 @@ import { applyFormationCommitment } from '../../state/front_posture_commitment.j
 import { expandRegionPostureToEdges } from '../../state/front_posture_regions.js';
 import { accumulateFrontPressure } from '../../state/front_pressure.js';
 import { syncFrontSegments } from '../../state/front_segments.js';
-import { GameState, type FactionId, type LegacyBrigadeAoRState, type EffectivePostureExposureState } from '../../state/game_state.js';
+import { GameState, type FactionId, type FormationState, type LegacyBrigadeAoRState, type EffectivePostureExposureState } from '../../state/game_state.js';
 import { updateHeavyEquipmentState } from '../../state/heavy_equipment.js';
 import { updateLegitimacyState } from '../../state/legitimacy.js';
 import { ensureMaintenanceCapacity } from '../../state/maintenance.js';
@@ -2715,9 +2715,45 @@ export const warPhases: NamedPhase[] = [
  */
 const DRIFT_RECALL_MAX_HOPS = 4;
 
-function recallDriftedBrigades(state: GameState, adjacency?: Map<string, string[]>): void {
+function isWithinSameCorpsSectorSpace(
+    formation: FormationState,
+    state: GameState,
+    adjacency: Map<string, string[]>,
+    politicalControllers: Record<string, string>,
+): boolean {
+    const corpsId = formation.elite_loan_state?.on_loan
+        ? formation.elite_loan_state.loaned_to_corps
+        : formation.corps_id;
+    const loc = formation.location_osid;
+    if (!corpsId || !loc) return false;
+
+    for (const sector of Object.values(state.military.corps_front_sectors ?? {})) {
+        if (sector.corps_id !== corpsId) continue;
+        if ((sector.territory_osids ?? []).includes(loc)) return true;
+
+        const frontSet = new Set<string>();
+        for (const seg of sector.sub_segments ?? []) {
+            for (const osid of seg.friendly_osids ?? []) {
+                frontSet.add(osid);
+                if (osid === loc) return true;
+            }
+        }
+
+        if (politicalControllers[loc] !== formation.faction) continue;
+        for (const frontOsid of frontSet) {
+            for (const neighbor of adjacency.get(frontOsid) ?? []) {
+                if (neighbor === loc) return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+export function recallDriftedBrigades(state: GameState, adjacency?: Map<string, string[]>): void {
     if (!adjacency || adjacency.size === 0) return;
     const formations = state.military.formations ?? {};
+    const pc = (state.political.political_controllers ?? {}) as Record<string, string>;
 
     // Build set of brigades in active operations
     const inOp = new Set<string>();
@@ -2749,7 +2785,6 @@ function recallDriftedBrigades(state: GameState, adjacency?: Map<string, string[
         if (f.home_osid === f.location_osid) continue;
         if (inOp.has(fid)) continue;
         if ((f.disrupted_turns ?? 0) > 0) continue;
-        if (moveOrders[fid]) continue; // already has movement orders
         // Sector-line-assigned brigades belong at the front — do not recall them home.
         // Matches evaluateHomeReturn's line-assigned filter.
         if (lineAssigned.has(fid)) continue;
@@ -2758,10 +2793,19 @@ function recallDriftedBrigades(state: GameState, adjacency?: Map<string, string[
         // Raw adjacency sees sela_2→mostar as 3 hops (through RS territory),
         // but the friendly path is 8-10 hops. Using raw distance let brigades
         // trapped in enemy pockets appear "close to home" and skip recall.
-        const pc = (state.political.political_controllers ?? {}) as Record<string, string>;
         const faction = f.faction;
         const dist = bfsFriendlyDistance(f.home_osid, f.location_osid, adj, pc, faction ?? '', DRIFT_RECALL_MAX_HOPS + 1);
         if (dist <= DRIFT_RECALL_MAX_HOPS) continue;
+
+        const existingOrder = moveOrders[fid];
+        if (existingOrder) {
+            const existingDest = existingOrder.destination_sids?.[0];
+            const isOwnerless = (f.assignment ?? null) == null;
+            const outsideOwnCorpsSpace = !isWithinSameCorpsSectorSpace(f, state, adj, pc);
+            if (!isOwnerless || !outsideOwnCorpsSpace || existingDest === f.home_osid) {
+                continue;
+            }
+        }
 
         // Brigade is too far from home — recall
         moveOrders[fid] = {
