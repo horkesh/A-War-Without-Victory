@@ -443,3 +443,8 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - `createStateFromScenario(...)` default desktop path now consumes that shared builder directly instead of going through `runScenario(...)` and re-reading harness artifacts. This keeps desktop/harness startup truth aligned while removing product dependence on harness artifact generation.
 - This lane was the builder-boundary prerequisite for later snapshot productization. It removed the harness dependency first, then left the repo ready for a product-owned baked startup artifact on top of that boundary.
 
+**Closed: Operation Roster Foreign-Sector Truth (2026-04-09)**
+- The live seam was in `final_operation_truth_reconciliation.ts`: active operations could keep a brigade on their flat roster and axis roster even after live sector truth had attached that brigade to a different same-faction corps.
+- Accepted boundary after cleanup: live sector ownership from `corps_front_sectors` outranks stale operation membership. If a brigade has live sector claims and none belong to the operation corps, both `participating_brigades` and `axis.assigned_brigades` must drop it.
+- Pipeline rule: when operation truth needs to protect live execution, run that reconciliation before sector offensives advance, not only at final serialization. End-of-turn repair is too late if the live pipeline can still read stale rosters.
+

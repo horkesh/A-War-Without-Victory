@@ -143,4 +143,82 @@ describe('reconcileFinalOperationTruth', () => {
         expect(op.recovery_reason).toBe('brigade_attrition');
         expect(op.phase_started_turn).toBe(12);
     });
+
+    it('drops participants whose only live sector claim belongs to a different corps', () => {
+        const state = makeState();
+        state.military.formations = {
+            b_same: makeFormation({
+                id: 'b_same',
+                faction: 'RS',
+                corps_id: 'test_corps',
+                location_osid: 'front_truth',
+                home_osid: 'front_truth',
+                status: 'active',
+            }),
+            b_foreign: makeFormation({
+                id: 'b_foreign',
+                faction: 'RS',
+                corps_id: 'test_corps',
+                location_osid: 'foreign_front',
+                home_osid: 'foreign_front',
+                status: 'active',
+            }),
+        };
+        state.military.corps_front_sectors = {
+            truth: makeSector({
+                sector_id: 'sector:test:truth',
+                corps_id: 'test_corps',
+                assigned_brigade_ids: ['b_same'],
+                territory_osids: ['front_truth'],
+                friendly_osids: ['front_truth'],
+                edge_ids: ['front_truth__enemy'],
+            }),
+            foreign: makeSector({
+                sector_id: 'sector:foreign:0',
+                corps_id: 'foreign_corps',
+                assigned_brigade_ids: ['b_foreign'],
+                territory_osids: ['foreign_front'],
+                friendly_osids: ['foreign_front'],
+                edge_ids: ['foreign_front__enemy'],
+            }),
+        };
+        state.military.corps_command = {
+            test_corps: {
+                active_operations: [{
+                    name: 'Operation Truth',
+                    type: 'sector_attack',
+                    phase: 'planning',
+                    started_turn: 10,
+                    phase_started_turn: 10,
+                    participating_brigades: ['b_foreign', 'b_same'],
+                    sector_id: 'sector:test:truth',
+                    axes: [
+                        {
+                            axis_id: 'axis:test',
+                            name: 'Main Axis',
+                            assigned_brigades: ['b_foreign', 'b_same'],
+                            objectives: ['enemy'],
+                            current_objective_index: 0,
+                            status: 'executing',
+                            failure_count: 0,
+                            consecutive_failures_on_current: 0,
+                            momentum: 0,
+                            attack_attempt_count: 0,
+                            objective_capture_count: 0,
+                            movement_only_execution_turns: 0,
+                            idle_execution_turn_streak: 0,
+                        },
+                    ],
+                    objectives: ['enemy'],
+                }],
+            } as any,
+        };
+
+        reconcileFinalOperationTruth(state);
+
+        const op = state.military.corps_command!.test_corps.active_operations[0];
+        expect(op.participating_brigades).toEqual(['b_same']);
+        expect(op.axes?.[0]?.assigned_brigades).toEqual(['b_same']);
+        expect(op.sector_id).toBe('sector:test:truth');
+    });
 });

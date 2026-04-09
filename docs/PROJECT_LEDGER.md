@@ -25282,3 +25282,40 @@ Main Staff HQ was Han Pijesak, not Rogatica. Tracked for OOB correction pass.
 - Report: `docs/40_reports/implemented/20260409_MILITARY_REVIEW_SHELL_COHERENCE_HARDENING.md`
 
 ---
+
+## [2026-04-09] fix(engine): align operation rosters with live foreign-sector truth
+
+**Type:** Engine hardening
+**Files:** `src/sim/combat/final_operation_truth_reconciliation.ts`, `src/sim/turn_phases/war_phases.ts`, `tests/final_operation_truth_reconciliation.test.ts`, `tests/war_phase_step_order.test.ts`, `docs/40_reports/implemented/20260409_OPERATION_ROSTER_FOREIGN_SECTOR_TRUTH_HARDENING.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/architect_notes.md`
+**Status:** VERIFIED - targeted regressions, fresh 40-week rerun, recovery check, full Vitest, tsc, and build all green
+
+### Summary of changes
+
+1. **Live sector truth now outranks stale operation roster membership** - `src/sim/combat/final_operation_truth_reconciliation.ts` now derives deterministic brigade sector claims from `corps_front_sectors` and drops any operation participant whose only live sector claims belong to a different corps. The same rule now updates both `participating_brigades` and `axis.assigned_brigades`.
+
+2. **Roster cleanup became a live war-phase authority, not only an end-of-turn repair** - `src/sim/turn_phases/war_phases.ts` now runs `reconcile-live-operation-truth` immediately before `advance-sector-offensives`, so stale cross-corps roster drift is cleaned during live execution rather than being tolerated until final serialization.
+
+3. **The phase contract now names the new authority explicitly** - `tests/final_operation_truth_reconciliation.test.ts` locks the exact foreign-sector participant seam, and `tests/war_phase_step_order.test.ts` now requires the live reconciliation step to run between `jna-phantom-withdrawals` and `advance-sector-offensives`.
+
+### Verification
+
+- `npx.cmd vitest run tests/final_operation_truth_reconciliation.test.ts`
+- `npx.cmd vitest run tests/final_operation_truth_reconciliation.test.ts tests/operation_lifecycle_assertion.test.ts`
+- `npx.cmd vitest run tests/war_phase_step_order.test.ts`
+- `npm.cmd run sim:scenario:run:40w` -> baseline `n1398`, post-fix `n1399`
+- `npm.cmd run recovery:check`
+- `npm.cmd run test:vitest`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run build`
+
+### Scenario proof
+
+- Baseline run `n1398`: `Operation Podrinje Sweep` still listed `rs_5th_podrinje` in its turn-5-through-turn-9 `participating_brigades` even though the final save attached that brigade to `sector:vrs_1st_krajina:1`; `cross_corps_sector_assignment` reported `2` brigades (`arbih_717th_slavna_mountain`, `rs_5th_podrinje`).
+- Post-fix run `n1399`: `Operation Podrinje Sweep` drops `rs_5th_podrinje` from turn 5 onward, the brigade ends the run with `assignment: null` instead of a foreign-sector attachment, and `cross_corps_sector_assignment` falls to `1`, leaving only `arbih_717th_slavna_mountain`.
+- Runtime health stayed honest and stable across both runs: `invalid_operation_count: 0`, `zero_eligible_attacker_operation_count: 0`, and `recovery_without_logged_attempt_count: 0` before and after. This lane hardened ownership truth rather than hiding causality failure behind cleaner wording.
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260409_OPERATION_ROSTER_FOREIGN_SECTOR_TRUTH_HARDENING.md`
+
+---

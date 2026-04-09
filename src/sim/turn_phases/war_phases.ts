@@ -785,6 +785,13 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'reconcile-live-operation-truth',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            reconcileFinalOperationTruth(context.state);
+        }
+    },
+    {
         name: 'advance-sector-offensives',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;

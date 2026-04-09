@@ -35,6 +35,10 @@ describe('war-phase step ordering', () => {
         // Operation casualties must be attributed after attacks resolve
         assertBefore('resolve-attack-orders', 'attribute-operation-casualties');
 
+        // Live operation rosters must be reconciled before sector offensives advance
+        assertBefore('jna-phantom-withdrawals', 'reconcile-live-operation-truth');
+        assertBefore('reconcile-live-operation-truth', 'advance-sector-offensives');
+
         // Warlord friction and officer maturity run after officer succession
         assertBefore('officer-succession', 'check-warlord-friction');
         assertBefore('officer-succession', 'update-faction-officer-maturity');
@@ -102,8 +106,9 @@ describe('war-phase step ordering', () => {
         // +1 from generate-level1-proposals (v0.8.4 Phase C: Level 1 Assisted stance proposals)
         // +1 from generate-level1-op-proposals (v0.8.4 Phase D: Level 1 Assisted op-planning proposals)
         // +1 from reconcile-final-sector-truth (final end-of-turn sector authority rebuild)
+        // +1 from reconcile-live-operation-truth (live operation roster cleanup before sector offensives advance)
         // +1 from reconcile-final-operation-truth (final end-of-turn operation authority rebuild)
         // +1 from assert-final-operation-lifecycle (late lifecycle seal after final reconciliation)
-        expect(stepNames.length).toBe(157);
+        expect(stepNames.length).toBe(158);
     });
 });
