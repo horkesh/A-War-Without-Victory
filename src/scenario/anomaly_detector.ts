@@ -14,6 +14,7 @@ import { strictCompare } from '../state/validateGameState.js';
 import type { AnomalyReport } from './anomaly_types.js';
 import { checkMoraleCollapseCluster, checkZeroCombatCorps, checkOrphanOperationBrigades, checkGhostParamilitaryPersonnel, checkOffensiveIntelBlindness, checkWeakerFactionAttackImbalance, checkUndefendedPaintedMismatch, checkAdjacentUncontestedTerritory } from './anomaly_checks_extended.js';
 import { isSectorAssignmentExemptCorpsId } from '../sim/combat/corps_front_sectors_constants.js';
+import { isSectorColdFront } from '../sim/combat/sector_utils.js';
 
 // ── Helpers ────────────────────────────────────────────────────────────
 
@@ -912,6 +913,7 @@ function detectFrontlineDensityImbalance(state: GameState): AnomalyReport[] {
     for (const sectorId of sortedKeys(sectors as Record<string, unknown>)) {
         const sector = sectors[sectorId];
         if (sector.edge_ids.length === 0) continue;
+        if (isSectorColdFront(state, sector)) continue;
         const faction = sector.faction;
         if (!factionSectors[faction]) factionSectors[faction] = [];
         factionSectors[faction].push({

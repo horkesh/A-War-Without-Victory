@@ -647,8 +647,9 @@ Patch bumps (0.X.1, 0.X.2) are for significant fixes within a milestone â€”
   - `zero_combat_corps` now respects Graz cold-front truth (`n1409`)
   - territorial warnings now respect canonical sector coverage (`n1410`)
   - `brigade_stacking` now respects same-sector frontline coverage truth (`n1412`)
+  - `frontline_density_imbalance` now excludes Graz cold-front sectors before computing faction density outliers (`n0`)
 - Still active:
-  - residual anomaly certainty / wording hardening around `frontline_density_imbalance`, territorial residuals, and `brigade_never_fights`
+  - residual anomaly certainty / wording hardening around `brigade_never_fights` and the remaining territorial residuals
 - Demoted / redesign-blocked:
   - same-faction ownerless unreachable brigades (`rs_1st_podrinje`, `rs_5th_podrinje`)
 - Investigated and demoted to realism/doctrine:
