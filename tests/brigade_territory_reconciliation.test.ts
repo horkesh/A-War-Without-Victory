@@ -757,7 +757,7 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
         expect(sector2.reserve_brigade_ids).not.toContain('brig_trapped');
     });
 
-    it('assigns an enclave defender when its corps has no sector in the brigade component', () => {
+    it('does not assign a brigade cross-corps when its corps has no sector in the brigade component', () => {
         const homeCorpsSector = makeSector(
             'sector:vrs_drina:0',
             'vrs_drina',
@@ -795,7 +795,7 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
             componentOf,
         );
 
-        expect(enclaveSector.assigned_brigade_ids).toContain('brig_enclave');
+        expect(enclaveSector.assigned_brigade_ids).not.toContain('brig_enclave');
         expect(homeCorpsSector.assigned_brigade_ids).not.toContain('brig_enclave');
     });
 
@@ -1183,7 +1183,7 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
         expect(ownCorpsSector.reserve_brigade_ids).not.toContain('brig_drifted');
     });
 
-    it('rehome DOES assign genuine enclave brigade whose home_osid is NOT in own-corps territory', () => {
+    it('rehome does not assign a foreign-corps enclave brigade whose home_osid is NOT in own-corps territory', () => {
         const foreignCorpsSector = makeSector(
             'sector:vrs_2nd_krajina:0',
             'vrs_2nd_krajina',
@@ -1215,7 +1215,7 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
             friendlyOsids,
         );
 
-        // Genuine enclave brigade SHOULD be rehomed to the sector covering its location
-        expect(foreignCorpsSector.assigned_brigade_ids).toContain('brig_enclave');
+        expect(foreignCorpsSector.assigned_brigade_ids).not.toContain('brig_enclave');
+        expect(foreignCorpsSector.reserve_brigade_ids).not.toContain('brig_enclave');
     });
 });

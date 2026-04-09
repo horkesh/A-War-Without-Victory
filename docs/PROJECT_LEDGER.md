@@ -1,3 +1,45 @@
+## [2026-04-09] fix(engine): forbid final non-elite cross-corps field-brigade sector ownership (n1400)
+
+**Type:** Engine hardening
+**Files:** `src/sim/combat/brigade_assignment.ts`, `tests/brigade_territory_reconciliation.test.ts`
+**Run:** n1400 — hash `701d14d32566c5b5`
+**Status:** VERIFIED — targeted tests, 40-week rerun, recovery bar, full vitest, typecheck, and build all clean
+
+### Summary of changes
+
+1. **Legacy foreign-corps rescue demoted** — `assignCrossCorpsEnclaveDefenders(...)` is now an explicit no-op for non-elite field brigades. The repo no longer launders displaced brigades into another corps's sector without an explicit attachment owner.
+
+2. **Final rehome is same-corps only** — `rehomeUnassignedBrigadesToPhysicalSectorOwners(...)` now filters candidate sectors to the brigade's resolved corps before ranking front / territory / reserve claims.
+
+3. **Regression contract updated** — `tests/brigade_territory_reconciliation.test.ts` now locks the strict rule in place by asserting that both prior foreign-corps rescue paths stay empty even for a same-faction enclave-style brigade.
+
+### Scenario proof
+
+- Baseline: `runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1399`
+  - `end_report.md` contained `[cross_corps_sector_assignment] 1 brigade(s)... arbih_717th_slavna_mountain ... in sector sector:arbih_1st_corps:3`
+  - final save had `arbih_717th_slavna_mountain.corps_id = arbih_3rd_corps` but `assignment.sector_id = sector:arbih_1st_corps:3`
+
+- Post-fix: `runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1400`
+  - `end_report.md` no longer contains `cross_corps_sector_assignment`
+  - final save has `arbih_717th_slavna_mountain.assignment.sector_id = sector:arbih_3rd_corps:4`
+  - residual truth is now `brigade_far_from_home`, not a false foreign-corps owner
+
+### Verification
+
+- `npx.cmd vitest run tests/brigade_territory_reconciliation.test.ts`
+- `npx.cmd vitest run tests/brigade_territory_reconciliation.test.ts tests/final_sector_truth_reconciliation.test.ts`
+- `npm.cmd run sim:scenario:run:40w`
+- `npm.cmd run recovery:check`
+- `npm.cmd run test:vitest`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run build`
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260409_STRICT_CROSS_CORPS_FIELD_BRIGADE_OWNERSHIP_HARDENING.md`
+
+---
+
 ## [2026-04-07] fix(calibration): DRINA investigation — initial controller fixes, Op Drina scope correction, painted target corrections (n1358)
 
 **Type:** Calibration fix + historical accuracy

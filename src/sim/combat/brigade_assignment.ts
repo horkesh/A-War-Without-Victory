@@ -842,11 +842,12 @@ export function classifyBrigadesByTerritory(
 }
 
 /**
- * Step 6b: Cross-corps enclave defense.
+ * Step 6b: Legacy enclave-rescue hook.
  *
- * After corps-strict assignment, some brigades are unassigned because they're
- * physically present in territory where the front edges belong to a different
- * corps's sector.
+ * Final cross-corps sector assignment for non-elite field brigades is
+ * forbidden. Until the sim grows an explicit non-elite attachment owner,
+ * leave these brigades unresolved so recall logic and diagnostics can treat
+ * them honestly instead of laundering them into another corps's sector.
  */
 export function assignCrossCorpsEnclaveDefenders(
     sectors: CorpsFrontSector[],
@@ -854,86 +855,10 @@ export function assignCrossCorpsEnclaveDefenders(
     faction: FactionId,
     componentOf: Map<string, number>,
 ): void {
-    const assigned = new Set<string>();
-    for (const s of sectors) {
-        for (const bid of s.assigned_brigade_ids) assigned.add(bid);
-        for (const bid of s.reserve_brigade_ids ?? []) assigned.add(bid);
-    }
-
-    const frontOsidToSectors = new Map<string, number[]>();
-    for (let i = 0; i < sectors.length; i++) {
-        for (const ss of sectors[i]!.sub_segments) {
-            for (const o of ss.friendly_osids) {
-                const existing = frontOsidToSectors.get(o);
-                if (existing) { if (!existing.includes(i)) existing.push(i); }
-                else frontOsidToSectors.set(o, [i]);
-            }
-        }
-    }
-
-    const territoryOsidToSectors = new Map<string, number[]>();
-    for (let i = 0; i < sectors.length; i++) {
-        for (const o of sectors[i]!.territory_osids) {
-            const existing = territoryOsidToSectors.get(o);
-            if (existing) { if (!existing.includes(i)) existing.push(i); }
-            else territoryOsidToSectors.set(o, [i]);
-        }
-    }
-
-    const sortedFormIds = Object.keys(formations).sort(strictCompare);
-    for (const fid of sortedFormIds) {
-        if (assigned.has(fid)) continue;
-        const f = formations[fid];
-        if (!f || f.faction !== faction || f.status !== 'active') continue;
-        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
-        if (!f.location_osid) continue;
-        const fCorpsId = getFormationCorpsId(f);
-        if (isSectorAssignmentExemptCorpsId(fCorpsId)) continue;
-
-        const loc = f.location_osid;
-        const ownCorpsSectors = sectors.filter(s => s.corps_id === fCorpsId);
-        const brigComp = componentOf.get(loc) ?? -2;
-        const ownCorpsHasSectorInComponent = ownCorpsSectors.some((s) => getSectorComponent(s, componentOf) === brigComp);
-        if (ownCorpsHasSectorInComponent) continue;
-
-        // Drifted-brigade gate: if the brigade's home_osid is still claimed by
-        // any own-corps sector (territory_osids), its home municipality hasn't
-        // been lost — it has merely drifted away from home. Assigning it to a
-        // foreign corps sector corrupts that sector's density and AI data.
-        // Let the normal recall mechanisms (evaluateHomeReturn,
-        // recall-drifted-brigades) pull it back instead.
-        if (f.home_osid) {
-            const homeStillOwnCorps = ownCorpsSectors.some((s) =>
-                s.territory_osids.includes(f.home_osid!)
-            );
-            if (homeStillOwnCorps) continue;
-        }
-
-        let sectorIndices = frontOsidToSectors.get(loc);
-        if (!sectorIndices || sectorIndices.length === 0) {
-            sectorIndices = territoryOsidToSectors.get(loc);
-        }
-        const factionIndices = (sectorIndices ?? []).filter(idx => {
-            const s = sectors[idx]!;
-            return s.faction === faction
-                && getSectorComponent(s, componentOf) === brigComp;
-        });
-        const candidateIndices = factionIndices;
-        if (candidateIndices.length === 0) continue;
-
-        let bestIdx = candidateIndices[0]!;
-        let bestNeed = -Infinity;
-        for (const idx of candidateIndices) {
-            const s = sectors[idx]!;
-            const need = s.length_edges - s.assigned_brigade_ids.length;
-            if (need > bestNeed || (need === bestNeed && strictCompare(s.sector_id, sectors[bestIdx]!.sector_id) < 0)) {
-                bestNeed = need;
-                bestIdx = idx;
-            }
-        }
-        sectors[bestIdx]!.assigned_brigade_ids.push(fid);
-        assigned.add(fid);
-    }
+    void sectors;
+    void formations;
+    void faction;
+    void componentOf;
 }
 
 /**
@@ -1068,11 +993,12 @@ export function enforcePhysicalSectorOwnership(
 
 /**
  * Final canonical repair: if a brigade still has no sector after the late
- * writers have run, but some sector truthfully owns its current location,
- * attach it back to that sector.
+ * writers have run, but its own corps still has a sector that truthfully owns
+ * its current location, attach it back to that sector.
  *
  * This is not a permissive fallback. Candidates must already own the brigade's
- * current position by frontline, territory, or one-hop reserve truth.
+ * current position by frontline, territory, or one-hop reserve truth, and the
+ * final owner must match the brigade's resolved corps.
  */
 export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
     sectors: CorpsFrontSector[],
@@ -1130,20 +1056,19 @@ export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
 
         const candidates = sectorClaims
             .map(({ sector, frontSet, territorySet, oneHopBehind }) => {
+                if (sector.corps_id !== corpsId) return null;
                 let claim: 'front' | 'territory' | 'reserve' | null = null;
                 if (frontSet.has(locationOsid)) claim = 'front';
                 else if (territorySet.has(locationOsid)) claim = 'territory';
                 else if (oneHopBehind.has(locationOsid)) claim = 'reserve';
                 if (!claim) return null;
                 const claimRank = claim === 'front' ? 0 : claim === 'territory' ? 1 : 2;
-                const sameCorps = sector.corps_id === corpsId ? 0 : 1;
                 const load = sector.assigned_brigade_ids.length + sector.reserve_brigade_ids.length;
-                return { sector, claim, claimRank, sameCorps, load };
+                return { sector, claim, claimRank, load };
             })
-            .filter((x): x is { sector: CorpsFrontSector; claim: 'front' | 'territory' | 'reserve'; claimRank: number; sameCorps: number; load: number } => x != null)
+            .filter((x): x is { sector: CorpsFrontSector; claim: 'front' | 'territory' | 'reserve'; claimRank: number; load: number } => x != null)
             .sort((a, b) =>
-                a.sameCorps - b.sameCorps
-                || a.claimRank - b.claimRank
+                a.claimRank - b.claimRank
                 || a.load - b.load
                 || strictCompare(a.sector.sector_id, b.sector.sector_id)
             );

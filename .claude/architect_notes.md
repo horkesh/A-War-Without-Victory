@@ -36,6 +36,11 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Active / Recent Accepted Lanes
 
+- **Strict non-elite cross-corps field-brigade ownership** — CLOSED 2026-04-09. Repo contract conflict resolved in favor of strict ownership: non-elite field brigades may not finish in another corps's sector. `assignCrossCorpsEnclaveDefenders(...)` is now a deliberate no-op for field brigades, and `rehomeUnassignedBrigadesToPhysicalSectorOwners(...)` only reattaches to same-corps sector truth. Scenario proof: `n1399` ended with `[cross_corps_sector_assignment] ... arbih_717th_slavna_mountain ... in sector:arbih_1st_corps:3`; `n1400` removes that anomaly and returns the brigade to `sector:arbih_3rd_corps:4`. Residual truth is now honest drift (`brigade_far_from_home`), not a fake foreign-corps owner. Report: `docs/40_reports/implemented/20260409_STRICT_CROSS_CORPS_FIELD_BRIGADE_OWNERSHIP_HARDENING.md`.
+  - **Canonical owner after cleanup:** brigade's resolved corps, or unresolved drift when no same-corps sector truth exists.
+  - **Demoted path:** legacy enclave-rescue fallback for non-elite field brigades.
+  - **Next lane:** brigade drift / home-return truth for far-from-home formations (`arbih_717th_slavna_mountain` class).
+
 - **v0.8.x-final Command Authority Cleanup — COMPLETE 2026-04-07.** 28 files annotated with T1-T6 movement authority tiers and canonical/transitional ownership blocks. `docs/20_engineering/MOVEMENT_AUTHORITY.md` created (six-tier table, file classification, pipeline steps). RS blitz probe exemption replaced with data-driven `DoctrinePhase.probe_exempt`. `RS_BLITZ_PHASE_END_WEEK` constant deleted. Sarajevo comms override moved to scenario JSON. 3 new test suites (15 tests total). 6 UI surfaces verified clean. tsc/vitest/build clean. Calibration n1359: 27/27 anchors held.
   - **T1 prepositioning exception:** `commander_loop.ts` writes `brigade_movement_orders` for surplus prepositioning — bounded exception (planning artifact, not runtime authority conflict). Documented in annotation.
   - **Deferred:** `brigade_assignment.ts` annotation pending Codex branch merge (`feature/hrhb-rbih-war-transition`).
