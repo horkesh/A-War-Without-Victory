@@ -277,6 +277,90 @@ describe('ensureMinimumSectorCoverage — Lane B pre-pass (territory membership)
     });
 
     /**
+     * Test 2b (FAILS before fix):
+     * The candidate brigade sits on a front OSID shared by donor and zeroChild.
+     * The pre-pass may transfer it only when the donor still retains its own
+     * hostile-edge floor after donation. This mirrors the live split-child
+     * overlap seam from the density audit.
+     */
+    it('rescues a zero-brigade shared-front child when the donor keeps its hostile-edge floor', () => {
+        const donorSs = makeSubSeg(
+            'ss_donor',
+            ['op:municipality:osid_1', 'op:municipality:osid_shared'],
+            ['op:enemy:e1', 'op:enemy:e2'],
+            2,
+        );
+        const donor = makeSector({
+            sectorId: 'sector:vrs_krajina:donor',
+            corpsId: 'vrs_krajina',
+            subSegments: [donorSs],
+            territoryOsids: [
+                'op:municipality:osid_1',
+                'op:municipality:osid_shared',
+                'op:municipality:osid_rear',
+            ],
+            assignedBrigadeIds: ['bde_front', 'bde_shared', 'bde_rear'],
+            lengthEdges: 2,
+        });
+
+        const zeroChildSs = makeSubSeg(
+            'ss_zero',
+            ['op:municipality:osid_shared'],
+            ['op:enemy:e3', 'op:enemy:e4', 'op:enemy:e5', 'op:enemy:e6'],
+            4,
+        );
+        const zeroChild = makeSector({
+            sectorId: 'sector:vrs_krajina:zero',
+            corpsId: 'vrs_krajina',
+            subSegments: [zeroChildSs],
+            territoryOsids: ['op:municipality:osid_shared'],
+            assignedBrigadeIds: [],
+            lengthEdges: 4,
+        });
+
+        const formations: Record<FormationId, FormationState> = {
+            bde_front: makeFormation('bde_front', {
+                corps_id: 'vrs_krajina',
+                location_osid: 'op:municipality:osid_1',
+            }),
+            bde_shared: makeFormation('bde_shared', {
+                corps_id: 'vrs_krajina',
+                location_osid: 'op:municipality:osid_shared',
+            }),
+            bde_rear: makeFormation('bde_rear', {
+                corps_id: 'vrs_krajina',
+                location_osid: 'op:municipality:osid_rear',
+            }),
+        };
+
+        const adjacency = makeAdjacency([
+            ['op:municipality:osid_1', 'op:municipality:osid_shared'],
+            ['op:municipality:osid_1', 'op:municipality:osid_rear'],
+        ]);
+        const friendlyOsids = new Set([
+            'op:municipality:osid_1',
+            'op:municipality:osid_shared',
+            'op:municipality:osid_rear',
+        ]);
+        const componentOf = makeComponentOf({
+            'op:municipality:osid_1': 0,
+            'op:municipality:osid_shared': 0,
+            'op:municipality:osid_rear': 0,
+        });
+
+        ensureMinimumSectorCoverage(
+            [donor, zeroChild],
+            formations,
+            adjacency,
+            friendlyOsids,
+            componentOf,
+        );
+
+        expect(zeroChild.assigned_brigade_ids).toEqual(['bde_shared']);
+        expect(donor.assigned_brigade_ids).toEqual(['bde_front', 'bde_rear']);
+    });
+
+    /**
      * Test 3 (guard — must hold before AND after fix):
      * Donor has exactly 1 brigade. The pre-pass must NOT strip it (donor-floor guard).
      */

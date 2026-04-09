@@ -1308,11 +1308,16 @@ export function ensureMinimumSectorCoverage(
 
         for (const zero of zeroFrontSectors) {
             const zeroTerritory = new Set(zero.territory_osids);
+            const zeroFrontOsids = getSectorFrontOsids(zero);
             if (zeroTerritory.size === 0) continue;
 
             // Collect (donor sector, brigade id) candidates: brigades physically in
             // the zero-child's territory that can be spared (donor retains ≥ 1).
-            const candidates: Array<{ donor: CorpsFrontSector; bid: FormationId }> = [];
+            const candidates: Array<{
+                donor: CorpsFrontSector;
+                bid: FormationId;
+                rescueKind: 'territory' | 'shared_front_overlap';
+            }> = [];
             for (const s of corpsSectors) {
                 if (s.sector_id === zero.sector_id) continue;
                 if (s.corps_id !== zero.corps_id) continue;
@@ -1323,16 +1328,23 @@ export function ensureMinimumSectorCoverage(
                     const f = formations[bid];
                     if (!f?.location_osid) continue;
                     if (!zeroTerritory.has(f.location_osid)) continue;  // not in zero-child territory
-                    if (donorFrontOsids.has(f.location_osid)) continue; // frontline-essential — skip
-                    candidates.push({ donor: s, bid });
+                    if (donorFrontOsids.has(f.location_osid)) {
+                        const donorRetainsEdgeFloor = s.assigned_brigade_ids.length > Math.max(1, s.length_edges);
+                        const sharedFrontOverlap = zeroFrontOsids.has(f.location_osid);
+                        if (!sharedFrontOverlap || !donorRetainsEdgeFloor) continue;
+                        candidates.push({ donor: s, bid, rescueKind: 'shared_front_overlap' });
+                        continue;
+                    }
+                    candidates.push({ donor: s, bid, rescueKind: 'territory' });
                 }
             }
 
             if (candidates.length === 0) continue;
 
-            // Best candidate: donor with most surplus (most brigades), ties by sector_id then bid.
+            // Best candidate: prefer pure territory rescues, then donor with most surplus.
             candidates.sort((a, b) =>
-                b.donor.assigned_brigade_ids.length - a.donor.assigned_brigade_ids.length
+                Number(a.rescueKind !== 'territory') - Number(b.rescueKind !== 'territory')
+                || b.donor.assigned_brigade_ids.length - a.donor.assigned_brigade_ids.length
                 || strictCompare(a.donor.sector_id, b.donor.sector_id)
                 || strictCompare(a.bid, b.bid)
             );

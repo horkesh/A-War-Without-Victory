@@ -193,27 +193,21 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - **Done means:** roadmap, architect board, and report trail agree on milestone status, next live lanes, accepted debt, and retained evidence; no lane is marked closed while those sources disagree.
 - **Plan:** `docs/plans/2026-04-06-studio-health-repo-truth-plan.md`
 
-### Split-Child Sector Assignment Routing — OPEN
-- **Symptom:** `sector:vrs_1st_krajina:8` has 4 hostile edges, 0 brigades, but 6 brigades at its front OSIDs assigned to sibling sectors :2 and :3.
-- **Root cause:** `ensureMinimumSectorCoverage` territory-membership pre-pass (`brigade_assignment.ts` lines 1276-1319) blocks transfers of frontline-essential brigades even when donor sector has surplus and recipient has zero coverage with hostile exposure. Same class as closed Lane B but different trigger: front-OSID overlap between siblings, not simple zero-assignment after split.
-- **Fix direction:** Relax the frontline-essential guard when (a) donor has brigades > hostile_edges, (b) recipient has 0 brigades + hostile_edges > 0, (c) brigade location_osid is in both sectors' territory.
-- **Owner:** sector-expert + systems-programmer
-- **Report:** `docs/40_reports/implemented/20260405_FRONTLINE_OCCUPANCY_DENSITY_AUDIT.md`
-
-### AAR Provenance Lane - OPEN
-- **Symptom:** `Operation Prijedor` and `Operation Visegrad` in `n1312` finalize as `success` with `total_attacks = 0`.
-- **Finding:** not a clean "not a bug." `operation_aar.ts` attributes objective-control changes to the active operation without tracking whether the capture came from combat, consolidation, or another control event.
-- **Scope:** AAR/export truth, not necessarily combat-logic truth.
-- **Owner:** `src/sim/combat/operation_aar.ts`
-- **Priority:** below Lane B, but explicitly tracked â€” do not dismiss these cases as rear-pocket consolidation by default.
+### Split-Child Sector Assignment Routing — CLOSED 2026-04-09
+- **Fix:** `ensureMinimumSectorCoverage(...)` now preserves the existing territory-membership rescue first, but can also rescue a zero-brigade split child from a shared front OSID when the donor retains its hostile-edge floor after donation. The guard is still narrow: same corps, same physical territory claim, shared front overlap only, deterministic candidate ordering.
+- **Tests:** `tests/sector_split_brigade_assignment.test.ts` now includes the failing-then-passing shared-front overlap regression; `tests/sector_coverage_truth_preservation.test.ts` and `tests/brigade_territory_reconciliation.test.ts` remained green.
+- **Scenario proof:** fresh 40-week proof improved from `n1396` -> `n1397`: `invalid_operation_count` 4 -> 2, `zero_eligible_attacker_operation_count` 3 -> 1, `brigade_far_from_home` 26/218 -> 25/218. Honest residual: this lane did not clear the remaining cross-corps or Podrinje / `arbih_224th_mountain` seams.
+- **Owner:** `src/sim/combat/brigade_assignment.ts`
+- **Report:** `docs/40_reports/implemented/20260409_SPLIT_CHILD_SHARED_FRONT_ROUTING_HARDENING.md`
 
 ## Next Priority Lanes
 
 1. **v0.8.4 Phase F — CLOSED 2026-04-07.** DRINA investigation complete: root cause proven (absent ARBiH Podrinje defensive ops), fixes applied (initial controllers, Op Drina scope, painted targets), remaining variance accepted with evidence (27/27 anchors, 93.6%). v0.8.4 ALL PHASES CLOSED. Next: v0.8.x-final command authority cleanup or v0.9 per MASTER_ROADMAP.
-2. **Studio Health / Repo Truth:** make the permanent lane real in operating practice — closeout gate, blindspot review, warning disposition, artifact policy, and evidence retention.
-3. **Split-child sector assignment routing:** bounded frontline coverage defect remains open; owner: sector-expert + systems-programmer.
-4. **AAR provenance follow-up:** zero-attack-success operations must distinguish combat capture from passive/external control changes. Owner: `src/sim/combat/operation_aar.ts`.
-5. **v0.8.x-final command authority cleanup:** operations singularity follow-through, movement ownership cleanup, and remaining canonical-owner retirements before `v0.9`.
+2. **Operation execution-quality follow-up:** fresh 40-week proof still shows `operation_zero_eligible_execution` / invalid combat-causality truth (`cmd_arbih_1st_corps_t18` in `n1397`). Owner: operation execution / combat-causality stack.
+3. **Military review shell coherence:** toolbar and Army HQ already key from `presidentialReviewQueue`, but `App.tsx` interrupt routing and `WarroomStatusBar.tsx` still read `pendingEventDecisions` directly. Owner: UI/read-model shell boundary.
+4. **Harness assignment-completeness validator drift:** `tools/validate_run_consistency.cjs` still hard-fails a broader doctrine than `brigadeRequiresSectorAssignment(...)` actually owns. Owner: scenario-harness diagnostics.
+5. **Studio Health / Repo Truth:** keep the permanent lane real in operating practice — closeout gate, blindspot review, warning disposition, artifact policy, and evidence retention.
+6. **v0.8.x-final command authority cleanup:** operations singularity follow-through, movement ownership cleanup, and remaining canonical-owner retirements before `v0.9`.
 
 ## Validation Gate Note
 

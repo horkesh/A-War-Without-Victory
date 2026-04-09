@@ -229,8 +229,8 @@ Plans: `docs/plans/2026-03-24-v082-autonomy-api-plan.md`, `docs/plans/2026-03-31
 
 These lanes matter to product truth or engine health, but they are not the current milestone driver. Keep them visible so they do not vanish into chat memory.
 
-- **AAR provenance** — `src/sim/combat/operation_aar.ts` still needs clearer attribution of combat capture vs passive/external control change.
-- **Split-child sector assignment routing** — bounded brigade assignment defect for zero-covered child sectors with hostile edges.
+- **Operation execution-quality follow-up** — fresh 40-week proof still shows `operation_zero_eligible_execution` / invalid combat-causality cases (`cmd_arbih_1st_corps_t18` in `n1397`) even after the split-child overlap routing fix.
+- **Harness assignment-completeness validator drift** — `tools/validate_run_consistency.cjs` still hard-fails broader "all brigades must be sector-assigned" cases than the sim's `brigadeRequiresSectorAssignment(...)` doctrine actually owns.
 - **Desktop New Game Start Snapshot** — desktop `New Game` birth state is now canonicalized onto the loaded-save contract, but it still boots from full scenario-source init instead of a baked campaign-start snapshot.
 - **Warroom React Shell Recovery / Feature Parity** — main desktop entry surface still needs parity/polish (modal behavior, shell cohesion, interactive room/map affordance).
 
@@ -551,7 +551,7 @@ These need design sessions before implementation. Preserved from the original ro
 | Victory conditions | Stub (roadmap-owned in v0.9.0) |
 | Diplomacy layer | Partial (patron pressure, alliance, IVP) |
 
-**Current:** 93.6% area-weighted calibration (n1358), 27/27 anchors, 6/6 benchmarks. 712 OSIDs. Political bot complete through Dayton branches (`v0.8.2`). Order interpretation complete through player-legible UX (`v0.8.3`). Autonomy review loop complete through high-stakes event gating and DRINA investigation (`v0.8.4` CLOSED 2026-04-07 — all phases 1, B, C, D, E, F complete). `v0.8.x-final` command authority cleanup plus the major startup/save-load, packaged-desktop, Warroom explanation-boundary, completed-operation AAR honesty, Army HQ presidential review queue coherence, Army Reserve request / presidential review boundary, Army Reserve urgency signaling / army-level attention contract, and Army Reserve severity legibility / critical request framing lanes are now closed. Next broad work: Army Reserve Cause Legibility / Why This Is Critical, then Warroom shell parity debt outside truth ownership, then `v0.9.0`. Active governance focus: keep roadmap truth, board truth, reports, and retained calibration evidence aligned through the permanent `Studio Health / Repo Truth` lane.
+**Current:** 93.6% area-weighted calibration (n1358), 27/27 anchors, 6/6 benchmarks. 712 OSIDs. Political bot complete through Dayton branches (`v0.8.2`). Order interpretation complete through player-legible UX (`v0.8.3`). Autonomy review loop complete through high-stakes event gating and DRINA investigation (`v0.8.4` CLOSED 2026-04-07 — all phases 1, B, C, D, E, F complete). `v0.8.x-final` command authority cleanup plus the major startup/save-load, packaged-desktop, Warroom explanation-boundary, completed-operation AAR honesty, Army HQ presidential review queue coherence, Army Reserve request / presidential review boundary, Army Reserve urgency signaling / army-level attention contract, Army Reserve severity legibility / critical request framing, and split-child shared-front routing lanes are now closed. Fresh 40-week proof (`n1397`) reduced `invalid_operation_count` from 4 to 2 and `zero_eligible_attacker_operation_count` from 3 to 1, but remaining high-value hardening is now concentrated in operation execution-quality follow-up and harness validator truth drift. Active governance focus: keep roadmap truth, board truth, reports, and retained calibration evidence aligned through the permanent `Studio Health / Repo Truth` lane.
 
 ---
 

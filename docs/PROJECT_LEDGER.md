@@ -25144,3 +25144,38 @@ Main Staff HQ was Han Pijesak, not Rogatica. Tracked for OOB correction pass.
 - Report: `docs/40_reports/implemented/20260408_OPERATION_PLANNING_CAMPAIGN_ORCHESTRATION_HARDENING.md`
 
 ---
+
+## [2026-04-09] fix(engine): Harden split-child shared-front sector routing
+
+**Type:** Engine hardening
+**Files:** `src/sim/combat/brigade_assignment.ts`, `tests/sector_split_brigade_assignment.test.ts`, `docs/40_reports/implemented/20260409_SPLIT_CHILD_SHARED_FRONT_ROUTING_HARDENING.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/architect_notes.md`
+**Status:** VERIFIED - targeted coverage, fresh 40w rerun, recovery check, full Vitest, tsc, and build all green
+
+### Summary of changes
+
+1. **Shared-front overlap exception in the territory-membership pre-pass** - `ensureMinimumSectorCoverage(...)` now keeps the existing low-risk territory rescue first, but can also move one brigade from a donor sector when the brigade sits on a front OSID shared with the zero-brigade child and the donor still retains its hostile-edge floor after donation.
+
+2. **Deterministic rescue ordering preserved** - candidate ordering now prefers ordinary territory rescues ahead of shared-front overlap rescues, then sorts by donor surplus, sector id, and brigade id. The lane relaxes the guard narrowly without weakening determinism or broadening transfer authority globally.
+
+3. **Regression proof added before implementation** - `tests/sector_split_brigade_assignment.test.ts` now locks the exact overlap seam with a failing-then-passing case: `rescues a zero-brigade shared-front child when the donor keeps its hostile-edge floor`.
+
+### Verification
+
+- `npx.cmd vitest run tests/sector_split_brigade_assignment.test.ts tests/sector_coverage_truth_preservation.test.ts tests/brigade_territory_reconciliation.test.ts`
+- `npm.cmd run sim:scenario:run:40w` -> baseline `n1396`, post-fix `n1397`
+- `npm.cmd run recovery:check`
+- `npm.cmd run test:vitest`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run build`
+
+### Scenario proof
+
+- Baseline run `n1396` (`922771c94560a967`): `invalid_operation_count: 4`, `zero_eligible_attacker_operation_count: 3`, `brigade_far_from_home: 26/218`
+- Post-fix run `n1397` (`165ac7e6b2ca5ba4`): `invalid_operation_count: 2`, `zero_eligible_attacker_operation_count: 1`, `brigade_far_from_home: 25/218`
+- Honest residuals: `cross_corps_sector_assignment` remains at 2; the Podrinje / `arbih_224th_mountain` unresolved-routing seam remains open; `sector:vrs_1st_krajina:8` still ends the run thin, so this lane hardened one routing deadlock class rather than the whole first-Krajina/Drina density problem.
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260409_SPLIT_CHILD_SHARED_FRONT_ROUTING_HARDENING.md`
+
+---
