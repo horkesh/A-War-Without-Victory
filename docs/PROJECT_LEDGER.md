@@ -25521,3 +25521,40 @@ Main Staff HQ was Han Pijesak, not Rogatica. Tracked for OOB correction pass.
 - Report: `docs/40_reports/implemented/20260409_UNREACHABLE_DRIFT_RECALL_OWNER_CLEANUP.md`
 
 ---
+
+## [2026-04-09] fix(engine): prune late ghost sectors after post-seal truth cleanup
+
+**Type:** Engine hardening
+**Files:** `src/sim/combat/corps_front_sectors.ts`, `tests/postmerge_ghost_sector_prune.test.ts`, `docs/40_reports/implemented/20260409_POSTSEAL_GHOST_SECTOR_PRUNE_HARDENING.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/architect_notes.md`
+**Status:** VERIFIED - targeted regressions, fresh 40-week rerun, validator, recovery check, full Vitest, tsc, and build all green
+
+### Summary of changes
+
+1. **Late ghost-sector cleanup became an explicit final-builder responsibility** - `src/sim/combat/corps_front_sectors.ts` now exposes `pruneGhostArtifactSectors(...)` and runs it after the second post-merge sealing pass in `buildCorpsFrontSectors(...)`, not only in the earlier faction-builder prune.
+
+2. **The prune boundary stays narrow and preserves real contested sectors** - only sectors with front edges but no `territory_osids`, no `assigned_brigade_ids`, and no `reserve_brigade_ids` are removed. Sectors that still own territory or brigades remain visible for later hardening instead of being hidden.
+
+3. **Regression coverage now locks the exact post-seal leak shape** - `tests/postmerge_ghost_sector_prune.test.ts` proves the live `n1405` ghost shape is pruned while real contested sectors with territory or brigades survive.
+
+### Verification
+
+- `npx.cmd vitest run tests/postmerge_ghost_sector_prune.test.ts`
+- `npx.cmd vitest run tests/sector_builder_sealing.test.ts tests/final_sector_truth_reconciliation.test.ts tests/sector_front_overlap_canonicalization.test.ts`
+- `npm.cmd run sim:scenario:run:40w` -> baseline `n1405`, post-fix `n1406`
+- `node tools/validate_run_consistency.cjs runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1406`
+- `npm.cmd run recovery:check`
+- `npm.cmd run test:vitest`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run build`
+
+### Proof
+
+- Baseline run `n1405` (`dbd50f6e5aaacb95`): `sector:arbih_1st_corps:8` survived final serialization with `assigned_brigade_ids = []`, `reserve_brigade_ids = []`, `territory_osids = []`, and `subseg:arbih_1st_corps:split1` `gap = true`, producing both `empty_contested_sector` and `undefended_front_subsegments`.
+- Post-fix run `n1406` (`b9d4706b45e36354`): `sector:arbih_1st_corps:8` no longer exists in final sector truth, and both anomaly lines disappear from `end_report.md`.
+- Residual runtime truth stayed honest: `brigade_far_from_home_unassigned` remained unchanged at `2/211` for the Podrinje pair, so this lane removed a false sector artifact rather than masking a different ownership problem.
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260409_POSTSEAL_GHOST_SECTOR_PRUNE_HARDENING.md`
+
+---

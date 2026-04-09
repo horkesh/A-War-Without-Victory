@@ -473,3 +473,8 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - Accepted boundary after cleanup: once `recallDriftedBrigades(...)` becomes the final movement owner for an ownerless brigade, it must prove home reachability before preserving or writing a recall order. If no friendly path exists, the repair must clear the packet and leave the unresolved stranded brigade visible.
 - Persistence rule: impossible orders are a lie even when they point at the "right" conceptual destination. Final-state movement truth must describe executable authority, not aspiration.
 
+**Closed: Post-Seal Ghost Sector Prune (2026-04-09)**
+- `buildFactionSectors(...)` already had the right ghost-artifact prune, but `buildCorpsFrontSectors(...)` still ran late ownership mutators after that point: sibling-front canonicalization, sealing, and misassignment relocation. Those passes could re-create an empty contested shell even after the earlier prune had fired.
+- Accepted boundary after cleanup: if a late sector mutator leaves a sector with front edges but no `territory_osids`, no `assigned_brigade_ids`, and no `reserve_brigade_ids`, the final sector builder must prune it again before sync/serialization. The shell is not a second-class warning surface; it is dead builder residue.
+- Architecture rule: whenever an authoritative builder has a late canonicalization phase after an earlier cleanup phase, rerun the narrow artifact-prune immediately before final sync. Do not assume an early prune stays true after later ownership rewrites.
+

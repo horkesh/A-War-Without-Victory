@@ -168,6 +168,7 @@ export function buildCorpsFrontSectors(
     sealMergedSectorTruth(result, state, formations, adjacency, spatial);
     relocateMisassignedBrigadesToTruthfulOwners(Object.values(result), state, formations, adjacency);
     sealMergedSectorTruth(result, state, formations, adjacency, spatial);
+    pruneGhostArtifactSectors(result);
 
     // Merge passes can zero density/power/threat when they union sectors. Refresh
     // metrics before we sync assignments back into formation truth.
@@ -237,6 +238,21 @@ function recomputeMetricsByFaction(
     }
     for (const [faction, factionSectors] of byFaction) {
         recomputeSectorPowerAndThreat(factionSectors, formations, faction, state);
+    }
+}
+
+export function pruneGhostArtifactSectors(sectors: Record<string, CorpsFrontSector>): void {
+    for (const sectorId of Object.keys(sectors).sort(strictCompare)) {
+        const sector = sectors[sectorId];
+        if (!sector) continue;
+        if (
+            sector.length_edges > 0
+            && sector.territory_osids.length === 0
+            && sector.assigned_brigade_ids.length === 0
+            && sector.reserve_brigade_ids.length === 0
+        ) {
+            delete sectors[sectorId];
+        }
     }
 }
 
@@ -965,11 +981,10 @@ function buildFactionSectors(
     recomputeSectorPowerAndThreat(sectors, formations, faction, state);
 
     // Final prune: remove ghost artifact sectors
-    const pruned = sectors.filter(s => {
+    const sectorMap = Object.fromEntries(sectors.map((sector) => [sector.sector_id, sector] as const));
+    pruneGhostArtifactSectors(sectorMap);
+    const pruned = Object.values(sectorMap).filter(s => {
         if (s.length_edges === 0) return false;
-        if (s.territory_osids.length === 0
-            && s.assigned_brigade_ids.length === 0
-            && s.reserve_brigade_ids.length === 0) return false;
         // Prune zero-brigade isolated sectors — ensureMinimumSectorCoverage already
         // exhausted all rescue attempts; no brigade can reach this sector.
         // Undefended territory will be captured by VRS via normal combat mechanics.
