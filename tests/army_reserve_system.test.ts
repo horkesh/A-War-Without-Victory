@@ -536,6 +536,60 @@ describe('evaluateArmyReserveAssignments', () => {
 });
 
 describe('generateArmyReserveRequests', () => {
+    it('preserves concrete sector-threat evidence when a thin front triggers a reserve request', () => {
+        const adj = chainAdj(6);
+        const elite = makeElite('arbih_guards', 'RBiH', 'op:mun:o1');
+        const frontline = {
+            id: 'arbih_1st_corps_bde_1',
+            faction: 'RBiH',
+            name: '1st Corps Brigade',
+            created_turn: 0,
+            status: 'active',
+            assignment: null,
+            personnel: 1200,
+            morale: 65,
+            cohesion: 55,
+            corps_id: 'arbih_1st_corps',
+            location_osid: 'op:mun:o3',
+            home_osid: 'op:mun:o3',
+        } as unknown as FormationState;
+
+        const state = makeState({
+            formations: {
+                arbih_guards: elite,
+                arbih_1st_corps_bde_1: frontline,
+            },
+            corps_command: {
+                arbih_1st_corps: {
+                    commander_reinforcement_requests: [],
+                    active_operations: [],
+                },
+            },
+            corps_front_sectors: {
+                sec_a: {
+                    corps_id: 'arbih_1st_corps',
+                    threat_ratio: 2.6,
+                    assigned_brigade_ids: ['arbih_1st_corps_bde_1'],
+                },
+            },
+            player_faction: 'RBiH',
+            turn: 10,
+        });
+
+        generateArmyReserveRequests(state, adj);
+
+        expect(state.military.pending_reserve_requests).toHaveLength(1);
+        expect(state.military.pending_reserve_requests?.[0]).toMatchObject({
+            corps_id: 'arbih_1st_corps',
+            faction: 'RBiH',
+            reason: 'defensive_gap',
+            provenance_driver: 'sector_threat',
+            sector_threat_ratio: 2.6,
+            sector_assigned_brigade_count: 1,
+            suggested_brigade_id: 'arbih_guards',
+        });
+    });
+
     it('turns commander reinforcement pressure into a real reserve request even without heuristic sector triggers', () => {
         const adj = chainAdj(6);
         const elite = makeElite('rs_1st_guards', 'RS', 'op:mun:o1');

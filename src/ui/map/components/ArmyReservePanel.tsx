@@ -13,6 +13,7 @@ import { getPanelRailStyle } from './panelRail';
 import {
     getArmyReserveAttentionSummary,
     getArmyReserveRequestCauseCopy,
+    getArmyReserveRequestEvidenceCopy,
     getArmyReserveRequestProvenanceCopy,
     getArmyReserveRequestSeverityCopy,
 } from '../utils/armyReserveSeverity';
@@ -257,6 +258,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                             {pendingRequests.map((req, idx) => {
                                 const severityCopy = getArmyReserveRequestSeverityCopy(req.priority);
                                 const causeCopy = getArmyReserveRequestCauseCopy(req);
+                                const evidenceCopy = getArmyReserveRequestEvidenceCopy(req);
                                 const provenanceCopy = getArmyReserveRequestProvenanceCopy(req);
                                 return (
                                     <div key={idx} className="bg-black/20 border border-panel-border/40 rounded p-2 space-y-2">
@@ -315,6 +317,20 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                             {provenanceCopy.detail}
                                         </div>
                                     </div>
+
+                                    {evidenceCopy && (
+                                        <div className="rounded border border-panel-border/30 bg-black/10 px-2 py-1.5">
+                                            <div className="text-[10px] font-semibold text-text-primary">
+                                                {evidenceCopy.label}
+                                            </div>
+                                            <div className="text-[10px] text-text-primary mt-0.5">
+                                                {evidenceCopy.summary}
+                                            </div>
+                                            <div className="text-[10px] text-text-secondary mt-0.5">
+                                                {evidenceCopy.detail}
+                                            </div>
+                                        </div>
+                                    )}
 
                                     {req.suggested_brigade_id && (
                                         <div className="text-[10px] text-text-secondary">

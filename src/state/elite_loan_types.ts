@@ -92,6 +92,10 @@ export interface ArmyReserveRequest {
     commander_request_brigades_needed?: number;
     /** Zone ID at the head of the commander reinforcement request queue. */
     commander_focus_zone_id?: string;
+    /** Threat ratio observed when a thin sector triggered this request. */
+    sector_threat_ratio?: number;
+    /** Number of brigades assigned to the threatened sector when the request fired. */
+    sector_assigned_brigade_count?: number;
     /** High-level purpose for Army CO review and player readability. */
     purpose?: ReserveRequestPurpose;
     /** Corps CO statement: why this loan is needed right now. */

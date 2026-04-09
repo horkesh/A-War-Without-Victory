@@ -2286,6 +2286,15 @@ function derivePendingReserveRequests(
                         : undefined,
                 commander_focus_zone_id:
                     typeof request.commander_focus_zone_id === 'string' ? request.commander_focus_zone_id : undefined,
+                sector_threat_ratio:
+                    typeof request.sector_threat_ratio === 'number' && Number.isFinite(request.sector_threat_ratio)
+                        ? request.sector_threat_ratio
+                        : undefined,
+                sector_assigned_brigade_count:
+                    typeof request.sector_assigned_brigade_count === 'number'
+                    && Number.isFinite(request.sector_assigned_brigade_count)
+                        ? request.sector_assigned_brigade_count
+                        : undefined,
                 purpose: request.purpose === 'offensive' || request.purpose === 'defensive' ? request.purpose : undefined,
                 why_needed: typeof request.why_needed === 'string' ? request.why_needed : undefined,
                 how_to_use: typeof request.how_to_use === 'string' ? request.how_to_use : undefined,
@@ -2333,6 +2342,8 @@ function deriveArmyReserveQueue({
         leadCriticalCommanderPriority: leadCriticalRequest?.commander_request_priority,
         leadCriticalCommanderBrigadesNeeded: leadCriticalRequest?.commander_request_brigades_needed,
         leadCriticalFocusZoneId: leadCriticalRequest?.commander_focus_zone_id,
+        leadCriticalThreatRatio: leadCriticalRequest?.sector_threat_ratio,
+        leadCriticalAssignedBrigadeCount: leadCriticalRequest?.sector_assigned_brigade_count,
         leadCriticalPurpose: leadCriticalRequest?.purpose,
         leadCriticalWhyNeeded: leadCriticalRequest?.why_needed,
         leadCriticalDescription: leadCriticalRequest?.description,

@@ -58,6 +58,8 @@ interface PresidentialToolbarProps {
         leadCriticalPurpose?: 'offensive' | 'defensive';
         leadCriticalWhyNeeded?: string;
         leadCriticalDescription?: string;
+        leadCriticalThreatRatio?: number;
+        leadCriticalAssignedBrigadeCount?: number;
     } | null;
     /** Whether any event has readiness > 50% of threshold. */
     pressureWarning: boolean;

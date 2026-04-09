@@ -401,6 +401,8 @@ export interface ArmyReserveQueueView {
     leadCriticalCommanderPriority?: 'critical' | 'high' | 'medium' | 'low';
     leadCriticalCommanderBrigadesNeeded?: number;
     leadCriticalFocusZoneId?: string;
+    leadCriticalThreatRatio?: number;
+    leadCriticalAssignedBrigadeCount?: number;
     leadCriticalPurpose?: 'offensive' | 'defensive';
     leadCriticalWhyNeeded?: string;
     leadCriticalDescription?: string;
@@ -750,6 +752,8 @@ export interface LoadedGameState {
         commander_request_priority?: 'critical' | 'high' | 'medium' | 'low';
         commander_request_brigades_needed?: number;
         commander_focus_zone_id?: string;
+        sector_threat_ratio?: number;
+        sector_assigned_brigade_count?: number;
         purpose?: 'offensive' | 'defensive';
         why_needed?: string;
         how_to_use?: string;

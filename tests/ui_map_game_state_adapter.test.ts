@@ -421,6 +421,8 @@ test('parseGameState derives an army-owned reserve queue summary without folding
                     commander_request_priority: 'critical',
                     commander_request_brigades_needed: 2,
                     commander_focus_zone_id: 'zone:arbih_1st_corps:sarajevo',
+                    sector_threat_ratio: 2.6,
+                    sector_assigned_brigade_count: 1,
                     purpose: 'defensive',
                     priority: 85,
                     description: 'Line in danger of collapse',
@@ -461,9 +463,23 @@ test('parseGameState derives an army-owned reserve queue summary without folding
         request_id: request.request_id,
         severityBand: request.severityBand,
         provenance_driver: request.provenance_driver,
+        sector_threat_ratio: request.sector_threat_ratio,
+        sector_assigned_brigade_count: request.sector_assigned_brigade_count,
     })), [
-        { request_id: 'reserve-critical-defense', severityBand: 'critical', provenance_driver: 'commander_request' },
-        { request_id: 'reserve-offensive', severityBand: 'routine', provenance_driver: undefined },
+        {
+            request_id: 'reserve-critical-defense',
+            severityBand: 'critical',
+            provenance_driver: 'commander_request',
+            sector_threat_ratio: 2.6,
+            sector_assigned_brigade_count: 1,
+        },
+        {
+            request_id: 'reserve-offensive',
+            severityBand: 'routine',
+            provenance_driver: undefined,
+            sector_threat_ratio: undefined,
+            sector_assigned_brigade_count: undefined,
+        },
     ]);
     assert.deepEqual(parsed.armyReserveQueue, {
         pendingCount: 2,
@@ -475,6 +491,8 @@ test('parseGameState derives an army-owned reserve queue summary without folding
         leadCriticalCommanderPriority: 'critical',
         leadCriticalCommanderBrigadesNeeded: 2,
         leadCriticalFocusZoneId: 'zone:arbih_1st_corps:sarajevo',
+        leadCriticalThreatRatio: 2.6,
+        leadCriticalAssignedBrigadeCount: 1,
         leadCriticalPurpose: 'defensive',
         leadCriticalWhyNeeded: undefined,
         leadCriticalDescription: 'Line in danger of collapse',

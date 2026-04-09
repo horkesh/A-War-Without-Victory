@@ -12,6 +12,8 @@ interface ArmyReserveProvenanceSource {
     commander_request_priority?: 'critical' | 'high' | 'medium' | 'low';
     commander_request_brigades_needed?: number;
     commander_focus_zone_id?: string;
+    sector_threat_ratio?: number;
+    sector_assigned_brigade_count?: number;
 }
 
 function getArmyReserveCauseSummary(source: ArmyReserveCauseSource): string {
@@ -63,6 +65,30 @@ function getArmyReserveProvenanceDetail(source: ArmyReserveProvenanceSource): st
     return 'Derived from the current reserve-generation pressure owned by Army HQ and corps command state.';
 }
 
+function getArmyReserveEvidenceSummary(source: ArmyReserveProvenanceSource): string | null {
+    if (
+        source.provenance_driver === 'sector_threat'
+        && typeof source.sector_threat_ratio === 'number'
+        && typeof source.sector_assigned_brigade_count === 'number'
+    ) {
+        return `Threat ratio ${source.sector_threat_ratio.toFixed(1)} with ${source.sector_assigned_brigade_count} brigade${source.sector_assigned_brigade_count === 1 ? '' : 's'} on the line triggered this reserve request.`;
+    }
+
+    return null;
+}
+
+function getArmyReserveEvidenceDetail(source: ArmyReserveProvenanceSource): string | null {
+    if (
+        source.provenance_driver === 'sector_threat'
+        && typeof source.sector_threat_ratio === 'number'
+        && typeof source.sector_assigned_brigade_count === 'number'
+    ) {
+        return 'Army HQ flagged this sector as too threatened for its current frontage.';
+    }
+
+    return null;
+}
+
 export function classifyArmyReserveSeverity(priority: number): ArmyReserveSeverityBand {
     return priority >= 75 ? 'critical' : 'routine';
 }
@@ -75,6 +101,8 @@ export function getArmyReserveToolbarSignal({
     leadCriticalCommanderPriority,
     leadCriticalCommanderBrigadesNeeded,
     leadCriticalFocusZoneId,
+    leadCriticalThreatRatio,
+    leadCriticalAssignedBrigadeCount,
     leadCriticalPurpose,
     leadCriticalWhyNeeded,
     leadCriticalDescription,
@@ -86,6 +114,8 @@ export function getArmyReserveToolbarSignal({
     leadCriticalCommanderPriority?: 'critical' | 'high' | 'medium' | 'low';
     leadCriticalCommanderBrigadesNeeded?: number;
     leadCriticalFocusZoneId?: string;
+    leadCriticalThreatRatio?: number;
+    leadCriticalAssignedBrigadeCount?: number;
     leadCriticalPurpose?: 'offensive' | 'defensive';
     leadCriticalWhyNeeded?: string;
     leadCriticalDescription?: string;
@@ -106,10 +136,20 @@ export function getArmyReserveToolbarSignal({
             commander_request_priority: leadCriticalCommanderPriority,
             commander_request_brigades_needed: leadCriticalCommanderBrigadesNeeded,
             commander_focus_zone_id: leadCriticalFocusZoneId,
+            sector_threat_ratio: leadCriticalThreatRatio,
+            sector_assigned_brigade_count: leadCriticalAssignedBrigadeCount,
+        });
+        const leadEvidence = getArmyReserveEvidenceSummary({
+            provenance_driver: leadCriticalProvenanceDriver,
+            commander_request_priority: leadCriticalCommanderPriority,
+            commander_request_brigades_needed: leadCriticalCommanderBrigadesNeeded,
+            commander_focus_zone_id: leadCriticalFocusZoneId,
+            sector_threat_ratio: leadCriticalThreatRatio,
+            sector_assigned_brigade_count: leadCriticalAssignedBrigadeCount,
         });
         return {
             label: `${criticalCount} ${criticalCount === 1 ? 'CRITICAL RESERVE REQUEST' : 'CRITICAL RESERVE REQUESTS'}`,
-            title: `${criticalCount} critical reserve request${criticalCount === 1 ? '' : 's'} need${criticalCount === 1 ? 's' : ''} immediate army attention. Lead cause: ${leadCause} Lead driver: ${leadDriver} ${pendingCount} reserve request${pendingCount === 1 ? ' is' : 's are'} pending in total.`,
+            title: `${criticalCount} critical reserve request${criticalCount === 1 ? '' : 's'} need${criticalCount === 1 ? 's' : ''} immediate army attention. Lead cause: ${leadCause} Lead driver: ${leadDriver}${leadEvidence ? ` Lead signal: ${leadEvidence}` : ''} ${pendingCount} reserve request${pendingCount === 1 ? ' is' : 's are'} pending in total.`,
             tone: 'critical',
         };
     }
@@ -129,6 +169,8 @@ export function getArmyReserveAttentionSummary({
     leadCriticalCommanderPriority,
     leadCriticalCommanderBrigadesNeeded,
     leadCriticalFocusZoneId,
+    leadCriticalThreatRatio,
+    leadCriticalAssignedBrigadeCount,
     leadCriticalPurpose,
     leadCriticalWhyNeeded,
     leadCriticalDescription,
@@ -140,6 +182,8 @@ export function getArmyReserveAttentionSummary({
     leadCriticalCommanderPriority?: 'critical' | 'high' | 'medium' | 'low';
     leadCriticalCommanderBrigadesNeeded?: number;
     leadCriticalFocusZoneId?: string;
+    leadCriticalThreatRatio?: number;
+    leadCriticalAssignedBrigadeCount?: number;
     leadCriticalPurpose?: 'offensive' | 'defensive';
     leadCriticalWhyNeeded?: string;
     leadCriticalDescription?: string;
@@ -160,10 +204,20 @@ export function getArmyReserveAttentionSummary({
             commander_request_priority: leadCriticalCommanderPriority,
             commander_request_brigades_needed: leadCriticalCommanderBrigadesNeeded,
             commander_focus_zone_id: leadCriticalFocusZoneId,
+            sector_threat_ratio: leadCriticalThreatRatio,
+            sector_assigned_brigade_count: leadCriticalAssignedBrigadeCount,
+        });
+        const leadEvidence = getArmyReserveEvidenceSummary({
+            provenance_driver: leadCriticalProvenanceDriver,
+            commander_request_priority: leadCriticalCommanderPriority,
+            commander_request_brigades_needed: leadCriticalCommanderBrigadesNeeded,
+            commander_focus_zone_id: leadCriticalFocusZoneId,
+            sector_threat_ratio: leadCriticalThreatRatio,
+            sector_assigned_brigade_count: leadCriticalAssignedBrigadeCount,
         });
         return {
             heading: `${criticalCount} critical reserve request${criticalCount === 1 ? '' : 's'} need${criticalCount === 1 ? 's' : ''} immediate army attention.`,
-            detail: `Lead cause: ${leadCause} Lead driver: ${leadDriver} Reserve requests are army-level reserve management, not presidential review. Routine requests remain in the Army Reserve desk.`,
+            detail: `Lead cause: ${leadCause} Lead driver: ${leadDriver}${leadEvidence ? ` Lead signal: ${leadEvidence}` : ''} Reserve requests are army-level reserve management, not presidential review. Routine requests remain in the Army Reserve desk.`,
             tone: 'critical',
         };
     }
@@ -246,5 +300,23 @@ export function getArmyReserveRequestProvenanceCopy({
             commander_request_brigades_needed,
             commander_focus_zone_id,
         }),
+    };
+}
+
+export function getArmyReserveRequestEvidenceCopy(
+    source: ArmyReserveProvenanceSource,
+): {
+    label: string;
+    summary: string;
+    detail: string;
+} | null {
+    const summary = getArmyReserveEvidenceSummary(source);
+    const detail = getArmyReserveEvidenceDetail(source);
+    if (!summary || !detail) return null;
+
+    return {
+        label: 'What Signal Triggered This',
+        summary,
+        detail,
     };
 }

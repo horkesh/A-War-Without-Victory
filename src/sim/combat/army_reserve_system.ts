@@ -342,6 +342,8 @@ export function generateArmyReserveRequests(
         let bestCommanderPriority: 'critical' | 'high' | 'medium' | 'low' | undefined;
         let bestCommanderBrigadesNeeded: number | undefined;
         let bestCommanderFocusZoneId: string | undefined;
+        let bestSectorThreatRatio: number | undefined;
+        let bestSectorAssignedBrigadeCount: number | undefined;
 
         // 1. Offensive support — active op in any committed phase (force_staging through execution)
         // Elites create momentum — they don't wait for it. Deploy during preparation so they arrive by execution.
@@ -362,6 +364,8 @@ export function generateArmyReserveRequests(
                 bestProvenanceDriver = 'active_operation';
                 bestRawPriority = rawPriority;
                 bestDescription = `Op "${op.name}" (${op.phase === 'execution' ? 'execution' : op.preparation_sub_phase}) — elite deployment for offensive`;
+                bestSectorThreatRatio = undefined;
+                bestSectorAssignedBrigadeCount = undefined;
             }
         }
 
@@ -373,6 +377,8 @@ export function generateArmyReserveRequests(
                 bestProvenanceDriver = 'sector_threat';
                 bestRawPriority = rawPriority;
                 bestDescription = `Sector threat ratio ${sector.threat_ratio.toFixed(1)} with only ${sector.assigned_brigade_ids.length} brigade(s) — line is thin`;
+                bestSectorThreatRatio = sector.threat_ratio;
+                bestSectorAssignedBrigadeCount = sector.assigned_brigade_ids.length;
             }
         }
 
@@ -386,6 +392,8 @@ export function generateArmyReserveRequests(
                     bestProvenanceDriver = 'captured_objectives';
                     bestRawPriority = rawPriority;
                     bestDescription = `Op "${op.name}" captured objectives — elite needed to exploit gains`;
+                    bestSectorThreatRatio = undefined;
+                    bestSectorAssignedBrigadeCount = undefined;
                 }
             }
         }
@@ -411,6 +419,8 @@ export function generateArmyReserveRequests(
                 bestCommanderPriority = commanderNeed.priority;
                 bestCommanderBrigadesNeeded = commanderNeed.brigadesNeeded;
                 bestCommanderFocusZoneId = commanderNeed.focusZoneId;
+                bestSectorThreatRatio = undefined;
+                bestSectorAssignedBrigadeCount = undefined;
             }
         }
 
@@ -451,6 +461,8 @@ export function generateArmyReserveRequests(
             commander_request_priority: bestCommanderPriority,
             commander_request_brigades_needed: bestCommanderBrigadesNeeded,
             commander_focus_zone_id: bestCommanderFocusZoneId,
+            sector_threat_ratio: bestSectorThreatRatio,
+            sector_assigned_brigade_count: bestSectorAssignedBrigadeCount,
             purpose: describeCorpsNeed(bestReason, corpsId, bestDescription).purpose,
             why_needed: describeCorpsNeed(bestReason, corpsId, bestDescription).whyNeeded,
             how_to_use: describeCorpsNeed(bestReason, corpsId, bestDescription).howToUse,
