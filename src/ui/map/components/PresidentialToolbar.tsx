@@ -64,6 +64,7 @@ interface PresidentialToolbarProps {
         leadCriticalOperationPhase?: string;
         leadCriticalOperationPreparationSubPhase?: string;
         leadCriticalOperationMomentum?: number;
+        leadCriticalOperationObjectiveCaptureCount?: number;
     } | null;
     /** Whether any event has readiness > 50% of threshold. */
     pressureWarning: boolean;

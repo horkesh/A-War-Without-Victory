@@ -104,6 +104,8 @@ export interface ArmyReserveRequest {
     operation_preparation_sub_phase?: string;
     /** Operation momentum when an execution-phase offensive is driving reserve support. */
     operation_momentum?: number;
+    /** Objectives captured by the live operation when exploitation support is being requested. */
+    operation_objective_capture_count?: number;
     /** High-level purpose for Army CO review and player readability. */
     purpose?: ReserveRequestPurpose;
     /** Corps CO statement: why this loan is needed right now. */

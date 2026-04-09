@@ -33,6 +33,21 @@ describe('Army reserve driver evidence legibility', () => {
     });
   });
 
+  it('explains the concrete captured-objective signal that opened an exploitation request', () => {
+    expect(
+      getArmyReserveRequestEvidenceCopy({
+        provenance_driver: 'captured_objectives',
+        operation_name: 'Operation Pocket Break',
+        operation_phase: 'execution',
+        operation_objective_capture_count: 2,
+      }),
+    ).toEqual({
+      label: 'What Signal Triggered This',
+      summary: 'Operation "Operation Pocket Break" captured 2 objectives in execution, opening an exploitation window that needs reserve support now.',
+      detail: 'Army HQ is reinforcing recent gains before the enemy can re-form around the breach.',
+    });
+  });
+
   it('explains staged active-operation support using the real preparation sub-phase when execution has not started', () => {
     expect(
       getArmyReserveRequestEvidenceCopy({
@@ -78,13 +93,16 @@ describe('Army reserve driver evidence legibility', () => {
     expect(reservePanelSource).toContain('getArmyReserveRequestEvidenceCopy');
     expect(toolbarSource).toContain('leadCriticalOperationName');
     expect(toolbarSource).toContain('leadCriticalOperationMomentum');
+    expect(toolbarSource).toContain('leadCriticalOperationObjectiveCaptureCount');
     expect(adapterSource).toContain('leadCriticalThreatRatio');
     expect(adapterSource).toContain('leadCriticalAssignedBrigadeCount');
     expect(adapterSource).toContain('leadCriticalOperationName');
     expect(adapterSource).toContain('leadCriticalOperationMomentum');
+    expect(adapterSource).toContain('leadCriticalOperationObjectiveCaptureCount');
     expect(systemSource).toContain('sector_threat_ratio');
     expect(systemSource).toContain('sector_assigned_brigade_count');
     expect(systemSource).toContain('operation_name');
     expect(systemSource).toContain('operation_momentum');
+    expect(systemSource).toContain('operation_objective_capture_count');
   });
 });

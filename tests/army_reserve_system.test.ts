@@ -674,6 +674,83 @@ describe('generateArmyReserveRequests', () => {
         });
     });
 
+    it('preserves captured-objective evidence when recent gains open an exploitation request', () => {
+        const adj = chainAdj(6);
+        const elite = makeElite('arbih_guards', 'RBiH', 'op:mun:o1');
+        const frontline = {
+            id: 'arbih_5th_corps_bde_1',
+            faction: 'RBiH',
+            name: '5th Corps Brigade',
+            created_turn: 0,
+            status: 'active',
+            assignment: null,
+            personnel: 1200,
+            morale: 65,
+            cohesion: 55,
+            corps_id: 'arbih_5th_corps',
+            location_osid: 'op:mun:o3',
+            home_osid: 'op:mun:o3',
+        } as unknown as FormationState;
+
+        const state = makeState({
+            formations: {
+                arbih_guards: elite,
+                arbih_5th_corps_bde_1: frontline,
+            },
+            corps_command: {
+                arbih_5th_corps: {
+                    commander_reinforcement_requests: [],
+                    active_operations: [{
+                        name: 'Operation Pocket Break',
+                        phase: 'execution',
+                        momentum: 1,
+                        objective_capture_count: 2,
+                        participating_brigades: ['arbih_5th_corps_bde_1'],
+                        objectives: ['op:enemy:ridge', 'op:enemy:crossroads'],
+                        current_objective_index: 1,
+                        axes: [{
+                            axis_id: 'axis:main',
+                            assigned_brigades: ['arbih_5th_corps_bde_1'],
+                            objectives: ['op:enemy:ridge', 'op:enemy:crossroads'],
+                            current_objective_index: 1,
+                            status: 'executing',
+                            failure_count: 0,
+                            consecutive_failures_on_current: 0,
+                            momentum: 1,
+                            attack_attempt_count: 2,
+                            objective_capture_count: 2,
+                            movement_only_execution_turns: 0,
+                            idle_execution_turn_streak: 0,
+                        }],
+                    }],
+                },
+            },
+            corps_front_sectors: {
+                sec_a: {
+                    corps_id: 'arbih_5th_corps',
+                    threat_ratio: 1.0,
+                    assigned_brigade_ids: ['arbih_5th_corps_bde_1'],
+                },
+            },
+            player_faction: 'RBiH',
+            turn: 10,
+        });
+
+        generateArmyReserveRequests(state, adj);
+
+        expect(state.military.pending_reserve_requests).toHaveLength(1);
+        expect(state.military.pending_reserve_requests?.[0]).toMatchObject({
+            corps_id: 'arbih_5th_corps',
+            faction: 'RBiH',
+            reason: 'exploitation',
+            provenance_driver: 'captured_objectives',
+            operation_name: 'Operation Pocket Break',
+            operation_phase: 'execution',
+            operation_objective_capture_count: 2,
+            suggested_brigade_id: 'arbih_guards',
+        });
+    });
+
     it('preserves concrete sector-threat evidence when a thin front triggers a reserve request', () => {
         const adj = chainAdj(6);
         const elite = makeElite('arbih_guards', 'RBiH', 'op:mun:o1');

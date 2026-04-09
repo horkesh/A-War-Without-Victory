@@ -2307,6 +2307,11 @@ function derivePendingReserveRequests(
                     typeof request.operation_momentum === 'number' && Number.isFinite(request.operation_momentum)
                         ? request.operation_momentum
                         : undefined,
+                operation_objective_capture_count:
+                    typeof request.operation_objective_capture_count === 'number'
+                    && Number.isFinite(request.operation_objective_capture_count)
+                        ? request.operation_objective_capture_count
+                        : undefined,
                 purpose: request.purpose === 'offensive' || request.purpose === 'defensive' ? request.purpose : undefined,
                 why_needed: typeof request.why_needed === 'string' ? request.why_needed : undefined,
                 how_to_use: typeof request.how_to_use === 'string' ? request.how_to_use : undefined,
@@ -2360,6 +2365,7 @@ function deriveArmyReserveQueue({
         leadCriticalOperationPhase: leadCriticalRequest?.operation_phase,
         leadCriticalOperationPreparationSubPhase: leadCriticalRequest?.operation_preparation_sub_phase,
         leadCriticalOperationMomentum: leadCriticalRequest?.operation_momentum,
+        leadCriticalOperationObjectiveCaptureCount: leadCriticalRequest?.operation_objective_capture_count,
         leadCriticalPurpose: leadCriticalRequest?.purpose,
         leadCriticalWhyNeeded: leadCriticalRequest?.why_needed,
         leadCriticalDescription: leadCriticalRequest?.description,

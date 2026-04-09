@@ -348,6 +348,7 @@ export function generateArmyReserveRequests(
         let bestOperationPhase: string | undefined;
         let bestOperationPreparationSubPhase: string | undefined;
         let bestOperationMomentum: number | undefined;
+        let bestOperationObjectiveCaptureCount: number | undefined;
 
         // 1. Offensive support — active op in any committed phase (force_staging through execution)
         // Elites create momentum — they don't wait for it. Deploy during preparation so they arrive by execution.
@@ -374,6 +375,7 @@ export function generateArmyReserveRequests(
                 bestOperationPhase = op.phase;
                 bestOperationPreparationSubPhase = op.phase === 'planning' ? op.preparation_sub_phase : undefined;
                 bestOperationMomentum = op.phase === 'execution' && typeof momentum === 'number' ? momentum : undefined;
+                bestOperationObjectiveCaptureCount = undefined;
             }
         }
 
@@ -391,25 +393,28 @@ export function generateArmyReserveRequests(
                 bestOperationPhase = undefined;
                 bestOperationPreparationSubPhase = undefined;
                 bestOperationMomentum = undefined;
+                bestOperationObjectiveCaptureCount = undefined;
             }
         }
 
         // 3. Exploitation — op captured OSIDs last turn, no reserve yet
         if (op && op.phase === 'execution') {
-            const capturedRecently = (op.objective_capture_count ?? (op.axes ? op.axes.reduce((s, a) => s + a.objective_capture_count, 0) : 0)) > 0;
-            if (capturedRecently && bestRawPriority < 65) {
-                const rawPriority = 65;
+            const objectiveCaptureCount = op.objective_capture_count ?? (op.axes ? op.axes.reduce((s, a) => s + a.objective_capture_count, 0) : 0);
+            const capturedRecently = objectiveCaptureCount > 0;
+            if (capturedRecently) {
+                const rawPriority = Math.min(95, 85 + Math.max(0, objectiveCaptureCount - 1) * 5);
                 if (rawPriority > bestRawPriority) {
                     bestReason = 'exploitation';
                     bestProvenanceDriver = 'captured_objectives';
                     bestRawPriority = rawPriority;
-                    bestDescription = `Op "${op.name}" captured objectives — elite needed to exploit gains`;
+                    bestDescription = `Op "${op.name}" captured ${objectiveCaptureCount} objective${objectiveCaptureCount === 1 ? '' : 's'} — elite needed to exploit gains`;
                     bestSectorThreatRatio = undefined;
                     bestSectorAssignedBrigadeCount = undefined;
-                    bestOperationName = undefined;
-                    bestOperationPhase = undefined;
+                    bestOperationName = op.name;
+                    bestOperationPhase = op.phase;
                     bestOperationPreparationSubPhase = undefined;
                     bestOperationMomentum = undefined;
+                    bestOperationObjectiveCaptureCount = objectiveCaptureCount;
                 }
             }
         }
@@ -441,6 +446,7 @@ export function generateArmyReserveRequests(
                 bestOperationPhase = undefined;
                 bestOperationPreparationSubPhase = undefined;
                 bestOperationMomentum = undefined;
+                bestOperationObjectiveCaptureCount = undefined;
             }
         }
 
@@ -487,6 +493,7 @@ export function generateArmyReserveRequests(
             operation_phase: bestOperationPhase,
             operation_preparation_sub_phase: bestOperationPreparationSubPhase,
             operation_momentum: bestOperationMomentum,
+            operation_objective_capture_count: bestOperationObjectiveCaptureCount,
             purpose: describeCorpsNeed(bestReason, corpsId, bestDescription).purpose,
             why_needed: describeCorpsNeed(bestReason, corpsId, bestDescription).whyNeeded,
             how_to_use: describeCorpsNeed(bestReason, corpsId, bestDescription).howToUse,

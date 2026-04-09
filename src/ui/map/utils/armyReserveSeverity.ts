@@ -18,6 +18,7 @@ interface ArmyReserveProvenanceSource {
     operation_phase?: string;
     operation_preparation_sub_phase?: string;
     operation_momentum?: number;
+    operation_objective_capture_count?: number;
 }
 
 function getArmyReserveCauseSummary(source: ArmyReserveCauseSource): string {
@@ -90,6 +91,16 @@ function getArmyReserveEvidenceSummary(source: ArmyReserveProvenanceSource): str
     }
 
     if (
+        source.provenance_driver === 'captured_objectives'
+        && typeof source.operation_name === 'string'
+        && source.operation_phase === 'execution'
+        && typeof source.operation_objective_capture_count === 'number'
+        && Number.isFinite(source.operation_objective_capture_count)
+    ) {
+        return `Operation "${source.operation_name}" captured ${source.operation_objective_capture_count} objective${source.operation_objective_capture_count === 1 ? '' : 's'} in execution, opening an exploitation window that needs reserve support now.`;
+    }
+
+    if (
         source.provenance_driver === 'sector_threat'
         && typeof source.sector_threat_ratio === 'number'
         && typeof source.sector_assigned_brigade_count === 'number'
@@ -121,6 +132,16 @@ function getArmyReserveEvidenceDetail(source: ArmyReserveProvenanceSource): stri
     }
 
     if (
+        source.provenance_driver === 'captured_objectives'
+        && typeof source.operation_name === 'string'
+        && source.operation_phase === 'execution'
+        && typeof source.operation_objective_capture_count === 'number'
+        && Number.isFinite(source.operation_objective_capture_count)
+    ) {
+        return 'Army HQ is reinforcing recent gains before the enemy can re-form around the breach.';
+    }
+
+    if (
         source.provenance_driver === 'sector_threat'
         && typeof source.sector_threat_ratio === 'number'
         && typeof source.sector_assigned_brigade_count === 'number'
@@ -149,6 +170,7 @@ export function getArmyReserveToolbarSignal({
     leadCriticalOperationPhase,
     leadCriticalOperationPreparationSubPhase,
     leadCriticalOperationMomentum,
+    leadCriticalOperationObjectiveCaptureCount,
     leadCriticalPurpose,
     leadCriticalWhyNeeded,
     leadCriticalDescription,
@@ -166,6 +188,7 @@ export function getArmyReserveToolbarSignal({
     leadCriticalOperationPhase?: string;
     leadCriticalOperationPreparationSubPhase?: string;
     leadCriticalOperationMomentum?: number;
+    leadCriticalOperationObjectiveCaptureCount?: number;
     leadCriticalPurpose?: 'offensive' | 'defensive';
     leadCriticalWhyNeeded?: string;
     leadCriticalDescription?: string;
@@ -192,6 +215,7 @@ export function getArmyReserveToolbarSignal({
             operation_phase: leadCriticalOperationPhase,
             operation_preparation_sub_phase: leadCriticalOperationPreparationSubPhase,
             operation_momentum: leadCriticalOperationMomentum,
+            operation_objective_capture_count: leadCriticalOperationObjectiveCaptureCount,
         });
         const leadEvidence = getArmyReserveEvidenceSummary({
             provenance_driver: leadCriticalProvenanceDriver,
@@ -204,6 +228,7 @@ export function getArmyReserveToolbarSignal({
             operation_phase: leadCriticalOperationPhase,
             operation_preparation_sub_phase: leadCriticalOperationPreparationSubPhase,
             operation_momentum: leadCriticalOperationMomentum,
+            operation_objective_capture_count: leadCriticalOperationObjectiveCaptureCount,
         });
         return {
             label: `${criticalCount} ${criticalCount === 1 ? 'CRITICAL RESERVE REQUEST' : 'CRITICAL RESERVE REQUESTS'}`,
@@ -233,6 +258,7 @@ export function getArmyReserveAttentionSummary({
     leadCriticalOperationPhase,
     leadCriticalOperationPreparationSubPhase,
     leadCriticalOperationMomentum,
+    leadCriticalOperationObjectiveCaptureCount,
     leadCriticalPurpose,
     leadCriticalWhyNeeded,
     leadCriticalDescription,
@@ -250,6 +276,7 @@ export function getArmyReserveAttentionSummary({
     leadCriticalOperationPhase?: string;
     leadCriticalOperationPreparationSubPhase?: string;
     leadCriticalOperationMomentum?: number;
+    leadCriticalOperationObjectiveCaptureCount?: number;
     leadCriticalPurpose?: 'offensive' | 'defensive';
     leadCriticalWhyNeeded?: string;
     leadCriticalDescription?: string;
@@ -276,6 +303,7 @@ export function getArmyReserveAttentionSummary({
             operation_phase: leadCriticalOperationPhase,
             operation_preparation_sub_phase: leadCriticalOperationPreparationSubPhase,
             operation_momentum: leadCriticalOperationMomentum,
+            operation_objective_capture_count: leadCriticalOperationObjectiveCaptureCount,
         });
         const leadEvidence = getArmyReserveEvidenceSummary({
             provenance_driver: leadCriticalProvenanceDriver,
@@ -288,6 +316,7 @@ export function getArmyReserveAttentionSummary({
             operation_phase: leadCriticalOperationPhase,
             operation_preparation_sub_phase: leadCriticalOperationPreparationSubPhase,
             operation_momentum: leadCriticalOperationMomentum,
+            operation_objective_capture_count: leadCriticalOperationObjectiveCaptureCount,
         });
         return {
             heading: `${criticalCount} critical reserve request${criticalCount === 1 ? '' : 's'} need${criticalCount === 1 ? 's' : ''} immediate army attention.`,

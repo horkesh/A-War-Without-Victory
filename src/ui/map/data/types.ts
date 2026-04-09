@@ -407,6 +407,7 @@ export interface ArmyReserveQueueView {
     leadCriticalOperationPhase?: string;
     leadCriticalOperationPreparationSubPhase?: string;
     leadCriticalOperationMomentum?: number;
+    leadCriticalOperationObjectiveCaptureCount?: number;
     leadCriticalPurpose?: 'offensive' | 'defensive';
     leadCriticalWhyNeeded?: string;
     leadCriticalDescription?: string;
@@ -762,6 +763,7 @@ export interface LoadedGameState {
         operation_phase?: string;
         operation_preparation_sub_phase?: string;
         operation_momentum?: number;
+        operation_objective_capture_count?: number;
         purpose?: 'offensive' | 'defensive';
         why_needed?: string;
         how_to_use?: string;

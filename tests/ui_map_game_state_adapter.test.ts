@@ -497,6 +497,7 @@ test('parseGameState derives an army-owned reserve queue summary without folding
         leadCriticalOperationPhase: undefined,
         leadCriticalOperationPreparationSubPhase: undefined,
         leadCriticalOperationMomentum: undefined,
+        leadCriticalOperationObjectiveCaptureCount: undefined,
         leadCriticalPurpose: 'defensive',
         leadCriticalWhyNeeded: undefined,
         leadCriticalDescription: 'Line in danger of collapse',
@@ -567,9 +568,78 @@ test('parseGameState preserves active-operation reserve evidence in pending requ
         leadCriticalOperationPhase: 'execution',
         leadCriticalOperationPreparationSubPhase: undefined,
         leadCriticalOperationMomentum: 2,
+        leadCriticalOperationObjectiveCaptureCount: undefined,
         leadCriticalPurpose: 'offensive',
         leadCriticalWhyNeeded: undefined,
         leadCriticalDescription: 'Main offensive needs elite support now',
+    });
+});
+
+test('parseGameState preserves captured-objectives reserve evidence in pending requests and lead-critical reserve summaries', () => {
+    const parsed = parseGameState({
+        meta: { turn: 15, phase: 'war', player_faction: 'RBiH' },
+        military: {
+            formations: {
+                arbih_main_staff: { id: 'arbih_main_staff', faction: 'RBiH', kind: 'army_hq', status: 'active', name: 'Main Staff', personnel: 0 },
+            },
+            pending_reserve_requests: [
+                {
+                    request_id: 'reserve-exploitation-critical',
+                    corps_id: 'arbih_5th_corps',
+                    faction: 'RBiH',
+                    reason: 'exploitation',
+                    provenance_driver: 'captured_objectives',
+                    operation_name: 'Operation Pocket Break',
+                    operation_phase: 'execution',
+                    operation_objective_capture_count: 2,
+                    purpose: 'offensive',
+                    priority: 84,
+                    description: 'Recent gains opened an exploitation window',
+                    turn_requested: 15,
+                },
+            ],
+        } as any,
+        political: {
+            political_controllers: {},
+        } as any,
+    });
+
+    assert.deepEqual(parsed.pendingReserveRequests?.map((request) => ({
+        request_id: request.request_id,
+        provenance_driver: request.provenance_driver,
+        operation_name: request.operation_name,
+        operation_phase: request.operation_phase,
+        operation_objective_capture_count: request.operation_objective_capture_count,
+    })), [
+        {
+            request_id: 'reserve-exploitation-critical',
+            provenance_driver: 'captured_objectives',
+            operation_name: 'Operation Pocket Break',
+            operation_phase: 'execution',
+            operation_objective_capture_count: 2,
+        },
+    ]);
+
+    assert.deepEqual(parsed.armyReserveQueue, {
+        pendingCount: 1,
+        criticalCount: 1,
+        offensiveCount: 1,
+        defensiveCount: 0,
+        leadCriticalReason: 'exploitation',
+        leadCriticalProvenanceDriver: 'captured_objectives',
+        leadCriticalCommanderPriority: undefined,
+        leadCriticalCommanderBrigadesNeeded: undefined,
+        leadCriticalFocusZoneId: undefined,
+        leadCriticalThreatRatio: undefined,
+        leadCriticalAssignedBrigadeCount: undefined,
+        leadCriticalOperationName: 'Operation Pocket Break',
+        leadCriticalOperationPhase: 'execution',
+        leadCriticalOperationPreparationSubPhase: undefined,
+        leadCriticalOperationMomentum: undefined,
+        leadCriticalOperationObjectiveCaptureCount: 2,
+        leadCriticalPurpose: 'offensive',
+        leadCriticalWhyNeeded: undefined,
+        leadCriticalDescription: 'Recent gains opened an exploitation window',
     });
 });
 
