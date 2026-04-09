@@ -648,11 +648,13 @@ Patch bumps (0.X.1, 0.X.2) are for significant fixes within a milestone â€”
   - territorial warnings now respect canonical sector coverage (`n1410`)
   - `brigade_stacking` now respects same-sector frontline coverage truth (`n1412`)
   - `frontline_density_imbalance` now excludes Graz cold-front sectors before computing faction density outliers (`n0`)
+  - `brigade_never_fights` now gates on live non-cold sector/loan ownership and demotes from warning to info (`n4`)
 - Still active:
-  - residual anomaly certainty / wording hardening around `brigade_never_fights` and the remaining territorial residuals
+  - the residual Gorazde territorial pair still needs exact seam classification before another hardening claim
 - Demoted / redesign-blocked:
   - same-faction ownerless unreachable brigades (`rs_1st_podrinje`, `rs_5th_podrinje`)
 - Investigated and demoted to realism/doctrine:
   - `arbih_444th_mountain` salient overextension near Konjic is not a cutoff/ownership bug; it belongs in doctrine / target-selection work
+  - remaining non-cold `frontline_density_imbalance` sectors now look like live force-distribution extremes, not detector owner drift
 
 

@@ -1,3 +1,45 @@
+## [2026-04-09] fix(harness): align brigade_never_fights with live owner truth (n4)
+
+**Type:** Harness / anomaly truth hardening
+**Files:** `src/scenario/anomaly_detector.ts`, `tests/anomaly_detector_deployment_truth.test.ts`, `docs/40_reports/implemented/20260409_BRIGADE_NEVER_FIGHTS_OWNER_TRUTH_HARDENING.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/architect_notes.md`
+**Run:** n4 - hash `bde31c0aab141f42` (baseline `n0`, same final hash)
+**Status:** VERIFIED - targeted anomaly regressions, fresh 40-week rerun, consistency audit, recovery bar, full vitest, typecheck, and build all green
+
+### Summary of changes
+
+1. **Zero-battle warnings now consume live owner truth** - `detectBrigadeNeverFights(...)` now reports only brigades with live sector/loan ownership and excludes assignment-null brigades that have no current battle owner.
+2. **Cold-front contamination removed** - the detector also suppresses sector-owned brigades on canonical Graz cold fronts via `isSectorColdFront(...)`, so the warning bucket no longer treats protected no-combat fronts as failed deployment.
+3. **Severity demoted to info** - once the bucket was narrowed to truthful live non-cold owned brigades, it became a deployment/coherence signal rather than a broken-runtime-truth accusation.
+
+### Scenario proof
+
+- Baseline: `runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n0`
+  - final hash `bde31c0aab141f42`
+  - `brigade_never_fights` was a `warning`
+  - count = `97`
+  - live final-state composition mixed `72` live non-cold owned brigades, `17` cold-front brigades, and `8` ownerless brigades into one bucket
+- Post-fix: `runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n4`
+  - final hash stayed `bde31c0aab141f42`
+  - `brigade_never_fights` is now `info`
+  - count = `72`
+  - the remaining bucket is limited to live non-cold sector/loan owners
+
+### Verification
+
+- `npx.cmd vitest run tests/anomaly_detector_deployment_truth.test.ts tests/integration_anomaly.test.ts`
+- `npm.cmd run sim:scenario:run:40w`
+- `node ..\..\tools\validate_run_consistency.cjs runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n4`
+- `npm.cmd run recovery:check`
+- `npm.cmd run test:vitest`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run build`
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260409_BRIGADE_NEVER_FIGHTS_OWNER_TRUTH_HARDENING.md`
+
+---
+
 ## [2026-04-09] fix(harness): align frontline density with Graz cold-front truth (n0)
 
 **Type:** Harness / anomaly truth hardening

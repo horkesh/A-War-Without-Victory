@@ -33,6 +33,14 @@ function isBrigadeKind(kind: string | undefined): boolean {
     return kind === undefined || kind === 'brigade' || kind === 'operational_group';
 }
 
+function getAssignedSector(state: GameState, formation: Record<string, any>) {
+    const sectorId = formation.assignment?.kind === 'sector'
+        ? formation.assignment.sector_id
+        : null;
+    if (!sectorId) return null;
+    return state.military.corps_front_sectors?.[sectorId] ?? null;
+}
+
 /** Load OSID adjacency graph from operational_contact_graph.json. Returns null on failure. */
 function loadOsidAdjacency(): Map<string, string[]> | null {
     const graphPath = resolve(process.cwd(), 'data/derived/operational/operational_contact_graph.json');
@@ -160,8 +168,8 @@ function detectZeroPersonnelActive(state: GameState): AnomalyReport[] {
 }
 
 /**
- * 4. brigade_never_fights (warning)
- * Active brigade with 0 battles in brigade_history.
+ * 4. brigade_never_fights (info)
+ * Active brigade with live sector/loan ownership outside cold fronts and 0 battles in brigade_history.
  */
 function detectBrigadeNeverFights(state: GameState): AnomalyReport[] {
     const reports: AnomalyReport[] = [];
@@ -175,6 +183,11 @@ function detectBrigadeNeverFights(state: GameState): AnomalyReport[] {
         const f = formations[fid];
         if (f.status !== 'active') continue;
         if (!isBrigadeKind(f.kind)) continue;
+        const assignedSector = getAssignedSector(state, f as Record<string, any>);
+        const onLoan = !!f.elite_loan_state?.on_loan
+            && typeof f.elite_loan_state.loaned_to_corps === 'string';
+        if (!assignedSector && !onLoan) continue;
+        if (assignedSector && isSectorColdFront(state, assignedSector)) continue;
         const battlesFought = f.brigade_history?.battles_fought ?? 0;
         if (battlesFought === 0) {
             neverFought.push(fid);
@@ -184,9 +197,9 @@ function detectBrigadeNeverFights(state: GameState): AnomalyReport[] {
     if (neverFought.length > 0) {
         reports.push({
             category: 'deployment',
-            severity: 'warning',
+            severity: 'info',
             type: 'brigade_never_fights',
-            description: `${neverFought.length} active brigade(s) have 0 battles in brigade_history after ${state.meta.turn} turns.`,
+            description: `${neverFought.length} active brigade(s) with live sector/loan ownership outside cold-front sectors have 0 battles in brigade_history after ${state.meta.turn} turns.`,
             entities: neverFought.slice().sort(strictCompare),
         });
     }

@@ -4,6 +4,7 @@ import type { GameState } from '../src/state/game_state.js';
 import {
     detectBrigadeFarFromHome,
     detectUnassignedFrontlineBrigades,
+    runAnomalyDetection,
 } from '../src/scenario/anomaly_detector.js';
 
 function makeAdjacency(pairs: Array<[string, string]>): Map<string, string[]> {
@@ -194,5 +195,138 @@ describe('anomaly detector deployment truth', () => {
         expect(unassigned?.severity).toBe('warning');
 
         expect(anomalies.some((report) => report.type === 'brigade_far_from_home')).toBe(false);
+    });
+
+    it('limits brigade_never_fights to live non-cold owners and demotes it to info', () => {
+        const state = {
+            meta: { turn: 40, phase: 'war' },
+            military: {
+                formations: {
+                    brig_owned: {
+                        id: 'brig_owned',
+                        faction: 'RBiH',
+                        kind: 'brigade',
+                        status: 'active',
+                        corps_id: 'arbih_1st_corps',
+                        location_osid: 'op:test:owned',
+                        home_osid: 'op:test:home',
+                        disrupted_turns: 0,
+                        assignment: { kind: 'sector', role: 'front', sector_id: 'sector:arbih_1st_corps:0' },
+                        brigade_history: { battles_fought: 0, engagements: [] },
+                    },
+                    brig_ownerless: {
+                        id: 'brig_ownerless',
+                        faction: 'HRHB',
+                        kind: 'brigade',
+                        status: 'active',
+                        corps_id: 'hvo_central_bosnia',
+                        location_osid: 'op:test:idle',
+                        home_osid: 'op:test:idle',
+                        disrupted_turns: 0,
+                        assignment: null,
+                        brigade_history: { battles_fought: 0, engagements: [] },
+                    },
+                    brig_cold: {
+                        id: 'brig_cold',
+                        faction: 'HRHB',
+                        kind: 'brigade',
+                        status: 'active',
+                        corps_id: 'hvo_tomislavgrad',
+                        location_osid: 'op:test:cold',
+                        home_osid: 'op:test:cold',
+                        disrupted_turns: 0,
+                        assignment: { kind: 'sector', role: 'front', sector_id: 'sector:hvo_tomislavgrad:0' },
+                        brigade_history: { battles_fought: 0, engagements: [] },
+                    },
+                    brig_loaned: {
+                        id: 'brig_loaned',
+                        faction: 'RBiH',
+                        kind: 'brigade',
+                        status: 'active',
+                        corps_id: 'arbih_7th_corps',
+                        location_osid: 'op:test:loan',
+                        home_osid: 'op:test:loan',
+                        disrupted_turns: 0,
+                        assignment: null,
+                        elite_loan_state: {
+                            on_loan: true,
+                            loaned_to_corps: 'arbih_2nd_corps',
+                        },
+                        brigade_history: { battles_fought: 0, engagements: [] },
+                    },
+                },
+                corps_front_sectors: {
+                    'sector:arbih_1st_corps:0': {
+                        sector_id: 'sector:arbih_1st_corps:0',
+                        corps_id: 'arbih_1st_corps',
+                        faction: 'RBiH',
+                        assigned_brigade_ids: ['brig_owned'],
+                        reserve_brigade_ids: [],
+                        sub_segments: [{
+                            sub_segment_id: 'subseg:owned',
+                            edge_ids: ['edge:owned'],
+                            friendly_osids: ['op:test:owned'],
+                            enemy_osids: ['op:test:enemy'],
+                            primary_brigade_ids: ['brig_owned'],
+                            length_edges: 1,
+                        }],
+                        edge_ids: ['edge:owned'],
+                        territory_osids: ['op:test:owned'],
+                        opposing_factions: ['RS'],
+                        density: 1,
+                        defensive_power: 100,
+                        threat_ratio: 1,
+                        sector_stance: 'defend',
+                        stance_source: 'bot',
+                    },
+                    'sector:hvo_tomislavgrad:0': {
+                        sector_id: 'sector:hvo_tomislavgrad:0',
+                        corps_id: 'hvo_tomislavgrad',
+                        faction: 'HRHB',
+                        assigned_brigade_ids: ['brig_cold'],
+                        reserve_brigade_ids: [],
+                        sub_segments: [{
+                            sub_segment_id: 'subseg:cold',
+                            edge_ids: ['edge:cold'],
+                            friendly_osids: ['op:test:cold'],
+                            enemy_osids: ['op:test:truce'],
+                            primary_brigade_ids: ['brig_cold'],
+                            length_edges: 1,
+                        }],
+                        edge_ids: ['edge:cold'],
+                        territory_osids: ['op:test:cold'],
+                        opposing_factions: ['RS'],
+                        density: 1,
+                        defensive_power: 100,
+                        threat_ratio: 1,
+                        sector_stance: 'defend',
+                        stance_source: 'bot',
+                    },
+                },
+                unresolved_sector_brigades: [],
+            },
+            political: {
+                political_controllers: {
+                    'op:test:owned': 'RBiH',
+                    'op:test:enemy': 'RS',
+                    'op:test:cold': 'HRHB',
+                    'op:test:truce': 'RS',
+                    'op:test:idle': 'HRHB',
+                    'op:test:loan': 'RBiH',
+                },
+                rbih_hrhb_state: { war_started_turn: null },
+                vienna_declaration_turn: 4,
+                vienna_accepted: { RS: true, HRHB: true },
+                vienna_herzegovina_broken_by: null,
+                vienna_kiseljak_broken: false,
+            },
+        } as unknown as GameState;
+
+        const report = runAnomalyDetection(state).find((anomaly) => anomaly.type === 'brigade_never_fights');
+
+        expect(report).toBeDefined();
+        expect(report?.severity).toBe('info');
+        expect(report?.entities).toEqual(['brig_loaned', 'brig_owned']);
+        expect(report?.description).toContain('live sector/loan ownership');
     });
 });
