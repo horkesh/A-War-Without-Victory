@@ -207,11 +207,19 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - **Owner:** `tools/validate_run_consistency.cjs`
 - **Report:** `docs/40_reports/implemented/20260409_HARNESS_ASSIGNMENT_COMPLETENESS_VALIDATOR_TRUTH_HARDENING.md`
 
+### Operation Readiness Approach Truth - CLOSED 2026-04-09
+- **Why this lane won:** parallel review produced two plausible next seams: runtime `cmd_arbih_1st_corps_t18` and military review shell coherence. Blindspot review agreed the runtime seam should win unless it collapsed into tuning. It did not. The problem was a concrete contract mismatch between planning and execution truth.
+- **Fix:** `src/sim/combat/sector_offensive.ts` now derives launch readiness from the same graph-valid objective approach OSIDs the executor already uses, via `war_front_edges_osid` adjacency. The old coarse sector-subsegment approach set survives only as a narrow fallback for sparse test states with no adjacency graph.
+- **Tests:** `tests/sector_offensive_idle_recovery.test.ts` now locks the exact false-readiness seam: rear brigades sharing a broad sector subsegment no longer make a sector attack appear execution-ready when only one graph-adjacent approach OSID is actually legal.
+- **Scenario proof:** fresh 40-week proof improved from `n1397` -> `n1398`. `cmd_arbih_1st_corps_t18` no longer enters execution and instead recovers on turn 23 as `planning_invalidated`; run-level counters improved from `invalid_operation_count: 2`, `zero_eligible_attacker_operation_count: 1`, `recovery_without_logged_attempt_count: 1` to `0 / 0 / 0`, and the explicit `operation_zero_eligible_execution` anomaly disappeared. Follow-on signal: `cmd_arbih_1st_corps_t24` became a successful `1/1` follow-up operation.
+- **Owner:** `src/sim/combat/sector_offensive.ts`
+- **Report:** `docs/40_reports/implemented/20260409_OPERATION_READINESS_APPROACH_TRUTH_HARDENING.md`
+
 ## Next Priority Lanes
 
 1. **v0.8.4 Phase F — CLOSED 2026-04-07.** DRINA investigation complete: root cause proven (absent ARBiH Podrinje defensive ops), fixes applied (initial controllers, Op Drina scope, painted targets), remaining variance accepted with evidence (27/27 anchors, 93.6%). v0.8.4 ALL PHASES CLOSED. Next: v0.8.x-final command authority cleanup or v0.9 per MASTER_ROADMAP.
-2. **Operation execution-quality follow-up:** fresh 40-week proof still shows `operation_zero_eligible_execution` / invalid combat-causality truth (`cmd_arbih_1st_corps_t18` in `n1397`). Owner: operation execution / combat-causality stack.
-3. **Military review shell coherence:** toolbar and Army HQ already key from `presidentialReviewQueue`, but `App.tsx` interrupt routing and `WarroomStatusBar.tsx` still read `pendingEventDecisions` directly. Owner: UI/read-model shell boundary.
+2. **Operation execution-quality follow-up:** fresh 40-week proof `n1398` clears `cmd_arbih_1st_corps_t18`; remaining top runtime seam is now `cmd_vrs_east_bosnian_t29`. Owner: operation execution / combat-causality stack.
+3. **Military review shell coherence:** toolbar and Army HQ already key from `presidentialReviewQueue`, but `App.tsx` still owns a second live decision-response path through `pendingEventDecisions`. Owner: UI/read-model shell boundary.
 4. **Studio Health / Repo Truth:** keep the permanent lane real in operating practice — closeout gate, blindspot review, warning disposition, artifact policy, and evidence retention.
 5. **v0.8.x-final command authority cleanup:** operations singularity follow-through, movement ownership cleanup, and remaining canonical-owner retirements before `v0.9`.
 

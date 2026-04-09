@@ -603,6 +603,91 @@ describe('sector offensive idle recovery', () => {
         expect(op?.recovery_reason).toBe('planning_invalidated');
     });
 
+    it('invalidates planning when coarse subsegment membership makes non-adjacent brigades look execution-ready', () => {
+        const state = {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 8, phase: 'war', seed: 'planning-coarse-approach-membership' } as any,
+  military: {
+    formations: {
+                rs_corps: {
+                    id: 'rs_corps',
+                    faction: 'RS',
+                    name: 'Corps',
+                    created_turn: 1,
+                    status: 'active',
+                    assignment: null,
+                    kind: 'corps',
+                    personnel: 50,
+                    cohesion: 80,
+                    hq_sid: 'S1',
+                    tags: [],
+                },
+                b1: makeBrigade('b1', 'op:front:rear_approach_a'),
+                b2: makeBrigade('b2', 'op:front:rear_approach_b'),
+            },
+    corps_front_sectors: {
+                rs_sector: {
+                    ...makeSector(
+                        'rs_sector',
+                        'rs_corps',
+                        'RS',
+                        ['e1'],
+                        ['op:front:valid_approach', 'op:front:rear_approach_a', 'op:front:rear_approach_b'],
+                        ['op:target:objective'],
+                    ),
+                },
+            },
+    war_front_edges_osid: [
+                { edge_id: 'front:valid', a: 'op:front:valid_approach', b: 'op:target:objective' },
+            ],
+    brigade_movement_state: {},
+    corps_command: {
+                rs_corps: {
+                    command_span: 5,
+                    subordinate_count: 2,
+                    og_slots: 1,
+                    active_ogs: [],
+                    corps_exhaustion: 0,
+                    stance: 'offensive',
+                    active_operations: [{
+                        name: 'False Ready From Coarse Sector Membership',
+                        type: 'sector_attack',
+                        phase: 'planning',
+                        started_turn: 4,
+                        phase_started_turn: 4,
+                        participating_brigades: ['b1', 'b2'],
+                        objectives: ['op:target:objective'],
+                        current_objective_index: 0,
+                        planning_duration: 1,
+                        attack_attempt_count: 0,
+                        objective_capture_count: 0,
+                        movement_only_execution_turns: 0,
+                        idle_execution_turn_streak: 0,
+                        failure_count: 0,
+                        consecutive_failures_on_current: 0,
+                        sector_id: 'rs_sector',
+                        staging_osid: 'op:front:valid_approach',
+                    }],
+                },
+            },
+  } as any,
+  political: {
+    political_controllers: {
+                'op:target:objective': 'RBiH',
+                'op:front:valid_approach': 'RS',
+                'op:front:rear_approach_a': 'RS',
+                'op:front:rear_approach_b': 'RS',
+            }
+  } as any,
+} as unknown as GameState;
+
+        advanceSectorOffensives(state, null);
+
+        const op = state.military.corps_command?.rs_corps?.active_operations[0];
+        expect(op?.phase).toBe('recovery');
+        expect(op?.recovery_reason).toBe('planning_invalidated');
+    });
+
     it('never promotes a planning operation when brigades are only assembled at rear staging', () => {
         const state = {
   schema_version: CURRENT_SCHEMA_VERSION,

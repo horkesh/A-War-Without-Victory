@@ -694,7 +694,7 @@ export function computePlanningDuration(objectiveCount: number): number {
     return Math.min(MAX_PLANNING_DURATION, base + PLANNING_MARCH_BUFFER);
 }
 
-function collectObjectiveApproachOsids(
+function collectSectorSubsegmentApproachOsids(
     state: GameState,
     corpsId: FormationId,
     objectives: string[]
@@ -715,14 +715,43 @@ function collectObjectiveApproachOsids(
     return approachOsids;
 }
 
+function collectObjectiveApproachOsids(
+    state: GameState,
+    corpsId: FormationId,
+    faction: FactionId,
+    objectives: string[]
+): Set<string> {
+    const adjacency = buildOsidAdjacencyFromFrontEdges(state);
+    if (adjacency.size > 0) {
+        const graphApproachOsids = new Set<string>();
+        for (const objective of objectives) {
+            for (const neighbor of adjacency.get(objective) ?? []) {
+                const controller = getPoliticalControllerOSID(state, neighbor, undefined);
+                if (controller === faction || isFriendlyFactionCtrl(controller, faction, state)) {
+                    graphApproachOsids.add(neighbor);
+                }
+            }
+            if (graphApproachOsids.size > 0) {
+                break;
+            }
+        }
+        return graphApproachOsids;
+    }
+
+    // Compatibility fallback for sparse unit states that do not populate
+    // front-edge adjacency. Runtime should prefer graph-valid approach truth.
+    return collectSectorSubsegmentApproachOsids(state, corpsId, objectives);
+}
+
 function areParticipantsReadyForExecution(
     state: GameState,
     corpsId: FormationId,
+    faction: FactionId,
     participatingBrigades: FormationId[],
     _stagingOsid: string | undefined,
     objectives: string[]
 ): boolean {
-    const objectiveApproachOsids = collectObjectiveApproachOsids(state, corpsId, objectives);
+    const objectiveApproachOsids = collectObjectiveApproachOsids(state, corpsId, faction, objectives);
     let eligibleParticipantCount = 0;
     for (const brigadeId of participatingBrigades) {
         const brigade = state.military.formations?.[brigadeId];
@@ -831,7 +860,7 @@ function reconcilePlanningObjectives(
         op.current_objective_index = Math.min(op.current_objective_index ?? 0, filteredObjectives.length - 1);
     }
 
-    const approachOsids = collectObjectiveApproachOsids(state, corpsId, getAllAxisObjectives(op));
+    const approachOsids = collectObjectiveApproachOsids(state, corpsId, faction, getAllAxisObjectives(op));
     return approachOsids.size > 0 ? 'valid' : 'invalidated';
 }
 
@@ -1211,6 +1240,7 @@ export function advanceSectorOffensives(
             const stagedEarly = elapsed >= 1 && areParticipantsReadyForExecution(
                 state,
                 corpsId,
+                faction,
                 allBrigades,
                 op.staging_osid,
                 getCurrentLaunchObjectives(op),
@@ -1247,6 +1277,7 @@ export function advanceSectorOffensives(
                 if (!forcedLaunch && !areParticipantsReadyForExecution(
                     state,
                     corpsId,
+                    faction,
                     allBrigades,
                     op.staging_osid,
                     getCurrentLaunchObjectives(op),

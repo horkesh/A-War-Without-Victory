@@ -25214,3 +25214,38 @@ Main Staff HQ was Han Pijesak, not Rogatica. Tracked for OOB correction pass.
 - Report: `docs/40_reports/implemented/20260409_HARNESS_ASSIGNMENT_COMPLETENESS_VALIDATOR_TRUTH_HARDENING.md`
 
 ---
+
+## [2026-04-09] fix(engine): Align operation readiness with approach truth
+
+**Type:** Engine hardening
+**Files:** `src/sim/combat/sector_offensive.ts`, `tests/sector_offensive_idle_recovery.test.ts`, `docs/40_reports/implemented/20260409_OPERATION_READINESS_APPROACH_TRUTH_HARDENING.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/architect_notes.md`
+**Status:** VERIFIED - targeted regression, fresh 40-week rerun, recovery check, full Vitest, tsc, and build all green
+
+### Summary of changes
+
+1. **Planning and execution now share the same approach-truth contract** - `src/sim/combat/sector_offensive.ts` no longer treats coarse sector-subsegment membership as readiness authority when front-edge adjacency is available. The new objective approach helper derives graph-valid friendly approach OSIDs from `war_front_edges_osid`, matching the executor's real attackability surface.
+
+2. **Compatibility fallback stays narrow** - sparse test states that do not populate front-edge adjacency still fall back to the older subsegment helper, but runtime states now prefer graph-valid objective approach truth instead of broader geometry heuristics.
+
+3. **Regression locks the false-readiness seam directly** - `tests/sector_offensive_idle_recovery.test.ts` now proves that rear brigades sharing a broad sector subsegment with a valid approach OSID no longer make a sector attack appear execution-ready. The operation now recovers as `planning_invalidated`.
+
+### Verification
+
+- `npx.cmd vitest run tests/sector_offensive_idle_recovery.test.ts tests/sector_offensive.test.ts tests/bot_operation_objective_focus.test.ts tests/scenario_operation_diagnostics.test.ts`
+- `npm.cmd run sim:scenario:run:40w` -> baseline `n1397`, post-fix `n1398`
+- `npm.cmd run recovery:check`
+- `npm.cmd run test:vitest`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run build`
+
+### Scenario proof
+
+- Baseline run `n1397` (`165ac7e6b2ca5ba4`): `cmd_arbih_1st_corps_t18` entered execution on turn 23, stayed there through turn 27 with `0` total attacks, then recovered as `no_logged_attempt`; the run still reported `invalid_operation_count: 2`, `zero_eligible_attacker_operation_count: 1`, and `recovery_without_logged_attempt_count: 1`, plus an explicit `operation_zero_eligible_execution` anomaly for that operation.
+- Post-fix run `n1398` (`bcd00cb1cf4339b9`): `cmd_arbih_1st_corps_t18` never enters execution, instead recovering on turn 23 as `planning_invalidated`; the run reports `invalid_operation_count: 0`, `zero_eligible_attacker_operation_count: 0`, and `recovery_without_logged_attempt_count: 0`, and the old `operation_zero_eligible_execution` anomaly disappears.
+- Follow-on evidence in the same rerun: `cmd_arbih_1st_corps_t24` becomes a `★★★★★` success with `1/1` objective and `1` logged attack, which is consistent with the engine no longer spending execution time on the false-ready predecessor.
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260409_OPERATION_READINESS_APPROACH_TRUTH_HARDENING.md`
+
+---
