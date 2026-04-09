@@ -200,14 +200,20 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - **Owner:** `src/sim/combat/brigade_assignment.ts`
 - **Report:** `docs/40_reports/implemented/20260409_SPLIT_CHILD_SHARED_FRONT_ROUTING_HARDENING.md`
 
+### Harness Assignment-Completeness Validator Truth — CLOSED 2026-04-09
+- **Fix:** `tools/validate_run_consistency.cjs` assignment completeness now reads `military.unresolved_sector_brigades` instead of reconstructing the retired broader doctrine that every brigade in a corps with sectors must be assigned.
+- **Tests:** `tests/validate_run_consistency.test.ts` proves honest interior brigades no longer fail when the canonical unresolved set is empty, while explicitly unresolved brigades still fail.
+- **Proof:** same-run validator proof on `n1397` improved from `FAIL` with 3 false assignment failures (`hrhb_travnik_brigade`, `rs_1st_podrinje`, `rs_5th_podrinje`) to `PASS` with `OK: 0 unresolved`. No scenario rerun was needed because the lane corrected downstream harness truth, not simulation output.
+- **Owner:** `tools/validate_run_consistency.cjs`
+- **Report:** `docs/40_reports/implemented/20260409_HARNESS_ASSIGNMENT_COMPLETENESS_VALIDATOR_TRUTH_HARDENING.md`
+
 ## Next Priority Lanes
 
 1. **v0.8.4 Phase F — CLOSED 2026-04-07.** DRINA investigation complete: root cause proven (absent ARBiH Podrinje defensive ops), fixes applied (initial controllers, Op Drina scope, painted targets), remaining variance accepted with evidence (27/27 anchors, 93.6%). v0.8.4 ALL PHASES CLOSED. Next: v0.8.x-final command authority cleanup or v0.9 per MASTER_ROADMAP.
 2. **Operation execution-quality follow-up:** fresh 40-week proof still shows `operation_zero_eligible_execution` / invalid combat-causality truth (`cmd_arbih_1st_corps_t18` in `n1397`). Owner: operation execution / combat-causality stack.
 3. **Military review shell coherence:** toolbar and Army HQ already key from `presidentialReviewQueue`, but `App.tsx` interrupt routing and `WarroomStatusBar.tsx` still read `pendingEventDecisions` directly. Owner: UI/read-model shell boundary.
-4. **Harness assignment-completeness validator drift:** `tools/validate_run_consistency.cjs` still hard-fails a broader doctrine than `brigadeRequiresSectorAssignment(...)` actually owns. Owner: scenario-harness diagnostics.
-5. **Studio Health / Repo Truth:** keep the permanent lane real in operating practice — closeout gate, blindspot review, warning disposition, artifact policy, and evidence retention.
-6. **v0.8.x-final command authority cleanup:** operations singularity follow-through, movement ownership cleanup, and remaining canonical-owner retirements before `v0.9`.
+4. **Studio Health / Repo Truth:** keep the permanent lane real in operating practice — closeout gate, blindspot review, warning disposition, artifact policy, and evidence retention.
+5. **v0.8.x-final command authority cleanup:** operations singularity follow-through, movement ownership cleanup, and remaining canonical-owner retirements before `v0.9`.
 
 ## Validation Gate Note
 

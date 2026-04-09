@@ -25179,3 +25179,38 @@ Main Staff HQ was Han Pijesak, not Rogatica. Tracked for OOB correction pass.
 - Report: `docs/40_reports/implemented/20260409_SPLIT_CHILD_SHARED_FRONT_ROUTING_HARDENING.md`
 
 ---
+
+## [2026-04-09] fix(harness): Align assignment validator with final sector truth
+
+**Type:** Harness truth hardening
+**Files:** `tools/validate_run_consistency.cjs`, `tests/validate_run_consistency.test.ts`, `docs/40_reports/implemented/20260409_HARNESS_ASSIGNMENT_COMPLETENESS_VALIDATOR_TRUTH_HARDENING.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/architect_notes.md`
+**Status:** VERIFIED - targeted validator regression, same-run before/after proof, recovery check, full Vitest, tsc, and build all green
+
+### Summary of changes
+
+1. **Canonical unresolved truth now owns harness assignment completeness** - `tools/validate_run_consistency.cjs` check 3 no longer reconstructs a broader "every brigade in a corps with sectors must be assigned" doctrine. It now reads `state.military.unresolved_sector_brigades`, which is the final sector builder's canonical unresolved set.
+
+2. **Validator script refactored for testable ownership** - the tool now exposes `collectAssignmentCompletenessIssues(...)`, `resolveRunInput(...)`, and `validateState(...)` while preserving the CLI entrypoint. This keeps the harness contract stable while making the ownership boundary regression-testable.
+
+3. **False-positive coverage added before closeout** - `tests/validate_run_consistency.test.ts` proves that an interior brigade like `hrhb_travnik_brigade` no longer fails when the canonical unresolved set is empty, while an explicitly unresolved brigade still fails.
+
+### Verification
+
+- `npx.cmd vitest run tests/validate_run_consistency.test.ts`
+- `node tools/validate_run_consistency.cjs runs/apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1397`
+- `npm.cmd run recovery:check`
+- `npm.cmd run test:vitest`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run build`
+
+### Same-run proof
+
+- Baseline on existing run `n1397`: validator `FAIL` with 3 false assignment failures (`hrhb_travnik_brigade`, `rs_1st_podrinje`, `rs_5th_podrinje`) even though the final save's canonical unresolved set was empty
+- Post-fix on the same saved run `n1397`: validator `PASS` and check 3 reports `OK: 0 unresolved`
+- This lane intentionally did **not** rerun the scenario because no simulation behavior changed; the hardening was a downstream harness truth correction against an existing saved run
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260409_HARNESS_ASSIGNMENT_COMPLETENESS_VALIDATOR_TRUTH_HARDENING.md`
+
+---
