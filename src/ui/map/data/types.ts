@@ -396,6 +396,10 @@ export interface ArmyReserveQueueView {
     criticalCount: number;
     offensiveCount: number;
     defensiveCount: number;
+    leadCriticalReason?: string;
+    leadCriticalPurpose?: 'offensive' | 'defensive';
+    leadCriticalWhyNeeded?: string;
+    leadCriticalDescription?: string;
 }
 
 export interface AttackOrderView {

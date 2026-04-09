@@ -2300,12 +2300,17 @@ function deriveArmyReserveQueue({
         request.purpose === 'defensive' || request.reason === 'defensive_gap',
     ).length;
     const offensiveCount = requests.length - defensiveCount;
+    const leadCriticalRequest = requests.find((request) => request.priority >= 75);
 
     return {
         pendingCount: requests.length,
         criticalCount,
         offensiveCount,
         defensiveCount,
+        leadCriticalReason: leadCriticalRequest?.reason,
+        leadCriticalPurpose: leadCriticalRequest?.purpose,
+        leadCriticalWhyNeeded: leadCriticalRequest?.why_needed,
+        leadCriticalDescription: leadCriticalRequest?.description,
     };
 }
 

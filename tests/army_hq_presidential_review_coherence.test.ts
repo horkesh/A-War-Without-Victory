@@ -22,7 +22,8 @@ describe('Army HQ / presidential review coherence', () => {
       'utf8',
     );
 
-    expect(source).toContain('reserveAttention?: { pendingCount: number; criticalCount: number } | null;');
+    expect(source).toContain('reserveAttention?: {');
+    expect(source).toContain('leadCriticalReason?: string;');
     expect(source).toContain('getArmyReserveToolbarSignal');
     expect(source).toContain('reserveSignal.label');
     expect(source).not.toContain("{pendingReviews +");

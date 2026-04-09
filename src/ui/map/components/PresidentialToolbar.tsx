@@ -47,7 +47,14 @@ interface PresidentialToolbarProps {
     /** Canonical pending military review count (from presidentialReviewQueue). */
     pendingReviews: number;
     /** Canonical army-level reserve pressure summary (from armyReserveQueue). */
-    reserveAttention?: { pendingCount: number; criticalCount: number } | null;
+    reserveAttention?: {
+        pendingCount: number;
+        criticalCount: number;
+        leadCriticalReason?: string;
+        leadCriticalPurpose?: 'offensive' | 'defensive';
+        leadCriticalWhyNeeded?: string;
+        leadCriticalDescription?: string;
+    } | null;
     /** Whether any event has readiness > 50% of threshold. */
     pressureWarning: boolean;
     onOpenSummary?: () => void;

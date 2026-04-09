@@ -17,7 +17,8 @@ describe('Army reserve severity legibility', () => {
   it('frames critical reserve pressure as immediate army attention in the toolbar signal', () => {
     expect(getArmyReserveToolbarSignal({ pendingCount: 3, criticalCount: 1 })).toEqual({
       label: '1 CRITICAL RESERVE REQUEST',
-      title: '1 critical reserve request needs immediate army attention. 3 reserve requests are pending in total.',
+      title:
+        '1 critical reserve request needs immediate army attention. Lead cause: A corps is reporting urgent reserve pressure on the line. 3 reserve requests are pending in total.',
       tone: 'critical',
     });
   });
@@ -33,7 +34,8 @@ describe('Army reserve severity legibility', () => {
   it('gives Army HQ one canonical reserve-attention summary', () => {
     expect(getArmyReserveAttentionSummary({ pendingCount: 4, criticalCount: 2 })).toEqual({
       heading: '2 critical reserve requests need immediate army attention.',
-      detail: 'Reserve requests are army-level reserve management, not presidential review. Routine requests remain in the Army Reserve desk.',
+      detail:
+        'Lead cause: A corps is reporting urgent reserve pressure on the line. Reserve requests are army-level reserve management, not presidential review. Routine requests remain in the Army Reserve desk.',
       tone: 'critical',
     });
   });

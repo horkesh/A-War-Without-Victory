@@ -1,8 +1,30 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-08. 222 lessons across 9 topic files.
+> Last restructured: 2026-04-09. 228 lessons across 9 topic files.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
+
+## New Lessons (2026-04-09)
+
+### [Process] Update working-on.md at every commit — not just at session start — see `docs/life_lessons/process.md`
+- Napkin violation (2026-04-08): file covered first 3 lanes, stale for 3+ hours across 6 subsequent commits. working-on.md is a crash-recovery artifact — treat updating it as a mandatory commit checklist step, like tsc and vitest. Delete only at session closeout.
+
+### [Testing] Proof tests for completed operations must read operation_aars.json — not active_operations — see `docs/life_lessons/process.md`
+- active_operations is empty after completion — that's correct behaviour, not a test failure. Proof tests for historical ops must read `operation_aars.json` (the archival record) and verify presence, outcome, and objectives there.
+
+### [Testing] Trigger conditions must encode prerequisite completion history — not just time gates or corps state — see `docs/life_lessons/process.md`
+- `Operation Herzegovina Consolidation` false-triggered on noop harnesses via `turn >= N && corps idle`. Fix: require `operation_aars` proof for prerequisite ops (Višegrad, Foča). Any trigger that passes on a noop harness fires at wrong times in real scenarios.
+
+### [Architecture] Final reconciliation passes required after all late writers — sector truth and operation truth — see `docs/life_lessons/architecture.md`
+- Recruitment, mobilization, elite-loan recall, and dissolution all fire after sectors/ops are built. Two new war-phase steps (`reconcile-final-sector-truth`, `reconcile-final-operation-truth`) rebuild authoritative state after all late writers. Every new late writer must be checked against these passes.
+
+### [Architecture] Operation birth quality and runtime truth are distinct failure classes — fix each separately — see `docs/life_lessons/architecture.md`
+- n1367: ZEA 52.6%, 94 invalid ops, zombie op. Required three separate passes: (1) harness/birth quality, (2) runtime truth reconciliation, (3) orchestration honesty. Each anomaly counter maps to a distinct code area. Don't conflate them.
+
+### [Architecture] Active operation participants must be pinned against generic attack-share trimming — see `docs/life_lessons/architecture.md`
+- Committed brigades' attack orders were stripped by generic per-corps trimming after op launch. Fix: `isPinnedActiveOperationAttacker(...)` exempts execution-phase op participants. Any new trimming/friction pass must check this before removing attack orders.
+
+---
 
 ## New Lessons (2026-04-08)
 

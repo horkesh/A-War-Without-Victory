@@ -675,6 +675,10 @@ function App() {
           ? {
             pendingCount: loadedGameState.armyReserveQueue.pendingCount,
             criticalCount: loadedGameState.armyReserveQueue.criticalCount,
+            leadCriticalReason: loadedGameState.armyReserveQueue.leadCriticalReason,
+            leadCriticalPurpose: loadedGameState.armyReserveQueue.leadCriticalPurpose,
+            leadCriticalWhyNeeded: loadedGameState.armyReserveQueue.leadCriticalWhyNeeded,
+            leadCriticalDescription: loadedGameState.armyReserveQueue.leadCriticalDescription,
           }
           : null}
         pressureWarning={loadedGameState?.pressureWarning ?? false}

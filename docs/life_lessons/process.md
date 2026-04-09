@@ -3,6 +3,24 @@
 
 ---
 
+### [Process] Update working-on.md at every commit — not just at session start (2026-04-09) — NEW
+- **Context**: 2026-04-08 violation (napkin flagged): `working-on.md` was written at session start covering first 3 lanes but not updated across 6 subsequent packaged-desktop commits spanning 3+ hours. The file's purpose is crash recovery — if the session dies, the next session reads it first. A stale file is worse than no file: it gives false confidence about where work stands.
+- **Wrong approach**: Treating `working-on.md` as a session-start artifact. Writing it once, then forgetting it while committing changes.
+- **Right approach**: Treat `working-on.md` as a mandatory commit checklist step. Before each `git commit`, update it: current state, files in play, next 3 steps. Delete only at session closeout.
+- **Do instead**: Add `working-on.md` to mental commit checklist alongside `tsc --noEmit` and `vitest run`. The cost of updating it per commit is 60 seconds. The cost of a stale file when the session crashes is a full reconstruction session.
+
+### [Testing] Proof tests for completed operations must read operation_aars.json — not active_operations (2026-04-09) — NEW
+- **Context**: `scenario_vrs_operation_proof.test.ts` verified operation completion by reading `active_operations` — the runtime slot that should be empty after completion. Every completed operation moves to `operation_aars.json` (the archival record). Reading `active_operations` for completed ops produces a false negative every time: the slot is empty because the operation finished, not because it never ran.
+- **Wrong approach**: Using `active_operations` as the proof authority for whether a historical operation completed and achieved its objectives.
+- **Right approach**: After an operation completes, it lives in `operation_aars.json`. Proof tests must read `operation_aars` and verify presence, outcome, and captured objectives there. `active_operations` is the authority for in-flight ops only.
+- **Do instead**: When writing a proof test for a historical op (pre-planned or triggered), check `operation_aars.json` for the operation entry. If it's not there, the op hasn't completed — not that it failed to inject.
+
+### [Testing] Trigger conditions must encode prerequisite completion history — not just time gates or corps state (2026-04-09) — NEW
+- **Context**: `Operation Herzegovina Consolidation` triggered on noop harnesses because its condition was "turn >= N and Herzegovina corps is idle." Noop harnesses easily satisfy both. Fix: required completed-history proof for both `Operation Visegrad` and `Operation Foca` (checked against `operation_aars`) before Herzegovina Consolidation can trigger. The noop harness immediately stopped false-triggering.
+- **Wrong approach**: Using `turn >= N` or "corps currently has no active op" as the sole trigger condition for a historically-sequenced operation. These conditions are satisfied by empty harness states with no military activity.
+- **Right approach**: Historical operations that depend on prior completed operations must require recorded completion proof: `operation_aars` contains entries for the prerequisite ops. Time gates and corps-idle checks are necessary but not sufficient.
+- **Do instead**: For any triggered op that should follow another: add `opStillHasEnemyObjectives(...)` and `hasEnemyObjective(...)` relevance checks PLUS a prerequisite completion check against `operation_aars`. A trigger that passes on a noop harness is a trigger that will fire at wrong times in real scenarios.
+
 ### [Testing] Integration test geographic boundaries are historical claims — apply historian gate (2026-04-07) — NEW
 - **Context**: `SARAJEVO_MUNICIPALITIES` in `integration_deployment_health.test.ts` listed `'pale'` as a siege-perimeter municipality. Pale is the RS political capital, 15–20 km east of the siege perimeter. Non-SRK VRS units (Main Staff Guards, Drina Corps) legitimately transit Pale. The test had been wrong since creation; brigade drift into Pale OSIDs exposed it. Fix: removed `'pale'` from the list; kept the >80% SRK threshold unchanged. Historian adjudication (sr.wiki OOB source) made the decision provable.
 - **Wrong approach**: Adding `'pale'` to the Sarajevo siege list because it is "near Sarajevo." Any geographic intuition that hasn't been verified against sources is a guess.

@@ -465,6 +465,10 @@ test('parseGameState derives an army-owned reserve queue summary without folding
         criticalCount: 1,
         offensiveCount: 1,
         defensiveCount: 1,
+        leadCriticalReason: 'defensive_gap',
+        leadCriticalPurpose: 'defensive',
+        leadCriticalWhyNeeded: undefined,
+        leadCriticalDescription: 'Line in danger of collapse',
     });
     assert.equal(parsed.presidentialReviewQueue, undefined);
 });
