@@ -6,6 +6,7 @@ import type {
 } from '../data/types';
 import { getPlayerFacingFaction, filterPlayerVisibleMapFormations } from '../../shared/playerVisibility';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
+import { getPlayerSafeThreatPresentation } from '../utils/playerSafeThreat';
 
 export interface PlayerSafeFormationTooltipModel {
   classification: 'own' | 'enemy_contact';
@@ -26,8 +27,7 @@ export interface PlayerSafeFrontTooltipModel {
   pressureLine: string;
   densityValue: number | null;
   densityLabel: string | null;
-  threatValue: number | null;
-  threatLabel: string | null;
+  threatSummary: string | null;
   ownFormationLabels: string[];
   enemyContactSummary: string | null;
 }
@@ -36,12 +36,6 @@ function getDensityLabel(density: number): string {
   if (density < 0.5) return 'THIN';
   if (density > 1.0) return 'DENSE';
   return 'Normal';
-}
-
-function getThreatLabel(ratio: number): string {
-  if (ratio > 1.5) return 'critical';
-  if (ratio > 0.8) return 'contested';
-  return 'secure';
 }
 
 function isOwnFormation(formation: Pick<FormationView, 'faction'>, playerFaction: string | null): boolean {
@@ -168,8 +162,7 @@ export function buildPlayerSafeFrontTooltipModel(args: {
     pressureLine,
     densityValue: sector?.faction === args.playerFaction ? sector.density : null,
     densityLabel: sector?.faction === args.playerFaction ? getDensityLabel(sector.density) : null,
-    threatValue: sector?.faction === args.playerFaction ? sector.threat_ratio : null,
-    threatLabel: sector?.faction === args.playerFaction ? getThreatLabel(sector.threat_ratio) : null,
+    threatSummary: sector?.faction === args.playerFaction ? getPlayerSafeThreatPresentation(sector.threat_ratio).summary : null,
     ownFormationLabels,
     enemyContactSummary: enemyContacts.length > 0 ? `${enemyContacts.length} enemy contact${enemyContacts.length === 1 ? '' : 's'} observed` : null,
   };

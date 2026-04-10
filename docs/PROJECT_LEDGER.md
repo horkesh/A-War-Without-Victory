@@ -456,3 +456,28 @@
 
 ### Artifacts
 - Report: `docs/40_reports/implemented/20260410_STARTUP_SNAPSHOT_GUARDRAIL_CONTRACT_HARDENING.md`
+## [2026-04-10] fix(ui): demote own-sector threat precision to player-safe abstractions
+
+**Type:** UI/player-knowledge hardening
+**Files:** `src/ui/map/utils/playerSafeThreat.ts`, `src/ui/map/components/CorpsFrontPanel.tsx`, `src/ui/map/components/army_hq/SectorsSection.tsx`, `src/ui/map/components/SituationTab.tsx`, `src/ui/map/components/tooltipPlayerSafe.ts`, `src/ui/map/components/Tooltip.tsx`, `tests/ui_threat_precision_player_visibility.test.ts`
+**Status:** VERIFIED - targeted player-visibility tests, recovery bar, full vitest, typecheck, and build clean
+
+### Summary of changes
+1. **Shared player-safe threat formatter added** - `playerSafeThreat.ts` now owns qualitative force-balance labels and summaries for player-facing shells.
+2. **Exact sector threat precision demoted** - `CorpsFrontPanel`, Army HQ `SectorsSection`, `SituationTab`, and the player-safe front tooltip no longer print raw `threat_ratio` values in normal play.
+3. **Regression gate added** - `ui_threat_precision_player_visibility.test.ts` now fails if exact threat-ratio formatting leaks back into those player-facing files.
+
+### Proof
+- This lane is local to player-facing UI truth, not simulation behavior, so scenario reruns were not the strongest evidence source.
+- Before: the normal player shells rendered exact `threat_ratio` precision like `ratio.toFixed(2)`, `THREAT RATIO`, and `model.threatValue.toFixed(2)`.
+- After: those same files render only qualitative staff-abstraction labels and summaries through one shared helper.
+
+### Verification
+- `npx.cmd vitest run tests/ui_threat_precision_player_visibility.test.ts tests/ui_opord_player_safe_labels.test.ts tests/ui_player_visibility.test.ts`
+- `npm.cmd run recovery:check`
+- `npm.cmd run test:vitest`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run build`
+
+### Artifacts
+- Report: `docs/40_reports/implemented/20260410_PLAYER_SAFE_THREAT_PRECISION_HARDENING.md`

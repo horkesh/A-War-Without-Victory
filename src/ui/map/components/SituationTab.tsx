@@ -11,6 +11,7 @@ import {
   getPlayerSafeMunicipalityName,
   getPlayerSafePoliticalFactionName,
 } from '../utils/playerSafeText';
+import { getPlayerSafeThreatPresentation } from '../utils/playerSafeThreat';
 import {
     DRINA_BLOCKADE_THRESHOLD,
     INTERNATIONAL_SANCTIONS_THRESHOLD,
@@ -304,7 +305,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
                   <span className="text-[10px] uppercase tracking-wide text-accent-gold">OPSEC active</span>
                 </div>
                 <div className="text-text-secondary">
-                  Threat {sector.threat_ratio.toFixed(2)} · Intel {(sector.intel_confidence * 100).toFixed(0)}%
+                  Pressure {getPlayerSafeThreatPresentation(sector.threat_ratio).summary} · Intel {(sector.intel_confidence * 100).toFixed(0)}%
                   {sector.offensive_signs ? ' · Offensive signs detected' : ''}
                 </div>
               </div>

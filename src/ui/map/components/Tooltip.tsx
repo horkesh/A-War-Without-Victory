@@ -170,13 +170,6 @@ function densityBadge(density: number): { label: string; color: string } {
   return { label: 'Normal', color: 'text-amber-300' };
 }
 
-/** Threat label + color class */
-function threatBadge(ratio: number): { label: string; color: string } {
-  if (ratio > 1.5) return { label: 'critical', color: 'text-red-400' };
-  if (ratio > 0.8) return { label: 'contested', color: 'text-amber-300' };
-  return { label: 'secure', color: 'text-green-400' };
-}
-
 /** §7.3 Front edge: factions, sector, density, threat, pressure, formations each side */
 function FrontTooltipContent({
   edgeId,
@@ -225,9 +218,9 @@ function FrontTooltipContent({
           Density: <span className={densityBadge(model.densityValue).color}>{model.densityValue.toFixed(2)} ({model.densityLabel})</span>
         </div>
       )}
-      {model.threatValue != null && model.threatLabel && (
+      {model.threatSummary && (
         <div className="text-[11px] text-text-secondary mb-2">
-          Threat: <span className={threatBadge(model.threatValue).color}>{model.threatValue.toFixed(2)}× ({model.threatLabel})</span>
+          Threat: <span className="text-amber-300 uppercase">{model.threatSummary}</span>
         </div>
       )}
       {model.ownFormationLabels.length > 0 && (

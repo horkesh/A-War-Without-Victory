@@ -7,6 +7,7 @@ import { collectSectorFriendlyOsids } from '../utils/sectorUtils';
 import { getOperationId, getOperationPhaseBadgeClass } from '../utils/operations';
 import { getPanelRailStyle } from './panelRail';
 import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
+import { getPlayerSafeThreatPresentation } from '../utils/playerSafeThreat';
 import { useIPC } from '../desktop/useIPC';
 import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
 
@@ -24,19 +25,12 @@ function StrengthBadge({ strengthClass }: { strengthClass?: 'fortress' | 'strong
 
 /** Threat ratio badge with descriptive balance labels. */
 function ThreatBadge({ ratio }: { ratio: number }) {
-  let label = 'BALANCED';
-  let color = 'text-green-400';
-
-  if (ratio > 2.0) { label = 'OVERMATCHED'; color = 'text-red-500 font-black'; }
-  else if (ratio > 1.5) { label = 'VULNERABLE'; color = 'text-red-400 font-bold'; }
-  else if (ratio > 1.2) { label = 'PRESSURE'; color = 'text-amber-500'; }
-  else if (ratio < 0.5) { label = 'SUPERIOR'; color = 'text-emerald-500 font-bold'; }
-  else if (ratio < 0.8) { label = 'FAVORABLE'; color = 'text-green-500'; }
+  const { label, summary, toneClass } = getPlayerSafeThreatPresentation(ratio);
 
   return (
     <div className="flex flex-col">
-      <span className={`${color} text-[10px] tracking-tighter leading-none mb-0.5`}>{label}</span>
-      <span className={`${color} font-mono`}>{ratio.toFixed(2)}:1</span>
+      <span className={`${toneClass} text-[10px] tracking-tighter leading-none mb-0.5`}>{label}</span>
+      <span className={`${toneClass} font-mono text-[10px] uppercase tracking-tight`}>{summary}</span>
     </div>
   );
 }

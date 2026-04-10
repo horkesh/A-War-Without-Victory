@@ -666,8 +666,9 @@ Patch bumps (0.X.1, 0.X.2) are for significant fixes within a milestone â€”
 - Closed this wave:
   - packaged startup snapshot proof no longer mutates the committed April 1992 artifact during guardrail tests
   - baked startup snapshot contract now normalizes checkout line endings before comparing against canonical builder truth
+  - own-sector force-balance precision is now demoted to qualitative staff-abstraction labels across CorpsFrontPanel, Army HQ sectors, Situation-tab OPSEC, and the player-safe front tooltip
 - Still active:
-  - rotate back to the global board after packaged/startup closure; next bounded candidates should come from live player-knowledge, harness, or command-shell evidence rather than the exhausted startup board
+  - rotate back to the global board after the player-knowledge threat-precision closure; next bounded candidates should come from live player-knowledge, harness, or command-shell evidence rather than the exhausted startup board
 - Demoted / redesign-blocked:
   - same-faction ownerless unreachable brigades (`rs_1st_podrinje`, `rs_5th_podrinje`)
 - Investigated and demoted to realism/doctrine:
