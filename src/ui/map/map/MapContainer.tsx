@@ -1779,7 +1779,11 @@ export function MapContainer() {
 
       // For fill, we can highlight all OSIDs in all active sectors
       const allActiveSectors = state?.corpsFrontSectors?.filter(s => activeSectorIds.has(s.sector_id)) ?? [];
-      const allOsids = allActiveSectors.flatMap(s => collectSectorFriendlyOsids(s, state!.frontEdgesOsid!));
+      const allOsids = allActiveSectors.flatMap(s =>
+        s.territory_osids && s.territory_osids.length > 0
+          ? s.territory_osids
+          : collectSectorFriendlyOsids(s, state!.frontEdgesOsid!)
+      );
 
       if (!state?.frontEdgesOsid) return true;
 

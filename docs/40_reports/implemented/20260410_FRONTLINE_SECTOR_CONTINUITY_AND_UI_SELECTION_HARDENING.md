@@ -114,3 +114,27 @@ When a sector is supposed to represent a frontline line, there are two separate 
 2. the UI must resolve sectors from their full territory/selection surface rather than only from brigade-selected or front-adjacent OSIDs.
 
 If either side drifts, the player sees the same symptom: a broken or non-clickable sector line.
+
+## Follow-up correction
+
+The first pass of this lane fixed the engine-side fragment and the Arapuša control issue, but it did **not** fully solve the visible broken selected-sector glow in the live map.
+
+That remaining symptom turned out to be a renderer-level bug:
+
+- the black/white frontline base was stitched into longer polylines,
+- but the selected-sector glow still rendered raw per-edge `glow` segments from `buildCorpsFrontLinesGeoJSON()`.
+
+So even with correct sector ownership, the selected white trail could still appear broken at edge joints.
+
+The follow-up fix:
+
+- merges connected glow segments per `(faction, corps_id, sector_id, sub_segment_id, offset_side)` group before emitting the front-lines source,
+- and highlights selected sector territory from `territory_osids` rather than the older front-friendly subset.
+
+Additional verification:
+
+- `npx.cmd vitest run tests/ui_sector_glow_continuity.test.ts tests/ui_map_interactions.test.ts tests/ui_map_sector_lookup.test.ts tests/front_sector_player_visibility.test.ts tests/ui_map_tooltip_player_visibility.test.ts`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run build`
+
+This follow-up is renderer/UI only. It does not change the `n1422` simulation outcome; it corrects how the already-correct sector is highlighted on the map.

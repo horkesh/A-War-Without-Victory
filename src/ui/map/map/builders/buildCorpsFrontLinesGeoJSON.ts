@@ -196,6 +196,31 @@ function mergeLineSegments<P extends CorpsLineProperties>(
     return merged;
 }
 
+export function mergeGlowSegments(
+    segments: Feature<LineString, CorpsGlowProperties>[]
+): Feature<LineString, CorpsGlowProperties>[] {
+    const byGroup = new Map<string, Feature<LineString, CorpsGlowProperties>[]>();
+    for (const segment of segments) {
+        const props = segment.properties;
+        const key = [
+            props.faction,
+            props.corps_id,
+            props.sector_id ?? '',
+            props.sub_segment_id ?? '',
+            props.offset_side ?? 0,
+        ].join('|');
+        const list = byGroup.get(key) ?? [];
+        list.push(segment);
+        byGroup.set(key, list);
+    }
+
+    const merged: Feature<LineString, CorpsGlowProperties>[] = [];
+    for (const group of byGroup.values()) {
+        merged.push(...mergeLineSegments(group));
+    }
+    return merged;
+}
+
 /**
  * Build a mapping from (OSID-pair edge key, faction) → corps info.
  * Keyed as "pairKey\0faction" so both sides of a front edge resolve to
@@ -687,6 +712,7 @@ export function buildCorpsFrontLinesGeoJSON(
         });
     }
 
-    const allFeatures: Feature<LineString>[] = [...glowFeatures, ...mergedFront];
+    const mergedGlow = mergeGlowSegments(glowFeatures);
+    const allFeatures: Feature<LineString>[] = [...mergedGlow, ...mergedFront];
     return { type: 'FeatureCollection', features: allFeatures as any };
 }
