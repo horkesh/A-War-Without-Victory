@@ -1,3 +1,43 @@
+## [2026-04-10] fix(desktop): align reserve approval with canonical request identity
+
+**Summary:** Closed a reserve-system ownership mismatch at the desktop/read-model boundary. `pending_reserve_requests` already had canonical packet identity via `request_id`, and decline/history already consumed it, but approval still flowed through `corps_id`. The lane threaded `request_id` through `ArmyReservePanel`, `useIPC`, `preload.cjs`, `electron-main.cjs`, and `desktop_sim.ts`, so the selected reserve request is now approved, recorded, and removed by the same canonical owner.
+
+**Files:** `src/desktop/desktop_sim.ts`, `src/desktop/electron-main.cjs`, `src/desktop/preload.cjs`, `src/ui/map/desktop/useIPC.ts`, `src/ui/map/components/ArmyReservePanel.tsx`, `tests/reserve_request_identity_boundary.test.ts`, `docs/40_reports/implemented/20260410_RESERVE_REQUEST_IDENTITY_BOUNDARY_HARDENING.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/architect_notes.md`
+
+**Why this changed**
+- Reserve requests were already canonical packets with `request_id`, but approval still behaved like a corps-level shortcut.
+- That meant approve/decline/history did not agree on what the selected request actually was.
+- The seam was bounded: preserve the existing request packet owner instead of inventing a new corps-level identity.
+
+**What changed**
+- `approveReserveRequest(...)` now accepts and resolves `requestId` in `desktop_sim.ts`.
+- The desktop IPC boundary and player UI now thread `request_id` instead of `corps_id` for approval.
+- Approval removes only the selected request instead of filtering every pending request for the same corps.
+- Added `tests/reserve_request_identity_boundary.test.ts` to prove the selected request survives as the owner across UI, preload, main-process, and desktop-sim boundaries.
+
+**Canonical owner**
+- Reserve approval identity: `ArmyReserveRequest.request_id`
+- Demoted path: corps-keyed approval/removal via `corps_id`
+
+**Verification**
+- Targeted:
+  - `npx.cmd vitest run tests/reserve_request_identity_boundary.test.ts`
+  - `npx.cmd vitest run tests/reserve_request_identity_boundary.test.ts tests/army_reserve_system.test.ts`
+  - `npx.cmd tsc --noEmit -p tsconfig.json`
+- Full bar:
+  - `npm.cmd run recovery:check`
+  - `npm.cmd run test:vitest`
+  - `npm.cmd run build`
+
+**Result**
+- Approve / decline / history now speak the same request identity contract.
+- The desktop boundary no longer collapses multiple same-corps requests into one implicit approval target.
+- Scenario residuals remain unchanged, which is correct for a reserve action-boundary lane.
+
+**Follow-up**
+- Next step: campaign-level reassessment. Gorazde remains content/runtime audit, Podrinje remains redesign-blocked, and 444th remains doctrine realism.
+- Report: `docs/40_reports/implemented/20260410_RESERVE_REQUEST_IDENTITY_BOUNDARY_HARDENING.md`
+
 ## [2026-04-10] fix(ui): demote player-facing operation force-ratio precision to staff abstractions
 
 **Summary:** Closed a cross-surface player-truth seam in operation planning and review shells. Exact `force_ratio_estimate` decimals and commander-threshold math were leaking into Army HQ, corps-front, briefing, OPORD, and narrative surfaces even though those exact values are staff-estimate internals. The lane introduced one shared player-facing owner, `getPlayerSafeOperationBalancePresentation(...)`, so normal play now sees banded staff-balance labels (`CLEAR EDGE`, `FAVORABLE`, `CONTESTED`, `UNFAVORABLE`) while exact decimals remain available only in the explicit debug-only raw-intel surface.

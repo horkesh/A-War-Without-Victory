@@ -394,6 +394,15 @@ export async function getRecruitmentCatalog(baseDir: string): Promise<{
 /** Re-export for main process (serialize/deserialize state for IPC). */
 export { deserializeState, serializeState };
 
+function getReserveRequestId(request: {
+    request_id?: string;
+    turn_requested?: number;
+    corps_id?: string;
+    reason?: string;
+}): string {
+    return request.request_id ?? `req:${Number(request.turn_requested ?? 0)}:${String(request.corps_id ?? '')}:${String(request.reason ?? '')}`;
+}
+
 // ── Operation Prediction Query ─────────────────────────────────────────
 
 import { loadOperationalData, loadOperationalEdges } from '../data/operational_data.js';
@@ -571,7 +580,7 @@ export function assignBrigadeToSector(
 /** Player approves a pending reserve request, deploying the suggested (or specified) brigade. */
 export async function approveReserveRequest(
     state: GameState,
-    corpsId: string,
+    requestId: string,
     brigadeId: string,
     decisionReason?: string,
     baseDir?: string,
@@ -582,17 +591,21 @@ export async function approveReserveRequest(
     if (f.elite_loan_state.on_loan) return { ok: false, error: `${brigadeId} is already on loan` };
     if (f.elite_loan_state.permanently_degraded) return { ok: false, error: `${brigadeId} has permanently lost elite status` };
     if (!baseDir) return { ok: false, error: 'Base directory required to validate reserve deployment route' };
+    const pending = state.military.pending_reserve_requests ?? [];
+    const req = pending.find((request) => getReserveRequestId(request) === requestId);
+    if (!req) return { ok: false, error: `Reserve request not found: ${requestId}` };
+    const corpsId = req.corps_id;
+    if (typeof corpsId !== 'string' || corpsId.length === 0) {
+        return { ok: false, error: `Reserve request ${requestId} has no corps owner` };
+    }
     if (!canEliteLoanReachCorpsTerritory(state, brigadeId, corpsId, await getCachedOsidAdjacency(baseDir))) {
         return { ok: false, error: `No friendly route from ${brigadeId} to ${corpsId} sector territory` };
     }
-    // Find the pending request to get the reason; fall back to 'offensive_support'
-    const req = state.military.pending_reserve_requests?.find(r => r.corps_id === corpsId);
     const reason = req?.reason ?? 'offensive_support';
     const hops = req?.travel_hops ?? 0;
     const purpose = req?.purpose ?? 'defensive';
     const whyNeeded = req?.why_needed ?? req?.description ?? 'Corps requires immediate reinforcement.';
     const howToUse = req?.how_to_use ?? 'Stabilize front pressure and reinforce key sub-segments.';
-    const requestId = req?.request_id ?? `req:${state.meta.turn}:${corpsId}:${reason}`;
     const armyReason = (decisionReason && decisionReason.trim().length > 0)
         ? decisionReason.trim()
         : 'Army CO accepted: request is actionable and priority justifies elite commitment.';
@@ -622,9 +635,7 @@ export async function approveReserveRequest(
         how_to_use: howToUse,
     });
     // Remove the fulfilled request from pending list
-    if (state.military.pending_reserve_requests) {
-        state.military.pending_reserve_requests = state.military.pending_reserve_requests.filter(r => r.corps_id !== corpsId);
-    }
+    state.military.pending_reserve_requests = pending.filter((request) => getReserveRequestId(request) !== requestId);
     return { ok: true };
 }
 
@@ -635,7 +646,7 @@ export function declineReserveRequest(
     reason?: string
 ): { ok: true } | { ok: false; error: string } {
     const pending = state.military.pending_reserve_requests ?? [];
-    const req = pending.find((r) => (r.request_id ?? '') === requestId);
+    const req = pending.find((request) => getReserveRequestId(request) === requestId);
     if (!req) return { ok: false, error: `Reserve request not found: ${requestId}` };
     const declineReason = (reason && reason.trim().length > 0)
         ? reason.trim()
@@ -657,7 +668,7 @@ export function declineReserveRequest(
         why_needed: whyNeeded,
         how_to_use: howToUse,
     });
-    state.military.pending_reserve_requests = pending.filter((r) => (r.request_id ?? '') !== requestId);
+    state.military.pending_reserve_requests = pending.filter((request) => getReserveRequestId(request) !== requestId);
     return { ok: true };
 }
 

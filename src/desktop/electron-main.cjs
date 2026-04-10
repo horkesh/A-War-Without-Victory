@@ -2489,14 +2489,14 @@ app.whenReady().then(() => {
 
   // --- Army Reserve IPC handlers ---
   ipcMain.handle('approve-reserve-request', async (_event, payload) => {
-    const { corpsId, brigadeId, reason } = payload || {};
-    if (!currentGameStateJson || typeof corpsId !== 'string' || typeof brigadeId !== 'string') {
+    const { requestId, brigadeId, reason } = payload || {};
+    if (!currentGameStateJson || typeof requestId !== 'string' || typeof brigadeId !== 'string') {
       return { ok: false, error: 'No game loaded or invalid payload' };
     }
     try {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
-      const result = await sim.approveReserveRequest(state, corpsId, brigadeId, typeof reason === 'string' ? reason : undefined, getBaseDir());
+      const result = await sim.approveReserveRequest(state, requestId, brigadeId, typeof reason === 'string' ? reason : undefined, getBaseDir());
       if (!result.ok) return result;
       currentGameStateJson = sim.serializeState(state);
       sendGameStateToRenderer(currentGameStateJson);

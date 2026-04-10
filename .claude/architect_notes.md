@@ -36,6 +36,11 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Active / Recent Accepted Lanes
 
+- **Reserve request identity boundary truth** - CLOSED 2026-04-10. `pending_reserve_requests` already carried canonical `request_id`, and decline/history already consumed it, but approval still flowed through `corps_id` across the UI, preload, main-process, and desktop sim. The lane threaded `request_id` through that full action boundary so the selected request is now approved, recorded, and removed by one canonical owner. Proof is local rather than scenario-based: request-identity regressions, reserve-system tests, `recovery:check`, `test:vitest`, `tsc`, and `build` all pass. Report: `docs/40_reports/implemented/20260410_RESERVE_REQUEST_IDENTITY_BOUNDARY_HARDENING.md`.
+  - **Canonical owner after cleanup:** `ArmyReserveRequest.request_id`.
+  - **Demoted path:** corps-keyed approval/removal via `corps_id`.
+  - **Residual board after lane:** Gorazde remains content/runtime audit, Podrinje remains redesign-blocked, and 444th remains doctrine realism.
+
 - **Player-safe operation force-balance truth** - CLOSED 2026-04-10. Normal player-facing operation shells were still printing exact force-ratio decimals and commander-threshold math even though those exact numerics are staff-estimate internals owned by operation prediction/readiness truth. The lane introduced a single downstream player-facing owner, `getPlayerSafeOperationBalancePresentation(...)`, and moved operations, corps-front, briefing, axis-assessment, OPORD, narrative, and recommendation-explanation surfaces onto shared staff-balance language while leaving `RawIntelTab` exact and explicitly debug-only. Proof is local rather than scenario-based: targeted force-balance regressions, `test:vitest`, `tsc`, `build`, and `recovery:check` all pass. Report: `docs/40_reports/implemented/20260410_PLAYER_SAFE_OPERATION_FORCE_BALANCE_HARDENING.md`.
   - **Canonical owner after cleanup:** exact numerics remain in operation prediction/readiness truth; normal player-facing wording is owned by `getPlayerSafeOperationBalancePresentation(...)`.
   - **Demoted path:** per-surface `toFixed(...)` ratio rendering and player-facing commander-threshold math.

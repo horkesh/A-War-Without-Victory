@@ -85,7 +85,7 @@ interface WindowAwwv {
     saveGame: (payload?: { filename?: string }) => Promise<{ ok: boolean; filePath?: string; error?: string }>;
     quickSave: () => Promise<{ ok: boolean; filePath?: string; error?: string }>;
     openTacticalMapWindow: (payload?: { mode?: string }) => Promise<void>;
-    approveReserveRequest: (corpsId: string, brigadeId: string, reason?: string) => Promise<{ ok: boolean; error?: string }>;
+    approveReserveRequest: (requestId: string, brigadeId: string, reason?: string) => Promise<{ ok: boolean; error?: string }>;
     declineReserveRequest: (requestId: string, reason?: string) => Promise<{ ok: boolean; error?: string }>;
     recallEliteBrigade: (brigadeId: string, reason?: string) => Promise<{ ok: boolean; error?: string }>;
     redirectReserveLoan: (brigadeId: string, newCorpsId: string) => Promise<{ ok: boolean; error?: string }>;
@@ -330,7 +330,7 @@ export function useIPC() {
                 : makeNoop<{ ok: boolean; data?: Record<string, unknown>; error?: string }>(),
 
             approveReserveRequest: awwv
-                ? (corpsId: string, brigadeId: string, reason?: string) => awwv.approveReserveRequest(corpsId, brigadeId, reason)
+                ? (requestId: string, brigadeId: string, reason?: string) => awwv.approveReserveRequest(requestId, brigadeId, reason)
                 : makeNoop<{ ok: boolean; error?: string }>(),
 
             declineReserveRequest: awwv
