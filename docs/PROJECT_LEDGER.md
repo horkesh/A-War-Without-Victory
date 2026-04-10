@@ -1,4 +1,31 @@
-## [2026-04-10] fix(harness): exempt army HQ brigades from unresolved-sector validator (n1414)
+## [2026-04-10] fix(sim): rescue loaned elites dropped by merge/seal passes (n1420)
+
+**Type:** Engine / sector assignment truth hardening
+**Files:** `src/sim/combat/corps_front_sectors.ts`, `src/sim/combat/brigade_assignment.ts`, `tools/validate_run_consistency.cjs`, `docs/40_reports/implemented/20260410_LOANED_ELITE_RESCUE_PASS.md`
+**Run:** n1420 — hash `d50c2b19d8b27628` (changed from n1413 `8e7acaa0d71e95c9`)
+**Status:** VERIFIED — fresh rerun, validator PASS, full vitest 3140/3140, tsc clean, build clean
+**Supersedes:** `bb454db4` (validator-only exemption — wrong fix, reverted)
+
+### Summary of changes
+
+1. **Rescue pass for loaned elites after merge/seal** — `rescueUnassignedLoanedElitesInTerritory()` runs after all destructive merge/seal passes and before `collectUnresolvedSectorBrigades`. Loaned elites in target-corps territory but component-separated from the front are assigned as reserves.
+2. **Faction filter on loaned-elites pass** — prevents cross-faction noise where RS brigades were processed during RBiH/HRHB passes (finding 0 matching sectors).
+3. **Validator reverted to strict** — `bb454db4` corps-id-only exemption removed. Validator trusts the sim again: all `unresolved_sector_brigades` entries are hard failures.
+
+### Scenario proof
+
+- Baseline n1413: FAIL (`rs_65th_protection_motorized_regiment` unresolved)
+- Post-fix n1420: PASS (0 unresolved), 65th assigned as reserve in `sector:vrs_sarajevo_romanija:5`
+- Hash changed (sim behavior changed — 65th now correctly assigned)
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260410_LOANED_ELITE_RESCUE_PASS.md`
+- Superseded: `docs/40_reports/implemented/20260410_UNRESOLVED_SECTOR_VALIDATOR_ARMY_HQ_EXEMPTION.md`
+
+---
+
+## [2026-04-10] fix(harness): exempt army HQ brigades from unresolved-sector validator (n1414) — SUPERSEDED by dc742d9e
 
 **Type:** Harness / validator truth hardening
 **Files:** `tools/validate_run_consistency.cjs`, `docs/40_reports/implemented/20260410_UNRESOLVED_SECTOR_VALIDATOR_ARMY_HQ_EXEMPTION.md`, `docs/PROJECT_LEDGER.md`, `.claude/architect_notes.md`
