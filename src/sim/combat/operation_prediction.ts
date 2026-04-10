@@ -24,6 +24,7 @@ import type { SupplyStateByOsidReport } from '../../state/supply_state_derivatio
 import type { OperationalToCanonicalReverseMap, OsidPopulationMap } from '../../data/operational_data.js';
 import type { OsidEthnicComposition } from './ethnic_defense.js';
 import type { Osid } from './osid_adjacency.js';
+import { getPlayerSafeOperationBalancePresentation } from '../../shared/playerSafeOperationBalance';
 import { predictCombatOutcome, type CombatPrediction } from './combat_predictor.js';
 import {
     getPreparationMaxTurns,
@@ -251,6 +252,7 @@ export function generateCommanderAssessment(
 
     const intelLabel = labelFromThresholds(overall.intelConfidence, INTEL_LABELS);
     const supplyLabel = labelFromThresholds(overall.supplyReadiness, SUPPLY_LABELS);
+    const forceBalance = getPlayerSafeOperationBalancePresentation(overall.forceRatio);
     const primaryAxis = axes[0];
     const terrainStr = primaryAxis?.terrain?.toUpperCase() ?? 'UNKNOWN';
     const entrenchStr = primaryAxis?.entrenchment?.toUpperCase() ?? 'UNKNOWN';
@@ -267,7 +269,7 @@ export function generateCommanderAssessment(
         const fatigueNote = axes.some(a => a.supplyReadiness < 0.5)
             ? ' Supply concerns on one or more axes.' : '';
         ownForces = `${axes.reduce((s, a) => s + (a.forceRatio > 0 ? 1 : 0), 0)} axes assigned, `
-            + `aggregate ratio ${overall.forceRatio.toFixed(1)}:1. Supply ${supplyLabel}.${fatigueNote}`;
+            + `staff judges ${forceBalance.summary}. Supply ${supplyLabel}.${fatigueNote}`;
 
         const outcomeStr = primaryAxis?.predictedOutcome?.replace(/_/g, ' ').toUpperCase() ?? 'UNCERTAIN';
         if (recommendation === 'launch') {
@@ -287,7 +289,7 @@ export function generateCommanderAssessment(
         // Mid competence: functional but less detailed
         enemy = `Enemy positions ${entrenchStr !== 'UNKNOWN' ? entrenchStr.toLowerCase() : 'of unknown strength'}. `
             + `Intel ${intelLabel.toLowerCase()}.`;
-        ownForces = `Forces assigned. Ratio ${overall.forceRatio.toFixed(1)}:1. Supply ${supplyLabel.toLowerCase()}.`;
+        ownForces = `Forces assigned. ${forceBalance.summary}. Supply ${supplyLabel.toLowerCase()}.`;
 
         if (recommendation === 'launch') {
             assessment = 'Situation favorable. Recommend attack.';

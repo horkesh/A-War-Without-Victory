@@ -14,6 +14,7 @@
 
 import type { GameState } from '../../../state/game_state.js';
 import type { FrictionEvent } from '../../../sim/combat/warlord_friction.js';
+import { getPlayerSafeOperationBalancePresentation } from '../../../shared/playerSafeOperationBalance';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -1180,6 +1181,7 @@ export function deriveRecommendationExplanation(
     const reqConf = Math.max(0, Math.min(1, 0.6 - aggressiveness * 0.06 + competence * 0.04));
     const reqForce = Math.max(1.0, 1.5 - aggressiveness * 0.10 + competence * 0.05);
     const goThreshold = 0.7 - aggressiveness * 0.08;
+    const forceBalance = getPlayerSafeOperationBalancePresentation(forceRatio);
 
     const confMet = intel >= reqConf ? 1.0 : intel / reqConf;
     const forceMet = forceRatio >= reqForce ? 1.0 : forceRatio / reqForce;
@@ -1202,7 +1204,9 @@ export function deriveRecommendationExplanation(
             name: 'force_ratio',
             fullness: forceMet,
             contrib: forceContrib,
-            detail: `Force ratio at ${forceRatio.toFixed(1)}:1 (commander needs ${reqForce.toFixed(1)}:1)`,
+            detail: forceRatio >= reqForce
+                ? `Force balance judged ${forceBalance.summary} and within the commander's launch standard`
+                : `Force balance judged ${forceBalance.summary} but still short of the commander's launch standard`,
         },
         {
             name: 'supply',

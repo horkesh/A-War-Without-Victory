@@ -6,6 +6,7 @@ import type { OpsPlanState } from './types';
 import { OP_TYPE_LABELS, TEMPO_LABELS, TOLERANCE_LABELS, FACTION_ARMY_HEADERS } from './types';
 import type { PredictionResult } from './usePrediction';
 import { buildOpordDisplayModel } from './opordDisplay';
+import { getPlayerSafeOperationBalancePresentation } from '../../../../shared/playerSafeOperationBalance';
 
 interface OpordDocumentProps {
     plan: OpsPlanState;
@@ -23,6 +24,7 @@ export function OpordDocument({ plan, prediction, commanderName, corpsName, fact
     const allBrigades = plan.axes.flatMap((a) => a.brigadeIds);
     const display = buildOpordDisplayModel(plan, osidDisplayNames);
     const allObjectives = display.objectiveLabels;
+    const forceBalance = prediction ? getPlayerSafeOperationBalancePresentation(prediction.overall.forceRatio) : null;
 
     return (
         <div className="relative bg-[#f0e8d8] rounded-lg border border-[#c0b090] p-8 max-w-[600px] mx-auto shadow-2xl"
@@ -76,8 +78,8 @@ export function OpordDocument({ plan, prediction, commanderName, corpsName, fact
                     <div className="text-[10px] text-[#4a4238] leading-relaxed">
                         {allBrigades.length} brigade{allBrigades.length !== 1 ? 's' : ''} assigned across{' '}
                         {plan.axes.length} axis/axes.
-                        {prediction && (
-                            <> Force ratio: {prediction.overall.forceRatio.toFixed(2)}:1.</>
+                        {forceBalance && (
+                            <> Staff balance: {forceBalance.summary}.</>
                         )}
                     </div>
                 </div>

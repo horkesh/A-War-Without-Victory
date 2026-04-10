@@ -1,3 +1,45 @@
+## [2026-04-10] fix(ui): demote player-facing operation force-ratio precision to staff abstractions
+
+**Summary:** Closed a cross-surface player-truth seam in operation planning and review shells. Exact `force_ratio_estimate` decimals and commander-threshold math were leaking into Army HQ, corps-front, briefing, OPORD, and narrative surfaces even though those exact values are staff-estimate internals. The lane introduced one shared player-facing owner, `getPlayerSafeOperationBalancePresentation(...)`, so normal play now sees banded staff-balance labels (`CLEAR EDGE`, `FAVORABLE`, `CONTESTED`, `UNFAVORABLE`) while exact decimals remain available only in the explicit debug-only raw-intel surface.
+
+**Files:** `src/shared/playerSafeOperationBalance.ts`, `src/ui/map/components/army_hq/OperationsSection.tsx`, `src/ui/map/components/CorpsFrontPanel.tsx`, `src/ui/map/components/OperationBriefingModal.tsx`, `src/ui/map/components/plan_ui/AxisAssessmentCard.tsx`, `src/ui/map/components/ops_modal/NarrativeTab.tsx`, `src/ui/map/components/ops_modal/OpordDocument.tsx`, `src/ui/map/data/command_strain.ts`, `src/sim/combat/operation_prediction.ts`, `tests/player_safe_operation_force_balance.test.ts`, `tests/command_authority.test.ts`, `docs/40_reports/implemented/20260410_PLAYER_SAFE_OPERATION_FORCE_BALANCE_HARDENING.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/architect_notes.md`
+
+**Why this changed**
+- Exact operation force-ratio numerics belong to engine/read-model truth, but normal player-facing shells were still printing them directly.
+- That created duplicated presentation ownership across multiple surfaces and leaked staff-internal precision to the player.
+- The seam was bounded: preserve the existing exact owner, then introduce one downstream player-safe abstraction instead of letting every surface format its own ratio copy.
+
+**What changed**
+- Added `getPlayerSafeOperationBalancePresentation(...)` as the shared player-safe force-balance owner.
+- Replaced exact ratio rendering in operations, corps-front, briefing, axis-assessment, OPORD, narrative, and command-strain explanation surfaces.
+- Updated player-facing commander-assessment text in `operation_prediction.ts` to use staff-balance wording instead of exact ratio prose.
+- Left `RawIntelTab` exact precision untouched as the explicit debug-only surface.
+- Added `tests/player_safe_operation_force_balance.test.ts` to fail on exact-ratio leaks in normal player-facing shells.
+
+**Canonical owner**
+- Exact force-ratio truth: operation prediction / readiness fields such as `force_ratio_estimate` and `prediction.forceRatio`
+- Player-facing abstraction: `getPlayerSafeOperationBalancePresentation(...)`
+- Demoted path: per-surface `toFixed(...)` rendering and player-facing threshold-math prose
+
+**Verification**
+- Targeted:
+  - `npx.cmd vitest run tests/player_safe_operation_force_balance.test.ts`
+  - `npx.cmd vitest run tests/player_safe_operation_force_balance.test.ts tests/ui_map_operations_mode.test.ts tests/operation_prediction.test.ts tests/operational_sitrep_views.test.ts tests/front_sector_player_visibility.test.ts`
+- Full bar:
+  - `npm.cmd run recovery:check`
+  - `npm.cmd run test:vitest`
+  - `npx.cmd tsc --noEmit -p tsconfig.json`
+  - `npm.cmd run build`
+
+**Result**
+- Normal operation shells no longer expose exact decimal force-ratio precision or commander threshold math.
+- The ownership story is simpler: engine/read-model owns exact numerics, one shared downstream helper owns player-facing abstraction.
+- Scenario residuals remain unchanged, which is correct for a presentation-boundary lane.
+
+**Follow-up**
+- Next step: rerun the global board and rotate to the next bounded seam, with Gorazde residuals currently the leading content/runtime-audit candidate.
+- Report: `docs/40_reports/implemented/20260410_PLAYER_SAFE_OPERATION_FORCE_BALANCE_HARDENING.md`
+
 ## [2026-04-10] fix(ui): align shell player-faction ownership with canonical resolver
 
 **Summary:** Closed a duplicated shell/bootstrap ownership seam. Several entrypoints were still inventing a player side with `?? 'RBiH'`, `?? 'RS'`, or `factions[0]?.id` when canonical `player_faction` was absent. The lane moved those surfaces onto shared resolver helpers and made neutral/unavailable states the truthful fallback instead of a fabricated faction.

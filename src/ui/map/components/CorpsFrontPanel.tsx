@@ -7,6 +7,7 @@ import { collectSectorFriendlyOsids } from '../utils/sectorUtils';
 import { getOperationId, getOperationPhaseBadgeClass } from '../utils/operations';
 import { getPanelRailStyle } from './panelRail';
 import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
+import { getPlayerSafeOperationBalancePresentation } from '../../../shared/playerSafeOperationBalance';
 import { getPlayerSafeThreatPresentation } from '../utils/playerSafeThreat';
 import { useIPC } from '../desktop/useIPC';
 import { filterPlayerFacingOperations, findPlayerFacingSectorById } from '../../shared/playerVisibility';
@@ -720,6 +721,9 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                     const phaseBg = getOperationPhaseBadgeClass(op.phase);
                     const operationId = getOperationId(op);
                     const objective = op.objectives?.[op.current_objective_index ?? 0] ?? op.objectives?.[0];
+                    const forceBalance = op.force_ratio_estimate != null
+                      ? getPlayerSafeOperationBalancePresentation(op.force_ratio_estimate)
+                      : null;
                     return (
                       <div key={operationId} className="bg-neutral-100 border-2 border-neutral-300 p-2 relative shadow-sm">
                         {/* Stamp effect */}
@@ -754,8 +758,10 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                             {op.has_active_probe && (
                               <div className="text-[9px] mt-0.5 text-blue-700 font-semibold uppercase">Probe in progress</div>
                             )}
-                            {op.force_ratio_estimate != null && (
-                              <div className="text-[9px] mt-0.5 text-neutral-600">Force Ratio Est: {op.force_ratio_estimate.toFixed(2)}</div>
+                            {forceBalance && (
+                              <div className="text-[9px] mt-0.5 text-neutral-600 uppercase">
+                                Force Balance: <span className={forceBalance.toneClass}>{forceBalance.label}</span> <span className="text-neutral-500">{forceBalance.summary}</span>
+                              </div>
                             )}
                             {(op.preparation_sub_phase === 'assessment' || op.preparation_sub_phase === 'ready') && (
                               <button

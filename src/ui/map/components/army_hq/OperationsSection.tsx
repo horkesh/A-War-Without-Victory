@@ -10,6 +10,7 @@ import { useGameStore } from '../../store/gameStore';
 import { turnToDateString } from '../../utils/formatters';
 import { getOsidDisplayName } from '../../utils/osidDisplayName';
 import { getPlayerSafeBrigadeName } from '../../utils/playerSafeText';
+import { getPlayerSafeOperationBalancePresentation } from '../../../../shared/playerSafeOperationBalance';
 import { CollapsibleSection } from './CollapsibleSection';
 import { deriveOperationOutcomeCategory } from '../../data/command_strain';
 
@@ -259,6 +260,9 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
     }, [gameState.operationHistory, op.name, op.corps_id]);
     const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
     const resolveObjectiveLabel = (osid: string) => getOsidDisplayName(osid, osidDisplayNames);
+    const forceBalance = op.force_ratio_estimate != null
+        ? getPlayerSafeOperationBalancePresentation(op.force_ratio_estimate)
+        : null;
 
     return (
         <div className="px-4 py-3 space-y-4 text-[11px] border-t border-panel-border/50 bg-panel-card font-mono">
@@ -328,12 +332,13 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                         </div>
                     )}
 
-                    {op.force_ratio_estimate != null && (
+                    {forceBalance && (
                         <div className="pt-1 flex items-center gap-2">
-                            <span className="text-text-secondary/60 uppercase">FORCE RATIO:</span>
-                            <span className={`font-bold text-[12px] ${op.force_ratio_estimate >= 1.5 ? 'text-emerald-400' : op.force_ratio_estimate >= 1.0 ? 'text-accent-gold' : 'text-red-500'}`}>
-                                {op.force_ratio_estimate.toFixed(2)} : 1.0
+                            <span className="text-text-secondary/60 uppercase">FORCE BALANCE:</span>
+                            <span className={`font-bold text-[12px] ${forceBalance.toneClass}`}>
+                                {forceBalance.label}
                             </span>
+                            <span className="text-[10px] text-text-secondary/70 uppercase">{forceBalance.summary}</span>
                         </div>
                     )}
                 </div>
