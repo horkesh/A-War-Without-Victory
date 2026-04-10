@@ -11,6 +11,7 @@ import { useState } from 'react';
 import type { LoadedGameState } from '../data/types';
 import { useIPC } from '../desktop/useIPC';
 import { useGameStore } from '../store/gameStore';
+import { getPlayerFacingFaction } from '../../shared/playerFacingLabels';
 
 type DaytonData = NonNullable<LoadedGameState['pendingDayton']>;
 
@@ -27,7 +28,7 @@ interface DaytonNegotiationModalProps {
 export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) {
     const ipc = useIPC();
     const setLoadError = useGameStore((s) => s.setLoadError);
-    const playerFaction = useGameStore((s) => s.loadedGameState?.player_faction) ?? 'RBiH';
+    const playerFaction = getPlayerFacingFaction(useGameStore((s) => s.loadedGameState));
 
     const [demands, setDemands] = useState<Set<string>>(new Set());
     const [concessions, setConcessions] = useState<Set<string>>(new Set());
@@ -45,7 +46,7 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
         if (choice === 'centralized') capitalSpent += pkg.centralizedCost;
         else if (choice === 'decentralized') capitalSpent += pkg.decentralizedCost;
     }
-    const capitalAvailable = dayton.factionCapital[playerFaction] ?? 50;
+    const capitalAvailable = playerFaction ? (dayton.factionCapital[playerFaction] ?? 0) : 0;
     const overBudget = capitalSpent > capitalAvailable;
 
     const toggleDemand = (id: string) => {
@@ -69,7 +70,7 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
     };
 
     const handleSubmit = async () => {
-        if (!ipc.isAvailable || overBudget) return;
+        if (!ipc.isAvailable || overBudget || !playerFaction) return;
         setSubmitting(true);
         const result = await ipc.resolveDayton({
             territorial_demands: [...demands],
@@ -83,7 +84,7 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
         // On success, game state push will trigger VerdictScreen (game_over = true)
     };
 
-    const patronOverride = dayton.patronOverride[playerFaction] ?? 0;
+    const patronOverride = playerFaction ? (dayton.patronOverride[playerFaction] ?? 0) : 0;
 
     return (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm">
@@ -134,7 +135,7 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                         {dayton.territorialPackages.map(pkg => {
                             const isDemand = demands.has(pkg.id);
                             const isConcession = concessions.has(pkg.id);
-                            const isPlayerHeld = pkg.defaultHolder === playerFaction;
+                            const isPlayerHeld = playerFaction != null && pkg.defaultHolder === playerFaction;
                             return (
                                 <div key={pkg.id} className={`p-3 rounded border transition-colors ${
                                     isDemand ? 'border-[#2a6a2a] bg-[#d0e8d0]/60' :

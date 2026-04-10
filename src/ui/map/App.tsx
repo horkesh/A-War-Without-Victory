@@ -59,6 +59,7 @@ import { getPlayerSafeMilitaryFactionName } from './utils/playerSafeText';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useDesktopSession } from './hooks/useDesktopSession';
 import { useIPC } from './desktop/useIPC';
+import { resolvePlayerFacingFaction } from '../shared/playerVisibility';
 import type { RecruitmentCatalogBrigade, StartNewCampaignPayload } from './desktop/types';
 import type { SummaryFocusSection } from './data/types';
 import { applyShellHandoffCommand, openArmyHQRecordsSubTab, warroomCommandStaysInRoom } from './utils/shellNavigation';
@@ -182,7 +183,7 @@ function App() {
   const loadSave = useGameStore((s) => s.loadSave);
   const setLoadError = useGameStore((s) => s.setLoadError);
   const loadError = useGameStore((s) => s.loadError);
-  const playerFaction = loadedGameState?.player_faction ?? 'RBiH';
+  const playerFaction = resolvePlayerFacingFaction(loadedGameState);
   const mapMode = useGameStore((s) => s.mapMode);
   const railState = derivePanelRailState({
     selectedOsid,
@@ -529,7 +530,7 @@ function App() {
 
   const openOrbat = () => {
     // If no corps selected for orbat, pick the first player corps
-    if (!useGameStore.getState().selectedOrbatCorpsId && loadedGameState) {
+    if (!useGameStore.getState().selectedOrbatCorpsId && loadedGameState && playerFaction) {
       const firstCorps = loadedGameState.formations.find(f => (f.kind === 'corps' || f.kind === 'corps_asset') && f.faction === playerFaction);
       if (firstCorps) useGameStore.getState().setSelectedOrbatCorpsId(firstCorps.id);
     }
@@ -592,10 +593,10 @@ function App() {
   }, []);
 
   const selectPrimaryArmy = () => {
-    if (!loadedGameState) return;
-    const army = loadedGameState.formations.find(f => f.kind === 'army_hq' && f.faction === playerFaction);
-    if (army) {
-      useGameStore.getState().setSelectedArmyHqId(army.id);
+      if (!loadedGameState || !playerFaction) return;
+      const army = loadedGameState.formations.find(f => f.kind === 'army_hq' && f.faction === playerFaction);
+      if (army) {
+        useGameStore.getState().setSelectedArmyHqId(army.id);
       useGameStore.getState().setSelectedFormationId(null);
       // Pan to it if possible
       const pan = useGameStore.getState().panToOsid;
@@ -604,10 +605,10 @@ function App() {
   };
 
   const selectPrimaryCorps = () => {
-    if (!loadedGameState) return;
-    const corps = loadedGameState.formations.find(f => (f.kind === 'corps' || f.kind === 'corps_asset') && f.faction === playerFaction);
-    if (corps) {
-      useGameStore.getState().setSelectedCorpsId(corps.id);
+      if (!loadedGameState || !playerFaction) return;
+      const corps = loadedGameState.formations.find(f => (f.kind === 'corps' || f.kind === 'corps_asset') && f.faction === playerFaction);
+      if (corps) {
+        useGameStore.getState().setSelectedCorpsId(corps.id);
       useGameStore.getState().setSelectedFormationId(null);
       // Pan to it if possible
       const pan = useGameStore.getState().panToOsid;

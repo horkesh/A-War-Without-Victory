@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useGameStore } from '../../store/gameStore.js';
 import { generateWrappedSlides } from './generateWrappedSlides.js';
 import { WrappedSlideComponent } from './WrappedSlide.js';
+import { getPlayerFacingFaction } from '../../../shared/playerFacingLabels.js';
 
 export function WrappedOverlay() {
     const open = useGameStore(s => s.wrappedOpen);
@@ -12,7 +13,7 @@ export function WrappedOverlay() {
 
     const slides = useMemo(() => (state ? generateWrappedSlides(state) : []), [state]);
 
-    const faction = state?.player_faction ?? 'RBiH';
+    const faction = getPlayerFacingFaction(state);
 
     const goNext = useCallback(() => {
         setCurrentSlide(prev => Math.min(prev + 1, slides.length - 1));
@@ -84,7 +85,7 @@ export function WrappedOverlay() {
                 slide={slides[currentSlide]}
                 index={currentSlide}
                 total={slides.length}
-                faction={faction}
+                faction={faction ?? undefined}
             />
 
             {/* "VIEW CHRONICLE" button on final slide */}

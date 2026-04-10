@@ -14,6 +14,7 @@ import scnApr1992Url from './assets/scenarios/apr1992_briefing.webp?url';
 // Main menu background (game start screen)
 import gameStartBgUrl from './assets/game start.webp?url';
 import { encodeShellHandoffCommand, type ShellHandoffCommand } from '../shared/shellHandoff.js';
+import { getPlayerFacingFaction } from '../shared/playerFacingLabels.js';
 
 type CampaignScenarioKey = 'apr_1992';
 
@@ -217,10 +218,12 @@ class WarroomApp {
 
     updateUIOverlay() {
         if (!this.gameState) return;
-        const playerFaction = (this.gameState.meta.player_faction ?? this.gameState.factions[0]?.id ?? 'RBiH') as FactionId;
+        const playerFaction = getPlayerFacingFaction(this.gameState.meta.player_faction);
         this.warPlanningMap.setControlFromState(this.gameState);
         this.warPlanningMap.setGameState(this.gameState);
-        this.warPlanningMap.setPlayerFaction(playerFaction);
+        if (playerFaction) {
+            this.warPlanningMap.setPlayerFaction(playerFaction);
+        }
         this.updateToolbarTurnDisplay();
     }
 
@@ -466,7 +469,7 @@ class WarroomApp {
         await this.loadMockState({
             turn,
             phase,
-            faction: this.pendingFaction || 'RBiH',
+            faction: this.pendingFaction ?? undefined,
             politicalControllers: polControllers
         });
 

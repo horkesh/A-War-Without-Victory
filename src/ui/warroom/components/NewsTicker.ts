@@ -9,6 +9,7 @@
 
 import type { FactionId } from '../../../state/game_state.js';
 import { GameState } from '../../../state/game_state.js';
+import { getPlayerFacingFaction } from '../../shared/playerFacingLabels.js';
 import { PHASE0_TICKER_EVENTS, TickerEvent } from '../content/ticker_events.js';
 import { generateTickerWarEvents } from '../content/ticker_war_events.js';
 import { generateTurnEvents } from '../data/turn_event_generator.js';
@@ -121,8 +122,8 @@ export class NewsTicker {
         const phase = gameState.meta.phase;
         if (!phase || phase === 'peace') return [];
 
-        const playerFaction: FactionId =
-            gameState.meta.player_faction ?? (gameState.factions[0]?.id as FactionId) ?? 'RBiH';
+        const playerFaction = getPlayerFacingFaction(gameState.meta.player_faction);
+        if (!playerFaction) return [];
         const previousSnapshot = getPreviousSnapshot();
         const turnEvents = generateTurnEvents(gameState, previousSnapshot, playerFaction);
         return generateTickerWarEvents(turnEvents, playerFaction);
@@ -172,11 +173,12 @@ export class NewsTicker {
      */
     show(gameState: GameState) {
         if (!this.container) return;
-        const playerFaction: FactionId =
-            gameState.meta.player_faction ?? (gameState.factions[0]?.id as FactionId) ?? 'RBiH';
+        const playerFaction = getPlayerFacingFaction(gameState.meta.player_faction);
         const label = this.container.querySelector('.news-ticker-label');
         if (label) {
-            label.textContent = getWarroomFactionIdentity(playerFaction).tickerLabel;
+            label.textContent = playerFaction
+                ? getWarroomFactionIdentity(playerFaction).tickerLabel
+                : 'LIVE WIRE';
         }
 
         const content = document.getElementById('news-ticker-content');

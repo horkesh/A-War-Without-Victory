@@ -25,10 +25,10 @@ export const WrappedSlideComponent = React.memo(function WrappedSlideComponent({
     slide,
     index,
     total,
-    faction = 'RBiH',
+    faction,
 }: WrappedSlideProps) {
-    const tint = FACTION_TINTS[faction] ?? 'rgba(196, 163, 90, 0.10)';
-    const accent = FACTION_ACCENT[faction] ?? '#c4a35a';
+    const tint = faction ? (FACTION_TINTS[faction] ?? 'rgba(196, 163, 90, 0.10)') : 'rgba(196, 163, 90, 0.10)';
+    const accent = faction ? (FACTION_ACCENT[faction] ?? '#c4a35a') : '#c4a35a';
 
     return (
         <div
@@ -76,7 +76,7 @@ export const WrappedSlideComponent = React.memo(function WrappedSlideComponent({
     );
 });
 
-function renderHeroContent(slide: WrappedSlideType, accent: string, faction: string): React.ReactNode {
+function renderHeroContent(slide: WrappedSlideType, accent: string, faction?: string): React.ReactNode {
     switch (slide.id) {
         case 'another_such_victory': {
             const values = slide.data ?? {};

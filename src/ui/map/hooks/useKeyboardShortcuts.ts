@@ -6,6 +6,7 @@
 import { useEffect, useRef } from 'react';
 import { advanceTurnAndSync } from '../desktop/orderActions';
 import { useIPC } from '../desktop/useIPC';
+import { getPlayerFacingFaction } from '../../shared/playerFacingLabels';
 import { useGameStore, type MapMode } from '../store/gameStore';
 
 const MAP_MODES_BY_KEY: MapMode[] = ['political', 'ethnic', 'supply', 'casualties', 'morale', 'operations', 'defense'];
@@ -84,8 +85,8 @@ export function useKeyboardShortcuts(): void {
         event.preventDefault();
         const store = useGameStore.getState();
         const state = store.loadedGameState;
-        const faction = state?.player_faction ?? 'RBiH';
-        if (!state) return;
+        const faction = getPlayerFacingFaction(state);
+        if (!state || !faction) return;
         const corpsFormations = state.formations.filter(
           (f) => f.faction === faction && (f.kind === 'corps' || f.kind === 'corps_asset')
         );

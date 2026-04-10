@@ -1,3 +1,43 @@
+## [2026-04-10] fix(ui): align shell player-faction ownership with canonical resolver
+
+**Summary:** Closed a duplicated shell/bootstrap ownership seam. Several entrypoints were still inventing a player side with `?? 'RBiH'`, `?? 'RS'`, or `factions[0]?.id` when canonical `player_faction` was absent. The lane moved those surfaces onto shared resolver helpers and made neutral/unavailable states the truthful fallback instead of a fabricated faction.
+
+**Files:** `src/ui/map/App.tsx`, `src/ui/map/components/BottomStatusStrip.tsx`, `src/ui/map/components/DaytonNegotiationModal.tsx`, `src/ui/map/components/chronicle/WrappedOverlay.tsx`, `src/ui/map/components/chronicle/WrappedSlide.tsx`, `src/ui/map/components/warroom/WarroomShellLayer.tsx`, `src/ui/map/hooks/useKeyboardShortcuts.ts`, `src/ui/warroom/ClickableRegionManager.ts`, `src/ui/warroom/components/NewsTicker.ts`, `src/ui/warroom/warroom.ts`, `tests/player_faction_shell_boundary_truth.test.ts`, `docs/40_reports/implemented/20260410_PLAYER_FACTION_SHELL_BOUNDARY_HARDENING.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/architect_notes.md`
+
+**Why this changed**
+- `state.meta.player_faction` was already canonical shell identity, but several UI/bootstrap surfaces still created local fallback owners.
+- Those fallbacks made missing identity look like a real side and risked routing news, warroom, and shell behavior through the wrong faction.
+- The seam was bounded: preserve the existing owner and propagate it consistently instead of inventing a new contract.
+
+**What changed**
+- `App.tsx` now resolves shell identity through `resolvePlayerFacingFaction(...)` and only auto-selects faction-scoped views when identity exists.
+- Bottom status, Dayton, Wrapped, Warroom, ticker, keyboard shortcuts, and clickable-region preview surfaces now consume shared player-faction resolvers instead of per-surface literals.
+- Neutral/unavailable UI is now the truthful fallback when player identity is absent.
+- Added `tests/player_faction_shell_boundary_truth.test.ts` to fail on targeted source fallback patterns.
+
+**Canonical owner**
+- Player shell identity: `state.meta.player_faction`, normalized through shared resolver helpers
+- Demoted path: per-surface defaults like `'RBiH'`, `'RS'`, and `factions[0]?.id`
+
+**Verification**
+- Targeted:
+  - `npx.cmd vitest run tests/player_faction_shell_boundary_truth.test.ts`
+  - `npx.cmd vitest run tests/player_faction_shell_boundary_truth.test.ts tests/ui_player_visibility.test.ts tests/ui_shell_navigation.test.ts tests/warroom_shell_layer.test.ts tests/warroom_player_visibility.test.ts tests/dayton_negotiation.test.ts tests/wrapped_slides.test.ts`
+- Full bar:
+  - `npm.cmd run recovery:check`
+  - `npm.cmd run test:vitest`
+  - `npx.cmd tsc --noEmit -p tsconfig.json`
+  - `npm.cmd run build`
+
+**Result**
+- Shell/bootstrap surfaces no longer fabricate a player faction to stay alive.
+- The ownership story is easier to explain: canonical player faction exists, or the shell stays neutral.
+- No sim/runtime behavior changed, which is correct for a UI-boundary truth lane.
+
+**Follow-up**
+- Next bounded lane: demote player-facing operation force-ratio precision to staff abstractions.
+- Report: `docs/40_reports/implemented/20260410_PLAYER_FACTION_SHELL_BOUNDARY_HARDENING.md`
+
 ## [2026-04-10] fix(ui): harden front sector player visibility
 
 **Summary:** Closed a live cross-faction tactical-shell leak. Front-edge hover/click payloads were still carrying both factions’ `sector_id` values, `MapContainer.tsx` forwarded those ids directly into `selectedCorpsFrontSectorId`, and `CorpsFrontPanel.tsx` trusted any matching sector in `loadedGameState.corpsFrontSectors`. The lane hardened the player-visibility boundary in two places: enemy front-edge payloads now drop `sector_id` / `corps_id` in player mode, and both map selection paths and `CorpsFrontPanel` revalidate sector ids through `findPlayerFacingSectorById(...)` before rendering or routing a shell.

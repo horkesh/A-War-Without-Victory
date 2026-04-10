@@ -4,6 +4,7 @@ import { FACTION_COLORS_SUBTLE, FACTION_HEX_COLORS } from '../utils/theme';
 import { MAP_MODES, DEV_LAYER_TOGGLES, LIVE_LAYER_TOGGLES } from '../utils/mapModes';
 import { Icon } from './icons/Icon';
 import osidAreasData from '../../../../data/derived/operational/osid_areas.json';
+import { getPlayerFacingFaction } from '../../shared/playerFacingLabels';
 import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
 
 const osidAreas = osidAreasData as { total_area_km2: number; areas: Record<string, number> };
@@ -19,7 +20,7 @@ const secondaryModes = MAP_MODES.filter(m => !PRIMARY_MODES.includes(m.id));
  */
 export function BottomStatusStrip() {
   const loadedGameState = useGameStore((s) => s.loadedGameState);
-  const playerFaction = loadedGameState?.player_faction ?? 'RS';
+  const playerFaction = getPlayerFacingFaction(loadedGameState);
   const playerOperations = useMemo(
     () => filterPlayerFacingOperations(loadedGameState),
     [loadedGameState],
@@ -52,9 +53,9 @@ export function BottomStatusStrip() {
     if (net < 0) return ' \u2193'; // down arrow
     return ' \u2192'; // right arrow (stable)
   }, [territoryNet]);
-  const playerTerritoryPct = territoryPct[playerFaction as 'RS' | 'RBiH' | 'HRHB'] ?? 0;
+  const playerTerritoryPct = playerFaction ? territoryPct[playerFaction] ?? 0 : 0;
   const hostileHeldPct = Math.max(0, 100 - playerTerritoryPct);
-  const playerTerritoryTrend = getTrendArrow(playerFaction as 'RS' | 'RBiH' | 'HRHB');
+  const playerTerritoryTrend = playerFaction ? getTrendArrow(playerFaction) : '';
 
   // Map mode
   const setStrategicDashboardOpen = useGameStore((s) => s.setStrategicDashboardOpen);
@@ -179,7 +180,7 @@ export function BottomStatusStrip() {
         <div className="flex h-[14px] rounded-sm overflow-hidden w-[180px] border border-white/10" title="Territory control (area-weighted)">
           <div
             className="h-full transition-all duration-500 relative group"
-            style={{ width: `${playerTerritoryPct}%`, backgroundColor: FACTION_HEX_COLORS[playerFaction] ?? '#888' }}
+            style={{ width: `${playerTerritoryPct}%`, backgroundColor: playerFaction ? (FACTION_HEX_COLORS[playerFaction] ?? '#888') : '#888' }}
           >
             {playerTerritoryPct > 15 && (
               <span className="absolute inset-0 flex items-center justify-center text-[8px] font-mono font-bold text-white/90 tabular-nums drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
@@ -201,7 +202,7 @@ export function BottomStatusStrip() {
 
         {/* Player-safe labels */}
         <div className="flex items-center gap-1.5">
-          <span className={`flex items-center gap-0.5 font-mono tabular-nums ${FACTION_COLORS_SUBTLE[playerFaction] ?? 'text-text-primary'}`}>
+          <span className={`flex items-center gap-0.5 font-mono tabular-nums ${playerFaction ? (FACTION_COLORS_SUBTLE[playerFaction] ?? 'text-text-primary') : 'text-text-primary'}`}>
             <span className="text-[11px] font-bold">
               Friendly {playerTerritoryPct.toFixed(1)}%
               {playerTerritoryTrend && (
@@ -235,7 +236,7 @@ export function BottomStatusStrip() {
         })()}
         {!showAlliance && loadedGameState && (() => {
           // RS: show patron confidence from dimensions
-          const dims = loadedGameState.strategicDimensions?.[playerFaction];
+            const dims = playerFaction ? loadedGameState.strategicDimensions?.[playerFaction] : undefined;
           const patronValue = dims?.patron_confidence?.effective_value ?? 50;
           const status = patronValue >= 70 ? 'SUPPORTIVE' : patronValue >= 40 ? 'CAUTIOUS' : 'WAVERING';
           const color = status === 'SUPPORTIVE' ? '#50b850' : status === 'CAUTIOUS' ? '#d4d455' : '#e05050';
