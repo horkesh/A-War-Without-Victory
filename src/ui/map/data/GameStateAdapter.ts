@@ -1500,6 +1500,9 @@ export function parseGameState(json: unknown): LoadedGameState {
             const edgeIds = Array.isArray(s.edge_ids)
                 ? (s.edge_ids as unknown[]).filter((value): value is string => typeof value === 'string').sort((a, b) => a.localeCompare(b))
                 : [];
+            const territoryOsids = Array.isArray(s.territory_osids)
+                ? (s.territory_osids as unknown[]).filter((value): value is string => typeof value === 'string').sort((a, b) => a.localeCompare(b))
+                : [];
             const opposingFactions = Array.isArray(s.opposing_factions)
                 ? (s.opposing_factions as unknown[]).filter((value): value is string => typeof value === 'string').sort((a, b) => a.localeCompare(b))
                 : [];
@@ -1535,6 +1538,7 @@ export function parseGameState(json: unknown): LoadedGameState {
                 faction,
                 opposing_factions: opposingFactions,
                 edge_ids: edgeIds,
+                territory_osids: territoryOsids,
                 sub_segment_count: subSegments.length,
                 length_edges: typeof s.length_edges === 'number' ? s.length_edges : edgeIds.length,
                 assigned_brigade_ids: assignedBrigadeIds,

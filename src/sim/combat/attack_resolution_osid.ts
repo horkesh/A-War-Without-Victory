@@ -1586,8 +1586,9 @@ export function resolveAttackOrdersOsid(
         }
 
         const isProbeOp = activeOp?.type === 'probe';
+        const defenderlessEnemyTile = defenderFormations.length === 0 && isEnemyControlled;
         let flip = (outcome === 'decisive_victory' || outcome === 'victory' || outcome === 'costly_victory')
-            && !isProbeOp;
+            && (!isProbeOp || defenderlessEnemyTile);
 
         // === MORALE-BASED RETREAT RESISTANCE ===
         let moraleAbsorbed = false;

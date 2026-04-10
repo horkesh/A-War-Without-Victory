@@ -213,6 +213,7 @@ export function useMapInteractions(
       'front-edges-hover-neg',
       'front-edges-highlight-pos',
       'front-edges-highlight-neg',
+      'sector-fill',
       'osid-control-fill',
       'osid-ethnic-fill',
       'osid-density-fill',
@@ -244,7 +245,7 @@ export function useMapInteractions(
       if (layerId.startsWith('front-edges-')) {
         const edgeId = feature.properties?.edge_id as string | undefined;
         if (edgeId) onFrontEdgeClick?.(edgeId, feature.properties as Record<string, unknown>);
-      } else if (layerId.startsWith('osid-')) {
+      } else if (layerId === 'sector-fill' || layerId.startsWith('osid-')) {
         const osid = feature.properties?.osid as string | undefined;
         if (osid) onOsidClick?.(osid, feature.properties as Record<string, unknown>);
       }
@@ -293,6 +294,9 @@ export function useMapInteractions(
 
   safeOn('mousemove', 'osid-control-fill', handleOsidMouseMove);
   safeOn('mouseleave', 'osid-control-fill', handleOsidMouseLeave);
+  safeOn('click', 'sector-fill', handleOsidClick);
+  safeOn('mousemove', 'sector-fill', handleOsidMouseMove);
+  safeOn('mouseleave', 'sector-fill', handleOsidMouseLeave);
   safeOn('mousemove', 'osid-ethnic-fill', handleOsidMouseMove);
   safeOn('mouseleave', 'osid-ethnic-fill', handleOsidMouseLeave);
   safeOn('click', 'osid-density-fill', handleOsidClick);
@@ -347,6 +351,9 @@ export function useMapInteractions(
     safeOff('click', 'osid-density-fill', handleOsidClick);
     safeOff('mousemove', 'osid-density-fill', handleOsidMouseMove);
     safeOff('mouseleave', 'osid-density-fill', handleOsidMouseLeave);
+    safeOff('click', 'sector-fill', handleOsidClick);
+    safeOff('mousemove', 'sector-fill', handleOsidMouseMove);
+    safeOff('mouseleave', 'sector-fill', handleOsidMouseLeave);
 
     if (onFormationHover) {
       safeOff('mousemove', 'formation-markers', handleFormationMouseMove);

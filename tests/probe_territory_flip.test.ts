@@ -215,6 +215,12 @@ function makeScenario(opType: CorpsOperation['type']) {
     return { state, edges, operation };
 }
 
+function makeUndefendedProbeScenario() {
+    const { state, edges } = makeScenario('probe');
+    delete (state.military.formations as any).brig_rbih_1;
+    return { state, edges };
+}
+
 // ─── Tests ──────────────────────────────────────────────────────────────────
 
 describe('probe territory flip gate', () => {
@@ -310,5 +316,17 @@ describe('probe territory flip gate', () => {
 
         // But battles_this_turn SHOULD increment (the battle happened)
         expect(operation.battles_this_turn ?? 0).toBeGreaterThan(0);
+    });
+
+    it('a probe that wins against an undefended enemy tile DOES flip political_controllers', () => {
+        const { state, edges } = makeUndefendedProbeScenario();
+        const reverseMap = new Map<string, string[]>();
+        const report = resolveAttackOrdersOsid(state, edges, reverseMap);
+
+        expect(report.battles.length).toBe(1);
+        expect(['decisive_victory', 'victory', 'costly_victory']).toContain(report.battles[0]!.outcome);
+
+        expect(state.political.political_controllers!['op:rbih:target']).toBe('RS');
+        expect(report.flips_applied).toBe(1);
     });
 });

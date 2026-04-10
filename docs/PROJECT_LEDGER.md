@@ -785,3 +785,29 @@
 
 ### Artifacts
 - Report: `docs/40_reports/implemented/20260410_PLAYER_SAFE_THREAT_PRECISION_HARDENING.md`
+## [2026-04-10] fix(map): restore sector continuity and direct sector selection
+
+**Type:** Engine/UI frontline truth hardening
+**Files:** `src/ui/map/data/types.ts`, `src/ui/map/data/GameStateAdapter.ts`, `src/ui/map/utils/sectorUtils.ts`, `src/ui/map/map/useMapInteractions.ts`, `src/sim/combat/corps_front_sectors.ts`, `src/sim/combat/attack_resolution_osid.ts`, `tests/ui_map_interactions.test.ts`, `tests/ui_map_sector_lookup.test.ts`, `tests/late_sibling_front_fragment_merge.test.ts`, `tests/probe_territory_flip.test.ts`
+**Status:** VERIFIED - targeted map/sector/probe tests, fresh 40w rerun, consistency validation, full vitest, typecheck, build, and recovery bar clean
+
+### Summary of changes
+1. **Sector selection now uses sector territory** - `GameStateAdapter` propagates `territory_osids`, `buildOsidToSectorMap()` indexes sectors by territory, and `useMapInteractions()` now binds click/hover handlers for `sector-fill`, restoring direct sector selection and hover.
+2. **Late sibling-front fragment repair added** - `corps_front_sectors.ts` now reruns a narrow small-fragment merge plus disconnected-territory repair after sibling-front ownership canonicalization, which removes tiny leftover front shards that were breaking sector continuity.
+3. **Undefended probe victories can take empty enemy-held tiles** - `attack_resolution_osid.ts` now allows a winning probe to flip control only when the tile is enemy-held and undefended, which resolves the Arapuša-style “won the fight but still did not take the empty tile” failure without changing defended-probe behavior.
+
+### Proof
+- Before: direct sector hover/click only worked reliably through brigade-first interaction paths; the Bihać/Krupa line could survive as a tiny Arapuša fragment plus a main sibling front; and `op:bosanska_krupa:arapusa_2` could stay politically `RBiH` after a winning RS probe into an undefended tile.
+- After: `sector-fill` is part of the interaction contract, `op:bosanska_krupa:arapusa_2` is mapped into the main Bihać/Krupa sector territory, the tiny fragment no longer survives as its own sector, and `political.political_controllers['op:bosanska_krupa:arapusa_2'] = 'RS'` in fresh run `n1422`.
+
+### Verification
+- `npx.cmd vitest run tests/ui_map_interactions.test.ts tests/ui_map_sector_lookup.test.ts tests/late_sibling_front_fragment_merge.test.ts tests/probe_territory_flip.test.ts tests/front_sector_player_visibility.test.ts tests/ui_map_tooltip_player_visibility.test.ts`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run sim:scenario:run:40w`
+- `node tools/validate_run_consistency.cjs runs\\apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1422`
+- `npm.cmd run test:vitest`
+- `npm.cmd run build`
+- `npm.cmd run recovery:check`
+
+### Artifacts
+- Report: `docs/40_reports/implemented/20260410_FRONTLINE_SECTOR_CONTINUITY_AND_UI_SELECTION_HARDENING.md`

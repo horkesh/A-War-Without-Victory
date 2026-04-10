@@ -451,6 +451,7 @@ export interface CorpsFrontSectorView {
     faction: string;
     opposing_factions: string[];
     edge_ids: string[];
+  territory_osids?: string[];
     sub_segment_count: number;
     length_edges: number;
     assigned_brigade_ids: string[];

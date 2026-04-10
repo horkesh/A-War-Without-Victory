@@ -43,6 +43,7 @@ interface SectorView {
   sector_id: string;
   faction: string;
   edge_ids: string[];
+  territory_osids?: string[];
   assigned_brigade_ids: string[];
   reserve_brigade_ids: string[];
 }
@@ -76,6 +77,11 @@ export function buildOsidToSectorMap(
 ): Map<string, string> {
   const osidToSector = new Map<string, string>();
   for (const sector of corpsFrontSectors) {
+    for (const osid of sector.territory_osids ?? []) {
+      if (!osidToSector.has(osid)) {
+        osidToSector.set(osid, sector.sector_id);
+      }
+    }
     const friendlyOsids = collectSectorFriendlyOsids(sector, frontEdgesOsid);
     for (const osid of friendlyOsids) {
       // If an OSID belongs to multiple sectors (rare/overlap), first one wins for hover.

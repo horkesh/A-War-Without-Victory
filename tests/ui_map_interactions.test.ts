@@ -9,7 +9,7 @@ describe('useMapInteractions', () => {
     expect(cleanup).toBeUndefined();
   });
 
-  it('registers click/mousemove/mouseleave for osid-density-fill and returns cleanup', () => {
+  it('registers click/mousemove/mouseleave for osid-density-fill and sector-fill and returns cleanup', () => {
     const onCalls: Array<[string, string, (e: MapLayerMouseEvent) => void]> = [];
     const offCalls: Array<[string, string, (e: MapLayerMouseEvent) => void]> = [];
     const noop = () => {};
@@ -30,11 +30,18 @@ describe('useMapInteractions', () => {
     expect(densityOn.length).toBe(3);
     expect(densityOn.map(([e]) => e).sort()).toEqual(['click', 'mouseleave', 'mousemove']);
 
+    const sectorOn = onCalls.filter(([, layer]) => layer === 'sector-fill');
+    expect(sectorOn.length).toBe(3);
+    expect(sectorOn.map(([e]) => e).sort()).toEqual(['click', 'mouseleave', 'mousemove']);
+
     expect(typeof cleanup).toBe('function');
 
     cleanup!();
 
     const densityOff = offCalls.filter(([, layer]) => layer === 'osid-density-fill');
     expect(densityOff.length).toBe(3);
+
+    const sectorOff = offCalls.filter(([, layer]) => layer === 'sector-fill');
+    expect(sectorOff.length).toBe(3);
   });
 });

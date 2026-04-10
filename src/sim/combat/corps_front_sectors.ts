@@ -166,6 +166,7 @@ export function buildCorpsFrontSectors(
     for (const sectorId of emptiedSectorIds) {
         delete result[sectorId];
     }
+    mergeLateSiblingFrontFragments(result, adjacency, globalEdgeMeta, sharedBoundaryAdj, centroids);
     sealMergedSectorTruth(result, state, formations, adjacency, spatial);
     relocateMisassignedBrigadesToTruthfulOwners(Object.values(result), state, formations, adjacency);
     sealMergedSectorTruth(result, state, formations, adjacency, spatial);
@@ -294,6 +295,22 @@ function recomputeMetricsByFaction(
     for (const [faction, factionSectors] of byFaction) {
         recomputeSectorPowerAndThreat(factionSectors, formations, faction, state);
     }
+}
+
+function mergeLateSiblingFrontFragments(
+    sectors: Record<string, CorpsFrontSector>,
+    adjacency: Map<Osid, Osid[]>,
+    edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
+    sharedBoundaryAdj: Map<Osid, Osid[]>,
+    centroids?: OsidCentroidMap,
+): void {
+    mergeSmallAdjacentSectors(sectors, adjacency, edgeMeta, sharedBoundaryAdj, centroids);
+    const allSectors = Object.values(sectors);
+    const allFriendly = new Set<string>();
+    for (const sector of allSectors) {
+        for (const osid of sector.territory_osids) allFriendly.add(osid);
+    }
+    repairDisconnectedTerritory(allSectors, sharedBoundaryAdj, allFriendly);
 }
 
 export function pruneGhostArtifactSectors(sectors: Record<string, CorpsFrontSector>): void {
@@ -1183,6 +1200,7 @@ export {
 
 /** @internal Exported for targeted testing only. */
 export { rescueUnassignedLoanedElitesInTerritory };
+export { mergeLateSiblingFrontFragments };
 
 // Re-export constants from corps_front_sectors_constants.ts
 export { MIN_SECTOR_EDGES } from './corps_front_sectors_constants.js';
