@@ -529,3 +529,8 @@ notify.ps1 rewritten (WScript.Shell Popup canonical method). Notification delive
 - Battle-to-operation attribution must be stamped at battle resolution time, not reconstructed later from the operation's surviving brigade list. Post-turn survivor trimming can legitimately diverge from the brigade that actually fought.
 - Accepted boundary after cleanup: `attack_resolution_osid` owns raw `operation_id` / `operation_name` on battle records, and downstream scenario diagnostics should prefer that canonical owner over late roster inference. Fallback inference is only for sparse compatibility cases that lack battle metadata.
 - Reporting rule: when a downstream diagnostic and a same-turn battle log disagree, preserve the sim-owned source identifier and propagate it outward. Do not "fix" the disagreement by weakening the diagnostic to a target-only heuristic.
+
+**Closed: Startup Snapshot Guardrail Contract (2026-04-10)**
+- The remaining packaged/startup seam was no longer launch behavior; it was proof integrity. `desktop_startup_snapshot_guardrails.test.ts` still mutated the committed April 1992 snapshot in place, and the contract test still treated checkout line endings as semantic truth.
+- Accepted boundary after cleanup: `src/scenario/startup_snapshot.ts` owns both snapshot override indirection for proof-only redirection and normalized payload reads for baked snapshot contract checks. Tests should never rewrite the repo-owned startup artifact directly.
+- Platform rule: when a baked artifact is both product input and verification target, isolate destructive proof through a canonical override seam and normalize non-semantic formatting before comparing against builder truth. Otherwise the proof substrate itself becomes the source of fake regressions.

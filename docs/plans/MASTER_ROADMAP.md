@@ -661,4 +661,16 @@ Patch bumps (0.X.1, 0.X.2) are for significant fixes within a milestone â€”
   - `arbih_444th_mountain` salient overextension near Konjic is not a cutoff/ownership bug; it belongs in doctrine / target-selection work
   - remaining non-cold `frontline_density_imbalance` sectors now look like live force-distribution extremes, not detector owner drift
 
+## 2026-04-10 hardening board note
+
+- Closed this wave:
+  - packaged startup snapshot proof no longer mutates the committed April 1992 artifact during guardrail tests
+  - baked startup snapshot contract now normalizes checkout line endings before comparing against canonical builder truth
+- Still active:
+  - rotate back to the global board after packaged/startup closure; next bounded candidates should come from live player-knowledge, harness, or command-shell evidence rather than the exhausted startup board
+- Demoted / redesign-blocked:
+  - same-faction ownerless unreachable brigades (`rs_1st_podrinje`, `rs_5th_podrinje`)
+- Investigated and demoted to realism/doctrine:
+  - `arbih_444th_mountain` salient overextension near Konjic remains planner/doctrine work, not startup/package or anomaly-owner hardening
+
 
