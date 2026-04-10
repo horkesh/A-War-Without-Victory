@@ -108,3 +108,36 @@ Add `rescueUnassignedLoanedElitesInTerritory()` in `corps_front_sectors.ts` afte
 1. **Other loaned elites outside territory:** If a loaned elite is NOT in any target-corps sector territory, the rescue pass won't fire. They would still be unresolved. This is correct — if the brigade isn't even in the right territory, it's a genuine placement issue.
 2. **Component -2 for deep rear OSIDs:** The friendly-component BFS doesn't reach deep rear OSIDs that aren't adjacent to any front. This is a pre-existing property of the component system, not a new issue.
 3. **`rs_1st_guards_motorized`:** Also loaned elite with `brigComp=-2` in logs — may have a similar pattern. Not in `unresolved_sector_brigades` at end-of-run (likely recalled before final turn or in territory of a matching sector).
+
+---
+
+## 9. Follow-up: Reserve Cap Guard (2026-04-10)
+
+**Problem:** `rescueUnassignedLoanedElitesInTerritory()` appended directly to `reserve_brigade_ids` after the last `reclassifyRearBrigades()` normalization in the pipeline. While n1420 did not trigger a 2-reserve sector, the code path could create one if a rescued elite targeted a sector already holding a reserve.
+
+**Invariant at risk:** One reserve per sector, enforced by `reclassifyRearBrigades()` (brigade_assignment.ts:918-925) via hard overwrite. The rescue pass ran after the last enforcement point (line 181 in `buildCorpsFrontSectors`, after `sealMergedSectorTruth` at line 170).
+
+**Fix:** Guard using `MAX_RESERVES_PER_SECTOR` (corps_front_sectors_constants.ts:19, first consumer). If the target sector already has a reserve, the rescued elite goes to `assigned_brigade_ids` instead. This preserves both the rescue behavior and the reserve invariant.
+
+**Validator hardened:** New check 7 ("Reserve Cap") in `validate_run_consistency.cjs` fails any sector with `reserve_brigade_ids.length > 1`.
+
+**Regression tests:** 4 new tests in `tests/loaned_elite_rescue_reserve_cap.test.ts`:
+1. Rescue into empty reserve slot → reserve
+2. Rescue into sector with existing reserve → assigned (cap preserved)
+3. Multiple elites into same sector → only 1 in reserve
+4. `MAX_RESERVES_PER_SECTOR === 1` assertion
+
+**Verification (n1421):**
+
+| Check | n1420 (pre-fix) | n1421 (post-fix) |
+|---|---|---|
+| Hash | `8ba9e38bf6ab76dc` | `8ba9e38bf6ab76dc` (identical) |
+| Sectors with >1 reserve | 0 | 0 |
+| 65th assignment | reserve in sector:vrs_sarajevo_romanija:5 | reserve in sector:vrs_sarajevo_romanija:5 |
+| Validator | PASS (6 checks) | PASS (7 checks) |
+| vitest | 3140/3140 | 3144/3144 (+4 new) |
+| tsc | clean | clean |
+
+**Zero delta:** The fix is latent-only — no sector currently triggers the overflow. The guard prevents future violations without changing current behavior.
+
+**Lane status:** CLOSED. Rescue pass preserves reserve invariant. Validator enforces it. Lane is clean.

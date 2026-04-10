@@ -41,6 +41,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { emitRoutineConsoleWarn } from '../../utils/routine_console_diagnostics.js';
 import {
     isSectorAssignmentExemptCorpsId,
+    MAX_RESERVES_PER_SECTOR,
     MIN_SECTOR_BRIGADES,
 } from './corps_front_sectors_constants.js';
 import { getCorpsArmyPriorities } from './bot_strategy.js';
@@ -226,7 +227,12 @@ function rescueUnassignedLoanedElitesInTerritory(
             }
         }
         if (bestSector) {
-            bestSector.reserve_brigade_ids.push(fid as FormationId);
+            if (bestSector.reserve_brigade_ids.length < MAX_RESERVES_PER_SECTOR) {
+                bestSector.reserve_brigade_ids.push(fid as FormationId);
+            } else {
+                bestSector.assigned_brigade_ids.push(fid as FormationId);
+                bestSector.assigned_brigade_ids.sort(strictCompare);
+            }
         }
     }
 }
@@ -1174,6 +1180,9 @@ export {
     mergeGapSubSegments,
     findSubSegmentForOsid,
 } from './subsegment_assignment.js';
+
+/** @internal Exported for targeted testing only. */
+export { rescueUnassignedLoanedElitesInTerritory };
 
 // Re-export constants from corps_front_sectors_constants.ts
 export { MIN_SECTOR_EDGES } from './corps_front_sectors_constants.js';

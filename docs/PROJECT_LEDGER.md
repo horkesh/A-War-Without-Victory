@@ -1,3 +1,16 @@
+## [2026-04-10] fix(sim): reserve cap guard on loaned elite rescue pass (n1421)
+
+**Type:** Engine / sector invariant hardening
+**Files:** `src/sim/combat/corps_front_sectors.ts`, `tools/validate_run_consistency.cjs`, `tests/loaned_elite_rescue_reserve_cap.test.ts` (new)
+**Run:** n1421 — hash `8ba9e38bf6ab76dc` (zero delta from n1420)
+**Status:** VERIFIED — validator 7/7 PASS, vitest 3144/3144, tsc clean
+
+### Summary
+
+`rescueUnassignedLoanedElitesInTerritory()` could bypass the one-reserve-per-sector invariant by pushing directly to `reserve_brigade_ids` after the last `reclassifyRearBrigades()` normalization. Latent risk only (n1420 never triggered it), but the code path allowed 2+ reserves per sector. Fix: guard using `MAX_RESERVES_PER_SECTOR` — overflow goes to `assigned_brigade_ids`. Validator check 7 ("Reserve Cap") added. 4 regression tests. Closes the loaned elite rescue lane.
+
+---
+
 ## [2026-04-10] fix(sim): rescue loaned elites dropped by merge/seal passes (n1420)
 
 **Type:** Engine / sector assignment truth hardening

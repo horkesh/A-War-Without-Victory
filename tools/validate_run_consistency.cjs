@@ -11,6 +11,7 @@
  *  4. Ghost paramilitaries: inactive paramilitaries with personnel > 0
  *  5. Offensive intel blindness: after turn 20, at least some intel records show offensive_signs
  *  6. Formation.assignment sync: sector-assigned brigades must have formation.assignment set
+ *  7. Reserve cap: no sector has more than 1 reserve brigade
  *
  * Exit code 0 = PASS, 1 = FAIL (any hard check fails; casualty gap is informational only).
  */
@@ -213,6 +214,25 @@ function validateState(state, runLabel) {
     } else {
         for (const m of missingAssignment) {
             fail(`${m.id} in ${m.sector} has no formation.assignment`);
+        }
+    }
+    log('');
+
+    // ── 7. Reserve Cap ───────────────────────────────────────────────────
+    log('--- Reserve Cap ---');
+    const reserveOverflows = [];
+    for (const [sectorId, sec] of Object.entries(sectors)) {
+        const reserves = sec.reserve_brigade_ids || [];
+        if (reserves.length > 1) {
+            reserveOverflows.push({ sector: sectorId, count: reserves.length, ids: reserves });
+        }
+    }
+
+    if (reserveOverflows.length === 0) {
+        ok('0 sectors with >1 reserve');
+    } else {
+        for (const r of reserveOverflows) {
+            fail(`${r.sector}: ${r.count} reserves (${r.ids.join(', ')}) — exceeds 1-reserve-per-sector cap`);
         }
     }
     log('');
