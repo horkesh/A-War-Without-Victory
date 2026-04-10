@@ -36,6 +36,11 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Active / Recent Accepted Lanes
 
+- **Unresolved-sector validator army HQ exemption** — CLOSED 2026-04-10. `validate_run_consistency.cjs` treated all `military.unresolved_sector_brigades` entries as hard failures. `rs_65th_protection_motorized_regiment` (vrs_main_staff, on elite loan to SRK, at sokolac_2) was truthfully unresolved in sim state but not a consistency failure — army HQ reserves may be legitimately sectorless per known invariant. Validator now filters army HQ corps before the completeness check. No sim change — hash unchanged (`8e7acaa0d71e95c9`). Report: `docs/40_reports/implemented/20260410_UNRESOLVED_SECTOR_VALIDATOR_ARMY_HQ_EXEMPTION.md`.
+  - **Canonical owner after cleanup:** `military.unresolved_sector_brigades` remains sim truth; validator now understands army HQ entries are acceptable.
+  - **Demoted path:** treating all unresolved entries as hard failures without corps-type awareness.
+  - **Residual board after lane:** sokolac_2 sector-territory gap (SRK coverage); elite loan placement realism (separate backlog).
+
 - **Reserve request identity boundary truth** - CLOSED 2026-04-10. `pending_reserve_requests` already carried canonical `request_id`, and decline/history already consumed it, but approval still flowed through `corps_id` across the UI, preload, main-process, and desktop sim. The lane threaded `request_id` through that full action boundary so the selected request is now approved, recorded, and removed by one canonical owner. Proof is local rather than scenario-based: request-identity regressions, reserve-system tests, `recovery:check`, `test:vitest`, `tsc`, and `build` all pass. Report: `docs/40_reports/implemented/20260410_RESERVE_REQUEST_IDENTITY_BOUNDARY_HARDENING.md`.
   - **Canonical owner after cleanup:** `ArmyReserveRequest.request_id`.
   - **Demoted path:** corps-keyed approval/removal via `corps_id`.

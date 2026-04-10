@@ -1,3 +1,50 @@
+## [2026-04-10] fix(harness): exempt army HQ brigades from unresolved-sector validator (n1414)
+
+**Type:** Harness / validator truth hardening
+**Files:** `tools/validate_run_consistency.cjs`, `docs/40_reports/implemented/20260410_UNRESOLVED_SECTOR_VALIDATOR_ARMY_HQ_EXEMPTION.md`, `docs/PROJECT_LEDGER.md`, `.claude/architect_notes.md`
+**Run:** n1414 — hash `8e7acaa0d71e95c9` (identical to n1413 baseline — no sim behavior change)
+**Status:** VERIFIED — fresh rerun, consistency validator PASS, full vitest 3140/3140, tsc clean, build clean
+
+### Summary of changes
+
+1. **Validator now exempts army HQ corps from unresolved-sector hard failure** — `validate_run_consistency.cjs` `collectAssignmentCompletenessIssues()` filters out `vrs_main_staff`/`arbih_general_staff`/`hvo_main_staff` brigades before reporting failures, per the known invariant that army HQ reserves may be legitimately sectorless.
+2. **No sim behavior change** — final hash unchanged. The sim still truthfully reports the 65th in `unresolved_sector_brigades`; the validator just no longer treats it as a hard failure.
+
+### Scenario proof
+
+- Baseline n1413: FAIL (`rs_65th_protection_motorized_regiment`)
+- Post-fix n1414: PASS (0 unresolved), same hash `8e7acaa0d71e95c9`
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260410_UNRESOLVED_SECTOR_VALIDATOR_ARMY_HQ_EXEMPTION.md`
+
+---
+
+## [2026-04-10] docs(plan): normalize A+++ scorecard against Pyrrhic review and add god-file program
+
+**Type:** Roadmap / planning governance
+**Files:** `docs/plans/2026-04-10-v08to09-a-plus-plus-system-scorecard-plan.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+**Status:** DOCUMENTED - docs-only planning refinement, no code or runtime behavior changed
+
+### Summary of changes
+
+1. **External review normalized against current mainline truth** - the scorecard now explicitly distinguishes review findings that are still live from findings that were historically correct but already closed, such as probe territory flips.
+2. **God files promoted into an actual program** - the plan now contains a dedicated maintainability track for `war_phases.ts`, `sector_offensive.ts`, `attack_resolution_osid.ts`, and `electron-main.cjs`, with explicit non-drift proof rules instead of leaving them as side commentary.
+3. **Promotion queue sharpened** - the immediate queue now elevates exhaustion/negative-sum identity audit, keeps save/load and political/autonomy truth lanes high, and adds a concrete structural maintainability tranche before doctrine/polish work.
+
+### Planning effect
+
+- This wave does **not** claim any new runtime hardening.
+- It changes planning truth only:
+  - how to consume external whole-repo reviews
+  - which concerns are still live vs already closed
+  - where maintainability/god-file work sits in the v0.8-to-v0.9 queue
+
+### Artifacts
+
+- Updated plan: `docs/plans/2026-04-10-v08to09-a-plus-plus-system-scorecard-plan.md`
+
 ## [2026-04-10] docs(plan): add A+++ system scorecard and promotion roadmap
 
 **Type:** Roadmap / planning governance
