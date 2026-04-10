@@ -1,3 +1,36 @@
+## [2026-04-10] fix(ui): humanize commander zone labels in reserve and autonomy text
+
+**Type:** UI / player-truth hardening
+**Files:** `src/utils/player_facing_zone_label.ts`, `src/sim/ai_commander/proposal_generation.ts`, `src/ui/map/utils/armyReserveSeverity.ts`, `tests/army_reserve_provenance_legibility.test.ts`, `tests/sim/autonomy/autonomy_phase_e_enrichment.test.ts`, `docs/40_reports/implemented/20260410_COMMANDER_ZONE_LABEL_HUMANIZATION_HARDENING.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/architect_notes.md`
+**Status:** VERIFIED - targeted regressions, `test:vitest`, `tsc`, `build`, and `recovery:check` all green
+
+### Summary of changes
+
+1. **Internal zone ids no longer leak into player-facing reserve/autonomy copy** - a shared formatter now strips `zone:<corps>:<anchor>` syntax and humanizes the anchor token for UI/reporting text.
+2. **Reserve provenance and autonomy proposal descriptions now read one canonical label helper** - Army Reserve copy and commander op-proposal enrichment both consume the same player-facing zone formatter instead of each inventing local wording.
+3. **No owner changed** - `commander_focus_zone_id` and `staging_zone` remain canonical sim-owned ids; only the final display string is humanized downstream.
+
+### Proof
+
+- Scenario proof is not relevant here because this lane does not change sim behavior, persistence, scenario outputs, or anomaly generation.
+- Strongest local proof:
+  - `tests/army_reserve_provenance_legibility.test.ts` proves reserve provenance now renders `Ozren` instead of raw `zone:vrs_2nd_krajina:ozren`.
+  - `tests/sim/autonomy/autonomy_phase_e_enrichment.test.ts` proves commander op descriptions render `Zone: Gorazde 2` and no longer leak raw `zone:arbih_1st_corps:gorazde_2` syntax.
+
+### Verification
+
+- `npx.cmd vitest run tests/army_reserve_provenance_legibility.test.ts tests/sim/autonomy/autonomy_phase_e_enrichment.test.ts`
+- `npm.cmd run test:vitest`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run build`
+- `npm.cmd run recovery:check`
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260410_COMMANDER_ZONE_LABEL_HUMANIZATION_HARDENING.md`
+
+---
+
 ## [2026-04-10] fix(ui): align autonomy proposal review with active player faction
 
 **Type:** UI / player-truth hardening

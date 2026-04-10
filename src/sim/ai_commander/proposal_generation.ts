@@ -14,6 +14,7 @@ import type { FactionId, GameState, PendingProposalReview } from '../../state/ga
 import type { CommanderState } from '../combat/commander/commander_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getFactionCorps } from '../combat/bot_corps_helpers.js';
+import { formatPlayerFacingZoneLabel } from '../../utils/player_facing_zone_label.js';
 
 // ---------------------------------------------------------------------------
 // Description enrichment helpers
@@ -25,10 +26,7 @@ import { getFactionCorps } from '../combat/bot_corps_helpers.js';
  * Pure — no side effects, no randomness.
  */
 function formatZoneName(zoneId: string): string {
-    return zoneId
-        .split('_')
-        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(' ');
+    return formatPlayerFacingZoneLabel(zoneId);
 }
 
 /**

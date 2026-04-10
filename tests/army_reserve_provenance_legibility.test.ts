@@ -15,7 +15,7 @@ describe('Army reserve driver provenance legibility', () => {
     ).toEqual({
       label: 'What Produced This Request',
       summary: 'This request was produced by an explicit corps commander reinforcement escalation.',
-      detail: 'Commander signal: critical priority for 3 brigades in zone:vrs_2nd_krajina:ozren.',
+      detail: 'Commander signal: critical priority for 3 brigades in Ozren.',
     });
   });
 

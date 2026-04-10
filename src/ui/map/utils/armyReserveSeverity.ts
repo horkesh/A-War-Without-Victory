@@ -1,5 +1,7 @@
 export type ArmyReserveSeverityBand = 'critical' | 'routine';
 
+import { formatPlayerFacingZoneLabel } from '../../../utils/player_facing_zone_label.js';
+
 interface ArmyReserveCauseSource {
     reason?: string;
     purpose?: 'offensive' | 'defensive';
@@ -63,7 +65,9 @@ function getArmyReserveProvenanceDetail(source: ArmyReserveProvenanceSource): st
         const brigadesLabel = typeof source.commander_request_brigades_needed === 'number'
             ? `${source.commander_request_brigades_needed} brigade${source.commander_request_brigades_needed === 1 ? '' : 's'}`
             : 'reinforcement';
-        const zoneLabel = source.commander_focus_zone_id ?? 'the lead sector';
+        const zoneLabel = source.commander_focus_zone_id
+            ? formatPlayerFacingZoneLabel(source.commander_focus_zone_id)
+            : 'the lead sector';
         return `Commander signal: ${priorityLabel} priority for ${brigadesLabel} in ${zoneLabel}.`;
     }
 
