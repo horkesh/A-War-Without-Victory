@@ -14,6 +14,10 @@ const { app, BrowserWindow, protocol, ipcMain, dialog, Menu } = _electronModule;
 const path = require('path');
 const fs = require('fs');
 const http = require('http');
+const {
+  getPendingProposalReviewsForPlayer,
+  resolvePendingProposalAccess,
+} = require('./autonomy_ipc_contract.cjs');
 const RUNTIME_PROBE_MODE = process.env.AWWV_DESKTOP_RUNTIME_PROBE === '1';
 
 /** Project root (dev) or resources root (packaged). Used for data paths and desktop sim. */
@@ -2690,7 +2694,7 @@ app.whenReady().then(() => {
       autonomy_level: state.meta?.autonomy_level ?? 0,
       autonomy_level_pending: state.meta?.autonomy_level_pending ?? null,
       autonomy_overrides: state.meta?.autonomy_overrides ?? [],
-      pending_proposal_reviews: state.meta?.pending_proposal_reviews ?? [],
+      pending_proposal_reviews: getPendingProposalReviewsForPlayer(state),
     };
   });
 
@@ -2745,8 +2749,10 @@ app.whenReady().then(() => {
     const sim = getDesktopSim();
     const state = readCanonicalCurrentState(sim);
     const proposals = state.meta?.pending_proposal_reviews ?? [];
-    const idx = proposals.findIndex(p => p.id === proposalId);
-    if (idx === -1) return { ok: false, error: 'proposal_not_found' };
+    const playerFaction = state.meta?.player_faction ?? null;
+    const proposalAccess = resolvePendingProposalAccess(proposals, proposalId, playerFaction);
+    if (proposalAccess.index === -1) return { ok: false, error: proposalAccess.error };
+    const idx = proposalAccess.index;
     const proposal = proposals[idx];
     if (proposal.accepted !== undefined) return { ok: false, error: 'already_resolved' };
 
@@ -2782,8 +2788,10 @@ app.whenReady().then(() => {
     const sim = getDesktopSim();
     const state = readCanonicalCurrentState(sim);
     const proposals = state.meta?.pending_proposal_reviews ?? [];
-    const idx = proposals.findIndex(p => p.id === proposalId);
-    if (idx === -1) return { ok: false, error: 'proposal_not_found' };
+    const playerFaction = state.meta?.player_faction ?? null;
+    const proposalAccess = resolvePendingProposalAccess(proposals, proposalId, playerFaction);
+    if (proposalAccess.index === -1) return { ok: false, error: proposalAccess.error };
+    const idx = proposalAccess.index;
     const proposal = proposals[idx];
     if (proposal.accepted !== undefined) return { ok: false, error: 'already_resolved' };
 

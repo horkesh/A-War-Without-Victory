@@ -1,3 +1,36 @@
+## [2026-04-10] fix(desktop): scope autonomy IPC to the active player faction
+
+**Type:** Desktop / read-model boundary hardening
+**Files:** `src/desktop/autonomy_ipc_contract.cjs`, `src/desktop/electron-main.cjs`, `tests/desktop_autonomy_boundary_truth.test.ts`, `docs/40_reports/implemented/20260410_DESKTOP_AUTONOMY_BOUNDARY_TRUTH_HARDENING.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/architect_notes.md`
+**Status:** VERIFIED - targeted regressions, `test:vitest`, `tsc`, `build`, and `recovery:check` all green
+
+### Summary of changes
+
+1. **Autonomy IPC readback now scopes proposals at the desktop boundary** - `get-autonomy-state` no longer returns the full mixed-faction `pending_proposal_reviews` array to the renderer when a live `player_faction` exists.
+2. **Proposal accept/reject now enforce proposal ownership** - desktop handlers reject cross-faction proposal ids instead of trusting any matching `proposal.id`.
+3. **Renderer remains downstream only** - the panel-level filter is preserved as presentation safety, but canonical scoping now lives at the desktop read-model boundary.
+
+### Proof
+
+- Scenario proof is not relevant here because this lane does not change sim behavior, persistence schema, scenario outputs, or anomaly generation.
+- Strongest local proof:
+  - `tests/desktop_autonomy_boundary_truth.test.ts` proves desktop readback filters to the active player faction, keeps observer-mode broad, rejects cross-faction proposal ids, and wires `electron-main.cjs` through the shared boundary helper.
+  - `tests/desktop_persistence_contract.test.ts` still proves the desktop autonomy handlers remain on the canonical serializer/deserializer path.
+
+### Verification
+
+- `npx.cmd vitest run tests/desktop_autonomy_boundary_truth.test.ts tests/desktop_persistence_contract.test.ts tests/autonomy_panel_player_faction_truth.test.ts`
+- `npm.cmd run test:vitest`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run build`
+- `npm.cmd run recovery:check`
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260410_DESKTOP_AUTONOMY_BOUNDARY_TRUTH_HARDENING.md`
+
+---
+
 ## [2026-04-10] fix(ui): humanize commander zone labels in reserve and autonomy text
 
 **Type:** UI / player-truth hardening
