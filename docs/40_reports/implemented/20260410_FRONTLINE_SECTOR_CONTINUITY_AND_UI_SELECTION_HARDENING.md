@@ -128,7 +128,8 @@ So even with correct sector ownership, the selected white trail could still appe
 
 The follow-up fix:
 
-- merges connected glow segments per `(faction, corps_id, sector_id, sub_segment_id, offset_side)` group before emitting the front-lines source,
+- stitches glow geometry at the sector trail level per `(faction, corps_id, sector_id)` instead of preserving fragmented offset-side edge groups,
+- then emits that stitched sector trail back out on both visual sides so the selected white highlight uses one continuous sector line,
 - and highlights selected sector territory from `territory_osids` rather than the older front-friendly subset.
 
 Additional verification:
@@ -136,5 +137,10 @@ Additional verification:
 - `npx.cmd vitest run tests/ui_sector_glow_continuity.test.ts tests/ui_map_interactions.test.ts tests/ui_map_sector_lookup.test.ts tests/front_sector_player_visibility.test.ts tests/ui_map_tooltip_player_visibility.test.ts`
 - `npx.cmd tsc --noEmit -p tsconfig.json`
 - `npm.cmd run build`
+
+Additional renderer proof:
+
+- Before the strengthened glow fix, the RS selected glow for `sector:vrs_2nd_krajina:1` still emitted `25`, then `17`, fragmented `glow` features from the front-lines source.
+- After the strengthened sector-level stitch, that same selected sector emits exactly `2` glow features total: one positive-side copy and one negative-side copy of the same 48-point sector trail.
 
 This follow-up is renderer/UI only. It does not change the `n1422` simulation outcome; it corrects how the already-correct sector is highlighted on the map.

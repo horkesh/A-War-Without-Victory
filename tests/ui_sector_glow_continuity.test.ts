@@ -37,9 +37,11 @@ describe('sector glow continuity', () => {
       },
     ];
 
-    const merged = mergeGlowSegments(segments);
+    const merged = mergeGlowSegments(segments, new Map(), new Map());
 
-    expect(merged).toHaveLength(1);
+    expect(merged).toHaveLength(2);
     expect(merged[0]!.geometry.coordinates).toEqual([[0, 0], [1, 0], [2, 0]]);
+    expect(merged[1]!.geometry.coordinates).toEqual([[0, 0], [1, 0], [2, 0]]);
+    expect(merged.map(feature => feature.properties.offset_side).sort()).toEqual([-1, 1]);
   });
 });

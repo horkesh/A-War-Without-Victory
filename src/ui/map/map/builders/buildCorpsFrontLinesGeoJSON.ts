@@ -196,8 +196,180 @@ function mergeLineSegments<P extends CorpsLineProperties>(
     return merged;
 }
 
+function stitchSegmentsWithFriendlyBridges<P extends CorpsLineProperties>(
+    segments: Feature<LineString, P>[],
+    edgeMap: Map<string, Set<string>>,
+    controllerMap: Map<string, string | null>,
+): Feature<LineString, P>[] {
+    if (segments.length === 0) return [];
+
+    const coordKey = (c: number[]) => `${c[0].toFixed(6)},${c[1].toFixed(6)}`;
+
+    const segEndpoints = new Map<string, Array<{ idx: number; isEnd: boolean }>>();
+    for (let i = 0; i < segments.length; i++) {
+        const c = segments[i].geometry.coordinates;
+        const sk = coordKey(c[0]);
+        const ek = coordKey(c[c.length - 1]);
+        if (!segEndpoints.has(sk)) segEndpoints.set(sk, []);
+        segEndpoints.get(sk)!.push({ idx: i, isEnd: false });
+        if (sk !== ek) {
+            if (!segEndpoints.has(ek)) segEndpoints.set(ek, []);
+            segEndpoints.get(ek)!.push({ idx: i, isEnd: true });
+        }
+    }
+
+    const used = new Set<number>();
+    const chains: { coords: [number, number][]; props: P }[] = [];
+
+    for (let seed = 0; seed < segments.length; seed++) {
+        if (used.has(seed)) continue;
+        used.add(seed);
+        const seg = segments[seed];
+        let line = [...seg.geometry.coordinates] as [number, number][];
+        const props = seg.properties;
+
+        let growing = true;
+        while (growing) {
+            growing = false;
+            const tailKey = coordKey(line[line.length - 1]);
+            for (const c of segEndpoints.get(tailKey) ?? []) {
+                if (used.has(c.idx)) continue;
+                used.add(c.idx);
+                const other = segments[c.idx].geometry.coordinates;
+                if (c.isEnd) {
+                    line = line.concat([...other].reverse().slice(1) as [number, number][]);
+                } else {
+                    line = line.concat(other.slice(1) as [number, number][]);
+                }
+                growing = true;
+                break;
+            }
+        }
+
+        growing = true;
+        while (growing) {
+            growing = false;
+            const headKey = coordKey(line[0]);
+            for (const c of segEndpoints.get(headKey) ?? []) {
+                if (used.has(c.idx)) continue;
+                used.add(c.idx);
+                const other = segments[c.idx].geometry.coordinates;
+                if (c.isEnd) {
+                    line = (other.slice(0, -1) as [number, number][]).concat(line);
+                } else {
+                    line = ([...other].reverse().slice(0, -1) as [number, number][]).concat(line);
+                }
+                growing = true;
+                break;
+            }
+        }
+
+        chains.push({ coords: line, props });
+    }
+
+    const hostileEdgeKeys = new Set<string>();
+    for (const [ek, osids] of edgeMap) {
+        if (osids.size !== 2) continue;
+        const [a, b] = [...osids];
+        const ca = controllerMap.get(a), cb = controllerMap.get(b);
+        if (ca && cb && ca !== cb) hostileEdgeKeys.add(ek);
+    }
+
+    const friendlyAdj = new Map<string, string[]>();
+    for (const [ek] of edgeMap) {
+        if (hostileEdgeKeys.has(ek)) continue;
+        const [partA, partB] = ek.split('|');
+        if (!friendlyAdj.has(partA)) friendlyAdj.set(partA, []);
+        if (!friendlyAdj.has(partB)) friendlyAdj.set(partB, []);
+        friendlyAdj.get(partA)!.push(partB);
+        friendlyAdj.get(partB)!.push(partA);
+    }
+
+    const MAX_BRIDGE_HOPS = 8;
+    let bridging = true;
+    while (bridging) {
+        bridging = false;
+        const deadEnds: Array<{ chainIdx: number; key: string; end: 'head' | 'tail' }> = [];
+        for (let ci = 0; ci < chains.length; ci++) {
+            if (!chains[ci]) continue;
+            const c = chains[ci].coords;
+            deadEnds.push({ chainIdx: ci, key: coordKey(c[0]), end: 'head' });
+            deadEnds.push({ chainIdx: ci, key: coordKey(c[c.length - 1]), end: 'tail' });
+        }
+        const deadEndByKey = new Map<string, typeof deadEnds[0]>();
+        for (const de of deadEnds) deadEndByKey.set(de.key, de);
+
+        for (const source of deadEnds) {
+            if (!(chains as any)[source.chainIdx]) continue;
+            const visited = new Map<string, string | null>();
+            visited.set(source.key, null);
+            let frontier = [source.key];
+            let found = false;
+
+            for (let hop = 0; hop < MAX_BRIDGE_HOPS && !found; hop++) {
+                const next: string[] = [];
+                for (const fk of frontier) {
+                    for (const nk of friendlyAdj.get(fk) ?? []) {
+                        if (visited.has(nk)) continue;
+                        visited.set(nk, fk);
+                        next.push(nk);
+
+                        const target = deadEndByKey.get(nk);
+                        if (target && target.chainIdx !== source.chainIdx && chains[target.chainIdx]) {
+                            const path: [number, number][] = [];
+                            let cur: string | null = nk;
+                            while (cur !== null) {
+                                const [x, y] = cur.split(',').map(Number);
+                                path.unshift([x, y]);
+                                cur = visited.get(cur) ?? null;
+                            }
+
+                            const srcChain = chains[source.chainIdx];
+                            const dstChain = chains[target.chainIdx];
+                            const bridge = path.slice(1, -1);
+
+                            let mergedCoords: [number, number][];
+                            if (source.end === 'tail' && target.end === 'head') {
+                                mergedCoords = [...srcChain.coords, ...bridge, ...dstChain.coords];
+                            } else if (source.end === 'tail' && target.end === 'tail') {
+                                mergedCoords = [...srcChain.coords, ...bridge, ...dstChain.coords.slice().reverse()];
+                            } else if (source.end === 'head' && target.end === 'tail') {
+                                mergedCoords = [...dstChain.coords, ...bridge.reverse(), ...srcChain.coords];
+                            } else {
+                                mergedCoords = [...dstChain.coords.slice().reverse(), ...bridge.reverse(), ...srcChain.coords];
+                            }
+
+                            chains[source.chainIdx] = { coords: mergedCoords, props: srcChain.props };
+                            (chains as any)[target.chainIdx] = null;
+                            bridging = true;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (found) break;
+                }
+                frontier = next;
+            }
+            if (found) break;
+        }
+    }
+
+    const stitched: Feature<LineString, P>[] = [];
+    for (const chain of chains) {
+        if (!chain || chain.coords.length < 2) continue;
+        stitched.push({
+            type: 'Feature',
+            properties: chain.props,
+            geometry: { type: 'LineString', coordinates: chain.coords },
+        });
+    }
+    return stitched;
+}
+
 export function mergeGlowSegments(
-    segments: Feature<LineString, CorpsGlowProperties>[]
+    segments: Feature<LineString, CorpsGlowProperties>[],
+    edgeMap: Map<string, Set<string>>,
+    controllerMap: Map<string, string | null>,
 ): Feature<LineString, CorpsGlowProperties>[] {
     const byGroup = new Map<string, Feature<LineString, CorpsGlowProperties>[]>();
     for (const segment of segments) {
@@ -206,8 +378,6 @@ export function mergeGlowSegments(
             props.faction,
             props.corps_id,
             props.sector_id ?? '',
-            props.sub_segment_id ?? '',
-            props.offset_side ?? 0,
         ].join('|');
         const list = byGroup.get(key) ?? [];
         list.push(segment);
@@ -216,7 +386,19 @@ export function mergeGlowSegments(
 
     const merged: Feature<LineString, CorpsGlowProperties>[] = [];
     for (const group of byGroup.values()) {
-        merged.push(...mergeLineSegments(group));
+        const stitched = stitchSegmentsWithFriendlyBridges(group, edgeMap, controllerMap);
+        for (const feature of stitched) {
+            merged.push({
+                type: 'Feature',
+                properties: { ...feature.properties, offset_side: 1 },
+                geometry: feature.geometry,
+            });
+            merged.push({
+                type: 'Feature',
+                properties: { ...feature.properties, offset_side: -1 },
+                geometry: feature.geometry,
+            });
+        }
     }
     return merged;
 }
@@ -543,176 +725,8 @@ export function buildCorpsFrontLinesGeoJSON(
         allFrontSegments.push(...segments);
     }
 
-    // Step 1: Build endpoint adjacency across ALL segments
-    const segEndpoints = new Map<string, Array<{ idx: number; isEnd: boolean }>>();
-    for (let i = 0; i < allFrontSegments.length; i++) {
-        const c = allFrontSegments[i].geometry.coordinates;
-        const sk = coordKey(c[0]);
-        const ek = coordKey(c[c.length - 1]);
-        if (!segEndpoints.has(sk)) segEndpoints.set(sk, []);
-        segEndpoints.get(sk)!.push({ idx: i, isEnd: false });
-        if (sk !== ek) {
-            if (!segEndpoints.has(ek)) segEndpoints.set(ek, []);
-            segEndpoints.get(ek)!.push({ idx: i, isEnd: true });
-        }
-    }
-
-    // Step 2: Greedy stitch into chains
-    const used = new Set<number>();
-    const chains: { coords: [number, number][]; props: CorpsFrontProperties }[] = [];
-
-    for (let seed = 0; seed < allFrontSegments.length; seed++) {
-        if (used.has(seed)) continue;
-        used.add(seed);
-        const seg = allFrontSegments[seed];
-        let line = [...seg.geometry.coordinates] as [number, number][];
-        const props = seg.properties;
-
-        // Extend forward
-        let growing = true;
-        while (growing) {
-            growing = false;
-            const tailKey = coordKey(line[line.length - 1]);
-            for (const c of segEndpoints.get(tailKey) ?? []) {
-                if (used.has(c.idx)) continue;
-                used.add(c.idx);
-                const other = allFrontSegments[c.idx].geometry.coordinates;
-                if (c.isEnd) {
-                    line = line.concat([...other].reverse().slice(1) as [number, number][]);
-                } else {
-                    line = line.concat(other.slice(1) as [number, number][]);
-                }
-                growing = true;
-                break;
-            }
-        }
-        // Extend backward
-        growing = true;
-        while (growing) {
-            growing = false;
-            const headKey = coordKey(line[0]);
-            for (const c of segEndpoints.get(headKey) ?? []) {
-                if (used.has(c.idx)) continue;
-                used.add(c.idx);
-                const other = allFrontSegments[c.idx].geometry.coordinates;
-                if (c.isEnd) {
-                    line = (other.slice(0, -1) as [number, number][]).concat(line);
-                } else {
-                    line = ([...other].reverse().slice(0, -1) as [number, number][]).concat(line);
-                }
-                growing = true;
-                break;
-            }
-        }
-
-        chains.push({ coords: line, props });
-    }
-
-    // Step 3: BFS-bridge dead ends through friendly polygon edges (max 3 hops).
-    // Friendly = ALL non-hostile polygon edges (including exterior/boundary edges).
-    const hostileEdgeKeys = new Set<string>();
-    for (const [ek, osids] of edgeMap) {
-        if (osids.size !== 2) continue;
-        const [a, b] = [...osids];
-        const ca = controllerMap.get(a), cb = controllerMap.get(b);
-        if (ca && cb && ca !== cb) hostileEdgeKeys.add(ek);
-    }
-
-    const friendlyAdj = new Map<string, string[]>();
-    for (const [ek] of edgeMap) {
-        if (hostileEdgeKeys.has(ek)) continue;
-        const [partA, partB] = ek.split('|');
-        if (!friendlyAdj.has(partA)) friendlyAdj.set(partA, []);
-        if (!friendlyAdj.has(partB)) friendlyAdj.set(partB, []);
-        friendlyAdj.get(partA)!.push(partB);
-        friendlyAdj.get(partB)!.push(partA);
-    }
-
-    const MAX_BRIDGE_HOPS = 8;
-    let bridging = true;
-    while (bridging) {
-        bridging = false;
-
-        // Collect all chain dead ends
-        const deadEnds: Array<{ chainIdx: number; key: string; end: 'head' | 'tail' }> = [];
-        for (let ci = 0; ci < chains.length; ci++) {
-            if (!chains[ci]) continue;
-            const c = chains[ci].coords;
-            deadEnds.push({ chainIdx: ci, key: coordKey(c[0]), end: 'head' });
-            deadEnds.push({ chainIdx: ci, key: coordKey(c[c.length - 1]), end: 'tail' });
-        }
-        const deadEndByKey = new Map<string, typeof deadEnds[0]>();
-        for (const de of deadEnds) deadEndByKey.set(de.key, de);
-
-        for (const source of deadEnds) {
-            if (!(chains as any)[source.chainIdx]) continue;
-            const visited = new Map<string, string | null>();
-            visited.set(source.key, null);
-            let frontier = [source.key];
-            let found = false;
-
-            for (let hop = 0; hop < MAX_BRIDGE_HOPS && !found; hop++) {
-                const next: string[] = [];
-                for (const fk of frontier) {
-                    for (const nk of friendlyAdj.get(fk) ?? []) {
-                        if (visited.has(nk)) continue;
-                        visited.set(nk, fk);
-                        next.push(nk);
-
-                        const target = deadEndByKey.get(nk);
-                        if (target && target.chainIdx !== source.chainIdx && chains[target.chainIdx]) {
-                            // Reconstruct BFS path
-                            const path: [number, number][] = [];
-                            let cur: string | null = nk;
-                            while (cur !== null) {
-                                const [x, y] = cur.split(',').map(Number);
-                                path.unshift([x, y]);
-                                cur = visited.get(cur) ?? null;
-                            }
-
-                            // Merge chains via path
-                            const srcChain = chains[source.chainIdx];
-                            const dstChain = chains[target.chainIdx];
-                            const bridge = path.slice(1, -1); // Exclude endpoints (already in chains)
-
-                            let mergedCoords: [number, number][];
-                            if (source.end === 'tail' && target.end === 'head') {
-                                mergedCoords = [...srcChain.coords, ...bridge, ...dstChain.coords];
-                            } else if (source.end === 'tail' && target.end === 'tail') {
-                                mergedCoords = [...srcChain.coords, ...bridge, ...dstChain.coords.slice().reverse()];
-                            } else if (source.end === 'head' && target.end === 'tail') {
-                                mergedCoords = [...dstChain.coords, ...bridge.reverse(), ...srcChain.coords];
-                            } else {
-                                mergedCoords = [...dstChain.coords.slice().reverse(), ...bridge.reverse(), ...srcChain.coords];
-                            }
-
-                            chains[source.chainIdx] = { coords: mergedCoords, props: srcChain.props };
-                            (chains as any)[target.chainIdx] = null;
-                            bridging = true;
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (found) break;
-                }
-                frontier = next;
-            }
-            if (found) break; // Restart outer loop after merge
-        }
-    }
-
-    // Convert chains to features
-    const mergedFront: Feature<LineString, CorpsFrontProperties>[] = [];
-    for (const chain of chains) {
-        if (!chain || chain.coords.length < 2) continue;
-        mergedFront.push({
-            type: 'Feature',
-            properties: chain.props,
-            geometry: { type: 'LineString', coordinates: chain.coords },
-        });
-    }
-
-    const mergedGlow = mergeGlowSegments(glowFeatures);
+    const mergedFront = stitchSegmentsWithFriendlyBridges(allFrontSegments, edgeMap, controllerMap);
+    const mergedGlow = mergeGlowSegments(glowFeatures, edgeMap, controllerMap);
     const allFeatures: Feature<LineString>[] = [...mergedGlow, ...mergedFront];
     return { type: 'FeatureCollection', features: allFeatures as any };
 }
