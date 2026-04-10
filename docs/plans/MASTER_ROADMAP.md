@@ -311,12 +311,19 @@ No version bump â€” engineering milestone between feature releases. Stabili
   - which major system is below its target grade
   - what exact work would promote it one rung
   - whether that work is bounded hardening, content/runtime audit, realism, or redesign
+- The scorecard is now explicitly normalized against the external Pyrrhic full-system review:
+  - already-landed fixes like probe no-flip are treated as closed, not re-added as fake queue items
+  - historically useful but stale metrics like old ZEA rates must be re-benchmarked on current `main` before reuse
+  - structural concerns that remain true, especially god files, are promoted into their own bounded maintainability track
 - Immediate promotion queue from the scorecard:
-  1. save/load + replay + adapter integrity
-  2. political / peace / review ownership and proof
-  3. autonomy replay / fallback / queue truth
-  4. residual harness audits where runtime truth may still be misclassified
-  5. planner/doctrine realism only after the remaining owner-truth lanes are exhausted
+  1. exhaustion activation / negative-sum identity audit
+  2. save/load + replay + adapter integrity
+  3. political / peace / review ownership and proof
+  4. autonomy replay / fallback / queue truth
+  5. god-file decomposition tranche 1
+  6. residual harness audits where runtime truth may still be misclassified
+  7. planner/doctrine realism only after the remaining owner-truth lanes are exhausted
+  8. thin player-experience layer after the identity and core-truth P0s
 - Explicit redesign gates from the scorecard:
   - stranded same-faction unreachable brigade lifecycle owner
   - any deeper packet/detail contract that the current canonical request or operation packet does not already own
