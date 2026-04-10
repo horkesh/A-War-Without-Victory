@@ -1,5 +1,6 @@
 import type { FeatureCollection, Feature, Polygon, MultiPolygon, LineString } from 'geojson';
 import type { CorpsFrontSectorView } from '../../data/types';
+import { buildDisplayFrontEdgeOwnership, buildDisplayOsidAdjacency } from './displayFrontEdgeOwnership.js';
 
 interface OsidProperties {
     osid: string;
@@ -404,24 +405,6 @@ export function mergeGlowSegments(
 }
 
 /**
- * Build a mapping from (OSID-pair edge key, faction) → corps info.
- * Keyed as "pairKey\0faction" so both sides of a front edge resolve to
- * the correct corps for their respective faction.
- */
-function buildEdgeFactionToCorps(
-    sectors: CorpsFrontSectorView[]
-): Map<string, string> {
-    const map = new Map<string, string>();
-    for (const sector of sectors) {
-        for (const edgeId of sector.edge_ids) {
-            const key = `${edgeId}\0${sector.faction}`;
-            if (!map.has(key)) map.set(key, sector.corps_id);
-        }
-    }
-    return map;
-}
-
-/**
  * Build a plain Record<corpsId, hexColor> for use in UI panels/badges.
  */
 export function buildCorpsFrontLinesGeoJSON(
@@ -438,26 +421,6 @@ export function buildCorpsFrontLinesGeoJSON(
     const controllerMap = new Map<string, string | null>();
     for (const f of features) {
         controllerMap.set(f.properties.osid, f.properties.controller);
-    }
-
-    const edgeFactionToCorps = buildEdgeFactionToCorps(corpsFrontSectors);
-    const sectorByEdgeAndFaction = new Map<string, CorpsFrontSectorView>();
-    for (const sector of corpsFrontSectors) {
-        for (const edgeId of sector.edge_ids) {
-            sectorByEdgeAndFaction.set(`${edgeId}\0${sector.faction}`, sector);
-        }
-    }
-
-    // Build edge → sub_segment_id lookup from sector sub_segments data
-    const edgeToSubSegment = new Map<string, string>();
-    for (const sector of corpsFrontSectors) {
-        for (const ss of sector.sub_segments ?? []) {
-            const ssId = ss.sub_segment_id;
-            if (!ssId) continue;
-            for (const edgeId of ss.edge_ids ?? []) {
-                edgeToSubSegment.set(`${edgeId}\0${sector.faction}`, ssId);
-            }
-        }
     }
 
     const authoritativePairs = new Set<string>();
@@ -492,6 +455,18 @@ export function buildCorpsFrontLinesGeoJSON(
             }
         }
     }
+
+    const displayAdjacency = buildDisplayOsidAdjacency(edgeMap);
+    const {
+        corpsByEdgeAndFaction: edgeFactionToCorps,
+        sectorByEdgeAndFaction,
+        subSegmentByEdgeAndFaction: edgeToSubSegment,
+    } = buildDisplayFrontEdgeOwnership(
+        corpsFrontSectors,
+        frontEdgesOsid,
+        controllerMap,
+        displayAdjacency,
+    );
 
     // Track which authoritative pairs get polygon-edge segments
     const pairsWithSegments = new Set<string>();

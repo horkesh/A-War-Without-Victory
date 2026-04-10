@@ -705,3 +705,16 @@ Patch bumps (0.X.1, 0.X.2) are for significant fixes within a milestone â€”
   - `arbih_444th_mountain` salient overextension near Konjic remains planner/doctrine work, not startup/package or anomaly-owner hardening
 
 
+## 2026-04-11 hardening board note
+
+- Closed this wave:
+  - front-edge hover/click/glow ownership now has one display-only completion owner shared by the map renderers
+  - real-save map payload proof now guards against visible front-edge faction-sides with missing `sector_id`
+  - East Bosnia `donje_zesce__podgrab` front-edge ownership now stays selectable without mutating sim sector truth
+- Still active:
+  - broader raw sector packet omissions still exist in the sim save, but they are now intentionally handled at the display boundary rather than by a behavior-drifting sim patch
+  - remaining map complaints should now be sorted into display/render seams, raw geometry/content seams, or planner/doctrine seams instead of treated as one blended “sector continuity” bucket
+- Demoted / redesign-blocked:
+  - same-faction ownerless unreachable brigades (`rs_1st_podrinje`, `rs_5th_podrinje`)
+- Investigated and rejected:
+  - sim-side front-edge backfill inside `corps_front_sectors.ts` was rejected for this lane because it broke `scenario_vrs_operation_proof`

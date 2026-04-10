@@ -1,6 +1,7 @@
 import type { FeatureCollection, Feature, Polygon, MultiPolygon, LineString } from 'geojson';
 import type { CorpsFrontSectorView } from '../../data/types';
 import type { PlayerFacingFaction } from '../../../shared/playerFacingLabels';
+import { buildDisplayFrontEdgeOwnership, buildDisplayOsidAdjacency } from './displayFrontEdgeOwnership.js';
 
 interface OsidProperties {
   osid: string;
@@ -83,32 +84,17 @@ export function buildFrontEdgesHoverGeoJSON(
     pairToSegments.get(pairKey)!.push(segment);
   }
 
-  // Build (edge_id + faction) → sector lookup
-  const edgeFactionToSector = new Map<string, { sector_id: string; corps_id: string }>();
-  if (corpsFrontSectors) {
-    for (const sector of corpsFrontSectors) {
-      for (const edgeId of sector.edge_ids) {
-        const key = `${edgeId}\0${sector.faction}`;
-        if (!edgeFactionToSector.has(key)) {
-          edgeFactionToSector.set(key, { sector_id: sector.sector_id, corps_id: sector.corps_id });
-        }
-      }
-    }
-  }
-
-  // Build edge_id → sub_segment_id lookup from sector sub_segments data
-  const edgeToSubSegment = new Map<string, string>();
-  if (corpsFrontSectors) {
-    for (const sector of corpsFrontSectors) {
-      for (const ss of sector.sub_segments ?? []) {
-        const ssId = ss.sub_segment_id;
-        if (!ssId) continue;
-        for (const edgeId of ss.edge_ids ?? []) {
-          edgeToSubSegment.set(`${edgeId}\0${sector.faction}`, ssId);
-        }
-      }
-    }
-  }
+  const displayAdjacency = buildDisplayOsidAdjacency(
+    new Map(
+      [...edgeOwners.entries()].map(([edgeKey, entry]) => [edgeKey, entry.osids]),
+    ),
+  );
+  const displayOwnership = buildDisplayFrontEdgeOwnership(
+    corpsFrontSectors,
+    frontEdgesOsid,
+    controllerMap,
+    displayAdjacency,
+  );
 
   // Fallback: synthesize boundary for front edge pairs with no shared polygon edges.
   // Find near-coincident vertices between the two polygons and build approximate boundary.
@@ -183,8 +169,8 @@ export function buildFrontEdgesHoverGeoJSON(
 
     const factionA = edge.side_a ?? '';
     const factionB = edge.side_b ?? '';
-    const sectorA = edgeFactionToSector.get(`${edge.edge_id}\0${factionA}`);
-    const sectorB = edgeFactionToSector.get(`${edge.edge_id}\0${factionB}`);
+    const sectorA = displayOwnership.sectorByEdgeAndFaction.get(`${edge.edge_id}\0${factionA}`);
+    const sectorB = displayOwnership.sectorByEdgeAndFaction.get(`${edge.edge_id}\0${factionB}`);
 
     // factionA = side_a controls edge.a — use its centroid for offset computation
     const centA = osidCentroids?.get(edge.a);
@@ -205,8 +191,8 @@ export function buildFrontEdgesHoverGeoJSON(
         offsetForB = cross > 0 ? 1 : -1;
       }
 
-      const subSegA = edgeToSubSegment.get(`${edge.edge_id}\0${factionA}`);
-      const subSegB = edgeToSubSegment.get(`${edge.edge_id}\0${factionB}`);
+      const subSegA = displayOwnership.subSegmentByEdgeAndFaction.get(`${edge.edge_id}\0${factionA}`);
+      const subSegB = displayOwnership.subSegmentByEdgeAndFaction.get(`${edge.edge_id}\0${factionB}`);
 
       const propsA: FrontEdgeHoverProperties = {
         edge_id: `${edge.edge_id}:${factionA}`,

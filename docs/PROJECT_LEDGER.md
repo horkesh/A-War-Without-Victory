@@ -814,3 +814,29 @@
 
 ### Follow-up correction
 4. **Selected-sector glow continuity fixed at renderer level** - the first pass corrected sector ownership and Arapuša control, but the live white sector trail could still render as broken because `buildCorpsFrontLinesGeoJSON()` only stitched the frontline base, not the `glow` features used by selected-sector highlight layers. The follow-up now stitches selected-sector glow at the sector-trail level before emitting the two visual-side copies and highlights fill from `territory_osids`, so the map highlight contract matches the already-correct engine state.
+## [2026-04-11] fix(map): complete display front-edge ownership for hover, click, and sector glow
+
+**Type:** UI/map frontline truth hardening
+**Files:** `src/ui/map/map/builders/displayFrontEdgeOwnership.ts`, `src/ui/map/map/builders/buildCorpsFrontLinesGeoJSON.ts`, `src/ui/map/map/builders/buildFrontEdgesHoverGeoJSON.ts`, `tests/front_edge_ownership_completion.test.ts`, `tests/ui_front_edge_display_ownership_real_save.test.ts`
+**Status:** VERIFIED - targeted map ownership tests, live-save ownership audit, consistency validation, recovery bar, full vitest, typecheck, and build clean
+
+### Summary of changes
+1. **One display-only owner added** - `displayFrontEdgeOwnership.ts` now canonically completes missing front-edge faction-side sector/corps ownership for the renderer from raw sector claims, sector territory/front claims, and deterministic nearest same-faction display adjacency.
+2. **Both map renderers now share the same completion contract** - `buildCorpsFrontLinesGeoJSON()` and `buildFrontEdgesHoverGeoJSON()` consume the same completed ownership map instead of each trusting only raw `edge_ids`.
+3. **Real-save regression locked in** - new tests now prove the live save's hover payload has no visible front-edge faction-sides missing `sector_id` and specifically protect the East Bosnia `op:foca:donje_zesce__op:pale:podgrab` seam.
+
+### Proof
+- Before: the raw `corps_front_sectors` packet in the live save still omitted `45` front-edge faction-sides, leaving some authoritative edge segments with no hover/click/glow sector owner.
+- After: the display ownership layer completes all `45` missing sides; the real-save hover payload now has `0 / 596` visible features missing `sector_id`.
+- East Bosnia proof: both sides of `op:foca:donje_zesce__op:pale:podgrab` now resolve a display-side sector owner.
+
+### Verification
+- `npx.cmd vitest run tests/front_edge_ownership_completion.test.ts tests/ui_sector_glow_continuity.test.ts tests/ui_map_sector_lookup.test.ts tests/front_sector_player_visibility.test.ts tests/ui_front_edge_display_ownership_real_save.test.ts`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `node tools/validate_run_consistency.cjs runs\\apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1425`
+- `npm.cmd run recovery:check`
+- `npm.cmd run build`
+- `npm.cmd run test:vitest`
+
+### Artifacts
+- Report: `docs/40_reports/implemented/20260411_FRONT_EDGE_DISPLAY_OWNERSHIP_COMPLETION_HARDENING.md`
