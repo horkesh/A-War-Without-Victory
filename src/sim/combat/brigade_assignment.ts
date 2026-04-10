@@ -666,6 +666,12 @@ export function classifyBrigadesByTerritory(
 
     // ── Loaned elites: only place them when the target corps has a truthful same-component sector ──
     for (const [fid, targetCorpsId] of loanedCorpsMap) {
+        // Only process loaned brigades belonging to the current faction.
+        // The pass runs per-faction; cross-faction entries would find zero
+        // matching sectors and silently fall through.
+        const loanedFormation = formations[fid];
+        if (!loanedFormation || loanedFormation.faction !== faction) continue;
+
         let alreadyAssigned = false;
         for (const sec of sectors) {
             if (sec.assigned_brigade_ids.includes(fid) || sec.reserve_brigade_ids?.includes(fid)) {
@@ -692,11 +698,6 @@ export function classifyBrigadesByTerritory(
 
         if (bestSector) {
             bestSector.assigned_brigade_ids.push(fid);
-        } else {
-            // Intermediate loan placement can legitimately miss here and still be
-            // repaired later by physical-truth rehome/final unresolved collection.
-            // Only the end-of-build unresolved snapshot should emit a canonical
-            // warning, otherwise scenario logs fill with false alarms.
         }
     }
 

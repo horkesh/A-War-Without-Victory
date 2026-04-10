@@ -174,12 +174,61 @@ export function buildCorpsFrontSectors(
     // metrics before we sync assignments back into formation truth.
     recomputeMetricsByFaction(Object.values(result), formations, state);
 
+    // Rescue loaned elites that are in a target-corps sector's territory but were
+    // dropped during merge/seal passes. The loaned-elites pass in classifyBrigadesByTerritory
+    // may have placed them, but sealMergedSectorTruth rebuilds assignments and can discard
+    // the placement. This final rescue assigns them as reserves so they are accounted for.
+    rescueUnassignedLoanedElitesInTerritory(result, formations);
+
     // Sync sector assignments back to formation.assignment
     syncSectorAssignmentsToFormations(result, formations);
     state.military.unresolved_sector_brigades = collectUnresolvedSectorBrigades(state, result, formations, adjacency);
     emitFinalUnresolvedSectorWarnings(state.military.unresolved_sector_brigades, formations);
 
     return result;
+}
+
+/**
+ * Rescue pass for loaned elite brigades dropped by merge/seal.
+ *
+ * A loaned elite may be placed by the loaned-elites pass in classifyBrigadesByTerritory,
+ * but sealMergedSectorTruth rebuilds assignments and can discard the placement when the
+ * brigade is component-separated from the sector front. This pass runs after all merge/seal
+ * work is complete and assigns any unplaced loaned elite as a reserve in its target-corps
+ * sector if the brigade is physically in that sector's territory.
+ */
+function rescueUnassignedLoanedElitesInTerritory(
+    sectors: Record<string, CorpsFrontSector>,
+    formations: Record<FormationId, FormationState>,
+): void {
+    const assigned = new Set<FormationId>();
+    for (const sec of Object.values(sectors)) {
+        for (const bid of sec.assigned_brigade_ids ?? []) assigned.add(bid);
+        for (const bid of sec.reserve_brigade_ids ?? []) assigned.add(bid);
+    }
+
+    const sectorList = Object.values(sectors);
+    for (const fid of Object.keys(formations).sort(strictCompare)) {
+        const f = formations[fid];
+        if (!f || f.status !== 'active') continue;
+        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+        if (!f.elite_loan_state?.on_loan || !f.elite_loan_state.loaned_to_corps) continue;
+        if (assigned.has(fid as FormationId)) continue;
+        if (!f.location_osid) continue;
+
+        const targetCorps = f.elite_loan_state.loaned_to_corps;
+        let bestSector: CorpsFrontSector | null = null;
+        for (const sec of sectorList) {
+            if (sec.corps_id !== targetCorps) continue;
+            if (!sec.territory_osids.includes(f.location_osid)) continue;
+            if (!bestSector || strictCompare(sec.sector_id, bestSector.sector_id) < 0) {
+                bestSector = sec;
+            }
+        }
+        if (bestSector) {
+            bestSector.reserve_brigade_ids.push(fid as FormationId);
+        }
+    }
 }
 
 function collectUnresolvedSectorBrigades(
