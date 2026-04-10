@@ -724,7 +724,10 @@ function App() {
       )}
       {/* v0.8.4 Phase C: Command Autonomy panel */}
       {autonomyPanelOpen && (
-        <AutonomyPanel onClose={() => setAutonomyPanelOpen(false)} />
+        <AutonomyPanel
+          onClose={() => setAutonomyPanelOpen(false)}
+          playerFaction={playerFaction}
+        />
       )}
       {aiAdvisorOpen && (
         <AiAdvisorPanel

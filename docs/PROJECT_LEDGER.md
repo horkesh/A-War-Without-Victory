@@ -1,3 +1,36 @@
+## [2026-04-10] fix(ui): align autonomy proposal review with active player faction
+
+**Type:** UI / player-truth hardening
+**Files:** `src/ui/map/App.tsx`, `src/ui/map/components/AutonomyPanel.tsx`, `tests/autonomy_panel_player_faction_truth.test.ts`, `docs/40_reports/implemented/20260410_AUTONOMY_PLAYER_FACTION_REVIEW_TRUTH_HARDENING.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/architect_notes.md`
+**Status:** VERIFIED - targeted regressions, `test:vitest`, `tsc`, `build`, and `recovery:check` all green
+
+### Summary of changes
+
+1. **Autonomy review now respects the active campaign faction** - `App.tsx` passes `playerFaction` into `AutonomyPanel`, and the panel filters `pending_proposal_reviews` against that live owner instead of a hardcoded `RBiH` literal.
+2. **All three playable factions can see their own proposals** - RS and HRHB campaigns no longer render an empty autonomy review surface when they have pending stance or op proposals.
+3. **No new owner was introduced** - proposal faction truth stays on `pending_proposal_reviews[*].faction`; the panel is now a pure consumer of the already-owned contract.
+
+### Proof
+
+- Scenario proof is not relevant here because this lane does not change sim behavior, persistence, scenario outputs, or anomaly generation.
+- Strongest local proof:
+  - `tests/autonomy_panel_player_faction_truth.test.ts` proves proposal filtering follows the active player faction instead of a hardcoded literal.
+  - the same test also proves `App.tsx` passes `playerFaction` into `AutonomyPanel`.
+
+### Verification
+
+- `npx.cmd vitest run tests/autonomy_panel_player_faction_truth.test.ts tests/desktop_persistence_contract.test.ts`
+- `npm.cmd run test:vitest`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run build`
+- `npm.cmd run recovery:check`
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260410_AUTONOMY_PLAYER_FACTION_REVIEW_TRUTH_HARDENING.md`
+
+---
+
 ## [2026-04-09] fix(harness): align brigade_never_fights with live owner truth (n4)
 
 **Type:** Harness / anomaly truth hardening

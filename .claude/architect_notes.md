@@ -36,6 +36,11 @@ Purpose: repo-local architect board for active findings, accepted direction, and
 
 ## Active / Recent Accepted Lanes
 
+- **Autonomy proposal review player-faction alignment** - CLOSED 2026-04-10. `AutonomyPanel` was still filtering `pending_proposal_reviews` with `p.faction === 'RBiH'`, which meant RS and HRHB campaigns could receive real pending proposals from the sim and still see an empty review surface. `App.tsx` now passes the live `playerFaction` into the panel, `filterPendingProposalsForPlayer(...)` consumes proposal `faction` truth without inventing a new owner, and `tests/autonomy_panel_player_faction_truth.test.ts` locks both the filter and the handoff. Proof is local rather than scenario-based: targeted regressions, `test:vitest`, `tsc`, `build`, and `recovery:check` all pass. Report: `docs/40_reports/implemented/20260410_AUTONOMY_PLAYER_FACTION_REVIEW_TRUTH_HARDENING.md`.
+  - **Canonical owner after cleanup:** `loadedGameState.player_faction` plus `pending_proposal_reviews[*].faction`.
+  - **Demoted path:** hardcoded `RBiH` filtering inside the autonomy panel.
+  - **Residual board after lane:** the next bounded UI/player-truth seam is commander zone-label humanization; Gorazde remains content/runtime audit, Podrinje remains redesign-blocked, and 444th remains doctrine realism.
+
 - **Territorial anomaly sector-coverage alignment** — CLOSED 2026-04-09. `checkUndefendedPaintedMismatch(...)` and `checkAdjacentUncontestedTerritory(...)` were still treating covered-but-empty OSIDs as undefended because they only read physical on-tile brigade presence. The detector now consults canonical sector coverage from `corps_front_sectors` before declaring a tile undefended, and `tests/territorial_anomaly_sector_coverage_truth.test.ts` locks the contract. Scenario proof: `n1409` kept final hash `bde31c0aab141f42` but still showed `undefended_painted_mismatch = 56` and `adjacent_uncontested_territory = 111`; `n1410` keeps the same final hash while dropping those to `2` and `9`. Report: `docs/40_reports/implemented/20260409_TERRITORIAL_ANOMALY_SECTOR_COVERAGE_HARDENING.md`.
   - **Canonical owner after cleanup:** sector coverage truth via `corps_front_sectors` with active assigned/reserve brigades.
   - **Demoted path:** physical on-tile brigade presence as the only definition of "defended."
