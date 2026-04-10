@@ -295,6 +295,24 @@ No version bump â€” engineering milestone between feature releases. Stabili
 - calibration claims are not accepted without a recoverable evidence trail
 - stale "next lane" language must be removed when repo evidence changes
 
+**A+++ system promotion scorecard (2026-04-10):**
+
+- The remaining `v0.8-to-v0.9` hardening work is now governed by a cross-system promotion scorecard rather than freeform “keep hardening” chat memory.
+- Canonical plan: `docs/plans/2026-04-10-v08to09-a-plus-plus-system-scorecard-plan.md`
+- Use the scorecard to choose the next bounded lane by asking:
+  - which major system is below its target grade
+  - what exact work would promote it one rung
+  - whether that work is bounded hardening, content/runtime audit, realism, or redesign
+- Immediate promotion queue from the scorecard:
+  1. save/load + replay + adapter integrity
+  2. political / peace / review ownership and proof
+  3. autonomy replay / fallback / queue truth
+  4. residual harness audits where runtime truth may still be misclassified
+  5. planner/doctrine realism only after the remaining owner-truth lanes are exhausted
+- Explicit redesign gates from the scorecard:
+  - stranded same-faction unreachable brigade lifecycle owner
+  - any deeper packet/detail contract that the current canonical request or operation packet does not already own
+
 **Hit list** (from Railroad Hunter Report):
 
 | Area | Current State | Target |
@@ -606,6 +624,7 @@ Patch bumps (0.X.1, 0.X.2) are for significant fixes within a milestone â€”
 | `docs/plans/2026-03-31-v08x-operations-singularity-plan.md` | v0.8.x operations singularity implementation plan |
 | `docs/plans/2026-03-31-v08x-command-authority-cleanup-plan.md` | v0.8.x-final overarching command authority cleanup plan |
 | `docs/plans/2026-04-06-studio-health-repo-truth-plan.md` | Permanent side lane for repo-truth gates, roadmap/board sync, warning disposition, artifact policy, and calibration evidence retention |
+| `docs/plans/2026-04-10-v08to09-a-plus-plus-system-scorecard-plan.md` | Cross-system gradecard and promotion queue for the remaining v0.8-to-v0.9 hardening band |
 | `docs/plans/2026-03-31-v08to09-save-load-and-replay-hardening-plan.md` | v0.8-to-v0.9 save/load, replay, and migration hardening |
 | `docs/plans/2026-03-31-v08to09-ui-surface-ownership-plan.md` | v0.8-to-v0.9 UI surface ownership matrix |
 | `docs/plans/2026-04-03-v08to09-ui-density-and-shell-cohesion-plan.md` | v0.8-to-v0.9 UI density and shell cohesion |

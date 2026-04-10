@@ -1,3 +1,28 @@
+## [2026-04-10] docs(plan): add A+++ system scorecard and promotion roadmap
+
+**Type:** Roadmap / planning governance
+**Files:** `docs/plans/2026-04-10-v08to09-a-plus-plus-system-scorecard-plan.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+**Status:** DOCUMENTED - docs-only planning wave, no code or runtime behavior changed
+
+### Summary of changes
+
+1. **System-grade scorecard formalized** - added a cross-system A+++ scorecard plan that grades the major product subsystems against current repo truth and names the exact work needed to promote each one to its next meaningful quality rung.
+2. **Roadmap slot added** - `MASTER_ROADMAP.md` now treats the scorecard as the canonical prioritization lens for the remaining `v0.8-to-v0.9` hardening band instead of leaving quality judgment trapped in chat or ad hoc campaign notes.
+3. **Promotion queue made actionable** - the new plan separates bounded hardening, content/runtime audit, realism work, and redesign-gated seams so future autonomous hardening runs can rotate across the board instead of stalling on one local seam family.
+
+### Planning effect
+
+- This wave does **not** claim any new runtime hardening.
+- It changes planning truth only:
+  - which systems are currently strongest
+  - which systems still need bounded hardening
+  - which seams have crossed into redesign or realism rather than substrate truth work
+- The roadmap now has an explicit artifact for “what moves this system up a grade?” rather than relying on freeform session memory.
+
+### Artifacts
+
+- Plan: `docs/plans/2026-04-10-v08to09-a-plus-plus-system-scorecard-plan.md`
+
 ## [2026-04-09] fix(harness): align territorial warnings with sector coverage truth (n1410)
 
 **Type:** Harness / anomaly truth hardening
