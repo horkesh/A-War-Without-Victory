@@ -44,6 +44,7 @@ import { MapboxOverlay } from '@deck.gl/mapbox';
 import { composeTacticalDeckLayers, DEFAULT_DECK_LAYER_CAPABILITIES } from '../layers/composeTacticalDeckLayers';
 import { setSettlementLabelData } from '../layers/buildTacticalDeckLayers';
 import { buildGhostMapData, type GhostMapDatum } from '../layers/buildGhostMapLayer';
+import { findPlayerFacingSectorById, resolvePlayerFacingFaction } from '../../shared/playerVisibility';
 
 const BOSNIA_CENTER: [number, number] = [17.7, 43.87];
 const DEFAULT_ZOOM = 8;
@@ -296,6 +297,7 @@ export function MapContainer() {
     if (!loadedGameState?.corpsFrontSectors || !loadedGameState?.frontEdgesOsid) return new Map<string, string>();
     return buildOsidToSectorMap(loadedGameState.corpsFrontSectors, loadedGameState.frontEdgesOsid);
   }, [loadedGameState?.corpsFrontSectors, loadedGameState?.frontEdgesOsid]);
+  const playerFaction = useMemo(() => resolvePlayerFacingFaction(loadedGameState), [loadedGameState]);
 
   const contextMenuItems: RadialMenuItem[] = useMemo(() => {
     if (!contextMenu) return [];
@@ -326,7 +328,9 @@ export function MapContainer() {
           id: 'sector', label: 'View Sector', icon: '\u{1F5FA}', action: () => {
             const osid = properties?.osid as string;
             const sectorId = osidToSector.get(osid ?? '');
-            if (sectorId) useGameStore.getState().setSelectedCorpsFrontSectorId(sectorId);
+            if (sectorId && findPlayerFacingSectorById(useGameStore.getState().loadedGameState, sectorId)) {
+              useGameStore.getState().setSelectedCorpsFrontSectorId(sectorId);
+            }
           }
         },
       ];
@@ -334,7 +338,9 @@ export function MapContainer() {
         {
           id: 'sector', label: 'Sector Detail', icon: '\u{1F5FA}', action: () => {
             const sectorId = properties?.sector_id as string;
-            if (sectorId) useGameStore.getState().setSelectedCorpsFrontSectorId(sectorId);
+            if (sectorId && findPlayerFacingSectorById(useGameStore.getState().loadedGameState, sectorId)) {
+              useGameStore.getState().setSelectedCorpsFrontSectorId(sectorId);
+            }
           }
         },
       ];
@@ -612,7 +618,7 @@ export function MapContainer() {
             setOverlayAnchor(null);
             // If this settlement belongs to a front sector, select that sector so it's visible on the map.
             const sectorId = osidToSector.get(osid);
-            if (sectorId) {
+            if (sectorId && findPlayerFacingSectorById(useGameStore.getState().loadedGameState, sectorId)) {
               sectorSelectedFromMapRef.current = true;
               setSelectedCorpsFrontSectorId(sectorId);
             }
@@ -642,7 +648,7 @@ export function MapContainer() {
           setExpandedStackOsid(null);
           setOverlayAnchor(null);
           const sectorId = props.sector_id as string | undefined;
-          if (sectorId) {
+          if (sectorId && findPlayerFacingSectorById(useGameStore.getState().loadedGameState, sectorId)) {
             sectorSelectedFromMapRef.current = true;
             setSelectedCorpsFrontSectorId(sectorId);
           }
@@ -832,7 +838,13 @@ export function MapContainer() {
             const frontEdgesOsid = state.frontEdgesOsid;
             if (frontEdgesOsid && frontEdgesOsid.length > 0) {
               const centroidsForHover = osidCentroidsRef.current.size > 0 ? osidCentroidsRef.current : undefined;
-              const frontEdgesHoverData = buildFrontEdgesHoverGeoJSON(controlledGeoJson, frontEdgesOsid, state.corpsFrontSectors, centroidsForHover);
+              const frontEdgesHoverData = buildFrontEdgesHoverGeoJSON(
+                controlledGeoJson,
+                frontEdgesOsid,
+                state.corpsFrontSectors,
+                centroidsForHover,
+                playerFaction,
+              );
               if (!m2.getSource(FRONT_EDGES_HOVER_SOURCE_ID)) {
                 m2.addSource(FRONT_EDGES_HOVER_SOURCE_ID, { type: 'geojson', data: frontEdgesHoverData });
                 // Hitbox layers: NO line-offset (MapLibre v4 doesn't index offset lines for queryRenderedFeatures).

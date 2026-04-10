@@ -1,3 +1,42 @@
+## [2026-04-10] fix(ui): harden front sector player visibility
+
+**Summary:** Closed a live cross-faction tactical-shell leak. Front-edge hover/click payloads were still carrying both factions’ `sector_id` values, `MapContainer.tsx` forwarded those ids directly into `selectedCorpsFrontSectorId`, and `CorpsFrontPanel.tsx` trusted any matching sector in `loadedGameState.corpsFrontSectors`. The lane hardened the player-visibility boundary in two places: enemy front-edge payloads now drop `sector_id` / `corps_id` in player mode, and both map selection paths and `CorpsFrontPanel` revalidate sector ids through `findPlayerFacingSectorById(...)` before rendering or routing a shell.
+
+**Files:** `src/ui/shared/playerVisibility.ts`, `src/ui/map/map/builders/buildFrontEdgesHoverGeoJSON.ts`, `src/ui/map/map/MapContainer.tsx`, `src/ui/map/components/CorpsFrontPanel.tsx`, `tests/front_sector_player_visibility.test.ts`, `docs/40_reports/implemented/20260410_FRONT_SECTOR_PLAYER_VISIBILITY_HARDENING.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/architect_notes.md`
+
+**Why this changed**
+- `sector_id` is a routing key, not harmless display text: it opens CorpsFrontPanel and sector highlighting.
+- Front-edge player-mode GeoJSON was still shipping enemy sector metadata, so enemy sides of the line could route the player into non-player sector shells.
+- The panel itself was not revalidating the selected sector against player-facing sector truth, so any injected raw id that matched `corpsFrontSectors` would render.
+
+**What changed**
+- Added `findPlayerFacingSectorById(...)` to the canonical player-visibility helpers.
+- `buildFrontEdgesHoverGeoJSON(...)` now strips `sector_id` / `corps_id` from non-player front-edge payloads in player mode.
+- `MapContainer.tsx` now gates settlement-context and front-edge sector selection through `findPlayerFacingSectorById(...)`.
+- `CorpsFrontPanel.tsx` now resolves its selected sector through the same player-facing helper instead of trusting a raw store id.
+
+**Canonical owner**
+- Player-facing sector truth: `filterPlayerFacingSectors(...)` / `findPlayerFacingSectorById(...)` in `src/ui/shared/playerVisibility.ts`
+- Demoted path: raw `sector_id` carried by front-edge payloads and trusted directly by map/panel shells
+
+**Verification**
+- Targeted:
+  - `npx.cmd vitest run tests/front_sector_player_visibility.test.ts tests/ui_player_visibility.test.ts tests/ui_map_render_smoke.test.ts`
+- Full bar:
+  - `npm.cmd run recovery:check`
+  - `npm.cmd run test:vitest`
+  - `npx.cmd tsc --noEmit -p tsconfig.json`
+  - `npm.cmd run build`
+
+**Result**
+- Enemy front-edge features no longer expose selectable sector ids in player mode.
+- Map/context-menu sector routing now ignores non-player sectors.
+- `CorpsFrontPanel` refuses injected enemy sector ids even if something upstream misroutes them.
+
+**Follow-up**
+- Next bounded lane: demote player-facing operation force-ratio precision to staff abstractions.
+- Report: `docs/40_reports/implemented/20260410_FRONT_SECTOR_PLAYER_VISIBILITY_HARDENING.md`
+
 ## [2026-04-10] fix(desktop): harden packaged startup contract
 
 **Summary:** Closed a shipped packaged-runtime seam at the desktop startup boundary. The packaged app was crashing in the Electron main process because `electron-main.cjs` now depended on local helpers that were not included in the packaged app file contract, and the baked `apr_1992` startup snapshot needed to be refreshed to current canonical builder truth. The lane hardened the packaged startup contract in two places: `package.json` now ships every local main-process `.cjs` helper required by `electron-main.cjs`, and `tests/desktop_packaging_contract.test.ts` proves that relationship directly instead of relying on a hand-maintained three-file list. The baked startup artifact was also re-generated so the guarded desktop/package path consumes current startup truth.

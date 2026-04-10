@@ -9,7 +9,7 @@ import { getPanelRailStyle } from './panelRail';
 import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { getPlayerSafeThreatPresentation } from '../utils/playerSafeThreat';
 import { useIPC } from '../desktop/useIPC';
-import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
+import { filterPlayerFacingOperations, findPlayerFacingSectorById } from '../../shared/playerVisibility';
 
 /** Strength class badge with color coding. */
 function StrengthBadge({ strengthClass }: { strengthClass?: 'fortress' | 'strong' | 'adequate' | 'thin' | 'critical' }) {
@@ -174,7 +174,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
     };
   }, [selectedSectorId, setHoveredSectorId]);
 
-  const _sector = loadedGameState?.corpsFrontSectors?.find((s) => s.sector_id === selectedSectorId) ?? null;
+  const _sector = findPlayerFacingSectorById(loadedGameState, selectedSectorId);
   const sectorFriendlyOsids = useMemo(
     () => _sector ? collectSectorFriendlyOsids(_sector, loadedGameState!.frontEdgesOsid) : [],
     [_sector, loadedGameState?.frontEdgesOsid]

@@ -26,6 +26,14 @@ export function filterPlayerFacingSectors(state: LoadedGameState | null | undefi
   return getPlayerVisibleFactions(state.corpsFrontSectors, resolvePlayerFacingFaction(state));
 }
 
+export function findPlayerFacingSectorById(
+  state: LoadedGameState | null | undefined,
+  sectorId: string | null | undefined,
+): SectorView | null {
+  if (!sectorId) return null;
+  return filterPlayerFacingSectors(state).find((sector) => sector.sector_id === sectorId) ?? null;
+}
+
 export function filterPlayerFacingOperations(state: LoadedGameState | null | undefined): OperationView[] {
   if (!state?.operations) return [];
   return getPlayerVisibleOperations(state.operations, resolvePlayerFacingFaction(state));
