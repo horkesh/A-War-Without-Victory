@@ -1,3 +1,34 @@
+## [2026-04-10] fix(combat): probes must not flip political control
+
+**Type:** Engine / combat truth hardening
+**Files:** `src/sim/combat/attack_resolution_osid.ts`, `tests/probe_territory_flip.test.ts`, `tests/integration_anomaly.test.ts`, `docs/40_reports/implemented/20260410_PROBE_NO_FLIP_TERRITORY_HARDENING.md`, `docs/PROJECT_LEDGER.md`, `.claude/architect_notes.md`
+**Run:** `apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n6` — hash `8e7acaa0d71e95c9`
+**Status:** VERIFIED — 6 targeted regressions, full vitest 3140/3140 (247 files), tsc clean, build clean, 40w scenario proof
+
+### Summary of changes
+
+1. **Probe operations no longer flip political_controllers** — `attack_resolution_osid.ts:1588` now gates the territory flip on `activeOp?.type !== 'probe'`. Probes still inflict casualties and generate battle records; they just don't capture territory.
+2. **Contract inconsistency sealed** — probes were first-class in lifecycle (planning, execution, recovery, cooldown suppression) but the combat resolution territory flip treated them identically to full offensives. The flip gate was the 5th and only missing probe-aware checkpoint.
+3. **Army HQ brigades exempted from critical anomaly gate** — `integration_anomaly.test.ts` now excludes `vrs_main_staff`/`arbih_general_staff`/`hvo_main_staff` from the `unassigned_frontline_brigades` critical check, per the known invariant that army HQ reserves may be legitimately sectorless.
+
+### Scenario proof
+
+- Baseline (main n1359): 92.7% area-weighted, 27/27 anchors, 6/6 benchmarks
+- Post-fix: 91.7% area-weighted, 27/27 anchors, 6/6 benchmarks
+- `op:konjic:sitnik` now RS (was RBiH via probe capture pre-fix)
+- -1.0pp cost from probes no longer contributing accidental territorial captures
+
+### Audit decision
+
+- **Fix A** (hostile-majority Phase B march guard): REJECTED as bounded hardening, classified as doctrine/realism. Deferred.
+- **Fix B** (probes must not flip territory): VALIDATED and landed as bounded contract hardening.
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260410_PROBE_NO_FLIP_TERRITORY_HARDENING.md`
+
+---
+
 ## [2026-04-10] fix(desktop): align reserve approval with canonical request identity
 
 **Summary:** Closed a reserve-system ownership mismatch at the desktop/read-model boundary. `pending_reserve_requests` already had canonical packet identity via `request_id`, and decline/history already consumed it, but approval still flowed through `corps_id`. The lane threaded `request_id` through `ArmyReservePanel`, `useIPC`, `preload.cjs`, `electron-main.cjs`, and `desktop_sim.ts`, so the selected reserve request is now approved, recorded, and removed by the same canonical owner.
