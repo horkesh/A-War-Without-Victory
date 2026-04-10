@@ -42,6 +42,13 @@ function resolveRunInput(input) {
     };
 }
 
+/**
+ * Army HQ reserve brigades may be legitimately sectorless — known invariant.
+ * A loaned army HQ brigade in unsectorized rear territory is acceptable;
+ * it is "unresolved" from the sim's perspective but not a consistency failure.
+ */
+const ARMY_HQ_CORPS = new Set(['vrs_main_staff', 'arbih_general_staff', 'hvo_main_staff']);
+
 function collectAssignmentCompletenessIssues(state) {
     const formations = state.military?.formations ?? {};
     const unresolved = Array.isArray(state.military?.unresolved_sector_brigades)
@@ -50,6 +57,10 @@ function collectAssignmentCompletenessIssues(state) {
 
     return unresolved
         .sort((a, b) => String(a).localeCompare(String(b)))
+        .filter((formationId) => {
+            const formation = formations[formationId] ?? {};
+            return !ARMY_HQ_CORPS.has(formation.corps_id);
+        })
         .map((formationId) => {
             const formation = formations[formationId] ?? {};
             return {
