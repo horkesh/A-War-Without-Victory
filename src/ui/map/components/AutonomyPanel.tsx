@@ -38,6 +38,15 @@ interface AutonomyState {
     pending_proposal_reviews?: PendingProposalReview[];
 }
 
+export function filterPendingProposalsForPlayer(
+    proposals: PendingProposalReview[] | undefined,
+    playerFaction: string | null | undefined,
+): PendingProposalReview[] {
+    if (!Array.isArray(proposals)) return [];
+    if (!playerFaction) return proposals;
+    return proposals.filter((proposal) => proposal.faction === playerFaction);
+}
+
 // Minimal extension of window.awwv for autonomy Phase C methods.
 // The full WindowAwwv type lives in useIPC.ts; this covers only what we need here.
 interface AutonomyBridge {
@@ -166,9 +175,10 @@ function ProposalCard({ proposal, onAccept, onReject, busy }: ProposalCardProps)
 
 export interface AutonomyPanelProps {
     onClose: () => void;
+    playerFaction: string | null;
 }
 
-export function AutonomyPanel({ onClose }: AutonomyPanelProps) {
+export function AutonomyPanel({ onClose, playerFaction }: AutonomyPanelProps) {
     const [autonomyState, setAutonomyState] = useState<AutonomyState | null>(null);
     const [loading, setLoading] = useState(true);
     const [levelError, setLevelError] = useState<string | null>(null);
@@ -245,9 +255,7 @@ export function AutonomyPanel({ onClose }: AutonomyPanelProps) {
 
     const currentLevel = autonomyState?.autonomy_level ?? 0;
     const pendingLevel = autonomyState?.autonomy_level_pending;
-    const proposals = (autonomyState?.pending_proposal_reviews ?? []).filter(
-        (p) => p.faction === 'RBiH',
-    );
+    const proposals = filterPendingProposalsForPlayer(autonomyState?.pending_proposal_reviews, playerFaction);
     const unresolvedCount = proposals.filter((p) => p.accepted === undefined).length;
 
     return (

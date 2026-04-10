@@ -10,6 +10,7 @@ import { useGameStore } from '../../store/gameStore';
 import { getOsidDisplayName } from '../../utils/osidDisplayName';
 import { OUTCOME_COLORS } from '../../utils/theme';
 import { formatPersonnel } from '../../utils/formatters';
+import { getPlayerSafeThreatPresentation } from '../../utils/playerSafeThreat';
 import { CollapsibleSection } from './CollapsibleSection';
 
 interface SectorsSectionProps {
@@ -47,6 +48,7 @@ function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector:
     const reserveIds = sector.reserve_brigade_ids;
 
     const threatRatio = sector.threat_ratio;
+    const threatPresentation = getPlayerSafeThreatPresentation(threatRatio);
     const stanceHint = threatRatio > 1.5 ? 'fortify' : threatRatio > 1.0 ? 'defend' : null;
     const currentStance = sector.sector_stance ?? 'defend';
     const stanceMismatch = stanceHint !== null && stanceHint !== currentStance;
@@ -58,12 +60,12 @@ function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector:
                 <IntelBar value={sector.intel_confidence} label="INTEL" />
                 {sector.offensive_signs && (
                     <div className="flex items-center gap-2 text-[10px] text-red-400 font-bold animate-pulse">
-                        <span className="text-red-500">!</span> OFFENSIVE SIGNS DETECTED — THREAT RATIO {threatRatio.toFixed(2)}
+                        <span className="text-red-500">!</span> OFFENSIVE SIGNS DETECTED — {threatPresentation.label}
                     </div>
                 )}
                 {!sector.offensive_signs && threatRatio > 0 && (
                     <div className="flex items-center gap-2 text-[10px] text-text-secondary/60">
-                        THREAT RATIO: <span className={`font-bold ${threatRatio > 1.5 ? 'text-red-400' : threatRatio > 1.0 ? 'text-amber-400' : 'text-emerald-400'}`}>{threatRatio.toFixed(2)}</span>
+                        THREAT: <span className={`font-bold ${threatPresentation.toneClass}`}>{threatPresentation.summary.toUpperCase()}</span>
                     </div>
                 )}
                 {stanceMismatch && (

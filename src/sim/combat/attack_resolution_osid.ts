@@ -1585,7 +1585,9 @@ export function resolveAttackOrdersOsid(
             applyOfficerLoss(defenderFormation, finalDefenderCas, personnelDefender);
         }
 
-        let flip = outcome === 'decisive_victory' || outcome === 'victory' || outcome === 'costly_victory';
+        const isProbeOp = activeOp?.type === 'probe';
+        let flip = (outcome === 'decisive_victory' || outcome === 'victory' || outcome === 'costly_victory')
+            && !isProbeOp;
 
         // === MORALE-BASED RETREAT RESISTANCE ===
         let moraleAbsorbed = false;

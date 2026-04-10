@@ -10,21 +10,31 @@ export type StartupSnapshotKey = 'apr_1992';
 interface StartupSnapshotDefinition {
     readonly scenarioRelativePath: string;
     readonly artifactRelativePath: string;
+    readonly overrideEnvVar?: string;
 }
 
 const STARTUP_SNAPSHOT_DEFINITIONS: Record<StartupSnapshotKey, StartupSnapshotDefinition> = {
     apr_1992: {
         scenarioRelativePath: 'data/scenarios/apr1992_definitive_52w.json',
         artifactRelativePath: 'data/derived/startup/apr_1992_initial_save.json',
+        overrideEnvVar: 'AWWV_STARTUP_SNAPSHOT_OVERRIDE_APR_1992',
     },
 };
+
+function normalizeStartupSnapshotPayload(payload: string): string {
+    return payload.replace(/\r\n/g, '\n');
+}
 
 export function getStartupSnapshotDefinition(key: StartupSnapshotKey): StartupSnapshotDefinition {
     return STARTUP_SNAPSHOT_DEFINITIONS[key];
 }
 
 export function getStartupSnapshotPath(baseDir: string, key: StartupSnapshotKey): string {
-    return join(baseDir, getStartupSnapshotDefinition(key).artifactRelativePath);
+    const definition = getStartupSnapshotDefinition(key);
+    const overridePath = definition.overrideEnvVar ? process.env[definition.overrideEnvVar] : undefined;
+    return overridePath && overridePath.trim().length > 0
+        ? overridePath
+        : join(baseDir, definition.artifactRelativePath);
 }
 
 export function getStartupSnapshotScenarioPath(baseDir: string, key: StartupSnapshotKey): string {
@@ -34,11 +44,11 @@ export function getStartupSnapshotScenarioPath(baseDir: string, key: StartupSnap
 export async function buildStartupSnapshotPayload(baseDir: string, key: StartupSnapshotKey): Promise<string> {
     const scenario = await loadScenario(getStartupSnapshotScenarioPath(baseDir, key));
     const { state } = await buildScenarioStartupState(scenario, baseDir);
-    return serializeState(state);
+    return normalizeStartupSnapshotPayload(serializeState(state));
 }
 
 export async function loadStartupSnapshotPayload(baseDir: string, key: StartupSnapshotKey): Promise<string> {
-    return readFile(getStartupSnapshotPath(baseDir, key), 'utf8');
+    return normalizeStartupSnapshotPayload(await readFile(getStartupSnapshotPath(baseDir, key), 'utf8'));
 }
 
 export async function loadStartupSnapshotState(baseDir: string, key: StartupSnapshotKey) {

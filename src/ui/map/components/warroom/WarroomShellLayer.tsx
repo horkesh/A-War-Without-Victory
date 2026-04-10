@@ -15,6 +15,7 @@
 
 import { useEffect, useState } from 'react';
 import type { ShellHandoffCommand } from '../../../shared/shellHandoff';
+import { getPlayerFacingFaction } from '../../../shared/playerFacingLabels';
 import { useGameStore } from '../../store/gameStore';
 import { WARROOM_SCENE_URLS } from './warroom-asset-urls';
 import rbihRegions from '../../../warroom/assets/hq_rbih_regions.json';
@@ -138,7 +139,7 @@ export interface WarroomShellLayerProps {
 
 export function WarroomShellLayer({ onNavigate }: WarroomShellLayerProps) {
   const loadedGameState = useGameStore((s) => s.loadedGameState);
-  const playerFaction = loadedGameState?.player_faction ?? 'RBiH';
+  const playerFaction = getPlayerFacingFaction(loadedGameState);
 
   // Derive year from metadata.date string (e.g. "April 1992"), clamped to 1992–1995.
   // metadata is optional and only present when a game is loaded.
@@ -146,18 +147,48 @@ export function WarroomShellLayer({ onNavigate }: WarroomShellLayerProps) {
   const parsedYear = parseInt(dateString.slice(-4), 10);
   const year = isNaN(parsedYear) ? 1992 : Math.max(1992, Math.min(1995, parsedYear));
 
-  const scenePlateUrl = WARROOM_SCENE_URLS[playerFaction]?.[year]
-    ?? WARROOM_SCENE_URLS['RBiH'][1992];
+  const scenePlateUrl = playerFaction
+    ? (WARROOM_SCENE_URLS[playerFaction]?.[year] ?? WARROOM_SCENE_URLS[playerFaction]?.[1992])
+    : null;
 
-  const regions = REGIONS_BY_FACTION[playerFaction] ?? REGIONS_BY_FACTION['RBiH'];
+  const regions = playerFaction ? REGIONS_BY_FACTION[playerFaction] : [];
 
   // Suppress unused-effect warning: regions are imported statically, no async needed.
   // The useState/useEffect pattern is retained for future dynamic loading if required.
   const [activeRegions, setActiveRegions] = useState<WarroomRegion[]>(regions);
 
   useEffect(() => {
-    setActiveRegions(REGIONS_BY_FACTION[playerFaction] ?? REGIONS_BY_FACTION['RBiH']);
+    setActiveRegions(playerFaction ? REGIONS_BY_FACTION[playerFaction] : []);
   }, [playerFaction]);
+
+  if (!playerFaction || !scenePlateUrl) {
+    return (
+      <div
+        style={{
+          position: 'relative',
+          width: '100%',
+          height: '100%',
+          background: '#000',
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <div
+          style={{
+            color: 'rgba(255,255,255,0.72)',
+            fontFamily: '"Courier New", Courier, monospace',
+            fontSize: '12px',
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+          }}
+        >
+          Warroom unavailable until a campaign side is selected.
+        </div>
+      </div>
+    );
+  }
 
   const handleRegionClick = (region: WarroomRegion) => {
     const command = regionToShellHandoff(region.id);

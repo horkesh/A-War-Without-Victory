@@ -7,8 +7,10 @@ import { collectSectorFriendlyOsids } from '../utils/sectorUtils';
 import { getOperationId, getOperationPhaseBadgeClass } from '../utils/operations';
 import { getPanelRailStyle } from './panelRail';
 import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
+import { getPlayerSafeOperationBalancePresentation } from '../../../shared/playerSafeOperationBalance';
+import { getPlayerSafeThreatPresentation } from '../utils/playerSafeThreat';
 import { useIPC } from '../desktop/useIPC';
-import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
+import { filterPlayerFacingOperations, findPlayerFacingSectorById } from '../../shared/playerVisibility';
 
 /** Strength class badge with color coding. */
 function StrengthBadge({ strengthClass }: { strengthClass?: 'fortress' | 'strong' | 'adequate' | 'thin' | 'critical' }) {
@@ -24,19 +26,12 @@ function StrengthBadge({ strengthClass }: { strengthClass?: 'fortress' | 'strong
 
 /** Threat ratio badge with descriptive balance labels. */
 function ThreatBadge({ ratio }: { ratio: number }) {
-  let label = 'BALANCED';
-  let color = 'text-green-400';
-
-  if (ratio > 2.0) { label = 'OVERMATCHED'; color = 'text-red-500 font-black'; }
-  else if (ratio > 1.5) { label = 'VULNERABLE'; color = 'text-red-400 font-bold'; }
-  else if (ratio > 1.2) { label = 'PRESSURE'; color = 'text-amber-500'; }
-  else if (ratio < 0.5) { label = 'SUPERIOR'; color = 'text-emerald-500 font-bold'; }
-  else if (ratio < 0.8) { label = 'FAVORABLE'; color = 'text-green-500'; }
+  const { label, summary, toneClass } = getPlayerSafeThreatPresentation(ratio);
 
   return (
     <div className="flex flex-col">
-      <span className={`${color} text-[10px] tracking-tighter leading-none mb-0.5`}>{label}</span>
-      <span className={`${color} font-mono`}>{ratio.toFixed(2)}:1</span>
+      <span className={`${toneClass} text-[10px] tracking-tighter leading-none mb-0.5`}>{label}</span>
+      <span className={`${toneClass} font-mono text-[10px] uppercase tracking-tight`}>{summary}</span>
     </div>
   );
 }
@@ -180,7 +175,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
     };
   }, [selectedSectorId, setHoveredSectorId]);
 
-  const _sector = loadedGameState?.corpsFrontSectors?.find((s) => s.sector_id === selectedSectorId) ?? null;
+  const _sector = findPlayerFacingSectorById(loadedGameState, selectedSectorId);
   const sectorFriendlyOsids = useMemo(
     () => _sector ? collectSectorFriendlyOsids(_sector, loadedGameState!.frontEdgesOsid) : [],
     [_sector, loadedGameState?.frontEdgesOsid]
@@ -726,6 +721,9 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                     const phaseBg = getOperationPhaseBadgeClass(op.phase);
                     const operationId = getOperationId(op);
                     const objective = op.objectives?.[op.current_objective_index ?? 0] ?? op.objectives?.[0];
+                    const forceBalance = op.force_ratio_estimate != null
+                      ? getPlayerSafeOperationBalancePresentation(op.force_ratio_estimate)
+                      : null;
                     return (
                       <div key={operationId} className="bg-neutral-100 border-2 border-neutral-300 p-2 relative shadow-sm">
                         {/* Stamp effect */}
@@ -760,8 +758,10 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                             {op.has_active_probe && (
                               <div className="text-[9px] mt-0.5 text-blue-700 font-semibold uppercase">Probe in progress</div>
                             )}
-                            {op.force_ratio_estimate != null && (
-                              <div className="text-[9px] mt-0.5 text-neutral-600">Force Ratio Est: {op.force_ratio_estimate.toFixed(2)}</div>
+                            {forceBalance && (
+                              <div className="text-[9px] mt-0.5 text-neutral-600 uppercase">
+                                Force Balance: <span className={forceBalance.toneClass}>{forceBalance.label}</span> <span className="text-neutral-500">{forceBalance.summary}</span>
+                              </div>
                             )}
                             {(op.preparation_sub_phase === 'assessment' || op.preparation_sub_phase === 'ready') && (
                               <button

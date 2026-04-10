@@ -1,5 +1,6 @@
 import type { FeatureCollection, Feature, Polygon, MultiPolygon, LineString } from 'geojson';
 import type { CorpsFrontSectorView } from '../../data/types';
+import type { PlayerFacingFaction } from '../../../shared/playerFacingLabels';
 
 interface OsidProperties {
   osid: string;
@@ -26,7 +27,8 @@ export function buildFrontEdgesHoverGeoJSON(
   controlledOsidGeoJson: FeatureCollection,
   frontEdgesOsid: { edge_id: string; a: string; b: string; side_a: string | null; side_b: string | null }[],
   corpsFrontSectors?: CorpsFrontSectorView[],
-  osidCentroids?: Map<string, [number, number]>
+  osidCentroids?: Map<string, [number, number]>,
+  playerFaction?: PlayerFacingFaction | null,
 ): FeatureCollection<LineString> {
   const features = controlledOsidGeoJson.features as Feature<Polygon | MultiPolygon, OsidProperties>[];
 
@@ -211,8 +213,8 @@ export function buildFrontEdgesHoverGeoJSON(
         faction: factionA,
         opposing_faction: factionB,
         offset_side: offsetForA,
-        sector_id: sectorA?.sector_id,
-        corps_id: sectorA?.corps_id,
+        sector_id: !playerFaction || factionA === playerFaction ? sectorA?.sector_id : undefined,
+        corps_id: !playerFaction || factionA === playerFaction ? sectorA?.corps_id : undefined,
       };
       if (subSegA) propsA.sub_segment_id = subSegA;
 
@@ -221,8 +223,8 @@ export function buildFrontEdgesHoverGeoJSON(
         faction: factionB,
         opposing_faction: factionA,
         offset_side: offsetForB,
-        sector_id: sectorB?.sector_id,
-        corps_id: sectorB?.corps_id,
+        sector_id: !playerFaction || factionB === playerFaction ? sectorB?.sector_id : undefined,
+        corps_id: !playerFaction || factionB === playerFaction ? sectorB?.corps_id : undefined,
       };
       if (subSegB) propsB.sub_segment_id = subSegB;
 

@@ -4,6 +4,7 @@
  */
 import type { PredictionResult } from './usePrediction';
 import { FACTION_ARMY_HEADERS } from './types';
+import { getPlayerSafeOperationBalancePresentation } from '../../../../shared/playerSafeOperationBalance';
 
 interface NarrativeTabProps {
     prediction: PredictionResult;
@@ -37,6 +38,7 @@ function translateTitle(title: string): string {
 export function NarrativeTab({ prediction, commanderName, corpsName, faction, date }: NarrativeTabProps) {
     const headers = FACTION_ARMY_HEADERS[faction] ?? FACTION_ARMY_HEADERS.RBiH;
     const sections = prediction.commanderAssessment?.sections ?? [];
+    const forceBalance = getPlayerSafeOperationBalancePresentation(prediction.overall.forceRatio);
 
     return (
         <div className="relative" style={{ fontFamily: "'Courier New', monospace" }}>
@@ -62,8 +64,8 @@ export function NarrativeTab({ prediction, commanderName, corpsName, faction, da
             <div className="mb-4 p-3 rounded border border-[#c0b090] bg-[#f0ead8]">
                 <div className="text-[9px] font-bold uppercase tracking-wider text-[#1a1610] mb-2">Quick Assessment</div>
                 <div className="grid grid-cols-2 gap-1 text-[9px]">
-                    <span className="text-[#3a3228]">Force Ratio</span>
-                    <span className="font-bold text-[#1a1610]">{prediction.overall.forceRatio.toFixed(1)}:1</span>
+                    <span className="text-[#3a3228]">Force Balance</span>
+                    <span className={`font-bold uppercase ${forceBalance.toneClass}`}>{forceBalance.label}</span>
                     <span className="text-[#3a3228]">Intel Confidence</span>
                     <span className="font-bold text-[#1a1610]">{Math.round(prediction.overall.intelConfidence * 100)}%</span>
                     <span className="text-[#3a3228]">Predicted</span>
@@ -93,8 +95,8 @@ export function NarrativeTab({ prediction, commanderName, corpsName, faction, da
                             1. NEPRIJATELJ \u2014 Enemy Forces
                         </div>
                         <div className="text-[10px] text-[#2a2218] leading-relaxed">
-                            Enemy forces in the area of operations are assessed at a force ratio of{' '}
-                            <span className="font-bold">{prediction.overall.forceRatio.toFixed(2)}:1</span>.
+                            Enemy forces in the area of operations are assessed as presenting a{' '}
+                            <span className="font-bold">{forceBalance.summary}</span>.
                             Intel confidence: <span className="font-bold">{(prediction.overall.intelConfidence * 100).toFixed(0)}%</span>.
                         </div>
                     </div>

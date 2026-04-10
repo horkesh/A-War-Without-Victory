@@ -6,6 +6,7 @@ import { useMemo } from 'react';
 import type { NamedOfficerView } from '../data/types';
 import { useGameStore } from '../store/gameStore';
 import { formatRank, getArchetype, formatPips, getRatingColor } from '../utils/officerCharacter';
+import { getPlayerSafeOperationBalancePresentation } from '../../../shared/playerSafeOperationBalance';
 import { getPlayerSafeCorpsName, getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { findPlayerFacingOperationByKey } from '../../shared/playerVisibility';
 import { OrderInterpretationSection } from './army_hq/OrderInterpretationSection';
@@ -405,6 +406,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
     const intelConf = operation.intel_confidence_at_assessment ?? operation.readiness?.intel ?? 0;
     const supplyReady = operation.supply_readiness_at_assessment ?? operation.readiness?.supply ?? 0;
     const forceRatio = operation.force_ratio_estimate;
+    const forceBalance = forceRatio != null ? getPlayerSafeOperationBalancePresentation(forceRatio) : null;
     const assessment = operation.commander_assessment;
     const postponements = operation.postponement_count ?? 0;
     const corpsLabel = getPlayerSafeCorpsName(
@@ -506,14 +508,14 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                         <ReadinessBar label="Force Cohesion" value={operation.readiness.cohesion} />
                     )}
 
-                    {forceRatio != null && (
+                    {forceBalance && (
                         <div className="flex items-center gap-2 mt-2 pt-2 border-t border-neutral-200">
-                            <span className="text-[9px] uppercase font-bold text-neutral-600">Force Ratio Estimate</span>
-                            <span className={`text-[11px] font-bold ${forceRatio >= 1.5 ? 'text-green-700' : forceRatio >= 1.0 ? 'text-amber-700' : 'text-red-700'}`}>
-                                {forceRatio.toFixed(2)}:1
+                            <span className="text-[9px] uppercase font-bold text-neutral-600">Force Balance Estimate</span>
+                            <span className={`text-[11px] font-bold ${forceBalance.toneClass}`}>
+                                {forceBalance.label}
                             </span>
-                            <span className="text-[8px] text-neutral-400">
-                                {forceRatio >= 2.0 ? '(overwhelming)' : forceRatio >= 1.5 ? '(favorable)' : forceRatio >= 1.0 ? '(marginal)' : '(unfavorable)'}
+                            <span className="text-[8px] text-neutral-400 uppercase">
+                                ({forceBalance.summary})
                             </span>
                         </div>
                     )}

@@ -6,17 +6,16 @@ import test from 'node:test';
 import { startNewCampaign } from '../src/desktop/desktop_sim.js';
 import {
     buildStartupSnapshotPayload,
-    getStartupSnapshotPath,
+    loadStartupSnapshotPayload,
     loadStartupSnapshotState,
     validateStartupSnapshot,
 } from '../src/scenario/startup_snapshot.js';
 import { deserializeState, serializeState } from '../src/state/serialize.js';
 
-test('baked April 1992 startup artifact matches canonical builder truth byte-for-byte', { timeout: 120_000 }, async () => {
+test('baked April 1992 startup artifact matches canonical builder truth after checkout normalization', { timeout: 120_000 }, async () => {
     const baseDir = process.cwd();
-    const snapshotPath = getStartupSnapshotPath(baseDir, 'apr_1992');
     const [artifactPayload, builderPayload] = await Promise.all([
-        readFile(snapshotPath, 'utf8'),
+        loadStartupSnapshotPayload(baseDir, 'apr_1992'),
         buildStartupSnapshotPayload(baseDir, 'apr_1992'),
     ]);
 

@@ -2422,7 +2422,8 @@ describe('Wave 10: Command Relationship Standing', () => {
             // Good intel (0.8), good supply (0.9), low force ratio (0.5), neutral commander
             const result = deriveRecommendationExplanation(0.8, 0.9, 0.5, 3, 0.5, 'postpone', 0);
             expect(result.mainBlocker).toBe('force_ratio');
-            expect(result.recommendationReason).toContain('Force ratio');
+            expect(result.recommendationReason).toContain('Force balance judged');
+            expect(result.recommendationReason).toContain('launch standard');
             expect(result.wouldImproveIf).toContain('force');
         });
 

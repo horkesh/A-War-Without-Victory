@@ -43,6 +43,7 @@ import type { FactionId } from '../../state/game_state.js';
 import { GameState } from '../../state/game_state.js';
 import { INTERNATIONAL_SANCTIONS_THRESHOLD } from '../../state/patron_pressure.js';
 import { deserializeState } from '../../state/serialize.js';
+import { getPlayerFacingFaction } from '../shared/playerFacingLabels.js';
 import { checkWarTransition, findCriticalEvent, findWarMilestoneEvent, showDeclarationModal, showWarBeginsModal } from './components/DeclarationEventModal.js';
 import { getPlayerFaction } from './components/warroom_utils.js';
 import { DiplomacyModal } from './components/DiplomacyModal.js';
@@ -423,7 +424,7 @@ export class ClickableRegionManager {
             advanceBtn.onclick = async () => {
                 const prevPhase = state.meta.phase;
                 const bridge = this.getDesktopBridge();
-                this.playerFaction = (state.meta.player_faction ?? this.playerFaction ?? state.factions[0]?.id) as FactionId | undefined;
+                this.playerFaction = getPlayerFacingFaction(state.meta.player_faction) ?? undefined;
 
                 // Capture pre-turn snapshot for delta-based event generation
                 setPreviousSnapshot(capturePreviousTurnSnapshot(state));
@@ -438,13 +439,14 @@ export class ClickableRegionManager {
                         }
 
                         const newState = deserializeState(result.stateJson);
-                        this.playerFaction = (newState.meta.player_faction ?? this.playerFaction ?? newState.factions[0]?.id) as FactionId | undefined;
+                        this.playerFaction = getPlayerFacingFaction(newState.meta.player_faction) ?? undefined;
                         if (result.report) setLastTurnReport(result.report as LastTurnReport);
-                        const pf = this.playerFaction ?? 'RBiH';
 
                         this.onGameStateChange?.(newState);
 
-                        await this.checkWarMilestone(newState, pf);
+                        if (this.playerFaction) {
+                            await this.checkWarMilestone(newState, this.playerFaction);
+                        }
                     } catch (e) {
                         this.modalManager?.hideModal();
                         console.error('Desktop advance-turn exception', e);
@@ -458,7 +460,9 @@ export class ClickableRegionManager {
                     const seed = state.meta.seed ?? 'start_1992_04';
                     const { nextState } = await runPhaseITurn(state, { seed, settlementGraph: graph });
                     this.onGameStateChange?.(nextState);
-                    await this.checkWarMilestone(nextState, this.playerFaction ?? 'RBiH');
+                    if (this.playerFaction) {
+                        await this.checkWarMilestone(nextState, this.playerFaction);
+                    }
                 } catch (e) {
                     console.error('War phase advance failed', e);
                 }
@@ -485,7 +489,15 @@ export class ClickableRegionManager {
         const phase = state.meta.phase ?? 'war';
         if (phase !== 'war') return '';
 
-        const pf = (state.meta.player_faction ?? this.playerFaction ?? state.factions[0]?.id ?? 'RBiH') as FactionId;
+        const pf = getPlayerFacingFaction(state.meta.player_faction);
+        if (!pf) {
+            return `
+                <div class="wr-dialog-section" style="margin-top:12px;border-top:1px solid #333;padding-top:10px;">
+                    <div style="font-size:11px;font-weight:600;color:#8b8ba7;margin-bottom:8px;letter-spacing:1px;">THIS WEEK</div>
+                    <div class="wr-dialog-row" style="color:#555570;font-style:italic;"><span class="wr-label">Player command identity unavailable.</span></div>
+                </div>
+            `;
+        }
         const snap = extractWarData(state, pf);
 
         const lines: string[] = [];

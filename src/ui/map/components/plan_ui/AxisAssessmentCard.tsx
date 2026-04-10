@@ -4,6 +4,7 @@ import {
   labelFromThresholds, getCasualtySeverityColor,
 } from './opsConstants';
 import { ReadinessBar } from './ReadinessBar';
+import { getPlayerSafeOperationBalancePresentation } from '../../../../shared/playerSafeOperationBalance';
 
 interface AxisPredictionView {
   axisId: string;
@@ -27,6 +28,7 @@ export function AxisAssessmentCard({ prediction, axisName, colorIndex }: AxisAss
   const color = AXIS_COLORS[colorIndex % AXIS_COLORS.length];
   const outcome = OUTCOME_STYLES[prediction.predictedOutcome] ?? OUTCOME_STYLES.stalemate;
   const casualtyColor = getCasualtySeverityColor(prediction.estimatedCasualties);
+  const forceBalance = getPlayerSafeOperationBalancePresentation(prediction.forceRatio);
 
   return (
     <div className="border border-[rgba(180,160,130,0.1)] rounded bg-panel-card/50">
@@ -53,8 +55,9 @@ export function AxisAssessmentCard({ prediction, axisName, colorIndex }: AxisAss
         <div className="px-3 pb-3 pt-1 border-t border-[rgba(180,160,130,0.06)] space-y-2">
           <div className="grid grid-cols-2 gap-3 text-[10px]">
             <div>
-              <span className="text-text-secondary uppercase tracking-wider">Force Ratio</span>
-              <div className="text-text-primary font-mono font-bold">{prediction.forceRatio.toFixed(1)} : 1</div>
+              <span className="text-text-secondary uppercase tracking-wider">Force Balance</span>
+              <div className={`font-bold uppercase ${forceBalance.toneClass}`}>{forceBalance.label}</div>
+              <div className="text-text-secondary text-[9px] uppercase">{forceBalance.summary}</div>
             </div>
             <div>
               <span className="text-text-secondary uppercase tracking-wider">Terrain</span>

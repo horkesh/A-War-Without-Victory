@@ -94,6 +94,13 @@ describe('buildOpProposalDescription: zone name', () => {
         expect(result).toContain('Zone: Sarajevo');
     });
 
+    it('humanizes real commander zone ids instead of leaking raw zone syntax', () => {
+        const cs = makeCS({ stagingZone: 'zone:arbih_1st_corps:gorazde_2', overallPressure: 'low' });
+        const result = buildOpProposalDescription('1st Corps', cs, 'Hold the line');
+        expect(result).toContain('Zone: Gorazde 2');
+        expect(result).not.toContain('zone:arbih_1st_corps:gorazde_2');
+    });
+
     it('omits zone segment when current_plan is null', () => {
         const cs = makeCS({ currentPlan: false, overallPressure: 'moderate' });
         const result = buildOpProposalDescription('1st Corps', cs, 'offensive operation');

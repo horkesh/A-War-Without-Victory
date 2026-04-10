@@ -1,14 +1,24 @@
 import assert from 'node:assert';
 import { existsSync } from 'node:fs';
-import { copyFile, readFile, rename, rm, writeFile } from 'node:fs/promises';
+import { copyFile, mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { spawn } from 'node:child_process';
+import { tmpdir } from 'node:os';
 import test from 'node:test';
 
-function runDesktopSimBuild(cwd: string): Promise<{ code: number | null; stdout: string; stderr: string }> {
+const SNAPSHOT_OVERRIDE_ENV = 'AWWV_STARTUP_SNAPSHOT_OVERRIDE_APR_1992';
+
+function runDesktopSimBuild(
+    cwd: string,
+    extraEnv?: Record<string, string>,
+): Promise<{ code: number | null; stdout: string; stderr: string }> {
     return new Promise((resolve, reject) => {
         const child = spawn(process.execPath, ['tools/desktop_bundle_sim.mjs'], {
             cwd,
+            env: {
+                ...process.env,
+                ...extraEnv,
+            },
             stdio: ['ignore', 'pipe', 'pipe'],
         });
 
@@ -25,6 +35,14 @@ function runDesktopSimBuild(cwd: string): Promise<{ code: number | null; stdout:
             resolve({ code, stdout, stderr });
         });
     });
+}
+
+async function createTempSnapshotCopy(baseDir: string): Promise<{ tempDir: string; snapshotPath: string }> {
+    const sourceSnapshotPath = join(baseDir, 'data', 'derived', 'startup', 'apr_1992_initial_save.json');
+    const tempDir = await mkdtemp(join(tmpdir(), 'awwv-startup-guard-'));
+    const snapshotPath = join(tempDir, 'apr_1992_initial_save.json');
+    await copyFile(sourceSnapshotPath, snapshotPath);
+    return { tempDir, snapshotPath };
 }
 
 test('desktop sim build source enforces startup snapshot check before bundling', async () => {
@@ -44,7 +62,7 @@ test('desktop sim build source enforces startup snapshot check before bundling',
 
 test('desktop sim build fails loudly when the baked startup snapshot is missing', { timeout: 120_000 }, async () => {
     const baseDir = process.cwd();
-    const snapshotPath = join(baseDir, 'data', 'derived', 'startup', 'apr_1992_initial_save.json');
+    const { tempDir, snapshotPath } = await createTempSnapshotCopy(baseDir);
     const backupPath = `${snapshotPath}.bak`;
 
     assert.ok(existsSync(snapshotPath), 'expected committed startup snapshot to exist');
@@ -52,7 +70,9 @@ test('desktop sim build fails loudly when the baked startup snapshot is missing'
     await rename(snapshotPath, backupPath);
 
     try {
-        const result = await runDesktopSimBuild(baseDir);
+        const result = await runDesktopSimBuild(baseDir, {
+            [SNAPSHOT_OVERRIDE_ENV]: snapshotPath,
+        });
         assert.notStrictEqual(result.code, 0, 'desktop sim build should fail when startup snapshot is missing');
         assert.match(
             `${result.stdout}\n${result.stderr}`,
@@ -60,13 +80,16 @@ test('desktop sim build fails loudly when the baked startup snapshot is missing'
             'failure should point at the startup snapshot guard rather than bundling silently',
         );
     } finally {
-        await rename(backupPath, snapshotPath);
+        if (existsSync(backupPath)) {
+            await rename(backupPath, snapshotPath);
+        }
+        await rm(tempDir, { recursive: true, force: true });
     }
 });
 
 test('desktop sim build fails loudly when the baked startup snapshot drifts', { timeout: 120_000 }, async () => {
     const baseDir = process.cwd();
-    const snapshotPath = join(baseDir, 'data', 'derived', 'startup', 'apr_1992_initial_save.json');
+    const { tempDir, snapshotPath } = await createTempSnapshotCopy(baseDir);
     const backupPath = `${snapshotPath}.bak`;
 
     await rm(backupPath, { force: true });
@@ -74,7 +97,9 @@ test('desktop sim build fails loudly when the baked startup snapshot drifts', { 
 
     try {
         await writeFile(snapshotPath, '{"stale":true}\n', 'utf8');
-        const result = await runDesktopSimBuild(baseDir);
+        const result = await runDesktopSimBuild(baseDir, {
+            [SNAPSHOT_OVERRIDE_ENV]: snapshotPath,
+        });
         assert.notStrictEqual(result.code, 0, 'desktop sim build should fail when startup snapshot drifts');
         assert.match(
             `${result.stdout}\n${result.stderr}`,
@@ -82,6 +107,9 @@ test('desktop sim build fails loudly when the baked startup snapshot drifts', { 
             'failure should point at snapshot drift instead of shipping the stale artifact',
         );
     } finally {
-        await rename(backupPath, snapshotPath);
+        if (existsSync(backupPath)) {
+            await rename(backupPath, snapshotPath);
+        }
+        await rm(tempDir, { recursive: true, force: true });
     }
 });

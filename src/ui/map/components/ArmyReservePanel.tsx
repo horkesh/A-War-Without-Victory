@@ -82,10 +82,10 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
         return getPlayerFacingCorpsName(corpsId, corpsNameById, 'Assigned command');
     }
 
-    async function handleApprove(corpsId: string, brigadeId: string | null) {
+    async function handleApprove(requestId: string, brigadeId: string | null) {
         if (!brigadeId) return;
         const result = await ipc.approveReserveRequest(
-            corpsId,
+            requestId,
             brigadeId,
             'Army CO accepts this request: mission rationale and employment plan are credible.'
         );
@@ -261,7 +261,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                 const evidenceCopy = getArmyReserveRequestEvidenceCopy(req);
                                 const provenanceCopy = getArmyReserveRequestProvenanceCopy(req);
                                 return (
-                                    <div key={idx} className="bg-black/20 border border-panel-border/40 rounded p-2 space-y-2">
+                                    <div key={req.request_id ?? idx} className="bg-black/20 border border-panel-border/40 rounded p-2 space-y-2">
                                     <div className="flex items-start justify-between gap-2">
                                         <div>
                                             <div className="text-text-primary font-semibold">{getCorpsName(req.corps_id)}</div>
@@ -364,7 +364,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                         <button
                                             type="button"
                                             disabled={!req.suggested_brigade_id}
-                                            onClick={() => void handleApprove(req.corps_id, req.suggested_brigade_id)}
+                                            onClick={() => void handleApprove(req.request_id, req.suggested_brigade_id)}
                                             className="flex-1 px-2 py-1 bg-[#55d48a]/20 border border-[#55d48a]/40 rounded text-[10px] text-[#55d48a] font-bold hover:bg-[#55d48a]/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                                         >
                                             APPROVE

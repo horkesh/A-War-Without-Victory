@@ -297,7 +297,9 @@
     "files": [
       "package.json",
       "src/desktop/electron-main.cjs",
-      "src/desktop/preload.cjs"
+      "src/desktop/preload.cjs",
+      "src/desktop/autonomy_ipc_contract.cjs",
+      "src/desktop/settings_store.cjs"
     ],
     "extraResources": [
       {
