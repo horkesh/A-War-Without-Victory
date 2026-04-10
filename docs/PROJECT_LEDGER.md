@@ -1,3 +1,43 @@
+## [2026-04-10] fix(desktop): harden packaged startup contract
+
+**Summary:** Closed a shipped packaged-runtime seam at the desktop startup boundary. The packaged app was crashing in the Electron main process because `electron-main.cjs` now depended on local helpers that were not included in the packaged app file contract, and the baked `apr_1992` startup snapshot needed to be refreshed to current canonical builder truth. The lane hardened the packaged startup contract in two places: `package.json` now ships every local main-process `.cjs` helper required by `electron-main.cjs`, and `tests/desktop_packaging_contract.test.ts` proves that relationship directly instead of relying on a hand-maintained three-file list. The baked startup artifact was also re-generated so the guarded desktop/package path consumes current startup truth.
+
+**Files:** `data/derived/startup/apr_1992_initial_save.json`, `package.json`, `tests/desktop_packaging_contract.test.ts`, `docs/40_reports/implemented/20260410_DESKTOP_PACKAGED_STARTUP_CONTRACT_HARDENING.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`, `.claude/architect_notes.md`
+
+**Why this changed**
+- Packaged runtime proof was failing with a real user-visible crash: `Cannot find module './autonomy_ipc_contract.cjs'` from the packaged `electron-main.cjs`.
+- `electron-main.cjs` had two local packaged-helper dependencies (`autonomy_ipc_contract.cjs`, `settings_store.cjs`), but the packaged app file list still only shipped `electron-main.cjs` and `preload.cjs`.
+- The baked `apr_1992` startup artifact had to be re-baked to remain byte-for-byte aligned with canonical builder truth after the recent engine/runtime hardening chain.
+
+**What changed**
+- Added `src/desktop/autonomy_ipc_contract.cjs` and `src/desktop/settings_store.cjs` to `build.files` in `package.json`.
+- Hardened `tests/desktop_packaging_contract.test.ts` so it scans `electron-main.cjs` for local `require('./*.cjs')` helpers and proves every one is included in packaged app files.
+- Rebuilt `data/derived/startup/apr_1992_initial_save.json` from the canonical startup builder.
+
+**Canonical owner**
+- Packaged main-process helper ownership: `package.json` `build.files`, proven by `tests/desktop_packaging_contract.test.ts`
+- Startup artifact ownership: `src/scenario/startup_snapshot.ts` builder truth, with `data/derived/startup/apr_1992_initial_save.json` as one-way derived product artifact
+
+**Verification**
+- Targeted:
+  - `npx.cmd vitest run tests/desktop_autonomy_boundary_truth.test.ts`
+  - `node --test tests/desktop_packaging_contract.test.ts tests/desktop_packaged_runtime_probe.test.ts`
+  - `npm.cmd run desktop:startup-snapshot:check`
+  - `npm.cmd run desktop:package:probe`
+- Full bar:
+  - `npm.cmd run test:vitest`
+  - `npx.cmd tsc --noEmit -p tsconfig.json`
+  - `npm.cmd run build`
+  - `npm.cmd run recovery:check`
+
+**Result**
+- Packaged runtime proof now reaches the canonical probe manifest instead of crashing in main-process startup.
+- The manifest proves packaged startup snapshot availability, packaged Warroom/tactical-map boot, packaged bridge push flow, and packaged renderer reaction flow.
+
+**Follow-up**
+- Residual bounded lane: isolate startup-snapshot guardrail tests so proof code stops mutating the committed startup artifact in place.
+- Report: `docs/40_reports/implemented/20260410_DESKTOP_PACKAGED_STARTUP_CONTRACT_HARDENING.md`
+
 ## [2026-04-10] fix(desktop): scope autonomy IPC to the active player faction
 
 **Type:** Desktop / read-model boundary hardening

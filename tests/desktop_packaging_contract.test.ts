@@ -33,6 +33,14 @@ test('electron-builder config matches the packaged runtime resource contract', a
     const packageJson = await readPackageJson();
     const build = packageJson.build;
     const extraResources = build?.extraResources ?? [];
+    const electronMainSource = await readFile(join(process.cwd(), 'src', 'desktop', 'electron-main.cjs'), 'utf8');
+    const packagedFiles = build?.files ?? [];
+    const localDesktopCjsDeps = Array.from(new Set(
+        Array.from(
+            electronMainSource.matchAll(/require\('\.\/([^']+\.cjs)'\)/g),
+            (match) => `src/desktop/${match[1]}`,
+        ),
+    )).sort();
 
     assert.strictEqual(build?.appId, 'com.awwv.desktop');
     assert.strictEqual(build?.productName, 'A War Without Victory');
@@ -44,9 +52,20 @@ test('electron-builder config matches the packaged runtime resource contract', a
     );
     assert.deepStrictEqual(build?.win?.target, ['dir']);
     assert.deepStrictEqual(
-        build?.files,
-        ['package.json', 'src/desktop/electron-main.cjs', 'src/desktop/preload.cjs'],
-        'packaged desktop should only ship the Electron entrypoints from app.asar; runtime bundles belong in extraResources',
+        packagedFiles,
+        [
+            'package.json',
+            'src/desktop/electron-main.cjs',
+            'src/desktop/preload.cjs',
+            'src/desktop/autonomy_ipc_contract.cjs',
+            'src/desktop/settings_store.cjs',
+        ],
+        'packaged desktop should ship the Electron entrypoints and any local main-process CJS helpers that electron-main.cjs requires from app.asar',
+    );
+    assert.deepStrictEqual(
+        localDesktopCjsDeps,
+        packagedFiles.filter((file) => file.startsWith('src/desktop/') && file.endsWith('.cjs') && file !== 'src/desktop/electron-main.cjs' && file !== 'src/desktop/preload.cjs').sort(),
+        'every local main-process CJS helper required by electron-main.cjs should be included in packaged app files',
     );
 
     assert.deepStrictEqual(
