@@ -917,3 +917,26 @@ Fresh 40-week run `n1426` validates cleanly. Scripted final-save proof shows `0`
 
 ### Artifacts
 - Report: `docs/40_reports/implemented/20260411_SECTOR_LINE_INTERACTION_HARDENING.md`
+
+## [2026-04-11] fix(sim): preserve Herzegovina rim front ownership through final reconciliation
+
+**Type:** Sim/map ownership hardening
+**Files:** `src/sim/combat/brigade_assignment.ts`, `src/sim/turn_phases/war_phases.ts`, `tests/sector_shared_front_assignment.test.ts`, `tests/sector_foca_kalinovik_front_ownership_real_save.test.ts`, `tests/front_edge_foca_shared_border_real_save.test.ts`, `tests/ui_front_edge_display_ownership_real_save.test.ts`, `data/derived/latest_run_final_save.json`
+**Status:** VERIFIED - targeted real-save sector/front suite, fresh 40w scenario, full vitest, typecheck, build, and recovery passed; validator still shows the known pre-existing 65th unresolved-sector residual
+
+### Summary of changes
+1. **Shared-front brigade assignment now reinforces the neediest sibling sector first** - when multiple same-corps sectors claim the same front OSID, the assignment heuristic now prefers zero-covered / higher-unmet-need siblings before falling back to pressure and deterministic id order.
+2. **Final sector truth now recomputes end-of-turn spatial ownership instead of trusting cached mid-turn context** - `reconcile-final-sector-truth` now rebuilds fresh spatial context from current control/front state so final sector packets answer to real end-of-turn war-edge truth.
+3. **Real-save Foča/Kalinovik proof now guards live Herzegovina rim ownership directly** - the new real-save regression proves every current Herzegovina-rim war edge keeps a `sector:vrs_herzegovina:*` owner, and the Foča front-edge/display tests now key off current hostile neighbors instead of one stale historical edge.
+
+### Verification
+- `npx.cmd vitest run tests/sector_shared_front_assignment.test.ts tests/sector_foca_kalinovik_front_ownership_real_save.test.ts tests/trnovo_kalinovik_sector_fix.test.ts tests/final_sector_edge_cap_real_save.test.ts tests/front_edge_foca_shared_border_real_save.test.ts tests/ui_front_edge_display_ownership_real_save.test.ts`
+- `npm.cmd run sim:scenario:run:40w`
+- `node tools/validate_run_consistency.cjs runs\\apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1429`
+- `npm.cmd run test:vitest`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run build`
+- `npm.cmd run recovery:check`
+
+### Artifacts
+- Report: `docs/40_reports/implemented/20260411_HERZEGOVINA_FRONT_OWNERSHIP_AND_FINAL_RECONCILIATION.md`

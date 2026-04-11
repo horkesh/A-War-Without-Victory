@@ -57,7 +57,7 @@ describe.skipIf(!hasFixtures)('real-save front-edge display ownership', () => {
     expect(missing).toEqual([]);
   });
 
-  it('keeps the Donje Zesce-Mazlina front edge selectable from both sector sides', () => {
+  it('keeps every live Donje Zesce front edge selectable from both sector sides', () => {
     const controllerMap = new Map(
       geo.features.map((feature) => [feature.properties.osid, feature.properties.controller] as const),
     );
@@ -68,9 +68,18 @@ describe.skipIf(!hasFixtures)('real-save front-edge display ownership', () => {
       buildDisplayOsidAdjacency(buildPolygonEdgeOwners(geo)),
     );
 
-    const targetEdgeId = 'op:foca:donje_zesce__op:foca:mazlina';
-    expect(parsed.frontEdgesOsid?.some((edge) => edge.edge_id === targetEdgeId)).toBe(true);
-    expect(displayOwnership.sectorByEdgeAndFaction.has(`${targetEdgeId}\0RBiH`)).toBe(true);
-    expect(displayOwnership.sectorByEdgeAndFaction.has(`${targetEdgeId}\0RS`)).toBe(true);
+    const donjeZesceEdges = (parsed.frontEdgesOsid ?? []).filter((edge) =>
+      edge.edge_id.includes('op:foca:donje_zesce__') || edge.edge_id.includes('__op:foca:donje_zesce'),
+    );
+
+    expect(donjeZesceEdges.length).toBeGreaterThan(0);
+    for (const edge of donjeZesceEdges) {
+      const sideA = edge.side_a;
+      const sideB = edge.side_b;
+      expect(sideA).toBeTruthy();
+      expect(sideB).toBeTruthy();
+      expect(displayOwnership.sectorByEdgeAndFaction.has(`${edge.edge_id}\0${sideA}`)).toBe(true);
+      expect(displayOwnership.sectorByEdgeAndFaction.has(`${edge.edge_id}\0${sideB}`)).toBe(true);
+    }
   });
 });

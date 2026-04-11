@@ -31,7 +31,7 @@ import { applyFormationCommitment } from '../../state/front_posture_commitment.j
 import { expandRegionPostureToEdges } from '../../state/front_posture_regions.js';
 import { accumulateFrontPressure } from '../../state/front_pressure.js';
 import { syncFrontSegments } from '../../state/front_segments.js';
-import { GameState, type FactionId, type FormationState, type LegacyBrigadeAoRState, type EffectivePostureExposureState } from '../../state/game_state.js';
+import { CANONICAL_FACTIONS, GameState, type FactionId, type FormationState, type LegacyBrigadeAoRState, type EffectivePostureExposureState } from '../../state/game_state.js';
 import { updateHeavyEquipmentState } from '../../state/heavy_equipment.js';
 import { updateLegitimacyState } from '../../state/legitimacy.js';
 import { ensureMaintenanceCapacity } from '../../state/maintenance.js';
@@ -2590,7 +2590,20 @@ export const warPhases: NamedPhase[] = [
             const od = getOperationalData(context);
             if (!od?.edges?.length) return;
             const spatial = getSpatialContextCache(context);
-            const finalSpatial = spatial?.postCombat ?? spatial?.preCombat;
+            const finalSpatial = computeSpatialContext(
+                od.edges,
+                context.state.political.political_controllers ?? {},
+                CANONICAL_FACTIONS,
+                context.state.meta.turn,
+                'post-combat',
+                context.state.military.war_front_edges_osid,
+                spatial?.preCombat.adjacency,
+                spatial?.preCombat.sharedBoundaryAdjacency,
+            );
+            setSpatialContextCache(context, {
+                preCombat: spatial?.preCombat ?? finalSpatial,
+                postCombat: finalSpatial,
+            });
             reconcileFinalSectorTruth(
                 context.state,
                 od.edges,

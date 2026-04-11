@@ -10,16 +10,28 @@ const SAVE_PATH = resolve(__dirname, '..', 'data', 'derived', 'latest_run_final_
 const hasFixture = existsSync(SAVE_PATH);
 
 describe.skipIf(!hasFixture)('Foca shared-border front edge on live save', () => {
-  it('emits Donje Zesce vs Mazlina as a front edge when controllers differ', async () => {
+  it('emits every current Donje Zesce hostile shared-boundary edge when controllers differ', async () => {
     const state = deserializeState(readFileSync(SAVE_PATH, 'utf8'));
     const graph = await loadSettlementGraph();
     const frontEdges = computeFrontEdgesOsid(state, graph.edges, new Map());
+    const controllers = state.political.political_controllers ?? {};
+    const donjeZesce = 'op:foca:donje_zesce';
+    const candidateNeighbors = [
+      'op:foca:izbisno',
+      'op:foca:patkovina',
+      'op:foca:ustikolina',
+      'op:foca:mazlina',
+    ];
 
-    const target = frontEdges.find((edge) =>
-      edge.edge_id === 'op:foca:donje_zesce__op:foca:mazlina'
-      || edge.edge_id === 'op:foca:mazlina__op:foca:donje_zesce',
-    );
+    const hostileNeighbors = candidateNeighbors.filter((neighbor) => {
+      const neighborController = controllers[neighbor];
+      return typeof neighborController === 'string' && neighborController !== controllers[donjeZesce];
+    });
 
-    expect(target).toBeDefined();
+    expect(hostileNeighbors.length).toBeGreaterThan(0);
+    for (const neighbor of hostileNeighbors) {
+      const edgeId = [donjeZesce, neighbor].sort().join('__');
+      expect(frontEdges.some((edge) => edge.edge_id === edgeId), `${edgeId} should be a live war edge`).toBe(true);
+    }
   });
 });

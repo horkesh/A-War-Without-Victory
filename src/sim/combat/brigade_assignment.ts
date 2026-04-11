@@ -317,12 +317,30 @@ export function classifyBrigadesByTerritory(
                 continue;
             } else if (corpsIndices.length > 1) {
                 let bestIdx = corpsIndices[0]!;
-                let bestThreat = -Infinity;
                 for (const idx of corpsIndices) {
                     const s = sectors[idx]!;
-                    const threat = preEnemyPers.get(s.sector_id) ?? 0;
-                    if (threat > bestThreat || (threat === bestThreat && strictCompare(s.sector_id, sectors[bestIdx]!.sector_id) < 0)) {
-                        bestThreat = threat;
+                    const incumbent = sectors[bestIdx]!;
+                    const currentNeed = Math.max(0, s.length_edges - s.assigned_brigade_ids.length);
+                    const bestNeed = Math.max(0, incumbent.length_edges - incumbent.assigned_brigade_ids.length);
+                    const currentIsEmpty = s.assigned_brigade_ids.length === 0;
+                    const bestIsEmpty = incumbent.assigned_brigade_ids.length === 0;
+                    const currentThreat = preEnemyPers.get(s.sector_id) ?? 0;
+                    const bestThreat = preEnemyPers.get(incumbent.sector_id) ?? 0;
+                    if (
+                        (currentIsEmpty && !bestIsEmpty) ||
+                        (currentIsEmpty === bestIsEmpty && currentNeed > bestNeed) ||
+                        (
+                            currentIsEmpty === bestIsEmpty &&
+                            currentNeed === bestNeed &&
+                            currentThreat > bestThreat
+                        ) ||
+                        (
+                            currentIsEmpty === bestIsEmpty &&
+                            currentNeed === bestNeed &&
+                            currentThreat === bestThreat &&
+                            strictCompare(s.sector_id, incumbent.sector_id) < 0
+                        )
+                    ) {
                         bestIdx = idx;
                     }
                 }

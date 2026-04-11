@@ -716,6 +716,10 @@ Patch bumps (0.X.1, 0.X.2) are for significant fixes within a milestone â€”
   - contact graph `shared_segments` derivation now uses tolerance-aware segment matching, so real shared polygon borders are not downgraded to point-only contacts by coordinate drift
 - Still active:
   - remaining map complaints must be rechecked against refreshed Electron data and then sorted into renderer styling, stale loaded save, geometry data, or planner/doctrine seams instead of treated as one blended sector-continuity bucket
+- Closed afterward:
+  - shared-front same-corps brigade assignment no longer starves small sibling sectors on the Herzegovina Foca/Kalinovik rim
+  - final sector reconciliation now recomputes end-of-turn spatial truth instead of trusting cached mid-turn context
+  - fresh real-save proof now requires every current Herzegovina-rim war edge to keep a `sector:vrs_herzegovina:*` owner
 - Demoted / redesign-blocked:
   - same-faction ownerless unreachable brigades (`rs_1st_podrinje`, `rs_5th_podrinje`)
 - Investigated and rejected:
