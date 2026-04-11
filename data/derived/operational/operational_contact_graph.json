@@ -3600,7 +3600,7 @@
       "a": "op:banja_luka:banja_luka_2",
       "b": "op:celinac:kablovi_2",
       "min_dist": 0,
-      "shared_segments": 15
+      "shared_segments": 14
     },
     {
       "a": "op:banja_luka:banja_luka_2",
@@ -3624,7 +3624,7 @@
       "a": "op:banja_luka:dragocaj",
       "b": "op:banja_luka:potkozarje_3",
       "min_dist": 0,
-      "shared_segments": 3
+      "shared_segments": 4
     },
     {
       "a": "op:banja_luka:dragocaj",
@@ -3636,7 +3636,7 @@
       "a": "op:banja_luka:dragocaj",
       "b": "op:laktasi:laktasi_2",
       "min_dist": 0,
-      "shared_segments": 17
+      "shared_segments": 16
     },
     {
       "a": "op:banja_luka:dragocaj",
@@ -3678,7 +3678,7 @@
       "a": "op:banja_luka:melina_2",
       "b": "op:banja_luka:pavici_2",
       "min_dist": 0,
-      "shared_segments": 0
+      "shared_segments": 1
     },
     {
       "a": "op:banja_luka:melina_2",
@@ -3696,13 +3696,13 @@
       "a": "op:banja_luka:melina_2",
       "b": "op:prijedor:maricka_2",
       "min_dist": 0,
-      "shared_segments": 17
+      "shared_segments": 16
     },
     {
       "a": "op:banja_luka:melina_2",
       "b": "op:sanski_most:donja_kozica",
       "min_dist": 0,
-      "shared_segments": 29
+      "shared_segments": 28
     },
     {
       "a": "op:banja_luka:melina_2",
@@ -3726,13 +3726,13 @@
       "a": "op:banja_luka:pavici_2",
       "b": "op:banja_luka:rekavice_2",
       "min_dist": 0,
-      "shared_segments": 0
+      "shared_segments": 1
     },
     {
       "a": "op:banja_luka:pavici_2",
       "b": "op:kljuc:donje_ratkovo_2",
       "min_dist": 0,
-      "shared_segments": 12
+      "shared_segments": 11
     },
     {
       "a": "op:banja_luka:pavici_2",
@@ -3744,7 +3744,7 @@
       "a": "op:banja_luka:pavici_2",
       "b": "op:mrkonjic_grad:mrkonjic_grad_2",
       "min_dist": 0,
-      "shared_segments": 16
+      "shared_segments": 17
     },
     {
       "a": "op:banja_luka:piskavica_2",
@@ -3756,7 +3756,7 @@
       "a": "op:banja_luka:piskavica_2",
       "b": "op:prijedor:maricka_2",
       "min_dist": 0,
-      "shared_segments": 31
+      "shared_segments": 28
     },
     {
       "a": "op:banja_luka:potkozarje_3",
@@ -3768,7 +3768,7 @@
       "a": "op:banja_luka:potkozarje_3",
       "b": "op:bosanska_gradiska:masici_2",
       "min_dist": 0,
-      "shared_segments": 11
+      "shared_segments": 10
     },
     {
       "a": "op:banja_luka:potkozarje_3",
@@ -3792,13 +3792,13 @@
       "a": "op:banja_luka:rekavice_2",
       "b": "op:mrkonjic_grad:bjelajce_2",
       "min_dist": 0,
-      "shared_segments": 36
+      "shared_segments": 37
     },
     {
       "a": "op:banja_luka:rekavice_2",
       "b": "op:skender_vakuf:javorani_2",
       "min_dist": 0,
-      "shared_segments": 18
+      "shared_segments": 16
     },
     {
       "a": "op:banovici:banovici_2",
@@ -3858,7 +3858,7 @@
       "a": "op:banovici:banovici_selo_2",
       "b": "op:zavidovici:ribnica_dio",
       "min_dist": 0,
-      "shared_segments": 20
+      "shared_segments": 19
     },
     {
       "a": "op:banovici:repnik_2",
@@ -3888,7 +3888,7 @@
       "a": "op:banovici:seona",
       "b": "op:lukavac:orahovica_2",
       "min_dist": 0,
-      "shared_segments": 13
+      "shared_segments": 12
     },
     {
       "a": "op:banovici:seona",
@@ -3900,13 +3900,13 @@
       "a": "op:banovici:seona",
       "b": "op:zavidovici:ribnica_dio",
       "min_dist": 0,
-      "shared_segments": 8
+      "shared_segments": 7
     },
     {
       "a": "op:banovici:seona",
       "b": "op:zavidovici:vozuca_2",
       "min_dist": 0,
-      "shared_segments": 17
+      "shared_segments": 16
     },
     {
       "a": "op:bihac:bihac_2",
@@ -3918,7 +3918,7 @@
       "a": "op:bihac:bihac_2",
       "b": "op:bihac:ripac",
       "min_dist": 0,
-      "shared_segments": 8
+      "shared_segments": 5
     },
     {
       "a": "op:bihac:bihac_2",
@@ -3942,7 +3942,7 @@
       "a": "op:bihac:brekovica_2",
       "b": "op:bosanska_krupa:gornja_suvaja",
       "min_dist": 0,
-      "shared_segments": 22
+      "shared_segments": 21
     },
     {
       "a": "op:bihac:brekovica_2",
@@ -3978,13 +3978,13 @@
       "a": "op:bihac:orasac_2",
       "b": "op:bihac:trubar",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 3
     },
     {
       "a": "op:bihac:orasac_2",
       "b": "op:bosanski_petrovac:prkosi",
       "min_dist": 0,
-      "shared_segments": 1
+      "shared_segments": 2
     },
     {
       "a": "op:bihac:orasac_2",
@@ -4038,19 +4038,19 @@
       "a": "op:bihac:trubar",
       "b": "op:bosanski_petrovac:vodjenica",
       "min_dist": 0,
-      "shared_segments": 0
+      "shared_segments": 1
     },
     {
       "a": "op:bihac:trubar",
       "b": "op:bosansko_grahovo:bosansko_grahovo_2",
       "min_dist": 0,
-      "shared_segments": 22
+      "shared_segments": 21
     },
     {
       "a": "op:bihac:trubar",
       "b": "op:titov_drvar:drvar_2",
       "min_dist": 0,
-      "shared_segments": 22
+      "shared_segments": 21
     },
     {
       "a": "op:bihac:velika_gata",
@@ -4062,7 +4062,7 @@
       "a": "op:bihac:velika_gata",
       "b": "op:cazin:prosici",
       "min_dist": 0,
-      "shared_segments": 20
+      "shared_segments": 19
     },
     {
       "a": "op:bihac:velika_gata",
@@ -4098,7 +4098,7 @@
       "a": "op:bijeljina:bukovica_donja",
       "b": "op:brcko:brezovo_polje_selo_2",
       "min_dist": 0,
-      "shared_segments": 15
+      "shared_segments": 14
     },
     {
       "a": "op:bijeljina:bukovica_donja",
@@ -4146,7 +4146,7 @@
       "a": "op:bijeljina:cadjavica_gornja_2",
       "b": "op:ugljevik:zabrdje_2",
       "min_dist": 0,
-      "shared_segments": 5
+      "shared_segments": 4
     },
     {
       "a": "op:bijeljina:crnjelovo_donje",
@@ -4206,7 +4206,7 @@
       "a": "op:bijeljina:glavicice",
       "b": "op:zvornik:gornji_sepak_2",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 6
     },
     {
       "a": "op:bijeljina:janja_2",
@@ -4278,7 +4278,7 @@
       "a": "op:bileca:bileca_2",
       "b": "op:trebinje:trebinje_2",
       "min_dist": 0,
-      "shared_segments": 14
+      "shared_segments": 13
     },
     {
       "a": "op:bileca:korita",
@@ -4290,7 +4290,7 @@
       "a": "op:bileca:korita",
       "b": "op:gacko:avtovac_2",
       "min_dist": 0,
-      "shared_segments": 21
+      "shared_segments": 18
     },
     {
       "a": "op:bileca:korita",
@@ -4302,7 +4302,7 @@
       "a": "op:bileca:korita",
       "b": "op:nevesinje:zovi_do",
       "min_dist": 0,
-      "shared_segments": 14
+      "shared_segments": 13
     },
     {
       "a": "op:bileca:mirilovici",
@@ -4320,13 +4320,13 @@
       "a": "op:bileca:mirilovici",
       "b": "op:ljubinje:ljubinje_2",
       "min_dist": 0,
-      "shared_segments": 19
+      "shared_segments": 16
     },
     {
       "a": "op:bileca:mirilovici",
       "b": "op:trebinje:hum",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 5
     },
     {
       "a": "op:bileca:vranjska",
@@ -4338,7 +4338,7 @@
       "a": "op:bileca:vranjska",
       "b": "op:ljubinje:ljubinje_2",
       "min_dist": 0,
-      "shared_segments": 17
+      "shared_segments": 16
     },
     {
       "a": "op:bileca:vranjska",
@@ -4350,7 +4350,7 @@
       "a": "op:bileca:vranjska",
       "b": "op:stolac:hatelji_2",
       "min_dist": 0,
-      "shared_segments": 18
+      "shared_segments": 15
     },
     {
       "a": "op:bileca:zausje",
@@ -4398,7 +4398,7 @@
       "a": "op:bosanska_dubica:donja_slabinja_2",
       "b": "op:bosanska_kostajnica:petrinja",
       "min_dist": 0,
-      "shared_segments": 21
+      "shared_segments": 20
     },
     {
       "a": "op:bosanska_dubica:donja_slabinja_2",
@@ -4422,7 +4422,7 @@
       "a": "op:bosanska_dubica:hadzibajir_2",
       "b": "op:bosanska_dubica:medjedja_2",
       "min_dist": 0,
-      "shared_segments": 4
+      "shared_segments": 5
     },
     {
       "a": "op:bosanska_dubica:hadzibajir_2",
@@ -4464,7 +4464,7 @@
       "a": "op:bosanska_dubica:knezica_2",
       "b": "op:prijedor:cejreci",
       "min_dist": 0,
-      "shared_segments": 31
+      "shared_segments": 30
     },
     {
       "a": "op:bosanska_dubica:kozarska_dubica",
@@ -4482,7 +4482,7 @@
       "a": "op:bosanska_dubica:medjedja_2",
       "b": "op:bosanska_gradiska:orahova",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 7
     },
     {
       "a": "op:bosanska_dubica:medjuvodje",
@@ -4494,13 +4494,13 @@
       "a": "op:bosanska_dubica:medjuvodje",
       "b": "op:prijedor:cejreci",
       "min_dist": 0,
-      "shared_segments": 3
+      "shared_segments": 4
     },
     {
       "a": "op:bosanska_dubica:medjuvodje",
       "b": "op:prijedor:omarska_2",
       "min_dist": 0,
-      "shared_segments": 4
+      "shared_segments": 5
     },
     {
       "a": "op:bosanska_dubica:medjuvodje",
@@ -4518,7 +4518,7 @@
       "a": "op:bosanska_dubica:vojskova",
       "b": "op:bosanska_gradiska:orahova",
       "min_dist": 0,
-      "shared_segments": 18
+      "shared_segments": 17
     },
     {
       "a": "op:bosanska_dubica:vojskova",
@@ -4644,7 +4644,7 @@
       "a": "op:bosanska_gradiska:mackovac",
       "b": "op:srbac:srbac_2",
       "min_dist": 0,
-      "shared_segments": 13
+      "shared_segments": 12
     },
     {
       "a": "op:bosanska_gradiska:masici_2",
@@ -4656,7 +4656,7 @@
       "a": "op:bosanska_gradiska:masici_2",
       "b": "op:laktasi:laktasi_2",
       "min_dist": 0,
-      "shared_segments": 17
+      "shared_segments": 18
     },
     {
       "a": "op:bosanska_gradiska:masici_2",
@@ -4674,19 +4674,19 @@
       "a": "op:bosanska_gradiska:nova_topola_2",
       "b": "op:laktasi:maglajani",
       "min_dist": 0,
-      "shared_segments": 12
+      "shared_segments": 11
     },
     {
       "a": "op:bosanska_gradiska:nova_topola_2",
       "b": "op:srbac:nozicko",
       "min_dist": 0,
-      "shared_segments": 15
+      "shared_segments": 13
     },
     {
       "a": "op:bosanska_gradiska:nova_topola_2",
       "b": "op:srbac:srbac_2",
       "min_dist": 0,
-      "shared_segments": 8
+      "shared_segments": 7
     },
     {
       "a": "op:bosanska_kostajnica:kostajnica",
@@ -4740,7 +4740,7 @@
       "a": "op:bosanska_krupa:donji_dubovik_2",
       "b": "op:bosanski_novi:krslje_2",
       "min_dist": 0,
-      "shared_segments": 20
+      "shared_segments": 18
     },
     {
       "a": "op:bosanska_krupa:donji_dubovik_2",
@@ -4806,7 +4806,7 @@
       "a": "op:bosanska_krupa:ivanjska_2",
       "b": "op:bosanski_novi:matavazi_2",
       "min_dist": 0,
-      "shared_segments": 28
+      "shared_segments": 25
     },
     {
       "a": "op:bosanska_krupa:jasenica_2",
@@ -4818,7 +4818,7 @@
       "a": "op:bosanska_krupa:jasenica_2",
       "b": "op:bosanski_petrovac:krnjeusa",
       "min_dist": 0,
-      "shared_segments": 24
+      "shared_segments": 23
     },
     {
       "a": "op:bosanska_krupa:jasenica_2",
@@ -4836,7 +4836,7 @@
       "a": "op:bosanska_krupa:jasenica_2",
       "b": "op:sanski_most:lusci_palanka_2",
       "min_dist": 0,
-      "shared_segments": 16
+      "shared_segments": 15
     },
     {
       "a": "op:bosanska_krupa:jezerski_2",
@@ -4908,13 +4908,13 @@
       "a": "op:bosanski_brod:donja_vrela",
       "b": "op:bosanski_brod:novo_selo_2",
       "min_dist": 0,
-      "shared_segments": 3
+      "shared_segments": 2
     },
     {
       "a": "op:bosanski_brod:donja_vrela",
       "b": "op:derventa:luzani_bosanski",
       "min_dist": 0,
-      "shared_segments": 23
+      "shared_segments": 22
     },
     {
       "a": "op:bosanski_brod:donja_vrela",
@@ -4926,13 +4926,13 @@
       "a": "op:bosanski_brod:lijesce_2",
       "b": "op:modrica:vranjak_2",
       "min_dist": 0,
-      "shared_segments": 8
+      "shared_segments": 7
     },
     {
       "a": "op:bosanski_brod:lijesce_2",
       "b": "op:odzak:gornji_svilaj",
       "min_dist": 0,
-      "shared_segments": 15
+      "shared_segments": 14
     },
     {
       "a": "op:bosanski_brod:novo_selo_2",
@@ -4944,7 +4944,7 @@
       "a": "op:bosanski_brod:novo_selo_2",
       "b": "op:derventa:luzani_bosanski",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 9
     },
     {
       "a": "op:bosanski_novi:blagaj_japra",
@@ -5040,7 +5040,7 @@
       "a": "op:bosanski_novi:suhaca_4",
       "b": "op:bosanski_novi:svodna_2",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 3
     },
     {
       "a": "op:bosanski_novi:suhaca_4",
@@ -5052,7 +5052,7 @@
       "a": "op:bosanski_novi:suhaca_4",
       "b": "op:sanski_most:budimlic_japra_2",
       "min_dist": 0,
-      "shared_segments": 12
+      "shared_segments": 11
     },
     {
       "a": "op:bosanski_novi:svodna_2",
@@ -5088,7 +5088,7 @@
       "a": "op:bosanski_petrovac:dobro_selo_2",
       "b": "op:bosanski_petrovac:jasenovac_2",
       "min_dist": 0,
-      "shared_segments": 3
+      "shared_segments": 4
     },
     {
       "a": "op:bosanski_petrovac:dobro_selo_2",
@@ -5118,13 +5118,13 @@
       "a": "op:bosanski_petrovac:dobro_selo_2",
       "b": "op:sanski_most:lusci_palanka_2",
       "min_dist": 0,
-      "shared_segments": 15
+      "shared_segments": 14
     },
     {
       "a": "op:bosanski_petrovac:jasenovac_2",
       "b": "op:bosanski_petrovac:kolonic_2",
       "min_dist": 0,
-      "shared_segments": 1
+      "shared_segments": 2
     },
     {
       "a": "op:bosanski_petrovac:jasenovac_2",
@@ -5136,13 +5136,13 @@
       "a": "op:bosanski_petrovac:jasenovac_2",
       "b": "op:kljuc:sanica_2",
       "min_dist": 0,
-      "shared_segments": 11
+      "shared_segments": 9
     },
     {
       "a": "op:bosanski_petrovac:jasenovac_2",
       "b": "op:sanski_most:jelasinovci",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 3
     },
     {
       "a": "op:bosanski_petrovac:jasenovac_2",
@@ -5160,7 +5160,7 @@
       "a": "op:bosanski_petrovac:jasenovac_2",
       "b": "op:titov_drvar:sipovljani_2",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 3
     },
     {
       "a": "op:bosanski_petrovac:kolonic_2",
@@ -5190,7 +5190,7 @@
       "a": "op:bosanski_petrovac:prkosi",
       "b": "op:bosanski_petrovac:vodjenica",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 4
     },
     {
       "a": "op:bosanski_petrovac:prkosi",
@@ -5220,31 +5220,31 @@
       "a": "op:bosanski_samac:crkvina_2",
       "b": "op:bosanski_samac:samac_2",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 4
     },
     {
       "a": "op:bosanski_samac:crkvina_2",
       "b": "op:modrica:garevac_2",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 5
     },
     {
       "a": "op:bosanski_samac:crkvina_2",
       "b": "op:odzak:donja_dubica",
       "min_dist": 0,
-      "shared_segments": 19
+      "shared_segments": 18
     },
     {
       "a": "op:bosanski_samac:domaljevac_2",
       "b": "op:bosanski_samac:tisina",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 4
     },
     {
       "a": "op:bosanski_samac:domaljevac_2",
       "b": "op:gradacac:pelagicevo",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 5
     },
     {
       "a": "op:bosanski_samac:domaljevac_2",
@@ -5268,7 +5268,7 @@
       "a": "op:bosanski_samac:novo_selo_2",
       "b": "op:modrica:garevac_2",
       "min_dist": 0,
-      "shared_segments": 13
+      "shared_segments": 12
     },
     {
       "a": "op:bosanski_samac:samac_2",
@@ -5334,19 +5334,19 @@
       "a": "op:bosansko_grahovo:crni_lug",
       "b": "op:glamoc:stekerovci_2",
       "min_dist": 0,
-      "shared_segments": 28
+      "shared_segments": 27
     },
     {
       "a": "op:bosansko_grahovo:crni_lug",
       "b": "op:livno:gubin_2",
       "min_dist": 0,
-      "shared_segments": 27
+      "shared_segments": 26
     },
     {
       "a": "op:bosansko_grahovo:crni_lug",
       "b": "op:titov_drvar:prekaja_2",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 5
     },
     {
       "a": "op:bosansko_grahovo:malesevci",
@@ -5478,13 +5478,13 @@
       "a": "op:bratunac:pobudje_2",
       "b": "op:vlasenica:sebiocina",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 5
     },
     {
       "a": "op:bratunac:pobudje_2",
       "b": "op:zvornik:novo_selo",
       "min_dist": 0,
-      "shared_segments": 12
+      "shared_segments": 11
     },
     {
       "a": "op:bratunac:polom",
@@ -5526,7 +5526,7 @@
       "a": "op:bratunac:zapolje_2",
       "b": "op:srebrenica:brezovice_2",
       "min_dist": 0,
-      "shared_segments": 22
+      "shared_segments": 21
     },
     {
       "a": "op:bratunac:zapolje_2",
@@ -5556,7 +5556,7 @@
       "a": "op:brcko:bijela_2",
       "b": "op:gradacac:mionica",
       "min_dist": 0,
-      "shared_segments": 20
+      "shared_segments": 17
     },
     {
       "a": "op:brcko:bijela_2",
@@ -5604,7 +5604,7 @@
       "a": "op:brcko:boce_2",
       "b": "op:lopare:humci_2",
       "min_dist": 0,
-      "shared_segments": 4
+      "shared_segments": 3
     },
     {
       "a": "op:brcko:boce_2",
@@ -5736,7 +5736,7 @@
       "a": "op:brcko:krepsic",
       "b": "op:orasje:orasje",
       "min_dist": 0,
-      "shared_segments": 5
+      "shared_segments": 4
     },
     {
       "a": "op:brcko:krepsic",
@@ -5754,7 +5754,7 @@
       "a": "op:brcko:maoca_2",
       "b": "op:srebrenik:tinja_gornja_2",
       "min_dist": 0,
-      "shared_segments": 14
+      "shared_segments": 13
     },
     {
       "a": "op:brcko:palanka",
@@ -5766,7 +5766,7 @@
       "a": "op:brcko:potocari_2",
       "b": "op:lopare:mrtvica_2",
       "min_dist": 0,
-      "shared_segments": 4
+      "shared_segments": 3
     },
     {
       "a": "op:brcko:skakava_donja",
@@ -5802,7 +5802,7 @@
       "a": "op:breza:koritnik",
       "b": "op:vares:budozelje_2",
       "min_dist": 0,
-      "shared_segments": 4
+      "shared_segments": 3
     },
     {
       "a": "op:breza:mahala",
@@ -5814,13 +5814,13 @@
       "a": "op:breza:mahala",
       "b": "op:vares:budozelje_2",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 6
     },
     {
       "a": "op:breza:mahala",
       "b": "op:visoko:gornja_vratnica_2",
       "min_dist": 0,
-      "shared_segments": 4
+      "shared_segments": 3
     },
     {
       "a": "op:breza:mahala",
@@ -5832,13 +5832,13 @@
       "a": "op:breza:podgora",
       "b": "op:breza:zupca_2",
       "min_dist": 0,
-      "shared_segments": 3
+      "shared_segments": 5
     },
     {
       "a": "op:breza:podgora",
       "b": "op:ilijas:podlugovi",
       "min_dist": 0,
-      "shared_segments": 16
+      "shared_segments": 14
     },
     {
       "a": "op:breza:podgora",
@@ -5850,13 +5850,13 @@
       "a": "op:breza:podgora",
       "b": "op:vares:budozelje_2",
       "min_dist": 0,
-      "shared_segments": 9
+      "shared_segments": 6
     },
     {
       "a": "op:breza:zupca_2",
       "b": "op:ilijas:podlugovi",
       "min_dist": 0,
-      "shared_segments": 4
+      "shared_segments": 2
     },
     {
       "a": "op:breza:zupca_2",
@@ -5940,7 +5940,7 @@
       "a": "op:bugojno:gracanica",
       "b": "op:gornji_vakuf:pajic_polje_2",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 10
     },
     {
       "a": "op:bugojno:kopcic_2",
@@ -5976,7 +5976,7 @@
       "a": "op:bugojno:kula_2",
       "b": "op:bugojno:udurlije",
       "min_dist": 0,
-      "shared_segments": 4
+      "shared_segments": 5
     },
     {
       "a": "op:bugojno:kula_2",
@@ -5994,7 +5994,7 @@
       "a": "op:bugojno:kula_2",
       "b": "op:donji_vakuf:korenici",
       "min_dist": 0,
-      "shared_segments": 0
+      "shared_segments": 1
     },
     {
       "a": "op:bugojno:medini",
@@ -6006,13 +6006,13 @@
       "a": "op:bugojno:medini",
       "b": "op:donji_vakuf:komar_2",
       "min_dist": 0,
-      "shared_segments": 10
+      "shared_segments": 9
     },
     {
       "a": "op:bugojno:medini",
       "b": "op:novi_travnik:ruda_2",
       "min_dist": 0,
-      "shared_segments": 10
+      "shared_segments": 9
     },
     {
       "a": "op:bugojno:medini",
@@ -6042,13 +6042,13 @@
       "a": "op:bugojno:rovna",
       "b": "op:gornji_vakuf:pajic_polje_2",
       "min_dist": 0,
-      "shared_segments": 5
+      "shared_segments": 3
     },
     {
       "a": "op:bugojno:rovna",
       "b": "op:novi_travnik:novi_travnik_2",
       "min_dist": 0,
-      "shared_segments": 1
+      "shared_segments": 2
     },
     {
       "a": "op:bugojno:rovna",
@@ -6060,19 +6060,19 @@
       "a": "op:bugojno:rovna",
       "b": "op:novi_travnik:senkovici_2",
       "min_dist": 0,
-      "shared_segments": 14
+      "shared_segments": 13
     },
     {
       "a": "op:bugojno:udurlije",
       "b": "op:bugojno:vesela_2",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 3
     },
     {
       "a": "op:bugojno:udurlije",
       "b": "op:donji_vakuf:jemanlici",
       "min_dist": 0,
-      "shared_segments": 0
+      "shared_segments": 1
     },
     {
       "a": "op:bugojno:vesela_2",
@@ -6090,7 +6090,7 @@
       "a": "op:bugojno:vesela_2",
       "b": "op:donji_vakuf:jemanlici",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 3
     },
     {
       "a": "op:bugojno:vesela_2",
@@ -6126,7 +6126,7 @@
       "a": "op:bugojno:vrpec",
       "b": "op:gornji_vakuf:pajic_polje_2",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 3
     },
     {
       "a": "op:bugojno:vrpec",
@@ -6156,7 +6156,7 @@
       "a": "op:busovaca:bare_2",
       "b": "op:busovaca:gornja_rovna",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 4
     },
     {
       "a": "op:busovaca:bare_2",
@@ -6240,13 +6240,13 @@
       "a": "op:busovaca:dobraljevo_2",
       "b": "op:kakanj:sopotnica",
       "min_dist": 0,
-      "shared_segments": 11
+      "shared_segments": 8
     },
     {
       "a": "op:busovaca:dobraljevo_2",
       "b": "op:kiseljak:bilalovac_2",
       "min_dist": 0,
-      "shared_segments": 17
+      "shared_segments": 15
     },
     {
       "a": "op:busovaca:dobraljevo_2",
@@ -6312,7 +6312,7 @@
       "a": "op:busovaca:putis_2",
       "b": "op:vitez:preocica_3",
       "min_dist": 0,
-      "shared_segments": 13
+      "shared_segments": 12
     },
     {
       "a": "op:busovaca:putis_2",
@@ -6342,7 +6342,7 @@
       "a": "op:cajnice:batotici",
       "b": "op:foca:brusna_2",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 5
     },
     {
       "a": "op:cajnice:batotici",
@@ -6354,13 +6354,13 @@
       "a": "op:cajnice:batotici",
       "b": "op:gorazde:kolovarice",
       "min_dist": 0,
-      "shared_segments": 10
+      "shared_segments": 9
     },
     {
       "a": "op:cajnice:batotici",
       "b": "op:gorazde:podkozara_donja_2",
       "min_dist": 0,
-      "shared_segments": 13
+      "shared_segments": 12
     },
     {
       "a": "op:cajnice:cajnice_2",
@@ -6396,13 +6396,13 @@
       "a": "op:cajnice:miljeno_2",
       "b": "op:gorazde:ustipraca_2",
       "min_dist": 0,
-      "shared_segments": 8
+      "shared_segments": 6
     },
     {
       "a": "op:cajnice:miljeno_2",
       "b": "op:rudo:gornja_strmica",
       "min_dist": 0,
-      "shared_segments": 14
+      "shared_segments": 12
     },
     {
       "a": "op:cajnice:todorovici",
@@ -6414,19 +6414,19 @@
       "a": "op:cajnice:todorovici",
       "b": "op:rudo:gornja_strmica",
       "min_dist": 0,
-      "shared_segments": 10
+      "shared_segments": 9
     },
     {
       "a": "op:cajnice:todorovici",
       "b": "op:rudo:mrsovo_2",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 5
     },
     {
       "a": "op:cajnice:zaborak",
       "b": "op:rudo:gornja_strmica",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 1
     },
     {
       "a": "op:capljina:capljina_2",
@@ -6450,13 +6450,13 @@
       "a": "op:capljina:capljina_2",
       "b": "op:citluk:krehin_gradac_2",
       "min_dist": 0,
-      "shared_segments": 23
+      "shared_segments": 22
     },
     {
       "a": "op:capljina:capljina_2",
       "b": "op:ljubuski:studenci_2",
       "min_dist": 0,
-      "shared_segments": 17
+      "shared_segments": 16
     },
     {
       "a": "op:capljina:tasovcici_2",
@@ -6504,7 +6504,7 @@
       "a": "op:capljina:visici_2",
       "b": "op:neum:gradac_2",
       "min_dist": 0,
-      "shared_segments": 9
+      "shared_segments": 8
     },
     {
       "a": "op:capljina:visici_2",
@@ -6576,13 +6576,13 @@
       "a": "op:cazin:coralici",
       "b": "op:velika_kladusa:vejinac_2",
       "min_dist": 0,
-      "shared_segments": 1
+      "shared_segments": 0
     },
     {
       "a": "op:cazin:coralici",
       "b": "op:velika_kladusa:zboriste_2",
       "min_dist": 0,
-      "shared_segments": 3
+      "shared_segments": 4
     },
     {
       "a": "op:cazin:liskovac_2",
@@ -6660,7 +6660,7 @@
       "a": "op:cazin:varoska_rijeka_3",
       "b": "op:velika_kladusa:zboriste_2",
       "min_dist": 0,
-      "shared_segments": 34
+      "shared_segments": 30
     },
     {
       "a": "op:celinac:celinac_2",
@@ -6678,7 +6678,7 @@
       "a": "op:celinac:celinac_2",
       "b": "op:kotor_varos:kotor_varos_2",
       "min_dist": 0,
-      "shared_segments": 9
+      "shared_segments": 8
     },
     {
       "a": "op:celinac:celinac_2",
@@ -6720,7 +6720,7 @@
       "a": "op:celinac:josavka_donja_2",
       "b": "op:prnjavor:crkvena_2",
       "min_dist": 0,
-      "shared_segments": 12
+      "shared_segments": 13
     },
     {
       "a": "op:celinac:josavka_donja_2",
@@ -6732,7 +6732,7 @@
       "a": "op:celinac:kablovi_2",
       "b": "op:kotor_varos:vagani_2",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 5
     },
     {
       "a": "op:celinac:kablovi_2",
@@ -6750,13 +6750,13 @@
       "a": "op:celinac:snjegotina_srednja",
       "b": "op:prnjavor:donji_vijacani_2",
       "min_dist": 0,
-      "shared_segments": 19
+      "shared_segments": 18
     },
     {
       "a": "op:celinac:snjegotina_srednja",
       "b": "op:teslic:buletic_2",
       "min_dist": 0,
-      "shared_segments": 15
+      "shared_segments": 14
     },
     {
       "a": "op:centar_sarajevo:radava",
@@ -6792,13 +6792,13 @@
       "a": "op:centar_sarajevo:radava",
       "b": "op:vogosca:hotonj",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 5
     },
     {
       "a": "op:centar_sarajevo:radava",
       "b": "op:vogosca:vogosca_3",
       "min_dist": 0,
-      "shared_segments": 15
+      "shared_segments": 14
     },
     {
       "a": "op:centar_sarajevo:sarajevo_dio_centar_sajarevo",
@@ -6816,7 +6816,7 @@
       "a": "op:centar_sarajevo:sarajevo_dio_centar_sajarevo",
       "b": "op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 6
     },
     {
       "a": "op:citluk:citluk_2",
@@ -6846,7 +6846,7 @@
       "a": "op:citluk:krehin_gradac_2",
       "b": "op:mostar:jasenica",
       "min_dist": 0,
-      "shared_segments": 22
+      "shared_segments": 21
     },
     {
       "a": "op:citluk:veliki_ogradjenik_2",
@@ -6864,7 +6864,7 @@
       "a": "op:citluk:veliki_ogradjenik_2",
       "b": "op:ljubuski:radisici_2",
       "min_dist": 0,
-      "shared_segments": 12
+      "shared_segments": 11
     },
     {
       "a": "op:citluk:veliki_ogradjenik_2",
@@ -6894,7 +6894,7 @@
       "a": "op:derventa:cerani_2",
       "b": "op:derventa:velika_socanica_2",
       "min_dist": 0,
-      "shared_segments": 5
+      "shared_segments": 7
     },
     {
       "a": "op:derventa:cerani_2",
@@ -6912,7 +6912,7 @@
       "a": "op:derventa:cerani_2",
       "b": "op:doboj:stanari_2",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 7
     },
     {
       "a": "op:derventa:cerani_2",
@@ -7008,13 +7008,13 @@
       "a": "op:derventa:misinci_2",
       "b": "op:doboj:kotorsko_2",
       "min_dist": 0,
-      "shared_segments": 16
+      "shared_segments": 14
     },
     {
       "a": "op:derventa:misinci_2",
       "b": "op:doboj:kozuhe_2",
       "min_dist": 0,
-      "shared_segments": 25
+      "shared_segments": 24
     },
     {
       "a": "op:derventa:velika_socanica_2",
@@ -7026,7 +7026,7 @@
       "a": "op:derventa:velika_socanica_2",
       "b": "op:doboj:bukovica_velika_2",
       "min_dist": 0,
-      "shared_segments": 10
+      "shared_segments": 8
     },
     {
       "a": "op:derventa:velika_socanica_2",
@@ -7068,7 +7068,7 @@
       "a": "op:doboj:boljanic_2",
       "b": "op:doboj:matuzici_2",
       "min_dist": 0,
-      "shared_segments": 4
+      "shared_segments": 5
     },
     {
       "a": "op:doboj:boljanic_2",
@@ -7092,7 +7092,7 @@
       "a": "op:doboj:boljanic_2",
       "b": "op:tesanj:sije_2",
       "min_dist": 0,
-      "shared_segments": 5
+      "shared_segments": 6
     },
     {
       "a": "op:doboj:brijesnica_velika",
@@ -7110,13 +7110,13 @@
       "a": "op:doboj:brijesnica_velika",
       "b": "op:gracanica:gracanica_2",
       "min_dist": 0,
-      "shared_segments": 11
+      "shared_segments": 10
     },
     {
       "a": "op:doboj:brijesnica_velika",
       "b": "op:gracanica:malesici",
       "min_dist": 0,
-      "shared_segments": 25
+      "shared_segments": 24
     },
     {
       "a": "op:doboj:bukovica_velika_2",
@@ -7230,7 +7230,7 @@
       "a": "op:doboj:kozuhe_2",
       "b": "op:modrica:vranjak_2",
       "min_dist": 0,
-      "shared_segments": 25
+      "shared_segments": 21
     },
     {
       "a": "op:doboj:makljenovac",
@@ -7242,13 +7242,13 @@
       "a": "op:doboj:makljenovac",
       "b": "op:tesanj:ularice_2",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 1
     },
     {
       "a": "op:doboj:matuzici_2",
       "b": "op:tesanj:lepenica",
       "min_dist": 0,
-      "shared_segments": 10
+      "shared_segments": 11
     },
     {
       "a": "op:doboj:matuzici_2",
@@ -7272,7 +7272,7 @@
       "a": "op:doboj:stanari_2",
       "b": "op:prnjavor:prnjavor_2",
       "min_dist": 0,
-      "shared_segments": 17
+      "shared_segments": 16
     },
     {
       "a": "op:doboj:stanari_2",
@@ -7296,13 +7296,13 @@
       "a": "op:doboj:zelinja_gornja_2",
       "b": "op:gracanica:malesici",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 5
     },
     {
       "a": "op:doboj:zelinja_gornja_2",
       "b": "op:modrica:skugric_gornji_2",
       "min_dist": 0,
-      "shared_segments": 14
+      "shared_segments": 13
     },
     {
       "a": "op:doboj:zelinja_gornja_2",
@@ -7380,7 +7380,7 @@
       "a": "op:donji_vakuf:jemanlici",
       "b": "op:donji_vakuf:korenici",
       "min_dist": 0,
-      "shared_segments": 3
+      "shared_segments": 5
     },
     {
       "a": "op:donji_vakuf:jemanlici",
@@ -7416,7 +7416,7 @@
       "a": "op:donji_vakuf:komar_2",
       "b": "op:travnik:gornje_krcevine",
       "min_dist": 0,
-      "shared_segments": 13
+      "shared_segments": 12
     },
     {
       "a": "op:donji_vakuf:komar_2",
@@ -7524,7 +7524,7 @@
       "a": "op:duvno:dobrici",
       "b": "op:posusje:vir_2",
       "min_dist": 0,
-      "shared_segments": 11
+      "shared_segments": 10
     },
     {
       "a": "op:duvno:kongora",
@@ -7536,7 +7536,7 @@
       "a": "op:duvno:kongora",
       "b": "op:duvno:tomislavgrad_2",
       "min_dist": 0,
-      "shared_segments": 5
+      "shared_segments": 7
     },
     {
       "a": "op:duvno:kongora",
@@ -7560,7 +7560,7 @@
       "a": "op:duvno:kongora",
       "b": "op:posusje:sutina_2",
       "min_dist": 0,
-      "shared_segments": 14
+      "shared_segments": 13
     },
     {
       "a": "op:duvno:kongora",
@@ -7608,7 +7608,7 @@
       "a": "op:duvno:prisoje_2",
       "b": "op:livno:misi_2",
       "min_dist": 0,
-      "shared_segments": 29
+      "shared_segments": 28
     },
     {
       "a": "op:duvno:rosko_polje_2",
@@ -7620,7 +7620,7 @@
       "a": "op:duvno:rosko_polje_2",
       "b": "op:posusje:vir_2",
       "min_dist": 0,
-      "shared_segments": 17
+      "shared_segments": 16
     },
     {
       "a": "op:duvno:stipanjici_2",
@@ -7656,7 +7656,7 @@
       "a": "op:duvno:suica_2",
       "b": "op:kupres:donji_malovan",
       "min_dist": 0,
-      "shared_segments": 24
+      "shared_segments": 22
     },
     {
       "a": "op:duvno:suica_2",
@@ -7764,7 +7764,7 @@
       "a": "op:foca:donje_zesce",
       "b": "op:foca:mazlina",
       "min_dist": 0,
-      "shared_segments": 0
+      "shared_segments": 2
     },
     {
       "a": "op:foca:donje_zesce",
@@ -7782,19 +7782,19 @@
       "a": "op:foca:donje_zesce",
       "b": "op:gorazde:faocici_2",
       "min_dist": 0,
-      "shared_segments": 8
+      "shared_segments": 5
     },
     {
       "a": "op:foca:donje_zesce",
       "b": "op:gorazde:hrancici",
       "min_dist": 0,
-      "shared_segments": 8
+      "shared_segments": 7
     },
     {
       "a": "op:foca:donje_zesce",
       "b": "op:pale:podgrab",
       "min_dist": 0,
-      "shared_segments": 4
+      "shared_segments": 5
     },
     {
       "a": "op:foca:foca_3",
@@ -7842,7 +7842,7 @@
       "a": "op:foca:izbisno",
       "b": "op:kalinovik:vlaholje",
       "min_dist": 0,
-      "shared_segments": 11
+      "shared_segments": 10
     },
     {
       "a": "op:foca:kosman",
@@ -7866,13 +7866,13 @@
       "a": "op:foca:mazlina",
       "b": "op:pale:gornje_pale",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 7
     },
     {
       "a": "op:foca:mazlina",
       "b": "op:pale:podgrab",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 3
     },
     {
       "a": "op:foca:mazlina",
@@ -7944,7 +7944,7 @@
       "a": "op:foca:prevrac",
       "b": "op:gorazde:ustipraca_2",
       "min_dist": 0.16185080027296686,
-      "shared_segments": 4
+      "shared_segments": 1
     },
     {
       "a": "op:foca:tjentiste_2",
@@ -7968,7 +7968,7 @@
       "a": "op:foca:ustikolina",
       "b": "op:gorazde:kola",
       "min_dist": 0,
-      "shared_segments": 12
+      "shared_segments": 8
     },
     {
       "a": "op:foca:ustikolina",
@@ -7992,7 +7992,7 @@
       "a": "op:fojnica:bakovici_2",
       "b": "op:fojnica:plocari_polje",
       "min_dist": 0,
-      "shared_segments": 8
+      "shared_segments": 9
     },
     {
       "a": "op:fojnica:bakovici_2",
@@ -8046,19 +8046,19 @@
       "a": "op:fojnica:plocari_polje",
       "b": "op:kiseljak:bilalovac_2",
       "min_dist": 0,
-      "shared_segments": 8
+      "shared_segments": 6
     },
     {
       "a": "op:fojnica:plocari_polje",
       "b": "op:kiseljak:gromiljak_2",
       "min_dist": 0,
-      "shared_segments": 11
+      "shared_segments": 8
     },
     {
       "a": "op:fojnica:plocari_polje",
       "b": "op:kresevo:kresevo_2",
       "min_dist": 0,
-      "shared_segments": 22
+      "shared_segments": 20
     },
     {
       "a": "op:fojnica:plocari_polje",
@@ -8076,7 +8076,7 @@
       "a": "op:fojnica:turkovici",
       "b": "op:gornji_vakuf:crkvice",
       "min_dist": 0,
-      "shared_segments": 12
+      "shared_segments": 11
     },
     {
       "a": "op:fojnica:turkovici",
@@ -8094,7 +8094,7 @@
       "a": "op:fojnica:zivcici_2",
       "b": "op:kiseljak:bilalovac_2",
       "min_dist": 0,
-      "shared_segments": 4
+      "shared_segments": 3
     },
     {
       "a": "op:fojnica:zivcici_2",
@@ -8154,7 +8154,7 @@
       "a": "op:gacko:bahori",
       "b": "op:kalinovik:tomislja",
       "min_dist": 0,
-      "shared_segments": 26
+      "shared_segments": 21
     },
     {
       "a": "op:gacko:gacko_2",
@@ -8196,7 +8196,7 @@
       "a": "op:gacko:gradina",
       "b": "op:nevesinje:krekovi_2",
       "min_dist": 0,
-      "shared_segments": 23
+      "shared_segments": 22
     },
     {
       "a": "op:gacko:gradina",
@@ -8268,7 +8268,7 @@
       "a": "op:glamoc:halapic",
       "b": "op:livno:gubin_2",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 1
     },
     {
       "a": "op:glamoc:halapic",
@@ -8304,7 +8304,7 @@
       "a": "op:glamoc:pribelja",
       "b": "op:sipovo:brdjani",
       "min_dist": 0,
-      "shared_segments": 5
+      "shared_segments": 4
     },
     {
       "a": "op:glamoc:pribelja",
@@ -8346,7 +8346,7 @@
       "a": "op:glamoc:vidimlije_2",
       "b": "op:kupres:novo_selo_2",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 6
     },
     {
       "a": "op:glamoc:vidimlije_2",
@@ -8358,13 +8358,13 @@
       "a": "op:glamoc:vidimlije_2",
       "b": "op:livno:priluka_2",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 4
     },
     {
       "a": "op:glamoc:vidimlije_2",
       "b": "op:livno:zastinje",
       "min_dist": 0,
-      "shared_segments": 20
+      "shared_segments": 19
     },
     {
       "a": "op:gorazde:bacci",
@@ -8568,7 +8568,7 @@
       "a": "op:gorazde:osjecani_2",
       "b": "op:gorazde:sopotnica",
       "min_dist": 0,
-      "shared_segments": 4
+      "shared_segments": 3
     },
     {
       "a": "op:gorazde:osjecani_2",
@@ -8616,7 +8616,7 @@
       "a": "op:gorazde:semihova_2",
       "b": "op:pale:podgrab",
       "min_dist": 0,
-      "shared_segments": 11
+      "shared_segments": 9
     },
     {
       "a": "op:gorazde:slatina_2",
@@ -8634,7 +8634,7 @@
       "a": "op:gorazde:sopotnica",
       "b": "op:gorazde:ustipraca_2",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 4
     },
     {
       "a": "op:gorazde:sopotnica",
@@ -8646,31 +8646,31 @@
       "a": "op:gorazde:sopotnica",
       "b": "op:rogatica:varosiste_2",
       "min_dist": 0,
-      "shared_segments": 4
+      "shared_segments": 6
     },
     {
       "a": "op:gorazde:ustipraca_2",
       "b": "op:rogatica:brcigovo",
       "min_dist": 0,
-      "shared_segments": 14
+      "shared_segments": 12
     },
     {
       "a": "op:gorazde:ustipraca_2",
       "b": "op:rogatica:varosiste_2",
       "min_dist": 0.0394907750493714,
-      "shared_segments": 1
+      "shared_segments": 3
     },
     {
       "a": "op:gorazde:ustipraca_2",
       "b": "op:rudo:gornja_strmica",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 5
     },
     {
       "a": "op:gorazde:zorovici",
       "b": "op:pale:podgrab",
       "min_dist": 0,
-      "shared_segments": 12
+      "shared_segments": 10
     },
     {
       "a": "op:gornji_vakuf:crkvice",
@@ -8706,7 +8706,7 @@
       "a": "op:gornji_vakuf:drazev_dolac",
       "b": "op:gornji_vakuf:pajic_polje_2",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 9
     },
     {
       "a": "op:gornji_vakuf:drazev_dolac",
@@ -8772,7 +8772,7 @@
       "a": "op:gornji_vakuf:jagnjid_2",
       "b": "op:kupres:bucovaca",
       "min_dist": 0,
-      "shared_segments": 3
+      "shared_segments": 2
     },
     {
       "a": "op:gornji_vakuf:jagnjid_2",
@@ -8790,7 +8790,7 @@
       "a": "op:gornji_vakuf:vaganjac",
       "b": "op:gornji_vakuf:voljevac",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 3
     },
     {
       "a": "op:gornji_vakuf:vaganjac",
@@ -8862,7 +8862,7 @@
       "a": "op:gracanica:dzakule",
       "b": "op:gradacac:zelinja_donja_2",
       "min_dist": 0,
-      "shared_segments": 20
+      "shared_segments": 17
     },
     {
       "a": "op:gracanica:dzakule",
@@ -8874,7 +8874,7 @@
       "a": "op:gracanica:dzakule",
       "b": "op:srebrenik:sladna_2",
       "min_dist": 0,
-      "shared_segments": 3
+      "shared_segments": 2
     },
     {
       "a": "op:gracanica:dzakule",
@@ -8928,7 +8928,7 @@
       "a": "op:gracanica:miricina_2",
       "b": "op:srebrenik:sladna_2",
       "min_dist": 0,
-      "shared_segments": 23
+      "shared_segments": 22
     },
     {
       "a": "op:gracanica:petrovo_2",
@@ -8946,19 +8946,19 @@
       "a": "op:gracanica:petrovo_2",
       "b": "op:maglaj:gornja_bocinja",
       "min_dist": 0,
-      "shared_segments": 8
+      "shared_segments": 7
     },
     {
       "a": "op:gracanica:petrovo_2",
       "b": "op:maglaj:jablanica",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 6
     },
     {
       "a": "op:gracanica:petrovo_2",
       "b": "op:maglaj:kosova_2",
       "min_dist": 0,
-      "shared_segments": 12
+      "shared_segments": 11
     },
     {
       "a": "op:gracanica:petrovo_2",
@@ -9048,7 +9048,7 @@
       "a": "op:gradacac:mionica",
       "b": "op:srebrenik:spionica_srednja_2",
       "min_dist": 0,
-      "shared_segments": 9
+      "shared_segments": 7
     },
     {
       "a": "op:gradacac:pelagicevo",
@@ -9078,7 +9078,7 @@
       "a": "op:grude:grude_2",
       "b": "op:listica:kocerin_2",
       "min_dist": 0,
-      "shared_segments": 13
+      "shared_segments": 12
     },
     {
       "a": "op:grude:grude_2",
@@ -9096,7 +9096,7 @@
       "a": "op:grude:grude_2",
       "b": "op:ljubuski:vitina_2",
       "min_dist": 0,
-      "shared_segments": 19
+      "shared_segments": 18
     },
     {
       "a": "op:grude:grude_2",
@@ -9144,7 +9144,7 @@
       "a": "op:hadzici:binjezevo",
       "b": "op:ilidza:sarajevo_dio_ilidza_2",
       "min_dist": 0,
-      "shared_segments": 15
+      "shared_segments": 14
     },
     {
       "a": "op:hadzici:budmolici",
@@ -9186,7 +9186,7 @@
       "a": "op:hadzici:budmolici",
       "b": "op:konjic:dzepi_2",
       "min_dist": 0,
-      "shared_segments": 15
+      "shared_segments": 14
     },
     {
       "a": "op:hadzici:hadzici",
@@ -9246,7 +9246,7 @@
       "a": "op:hadzici:lokve",
       "b": "op:trnovo:tusila",
       "min_dist": 0,
-      "shared_segments": 8
+      "shared_segments": 7
     },
     {
       "a": "op:hadzici:luke",
@@ -9300,13 +9300,13 @@
       "a": "op:hadzici:tarcin_2",
       "b": "op:kiseljak:bukovica",
       "min_dist": 0,
-      "shared_segments": 11
+      "shared_segments": 7
     },
     {
       "a": "op:hadzici:tarcin_2",
       "b": "op:konjic:bradina",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 5
     },
     {
       "a": "op:hadzici:tarcin_2",
@@ -9330,13 +9330,13 @@
       "a": "op:hanpijesak:godjenje_2",
       "b": "op:rogatica:zepa_2",
       "min_dist": 0,
-      "shared_segments": 16
+      "shared_segments": 15
     },
     {
       "a": "op:hanpijesak:godjenje_2",
       "b": "op:vlasenica:pomol_2",
       "min_dist": 0,
-      "shared_segments": 22
+      "shared_segments": 19
     },
     {
       "a": "op:hanpijesak:han_pijesak_2",
@@ -9372,13 +9372,13 @@
       "a": "op:hanpijesak:han_pijesak_2",
       "b": "op:vlasenica:bacici",
       "min_dist": 0,
-      "shared_segments": 15
+      "shared_segments": 14
     },
     {
       "a": "op:hanpijesak:han_pijesak_2",
       "b": "op:vlasenica:grabovica",
       "min_dist": 0,
-      "shared_segments": 9
+      "shared_segments": 7
     },
     {
       "a": "op:hanpijesak:han_pijesak_2",
@@ -9390,19 +9390,19 @@
       "a": "op:hanpijesak:nevacka_3",
       "b": "op:olovo:slivnje",
       "min_dist": 0,
-      "shared_segments": 12
+      "shared_segments": 11
     },
     {
       "a": "op:hanpijesak:nevacka_3",
       "b": "op:sokolac:knezina_2",
       "min_dist": 0,
-      "shared_segments": 9
+      "shared_segments": 8
     },
     {
       "a": "op:hanpijesak:nevacka_3",
       "b": "op:sokolac:sasevci_2",
       "min_dist": 0,
-      "shared_segments": 14
+      "shared_segments": 13
     },
     {
       "a": "op:hanpijesak:nevacka_3",
@@ -9438,7 +9438,7 @@
       "a": "op:ilidza:kasindo",
       "b": "op:trnovo:kijevo_2",
       "min_dist": 0,
-      "shared_segments": 25
+      "shared_segments": 22
     },
     {
       "a": "op:ilidza:rakovica_2",
@@ -9474,7 +9474,7 @@
       "a": "op:ilidza:rudnik_2",
       "b": "op:kiseljak:drazevici",
       "min_dist": 0,
-      "shared_segments": 9
+      "shared_segments": 10
     },
     {
       "a": "op:ilidza:rudnik_2",
@@ -9558,7 +9558,7 @@
       "a": "op:ilijas:dragoradi",
       "b": "op:olovo:olovo_2",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 5
     },
     {
       "a": "op:ilijas:krivajevici",
@@ -9624,7 +9624,7 @@
       "a": "op:ilijas:podlugovi",
       "b": "op:novi_grad_sarajevo:recica",
       "min_dist": 0,
-      "shared_segments": 10
+      "shared_segments": 9
     },
     {
       "a": "op:ilijas:podlugovi",
@@ -9636,7 +9636,7 @@
       "a": "op:ilijas:podlugovi",
       "b": "op:visoko:stuparici_2",
       "min_dist": 0,
-      "shared_segments": 16
+      "shared_segments": 13
     },
     {
       "a": "op:ilijas:podlugovi",
@@ -9666,7 +9666,7 @@
       "a": "op:ilijas:sirovine",
       "b": "op:sokolac:meljine_2",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 4
     },
     {
       "a": "op:ilijas:sirovine",
@@ -9702,13 +9702,13 @@
       "a": "op:ilijas:visojevica",
       "b": "op:stari_grad_sarajevo:faletici",
       "min_dist": 0,
-      "shared_segments": 9
+      "shared_segments": 8
     },
     {
       "a": "op:ilijas:visojevica",
       "b": "op:vogosca:vogosca_3",
       "min_dist": 0,
-      "shared_segments": 14
+      "shared_segments": 12
     },
     {
       "a": "op:jablanica:doljani_2",
@@ -9720,7 +9720,7 @@
       "a": "op:jablanica:doljani_2",
       "b": "op:mostar:gornja_dreznica",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 5
     },
     {
       "a": "op:jablanica:doljani_2",
@@ -9774,19 +9774,19 @@
       "a": "op:jablanica:ostrozac_2",
       "b": "op:jablanica:slatina_2",
       "min_dist": 0,
-      "shared_segments": 0
+      "shared_segments": 1
     },
     {
       "a": "op:jablanica:ostrozac_2",
       "b": "op:konjic:buturovic_polje_2",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 5
     },
     {
       "a": "op:jablanica:ostrozac_2",
       "b": "op:konjic:celebici_2",
       "min_dist": 0,
-      "shared_segments": 25
+      "shared_segments": 24
     },
     {
       "a": "op:jablanica:ostrozac_2",
@@ -9810,7 +9810,7 @@
       "a": "op:jablanica:ostrozac_2",
       "b": "op:prozor:uzdol_2",
       "min_dist": 0.06480434054135671,
-      "shared_segments": 3
+      "shared_segments": 4
     },
     {
       "a": "op:jablanica:slatina_2",
@@ -9840,7 +9840,7 @@
       "a": "op:jajce:barevo_2",
       "b": "op:jajce:divicani_2",
       "min_dist": 0,
-      "shared_segments": 4
+      "shared_segments": 5
     },
     {
       "a": "op:jajce:barevo_2",
@@ -9870,7 +9870,7 @@
       "a": "op:jajce:barevo_2",
       "b": "op:mrkonjic_grad:baljvine_2",
       "min_dist": 0,
-      "shared_segments": 17
+      "shared_segments": 16
     },
     {
       "a": "op:jajce:barevo_2",
@@ -9924,7 +9924,7 @@
       "a": "op:jajce:divicani_2",
       "b": "op:skender_vakuf:donji_koricani",
       "min_dist": 0,
-      "shared_segments": 9
+      "shared_segments": 8
     },
     {
       "a": "op:jajce:divicani_2",
@@ -9990,7 +9990,7 @@
       "a": "op:jajce:jezero_2",
       "b": "op:sipovo:volari_2",
       "min_dist": 0,
-      "shared_segments": 14
+      "shared_segments": 13
     },
     {
       "a": "op:jajce:kruscica",
@@ -10002,7 +10002,7 @@
       "a": "op:jajce:kruscica",
       "b": "op:skender_vakuf:donji_koricani",
       "min_dist": 0,
-      "shared_segments": 12
+      "shared_segments": 11
     },
     {
       "a": "op:jajce:prisoje",
@@ -10044,7 +10044,7 @@
       "a": "op:kakanj:biljesevo",
       "b": "op:kakanj:sopotnica",
       "min_dist": 0,
-      "shared_segments": 5
+      "shared_segments": 7
     },
     {
       "a": "op:kakanj:biljesevo",
@@ -10074,7 +10074,7 @@
       "a": "op:kakanj:brnjic_2",
       "b": "op:kakanj:vukanovici",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 3
     },
     {
       "a": "op:kakanj:brnjic_2",
@@ -10092,7 +10092,7 @@
       "a": "op:kakanj:brnjic_2",
       "b": "op:zenica:briznik_2",
       "min_dist": 0,
-      "shared_segments": 5
+      "shared_segments": 4
     },
     {
       "a": "op:kakanj:brnjic_2",
@@ -10182,7 +10182,7 @@
       "a": "op:kakanj:poljani_2",
       "b": "op:kakanj:seoce_2",
       "min_dist": 0,
-      "shared_segments": 5
+      "shared_segments": 6
     },
     {
       "a": "op:kakanj:poljani_2",
@@ -10194,13 +10194,13 @@
       "a": "op:kakanj:poljani_2",
       "b": "op:vares:budozelje_2",
       "min_dist": 0,
-      "shared_segments": 10
+      "shared_segments": 11
     },
     {
       "a": "op:kakanj:poljani_2",
       "b": "op:visoko:podvinjci_2",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 5
     },
     {
       "a": "op:kakanj:seoce_2",
@@ -10230,7 +10230,7 @@
       "a": "op:kakanj:seoce_2",
       "b": "op:vares:gornja_borovica_2",
       "min_dist": 0,
-      "shared_segments": 10
+      "shared_segments": 11
     },
     {
       "a": "op:kakanj:slapnica_2",
@@ -10248,13 +10248,13 @@
       "a": "op:kakanj:slapnica_2",
       "b": "op:visoko:podvinje_2",
       "min_dist": 0,
-      "shared_segments": 13
+      "shared_segments": 12
     },
     {
       "a": "op:kakanj:sopotnica",
       "b": "op:visoko:buzic_mahala_2",
       "min_dist": 0,
-      "shared_segments": 3
+      "shared_segments": 2
     },
     {
       "a": "op:kakanj:sopotnica",
@@ -10314,7 +10314,7 @@
       "a": "op:kakanj:vukanovici",
       "b": "op:zavidovici:hajderovici_2",
       "min_dist": 0,
-      "shared_segments": 5
+      "shared_segments": 6
     },
     {
       "a": "op:kalesija:gojcin_2",
@@ -10356,7 +10356,7 @@
       "a": "op:kalesija:gojcin_2",
       "b": "op:sekovici:sekovici_2",
       "min_dist": 0,
-      "shared_segments": 5
+      "shared_segments": 4
     },
     {
       "a": "op:kalesija:gojcin_2",
@@ -10386,7 +10386,7 @@
       "a": "op:kalesija:kalesija_grad_2",
       "b": "op:zvornik:rastosnica_2",
       "min_dist": 0,
-      "shared_segments": 8
+      "shared_segments": 7
     },
     {
       "a": "op:kalesija:kalesija_selo",
@@ -10398,13 +10398,13 @@
       "a": "op:kalesija:kalesija_selo",
       "b": "op:zvornik:rastosnica_2",
       "min_dist": 0,
-      "shared_segments": 8
+      "shared_segments": 7
     },
     {
       "a": "op:kalesija:kalesija_selo",
       "b": "op:zvornik:sapna",
       "min_dist": 0,
-      "shared_segments": 16
+      "shared_segments": 14
     },
     {
       "a": "op:kalesija:kikaci",
@@ -10416,13 +10416,13 @@
       "a": "op:kalesija:kikaci",
       "b": "op:lopare:lopare_selo_2",
       "min_dist": 0,
-      "shared_segments": 3
+      "shared_segments": 2
     },
     {
       "a": "op:kalesija:kikaci",
       "b": "op:tuzla:simin_han_2",
       "min_dist": 0,
-      "shared_segments": 11
+      "shared_segments": 10
     },
     {
       "a": "op:kalesija:kikaci",
@@ -10446,13 +10446,13 @@
       "a": "op:kalesija:seher_2",
       "b": "op:zvornik:krizevici",
       "min_dist": 0,
-      "shared_segments": 16
+      "shared_segments": 14
     },
     {
       "a": "op:kalesija:seher_2",
       "b": "op:zvornik:sapna",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 6
     },
     {
       "a": "op:kalesija:tojsici_2",
@@ -10470,13 +10470,13 @@
       "a": "op:kalesija:tojsici_2",
       "b": "op:zivinice:gracanica_2",
       "min_dist": 0,
-      "shared_segments": 9
+      "shared_segments": 8
     },
     {
       "a": "op:kalinovik:golubici_2",
       "b": "op:kalinovik:obalj",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 7
     },
     {
       "a": "op:kalinovik:golubici_2",
@@ -10494,7 +10494,7 @@
       "a": "op:kalinovik:golubici_2",
       "b": "op:konjic:ljuta",
       "min_dist": 0,
-      "shared_segments": 15
+      "shared_segments": 12
     },
     {
       "a": "op:kalinovik:golubici_2",
@@ -10530,7 +10530,7 @@
       "a": "op:kalinovik:obalj",
       "b": "op:kalinovik:sela_2",
       "min_dist": 0,
-      "shared_segments": 10
+      "shared_segments": 12
     },
     {
       "a": "op:kalinovik:obalj",
@@ -10560,19 +10560,19 @@
       "a": "op:kalinovik:sela_2",
       "b": "op:konjic:ljuta",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 5
     },
     {
       "a": "op:kalinovik:sela_2",
       "b": "op:konjic:sitnik",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 5
     },
     {
       "a": "op:kalinovik:sela_2",
       "b": "op:nevesinje:hrusta_2",
       "min_dist": 0,
-      "shared_segments": 10
+      "shared_segments": 9
     },
     {
       "a": "op:kalinovik:sela_2",
@@ -10584,7 +10584,7 @@
       "a": "op:kalinovik:sela_2",
       "b": "op:nevesinje:sopilja",
       "min_dist": 0,
-      "shared_segments": 13
+      "shared_segments": 12
     },
     {
       "a": "op:kalinovik:varos_2",
@@ -10602,7 +10602,7 @@
       "a": "op:kalinovik:varos_2",
       "b": "op:trnovo:tosici",
       "min_dist": 0,
-      "shared_segments": 5
+      "shared_segments": 4
     },
     {
       "a": "op:kalinovik:vlaholje",
@@ -10626,7 +10626,7 @@
       "a": "op:kiseljak:azapovici_2",
       "b": "op:kiseljak:drazevici",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 8
     },
     {
       "a": "op:kiseljak:azapovici_2",
@@ -10668,13 +10668,13 @@
       "a": "op:kiseljak:brnjaci_2",
       "b": "op:kresevo:polje_2",
       "min_dist": 0,
-      "shared_segments": 5
+      "shared_segments": 4
     },
     {
       "a": "op:kiseljak:brnjaci_2",
       "b": "op:visoko:rajcici_2",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 6
     },
     {
       "a": "op:kiseljak:bukovica",
@@ -10704,7 +10704,7 @@
       "a": "op:kiseljak:gromiljak_2",
       "b": "op:kiseljak:kiseljak_2",
       "min_dist": 0,
-      "shared_segments": 12
+      "shared_segments": 11
     },
     {
       "a": "op:kiseljak:gromiljak_2",
@@ -10734,13 +10734,13 @@
       "a": "op:kiseljak:kiseljak_2",
       "b": "op:kresevo:polje_2",
       "min_dist": 0,
-      "shared_segments": 8
+      "shared_segments": 7
     },
     {
       "a": "op:kiseljak:kiseljak_2",
       "b": "op:visoko:rajcici_2",
       "min_dist": 0,
-      "shared_segments": 12
+      "shared_segments": 11
     },
     {
       "a": "op:kladanj:brgule",
@@ -10764,7 +10764,7 @@
       "a": "op:kladanj:brgule",
       "b": "op:sekovici:kastijelj_2",
       "min_dist": 0,
-      "shared_segments": 16
+      "shared_segments": 15
     },
     {
       "a": "op:kladanj:brgule",
@@ -10776,7 +10776,7 @@
       "a": "op:kladanj:brgule",
       "b": "op:zivinice:gracanica_2",
       "min_dist": 0,
-      "shared_segments": 14
+      "shared_segments": 13
     },
     {
       "a": "op:kladanj:kladanj_3",
@@ -10818,7 +10818,7 @@
       "a": "op:kladanj:olovci_2",
       "b": "op:kladanj:tuholj_2",
       "min_dist": 0,
-      "shared_segments": 5
+      "shared_segments": 6
     },
     {
       "a": "op:kladanj:olovci_2",
@@ -10836,7 +10836,7 @@
       "a": "op:kladanj:staric_2",
       "b": "op:olovo:slivnje",
       "min_dist": 0,
-      "shared_segments": 9
+      "shared_segments": 8
     },
     {
       "a": "op:kladanj:staric_2",
@@ -10878,7 +10878,7 @@
       "a": "op:kladanj:tuholj_2",
       "b": "op:olovo:milankovici_2",
       "min_dist": 0,
-      "shared_segments": 9
+      "shared_segments": 8
     },
     {
       "a": "op:kladanj:tuholj_2",
@@ -10896,19 +10896,19 @@
       "a": "op:kladanj:vucinici_2",
       "b": "op:olovo:gurdici_2",
       "min_dist": 0,
-      "shared_segments": 12
+      "shared_segments": 10
     },
     {
       "a": "op:kladanj:vucinici_2",
       "b": "op:olovo:olovo_2",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 5
     },
     {
       "a": "op:kladanj:vucinici_2",
       "b": "op:olovo:slivnje",
       "min_dist": 0,
-      "shared_segments": 11
+      "shared_segments": 10
     },
     {
       "a": "op:kljuc:cadjavica",
@@ -10920,7 +10920,7 @@
       "a": "op:kljuc:cadjavica",
       "b": "op:mrkonjic_grad:mrkonjic_grad_2",
       "min_dist": 0,
-      "shared_segments": 5
+      "shared_segments": 4
     },
     {
       "a": "op:kljuc:donje_ratkovo_2",
@@ -10944,19 +10944,19 @@
       "a": "op:kljuc:donje_ratkovo_2",
       "b": "op:mrkonjic_grad:mrkonjic_grad_2",
       "min_dist": 0,
-      "shared_segments": 26
+      "shared_segments": 25
     },
     {
       "a": "op:kljuc:donje_ratkovo_2",
       "b": "op:sanski_most:donja_kozica",
       "min_dist": 0,
-      "shared_segments": 10
+      "shared_segments": 9
     },
     {
       "a": "op:kljuc:donji_vrbljani_2",
       "b": "op:kljuc:hadzici",
       "min_dist": 0,
-      "shared_segments": 5
+      "shared_segments": 4
     },
     {
       "a": "op:kljuc:donji_vrbljani_2",
@@ -10980,13 +10980,13 @@
       "a": "op:kljuc:donji_vrbljani_2",
       "b": "op:mrkonjic_grad:podrasnica_2",
       "min_dist": 0,
-      "shared_segments": 20
+      "shared_segments": 18
     },
     {
       "a": "op:kljuc:donji_vrbljani_2",
       "b": "op:titov_drvar:prekaja_2",
       "min_dist": 0,
-      "shared_segments": 18
+      "shared_segments": 16
     },
     {
       "a": "op:kljuc:hadzici",
@@ -11022,7 +11022,7 @@
       "a": "op:kljuc:krasulje_2",
       "b": "op:kljuc:sanica_2",
       "min_dist": 0,
-      "shared_segments": 3
+      "shared_segments": 4
     },
     {
       "a": "op:kljuc:krasulje_2",
@@ -11034,7 +11034,7 @@
       "a": "op:kljuc:krasulje_2",
       "b": "op:sanski_most:ilidza_2",
       "min_dist": 0,
-      "shared_segments": 21
+      "shared_segments": 19
     },
     {
       "a": "op:kljuc:krasulje_2",
@@ -11106,13 +11106,13 @@
       "a": "op:konjic:bijela_2",
       "b": "op:mostar:potoci",
       "min_dist": 0,
-      "shared_segments": 8
+      "shared_segments": 7
     },
     {
       "a": "op:konjic:bijela_2",
       "b": "op:nevesinje:hrusta_2",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 1
     },
     {
       "a": "op:konjic:bradina",
@@ -11148,7 +11148,7 @@
       "a": "op:konjic:bradina",
       "b": "op:kresevo:kresevo_2",
       "min_dist": 0,
-      "shared_segments": 14
+      "shared_segments": 13
     },
     {
       "a": "op:konjic:bradina",
@@ -11226,7 +11226,7 @@
       "a": "op:konjic:dzepi_2",
       "b": "op:trnovo:tusila",
       "min_dist": 0,
-      "shared_segments": 16
+      "shared_segments": 15
     },
     {
       "a": "op:konjic:glavaticevo_2",
@@ -11262,7 +11262,7 @@
       "a": "op:konjic:gorani_2",
       "b": "op:prozor:uzdol_2",
       "min_dist": 0,
-      "shared_segments": 22
+      "shared_segments": 23
     },
     {
       "a": "op:konjic:jasenik_2",
@@ -11292,13 +11292,13 @@
       "a": "op:konjic:ljuta",
       "b": "op:trnovo:trnovo",
       "min_dist": 0,
-      "shared_segments": 13
+      "shared_segments": 12
     },
     {
       "a": "op:konjic:ljuta",
       "b": "op:trnovo:tusila",
       "min_dist": 0,
-      "shared_segments": 8
+      "shared_segments": 7
     },
     {
       "a": "op:konjic:sitnik",
@@ -11316,7 +11316,7 @@
       "a": "op:kotor_varos:kotor_varos_2",
       "b": "op:kotor_varos:vrbanjci_2",
       "min_dist": 0,
-      "shared_segments": 11
+      "shared_segments": 12
     },
     {
       "a": "op:kotor_varos:kotor_varos_2",
@@ -11334,7 +11334,7 @@
       "a": "op:kotor_varos:kotor_varos_2",
       "b": "op:teslic:buletic_2",
       "min_dist": 0,
-      "shared_segments": 3
+      "shared_segments": 4
     },
     {
       "a": "op:kotor_varos:krusevo_brdo_i",
@@ -11352,7 +11352,7 @@
       "a": "op:kotor_varos:krusevo_brdo_i",
       "b": "op:teslic:blatnica_2",
       "min_dist": 0,
-      "shared_segments": 35
+      "shared_segments": 33
     },
     {
       "a": "op:kotor_varos:krusevo_brdo_i",
@@ -11376,19 +11376,19 @@
       "a": "op:kotor_varos:maslovare_2",
       "b": "op:kotor_varos:vrbanjci_2",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 3
     },
     {
       "a": "op:kotor_varos:maslovare_2",
       "b": "op:teslic:blatnica_2",
       "min_dist": 0,
-      "shared_segments": 13
+      "shared_segments": 12
     },
     {
       "a": "op:kotor_varos:maslovare_2",
       "b": "op:teslic:buletic_2",
       "min_dist": 0,
-      "shared_segments": 11
+      "shared_segments": 12
     },
     {
       "a": "op:kotor_varos:prisocka_2",
@@ -11400,7 +11400,7 @@
       "a": "op:kotor_varos:prisocka_2",
       "b": "op:skender_vakuf:donji_koricani",
       "min_dist": 0,
-      "shared_segments": 12
+      "shared_segments": 11
     },
     {
       "a": "op:kotor_varos:prisocka_2",
@@ -11412,7 +11412,7 @@
       "a": "op:kotor_varos:prisocka_2",
       "b": "op:teslic:blatnica_2",
       "min_dist": 0,
-      "shared_segments": 5
+      "shared_segments": 3
     },
     {
       "a": "op:kotor_varos:vagani_2",
@@ -11538,7 +11538,7 @@
       "a": "op:laktasi:drugovici_2",
       "b": "op:prnjavor:crkvena_2",
       "min_dist": 0,
-      "shared_segments": 33
+      "shared_segments": 32
     },
     {
       "a": "op:laktasi:drugovici_2",
@@ -11586,7 +11586,7 @@
       "a": "op:listica:kocerin_2",
       "b": "op:posusje:posusje_2",
       "min_dist": 0,
-      "shared_segments": 23
+      "shared_segments": 22
     },
     {
       "a": "op:listica:kocerin_2",
@@ -11616,7 +11616,7 @@
       "a": "op:listica:lise",
       "b": "op:mostar:mostar_zapad_2",
       "min_dist": 0,
-      "shared_segments": 17
+      "shared_segments": 14
     },
     {
       "a": "op:listica:lise",
@@ -11640,7 +11640,7 @@
       "a": "op:listica:ljuti_dolac",
       "b": "op:mostar:mostar_zapad_2",
       "min_dist": 0,
-      "shared_segments": 15
+      "shared_segments": 13
     },
     {
       "a": "op:listica:siroki_brijeg_2",
@@ -11748,7 +11748,7 @@
       "a": "op:ljubinje:bancici",
       "b": "op:trebinje:velicani",
       "min_dist": 0,
-      "shared_segments": 12
+      "shared_segments": 11
     },
     {
       "a": "op:ljubinje:ljubinje_2",
@@ -11766,7 +11766,7 @@
       "a": "op:ljubinje:ljubinje_2",
       "b": "op:trebinje:hum",
       "min_dist": 0,
-      "shared_segments": 22
+      "shared_segments": 19
     },
     {
       "a": "op:ljubinje:ljubinje_2",
@@ -11778,7 +11778,7 @@
       "a": "op:ljubinje:ljubinje_2",
       "b": "op:trebinje:zakovo_2",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 5
     },
     {
       "a": "op:ljubuski:grab",
@@ -11862,7 +11862,7 @@
       "a": "op:lopare:humci_2",
       "b": "op:tuzla:obodnica_donja_2",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 6
     },
     {
       "a": "op:lopare:jablanica_2",
@@ -11880,13 +11880,13 @@
       "a": "op:lopare:jablanica_2",
       "b": "op:lopare:nahvioci",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 5
     },
     {
       "a": "op:lopare:jablanica_2",
       "b": "op:tuzla:gornja_tuzla",
       "min_dist": 0,
-      "shared_segments": 14
+      "shared_segments": 13
     },
     {
       "a": "op:lopare:jablanica_2",
@@ -11916,7 +11916,7 @@
       "a": "op:lopare:koraj_4",
       "b": "op:lopare:priboj_2",
       "min_dist": 0,
-      "shared_segments": 3
+      "shared_segments": 2
     },
     {
       "a": "op:lopare:koraj_4",
@@ -11958,7 +11958,7 @@
       "a": "op:lopare:lopare_selo_2",
       "b": "op:tuzla:simin_han_2",
       "min_dist": 0,
-      "shared_segments": 11
+      "shared_segments": 10
     },
     {
       "a": "op:lopare:lopare_selo_2",
@@ -11970,7 +11970,7 @@
       "a": "op:lopare:lopare_selo_2",
       "b": "op:zvornik:rastosnica_2",
       "min_dist": 0,
-      "shared_segments": 8
+      "shared_segments": 6
     },
     {
       "a": "op:lopare:mrtvica_2",
@@ -11982,7 +11982,7 @@
       "a": "op:lopare:nahvioci",
       "b": "op:tuzla:gornja_tuzla",
       "min_dist": 0,
-      "shared_segments": 1
+      "shared_segments": 2
     },
     {
       "a": "op:lopare:nahvioci",
@@ -12000,13 +12000,13 @@
       "a": "op:lopare:priboj_2",
       "b": "op:ugljevik:teocak_krstac_2",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 5
     },
     {
       "a": "op:lopare:priboj_2",
       "b": "op:ugljevik:ugljevik_2",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 5
     },
     {
       "a": "op:lopare:priboj_2",
@@ -12120,13 +12120,13 @@
       "a": "op:lukavac:poljice_2",
       "b": "op:tuzla:husino_2",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 1
     },
     {
       "a": "op:lukavac:poljice_2",
       "b": "op:tuzla:lipnica_gornja_2",
       "min_dist": 0,
-      "shared_segments": 1
+      "shared_segments": 2
     },
     {
       "a": "op:lukavac:poljice_2",
@@ -12144,7 +12144,7 @@
       "a": "op:lukavac:smoluca_donja_2",
       "b": "op:srebrenik:duboki_potok_2",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 1
     },
     {
       "a": "op:lukavac:smoluca_donja_2",
@@ -12156,13 +12156,13 @@
       "a": "op:lukavac:smoluca_donja_2",
       "b": "op:tuzla:lipnica_gornja_2",
       "min_dist": 0,
-      "shared_segments": 12
+      "shared_segments": 11
     },
     {
       "a": "op:maglaj:cobe_2",
       "b": "op:maglaj:strupina",
       "min_dist": 0,
-      "shared_segments": 3
+      "shared_segments": 4
     },
     {
       "a": "op:maglaj:cobe_2",
@@ -12180,13 +12180,13 @@
       "a": "op:maglaj:cobe_2",
       "b": "op:teslic:kamenica_2",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 6
     },
     {
       "a": "op:maglaj:cobe_2",
       "b": "op:teslic:vitkovci",
       "min_dist": 0,
-      "shared_segments": 8
+      "shared_segments": 7
     },
     {
       "a": "op:maglaj:cobe_2",
@@ -12270,7 +12270,7 @@
       "a": "op:maglaj:kosova_2",
       "b": "op:tesanj:novo_selo",
       "min_dist": 0,
-      "shared_segments": 9
+      "shared_segments": 8
     },
     {
       "a": "op:maglaj:kosova_2",
@@ -12294,13 +12294,13 @@
       "a": "op:maglaj:lijesnica",
       "b": "op:zavidovici:cinovici",
       "min_dist": 0,
-      "shared_segments": 21
+      "shared_segments": 20
     },
     {
       "a": "op:maglaj:lijesnica",
       "b": "op:zepce:ozimica_2",
       "min_dist": 0,
-      "shared_segments": 1
+      "shared_segments": 2
     },
     {
       "a": "op:maglaj:maglaj_2",
@@ -12312,21 +12312,21 @@
       "a": "op:maglaj:misurici_2",
       "b": "op:maglaj:strupina",
       "min_dist": 0,
-      "shared_segments": 4
+      "shared_segments": 6
     },
     {
       "a": "op:maglaj:misurici_2",
       "b": "op:tesanj:novo_selo",
+      "min_dist": 0,
+      "shared_segments": 2
+    },
+    {
+      "a": "op:maglaj:misurici_2",
+      "b": "op:zepce:ozimica_2",
       "min_dist": 0,
       "shared_segments": 3
     },
     {
-      "a": "op:maglaj:misurici_2",
-      "b": "op:zepce:ozimica_2",
-      "min_dist": 0,
-      "shared_segments": 1
-    },
-    {
       "a": "op:maglaj:strupina",
       "b": "op:tesanj:novo_selo",
       "min_dist": 0,
@@ -12336,7 +12336,7 @@
       "a": "op:maglaj:strupina",
       "b": "op:zepce:ozimica_2",
       "min_dist": 0,
-      "shared_segments": 5
+      "shared_segments": 6
     },
     {
       "a": "op:modrica:garevac_2",
@@ -12366,13 +12366,13 @@
       "a": "op:modrica:modrica",
       "b": "op:modrica:vranjak_2",
       "min_dist": 0,
-      "shared_segments": 5
+      "shared_segments": 6
     },
     {
       "a": "op:modrica:modrica",
       "b": "op:odzak:donja_dubica",
       "min_dist": 0,
-      "shared_segments": 11
+      "shared_segments": 12
     },
     {
       "a": "op:modrica:skugric_gornji_2",
@@ -12390,7 +12390,7 @@
       "a": "op:modrica:vranjak_2",
       "b": "op:odzak:gornji_svilaj",
       "min_dist": 0,
-      "shared_segments": 4
+      "shared_segments": 5
     },
     {
       "a": "op:mostar:blagaj_2",
@@ -12438,13 +12438,13 @@
       "a": "op:mostar:gornja_dreznica",
       "b": "op:mostar:potoci",
       "min_dist": 0,
-      "shared_segments": 0
+      "shared_segments": 1
     },
     {
       "a": "op:mostar:gornja_dreznica",
       "b": "op:posusje:sutina_2",
       "min_dist": 0,
-      "shared_segments": 33
+      "shared_segments": 32
     },
     {
       "a": "op:mostar:hodbina_2",
@@ -12462,7 +12462,7 @@
       "a": "op:mostar:hodbina_2",
       "b": "op:stolac:rotimlja_2",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 6
     },
     {
       "a": "op:mostar:jasenica",
@@ -12498,7 +12498,7 @@
       "a": "op:mostar:kruzanj_2",
       "b": "op:nevesinje:hrusta_2",
       "min_dist": 0,
-      "shared_segments": 46
+      "shared_segments": 45
     },
     {
       "a": "op:mostar:mostar_istok_2",
@@ -12552,7 +12552,7 @@
       "a": "op:mrkonjic_grad:bjelajce_2",
       "b": "op:mrkonjic_grad:mrkonjic_grad_2",
       "min_dist": 0,
-      "shared_segments": 3
+      "shared_segments": 4
     },
     {
       "a": "op:mrkonjic_grad:gerzovo_2",
@@ -12570,13 +12570,13 @@
       "a": "op:mrkonjic_grad:gerzovo_2",
       "b": "op:sipovo:brdjani",
       "min_dist": 0,
-      "shared_segments": 22
+      "shared_segments": 21
     },
     {
       "a": "op:mrkonjic_grad:gerzovo_2",
       "b": "op:sipovo:sipovo_2",
       "min_dist": 0,
-      "shared_segments": 14
+      "shared_segments": 13
     },
     {
       "a": "op:mrkonjic_grad:majdan_2",
@@ -12618,7 +12618,7 @@
       "a": "op:neum:gornje_hrasno_2",
       "b": "op:stolac:prenj",
       "min_dist": 0,
-      "shared_segments": 10
+      "shared_segments": 8
     },
     {
       "a": "op:neum:gornje_hrasno_2",
@@ -12684,7 +12684,7 @@
       "a": "op:nevesinje:nevesinje_2",
       "b": "op:stolac:hatelji_2",
       "min_dist": 0,
-      "shared_segments": 16
+      "shared_segments": 15
     },
     {
       "a": "op:nevesinje:nevesinje_2",
@@ -12720,7 +12720,7 @@
       "a": "op:novi_grad_sarajevo:recica",
       "b": "op:vogosca:svrake",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 6
     },
     {
       "a": "op:novi_grad_sarajevo:recica",
@@ -12762,7 +12762,7 @@
       "a": "op:novi_travnik:novi_travnik_2",
       "b": "op:novi_travnik:ruda_2",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 9
     },
     {
       "a": "op:novi_travnik:novi_travnik_2",
@@ -12792,13 +12792,13 @@
       "a": "op:novi_travnik:orasac_2",
       "b": "op:novi_travnik:trenica_2",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 4
     },
     {
       "a": "op:novi_travnik:orasac_2",
       "b": "op:vitez:kruscica",
       "min_dist": 0,
-      "shared_segments": 5
+      "shared_segments": 6
     },
     {
       "a": "op:novi_travnik:orasac_2",
@@ -12828,13 +12828,13 @@
       "a": "op:novi_travnik:rankovici_2",
       "b": "op:travnik:puticevo_2",
       "min_dist": 0,
-      "shared_segments": 15
+      "shared_segments": 13
     },
     {
       "a": "op:novi_travnik:rankovici_2",
       "b": "op:travnik:travnik_2",
       "min_dist": 0,
-      "shared_segments": 8
+      "shared_segments": 7
     },
     {
       "a": "op:novi_travnik:rankovici_2",
@@ -12846,7 +12846,7 @@
       "a": "op:novi_travnik:ruda_2",
       "b": "op:travnik:ovcarevo_2",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 6
     },
     {
       "a": "op:novi_travnik:ruda_2",
@@ -12864,7 +12864,7 @@
       "a": "op:novi_travnik:trenica_2",
       "b": "op:vitez:kruscica",
       "min_dist": 0,
-      "shared_segments": 1
+      "shared_segments": 2
     },
     {
       "a": "op:novi_travnik:trenica_2",
@@ -12882,7 +12882,7 @@
       "a": "op:novo_sarajevo:lukavica",
       "b": "op:pale:gornje_pale",
       "min_dist": 0,
-      "shared_segments": 1
+      "shared_segments": 0
     },
     {
       "a": "op:novo_sarajevo:lukavica",
@@ -12894,7 +12894,7 @@
       "a": "op:novo_sarajevo:lukavica",
       "b": "op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 1
     },
     {
       "a": "op:novo_sarajevo:lukavica",
@@ -12906,7 +12906,7 @@
       "a": "op:novo_sarajevo:lukavica",
       "b": "op:trnovo:kijevo_2",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 8
     },
     {
       "a": "op:novo_sarajevo:sarajevo_dio_novo_sarajevo",
@@ -12918,7 +12918,7 @@
       "a": "op:odzak:donja_dubica",
       "b": "op:odzak:gornji_svilaj",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 3
     },
     {
       "a": "op:odzak:donja_dubica",
@@ -12966,7 +12966,7 @@
       "a": "op:olovo:kamensko_2",
       "b": "op:vares:vares_2",
       "min_dist": 0,
-      "shared_segments": 12
+      "shared_segments": 9
     },
     {
       "a": "op:olovo:kamensko_2",
@@ -12996,7 +12996,7 @@
       "a": "op:olovo:olovo_2",
       "b": "op:vares:ravne",
       "min_dist": 0,
-      "shared_segments": 16
+      "shared_segments": 15
     },
     {
       "a": "op:olovo:slivnje",
@@ -13020,7 +13020,7 @@
       "a": "op:orasje:donja_mahala",
       "b": "op:orasje:ostra_luka",
       "min_dist": 0,
-      "shared_segments": 4
+      "shared_segments": 6
     },
     {
       "a": "op:orasje:orasje",
@@ -13038,13 +13038,13 @@
       "a": "op:pale:bulozi",
       "b": "op:pale:praca",
       "min_dist": 0,
-      "shared_segments": 0
+      "shared_segments": 1
     },
     {
       "a": "op:pale:bulozi",
       "b": "op:pale:vrazalice",
       "min_dist": 0,
-      "shared_segments": 0
+      "shared_segments": 1
     },
     {
       "a": "op:pale:bulozi",
@@ -13074,7 +13074,7 @@
       "a": "op:pale:gornje_pale",
       "b": "op:pale:podgrab",
       "min_dist": 0,
-      "shared_segments": 4
+      "shared_segments": 5
     },
     {
       "a": "op:pale:gornje_pale",
@@ -13092,7 +13092,7 @@
       "a": "op:pale:gornje_pale",
       "b": "op:trnovo:delijas",
       "min_dist": 0,
-      "shared_segments": 20
+      "shared_segments": 19
     },
     {
       "a": "op:pale:hotocina",
@@ -13122,7 +13122,7 @@
       "a": "op:pale:hotocina",
       "b": "op:sokolac:sokolac_2",
       "min_dist": 0,
-      "shared_segments": 8
+      "shared_segments": 6
     },
     {
       "a": "op:pale:mokro",
@@ -13134,7 +13134,7 @@
       "a": "op:pale:mokro",
       "b": "op:sokolac:meljine_2",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 6
     },
     {
       "a": "op:pale:mokro",
@@ -13152,7 +13152,7 @@
       "a": "op:pale:pale",
       "b": "op:sokolac:meljine_2",
       "min_dist": 0,
-      "shared_segments": 15
+      "shared_segments": 14
     },
     {
       "a": "op:pale:pale",
@@ -13170,13 +13170,13 @@
       "a": "op:pale:praca",
       "b": "op:rogatica:kramer_selo_2",
       "min_dist": 0,
-      "shared_segments": 4
+      "shared_segments": 5
     },
     {
       "a": "op:pale:vrazalice",
       "b": "op:rogatica:kramer_selo_2",
       "min_dist": 0,
-      "shared_segments": 1
+      "shared_segments": 2
     },
     {
       "a": "op:pale:vrazalice",
@@ -13224,7 +13224,7 @@
       "a": "op:prijedor:cejreci",
       "b": "op:prijedor:prijedor_2",
       "min_dist": 0,
-      "shared_segments": 5
+      "shared_segments": 7
     },
     {
       "a": "op:prijedor:kamicani",
@@ -13308,13 +13308,13 @@
       "a": "op:prijedor:maricka_2",
       "b": "op:prijedor:rasavci_2",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 3
     },
     {
       "a": "op:prijedor:maricka_2",
       "b": "op:sanski_most:ilidza_2",
       "min_dist": 0,
-      "shared_segments": 3
+      "shared_segments": 4
     },
     {
       "a": "op:prijedor:maricka_2",
@@ -13326,7 +13326,7 @@
       "a": "op:prijedor:omarska_2",
       "b": "op:prijedor:prijedor_2",
       "min_dist": 0,
-      "shared_segments": 1
+      "shared_segments": 2
     },
     {
       "a": "op:prijedor:prijedor_2",
@@ -13344,7 +13344,7 @@
       "a": "op:prijedor:raljas",
       "b": "op:sanski_most:stari_majdan",
       "min_dist": 0,
-      "shared_segments": 16
+      "shared_segments": 15
     },
     {
       "a": "op:prijedor:rasavci_2",
@@ -13356,7 +13356,7 @@
       "a": "op:prnjavor:crkvena_2",
       "b": "op:prnjavor:donji_vijacani_2",
       "min_dist": 0,
-      "shared_segments": 3
+      "shared_segments": 4
     },
     {
       "a": "op:prnjavor:crkvena_2",
@@ -13374,7 +13374,7 @@
       "a": "op:prnjavor:crkvena_2",
       "b": "op:srbac:nozicko",
       "min_dist": 0,
-      "shared_segments": 31
+      "shared_segments": 29
     },
     {
       "a": "op:prnjavor:donji_strpci_2",
@@ -13566,7 +13566,7 @@
       "a": "op:prozor:ustirama_3",
       "b": "op:prozor:uzdol_2",
       "min_dist": 0.033100789507200884,
-      "shared_segments": 1
+      "shared_segments": 3
     },
     {
       "a": "op:rogatica:brcigovo",
@@ -13596,7 +13596,7 @@
       "a": "op:rogatica:brcigovo",
       "b": "op:visegrad:medjedja_2",
       "min_dist": 0,
-      "shared_segments": 10
+      "shared_segments": 8
     },
     {
       "a": "op:rogatica:kovanj",
@@ -13608,7 +13608,7 @@
       "a": "op:rogatica:kovanj",
       "b": "op:rogatica:pljesevica",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 8
     },
     {
       "a": "op:rogatica:kovanj",
@@ -13650,7 +13650,7 @@
       "a": "op:rogatica:kramer_selo_2",
       "b": "op:sokolac:vidrici",
       "min_dist": 0,
-      "shared_segments": 11
+      "shared_segments": 10
     },
     {
       "a": "op:rogatica:pljesevica",
@@ -13674,7 +13674,7 @@
       "a": "op:rogatica:pljesevica",
       "b": "op:sokolac:donji_kalimanici",
       "min_dist": 0,
-      "shared_segments": 28
+      "shared_segments": 29
     },
     {
       "a": "op:rogatica:rogatica_2",
@@ -13698,13 +13698,13 @@
       "a": "op:rogatica:stara_gora",
       "b": "op:visegrad:drinsko",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 7
     },
     {
       "a": "op:rogatica:stara_gora",
       "b": "op:visegrad:kamenica_2",
       "min_dist": 0,
-      "shared_segments": 21
+      "shared_segments": 17
     },
     {
       "a": "op:rogatica:stara_gora",
@@ -13716,7 +13716,7 @@
       "a": "op:rogatica:stara_gora",
       "b": "op:visegrad:prelovo_2",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 6
     },
     {
       "a": "op:rogatica:zepa_2",
@@ -13746,7 +13746,7 @@
       "a": "op:rudo:gornja_strmica",
       "b": "op:rudo:mrsovo_2",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 7
     },
     {
       "a": "op:rudo:gornja_strmica",
@@ -13776,7 +13776,7 @@
       "a": "op:rudo:mrsovo_2",
       "b": "op:visegrad:donji_dobrun_2",
       "min_dist": 0,
-      "shared_segments": 11
+      "shared_segments": 10
     },
     {
       "a": "op:rudo:mrsovo_2",
@@ -13788,7 +13788,7 @@
       "a": "op:rudo:rudo_2",
       "b": "op:visegrad:donji_dobrun_2",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 5
     },
     {
       "a": "op:sanski_most:budimlic_japra_2",
@@ -13818,13 +13818,13 @@
       "a": "op:sanski_most:ilidza_2",
       "b": "op:sanski_most:kljevci",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 8
     },
     {
       "a": "op:sanski_most:ilidza_2",
       "b": "op:sanski_most:ostra_luka",
       "min_dist": 0,
-      "shared_segments": 0
+      "shared_segments": 2
     },
     {
       "a": "op:sanski_most:ilidza_2",
@@ -13842,7 +13842,7 @@
       "a": "op:sanski_most:jelasinovci",
       "b": "op:sanski_most:lusci_palanka_2",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 3
     },
     {
       "a": "op:sanski_most:jelasinovci",
@@ -13908,7 +13908,7 @@
       "a": "op:sekovici:kastijelj_2",
       "b": "op:vlasenica:grabovica",
       "min_dist": 0,
-      "shared_segments": 8
+      "shared_segments": 6
     },
     {
       "a": "op:sekovici:sekovici_2",
@@ -13920,7 +13920,7 @@
       "a": "op:sekovici:sekovici_2",
       "b": "op:vlasenica:grabovica",
       "min_dist": 0,
-      "shared_segments": 10
+      "shared_segments": 9
     },
     {
       "a": "op:sekovici:udbina_2",
@@ -13932,7 +13932,7 @@
       "a": "op:sekovici:udbina_2",
       "b": "op:vlasenica:grabovica",
       "min_dist": 0,
-      "shared_segments": 10
+      "shared_segments": 9
     },
     {
       "a": "op:sekovici:udbina_2",
@@ -13992,7 +13992,7 @@
       "a": "op:skender_vakuf:donji_koricani",
       "b": "op:skender_vakuf:javorani_2",
       "min_dist": 0,
-      "shared_segments": 0
+      "shared_segments": 1
     },
     {
       "a": "op:skender_vakuf:donji_koricani",
@@ -14010,13 +14010,13 @@
       "a": "op:skender_vakuf:donji_koricani",
       "b": "op:travnik:gornje_krcevine",
       "min_dist": 0,
-      "shared_segments": 21
+      "shared_segments": 19
     },
     {
       "a": "op:skender_vakuf:donji_koricani",
       "b": "op:travnik:paklarevo",
       "min_dist": 0,
-      "shared_segments": 14
+      "shared_segments": 12
     },
     {
       "a": "op:skender_vakuf:imljani_2",
@@ -14034,7 +14034,7 @@
       "a": "op:sokolac:donji_kalimanici",
       "b": "op:sokolac:vidrici",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 8
     },
     {
       "a": "op:sokolac:knezina_2",
@@ -14142,7 +14142,7 @@
       "a": "op:srebrenica:bostahovine_2",
       "b": "op:vlasenica:sebiocina",
       "min_dist": 0,
-      "shared_segments": 11
+      "shared_segments": 8
     },
     {
       "a": "op:srebrenica:brezovice_2",
@@ -14208,13 +14208,13 @@
       "a": "op:srebrenica:ljeskovik_2",
       "b": "op:visegrad:kamenica_2",
       "min_dist": 0,
-      "shared_segments": 4
+      "shared_segments": 3
     },
     {
       "a": "op:srebrenica:ljeskovik_2",
       "b": "op:visegrad:zlijeb",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 1
     },
     {
       "a": "op:srebrenica:luka_2",
@@ -14370,7 +14370,7 @@
       "a": "op:srebrenik:tinja_gornja_2",
       "b": "op:tuzla:lipnica_gornja_2",
       "min_dist": 0,
-      "shared_segments": 16
+      "shared_segments": 15
     },
     {
       "a": "op:srebrenik:tinja_gornja_2",
@@ -14424,7 +14424,7 @@
       "a": "op:stolac:prenj",
       "b": "op:stolac:stolac_2",
       "min_dist": 0,
-      "shared_segments": 3
+      "shared_segments": 4
     },
     {
       "a": "op:tesanj:kalosevic_2",
@@ -14442,7 +14442,7 @@
       "a": "op:tesanj:kalosevic_2",
       "b": "op:teslic:vitkovci",
       "min_dist": 0,
-      "shared_segments": 6
+      "shared_segments": 5
     },
     {
       "a": "op:tesanj:lepenica",
@@ -14454,7 +14454,7 @@
       "a": "op:tesanj:lepenica",
       "b": "op:tesanj:sije_2",
       "min_dist": 0,
-      "shared_segments": 1
+      "shared_segments": 3
     },
     {
       "a": "op:tesanj:lepenica",
@@ -14484,7 +14484,7 @@
       "a": "op:tesanj:novi_miljanovci_2",
       "b": "op:teslic:vitkovci",
       "min_dist": 0,
-      "shared_segments": 3
+      "shared_segments": 2
     },
     {
       "a": "op:tesanj:novo_selo",
@@ -14574,7 +14574,7 @@
       "a": "op:teslic:blatnica_2",
       "b": "op:zenica:serici_2",
       "min_dist": 0,
-      "shared_segments": 5
+      "shared_segments": 4
     },
     {
       "a": "op:teslic:buletic_2",
@@ -14604,7 +14604,7 @@
       "a": "op:teslic:cecava_2",
       "b": "op:teslic:vitkovci",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 3
     },
     {
       "a": "op:teslic:donji_ruzevic",
@@ -14634,7 +14634,7 @@
       "a": "op:teslic:kamenica_2",
       "b": "op:zenica:serici_2",
       "min_dist": 0,
-      "shared_segments": 8
+      "shared_segments": 6
     },
     {
       "a": "op:teslic:kamenica_2",
@@ -14652,7 +14652,7 @@
       "a": "op:titov_drvar:drvar_2",
       "b": "op:titov_drvar:sipovljani_2",
       "min_dist": 0,
-      "shared_segments": 5
+      "shared_segments": 7
     },
     {
       "a": "op:titov_drvar:prekaja_2",
@@ -14670,7 +14670,7 @@
       "a": "op:travnik:cukle_2",
       "b": "op:travnik:paklarevo",
       "min_dist": 0.06790099631080483,
-      "shared_segments": 1
+      "shared_segments": 0
     },
     {
       "a": "op:travnik:cukle_2",
@@ -14700,7 +14700,7 @@
       "a": "op:travnik:cukle_2",
       "b": "op:zenica:orahovica_2",
       "min_dist": 0,
-      "shared_segments": 14
+      "shared_segments": 12
     },
     {
       "a": "op:travnik:cukle_2",
@@ -14712,7 +14712,7 @@
       "a": "op:travnik:cukle_2",
       "b": "op:zenica:stranjani_2",
       "min_dist": 0,
-      "shared_segments": 15
+      "shared_segments": 13
     },
     {
       "a": "op:travnik:gluha_bukovica",
@@ -14736,7 +14736,7 @@
       "a": "op:travnik:gluha_bukovica",
       "b": "op:zenica:serici_2",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 6
     },
     {
       "a": "op:travnik:gornje_krcevine",
@@ -14766,7 +14766,7 @@
       "a": "op:travnik:ovcarevo_2",
       "b": "op:travnik:turbe_2",
       "min_dist": 0,
-      "shared_segments": 11
+      "shared_segments": 10
     },
     {
       "a": "op:travnik:paklarevo",
@@ -14868,7 +14868,7 @@
       "a": "op:trebinje:trebimlja_2",
       "b": "op:trebinje:velicani",
       "min_dist": 0,
-      "shared_segments": 9
+      "shared_segments": 10
     },
     {
       "a": "op:trebinje:trebimlja_2",
@@ -14886,7 +14886,7 @@
       "a": "op:trnovo:delijas",
       "b": "op:trnovo:kijevo_2",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 3
     },
     {
       "a": "op:trnovo:delijas",
@@ -14940,7 +14940,7 @@
       "a": "op:tuzla:gornja_tuzla",
       "b": "op:tuzla:obodnica_donja_2",
       "min_dist": 0,
-      "shared_segments": 1
+      "shared_segments": 2
     },
     {
       "a": "op:tuzla:gornja_tuzla",
@@ -14958,7 +14958,7 @@
       "a": "op:tuzla:husino_2",
       "b": "op:tuzla:lipnica_gornja_2",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 8
     },
     {
       "a": "op:tuzla:husino_2",
@@ -14970,7 +14970,7 @@
       "a": "op:tuzla:husino_2",
       "b": "op:tuzla:sicki_brod_2",
       "min_dist": 0,
-      "shared_segments": 10
+      "shared_segments": 11
     },
     {
       "a": "op:tuzla:husino_2",
@@ -15096,7 +15096,7 @@
       "a": "op:vares:budozelje_2",
       "b": "op:vares:gornja_borovica_2",
       "min_dist": 0,
-      "shared_segments": 5
+      "shared_segments": 6
     },
     {
       "a": "op:vares:budozelje_2",
@@ -15114,13 +15114,13 @@
       "a": "op:vares:budozelje_2",
       "b": "op:visoko:podvinjci_2",
       "min_dist": 0,
-      "shared_segments": 9
+      "shared_segments": 8
     },
     {
       "a": "op:vares:gornja_borovica_2",
       "b": "op:vares:vares_2",
       "min_dist": 0,
-      "shared_segments": 9
+      "shared_segments": 6
     },
     {
       "a": "op:vares:gornja_borovica_2",
@@ -15174,7 +15174,7 @@
       "a": "op:velika_kladusa:poljana_2",
       "b": "op:velika_kladusa:zboriste_2",
       "min_dist": 0,
-      "shared_segments": 12
+      "shared_segments": 9
     },
     {
       "a": "op:velika_kladusa:vejinac_2",
@@ -15204,13 +15204,13 @@
       "a": "op:visegrad:drinsko",
       "b": "op:visegrad:medjedja_2",
       "min_dist": 0,
-      "shared_segments": 12
+      "shared_segments": 13
     },
     {
       "a": "op:visegrad:drinsko",
       "b": "op:visegrad:okrugla",
       "min_dist": 0,
-      "shared_segments": 3
+      "shared_segments": 4
     },
     {
       "a": "op:visegrad:drinsko",
@@ -15354,7 +15354,7 @@
       "a": "op:visoko:rajcici_2",
       "b": "op:visoko:stuparici_2",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 8
     },
     {
       "a": "op:visoko:rajcici_2",
@@ -15366,7 +15366,7 @@
       "a": "op:vitez:kruscica",
       "b": "op:vitez:vitez_2",
       "min_dist": 0,
-      "shared_segments": 15
+      "shared_segments": 18
     },
     {
       "a": "op:vitez:preocica_3",
@@ -15378,7 +15378,7 @@
       "a": "op:vitez:preocica_3",
       "b": "op:zenica:gornja_zenica_2",
       "min_dist": 0,
-      "shared_segments": 11
+      "shared_segments": 8
     },
     {
       "a": "op:vitez:preocica_3",
@@ -15450,7 +15450,7 @@
       "a": "op:vlasenica:cerska_2",
       "b": "op:zvornik:novo_selo",
       "min_dist": 0,
-      "shared_segments": 17
+      "shared_segments": 16
     },
     {
       "a": "op:vlasenica:grabovica",
@@ -15474,7 +15474,7 @@
       "a": "op:vlasenica:pomol_2",
       "b": "op:vlasenica:sebiocina",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 8
     },
     {
       "a": "op:vogosca:hotonj",
@@ -15492,7 +15492,7 @@
       "a": "op:zavidovici:cardak_2",
       "b": "op:zavidovici:hajderovici_2",
       "min_dist": 0,
-      "shared_segments": 5
+      "shared_segments": 7
     },
     {
       "a": "op:zavidovici:cardak_2",
@@ -15534,7 +15534,7 @@
       "a": "op:zavidovici:cinovici",
       "b": "op:zepce:ozimica_2",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 5
     },
     {
       "a": "op:zavidovici:hajderovici_2",
@@ -15564,7 +15564,7 @@
       "a": "op:zavidovici:zavidovici_2",
       "b": "op:zepce:viniste_2",
       "min_dist": 0,
-      "shared_segments": 17
+      "shared_segments": 16
     },
     {
       "a": "op:zenica:briznik_2",
@@ -15576,7 +15576,7 @@
       "a": "op:zenica:briznik_2",
       "b": "op:zenica:janjici",
       "min_dist": 0,
-      "shared_segments": 3
+      "shared_segments": 5
     },
     {
       "a": "op:zenica:gornja_vraca",
@@ -15588,7 +15588,7 @@
       "a": "op:zenica:gornja_vraca",
       "b": "op:zenica:orahovica_2",
       "min_dist": 0,
-      "shared_segments": 2
+      "shared_segments": 5
     },
     {
       "a": "op:zenica:gornja_vraca",
@@ -15606,7 +15606,7 @@
       "a": "op:zenica:gornja_vraca",
       "b": "op:zepce:zeljezno_polje_2",
       "min_dist": 0,
-      "shared_segments": 1
+      "shared_segments": 2
     },
     {
       "a": "op:zenica:gornja_zenica_2",
@@ -15666,7 +15666,7 @@
       "a": "op:zenica:serici_2",
       "b": "op:zepce:zeljezno_polje_2",
       "min_dist": 0,
-      "shared_segments": 7
+      "shared_segments": 6
     },
     {
       "a": "op:zenica:serici_2",
@@ -15798,7 +15798,7 @@
       "a": "op:zvornik:gornji_sepak_2",
       "b": "op:zvornik:kozluk_2",
       "min_dist": 0,
-      "shared_segments": 4
+      "shared_segments": 3
     },
     {
       "a": "op:zvornik:gornji_sepak_2",

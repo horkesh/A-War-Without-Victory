@@ -26,6 +26,7 @@
 
 import type {
     CorpsFrontSector,
+    CorpsFrontSubSegment,
     FactionId,
     FormationId,
     FormationState,
@@ -41,6 +42,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { emitRoutineConsoleWarn } from '../../utils/routine_console_diagnostics.js';
 import {
     isSectorAssignmentExemptCorpsId,
+    MAX_SECTOR_EDGES,
     MAX_RESERVES_PER_SECTOR,
     MIN_SECTOR_BRIGADES,
 } from './corps_front_sectors_constants.js';
@@ -58,8 +60,8 @@ import {
     consolidateCrossCorpsFronts,
     consolidateIsolatedCorpsPockets,
 } from './sector_territory.js';
-import { buildMultiSectorsForCorps } from './sector_building.js';
-import { mergeSectors } from './sector_splitting.js';
+import { buildMultiSectorsForCorps, splitOversizedSubSegments } from './sector_building.js';
+import { mergeSectors, splitNonContiguousSectors } from './sector_splitting.js';
 import {
     classifyBrigadesByTerritory,
     assignCrossCorpsEnclaveDefenders,
@@ -167,6 +169,7 @@ export function buildCorpsFrontSectors(
         delete result[sectorId];
     }
     mergeLateSiblingFrontFragments(result, adjacency, globalEdgeMeta, sharedBoundaryAdj, centroids);
+    enforceFinalSectorGeometryInvariants(result, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids);
     sealMergedSectorTruth(result, state, formations, adjacency, spatial);
     relocateMisassignedBrigadesToTruthfulOwners(Object.values(result), state, formations, adjacency);
     sealMergedSectorTruth(result, state, formations, adjacency, spatial);
@@ -311,6 +314,137 @@ function mergeLateSiblingFrontFragments(
         for (const osid of sector.territory_osids) allFriendly.add(osid);
     }
     repairDisconnectedTerritory(allSectors, sharedBoundaryAdj, allFriendly);
+}
+
+function enforceFinalSectorGeometryInvariants(
+    sectors: Record<string, CorpsFrontSector>,
+    adjacency: Map<Osid, Osid[]>,
+    edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
+    sharedBoundaryAdj: Map<Osid, Osid[]>,
+    caseBSplitAdj: Map<Osid, Osid[]>,
+    centroids?: OsidCentroidMap,
+): void {
+    const nextSectors: Record<string, CorpsFrontSector> = {};
+    const byCorps = new Map<FormationId, CorpsFrontSector[]>();
+    const friendlyByFaction = new Map<FactionId, Set<Osid>>();
+    const osidToCorpsByFaction = new Map<FactionId, Map<Osid, FormationId>>();
+
+    for (const sector of Object.values(sectors).sort((a, b) => strictCompare(a.sector_id, b.sector_id))) {
+        const list = byCorps.get(sector.corps_id) ?? [];
+        list.push(sector);
+        byCorps.set(sector.corps_id, list);
+
+        let friendly = friendlyByFaction.get(sector.faction);
+        if (!friendly) {
+            friendly = new Set<Osid>();
+            friendlyByFaction.set(sector.faction, friendly);
+        }
+        let osidToCorps = osidToCorpsByFaction.get(sector.faction);
+        if (!osidToCorps) {
+            osidToCorps = new Map<Osid, FormationId>();
+            osidToCorpsByFaction.set(sector.faction, osidToCorps);
+        }
+        for (const osid of sector.territory_osids) {
+            friendly.add(osid as Osid);
+            if (!osidToCorps.has(osid as Osid)) {
+                osidToCorps.set(osid as Osid, sector.corps_id);
+            }
+        }
+    }
+
+    for (const corpsId of [...byCorps.keys()].sort(strictCompare)) {
+        const corpsSectors = byCorps.get(corpsId) ?? [];
+        let nextIndex = 0;
+
+        for (const sector of corpsSectors) {
+            normalizeSectorSubSegmentsFromEdges(sector, edgeMeta);
+
+            const contiguousPieces = splitNonContiguousSectors(
+                [sector],
+                adjacency,
+                sector.faction,
+                edgeMeta,
+                sharedBoundaryAdj,
+                undefined,
+                caseBSplitAdj,
+                centroids,
+            ).sort((a, b) =>
+                strictCompare(a.edge_ids[0] ?? a.sector_id, b.edge_ids[0] ?? b.sector_id)
+                || strictCompare(a.sector_id, b.sector_id),
+            );
+
+            for (const contiguousPiece of contiguousPieces) {
+                normalizeSectorSubSegmentsFromEdges(contiguousPiece, edgeMeta);
+                const splitPieces = contiguousPiece.edge_ids.length > MAX_SECTOR_EDGES
+                    ? splitOversizedSubSegments(contiguousPiece.corps_id, contiguousPiece.sub_segments, edgeMeta)
+                    : contiguousPiece.sub_segments;
+                const orderedPieces = splitPieces
+                    .map((piece) => buildSectorSliceFromSubSegment(contiguousPiece, piece))
+                    .sort((a, b) =>
+                        strictCompare(a.edge_ids[0] ?? a.sector_id, b.edge_ids[0] ?? b.sector_id)
+                        || strictCompare(a.sector_id, b.sector_id),
+                    );
+
+                for (let i = 0; i < orderedPieces.length; i++) {
+                    const piece = orderedPieces[i]!;
+                    const sectorId = `sector:${corpsId}:${nextIndex++}`;
+                    piece.sector_id = sectorId;
+                    piece.sub_segments = piece.sub_segments.map((subSegment, subIndex) => ({
+                        ...subSegment,
+                        sub_segment_id: `subseg:${sectorId}:${subIndex}`,
+                    }));
+                    nextSectors[sectorId] = piece;
+                }
+            }
+        }
+    }
+
+    for (const key of Object.keys(sectors)) delete sectors[key];
+    for (const [sectorId, sector] of Object.entries(nextSectors).sort((a, b) => strictCompare(a[0], b[0]))) {
+        sectors[sectorId] = sector;
+    }
+
+    const repairedSectors = Object.values(sectors);
+    const byFaction = new Map<FactionId, CorpsFrontSector[]>();
+    for (const sector of repairedSectors) {
+        const list = byFaction.get(sector.faction) ?? [];
+        list.push(sector);
+        byFaction.set(sector.faction, list);
+    }
+
+    for (const [faction, factionSectors] of byFaction) {
+        const friendly = friendlyByFaction.get(faction);
+        if (!friendly || friendly.size === 0) continue;
+        assignTerritoryVoronoi(
+            factionSectors,
+            adjacency,
+            friendly,
+            osidToCorpsByFaction.get(faction),
+        );
+        repairDisconnectedTerritory(factionSectors, sharedBoundaryAdj, friendly);
+    }
+}
+
+function buildSectorSliceFromSubSegment(
+    template: CorpsFrontSector,
+    subSegment: CorpsFrontSubSegment,
+): CorpsFrontSector {
+    return {
+        ...template,
+        edge_ids: [...subSegment.edge_ids].sort(strictCompare),
+        sub_segments: [{
+            ...subSegment,
+            edge_ids: [...subSegment.edge_ids].sort(strictCompare),
+            friendly_osids: [...subSegment.friendly_osids].sort(strictCompare),
+            enemy_osids: [...subSegment.enemy_osids].sort(strictCompare),
+            primary_brigade_ids: [],
+        }],
+        length_edges: subSegment.edge_ids.length,
+        territory_osids: [],
+        density: 0,
+        threat_ratio: 0,
+        defensive_power: 0,
+    };
 }
 
 export function pruneGhostArtifactSectors(sectors: Record<string, CorpsFrontSector>): void {

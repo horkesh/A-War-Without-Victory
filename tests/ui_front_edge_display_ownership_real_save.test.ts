@@ -57,7 +57,7 @@ describe.skipIf(!hasFixtures)('real-save front-edge display ownership', () => {
     expect(missing).toEqual([]);
   });
 
-  it('keeps east-bosnia front edges selectable even when the raw packet omitted sector-side ownership', () => {
+  it('keeps the Donje Zesce-Mazlina front edge selectable from both sector sides', () => {
     const controllerMap = new Map(
       geo.features.map((feature) => [feature.properties.osid, feature.properties.controller] as const),
     );
@@ -68,7 +68,8 @@ describe.skipIf(!hasFixtures)('real-save front-edge display ownership', () => {
       buildDisplayOsidAdjacency(buildPolygonEdgeOwners(geo)),
     );
 
-    const targetEdgeId = 'op:foca:donje_zesce__op:pale:podgrab';
+    const targetEdgeId = 'op:foca:donje_zesce__op:foca:mazlina';
+    expect(parsed.frontEdgesOsid?.some((edge) => edge.edge_id === targetEdgeId)).toBe(true);
     expect(displayOwnership.sectorByEdgeAndFaction.has(`${targetEdgeId}\0RBiH`)).toBe(true);
     expect(displayOwnership.sectorByEdgeAndFaction.has(`${targetEdgeId}\0RS`)).toBe(true);
   });

@@ -706,6 +706,50 @@ if (finalMultiCount > 0) console.warn(`  WARNING: ${finalMultiCount} features st
 if (finalUnclosedRings > 0) console.warn(`  WARNING: ${finalUnclosedRings} unclosed rings after normalization`);
 console.log(`  All features: ${(smoothedFc as any).features.length}, Polygon: ${(smoothedFc as any).features.length - finalMultiCount}`);
 
+const SHARED_SEGMENT_EPSILON = 0.000001;
+
+function getOuterRings(feature: any): number[][][] {
+    const geom = feature?.geometry;
+    if (!geom) return [];
+    if (geom.type === 'Polygon') return geom.coordinates;
+    if (geom.type === 'MultiPolygon') return geom.coordinates.flat();
+    return [];
+}
+
+function pointsMatch(a: number[], b: number[]): boolean {
+    return Math.abs(a[0] - b[0]) <= SHARED_SEGMENT_EPSILON
+        && Math.abs(a[1] - b[1]) <= SHARED_SEGMENT_EPSILON;
+}
+
+function segmentsMatch(a0: number[], a1: number[], b0: number[], b1: number[]): boolean {
+    return (pointsMatch(a0, b0) && pointsMatch(a1, b1))
+        || (pointsMatch(a0, b1) && pointsMatch(a1, b0));
+}
+
+function countSharedSegments(featureA: any, featureB: any): number {
+    const ringsA = getOuterRings(featureA);
+    const ringsB = getOuterRings(featureB);
+    const segmentsB: Array<[number[], number[]]> = [];
+    for (const ring of ringsB) {
+        for (let i = 1; i < ring.length; i++) segmentsB.push([ring[i - 1], ring[i]]);
+    }
+
+    let total = 0;
+    for (const ring of ringsA) {
+        for (let i = 1; i < ring.length; i++) {
+            const a0 = ring[i - 1];
+            const a1 = ring[i];
+            for (const [b0, b1] of segmentsB) {
+                if (segmentsMatch(a0, a1, b0, b1)) {
+                    total++;
+                    break;
+                }
+            }
+        }
+    }
+    return total;
+}
+
 // ─── Phase 7: Write Outputs ─────────────────────────────────────────────────
 console.log('Phase 7: Writing outputs...');
 writeFileSync(resolve(OUT_DIR, 'operational_settlements.geojson'), JSON.stringify(smoothedFc));
@@ -738,11 +782,16 @@ const opContactGraph = {
         const ctr = turf.centroid(feat).geometry.coordinates;
         return { id, lat: ctr[1], lon: ctr[0] };
     }),
-    edges: Array.from(opEdges.values()).sort((a: any, b: any) => {
-        const ka = `${a.a}||${a.b}`;
-        const kb = `${b.a}||${b.b}`;
-        return ka.localeCompare(kb);
-    }),
+    edges: Array.from(opEdges.values())
+        .sort((a: any, b: any) => {
+            const ka = `${a.a}||${a.b}`;
+            const kb = `${b.a}||${b.b}`;
+            return ka.localeCompare(kb);
+        })
+        .map((edge: any) => ({
+            ...edge,
+            shared_segments: countSharedSegments(clusteredFeatures.get(edge.a), clusteredFeatures.get(edge.b)),
+        })),
 };
 writeFileSync(resolve(OUT_DIR, 'operational_contact_graph.json'), JSON.stringify(opContactGraph));
 

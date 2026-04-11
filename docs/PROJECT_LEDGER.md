@@ -1,3 +1,26 @@
+## [2026-04-11] fix(sim): enforce final sector-line geometry and tolerant shared-border fronts (n1426)
+
+**Type:** Engine / map geometry / sector packet hardening
+**Files:** `src/sim/combat/corps_front_sectors.ts`, `tools/enrich_contact_graph_shared_segments.cjs`, `scripts/derive_operational_settlements.ts`, `scripts/derive_operational_osid_first.ts`, `data/derived/operational/operational_contact_graph.json`, `tests/final_sector_edge_cap_real_save.test.ts`, `tests/front_edge_foca_shared_border_real_save.test.ts`, `tests/operational_contact_graph_shared_border_precision.test.ts`, `tests/ui_front_edge_display_ownership_real_save.test.ts`
+**Run:** n1426 - hash `649b3e38b0b26009`
+**Status:** VERIFIED - validator PASS, vitest 3156/3156, tsc clean, build clean, recovery:check clean
+
+### Summary
+
+Late sector merge/canonicalization could reassemble sectors after earlier split guards, so final packets could serialize over-wide, non-line sectors. `enforceFinalSectorGeometryInvariants(...)` now runs after late sibling merges, re-splits non-contiguous sectors, re-applies `MAX_SECTOR_EDGES`, renumbers deterministically, and repartitions territory through the existing Voronoi owner path before seal/rehome.
+
+The Donje Zesce/Mazlina missing-front case was a separate map-data precision seam: their polygons share boundary segments, but exact-coordinate matching wrote `shared_segments: 0`, so `computeFrontEdgesOsid(...)` skipped the real contact. Shared-segment enrichment now compares segment endpoints with tolerance, the derived contact graph was regenerated, and the derivation scripts preserve that rule for future rebuilds.
+
+### Scenario proof
+
+Fresh 40-week run `n1426` validates cleanly. Scripted final-save proof shows `0` sectors over `MAX_SECTOR_EDGES`, and `op:foca:donje_zesce__op:foca:mazlina` is present as an RBiH-RS front edge with RBiH ownership in `sector:arbih_1st_corps:4` and RS ownership in `sector:vrs_herzegovina:0`.
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260411_FRONT_SECTOR_GEOMETRY_AND_CONTACT_GRAPH_HARDENING.md`
+
+---
+
 ## [2026-04-10] fix(sim): reserve cap guard on loaned elite rescue pass (n1421)
 
 **Type:** Engine / sector invariant hardening
@@ -840,3 +863,36 @@
 
 ### Artifacts
 - Report: `docs/40_reports/implemented/20260411_FRONT_EDGE_DISPLAY_OWNERSHIP_COMPLETION_HARDENING.md`
+
+## [2026-04-11] fix(map): harden final sector geometry and tolerant Foča shared-border truth
+
+**Type:** Engine/map geometry hardening
+**Files:** `src/sim/combat/corps_front_sectors.ts`, `scripts/derive_operational_settlements.ts`, `scripts/derive_operational_osid_first.ts`, `tools/enrich_contact_graph_shared_segments.cjs`, `data/derived/operational/operational_contact_graph.json`, `tests/operational_contact_graph_shared_border_precision.test.ts`, `tests/front_edge_foca_shared_border_real_save.test.ts`, `tests/final_sector_edge_cap_real_save.test.ts`, `tests/ui_front_edge_display_ownership_real_save.test.ts`
+**Status:** VERIFIED - fresh 40-week run `n1427`, consistency validation, full vitest, typecheck, build, and recovery bar clean
+
+### Summary of changes
+1. **Late split sectors now reclaim territory truthfully** - `enforceFinalSectorGeometryInvariants(...)` no longer leaves split sectors with only front-OSID fragments. After final splitting it re-runs per-faction territory Voronoi using the original friendly territory/corps map, which preserves rear/depth ownership and keeps brigades attached to truthful owners.
+2. **Hard edge-cap proof is now locked in on the live save** - rebuilt final sectors from `latest_run_final_save.json` may no longer exceed `MAX_SECTOR_EDGES`, and a dedicated real-save regression now guards that contract.
+3. **Foča shared borders now survive floating-point drift** - operational contact-graph enrichment now compares polygon segments with an epsilon instead of exact coordinate-string equality, so Donje Žešće / Mazlina is recognized as a real shared border and the runtime emits `op:foca:donje_zesce__op:foca:mazlina` as a front edge.
+4. **Real-save UI proof now follows the live Foča edge** - the East Bosnia display-ownership regression now asserts on the stable live edge `op:foca:donje_zesce__op:foca:mazlina`, which is the edge the engine now truly serializes in the fresh save.
+
+### Proof
+- Fresh run: `runs\\apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1427`
+- Final hash: `0c7038a939a8ad21`
+- `validate_run_consistency`: `PASS`
+- unresolved sector brigades: `0`
+- sectors above hard edge cap in fresh final save: `0`
+- fresh final save contains `op:foca:donje_zesce__op:foca:mazlina` with `side_a = RBiH`, `side_b = RS`
+
+### Verification
+- `npx.cmd vitest run tests/commander_driven_brigade_assignment.test.ts tests/sector_misassignment_relocation.test.ts tests/final_sector_edge_cap_real_save.test.ts`
+- `npx.cmd vitest run tests/ui_front_edge_display_ownership_real_save.test.ts tests/operational_contact_graph_shared_border_precision.test.ts tests/front_edge_foca_shared_border_real_save.test.ts tests/final_sector_edge_cap_real_save.test.ts tests/sector_frontline_contiguity_repro.test.ts tests/sector_contiguity_split.test.ts tests/ui_sector_glow_continuity.test.ts`
+- `npx.cmd vitest run`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run build`
+- `npm.cmd run recovery:check`
+- `npm.cmd run sim:scenario:run:40w`
+- `node tools/validate_run_consistency.cjs runs\\apr1992_definitive_40w__8ba9e38bf6ab76dc__w40_n1427`
+
+### Artifacts
+- Report: `docs/40_reports/implemented/20260411_FRONT_SECTOR_GEOMETRY_AND_CONTACT_GRAPH_HARDENING.md`

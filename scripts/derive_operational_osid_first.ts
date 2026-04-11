@@ -34,6 +34,50 @@ function strictCompare(a: string, b: string): number {
     return a.localeCompare(b, 'en');
 }
 
+const SHARED_SEGMENT_EPSILON = 0.000001;
+
+function getOuterRings(feature: GeoJSON.Feature): number[][][] {
+    const geom = feature.geometry;
+    if (!geom) return [];
+    if (geom.type === 'Polygon') return geom.coordinates as number[][][];
+    if (geom.type === 'MultiPolygon') return (geom.coordinates as number[][][][]).flat();
+    return [];
+}
+
+function pointsMatch(a: number[], b: number[]): boolean {
+    return Math.abs(a[0] - b[0]) <= SHARED_SEGMENT_EPSILON
+        && Math.abs(a[1] - b[1]) <= SHARED_SEGMENT_EPSILON;
+}
+
+function segmentsMatch(a0: number[], a1: number[], b0: number[], b1: number[]): boolean {
+    return (pointsMatch(a0, b0) && pointsMatch(a1, b1))
+        || (pointsMatch(a0, b1) && pointsMatch(a1, b0));
+}
+
+function countSharedSegments(featureA: GeoJSON.Feature, featureB: GeoJSON.Feature): number {
+    const ringsA = getOuterRings(featureA);
+    const ringsB = getOuterRings(featureB);
+    const segmentsB: Array<[number[], number[]]> = [];
+    for (const ring of ringsB) {
+        for (let i = 1; i < ring.length; i++) segmentsB.push([ring[i - 1]!, ring[i]!]);
+    }
+
+    let total = 0;
+    for (const ring of ringsA) {
+        for (let i = 1; i < ring.length; i++) {
+            const a0 = ring[i - 1]!;
+            const a1 = ring[i]!;
+            for (const [b0, b1] of segmentsB) {
+                if (segmentsMatch(a0, a1, b0, b1)) {
+                    total++;
+                    break;
+                }
+            }
+        }
+    }
+    return total;
+}
+
 if (!existsSync(OUT_DIR)) mkdirSync(OUT_DIR, { recursive: true });
 
 // ─── Load OSID-native source ────────────────────────────────────────────────
@@ -122,7 +166,10 @@ const opContactGraph = {
         const ctr = turf.centroid(feat as any).geometry.coordinates;
         return { id, lat: ctr[1], lon: ctr[0] };
     }),
-    edges
+    edges: edges.map((edge) => ({
+        ...edge,
+        shared_segments: countSharedSegments(osidToFeature.get(edge.a)!, osidToFeature.get(edge.b)!),
+    })),
 };
 writeFileSync(resolve(OUT_DIR, 'operational_contact_graph.json'), JSON.stringify(opContactGraph));
 

@@ -34,47 +34,49 @@ for (const feature of geoData.features) {
     }
 }
 
-/**
- * Build a Set of coordinate keys from a polygon ring for fast lookup.
- * Key format: "lon,lat" with full precision.
- */
-function buildVertexSet(ring) {
-    const set = new Set();
-    for (let i = 0; i < ring.length; i++) {
-        set.add(ring[i][0] + ',' + ring[i][1]);
+const SEGMENT_EPSILON = 0.000001;
+
+function pointsMatch(a, b) {
+    return Math.abs(a[0] - b[0]) <= SEGMENT_EPSILON
+        && Math.abs(a[1] - b[1]) <= SEGMENT_EPSILON;
+}
+
+function segmentsMatch(a1, a2, b1, b2) {
+    return (pointsMatch(a1, b1) && pointsMatch(a2, b2))
+        || (pointsMatch(a1, b2) && pointsMatch(a2, b1));
+}
+
+function collectSegments(rings) {
+    const segments = [];
+    for (const ring of rings) {
+        for (let i = 1; i < ring.length; i++) {
+            segments.push([ring[i - 1], ring[i]]);
+        }
     }
-    return set;
+    return segments;
 }
 
 /**
  * Count shared boundary segments between two sets of polygon rings.
- * A "shared segment" is a pair of consecutive vertices in ring A that
- * both appear in ring B (exact coordinate match). We count how many
- * such consecutive pairs exist across all ring combinations.
+ * A "shared segment" is a pair of consecutive vertices whose endpoints match
+ * within a small epsilon, in either direction. This tolerates harmless float
+ * drift between otherwise identical polygon boundaries.
  *
  * Deterministic: iterates rings and vertices in source order.
  */
 function countSharedSegments(ringsA, ringsB) {
+    const segmentsB = collectSegments(ringsB);
     let totalSegments = 0;
 
     for (const ringA of ringsA) {
-        // Build vertex set from all B rings for fast lookup
-        const vertexSetB = new Set();
-        for (const ringB of ringsB) {
-            for (let i = 0; i < ringB.length; i++) {
-                vertexSetB.add(ringB[i][0] + ',' + ringB[i][1]);
-            }
-        }
-
-        // Count consecutive shared vertex pairs in ring A
-        // Skip closing vertex (ringA[len-1] === ringA[0] for closed rings)
-        const len = ringA.length - 1;
-        for (let i = 0; i < len; i++) {
-            const keyI = ringA[i][0] + ',' + ringA[i][1];
-            const nextIdx = (i + 1) % len;
-            const keyNext = ringA[nextIdx][0] + ',' + ringA[nextIdx][1];
-            if (vertexSetB.has(keyI) && vertexSetB.has(keyNext)) {
-                totalSegments++;
+        for (let i = 1; i < ringA.length; i++) {
+            const segA0 = ringA[i - 1];
+            const segA1 = ringA[i];
+            for (const [segB0, segB1] of segmentsB) {
+                if (segmentsMatch(segA0, segA1, segB0, segB1)) {
+                    totalSegments++;
+                    break;
+                }
             }
         }
     }
