@@ -22,6 +22,16 @@ const MOUSEMOVE_THROTTLE_MS = 50;
 
 const HIGHLIGHT_POS_LAYER = 'front-edges-highlight-pos';
 const HIGHLIGHT_NEG_LAYER = 'front-edges-highlight-neg';
+const SECTOR_EDGE_GLOW_POS_LAYER = 'sector-edge-glow-pos';
+const SECTOR_EDGE_GLOW_NEG_LAYER = 'sector-edge-glow-neg';
+const FRONT_EDGE_INTERACTIVE_LAYERS = [
+  'front-edges-hover-pos',
+  'front-edges-hover-neg',
+  HIGHLIGHT_POS_LAYER,
+  HIGHLIGHT_NEG_LAYER,
+  SECTOR_EDGE_GLOW_POS_LAYER,
+  SECTOR_EDGE_GLOW_NEG_LAYER,
+];
 
 export function useMapInteractions(
   map: MapLibreMap | null,
@@ -78,7 +88,7 @@ export function useMapInteractions(
     const point = e.originalEvent ? { x: e.originalEvent.clientX, y: e.originalEvent.clientY } : null;
     // Suppress OSID tooltip when cursor is also over a front edge (front tooltip takes priority)
     if (e.point) {
-      const frontHits = map.queryRenderedFeatures(e.point, { layers: ['front-edges-hover-pos', 'front-edges-hover-neg'].filter(id => !!map.getLayer(id)) });
+      const frontHits = map.queryRenderedFeatures(e.point, { layers: FRONT_EDGE_INTERACTIVE_LAYERS.filter(id => !!map.getLayer(id)) });
       if (frontHits.length > 0) return; // front-edge handler will fire instead
     }
     if (onOsidHover) {
@@ -184,7 +194,6 @@ export function useMapInteractions(
       } else {
         if (hoverTimeout) clearTimeout(hoverTimeout);
         hoverTimeout = undefined;
-        onFrontEdgeHover(null, null);
       }
     }
   };
@@ -200,6 +209,15 @@ export function useMapInteractions(
     onMapMouseLeave?.();
   };
 
+  const handleFrontEdgeClick = (e: MapLayerMouseEvent) => {
+    const feature = e.features?.[0];
+    const props = (feature?.properties ?? {}) as Record<string, unknown>;
+    const edgeId = typeof props.edge_id === 'string' ? props.edge_id : '';
+    const sectorId = typeof props.sector_id === 'string' ? props.sector_id : '';
+    if (!edgeId && !sectorId) return;
+    onFrontEdgeClick?.(edgeId, props);
+  };
+
   const handleMapMouseMove = (e: MapLayerMouseEvent) => {
     onMouseMove?.([e.lngLat.lng, e.lngLat.lat]);
   };
@@ -213,6 +231,8 @@ export function useMapInteractions(
       'front-edges-hover-neg',
       'front-edges-highlight-pos',
       'front-edges-highlight-neg',
+      SECTOR_EDGE_GLOW_POS_LAYER,
+      SECTOR_EDGE_GLOW_NEG_LAYER,
       'sector-fill',
       'osid-control-fill',
       'osid-ethnic-fill',
@@ -239,12 +259,26 @@ export function useMapInteractions(
         }
       }
 
+      const frontFeature = features.find((f) =>
+        FRONT_EDGE_INTERACTIVE_LAYERS.includes(f.layer.id)
+        && (f.properties?.edge_id || f.properties?.sector_id)
+      );
+      if (frontFeature) {
+        const props = frontFeature.properties as Record<string, unknown>;
+        const edgeId = props?.edge_id as string | undefined;
+        const sectorId = props?.sector_id as string | undefined;
+        onFrontEdgeClick?.(edgeId ?? sectorId ?? '', props);
+        return;
+      }
+
       const feature = features[0];
       const layerId = feature.layer.id;
 
-      if (layerId.startsWith('front-edges-')) {
-        const edgeId = feature.properties?.edge_id as string | undefined;
-        if (edgeId) onFrontEdgeClick?.(edgeId, feature.properties as Record<string, unknown>);
+      if (layerId.startsWith('front-edges-') || layerId.startsWith('sector-edge-glow-')) {
+        const props = feature.properties as Record<string, unknown>;
+        const edgeId = props?.edge_id as string | undefined;
+        const sectorId = props?.sector_id as string | undefined;
+        if (edgeId || sectorId) onFrontEdgeClick?.(edgeId ?? '', props);
       } else if (layerId === 'sector-fill' || layerId.startsWith('osid-')) {
         const osid = feature.properties?.osid as string | undefined;
         if (osid) onOsidClick?.(osid, feature.properties as Record<string, unknown>);
@@ -290,6 +324,7 @@ export function useMapInteractions(
 
   const frontEdgeLayers = ['front-edges-hover-pos', 'front-edges-hover-neg'];
   const frontEdgeHighlightLayers = ['front-edges-highlight-pos', 'front-edges-highlight-neg'];
+  const sectorGlowLayers = [SECTOR_EDGE_GLOW_POS_LAYER, SECTOR_EDGE_GLOW_NEG_LAYER];
 
 
   safeOn('mousemove', 'osid-control-fill', handleOsidMouseMove);
@@ -313,6 +348,7 @@ export function useMapInteractions(
       safeOn('mousemove', layerId, handleFrontEdgeMouseMove);
       safeOn('mouseleave', layerId, handleFrontEdgeMouseLeave);
     }
+    safeOn('click', layerId, handleFrontEdgeClick);
   }
 
   for (const layerId of frontEdgeHighlightLayers) {
@@ -320,6 +356,15 @@ export function useMapInteractions(
       safeOn('mousemove', layerId, handleFrontEdgeMouseMove);
       safeOn('mouseleave', layerId, handleFrontEdgeMouseLeave);
     }
+    safeOn('click', layerId, handleFrontEdgeClick);
+  }
+
+  for (const layerId of sectorGlowLayers) {
+    if (onFrontEdgeHover) {
+      safeOn('mousemove', layerId, handleFrontEdgeMouseMove);
+      safeOn('mouseleave', layerId, handleFrontEdgeMouseLeave);
+    }
+    safeOn('click', layerId, handleFrontEdgeClick);
   }
 
   // Battle markers hover
@@ -363,10 +408,17 @@ export function useMapInteractions(
     if (hoverTimeout) clearTimeout(hoverTimeout);
 
     for (const layerId of frontEdgeLayers) {
+      safeOff('click', layerId, handleFrontEdgeClick);
       safeOff('mousemove', layerId, handleFrontEdgeMouseMove);
       safeOff('mouseleave', layerId, handleFrontEdgeMouseLeave);
     }
     for (const layerId of frontEdgeHighlightLayers) {
+      safeOff('click', layerId, handleFrontEdgeClick);
+      safeOff('mousemove', layerId, handleFrontEdgeMouseMove);
+      safeOff('mouseleave', layerId, handleFrontEdgeMouseLeave);
+    }
+    for (const layerId of sectorGlowLayers) {
+      safeOff('click', layerId, handleFrontEdgeClick);
       safeOff('mousemove', layerId, handleFrontEdgeMouseMove);
       safeOff('mouseleave', layerId, handleFrontEdgeMouseLeave);
     }

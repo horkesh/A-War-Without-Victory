@@ -896,3 +896,24 @@ Fresh 40-week run `n1426` validates cleanly. Scripted final-save proof shows `0`
 
 ### Artifacts
 - Report: `docs/40_reports/implemented/20260411_FRONT_SECTOR_GEOMETRY_AND_CONTACT_GRAPH_HARDENING.md`
+
+## [2026-04-11] fix(ui): harden sector-line hover and click interaction
+
+**Type:** UI/map interaction hardening
+**Files:** `src/ui/map/map/useMapInteractions.ts`, `tests/ui_map_interactions.test.ts`
+**Status:** VERIFIED - targeted interaction/map UI suite, typecheck, and build clean
+
+### Summary of changes
+1. **Visible sector-glow lines are now real interaction layers** - `useMapInteractions.ts` now treats `sector-edge-glow-pos` / `sector-edge-glow-neg` as first-class click and hover surfaces instead of relying on the older generic map query to incidentally catch them.
+2. **Fallback map click now respects sector-glow hits** - the map-wide priority query now recognizes `sector-edge-glow-*` hits as valid sector-line interactions and forwards their `sector_id` payload to the same front/sector selection path.
+3. **OSID hover no longer competes with the full visible line family** - settlement hover suppression now checks the complete interactive front-line layer family, not just the original hover hitbox layers.
+4. **Highlight-only stitched segments stop clearing front hover state** - moving across a visible stitched line segment that has `sector_id` but no `edge_id` now preserves the existing front hover instead of spuriously clearing it.
+
+### Verification
+- `npx.cmd vitest run tests/ui_map_interactions.test.ts`
+- `npx.cmd vitest run tests/ui_map_interactions.test.ts tests/ui_map_sector_lookup.test.ts tests/front_sector_player_visibility.test.ts tests/ui_front_edge_display_ownership_real_save.test.ts tests/ui_sector_glow_continuity.test.ts`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run build`
+
+### Artifacts
+- Report: `docs/40_reports/implemented/20260411_SECTOR_LINE_INTERACTION_HARDENING.md`
