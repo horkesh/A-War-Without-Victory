@@ -1,0 +1,17 @@
+{
+    "war_duration_weeks": 182,
+    "territory_final": {
+        "RS": 49,
+        "RBiH_HRHB_Federation": 51
+    },
+    "total_killed": 97207,
+    "military_killed": {
+        "RBiH": 31270,
+        "RS": 21173,
+        "HRHB": 7788
+    },
+    "civilian_killed": 38476,
+    "total_displaced": 2200000,
+    "srebrenica_killed": 8372,
+    "source_notes": "RDC 2007 (total killed), ICTY Krstic judgment (Srebrenica), UNHCR (displaced), Dayton Annex 2 (territory)"
+}

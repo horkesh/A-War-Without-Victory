@@ -1,0 +1,298 @@
+import { describe, it, expect } from 'vitest';
+import { buildCostLedger } from '../src/sim/endgame/cost_ledger.js';
+import { compareToHistorical } from '../src/sim/endgame/endgame_comparison.js';
+import type { CostLedger } from '../src/sim/endgame/cost_ledger.js';
+import {
+    createEmptyCapital,
+    createDefaultPatronRelationship,
+} from '../src/state/negotiation_types.js';
+import type { GameState } from '../src/state/game_state.js';
+import type { NegotiationBreakdown, HistoricalBaseline, NegotiationState, RuptureConsequence } from '../src/state/negotiation_types.js';
+import type { CasualtyLedger } from '../src/state/casualty_ledger.js';
+import { initializeCasualtyLedger } from '../src/state/casualty_ledger.js';
+import { initializeStrategicDimensions } from '../src/sim/events/strategic_dimensions.js';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Helpers
+// ═══════════════════════════════════════════════════════════════════════════
+
+function makeBreakdown(overrides: Partial<NegotiationBreakdown> = {}): NegotiationBreakdown {
+    return { ...createEmptyCapital(), ...overrides };
+}
+
+function makeNegotiationState(
+    factionBreakdowns: Record<string, Partial<NegotiationBreakdown>> = {},
+    ruptures: RuptureConsequence[] = [],
+): NegotiationState {
+    const capital: Record<string, NegotiationBreakdown> = {};
+    const patron_relationships: Record<string, ReturnType<typeof createDefaultPatronRelationship>> = {};
+    for (const fid of ['RBiH', 'RS', 'HRHB']) {
+        capital[fid] = makeBreakdown(factionBreakdowns[fid] ?? {});
+        patron_relationships[fid] = createDefaultPatronRelationship(fid);
+    }
+    return {
+        capital,
+        patron_relationships,
+        peace_plan_history: [],
+        strategic_dimensions: initializeStrategicDimensions(),
+        rupture_consequences: ruptures,
+    };
+}
+
+function makeState(overrides: {
+    turn?: number;
+    casualtyLedger?: CasualtyLedger;
+    factionBreakdowns?: Record<string, Partial<NegotiationBreakdown>>;
+    ruptures?: RuptureConsequence[];
+    civilianCasualties?: Record<string, { killed: number; fled_abroad: number }>;
+} = {}): GameState {
+    const {
+        turn = 40,
+        casualtyLedger,
+        factionBreakdowns = {},
+        ruptures = [],
+        civilianCasualties = {},
+    } = overrides;
+
+    const cl = casualtyLedger ?? initializeCasualtyLedger(['RBiH', 'RS', 'HRHB']);
+
+    return {
+        meta: { turn, phase: 'war', seed: 1, date: '1993-01-15' },
+        factions: [{ id: 'RBiH' }, { id: 'RS' }, { id: 'HRHB' }],
+        military: {
+            formations: {},
+            negotiation: makeNegotiationState(factionBreakdowns, ruptures),
+            casualty_ledger: cl,
+        },
+        political: {
+            political_controllers: {},
+        },
+        displacement: {
+            civilian_casualties: civilianCasualties,
+        },
+    } as unknown as GameState;
+}
+
+function makeBaseline(overrides: Partial<HistoricalBaseline> = {}): HistoricalBaseline {
+    return {
+        war_duration_weeks: 182,
+        territory_final: { RS: 49, RBiH_HRHB_Federation: 51 },
+        total_killed: 97207,
+        military_killed: { RBiH: 31270, RS: 21173, HRHB: 7788 },
+        civilian_killed: 38476,
+        total_displaced: 2200000,
+        srebrenica_killed: 8372,
+        source_notes: 'RDC 2007',
+        ...overrides,
+    };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// buildCostLedger
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('buildCostLedger', () => {
+    it('produces one entry per canonical faction', () => {
+        const state = makeState();
+        const ledger = buildCostLedger(state);
+        expect(ledger.entries).toHaveLength(3);
+        const factions = ledger.entries.map(e => e.faction);
+        expect(factions).toContain('RBiH');
+        expect(factions).toContain('RS');
+        expect(factions).toContain('HRHB');
+    });
+
+    it('reads military_killed from casualty_ledger', () => {
+        const cl = initializeCasualtyLedger(['RBiH', 'RS', 'HRHB']);
+        cl.RBiH!.killed = 5000;
+        cl.RS!.killed = 3000;
+        cl.HRHB!.killed = 1000;
+
+        const state = makeState({ casualtyLedger: cl });
+        const ledger = buildCostLedger(state);
+
+        const rbih = ledger.entries.find(e => e.faction === 'RBiH')!;
+        const rs = ledger.entries.find(e => e.faction === 'RS')!;
+        const hrhb = ledger.entries.find(e => e.faction === 'HRHB')!;
+
+        expect(rbih.military_killed).toBe(5000);
+        expect(rs.military_killed).toBe(3000);
+        expect(hrhb.military_killed).toBe(1000);
+        expect(ledger.total_military_killed).toBe(9000);
+    });
+
+    it('reads territory from negotiation capital', () => {
+        const state = makeState({
+            factionBreakdowns: {
+                RS: { territory_controlled_pct: 49.2 },
+                RBiH: { territory_controlled_pct: 30.1 },
+                HRHB: { territory_controlled_pct: 15.5 },
+            },
+        });
+        const ledger = buildCostLedger(state);
+
+        const rs = ledger.entries.find(e => e.faction === 'RS')!;
+        const rbih = ledger.entries.find(e => e.faction === 'RBiH')!;
+        const hrhb = ledger.entries.find(e => e.faction === 'HRHB')!;
+
+        expect(rs.territory_controlled_pct).toBe(49.2);
+        expect(rbih.territory_controlled_pct).toBe(30.1);
+        expect(hrhb.territory_controlled_pct).toBe(15.5);
+    });
+
+    it('includes rupture_consequences from upstream', () => {
+        const ruptures: RuptureConsequence[] = [
+            {
+                id: 'srebrenica_genocide_1995',
+                recorded_turn: 160,
+                perpetrator_faction: 'RS',
+                description: 'Fall of the Srebrenica safe area and subsequent genocide of Bosniak men and boys',
+                condemnation_flag: 'genocide_condemnation',
+            },
+        ];
+        const state = makeState({ ruptures });
+        const ledger = buildCostLedger(state);
+
+        expect(ledger.rupture_consequences).toHaveLength(1);
+        expect(ledger.rupture_consequences[0].id).toBe('srebrenica_genocide_1995');
+        expect(ledger.rupture_consequences[0].perpetrator_faction).toBe('RS');
+    });
+
+    it('is deterministic — same input produces same output', () => {
+        const cl = initializeCasualtyLedger(['RBiH', 'RS', 'HRHB']);
+        cl.RBiH!.killed = 2500;
+        cl.RS!.killed = 1800;
+        const ruptures: RuptureConsequence[] = [
+            {
+                id: 'srebrenica_genocide_1995',
+                recorded_turn: 160,
+                perpetrator_faction: 'RS',
+                description: 'Fall of Srebrenica',
+                condemnation_flag: 'genocide_condemnation',
+            },
+        ];
+        const state = makeState({
+            turn: 52,
+            casualtyLedger: cl,
+            factionBreakdowns: {
+                RS: { territory_controlled_pct: 49 },
+                RBiH: { territory_controlled_pct: 30 },
+                HRHB: { territory_controlled_pct: 15 },
+            },
+            ruptures,
+        });
+
+        const ledger1 = buildCostLedger(state);
+        const ledger2 = buildCostLedger(state);
+
+        expect(JSON.stringify(ledger1)).toBe(JSON.stringify(ledger2));
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// compareToHistorical
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('compareToHistorical', () => {
+    it('computes correct duration delta', () => {
+        const state = makeState({ turn: 200 });
+        const ledger = buildCostLedger(state);
+        const baseline = makeBaseline();
+        const result = compareToHistorical(ledger, baseline);
+
+        expect(result.duration_delta_weeks).toBe(200 - 182);
+        expect(result.divergence_notes.some(n => n.includes('18 weeks longer'))).toBe(true);
+    });
+
+    it('computes correct negative duration delta', () => {
+        const state = makeState({ turn: 100 });
+        const ledger = buildCostLedger(state);
+        const baseline = makeBaseline();
+        const result = compareToHistorical(ledger, baseline);
+
+        expect(result.duration_delta_weeks).toBe(100 - 182);
+        expect(result.divergence_notes.some(n => n.includes('82 weeks shorter'))).toBe(true);
+    });
+
+    it('computes correct territory divergence', () => {
+        const state = makeState({
+            factionBreakdowns: {
+                RS: { territory_controlled_pct: 55 },
+                RBiH: { territory_controlled_pct: 28 },
+                HRHB: { territory_controlled_pct: 12 },
+            },
+        });
+        const ledger = buildCostLedger(state);
+        const baseline = makeBaseline();
+        const result = compareToHistorical(ledger, baseline);
+
+        // RS: 55 - 49 = 6
+        expect(result.territory_divergence.RS).toBe(6);
+        // Federation: (28 + 12) - 51 = -11
+        expect(result.territory_divergence.RBiH_HRHB_Federation).toBe(-11);
+    });
+
+    it('generates divergence note for Srebrenica rupture', () => {
+        const ruptures: RuptureConsequence[] = [
+            {
+                id: 'srebrenica_genocide_1995',
+                recorded_turn: 160,
+                perpetrator_faction: 'RS',
+                description: 'Fall of Srebrenica',
+                condemnation_flag: 'genocide_condemnation',
+            },
+        ];
+        const state = makeState({ ruptures });
+        const ledger = buildCostLedger(state);
+        const baseline = makeBaseline();
+        const result = compareToHistorical(ledger, baseline);
+
+        expect(result.rupture_divergence).toContain('srebrenica_genocide_1995');
+        expect(result.divergence_notes.some(n => n.includes('Srebrenica genocide occurred'))).toBe(true);
+    });
+
+    it('generates Srebrenica survived note when no rupture', () => {
+        const state = makeState();
+        const ledger = buildCostLedger(state);
+        const baseline = makeBaseline();
+        const result = compareToHistorical(ledger, baseline);
+
+        expect(result.rupture_divergence).toHaveLength(0);
+        expect(result.divergence_notes.some(n => n.includes('Srebrenica enclave survived'))).toBe(true);
+    });
+
+    it('generates divergence note for duration', () => {
+        const state = makeState({ turn: 182 });
+        const ledger = buildCostLedger(state);
+        const baseline = makeBaseline();
+        const result = compareToHistorical(ledger, baseline);
+
+        expect(result.duration_delta_weeks).toBe(0);
+        expect(result.divergence_notes.some(n => n.includes('exactly the historical'))).toBe(true);
+    });
+
+    it('comparison inputs are explicit and serializable (JSON round-trip)', () => {
+        const cl = initializeCasualtyLedger(['RBiH', 'RS', 'HRHB']);
+        cl.RBiH!.killed = 4000;
+        const state = makeState({
+            turn: 52,
+            casualtyLedger: cl,
+            factionBreakdowns: {
+                RS: { territory_controlled_pct: 50 },
+                RBiH: { territory_controlled_pct: 30 },
+                HRHB: { territory_controlled_pct: 15 },
+            },
+        });
+        const ledger = buildCostLedger(state);
+        const baseline = makeBaseline();
+
+        // Round-trip both inputs through JSON
+        const ledgerRT: CostLedger = JSON.parse(JSON.stringify(ledger));
+        const baselineRT: HistoricalBaseline = JSON.parse(JSON.stringify(baseline));
+
+        const result1 = compareToHistorical(ledger, baseline);
+        const result2 = compareToHistorical(ledgerRT, baselineRT);
+
+        expect(JSON.stringify(result1)).toBe(JSON.stringify(result2));
+    });
+});

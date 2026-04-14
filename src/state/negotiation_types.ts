@@ -278,6 +278,23 @@ export interface GameVerdict {
     dayton_result?: DaytonResult;
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// Historical Baseline (endgame comparison reference data)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Historical baseline data for endgame comparison.
+ *  Loaded from data/reference/historical_baseline.json — not computed. */
+export interface HistoricalBaseline {
+    war_duration_weeks: number;
+    territory_final: Record<string, number>;
+    total_killed: number;
+    military_killed: Record<string, number>;
+    civilian_killed: number;
+    total_displaced: number;
+    srebrenica_killed: number;
+    source_notes: string;
+}
+
 /** Create empty negotiation breakdown for a faction. */
 export function createEmptyCapital(): NegotiationBreakdown {
     return {
