@@ -8,15 +8,15 @@
 ### Summary
 Three seam clusters investigated for the read-model-truth bundle:
 
-1. **Cluster A — adapter-after-deserialize parity proof**: Formation field values (readiness, cohesion, morale, kind, faction, personnel) and corps command fields (corpsStance, corpsExhaustion) now proven to survive serialize→deserialize→adapter roundtrip identically via real-save spot-check. Six intentionally recomputed fields documented as NOT parity-owned: commandStrain, projectedStrainNextTurn, recoveryForecast, situationAssessment, homeDistanceMult, readinessTrend.
+1. **Cluster A — adapter-after-deserialize sample parity proof**: Spot-checked one sample brigade and one sample corps from a real save: readiness, cohesion, morale, kind, faction, personnel (brigade); readiness, cohesion, kind, faction (corps); corpsStance, corpsExhaustion (corps command) survive serialize→deserialize→adapter roundtrip identically. This is a sample proof, not exhaustive across all formations. Six intentionally recomputed fields documented as NOT parity-owned: commandStrain, projectedStrainNextTurn, recoveryForecast, situationAssessment, homeDistanceMult, readinessTrend.
 
 2. **Cluster B — adapter boundary simplification: NO-OP.** All three top candidates (deriveNegotiatingCapital, homeDistanceMult replication, deriveOperationCaptureProvenance fallback) require state-layer changes that would violate "do not invent new packet/state structures." Documented with sentinel test.
 
-3. **Cluster C — review/action-family ownership: split ownership documented (not competing).** Investigation found PresidentialAttentionPanel owns action execution via direct IPC (handleDecisionResponse, handleAcknowledgeOfficerEvent, handleAcceptReplacement). App.tsx onAction owns navigation routing only (opens modals/panels). No duplication — intentional split. Two proof tests confirm the boundary.
+3. **Cluster C — review/action-family ownership: split ownership documented.** Two execution surfaces exist: PresidentialAttentionPanel handles officer acknowledgement/replacement via direct IPC (sole surface for those), AND event decisions via handleDecisionResponse. App.tsx EventModal is a second execution surface for event decisions (onDecisionResponse → ipc.respondToEventDecision). App.tsx onAction owns navigation routing only. Two proof tests confirm the boundary.
 
-**Parity fields directly proven:** readiness, cohesion, morale, kind, faction, personnel (formation); corpsStance, corpsExhaustion (corps command).
+**Parity fields spot-checked (sample, not exhaustive):** readiness, cohesion, morale, kind, faction, personnel (one brigade); corpsStance, corpsExhaustion (one corps).
 **Intentionally recomputed (not parity-owned):** commandStrain, projectedStrainNextTurn, recoveryForecast, situationAssessment, homeDistanceMult, readinessTrend.
-**Canonical queue owners confirmed:** PresidentialAttentionPanel = action execution; App.tsx onAction = navigation routing; inboxItems.ts = item derivation.
+**Execution surfaces documented:** PresidentialAttentionPanel = officer IPC (sole) + event decisions (shared); App.tsx EventModal = event decisions (shared); App.tsx onAction = navigation routing; inboxItems.ts = item derivation.
 
 ## [2026-04-14] fix(ui+desktop): harden post-load UI state reset and load error classification
 

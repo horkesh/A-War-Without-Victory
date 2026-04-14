@@ -264,7 +264,7 @@ describe('adapter-after-deserialize contract', () => {
         expect(rtIds).toEqual(rawIds);
     });
 
-    it('formation FIELD VALUES (readiness, cohesion, morale, kind, faction) survive roundtrip identically', () => {
+    it('formation field values spot-check: sample brigade and corps survive roundtrip identically', () => {
         if (!existsSync(REAL_SAVE_PATH)) {
             console.warn(SKIP_REASON);
             return;
@@ -278,7 +278,8 @@ describe('adapter-after-deserialize contract', () => {
         const reserialized = JSON.parse(serializeState(state));
         const adapterFromRoundTrip = parseGameState(reserialized);
 
-        // Pick sample formations: first brigade and first corps from raw adapter output.
+        // Spot-check: first brigade and first corps only. This is NOT exhaustive —
+        // it proves the roundtrip path works for sampled formations, not all of them.
         const rawBrigade = adapterFromRaw.formations.find(f => f.kind === 'brigade');
         const rawCorps = adapterFromRaw.formations.find(f => f.kind === 'corps' || f.kind === 'corps_asset');
 
@@ -310,7 +311,7 @@ describe('adapter-after-deserialize contract', () => {
         }
     });
 
-    it('corps command FIELD VALUES (corpsStance, corpsExhaustion) survive roundtrip identically', () => {
+    it('corps command field values spot-check: sample corps stance and exhaustion survive roundtrip', () => {
         if (!existsSync(REAL_SAVE_PATH)) {
             console.warn(SKIP_REASON);
             return;
@@ -324,7 +325,7 @@ describe('adapter-after-deserialize contract', () => {
         const reserialized = JSON.parse(serializeState(state));
         const adapterFromRoundTrip = parseGameState(reserialized);
 
-        // Find a corps formation that has corpsStance set (from corps_command).
+        // Spot-check: first corps with a stance set. One sample, not exhaustive.
         const rawCorpsWithStance = adapterFromRaw.formations.find(
             f => (f.kind === 'corps' || f.kind === 'corps_asset') && f.corpsStance !== undefined,
         );

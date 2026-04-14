@@ -81,17 +81,21 @@ describe('Army HQ / presidential review coherence', () => {
   /**
    * Cluster C: Review/Action-Family Ownership Boundary.
    *
-   * Ownership is SPLIT, not competing:
+   * Ownership is SPLIT across two execution surfaces:
+   * - PresidentialAttentionPanel executes officer acknowledgements and
+   *   replacement acceptance via direct IPC (handleAcknowledgeOfficerEvent,
+   *   handleAcceptReplacement). It ALSO handles event decisions
+   *   (handleDecisionResponse → ipc.respondToEventDecision).
+   * - App.tsx EventModal is a SECOND execution surface for event decisions
+   *   (onDecisionResponse → ipc.respondToEventDecision, line ~800).
    * - PresidentialInbox (via App.tsx onAction) owns NAVIGATION routing:
    *   opens modals/panels (event_modal, army_hq_personnel, army_reserve, etc.)
-   * - PresidentialAttentionPanel owns ACTION EXECUTION:
-   *   handleDecisionResponse, handleAcknowledgeOfficerEvent, handleAcceptReplacement
-   *   (all via direct IPC calls)
    *
-   * This is intentional: the inbox is a routing surface, the panel is the
-   * action queue. They don't duplicate each other.
+   * Officer acknowledgement/replacement: panel is the sole execution surface.
+   * Event decisions: TWO execution surfaces (panel + EventModal).
+   * Navigation routing: App.tsx onAction only.
    */
-  it('PresidentialAttentionPanel owns action execution via IPC (not duplicated in App.tsx)', () => {
+  it('PresidentialAttentionPanel is one execution surface; officer IPC not duplicated in App.tsx', () => {
     const panelSource = readFileSync(
       new URL('../src/ui/map/components/army_hq/PresidentialAttentionPanel.tsx', import.meta.url),
       'utf8',
@@ -101,7 +105,7 @@ describe('Army HQ / presidential review coherence', () => {
       'utf8',
     );
 
-    // Panel owns these three IPC action handlers directly
+    // Panel has these three IPC action handlers
     expect(panelSource).toContain('handleDecisionResponse');
     expect(panelSource).toContain('handleAcknowledgeOfficerEvent');
     expect(panelSource).toContain('handleAcceptReplacement');
@@ -109,13 +113,14 @@ describe('Army HQ / presidential review coherence', () => {
     expect(panelSource).toContain('ipc.acknowledgeOfficerEvent');
     expect(panelSource).toContain('ipc.acceptOfficerReplacement');
 
-    // App.tsx does NOT duplicate these action handlers — it only uses
-    // respondToEventDecision in the EventModal's onDecisionResponse callback,
-    // which is a separate entry point (EventModal, not the panel).
-    // The panel's filtering of pendingOfficerEvents is its own rendering
-    // concern, not a duplication of inboxItems.ts derivation.
+    // Officer acknowledgement and replacement acceptance: panel-only.
+    // App.tsx does not have these two handlers.
     expect(appSource).not.toContain('handleAcceptReplacement');
     expect(appSource).not.toContain('handleAcknowledgeOfficerEvent');
+
+    // Event decisions: App.tsx ALSO calls respondToEventDecision via EventModal.
+    // This is a second execution surface, not a duplication of the panel's handler.
+    expect(appSource).toContain('respondToEventDecision');
   });
 
   it('Inbox onAction routes navigation only — does not execute IPC actions', () => {
