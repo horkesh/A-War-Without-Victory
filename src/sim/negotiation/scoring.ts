@@ -18,6 +18,7 @@
 import type { GameState, FactionId } from '../../state/game_state.js';
 import type { NegotiationBreakdown, OutcomeClass } from '../../state/negotiation_types.js';
 import type { FactionVerdict, GameVerdict, DimensionGrade } from '../../state/negotiation_types.js';
+import { collectCondemnationFlags } from './rupture_consequences.js';
 import { DIMENSION_WEIGHTS, computeNegotiatingCapital } from '../events/strategic_dimensions.js';
 import type { DimensionStore } from '../events/strategic_dimensions.js';
 import { strictCompare } from '../../state/validateGameState.js';
@@ -334,8 +335,8 @@ export function computeFactionVerdict(
     const { grade, description } = computeFactionGrade(capital, faction, state);
     const dimensionGrades = computeDimensionGrades(capital, faction, dimStore);
 
-    // Condemnation flags: empty array for now — Lane D will populate these
-    const condemnationFlags: string[] = [];
+    // Collect condemnation flags from rupture consequences (Ring 2)
+    const condemnationFlags = collectCondemnationFlags(state, faction);
     const outcomeClass = classifyOutcome(faction, capital, dimStore, grade, pyrrhicScore, condemnationFlags);
 
     return {

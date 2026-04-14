@@ -161,6 +161,7 @@ import { computeCombatEffectiveBrigades } from '../negotiation/compute_combat_ef
 import { evaluatePeacePlans } from '../negotiation/peace_plans.js';
 import { updatePatronPressure } from '../negotiation/patron_pressure.js';
 import { evaluatePatronEvents } from '../negotiation/patron_events.js';
+import { evaluateRuptureConsequences } from '../negotiation/rupture_consequences.js';
 import { shouldInitiateDayton, initiateDaytonNegotiation } from '../negotiation/dayton_negotiation.js';
 
 // --- Pipeline infrastructure imports ---
@@ -2726,6 +2727,13 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             updatePatronPressure(context.state);
             evaluatePatronEvents(context.state);
+        }
+    },
+    {
+        name: 'evaluate-rupture-consequences',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            evaluateRuptureConsequences(context.state);
         }
     },
     {

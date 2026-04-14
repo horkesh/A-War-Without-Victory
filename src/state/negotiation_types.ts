@@ -92,6 +92,24 @@ export interface PeacePlanResponse {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Rupture Consequences (Ring 2 — locked, non-reversible)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** A locked rupture consequence record — one-way, non-reversible. */
+export interface RuptureConsequence {
+    /** Unique identifier for this rupture event. */
+    id: string;
+    /** Turn when the rupture was recorded. */
+    recorded_turn: number;
+    /** Faction responsible (perpetrator). */
+    perpetrator_faction: string;
+    /** Brief historically-grounded description. Restrained wording. */
+    description: string;
+    /** Condemnation flag propagated to verdict. */
+    condemnation_flag: string;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Negotiation State (on GameState)
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -117,6 +135,8 @@ export interface NegotiationState {
     pending_dayton?: PendingDaytonPacket;
     /** v0.6.0: Strategic dimensions per faction — hybrid base_value + event_modifier. */
     strategic_dimensions?: DimensionStore;
+    /** Ring 2: Locked rupture consequences — permanent, non-reversible records. */
+    rupture_consequences?: RuptureConsequence[];
 }
 
 /** Persisted Dayton negotiation menu — set by pipeline, read by adapter. */
