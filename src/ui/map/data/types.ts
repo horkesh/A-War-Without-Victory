@@ -456,6 +456,7 @@ export interface CorpsFrontSectorView {
     length_edges: number;
     assigned_brigade_ids: string[];
     reserve_brigade_ids: string[];
+    rear_brigade_ids?: string[];
     density: number;
     threat_ratio: number;
     defensive_power: number;
@@ -911,16 +912,6 @@ export interface LoadedGameState {
             description?: string;
             effects: import('../../../sim/events/event_types.js').EventEffect[];
         }>;
-    }>;
-
-    /** Per-faction negotiation capital (5 dimensions, 0-100 each). */
-    negotiationCapital?: Record<string, {
-        military_position: number;
-        humanitarian_standing: number;
-        international_credibility: number;
-        military_effectiveness: number;
-        political_cohesion: number;
-        composite: number;
     }>;
 
     /** Per-faction composite negotiating capital score (weighted 0-100). Derived from strategicDimensions. */

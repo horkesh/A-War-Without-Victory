@@ -121,7 +121,8 @@ export function findNearestFrontOsid(
     adjacency: Map<Osid, Osid[]>,
     reverseMap: OperationalToCanonicalReverseMap,
     graphAnalysis: FactionGraphAnalysis,
-    targetClassifications: string[]
+    targetClassifications: string[],
+    allowedTargets?: Set<Osid>,
 ): Osid | null {
     // BFS from current location through friendly territory toward front
     const controllerCache = new Map<Osid, FactionId | null>();
@@ -146,6 +147,7 @@ export function findNearestFrontOsid(
             const step = firstStep ?? n;
             const analysis = graphAnalysis.osid_analysis.get(n);
             if (analysis && targetClassifications.includes(analysis.classification)) {
+                if (allowedTargets && !allowedTargets.has(n)) continue;
                 if (!isMovementDestinationRisky(n, graphAnalysis)) return step; // safe first step
             }
             queue.push({ osid: n, firstStep: step });
@@ -241,7 +243,8 @@ export function findFrontDestinationForColumnMarch(
     adjacency: Map<Osid, Osid[]>,
     reverseMap: OperationalToCanonicalReverseMap,
     graphAnalysis: FactionGraphAnalysis,
-    assignedDests?: Map<Osid, number>
+    assignedDests?: Map<Osid, number>,
+    allowedTargets?: Set<Osid>,
 ): Osid | null {
     // BFS outward through friendly territory, find closest front OSID
     // Priority: undefended first (needs reinforcement most), then critical, then threatened, then active
@@ -273,6 +276,7 @@ export function findFrontDestinationForColumnMarch(
         if (depth > 0) {
             const analysis = graphAnalysis.osid_analysis.get(osid);
             if (analysis && analysis.enemy_neighbors.length > 0) {
+                if (allowedTargets && !allowedTargets.has(osid)) continue;
                 // Skip salient or cut-off destinations — avoid sending brigades into risky positions
                 if (isMovementDestinationRisky(osid, graphAnalysis)) continue;
                 // Distribution: skip if too many brigades already assigned here
@@ -309,6 +313,25 @@ export function findFrontDestinationForColumnMarch(
     return bestTarget;
 }
 
+function getEffectiveCorpsFrontTargets(state: GameState, brigade: FormationState): Set<Osid> {
+    const effectiveCorpsId = brigade.elite_loan_state?.on_loan
+        ? brigade.elite_loan_state.loaned_to_corps
+        : brigade.corps_id;
+    const targets = new Set<Osid>();
+    if (!effectiveCorpsId) return targets;
+
+    for (const sector of Object.values(state.military.corps_front_sectors ?? {})) {
+        if (sector.corps_id !== effectiveCorpsId) continue;
+        for (const subSegment of sector.sub_segments ?? []) {
+            for (const osid of subSegment.friendly_osids ?? []) {
+                targets.add(osid as Osid);
+            }
+        }
+    }
+
+    return targets;
+}
+
 /**
  * Shared interior-brigade movement: column march if deep, 1-hop move if close to front.
  * Returns true if an order was issued (caller should `continue`), false if nothing was done.
@@ -332,6 +355,8 @@ export function issueInteriorMovement(
     columnAssignments?: Map<Osid, number>
 ): boolean {
     const hopsToFront = computeHopsToFront(loc, faction, adjacency, state, reverseMap, graphAnalysis);
+    const corpsFrontTargets = getEffectiveCorpsFrontTargets(state, brigade);
+    const restrictedTargets = corpsFrontTargets.size > 0 ? corpsFrontTargets : undefined;
 
     // Anti-oscillation: if brigade is only 1 hop from front but has been at this location
     // for multiple turns (entrenchment_turns > 0), use column march instead of 1-hop.
@@ -340,7 +365,16 @@ export function issueInteriorMovement(
         (hopsToFront === 1 && (brigade.entrenchment_turns ?? 0) >= 1);
 
     if (useColumnMarch) {
-        const frontDest = findFrontDestinationForColumnMarch(state, faction, loc, adjacency, reverseMap, graphAnalysis, columnAssignments);
+        const frontDest = findFrontDestinationForColumnMarch(
+            state,
+            faction,
+            loc,
+            adjacency,
+            reverseMap,
+            graphAnalysis,
+            columnAssignments,
+            restrictedTargets,
+        );
         if (frontDest) {
             result.column_march_orders[brigade.id] = frontDest;
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
@@ -348,11 +382,30 @@ export function issueInteriorMovement(
         }
     }
     // 1-hop movement: try priority classifications first, then fall back to any front OSID ('active')
-    let dest = findNearestFrontOsid(state, faction, loc, adjacency, reverseMap, graphAnalysis, oneHopClassifications);
+    let dest = findNearestFrontOsid(
+        state,
+        faction,
+        loc,
+        adjacency,
+        reverseMap,
+        graphAnalysis,
+        oneHopClassifications,
+        restrictedTargets,
+    );
     if (!dest) {
-        // Fallback: move toward ANY front OSID (including 'active' — already defended but still front)
-        dest = findNearestFrontOsid(state, faction, loc, adjacency, reverseMap, graphAnalysis,
-            ['undefended', 'critical', 'threatened', 'active', 'quiet']);
+        // Once a brigade has a live corps owner, interior movement must stay inside that
+        // corps' current front footprint. Only brigades with no same-corps front packet
+        // fall back to faction-wide front hunting.
+        dest = findNearestFrontOsid(
+            state,
+            faction,
+            loc,
+            adjacency,
+            reverseMap,
+            graphAnalysis,
+            ['undefended', 'critical', 'threatened', 'active', 'quiet'],
+            restrictedTargets,
+        );
     }
     if (dest) result.movement_orders[brigade.id] = dest;
     result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });

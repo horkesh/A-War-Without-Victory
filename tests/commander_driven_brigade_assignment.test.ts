@@ -244,6 +244,7 @@ describe('n696: Phase 2a — home affinity without need gate', () => {
         const allBrigs = [
             ...(sector?.assigned_brigade_ids ?? []),
             ...(sector?.reserve_brigade_ids ?? []),
+            ...(sector?.rear_brigade_ids ?? []),
         ];
         expect(allBrigs).toContain('brig_home_rear');
     });
@@ -273,6 +274,7 @@ describe('n696: Phase 2b — competence-gated commander distribution', () => {
         const allBrigs = [
             ...(sector?.assigned_brigade_ids ?? []),
             ...(sector?.reserve_brigade_ids ?? []),
+            ...(sector?.rear_brigade_ids ?? []),
         ];
         // BFS: rear → f1 (1 hop) → sector found → assigned
         expect(allBrigs).toContain('brig_rear');
@@ -300,6 +302,7 @@ describe('n696: Phase 2b — competence-gated commander distribution', () => {
         const allBrigs = [
             ...(sector?.assigned_brigade_ids ?? []),
             ...(sector?.reserve_brigade_ids ?? []),
+            ...(sector?.rear_brigade_ids ?? []),
         ];
         expect(allBrigs).toContain('brig_rear');
     });
@@ -325,6 +328,7 @@ describe('n696: Phase 2b — competence-gated commander distribution', () => {
         const allBrigs = [
             ...(sector?.assigned_brigade_ids ?? []),
             ...(sector?.reserve_brigade_ids ?? []),
+            ...(sector?.rear_brigade_ids ?? []),
         ];
         expect(allBrigs).toContain('brig_rear');
     });
@@ -355,6 +359,7 @@ describe('n696: Phase 2b — competence-gated commander distribution', () => {
         const allBrigs = [
             ...(sector?.assigned_brigade_ids ?? []),
             ...(sector?.reserve_brigade_ids ?? []),
+            ...(sector?.rear_brigade_ids ?? []),
         ];
         expect(allBrigs).toContain('brig_rear');
     });
@@ -380,6 +385,7 @@ describe('n696: Phase 2c — PHASE_2C_MAX_HOPS = 4', () => {
         const allBrigs = [
             ...(sector?.assigned_brigade_ids ?? []),
             ...(sector?.reserve_brigade_ids ?? []),
+            ...(sector?.rear_brigade_ids ?? []),
         ];
         expect(allBrigs).toContain('brig_rear');
     });
@@ -399,15 +405,18 @@ describe('n696: Phase 2c — PHASE_2C_MAX_HOPS = 4', () => {
         });
 
         const sectors = buildCorpsFrontSectors(state, edges, null);
-        const sector = Object.values(sectors).find(s => s.corps_id === 'corps_a');
-        expect(sector).toBeDefined();
+        const corpsSectors = Object.values(sectors).filter(s => s.corps_id === 'corps_a');
+        expect(corpsSectors.length).toBeGreaterThan(0);
 
-        const allBrigs = [
-            ...(sector?.assigned_brigade_ids ?? []),
-            ...(sector?.reserve_brigade_ids ?? []),
-        ];
+        const allBrigs = corpsSectors.flatMap((sector) => [
+            ...sector.assigned_brigade_ids,
+            ...sector.reserve_brigade_ids,
+            ...(sector.rear_brigade_ids ?? []),
+        ]);
         // deep → rear (1) → f1 (2): within cap
         expect(allBrigs).toContain('brig_deep');
+        expect(state.military.formations.brig_deep.location_osid).toMatch(/^op:zon:f[1-5]$/);
+        expect(state.military.formations.brig_deep.assignment?.role).toBe('front');
     });
 
     it('frontline brigade is assigned via Phase 1 (0 hops)', () => {
@@ -474,6 +483,7 @@ describe('n696: Pre-op staging weight', () => {
         const allBrigs = [
             ...(sector?.assigned_brigade_ids ?? []),
             ...(sector?.reserve_brigade_ids ?? []),
+            ...(sector?.rear_brigade_ids ?? []),
         ];
         expect(allBrigs).toContain('brig_rear');
     });
@@ -505,6 +515,7 @@ describe('n696: Determinism', () => {
         for (const sid of Object.keys(sectors1)) {
             expect(sectors1[sid]!.assigned_brigade_ids).toEqual(sectors2[sid]!.assigned_brigade_ids);
             expect(sectors1[sid]!.reserve_brigade_ids).toEqual(sectors2[sid]!.reserve_brigade_ids);
+            expect(sectors1[sid]!.rear_brigade_ids ?? []).toEqual(sectors2[sid]!.rear_brigade_ids ?? []);
         }
     });
 
@@ -528,6 +539,7 @@ describe('n696: Determinism', () => {
         const allBrigs = [
             ...(sector?.assigned_brigade_ids ?? []),
             ...(sector?.reserve_brigade_ids ?? []),
+            ...(sector?.rear_brigade_ids ?? []),
         ];
         // Brigade should be assigned by Phase 2c BFS (1 hop from front)
         expect(allBrigs).toContain('brig_rear');

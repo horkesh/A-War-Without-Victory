@@ -178,6 +178,7 @@ function makeBriefing(overrides: Partial<CommanderBriefing> = {}): CommanderBrie
         doctrine_stance: 'balanced',
         corps_stance: 'balanced',
         corps_exhaustion: 0,
+        faction_war_exhaustion: 0,
         avg_fatigue_pct: 0,
         brigades_above_fatigue_threshold: 0,
         enemy_equipment_summary: { tanks: 0, artillery: 0, infantry_only: true },
@@ -560,6 +561,7 @@ describe('prepositioning pipeline priority', () => {
         orderStance?: string;
         inTransit?: boolean;
         transitDest?: string;
+        locationOsid?: string;
     } = {}): GameState {
         const state: any = {
             political: {
@@ -575,7 +577,7 @@ describe('prepositioning pipeline priority', () => {
                     'bde_1': {
                         status: 'active',
                         faction: 'RS',
-                        location_osid: 'op:brigade:loc',
+                        location_osid: overrides.locationOsid ?? 'op:brigade:loc',
                         assigned_sub_segment_id: 'subseg:test:0',
                     },
                 },
@@ -631,6 +633,19 @@ describe('prepositioning pipeline priority', () => {
         expect((correctedOrder as any).stance).toBe('column');
     });
 
+    it('correctMarchOrders clears a stale wrong order when the brigade is already on its assigned front', () => {
+        const state = makeMinimalState({
+            locationOsid: 'op:sector:front_a',
+            orderDest: 'op:wrong:dest',
+            orderStance: 'column',
+        });
+        const adjacency = makeTestAdjacency();
+
+        correctMarchOrders(state, adjacency);
+
+        expect(state.military.brigade_movement_orders?.['bde_1' as FormationId]).toBeUndefined();
+    });
+
     it('correctTransitStates preserves stance column on corrected orders', () => {
         const state = makeMinimalState({
             inTransit: true,
@@ -651,6 +666,20 @@ describe('prepositioning pipeline priority', () => {
         expect(['op:sector:front_a', 'op:sector:front_b']).toContain(dest);
         // stance: 'column' must be set — Bug 1 fix
         expect((correctedOrder as any).stance).toBe('column');
+    });
+
+    it('correctTransitStates cancels stale wrong transit when the brigade is already on its assigned front', () => {
+        const state = makeMinimalState({
+            locationOsid: 'op:sector:front_a',
+            inTransit: true,
+            transitDest: 'op:wrong:dest',
+        });
+        const adjacency = makeTestAdjacency();
+
+        correctTransitStates(state, adjacency);
+
+        expect(state.military.brigade_movement_state?.['bde_1' as FormationId]).toBeUndefined();
+        expect(state.military.brigade_movement_orders?.['bde_1' as FormationId]).toBeUndefined();
     });
 
     it('prepositioning overrides existing distribution order', () => {

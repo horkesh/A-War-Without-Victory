@@ -10,12 +10,14 @@ function makeState(overrides?: {
     formations?: Record<string, any>;
     sectors?: Record<string, any>;
     controllers?: Record<string, string>;
+    warFrontEdges?: Array<{ edge_id?: string; a: string; b: string; side_a: string | null; side_b: string | null }>;
 }): GameState {
     return {
         meta: { turn: 40, phase: 'war' },
         military: {
             formations: overrides?.formations ?? {},
             corps_front_sectors: overrides?.sectors ?? {},
+            war_front_edges_osid: overrides?.warFrontEdges ?? [],
         },
         political: {
             political_controllers: overrides?.controllers ?? {},
@@ -145,6 +147,15 @@ describe('territorial anomaly checks respect canonical sector coverage', () => {
                 'op:brcko:brka_2': 'RBiH',
                 [enemyOsid]: 'RS',
             },
+            warFrontEdges: [
+                {
+                    edge_id: `${enemyOsid}__${osid}`,
+                    a: enemyOsid,
+                    b: osid,
+                    side_a: 'RS',
+                    side_b: 'RBiH',
+                },
+            ],
         });
 
         const reports = checkAdjacentUncontestedTerritory(state);
@@ -168,11 +179,54 @@ describe('territorial anomaly checks respect canonical sector coverage', () => {
                 [osid]: 'RBiH',
                 [enemyOsid]: 'RS',
             },
+            warFrontEdges: [
+                {
+                    edge_id: `${enemyOsid}__${osid}`,
+                    a: enemyOsid,
+                    b: osid,
+                    side_a: 'RS',
+                    side_b: 'RBiH',
+                },
+            ],
         });
 
         const reports = checkAdjacentUncontestedTerritory(state);
         expect(reports).toHaveLength(1);
         expect(reports[0]?.type).toBe('adjacent_uncontested_territory');
         expect(reports[0]?.entities).toContain(osid);
+    });
+
+    it('suppresses adjacent uncontested territory when the adjacent brigade is a different faction but the canonical war-front packet has no active hostile edge', () => {
+        const osid = 'op:konjic:turija';
+        const adjacentRbih = 'op:konjic:celebici_2';
+        const unrelatedRsFront = 'op:konjic:bijela_2';
+        const state = makeState({
+            formations: {
+                arbih_adjacent_brigade: makeBrigade({
+                    id: 'arbih_adjacent_brigade',
+                    faction: 'RBiH',
+                    corps_id: 'arbih_4th_corps',
+                    location_osid: adjacentRbih,
+                }),
+            },
+            sectors: {},
+            controllers: {
+                [osid]: 'HRHB',
+                [adjacentRbih]: 'RBiH',
+                [unrelatedRsFront]: 'RS',
+            },
+            warFrontEdges: [
+                {
+                    edge_id: `${unrelatedRsFront}__${osid}`,
+                    a: unrelatedRsFront,
+                    b: osid,
+                    side_a: 'RS',
+                    side_b: 'HRHB',
+                },
+            ],
+        });
+
+        const reports = checkAdjacentUncontestedTerritory(state);
+        expect(reports).toEqual([]);
     });
 });

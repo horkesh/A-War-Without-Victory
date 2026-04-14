@@ -15,5 +15,8 @@ export default defineConfig({
     globals: false,
     environment: 'node',
     environmentMatchGlobs,
+    fileParallelism: false,
+    minWorkers: 1,
+    maxWorkers: 1,
   }
 });

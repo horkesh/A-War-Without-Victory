@@ -54,6 +54,10 @@ describe('war-phase step ordering', () => {
         assertBefore('ongoing-mobilization', 'reconcile-final-sector-truth');
         assertBefore('tick-elite-loans', 'reconcile-final-sector-truth');
         assertBefore('rederive-osid-front-segments', 'reconcile-final-sector-truth');
+        assertBefore('reconcile-final-operation-truth', 'reconcile-final-sector-truth-after-ops');
+        assertBefore('reconcile-final-sector-truth-after-ops', 'final-distribute-brigades-to-front');
+        assertBefore('final-distribute-brigades-to-front', 'assert-final-operation-lifecycle');
+        assertBefore('reconcile-final-sector-truth-after-ops', 'assert-final-operation-lifecycle');
         assertBefore('reconcile-final-sector-truth', 'assert-formations-in-friendly-territory');
     });
 
@@ -108,7 +112,9 @@ describe('war-phase step ordering', () => {
         // +1 from reconcile-final-sector-truth (final end-of-turn sector authority rebuild)
         // +1 from reconcile-live-operation-truth (live operation roster cleanup before sector offensives advance)
         // +1 from reconcile-final-operation-truth (final end-of-turn operation authority rebuild)
+        // +1 from reconcile-final-sector-truth-after-ops (final sector authority refresh after op truth)
+        // +1 from final-distribute-brigades-to-front (late physical dispersion after final sector truth)
         // +1 from assert-final-operation-lifecycle (late lifecycle seal after final reconciliation)
-        expect(stepNames.length).toBe(158);
+        expect(stepNames.length).toBe(160);
     });
 });

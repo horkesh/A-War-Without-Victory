@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { buildAdjacencyMap } from '../map/adjacency_map.js';
 import type { EdgeRecord, LoadedSettlementGraph } from '../map/settlements.js';
 import { clamp01 } from '../utils/math.js';
@@ -13,11 +12,14 @@ export const INTEGRITY_DECAY_RATE = 0.02;
 export const HUMANITARIAN_PRESSURE_MULTIPLIER = 1.0;
 export const CAPITAL_ENCLAVE_VISIBILITY = 3.0;
 export const INTEGRITY_COLLAPSE_THRESHOLD = 0.1;
-export const SARAJEVO_MUN_IDS: MunicipalityId[] = [
+export const SARAJEVO_CITY_CORE_MUN_IDS: MunicipalityId[] = [
     'centar_sarajevo',
     'novi_grad_sarajevo',
     'novo_sarajevo',
-    'stari_grad_sarajevo',
+    'stari_grad_sarajevo'
+];
+export const SARAJEVO_MUN_IDS: MunicipalityId[] = [
+    ...SARAJEVO_CITY_CORE_MUN_IDS,
     'ilidza',
     'vogosca',
     'ilijas',
@@ -27,9 +29,20 @@ export const SARAJEVO_INTEGRITY_FLOOR = 0.15;
 export const SARAJEVO_DEGRADATION_RATE = 0.5;
 export const SARAJEVO_PRESSURE_MULTIPLIER = 3.0;
 
+function fnv1a32(input: string): number {
+    let hash = 0x811c9dc5;
+    for (let i = 0; i < input.length; i += 1) {
+        hash ^= input.charCodeAt(i);
+        hash = Math.imul(hash, 0x01000193);
+    }
+    return hash >>> 0;
+}
+
 function hashEnclaveId(factionId: FactionId, settlementIds: SettlementId[]): string {
     const raw = `${factionId}:${settlementIds.join('|')}`;
-    return createHash('sha256').update(raw, 'utf8').digest('hex').slice(0, 12);
+    const forward = fnv1a32(raw).toString(16).padStart(8, '0');
+    const backward = fnv1a32(raw.split('').reverse().join('')).toString(16).padStart(8, '0');
+    return `${forward}${backward}`.slice(0, 12);
 }
 
 function supplyStateToScore(state: SupplyStateLevel): number {

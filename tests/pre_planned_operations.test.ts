@@ -161,6 +161,13 @@ describe('pre-planned operations', () => {
         assert.ok(prsten?.participating_brigades.includes('jna_4th_corps_tg'));
     });
 
+    it('keeps Operation Koridor on an explicit corridor-breaking contract', () => {
+        const koridor = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Koridor');
+        assert.ok(koridor);
+        assert.equal(koridor!.min_attack_outcome, 'repulsed');
+        assert.equal(koridor!.planning_duration, 3);
+    });
+
     it('filters already-controlled objectives without dropping viable axes', () => {
         const state = makeMinimalState();
         state.political.political_controllers!['op:zvornik:zvornik'] = 'RS';
@@ -220,7 +227,7 @@ describe('pre-planned operations', () => {
         );
     });
 
-    it('keeps a queued operation queued when fatal validation detects an objective overlap', () => {
+    it('keeps a queued operation queued when live operations already claim every objective', () => {
         const state = makeMinimalState();
         state.meta.turn = 8;
         state.military.corps_command!.vrs_herzegovina!.queued_operations = ['Operation Foca'];
@@ -229,7 +236,14 @@ describe('pre-planned operations', () => {
             type: 'sector_attack',
             phase: 'planning',
             participating_brigades: ['rs_foa_brigade'],
-            objectives: ['op:gorazde:kolovarice'],
+            objectives: [
+                'op:foca:prevrac',
+                'op:gorazde:kolovarice',
+                'op:kalinovik:vlaholje',
+                'op:kalinovik:varos_2',
+                'op:kalinovik:golubici_2',
+                'op:kalinovik:sela_2',
+            ],
             current_objective_index: 0,
         } as any];
 
@@ -307,5 +321,44 @@ describe('pre-planned operations', () => {
         collectOpInjectionWarnings(state, warnings);
 
         assert.equal(state.military.op_injection_warnings?.length, 2);
+    });
+
+    it('trims queued objectives already claimed by a live probe before overlap validation', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 19;
+
+        const command = state.military.corps_command!.vrs_1st_krajina!;
+        command.active_operations = [{
+            id: 'probe_vrs_1st_krajina_t18',
+            name: 'probe_vrs_1st_krajina_t18',
+            type: 'probe',
+            phase: 'execution',
+            status: 'active',
+            is_pre_planned: false,
+            participating_brigades: ['rs_1st_armored'],
+            axes: [{
+                axis_id: 'probe',
+                name: 'Probe',
+                staging_osid: 'op:donji_vakuf:komar_2',
+                objectives: ['op:donji_vakuf:oborci_2'],
+                current_objective_index: 0,
+                completed_objectives: [],
+            }],
+            objectives: ['op:donji_vakuf:oborci_2'],
+            turns_elapsed: 0,
+        } as any];
+        command.queued_operations = ['Operation Donji Vakuf'];
+
+        const injected = injectQueuedOperation(state, 'vrs_1st_krajina');
+
+        assert.equal(injected, true);
+        const donjiVakuf = command.active_operations.find((op) => op.name === 'Operation Donji Vakuf');
+        assert.ok(donjiVakuf);
+        const objectives = donjiVakuf!.axes!.flatMap((axis) => axis.objectives);
+        assert.ok(!objectives.includes('op:donji_vakuf:oborci_2'));
+        assert.ok(objectives.includes('op:donji_vakuf:torlakovac_2'));
+        assert.ok(
+            !(state.military.op_injection_warnings ?? []).some((warning) => warning.check === 'objective_overlap'),
+        );
     });
 });

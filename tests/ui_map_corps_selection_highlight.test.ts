@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { collectHighlightedFormationIds } from '../src/ui/map/map/highlightSelection.js';
+import {
+    collectEmphasizedFormationIds,
+    collectHighlightedFormationIds,
+} from '../src/ui/map/map/highlightSelection.js';
 
 function makeFeature(id: string, corpsId: string | null, sectorId: string | null) {
     return {
@@ -66,4 +69,29 @@ test('sector selection remains sector-scoped', () => {
     });
 
     assert.deepEqual(ids, ['rs_front']);
+});
+
+test('corps emphasis ids stay roster-scoped instead of collapsing back to active sector buckets', () => {
+    const formationsGeoJson = {
+        type: 'FeatureCollection',
+        features: [
+            makeFeature('rs_front', 'vrs_1kk', 'sector:1'),
+            makeFeature('rs_reserve', 'vrs_1kk', null),
+            makeFeature('rs_rear', 'vrs_1kk', null),
+            makeFeature('other_corps', 'vrs_drina', 'sector:2'),
+        ],
+    } as any;
+
+    const ids = collectEmphasizedFormationIds({
+        formationsGeoJson,
+        loadedGameState: null,
+        selectedCorpsId: 'vrs_1kk',
+        selectedCorpsFrontSectorId: null,
+    });
+
+    assert.deepEqual(
+        ids,
+        ['rs_front', 'rs_rear', 'rs_reserve'],
+        'corps emphasis should include all visible corps brigades, not only sector-attached ones',
+    );
 });

@@ -1,5 +1,6 @@
 import type { FeatureCollection, Geometry } from 'geojson';
 import type { FogOfWarView } from '../../data/types';
+import { deriveWarFrontVisibleEnemyOsids } from '../../utils/deriveWarFrontVisibleEnemyOsids';
 
 /**
  * Builds a GeoJSON FeatureCollection of OSID polygons that are under fog of war.
@@ -13,11 +14,13 @@ export function buildFogOfWarGeoJSON(
   controlBySettlement: Record<string, string | null>,
   playerFaction: string | null | undefined,
   fogOfWar: FogOfWarView | undefined,
+  frontEdgesOsid?: Array<{ edge_id?: string | null; a?: string | null; b?: string | null; side_a?: string | null; side_b?: string | null }> | undefined,
 ): FeatureCollection {
   const empty: FeatureCollection = { type: 'FeatureCollection', features: [] };
   if (!playerFaction || !fogOfWar) return empty;
 
   const visibleEnemyOsids = new Set<string>(fogOfWar.visibleEnemyOsids);
+  for (const osid of deriveWarFrontVisibleEnemyOsids(playerFaction, frontEdgesOsid)) visibleEnemyOsids.add(osid);
 
   const fogFeatures = baseGeoJson.features
     .filter((feature) => {

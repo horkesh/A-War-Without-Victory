@@ -101,6 +101,112 @@ describe('distributeBrigadesToFront', () => {
         expect(locations).toEqual(['op:test:a', 'op:test:b', 'op:test:c']);
     });
 
+    it('sees sibling-sector front occupants when deconflicting a shared OSID', () => {
+        const state = makeState({
+            brig_sector_a: makeFormation({ location_osid: 'op:test:shared', entrenchment_turns: 12 }),
+            brig_sector_b: makeFormation({ location_osid: 'op:test:shared', entrenchment_turns: 12 }),
+        });
+
+        const sectors = [
+            makeSector({
+                sector_id: 'sector:test:a',
+                assigned_brigade_ids: ['brig_sector_a'],
+                sub_segments: [{
+                    sub_segment_id: 'subseg:test:a',
+                    friendly_osids: ['op:test:shared', 'op:test:a_empty'],
+                    enemy_osids: ['op:enemy:x'],
+                    primary_brigade_ids: ['brig_sector_a'],
+                    edge_ids: [],
+                    length_edges: 2,
+                }],
+            }),
+            makeSector({
+                sector_id: 'sector:test:b',
+                assigned_brigade_ids: ['brig_sector_b'],
+                sub_segments: [{
+                    sub_segment_id: 'subseg:test:b',
+                    friendly_osids: ['op:test:shared', 'op:test:b_empty'],
+                    enemy_osids: ['op:enemy:y'],
+                    primary_brigade_ids: ['brig_sector_b'],
+                    edge_ids: [],
+                    length_edges: 2,
+                }],
+            }),
+        ];
+
+        const adjacency = makeAdjacency([
+            ['op:test:shared', 'op:test:a_empty'],
+            ['op:test:shared', 'op:test:b_empty'],
+        ]);
+
+        distributeBrigadesToFront(state, sectors, adjacency);
+
+        const locations = [
+            state.military.formations.brig_sector_a.location_osid,
+            state.military.formations.brig_sector_b.location_osid,
+        ].sort();
+        expect(locations).toContain('op:test:shared');
+        expect(
+            locations.includes('op:test:a_empty') || locations.includes('op:test:b_empty'),
+        ).toBe(true);
+    });
+
+    it('breaks entrenched cross-sector boundary stacks without requiring a normal Phase A spread', () => {
+        const state = makeState({
+            brig_large_boundary: makeFormation({
+                location_osid: 'op:test:shared',
+                entrenchment_turns: 12,
+                personnel: 2000,
+            }),
+            brig_smaller_boundary: makeFormation({
+                location_osid: 'op:test:shared',
+                entrenchment_turns: 12,
+                personnel: 700,
+            }),
+        });
+
+        const sectors = [
+            makeSector({
+                sector_id: 'sector:test:left',
+                assigned_brigade_ids: ['brig_smaller_boundary'],
+                sub_segments: [{
+                    sub_segment_id: 'subseg:test:left',
+                    friendly_osids: ['op:test:shared', 'op:test:left_empty'],
+                    enemy_osids: ['op:enemy:left'],
+                    primary_brigade_ids: ['brig_smaller_boundary'],
+                    edge_ids: [],
+                    length_edges: 2,
+                }],
+            }),
+            makeSector({
+                sector_id: 'sector:test:right',
+                assigned_brigade_ids: ['brig_large_boundary'],
+                sub_segments: [{
+                    sub_segment_id: 'subseg:test:right',
+                    friendly_osids: ['op:test:shared', 'op:test:right_occupied'],
+                    enemy_osids: ['op:enemy:right'],
+                    primary_brigade_ids: ['brig_large_boundary'],
+                    edge_ids: [],
+                    length_edges: 2,
+                }],
+            }),
+        ];
+
+        const adjacency = makeAdjacency([
+            ['op:test:shared', 'op:test:left_empty'],
+            ['op:test:shared', 'op:test:right_occupied'],
+        ]);
+        state.military.formations.brig_existing = makeFormation({
+            location_osid: 'op:test:right_occupied',
+            entrenchment_turns: 12,
+        });
+
+        distributeBrigadesToFront(state, sectors, adjacency);
+
+        expect(state.military.formations.brig_large_boundary.location_osid).toBe('op:test:shared');
+        expect(state.military.formations.brig_smaller_boundary.location_osid).toBe('op:test:left_empty');
+    });
+
     it('issues column march for rear brigade beyond 1 hop', () => {
         // Brigade at rear OSID (4 hops from front), sub-segment front = [F1, F2]
         const state = makeState({
@@ -189,8 +295,8 @@ describe('distributeBrigadesToFront', () => {
 
     it('skips Sarajevo siege sectors (arbih_1st_corps)', () => {
         const state = makeState({
-            brig_sarajevo: makeFormation({ location_osid: 'op:test:a' }),
-            brig_sarajevo_2: makeFormation({ location_osid: 'op:test:a' }),
+            brig_sarajevo: makeFormation({ location_osid: 'op:novo_sarajevo:sarajevo_dio_novo_sarajevo' }),
+            brig_sarajevo_2: makeFormation({ location_osid: 'op:novo_sarajevo:sarajevo_dio_novo_sarajevo' }),
         });
 
         const sectors = [
@@ -200,8 +306,8 @@ describe('distributeBrigadesToFront', () => {
                 assigned_brigade_ids: ['brig_sarajevo', 'brig_sarajevo_2'],
                 sub_segments: [{
                     sub_segment_id: 'subseg:arbih_1st:0',
-                    friendly_osids: ['op:test:a', 'op:test:b'],
-                    enemy_osids: ['op:enemy:x'],
+                    friendly_osids: ['op:novo_sarajevo:sarajevo_dio_novo_sarajevo', 'op:novo_sarajevo:hvarska'],
+                    enemy_osids: ['op:novo_sarajevo:lukavica'],
                     primary_brigade_ids: ['brig_sarajevo', 'brig_sarajevo_2'],
                     edge_ids: [],
                     length_edges: 2,
@@ -210,14 +316,14 @@ describe('distributeBrigadesToFront', () => {
         ];
 
         const adjacency = makeAdjacency([
-            ['op:test:a', 'op:test:b'],
+            ['op:novo_sarajevo:sarajevo_dio_novo_sarajevo', 'op:novo_sarajevo:hvarska'],
         ]);
 
         distributeBrigadesToFront(state, sectors, adjacency);
 
         // Both should stay stacked — siege sector is exempt
-        expect(state.military.formations.brig_sarajevo.location_osid).toBe('op:test:a');
-        expect(state.military.formations.brig_sarajevo_2.location_osid).toBe('op:test:a');
+        expect(state.military.formations.brig_sarajevo.location_osid).toBe('op:novo_sarajevo:sarajevo_dio_novo_sarajevo');
+        expect(state.military.formations.brig_sarajevo_2.location_osid).toBe('op:novo_sarajevo:sarajevo_dio_novo_sarajevo');
     });
 
     it('prefers least-stacked OSID for redistribution', () => {
@@ -427,10 +533,10 @@ describe('distributeBrigadesToFront', () => {
         expect(state.military.formations.brig_normal.location_osid).toBe('op:test:b');
     });
 
-    it('skips vrs_sarajevo_romanija sectors', () => {
+    it('skips vrs_sarajevo_romanija Sarajevo siege sectors', () => {
         const state = makeState({
-            brig_srk_1: makeFormation({ location_osid: 'op:test:a', faction: 'RS' }),
-            brig_srk_2: makeFormation({ location_osid: 'op:test:a', faction: 'RS' }),
+            brig_srk_1: makeFormation({ location_osid: 'op:novo_sarajevo:lukavica', faction: 'RS' }),
+            brig_srk_2: makeFormation({ location_osid: 'op:novo_sarajevo:lukavica', faction: 'RS' }),
         });
 
         const sectors = [
@@ -440,8 +546,8 @@ describe('distributeBrigadesToFront', () => {
                 assigned_brigade_ids: ['brig_srk_1', 'brig_srk_2'],
                 sub_segments: [{
                     sub_segment_id: 'subseg:srk:0',
-                    friendly_osids: ['op:test:a', 'op:test:b'],
-                    enemy_osids: ['op:enemy:x'],
+                    friendly_osids: ['op:novo_sarajevo:lukavica', 'op:novo_sarajevo:vraca'],
+                    enemy_osids: ['op:novo_sarajevo:sarajevo_dio_novo_sarajevo'],
                     primary_brigade_ids: ['brig_srk_1', 'brig_srk_2'],
                     edge_ids: [],
                     length_edges: 2,
@@ -450,14 +556,54 @@ describe('distributeBrigadesToFront', () => {
         ];
 
         const adjacency = makeAdjacency([
-            ['op:test:a', 'op:test:b'],
+            ['op:novo_sarajevo:lukavica', 'op:novo_sarajevo:vraca'],
         ]);
 
         distributeBrigadesToFront(state, sectors, adjacency);
 
         // Both stay stacked — SRK siege sector exempt
-        expect(state.military.formations.brig_srk_1.location_osid).toBe('op:test:a');
-        expect(state.military.formations.brig_srk_2.location_osid).toBe('op:test:a');
+        expect(state.military.formations.brig_srk_1.location_osid).toBe('op:novo_sarajevo:lukavica');
+        expect(state.military.formations.brig_srk_2.location_osid).toBe('op:novo_sarajevo:lukavica');
+    });
+
+    it('still disperses rear stacks in Sarajevo-Romanija sectors', () => {
+        const state = makeState({
+            brig_srk_front: makeFormation({ location_osid: 'op:sokolac:front', faction: 'RS' }),
+            brig_srk_reserve: makeFormation({ location_osid: 'op:sokolac:rear_stack', faction: 'RS' }),
+            brig_srk_rear: makeFormation({ location_osid: 'op:sokolac:rear_stack', faction: 'RS' }),
+        });
+
+        const sectors = [
+            makeSector({
+                corps_id: 'vrs_sarajevo_romanija',
+                faction: 'RS',
+                territory_osids: ['op:sokolac:rear_stack', 'op:sokolac:rear_empty'],
+                assigned_brigade_ids: ['brig_srk_front'],
+                reserve_brigade_ids: ['brig_srk_reserve'],
+                rear_brigade_ids: ['brig_srk_rear'],
+                sub_segments: [{
+                    sub_segment_id: 'subseg:srk:0',
+                    friendly_osids: ['op:sokolac:front'],
+                    enemy_osids: ['op:pale:praca'],
+                    primary_brigade_ids: ['brig_srk_front'],
+                    edge_ids: [],
+                    length_edges: 1,
+                }],
+            }),
+        ];
+
+        const adjacency = makeAdjacency([
+            ['op:sokolac:rear_stack', 'op:sokolac:rear_empty'],
+            ['op:sokolac:rear_stack', 'op:sokolac:front'],
+        ]);
+
+        distributeBrigadesToFront(state, sectors, adjacency);
+
+        const locations = [
+            state.military.formations.brig_srk_reserve.location_osid,
+            state.military.formations.brig_srk_rear.location_osid,
+        ].sort();
+        expect(locations).toEqual(['op:sokolac:rear_empty', 'op:sokolac:rear_stack']);
     });
 
     it('skips brigades too far away (> MAX_REDISTRIBUTION_DISTANCE)', () => {
@@ -534,4 +680,283 @@ describe('distributeBrigadesToFront', () => {
         // No column march order needed
         expect(state.military.brigade_movement_orders?.brig_near).toBeUndefined();
     });
+
+    it('spreads stacked rear brigades across empty sector territory OSIDs', () => {
+        const state = makeState({
+            brig_front: makeFormation({ location_osid: 'op:test:front' }),
+            brig_rear_1: makeFormation({ location_osid: 'op:test:rear_a', entrenchment_turns: 12 }),
+            brig_rear_2: makeFormation({ location_osid: 'op:test:rear_a', entrenchment_turns: 12 }),
+        });
+
+        const sectors = [
+            makeSector({
+                assigned_brigade_ids: ['brig_front'],
+                reserve_brigade_ids: [],
+                rear_brigade_ids: ['brig_rear_1', 'brig_rear_2'],
+                territory_osids: ['op:test:front', 'op:test:rear_a', 'op:test:rear_b'],
+                sub_segments: [{
+                    sub_segment_id: 'subseg:test:0',
+                    friendly_osids: ['op:test:front'],
+                    enemy_osids: ['op:enemy:x'],
+                    primary_brigade_ids: ['brig_front'],
+                    edge_ids: [],
+                    length_edges: 1,
+                }],
+            }),
+        ];
+
+        const adjacency = makeAdjacency([
+            ['op:test:front', 'op:test:rear_a'],
+            ['op:test:rear_a', 'op:test:rear_b'],
+        ]);
+
+        distributeBrigadesToFront(state, sectors, adjacency);
+
+        const rearLocations = [
+            state.military.formations.brig_rear_1.location_osid,
+            state.military.formations.brig_rear_2.location_osid,
+        ].sort();
+
+        expect(rearLocations).toEqual(['op:test:rear_a', 'op:test:rear_b']);
+        expect(state.military.brigade_movement_orders?.brig_rear_1).toBeUndefined();
+        expect(state.military.brigade_movement_orders?.brig_rear_2).toBeUndefined();
+    });
+
+    it('creates a short same-sector column march when the nearest empty rear target is beyond one hop', () => {
+        const state = makeState({
+            brig_front: makeFormation({ location_osid: 'op:test:front' }),
+            brig_blocker: makeFormation({ location_osid: 'op:test:rear_2' }),
+            brig_rear_1: makeFormation({ location_osid: 'op:test:rear_3', entrenchment_turns: 12 }),
+            brig_rear_2: makeFormation({ location_osid: 'op:test:rear_3', entrenchment_turns: 12 }),
+        });
+
+        const sectors = [
+            makeSector({
+                assigned_brigade_ids: ['brig_front'],
+                reserve_brigade_ids: [],
+                rear_brigade_ids: ['brig_rear_1', 'brig_rear_2'],
+                territory_osids: ['op:test:front', 'op:test:rear_1', 'op:test:rear_2', 'op:test:rear_3'],
+                sub_segments: [{
+                    sub_segment_id: 'subseg:test:0',
+                    friendly_osids: ['op:test:front'],
+                    enemy_osids: ['op:enemy:x'],
+                    primary_brigade_ids: ['brig_front'],
+                    edge_ids: [],
+                    length_edges: 1,
+                }],
+            }),
+        ];
+
+        const adjacency = makeAdjacency([
+            ['op:test:front', 'op:test:rear_1'],
+            ['op:test:rear_1', 'op:test:rear_2'],
+            ['op:test:rear_2', 'op:test:rear_3'],
+        ]);
+
+        distributeBrigadesToFront(state, sectors, adjacency);
+
+        const movedDirectly = ['op:test:rear_1', 'op:test:rear_2'].includes(
+            state.military.formations.brig_rear_1.location_osid,
+        ) || ['op:test:rear_1', 'op:test:rear_2'].includes(
+            state.military.formations.brig_rear_2.location_osid,
+        );
+        const orders = [
+            state.military.brigade_movement_orders?.brig_rear_1,
+            state.military.brigade_movement_orders?.brig_rear_2,
+        ].filter(Boolean);
+
+        expect(movedDirectly).toBe(false);
+        expect(orders).toHaveLength(1);
+        expect(orders[0]!.destination_sids).toEqual(['op:test:rear_1']);
+        expect(orders[0]!.stance).toBe('column');
+    });
+
+    it('can directly repair two-hop rear stacks when called from the final truth seal', () => {
+        const state = makeState({
+            brig_front: makeFormation({ location_osid: 'op:test:front' }),
+            brig_blocker: makeFormation({ location_osid: 'op:test:rear_2' }),
+            brig_rear_1: makeFormation({ location_osid: 'op:test:rear_3', entrenchment_turns: 12 }),
+            brig_rear_2: makeFormation({ location_osid: 'op:test:rear_3', entrenchment_turns: 12 }),
+        });
+
+        const sectors = [
+            makeSector({
+                assigned_brigade_ids: ['brig_front'],
+                reserve_brigade_ids: [],
+                rear_brigade_ids: ['brig_rear_1', 'brig_rear_2'],
+                territory_osids: ['op:test:front', 'op:test:rear_1', 'op:test:rear_2', 'op:test:rear_3'],
+                sub_segments: [{
+                    sub_segment_id: 'subseg:test:0',
+                    friendly_osids: ['op:test:front'],
+                    enemy_osids: ['op:enemy:x'],
+                    primary_brigade_ids: ['brig_front'],
+                    edge_ids: [],
+                    length_edges: 1,
+                }],
+            }),
+        ];
+
+        const adjacency = makeAdjacency([
+            ['op:test:front', 'op:test:rear_1'],
+            ['op:test:rear_1', 'op:test:rear_2'],
+            ['op:test:rear_2', 'op:test:rear_3'],
+        ]);
+
+        distributeBrigadesToFront(state, sectors, adjacency, { rearDirectRepairMaxHops: 2 });
+
+        const locations = [
+            state.military.formations.brig_rear_1.location_osid,
+            state.military.formations.brig_rear_2.location_osid,
+        ].sort();
+
+        expect(locations).toEqual(['op:test:rear_1', 'op:test:rear_3']);
+        expect(state.military.brigade_movement_orders?.brig_rear_1).toBeUndefined();
+        expect(state.military.brigade_movement_orders?.brig_rear_2).toBeUndefined();
+    });
+
+    it('disperses physically rear assigned brigades even before later bucket reclassification demotes them', () => {
+        const state = makeState({
+            brig_assigned_offfront: makeFormation({ location_osid: 'op:test:rear_a', entrenchment_turns: 12 }),
+            brig_rear: makeFormation({ location_osid: 'op:test:rear_a', entrenchment_turns: 12 }),
+        });
+
+        const sectors = [
+            makeSector({
+                assigned_brigade_ids: ['brig_assigned_offfront'],
+                reserve_brigade_ids: [],
+                rear_brigade_ids: ['brig_rear'],
+                territory_osids: ['op:test:front', 'op:test:rear_a', 'op:test:rear_b'],
+                sub_segments: [{
+                    sub_segment_id: 'subseg:test:0',
+                    friendly_osids: ['op:test:front'],
+                    enemy_osids: ['op:enemy:x'],
+                    primary_brigade_ids: ['brig_assigned_offfront'],
+                    edge_ids: [],
+                    length_edges: 1,
+                }],
+            }),
+        ];
+
+        const adjacency = makeAdjacency([
+            ['op:test:front', 'op:test:rear_a'],
+            ['op:test:rear_a', 'op:test:rear_b'],
+        ]);
+
+        distributeBrigadesToFront(state, sectors, adjacency);
+
+        const locations = [
+            state.military.formations.brig_assigned_offfront.location_osid,
+            state.military.formations.brig_rear.location_osid,
+        ].sort();
+
+        expect(locations).toEqual(['op:test:rear_a', 'op:test:rear_b']);
+    });
+
+    it('fills an unmanned sub-segment by marching a same-sector reserve brigade to its front', () => {
+        const state = makeState({
+            brig_reserve: makeFormation({ location_osid: 'op:test:rear_2', entrenchment_turns: 12 }),
+        });
+
+        const sectors = [
+            makeSector({
+                assigned_brigade_ids: [],
+                reserve_brigade_ids: ['brig_reserve'],
+                rear_brigade_ids: [],
+                territory_osids: ['op:test:front', 'op:test:rear_1', 'op:test:rear_2'],
+                sub_segments: [{
+                    sub_segment_id: 'subseg:test:gap',
+                    friendly_osids: ['op:test:front'],
+                    enemy_osids: ['op:enemy:x'],
+                    primary_brigade_ids: [],
+                    edge_ids: ['edge:1', 'edge:2', 'edge:3'],
+                    length_edges: 3,
+                    gap: true,
+                }],
+            }),
+        ];
+
+        const adjacency = makeAdjacency([
+            ['op:test:front', 'op:test:rear_1'],
+            ['op:test:rear_1', 'op:test:rear_2'],
+        ]);
+
+        distributeBrigadesToFront(state, sectors, adjacency);
+
+        expect(state.military.formations.brig_reserve.location_osid).toBe('op:test:rear_2');
+        expect(state.military.brigade_movement_orders?.brig_reserve).toEqual({
+            destination_sids: ['op:test:front'],
+            stance: 'column',
+        });
+    });
+
+    it('commits an understrength sector reserve to an otherwise unmanned sub-segment', () => {
+        const state = makeState({
+            brig_reserve: makeFormation({ location_osid: 'op:test:rear_1', entrenchment_turns: 12 }),
+        });
+
+        const sectors = [
+            makeSector({
+                assigned_brigade_ids: [],
+                reserve_brigade_ids: ['brig_reserve'],
+                rear_brigade_ids: [],
+                territory_osids: ['op:test:front_a', 'op:test:front_b', 'op:test:rear_1'],
+                sub_segments: [{
+                    sub_segment_id: 'subseg:test:thin',
+                    friendly_osids: ['op:test:front_a', 'op:test:front_b'],
+                    enemy_osids: ['op:enemy:x'],
+                    primary_brigade_ids: [],
+                    edge_ids: ['edge:1', 'edge:2'],
+                    length_edges: 2,
+                    gap: true,
+                }],
+            }),
+        ];
+
+        const adjacency = makeAdjacency([
+            ['op:test:front_a', 'op:test:rear_1'],
+            ['op:test:front_b', 'op:test:rear_1'],
+        ]);
+
+        distributeBrigadesToFront(state, sectors, adjacency);
+
+        expect(state.military.formations.brig_reserve.location_osid).toBe('op:test:front_a');
+        expect(state.military.brigade_movement_orders?.brig_reserve).toBeUndefined();
+    });
+
+    it('may promote a reserve when the sector has enough active brigades to cover its frontage', () => {
+        const state = makeState({
+            brig_front: makeFormation({ location_osid: 'op:test:front_a', entrenchment_turns: 12 }),
+            brig_reserve: makeFormation({ location_osid: 'op:test:rear_1', entrenchment_turns: 12 }),
+        });
+
+        const sectors = [
+            makeSector({
+                assigned_brigade_ids: ['brig_front'],
+                reserve_brigade_ids: ['brig_reserve'],
+                rear_brigade_ids: [],
+                territory_osids: ['op:test:front_a', 'op:test:front_b', 'op:test:rear_1'],
+                sub_segments: [{
+                    sub_segment_id: 'subseg:test:coverable',
+                    friendly_osids: ['op:test:front_a', 'op:test:front_b'],
+                    enemy_osids: ['op:enemy:x'],
+                    primary_brigade_ids: ['brig_front'],
+                    edge_ids: ['edge:1', 'edge:2'],
+                    length_edges: 2,
+                    gap: false,
+                }],
+            }),
+        ];
+
+        const adjacency = makeAdjacency([
+            ['op:test:front_a', 'op:test:rear_1'],
+            ['op:test:front_b', 'op:test:rear_1'],
+        ]);
+
+        distributeBrigadesToFront(state, sectors, adjacency);
+
+        expect(
+            ['op:test:front_a', 'op:test:front_b'].includes(state.military.formations.brig_reserve.location_osid),
+        ).toBe(true);
+    });
+
 });

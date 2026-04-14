@@ -1,8 +1,21 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-09. 228 lessons across 9 topic files.
+> Last restructured: 2026-04-11. 231 lessons across 9 topic files.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
+
+## New Lessons (2026-04-10)
+
+### [Architecture] Validator exemptions that suppress real sim failures are always wrong — fix the sim — see `docs/life_lessons/architecture.md`
+- bb454db4 exempted army HQ brigades from unresolved-sector validator. Hid a real sim gap (65th genuinely unresolved). dc742d9e fixed the actual sim. Pattern: when a validator fails, fix the system under test, not the test harness.
+
+### [Architecture] Latent contract violations are worth closing proactively — don't wait for live triggers — see `docs/life_lessons/architecture.md`
+- rescueUnassignedLoanedElitesInTerritory() could bypass 1-reserve-per-sector invariant. Zero delta (n1420 = n1421). Guard added anyway. If a code path CAN violate an invariant, fix it now.
+
+### [UI] Player-facing state must go through tier-gated abstractions — never expose raw numerics — see `docs/life_lessons/ui_map.md`
+- 6 hardening commits follow same pattern: replace raw state with playerSafe*() functions. The abstraction boundary IS the information control point.
+
+---
 
 ## New Lessons (2026-04-09)
 
@@ -146,8 +159,8 @@
 ### [Process] Validate expert diagnosis against run data BEFORE implementing the fix — VIOLATED 2026-04-07 (second instance) — see `docs/life_lessons/process.md`
 - Phase F DRINA investigation: subagent claimed "Op Teočak deleted" as the root cause — Op Teočak had NOT been deleted. Claim was deferred rather than immediately verified in code. Also violated in 2026-03-31 (trimming diagnosis). Two instances in two weeks: this pattern is an active threat. Require mechanistic verification ("what diagnostic field would change if this fix is correct?") before accepting any subagent root-cause claim.
 
-### [Architecture] When a guard is added to one pipeline path, audit ALL paths — VALIDATED PATTERN (moved from Recently Violated 2026-04-07) — see `docs/life_lessons/architecture.md`
-- Violated 2026-04-05 (Step 6b guard without Step 8d), complied 2026-04-06, validated. No new violations in 72h window. Pattern confirmed: when adding a guard to prevent outcome X, grep for every function in the pipeline that can also produce X.
+### [Architecture] When a guard is added to one pipeline path, audit ALL paths — CONFIRMED STRONG PATTERN (promoted 2026-04-11) — see `docs/life_lessons/architecture.md`
+- Violated 2026-04-05 (Step 6b guard without Step 8d), complied 2026-04-06, validated 2026-04-07. Reserve cap audit 2026-04-10 cataloged 14 write sites across 3 files — strongest validation yet. Three consecutive compliance instances over 4 days. No violations since original fix.
 
 ### [Architecture] Movement orders must declare stance explicitly — ARCHIVED 2026-04-07 (no new violations)
 - Fixed 2026-04-05. No new violations. `stance: 'column'` required for multi-hop movement orders. Archived from active watch.
@@ -388,9 +401,9 @@
 |------|--------|---------|-------------|
 | [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Bot AI | 48 | Running calibration scenarios, tuning parameters, OOB changes |
 | [combat.md](life_lessons/combat.md) | Combat, Brigade Distribution, March System | 4 | Combat resolution, brigade movement, march/distribution system |
-| [architecture.md](life_lessons/architecture.md) | Architecture, Engine, Scaling, Defaults, Data Integrity | 57 | Changing engine structure, state, pipeline, adding systems |
+| [architecture.md](life_lessons/architecture.md) | Architecture, Engine, Scaling, Defaults, Data Integrity | 59 | Changing engine structure, state, pipeline, adding systems |
 | [data_pipeline.md](life_lessons/data_pipeline.md) | Data, Pipeline, Geometry | 10 | Modifying derived data, running data scripts, geometry work |
-| [ui_map.md](life_lessons/ui_map.md) | UI, GUI, MapLibre, Rendering, React | 13 | Frontend, map, tactical overlay, modal work |
+| [ui_map.md](life_lessons/ui_map.md) | UI, GUI, MapLibre, Rendering, React | 14 | Frontend, map, tactical overlay, modal work |
 | [process.md](life_lessons/process.md) | Process, Planning, QA, Quality, Night Shift, Debugging | 55 | General development process (skim at session start) |
 | [sectors.md](life_lessons/sectors.md) | Sectors, Design | 9 | Sector system, front lines, territory assignment, sub-segments |
 | [platform.md](life_lessons/platform.md) | Platform, Tooling | 4 | Build issues, platform-specific bugs, tooling |

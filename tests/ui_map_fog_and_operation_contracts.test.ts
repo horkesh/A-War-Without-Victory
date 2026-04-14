@@ -76,6 +76,38 @@ test('parseGameState derives fog-of-war visibility from sector_intel', () => {
     assert.equal('enemy_corps_id' in (parsed.sectorIntel?.[0] ?? {}), false);
   });
 
+test('parseGameState reveals frontline enemy osids directly from war_front_edges_osid', () => {
+    const parsed = parseGameState({
+        meta: { turn: 12, phase: 'war', player_faction: 'RS' },
+        military: {
+            formations: {
+                rs_corps: { id: 'rs_corps', faction: 'RS', name: 'RS Corps', kind: 'corps', tags: [] },
+            },
+            corps_front_sectors: {},
+            sector_intel: {},
+            war_front_edges_osid: [
+                {
+                    edge_id: 'e_front',
+                    a: 'op:rs:front',
+                    b: 'op:rbih:frontline',
+                    side_a: 'RS',
+                    side_b: 'RBiH',
+                },
+            ],
+        } as any,
+        political: {
+            political_controllers: {
+                'op:rs:front': 'RS',
+                'op:rbih:frontline': 'RBiH',
+            },
+        } as any,
+    });
+
+    assert.ok(parsed.fogOfWar);
+    assert.deepEqual(parsed.fogOfWar?.visibleEnemyOsids, ['op:rbih:frontline']);
+    assert.deepEqual(parsed.fogOfWar?.visibleEnemySectorIds, []);
+});
+
 test('fog builder uses sector-intel-derived visible enemy osids', () => {
     const geojson = {
         type: 'FeatureCollection',
@@ -103,7 +135,51 @@ test('fog builder uses sector-intel-derived visible enemy osids', () => {
         {
             visibleEnemyOsids: ['op:rbih:frontline'],
             visibleEnemySectorIds: ['rbih_sector']
-        }
+        },
+        []
+    );
+
+    assert.equal(fog.features.length, 1);
+    assert.equal((fog.features[0]!.properties as any).osid, 'op:rbih:rear');
+});
+
+test('fog builder always clears live war-front endpoints even if fogOfWar.visibleEnemyOsids is stale', () => {
+    const geojson = {
+        type: 'FeatureCollection',
+        features: [
+            {
+                type: 'Feature',
+                geometry: { type: 'Polygon', coordinates: [[[0, 0], [1, 0], [1, 1], [0, 0]]] },
+                properties: { osid: 'op:rbih:frontline' }
+            },
+            {
+                type: 'Feature',
+                geometry: { type: 'Polygon', coordinates: [[[2, 0], [3, 0], [3, 1], [2, 0]]] },
+                properties: { osid: 'op:rbih:rear' }
+            }
+        ]
+    } as any;
+
+    const fog = buildFogOfWarGeoJSON(
+        geojson,
+        {
+            'op:rbih:frontline': 'RBiH',
+            'op:rbih:rear': 'RBiH'
+        },
+        'RS',
+        {
+            visibleEnemyOsids: [],
+            visibleEnemySectorIds: []
+        },
+        [
+            {
+                edge_id: 'e_front',
+                a: 'op:rs:front',
+                b: 'op:rbih:frontline',
+                side_a: 'RS',
+                side_b: 'RBiH',
+            },
+        ],
     );
 
     assert.equal(fog.features.length, 1);

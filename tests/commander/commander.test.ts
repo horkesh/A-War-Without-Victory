@@ -662,6 +662,7 @@ describe('plan', () => {
             doctrine_stance: 'balanced',
             corps_stance: 'balanced',
             corps_exhaustion: 0,
+        faction_war_exhaustion: 0,
             avg_fatigue_pct: 0,
             brigades_above_fatigue_threshold: 0,
             enemy_equipment_summary: {
@@ -754,6 +755,7 @@ describe('plan', () => {
 
         const briefing = makeMinimalBriefing({
             corps_exhaustion: 31,
+        faction_war_exhaustion: 0,
         });
 
         const result = managePlan(briefing, zones, forces, evals, null, 10);
@@ -1282,6 +1284,7 @@ describe('commander_loop', () => {
             doctrine_stance: 'balanced',
             corps_stance: 'balanced',
             corps_exhaustion: 0,
+        faction_war_exhaustion: 0,
             enemy_equipment_summary: {
                 tanks: 0,
                 artillery: 0,

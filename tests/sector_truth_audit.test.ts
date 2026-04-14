@@ -229,4 +229,66 @@ describe('auditSectorTruth', () => {
         expect(audit.counts.active_formations_in_enemy_territory).toBe(0);
         expect(audit.ok).toBe(true);
     });
+
+    it('does not flag same-corps sectors that share a seam osid but own disconnected hostile-side lines', () => {
+        const edges: EdgeRecord[] = [
+            { a: 'op:front:shared', b: 'op:enemy:left' } as EdgeRecord,
+            { a: 'op:front:shared', b: 'op:enemy:right' } as EdgeRecord,
+        ];
+        const state = makeState(
+            {
+                brig_left: makeFormation('brig_left', 'RS', 'corps_a', 'op:front:shared'),
+                brig_right: makeFormation('brig_right', 'RS', 'corps_a', 'op:front:shared'),
+            },
+            [
+                {
+                    edge_id: 'op:front:shared__op:enemy:left',
+                    a: 'op:front:shared',
+                    b: 'op:enemy:left',
+                    side_a: 'RS',
+                    side_b: 'RBiH',
+                },
+                {
+                    edge_id: 'op:front:shared__op:enemy:right',
+                    a: 'op:front:shared',
+                    b: 'op:enemy:right',
+                    side_a: 'RS',
+                    side_b: 'RBiH',
+                },
+            ],
+            {
+                'op:front:shared': 'RS',
+                'op:enemy:left': 'RBiH',
+                'op:enemy:right': 'RBiH',
+            },
+        );
+
+        const sectors = [
+            makeSector(
+                'sector:corps_a:0',
+                'corps_a',
+                'RS',
+                ['op:front:shared'],
+                ['op:enemy:left'],
+                ['op:front:shared__op:enemy:left'],
+                ['op:front:shared'],
+                ['brig_left'],
+            ),
+            makeSector(
+                'sector:corps_a:1',
+                'corps_a',
+                'RS',
+                ['op:front:shared'],
+                ['op:enemy:right'],
+                ['op:front:shared__op:enemy:right'],
+                ['op:front:shared'],
+                ['brig_right'],
+            ),
+        ];
+
+        const audit = auditSectorTruth(state, sectors, edges);
+
+        expect(audit.counts.same_corps_front_overlaps).toBe(0);
+        expect(audit.ok).toBe(true);
+    });
 });

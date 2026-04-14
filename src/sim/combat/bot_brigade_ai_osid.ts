@@ -50,6 +50,7 @@ import {
     buildOsidAdjacency,
     type Osid
 } from './osid_adjacency.js';
+import { getTacticalAdjacentOsids } from './tactical_adjacency.js';
 import { areRbihHrhbAllied, isFriendlyFaction } from '../early_war/alliance_update.js';
 import { shouldGrazBlockAttack, isGrazAccordsActive, isEastHerzegovinaPair } from '../local_truces.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
@@ -61,7 +62,7 @@ import { findBrigadeOperation } from './corps_operation_helpers.js';
 
 import { evaluateGarrisonAndDetachments, evaluateReserve, evaluateHold } from './bot_brigade_eval_hold.js';
 import { evaluateSectorMarch, evaluateReturnToCorps, evaluatePocketEvacuation, evaluateFrontCoverage } from './bot_brigade_eval_front.js';
-import { evaluateHomeDefense, evaluateSupplyGate, evaluateSectorAttack, evaluateReorganize, evaluateDefensive, evaluateOffensive, evaluateUncontestedOccupation } from './bot_brigade_eval_attack.js';
+import { evaluateHomeDefense, evaluateSupplyGate, evaluateSectorAttack, evaluateReorganize, evaluateDefensive, evaluateOffensive, evaluateUncontestedOccupation, UNCONTESTED_OCCUPATION_SCORE } from './bot_brigade_eval_attack.js';
 import { evaluateInteriorMovement } from './bot_brigade_eval_movement.js';
 import type { BrigadeEvaluationContext } from './bot_brigade_eval_types.js';
 
@@ -292,7 +293,7 @@ export function getSectorOffensiveApproachOsids(
     const currentIdx = axis ? axis.current_objective_index : (activeOp.current_objective_index ?? 0);
     const approachOsids = new Set<Osid>();
     for (const objective of objectives.slice(currentIdx)) {
-        for (const neighbor of adjacency.get(objective as Osid) ?? []) {
+        for (const neighbor of getTacticalAdjacentOsids(state, objective as Osid, adjacency)) {
             const neighborController = getPoliticalControllerOSID(state, neighbor, reverseMap);
             if (neighborController === faction || isFriendlyFaction(neighborController, faction, state)) {
                 approachOsids.add(neighbor);
@@ -487,10 +488,10 @@ function executeFactionDirectives(
         if (evaluateReserve(ctx)) continue;
         if (evaluateSupplyGate(ctx)) continue;
         if (evaluateSectorAttack(ctx)) continue;
+        if (evaluateUncontestedOccupation(ctx)) continue;
         if (evaluateHold(ctx)) continue;
         if (evaluateReorganize(ctx)) continue;
         if (evaluateDefensive(ctx)) continue;
-        if (evaluateUncontestedOccupation(ctx)) continue;
         if (evaluateOffensive(ctx)) continue;
         if (evaluateFrontCoverage(ctx)) continue;
         evaluateInteriorMovement(ctx);
@@ -592,7 +593,10 @@ export function generateAllBotOrdersOsid(
                 return strictCompare(a.bid, b.bid);
             });
             const pinned = attacks.filter((entry) => isPinnedActiveOperationAttacker(state, entry.bid));
-            const trimmable = attacks.filter((entry) => !isPinnedActiveOperationAttacker(state, entry.bid));
+            const trimmable = attacks.filter((entry) =>
+                !isPinnedActiveOperationAttacker(state, entry.bid)
+                && entry.score !== UNCONTESTED_OCCUPATION_SCORE
+            );
             const keepTrimmable = Math.max(0, maxCorpsAttacks - pinned.length);
             const trimmed = trimmable.slice(keepTrimmable);
             for (const entry of trimmed) {
@@ -609,7 +613,10 @@ export function generateAllBotOrdersOsid(
         const warlordFrictionEndWeek = state.military.war_timeline?.officer_config?.RBiH?.warlord_friction_end_week ?? 78;
         if (faction === 'RBiH' && turn < warlordFrictionEndWeek) {
             for (const [cid, attacks] of [...attacksByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
-                const trimmable = attacks.filter((entry) => !isPinnedActiveOperationAttacker(state, entry.bid));
+                const trimmable = attacks.filter((entry) =>
+                    !isPinnedActiveOperationAttacker(state, entry.bid)
+                    && entry.score !== UNCONTESTED_OCCUPATION_SCORE
+                );
                 if (trimmable.length <= 1) continue; // Need at least 2 non-operation attackers for friction
                 // Sort by bid for deterministic selection
                 const sorted = [...trimmable].sort((a, b) => strictCompare(a.bid, b.bid));

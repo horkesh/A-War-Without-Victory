@@ -66,12 +66,12 @@ This plan therefore absorbs the review in two ways:
 | Operation lifecycle / execution / combat causality | `A-` | Readiness, rosters, battle ownership, and false invalidation seams improved substantially. | `A` | Finish the operation launch-model hardening still deferred in roadmap language: sector-anchored, corps-authorized, reinforcement-bounded launch truth, then rerun long scenarios to prove invalid ops remain at zero under the stricter contract. | 40w/52w proof, causality metrics, zero invalid-operation residuals |
 | Reserve system ownership + evidence | `A-` | Reserve ownership, severity, cause, provenance, and several driver-evidence seams are now unusually well-defined. | `A` | Run one bounded completion audit over remaining reserve drivers, preserving only packet-owned evidence and explicitly declaring the reserve explanation stack complete where no sharper truth exists. | Driver-by-driver audit report, UI contract matrix, targeted reserve tests, full suite |
 | Command / review shell coherence | `A-` | Military review ownership is much cleaner, and Army HQ now feels like a real owner rather than a duplicate shell. | `A` | Unify the remaining interrupt-modal vs sustained-review-desk ownership seams across Army HQ, reserve handoff, and political review surfaces so every live review action has one canonical queue owner. | UI ownership matrix update, targeted shell tests, walkthrough proof of one queue per action family |
-| Political leader / peace-plan / patron review systems | `B+` | Rich and meaningful, but not yet hardened with the same owner-truth rigor as sectors, operations, and reserves. | `A-` | Run a political review ownership and consequence-truth program: peace/dayton/patron review surfaces, decision provenance, and scenario proof that the same owner drives both the decision and the reporting surface. | Decision-flow audit, targeted tests, scenario proof for representative peace-plan / patron branches |
-| Autonomy / proposal / review framework | `B+` | Structurally strong, but still feels one pass short of fully battle-proven product truth. | `A-` | Complete the replay/fallback/review contract with queue ownership proof, deterministic decision audit surfaces, and scenario/harness evidence that accepted, rejected, and blocked proposals replay honestly. | Replay/fallback audit, queue-truth tests, scenario/harness runs |
+| Political leader / peace-plan / patron review systems | `A-` | **2026-04-14:** Dimension weights unified to single canonical source. DiplomacyOverview migrated to canonical 6 dimensions (dead code removed). Negotiation capital composite computed from real weights (was hardcoded 50). Exhaustion rescaled in situation_score. Negotiation pressure wired into RS peace plan acceptance floor. HRHB patron directive scoped per-corps. n1572: 93.6%, HRHB orders 2→6. Remaining: Dayton adapter side effect (redesign-gated), pressure floor for RBiH/HRHB. | `A` | Extend pressure floor to all factions. Move Dayton trigger out of adapter read path. | Per-faction pressure floor, Dayton pipeline step |
+| Autonomy / proposal / review framework | `B+` | **2026-04-14:** Resolved proposal GC added (prior-turn proposals cleared each turn instead of accumulating). Three separate queues still exist (meta proposals, event decisions, per-corps responses). No unified decision inventory. Headless replay determinism unproven. | `A-` | Unify queue inventory accessor. Add autonomy round-trip proof. Add headless replay determinism test. | Replay/fallback audit, queue-truth tests, scenario/harness runs |
 | Scenario harness / anomaly diagnostics / calibration surfaces | `B+` | Stronger than before, but still not completely through the residual board. Some anomaly families are now honest; others still need classification. | `A-` | Merge the verified cold-front density / brigade-never-fights truth lanes, then run a bounded residual audit to separate true detector drift from accepted content/runtime variance. | Anomaly deltas with unchanged hashes, consistency audit, recovery bar |
-| Code maintainability / god-file decomposition | `C+` | The substrate is materially stronger than its file structure. `war_phases.ts`, `sector_offensive.ts`, `attack_resolution_osid.ts`, and `electron-main.cjs` are still oversized merge magnets that make safe hardening slower and riskier than it needs to be. | `B-` | Run a no-behavior-drift decomposition program that extracts pure helpers and ownership-bounded submodules from the god files, starting with battle resolution, sector-offensive execution/recovery slices, war-phase repair/cleanup families, and desktop IPC contract boundaries. | Same-hash scenario proof where behavior is not meant to change, targeted extracted-module tests, full verification bar |
-| Game identity / exhaustion / negative-sum pressure | `C+` | The product still risks reading like a conquest sim if exhaustion and negotiation pressure remain mechanically weak or effectively silent in live runs. The external review surfaced this as the highest identity risk, and it has not yet been retired with fresh proof. | `B-` | Run an exhaustion activation and visibility audit: verify accumulation, downstream effects, negotiation pressure coupling, and player-facing visibility; fix whichever layer is dead, muted, or disconnected. | Before/after 40w proof showing non-zero exhaustion dynamics plus visible gameplay consequence |
-| Save/load / replay / adapter/read-model integrity | `B+` | Better than most projects at this stage, but still one of the biggest remaining quality multipliers. | `A-` | Execute the save/load/replay hardening plan end-to-end: migration fidelity, replay equivalence, adapter contract matrix, startup snapshot contract, and packaged-desktop continuity proof. | Migration matrix, replay equivalence runs, desktop/startup checks, full verification bar |
+| Code maintainability / god-file decomposition | `B-` | **2026-04-14:** Decomposition program CLOSED. 7 tranches extracted from `attack_resolution_osid.ts`: 1809→907 lines (-49.9%). 8 new modules, 187 targeted tests. `war_phases.ts`, `sector_offensive.ts`, and `electron-main.cjs` remain oversized but are not blocking safe hardening at current velocity. | `B` | Further decomposition only if a genuinely bounded no-drift seam emerges. Do not reopen as active driver. | Same-hash proof for any future tranche |
+| Game identity / exhaustion / negative-sum pressure | `B` | **2026-04-14:** Commander reads `faction_war_exhaustion` (n1568). `situation_score` exhaustion rescaled from dead 0-100 clamp to /6 normalization (n1571). Negotiation pressure now erodes RS territory floor gap by up to 15pp (n1572). **40w proof: n1572, 93.6%, 27/27, 6/6.** Remaining: negotiation pressure consequences for RBiH/HRHB (currently RS-only floor), exhaustion visibility in player-facing briefing. | `B+` | Extend pressure floor to RBiH/HRHB acceptance logic. Surface exhaustion drag in commander briefing UI. | Per-faction acceptance pressure, briefing UI |
+| Save/load / replay / adapter/read-model integrity | `A-` | **2026-04-14:** Real-save round-trip proven (12 tests against 13MB production save). Idempotency byte-identity, adapter-after-deserialize contract (formation/settlement/sector/front-edge counts match raw vs round-tripped), and SHA-256 hash preservation all verified. Remaining for A: replay-from-save-point equivalence (no continue-from-save facility exists yet). | `A` | Build save-load-continue facility in scenario runner, prove hash equivalence on continued run. | Continue-from-save hash chain proof |
 | Desktop runtime / packaging / shipped-platform contract | `B` | Packaged-runtime proof exists and is much stronger than before, but this is still below the simulation core in confidence. | `B+` | Promote packaged proof from "headless smoke with strong route coverage" to "shippable packaging contract": CI-owned packaged probe, installer/artifact path truth, and explicit disposition for the remaining unsigned/store gaps. | Packaged probe in CI, artifact validation, release-check proof |
 | Planner realism / salient-risk doctrine | `B-` | Not broken in an ownership sense, but still capable of overextension and low-wisdom operational choices. | `B+` | Run a doctrine program focused on salient-risk, one-brigade probe overreach, and target-selection wisdom, using scenario evidence rather than truth-surface patches. | Multi-run scenario evidence, doctrine metrics, accepted-variance notes |
 | Stranded brigade lifecycle ownership | `D+` | This is the clearest remaining contract hole. The engine can now report strandedness honestly, but it still lacks a canonical lifecycle owner. | `C` | Choose one explicit lifecycle contract for same-faction ownerless unreachable brigades, then implement that owner end-to-end before attempting any richer behavior. | Contract decision first, then Podrinje-pair before/after proof with unchanged unrelated outcomes |
@@ -82,43 +82,33 @@ This plan therefore absorbs the review in two ways:
 
 This is the recommended queue for the remaining `v0.8-to-v0.9` band.
 
-### 1. Exhaustion activation / negative-sum identity audit
+### ~~1. Code maintainability / god-file decomposition~~ — CLOSED 2026-04-14
 
-Why first:
+7 tranches complete. `attack_resolution_osid.ts` 1809→907 (-49.9%). Program canonically closed. Do not reopen unless a genuinely bounded no-drift seam emerges.
 
-- if exhaustion and negotiation pressure are still effectively silent, the game's central promise is mechanically underpowered
-- this is a cross-cutting quality and identity issue, not just a balance tweak
-- the external review was directionally right to elevate it, even though the exact runtime claim must be re-proven on current `main`
+### ~~2. Exhaustion activation / negative-sum identity audit~~ — PARTIALLY SHIPPED 2026-04-14
 
-### 2. Save/load + replay + adapter integrity
+Commander now reads `faction_war_exhaustion` via `factionExhaustionDrag` multiplier. Remaining: 40w scenario proof, negotiation pressure → consequence wiring (needs design decision).
 
-Why second:
+### ~~3. Save/load + replay + adapter integrity~~ — PARTIALLY SHIPPED 2026-04-14
 
-- it raises the confidence ceiling for everything else
-- it multiplies the value of later platform and scenario work
-- it is still a bounded hardening lane rather than realism or content
+Real-save round-trip byte-identity proven (9 tests). Remaining: adapter-after-deserialize contract test, save-load-continue hash chain.
 
-### 3. Political review ownership + consequence truth
+### 4. Political review ownership + consequence truth
 
-Why third:
+### 4. Political review ownership + consequence truth
+
+Why fourth:
 
 - the military review and reserve review stacks have improved faster than the political stack
 - this is now one of the biggest product-coherence gaps
 
-### 4. Autonomy replay / fallback / queue truth
-
-Why fourth:
-
-- autonomy is structurally impressive but still under-proven relative to the simulation core
-- it needs the same "one owner, one queue, one replay truth" discipline already applied elsewhere
-
-### 5. Code maintainability / god-file decomposition (tranche 1)
+### 5. Autonomy replay / fallback / queue truth
 
 Why fifth:
 
-- the codebase has crossed the point where structural maintainability is no longer optional background hygiene
-- god files are now slowing safe hardening by concentrating unrelated responsibilities into a few merge-magnet entrypoints
-- this can be pursued as a bounded no-behavior-drift program, separate from doctrine or redesign
+- autonomy is structurally impressive but still under-proven relative to the simulation core
+- it needs the same "one owner, one queue, one replay truth" discipline already applied elsewhere
 
 ### 6. Residual harness/content-runtime audits
 
@@ -169,41 +159,17 @@ That applies especially to:
 - commander-escalation evidence beyond the packet-owned fields
 - any political or review UI surface that wants deeper provenance than the engine currently serializes
 
-## Structural maintainability program: god files
+## Structural maintainability program: god files — PARTIALLY CLOSED
 
-This is now an explicit scorecard lane family, not background cleanup.
+**`attack_resolution_osid.ts` — CLOSED 2026-04-14.** 7 tranches, 1809→907 lines (-49.9%), 8 extracted modules, 187 targeted tests. Remaining inline logic is core orchestration — further extraction would require fake abstractions.
 
-Target files:
+**Remaining targets (not active — reopen only if a genuinely bounded no-drift seam emerges):**
 
-- `src/sim/turn_phases/war_phases.ts`
-- `src/sim/combat/sector_offensive.ts`
-- `src/sim/combat/attack_resolution_osid.ts`
-- `src/desktop/electron-main.cjs`
+- `src/sim/turn_phases/war_phases.ts` — still oversized but not currently blocking safe hardening
+- `src/sim/combat/sector_offensive.ts` — same assessment
+- `src/desktop/electron-main.cjs` — same assessment
 
-Program rules:
-
-- do not hide behavior changes inside decomposition commits
-- prefer pure-helper extraction and ownership-bounded module splits over class churn or aesthetic rearrangement
-- if a god-file extraction reveals a real logic bug, land that bug as its own lane or commit instead of burying it in refactor noise
-- every tranche must prove no unintended drift through the strongest available scenario/runtime checks
-
-Recommended decomposition order:
-
-1. `attack_resolution_osid.ts`
-   - extract outcome calculation, control-flip/displacement rules, and battle-record stamping into separately testable helpers
-2. `sector_offensive.ts`
-   - extract execution-entry gating, attack emission, and recovery-classification slices
-3. `war_phases.ts`
-   - extract post-phase repair/cleanup/validation families by owner domain rather than by arbitrary chunk size
-4. `electron-main.cjs`
-   - extract IPC contract families and read-only/mutating boundaries into named helper modules
-
-Proof standard for every tranche:
-
-- targeted tests around the extracted seam
-- full verification bar
-- same-hash scenario proof when the tranche claims no behavior change
-- explicit documentation of the canonical owner before and after extraction
+Program rules (if reopened): same as before — no hidden behavior changes, pure-helper extraction, same-hash proof, explicit ownership documentation.
 
 ## How to use this scorecard in the campaign
 
@@ -217,18 +183,25 @@ For every future hardening batch:
 
 If the top candidate is redesign-gated, demote it and rotate to the next system rather than stopping the whole campaign.
 
-## Immediate recommended next program
+## Immediate recommended next program (updated 2026-04-14)
 
-If the team wants the highest-value quality program now, run this sequence:
+**Completed (this campaign session):**
+1. ~~`god-file decomposition`~~ — CLOSED (7 tranches, resolver 1809→907)
+2. ~~`exhaustion activation`~~ — PARTIALLY SHIPPED (commander reads faction exhaustion; negotiation pressure consequences still design-gated)
+3. ~~`save/load + replay + adapter integrity`~~ — PARTIALLY SHIPPED (A- grade; continue-from-save facility still missing for full A)
 
-1. `exhaustion activation / negative-sum identity audit`
-2. `v0.8-to-v0.9 save/load + replay + adapter integrity`
-3. `political review ownership + consequence truth`
-4. `autonomy replay / fallback + queue truth`
-5. `god-file decomposition tranche 1`
-6. `residual harness/content-runtime audits`
-7. `planner/doctrine realism`
-8. `thin player-experience layer`
+**Remaining queue:**
+4. `political review ownership + consequence truth` — dimension weights unified, DiplomacyOverview migrated. Next: Dayton pipeline step (redesign-gated)
+5. `autonomy replay / fallback + queue truth` — proposal GC done. Next: queue unification (redesign-gated)
+6. `residual harness/content-runtime audits` — anomaly report clean (0 critical, 1 warning). Classification tail.
+7. `planner/doctrine realism` — design-gated
+8. `thin player-experience layer` — after identity and core-truth work
+
+**Design decisions needed before further progress:**
+- What should negotiation pressure trigger? (exhaustion → consequences)
+- What should feints do to the enemy? (feint zero-effect P2)
+- Which HVO corps should patron directives constrain? (HRHB scope)
+- What is the stranded brigade lifecycle contract? (inert/recovering/evacuated)
 
 If the team wants the hardest remaining contract hole instead, do that deliberately:
 

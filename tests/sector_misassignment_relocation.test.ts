@@ -92,13 +92,19 @@ describe('post-merge misassignment relocation', () => {
         ];
 
         const sectors = buildCorpsFrontSectors(state, edges, null);
-        const homeOwner = Object.values(sectors).find((sector) => sector.territory_osids.includes('op:home:rear'));
-        expect(homeOwner).toBeDefined();
-        expect(homeOwner?.assigned_brigade_ids).toContain('brig_home');
+        const assignedOwner = Object.values(sectors).find((sector) => sector.assigned_brigade_ids.includes('brig_home'));
+        expect(assignedOwner).toBeDefined();
+        expect(state.military.formations.brig_home.location_osid).toMatch(/^op:front:/);
+        expect(state.military.formations.brig_home.assignment).toEqual({
+            kind: 'sector',
+            sector_id: assignedOwner?.sector_id,
+            role: 'front',
+        });
         for (const sector of Object.values(sectors)) {
-            if (sector.sector_id === homeOwner?.sector_id) continue;
+            if (sector.sector_id === assignedOwner?.sector_id) continue;
             expect(sector.assigned_brigade_ids).not.toContain('brig_home');
             expect(sector.reserve_brigade_ids).not.toContain('brig_home');
+            expect(sector.rear_brigade_ids ?? []).not.toContain('brig_home');
         }
     });
 });

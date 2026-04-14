@@ -38,6 +38,27 @@ function areCobelligerent(factionA: string, factionB: string, turn: number): boo
            (factionA === 'HRHB' && factionB === 'RBiH');
 }
 
+/**
+ * Prefix-wide enclave definitions are too broad for passive rear-pocket cleanup.
+ * They are appropriate for resilience and siege behavior, but not for freezing
+ * isolated singleton teeth that only happen to live inside a wide municipality
+ * bundle. Capital-anchored and explicit-list enclaves remain protected here.
+ */
+function shouldProtectRearPocketClusterFromEnclave(
+    cluster: string[],
+    surroundingFaction: string,
+): boolean {
+    for (const clusterOsid of cluster) {
+        for (const enclave of ENCLAVE_DEFINITIONS) {
+            if (enclave.faction === surroundingFaction) continue;
+            if (!osidBelongsToEnclave(clusterOsid, enclave)) continue;
+            if (enclave.osid_prefixes && !enclave.osid_list && !enclave.capital_osid) continue;
+            return true;
+        }
+    }
+    return false;
+}
+
 export interface RearPocketConsolidationReport {
     flipped: Array<{ osid: Osid; from: string; to: string }>;
     total_flipped: number;
@@ -136,17 +157,7 @@ export function consolidateRearPockets(
         // correct siege geometry, NOT an abandoned pocket. Consolidation must not
         // auto-flip enclave-interior OSIDs based on topology alone.
         if (surroundingFaction) {
-            let enclaveProtected = false;
-            outer: for (const clusterOsid of cluster) {
-                for (const enclave of ENCLAVE_DEFINITIONS) {
-                    if (enclave.faction === surroundingFaction) continue; // don't protect attacker's own enclaves
-                    if (osidBelongsToEnclave(clusterOsid, enclave)) {
-                        enclaveProtected = true;
-                        break outer;
-                    }
-                }
-            }
-            if (enclaveProtected) continue;
+            if (shouldProtectRearPocketClusterFromEnclave(cluster, surroundingFaction)) continue;
         }
 
         // Auto-flip entire cluster

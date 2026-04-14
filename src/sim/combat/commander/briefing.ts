@@ -474,6 +474,7 @@ export function buildBriefing(
     // 10. Active operations currently in the field (needed by emit for RC1 fallback)
     const activeOperations = getActiveOperations(state, corpsId);
     const corpsExhaustion = getCorpsExhaustion(state, corpsId);
+    const factionWarExhaustion = state.political?.war_exhaustion?.[faction] ?? 0;
     const fatigueSummary = collectFatigueSummary(brigades);
     const enemyEquipmentSummary = collectEnemyEquipmentSummary(state, sectors);
     const adjacentCorps = collectAdjacentCorpsSummaries(state, corpsId, faction, sectors, spatial);
@@ -504,6 +505,7 @@ export function buildBriefing(
         doctrine_stance: doctrineStance,
         corps_stance: corpsStance,
         corps_exhaustion: corpsExhaustion,
+        faction_war_exhaustion: factionWarExhaustion,
         avg_fatigue_pct: fatigueSummary.avgFatiguePct,
         brigades_above_fatigue_threshold: fatigueSummary.brigadesAboveFatigueThreshold,
         enemy_equipment_summary: enemyEquipmentSummary,

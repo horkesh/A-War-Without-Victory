@@ -217,6 +217,66 @@ function makeCtx(overrides: {
 
 describe('evaluateSectorMarch — tooth guard', () => {
 
+    it('marches a one-hop sector reserve forward when its sector has no line holder', () => {
+        const loc = 'op:jablanica:jablanica_2' as Osid;
+        const front = 'op:kalinovik:sela_2' as Osid;
+        const state = makeState('brig_test', loc, [{
+            sub_segment_id: 'subseg:vrs_test_corps:empty',
+            edge_ids: ['e1'],
+            enemy_osids: ['op:rbih:enemy_1'],
+            friendly_osids: [front],
+            primary_brigade_ids: [],
+            length_edges: 1,
+        }]);
+        const sector = state.military.corps_front_sectors![`sector:${CORPS_ID}:0`]!;
+        sector.assigned_brigade_ids = [];
+        sector.reserve_brigade_ids = ['brig_test'] as any[];
+
+        const ctx = makeCtx({
+            state,
+            loc,
+            adjacency: makeAdjacency(loc, front),
+            graphAnalysis: makeGraphAnalysis([
+                [front, makeOsidAnalysis(front, ['op:rbih:enemy_1' as Osid], [loc, 'op:rs:friend_2' as Osid])],
+            ]),
+        });
+
+        const returned = evaluateSectorMarch(ctx);
+
+        expect(returned).toBe(true);
+        expect(ctx.result.column_march_orders.brig_test).toBe(front);
+    });
+
+    it('keeps a one-hop sector reserve back when its sector already has a line holder', () => {
+        const loc = 'op:jablanica:jablanica_2' as Osid;
+        const front = 'op:kalinovik:sela_2' as Osid;
+        const state = makeState('brig_test', loc, [{
+            sub_segment_id: 'subseg:vrs_test_corps:held',
+            edge_ids: ['e1'],
+            enemy_osids: ['op:rbih:enemy_1'],
+            friendly_osids: [front],
+            primary_brigade_ids: ['brig_line'],
+            length_edges: 1,
+        }]);
+        const sector = state.military.corps_front_sectors![`sector:${CORPS_ID}:0`]!;
+        sector.assigned_brigade_ids = ['brig_line'] as any[];
+        sector.reserve_brigade_ids = ['brig_test'] as any[];
+
+        const ctx = makeCtx({
+            state,
+            loc,
+            adjacency: makeAdjacency(loc, front),
+            graphAnalysis: makeGraphAnalysis([
+                [front, makeOsidAnalysis(front, ['op:rbih:enemy_1' as Osid], [loc, 'op:rs:friend_2' as Osid])],
+            ]),
+        });
+
+        const returned = evaluateSectorMarch(ctx);
+
+        expect(returned).toBe(false);
+        expect(ctx.result.column_march_orders.brig_test).toBeUndefined();
+    });
+
     it('Test 1: single-tooth salient (7 enemy neighbors) → direct march suppressed, trap remediation routes to safe alternate', () => {
         // Topology design:
         //   Assigned sector has ONE sub-segment: { friendly_osids: [tooth] } — a pure tooth.

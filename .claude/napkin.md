@@ -10,8 +10,8 @@
 
 **Player command model CANON (n717):** Player commands Army→Corps→Sector only. Brigades NEVER attack independently. Valid tactical levers: corps stance, sector stance, ops planning, logistics priority, OPSEC, sector override. Direct brigade attack/move orders are architecturally wrong.
 
-## Current State (2026-04-07, v0.8.x-final CLOSED)
-**2962/2962 vitest (209 files). v0.8.4 ALL PHASES CLOSED. v0.8.x-final Command Authority Cleanup CLOSED 2026-04-07 (commit b932a3e7). Next: v0.8-to-v0.9 simplification lane or v0.9 per MASTER_ROADMAP.md.**
+## Current State (2026-04-14, v0.8-to-v0.9 active)
+**3499/3499 vitest (297 suites). v0.8.4 ALL PHASES CLOSED. v0.8.x-final CLOSED. v0.8-to-v0.9 hardening active. Latest baseline: n1570 (93.5%, 27/27, 6/6, 0 ZEA, 0 invalid ops, hash `6810f0c64713e7f6`). God-file decomposition CLOSED (7 tranches, resolver 1809→907). Commander reads faction war exhaustion. Save/load round-trip proven on real saves.**
 v0.8.x-final: 28 files annotated (T1-T6 movement authority tiers + canonical/transitional ownership blocks). MOVEMENT_AUTHORITY.md created. RS_BLITZ_PHASE_END_WEEK deleted; probe_exempt data-driven. comms_override_by_corps in scenario JSON. unresolvedSectorBrigades wired end-to-end (Codex #6). 3 new test suites (movement_authority_tiers/hardcoded_rail_audit/ui_adapter_boundary — 15 tests). Calibration n1359: 92.7%, 27/27 anchors, 6/6 benchmarks. Report: `docs/40_reports/implemented/20260407_V08X_FINAL_COMMAND_AUTHORITY_CLEANUP.md`. Deferred to v0.8-to-v0.9: Phase 5 diagnostics/SITREP unification; brigade_assignment.ts annotation (Codex branch conflict).
 **Architectural finding (v0.8.x-final):** commander_loop.ts has bounded T1 exception — writes brigade_movement_orders for surplus prepositioning. Documented in annotation; not a violation.
 DRINA investigation complete (n1358): root cause proven (absent ARBiH Podrinje defensive ops; RS captures via multiple vectors). Fixes: Op Drina bratunac_vlasenica cerska_2+pobudje_2 removed; initial controllers fixed (jezestica_2, donje_zesce, obadi, sebiocina → RBiH); painted targets corrected (radovcici, sulice_2 → RBiH). Remaining DRINA mismatches accepted as calibration variance — require ARBiH Cerska/Bratunac/Višegrad/Foča defensive ops. Report: `docs/40_reports/implemented/20260407_DRINA_CALIBRATION_INVESTIGATION.md`.
@@ -24,11 +24,11 @@ Commander Intelligence Overhaul (n1294–1301): must_hold 1.5× garrison (Brcko/
 
 **Open P1s:**
 - **[RESOLVED 2026-04-07] DRINA investigation CLOSED**: root cause proven — absent ARBiH Podrinje defensive ops; RS captures via multiple vectors (paramilitary, consolidation, ops). Fixes: Op Drina scope (cerska_2+pobudje_2 removed), initial controllers (jezestica_2/donje_zesce/obadi/sebiocina→RBiH), painted targets (radovcici/sulice_2→RBiH). Remaining mismatches (~11 RS overcaptures) accepted as calibration variance. Future work: ARBiH Cerska/Bratunac/Višegrad/Foča defensive ops. n1358: 93.6%, 27/27.
-- **boljanic_2 (Doboj)**: arbih_3rd_corps auto-generates ops from petrovo_2 adjacency; vrs_1st_krajina has no hold_osids for Doboj. rs_2nd_armored displaced to petrovo_2 (856 pers, morale 35). Fix: add boljanic_2 + adjacent Doboj OSIDs to vrs_1st_krajina hold_osids.
-- **Ozren pocket** (petrovo_2, brijesnica_donja_2, vozuca_2): all flip RBiH w31–40 (historical fall: Sep 1995). Fix: add hold_osids to Ozren brigades; add petrovo_2 + brijesnica_donja_2 as RS anchors in scenario_runner.ts.
-- **Casualty ratio discrepancy**: attack_resolution reports 0.814, anomaly_detection reports 0.63 — data source mismatch.
-- **ZEA rate 47%** (up from 39%): op-scale cap narrowing eligible attacker pools.
-- vrs_east_bosnian zero-attack ops (bounded: 2 ZEA ops at 6.7%, down from 47% — staging unreachability + Sarajevo siege); estimateTurnsActive broken suspend counter; jajce_falls turn_min 40→28; 3 stale ssid refs; P5 NATO air; P6 breakthrough.
+- ~~**boljanic_2 (Doboj)**~~ — **RESOLVED**: n1568 anchor PASS (RS→RS). Previous issue was ARBiH overcapture from Petrovo adjacency.
+- ~~**Ozren pocket** (petrovo_2, brijesnica_donja_2, vozuca_2)~~ — **RESOLVED**: All 3 anchors PASS in n1568 (RS→RS). Previously flipped RBiH w31-40. Exhaustion drag + defensive fire hardening likely stabilized the front.
+- ~~**Casualty ratio discrepancy**~~ — **RESOLVED 2026-04-14.** Root cause: anomaly detector counted frontline friction engagements mixed with battle casualties. Fix: filter by `battle_id` format, report friction separately.
+- ~~**ZEA rate 47%**~~ — **RESOLVED**: n1568 shows 0 ZEA operations (was 47% at n1302). Combat predictor and sector-anchored launch fixes eliminated the structural cause.
+- vrs_east_bosnian zero-attack ops (bounded: ~~2 ZEA ops at 6.7%~~ → 0 ZEA in n1568); estimateTurnsActive broken suspend counter (needs investigation); ~~jajce_falls turn_min 40→28~~ **FIXED 2026-04-14** (was 40, now 28 — historical fall Oct 1992 ≈ w28); ~~3 stale ssid refs~~ **RESOLVED 2026-04-14** (brigades are legitimately sector-assigned; safety-net sweep added in `final_sector_truth_reconciliation.ts`); P5 NATO air; P6 breakthrough.
 - **[RESOLVED 2026-04-06] warlord_friction enclave-lock guard**: `checkWarlordFriction` now skips `refused_release` for officers with active `enclave_lock`. 4 tests. 2881 vitest.
 - **RESOLVED this session:** P9 supply recalibration (graduated scoring + BFS corridor fix), estimateForceRatio supply awareness (demoted — practically inert), COMBAT-P14 (stale — feasibility check now includes defender modifiers).
 
@@ -184,24 +184,24 @@ After EVERY scenario run, the orchestrator:
 
 **Ops engine backlog (2026-03-28):**
 - **[P1] Bake initial OSID control into scenario JSON (2026-03-31)** — initial `political_controllers` currently derived at runtime from municipality-level data → wrong per-OSID assignments (e.g. all Stolac/Capljina OSIDs init as RS, blocking Op Jackal staging). Fix: write explicit `initial_osid_controllers` map into scenario JSON (one-time curation per scenario); read it at init instead of deriving. Discovered during Op Jackal root-cause investigation. Historian must determine correct April 1992 per-OSID controllers for Stolac/Capljina before Op Jackal can be fixed.
-- **[P1] `validateOpAtInjection()`** — engine-level validation firing at op injection. Five failure modes to catch: (1) non-existent OSID objectives, (2) staging not adjacent to first-objective path, (3) brigade doesn't exist at injection turn, (4) all objectives already friendly-controlled, (5) cross-corps axis assignment. Stop patching individual ops; fix the engine.
-- **[P2] Check #12 false positive** — `operation_zero_eligible_execution` flags Op Drina + Op Visegrad (consolidation sweeps). Fix: one-line exclusion `if (op.success && op.captures > 0 && op.attacks === 0) skip`. Files: `anomaly_detector.ts`.
-- **[P2] Ghost sector investigation** — 5 empty sectors with front edges. `phantom_sector_advantage` check #11 may be reading the wrong fields to detect these. Verify which field represents "sector has no brigades" in the anomaly detector vs the sector data structure.
-- **[P2] Op Foča `rs_kalinovik_brigade`** — `home_osid` is `zavait_3`, should be `kalinovik_2`; Kalinovik staging OSID not adjacent to `varos_2`. Brigade stranded at injection.
-- **[P2] Op Herzegovina Consolidation** — `rs_2nd_herzegovina` spawns w20 but op fires w12 → axis always dropped. Either delay op to w22+ or find a w12-eligible replacement brigade.
-- **[P2] Op Donji Vakuf** — `rs_19th` dissolves before injection; 2 objectives (`torlakovac_2`, `babin_potok_2`) always pre-captured. Need dissolution-resistant brigade assignment + conditional objective guard.
+- ~~**[P1] `validateOpAtInjection()`**~~ — **ALREADY IMPLEMENTED:** `operation_validation.ts:84` exports `validateOpAtInjection()` + `collectOpInjectionWarnings()`. Called from `pre_planned_operations.ts` (initial + queued injection) and `triggered_operations.ts`. All 5 failure modes covered.
+- ~~**[P2] Check #12 false positive**~~ — **STALE (n1572):** 0 matching ops (success+captures+0attacks). No false positive to fix.
+- ~~**[P2] Ghost sector investigation**~~ — **STALE (n1572):** 0 phantom_sector_advantage anomalies. Ghost sectors eliminated by sector truth hardening.
+- ~~**[P2] Op Foča `rs_kalinovik_brigade`**~~ — **ALREADY FIXED:** home_osid is `kalinovik_2` (verified in OOB data).
+- ~~**[P2] Op Herzegovina Consolidation**~~ — **REWRITTEN:** now trigger-gated on Op Višegrad + Op Foča completion, uses `rs_nevesinje_brigade` + `rs_bilea_brigade` (not rs_2nd_herzegovina).
+- ~~**[P2] Op Donji Vakuf**~~ — **ACCEPTED VARIANCE:** rs_19th active in n1572, 4/5 objectives captured via consolidation before queued op executes. Territory falls organically — not a bug.
 - **[P3] Op Kotor Varos** — 1KK queue always full w10-w40; Kotor Varos never gets its op. Design queue priority mechanism or dedicated 2KK handoff.
 
-**Engine health quick wins (2026-04-02) — all ≤30 lines, high-confidence fixes:**
-- **[P1] Combat predictor blind to defender multipliers** — `checkLaunchFeasibility()` uses `basePower × 0.8` only; ignores defender artillery (`getDefensiveFireMult` up to 1.8×), terrain (urban 1.35×, forest 1.15×), entrenchment (+51%). **Primary driver of 47% ZEA rate.** Fix: multiply defender raw power by these factors before computing required force. File: `bot_corps_directives.ts`. ~30 lines.
-- **[P1] `recent_territory_change` hardcoded 0** — `assessCorps()` returns 0 always. Theater Assessment trend-blind. Fix: count Δ(friendly_osids) over last 3–5 turns. File: `src/sim/combat/commander/assess.ts`. ~20 lines.
-- **[P1] `supply_by_osid` never consumed by briefing** — hardcoded 0.8. Fix: read supply for sector OSIDs, derive min/mean, pass to briefing. File: `src/sim/combat/commander/briefing.ts`. ~15 lines.
-- **[P2] Feint has zero enemy effect** — applies −5 cohesion to own brigades only. Fix: when feint active on sector, raise enemy sector threat_ratio ×1.5 for the duration. File: `src/sim/combat/sector_offensive.ts`. ~20 lines.
-- **[P2] Corps exhaustion not in briefing** — field exists in state, never passed. Fix: single lookup. File: `briefing.ts`. ~5 lines.
-- **[P2] Enemy equipment absent from briefing** — Fix: derive `{ artillery, tanks, infantry_only }` from adjacent enemy brigades. File: `briefing.ts`. ~25 lines.
-- **[P2] Op-level failure cap broken (Issue #29)** — cap applied per-axis (8 failures each), not per-operation. File: `sector_offensive.ts`. ~10 lines.
-- **[P2] Winter season combat modifier absent** — Fix: `getSeasonalCombatMult(week)` ~15% attacker penalty weeks 1–8 and 48–52. File: `combat_math.ts`. ~15 lines.
-- **[P0] CampaignPlan not wired to corps CO briefings** — `army_hq_gathering.ts` produces `CampaignPlan` every turn; `buildBriefing()` never reads it. Strategic layer structurally disconnected. Needs design first. File: `commander/briefing.ts`. ~30 lines wiring, but requires design of how priorities map to briefing fields.
+**Engine health quick wins (2026-04-02, curated 2026-04-14):**
+- ~~[P1] Combat predictor blind to defender multipliers~~ — **RESOLVED**: ZEA rate now 0% in n1568 (was 47%). Predictor improvements landed in earlier sessions.
+- ~~[P1] `recent_territory_change` hardcoded 0~~ — **RESOLVED**: `computeRecentTerritoryChange()` in `army_hq_gathering.ts` reads `control_events`, counts Δ over last N turns.
+- ~~[P1] `supply_by_osid` never consumed by briefing~~ — **RESOLVED**: Consumed in `assess.ts`, `belief.ts`, `force_eval.ts`, `emit.ts`.
+- ~~**[P2] Feint has zero enemy effect**~~ — **STALE (verified 2026-04-14).** `brigade_assignment.ts` already has `FEINT_THREAT_MULTIPLIER = 1.5` and `hasActiveEnemyFeintAgainstSector()`. Enemy sector threat_ratio inflated 1.5× when feint active. `sector_intel.ts:computeOffensiveSigns()` also detects feints as offensive signs at confidence >= 0.5.
+- ~~[P2] Corps exhaustion not in briefing~~ — **RESOLVED**: `corps_exhaustion` is on `CommanderBriefing`. `faction_war_exhaustion` added 2026-04-14.
+- ~~[P2] Enemy equipment absent from briefing~~ — **RESOLVED**: `enemy_equipment_summary` on `CommanderBriefing`, consumed by plan scoring.
+- ~~[P2] Op-level failure cap broken~~ — **RESOLVED**: Op-level + axis-level `consecutive_failures_on_current` tracking in `sector_offensive.ts`.
+- ~~[P2] Winter season combat modifier absent~~ — **RESOLVED**: `seasonal_effects.ts` with full month-by-month multipliers, defense bonus, terrain interaction, attack share reduction.
+- **[P0] CampaignPlan not wired to corps CO briefings** — Still live but **design-gated**. `army_hq_gathering.ts` produces `CampaignPlan`; `buildBriefing()` has `campaign_intent` but not the full plan. Needs design: how do army-level priorities map to corps briefing fields?
 
 **Deferred to roadmap:**
 - Front Line Terrain Tinting (P4) → v0.9.4 (Map That Scars milestone)

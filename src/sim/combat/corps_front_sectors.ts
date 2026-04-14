@@ -13,7 +13,7 @@
  *      into false sector truth.
  *   2. Brigades at a sector MUST be at the frontline. Exception: one reserve
  *      brigade per sector sits 1 hop behind the front (recovery/reaction).
- *      Deep-rear brigades are kept assigned and march forward via interior movement.
+ *      Deep-rear brigades remain sector-owned, but not in the frontline-assigned bucket.
  *
  * Derived each turn (Engine Invariants §13: no serialization of derived state).
  * Deterministic: sorted iteration via strictCompare, no Math.random().
@@ -36,7 +36,6 @@ import type { EdgeRecord } from '../../map/settlements.js';
 import type { OsidCentroidMap } from '../../data/operational_data_types.js';
 import type { SpatialContext } from '../spatial_context.js';
 import { buildOsidAdjacency, buildSharedBoundaryAdjacency, type Osid } from './osid_adjacency.js';
-import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { emitRoutineConsoleWarn } from '../../utils/routine_console_diagnostics.js';
@@ -60,17 +59,20 @@ import {
     consolidateCrossCorpsFronts,
     consolidateIsolatedCorpsPockets,
 } from './sector_territory.js';
-import { buildMultiSectorsForCorps, splitOversizedSubSegments } from './sector_building.js';
-import { mergeSectors, splitNonContiguousSectors } from './sector_splitting.js';
+import { buildMultiSectorsForCorps, buildSectorFromSubSegments, findSubSegments, splitOversizedSubSegments } from './sector_building.js';
+import { areSectorsEdgeAdjacent, mergeSectors, splitNonContiguousSectors } from './sector_splitting.js';
 import {
     classifyBrigadesByTerritory,
     assignCrossCorpsEnclaveDefenders,
+    buildOneHopReserveBand,
     ensureMinimumSectorCoverage,
     reclassifyRearBrigades,
     brigadeRequiresSectorAssignment,
     enforcePhysicalSectorOwnership,
     rehomeUnassignedBrigadesToPhysicalSectorOwners,
     deduplicateBrigadesAcrossSectors,
+    isMovementOwnedHomeReturn,
+    isMovementOwnedReturnToCorps,
     recomputeSectorPowerAndThreat,
     syncSectorAssignmentsToFormations,
     TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS,
@@ -93,6 +95,10 @@ import {
  * @param reverseMap - operationalToCanonical map for getPoliticalControllerOSID
  * @param centroids - Optional OSID centroid map
  * @param spatial - SpatialContext providing adjacency, sharedBoundaryAdj, friendlyOsids, components
+ * @param isFinalPass - When true, emit "fell through sector pipeline" warnings. Default false
+ *   suppresses warnings because early/mid-pipeline invocations produce transient unresolved
+ *   brigades that later repair passes resolve. Only the genuinely final invocation
+ *   (reconcile-final-sector-truth-after-ops) should set this to true.
  */
 export function buildCorpsFrontSectors(
     state: GameState,
@@ -100,6 +106,7 @@ export function buildCorpsFrontSectors(
     reverseMap: Map<string, string[]> | null,
     centroids?: OsidCentroidMap,
     spatial?: SpatialContext,
+    isFinalPass: boolean = false,
 ): Record<string, CorpsFrontSector> {
     const osidFrontEdges = state.military.war_front_edges_osid;
     if (!osidFrontEdges || osidFrontEdges.length === 0) return {};
@@ -163,32 +170,154 @@ export function buildCorpsFrontSectors(
         }
         repairDisconnectedTerritory(allSectors, sharedBoundaryAdj, allFriendly);
     }
-
-    const emptiedSectorIds = canonicalizeSiblingFrontOwnership(Object.values(result), formations, globalEdgeMeta);
+    const emptiedSectorIds = canonicalizeSiblingFrontOwnership(
+        Object.values(result),
+        formations,
+        globalEdgeMeta,
+        adjacency,
+        sharedBoundaryAdj,
+        caseBSplitAdj,
+        centroids,
+    );
     for (const sectorId of emptiedSectorIds) {
         delete result[sectorId];
     }
     mergeLateSiblingFrontFragments(result, adjacency, globalEdgeMeta, sharedBoundaryAdj, centroids);
-    enforceFinalSectorGeometryInvariants(result, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids);
-    sealMergedSectorTruth(result, state, formations, adjacency, spatial);
+    enforceFinalSectorGeometryInvariants(result, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, formations);
+    const postInvariantEmptiedSectorIds = canonicalizeSiblingFrontOwnership(
+        Object.values(result),
+        formations,
+        globalEdgeMeta,
+        adjacency,
+        sharedBoundaryAdj,
+        caseBSplitAdj,
+        centroids,
+    );
+    for (const sectorId of postInvariantEmptiedSectorIds) {
+        delete result[sectorId];
+    }
+    sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial);
     relocateMisassignedBrigadesToTruthfulOwners(Object.values(result), state, formations, adjacency);
-    sealMergedSectorTruth(result, state, formations, adjacency, spatial);
+    sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial);
+    pruneGhostArtifactSectors(result);
+    recoverDroppedFrontEdges(result, state, osidFrontEdges, adjacency, sharedBoundaryAdj, caseBSplitAdj, globalEdgeMeta, formations, reverseMap, centroids, spatial);
+    sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial);
+    pruneGhostArtifactSectors(result);
+    recoverDroppedFrontEdges(result, state, osidFrontEdges, adjacency, sharedBoundaryAdj, caseBSplitAdj, globalEdgeMeta, formations, reverseMap, centroids, spatial);
+
+    // Final geometry barrier: late recovery and seal passes can still leave
+    // duplicate same-corps front ownership on sibling fragments. Resolve those
+    // at whole-piece granularity before the final packet rebuild so the last
+    // rebuild sees one canonical owner per front fragment instead of trying to
+    // canonicalize individual edges in place.
+    canonicalizeDuplicateFrontOwnershipByPiece(
+        result,
+        formations,
+        adjacency,
+        globalEdgeMeta,
+        sharedBoundaryAdj,
+        caseBSplitAdj,
+        centroids,
+    );
+
+    // Final geometry barrier: late recovery and seal passes can still leave
+    // fractured frontline packets. Rebuild the final packets from edge truth
+    // one last time and preserve brigade ownership across any split so no
+    // later writer can silently re-fragment the serialized result.
+    enforceFinalSectorGeometryInvariants(result, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, formations);
+    pruneGhostArtifactSectors(result);
+
+    // The final geometry rebuild can leave territory packets stale relative to
+    // the recovered/split edge truth. Refresh territory one last time before
+    // the final live-owner seal, otherwise zero-owner sibling fragments keep
+    // their old one-OSID packets and survive absorption even though the line
+    // truth has changed underneath them.
+    {
+        const byFaction = new Map<FactionId, CorpsFrontSector[]>();
+        for (const sector of Object.values(result)) {
+            const list = byFaction.get(sector.faction) ?? [];
+            list.push(sector);
+            byFaction.set(sector.faction, list);
+        }
+        for (const [faction, factionSectors] of byFaction) {
+            const friendlyOsids = spatial?.friendlyOsidsByFaction.get(faction)
+                ? new Set(spatial.friendlyOsidsByFaction.get(faction)!)
+                : buildFriendlyOsidsFromState(state, adjacency, faction);
+            const osidToCorps = mapOsidsToCorps(
+                state,
+                faction,
+                getCorpsForFaction(formations, faction),
+                adjacency,
+                formations,
+                reverseMap,
+            );
+            assignTerritoryVoronoi(factionSectors, adjacency, friendlyOsids, osidToCorps);
+            repairDisconnectedTerritory(factionSectors, sharedBoundaryAdj, friendlyOsids);
+        }
+    }
+
+    // Late recovery can still leave zero-owner sibling fragments behind even
+    // after the final geometry rebuild. Run one last live-owner sealing pass so
+    // overlapping same-corps fragments are absorbed before final packet truth is
+    // synchronized into formation assignments and UI-facing sector geometry.
+    sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial);
     pruneGhostArtifactSectors(result);
 
     // Merge passes can zero density/power/threat when they union sectors. Refresh
     // metrics before we sync assignments back into formation truth.
     recomputeMetricsByFaction(Object.values(result), formations, state);
 
-    // Rescue loaned elites that are in a target-corps sector's territory but were
-    // dropped during merge/seal passes. The loaned-elites pass in classifyBrigadesByTerritory
-    // may have placed them, but sealMergedSectorTruth rebuilds assignments and can discard
-    // the placement. This final rescue assigns them as reserves so they are accounted for.
+    // Final packet truth must be reconciled before the last late seal. Any sector
+    // bucket that does not physically own its brigade is false final state and must
+    // be moved or dropped before the closing absorb/seal pass serializes assignments.
+    applyFinalSectorOwnerTruthPass(result, state, formations, adjacency);
+    sealMergedSectorTruth(result, state, formations, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, spatial);
+    pruneGhostArtifactSectors(result);
     rescueUnassignedLoanedElitesInTerritory(result, formations);
+    applyFinalSectorOwnerTruthPass(result, state, formations, adjacency);
+    if (absorbEmptyStaffableSiblingSectors(
+        result,
+        state,
+        formations,
+        adjacency,
+        sharedBoundaryAdj,
+        caseBSplitAdj,
+        globalEdgeMeta,
+        centroids,
+        spatial,
+    )) {
+        enforceFinalSectorGeometryInvariants(result, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, formations);
+        pruneGhostArtifactSectors(result);
+        for (const faction of getFactions(state)) {
+            const factionSectors = Object.values(result).filter((sector) => sector.faction === faction);
+            if (factionSectors.length === 0) continue;
+            const friendlyOsids = spatial?.friendlyOsidsByFaction.get(faction)
+                ? new Set(spatial.friendlyOsidsByFaction.get(faction)!)
+                : buildFriendlyOsidsFromState(state, adjacency, faction);
+            const osidToCorps = mapOsidsToCorps(state, faction, getCorpsForFaction(formations, faction), adjacency, formations, reverseMap);
+            assignTerritoryVoronoi(factionSectors, adjacency, friendlyOsids, osidToCorps);
+            repairDisconnectedTerritory(factionSectors, sharedBoundaryAdj, friendlyOsids);
+        }
+        applyFinalSectorOwnerTruthPass(result, state, formations, adjacency);
+    }
+    for (const faction of getFactions(state)) {
+        const factionSectors = Object.values(result).filter((sector) => sector.faction === faction);
+        if (factionSectors.length === 0) continue;
+        const friendlyOsids = spatial?.friendlyOsidsByFaction.get(faction)
+            ? new Set(spatial.friendlyOsidsByFaction.get(faction)!)
+            : buildFriendlyOsidsFromState(state, adjacency, faction);
+        repairDisconnectedTerritory(factionSectors, sharedBoundaryAdj, friendlyOsids);
+    }
+    applyFinalSectorOwnerTruthPass(result, state, formations, adjacency);
+    annotateUnstaffedFrontSectors(result, state, formations, adjacency, spatial);
+    recomputeMetricsByFaction(Object.values(result), formations, state);
 
     // Sync sector assignments back to formation.assignment
-    syncSectorAssignmentsToFormations(result, formations);
+    syncSectorAssignmentsToFormations(result, formations, adjacency);
     state.military.unresolved_sector_brigades = collectUnresolvedSectorBrigades(state, result, formations, adjacency);
-    emitFinalUnresolvedSectorWarnings(state.military.unresolved_sector_brigades, formations);
+    if (isFinalPass) {
+        emitFinalUnresolvedSectorWarnings(state.military.unresolved_sector_brigades, formations);
+    }
 
     return result;
 }
@@ -210,6 +339,7 @@ function rescueUnassignedLoanedElitesInTerritory(
     for (const sec of Object.values(sectors)) {
         for (const bid of sec.assigned_brigade_ids ?? []) assigned.add(bid);
         for (const bid of sec.reserve_brigade_ids ?? []) assigned.add(bid);
+        for (const bid of sec.rear_brigade_ids ?? []) assigned.add(bid);
     }
 
     const sectorList = Object.values(sectors);
@@ -247,14 +377,8 @@ function collectUnresolvedSectorBrigades(
     formations: Record<FormationId, FormationState>,
     adjacency: Map<Osid, Osid[]>,
 ): FormationId[] {
-    const assigned = new Set<FormationId>();
     const sectorList = Object.values(sectors);
     const frontEdges = state.military.war_front_edges_osid ?? [];
-    for (const sector of Object.values(sectors)) {
-        if (!sector) continue;
-        for (const brigadeId of sector.assigned_brigade_ids ?? []) assigned.add(brigadeId);
-        for (const brigadeId of sector.reserve_brigade_ids ?? []) assigned.add(brigadeId);
-    }
 
     return Object.keys(formations)
         .sort(strictCompare)
@@ -265,8 +389,14 @@ function collectUnresolvedSectorBrigades(
             const corpsId = getFormationCorpsId(formation);
             const loaned = !!formation.elite_loan_state?.on_loan;
             if (isSectorAssignmentExemptCorpsId(corpsId) && !loaned) return false;
+            if (isMovementOwnedHomeReturn(state, formationId, formation)) {
+                return false;
+            }
+            if (isMovementOwnedReturnToCorps(state, formationId, formation, sectorList)) {
+                return false;
+            }
             if (!brigadeRequiresSectorAssignment(formation, sectorList, adjacency, frontEdges)) return false;
-            return !assigned.has(formationId);
+            return formation.assignment?.kind !== 'sector';
         });
 }
 
@@ -300,6 +430,208 @@ function recomputeMetricsByFaction(
     }
 }
 
+function canCorpsStaffSectorFront(
+    sector: CorpsFrontSector,
+    siblingSectors: CorpsFrontSector[],
+    corpsBrigadeLocations: string[],
+    factionBrigadeLocations: string[],
+    adjacency: Map<Osid, Osid[]>,
+    friendlyOsids: Set<string>,
+    componentOf: Map<string, number>,
+    corpsBrigadeComponents: Set<number>,
+    factionBrigadeComponents: Set<number>,
+): boolean {
+    const uniqueFrontOsids = getSectorUniqueFrontOsids(sector, siblingSectors);
+    if (uniqueFrontOsids.size > 0) {
+        if (canAnyBrigadeReachAny(
+            corpsBrigadeLocations,
+            uniqueFrontOsids,
+            adjacency,
+            friendlyOsids,
+            TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS,
+        )) {
+            return true;
+        }
+        return !canAnyBrigadeReachAny(
+            factionBrigadeLocations,
+            uniqueFrontOsids,
+            adjacency,
+            friendlyOsids,
+            TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS,
+        );
+    }
+
+    const sectorComp = getSectorComponent(sector, componentOf);
+    return sectorComp === -1
+        || corpsBrigadeComponents.has(sectorComp)
+        || !factionBrigadeComponents.has(sectorComp);
+}
+
+function isSectorUnstaffableByFaction(
+    sector: CorpsFrontSector,
+    siblingSectors: CorpsFrontSector[],
+    factionBrigadeLocations: string[],
+    adjacency: Map<Osid, Osid[]>,
+    friendlyOsids: Set<string>,
+    componentOf: Map<string, number>,
+    factionBrigadeComponents: Set<number>,
+): boolean {
+    const uniqueFrontOsids = getSectorUniqueFrontOsids(sector, siblingSectors);
+    if (uniqueFrontOsids.size > 0) {
+        return !canAnyBrigadeReachAny(
+            factionBrigadeLocations,
+            uniqueFrontOsids,
+            adjacency,
+            friendlyOsids,
+            TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS,
+        );
+    }
+
+    const sectorComp = getSectorComponent(sector, componentOf);
+    return sectorComp === -1 || !factionBrigadeComponents.has(sectorComp);
+}
+
+export function annotateUnstaffedFrontSectors(
+    sectors: Record<string, CorpsFrontSector>,
+    state: GameState,
+    formations: Record<FormationId, FormationState>,
+    adjacency: Map<Osid, Osid[]>,
+    _spatial?: SpatialContext,
+): void {
+    const byFaction = new Map<FactionId, CorpsFrontSector[]>();
+    for (const sector of Object.values(sectors)) {
+        delete sector.unstaffed_front;
+        const list = byFaction.get(sector.faction) ?? [];
+        list.push(sector);
+        byFaction.set(sector.faction, list);
+    }
+
+    for (const faction of getFactions(state)) {
+        const factionSectors = byFaction.get(faction) ?? [];
+        if (factionSectors.length === 0) continue;
+        const friendlyOsids = buildFriendlyOsidsFromState(state, adjacency, faction);
+        const componentOf = buildFriendlyComponents(adjacency, friendlyOsids);
+        const factionBrigadeLocations = Object.values(formations)
+            .filter((formation) =>
+                formation.faction === faction
+                && formation.status === 'active'
+                && formation.location_osid)
+            .map((formation) => formation.location_osid!);
+        const factionBrigadeComponents = new Set<number>();
+        for (const location of factionBrigadeLocations) {
+            const component = componentOf.get(location);
+            if (component != null) factionBrigadeComponents.add(component);
+        }
+
+        for (const sector of factionSectors) {
+            if (sector.edge_ids.length === 0) continue;
+            if ((sector.assigned_brigade_ids?.length ?? 0) + (sector.reserve_brigade_ids?.length ?? 0) > 0) continue;
+            if (!isSectorUnstaffableByFaction(
+                sector,
+                factionSectors,
+                factionBrigadeLocations,
+                adjacency,
+                friendlyOsids,
+                componentOf,
+                factionBrigadeComponents,
+            )) {
+                continue;
+            }
+            sector.unstaffed_front = true;
+        }
+    }
+}
+
+function absorbEmptyStaffableSiblingSectors(
+    sectors: Record<string, CorpsFrontSector>,
+    state: GameState,
+    formations: Record<FormationId, FormationState>,
+    adjacency: Map<Osid, Osid[]>,
+    sharedBoundaryAdj: Map<Osid, Osid[]>,
+    caseBSplitAdj: Map<Osid, Osid[]>,
+    edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
+    centroids?: OsidCentroidMap,
+    spatial?: SpatialContext,
+): boolean {
+    let changed = false;
+    const factionGroups = new Map<FactionId, CorpsFrontSector[]>();
+    for (const sector of Object.values(sectors)) {
+        const list = factionGroups.get(sector.faction) ?? [];
+        list.push(sector);
+        factionGroups.set(sector.faction, list);
+    }
+
+    for (const [faction, factionSectors] of factionGroups) {
+        const friendlyOsids = spatial?.friendlyOsidsByFaction.get(faction)
+            ? new Set(spatial.friendlyOsidsByFaction.get(faction)!)
+            : buildFriendlyOsidsFromState(state, adjacency, faction);
+        const componentOf = spatial?.componentsByFaction.get(faction)
+            ? new Map(spatial.componentsByFaction.get(faction)!)
+            : buildFriendlyComponents(adjacency, friendlyOsids);
+        const factionBrigadeLocations: string[] = [];
+        const factionBrigadeComponents = new Set<number>();
+        for (const fid of Object.keys(formations).sort(strictCompare)) {
+            const formation = formations[fid];
+            if (!formation || formation.faction !== faction || formation.status !== 'active') continue;
+            if (formation.kind !== 'brigade' && formation.kind !== 'og' && formation.kind !== 'operational_group') continue;
+            if (!formation.location_osid) continue;
+            factionBrigadeLocations.push(formation.location_osid);
+            const componentId = componentOf.get(formation.location_osid);
+            if (componentId !== undefined) factionBrigadeComponents.add(componentId);
+        }
+
+        const corpsGroups = new Map<FormationId, CorpsFrontSector[]>();
+        for (const sector of factionSectors) {
+            const list = corpsGroups.get(sector.corps_id) ?? [];
+            list.push(sector);
+            corpsGroups.set(sector.corps_id, list);
+        }
+
+        for (const [, corpsSectors] of corpsGroups) {
+            for (const sector of [...corpsSectors].sort((a, b) => strictCompare(a.sector_id, b.sector_id))) {
+                if (!sectors[sector.sector_id]) continue;
+                if (sector.edge_ids.length === 0) continue;
+                if ((sector.assigned_brigade_ids?.length ?? 0) + (sector.reserve_brigade_ids?.length ?? 0) > 0) continue;
+                if (isSectorUnstaffableByFaction(
+                    sector,
+                    corpsSectors,
+                    factionBrigadeLocations,
+                    adjacency,
+                    friendlyOsids,
+                    componentOf,
+                    factionBrigadeComponents,
+                )) {
+                    continue;
+                }
+
+                const staffedSiblings = corpsSectors.filter((candidate) =>
+                    candidate.sector_id !== sector.sector_id
+                    && sectors[candidate.sector_id]
+                    && ((candidate.assigned_brigade_ids?.length ?? 0) + (candidate.reserve_brigade_ids?.length ?? 0) > 0),
+                );
+                if (staffedSiblings.length === 0) continue;
+                const recipient = pickRecoveredFrontEdgeRecipient(
+                    sector,
+                    staffedSiblings,
+                    adjacency,
+                    sharedBoundaryAdj,
+                    caseBSplitAdj,
+                    edgeMeta,
+                    centroids,
+                );
+                if (!recipient) continue;
+
+                recipient.edge_ids = [...new Set([...recipient.edge_ids, ...sector.edge_ids])].sort(strictCompare);
+                normalizeSectorSubSegmentsFromEdges(recipient, edgeMeta);
+                delete sectors[sector.sector_id];
+                changed = true;
+            }
+        }
+    }
+
+    return changed;
+}
+
 function mergeLateSiblingFrontFragments(
     sectors: Record<string, CorpsFrontSector>,
     adjacency: Map<Osid, Osid[]>,
@@ -323,8 +655,10 @@ function enforceFinalSectorGeometryInvariants(
     sharedBoundaryAdj: Map<Osid, Osid[]>,
     caseBSplitAdj: Map<Osid, Osid[]>,
     centroids?: OsidCentroidMap,
+    formations?: Record<FormationId, FormationState>,
 ): void {
     const nextSectors: Record<string, CorpsFrontSector> = {};
+    const splitGroups: Array<{ original: CorpsFrontSector; pieces: CorpsFrontSector[] }> = [];
     const byCorps = new Map<FormationId, CorpsFrontSector[]>();
     const friendlyByFaction = new Map<FactionId, Set<Osid>>();
     const osidToCorpsByFaction = new Map<FactionId, Map<Osid, FormationId>>();
@@ -395,6 +729,8 @@ function enforceFinalSectorGeometryInvariants(
                     }));
                     nextSectors[sectorId] = piece;
                 }
+
+                splitGroups.push({ original: sector, pieces: orderedPieces });
             }
         }
     }
@@ -423,6 +759,211 @@ function enforceFinalSectorGeometryInvariants(
         );
         repairDisconnectedTerritory(factionSectors, sharedBoundaryAdj, friendly);
     }
+
+    if (formations) {
+        for (const group of splitGroups) {
+            seedSplitPieceBrigadeBuckets(group.original, group.pieces, formations, adjacency);
+        }
+    }
+}
+
+export function applyFinalSectorOwnerTruthPass(
+    sectors: Record<string, CorpsFrontSector>,
+    state: GameState,
+    formations: Record<FormationId, FormationState>,
+    adjacency: Map<Osid, Osid[]>,
+): void {
+    const sectorList = Object.values(sectors);
+    relocateMisassignedBrigadesToTruthfulOwners(sectorList, state, formations, adjacency);
+
+    const byFaction = new Map<FactionId, CorpsFrontSector[]>();
+    for (const sector of sectorList) {
+        const list = byFaction.get(sector.faction) ?? [];
+        list.push(sector);
+        byFaction.set(sector.faction, list);
+    }
+
+    for (const [faction, factionSectors] of byFaction) {
+        const friendlyOsids = buildFriendlyOsidsFromState(state, adjacency, faction);
+        rehomeUnassignedBrigadesToPhysicalSectorOwners(
+            factionSectors,
+            formations,
+            faction,
+            adjacency,
+            friendlyOsids,
+        );
+        rescueAdjacentLiveOwnersForEmptyFrontSectors(
+            factionSectors,
+            formations,
+            adjacency,
+            friendlyOsids,
+        );
+    }
+
+    normalizeFinalSectorBuckets(
+        sectorList,
+        formations,
+        adjacency,
+        state.political?.political_controllers,
+    );
+}
+
+function rescueAdjacentLiveOwnersForEmptyFrontSectors(
+    sectors: CorpsFrontSector[],
+    formations: Record<FormationId, FormationState>,
+    adjacency: Map<Osid, Osid[]>,
+    friendlyOsids: Set<string>,
+): void {
+    const liveOwnerCount = (sector: CorpsFrontSector): number =>
+        sector.assigned_brigade_ids.length + sector.reserve_brigade_ids.length;
+
+    const claims = sectors.map((sector) => {
+        const frontSet = getSectorFrontOsids(sector);
+        const oneHopBehind = buildOneHopReserveBand(frontSet, adjacency, friendlyOsids);
+        return { sector, frontSet, oneHopBehind };
+    });
+
+    const byCorps = new Map<FormationId, typeof claims>();
+    for (const claim of claims) {
+        const list = byCorps.get(claim.sector.corps_id) ?? [];
+        list.push(claim);
+        byCorps.set(claim.sector.corps_id, list);
+    }
+
+    for (const [, corpsClaims] of [...byCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+        const orderedClaims = corpsClaims.sort((a, b) => strictCompare(a.sector.sector_id, b.sector.sector_id));
+        for (const recipient of orderedClaims) {
+            if (recipient.sector.edge_ids.length === 0) continue;
+            if (liveOwnerCount(recipient.sector) > 0) continue;
+
+            const candidates = orderedClaims
+                .filter((donor) =>
+                    donor.sector.sector_id !== recipient.sector.sector_id
+                    && liveOwnerCount(donor.sector) > 1,
+                )
+                .flatMap((donor) => {
+                    const donorReserve = donor.sector.reserve_brigade_ids
+                        .filter((brigadeId) => recipient.oneHopBehind.has(formations[brigadeId]?.location_osid ?? ''))
+                        .sort(strictCompare)
+                        .map((brigadeId) => ({
+                            donor,
+                            brigadeId,
+                            donorRole: 'reserve' as const,
+                        }));
+                    const donorFront = donor.sector.assigned_brigade_ids
+                        .filter((brigadeId) => recipient.oneHopBehind.has(formations[brigadeId]?.location_osid ?? ''))
+                        .sort(strictCompare)
+                        .map((brigadeId) => ({
+                            donor,
+                            brigadeId,
+                            donorRole: 'front' as const,
+                        }));
+                    return [...donorReserve, ...donorFront];
+                })
+                .sort((a, b) =>
+                    Number(a.donorRole !== 'reserve') - Number(b.donorRole !== 'reserve')
+                    || liveOwnerCount(b.donor.sector) - liveOwnerCount(a.donor.sector)
+                    || strictCompare(a.donor.sector.sector_id, b.donor.sector.sector_id)
+                    || strictCompare(a.brigadeId, b.brigadeId),
+                );
+
+            const best = candidates[0];
+            if (!best) continue;
+
+            if (best.donorRole === 'reserve') {
+                best.donor.sector.reserve_brigade_ids = best.donor.sector.reserve_brigade_ids
+                    .filter((brigadeId) => brigadeId !== best.brigadeId);
+            } else {
+                best.donor.sector.assigned_brigade_ids = best.donor.sector.assigned_brigade_ids
+                    .filter((brigadeId) => brigadeId !== best.brigadeId);
+            }
+            recipient.sector.reserve_brigade_ids.push(best.brigadeId);
+            recipient.sector.reserve_brigade_ids.sort(strictCompare);
+        }
+    }
+}
+
+function normalizeFinalSectorBuckets(
+    sectors: CorpsFrontSector[],
+    formations: Record<FormationId, FormationState>,
+    adjacency: Map<Osid, Osid[]>,
+    politicalControllers?: Record<string, FactionId | null | undefined>,
+): void {
+    for (const sector of sectors) {
+        const frontSet = getSectorFrontOsids(sector);
+        const territorySet = new Set(sector.territory_osids);
+        const expandedTerritory = new Set(territorySet);
+        const friendlyUniverse = politicalControllers
+            ? new Set(
+                Object.entries(politicalControllers)
+                    .filter(([, controller]) => controller === sector.faction)
+                    .map(([osid]) => osid),
+            )
+            : new Set(territorySet);
+        const reserveBand = new Set<string>();
+        for (const frontOsid of frontSet) {
+            for (const neighbor of adjacency.get(frontOsid as Osid) ?? []) {
+                if (frontSet.has(neighbor)) continue;
+                if (!friendlyUniverse.has(neighbor)) continue;
+                reserveBand.add(neighbor);
+            }
+        }
+
+        const nextAssigned: FormationId[] = [];
+        const nextRear: FormationId[] = [];
+        const reserveCandidates: Array<{ bid: FormationId; personnel: number }> = [];
+        const rearCandidates: Array<{ bid: FormationId; personnel: number }> = [];
+        const allBrigades = [...new Set([
+            ...sector.assigned_brigade_ids,
+            ...sector.reserve_brigade_ids,
+            ...(sector.rear_brigade_ids ?? []),
+        ])].sort(strictCompare);
+
+        for (const brigadeId of allBrigades) {
+            const locationOsid = formations[brigadeId]?.location_osid;
+            if (!locationOsid) {
+                nextRear.push(brigadeId);
+                continue;
+            }
+            if (frontSet.has(locationOsid)) {
+                expandedTerritory.add(locationOsid);
+                nextAssigned.push(brigadeId);
+                continue;
+            }
+            if (reserveBand.has(locationOsid)) {
+                expandedTerritory.add(locationOsid);
+                reserveCandidates.push({ bid: brigadeId, personnel: formations[brigadeId]?.personnel ?? 0 });
+                continue;
+            }
+            if (territorySet.has(locationOsid)) {
+                rearCandidates.push({ bid: brigadeId, personnel: formations[brigadeId]?.personnel ?? 0 });
+                nextRear.push(brigadeId);
+            }
+        }
+
+        reserveCandidates.sort((a, b) => b.personnel - a.personnel || strictCompare(a.bid, b.bid));
+        const nextReserve = reserveCandidates.slice(0, MAX_RESERVES_PER_SECTOR).map((entry) => entry.bid);
+        nextRear.push(...reserveCandidates.slice(MAX_RESERVES_PER_SECTOR).map((entry) => entry.bid));
+
+        sector.assigned_brigade_ids = nextAssigned.sort(strictCompare);
+        sector.reserve_brigade_ids = nextReserve.sort(strictCompare);
+        sector.rear_brigade_ids = nextRear.sort(strictCompare);
+        sector.territory_osids = [...expandedTerritory].sort(strictCompare);
+    }
+}
+
+function clearRearOnlySectorClaims(
+    sectors: CorpsFrontSector[],
+): void {
+    for (const sector of sectors) {
+        if (
+            sector.assigned_brigade_ids.length === 0
+            && sector.reserve_brigade_ids.length === 0
+            && (sector.rear_brigade_ids?.length ?? 0) > 0
+        ) {
+            sector.rear_brigade_ids = [];
+        }
+    }
 }
 
 function buildSectorSliceFromSubSegment(
@@ -441,10 +982,249 @@ function buildSectorSliceFromSubSegment(
         }],
         length_edges: subSegment.edge_ids.length,
         territory_osids: [],
+        rear_brigade_ids: [],
         density: 0,
         threat_ratio: 0,
         defensive_power: 0,
     };
+}
+
+function seedSplitPieceBrigadeBuckets(
+    original: CorpsFrontSector,
+    pieces: CorpsFrontSector[],
+    formations: Record<FormationId, FormationState>,
+    adjacency: Map<Osid, Osid[]>,
+): void {
+    const brigadeIds = [...new Set([
+        ...original.assigned_brigade_ids,
+        ...original.reserve_brigade_ids,
+        ...(original.rear_brigade_ids ?? []),
+    ])].sort(strictCompare);
+
+    for (const piece of pieces) {
+        piece.assigned_brigade_ids = [];
+        piece.reserve_brigade_ids = [];
+        piece.rear_brigade_ids = [];
+    }
+
+    const claims = pieces.map((piece) => {
+        const frontSet = getSectorFrontOsids(piece);
+        const territorySet = new Set(piece.territory_osids);
+        const reserveBand = buildOneHopReserveBand(frontSet, adjacency, territorySet);
+        return { piece, frontSet, territorySet, reserveBand };
+    });
+
+    for (const brigadeId of brigadeIds) {
+        const locationOsid = formations[brigadeId]?.location_osid;
+        if (!locationOsid) continue;
+
+        const candidates = claims
+            .map((claim) => {
+                let role: 'front' | 'reserve' | 'rear' | null = null;
+                if (claim.frontSet.has(locationOsid)) role = 'front';
+                else if (claim.reserveBand.has(locationOsid)) role = 'reserve';
+                else if (claim.territorySet.has(locationOsid)) role = 'rear';
+                if (!role) return null;
+                return {
+                    piece: claim.piece,
+                    role,
+                    roleRank: role === 'front' ? 0 : role === 'reserve' ? 1 : 2,
+                    load:
+                        claim.piece.assigned_brigade_ids.length
+                        + claim.piece.reserve_brigade_ids.length
+                        + (claim.piece.rear_brigade_ids?.length ?? 0),
+                };
+            })
+            .filter((candidate): candidate is {
+                piece: CorpsFrontSector;
+                role: 'front' | 'reserve' | 'rear';
+                roleRank: number;
+                load: number;
+            } => candidate != null)
+            .sort((a, b) =>
+                a.roleRank - b.roleRank
+                || a.load - b.load
+                || strictCompare(a.piece.sector_id, b.piece.sector_id),
+            );
+
+        if (candidates.length === 0) continue;
+        const best = candidates[0]!;
+        if (best.role === 'front') best.piece.assigned_brigade_ids.push(brigadeId);
+        else if (best.role === 'reserve') best.piece.reserve_brigade_ids.push(brigadeId);
+        else {
+            best.piece.rear_brigade_ids ??= [];
+            best.piece.rear_brigade_ids.push(brigadeId);
+        }
+    }
+
+    normalizeFinalSectorBuckets(pieces, formations, adjacency);
+}
+
+function canonicalizeDuplicateFrontOwnershipByPiece(
+    sectors: Record<string, CorpsFrontSector>,
+    formations: Record<FormationId, FormationState>,
+    adjacency: Map<Osid, Osid[]>,
+    edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
+    sharedBoundaryAdj: Map<Osid, Osid[]>,
+    caseBSplitAdj: Map<Osid, Osid[]>,
+    centroids?: OsidCentroidMap,
+): void {
+    const seenTopologies = new Set<string>();
+    let changed = true;
+    while (changed) {
+        const topologySignature = Object.values(sectors)
+            .sort((a, b) => strictCompare(a.sector_id, b.sector_id))
+            .map((sector) => `${sector.sector_id}=${[...sector.edge_ids].sort(strictCompare).join(',')}`)
+            .join('|');
+        if (seenTopologies.has(topologySignature)) {
+            break;
+        }
+        seenTopologies.add(topologySignature);
+        changed = false;
+        const byCorps = new Map<FormationId, CorpsFrontSector[]>();
+        for (const sector of Object.values(sectors).sort((a, b) => strictCompare(a.sector_id, b.sector_id))) {
+            if (sector.length_edges === 0) continue;
+            const list = byCorps.get(sector.corps_id) ?? [];
+            list.push(sector);
+            byCorps.set(sector.corps_id, list);
+        }
+
+        outer:
+        for (const [corpsId, corpsSectors] of [...byCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+            const frontOwnerMap = new Map<string, CorpsFrontSector[]>();
+            for (const sector of corpsSectors) {
+                for (const osid of [...getSectorFrontOsids(sector)].sort(strictCompare)) {
+                    const owners = frontOwnerMap.get(osid) ?? [];
+                    owners.push(sector);
+                    frontOwnerMap.set(osid, owners);
+                }
+            }
+
+            for (const [frontOsid, owners] of [...frontOwnerMap.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+                if (owners.length <= 1) continue;
+
+                const ownerPieces = owners
+                    .map((sector) => {
+                        const pieces = splitNonContiguousSectors(
+                            [sector],
+                            adjacency,
+                            sector.faction,
+                            edgeMeta,
+                            sharedBoundaryAdj,
+                            undefined,
+                            caseBSplitAdj,
+                            centroids,
+                        );
+                        const piece = pieces.find((candidate) => getSectorFrontOsids(candidate).has(frontOsid));
+                        if (!piece || piece.edge_ids.length === 0) return null;
+                        return {
+                            sector,
+                            piece,
+                            incidentEdges: countIncidentEdgesForFrontOsid(piece, frontOsid, edgeMeta),
+                            brigadesAtOsid: countBrigadesAtOsid(sector, formations, frontOsid),
+                            pieceSize: piece.edge_ids.length,
+                        };
+                    })
+                    .filter((entry): entry is {
+                        sector: CorpsFrontSector;
+                        piece: CorpsFrontSector;
+                        incidentEdges: number;
+                        brigadesAtOsid: number;
+                        pieceSize: number;
+                    } => entry != null)
+                    .sort((a, b) =>
+                        b.incidentEdges - a.incidentEdges
+                        || b.brigadesAtOsid - a.brigadesAtOsid
+                        || b.pieceSize - a.pieceSize
+                        || strictCompare(a.sector.sector_id, b.sector.sector_id),
+                    );
+
+                if (ownerPieces.length <= 1) continue;
+
+                let winnerEntry: (typeof ownerPieces)[number] | null = null;
+                let mergedWinnerEdges: string[] = [];
+                for (const candidate of ownerPieces) {
+                    let nextMergedEdges = [...candidate.piece.edge_ids].sort(strictCompare);
+                    let viable = true;
+                    for (const loser of ownerPieces) {
+                        if (loser.sector.sector_id === candidate.sector.sector_id) continue;
+                        const hypotheticalWinner: CorpsFrontSector = {
+                            ...candidate.sector,
+                            edge_ids: [...new Set([...nextMergedEdges, ...loser.piece.edge_ids])].sort(strictCompare),
+                            sub_segments: candidate.sector.sub_segments.map((subSegment) => ({
+                                ...subSegment,
+                                edge_ids: [...subSegment.edge_ids],
+                                friendly_osids: [...subSegment.friendly_osids],
+                                enemy_osids: [...subSegment.enemy_osids],
+                                primary_brigade_ids: [...subSegment.primary_brigade_ids],
+                            })),
+                            territory_osids: [...candidate.sector.territory_osids],
+                            assigned_brigade_ids: [...candidate.sector.assigned_brigade_ids],
+                            reserve_brigade_ids: [...candidate.sector.reserve_brigade_ids],
+                            rear_brigade_ids: [...(candidate.sector.rear_brigade_ids ?? [])],
+                        };
+                        normalizeSectorSubSegmentsFromEdges(hypotheticalWinner, edgeMeta);
+                        const split = splitNonContiguousSectors(
+                            [hypotheticalWinner],
+                            adjacency,
+                            candidate.sector.faction,
+                            edgeMeta,
+                            sharedBoundaryAdj,
+                            undefined,
+                            caseBSplitAdj,
+                            centroids,
+                        );
+                        if (split.length !== 1) {
+                            viable = false;
+                            break;
+                        }
+                        nextMergedEdges = hypotheticalWinner.edge_ids;
+                    }
+                    if (!viable) continue;
+                    winnerEntry = candidate;
+                    mergedWinnerEdges = nextMergedEdges;
+                    break;
+                }
+
+                if (!winnerEntry) continue;
+
+                let mutated = false;
+                const winner = winnerEntry.sector;
+                const nextWinnerEdgeIds = [
+                    ...new Set([
+                        ...winner.edge_ids.filter((edgeId) => !winnerEntry!.piece.edge_ids.includes(edgeId)),
+                        ...mergedWinnerEdges,
+                    ]),
+                ].sort(strictCompare);
+                if (nextWinnerEdgeIds.length !== winner.edge_ids.length
+                    || nextWinnerEdgeIds.some((edgeId, index) => edgeId !== winner.edge_ids[index])) {
+                    winner.edge_ids = nextWinnerEdgeIds;
+                    normalizeSectorSubSegmentsFromEdges(winner, edgeMeta);
+                    mutated = true;
+                }
+
+                for (const loser of ownerPieces) {
+                    if (loser.sector.sector_id === winner.sector_id) continue;
+                    const nextLoserEdgeIds = loser.sector.edge_ids
+                        .filter((edgeId) => !loser.piece.edge_ids.includes(edgeId))
+                        .sort(strictCompare);
+                    if (nextLoserEdgeIds.length !== loser.sector.edge_ids.length
+                        || nextLoserEdgeIds.some((edgeId, index) => edgeId !== loser.sector.edge_ids[index])) {
+                        loser.sector.edge_ids = nextLoserEdgeIds;
+                        normalizeSectorSubSegmentsFromEdges(loser.sector, edgeMeta);
+                        mutated = true;
+                    }
+                }
+
+                if (!mutated) {
+                    continue;
+                }
+
+                changed = true;
+                break outer;
+            }
+        }
+    }
 }
 
 export function pruneGhostArtifactSectors(sectors: Record<string, CorpsFrontSector>): void {
@@ -456,10 +1236,299 @@ export function pruneGhostArtifactSectors(sectors: Record<string, CorpsFrontSect
             && sector.territory_osids.length === 0
             && sector.assigned_brigade_ids.length === 0
             && sector.reserve_brigade_ids.length === 0
+            && (sector.rear_brigade_ids?.length ?? 0) === 0
         ) {
             delete sectors[sectorId];
         }
     }
+}
+
+function recoverDroppedFrontEdges(
+    sectors: Record<string, CorpsFrontSector>,
+    state: GameState,
+    osidFrontEdges: Array<{ edge_id: string; a: string; b: string; side_a: string | null; side_b: string | null }>,
+    adjacency: Map<Osid, Osid[]>,
+    sharedBoundaryAdj: Map<Osid, Osid[]>,
+    caseBSplitAdj: Map<Osid, Osid[]>,
+    edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
+    formations: Record<FormationId, FormationState>,
+    reverseMap: Map<string, string[]> | null,
+    centroids?: OsidCentroidMap,
+    spatial?: SpatialContext,
+): void {
+    let recoveredAny = false;
+
+    for (const faction of getFactions(state)) {
+        const corpsIds = getCorpsForFaction(formations, faction);
+        if (corpsIds.length === 0) continue;
+
+        const osidToCorps = mapOsidsToCorps(state, faction, corpsIds, adjacency, formations, reverseMap);
+        const corpsEdges = partitionFrontEdges(osidFrontEdges, faction, osidToCorps, state, reverseMap, corpsIds, adjacency);
+        consolidateCrossCorpsFronts(corpsEdges, osidFrontEdges, faction, adjacency, formations, osidToCorps, centroids, sharedBoundaryAdj);
+        consolidateIsolatedCorpsPockets(corpsEdges, osidFrontEdges, faction, adjacency, formations, centroids, sharedBoundaryAdj);
+        const friendlyOsids = spatial?.friendlyOsidsByFaction.get(faction)
+            ? new Set(spatial.friendlyOsidsByFaction.get(faction)!)
+            : buildFriendlyOsidsFromState(state, adjacency, faction);
+        const componentOf = spatial?.componentsByFaction.get(faction)
+            ? new Map(spatial.componentsByFaction.get(faction)!)
+            : buildFriendlyComponents(adjacency, friendlyOsids);
+        const factionBrigadeLocations: string[] = [];
+        const factionBrigadeComponents = new Set<number>();
+        for (const fid of Object.keys(formations).sort(strictCompare)) {
+            const formation = formations[fid];
+            if (!formation || formation.faction !== faction || formation.status !== 'active') continue;
+            if (formation.kind !== 'brigade' && formation.kind !== 'og' && formation.kind !== 'operational_group') continue;
+            if (!formation.location_osid) continue;
+            factionBrigadeLocations.push(formation.location_osid);
+            const componentId = componentOf.get(formation.location_osid);
+            if (componentId !== undefined) factionBrigadeComponents.add(componentId);
+        }
+
+        for (const corpsId of corpsIds) {
+            const expectedEdgeIds = corpsEdges.get(corpsId) ?? [];
+            if (expectedEdgeIds.length === 0) continue;
+
+            const currentEdgeIds = new Set<string>();
+            const corpsSectorIds = Object.keys(sectors)
+                .sort(strictCompare)
+                .filter((sectorId) => sectors[sectorId]?.corps_id === corpsId);
+
+            for (const sectorId of corpsSectorIds) {
+                const sector = sectors[sectorId];
+                if (!sector) continue;
+                for (const edgeId of sector.edge_ids) currentEdgeIds.add(edgeId);
+            }
+
+            const missingEdgeIds = expectedEdgeIds.filter((edgeId) => !currentEdgeIds.has(edgeId));
+            if (missingEdgeIds.length === 0) continue;
+
+            const corpsBrigadeLocations: string[] = [];
+            const corpsBrigadeComponents = new Set<number>();
+            for (const fid of Object.keys(formations).sort(strictCompare)) {
+                const formation = formations[fid];
+                if (!formation || formation.faction !== faction || formation.status !== 'active') continue;
+                if (formation.kind !== 'brigade' && formation.kind !== 'og' && formation.kind !== 'operational_group') continue;
+                if (getFormationCorpsId(formation) !== corpsId) continue;
+                if (!formation.location_osid) continue;
+                corpsBrigadeLocations.push(formation.location_osid);
+                const componentId = componentOf.get(formation.location_osid);
+                if (componentId !== undefined) corpsBrigadeComponents.add(componentId);
+            }
+
+            const recoveredSubSegments = findSubSegments(
+                corpsId,
+                faction,
+                missingEdgeIds,
+                edgeMeta,
+                adjacency,
+                sharedBoundaryAdj,
+                centroids,
+            );
+            if (recoveredSubSegments.length === 0) continue;
+
+            let nextIndex = 0;
+            for (const sectorId of corpsSectorIds) {
+                const match = /^sector:[^:]+:(\d+)$/.exec(sectorId);
+                if (!match) continue;
+                nextIndex = Math.max(nextIndex, Number(match[1]) + 1);
+            }
+
+            for (const subSegment of recoveredSubSegments) {
+                const recoveredSector = buildSectorFromSubSegments(
+                    state,
+                    corpsId,
+                    faction,
+                    nextIndex++,
+                    [subSegment],
+                    edgeMeta,
+                    formations,
+                );
+                if (!recoveredSector || recoveredSector.edge_ids.length === 0) continue;
+                const currentCorpsSectors = corpsSectorIds
+                    .map((sectorId) => sectors[sectorId])
+                    .filter((sector): sector is CorpsFrontSector => Boolean(sector && sector.corps_id === corpsId));
+                if (!canCorpsStaffSectorFront(
+                    recoveredSector,
+                    [...currentCorpsSectors, recoveredSector],
+                    corpsBrigadeLocations,
+                    factionBrigadeLocations,
+                    adjacency,
+                    friendlyOsids,
+                    componentOf,
+                    corpsBrigadeComponents,
+                    factionBrigadeComponents,
+                )) {
+                    continue;
+                }
+                const recipient = pickRecoveredFrontEdgeRecipient(
+                    recoveredSector,
+                    currentCorpsSectors,
+                    adjacency,
+                    sharedBoundaryAdj,
+                    caseBSplitAdj,
+                    edgeMeta,
+                    centroids,
+                );
+                if (recipient) {
+                    recipient.edge_ids = [...new Set([...recipient.edge_ids, ...recoveredSector.edge_ids])].sort(strictCompare);
+                    normalizeSectorSubSegmentsFromEdges(recipient, edgeMeta);
+                } else {
+                    sectors[recoveredSector.sector_id] = recoveredSector;
+                }
+                recoveredAny = true;
+            }
+        }
+    }
+
+    if (!recoveredAny) return;
+
+    const emptiedSectorIds = canonicalizeSiblingFrontOwnership(
+        Object.values(sectors),
+        formations,
+        edgeMeta,
+        adjacency,
+        sharedBoundaryAdj,
+        caseBSplitAdj,
+        centroids,
+    );
+    for (const sectorId of emptiedSectorIds) {
+        delete sectors[sectorId];
+    }
+
+    // Re-run the late sibling merge and final geometry invariant pass after
+    // synthetic recovery inserts new sectors. Without this, the recovered edge
+    // owner can survive as a same-corps fragment and split a single frontline
+    // territory across multiple sectors in the final save.
+    mergeLateSiblingFrontFragments(sectors, adjacency, edgeMeta, sharedBoundaryAdj, centroids);
+    enforceFinalSectorGeometryInvariants(sectors, adjacency, edgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, formations);
+    const postInvariantEmptiedRecoveredSectorIds = canonicalizeSiblingFrontOwnership(
+        Object.values(sectors),
+        formations,
+        edgeMeta,
+        adjacency,
+        sharedBoundaryAdj,
+        caseBSplitAdj,
+        centroids,
+    );
+    for (const sectorId of postInvariantEmptiedRecoveredSectorIds) {
+        delete sectors[sectorId];
+    }
+
+    const sectorList = Object.values(sectors).sort((a, b) => strictCompare(a.sector_id, b.sector_id));
+    const byFaction = new Map<FactionId, CorpsFrontSector[]>();
+    for (const sector of sectorList) {
+        const list = byFaction.get(sector.faction) ?? [];
+        list.push(sector);
+        byFaction.set(sector.faction, list);
+    }
+
+    for (const [faction, factionSectors] of byFaction) {
+        const friendlyOsids = spatial?.friendlyOsidsByFaction.get(faction)
+            ? new Set(spatial.friendlyOsidsByFaction.get(faction)!)
+            : buildFriendlyOsidsFromState(state, adjacency, faction);
+        const componentOf = spatial?.componentsByFaction.get(faction)
+            ? new Map(spatial.componentsByFaction.get(faction)!)
+            : buildFriendlyComponents(adjacency, friendlyOsids);
+        const osidToCorps = mapOsidsToCorps(
+            state,
+            faction,
+            getCorpsForFaction(formations, faction),
+            adjacency,
+            formations,
+            reverseMap,
+        );
+
+        assignTerritoryVoronoi(factionSectors, adjacency, friendlyOsids, osidToCorps);
+        repairDisconnectedTerritory(factionSectors, sharedBoundaryAdj, friendlyOsids);
+        classifyBrigadesByTerritory(factionSectors, faction, formations, adjacency, friendlyOsids, componentOf, buildCorpsCommanderProfiles(state, factionSectors), state.military.brigade_sector_override, state);
+        assignCrossCorpsEnclaveDefenders(factionSectors, formations, faction, componentOf);
+        ensureMinimumSectorCoverage(factionSectors, formations, adjacency, friendlyOsids, componentOf, state);
+        reclassifyRearBrigades(factionSectors, formations, adjacency, friendlyOsids);
+        deduplicateBrigadesAcrossSectors(factionSectors);
+        enforcePhysicalSectorOwnership(factionSectors, formations, adjacency, friendlyOsids);
+        rehomeUnassignedBrigadesToPhysicalSectorOwners(factionSectors, formations, faction, adjacency, friendlyOsids);
+        reclassifyRearBrigades(factionSectors, formations, adjacency, friendlyOsids);
+        recomputeSectorPowerAndThreat(factionSectors, formations, faction, state);
+    }
+
+    pruneGhostArtifactSectors(sectors);
+}
+
+function pickRecoveredFrontEdgeRecipient(
+    recoveredSector: CorpsFrontSector,
+    siblingSectors: CorpsFrontSector[],
+    adjacency: Map<Osid, Osid[]>,
+    sharedBoundaryAdj: Map<Osid, Osid[]>,
+    caseBSplitAdj: Map<Osid, Osid[]>,
+    edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
+    centroids?: OsidCentroidMap,
+): CorpsFrontSector | null {
+    const recoveredFront = getSectorFrontOsids(recoveredSector);
+    const recoveredTerritory = new Set(recoveredSector.territory_osids ?? []);
+    const recoveredClaimed = new Set<string>([...recoveredFront, ...recoveredTerritory]);
+
+    const candidates = siblingSectors
+        .filter((sector) => sector.edge_ids.length > 0)
+        .map((sector) => {
+            const sectorFront = getSectorFrontOsids(sector);
+            const sectorTerritory = new Set(sector.territory_osids ?? []);
+            let adjacentClaims = 0;
+            for (const osid of recoveredClaimed) {
+                if (sectorFront.has(osid)) adjacentClaims += 4;
+                if (sectorTerritory.has(osid)) adjacentClaims += 3;
+                for (const neighbor of adjacency.get(osid as Osid) ?? []) {
+                    if (sectorFront.has(neighbor)) adjacentClaims += 2;
+                    if (sectorTerritory.has(neighbor)) adjacentClaims += 1;
+                }
+            }
+            return {
+                sector,
+                adjacentClaims,
+                frontOverlap: [...recoveredFront].filter((osid) => sectorFront.has(osid)).length,
+                territoryOverlap: [...recoveredClaimed].filter((osid) => sectorTerritory.has(osid)).length,
+                shareEndpoint: shareFrontEdgeEndpoint(recoveredSector, sector) ? 1 : 0,
+                edgeAdjacent: areSectorsEdgeAdjacent(recoveredSector, sector, edgeMeta, recoveredSector.faction, sharedBoundaryAdj, centroids) ? 1 : 0,
+            };
+        })
+        .filter((candidate) =>
+            candidate.frontOverlap > 0
+            || candidate.territoryOverlap > 0
+            || candidate.shareEndpoint > 0
+            || candidate.edgeAdjacent > 0
+            || candidate.adjacentClaims > 0,
+        )
+        .sort((a, b) =>
+            b.frontOverlap - a.frontOverlap
+            || b.territoryOverlap - a.territoryOverlap
+            || b.shareEndpoint - a.shareEndpoint
+            || b.edgeAdjacent - a.edgeAdjacent
+            || b.adjacentClaims - a.adjacentClaims
+            || strictCompare(a.sector.sector_id, b.sector.sector_id),
+        );
+
+    for (const candidate of candidates) {
+        const merged = mergeSectors(
+            recoveredSector.corps_id,
+            candidate.sector,
+            recoveredSector,
+            candidate.sector.length_edges + recoveredSector.length_edges,
+        );
+        const contiguousPieces = splitNonContiguousSectors(
+            [merged],
+            adjacency,
+            recoveredSector.faction,
+            edgeMeta,
+            sharedBoundaryAdj,
+            undefined,
+            caseBSplitAdj,
+            centroids,
+        );
+        if (contiguousPieces.length === 1) {
+            return candidate.sector;
+        }
+    }
+
+    return null;
 }
 
 function sealMergedSectorTruth(
@@ -467,6 +1536,10 @@ function sealMergedSectorTruth(
     state: GameState,
     formations: Record<FormationId, FormationState>,
     adjacency: Map<Osid, Osid[]>,
+    edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
+    sharedBoundaryAdj: Map<Osid, Osid[]>,
+    caseBSplitAdj: Map<Osid, Osid[]>,
+    centroids?: OsidCentroidMap,
     spatial?: SpatialContext,
 ): void {
     const sectorList = Object.values(sectors);
@@ -489,9 +1562,103 @@ function sealMergedSectorTruth(
         enforcePhysicalSectorOwnership(factionSectors, formations, adjacency, friendlyOsids);
         rehomeUnassignedBrigadesToPhysicalSectorOwners(factionSectors, formations, faction, adjacency, friendlyOsids);
         deduplicateBrigadesAcrossSectors(factionSectors);
-        ensureMinimumSectorCoverage(factionSectors, formations, adjacency, friendlyOsids, componentOf);
+        ensureMinimumSectorCoverage(factionSectors, formations, adjacency, friendlyOsids, componentOf, state);
         reclassifyRearBrigades(factionSectors, formations, adjacency, friendlyOsids);
+        if (absorbUnstaffedSiblingFrontSectors(sectors, factionSectors, adjacency, edgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids)) {
+            const refreshedFactionSectors = Object.values(sectors).filter((sector) => sector.faction === faction);
+            deduplicateBrigadesAcrossSectors(refreshedFactionSectors);
+            enforcePhysicalSectorOwnership(refreshedFactionSectors, formations, adjacency, friendlyOsids);
+            rehomeUnassignedBrigadesToPhysicalSectorOwners(refreshedFactionSectors, formations, faction, adjacency, friendlyOsids);
+            deduplicateBrigadesAcrossSectors(refreshedFactionSectors);
+            ensureMinimumSectorCoverage(refreshedFactionSectors, formations, adjacency, friendlyOsids, componentOf, state);
+            reclassifyRearBrigades(refreshedFactionSectors, formations, adjacency, friendlyOsids);
+        }
     }
+}
+
+export function absorbUnstaffedSiblingFrontSectors(
+    sectors: Record<string, CorpsFrontSector>,
+    factionSectors: CorpsFrontSector[],
+    adjacency: Map<Osid, Osid[]>,
+    edgeMeta: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
+    sharedBoundaryAdj: Map<Osid, Osid[]>,
+    caseBSplitAdj: Map<Osid, Osid[]>,
+    centroids?: OsidCentroidMap,
+): boolean {
+    let changed = false;
+    const liveOwnerCount = (sector: CorpsFrontSector): number =>
+        sector.assigned_brigade_ids.length + sector.reserve_brigade_ids.length;
+    const byCorps = new Map<FormationId, CorpsFrontSector[]>();
+    for (const sector of factionSectors) {
+        const list = byCorps.get(sector.corps_id) ?? [];
+        list.push(sector);
+        byCorps.set(sector.corps_id, list);
+    }
+
+    for (const corpsId of [...byCorps.keys()].sort(strictCompare)) {
+        const corpsSectors = (byCorps.get(corpsId) ?? []).sort((a, b) => strictCompare(a.sector_id, b.sector_id));
+        for (const target of corpsSectors) {
+            if (sectors[target.sector_id] !== target) continue;
+            const ownerCount = liveOwnerCount(target);
+            if (ownerCount > 0 || target.length_edges === 0) continue;
+
+            const recipient = corpsSectors
+                .filter((candidate) =>
+                    candidate.sector_id !== target.sector_id
+                    && liveOwnerCount(candidate) > 0
+                    && (
+                        shareFrontEdgeEndpoint(target, candidate)
+                        || areSectorsEdgeAdjacent(target, candidate, edgeMeta, target.faction, sharedBoundaryAdj, centroids)
+                    ))
+                .sort((a, b) =>
+                    liveOwnerCount(b) - liveOwnerCount(a)
+                    || strictCompare(a.sector_id, b.sector_id)
+                )[0];
+
+            if (!recipient) continue;
+
+            const liveRecipient = sectors[recipient.sector_id] ?? recipient;
+            if (liveRecipient.length_edges + target.length_edges > MAX_SECTOR_EDGES) continue;
+            const merged = mergeSectors(corpsId, liveRecipient, target, liveRecipient.length_edges + target.length_edges);
+            const contiguousPieces = splitNonContiguousSectors(
+                [merged],
+                adjacency,
+                target.faction,
+                edgeMeta,
+                sharedBoundaryAdj,
+                undefined,
+                caseBSplitAdj,
+                centroids,
+            );
+            if (contiguousPieces.length !== 1) continue;
+            merged.sector_id = recipient.sector_id;
+            merged.sub_segments = merged.sub_segments.map((subSegment, index) => ({
+                ...subSegment,
+                sub_segment_id: `subseg:${recipient.sector_id}:${index}`,
+            }));
+            sectors[recipient.sector_id] = merged;
+            delete sectors[target.sector_id];
+            changed = true;
+        }
+    }
+
+    return changed;
+}
+
+function shareFrontEdgeEndpoint(a: CorpsFrontSector, b: CorpsFrontSector): boolean {
+    const endpoints = new Set<string>();
+    for (const edgeId of a.edge_ids) {
+        const parsed = parseEdgeId(edgeId);
+        if (!parsed) continue;
+        endpoints.add(parsed.a);
+        endpoints.add(parsed.b);
+    }
+    for (const edgeId of b.edge_ids) {
+        const parsed = parseEdgeId(edgeId);
+        if (!parsed) continue;
+        if (endpoints.has(parsed.a) || endpoints.has(parsed.b)) return true;
+    }
+    return false;
 }
 
 function buildFriendlyOsidsFromState(
@@ -510,7 +1677,7 @@ function buildFriendlyOsidsFromState(
     return friendly;
 }
 
-function relocateMisassignedBrigadesToTruthfulOwners(
+export function relocateMisassignedBrigadesToTruthfulOwners(
     sectors: CorpsFrontSector[],
     state: GameState,
     formations: Record<FormationId, FormationState>,
@@ -528,31 +1695,27 @@ function relocateMisassignedBrigadesToTruthfulOwners(
         const claims = factionSectors.map((sector) => {
             const frontSet = getSectorFrontOsids(sector);
             const territorySet = new Set(sector.territory_osids);
-            const oneHopBehind = new Set<string>();
-            for (const frontOsid of frontSet) {
-                for (const neighbor of adjacency.get(frontOsid as Osid) ?? []) {
-                    if (frontSet.has(neighbor)) continue;
-                    if (!friendlyOsids.has(neighbor)) continue;
-                    oneHopBehind.add(neighbor);
-                }
-            }
+            const oneHopBehind = buildOneHopReserveBand(frontSet, adjacency, friendlyOsids);
             return { sector, frontSet, territorySet, oneHopBehind };
         });
 
         for (const { sector, frontSet, territorySet, oneHopBehind } of claims) {
             const currentAssigned = [...sector.assigned_brigade_ids];
             const currentReserve = [...sector.reserve_brigade_ids];
+            const currentRear = [...(sector.rear_brigade_ids ?? [])];
             sector.assigned_brigade_ids = [];
             sector.reserve_brigade_ids = [];
+            sector.rear_brigade_ids = [];
 
-            const keepOrMove = (brigadeId: FormationId, currentRole: 'front' | 'reserve'): void => {
+            const keepOrMove = (brigadeId: FormationId, currentRole: 'front' | 'reserve' | 'rear'): void => {
+                const formation = formations[brigadeId];
                 const locationOsid = formations[brigadeId]?.location_osid;
                 const currentClaim = locationOsid == null ? null
                     : frontSet.has(locationOsid) ? 'front'
-                        : territorySet.has(locationOsid) ? 'territory'
-                            : oneHopBehind.has(locationOsid) ? 'reserve'
+                        : oneHopBehind.has(locationOsid) ? 'reserve'
+                            : territorySet.has(locationOsid) ? 'territory'
                                 : null;
-                if (currentClaim === 'front' || currentClaim === 'territory') {
+                if (currentClaim === 'front') {
                     sector.assigned_brigade_ids.push(brigadeId);
                     return;
                 }
@@ -560,52 +1723,63 @@ function relocateMisassignedBrigadesToTruthfulOwners(
                     sector.reserve_brigade_ids.push(brigadeId);
                     return;
                 }
+                if (currentClaim === 'territory') {
+                    sector.rear_brigade_ids ??= [];
+                    sector.rear_brigade_ids.push(brigadeId);
+                    return;
+                }
 
                 const candidates = claims
                     .map((candidate) => {
                         if (!locationOsid) return null;
+                        const effectiveCorpsId =
+                            (formations[brigadeId]?.elite_loan_state?.on_loan && formations[brigadeId]?.elite_loan_state?.loaned_to_corps)
+                                ? formations[brigadeId]!.elite_loan_state!.loaned_to_corps
+                                : formations[brigadeId]?.corps_id;
+                        if (!effectiveCorpsId || candidate.sector.corps_id !== effectiveCorpsId) return null;
                         let claim: 'front' | 'territory' | 'reserve' | null = null;
                         if (candidate.frontSet.has(locationOsid)) claim = 'front';
-                        else if (candidate.territorySet.has(locationOsid)) claim = 'territory';
                         else if (candidate.oneHopBehind.has(locationOsid)) claim = 'reserve';
+                        else if (candidate.territorySet.has(locationOsid)) claim = 'territory';
                         if (!claim) return null;
                         return {
                             sector: candidate.sector,
                             claim,
-                            sameCorps: candidate.sector.corps_id === formations[brigadeId]?.corps_id ? 0 : 1,
-                            claimRank: claim === 'front' ? 0 : claim === 'territory' ? 1 : 2,
+                            claimRank: claim === 'front' ? 0 : claim === 'reserve' ? 1 : 2,
                             load: candidate.sector.assigned_brigade_ids.length + candidate.sector.reserve_brigade_ids.length,
                         };
                     })
                     .filter((candidate): candidate is {
                         sector: CorpsFrontSector;
                         claim: 'front' | 'territory' | 'reserve';
-                        sameCorps: number;
                         claimRank: number;
                         load: number;
                     } => candidate != null)
                     .sort((a, b) =>
-                        a.sameCorps - b.sameCorps
-                        || a.claimRank - b.claimRank
+                        a.claimRank - b.claimRank
                         || a.load - b.load
                         || strictCompare(a.sector.sector_id, b.sector.sector_id),
                     );
 
-                if (candidates.length === 0) {
-                    if (currentRole === 'front') sector.assigned_brigade_ids.push(brigadeId);
-                    else sector.reserve_brigade_ids.push(brigadeId);
-                    return;
-                }
+                if (candidates.length === 0) return;
                 const best = candidates[0]!;
-                if (best.claim === 'reserve') best.sector.reserve_brigade_ids.push(brigadeId);
-                else best.sector.assigned_brigade_ids.push(brigadeId);
+                if (best.claim === 'reserve') {
+                    best.sector.reserve_brigade_ids.push(brigadeId);
+                } else if (best.claim === 'territory') {
+                    best.sector.rear_brigade_ids ??= [];
+                    best.sector.rear_brigade_ids.push(brigadeId);
+                } else {
+                    best.sector.assigned_brigade_ids.push(brigadeId);
+                }
             };
 
             for (const brigadeId of currentAssigned) keepOrMove(brigadeId, 'front');
             for (const brigadeId of currentReserve) keepOrMove(brigadeId, 'reserve');
+            for (const brigadeId of currentRear) keepOrMove(brigadeId, 'rear');
 
             sector.assigned_brigade_ids.sort(strictCompare);
             sector.reserve_brigade_ids.sort(strictCompare);
+            sector.rear_brigade_ids.sort(strictCompare);
         }
     }
 }
@@ -614,6 +1788,10 @@ export function canonicalizeSiblingFrontOwnership(
     sectors: CorpsFrontSector[],
     formations: Record<FormationId, FormationState>,
     edgeMeta?: Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>,
+    adjacency?: Map<Osid, Osid[]>,
+    sharedBoundaryAdj?: Map<Osid, Osid[]>,
+    caseBSplitAdj?: Map<Osid, Osid[]>,
+    centroids?: OsidCentroidMap,
 ): string[] {
     const byCorps = new Map<FormationId, CorpsFrontSector[]>();
     const emptied = new Set<string>();
@@ -657,7 +1835,6 @@ export function canonicalizeSiblingFrontOwnership(
             const winner = rankedOwners[0]!.sector;
             for (const owner of rankedOwners.slice(1)) {
                 const frontSet = getSectorFrontOsids(owner.sector);
-                if (frontSet.size <= 1) continue;
                 const movedEdgeIds = owner.sector.edge_ids.filter((edgeId) => {
                     const meta = edgeMeta?.get(edgeId) ?? parseEdgeId(edgeId);
                     if (!meta) return false;
@@ -666,6 +1843,36 @@ export function canonicalizeSiblingFrontOwnership(
                     return meta.a === osid || meta.b === osid;
                 });
                 if (movedEdgeIds.length === 0) continue;
+
+                if (adjacency && sharedBoundaryAdj && caseBSplitAdj && edgeMeta) {
+                    const hypotheticalWinner: CorpsFrontSector = {
+                        ...winner,
+                        edge_ids: [...new Set([...winner.edge_ids, ...movedEdgeIds])].sort(strictCompare),
+                        sub_segments: winner.sub_segments.map((subSegment) => ({
+                            ...subSegment,
+                            edge_ids: [...subSegment.edge_ids],
+                            friendly_osids: [...subSegment.friendly_osids],
+                            enemy_osids: [...subSegment.enemy_osids],
+                            primary_brigade_ids: [...subSegment.primary_brigade_ids],
+                        })),
+                        territory_osids: [...winner.territory_osids],
+                        assigned_brigade_ids: [...winner.assigned_brigade_ids],
+                        reserve_brigade_ids: [...winner.reserve_brigade_ids],
+                        rear_brigade_ids: [...(winner.rear_brigade_ids ?? [])],
+                    };
+                    normalizeSectorSubSegmentsFromEdges(hypotheticalWinner, edgeMeta);
+                    const contiguousPieces = splitNonContiguousSectors(
+                        [hypotheticalWinner],
+                        adjacency,
+                        winner.faction,
+                        edgeMeta,
+                        sharedBoundaryAdj,
+                        undefined,
+                        caseBSplitAdj,
+                        centroids,
+                    );
+                    if (contiguousPieces.length !== 1) continue;
+                }
 
                 owner.sector.edge_ids = owner.sector.edge_ids.filter((edgeId) => !movedEdgeIds.includes(edgeId));
                 winner.edge_ids = [...new Set([...winner.edge_ids, ...movedEdgeIds])].sort(strictCompare);
@@ -951,11 +2158,10 @@ function buildFactionSectors(
         friendlyOsids = spatialFriendly ? new Set(spatialFriendly) : new Set<string>();
     } else {
         friendlyOsids = new Set<string>();
-        for (const osid of adjacency.keys()) {
-            const ctrl = getPoliticalControllerOSID(state, osid, reverseMap ?? undefined);
-            if (ctrl === faction) friendlyOsids.add(osid);
-        }
         const pc = state.political.political_controllers ?? {};
+        for (const osid of adjacency.keys()) {
+            if (pc[osid] === faction) friendlyOsids.add(osid);
+        }
         for (const [osid, ctrl] of Object.entries(pc)) {
             if (ctrl === faction) friendlyOsids.add(osid);
         }
@@ -966,6 +2172,17 @@ function buildFactionSectors(
     // friendly connected component — meaning no unit can physically reach it.
     // Use SpatialContext if available; otherwise build from adjacency + friendlyOsids.
     const preComponentOf = ((spatial?.componentsByFaction.get(faction)) ?? buildFriendlyComponents(adjacency, friendlyOsids)) as Map<string, number>;
+    const factionBrigadeLocations: string[] = [];
+    const factionBrigadeComponents = new Set<number>();
+    for (const fid of Object.keys(formations).sort(strictCompare)) {
+        const f = formations[fid];
+        if (!f || f.faction !== faction || f.status !== 'active') continue;
+        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+        if (!f.location_osid) continue;
+        factionBrigadeLocations.push(f.location_osid);
+        const comp = preComponentOf.get(f.location_osid);
+        if (comp !== undefined) factionBrigadeComponents.add(comp);
+    }
 
     // Step 4: Build multi-sectors (sub-segments promoted to independent sectors)
     const sectors: CorpsFrontSector[] = [];
@@ -1018,16 +2235,18 @@ function buildFactionSectors(
             //
             // Falls back to the original component check when all front OSIDs are
             // shared (no unique ones), so junction-only sectors are still handled.
-            const uniqueFrontOsids = getSectorUniqueFrontOsids(sector, corpsMultiSectors);
-            if (uniqueFrontOsids.size > 0) {
-                // Unique front OSIDs exist — check brigade reachability.
-                if (!canAnyBrigadeReachAny(corpsBrigadeLocations, uniqueFrontOsids, adjacency, friendlyOsids, TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS)) {
-                    continue; // No brigade can reach the sector's unique front — skip.
-                }
-            } else {
-                // All front OSIDs are shared — fall back to original component check.
-                const sectorComp = getSectorComponent(sector, preComponentOf);
-                if (sectorComp !== -1 && !corpsBrigadeComponents.has(sectorComp)) continue;
+            if (!canCorpsStaffSectorFront(
+                sector,
+                corpsMultiSectors,
+                corpsBrigadeLocations,
+                factionBrigadeLocations,
+                adjacency,
+                friendlyOsids,
+                preComponentOf,
+                corpsBrigadeComponents,
+                factionBrigadeComponents,
+            )) {
+                continue;
             }
             sectors.push(sector);
         }
@@ -1141,7 +2360,7 @@ function buildFactionSectors(
     assignCrossCorpsEnclaveDefenders(sectors, formations, faction, componentOf);
 
     // Step 7: Ensure every sector with front edges has at least one assigned brigade.
-    ensureMinimumSectorCoverage(sectors, formations, adjacency, friendlyOsids, componentOf);
+    ensureMinimumSectorCoverage(sectors, formations, adjacency, friendlyOsids, componentOf, state);
 
     // Step 8: Reclassify brigades by frontline proximity.
     reclassifyRearBrigades(sectors, formations, adjacency, friendlyOsids);
@@ -1191,10 +2410,6 @@ function buildFactionSectors(
     pruneGhostArtifactSectors(sectorMap);
     const pruned = Object.values(sectorMap).filter(s => {
         if (s.length_edges === 0) return false;
-        // Prune zero-brigade isolated sectors — ensureMinimumSectorCoverage already
-        // exhausted all rescue attempts; no brigade can reach this sector.
-        // Undefended territory will be captured by VRS via normal combat mechanics.
-        if (s.assigned_brigade_ids.length === 0 && s.reserve_brigade_ids.length === 0) return false;
         return true;
     });
     pruned.sort((a, b) => strictCompare(a.sector_id, b.sector_id));
@@ -1225,7 +2440,7 @@ function buildFactionSectors(
             }
         }
     }
-    ensureMinimumSectorCoverage(pruned, formations, adjacency, friendlyOsids, componentOf);
+    ensureMinimumSectorCoverage(pruned, formations, adjacency, friendlyOsids, componentOf, state);
     reclassifyRearBrigades(pruned, formations, adjacency, friendlyOsids);
     recomputeSectorPowerAndThreat(pruned, formations, faction, state);
     assertSectorBrigadesActive(pruned, formations);
@@ -1335,6 +2550,8 @@ export {
 /** @internal Exported for targeted testing only. */
 export { rescueUnassignedLoanedElitesInTerritory };
 export { mergeLateSiblingFrontFragments };
+/** @internal Exported for targeted testing only. */
+export { collectUnresolvedSectorBrigades };
 
 // Re-export constants from corps_front_sectors_constants.ts
 export { MIN_SECTOR_EDGES } from './corps_front_sectors_constants.js';

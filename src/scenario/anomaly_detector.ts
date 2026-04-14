@@ -41,6 +41,108 @@ function getAssignedSector(state: GameState, formation: Record<string, any>) {
     return state.military.corps_front_sectors?.[sectorId] ?? null;
 }
 
+function getSectorFrontOsids(sector: Record<string, any> | null | undefined): Set<string> {
+    const front = new Set<string>();
+    for (const subSegment of sector?.sub_segments ?? []) {
+        for (const osid of subSegment?.friendly_osids ?? []) {
+            if (typeof osid === 'string' && osid.length > 0) front.add(osid);
+        }
+    }
+    return front;
+}
+
+function isSameCorpsSharedFrontKnotStack(
+    osid: string,
+    brigades: string[],
+    formations: Record<string, any>,
+    sectors: Record<string, any>,
+): boolean {
+    const assignments = brigades.map((bid) => formations[bid]?.assignment ?? null);
+    if (assignments.length === 0) return false;
+    if (!assignments.every((assignment) =>
+        assignment?.kind === 'sector'
+        && assignment?.role === 'front'
+        && typeof assignment?.sector_id === 'string')) {
+        return false;
+    }
+
+    const sectorIds = [...new Set(assignments.map((assignment) => assignment.sector_id as string))].sort(strictCompare);
+    if (sectorIds.length <= 1) return false;
+
+    const claimedSectors = sectorIds
+        .map((sectorId) => sectors[sectorId] ?? null)
+        .filter((sector): sector is Record<string, any> => sector != null);
+    if (claimedSectors.length !== sectorIds.length) return false;
+
+    const corpsIds = [...new Set(claimedSectors.map((sector) => sector.corps_id).filter((corpsId) => typeof corpsId === 'string'))];
+    if (corpsIds.length !== 1) return false;
+
+    return claimedSectors.every((sector) => getSectorFrontOsids(sector).has(osid));
+}
+
+function isLoanedArmyHqRearSupportStack(
+    osid: string,
+    brigades: string[],
+    formations: Record<string, any>,
+    sectors: Record<string, any>,
+): boolean {
+    const assignments = brigades.map((bid) => formations[bid]?.assignment ?? null);
+    if (assignments.length === 0) return false;
+    if (!assignments.every((assignment) =>
+        assignment?.kind === 'sector'
+        && assignment?.role !== 'front'
+        && typeof assignment?.sector_id === 'string')) {
+        return false;
+    }
+
+    const sectorIds = [...new Set(assignments.map((assignment) => assignment.sector_id as string))];
+    if (sectorIds.length !== 1) return false;
+
+    const sector = sectors[sectorIds[0]!] ?? null;
+    if (!sector) return false;
+    if (!(sector.territory_osids ?? []).includes(osid)) return false;
+    if (getSectorFrontOsids(sector).has(osid)) return false;
+
+    return brigades.some((bid) => {
+        const formation = formations[bid];
+        return !!formation?.elite_loan_state?.on_loan
+            && isSectorAssignmentExemptCorpsId(formation?.corps_id);
+    });
+}
+
+function isLowDensitySectorPhysicallyCoveredBySameCorps(state: GameState, sector: Record<string, any>): boolean {
+    const ownBrigadeCount = (sector.assigned_brigade_ids?.length ?? 0) + (sector.reserve_brigade_ids?.length ?? 0);
+    if (ownBrigadeCount > 0) return false;
+    const frontOsids = [...getSectorFrontOsids(sector)].sort(strictCompare);
+    if (frontOsids.length === 0) return false;
+    return frontOsids.every((osid) => {
+        const sectors = state.military.corps_front_sectors ?? {};
+        const formations = state.military.formations ?? {};
+        for (const brigadeId of sortedKeys(formations as Record<string, unknown>)) {
+            const formation = formations[brigadeId] as Record<string, any>;
+            if (formation?.status !== 'active') continue;
+            if (!isBrigadeKind(formation?.kind)) continue;
+            if (formation?.location_osid !== osid) continue;
+            if (formation?.faction !== sector.faction) continue;
+
+            const assignment = formation?.assignment;
+            if (assignment?.kind !== 'sector' || assignment?.role !== 'front') continue;
+            if (typeof assignment?.sector_id !== 'string') continue;
+            if (assignment.sector_id === sector.sector_id) continue;
+
+            const assignedSector = sectors[assignment.sector_id] as Record<string, any> | undefined;
+            if (!assignedSector) continue;
+            if (assignedSector.corps_id !== sector.corps_id) continue;
+            if (assignedSector.faction !== sector.faction) continue;
+            if (!getSectorFrontOsids(assignedSector).has(osid)) continue;
+            return true;
+        }
+        return false;
+    });
+}
+
+const FRONTLINE_DENSITY_WARNING_MIN_THREAT = 50;
+
 /** Load OSID adjacency graph from operational_contact_graph.json. Returns null on failure. */
 function loadOsidAdjacency(): Map<string, string[]> | null {
     const graphPath = resolve(process.cwd(), 'data/derived/operational/operational_contact_graph.json');
@@ -323,6 +425,7 @@ function detectEmptyContestedSector(state: GameState): AnomalyReport[] {
     for (const sectorId of sortedKeys(sectors as Record<string, unknown>)) {
         const sector = sectors[sectorId];
         if (sector.edge_ids.length === 0) continue;
+        if (sector.unstaffed_front === true) continue;
         const totalBrigades = sector.assigned_brigade_ids.length + sector.reserve_brigade_ids.length;
         if (totalBrigades === 0) {
             emptySectors.push(sectorId);
@@ -401,28 +504,34 @@ function detectCasualtyRatio(state: GameState): AnomalyReport[] {
     const reports: AnomalyReport[] = [];
     const formations = state.military.formations;
 
-    let attackerCasualties = 0;
-    let defenderCasualties = 0;
+    let battleAttackerCas = 0;
+    let battleDefenderCas = 0;
+    let frictionCas = 0;
 
     for (const fid of sortedKeys(formations as Record<string, unknown>)) {
         const f = formations[fid];
         if (!f.brigade_history) continue;
         for (const eng of f.brigade_history.engagements) {
-            if (eng.role === 'attacker') {
-                attackerCasualties += eng.casualties_taken;
+            // Friction engagements use battle_id format "*:friction:*" — separate from attack resolution
+            const isFriction = typeof eng.battle_id === 'string' && eng.battle_id.includes(':friction:');
+            if (isFriction) {
+                frictionCas += eng.casualties_taken;
+            } else if (eng.role === 'attacker') {
+                battleAttackerCas += eng.casualties_taken;
             } else {
-                defenderCasualties += eng.casualties_taken;
+                battleDefenderCas += eng.casualties_taken;
             }
         }
     }
 
-    if (attackerCasualties > 0 || defenderCasualties > 0) {
-        const ratio = defenderCasualties > 0 ? (attackerCasualties / defenderCasualties).toFixed(2) : 'N/A';
+    if (battleAttackerCas > 0 || battleDefenderCas > 0) {
+        const ratio = battleDefenderCas > 0 ? (battleAttackerCas / battleDefenderCas).toFixed(2) : 'N/A';
+        const frictionNote = frictionCas > 0 ? ` Frontline friction casualties (excluded): ${frictionCas}.` : '';
         reports.push({
             category: 'combat',
             severity: 'info',
             type: 'casualty_ratio_check',
-            description: `Attacker casualties: ${attackerCasualties}, defender casualties: ${defenderCasualties}, ratio (att:def): ${ratio}.`,
+            description: `Battle casualties — attacker: ${battleAttackerCas}, defender: ${battleDefenderCas}, ratio (att:def): ${ratio}.${frictionNote}`,
         });
     }
     return reports;
@@ -738,7 +847,12 @@ function detectBrigadeStacking(state: GameState): AnomalyReport[] {
     const stacked: Array<{ osid: string; brigades: string[] }> = [];
     const sortedOsids = [...osidBrigades.keys()].sort(strictCompare);
     for (const osid of sortedOsids) {
-        const brigades = osidBrigades.get(osid)!;
+        const brigades = osidBrigades.get(osid)!
+            .filter((bid) => {
+                const formation = formations[bid];
+                const onLoan = formation?.elite_loan_state?.on_loan === true;
+                return !(isSectorAssignmentExemptCorpsId(formation?.corps_id) && !onLoan && !formation?.assignment);
+            });
         if (brigades.length < 2) continue;
 
         // Exempt: Sarajevo OSIDs
@@ -765,6 +879,14 @@ function detectBrigadeStacking(state: GameState): AnomalyReport[] {
             if (typeof sectorId === 'string' && osidSectorCoverage.get(osid)?.has(sectorId)) {
                 continue;
             }
+        }
+
+        if (isSameCorpsSharedFrontKnotStack(osid, brigades, formations as Record<string, any>, sectors as Record<string, any>)) {
+            continue;
+        }
+
+        if (isLoanedArmyHqRearSupportStack(osid, brigades, formations as Record<string, any>, sectors as Record<string, any>)) {
+            continue;
         }
 
         stacked.push({ osid, brigades: brigades.slice().sort(strictCompare) });
@@ -860,17 +982,23 @@ export function detectBrigadeFarFromHome(state: GameState, adjacency: Map<string
         const assignment = f.assignment;
         const hasLiveSectorOwner = assignment?.kind === 'sector'
             && typeof assignment.sector_id === 'string'
-            && (assignment.role === 'front' || assignment.role === 'reserve');
+            && (assignment.role === 'front' || assignment.role === 'reserve' || assignment.role === 'rear');
         const onLoan = !!f.elite_loan_state?.on_loan && typeof f.elite_loan_state.loaned_to_corps === 'string';
+        const movementOrder = state.military.brigade_movement_orders?.[fid];
+        const onHomeRecall = movementOrder?.destination_sids?.[0] === f.home_osid;
         const sectorlessReserve = isSectorAssignmentExemptCorpsId(f.corps_id) && !onLoan;
 
-        if (hasLiveSectorOwner || onLoan) {
+        if (hasLiveSectorOwner || onLoan || onHomeRecall) {
             redeployed.push({
                 id: fid,
                 home: target,
                 location: start,
                 distance: effectiveDistance,
-                owner: onLoan ? 'elite loan' : `sector ${assignment?.role ?? 'owned'}`,
+                owner: onLoan
+                    ? 'elite loan'
+                    : onHomeRecall
+                        ? 'home recall'
+                        : `sector ${assignment?.role ?? 'owned'}`,
             });
             continue;
         }
@@ -915,7 +1043,9 @@ export function detectBrigadeFarFromHome(state: GameState, adjacency: Map<string
 
 /**
  * 18. frontline_density_imbalance (warning)
- * Sectors with wildly different brigade density compared to their faction's median.
+ * Sectors with dangerously low brigade density compared to their faction's median.
+ * High density is force concentration, not a line-holding failure; physical
+ * stacking and false ownership are covered by dedicated checks.
  */
 function detectFrontlineDensityImbalance(state: GameState): AnomalyReport[] {
     const reports: AnomalyReport[] = [];
@@ -953,7 +1083,14 @@ function detectFrontlineDensityImbalance(state: GameState): AnomalyReport[] {
 
         for (const s of sectorList) {
             const ratio = s.density / median;
-            if (ratio > 3 || ratio < 1 / 3) {
+            if (ratio < 1 / 3) {
+                const sector = sectors[s.sectorId];
+                if ((sector.threat_ratio ?? 0) < FRONTLINE_DENSITY_WARNING_MIN_THREAT) {
+                    continue;
+                }
+                if (ratio < 1 / 3 && isLowDensitySectorPhysicallyCoveredBySameCorps(state, sector)) {
+                    continue;
+                }
                 flagged.push({
                     sectorId: s.sectorId,
                     corpsId: s.corpsId,
@@ -976,7 +1113,7 @@ function detectFrontlineDensityImbalance(state: GameState): AnomalyReport[] {
             category: 'deployment',
             severity: 'warning',
             type: 'frontline_density_imbalance',
-            description: `${flagged.length} sector(s) have density >3x or <1/3 of faction median: ${detail}${suffix}.`,
+            description: `${flagged.length} sector(s) have density <1/3 of faction median without same-corps physical coverage: ${detail}${suffix}.`,
             entities: flagged.map(f => f.sectorId),
         });
     }

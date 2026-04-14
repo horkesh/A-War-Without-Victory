@@ -1,13 +1,15 @@
 import type { FeatureCollection } from 'geojson';
 import type { LoadedGameState } from '../data/types';
 
-export function collectHighlightedFormationIds(args: {
+type SelectionFormationArgs = {
   formationsGeoJson: FeatureCollection | null;
   loadedGameState: LoadedGameState | null;
   selectedFormationId: string | null;
   selectedCorpsId: string | null;
   selectedCorpsFrontSectorId: string | null;
-}): string[] {
+};
+
+function collectSelectionFormationIds(args: SelectionFormationArgs): string[] {
   const {
     formationsGeoJson,
     loadedGameState,
@@ -47,4 +49,17 @@ export function collectHighlightedFormationIds(args: {
   }
 
   return [...highlightedFormationIds].sort((a, b) => a.localeCompare(b));
+}
+
+export function collectHighlightedFormationIds(args: SelectionFormationArgs): string[] {
+  return collectSelectionFormationIds(args);
+}
+
+export function collectEmphasizedFormationIds(
+  args: Omit<SelectionFormationArgs, 'selectedFormationId'>,
+): string[] {
+  return collectSelectionFormationIds({
+    ...args,
+    selectedFormationId: null,
+  });
 }

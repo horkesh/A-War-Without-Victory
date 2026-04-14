@@ -190,6 +190,7 @@ function makeMinimalBriefing(overrides: Partial<CommanderBriefing> = {}): Comman
         doctrine_stance: 'balanced',
         corps_stance: 'balanced',
         corps_exhaustion: 0,
+        faction_war_exhaustion: 0,
         avg_fatigue_pct: 0,
         brigades_above_fatigue_threshold: 0,
         enemy_equipment_summary: { tanks: 0, artillery: 0, infantry_only: true },
@@ -371,6 +372,7 @@ describe('v0.8.1 Phase 5 — Constraint Reclassification and Preference Scoring'
                 turn,
                 pre_planned_ops: [{ id: 'op_1' }],
                 corps_exhaustion: MAX_EXHAUSTION_FOR_OPERATION + 10,
+        faction_war_exhaustion: 0,
                 previous_state: previousState,
             });
 
@@ -402,6 +404,7 @@ describe('v0.8.1 Phase 5 — Constraint Reclassification and Preference Scoring'
                 turn,
                 pre_planned_ops: [{ id: 'op_1' }],
                 corps_exhaustion: MAX_EXHAUSTION_FOR_OPERATION + 10,
+        faction_war_exhaustion: 0,
                 previous_state: previousState,
             });
 
@@ -788,6 +791,7 @@ describe('v0.8.1 Phase 5 — Constraint Reclassification and Preference Scoring'
 
             const briefing = makeMinimalBriefing({
                 corps_exhaustion: MAX_EXHAUSTION_FOR_OPERATION + 1,
+        faction_war_exhaustion: 0,
                 pre_planned_ops: [{ id: 'op_1' }],
             });
 

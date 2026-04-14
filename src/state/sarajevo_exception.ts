@@ -1,5 +1,8 @@
 import { clamp01 } from '../utils/math.js';
-import { SARAJEVO_MUN_IDS, SARAJEVO_PRESSURE_MULTIPLIER } from './enclave_integrity.js';
+import {
+    SARAJEVO_CITY_CORE_MUN_IDS,
+    SARAJEVO_PRESSURE_MULTIPLIER
+} from './enclave_integrity.js';
 import type { GameState, SarajevoState } from './game_state.js';
 import type { SupplyStateByOsidReport, SupplyStateLevel } from './supply_state_derivation.js';
 
@@ -21,7 +24,7 @@ function getMunFromOsid(osid: string): string | null {
 function getSarajevoOsids(state: GameState): string[] {
     const controllers = state.political.political_controllers;
     if (!controllers) return [];
-    const sarajevoMunSet = new Set(SARAJEVO_MUN_IDS as string[]);
+    const sarajevoMunSet = new Set(SARAJEVO_CITY_CORE_MUN_IDS as string[]);
     const osids: string[] = [];
     for (const osid of Object.keys(controllers)) {
         const mun = getMunFromOsid(osid);
@@ -61,19 +64,41 @@ function getMajorityController(state: GameState, osids: string[]): string | null
     return best;
 }
 
+function getSarajevoDefenderController(state: GameState, osids: string[]): string | null {
+    if (isSarajevoSiegeCanonicallyActive(state)) {
+        for (const osid of osids) {
+            if (state.political.political_controllers?.[osid] === 'RBiH') {
+                return 'RBiH';
+            }
+        }
+    }
+    return getMajorityController(state, osids);
+}
+
+function isSarajevoSiegeCanonicallyActive(state: GameState): boolean {
+    if (state.military.event_flags?.sarajevo_siege_active === true) return true;
+    const resilience = state.political.enclave_resilience?.sarajevo;
+    if (typeof resilience === 'number') return resilience > 0;
+    return (resilience?.isolation_turns ?? 0) > 0 || resilience?.hardening_active === true;
+}
+
 export function updateSarajevoState(
     state: GameState,
     supplyByOsid: SupplyStateByOsidReport | undefined
 ): SarajevoState {
     const sarajevoOsids = getSarajevoOsids(state);
-    const controller = getMajorityController(state, sarajevoOsids);
+    const controller = getSarajevoDefenderController(state, sarajevoOsids);
+    const pocketOsids =
+        controller == null
+            ? sarajevoOsids
+            : sarajevoOsids.filter((osid) => state.political.political_controllers?.[osid] === controller);
     const prev = state.political.sarajevo_state;
     const turn = state.meta.turn;
 
     let supplyScoreSum = 0;
     let count = 0;
     if (controller) {
-        for (const osid of sarajevoOsids) {
+        for (const osid of pocketOsids) {
             const supplyState = getOsidSupplyState(supplyByOsid, controller, osid);
             if (!supplyState) continue;
             supplyScoreSum += supplyStateToScore(supplyState);
@@ -82,7 +107,14 @@ export function updateSarajevoState(
     }
     const internalSupply = count > 0 ? clamp01(supplyScoreSum / count) : 0;
     const externalSupply = internalSupply;
-    const siegeStatus = internalSupply < 0.4 ? 'BESIEGED' : internalSupply < 0.8 ? 'PARTIAL' : 'OPEN';
+    const siegeStatus =
+        controller === 'RBiH' && isSarajevoSiegeCanonicallyActive(state)
+            ? 'BESIEGED'
+            : internalSupply < 0.4
+                ? 'BESIEGED'
+                : internalSupply < 0.8
+                    ? 'PARTIAL'
+                    : 'OPEN';
     const siegeDuration =
         siegeStatus === 'OPEN' ? 0 : (prev?.siege_duration ?? 0) + 1;
     const siegeIntensity =
@@ -95,8 +127,8 @@ export function updateSarajevoState(
 
     const sarajevo: SarajevoState = {
         mun_id: 'sarajevo_cluster_1990',
-        mun_ids: SARAJEVO_MUN_IDS.slice(),
-        settlement_ids: sarajevoOsids,
+        mun_ids: SARAJEVO_CITY_CORE_MUN_IDS.slice(),
+        settlement_ids: pocketOsids,
         siege_status: siegeStatus,
         siege_duration: siegeDuration,
         external_supply: externalSupply,

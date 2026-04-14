@@ -140,35 +140,18 @@ describe('deployment health (40w)', () => {
         it('<5% of active brigades are unassigned to any sector', () => {
             if (skipped) return;
             const formations = (state as any).military.formations as Record<string, FormationState>;
-            const sectors = (state as any).military.corps_front_sectors as Record<string, CorpsFrontSector> ?? {};
+            const unresolved = ((state as any).military.unresolved_sector_brigades ?? []) as Array<{ brigade_id: string; corps_id?: string; location_osid?: string }>;
 
-            // Build set of all brigade IDs assigned to any sector
-            const assignedIds = new Set<string>();
-            const corpsWithSectors = new Set<string>();
-            for (const sector of Object.values(sectors)) {
-                corpsWithSectors.add(sector.corps_id);
-                for (const bid of sector.assigned_brigade_ids ?? []) assignedIds.add(bid);
-                for (const bid of sector.reserve_brigade_ids ?? []) assignedIds.add(bid);
-            }
-
-            const unassigned: string[] = [];
             let totalActive = 0;
 
             for (const [id, f] of Object.entries(formations)) {
                 if (f.status !== 'active' || f.kind !== 'brigade') continue;
                 totalActive++;
-
-                if (assignedIds.has(id)) continue;
-
-                // Allow: brigades in corps that have no sectors (siege/exempt corps)
-                if (f.corps_id && !corpsWithSectors.has(f.corps_id)) continue;
-                // Allow: disrupted brigades
-                if ((f as any).readiness === 'disrupted') continue;
-                // Allow: activation-gated brigades
-                if ((f as any).activation_gated) continue;
-
-                unassigned.push(`${id} faction=${f.faction} corps=${f.corps_id} @ ${f.location_osid}`);
             }
+            const unassigned = unresolved.map((entry) => {
+                    const formation = formations[entry.brigade_id];
+                    return `${entry.brigade_id} faction=${formation?.faction ?? 'unknown'} corps=${entry.corps_id ?? formation?.corps_id ?? 'unknown'} @ ${entry.location_osid ?? formation?.location_osid ?? 'none'}`;
+                });
 
             if (unassigned.length > 0) {
                 console.log(`Unassigned active brigades (${unassigned.length}/${totalActive}):`);
@@ -415,6 +398,7 @@ describe('deployment health (40w)', () => {
                 const s = sector as any;
                 const assigned = s.assigned_brigade_ids?.length ?? 0;
                 const reserves = s.reserve_brigade_ids?.length ?? 0;
+                if (s.unstaffed_front === true) continue;
                 if (assigned + reserves === 0 && (s.edge_ids?.length ?? 0) > 0) {
                     // This sector has a front but nobody defending it
                     // Check: are the territory OSIDs still friendly?

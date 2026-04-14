@@ -286,6 +286,52 @@ describe('runBotRecruitment', () => {
         assert.strictEqual(resources.equipment_pools.RBiH.points, 0);
     });
 
+    test('mandatory recruitment uses a friendly operational HQ fallback instead of an enemy-controlled fixed home osid', () => {
+        const poolKey = militiaPoolKey('donji_vakuf', 'RBiH');
+        const state = makeState({
+  military: {
+    militia_pools: {
+                [poolKey]: { mun_id: 'donji_vakuf', faction: 'RBiH', available: 1200, committed: 0, exhausted: 0, updated_turn: 4 }
+            }
+  } as any,
+  political: {
+    political_controllers: {
+                'op:donji_vakuf:donji_vakuf_2': 'RS',
+                'op:donji_vakuf:korenici': 'RBiH'
+            }
+  } as any,
+});
+        const sidToMun = new Map([
+            ['op:donji_vakuf:donji_vakuf_2', 'donji_vakuf'],
+            ['op:donji_vakuf:korenici', 'donji_vakuf'],
+        ]);
+        const resources = initializeRecruitmentResources(['RBiH'], { RBiH: 0 }, { RBiH: 0 });
+        const brigades: OobBrigade[] = [
+            makeBrigade({
+                id: 'arbih_770th_slavna_mountain',
+                faction: 'RBiH',
+                name: '770th Slavna Mountain',
+                home_mun: 'donji_vakuf',
+                mandatory: true,
+                home_osid: 'op:donji_vakuf:donji_vakuf_2',
+                priority: 1,
+            })
+        ];
+
+        const report = runBotRecruitment(
+            state,
+            [],
+            brigades,
+            resources,
+            sidToMun,
+            { donji_vakuf: 'op:donji_vakuf:korenici' },
+            { includeCorps: false, includeMandatory: true }
+        );
+
+        assert.strictEqual(report.mandatory_recruited, 1);
+        assert.strictEqual(state.military.formations!['arbih_770th_slavna_mountain']?.location_osid, 'op:donji_vakuf:korenici');
+    });
+
     test('bot downgrades equipment when points scarce', () => {
         const poolKey = militiaPoolKey('zenica', 'RBiH');
         const state = makeState({

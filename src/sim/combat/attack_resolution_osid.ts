@@ -31,20 +31,13 @@
 
 import type { EdgeRecord } from '../../map/settlements.js';
 import type { TerrainScalarsData } from '../../map/terrain_scalars.js';
-import { getTerrainScalarsForSid } from '../../map/terrain_scalars.js';
-import {
-    recordAttackerEngagements,
-    recordDefenderEngagement,
-} from './brigade_history_recorder.js';
+import { recordBattleHistory } from './attack_history_recording.js';
 import { updateSectorIntelFromCombat } from './sector_intel.js';
 import {
     initializeCasualtyLedger,
     recordBattleCasualties,
-    recordEquipmentLoss
 } from '../../state/casualty_ledger.js';
-import { ensureBrigadeComposition } from './equipment_effects.js';
 import { recordFormationFatigue } from '../../state/formation_fatigue.js';
-import { FATIGUE_MAX, MIN_COMBAT_PERSONNEL } from '../../state/formation_constants.js';
 import type {
     ControlEvent,
     FactionId,
@@ -54,8 +47,6 @@ import type {
 } from '../../state/game_state.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
-import { deductCombatExpenditure } from '../../state/supply_reserves.js';
-import { FACILITY_COMBAT_DAMAGE_RATE } from '../../state/supply_reserve_constants.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { OperationalToCanonicalReverseMap, OsidPopulationMap } from '../../data/operational_data.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
@@ -69,7 +60,6 @@ import {
     getCoEthnicShare,
     getEthnicDefenseBonus,
 } from './ethnic_defense.js';
-import { removeFromActiveOperation } from './brigade_dissolution.js';
 import { isRbihHrhbCombatEnabled } from '../early_war/alliance_update.js';
 import { findBrigadeOperation } from './corps_operation_helpers.js';
 
@@ -78,20 +68,15 @@ import {
     type CombatOutcome,
     // Constants used directly in resolver
     MAX_RESILIENCE_STREAK,
-    BASE_ATTACKER_LOSS_RATE,
-    BASE_DEFENDER_LOSS_RATE,
     MILITIA_DEFENSE_RATIO,
     COORDINATION_PENALTY_2,
     COORDINATION_PENALTY_3PLUS,
     STACKING_DEFENDER_SUPPORT,
     ENTRENCHMENT_DEGRADATION_PER_BATTLE,
     POSTURE_ATTACK,
-    OUTCOME_ATTACKER_MOD,
-    OUTCOME_DEFENDER_MOD,
     COHESION_ATTACKER,
     COHESION_DEFENDER,
-    // Functions
-    getMoraleResistFloor,
+    // Functions (getMoraleResistFloor moved to attack_morale_absorption.ts)
     getConcentrationBonus,
     getArtillerySuppression,
     getBombardmentCasualtyMult,
@@ -115,596 +100,105 @@ import {
     HOME_DEFENSE_REACTIVE_BONUS,
     SECTOR_STANCE_REACTIVE_BONUS,
     getWarExhaustionTempoMult,
-    getLanchesterConcentrationBonus,
 } from './combat_math.js';
-import { OFFICER_CASUALTY_MULT, OFFICER_QUALITY_FLOOR } from './officer_quality_update.js';
+// OFFICER_CASUALTY_MULT, OFFICER_QUALITY_FLOOR moved to attack_post_battle_effects.ts
 import { isSupportBrigadeOnActiveOp } from './sector_offensive.js';
-import { SUPPORT_POWER_MULT, MAIN_CASUALTY_MULT, SUPPORT_CASUALTY_MULT } from './bot_constants.js';
-import { findSectorForEnemyOsid, findSubSegmentForOsid, getCorpsHqOsid } from './corps_front_sectors.js';
-import { getEnclaveGarrisonPower, getEnclaveCapitalOsid, isEnclaveCapital, isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
+import { SUPPORT_POWER_MULT } from './bot_constants.js';
+import { findSectorForEnemyOsid, findSubSegmentForOsid } from './corps_front_sectors.js';
+import { getEnclaveGarrisonPower, isEnclaveCapital } from './enclave_resilience.js';
 // frontDensityModifier import removed — no longer used in sector defense
 
-// Backward-compat re-exports
+// ── Retreat & displacement helpers (extracted to attack_retreat_displacement.ts) ──
+import {
+    buildSlopeByOsid,
+    buildFriendlySet,
+    getFriendlyRetreatDestinations,
+    resetFormationEntrenchment,
+    forceRetreatWithPenalties,
+    applyDefeatPenalties,
+    applyPersonnelLoss,
+    findEmergencyRetreatOsid as _findEmergencyRetreatOsid,
+    displaceFormationsInEnemyTerritory as _displaceFormationsInEnemyTerritory,
+} from './attack_retreat_displacement.js';
+
+// ── Equipment battle effects (extracted to attack_equipment_effects.ts) ──
+import {
+    computeFormationEquipmentLoss,
+    processEquipmentTransfers,
+    buildBattleEquipmentReport,
+    type EquipmentTransferResult,
+    type BattleEquipmentData,
+} from './attack_equipment_effects.js';
+
+// ── Battle report types (extracted to attack_resolution_types.ts) ──
+import {
+    type AttackResolutionOsidSnapEventType,
+    type AttackResolutionOsidSnapEvent,
+    type AttackResolutionOsidReport,
+    type DefenderContribution,
+    pushSnapEvent,
+} from './attack_resolution_types.js';
+
+// ── Morale absorption & homeland determination (extracted to attack_morale_absorption.ts) ──
+import { evaluateAndApplyMoraleAbsorption } from './attack_morale_absorption.js';
+
+// ── Resource aftermath: supply expenditure, facility damage, fatigue (extracted to attack_resource_aftermath.ts) ──
+import {
+    deductCombatSupplyExpenditure,
+    applyFacilityCombatDamage,
+    applyCombatFatigue,
+} from './attack_resource_aftermath.js';
+
+// ── Casualty calculation & distribution (extracted to attack_casualty_distribution.ts) ──
+import {
+    splitKiaWiaMia,
+    computeFinalCasualties,
+    computeAttackerCasualtyShares,
+    distributeDefenderCasualties,
+    buildDefenderContributions,
+} from './attack_casualty_distribution.js';
+
+// ── Post-battle effects (extracted to attack_post_battle_effects.ts) ──
+import {
+    applyExperienceGain,
+    applyOfficerCasualtyLoss,
+    getDefenderOutcomePerspective,
+    applyDisruptionFromOutcome,
+    applyAmmoCrisisPyrrhicEffects,
+    applyPostBattleMorale,
+    COMMANDER_EXP_LOSS,
+} from './attack_post_battle_effects.js';
+
+// Backward-compat re-exports (types)
 export type AttackOutcome = CombatOutcome;
 export { getEquipmentRatio, getToTerrainDefenseMult };
 export type { CombatOutcome };
+export type { AttackResolutionOsidSnapEventType, AttackResolutionOsidSnapEvent, AttackResolutionOsidReport, DefenderContribution };
+export { pushSnapEvent };
+
+// Backward-compat re-exports for retreat/displacement (consumers may import from this file)
+export { _findEmergencyRetreatOsid as findEmergencyRetreatOsid };
+export { _displaceFormationsInEnemyTerritory as displaceFormationsInEnemyTerritory };
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Resolver-only constants
 // ═══════════════════════════════════════════════════════════════════════════
 
-/**
- * Homeland determination casualty multiplier.
- * When morale absorption triggers (defender stays after costly_victory),
- * BOTH sides take additional casualties. This is the primary driver of
- * "defending harder, taking more casualties, not yielding ground" behavior.
- * High multiplier = bloodier stalemates (historically accurate for Bosnian War).
- */
-const MORALE_ABSORPTION_CAS_MULT = 1.6;
+// MORALE_ABSORPTION_CAS_MULT moved to attack_morale_absorption.ts
 
 // SECTOR_COVERAGE_PENALTY removed — replaced by distance-weighted reactive defense (n666).
+// SECTOR_ROUT_* and EMERGENCY_RETREAT_* constants moved to attack_retreat_displacement.ts
 
-/** Disruption turns applied to a brigade that is routed to its corps HQ after defending a lost sector OSID. */
-const SECTOR_ROUT_DISRUPTED_TURNS = 4;
-/** Cohesion loss on rout to corps HQ. */
-const SECTOR_ROUT_COHESION_LOSS = 30;
-/** Personnel fraction retained after rout (0.7 = 30% additional loss). */
-const SECTOR_ROUT_PERSONNEL_RETAIN = 0.7;
+// KIA_FRACTION, WIA_FRACTION, MIA_FRACTION moved to attack_casualty_distribution.ts
 
-const KIA_FRACTION = 0.30;
-const WIA_FRACTION = 0.55;
-const MIA_FRACTION = 0.15;
+// Equipment loss rates moved to attack_equipment_effects.ts
 
-// Equipment loss rates per battle (same as legacy path in battle_resolution.ts)
-const TANK_LOSS_RATE = 0.08;
-const ARTILLERY_LOSS_RATE = 0.04;
+// Experience constants + COMMANDER_EXP_LOSS moved to attack_post_battle_effects.ts
 
-// Part 7a: Experience gain from combat (Mobilization & Force Growth)
-const BASE_EXPERIENCE_GAIN = 0.03;
-const VICTORY_EXPERIENCE_BONUS = 0.02;
-const DEFEAT_EXPERIENCE_GAIN = 0.01;
-const FACTION_LEARNING_RATE: Record<string, number> = {
-    RBiH: 1.5,
-    RS: 0.7,
-    HRHB: 1.0
-};
-const DEFAULT_LEARNING_RATE = 1.0;
-const COMMANDER_EXP_LOSS = 0.15;
+// Defeat/displacement helpers, terrain helpers, retreat/displacement functions
+// moved to attack_retreat_displacement.ts — imported above.
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Defeat/displacement helpers
-// ═══════════════════════════════════════════════════════════════════════════
-
-/** Zero entrenchment and defense streak after displacement or defeat. */
-function resetFormationEntrenchment(f: FormationState): void {
-    (f as { entrenchment_turns?: number }).entrenchment_turns = 0;
-    (f as { defense_streak?: number }).defense_streak = 0;
-}
-
-/** Apply standard defeat penalties to a displaced defender: reset entrenchment, record retreat origin, and optionally set disrupted turns. */
-function applyDefeatPenalties(
-    f: FormationState,
-    targetOsid: string,
-    turn: number,
-    outcome: CombatOutcome,
-): void {
-    resetFormationEntrenchment(f);
-    (f as { last_retreat_from?: { osid: string; turn: number } }).last_retreat_from = {
-        osid: targetOsid, turn,
-    };
-    if (outcome === 'decisive_victory') (f as { disrupted_turns?: number }).disrupted_turns = 2;
-    else if (outcome === 'victory') (f as { disrupted_turns?: number }).disrupted_turns = 1;
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Resolver-only helpers
-// ═══════════════════════════════════════════════════════════════════════════
-
-/** Build average slope index per OSID for seasonal terrain interaction. */
-function buildSlopeByOsid(
-    reverseMap: OperationalToCanonicalReverseMap,
-    terrainData?: TerrainScalarsData | null
-): Record<string, number> {
-    const out: Record<string, number> = {};
-    if (!terrainData?.by_sid) return out;
-    const osids = Array.from(reverseMap.keys()).sort(strictCompare);
-    for (const osid of osids) {
-        const sids = reverseMap.get(osid) ?? [];
-        if (sids.length === 0) { out[osid] = 0; continue; }
-        let sum = 0;
-        for (const sid of sids) {
-            const t = getTerrainScalarsForSid(terrainData, sid);
-            sum += t.slope_index;
-        }
-        out[osid] = sum / sids.length;
-    }
-    return out;
-}
-
-/**
- * Find friendly adjacent OSIDs for retreat. Sorted deterministically:
- * fewer enemy neighbors first, then by OSID name.
- */
-/**
- * BFS distance from an OSID to a target through friendly territory.
- * Returns hop count, or Infinity if unreachable.
- */
-function bfsDistanceToCapital(
-    from: Osid,
-    target: Osid,
-    adjacency: Map<Osid, Osid[]>,
-    state: GameState,
-    factionId: FactionId,
-    reverseMap: OperationalToCanonicalReverseMap
-): number {
-    if (from === target) return 0;
-    const visited = new Set<string>([from]);
-    let frontier = [from];
-    let dist = 0;
-    while (frontier.length > 0 && dist < 50) {
-        dist++;
-        const next: Osid[] = [];
-        for (const osid of frontier) {
-            for (const n of (adjacency.get(osid) ?? [])) {
-                if (visited.has(n)) continue;
-                visited.add(n);
-                if (n === target) return dist;
-                const c = getPoliticalControllerOSID(state, n, reverseMap);
-                if (c === factionId) next.push(n);
-            }
-        }
-        frontier = next;
-    }
-    return Infinity;
-}
-
-function getFriendlyRetreatDestinations(
-    state: GameState,
-    formation: FormationState,
-    adjacency: Map<Osid, Osid[]>,
-    reverseMap: OperationalToCanonicalReverseMap
-): Osid[] {
-    const loc = (formation as { location_osid?: string }).location_osid;
-    const factionId = formation.faction as FactionId;
-    if (!loc) return [];
-    const neighbors = adjacency.get(loc) ?? [];
-    let friendly: Osid[] = [];
-    for (const n of neighbors) {
-        const c = getPoliticalControllerOSID(state, n, reverseMap);
-        if (c === factionId) friendly.push(n);
-    }
-
-    // Enclave retreat gravity: brigades in enclaves prefer retreating toward the capital.
-    // BB2 p.479: beaten units fell back concentrically toward Goražde town.
-    const capitalOsid = getEnclaveCapitalOsid(loc);
-    if (capitalOsid) {
-        // Enclave-tagged brigades MUST NOT retreat outside their enclave.
-        // Without this filter, brigades drift out through temporary corridors
-        // and end up 100km from their pocket (e.g., Goražde brigades in Visoko).
-        if (isEnclaveBrigade(formation)) {
-            friendly = friendly.filter(f => isOsidInSameEnclave(loc, f));
-        }
-
-        // Pre-compute BFS distance to capital for each candidate
-        const distCache = new Map<string, number>();
-        for (const f of friendly) {
-            distCache.set(f, bfsDistanceToCapital(f, capitalOsid, adjacency, state, factionId, reverseMap));
-        }
-        friendly.sort((a, b) => {
-            const dA = distCache.get(a) ?? Infinity;
-            const dB = distCache.get(b) ?? Infinity;
-            if (dA !== dB) return dA - dB; // Closer to capital = better
-            // Tie-break: fewer enemy neighbors = safer
-            const aAdj = (adjacency.get(a) ?? []).filter(n => {
-                const c = getPoliticalControllerOSID(state, n, reverseMap);
-                return c !== null && c !== factionId;
-            }).length;
-            const bAdj = (adjacency.get(b) ?? []).filter(n => {
-                const c = getPoliticalControllerOSID(state, n, reverseMap);
-                return c !== null && c !== factionId;
-            }).length;
-            if (aAdj !== bAdj) return aAdj - bAdj;
-            return strictCompare(a, b);
-        });
-    } else {
-        // Non-enclave: original logic (fewest enemy neighbors first)
-        friendly.sort((a, b) => {
-            const aAdj = (adjacency.get(a) ?? []).filter(n => {
-                const c = getPoliticalControllerOSID(state, n, reverseMap);
-                return c !== null && c !== factionId;
-            }).length;
-            const bAdj = (adjacency.get(b) ?? []).filter(n => {
-                const c = getPoliticalControllerOSID(state, n, reverseMap);
-                return c !== null && c !== factionId;
-            }).length;
-            if (aAdj !== bAdj) return aAdj - bAdj;
-            return strictCompare(a, b);
-        });
-    }
-    return friendly;
-}
-
-/**
- * Find any friendly OSID for a faction as an emergency retreat destination.
- * Priority: home_osid → fallback_osid → BFS nearest (8 hops) → corps HQ → any friendly.
- * BFS step keeps enclave brigades in their pocket instead of teleporting to corps HQ.
- */
-/** Max BFS hops when searching for nearest friendly OSID during emergency retreat. */
-const EMERGENCY_RETREAT_BFS_MAX_HOPS = 8;
-
-function allocateIntegerByWeights(
-    ids: string[],
-    total: number,
-    weightById: Map<string, number>
-): Map<string, number> {
-    const out = new Map<string, number>();
-    if (total <= 0 || ids.length === 0) return out;
-    const sorted = [...ids].sort(strictCompare);
-    const totalWeight = sorted.reduce((s, id) => s + Math.max(0, weightById.get(id) ?? 0), 0);
-    if (totalWeight <= 0) {
-        // If no brigade has defensive weight, attribute all to deterministic primary.
-        out.set(sorted[0]!, total);
-        return out;
-    }
-    let assigned = 0;
-    const remainderOrder: Array<{ id: string; rem: number }> = [];
-    for (const id of sorted) {
-        const raw = total * (Math.max(0, weightById.get(id) ?? 0) / totalWeight);
-        const whole = Math.floor(raw);
-        out.set(id, whole);
-        assigned += whole;
-        remainderOrder.push({ id, rem: raw - whole });
-    }
-    remainderOrder.sort((a, b) => (b.rem - a.rem) || strictCompare(a.id, b.id));
-    let left = total - assigned;
-    for (let i = 0; i < remainderOrder.length && left > 0; i++) {
-        const id = remainderOrder[i]!.id;
-        out.set(id, (out.get(id) ?? 0) + 1);
-        left--;
-    }
-    return out;
-}
-
-export function findEmergencyRetreatOsid(
-    state: GameState,
-    formation: FormationState,
-    reverseMap: OperationalToCanonicalReverseMap,
-    adjacency?: Map<Osid, Osid[]>,
-    sourceOsid?: string,
-    friendlyOsids?: Set<string>
-): string | null {
-    const factionId = formation.faction as FactionId;
-    const pc = state.political?.political_controllers ?? {};
-
-    // Build friendly set and connected components for reachability checks
-    const friendly = friendlyOsids ?? buildFriendlySet(pc, factionId);
-    const componentOf = adjacency ? buildFriendlyComponentsLocal(adjacency, friendly) : new Map<string, number>();
-
-    const origin = sourceOsid ?? (formation as { location_osid?: string }).location_osid;
-    const originComponent = origin ? componentOf.get(origin) : undefined;
-
-    /** Check if a candidate OSID is reachable from origin through friendly territory. */
-    const isReachable = (osid: string): boolean => {
-        if (originComponent === undefined) return true; // no adjacency → can't verify, allow
-        const comp = componentOf.get(osid);
-        return comp !== undefined && comp === originComponent;
-    };
-
-    // 1. Try home_osid (must be friendly AND reachable)
-    const homeOsid = (formation as { home_osid?: string }).home_osid;
-    if (homeOsid && friendly.has(homeOsid) && isReachable(homeOsid)) {
-        return homeOsid;
-    }
-
-    // 2. Try fallback_osid (must be friendly AND reachable)
-    const fallbackOsid = (formation as { fallback_osid?: string }).fallback_osid;
-    if (fallbackOsid && friendly.has(fallbackOsid) && isReachable(fallbackOsid)) {
-        return fallbackOsid;
-    }
-
-    // 3. BFS from current location through friendly territory only.
-    //    Keeps enclave brigades inside their pocket instead of teleporting to corps HQ.
-    //    BB2 p.479: beaten units fell back concentrically toward Goražde town.
-    if (adjacency && origin) {
-        const visited = new Set<string>([origin]);
-        let frontier = [origin as Osid];
-        for (let hop = 0; hop < EMERGENCY_RETREAT_BFS_MAX_HOPS && frontier.length > 0; hop++) {
-            const next: Osid[] = [];
-            for (const curr of frontier) {
-                for (const n of (adjacency.get(curr) ?? [])) {
-                    if (visited.has(n)) continue;
-                    visited.add(n);
-                    if (friendly.has(n)) {
-                        return n;
-                    }
-                    // Do NOT expand through enemy territory
-                }
-            }
-            frontier = next;
-        }
-    }
-
-    // 4. Try corps HQ (must be reachable)
-    const hqOsid = getCorpsHqOsid(state, formation);
-    if (hqOsid && friendly.has(hqOsid) && isReachable(hqOsid)) {
-        return hqOsid;
-    }
-
-    // 5. Same connected component fallback (sorted for determinism)
-    if (originComponent !== undefined) {
-        const compOsids = Array.from(componentOf.entries())
-            .filter(([, comp]) => comp === originComponent)
-            .map(([osid]) => osid)
-            .sort(strictCompare);
-        for (const osid of compOsids) {
-            if (friendly.has(osid)) return osid;
-        }
-    }
-
-    // 6. Largest friendly component fallback
-    const largestComp = findLargestComponent(componentOf);
-    if (largestComp !== -1) {
-        const compOsids = Array.from(componentOf.entries())
-            .filter(([, comp]) => comp === largestComp)
-            .map(([osid]) => osid)
-            .sort(strictCompare);
-        for (const osid of compOsids) {
-            if (friendly.has(osid)) return osid;
-        }
-    }
-
-    // 7. Any friendly OSID (sorted for determinism) — absolute last resort
-    const osids = Object.keys(pc).sort(strictCompare);
-    for (const osid of osids) {
-        if (pc[osid] === factionId) return osid;
-    }
-
-    return null;
-}
-
-/** Build a Set of OSIDs controlled by a faction from political_controllers. */
-function buildFriendlySet(
-    pc: Record<string, string | null>,
-    factionId: string
-): Set<string> {
-    const result = new Set<string>();
-    for (const osid of Object.keys(pc)) {
-        if (pc[osid] === factionId) result.add(osid);
-    }
-    return result;
-}
-
-/**
- * BFS connected components through friendly-only territory.
- * Returns Map<osid, componentIndex>. Deterministic via strictCompare sort.
- */
-function buildFriendlyComponentsLocal(
-    adjacency: Map<Osid, Osid[]>,
-    friendlyOsids: Set<string>
-): Map<string, number> {
-    const componentOf = new Map<string, number>();
-    let nextComponent = 0;
-    const sorted = Array.from(friendlyOsids).sort(strictCompare);
-    for (const seed of sorted) {
-        if (componentOf.has(seed)) continue;
-        const comp = nextComponent++;
-        const queue = [seed];
-        componentOf.set(seed, comp);
-        while (queue.length > 0) {
-            const curr = queue.shift()!;
-            for (const n of (adjacency.get(curr as Osid) ?? [])) {
-                if (componentOf.has(n)) continue;
-                if (!friendlyOsids.has(n)) continue;
-                componentOf.set(n, comp);
-                queue.push(n);
-            }
-        }
-    }
-    return componentOf;
-}
-
-/** Find the component index with the most OSIDs. Returns -1 if empty. */
-function findLargestComponent(componentOf: Map<string, number>): number {
-    if (componentOf.size === 0) return -1;
-    const counts = new Map<number, number>();
-    for (const comp of componentOf.values()) {
-        counts.set(comp, (counts.get(comp) ?? 0) + 1);
-    }
-    let best = -1;
-    let bestCount = 0;
-    // Deterministic: iterate sorted component indices
-    const compIndices = Array.from(counts.keys()).sort((a, b) => a - b);
-    for (const comp of compIndices) {
-        const c = counts.get(comp) ?? 0;
-        if (c > bestCount) { bestCount = c; best = comp; }
-    }
-    return best;
-}
-
-/** Personnel retain fraction for emergency long-distance retreat (e.g. displaced from behind enemy lines). */
-const EMERGENCY_RETREAT_PERSONNEL_RETAIN = 0.60;
-/** Cohesion loss on emergency retreat. */
-const EMERGENCY_RETREAT_COHESION_LOSS = 20;
-/** Disruption turns on emergency retreat. */
-const EMERGENCY_RETREAT_DISRUPTED_TURNS = 3;
-
-/** Options for force retreat penalty overrides. */
-interface ForceRetreatOptions {
-    personnelRetain?: number;
-    cohesionLoss?: number;
-    disruptedTurns?: number;
-    adjacency?: Map<Osid, Osid[]>;
-    friendlyOsids?: Set<string>;
-}
-
-/**
- * Force-retreat a formation to a friendly OSID with heavy penalties.
- * Never destroys the brigade — worst case it goes to reserve status with minimal personnel.
- */
-function forceRetreatWithPenalties(
-    state: GameState,
-    formation: FormationState,
-    reverseMap: OperationalToCanonicalReverseMap,
-    sourceOsid: string,
-    opts?: ForceRetreatOptions
-): void {
-    const personnelRetain = opts?.personnelRetain ?? EMERGENCY_RETREAT_PERSONNEL_RETAIN;
-    const cohesionLoss = opts?.cohesionLoss ?? EMERGENCY_RETREAT_COHESION_LOSS;
-    const disruptedTurns = opts?.disruptedTurns ?? EMERGENCY_RETREAT_DISRUPTED_TURNS;
-    const dest = findEmergencyRetreatOsid(state, formation, reverseMap, opts?.adjacency, sourceOsid, opts?.friendlyOsids);
-    const f = formation as FormationState & { location_osid?: string; disrupted_turns?: number; last_retreat_from?: { osid: string; turn: number } };
-    resetFormationEntrenchment(formation);
-    f.disrupted_turns = disruptedTurns;
-    formation.cohesion = Math.max(0, (formation.cohesion ?? 60) - cohesionLoss);
-    formation.personnel = Math.max(MIN_COMBAT_PERSONNEL, Math.floor((formation.personnel ?? 0) * personnelRetain));
-    if (dest != null) {
-        f.location_osid = dest;
-        f.last_retreat_from = { osid: sourceOsid, turn: state.meta?.turn ?? 0 };
-    } else {
-        // Absolute last resort: no friendly territory exists at all — brigade disperses
-        // This should only happen if the entire faction's territory is lost
-        f.location_osid = undefined;
-        removeFromActiveOperation(state, formation.id, formation.corps_id);
-        formation.status = 'inactive';
-        formation.destruction_turn = state.meta?.turn ?? 0;
-    }
-}
-
-/**
- * Displace any active formation that has location_osid in an OSID not controlled by its faction.
- * Used after attack resolution (and optionally at end of turn) to enforce invariant: no brigade in enemy territory.
- * Brigades are NEVER destroyed — they retreat with penalties.
- */
-export function displaceFormationsInEnemyTerritory(
-    state: GameState,
-    edges: EdgeRecord[],
-    reverseMap: OperationalToCanonicalReverseMap,
-    preComputedAdjacency?: ReadonlyMap<string, readonly string[]>,
-): void {
-    const adjacency = (preComputedAdjacency as Map<Osid, Osid[]>) ?? buildOsidAdjacency(edges);
-    const pc = state.political?.political_controllers ?? {};
-    // Lazy per-faction friendly sets
-    const friendlyCache = new Map<string, Set<string>>();
-    const getFriendly = (fac: string): Set<string> => {
-        let s = friendlyCache.get(fac);
-        if (!s) { s = buildFriendlySet(pc, fac); friendlyCache.set(fac, s); }
-        return s;
-    };
-    const formations = state.military.formations ?? {};
-    for (const fid of Object.keys(formations).sort(strictCompare)) {
-        const f = formations[fid];
-        if (!f || f.status !== 'active') continue;
-        const loc = (f as { location_osid?: string }).location_osid;
-        if (!loc) continue;
-        const factionId = f.faction as FactionId;
-        if (getPoliticalControllerOSID(state, loc, reverseMap) === factionId) continue;
-        const otherFormation = f as FormationState & { location_osid?: string; fallback_osid?: string };
-        const retreatDests = getFriendlyRetreatDestinations(state, otherFormation, adjacency, reverseMap);
-        const dest = retreatDests[0];
-        if (dest != null) {
-            // Adjacent friendly OSID — simple displacement, no penalties
-            otherFormation.location_osid = dest;
-            resetFormationEntrenchment(otherFormation);
-        } else {
-            // No adjacent friendly — emergency retreat with penalties
-            forceRetreatWithPenalties(state, otherFormation, reverseMap, loc, { adjacency, friendlyOsids: getFriendly(factionId) });
-        }
-    }
-}
-
-function applyPersonnelLoss(formation: FormationState, loss: number): void {
-    if (typeof formation.personnel !== 'number') return;
-    formation.personnel = Math.max(MIN_COMBAT_PERSONNEL, formation.personnel - loss);
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Types
-// ═══════════════════════════════════════════════════════════════════════════
-
-export type AttackResolutionOsidSnapEventType =
-    | 'ammo_crisis'
-    | 'commander_casualty'
-    | 'last_stand'
-    | 'surrender_cascade'
-    | 'pyrrhic_victory'
-    | 'morale_absorption';
-
-export interface AttackResolutionOsidSnapEvent {
-    snap_type: AttackResolutionOsidSnapEventType;
-    trigger_phase: 'pre_battle' | 'post_battle';
-    attacker_brigade: FormationId;
-    target_osid: Osid;
-    affected_formation?: FormationId;
-    description: string;
-    effects: Record<string, number | string | boolean | null>;
-}
-
-export interface AttackResolutionOsidReport {
-    orders_processed: number;
-    unique_attack_targets: number;
-    flips_applied: number;
-    casualty_attacker: number;
-    casualty_defender: number;
-    orders_by_faction: Record<string, number>;
-    engaged_formation_ids: FormationId[];
-    snap_events: AttackResolutionOsidSnapEvent[];
-    snap_event_counts: Partial<Record<AttackResolutionOsidSnapEventType, number>>;
-    battles: Array<{
-        /** Deterministic join key: {turn}:{osid}:{attacker_brigade}:{defender_brigade|null} */
-        battle_id: string;
-        attacker_brigade: FormationId;
-        attacker_faction: FactionId;
-        defender_faction: FactionId;
-        target_osid: Osid;
-        outcome: CombatOutcome;
-        power_ratio: number;
-        attacker_won: boolean;
-        defender_brigade: FormationId | null;
-        snap_events: AttackResolutionOsidSnapEvent[];
-        /** Actual total attacker casualties (KIA+WIA+MIA) from this battle. */
-        attacker_casualties: number;
-        /** Actual total defender casualties (KIA+WIA+MIA) from this battle. */
-        defender_casualties: number;
-        /** Per-brigade defender contributions (Layer A distance-weighted). */
-        defender_contributions?: DefenderContribution[];
-        /** Sub-segment that defended this OSID (Phase B). */
-        defending_sub_segment_id?: string;
-        /** Equipment destroyed, scavenged, and captured in this battle. */
-        equipment?: {
-            attacker_tanks_lost: number;
-            attacker_artillery_lost: number;
-            defender_tanks_lost: number;
-            defender_artillery_lost: number;
-            scavenged_tanks: number;
-            scavenged_artillery: number;
-            scavenged_by?: string;
-            captured_tanks: number;
-            captured_artillery: number;
-            captured_by?: string;
-        };
-        /** Deterministic operation join key: {corps_id}:{op_name}:t{started_turn}. */
-        operation_id?: string;
-        /** Human-readable operation name. */
-        operation_name?: string;
-    }>;
-}
-
-export interface DefenderContribution {
-    brigade_id: FormationId;
-    /** BFS hop distance from brigade location to battle OSID (0 = physically present). */
-    distance_hops: number;
-    /** Whether brigade is defending its home municipality. */
-    is_home_municipality: boolean;
-    /** Reactive weight used for power and casualty calculation. */
-    reactive_weight: number;
-    /** Casualties absorbed by this brigade in this battle. */
-    casualties_taken: number;
-}
-
-function pushSnapEvent(report: AttackResolutionOsidReport, event: AttackResolutionOsidSnapEvent): void {
-    report.snap_events.push(event);
-    report.snap_event_counts[event.snap_type] = (report.snap_event_counts[event.snap_type] ?? 0) + 1;
-}
+// Types and pushSnapEvent imported from attack_resolution_types.ts above.
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Main resolver
@@ -1064,31 +558,29 @@ export function resolveAttackOrdersOsid(
             controller ?? attackerFaction,
             state
         );
-        const baseAttackerCas = personnelAttacker * BASE_ATTACKER_LOSS_RATE * (OUTCOME_ATTACKER_MOD[outcome] ?? 1) * lastStandCasMult * militiaOnlyMult * attCasMult * defensiveFireMult;
-        const baseDefenderCas = personnelDefender * BASE_DEFENDER_LOSS_RATE * (OUTCOME_DEFENDER_MOD[outcome] ?? 1) * lastStandCasMult * bombardmentMult * defCasMult;
-        const finalAttackerCas = Math.min(personnelAttacker - MIN_COMBAT_PERSONNEL, Math.max(0, Math.round(baseAttackerCas)));
-        const finalDefenderCas = Math.min(personnelDefender, Math.max(0, Math.round(
-            baseDefenderCas * getLanchesterConcentrationBonus(attackerFormations.length, powerRatio) // P10: Lanchester numerical superiority
-        )));
+        const { finalAttackerCas, finalDefenderCas } = computeFinalCasualties({
+            personnelAttacker,
+            personnelDefender,
+            outcome,
+            lastStandCasMult,
+            militiaOnlyMult,
+            attCasMult,
+            defCasMult,
+            defensiveFireMult,
+            bombardmentMult,
+            attackerCount: attackerFormations.length,
+            powerRatio,
+        });
 
         // Build defender contribution records for Layer C battle reports
-        let defenderContributions: DefenderContribution[] | undefined;
-        if (sectorBrigadeWeights && sectorBrigadeMeta && sectorDefenseBrigades && sectorDefenseBrigades.length > 1) {
-            const totalWeight = sectorDefenseBrigades.reduce((s, b) => s + (sectorBrigadeWeights!.get(b.id) ?? 0), 0);
-            defenderContributions = [];
-            for (const b of sectorDefenseBrigades) {
-                const w = sectorBrigadeWeights.get(b.id) ?? 0;
-                const meta = sectorBrigadeMeta.get(b.id);
-                const frac = totalWeight > 0 ? w / totalWeight : 1 / sectorDefenseBrigades.length;
-                defenderContributions.push({
-                    brigade_id: b.id,
-                    distance_hops: meta?.hops ?? 0,
-                    is_home_municipality: meta?.isHome ?? false,
-                    reactive_weight: Math.round(w * 100) / 100,
-                    casualties_taken: Math.round(finalDefenderCas * frac),
-                });
-            }
-        }
+        const defenderContributions = (sectorBrigadeWeights && sectorBrigadeMeta && sectorDefenseBrigades && sectorDefenseBrigades.length > 1)
+            ? buildDefenderContributions({
+                sectorDefenseBrigades,
+                sectorBrigadeWeights,
+                sectorBrigadeMeta,
+                finalDefenderCas,
+            })
+            : undefined;
 
         // Battle report pushed AFTER equipment processing (below) so it includes equipment data.
         // Collect equipment tracking variables here:
@@ -1099,13 +591,6 @@ export function resolveAttackOrdersOsid(
         let battleEquipScavengedBy = '' as string;
         let battleEquipCapturedBy = '' as string;
 
-        const aKia = Math.floor(finalAttackerCas * KIA_FRACTION);
-        const aWia = Math.floor(finalAttackerCas * WIA_FRACTION);
-        const aMia = finalAttackerCas - aKia - aWia;
-        const dKia = Math.floor(finalDefenderCas * KIA_FRACTION);
-        const dWia = Math.floor(finalDefenderCas * WIA_FRACTION);
-        const dMia = finalDefenderCas - dKia - dWia;
-
         report.casualty_attacker += finalAttackerCas;
         report.casualty_defender += finalDefenderCas;
 
@@ -1115,21 +600,20 @@ export function resolveAttackOrdersOsid(
         let totalDTanksLost = 0;
         let totalDArtLost = 0;
 
-        // Compute renormalized casualty weights: main takes MAIN_CASUALTY_MULT, support takes SUPPORT_CASUALTY_MULT.
-        // Total casualties are preserved — weights are renormalized so sum matches finalAttackerCas.
-        const rawWeights: { f: typeof attackerFormations[0]; w: number }[] = [];
-        let weightSum = 0;
+        // Pre-classify support roles for weight computation
+        const anySupport = attackerFormations.some(a => isSupportBrigadeOnActiveOp(state, a.id, a.corps_id));
+        const casShares = computeAttackerCasualtyShares(
+            attackerFormations.map(a => ({
+                id: a.id,
+                personnel: a.personnel ?? 0,
+                supportRole: isSupportBrigadeOnActiveOp(state, a.id, a.corps_id) ? 'support' as const
+                    : anySupport ? 'main' as const : 'none' as const,
+            })),
+            personnelAttacker,
+            finalAttackerCas,
+        );
         for (const a of attackerFormations) {
-            const frac = (a.personnel ?? 0) / Math.max(1, personnelAttacker);
-            const isSupport = isSupportBrigadeOnActiveOp(state, a.id, a.corps_id);
-            const isMain = !isSupport && attackerFormations.some(b => isSupportBrigadeOnActiveOp(state, b.id, b.corps_id));
-            const mult = isSupport ? SUPPORT_CASUALTY_MULT : isMain ? MAIN_CASUALTY_MULT : 1.0;
-            const w = frac * mult;
-            rawWeights.push({ f: a, w });
-            weightSum += w;
-        }
-        for (const { f: a, w } of rawWeights) {
-            const cas = Math.round(finalAttackerCas * (weightSum > 0 ? w / weightSum : 0));
+            const cas = casShares.get(a.id) ?? 0;
             applyPersonnelLoss(a, cas);
             a.cohesion = Math.max(0, Math.min(100, (a.cohesion ?? 60) + (COHESION_ATTACKER[outcome] ?? 0)));
 
@@ -1140,34 +624,10 @@ export function resolveAttackOrdersOsid(
             // Record battle outcome for morale drift (victory boost / defeat penalty).
             (a as { recent_battle_outcome?: string }).recent_battle_outcome = outcome;
 
-            if (outcome === 'costly_victory') (a as { disrupted_turns?: number }).disrupted_turns = 1;
-            if (outcome === 'repulsed' || outcome === 'catastrophic') {
-                (a as { disrupted_turns?: number }).disrupted_turns = 1;
-                (a as { last_repulsed_from?: { osid: string; turn: number } }).last_repulsed_from = {
-                    osid: targetOsid, turn: state.meta?.turn ?? 0
-                };
-            }
-            recordBattleCasualties(state.military.casualty_ledger!, a.faction, a.id, {
-                killed: Math.floor(cas * KIA_FRACTION),
-                wounded: Math.floor(cas * WIA_FRACTION),
-                missing_captured: Math.max(0, cas - Math.floor(cas * KIA_FRACTION) - Math.floor(cas * WIA_FRACTION))
-            });
-            // Equipment losses: minimum 1 per piece type if formation has them
-            const aComp = a.composition ?? ensureBrigadeComposition(a);
-            // Scarce tank protection: brigades with <10 tanks preserve them more carefully
-            // (hull-down positions, indirect fire, not leading assaults). No minimum-1 loss.
-            // VRS with 40 tanks loses 3+ per battle; ARBiH with 3 tanks loses 0-1.
-            const aTanksLost = aComp.tanks > 0
-                ? (aComp.tanks >= 10
-                    ? Math.max(1, Math.round(aComp.tanks * TANK_LOSS_RATE))
-                    : Math.round(aComp.tanks * TANK_LOSS_RATE * 0.5))
-                : 0;
-            const aArtLost = aComp.artillery > 0 ? Math.max(1, Math.round(aComp.artillery * ARTILLERY_LOSS_RATE)) : 0;
-            if (aTanksLost > 0 || aArtLost > 0) {
-                aComp.tanks = Math.max(0, aComp.tanks - aTanksLost);
-                aComp.artillery = Math.max(0, aComp.artillery - aArtLost);
-                recordEquipmentLoss(state.military.casualty_ledger!, a.faction, { tanks: aTanksLost, artillery: aArtLost });
-            }
+            applyDisruptionFromOutcome(a, outcome, targetOsid, state.meta?.turn ?? 0);
+            recordBattleCasualties(state.military.casualty_ledger!, a.faction, a.id, splitKiaWiaMia(cas));
+            // Equipment losses (extracted to attack_equipment_effects.ts)
+            const { tanksLost: aTanksLost, artLost: aArtLost } = computeFormationEquipmentLoss(a, 'attacker', state.military.casualty_ledger!);
             totalATanksLost += aTanksLost;
             totalAArtLost += aArtLost;
             battleEquipAttackerTanksLost += aTanksLost;
@@ -1175,68 +635,28 @@ export function resolveAttackOrdersOsid(
         }
         if (defenderFormation) {
             // ── Distance-weighted casualty distribution ───────────────────
-            // Casualties distributed proportionally to each brigade's reactive
-            // weight. Physical defenders (weight 1.0 × homeBonus) take the most.
-            // Distant reserves take almost nothing. No arbitrary 50/50 split.
-            const defBrigades = sectorDefenseBrigades && sectorDefenseBrigades.length > 1
-                ? sectorDefenseBrigades : [defenderFormation];
-
-            if (sectorBrigadeWeights && defBrigades.length > 1) {
-                // Distance-weighted distribution
-                const totalWeight = defBrigades.reduce((s, b) => s + (sectorBrigadeWeights!.get(b.id) ?? 0), 0);
-                for (const b of defBrigades) {
-                    const w = sectorBrigadeWeights.get(b.id) ?? 0;
-                    const frac = totalWeight > 0 ? w / totalWeight : 1 / defBrigades.length;
-                    const cas = Math.round(finalDefenderCas * frac);
-                    if (cas > 0) {
-                        applyPersonnelLoss(b, cas);
-                        const kia = Math.floor(cas * KIA_FRACTION);
-                        const wia = Math.floor(cas * WIA_FRACTION);
-                        const mia = Math.max(0, cas - kia - wia);
-                        recordBattleCasualties(state.military.casualty_ledger!, b.faction, b.id, { killed: kia, wounded: wia, missing_captured: mia });
-                    }
-                }
-            } else {
-                // Single defender or no weights — all casualties to primary
-                applyPersonnelLoss(defenderFormation, finalDefenderCas);
-                const kia = Math.floor(finalDefenderCas * KIA_FRACTION);
-                const wia = Math.floor(finalDefenderCas * WIA_FRACTION);
-                const mia = Math.max(0, finalDefenderCas - kia - wia);
-                recordBattleCasualties(state.military.casualty_ledger!, defenderFormation.faction, defenderFormation.id, { killed: kia, wounded: wia, missing_captured: mia });
-            }
+            distributeDefenderCasualties({
+                defenderFormation,
+                sectorDefenseBrigades,
+                sectorBrigadeWeights,
+                finalDefenderCas,
+                casualtyLedger: state.military.casualty_ledger!,
+            });
 
             // Apply cohesion/fatigue/morale to primary defender
             defenderFormation.cohesion = Math.max(0, Math.min(100, (defenderFormation.cohesion ?? 60) + (COHESION_DEFENDER[outcome] ?? 0)));
             recordFormationFatigue(defenderFormation, 1);
 
             // Record battle outcome for morale drift — defender's perspective is inverted
-            (defenderFormation as { recent_battle_outcome?: string }).recent_battle_outcome =
-                outcome === 'decisive_victory' ? 'catastrophic' :
-                outcome === 'victory' ? 'repulsed' :
-                outcome === 'costly_victory' ? 'stalemate' :
-                outcome === 'stalemate' ? 'costly_victory' :
-                outcome === 'repulsed' ? 'victory' :
-                outcome === 'catastrophic' ? 'decisive_victory' : outcome;
+            (defenderFormation as { recent_battle_outcome?: string }).recent_battle_outcome = getDefenderOutcomePerspective(outcome);
 
             (defenderFormation as { defense_streak?: number }).defense_streak = (outcome === 'stalemate' || outcome === 'repulsed' || outcome === 'catastrophic')
                 ? Math.min(MAX_RESILIENCE_STREAK, ((defenderFormation as { defense_streak?: number }).defense_streak ?? 0) + 1)
                 : 0;
             const prevEntrenchment = (defenderFormation as { entrenchment_turns?: number }).entrenchment_turns ?? 0;
             (defenderFormation as { entrenchment_turns?: number }).entrenchment_turns = Math.max(0, prevEntrenchment - ENTRENCHMENT_DEGRADATION_PER_BATTLE);
-            // Defender equipment losses (primary only)
-            const dComp = defenderFormation.composition ?? ensureBrigadeComposition(defenderFormation);
-            // Defender tank losses: half rate, and scarce tank protection (no min-1 below 10)
-            const dTanksLost = dComp.tanks > 0
-                ? (dComp.tanks >= 10
-                    ? Math.max(1, Math.round(dComp.tanks * TANK_LOSS_RATE * 0.5))
-                    : Math.round(dComp.tanks * TANK_LOSS_RATE * 0.25))
-                : 0;
-            const dArtLost = dComp.artillery > 0 ? Math.max(1, Math.round(dComp.artillery * ARTILLERY_LOSS_RATE * 0.5)) : 0;
-            if (dTanksLost > 0 || dArtLost > 0) {
-                dComp.tanks = Math.max(0, dComp.tanks - dTanksLost);
-                dComp.artillery = Math.max(0, dComp.artillery - dArtLost);
-                recordEquipmentLoss(state.military.casualty_ledger!, defenderFormation.faction, { tanks: dTanksLost, artillery: dArtLost });
-            }
+            // Defender equipment losses (extracted to attack_equipment_effects.ts)
+            const { tanksLost: dTanksLost, artLost: dArtLost } = computeFormationEquipmentLoss(defenderFormation, 'defender', state.military.casualty_ledger!);
             totalDTanksLost += dTanksLost;
             totalDArtLost += dArtLost;
             battleEquipDefenderTanksLost += dTanksLost;
@@ -1263,194 +683,22 @@ export function resolveAttackOrdersOsid(
             }
         }
 
-        // ── Battlefield scavenging (with fractional accumulator) ──────────────
-        // Winner recovers a fraction of destroyed enemy equipment from the battlefield.
-        // Uses fractional accumulator: small amounts (e.g. 0.3 tanks) accumulate across
-        // battles. When ≥1.0, a whole unit is granted and the accumulator is debited.
-        // This ensures scavenging works even when individual battles destroy few units.
-        // Zero-sum: scavenged equipment is already destroyed — doesn't reduce the loser's count.
+        // ── Equipment transfers (extracted to attack_equipment_effects.ts) ──
         const attackerLost = outcome === 'repulsed' || outcome === 'catastrophic';
         const attackerWon = outcome === 'decisive_victory' || outcome === 'victory' || outcome === 'costly_victory';
 
-        // Helper: accumulate fractional scavenge, return whole units to grant
-        const accumulateScavenge = (formation: FormationState, fracTanks: number, fracArt: number): { tanks: number; art: number } => {
-            if (!formation.scavenge_accumulator) formation.scavenge_accumulator = { tanks: 0, artillery: 0 };
-            const acc = formation.scavenge_accumulator;
-            acc.tanks += fracTanks;
-            acc.artillery += fracArt;
-            const grantTanks = Math.floor(acc.tanks);
-            const grantArt = Math.floor(acc.artillery);
-            acc.tanks -= grantTanks;
-            acc.artillery -= grantArt;
-            return { tanks: grantTanks, art: grantArt };
-        };
-
-        // Both sides scavenge from the other's destroyed equipment.
-        // Winner gets higher rate; loser still recovers some (the battlefield is
-        // contested — knocked-out vehicles left on the field are recovered by field
-        // repair teams from both sides). Historically critical: ARBiH recovered disabled
-        // VRS tanks even from lost engagements.
-        // Note: scavenging is from DESTROYED equipment (already removed from composition
-        // above). It does NOT further reduce the loser's count — it's partial recovery
-        // of equipment that would otherwise be total write-off.
-        const applyScavenge = (
-            recipient: FormationState,
-            enemyTanksLost: number, enemyArtLost: number,
-            rate: number, faction: string
-        ) => {
-            const comp = recipient.composition;
-            if (!comp) return;
-            const fracTanks = enemyTanksLost * rate;
-            const fracArt = enemyArtLost * rate;
-            const { tanks: scavTanks, art: scavArt } = accumulateScavenge(recipient, fracTanks, fracArt);
-            if (scavTanks > 0) {
-                comp.tanks += scavTanks;
-                const frac = scavTanks / Math.max(1, comp.tanks);
-                comp.tank_condition.degraded += frac * 0.7;
-                comp.tank_condition.operational = Math.max(0, comp.tank_condition.operational - frac * 0.5);
-            }
-            if (scavArt > 0) {
-                comp.artillery += scavArt;
-                const frac = scavArt / Math.max(1, comp.artillery);
-                comp.artillery_condition.degraded += frac * 0.7;
-                comp.artillery_condition.operational = Math.max(0, comp.artillery_condition.operational - frac * 0.5);
-            }
-            battleEquipScavengedTanks += scavTanks;
-            battleEquipScavengedArt += scavArt;
-            if (scavTanks > 0 || scavArt > 0) battleEquipScavengedBy = faction;
-        };
-
-        if (attackerWon) {
-            // Winner (attacker) scavenges from defender's destroyed equipment at high rate
-            const winRate = outcome === 'decisive_victory' ? 0.20
-                : outcome === 'victory' ? 0.15 : 0.10;
-            applyScavenge(firstAttacker, totalDTanksLost, totalDArtLost, winRate, attackerFaction);
-            // Loser (defender) recovers disabled enemy vehicles from the battlefield.
-            // Rate is meaningful (15%) because the defender is on home ground — they
-            // stay on the position (even if pushed back) and have time to recover
-            // knocked-out tanks. Historically: ARBiH field repair teams recovered
-            // disabled VRS T-55s and M-84s after every major VRS assault.
-            if (defenderFormation) {
-                const loseRate = 0.15;
-                applyScavenge(defenderFormation, totalATanksLost, totalAArtLost, loseRate, defenderFormation.faction as string);
-            }
-        } else if (attackerLost) {
-            // Winner (defender) scavenges from attacker's destroyed equipment at high rate
-            // Defender held the field — they get everything the attacker left behind.
-            if (defenderFormation) {
-                const winRate = outcome === 'catastrophic' ? 0.25 : 0.15;
-                applyScavenge(defenderFormation, totalATanksLost, totalAArtLost, winRate, defenderFormation.faction as string);
-            }
-            // Loser (attacker) retreats — minimal recovery from defender losses
-            const loseRate = 0.05;
-            applyScavenge(firstAttacker, totalDTanksLost, totalDArtLost, loseRate, attackerFaction);
-        } else {
-            // Stalemate: both sides recover from each other's losses at moderate rate
-            applyScavenge(firstAttacker, totalDTanksLost, totalDArtLost, 0.08, attackerFaction);
-            if (defenderFormation) {
-                applyScavenge(defenderFormation, totalATanksLost, totalAArtLost, 0.08, defenderFormation.faction as string);
-            }
-        }
-
-        // ── Equipment capture (from retreating/routed forces) ────────────────
-        // Separate from scavenging (destroyed equipment). When one side wins,
-        // the loser retreats and abandons some intact equipment on the field.
-        // Capture transfers equipment from loser to winner (not destroyed — moved).
-        // Decisive outcomes cause more abandonment (rout). Captured gear starts degraded.
-        if (attackerWon && defenderFormation?.composition && firstAttacker.composition) {
-            const captureRate = outcome === 'decisive_victory' ? 0.08
-                : outcome === 'victory' ? 0.05 : 0.02;
-            const dComp3 = defenderFormation.composition;
-            const aComp3 = firstAttacker.composition;
-            const capTanks = Math.floor(dComp3.tanks * captureRate);
-            const capArt = Math.floor(dComp3.artillery * captureRate);
-            if (capTanks > 0) {
-                dComp3.tanks -= capTanks;
-                aComp3.tanks += capTanks;
-                const frac = capTanks / Math.max(1, aComp3.tanks);
-                aComp3.tank_condition.degraded += frac * 0.5;
-                aComp3.tank_condition.operational = Math.max(0, aComp3.tank_condition.operational - frac * 0.3);
-            }
-            if (capArt > 0) {
-                dComp3.artillery -= capArt;
-                aComp3.artillery += capArt;
-                const frac = capArt / Math.max(1, aComp3.artillery);
-                aComp3.artillery_condition.degraded += frac * 0.5;
-                aComp3.artillery_condition.operational = Math.max(0, aComp3.artillery_condition.operational - frac * 0.3);
-            }
-            battleEquipCapturedTanks = capTanks;
-            battleEquipCapturedArt = capArt;
-            battleEquipCapturedBy = attackerFaction;
-        } else if (attackerLost && defenderFormation?.composition && firstAttacker.composition) {
-            // Defender captures from retreating/routed attacker — ARBiH repulsing
-            // a VRS assault recovers abandoned tanks and artillery from the field.
-            // Minimum 1 tank captured if attacker had 10+ tanks (disabled vehicle left
-            // on the battlefield — historically common when VRS attacked ARBiH positions).
-            // Zero-sum: captured equipment is removed from the attacker's composition.
-            const captureRate = outcome === 'catastrophic' ? 0.12 : 0.05;
-            const aComp3 = firstAttacker.composition;
-            const dComp3 = defenderFormation.composition;
-            const DEFENSIVE_CAPTURE_MIN_TANKS = 10; // attacker needs 10+ tanks for guaranteed capture
-            const DEFENSIVE_CAPTURE_MIN_ART = 15;   // attacker needs 15+ artillery for guaranteed capture
-            const rawCapTanks = aComp3.tanks * captureRate;
-            const rawCapArt = aComp3.artillery * captureRate;
-            const capTanks = rawCapTanks >= 1 ? Math.floor(rawCapTanks)
-                : (aComp3.tanks >= DEFENSIVE_CAPTURE_MIN_TANKS ? 1 : 0);
-            const capArt = rawCapArt >= 1 ? Math.floor(rawCapArt)
-                : (aComp3.artillery >= DEFENSIVE_CAPTURE_MIN_ART ? 1 : 0);
-            if (capTanks > 0) {
-                aComp3.tanks -= capTanks;
-                dComp3.tanks += capTanks;
-                const frac = capTanks / Math.max(1, dComp3.tanks);
-                dComp3.tank_condition.degraded += frac * 0.5;
-                dComp3.tank_condition.operational = Math.max(0, dComp3.tank_condition.operational - frac * 0.3);
-            }
-            if (capArt > 0) {
-                aComp3.artillery -= capArt;
-                dComp3.artillery += capArt;
-                const frac = capArt / Math.max(1, dComp3.artillery);
-                dComp3.artillery_condition.degraded += frac * 0.5;
-                dComp3.artillery_condition.operational = Math.max(0, dComp3.artillery_condition.operational - frac * 0.3);
-            }
-            battleEquipCapturedTanks = capTanks;
-            battleEquipCapturedArt = capArt;
-            battleEquipCapturedBy = defenderFormation.faction as string;
-        }
-        // ── Abandoned equipment on uncontested occupation ──────────────────
-        // When a force walks into a vacated enemy OSID, it recovers some equipment
-        // left behind by the retreating garrison. Historically critical for ARBiH:
-        // much of their early heavy equipment came from overrunning JNA barracks
-        // and abandoned VRS positions. Amount based on OSID population (proxy for
-        // garrison size) and the occupying faction's equipment scarcity.
-        if (!defenderFormation && firstAttacker.composition) {
-            const pop = osidPopulationMap?.get(targetOsid) ?? 0;
-            const defenderFaction = (controller ?? '') as string;
-            // Only RS positions leave significant abandoned equipment (JNA inheritance)
-            if (defenderFaction === 'RS' && pop > 500) {
-                const ABANDONED_TANK_RATE = 0.0004;  // ~1 tank per 2500 pop
-                const ABANDONED_ART_RATE = 0.0006;   // ~1.5 artillery per 2500 pop
-                const abandonedTanks = Math.floor(pop * ABANDONED_TANK_RATE);
-                const abandonedArt = Math.floor(pop * ABANDONED_ART_RATE);
-                if (abandonedTanks > 0 || abandonedArt > 0) {
-                    const aComp4 = firstAttacker.composition;
-                    if (abandonedTanks > 0) {
-                        aComp4.tanks += abandonedTanks;
-                        const frac = abandonedTanks / Math.max(1, aComp4.tanks);
-                        aComp4.tank_condition.degraded += frac * 0.6;
-                        aComp4.tank_condition.operational = Math.max(0, aComp4.tank_condition.operational - frac * 0.4);
-                    }
-                    if (abandonedArt > 0) {
-                        aComp4.artillery += abandonedArt;
-                        const frac = abandonedArt / Math.max(1, aComp4.artillery);
-                        aComp4.artillery_condition.degraded += frac * 0.6;
-                        aComp4.artillery_condition.operational = Math.max(0, aComp4.artillery_condition.operational - frac * 0.4);
-                    }
-                    battleEquipCapturedTanks = abandonedTanks;
-                    battleEquipCapturedArt = abandonedArt;
-                    battleEquipCapturedBy = attackerFaction;
-                }
-            }
-        }
+        const transfers = processEquipmentTransfers({
+            outcome, firstAttacker, defenderFormation, attackerFaction,
+            controller, targetOsid,
+            totalATanksLost, totalAArtLost, totalDTanksLost, totalDArtLost,
+            osidPopulationMap,
+        });
+        battleEquipScavengedTanks = transfers.scavengedTanks;
+        battleEquipScavengedArt = transfers.scavengedArt;
+        battleEquipScavengedBy = transfers.scavengedBy;
+        battleEquipCapturedTanks = transfers.capturedTanks;
+        battleEquipCapturedArt = transfers.capturedArt;
+        battleEquipCapturedBy = transfers.capturedBy;
 
         const attackerCorpsId = firstAttacker.corps_id;
         const attackerCmd = attackerCorpsId && state.military.corps_command
@@ -1480,18 +728,11 @@ export function resolveAttackOrdersOsid(
             defender_casualties: finalDefenderCas,
             defender_contributions: defenderContributions,
             defending_sub_segment_id: defendingSubSegmentId,
-            equipment: {
-                attacker_tanks_lost: battleEquipAttackerTanksLost,
-                attacker_artillery_lost: battleEquipAttackerArtLost,
-                defender_tanks_lost: battleEquipDefenderTanksLost,
-                defender_artillery_lost: battleEquipDefenderArtLost,
-                scavenged_tanks: battleEquipScavengedTanks,
-                scavenged_artillery: battleEquipScavengedArt,
-                scavenged_by: battleEquipScavengedBy || undefined,
-                captured_tanks: battleEquipCapturedTanks,
-                captured_artillery: battleEquipCapturedArt,
-                captured_by: battleEquipCapturedBy || undefined,
-            },
+            equipment: buildBattleEquipmentReport(
+                battleEquipAttackerTanksLost, battleEquipAttackerArtLost,
+                battleEquipDefenderTanksLost, battleEquipDefenderArtLost,
+                transfers,
+            ),
             ...(activeOperationId ? {
                 operation_id: activeOperationId,
                 operation_name: activeOp!.name,
@@ -1500,180 +741,63 @@ export function resolveAttackOrdersOsid(
 
         const ammoCrisis = attackerLost && getSupplyMult(firstAttacker, state, 'attack', supplyStateByOsid) < 0.5;
         const pyrrhic = attackerWon && personnelAttacker > 0 && finalAttackerCas / personnelAttacker > 0.15;
-        if (ammoCrisis || pyrrhic) {
-            const ev: AttackResolutionOsidSnapEvent = ammoCrisis
-                ? {
-                    snap_type: 'ammo_crisis',
-                    trigger_phase: 'post_battle',
-                    attacker_brigade: firstAttacker.id,
-                    target_osid: targetOsid,
-                    affected_formation: firstAttacker.id,
-                    description: 'Attack force suffered ammunition/sustainment collapse after failed assault.',
-                    effects: { forced_posture: 'defend', attacker_cohesion_delta: -10 },
-                }
-                : {
-                    snap_type: 'pyrrhic_victory',
-                    trigger_phase: 'post_battle',
-                    attacker_brigade: firstAttacker.id,
-                    target_osid: targetOsid,
-                    affected_formation: firstAttacker.id,
-                    description: 'Assault succeeded but losses were severe enough to force a defensive reset.',
-                    effects: { forced_posture: 'defend', attacker_cohesion_delta: -10 },
-                };
-            battleSnapEvents.push(ev);
-            pushSnapEvent(report, ev);
-            for (const a of attackerFormations) {
-                a.cohesion = Math.max(0, (a.cohesion ?? 60) - 10);
-                a.posture = 'defend';
-            }
+        const crisisEvent = applyAmmoCrisisPyrrhicEffects({
+            isAmmoCrisis: ammoCrisis,
+            isPyrrhic: pyrrhic,
+            firstAttackerId: firstAttacker.id,
+            targetOsid,
+            attackerFormations,
+        });
+        if (crisisEvent) {
+            battleSnapEvents.push(crisisEvent);
+            pushSnapEvent(report, crisisEvent);
         }
 
         // Part 6b: Supply reserve expenditure (Phase A)
-        if (state.meta.supply_reserves_enabled && state.military.general_supply_reserve && state.military.heavy_munitions_reserve) {
-            deductCombatExpenditure(state, attackerFaction, attackerFormations.length, powerRatio);
-            if (defenderFormation) {
-                deductCombatExpenditure(state, defenderFormation.faction, 1, powerRatio * 0.5);
-            }
-        }
+        deductCombatSupplyExpenditure({
+            state,
+            attackerFaction,
+            attackerCount: attackerFormations.length,
+            powerRatio,
+            defenderFormation,
+        });
 
         // Part 6c: Facility combat damage (Phase B)
-        if (state.meta.supply_reserves_enabled && state.military.production_facilities) {
-            const osidParts = targetOsid.split(':');
-            if (osidParts.length >= 2) {
-                const munId = osidParts[1];
-                const facilityIds = Object.keys(state.military.production_facilities).sort((a, b) => a.localeCompare(b));
-                for (const fId of facilityIds) {
-                    const facility = state.military.production_facilities[fId];
-                    if (facility && facility.municipality_id === munId) {
-                        facility.current_condition = Math.max(0, facility.current_condition - FACILITY_COMBAT_DAMAGE_RATE);
-                    }
-                }
-            }
-        }
+        applyFacilityCombatDamage({ state, targetOsid });
 
-        // Part 7a: Experience gain
-        const applyExperienceGain = (f: FormationState, won: boolean) => {
-            const rate = FACTION_LEARNING_RATE[f.faction] ?? DEFAULT_LEARNING_RATE;
-            let gain = BASE_EXPERIENCE_GAIN * rate;
-            if (won) gain += VICTORY_EXPERIENCE_BONUS * rate;
-            else gain = Math.max(gain, DEFEAT_EXPERIENCE_GAIN * rate);
-            const exp = Math.max(0, Math.min(1, f.experience ?? 0));
-            const effectiveGain = gain * (1.0 - exp * 0.5);
-            (f as { experience?: number }).experience = Math.min(1.0, exp + effectiveGain);
-        };
-        for (const a of attackerFormations) {
-            applyExperienceGain(a, attackerWon);
-        }
-        if (defenderFormation && (defenderFormation.personnel ?? 0) > 0) {
-            applyExperienceGain(defenderFormation, !attackerWon);
-        }
+        // Part 7a: Experience gain (extracted to attack_post_battle_effects.ts)
+        for (const a of attackerFormations) applyExperienceGain(a, attackerWon);
+        if (defenderFormation && (defenderFormation.personnel ?? 0) > 0) applyExperienceGain(defenderFormation, !attackerWon);
 
-        // Officer quality loss from casualties
-        const applyOfficerLoss = (f: FormationState, cas: number, totalPersonnel: number) => {
-            if (f.officer_quality === undefined) return;
-            if (totalPersonnel <= 0) return;
-            const casualtyRatio = cas / totalPersonnel;
-            const officerLoss = casualtyRatio * OFFICER_CASUALTY_MULT * (1.0 - f.officer_quality * 0.3);
-            f.officer_quality = Math.max(OFFICER_QUALITY_FLOOR, f.officer_quality - officerLoss);
-        };
+        // Officer quality loss from casualties (extracted to attack_post_battle_effects.ts)
         for (const a of attackerFormations) {
             const frac = (a.personnel ?? 0) / Math.max(1, personnelAttacker);
-            const cas = Math.round(finalAttackerCas * frac);
-            applyOfficerLoss(a, cas, a.personnel ?? 0);
+            applyOfficerCasualtyLoss(a, Math.round(finalAttackerCas * frac), a.personnel ?? 0);
         }
-        if (defenderFormation) {
-            applyOfficerLoss(defenderFormation, finalDefenderCas, personnelDefender);
-        }
+        if (defenderFormation) applyOfficerCasualtyLoss(defenderFormation, finalDefenderCas, personnelDefender);
 
         const isProbeOp = activeOp?.type === 'probe';
         const defenderlessEnemyTile = defenderFormations.length === 0 && isEnemyControlled;
         let flip = (outcome === 'decisive_victory' || outcome === 'victory' || outcome === 'costly_victory')
             && (!isProbeOp || defenderlessEnemyTile);
 
-        // === MORALE-BASED RETREAT RESISTANCE ===
-        let moraleAbsorbed = false;
-        const defenderFaction = defenderFormation?.faction as string ?? '';
-        if (defenderFormation) {
-            const defMorale = defenderFormation.morale ?? 60;
-            const resistFloor = getMoraleResistFloor(defenderFaction);
-            const coEthnicShare = getCoEthnicShare(targetOsid, defenderFaction, ethnicComposition);
-            // Enclave capital last stand: defenders at the capital absorb ALL outcomes
-            // except decisive_victory. BB2 p.479: "hung on at Gradina — the key to ARBiH defenses."
-            const capitalLastStand = isEnclaveCapital(targetOsid);
-            // ARBiH homeland defense: fighters refuse to retreat even under heavy losses.
-            // n536: In co-ethnic homeland (≥50%), absorb victory + costly_victory at any morale.
-            // ARBiH didn't retreat from their villages — they stood and died, and VRS paid in
-            // blood for every meter. Both sides bleed (MORALE_ABSORPTION_CAS_MULT applies).
-            // n1240 (EI §9.6 + SM §7.4): decisive_victory ALWAYS flips — no exception.
-            // homelandAbsorbDecisive (n536–n539) removed: absorbing decisive_victory at any
-            // power ratio violates Engine Invariants §9.6. A 23× ratio attack on a displaced
-            // Brčko brigade defending Ilijas was being absorbed, preventing OSID transfer.
-            const homelandLastStand = defenderFaction === 'RBiH' && coEthnicShare >= 0.50;
-            // All factions: any defender absorbs costly_victory at morale ≥ floor.
-            // n536: RS/HRHB also absorb 'victory' at high morale — professional forces
-            // don't retreat from a single costly engagement.
-            const professionalResilience = defMorale >= resistFloor
-                && (outcome === 'costly_victory' || outcome === 'victory');
-            const absorb = capitalLastStand
-                ? (outcome !== 'decisive_victory')
-                : homelandLastStand
-                    ? (outcome === 'costly_victory' || outcome === 'victory')
-                    : professionalResilience;
-            if (absorb && flip) {
-                flip = false;
-                moraleAbsorbed = true;
-                defenderFormation.morale = Math.max(0, defMorale - 5);
-                const ev: AttackResolutionOsidSnapEvent = {
-                    snap_type: 'morale_absorption',
-                    trigger_phase: 'post_battle',
-                    attacker_brigade: firstAttacker.id,
-                    target_osid: targetOsid,
-                    affected_formation: defenderFormation.id,
-                    description: capitalLastStand
-                        ? 'Enclave capital last stand — defenders fight to the last.'
-                        : homelandLastStand
-                            ? 'ARBiH homeland last stand — absorbed defeat without retreating.'
-                            : 'Defender morale held — absorbed attack without retreating.',
-                    effects: { flip_prevented: true, morale_drain: -5 },
-                };
-                battleSnapEvents.push(ev);
-                pushSnapEvent(report, ev);
-            }
-        }
-
-        // === HOMELAND DETERMINATION: Extra casualties when morale absorption triggers ===
-        if (moraleAbsorbed && defenderFormation) {
-            const extraMult = MORALE_ABSORPTION_CAS_MULT - 1.0;
-            const extraAttackerTotal = Math.round(finalAttackerCas * extraMult);
-            if (extraAttackerTotal > 0) {
-                for (const a of attackerFormations) {
-                    const frac = (a.personnel ?? 0) / Math.max(1, personnelAttacker);
-                    const extraCas = Math.min(Math.max(0, (a.personnel ?? 0) - MIN_COMBAT_PERSONNEL), Math.round(extraAttackerTotal * frac));
-                    if (extraCas > 0) {
-                        applyPersonnelLoss(a, extraCas);
-                        report.casualty_attacker += extraCas;
-                        recordBattleCasualties(state.military.casualty_ledger!, a.faction, a.id, {
-                            killed: Math.floor(extraCas * KIA_FRACTION),
-                            wounded: Math.floor(extraCas * WIA_FRACTION),
-                            missing_captured: Math.max(0, extraCas - Math.floor(extraCas * KIA_FRACTION) - Math.floor(extraCas * WIA_FRACTION))
-                        });
-                    }
-                }
-            }
-            const extraDefenderTotal = Math.min(
-                Math.max(0, (defenderFormation.personnel ?? 0) - MIN_COMBAT_PERSONNEL),
-                Math.round(finalDefenderCas * extraMult)
-            );
-            if (extraDefenderTotal > 0) {
-                applyPersonnelLoss(defenderFormation, extraDefenderTotal);
-                report.casualty_defender += extraDefenderTotal;
-                recordBattleCasualties(state.military.casualty_ledger!, defenderFormation.faction, defenderFormation.id, {
-                    killed: Math.floor(extraDefenderTotal * KIA_FRACTION),
-                    wounded: Math.floor(extraDefenderTotal * WIA_FRACTION),
-                    missing_captured: Math.max(0, extraDefenderTotal - Math.floor(extraDefenderTotal * KIA_FRACTION) - Math.floor(extraDefenderTotal * WIA_FRACTION))
-                });
-            }
-        }
+        // === MORALE-BASED RETREAT RESISTANCE + HOMELAND DETERMINATION (extracted to attack_morale_absorption.ts) ===
+        const { moraleAbsorbed, flip: updatedFlip } = evaluateAndApplyMoraleAbsorption({
+            defenderFormation,
+            attackerFormations,
+            targetOsid,
+            outcome,
+            flip,
+            ethnicComposition,
+            personnelAttacker,
+            finalAttackerCas,
+            finalDefenderCas,
+            casualtyLedger: state.military.casualty_ledger!,
+            report,
+            firstAttackerId: firstAttacker.id,
+            battleSnapEvents,
+        });
+        flip = updatedFlip;
 
         if (flip) {
             if (!state.political.political_controllers) state.political.political_controllers = {};
@@ -1762,25 +886,8 @@ export function resolveAttackOrdersOsid(
             }
         }
 
-        // === POST-BATTLE MORALE EFFECTS ===
-        for (const a of attackerFormations) {
-            if (a.morale === undefined) continue;
-            switch (outcome) {
-                case 'decisive_victory': a.morale = Math.min(100, a.morale + 3); break;
-                case 'victory': a.morale = Math.min(100, a.morale + 1); break;
-                case 'costly_victory': break;
-                case 'stalemate': a.morale = Math.max(0, a.morale - 2); break;
-                case 'repulsed': a.morale = Math.max(0, a.morale - 5); break;
-                case 'catastrophic': a.morale = Math.max(0, a.morale - 10); break;
-            }
-        }
-        if (defenderFormation?.morale !== undefined) {
-            if (flip) {
-                defenderFormation.morale = Math.max(0, defenderFormation.morale - 5);
-            } else if (!moraleAbsorbed) {
-                defenderFormation.morale = Math.min(100, defenderFormation.morale + 1);
-            }
-        }
+        // === POST-BATTLE MORALE EFFECTS (extracted to attack_post_battle_effects.ts) ===
+        applyPostBattleMorale({ attackerFormations, defenderFormation, outcome, flip, moraleAbsorbed });
 
         if (flip) {
             const advanceFormation = attackerFormations[0];
@@ -1807,78 +914,35 @@ export function resolveAttackOrdersOsid(
         }
 
         // === BRIGADE HISTORY RECORDING ===
-        const defFaction = (controller ?? attackerFaction) as FactionId;
-        const isConcentrated = attackerFormations.length > 1;
-        // Attacker: destroyed defender equipment, captured from defender
-        const attackerEquipData = {
-            destroyed: { tanks: battleEquipDefenderTanksLost, artillery: battleEquipDefenderArtLost },
-            captured: { tanks: battleEquipCapturedBy === attackerFaction ? battleEquipCapturedTanks : 0,
-                        artillery: battleEquipCapturedBy === attackerFaction ? battleEquipCapturedArt : 0 },
-        };
-        recordAttackerEngagements(
-            attackerFormations, currentTurn, targetOsid, outcome,
-            defFaction, flip, finalAttackerCas, finalDefenderCas, isConcentrated, state,
-            attackerEquipData, battleId,
-        );
-        if (defenderFormation) {
-            const defenderGroup = sectorDefenseBrigades && sectorDefenseBrigades.length > 1
-                ? [...sectorDefenseBrigades].sort((a, b) => strictCompare(a.id, b.id))
-                : [defenderFormation];
-            if (defenderGroup.length > 1 && sectorBrigadeWeights) {
-                const weightById = new Map<string, number>();
-                for (const b of defenderGroup) weightById.set(b.id, sectorBrigadeWeights.get(b.id) ?? 0);
-                const takenById = allocateIntegerByWeights(
-                    defenderGroup.map(b => b.id),
-                    finalDefenderCas,
-                    weightById
-                );
-                const inflictedById = allocateIntegerByWeights(
-                    defenderGroup.map(b => b.id),
-                    finalAttackerCas,
-                    weightById
-                );
-                for (const b of defenderGroup) {
-                    const defenderEquipData = {
-                        destroyed: { tanks: 0, artillery: 0 },
-                        captured: { tanks: 0, artillery: 0 },
-                    };
-                    recordDefenderEngagement(
-                        b, currentTurn, targetOsid, outcome,
-                        attackerFaction, flip, takenById.get(b.id) ?? 0, inflictedById.get(b.id) ?? 0, isConcentrated, state,
-                        defenderEquipData, battleId,
-                    );
-                }
-            } else {
-                // Single/primary defender path keeps equipment accounting attached here.
-                const defenderEquipData = {
-                    destroyed: { tanks: battleEquipAttackerTanksLost, artillery: battleEquipAttackerArtLost },
-                    captured: { tanks: battleEquipCapturedBy === (defenderFormation.faction as string) ? battleEquipCapturedTanks : 0,
-                                artillery: battleEquipCapturedBy === (defenderFormation.faction as string) ? battleEquipCapturedArt : 0 },
-                };
-                recordDefenderEngagement(
-                    defenderFormation, currentTurn, targetOsid, outcome,
-                    attackerFaction, flip, finalDefenderCas, finalAttackerCas, isConcentrated, state,
-                    defenderEquipData, battleId,
-                );
-            }
-        }
+        recordBattleHistory({
+            attackerFormations,
+            defenderFormation,
+            sectorDefenseBrigades,
+            sectorBrigadeWeights,
+            currentTurn,
+            targetOsid,
+            outcome,
+            attackerFaction,
+            controller,
+            flip,
+            finalAttackerCas,
+            finalDefenderCas,
+            state,
+            battleId,
+            battleEquipDefenderTanksLost,
+            battleEquipDefenderArtLost,
+            battleEquipAttackerTanksLost,
+            battleEquipAttackerArtLost,
+            battleEquipCapturedBy,
+            battleEquipCapturedTanks,
+            battleEquipCapturedArt,
+        });
 
         // === SECTOR INTEL: RECON BY FORCE ===
         updateSectorIntelFromCombat(state, attackerFormations[0].location_osid ?? targetOsid, targetOsid, currentTurn);
 
         // === COMBAT FATIGUE ===
-        // Attackers accumulate +2 fatigue per battle; defender +1.
-        // Fatigue is reduced by recovery each turn (see formation_fatigue.ts).
-        const FATIGUE_ATTACKER = 2;
-        const FATIGUE_DEFENDER = 1;
-        for (const af of attackerFormations) {
-            if (!af.ops) af.ops = { fatigue: 0, last_supplied_turn: null };
-            af.ops.fatigue = Math.min(FATIGUE_MAX, (af.ops.fatigue ?? 0) + FATIGUE_ATTACKER);
-        }
-        if (defenderFormation) {
-            if (!defenderFormation.ops) defenderFormation.ops = { fatigue: 0, last_supplied_turn: null };
-            defenderFormation.ops.fatigue = Math.min(FATIGUE_MAX, (defenderFormation.ops.fatigue ?? 0) + FATIGUE_DEFENDER);
-        }
+        applyCombatFatigue({ attackerFormations, defenderFormation });
     }
 
     // Final pass: displace any formation still in enemy territory (e.g. moved to an OSID that flipped in a later battle this turn)

@@ -20,6 +20,7 @@ import {
     type Osid
 } from './osid_adjacency.js';
 import type { FactionGraphAnalysis } from './osid_graph_analysis.js';
+import { getTacticalAdjacentOsids } from './tactical_adjacency.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -91,9 +92,8 @@ export function getAdjacentEnemyOsids(
     state: GameState,
     reverseMap: OperationalToCanonicalReverseMap
 ): Osid[] {
-    const neighbors = adjacency.get(loc) ?? [];
     const result: Osid[] = [];
-    for (const n of neighbors) {
+    for (const n of getTacticalAdjacentOsids(state, loc, adjacency)) {
         const c = getPoliticalControllerOSID(state, n, reverseMap);
         if (c !== null && c !== faction) result.push(n);
     }

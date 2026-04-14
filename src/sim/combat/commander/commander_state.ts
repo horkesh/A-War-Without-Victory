@@ -475,6 +475,8 @@ export interface CommanderBriefing {
     readonly corps_stance: string;
     /** Current corps-level exhaustion (0-100). */
     readonly corps_exhaustion: number;
+    /** Faction-level war exhaustion (monotonic, unbounded). Engine Invariants §8. */
+    readonly faction_war_exhaustion: number;
     /** Average subordinate brigade fatigue as 0-100 percent of FATIGUE_MAX. */
     readonly avg_fatigue_pct: number;
     /** Number of subordinate brigades at or above the high-fatigue threshold. */

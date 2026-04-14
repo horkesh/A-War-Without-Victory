@@ -144,6 +144,65 @@ describe('recallDriftedBrigades', () => {
         });
     });
 
+    it('does not issue or preserve a home-recall order for a sector-owned reserve brigade', () => {
+        const state = makeState({
+            formation: {
+                assignment: {
+                    kind: 'sector',
+                    sector_id: 'sector:vrs_drina:7',
+                    role: 'reserve',
+                },
+            },
+            sectors: {
+                'sector:vrs_drina:7': makeSector({
+                    sectorId: 'sector:vrs_drina:7',
+                    corpsId: 'vrs_drina',
+                    territory: [
+                        'op:rogatica:rogatica_2',
+                        'op:rogatica:pljesevica',
+                        'op:banja_luka:banja_luka_2',
+                    ],
+                    front: ['op:rogatica:pljesevica'],
+                    reserve: ['rs_1st_podrinje'],
+                }),
+            },
+        });
+
+        recallDriftedBrigades(state, makeAdjacency());
+
+        expect(state.military.brigade_movement_orders?.rs_1st_podrinje).toBeUndefined();
+    });
+
+    it('clears stale home-recall intent when a brigade has become sector-owned reserve truth', () => {
+        const state = makeState({
+            movementOrder: 'op:rogatica:rogatica_2',
+            formation: {
+                assignment: {
+                    kind: 'sector',
+                    sector_id: 'sector:vrs_drina:7',
+                    role: 'reserve',
+                },
+            },
+            sectors: {
+                'sector:vrs_drina:7': makeSector({
+                    sectorId: 'sector:vrs_drina:7',
+                    corpsId: 'vrs_drina',
+                    territory: [
+                        'op:rogatica:rogatica_2',
+                        'op:rogatica:pljesevica',
+                        'op:banja_luka:banja_luka_2',
+                    ],
+                    front: ['op:rogatica:pljesevica'],
+                    reserve: ['rs_1st_podrinje'],
+                }),
+            },
+        });
+
+        recallDriftedBrigades(state, makeAdjacency());
+
+        expect(state.military.brigade_movement_orders?.rs_1st_podrinje).toBeUndefined();
+    });
+
     it('preserves an existing move order while the brigade is still claimed by an active operation', () => {
         const state = makeState({
             movementOrder: 'op:donji_vakuf:pribraca_2',
@@ -160,6 +219,25 @@ describe('recallDriftedBrigades', () => {
             destination_sids: ['op:donji_vakuf:pribraca_2'],
             stance: 'column',
         });
+    });
+
+    it('clears a stale home-recall order once the brigade is reserve-owned by a live sector', () => {
+        const state = makeState({
+            movementOrder: 'op:rogatica:rogatica_2',
+            sectors: {
+                'sector:vrs_drina:7': makeSector({
+                    sectorId: 'sector:vrs_drina:7',
+                    corpsId: 'vrs_drina',
+                    territory: ['op:rogatica:rogatica_2', 'op:rogatica:pljesevica', 'op:banja_luka:banja_luka_2'],
+                    front: ['op:rogatica:pljesevica'],
+                    reserve: ['rs_1st_podrinje'],
+                }),
+            },
+        });
+
+        recallDriftedBrigades(state, makeAdjacency());
+
+        expect(state.military.brigade_movement_orders?.rs_1st_podrinje).toBeUndefined();
     });
 
     it('clears a stale move order when the brigade is ownerless but has no friendly path home', () => {
@@ -184,6 +262,46 @@ describe('recallDriftedBrigades', () => {
         controllers['op:rogatica:pljesevica'] = 'RBiH';
 
         recallDriftedBrigades(state, makeAdjacency());
+
+        expect(state.military.brigade_movement_orders?.rs_1st_podrinje).toBeUndefined();
+    });
+
+    it('clears an impossible home-recall order when the brigade home is enemy-controlled', () => {
+        const state = makeState({ movementOrder: 'op:rogatica:rogatica_2' });
+        const controllers = state.political.political_controllers as Record<string, string>;
+        controllers['op:rogatica:rogatica_2'] = 'RBiH';
+
+        recallDriftedBrigades(state, makeAdjacency());
+
+        expect(state.military.brigade_movement_orders?.rs_1st_podrinje).toBeUndefined();
+    });
+
+    it('clears an enemy-home recall order even when the ownerless brigade is still inside same-corps space', () => {
+        const state = makeState({
+            movementOrder: 'op:rogatica:rogatica_2',
+            sectors: {
+                'sector:vrs_drina:rear-space': makeSector({
+                    sectorId: 'sector:vrs_drina:rear-space',
+                    corpsId: 'vrs_drina',
+                    territory: ['op:banja_luka:banja_luka_2'],
+                    front: ['op:donji_vakuf:pribraca_2'],
+                }),
+            },
+        });
+        const controllers = state.political.political_controllers as Record<string, string>;
+        controllers['op:rogatica:rogatica_2'] = 'RBiH';
+
+        recallDriftedBrigades(state, makeAdjacency());
+
+        expect(state.military.brigade_movement_orders?.rs_1st_podrinje).toBeUndefined();
+    });
+
+    it('clears enemy-controlled movement destinations even when adjacency is unavailable', () => {
+        const state = makeState({ movementOrder: 'op:rogatica:rogatica_2' });
+        const controllers = state.political.political_controllers as Record<string, string>;
+        controllers['op:rogatica:rogatica_2'] = 'RBiH';
+
+        recallDriftedBrigades(state, undefined);
 
         expect(state.military.brigade_movement_orders?.rs_1st_podrinje).toBeUndefined();
     });

@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWWV Life-Lessons Review — 2026-04-11</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=JetBrains+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --font-display: 'Instrument Serif', 'Georgia', serif;
+  --font-body: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace;
+
+  --bg: #0f1318;
+  --bg-subtle: #141920;
+  --surface: #1a2029;
+  --surface2: #212a35;
+  --surface-elevated: #252f3c;
+  --border: rgba(255,255,255,0.06);
+  --border-bright: rgba(255,255,255,0.12);
+  --text: #d8dde6;
+  --text-dim: #7a8595;
+  --text-bright: #edf0f5;
+
+  --gold: #d4a73a;
+  --gold-dim: rgba(212,167,58,0.12);
+  --gold-bg: rgba(212,167,58,0.06);
+  --blue: #3b82b8;
+  --blue-dim: rgba(59,130,184,0.12);
+  --green: #3a9e6e;
+  --green-dim: rgba(58,158,110,0.12);
+  --green-bg: rgba(58,158,110,0.06);
+  --red: #c05252;
+  --red-dim: rgba(192,82,82,0.12);
+  --red-bg: rgba(192,82,82,0.06);
+  --amber: #c49032;
+  --amber-dim: rgba(196,144,50,0.12);
+  --amber-bg: rgba(196,144,50,0.06);
+  --purple: #8b6abf;
+  --purple-dim: rgba(139,106,191,0.12);
+  --slate: #5a6a7e;
+  --slate-dim: rgba(90,106,126,0.12);
+  --orange: #c47a32;
+  --orange-dim: rgba(196,122,50,0.12);
+
+  --accent: var(--gold);
+  --accent-dim: var(--gold-dim);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f5f3ef;
+    --bg-subtle: #eee9e2;
+    --surface: #ffffff;
+    --surface2: #f7f5f1;
+    --surface-elevated: #ffffff;
+    --border: rgba(0,0,0,0.08);
+    --border-bright: rgba(0,0,0,0.15);
+    --text: #2c2418;
+    --text-dim: #7a7062;
+    --text-bright: #1a1208;
+    --gold: #a07c1c;
+    --gold-dim: rgba(160,124,28,0.10);
+    --gold-bg: rgba(160,124,28,0.05);
+    --blue: #2a6494;
+    --blue-dim: rgba(42,100,148,0.10);
+    --green: #267a52;
+    --green-dim: rgba(38,122,82,0.10);
+    --green-bg: rgba(38,122,82,0.05);
+    --red: #a83a3a;
+    --red-dim: rgba(168,58,58,0.10);
+    --red-bg: rgba(168,58,58,0.05);
+    --amber: #9a7020;
+    --amber-dim: rgba(154,112,32,0.10);
+    --amber-bg: rgba(154,112,32,0.05);
+    --purple: #6a4fa0;
+    --purple-dim: rgba(106,79,160,0.10);
+    --slate: #5a6a7e;
+    --slate-dim: rgba(90,106,126,0.10);
+    --orange: #9a5e20;
+    --orange-dim: rgba(154,94,32,0.10);
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  background-image:
+    radial-gradient(ellipse at 30% 0%, var(--gold-dim) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 100%, var(--blue-dim) 0%, transparent 40%);
+  color: var(--text);
+  line-height: 1.6;
+  padding: 40px;
+  min-height: 100vh;
+}
+
+a { color: var(--gold); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* === NAV === */
+.wrap {
+  max-width: 1320px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 170px 1fr;
+  gap: 0 40px;
+}
+.main { min-width: 0; }
+
+.toc {
+  position: sticky;
+  top: 24px;
+  align-self: start;
+  padding: 14px 0;
+  grid-row: 1 / -1;
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+}
+.toc::-webkit-scrollbar { width: 3px; }
+.toc::-webkit-scrollbar-thumb { background: var(--surface-elevated); border-radius: 2px; }
+
+.toc-title {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  padding: 0 0 10px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.toc a {
+  display: block;
+  font-size: 11px;
+  color: var(--text-dim);
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: 5px;
+  border-left: 2px solid transparent;
+  transition: all 0.15s;
+  line-height: 1.4;
+  margin-bottom: 1px;
+}
+.toc a:hover { color: var(--text); background: var(--surface2); }
+.toc a.active { color: var(--text); border-left-color: var(--gold); }
+
+@media (max-width: 1000px) {
+  .wrap { grid-template-columns: 1fr; padding-top: 0; }
+  body { padding: 16px; padding-top: 0; }
+  .toc {
+    position: sticky; top: 0; z-index: 200;
+    max-height: none; display: flex; gap: 4px; align-items: center;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+    padding: 10px 16px; margin: 0 -16px; grid-row: auto;
+  }
+  .toc::-webkit-scrollbar { display: none; }
+  .toc-title { display: none; }
+  .toc a {
+    white-space: nowrap; flex-shrink: 0; border-left: none;
+    border-bottom: 2px solid transparent; border-radius: 4px 4px 0 0;
+    padding: 6px 10px; font-size: 10px;
+  }
+  .toc a.active { border-left: none; border-bottom-color: var(--gold); background: var(--surface); }
+  .main { padding-top: 20px; }
+  .sec-head { scroll-margin-top: 52px; }
+}
+
+/* === HEADER === */
+.page-header {
+  margin-bottom: 48px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--border);
+}
+.page-header h1 {
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  font-weight: 400;
+  color: var(--text-bright);
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+.page-header .subtitle {
+  font-size: 0.95rem;
+  color: var(--text-dim);
+  max-width: 640px;
+}
+.page-header .meta-row {
+  display: flex;
+  gap: 24px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+.meta-badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.meta-badge strong { color: var(--text); }
+
+/* === SECTION HEADS === */
+.sec-head {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--gold);
+  padding: 32px 0 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sec-head .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--gold);
+  flex-shrink: 0;
+}
+
+/* === KPI ROW === */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.kpi {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  text-align: center;
+}
+.kpi--hero {
+  background: color-mix(in srgb, var(--surface) 90%, var(--gold) 10%);
+  border-color: color-mix(in srgb, var(--border) 50%, var(--gold) 50%);
+}
+.kpi .num {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  color: var(--text-bright);
+  line-height: 1.1;
+}
+.kpi .label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+.kpi .sublabel {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+/* === TIMELINE === */
+.timeline {
+  position: relative;
+  padding-left: 24px;
+  margin-bottom: 32px;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 0; bottom: 0;
+  width: 2px;
+  background: var(--border-bright);
+}
+.tl-item {
+  position: relative;
+  padding: 6px 0 6px 20px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.tl-item::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 12px;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--blue);
+  background: var(--bg);
+}
+.tl-item[data-cat="hardening"]::before { border-color: var(--blue); }
+.tl-item[data-cat="rescue"]::before { border-color: var(--orange); }
+.tl-item[data-cat="map"]::before { border-color: var(--green); }
+.tl-item[data-cat="probe"]::before { border-color: var(--purple); }
+.tl-item[data-cat="planning"]::before { border-color: var(--slate); }
+.tl-item[data-cat="wrong"]::before { border-color: var(--red); background: var(--red-dim); }
+
+.tl-hash {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  min-width: 68px;
+  display: inline-block;
+}
+.tl-msg { color: var(--text); }
+.tl-tag {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin-left: 6px;
+}
+.tl-tag--hardening { background: var(--blue-dim); color: var(--blue); }
+.tl-tag--rescue { background: var(--orange-dim); color: var(--orange); }
+.tl-tag--map { background: var(--green-dim); color: var(--green); }
+.tl-tag--probe { background: var(--purple-dim); color: var(--purple); }
+.tl-tag--planning { background: var(--slate-dim); color: var(--slate); }
+.tl-tag--wrong { background: var(--red-dim); color: var(--red); }
+
+/* === CARDS === */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin-bottom: 12px;
+  position: relative;
+}
+.card--red { border-left: 3px solid var(--red); }
+.card--green { border-left: 3px solid var(--green); }
+.card--amber { border-left: 3px solid var(--amber); }
+.card--blue { border-left: 3px solid var(--blue); }
+.card--gold { border-left: 3px solid var(--gold); }
+
+.card-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-label .indicator {
+  width: 8px; height: 8px; border-radius: 50%;
+  flex-shrink: 0;
+}
+.card-label--red { color: var(--red); }
+.card-label--red .indicator { background: var(--red); }
+.card-label--green { color: var(--green); }
+.card-label--green .indicator { background: var(--green); }
+.card-label--amber { color: var(--amber); }
+.card-label--amber .indicator { background: var(--amber); }
+.card-label--blue { color: var(--blue); }
+.card-label--blue .indicator { background: var(--blue); }
+.card-label--gold { color: var(--gold); }
+.card-label--gold .indicator { background: var(--gold); }
+
+.card h3 {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-bright);
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+.card p, .card ul {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+.card ul { padding-left: 18px; }
+.card li { margin-bottom: 3px; }
+.card code {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  background: var(--surface2);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--text);
+}
+.card .severity {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-top: 8px;
+}
+.severity--moderate { background: var(--amber-dim); color: var(--amber); }
+.severity--low { background: var(--slate-dim); color: var(--slate); }
+.severity--strong { background: var(--green-dim); color: var(--green); }
+
+/* === SCORECARD TABLE === */
+.scorecard {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.85rem;
+  margin-bottom: 24px;
+}
+.scorecard th, .scorecard td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.scorecard th {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  background: var(--bg-subtle);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.scorecard tr:hover td { background: var(--surface2); }
+.scorecard .status-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.status-dot--green { background: var(--green); }
+.status-dot--red { background: var(--red); }
+.status-dot--amber { background: var(--amber); }
+.status-dot--blue { background: var(--blue); }
+
+/* === LESSON DISTRIBUTION === */
+.dist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+  margin-bottom: 32px;
+}
+.dist-cell {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+}
+.dist-cell .count {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  color: var(--text-bright);
+}
+.dist-cell .topic {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+.dist-cell--highlight {
+  background: var(--gold-bg);
+  border-color: color-mix(in srgb, var(--border) 50%, var(--gold) 50%);
+}
+
+/* === HEALTH BAR === */
+.health-bar {
+  display: flex;
+  height: 28px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 8px;
+  border: 1px solid var(--border);
+}
+.health-seg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: #fff;
+  min-width: 40px;
+}
+.health-seg--green { background: var(--green); }
+.health-seg--red { background: var(--red); }
+.health-seg--amber { background: var(--amber); }
+.health-legend {
+  display: flex; gap: 16px;
+  font-size: 11px; color: var(--text-dim);
+  margin-bottom: 24px;
+}
+.health-legend span {
+  display: flex; align-items: center; gap: 5px;
+}
+.health-legend .swatch {
+  width: 10px; height: 10px; border-radius: 3px;
+}
+
+/* === PROMOTED/ARCHIVED === */
+.badge-row {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-bottom: 24px;
+}
+.badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.badge--promoted { background: var(--green-dim); color: var(--green); border: 1px solid var(--green-dim); }
+.badge--archived { background: var(--slate-dim); color: var(--slate); border: 1px solid var(--slate-dim); }
+.badge--stays { background: var(--amber-dim); color: var(--amber); border: 1px solid var(--amber-dim); }
+
+/* === FOOTER === */
+.page-footer {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+/* === ANIMATIONS === */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeScale {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.anim-up { animation: fadeUp 0.4s ease-out both; }
+.anim-scale { animation: fadeScale 0.35s ease-out both; }
+.d1 { animation-delay: 0.05s; }
+.d2 { animation-delay: 0.10s; }
+.d3 { animation-delay: 0.15s; }
+.d4 { animation-delay: 0.20s; }
+.d5 { animation-delay: 0.25s; }
+.d6 { animation-delay: 0.30s; }
+.d7 { animation-delay: 0.35s; }
+.d8 { animation-delay: 0.40s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-up, .anim-scale { animation: none; }
+}
+
+/* Compact two-col for cards */
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+@media (min-width: 800px) {
+  .card-grid--2col { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="toc" id="toc">
+  <div class="toc-title">Review</div>
+  <a href="#s1">1. Scorecard</a>
+  <a href="#s2">2. Git Timeline</a>
+  <a href="#s3">3. Violations</a>
+  <a href="#s4">4. Compliance</a>
+  <a href="#s5">5. New Lessons</a>
+  <a href="#s6">6. Lesson Health</a>
+  <a href="#s7">7. Distribution</a>
+  <a href="#s8">8. Next Actions</a>
+</nav>
+
+<div class="main">
+
+<!-- HEADER -->
+<div class="page-header anim-up">
+  <h1>Life-Lessons Review</h1>
+  <p class="subtitle">24-hour audit of lesson compliance, violations, and synthesis from the AWWV codebase. Covering 20 commits across the hardening blitz, loaned elite rescue lane, and map/sector work.</p>
+  <div class="meta-row">
+    <span class="meta-badge"><strong>Window</strong> 2026-04-10 → 04-11</span>
+    <span class="meta-badge"><strong>20</strong> commits</span>
+    <span class="meta-badge"><strong>228</strong> lessons indexed</span>
+    <span class="meta-badge"><strong>9</strong> topic files</span>
+  </div>
+</div>
+
+<!-- 1. SCORECARD -->
+<div id="s1" class="sec-head"><span class="dot"></span>1 — Compliance Scorecard</div>
+
+<div class="kpi-row anim-scale d1">
+  <div class="kpi">
+    <div class="num" style="color:var(--green)">5</div>
+    <div class="label">Complied</div>
+  </div>
+  <div class="kpi">
+    <div class="num" style="color:var(--red)">2</div>
+    <div class="label">Violated</div>
+  </div>
+  <div class="kpi">
+    <div class="num" style="color:var(--amber)">3</div>
+    <div class="label">New Synthesized</div>
+  </div>
+  <div class="kpi">
+    <div class="num" style="color:var(--blue)">1</div>
+    <div class="label">Promoted</div>
+  </div>
+  <div class="kpi kpi--hero">
+    <div class="num">231</div>
+    <div class="label">Post-Update Total</div>
+    <div class="sublabel">+3 from 228</div>
+  </div>
+</div>
+
+<div class="health-bar anim-up d2">
+  <div class="health-seg health-seg--green" style="flex:5">5</div>
+  <div class="health-seg health-seg--amber" style="flex:3">3</div>
+  <div class="health-seg health-seg--red" style="flex:2">2</div>
+</div>
+<div class="health-legend">
+  <span><span class="swatch" style="background:var(--green)"></span> Complied</span>
+  <span><span class="swatch" style="background:var(--amber)"></span> New / Latent</span>
+  <span><span class="swatch" style="background:var(--red)"></span> Violated</span>
+</div>
+
+<!-- 2. GIT TIMELINE -->
+<div id="s2" class="sec-head"><span class="dot"></span>2 — 24h Git Timeline</div>
+
+<div class="timeline anim-up d2">
+  <div class="tl-item" data-cat="planning">
+    <span class="tl-hash">c39cf7de</span>
+    <span class="tl-msg">A+++ system promotion scorecard</span>
+    <span class="tl-tag tl-tag--planning">planning</span>
+  </div>
+  <div class="tl-item" data-cat="hardening">
+    <span class="tl-hash">d49a3d04</span>
+    <span class="tl-msg">align autonomy review with player faction</span>
+    <span class="tl-tag tl-tag--hardening">hardening</span>
+  </div>
+  <div class="tl-item" data-cat="hardening">
+    <span class="tl-hash">25f6ae93</span>
+    <span class="tl-msg">humanize commander zone labels</span>
+    <span class="tl-tag tl-tag--hardening">hardening</span>
+  </div>
+  <div class="tl-item" data-cat="hardening">
+    <span class="tl-hash">25e124f2</span>
+    <span class="tl-msg">scope autonomy IPC to player faction</span>
+    <span class="tl-tag tl-tag--hardening">hardening</span>
+  </div>
+  <div class="tl-item" data-cat="hardening">
+    <span class="tl-hash">3412d9d9</span>
+    <span class="tl-msg">harden packaged startup contract</span>
+    <span class="tl-tag tl-tag--hardening">hardening</span>
+  </div>
+  <div class="tl-item" data-cat="hardening">
+    <span class="tl-hash">887b1fa9</span>
+    <span class="tl-msg">harden startup snapshot guardrail contract</span>
+    <span class="tl-tag tl-tag--hardening">hardening</span>
+  </div>
+  <div class="tl-item" data-cat="hardening">
+    <span class="tl-hash">150f22b8</span>
+    <span class="tl-msg">demote threat precision to staff abstractions</span>
+    <span class="tl-tag tl-tag--hardening">hardening</span>
+  </div>
+  <div class="tl-item" data-cat="hardening">
+    <span class="tl-hash">6a0a3cb5</span>
+    <span class="tl-msg">harden front sector player visibility</span>
+    <span class="tl-tag tl-tag--hardening">hardening</span>
+  </div>
+  <div class="tl-item" data-cat="hardening">
+    <span class="tl-hash">3b790e1b</span>
+    <span class="tl-msg">align shell player-faction with canonical resolver</span>
+    <span class="tl-tag tl-tag--hardening">hardening</span>
+  </div>
+  <div class="tl-item" data-cat="hardening">
+    <span class="tl-hash">80680305</span>
+    <span class="tl-msg">demote player-facing operation force balance</span>
+    <span class="tl-tag tl-tag--hardening">hardening</span>
+  </div>
+  <div class="tl-item" data-cat="hardening">
+    <span class="tl-hash">b335466e</span>
+    <span class="tl-msg">align reserve approval with request identity</span>
+    <span class="tl-tag tl-tag--hardening">hardening</span>
+  </div>
+  <div class="tl-item" data-cat="probe">
+    <span class="tl-hash">6f0b4560</span>
+    <span class="tl-msg">probes must not flip political control</span>
+    <span class="tl-tag tl-tag--probe">probe</span>
+  </div>
+  <div class="tl-item" data-cat="hardening">
+    <span class="tl-hash">4fb967a9</span>
+    <span class="tl-msg">exempt army HQ brigades from anomaly gate</span>
+    <span class="tl-tag tl-tag--hardening">hardening</span>
+  </div>
+  <div class="tl-item" data-cat="wrong">
+    <span class="tl-hash">bb454db4</span>
+    <span class="tl-msg">exempt army HQ from unresolved-sector validator</span>
+    <span class="tl-tag tl-tag--wrong">wrong fix</span>
+  </div>
+  <div class="tl-item" data-cat="rescue">
+    <span class="tl-hash">dc742d9e</span>
+    <span class="tl-msg">rescue loaned elites dropped by merge/seal</span>
+    <span class="tl-tag tl-tag--rescue">rescue</span>
+  </div>
+  <div class="tl-item" data-cat="planning">
+    <span class="tl-hash">5188067d</span>
+    <span class="tl-msg">normalize scorecard against external review</span>
+    <span class="tl-tag tl-tag--planning">planning</span>
+  </div>
+  <div class="tl-item" data-cat="rescue">
+    <span class="tl-hash">18546201</span>
+    <span class="tl-msg">guard rescue pass against reserve-per-sector overflow</span>
+    <span class="tl-tag tl-tag--rescue">rescue</span>
+  </div>
+  <div class="tl-item" data-cat="map">
+    <span class="tl-hash">60f43a13</span>
+    <span class="tl-msg">restore sector continuity and direct selection</span>
+    <span class="tl-tag tl-tag--map">map</span>
+  </div>
+  <div class="tl-item" data-cat="map">
+    <span class="tl-hash">a031723d</span>
+    <span class="tl-msg">stitch selected sector glow lines</span>
+    <span class="tl-tag tl-tag--map">map</span>
+  </div>
+  <div class="tl-item" data-cat="map">
+    <span class="tl-hash">8952dd19</span>
+    <span class="tl-msg">complete display front-edge ownership</span>
+    <span class="tl-tag tl-tag--map">map</span>
+  </div>
+</div>
+
+<!-- 3. VIOLATIONS -->
+<div id="s3" class="sec-head"><span class="dot" style="background:var(--red)"></span>3 — Violations Detected</div>
+
+<div class="card card--red anim-up d3">
+  <div class="card-label card-label--red"><span class="indicator"></span>Violation 1 — Architecture</div>
+  <h3>Validator exemptions that suppress real sim failures</h3>
+  <p><code>bb454db4</code> exempted army HQ brigades from the unresolved-sector validator by <code>corps_id</code> alone. This hid a genuine sim gap: the 65th Protection Motorized Regiment was truly unresolved — component-separated from the sector front at <code>op:sokolac:sokolac_2</code>. The exemption suppressed the signal instead of fixing the cause.</p>
+  <p style="margin-top:8px"><strong>Recovery:</strong> Caught within hours. <code>dc742d9e</code> added <code>rescueUnassignedLoanedElitesInTerritory()</code> to fix the sim directly. Validator reverted to strict.</p>
+  <p style="margin-top:6px;color:var(--text-dim);font-size:0.8rem;">Violated spirit of: <em>"Calibration % means nothing if reached through broken mechanics"</em></p>
+  <span class="severity severity--moderate">Moderate — Same-day recovery</span>
+</div>
+
+<div class="card card--red anim-up d4">
+  <div class="card-label card-label--red"><span class="indicator"></span>Violation 2 — Process</div>
+  <h3>working-on.md update discipline</h3>
+  <p>20 commits in 24 hours with no evidence of <code>working-on.md</code> updates between commits. The file's purpose is crash recovery — a stale file is worse than no file. This lesson was added just yesterday (2026-04-09) after the same pattern during the desktop hardening blitz.</p>
+  <span class="severity severity--low">Low — Recurring pattern</span>
+</div>
+
+<!-- 4. COMPLIANCE -->
+<div id="s4" class="sec-head"><span class="dot" style="background:var(--green)"></span>4 — Lessons Complied With</div>
+
+<div class="card-grid card-grid--2col">
+
+<div class="card card--green anim-up d3">
+  <div class="card-label card-label--green"><span class="indicator"></span>Strong Compliance</div>
+  <h3>Audit ALL paths when adding a guard</h3>
+  <p>Reserve cap guard audit cataloged <strong>14 write sites</strong> across 3 files. Both investigators traced every <code>reserve_brigade_ids</code> mutation path. Confirmed the rescue pass is the only unprotected final writer.</p>
+  <span class="severity severity--strong">Strong</span>
+</div>
+
+<div class="card card--green anim-up d4">
+  <div class="card-label card-label--green"><span class="indicator"></span>Strong Compliance</div>
+  <h3>Prove it in a test script BEFORE renderer changes</h3>
+  <p>All 3 map commits include dedicated test files: <code>front_edge_ownership_completion.test.ts</code> (203 lines), <code>ui_sector_glow_continuity.test.ts</code>, <code>late_sibling_front_fragment_merge.test.ts</code>.</p>
+  <span class="severity severity--strong">Strong</span>
+</div>
+
+<div class="card card--green anim-up d5">
+  <div class="card-label card-label--green"><span class="indicator"></span>Strong Compliance</div>
+  <h3>Front line continuity: cross-group stitching</h3>
+  <p>New <code>displayFrontEdgeOwnership.ts</code> (300 lines) implements the exact three-step algorithm: flatten, BFS-bridge, merge chains. Follows the proven edges-viewer pattern.</p>
+  <span class="severity severity--strong">Strong</span>
+</div>
+
+<div class="card card--green anim-up d5">
+  <div class="card-label card-label--green"><span class="indicator"></span>Complied</div>
+  <h3>One change per calibration run</h3>
+  <p>n1420 (rescue pass) and n1421 (reserve cap guard) were separate sequential runs with separate verification. No bundling.</p>
+</div>
+
+<div class="card card--green anim-up d6">
+  <div class="card-label card-label--green"><span class="indicator"></span>Complied</div>
+  <h3>Final reconciliation after all late writers</h3>
+  <p>Rescue pass correctly positioned after all merge/seal passes (line 181 in <code>buildCorpsFrontSectors</code>) and before <code>syncSectorAssignmentsToFormations</code>.</p>
+</div>
+
+</div>
+
+<!-- 5. NEW LESSONS -->
+<div id="s5" class="sec-head"><span class="dot" style="background:var(--amber)"></span>5 — New Lessons Synthesized</div>
+
+<div class="card card--amber anim-up d4">
+  <div class="card-label card-label--amber"><span class="indicator"></span>New Lesson 1 — Architecture</div>
+  <h3>Validator exemptions that suppress real sim failures are always wrong — fix the sim</h3>
+  <p><strong>Source:</strong> <code>bb454db4</code> → <code>dc742d9e</code> sequence. The validator correctly identified a sim gap. Exempting the brigade hid the signal.</p>
+  <p style="margin-top:6px"><strong>Pattern:</strong> When a validator fails, the validator is probably right. Fix the system under test, not the test harness. A passing validator via exemption is epistemic debt — it makes the next failure invisible.</p>
+  <p style="margin-top:6px;font-size:0.8rem;color:var(--text-dim)">Add to: <code>docs/life_lessons/architecture.md</code></p>
+</div>
+
+<div class="card card--amber anim-up d5">
+  <div class="card-label card-label--amber"><span class="indicator"></span>New Lesson 2 — Architecture</div>
+  <h3>Latent contract violations are worth closing proactively</h3>
+  <p><strong>Source:</strong> <code>18546201</code> (reserve cap guard). Zero delta — n1420 and n1421 are byte-identical. The code path <em>could</em> create 2-reserve sectors but never did in practice.</p>
+  <p style="margin-top:6px"><strong>Pattern:</strong> If a code path CAN violate an invariant, fix it now. Latent violations become live violations under conditions you haven't tested. The cost of a 5-line guard is always less than the cost of debugging a future invariant breach with no reproduction case.</p>
+  <p style="margin-top:6px;font-size:0.8rem;color:var(--text-dim)">Add to: <code>docs/life_lessons/architecture.md</code></p>
+</div>
+
+<div class="card card--amber anim-up d6">
+  <div class="card-label card-label--amber"><span class="indicator"></span>New Lesson 3 — UI / Map</div>
+  <h3>Player-facing state must go through tier-gated abstractions</h3>
+  <p><strong>Source:</strong> 6 hardening commits follow the same pattern: replace raw numeric state with <code>playerSafe*()</code> abstraction functions.</p>
+  <ul style="margin-top:6px">
+    <li><code>playerSafeThreat()</code> — threat precision demotion</li>
+    <li><code>playerSafeForceBalance()</code> — operation force balance</li>
+    <li><code>playerVisibility</code> filter — sector front gating</li>
+    <li><code>playerFaction</code> canonical resolver — shell boundary</li>
+  </ul>
+  <p style="margin-top:6px"><strong>Pattern:</strong> The abstraction boundary IS the information control point. Raw numerics bypass fog-of-war and reveal internal sim state the player shouldn't see. Every player-facing read should go through a tier-gated function.</p>
+  <p style="margin-top:6px;font-size:0.8rem;color:var(--text-dim)">Add to: <code>docs/life_lessons/ui_map.md</code></p>
+</div>
+
+<!-- 6. LESSON HEALTH -->
+<div id="s6" class="sec-head"><span class="dot" style="background:var(--blue)"></span>6 — Lesson Health</div>
+
+<div style="margin-bottom:24px" class="anim-up d4">
+  <h3 style="font-size:0.9rem;font-weight:600;color:var(--text-bright);margin-bottom:12px">Promotions</h3>
+  <div class="badge-row">
+    <span class="badge badge--promoted">&#9650; Promoted</span>
+  </div>
+  <div class="card card--green" style="margin-bottom:16px">
+    <h3>[Architecture] When a guard is added to one pipeline path, audit ALL paths</h3>
+    <p><strong>From:</strong> Recently Violated / Validated Pattern<br>
+    <strong>To:</strong> Confirmed Strong Pattern<br>
+    <strong>Evidence:</strong> Three consecutive compliance instances over 4 days. Reserve cap audit (14 write sites) is the strongest validation yet. No violations since the original 2026-04-05 fix.</p>
+  </div>
+</div>
+
+<div style="margin-bottom:24px" class="anim-up d5">
+  <h3 style="font-size:0.9rem;font-weight:600;color:var(--text-bright);margin-bottom:12px">Stays in Recently Violated</h3>
+  <div class="badge-row">
+    <span class="badge badge--stays">&#9679; Stays Active</span>
+  </div>
+  <div class="card card--amber" style="margin-bottom:16px">
+    <h3>[Process] Validate expert diagnosis against run data BEFORE implementing</h3>
+    <p>Mild re-violation via <code>bb454db4</code> — a symptom fix was implemented before the root cause was traced. Recovery was fast (same day), but this is the <strong>second instance in two weeks</strong> (first: 2026-03-31 trimming diagnosis). The pattern is an active threat.</p>
+  </div>
+</div>
+
+<div style="margin-bottom:24px" class="anim-up d6">
+  <h3 style="font-size:0.9rem;font-weight:600;color:var(--text-bright);margin-bottom:12px">Archived (no change)</h3>
+  <div class="badge-row">
+    <span class="badge badge--archived">&#9632; setData() on dynamic sources</span>
+    <span class="badge badge--archived">&#9632; Movement stance declaration</span>
+    <span class="badge badge--archived">&#9632; Slot cap recovery-phase ops</span>
+  </div>
+  <p style="font-size:0.82rem;color:var(--text-dim)">No relevant code touched in 24h. All three stay archived.</p>
+</div>
+
+<!-- 7. DISTRIBUTION -->
+<div id="s7" class="sec-head"><span class="dot"></span>7 — Lesson Distribution</div>
+
+<div class="dist-grid anim-up d5">
+  <div class="dist-cell dist-cell--highlight">
+    <div class="count">59</div>
+    <div class="topic">Architecture</div>
+  </div>
+  <div class="dist-cell">
+    <div class="count">55</div>
+    <div class="topic">Process</div>
+  </div>
+  <div class="dist-cell">
+    <div class="count">48</div>
+    <div class="topic">Calibration</div>
+  </div>
+  <div class="dist-cell dist-cell--highlight">
+    <div class="count">14</div>
+    <div class="topic">UI / Map</div>
+  </div>
+  <div class="dist-cell">
+    <div class="count">10</div>
+    <div class="topic">Data Pipeline</div>
+  </div>
+  <div class="dist-cell">
+    <div class="count">9</div>
+    <div class="topic">Sectors</div>
+  </div>
+  <div class="dist-cell">
+    <div class="count">4</div>
+    <div class="topic">Combat</div>
+  </div>
+  <div class="dist-cell">
+    <div class="count">4</div>
+    <div class="topic">Platform</div>
+  </div>
+  <div class="dist-cell">
+    <div class="count">1</div>
+    <div class="topic">Events</div>
+  </div>
+</div>
+<p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:24px">
+  Highlighted: topic files receiving new lessons this review. Architecture +2 (validator exemption, latent violations), UI/Map +1 (tier-gated abstractions). Total: 228 → 231.
+</p>
+
+<table class="scorecard anim-up d6">
+  <thead>
+    <tr>
+      <th>Topic File</th>
+      <th>Pre-Review</th>
+      <th>New</th>
+      <th>Post-Review</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>architecture.md</code></td>
+      <td>57</td>
+      <td style="color:var(--amber);font-weight:600">+2</td>
+      <td><strong>59</strong></td>
+      <td><span class="status-dot status-dot--amber"></span>Growing</td>
+    </tr>
+    <tr>
+      <td><code>process.md</code></td>
+      <td>55</td>
+      <td>—</td>
+      <td>55</td>
+      <td><span class="status-dot status-dot--green"></span>Stable</td>
+    </tr>
+    <tr>
+      <td><code>calibration.md</code></td>
+      <td>48</td>
+      <td>—</td>
+      <td>48</td>
+      <td><span class="status-dot status-dot--green"></span>Stable</td>
+    </tr>
+    <tr>
+      <td><code>ui_map.md</code></td>
+      <td>13</td>
+      <td style="color:var(--amber);font-weight:600">+1</td>
+      <td><strong>14</strong></td>
+      <td><span class="status-dot status-dot--amber"></span>Growing</td>
+    </tr>
+    <tr>
+      <td><code>data_pipeline.md</code></td>
+      <td>10</td>
+      <td>—</td>
+      <td>10</td>
+      <td><span class="status-dot status-dot--green"></span>Stable</td>
+    </tr>
+    <tr>
+      <td><code>sectors.md</code></td>
+      <td>9</td>
+      <td>—</td>
+      <td>9</td>
+      <td><span class="status-dot status-dot--green"></span>Stable</td>
+    </tr>
+    <tr>
+      <td><code>combat.md</code></td>
+      <td>4</td>
+      <td>—</td>
+      <td>4</td>
+      <td><span class="status-dot status-dot--green"></span>Stable</td>
+    </tr>
+    <tr>
+      <td><code>platform.md</code></td>
+      <td>4</td>
+      <td>—</td>
+      <td>4</td>
+      <td><span class="status-dot status-dot--green"></span>Stable</td>
+    </tr>
+    <tr>
+      <td><code>events.md</code></td>
+      <td>1</td>
+      <td>—</td>
+      <td>1</td>
+      <td><span class="status-dot status-dot--green"></span>Stable</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- 8. NEXT ACTIONS -->
+<div id="s8" class="sec-head"><span class="dot"></span>8 — Next Actions</div>
+
+<div class="card card--gold anim-up d7">
+  <div class="card-label card-label--gold"><span class="indicator"></span>Action Required</div>
+  <h3>Write 3 new lessons to topic files</h3>
+  <ul>
+    <li><strong>architecture.md:</strong> Validator exemptions are always wrong — fix the sim</li>
+    <li><strong>architecture.md:</strong> Latent contract violations worth closing proactively</li>
+    <li><strong>ui_map.md:</strong> Player-facing state through tier-gated abstractions</li>
+  </ul>
+  <p style="margin-top:8px">Update the index counts in <code>docs/life_lessons.md</code> after writing.</p>
+</div>
+
+<div class="card card--gold anim-up d7">
+  <div class="card-label card-label--gold"><span class="indicator"></span>Action Required</div>
+  <h3>Promote "audit ALL paths" lesson</h3>
+  <p>Move from "Recently Violated / Validated Pattern" in the index to a confirmed-strong entry. Note the reserve cap audit as the third validation instance.</p>
+</div>
+
+<div class="card card--blue anim-up d8">
+  <div class="card-label card-label--blue"><span class="indicator"></span>Process Improvement</div>
+  <h3>Integrate working-on.md into commit discipline</h3>
+  <p>Second consecutive blitz session without <code>working-on.md</code> updates. Consider: add to the pre-commit hook reminder, or add a napkin-level mandatory step alongside <code>tsc --noEmit</code> and <code>vitest</code>.</p>
+</div>
+
+<div class="page-footer">
+  AWWV Life-Lessons Review &middot; Generated 2026-04-11 &middot; A War Without Victory — Pyrrhic Games
+</div>
+
+</div><!-- /main -->
+</div><!-- /wrap -->
+
+<script>
+(function() {
+  const toc = document.getElementById('toc');
+  const links = toc.querySelectorAll('a');
+  const sections = [];
+  links.forEach(link => {
+    const id = link.getAttribute('href').slice(1);
+    const el = document.getElementById(id);
+    if (el) sections.push({ id, el, link });
+  });
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const match = sections.find(s => s.el === entry.target);
+        if (match) {
+          match.link.classList.add('active');
+          if (window.innerWidth <= 1000) {
+            match.link.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+          }
+        }
+      }
+    });
+  }, { rootMargin: '-10% 0px -80% 0px' });
+  sections.forEach(s => observer.observe(s.el));
+  links.forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const id = link.getAttribute('href').slice(1);
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.replaceState(null, '', '#' + id);
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>

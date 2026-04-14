@@ -11,7 +11,6 @@ import type {
     GameState,
 } from '../../state/game_state.js';
 import type { OsidCentroidMap } from '../../data/operational_data_types.js';
-import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { findConnectedComponents } from '../../utils/graph.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
@@ -51,19 +50,21 @@ export function mapOsidsToCorps(
     reverseMap: Map<string, string[]> | null
 ): Map<Osid, FormationId> {
     const result = new Map<Osid, FormationId>();
+    const pc = state.political.political_controllers ?? {};
 
     // Pre-compute friendly OSIDs for fast membership checks.
-    // Include BOTH edge-graph OSIDs and political_controllers entries so that
-    // corps/brigades at deep-interior locations can seed BFS.
+    // Sector partitioning is operational-front truth. It must only read explicit
+    // OSID control, not municipality-level canonical fallback via reverseMap.
+    // Otherwise a canonical municipality claim can flood whole operational
+    // interiors, fuse unrelated front arcs, and serialize giant non-contiguous
+    // sectors that the frontline geometry never actually owns.
     const friendlyOsids = new Set<Osid>();
     for (const osid of adjacency.keys()) {
-        const ctrl = getPoliticalControllerOSID(state, osid, reverseMap ?? undefined);
-        if (ctrl === faction) friendlyOsids.add(osid);
+        if (pc[osid] === faction) friendlyOsids.add(osid);
     }
     // Also add all OSIDs from political_controllers that belong to this faction.
     // These may not appear in the adjacency graph (interior OSIDs with no edges)
     // but are needed for BFS seeding from corps HQ / subordinate locations.
-    const pc = state.political.political_controllers ?? {};
     for (const [osid, ctrl] of Object.entries(pc)) {
         if (ctrl === faction) friendlyOsids.add(osid);
     }
@@ -396,29 +397,15 @@ export function assignTerritoryVoronoi(
     for (const [osid, sectorIdx] of claimed) {
         perSector[sectorIdx]!.add(osid);
     }
-    // 2. Shared front-edge OSIDs → exclusive ownership to primary sector
-    // When multiple sectors claim the same front-edge OSID (split children),
-    // assign exclusively to the sector with the most front edges (length_edges).
-    // Tiebreaker: lower sector_id in strictCompare order for determinism.
+    // 2. Shared front-edge OSIDs -> every claiming sector keeps that frontline OSID.
+    // A sector packet must always own its own front, even when sibling sectors in the
+    // same corps share a frontline settlement at a fork or hinge. Exclusive winner-take-all
+    // ownership here launders away real frontline OSIDs from one sibling's territory packet,
+    // which later breaks map fills, hover/select, and truthful sector ownership.
     for (const [osid, sectorIndices] of sharedClaims) {
-        if (sectorIndices.length === 1) {
-            perSector[sectorIndices[0]!]!.add(osid);
-            continue;
+        for (const sectorIdx of sectorIndices) {
+            perSector[sectorIdx]!.add(osid);
         }
-        let winnerId = sectorIndices[0]!;
-        for (let k = 1; k < sectorIndices.length; k++) {
-            const si = sectorIndices[k]!;
-            const candidateEdges = sectors[si]!.length_edges;
-            const winnerEdges = sectors[winnerId]!.length_edges;
-            if (
-                candidateEdges > winnerEdges ||
-                (candidateEdges === winnerEdges &&
-                    strictCompare(sectors[si]!.sector_id, sectors[winnerId]!.sector_id) < 0)
-            ) {
-                winnerId = si;
-            }
-        }
-        perSector[winnerId]!.add(osid);
     }
     for (let i = 0; i < sectors.length; i++) {
         sectors[i]!.territory_osids = [...perSector[i]!].sort(strictCompare);
@@ -484,29 +471,55 @@ export function repairDisconnectedTerritory(
 
         if (components.length <= 1) continue;
 
-        // Find the largest component (ties broken by first OSID in sort order for determinism).
-        let largestIdx = 0;
-        for (let ci = 1; ci < components.length; ci++) {
-            if (components[ci]!.size > components[largestIdx]!.size) {
-                largestIdx = ci;
-            } else if (components[ci]!.size === components[largestIdx]!.size) {
-                const minA = [...components[largestIdx]!].sort(strictCompare)[0]!;
-                const minB = [...components[ci]!].sort(strictCompare)[0]!;
-                if (strictCompare(minB, minA) < 0) largestIdx = ci;
+        const frontOsids = new Set<string>();
+        for (const subSegment of sector.sub_segments) {
+            for (const friendlyOsid of subSegment.friendly_osids) {
+                frontOsids.add(friendlyOsid);
             }
         }
 
-        // Keep the largest component in this sector.
-        const kept = components[largestIdx]!;
+        // Keep every component that contains any of the sector's frontline OSIDs.
+        // repairDisconnectedTerritory is allowed to shed stray rear blobs, but it must
+        // never strip the sector's own front out of its territory packet.
+        const keptComponentIndexes = new Set<number>();
+        for (let ci = 0; ci < components.length; ci++) {
+            for (const osid of components[ci]!) {
+                if (frontOsids.has(osid)) {
+                    keptComponentIndexes.add(ci);
+                    break;
+                }
+            }
+        }
+
+        // If no component contains a front OSID, fall back to the largest component
+        // so we do not drop the sector wholesale.
+        if (keptComponentIndexes.size === 0) {
+            let largestIdx = 0;
+            for (let ci = 1; ci < components.length; ci++) {
+                if (components[ci]!.size > components[largestIdx]!.size) {
+                    largestIdx = ci;
+                } else if (components[ci]!.size === components[largestIdx]!.size) {
+                    const minA = [...components[largestIdx]!].sort(strictCompare)[0]!;
+                    const minB = [...components[ci]!].sort(strictCompare)[0]!;
+                    if (strictCompare(minB, minA) < 0) largestIdx = ci;
+                }
+            }
+            keptComponentIndexes.add(largestIdx);
+        }
+
+        const kept = new Set<string>();
+        for (const keptIndex of keptComponentIndexes) {
+            for (const osid of components[keptIndex]!) kept.add(osid);
+        }
         sector.territory_osids = [...kept].sort(strictCompare);
         anyRepair = true;
 
-            // Reassign orphaned components to adjacent sectors.
+            // Reassign orphaned non-front components to adjacent sectors.
             // Never hand a disconnected orphan to another corps here; if the
             // original corps cannot retain it contiguously, surfacing the gap
             // is more truthful than laundering the territory across corps lines.
             for (let ci = 0; ci < components.length; ci++) {
-                if (ci === largestIdx) continue;
+                if (keptComponentIndexes.has(ci)) continue;
                 const orphan = components[ci]!;
                 const orphanOsids = [...orphan].sort(strictCompare);
 

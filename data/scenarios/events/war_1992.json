@@ -1662,7 +1662,7 @@
     "narrative": "The strategic town of Jajce in central Bosnia falls to the VRS after a prolonged siege. The loss is a major blow to both the ARBiH and HVO, who blame each other for failing to coordinate the defense. Tens of thousands of civilians flee westward, and recriminations between the two forces deepen the growing rift.",
     "category": "territorial",
     "trigger": {
-      "turn_min": 40,
+      "turn_min": 28,
       "turn_max": 52,
       "phase": "war",
       "condition": {

@@ -275,6 +275,8 @@ export function isSegmentAdjacent(
     b: { friendly_osids: string[]; enemy_osids: string[]; edge_ids: string[] },
     osidAdjacency: Map<Osid, Osid[]>,
     sharedBoundaryAdj?: Map<Osid, Osid[]>,
+    strictAdjForCaseB?: Map<Osid, Osid[]>,
+    centroids?: OsidCentroidMap,
 ): boolean {
     const aFriendlySet = new Set(a.friendly_osids);
     const bFriendlySet = new Set(b.friendly_osids);
@@ -304,8 +306,18 @@ export function isSegmentAdjacent(
         for (const eb of edgesB) {
             // Case A: same friendly, hostile OSIDs share true boundary
             if (ea.friendly === eb.friendly && (caseAdj.get(ea.hostile as Osid) ?? []).includes(eb.hostile)) return true;
-            // Case B: same hostile, friendly OSIDs share true boundary
-            if (ea.hostile === eb.hostile && (caseAdj.get(ea.friendly as Osid) ?? []).includes(eb.friendly)) return true;
+            // Case B: same hostile, friendly OSIDs share true boundary.
+            // This must honor the same bridge guard and threshold gate as the
+            // main edge adjacency builder, otherwise undersized-subsegment merge
+            // can re-stitch separate front branches that strict splitting just cut apart.
+            if (ea.hostile === eb.hostile && (caseAdj.get(ea.friendly as Osid) ?? []).includes(eb.friendly)) {
+                if (strictAdjForCaseB) {
+                    if (!isOsidAdjacent(ea.friendly as Osid, ea.hostile as Osid, strictAdjForCaseB)) continue;
+                    if (!isOsidAdjacent(eb.friendly as Osid, eb.hostile as Osid, strictAdjForCaseB)) continue;
+                }
+                if (isCaseBBridge(ea.friendly as Osid, eb.friendly as Osid, ea.hostile as Osid, centroids)) continue;
+                return true;
+            }
         }
     }
 

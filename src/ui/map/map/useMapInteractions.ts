@@ -14,30 +14,138 @@ export interface MapInteractionCallbacks {
   onMouseMove?: (lngLat: [number, number]) => void;
   onMapMouseLeave?: () => void;
   onContextMenu?: (type: 'formation' | 'front' | 'osid' | 'empty', properties: Record<string, unknown> | null, point: { x: number; y: number }) => void;
+  /**
+   * Guard ref: when true, the Deck.gl overlay already handled a formation click
+   * in this event. MapLibre's handleMapClick must skip front-edge fallthrough to
+   * prevent sector selection from overriding the formation selection.
+   * Set by Deck.gl onClick handler, consumed (reset to false) by handleMapClick.
+   */
+  deckHandledFormationClick?: { current: boolean };
 }
 
 const HOVER_DELAY_MS = 300;
 /** Throttle interval for mousemove handlers that call queryRenderedFeatures (ms). */
 const MOUSEMOVE_THROTTLE_MS = 50;
+export const FRONT_INTERACTION_PICK_RADIUS_PX = 10;
 
 const HIGHLIGHT_POS_LAYER = 'front-edges-highlight-pos';
 const HIGHLIGHT_NEG_LAYER = 'front-edges-highlight-neg';
 const SECTOR_EDGE_GLOW_POS_LAYER = 'sector-edge-glow-pos';
 const SECTOR_EDGE_GLOW_NEG_LAYER = 'sector-edge-glow-neg';
-const FRONT_EDGE_INTERACTIVE_LAYERS = [
+const SECTOR_EDGE_HIT_POS_LAYER = 'sector-edge-hit-pos';
+const SECTOR_EDGE_HIT_NEG_LAYER = 'sector-edge-hit-neg';
+const SECTOR_DEMARCATION_HIT_LAYER = 'sector-demarcation-lines-hit';
+export const FRONT_EDGE_INTERACTIVE_LAYERS = [
   'front-edges-hover-pos',
   'front-edges-hover-neg',
   HIGHLIGHT_POS_LAYER,
   HIGHLIGHT_NEG_LAYER,
   SECTOR_EDGE_GLOW_POS_LAYER,
   SECTOR_EDGE_GLOW_NEG_LAYER,
+  SECTOR_EDGE_HIT_POS_LAYER,
+  SECTOR_EDGE_HIT_NEG_LAYER,
+  SECTOR_DEMARCATION_HIT_LAYER,
 ];
+
+export const getFrontFeatureSectorId = (feature: { properties?: Record<string, unknown> } | undefined): string | null => {
+  const sectorId = feature?.properties?.sector_id ?? feature?.properties?.sector_a;
+  return typeof sectorId === 'string' && sectorId.length > 0 ? sectorId : null;
+};
+
+export const getFrontFeatureEdgeId = (feature: { properties?: Record<string, unknown> } | undefined): string | null => {
+  const edgeId = feature?.properties?.edge_id;
+  return typeof edgeId === 'string' && edgeId.length > 0 ? edgeId : null;
+};
+
+export const isSelectableFrontFeature = (feature: { layer?: { id?: string }; properties?: Record<string, unknown> } | undefined): boolean =>
+  !!feature
+  && !!feature.layer?.id
+  && FRONT_EDGE_INTERACTIVE_LAYERS.includes(feature.layer.id)
+  && !!getFrontFeatureSectorId(feature);
+
+const frontFeatureInteractionPriority = (feature: { layer?: { id?: string } } | undefined): number => {
+  const layerId = feature?.layer?.id ?? '';
+  if (layerId === SECTOR_DEMARCATION_HIT_LAYER) return 0;
+  if (layerId === SECTOR_EDGE_HIT_POS_LAYER || layerId === SECTOR_EDGE_HIT_NEG_LAYER) return 1;
+  if (layerId === 'front-edges-hover-pos' || layerId === 'front-edges-hover-neg') return 2;
+  if (layerId === SECTOR_EDGE_GLOW_POS_LAYER || layerId === SECTOR_EDGE_GLOW_NEG_LAYER) return 3;
+  if (layerId === HIGHLIGHT_POS_LAYER || layerId === HIGHLIGHT_NEG_LAYER) return 4;
+  return 99;
+};
+
+export const normalizeFrontFeatureProperties = (feature: { properties?: Record<string, unknown> } | undefined): Record<string, unknown> => {
+  const props = { ...(feature?.properties ?? {}) } as Record<string, unknown>;
+  if (typeof props.sector_id !== 'string' || props.sector_id.length === 0) {
+    const fallbackSectorId = getFrontFeatureSectorId(feature);
+    if (fallbackSectorId) props.sector_id = fallbackSectorId;
+  }
+  return props;
+};
+
+export const pickPreferredFrontFeature = <T extends { layer?: { id?: string }; properties?: Record<string, unknown> }>(
+  features: T[] | undefined,
+): T | undefined => {
+  if (!features || features.length === 0) return undefined;
+  const selectable = features.filter((feature) => isSelectableFrontFeature(feature));
+  if (selectable.length === 0) return features[0];
+  return [...selectable].sort((a, b) => frontFeatureInteractionPriority(a) - frontFeatureInteractionPriority(b))[0];
+};
+
+export const getPresentFrontInteractionLayers = (map: Pick<MapLibreMap, 'getLayer'>) =>
+  FRONT_EDGE_INTERACTIVE_LAYERS.filter((layerId) => !!map.getLayer(layerId));
+
+const queryPreferredFrontFeatureAtPoint = (
+  map: MapLibreMap,
+  point: MapLayerMouseEvent['point'] | undefined,
+  fallbackFeatures: Array<{ layer?: { id?: string }; properties?: Record<string, unknown> }> | undefined,
+): { layer?: { id?: string }; properties?: Record<string, unknown> } | undefined => {
+  if (!point) return pickPreferredFrontFeature(fallbackFeatures);
+  const layers = getPresentFrontInteractionLayers(map);
+  if (layers.length === 0) return pickPreferredFrontFeature(fallbackFeatures);
+
+  try {
+    const queriedFeatures = map.queryRenderedFeatures(point, { layers }) as Array<{ layer?: { id?: string }; properties?: Record<string, unknown> }>;
+    return pickPreferredFrontFeature([...(fallbackFeatures ?? []), ...queriedFeatures]);
+  } catch (_) {
+    return pickPreferredFrontFeature(fallbackFeatures);
+  }
+};
+
+export const queryPreferredFrontFeatureNearPoint = (
+  map: Pick<MapLibreMap, 'getLayer' | 'queryRenderedFeatures'>,
+  point: { x: number; y: number } | undefined,
+  allowNeighborhood = false,
+) => {
+  if (!point) return undefined;
+  const layers = getPresentFrontInteractionLayers(map);
+  if (layers.length === 0) return undefined;
+
+  const queryPoint: [number, number] = [point.x, point.y];
+  const exactHits = map.queryRenderedFeatures(queryPoint, { layers });
+  const exactFeature = pickPreferredFrontFeature(exactHits as Array<{ layer?: { id?: string }; properties?: Record<string, unknown> }> | undefined);
+  if (exactFeature && isSelectableFrontFeature(exactFeature as { layer?: { id?: string }; properties?: Record<string, unknown> })) {
+    return exactFeature;
+  }
+
+  if (!allowNeighborhood) return undefined;
+
+  const radius = FRONT_INTERACTION_PICK_RADIUS_PX;
+  const bbox: [[number, number], [number, number]] = [
+    [point.x - radius, point.y - radius],
+    [point.x + radius, point.y + radius],
+  ];
+  const nearbyHits = map.queryRenderedFeatures(bbox, { layers });
+  const nearbyFeature = pickPreferredFrontFeature(nearbyHits as Array<{ layer?: { id?: string }; properties?: Record<string, unknown> }> | undefined);
+  return nearbyFeature && isSelectableFrontFeature(nearbyFeature as { layer?: { id?: string }; properties?: Record<string, unknown> })
+    ? nearbyFeature
+    : undefined;
+};
 
 export function useMapInteractions(
   map: MapLibreMap | null,
   callbacks: MapInteractionCallbacks | ((osid: string) => void)
 ) {
-  let hoverTimeout: number | undefined;
+  let hoverTimeout: ReturnType<typeof globalThis.setTimeout> | undefined;
   let hoveredSectorId: string | null = null;
   let lastOsidMoveTime = 0;
   let lastFrontEdgeMoveTime = 0;
@@ -72,9 +180,13 @@ export function useMapInteractions(
   const onFormationHover = typeof callbacks === 'function' ? undefined : callbacks.onFormationHover;
   const onFrontEdgeHover = typeof callbacks === 'function' ? undefined : callbacks.onFrontEdgeHover;
   const onBattleHover = typeof callbacks === 'function' ? undefined : callbacks.onBattleHover;
+  const onSectorHover = typeof callbacks === 'function' ? undefined : callbacks.onSectorHover;
   const onMouseMove = typeof callbacks === 'function' ? undefined : callbacks.onMouseMove;
   const onMapMouseLeave = typeof callbacks === 'function' ? undefined : callbacks.onMapMouseLeave;
   const onContextMenu = typeof callbacks === 'function' ? undefined : callbacks.onContextMenu;
+  const deckHandledFormationClick = typeof callbacks === 'function' ? undefined : callbacks.deckHandledFormationClick;
+
+  const needsFrontSurfaceHover = !!onFrontEdgeHover || !!onSectorHover;
 
 
   const handleOsidMouseMove = (e: MapLayerMouseEvent) => {
@@ -87,14 +199,13 @@ export function useMapInteractions(
     const osid = feature?.properties?.osid as string | undefined;
     const point = e.originalEvent ? { x: e.originalEvent.clientX, y: e.originalEvent.clientY } : null;
     // Suppress OSID tooltip when cursor is also over a front edge (front tooltip takes priority)
-    if (e.point) {
-      const frontHits = map.queryRenderedFeatures(e.point, { layers: FRONT_EDGE_INTERACTIVE_LAYERS.filter(id => !!map.getLayer(id)) });
-      if (frontHits.length > 0) return; // front-edge handler will fire instead
+    if (e.point && queryPreferredFrontFeatureNearPoint(map, e.point, true)) {
+      return;
     }
     if (onOsidHover) {
       if (osid) {
         if (hoverTimeout) clearTimeout(hoverTimeout);
-        hoverTimeout = window.setTimeout(() => {
+        hoverTimeout = globalThis.setTimeout(() => {
           onOsidHover(osid, point);
           hoverTimeout = undefined;
         }, HOVER_DELAY_MS);
@@ -123,13 +234,21 @@ export function useMapInteractions(
   };
 
   const handleFormationMouseMove = (e: MapLayerMouseEvent) => {
+    if (e.point && queryPreferredFrontFeatureNearPoint(map, e.point, true)) {
+      if (hoverTimeout) {
+        clearTimeout(hoverTimeout);
+        hoverTimeout = undefined;
+      }
+      onFormationHover?.(null, null);
+      return;
+    }
     const feature = e.features?.[0];
     const id = feature?.properties?.id as string | undefined;
     const point = e.originalEvent ? { x: e.originalEvent.clientX, y: e.originalEvent.clientY } : null;
     if (onFormationHover) {
       if (id) {
         if (hoverTimeout) clearTimeout(hoverTimeout);
-        hoverTimeout = window.setTimeout(() => {
+        hoverTimeout = globalThis.setTimeout(() => {
           onFormationHover!(id, point);
           hoverTimeout = undefined;
         }, HOVER_DELAY_MS);
@@ -164,30 +283,24 @@ export function useMapInteractions(
       }
     } catch (_) { /* layers may not exist yet */ }
 
-    if (typeof callbacks !== 'function' && callbacks.onSectorHover) {
-      callbacks.onSectorHover(sectorId, point);
-    }
+    onSectorHover?.(sectorId, point);
   };
 
 
-  const handleFrontEdgeMouseMove = (e: MapLayerMouseEvent) => {
-    map.getCanvas().style.cursor = 'pointer';
-    // Throttle: skip processing if called too frequently
-    const now = performance.now();
-    if (now - lastFrontEdgeMoveTime < MOUSEMOVE_THROTTLE_MS) return;
-    lastFrontEdgeMoveTime = now;
-    const feature = e.features?.[0];
-    const edgeId = feature?.properties?.edge_id as string | undefined;
-    const sectorId = feature?.properties?.sector_id as string | undefined;
-    const point = e.originalEvent ? { x: e.originalEvent.clientX, y: e.originalEvent.clientY } : null;
+  const handleFrontFeatureHover = (
+    features: Array<{ layer?: { id?: string }; properties?: Record<string, unknown> }> | undefined,
+    point: { x: number; y: number } | null,
+  ) => {
+    const feature = pickPreferredFrontFeature(features);
+    const edgeId = getFrontFeatureEdgeId(feature);
+    const sectorId = getFrontFeatureSectorId(feature);
 
-    // Highlight entire sector on hover
     if (sectorId) setHoverHighlight(sectorId, point);
 
     if (onFrontEdgeHover) {
       if (edgeId) {
         if (hoverTimeout) clearTimeout(hoverTimeout);
-        hoverTimeout = window.setTimeout(() => {
+        hoverTimeout = globalThis.setTimeout(() => {
           onFrontEdgeHover!(edgeId, point);
           hoverTimeout = undefined;
         }, HOVER_DELAY_MS);
@@ -196,6 +309,19 @@ export function useMapInteractions(
         hoverTimeout = undefined;
       }
     }
+  };
+
+  const handleFrontEdgeMouseMove = (e: MapLayerMouseEvent) => {
+    map.getCanvas().style.cursor = 'pointer';
+    // Throttle: skip processing if called too frequently
+    const now = performance.now();
+    if (now - lastFrontEdgeMoveTime < MOUSEMOVE_THROTTLE_MS) return;
+    lastFrontEdgeMoveTime = now;
+    const point = e.originalEvent ? { x: e.originalEvent.clientX, y: e.originalEvent.clientY } : null;
+    handleFrontFeatureHover(
+      e.features as Array<{ layer?: { id?: string }; properties?: Record<string, unknown> }> | undefined,
+      point,
+    );
   };
 
   const handleFrontEdgeMouseLeave = () => {
@@ -210,19 +336,55 @@ export function useMapInteractions(
   };
 
   const handleFrontEdgeClick = (e: MapLayerMouseEvent) => {
-    const feature = e.features?.[0];
-    const props = (feature?.properties ?? {}) as Record<string, unknown>;
-    const edgeId = typeof props.edge_id === 'string' ? props.edge_id : '';
-    const sectorId = typeof props.sector_id === 'string' ? props.sector_id : '';
-    if (!edgeId && !sectorId) return;
+    const fallbackFeatures = e.features as Array<{ layer?: { id?: string }; properties?: Record<string, unknown> }> | undefined;
+    const pointFeature = queryPreferredFrontFeatureNearPoint(map, e.point, true);
+    const feature = pickPreferredFrontFeature([
+      ...(fallbackFeatures ?? []),
+      ...(pointFeature ? [pointFeature] : []),
+    ]);
+    const props = normalizeFrontFeatureProperties(feature);
+    const edgeId = getFrontFeatureEdgeId(feature) ?? '';
+    const sectorId = getFrontFeatureSectorId(feature) ?? '';
+    if (!sectorId) return;
     onFrontEdgeClick?.(edgeId, props);
   };
 
   const handleMapMouseMove = (e: MapLayerMouseEvent) => {
     onMouseMove?.([e.lngLat.lng, e.lngLat.lat]);
+    if (!needsFrontSurfaceHover || !e.point) return;
+
+    const now = performance.now();
+    if (now - lastFrontEdgeMoveTime < MOUSEMOVE_THROTTLE_MS) return;
+    lastFrontEdgeMoveTime = now;
+
+    const selectableFrontHit = queryPreferredFrontFeatureNearPoint(map, e.point, true);
+    const point = e.originalEvent ? { x: e.originalEvent.clientX, y: e.originalEvent.clientY } : null;
+    if (selectableFrontHit && isSelectableFrontFeature(selectableFrontHit)) {
+      map.getCanvas().style.cursor = 'pointer';
+      handleFrontFeatureHover([selectableFrontHit], point);
+      return;
+    }
+
+    if (hoveredSectorId) {
+      map.getCanvas().style.cursor = '';
+      setHoverHighlight(null, null);
+      if (hoverTimeout) {
+        clearTimeout(hoverTimeout);
+        hoverTimeout = undefined;
+      }
+      onFrontEdgeHover?.(null, null);
+    }
   };
 
   const handleMapClick = (e: MapLayerMouseEvent) => {
+    // Deck.gl overlay fires its onClick before MapLibre's click handler.
+    // When Deck.gl already resolved a formation click, skip MapLibre fallthrough
+    // to prevent front-edge/sector selection from overriding the formation.
+    if (deckHandledFormationClick?.current) {
+      deckHandledFormationClick.current = false;
+      return;
+    }
+
     // Priority: Formations > Front Edges (Sectors) > Settlements (OSIDs)
     const priorityLayers = [
       'battle-markers-pulse',
@@ -233,6 +395,9 @@ export function useMapInteractions(
       'front-edges-highlight-neg',
       SECTOR_EDGE_GLOW_POS_LAYER,
       SECTOR_EDGE_GLOW_NEG_LAYER,
+      SECTOR_EDGE_HIT_POS_LAYER,
+      SECTOR_EDGE_HIT_NEG_LAYER,
+      SECTOR_DEMARCATION_HIT_LAYER,
       'sector-fill',
       'osid-control-fill',
       'osid-ethnic-fill',
@@ -249,7 +414,7 @@ export function useMapInteractions(
         if (osid) { onBattleClick?.(osid, battleFeature.properties as Record<string, unknown>); return; }
       }
 
-      // Find the first formation-marker or label if it exists in the hits
+      // Exact formation hits own the click; nearby front rescue must not steal brigade selection.
       const formationFeature = features.find(f => f.layer.id.startsWith('formation-'));
       if (formationFeature) {
         const id = formationFeature.properties?.id as string | undefined;
@@ -259,15 +424,25 @@ export function useMapInteractions(
         }
       }
 
+      const selectableFrontFeature = queryPreferredFrontFeatureNearPoint(map, e.point, true)
+        ?? pickPreferredFrontFeature(
+          features as Array<{ layer?: { id?: string }; properties?: Record<string, unknown> }> | undefined,
+        );
+      if (selectableFrontFeature && isSelectableFrontFeature(selectableFrontFeature as { layer?: { id?: string }; properties?: Record<string, unknown> })) {
+        const props = normalizeFrontFeatureProperties(selectableFrontFeature as { properties?: Record<string, unknown> });
+        const edgeId = getFrontFeatureEdgeId(selectableFrontFeature as { properties?: Record<string, unknown> }) ?? '';
+        onFrontEdgeClick?.(edgeId, props);
+        return;
+      }
+
       const frontFeature = features.find((f) =>
         FRONT_EDGE_INTERACTIVE_LAYERS.includes(f.layer.id)
-        && (f.properties?.edge_id || f.properties?.sector_id)
+        && !!getFrontFeatureSectorId(f as { properties?: Record<string, unknown> })
       );
       if (frontFeature) {
         const props = frontFeature.properties as Record<string, unknown>;
-        const edgeId = props?.edge_id as string | undefined;
-        const sectorId = props?.sector_id as string | undefined;
-        onFrontEdgeClick?.(edgeId ?? sectorId ?? '', props);
+        const edgeId = getFrontFeatureEdgeId(frontFeature as { properties?: Record<string, unknown> }) ?? '';
+        onFrontEdgeClick?.(edgeId, props);
         return;
       }
 
@@ -276,9 +451,9 @@ export function useMapInteractions(
 
       if (layerId.startsWith('front-edges-') || layerId.startsWith('sector-edge-glow-')) {
         const props = feature.properties as Record<string, unknown>;
-        const edgeId = props?.edge_id as string | undefined;
-        const sectorId = props?.sector_id as string | undefined;
-        if (edgeId || sectorId) onFrontEdgeClick?.(edgeId ?? '', props);
+        const edgeId = getFrontFeatureEdgeId(feature as { properties?: Record<string, unknown> }) ?? '';
+        const sectorId = getFrontFeatureSectorId(feature as { properties?: Record<string, unknown> });
+        if (sectorId) onFrontEdgeClick?.(edgeId, props);
       } else if (layerId === 'sector-fill' || layerId.startsWith('osid-')) {
         const osid = feature.properties?.osid as string | undefined;
         if (osid) onOsidClick?.(osid, feature.properties as Record<string, unknown>);
@@ -297,17 +472,34 @@ export function useMapInteractions(
 
     const contextLayerIds = ['formation-markers',
       'front-edges-hover-pos', 'front-edges-hover-neg',
+      'front-edges-highlight-pos', 'front-edges-highlight-neg',
+      SECTOR_EDGE_GLOW_POS_LAYER, SECTOR_EDGE_GLOW_NEG_LAYER,
+      SECTOR_EDGE_HIT_POS_LAYER, SECTOR_EDGE_HIT_NEG_LAYER,
+      SECTOR_DEMARCATION_HIT_LAYER,
       'osid-control-fill'].filter(id => !!map.getLayer(id));
 
     const hits = map.queryRenderedFeatures(e.point, { layers: contextLayerIds });
-    const first = hits[0];
+    const selectableFrontFeature = pickPreferredFrontFeature(
+      hits as Array<{ layer?: { id?: string }; properties?: Record<string, unknown> }> | undefined,
+    );
 
+    if (selectableFrontFeature && isSelectableFrontFeature(selectableFrontFeature)) {
+      onContextMenu('front', normalizeFrontFeatureProperties(selectableFrontFeature), point);
+      return;
+    }
+
+    const first = hits[0];
     if (!first) { onContextMenu('empty', null, point); return; }
 
     const props = first.properties as Record<string, unknown>;
     if (first.layer.id === 'formation-markers') {
       onContextMenu('formation', props, point);
-    } else if (first.layer.id.includes('front-edges')) {
+    } else if (
+      first.layer.id.includes('front-edges')
+      || first.layer.id.startsWith('sector-edge-glow-')
+      || first.layer.id.startsWith('sector-edge-hit-')
+      || first.layer.id === SECTOR_DEMARCATION_HIT_LAYER
+    ) {
       onContextMenu('front', props, point);
     } else {
       onContextMenu('osid', props, point);
@@ -325,8 +517,8 @@ export function useMapInteractions(
   const frontEdgeLayers = ['front-edges-hover-pos', 'front-edges-hover-neg'];
   const frontEdgeHighlightLayers = ['front-edges-highlight-pos', 'front-edges-highlight-neg'];
   const sectorGlowLayers = [SECTOR_EDGE_GLOW_POS_LAYER, SECTOR_EDGE_GLOW_NEG_LAYER];
-
-
+  const sectorHitLayers = [SECTOR_EDGE_HIT_POS_LAYER, SECTOR_EDGE_HIT_NEG_LAYER];
+  const sectorDemarcationHitLayers = [SECTOR_DEMARCATION_HIT_LAYER];
   safeOn('mousemove', 'osid-control-fill', handleOsidMouseMove);
   safeOn('mouseleave', 'osid-control-fill', handleOsidMouseLeave);
   safeOn('click', 'sector-fill', handleOsidClick);
@@ -344,26 +536,22 @@ export function useMapInteractions(
   }
 
   for (const layerId of frontEdgeLayers) {
-    if (onFrontEdgeHover) {
-      safeOn('mousemove', layerId, handleFrontEdgeMouseMove);
-      safeOn('mouseleave', layerId, handleFrontEdgeMouseLeave);
-    }
     safeOn('click', layerId, handleFrontEdgeClick);
   }
 
   for (const layerId of frontEdgeHighlightLayers) {
-    if (onFrontEdgeHover) {
-      safeOn('mousemove', layerId, handleFrontEdgeMouseMove);
-      safeOn('mouseleave', layerId, handleFrontEdgeMouseLeave);
-    }
     safeOn('click', layerId, handleFrontEdgeClick);
   }
 
   for (const layerId of sectorGlowLayers) {
-    if (onFrontEdgeHover) {
-      safeOn('mousemove', layerId, handleFrontEdgeMouseMove);
-      safeOn('mouseleave', layerId, handleFrontEdgeMouseLeave);
-    }
+    safeOn('click', layerId, handleFrontEdgeClick);
+  }
+
+  for (const layerId of sectorHitLayers) {
+    safeOn('click', layerId, handleFrontEdgeClick);
+  }
+
+  for (const layerId of sectorDemarcationHitLayers) {
     safeOn('click', layerId, handleFrontEdgeClick);
   }
 
@@ -409,18 +597,18 @@ export function useMapInteractions(
 
     for (const layerId of frontEdgeLayers) {
       safeOff('click', layerId, handleFrontEdgeClick);
-      safeOff('mousemove', layerId, handleFrontEdgeMouseMove);
-      safeOff('mouseleave', layerId, handleFrontEdgeMouseLeave);
     }
     for (const layerId of frontEdgeHighlightLayers) {
       safeOff('click', layerId, handleFrontEdgeClick);
-      safeOff('mousemove', layerId, handleFrontEdgeMouseMove);
-      safeOff('mouseleave', layerId, handleFrontEdgeMouseLeave);
     }
     for (const layerId of sectorGlowLayers) {
       safeOff('click', layerId, handleFrontEdgeClick);
-      safeOff('mousemove', layerId, handleFrontEdgeMouseMove);
-      safeOff('mouseleave', layerId, handleFrontEdgeMouseLeave);
+    }
+    for (const layerId of sectorHitLayers) {
+      safeOff('click', layerId, handleFrontEdgeClick);
+    }
+    for (const layerId of sectorDemarcationHitLayers) {
+      safeOff('click', layerId, handleFrontEdgeClick);
     }
     setHoverHighlight(null, null);
   };

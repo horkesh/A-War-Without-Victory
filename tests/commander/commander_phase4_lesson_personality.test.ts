@@ -172,6 +172,7 @@ function makeMinimalBriefing(overrides: Partial<CommanderBriefing> = {}): Comman
         doctrine_stance: 'balanced',
         corps_stance: 'balanced',
         corps_exhaustion: 0,
+        faction_war_exhaustion: 0,
         avg_fatigue_pct: 0,
         brigades_above_fatigue_threshold: 0,
         enemy_equipment_summary: { tanks: 0, artillery: 0, infantry_only: true },
@@ -507,6 +508,7 @@ describe('v0.8.1 Phase 4 — Lesson Memory and Personality Weighting', () => {
                 pre_planned_ops: [{ id: 'op_1' }],
                 officer_personality: aggressivePersonality,
                 corps_exhaustion: MAX_EXHAUSTION_FOR_OPERATION + 10, // hard block
+        faction_war_exhaustion: 0,
             });
 
             const { trace } = selectWinningIntent(briefing, zones, forces, surplusPool, turn);

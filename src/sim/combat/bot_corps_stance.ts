@@ -252,13 +252,18 @@ export function generateCorpsStanceOrders(
             }
         }
 
-        // Patron directive ceiling: Zagreb's political orders constrain HVO corps stances
+        // Patron directive ceiling: Zagreb's political orders constrain HVO corps stances.
+        // Directives may scope to specific corps via optional corps_ids[]. If absent, applies to all.
+        // Posavina (hvo_northwest_bosnia) is historically exempt — fighting for survival from day one.
         if (faction === 'HRHB') {
-            type PatronDirective = { start_week: number; end_week: number; stance_ceiling: string };
+            type PatronDirective = { start_week: number; end_week: number; stance_ceiling: string; corps_ids?: string[] };
             const timeline = state.military.war_timeline as (typeof state.military.war_timeline & { patron_directives?: Record<string, PatronDirective[]> }) | undefined;
             const directives = timeline?.patron_directives?.['HRHB'];
             if (directives) {
-                const activeDirective = directives.find(d => turn >= d.start_week && turn < d.end_week);
+                const activeDirective = directives.find(d =>
+                    turn >= d.start_week && turn < d.end_week
+                    && (!d.corps_ids || d.corps_ids.includes(corps.id))
+                );
                 if (activeDirective && STANCE_RANK[stance] > STANCE_RANK[activeDirective.stance_ceiling as CorpsStance]) {
                     stance = activeDirective.stance_ceiling as CorpsStance;
                 }

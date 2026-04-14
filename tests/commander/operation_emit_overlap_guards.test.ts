@@ -142,6 +142,7 @@ function makeBriefing(activeOperations: any[] = [], brigades: FormationState[] =
                         active_ogs: [],
                         active_operations: activeOperations,
                         corps_exhaustion: 0,
+        faction_war_exhaustion: 0,
                         stance: 'offensive',
                     },
                 },
@@ -158,6 +159,7 @@ function makeBriefing(activeOperations: any[] = [], brigades: FormationState[] =
         doctrine_stance: 'balanced',
         corps_stance: 'offensive',
         corps_exhaustion: 0,
+        faction_war_exhaustion: 0,
         avg_fatigue_pct: 0,
         brigades_above_fatigue_threshold: 0,
         enemy_equipment_summary: { tanks: 0, artillery: 0, infantry_only: true },
@@ -290,6 +292,7 @@ describe('commander emission overlap guards', () => {
                         og_slots: 0,
                         active_ogs: [],
                         corps_exhaustion: 0,
+        faction_war_exhaustion: 0,
                         stance: 'offensive',
                         active_operations: [{
                             name: 'cmd_old',

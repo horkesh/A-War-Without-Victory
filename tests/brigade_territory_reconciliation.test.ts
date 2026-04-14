@@ -12,16 +12,19 @@ import {
     assignCrossCorpsEnclaveDefenders,
     brigadeRequiresSectorAssignment,
     enforcePhysicalSectorOwnership,
+    isMovementOwnedReturnToCorps,
     rehomeUnassignedBrigadesToPhysicalSectorOwners,
     syncSectorAssignmentsToFormations,
     warnUnresolvedSectorAssignments,
 } from '../src/sim/combat/brigade_assignment.js';
+import { collectUnresolvedSectorBrigades } from '../src/sim/combat/corps_front_sectors.js';
 import type {
     CorpsFrontSector,
     CorpsFrontSubSegment,
     FactionId,
     FormationId,
     FormationState,
+    GameState,
 } from '../src/state/game_state.js';
 import type { Osid } from '../src/sim/combat/osid_adjacency.js';
 import type { CorpsCommanderProfile } from '../src/sim/combat/commander_override.js';
@@ -1089,6 +1092,55 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
         expect(requiresSector).toBe(true);
     });
 
+    it('treats a brigade on another same-faction corps frontline as sector-mandatory even when its own corps has sectors elsewhere', () => {
+        const ownCorpsSector = makeSector(
+            'sector:hvo_southeast_herzegovina:0',
+            'hvo_southeast_herzegovina',
+            [makeSubSeg('front', ['op:m:posusje_front'], ['op:m:posusje_enemy'], 3)],
+            ['op:m:posusje_front', 'op:m:posusje_depth'],
+        );
+        const neighboringCorpsSector = makeSector(
+            'sector:hvo_tomislavgrad:0',
+            'hvo_tomislavgrad',
+            [makeSubSeg('front', ['op:m:kongora'], ['op:m:kongora_enemy'], 3)],
+            ['op:m:kongora', 'op:m:kongora_depth'],
+        );
+        const brigade = makeFormation({
+            id: 'hrhb_herceg_stjepan_brigade',
+            faction: 'HRHB' as FactionId,
+            corps_id: 'hvo_southeast_herzegovina',
+            location_osid: 'op:m:kongora',
+        });
+        const adjacency = makeAdjacency([
+            ['op:m:kongora', 'op:m:kongora_enemy'],
+            ['op:m:posusje_front', 'op:m:posusje_enemy'],
+        ]);
+
+        const requiresSector = brigadeRequiresSectorAssignment(
+            brigade,
+            [ownCorpsSector, neighboringCorpsSector],
+            adjacency,
+            [
+                {
+                    edge_id: 'op:m:kongora__op:m:kongora_enemy',
+                    a: 'op:m:kongora',
+                    b: 'op:m:kongora_enemy',
+                    side_a: 'HRHB',
+                    side_b: 'RBiH',
+                },
+                {
+                    edge_id: 'op:m:posusje_front__op:m:posusje_enemy',
+                    a: 'op:m:posusje_front',
+                    b: 'op:m:posusje_enemy',
+                    side_a: 'HRHB',
+                    side_b: 'RBiH',
+                },
+            ],
+        );
+
+        expect(requiresSector).toBe(true);
+    });
+
     it('clears stale assigned_sub_segment_id when a brigade is no longer sector-owned', () => {
         const dropped = makeFormation({
             id: 'brig_dropped',
@@ -1130,6 +1182,43 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
     });
 
     // ─── Drifted-brigade gate in rehomeUnassignedBrigadesToPhysicalSectorOwners ──
+
+    it('demotes a deeper same-sector reserve packet to rear physical truth', () => {
+        const reserve = makeFormation({
+            id: 'brig_reserve_depth',
+            corps_id: 'vrs_drina',
+            location_osid: 'op:m:rear_depth',
+        });
+
+        const formations: Record<FormationId, FormationState> = {
+            brig_reserve_depth: reserve,
+        };
+
+        const sector = makeSector(
+            'sector:vrs_drina:0',
+            'vrs_drina',
+            [makeSubSeg('front', ['op:m:front'], ['op:m:enemy'], 3)],
+            ['op:m:front', 'op:m:rear_local', 'op:m:rear_depth'],
+        );
+        sector.reserve_brigade_ids = ['brig_reserve_depth'];
+
+        const adjacency = makeAdjacency([
+            ['op:m:front', 'op:m:rear_local'],
+            ['op:m:rear_local', 'op:m:rear_depth'],
+        ]);
+
+        syncSectorAssignmentsToFormations(
+            { [sector.sector_id]: sector },
+            formations,
+            adjacency,
+        );
+
+        expect(formations.brig_reserve_depth.assignment).toEqual({
+            kind: 'sector',
+            sector_id: sector.sector_id,
+            role: 'rear',
+        });
+    });
 
     it('rehome skips drifted brigade whose home_osid is still in own-corps territory', () => {
         // Brigade at foreign-corps territory but home_osid is in own-corps sector
@@ -1181,6 +1270,171 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
         // Should NOT be assigned to own corps sector either (it's not physically there)
         expect(ownCorpsSector.assigned_brigade_ids).not.toContain('brig_drifted');
         expect(ownCorpsSector.reserve_brigade_ids).not.toContain('brig_drifted');
+    });
+
+    it('does not warn when a rear-guard brigade is movement-owned on a column return home', () => {
+        const sector = makeSector(
+            'sector:vrs_1st_krajina:0',
+            'vrs_1st_krajina',
+            [makeSubSeg('front_home', ['op:prijedor:front'], ['op:enemy:a'], 3)],
+            ['op:prijedor:front', 'op:prijedor:maricka_2'],
+        );
+
+        const movingBrigade = makeFormation({
+            id: 'rs_1st_armored',
+            corps_id: 'vrs_1st_krajina',
+            location_osid: 'op:bosanska_krupa:vranjska_2',
+            home_osid: 'op:prijedor:maricka_2',
+        });
+
+        const formations: Record<FormationId, FormationState> = {
+            rs_1st_armored: movingBrigade,
+        };
+        const adjacency = new Map<Osid, Osid[]>([
+            ['op:bosanska_krupa:vranjska_2' as Osid, ['op:bosanska_krupa:jasenica_2' as Osid]],
+            ['op:bosanska_krupa:jasenica_2' as Osid, ['op:bosanska_krupa:vranjska_2' as Osid]],
+            ['op:prijedor:front' as Osid, ['op:prijedor:maricka_2' as Osid]],
+            ['op:prijedor:maricka_2' as Osid, ['op:prijedor:front' as Osid]],
+        ]);
+        const friendlyOsids = new Set<string>([
+            'op:bosanska_krupa:vranjska_2',
+            'op:bosanska_krupa:jasenica_2',
+            'op:prijedor:front',
+            'op:prijedor:maricka_2',
+        ]);
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+        classifyBrigadesByTerritory(
+            [sector],
+            'RS' as FactionId,
+            formations,
+            adjacency,
+            friendlyOsids,
+            new Map<string, number>([
+                ['op:bosanska_krupa:vranjska_2', 1],
+                ['op:bosanska_krupa:jasenica_2', 1],
+                ['op:prijedor:front', 0],
+                ['op:prijedor:maricka_2', 0],
+            ]),
+            new Map<string, CorpsCommanderProfile>(),
+            undefined,
+            {
+                military: {
+                    brigade_movement_orders: {
+                        rs_1st_armored: {
+                            destination_sids: ['op:prijedor:maricka_2'],
+                            stance: 'column',
+                        },
+                    },
+                    brigade_movement_state: {
+                        rs_1st_armored: {
+                            destination_sids: ['op:prijedor:maricka_2'],
+                            path: ['op:bosanska_krupa:vranjska_2', 'op:prijedor:maricka_2'],
+                            stance: 'column',
+                            status: 'in_transit',
+                            turns_remaining: 4,
+                        },
+                    },
+                },
+            } as unknown as GameState,
+        );
+
+        expect(warnSpy.mock.calls.join('\n')).not.toContain('UNASSIGNED rs_1st_armored');
+        warnSpy.mockRestore();
+    });
+
+    it('recognizes a pending return-to-corps move into own-corps territory as movement-owned', () => {
+        const ownCorpsSector = makeSector(
+            'sector:hvo_southeast_herzegovina:0',
+            'hvo_southeast_herzegovina',
+            [makeSubSeg('front_own', ['op:stolac:front'], ['op:enemy:a'], 3)],
+            ['op:posusje:posusje_2', 'op:stolac:front'],
+        );
+        const otherCorpsSector = makeSector(
+            'sector:hvo_tomislavgrad:0',
+            'hvo_tomislavgrad',
+            [makeSubSeg('front_other', ['op:duvno:kongora'], ['op:kupres:bucovaca'], 3)],
+            ['op:duvno:kongora'],
+        );
+        const brigade = makeFormation({
+            id: 'hrhb_herceg_stjepan_brigade',
+            faction: 'HRHB' as FactionId,
+            corps_id: 'hvo_southeast_herzegovina',
+            location_osid: 'op:duvno:kongora',
+        });
+
+        const movementOwned = isMovementOwnedReturnToCorps(
+            {
+                military: {
+                    brigade_movement_orders: {
+                        hrhb_herceg_stjepan_brigade: {
+                            destination_sids: ['op:posusje:posusje_2'],
+                        },
+                    },
+                },
+            } as unknown as GameState,
+            'hrhb_herceg_stjepan_brigade' as FormationId,
+            brigade,
+            [ownCorpsSector, otherCorpsSector],
+        );
+
+        expect(movementOwned).toBe(true);
+    });
+
+    it('does not keep a pending return-to-corps brigade in the final unresolved list', () => {
+        const ownCorpsSector = makeSector(
+            'sector:hvo_southeast_herzegovina:0',
+            'hvo_southeast_herzegovina',
+            [makeSubSeg('front_own', ['op:stolac:front'], ['op:enemy:a'], 3)],
+            ['op:posusje:posusje_2', 'op:stolac:front'],
+        );
+        const otherCorpsSector = makeSector(
+            'sector:hvo_tomislavgrad:0',
+            'hvo_tomislavgrad',
+            [makeSubSeg('front_other', ['op:duvno:kongora'], ['op:kupres:bucovaca'], 3)],
+            ['op:duvno:kongora'],
+        );
+        const brigade = makeFormation({
+            id: 'hrhb_herceg_stjepan_brigade',
+            faction: 'HRHB' as FactionId,
+            corps_id: 'hvo_southeast_herzegovina',
+            location_osid: 'op:duvno:kongora',
+        });
+        const formations: Record<FormationId, FormationState> = {
+            hrhb_herceg_stjepan_brigade: brigade,
+        };
+        const adjacency = makeAdjacency([
+            ['op:duvno:kongora', 'op:kupres:bucovaca'],
+            ['op:duvno:kongora', 'op:posusje:posusje_2'],
+            ['op:stolac:front', 'op:enemy:a'],
+        ]);
+
+        const unresolved = collectUnresolvedSectorBrigades(
+            {
+                military: {
+                    brigade_movement_orders: {
+                        hrhb_herceg_stjepan_brigade: {
+                            destination_sids: ['op:posusje:posusje_2'],
+                        },
+                    },
+                    war_front_edges_osid: [{
+                        edge_id: 'op:duvno:kongora__op:kupres:bucovaca',
+                        a: 'op:duvno:kongora',
+                        b: 'op:kupres:bucovaca',
+                        side_a: 'HRHB',
+                        side_b: 'RS',
+                    }],
+                },
+            } as unknown as GameState,
+            {
+                [ownCorpsSector.sector_id]: ownCorpsSector,
+                [otherCorpsSector.sector_id]: otherCorpsSector,
+            },
+            formations,
+            adjacency,
+        );
+
+        expect(unresolved).toEqual([]);
     });
 
     it('rehome does not assign a foreign-corps enclave brigade whose home_osid is NOT in own-corps territory', () => {

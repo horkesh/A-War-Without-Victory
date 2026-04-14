@@ -601,6 +601,76 @@ describe('ensureMinimumSectorCoverage — Lane B pre-pass (territory membership)
         expect(donorB.assigned_brigade_ids).toContain('bde_e');
     });
 
+    it('rescues an empty shared-front child from a donor that can still retain a brigade', () => {
+        const sharedOsid = 'op:municipality:shared_front';
+        const donorSs = makeSubSeg(
+            'ss_donor',
+            ['op:municipality:donor_front', sharedOsid],
+            ['op:enemy:e1'],
+            7,
+        );
+        const donor = makeSector({
+            sectorId: 'sector:vrs_krajina:donor',
+            corpsId: 'vrs_krajina',
+            subSegments: [donorSs],
+            territoryOsids: ['op:municipality:donor_front', sharedOsid],
+            assignedBrigadeIds: ['bde_anchor', 'bde_shared'],
+            lengthEdges: 7,
+        });
+
+        const zeroChildSs = makeSubSeg(
+            'ss_zero',
+            [sharedOsid, 'op:municipality:zero_front'],
+            ['op:enemy:e2'],
+            5,
+        );
+        const zeroChild = makeSector({
+            sectorId: 'sector:vrs_krajina:zero',
+            corpsId: 'vrs_krajina',
+            subSegments: [zeroChildSs],
+            territoryOsids: [sharedOsid, 'op:municipality:zero_front'],
+            assignedBrigadeIds: [],
+            lengthEdges: 5,
+        });
+
+        const formations: Record<FormationId, FormationState> = {
+            bde_anchor: makeFormation('bde_anchor', {
+                corps_id: 'vrs_krajina',
+                location_osid: 'op:municipality:donor_front',
+            }),
+            bde_shared: makeFormation('bde_shared', {
+                corps_id: 'vrs_krajina',
+                location_osid: sharedOsid,
+            }),
+        };
+
+        const adjacency = makeAdjacency([
+            ['op:municipality:donor_front', sharedOsid],
+            [sharedOsid, 'op:municipality:zero_front'],
+        ]);
+        const friendlyOsids = new Set([
+            'op:municipality:donor_front',
+            sharedOsid,
+            'op:municipality:zero_front',
+        ]);
+        const componentOf = makeComponentOf({
+            'op:municipality:donor_front': 0,
+            [sharedOsid]: 0,
+            'op:municipality:zero_front': 0,
+        });
+
+        ensureMinimumSectorCoverage(
+            [donor, zeroChild],
+            formations,
+            adjacency,
+            friendlyOsids,
+            componentOf,
+        );
+
+        expect(donor.assigned_brigade_ids).toEqual(['bde_anchor']);
+        expect(zeroChild.assigned_brigade_ids).toEqual(['bde_shared']);
+    });
+
     /**
      * Test 6 (guard — must hold before AND after fix):
      * A sector with zero assigned brigades AND zero front edges must NOT be targeted

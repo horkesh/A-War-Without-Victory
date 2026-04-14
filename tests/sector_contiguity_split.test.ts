@@ -138,6 +138,52 @@ describe('splitNonContiguousSectors', () => {
         expect(result).toHaveLength(1);
     });
 
+    it('splits a single friendly frontline OSID when its hostile-side edges form disconnected boundary components', () => {
+        const adj = new Map<Osid, Osid[]>();
+        adj.set('op:maglaj:jablanica' as Osid, []);
+        adj.set('op:maglaj:maglaj_2' as Osid, ['op:maglaj:misurici_2' as Osid]);
+        adj.set('op:maglaj:misurici_2' as Osid, ['op:maglaj:maglaj_2' as Osid]);
+        adj.set('op:maglaj:kosova_2' as Osid, []);
+
+        const subSeg = makeSubSeg(
+            'ss0',
+            [
+                'op:maglaj:jablanica__op:maglaj:maglaj_2',
+                'op:maglaj:jablanica__op:maglaj:misurici_2',
+                'op:maglaj:jablanica__op:maglaj:kosova_2',
+            ],
+            ['op:maglaj:jablanica'],
+            ['op:maglaj:maglaj_2', 'op:maglaj:misurici_2', 'op:maglaj:kosova_2'],
+        );
+        const sector = makeSector('sector:test:0', 'test_corps', [subSeg], ['brig1'], ['res1']);
+        const edgeMeta = new Map([
+            ['op:maglaj:jablanica__op:maglaj:maglaj_2', { a: 'op:maglaj:jablanica', b: 'op:maglaj:maglaj_2', side_a: 'RS', side_b: 'RBiH' }],
+            ['op:maglaj:jablanica__op:maglaj:misurici_2', { a: 'op:maglaj:jablanica', b: 'op:maglaj:misurici_2', side_a: 'RS', side_b: 'RBiH' }],
+            ['op:maglaj:jablanica__op:maglaj:kosova_2', { a: 'op:maglaj:jablanica', b: 'op:maglaj:kosova_2', side_a: 'RS', side_b: 'RBiH' }],
+        ]);
+
+        const result = splitNonContiguousSectors(
+            [sector],
+            adj,
+            'RS',
+            edgeMeta,
+            adj,
+            undefined,
+            adj,
+        );
+
+        expect(result).toHaveLength(2);
+        expect(result.map((entry) => entry.edge_ids.slice().sort())).toEqual([
+            ['op:maglaj:jablanica__op:maglaj:kosova_2'],
+            [
+                'op:maglaj:jablanica__op:maglaj:maglaj_2',
+                'op:maglaj:jablanica__op:maglaj:misurici_2',
+            ],
+        ]);
+        expect(result.flatMap((entry) => entry.assigned_brigade_ids)).toEqual(['brig1']);
+        expect(result.flatMap((entry) => entry.reserve_brigade_ids)).toEqual(['res1']);
+    });
+
     it('splits edges with no shared OSIDs even if territory is connected (osidA__osidB format)', () => {
         const adj = buildLinearAdjacency();
         // Group 1: op:a:a facing op:x:x

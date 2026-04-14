@@ -94,6 +94,8 @@ export interface PoliticalAssessment {
     patron_pressure: number;
     /** [0, 100] war exhaustion level. */
     exhaustion_level: number;
+    /** Monotonic negotiation pressure accumulator (unbounded, typically 0-4000+ at w40). */
+    negotiation_pressure: number;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -117,6 +119,9 @@ export interface PoliticalAssessment {
  * is included as a forward-compatibility key. It will be treated as weight 0
  * by computePoliticalAssessment until it appears in the dimension store.
  */
+// NOTE: The dimension_weights below are intentionally different from DIMENSION_WEIGHTS
+// in strategic_dimensions.ts — they weight personality scoring factors for bot political
+// decision-making, not Dayton negotiating capital composite scores.
 export const POLITICAL_PERSONALITIES: Record<FactionId, PoliticalPersonality> = {
     RS: {
         faction: 'RS',
@@ -296,9 +301,12 @@ export function computePoliticalAssessment(
     const patron_pressure = clamp(rawOverrideAuthority, 0, 100);
 
     // ── Exhaustion ──────────────────────────────────────────────────────────
-    // war_exhaustion lives on PoliticalState (state.political.war_exhaustion).
+    // war_exhaustion is unbounded monotonic (Engine Invariants §8), typically 0-600+
+    // at 40w. Normalize to 0-100 scale for situation_score: divide by 6 so that
+    // exhaustion 600 maps to 100. Previous 0-100 clamp made ALL factions read 100
+    // after ~w5, contributing zero differential to political decisions.
     const exhaustion_level = clamp(
-        state.political?.war_exhaustion?.[faction] ?? 0,
+        (state.political?.war_exhaustion?.[faction] ?? 0) / 6,
         0,
         100,
     );
@@ -376,5 +384,6 @@ export function computePoliticalAssessment(
         military_strength,
         patron_pressure,
         exhaustion_level,
+        negotiation_pressure: (state.factions ?? []).find(f => f.id === faction)?.negotiation?.pressure ?? 0,
     };
 }

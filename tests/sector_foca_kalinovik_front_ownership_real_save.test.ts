@@ -27,14 +27,25 @@ function loadEdges(): ContactGraphEdge[] {
 }
 
 describe('Herzegovina Foca/Kalinovik front ownership from real save', () => {
+  function getRsFriendlyEndpoint(edge: { a: string; b: string; side_a: string | null; side_b: string | null }): string | null {
+    if (edge.side_a === 'RS') return edge.a;
+    if (edge.side_b === 'RS') return edge.b;
+    return null;
+  }
+
   function getHerzegovinaRimWarEdgeIds(state: GameState): string[] {
     return (state.military.war_front_edges_osid ?? [])
+      .filter((edge) => {
+        const rsFriendlyEndpoint = getRsFriendlyEndpoint(edge);
+        if (!rsFriendlyEndpoint) return false;
+        return rsFriendlyEndpoint.includes('op:foca:')
+          || rsFriendlyEndpoint.includes('op:kalinovik:')
+          || rsFriendlyEndpoint.includes('op:gacko:')
+          || rsFriendlyEndpoint.includes('op:nevesinje:');
+      })
       .map((edge) => edge.edge_id)
       .filter((edgeId): edgeId is string =>
-        edgeId.includes('op:foca:')
-        || edgeId.includes('op:kalinovik:')
-        || edgeId.includes('op:gacko:')
-        || edgeId.includes('op:nevesinje:'),
+        edgeId != null,
       );
   }
 

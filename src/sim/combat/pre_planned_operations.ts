@@ -11,6 +11,7 @@
  */
 
 import type {
+    CorpsCommandState,
     CorpsOperation,
     FactionId,
     FormationId,
@@ -76,6 +77,8 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         faction: 'RS',
         name: 'Operation Koridor',
         staging_osid: 'op:bijeljina:dvorovi_2',
+        min_attack_outcome: 'repulsed',
+        planning_duration: 3,
         axes: [
             {
                 axis_id: 'brcko_corridor',
@@ -658,6 +661,29 @@ function hasInjectableBrigadeRoster(state: GameState): boolean {
 
 // Use shared isEligibleOperationFormation from formation_constants
 
+function activeOperationObjectiveOsids(cmd: CorpsCommandState | undefined): Set<Osid> {
+    const objectives = new Set<Osid>();
+    for (const op of cmd?.active_operations ?? []) {
+        const opObjectives = op.axes?.flatMap(axis => axis.objectives ?? []) ?? op.objectives ?? [];
+        for (const osid of opObjectives) objectives.add(osid as Osid);
+    }
+    return objectives;
+}
+
+function omitObjectivesClaimedByActiveOperations(def: PrePlannedOp, cmd: CorpsCommandState | undefined): PrePlannedOp {
+    const claimedObjectives = activeOperationObjectiveOsids(cmd);
+    if (claimedObjectives.size === 0) return def;
+
+    const axes = def.axes
+        .map((axis) => ({
+            ...axis,
+            objectives: axis.objectives.filter((osid) => !claimedObjectives.has(osid as Osid)),
+        }))
+        .filter((axis) => axis.objectives.length > 0);
+
+    return { ...def, axes };
+}
+
 /**
  * Build axes and operation from a PrePlannedOp definition.
  * Shared by both initial injection and queued operation injection.
@@ -896,12 +922,15 @@ export function injectQueuedOperation(state: GameState, corpsId: string, adjacen
     // Check available_from gating
     if (def.available_from != null && turn < def.available_from) return false;
 
+    const effectiveDef = omitObjectivesClaimedByActiveOperations(def, cmd);
+    if (effectiveDef.axes.length === 0) return false;
+
     // Skip if all objectives already achieved (faction-controlled) — op is moot.
     // Without this, the queue entry blocks sector offensives forever.
-    const allObjectives = def.axes.flatMap(a => a.objectives);
+    const allObjectives = effectiveDef.axes.flatMap(a => a.objectives);
     const allAchieved = allObjectives.length > 0 && allObjectives.every(osid => {
         const controller = getPoliticalControllerOSID(state, osid, undefined);
-        return controller === def.faction;
+        return controller === effectiveDef.faction;
     });
     if (allAchieved) {
         cmd.queued_operations.shift();
@@ -910,16 +939,16 @@ export function injectQueuedOperation(state: GameState, corpsId: string, adjacen
     }
 
     // Validate before building
-    const queueWarnings = validateOpAtInjection(def, state, undefined, cmd);
+    const queueWarnings = validateOpAtInjection(effectiveDef, state, undefined, cmd);
     collectOpInjectionWarnings(state, queueWarnings);
     if (hasBlockingOpInjectionWarnings(queueWarnings)) return false;
 
     // Build axes — brigades may not exist yet; keep queue entry for retry
-    const result = buildAxesFromDef(def, state, adjacency);
+    const result = buildAxesFromDef(effectiveDef, state, adjacency);
     if (!result) return false;
     if (result.participating.length < MIN_OPERATION_PARTICIPANTS) return false;
 
-    deployPrePlannedEliteLoans(state, result.eliteLoans, def, turn, adjacency);
+    deployPrePlannedEliteLoans(state, result.eliteLoans, effectiveDef, turn, adjacency);
 
     // Success — consume queue entry
     cmd.queued_operations.shift();
@@ -931,9 +960,9 @@ export function injectQueuedOperation(state: GameState, corpsId: string, adjacen
         result.participating,
         state.military.formations ?? {},
     );
-    const op = buildCorpsOperation(def, result.axes, result.participating, turn, true, primarySectorId);
+    const op = buildCorpsOperation(effectiveDef, result.axes, result.participating, turn, true, primarySectorId);
     cmd.active_operations.push(op);
-    assignOperationCommander(state, op, corpsId, def.faction);
+    assignOperationCommander(state, op, corpsId, effectiveDef.faction);
     cmd.stance = 'offensive';
     return true;
 }

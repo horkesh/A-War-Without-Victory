@@ -79,6 +79,22 @@ function classifyClaim(
     return buildOneHopBehind(sector, adjacency, controllers).has(locationOsid) ? 'reserve' : null;
 }
 
+function incidentHostileEndpointsForFrontOsid(
+    sector: CorpsFrontSector,
+    frontOsid: string,
+    edgeMeta: Map<string, EdgeMeta>,
+): Set<string> {
+    const hostile = new Set<string>();
+    for (const edgeId of sector.edge_ids ?? []) {
+        const edge = edgeMeta.get(edgeId);
+        if (!edge) continue;
+        const friendly = getFriendlyEndpoint(edge, sector.faction);
+        if (friendly !== frontOsid) continue;
+        hostile.add(friendly === edge.a ? edge.b : edge.a);
+    }
+    return hostile;
+}
+
 export function auditSectorTruth(
     state: GameState,
     sectors: CorpsFrontSector[],
@@ -168,12 +184,36 @@ export function auditSectorTruth(
     for (const [corpsId, frontOwners] of [...byCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
         for (const [osid, owners] of [...frontOwners.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
             if (owners.length <= 1) continue;
-            result.counts.same_corps_front_overlaps++;
-            result.issues.same_corps_front_overlaps.push({
-                sector_id: owners.sort(strictCompare)[0]!,
-                osid,
-                details: `${corpsId}: ${owners.sort(strictCompare).join(', ')}`,
-            });
+
+            const ownerSectors = owners
+                .map((sectorId) => sectors.find((sector) => sector.sector_id === sectorId))
+                .filter((sector): sector is CorpsFrontSector => sector != null);
+            const hostileBySector = new Map<string, Set<string>>();
+            for (const sector of ownerSectors) {
+                const hostileEndpoints = incidentHostileEndpointsForFrontOsid(sector, osid, edgeMeta);
+                hostileBySector.set(sector.sector_id, hostileEndpoints);
+            }
+            const hostileToSectors = new Map<string, Set<string>>();
+
+            for (const sector of ownerSectors) {
+                const hostileEndpoints = hostileBySector.get(sector.sector_id) ?? new Set<string>();
+                for (const hostileOsid of hostileEndpoints) {
+                    const bucket = hostileToSectors.get(hostileOsid) ?? new Set<string>();
+                    bucket.add(sector.sector_id);
+                    hostileToSectors.set(hostileOsid, bucket);
+                }
+            }
+
+            for (const ownersAtHostileSeam of hostileToSectors.values()) {
+                if (ownersAtHostileSeam.size <= 1) continue;
+                const sortedOwners = [...ownersAtHostileSeam].sort(strictCompare);
+                result.counts.same_corps_front_overlaps++;
+                result.issues.same_corps_front_overlaps.push({
+                    sector_id: sortedOwners[0]!,
+                    osid,
+                    details: `${corpsId}: ${sortedOwners.join(', ')}`,
+                });
+            }
         }
     }
 

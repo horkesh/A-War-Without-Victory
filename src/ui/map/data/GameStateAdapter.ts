@@ -44,10 +44,12 @@ import {
     getPlayerSafeOfficerName,
 } from '../utils/playerSafeText.js';
 import { classifyArmyReserveSeverity } from '../utils/armyReserveSeverity.js';
+import { deriveWarFrontVisibleEnemyOsids } from '../utils/deriveWarFrontVisibleEnemyOsids.js';
 import { buildControlLookup, buildStatusLookup } from './ControlLookup.js';
 import { getMunicipalitySupportLabel } from '../../../sim/combat/municipality_support.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { computeFullVerdict } from '../../../sim/negotiation/scoring.js';
+import { DIMENSION_WEIGHTS } from '../../../sim/events/strategic_dimensions.js';
 import type { GameVerdict } from '../../../state/negotiation_types.js';
 import { computeCorpsCommandStrain, getCommandStrainLabel, projectStrainDecay, deriveRecoveryForecast, deriveCorpsSituationAssessment, deriveReadinessTrend } from './command_strain.js';
 import type { GameState } from '../../../state/game_state.js';
@@ -1307,52 +1309,58 @@ export function parseGameState(json: unknown): LoadedGameState {
     const sectorIntelRecords: LoadedGameState['sectorIntel'] = [];
     const rawSectorIntel = state.military.sector_intel as Record<string, Array<Record<string, unknown>>> | undefined;
     const rawCorpsFrontSectors = state.military.corps_front_sectors as Record<string, Record<string, unknown>> | undefined;
-    if (playerFaction && rawSectorIntel && rawCorpsFrontSectors) {
+    if (playerFaction) {
         const visibleEnemySectorIds = new Set<string>();
         const visibleEnemyOsids = new Set<string>();
-        for (const [friendlySectorId, records] of Object.entries(rawSectorIntel).sort((a, b) => a[0].localeCompare(b[0]))) {
-            const friendlySector = rawCorpsFrontSectors[friendlySectorId];
-            if (!friendlySector || friendlySector.faction !== playerFaction || !Array.isArray(records)) continue;
-            for (const rec of records) {
-                const enemySectorId = typeof rec.enemy_sector_id === 'string' ? rec.enemy_sector_id : '';
-                if (!enemySectorId) continue;
+        if (rawSectorIntel && rawCorpsFrontSectors) {
+            for (const [friendlySectorId, records] of Object.entries(rawSectorIntel).sort((a, b) => a[0].localeCompare(b[0]))) {
+                const friendlySector = rawCorpsFrontSectors[friendlySectorId];
+                if (!friendlySector || friendlySector.faction !== playerFaction || !Array.isArray(records)) continue;
+                for (const rec of records) {
+                    const enemySectorId = typeof rec.enemy_sector_id === 'string' ? rec.enemy_sector_id : '';
+                    if (!enemySectorId) continue;
 
-                // Fog-of-war: accumulate visible enemy OSIDs and sector IDs
-                visibleEnemySectorIds.add(enemySectorId);
-                const enemySector = rawCorpsFrontSectors[enemySectorId];
-                const subSegments = Array.isArray(enemySector?.sub_segments)
-                    ? enemySector.sub_segments as Array<Record<string, unknown>>
-                    : [];
-                for (const sub of subSegments) {
-                    const friendlyOsids = Array.isArray(sub.friendly_osids) ? sub.friendly_osids : [];
-                    for (const osid of friendlyOsids) {
-                        if (typeof osid === 'string' && osid.length > 0) visibleEnemyOsids.add(osid);
+                    // Fog-of-war: accumulate visible enemy OSIDs and sector IDs
+                    visibleEnemySectorIds.add(enemySectorId);
+                    const enemySector = rawCorpsFrontSectors[enemySectorId];
+                    const subSegments = Array.isArray(enemySector?.sub_segments)
+                        ? enemySector.sub_segments as Array<Record<string, unknown>>
+                        : [];
+                    for (const sub of subSegments) {
+                        const friendlyOsids = Array.isArray(sub.friendly_osids) ? sub.friendly_osids : [];
+                        for (const osid of friendlyOsids) {
+                            if (typeof osid === 'string' && osid.length > 0) visibleEnemyOsids.add(osid);
+                        }
                     }
-                }
-                const visibleBrigadeIds = Array.isArray(rec.visible_brigade_ids) ? rec.visible_brigade_ids : [];
-                for (const brigadeId of visibleBrigadeIds) {
-                    if (typeof brigadeId !== 'string' || brigadeId.length === 0) continue;
-                    const brigade = formationsRecord[brigadeId];
-                    const locationOsid = typeof brigade?.location_osid === 'string' ? brigade.location_osid : '';
-                    if (locationOsid) visibleEnemyOsids.add(locationOsid);
-                }
+                    const visibleBrigadeIds = Array.isArray(rec.visible_brigade_ids) ? rec.visible_brigade_ids : [];
+                    for (const brigadeId of visibleBrigadeIds) {
+                        if (typeof brigadeId !== 'string' || brigadeId.length === 0) continue;
+                        const brigade = formationsRecord[brigadeId];
+                        const locationOsid = typeof brigade?.location_osid === 'string' ? brigade.location_osid : '';
+                        if (locationOsid) visibleEnemyOsids.add(locationOsid);
+                    }
 
-                // Sector intel: full record for Threat Assessment panel
-                sectorIntelRecords.push({
-                    friendly_sector_id: friendlySectorId,
-                    enemy_sector_id: enemySectorId,
-                    front_edge_count: typeof rec.front_edge_count === 'number' ? rec.front_edge_count : 0,
-                    strength_category: (['unknown', 'thin', 'moderate', 'dense', 'fortress'].includes(rec.strength_category as string)
-                        ? rec.strength_category as 'unknown' | 'thin' | 'moderate' | 'dense' | 'fortress' : 'unknown'),
-                    posture_observed: (['unknown', 'defensive', 'entrenched', 'offensive_prep'].includes(rec.posture_observed as string)
-                        ? rec.posture_observed as 'unknown' | 'defensive' | 'entrenched' | 'offensive_prep' : 'unknown'),
-                    offensive_signs: Boolean(rec.offensive_signs),
-                    confidence: typeof rec.confidence === 'number' ? rec.confidence : 0,
-                    turns_in_contact: typeof rec.turns_in_contact === 'number' ? rec.turns_in_contact : 0,
-                    visible_brigade_ids: visibleBrigadeIds.filter((id: unknown): id is string => typeof id === 'string').sort(strictCompare),
-                });
+                    // Sector intel: full record for Threat Assessment panel
+                    sectorIntelRecords.push({
+                        friendly_sector_id: friendlySectorId,
+                        enemy_sector_id: enemySectorId,
+                        front_edge_count: typeof rec.front_edge_count === 'number' ? rec.front_edge_count : 0,
+                        strength_category: (['unknown', 'thin', 'moderate', 'dense', 'fortress'].includes(rec.strength_category as string)
+                            ? rec.strength_category as 'unknown' | 'thin' | 'moderate' | 'dense' | 'fortress' : 'unknown'),
+                        posture_observed: (['unknown', 'defensive', 'entrenched', 'offensive_prep'].includes(rec.posture_observed as string)
+                            ? rec.posture_observed as 'unknown' | 'defensive' | 'entrenched' | 'offensive_prep' : 'unknown'),
+                        offensive_signs: Boolean(rec.offensive_signs),
+                        confidence: typeof rec.confidence === 'number' ? rec.confidence : 0,
+                        turns_in_contact: typeof rec.turns_in_contact === 'number' ? rec.turns_in_contact : 0,
+                        visible_brigade_ids: visibleBrigadeIds.filter((id: unknown): id is string => typeof id === 'string').sort(strictCompare),
+                    });
+                }
             }
         }
+        const rawFrontEdges = Array.isArray(state.military.war_front_edges_osid)
+            ? state.military.war_front_edges_osid as Array<Record<string, unknown>>
+            : [];
+        for (const osid of deriveWarFrontVisibleEnemyOsids(playerFaction, rawFrontEdges)) visibleEnemyOsids.add(osid);
         if (visibleEnemySectorIds.size > 0 || visibleEnemyOsids.size > 0) {
             fogOfWar = {
                 visibleEnemyOsids: Array.from(visibleEnemyOsids).sort(strictCompare),
@@ -1509,6 +1517,7 @@ export function parseGameState(json: unknown): LoadedGameState {
             const subSegments = Array.isArray(s.sub_segments) ? s.sub_segments as Array<Record<string, unknown>> : [];
             const assignedBrigadeIds = Array.isArray(s.assigned_brigade_ids) ? (s.assigned_brigade_ids as string[]).filter(id => typeof id === 'string').sort((a, b) => a.localeCompare(b)) : [];
             const reserveBrigadeIds = Array.isArray(s.reserve_brigade_ids) ? (s.reserve_brigade_ids as string[]).filter(id => typeof id === 'string').sort((a, b) => a.localeCompare(b)) : [];
+            const rearBrigadeIds = Array.isArray(s.rear_brigade_ids) ? (s.rear_brigade_ids as string[]).filter(id => typeof id === 'string').sort((a, b) => a.localeCompare(b)) : [];
 
             // Derive display_name from municipality slugs in friendly_osids
             const munCounts = new Map<string, number>();
@@ -1543,6 +1552,7 @@ export function parseGameState(json: unknown): LoadedGameState {
                 length_edges: typeof s.length_edges === 'number' ? s.length_edges : edgeIds.length,
                 assigned_brigade_ids: assignedBrigadeIds,
                 reserve_brigade_ids: reserveBrigadeIds,
+                rear_brigade_ids: rearBrigadeIds,
                 density: typeof s.density === 'number' ? s.density : 0,
                 threat_ratio: typeof s.threat_ratio === 'number' ? s.threat_ratio : 0,
                 defensive_power: typeof s.defensive_power === 'number' ? s.defensive_power : 0,
@@ -1747,7 +1757,6 @@ export function parseGameState(json: unknown): LoadedGameState {
         presidentialReviewQueue,
         pendingPeacePlan: derivePendingPeacePlan(state),
         pendingDayton: derivePendingDayton(state),
-        negotiationCapital: deriveNegotiationCapital(state),
         strategicDimensions: deriveStrategicDimensions(state),
         negotiatingCapital: deriveNegotiatingCapital(state),
         eventFlags: state.military?.event_flags ?? undefined,
@@ -2376,27 +2385,6 @@ function deriveArmyReserveQueue({
     };
 }
 
-function deriveNegotiationCapital(state: any): LoadedGameState['negotiationCapital'] {
-    // TODO: Migrate UI to read from strategicDimensions instead of legacy negotiationCapital.
-    // For now, derive placeholder values from strategic_dimensions if available, else zeros.
-    const neg = state.military?.negotiation;
-    const dimStore = neg?.strategic_dimensions;
-    if (!neg?.capital || typeof neg.capital !== 'object') return undefined;
-    const out: Record<string, { military_position: number; humanitarian_standing: number; international_credibility: number; military_effectiveness: number; political_cohesion: number; composite: number }> = {};
-    for (const [faction] of Object.entries(neg.capital).sort((a: [string, unknown], b: [string, unknown]) => a[0].localeCompare(b[0]))) {
-        const dims = dimStore?.[faction];
-        out[faction] = {
-            military_position: Number(dims?.military_credibility?.effective_value ?? 0),
-            humanitarian_standing: Number(dims?.international_standing?.effective_value ?? 0),
-            international_credibility: Number(dims?.international_standing?.effective_value ?? 0),
-            military_effectiveness: Number(dims?.military_credibility?.effective_value ?? 0),
-            political_cohesion: Number(dims?.internal_cohesion?.effective_value ?? 0),
-            composite: 50, // TODO: compute from DIMENSION_WEIGHTS
-        };
-    }
-    return Object.keys(out).length > 0 ? out : undefined;
-}
-
 function deriveStrategicDimensions(state: any): LoadedGameState['strategicDimensions'] {
     const dims = state.military?.negotiation?.strategic_dimensions;
     if (!dims || typeof dims !== 'object') return undefined;
@@ -2421,11 +2409,7 @@ function deriveStrategicDimensions(state: any): LoadedGameState['strategicDimens
 function deriveNegotiatingCapital(state: any): LoadedGameState['negotiatingCapital'] {
     const dims = state.military?.negotiation?.strategic_dimensions;
     if (!dims || typeof dims !== 'object') return undefined;
-    const WEIGHTS: Record<string, Record<string, number>> = {
-        RS:   { military_credibility: 0.25, territorial_legitimacy: 0.25, international_standing: 0.10, patron_confidence: 0.15, internal_cohesion: 0.10, negotiating_leverage: 0.15 },
-        RBiH: { military_credibility: 0.15, territorial_legitimacy: 0.15, international_standing: 0.25, patron_confidence: 0.15, internal_cohesion: 0.15, negotiating_leverage: 0.15 },
-        HRHB: { military_credibility: 0.15, territorial_legitimacy: 0.20, international_standing: 0.15, patron_confidence: 0.25, internal_cohesion: 0.15, negotiating_leverage: 0.10 },
-    };
+    const WEIGHTS = DIMENSION_WEIGHTS;
     const out: Record<string, number> = {};
     for (const [faction, factionDims] of Object.entries(dims).sort((a, b) => a[0].localeCompare(b[0]))) {
         const w = WEIGHTS[faction];

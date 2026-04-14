@@ -90,11 +90,15 @@ function hasCanonicalDefense(
 // ── Check #21: morale_collapse_cluster ─────────────────────────────────
 
 const CRITICAL_MORALE_THRESHOLD = 15;
+const COLLAPSE_COHESION_THRESHOLD = 40;
+const COLLAPSE_PERSONNEL_THRESHOLD = 500;
 const MORALE_CLUSTER_MIN = 3;
 
 /**
  * 21. morale_collapse_cluster (warning, combat)
- * 3+ brigades in the same corps with morale below critical threshold (15).
+ * 3+ brigades in the same corps with morale below critical threshold (15)
+ * and actual cohesion/personnel collapse. Low morale alone is fragility, not
+ * a collapse cluster.
  */
 export function checkMoraleCollapseCluster(state: GameState): AnomalyReport[] {
     const reports: AnomalyReport[] = [];
@@ -110,7 +114,10 @@ export function checkMoraleCollapseCluster(state: GameState): AnomalyReport[] {
         const cid = f.corps_id;
         if (!cid) continue;
         const morale = f.morale ?? 100;
-        if (morale < CRITICAL_MORALE_THRESHOLD) {
+        const collapsed =
+            (f.cohesion ?? 100) < COLLAPSE_COHESION_THRESHOLD
+            || (f.personnel ?? Number.POSITIVE_INFINITY) < COLLAPSE_PERSONNEL_THRESHOLD;
+        if (morale < CRITICAL_MORALE_THRESHOLD && collapsed) {
             if (!corpsBrigades[cid]) corpsBrigades[cid] = [];
             corpsBrigades[cid].push({ id: fid, morale });
         }
@@ -622,6 +629,14 @@ export function checkAdjacentUncontestedTerritory(state: GameState): AnomalyRepo
     const reports: AnomalyReport[] = [];
     const politicalControllers = state.political.political_controllers ?? {};
     const grazActive = isGrazAccordsActive(state);
+    const activeWarEdges = new Map<string, { side_a: string | null; side_b: string | null }>();
+    for (const edge of state.military.war_front_edges_osid ?? []) {
+        if (!edge?.a || !edge?.b) continue;
+        activeWarEdges.set(canonicalEdgeKey(edge.a, edge.b), {
+            side_a: edge.side_a ?? null,
+            side_b: edge.side_b ?? null,
+        });
+    }
 
     // Load OSID adjacency graph
     const graphPath = resolve(process.cwd(), 'data/derived/operational/operational_contact_graph.json');
@@ -676,6 +691,13 @@ export function checkAdjacentUncontestedTerritory(state: GameState): AnomalyRepo
                     if (pair[0] === 'HRHB' && pair[1] === 'RS') continue;
                 }
 
+                const canonicalWarEdge = activeWarEdges.get(canonicalEdgeKey(osid, adj));
+                if (!canonicalWarEdge) continue;
+                const edgeHostsControllerVsAdjacent =
+                    (canonicalWarEdge.side_a === controller && canonicalWarEdge.side_b === adjFaction)
+                    || (canonicalWarEdge.side_b === controller && canonicalWarEdge.side_a === adjFaction);
+                if (!edgeHostsControllerVsAdjacent) continue;
+
                 uncontested.push({
                     osid,
                     controller,
@@ -704,4 +726,8 @@ export function checkAdjacentUncontestedTerritory(state: GameState): AnomalyRepo
     }
 
     return reports;
+}
+
+function canonicalEdgeKey(a: string, b: string): string {
+    return strictCompare(a, b) <= 0 ? `${a}__${b}` : `${b}__${a}`;
 }

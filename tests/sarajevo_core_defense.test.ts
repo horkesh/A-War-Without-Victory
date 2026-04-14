@@ -15,6 +15,7 @@
  *   3. Defender physically present at enclave OSID → hasDefender blocks before enclave guard
  *   4. Multi-OSID cluster where one member is an enclave OSID → whole cluster protected
  *   5. Srebrenica enclave OSID surrounded by RS → flip suppressed (generality)
+ *   6. Broad prefix-only Bihać pocket teeth are not protected from cleanup
  */
 
 import { describe, it, expect } from 'vitest';
@@ -165,6 +166,31 @@ const RS_DRINA_BULK = [
     'op:zvornik:zvornik_rs_e',
 ];
 
+const BIHAC_TOOTH = 'op:bihac:orasac_2';
+const KRUPA_TOOTH = 'op:bosanska_krupa:arapusa_2';
+const RS_BIHAC_RING = [
+    'op:bihac:racic',
+    'op:bihac:trubar',
+];
+const RS_BIHAC_BULK = [
+    'op:bihac:bulk_a',
+    'op:bihac:bulk_b',
+    'op:bihac:bulk_c',
+    'op:bihac:bulk_d',
+    'op:bihac:bulk_e',
+];
+const RS_KRUPA_RING = [
+    'op:bosanska_krupa:donji_dubovik_2',
+    'op:bosanska_krupa:jasenica_2',
+];
+const RS_KRUPA_BULK = [
+    'op:bosanska_krupa:bulk_a',
+    'op:bosanska_krupa:bulk_b',
+    'op:bosanska_krupa:bulk_c',
+    'op:bosanska_krupa:bulk_d',
+    'op:bosanska_krupa:bulk_e',
+];
+
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('consolidateRearPockets — enclave guard', () => {
@@ -273,6 +299,30 @@ describe('consolidateRearPockets — enclave guard', () => {
 
         expect(report.total_flipped).toBe(0);
         expect(state.political.political_controllers![SREBRENICA_OSID]).toBe(RBIH);
+    });
+
+    it('Test 6: broad prefix-only Bihać pocket teeth do not block surrounded-pocket cleanup', () => {
+        const pc: Record<string, FactionId> = {
+            [BIHAC_TOOTH]: RBIH,
+            [KRUPA_TOOTH]: RBIH,
+        };
+        for (const n of RS_BIHAC_RING) pc[n] = RS;
+        for (const n of RS_BIHAC_BULK) pc[n] = RS;
+        for (const n of RS_KRUPA_RING) pc[n] = RS;
+        for (const n of RS_KRUPA_BULK) pc[n] = RS;
+
+        const state = makeState({ pc });
+        const edges: EdgeRecord[] = [
+            ...makeSurroundedEdges(BIHAC_TOOTH, RS_BIHAC_RING, RS_BIHAC_BULK),
+            ...makeSurroundedEdges(KRUPA_TOOTH, RS_KRUPA_RING, RS_KRUPA_BULK),
+        ];
+        const reverseMap = new Map();
+
+        const report = consolidateRearPockets(state, edges, reverseMap);
+
+        expect(report.total_flipped).toBe(2);
+        expect(state.political.political_controllers![BIHAC_TOOTH]).toBe(RS);
+        expect(state.political.political_controllers![KRUPA_TOOTH]).toBe(RS);
     });
 
 });

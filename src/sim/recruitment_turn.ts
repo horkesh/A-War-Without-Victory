@@ -1,5 +1,6 @@
 import type { SettlementRecord } from '../map/settlements.js';
 import type { OobBrigade, OobCorps } from '../scenario/oob_loader.js';
+import type { CanonicalToOperationalMap } from '../data/operational_data_types.js';
 import { getEffectiveHeavyEquipmentAccess } from '../state/embargo.js';
 import { MIN_MANDATORY_SPAWN } from '../state/formation_constants.js';
 import type { FactionId, GameState, MunicipalityId, SettlementId } from '../state/game_state.js';
@@ -226,7 +227,8 @@ export function runOngoingRecruitment(
     oobCorps: OobCorps[],
     oobBrigades: OobBrigade[],
     sidToMun: Map<SettlementId, MunicipalityId>,
-    municipalityHqSettlement: Record<string, string>
+    municipalityHqSettlement: Record<string, string>,
+    canonicalToOperational?: CanonicalToOperationalMap,
 ): SetupPhaseRecruitmentReport | null {
     const resources = state.military.recruitment_state;
     if (!resources) return null;
@@ -236,7 +238,8 @@ export function runOngoingRecruitment(
         includeCorps: false,
         includeMandatory: true,
         maxMandatoryPerFaction: maxRecruitsPerFaction,
-        maxElectivePerFaction: maxRecruitsPerFaction
+        maxElectivePerFaction: maxRecruitsPerFaction,
+        canonicalToOperational,
     });
 }
 
@@ -252,7 +255,8 @@ function applyRsMandatoryMobilizationAccrual(state: GameState, oobBrigades: OobB
                 brigade.faction === 'RS' &&
                 brigade.mandatory &&
                 brigade.available_from <= state.meta.turn &&
-                !recruited.has(brigade.id)
+                !recruited.has(brigade.id) &&
+                !state.military.formations?.[brigade.id]
         )
         .sort((a, b) => a.priority - b.priority || strictCompare(a.id, b.id));
 

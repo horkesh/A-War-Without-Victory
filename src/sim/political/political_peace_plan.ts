@@ -121,12 +121,19 @@ export function computePoliticalPeacePlanResponse(
 
     // RS territory floor: per-plan gap threshold → hard reject.
     // Uses per-plan floor from RS_PLAN_FLOOR_GAPS; defaults to RS_FLOOR_GAP_DEFAULT (18pp).
+    // High negotiation pressure erodes the floor — accumulated war suffering makes factions
+    // willing to accept deals they would have rejected earlier. At pressure ~4000 (typical w40),
+    // the floor drops by up to 15 points. This is the core negative-sum mechanic: fighting
+    // longer doesn't win, it just makes the eventual deal worse.
     if (faction === 'RS') {
         const proposedPct = plan.proposed_split['RS'] ?? 0;
         const territoryGap = currentTerritoryPct - proposedPct;
-        const planFloor = RS_PLAN_FLOOR_GAPS[plan.id] ?? RS_FLOOR_GAP_DEFAULT;
+        const basePlanFloor = RS_PLAN_FLOOR_GAPS[plan.id] ?? RS_FLOOR_GAP_DEFAULT;
+        const factionPressure = assessment.negotiation_pressure ?? 0;
+        const pressureFloorReduction = Math.min(15, factionPressure / 267);
+        const planFloor = Math.max(0, basePlanFloor - pressureFloorReduction);
         if (territoryGap > planFloor) {
-            return 'rejected'; // RS territory floor — canonical constraint
+            return 'rejected'; // RS territory floor — canonical constraint (pressure-adjusted)
         }
     }
 

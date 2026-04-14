@@ -1,15 +1,15 @@
 /**
  * Build a GeoJSON source for sector demarcation lines.
  *
- * Finds OSID polygon edges that lie between two front-adjacent OSIDs belonging
- * to DIFFERENT sectors of the SAME faction. These are the lateral boundaries
+ * Finds polygon edges that lie between two front-adjacent OSIDs belonging
+ * to different sectors of the same faction. These are the lateral boundaries
  * where one corps sector meets another along the friendly line.
  *
  * Output properties: { faction, sector_a, sector_b }
  */
 import type { FeatureCollection, Feature, Polygon, MultiPolygon, LineString } from 'geojson';
 import type { CorpsFrontSectorView } from '../../data/types';
-import { collectSectorFriendlyOsids } from '../../utils/sectorUtils';
+import { buildDisplayOsidAdjacency, buildDisplayOsidSectorOwnership } from './displayFrontEdgeOwnership.js';
 
 interface OsidProperties {
   osid: string;
@@ -19,6 +19,7 @@ interface OsidProperties {
 
 interface DemarcationProperties {
   faction: string;
+  sector_id: string;
   sector_a: string;
   sector_b: string;
 }
@@ -42,37 +43,25 @@ export function buildSectorDemarcationGeoJSON(
     return { type: 'FeatureCollection', features: [] };
   }
 
-  // Build osid → { sector_id, faction } for every front-adjacent OSID
-  const osidToSector = new Map<string, { sector_id: string; faction: string }>();
-  for (const sector of corpsFrontSectors) {
-    const friendlyOsids = collectSectorFriendlyOsids(sector, frontEdgesOsid);
-    for (const osid of friendlyOsids) {
-      if (!osidToSector.has(osid)) {
-        osidToSector.set(osid, { sector_id: sector.sector_id, faction: sector.faction });
-      }
-    }
-  }
-
-  // Build OSID → faction lookup for front-line proximity filtering
+  const features = controlledOsidGeoJson.features as Feature<Polygon | MultiPolygon, OsidProperties>[];
+  const controllerMap = new Map<string, string | null>();
   const osidFaction = new Map<string, string>();
-  for (const sector of corpsFrontSectors) {
-    for (const osid of collectSectorFriendlyOsids(sector, frontEdgesOsid)) {
-      if (!osidFaction.has(osid)) osidFaction.set(osid, sector.faction);
-    }
+
+  for (const feature of features) {
+    const osid = feature.properties.osid;
+    const controller = feature.properties.controller;
+    controllerMap.set(osid, controller);
+    if (controller) osidFaction.set(osid, controller);
   }
-  // Also record enemy-side OSIDs from front edges
   for (const edge of frontEdgesOsid) {
     if (edge.side_a && !osidFaction.has(edge.a)) osidFaction.set(edge.a, edge.side_a);
     if (edge.side_b && !osidFaction.has(edge.b)) osidFaction.set(edge.b, edge.side_b);
   }
 
-  // Build edgeKey → { segment, owning OSIDs }
   const edgeOwners = new Map<string, { segment: number[][]; osids: Set<string> }>();
-  const features = controlledOsidGeoJson.features as Feature<Polygon | MultiPolygon, OsidProperties>[];
-
   for (const feature of features) {
     const osid = feature.properties.osid;
-    if (!osidToSector.has(osid) && !osidFaction.has(osid)) continue;
+    if (!osidFaction.has(osid)) continue;
 
     const rings =
       feature.geometry.type === 'Polygon'
@@ -98,8 +87,7 @@ export function buildSectorDemarcationGeoJSON(
     }
   }
 
-  // Collect front-line vertices: polygon edge vertices shared between opposing-faction OSIDs.
-  // These mark where the actual contact line runs. Demarcation segments far from these are deep-rear.
+  // Collect front-line vertices: polygon edge vertices shared between opposing factions.
   const frontLineVertices = new Set<string>();
   for (const { segment, osids } of edgeOwners.values()) {
     if (osids.size !== 2) continue;
@@ -107,54 +95,59 @@ export function buildSectorDemarcationGeoJSON(
     const fA = osidFaction.get(oA);
     const fB = osidFaction.get(oB);
     if (fA && fB && fA !== fB) {
-      // This polygon edge is on the actual front line
       frontLineVertices.add(coordKey(segment[0]));
       frontLineVertices.add(coordKey(segment[1]));
     }
   }
 
-  // Collect segments per sector pair
+  const displayAdjacency = buildDisplayOsidAdjacency(
+    new Map(
+      [...edgeOwners.entries()].map(([edgeKey, entry]) => [edgeKey, entry.osids]),
+    ),
+  );
+  const displaySectorByOsid = buildDisplayOsidSectorOwnership(
+    corpsFrontSectors,
+    controllerMap,
+    displayAdjacency,
+  );
+
   const segmentsByPair = new Map<string, { segments: number[][][]; faction: string; sector_a: string; sector_b: string }>();
 
   for (const { segment, osids } of edgeOwners.values()) {
     if (osids.size !== 2) continue;
     const [oA, oB] = [...osids];
-    const sA = osidToSector.get(oA);
-    const sB = osidToSector.get(oB);
-    if (!sA || !sB) continue;
-    if (sA.faction !== sB.faction) continue;       // different factions → front line, not demarcation
-    if (sA.sector_id === sB.sector_id) continue;   // same sector → internal edge
-
-    // Only include demarcation segments near the front line (at least one vertex
-    // shared with a front-line polygon edge). Filters deep-rear boundary noise.
-    const nearFront =
-      frontLineVertices.has(coordKey(segment[0])) ||
-      frontLineVertices.has(coordKey(segment[1]));
-    if (!nearFront) continue;
-
-    const pairKey = sA.sector_id < sB.sector_id
-      ? `${sA.sector_id}__${sB.sector_id}`
-      : `${sB.sector_id}__${sA.sector_id}`;
+    const factionA = osidFaction.get(oA);
+    const factionB = osidFaction.get(oB);
+    if (!factionA || factionA !== factionB) continue;
+    const sectorA = displaySectorByOsid.get(oA);
+    const sectorB = displaySectorByOsid.get(oB);
+    if (!sectorA || !sectorB) continue;
+    if (sectorA.sector_id === sectorB.sector_id) continue;
+    const pairKey = sectorA.sector_id < sectorB.sector_id
+      ? `${sectorA.sector_id}__${sectorB.sector_id}`
+      : `${sectorB.sector_id}__${sectorA.sector_id}`;
+    const [sector_a, sector_b] = pairKey.split('__');
     let entry = segmentsByPair.get(pairKey);
     if (!entry) {
-      entry = { segments: [], faction: sA.faction, sector_a: sA.sector_id, sector_b: sB.sector_id };
+      entry = { segments: [], faction: factionA, sector_a, sector_b };
       segmentsByPair.set(pairKey, entry);
     }
     entry.segments.push(segment);
   }
 
-  // Merge segments with endpoint-map, simplify, smooth, and emit features
   const outFeatures: Feature<LineString, DemarcationProperties>[] = [];
   for (const { segments, faction, sector_a, sector_b } of segmentsByPair.values()) {
-    const chains = mergeSegments(segments);
-    const props: DemarcationProperties = { faction, sector_a, sector_b };
+    const connectedNearFront = filterSegmentsConnectedToFront(segments, frontLineVertices);
+    if (connectedNearFront.length === 0) continue;
+    const chains = pickCanonicalDemarcationChains(mergeSegments(connectedNearFront));
+    const props: DemarcationProperties = { faction, sector_id: sector_a, sector_a, sector_b };
     for (const chain of chains) {
       const simplified = simplifyLine(chain, 0.001);
       if (simplified.length < 2) continue;
       const smoothed = chaikinSmooth(simplified, 3);
       outFeatures.push({
         type: 'Feature',
-        properties: props,
+        properties: { ...props, sector_id: sector_a },
         geometry: { type: 'LineString', coordinates: smoothed },
       });
     }
@@ -163,17 +156,82 @@ export function buildSectorDemarcationGeoJSON(
   return { type: 'FeatureCollection', features: outFeatures };
 }
 
-// ─── Endpoint-map segment merger (O(n) average instead of O(n²)) ────────────
+function pickCanonicalDemarcationChains(chains: number[][][]): number[][][] {
+  if (chains.length <= 1) return chains;
+  const scored = chains.map((chain) => ({
+    chain,
+    score: computePolylineLength(chain),
+  }));
+  scored.sort((a, b) => b.score - a.score);
+  return scored[0] ? [scored[0].chain] : [];
+}
 
-/** Merge 2-point segments sharing endpoints into longer LineStrings using an endpoint index. */
+function computePolylineLength(chain: number[][]): number {
+  let total = 0;
+  for (let i = 1; i < chain.length; i++) {
+    const prev = chain[i - 1]!;
+    const curr = chain[i]!;
+    const dx = curr[0] - prev[0];
+    const dy = curr[1] - prev[1];
+    total += Math.hypot(dx, dy);
+  }
+  return total;
+}
+
+function filterSegmentsConnectedToFront(
+  segments: number[][][],
+  frontLineVertices: Set<string>,
+): number[][][] {
+  if (segments.length === 0) return [];
+
+  const segmentEndpointKeys = segments.map((segment) => [
+    coordKey(segment[0]),
+    coordKey(segment[segment.length - 1]),
+  ] as const);
+  const endpointToSegments = new Map<string, number[]>();
+  for (let i = 0; i < segmentEndpointKeys.length; i++) {
+    for (const endpointKey of segmentEndpointKeys[i]!) {
+      const bucket = endpointToSegments.get(endpointKey) ?? [];
+      bucket.push(i);
+      endpointToSegments.set(endpointKey, bucket);
+    }
+  }
+
+  const keep = new Set<number>();
+  const queue: number[] = [];
+  for (let i = 0; i < segmentEndpointKeys.length; i++) {
+    const [a, b] = segmentEndpointKeys[i]!;
+    if (frontLineVertices.has(a) || frontLineVertices.has(b)) {
+      keep.add(i);
+      queue.push(i);
+    }
+  }
+  if (queue.length === 0) return [];
+
+  for (let i = 0; i < queue.length; i++) {
+    const idx = queue[i]!;
+    for (const endpointKey of segmentEndpointKeys[idx]!) {
+      for (const neighborIdx of endpointToSegments.get(endpointKey) ?? []) {
+        if (keep.has(neighborIdx)) continue;
+        keep.add(neighborIdx);
+        queue.push(neighborIdx);
+      }
+    }
+  }
+
+  return [...keep].sort((a, b) => a - b).map((idx) => segments[idx]!);
+}
+
 function mergeSegments(segments: number[][][]): number[][][] {
   if (segments.length === 0) return [];
 
-  // Build endpoint → segment-index lookup
   const endpointMap = new Map<string, number[]>();
   const addToMap = (key: string, idx: number) => {
     let arr = endpointMap.get(key);
-    if (!arr) { arr = []; endpointMap.set(key, arr); }
+    if (!arr) {
+      arr = [];
+      endpointMap.set(key, arr);
+    }
     arr.push(idx);
   };
   for (let i = 0; i < segments.length; i++) {
@@ -190,7 +248,6 @@ function mergeSegments(segments: number[][][]): number[][][] {
     used.add(i);
     let chain = [...segments[i]];
 
-    // Extend tail
     let changed = true;
     while (changed) {
       changed = false;
@@ -215,7 +272,6 @@ function mergeSegments(segments: number[][][]): number[][][] {
       }
     }
 
-    // Extend head
     changed = true;
     while (changed) {
       changed = false;
@@ -245,9 +301,6 @@ function mergeSegments(segments: number[][][]): number[][][] {
   return result;
 }
 
-// ─── Douglas-Peucker line simplification ─────────────────────────────────────
-
-/** Perpendicular distance from point p to line segment a–b (in degrees, good enough for small areas). */
 function perpendicularDistance(p: number[], a: number[], b: number[]): number {
   const dx = b[0] - a[0];
   const dy = b[1] - a[1];
@@ -259,24 +312,14 @@ function perpendicularDistance(p: number[], a: number[], b: number[]): number {
   return Math.sqrt((p[0] - projX) ** 2 + (p[1] - projY) ** 2);
 }
 
-// ─── Chaikin corner-cutting smoothing ─────────────────────────────────────────
-
-/**
- * Chaikin's corner-cutting algorithm. Each pass replaces every vertex (except
- * endpoints) with two new vertices at 25% and 75% along adjacent edges,
- * progressively rounding corners into smooth curves.
- * @param coords Input coordinate array
- * @param iterations Number of smoothing passes (2-3 recommended)
- */
 function chaikinSmooth(coords: number[][], iterations: number): number[][] {
   if (coords.length <= 2) return coords;
   let pts = coords;
   for (let iter = 0; iter < iterations; iter++) {
-    const next: number[][] = [pts[0]]; // preserve first endpoint
+    const next: number[][] = [pts[0]];
     for (let i = 0; i < pts.length - 1; i++) {
       const p0 = pts[i];
       const p1 = pts[i + 1];
-      // Skip subdividing the first and last segment endpoints to anchor the line
       if (i > 0) {
         next.push([
           p0[0] * 0.75 + p1[0] * 0.25,
@@ -290,15 +333,12 @@ function chaikinSmooth(coords: number[][], iterations: number): number[][] {
         ]);
       }
     }
-    next.push(pts[pts.length - 1]); // preserve last endpoint
+    next.push(pts[pts.length - 1]);
     pts = next;
   }
   return pts;
 }
 
-// ─── Douglas-Peucker line simplification ─────────────────────────────────────
-
-/** Douglas-Peucker simplification. Tolerance in degrees (~0.001° ≈ 110m). */
 function simplifyLine(coords: number[][], tolerance: number): number[][] {
   if (coords.length <= 2) return coords;
 

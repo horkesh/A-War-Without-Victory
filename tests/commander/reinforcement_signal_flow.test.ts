@@ -19,6 +19,7 @@ function makeState(): GameState {
                     og_slots: 0,
                     active_ogs: [],
                     corps_exhaustion: 12,
+        faction_war_exhaustion: 0,
                     stance: 'balanced',
                     active_operations: [],
                 },

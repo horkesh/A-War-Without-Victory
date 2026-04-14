@@ -1,6 +1,9 @@
 /**
  * Diplomacy Overview — patron pressure gauges + negotiation capital bars.
  * Rendered as a tab section in WarSummaryModal.
+ *
+ * Consumes canonical strategicDimensions (6 dimensions) + negotiatingCapital (weighted composite).
+ * Legacy negotiationCapital with duplicate field mappings is no longer used here.
  */
 import type { LoadedGameState } from '../data/types';
 import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
@@ -11,12 +14,14 @@ const PATRON_LABELS: Record<string, string> = {
     HRHB: 'Croatia (Zagreb)',
 };
 
+/** Canonical dimension display — matches strategic_dimensions.ts DIMENSION_WEIGHTS keys. */
 const DIMENSION_LABELS: Record<string, { label: string; color: string }> = {
-    military_position: { label: 'Military Position', color: '#4a6a8a' },
-    humanitarian_standing: { label: 'Humanitarian Standing', color: '#c4a35a' },
-    international_credibility: { label: 'Int\'l Credibility', color: '#d4a055' },
-    military_effectiveness: { label: 'Military Effectiveness', color: '#3a6a4a' },
-    political_cohesion: { label: 'Political Cohesion', color: '#7a5a8a' },
+    military_credibility: { label: 'Military Credibility', color: '#4a6a8a' },
+    territorial_legitimacy: { label: 'Territorial Legitimacy', color: '#6a8a4a' },
+    international_standing: { label: 'Int\'l Standing', color: '#c4a35a' },
+    patron_confidence: { label: 'Patron Confidence', color: '#d4a055' },
+    internal_cohesion: { label: 'Internal Cohesion', color: '#7a5a8a' },
+    negotiating_leverage: { label: 'Negotiating Leverage', color: '#3a6a4a' },
 };
 
 function PatronGauge({ faction, authority }: { faction: string; authority: number }) {
@@ -42,8 +47,8 @@ function PatronGauge({ faction, authority }: { faction: string; authority: numbe
     );
 }
 
-function CapitalBar({ dimension, value }: { dimension: string; value: number }) {
-    const dim = DIMENSION_LABELS[dimension];
+function DimensionBar({ dimKey, value }: { dimKey: string; value: number }) {
+    const dim = DIMENSION_LABELS[dimKey];
     if (!dim) return null;
     const pct = Math.min(100, Math.max(0, value));
 
@@ -63,13 +68,17 @@ function CapitalBar({ dimension, value }: { dimension: string; value: number }) 
 }
 
 interface DiplomacyOverviewProps {
-    capital: LoadedGameState['negotiationCapital'];
+    strategicDimensions: LoadedGameState['strategicDimensions'];
+    negotiatingCapital: LoadedGameState['negotiatingCapital'];
     patronOverride: LoadedGameState['patronOverrideAuthority'];
     playerFaction?: string;
 }
 
-export function DiplomacyOverview({ capital, patronOverride, playerFaction }: DiplomacyOverviewProps) {
-    const factions = playerFaction ? [playerFaction] : Object.keys(capital ?? {}).sort();
+export function DiplomacyOverview({ strategicDimensions, negotiatingCapital, patronOverride, playerFaction }: DiplomacyOverviewProps) {
+    const hasDims = strategicDimensions && Object.keys(strategicDimensions).length > 0;
+    const factions = playerFaction
+        ? [playerFaction]
+        : Object.keys(strategicDimensions ?? {}).sort();
 
     return (
         <div className="space-y-5">
@@ -87,29 +96,30 @@ export function DiplomacyOverview({ capital, patronOverride, playerFaction }: Di
                 </div>
             )}
 
-            {/* Negotiation Capital */}
-            {capital && factions.length > 0 && (
+            {/* Strategic Dimensions */}
+            {hasDims && factions.length > 0 && (
                 <div>
                     <div className="text-[9px] uppercase tracking-widest text-[#8a7a60] font-bold mb-2">
                         Negotiation Capital
                     </div>
                     {factions.map(faction => {
-                        const cap = capital[faction];
-                        if (!cap) return null;
+                        const dims = strategicDimensions![faction];
+                        if (!dims) return null;
+                        const composite = negotiatingCapital?.[faction];
                         return (
                             <div key={faction} className="mb-3">
                                 <div className="text-[11px] font-bold text-[#2a2016] mb-1.5">
                                     {getPlayerSafePoliticalFactionName(faction)}
-                                    <span className="ml-2 text-[10px] font-normal text-[#6a5a40]">
-                                        (Composite: {Math.round(cap.composite)})
-                                    </span>
+                                    {composite != null && (
+                                        <span className="ml-2 text-[10px] font-normal text-[#6a5a40]">
+                                            (Composite: {Math.round(composite)})
+                                        </span>
+                                    )}
                                 </div>
                                 <div className="space-y-1">
-                                    <CapitalBar dimension="military_position" value={cap.military_position} />
-                                    <CapitalBar dimension="humanitarian_standing" value={cap.humanitarian_standing} />
-                                    <CapitalBar dimension="international_credibility" value={cap.international_credibility} />
-                                    <CapitalBar dimension="military_effectiveness" value={cap.military_effectiveness} />
-                                    <CapitalBar dimension="political_cohesion" value={cap.political_cohesion} />
+                                    {Object.entries(dims).sort((a, b) => a[0].localeCompare(b[0])).map(([dimKey, dimVal]) => (
+                                        <DimensionBar key={dimKey} dimKey={dimKey} value={dimVal.effective_value} />
+                                    ))}
                                 </div>
                             </div>
                         );
@@ -117,7 +127,7 @@ export function DiplomacyOverview({ capital, patronOverride, playerFaction }: Di
                 </div>
             )}
 
-            {!capital && !patronOverride && (
+            {!hasDims && !patronOverride && (
                 <div className="text-[11px] text-[#8a7a60] italic">
                     Diplomatic intelligence not yet available.
                 </div>

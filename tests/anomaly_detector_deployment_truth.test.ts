@@ -125,6 +125,18 @@ describe('anomaly detector deployment truth', () => {
                         assignment: { kind: 'sector', role: 'front', sector_id: 'sector:arbih_3rd_corps:1' },
                         tags: ['placement:fixed_home_osid'],
                     },
+                    brig_rear_owned: {
+                        id: 'brig_rear_owned',
+                        faction: 'RBiH',
+                        kind: 'brigade',
+                        status: 'active',
+                        corps_id: 'arbih_3rd_corps',
+                        location_osid: 'op:front:h',
+                        home_osid: 'op:home:a',
+                        disrupted_turns: 0,
+                        assignment: { kind: 'sector', role: 'rear', sector_id: 'sector:arbih_3rd_corps:1' },
+                        tags: ['placement:fixed_home_osid'],
+                    },
                     brig_loaned: {
                         id: 'brig_loaned',
                         faction: 'RBiH',
@@ -158,6 +170,18 @@ describe('anomaly detector deployment truth', () => {
                         assignment: null,
                         tags: ['placement:fixed_home_osid'],
                     },
+                    brig_recalled: {
+                        id: 'brig_recalled',
+                        faction: 'RBiH',
+                        kind: 'brigade',
+                        status: 'active',
+                        corps_id: 'arbih_3rd_corps',
+                        location_osid: 'op:front:h',
+                        home_osid: 'op:home:a',
+                        disrupted_turns: 0,
+                        assignment: null,
+                        tags: ['placement:fixed_home_osid'],
+                    },
                     brig_hq_idle: {
                         id: 'brig_hq_idle',
                         faction: 'RBiH',
@@ -176,6 +200,12 @@ describe('anomaly detector deployment truth', () => {
                     arbih_2nd_corps: { active_operations: [] },
                     arbih_general_staff: { active_operations: [] },
                 },
+                brigade_movement_orders: {
+                    brig_recalled: {
+                        destination_sids: ['op:home:a'],
+                        stance: 'column',
+                    },
+                },
             },
             political: {
                 political_controllers: controllers,
@@ -187,7 +217,7 @@ describe('anomaly detector deployment truth', () => {
         const unassigned = anomalies.find((report) => report.type === 'brigade_far_from_home_unassigned');
 
         expect(redeployed).toBeDefined();
-        expect(redeployed?.entities).toEqual(['brig_loaned', 'brig_redeployed']);
+        expect(redeployed?.entities).toEqual(['brig_loaned', 'brig_rear_owned', 'brig_recalled', 'brig_redeployed']);
         expect(redeployed?.severity).toBe('info');
 
         expect(unassigned).toBeDefined();

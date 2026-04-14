@@ -131,4 +131,212 @@ describe('brigade stacking respects canonical sector truth', () => {
         expect(stacking).toBeDefined();
         expect(stacking?.entities).toEqual([osid]);
     });
+
+    it('does not accuse unassigned army-HQ reserves co-located with a sector brigade', () => {
+        const osid = 'op:visoko:visoko_2';
+        const sectorId = 'sector:arbih_1st_corps:0';
+        const state = makeState({
+            formations: {
+                arbih_146th_light: makeBrigade({
+                    id: 'arbih_146th_light',
+                    location_osid: osid,
+                    assignment: { kind: 'sector', role: 'front', sector_id: sectorId },
+                }),
+                arbih_guards_brigade: makeBrigade({
+                    id: 'arbih_guards_brigade',
+                    corps_id: 'arbih_general_staff',
+                    location_osid: osid,
+                    assignment: null,
+                }),
+            },
+            sectors: {
+                [sectorId]: {
+                    sector_id: sectorId,
+                    corps_id: 'arbih_1st_corps',
+                    faction: 'RBiH',
+                    assigned_brigade_ids: ['arbih_146th_light'],
+                    reserve_brigade_ids: [],
+                    territory_osids: [osid],
+                    sub_segments: [
+                        {
+                            sub_segment_id: 'subseg:0',
+                            edge_ids: ['edge:1'],
+                            friendly_osids: [osid],
+                            enemy_osids: ['op:visoko:enemy'],
+                            primary_brigade_ids: ['arbih_146th_light'],
+                            length_edges: 1,
+                        },
+                    ],
+                    edge_ids: ['edge:1'],
+                    opposing_factions: ['RS'],
+                    density: 1,
+                    defensive_power: 100,
+                    threat_ratio: 1,
+                    sector_stance: 'defend',
+                    stance_source: 'bot',
+                },
+            },
+        });
+
+        const anomalies = runAnomalyDetection(state);
+        expect(anomalies.some((report) => report.type === 'brigade_stacking')).toBe(false);
+    });
+
+    it('does not accuse same-corps sibling sectors sharing a frontline knot OSID', () => {
+        const osid = 'op:donji_vakuf:komar_2';
+        const leftSectorId = 'sector:vrs_1st_krajina:1';
+        const rightSectorId = 'sector:vrs_1st_krajina:2';
+        const state = makeState({
+            formations: {
+                rs_31st_light_infantry: makeBrigade({
+                    id: 'rs_31st_light_infantry',
+                    faction: 'RS',
+                    corps_id: 'vrs_1st_krajina',
+                    location_osid: osid,
+                    assignment: { kind: 'sector', role: 'front', sector_id: leftSectorId },
+                }),
+                rs_2nd_banja_luka_light_infantry: makeBrigade({
+                    id: 'rs_2nd_banja_luka_light_infantry',
+                    faction: 'RS',
+                    corps_id: 'vrs_1st_krajina',
+                    location_osid: osid,
+                    assignment: { kind: 'sector', role: 'front', sector_id: rightSectorId },
+                }),
+            },
+            sectors: {
+                [leftSectorId]: {
+                    sector_id: leftSectorId,
+                    corps_id: 'vrs_1st_krajina',
+                    faction: 'RS',
+                    assigned_brigade_ids: ['rs_31st_light_infantry'],
+                    reserve_brigade_ids: [],
+                    rear_brigade_ids: [],
+                    territory_osids: [
+                        'op:donji_vakuf:donji_vakuf_2',
+                        'op:donji_vakuf:jemanlici',
+                        osid,
+                        'op:donji_vakuf:prusac_2',
+                    ],
+                    sub_segments: [
+                        {
+                            sub_segment_id: 'subseg:left',
+                            edge_ids: ['edge:left'],
+                            friendly_osids: [
+                                'op:donji_vakuf:donji_vakuf_2',
+                                'op:donji_vakuf:jemanlici',
+                                osid,
+                                'op:donji_vakuf:prusac_2',
+                            ],
+                            enemy_osids: ['op:bugojno:kula_2'],
+                            primary_brigade_ids: ['rs_31st_light_infantry'],
+                            length_edges: 4,
+                        },
+                    ],
+                    edge_ids: ['edge:left'],
+                    opposing_factions: ['RBiH'],
+                    density: 1,
+                    defensive_power: 100,
+                    threat_ratio: 1,
+                    sector_stance: 'defend',
+                    stance_source: 'bot',
+                },
+                [rightSectorId]: {
+                    sector_id: rightSectorId,
+                    corps_id: 'vrs_1st_krajina',
+                    faction: 'RS',
+                    assigned_brigade_ids: ['rs_2nd_banja_luka_light_infantry'],
+                    reserve_brigade_ids: [],
+                    rear_brigade_ids: [],
+                    territory_osids: [osid, 'op:travnik:varosluk'],
+                    sub_segments: [
+                        {
+                            sub_segment_id: 'subseg:right',
+                            edge_ids: ['edge:right'],
+                            friendly_osids: [osid, 'op:travnik:varosluk'],
+                            enemy_osids: ['op:travnik:paklarevo'],
+                            primary_brigade_ids: ['rs_2nd_banja_luka_light_infantry'],
+                            length_edges: 2,
+                        },
+                    ],
+                    edge_ids: ['edge:right'],
+                    opposing_factions: ['RBiH'],
+                    density: 1,
+                    defensive_power: 100,
+                    threat_ratio: 1,
+                    sector_stance: 'defend',
+                    stance_source: 'bot',
+                },
+            },
+        });
+
+        const anomalies = runAnomalyDetection(state);
+        expect(anomalies.some((report) => report.type === 'brigade_stacking')).toBe(false);
+    });
+
+    it('does not accuse a loaned army-HQ rear brigade co-located with the sector reserve in rear territory', () => {
+        const osid = 'op:sokolac:donji_kalimanici';
+        const sectorId = 'sector:vrs_sarajevo_romanija:3';
+        const state = makeState({
+            formations: {
+                rs_4th_sarajevo_light_infantry: makeBrigade({
+                    id: 'rs_4th_sarajevo_light_infantry',
+                    faction: 'RS',
+                    corps_id: 'vrs_sarajevo_romanija',
+                    location_osid: 'op:pale:bulozi',
+                    assignment: { kind: 'sector', role: 'front', sector_id: sectorId },
+                }),
+                rs_2nd_romanija_brigade: makeBrigade({
+                    id: 'rs_2nd_romanija_brigade',
+                    faction: 'RS',
+                    corps_id: 'vrs_sarajevo_romanija',
+                    location_osid: osid,
+                    assignment: { kind: 'sector', role: 'reserve', sector_id: sectorId },
+                }),
+                rs_65th_protection_motorized_regiment: {
+                    ...makeBrigade({
+                        id: 'rs_65th_protection_motorized_regiment',
+                        faction: 'RS',
+                        corps_id: 'vrs_main_staff',
+                        location_osid: osid,
+                        assignment: { kind: 'sector', role: 'reserve', sector_id: sectorId },
+                    }),
+                    elite_loan_state: {
+                        on_loan: true,
+                        loaned_to_corps: 'vrs_sarajevo_romanija',
+                    },
+                },
+            },
+            sectors: {
+                [sectorId]: {
+                    sector_id: sectorId,
+                    corps_id: 'vrs_sarajevo_romanija',
+                    faction: 'RS',
+                    assigned_brigade_ids: ['rs_4th_sarajevo_light_infantry'],
+                    reserve_brigade_ids: ['rs_2nd_romanija_brigade'],
+                    rear_brigade_ids: ['rs_65th_protection_motorized_regiment'],
+                    territory_osids: [osid, 'op:pale:bulozi'],
+                    sub_segments: [
+                        {
+                            sub_segment_id: 'subseg:srk',
+                            edge_ids: ['edge:srk'],
+                            friendly_osids: ['op:pale:bulozi'],
+                            enemy_osids: ['op:rogatica:enemy'],
+                            primary_brigade_ids: ['rs_4th_sarajevo_light_infantry'],
+                            length_edges: 1,
+                        },
+                    ],
+                    edge_ids: ['edge:srk'],
+                    opposing_factions: ['RBiH'],
+                    density: 1,
+                    defensive_power: 100,
+                    threat_ratio: 1,
+                    sector_stance: 'defend',
+                    stance_source: 'bot',
+                },
+            },
+        });
+
+        const anomalies = runAnomalyDetection(state);
+        expect(anomalies.some((report) => report.type === 'brigade_stacking')).toBe(false);
+    });
 });

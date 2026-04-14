@@ -17,6 +17,7 @@ import { getAttackerSupplyPenalty, getRsVsHrhbPenalty } from './bot_brigade_supp
 import { findAdjacentFrontGap } from './bot_brigade_movement_ai.js';
 import { countFactionBrigadesAtOsid } from './bot_brigade_context.js';
 import type { Osid } from './osid_adjacency.js';
+import { getTacticalAdjacentOsids } from './tactical_adjacency.js';
 import type { BrigadePosture, FactionId, FormationState, GameState } from '../../state/game_state.js';
 import { findSectorForEnemyOsid, findSubSegmentForOsid } from './corps_front_sectors.js';
 import type { CorpsFrontSector, CorpsFrontSubSegment } from '../../state/game_state.js';
@@ -29,6 +30,8 @@ import {
     COUNTER_ATTACK_MIN_COHESION,
     COUNTER_ATTACK_MAX_HOPS,
 } from './bot_constants.js';
+
+export const UNCONTESTED_OCCUPATION_SCORE = 600;
 
 // The following functions are assumed to be exported/accessible from bot_brigade_ai_osid or another common file.
 // We will import them appropriately. For now, I'll import from bot_brigade_ai_osid if needed, but they are pure.
@@ -65,6 +68,9 @@ export function evaluateHomeDefense(ctx: BrigadeEvaluationContext): boolean {
         if ((brigade.counterattack_window_turns ?? 0) > 0) {
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'counterattack' });
         } else {
+            if (evaluateUncontestedOccupation(ctx)) {
+                return true;
+            }
             // Home defense: defend in place. Attacks only through operations.
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
         }
@@ -185,6 +191,8 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                     return tc !== (faction === 'HRHB' ? 'RBiH' : 'HRHB');
                 })
                 : allTargets;
+            const tacticallyAdjacentToObjective = getTacticalAdjacentOsids(state, loc as Osid, adjacency)
+                .includes(currentObjective);
             const avoidedOsidsForFaction = state.meta?.avoided_osids_by_faction?.[faction];
             const directObjectiveAttack = avoidedOsidsForFaction?.includes(currentObjective as string)
                 ? undefined
@@ -198,7 +206,8 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 const adjacentOperationParticipants = axisBrigades.filter((brigadeId) => {
                     const participant = state.military.formations?.[brigadeId];
                     if (!participant?.location_osid || participant.status !== 'active') return false;
-                    return (adjacency.get(participant.location_osid) ?? []).includes(currentObjective);
+                    return getTacticalAdjacentOsids(state, participant.location_osid as Osid, adjacency)
+                        .includes(currentObjective);
                 }).length;
                 const concentratedOutcome = adjacentOperationParticipants > 1
                     ? estimateConcentratedOutcome(
@@ -222,6 +231,10 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                     chosenTargets.set(currentObjective, alreadyAssigned + 1);
                     return true;
                 }
+            }
+            if (tacticallyAdjacentToObjective) {
+                result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                return true;
             }
 
             // ── March toward objective first ─────────────────────────
@@ -489,6 +502,12 @@ export function evaluateDefensive(ctx: BrigadeEvaluationContext): boolean {
                 return true;
             }
         }
+        // Defensive corps should still walk into truly undefended adjacent territory.
+        // Keep this after higher-priority retreat counterattacks and front-gap movement,
+        // but before passive dig-in/defend so empty enemy OSIDs do not persist forever.
+        if (evaluateUncontestedOccupation(ctx)) {
+            return true;
+        }
         // Defensive stance, no attack — dig_in if cohesion sufficient
         if ((brigade.cohesion ?? 0) >= 20) {
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'dig_in' });
@@ -630,7 +649,7 @@ export function evaluateUncontestedOccupation(ctx: BrigadeEvaluationContext): bo
         // Truly undefended — walk in
         result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
         result.attack_orders[brigade.id] = n as Osid;
-        result.attack_scores[brigade.id] = 600; // lower priority than formal ops (800/900)
+        result.attack_scores[brigade.id] = UNCONTESTED_OCCUPATION_SCORE; // lower priority than formal ops (800/900)
         return true;
     }
 

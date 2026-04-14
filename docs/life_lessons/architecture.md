@@ -3,6 +3,18 @@
 
 ---
 
+### [Architecture] Validator exemptions that suppress real sim failures are always wrong — fix the sim (2026-04-10) — NEW
+- **Context**: `bb454db4` exempted army HQ brigades from the unresolved-sector validator by `corps_id` alone. The 65th Protection Motorized Regiment was genuinely unresolved — component-separated from the sector front at sokolac_2. The exemption hid the signal. `dc742d9e` fixed the actual sim gap with `rescueUnassignedLoanedElitesInTerritory()`, and the validator was reverted to strict.
+- **Wrong approach**: When a validator fails, suppressing the failure via an exemption or filter. The validator correctly identified a sim gap — silencing it creates epistemic debt where the next failure becomes invisible.
+- **Right approach**: When a validator fails, the validator is probably right. Fix the system under test, not the test harness. A passing validator via exemption means nothing — the sim is still broken, you just can't see it.
+- **Do instead**: Before adding ANY validator exemption, ask: "Is the system under test genuinely correct, or am I hiding a real bug?" If the system is wrong, fix the system. Only add exemptions for cases where the validator's model is genuinely inapplicable (e.g., army HQ formations that are structurally exempt by design, not by accident).
+
+### [Architecture] Latent contract violations are worth closing proactively — don't wait for live triggers (2026-04-10) — NEW
+- **Context**: `rescueUnassignedLoanedElitesInTerritory()` appended to `reserve_brigade_ids` after the last `reclassifyRearBrigades()` normalization. n1420 never triggered a 2-reserve sector, but the code PATH could create one. `18546201` added a guard using `MAX_RESERVES_PER_SECTOR`. Zero delta (n1420 = n1421, byte-identical).
+- **Wrong approach**: Leaving latent violations unfixed because they aren't currently triggered. "It works now" is not an invariant guarantee.
+- **Right approach**: If a code path CAN violate an invariant, fix it now. Latent violations become live violations under conditions you haven't tested. The cost of a 5-line guard is always less than debugging a future invariant breach with no reproduction case.
+- **Do instead**: After any pipeline or contract change, ask: "Can any code path reach a state that violates the invariant, even if the current data doesn't trigger it?" If yes, add the guard. Add a validator check to enforce it at runtime.
+
 ### [Architecture] Final reconciliation passes are required after all late writers — sector truth and operation truth (2026-04-09) — NEW
 - **Context**: Sector builders and operation injection both run early in the turn pipeline. But recruitment, mobilization, elite-loan recall, and brigade dissolution all fire later as "late writers" — they change brigade rosters, locations, and loan states after sectors and ops were built. Without a final pass, the saved state carries stale sector assignments, zombie op participants, and incorrect sector anchors. Two new war-phase steps (`reconcile-final-sector-truth`, `reconcile-final-operation-truth`) fix this by running after all late writers and before the final assertion.
 - **Wrong approach**: Trusting that sector and operation state is authoritative as built. Debugging why diagnostic tools show discrepancies between saved state and what the turn computed.

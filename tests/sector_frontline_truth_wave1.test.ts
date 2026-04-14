@@ -306,9 +306,10 @@ describe('Wave 1: sector sync after dissolution', () => {
         expect(formations['brig_active']?.assignment).toEqual(
             expect.objectContaining({ kind: 'sector', role: 'front' })
         );
-        // Reserve brigade gets reserve role
+        // Reserve-list brigade on the front still gets front role because sync now
+        // derives player-visible role from physical position truth, not list origin.
         expect(formations['brig_reserve']?.assignment).toEqual(
-            expect.objectContaining({ kind: 'sector', role: 'reserve' })
+            expect.objectContaining({ kind: 'sector', role: 'front' })
         );
         // Brigade not in any sector list gets no assignment written (assignment cleared in step 1)
         const unassignedAssignment = formations['brig_unassigned']?.assignment;

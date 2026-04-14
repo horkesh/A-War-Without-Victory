@@ -41,6 +41,7 @@ function makeAssessment(overrides: Partial<PoliticalAssessment> = {}): Political
         military_strength: 0.5,
         patron_pressure: 0,
         exhaustion_level: 20,
+        negotiation_pressure: 0,
         ...overrides,
     };
 }
@@ -691,6 +692,7 @@ describe('Group 7: Fallback and contract', () => {
             blended_score: 100,
             patron_pressure: 100,
             exhaustion_level: 100,
+        negotiation_pressure: 0,
         });
         const rsPersonality = getPoliticalPersonality('RS');
 

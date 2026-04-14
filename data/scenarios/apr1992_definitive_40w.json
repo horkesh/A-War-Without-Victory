@@ -251,16 +251,16 @@
     "op:derventa:velika_socanica_2": "RS",
     "op:derventa:zivinice": "HRHB",
     "op:doboj:boljanic_2": "RS",
-    "op:doboj:brijesnica_velika": "RBiH",
+    "op:doboj:brijesnica_velika": "RS",
     "op:doboj:bukovica_velika_2": "RS",
     "op:doboj:cerovica_2": "RS",
     "op:doboj:civcije_bukovicke": "RS",
-    "op:doboj:grapska_gornja_2": "RBiH",
-    "op:doboj:klokotnica_2": "RBiH",
+    "op:doboj:grapska_gornja_2": "RS",
+    "op:doboj:klokotnica_2": "RS",
     "op:doboj:kotorsko_2": "HRHB",
     "op:doboj:kozuhe_2": "RS",
-    "op:doboj:makljenovac": "RBiH",
-    "op:doboj:matuzici_2": "RBiH",
+    "op:doboj:makljenovac": "RS",
+    "op:doboj:matuzici_2": "RS",
     "op:doboj:stanari_2": "RS",
     "op:doboj:zelinja_gornja_2": "RS",
     "op:donji_vakuf:babin_potok_2": "RS",
@@ -795,8 +795,13 @@
   "war_timeline": "apr1992",
   "init_officers": "apr1992",
   "must_hold_osids_by_corps": {
-    "vrs_posavina": ["op:brcko:brcko_2"],
-    "vrs_east_bosnian": ["op:doboj:doboj_2", "op:doboj:boljanic_2"],
+    "vrs_east_bosnian": [
+      "op:brcko:brcko",
+      "op:brcko:donji_rahic",
+      "op:brcko:krepsic",
+      "op:brcko:potocari_2",
+      "op:doboj:boljanic_2"
+    ],
     "vrs_1st_krajina": ["op:gracanica:petrovo_2", "op:lukavac:brijesnica_donja_2"]
   },
   "comms_override_by_corps": {

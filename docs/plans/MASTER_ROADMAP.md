@@ -1,6 +1,6 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
-**Last Updated:** 2026-04-10
+**Last Updated:** 2026-04-11
 **Current Version:** 0.8.4 (Autonomy Depth + Claude API)
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."
@@ -98,17 +98,16 @@ Plan: `docs/plans/2026-04-06-studio-health-repo-truth-plan.md`
 
 PERCEIVE-DECIDE-EXECUTE per-corps loop. 10 files in `src/sim/combat/commander/` (~3,800 lines). Zone detection, garrison allocation (Grigsby two-pass), multi-turn planning, intel-reactive stance, force fitness scoring. Replaces `generateCorpsDirectives` behind `USE_COMMANDER_LOOP` flag. Concurrent corps operations (multi-slot). Serializer Map/Set support.
 
-**Status:** n1302 = 93.7% area-weighted (ATH), 25/25 anchors, 6/6 benchmarks. Combat factor overhaul complete (P1â€“P4, P7, P8, P10). Sector merge guard implemented. brcko P0 resolved. generateCorpsDirectives removed. USE_COMMANDER_LOOP flag removed.
+**Status (updated 2026-04-14):** n1570 = 93.5% area-weighted, 27/27 anchors, 6/6 benchmarks. Commander now reads faction war exhaustion. 0 invalid operations, 0 ZEA operations. Consistency validator PASS.
 
-**Open P0:** gradacac_2 (RS overperforming newly-covered fronts â€” pre-existing).
+**Open P0:** ~~gradacac_2~~ â€” **RESOLVED**: anchor PASS in n1570 (RBiH â†' RBiH).
 
-**Open P1s:** vrs_east_bosnian zero-attack ops, estimateTurnsActive suspend counter, HRHB patron directive, jajce turn_min, 3 stale ssid refs. Deferred: P5 NATO air, P6 breakthrough, P9 supply recalibration.
+**Open P1s (updated 2026-04-14):** ~~vrs_east_bosnian zero-attack ops~~ (0 ZEA in n1568+), ~~estimateTurnsActive suspend counter~~ (not reproducible), HRHB patron directive scope (design-gated), ~~jajce turn_min~~ (fixed 40â†'28), ~~3 stale ssid refs~~ (safety net added, brigades legitimately assigned). **Remaining live:** HRHB patron directive scope (design-gated). Deferred: P5 NATO air, P6 breakthrough.
 
 **Next steps (in order):**
-1. Investigate + fix gradacac_2 P0
-2. vrs_east_bosnian zero-attack ops (39% ZEA structural root cause)
-3. P9 supply recalibration (solo run, high cascade risk)
-4. v0.8.1 Commander Maturity gate check
+1. HRHB patron directive scope â€” needs design decision on per-corps vs faction-wide ceiling
+2. Exhaustion visibility in player-facing briefing surfaces
+3. v0.9 planning
 
 **Parallel content track (v0.8.0.x, no engine risk):**
 - v0.7.0.1: Author 13 missing 1992 foundation essays (barracks seizures, Sarajevo siege, JNA withdrawal, Drina cleansing, etc.). Spec: `docs/plans/2026-03-25-letter-home-and-essay-authoring-spec.md`. Assign to `/historian` + `/narrative-designer` â€” completely independent of engine work.
@@ -118,6 +117,7 @@ PERCEIVE-DECIDE-EXECUTE per-corps loop. 10 files in `src/sim/combat/commander/` 
 - **COMPLETE 2026-04-04 (Waves 1â€“4).** All 6 plan phases landed. Phase 1.5 front-adjacency guard, assertBrigadeReachability actionable return, assigned_sub_segment_id cleared on demotion, adapter canonical-first sub-segment derivation, displacement trigger proxy-fork observable (console.warn), activity zero-fill, activity summary fidelity. 29 regression tests across 4 wave files lock all invariants. Lane: CLOSED.
 - **Hardening campaign update 2026-04-09.** Subsequent bounded lanes on `main` closed the remaining false-owner seams around shared-front routing, assignment-validator alignment, operation readiness, military review shell ownership, operation roster foreign-sector truth, and strict non-elite cross-corps field-brigade ownership. Current next substrate lane: brigade drift / far-from-home truth, now that foreign-corps sector laundering is blocked and residual drift is visible honestly in scenario output.
 - **Hardening campaign update 2026-04-09 (deployment truth).** `placement:fixed_home_osid` is now demoted to descriptive metadata in harness/anomaly surfaces. The old blended `brigade_far_from_home` warning is split into `brigade_far_from_home_redeployed` (live sector/loan owner) and `brigade_far_from_home_unassigned` (no live owner), and the same 40-week save hash in `n1400`/`n1401` proved the lane changed reporting truth without changing sim behavior. `n1409` then removed a final false HVO/RS dead-front warning by making `zero_combat_corps` respect canonical Graz cold-front truth for `hvo_tomislavgrad`, and `n1410` collapsed territorial false positives by making `undefended_painted_mismatch` / `adjacent_uncontested_territory` consume sector coverage truth before calling empty tiles undefended. Current board: no live invalid-operation seams remain; territorial residuals are now mostly genuine uncovered walk-ins. The next bounded anomaly-contract candidate is `brigade_stacking`, while Podrinje strandedness and the 444th Konjic salient remain redesign/doctrine rather than hardening.
+- **Hardening campaign update 2026-04-12 (shared-front density truth).** The final-save sector geometry and live-owner checks now distinguish active front failures from paper-empty shared-front sectors. `frontline_density_imbalance` consumes physical same-corps sibling coverage before accusing low-density sectors, removing the false `sector:vrs_1st_krajina:4` Maglaj/Jablanica warning on `n1541`. Remaining density warnings are force-distribution/doctrine signals, not sector-contiguity or assignment-truth failures. Cold-front unstaffed sectors such as the Vares HRHB-RS pair remain Graz/truce-owned and should not be treated as active-front coverage bugs.
 - **Hardening campaign update 2026-04-10 (player-truth shell pass).** The active UI/read-model hardening batch now also demotes player-facing operation force-ratio precision to one shared staff-balance abstraction. Normal operation shells no longer print exact decimal ratios or commander-threshold math; those exact numerics remain canonical in engine/read-model truth and stay visible only in explicit debug-only raw-intel surfaces. Current board after the shell pass: the next likely bounded candidate rotates back to Gorazde uncovered-edge content/runtime audit unless a stronger cross-domain truth seam emerges.
 - **Hardening campaign update 2026-04-10 (reserve identity pass).** The reserve-system action boundary now honors canonical request identity end-to-end: approval, decline, and history all consume `ArmyReserveRequest.request_id`, and the desktop/read-model path no longer collapses approvals to `corps_id`. After this lane, the remaining top board is mostly Gorazde content/runtime audit, Podrinje redesign, and 444th realism unless another bounded cross-domain seam is proven.
 - **Hardening campaign update 2026-04-10 (shell/bootstrap truth).** The 2026-04-10 branch batch tightened player-facing shell ownership without changing sim truth. Packaged startup now proves every local Electron main-process helper and the baked `apr_1992` startup snapshot through package-probe coverage, while UI shell/bootstrap surfaces now consume canonical player-faction resolvers instead of inventing `'RBiH'`, `'RS'`, or `factions[0]`. Current next bounded UI/player-truth lane: demote player-facing operation force-ratio precision to staff abstractions. Global residual board remains: Gorazde = content/runtime audit, Podrinje = redesign-blocked, 444th Konjic = doctrine realism.
@@ -129,6 +129,7 @@ PERCEIVE-DECIDE-EXECUTE per-corps loop. 10 files in `src/sim/combat/commander/` 
 - **Hardening campaign update 2026-04-10 (desktop packaged startup contract).** The packaged desktop startup path is now explicitly owned and proved: `package.json` ships every local main-process `.cjs` helper that `electron-main.cjs` requires, `tests/desktop_packaging_contract.test.ts` proves that helper set from source, and the baked `apr_1992` startup artifact was refreshed to current canonical builder truth. This lane’s runtime proof is the packaged executable itself, not scenario output: `desktop:startup-snapshot:check` passed, `desktop:package:probe` now reaches a full success manifest, and the full bar (`test:vitest`, `tsc`, `build`, `recovery:check`) stayed green. Current next bounded lane: startup-snapshot proof-path interference, because `desktop_startup_snapshot_guardrails.test.ts` still mutates the committed artifact in place and can reintroduce false drift after targeted node-test runs.
 - **Hardening campaign update 2026-04-10 (front sector player visibility).** Front-edge interaction payloads no longer route enemy `sector_id` values into player shells. `buildFrontEdgesHoverGeoJSON(...)` now strips enemy `sector_id` / `corps_id` in player mode, and both `MapContainer.tsx` and `CorpsFrontPanel.tsx` revalidate sector selection through `findPlayerFacingSectorById(...)` before opening a sector shell. This was a UI/player-truth lane only: targeted visibility regressions plus `recovery:check`, `test:vitest`, `tsc`, and `build` all passed, and no scenario rerun was needed because sim truth did not change. Current next bounded lane: demote player-facing operation force-ratio precision to staff abstractions, with Gorazde still content/runtime audit, Podrinje still redesign-blocked, and 444th still doctrine realism.
 - **Hardening campaign update 2026-04-11 (final sector geometry + Foča border truth).** The next map seam was no longer just renderer ownership. `corps_front_sectors.ts` could still serialize post-merge sectors above the hard edge cap, and the operational contact graph could miss real shared borders when adjacent polygons differed only by floating-point precision. The hardened rule now has two owners: late sector splits must re-run per-faction territory Voronoi before final sealing so split sectors remain one truthful line with owned rear/depth space, and shared-border derivation must use epsilon-based segment matching so true Foča borders survive derivation. Fresh 40-week proof on `n1427` passed consistency validation with `0` unresolved brigades, `0` over-cap sectors, and a real `op:foca:donje_zesce__op:foca:mazlina` front edge in the final save. Current follow-up: live Electron confirmation for any remaining white-line visual breaks, then sort leftovers into renderer stitching vs genuine content/runtime fronts.
+- **Hardening campaign update 2026-04-11 (Podrinje / Sarajevo / Posavina story recovery).** The three live story-breakers proved to have different owners, so they were closed as one coordinated but non-monolithic lane. Podrinje required recruitment identity preservation for already-existing OOB brigades plus per-axis readiness truth for multi-axis operations; Sarajevo required `sarajevo_state` to follow the besieged RBiH city-core pocket instead of whole-city majority supply; Posavina required the same per-axis readiness fix plus a live Koridor contract and validated `must_hold_osids_by_corps` anchors. Fresh 40-week proof on `n1437` (`e146406ca031ebf2`) shows `rs_1st_podrinje` back on the Drina front, `sarajevo_state.siege_status = BESIEGED`, and an RS-controlled path from Banja Luka to Modrica through Doboj/Derventa. Current residual board after this lane is no longer these three failures; the remaining live reds are the separate southeast-Herzegovina unresolved-frontline seam, `op:brcko:brka_2` anchor drift, and Foča/Kalinovik front-edge ownership regressions surfaced by the wider integration suite.
 **Presidential Command / Friction / Review (v0.8.0.x UX lane):**
 - Command authority system: CA resource, force-launch costs, recovery mechanics, CA recovery penalty from friction/intervention
 - Command friction waves 1-5: strain visibility â†’ friction resolution â†’ stabilization action â†’ standing indicator â†’ CA recovery consequence
@@ -242,8 +243,8 @@ Plans: `docs/plans/2026-03-24-v082-autonomy-api-plan.md`, `docs/plans/2026-03-31
 
 These lanes matter to product truth or engine health, but they are not the current milestone driver. Keep them visible so they do not vanish into chat memory.
 
-- **Operation execution-quality follow-up** â€” fresh 40-week proof still shows `operation_zero_eligible_execution` / invalid combat-causality cases (`cmd_arbih_1st_corps_t18` in `n1397`) even after the split-child overlap routing fix.
-- **Harness assignment-completeness validator drift** â€” `tools/validate_run_consistency.cjs` still hard-fails broader "all brigades must be sector-assigned" cases than the sim's `brigadeRequiresSectorAssignment(...)` doctrine actually owns.
+- ~~**Operation execution-quality follow-up**~~ â€” **RESOLVED 2026-04-14:** n1570 shows 0 invalid operations, 0 ZEA operations. The `n1397` issues are no longer reproducible on current mainline.
+- ~~**Harness assignment-completeness validator drift**~~ â€” **RESOLVED 2026-04-14:** `validate_run_consistency.cjs` passes completely clean on n1570 (RESULT: PASS, 0 failures across all checks). Validator now aligned with sim doctrine.
 - **Desktop New Game Start Snapshot** â€” desktop `New Game` birth state is now canonicalized onto the loaded-save contract, but it still boots from full scenario-source init instead of a baked campaign-start snapshot.
 - **Warroom React Shell Recovery / Feature Parity** â€” main desktop entry surface still needs parity/polish (modal behavior, shell cohesion, interactive room/map affordance).
 
@@ -280,7 +281,7 @@ If the implementer cannot answer all five, the task is not ready to start.
 - Operation launch contract: sector-anchored, corps-authorized, reinforcement-bounded â€” NOT YET IMPLEMENTED. Plan: `docs/plans/2026-04-01-v08x-sector-anchored-corps-operations-plan.md` (needs amendment before execution â€” sector_id naming, writer inventory, attachment thresholds, calibration gate)
 - Player knowledge integrity: renderer must stop receiving omniscient "full state plus fog" truth. Plan: `docs/plans/2026-04-01-v08x-player-knowledge-integrity-plan.md`. **Wave 2 landed (2026-04-04):** RawIntelTab removed, threat assessment uses uncertainty-qualified language + bucketed confidence. Remaining: own-sector force-balance precision in CorpsFrontPanel.
 - Studio governance contracts for product truth: `docs/20_engineering/PLAYER_VISIBLE_STATE.md`, `docs/20_engineering/UI_OWNERSHIP_MATRIX.md`, `docs/20_engineering/DEBUG_SURFACE_POLICY.md`, `docs/20_engineering/FEATURE_DONE_MEANS.md` â€” **All four docs landed and actively enforced (2026-04-03).**
-- Command authority / delegation substrate: **Partially built (2026-04-04).** CA resource with force-launch costs, friction visibility, stabilization action (pay CA to resolve friction, 3-turn cooldown), strain-gated stance (offensive blocked when compromised), CA recovery penalty from intervention/friction. Full delegation visibility remains v0.8.3+.
+- Command authority / delegation substrate: **Complete.** CA resource with force-launch costs, friction visibility, stabilization action, strain-gated stance, CA recovery penalty. Full delegation visibility and order interpretation shipped (v0.8.3 CLOSED 2026-04-06).
 - Movement ownership: reduce movement writers from ~7 competing sources to one intent owner + small execution stack
 - Boundary comments in all hotspot files naming what is canonical vs transitional
 
@@ -317,14 +318,16 @@ No version bump â€” engineering milestone between feature releases. Stabili
   - historically useful but stale metrics like old ZEA rates must be re-benchmarked on current `main` before reuse
   - structural concerns that remain true, especially god files, are promoted into their own bounded maintainability track
 - Immediate promotion queue from the scorecard:
-  1. exhaustion activation / negative-sum identity audit
-  2. save/load + replay + adapter integrity
-  3. political / peace / review ownership and proof
-  4. autonomy replay / fallback / queue truth
-  5. god-file decomposition tranche 1
+  1. god-file decomposition tranche 1
+  2. exhaustion activation / negative-sum identity audit
+  3. save/load + replay + adapter integrity
+  4. political / peace / review ownership and proof
+  5. autonomy replay / fallback / queue truth
   6. residual harness audits where runtime truth may still be misclassified
   7. planner/doctrine realism only after the remaining owner-truth lanes are exhausted
   8. thin player-experience layer after the identity and core-truth P0s
+- Active roadmap call on 2026-04-13: start with maintainability tranche 1, because the engine is now strong enough that oversized merge-magnet files are the main drag on safe hardening velocity. Exhaustion/identity remains the next substantive product-truth audit immediately after that tranche.
+- **Campaign results 2026-04-14:** God-file decomposition CLOSED (7 tranches, resolver 1809→907). Exhaustion partially shipped (commander now reads `faction_war_exhaustion`, 40w proof pending). Save/load partially shipped (real-save round-trip byte-identity proven, 9 tests). Autonomy proposal GC shipped. Remaining immediate queue: 40w scenario proof for exhaustion, adapter-after-deserialize test, save-load-continue hash chain, then political review ownership. Report: `docs/40_reports/implemented/20260414_CAMPAIGN_NIGHTSHIFT_ROADMAP_CLEARANCE.md`.
 - Explicit redesign gates from the scorecard:
   - stranded same-faction unreachable brigade lifecycle owner
   - any deeper packet/detail contract that the current canonical request or operation packet does not already own
@@ -337,10 +340,11 @@ No version bump â€” engineering milestone between feature releases. Stabili
 | Pathfinding | 3 separate engines (settlement BFS, OSID Dijkstra, graph BFS), no shared cache | 1 engine with caching, unified tie-breaking |
 | String hardcoding | Postures, classifications, faction IDs as string literals | TypeScript enums throughout |
 | Dead branches | ZoC/AoR era code, old bot_corps_directives paths | Removed |
+| Test suite unification | **Audited 2026-04-14.** 497 files across two frameworks (vitest 297 + node:test 200). 172 node:test files overlap vitest coverage. 89 single-test files. 1 dead file (battle_resolution.test.ts, 580 lines, legacy API). `command_authority.test.ts` at 290 tests likely ~50% internal overlap. ~40% of files are organizational overhead. | Unify to vitest, consolidate single-test files into domain files, dedup oversized files. Audit: `docs/40_reports/implemented/20260414_TEST_SUITE_AUDIT.md` |
 | Execution entrypoints | `src/turn/pipeline.ts` + `src/sim/run_combat_browser.ts` are live variants adding cognitive overhead alongside canonical `src/sim/turn_pipeline.ts` | Consolidate or explicitly mark non-authoritative with ownership comment |
 | Magic numbers | bot_constants.ts scattered thresholds | Domain-grouped constant files |
 | Canon docs | Systems Manual and Game Bible reference pre-v0.8 architecture | Updated for v0.8 command chain |
-| Save/load + replay hardening | Command briefing round-trip, desktop canonical save-string ownership, `front_segments` deserialize preservation, nested-owner migration/default rescue, campaign-birth save-contract canonicalization, desktop startup artifact decoupling, baked April 1992 startup snapshot productization, desktop startup packaging guardrails, and Release/CI startup snapshot enforcement are now hardened; broader validation-contract and future packaging-productization still remain | Explicit save/load, replay, and migration hardening. Plan: `docs/plans/2026-03-31-v08to09-save-load-and-replay-hardening-plan.md` |
+| Save/load + replay hardening | **Grade A- (2026-04-14).** Real-save round-trip byte-identity proven (12 tests against 13MB production save). Adapter-after-deserialize contract proven. SHA-256 hash preservation proven. Remaining for A: continue-from-save replay facility. | Plan: `docs/plans/2026-03-31-v08to09-save-load-and-replay-hardening-plan.md` |
 | UI surface ownership | Army HQ, Warroom, map panels, ops modal, and future command-review surfaces can drift into duplicate half-owners. **Warroom React migration complete (2026-04-04); Army HQ command-review ownership clarified.** | One clear ownership matrix for command, ops, review, and explanation surfaces. Plan: `docs/plans/2026-03-31-v08to09-ui-surface-ownership-plan.md` |
 | UI density + shell cohesion | Warroom, Tactical Map, Army HQ, Chronicle, and Codex still carry dead air, spacing waste, and shell seams that make the product feel like tools rather than one game | Tightened spacing, clearer hierarchy, and shell-level cohesion across the live player journey. Plan: `docs/plans/2026-04-03-v08to09-ui-density-and-shell-cohesion-plan.md` |
 | Player knowledge integrity | Desktop / tactical map still trends toward omniscient renderer payloads plus fog visuals | Player-facing state boundary, leak classifications, display-name discipline, and desktop knowledge integrity contract. Primary plan: `docs/plans/2026-04-01-v08x-player-knowledge-integrity-plan.md` |
@@ -349,7 +353,7 @@ No version bump â€” engineering milestone between feature releases. Stabili
 | Army-command maturity | Army layer is serviceable but still undernamed and too implicit as a real command substrate | Explicit army-command maturity and responsibility model. Plan: `docs/plans/2026-03-31-v08to09-army-command-maturity-plan.md` |
 | Army â†” corps command coherence | Assumed rather than owned; handshake and authority boundaries are still undernamed | Named handshake rules, ownership comments, and explicit authority boundaries. Plan: `docs/plans/2026-03-31-v08to09-army-corps-authority-coherence-plan.md` |
 | Commander explanation surfaces | Command briefing truth unified around sim-owned `last_briefing`; operational SITREP core now flows through one shared packet read path (`extractWarData(...)` -> `getOperationalSitrepView(...)` -> adapter / Warroom consumers); broader staff/player-facing explanation surfaces still remain | Build truthful explanation surfaces from real traces, not theater. Plan: `docs/plans/2026-03-31-v08to09-commander-explanation-surfaces-plan.md` |
-| Player command review UX | **Significant advance (2026-04-04):** Command review surfaces now landed (v0.8.0.x) â€” outcome badge, trend summary, order interpretation preview, stance interpretation, three-tier outcome category. Full order interpretation *system* remains v0.8.3. | Minimum viable review UX satisfied. Full system plan: `docs/plans/2026-03-31-v083-player-command-review-ux-plan.md` |
+| Player command review UX | **Complete.** Command review surfaces landed (v0.8.0.x). Full order interpretation system shipped (v0.8.3 CLOSED 2026-04-06, all 5 phases). | Done. |
 | Autonomy determinism and review | API-assisted autonomy can still be mistaken for readiness without hardened replay/fallback/review gates | Explicit determinism, fallback, and player-review contract. Plan: `docs/plans/2026-03-31-v084-autonomy-determinism-and-review-plan.md` |
 | Connectivity checks | Column march validates destination but not path; no enclave boundary check during transit | Full path validation |
 | **Essay template engine + dynamic Codex divergence** | Partially advanced. Letter Home is shipped; dynamic sections / divergence notes / ghost entries are still open. | Build `dynamic_sections`, divergence notes, ghost entries, historical ghost entries, and endgame comparison glue. Plans: `docs/plans/2026-04-06-v091-dynamic-essay-endgame-comparison-plan.md`, `docs/plans/2026-03-23-essay-template-engine-plan.md`, `docs/plans/2026-03-25-letter-home-and-essay-authoring-spec.md` |
@@ -559,7 +563,7 @@ These need design sessions before implementation. Preserved from the original ro
 | Equipment pipeline | Complete |
 | OOB (247 brigades, 166 active) | Complete |
 | Scenario runner | Complete |
-| Calibration pipeline | Complete (93.7% area-weighted ATH, n1302, 25/25 anchors, 6/6 benchmarks) |
+| Calibration pipeline | Complete (93.5% area-weighted, n1570, 27/27 anchors, 6/6 benchmarks, 0 ZEA, 0 invalid ops) |
 | Desktop app (Electron v41) | Functional |
 | Tactical map (React + MapLibre + Deck.gl) | Functional |
 | Warroom (React) | Complete â€” React migration landed 2026-04-04. `warroom.ts` retains launch/picker/iframe/bridge. |

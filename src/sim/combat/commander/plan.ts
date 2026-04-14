@@ -247,10 +247,19 @@ export function selectWinningIntent(
         forces.total_surplus / Math.max(1, forces.total_brigades * 0.3),
     );
 
-    const exhaustionPenalty: number = Math.max(
+    // Corps operational exhaustion (0-1, higher = more capacity for ops)
+    const corpsExhaustionCapacity: number = Math.max(
         0.0,
         1.0 - briefing.corps_exhaustion / MAX_EXHAUSTION_FOR_OPERATION,
     );
+    // Faction strategic exhaustion drag: nation's accumulated suffering throttles
+    // even fresh corps' offensive appetite. At 0: full willingness (1.0).
+    // At 600+: floor 0.3 — never fully zero, corps exhaustion handles hard block.
+    const factionExhaustionDrag: number = Math.max(
+        0.3,
+        1.0 - briefing.faction_war_exhaustion / 600,
+    );
+    const exhaustionPenalty: number = corpsExhaustionCapacity * factionExhaustionDrag;
 
     const fatigueReadiness: number = Math.max(
         0.0,
@@ -426,6 +435,7 @@ export function selectWinningIntent(
                 score_breakdown = {
                     supply_readiness: r,
                     surplus_ratio: s,
+                    faction_exhaustion_drag: factionExhaustionDrag,
                     threat_inverse: t,
                     exhaustion_penalty: e,
                     fatigue_readiness: f,
@@ -449,6 +459,7 @@ export function selectWinningIntent(
                     surplus_ratio: s,
                     supply_readiness: r,
                     threat_inverse: t,
+                    faction_exhaustion_drag: factionExhaustionDrag,
                     exhaustion_penalty: e,
                     fatigue_readiness: f,
                 };

@@ -37,6 +37,7 @@ function makeAssessment(overrides: Partial<PoliticalAssessment> = {}): Political
         military_strength: 0.5,
         patron_pressure: 0,
         exhaustion_level: 0,
+        negotiation_pressure: 0,
         ...overrides,
     };
 }

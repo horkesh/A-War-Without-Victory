@@ -166,6 +166,7 @@ function computeHumanitarianData(state: GameState, faction: FactionId): {
     let refugees_created = 0;
     let refugees_received = 0;
     let civilians_under_protection = 0;
+    let civilian_casualties_caused = 0;
 
     // Attribution: count refugees from events where THIS faction was the causer.
     // Fallback: if caused_by is absent (legacy events), attribute to current OSID controller.
@@ -177,6 +178,7 @@ function computeHumanitarianData(state: GameState, faction: FactionId): {
                 ?? (evt.origin_osid && controllers ? controllers[evt.origin_osid] : undefined);
             if (causer === faction) {
                 refugees_created += (evt.displaced ?? 0) + (evt.killed ?? 0) + (evt.fled_abroad ?? 0);
+                civilian_casualties_caused += evt.killed ?? 0;
             }
             // refugees_received: events where displaced people settled in faction-controlled territory
             if (evt.dest_osid && controllers && controllers[evt.dest_osid] === faction) {
@@ -210,7 +212,7 @@ function computeHumanitarianData(state: GameState, faction: FactionId): {
         refugees_created,
         refugees_received,
         civilians_under_protection,
-        civilian_casualties_caused: 0, // TODO: derive from battle civilian casualties when available
+        civilian_casualties_caused,
         war_crimes_events: warCrimes,
     };
 }

@@ -44,4 +44,45 @@ describe('sector glow continuity', () => {
     expect(merged[1]!.geometry.coordinates).toEqual([[0, 0], [1, 0], [2, 0]]);
     expect(merged.map(feature => feature.properties.offset_side).sort()).toEqual([-1, 1]);
   });
+
+  it('drops detached micro-fragments when a sector already has one substantial chain', () => {
+    const segments: Feature<LineString, any>[] = [
+      {
+        type: 'Feature',
+        properties: {
+          lineType: 'glow',
+          faction: 'RS',
+          corps_id: 'vrs_drina',
+          sector_id: 'sector:vrs_drina:4',
+          offset_side: 1,
+          pressure_intensity: 0,
+        },
+        geometry: {
+          type: 'LineString',
+          coordinates: [[0, 0], [1, 0], [2, 0]],
+        },
+      },
+      {
+        type: 'Feature',
+        properties: {
+          lineType: 'glow',
+          faction: 'RS',
+          corps_id: 'vrs_drina',
+          sector_id: 'sector:vrs_drina:4',
+          offset_side: 1,
+          pressure_intensity: 0,
+        },
+        geometry: {
+          type: 'LineString',
+          coordinates: [[10, 10], [10.005, 10]],
+        },
+      },
+    ];
+
+    const merged = mergeGlowSegments(segments, new Map(), new Map());
+
+    expect(merged).toHaveLength(2);
+    expect(merged[0]!.geometry.coordinates).toEqual([[0, 0], [1, 0], [2, 0]]);
+    expect(merged[1]!.geometry.coordinates).toEqual([[0, 0], [1, 0], [2, 0]]);
+  });
 });

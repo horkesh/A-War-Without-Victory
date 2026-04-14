@@ -286,7 +286,7 @@ function stitchSegmentsWithFriendlyBridges<P extends CorpsLineProperties>(
         friendlyAdj.get(partB)!.push(partA);
     }
 
-    const MAX_BRIDGE_HOPS = 8;
+    const MAX_BRIDGE_HOPS = 32;
     let bridging = true;
     while (bridging) {
         bridging = false;
@@ -367,11 +367,161 @@ function stitchSegmentsWithFriendlyBridges<P extends CorpsLineProperties>(
     return stitched;
 }
 
+function projectPointToSegment(
+    point: [number, number],
+    start: [number, number],
+    end: [number, number],
+): [number, number] {
+    const dx = end[0] - start[0];
+    const dy = end[1] - start[1];
+    const lenSq = dx * dx + dy * dy;
+    if (lenSq === 0) return start;
+    const t = Math.max(0, Math.min(1, ((point[0] - start[0]) * dx + (point[1] - start[1]) * dy) / lenSq));
+    return [start[0] + t * dx, start[1] + t * dy];
+}
+
+function distanceSq(a: [number, number], b: [number, number]): number {
+    const dx = a[0] - b[0];
+    const dy = a[1] - b[1];
+    return dx * dx + dy * dy;
+}
+
+function collectBoundaryMatchPoints(
+    sourceVerts: [number, number][],
+    targetVerts: [number, number][],
+    thresholdSq: number,
+): [number, number][] {
+    const matches: [number, number][] = [];
+    if (sourceVerts.length === 0 || targetVerts.length < 2) return matches;
+
+    for (const vertex of sourceVerts) {
+        let matched = false;
+        for (let i = 0; i < targetVerts.length - 1; i++) {
+            const projection = projectPointToSegment(vertex, targetVerts[i]!, targetVerts[i + 1]!);
+            if (distanceSq(vertex, projection) <= thresholdSq) {
+                matches.push(vertex);
+                matched = true;
+                break;
+            }
+        }
+        if (!matched && targetVerts.length > 2) {
+            const projection = projectPointToSegment(vertex, targetVerts[targetVerts.length - 1]!, targetVerts[0]!);
+            if (distanceSq(vertex, projection) <= thresholdSq) {
+                matches.push(vertex);
+            }
+        }
+    }
+
+    return matches;
+}
+
+function orderBoundaryPoints(points: [number, number][]): [number, number][] {
+    if (points.length <= 2) return points;
+
+    let startIdx = 0;
+    let farthestDistance = -1;
+    for (let i = 0; i < points.length; i++) {
+        for (let j = i + 1; j < points.length; j++) {
+            const d = distanceSq(points[i]!, points[j]!);
+            if (d > farthestDistance) {
+                farthestDistance = d;
+                startIdx = i;
+            }
+        }
+    }
+
+    const ordered: [number, number][] = [points[startIdx]!];
+    const remaining = new Set(points.map((_, index) => index));
+    remaining.delete(startIdx);
+
+    while (remaining.size > 0) {
+        const last = ordered[ordered.length - 1]!;
+        let bestIdx = -1;
+        let bestDistance = Infinity;
+        for (const index of remaining) {
+            const d = distanceSq(last, points[index]!);
+            if (d < bestDistance) {
+                bestDistance = d;
+                bestIdx = index;
+            }
+        }
+        if (bestIdx < 0) break;
+        remaining.delete(bestIdx);
+        ordered.push(points[bestIdx]!);
+    }
+
+    return ordered;
+}
+
 export function mergeGlowSegments(
     segments: Feature<LineString, CorpsGlowProperties>[],
     edgeMap: Map<string, Set<string>>,
     controllerMap: Map<string, string | null>,
 ): Feature<LineString, CorpsGlowProperties>[] {
+    const chainLength = (coords: [number, number][]) => {
+        let total = 0;
+        for (let i = 1; i < coords.length; i++) {
+            total += Math.sqrt(distanceSq(coords[i - 1]!, coords[i]!));
+        }
+        return total;
+    };
+    const DETACHED_FRAGMENT_MAX_LENGTH = 0.02;
+    const DETACHED_FRAGMENT_MAX_RATIO = 0.05;
+    const connectChains = (
+        features: Feature<LineString, CorpsGlowProperties>[],
+    ): Feature<LineString, CorpsGlowProperties> => {
+        const stableKey = (feature: Feature<LineString, CorpsGlowProperties>) =>
+            JSON.stringify(feature.geometry.coordinates);
+        const pending = [...features].sort((a, b) => stableKey(a).localeCompare(stableKey(b)));
+        pending.sort((a, b) =>
+            chainLength(b.geometry.coordinates as [number, number][])
+            - chainLength(a.geometry.coordinates as [number, number][])
+            || stableKey(a).localeCompare(stableKey(b)));
+        let coords = [...pending.shift()!.geometry.coordinates] as [number, number][];
+
+        while (pending.length > 0) {
+            let bestIndex = 0;
+            let bestMode: 'tail-head' | 'tail-tail' | 'head-tail' | 'head-head' = 'tail-head';
+            let bestDistance = Infinity;
+            for (let i = 0; i < pending.length; i++) {
+                const other = pending[i]!.geometry.coordinates as [number, number][];
+                const options = [
+                    { mode: 'tail-head' as const, distance: distanceSq(coords[coords.length - 1]!, other[0]!) },
+                    { mode: 'tail-tail' as const, distance: distanceSq(coords[coords.length - 1]!, other[other.length - 1]!) },
+                    { mode: 'head-tail' as const, distance: distanceSq(coords[0]!, other[other.length - 1]!) },
+                    { mode: 'head-head' as const, distance: distanceSq(coords[0]!, other[0]!) },
+                ].sort((a, b) => a.distance - b.distance || a.mode.localeCompare(b.mode));
+                const bestForOther = options[0]!;
+                if (
+                    bestForOther.distance < bestDistance
+                    || (bestForOther.distance === bestDistance && stableKey(pending[i]!).localeCompare(stableKey(pending[bestIndex]!)) < 0)
+                ) {
+                    bestIndex = i;
+                    bestMode = bestForOther.mode;
+                    bestDistance = bestForOther.distance;
+                }
+            }
+
+            const [next] = pending.splice(bestIndex, 1);
+            const other = next!.geometry.coordinates as [number, number][];
+            if (bestMode === 'tail-head') {
+                coords = coords.concat(other);
+            } else if (bestMode === 'tail-tail') {
+                coords = coords.concat([...other].reverse());
+            } else if (bestMode === 'head-tail') {
+                coords = other.concat(coords);
+            } else {
+                coords = [...other].reverse().concat(coords);
+            }
+        }
+
+        return {
+            type: 'Feature',
+            properties: features[0]!.properties,
+            geometry: { type: 'LineString', coordinates: coords },
+        };
+    };
+
     const byGroup = new Map<string, Feature<LineString, CorpsGlowProperties>[]>();
     for (const segment of segments) {
         const props = segment.properties;
@@ -388,7 +538,25 @@ export function mergeGlowSegments(
     const merged: Feature<LineString, CorpsGlowProperties>[] = [];
     for (const group of byGroup.values()) {
         const stitched = stitchSegmentsWithFriendlyBridges(group, edgeMap, controllerMap);
-        for (const feature of stitched) {
+        const measured = stitched.map((feature) => ({
+            feature,
+            length: chainLength(feature.geometry.coordinates as [number, number][]),
+        }));
+        const longest = measured.reduce((best, current) => Math.max(best, current.length), 0);
+        const substantialChains = measured.filter(({ length }) => (
+            length > DETACHED_FRAGMENT_MAX_LENGTH && length > longest * DETACHED_FRAGMENT_MAX_RATIO
+        ));
+        const selected = substantialChains.length === 0
+            ? measured
+            : measured.filter(({ length }) => (
+                length > DETACHED_FRAGMENT_MAX_LENGTH || length > longest * DETACHED_FRAGMENT_MAX_RATIO
+            ));
+
+        const continuousFeatures = selected.length <= 1
+            ? selected.map(({ feature }) => feature)
+            : [connectChains(selected.map(({ feature }) => feature))];
+
+        for (const feature of continuousFeatures) {
             merged.push({
                 type: 'Feature',
                 properties: { ...feature.properties, offset_side: 1 },
@@ -576,51 +744,27 @@ export function buildCorpsFrontLinesGeoJSON(
             const ringsB = osidRings.get(osidB);
             if (!ringsA || !ringsB) continue;
 
-            // Collect all vertices from each polygon
+            // Collect all vertices from each polygon.
+            // We use vertex-to-segment proximity instead of only vertex-to-vertex
+            // matches so fallback front lines can recover full shared boundaries
+            // even when the two polygons do not share identical junction vertices.
             const vertsA: [number, number][] = [];
             for (const ring of ringsA) for (const v of ring) vertsA.push([v[0], v[1]]);
             const vertsB: [number, number][] = [];
             for (const ring of ringsB) for (const v of ring) vertsB.push([v[0], v[1]]);
 
-            // Find pairs of near-coincident vertices — these trace the approximate shared boundary
-            const midpoints: [number, number][] = [];
-            for (const va of vertsA) {
-                for (const vb of vertsB) {
-                    const dx = va[0] - vb[0];
-                    const dy = va[1] - vb[1];
-                    if (dx * dx + dy * dy < SNAP_THRESHOLD_SQ) {
-                        midpoints.push([(va[0] + vb[0]) / 2, (va[1] + vb[1]) / 2]);
-                    }
-                }
-            }
-
-            if (midpoints.length < 2) continue;
-
-            // Order midpoints into a polyline by greedy nearest-neighbor
-            const ordered: [number, number][] = [midpoints[0]];
-            const remaining = new Set(midpoints.map((_, i) => i));
-            remaining.delete(0);
-
-            while (remaining.size > 0) {
-                const last = ordered[ordered.length - 1];
-                let bestIdx = -1;
-                let bestDist = Infinity;
-                for (const ri of remaining) {
-                    const dx = midpoints[ri][0] - last[0];
-                    const dy = midpoints[ri][1] - last[1];
-                    const d = dx * dx + dy * dy;
-                    if (d < bestDist) { bestDist = d; bestIdx = ri; }
-                }
-                if (bestIdx < 0) break;
-                remaining.delete(bestIdx);
-                ordered.push(midpoints[bestIdx]);
-            }
+            const candidatePoints = [
+                ...collectBoundaryMatchPoints(vertsA, vertsB, SNAP_THRESHOLD_SQ),
+                ...collectBoundaryMatchPoints(vertsB, vertsA, SNAP_THRESHOLD_SQ),
+            ];
 
             // Deduplicate consecutive identical points
-            const deduped: [number, number][] = [ordered[0]];
+            if (candidatePoints.length < 2) continue;
+            const ordered = orderBoundaryPoints(candidatePoints);
+            const deduped: [number, number][] = [ordered[0]!];
             for (let i = 1; i < ordered.length; i++) {
-                if (ordered[i][0] !== ordered[i - 1][0] || ordered[i][1] !== ordered[i - 1][1]) {
-                    deduped.push(ordered[i]);
+                if (ordered[i]![0] !== ordered[i - 1]![0] || ordered[i]![1] !== ordered[i - 1]![1]) {
+                    deduped.push(ordered[i]!);
                 }
             }
             if (deduped.length < 2) continue;

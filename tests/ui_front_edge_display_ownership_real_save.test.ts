@@ -82,4 +82,47 @@ describe.skipIf(!hasFixtures)('real-save front-edge display ownership', () => {
       expect(displayOwnership.sectorByEdgeAndFaction.has(`${edge.edge_id}\0${sideB}`)).toBe(true);
     }
   });
+
+  it('demotes rear-only sector packets behind staffed display owners in the live save when a staffed sibling also claims the edge', () => {
+    const controllerMap = new Map(
+      geo.features.map((feature) => [feature.properties.osid, feature.properties.controller] as const),
+    );
+    const displayOwnership = buildDisplayFrontEdgeOwnership(
+      parsed.corpsFrontSectors ?? [],
+      parsed.frontEdgesOsid ?? [],
+      controllerMap,
+      buildDisplayOsidAdjacency(buildPolygonEdgeOwners(geo)),
+    );
+
+    const rearOnly = (parsed.corpsFrontSectors ?? [])
+      .filter((sector) =>
+        (sector.edge_ids?.length ?? 0) > 0
+        && (sector.assigned_brigade_ids?.length ?? 0) === 0
+        && (sector.reserve_brigade_ids?.length ?? 0) === 0
+        && (sector.rear_brigade_ids?.length ?? 0) > 0,
+      );
+
+    for (const sector of rearOnly) {
+      for (const edgeId of sector.edge_ids ?? []) {
+        const projected = displayOwnership.sectorByEdgeAndFaction.get(`${edgeId}\0${sector.faction}`);
+        expect(projected?.sector_id, `${edgeId} should project to a display owner`).toBeTruthy();
+
+        const siblingOwners = (parsed.corpsFrontSectors ?? []).filter((entry) =>
+          entry.faction === sector.faction
+          && (entry.edge_ids ?? []).includes(edgeId),
+        );
+        const staffedSiblingExists = siblingOwners.some((entry) =>
+          entry.sector_id !== sector.sector_id
+          && ((entry.assigned_brigade_ids?.length ?? 0) > 0 || (entry.reserve_brigade_ids?.length ?? 0) > 0),
+        );
+
+        if (staffedSiblingExists) {
+          expect(
+            projected?.sector_id,
+            `${edgeId} should not stay owned by rear-only packet ${sector.sector_id} when a staffed sibling exists`,
+          ).not.toBe(sector.sector_id);
+        }
+      }
+    }
+  });
 });

@@ -82,7 +82,7 @@ function makeState(): { state: GameState; edges: EdgeRecord[] } {
 }
 
 describe('sector builder sealing', () => {
-    it('promotes a one-hop reserve candidate so the final live sector is not reserve-only', () => {
+    it('moves a one-hop reserve candidate onto an empty front so the sector does not serialize as a gap', () => {
         const { state, edges } = makeState();
 
         const sectors = buildCorpsFrontSectors(state, edges, null);
@@ -91,6 +91,12 @@ describe('sector builder sealing', () => {
         expect(sector).toBeDefined();
         expect(sector?.assigned_brigade_ids).toContain('rear_guard');
         expect(sector?.reserve_brigade_ids).not.toContain('rear_guard');
+        expect(state.military.formations.rear_guard?.location_osid).toBe('op:test:front');
+        expect(state.military.formations.rear_guard?.assignment).toEqual({
+            kind: 'sector',
+            sector_id: sector?.sector_id,
+            role: 'front',
+        });
         expect(sector?.density ?? 0).toBeGreaterThan(0);
         expect(sector?.defensive_power ?? 0).toBeGreaterThan(0);
     });

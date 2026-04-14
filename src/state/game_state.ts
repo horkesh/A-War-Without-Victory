@@ -555,8 +555,8 @@ export interface FormationAssignment {
     edge_id?: string;
     /** Sector ID when kind === 'sector'. Set by brigade-to-sector sync. */
     sector_id?: string;
-    /** Role within sector: 'front' (assigned) or 'reserve'. */
-    role?: 'front' | 'reserve';
+    /** Role within sector: 'front', 'reserve', or 'rear' (sector-attached but not at the line). */
+    role?: 'front' | 'reserve' | 'rear';
 }
 
 export interface FormationOpsState {
@@ -1650,10 +1650,17 @@ export interface CorpsFrontSector {
     length_edges: number;
     /** All friendly OSIDs in this sector's territory (front edges + depth via Voronoi BFS). */
     territory_osids: string[];
-    /** Brigade IDs assigned to this sector (located in territory_osids). */
+    /** Brigade IDs assigned to this sector's active line. */
     assigned_brigade_ids: FormationId[];
     /** Brigade IDs designated reserve for this sector (deep interior, not in any sector territory). */
     reserve_brigade_ids: FormationId[];
+    /** Brigade IDs owned by this sector but positioned in rear territory rather than the live line. */
+    rear_brigade_ids?: FormationId[];
+    /**
+     * Canonical truth flag: this sector packet preserves a live faction-side war front,
+     * but no assigned/reserve brigade physically owns that line right now.
+     */
+    unstaffed_front?: boolean;
     /** Density: assigned_brigades / length_edges. */
     density: number;
     /** Threat ratio: enemy power adjacent to sector / defensive power. */

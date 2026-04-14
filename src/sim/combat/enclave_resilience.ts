@@ -29,6 +29,7 @@ import {
     RESILIENCE_GROWTH_STRAINED,
 } from '../../state/supply_reserve_constants.js';
 import { ENCLAVE_MAX_PERSONNEL } from '../../state/formation_constants.js';
+import { SARAJEVO_CITY_CORE_MUN_IDS } from '../../state/enclave_integrity.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 /** Canonical tag string used to identify enclave brigades in formation tags. */
@@ -126,7 +127,7 @@ export const ENCLAVE_DEFINITIONS: readonly EnclaveDefinition[] = [
     {
         id: 'sarajevo',
         faction: 'RBiH',
-        osid_prefixes: ['op:centar_sarajevo:', 'op:novo_sarajevo:', 'op:stari_grad_sarajevo:', 'op:novi_grad_sarajevo:'],
+        osid_prefixes: SARAJEVO_CITY_CORE_MUN_IDS.map((munId) => `op:${munId}:`),
         resilience_start_turn: 0,   // Sarajevo barricades went up March 1 1992 — defense from day one
         initial_resilience: 20,     // Pre-organized defense: Patriotic League, TDF, barricades, urban terrain knowledge
         capital_osid: 'op:centar_sarajevo:centar_sarajevo',

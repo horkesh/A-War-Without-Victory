@@ -266,6 +266,22 @@ describe('checkTriggeredOperations', () => {
         assert.ok(cerskaAxis!.objectives.length > 0);
     });
 
+    it('does not warn for a triggered axis whose objectives are already controlled when another axis remains viable', () => {
+        const state = makeState(40);
+        state.military.corps_command!['vrs_herzegovina']!.active_operations = [{ name: 'x' } as any];
+        state.military.corps_command!['vrs_1st_krajina']!.active_operations = [{ name: 'y' } as any];
+        state.political.political_controllers!['op:srebrenica:brezovice_2'] = 'RS';
+        state.political.political_controllers!['op:srebrenica:mala_daljegosta_2'] = 'RS';
+
+        const injected = checkTriggeredOperations(state);
+
+        assert.ok(injected.includes('Operation Cerska-Kamenica'));
+        const cerskaOp = state.military.corps_command!['vrs_drina']!.active_operations[0];
+        assert.ok(!cerskaOp!.axes!.some((axis) => axis.axis_id === 'cerska_pocket'));
+        assert.ok(cerskaOp!.axes!.some((axis) => axis.axis_id === 'kamenica'));
+        assert.equal((state.military.op_injection_warnings ?? []).length, 0);
+    });
+
     it('injects Herzegovina Consolidation without brigade-missing warnings once its chain is complete', () => {
         const state = makeState(12);
         state.operation_history = [

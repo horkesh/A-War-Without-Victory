@@ -21,8 +21,9 @@ export function reconcileFinalSectorTruth(
     centroids?: OsidCentroidMap,
     spatial?: SpatialContext,
     supplyStateByOsid?: SupplyStateByOsidReport | null,
+    isFinalPass: boolean = false,
 ): FinalSectorTruthReconciliationReport {
-    const sectors = buildCorpsFrontSectors(state, edges, reverseMap, centroids, spatial);
+    const sectors = buildCorpsFrontSectors(state, edges, reverseMap, centroids, spatial, isFinalPass);
     state.military.corps_front_sectors = sectors;
 
     const sectorList = Object.values(sectors);
@@ -38,6 +39,24 @@ export function reconcileFinalSectorTruth(
 
     const adjacency = (spatial?.adjacency as Map<Osid, Osid[]>) ?? buildOsidAdjacency(edges);
     assignBrigadesToSubSegments(state, sectorList, adjacency);
+
+    // Clear stale assigned_sub_segment_id on formations not in any sector's brigade lists.
+    // Life lesson: "When demoting a brigade, always clear derived cache fields."
+    // Late writers (recruitment, mobilization, elite recall) can re-assign ssids after
+    // the main sector pipeline clears them — this final sweep catches stragglers.
+    const sectorOwnedBrigades = new Set<string>();
+    for (const sector of sectorList) {
+        for (const bid of sector.assigned_brigade_ids ?? []) sectorOwnedBrigades.add(bid);
+        for (const bid of sector.reserve_brigade_ids ?? []) sectorOwnedBrigades.add(bid);
+    }
+    const formations = state.military.formations ?? {};
+    for (const fid of Object.keys(formations)) {
+        const f = formations[fid];
+        if (f.assigned_sub_segment_id && !sectorOwnedBrigades.has(fid)) {
+            f.assigned_sub_segment_id = undefined;
+        }
+    }
+
     const ratings = computeSectorCombatRatings(state, supplyStateByOsid ?? null);
 
     return {

@@ -168,6 +168,7 @@ function makeMinimalBriefing(overrides: Partial<CommanderBriefing> = {}): Comman
         doctrine_stance: 'balanced',
         corps_stance: 'balanced',
         corps_exhaustion: 0,
+        faction_war_exhaustion: 0,
         avg_fatigue_pct: 0,
         brigades_above_fatigue_threshold: 0,
         enemy_equipment_summary: { tanks: 0, artillery: 0, infantry_only: true },
@@ -245,6 +246,7 @@ describe('v0.8.1 Phase 3 — Candidate Generation', () => {
         // Exhaustion and fatigue block offensive; heavy/critical stance blocks others
         const briefing = makeMinimalBriefing({
             corps_exhaustion: MAX_EXHAUSTION_FOR_OPERATION + 10,
+        faction_war_exhaustion: 0,
             avg_fatigue_pct: 90,
             corps_stance: 'defensive',
         });
@@ -365,6 +367,7 @@ describe('v0.8.1 Phase 3 — Hard-Block Rules', () => {
         const surplusPool = makeSurplusPool(MIN_BRIGADES_FOR_PLAN);
         const briefing = makeMinimalBriefing({
             corps_exhaustion: MAX_EXHAUSTION_FOR_OPERATION + 5,
+        faction_war_exhaustion: 0,
             pre_planned_ops: [{ id: 'op_1' }],
         });
         const zones = [makeZone({ posture: 'balanced', surplus_brigades: surplusPool.map(e => e.brigade_id) })];
@@ -382,6 +385,7 @@ describe('v0.8.1 Phase 3 — Hard-Block Rules', () => {
         const surplusPool = makeSurplusPool(MIN_BRIGADES_FOR_PLAN);
         const briefing = makeMinimalBriefing({
             corps_exhaustion: MAX_EXHAUSTION_FOR_OPERATION + 5,
+        faction_war_exhaustion: 0,
         });
         const zones = [makeZone({ posture: 'projecting', surplus_brigades: surplusPool.map(e => e.brigade_id) })];
         const forces = makeForces(surplusPool, surplusPool.length);
@@ -399,6 +403,7 @@ describe('v0.8.1 Phase 3 — Hard-Block Rules', () => {
         // Block all offensive intents via exhaustion
         const briefing = makeMinimalBriefing({
             corps_exhaustion: MAX_EXHAUSTION_FOR_OPERATION + 5,
+        faction_war_exhaustion: 0,
             pre_planned_ops: [{ id: 'op_1' }],
         });
         const zones = [makeZone({ posture: 'projecting', surplus_brigades: surplusPool.map(e => e.brigade_id) })];
@@ -417,6 +422,7 @@ describe('v0.8.1 Phase 3 — Hard-Block Rules', () => {
         const surplusPool = makeSurplusPool(MIN_BRIGADES_FOR_PLAN);
         const briefing = makeMinimalBriefing({
             corps_exhaustion: MAX_EXHAUSTION_FOR_OPERATION + 5,
+        faction_war_exhaustion: 0,
             pre_planned_ops: [{ id: 'op_1' }],
         });
         const zones = [makeZone({ posture: 'projecting', surplus_brigades: surplusPool.map(e => e.brigade_id) })];
@@ -563,6 +569,7 @@ describe('v0.8.1 Phase 3 — Winner Selection', () => {
         const briefing = makeMinimalBriefing({
             corps_stance: 'balanced',
             corps_exhaustion: 0,
+        faction_war_exhaustion: 0,
             previous_state: makeMinimalState({
                 threat_assessment: {
                     threatened_zones: [],
@@ -586,6 +593,7 @@ describe('v0.8.1 Phase 3 — Winner Selection', () => {
         const briefing = makeMinimalBriefing({
             corps_stance: 'balanced',
             corps_exhaustion: 0,
+        faction_war_exhaustion: 0,
         });
         const zones: ZoneAssessment[] = [];
         const forces = makeForces([]);
@@ -761,6 +769,7 @@ describe('v0.8.1 Phase 3 — Decision Trace Persistence', () => {
         const briefing = makeMinimalBriefing({
             corps_stance: 'balanced',
             corps_exhaustion: MAX_EXHAUSTION_FOR_OPERATION + 5,
+        faction_war_exhaustion: 0,
             pre_planned_ops: [{ id: 'op_1' }],
         });
         const zones = [makeZone({ posture: 'projecting', surplus_brigades: surplusPool.map(e => e.brigade_id) })];
@@ -802,6 +811,7 @@ describe('v0.8.1 Phase 3 — Decision Trace Persistence', () => {
         const surplusPool = makeSurplusPool(MIN_BRIGADES_FOR_PLAN);
         const briefing = makeMinimalBriefing({
             corps_exhaustion: MAX_EXHAUSTION_FOR_OPERATION + 5,
+        faction_war_exhaustion: 0,
             avg_fatigue_pct: 80,
             pre_planned_ops: [{ id: 'op_1' }],
         });

@@ -15,6 +15,37 @@ Every calibration run is reviewed by a two-tier expert panel before any action i
 
 **Orchestrator** synthesizes, gives go/no-go, updates this file + PROJECT_LEDGER.md.
 
+## n1572 (2026-04-14) — Exhaustion Rescale + HRHB Directive Scope + Pressure Floor
+
+- **93.6% area-weighted. 27/27 anchors. 6/6 benchmarks. Hash: bd7e8d59508b858a.**
+- Run dir: `apr1992_definitive_40w__3649b3861a87e6ea__w40_n1572`
+- Changes: (1) Fix 1A — `situation_score` exhaustion rescaled from 0-100 clamp to /6 normalization (values ~400 at w40 now read as ~67, not 100). (2) Fix 3 — HRHB patron directive per-corps scope: Posavina exempt from defensive ceiling, Herzegovina/Central Bosnia/Tomislavgrad scoped individually. (3) Fix 1B — negotiation pressure erodes RS territory floor gap (up to -15pp at pressure ~4000).
+- HRHB attack orders: **6** (was 2 in n1570). Posavina no longer capped at defensive — historically correct.
+- Calibration improved +0.1pp (93.6% vs 93.5%). Zero regressions.
+- n1571 (Fix 1A alone): same hash as n1570 — zero-delta for 40w (peace plans not evaluated in this window).
+
+## n1570 (2026-04-14) — jajce_falls turn_min Historical Correction
+
+- **93.5% area-weighted. 27/27 anchors. 6/6 benchmarks. Hash: 6810f0c64713e7f6.**
+- Run dir: `apr1992_definitive_40w__3649b3861a87e6ea__w40_n1570`
+- Changes: `jajce_falls_1992` event `turn_min` 40→28 (historical fall Oct 29, 1992 ≈ w28). Plus: stale ssid safety net in `final_sector_truth_reconciliation.ts` (zero-delta in practice).
+- Event now fires at turn 28 (was unreachable before turn 40). All 10 Jajce OSIDs RS-controlled — historically correct.
+- Zero calibration regression from n1568/n1569.
+- 0 critical anomalies, 1 warning, 7 info.
+
+## n1568 (2026-04-14) — Exhaustion Commander Wiring
+
+- **93.5% area-weighted. 27/27 anchors. 6/6 benchmarks. Hash: cd3083a0295af31b.**
+- Run dir: `apr1992_definitive_40w__3649b3861a87e6ea__w40_n1568`
+- Changes: `faction_war_exhaustion` wired into commander plan scoring via `factionExhaustionDrag` multiplier (1.0 at 0 exhaustion → floor 0.3 at 600+). Offensive intents (`stage_operation`, `launch_opportunity`) now suppressed as nation exhausts. Defensive intents unaffected.
+- Hash changed from previous baseline — confirms real behavior change. Zero calibration regression (93.5% vs previous ~93.2%).
+- 0 critical anomalies, 1 warning (thin arbih_1st_corps:11 sector — accepted variance), 7 info.
+- 0 invalid operations, 0 zero-eligible-attacker operations (historic low).
+- 94 total battles (74 defender-present), 125 attack orders (RS=112, RBiH=11, HRHB=2), 44 flips.
+- Battleless weeks: 0, 24, 32-39. Late-war quiet period (w32-39) is the exhaustion drag producing natural operational tempo decay — historically plausible for late 1992 front stabilization.
+- War exhaustion at w40: RS=400, HRHB=400, RBiH=271.
+- **No panel dispatch** — this is a nightshift campaign run. Raw data collected and compared. No P0/P1 regressions.
+
 ## n1302 (2026-04-02) — NEW ATH
 - **93.7% area-weighted. 25/25 anchors. 6/6 benchmarks. Hash: 0cf989330bd36cc8.**
 - Run dir: `apr1992_definitive_40w__d452d2a10f3d69af__w40_n1294`
@@ -23,7 +54,7 @@ Every calibration run is reviewed by a two-tier expert panel before any action i
 - DRINA regressed ~1.5pp (86.6%) — RS overcapturing Bratunac/Foča/Rogatica/Srebrenica/Višegrad/Vlasenica. Possible cause: must_hold corridor changes freed Drina Corps brigades.
 - ZEA rate elevated: 47% (was ~39% at n1281). Op-scale cap narrowing eligible attacker pools may be a factor.
 - Order counts identical to n1289: RS=62, RBiH=22, HRHB=7, 91 total, 32 weeks with orders.
-- **P1 open:** Casualty ratio discrepancy — `attack_resolution` reports 0.814 att:def, `anomaly_detection` reports 0.63. Source mismatch unresolved.
+- ~~P1 open: Casualty ratio discrepancy~~ — **RESOLVED 2026-04-14.** Root cause: anomaly detector counted frontline friction engagements (battle_id `*:friction:*`) mixed with battle casualties. Fix: filter friction out, report separately. The two sources now measure the same pool.
 - **P1 open:** 112 adjacent-uncontested OSIDs (pre-existing brigade concentration thinning).
 - **WOG verdict: APPROVE WITH CONCERNS.** No P0 blockers.
 - Commits: c63c2313 (n1294–n1296) + b0d06442 (n1297) + 6f6f3c52 (n1298) + 0f3b05df (n1299) + ce6f2b97 (n1300) + fe7c5630 (n1301).

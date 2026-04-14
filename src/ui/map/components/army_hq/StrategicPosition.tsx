@@ -8,6 +8,7 @@
  */
 
 import { useState } from 'react';
+import { DIMENSION_WEIGHTS } from '../../../../sim/events/strategic_dimensions.js';
 
 const DIMENSION_CONFIG: Array<{
     id: string;
@@ -23,12 +24,8 @@ const DIMENSION_CONFIG: Array<{
     { id: 'negotiating_leverage', label: 'Negotiating Leverage', color: 'bg-yellow-400', bgColor: 'bg-yellow-400/20' },
 ];
 
-/** Per-faction dimension weights (must match GameStateAdapter deriveNegotiatingCapital). */
-const FACTION_WEIGHTS: Record<string, Record<string, number>> = {
-    RS:   { military_credibility: 0.25, territorial_legitimacy: 0.25, international_standing: 0.10, patron_confidence: 0.15, internal_cohesion: 0.10, negotiating_leverage: 0.15 },
-    RBiH: { military_credibility: 0.15, territorial_legitimacy: 0.15, international_standing: 0.25, patron_confidence: 0.15, internal_cohesion: 0.15, negotiating_leverage: 0.15 },
-    HRHB: { military_credibility: 0.15, territorial_legitimacy: 0.20, international_standing: 0.15, patron_confidence: 0.25, internal_cohesion: 0.15, negotiating_leverage: 0.10 },
-};
+/** Per-faction dimension weights — canonical source: DIMENSION_WEIGHTS in strategic_dimensions.ts */
+const FACTION_WEIGHTS = DIMENSION_WEIGHTS;
 
 interface DimValue {
     base_value: number;

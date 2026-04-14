@@ -415,18 +415,30 @@ export function checkTriggeredOperations(state: GameState): string[] {
         if (!opStillHasEnemyObjectives(state, def)) continue;
 
         // Validate before building
+        const liveAxes = def.axes
+            .map((axis) => ({
+                ...axis,
+                objectives: axis.objectives.filter((osid) => {
+                    const controller = getPoliticalControllerOSID(state, osid, undefined);
+                    return controller !== null && controller !== def.faction;
+                }),
+            }))
+            .filter((axis) => axis.objectives.length > 0);
+        if (liveAxes.length === 0) continue;
+        const effectiveDef = { ...def, axes: liveAxes };
+
         const validatable: ValidatableOpDef = {
-            name: def.name,
-            faction: def.faction,
-            axes: def.axes.map(a => ({ axis_id: a.axis_id, brigades: a.brigades, objectives: a.objectives, staging_osid: a.staging_osid })),
-            staging_osid: def.staging_osid,
+            name: effectiveDef.name,
+            faction: effectiveDef.faction,
+            axes: liveAxes.map(a => ({ axis_id: a.axis_id, brigades: a.brigades, objectives: a.objectives, staging_osid: a.staging_osid })),
+            staging_osid: effectiveDef.staging_osid,
         };
         const trigWarnings = validateOpAtInjection(validatable, state, undefined, primaryCmd);
         collectOpInjectionWarnings(state, trigWarnings);
         if (hasBlockingOpInjectionWarnings(trigWarnings)) continue;
 
         // Bot auto-accept: build and inject the operation
-        const result = buildOperation(def, state, turn);
+        const result = buildOperation(effectiveDef, state, turn);
         if (!result) continue;
 
         // For single-corps ops: inject directly

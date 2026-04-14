@@ -125,14 +125,15 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
             }
             if (!frontSet.has(loc)) {
                 // Reserve brigades only column march if deep rear (2+ hops).
-                // 1-hop reserves stay put — they're the immediate reinforcement pool.
+                // 1-hop reserves stay put when the sector already has line holders. If the
+                // sector has no line holder, the reserve must march forward to close the seam.
                 if (isReserve) {
                     const neighbors = adjacency.get(loc as Osid) ?? [];
                     const nearFront = neighbors.some(n => {
                         const nAnalysis = graphAnalysis.osid_analysis.get(n as Osid);
                         return nAnalysis != null && nAnalysis.enemy_neighbors.length > 0;
                     });
-                    if (nearFront) return false; // 1-hop reserve — let later evaluations handle
+                    if (nearFront && assignedSector.assigned_brigade_ids.length > 0) return false;
                 }
                 // Not on sector front — column march there (use actual destination
                 // for multi-hop Dijkstra pathfinding, not just first step)

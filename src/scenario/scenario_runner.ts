@@ -10,7 +10,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { loadSettlementEthnicityData } from '../data/settlement_ethnicity.js';
-import { computeFrontEdges } from '../map/front_edges.js';
+import { computeFrontEdges, computeFrontEdgesOsid } from '../map/front_edges.js';
 import type { LoadedSettlementGraph } from '../map/settlements.js';
 import { loadSettlementGraph } from '../map/settlements.js';
 import { BotManager } from '../sim/bot/bot_manager.js';
@@ -67,10 +67,11 @@ import {
     applyBaselineOpsExhaustion,
     computeEngagementLevel
 } from './baseline_ops_scheduler.js';
-import { backfillFormationLocationOsid, loadOperationalData, loadOperationalEdges } from './../data/operational_data.js';
+import { backfillFormationLocationOsid, loadOperationalCentroids, loadOperationalData, loadOperationalEdges } from './../data/operational_data.js';
 import { setUrbanOsidSet, setForestOsidSet } from '../sim/combat/combat_math.js';
 import { loadUrbanOsidSet, loadForestOsidSet } from '../sim/combat/combat_terrain_sets_node.js';
 import { displaceFormationsInEnemyTerritory } from '../sim/combat/attack_resolution_osid.js';
+import { reconcileFinalSectorTruth } from '../sim/combat/final_sector_truth_reconciliation.js';
 import { loadInitialFormations } from './initial_formations_loader.js';
 import {
     loadMunicipalityHqSettlement,
@@ -155,12 +156,15 @@ function safeDebugLog(...args: unknown[]): void {
 export function repairScenarioArtifactState(
     state: GameState,
     edges: import('../map/settlements.js').EdgeRecord[] | undefined,
-    operationalToCanonical?: import('../data/operational_data.js').OperationalToCanonicalReverseMap | null
+    operationalToCanonical?: import('../data/operational_data.js').OperationalToCanonicalReverseMap | null,
+    centroids?: import('../data/operational_data_types.js').OsidCentroidMap,
 ): void {
     if (state.meta.phase !== 'war' || !edges?.length || !operationalToCanonical) {
         return;
     }
     displaceFormationsInEnemyTerritory(state, edges, operationalToCanonical);
+    state.military.war_front_edges_osid = computeFrontEdgesOsid(state, edges, operationalToCanonical);
+    reconcileFinalSectorTruth(state, edges, operationalToCanonical, centroids);
 }
 
 function buildZeroBattleCombatCausalitySummary(): CombatCausalitySummary {
@@ -690,9 +694,14 @@ async function writeFailureReport(
     ];
     const failureReportPath = join(outDir, 'failure_report.txt');
     const failureReportJsonPath = join(outDir, 'failure_report.json');
+    await ensureRunOutputDir(outDir);
     await writeFile(failureReportPath, txtLines.join('\n'), 'utf8');
     const failureJson = { run_id, scenario_id, weeks, error_name, error_message, stack };
     await writeFile(failureReportJsonPath, stableStringify(failureJson, 2), 'utf8');
+}
+
+async function ensureRunOutputDir(outDir: string): Promise<void> {
+    await mkdir(outDir, { recursive: true });
 }
 
 /**
@@ -890,9 +899,38 @@ interface ScenarioStartupBuildResult {
     oobCorps: OobCorps[];
     municipalityHqSettlement: Record<string, string>;
     operationalData: Awaited<ReturnType<typeof loadOperationalData>> | null;
+    operationalCentroids: Awaited<ReturnType<typeof loadOperationalCentroids>> | undefined;
     historicalNameLookup?: HistoricalNameLookup;
     sidToMun: Map<string, string>;
     initOverrideChangeCount: number;
+}
+
+function validateScenarioMustHoldContract(
+    scenario: Awaited<ReturnType<typeof loadScenario>>,
+    liveCorpsIdsSource: Iterable<string>,
+    operationalData: Awaited<ReturnType<typeof loadOperationalData>> | null
+): void {
+    const mustHold = scenario.must_hold_osids_by_corps;
+    if (!mustHold || Object.keys(mustHold).length === 0) return;
+
+    const liveCorpsIds = new Set(liveCorpsIdsSource);
+    const realOsids = operationalData ? new Set(operationalData.operationalToCanonical.keys()) : null;
+    const problems: string[] = [];
+
+    for (const corpsId of Object.keys(mustHold).sort(strictCompare)) {
+        if (!liveCorpsIds.has(corpsId)) {
+            problems.push(`unknown corps "${corpsId}"`);
+        }
+        for (const osid of mustHold[corpsId] ?? []) {
+            if (realOsids && !realOsids.has(osid)) {
+                problems.push(`unknown OSID "${osid}" for corps "${corpsId}"`);
+            }
+        }
+    }
+
+    if (problems.length > 0) {
+        throw new Error(`Scenario must_hold_osids_by_corps contract invalid: ${problems.join('; ')}`);
+    }
 }
 
 export async function buildScenarioStartupState(
@@ -974,8 +1012,10 @@ export async function buildScenarioStartupState(
     let oobCorps: OobCorps[] = [];
     let municipalityHqSettlement: Record<string, string> = {};
     let operationalData: Awaited<ReturnType<typeof loadOperationalData>> | null = null;
+    let operationalCentroids: Awaited<ReturnType<typeof loadOperationalCentroids>> | undefined;
     try {
         operationalData = await loadOperationalData(baseDir);
+        operationalCentroids = await loadOperationalCentroids(baseDir);
     } catch {
         // canonical_to_operational_map.json may be missing; location_osid will not be set
     }
@@ -1294,6 +1334,11 @@ export async function buildScenarioStartupState(
     }
 
     if (scenario.must_hold_osids_by_corps && Object.keys(scenario.must_hold_osids_by_corps).length > 0) {
+        validateScenarioMustHoldContract(
+            scenario,
+            oobCorps.map((corps) => corps.id),
+            operationalData
+        );
         state.military.must_hold_osids_by_corps = scenario.must_hold_osids_by_corps;
     }
 
@@ -1384,6 +1429,7 @@ export async function buildScenarioStartupState(
         oobCorps,
         municipalityHqSettlement,
         operationalData,
+        operationalCentroids,
         historicalNameLookup,
         sidToMun,
         initOverrideChangeCount
@@ -1433,7 +1479,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         runDirName = run_id;
     }
     const outDir = outDirOverride ?? join(outDirBase, runDirName);
-    await mkdir(outDir, { recursive: true });
+    await ensureRunOutputDir(outDir);
 
     const out_dir_relative = outDirOverride ?? (uniqueRunFolder ? `${outDirBase}/${runDirName}` : `${outDirBase}/${run_id}`);
     const run_meta = {
@@ -1444,6 +1490,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         out_dir: out_dir_relative
     };
     const runMetaPath = join(outDir, 'run_meta.json');
+    await ensureRunOutputDir(outDir);
     await writeFile(runMetaPath, stableStringify(run_meta, 2), 'utf8');
 
     const baseDir = optionsBaseDir ?? process.cwd();
@@ -1463,6 +1510,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             oobCorps,
             municipalityHqSettlement,
             operationalData,
+            operationalCentroids,
             historicalNameLookup,
             sidToMun,
             initOverrideChangeCount
@@ -1472,6 +1520,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         const historicalMetricsInitial = captureHistoricalFactionMetrics(state);
 
         const initialSavePath = join(outDir, 'initial_save.json');
+        await ensureRunOutputDir(outDir);
         await writeFile(initialSavePath, serializedState, 'utf8');
         const initialControlSnapshot = extractSettlementControlSnapshot(state, graph);
 
@@ -1510,6 +1559,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
 
         const weeklyReportPath = join(outDir, 'weekly_report.jsonl');
         const replayPath = emitWeeklySavesForVideo ? join(outDir, 'replay.jsonl') : null;
+        await ensureRunOutputDir(outDir);
         const reportStream = createWriteStream(weeklyReportPath, { flags: 'w' });
         const replayStream = replayPath ? createWriteStream(replayPath, { flags: 'w' }) : null;
 
@@ -1523,6 +1573,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         let replayTimelineFirstFrame = true;
         if (emitWeeklySavesForVideo) {
             replayTimelinePath = join(outDir, 'replay_timeline.json');
+            await ensureRunOutputDir(outDir);
             replayTimelineStream = createWriteStream(replayTimelinePath, { flags: 'w' });
             const meta = { run_id, scenario_id: scenario.scenario_id, weeks };
             replayTimelineStream.write('{"meta":' + stableStringify(meta) + ',"frames":[');
@@ -1921,7 +1972,12 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 ops = { enabled: true, level };
             }
 
-            repairScenarioArtifactState(state, graph.edges, operationalData?.operationalToCanonical ?? null);
+            repairScenarioArtifactState(
+                state,
+                graph.edges,
+                operationalData?.operationalToCanonical ?? null,
+                operationalCentroids,
+            );
 
             // Capture corps AI snapshots at key turns for the end report
             const currentTurn = state.meta.turn;
@@ -2044,6 +2100,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             if (effectiveEmitEvery > 0 && (week_index + 1) % effectiveEmitEvery === 0) {
                 const midPath = join(outDir, `save_w${week_index + 1}.json`);
                 const serializedMid = serializeState(state);
+                await ensureRunOutputDir(outDir);
                 await writeFile(midPath, serializedMid, 'utf8');
                 weeklySavePaths.push(midPath);
                 if (emitWeeklySavesForVideo && replayTimelineStream) {
@@ -2066,7 +2123,24 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         });
 
         const finalSavePath = join(outDir, 'final_save.json');
-        await writeFile(finalSavePath, serializeState(state), 'utf8');
+        if (state.meta.phase === 'war' && operationalData) {
+            const finalOperationalEdges = await loadOperationalEdges(baseDir);
+            state.military.war_front_edges_osid = computeFrontEdgesOsid(
+                state,
+                finalOperationalEdges,
+                operationalData.operationalToCanonical,
+            );
+            reconcileFinalSectorTruth(
+                state,
+                finalOperationalEdges,
+                operationalData.operationalToCanonical,
+                operationalCentroids,
+            );
+        }
+        const finalSerialized = serializeState(state);
+        final_state_hash = createHash('sha256').update(finalSerialized, 'utf8').digest('hex').slice(0, 16);
+        await ensureRunOutputDir(outDir);
+        await writeFile(finalSavePath, finalSerialized, 'utf8');
 
         const anomalyReports: AnomalyReport[] = runAnomalyDetection(state);
 
@@ -2273,18 +2347,22 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         };
         const runSummaryPath = join(outDir, 'run_summary.json');
         const runSummaryForWrite = integerizeRunSummaryCounts(runSummary);
+        await ensureRunOutputDir(outDir);
         await writeFile(runSummaryPath, stableStringify(runSummaryForWrite, 2), 'utf8');
         const controlDelta = computeControlDelta(initialControlSnapshot, finalControlSnapshot);
         const controlDeltaPath = join(outDir, 'control_delta.json');
+        await ensureRunOutputDir(outDir);
         await writeFile(controlDeltaPath, stableStringify(controlDelta, 2), 'utf8');
 
         const activitySummary = computeActivitySummary(activityCountsPerWeek);
         const activitySummaryPath = join(outDir, 'activity_summary.json');
+        await ensureRunOutputDir(outDir);
         await writeFile(activitySummaryPath, stableStringify(activitySummary, 2), 'utf8');
 
         let botDiagnosticsPath: string | undefined;
         if (enableBotDiagnostics) {
             botDiagnosticsPath = join(outDir, 'bot_diagnostics.json');
+            await ensureRunOutputDir(outDir);
             await writeFile(botDiagnosticsPath, stableStringify(botWeeklyDiagnostics, 2), 'utf8');
         }
 
@@ -2300,14 +2378,17 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         // finalFormations and destroyedBrigades are hoisted above runSummary.
         const formationDelta = computeFormationDelta(initialFormationsSnapshot, finalFormations);
         const formationDeltaPath = join(outDir, 'formation_delta.json');
+        await ensureRunOutputDir(outDir);
         await writeFile(formationDeltaPath, stableStringify(formationDelta, 2), 'utf8');
 
         const destroyedBrigadesPath = join(outDir, 'destroyed_brigades.json');
+        await ensureRunOutputDir(outDir);
         await writeFile(destroyedBrigadesPath, stableStringify(destroyedBrigades, 2), 'utf8');
 
         // Operation AARs artifact
         const operationAars = state.operation_history ?? [];
         const operationAarsPath = join(outDir, 'operation_aars.json');
+        await ensureRunOutputDir(outDir);
         await writeFile(operationAarsPath, stableStringify(operationAars, 2), 'utf8');
 
         let formationFatigueSummary: FormationFatigueSummary | null = null;
@@ -2386,6 +2467,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             anomalyReports: anomalyReports.length > 0 ? anomalyReports : null
         });
         const endReportPath = join(outDir, 'end_report.md');
+        await ensureRunOutputDir(outDir);
         await writeFile(endReportPath, endReportMd, 'utf8');
 
         return {

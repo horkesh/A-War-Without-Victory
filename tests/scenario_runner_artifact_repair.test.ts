@@ -45,5 +45,14 @@ describe('scenario runner artifact repair', () => {
 
         expect(state.military.formations.arbih_test.location_osid).toBe('op:friendly:town');
         expect(state.military.formations.arbih_test.status).toBe('active');
+        expect(state.military.war_front_edges_osid).toEqual([
+            {
+                edge_id: 'op:enemy:town__op:friendly:town',
+                a: 'op:enemy:town',
+                b: 'op:friendly:town',
+                side_a: 'RS',
+                side_b: 'RBiH',
+            },
+        ]);
     });
 });

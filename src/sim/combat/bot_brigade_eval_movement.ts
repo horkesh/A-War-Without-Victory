@@ -62,6 +62,32 @@ export function evaluateInteriorMovement(ctx: BrigadeEvaluationContext): boolean
             return true;
         }
     }
+    const effectiveCorpsId = brigade.elite_loan_state?.on_loan && brigade.elite_loan_state.loaned_to_corps
+        ? brigade.elite_loan_state.loaned_to_corps
+        : brigade.corps_id;
+    if (!brigade.assignment && effectiveCorpsId && state.military.corps_front_sectors) {
+        const ownCorpsFrontOsids = new Set<string>();
+        let insideOwnCorpsTerritory = false;
+        for (const sector of Object.values(state.military.corps_front_sectors)) {
+            if (sector.corps_id !== effectiveCorpsId) continue;
+            if (sector.territory_osids.includes(loc)) insideOwnCorpsTerritory = true;
+            for (const subSegment of sector.sub_segments ?? []) {
+                for (const osid of subSegment.friendly_osids ?? []) ownCorpsFrontOsids.add(osid);
+            }
+        }
+        if (insideOwnCorpsTerritory && ownCorpsFrontOsids.size > 0) {
+            if (!ownCorpsFrontOsids.has(loc)) {
+                const dest = findNearestFriendlyOsidInSet(
+                    state, faction, loc, adjacency, reverseMap, ownCorpsFrontOsids,
+                );
+                if (dest && !isMovementDestinationRisky(dest, graphAnalysis)) {
+                    result.movement_orders[brigade.id] = dest;
+                }
+            }
+            result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+            return true;
+        }
+    }
     // Fallback: standard interior movement toward nearest front
     issueInteriorMovement(brigade, loc, faction, adjacency, state, reverseMap, graphAnalysis, result,
         ['undefended', 'critical', 'threatened', 'active'], columnAssignments);

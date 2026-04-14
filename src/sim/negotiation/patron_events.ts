@@ -203,8 +203,7 @@ export function applyPatronEvent(state: GameState, event: PatronEvent): void {
             pr.sanctions_active = effect.set_sanctions;
         }
 
-        // Humanitarian standing changes — now applied to strategic_dimensions
-        // TODO: Apply humanitarian_delta to international_standing dimension instead
+        // Humanitarian standing changes — applied to strategic_dimensions international_standing
         if (effect.humanitarian_delta !== undefined && neg.strategic_dimensions?.[effect.faction]) {
             const dim = neg.strategic_dimensions[effect.faction]['international_standing'];
             if (dim) {

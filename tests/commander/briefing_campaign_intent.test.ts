@@ -119,6 +119,7 @@ function makeMinimalBriefing(overrides: Partial<CommanderBriefing> = {}): Comman
         doctrine_stance: 'balanced',
         corps_stance: 'balanced',
         corps_exhaustion: 0,
+        faction_war_exhaustion: 0,
         avg_fatigue_pct: 0,
         brigades_above_fatigue_threshold: 0,
         enemy_equipment_summary: {
@@ -197,6 +198,7 @@ describe('commander briefing campaign intent', () => {
                     [corpsId]: {
                         stance: 'balanced',
                         corps_exhaustion: 14,
+        faction_war_exhaustion: 0,
                         active_operations: [],
                     },
                 },
@@ -355,11 +357,13 @@ describe('commander briefing campaign intent', () => {
                     [corpsId]: {
                         stance: 'balanced',
                         corps_exhaustion: 14,
+        faction_war_exhaustion: 0,
                         active_operations: [],
                     },
                     [adjacentCorpsId]: {
                         stance: 'offensive',
                         corps_exhaustion: 5,
+        faction_war_exhaustion: 0,
                         active_operations: [
                             { id: 'op:adjacent:1', name: 'Adjacent Op' },
                             { id: 'op:adjacent:2', name: 'Adjacent Op 2' },
@@ -368,6 +372,7 @@ describe('commander briefing campaign intent', () => {
                     [distantCorpsId]: {
                         stance: 'defensive',
                         corps_exhaustion: 7,
+        faction_war_exhaustion: 0,
                         active_operations: [{ id: 'op:distant:1', name: 'Distant Op' }],
                     },
                 },
@@ -653,6 +658,7 @@ describe('commander briefing campaign intent', () => {
                     [corpsId]: {
                         stance: 'balanced',
                         corps_exhaustion: 14,
+        faction_war_exhaustion: 0,
                         active_operations: [],
                     },
                 },
@@ -753,6 +759,7 @@ describe('commander briefing campaign intent', () => {
                     [corpsId]: {
                         stance: 'balanced',
                         corps_exhaustion: 10,
+        faction_war_exhaustion: 0,
                         active_operations: [],
                     },
                 },

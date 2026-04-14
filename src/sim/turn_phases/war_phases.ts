@@ -893,10 +893,12 @@ export const warPhases: NamedPhase[] = [
                 meta.autonomy_level_pending = undefined;
             }
             meta.autonomy_overrides = undefined;
-            // Expire unresolved proposals from previous turns (silently discard — player missed them).
+            // GC all proposals from previous turns — unresolved ones were missed by the player,
+            // resolved ones have already been consumed. Current-turn proposals are not yet generated
+            // at this pipeline point.
             if (meta.pending_proposal_reviews) {
                 meta.pending_proposal_reviews = meta.pending_proposal_reviews.filter(
-                    p => !(p.turn < meta.turn && p.accepted === undefined)
+                    p => p.turn >= meta.turn
                 );
             }
             // v0.8.4 Phase D: Clear per-corps player_op_response each turn so stale responses
@@ -1783,7 +1785,8 @@ export const warPhases: NamedPhase[] = [
                     catalog.corps,
                     catalog.brigades,
                     sidToMun,
-                    catalog.municipality_hq_settlement
+                    catalog.municipality_hq_settlement,
+                    opDataCache?.opData?.canonicalToOperational,
                 );
                 recruited_actions = ongoingReport?.actions.length ?? 0;
                 for (const action of ongoingReport?.actions ?? []) {
@@ -2622,6 +2625,36 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'reconcile-final-sector-truth-after-ops',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const od = getOperationalData(context);
+            if (!od?.edges?.length) return;
+            const cachedSpatial = getSpatialContextCache(context)?.postCombat;
+            reconcileFinalSectorTruth(
+                context.state,
+                od.edges,
+                od.opData?.operationalToCanonical ?? null,
+                od.centroids,
+                cachedSpatial,
+                context.report?.supply_resolution?.supply_state_by_osid ?? null,
+                true, // isFinalPass: only this genuinely-final invocation emits unresolved warnings
+            );
+        }
+    },
+    {
+        name: 'final-distribute-brigades-to-front',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const sectorMap = context.state.military.corps_front_sectors;
+            if (!sectorMap) return;
+            const spatial = getSpatialContextCache(context);
+            const adjacency = (spatial?.postCombat?.adjacency ?? spatial?.preCombat.adjacency) as Map<Osid, Osid[]> | undefined;
+            if (!adjacency) return;
+            distributeBrigadesToFront(context.state, Object.values(sectorMap), adjacency);
+        }
+    },
+    {
         name: 'assert-final-operation-lifecycle',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
@@ -2764,9 +2797,21 @@ function isWithinSameCorpsSectorSpace(
 }
 
 export function recallDriftedBrigades(state: GameState, adjacency?: Map<string, string[]>): void {
-    if (!adjacency || adjacency.size === 0) return;
     const formations = state.military.formations ?? {};
     const pc = (state.political.political_controllers ?? {}) as Record<string, string>;
+    const moveOrders = state.military.brigade_movement_orders ??= {};
+
+    for (const [fid, order] of Object.entries(moveOrders)) {
+        const formation = formations[fid];
+        const dest = order?.destination_sids?.[0];
+        if (!formation || !dest || !formation.faction) continue;
+        const controller = pc[dest];
+        if (controller != null && controller !== formation.faction) {
+            delete moveOrders[fid];
+        }
+    }
+
+    if (!adjacency || adjacency.size === 0) return;
 
     // Build set of brigades in active operations
     const inOp = new Set<string>();
@@ -2783,12 +2828,14 @@ export function recallDriftedBrigades(state: GameState, adjacency?: Map<string, 
     }
 
     const adj = adjacency;
-    const moveOrders = state.military.brigade_movement_orders ??= {};
 
-    // Build set of sector-line-assigned brigades (do not recall these)
-    const lineAssigned = new Set<string>();
+    // Build set of sector-owned brigades (do not recall these). Reserve and rear
+    // buckets are still live sector ownership, not ownerless drift.
+    const sectorOwned = new Set<string>();
     for (const sector of Object.values(state.military.corps_front_sectors ?? {})) {
-        for (const bid of sector.assigned_brigade_ids ?? []) lineAssigned.add(bid);
+        for (const bid of sector.assigned_brigade_ids ?? []) sectorOwned.add(bid);
+        for (const bid of sector.reserve_brigade_ids ?? []) sectorOwned.add(bid);
+        for (const bid of sector.rear_brigade_ids ?? []) sectorOwned.add(bid);
     }
 
     for (const [fid, f] of Object.entries(formations)) {
@@ -2798,15 +2845,25 @@ export function recallDriftedBrigades(state: GameState, adjacency?: Map<string, 
         if (f.home_osid === f.location_osid) continue;
         if (inOp.has(fid)) continue;
         if ((f.disrupted_turns ?? 0) > 0) continue;
-        // Sector-line-assigned brigades belong at the front — do not recall them home.
-        // Matches evaluateHomeReturn's line-assigned filter.
-        if (lineAssigned.has(fid)) continue;
+        if (sectorOwned.has(fid) || f.assignment?.kind === 'sector') {
+            if (moveOrders[fid]?.destination_sids?.[0] === f.home_osid) {
+                delete moveOrders[fid];
+            }
+            continue;
+        }
+
+        const faction = f.faction;
+        if (!faction || pc[f.home_osid] !== faction) {
+            if (moveOrders[fid]?.destination_sids?.[0] === f.home_osid) {
+                delete moveOrders[fid];
+            }
+            continue;
+        }
 
         // n1198: BFS through FRIENDLY territory only, not raw adjacency.
         // Raw adjacency sees sela_2→mostar as 3 hops (through RS territory),
         // but the friendly path is 8-10 hops. Using raw distance let brigades
         // trapped in enemy pockets appear "close to home" and skip recall.
-        const faction = f.faction;
         const dist = bfsFriendlyDistance(f.home_osid, f.location_osid, adj, pc, faction ?? '', DRIFT_RECALL_MAX_HOPS + 1);
         if (dist <= DRIFT_RECALL_MAX_HOPS) continue;
         const homeReachable = bfsFriendlyDistance(

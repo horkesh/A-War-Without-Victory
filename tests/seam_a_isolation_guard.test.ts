@@ -403,4 +403,58 @@ describe('correctTransitStates isolation guard (commander_march_correction)', ()
         expect(ts?.status).toBe('in_transit');
         expect(ts?.destination_sids?.[0]).toBe('valid_dest');
     });
+
+    it('cancels stale homeward transit when the brigade is already back on a valid front OSID', () => {
+        const state = makeState();
+
+        state.political!.political_controllers = {
+            'front_now': 'RBiH',
+            'front_link': 'RBiH',
+            'rear_home': 'RBiH',
+            'enemy': 'RS',
+        } as any;
+
+        state.military.formations = {
+            brig1: {
+                id: 'brig1',
+                faction: 'RBiH',
+                status: 'active',
+                kind: 'brigade',
+                location_osid: 'front_now',
+                assigned_sub_segment_id: 'sector1_ss1',
+            } as any,
+        };
+
+        state.military.corps_front_sectors = {
+            sector1: makeSector('sector1', 'RBiH', ['front_now'], ['brig1']),
+        };
+
+        state.military.brigade_movement_orders = {
+            brig1: {
+                destination_sids: ['rear_home'],
+                stance: 'column',
+            } as any,
+        };
+        state.military.brigade_movement_state = {
+            brig1: {
+                status: 'in_transit',
+                destination_sids: ['rear_home'],
+                stance: 'column',
+                turns_in_transit: 1,
+                total_turns_required: 4,
+            } as any,
+        };
+
+        const adjacency = new Map<string, string[]>([
+            ['front_now', ['front_link', 'enemy']],
+            ['front_link', ['front_now', 'rear_home']],
+            ['rear_home', ['front_link']],
+            ['enemy', ['front_now']],
+        ]);
+
+        correctTransitStates(state, adjacency);
+
+        expect(state.military.brigade_movement_state?.['brig1']).toBeUndefined();
+        expect(state.military.brigade_movement_orders?.['brig1']).toBeUndefined();
+    });
 });

@@ -5,7 +5,10 @@ import { Protocol } from 'pmtiles';
 import type { GeoJSONSource } from 'maplibre-gl';
 import type { FeatureCollection } from 'geojson';
 import type { LoadedGameState } from '../data/types';
-import { useMapInteractions } from './useMapInteractions';
+import {
+  useMapInteractions,
+  queryPreferredFrontFeatureNearPoint,
+} from './useMapInteractions';
 import { useGameStore } from '../store/gameStore';
 import { collectSectorFriendlyOsids, buildOsidToSectorMap, getSectorIdForFormation } from '../utils/sectorUtils';
 import { buildCorpsColorMap } from './builders/buildCorpsFrontLinesGeoJSON';
@@ -38,13 +41,21 @@ import type { RadialMenuItem } from '../components/RadialMenu';
 import { rewritePmtilesUrls } from './rewritePmtilesUrls';
 import { useIPC } from '../desktop/useIPC';
 import { stageMoveOrderFromOsid, stageAssignBrigadeToSectorAction } from '../desktop/orderActions';
-import { collectHighlightedFormationIds } from './highlightSelection';
+import { collectEmphasizedFormationIds, collectHighlightedFormationIds } from './highlightSelection';
 import styleJson from './awwv_map_style.json';
 import { MapboxOverlay } from '@deck.gl/mapbox';
 import { composeTacticalDeckLayers, DEFAULT_DECK_LAYER_CAPABILITIES } from '../layers/composeTacticalDeckLayers';
 import { setSettlementLabelData } from '../layers/buildTacticalDeckLayers';
 import { buildGhostMapData, type GhostMapDatum } from '../layers/buildGhostMapLayer';
 import { findPlayerFacingSectorById, resolvePlayerFacingFaction } from '../../shared/playerVisibility';
+import {
+  FRONT_SURFACE_HITBOX_WIDTHS,
+  INTERACTION_HITBOX_OPACITY,
+  SECTOR_DEMARCATION_HITBOX_WIDTHS,
+  toZoomWidthExpression,
+} from './interactionLayerConfig';
+import { getDynamicInteractionLayerSignature, shouldScheduleInteractionRetry } from './dynamicInteractionLayers';
+import { resolveDeckFormationClickTarget } from './clickSelectionPriority';
 
 const BOSNIA_CENTER: [number, number] = [17.7, 43.87];
 const DEFAULT_ZOOM = 8;
@@ -126,6 +137,8 @@ const BRIGADE_AOR_NEG_LAYER_ID = 'brigade-aor-neg';
 const FRONT_EDGES_HOVER_SOURCE_ID = 'front-edges-hover';
 const FRONT_EDGES_HOVER_POS_LAYER_ID = 'front-edges-hover-pos';
 const FRONT_EDGES_HOVER_NEG_LAYER_ID = 'front-edges-hover-neg';
+const SECTOR_EDGE_HIT_POS_LAYER_ID = 'sector-edge-hit-pos';
+const SECTOR_EDGE_HIT_NEG_LAYER_ID = 'sector-edge-hit-neg';
 const FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID = 'front-edges-highlight-pos';
 const FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID = 'front-edges-highlight-neg';
 const MOVE_PREVIEW_LAYER_ID = 'move-preview-fill';
@@ -223,12 +236,16 @@ export function MapContainer() {
   const prevSectorIdRef = useRef<string | null>(null);
   /** When true, sector selection came from a map click — skip zoom. Cleared after the pan/zoom effect reads it. */
   const sectorSelectedFromMapRef = useRef(false);
+  /** Guard: Deck.gl onClick sets this when it handles a formation click, so MapLibre's handleMapClick skips front-edge fallthrough. */
+  const deckHandledFormationClickRef = useRef(false);
   const sourceUpdatePollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   /** Guard: only run heavy overlay build once per loadedGameState; poll must not run build (napkin). */
   const appliedStateRef = useRef<LoadedGameState | null>(null);
   /** Idle/timeout handle for deferred formation icons + setData; cleared on effect cleanup. */
   const deferredOverlayHandleRef = useRef<ReturnType<typeof requestIdleCallback> | ReturnType<typeof setTimeout> | null>(null);
+  const interactionLayerSignatureRef = useRef('');
   const [mapReady, setMapReady] = useState(false);
+  const [interactionBindingRevision, setInteractionBindingRevision] = useState(0);
   const setSelectedOsid = useGameStore((s) => s.setSelectedOsid);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
   const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
@@ -476,11 +493,36 @@ export function MapContainer() {
         interleaved: true,
         layers: [],
         onClick: (info: any) => {
-          if (!info?.object?.properties?.id) return;
-          const props = info.object.properties;
-          const id = props.id as string;
           const store = useGameStore.getState();
-          store.setSelectedFormationId(id);
+          const mapAtClick = mapRef.current;
+          const frontFeature =
+            mapAtClick && typeof info?.x === 'number' && typeof info?.y === 'number'
+              ? queryPreferredFrontFeatureNearPoint(mapAtClick, { x: info.x, y: info.y }, true)
+              : undefined;
+          const clickTarget = resolveDeckFormationClickTarget({
+            deckObjectProperties: info?.object?.properties ?? null,
+            nearbyFrontFeature: frontFeature,
+          });
+
+          if (clickTarget.kind === 'sector') {
+            if (findPlayerFacingSectorById(store.loadedGameState, clickTarget.sectorId)) {
+              store.setExpandedStackOsid(null);
+              sectorSelectedFromMapRef.current = true;
+              store.setSelectedCorpsFrontSectorId(clickTarget.sectorId);
+            }
+            return;
+          }
+
+          if (clickTarget.kind !== 'formation' || !info?.object?.properties) return;
+
+          // Signal MapLibre's handleMapClick to skip front-edge fallthrough —
+          // without this, the hidden formation-markers layer means MapLibre falls
+          // through to the front edge and setSelectedCorpsFrontSectorId clears
+          // the formation selection we're about to set.
+          deckHandledFormationClickRef.current = true;
+
+          const props = info.object.properties;
+          store.setSelectedFormationId(clickTarget.formationId);
           // Use pre-computed stack_count from GeoJSON feature properties
           const osid = props.location_osid as string | undefined;
           const stackCount = props.stack_count ?? 1;
@@ -584,8 +626,11 @@ export function MapContainer() {
   useEffect(() => {
     if (!mapReady || !mapRef.current) return;
     let cleanup: (() => void) | undefined;
-    // Re-register interactions when layers may have been added (e.g. front-edges, ethnic, density after loadedGameState).
-    const t = setTimeout(() => {
+    let attempts = 0;
+    let cancelled = false;
+    const registerInteractions = () => {
+      if (cancelled || !mapRef.current) return;
+      cleanup?.();
       if (!mapRef.current) return;
       cleanup = useMapInteractions(mapRef.current, {
         onOsidClick: (osid) => {
@@ -715,13 +760,19 @@ export function MapContainer() {
         onContextMenu: (type, properties, position) => {
           setContextMenu({ type, properties, position });
         },
+        deckHandledFormationClick: deckHandledFormationClickRef,
       });
-    }, 400);
+      if (mapRef.current && shouldScheduleInteractionRetry(mapRef.current, attempts)) {
+        attempts += 1;
+        window.setTimeout(registerInteractions, 100);
+      }
+    };
+    registerInteractions();
     return () => {
-      clearTimeout(t);
+      cancelled = true;
       if (cleanup) cleanup();
     };
-  }, [mapReady, loadedGameState, setSelectedOsid, setSelectedFormationId, setSelectedCorpsFrontSectorId, setTooltipTargetWithPosition, clearTooltipTarget, orderModeForFormation, selectedFormationId, setPendingAttackConfirmation, setOrderModeForFormation, ipc, setLoadError, osidToSector]);
+  }, [mapReady, loadedGameState, setSelectedOsid, setSelectedFormationId, setSelectedCorpsFrontSectorId, setTooltipTargetWithPosition, clearTooltipTarget, orderModeForFormation, selectedFormationId, setPendingAttackConfirmation, setOrderModeForFormation, ipc, setLoadError, osidToSector, interactionBindingRevision]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -856,8 +907,8 @@ export function MapContainer() {
                     source: FRONT_EDGES_HOVER_SOURCE_ID,
                     filter: ['==', ['get', 'offset_side'], 1],
                     paint: {
-                      'line-width': ['interpolate', ['linear'], ['zoom'], 6, 14, 10, 24, 14, 36],
-                      'line-opacity': 0.01,
+                      'line-width': toZoomWidthExpression(FRONT_SURFACE_HITBOX_WIDTHS),
+                      'line-opacity': INTERACTION_HITBOX_OPACITY,
                       'line-color': '#ffffff',
                     },
                   },
@@ -870,8 +921,8 @@ export function MapContainer() {
                     {
                       id: FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID,
                       type: 'line',
-                      source: 'front-lines',
-                      filter: ['all', ['==', ['get', 'lineType'], 'glow'], ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], '__none__']],
+                      source: FRONT_EDGES_HOVER_SOURCE_ID,
+                      filter: ['all', ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], '__none__']],
                       paint: {
                         'line-width': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 8, 14, 12],
                         'line-offset': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 8, 14, 12],
@@ -886,8 +937,8 @@ export function MapContainer() {
                     {
                       id: FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID,
                       type: 'line',
-                      source: 'front-lines',
-                      filter: ['all', ['==', ['get', 'lineType'], 'glow'], ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], '__none__']],
+                      source: FRONT_EDGES_HOVER_SOURCE_ID,
+                      filter: ['all', ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], '__none__']],
                       paint: {
                         'line-width': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 8, 14, 12],
                         'line-offset': ['interpolate', ['linear'], ['zoom'], 6, -4, 10, -8, 14, -12],
@@ -900,13 +951,13 @@ export function MapContainer() {
                   );
                 } else {
                   // Live mode: single centered highlight ON TOP of front lines.
-                  // Uses front-lines source so highlight trails the front line exactly.
+                  // Uses sector-owned front-edge source so selection has sector_id metadata.
                   m2.addLayer(
                     {
                       id: FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID,
                       type: 'line',
-                      source: 'front-lines',
-                      filter: ['all', ['==', ['get', 'lineType'], 'glow'], ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], '__none__']],
+                      source: FRONT_EDGES_HOVER_SOURCE_ID,
+                      filter: ['all', ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], '__none__']],
                       paint: {
                         'line-width': ['interpolate', ['linear'], ['zoom'], 6, 5, 10, 9, 14, 14],
                         'line-opacity': 0.95,
@@ -923,8 +974,8 @@ export function MapContainer() {
                     {
                       id: FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID,
                       type: 'line',
-                      source: 'front-lines',
-                      filter: ['all', ['==', ['get', 'lineType'], 'glow'], ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], '__none__']],
+                      source: FRONT_EDGES_HOVER_SOURCE_ID,
+                      filter: ['all', ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], '__none__']],
                       paint: {
                         'line-width': ['interpolate', ['linear'], ['zoom'], 6, 5, 10, 9, 14, 14],
                         'line-opacity': 0.95,
@@ -944,8 +995,36 @@ export function MapContainer() {
                     source: FRONT_EDGES_HOVER_SOURCE_ID,
                     filter: ['==', ['get', 'offset_side'], -1],
                     paint: {
-                      'line-width': ['interpolate', ['linear'], ['zoom'], 6, 14, 10, 24, 14, 36],
-                      'line-opacity': 0.01,
+                      'line-width': toZoomWidthExpression(FRONT_SURFACE_HITBOX_WIDTHS),
+                      'line-opacity': INTERACTION_HITBOX_OPACITY,
+                      'line-color': '#ffffff',
+                    },
+                  },
+                  'formation-markers'
+                );
+                m2.addLayer(
+                  {
+                    id: SECTOR_EDGE_HIT_POS_LAYER_ID,
+                    type: 'line',
+                    source: FRONT_EDGES_HOVER_SOURCE_ID,
+                    filter: ['==', ['get', 'offset_side'], 1],
+                    paint: {
+                      'line-width': toZoomWidthExpression(FRONT_SURFACE_HITBOX_WIDTHS),
+                      'line-opacity': INTERACTION_HITBOX_OPACITY,
+                      'line-color': '#ffffff',
+                    },
+                  },
+                  'formation-markers'
+                );
+                m2.addLayer(
+                  {
+                    id: SECTOR_EDGE_HIT_NEG_LAYER_ID,
+                    type: 'line',
+                    source: FRONT_EDGES_HOVER_SOURCE_ID,
+                    filter: ['==', ['get', 'offset_side'], -1],
+                    paint: {
+                      'line-width': toZoomWidthExpression(FRONT_SURFACE_HITBOX_WIDTHS),
+                      'line-opacity': INTERACTION_HITBOX_OPACITY,
                       'line-color': '#ffffff',
                     },
                   },
@@ -1010,8 +1089,8 @@ export function MapContainer() {
                       type: 'line',
                       source: SECTOR_DEMARCATION_SOURCE_ID,
                       paint: {
-                        'line-width': ['interpolate', ['linear'], ['zoom'], 6, 8, 10, 14, 14, 20],
-                        'line-opacity': 0,
+                        'line-width': toZoomWidthExpression(SECTOR_DEMARCATION_HITBOX_WIDTHS),
+                        'line-opacity': INTERACTION_HITBOX_OPACITY,
                       },
                       layout: { 'line-cap': 'round', 'line-join': 'round' },
                     },
@@ -1019,6 +1098,14 @@ export function MapContainer() {
                   );
                 } else {
                   (m2.getSource(SECTOR_DEMARCATION_SOURCE_ID) as GeoJSONSource).setData(demarcData);
+                }
+              }
+
+              const nextInteractionSignature = getDynamicInteractionLayerSignature(m2);
+              if (nextInteractionSignature !== interactionLayerSignatureRef.current) {
+                interactionLayerSignatureRef.current = nextInteractionSignature;
+                if (nextInteractionSignature.length > 0) {
+                  setInteractionBindingRevision((revision) => revision + 1);
                 }
               }
             }
@@ -1139,8 +1226,20 @@ export function MapContainer() {
                     (m.getSource(OP_ARROWS_SOURCE_ID) as GeoJSONSource)?.setData(opArrowsGeoJson);
 
                     // Fog of war: cover enemy OSIDs not confirmed empty by player recon
-                    const fogGeoJson = buildFogOfWarGeoJSON(base, state.controlBySettlement, state.player_faction, state.fogOfWar);
-                    safeEnsureLayer(m, { id: FOG_FILL_LAYER_ID, type: 'fill', source: FOG_OVERLAY_SOURCE_ID, paint: { 'fill-color': 'rgba(0, 0, 0, 0.42)' } }, 'formation-markers');
+                    const fogGeoJson = buildFogOfWarGeoJSON(
+                      base,
+                      state.controlBySettlement,
+                      state.player_faction,
+                      state.fogOfWar,
+                      state.frontEdgesOsid,
+                    );
+                    const fogBeforeId = FRONT_LAYER_IDS.find((layerId) => safeHasLayer(m, layerId))
+                      ?? (safeHasLayer(m, 'formation-markers') ? 'formation-markers' : undefined);
+                    safeEnsureLayer(
+                      m,
+                      { id: FOG_FILL_LAYER_ID, type: 'fill', source: FOG_OVERLAY_SOURCE_ID, paint: { 'fill-color': 'rgba(0, 0, 0, 0.42)' } },
+                      fogBeforeId,
+                    );
                     if (m.getSource(FOG_OVERLAY_SOURCE_ID)) (m.getSource(FOG_OVERLAY_SOURCE_ID) as GeoJSONSource).setData(fogGeoJson);
                     const { fogVisible: fogVis } = useGameStore.getState();
                     safeSetLayoutVisibility(m, FOG_FILL_LAYER_ID, fogVis && !!state.player_faction && !!state.fogOfWar);
@@ -1603,7 +1702,7 @@ export function MapContainer() {
       // Sector edge glow layers — use front-lines source (same geometry as front line rendering)
       // so the highlight trails the front line exactly. Filter for lineType=glow which carries
       // sector_id, corps_id, offset_side metadata.
-      if (!map.getSource('front-lines')) {
+      if (!map.getSource(FRONT_EDGES_HOVER_SOURCE_ID)) {
         return false;
       }
       if (!safeHasLayer(map, SECTOR_EDGE_GLOW_POS_LAYER_ID)) {
@@ -1611,8 +1710,8 @@ export function MapContainer() {
           {
             id: SECTOR_EDGE_GLOW_POS_LAYER_ID,
             type: 'line',
-            source: 'front-lines',
-            filter: ['all', ['==', ['get', 'lineType'], 'glow'], ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], '__none__']],
+            source: FRONT_EDGES_HOVER_SOURCE_ID,
+            filter: ['all', ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], '__none__']],
             paint: devMode ? {
               'line-width': ['interpolate', ['linear'], ['zoom'], 6, 3, 10, 5, 14, 8],
               'line-offset': ['interpolate', ['linear'], ['zoom'], 6, 4, 10, 8, 14, 12],
@@ -1635,8 +1734,8 @@ export function MapContainer() {
           {
             id: SECTOR_EDGE_GLOW_NEG_LAYER_ID,
             type: 'line',
-            source: 'front-lines',
-            filter: ['all', ['==', ['get', 'lineType'], 'glow'], ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], '__none__']],
+            source: FRONT_EDGES_HOVER_SOURCE_ID,
+            filter: ['all', ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], '__none__']],
             paint: devMode ? {
               'line-width': ['interpolate', ['linear'], ['zoom'], 6, 3, 10, 5, 14, 8],
               'line-offset': ['interpolate', ['linear'], ['zoom'], 6, -4, 10, -8, 14, -12],
@@ -1752,16 +1851,16 @@ export function MapContainer() {
         try {
           map.setFilter(SECTOR_FILL_LAYER_ID, ['==', ['get', 'osid'], '__none__'] as maplibregl.FilterSpecification);
           if (safeHasLayer(map, SECTOR_EDGE_GLOW_POS_LAYER_ID)) {
-            map.setFilter(SECTOR_EDGE_GLOW_POS_LAYER_ID, ['all', ['==', ['get', 'lineType'], 'glow'], ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], '__none__']] as maplibregl.FilterSpecification);
+            map.setFilter(SECTOR_EDGE_GLOW_POS_LAYER_ID, ['all', ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], '__none__']] as maplibregl.FilterSpecification);
           }
           if (safeHasLayer(map, SECTOR_EDGE_GLOW_NEG_LAYER_ID)) {
-            map.setFilter(SECTOR_EDGE_GLOW_NEG_LAYER_ID, ['all', ['==', ['get', 'lineType'], 'glow'], ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], '__none__']] as maplibregl.FilterSpecification);
+            map.setFilter(SECTOR_EDGE_GLOW_NEG_LAYER_ID, ['all', ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], '__none__']] as maplibregl.FilterSpecification);
           }
           if (safeHasLayer(map, FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID)) {
-            map.setFilter(FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID, ['all', ['==', ['get', 'lineType'], 'glow'], ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], '__none__']] as maplibregl.FilterSpecification);
+            map.setFilter(FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID, ['all', ['==', ['get', 'offset_side'], 1], ['==', ['get', 'sector_id'], '__none__']] as maplibregl.FilterSpecification);
           }
           if (safeHasLayer(map, FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID)) {
-            map.setFilter(FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID, ['all', ['==', ['get', 'lineType'], 'glow'], ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], '__none__']] as maplibregl.FilterSpecification);
+            map.setFilter(FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID, ['all', ['==', ['get', 'offset_side'], -1], ['==', ['get', 'sector_id'], '__none__']] as maplibregl.FilterSpecification);
           }
           if (safeHasLayer(map, SECTOR_BRIGADE_RINGS_LAYER_ID)) {
             map.setFilter(SECTOR_BRIGADE_RINGS_LAYER_ID, ['==', ['get', 'id'], '__none__'] as maplibregl.FilterSpecification);
@@ -1814,16 +1913,16 @@ export function MapContainer() {
       const filterExpr = ['in', ['get', 'sector_id'], ['literal', ids]] as any;
       try {
         if (safeHasLayer(map, SECTOR_EDGE_GLOW_POS_LAYER_ID)) {
-          map.setFilter(SECTOR_EDGE_GLOW_POS_LAYER_ID, ['all', ['==', ['get', 'lineType'], 'glow'], ['==', ['get', 'offset_side'], 1], filterExpr] as any);
+          map.setFilter(SECTOR_EDGE_GLOW_POS_LAYER_ID, ['all', ['==', ['get', 'offset_side'], 1], filterExpr] as any);
         }
         if (safeHasLayer(map, SECTOR_EDGE_GLOW_NEG_LAYER_ID)) {
-          map.setFilter(SECTOR_EDGE_GLOW_NEG_LAYER_ID, ['all', ['==', ['get', 'lineType'], 'glow'], ['==', ['get', 'offset_side'], -1], filterExpr] as any);
+          map.setFilter(SECTOR_EDGE_GLOW_NEG_LAYER_ID, ['all', ['==', ['get', 'offset_side'], -1], filterExpr] as any);
         }
         if (safeHasLayer(map, FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID)) {
-          map.setFilter(FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID, ['all', ['==', ['get', 'lineType'], 'glow'], ['==', ['get', 'offset_side'], 1], filterExpr] as any);
+          map.setFilter(FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID, ['all', ['==', ['get', 'offset_side'], 1], filterExpr] as any);
         }
         if (safeHasLayer(map, FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID)) {
-          map.setFilter(FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID, ['all', ['==', ['get', 'lineType'], 'glow'], ['==', ['get', 'offset_side'], -1], filterExpr] as any);
+          map.setFilter(FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID, ['all', ['==', ['get', 'offset_side'], -1], filterExpr] as any);
         }
 
         // Apply static highlight opacity
@@ -1835,11 +1934,14 @@ export function MapContainer() {
       }
 
       // C.3: Brigade rings — highlight assigned + reserve brigades for selected sector or corps
-      try {
-        if (safeHasLayer(map, SECTOR_BRIGADE_RINGS_LAYER_ID)) {
-          // Collect brigade IDs from whichever source is active
-          const ringSectors = selectedCorpsId ? allActiveSectors : selectedSector ? [selectedSector] : [];
-          const ringBrigadeIds = ringSectors.flatMap(s => [...s.assigned_brigade_ids, ...s.reserve_brigade_ids]);
+        try {
+          if (safeHasLayer(map, SECTOR_BRIGADE_RINGS_LAYER_ID)) {
+          const ringBrigadeIds = collectEmphasizedFormationIds({
+            formationsGeoJson: lastFormationsGeoJsonRef.current,
+            loadedGameState,
+            selectedCorpsId,
+            selectedCorpsFrontSectorId,
+          });
           if (ringBrigadeIds.length > 0) {
             map.setFilter(SECTOR_BRIGADE_RINGS_LAYER_ID, ['in', ['get', 'id'], ['literal', ringBrigadeIds]] as any);
             map.setPaintProperty(SECTOR_BRIGADE_RINGS_LAYER_ID, 'circle-stroke-color', highlightCorpsHex);
@@ -2479,6 +2581,31 @@ export function MapContainer() {
       safeSetLayoutVisibility(map, MUN_BORDERS_LAYER_ID, municipalityBordersVisible);
     }
   }, [mapReady, fogVisible, battlesVisible, municipalityBordersVisible]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    const base = osidBaseRef.current;
+    if (!mapReady || !map || !base) return;
+    const state = useGameStore.getState().loadedGameState;
+    if (!state?.player_faction || !state?.fogOfWar) return;
+    const fogSource = map.getSource(FOG_OVERLAY_SOURCE_ID) as GeoJSONSource | undefined;
+    if (!fogSource) return;
+    fogSource.setData(
+      buildFogOfWarGeoJSON(
+        base,
+        state.controlBySettlement,
+        state.player_faction,
+        state.fogOfWar,
+        state.frontEdgesOsid,
+      ),
+    );
+  }, [
+    mapReady,
+    loadedGameState?.player_faction,
+    loadedGameState?.fogOfWar,
+    loadedGameState?.frontEdgesOsid,
+    loadedGameState?.controlBySettlement,
+  ]);
 
   // Ghost Map toggle: rebuild Deck.gl layers when ghostMapVisible changes
   const ghostMapVisible = useGameStore((s) => s.ghostMapVisible);

@@ -76,8 +76,9 @@ export function correctMarchOrders(state: GameState, adjacency: Map<string, stri
         const loc = f.location_osid;
         if (!loc) continue;
 
-        // Already at a valid front position — no correction needed
-        if (frontOsids.includes(loc)) continue;
+        // Being on the assigned front only proves the current location is valid;
+        // a stale order can still drag the brigade away next turn.
+        const atAssignedFront = frontOsids.includes(loc);
 
         // Check if there's a march order pointing to wrong destination
         const order = moveOrders[bid];
@@ -85,6 +86,10 @@ export function correctMarchOrders(state: GameState, adjacency: Map<string, stri
         const dest = order.destination_sids?.[0];
         if (!dest) continue;
         if (frontOsids.includes(dest)) continue; // Destination already correct
+        if (atAssignedFront) {
+            delete state.military.brigade_movement_orders?.[bid];
+            continue;
+        }
 
         // Wrong destination — find nearest front OSID by BFS and override
         const factionFriendly = friendlyByFaction.get(f.faction);
@@ -161,11 +166,9 @@ export function correctTransitStates(state: GameState, adjacency: Map<string, st
         const loc = f.location_osid;
         if (!loc) continue;
 
-        // Brigade already at a valid front position — don't interrupt its transit
-        if (frontOsids.includes(loc)) continue;
-
         const transitDest = transitState.destination_sids?.[0];
         if (!transitDest) continue;
+        const brigadeAlreadyAtValidFront = frontOsids.includes(loc);
         if (frontOsids.includes(transitDest)) {
             // Destination is in assigned front OSIDs, but check if it is now an isolated island.
             // A corridor collapse can leave the destination with 0 friendly-controlled neighbors;
@@ -177,7 +180,20 @@ export function correctTransitStates(state: GameState, adjacency: Map<string, st
         }
 
         // Wrong transit destination — cancel transit state first, then issue corrected order
+        if (brigadeAlreadyAtValidFront && !frontOsids.includes(transitDest)) {
+            delete state.military.brigade_movement_state![bid];
+            delete state.military.brigade_movement_orders?.[bid];
+            continue;
+        }
+
         delete state.military.brigade_movement_state![bid];
+        if (state.military.brigade_movement_orders?.[bid]) {
+            delete state.military.brigade_movement_orders[bid];
+        }
+
+        // If the brigade is already sitting on one of its valid front OSIDs, the truthful
+        // correction is to stop the stale transit and hold the current line position.
+        if (brigadeAlreadyAtValidFront) continue;
 
         const factionFriendly = friendlyByFaction.get(f.faction);
         const sortedFrontOsids = [...frontOsids].sort(strictCompare);

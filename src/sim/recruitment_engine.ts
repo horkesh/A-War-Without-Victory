@@ -34,6 +34,7 @@ import type {
     RecruitmentResourceState,
     SetupPhaseRecruitmentReport
 } from '../state/recruitment_types.js';
+import { strictCompare } from '../state/validateGameState.js';
 import {
     bestAffordableClass,
     DEFAULT_FACTION_RESOURCES,
@@ -41,10 +42,90 @@ import {
     getEquipmentCost
 } from '../state/recruitment_types.js';
 import { getRsJnaHeavyComposition, getRsMountainComposition } from './combat/equipment_effects.js';
-import { isEnclaveBrigade } from './combat/enclave_resilience.js';
+import { ENCLAVE_DEFINITIONS, isEnclaveBrigade, osidBelongsToEnclave } from './combat/enclave_resilience.js';
 import { getFactionDefaultOfficerQuality } from './combat/combat_math.js';
+import { isFriendlyFaction } from './early_war/alliance_update.js';
 
 const FIXED_HOME_OSID_TAG = 'placement:fixed_home_osid';
+
+function isFriendlyControlledPlacement(
+    state: GameState,
+    faction: FactionId,
+    osid: string | undefined
+): boolean {
+    if (!osid) return false;
+    const controller = state.political.political_controllers?.[osid];
+    if (controller == null) return true;
+    return isFriendlyFaction(controller, faction, state);
+}
+
+function chooseFriendlyEnclavePlacementOsid(
+    state: GameState,
+    brigade: OobBrigade
+): string | undefined {
+    if (!isEnclaveBrigade(brigade)) return undefined;
+
+    const homePrefix = `op:${brigade.home_mun}:`;
+    const controllers = state.political.political_controllers ?? {};
+    const candidates: string[] = [];
+
+    const sortedDefinitions = [...ENCLAVE_DEFINITIONS]
+        .filter((enclave) => {
+            if (enclave.faction !== brigade.faction) return false;
+            if (enclave.capital_osid?.startsWith(homePrefix)) return true;
+            if (enclave.osid_list?.some((osid) => osid.startsWith(homePrefix))) return true;
+            if (enclave.osid_prefixes?.some((prefix) => prefix === homePrefix)) return true;
+            return false;
+        })
+        .sort((a, b) => strictCompare(a.id, b.id));
+
+    for (const enclave of sortedDefinitions) {
+        if (enclave.capital_osid?.startsWith(homePrefix)) {
+            candidates.push(enclave.capital_osid);
+        }
+        for (const osid of [...(enclave.osid_list ?? [])].sort(strictCompare)) {
+            if (osid.startsWith(homePrefix)) candidates.push(osid);
+        }
+        for (const osid of Object.keys(controllers).sort(strictCompare)) {
+            if (!osid.startsWith(homePrefix)) continue;
+            if (osidBelongsToEnclave(osid, enclave)) candidates.push(osid);
+        }
+    }
+
+    for (const osid of [...new Set(candidates)]) {
+        if (isFriendlyControlledPlacement(state, brigade.faction, osid)) return osid;
+    }
+    return undefined;
+}
+
+function chooseRecruitmentPlacementOsid(
+    state: GameState,
+    brigade: OobBrigade,
+    resolvedLocationOsid?: string
+): string | undefined {
+    if (isFriendlyControlledPlacement(state, brigade.faction, brigade.deployment_osid)) {
+        return brigade.deployment_osid;
+    }
+    if (isFriendlyControlledPlacement(state, brigade.faction, brigade.home_osid)) {
+        return brigade.home_osid;
+    }
+    const enclavePlacement = chooseFriendlyEnclavePlacementOsid(state, brigade);
+    if (enclavePlacement) return enclavePlacement;
+    if (isFriendlyControlledPlacement(state, brigade.faction, resolvedLocationOsid)) {
+        return resolvedLocationOsid;
+    }
+    return undefined;
+}
+
+function resolveRecruitmentLocationOsid(
+    hqSid: string | undefined,
+    canonicalToOperational?: CanonicalToOperationalMap,
+): string | undefined {
+    if (!hqSid) return undefined;
+    if (hqSid.startsWith('op:')) return hqSid;
+    if (!canonicalToOperational) return undefined;
+    return resolveLocationOsid(hqSid, canonicalToOperational);
+}
 
 // ---------------------------------------------------------------------------
 // Strategic area scoring for bot AI
@@ -207,8 +288,6 @@ function buildRecruitedFormation(
     const effectivePersonnel = brigade.initial_personnel ?? personnel;
     const defaultCohesion = isMandatory ? BRIGADE_BASE_COHESION + 10 : BRIGADE_BASE_COHESION;
     const effectiveCohesion = brigade.initial_cohesion ?? defaultCohesion;
-    const effectiveLocationOsid = brigade.deployment_osid ?? brigade.home_osid ?? locationOsid;
-
     return {
         id: brigade.id as FormationId,
         faction: brigade.faction,
@@ -234,7 +313,7 @@ function buildRecruitedFormation(
         ...(brigade.displaced_from ? { displaced_from: brigade.displaced_from } : {}),
         ...(brigade.garrison ? { garrison: true } : {}),
         ...(hqSid ? { hq_sid: hqSid } : {}),
-        ...(effectiveLocationOsid != null ? { location_osid: effectiveLocationOsid } : {}),
+        ...(locationOsid != null ? { location_osid: locationOsid } : {}),
         equipment_class: equipClass,
         max_personnel: brigade.max_personnel ?? deriveMaxPersonnel(equipClass, brigade.faction),
         home_osid: brigade.home_osid ?? locationOsid
@@ -414,7 +493,7 @@ export function recruitBrigade(
     const { faction, home_mun, id } = brigade;
 
     // Already recruited?
-    if (resources.recruited_brigade_ids.includes(id)) {
+    if (resources.recruited_brigade_ids.includes(id) || state.military.formations?.[id]) {
         return { success: false, reason: 'already_recruited' };
     }
 
@@ -452,7 +531,11 @@ export function recruitBrigade(
 
     // All checks pass -- build formation
     const hq_sid = resolveValidHqSid(state, faction, home_mun, municipalityHqSettlement, sidToMun);
-    const location_osid = canonicalToOperational && hq_sid ? resolveLocationOsid(hq_sid, canonicalToOperational) : undefined;
+    const resolvedLocationOsid = resolveRecruitmentLocationOsid(hq_sid, canonicalToOperational);
+    const location_osid = chooseRecruitmentPlacementOsid(state, brigade, resolvedLocationOsid);
+    if (!location_osid && !isEnclaveBrigade(brigade)) {
+        return { success: false, reason: 'no_control' };
+    }
     // Dynamic recruitment: no JNA override — newly formed brigades are militia/TDF,
     // they don't inherit JNA heavy equipment. Only initial OOB brigades get JNA kit.
     const composition = buildBrigadeComposition(chosenClass, faction, false);
@@ -522,6 +605,18 @@ export interface RunBotRecruitmentOptions {
     canonicalToOperational?: CanonicalToOperationalMap;
 }
 
+function markExistingFormationAsRecruited(
+    state: GameState,
+    resources: RecruitmentResourceState,
+    brigadeId: string
+): boolean {
+    if (!state.military.formations?.[brigadeId]) return false;
+    if (!resources.recruited_brigade_ids.includes(brigadeId)) {
+        resources.recruited_brigade_ids.push(brigadeId);
+    }
+    return true;
+}
+
 /**
  * Run bot recruitment for all factions. Deterministic greedy algorithm.
  *
@@ -564,7 +659,7 @@ export function runBotRecruitment(
             if (!factionHasPresenceInMun(state, c.faction, c.hq_mun, sidToMun)) continue;
             const hq_sid = resolveValidHqSid(state, c.faction, c.hq_mun, municipalityHqSettlement, sidToMun);
             const location_osid =
-                c.hq_osid ?? (options?.canonicalToOperational && hq_sid ? resolveLocationOsid(hq_sid, options.canonicalToOperational) : undefined);
+                c.hq_osid ?? resolveRecruitmentLocationOsid(hq_sid, options?.canonicalToOperational);
             state.military.formations[c.id] = {
                 id: c.id as FormationId,
                 faction: c.faction,
@@ -610,6 +705,7 @@ export function runBotRecruitment(
 
         let mandatoryRecruitedForFaction = 0;
         for (const brigade of mandatoryBrigades) {
+            if (markExistingFormationAsRecruited(state, resources, brigade.id)) continue;
             if (
                 typeof maxMandatoryPerFaction === 'number' &&
                 maxMandatoryPerFaction >= 0 &&
@@ -679,7 +775,12 @@ export function runBotRecruitment(
 
             // Build formation directly for mandatory (bypass normal cost checks)
             const hq_sid = resolveValidHqSid(state, faction, brigade.home_mun, municipalityHqSettlement, sidToMun);
-            const location_osid = options?.canonicalToOperational && hq_sid ? resolveLocationOsid(hq_sid, options.canonicalToOperational) : undefined;
+            const resolvedLocationOsid = resolveRecruitmentLocationOsid(hq_sid, options?.canonicalToOperational);
+            const location_osid = chooseRecruitmentPlacementOsid(state, brigade, resolvedLocationOsid);
+            if (!location_osid && !isEnclaveBrigade(brigade)) {
+                report.brigades_skipped_no_control++;
+                continue;
+            }
             const formation = buildRecruitedFormation(
                 brigade, brigade.default_equipment_class, effectiveManpower, currentTurn, hq_sid, true, location_osid
             );
@@ -736,6 +837,7 @@ export function runBotRecruitment(
         let electiveRecruitedForFaction = 0;
         // Greedy spend
         for (const { brigade } of scored) {
+            if (markExistingFormationAsRecruited(state, resources, brigade.id)) continue;
             if (typeof maxElectivePerFaction === 'number' && maxElectivePerFaction >= 0 && electiveRecruitedForFaction >= maxElectivePerFaction) {
                 break;
             }

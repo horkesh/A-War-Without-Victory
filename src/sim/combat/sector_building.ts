@@ -124,11 +124,27 @@ export function buildMultiSectorsForCorps(
 ): CorpsFrontSector[] {
     if (edgeIds.length === 0) return [];
 
-    // Build edge metadata lookup
+    // Build edge metadata lookup from the already-derived front-edge packet.
+    // Sector geometry must inherit the exact edge-side truth from
+    // war_front_edges_osid, not re-derive friendly/enemy sides from broad
+    // municipality-level control fallback. Re-derivation can smear canonical
+    // control across operational OSIDs and fuse unrelated front arcs into one
+    // fake sector line.
     const edgeMeta = new Map<string, { a: string; b: string; side_a: string | null; side_b: string | null }>();
-    const allFriendly = friendlyOsids ?? new Set<string>();
-
+    const frontEdgeLookup = new Map(
+        osidFrontEdges.map((edge) => [edge.edge_id, edge] as const),
+    );
     for (const eid of edgeIds) {
+        const frontEdge = frontEdgeLookup.get(eid);
+        if (frontEdge) {
+            edgeMeta.set(eid, {
+                a: frontEdge.a,
+                b: frontEdge.b,
+                side_a: frontEdge.side_a,
+                side_b: frontEdge.side_b,
+            });
+            continue;
+        }
         const sep = eid.indexOf('__');
         if (sep < 0) continue;
         const osidA = eid.slice(0, sep);
@@ -139,7 +155,6 @@ export function buildMultiSectorsForCorps(
             side_a: getPoliticalControllerOSID(state, osidA, reverseMap ?? undefined),
             side_b: getPoliticalControllerOSID(state, osidB, reverseMap ?? undefined),
         });
-
     }
 
     // Step 1: Find connected components via triple-junction connectivity.
@@ -151,7 +166,7 @@ export function buildMultiSectorsForCorps(
     // Proposal B: merge undersized sub-segments up to MIN_SECTOR_EDGES.
     // Do NOT pass friendlyOsids — merging should use direct OSID adjacency only,
     // not unbounded BFS through rear territory (which merges distant segments).
-    subSegments = mergeUndersizedSubSegments(corpsId, subSegments, adjacency, sharedBoundaryAdj);
+    subSegments = mergeUndersizedSubSegments(corpsId, subSegments, adjacency, sharedBoundaryAdj, caseBSplitAdj, centroids);
     if (subSegments.length === 0) return [];
 
     // Step 2 (Phase 1D): Split oversized sub-segments
@@ -495,6 +510,7 @@ export function buildSectorFromSubSegments(
         territory_osids: [],
         assigned_brigade_ids: assignedBrigadeIds,
         reserve_brigade_ids: [],
+        rear_brigade_ids: [],
         density,
         threat_ratio: threatRatio,
         defensive_power: defensivePower,

@@ -2,11 +2,10 @@
  * Regression tests for two sector fixes:
  *
  * Fix 1 (sector_territory.ts assignTerritoryVoronoi):
- *   When multiple sectors claim the same front-edge OSID (sharedClaims has
- *   multiple indices), the OSID is now assigned exclusively to the sector with
- *   the most length_edges.  Tiebreaker: lower sector_id via strictCompare.
- *   Previously all claiming sectors received the OSID, creating duplicate
- *   territory_osids.
+ *   When multiple sectors claim the same front-edge OSID, every claiming
+ *   sector keeps that frontline OSID in its territory packet. A sector must
+ *   never lose one of its own front OSIDs just because a sibling sector also
+ *   touches the same settlement.
  *
  * Fix 2 (corps_front_sectors.ts final prune):
  *   Added condition: if assigned_brigade_ids.length === 0 &&
@@ -87,15 +86,15 @@ function makeAdjacency(connections: [string, string][]): Map<Osid, Osid[]> {
 
 // ── Group A: Fix 1 — Voronoi exclusive territory ─────────────────────────────
 
-describe('assignTerritoryVoronoi exclusive ownership (Fix 1)', () => {
+describe('assignTerritoryVoronoi shared frontline ownership (Fix 1)', () => {
 
     /**
-     * Test 1: multi-claim OSID goes to sector with more edges.
+     * Test 1: multi-claim OSID stays in every claiming sector.
      * Two sectors both list the same OSID in sub_segments.friendly_osids.
-     * Sector A has length_edges=10, Sector B has length_edges=5.
-     * The OSID must end up only in Sector A's territory_osids.
+     * The OSID must remain in both sectors' territory packets because it is
+     * part of both sectors' actual frontline.
      */
-    it('multi-claim OSID goes to sector with more edges', () => {
+    it('multi-claim OSID remains in every claiming sector', () => {
         const sharedOsid = 'op:trnovo:golubici_2';
         const aSs = makeSubSeg('ss_a', [sharedOsid], ['op:enemy:e1'], 10);
         const bSs = makeSubSeg('ss_b', [sharedOsid], ['op:enemy:e1'], 5);
@@ -119,22 +118,14 @@ describe('assignTerritoryVoronoi exclusive ownership (Fix 1)', () => {
 
         assignTerritoryVoronoi([sectorA, sectorB], adjacency, friendlyOsids);
 
-        // Only sectorA (more edges) should own the shared OSID.
         expect(sectorA.territory_osids).toContain(sharedOsid);
-        // sectorB must NOT receive the shared OSID.
-        expect(sectorB.territory_osids).not.toContain(sharedOsid);
-
-        // No OSID duplication: the shared OSID appears at most once across all sectors.
-        const allClaimed = [...sectorA.territory_osids, ...sectorB.territory_osids];
-        const occurrences = allClaimed.filter(o => o === sharedOsid).length;
-        expect(occurrences).toBe(1);
+        expect(sectorB.territory_osids).toContain(sharedOsid);
     });
 
     /**
-     * Test 2: equal edges — tiebreaker is lower sector_id (strictCompare).
-     * sector:test_corps:0 < sector:test_corps:1 lexicographically.
+     * Test 2: equal edges still preserve the shared front OSID for both sectors.
      */
-    it('equal edges tiebreaks to lower sector_id via strictCompare', () => {
+    it('equal edges still preserve the shared front OSID for both sectors', () => {
         const sharedOsid = 'op:kalinovik:kalinovik_2';
         const ss0 = makeSubSeg('ss_0', [sharedOsid], ['op:enemy:e2'], 5);
         const ss1 = makeSubSeg('ss_1', [sharedOsid], ['op:enemy:e2'], 5);
@@ -157,13 +148,8 @@ describe('assignTerritoryVoronoi exclusive ownership (Fix 1)', () => {
 
         assignTerritoryVoronoi([sector0, sector1], adjacency, friendlyOsids);
 
-        // sector:test_corps:0 has the lower ID → wins the tiebreak.
         expect(sector0.territory_osids).toContain(sharedOsid);
-        expect(sector1.territory_osids).not.toContain(sharedOsid);
-
-        // No duplication.
-        const allClaimed = [...sector0.territory_osids, ...sector1.territory_osids];
-        expect(allClaimed.filter(o => o === sharedOsid)).toHaveLength(1);
+        expect(sector1.territory_osids).toContain(sharedOsid);
     });
 
     /**

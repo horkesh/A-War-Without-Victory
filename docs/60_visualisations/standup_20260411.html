@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pyrrhic Daily Standup — 2026-04-11</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=Fragment+Mono&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
+  --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'Fragment Mono', 'JetBrains Mono', monospace;
+
+  --bg: #111419;
+  --bg2: #161a21;
+  --surface: #1c2028;
+  --surface2: #242830;
+  --surface-hi: #2a3040;
+  --border: rgba(255,255,255,0.06);
+  --border-hi: rgba(255,255,255,0.12);
+  --text: #cdd4e0;
+  --text-dim: #6b7a8e;
+  --text-bright: #eaeff6;
+
+  --teal: #0e9aa7;
+  --teal-dim: rgba(14,154,167,0.12);
+  --teal-bg: rgba(14,154,167,0.06);
+  --rust: #c2410c;
+  --rust-dim: rgba(194,65,12,0.12);
+  --green: #2d8a56;
+  --green-dim: rgba(45,138,86,0.12);
+  --amber: #b8860b;
+  --amber-dim: rgba(184,134,11,0.12);
+  --red: #b53b3b;
+  --red-dim: rgba(181,59,59,0.12);
+  --slate: #5e6e82;
+  --slate-dim: rgba(94,110,130,0.12);
+  --blue: #3572a5;
+  --blue-dim: rgba(53,114,165,0.12);
+  --gold: #c4972e;
+  --gold-dim: rgba(196,151,46,0.10);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f3f1ed;
+    --bg2: #eae7e0;
+    --surface: #ffffff;
+    --surface2: #f5f3ef;
+    --surface-hi: #ffffff;
+    --border: rgba(0,0,0,0.07);
+    --border-hi: rgba(0,0,0,0.14);
+    --text: #2c3040;
+    --text-dim: #6b7080;
+    --text-bright: #151a28;
+    --teal: #087f8c;
+    --teal-dim: rgba(8,127,140,0.10);
+    --green: #1e7040;
+    --green-dim: rgba(30,112,64,0.10);
+    --amber: #8a6508;
+    --amber-dim: rgba(138,101,8,0.10);
+    --red: #922e2e;
+    --red-dim: rgba(146,46,46,0.10);
+    --slate: #4a5a6e;
+    --slate-dim: rgba(74,90,110,0.10);
+    --blue: #2a5a8a;
+    --blue-dim: rgba(42,90,138,0.10);
+    --rust: #9a3408;
+    --rust-dim: rgba(154,52,8,0.10);
+    --gold: #8a6808;
+    --gold-dim: rgba(138,104,8,0.10);
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  background-image:
+    radial-gradient(ellipse at 20% 10%, var(--teal-dim) 0%, transparent 45%),
+    radial-gradient(ellipse at 80% 90%, var(--rust-dim) 0%, transparent 40%);
+  color: var(--text);
+  line-height: 1.6;
+  padding: 40px;
+  min-height: 100vh;
+}
+
+a { color: var(--teal); }
+
+.wrap {
+  max-width: 1340px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 0 40px;
+}
+.main { min-width: 0; }
+
+.toc {
+  position: sticky;
+  top: 24px;
+  align-self: start;
+  padding: 14px 0;
+  grid-row: 1 / -1;
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+}
+.toc::-webkit-scrollbar { width: 3px; }
+.toc::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 2px; }
+.toc-title {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  padding: 0 0 10px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.toc a {
+  display: block;
+  font-size: 11px;
+  color: var(--text-dim);
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: 5px;
+  border-left: 2px solid transparent;
+  transition: all 0.15s;
+  line-height: 1.4;
+  margin-bottom: 1px;
+}
+.toc a:hover { color: var(--text); background: var(--surface2); }
+.toc a.active { color: var(--text); border-left-color: var(--teal); }
+
+@media (max-width: 1000px) {
+  .wrap { grid-template-columns: 1fr; }
+  body { padding: 16px; padding-top: 0; }
+  .toc {
+    position: sticky; top: 0; z-index: 200; max-height: none;
+    display: flex; gap: 4px; align-items: center; overflow-x: auto;
+    -webkit-overflow-scrolling: touch; background: var(--bg);
+    border-bottom: 1px solid var(--border); padding: 10px 16px;
+    margin: 0 -16px; grid-row: auto;
+  }
+  .toc::-webkit-scrollbar { display: none; }
+  .toc-title { display: none; }
+  .toc a {
+    white-space: nowrap; flex-shrink: 0; border-left: none;
+    border-bottom: 2px solid transparent; border-radius: 4px 4px 0 0;
+    padding: 6px 10px; font-size: 10px;
+  }
+  .toc a.active { border-left: none; border-bottom-color: var(--teal); background: var(--surface); }
+  .main { padding-top: 20px; }
+  .sec-head { scroll-margin-top: 52px; }
+}
+
+/* === HEADER === */
+.hdr {
+  margin-bottom: 48px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--border);
+}
+.hdr h1 {
+  font-family: var(--font-display);
+  font-size: 2.6rem;
+  font-weight: 800;
+  color: var(--text-bright);
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+.hdr .sub {
+  font-size: 0.95rem;
+  color: var(--text-dim);
+  max-width: 700px;
+}
+.hdr .pills {
+  display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px;
+}
+.pill {
+  font-family: var(--font-mono);
+  font-size: 10px; font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-dim);
+}
+.pill strong { color: var(--text); }
+
+/* === SECTION === */
+.sec-head {
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--teal);
+  padding: 36px 0 14px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sec-head .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* === KPI === */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin-bottom: 28px;
+}
+.kpi {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  text-align: center;
+}
+.kpi--hi {
+  background: color-mix(in srgb, var(--surface) 88%, var(--teal) 12%);
+  border-color: color-mix(in srgb, var(--border) 40%, var(--teal) 60%);
+}
+.kpi .n {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-bright);
+  line-height: 1;
+}
+.kpi .l {
+  font-family: var(--font-mono);
+  font-size: 9px; font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+.kpi .l2 {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+/* === CARD === */
+.c {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 22px;
+  margin-bottom: 10px;
+}
+.c--left { border-left: 3px solid; }
+.c h3 {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-bright);
+  margin-bottom: 5px;
+  line-height: 1.35;
+}
+.c p, .c ul {
+  font-size: 0.84rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+.c ul { padding-left: 16px; }
+.c li { margin-bottom: 2px; }
+.c code {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  background: var(--surface2);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--text);
+}
+.lbl {
+  font-family: var(--font-mono);
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.lbl .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.tag {
+  font-family: var(--font-mono);
+  font-size: 9px; font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-top: 6px;
+}
+
+/* === GRID === */
+.g2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+@media (min-width: 800px) { .g2 { grid-template-columns: 1fr 1fr; } }
+.g3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* === RETRO TABLE === */
+.retro-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+@media (max-width: 800px) { .retro-grid { grid-template-columns: 1fr; } }
+.retro-col {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.retro-col__head {
+  font-family: var(--font-mono);
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.retro-col__body {
+  padding: 12px 16px;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+}
+.retro-col__body li {
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+.retro-col__body ul { padding-left: 16px; }
+
+/* === PRIORITY CARD === */
+.pri {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 22px;
+  margin-bottom: 10px;
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 14px;
+  align-items: start;
+}
+.pri .rank {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+  padding-top: 2px;
+}
+.pri h3 {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-bright);
+  margin-bottom: 4px;
+}
+.pri p {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  line-height: 1.55;
+}
+.pri .dispatch {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--teal);
+  margin-top: 6px;
+}
+
+/* === ANIM === */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.au { animation: fadeUp 0.35s ease-out both; }
+.d1{animation-delay:.05s}.d2{animation-delay:.1s}.d3{animation-delay:.15s}
+.d4{animation-delay:.2s}.d5{animation-delay:.25s}.d6{animation-delay:.3s}
+.d7{animation-delay:.35s}.d8{animation-delay:.4s}
+@media (prefers-reduced-motion: reduce) { .au { animation: none; } }
+
+/* === GAUGE === */
+.gauge-row {
+  display: flex; gap: 20px; flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.gauge {
+  flex: 1; min-width: 180px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+}
+.gauge .title {
+  font-family: var(--font-mono);
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+.gauge .bar-bg {
+  height: 10px;
+  background: var(--surface2);
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+.gauge .bar-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.6s ease;
+}
+.gauge .val {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--text-bright);
+}
+.gauge .note {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.ftr {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: center;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="toc" id="toc">
+  <div class="toc-title">Standup</div>
+  <a href="#s1">1. Yesterday</a>
+  <a href="#s2">2. Retrospective</a>
+  <a href="#s3">3. Sim Health</a>
+  <a href="#s4">4. Realism Audit</a>
+  <a href="#s5">5. Today's Plan</a>
+</nav>
+
+<div class="main">
+
+<div class="hdr au">
+  <h1>Daily Standup</h1>
+  <p class="sub">Pyrrhic Games war room briefing. Yesterday's retrospective, fresh simulation assessment from War-or-Game, and today's battle plan.</p>
+  <div class="pills">
+    <span class="pill"><strong>2026-04-11</strong></span>
+    <span class="pill"><strong>v0.8.4</strong> Command Chain</span>
+    <span class="pill">Run <strong>n1421</strong> &middot; hash 8ba9e38b</span>
+    <span class="pill"><strong>3148</strong> tests</span>
+  </div>
+</div>
+
+<!-- 1 YESTERDAY -->
+<div id="s1" class="sec-head"><span class="dot" style="background:var(--teal)"></span>1 &mdash; Yesterday's Output</div>
+
+<div class="kpi-row au d1">
+  <div class="kpi kpi--hi">
+    <div class="n">25</div>
+    <div class="l">Commits</div>
+  </div>
+  <div class="kpi">
+    <div class="n">12</div>
+    <div class="l">Hardening</div>
+    <div class="l2">player-truth</div>
+  </div>
+  <div class="kpi">
+    <div class="n">4</div>
+    <div class="l">Rescue Lane</div>
+    <div class="l2">loaned elite</div>
+  </div>
+  <div class="kpi">
+    <div class="n">4</div>
+    <div class="l">Map / Sector</div>
+    <div class="l2">glow + ownership</div>
+  </div>
+  <div class="kpi">
+    <div class="n">3</div>
+    <div class="l">Probe + Plan</div>
+    <div class="l2">territory + scorecard</div>
+  </div>
+  <div class="kpi">
+    <div class="n">3</div>
+    <div class="l">Life Lessons</div>
+    <div class="l2">synthesized</div>
+  </div>
+</div>
+
+<!-- 2 RETRO -->
+<div id="s2" class="sec-head"><span class="dot" style="background:var(--green)"></span>2 &mdash; Retrospective</div>
+
+<div class="retro-grid au d2">
+  <div class="retro-col">
+    <div class="retro-col__head" style="background:var(--green-dim);color:var(--green)">
+      <span class="dot" style="background:var(--green);width:7px;height:7px;border-radius:50%"></span>
+      The Good
+    </div>
+    <div class="retro-col__body">
+      <ul>
+        <li><strong>Loaned elite rescue lane CLOSED</strong> — wrong fix caught same-day, correct sim-side fix shipped, reserve invariant hardened proactively (zero delta)</li>
+        <li><strong>12 player-truth commits</strong> — consistent <code>playerSafe*()</code> abstraction pattern across threat, force balance, visibility, faction, identity</li>
+        <li><strong>Map work landed with tests</strong> — sector continuity, glow stitching, front-edge display ownership (300-line new module + 203-line test)</li>
+        <li><strong>Probes no longer flip territory</strong> — recon is recon, not conquest</li>
+        <li><strong>3 new life lessons</strong> synthesized and written to topic files</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="retro-col">
+    <div class="retro-col__head" style="background:var(--amber-dim);color:var(--amber)">
+      <span class="dot" style="background:var(--amber);width:7px;height:7px;border-radius:50%"></span>
+      The Bad
+    </div>
+    <div class="retro-col__body">
+      <ul>
+        <li><strong>Wrong fix shipped first</strong> — <code>bb454db4</code> validator exemption hid a real sim gap before <code>dc742d9e</code> fixed it properly. 2nd instance in 2 weeks.</li>
+        <li><strong>working-on.md discipline</strong> — 25 commits without crash-recovery updates. 2nd consecutive blitz with this violation.</li>
+        <li><strong>CALIBRATION_MASTER stale</strong> — still shows n1302 as ATH. Current main is n1421. Document truth drifted.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="retro-col">
+    <div class="retro-col__head" style="background:var(--red-dim);color:var(--red)">
+      <span class="dot" style="background:var(--red);width:7px;height:7px;border-radius:50%"></span>
+      The Ugly
+    </div>
+    <div class="retro-col__body">
+      <ul>
+        <li><strong>Validator-exemption antipattern recurring</strong> — "suppress the signal" before "fix the source." Life lesson written but must be internalized.</li>
+        <li><strong>No scenario rerun with Calibration Master update</strong> — the n1302→n1421 gap means we don't have a fresh expert-panel-reviewed baseline.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- 3 SIM HEALTH -->
+<div id="s3" class="sec-head"><span class="dot" style="background:var(--blue)"></span>3 &mdash; Simulation Health (n1421)</div>
+
+<p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:16px"><em>Source: War-or-Game realism auditor. All findings attributed to expert.</em></p>
+
+<div class="gauge-row au d3">
+  <div class="gauge">
+    <div class="title">Territory Accuracy</div>
+    <div class="bar-bg"><div class="bar-fill" style="width:92%;background:var(--green)"></div></div>
+    <div class="val">25/25</div>
+    <div class="note">anchors PASS &middot; 6/6 benchmarks</div>
+  </div>
+  <div class="gauge">
+    <div class="title">RS Territory Share</div>
+    <div class="bar-bg"><div class="bar-fill" style="width:50.4%;background:var(--teal)"></div></div>
+    <div class="val">50.4%</div>
+    <div class="note">expected ~55.3% &middot; within tolerance</div>
+  </div>
+  <div class="gauge">
+    <div class="title">Att:Def Casualty Ratio</div>
+    <div class="bar-bg"><div class="bar-fill" style="width:81%;background:var(--amber)"></div></div>
+    <div class="val">0.81</div>
+    <div class="note">13.7k att / 17.0k def</div>
+  </div>
+</div>
+
+<div class="g3 au d4">
+  <div class="c">
+    <div class="lbl" style="color:var(--green)"><span class="dot" style="background:var(--green)"></span>RS Force</div>
+    <h3>101k personnel</h3>
+    <p>Historical: 80-100k. Slightly over. Operational tempo: 61 orders — dominant as expected.</p>
+  </div>
+  <div class="c">
+    <div class="lbl" style="color:var(--amber)"><span class="dot" style="background:var(--amber)"></span>RBiH Force</div>
+    <h3>143k personnel</h3>
+    <p>Historical: 100-130k. Over by ~10%. Overmobilization persists (Issue #43). 41 orders — aggressive in late war.</p>
+  </div>
+  <div class="c">
+    <div class="lbl" style="color:var(--red)"><span class="dot" style="background:var(--red)"></span>HRHB Force</div>
+    <h3>42k, 1 operation</h3>
+    <p>Historical: 25-40k. Force OK. But <strong>1 operation in 40 weeks</strong> — HVO is a spectator. P1 absurdity.</p>
+  </div>
+</div>
+
+<!-- 4 REALISM -->
+<div id="s4" class="sec-head"><span class="dot" style="background:var(--rust)"></span>4 &mdash; War-or-Game Realism Audit</div>
+
+<div class="c c--left au d4" style="border-left-color:var(--red)">
+  <div class="lbl" style="color:var(--red)"><span class="dot" style="background:var(--red)"></span>P0 — Exhaustion is Dead</div>
+  <h3>The core negative-sum mechanic does not function</h3>
+  <p>All factions show exhaustion 270-400 at w40, but <code>getWarExhaustionTempoMult()</code> only activates at 500-800. No faction reaches the threshold. By January 1993, every real commander felt 9 months of war. Without functioning exhaustion, the sim is a perpetual-motion machine.</p>
+  <p style="margin-top:6px"><strong>Fix direction:</strong> Lower thresholds from 500-800 to 200-500, or increase per-turn accumulation so factions hit meaningful range by w25-30.</p>
+  <span class="tag" style="background:var(--red-dim);color:var(--red)">Blocks negative-sum identity</span>
+</div>
+
+<div class="c c--left au d5" style="border-left-color:var(--amber)">
+  <div class="lbl" style="color:var(--amber)"><span class="dot" style="background:var(--amber)"></span>P1 — HRHB Spectator</div>
+  <h3>HVO fights 1 operation in 40 weeks</h3>
+  <p>HVO fought actively in 1992: Operation Bura around Prozor, Posavina fighting, Mostar battles. 1 order means HRHB holds starting territory and does nothing. A real HVO commander would be relieved of duty.</p>
+  <p style="margin-top:6px"><strong>Fix direction:</strong> HRHB patron directive scope fix (already flagged). Investigate aggression floor for HRHB corps.</p>
+</div>
+
+<div class="c c--left au d5" style="border-left-color:var(--amber)">
+  <div class="lbl" style="color:var(--amber)"><span class="dot" style="background:var(--amber)"></span>P1 — 83 Brigades Never Fight</div>
+  <h3>38% of eligible force sits idle in an existential war</h3>
+  <p>In 40 weeks, 83 brigades (38%) see zero combat. Many are front-assigned with sector ownership but never generated or joined an operation. Real ARBiH garrison brigades still had frontline attrition, sniper exchanges, and raids.</p>
+</div>
+
+<div class="g2 au d6">
+  <div class="c c--left" style="border-left-color:var(--green)">
+    <div class="lbl" style="color:var(--green)"><span class="dot" style="background:var(--green)"></span>What Works Well</div>
+    <h3>Three emergent successes worth protecting</h3>
+    <ul>
+      <li><strong>Posavina Corridor holds</strong> — Brcko=RS through defensive fire mechanics, no must_hold hack</li>
+      <li><strong>RS operational tempo</strong> — 1st Krajina runs 5+ sequential ops matching Mladic's 1992 western-Bosnia-first strategy</li>
+      <li><strong>Enclaves survive</strong> — Srebrenica, Zepa, Gorazde stay RBiH without railroading (terrain + garrison + force-ratio)</li>
+    </ul>
+  </div>
+
+  <div class="c c--left" style="border-left-color:var(--red)">
+    <div class="lbl" style="color:var(--red)"><span class="dot" style="background:var(--red)"></span>Negative-Sum Identity Check</div>
+    <h3>Verdict: NOT YET FELT</h3>
+    <p>The map looks right but the experiential texture is absent. Exhaustion has zero effect. RBiH triples in personnel (mobilization without cost). HRHB's silence is mechanical, not strategic caution. No events force hard choices. The sim is a conventional wargame where the strongest army wins — the opposite of AWWV's design intent.</p>
+  </div>
+</div>
+
+<!-- 5 PLAN -->
+<div id="s5" class="sec-head"><span class="dot" style="background:var(--gold)"></span>5 &mdash; Today's Battle Plan</div>
+
+<div class="pri au d5">
+  <div class="rank" style="color:var(--red)">1</div>
+  <div>
+    <h3>Fix the Exhaustion Ramp (P0)</h3>
+    <p>Lower <code>getWarExhaustionTempoMult()</code> thresholds from 500-800 to 200-500. Single constant change with the highest realism payoff in the entire backlog. Directly addresses the negative-sum identity gap — the thing that makes AWWV not just another wargame.</p>
+    <div class="dispatch">Dispatch: /gameplay-programmer + /game-designer &middot; One calibration run to verify</div>
+  </div>
+</div>
+
+<div class="pri au d5">
+  <div class="rank" style="color:var(--amber)">2</div>
+  <div>
+    <h3>Investigate HRHB Passivity (P1)</h3>
+    <p>HRHB patron directive scope fix already flagged in CALIBRATION_MASTER. Investigate aggression floor for HRHB corps commanders. 1 operation in 40 weeks is the most visible absurdity any player would notice.</p>
+    <div class="dispatch">Dispatch: /corps-army-commander + /operations-expert &middot; Diagnosis first, then fix</div>
+  </div>
+</div>
+
+<div class="pri au d6">
+  <div class="rank" style="color:var(--teal)">3</div>
+  <div>
+    <h3>Map Tactical Overlay Continuation</h3>
+    <p>Front-edge display ownership just landed (300 lines). Next: sector selection UX refinement, Gorazde uncovered-edge content/runtime audit. Continue the map work that makes the game visually readable.</p>
+    <div class="dispatch">Dispatch: /ui-ux-developer + /graphics-programmer</div>
+  </div>
+</div>
+
+<div class="pri au d7">
+  <div class="rank" style="color:var(--slate)">4</div>
+  <div>
+    <h3>Rebase CALIBRATION_MASTER</h3>
+    <p>Master reference stuck at n1302. Current main is n1421 (25+ runs later). Rebase the document against current truth so the next calibration run starts from honest ground.</p>
+    <div class="dispatch">Dispatch: /scenario-creator-runner-tester &middot; 40w run + full panel review</div>
+  </div>
+</div>
+
+<div class="pri au d8">
+  <div class="rank" style="color:var(--slate)">5</div>
+  <div>
+    <h3>God-File Program: war_phases.ts</h3>
+    <p>Start structural maintainability on <code>war_phases.ts</code> (151 steps). From the A+++ scorecard plan. Reduce coupling, extract step groups, add structural documentation. Enables faster future work on every pipeline change.</p>
+    <div class="dispatch">Dispatch: /technical-architect &middot; Plan first, execute with /refactor-pass</div>
+  </div>
+</div>
+
+<div class="ftr">
+  Pyrrhic Games Daily Standup &middot; 2026-04-11 &middot; "Another such victory and we are undone."
+</div>
+
+</div>
+</div>
+
+<script>
+(function(){
+  const toc=document.getElementById('toc'),links=toc.querySelectorAll('a'),sections=[];
+  links.forEach(l=>{const id=l.getAttribute('href').slice(1),el=document.getElementById(id);if(el)sections.push({id,el,link:l})});
+  const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove('active'));const m=sections.find(s=>s.el===e.target);if(m){m.link.classList.add('active');if(window.innerWidth<=1000)m.link.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'})}}})},{rootMargin:'-10% 0px -80% 0px'});
+  sections.forEach(s=>obs.observe(s.el));
+  links.forEach(l=>{l.addEventListener('click',e=>{e.preventDefault();const id=l.getAttribute('href').slice(1),el=document.getElementById(id);if(el){el.scrollIntoView({behavior:'smooth',block:'start'});history.replaceState(null,'','#'+id)}})});
+})();
+</script>
+</body>
+</html>

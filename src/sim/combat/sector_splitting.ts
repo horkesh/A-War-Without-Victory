@@ -71,6 +71,41 @@ export function splitNonContiguousSectors(
             }
         }
 
+        // A single frontline settlement can legitimately face multiple hostile
+        // neighbors around its perimeter, but only when those hostile-facing
+        // edge slices form one continuous hostile-side boundary component.
+        // If the hostile endpoints split into disconnected boundary components,
+        // this is not one continuous sector line; it is a branching seam that
+        // must split even though the friendly OSID count is 1.
+        if (allFriendly.size <= 1) {
+            if (!(faction && edgeMeta && sharedBoundaryAdj)) {
+                result.push(sector);
+                continue;
+            }
+
+            const hostileOsids = new Set<string>();
+            for (const eid of sector.edge_ids) {
+                const meta = edgeMeta.get(eid);
+                if (!meta) continue;
+                if (meta.side_a === faction) hostileOsids.add(meta.b);
+                else if (meta.side_b === faction) hostileOsids.add(meta.a);
+            }
+
+            if (hostileOsids.size <= 1) {
+                result.push(sector);
+                continue;
+            }
+
+            const hostileComponents = findConnectedComponents(
+                hostileOsids,
+                (osid) => (sharedBoundaryAdj.get(osid as Osid) ?? []).filter((neighbor) => hostileOsids.has(neighbor)),
+            );
+            if (hostileComponents.length <= 1) {
+                result.push(sector);
+                continue;
+            }
+        }
+
         // Build edge adjacency for this sector's edges.
         // When faction info is available, use triple-junction connectivity
         // (buildEdgeAdjacency) which correctly splits at branching points:
@@ -120,6 +155,7 @@ export function splitNonContiguousSectors(
                         territory_osids: sector.territory_osids.filter(o => comp.has(o)),
                         assigned_brigade_ids: isLargest ? [...sector.assigned_brigade_ids] : [],
                         reserve_brigade_ids: isLargest ? [...sector.reserve_brigade_ids] : [],
+                        rear_brigade_ids: isLargest ? [...(sector.rear_brigade_ids ?? [])] : [],
                         density: 0,
                         threat_ratio: 0,
                         defensive_power: 0,
@@ -214,6 +250,7 @@ export function splitNonContiguousSectors(
                     territory_osids: sector.territory_osids.filter(o => compFriendly.has(o)),
                     assigned_brigade_ids: isLargest ? [...sector.assigned_brigade_ids] : [],
                     reserve_brigade_ids: isLargest ? [...sector.reserve_brigade_ids] : [],
+                    rear_brigade_ids: isLargest ? [...(sector.rear_brigade_ids ?? [])] : [],
                     density: 0,
                     threat_ratio: 0,
                     defensive_power: 0,
@@ -290,6 +327,7 @@ export function splitNonContiguousSectors(
                 territory_osids: compTerritoryOsids.sort(strictCompare),
                 assigned_brigade_ids: isLargest ? [...sector.assigned_brigade_ids] : [],
                 reserve_brigade_ids: isLargest ? [...sector.reserve_brigade_ids] : [],
+                rear_brigade_ids: isLargest ? [...(sector.rear_brigade_ids ?? [])] : [],
                 density: 0,
                 threat_ratio: 0,
                 defensive_power: 0,
@@ -320,6 +358,8 @@ export function mergeUndersizedSubSegments(
     subSegments: CorpsFrontSubSegment[],
     osidAdjacency: Map<Osid, Osid[]>,
     sharedBoundaryAdj?: Map<Osid, Osid[]>,
+    strictAdjForCaseB?: Map<Osid, Osid[]>,
+    centroids?: OsidCentroidMap,
 ): CorpsFrontSubSegment[] {
     if (subSegments.length <= 1) return subSegments;
 
@@ -353,7 +393,7 @@ export function mergeUndersizedSubSegments(
         for (let i = 0; i < segs.length; i++) {
             if (i === targetIdx) continue;
             const candidate = segs[i]!;
-            if (isSegmentAdjacent(target, candidate, osidAdjacency, sharedBoundaryAdj)) {
+            if (isSegmentAdjacent(target, candidate, osidAdjacency, sharedBoundaryAdj, strictAdjForCaseB, centroids)) {
                 if (candidate.length_edges < bestSize ||
                     (candidate.length_edges === bestSize && bestIdx >= 0 &&
                         strictCompare(candidate.sub_segment_id, segs[bestIdx]!.sub_segment_id) < 0)) {
@@ -621,6 +661,7 @@ export function mergeSectors(
 
     const brigadeIds = [...new Set([...base.assigned_brigade_ids, ...other.assigned_brigade_ids])].sort(strictCompare);
     const reserveIds = [...new Set([...base.reserve_brigade_ids, ...other.reserve_brigade_ids])].sort(strictCompare);
+    const rearIds = [...new Set([...(base.rear_brigade_ids ?? []), ...(other.rear_brigade_ids ?? [])])].sort(strictCompare);
 
     return {
         sector_id: `sector:${corpsId}:${indexHint}`,
@@ -633,6 +674,7 @@ export function mergeSectors(
         territory_osids: territoryOsids,
         assigned_brigade_ids: brigadeIds,
         reserve_brigade_ids: reserveIds,
+        rear_brigade_ids: rearIds,
         density: 0,
         threat_ratio: 0,
         defensive_power: 0,

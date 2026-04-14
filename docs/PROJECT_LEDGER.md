@@ -1,3 +1,406 @@
+## [2026-04-14] fix(negotiation): wire civilian_casualties_caused from displacement events into NegotiationBreakdown
+
+**Type:** Political truth / dead wire fix (v0.8-to-v0.9)
+**Files:** `src/sim/negotiation/compute_capital.ts` (2 lines)
+**Status:** VERIFIED — tsc clean, 54/54 negotiation tests. **40w proof: n1574, 93.6%, 27/27, 6/6. RS civilian_casualties_caused: 37,324 (was 0). International standing now data-driven.**
+
+### Summary
+`civilian_casualties_caused` on `NegotiationBreakdown` was hardcoded to 0 with a TODO. Displacement events already have per-event `killed` counts attributed by `caused_by` faction. Added one line to sum `killed` in the existing loop. This feeds `strategic_dimensions.ts` which uses it for `international_standing`. RS now earns its 0.0 international standing from 37,324 civilian deaths rather than from a separate hardcoded path.
+
+**Canonical owner:** `computeHumanitarianData()` in `compute_capital.ts`.
+**Demoted path:** Hardcoded `civilian_casualties_caused: 0` with TODO.
+
+## [2026-04-14] fix(commander): give commander-generated ops proper code names from faction name pools
+
+**Type:** Player-facing truth / immersion (v0.8-to-v0.9)
+**Files:** `src/sim/combat/commander/emit.ts` (+import, +1 line)
+**Status:** VERIFIED — 255/255 commander tests, tsc clean. **40w proof: n1573, 93.6%, 27/27, 6/6. All 14 ops now have proper names. Zero `cmd_` debug names.**
+
+### Summary
+Commander-generated ops used debug identifiers like `cmd_arbih_1st_corps_t34` as their operation name. The faction-specific historical name pools in `operation_names.ts` (VRS: JNA bureaucratic style, ARBiH: aspirational/Islamic, HVO: Croatian weather/force) already existed and were used by `sector_offensive.ts`, but `emit.ts` bypassed them. Fixed by calling `pickOperationName()` before `buildCommanderOperation()`. The factory already accepted an optional `name` parameter.
+
+Before: `cmd_vrs_east_bosnian_t9`, `cmd_arbih_1st_corps_t34`
+After: `Operacija Breza`, `Operacija Tigar-Sloboda`
+
+## [2026-04-14] fix(political): rescale exhaustion in situation_score + wire negotiation pressure into peace plan floor + scope HRHB patron directives per-corps
+
+**Type:** Political truth / game identity (v0.8-to-v0.9 design decisions 1A, 1B, 3)
+**Files:** `political_personality.ts` (exhaustion /6 rescale + negotiation_pressure field), `political_peace_plan.ts` (pressure floor reduction), `bot_corps_stance.ts` (corps_ids directive scope), `apr1992.json` (5 per-corps directives), 9 test fixtures
+**Status:** VERIFIED — tsc clean, 226/226 political+stance tests. **40w proof: n1572, 93.6%, 27/27, 6/6, hash `bd7e8d59508b858a`. HRHB orders 2→6 (Posavina uncapped). +0.1pp calibration.**
+
+### Summary
+Three design decisions implemented as one coherent political truth lane:
+1. **Fix 1A (bug):** `situation_score` clamped `war_exhaustion` to 0-100 but values reach 400+. ALL factions read 100 after ~w5 — zero differential. Rescaled to /6 (600→100). RS/HRHB now read ~67, RBiH ~45 — correct differential.
+2. **Fix 1B (new mechanic):** High `negotiation.pressure` (~4000 at w40) erodes RS territory floor gap by up to 15pp. War's accumulated suffering makes factions accept deals they'd have rejected earlier. Core negative-sum promise.
+3. **Fix 3 (data + code):** Patron directive `corps_ids` field scopes ceilings per-corps. Posavina exempt (fighting from day one). Herzegovina/CB/Tomislavgrad scoped individually with differentiated timelines.
+
+**Canonical owner:** `computePoliticalAssessment()` owns exhaustion rescale. `computePoliticalPeacePlanResponse()` owns pressure floor. `bot_corps_stance.ts` patron directive block owns corps scoping.
+
+## [2026-04-14] fix(scenario): correct jajce_falls_1992 turn_min from 40 to 28
+
+**Type:** Scenario data / historical accuracy (v0.8-to-v0.9)
+**Files:** `data/scenarios/events/war_1992.json` (jajce_falls_1992 trigger)
+**Status:** VERIFIED — tsc clean, 43/43 event tests. **40w proof: n1570, 93.5%, 27/27, 6/6. Event fires at turn 28 (was unreachable before turn 40). Zero calibration regression.**
+
+### Summary
+`jajce_falls_1992` event had `turn_min: 40` (February 1993) but Jajce historically fell October 29, 1992 (~week 28-30 from April 1992 start). Event couldn't fire until 4 months after the historical date. Changed to `turn_min: 28`. The event is condition-gated (`faction_controls_municipality: RS, jajce, 0.5`) so it still only fires when RS actually controls Jajce — the timing window now matches history.
+
+## [2026-04-14] fix(sim): clear stale assigned_sub_segment_id on non-sector formations
+
+**Type:** Sector truth / derived cache cleanup (v0.8-to-v0.9)
+**Files:** `src/sim/combat/final_sector_truth_reconciliation.ts` (+13 lines)
+**Status:** VERIFIED — tsc clean, 5/5 sector truth tests. **40w proof: n1569, 93.5%, 27/27, 6/6.** Zero-delta: all three target brigades are legitimately sector-assigned in current runs. The sweep is a latent safety net for future late-writer regressions.
+
+### Summary
+Three brigades (705th Slavna Mountain, Bileća Brigade, 1st Laktaši) carried `assigned_sub_segment_id` values despite not being in any sector's brigade lists. Late writers (recruitment, mobilization, elite recall) can re-assign ssids after the main clearing step. Added a final sweep in `reconcileFinalSectorTruth()` that builds a set of all sector-owned brigades and clears `assigned_sub_segment_id` on any formation not in that set. Follows life lesson: "When demoting a brigade, always clear derived cache fields."
+
+**Canonical owner:** `reconcileFinalSectorTruth()` final sweep — runs after all late writers.
+**Demoted path:** Stale `assigned_sub_segment_id` values persisting through late-writer pipeline gaps.
+
+## [2026-04-14] fix(harness): resolve casualty ratio discrepancy between attack_resolution and anomaly_detection
+
+**Type:** Harness truth / anomaly detector fix (v0.8-to-v0.9)
+**Files:** `src/scenario/anomaly_detector.ts` (casualty ratio check)
+**Status:** VERIFIED — tsc clean, 10/10 anomaly tests.
+
+### Summary
+P1 open since n1302: `attack_resolution` and `anomaly_detection` reported different casualty numbers. Root cause: the anomaly detector summed ALL `brigade_history.engagements[].casualties_taken` including frontline friction engagements (battle_id `*:friction:*`), while `attack_resolution` only counted battle casualties. Fix: filter friction engagements out of the battle casualty ratio and report them separately. The two sources now measure the same thing.
+
+**Canonical owner:** `checkCasualtyRatio()` in `anomaly_detector.ts` — counts battle engagements only, reports friction separately.
+**Demoted path:** Unfiltered engagement sum that conflated battle and friction casualties.
+
+## [2026-04-14] refactor(ui): migrate DiplomacyOverview to canonical strategic dimensions
+
+**Type:** UI truth / dead code removal (v0.8-to-v0.9)
+**Files:** `DiplomacyOverview.tsx` (rewritten), `SituationTab.tsx` (caller updated), `GameStateAdapter.ts` (removed `deriveNegotiationCapital` + call site), `types.ts` (removed `negotiationCapital` type)
+**Status:** VERIFIED — tsc clean, desktop:map:build clean.
+
+### Summary
+`DiplomacyOverview` consumed legacy `negotiationCapital` adapter data that had 5 bars with 2 duplicate pairs (`military_position`=`military_effectiveness`, `humanitarian_standing`=`international_credibility`). Migrated to consume `strategicDimensions` (6 canonical dimensions with distinct real values) + `negotiatingCapital` (weighted composite). Removed dead `deriveNegotiationCapital()` function (~40 lines) and its type definition.
+
+**Canonical owner:** `strategicDimensions` + `negotiatingCapital` on `LoadedGameState`, derived from `deriveStrategicDimensions()` + `deriveNegotiatingCapital()`.
+**Demoted path:** `negotiationCapital` with duplicate field mappings — deleted.
+
+## [2026-04-14] fix(political): compute real negotiation capital composite from DIMENSION_WEIGHTS
+
+**Type:** Political truth / dead wire fix (v0.8-to-v0.9)
+**Files:** `src/ui/map/data/GameStateAdapter.ts` (deriveNegotiationCapital — replaced hardcoded `composite: 50` with weighted sum from canonical DIMENSION_WEIGHTS)
+**Status:** VERIFIED — tsc clean, desktop:map:build clean.
+
+### Summary
+`DiplomacyOverview` displayed `(Composite: 50)` for all factions at all times because `deriveNegotiationCapital` had a hardcoded `composite: 50` TODO. Now computes the real weighted composite from `DIMENSION_WEIGHTS` and each dimension's `effective_value`. Fallback remains 50 when weights or dimensions are unavailable.
+
+**Canonical owner:** `deriveNegotiationCapital` in `GameStateAdapter.ts`, sourcing weights from `DIMENSION_WEIGHTS` in `strategic_dimensions.ts`.
+**Demoted path:** Hardcoded `composite: 50` placeholder.
+
+## [2026-04-14] refactor(political): unify dimension weights to single canonical source
+
+**Type:** Political truth / DRY refactor (v0.8-to-v0.9)
+**Files:** `src/ui/map/data/GameStateAdapter.ts` (import + replace inline weights), `src/sim/political/political_personality.ts` (+comment)
+**Status:** VERIFIED — 297/297 suites, 3496/3496 vitest, tsc clean, build clean.
+
+### Summary
+`deriveNegotiatingCapital()` in GameStateAdapter had inline dimension weights duplicating the canonical `DIMENSION_WEIGHTS` from `strategic_dimensions.ts`. Replaced with import. `StrategicPosition.tsx` was already using the canonical import. Added cross-reference comment to `political_personality.ts` documenting that its weights are intentionally different (personality scoring, not Dayton capital composite).
+
+**Canonical owner:** `DIMENSION_WEIGHTS` in `src/sim/events/strategic_dimensions.ts`
+**Demoted path:** Inline weight objects in adapter.
+
+## [2026-04-14] fix(autonomy): GC resolved proposals from prior turns in apply-autonomy-transition
+
+**Type:** Autonomy hygiene (v0.8-to-v0.9)
+**Files:** `src/sim/turn_phases/war_phases.ts` (1 line filter change)
+**Status:** VERIFIED — tsc clean, 113/113 autonomy tests, build clean, desktop:map:build clean.
+
+### Summary
+`apply-autonomy-transition` previously only expired *unresolved* prior-turn proposals. Resolved proposals (accepted/rejected) accumulated indefinitely on `pending_proposal_reviews`. Simplified filter to `p.turn >= meta.turn` — clears all prior-turn proposals at the start of each turn.
+
+**Canonical owner:** `apply-autonomy-transition` pipeline step owns proposal lifecycle GC.
+**Demoted path:** Prior filter that preserved resolved proposals indefinitely.
+
+## [2026-04-14] feat(commander): wire faction war_exhaustion into commander plan scoring
+
+**Type:** Game identity / exhaustion activation (v0.8-to-v0.9 scorecard lane)
+**Files:** `src/sim/combat/commander/commander_state.ts` (+1 field), `src/sim/combat/commander/briefing.ts` (+2 lines), `src/sim/combat/commander/plan.ts` (+8 lines), 38 test fixtures updated
+**Status:** VERIFIED — tsc clean, 255/255 commander tests, build clean, desktop:map:build clean. **40w scenario proof: n1568, 93.5% area-weighted, 27/27 anchors, 6/6 benchmarks, hash `cd3083a0295af31b`.** Hash differs from previous baseline — confirms real behavior change. No calibration regression.
+
+### Summary
+The commander system was completely blind to faction-level war exhaustion (`state.political.war_exhaustion`). Corps COs only read `corps_exhaustion` (operational, decaying 0-100) and never felt the nation's accumulated suffering. This is the central identity gap — a negative-sum wargame where exhaustion doesn't throttle military appetite.
+
+Fix: `faction_war_exhaustion` field added to `CommanderBriefing`, read from `state.political.war_exhaustion`. In plan scoring, a `factionExhaustionDrag` multiplier (1.0 at 0, 0.3 floor at 600+) now scales the existing `exhaustionPenalty`, making offensive intents (`stage_operation`, `launch_opportunity`) relatively less attractive as the nation exhausts. Defensive intents are unaffected.
+
+At RS w40 (war_exhaustion=400): offensive scoring contribution drops from 0.15 to ~0.05. At RBiH w40 (271): drops to ~0.08. The nation's suffering now shapes commander behavior.
+
+**Canonical owner:** `plan.ts:exhaustionPenalty` computation, fed by `briefing.ts:factionWarExhaustion`.
+**Demoted path:** Corps-only exhaustion that ignored faction-level war weariness.
+
+## [2026-04-14] test(save-load): add real-save round-trip proof tests
+
+**Type:** Save/load integrity hardening (v0.8-to-v0.9 scorecard lane)
+**Files:** `tests/save_load_real_roundtrip.test.ts` (NEW, 12 tests)
+**Status:** VERIFIED — 12/12 passed on real 13MB 40w final save.
+
+### Summary
+Existing round-trip tests used minimal hand-built fixtures (one brigade, one OSID). Added 9 tests against `data/derived/latest_run_final_save.json` (real production-scale state):
+1. **Idempotency**: `serialize(deserialize(file))` round-trip is byte-identical on second pass
+2. **Key preservation**: all top-level keys, faction IDs, formation count, political_controllers count
+3. **Autonomy fields**: autonomy_level, pending_proposal_reviews, autonomy_overrides survive round-trip
+4. **Corps command**: corps_command entries and player_op_response preserved
+5. **War exhaustion**: war_exhaustion values preserved exactly
+6. **Determinism**: serializeGameState output identical on same input
+7. **Adapter-after-deserialize contract**: parseGameState produces identical field counts on raw vs round-tripped state (formations, settlements, sectors, front edges)
+8. **Hash preservation**: deserialize-then-reserialize preserves SHA-256 content hash
+
+**Canonical owner:** `serialize.ts` + `serializeGameState.ts` round-trip contract.
+**Player-visible truth:** Save/load fidelity now proven on real state, not just toy fixtures.
+
+## [2026-04-14] refactor(combat): extract brigade history recording from attack_resolution_osid.ts (tranche 7)
+
+**Type:** God-file decomposition (v0.8-to-v0.9)
+**Files:** `src/sim/combat/attack_history_recording.ts` (NEW, 136 lines), `src/sim/combat/attack_resolution_osid.ts` (→907 lines, measured)
+**Status:** VERIFIED — tsc clean, 3487/3487 vitest (296 suites), build clean, desktop:map:build clean. 40w hash not run; zero-drift strongly indicated, not proven.
+
+### Summary of changes
+1. **`recordBattleHistory()` extracted** — attacker equipment record assembly + `recordAttackerEngagements`, multi-defender weight distribution via `allocateIntegerByWeights`, per-defender `recordDefenderEngagement`, single-defender equipment record assembly
+2. **5 imports removed from resolver** — `recordAttackerEngagements`, `recordDefenderEngagement`, `buildAttackerEquipmentRecord`, `buildDefenderEquipmentRecord`, `allocateIntegerByWeights` (all used exclusively in the extracted block)
+
+### Proof
+- New tests: 9/9 (attack_history_recording.test.ts)
+- Regression: 178/178 (7 tranche files)
+- Full vitest: 296 suites, 3487 tests
+- Cumulative from HEAD (1809 lines): 907 lines remaining (-902 lines, -49.9%)
+
+### Artifacts
+- Report: `docs/40_reports/implemented/20260414_ATTACK_HISTORY_RECORDING_DECOMPOSITION.md`
+
+## [2026-04-13] refactor(combat): extract resource aftermath from attack_resolution_osid.ts (tranche 6)
+
+**Type:** God-file decomposition (v0.8-to-v0.9)
+**Files:** `src/sim/combat/attack_resource_aftermath.ts` (NEW, 95 lines), `src/sim/combat/attack_resolution_osid.ts` (reported 1045→1027, -18; intermediate not remeasured)
+**Status:** VERIFIED — tsc clean, 3478/3478 vitest (295 suites), build clean, desktop:map:build clean. 40w hash not run; zero-drift strongly indicated, not proven.
+
+### Summary of changes
+1. **Supply reserve expenditure extracted** — `deductCombatSupplyExpenditure()` wraps Part 6b (attacker full rate, defender half rate, guarded by `supply_reserves_enabled`)
+2. **Facility combat damage extracted** — `applyFacilityCombatDamage()` wraps Part 6c (deterministic sorted iteration, municipality matching, condition clamped to 0)
+3. **Combat fatigue extracted** — `applyCombatFatigue()` wraps COMBAT FATIGUE block (attacker +2, defender +1, ops init, FATIGUE_MAX cap)
+
+### Proof
+- New tests: 17/17 (attack_resource_aftermath.test.ts)
+- Regression: 161/161 (6 tranche files)
+- Full vitest: 295 suites, 3478 tests
+- Cumulative from HEAD (1809 lines): intermediate 1027 reported (-782 lines, -43.2%; not independently remeasured)
+
+### Artifacts
+- Report: `docs/40_reports/implemented/20260413_ATTACK_RESOURCE_AFTERMATH_DECOMPOSITION.md`
+
+## [2026-04-13] refactor(combat): extract morale absorption from attack_resolution_osid.ts (tranche 5a)
+
+**Type:** God-file decomposition (v0.8-to-v0.9)
+**Files:** `src/sim/combat/attack_morale_absorption.ts` (NEW, 169 lines), `src/sim/combat/attack_resolution_osid.ts` (reported 1119→1045, -74; intermediate not remeasured)
+**Status:** VERIFIED — tsc clean, 3461/3461 vitest (294 suites), build clean, desktop:map:build clean. 40w hash not run; zero-drift strongly indicated, not proven.
+
+### Summary of changes
+1. **Morale absorption evaluation extracted** — `evaluateAndApplyMoraleAbsorption()` encapsulates three absorption paths: enclave capital last stand, ARBiH homeland defense (≥50% co-ethnic), professional resilience (morale ≥ floor)
+2. **Extra casualty application extracted** — homeland-determination extra casualties (MORALE_ABSORPTION_CAS_MULT × both sides) with MIN_COMBAT_PERSONNEL clamping and casualty ledger recording
+3. **MoraleAbsorptionResult interface** — clean `{ moraleAbsorbed, flip }` contract consumed by downstream flip/morale logic
+
+### Proof
+- New tests: 23/23 (attack_morale_absorption.test.ts)
+- Regression: 138/138 (5 tranche files)
+- Full vitest: 294 suites, 3461 tests
+- Cumulative from HEAD (1809 lines): intermediate 1045 reported (-764 lines, -42.2%; not independently remeasured)
+
+### Artifacts
+- Report: `docs/40_reports/implemented/20260413_ATTACK_MORALE_ABSORPTION_DECOMPOSITION.md`
+
+## [2026-04-13] refactor(combat): extract post-battle effects from attack_resolution_osid.ts (tranche 4)
+
+**Type:** God-file decomposition (v0.8-to-v0.9)
+**Files:** `src/sim/combat/attack_post_battle_effects.ts` (NEW, 164 lines measured), `src/sim/combat/attack_resolution_osid.ts` (reported 1186→1119, -67; intermediate not remeasured)
+**Status:** VERIFIED — zero-drift hash proof `16badcf4f470d2ce` (n1567) identical to HEAD baseline, 3438/3438 vitest (293 suites), tsc clean, build clean, desktop:map:build clean
+
+### Summary of changes
+1. **Experience gain extracted** — `applyExperienceGain()` with faction-differentiated learning rates and diminishing returns
+2. **Officer quality loss extracted** — `applyOfficerCasualtyLoss()` with casualty-ratio-driven degradation
+3. **Outcome perspective extracted** — `getDefenderOutcomePerspective()` maps attacker outcome to defender perspective
+4. **Disruption extracted** — `applyDisruptionFromOutcome()` sets disrupted_turns and last_repulsed_from
+5. **Ammo crisis / pyrrhic extracted** — `applyAmmoCrisisPyrrhicEffects()` generates snap events + applies cohesion/posture effects
+6. **Post-battle morale extracted** — `applyPostBattleMorale()` handles attacker outcome-based morale + defender flip/hold morale
+
+### Proof
+- Full vitest: 292 suites, 3394 tests
+- Cumulative from HEAD (1809 lines): intermediate 1119 reported (-690 lines, -38.1%; not independently remeasured)
+
+### Artifacts
+- Report: `docs/40_reports/implemented/20260413_ATTACK_POST_BATTLE_EFFECTS_DECOMPOSITION.md`
+
+## [2026-04-13] refactor(combat): extract casualty calculation & distribution from attack_resolution_osid.ts (tranche 3)
+
+**Type:** God-file decomposition (v0.8-to-v0.9)
+**Files:** `src/sim/combat/attack_casualty_distribution.ts` (NEW, 175 lines measured), `src/sim/combat/attack_resolution_osid.ts` (reported 1218→1186, -32; intermediate not remeasured)
+**Status:** VERIFIED — zero-drift hash proof `16badcf4f470d2ce` (n1566) identical to HEAD baseline, 3394/3394 vitest (292 suites), tsc clean, build clean, desktop:map:build clean
+
+### Summary of changes
+1. **Casualty formula extracted** — `computeFinalCasualties()` encapsulates the base attacker/defender casualty formula with Lanchester concentration bonus and MIN_COMBAT_PERSONNEL cap
+2. **KIA/WIA/MIA split deduplicated** — `splitKiaWiaMia()` replaces 3 inline instances of the same 3-line pattern
+3. **Attacker casualty weights extracted** — `computeAttackerCasualtyShares()` computes per-formation shares with support/main role multipliers
+4. **Defender distribution extracted** — `distributeDefenderCasualties()` handles both multi-brigade weighted and single-brigade paths
+5. **Contribution records extracted** — `buildDefenderContributions()` builds Layer C battle report structures
+6. **Dead code removed** — 6 unused KIA/WIA/MIA variables (computed but never referenced)
+
+### Proof
+- Full vitest: 292 suites, 3394 tests (3365 + 29 new)
+- Cumulative from HEAD (1809 lines): intermediate 1186 reported (-623 lines, -34.4%; not independently remeasured)
+
+### Artifacts
+- Report: `docs/40_reports/implemented/20260413_ATTACK_CASUALTY_DISTRIBUTION_DECOMPOSITION.md`
+- Tests: `tests/attack_casualty_distribution.test.ts` (29 tests)
+
+## [2026-04-13] refactor(combat): extract equipment battle-effects from attack_resolution_osid.ts (tranche 2)
+
+**Type:** God-file decomposition (v0.8-to-v0.9)
+**Files:** `src/sim/combat/attack_equipment_effects.ts` (NEW, 378 lines measured), `src/sim/combat/attack_resolution_osid.ts` (reported 1416→1218, -198; intermediate not remeasured)
+**Status:** VERIFIED — zero-drift hash proof `16badcf4f470d2ce` identical pre/post (n1564 vs n1565), 3311/3311 vitest, tsc clean, build clean
+
+### Summary of changes
+1. **Equipment loss calculation extracted** — `computeFormationEquipmentLoss()` handles attacker/defender role-differentiated rates with scarce tank protection
+2. **Equipment transfers extracted** — `processEquipmentTransfers()` consolidates battlefield scavenging, equipment capture, and abandoned equipment into a single call with narrow parameter surface
+3. **Report builders extracted** — `buildBattleEquipmentReport()` and `buildAttacker/DefenderEquipmentRecord()` encapsulate battle report and brigade history equipment data construction
+4. **Main file simplified** — 6 inline code blocks replaced with function calls; main file now more orchestration-like
+
+### Proof
+- Pre-extraction: n1564, hash `16badcf4f470d2ce`
+- Post-extraction: n1565, hash `16badcf4f470d2ce`
+- Cumulative from HEAD (1809 lines): intermediate 1218 reported (-591 lines, -32.7%; not independently remeasured)
+
+### Artifacts
+- Report: `docs/40_reports/implemented/20260413_ATTACK_EQUIPMENT_EFFECTS_DECOMPOSITION.md`
+
+## [2026-04-13] refactor(combat): decompose attack_resolution_osid.ts — tranche 1 (no behavior change)
+
+**Type:** Maintainability / god-file decomposition (no sim behavior change)
+**Files:** `src/sim/combat/attack_retreat_displacement.ts` (NEW), `src/sim/combat/attack_resolution_types.ts` (NEW), `src/sim/combat/attack_resolution_osid.ts` (MODIFIED), `tests/probe_territory_flip.test.ts` (REVERTED TO HEAD)
+**Status:** VERIFIED — same-hash scenario proof (n1564 HEAD baseline = n1563 extraction = `16badcf4f470d2ce`)
+
+### Summary
+First tranche of v0.8-to-v0.9 god-file decomposition. Extracted two ownership families from `attack_resolution_osid.ts` (HEAD: 1809 lines measured):
+1. **Retreat & displacement helpers** (13 functions, 7 constants, 1 interface) → `attack_retreat_displacement.ts` (468 lines measured)
+2. **Battle report types** (5 type definitions, 1 helper) → `attack_resolution_types.ts` (95 lines measured)
+
+Resolver intermediate size after T1 was reported as ~1,430 during extraction (not independently remeasured). Backward-compat re-exports preserved — no consumer changes needed. Zero behavior drift proven by identical scenario hash against HEAD.
+
+### Codex review repair
+Initial submission REJECTED: three pre-existing dirty worktree behavioral changes (tactical adjacency, forced costly_victory, blanket probe no-flip) + matching tests were carried into the extraction diff. Repaired by reverting all behavioral hunks and test additions to HEAD, then re-proving with corrected baseline. Full audit in report.
+
+### Verification
+- `npx tsc --noEmit` — PASS (0 errors)
+- `npm run test:vitest` — 290/290 files, 3311/3311 tests
+- `npm run build` — PASS
+- `npm run desktop:map:build` — PASS
+- 40w scenario hash: `16badcf4f470d2ce` (identical to HEAD baseline n1564)
+
+### Artifacts
+- Report: `docs/40_reports/implemented/20260413_ATTACK_RESOLUTION_OSID_DECOMPOSITION_TRANCHE1.md`
+- Next recommended seam: equipment battle effects → `attack_equipment_effects.ts`
+
+## [2026-04-13] docs(plan): promote god-file decomposition to the active next roadmap program
+
+**Type:** Planning / maintainability sequencing
+**Files:** `docs/plans/MASTER_ROADMAP.md`, `docs/plans/2026-04-10-v08to09-a-plus-plus-system-scorecard-plan.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+**Status:** DOCUMENTED
+
+### Summary
+The A+++ scorecard and master roadmap were updated to make `god-file decomposition tranche 1` the active next `v0.8-to-v0.9` program, ahead of the exhaustion/negative-sum identity audit. This is not a downgrade of the identity lane; it is a sequencing decision that recognizes oversized merge-magnet files have become the main drag on safe hardening across engine, UI, and desktop work.
+
+### Why this changed
+
+1. **Structure is now the bottleneck** - after the recent hardening campaign, file structure became the highest-leverage risk reducer for future work.
+2. **The scorecard already supported this** - the god-file lane was already formalized with target files, extraction order, and proof rules; the roadmap queue was simply brought into line with that reality.
+3. **Identity work stays next** - exhaustion/negative-sum pressure remains the next substantive product-truth audit immediately after maintainability tranche 1.
+
+### Artifacts
+
+- Updated roadmap: `docs/plans/MASTER_ROADMAP.md`
+- Updated scorecard plan: `docs/plans/2026-04-10-v08to09-a-plus-plus-system-scorecard-plan.md`
+
+## [2026-04-13] fix(ui): Deck.gl/MapLibre click guard — prevent sector from stealing brigade clicks
+
+**Type:** UI/map interaction hardening (no sim behavior change)
+**Files:** `src/ui/map/map/useMapInteractions.ts`, `src/ui/map/map/MapContainer.tsx`, `tests/ui_map_interactions.test.ts`
+**Status:** VERIFIED (code/test) — live browser verification pending
+
+### Summary
+When `deckFormationCounters` is true (default), MapLibre's `formation-markers` layer is hidden. Clicking a brigade near a front line caused a race: Deck.gl correctly set the formation selection, then MapLibre's `handleMapClick` fell through to front-edge detection and cleared the formation via `setSelectedCorpsFrontSectorId`. Fix: `deckHandledFormationClickRef` guard — Deck.gl sets it on formation click, MapLibre's handler consumes it and skips fallthrough.
+
+### Verification
+- `npx.cmd tsc --noEmit` — PASS
+- `npm.cmd run build` — PASS
+- `npm.cmd run test:vitest` — 290/290 files, 3313/3313 tests
+
+### Artifacts
+- Report: `docs/40_reports/implemented/20260413_MAP_SELECTION_CLICK_GUARD.md`
+
+## [2026-04-12] fix(diagnostics): harden sector pipeline reporting — isFinalPass gate + provisional prefixes
+
+**Type:** Diagnostic/reporting hardening (no sim behavior change)
+**Files:** `src/sim/combat/corps_front_sectors.ts`, `src/sim/combat/brigade_assignment.ts`, `src/sim/combat/final_sector_truth_reconciliation.ts`, `src/sim/turn_phases/war_phases.ts`, `tests/final_sector_truth_reconciliation.test.ts`
+**Status:** VERIFIED — 290 files / 3312 tests / 0 failures, tsc clean, build clean
+
+### Summary
+Transient mid-pipeline brigade assignment churn was logged with the same severity and language as final unresolved truth, harming anomaly reading and developer trust. Three fixes:
+
+1. **`isFinalPass` gate**: `buildCorpsFrontSectors()` now takes `isFinalPass` parameter (default `false`). `emitFinalUnresolvedSectorWarnings()` only fires when `isFinalPass=true`, which is passed only at war_phases.ts step 2626 (`reconcile-final-sector-truth-after-ops`). Steps 598 and 2588 no longer emit false-positive "fell through sector pipeline" warnings.
+2. **`[PROVISIONAL]` prefix**: Four mid-pipeline warnings in `brigade_assignment.ts` (lines 570, 766, 786, 904) now prefixed with `[PROVISIONAL]` to distinguish transient pipeline states from final truth.
+3. **`@deprecated` annotation**: `warnUnresolvedSectorAssignments()` marked deprecated with docstring pointing to canonical emission path.
+
+### Verification
+- `npx.cmd tsc --noEmit -p tsconfig.json` — PASS
+- `npm.cmd run build` — PASS
+- `npm.cmd run test:vitest` — 290/290 files, 3312/3312 tests
+- No scenario re-run needed (diagnostic-only, no state mutation changes)
+
+### Artifacts
+- Report: `docs/40_reports/implemented/20260412_DIAGNOSTICS_SEAM_HARDENING.md`
+
+## [2026-04-12] fix(harness): align frontline density with shared-front physical coverage truth (n1541)
+
+**Type:** Harness / anomaly reporting / sector-front truth hardening
+**Files:** `src/scenario/anomaly_detector.ts`, `tests/frontline_density_cold_front_truth.test.ts`
+**Run:** `n1541` - hash `bac53e3038883843`
+**Status:** VERIFIED - targeted regressions PASS, final-save proof PASS, `tsc` clean, `build` clean
+
+### Summary
+
+`frontline_density_imbalance` could still accuse paper-empty sectors at same-corps shared-front knots even when the front OSID was physically covered by a sibling sector's active front brigade. The live case was `sector:vrs_1st_krajina:4` at `op:maglaj:jablanica`, covered by `rs_1st_ozren_light_infantry` from sibling `sector:vrs_1st_krajina:0`. The detector now suppresses only low-density paper-empty sectors whose front OSIDs are all physically covered by active same-corps sibling front assignments, while preserving reports for unique uncovered low-density frontage.
+
+### Scenario proof
+
+On the `n1541` final save, `frontline_density_imbalance` drops from 10 entities to 9 and `sector:vrs_1st_krajina:4` disappears from the report. Direct audits show `frontAssignedOffFrontCount = 0`, `nonColdFrontSectorsWithoutPhysicalFrontOwner = 0`, and no `empty_contested_sector`, `undefended_front_subsegments`, `adjacent_uncontested_territory`, or `unassigned_frontline_brigades`.
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260412_SHARED_FRONT_DENSITY_REPORTING_TRUTH_HARDENING.md`
+
+## [2026-04-11] fix(sim): harden Podrinje identity, Sarajevo siege pocket truth, and Posavina corridor continuity (n1437)
+
+**Type:** Engine / scenario contract / state-boundary hardening
+**Files:** `src/sim/recruitment_engine.ts`, `src/sim/recruitment_turn.ts`, `src/sim/combat/sector_offensive.ts`, `src/sim/combat/pre_planned_operations.ts`, `src/scenario/scenario_runner.ts`, `src/state/sarajevo_exception.ts`, `src/state/enclave_integrity.ts`, `src/sim/combat/enclave_resilience.ts`, `data/scenarios/apr1992_definitive_40w.json`, `tests/recruitment_existing_formation_identity.test.ts`, `tests/sector_offensive_idle_recovery.test.ts`, `tests/pre_planned_operations.test.ts`, `tests/scenario_must_hold_contract.test.ts`, `tests/sarajevo_exception.test.ts`
+**Run:** `n1437` - hash `e146406ca031ebf2`
+**Status:** VERIFIED - targeted regressions PASS, fresh 40w proof PASS, `tsc` clean, `desktop:map:build` clean, `build` clean
+
+### Summary
+
+Three live story-breakers were traced to separate owners, not one blended failure. Podrinje drift to Banja Luka was caused by stale recruitment identity plus multi-axis operation readiness using the wrong approach truth; Sarajevo's final political state was averaging supply across split city-core control instead of following the besieged RBiH pocket; and Posavina corridor failure combined the same multi-axis readiness bug with stale scenario `must_hold_osids_by_corps` anchors and a weak Koridor persistence contract. The lane preserves canonical truth at each source instead of patching UI symptoms.
+
+### Scenario proof
+
+- Podrinje no longer teleports west: `rs_1st_podrinje` keeps `created_turn: 0`, finishes at `op:rogatica:pljesevica`, and is assigned to `sector:vrs_drina:0`; `rs_5th_podrinje` is no longer in Banja Luka and instead dies in the Drina/Zepa lane after combat.
+- Sarajevo now ends the run with `political.sarajevo_state.siege_status = "BESIEGED"` and `settlement_ids` limited to the RBiH-held city-core pocket.
+- Posavina corridor is no longer severed in the final save: a fresh RS-controlled BFS path exists from `op:banja_luka:banja_luka_2` through Doboj/Derventa to `op:modrica:modrica`.
+
+### Artifacts
+
+- Report: `docs/40_reports/implemented/20260411_PODRINJE_SARAJEVO_POSAVINA_STORY_BREAKER_HARDENING.md`
+
 ## [2026-04-11] fix(sim): enforce final sector-line geometry and tolerant shared-border fronts (n1426)
 
 **Type:** Engine / map geometry / sector packet hardening

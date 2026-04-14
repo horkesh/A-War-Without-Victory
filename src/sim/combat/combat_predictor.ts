@@ -33,6 +33,7 @@ import {
     munFromOsid,
     type Osid
 } from './osid_adjacency.js';
+import { getTacticalAdjacentOsids } from './tactical_adjacency.js';
 import {
     type OsidEthnicComposition,
     getCoEthnicShare,
@@ -181,7 +182,7 @@ export function predictCombatOutcome(
     const attackerLoc = attacker.location_osid;
     if (!attackerLoc) return null;
 
-    const neighbors = adjacency.get(attackerLoc) ?? [];
+    const neighbors = getTacticalAdjacentOsids(state, attackerLoc as Osid, adjacency);
     if (!neighbors.includes(targetOsid)) return null;
 
     const attackerFaction = attacker.faction as FactionId;
@@ -355,7 +356,7 @@ export function predictCombatOutcome(
 
     const isCounterAttack = false;
 
-    const targetNeighbors = adjacency.get(targetOsid) ?? [];
+    const targetNeighbors = getTacticalAdjacentOsids(state, targetOsid as Osid, adjacency);
     let enemyAdj = 0;
     for (const n of targetNeighbors) {
         const c = getPoliticalControllerOSID(state, n, reverseMap);
@@ -408,10 +409,9 @@ export function predictAllAdjacentTargets(
     if (!loc) return [];
     const factionId = attacker.faction as FactionId;
 
-    const neighbors = adjacency.get(loc) ?? [];
     const results: Array<{ osid: Osid; prediction: CombatPrediction }> = [];
 
-    for (const n of neighbors) {
+    for (const n of getTacticalAdjacentOsids(state, loc as Osid, adjacency)) {
         const controller = getPoliticalControllerOSID(state, n, reverseMap);
         if (controller === null || controller === factionId) continue;
         const pred = predictCombatOutcome(state, attackerId, n, adjacency, reverseMap, terrainMultByOsid, attackerPosture, undefined, supplyStateByOsid, osidPopulationMap, slopeByOsid, ethnicComposition);

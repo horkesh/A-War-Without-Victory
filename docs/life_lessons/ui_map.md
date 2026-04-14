@@ -3,6 +3,12 @@
 
 ---
 
+### [UI] Player-facing state must go through tier-gated abstraction functions — never expose raw numerics (2026-04-10) — NEW
+- **Context**: 6 hardening commits in one session all followed the same pattern: replace raw numeric state reads with `playerSafe*()` abstraction functions. `playerSafeThreat()` (threat precision), `playerSafeForceBalance()` (operation balance), `playerVisibility` filter (sector front gating), `playerFaction` canonical resolver (shell boundary), reserve request identity alignment, autonomy review faction scoping.
+- **Wrong approach**: Passing raw `threat_ratio`, `force_balance`, or `sector.density` directly to player-facing UI components. Raw numerics bypass fog-of-war and reveal internal sim state the player shouldn't see. They also create brittle coupling — UI components break when the sim changes its internal representation.
+- **Right approach**: Every player-facing data path goes through a tier-gated abstraction function that maps raw numerics to player-appropriate labels, categories, or filtered values. The abstraction boundary IS the information control point.
+- **Do instead**: Before adding a new field to any player-facing component, ask: "Should the player see this exact number?" If not, create a `playerSafe*()` function in `src/ui/shared/` or `src/ui/map/utils/`. Pattern: `playerSafeThreat(raw_ratio) → 'low' | 'moderate' | 'high' | 'critical'`. Grep for raw `state.military.*` reads in `src/ui/` — any direct numeric read is a candidate for abstraction.
+
 ### [MapLibre] visibility:hidden > display:none for stable context (2026-03-20)
 - **Problem**: Toggling `display:none` on a MapLibre container (like the Minimap) frequently causes layer re-render failures or blank screens if context isn't handled perfectly (M1 - P1 UI Audit).
 - **Right approach**: Keep the map in the layout to preserve its context. Use `visibility: hidden`, `opacity: 0`, and `pointer-events: none` to hide it.

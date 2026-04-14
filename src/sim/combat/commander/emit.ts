@@ -42,6 +42,7 @@ import { isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../../sta
 import { strictCompare } from '../../../state/validateGameState.js';
 import { spatialFriendlyDistance, spatialSameComponent } from '../../spatial_context.js';
 import { buildCommanderOperation, buildProbeOperation, derivePrimarySectorForBrigades, getMaxOperationSlots } from '../corps_operation_helpers.js';
+import { pickOperationName } from '../operation_names.js';
 import { buildTerrainCache, predictAllAdjacentTargets } from '../combat_predictor.js';
 import { isOutcomeSufficientForAttack } from '../bot_brigade_targeting.js';
 import { getPoliticalControllerOSID } from '../../../state/settlement_control.js';
@@ -266,7 +267,7 @@ function buildDirective(
     const prioritySectorId = findSectorWithMostTargetOverlap(planDecision, briefing);
 
     // sector_reassignment_orders: from decide.reserve_shifts mapped to sectors
-    const sectorReassignmentOrders = buildSectorReassignmentOrders(decisions, briefing);
+    const sectorReassignmentOrders = buildSectorReassignmentOrders(decisions, briefing, zones);
 
     return {
         assigned_front_ids: assignedFrontIds,
@@ -422,7 +423,6 @@ function buildSectorTargets(
     const corpsSectors = briefing.sectors
         .filter(s => s.corps_id === briefing.corps_id)
         .sort((a, b) => strictCompare(a.sector_id, b.sector_id));
-
     for (const sector of corpsSectors) {
         const sectorEnemyOsids = new Set<string>();
         for (const subSeg of sector.sub_segments) {
@@ -515,6 +515,7 @@ function findSectorWithMostTargetOverlap(
 function buildSectorReassignmentOrders(
     decisions: DecisionResult,
     briefing: CommanderBriefing,
+    zones: ZoneAssessment[],
 ): Array<{ brigade_id: string; to_sector_id: string }> {
     if (decisions.reserve_shifts.length === 0) return [];
 
@@ -522,6 +523,7 @@ function buildSectorReassignmentOrders(
     const corpsSectors = briefing.sectors
         .filter(s => s.corps_id === briefing.corps_id)
         .sort((a, b) => strictCompare(a.sector_id, b.sector_id));
+    const zoneById = new Map(zones.map((zone) => [zone.zone_id, zone]));
 
     const osidToSector = new Map<string, string>();
     for (const sector of corpsSectors) {
@@ -555,6 +557,31 @@ function buildSectorReassignmentOrders(
                 // Step 8 (wiring) can refine with full zone-to-sector maps.
                 break;
             }
+        }
+
+        const destinationOsids = new Set(zoneById.get(shift.to_zone)?.osids ?? []);
+        if (destinationOsids.size > 0) {
+            let bestOverlap = 0;
+            let overlapSectorId: string | null = null;
+            for (const sector of corpsSectors) {
+                let overlap = 0;
+                for (const osid of sector.territory_osids ?? []) {
+                    if (destinationOsids.has(osid)) overlap++;
+                }
+                if (
+                    overlap > bestOverlap
+                    || (
+                        overlap === bestOverlap
+                        && overlap > 0
+                        && overlapSectorId != null
+                        && strictCompare(sector.sector_id, overlapSectorId) < 0
+                    )
+                ) {
+                    bestOverlap = overlap;
+                    overlapSectorId = sector.sector_id;
+                }
+            }
+            if (overlapSectorId) targetSectorId = overlapSectorId;
         }
 
         if (targetSectorId) {
@@ -757,6 +784,7 @@ function buildOperations(
 
         // PERMITTED CREATION ENTRY POINT — commander-generated operations only.
         // All CorpsOperation objects must be built via the factory functions in corps_operation_helpers.ts.
+        const opName = pickOperationName(briefing.corps_id, briefing.turn, briefing.faction, briefing.state_ref);
         const op = buildCommanderOperation(
             briefing.corps_id,
             briefing.turn,
@@ -764,6 +792,7 @@ function buildOperations(
             sectorId ?? undefined,
             objectives,
             initialStrength,
+            opName,
         );
 
         // Sector-anchored launch contract fields — direct from Phase 3 pool selection.

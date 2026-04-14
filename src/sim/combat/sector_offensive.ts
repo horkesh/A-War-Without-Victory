@@ -749,13 +749,41 @@ function areParticipantsReadyForExecution(
     state: GameState,
     corpsId: FormationId,
     faction: FactionId,
-    participatingBrigades: FormationId[],
-    _stagingOsid: string | undefined,
-    objectives: string[]
+    operation: CorpsOperation
 ): boolean {
-    const objectiveApproachOsids = collectObjectiveApproachOsids(state, corpsId, faction, objectives);
+    if (isMultiAxis(operation) && operation.axes) {
+        let readyAxisCount = 0;
+        for (const axis of operation.axes) {
+            const currentObjective = axis.objectives[axis.current_objective_index ?? 0];
+            if (typeof currentObjective !== 'string' || currentObjective.length === 0) continue;
+            const axisApproachOsids = collectObjectiveApproachOsids(state, corpsId, faction, [currentObjective]);
+            if (axisApproachOsids.size === 0) continue;
+
+            for (const brigadeId of axis.assigned_brigades) {
+                const brigade = state.military.formations?.[brigadeId];
+                if (!brigade || brigade.status !== 'active') continue;
+                if ((brigade.personnel ?? 0) < MIN_ATTACK_PERSONNEL) continue;
+                if ((brigade.disrupted_turns ?? 0) > 0) continue;
+                const movementState = state.military.brigade_movement_state?.[brigadeId];
+                if (movementState?.status === 'in_transit') continue;
+                const location = brigade.location_osid;
+                if (typeof location !== 'string' || location.length === 0) continue;
+                if (!axisApproachOsids.has(location)) continue;
+                readyAxisCount += 1;
+                break;
+            }
+        }
+        return readyAxisCount > 0;
+    }
+
+    const objectiveApproachOsids = collectObjectiveApproachOsids(
+        state,
+        corpsId,
+        faction,
+        getCurrentLaunchObjectives(operation),
+    );
     let eligibleParticipantCount = 0;
-    for (const brigadeId of participatingBrigades) {
+    for (const brigadeId of operation.participating_brigades ?? []) {
         const brigade = state.military.formations?.[brigadeId];
         if (!brigade || brigade.status !== 'active') continue;
         if ((brigade.personnel ?? 0) < MIN_ATTACK_PERSONNEL) continue;
@@ -1328,9 +1356,7 @@ export function advanceSectorOffensives(
                 state,
                 corpsId,
                 faction,
-                allBrigades,
-                op.staging_osid,
-                getCurrentLaunchObjectives(op),
+                op,
             );
             const forcedLaunch = op.force_launch === true && elapsed >= 1;
 
@@ -1365,9 +1391,7 @@ export function advanceSectorOffensives(
                     state,
                     corpsId,
                     faction,
-                    allBrigades,
-                    op.staging_osid,
-                    getCurrentLaunchObjectives(op),
+                    op,
                 )) {
                     if (elapsed <= planDuration + PLANNING_INVALIDATION_GRACE_TURNS) {
                         continue;
