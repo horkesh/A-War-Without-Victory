@@ -1,3 +1,23 @@
+## [2026-04-14] test(ui): prove read-model parity after deserialize and document ownership boundaries
+
+**Type:** Read-model truth / adapter parity / ownership proof (v0.8-to-v0.9)
+**Files:** `tests/save_load_real_roundtrip.test.ts` (+3 tests), `tests/ui_adapter_boundary.test.ts` (+1 test), `tests/army_hq_presidential_review_coherence.test.ts` (+2 tests)
+**Tests:** 6 new proof tests (91 total across 7 suites), all pass.
+**Status:** VERIFIED — tsc clean, 91/91 tests pass, desktop:map:build clean.
+
+### Summary
+Three seam clusters investigated for the read-model-truth bundle:
+
+1. **Cluster A — adapter-after-deserialize parity proof**: Formation field values (readiness, cohesion, morale, kind, faction, personnel) and corps command fields (corpsStance, corpsExhaustion) now proven to survive serialize→deserialize→adapter roundtrip identically via real-save spot-check. Six intentionally recomputed fields documented as NOT parity-owned: commandStrain, projectedStrainNextTurn, recoveryForecast, situationAssessment, homeDistanceMult, readinessTrend.
+
+2. **Cluster B — adapter boundary simplification: NO-OP.** All three top candidates (deriveNegotiatingCapital, homeDistanceMult replication, deriveOperationCaptureProvenance fallback) require state-layer changes that would violate "do not invent new packet/state structures." Documented with sentinel test.
+
+3. **Cluster C — review/action-family ownership: split ownership documented (not competing).** Investigation found PresidentialAttentionPanel owns action execution via direct IPC (handleDecisionResponse, handleAcknowledgeOfficerEvent, handleAcceptReplacement). App.tsx onAction owns navigation routing only (opens modals/panels). No duplication — intentional split. Two proof tests confirm the boundary.
+
+**Parity fields directly proven:** readiness, cohesion, morale, kind, faction, personnel (formation); corpsStance, corpsExhaustion (corps command).
+**Intentionally recomputed (not parity-owned):** commandStrain, projectedStrainNextTurn, recoveryForecast, situationAssessment, homeDistanceMult, readinessTrend.
+**Canonical queue owners confirmed:** PresidentialAttentionPanel = action execution; App.tsx onAction = navigation routing; inboxItems.ts = item derivation.
+
 ## [2026-04-14] fix(ui+desktop): harden post-load UI state reset and load error classification
 
 **Type:** Save/load truth / UI coherence (v0.8-to-v0.9)
