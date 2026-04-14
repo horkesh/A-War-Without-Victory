@@ -12,7 +12,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { deriveInboxItems, countActionableItems, hasBlockingItems } from '../../src/ui/map/data/inboxItems.js';
+import { deriveInboxItems, countActionableItems, hasBlockingItems, resolveEventQueueIndex } from '../../src/ui/map/data/inboxItems.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 
 // ---------------------------------------------------------------------------
@@ -321,5 +321,42 @@ describe('countActionableItems / hasBlockingItems', () => {
         const state = makeStub();
         const items = deriveInboxItems(state, null);
         expect(hasBlockingItems(items)).toBe(false);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// 9. resolveEventQueueIndex — direct behavioral proof of identity routing
+// ---------------------------------------------------------------------------
+describe('resolveEventQueueIndex — inbox click → queue index resolution', () => {
+    const queue = [
+        { id: 'evt_alpha' },
+        { id: 'evt_beta' },
+        { id: 'evt_gamma' },
+    ];
+
+    it('clicking event:evt_beta resolves to queue index 1, not 0', () => {
+        expect(resolveEventQueueIndex('event:evt_beta', queue)).toBe(1);
+    });
+
+    it('clicking event:evt_gamma resolves to queue index 2', () => {
+        expect(resolveEventQueueIndex('event:evt_gamma', queue)).toBe(2);
+    });
+
+    it('clicking event:evt_alpha resolves to queue index 0', () => {
+        expect(resolveEventQueueIndex('event:evt_alpha', queue)).toBe(0);
+    });
+
+    it('malformed itemId (no event: prefix) falls back to 0', () => {
+        expect(resolveEventQueueIndex('garbage', queue)).toBe(0);
+        expect(resolveEventQueueIndex('peace:vance_owen', queue)).toBe(0);
+        expect(resolveEventQueueIndex('reserve:req_1', queue)).toBe(0);
+    });
+
+    it('event: prefix with non-existent event_id falls back to 0', () => {
+        expect(resolveEventQueueIndex('event:nonexistent', queue)).toBe(0);
+    });
+
+    it('empty queue falls back to 0', () => {
+        expect(resolveEventQueueIndex('event:evt_alpha', [])).toBe(0);
     });
 });

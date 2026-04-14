@@ -31,6 +31,7 @@ import { AiAdvisorPanel } from './components/AiAdvisorPanel';
 import { AiSettingsPanel } from './components/AiSettingsPanel';
 import { AutonomyPanel } from './components/AutonomyPanel';
 import { PresidentialInbox, InboxBadge } from './components/PresidentialInbox';
+import { resolveEventQueueIndex } from './data/inboxItems';
 import type { EventDisplayData } from './components/EventModal';
 import type { EventLogEntry } from './components/EventLogPanel';
 import { CommandBriefingLayer } from './components/CommandBriefingLayer';
@@ -650,7 +651,7 @@ function App() {
       <OperationsPanel />
       <OrderQueue />
       {/* Tactical Detail Panels (Nested Rail Architecture) */}
-      {railState.primary === 'inbox' && <PresidentialInbox onAction={(action) => {
+      {railState.primary === 'inbox' && <PresidentialInbox onAction={(action, itemId) => {
         const gs = useGameStore.getState();
         if (action === 'army_reserve') {
           const hqId = playerFaction === 'RS' ? 'vrs_main_staff' : playerFaction === 'HRHB' ? 'hvo_main_staff' : 'arbih_general_staff';
@@ -678,7 +679,7 @@ function App() {
               })),
             }));
             setEventQueue(decisionDisplayData);
-            setEventQueueIndex(0);
+            setEventQueueIndex(resolveEventQueueIndex(itemId, decisionDisplayData));
           }
         }
         if (action === 'peace_plan_modal') {

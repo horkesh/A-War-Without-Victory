@@ -230,5 +230,7 @@ describe('shellNavigation', () => {
 
     expect(appSource).toContain('pendingEventDecisions');
     expect(appSource).toContain('respondToEventDecision');
+    // Verify identity routing — inbox passes itemId, not just action family
+    expect(appSource).toContain('itemId');
   });
 });

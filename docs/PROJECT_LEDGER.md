@@ -1,3 +1,17 @@
+## [2026-04-14] fix(ui): close inbox identity routing seam — clicked row opens exact item
+
+**Type:** UI truth / inbox routing (v0.8-to-v0.9)
+**Files:** `PresidentialInbox.tsx` (callback signature), `App.tsx` (event_modal handler + import), `inboxItems.ts` (+`resolveEventQueueIndex` helper), `inbox_items.test.ts` (+6 direct proof tests), `ui_shell_navigation.test.ts` (+identity guard)
+**Status:** VERIFIED — tsc clean, 17 inbox tests + 14 shell tests pass, desktop:map:build clean.
+
+### Summary
+Presidential Inbox passed only action family (`'event_modal'`) to App.tsx, which rebuilt the full pending event queue and forced `setEventQueueIndex(0)`. Clicking the second or third event decision always opened the first. Fixed by extending the `onAction` callback to pass `itemId` and extracting a pure `resolveEventQueueIndex(itemId, queue)` helper that maps `event:<event_id>` to the correct queue index with fallback to 0. App.tsx now calls the helper instead of hardcoding index 0. Peace plan, reserve, and personnel routing unchanged (family-based is correct — single modal or panel, no per-item ambiguity).
+
+Direct behavioral proof: 6 tests exercise `resolveEventQueueIndex` with exact match (index 1, not 0), all three queue positions, malformed prefix, missing event_id, and empty queue — all fallback to 0.
+
+**Canonical owner:** `resolveEventQueueIndex()` in `inboxItems.ts` owns queue-index resolution. `PresidentialInbox.onAction` callback shape (action + itemId). App.tsx wires the two together.
+**Demoted path:** Action-family-only routing that discarded clicked item identity. Inline queue-index logic in App.tsx replaced by extracted helper.
+
 ## [2026-04-14] fix(negotiation): wire civilian_casualties_caused from displacement events into NegotiationBreakdown
 
 **Type:** Political truth / dead wire fix (v0.8-to-v0.9)

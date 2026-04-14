@@ -171,3 +171,21 @@ export function countActionableItems(items: InboxItem[]): number {
 export function hasBlockingItems(items: InboxItem[]): boolean {
     return items.some(i => i.severity === 'blocking');
 }
+
+/**
+ * Resolve which queue index to open when an inbox event_decision row is clicked.
+ *
+ * @param itemId  The InboxItem.id passed from the inbox click (e.g. "event:evt_beta").
+ * @param queue   The EventDisplayData[] queue built from pendingEventDecisions,
+ *                where each entry's `.id` is the raw event_id.
+ * @returns       The index into `queue` for the clicked event, or 0 as fallback.
+ */
+export function resolveEventQueueIndex(
+    itemId: string,
+    queue: ReadonlyArray<{ id: string }>,
+): number {
+    if (!itemId.startsWith('event:')) return 0;
+    const targetEventId = itemId.slice(6);
+    const idx = queue.findIndex(d => d.id === targetEventId);
+    return idx >= 0 ? idx : 0;
+}

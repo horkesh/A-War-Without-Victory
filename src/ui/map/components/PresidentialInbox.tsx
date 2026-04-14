@@ -101,7 +101,7 @@ function OpeningBrief({ faction, onDismiss }: { faction: string; onDismiss: () =
 }
 
 interface PresidentialInboxProps {
-    onAction: (action: InboxItem['action']) => void;
+    onAction: (action: InboxItem['action'], itemId: string) => void;
 }
 
 export function PresidentialInbox({ onAction }: PresidentialInboxProps) {
@@ -156,7 +156,7 @@ export function PresidentialInbox({ onAction }: PresidentialInboxProps) {
                             <InboxCard
                                 key={item.id}
                                 item={item}
-                                onClick={() => onAction(item.action)}
+                                onClick={() => onAction(item.action, item.id)}
                             />
                         ))}
                     </div>
