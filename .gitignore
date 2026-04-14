@@ -45,6 +45,12 @@ data/derived/terrain/_tmp/
 # Temporary diagnostic scripts (one-off session artifacts)
 tools/tmp_*.cjs
 
+# Codex temp diagnostic artifacts (do not track)
+.codex_tmp*
+
+# Sector audit snapshots (research only, do not track)
+tmp_sector_audit/
+
 # Repo cleanup 2026: run outputs and temp dirs (do not track)
 runs/
 .tmp_*/

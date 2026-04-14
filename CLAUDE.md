@@ -13,7 +13,7 @@ Deterministic strategic-level simulation of the 1992-1995 Bosnian War. Negative-
 ## Key Commands
 
 ```bash
-npm run test:vitest          # 1204 tests, 98 suites
+npm run test:vitest          # 3513 tests, 298 suites
 npx tsc --noEmit             # Typecheck
 npm run sim:scenario:run:40w # 40-week calibration scenario
 npm run sim:scenario:run:default  # 52-week historical scenario
