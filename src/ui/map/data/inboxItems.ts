@@ -12,7 +12,7 @@ import type { LoadedGameState } from './types';
 import { turnToDateString } from '../utils/formatters';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 
-export type InboxItemType = 'event_decision' | 'peace_plan' | 'reserve_request' | 'officer_event' | 'situation';
+export type InboxItemType = 'event_decision' | 'peace_plan' | 'reserve_request' | 'officer_event' | 'autonomy_proposal' | 'situation';
 export type InboxSeverity = 'blocking' | 'urgent' | 'normal' | 'info';
 
 export interface InboxItem {
@@ -22,7 +22,7 @@ export interface InboxItem {
     title: string;
     subtitle: string;
     /** Which panel/modal to open when clicked */
-    action: 'event_modal' | 'peace_plan_modal' | 'army_reserve' | 'army_hq_personnel' | 'none';
+    action: 'event_modal' | 'peace_plan_modal' | 'army_reserve' | 'army_hq_personnel' | 'autonomy_panel' | 'none';
     /** Priority for sorting (lower = higher priority) */
     priority: number;
 }
@@ -69,11 +69,23 @@ export function deriveInboxItems(
         });
     }
 
-    // TODO: Autonomy proposals (pendingProposalReviews) removed from inbox scope.
-    // The GameStateAdapter does not yet map state.meta.pending_proposal_reviews to LoadedGameState.
-    // Re-add when adapter plumbing is wired (see v0.8.4 Phase E backlog).
+    // 3. Autonomy proposals (Level 1 Assisted — requires player accept/reject)
+    const proposals = state.pendingProposalReviews;
+    if (proposals && proposals.length > 0) {
+        for (const prop of proposals) {
+            items.push({
+                id: `proposal:${prop.id}`,
+                type: 'autonomy_proposal',
+                severity: 'normal',
+                title: 'Command Proposal',
+                subtitle: prop.description || `${prop.domain} proposal requires your review.`,
+                action: 'autonomy_panel',
+                priority: 35,
+            });
+        }
+    }
 
-    // 3. Reserve requests
+    // 4. Reserve requests
     const reserveRequests = state.pendingReserveRequests;
     if (reserveRequests) {
         for (const req of reserveRequests) {
@@ -90,7 +102,7 @@ export function deriveInboxItems(
         }
     }
 
-    // 4. Officer events
+    // 5. Officer events
     const officerEvents = state.pendingOfficerEvents;
     if (officerEvents) {
         for (const evt of officerEvents) {
@@ -106,7 +118,7 @@ export function deriveInboxItems(
         }
     }
 
-    // 5. Situation highlights (informational, from turn summary + state)
+    // 6. Situation highlights (informational, from turn summary + state)
     const turn = state.turn ?? 0;
     const dateStr = turnToDateString(turn);
 

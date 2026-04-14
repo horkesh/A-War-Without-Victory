@@ -1757,6 +1757,7 @@ export function parseGameState(json: unknown): LoadedGameState {
         presidentialReviewQueue,
         pendingPeacePlan: derivePendingPeacePlan(state),
         pendingDayton: derivePendingDayton(state),
+        pendingProposalReviews: derivePendingProposalReviews(state, playerFaction),
         strategicDimensions: deriveStrategicDimensions(state),
         negotiatingCapital: deriveNegotiatingCapital(state),
         eventFlags: state.military?.event_flags ?? undefined,
@@ -2500,6 +2501,24 @@ function derivePendingPeacePlan(state: any): LoadedGameState['pendingPeacePlan']
             ? pp.bot_responses as Record<string, 'accepted' | 'rejected'>
             : {},
     };
+}
+
+function derivePendingProposalReviews(
+    state: any,
+    playerFaction: string | null | undefined,
+): LoadedGameState['pendingProposalReviews'] {
+    const reviews = state.meta?.pending_proposal_reviews as any[] | undefined;
+    if (!reviews || reviews.length === 0) return undefined;
+    const pending = reviews
+        .filter((r: any) => r && r.accepted == null && (!playerFaction || r.faction === playerFaction))
+        .map((r: any) => ({
+            id: String(r.id ?? ''),
+            turn: typeof r.turn === 'number' ? r.turn : 0,
+            faction: String(r.faction ?? ''),
+            domain: String(r.domain ?? ''),
+            description: String(r.description ?? ''),
+        }));
+    return pending.length > 0 ? pending : undefined;
 }
 
 function deriveGameVerdict(state: any): GameVerdict | undefined {

@@ -214,20 +214,77 @@ describe('deriveInboxItems — officer events', () => {
 });
 
 // ---------------------------------------------------------------------------
-// 5. Autonomy proposals are NOT produced
+// 5. Autonomy proposals
 // ---------------------------------------------------------------------------
-describe('deriveInboxItems — autonomy proposals removed', () => {
-    it('does not produce any autonomy_proposal items regardless of state', () => {
-        // Even if someone were to sneak a field onto the state, the derivation
-        // function no longer reads it.
-        const state = makeStub();
-        // Simulate a hypothetical field that the old code would have read:
-        (state as unknown as Record<string, unknown>).pendingProposalReviews = [
-            { id: 'prop_1', domain: 'ops', description: 'Attack proposal' },
-        ];
+describe('deriveInboxItems — autonomy proposals', () => {
+    it('produces autonomy_proposal items from pendingProposalReviews', () => {
+        const state = makeStub({
+            pendingProposalReviews: [
+                { id: 'PROP_5_ops_0', turn: 5, faction: 'RBiH', domain: 'ops', description: 'Launch operation Corridor' },
+                { id: 'PROP_5_ops_1', turn: 5, faction: 'RBiH', domain: 'ops', description: 'Reinforce 1st Corps sector' },
+            ],
+        });
         const items = deriveInboxItems(state, null);
-        const autonomyItems = items.filter(i => (i.type as string) === 'autonomy_proposal');
-        expect(autonomyItems).toHaveLength(0);
+        const proposalItems = items.filter(i => i.type === 'autonomy_proposal');
+        expect(proposalItems).toHaveLength(2);
+        expect(proposalItems[0].id).toBe('proposal:PROP_5_ops_0');
+        expect(proposalItems[0].severity).toBe('normal');
+        expect(proposalItems[0].action).toBe('autonomy_panel');
+        expect(proposalItems[0].title).toBe('Command Proposal');
+        expect(proposalItems[0].subtitle).toBe('Launch operation Corridor');
+        expect(proposalItems[1].id).toBe('proposal:PROP_5_ops_1');
+    });
+
+    it('does not produce items when pendingProposalReviews is undefined', () => {
+        const state = makeStub();
+        const items = deriveInboxItems(state, null);
+        const proposalItems = items.filter(i => i.type === 'autonomy_proposal');
+        expect(proposalItems).toHaveLength(0);
+    });
+
+    it('does not produce items when pendingProposalReviews is empty', () => {
+        const state = makeStub({ pendingProposalReviews: [] });
+        const items = deriveInboxItems(state, null);
+        const proposalItems = items.filter(i => i.type === 'autonomy_proposal');
+        expect(proposalItems).toHaveLength(0);
+    });
+
+    it('uses fallback subtitle when description is empty', () => {
+        const state = makeStub({
+            pendingProposalReviews: [
+                { id: 'PROP_3_military_0', turn: 3, faction: 'RS', domain: 'military', description: '' },
+            ],
+        });
+        const items = deriveInboxItems(state, null);
+        const proposalItems = items.filter(i => i.type === 'autonomy_proposal');
+        expect(proposalItems).toHaveLength(1);
+        expect(proposalItems[0].subtitle).toBe('military proposal requires your review.');
+    });
+
+    it('autonomy proposals sort between peace plan and reserve requests', () => {
+        const state = makeStub({
+            pendingPeacePlan: {
+                planId: 'vance', planName: 'Vance Plan', narrative: '', turnOffered: 5,
+                proposedSplit: { RBiH: 33, RS: 34, HRHB: 33 }, institutionalModel: 'cantons', botResponses: {},
+            },
+            pendingProposalReviews: [
+                { id: 'PROP_5_ops_0', turn: 5, faction: 'RBiH', domain: 'ops', description: 'Test' },
+            ],
+            pendingReserveRequests: [
+                {
+                    request_id: 'req_1', corps_id: 'test_corps', faction: 'RBiH', reason: 'test',
+                    priority: 1, severityBand: 'routine' as const, travel_hops: 1, description: 'test',
+                    suggested_brigade_id: null, turn_requested: 5,
+                },
+            ],
+        });
+        const items = deriveInboxItems(state, null);
+        const types = items.map(i => i.type);
+        const peaceIdx = types.indexOf('peace_plan');
+        const proposalIdx = types.indexOf('autonomy_proposal');
+        const reserveIdx = types.indexOf('reserve_request');
+        expect(peaceIdx).toBeLessThan(proposalIdx);
+        expect(proposalIdx).toBeLessThan(reserveIdx);
     });
 });
 
@@ -358,5 +415,42 @@ describe('resolveEventQueueIndex — inbox click → queue index resolution', ()
 
     it('empty queue falls back to 0', () => {
         expect(resolveEventQueueIndex('event:evt_alpha', [])).toBe(0);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// 10. Save-load dismissal reset contract (Lane 1)
+// ---------------------------------------------------------------------------
+describe('deriveInboxItems — save-load dismissal reset contract', () => {
+    it('peace plan item is derivable from fresh state (dismissal is UI-side, not derivation-side)', () => {
+        // Contract: deriveInboxItems always produces a peace plan item when
+        // pendingPeacePlan is present. The dismissal flag is React state in App.tsx
+        // and is reset by a useEffect watching lastLoadedStateFingerprint.
+        // This test verifies the derivation side: the item is always produced.
+        const state = makeStub({
+            pendingPeacePlan: {
+                planId: 'vance', planName: 'Vance Plan', narrative: '', turnOffered: 5,
+                proposedSplit: { RBiH: 33, RS: 34, HRHB: 33 }, institutionalModel: 'cantons', botResponses: {},
+            },
+        });
+        const items1 = deriveInboxItems(state, null);
+        expect(items1.filter(i => i.type === 'peace_plan')).toHaveLength(1);
+
+        // Derive again from same state — still produces the item (no internal dismissal memory)
+        const items2 = deriveInboxItems(state, null);
+        expect(items2.filter(i => i.type === 'peace_plan')).toHaveLength(1);
+    });
+
+    it('event decisions are derivable from fresh state (acknowledgement is UI-side)', () => {
+        const state = makeStub({
+            pendingEventDecisions: [
+                { event_id: 'evt_1', event_title: 'Crisis', turn_fired: 5, faction: 'RBiH', response_options: [{ id: 'a', label: 'A', effects: [] }] },
+            ],
+        });
+        const items1 = deriveInboxItems(state, null);
+        expect(items1.filter(i => i.type === 'event_decision')).toHaveLength(1);
+
+        const items2 = deriveInboxItems(state, null);
+        expect(items2.filter(i => i.type === 'event_decision')).toHaveLength(1);
     });
 });

@@ -961,5 +961,14 @@ export interface LoadedGameState {
         institutionalModel: string;
         botResponses: Record<string, 'accepted' | 'rejected'>;
     };
+
+    /** Pending autonomy proposal reviews (Level 1 Assisted). Mapped from state.meta.pending_proposal_reviews. */
+    pendingProposalReviews?: Array<{
+        id: string;
+        turn: number;
+        faction: string;
+        domain: string;
+        description: string;
+    }>;
 }
 
