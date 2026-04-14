@@ -1,3 +1,31 @@
+## [2026-04-14] test(sim): scenario proof and calibration audit for DG2-DG6 campaign
+
+**Type:** Scenario proof / calibration measurement (campaign DG2-DG6 closeout)
+**Files:** `tools/audit_campaign_proof.cjs` (NEW — reusable run auditor)
+**Scenario:** `npm run sim:scenario:run:40w` → n1575, hash `2dc5a98fd4f2ec2e`
+**Calibration:** 93.6% area-weighted (vs n1570 baseline 93.5%) = +0.1pp, no meaningful drift.
+**Status:** VERIFIED — tsc clean, desktop:map:build clean.
+
+### Scenario Proof Findings
+
+**Stranded brigade lifecycle — SCENARIO PROVEN:**
+`hrhb_travnik_brigade` (HRHB, at `op:novi_travnik:rat_2`) entered `holding` at turn 1, isolated from corps sector front. Degraded through 12 turns. Collapsed at turn 13 (`STRANDED_MAX_HOLD_TURNS`). Final state: `status=inactive`, `lifecycle_status=destroyed`, `personnel=0`, `cohesion=37`, `morale=38`. Full lifecycle exercised: none → holding → collapsed → destroyed.
+
+**Rupture consequences — NOT ARISEN (honest, conditions-not-met):**
+0 ruptures recorded. `srebrenica_enclave_formed` flag = true (precondition met), but `op:srebrenica:srebrenica_2` controller = RBiH (enclave has NOT fallen), and turn = 40 < 140 threshold. All three preconditions must be met simultaneously. Cannot scenario-prove with 40w/52w — requires a 140+ turn run where RS captures Srebrenica.
+
+**Calibration impact of stranded lifecycle:**
+One HRHB brigade destroyed at turn 13. Area-weighted match improved +0.1pp (93.5% → 93.6%). No anchor regressions attributable to the new step. The destroyed brigade was at an OSID (`op:novi_travnik:rat_2`) where painted expects HRHB but sim shows RBiH — the brigade's destruction did not change control (HRHB lost the OSID to RBiH via combat, not via stranded collapse).
+
+**Verdict / cost ledger inputs confirmed present:**
+All three factions have populated `NegotiationBreakdown` (territory, casualties, war_crimes, civilian_casualties). Strategic dimensions present. Casualty ledger populated (RBiH 15,311 killed, RS 5,879, HRHB 1,419). These are the upstream inputs consumed by the verdict, cost ledger, and comparison surfaces.
+
+### Proof Classification
+- **Direct scenario proof:** stranded brigade lifecycle (full lifecycle in n1575)
+- **Conditions-not-arisen:** rupture consequences (turn < 140, Srebrenica not fallen)
+- **Harness-proven only:** rupture consequence step execution (from pipeline_step_execution_proof.test.ts)
+- **Source-verified only:** verdict/comparison UI rendering with real scenario data (adapter fields proven, React rendering not independently tested)
+
 ## [2026-04-14] feat(sim+ui): campaign closeout — scenario proof and player-visible truth
 
 **Type:** Closeout / scenario proof + visibility (campaign DG2–DG6 closeout)
