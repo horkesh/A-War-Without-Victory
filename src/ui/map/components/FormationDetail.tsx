@@ -297,6 +297,23 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
               <span className="text-text-primary">{toTitleCase(formation.readiness)}</span>
             </div>
 
+            {/* Stranded (Isolated) indicator */}
+            {formation.strandedStatus === 'holding' && (
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-red-900/30 border border-red-500/30">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-red-400">Isolated</span>
+                {formation.strandedSinceTurn != null && (
+                  <span className="text-[9px] text-red-400/60">
+                    since {turnToDateString(formation.strandedSinceTurn)}
+                  </span>
+                )}
+              </div>
+            )}
+            {formation.strandedStatus === 'reconnected' && (
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-green-900/30 border border-green-500/30">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-green-400">Reconnected</span>
+              </div>
+            )}
+
             {/* Officer info */}
             {(() => {
               const commander = getFormationCommander(formation, loadedGameState);
