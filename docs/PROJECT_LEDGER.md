@@ -1,3 +1,22 @@
+## [2026-04-14] feat(negotiation): add endgame verdict packet contract with outcome classification
+
+**Type:** Verdict contract / owner split (v0.9.0 design-gate DG4)
+**Files:** `negotiation_types.ts` (+OutcomeClass type, +outcome_class/condemnation_flags on FactionVerdict), `scoring.ts` (+classifyOutcome(), owner split doc, wiring), `scoring.test.ts` (+16 tests)
+**Tests:** 16 new tests (10 classification + 6 verdict packet contract). 40 total scoring tests pass + 17 war_termination tests pass.
+**Status:** VERIFIED — tsc clean, 57/57 tests, desktop:map:build clean.
+
+### Summary
+Made the termination/judgment/comparison owner split explicit and real:
+
+1. **OutcomeClass type:** `strategic_success | survival | negotiated_escape | pyrrhic_success | hollow_victory | failure | collapse` — ordered best to worst, primary narrative driver.
+2. **classifyOutcome():** Pure deterministic function mapping grade + condemnation flags to outcome class. Key contract: `genocide_condemnation` flag forces `failure` regardless of territorial success. Any condemnation flags with >30% territory → `hollow_victory`.
+3. **FactionVerdict extended:** `outcome_class` and `condemnation_flags` fields. Condemnation flags currently empty array — Lane D populates them.
+4. **Owner split documented:** scoring.ts header now explicitly names termination (war_termination.ts), judgment (scoring.ts), comparison (future downstream).
+
+**Canonical owner:** `classifyOutcome()` in scoring.ts. `OutcomeClass` type in negotiation_types.ts.
+**Intentionally not implemented:** Comparison system (Lane E). Condemnation flag population (Lane D). Score-positive atrocity levers (permanently rejected).
+**Demoted path:** Naked pyrrhic_score as sole verdict authority. Grade-only outcome narrative.
+
 ## [2026-04-14] feat(sim): add stranded brigade lifecycle owner and state machine
 
 **Type:** Engine lifecycle / stranded brigade ownership (v0.9.0 design-gate DG2)
