@@ -1,3 +1,22 @@
+## [2026-04-14] fix(negotiation): complete consequence substrate dead wire fixes
+
+**Type:** Dead wire fix / substrate audit (v0.8-to-v0.9 consequence substrate)
+**Files:** `scoring.ts` (4 grade anchor TODOs replaced with internal_cohesion dimension reads), `strategic_dimensions.ts` (war_phase_exhaustion → war_exhaustion field fix), `PROJECT_LEDGER_KNOWLEDGE.md` (+substrate owner map)
+**Tests:** 14 new tests in `consequence_substrate_ownership.test.ts`, 24 existing scoring tests still pass. 38/38 total.
+**Status:** VERIFIED — tsc clean, 38/38 tests pass, desktop:map:build clean.
+
+### Summary
+Closed two bounded dead wires in the consequence substrate:
+
+1. **Grade anchor migration (political_cohesion → internal_cohesion):** RS grade 'A' and HRHB grades 'A+', 'A', 'B' had TODO comments referencing a nonexistent `political_cohesion` field. Now read `internal_cohesion.effective_value` from the strategic dimensions store with cohesion thresholds (RS A: ≥30, HRHB A+: ≥50, A: ≥40, B: ≥30). Grade anchors now respond to actual factional internal cohesion instead of being territory-only.
+
+2. **Exhaustion wiring (war_phase_exhaustion → war_exhaustion):** The `internal_cohesion` dimension computation in `strategic_dimensions.ts` read `state.military.war_phase_exhaustion[faction]` which was never populated. Changed to `state.military.war_exhaustion[faction]` which is the real faction exhaustion field. Internal cohesion now actually degrades as factions exhaust.
+
+3. **Substrate owner map:** Documented all 8 canonical consequence substrate owners in LEDGER_KNOWLEDGE with their file locations, functions, and data flow.
+
+**Canonical owners:** `computeFactionGrade()` in scoring.ts (grade anchors). `computeDimensionBaseValues()` in strategic_dimensions.ts (internal_cohesion).
+**Demoted path:** Dead `political_cohesion` field checks. Dead `war_phase_exhaustion` field path.
+
 ## [2026-04-14] fix(sim): move Dayton trigger ownership from adapter to pipeline
 
 **Type:** Trigger ownership / adapter boundary (v0.8-to-v0.9)
