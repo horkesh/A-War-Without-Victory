@@ -1,3 +1,22 @@
+## [2026-04-14] feat(sim): add stranded brigade lifecycle owner and state machine
+
+**Type:** Engine lifecycle / stranded brigade ownership (v0.9.0 design-gate DG2)
+**Files:** `game_state.ts` (+3 FormationState fields), `stranded_brigade_lifecycle.ts` (NEW — 265 lines), `war_phases.ts` (+pipeline step), `turn_pipeline_types.ts` (+report type)
+**Tests:** 14 new tests in `stranded_brigade_lifecycle.test.ts`. 24 existing reserve/sector tests still pass. All 38/38.
+**Status:** VERIFIED — tsc clean, 38/38 tests, desktop:map:build clean.
+
+### Summary
+Added canonical lifecycle owner for same-faction unreachable brigades outside hard-coded enclaves:
+
+1. **State machine:** `none` → `holding` → `reconnected`/`collapsed`. Fields on FormationState: `stranded_status`, `stranded_since_turn`, `last_reachable_turn`.
+2. **Pipeline step:** `update-stranded-brigade-lifecycle` runs after `reconcile-live-operation-truth`, before `advance-sector-offensives`. BFS reachability through friendly-controlled OSIDs with sorted frontier (deterministic).
+3. **Degradation:** -3 cohesion, -2 morale per turn while holding. Collapse at cohesion ≤ 10 or 12+ turns stranded. On collapse: dissolve brigade (status=inactive, lifecycle_status=destroyed, 30% personnel to strategic reserve).
+4. **Exclusions:** Enclave brigades (via `isEnclaveBrigade()`), active operation participants, unattached brigades, non-brigade formations.
+
+**Canonical owner:** `updateStrandedBrigadeLifecycle()` in `src/sim/combat/stranded_brigade_lifecycle.ts`.
+**Intentionally not implemented:** Breakout AI, dynamic enclave generation, UI-only ownership, auto-generated march orders.
+**Proof scope:** 14 direct unit tests covering all state transitions, degradation, collapse, exclusions, and determinism. Pipeline integration is source-verified only (step exists and imports correct function).
+
 ## [2026-04-14] fix(negotiation): complete consequence substrate dead wire fixes
 
 **Type:** Dead wire fix / substrate audit (v0.8-to-v0.9 consequence substrate)
