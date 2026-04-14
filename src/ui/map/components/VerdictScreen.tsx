@@ -8,7 +8,46 @@
 import { useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { useIPC } from '../desktop/useIPC';
-import type { GameVerdict, FactionVerdict, DimensionGrade } from '../../../state/negotiation_types.js';
+import type { FactionVerdict, DimensionGrade } from '../../../state/negotiation_types.js';
+import { WarCostSummary } from './WarCostSummary';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Outcome Class & Condemnation Helpers (exported for testing)
+// ═══════════════════════════════════════════════════════════════════════════
+
+export function formatOutcomeClass(oc: string | undefined): string {
+    const labels: Record<string, string> = {
+        strategic_success: 'Strategic Success',
+        survival: 'Survival',
+        negotiated_escape: 'Negotiated Escape',
+        pyrrhic_success: 'Pyrrhic Success',
+        hollow_victory: 'Hollow Victory',
+        failure: 'Failure',
+        collapse: 'Collapse',
+    };
+    return labels[oc ?? ''] ?? 'Unknown';
+}
+
+export function getOutcomeClassStyle(oc: string | undefined): string {
+    const styles: Record<string, string> = {
+        strategic_success: 'bg-green-900/40 text-green-400 border border-green-500/30',
+        survival: 'bg-green-900/30 text-green-300 border border-green-500/20',
+        negotiated_escape: 'bg-blue-900/30 text-blue-300 border border-blue-500/20',
+        pyrrhic_success: 'bg-amber-900/30 text-amber-300 border border-amber-500/20',
+        hollow_victory: 'bg-orange-900/30 text-orange-300 border border-orange-500/20',
+        failure: 'bg-red-900/30 text-red-300 border border-red-500/20',
+        collapse: 'bg-red-900/40 text-red-400 border border-red-500/30',
+    };
+    return styles[oc ?? ''] ?? 'bg-panel-card text-text-secondary border border-panel-border';
+}
+
+export function formatCondemnationFlag(flag: string): string {
+    const labels: Record<string, string> = {
+        genocide_condemnation: 'Condemned for genocide \u2014 international tribunal proceedings inevitable',
+        civilian_atrocities: 'Condemned for systematic atrocities against civilian population',
+    };
+    return labels[flag] ?? flag.replace(/_/g, ' ');
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Faction hex colors (from tailwind.config.ts)
@@ -167,6 +206,13 @@ export function VerdictScreen() {
                             No verdict data for this faction.
                         </div>
                     )}
+                    {/* War Cost & Historical Comparison — per-war, not per-faction */}
+                    {loadedGameState?.costLedger && loadedGameState?.historicalComparison && (
+                        <WarCostSummary
+                            costLedger={loadedGameState.costLedger}
+                            comparison={loadedGameState.historicalComparison}
+                        />
+                    )}
                 </div>
 
                 {/* Footer */}
@@ -242,6 +288,25 @@ function FactionReport({
                         {verdict.grade}
                     </span>
                 </div>
+                {/* Outcome Classification */}
+                <div className="mt-3 text-center">
+                    <span className={`inline-block px-3 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${getOutcomeClassStyle(verdict.outcome_class)}`}>
+                        {formatOutcomeClass(verdict.outcome_class)}
+                    </span>
+                </div>
+                {/* Condemnation Flags — shown only when present */}
+                {verdict.condemnation_flags && verdict.condemnation_flags.length > 0 && (
+                    <div className="mt-3 p-3 rounded bg-red-950/40 border border-red-800/40">
+                        <div className="text-[9px] uppercase tracking-wider text-red-400/80 font-semibold mb-1.5">
+                            International Condemnation
+                        </div>
+                        {verdict.condemnation_flags.map((flag: string, i: number) => (
+                            <div key={i} className="text-[10px] text-red-300/90 leading-relaxed">
+                                {formatCondemnationFlag(flag)}
+                            </div>
+                        ))}
+                    </div>
+                )}
                 <div className="mt-2 text-[11px] text-text-secondary italic max-w-md mx-auto leading-relaxed">
                     {verdict.grade_description}
                 </div>

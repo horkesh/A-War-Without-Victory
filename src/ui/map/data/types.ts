@@ -200,6 +200,10 @@ export interface FormationView {
         total_equipment_destroyed?: { tanks: number; artillery: number; aa_systems: number };
         total_equipment_captured?: { tanks: number; artillery: number; aa_systems: number };
     };
+    /** Stranded brigade lifecycle status. Undefined if not stranded. */
+    strandedStatus?: 'none' | 'holding' | 'reconnected' | 'collapsed';
+    /** Turn when brigade became stranded. */
+    strandedSinceTurn?: number;
     /**
      * Command strain score for this corps (derived on-read, never stored on GameState).
      * Accumulates from force-launched ops (+3) and unresolved warlord friction (+2).
@@ -871,6 +875,10 @@ export interface LoadedGameState {
     gameOutcome?: string;
     /** Game verdict (computed at game end from negotiation capital). */
     gameVerdict?: import('../../../state/negotiation_types.js').GameVerdict;
+    /** Cost ledger (computed at game end — downstream aggregation of war costs). */
+    costLedger?: import('../../../sim/endgame/cost_ledger.js').CostLedger;
+    /** Historical comparison (computed at game end — divergence from historical baseline). */
+    historicalComparison?: import('../../../sim/endgame/endgame_comparison.js').ComparisonResult;
 
     /** Active (in-progress) operations. */
     activeOperations?: Array<{

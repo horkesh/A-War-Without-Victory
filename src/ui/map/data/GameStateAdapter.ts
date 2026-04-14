@@ -51,6 +51,9 @@ import { strictCompare } from '../../../state/validateGameState.js';
 import { computeFullVerdict } from '../../../sim/negotiation/scoring.js';
 import { DIMENSION_WEIGHTS } from '../../../sim/events/strategic_dimensions.js';
 import type { GameVerdict } from '../../../state/negotiation_types.js';
+import { buildCostLedger } from '../../../sim/endgame/cost_ledger.js';
+import { compareToHistorical } from '../../../sim/endgame/endgame_comparison.js';
+import historicalBaseline from '../../../../data/reference/historical_baseline.json';
 import { computeCorpsCommandStrain, getCommandStrainLabel, projectStrainDecay, deriveRecoveryForecast, deriveCorpsSituationAssessment, deriveReadinessTrend } from './command_strain.js';
 import type { GameState } from '../../../state/game_state.js';
 import { toCommandBriefingView } from '../../shared/command_briefing_views.js';
@@ -474,6 +477,8 @@ export function parseGameState(json: unknown): LoadedGameState {
                 decorations: Array.isArray(f.decorations) ? f.decorations as NonNullable<FormationView['decorations']> : undefined,
                 last_repulsed_from: f.last_repulsed_from as NonNullable<FormationView['last_repulsed_from']> ?? undefined,
                 last_retreat_from: f.last_retreat_from as NonNullable<FormationView['last_retreat_from']> ?? undefined,
+                strandedStatus: typeof f.stranded_status === 'string' ? f.stranded_status as FormationView['strandedStatus'] : undefined,
+                strandedSinceTurn: typeof f.stranded_since_turn === 'number' ? f.stranded_since_turn : undefined,
             };
 
             // Brigade first battle milestone and engagement log: use history on formation first (save has formations[id].brigade_history).
@@ -1769,6 +1774,8 @@ export function parseGameState(json: unknown): LoadedGameState {
         gameOver: Boolean(meta.game_over),
         gameOutcome: typeof meta.outcome === 'string' ? meta.outcome : undefined,
         gameVerdict: Boolean(meta.game_over) ? deriveGameVerdict(state) : undefined,
+        costLedger: Boolean(meta.game_over) ? deriveCostLedger(state) : undefined,
+        historicalComparison: Boolean(meta.game_over) ? deriveHistoricalComparison(state) : undefined,
     };
 }
 
@@ -2520,6 +2527,23 @@ function derivePendingProposalReviews(
 function deriveGameVerdict(state: any): GameVerdict | undefined {
     try {
         return computeFullVerdict(state);
+    } catch {
+        return undefined;
+    }
+}
+
+function deriveCostLedger(state: any): LoadedGameState['costLedger'] {
+    try {
+        return buildCostLedger(state as GameState);
+    } catch {
+        return undefined;
+    }
+}
+
+function deriveHistoricalComparison(state: any): LoadedGameState['historicalComparison'] {
+    try {
+        const ledger = buildCostLedger(state as GameState);
+        return compareToHistorical(ledger, historicalBaseline as any);
     } catch {
         return undefined;
     }
