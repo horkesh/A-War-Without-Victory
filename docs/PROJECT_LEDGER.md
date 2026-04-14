@@ -1,3 +1,27 @@
+## [2026-04-14] fix(ui): plumb autonomy proposals into presidential inbox
+
+**Type:** UI truth / inbox plumbing (v0.8-to-v0.9)
+**Files:** `types.ts` (+pendingProposalReviews field), `GameStateAdapter.ts` (+derivePendingProposalReviews), `inboxItems.ts` (+autonomy_proposal type/derivation), `PresidentialInbox.tsx` (+PROPOSAL label), `App.tsx` (+autonomy_panel action handler), `inbox_items.test.ts` (+7 tests)
+**Status:** VERIFIED — tsc clean, 26 inbox tests pass, desktop:map:build clean.
+
+### Summary
+`state.meta.pending_proposal_reviews` (PendingProposalReview[]) existed canonically in GameState but the adapter dropped it. AutonomyPanel fetched it via separate IPC. Fixed: added `derivePendingProposalReviews()` to adapter (filters to player faction, unresolved only), added `autonomy_proposal` inbox item type with `autonomy_panel` action routing, priority 35 (between peace plan and reserve). Stale TODO comment removed — seam closed.
+
+**Proof scope:** Derivation tested (5 tests: production, empty states, fallback subtitle, sort ordering). Adapter mapping (`derivePendingProposalReviews`) and routing (`autonomy_panel` → `setAutonomyPanelOpen`) are surface-wired and source-verified, not independently tested — no pure-helper seam exists for either.
+**Canonical owner:** `derivePendingProposalReviews()` in GameStateAdapter. `deriveInboxItems()` autonomy_proposal block in inboxItems.ts. App.tsx `autonomy_panel` action case.
+
+## [2026-04-14] fix(ui): reset inbox dismissal state on save load
+
+**Type:** UI truth / dismissal contract (v0.8-to-v0.9)
+**Files:** `App.tsx` (+useEffect for fingerprint-based reset)
+**Status:** VERIFIED — tsc clean, inbox tests pass, desktop:map:build clean.
+
+### Summary
+`peacePlanDismissed` and `acknowledgedEventIds` were React local state that survived save loads — stale dismissal flags could hide real pending items after loading a new save mid-session. Fixed: added useEffect watching `lastLoadedStateFingerprint` that resets both on change.
+
+**Proof scope:** Derivation statelessness tested (2 tests: peace plan and event decisions are always re-derivable from state). The React useEffect reset itself is not directly tested — it is component behavior requiring a React test harness.
+**Canonical owner:** App.tsx fingerprint reset effect.
+
 ## [2026-04-14] fix(ui): close inbox identity routing seam — clicked row opens exact item
 
 **Type:** UI truth / inbox routing (v0.8-to-v0.9)

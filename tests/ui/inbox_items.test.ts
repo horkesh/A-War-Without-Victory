@@ -6,7 +6,7 @@
  *  - Peace plans produce urgent inbox items with correct planName
  *  - Reserve requests produce army_reserve action items
  *  - Officer events produce army_hq_personnel action items
- *  - Autonomy proposals are NOT produced (adapter doesn't map them yet)
+ *  - Autonomy proposals produce autonomy_panel action items from pendingProposalReviews
  *  - Opening brief appears when openingBriefDismissed is false and player_faction is set
  *  - Empty state returns only date marker
  */
