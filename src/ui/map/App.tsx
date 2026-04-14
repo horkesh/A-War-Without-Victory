@@ -226,6 +226,14 @@ function App() {
   const recruitmentCatalogRequestId = useRef(0);
   const initialShellHandoffApplied = useRef(false);
 
+  // Reset dismissal/acknowledgement state when a new save is loaded.
+  // Without this, stale flags from a previous save hide real pending items.
+  const stateFingerprint = useGameStore((s) => s.lastLoadedStateFingerprint);
+  useEffect(() => {
+    setPeacePlanDismissed(false);
+    setAcknowledgedEventIds(new Set());
+  }, [stateFingerprint]);
+
   // C4.3: Combat odds — call existing query-combat-estimate when modal opens; show "—" if unavailable.
   // Phase 5 could add a dedicated combat-estimate IPC if needed; we use existing query-combat-estimate only.
   const [combatOdds, setCombatOdds] = useState('—');
@@ -685,6 +693,9 @@ function App() {
         if (action === 'peace_plan_modal') {
           // Reset dismissal so the PeacePlanModal renders again
           setPeacePlanDismissed(false);
+        }
+        if (action === 'autonomy_panel') {
+          setAutonomyPanelOpen(true);
         }
       }} />}
       {railState.primary === 'settlement' && <SelectionPanel railSlot="primary" />}
