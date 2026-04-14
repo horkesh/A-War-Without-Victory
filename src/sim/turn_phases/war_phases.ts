@@ -147,6 +147,7 @@ import { reconcileFinalSectorTruth } from '../combat/final_sector_truth_reconcil
 import { reconcileFinalOperationTruth } from '../combat/final_operation_truth_reconciliation.js';
 import { detectParamilitaryTargets, advanceParamilitaries, detectOffensiveParamilitaryTargets } from '../combat/paramilitary_sweep.js';
 import { consolidateRearPockets } from '../combat/rear_pocket_consolidation.js';
+import { updateStrandedBrigadeLifecycle } from '../combat/stranded_brigade_lifecycle.js';
 import { PARAMILITARY_FADE_WEEK, OFFENSIVE_PARA_FADE_WEEK } from '../../state/formation_constants.js';
 import { generateLevel1StanceProposals, generateLevel1OpProposals } from '../ai_commander/proposal_generation.js';
 import { generateCorpsStanceOrders } from '../combat/bot_corps_stance.js';
@@ -790,6 +791,19 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             reconcileFinalOperationTruth(context.state);
+        }
+    },
+    {
+        name: 'update-stranded-brigade-lifecycle',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const spatial = getSpatialContextCache(context);
+            const adj = spatial?.preCombat?.adjacency;
+            if (!adj) return;
+            const strandedReport = updateStrandedBrigadeLifecycle(context.state, adj);
+            if (strandedReport.updated > 0) {
+                context.report.stranded_brigade_lifecycle = strandedReport;
+            }
         }
     },
     {

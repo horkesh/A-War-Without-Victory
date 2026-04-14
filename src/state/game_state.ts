@@ -653,6 +653,14 @@ export interface FormationState {
     recruit_pool_faction?: FactionId;
     /** Fallback OSID where brigade reforms if stranded with no retreat path. Set from OOB. */
     fallback_osid?: string;
+    /** Stranded brigade lifecycle status. 'none' = not stranded, 'holding' = isolated and degrading,
+     *  'reconnected' = friendly path restored (clears next turn), 'collapsed' = dissolved.
+     *  Managed by update-stranded-brigade-lifecycle pipeline step. */
+    stranded_status?: 'none' | 'holding' | 'reconnected' | 'collapsed';
+    /** Turn when brigade first became stranded (entered 'holding' status). */
+    stranded_since_turn?: number;
+    /** Last turn when brigade was reachable to a same-corps sector front via friendly OSID path. */
+    last_reachable_turn?: number;
     /** Origin OSID — where this brigade was raised / permanently based. Used for home distance effectiveness. Set at creation, never changes. */
     home_osid?: string;
     /** Elite reserve base OSID used for return after loan termination/recall. */
