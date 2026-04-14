@@ -1,3 +1,20 @@
+## [2026-04-14] feat(endgame): add cost ledger and historical comparison substrate
+
+**Type:** Endgame comparison / downstream substrate (v0.9.0 design-gate DG6)
+**Files:** `negotiation_types.ts` (+HistoricalBaseline type), `cost_ledger.ts` (NEW — 120 lines), `endgame_comparison.ts` (NEW — 127 lines), `historical_baseline.json` (NEW — 17 lines)
+**Tests:** 12 new tests in `cost_ledger_comparison.test.ts`. 40 scoring + 18 rupture tests still pass. 70/70 total.
+**Status:** VERIFIED — tsc clean, 70/70 tests, desktop:map:build clean.
+
+### Summary
+Added smallest honest downstream substrate consuming upstream verdict/consequence truth:
+
+1. **CostLedger:** `buildCostLedger()` aggregates per-faction war costs from casualty_ledger, displacement, negotiation capital, rupture consequences. Pure downstream reader — owns no upstream truth.
+2. **EndgameComparison:** `compareToHistorical()` compares player war against canonical BiH war baseline. Produces duration_delta, territory_divergence, casualty_ratio, displacement_ratio, and human-readable divergence_notes.
+3. **HistoricalBaseline:** `data/reference/historical_baseline.json` — canonical figures from RDC 2007 (97,207 killed), ICTY Krstić judgment (8,372 Srebrenica), UNHCR (2.2M displaced), Dayton Annex 2 (49/51 territory split).
+
+**Canonical owner:** `buildCostLedger()` in `cost_ledger.ts`. `compareToHistorical()` in `endgame_comparison.ts`. Both are downstream consumers only.
+**Intentionally not implemented:** Dynamic essay engine, UI rendering, Cost Ledger modal, Codex integration. Comparison does not write to any upstream state.
+
 ## [2026-04-14] feat(negotiation): enforce sensitive-history boundary and Srebrenica rupture contract
 
 **Type:** Sensitive-history boundary / rupture consequence (v0.9.0 design-gate DG5)
