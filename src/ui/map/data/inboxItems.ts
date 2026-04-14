@@ -12,7 +12,7 @@ import type { LoadedGameState } from './types';
 import { turnToDateString } from '../utils/formatters';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 
-export type InboxItemType = 'event_decision' | 'peace_plan' | 'autonomy_proposal' | 'reserve_request' | 'officer_event' | 'situation';
+export type InboxItemType = 'event_decision' | 'peace_plan' | 'reserve_request' | 'officer_event' | 'situation';
 export type InboxSeverity = 'blocking' | 'urgent' | 'normal' | 'info';
 
 export interface InboxItem {
@@ -22,7 +22,7 @@ export interface InboxItem {
     title: string;
     subtitle: string;
     /** Which panel/modal to open when clicked */
-    action: 'event_modal' | 'peace_plan_modal' | 'autonomy_panel' | 'army_reserve' | 'army_hq_personnel' | 'none';
+    action: 'event_modal' | 'peace_plan_modal' | 'army_reserve' | 'army_hq_personnel' | 'none';
     /** Priority for sorting (lower = higher priority) */
     priority: number;
 }
@@ -40,16 +40,15 @@ export function deriveInboxItems(
     const items: InboxItem[] = [];
 
     // 1. Pending event decisions (BLOCKING — turn won't advance)
-    const eventDecisions = (state as any).pendingEventDecisions as Array<{ id: string; title?: string; narrative?: string; requires_player_response?: boolean }> | undefined;
+    const eventDecisions = state.pendingEventDecisions;
     if (eventDecisions) {
         for (const evt of eventDecisions) {
-            if (!evt.requires_player_response) continue;
             items.push({
-                id: `event:${evt.id}`,
+                id: `event:${evt.event_id}`,
                 type: 'event_decision',
                 severity: 'blocking',
-                title: evt.title ?? 'Decision Required',
-                subtitle: evt.narrative?.substring(0, 80) ?? 'An event requires your response.',
+                title: evt.event_title ?? 'Decision Required',
+                subtitle: `An event requires your response (turn ${evt.turn_fired}).`,
                 action: 'event_modal',
                 priority: 10,
             });
@@ -57,49 +56,25 @@ export function deriveInboxItems(
     }
 
     // 2. Pending peace plan
-    const peacePlan = (state as any).pendingPeacePlan as { id: string; name?: string; title?: string } | undefined;
+    const peacePlan = state.pendingPeacePlan;
     if (peacePlan) {
         items.push({
-            id: `peace:${peacePlan.id}`,
+            id: `peace:${peacePlan.planId}`,
             type: 'peace_plan',
             severity: 'urgent',
-            title: peacePlan.name ?? peacePlan.title ?? 'Peace Proposal',
+            title: peacePlan.planName ?? 'Peace Proposal',
             subtitle: 'International mediators have presented a peace plan.',
             action: 'peace_plan_modal',
             priority: 20,
         });
     }
 
-    // 3. Autonomy proposals (stance changes, op approvals)
-    const proposals = (state as any).pendingProposalReviews as Array<{ id: string; domain?: string; description?: string; action?: string }> | undefined;
-    if (proposals) {
-        for (const prop of proposals) {
-            if (prop.domain === 'ops') {
-                items.push({
-                    id: `proposal:${prop.id}`,
-                    type: 'autonomy_proposal',
-                    severity: 'urgent',
-                    title: 'Operation Order',
-                    subtitle: prop.description?.substring(0, 80) ?? 'A corps commander requests authorization.',
-                    action: 'autonomy_panel',
-                    priority: 30,
-                });
-            } else {
-                items.push({
-                    id: `proposal:${prop.id}`,
-                    type: 'autonomy_proposal',
-                    severity: 'normal',
-                    title: 'Stance Proposal',
-                    subtitle: prop.description?.substring(0, 80) ?? 'A commander proposes a change in posture.',
-                    action: 'autonomy_panel',
-                    priority: 35,
-                });
-            }
-        }
-    }
+    // TODO: Autonomy proposals (pendingProposalReviews) removed from inbox scope.
+    // The GameStateAdapter does not yet map state.meta.pending_proposal_reviews to LoadedGameState.
+    // Re-add when adapter plumbing is wired (see v0.8.4 Phase E backlog).
 
-    // 4. Reserve requests
-    const reserveRequests = (state as any).pendingReserveRequests as Array<{ request_id: string; corps_id: string; reason?: string; purpose?: string }> | undefined;
+    // 3. Reserve requests
+    const reserveRequests = state.pendingReserveRequests;
     if (reserveRequests) {
         for (const req of reserveRequests) {
             const corpsName = req.corps_id?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) ?? 'A corps';
@@ -115,8 +90,8 @@ export function deriveInboxItems(
         }
     }
 
-    // 5. Officer events
-    const officerEvents = (state as any).pendingOfficerEvents as Array<{ event_id: string; type?: string; officer_name?: string }> | undefined;
+    // 4. Officer events
+    const officerEvents = state.pendingOfficerEvents;
     if (officerEvents) {
         for (const evt of officerEvents) {
             items.push({
@@ -131,13 +106,13 @@ export function deriveInboxItems(
         }
     }
 
-    // 6. Situation highlights (informational, from turn summary + state)
+    // 5. Situation highlights (informational, from turn summary + state)
     const turn = state.turn ?? 0;
     const dateStr = turnToDateString(turn);
 
     // Territory changes from recent control events (current turn only)
     const recentEvents = (state.recentControlEvents ?? []).filter(e => e.turn === turn);
-    const playerFaction = (state as any).player_faction as string | undefined;
+    const playerFaction = state.player_faction;
     const losses = recentEvents.filter(e => e.from === playerFaction && e.to !== playerFaction);
     const gains = recentEvents.filter(e => e.to === playerFaction && e.from !== playerFaction);
     if (losses.length > 0) {

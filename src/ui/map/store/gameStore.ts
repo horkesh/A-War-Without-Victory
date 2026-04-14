@@ -533,7 +533,7 @@ export const useGameStore = create<GameStore>((set) => ({
         // Apply state in next tick so we don't block after parse.
         queueMicrotask(() => {
           try {
-            set({ loadedGameState: state, loadError: null, lastLoadedStateFingerprint: fingerprint });
+            set({ loadedGameState: state, loadError: null, lastLoadedStateFingerprint: fingerprint, openingBriefDismissed: false });
             console.log(`[gameStore] Loaded save: ${state.label} — ${state.formations.length} formations, ${Object.keys(state.controlBySettlement).length} control entries`);
             resolve();
           } catch (e) {

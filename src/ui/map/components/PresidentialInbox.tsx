@@ -7,7 +7,7 @@
  *
  * Canonical owner: this file.
  * Reads: inboxItems.ts (derived from LoadedGameState)
- * Routes to: existing modals/panels (EventModal, PeacePlanModal, AutonomyPanel, etc.)
+ * Routes to: existing modals/panels (EventModal, PeacePlanModal, ArmyReservePanel, ArmyHQ Personnel)
  */
 
 import { useGameStore } from '../store/gameStore';
@@ -41,7 +41,6 @@ const SEVERITY_STYLES: Record<InboxSeverity, { badge: string; border: string; la
 const TYPE_LABELS: Record<string, string> = {
     event_decision: 'DECISION',
     peace_plan: 'PEACE PLAN',
-    autonomy_proposal: 'PROPOSAL',
     reserve_request: 'RESERVE',
     officer_event: 'PERSONNEL',
     situation: 'SITUATION',

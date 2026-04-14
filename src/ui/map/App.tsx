@@ -660,6 +660,31 @@ function App() {
           gs.setArmyHQOpen(true);
           useGameStore.setState({ armyHQTab: 'personnel' });
         }
+        if (action === 'event_modal') {
+          // Push pending event decisions into the event queue so the EventModal shows them
+          const pending = gs.loadedGameState?.pendingEventDecisions;
+          if (pending && pending.length > 0) {
+            const decisionDisplayData: EventDisplayData[] = pending.map(evt => ({
+              id: evt.event_id,
+              title: evt.event_title ?? 'Decision Required',
+              narrative: `An event from turn ${evt.turn_fired} requires your response.`,
+              category: 'military',
+              effects: [],
+              isDecision: true,
+              responseOptions: evt.response_options.map(opt => ({
+                id: opt.id,
+                label: opt.label,
+                description: opt.description,
+              })),
+            }));
+            setEventQueue(decisionDisplayData);
+            setEventQueueIndex(0);
+          }
+        }
+        if (action === 'peace_plan_modal') {
+          // Reset dismissal so the PeacePlanModal renders again
+          setPeacePlanDismissed(false);
+        }
       }} />}
       {railState.primary === 'settlement' && <SelectionPanel railSlot="primary" />}
       {railState.primary === 'sector' && <CorpsFrontPanel railSlot="primary" />}
@@ -757,6 +782,13 @@ function App() {
           queuePosition={eventQueueIndex + 1}
           queueTotal={eventQueue.length}
           onAcknowledge={handleEventAcknowledge}
+          onDecisionResponse={(responseId) => {
+            const current = eventQueue[eventQueueIndex];
+            if (current?.isDecision) {
+              ipc.respondToEventDecision(current.id, responseId);
+            }
+            handleEventAcknowledge();
+          }}
         />
       )}
       {/* v0.5.0: Peace Plan Modal — blocks turn progression until player responds */}
