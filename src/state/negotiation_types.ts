@@ -209,6 +209,17 @@ export interface DaytonResult {
 // Verdict & Scoring Types (Phase 5)
 // ═══════════════════════════════════════════════════════════════════════════
 
+/** Outcome classification for faction endgame verdict.
+ *  Ordered from best to worst. Used by verdict packet, not by termination. */
+export type OutcomeClass =
+    | 'strategic_success'
+    | 'survival'
+    | 'negotiated_escape'
+    | 'pyrrhic_success'
+    | 'hollow_victory'
+    | 'failure'
+    | 'collapse';
+
 /** Per-dimension grade (one of the 5 capital dimensions). */
 export interface DimensionGrade {
     dimension: string;
@@ -230,6 +241,10 @@ export interface FactionVerdict {
     capital_breakdown: NegotiationBreakdown;
     /** Per-dimension letter grades (5 dimensions). */
     dimension_grades: DimensionGrade[];
+    /** Classified outcome — primary narrative driver, not a naked number. */
+    outcome_class: OutcomeClass;
+    /** Condemnation flags that cap or taint the verdict regardless of score. */
+    condemnation_flags: string[];
 }
 
 /** Complete game verdict covering all factions and the overall outcome. */

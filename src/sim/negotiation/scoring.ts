@@ -1,8 +1,14 @@
 /**
- * Verdict & Scoring Engine — Phase 5 of the Endgame System.
+ * Endgame verdict owner — JUDGMENT only.
  *
- * Computes per-faction Pyrrhic Scores (0-100), letter grades (A+ through F),
- * and full game verdicts from negotiation capital + game state.
+ * Owner split:
+ * - TERMINATION: war_termination.ts -> checkWarTermination() -> WarTerminationResult
+ * - JUDGMENT: scoring.ts -> computeFullVerdict() -> GameVerdict (this file)
+ * - COMPARISON: future downstream consumer, not this file
+ *
+ * Pyrrhic score is supporting context, not sovereign truth.
+ * OutcomeClass + grade are the primary verdict drivers.
+ * Condemnation flags can cap or taint any result.
  *
  * Deterministic: no Math.random(), sorted iteration via strictCompare.
  *
@@ -10,7 +16,7 @@
  */
 
 import type { GameState, FactionId } from '../../state/game_state.js';
-import type { NegotiationBreakdown } from '../../state/negotiation_types.js';
+import type { NegotiationBreakdown, OutcomeClass } from '../../state/negotiation_types.js';
 import type { FactionVerdict, GameVerdict, DimensionGrade } from '../../state/negotiation_types.js';
 import { DIMENSION_WEIGHTS, computeNegotiatingCapital } from '../events/strategic_dimensions.js';
 import type { DimensionStore } from '../events/strategic_dimensions.js';
@@ -198,6 +204,50 @@ const FACTION_GRADE_ANCHORS: Record<string, GradeAnchor[]> = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Outcome Classification — maps grade + condemnation flags to OutcomeClass
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Classify a faction's endgame outcome from grade, breakdown, and condemnation flags.
+ * Pure, deterministic. Condemnation flags can force hollow_victory or failure
+ * regardless of territorial/military success.
+ *
+ * Evaluation order matters — checked top to bottom, first match wins.
+ */
+export function classifyOutcome(
+    _faction: string,
+    breakdown: NegotiationBreakdown,
+    _dimensionStore: DimensionStore | undefined,
+    grade: string,
+    _pyrrhicScore: number,
+    condemnationFlags: string[],
+): OutcomeClass {
+    // Collapse: faction destroyed or zero territory
+    if (breakdown.territory_controlled_pct <= 0 || grade === 'F') return 'collapse';
+
+    // Failure: grade D or genocide condemnation forces failure
+    if (grade === 'D' || condemnationFlags.includes('genocide_condemnation')) return 'failure';
+
+    // Hollow victory: any condemnation flags taint the result, even with strong territory
+    if (condemnationFlags.length > 0 && breakdown.territory_controlled_pct > 30) return 'hollow_victory';
+
+    // Strategic success: A+ grade, strong position
+    if (grade === 'A+') return 'strategic_success';
+
+    // Survival: A grade, maintained position
+    if (grade === 'A') return 'survival';
+
+    // Negotiated escape: B grade, acceptable compromise
+    if (grade === 'B') return 'negotiated_escape';
+
+    // Pyrrhic success: C grade, won something but at great cost
+    if (grade === 'C') return 'pyrrhic_success';
+
+    // Default to failure for anything unmapped
+    return 'failure';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Public API
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -275,12 +325,18 @@ export function computeFactionVerdict(
             grade_description: 'No negotiation data available',
             capital_breakdown: null as unknown as NegotiationBreakdown,
             dimension_grades: emptyDims,
+            outcome_class: 'collapse' as OutcomeClass,
+            condemnation_flags: [],
         };
     }
 
     const pyrrhicScore = computePyrrhicScore(capital, faction, dimStore);
     const { grade, description } = computeFactionGrade(capital, faction, state);
     const dimensionGrades = computeDimensionGrades(capital, faction, dimStore);
+
+    // Condemnation flags: empty array for now — Lane D will populate these
+    const condemnationFlags: string[] = [];
+    const outcomeClass = classifyOutcome(faction, capital, dimStore, grade, pyrrhicScore, condemnationFlags);
 
     return {
         faction,
@@ -289,6 +345,8 @@ export function computeFactionVerdict(
         grade_description: description,
         capital_breakdown: capital,
         dimension_grades: dimensionGrades,
+        outcome_class: outcomeClass,
+        condemnation_flags: condemnationFlags,
     };
 }
 

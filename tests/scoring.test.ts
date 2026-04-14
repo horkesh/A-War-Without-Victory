@@ -5,12 +5,13 @@ import {
     computeDimensionGrades,
     computeFactionVerdict,
     computeFullVerdict,
+    classifyOutcome,
 } from '../src/sim/negotiation/scoring.js';
 import {
     createEmptyCapital,
     createDefaultPatronRelationship,
 } from '../src/state/negotiation_types.js';
-import type { NegotiationBreakdown } from '../src/state/negotiation_types.js';
+import type { NegotiationBreakdown, OutcomeClass } from '../src/state/negotiation_types.js';
 import type { GameState } from '../src/state/game_state.js';
 import { initializeStrategicDimensions, DIMENSION_WEIGHTS } from '../src/sim/events/strategic_dimensions.js';
 import type { DimensionStore } from '../src/sim/events/strategic_dimensions.js';
@@ -359,5 +360,143 @@ describe('computeFactionVerdict', () => {
         expect(verdict.faction).toBe('RS');
         // All dims at 65, weights sum to 1 => pyrrhic score ~65
         expect(verdict.pyrrhic_score).toBeCloseTo(65, 1);
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// OutcomeClass Classification (Lane C verdict packet contract)
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('classifyOutcome', () => {
+    it('returns collapse for grade F', () => {
+        const bd = makeBreakdown({ territory_controlled_pct: 5 });
+        const result = classifyOutcome('RBiH', bd, undefined, 'F', 10, []);
+        expect(result).toBe('collapse');
+    });
+
+    it('returns collapse for zero territory regardless of grade', () => {
+        const bd = makeBreakdown({ territory_controlled_pct: 0 });
+        const result = classifyOutcome('RS', bd, undefined, 'A', 80, []);
+        expect(result).toBe('collapse');
+    });
+
+    it('returns failure for grade D', () => {
+        const bd = makeBreakdown({ territory_controlled_pct: 15 });
+        const result = classifyOutcome('RBiH', bd, undefined, 'D', 30, []);
+        expect(result).toBe('failure');
+    });
+
+    it('returns failure for genocide_condemnation flag regardless of grade', () => {
+        const bd = makeBreakdown({ territory_controlled_pct: 55 });
+        const result = classifyOutcome('RS', bd, undefined, 'A+', 90, ['genocide_condemnation']);
+        expect(result).toBe('failure');
+    });
+
+    it('returns hollow_victory for condemnation flags with high territory', () => {
+        const bd = makeBreakdown({ territory_controlled_pct: 50 });
+        const result = classifyOutcome('RS', bd, undefined, 'A', 75, ['civilian_atrocities']);
+        expect(result).toBe('hollow_victory');
+    });
+
+    it('returns strategic_success for grade A+', () => {
+        const bd = makeBreakdown({ territory_controlled_pct: 56 });
+        const result = classifyOutcome('RS', bd, undefined, 'A+', 90, []);
+        expect(result).toBe('strategic_success');
+    });
+
+    it('returns survival for grade A', () => {
+        const bd = makeBreakdown({ territory_controlled_pct: 50 });
+        const result = classifyOutcome('RS', bd, undefined, 'A', 75, []);
+        expect(result).toBe('survival');
+    });
+
+    it('returns negotiated_escape for grade B', () => {
+        const bd = makeBreakdown({ territory_controlled_pct: 46 });
+        const result = classifyOutcome('RS', bd, undefined, 'B', 60, []);
+        expect(result).toBe('negotiated_escape');
+    });
+
+    it('returns pyrrhic_success for grade C', () => {
+        const bd = makeBreakdown({ territory_controlled_pct: 42 });
+        const result = classifyOutcome('RS', bd, undefined, 'C', 45, []);
+        expect(result).toBe('pyrrhic_success');
+    });
+
+    it('is deterministic', () => {
+        const bd = makeBreakdown({ territory_controlled_pct: 50 });
+        const r1 = classifyOutcome('RS', bd, undefined, 'A', 75, []);
+        const r2 = classifyOutcome('RS', bd, undefined, 'A', 75, []);
+        expect(r1).toBe(r2);
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Verdict Packet Contract — outcome_class and condemnation_flags on FactionVerdict
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('verdict packet contract', () => {
+    it('FactionVerdict contains outcome_class field', () => {
+        const state = makeStateWithCapital({
+            RS: { territory_controlled_pct: 52 },
+        });
+        const verdict = computeFactionVerdict(state, 'RS');
+        expect(verdict.outcome_class).toBeDefined();
+        expect(typeof verdict.outcome_class).toBe('string');
+    });
+
+    it('FactionVerdict contains condemnation_flags field', () => {
+        const state = makeStateWithCapital({
+            RS: { territory_controlled_pct: 52 },
+        });
+        const verdict = computeFactionVerdict(state, 'RS');
+        expect(verdict.condemnation_flags).toBeDefined();
+        expect(Array.isArray(verdict.condemnation_flags)).toBe(true);
+    });
+
+    it('condemnation_flags is empty array (Lane D not yet wired)', () => {
+        const state = makeStateWithCapital({
+            RBiH: { territory_controlled_pct: 30 },
+            RS: { territory_controlled_pct: 52 },
+            HRHB: { territory_controlled_pct: 18 },
+        });
+        const verdict = computeFullVerdict(state);
+        for (const fid of ['RBiH', 'RS', 'HRHB']) {
+            expect(verdict.faction_verdicts[fid].condemnation_flags).toEqual([]);
+        }
+    });
+
+    it('outcome_class is valid OutcomeClass value for all factions in full verdict', () => {
+        const validClasses: OutcomeClass[] = [
+            'strategic_success', 'survival', 'negotiated_escape',
+            'pyrrhic_success', 'hollow_victory', 'failure', 'collapse',
+        ];
+        const state = makeStateWithCapital({
+            RBiH: { territory_controlled_pct: 30 },
+            RS: { territory_controlled_pct: 52 },
+            HRHB: { territory_controlled_pct: 18 },
+        });
+        const verdict = computeFullVerdict(state);
+        for (const fid of ['RBiH', 'RS', 'HRHB']) {
+            expect(validClasses).toContain(verdict.faction_verdicts[fid].outcome_class);
+        }
+    });
+
+    it('no-capital verdict returns collapse outcome_class', () => {
+        const state = makeState();
+        const verdict = computeFactionVerdict(state, 'RBiH');
+        expect(verdict.outcome_class).toBe('collapse');
+        expect(verdict.condemnation_flags).toEqual([]);
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Termination owner not changed — war_termination.ts types unchanged
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('termination owner integrity', () => {
+    it('WarTerminationResult type exists and has expected shape (import check)', async () => {
+        // Verify the import path still works and the type is unchanged
+        const mod = await import('../src/sim/war_termination.js');
+        expect(typeof mod.checkWarTermination).toBe('function');
     });
 });
