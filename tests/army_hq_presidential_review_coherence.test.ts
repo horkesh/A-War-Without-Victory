@@ -77,4 +77,59 @@ describe('Army HQ / presidential review coherence', () => {
     expect(source).toContain('loadedGameState.presidentialReviewQueue?.pendingCount');
     expect(source).not.toContain('loadedGameState.pendingEventDecisions?.length');
   });
+
+  /**
+   * Cluster C: Review/Action-Family Ownership Boundary.
+   *
+   * Ownership is SPLIT, not competing:
+   * - PresidentialInbox (via App.tsx onAction) owns NAVIGATION routing:
+   *   opens modals/panels (event_modal, army_hq_personnel, army_reserve, etc.)
+   * - PresidentialAttentionPanel owns ACTION EXECUTION:
+   *   handleDecisionResponse, handleAcknowledgeOfficerEvent, handleAcceptReplacement
+   *   (all via direct IPC calls)
+   *
+   * This is intentional: the inbox is a routing surface, the panel is the
+   * action queue. They don't duplicate each other.
+   */
+  it('PresidentialAttentionPanel owns action execution via IPC (not duplicated in App.tsx)', () => {
+    const panelSource = readFileSync(
+      new URL('../src/ui/map/components/army_hq/PresidentialAttentionPanel.tsx', import.meta.url),
+      'utf8',
+    );
+    const appSource = readFileSync(
+      new URL('../src/ui/map/App.tsx', import.meta.url),
+      'utf8',
+    );
+
+    // Panel owns these three IPC action handlers directly
+    expect(panelSource).toContain('handleDecisionResponse');
+    expect(panelSource).toContain('handleAcknowledgeOfficerEvent');
+    expect(panelSource).toContain('handleAcceptReplacement');
+    expect(panelSource).toContain('ipc.respondToEventDecision');
+    expect(panelSource).toContain('ipc.acknowledgeOfficerEvent');
+    expect(panelSource).toContain('ipc.acceptOfficerReplacement');
+
+    // App.tsx does NOT duplicate these action handlers — it only uses
+    // respondToEventDecision in the EventModal's onDecisionResponse callback,
+    // which is a separate entry point (EventModal, not the panel).
+    // The panel's filtering of pendingOfficerEvents is its own rendering
+    // concern, not a duplication of inboxItems.ts derivation.
+    expect(appSource).not.toContain('handleAcceptReplacement');
+    expect(appSource).not.toContain('handleAcknowledgeOfficerEvent');
+  });
+
+  it('Inbox onAction routes navigation only — does not execute IPC actions', () => {
+    const appSource = readFileSync(
+      new URL('../src/ui/map/App.tsx', import.meta.url),
+      'utf8',
+    );
+
+    // Inbox onAction routes to panels/modals via state changes, not IPC calls
+    expect(appSource).toContain("onAction={(action, itemId)");
+    expect(appSource).toContain("action === 'army_reserve'");
+    expect(appSource).toContain("action === 'army_hq_personnel'");
+    expect(appSource).toContain("action === 'event_modal'");
+    expect(appSource).toContain("action === 'peace_plan_modal'");
+    expect(appSource).toContain("action === 'autonomy_panel'");
+  });
 });

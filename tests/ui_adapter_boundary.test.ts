@@ -108,5 +108,36 @@ describe('UI Adapter Boundary Discipline', () => {
     const typesSrc = readFile(join(SRC_ROOT, 'ui/map/data/types.ts'));
     expect(typesSrc).toMatch(/operationalSitrep/);
   });
+
+  /**
+   * Cluster B: Adapter Boundary Simplification — NO-OP.
+   *
+   * All adapter boundary simplifications require state-layer changes that
+   * violate the constraint "do not invent new packet/state structures."
+   *
+   * Documented seams (top 3 candidates examined, none actionable without
+   * state-layer changes):
+   *
+   * 1. deriveNegotiatingCapital — replicates DIMENSION_WEIGHTS weighting
+   *    inline. Simplification would require adding a pre-computed
+   *    negotiating_capital field to GameState.military.negotiation.
+   *
+   * 2. homeDistanceMult — replicates getHomeDistanceMult() inline
+   *    (HOME_DISTANCE_FREE_RANGE, perHop, floor constants). Simplification
+   *    would require importing engine code into the adapter (violates
+   *    adapter isolation) or adding a pre-computed field to GameState.
+   *
+   * 3. deriveOperationCaptureProvenance — heuristic fallback when
+   *    capture_provenance string is absent. Simplification requires the
+   *    engine to always emit capture_provenance on operation AARs.
+   */
+  it('Cluster B: adapter derive functions are structurally necessary (no-op documented)', () => {
+    const adapterSrc = readFile(join(SRC_ROOT, 'ui/map/data/GameStateAdapter.ts'));
+    // Verify the three seams still exist (test breaks if they're removed,
+    // prompting re-evaluation of whether simplification became possible).
+    expect(adapterSrc).toMatch(/deriveNegotiatingCapital/);
+    expect(adapterSrc).toMatch(/homeDistanceMult/);
+    expect(adapterSrc).toMatch(/deriveOperationCaptureProvenance/);
+  });
 });
 
