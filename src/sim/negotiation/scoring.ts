@@ -115,9 +115,11 @@ const RS_GRADE_ANCHORS: GradeAnchor[] = [
     {
         grade: 'A',
         description: '49% contiguous territory, entity intact, Belgrade relationship intact',
-        test: (cap) =>
-            cap.territory_controlled_pct >= 49,
-            // TODO: migrate political_cohesion check to strategic_dimensions internal_cohesion
+        test: (cap, state) => {
+            const dimStore = state.military?.negotiation?.strategic_dimensions;
+            const cohesion = dimStore?.RS?.internal_cohesion?.effective_value ?? 50;
+            return cap.territory_controlled_pct >= 49 && cohesion >= 30;
+        },
     },
     {
         grade: 'B',
@@ -147,23 +149,29 @@ const HRHB_GRADE_ANCHORS: GradeAnchor[] = [
     {
         grade: 'A+',
         description: 'Strong territorial position with high political cohesion, Herzegovina secured',
-        test: (cap) =>
-            cap.territory_controlled_pct > 20,
-            // TODO: migrate political_cohesion check to strategic_dimensions internal_cohesion
+        test: (cap, state) => {
+            const dimStore = state.military?.negotiation?.strategic_dimensions;
+            const cohesion = dimStore?.HRHB?.internal_cohesion?.effective_value ?? 50;
+            return cap.territory_controlled_pct > 20 && cohesion >= 50;
+        },
     },
     {
         grade: 'A',
         description: 'Federation partner with constitutional protections, Herzegovina intact',
-        test: (cap) =>
-            cap.territory_controlled_pct >= 15,
-            // TODO: migrate political_cohesion check to strategic_dimensions internal_cohesion
+        test: (cap, state) => {
+            const dimStore = state.military?.negotiation?.strategic_dimensions;
+            const cohesion = dimStore?.HRHB?.internal_cohesion?.effective_value ?? 50;
+            return cap.territory_controlled_pct >= 15 && cohesion >= 40;
+        },
     },
     {
         grade: 'B',
         description: 'Federation absorbed but Croat interests protected',
-        test: (cap) =>
-            cap.territory_controlled_pct >= 12,
-            // TODO: migrate political_cohesion check to strategic_dimensions internal_cohesion
+        test: (cap, state) => {
+            const dimStore = state.military?.negotiation?.strategic_dimensions;
+            const cohesion = dimStore?.HRHB?.internal_cohesion?.effective_value ?? 50;
+            return cap.territory_controlled_pct >= 12 && cohesion >= 30;
+        },
     },
     {
         grade: 'C',
