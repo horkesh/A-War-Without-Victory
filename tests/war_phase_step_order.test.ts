@@ -115,7 +115,6 @@ describe('war-phase step ordering', () => {
         // +1 from reconcile-final-sector-truth-after-ops (final sector authority refresh after op truth)
         // +1 from final-distribute-brigades-to-front (late physical dispersion after final sector truth)
         // +1 from assert-final-operation-lifecycle (late lifecycle seal after final reconciliation)
-        // +1 from check-stranded-brigades (stranded brigade lifecycle after final sector truth)
-        expect(stepNames.length).toBe(161);
+        expect(stepNames.length).toBe(160);
     });
 });
