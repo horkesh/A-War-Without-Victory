@@ -1,3 +1,36 @@
+## [2026-04-15] test(sim): long-horizon rupture proof and direct render verification
+
+**Type:** Long-horizon proof / render verification (campaign DG2-DG6 final proof)
+**Files:** `late_state_rupture_proof.test.ts` (NEW — 8 tests), `render_proof_real_fixtures.test.ts` (NEW — 15 tests), `apr1992_definitive_188w.json` (NEW — 188-week scenario)
+**Scenario:** `188w run → n1576, hash be8aee0a3faebdb5`
+**Tests:** 23 new tests. 105 proof-suite total pass.
+**Status:** VERIFIED — tsc clean, 105/105 tests, desktop:map:build clean.
+
+### Proof Findings
+
+**Rupture consequences — LATE-STATE PIPELINE PROOF + SCENARIO NON-FIRING PROOF:**
+Late-state test exercises real `warPhases` steps (update-patron-pressure → evaluate-rupture-consequences) with realistic fixture at turn 140+. Rupture fires correctly when Srebrenica RS-controlled at turn ≥ 140. Idempotent, deterministic.
+
+188w real scenario (n1576): Srebrenica OSID remained RBiH-controlled through all 188 turns. Rupture correctly did NOT fire — system is properly gated on actual enclave fall, not hardcoded to a fixed week. This proves the three-ring boundary: precursors existed (enclave_formed=true) but the military outcome (enclave survival) prevented the rupture from triggering. No railroad.
+
+**Stranded lifecycle — EXPANDED DIRECT SCENARIO PROOF:**
+n1576 (188w) shows 5 formations with non-none stranded_status across 3 factions: hrhb_travnik_brigade (t1→t13 collapsed), rs_1st_ozren_light_infantry (t54 collapsed), rs_2nd_ozren_light_infantry (t176→t188 collapsed), rs_skelani_battalion (t85 collapsed), arbih_161st_slavna_olovo_mountain (t18 collapsed). Full lifecycle exercised repeatedly in emergent conditions.
+
+**Direct render proof:**
+15 tests exercise verdict/condemnation/cost-ledger display helpers with contract-realistic fixtures matching actual n1575/n1576 field shapes. End-to-end chains proven: collectCondemnationFlags → classifyOutcome → formatOutcomeClass, buildCostLedger → compareToHistorical → formatting helpers.
+
+### Final Proof Classification
+
+| Behavior | Proof Level | Evidence |
+|----------|------------|---------|
+| Stranded lifecycle | **Direct scenario proof** | n1575 (1 formation), n1576 (5 formations, 3 factions) |
+| Rupture consequence firing | **Late-state pipeline proof** | Real warPhases steps with crafted state |
+| Rupture correct non-firing | **Direct scenario proof** | n1576: Srebrenica held → no rupture (correct) |
+| Verdict outcome_class display | **Direct render proof** | Helper chain tested with realistic fixtures |
+| Condemnation flags display | **Direct render proof** | genocide_condemnation → restrained wording proven |
+| Cost ledger / comparison | **Direct render proof** | buildCostLedger → compareToHistorical → format proven |
+| React component mounting | **Source-verified only** | No @testing-library/react available |
+
 ## [2026-04-14] test(sim): scenario proof and calibration audit for DG2-DG6 campaign
 
 **Type:** Scenario proof / calibration measurement (campaign DG2-DG6 closeout)
