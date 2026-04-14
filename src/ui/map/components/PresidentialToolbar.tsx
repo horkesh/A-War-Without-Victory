@@ -16,6 +16,7 @@
 
 import { useRef, useState, useCallback } from 'react';
 import { useGameStore } from '../store/gameStore';
+import { InboxBadge } from './PresidentialInbox';
 import { useIPC } from '../desktop/useIPC';
 import { advanceTurnAndSync } from '../desktop/orderActions';
 import { loadLatestRunSaveAsText, loadRunFinalSaveAsText } from '../data/DataLoader';
@@ -257,6 +258,20 @@ export function PresidentialToolbar({
 
                 {/* CENTER: Alert badges (crest is separate floating element below) */}
                 <div className="flex items-center gap-4">
+                    {/* Inbox badge — unified presidential decision queue */}
+                    <InboxBadge onClick={() => {
+                        const gs = useGameStore.getState();
+                        // Deselect everything to return to inbox home state
+                        gs.setSelectedOsid(null);
+                        gs.setSelectedFormationId(null);
+                        gs.setSelectedCorpsId(null);
+                        gs.setSelectedCorpsFrontSectorId(null);
+                        gs.setSelectedArmyId(null);
+                        gs.setSelectedArmyHqId(null);
+                        gs.setSelectedOperationKey(null);
+                        gs.setSelectedOrbatCorpsId(null);
+                    }} />
+
                     {/* Left alert: Pending decisions */}
                     {pendingReviews > 0 && (
                         <button
