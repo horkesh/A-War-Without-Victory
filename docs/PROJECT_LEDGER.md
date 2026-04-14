@@ -1,3 +1,28 @@
+## [2026-04-14] feat(sim+ui): campaign closeout — scenario proof and player-visible truth
+
+**Type:** Closeout / scenario proof + visibility (campaign DG2–DG6 closeout)
+**Files:** `FormationDetail.tsx` (+stranded indicator), `VerdictScreen.tsx` (+outcome_class badge, condemnation flags, cost ledger integration), `WarCostSummary.tsx` (NEW), `GameStateAdapter.ts` (+strandedStatus/costLedger/comparison adapter), `types.ts` (+FormationView/LoadedGameState fields), `pipeline_step_execution_proof.test.ts` (NEW), `formation_stranded_visibility.test.ts` (NEW), `verdict_visibility.test.ts` (NEW), `war_cost_summary.test.ts` (NEW)
+**Tests:** 52 new tests across 4 suites. 167 total campaign tests pass.
+**Status:** VERIFIED — tsc clean, 167/167 tests, desktop:map:build clean.
+
+### Summary
+Closed the scenario-proof and player-visibility gaps from the 5-lane architecture campaign:
+
+**Cluster A — Pipeline execution proof (12 tests):**
+Both `update-stranded-brigade-lifecycle` and `evaluate-rupture-consequences` proven to exist in `warPhases` array at correct pipeline positions and to execute correctly with preconditions. Stranded: unreachable brigade transitions to holding. Rupture: Srebrenica fallen + RS control + turn≥140 records genocide_condemnation. This is targeted harness proof (step `run()` called directly with crafted TurnContext), not full scenario proof.
+
+**Cluster B — Stranded visibility (7 tests):**
+`stranded_status` surfaced in FormationDetail as "Isolated" indicator with date. `strandedStatus`/`strandedSinceTurn` added to FormationView and adapter passthrough. Wording: operational ("Isolated since [date]"), not melodramatic.
+
+**Cluster C — Verdict visibility (22 tests):**
+`outcome_class` displayed as labeled badge (Strategic Success / Survival / Negotiated Escape / Pyrrhic Success / Hollow Victory / Failure / Collapse). `condemnation_flags` displayed as restrained "International Condemnation" notice. Wording for genocide: "Condemned for genocide — international tribunal proceedings inevitable".
+
+**Cluster D — Cost Ledger surface (11 tests):**
+`WarCostSummary` component consumes `buildCostLedger()` and `compareToHistorical()`. Displays total casualties, duration delta, territory divergence, and divergence notes. Downstream display only — no re-derivation of upstream truth.
+
+**Canonical UI owners:** FormationDetail.tsx (stranded status), VerdictScreen.tsx (outcome_class + condemnation), WarCostSummary.tsx (cost ledger + comparison).
+**Still source-verified only:** Full 40w/52w scenario execution of both pipeline steps (harness proof covers step execution but not scenario-level emergent behavior).
+
 ## [2026-04-14] feat(endgame): add cost ledger and historical comparison substrate
 
 **Type:** Endgame comparison / downstream substrate (v0.9.0 design-gate DG6)
