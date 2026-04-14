@@ -522,6 +522,15 @@ export const useGameStore = create<GameStore>((set) => ({
             typeof jsonOrText === 'string'
               ? JSON.parse(jsonOrText as string)
               : jsonOrText;
+          // Pre-check: verify basic GameState shape before full adapter parse.
+          // This gives a clearer error than a deep adapter crash on malformed input.
+          if (json == null || typeof json !== 'object' || Array.isArray(json)) {
+            throw new Error('Save file does not contain a valid game state object.');
+          }
+          const candidate = json as Record<string, unknown>;
+          if (!candidate.meta || typeof candidate.meta !== 'object') {
+            throw new Error('Save file is missing required game data (no meta block). Ensure this is a valid AWWV save.');
+          }
           state = parseGameState(json);
         } catch (e) {
           const message = e instanceof Error ? e.message : String(e);
@@ -533,7 +542,55 @@ export const useGameStore = create<GameStore>((set) => ({
         // Apply state in next tick so we don't block after parse.
         queueMicrotask(() => {
           try {
-            set({ loadedGameState: state, loadError: null, lastLoadedStateFingerprint: fingerprint, openingBriefDismissed: false });
+            set({
+              loadedGameState: state,
+              loadError: null,
+              lastLoadedStateFingerprint: fingerprint,
+              // ── Post-load UI state reset ──
+              // Selection state holds references to entities from the previous save.
+              // A different save may not contain those IDs — stale references cause
+              // ghost panels, broken detail views, and confusing player state.
+              openingBriefDismissed: false,
+              selectedOsid: null,
+              selectedFormationId: null,
+              selectedCorpsId: null,
+              selectedCorpsFrontSectorId: null,
+              selectedArmyId: null,
+              selectedArmyHqId: null,
+              selectedOperationKey: null,
+              selectedOrbatCorpsId: null,
+              hoveredOsids: [],
+              hoveredCorpsId: null,
+              hoveredSectorId: null,
+              expandedStackOsid: null,
+              // Modal state: close all modals that reference save-specific entities
+              orderModeForFormation: null,
+              pendingAttackConfirmation: null,
+              armyHQOpen: false,
+              armyHQExpandedCorpsId: null,
+              armyHQExpandedSections: {},
+              armyHQOfficerSelectionCorpsId: null,
+              opsPlanningModalOpen: false,
+              opsPlanningCorpsId: null,
+              opsPlanningOriginSectorId: null,
+              opsPlanningSelectedOfficerId: null,
+              commanderSelectionContext: null,
+              operationBriefingContext: null,
+              isOperationsPanelOpen: false,
+              // Staged orders are for the old save's turn — invalid after load
+              stagedOrders: [],
+              // Transition overlay: new save may be in a different phase
+              peaceWarTransitionSeen: false,
+              // Tooltip: clear to avoid stale hover references
+              tooltipTarget: null,
+              tooltipPosition: null,
+              // Operation target highlights from the old save
+              operationTargetOsids: [],
+              // Ghost line from stale interaction
+              ghostLinePoint: null,
+              // Flash highlight from stale ORBAT-map sync
+              flashOsid: null,
+            });
             console.log(`[gameStore] Loaded save: ${state.label} — ${state.formations.length} formations, ${Object.keys(state.controlBySettlement).length} control entries`);
             resolve();
           } catch (e) {

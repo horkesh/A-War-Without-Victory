@@ -91,11 +91,19 @@ After EVERY scenario run, the orchestrator:
 5. **Record**: Update CALIBRATION_MASTER with the run entry.
 
 ## Execution & Validation
-1. **[2026-04-05] Claude report handoff protocol: treat report as claims, not truth**
+1. **[2026-04-14] Packetize from existing milestone plans before writing new roadmap docs**
+   Do instead: Audit `MASTER_ROADMAP.md`, current `docs/plans/*.md`, the live scorecard, and recent implemented reports first. Reuse milestone-grade plans as Claude packet sources. Write new plan docs only when the existing lane is stale, too broad to packetize, or blocked by missing design contracts.
+2. **[2026-04-14] Packet prompts must inspect repo truth first and no-op cleanly if the seam is already landed**
+   Do instead: Write Claude packets so they begin by inspecting the actual current files/tests/diffs for the target seam. If another lane already landed it, Claude should tighten proof or docs only if there is an honest small follow-up; otherwise report a no-op with evidence instead of churning code to satisfy the prompt.
+3. **[2026-04-14] Endgame architecture = termination, judgment, comparison — never collapse them into one owner**
+   Do instead: Keep scenario victory checks / war termination responsible only for ending the war. Keep the verdict packet responsible for judging the outcome. Keep historical comparison as a downstream mirror surface. If one lane touches endgame, state which of the three it owns.
+4. **[2026-04-14] Sensitive-history implementation must use locked consequence and reckoning surfaces, not optimization loops**
+   Do instead: Allow the engine to model precursors (enclave integrity, displacement, atrocity visibility, patron pressure), but route atrocity/genocide content into locked consequence flags and post-hoc reckoning. Never hand Claude a packet that makes atrocity into a toy system or score-positive tactic.
+5. **[2026-04-05] Claude report handoff protocol: treat report as claims, not truth**
    Do instead: When the user pastes a Claude/subagent report, do not synthesize from the pasted text alone. Inspect the actual repo changes, verify the claimed files and behavior locally, run the relevant checks yourself, correct overclaims, and if the lane is truly accepted, stage/commit it before replying. Always include the next prompt automatically after the verdict.
-1. **[2026-03-27] Brigade front-lock investigations need both placement and history validation**
+6. **[2026-03-27] Brigade front-lock investigations need both placement and history validation**
    Do instead: After any line-assignment/march fix, verify the target brigade in final_save has (a) `onSectorFront=true`, (b) no deep-rear friction OSIDs in `brigade_history.engagements`, and (c) fresh 40w run evidence recorded in PROJECT_LEDGER.
-1. **[2026-03-11] NEVER claim a fix works without running the scenario and verifying the output**
+7. **[2026-03-11] NEVER claim a fix works without running the scenario and verifying the output**
    Do instead: After any bug fix, run a fresh scenario (`npm run sim:scenario:run:40w`), then write a diagnostic script to verify the specific bug is gone. Check for related issues (e.g. other code paths that do the same wrong thing). Always verify with data, never with assumptions.
 2. **[2026-03-30 UPDATED] Two-tier post-run panel required after every calibration run — standing directive**
    Do instead: After every scenario run, dispatch the full two-tier panel (see §Post-Run Analysis Protocol). /war-or-game is Tier 1 investigator — its sign-off alone is NOT sufficient. Orchestrator issues go/no-go only after all Tier 2 analysts report. No phase is complete without Orchestrator go/no-go.

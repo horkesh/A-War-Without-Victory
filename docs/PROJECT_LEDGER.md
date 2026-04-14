@@ -1,3 +1,63 @@
+## [2026-04-14] fix(ui+desktop): harden post-load UI state reset and load error classification
+
+**Type:** Save/load truth / UI coherence (v0.8-to-v0.9)
+**Files:** `gameStore.ts` (post-load reset of 30+ selection/modal/order fields), `electron-main.cjs` (+classifyLoadError helper, wired into load-scenario-dialog, start-new-campaign, load-state-dialog), `gameStore.ts` (+pre-check for basic GameState shape before adapter parse)
+**Tests:** `tests/ui/gamestore_load_reset.test.ts` (11 tests: selection reset, modal reset, order reset, fingerprint, error paths, deduplication), `tests/ui/desktop_load_error_classification.test.ts` (10 tests: JSON parse, shape, meta, schema version, military, validation, fallback)
+**Status:** VERIFIED — tsc clean, 21 new tests pass, 56 existing save/load+inbox tests pass, desktop:map:build clean.
+
+### Summary
+Three seams closed in the save/load hardening lane:
+
+1. **Post-load UI selection state reset**: `loadSave` in `gameStore.ts` now resets all selection (`selectedOsid`, `selectedFormationId`, `selectedCorpsId`, `selectedCorpsFrontSectorId`, `selectedArmyId`, `selectedArmyHqId`, `selectedOperationKey`, `selectedOrbatCorpsId`), hover, modal (`armyHQOpen`, `opsPlanningModalOpen`, `commanderSelectionContext`, `operationBriefingContext`, `isOperationsPanelOpen`), order (`stagedOrders`, `orderModeForFormation`, `pendingAttackConfirmation`), visual (`operationTargetOsids`, `ghostLinePoint`, `flashOsid`, `tooltipTarget`), and transition state (`peaceWarTransitionSeen`) on every save load. Previously only `openingBriefDismissed` was reset — stale entity references from old saves survived into new sessions, causing ghost panels and broken detail views.
+
+2. **Desktop load error classification**: Added `classifyLoadError()` to `electron-main.cjs` that translates raw exception messages into player-facing error text ("Save file is damaged or not valid JSON", "Save file structure is incompatible with this version", etc.). Wired into `load-scenario-dialog`, `start-new-campaign`, and `load-state-dialog` IPC handlers.
+
+3. **Browser-side pre-check for malformed input**: `loadSave` now validates basic GameState shape (non-null object with `meta` block) before calling `parseGameState`, giving a clearer error message than a deep adapter crash.
+
+**Proof scope:** Post-load reset contract has 11 direct proof tests via pure Zustand store tests (no React). Error classification has 10 proof tests via inline copy of the classification logic (CJS entry point not directly importable in vitest). The React `useEffect` for inbox dismissal reset (App.tsx) is not independently tested — it is component behavior requiring a React test harness.
+**Canonical owner:** `loadSave` in `gameStore.ts` owns the post-load reset contract. `classifyLoadError` in `electron-main.cjs` owns error classification.
+
+## [2026-04-14] docs(plan): resolve design gates and ungate blocked roadmap lanes
+
+**Type:** Planning / architecture / design-gate resolution
+**Files:** `docs/plans/2026-04-14-design-gate-resolutions-and-ungating.md`, `docs/plans/2026-04-14-roadmap-execution-packet-backlog.md`, `docs/plans/2026-04-14-roadmap-execution-packet-prompts.md`, `.claude/napkin.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+**Status:** DOCS-ONLY — no code behavior changed.
+
+### Summary
+Resolved the major roadmap design gates into explicit architectural contracts instead of leaving them as vague blockers:
+
+1. stranded brigades now have a chosen lifecycle-owner direction rather than a floating anomaly label,
+2. consequence work is split into substrate / pressure / non-sensitive divergence / sensitive-history rupture layers,
+3. victory work is split into termination vs judgment vs comparison,
+4. sensitive-history handling is bounded by a three-ring model (mechanical precursors, locked rupture consequences, post-hoc reckoning),
+5. Dayton initiation is assigned to a future pipeline/state owner instead of an adapter read side effect.
+
+Updated the packet backlog and prompt shelf so these areas are now packetizable. The remaining blocked items are no longer “missing design”; they are the few things the project is intentionally refusing (atrocity-as-optimization, all-at-once mega-sprints, freeform Dayton redesign, generic dynamic enclave generation).
+
+**Canonical owner:** `2026-04-14-design-gate-resolutions-and-ungating.md` owns the architectural resolutions; the backlog/prompt shelf own execution packetization.
+**Demoted path:** leaving these lanes in permanent “design-gated” limbo; adapter reads that mutate state; treating endgame scoring as identical to war termination; gamifying atrocity.
+
+## [2026-04-14] docs(plan): packetize roadmap execution backlog and refresh v0.9 consequence/endgame planning
+
+**Type:** Planning / execution packetization
+**Files:** `docs/plans/2026-04-14-roadmap-execution-packet-backlog.md`, `docs/plans/2026-04-14-roadmap-execution-packet-prompts.md`, `docs/plans/2026-04-14-v090-consequence-system-refresh-plan.md`, `docs/plans/2026-04-14-v090-victory-pyrrhic-scoring-contract-plan.md`, `.claude/napkin.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+**Status:** DOCS-ONLY — no code behavior changed.
+
+### Summary
+Audited current roadmap, plan docs, scorecard, and recent hardening ledger to separate:
+
+1. lanes that already have execution-grade plans and only need Claude-ready packetization,
+2. lanes that are planned but should wait for prerequisite truth work,
+3. lanes that still need fresh planning before implementation.
+
+Added a new packet backlog doc that translates the existing `v0.8-to-v0.9` plans into bounded execution packets with readiness classes (`packet-ready now`, `packet-ready after current lane`, `blocked by design contract`) and a companion prompt shelf with copy-paste Claude packets, sequencing guidance, and review discipline. Also added two refreshed `v0.9.0` planning docs:
+
+- a consequence-system refresh that demotes the old all-at-once mega-sprint into smaller programs and current repo-truth packet order,
+- a victory/Pyrrhic scoring contract plan that turns the earlier philosophy-first plan into a concrete contract sequence.
+
+**Canonical owner:** the new packet backlog doc owns near-term Claude packet sequencing; the new prompt shelf owns ready-to-send execution packets; the refreshed `v0.9.0` plan docs own updated planning guidance for consequence and endgame work.
+**Demoted path:** writing fresh roadmap docs for lanes that already have milestone-grade plans; handing Claude giant implementation prompts for design-gated `v0.9.0` work; packet prompts that assume the pasted report is truth without first inspecting current repo state.
+
 ## [2026-04-14] fix(ui): plumb autonomy proposals into presidential inbox
 
 **Type:** UI truth / inbox plumbing (v0.8-to-v0.9)

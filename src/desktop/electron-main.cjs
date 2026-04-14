@@ -61,6 +61,33 @@ function sendTurnReportToRenderer(report) {
   }
 }
 
+/**
+ * Classify a save/load error into a player-facing message.
+ * Raw validation details are appended for debugging but the leading text is human-readable.
+ */
+function classifyLoadError(e) {
+  const raw = e.message || String(e);
+  if (raw.includes('Unexpected token') || raw.includes('JSON')) {
+    return 'Save file is damaged or not valid JSON. ' + raw;
+  }
+  if (raw.includes('shape validation failed') || raw.includes('unexpected top-level key')) {
+    return 'Save file structure is incompatible with this version. ' + raw;
+  }
+  if (raw.includes('missing meta') || raw.includes('meta.turn')) {
+    return 'Save file is missing required game data (no meta block). ' + raw;
+  }
+  if (raw.includes('Unsupported schema_version')) {
+    return 'Save file was created by a newer version and cannot be loaded. ' + raw;
+  }
+  if (raw.includes('missing military block')) {
+    return 'Save file is missing required military data. ' + raw;
+  }
+  if (raw.includes('validation') || raw.includes('error')) {
+    return 'Save file failed validation. ' + raw;
+  }
+  return 'Failed to load save file. ' + raw;
+}
+
 function readCanonicalCurrentState(sim) {
   if (!currentGameStateJson) {
     throw new Error('No game loaded');
@@ -1308,7 +1335,7 @@ app.whenReady().then(() => {
       sendGameStateToRenderer(currentGameStateJson, _event.sender);
       return { ok: true, stateJson: currentGameStateJson };
     } catch (e) {
-      return { ok: false, error: e.message || String(e) };
+      return { ok: false, error: classifyLoadError(e) };
     }
   });
 
@@ -1328,7 +1355,7 @@ app.whenReady().then(() => {
       sendGameStateToRenderer(currentGameStateJson, _event.sender);
       return { ok: true, stateJson: currentGameStateJson };
     } catch (e) {
-      return { ok: false, error: e.message || String(e) };
+      return { ok: false, error: classifyLoadError(e) };
     }
   });
 
@@ -1342,7 +1369,7 @@ app.whenReady().then(() => {
       sendGameStateToRenderer(currentGameStateJson, _event.sender);
       return { ok: true, stateJson: currentGameStateJson };
     } catch (e) {
-      return { ok: false, error: e.message || String(e) };
+      return { ok: false, error: classifyLoadError(e) };
     }
   });
 
