@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 
 export type PanelRailPanel =
+  | 'inbox'
   | 'settlement'
   | 'formation'
   | 'corps'
@@ -135,7 +136,8 @@ export function derivePanelRailState(state: PanelRailSelectionState): PanelRailS
   // FIX: Assign to primary instead of secondary to avoid starting with a gap
   if (state.selectedOsid) return { primary: 'settlement', secondary: null };
 
-  return { primary: null, secondary: null };
+  // Default: Presidential Inbox when nothing is selected
+  return { primary: 'inbox', secondary: null };
 }
 
 export function getPanelRailStyle(

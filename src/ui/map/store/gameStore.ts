@@ -154,6 +154,13 @@ export interface GameStore {
   /** True when the player clicked the Warroom wall calendar — triggers AdvanceTurnModal. */
   advanceTurnPending: boolean;
   setAdvanceTurnPending: (v: boolean) => void;
+
+  /** Presidential Inbox: opening brief dismissed flag */
+  openingBriefDismissed: boolean;
+  setOpeningBriefDismissed: (v: boolean) => void;
+  /** Force inbox panel open (from toolbar badge click) */
+  forceInboxOpen: boolean;
+  setForceInboxOpen: (v: boolean) => void;
   setArmyHQOpen: (open: boolean) => void;
   setArmyHQTab: (tab: 'briefing' | 'summary' | 'records' | 'personnel') => void;
   setArmyHQRecordsSubTab: (subTab: 'aar' | 'ops') => void;
@@ -355,6 +362,10 @@ export const useGameStore = create<GameStore>((set) => ({
   pauseMenuOpen: false,
   advanceTurnPending: false,
   setAdvanceTurnPending: (v) => set({ advanceTurnPending: v }),
+  openingBriefDismissed: false,
+  setOpeningBriefDismissed: (v) => set({ openingBriefDismissed: v }),
+  forceInboxOpen: false,
+  setForceInboxOpen: (v) => set({ forceInboxOpen: v }),
   setArmyHQOpen: (open) => set({
     armyHQOpen: open,
     ...(open ? {} : {
