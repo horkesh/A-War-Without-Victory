@@ -1,7 +1,14 @@
 /**
- * Verdict Screen — full-screen results display shown when the game ends.
- * Replaces GameOverModal with comprehensive Pyrrhic Score, letter grades,
- * per-dimension breakdowns, and statistics.
+ * Verdict Screen — canonical endgame presentation surface.
+ *
+ * Owner split (do not collapse):
+ * - TERMINATION: war_termination.ts (how the war ends)
+ * - JUDGMENT: scoring.ts → GameVerdict (how the outcome is assessed)
+ * - COMPARISON: cost_ledger.ts + endgame_comparison.ts (player war vs history)
+ * - PRESENTATION: this file (display only — no truth derivation)
+ *
+ * Flow: War header → Faction tabs (with outcome badge) → Faction detail →
+ *       War Reckoning (cost ledger + historical comparison) → Footer
  *
  * "The least bad version of a tragedy."
  */
@@ -47,6 +54,68 @@ export function formatCondemnationFlag(flag: string): string {
         civilian_atrocities: 'Condemned for systematic atrocities against civilian population',
     };
     return labels[flag] ?? flag.replace(/_/g, ' ');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Endgame summary composition (pure, testable — no React)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** War-level summary built from adapted endgame state. Pure, deterministic. */
+export interface EndgameSummary {
+    /** Per-faction outcome + grade + condemnation for tab display. */
+    factionSummaries: Array<{
+        faction: string;
+        outcomeClass: string;
+        outcomeLabel: string;
+        outcomeStyle: string;
+        grade: string;
+        score: number;
+        condemnationNotices: string[];
+    }>;
+    /** True if any faction has condemnation flags. */
+    hasCondemnation: boolean;
+    /** Total military killed across all factions (from cost ledger). */
+    totalMilitaryKilled: number;
+    /** Total civilian killed across all factions (from cost ledger). */
+    totalCivilianKilled: number;
+}
+
+/**
+ * Build the canonical endgame summary from verdict + cost ledger data.
+ * Exported for testing — pure function, no React, no side effects.
+ * Deterministic: factions sorted in canonical order.
+ */
+export function buildEndgameSummary(
+    verdict: import('../../../state/negotiation_types.js').GameVerdict | undefined,
+    costLedger: import('../../../sim/endgame/cost_ledger.js').CostLedger | undefined,
+): EndgameSummary {
+    const CANONICAL_ORDER = ['RBiH', 'RS', 'HRHB'];
+    const factionSummaries: EndgameSummary['factionSummaries'] = [];
+    let hasCondemnation = false;
+
+    for (const faction of CANONICAL_ORDER) {
+        const fv = verdict?.faction_verdicts?.[faction];
+        const condemnationFlags = fv?.condemnation_flags ?? [];
+        const condemnationNotices = condemnationFlags.map(formatCondemnationFlag);
+        if (condemnationFlags.length > 0) hasCondemnation = true;
+
+        factionSummaries.push({
+            faction,
+            outcomeClass: fv?.outcome_class ?? 'collapse',
+            outcomeLabel: formatOutcomeClass(fv?.outcome_class),
+            outcomeStyle: getOutcomeClassStyle(fv?.outcome_class),
+            grade: fv?.grade ?? 'F',
+            score: fv?.pyrrhic_score ?? 0,
+            condemnationNotices,
+        });
+    }
+
+    return {
+        factionSummaries,
+        hasCondemnation,
+        totalMilitaryKilled: costLedger?.total_military_killed ?? 0,
+        totalCivilianKilled: costLedger?.total_civilian_killed ?? 0,
+    };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -175,15 +244,20 @@ export function VerdictScreen() {
                                     {FACTION_SHORT[fid] ?? fid}
                                 </div>
                                 {v && (
-                                    <div className="flex items-center justify-center gap-2 mt-1">
-                                        <span className="text-[18px] font-bold text-text-primary tabular-nums">
-                                            {v.pyrrhic_score.toFixed(1)}
-                                        </span>
-                                        <span className="text-[14px] font-bold"
-                                              style={{ color: GRADE_COLORS[v.grade] ?? '#9a9080' }}>
-                                            {v.grade}
-                                        </span>
-                                    </div>
+                                    <>
+                                        <div className="flex items-center justify-center gap-2 mt-1">
+                                            <span className="text-[18px] font-bold text-text-primary tabular-nums">
+                                                {v.pyrrhic_score.toFixed(1)}
+                                            </span>
+                                            <span className="text-[14px] font-bold"
+                                                  style={{ color: GRADE_COLORS[v.grade] ?? '#9a9080' }}>
+                                                {v.grade}
+                                            </span>
+                                        </div>
+                                        <div className={`mt-1 inline-block px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider ${getOutcomeClassStyle(v.outcome_class)}`}>
+                                            {formatOutcomeClass(v.outcome_class)}
+                                        </div>
+                                    </>
                                 )}
                             </button>
                         );
@@ -206,14 +280,17 @@ export function VerdictScreen() {
                             No verdict data for this faction.
                         </div>
                     )}
-                    {/* War Cost & Historical Comparison — per-war, not per-faction */}
-                    {loadedGameState?.costLedger && loadedGameState?.historicalComparison && (
+                </div>
+
+                {/* War Reckoning — per-war cost ledger and historical comparison */}
+                {loadedGameState?.costLedger && loadedGameState?.historicalComparison && (
+                    <div className="border-t border-panel-border">
                         <WarCostSummary
                             costLedger={loadedGameState.costLedger}
                             comparison={loadedGameState.historicalComparison}
                         />
-                    )}
-                </div>
+                    </div>
+                )}
 
                 {/* Footer */}
                 <div className="px-6 py-4 border-t border-panel-border bg-panel-card/30">
