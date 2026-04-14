@@ -1,3 +1,22 @@
+## [2026-04-15] feat(ui): consolidate endgame presentation into canonical VerdictScreen
+
+**Type:** UI consolidation / endgame presentation (post-campaign product packet)
+**Files:** `VerdictScreen.tsx` (canonical endgame owner — restructured), `endgame_presentation_proof.test.ts` (NEW — 26 tests)
+**Tests:** 26 new composition tests. 74 total endgame UI tests pass.
+**Status:** VERIFIED — tsc clean, 74/74 tests, desktop:map:build clean.
+
+### Summary
+Consolidated the fragmented endgame surfaces into one coherent canonical presentation:
+
+1. **WarCostSummary moved to war-level section:** Was inside per-faction scroll area (confusing — per-war data inside per-faction flow). Now its own bordered section between faction detail and footer.
+2. **Outcome class badge on faction tabs:** Player sees the verdict classification (Survival / Failure / etc.) immediately in the faction selector, not buried inside the report.
+3. **buildEndgameSummary() pure composition function:** Testable entry point that builds the complete war-level summary from GameVerdict + CostLedger. Canonical order (RBiH, RS, HRHB). Detects condemnation presence. Reads upstream totals without re-deriving.
+4. **Owner split documented in file header:** Termination (war_termination.ts) / Judgment (scoring.ts) / Comparison (cost_ledger + endgame_comparison) / Presentation (VerdictScreen) — four distinct owners, explicitly named.
+
+**Canonical endgame UI owner:** `VerdictScreen.tsx` — composes `FactionReport` (per-faction verdict) and `WarCostSummary` (per-war cost + comparison).
+**Upstream truths consumed:** GameVerdict.faction_verdicts (outcome_class, grade, pyrrhic_score, condemnation_flags, capital_breakdown, dimension_grades), CostLedger (total_military_killed, total_civilian_killed, entries, rupture_consequences), ComparisonResult (duration_delta, territory_divergence, casualty_ratio, divergence_notes).
+**Component mount proof:** Not achieved — React only in UI workspace, not root. Requires react + @testing-library/react at root to unblock.
+
 ## [2026-04-15] test(sim): long-horizon rupture proof and direct render verification
 
 **Type:** Long-horizon proof / render verification (campaign DG2-DG6 final proof)
