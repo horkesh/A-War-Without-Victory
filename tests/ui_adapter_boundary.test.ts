@@ -131,6 +131,45 @@ describe('UI Adapter Boundary Discipline', () => {
    *    capture_provenance string is absent. Simplification requires the
    *    engine to always emit capture_provenance on operation AARs.
    */
+  /**
+   * Dayton trigger ownership: pipeline owns initiation, adapter only reads.
+   *
+   * Before this fix, derivePendingDayton() in GameStateAdapter called
+   * shouldInitiateDayton() and initiateDaytonNegotiation() from sim code.
+   * That was a read-path initiation: the adapter decided when Dayton starts
+   * and mutated state via ensureNegotiationState().
+   *
+   * After: the 'evaluate-dayton-trigger' pipeline step persists
+   * state.military.negotiation.pending_dayton. The adapter reads it.
+   */
+  it('adapter derivePendingDayton does not import or call sim negotiation code', () => {
+    const adapterSrc = readFile(join(SRC_ROOT, 'ui/map/data/GameStateAdapter.ts'));
+    // Must not require/import dayton_negotiation
+    expect(adapterSrc).not.toMatch(/require\(.*dayton_negotiation/);
+    expect(adapterSrc).not.toMatch(/import.*from.*dayton_negotiation/);
+    // Must not call shouldInitiateDayton or initiateDaytonNegotiation
+    expect(adapterSrc).not.toContain('shouldInitiateDayton');
+    expect(adapterSrc).not.toContain('initiateDaytonNegotiation');
+  });
+
+  it('adapter derivePendingDayton reads from persisted state.military.negotiation.pending_dayton', () => {
+    const adapterSrc = readFile(join(SRC_ROOT, 'ui/map/data/GameStateAdapter.ts'));
+    // Must reference the persisted field
+    expect(adapterSrc).toContain('neg?.pending_dayton');
+    expect(adapterSrc).toContain('neg.pending_dayton');
+    // Comment must declare pipeline ownership
+    expect(adapterSrc).toMatch(/[Pp]ipeline owns trigger/);
+  });
+
+  it('pipeline evaluate-dayton-trigger step exists and imports shouldInitiateDayton', () => {
+    const pipelineSrc = readFile(join(SRC_ROOT, 'sim/turn_phases/war_phases.ts'));
+    expect(pipelineSrc).toContain("name: 'evaluate-dayton-trigger'");
+    expect(pipelineSrc).toContain('shouldInitiateDayton');
+    expect(pipelineSrc).toContain('initiateDaytonNegotiation');
+    // Must persist to state, not return
+    expect(pipelineSrc).toContain('pending_dayton');
+  });
+
   it('Cluster B: adapter derive functions are structurally necessary (no-op documented)', () => {
     const adapterSrc = readFile(join(SRC_ROOT, 'ui/map/data/GameStateAdapter.ts'));
     // Verify the three seams still exist (test breaks if they're removed,

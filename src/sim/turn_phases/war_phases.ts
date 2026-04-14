@@ -160,6 +160,7 @@ import { computeCombatEffectiveBrigades } from '../negotiation/compute_combat_ef
 import { evaluatePeacePlans } from '../negotiation/peace_plans.js';
 import { updatePatronPressure } from '../negotiation/patron_pressure.js';
 import { evaluatePatronEvents } from '../negotiation/patron_events.js';
+import { shouldInitiateDayton, initiateDaytonNegotiation } from '../negotiation/dayton_negotiation.js';
 
 // --- Pipeline infrastructure imports ---
 import type { NamedPhase, TurnContext, TurnReport } from '../turn_pipeline_types.js';
@@ -2718,6 +2719,22 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             computeNegotiationBreakdown(context.state);
+        }
+    },
+    {
+        name: 'evaluate-dayton-trigger',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            if (context.state.meta.game_over) return;
+            const neg = context.state.military.negotiation;
+            if (neg?.dayton_result) return;
+            if (neg?.pending_dayton) return; // already pending, idempotent
+            if (shouldInitiateDayton(context.state)) {
+                const menu = initiateDaytonNegotiation(context.state);
+                // ensureNegotiationState was called by initiateDaytonNegotiation,
+                // so neg is guaranteed populated now
+                context.state.military.negotiation!.pending_dayton = menu;
+            }
         }
     },
     {

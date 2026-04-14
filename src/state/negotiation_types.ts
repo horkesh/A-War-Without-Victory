@@ -112,8 +112,30 @@ export interface NegotiationState {
     pyrrhic_scores?: Record<string, number>;
     /** Result of the Dayton negotiation (set when Dayton resolves). */
     dayton_result?: DaytonResult;
+    /** Pending Dayton negotiation menu, persisted by pipeline when trigger fires.
+     *  UI adapter reads this — never computes it. Cleared implicitly when dayton_result is set. */
+    pending_dayton?: PendingDaytonPacket;
     /** v0.6.0: Strategic dimensions per faction — hybrid base_value + event_modifier. */
     strategic_dimensions?: DimensionStore;
+}
+
+/** Persisted Dayton negotiation menu — set by pipeline, read by adapter. */
+export interface PendingDaytonPacket {
+    territorial_packages: Array<{
+        id: string;
+        name: string;
+        default_holder: string;
+        demand_cost: number;
+        concede_cost: number;
+    }>;
+    institutional_packages: Array<{
+        id: string;
+        name: string;
+        centralized_cost: number;
+        decentralized_cost: number;
+    }>;
+    faction_capital: Record<string, number>;
+    patron_override: Record<string, number>;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

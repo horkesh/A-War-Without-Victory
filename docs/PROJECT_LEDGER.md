@@ -1,3 +1,22 @@
+## [2026-04-14] fix(sim): move Dayton trigger ownership from adapter to pipeline
+
+**Type:** Trigger ownership / adapter boundary (v0.8-to-v0.9)
+**Files:** `negotiation_types.ts` (+PendingDaytonPacket interface, +pending_dayton field on NegotiationState), `war_phases.ts` (+evaluate-dayton-trigger pipeline step), `GameStateAdapter.ts` (derivePendingDayton simplified to read-only), `dayton_negotiation.test.ts` (+4 trigger ownership tests), `ui_adapter_boundary.test.ts` (+3 adapter boundary proof tests)
+**Tests:** 7 new tests (50 total across 2 suites), all pass.
+**Status:** VERIFIED — tsc clean, 50/50 tests pass, desktop:map:build clean.
+
+### Summary
+The adapter `derivePendingDayton()` previously called `shouldInitiateDayton()` and `initiateDaytonNegotiation()` from sim code on every read — a read-path trigger that also mutated state via `ensureNegotiationState()`. Fixed:
+
+1. **State**: Added `PendingDaytonPacket` interface and `pending_dayton` optional field to `NegotiationState` in `negotiation_types.ts`.
+2. **Pipeline**: Added `evaluate-dayton-trigger` step in `war_phases.ts` after `compute-negotiation-capital`. Checks `shouldInitiateDayton()`, calls `initiateDaytonNegotiation()`, persists the menu on `state.military.negotiation.pending_dayton`. Idempotent — skips if packet already exists or Dayton already resolved.
+3. **Adapter**: `derivePendingDayton()` now reads `state.military.negotiation.pending_dayton` and shapes it into UI types. No sim imports, no trigger decisions, no mutations.
+
+**Canonical trigger owner:** `evaluate-dayton-trigger` pipeline step in `war_phases.ts`.
+**Persisted packet:** `state.military.negotiation.pending_dayton` (PendingDaytonPacket — territorial_packages, institutional_packages, faction_capital, patron_override).
+**Adapter behavior removed:** `require('dayton_negotiation.js')`, `shouldInitiateDayton()` call, `initiateDaytonNegotiation()` call, `ensureNegotiationState()` mutation.
+**Source-verified only:** The `evaluate-dayton-trigger` step is proven to exist and import the right functions (source grep). It is NOT proven to execute correctly within a full scenario run — that requires a 52w scenario reaching week 188. The packet round-trip through JSON is proven.
+
 ## [2026-04-14] test(ui): prove read-model parity after deserialize and document ownership boundaries
 
 **Type:** Read-model truth / adapter parity / ownership proof (v0.8-to-v0.9)

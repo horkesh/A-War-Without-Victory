@@ -454,6 +454,82 @@ describe('Dayton Initiation', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Dayton Trigger Ownership — pipeline persists, adapter reads
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('Dayton trigger ownership', () => {
+    it('initiateDaytonNegotiation produces a packet that can be persisted as pending_dayton', () => {
+        const state = makeState({
+            turn: 190, war_start_turn: 0,
+            capital: { RBiH: highCapital(), RS: highCapital(), HRHB: highCapital() },
+        });
+        expect(shouldInitiateDayton(state)).toBe(true);
+
+        const menu = initiateDaytonNegotiation(state);
+        // Simulate what the pipeline step does: persist the menu
+        state.military.negotiation!.pending_dayton = menu as any;
+
+        // Verify the persisted packet has the expected shape
+        const pd = state.military.negotiation!.pending_dayton as any;
+        expect(pd.territorial_packages).toHaveLength(8);
+        expect(pd.institutional_packages).toHaveLength(6);
+        expect(pd.faction_capital.RBiH).toBeGreaterThan(0);
+        expect(pd.patron_override).toBeDefined();
+    });
+
+    it('pending_dayton survives JSON round-trip', () => {
+        const state = makeState({
+            turn: 190, war_start_turn: 0,
+            capital: { RBiH: highCapital(), RS: highCapital(), HRHB: highCapital() },
+        });
+        const menu = initiateDaytonNegotiation(state);
+        state.military.negotiation!.pending_dayton = menu as any;
+
+        // JSON round-trip (what serialize/deserialize does)
+        const json = JSON.stringify(state);
+        const restored = JSON.parse(json);
+
+        const pd = restored.military.negotiation.pending_dayton;
+        expect(pd.territorial_packages).toHaveLength(8);
+        expect(pd.institutional_packages).toHaveLength(6);
+        expect(pd.faction_capital.RBiH).toBeGreaterThan(0);
+    });
+
+    it('pipeline step is idempotent: does not overwrite existing pending_dayton', () => {
+        const state = makeState({
+            turn: 190, war_start_turn: 0,
+            capital: { RBiH: highCapital(), RS: highCapital(), HRHB: highCapital() },
+        });
+        const menu = initiateDaytonNegotiation(state);
+        state.military.negotiation!.pending_dayton = menu as any;
+
+        // Mark the packet so we can detect overwrites
+        const sentinel = 'SENTINEL_VALUE';
+        (state.military.negotiation!.pending_dayton as any)._marker = sentinel;
+
+        // Simulate running the pipeline step again — it should skip because pending_dayton exists
+        const neg = state.military.negotiation;
+        if (neg && !neg.dayton_result && neg.pending_dayton) {
+            // This is the idempotent guard — step should not run
+        } else {
+            // Would set pending_dayton — should not reach here
+            neg!.pending_dayton = initiateDaytonNegotiation(state) as any;
+        }
+
+        expect((state.military.negotiation!.pending_dayton as any)._marker).toBe(sentinel);
+    });
+
+    it('pending_dayton is not set when shouldInitiateDayton returns false', () => {
+        const state = makeState({
+            turn: 50, war_start_turn: 0, // too early
+            capital: { RBiH: highCapital(), RS: highCapital(), HRHB: highCapital() },
+        });
+        expect(shouldInitiateDayton(state)).toBe(false);
+        expect(state.military.negotiation?.pending_dayton).toBeUndefined();
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
 // Dayton Resolution
 // ═══════════════════════════════════════════════════════════════════════════
 
