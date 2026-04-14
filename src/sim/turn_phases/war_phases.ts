@@ -2643,6 +2643,14 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'check-stranded-brigades',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const { processStrandedBrigades } = require('../combat/stranded_brigade_lifecycle.js') as typeof import('../combat/stranded_brigade_lifecycle.js');
+            processStrandedBrigades(context.state);
+        }
+    },
+    {
         name: 'final-distribute-brigades-to-front',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;

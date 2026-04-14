@@ -626,6 +626,10 @@ export interface FormationState {
     disrupted_turns?: number;
     /** Consecutive turns at morale 0; after 3+, 5% personnel attrition per turn. */
     zero_morale_turns?: number;
+    /** Turn when brigade became stranded (unreachable from any same-corps sector for 3+ turns).
+     *  While stranded: -2 morale/turn, -1 cohesion/turn, no reinforcement, implicit defensive stance.
+     *  Cleared when BFS reconnects to a same-corps sector. Collapse at morale < 15. */
+    stranded_since_turn?: number;
     /** How many battle outcomes this formation has processed through morale drift. Used for habituation — diminishing morale effect of combat over time. */
     battle_outcome_count?: number;
     /** Per-brigade personnel cap. When set, overrides MAX_BRIGADE_PERSONNEL for reinforcement. Derived from OOB max_personnel field. Varies by formation type and faction — historical brigades ranged from 1500 (enclave) to 3500 (mechanized). */
