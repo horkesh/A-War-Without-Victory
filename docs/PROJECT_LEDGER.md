@@ -1,3 +1,21 @@
+## [2026-04-14] feat(negotiation): enforce sensitive-history boundary and Srebrenica rupture contract
+
+**Type:** Sensitive-history boundary / rupture consequence (v0.9.0 design-gate DG5)
+**Files:** `negotiation_types.ts` (+RuptureConsequence type, +rupture_consequences on NegotiationState), `rupture_consequences.ts` (NEW — 89 lines), `scoring.ts` (+collectCondemnationFlags import/wiring), `war_phases.ts` (+evaluate-rupture-consequences pipeline step)
+**Tests:** 18 new tests in `rupture_consequences.test.ts`. 40 existing scoring tests still pass. 58/58 total.
+**Status:** VERIFIED — tsc clean, 58/58 tests, desktop:map:build clean.
+
+### Summary
+Enforced three-ring sensitive-history boundary in code:
+
+1. **Ring 1 (precursors — already existed):** Enclave integrity, displacement tracking, patron pressure, international standing dimension.
+2. **Ring 2 (rupture — NEW):** `evaluateRuptureConsequences()` checks Srebrenica enclave fall conditions (enclave formed + RS controls `op:srebrenica:srebrenica_2` + turn ≥ 140). Records locked `RuptureConsequence` with `genocide_condemnation` flag. Idempotent — once recorded, permanent.
+3. **Ring 3 (reckoning — wired):** `collectCondemnationFlags()` propagates rupture flags to `FactionVerdict.condemnation_flags`. Lane C's `classifyOutcome()` maps `genocide_condemnation` → `failure` outcome class regardless of territorial success.
+
+**Canonical owner:** `evaluateRuptureConsequences()` in `rupture_consequences.ts`. `collectCondemnationFlags()` in same file.
+**Intentionally not implemented:** Player-issued atrocity controls, atrocity-as-optimization surfaces, Cost Ledger UI (Lane E), dynamic essay content.
+**Pipeline placement:** `evaluate-rupture-consequences` after `evaluate-patron-events`, before `compute-negotiation-capital`.
+
 ## [2026-04-14] feat(negotiation): add endgame verdict packet contract with outcome classification
 
 **Type:** Verdict contract / owner split (v0.9.0 design-gate DG4)
