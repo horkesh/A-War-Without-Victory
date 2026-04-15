@@ -1,3 +1,35 @@
+## [2026-04-15] perf(ui): reduce tactical map render churn
+
+**Type:** Performance baseline packet / tactical-map render-churn reduction
+**Commit (code):** 008dad6d
+**Commit (ledger):** this entry
+**Files:** `src/ui/map/map/MapContainer.tsx`, `src/ui/map/map/renderChurnGuards.ts`, `tests/ui/render_churn_guards.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+**Tests:** `npx.cmd tsc --noEmit -p tsconfig.json` clean; vitest `tests/ui/render_churn_guards.test.ts` = 5/5 pass; `npm.cmd run desktop:map:build` clean in 6.25s; `git diff --check` clean.
+**Status:** VERIFIED - tactical-map render churn is lower in two concrete places, but no new benchmark artifact was produced and the existing Vite chunk warnings remain open.
+
+### Summary
+
+1. **Deck.gl layer recomposition now has a guard rail:** `renderChurnGuards.ts` introduced `deckLayerRenderInputsChanged()`, and `MapContainer` now routes all three Deck overlay update paths through `applyDeckLayerSelection()`. Duplicate input sets no longer call `deckOverlay.setProps(...)` just because multiple effects fired.
+2. **Pulse RAF now sleeps when nothing is animating:** the staged-order / ghost-path / battle-marker pulse loop is now gated by `shouldRunPulseAnimation()`. If there are no staged orders, no ghost path, and no visible recent battle markers, the requestAnimationFrame loop does not run.
+3. **The guard behavior is directly proven:** `render_churn_guards.test.ts` locks both the deck-layer input comparison and the pulse-animation gate so future churn regressions fail in one small pure suite.
+
+### Why this mattered
+
+The repo already had a live UI audit calling out poor tactical-map frame rate, and `MapContainer` itself admitted two suspect churn sources: repeated Deck layer rebuilds and a perpetual pulse loop throttled only by time. This packet does not pretend to benchmark or solve the whole performance milestone. It closes the first obvious render-churn seams that were already sitting in plain sight.
+
+### Proof boundaries
+
+- **Direct proof:** the guard logic is proven in a pure vitest suite, and the build still passes with the new guard layer in place.
+- **Source-verified only:** this packet does **not** add a numeric before/after benchmark artifact or FPS capture. The repo still only has the earlier audit's `10 fps` observation as baseline evidence, so no new performance gain is claimed here.
+- **Still open:** the existing build warnings remain: dynamic/static import overlap around `Minimap` + `DataLoader`, the `loaders.gl` browser `spawn` warning, and the large tactical chunk.
+
+### Rejected / deferred
+
+- **Hot-path sim optimization:** deferred. This packet stays entirely in the tactical-map renderer layer.
+- **Build-warning cleanup:** deferred. The warnings are now explicitly dispositioned as still open, not silently implied solved.
+
+---
+
 ## [2026-04-15] feat(ui): make Warroom hotspots keyboard-accessible
 
 **Type:** Accessibility baseline / Warroom shell hotspot reachability
