@@ -1,3 +1,30 @@
+## [2026-04-15] test(repo): retire superseded save-load fixture and roadmap sentinel
+
+**Type:** Test-residue cleanup / superseded-proof retirement
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/save_load_roundtrip.test.ts` (deleted), `tests/phase_e0_1_roadmap_alignment.test.ts` (deleted), `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/save_load_real_roundtrip.test.ts` pass; `npx.cmd vitest run tests/test_discovery_contract.test.ts` pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED - two weak residual sentinels were removed because stronger owners already cover the truth they were gesturing at.
+
+### Summary
+
+1. **`save_load_roundtrip.test.ts` was retired as superseded:** the repo already has real-save round-trip proof on `latest_run_final_save.json` plus dedicated serializer contract suites for stability and reject/denylist behavior.
+2. **`phase_e0_1_roadmap_alignment.test.ts` was retired as prose residue:** it only asserted that a shim directive file still contained an exact title and prohibition string, which no longer serves as a meaningful product or runtime gate.
+3. **This is deletion of weak proof, not deletion of coverage:** the stronger serializer and discovery/runtime lanes remain intact.
+
+### Why this mattered
+
+These were classic “feels safe” files. They were easy to keep because they were small, but they were no longer the sharpest owner of anything important. Leaving them around would make the suite look more comprehensive than it really was.
+
+### Proof boundaries
+
+- **Direct proof retained elsewhere:** real-save save/load idempotency and serializer contracts remain.
+- **Direct proof retained elsewhere:** the repo no longer depends on a wording-only roadmap sentinel to know what Phase E was.
+- **Not claimed here:** this does **not** imply the entire serializer lane is done forever; it only removes two weak residuals whose jobs are already covered better elsewhere.
+
+---
+
 ## [2026-04-15] test(repo): migrate pure engine contract suites onto vitest
 
 **Type:** Test-harness cleanup / pure-suite migration
