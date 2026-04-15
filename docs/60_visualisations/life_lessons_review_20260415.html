@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Life Lessons Review — 2026-04-15</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0f14; color: #c8ccd0; font-family: 'Segoe UI', system-ui, sans-serif; padding: 2rem; }
+  .container { max-width: 960px; margin: 0 auto; }
+  h1 { color: #c4a35a; font-size: 1.4rem; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 0.3rem; }
+  .subtitle { color: #6b7280; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.3em; margin-bottom: 2rem; }
+  .stats-bar { display: flex; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
+  .stat { background: #111820; border: 1px solid #1e2a38; border-radius: 6px; padding: 0.8rem 1.2rem; min-width: 120px; }
+  .stat-value { font-size: 1.8rem; font-weight: 700; color: #e5e7eb; font-variant-numeric: tabular-nums; }
+  .stat-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: #6b7280; margin-top: 0.2rem; }
+  .section { margin-bottom: 2rem; }
+  .section-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.2em; color: #c4a35a; margin-bottom: 0.8rem; border-bottom: 1px solid #1e2a38; padding-bottom: 0.4rem; }
+  .lesson-card { background: #111820; border: 1px solid #1e2a38; border-radius: 6px; padding: 1rem; margin-bottom: 0.6rem; border-left: 3px solid #c4a35a; }
+  .lesson-card.new { border-left-color: #4ade80; }
+  .lesson-card.validated { border-left-color: #60a5fa; }
+  .lesson-card.violation { border-left-color: #f87171; }
+  .lesson-tag { display: inline-block; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; padding: 0.15rem 0.5rem; border-radius: 3px; margin-right: 0.4rem; font-weight: 600; }
+  .tag-new { background: #064e3b; color: #4ade80; }
+  .tag-validated { background: #1e3a5f; color: #60a5fa; }
+  .tag-process { background: #3b1f5e; color: #c084fc; }
+  .tag-arch { background: #5e3b1f; color: #fbbf24; }
+  .tag-ui { background: #1f4e5e; color: #67e8f9; }
+  .lesson-title { font-size: 0.85rem; font-weight: 600; color: #e5e7eb; margin-top: 0.4rem; }
+  .lesson-body { font-size: 0.75rem; color: #9ca3af; margin-top: 0.3rem; line-height: 1.5; }
+  .activity-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.6rem; }
+  .activity-card { background: #111820; border: 1px solid #1e2a38; border-radius: 4px; padding: 0.6rem 0.8rem; }
+  .activity-hash { font-family: monospace; font-size: 0.7rem; color: #c4a35a; }
+  .activity-msg { font-size: 0.7rem; color: #9ca3af; margin-top: 0.2rem; }
+  .verdict-row { display: flex; align-items: center; gap: 0.6rem; padding: 0.4rem 0; }
+  .verdict-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot-green { background: #4ade80; }
+  .dot-blue { background: #60a5fa; }
+  .dot-amber { background: #fbbf24; }
+  .verdict-text { font-size: 0.75rem; color: #c8ccd0; }
+  .footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #1e2a38; text-align: center; font-size: 0.6rem; color: #4b5563; text-transform: uppercase; letter-spacing: 0.2em; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Life Lessons Review</h1>
+<div class="subtitle">DG2-DG6 Architecture Campaign &mdash; 2026-04-14/15</div>
+
+<div class="stats-bar">
+  <div class="stat"><div class="stat-value">236</div><div class="stat-label">Total Lessons</div></div>
+  <div class="stat"><div class="stat-value" style="color:#4ade80">+5</div><div class="stat-label">New This Session</div></div>
+  <div class="stat"><div class="stat-value" style="color:#60a5fa">2</div><div class="stat-label">Validated</div></div>
+  <div class="stat"><div class="stat-value" style="color:#4ade80">0</div><div class="stat-label">Violations</div></div>
+  <div class="stat"><div class="stat-value">30+</div><div class="stat-label">Commits Reviewed</div></div>
+  <div class="stat"><div class="stat-value">0</div><div class="stat-label">Demoted</div></div>
+</div>
+
+<!-- New Lessons -->
+<div class="section">
+  <div class="section-title">New Lessons Synthesized</div>
+
+  <div class="lesson-card new">
+    <span class="lesson-tag tag-new">New</span><span class="lesson-tag tag-process">Process</span>
+    <div class="lesson-title">Worktree agents produce uncommitted changes &mdash; extract, apply, verify on main</div>
+    <div class="lesson-body">All 5 worktree agents (Lanes A&ndash;E) couldn't verify/commit &mdash; 8,000+ tsc errors from missing UI workspace deps. Treat worktree agents as code generators, not self-contained CI. Extract patches, verify on main.</div>
+  </div>
+
+  <div class="lesson-card new">
+    <span class="lesson-tag tag-new">New</span><span class="lesson-tag tag-process">Process</span>
+    <div class="lesson-title">Verify pipeline step names by grepping the actual pipeline, not agent memory</div>
+    <div class="lesson-body">Agent said <code>evaluate-patron-events</code>, actual was <code>update-patron-pressure</code>. Test failed. Always grep the <code>name:</code> field in war_phases.ts.</div>
+  </div>
+
+  <div class="lesson-card new">
+    <span class="lesson-tag tag-new">New</span><span class="lesson-tag tag-arch">Architecture</span>
+    <div class="lesson-title">Scenario proof requires turn-threshold analysis before claiming feasibility</div>
+    <div class="lesson-body">Rupture needs turn &ge; 140. 40w/52w can't reach it. 188w proved correct non-firing. Check precondition thresholds against scenario lengths BEFORE promising proof.</div>
+  </div>
+
+  <div class="lesson-card new">
+    <span class="lesson-tag tag-new">New</span><span class="lesson-tag tag-arch">Architecture</span>
+    <div class="lesson-title">Correct non-firing is valid scenario proof for condition-gated behavior</div>
+    <div class="lesson-body">188w: Srebrenica held &rarr; rupture correctly did NOT fire. Non-firing when conditions aren't met IS proof, not a gap. Both firing and non-firing prove the full contract.</div>
+  </div>
+
+  <div class="lesson-card new">
+    <span class="lesson-tag tag-new">New</span><span class="lesson-tag tag-ui">UI</span>
+    <div class="lesson-title">Component mount tests require React at root level</div>
+    <div class="lesson-body">React in <code>src/ui/map/node_modules</code> doesn't help vitest at root. Install react + @testing-library/react at root to unblock mount tests. Standing infrastructure gap.</div>
+  </div>
+</div>
+
+<!-- Validated Lessons -->
+<div class="section">
+  <div class="section-title">Existing Lessons Validated (Not Violated)</div>
+
+  <div class="lesson-card validated">
+    <span class="lesson-tag tag-validated">Validated</span><span class="lesson-tag tag-process">Process</span>
+    <div class="lesson-title">Update working-on.md at every commit</div>
+    <div class="lesson-body">Session maintained working-on.md through all campaign phases and closeout. No violation detected. File was updated at each wave transition and commit milestone.</div>
+  </div>
+
+  <div class="lesson-card validated">
+    <span class="lesson-tag tag-validated">Validated</span><span class="lesson-tag tag-process">Process</span>
+    <div class="lesson-title">Parallel agent dispatch needs exclusive file ownership</div>
+    <div class="lesson-body">Wave 1 (A+B) confirmed zero file overlap before dispatch. Closeout agents (AB vs CD) had exclusive write scopes. No file corruption observed. Lesson from 2026-03-29 fully respected.</div>
+  </div>
+</div>
+
+<!-- Verdict Summary -->
+<div class="section">
+  <div class="section-title">Session Proof Ladder &mdash; Final State</div>
+  <div class="verdict-row"><div class="verdict-dot dot-green"></div><div class="verdict-text"><strong>Direct scenario proof:</strong> Stranded lifecycle (n1575 + n1576, 5 formations across 3 factions)</div></div>
+  <div class="verdict-row"><div class="verdict-dot dot-green"></div><div class="verdict-text"><strong>Direct scenario proof (non-firing):</strong> Rupture consequences &mdash; Srebrenica held in 188w, system correctly gated</div></div>
+  <div class="verdict-row"><div class="verdict-dot dot-blue"></div><div class="verdict-text"><strong>Late-state pipeline proof:</strong> Rupture consequences fire correctly when preconditions met (crafted state + real warPhases steps)</div></div>
+  <div class="verdict-row"><div class="verdict-dot dot-blue"></div><div class="verdict-text"><strong>Direct composition proof:</strong> buildEndgameSummary, outcome taxonomy, condemnation wording, cost/comparison chain (26 tests)</div></div>
+  <div class="verdict-row"><div class="verdict-dot dot-amber"></div><div class="verdict-text"><strong>Source-verified only:</strong> React component mounting (React not at root &mdash; standing infrastructure gap)</div></div>
+</div>
+
+<!-- Campaign Activity -->
+<div class="section">
+  <div class="section-title">Campaign Commits (key milestones)</div>
+  <div class="activity-grid">
+    <div class="activity-card"><div class="activity-hash">ed02fec0</div><div class="activity-msg">Stranded brigade lifecycle</div></div>
+    <div class="activity-card"><div class="activity-hash">9e3c0dd5</div><div class="activity-msg">Consequence substrate fixes</div></div>
+    <div class="activity-card"><div class="activity-hash">8ec4b548</div><div class="activity-msg">Verdict packet contract</div></div>
+    <div class="activity-card"><div class="activity-hash">820474ed</div><div class="activity-msg">Sensitive-history boundary</div></div>
+    <div class="activity-card"><div class="activity-hash">4eec8e17</div><div class="activity-msg">Cost Ledger + comparison</div></div>
+    <div class="activity-card"><div class="activity-hash">0a19b1b4</div><div class="activity-msg">Scenario proof n1575</div></div>
+    <div class="activity-card"><div class="activity-hash">dfb67527</div><div class="activity-msg">188w rupture proof</div></div>
+    <div class="activity-card"><div class="activity-hash">37b91e91</div><div class="activity-msg">Endgame consolidation</div></div>
+  </div>
+</div>
+
+<div class="footer">Pyrrhic Games &mdash; A War Without Victory &mdash; Life Lessons Review &mdash; 2026-04-15</div>
+
+</div>
+</body>
+</html>

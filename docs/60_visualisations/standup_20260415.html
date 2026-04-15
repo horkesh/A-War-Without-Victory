@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pyrrhic Daily Standup — 2026-04-15</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#080c10;color:#c8ccd0;font-family:'Segoe UI',system-ui,sans-serif;padding:1.5rem}
+.container{max-width:1100px;margin:0 auto}
+h1{color:#c4a35a;font-size:1.3rem;text-transform:uppercase;letter-spacing:.15em}
+.subtitle{color:#6b7280;font-size:.65rem;text-transform:uppercase;letter-spacing:.35em;margin-bottom:1.5rem}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem}
+.card{background:#0f1620;border:1px solid #1e2a38;border-radius:8px;padding:1rem;overflow:hidden}
+.card-header{font-size:.6rem;text-transform:uppercase;letter-spacing:.2em;color:#c4a35a;margin-bottom:.8rem;border-bottom:1px solid #1e2a38;padding-bottom:.4rem}
+.big-number{font-size:2.2rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+.stat-row{display:flex;justify-content:space-between;font-size:.75rem;padding:.25rem 0;border-bottom:1px solid #0d1219}
+.stat-label{color:#6b7280}.stat-value{color:#e5e7eb;font-weight:500;font-variant-numeric:tabular-nums}
+.phase-tag{display:inline-block;font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;padding:.15rem .5rem;border-radius:3px;font-weight:700;margin-right:.3rem}
+.tag-good{background:#064e3b;color:#4ade80}.tag-shipped{background:#1e3a5f;color:#60a5fa}
+.tag-warn{background:#5e3b1f;color:#fbbf24}.tag-blocked{background:#4a1010;color:#f87171}
+.tag-new{background:#2e1065;color:#c084fc}
+.lane{padding:.5rem 0;border-bottom:1px solid #111820;font-size:.75rem}
+.lane-title{color:#e5e7eb;font-weight:600}.lane-detail{color:#6b7280;margin-top:.15rem}
+.priority{background:#0f1620;border:1px solid #1e2a38;border-radius:6px;padding:.8rem 1rem;margin-bottom:.5rem;border-left:3px solid #c4a35a}
+.priority.p1{border-left-color:#f87171}.priority.p2{border-left-color:#fbbf24}.priority.p3{border-left-color:#60a5fa}
+.priority-num{font-size:.6rem;text-transform:uppercase;letter-spacing:.15em;font-weight:700;margin-bottom:.3rem}
+.priority-title{font-size:.85rem;font-weight:600;color:#e5e7eb}
+.priority-body{font-size:.7rem;color:#9ca3af;margin-top:.3rem;line-height:1.5}
+.bar{height:6px;border-radius:3px;overflow:hidden;background:#111820;margin-top:.3rem}
+.bar-fill{height:100%;border-radius:3px}
+.verdict-row{display:flex;align-items:center;gap:.5rem;padding:.3rem 0;font-size:.72rem}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dot-g{background:#4ade80}.dot-b{background:#60a5fa}.dot-a{background:#fbbf24}.dot-r{background:#f87171}
+.footer{margin-top:1.5rem;text-align:center;font-size:.55rem;color:#374151;text-transform:uppercase;letter-spacing:.25em;border-top:1px solid #1e2a38;padding-top:.8rem}
+.good{color:#4ade80}.warn{color:#fbbf24}.bad{color:#f87171}.info{color:#60a5fa}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Daily Pyrrhic Standup</h1>
+<div class="subtitle">2026-04-15 &mdash; War Room Briefing Board</div>
+
+<!-- ═══ PHASE 1: YESTERDAY'S RETROSPECTIVE ═══ -->
+
+<div class="grid3">
+  <div class="card">
+    <div class="card-header">Session Output</div>
+    <div class="big-number good">36</div>
+    <div style="font-size:.65rem;color:#6b7280;margin-top:.3rem">commits in 24h</div>
+    <div class="stat-row"><span class="stat-label">Insertions</span><span class="stat-value">+107,738</span></div>
+    <div class="stat-row"><span class="stat-label">Deletions</span><span class="stat-value">-63,471</span></div>
+    <div class="stat-row"><span class="stat-label">Net lines</span><span class="stat-value good">+44,267</span></div>
+  </div>
+  <div class="card">
+    <div class="card-header">Test Suite Health</div>
+    <div class="big-number info">3,690+</div>
+    <div style="font-size:.65rem;color:#6b7280;margin-top:.3rem">vitest tests (est.)</div>
+    <div class="stat-row"><span class="stat-label">Baseline</span><span class="stat-value">3,499 (297 suites)</span></div>
+    <div class="stat-row"><span class="stat-label">New this session</span><span class="stat-value good">+191 tests</span></div>
+    <div class="stat-row"><span class="stat-label">New suites</span><span class="stat-value good">+12 files</span></div>
+  </div>
+  <div class="card">
+    <div class="card-header">Calibration State</div>
+    <div class="big-number" style="color:#4ade80">93.6%</div>
+    <div style="font-size:.65rem;color:#6b7280;margin-top:.3rem">area-weighted (n1575)</div>
+    <div class="stat-row"><span class="stat-label">Anchors</span><span class="stat-value good">27/27</span></div>
+    <div class="stat-row"><span class="stat-label">Benchmarks</span><span class="stat-value good">6/6</span></div>
+    <div class="stat-row"><span class="stat-label">ZEA operations</span><span class="stat-value good">0</span></div>
+    <div class="stat-row"><span class="stat-label">Campaign drift</span><span class="stat-value good">+0.1pp</span></div>
+  </div>
+</div>
+
+<!-- Campaign Summary -->
+<div class="card" style="margin-bottom:1.5rem">
+  <div class="card-header">Yesterday &mdash; DG2-DG6 Architecture Campaign (Complete)</div>
+
+  <div class="lane"><span class="phase-tag tag-shipped">Shipped</span><span class="lane-title">Lane A: Stranded Brigade Lifecycle Owner</span><div class="lane-detail">State machine: none&rarr;holding&rarr;reconnected&rarr;collapsed. Pipeline step. 14 tests. Scenario-proven (n1575 + n1576, 5 formations, 3 factions).</div></div>
+
+  <div class="lane"><span class="phase-tag tag-shipped">Shipped</span><span class="lane-title">Lane B: Consequence Substrate Dead Wire Fixes</span><div class="lane-detail">political_cohesion&rarr;internal_cohesion migration (4 TODOs). war_phase_exhaustion wired. Substrate owner map. 14 tests.</div></div>
+
+  <div class="lane"><span class="phase-tag tag-shipped">Shipped</span><span class="lane-title">Lane C: Endgame Verdict Packet Contract</span><div class="lane-detail">OutcomeClass (7 types). classifyOutcome(). condemnation_flags. Owner split: termination/judgment/comparison. 16 tests.</div></div>
+
+  <div class="lane"><span class="phase-tag tag-shipped">Shipped</span><span class="lane-title">Lane D: Sensitive-History Boundary &amp; Srebrenica Rupture</span><div class="lane-detail">RuptureConsequence. Three-ring model enforced. genocide_condemnation&rarr;failure. Late-state pipeline proof + 188w non-firing proof. 18 tests.</div></div>
+
+  <div class="lane"><span class="phase-tag tag-shipped">Shipped</span><span class="lane-title">Lane E: Cost Ledger &amp; Historical Comparison</span><div class="lane-detail">buildCostLedger(). compareToHistorical(). historical_baseline.json (RDC/ICTY/UNHCR/Dayton). 12 tests.</div></div>
+
+  <div class="lane"><span class="phase-tag tag-shipped">Shipped</span><span class="lane-title">Closeout: Pipeline Proof + Stranded Visibility</span><div class="lane-detail">Pipeline step execution proof. FormationDetail "Isolated" indicator. 19 tests.</div></div>
+
+  <div class="lane"><span class="phase-tag tag-shipped">Shipped</span><span class="lane-title">Closeout: Verdict Display + Cost Ledger Surface</span><div class="lane-detail">outcome_class badge in VerdictScreen. Condemnation notices. WarCostSummary component. 33 tests.</div></div>
+
+  <div class="lane"><span class="phase-tag tag-shipped">Shipped</span><span class="lane-title">Scenario Proof (n1575 40w + n1576 188w)</span><div class="lane-detail">Stranded lifecycle: direct scenario proof. Rupture: correct non-firing (Srebrenica held). Calibration: 93.6% (+0.1pp). No bugs.</div></div>
+
+  <div class="lane"><span class="phase-tag tag-shipped">Shipped</span><span class="lane-title">Endgame Presentation Consolidation</span><div class="lane-detail">VerdictScreen = canonical endgame owner. WarCostSummary moved to war-level section. Outcome class on faction tabs. buildEndgameSummary(). 26 tests.</div></div>
+
+  <div class="lane"><span class="phase-tag tag-new">New</span><span class="lane-title">5 Life Lessons Synthesized</span><div class="lane-detail">Worktree agent discipline. Pipeline step name verification. Turn-threshold analysis. Non-firing as proof. React root-level requirement.</div></div>
+</div>
+
+<!-- ═══ PHASE 2: GAME ANALYSIS ═══ -->
+
+<div class="grid2">
+  <div class="card">
+    <div class="card-header">Calibration Trajectory</div>
+    <div class="stat-row"><span class="stat-label">ATH (combat)</span><span class="stat-value">94.3% (n1315)</span></div>
+    <div class="stat-row"><span class="stat-label">Current</span><span class="stat-value">93.6% (n1575)</span></div>
+    <div class="stat-row"><span class="stat-label">Anchors</span><span class="stat-value good">27/27</span></div>
+    <div class="stat-row"><span class="stat-label">Campaign impact</span><span class="stat-value good">+0.1pp (no drift)</span></div>
+    <div class="stat-row"><span class="stat-label">ZEA rate</span><span class="stat-value good">0% (was 47%)</span></div>
+    <div class="stat-row"><span class="stat-label">Invalid ops</span><span class="stat-value good">0</span></div>
+    <div style="margin-top:.6rem;font-size:.65rem;color:#6b7280">Stable. Architecture campaign added lifecycle, verdict, rupture, cost-ledger without calibration regression.</div>
+  </div>
+  <div class="card">
+    <div class="card-header">Real War Gap Status</div>
+    <div class="verdict-row"><div class="dot dot-r"></div><div>HIST-GAP-1: UNPROFOR absent (P0, v0.9)</div></div>
+    <div class="verdict-row"><div class="dot dot-r"></div><div>HIST-GAP-2: VRS strangle-not-capture (P0, v0.9)</div></div>
+    <div class="verdict-row"><div class="dot dot-a"></div><div>HIST-GAP-3: Comms quality asymmetry (P1)</div></div>
+    <div class="verdict-row"><div class="dot dot-a"></div><div>HIST-GAP-4: Per-brigade ammo (P1)</div></div>
+    <div class="verdict-row"><div class="dot dot-g"></div><div>Exhaustion: wired into commander (n1568)</div></div>
+    <div class="verdict-row"><div class="dot dot-g"></div><div>Civilian casualties: wired from events (n1574)</div></div>
+    <div class="verdict-row"><div class="dot dot-g"></div><div>Internal cohesion: wired to dimensions (9e3c0dd5)</div></div>
+    <div class="verdict-row"><div class="dot dot-g"></div><div>International standing: data-driven (n1574)</div></div>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:1.5rem">
+  <div class="card-header">Proof Ladder &mdash; Current State</div>
+  <div class="verdict-row"><div class="dot dot-g"></div><div><strong>Direct scenario proof:</strong> Stranded lifecycle (n1575+n1576), calibration stability, correct non-firing of rupture (188w)</div></div>
+  <div class="verdict-row"><div class="dot dot-b"></div><div><strong>Late-state pipeline proof:</strong> Rupture consequence firing (real warPhases steps, crafted late-state)</div></div>
+  <div class="verdict-row"><div class="dot dot-b"></div><div><strong>Direct composition proof:</strong> buildEndgameSummary, outcome taxonomy, condemnation wording, cost/comparison chain (26+15 tests)</div></div>
+  <div class="verdict-row"><div class="dot dot-b"></div><div><strong>Direct render proof:</strong> All formatting helpers with realistic fixtures (verdict, cost ledger, comparison)</div></div>
+  <div class="verdict-row"><div class="dot dot-a"></div><div><strong>Source-verified only:</strong> React component mounting (React not at root &mdash; infrastructure gap)</div></div>
+</div>
+
+<!-- ═══ PHASE 3: TODAY'S PRIORITIES ═══ -->
+
+<div class="card" style="margin-bottom:1.5rem">
+  <div class="card-header">Today's Priorities &mdash; 2026-04-15</div>
+
+  <div class="priority p1">
+    <div class="priority-num bad">Priority 1</div>
+    <div class="priority-title">Install React at root + add component mount tests</div>
+    <div class="priority-body">Standing infrastructure gap. Install <code>react</code>, <code>react-dom</code>, <code>@testing-library/react</code> as root devDependencies. Write mount tests for VerdictScreen, WarCostSummary, FormationDetail stranded indicator. This closes the last proof tier.</div>
+    <div class="bar"><div class="bar-fill" style="width:0%;background:#f87171"></div></div>
+  </div>
+
+  <div class="priority p2">
+    <div class="priority-num warn">Priority 2</div>
+    <div class="priority-title">CALIBRATION_MASTER + REAL_WAR_MASTER update</div>
+    <div class="priority-body">CALIBRATION_MASTER still shows n1302 as latest review. Needs n1568&ndash;n1576 entries (exhaustion wiring, jajce correction, campaign proof runs). REAL_WAR_MASTER still shows n1302 review &mdash; update with new proof findings (stranded lifecycle emergent behavior, Srebrenica holds in 188w, cost ledger inputs confirmed).</div>
+    <div class="bar"><div class="bar-fill" style="width:0%;background:#fbbf24"></div></div>
+  </div>
+
+  <div class="priority p3">
+    <div class="priority-num info">Priority 3</div>
+    <div class="priority-title">v0.9.0 consequence substrate: early-peace bridge</div>
+    <div class="priority-body">Design-gate DG3 is resolved. Next consequence packet: complete pressure/peace-response symmetry for non-RS factions. The substrate owner map is documented. RBiH patron has no exhaustion mechanism (dead wire). HRHB alliance split not in internal_cohesion. Bounded, non-architectural work.</div>
+    <div class="bar"><div class="bar-fill" style="width:0%;background:#60a5fa"></div></div>
+  </div>
+
+  <div class="priority p2">
+    <div class="priority-num warn">Priority 4</div>
+    <div class="priority-title">Napkin curation &mdash; update current state block</div>
+    <div class="priority-body">Napkin current-state block still shows n1570 baseline and pre-campaign test count. Needs update: n1575/n1576 baselines, 3690+ tests, campaign lanes shipped, new endgame owner (VerdictScreen), stranded lifecycle proven, 188w scenario available, 5 new life lessons. Open P1s need refresh too.</div>
+    <div class="bar"><div class="bar-fill" style="width:0%;background:#fbbf24"></div></div>
+  </div>
+
+  <div class="priority p3">
+    <div class="priority-num info">Priority 5</div>
+    <div class="priority-title">v0.8-to-v0.9 remaining hardening: save/load truth inventory</div>
+    <div class="priority-body">Packet 1 from the roadmap backlog is "packet-ready now": Save/Load Truth Inventory and Entrypoint Audit. Current save/load hardening landed (post-load reset, error classification, adapter parity proof). Next: produce one truthful inventory of all entrypoints and owners. Docs-first, low risk.</div>
+    <div class="bar"><div class="bar-fill" style="width:0%;background:#60a5fa"></div></div>
+  </div>
+</div>
+
+<div class="footer">Pyrrhic Games &mdash; A War Without Victory &mdash; v0.8-to-v0.9 Active &mdash; 2026-04-15</div>
+
+</div>
+</body>
+</html>
