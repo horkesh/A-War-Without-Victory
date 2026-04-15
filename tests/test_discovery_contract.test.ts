@@ -43,6 +43,8 @@ describe('test discovery contracts', () => {
             'tests/combat_front_emergence.test.ts',
             'tests/combat_summary.test.ts',
             'tests/combat_state_schema.test.ts',
+            'tests/bot_manager_a1.test.ts',
+            'tests/bot_operation_objective_focus.test.ts',
             'tests/desktop_packaging_contract.test.ts',
             'tests/desktop_sim_bundle_smoke.test.ts',
             'tests/displacement_pipeline_state_schema.test.ts',

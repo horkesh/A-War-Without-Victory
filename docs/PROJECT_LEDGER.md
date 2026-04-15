@@ -1,3 +1,31 @@
+## [2026-04-15] test(repo): migrate bot management contracts onto vitest and retire dead dedup placeholder
+
+**Type:** Test-harness cleanup / residual test retirement
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/bot_benchmark_eval_a1.test.ts`, `tests/bot_manager_a1.test.ts`, `tests/bot_operation_objective_focus.test.ts`, `tests/bot_strategy_adaptation_a1.test.ts`, `tests/bot_brigade_attack_dedup.test.ts` (deleted), `tests/test_discovery_contract.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/bot_benchmark_eval_a1.test.ts tests/bot_manager_a1.test.ts tests/bot_strategy_adaptation_a1.test.ts tests/bot_operation_objective_focus.test.ts tests/test_discovery_contract.test.ts` = 19/19 pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED - four live bot-management contracts now run under vitest, and the deleted `bot_brigade_attack_dedup.test.ts` placeholder no longer pretends to prove a seam whose real SID-era owner was already removed.
+
+### Summary
+
+1. **The live bot lane moved to vitest:** benchmark evaluation, bot-manager determinism/difficulty, strategy adaptation, and execution-phase objective focus now sit on the canonical vitest lane.
+2. **The fake file is gone:** `bot_brigade_attack_dedup.test.ts` had become a one-test placeholder explicitly admitting that the legacy SID-based owner was deleted and that no current OSID proof lived there. The actual live seam already belongs in `bot_operation_objective_focus.test.ts` and the bot order-generation path.
+3. **Discovery now keeps representative bot proof in the fast slice:** bot-manager and objective-focus contracts are pinned so the family does not drift back into runner residue.
+
+### Why this mattered
+
+This is exactly the kind of residue the audit was meant to kill: a mixed lane where some files still prove live bot behavior and one file is just a ceremonial marker for deleted code. Migrating the real contracts and deleting the fake one reduces noise without weakening coverage.
+
+### Proof boundaries
+
+- **Direct proof:** all 4 migrated bot suites pass under vitest.
+- **Direct proof:** the dead placeholder file is removed rather than reclassified.
+- **Direct proof:** discovery now pins representative bot-management files in the fast vitest slice.
+- **Not claimed here:** this does **not** close the full bot/scenario behavior lane or broad AI balance; it closes a small deterministic bot-management substrate plus one fake residual.
+
+---
+
 ## [2026-04-15] test(repo): migrate treaty and victory-condition contracts onto vitest
 
 **Type:** Test-harness cleanup / treaty-victory lane unification

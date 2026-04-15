@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 
 import { evaluateBotBenchmarks } from '../src/scenario/scenario_end_report.js';
 
