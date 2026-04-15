@@ -15,6 +15,7 @@ import { encodeShellHandoffCommand, type ShellHandoffCommand } from '../shared/s
 import { getPlayerFacingFaction } from '../shared/playerFacingLabels.js';
 
 type CampaignScenarioKey = 'apr_1992';
+const BROWSER_STARTUP_SNAPSHOT_PATH = '/data/derived/startup/apr_1992_initial_save.json';
 
 interface DesktopBridge {
     startNewCampaign?: (payload: { playerFaction: FactionId; scenarioKey: CampaignScenarioKey }) => Promise<{ ok: boolean; error?: string; stateJson?: string }>;
@@ -129,8 +130,11 @@ class WarroomApp {
         if (existingStateJson) {
             this.applyGameStateFromJson(existingStateJson);
         } else if (!this.desktopBridge?.startNewCampaign) {
-            // Browser/dev mode fallback
-            await this.loadMockState();
+            // Browser/dev mode fallback: prefer the same baked startup artifact as desktop.
+            const loadedSnapshot = await this.loadStartupSnapshotFallback();
+            if (!loadedSnapshot) {
+                await this.loadMockState();
+            }
             this.showMainMenu();
         } else if (!this.userNavigatedFromMenu) {
             // Only show main menu if the user hasn't already navigated away
@@ -180,6 +184,24 @@ class WarroomApp {
 
         setScenarioStartDate(this.gameState.meta.scenario_start_date);
         this.updateUIOverlay();
+    }
+
+    private async loadStartupSnapshotFallback(faction?: FactionId): Promise<boolean> {
+        try {
+            const response = await fetch(BROWSER_STARTUP_SNAPSHOT_PATH);
+            if (!response.ok) return false;
+            const stateJson = await response.text();
+            this.gameState = deserializeState(stateJson);
+            if (faction) {
+                this.gameState.meta.player_faction = faction;
+            }
+            setScenarioStartDate(this.gameState.meta.scenario_start_date);
+            this.updateUIOverlay();
+            return true;
+        } catch (error) {
+            console.warn('[warroom] Failed to load baked startup snapshot fallback:', error);
+            return false;
+        }
     }
 
     /**
@@ -372,7 +394,7 @@ class WarroomApp {
 
                 if (!this.desktopBridge?.startNewCampaign) {
                     // Browser development mode fallback
-                    console.warn('[warroom] Desktop bridge unavailable, using fallback mock state for apr_1992');
+                    console.warn('[warroom] Desktop bridge unavailable, using baked startup snapshot fallback for apr_1992');
                     await this.loadScenarioFallback(faction);
                     return;
                 }
@@ -404,29 +426,15 @@ class WarroomApp {
 
     /** Browser fallback for starting the single live desktop campaign key (`apr_1992`). */
     private async loadScenarioFallback(faction: FactionId): Promise<void> {
-        let turn = 0;
-        let phase = 'peace';
-        let polControllers: Record<string, string | null> | undefined;
-
-        turn = 30;
-        phase = 'war';
-        try {
-            const r = await fetch('/data/derived/operational/operational_political_control.json');
-            if (r.ok) {
-                const data = await r.json();
-                polControllers = data.by_settlement_id;
-            }
-        } catch (err) {
-            console.warn('[warroom] Failed to load 1992 political control fallback:', err);
+        const loadedSnapshot = await this.loadStartupSnapshotFallback(faction);
+        if (!loadedSnapshot) {
+            console.warn('[warroom] Baked startup snapshot unavailable, falling back to legacy mock apr_1992 state');
+            await this.loadMockState({
+                turn: 30,
+                phase: 'war',
+                faction,
+            });
         }
-
-        await this.loadMockState({
-            turn,
-            phase,
-            faction,
-            politicalControllers: polControllers
-        });
-
         this.showScreen('none');
     }
 

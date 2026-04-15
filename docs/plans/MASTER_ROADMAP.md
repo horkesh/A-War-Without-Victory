@@ -245,7 +245,7 @@ These lanes matter to product truth or engine health, but they are not the curre
 
 - ~~**Operation execution-quality follow-up**~~ â€” **RESOLVED 2026-04-14:** n1570 shows 0 invalid operations, 0 ZEA operations. The `n1397` issues are no longer reproducible on current mainline.
 - ~~**Harness assignment-completeness validator drift**~~ â€” **RESOLVED 2026-04-14:** `validate_run_consistency.cjs` passes completely clean on n1570 (RESULT: PASS, 0 failures across all checks). Validator now aligned with sim doctrine.
-- **Desktop New Game Start Snapshot** â€” desktop `New Game` birth state is now canonicalized onto the loaded-save contract, but it still boots from full scenario-source init instead of a baked campaign-start snapshot.
+- ~~**Desktop New Game Start Snapshot**~~ — **RESOLVED 2026-04-16:** desktop `startNewCampaign(...)` and the Warroom/browser fallback now use the baked `apr_1992` startup snapshot as the primary start-state source; the old mock-state path survives only as an emergency browser/dev fallback if the baked artifact is unavailable.
 - **Warroom React Shell Recovery / Feature Parity** â€” main desktop entry surface still needs parity/polish (modal behavior, shell cohesion, interactive room/map affordance).
 
 ### v0.8.x-final â€” Command Authority Cleanup + Old Code Removal

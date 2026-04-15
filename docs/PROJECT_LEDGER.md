@@ -1,3 +1,23 @@
+## [2026-04-16] fix(ui+docs): unify Warroom fallback startup with the baked apr_1992 snapshot
+
+**Type:** Desktop/Warroom startup truth closure
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `src/ui/warroom/warroom.ts`, `tests/warroom_startup_snapshot_truth.test.ts`, `tests/docs_desktop_v09_truth.test.ts`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+**Tests:** `npx.cmd vitest run tests/warroom_startup_snapshot_truth.test.ts tests/docs_desktop_v09_truth.test.ts tests/warroom_new_campaign_flow_truth.test.ts tests/warroom_shell_layer.test.ts tests/ui_shell_navigation.test.ts` pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED after packet verification. Warroom/browser fallback no longer invents a separate apr_1992 birth state as its normal path; it now consumes the same baked startup snapshot that desktop `startNewCampaign(...)` already owns, while retaining the old mock builder only as an emergency browser/dev fallback if the baked artifact is missing.
+
+### Summary
+
+1. **The same startup artifact now owns both sides of the shell seam:** `warroom.ts` now loads `/data/derived/startup/apr_1992_initial_save.json` through `loadStartupSnapshotFallback(...)` before showing the browser/dev main menu and before launching the non-Electron side-picker fallback, instead of defaulting those paths to a hand-built mock state.
+2. **Player-faction selection is still applied at the shell edge, not baked into the artifact:** the fallback loader deserializes the committed startup save, then stamps `meta.player_faction` only when the player actually chooses a side, matching the desktop `startNewCampaign(...)` contract instead of introducing a second canonical birth packet.
+3. **The old mock constructor is demoted instead of pretending to be equal truth:** `loadMockState(...)` survives only as an emergency browser/dev guard if the baked startup artifact is unavailable; the old operational-control special-case fetch is gone from the mainline fallback path.
+4. **Roadmap and tests now lock the narrower truth:** `MASTER_ROADMAP.md` no longer carries the stale active lane saying desktop new game still boots from scenario-source init, and the new `warroom_startup_snapshot_truth` assertions plus the updated desktop docs-truth test guard the baked snapshot path and the demoted mock fallback.
+
+### Why this mattered
+
+This closed a real pre-0.9 shell truth gap. Desktop startup had already been hardened onto the baked `apr_1992` snapshot, but Warroom/browser mode still synthesized a turn-30 mock state as if startup were allowed to fork by surface. That made the same campaign key mean two different birth states depending on which shell happened to launch it. The product now has one primary apr_1992 start-state artifact again, and the only remaining divergence is an explicit emergency fallback for environments where the baked asset cannot be loaded.
+
 ## [2026-04-16] fix(ui): collapse Warroom new-campaign flow onto the sole live scenario
 
 **Type:** Desktop shell parity / Warroom flow simplification

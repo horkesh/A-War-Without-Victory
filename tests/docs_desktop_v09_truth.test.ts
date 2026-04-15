@@ -24,9 +24,11 @@ describe('desktop and roadmap truth docs', () => {
     const roadmap = readRepoFile('docs', 'plans', 'MASTER_ROADMAP.md');
 
     expect(roadmap).toContain('The startup-snapshot interference residue is now closed');
+    expect(roadmap).toContain('desktop `startNewCampaign(...)` and the Warroom/browser fallback now use the baked `apr_1992` startup snapshot as the primary start-state source');
     expect(roadmap).toContain('live replay playback/consumer is still absent from the product shell');
     expect(roadmap).not.toContain('Current next bounded lane: startup-snapshot proof-path interference');
     expect(roadmap).not.toContain('replay is still absent, tutorial/onboarding is still untouched');
+    expect(roadmap).not.toContain('desktop `New Game` birth state is now canonicalized onto the loaded-save contract, but it still boots from full scenario-source init instead of a baked campaign-start snapshot');
   });
 
   it('keeps the v0.9.1 plan baseline aligned with already-landed comparison and codex slices', () => {
