@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { test } from 'node:test';
+import { test } from 'vitest';
 
 import { checkDataPrereqs } from '../src/data_prereq/check_data_prereqs.js';
 import { runScenario } from '../src/scenario/scenario_runner.js';

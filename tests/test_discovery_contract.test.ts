@@ -34,6 +34,7 @@ describe('test discovery contracts', () => {
             'tests/integration_scenario_roundtrip.test.ts',
             'tests/integration_run_summary.test.ts',
             'tests/scenario_continue_from_save_equivalence.test.ts',
+            'tests/victory_conditions_a2.test.ts',
         ];
         const fastRepresentatives = [
             'tests/alliance_lifecycle.test.ts',
@@ -57,6 +58,8 @@ describe('test discovery contracts', () => {
             'tests/scenario_registry.test.ts',
             'tests/serialize_gamestate_stability.test.ts',
             'tests/state.test.ts',
+            'tests/treaty.test.ts',
+            'tests/treaty_apply_military.test.ts',
             'tests/turn_pipeline.test.ts',
             'tests/turn_pipeline_order.test.ts',
             'tests/ui_map_panel_rail.test.ts',

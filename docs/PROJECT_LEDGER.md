@@ -1,3 +1,30 @@
+## [2026-04-15] test(repo): migrate treaty and victory-condition contracts onto vitest
+
+**Type:** Test-harness cleanup / treaty-victory lane unification
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/treaty.test.ts`, `tests/treaty_brcko.test.ts`, `tests/treaty_apply_military.test.ts`, `tests/treaty_apply_territorial.test.ts`, `tests/victory_conditions_a2.test.ts`, `tests/test_discovery_contract.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/treaty.test.ts tests/treaty_brcko.test.ts tests/treaty_apply_military.test.ts tests/treaty_apply_territorial.test.ts tests/victory_conditions_a2.test.ts tests/test_discovery_contract.test.ts` = 50/50 pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED - the treaty contract family now lives on the canonical vitest lane, and the one adjacent victory-condition scenario contract is now classified through the vitest scenario slice instead of lingering in `node:test`.
+
+### Summary
+
+1. **The treaty family moved together:** treaty clause library/acceptance, Brcko special-status/deprecation, military annex application, and territorial annex application all now run under vitest.
+2. **The adjacent victory-condition check moved with it:** `victory_conditions_a2.test.ts` still exercises a real scenario run and stays honest about that, but it now belongs to the same canonical vitest universe as the rest of the repo instead of hanging off a second runner.
+3. **Discovery now reflects the split correctly:** treaty representatives stay pinned in the fast vitest slice, while the scenario-backed victory-condition contract is pinned in the scenario vitest slice.
+
+### Why this mattered
+
+This lane sits right on the pre-0.9 boundary: treaty shaping, treaty application, and victory-condition reporting are part of the end-state/consequence story, and there was no good reason for them to keep a second harness alive. Bringing the whole lane onto vitest reduces runner noise without claiming that the scenario-backed piece became a “fast” test just because the import changed.
+
+### Proof boundaries
+
+- **Direct proof:** all 5 migrated treaty/victory suites pass under vitest.
+- **Direct proof:** discovery now classifies `treaty.test.ts` / `treaty_apply_military.test.ts` as fast vitest and `victory_conditions_a2.test.ts` as scenario vitest.
+- **Not claimed here:** this does **not** close the broader consequence-system milestone or all end-state design questions; it only closes the harness ownership of the current treaty/victory contract lane.
+
+---
+
 ## [2026-04-15] test(repo): migrate emergence substrate contracts onto vitest and retarget stale phase-proof labels
 
 **Type:** Test-harness cleanup / emergence proof retargeting

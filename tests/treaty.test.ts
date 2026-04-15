@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 import type { FrontEdge } from '../src/map/front_edges.js';
 import type { GameState } from '../src/state/game_state.js';
 import type { TreatyClause, TreatyDraft, TreatyScope } from '../src/state/treaty.js';

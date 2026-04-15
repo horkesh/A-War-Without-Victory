@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 import type { LoadedSettlementGraph } from '../src/map/settlements.js';
 import { getEffectiveSettlementSide } from '../src/state/control_effective.js';
 import type { GameState } from '../src/state/game_state.js';

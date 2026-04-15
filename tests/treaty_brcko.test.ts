@@ -3,7 +3,7 @@
  */
 
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 import type { LoadedSettlementGraph } from '../src/map/settlements.js';
 import { BRCKO_SIDS } from '../src/state/brcko.js';
 import { buildEndStateSnapshot } from '../src/state/end_state_snapshot.js';
