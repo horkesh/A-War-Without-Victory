@@ -3,7 +3,7 @@
  *
  * Verifies dead-wire fixes:
  * 1. Grade anchors for RS/HRHB read internal_cohesion dimension (not political_cohesion).
- * 2. internal_cohesion dimension computation uses real faction war_exhaustion.
+ * 2. internal_cohesion dimension computation uses canonical political war_exhaustion.
  * 3. Substrate owner boundaries: compute_capital produces breakdown,
  *    dimensions consume it, scoring consumes dimensions.
  *
@@ -184,10 +184,10 @@ describe('Grade anchors use internal_cohesion dimension', () => {
 });
 
 // ═════════════════════════════════════════════════════════════════════════
-// Fix 2: internal_cohesion uses real war_exhaustion
+// Fix 2: internal_cohesion uses canonical political war_exhaustion
 // ═════════════════════════════════════════════════════════════════════════
 
-describe('internal_cohesion dimension uses real war_exhaustion', () => {
+describe('internal_cohesion dimension uses canonical political war_exhaustion', () => {
     it('zero exhaustion yields higher cohesion than high exhaustion', () => {
         const store1 = initializeStrategicDimensions();
         const store2 = initializeStrategicDimensions();
@@ -203,8 +203,8 @@ describe('internal_cohesion dimension uses real war_exhaustion', () => {
             political: { war_alliance_rbih_hrhb: 1 },
         };
 
-        const stateNoExhaustion = { ...baseState, military: { ...baseState.military, war_exhaustion: { RS: 0, RBiH: 0, HRHB: 0 } } };
-        const stateHighExhaustion = { ...baseState, military: { ...baseState.military, war_exhaustion: { RS: 300, RBiH: 300, HRHB: 300 } } };
+        const stateNoExhaustion = { ...baseState, political: { ...baseState.political, war_exhaustion: { RS: 0, RBiH: 0, HRHB: 0 } } };
+        const stateHighExhaustion = { ...baseState, political: { ...baseState.political, war_exhaustion: { RS: 300, RBiH: 300, HRHB: 300 } } };
 
         computeDimensionBaseValues(store1, stateNoExhaustion, 'RS');
         computeDimensionBaseValues(store2, stateHighExhaustion, 'RS');
@@ -215,10 +215,10 @@ describe('internal_cohesion dimension uses real war_exhaustion', () => {
         expect(cohesionLow).toBeGreaterThan(cohesionHigh);
     });
 
-    it('reads from war_exhaustion, not war_phase_exhaustion', () => {
+    it('reads from political.war_exhaustion, not war_phase_exhaustion', () => {
         const store = initializeStrategicDimensions();
 
-        // State has war_exhaustion (the real field) but NOT war_phase_exhaustion (the dead field)
+        // State has canonical political war_exhaustion but NOT war_phase_exhaustion (the dead field)
         const state = {
             military: {
                 formations: {},
@@ -226,9 +226,8 @@ describe('internal_cohesion dimension uses real war_exhaustion', () => {
                     capital: { RBiH: createEmptyCapital() },
                     patron_relationships: {},
                 },
-                war_exhaustion: { RBiH: 150, RS: 0, HRHB: 0 },
             },
-            political: { war_alliance_rbih_hrhb: 1 },
+            political: { war_alliance_rbih_hrhb: 1, war_exhaustion: { RBiH: 150, RS: 0, HRHB: 0 } },
         };
 
         computeDimensionBaseValues(store, state, 'RBiH');
@@ -238,6 +237,28 @@ describe('internal_cohesion dimension uses real war_exhaustion', () => {
         // Alliance val for RBiH = 1 * 40 = 40, avgCohesion = 50 (default), avgCohesion/2 = 25
         // Total = 40 + 25 - 50 = 15
         expect(cohesion).toBe(15);
+    });
+
+    it('ignores stale military.war_exhaustion shadow data', () => {
+        const store = initializeStrategicDimensions();
+
+        const state = {
+            military: {
+                formations: {},
+                negotiation: {
+                    capital: { RS: createEmptyCapital() },
+                    patron_relationships: {},
+                },
+                war_exhaustion: { RS: 999 },
+            },
+            political: { war_alliance_rbih_hrhb: 1, war_exhaustion: { RS: 0 } },
+        };
+
+        computeDimensionBaseValues(store, state, 'RS');
+        const cohesion = getDimensionEffective(store, 'RS', 'internal_cohesion');
+
+        // Canonical political exhaustion is 0, so stale military shadow data must be ignored.
+        expect(cohesion).toBe(45);
     });
 
     it('dead war_phase_exhaustion field has no effect', () => {
@@ -292,9 +313,8 @@ describe('Substrate owner boundaries', () => {
                     capital: { RS: capital },
                     patron_relationships: { RS: { support_level: 70 } },
                 },
-                war_exhaustion: { RS: 50 },
             },
-            political: { war_alliance_rbih_hrhb: 1 },
+            political: { war_alliance_rbih_hrhb: 1, war_exhaustion: { RS: 50 } },
         };
 
         computeDimensionBaseValues(store, state, 'RS');

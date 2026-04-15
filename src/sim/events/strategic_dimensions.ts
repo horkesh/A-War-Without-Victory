@@ -107,7 +107,7 @@ export function computeDimensionBaseValues(store: DimensionStore, state: any, fa
     const avgCohesion = factionBrigades.length > 0
         ? factionBrigades.reduce((s: number, b: any) => s + (b.cohesion ?? 50), 0) / factionBrigades.length
         : 50;
-    const exhaustion = state.military?.war_exhaustion?.[faction] ?? 0;
+    const exhaustion = state.political?.war_exhaustion?.[faction] ?? 0;
     updateBaseValue(store, faction, 'internal_cohesion', clamp(allianceVal + (avgCohesion / 2) - (exhaustion / 3), 0, 100));
 
     // negotiating_leverage: derived meta-dimension (average of 3 key dimensions)
