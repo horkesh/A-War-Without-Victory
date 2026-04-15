@@ -22,4 +22,41 @@ describe('test discovery contracts', () => {
             expect(nodeTestFiles.has(file), `${file} should not stay in node:test discovery`).toBe(false);
         }
     });
+
+    it('splits vitest files into fast and scenario slices without overlap', () => {
+        const rootDir = process.cwd();
+        const discovered = discoverTests(rootDir);
+        const vitestFiles = new Set(toRepoRelative(rootDir, discovered.vitestFiles));
+        const scenarioVitestFiles = new Set(toRepoRelative(rootDir, discovered.scenarioVitestFiles));
+        const fastVitestFiles = new Set(toRepoRelative(rootDir, discovered.fastVitestFiles));
+        const scenarioRepresentatives = [
+            'tests/integration_scenario_roundtrip.test.ts',
+            'tests/integration_run_summary.test.ts',
+            'tests/scenario_continue_from_save_equivalence.test.ts',
+        ];
+        const fastRepresentatives = [
+            'tests/test_discovery_contract.test.ts',
+            'tests/desktop_packaging_contract.test.ts',
+            'tests/scenario_registry.test.ts',
+        ];
+
+        expect(discovered.fastVitestFiles.length + discovered.scenarioVitestFiles.length).toBe(discovered.vitestFiles.length);
+
+        for (const file of vitestFiles) {
+            const inScenarioSlice = scenarioVitestFiles.has(file);
+            const inFastSlice = fastVitestFiles.has(file);
+            expect(inScenarioSlice || inFastSlice, `${file} should belong to one vitest slice`).toBe(true);
+            expect(inScenarioSlice && inFastSlice, `${file} should not belong to both vitest slices`).toBe(false);
+        }
+
+        for (const file of scenarioRepresentatives) {
+            expect(scenarioVitestFiles.has(file), `${file} should be classified as scenario-heavy vitest`).toBe(true);
+            expect(fastVitestFiles.has(file), `${file} should not remain in the fast vitest slice`).toBe(false);
+        }
+
+        for (const file of fastRepresentatives) {
+            expect(fastVitestFiles.has(file), `${file} should stay in the fast vitest slice`).toBe(true);
+            expect(scenarioVitestFiles.has(file), `${file} should not drift into the scenario vitest slice`).toBe(false);
+        }
+    });
 });

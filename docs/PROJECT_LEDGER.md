@@ -1,3 +1,30 @@
+## [2026-04-15] test(repo): split vitest discovery into fast and scenario slices
+
+**Type:** Test-harness classification cleanup / repo-truth hardening
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tools/test/discover_test_files.mjs`, `tools/test/run_vitest_slice.mjs`, `tests/test_discovery_contract.test.ts`, `package.json`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+**Tests:** `npx.cmd vitest run tests/test_discovery_contract.test.ts` = 2/2 pass; `node tools/test/run_vitest_slice.mjs fast --list` and `node tools/test/run_vitest_slice.mjs scenario --list` both classify cleanly; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED - vitest discovery no longer treats every vitest suite as one undifferentiated lane, and the slow scenario-style residue now has an explicit owner boundary.
+
+### Summary
+
+1. **Vitest discovery now has two explicit slices:** `discoverTests(...)` still owns repo-wide classification, but it now returns `fastVitestFiles` and `scenarioVitestFiles` in addition to the raw `vitestFiles` list.
+2. **The split is based on real runner behavior, not filename superstition:** a vitest file lands in the scenario slice only when it actually calls scenario-heavy runners such as `runScenario`, `runScenarioDeterministic`, `runProbeCompare`, or `compareAgainstBaselines`.
+3. **The repo now has first-class scripts for both lanes:** `test:vitest:fast` and `test:vitest:scenario` route through `tools/test/run_vitest_slice.mjs`, so the broad test-review lane can keep shrinking without inventing a second ad hoc test scanner.
+
+### Why this mattered
+
+The audit residue had become narrower and more honest: after moving the desktop contract/startup guardrails into vitest, the real remaining split-harness debt was that all vitest files still looked equivalent even though some of them launch full scenario runs and some are tiny pure suites. Without an explicit slice boundary, "run vitest" stayed noisier and slower than it needed to be, and any future fast/slow gate would be tempted to reintroduce manual file lists.
+
+### Proof boundaries
+
+- **Direct proof:** `tests/test_discovery_contract.test.ts` now proves that every discovered vitest file belongs to exactly one slice, and it pins representative heavy suites (`integration_scenario_roundtrip`, `integration_run_summary`, `scenario_continue_from_save_equivalence`) into the scenario lane.
+- **Direct proof:** the slice runner lists both lanes from the same discovery authority with no overlap.
+- **Not claimed here:** this does **not** close the whole test-review lane. The giant `tests/command_authority.test.ts` suite and broader refactor/dedup residue remain open.
+
+---
+
 ## [2026-04-15] test(repo): move desktop contract guardrails onto the canonical vitest lane
 
 **Type:** Test-harness unification / repo-truth cleanup

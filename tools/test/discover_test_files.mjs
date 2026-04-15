@@ -33,16 +33,33 @@ export function fileNeedsJsdom(path) {
   return base === 'warroom_smoke.test.ts' || base === 'warroom_player_visibility.test.ts';
 }
 
+export function fileRunsScenario(path) {
+  const content = readFileSync(path, 'utf8');
+  return (
+    /\brunScenario\s*\(/.test(content) ||
+    /\brunScenarioDeterministic\s*\(/.test(content) ||
+    /\brunProbeCompare\s*\(/.test(content) ||
+    /\bcompareAgainstBaselines\s*\(/.test(content)
+  );
+}
+
 export function discoverTests(rootDir) {
   const testsDir = join(rootDir, 'tests');
   const files = listTsFiles(testsDir);
   const vitestFiles = [];
+  const fastVitestFiles = [];
+  const scenarioVitestFiles = [];
   const nodeTestFiles = [];
   const jsdomVitestFiles = [];
 
   for (const file of files) {
     if (fileUsesVitest(file)) {
       vitestFiles.push(file);
+      if (fileRunsScenario(file)) {
+        scenarioVitestFiles.push(file);
+      } else {
+        fastVitestFiles.push(file);
+      }
       if (fileNeedsJsdom(file)) jsdomVitestFiles.push(file);
     } else {
       nodeTestFiles.push(file);
@@ -51,6 +68,8 @@ export function discoverTests(rootDir) {
 
   return {
     vitestFiles,
+    fastVitestFiles,
+    scenarioVitestFiles,
     nodeTestFiles,
     jsdomVitestFiles,
   };

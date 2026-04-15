@@ -1,7 +1,7 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
-**Last Updated:** 2026-04-11
-**Current Version:** 0.8.4 (Autonomy Depth + Claude API)
+**Last Updated:** 2026-04-15
+**Current Version:** v0.8-to-v0.9 transition band (formal package semver still 0.8.1)
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."
 
@@ -340,7 +340,7 @@ No version bump â€” engineering milestone between feature releases. Stabili
 | Pathfinding | 3 separate engines (settlement BFS, OSID Dijkstra, graph BFS), no shared cache | 1 engine with caching, unified tie-breaking |
 | String hardcoding | Postures, classifications, faction IDs as string literals | TypeScript enums throughout |
 | Dead branches | ZoC/AoR era code, old bot_corps_directives paths | Removed |
-| Test suite unification | **Audited 2026-04-14, corrected 2026-04-15, advanced again 2026-04-15.** The broad audit still stands, but one cited dead file (`battle_resolution.test.ts`) was already gone by the time the closure pass reached `main`. Two bounded cleanups are now landed: 4 tiny v0.8-to-v0.9 guardrail files were consolidated into one suite, and the desktop contract/startup/packaging guardrails moved out of `node:test` into the canonical vitest lane with an explicit discovery contract. Remaining work is still the real work: oversized suites like `command_authority.test.ts`, broader node:test/vitest overlap, and slow scenario-style gate separation. | Keep shrinking split-harness debt: unify source/package contract suites to vitest, consolidate single-test files into domain files, dedup oversized files, then separate slow scenario gates. Audit: `docs/40_reports/implemented/20260414_TEST_SUITE_AUDIT.md` |
+| Test suite unification | **Audited 2026-04-14, corrected and advanced twice on 2026-04-15.** The broad audit still stands, but the residue is now narrower and more structured: 4 tiny v0.8-to-v0.9 guardrail files were consolidated into one suite, the desktop contract/startup/packaging guardrails moved out of `node:test` into the canonical vitest lane, and vitest discovery now splits into explicit `fast` vs `scenario` slices driven by real runner calls instead of filename folklore. Remaining work is now concentrated in the genuinely messy residue: oversized suites like `command_authority.test.ts` and broader overlap/dedup work. | Keep shrinking split-harness debt: unify remaining source/package contract suites to vitest, consolidate or split oversized files, and keep the new fast/scenario vitest split honest through the discovery contract. Audit: `docs/40_reports/implemented/20260414_TEST_SUITE_AUDIT.md` |
 | Execution entrypoints | `src/turn/pipeline.ts` + `src/sim/run_combat_browser.ts` are live variants adding cognitive overhead alongside canonical `src/sim/turn_pipeline.ts` | Consolidate or explicitly mark non-authoritative with ownership comment |
 | Magic numbers | bot_constants.ts scattered thresholds | Domain-grouped constant files |
 | Canon docs | Systems Manual and Game Bible reference pre-v0.8 architecture | Updated for v0.8 command chain |
