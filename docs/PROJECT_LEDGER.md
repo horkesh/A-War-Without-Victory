@@ -1,3 +1,22 @@
+## [2026-04-15] test(repo): migrate scenario reporting contracts onto vitest
+
+**Type:** Test-harness cleanup / scenario-reporting truth refresh
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/control_change_attribution.test.ts`, `tests/scenario_end_report_army_strengths.test.ts`, `tests/scenario_reporting_contracts.test.ts`, `tests/scenario_control_change_attribution_contract.test.ts`, `tests/scenario_end_report_h1_5.test.ts`, `tests/scenario_failure_reporting_h1_5_1.test.ts`, `tests/test_discovery_contract.test.ts`, `working-on.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/control_change_attribution.test.ts tests/scenario_end_report_army_strengths.test.ts tests/scenario_reporting_contracts.test.ts tests/scenario_control_change_attribution_contract.test.ts tests/scenario_end_report_h1_5.test.ts tests/scenario_failure_reporting_h1_5_1.test.ts tests/test_discovery_contract.test.ts` pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED after packet verification - the scenario reporting/report-shape residue now lives on vitest, with the one true artifact-heavy keeper (`scenario_vrs_operation_proof.test.ts`) left in `node:test` on purpose instead of by inertia.
+
+### Summary
+
+1. **Six reporting/report-shape files moved to the canonical harness:** the pure control-change/report-validator files and the lighter scenario-run artifact/report files now run under vitest instead of `node:test`.
+2. **One stale expectation was corrected to live report truth:** `computeArmyStrengthsSummary(...)` counts brigades from `buildFrontlineAssignedFormationSet(state)`, so reserve brigades and legacy `brigade_front_assignment` aliases do not inflate `assigned_brigades`.
+3. **Discovery now records the honest split:** the migrated reporting files are pinned into the fast vs scenario vitest slices, while `scenario_vrs_operation_proof.test.ts` is explicitly locked as a `node:test` harness keeper because it still owns multi-run artifact/determinism proof rather than simple report shape.
+
+### Why this mattered
+
+This band was exactly the kind of residue that can fool a cleanup campaign: some files were only old runner choice and could move cleanly, but one of them had already drifted into a false contract. Leaving it alone would have preserved a lie that reserves counted as live frontline assignment. Migrating the cluster forced the distinction between current report truth and historical test prose. It also forced an honest call on the remaining heavy proof: `scenario_vrs_operation_proof.test.ts` is still a harness/artifact gate, so pretending it should migrate just for aesthetic symmetry would have been theater.
+
 ## [2026-04-15] test(repo): refresh sector and movement residue contracts onto vitest
 
 **Type:** Test-harness cleanup / sector-movement truth refresh

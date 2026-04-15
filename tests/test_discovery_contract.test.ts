@@ -33,7 +33,10 @@ describe('test discovery contracts', () => {
         const scenarioRepresentatives = [
             'tests/integration_scenario_roundtrip.test.ts',
             'tests/integration_run_summary.test.ts',
+            'tests/scenario_control_change_attribution_contract.test.ts',
             'tests/scenario_continue_from_save_equivalence.test.ts',
+            'tests/scenario_end_report_h1_5.test.ts',
+            'tests/scenario_failure_reporting_h1_5_1.test.ts',
             'tests/scenario_init_control_apr1992.test.ts',
             'tests/scenario_init_formations.test.ts',
             'tests/victory_conditions_a2.test.ts',
@@ -45,6 +48,7 @@ describe('test discovery contracts', () => {
             'tests/combat_front_emergence.test.ts',
             'tests/combat_summary.test.ts',
             'tests/combat_state_schema.test.ts',
+            'tests/control_change_attribution.test.ts',
             'tests/bot_manager_a1.test.ts',
             'tests/bot_operation_objective_focus.test.ts',
             'tests/competence_valuations.test.ts',
@@ -83,6 +87,8 @@ describe('test discovery contracts', () => {
             'tests/negotiation_pressure.test.ts',
             'tests/organizational_penetration_formula.test.ts',
             'tests/scenario_registry.test.ts',
+            'tests/scenario_end_report_army_strengths.test.ts',
+            'tests/scenario_reporting_contracts.test.ts',
             'tests/sector_coverage_defense.test.ts',
             'tests/sector_frontline_contiguity_repro.test.ts',
             'tests/sector_offensive.test.ts',
@@ -123,5 +129,16 @@ describe('test discovery contracts', () => {
             expect(fastVitestFiles.has(file), `${file} should stay in the fast vitest slice`).toBe(true);
             expect(scenarioVitestFiles.has(file), `${file} should not drift into the scenario vitest slice`).toBe(false);
         }
+    });
+
+    it('keeps the heaviest scenario artifact proof in node:test until it stops needing harness-shaped execution', () => {
+        const rootDir = process.cwd();
+        const discovered = discoverTests(rootDir);
+        const vitestFiles = new Set(toRepoRelative(rootDir, discovered.vitestFiles));
+        const nodeTestFiles = new Set(toRepoRelative(rootDir, discovered.nodeTestFiles));
+        const keeper = 'tests/scenario_vrs_operation_proof.test.ts';
+
+        expect(nodeTestFiles.has(keeper), `${keeper} should remain a node:test harness keeper`).toBe(true);
+        expect(vitestFiles.has(keeper), `${keeper} should not drift into vitest discovery yet`).toBe(false);
     });
 });
