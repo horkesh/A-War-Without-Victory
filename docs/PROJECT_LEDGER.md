@@ -1,3 +1,23 @@
+## [2026-04-16] fix(ui): collapse Warroom new-campaign flow onto the sole live scenario
+
+**Type:** Desktop shell parity / Warroom flow simplification
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `src/ui/warroom/warroom.ts`, `src/ui/warroom/index.html`, `tests/warroom_new_campaign_flow_truth.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+**Tests:** `npx.cmd vitest run tests/warroom_new_campaign_flow_truth.test.ts tests/warroom_shell_layer.test.ts tests/ui_shell_navigation.test.ts` pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED after packet verification. Warroom no longer pretends the player is choosing among multiple campaign starts when only `apr_1992` is live. The desktop entry flow is now `Main Menu -> Side Picker -> startNewCampaign('apr_1992')`, with browser fallback using the same single-scenario assumption.
+
+### Summary
+
+1. **The fake scenario-selection step is gone:** `warroom.ts` no longer carries `pendingFaction`, `showScenarioPicker()`, or `wireScenarioPickerButtons()`, and `index.html` no longer renders the dead `scenario-picker` overlay with its single `apr_1992` card.
+2. **The side picker now launches the real campaign directly:** choosing a faction now calls `desktopBridge.startNewCampaign({ playerFaction: faction, scenarioKey: 'apr_1992' })` immediately instead of bouncing through a redundant second overlay.
+3. **Browser fallback matches the same truth:** the non-Electron fallback path now loads the single live `apr_1992` mock campaign directly for the chosen faction instead of pretending there is a second scenario-selection owner.
+4. **A source-contract test locks the flow:** `tests/warroom_new_campaign_flow_truth.test.ts` proves the zombie scenario-picker code and DOM are gone, and that the Warroom shell wires side-picker selection straight to the canonical live campaign key.
+
+### Why this mattered
+
+This was a real shell-parity bug, not mere UI tidying. The product currently has one sanctioned desktop campaign start: `apr_1992`. Keeping a second overlay for "scenario selection" when that overlay only offered the same single key created a false choice, extra click friction, and a second owner for something the product had already simplified elsewhere. The shell now tells the truth: the meaningful decision at campaign start is faction, not scenario.
+
 ## [2026-04-16] docs(test+roadmap): align desktop startup and v0.9 plan truth with landed repo state
 
 **Type:** Engineering docs truth / roadmap honesty / desktop shell contract

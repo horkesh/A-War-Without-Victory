@@ -9,8 +9,6 @@ import { setScenarioStartDate, turnToShortLabel } from './components/warroom_uti
 import flagHrhbUrl from './assets/flag_HRHB.webp?url';
 import flagRbihUrl from './assets/flag_RBiH.webp?url';
 import flagRsUrl from './assets/flag_RS.webp?url';
-// Scenario briefing images
-import scnApr1992Url from './assets/scenarios/apr1992_briefing.webp?url';
 // Main menu background (game start screen)
 import gameStartBgUrl from './assets/game start.webp?url';
 import { encodeShellHandoffCommand, type ShellHandoffCommand } from '../shared/shellHandoff.js';
@@ -36,8 +34,6 @@ class WarroomApp {
     private modalManager = new ModalManager();
 
     private desktopBridge: DesktopBridge | null = null;
-    /** Faction chosen in step 2, used when step 3 fires. */
-    private pendingFaction: FactionId | null = null;
     /** Tactical map iframe (lazily created on first open). */
     private tacticalMapIframe: HTMLIFrameElement | null = null;
     private tacticalMapReady = false;
@@ -73,8 +69,6 @@ class WarroomApp {
         // Wire overlay buttons immediately so "New Campaign" etc. work before assets finish loading
         this.wireMainMenuButtons();
         this.wireSidePickerButtons();
-        this.wireScenarioPickerButtons();
-
         const mapScene = document.getElementById('map-scene');
         if (mapScene) {
             mapScene.appendChild(this.warPlanningMap.getContainer());
@@ -256,11 +250,11 @@ class WarroomApp {
         }
     }
 
-    // ── 3-step campaign flow: Main Menu → Side Picker → Scenario Picker ──
+    // ── 2-step campaign flow: Main Menu → Side Picker → Campaign ──
 
     /** Show a specific overlay screen and hide others. */
-    private showScreen(screenId: 'main-menu' | 'side-picker' | 'scenario-picker' | 'none'): void {
-        const screens = ['main-menu', 'side-picker', 'scenario-picker'];
+    private showScreen(screenId: 'main-menu' | 'side-picker' | 'none'): void {
+        const screens = ['main-menu', 'side-picker'];
         for (const id of screens) {
             const el = document.getElementById(id);
             if (!el) continue;
@@ -301,23 +295,6 @@ class WarroomApp {
                 if (img) {
                     img.src = url;
                     img.alt = `${fid} flag`;
-                    img.onerror = () => { img.style.display = 'none'; };
-                }
-            }
-        }, 0);
-    }
-
-    /** STEP 3: Show the scenario picker. */
-    private showScenarioPicker(): void {
-        this.showScreen('scenario-picker');
-
-        // Defer scenario image loads
-        const scenarioImages: Record<string, string> = { apr1992: scnApr1992Url };
-        setTimeout(() => {
-            for (const [key, src] of Object.entries(scenarioImages)) {
-                const img = document.getElementById(`scn-img-${key}`) as HTMLImageElement | null;
-                if (img) {
-                    img.src = src;
                     img.onerror = () => { img.style.display = 'none'; };
                 }
             }
@@ -383,51 +360,30 @@ class WarroomApp {
             backBtn.onclick = () => this.showMainMenu();
         }
 
-        for (const btn of factionButtons) {
-            btn.onclick = () => {
-                const faction = btn.dataset.faction as FactionId | undefined;
-                if (!faction) return;
-                if (errorEl) { errorEl.textContent = ''; errorEl.classList.add('hidden'); }
-                this.pendingFaction = faction;
-                this.showScenarioPicker();
-            };
-        }
-    }
-
-    /** Wire scenario picker (step 3) button handlers. */
-    private wireScenarioPickerButtons(): void {
-        const backBtn = document.getElementById('scn-back');
-        const scenarioButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('.scn-option'));
-        const errorEl = document.getElementById('scn-error');
-
-        if (backBtn) {
-            backBtn.onclick = () => this.showSidePicker();
-        }
-
         const showError = (msg: string) => {
             if (errorEl) { errorEl.textContent = msg; errorEl.classList.remove('hidden'); }
         };
 
-        for (const btn of scenarioButtons) {
+        for (const btn of factionButtons) {
             btn.onclick = async () => {
-                const scenarioKey = btn.dataset.scenario as CampaignScenarioKey | undefined;
-                if (!scenarioKey || !this.pendingFaction) return;
+                const faction = btn.dataset.faction as FactionId | undefined;
+                if (!faction) return;
+                if (errorEl) { errorEl.textContent = ''; errorEl.classList.add('hidden'); }
 
                 if (!this.desktopBridge?.startNewCampaign) {
                     // Browser development mode fallback
-                    console.warn('[warroom] Desktop bridge unavailable, using fallback mock state for:', scenarioKey);
-                    await this.loadScenarioFallback(scenarioKey);
+                    console.warn('[warroom] Desktop bridge unavailable, using fallback mock state for apr_1992');
+                    await this.loadScenarioFallback(faction);
                     return;
                 }
 
-                // Disable all scenario buttons during loading
-                for (const b of scenarioButtons) b.disabled = true;
-                if (errorEl) { errorEl.textContent = ''; errorEl.classList.add('hidden'); }
+                // Disable all faction buttons during loading
+                for (const b of factionButtons) b.disabled = true;
 
                 try {
                     const result = await this.desktopBridge.startNewCampaign({
-                        playerFaction: this.pendingFaction,
-                        scenarioKey,
+                        playerFaction: faction,
+                        scenarioKey: 'apr_1992',
                     });
                     if (!result?.ok) {
                         showError(result?.error ?? 'Failed to start campaign.');
@@ -440,36 +396,34 @@ class WarroomApp {
                 } catch (error) {
                     showError(error instanceof Error ? error.message : String(error));
                 } finally {
-                    for (const b of scenarioButtons) b.disabled = false;
+                    for (const b of factionButtons) b.disabled = false;
                 }
             };
         }
     }
 
-    /** Browser fallback for starting a new campaign: constructs a basic mock state. */
-    private async loadScenarioFallback(scenarioKey: CampaignScenarioKey): Promise<void> {
+    /** Browser fallback for starting the single live desktop campaign key (`apr_1992`). */
+    private async loadScenarioFallback(faction: FactionId): Promise<void> {
         let turn = 0;
         let phase = 'peace';
         let polControllers: Record<string, string | null> | undefined;
 
-        if (scenarioKey === 'apr_1992') {
-            turn = 30;
-            phase = 'war';
-            try {
-                const r = await fetch('/data/derived/operational/operational_political_control.json');
-                if (r.ok) {
-                    const data = await r.json();
-                    polControllers = data.by_settlement_id;
-                }
-            } catch (err) {
-                console.warn('[warroom] Failed to load 1992 political control fallback:', err);
+        turn = 30;
+        phase = 'war';
+        try {
+            const r = await fetch('/data/derived/operational/operational_political_control.json');
+            if (r.ok) {
+                const data = await r.json();
+                polControllers = data.by_settlement_id;
             }
+        } catch (err) {
+            console.warn('[warroom] Failed to load 1992 political control fallback:', err);
         }
 
         await this.loadMockState({
             turn,
             phase,
-            faction: this.pendingFaction ?? undefined,
+            faction,
             politicalControllers: polControllers
         });
 

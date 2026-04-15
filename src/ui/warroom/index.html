@@ -133,7 +133,7 @@
             border: none;
         }
 
-        /* Full-screen overlay used by main menu, side picker, scenario picker */
+        /* Full-screen overlay used by the main menu and side picker */
         .mm-overlay {
             position: fixed;
             inset: 0;
@@ -237,34 +237,6 @@
                         <span class="sp-difficulty-badge sp-difficulty-moderate">MODERATE</span>
                         <span class="sp-faction-desc">Backed by Zagreb but squeezed between two wars. Will the alliance
                             hold, or will you fight alone?</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- STEP 3: Scenario selection (after faction is chosen) -->
-    <div id="scenario-picker" class="mm-overlay mm-hidden" aria-live="polite">
-        <div class="side-picker-card scenario-picker-card">
-            <div class="side-picker-header">
-                <span>Select Scenario</span>
-                <button type="button" class="side-picker-close" id="scn-back" aria-label="Back">&larr;</button>
-            </div>
-            <div class="side-picker-content">
-                <p class="sp-muted">Choose a starting scenario for your campaign.</p>
-                <div id="scn-error" class="sp-error hidden" role="alert"></div>
-                <div class="scn-options" role="group" aria-label="Scenario selection">
-                    <!-- Sep 1991 scenario removed (legacy) -->
-                    <button type="button" class="scn-option" id="scn-apr1992" data-scenario="apr_1992">
-                        <div class="scn-image-wrap">
-                            <img class="scn-image" id="scn-img-apr1992" src="" alt="April 1992 scenario">
-                        </div>
-                        <div class="scn-info">
-                            <span class="scn-title">War Start (Apr 1992) &mdash; Independence</span>
-                            <span class="scn-desc">The referendum has passed. JNA columns withdraw through burning
-                                suburbs, leaving arsenals behind. Three factions scramble to arm, organise, and seize
-                                ground before the frontlines harden. There will be no clean ending.</span>
-                        </div>
                     </button>
                 </div>
             </div>
