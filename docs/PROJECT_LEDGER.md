@@ -1,3 +1,31 @@
+## [2026-04-15] test(repo): migrate officer-system contracts onto vitest
+
+**Type:** Test-harness cleanup / officer substrate contract unification
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/officer_system.test.ts`, `tests/officer_quality.test.ts`, `tests/test_discovery_contract.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/officer_system.test.ts tests/officer_quality.test.ts tests/test_discovery_contract.test.ts` = 67/67 pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED - the remaining pure officer-quality and named-officer contracts now run on vitest, and discovery pins them into the fast slice.
+
+### Summary
+
+1. **The officer band moved together:** brigade officer-quality growth/back-compat rules and the named-officer lookup / succession / three-tier combat-mod contracts now live on the canonical vitest lane instead of `node:test`.
+2. **The real bug was in the fixtures, not the engine:** `tests/officer_system.test.ts` had a shallow `makeMinimalState(...)` helper that discarded nested `military` and `political` overrides, which made commander lookups and three-tier combat math appear broken under the new runner. The helper now preserves canonical nested partitions, and the RS three-tier attack case declares an explicit empty `corps_command` owner instead of depending on an accidental undefined path.
+3. **Discovery now remembers the officer lane:** representative officer files are pinned in the fast vitest slice so this band does not drift back into runner residue.
+
+### Why this mattered
+
+Officer quality and named-officer math sit directly on the command-effectiveness substrate that v0.9 keeps building on. Leaving them as a tiny split-harness island made the repo look less coherent than it really is, while the shallow-state helper was exactly the kind of stale test residue that can impersonate an engine regression.
+
+### Proof boundaries
+
+- **Direct proof:** both migrated officer suites pass under vitest.
+- **Direct proof:** discovery now pins representative officer files in the fast vitest slice.
+- **Direct proof:** the failing lookups were repaired by canonical nested-state fixture ownership, not by changing officer-system or combat-math runtime behavior.
+- **Not claimed here:** this does **not** add new officer gameplay or broaden UI proof; it closes a pure harness/fixture lane around already-live officer truth.
+
+---
+
 ## [2026-04-15] test(repo): migrate institutional competence and organizational-penetration contracts onto vitest
 
 **Type:** Test-harness cleanup / institutional-state contract unification

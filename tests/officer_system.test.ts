@@ -4,7 +4,7 @@
  * Tests for officer_system.ts functions: hash, lookups, modifiers,
  * initialization, succession, validation, and three-tier combat math.
  */
-import { describe, it } from 'node:test';
+import { describe, it } from 'vitest';
 import * as assert from 'node:assert/strict';
 import type { FactionId, FormationState, GameState } from '../src/state/game_state.js';
 import type { NamedOfficer, NamedOfficerState } from '../src/state/officer_types.js';
@@ -63,17 +63,26 @@ function makeOfficerState(overrides: Partial<NamedOfficerState> & { officer_id: 
 }
 
 function makeMinimalState(overrides?: Partial<GameState>): GameState {
+    const overrideMilitary = (overrides?.military ?? {}) as Record<string, unknown>;
+    const overridePolitical = (overrides?.political ?? {}) as Record<string, unknown>;
+
     return {
-  meta: { turn: 0, phase: 'war', scenario_id: 'test' },
-  factions: {},
-  ...overrides,
-  military: {
-    formations: {}
-  } as any,
-  political: {
-    settlements: {}
-  } as any,
-} as unknown as GameState;
+        meta: { turn: 0, phase: 'war', scenario_id: 'test' },
+        factions: [],
+        ...Object.fromEntries(
+            Object.entries(overrides ?? {}).filter(([key]) => key !== 'military' && key !== 'political'),
+        ),
+        military: {
+            formations: {},
+            corps_command: {},
+            ...overrideMilitary,
+        } as any,
+        political: {
+            settlements: {},
+            political_controllers: {},
+            ...overridePolitical,
+        } as any,
+    } as unknown as GameState;
 }
 
 function makeFormation(overrides: Partial<FormationState> & { id: string; faction: FactionId }): FormationState {
@@ -89,6 +98,19 @@ function makeFormation(overrides: Partial<FormationState> & { id: string; factio
         cohesion: 70,
         ...overrides,
     } as unknown as FormationState;
+}
+
+function makeCorpsCommand(overrides: Record<string, unknown> = {}): any {
+    return {
+        command_span: 0,
+        subordinate_count: 0,
+        og_slots: 0,
+        active_ogs: [],
+        corps_exhaustion: 0,
+        stance: 'hold',
+        active_operations: [],
+        ...overrides,
+    };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -267,7 +289,10 @@ describe('getOfficerCombatMod', () => {
     named_officer_data: [data],
     named_officers: {
                 cmd: makeOfficerState({ officer_id: 'cmd', assigned_corps_id: 'vrs_1kk' }),
-            }
+            },
+            corps_command: {
+                vrs_1kk: makeCorpsCommand(),
+            },
   } as any,
 });
         const formation = makeFormation({ id: 'bde1', faction: 'RS', corps_id: 'vrs_1kk', officer_quality: 0.50 });
@@ -319,7 +344,10 @@ describe('getThreeTierOfficerMod', () => {
     named_officer_data: [data],
     named_officers: {
                 cmd: makeOfficerState({ officer_id: 'cmd', assigned_corps_id: 'vrs_1kk' }),
-            }
+            },
+            corps_command: {
+                vrs_1kk: makeCorpsCommand(),
+            },
   } as any,
 });
         const formation = makeFormation({ id: 'bde1', faction: 'RS', corps_id: 'vrs_1kk', officer_quality: 0.50 });

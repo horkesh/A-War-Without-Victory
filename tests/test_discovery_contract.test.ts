@@ -62,6 +62,8 @@ describe('test discovery contracts', () => {
             'tests/generate_formations.test.ts',
             'tests/formations_validate.test.ts',
             'tests/militia_pools.test.ts',
+            'tests/officer_quality.test.ts',
+            'tests/officer_system.test.ts',
             'tests/recruitment_engine.test.ts',
             'tests/negotiation_pressure.test.ts',
             'tests/organizational_penetration_formula.test.ts',
