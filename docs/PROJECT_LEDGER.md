@@ -3299,6 +3299,26 @@ Fresh 40-week run `n1426` validates cleanly. Scripted final-save proof shows `0`
 ### Artifacts
 - None
 
+## [2026-04-15] test(repo): migrate scenario residue onto vitest
+
+**Type:** Test harness unification / scenario-slice cleanup
+**Files:** `tests/calibration.test.ts`, `tests/scenario_activity_diagnostics_h1_7.test.ts`, `tests/scenario_baseline_ops_h1_9.test.ts`, `tests/scenario_bots_determinism_h2_4.test.ts`, `tests/scenario_determinism_h1_1.test.ts`, `tests/scenario_probe_compare_h1_8.test.ts`, `tests/test_discovery_contract.test.ts`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Status:** VERIFIED - targeted vitest, tsc, and desktop:map:build clean
+
+### Summary of changes
+1. **Six scenario/calibration contracts moved into the canonical Vitest lanes** - `calibration`, `scenario_activity_diagnostics_h1_7`, `scenario_baseline_ops_h1_9`, `scenario_bots_determinism_h2_4`, `scenario_determinism_h1_1`, and `scenario_probe_compare_h1_8` now run under Vitest instead of `node:test`.
+2. **Discovery truth was refreshed again** - `tests/test_discovery_contract.test.ts` now pins this band in the scenario slice where appropriate and keeps `calibration.test.ts` in the fast slice.
+3. **One apparent migration candidate was explicitly rejected for this packet** - `systems_2_3_4_7_9_10_acceptance_gates.test.ts` stays out of the Vitest packet because the migration attempt exposed a live contract gap: three active formations in the `apr1992_phase_ii_4w` output are missing `equipment_state` and `doctrine_state`.
+4. **Runner residue is now small enough to be explicit** - the remaining `node:test` inventory is down to seven files, all of which are now either heavy baseline/artifact keepers or a real owner-gap sentinel.
+
+### Verification
+- `npx.cmd vitest run tests/calibration.test.ts tests/scenario_activity_diagnostics_h1_7.test.ts tests/scenario_baseline_ops_h1_9.test.ts tests/scenario_bots_determinism_h2_4.test.ts tests/scenario_determinism_h1_1.test.ts tests/scenario_probe_compare_h1_8.test.ts tests/test_discovery_contract.test.ts`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run desktop:map:build`
+
+### Artifacts
+- None
+
 ## [2026-04-15] test(repo): migrate bootstrap and determinism residue onto vitest
 
 **Type:** Test harness unification / deterministic-helper hardening

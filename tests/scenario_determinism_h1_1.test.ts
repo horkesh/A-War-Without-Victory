@@ -8,7 +8,7 @@ import assert from 'node:assert';
 import { existsSync } from 'node:fs';
 import { readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
-import { test } from 'node:test';
+import { test } from 'vitest';
 
 import { computeRunId, loadScenario } from '../src/scenario/scenario_loader.js';
 import { runScenario } from '../src/scenario/scenario_runner.js';

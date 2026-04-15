@@ -8,7 +8,7 @@
  */
 
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 
 import { computeFrontEdges } from '../src/map/front_edges.js';
 import type { EdgeRecord, SettlementRecord } from '../src/map/settlements.js';
