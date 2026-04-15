@@ -1,3 +1,30 @@
+## [2026-04-15] feat(test): unify dual-React and add VerdictScreen live-hook mount proof
+
+**Type:** Infrastructure fix + component mount proof (dual-React unification)
+**Files:** `vitest.config.ts` (+resolve.alias for react/zustand chain), `package.json` (+zustand, use-sync-external-store as root devDeps), `endgame_verdict_screen_mount.test.ts` (NEW — 14 tests)
+**Tests:** 14 new mount tests. 125 total endgame UI tests pass across 7 suites.
+**Status:** VERIFIED — tsc clean, 125/125 tests, desktop:map:build clean.
+
+### Summary
+Closed the final endgame proof gap: VerdictScreen mounted with live React hooks.
+
+**Dual-React fix:** UI workspace had its own react/react-dom/zustand/use-sync-external-store in `src/ui/map/node_modules` — separate module singletons from root copies. When `renderToStaticMarkup` (root react-dom) set up the hooks dispatcher but VerdictScreen's `useState` (UI workspace react) read from a different dispatcher → null crash. Fix: install `zustand@4.5.7` and `use-sync-external-store@1.6.0` at root as devDependencies; add `resolve.alias` in `vitest.config.ts` forcing all react/react-dom/zustand/use-sync-external-store imports to root copies. Single React instance for all test rendering.
+
+**VerdictScreen mount proof (14 tests):** Real component mounted with real `useState` hook. Store selector replaced via `vi.mock` with test-controlled state object. Proves: gating (null→empty, false→empty, true→full surface), outcome label, date, faction tabs with outcome_class badges, pyrrhic score, grade description, dimension bars, footer, War Cost section, divergence notes in order, cost section gating, and FallbackGameOver path.
+
+### Final Endgame Proof Ladder (COMPLETE)
+
+| Layer | Proof Level | Tests |
+|-------|------------|-------|
+| Engine truth (scoring, rupture, cost ledger) | Direct scenario + harness proof | 70+ |
+| VerdictScreen (canonical owner, live hooks) | **Direct live-hook mount proof** | **14** |
+| FactionReport + WarCostSummary (hookless) | Direct component mount proof | 20 |
+| Composition logic (buildEndgameSummary, formatters) | Direct composition proof | 74 |
+| Store state acceptance | Direct store-state proof | 5 |
+| App reachability | Structural source proof | 4+4 |
+| Full App.tsx tree mount | Not proven (would require full shell mock) | — |
+| Desktop Electron shell | Not proven (requires live Electron) | — |
+
 ## [2026-04-15] test(ui): add store-state and structural gating proof for VerdictScreen
 
 **Type:** Integration proof / structural contract (final endgame proof packet)
