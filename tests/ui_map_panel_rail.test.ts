@@ -1,9 +1,8 @@
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, it } from 'vitest';
 
 import * as panelRail from '../src/ui/map/components/panelRail.js';
 
-test('derivePanelRailState keeps sector as primary when a brigade drills in from it', () => {
+it('derivePanelRailState keeps sector as primary when a brigade drills in from it', () => {
     const rail = (panelRail as typeof panelRail & {
         derivePanelRailState?: (state: {
             selectedOsid: string | null;
@@ -22,10 +21,10 @@ test('derivePanelRailState keeps sector as primary when a brigade drills in from
         selectedOperationKey: null,
     });
 
-    assert.deepStrictEqual(rail, { primary: 'sector', secondary: 'formation' });
+    expect(rail).toEqual({ primary: 'sector', secondary: 'formation' });
 });
 
-test('derivePanelRailState keeps army as primary when corps drills in from it', () => {
+it('derivePanelRailState keeps army as primary when corps drills in from it', () => {
     const rail = (panelRail as typeof panelRail & {
         derivePanelRailState?: (state: {
             selectedOsid: string | null;
@@ -44,10 +43,10 @@ test('derivePanelRailState keeps army as primary when corps drills in from it', 
         selectedOperationKey: null,
     });
 
-    assert.deepStrictEqual(rail, { primary: 'army', secondary: 'corps' });
+    expect(rail).toEqual({ primary: 'army', secondary: 'corps' });
 });
 
-test('derivePanelRailState keeps direct operation selection off the panel rail', () => {
+it('derivePanelRailState falls back to inbox when operation selection has no panel-rail owner', () => {
     const rail = (panelRail as typeof panelRail & {
         derivePanelRailState?: (state: {
             selectedOsid: string | null;
@@ -66,5 +65,5 @@ test('derivePanelRailState keeps direct operation selection off the panel rail',
         selectedOperationKey: 'rbih_corps|Operation Drina',
     });
 
-    assert.deepStrictEqual(rail, { primary: null, secondary: null });
+    expect(rail).toEqual({ primary: 'inbox', secondary: null });
 });

@@ -1,9 +1,8 @@
-import assert from 'node:assert/strict';
-import { test } from 'node:test';
+import { expect, it } from 'vitest';
 
 import { buildOperationalWeightGeoJSON } from '../src/ui/map/map/builders/buildOperationalWeightGeoJSON.js';
 
-test('buildOperationalWeightGeoJSON classifies frontline effort from sector assignment and tempo', () => {
+it('buildOperationalWeightGeoJSON classifies frontline effort from sector assignment and tempo', () => {
     const geojson = {
         type: 'FeatureCollection',
         features: [
@@ -59,7 +58,7 @@ test('buildOperationalWeightGeoJSON classifies frontline effort from sector assi
     ] as any;
 
     const result = buildOperationalWeightGeoJSON(geojson, sectors as any, frontEdges as any, operations);
-    assert.equal(result.features.length, 1);
-    assert.equal(result.features[0]?.properties.effort_class, 'main');
-    assert.equal(result.features[0]?.properties.has_active_operation, true);
+    expect(result.features.length).toBe(1);
+    expect(result.features[0]?.properties.effort_class).toBe('main');
+    expect(result.features[0]?.properties.has_active_operation).toBe(true);
 });

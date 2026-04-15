@@ -1,3 +1,29 @@
+## [2026-04-15] test(repo): move small UI contract shards onto vitest
+
+**Type:** Test-harness cleanup / small-suite migration
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/ui_map_browser_safe_imports.test.ts`, `tests/ui_map_panel_rail.test.ts`, `tests/ui_map_operations_mode.test.ts`, `tests/ui_map_deck_counter_visibility.test.ts`, `tests/ui_map_corps_selection_highlight.test.ts`, `tests/test_discovery_contract.test.ts`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/ui_map_browser_safe_imports.test.ts tests/ui_map_panel_rail.test.ts tests/ui_map_operations_mode.test.ts tests/ui_map_deck_counter_visibility.test.ts tests/ui_map_corps_selection_highlight.test.ts tests/test_discovery_contract.test.ts` = 13/13 pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED - five small UI/source contract suites now live on the canonical vitest lane, and the panel-rail expectation matches the current owner code again.
+
+### Summary
+
+1. **Five pure UI/source contract shards no longer sit in `node:test` by inertia:** browser-safe import bundling, panel-rail state, operational-weight mode, deck counter visibility, and corps-selection highlight tests now import `vitest`.
+2. **Discovery truth was strengthened at the same time:** `tests/test_discovery_contract.test.ts` now pins two of those UI shards as fast-lane vitest representatives so they cannot silently drift back.
+3. **One stale expectation was corrected honestly:** `derivePanelRailState(...)` currently falls back to `{ primary: 'inbox', secondary: null }` when an operation selection has no panel-rail owner, so the old test expectation of `{ primary: null, secondary: null }` was wrong and is now aligned to source truth.
+
+### Why this mattered
+
+Once the big harness seams were closed, the remaining residue included a handful of tiny UI/source contract files that were still living in `node:test` for no good reason. Moving them tightens the daily vitest lane further and makes the remaining overlap work more obviously about the genuinely hard cases, not the easy leftovers.
+
+### Proof boundaries
+
+- **Direct proof:** the five migrated suites pass under vitest, and discovery still classifies them into the fast slice.
+- **Not claimed here:** this does **not** close the whole mixed-harness lane. There are still other `node:test` holdouts that may or may not deserve migration.
+
+---
+
 ## [2026-04-15] test(repo): split command-authority proof into domain suites
 
 **Type:** Test-structure cleanup / oversized-suite decomposition

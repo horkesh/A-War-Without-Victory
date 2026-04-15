@@ -1,5 +1,4 @@
-import assert from 'node:assert/strict';
-import { test } from 'node:test';
+import { expect, it } from 'vitest';
 
 import {
     collectEmphasizedFormationIds,
@@ -18,7 +17,7 @@ function makeFeature(id: string, corpsId: string | null, sectorId: string | null
     };
 }
 
-test('corps selection highlights all corps brigades, not only brigades with sector assignments', () => {
+it('corps selection highlights all corps brigades, not only brigades with sector assignments', () => {
     const formationsGeoJson = {
         type: 'FeatureCollection',
         features: [
@@ -43,14 +42,13 @@ test('corps selection highlights all corps brigades, not only brigades with sect
         selectedCorpsFrontSectorId: null,
     });
 
-    assert.deepEqual(
+    expect(
         ids,
-        ['rs_front', 'rs_reserve'],
         'corps selection should include reserve/non-sector brigades belonging to the corps',
-    );
+    ).toEqual(['rs_front', 'rs_reserve']);
 });
 
-test('sector selection remains sector-scoped', () => {
+it('sector selection remains sector-scoped', () => {
     const formationsGeoJson = {
         type: 'FeatureCollection',
         features: [
@@ -68,10 +66,10 @@ test('sector selection remains sector-scoped', () => {
         selectedCorpsFrontSectorId: 'sector:1',
     });
 
-    assert.deepEqual(ids, ['rs_front']);
+    expect(ids).toEqual(['rs_front']);
 });
 
-test('corps emphasis ids stay roster-scoped instead of collapsing back to active sector buckets', () => {
+it('corps emphasis ids stay roster-scoped instead of collapsing back to active sector buckets', () => {
     const formationsGeoJson = {
         type: 'FeatureCollection',
         features: [
@@ -89,9 +87,8 @@ test('corps emphasis ids stay roster-scoped instead of collapsing back to active
         selectedCorpsFrontSectorId: null,
     });
 
-    assert.deepEqual(
+    expect(
         ids,
-        ['rs_front', 'rs_rear', 'rs_reserve'],
         'corps emphasis should include all visible corps brigades, not only sector-attached ones',
-    );
+    ).toEqual(['rs_front', 'rs_rear', 'rs_reserve']);
 });

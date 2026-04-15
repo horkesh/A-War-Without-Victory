@@ -38,6 +38,8 @@ describe('test discovery contracts', () => {
             'tests/test_discovery_contract.test.ts',
             'tests/desktop_packaging_contract.test.ts',
             'tests/scenario_registry.test.ts',
+            'tests/ui_map_panel_rail.test.ts',
+            'tests/ui_map_deck_counter_visibility.test.ts',
         ];
 
         expect(discovered.fastVitestFiles.length + discovered.scenarioVitestFiles.length).toBe(discovered.vitestFiles.length);

@@ -1,5 +1,4 @@
-import assert from 'node:assert/strict';
-import { test } from 'node:test';
+import { expect, it } from 'vitest';
 
 import {
     buildTacticalDeckLayers,
@@ -20,7 +19,7 @@ function makeFeature(id: string, isStackTop: boolean) {
     };
 }
 
-test('deck formation layer keeps all formation counters visible in normal state', () => {
+it('deck formation layer keeps all formation counters visible in normal state', () => {
     const formationsGeoJson = {
         type: 'FeatureCollection',
         features: [
@@ -33,11 +32,11 @@ test('deck formation layer keeps all formation counters visible in normal state'
     const layers = buildTacticalDeckLayers(formationsGeoJson, false, true, 10, []);
     const baseLayer = layers.find((layer: any) => layer.id === 'deck-formations-icons') as any;
 
-    assert.ok(baseLayer, 'expected base Deck icon layer');
-    assert.equal(baseLayer.props.data.length, 3, 'base Deck layer should render every formation feature');
+    expect(baseLayer, 'expected base Deck icon layer').toBeTruthy();
+    expect(baseLayer.props.data.length, 'base Deck layer should render every formation feature').toBe(3);
 });
 
-test('highlight overlay remains a styling layer, not a visibility backdoor', () => {
+it('highlight overlay remains a styling layer, not a visibility backdoor', () => {
     const formationsGeoJson = {
         type: 'FeatureCollection',
         features: [
@@ -50,27 +49,24 @@ test('highlight overlay remains a styling layer, not a visibility backdoor', () 
     const baseLayer = layers.find((layer: any) => layer.id === 'deck-formations-icons') as any;
     const highlightedLayer = layers.find((layer: any) => layer.id === 'deck-formations-highlighted') as any;
 
-    assert.ok(baseLayer, 'expected base Deck icon layer');
-    assert.ok(highlightedLayer, 'expected highlighted Deck icon layer');
-    assert.equal(baseLayer.props.data.length, 2, 'normal visibility should already include highlighted formations');
-    assert.deepEqual(
+    expect(baseLayer, 'expected base Deck icon layer').toBeTruthy();
+    expect(highlightedLayer, 'expected highlighted Deck icon layer').toBeTruthy();
+    expect(baseLayer.props.data.length, 'normal visibility should already include highlighted formations').toBe(2);
+    expect(
         highlightedLayer.props.data.map((feature: any) => feature.properties.id),
-        ['b_hidden'],
         'highlight layer should only restyle requested formations',
-    );
+    ).toEqual(['b_hidden']);
 });
 
-test('base deck counters stay faction-colored while selected formations get a white overlay', () => {
+it('base deck counters stay faction-colored while selected formations get a white overlay', () => {
     const feature = makeFeature('b_selected', false) as any;
 
-    assert.equal(
+    expect(
         getBaseFormationIconId(feature),
-        'brigade__RS__h100__m100_b_selected',
         'base layer should keep the selected formation in faction colors',
-    );
-    assert.equal(
+    ).toBe('brigade__RS__h100__m100_b_selected');
+    expect(
         getHighlightedFormationIconId(feature),
-        'white__brigade__RS__h100__m100_b_selected',
         'highlight overlay should provide the white selected counter',
-    );
+    ).toBe('white__brigade__RS__h100__m100_b_selected');
 });

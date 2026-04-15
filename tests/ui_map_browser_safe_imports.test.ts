@@ -1,9 +1,8 @@
-import assert from 'node:assert';
 import path from 'node:path';
-import { test } from 'node:test';
 import { build } from 'esbuild';
+import { expect, it } from 'vitest';
 
-test('browser-safe combat imports bundle without Node builtins', async () => {
+it('browser-safe combat imports bundle without Node builtins', async () => {
     const repoRoot = process.cwd();
 
     const result = await build({
@@ -23,8 +22,8 @@ test('browser-safe combat imports bundle without Node builtins', async () => {
     });
 
     const output = result.outputFiles.map(file => file.text).join('\n');
-    assert.ok(!output.includes('node:fs'), 'browser bundle should not reference node:fs');
-    assert.ok(!output.includes('node:path'), 'browser bundle should not reference node:path');
-    assert.ok(!output.includes(' from "fs"'), 'browser bundle should not reference fs');
-    assert.ok(!output.includes(' from "path"'), 'browser bundle should not reference path');
+    expect(output.includes('node:fs'), 'browser bundle should not reference node:fs').toBe(false);
+    expect(output.includes('node:path'), 'browser bundle should not reference node:path').toBe(false);
+    expect(output.includes(' from "fs"'), 'browser bundle should not reference fs').toBe(false);
+    expect(output.includes(' from "path"'), 'browser bundle should not reference path').toBe(false);
 });
