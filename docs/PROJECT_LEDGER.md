@@ -1,3 +1,22 @@
+## [2026-04-16] docs(plan): retire Warroom shell recovery as an active pre-0.9 lane
+
+**Type:** Roadmap truth cleanup
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `docs/plans/MASTER_ROADMAP.md`, `tests/docs_desktop_v09_truth.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+**Tests:** `npx.cmd vitest run tests/docs_desktop_v09_truth.test.ts` pass; `git diff --check` clean.
+**Status:** VERIFIED after packet verification. The roadmap no longer presents Warroom React shell recovery as an active blocking side lane; after the host-entry closure, the remaining work is ordinary parity/polish backlog rather than pre-0.9 shell-truth debt.
+
+### Summary
+
+1. **The active-side-lane list now matches repo truth:** `MASTER_ROADMAP.md` marks `Warroom React Shell Recovery / Feature Parity` resolved as a pre-0.9 truth lane instead of leaving it on the board as if shell ownership were still unsettled.
+2. **The closure wording is narrow and honest:** the roadmap now states the actual reason the lane is closed - loaded-game Warroom entry stays on the React shell path and the shell/test ownership story is consistent - while keeping modal behavior, shell cohesion, and interactive room/map affordance explicitly demoted to ordinary polish backlog.
+3. **A docs-truth test now guards the retirement:** `tests/docs_desktop_v09_truth.test.ts` now checks for the resolved Warroom-lane wording and prevents the old "still active" line from drifting back into the roadmap.
+
+### Why this mattered
+
+The repo had already crossed the line where keeping this lane active was misleading. The remaining work in that area is still real, but it is no longer a shell-recovery blocker. Retiring the lane now keeps the roadmap from reopening already-closed ownership work and helps future packets focus on genuinely live reds instead of stale status prose.
+
 ## [2026-04-16] fix(ui): keep loaded Warroom entry on the React shell path
 
 **Type:** Warroom host-boundary truth closure
