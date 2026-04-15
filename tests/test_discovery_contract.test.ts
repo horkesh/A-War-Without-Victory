@@ -82,6 +82,9 @@ describe('test discovery contracts', () => {
             'tests/turn_pipeline_order.test.ts',
             'tests/ui_map_panel_rail.test.ts',
             'tests/ui_map_deck_counter_visibility.test.ts',
+            'tests/ui_map_fog_and_operation_contracts.test.ts',
+            'tests/ui_map_front_lines_phase_a.test.ts',
+            'tests/ui_map_game_state_adapter.test.ts',
         ];
 
         expect(discovered.fastVitestFiles.length + discovered.scenarioVitestFiles.length).toBe(discovered.vitestFiles.length);

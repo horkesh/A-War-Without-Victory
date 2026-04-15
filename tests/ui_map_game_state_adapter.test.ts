@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 
 import { parseGameState } from '../src/ui/map/data/GameStateAdapter.js';
 import { extractWarData } from '../src/ui/warroom/data/war_data_extractor.js';
@@ -302,6 +302,18 @@ test('parseGameState derives operation readiness and offensive metadata', () => 
   political: {
     political_controllers: {}
   } as any,
+});
+
+    const operation = parsed.operations?.[0];
+    assert.ok(operation);
+    assert.equal(operation?.min_attack_outcome, 'costly_victory');
+    assert.equal(operation?.tempo, 'all_out');
+    assert.equal(operation?.schwerpunkt_osid, 'op:drina:1');
+    assert.equal(operation?.artillery_preparation, true);
+    assert.equal(operation?.readiness?.supply, 0.75);
+    assert.equal(operation?.readiness?.intel, 0.65);
+    assert.equal(operation?.avg_cohesion, 70);
+    assert.equal(operation?.avg_personnel_pct, 0.7);
 });
 
 test('parseGameState scopes player-facing operations, operation history, active operations, and reserve requests', () => {
@@ -678,18 +690,6 @@ test('parseGameState derives legacy AAR provenance when new provenance fields ar
     assert.deepEqual(parsed.operationHistory?.[0]?.objectives_held_without_logged_capture, ['osid_a', 'osid_b']);
 });
 
-    const operation = parsed.operations?.[0];
-    assert.ok(operation);
-    assert.equal(operation?.min_attack_outcome, 'costly_victory');
-    assert.equal(operation?.tempo, 'all_out');
-    assert.equal(operation?.schwerpunkt_osid, 'op:drina:1');
-    assert.equal(operation?.artillery_preparation, true);
-    assert.equal(operation?.readiness?.supply, 0.75);
-    assert.equal(operation?.readiness?.intel, 0.65);
-    assert.equal(operation?.avg_cohesion, 70);
-    assert.equal(operation?.avg_personnel_pct, 0.7);
-});
-
 test('parseGameState exposes municipality support orders for the player faction UI', () => {
     const parsed = parseGameState({
   meta: { turn: 9, phase: 'war', player_faction: 'RBiH' },
@@ -750,6 +750,33 @@ test('parseGameState maps sim-owned command briefing without rebuilding it in th
   } as any,
 });
 
+    const briefing = (parsed as typeof parsed & {
+        commandBriefing?: {
+            headline: string;
+            criticalCount: number;
+            pendingCount: number;
+            items: Array<{
+                id: string;
+                kind: string;
+                severity: string;
+                target: { type: string };
+            }>;
+        };
+    }).commandBriefing;
+
+    assert.ok(briefing);
+    assert.equal(briefing?.criticalCount, 1);
+    assert.equal(briefing?.pendingCount, 2);
+    assert.equal(briefing?.headline, '2 items for your review.');
+    assert.deepStrictEqual(
+        briefing?.items.map((item) => `${item.id}:${item.kind}:${item.severity}:${item.target.type}`),
+        [
+            'cmd-1:command:critical:corps',
+            'hum-1:humanitarian:warning:enclaves',
+        ]
+    );
+});
+
 test('parseGameState maps the canonical operational SITREP packet from extractWarData', () => {
     const rawState = {
         meta: { turn: 9, phase: 'war', player_faction: 'RBiH' },
@@ -806,31 +833,4 @@ test('parseGameState maps the canonical operational SITREP packet from extractWa
     assert.deepStrictEqual(parsed.operationalSitrep?.operations, expected.operations);
     assert.deepStrictEqual(parsed.operationalSitrep?.alerts, expected.alerts);
     assert.strictEqual(parsed.operationalSitrep?.headline, expected.headline);
-});
-
-    const briefing = (parsed as typeof parsed & {
-        commandBriefing?: {
-            headline: string;
-            criticalCount: number;
-            pendingCount: number;
-            items: Array<{
-                id: string;
-                kind: string;
-                severity: string;
-                target: { type: string };
-            }>;
-        };
-    }).commandBriefing;
-
-    assert.ok(briefing);
-    assert.equal(briefing?.criticalCount, 1);
-    assert.equal(briefing?.pendingCount, 2);
-    assert.equal(briefing?.headline, '2 items for your review.');
-    assert.deepStrictEqual(
-        briefing?.items.map((item) => `${item.id}:${item.kind}:${item.severity}:${item.target.type}`),
-        [
-            'cmd-1:command:critical:corps',
-            'hum-1:humanitarian:warning:enclaves',
-        ]
-    );
 });

@@ -1,3 +1,31 @@
+## [2026-04-15] test(repo): migrate UI map boundary contracts onto vitest
+
+**Type:** Test-harness cleanup / GUI truth-boundary hardening
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/ui_map_game_state_adapter.test.ts`, `tests/ui_map_front_lines_phase_a.test.ts`, `tests/ui_map_fog_and_operation_contracts.test.ts`, `tests/test_discovery_contract.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/ui_map_game_state_adapter.test.ts tests/ui_map_front_lines_phase_a.test.ts tests/ui_map_fog_and_operation_contracts.test.ts tests/test_discovery_contract.test.ts` = 25/25 pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED - the remaining UI map boundary contracts in this residue band now run under vitest, and the adapter suite no longer depends on `node:test` nested-subtest semantics.
+
+### Summary
+
+1. **The map-boundary trio moved together:** `ui_map_game_state_adapter`, `ui_map_front_lines_phase_a`, and `ui_map_fog_and_operation_contracts` now live on the canonical vitest lane.
+2. **This packet was not just an import flip:** `tests/ui_map_game_state_adapter.test.ts` had two assertions trapped behind old `node:test` nested-subtest structure. The packet flattened those into real top-level Vitest tests so the adapter/command-briefing/SITREP proof is actually collected and executed under the new runner.
+3. **Discovery now remembers the GUI lane:** representative UI map boundary files are pinned in the fast vitest slice so these map-shell contracts stay with the rest of the GUI truth boundary.
+
+### Why this mattered
+
+If the remaining pre-0.9 GUI residue is worth keeping, it has to sit on the same canonical harness as the rest of the repo and actually execute the adapter assertions it claims to own. This packet closes that gap without inventing new UI behavior.
+
+### Proof boundaries
+
+- **Direct proof:** all 3 migrated UI map suites pass under vitest.
+- **Direct proof:** discovery now pins representative UI map boundary files in the fast vitest slice.
+- **Direct proof:** the adapter/briefing/SITREP assertions are now top-level collected tests, not nested `node:test` leftovers.
+- **Not claimed here:** this does **not** broaden browser/Electron interaction proof beyond these boundary contracts; it keeps the existing GUI truth surfaces on the canonical runner.
+
+---
+
 ## [2026-04-15] test(repo): migrate negotiation and political-helper contracts onto vitest
 
 **Type:** Test-harness cleanup / political-helper residue audit
