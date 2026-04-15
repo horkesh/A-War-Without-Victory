@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { describe, it } from 'node:test';
+import { describe, it } from 'vitest';
 
 import type { GameState } from '../src/state/game_state.js';
 import { checkOrphanOperationBrigades } from '../src/scenario/anomaly_checks_extended.js';

@@ -1,5 +1,5 @@
-import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
+import { describe, it } from 'vitest';
 
 import { injectPrePlannedOperations, injectQueuedOperation, _ALL_PRE_PLANNED } from '../src/sim/combat/pre_planned_operations.js';
 import { collectOpInjectionWarnings } from '../src/sim/combat/operation_validation.js';

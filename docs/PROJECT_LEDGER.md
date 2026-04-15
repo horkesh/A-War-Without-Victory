@@ -1,3 +1,22 @@
+## [2026-04-15] test(repo): migrate operation injection and anomaly contracts onto vitest
+
+**Type:** Test-harness cleanup / operations-substrate residue audit
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/pre_planned_operations.test.ts`, `tests/triggered_operations.test.ts`, `tests/multi_axis_operations.test.ts`, `tests/operation_birth_anomaly_contract.test.ts`, `tests/orphan_operation_brigades.test.ts`, `tests/test_discovery_contract.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/pre_planned_operations.test.ts tests/triggered_operations.test.ts tests/multi_axis_operations.test.ts tests/operation_birth_anomaly_contract.test.ts tests/orphan_operation_brigades.test.ts tests/test_discovery_contract.test.ts` = 54/54 pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED after packet verification - pure operation-injection and anomaly contracts now run on the fast vitest lane.
+
+### Summary
+
+1. **The operations-injection band moved together:** `pre_planned_operations`, `triggered_operations`, `multi_axis_operations`, `operation_birth_anomaly_contract`, and `orphan_operation_brigades` now live on vitest instead of preserving a fake `node:test` island.
+2. **Fast discovery now remembers the operations substrate:** representative members are pinned in the fast vitest slice through `tests/test_discovery_contract.test.ts`.
+3. **The stale owner stayed out on purpose:** `tests/sector_offensive.test.ts` remains outside this packet because its expectations are already documented as stale against HEAD and need a dedicated truth-refresh packet, not a performative runner swap.
+
+### Why this mattered
+
+This cluster is real in-process operations truth: queue injection, triggered follow-ons, axis helper behavior, and anomaly classification over live state. It never needed scenario-runner semantics. Keeping it in `node:test` was just historical inertia.
+
 ## [2026-04-15] test(repo): migrate identity and nested migration contracts onto vitest
 
 **Type:** Test-harness cleanup / migration-owner truth audit

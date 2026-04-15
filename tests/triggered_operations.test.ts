@@ -1,5 +1,5 @@
-import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
+import { describe, it } from 'vitest';
 
 import { checkTriggeredOperations, _TRIGGERED_OPS } from '../src/sim/combat/triggered_operations.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
