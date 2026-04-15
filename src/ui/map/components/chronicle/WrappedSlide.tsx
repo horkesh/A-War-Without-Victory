@@ -101,6 +101,13 @@ function renderHeroContent(slide: WrappedSlideType, accent: string, faction?: st
                             {slide.heroLabel}
                         </div>
                     )}
+                    {slide.bullets && slide.bullets.length > 0 && (
+                        <ul className="max-w-sm text-left text-[11px] text-white/60 leading-relaxed mt-2 space-y-2">
+                            {slide.bullets.map((bullet, idx) => (
+                                <li key={`${slide.id}-bullet-${idx}`}>{bullet}</li>
+                            ))}
+                        </ul>
+                    )}
                 </div>
             );
         }

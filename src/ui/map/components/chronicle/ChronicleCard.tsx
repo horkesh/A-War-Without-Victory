@@ -30,13 +30,14 @@ interface ChronicleCardProps {
  */
 export const ChronicleCard = React.memo(function ChronicleCard({ entry }: ChronicleCardProps) {
     const accent = CARD_ACCENT[entry.type];
-    const label = CARD_LABELS[entry.type];
+    const label = entry.ghost ? 'GHOST' : CARD_LABELS[entry.type];
 
     return (
         <div
             className="rounded-sm shadow-md overflow-hidden"
             style={{
                 borderLeft: `3px solid ${accent.border}`,
+                borderStyle: entry.ghost ? 'dashed' : 'solid',
                 background: entry.headline
                     ? 'linear-gradient(135deg, #2a2520 0%, #1e1b18 100%)'
                     : 'linear-gradient(135deg, #222020 0%, #1a1918 100%)',
@@ -64,7 +65,7 @@ export const ChronicleCard = React.memo(function ChronicleCard({ entry }: Chroni
 
                 {/* Detail */}
                 {entry.detail && (
-                    <div className="text-[9px] font-mono text-stone-400/70 mt-1 leading-tight">
+                    <div className={`text-[9px] font-mono mt-1 leading-tight ${entry.ghost ? 'text-amber-200/55 italic' : 'text-stone-400/70'}`}>
                         {entry.detail}
                     </div>
                 )}

@@ -4,6 +4,7 @@ export interface ChronicleEntry {
     turn: number;
     type: ChronicleCardType;
     headline: boolean;
+    ghost?: boolean;
     title: string;
     detail: string;
     metadata?: {
@@ -37,6 +38,66 @@ function isDiplomaticEvent(id: string): boolean {
 
 function isHeadlineEvent(id: string): boolean {
     return HEADLINE_EVENT_PATTERNS.some(p => id.includes(p));
+}
+
+function buildEndgameComparisonEntries(state: any): ChronicleEntry[] {
+    if (!state?.gameOver || !state?.historicalComparison) return [];
+
+    const comparison = state.historicalComparison as {
+        divergence_notes?: string[];
+        rupture_divergence?: string[];
+    };
+    const rawNotes = Array.isArray(comparison.divergence_notes)
+        ? comparison.divergence_notes.filter((note): note is string => typeof note === 'string' && note.trim().length > 0)
+        : [];
+    const ruptureDivergence = new Set(
+        Array.isArray(comparison.rupture_divergence)
+            ? comparison.rupture_divergence.filter((id): id is string => typeof id === 'string' && id.length > 0)
+            : [],
+    );
+    const turn = Number(state.turn ?? 0);
+
+    if (rawNotes.length === 0 && ruptureDivergence.size > 0) {
+        return [];
+    }
+
+    const entries: ChronicleEntry[] = [];
+    const nonGhostNotes = rawNotes.filter((note) => note !== 'Srebrenica enclave survived');
+    const ghostSrebrenica = !ruptureDivergence.has('srebrenica_genocide_1995');
+    const visibleComparisons = nonGhostNotes.length + (ghostSrebrenica ? 1 : 0);
+
+    entries.push({
+        turn,
+        type: 'narrative',
+        headline: true,
+        title: 'History kept its own ledger',
+        detail: visibleComparisons > 0
+            ? `${visibleComparisons} divergence ${visibleComparisons === 1 ? 'note' : 'notes'} marked against the historical war`
+            : 'No divergence notes were recorded against the historical war',
+    });
+
+    for (const note of nonGhostNotes) {
+        entries.push({
+            turn,
+            type: 'narrative',
+            headline: false,
+            title: 'Historical divergence',
+            detail: note,
+        });
+    }
+
+    if (ghostSrebrenica) {
+        entries.push({
+            turn,
+            type: 'narrative',
+            headline: false,
+            ghost: true,
+            title: 'Historical rupture absent',
+            detail: 'Srebrenica enclave survived in your war; the historical July 1995 catastrophe never arrived.',
+        });
+    }
+
+    return entries;
 }
 
 export function generateChronicleEntries(state: any): ChronicleEntry[] {
@@ -148,6 +209,7 @@ export function generateChronicleEntries(state: any): ChronicleEntry[] {
         }
     }
 
+    entries.push(...buildEndgameComparisonEntries(state));
     entries.sort((a, b) => a.turn - b.turn);
     return entries;
 }

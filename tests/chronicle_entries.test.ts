@@ -1,6 +1,28 @@
 import { describe, it, expect } from 'vitest';
 import { generateChronicleEntries } from '../src/ui/map/components/chronicle/generateChronicleEntries.js';
 
+function makeTurnSummary(turn: number, overrides: Record<string, any> = {}) {
+    return {
+        turn,
+        battles: [],
+        notable_flips: [],
+        events_fired: [],
+        notable_events: [],
+        decoration_awards: [],
+        arc_transitions: [],
+        formation_spawns: [],
+        formation_destructions: [],
+        displacement_total: 0,
+        displacement_by_ethnicity: {},
+        territory_net: {},
+        supply_deltas: {},
+        heavy_munitions_deltas: {},
+        movements: [],
+        supply_transitions: [],
+        ...overrides,
+    };
+}
+
 describe('generateChronicleEntries', () => {
     it('returns empty array for null state', () => {
         expect(generateChronicleEntries(null as any)).toEqual([]);
@@ -198,5 +220,44 @@ describe('generateChronicleEntries', () => {
         expect(military.length).toBe(1);
         expect(military[0].title).toBe('305th Brigade destroyed');
         expect(military[0].headline).toBe(true);
+    });
+
+    it('appends endgame comparison entries from historicalComparison', () => {
+        const state = {
+            turn: 188,
+            gameOver: true,
+            historicalComparison: {
+                divergence_notes: [
+                    'War lasted 18 weeks shorter than the historical 188 weeks',
+                    'Federation controlled 54.0% territory vs historical 51%',
+                ],
+                rupture_divergence: ['srebrenica_genocide_1995'],
+            },
+            turnSummaries: [makeTurnSummary(188)],
+        };
+        const entries = generateChronicleEntries(state as any);
+        const comparisonEntries = entries.filter((e) => e.turn === 188 && e.type === 'narrative');
+
+        expect(comparisonEntries.some((e) => e.headline && e.title === 'History kept its own ledger')).toBe(true);
+        expect(comparisonEntries.some((e) => e.detail === 'War lasted 18 weeks shorter than the historical 188 weeks')).toBe(true);
+        expect(comparisonEntries.some((e) => e.ghost)).toBe(false);
+    });
+
+    it('creates a ghost chronicle entry when the historical Srebrenica rupture never occurs', () => {
+        const state = {
+            turn: 188,
+            gameOver: true,
+            historicalComparison: {
+                divergence_notes: ['Srebrenica enclave survived'],
+                rupture_divergence: [],
+            },
+            turnSummaries: [makeTurnSummary(188)],
+        };
+        const entries = generateChronicleEntries(state as any);
+        const ghostEntry = entries.find((e) => e.ghost);
+
+        expect(ghostEntry).toBeDefined();
+        expect(ghostEntry?.title).toBe('Historical rupture absent');
+        expect(ghostEntry?.detail).toContain('Srebrenica enclave survived in your war');
     });
 });

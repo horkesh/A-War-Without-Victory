@@ -243,6 +243,25 @@ describe('generateWrappedSlides', () => {
             expect(slide.heroValue).toBe('48');
         });
 
+        it('surfaces historical divergence notes when comparison data exists', () => {
+            const state = makeMinimalState({
+                player_faction: 'RBiH',
+                negotiatingCapital: { RBiH: 48.0 },
+                historicalComparison: {
+                    divergence_notes: [
+                        'War lasted 18 weeks shorter than the historical 188 weeks',
+                        'Federation controlled 54.0% territory vs historical 51%',
+                    ],
+                },
+            });
+            const slide = generateWrappedSlides(state).find(s => s.id === 'another_such_victory')!;
+            expect(slide.subtitle).toBe('History remembered this war differently');
+            expect(slide.bullets).toEqual([
+                'War lasted 18 weeks shorter than the historical 188 weeks',
+                'Federation controlled 54.0% territory vs historical 51%',
+            ]);
+        });
+
         it('handles missing dimensions gracefully', () => {
             const slide = generateWrappedSlides(makeMinimalState()).find(s => s.id === 'another_such_victory')!;
             expect(slide.data).toEqual({});

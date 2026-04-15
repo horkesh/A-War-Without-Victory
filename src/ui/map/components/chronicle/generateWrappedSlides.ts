@@ -5,6 +5,7 @@ export interface WrappedSlide {
     heroValue?: string;
     heroLabel?: string;
     detail?: string;
+    bullets?: string[];
     data?: Record<string, unknown>;
 }
 
@@ -33,6 +34,7 @@ export function generateWrappedSlides(state: any): WrappedSlide[] {
     const negotiatingCapital: Record<string, number> | undefined = state?.negotiatingCapital;
     const firedEvents: any[] = state?.firedEvents ?? [];
     const historicalEventsByTurn: any[] = state?.historicalEventsByTurn ?? [];
+    const historicalComparison: { divergence_notes?: string[] } | undefined = state?.historicalComparison;
     const playerFaction: string = state?.player_faction ?? 'Unknown';
     const playerFactionLabel = getFactionDisplayLabel(playerFaction);
     const currentTurn: number = state?.turn ?? 0;
@@ -231,15 +233,21 @@ export function generateWrappedSlides(state: any): WrappedSlide[] {
             finalDimensions[dim] = val?.effective_value ?? 0;
         }
     }
+    const divergenceNotes = Array.isArray(historicalComparison?.divergence_notes)
+        ? historicalComparison.divergence_notes.filter((note): note is string => typeof note === 'string' && note.trim().length > 0)
+        : [];
     slides.push({
         id: 'another_such_victory',
         title: 'Another Such Victory',
-        subtitle: 'And we are undone',
+        subtitle: divergenceNotes.length > 0
+            ? 'History remembered this war differently'
+            : 'And we are undone',
         heroValue: negotiatingCapital?.[playerFaction] != null
             ? negotiatingCapital[playerFaction].toFixed(0)
             : '-',
         heroLabel: 'final score',
         detail: playerFactionLabel,
+        bullets: divergenceNotes.slice(0, 3),
         data: finalDimensions,
     });
 
