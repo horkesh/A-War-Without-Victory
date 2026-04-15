@@ -1,3 +1,59 @@
+## [2026-04-15] refactor(arch): make canonical turn-pipeline ownership explicit + passthrough one adapter seam
+
+**Type:** Architecture-simplification packet (authority docs + one adapter seam + direct proof)
+**Commit:** c1a4fcc6
+**Files:** `CODE_CANON.md`, `REPO_MAP.md`, `PIPELINE_ENTRYPOINTS.md`, `PRODUCT_ARCHITECTURE_AUTHORITY.md`, `src/ui/map/data/GameStateAdapter.ts`, `tests/ui_adapter_boundary.test.ts`
+**Tests:** 31/31 vitest (adapter trio), 18/18 node:test (`ui_map_game_state_adapter`).
+**Status:** VERIFIED — tsc clean, vitest 31/31, node:test 18/18, desktop:map:build clean (6.84s), git diff --check clean.
+
+### Summary
+One bounded architecture-cleanup packet across four clusters. Tightened four authority docs so canonical ownership is singular and explicit, demoted legacy/variant entrypoints honestly (doc-only — code headers were already correct), simplified exactly one adapter seam from defensive coercion to a reference-identity passthrough, and added direct behavioral proof for the new contract.
+
+### Canonical entrypoints named (after this packet)
+All four authority docs now state the same contract verbatim:
+- **War-phase pipeline:** `src/sim/turn_pipeline.ts` — `runTurn()`. Steps in `src/sim/turn_phases/war_phases.ts` + `early_war_phases.ts`; shared types in `src/sim/turn_pipeline_types.ts`.
+- **Peace/state pipeline:** `src/state/turn_pipeline.ts` — `runOneTurn()`. Weekly state progression (directives → deployments → military_interaction → fragmentation_resolution → supply_resolution → political_effects → exhaustion_update → persistence).
+
+### Files/surfaces demoted (doc + wording only, no code moves)
+- **Bounded UI variant (not co-equal):** `src/sim/run_combat_browser.ts` — `runPhaseIITurn()`. Single caller: `src/ui/warroom/ClickableRegionManager.ts`. Increments turn counter only; does not run supply or exhaustion. Corrected function-name reference in `PIPELINE_ENTRYPOINTS.md` (was `runWarTurn`, actual `runPhaseIITurn`).
+- **Demoted smoke-only (do not route live behavior):** `src/index.ts`, `src/turn/pipeline.ts`.
+- **Deprecated:** `src/scenario/aor_init.ts` — AoR removed in n344; do not use for war-phase state.
+
+### Adapter seam simplified
+**Seam:** `derivePendingEventDecisions` in `src/ui/map/data/GameStateAdapter.ts`.
+
+**Truth owner before:** Ambiguous. Adapter re-coerced every field with `String()`, `Number()`, `Array.isArray()` — generating new objects per call with the same logical shape.
+
+**Truth owner after:** Explicit. `src/sim/events/evaluate_events.ts` writes the canonical `PendingEventDecision[]` (type in `src/sim/events/event_types.ts`) onto `state.military.pending_event_decisions`. The adapter passes that reference through unchanged under the UI-friendly property name `pendingEventDecisions`. Empty/missing arrays still collapse to `undefined` to match the rest of the `LoadedGameState` contract.
+
+Code shrank from 19 lines of defensive coercion to 4 lines of passthrough plus a truth-owner docblock.
+
+### Proof added
+
+| Assertion | Location | Kind |
+|---|---|---|
+| `parseGameState` preserves reference identity of engine `PendingEventDecision` element | `tests/ui_adapter_boundary.test.ts` | Direct behavioral proof (`.toBe(engineDecision)`) |
+| Engine-only fields (e.g. `requires_player_response`) survive passthrough at runtime | `tests/ui_adapter_boundary.test.ts` | Direct behavioral proof |
+| Empty array collapses to `undefined` | `tests/ui_adapter_boundary.test.ts` | Direct behavioral proof |
+| Missing field collapses to `undefined` | `tests/ui_adapter_boundary.test.ts` | Direct behavioral proof |
+| Three other adapter seams still structurally necessary | `tests/ui_adapter_boundary.test.ts` | Existence assertion with justification |
+| All four authority docs name the two canonical pipelines consistently | code/doc edits | Source tightening (no runtime proof) |
+
+### Remaining proof boundary
+**Directly proven by this packet:** `derivePendingEventDecisions` is a reference-identity passthrough of engine truth, not a coercion or re-allocation seam. Three other adapter seams (`deriveNegotiatingCapital`, `homeDistanceMult`, `deriveOperationCaptureProvenance`) still do inline computation; each is documented in the adapter-boundary test with the concrete engine-side change that would be needed to retire it. This packet did not retire those.
+
+**Source-verified only:** The four authority docs now state the canonical war/peace pipeline ownership consistently, but there is no runtime assertion binding the docs to the code. Doc drift is still possible if a future change renames `runTurn` / `runOneTurn` without updating the docs. A future packet could add a grep-based test guarding those function names in the docs if that becomes a real risk.
+
+**Not proven by this packet:** The `src/sim/run_combat_browser.ts` vs `src/sim/turn_pipeline.ts` non-equivalence is asserted only in prose; no test forbids adding a second caller of `runPhaseIITurn()`. That is acceptable for now — the file has one caller and a file-level comment documenting the boundary.
+
+### Rejected/deferred this packet
+- GameStateAdapter rewrite
+- `App.tsx` decomposition
+- Shell hierarchy redesign
+- Package/build pipeline surgery
+- Desktop packaged probe expansion
+- Touching unrelated roadmap/planning files or stray untracked files under `docs/60_visualisations/`
+
 ## [2026-04-15] fix(ui): make PresidentialAttentionPanel sole executor for event decisions
 
 **Type:** Ownership seam closure (execution-surface consolidation)
