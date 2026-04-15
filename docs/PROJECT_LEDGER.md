@@ -1,4 +1,46 @@
-## [2026-04-15] refactor(arch): make canonical turn-pipeline ownership explicit + passthrough one adapter seam
+## [2026-04-15] fix(ui): surface campaign-drag in Army HQ command relationship and handoff via war summary
+
+**Type:** Commander-explanation surfaces packet (Clusters B + C + D of the v0.8→v0.9 explanation-surfaces lane)
+**Commit:** fa7b808b
+**Files:** `src/ui/map/components/army_hq/CommandRelationshipSection.tsx`, `ArmyHQCorpsCard.tsx`, `ChiefOfStaffBriefing.tsx`, `WarSummaryContent.tsx`, `warSummaryOverview.ts`; `tests/ui_army_hq_war_summary_visibility.test.ts`, `tests/ui/command_relationship_campaign_drag_proof.test.ts`
+**Tests:** 78/78 vitest across the four target suites (4 suites: commander.test, briefing_campaign_intent, ui_army_hq_war_summary_visibility, command_relationship_campaign_drag_proof).
+**Status:** VERIFIED — tsc clean, vitest 78/78, desktop:map:build clean (7.03s), git diff --check clean (CRLF warnings only).
+
+### Summary
+Bounded UI clarification packet: make Army HQ → Command Relationship the canonical surface for campaign-drag explanation at the corps level, tighten War Summary to a compact summary/handoff, and remove one piece of fake-certainty prose in ChiefOfStaffBriefing. No engine cognition added. No new briefing fields. No new adapter. No IPC contract changes.
+
+### Canonical surface named (after this packet)
+**Cluster B owner:** `CommandRelationshipSection` (already consumed `commandStrain`, `commandStrainLabel`, `corpsExhaustion`, `recoveryForecast`, friction events). Now also consumes `factionWarExhaustion`, passed through from `LoadedGameState.warPhaseExhaustion` (adapter-scoped view of `GameState.political.war_exhaustion[faction]`, `src/state/game_state.ts:1971`). When elevated (threshold 500 matching `WAR_EXHAUSTION_TEMPO_THRESHOLD_LOW` in `src/sim/combat/combat_math.ts:1120`), renders one staff-voice readout — no psychology prose, no certainty words the payload does not support.
+
+### Player-visible wording added
+> National war strain ({value}) is narrowing the latitude this corps has for sustained offensive tempo.
+
+ChiefOfStaffBriefing exhaustion warnings tightened from "taking its toll / diminishing" (fake certainty) to "narrowing our offensive latitude" / "limiting sustainable offensive tempo" (staff interpretation) — same voice as the data readout, eliminating the contradiction the audit flagged.
+
+### Handoff surface (Cluster C)
+`WarSummaryContent` renders a new `Campaign Drag` block only when the player faction's war exhaustion reaches the same engine floor (≥500). Two short lines: value + "Corps-level command strain is tracked per corps in Army HQ → Command Relationship." Model extended with `warExhaustionByFaction` (passthrough from `state.warPhaseExhaustion`; no game_state re-read). Does not duplicate CommandRelationshipSection's prose.
+
+### Proof added
+
+| Assertion | Location | Kind |
+|---|---|---|
+| New readout renders at elevated faction war exhaustion (620) | `tests/ui/command_relationship_campaign_drag_proof.test.ts` | Direct render mount (@testing-library/react + jsdom) |
+| New readout absent below threshold (120) | same | Direct render mount |
+| Silence=healthy preserved when `factionWarExhaustion` undefined | same | Direct render mount |
+| Readout coexists with corps strain line | same | Direct render mount |
+| Section appears on campaign drag alone when corps is healthy | same | Direct render mount |
+| WarSummaryContent source advertises Army HQ → Command Relationship | same | Source-level grep |
+| WarSummaryContent source does NOT duplicate the corps-level staff phrase | same | Source-level grep |
+| `warExhaustionByFaction` populated from `state.warPhaseExhaustion` (elevated) | `tests/ui_army_hq_war_summary_visibility.test.ts` | Pure model derivation |
+| Low values pass through unmasked | same | Pure model derivation |
+| Absent field collapses to empty map | same | Pure model derivation |
+
+### Rejected/deferred this packet
+- **`campaign_role` / `campaign_stance_ceiling` directive readout:** Deferred. Those fields live on `CommanderBriefing` (engine-internal) and are not adapter-reachable without a new adapter seam. Spec said "otherwise defer" — deferred.
+- **3-faction table variant of WarSummary handoff:** Deferred. That view is a spectator/debug surface; duplicating the handoff there would create a second explanation owner (alongside `ExhaustionClock`) and blur ownership. Player-faction view is sufficient for Cluster C scope.
+- **Component mount of WarSummaryContent itself:** Deferred. The section is verified at source level (wording + non-duplication) and at the pure model layer (three new model assertions). Full mount would add fixture weight without changing the truth guarantee.
+
+
 
 **Type:** Architecture-simplification packet (authority docs + one adapter seam + direct proof)
 **Commit:** c1a4fcc6
