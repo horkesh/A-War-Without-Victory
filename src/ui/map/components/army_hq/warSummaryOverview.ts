@@ -9,6 +9,14 @@ export interface WarSummaryOverviewModel {
     personnelByFaction: Record<string, number>;
     totalDisplaced: number;
     displacedByFaction: Record<string, number>;
+    /**
+     * Cluster C — faction-level war exhaustion passthrough.
+     * Sourced from state.warPhaseExhaustion (which is
+     * GameState.political.war_exhaustion, adapter-scoped to player faction).
+     * Summary-only: the canonical per-corps explanation lives in
+     * Army HQ → Command Relationship. WarSummary advertises and hands off.
+     */
+    warExhaustionByFaction: Partial<Record<(typeof WAR_SUMMARY_FACTIONS)[number], number>>;
 }
 
 export function buildWarSummaryOverviewModel(state: LoadedGameState): WarSummaryOverviewModel {
@@ -54,11 +62,23 @@ export function buildWarSummaryOverviewModel(state: LoadedGameState): WarSummary
         ? state.player_faction as (typeof WAR_SUMMARY_FACTIONS)[number]
         : null;
 
+    const warExhaustionByFaction: WarSummaryOverviewModel['warExhaustionByFaction'] = {};
+    const rawExhaustion = state.warPhaseExhaustion;
+    if (rawExhaustion) {
+        for (const f of WAR_SUMMARY_FACTIONS) {
+            const v = rawExhaustion[f];
+            if (typeof v === 'number' && Number.isFinite(v)) {
+                warExhaustionByFaction[f] = v;
+            }
+        }
+    }
+
     return {
         playerFaction,
         areaPct,
         personnelByFaction,
         totalDisplaced,
         displacedByFaction,
+        warExhaustionByFaction,
     };
 }

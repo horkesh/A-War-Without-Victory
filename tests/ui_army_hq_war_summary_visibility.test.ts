@@ -44,7 +44,21 @@ function makeLoadedGameState(): LoadedGameState {
     },
     pressureWarning: false,
     player_faction: 'RBiH',
+    warPhaseExhaustion: { RBiH: 620 },
   } as unknown as LoadedGameState;
+}
+
+function makeLoadedGameStateLowExhaustion(): LoadedGameState {
+  const base = makeLoadedGameState();
+  return { ...base, warPhaseExhaustion: { RBiH: 120 } } as LoadedGameState;
+}
+
+function makeLoadedGameStateNoExhaustion(): LoadedGameState {
+  const base = makeLoadedGameState();
+  // Remove the field entirely — this is the pre-political.war_exhaustion
+  // state path where the adapter emitted nothing.
+  const { warPhaseExhaustion: _drop, ...rest } = base as unknown as Record<string, unknown>;
+  return rest as unknown as LoadedGameState;
 }
 
 describe('ui army hq war summary visibility', () => {
@@ -61,5 +75,22 @@ describe('ui army hq war summary visibility', () => {
     expect(model.areaPct.RBiH).toBeGreaterThanOrEqual(0);
     expect(model.areaPct.RS).toBeGreaterThanOrEqual(0);
     expect(model.areaPct.HRHB).toBeGreaterThanOrEqual(0);
+  });
+
+  // Cluster C — war exhaustion passthrough from state.warPhaseExhaustion
+  // (adapter-scoped view of GameState.political.war_exhaustion).
+  it('exposes faction war exhaustion from the adapter-scoped state', () => {
+    const model = buildWarSummaryOverviewModel(makeLoadedGameState());
+    expect(model.warExhaustionByFaction.RBiH).toBe(620);
+  });
+
+  it('passes through low war exhaustion values without masking', () => {
+    const model = buildWarSummaryOverviewModel(makeLoadedGameStateLowExhaustion());
+    expect(model.warExhaustionByFaction.RBiH).toBe(120);
+  });
+
+  it('returns an empty map when warPhaseExhaustion is absent', () => {
+    const model = buildWarSummaryOverviewModel(makeLoadedGameStateNoExhaustion());
+    expect(model.warExhaustionByFaction).toEqual({});
   });
 });

@@ -41,7 +41,12 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
     const data = useMemo(() => buildWarSummaryOverviewModel(loadedGameState), [loadedGameState]);
     const sitrep = loadedGameState.operationalSitrep;
 
-    const { playerFaction, areaPct, personnelByFaction, totalDisplaced, displacedByFaction } = data;
+    const { playerFaction, areaPct, personnelByFaction, totalDisplaced, displacedByFaction, warExhaustionByFaction } = data;
+
+    // Cluster C — campaign drag handoff. WarSummary summarises + routes;
+    // canonical per-corps explanation lives in Army HQ → Command Relationship.
+    const playerWarExhaustion = playerFaction ? warExhaustionByFaction[playerFaction] : undefined;
+    const hasElevatedWarExhaustion = typeof playerWarExhaustion === 'number' && playerWarExhaustion >= 500;
 
     return (
         <div className="w-full max-w-[1100px]">
@@ -123,6 +128,20 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                                     </div>
                                 </div>
                             </SummarySection>
+
+                            {hasElevatedWarExhaustion && (
+                                <SummarySection title="Campaign Drag">
+                                    <div className="space-y-1 text-[12px]" data-testid="war-summary-campaign-drag">
+                                        <div className="flex items-center justify-between gap-3">
+                                            <span className="text-text-secondary">War exhaustion</span>
+                                            <span className="text-text-primary tabular-nums">{Math.round(playerWarExhaustion!)}</span>
+                                        </div>
+                                        <div className="text-[10px] text-text-secondary leading-snug">
+                                            Corps-level command strain is tracked per corps in Army HQ → Command Relationship.
+                                        </div>
+                                    </div>
+                                </SummarySection>
+                            )}
 
                             {sitrep && (
                                 <SummarySection title="Operational SITREP">

@@ -433,6 +433,7 @@ export function ArmyHQCorpsCard({
                     recoveryForecast={data.recoveryForecast}
                     frictionEvents={data.frictionEvents}
                     corpsExhaustion={corps.corpsExhaustion ?? 0}
+                    factionWarExhaustion={gameState.warPhaseExhaustion?.[corps.faction]}
                     delegationSummary={data.delegationSummary}
                     stabilizationAvailable={data.stabilizationAvailable}
                     stabilizationCooldownUntil={data.stabilizationCooldownUntil}

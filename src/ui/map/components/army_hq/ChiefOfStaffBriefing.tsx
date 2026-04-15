@@ -255,9 +255,12 @@ export function generateCoSBriefing(
 
         const exhaustionItem = warnings.find(i => i.category === 'exhaustion');
         if (exhaustionItem && count < 3) {
+            // Wording note (Cluster B): staff interpretation, not prediction.
+            // Canonical corps-level readout lives in CommandRelationshipSection;
+            // this line stays at army-wide narrative scope and avoids fake certainty.
             segments.push(text(
-                tone === 'cautious' ? 'War exhaustion is taking its toll. Our offensive capacity is diminishing.'
-                    : tone === 'precise' ? 'War exhaustion levels affecting offensive capability. Tempo reduction advisable.'
+                tone === 'cautious' ? 'War exhaustion is narrowing our offensive latitude across the theater.'
+                    : tone === 'precise' ? 'Faction war exhaustion is limiting sustainable offensive tempo. Corps-level detail in Command Relationship.'
                         : 'The men are tired, but so is the enemy. Push through or lose initiative.',
             ));
             count++;

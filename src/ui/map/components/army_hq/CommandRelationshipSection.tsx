@@ -35,6 +35,15 @@ import type { FrictionEventView } from '../../data/types';
 
 const COMPROMISED_THRESHOLD = 6;
 
+/**
+ * Faction war exhaustion threshold at which national strain begins
+ * narrowing corps offensive latitude. Matches the engine's
+ * WAR_EXHAUSTION_TEMPO_THRESHOLD_LOW used by getWarExhaustionTempoMult
+ * in src/sim/combat/combat_math.ts — at this value attacker-power tempo
+ * multiplier starts dropping from 1.0 toward 0.85.
+ */
+const FACTION_WAR_EXHAUSTION_ELEVATED = 500;
+
 interface CommandRelationshipSectionProps {
     corpsId: string;
     commandStrain: number;
@@ -43,6 +52,14 @@ interface CommandRelationshipSectionProps {
     frictionEvents: FrictionEventView[];
     /** Corps exhaustion (0-100) — Wave 6: exhaustion above threshold contributes to strain. */
     corpsExhaustion: number;
+    /**
+     * Faction-level war exhaustion from GameState.political.war_exhaustion[faction]
+     * (unbounded accumulator; engine tempo throttle fires at 500, saturates at 800).
+     * When elevated, one readout line advertises that national strain is narrowing
+     * this corps's latitude for sustained offensive tempo. Staff interpretation only;
+     * does not claim certainty the payload does not support.
+     */
+    factionWarExhaustion?: number;
     /** Delegation Visibility Wave 1: standing delegation summary for active operations. */
     delegationSummary?: CorpsDelegationSummary | null;
     // Stabilization fields
@@ -59,6 +76,7 @@ export function CommandRelationshipSection({
     recoveryForecast,
     frictionEvents,
     corpsExhaustion,
+    factionWarExhaustion,
     delegationSummary,
     stabilizationAvailable,
     stabilizationCooldownUntil,
@@ -71,11 +89,20 @@ export function CommandRelationshipSection({
     const unresolvedEvents = frictionEvents.filter(e => !e.resolved);
     const unresolvedCount = unresolvedEvents.length;
     const exhaustionContributing = isExhaustionContributingToStrain(corpsExhaustion);
+    const factionExhaustionElevated =
+        typeof factionWarExhaustion === 'number'
+        && factionWarExhaustion >= FACTION_WAR_EXHAUSTION_ELEVATED;
 
     const hasDelegationNotice = delegationSummary?.summaryLabel != null;
 
-    // Silence = healthy: nothing to show when strain is 0, no unresolved friction, and no delegation notice
-    if (commandStrain === 0 && unresolvedCount === 0 && !hasDelegationNotice) return null;
+    // Silence = healthy: nothing to show when strain is 0, no unresolved friction,
+    // no delegation notice, and faction war strain below the engine's tempo-throttle floor.
+    if (
+        commandStrain === 0
+        && unresolvedCount === 0
+        && !hasDelegationNotice
+        && !factionExhaustionElevated
+    ) return null;
 
     const isCompromised = commandStrain >= COMPROMISED_THRESHOLD;
     const strainColor = isCompromised ? 'text-red-400' : 'text-amber-400';
@@ -164,6 +191,23 @@ export function CommandRelationshipSection({
                         <span className="text-[9px] text-amber-500/70 shrink-0">▲</span>
                         <span className="text-[10px] text-text-secondary font-mono">
                             Corps exhaustion ({Math.round(corpsExhaustion)}%) is straining the command relationship
+                        </span>
+                    </div>
+                )}
+
+                {/*
+                  2c. Campaign-drag readout — Cluster B.
+                  Staff interpretation of faction-level war exhaustion
+                  (GameState.political.war_exhaustion[faction]). Renders ONLY
+                  when the engine's tempo-throttle floor is reached
+                  (>= WAR_EXHAUSTION_TEMPO_THRESHOLD_LOW = 500). Staff voice:
+                  "is narrowing" — not "will", not "must". No morale prose.
+                */}
+                {factionExhaustionElevated && (
+                    <div className="flex items-start gap-1.5" data-testid="faction-campaign-drag">
+                        <span className="text-[9px] text-amber-500/70 mt-0.5 shrink-0">▲</span>
+                        <span className="text-[10px] text-text-secondary font-mono leading-snug">
+                            National war strain ({Math.round(factionWarExhaustion!)}) is narrowing the latitude this corps has for sustained offensive tempo.
                         </span>
                     </div>
                 )}
