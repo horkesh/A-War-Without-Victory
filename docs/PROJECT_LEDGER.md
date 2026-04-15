@@ -1,3 +1,30 @@
+## [2026-04-15] test(ui): add VerdictScreen interaction proof and app-route proof
+
+**Type:** Interaction proof + route proof (final endgame proof packet)
+**Files:** `package.json` (+@testing-library/react@14), `endgame_interaction_proof.test.ts` (NEW — 16 tests)
+**Tests:** 16 new tests. 141 total endgame UI tests pass across 8 suites.
+**Status:** VERIFIED — tsc clean, 141/141 tests, desktop:map:build clean.
+
+### Summary
+Closed the final interaction and route proof gaps for the endgame lane.
+
+**Interaction proof (9 tests):** Uses `@testing-library/react` with `fireEvent.click` for real user interaction simulation. Faction tab switching proven: clicking VRS tab shows RS report with condemnation notice ("International Condemnation" + genocide/tribunal wording), clicking HVO shows HRHB report, switching back to ARBiH restores original. War Cost section and divergence notes remain stable across all tab switches (war-level, not per-faction).
+
+**App-route proof (7 tests):** VerdictScreen renders nothing when null or gameOver=false, full surface when gameOver=true, FallbackGameOver when verdict absent. Verdict path shows Pyrrhic Score and hides Final Standings. Cost section present/absent based on costLedger.
+
+### Complete Endgame Proof Ladder
+
+| Layer | Proof Level | Tests |
+|-------|------------|-------|
+| Engine truth (scoring, rupture, cost ledger) | Direct scenario + harness proof | 70+ |
+| VerdictScreen live-hook mount | Direct mount proof | 14 |
+| VerdictScreen interaction (tab switching) | **Direct interaction proof** | **9** |
+| VerdictScreen app-route (gating, fallback) | **Direct route proof** | **7** |
+| FactionReport + WarCostSummary (hookless) | Direct component mount proof | 20 |
+| Composition logic (all formatters) | Direct composition proof | 74 |
+| Store state + structural gating | Direct store/source proof | 17+8 |
+| Desktop Electron shell | Not proven (requires live Electron) | — |
+
 ## [2026-04-15] feat(test): unify dual-React and add VerdictScreen live-hook mount proof
 
 **Type:** Infrastructure fix + component mount proof (dual-React unification)
