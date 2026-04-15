@@ -5,6 +5,8 @@ import {
   openArmyHQBriefingForCorps,
   openArmyHQRecordsSubTab,
   openArmyHQTab,
+  openChronicle,
+  openCodex,
   type ShellNavigationState,
 } from '../src/ui/map/utils/shellNavigation.js';
 import { decodeShellHandoffCommand, encodeShellHandoffCommand } from '../src/ui/shared/shellHandoff.js';
@@ -66,6 +68,68 @@ describe('shellNavigation', () => {
       ['setArmyHQTab', 'briefing'],
       ['setArmyHQExpandedCorpsId', 'hvo_operational_group_north'],
     ]);
+  });
+
+  it('openCodex routes through canonical shellNavigation helper', () => {
+    const state = createState('RBiH');
+
+    expect(openCodex(state)).toBe(true);
+    expect(state.calls).toEqual([['setCodexOpen', true]]);
+  });
+
+  it('openChronicle routes through canonical shellNavigation helper', () => {
+    const state = createState('RS');
+
+    expect(openChronicle(state)).toBe(true);
+    expect(state.calls).toEqual([['setChronicleOpen', true]]);
+  });
+
+  it('openArmyHQTab supports personnel tab for inbox army_hq_personnel action', () => {
+    const state = createState('HRHB');
+
+    const ok = openArmyHQTab(state, 'personnel');
+
+    expect(ok).toBe(true);
+    expect(state.calls).toEqual([
+      ['setSelectedArmyId', 'HRHB'],
+      ['setArmyHQOpen', true],
+      ['setArmyHQTab', 'personnel'],
+    ]);
+  });
+
+  it('Tactical shell call sites route Codex/Chronicle/ArmyHQ through shellNavigation helpers', () => {
+    // Behavioural proof that App.tsx + PresidentialToolbar + TopToolbar do not
+    // reintroduce direct setter sequences for navigation dispatch. shellNavigation.ts
+    // is the single chokepoint for Tactical → child-surface navigation.
+    const appSource = readFileSync(
+      new URL('../src/ui/map/App.tsx', import.meta.url),
+      'utf8',
+    );
+    const toolbarSource = readFileSync(
+      new URL('../src/ui/map/components/PresidentialToolbar.tsx', import.meta.url),
+      'utf8',
+    );
+    const topToolbarSource = readFileSync(
+      new URL('../src/ui/map/components/TopToolbar.tsx', import.meta.url),
+      'utf8',
+    );
+
+    // App.tsx imports the canonical helpers and uses them for navigation dispatch.
+    expect(appSource).toContain('openCodex');
+    expect(appSource).toContain('openChronicle');
+    expect(appSource).toContain("openCodex(useGameStore.getState())");
+    expect(appSource).toContain("openArmyHQTab(gs, 'personnel')");
+    expect(appSource).not.toContain('useGameStore.setState({ armyHQTab:');
+    expect(appSource).not.toContain('useGameStore.getState().setCodexOpen(true)');
+
+    // PresidentialToolbar: Chronicle button routes through openChronicle.
+    expect(toolbarSource).toContain('openChronicle');
+    expect(toolbarSource).not.toContain('useGameStore.getState().setChronicleOpen(true)');
+
+    // TopToolbar: Codex buttons route through openCodex and the legacy
+    // setCodexOpen binding is gone.
+    expect(topToolbarSource).toContain('openCodex');
+    expect(topToolbarSource).not.toContain('const setCodexOpen = useGameStore');
   });
 
   it('refuses to navigate when no player faction is loaded', () => {

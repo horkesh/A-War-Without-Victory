@@ -7,6 +7,7 @@
  */
 import { useRef, useCallback, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
+import { openCodex } from '../utils/shellNavigation';
 import { loadLatestRunSaveAsText, loadRunFinalSaveAsText } from '../data/DataLoader';
 import { useIPC } from '../desktop/useIPC';
 import { advanceTurnAndSync } from '../desktop/orderActions';
@@ -62,7 +63,6 @@ export function TopToolbar({
   onOpenOrbat, onSelectPrimaryArmy, onSelectPrimaryCorps
 }: TopToolbarProps) {
   const ipc = useIPC();
-  const setCodexOpen = useGameStore((s) => s.setCodexOpen);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const devMode = useGameStore((s) => s.devMode);
   const loadSave = useGameStore((s) => s.loadSave);
@@ -295,7 +295,7 @@ export function TopToolbar({
         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/5 to-transparent" />
         <div className="module-header">Reference</div>
         <button
-          onClick={() => setCodexOpen(true)}
+          onClick={() => openCodex(useGameStore.getState())}
           className={TOOLBAR_BUTTON_CLASS}
           title="Open Codex"
         >
@@ -376,7 +376,7 @@ export function TopToolbar({
             <button onClick={() => onOpenAAR?.()} disabled={!loadedGameState} className={TOOLBAR_BUTTON_CLASS}>AAR</button>
             <button onClick={() => onOpenOpsHistory?.()} disabled={!loadedGameState} className={TOOLBAR_BUTTON_CLASS}>OPS</button>
             <button onClick={() => onOpenEventLog?.()} disabled={!loadedGameState} className={TOOLBAR_BUTTON_CLASS}>EVENTS</button>
-            <button onClick={() => setCodexOpen(true)} disabled={!loadedGameState} className={TOOLBAR_BUTTON_CLASS}>CODEX</button>
+            <button onClick={() => openCodex(useGameStore.getState())} disabled={!loadedGameState} className={TOOLBAR_BUTTON_CLASS}>CODEX</button>
             <button onClick={() => onOpenAiSettings?.()} className={`${TOOLBAR_BUTTON_CLASS} text-[#c4a04a] border-[#c4a04a]/20 hover:bg-[#c4a04a]/10`}>AI</button>
           </div>
         </div>

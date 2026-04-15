@@ -24,6 +24,7 @@ import { getArmyCrest, getArmyName } from '../utils/factionAssets';
 import { formatTurnLabel } from '../utils/formatters';
 import { getArmyReserveToolbarSignal } from '../utils/armyReserveSeverity';
 import { shouldShowWarroomReturn, isEmbeddedTacticalMap } from '../utils/warroomReturn';
+import { openChronicle } from '../utils/shellNavigation';
 
 /** Command Authority gauge — shows the president's override resource. Level 3 actions deplete this. */
 function CommandAuthorityGauge({ current, max }: { current: number; max: number }) {
@@ -117,6 +118,10 @@ export function PresidentialToolbar({
 
     const handleOpenHQ = useCallback(() => {
         if (!playerFaction) return;
+        // NOTE: This is a reopen-with-last-tab dispatch, not a navigation to a
+        // specific tab. shellNavigation.openArmyHQTab() would force a specific
+        // tab and stomp the user's last-viewed tab, so we keep the two-setter
+        // sequence here. Treat this pair as the canonical "reopen HQ" idiom.
         setSelectedArmyId(playerFaction);
         setArmyHQOpen(true);
     }, [playerFaction, setSelectedArmyId, setArmyHQOpen]);
@@ -189,7 +194,7 @@ export function PresidentialToolbar({
                         </button>
                     )}
                     <button
-                        onClick={() => useGameStore.getState().setChronicleOpen(true)}
+                        onClick={() => openChronicle(useGameStore.getState())}
                         className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors"
                         title="Campaign timeline"
                     >

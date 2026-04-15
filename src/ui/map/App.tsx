@@ -63,7 +63,7 @@ import { useIPC } from './desktop/useIPC';
 import { resolvePlayerFacingFaction } from '../shared/playerVisibility';
 import type { RecruitmentCatalogBrigade, StartNewCampaignPayload } from './desktop/types';
 import type { SummaryFocusSection } from './data/types';
-import { applyShellHandoffCommand, openArmyHQRecordsSubTab, openArmyHQTab, warroomCommandStaysInRoom } from './utils/shellNavigation';
+import { applyShellHandoffCommand, openArmyHQRecordsSubTab, openArmyHQTab, openChronicle, openCodex, warroomCommandStaysInRoom } from './utils/shellNavigation';
 import { decodeShellHandoffCommand, isShellHandoffCommand } from '../shared/shellHandoff';
 import {
   applyRecruitmentAndSync,
@@ -512,8 +512,8 @@ function App() {
         e.preventDefault();
         const gs = useGameStore.getState();
         if (gs.armyHQOpen) { gs.setArmyHQOpen(false); return; }
-        const pf = gs.loadedGameState?.player_faction;
-        if (pf) { gs.setSelectedArmyId(pf); gs.setArmyHQOpen(true); gs.setArmyHQTab('briefing'); }
+        // Route through canonical shellNavigation helper — no direct setter sequences.
+        openArmyHQTab(gs, 'briefing');
       } else if (e.key === 's' && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
         const gs = useGameStore.getState();
@@ -647,7 +647,7 @@ function App() {
         onOpenSummary={openSummary}
         onOpenRecords={() => openArmyHQRecords('aar')}
         onOpenOpsHistory={() => useGameStore.getState().setIsOperationsPanelOpen(true)}
-        onOpenCodex={() => useGameStore.getState().setCodexOpen(true)}
+        onOpenCodex={() => openCodex(useGameStore.getState())}
         onOpenEventLog={() => setEventLogOpen(true)}
       />
       <CommandBriefingLayer
@@ -665,8 +665,9 @@ function App() {
           gs.setSelectedArmyHqId(hqId);
         }
         if (action === 'army_hq_personnel') {
-          gs.setArmyHQOpen(true);
-          useGameStore.setState({ armyHQTab: 'personnel' });
+          // Route through canonical shellNavigation helper — single chokepoint
+          // for Tactical → Army HQ navigation dispatch.
+          openArmyHQTab(gs, 'personnel');
         }
         if (action === 'event_modal') {
           // Presidential event decisions are executed inside PresidentialAttentionPanel

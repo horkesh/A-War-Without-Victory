@@ -59,6 +59,32 @@ export function openArmyHQBriefingForCorps(state: ShellNavigationState, corpsId:
   return true;
 }
 
+/**
+ * Canonical Tactical → Codex navigation dispatch.
+ *
+ * Tactical toolbars/keyboard shortcuts MUST route through this helper rather
+ * than calling `setCodexOpen(true)` directly. Keeps the Codex entrypoint
+ * contract in one place (see `tests/ui_shell_navigation.test.ts`).
+ */
+export function openCodex(state: ShellNavigationState): boolean {
+  state.setCodexOpen(true);
+  return true;
+}
+
+/**
+ * Canonical Tactical → Chronicle navigation dispatch.
+ *
+ * Same contract as `openCodex` — prefer this helper over direct
+ * `setChronicleOpen(true)` in navigation surfaces (toolbars, keyboard
+ * shortcuts, hotspot callbacks). Toggle behaviour for keyboard shortcuts
+ * should still read/toggle through gameStore since toggling is not a pure
+ * navigation dispatch.
+ */
+export function openChronicle(state: ShellNavigationState): boolean {
+  state.setChronicleOpen(true);
+  return true;
+}
+
 export function applyShellHandoffCommand(state: ShellNavigationState, command: ShellHandoffCommand): boolean {
   if (command.kind === 'codex') {
     state.setCodexOpen(true);
