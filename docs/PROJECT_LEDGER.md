@@ -1,3 +1,26 @@
+## [2026-04-15] fix(ui): unify Tactical navigation on shellNavigation helpers
+
+**Type:** Shell-cohesion packet (v0.8→v0.9 UI density lane, Chunk A3 + D1)
+**Commit (code):** 2d096e58
+**Commit (ledger):** this entry
+**Files:** `src/ui/map/utils/shellNavigation.ts`, `src/ui/map/App.tsx`, `src/ui/map/components/PresidentialToolbar.tsx`, `src/ui/map/components/TopToolbar.tsx`, `tests/ui_shell_navigation.test.ts`
+**Tests:** tsc clean; vitest `ui_shell_navigation` 18/18 + `army_hq_presidential_review_coherence` 7/7; `desktop:map:build` clean in 6.40s; `git diff --check` clean.
+**Status:** VERIFIED — no behavior change. Every refactored call site preserves prior user-visible behavior; navigation dispatch is now single-chokepoint.
+
+### Summary
+Added `openCodex()` and `openChronicle()` to `src/ui/map/utils/shellNavigation.ts` and routed the remaining Tactical-shell navigation-dispatch call sites through canonical helpers. App.tsx 'h' keyboard shortcut, `onOpenCodex` wiring, and the inbox `army_hq_personnel` action (which previously bypassed the canonical setter via `useGameStore.setState({ armyHQTab: 'personnel' })`) now all go through `shellNavigation`. `PresidentialToolbar` Chronicle button + `TopToolbar` CODEX buttons likewise routed through the helpers; TopToolbar's unused `setCodexOpen` binding removed.
+
+### No-op findings (Chunk A2)
+Warroom hotspot dispatch (`ClickableRegionManager.executeRegion`) was audited and is already unified — every handler with a shell-handoff equivalent (`openFactionOverview`, `openNewspaperModal`, `openMagazineModal`, `openCommandBriefingModal`, `openReportsModal`) checks `tacticalShellHandoffHandler` first and falls back to the legacy modal only when no handler is set. Existing proof at `tests/ui_shell_navigation.test.ts:211-214` covers the contract. No code change needed.
+
+### Preserved call sites (with canonical comment)
+`PresidentialToolbar.handleOpenHQ` keeps the `setSelectedArmyId` + `setArmyHQOpen(true)` pair — it is a reopen-with-last-tab dispatch, and forcing a specific tab via `openArmyHQTab` would stomp the user's last-viewed tab. Comment added to flag this as canonical idiom.
+
+### Proof
+Added three unit tests (`openCodex`, `openChronicle`, `openArmyHQTab('personnel')`) and one behavioural source-scan test that prevents App.tsx / PresidentialToolbar / TopToolbar from reintroducing direct setter sequences for navigation dispatch.
+
+---
+
 ## [2026-04-15] docs(engineering): add canonical save/load/migration owner map to pipeline + repo map
 
 **Type:** Inventory/docs alignment packet (v0.8→v0.9 save/load/replay hardening lane, Phase 1 — Current Contract Inventory)
