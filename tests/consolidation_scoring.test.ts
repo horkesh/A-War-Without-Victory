@@ -3,7 +3,7 @@
  * Covers: exception data, scoreConsolidationTarget, sortTargetsByConsolidationScore, determinism.
  */
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 import {
     BONUS_FAST_CLEANUP_MUN,
     isConnectedStrongholdSid,

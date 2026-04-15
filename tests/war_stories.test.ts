@@ -2,8 +2,8 @@
  * Tests for war stories system: arc classification, narrative generation, notable moments.
  */
 
-import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
+import { describe, it } from 'vitest';
 import { createEmptyBrigadeHistory } from '../src/state/brigade_history.js';
 import type { BrigadeHistory } from '../src/state/brigade_history.js';
 import {

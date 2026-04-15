@@ -15,7 +15,7 @@ export function listTsFiles(dir) {
       out.push(...listTsFiles(full));
       continue;
     }
-    if (extname(full) === '.ts') out.push(full);
+    if (extname(full) === '.ts' && basename(full).endsWith('.test.ts')) out.push(full);
   }
   return out.sort((a, b) => a.localeCompare(b));
 }

@@ -92,11 +92,16 @@ describe('test discovery contracts', () => {
             'tests/scenario_registry.test.ts',
             'tests/scenario_end_report_army_strengths.test.ts',
             'tests/scenario_reporting_contracts.test.ts',
+            'tests/consolidation_scoring.test.ts',
+            'tests/hv_integration.test.ts',
+            'tests/production_facilities_a3.test.ts',
+            'tests/sarajevo_exception.test.ts',
             'tests/sector_coverage_defense.test.ts',
             'tests/sector_frontline_contiguity_repro.test.ts',
             'tests/sector_offensive.test.ts',
             'tests/serialize_gamestate_stability.test.ts',
             'tests/supply_gating.test.ts',
+            'tests/sustainability.test.ts',
             'tests/supply_reachability.test.ts',
             'tests/state.test.ts',
             'tests/to_terrain_combat.test.ts',
@@ -112,6 +117,7 @@ describe('test discovery contracts', () => {
             'tests/ui_map_fog_and_operation_contracts.test.ts',
             'tests/ui_map_front_lines_phase_a.test.ts',
             'tests/ui_map_game_state_adapter.test.ts',
+            'tests/war_stories.test.ts',
         ];
 
         expect(discovered.fastVitestFiles.length + discovered.scenarioVitestFiles.length).toBe(discovered.vitestFiles.length);
@@ -143,5 +149,18 @@ describe('test discovery contracts', () => {
 
         expect(nodeTestFiles.has(keeper), `${keeper} should remain a node:test harness keeper`).toBe(true);
         expect(vitestFiles.has(keeper), `${keeper} should not drift into vitest discovery yet`).toBe(false);
+    });
+
+    it('ignores helper files under tests that are not test-entrypoints', () => {
+        const rootDir = process.cwd();
+        const discovered = discoverTests(rootDir);
+        const discoveredFiles = new Set(
+            toRepoRelative(rootDir, [
+                ...discovered.vitestFiles,
+                ...discovered.nodeTestFiles,
+            ])
+        );
+
+        expect(discoveredFiles.has('tests/test_factories.ts')).toBe(false);
     });
 });

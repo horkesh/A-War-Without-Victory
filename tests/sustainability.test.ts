@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 
 import type { SettlementRecord } from '../src/map/settlements.js';
 import { CURRENT_SCHEMA_VERSION, type GameState } from '../src/state/game_state.js';

@@ -1,3 +1,22 @@
+## [2026-04-15] test(repo): migrate pure state and narrative residue contracts onto vitest
+
+**Type:** Test-harness cleanup / discovery truth tightening
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tools/test/discover_test_files.mjs`, `tests/consolidation_scoring.test.ts`, `tests/hv_integration.test.ts`, `tests/sustainability.test.ts`, `tests/sarajevo_exception.test.ts`, `tests/production_facilities_a3.test.ts`, `tests/war_stories.test.ts`, `tests/test_discovery_contract.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/consolidation_scoring.test.ts tests/hv_integration.test.ts tests/sustainability.test.ts tests/sarajevo_exception.test.ts tests/production_facilities_a3.test.ts tests/war_stories.test.ts tests/test_discovery_contract.test.ts` pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED after packet verification - six adjacent pure contracts now live on the canonical vitest lane, and discovery no longer lies by classifying helper files under `tests/` as `node:test` residue just because they are `.ts`.
+
+### Summary
+
+1. **Six pure adjacent suites moved cleanly to vitest:** `consolidation_scoring`, `hv_integration`, `sustainability`, `sarajevo_exception`, `production_facilities_a3`, and `war_stories` all proved to be deterministic in-process contracts with no harness-shaped needs.
+2. **Discovery now classifies test entrypoints instead of every `.ts` under `tests/`:** `discover_test_files.mjs` only tracks `*.test.ts`, so helper modules like `tests/test_factories.ts` stop polluting the `node:test` inventory.
+3. **The remaining `node:test` list got smaller for honest reasons, not cosmetic ones:** the residue count drops because true pure contracts moved and a helper file left the inventory, while the still-heavy scenario/determinism/content keepers remain visible.
+
+### Why this mattered
+
+This was one of the quieter ways test debt could keep lying to us. A bundle of old `node:test` files looked like “hard stuff” when most of them were just pure deterministic contracts stranded on the wrong runner, and the discovery inventory itself was overstating residue by counting helper files as if they were active node-runner proof. Migrating the six real pure suites and tightening discovery together makes the board truer: the remaining `node:test` list is now closer to the actual hard residue, which is exactly what we need before the next keeper-vs-migration decisions around JNA, fatigue, siege, and the scenario-heavy audit files.
+
 ## [2026-04-15] test(repo): refresh end-state shell contracts onto vitest
 
 **Type:** Test-harness cleanup / end-state owner refresh

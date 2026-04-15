@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 import type { GameState } from '../src/state/game_state.js';
 import { updateSarajevoState } from '../src/state/sarajevo_exception.js';
 import type { SupplyStateByOsidReport } from '../src/state/supply_state_derivation.js';

@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 
 import type { EdgeRecord, SettlementRecord } from '../src/map/settlements.js';
 import { updateSupplyPressure } from '../src/sim/combat/supply_pressure.js';
