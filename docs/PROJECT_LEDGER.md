@@ -1,3 +1,20 @@
+## [2026-04-15] test(ui): add direct component mount proof for endgame surfaces
+
+**Type:** Component mount proof / test infrastructure (final endgame UI proof)
+**Files:** `package.json` (+react, react-dom, @types as root devDeps), `VerdictScreen.tsx` (export FactionReport), `endgame_mount_proof.test.ts` (NEW — 20 tests)
+**Tests:** 20 new mount tests. 79 total endgame UI tests pass.
+**Status:** VERIFIED — tsc clean, 79/79 tests, desktop:map:build clean.
+
+### Summary
+Closed the final endgame UI proof gap: direct React component mount testing.
+
+1. **Infrastructure:** Installed `react@18.3.1`, `react-dom`, `@types/react`, `@types/react-dom` as root devDependencies (matching UI workspace `^18.2.0`). Uses `renderToStaticMarkup()` from `react-dom/server` in JSDOM vitest environment — no @testing-library/react needed.
+2. **FactionReport mount proof (11 tests):** Renders with realistic RS verdict (outcome_class=failure + genocide_condemnation). Proves outcome_class badge, condemnation notice, grade, pyrrhic score, dimension bars, statistics, and enclaves all appear in mounted output. Proves condemnation is absent for clean factions.
+3. **WarCostSummary mount proof (9 tests):** Renders with realistic CostLedger + ComparisonResult. Proves total killed, duration, comparison, territory divergence, divergence notes (including Srebrenica) all appear in mounted output in canonical order.
+
+**Condemnation wording in rendered output:** "International Condemnation" heading + "Condemned for genocide — international tribunal proceedings inevitable" — verified present in mounted HTML.
+**Proof scope:** FactionReport and WarCostSummary are directly mount-proven. VerdictScreen parent (uses Zustand + useIPC hooks) is composition-proven via buildEndgameSummary() but not mount-proven — would require store mocking.
+
 ## [2026-04-15] feat(ui): consolidate endgame presentation into canonical VerdictScreen
 
 **Type:** UI consolidation / endgame presentation (post-campaign product packet)
