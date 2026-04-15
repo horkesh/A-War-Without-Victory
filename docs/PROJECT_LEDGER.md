@@ -1,3 +1,61 @@
+## [2026-04-15] docs(engineering): add canonical save/load/migration owner map to pipeline + repo map
+
+**Type:** Inventory/docs alignment packet (v0.8→v0.9 save/load/replay hardening lane, Phase 1 — Current Contract Inventory)
+**Commit (docs):** 3f488076
+**Commit (ledger):** this entry
+**Files:** `docs/20_engineering/PIPELINE_ENTRYPOINTS.md`, `docs/20_engineering/REPO_MAP.md`, `docs/PROJECT_LEDGER.md`
+**Tests:** Direct proof already on main; this packet adds no new tests. tsc clean; vitest 31/31 adapter trio; node:test 18/18 `ui_map_game_state_adapter`; `desktop:map:build` clean; `git diff --check` clean.
+**Status:** VERIFIED — doc-only alignment. No code seam added, no behavior change.
+
+### Summary
+Bounded inventory-docs packet for the v0.8→v0.9 save/load/replay hardening lane. The audit confirmed three of four clusters were already landed on main in prior packets; this packet's job is to make the canonical owner map legible in the two authority docs, record the truth about replay (no code exists yet), and stop readers from chasing a phantom replay seam. No code changes, no new tests, no restructuring of unrelated sections.
+
+### Baseline (already landed on main — cited, not re-claimed)
+- `05ed4afa` — post-load UI reset owner (`gameStore.loadSave` resets 30+ selection/modal/order fields) + desktop load error classification (`classifyLoadError`, 10 categories).
+- `766c0f1a` / `82e02fbd` — adapter-after-deserialize parity proof + documentation of 6 owned fields vs 6 intentionally recomputed fields.
+- `c1a4fcc6` / `3c7888ac` — canonical turn-pipeline ownership explicit across four authority docs; one adapter seam (`derivePendingEventDecisions`) simplified to reference-identity passthrough.
+
+### Cluster outcomes (honest)
+- **Cluster A — Authority docs name canonical save/load/migration owners:** tightened. Added one compact "Save/Load/Migration Contract" section to `PIPELINE_ENTRYPOINTS.md` and a mirroring "Save/Load/Migration Pipeline" subsection to `REPO_MAP.md`. `REPO_MAP.md` points at `PIPELINE_ENTRYPOINTS.md` for the full contract rather than duplicating prose.
+- **Cluster B — Post-load UI reset:** no-op, already closed by `05ed4afa`. The new PIPELINE_ENTRYPOINTS section names `src/ui/map/store/gameStore.ts::loadSave()` as the canonical post-load UI reset owner and cites `tests/ui/gamestore_load_reset.test.ts` as proof.
+- **Cluster C — Replay contract:** no-op + inventory truth. Replay code does not exist in the repo today — no `*replay*.ts` under `src/` or `tests/`. The packet adds a one-line "Replay (future)" note to both docs pointing at Phase 4 of `docs/plans/2026-03-31-v08to09-save-load-and-replay-hardening-plan.md`. This prevents future readers from chasing a replay owner in code.
+- **Cluster D — CODE_CANON.md:** no-op, already honest and owner-focused. Not touched this packet.
+
+### Canonical owner map added to the two docs
+- **Serializer:** `src/state/serializeGameState.ts` — 11-key top-level allow-list (`GAMESTATE_TOP_LEVEL_KEYS`, lines 17–29). Wrappers and derived/transient fields rejected.
+- **Deserializer:** `src/state/serialize.ts` — `deserializeState()` at line 29: parse → `applyMigrations()` → validate.
+- **Migration registry:** `src/state/save_migration.ts` — `registerMigration()` / `applyMigrations()` at lines 32–51. Two current migrations (v1 HRHB enclaves; v2 `active_operation` → `active_operations`).
+- **Desktop load-path (Electron):** `src/desktop/electron-main.cjs` — IPC handlers `load-scenario-dialog` (line 1427), `start-new-campaign` (line 1441), `load-state-dialog` (line 1461); `classifyLoadError()` at line 68.
+- **Browser load-path + post-load UI reset owner:** `src/ui/map/store/gameStore.ts` — `loadSave()` at line 490.
+- **Adapter after deserialize:** `src/ui/map/data/GameStateAdapter.ts`.
+- **Intermediaries (not load entrypoints):** `src/desktop/desktop_sim.ts`, `src/ui/map/desktop/useIPC.ts`.
+
+### Proof today (what is directly proven vs what is source-verified only)
+
+| Claim | Proof kind | Location |
+|---|---|---|
+| Real-save roundtrip idempotency | Direct behavioral | `tests/save_load_real_roundtrip.test.ts` |
+| Adapter-after-deserialize field completeness (18 fields) | Direct behavioral | `tests/adapter_field_completeness.test.ts` |
+| Adapter discipline (vitest 31 + node:test 18) | Direct behavioral | `tests/ui_adapter_boundary.test.ts`, `tests/ui_map_game_state_adapter.test.ts` |
+| Post-load UI reset (11 selection/modal/order assertions) | Direct behavioral | `tests/ui/gamestore_load_reset.test.ts` |
+| Desktop load error classification (10 categories) | Direct behavioral | `tests/ui/desktop_load_error_classification.test.ts` |
+| Serializer allow-list rejects wrappers + derived fields | Direct behavioral | `tests/serialize_gamestate_rejects_wrappers.test.ts`, `tests/serialize_gamestate_no_derived_fields.test.ts` |
+| Canonical-owner prose in the two authority docs | Source-verified only | `PIPELINE_ENTRYPOINTS.md`, `REPO_MAP.md` — no grep-test binds the docs to the code |
+| 6 adapter fields intentionally recomputed (vs 6 owned) | Documented in ledger | See `766c0f1a` / `82e02fbd` entries |
+
+### Replay truth (stated explicitly)
+Replay has no code. It is deferred to Phase 4 of the v0.8→v0.9 save/load/replay hardening plan and is not a closed seam. Future readers should not search `src/` for a replay owner until that lane opens.
+
+### Rejected/deferred this packet
+- **Authoring replay code:** future lane (Phase 4 of the hardening plan).
+- **Grep-test binding the canonical-owner prose in the two authority docs to the real file paths:** deferred — no product need yet; raise only if doc drift becomes real risk.
+- **Touching `CODE_CANON.md`:** already honest per audit.
+- **Touching `FORAWWV.md`:** sacred, never auto-edited.
+- **Touching the lane plan or master roadmap:** the plan already covers replay as Phase 4 and the packet backlog already exists.
+- **Restructuring unrelated sections of the two authority docs:** out of scope.
+
+
+
 ## [2026-04-15] fix(ui): surface campaign-drag in Army HQ command relationship and handoff via war summary
 
 **Type:** Commander-explanation surfaces packet (Clusters B + C + D of the v0.8→v0.9 explanation-surfaces lane)
