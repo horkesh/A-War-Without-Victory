@@ -1,3 +1,34 @@
+## [2026-04-15] feat(ui): make Codex endgame-aware with ghost essays
+
+**Type:** UI narrative-surface completion / Codex dynamic essay slice
+**Commit (code):** a42f4ac1
+**Commit (ledger):** this entry
+**Files:** `src/ui/map/components/CodexPanel.tsx`, `src/ui/map/components/codex/codexEssayResolver.ts`, `data/scenarios/essays/essay_index.json`, `tests/ui/codex_essay_resolver.test.ts`, `tests/ui/codex_panel_dynamic_mount.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+**Tests:** `npx.cmd tsc --noEmit -p tsconfig.json` clean; vitest `tests/ui/codex_essay_resolver.test.ts` + `tests/ui/codex_panel_dynamic_mount.test.ts` = 9/9 pass; `npm.cmd run desktop:map:build` clean in 6.16s; `git diff --check` clean.
+**Status:** VERIFIED - Codex now has a first-class endgame-aware resolver, with one live ghost essay and one live divergence-note essay.
+
+### Summary
+
+1. **Codex got a real essay resolver instead of ad hoc panel logic:** `resolveCodexEssay()` now owns unlock state, ghost state, dynamic-section insertion, and a narrow deterministic condition language (`GAME_OVER`, `COMPARISON_NOTES`, `RUPTURE:*`, `EVENT:*`, `FLAG:*`, `AND` / `OR` / `NOT`).
+2. **One historically sensitive ghost path is now live in Codex:** `essay_srebrenica_falls_1995` can surface as a ghost entry when the game is over and the historical Srebrenica rupture never occurred. The panel labels it explicitly as a ghost entry rather than pretending it was unlocked by event fire.
+3. **Endgame comparison now reaches a live Codex essay:** `essay_dayton_signed_1995` now appends `historicalComparison.divergence_notes` through a data-authored `dynamic_sections` block, and `CodexPanel` renders those paragraphs as downstream "Player War Divergence" notes inside the essay body.
+
+### Why this mattered
+
+Chronicle and Wrapped were no longer static after the previous packet, but Codex still was. That left the long-form historical shell unable to acknowledge the player's endgame divergence at all. The missing seam was not "generate more essays"; it was "teach Codex how to render a small amount of existing endgame truth honestly." This packet closes that seam without pretending a giant universal narrative engine already exists.
+
+### Proof boundaries
+
+- **Direct proof:** `codex_essay_resolver.test.ts` proves the resolver's unlock, ghost, condition-evaluation, and dynamic-section insertion behavior. `codex_panel_dynamic_mount.test.ts` mounts the real panel in jsdom, clicks the real 1995 essay list, and proves both the Srebrenica ghost surface and the Dayton divergence notes render through the actual UI tree.
+- **Source-verified only:** this is the first dynamic Codex slice, not a whole essay-system migration. Most essays in `essay_index.json` still remain canonical static content with no `dynamic_sections` or `ghost_when` metadata, and no Electron packaged-runtime probe targets Codex specifically yet.
+
+### Rejected / deferred
+
+- **Generic narrative/essay DSL:** rejected for this packet. The resolver language is deliberately narrow and only covers conditions needed for the live essays.
+- **Bulk conversion of all Codex essays:** deferred. Only two essays were promoted into the new schema slice here, because proving one ghost path and one divergence path mattered more than spraying metadata across the whole corpus without tests.
+
+---
+
 ## [2026-04-15] feat(ui): thread endgame comparison into Chronicle and Wrapped
 
 **Type:** UI narrative-surface completion / endgame comparison propagation
