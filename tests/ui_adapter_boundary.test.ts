@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
+import { parseGameState } from '../src/ui/map/data/GameStateAdapter.js';
 
 const UI_COMPONENTS_ROOT = join(process.cwd(), 'src', 'ui', 'map', 'components');
 const SRC_ROOT = join(process.cwd(), 'src');
@@ -110,13 +111,15 @@ describe('UI Adapter Boundary Discipline', () => {
   });
 
   /**
-   * Cluster B: Adapter Boundary Simplification — NO-OP.
+   * Cluster B: Adapter Boundary Simplification — INCREMENTAL PROGRESS.
    *
-   * All adapter boundary simplifications require state-layer changes that
-   * violate the constraint "do not invent new packet/state structures."
+   * One seam simplified (2026-04-15): derivePendingEventDecisions is now a
+   * direct passthrough of engine-owned state.military.pending_event_decisions.
+   * Engine type PendingEventDecision already matches the adapter's structural
+   * shape exactly; defensive String/Number/Array coercion was removed.
+   * Reference identity is preserved — see the behavioral proof test below.
    *
-   * Documented seams (top 3 candidates examined, none actionable without
-   * state-layer changes):
+   * Three seams remain structurally necessary without engine-side work:
    *
    * 1. deriveNegotiatingCapital — replicates DIMENSION_WEIGHTS weighting
    *    inline. Simplification would require adding a pre-computed
@@ -131,6 +134,56 @@ describe('UI Adapter Boundary Discipline', () => {
    *    capture_provenance string is absent. Simplification requires the
    *    engine to always emit capture_provenance on operation AARs.
    */
+  it('derivePendingEventDecisions is a reference-identity passthrough of engine truth', () => {
+    // Behavioral proof: the adapter does not clone, coerce, or restructure
+    // pending_event_decisions. Element references are preserved, which means
+    // the UI and the engine are looking at the exact same object — no hidden
+    // adapter-side interpretation, no allocation cost, no schema drift risk.
+    const engineDecision = {
+      event_id: 'evt_srebrenica_crisis',
+      event_title: 'Srebrenica Crisis',
+      turn_fired: 42,
+      faction: 'RBiH',
+      requires_player_response: true,
+      response_options: [
+        { id: 'accept', label: 'Accept UN protection', description: 'Trust Akashi', effects: [] },
+        { id: 'reject', label: 'Reject UN protection', effects: [] },
+      ],
+    };
+    const rawState: any = {
+      meta: { turn: 42, phase: 'war' },
+      military: {
+        formations: {},
+        pending_event_decisions: [engineDecision],
+      },
+      political: { political_controllers: {} },
+    };
+
+    const parsed = parseGameState(rawState);
+    expect(parsed.pendingEventDecisions).toHaveLength(1);
+    // Reference equality proves no coercion/allocation occurred for the element.
+    expect(parsed.pendingEventDecisions?.[0]).toBe(engineDecision);
+    // Engine-only field that the adapter UI type omits is still present at
+    // runtime — adapter only narrows the TS view, it does not strip fields.
+    expect((parsed.pendingEventDecisions?.[0] as any).requires_player_response).toBe(true);
+  });
+
+  it('derivePendingEventDecisions collapses empty/missing arrays to undefined', () => {
+    const emptyState: any = {
+      meta: { turn: 1, phase: 'war' },
+      military: { formations: {}, pending_event_decisions: [] },
+      political: { political_controllers: {} },
+    };
+    expect(parseGameState(emptyState).pendingEventDecisions).toBeUndefined();
+
+    const missingState: any = {
+      meta: { turn: 1, phase: 'war' },
+      military: { formations: {} },
+      political: { political_controllers: {} },
+    };
+    expect(parseGameState(missingState).pendingEventDecisions).toBeUndefined();
+  });
+
   /**
    * Dayton trigger ownership: pipeline owns initiation, adapter only reads.
    *

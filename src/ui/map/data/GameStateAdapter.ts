@@ -2224,24 +2224,21 @@ function deriveFiredEvents(state: any): LoadedGameState['firedEvents'] {
     return entries.length > 0 ? entries.slice(0, 20) : undefined;
 }
 
+/**
+ * Pass engine-owned PendingEventDecision[] through unchanged.
+ *
+ * Truth owner: src/sim/events/evaluate_events.ts writes canonical
+ * PendingEventDecision[] into state.military.pending_event_decisions
+ * (type: src/sim/events/event_types.ts). The adapter type in data/types.ts
+ * is a structural subset of that shape, so no coercion is needed — the
+ * adapter only exposes it under a UI-friendly property name. Empty arrays
+ * collapse to undefined to match the rest of the LoadedGameState contract.
+ */
 function derivePendingEventDecisions(state: any): LoadedGameState['pendingEventDecisions'] {
-    const pending = state.military?.pending_event_decisions as any[] | undefined;
+    const pending = state.military?.pending_event_decisions as
+        LoadedGameState['pendingEventDecisions'];
     if (!pending || pending.length === 0) return undefined;
-
-    return pending.map((d: any) => ({
-        event_id: String(d.event_id ?? ''),
-        event_title: String(d.event_title ?? ''),
-        turn_fired: Number(d.turn_fired ?? 0),
-        faction: String(d.faction ?? ''),
-        response_options: Array.isArray(d.response_options)
-            ? d.response_options.map((opt: any) => ({
-                id: String(opt.id ?? ''),
-                label: String(opt.label ?? ''),
-                description: opt.description ? String(opt.description) : undefined,
-                effects: Array.isArray(opt.effects) ? opt.effects : [],
-            }))
-            : [],
-    }));
+    return pending;
 }
 
 function derivePresidentialReviewQueue({

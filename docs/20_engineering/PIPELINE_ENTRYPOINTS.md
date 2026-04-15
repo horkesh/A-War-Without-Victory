@@ -4,6 +4,15 @@
 
 **Quick change routing:** Scenario changes → `src/scenario/`, `data/scenarios/`. Early-war control flip (incl. B4 coercion) → `src/sim/early_war/control_flip.ts`. Authority derivation → `src/state/formation_lifecycle.ts`. Events (B1) → `src/sim/events/`. Map build → [MAP_BUILD_SYSTEM.md](MAP_BUILD_SYSTEM.md). Full routing: REPO_MAP.md §Change X → Go Here.
 
+## Canonical Turn Pipelines (one owner per phase)
+
+AWWV has exactly two canonical turn runtimes. Nothing else in the repo is co-equal with them:
+
+- **War-phase pipeline:** `src/sim/turn_pipeline.ts` — `runTurn()`. Steps in `src/sim/turn_phases/war_phases.ts` + `early_war_phases.ts`; shared types in `src/sim/turn_pipeline_types.ts`. If you are changing live war behavior, start here.
+- **Peace/state pipeline:** `src/state/turn_pipeline.ts` — `runOneTurn()`. Phase order: directives → deployments → military_interaction → fragmentation_resolution → supply_resolution → political_effects → exhaustion_update → persistence (see Systems Manual §1). If you are changing weekly non-war state progression, start here.
+
+Scenario runner (`src/scenario/scenario_runner.ts`) routes to whichever pipeline matches `state.meta.phase`. The CLI harnesses and desktop sim call the same two functions.
+
 ## Canonical Entry Points
 ### Scenario Harness (Deterministic, Multi-Turn)
 - `src/scenario/scenario_runner.ts`
@@ -54,8 +63,8 @@
   - Inputs: `docs/50_research/*.pdf`
   - Outputs: `docs/50_research/extracts/*.txt` (agent-readable). See `docs/50_research/README_KNOWLEDGE_BASE.md`.
 
-### War-Phase Browser Advance (Warroom)
-- `src/sim/run_combat_browser.ts` — `runWarTurn(state, input)` — browser-safe war-phase turn advance. No Node/fs. Used by warroom when advancing a turn in war phase. War phase uses location_osid only (no AoR). Does not run supply pressure or exhaustion; full war-phase use Node `runTurn`.
+### War-Phase Browser Advance (Warroom — bounded variant, not co-equal)
+- `src/sim/run_combat_browser.ts` — `runPhaseIITurn(state, input)` — browser-safe war-phase turn advance. No Node/fs. Used only by the warroom (`src/ui/warroom/ClickableRegionManager.ts`) when advancing a turn in war phase. Increments the turn counter; war phase uses location_osid only (no AoR). Does not run supply pressure or exhaustion. This is a bounded UI variant; full war-phase behavior comes from the canonical war pipeline `runTurn()` in `src/sim/turn_pipeline.ts`.
 
 ### War-phase location_osid (AoR removed)
 - AoR init is removed. War-phase brigade location is **location_osid** only; set at formation creation and via `backfillFormationLocationOsid` at war entry. See docs/30_planning/AOR_PHASEOUT_OSID_ZOC_RECONCILIATION.md. Legacy `src/scenario/aor_init.ts` is deprecated and must not be used for war-phase state.
@@ -115,10 +124,10 @@ Early-war steps: `evaluate-events` (first), `militia-emergence`, `pool-populatio
 
 After combat resolution: `generate-army-reserve-requests` (scans all non-exempt corps; generates loan requests for offensive_support/defensive_gap/exploitation; bot AI auto-assigns bot-faction requests via `evaluateArmyReserveAssignments`; player-faction requests persist in `state.military.pending_reserve_requests` for UI; `army_reserve_system.ts`), `tick-elite-loans` (replaces old `elite-loan-lifecycle`; force-recalls on ≥30% casualties/morale<35/cohesion<25/permanent-degradation; auto-joins target corps's active operation each turn; voluntary recall after op ends + threat subsides + ELITE_LOAN_MIN_DURATION met; updates EliteBrigadeTracker episodes; battle counters synced in real-time by `recordBrigadeEngagement`; `army_reserve_system.ts`), `generate-war-stories` (per-turn narrative generation from brigade_history → FormationState.war_story; `war_stories.ts`), `compute-combat-summaries` (aggregates subordinate brigade_history tallies onto FormationState.combat_summary for corps/army_hq; `combat_summary_aggregator.ts`), `wia-trickleback`. After `alliance-update`, RBiH–HRHB milestone checks run: `ceasefire-check`, `washington-check` (same precondition logic as early-war). Brigade location is location_osid only; war entry uses backfillFormationLocationOsid. Combat code in `src/sim/combat/`; early-war code in `src/sim/early_war/`. See War_Specification_v0_6_0.md §5 and AOR_PHASEOUT_OSID_ZOC_RECONCILIATION.md. Game version: see `docs/20_engineering/VERSIONING.md`.
 
-## Non-Canonical / Legacy Harnesses
-These exist for smoke and internal checks, not for authoritative runs:
-- `src/index.ts` (smoke entrypoint)
-- `src/turn/pipeline.ts` (minimal turn harness used by `src/index.ts`)
+## Demoted / Legacy Harnesses (do not route live behavior through these)
+These exist for smoke and internal checks only. They are not co-equal with the canonical war/peace pipelines named above. Do not add new callers.
+- `src/index.ts` — minimal deterministic smoke entrypoint. Runs a one-shot `executeTurn()` and prints serialized state. Not the game entrypoint.
+- `src/turn/pipeline.ts` — legacy prototype `executeTurn()`; only invoked by `src/index.ts`. Live war behavior belongs in `src/sim/turn_pipeline.ts`.
 
 ## UI / Asset Tooling (Non-Sim, Opt-In)
 These are **not** simulation entrypoints. They are opt-in tooling and must remain isolated from deterministic sim outputs.

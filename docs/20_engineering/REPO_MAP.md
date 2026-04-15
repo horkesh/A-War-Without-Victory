@@ -21,10 +21,11 @@ Populate this section from the discovery checklist.
 ## Key Pipelines and Their Code Locations
 ### Turn/Phase Pipeline
 - Canon references: `docs/10_canon/Systems_Manual_v0_7_0.md`, `docs/10_canon/Engine_Invariants_v0_7_0.md`
-- Code entrypoints:
-  - War phases: `src/sim/turn_pipeline.ts` (orchestrator); step definitions in `src/sim/turn_phases/war_phases.ts` + `early_war_phases.ts`; types in `src/sim/turn_pipeline_types.ts`
-  - Canonical pipeline: `src/state/turn_pipeline.ts`
-  - Legacy/minimal turn harness: `src/turn/pipeline.ts` (used by `src/index.ts`)
+- Code entrypoints (one canonical owner per phase; nothing else is co-equal):
+  - **Canonical war-phase pipeline:** `src/sim/turn_pipeline.ts` — `runTurn()`. Steps in `src/sim/turn_phases/war_phases.ts` + `early_war_phases.ts`; shared types in `src/sim/turn_pipeline_types.ts`.
+  - **Canonical peace/state pipeline:** `src/state/turn_pipeline.ts` — `runOneTurn()`. Weekly state progression (directives, deployments, military_interaction, fragmentation_resolution, supply_resolution, political_effects, exhaustion_update, persistence).
+  - Bounded browser variant (not co-equal): `src/sim/run_combat_browser.ts` — warroom-only war-phase turn advance; increments turn counter only (see §GUI for details).
+  - Demoted smoke harness: `src/index.ts` → `src/turn/pipeline.ts`. Deterministic smoke only; do not route live behavior through this path.
 - Militia/brigade formation (early-war): pool population `src/sim/early_war/pool_population.ts`, formation spawn `src/sim/formation_spawn.ts`, recruitment (player_choice mode) `src/sim/recruitment_engine.ts`, `src/state/recruitment_types.ts`; design: `docs/20_engineering/MILITIA_BRIGADE_FORMATION_DESIGN.md`. CLI: `src/cli/sim_generate_formations.ts`.
 - B1 Events: `src/sim/events/` — emergent event system (v0.6.0)
   - `event_types.ts` — EventCondition (23 variants), EventDefinition, EventResponseOption, PressureConfig, RecurrenceConfig, DimensionId, StrategicDimension, DimensionShift

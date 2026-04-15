@@ -25,20 +25,29 @@ If you touch determinism-sensitive areas, also read:
 ## Where to Start Reading the Code (First 30 Minutes)
 Read `docs/context.md` first (workflow discipline and validation rules).
 
-Primary entrypoints (from deterministic discovery):
-- Scenario harness: `src/scenario/scenario_runner.ts`
-- Scenario CLI: `src/cli/sim_scenario.ts`
-- Single-turn sim CLI: `src/cli/sim_run.ts`
-- War-phase pipeline: `src/sim/turn_pipeline.ts` (orchestrator; steps in `src/sim/turn_phases/war_phases.ts`)
-- Canonical pipeline: `src/state/turn_pipeline.ts`
-- War-phase browser advance (warroom subset): `src/sim/run_combat_browser.ts`
-- AoR init shared helper: `src/scenario/aor_init.ts`
-- Event framework (B1, report-only): `src/sim/events/`
-- Serialization core: `src/state/serialize.ts` and `src/state/serializeGameState.ts`
-- Minimal smoke entrypoint: `src/index.ts`
-- Map pipeline: `docs/20_engineering/MAP_BUILD_SYSTEM.md` (scripts under `scripts/map/`)
-- Product architecture authority: `docs/20_engineering/PRODUCT_ARCHITECTURE_AUTHORITY.md`
-- Tactical Map (canonical map GUI): `docs/20_engineering/TACTICAL_MAP_SYSTEM.md` §0 and `docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md` — React + MapLibre app in `src/ui/map/`; `npm run dev:map`
+### Canonical turn pipelines (one owner per phase)
+- **War-phase pipeline:** `src/sim/turn_pipeline.ts` — `runTurn()`. Sole canonical runtime for live war behavior. Steps in `src/sim/turn_phases/war_phases.ts` and `early_war_phases.ts`; types in `src/sim/turn_pipeline_types.ts`.
+- **Peace/state pipeline:** `src/state/turn_pipeline.ts` — `runOneTurn()`. Sole canonical runtime for non-war weekly state progression (directives → deployments → military_interaction → fragmentation_resolution → supply_resolution → political_effects → exhaustion_update → persistence).
+
+If you are changing war behavior, start at `src/sim/turn_pipeline.ts`. If you are changing peace/state progression, start at `src/state/turn_pipeline.ts`. Nothing else is co-equal with these two.
+
+### Canonical harnesses and surfaces (callers of the pipelines)
+- Scenario harness: `src/scenario/scenario_runner.ts` — routes to peace vs war runner based on `state.meta.phase`.
+- Scenario CLI: `src/cli/sim_scenario.ts`.
+- Single-turn sim CLI: `src/cli/sim_run.ts`.
+- Event framework (B1): `src/sim/events/`.
+- Serialization core: `src/state/serialize.ts` and `src/state/serializeGameState.ts`.
+- Map pipeline: `docs/20_engineering/MAP_BUILD_SYSTEM.md` (scripts under `scripts/map/`).
+- Tactical Map (canonical map GUI): `docs/20_engineering/TACTICAL_MAP_SYSTEM.md` §0 and `docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md` — React + MapLibre app in `src/ui/map/`; `npm run dev:map`.
+- Product architecture authority: `docs/20_engineering/PRODUCT_ARCHITECTURE_AUTHORITY.md`.
+
+### Bounded variant (not co-equal with canonical pipelines)
+- `src/sim/run_combat_browser.ts` — `runPhaseIITurn()`. Browser-safe war-phase turn advance (no Node/fs). Increments the turn counter only; does not run supply pressure or exhaustion. Used by the warroom when advancing a turn in war phase. Full war-phase behavior comes from `runTurn()` in Node; do not treat this file as equivalent to `src/sim/turn_pipeline.ts`.
+
+### Demoted / smoke-only (do not treat as canonical)
+- `src/index.ts` — minimal deterministic smoke harness. Not the game entrypoint.
+- `src/turn/pipeline.ts` — legacy prototype `executeTurn()`. Only invoked by `src/index.ts`. Live war behavior belongs in `src/sim/turn_pipeline.ts`.
+- `src/scenario/aor_init.ts` — deprecated (AoR removed in n344). Do not use for war-phase state; war phase uses `location_osid` only.
 
 ## Single Source of Truth for Entry Points
 Only the entrypoints listed in `docs/20_engineering/REPO_MAP.md` and `docs/20_engineering/PIPELINE_ENTRYPOINTS.md`,
