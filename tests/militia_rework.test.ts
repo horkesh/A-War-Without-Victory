@@ -6,7 +6,7 @@
  */
 
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 import { reinforceBrigadesFromPools, spawnFormationsFromPools } from '../src/sim/formation_spawn.js';
 import { runMinorityMilitiaDecay } from '../src/sim/early_war/minority_militia_decay.js';
 import { MIN_BRIGADE_SPAWN } from '../src/state/formation_constants.js';

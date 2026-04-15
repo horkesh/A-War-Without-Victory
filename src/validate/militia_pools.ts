@@ -19,7 +19,7 @@ export function validateMilitiaPools(
 ): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
-    const militiaPools = (state as any)?.militia_pools as Record<string, any> | undefined;
+    const militiaPools = ((state as any)?.military?.militia_pools ?? (state as any)?.militia_pools) as Record<string, any> | undefined;
     if (!militiaPools || typeof militiaPools !== 'object') return issues;
 
     const validMunIds = new Set(validMunicipalityIds);

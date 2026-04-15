@@ -60,6 +60,8 @@ describe('test discovery contracts', () => {
             'tests/game_state_shape.test.ts',
             'tests/generate_formations.test.ts',
             'tests/formations_validate.test.ts',
+            'tests/militia_pools.test.ts',
+            'tests/recruitment_engine.test.ts',
             'tests/negotiation_pressure.test.ts',
             'tests/scenario_registry.test.ts',
             'tests/serialize_gamestate_stability.test.ts',

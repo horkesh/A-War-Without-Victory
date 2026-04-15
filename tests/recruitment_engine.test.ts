@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { describe, test } from 'node:test';
+import { describe, test } from 'vitest';
 import type { OobBrigade, OobCorps } from '../src/scenario/oob_loader.js';
 import {
     applyRecruitment,
@@ -17,11 +17,14 @@ function makeBrigade(overrides: Partial<OobBrigade> & Pick<OobBrigade, 'id' | 'f
     return {
         kind: 'brigade',
         ...RECRUITMENT_DEFAULTS,
+        home_osid: `op:${overrides.home_mun}:core`,
         ...overrides
     };
 }
 
 function makeState(overrides?: Partial<GameState>): GameState {
+    const overrideMilitary = (overrides?.military ?? {}) as Record<string, unknown>;
+    const overridePolitical = (overrides?.political ?? {}) as Record<string, unknown>;
     return {
   schema_version: CURRENT_SCHEMA_VERSION,
   meta: { turn: 0, seed: 'test' },
@@ -30,18 +33,20 @@ function makeState(overrides?: Partial<GameState>): GameState {
             { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'HRHB', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
-  ...overrides,
   military: {
     formations: {},
     front_segments: {},
     front_posture: {},
     front_posture_regions: {},
     front_pressure: {},
-    militia_pools: {}
+    militia_pools: {},
+    ...overrideMilitary
   } as any,
   political: {
-    political_controllers: {}
+    political_controllers: {},
+    ...overridePolitical
   } as any,
+  ...Object.fromEntries(Object.entries(overrides ?? {}).filter(([key]) => key !== 'military' && key !== 'political')),
 } as unknown as GameState;
 }
 

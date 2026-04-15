@@ -1,3 +1,31 @@
+## [2026-04-15] test(repo): migrate recruitment and militia contracts onto vitest
+
+**Type:** Test-harness cleanup / recruitment-militia truth hardening
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `src/validate/militia_pools.ts`, `tests/militia_rework.test.ts`, `tests/militia_pools.test.ts`, `tests/recruitment_engine.test.ts`, `tests/recruitment_turn.test.ts`, `tests/test_discovery_contract.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/militia_rework.test.ts tests/militia_pools.test.ts tests/recruitment_engine.test.ts tests/recruitment_turn.test.ts tests/test_discovery_contract.test.ts` = 34/34 pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED - four adjacent recruitment/militia contracts now run on vitest, discovery pins representative militia/recruitment files into the fast slice, and militia pool validation reads the canonical nested owner path again.
+
+### Summary
+
+1. **The recruitment/militia band moved together:** militia rework/spawn rules, militia-pool validation/defaulting, recruitment-engine resource and spawn contracts, and ongoing recruitment turn logic now live on the canonical vitest lane.
+2. **A second nested-owner validator bug was repaired:** `validateMilitiaPools(...)` had drifted to a dead top-level `state.militia_pools` alias, which silently emptied the validator for live callers. It now reads `state.military.militia_pools`, with the top-level path only as a legacy fallback.
+3. **Fixture drift was corrected honestly:** the recruitment test helper now actually preserves nested `military` / `political` overrides, current recruitment fixtures provide canonical `political.political_controllers`, and recruitment brigades use explicit operational placement ids so the tests prove the live placement gate instead of relying on an older canonical-to-operational shortcut.
+
+### Why this mattered
+
+Recruitment and militia are still pre-0.9 core truth, not decorative residue. Pulling this family onto vitest closes another split-harness island, and the validator fix matters beyond the tests because it restores a real canonical owner path to a live validation surface.
+
+### Proof boundaries
+
+- **Direct proof:** all 4 migrated recruitment/militia suites pass under vitest.
+- **Direct proof:** discovery now pins representative militia/recruitment files in the fast vitest slice.
+- **Direct proof:** `validateMilitiaPools(...)` now reads `state.military.militia_pools` again.
+- **Not claimed here:** this does **not** broaden recruitment design or add new simulation behavior; it aligns the harness and validators with already-live recruitment truth.
+
+---
+
 ## [2026-04-15] test(repo): migrate formation contracts onto vitest and repair canonical validator ownership
 
 **Type:** Test-harness cleanup / formation truth hardening

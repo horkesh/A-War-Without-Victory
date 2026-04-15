@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { describe, test } from 'node:test';
+import { describe, test } from 'vitest';
 import type { OobBrigade } from '../src/scenario/oob_loader.js';
 import { initializeRecruitmentResources } from '../src/sim/recruitment_engine.js';
 import { accrueRecruitmentResources, runOngoingRecruitment } from '../src/sim/recruitment_turn.js';
@@ -121,6 +121,7 @@ describe('runOngoingRecruitment', () => {
                 manpower_cost: 800,
                 capital_cost: 10,
                 default_equipment_class: 'light_infantry',
+                home_osid: 'op:zenica:core',
                 priority: 1,
                 mandatory: false,
                 available_from: 0,
@@ -135,6 +136,7 @@ describe('runOngoingRecruitment', () => {
                 manpower_cost: 800,
                 capital_cost: 10,
                 default_equipment_class: 'light_infantry',
+                home_osid: 'op:zenica:core',
                 priority: 2,
                 mandatory: false,
                 available_from: 0,
@@ -166,6 +168,7 @@ describe('runOngoingRecruitment', () => {
                 manpower_cost: 800,
                 capital_cost: 10,
                 default_equipment_class: 'light_infantry',
+                home_osid: 'op:zenica:core',
                 priority: 1,
                 mandatory: true,
                 available_from: 0,
@@ -234,6 +237,7 @@ describe('runOngoingRecruitment', () => {
                 manpower_cost: 800,
                 capital_cost: 10,
                 default_equipment_class: 'light_infantry',
+                home_osid: 'op:prijedor:core',
                 priority: 1,
                 mandatory: true,
                 available_from: 0,

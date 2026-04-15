@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 
 import { CURRENT_SCHEMA_VERSION, type GameState } from '../src/state/game_state.js';
 import { deserializeState, serializeState } from '../src/state/serialize.js';
@@ -10,8 +10,8 @@ test('validateMilitiaPools emits deterministic errors', () => {
   schema_version: CURRENT_SCHEMA_VERSION,
   meta: { turn: 5, seed: 'seed' },
   factions: [
-            { id: 'ARBiH', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
-            { id: 'VRS', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
+            { id: 'RBiH', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
+            { id: 'RS', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
         ],
   military: {
     formations: {},
@@ -87,7 +87,7 @@ test('validateMilitiaPools emits deterministic errors', () => {
             }
         }
   } as any,
-  political: {} as any, displacement: {} as any
+  political: { political_controllers: {} } as any, displacement: {} as any
 };
 
     const validMunicipalityIds = new Set(['20168', '20044', '21001', '22001', '23001', '24001', '25001']);
@@ -138,7 +138,7 @@ test('validateMilitiaPools accepts valid militia pools', () => {
             }
         }
   } as any,
-  political: {} as any, displacement: {} as any
+  political: { political_controllers: {} } as any, displacement: {} as any
 };
 
     const validMunicipalityIds = new Set(['20168', '20044']);
@@ -160,7 +160,7 @@ test('militia_pools defaults to {} on deserialize', () => {
     front_pressure: {},
     militia_pools: {}
   } as any,
-  political: {} as any, displacement: {} as any
+  political: { political_controllers: {} } as any, displacement: {} as any
 };
 
     const payload = serializeState(stateWithoutMilitia);
@@ -183,7 +183,7 @@ test('validateMilitiaPools handles empty militia_pools', () => {
     front_pressure: {},
     militia_pools: {}
   } as any,
-  political: {} as any, displacement: {} as any
+  political: { political_controllers: {} } as any, displacement: {} as any
 };
 
     const validMunicipalityIds = new Set<string>();
