@@ -6,7 +6,7 @@
  * - Critical supply → forced defend, no voluntary attacks
  * - Strained supply → min_attack_outcome upgraded to 'victory', no pioneer attacks
  */
-import { describe, it } from 'node:test';
+import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
 import { getBrigadeSupplyState } from '../src/sim/combat/bot_brigade_ai_osid.js';
 import type { FormationState, FactionId } from '../src/state/game_state.js';

@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 
 import { buildAdjacencyMap } from '../src/map/adjacency_map.js';
 import { CURRENT_SCHEMA_VERSION, GameState } from '../src/state/game_state.js';

@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 
 import { CURRENT_SCHEMA_VERSION, GameState } from '../src/state/game_state.js';
 import { computeSupplyReachabilityOsid } from '../src/state/supply_reachability_osid.js';

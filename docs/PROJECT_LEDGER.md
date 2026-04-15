@@ -1,3 +1,30 @@
+## [2026-04-15] test(repo): migrate supply reachability and gating contracts onto vitest
+
+**Type:** Test-harness cleanup / supply contract unification
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/supply_gating.test.ts`, `tests/supply_reachability.test.ts`, `tests/supply_reachability_osid.test.ts`, `tests/test_discovery_contract.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/supply_gating.test.ts tests/supply_reachability.test.ts tests/supply_reachability_osid.test.ts tests/test_discovery_contract.test.ts` = 19/19 pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED - the remaining pure supply-gating and reachability contracts now run under vitest, with discovery pinning representative supply files in the fast slice.
+
+### Summary
+
+1. **The remaining pure supply contracts moved together:** brigade supply gating, settlement-level reachability, and OSID-level reachability/state derivation now live on the canonical vitest lane.
+2. **This packet was intentionally small and pure:** no production changes were needed because these suites were only stranded by runner history, not by any special execution requirement.
+3. **Discovery now keeps supply truth visible:** representative supply-gating and supply-reachability files are pinned in the fast vitest slice so this family does not drift back into split-harness residue.
+
+### Why this mattered
+
+Supply is foundational engine truth. Keeping a few of its cleanest deterministic contracts in `node:test` made the harness map look messier than the code actually is. Migrating this small family closes another obvious runner split without touching behavior.
+
+### Proof boundaries
+
+- **Direct proof:** all 3 migrated supply suites pass under vitest.
+- **Direct proof:** discovery now pins representative supply files in the fast vitest slice.
+- **Not claimed here:** this does **not** close every supply-domain or reserve-domain test; it closes the remaining pure reachability/gating band.
+
+---
+
 ## [2026-04-15] test(repo): migrate bot management contracts onto vitest and retire dead dedup placeholder
 
 **Type:** Test-harness cleanup / residual test retirement
