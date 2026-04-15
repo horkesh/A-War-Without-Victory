@@ -12,6 +12,7 @@ describe('test discovery contracts', () => {
             'tests/desktop_campaign_start_contract.test.ts',
             'tests/desktop_packaging_contract.test.ts',
             'tests/desktop_packaged_runtime_probe.test.ts',
+            'tests/desktop_sim_bundle_smoke.test.ts',
             'tests/desktop_startup_snapshot_guardrails.test.ts',
             'tests/desktop_release_ci_guardrails.test.ts',
             'tests/startup_snapshot_contract.test.ts',
@@ -37,6 +38,7 @@ describe('test discovery contracts', () => {
         const fastRepresentatives = [
             'tests/test_discovery_contract.test.ts',
             'tests/desktop_packaging_contract.test.ts',
+            'tests/desktop_sim_bundle_smoke.test.ts',
             'tests/scenario_registry.test.ts',
             'tests/ui_map_panel_rail.test.ts',
             'tests/ui_map_deck_counter_visibility.test.ts',

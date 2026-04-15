@@ -1,3 +1,30 @@
+## [2026-04-15] test(repo): move bundle smoke to vitest and fold threat-precision residue into player visibility
+
+**Type:** Test-harness cleanup / owner-suite consolidation
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/desktop_sim_bundle_smoke.test.ts`, `tests/ui_player_visibility.test.ts`, `tests/ui_threat_precision_player_visibility.test.ts` (deleted), `tests/test_discovery_contract.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/ui_player_visibility.test.ts tests/desktop_sim_bundle_smoke.test.ts tests/test_discovery_contract.test.ts` = 30/30 pass; `node tools/test/run_vitest_slice.mjs fast --list` includes `tests/desktop_sim_bundle_smoke.test.ts`; `npx.cmd tsc --noEmit -p tsconfig.json` clean.
+**Status:** VERIFIED - one necessary desktop smoke proof now lives in vitest, and one visibility-residue shard has been merged into its canonical owner suite.
+
+### Summary
+
+1. **`desktop_sim_bundle_smoke` was kept, not deleted:** it still proves a unique runtime-adjacent contract — that the bundled desktop sim can be built and loaded in CommonJS mode without throwing — so the test remains.
+2. **The harness split was unnecessary:** because that proof is just child-process orchestration plus assertions, it now imports `vitest` and rides the canonical desktop contract lane instead of staying in `node:test` by inertia.
+3. **`ui_threat_precision_player_visibility` was only packaging residue:** its one source-scan clause now lives inside `ui_player_visibility.test.ts`, where the rest of the player-facing visibility contract already resides.
+
+### Why this mattered
+
+This is the difference between “delete a redundant file” and “delete proof.” The bundle smoke test still mattered; only its harness was wrong. The threat-precision file did not have an independent owner surface, so keeping it separate made the repo look noisier without strengthening the product truth.
+
+### Proof boundaries
+
+- **Direct proof:** the migrated bundle smoke test passes under vitest, and discovery now classifies it into the fast vitest slice.
+- **Direct proof:** the exact-threat-precision guard still runs, now under `ui_player_visibility.test.ts`.
+- **Not claimed here:** this does **not** retire the broader desktop contract lane or the remaining visibility/source-scan residue elsewhere in the repo.
+
+---
+
 ## [2026-04-15] test(repo): consolidate real-save sector truth contracts
 
 **Type:** Test-structure cleanup / latest-save proof consolidation

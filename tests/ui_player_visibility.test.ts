@@ -347,11 +347,36 @@ describe('player visibility helpers', () => {
       new URL('../src/ui/map/components/army_hq/WarSummaryContent.tsx', import.meta.url),
       'utf8',
     );
-    expect(warSummarySource).toContain('const { playerFaction, areaPct, personnelByFaction, totalDisplaced, displacedByFaction } = data;');
+    expect(warSummarySource).toContain('const { playerFaction, areaPct, personnelByFaction, totalDisplaced, displacedByFaction, warExhaustionByFaction } = data;');
     expect(warSummarySource).toContain('const sitrep = loadedGameState.operationalSitrep;');
     expect(warSummarySource).toContain('getPlayerSafeMilitaryFactionName');
 
     expect(situationTabSource).toContain('const sitrep = state.operationalSitrep;');
+  });
+
+  it('keeps exact threat ratios out of normal player-facing shells', () => {
+    const corpsFrontPanelSource = readFileSync(
+      new URL('../src/ui/map/components/CorpsFrontPanel.tsx', import.meta.url),
+      'utf8',
+    );
+    const sectorsSectionSource = readFileSync(
+      new URL('../src/ui/map/components/army_hq/SectorsSection.tsx', import.meta.url),
+      'utf8',
+    );
+    const situationTabSource = readFileSync(
+      new URL('../src/ui/map/components/SituationTab.tsx', import.meta.url),
+      'utf8',
+    );
+    const tooltipSource = readFileSync(
+      new URL('../src/ui/map/components/Tooltip.tsx', import.meta.url),
+      'utf8',
+    );
+
+    expect(corpsFrontPanelSource).not.toContain('ratio.toFixed(2)');
+    expect(sectorsSectionSource).not.toContain('threatRatio.toFixed(2)');
+    expect(sectorsSectionSource).not.toContain('THREAT RATIO');
+    expect(situationTabSource).not.toContain('sector.threat_ratio.toFixed(2)');
+    expect(tooltipSource).not.toContain('model.threatValue.toFixed(2)');
   });
 
   it('keeps the strategic dashboard player-safe when opened from the live bottom strip', () => {
