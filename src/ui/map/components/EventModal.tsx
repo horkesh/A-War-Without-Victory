@@ -1,7 +1,13 @@
 /**
  * v0.4.1 Phase 5: Event Modal.
- * Displays a fired event with narrative, effects preview, faction impact badges.
- * For decision events, renders response buttons. For non-decision events, "Acknowledge".
+ * Displays a non-decision fired event with narrative, effects preview, and
+ * faction impact badges. Renders an "Acknowledged" button and auto-dismisses.
+ *
+ * Ownership boundary: this modal does NOT execute presidential event decisions.
+ * Those are owned by PresidentialAttentionPanel inside Army HQ briefing, which
+ * calls ipc.respondToEventDecision directly. Inbox 'event_modal' clicks route
+ * the president to that panel; they do not land here.
+ *
  * Uses GlassPanel overlay with dispatch paper inner content.
  */
 
@@ -27,7 +33,6 @@ export interface EventModalProps {
     queuePosition?: number;
     queueTotal?: number;
     onAcknowledge: () => void;
-    onDecisionResponse?: (responseId: string) => void;
 }
 
 const FACTION_COLORS: Record<string, string> = {
@@ -88,7 +93,7 @@ export function describeEventEffect(effect: EventEffect): string {
     return effect.kind;
 }
 
-export function EventModal({ event, queuePosition, queueTotal, onAcknowledge, onDecisionResponse }: EventModalProps) {
+export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: EventModalProps) {
     const cat = CATEGORY_CONFIG[event.category] ?? { bg: '#444', color: '#aaa', label: event.category.toUpperCase(), icon: 'star' as IconName };
     const factions = extractFactions(event.effects);
     const mechanicalEffects = event.effects.filter(e => !e.description.startsWith('[narrative]'));
@@ -202,63 +207,28 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge, on
                         </div>
                     )}
 
-                    {/* Decision responses or acknowledge */}
-                    {event.isDecision && event.responseOptions && onDecisionResponse ? (
-                        <div className="space-y-2">
-                            <div
-                                className="text-[10px] uppercase tracking-[0.15em] mb-2 font-bold"
-                                style={{ color: '#8a7e68' }}
-                            >
-                                Presidential Decision Required
-                            </div>
-                            {event.responseOptions.map(opt => (
-                                <button
-                                    key={opt.id}
-                                    onClick={() => onDecisionResponse(opt.id)}
-                                    className="w-full text-left p-3 rounded-sm text-sm transition-all group"
-                                    style={{
-                                        backgroundColor: 'rgba(60,50,35,0.08)',
-                                        color: '#3a3228',
-                                        border: '1px solid rgba(60,50,35,0.15)',
-                                    }}
-                                    onMouseEnter={e => {
-                                        (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(60,50,35,0.15)';
-                                        (e.currentTarget as HTMLElement).style.borderColor = 'rgba(60,50,35,0.3)';
-                                    }}
-                                    onMouseLeave={e => {
-                                        (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(60,50,35,0.08)';
-                                        (e.currentTarget as HTMLElement).style.borderColor = 'rgba(60,50,35,0.15)';
-                                    }}
-                                >
-                                    <div className="font-bold" style={{ fontFamily: 'Georgia, serif' }}>{opt.label}</div>
-                                    {opt.description && (
-                                        <div className="text-xs mt-1" style={{ color: '#6a6050' }}>{opt.description}</div>
-                                    )}
-                                </button>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="flex justify-end pt-2">
-                            <button
-                                onClick={onAcknowledge}
-                                className="px-5 py-2 rounded-sm text-sm font-bold uppercase tracking-wider transition-all"
-                                style={{
-                                    backgroundColor: 'rgba(60,80,50,0.12)',
-                                    color: '#5a6a4a',
-                                    border: '1px solid rgba(60,80,50,0.25)',
-                                    fontFamily: 'Georgia, serif',
-                                }}
-                                onMouseEnter={e => {
-                                    (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(60,80,50,0.22)';
-                                }}
-                                onMouseLeave={e => {
-                                    (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(60,80,50,0.12)';
-                                }}
-                            >
-                                Acknowledged
-                            </button>
-                        </div>
-                    )}
+                    {/* Acknowledge — non-decision events only. Presidential decisions
+                        are executed by PresidentialAttentionPanel, not here. */}
+                    <div className="flex justify-end pt-2">
+                        <button
+                            onClick={onAcknowledge}
+                            className="px-5 py-2 rounded-sm text-sm font-bold uppercase tracking-wider transition-all"
+                            style={{
+                                backgroundColor: 'rgba(60,80,50,0.12)',
+                                color: '#5a6a4a',
+                                border: '1px solid rgba(60,80,50,0.25)',
+                                fontFamily: 'Georgia, serif',
+                            }}
+                            onMouseEnter={e => {
+                                (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(60,80,50,0.22)';
+                            }}
+                            onMouseLeave={e => {
+                                (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(60,80,50,0.12)';
+                            }}
+                        >
+                            Acknowledged
+                        </button>
+                    </div>
                 </div>
             </div>
         </GlassPanel>

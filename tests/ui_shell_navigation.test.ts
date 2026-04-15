@@ -218,19 +218,32 @@ describe('shellNavigation', () => {
     expect(appSource).toContain("params.get('shellHandoff')");
   });
 
-  it('routes inbox event_modal actions through App.tsx to existing EventModal', () => {
-    // App.tsx is the inbox action routing hub. It reads pendingEventDecisions to
-    // build EventDisplayData for the EventModal, and wires onDecisionResponse
-    // through ipc.respondToEventDecision. This is intentional — App.tsx owns
-    // modal routing for all inbox actions.
+  it('inbox event_modal action routes the president to Army HQ briefing (sole executor)', () => {
+    // Behavioral proof: openArmyHQTab(state, 'briefing') is the routing call
+    // App.tsx wires the 'event_modal' inbox branch to. It lands the president
+    // at PresidentialAttentionPanel, which executes ipc.respondToEventDecision.
+    // App.tsx no longer pushes decisions into an EventModal queue and no longer
+    // calls ipc.respondToEventDecision itself.
+    const state = createState('RBiH');
+    const ok = openArmyHQTab(state, 'briefing');
+    expect(ok).toBe(true);
+    expect(state.calls).toEqual([
+      ['setSelectedArmyId', 'RBiH'],
+      ['setArmyHQOpen', true],
+      ['setArmyHQTab', 'briefing'],
+    ]);
+
     const appSource = readFileSync(
       new URL('../src/ui/map/App.tsx', import.meta.url),
       'utf8',
     );
-
-    expect(appSource).toContain('pendingEventDecisions');
-    expect(appSource).toContain('respondToEventDecision');
-    // Verify identity routing — inbox passes itemId, not just action family
+    // App.tsx no longer executes event decisions or reads pendingEventDecisions.
+    expect(appSource).not.toContain('respondToEventDecision');
+    expect(appSource).not.toContain('pendingEventDecisions');
+    // event_modal branch routes to Army HQ briefing.
+    expect(appSource).toContain("action === 'event_modal'");
+    expect(appSource).toContain("openArmyHQTab(gs, 'briefing')");
+    // Identity routing preserved — inbox passes itemId.
     expect(appSource).toContain('itemId');
   });
 });

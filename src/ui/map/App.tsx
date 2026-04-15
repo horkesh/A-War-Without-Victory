@@ -31,7 +31,6 @@ import { AiAdvisorPanel } from './components/AiAdvisorPanel';
 import { AiSettingsPanel } from './components/AiSettingsPanel';
 import { AutonomyPanel } from './components/AutonomyPanel';
 import { PresidentialInbox, InboxBadge } from './components/PresidentialInbox';
-import { resolveEventQueueIndex } from './data/inboxItems';
 import type { EventDisplayData } from './components/EventModal';
 import type { EventLogEntry } from './components/EventLogPanel';
 import { CommandBriefingLayer } from './components/CommandBriefingLayer';
@@ -64,7 +63,7 @@ import { useIPC } from './desktop/useIPC';
 import { resolvePlayerFacingFaction } from '../shared/playerVisibility';
 import type { RecruitmentCatalogBrigade, StartNewCampaignPayload } from './desktop/types';
 import type { SummaryFocusSection } from './data/types';
-import { applyShellHandoffCommand, openArmyHQRecordsSubTab, warroomCommandStaysInRoom } from './utils/shellNavigation';
+import { applyShellHandoffCommand, openArmyHQRecordsSubTab, openArmyHQTab, warroomCommandStaysInRoom } from './utils/shellNavigation';
 import { decodeShellHandoffCommand, isShellHandoffCommand } from '../shared/shellHandoff';
 import {
   applyRecruitmentAndSync,
@@ -670,25 +669,10 @@ function App() {
           useGameStore.setState({ armyHQTab: 'personnel' });
         }
         if (action === 'event_modal') {
-          // Push pending event decisions into the event queue so the EventModal shows them
-          const pending = gs.loadedGameState?.pendingEventDecisions;
-          if (pending && pending.length > 0) {
-            const decisionDisplayData: EventDisplayData[] = pending.map(evt => ({
-              id: evt.event_id,
-              title: evt.event_title ?? 'Decision Required',
-              narrative: `An event from turn ${evt.turn_fired} requires your response.`,
-              category: 'military',
-              effects: [],
-              isDecision: true,
-              responseOptions: evt.response_options.map(opt => ({
-                id: opt.id,
-                label: opt.label,
-                description: opt.description,
-              })),
-            }));
-            setEventQueue(decisionDisplayData);
-            setEventQueueIndex(resolveEventQueueIndex(itemId, decisionDisplayData));
-          }
+          // Presidential event decisions are executed inside PresidentialAttentionPanel
+          // (Army HQ briefing tab). Route the president to that surface; do not execute
+          // here. Inbox is navigation-only for this family; the panel owns IPC.
+          openArmyHQTab(gs, 'briefing');
         }
         if (action === 'peace_plan_modal') {
           // Reset dismissal so the PeacePlanModal renders again
@@ -787,20 +771,16 @@ function App() {
         />
       )}
       {loadedGameState?.phase === 'peace' && <PeaceStatusPanel />}
-      {/* v0.4.1 Phase 5: Event modal (queue-based) */}
+      {/* v0.4.1 Phase 5: Event modal (queue-based).
+          Non-decision fired events only — acknowledgement flash with auto-dismiss.
+          Presidential event DECISIONS are owned by PresidentialAttentionPanel
+          (Army HQ briefing); this modal never executes IPC for them. */}
       {eventQueue.length > 0 && eventQueue[eventQueueIndex] && (
         <EventModal
           event={eventQueue[eventQueueIndex]}
           queuePosition={eventQueueIndex + 1}
           queueTotal={eventQueue.length}
           onAcknowledge={handleEventAcknowledge}
-          onDecisionResponse={(responseId) => {
-            const current = eventQueue[eventQueueIndex];
-            if (current?.isDecision) {
-              ipc.respondToEventDecision(current.id, responseId);
-            }
-            handleEventAcknowledge();
-          }}
         />
       )}
       {/* v0.5.0: Peace Plan Modal — blocks turn progression until player responds */}

@@ -81,21 +81,20 @@ describe('Army HQ / presidential review coherence', () => {
   /**
    * Cluster C: Review/Action-Family Ownership Boundary.
    *
-   * Ownership is SPLIT across two execution surfaces:
-   * - PresidentialAttentionPanel executes officer acknowledgements and
-   *   replacement acceptance via direct IPC (handleAcknowledgeOfficerEvent,
-   *   handleAcceptReplacement). It ALSO handles event decisions
-   *   (handleDecisionResponse → ipc.respondToEventDecision).
-   * - App.tsx EventModal is a SECOND execution surface for event decisions
-   *   (onDecisionResponse → ipc.respondToEventDecision, line ~800).
-   * - PresidentialInbox (via App.tsx onAction) owns NAVIGATION routing:
-   *   opens modals/panels (event_modal, army_hq_personnel, army_reserve, etc.)
+   * Presidential event decisions have ONE execution owner:
+   * - PresidentialAttentionPanel (inside Army HQ briefing) calls
+   *   ipc.respondToEventDecision. It is the sole surface for decision execution,
+   *   officer acknowledgement, and replacement acceptance.
    *
-   * Officer acknowledgement/replacement: panel is the sole execution surface.
-   * Event decisions: TWO execution surfaces (panel + EventModal).
-   * Navigation routing: App.tsx onAction only.
+   * App.tsx owns inbox NAVIGATION routing only. Inbox 'event_modal' clicks
+   * route the president to Army HQ briefing via openArmyHQTab(gs, 'briefing');
+   * App.tsx no longer calls ipc.respondToEventDecision and no longer pushes
+   * decision events into the EventModal queue.
+   *
+   * EventModal remains for non-decision fired-event display (acknowledgement
+   * flash with auto-dismiss). It no longer owns event decisions.
    */
-  it('PresidentialAttentionPanel is one execution surface; officer IPC not duplicated in App.tsx', () => {
+  it('PresidentialAttentionPanel is the sole execution owner for presidential event decisions', () => {
     const panelSource = readFileSync(
       new URL('../src/ui/map/components/army_hq/PresidentialAttentionPanel.tsx', import.meta.url),
       'utf8',
@@ -104,8 +103,12 @@ describe('Army HQ / presidential review coherence', () => {
       new URL('../src/ui/map/App.tsx', import.meta.url),
       'utf8',
     );
+    const eventModalSource = readFileSync(
+      new URL('../src/ui/map/components/EventModal.tsx', import.meta.url),
+      'utf8',
+    );
 
-    // Panel has these three IPC action handlers
+    // Panel is the sole execution surface for all three presidential families.
     expect(panelSource).toContain('handleDecisionResponse');
     expect(panelSource).toContain('handleAcknowledgeOfficerEvent');
     expect(panelSource).toContain('handleAcceptReplacement');
@@ -113,28 +116,31 @@ describe('Army HQ / presidential review coherence', () => {
     expect(panelSource).toContain('ipc.acknowledgeOfficerEvent');
     expect(panelSource).toContain('ipc.acceptOfficerReplacement');
 
-    // Officer acknowledgement and replacement acceptance: panel-only.
-    // App.tsx does not have these two handlers.
+    // App.tsx executes none of the three families.
+    expect(appSource).not.toContain('respondToEventDecision');
     expect(appSource).not.toContain('handleAcceptReplacement');
     expect(appSource).not.toContain('handleAcknowledgeOfficerEvent');
 
-    // Event decisions: App.tsx ALSO calls respondToEventDecision via EventModal.
-    // This is a second execution surface, not a duplication of the panel's handler.
-    expect(appSource).toContain('respondToEventDecision');
+    // EventModal no longer has a decision-response execution seam.
+    expect(eventModalSource).not.toContain('onDecisionResponse');
   });
 
-  it('Inbox onAction routes navigation only — does not execute IPC actions', () => {
+  it('Inbox onAction routes navigation only — event_modal lands on the sole executor', () => {
     const appSource = readFileSync(
       new URL('../src/ui/map/App.tsx', import.meta.url),
       'utf8',
     );
 
-    // Inbox onAction routes to panels/modals via state changes, not IPC calls
+    // Inbox onAction signature preserved for identity routing.
     expect(appSource).toContain("onAction={(action, itemId)");
     expect(appSource).toContain("action === 'army_reserve'");
     expect(appSource).toContain("action === 'army_hq_personnel'");
     expect(appSource).toContain("action === 'event_modal'");
     expect(appSource).toContain("action === 'peace_plan_modal'");
     expect(appSource).toContain("action === 'autonomy_panel'");
+
+    // event_modal routes to Army HQ briefing — where PresidentialAttentionPanel
+    // renders and executes. Routing is navigation only; no IPC here.
+    expect(appSource).toContain("openArmyHQTab(gs, 'briefing')");
   });
 });
