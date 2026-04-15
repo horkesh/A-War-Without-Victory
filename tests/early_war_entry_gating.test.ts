@@ -5,8 +5,7 @@
  * - Phase 0 continues to run safely via state pipeline (runOneTurn).
  */
 
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 import { runTurn } from '../src/sim/turn_pipeline.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
@@ -79,48 +78,54 @@ function minimalPhase0State(): GameState {
 test('runTurn accepts war when referendum_held is false', async () => {
     const state = minimalPhaseIState({ referendum_held: false });
     const { nextState } = await runTurn(state, { seed: state.meta.seed });
-    assert.strictEqual(nextState.meta.turn, 11);
+    expect(nextState.meta.turn).toBe(11);
 });
 
 test('runTurn accepts war when war_start_turn is null', async () => {
     const state = minimalPhaseIState({ war_start_turn: null });
     const { nextState } = await runTurn(state, { seed: state.meta.seed });
-    assert.strictEqual(nextState.meta.turn, 11);
+    expect(nextState.meta.turn).toBe(11);
 });
 
 test('runTurn accepts war when current_turn < war_start_turn', async () => {
     const state = minimalPhaseIState({ turn: 8, war_start_turn: 10 });
     const { nextState } = await runTurn(state, { seed: state.meta.seed });
-    assert.strictEqual(nextState.meta.turn, 9);
+    expect(nextState.meta.turn).toBe(9);
 });
 
 test('runTurn accepts war phase and advances turn', async () => {
     const state = minimalPhaseIState({ turn: 10, war_start_turn: 10 });
     const { nextState, report } = await runTurn(state, { seed: state.meta.seed });
-    assert.strictEqual(nextState.meta.turn, 11);
-    assert.strictEqual(nextState.meta.phase, 'war');
-    assert.ok(report.phases.length > 0);
+    expect(nextState.meta.turn).toBe(11);
+    expect(nextState.meta.phase).toBe('war');
+    expect(report.phases.length > 0).toBeTruthy();
 });
 
 test('runTurn tolerates AoR entries on war path', async () => {
     const state = minimalPhaseIState({ turn: 10, war_start_turn: 10 });
     state.factions![0]!.areasOfResponsibility = ['SID_001'];
     const { nextState } = await runTurn(state, { seed: state.meta.seed });
-    assert.strictEqual(nextState.meta.turn, 11);
+    expect(nextState.meta.turn).toBe(11);
 });
 
 test('runTurn throws when peace (use state pipeline)', async () => {
     const state = minimalPhase0State();
-    await assert.rejects(
-        async () => runTurn(state, { seed: state.meta.seed }),
-        /use state pipeline runOneTurn for peace/
-    );
+    await expect(runTurn(state, { seed: state.meta.seed })).rejects.toThrow(/unsupported lifecycle phase "peace"/);
 });
 
 test('Phase 0 continues to run safely via runOneTurn when phase_0', () => {
     const state = minimalPhase0State();
     const result = runOneTurn(state, { seed: state.meta.seed });
-    assert.strictEqual(result.state.meta.turn, 6);
-    assert.strictEqual(result.state.meta.phase, 'peace');
-    assert.deepStrictEqual(result.phasesExecuted, ['peace']);
+    expect(result.state.meta.turn).toBe(6);
+    expect(result.state.meta.phase).toBe('peace');
+    expect(result.phasesExecuted).toEqual([
+        'directives',
+        'deployments',
+        'military_interaction',
+        'fragmentation_resolution',
+        'supply_resolution',
+        'political_effects',
+        'exhaustion_update',
+        'persistence',
+    ]);
 });

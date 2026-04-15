@@ -5,8 +5,7 @@
  * - No emergence before war_start_turn (Peace phase path not run; gating in phase_i_entry_gating.test.ts).
  */
 
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 import {
     computeMilitiaStrength,
     MILITIA_STRENGTH_MAX,
@@ -97,15 +96,15 @@ function stateWithMunicipalities(overrides: Partial<GameState['meta']> = {}): Ga
 test('updateMilitiaEmergence populates war_militia_strength when municipalities and org penetration present', () => {
     const state = stateWithMunicipalities();
     const report = updateMilitiaEmergence(state);
-    assert.ok(state.military.war_militia_strength);
-    assert.strictEqual(report.municipalities_updated, 2);
-    assert.ok(state.military.war_militia_strength!['MUN_A']);
-    assert.ok(state.military.war_militia_strength!['MUN_B']);
+    expect(state.military.war_militia_strength).toBeTruthy();
+    expect(report.municipalities_updated).toBe(2);
+    expect(state.military.war_militia_strength!['MUN_A']).toBeTruthy();
+    expect(state.military.war_militia_strength!['MUN_B']).toBeTruthy();
     const munA = state.military.war_militia_strength!['MUN_A'];
-    assert.strictEqual(typeof munA.RBiH, 'number');
-    assert.strictEqual(typeof munA.RS, 'number');
-    assert.strictEqual(typeof munA.HRHB, 'number');
-    assert.ok(munA.RS >= MILITIA_STRENGTH_MIN && munA.RS <= MILITIA_STRENGTH_MAX);
+    expect(typeof munA.RBiH).toBe('number');
+    expect(typeof munA.RS).toBe('number');
+    expect(typeof munA.HRHB).toBe('number');
+    expect(munA.RS >= MILITIA_STRENGTH_MIN && munA.RS <= MILITIA_STRENGTH_MAX).toBeTruthy();
 });
 
 test('militia strength is bounded [0, 100]', () => {
@@ -115,7 +114,7 @@ test('militia strength is bounded [0, 100]', () => {
         const byFaction = state.military.war_militia_strength![munId];
         for (const faction of Object.keys(byFaction)) {
             const v = byFaction[faction];
-            assert.ok(v >= MILITIA_STRENGTH_MIN && v <= MILITIA_STRENGTH_MAX, `${munId}.${faction}=${v}`);
+            expect(v >= MILITIA_STRENGTH_MIN && v <= MILITIA_STRENGTH_MAX).toBeTruthy();
         }
     }
 });
@@ -127,16 +126,16 @@ test('deterministic ordering: same state yields same report order and values', (
     const report2 = updateMilitiaEmergence(state2);
     const munIds1 = report1.by_mun.map((m) => m.mun_id);
     const munIds2 = report2.by_mun.map((m) => m.mun_id);
-    assert.deepStrictEqual(munIds1, munIds2, 'Municipality order must be deterministic (sorted)');
-    assert.strictEqual(munIds1[0], 'MUN_A');
-    assert.strictEqual(munIds1[1], 'MUN_B');
-    assert.deepStrictEqual(state.military.war_militia_strength, state2.military.war_militia_strength, 'Same state must yield same strength map');
+    expect(munIds1).toEqual(munIds2);
+    expect(munIds1[0]).toBe('MUN_A');
+    expect(munIds1[1]).toBe('MUN_B');
+    expect(state.military.war_militia_strength).toEqual(state2.military.war_militia_strength);
 });
 
 test('computeMilitiaStrength returns 0 when no organizational penetration', () => {
     const state = stateWithMunicipalities();
     const strength = computeMilitiaStrength(undefined, 'RS', state, 'MUN_X');
-    assert.strictEqual(strength, 0);
+    expect(strength).toBe(0);
 });
 
 test('RS declared increases militia growth; second runTurn shows higher RS strength in MUN with SDS', async () => {
@@ -146,12 +145,12 @@ test('RS declared increases militia growth; second runTurn shows higher RS stren
     const rsFirst = state.military.war_militia_strength!['MUN_B']?.RS ?? 0;
     const { nextState } = await runTurn(state, { seed: state.meta.seed });
     const rsSecond = nextState.military.war_militia_strength!['MUN_B']?.RS ?? 0;
-    assert.ok(rsSecond >= rsFirst, 'RS militia in MUN_B should grow when RS declared');
+    expect(rsSecond >= rsFirst).toBeTruthy();
 });
 
 test('war runTurn default path omits phase_i militia emergence report', async () => {
     const state = stateWithMunicipalities();
     const { report } = await runTurn(state, { seed: state.meta.seed });
-    assert.strictEqual(report.militia_emergence, undefined);
-    assert.strictEqual(report.phases.some((p) => p.name === 'phase-i-militia-emergence'), false);
+    expect(report.militia_emergence).toBe(undefined);
+    expect(report.phases.some((p) => p.name === 'phase-i-militia-emergence')).toBe(false);
 });

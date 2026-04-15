@@ -5,8 +5,7 @@
  * - Deterministic: same state -> same report and pool state.
  */
 
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 import { applyRsJnaInheritanceBonus, runPoolPopulation } from '../src/sim/early_war/pool_population.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
@@ -53,20 +52,20 @@ test('runPoolPopulation creates pools with composite key from war_militia_streng
 
     const report = runPoolPopulation(state, settlements);
 
-    assert.ok(report.pools_created >= 4 || report.pools_updated >= 0);
+    expect(report.pools_created >= 4 || report.pools_updated >= 0).toBeTruthy();
     const keyA_RBiH = militiaPoolKey('MUN_A', 'RBiH');
     const keyA_RS = militiaPoolKey('MUN_A', 'RS');
     const poolA_RBiH = state.military.militia_pools![keyA_RBiH];
     const poolA_RS = state.military.militia_pools![keyA_RS];
-    assert.ok(poolA_RBiH, 'pool MUN_A:RBiH should exist');
-    assert.ok(poolA_RS, 'pool MUN_A:RS should exist');
-    assert.strictEqual(poolA_RBiH.mun_id, 'MUN_A');
-    assert.strictEqual(poolA_RBiH.faction, 'RBiH');
-    assert.strictEqual(poolA_RS.mun_id, 'MUN_A');
-    assert.strictEqual(poolA_RS.faction, 'RS');
+    expect(poolA_RBiH).toBeTruthy();
+    expect(poolA_RS).toBeTruthy();
+    expect(poolA_RBiH.mun_id).toBe('MUN_A');
+    expect(poolA_RBiH.faction).toBe('RBiH');
+    expect(poolA_RS.mun_id).toBe('MUN_A');
+    expect(poolA_RS.faction).toBe('RS');
     // Calibration evolves; assert structural expectations instead of brittle constants.
-    assert.ok(poolA_RBiH.available > 0);
-    assert.ok(poolA_RS.available > 0);
+    expect(poolA_RBiH.available > 0).toBeTruthy();
+    expect(poolA_RS.available > 0).toBeTruthy();
 });
 
 test('runPoolPopulation is deterministic (same state -> same pools)', () => {
@@ -86,7 +85,7 @@ test('runPoolPopulation is deterministic (same state -> same pools)', () => {
         Object.entries(state.military.militia_pools!).sort((a, b) => a[0].localeCompare(b[0]))
     );
 
-    assert.strictEqual(afterFirst, afterSecond);
+    expect(afterFirst).toBe(afterSecond);
 });
 
 test('runPoolPopulation does not decrease available when pool already exists', () => {
@@ -107,8 +106,8 @@ test('runPoolPopulation does not decrease available when pool already exists', (
     runPoolPopulation(state, settlements);
 
     const pool = state.military.militia_pools![key];
-    assert.ok(pool);
-    assert.ok(pool.available >= 10000, 'available must not decrease (strength 30 -> 3000, max(10000,3000)=10000)');
+    expect(pool).toBeTruthy();
+    expect(pool.available >= 10000).toBeTruthy();
 });
 
 test('runPoolPopulation applies authority scale: contested 0.85, fragmented 0.70', () => {
@@ -124,12 +123,12 @@ test('runPoolPopulation applies authority scale: contested 0.85, fragmented 0.70
 
     const poolA_RBiH = state.military.militia_pools![militiaPoolKey('MUN_A', 'RBiH')];
     const poolB_RBiH = state.military.militia_pools![militiaPoolKey('MUN_B', 'RBiH')];
-    assert.ok(poolA_RBiH, 'MUN_A:RBiH pool exists');
-    assert.ok(poolB_RBiH, 'MUN_B:RBiH pool exists');
+    expect(poolA_RBiH).toBeTruthy();
+    expect(poolB_RBiH).toBeTruthy();
     const expectedA = Math.floor(30 * 100 * 1.2 * 0.85);
     const expectedB = Math.floor(20 * 100 * 1.2 * 0.7);
-    assert.ok(poolA_RBiH.available <= expectedA + 1, 'contested scales down (~0.85)');
-    assert.ok(poolB_RBiH.available <= expectedB + 1, 'fragmented scales down (~0.70)');
+    expect(poolA_RBiH.available <= expectedA + 1).toBeTruthy();
+    expect(poolB_RBiH.available <= expectedB + 1).toBeTruthy();
 });
 
 test('runPoolPopulation RBiH 10% adds to RBiH pools when at least one RBiH brigade exists', () => {
@@ -157,9 +156,9 @@ test('runPoolPopulation RBiH 10% adds to RBiH pools when at least one RBiH briga
 
     const keyA = militiaPoolKey('MUN_A', 'RBiH');
     const keyB = militiaPoolKey('MUN_B', 'RBiH');
-    assert.ok(state.military.militia_pools![keyA], 'RBiH pool MUN_A exists');
-    assert.ok(state.military.militia_pools![keyB], 'RBiH pool MUN_B exists');
-    assert.ok((report.rbih_10pct_additions ?? 0) > 0, 'RBiH 10%% additions reported');
+    expect(state.military.militia_pools![keyA]).toBeTruthy();
+    expect(state.military.militia_pools![keyB]).toBeTruthy();
+    expect((report.rbih_10pct_additions ?? 0) > 0).toBeTruthy();
 });
 
 test('applyRsJnaInheritanceBonus adds to RS pools proportionally by eligible Serb pop', () => {
@@ -188,11 +187,11 @@ test('applyRsJnaInheritanceBonus adds to RS pools proportionally by eligible Ser
         MUN_B: { total: 8000, bosniak: 1000, serb: 4000, croat: 2000, other: 1000 }
     };
     const report = applyRsJnaInheritanceBonus(state, pop1991);
-    assert.ok(report.total_added > 0, 'bonus applied');
-    assert.strictEqual(report.pools_updated, 2);
+    expect(report.total_added > 0).toBeTruthy();
+    expect(report.pools_updated).toBe(2);
     const poolA = state.military.militia_pools![militiaPoolKey('MUN_A', 'RS')];
     const poolB = state.military.militia_pools![militiaPoolKey('MUN_B', 'RS')];
-    assert.ok(poolA.available > 1000, 'MUN_A RS pool increased');
-    assert.ok(poolB.available > 500, 'MUN_B RS pool increased');
-    assert.ok(poolA.available - 1000 >= poolB.available - 500, 'MUN_A gets more (higher Serb pop)');
+    expect(poolA.available > 1000).toBeTruthy();
+    expect(poolB.available > 500).toBeTruthy();
+    expect(poolA.available - 1000 >= poolB.available - 500).toBeTruthy();
 });

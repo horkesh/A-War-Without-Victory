@@ -36,6 +36,7 @@ describe('test discovery contracts', () => {
             'tests/scenario_continue_from_save_equivalence.test.ts',
         ];
         const fastRepresentatives = [
+            'tests/alliance_lifecycle.test.ts',
             'tests/test_discovery_contract.test.ts',
             'tests/combat_exhaustion.test.ts',
             'tests/combat_front_emergence.test.ts',
@@ -43,6 +44,8 @@ describe('test discovery contracts', () => {
             'tests/combat_state_schema.test.ts',
             'tests/desktop_packaging_contract.test.ts',
             'tests/desktop_sim_bundle_smoke.test.ts',
+            'tests/early_war_state_schema.test.ts',
+            'tests/early_war_turn_structure.test.ts',
             'tests/game_state_shape.test.ts',
             'tests/negotiation_pressure.test.ts',
             'tests/scenario_registry.test.ts',

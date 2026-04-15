@@ -1,3 +1,30 @@
+## [2026-04-15] fix(test+state): migrate early-war contract family onto vitest and repair nested early-war validation
+
+**Type:** Test-harness cleanup / early-war validation-truth correction
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/alliance_lifecycle.test.ts`, `tests/early_war_authority_degradation.test.ts`, `tests/early_war_control_flip.test.ts`, `tests/early_war_control_strain.test.ts`, `tests/early_war_displacement_hooks.test.ts`, `tests/early_war_entry_gating.test.ts`, `tests/early_war_injected_graph_parity.test.ts`, `tests/early_war_jna_transition.test.ts`, `tests/early_war_militia_emergence.test.ts`, `tests/early_war_pool_population.test.ts`, `tests/early_war_state_schema.test.ts`, `tests/early_war_turn_structure.test.ts`, `tests/oob_early_war_entry.test.ts`, `tests/test_discovery_contract.test.ts`, `src/state/validateGameState.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/alliance_lifecycle.test.ts tests/early_war_authority_degradation.test.ts tests/early_war_control_flip.test.ts tests/early_war_control_strain.test.ts tests/early_war_displacement_hooks.test.ts tests/early_war_entry_gating.test.ts tests/early_war_injected_graph_parity.test.ts tests/early_war_jna_transition.test.ts tests/early_war_militia_emergence.test.ts tests/early_war_pool_population.test.ts tests/early_war_state_schema.test.ts tests/early_war_turn_structure.test.ts tests/oob_early_war_entry.test.ts tests/test_discovery_contract.test.ts` = 116/116 pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED - the early-war contract family now lives on the canonical vitest lane, and the migration exposed and repaired another dead validator path where early-war fields were still being checked on stale top-level owners instead of under `state.military` / `state.political`.
+
+### Summary
+
+1. **A whole early-war family moved together instead of file-by-file drift:** alliance lifecycle, authority degradation, control flip, control strain, displacement hooks, entry gating, injected-graph parity, JNA transition, militia emergence, pool population, early-war schema, turn structure, and OOB early-war entry now import `vitest`.
+2. **The migration flushed out stale proof, not just syntax:** several tests were still assuming pre-floor alliance behavior, an old `runTurn(...)` error string, an outdated `runOneTurn(...)` phase list, and a control-flip fixture that accidentally erased the very state it meant to exercise.
+3. **The validator now checks the real early-war owners:** `war_jna` is validated under `state.military`, and `war_alliance_rbih_hrhb` is validated under `state.political`, matching the canonical schema and serializer paths.
+
+### Why this mattered
+
+Early-war residue was one of the biggest remaining chunks of fake harness multiplicity: a coherent deterministic family stranded in `node:test` by history rather than by need. Moving it as one band both shrinks the split-harness debt and keeps the repo honest about where early-war state actually lives.
+
+### Proof boundaries
+
+- **Direct proof:** all 13 migrated early-war suites pass under vitest.
+- **Direct proof:** the validator now rejects malformed nested `military.war_jna` and `political.war_alliance_rbih_hrhb` values, which the migrated early-war schema tests exercise directly.
+- **Not claimed here:** this does **not** close every peace/early-war test in the repo or the broader scenario-heavy lane; it closes one large pure family plus one real nested validator mismatch.
+
+---
+
 ## [2026-04-15] test(repo): migrate Phase D combat substrate contracts onto vitest
 
 **Type:** Test-harness cleanup / combat substrate contract migration

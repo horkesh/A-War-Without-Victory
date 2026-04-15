@@ -4,8 +4,7 @@
  * - Strain does not alter supply; strain does alter exhaustion per spec §4.5.3 (authorized).
  */
 
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 import { getFactionTotalControlStrain, runControlStrain } from '../src/sim/early_war/control_strain.js';
 import { runTurn } from '../src/sim/turn_pipeline.js';
 import type { GameState, MunicipalityId } from '../src/state/game_state.js';
@@ -80,15 +79,15 @@ test('runControlStrain accumulates strain per municipality and reports faction t
     const state = stateWithMunicipalitiesAndControl();
     const byMun = stubSettlementsByMun();
     const report = runControlStrain(state, 12, byMun);
-    assert.strictEqual(report.municipalities_updated, 2);
-    assert.ok(Array.isArray(report.faction_totals));
-    assert.ok(report.faction_totals.length >= 2);
+    expect(report.municipalities_updated).toBe(2);
+    expect(Array.isArray(report.faction_totals)).toBeTruthy();
+    expect(report.faction_totals.length >= 2).toBeTruthy();
     const rbihTotal = report.faction_totals.find((t) => t.faction_id === 'RBiH');
     const rsTotal = report.faction_totals.find((t) => t.faction_id === 'RS');
-    assert.ok(rbihTotal !== undefined);
-    assert.ok(rsTotal !== undefined);
-    assert.ok(state.political.war_control_strain);
-    assert.ok('MUN_A' in state.political.war_control_strain! || 'MUN_B' in state.political.war_control_strain!);
+    expect(rbihTotal !== undefined).toBeTruthy();
+    expect(rsTotal !== undefined).toBeTruthy();
+    expect(state.political.war_control_strain).toBeTruthy();
+    expect('MUN_A' in state.political.war_control_strain! || 'MUN_B' in state.political.war_control_strain!).toBeTruthy();
 });
 
 test('runControlStrain is deterministic: same state yields same report', () => {
@@ -97,10 +96,7 @@ test('runControlStrain is deterministic: same state yields same report', () => {
     const byMun = stubSettlementsByMun();
     const report1 = runControlStrain(state1, 12, byMun);
     const report2 = runControlStrain(state2, 12, byMun);
-    assert.deepStrictEqual(
-        report1.faction_totals.map((t) => ({ id: t.faction_id, total: t.total_strain })),
-        report2.faction_totals.map((t) => ({ id: t.faction_id, total: t.total_strain }))
-    );
+    expect(report1.faction_totals.map((t) => ({ id: t.faction_id, total: t.total_strain }))).toEqual(report2.faction_totals.map((t) => ({ id: t.faction_id, total: t.total_strain })));
 });
 
 test('runControlStrain applies exhaustion coupling per spec (exhaustion increases)', () => {
@@ -109,7 +105,7 @@ test('runControlStrain applies exhaustion coupling per spec (exhaustion increase
     const rbihExhaustionBefore = state.factions!.find((f) => f.id === 'RBiH')!.profile.exhaustion;
     runControlStrain(state, 12, byMun);
     const rbihExhaustionAfter = state.factions!.find((f) => f.id === 'RBiH')!.profile.exhaustion;
-    assert.ok(rbihExhaustionAfter >= rbihExhaustionBefore, 'Exhaustion coupling per spec §4.5.3');
+    expect(rbihExhaustionAfter >= rbihExhaustionBefore).toBeTruthy();
 });
 
 test('runControlStrain does not touch supply state', () => {
@@ -118,7 +114,7 @@ test('runControlStrain does not touch supply state', () => {
     const supplySourcesBefore = state.factions!.map((f) => [...(f.supply_sources ?? [])]);
     runControlStrain(state, 12, byMun);
     const supplySourcesAfter = state.factions!.map((f) => [...(f.supply_sources ?? [])]);
-    assert.deepStrictEqual(supplySourcesAfter, supplySourcesBefore, 'Supply must be unchanged');
+    expect(supplySourcesAfter).toEqual(supplySourcesBefore);
 });
 
 test('getFactionTotalControlStrain returns sum for faction-controlled municipalities', () => {
@@ -127,13 +123,13 @@ test('getFactionTotalControlStrain returns sum for faction-controlled municipali
     const byMun = stubSettlementsByMun();
     const rbihTotal = getFactionTotalControlStrain(state, 'RBiH', byMun);
     const rsTotal = getFactionTotalControlStrain(state, 'RS', byMun);
-    assert.strictEqual(rbihTotal, 5, 'RBiH controls MUN_A (s1,s3)');
-    assert.strictEqual(rsTotal, 3, 'RS controls MUN_B (s2)');
+    expect(rbihTotal).toBe(5);
+    expect(rsTotal).toBe(3);
 });
 
 test('war runTurn default path omits phase_i control strain report', async () => {
     const state = stateWithMunicipalitiesAndControl();
     const { report } = await runTurn(state, { seed: state.meta.seed });
-    assert.strictEqual(report.war_control_strain, undefined);
-    assert.strictEqual(report.phases.some((p) => p.name === 'phase-i-control-strain'), false);
+    expect(report.war_control_strain).toBe(undefined);
+    expect(report.phases.some((p) => p.name === 'phase-i-control-strain')).toBe(false);
 });

@@ -4,8 +4,7 @@
  * runTurn(state, { seed }) when settlementGraph is the graph from loadSettlementGraph().
  */
 
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 import { loadSettlementGraph } from '../src/map/settlements.js';
 import { runTurn } from '../src/sim/turn_pipeline.js';
 import type { GameState } from '../src/state/game_state.js';
@@ -83,22 +82,18 @@ test('Peace phase: injected settlementGraph produces same nextState as loadSettl
     const { nextState: nextA } = await runTurn(stateA, { seed, settlementGraph: graph });
     const { nextState: nextB } = await runTurn(stateB, { seed });
 
-    assert.strictEqual(nextA.meta.turn, nextB.meta.turn, 'meta.turn must match');
-    assert.strictEqual(nextA.meta.phase, nextB.meta.phase, 'meta.phase must match');
+    expect(nextA.meta.turn).toBe(nextB.meta.turn);
+    expect(nextA.meta.phase).toBe(nextB.meta.phase);
 
     const keysA = Object.keys(nextA.political.political_controllers ?? {}).sort((a, b) => a.localeCompare(b));
     const keysB = Object.keys(nextB.political.political_controllers ?? {}).sort((a, b) => a.localeCompare(b));
-    assert.deepStrictEqual(keysA, keysB, 'political_controllers keys must match');
+    expect(keysA).toEqual(keysB);
 
     for (const k of keysA) {
-        assert.strictEqual(
-            (nextA.political.political_controllers as Record<string, string | null>)[k],
-            (nextB.political.political_controllers as Record<string, string | null>)[k],
-            `political_controllers[${k}] must match`
-        );
+        expect((nextA.political.political_controllers as Record<string, string | null>)[k]).toBe((nextB.political.political_controllers as Record<string, string | null>)[k]);
     }
 
     const formationsA = Object.keys(nextA.military.formations ?? {}).sort((a, b) => a.localeCompare(b));
     const formationsB = Object.keys(nextB.military.formations ?? {}).sort((a, b) => a.localeCompare(b));
-    assert.deepStrictEqual(formationsA, formationsB, 'formation ids must match');
+    expect(formationsA).toEqual(formationsB);
 });

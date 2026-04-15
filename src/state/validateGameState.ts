@@ -174,34 +174,35 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
         }
     }
 
-    // Peace phase: optional top-level Peace phase state (validate type when present)
-    if ('war_jna' in s && s.war_jna !== undefined) {
-        const jna = s.war_jna;
+    // Peace phase: optional early-war fields live under state.military/state.political
+    const military = s.military as any;
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'war_jna' in military && military.war_jna !== undefined) {
+        const jna = military.war_jna;
         if (jna !== null && typeof jna === 'object') {
             const j = jna as any;
             if (typeof j.transition_begun !== 'boolean') {
-                errors.push('war_jna.transition_begun must be boolean when present');
+                errors.push('military.war_jna.transition_begun must be boolean when present');
             }
             if (typeof j.withdrawal_progress !== 'number' || j.withdrawal_progress < 0 || j.withdrawal_progress > 1) {
-                errors.push('war_jna.withdrawal_progress must be a number in [0, 1] when present');
+                errors.push('military.war_jna.withdrawal_progress must be a number in [0, 1] when present');
             }
             if (typeof j.asset_transfer_rs !== 'number' || j.asset_transfer_rs < 0 || j.asset_transfer_rs > 1) {
-                errors.push('war_jna.asset_transfer_rs must be a number in [0, 1] when present');
+                errors.push('military.war_jna.asset_transfer_rs must be a number in [0, 1] when present');
             }
         } else {
-            errors.push('war_jna must be an object when present');
-        }
-    }
-    if ('war_alliance_rbih_hrhb' in s && s.war_alliance_rbih_hrhb !== undefined) {
-        const v = s.war_alliance_rbih_hrhb;
-        if (typeof v !== 'number' || v < -1 || v > 1) {
-            errors.push('war_alliance_rbih_hrhb must be a number in [-1, 1] when present');
+            errors.push('military.war_jna must be an object when present');
         }
     }
 
     // War phase: optional supply pressure and exhaustion live under state.political
     const political = s.political as any;
     if (political && typeof political === 'object' && !Array.isArray(political)) {
+        if ('war_alliance_rbih_hrhb' in political && political.war_alliance_rbih_hrhb !== undefined) {
+            const v = political.war_alliance_rbih_hrhb;
+            if (typeof v !== 'number' || v < -1 || v > 1) {
+                errors.push('political.war_alliance_rbih_hrhb must be a number in [-1, 1] when present');
+            }
+        }
         if ('war_supply_pressure' in political && political.war_supply_pressure !== undefined) {
             const pp = political.war_supply_pressure;
             if (pp !== null && typeof pp === 'object' && !Array.isArray(pp)) {

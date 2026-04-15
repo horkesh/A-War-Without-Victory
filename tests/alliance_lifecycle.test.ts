@@ -4,9 +4,9 @@
  * Determinism: all tests verify identical outputs for identical inputs (no randomness).
  */
 
-import assert from 'node:assert';
-import { describe, test } from 'node:test';
+import { describe, expect, test } from 'vitest';
 import {
+    ALLIANCE_FLOOR_BEFORE_WAR,
     areRbihHrhbAllied,
     CEASEFIRE_RECOVERY_RATE,
     computeRefugeePressure,
@@ -47,9 +47,9 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 /** Minimal GameState for alliance tests. */
 function makeState(overrides?: Partial<GameState>): GameState {
     return {
-  schema_version: CURRENT_SCHEMA_VERSION,
-  meta: { turn: 10, seed: 'alliance-test', phase: 'war', referendum_held: true, war_start_turn: 1 },
-  factions: [
+        schema_version: CURRENT_SCHEMA_VERSION,
+        meta: { turn: 10, seed: 'alliance-test', phase: 'war', referendum_held: true, war_start_turn: 1 },
+        factions: [
             {
                 id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
                 areasOfResponsibility: [], supply_sources: [], declared: false, declaration_turn: null
@@ -64,16 +64,22 @@ function makeState(overrides?: Partial<GameState>): GameState {
                 patron_state: { material_support_level: 0.5, diplomatic_isolation: 0.2, constraint_severity: 0.3, patron_commitment: 0.5, last_updated: 5 }
             }
         ],
-  ...overrides,
-  military: {
-    formations: {},
-    front_segments: {},
-    front_posture: {},
-    front_posture_regions: {},
-    front_pressure: {},
-    militia_pools: {}
-  } as any,
-} as unknown as GameState;
+        military: {
+            formations: {},
+            front_segments: {},
+            front_posture: {},
+            front_posture_regions: {},
+            front_pressure: {},
+            militia_pools: {}
+        } as any,
+        political: {
+            political_controllers: {},
+            municipalities: {},
+            settlements: {}
+        } as any,
+        displacement: {} as DisplacementState,
+        ...overrides,
+    } as unknown as GameState;
 }
 
 // ── Alliance Update Tests ──
@@ -82,18 +88,18 @@ describe('alliance update', () => {
     test('ensureRbihHrhbState initializes with defaults', () => {
         const state = makeState();
         ensureRbihHrhbState(state);
-        assert.strictEqual(state.political.war_alliance_rbih_hrhb, DEFAULT_INIT_ALLIANCE);
-        assert.ok(state.political.rbih_hrhb_state);
-        assert.deepStrictEqual(state.political.rbih_hrhb_state!.allied_mixed_municipalities, [...DEFAULT_MIXED_MUNICIPALITIES].sort());
-        assert.strictEqual(state.political.rbih_hrhb_state!.ceasefire_active, false);
-        assert.strictEqual(state.political.rbih_hrhb_state!.washington_signed, false);
+        expect(state.political.war_alliance_rbih_hrhb).toBe(DEFAULT_INIT_ALLIANCE);
+        expect(state.political.rbih_hrhb_state).toBeTruthy();
+        expect(state.political.rbih_hrhb_state!.allied_mixed_municipalities).toEqual([...DEFAULT_MIXED_MUNICIPALITIES].sort());
+        expect(state.political.rbih_hrhb_state!.ceasefire_active).toBe(false);
+        expect(state.political.rbih_hrhb_state!.washington_signed).toBe(false);
     });
 
     test('ensureRbihHrhbState uses custom init value', () => {
         const state = makeState();
         ensureRbihHrhbState(state, 0.50, ['travnik', 'mostar']);
-        assert.strictEqual(state.political.war_alliance_rbih_hrhb, 0.50);
-        assert.deepStrictEqual(state.political.rbih_hrhb_state!.allied_mixed_municipalities, ['mostar', 'travnik']);
+        expect(state.political.war_alliance_rbih_hrhb).toBe(0.50);
+        expect(state.political.rbih_hrhb_state!.allied_mixed_municipalities).toEqual(['mostar', 'travnik']);
     });
 
     test('updateAllianceValue decreases with patron pressure', () => {
@@ -107,9 +113,9 @@ describe('alliance update', () => {
         // patron_commitment is 0.5, so patron_drag = 0.015 * 0.5 = 0.0075
         // appeasement = 0.003 (no incidents)
         // delta = 0.003 - 0.0075 = -0.0045
-        assert.ok(report.delta < 0, 'delta should be negative with patron pressure');
-        assert.strictEqual(report.previous_value, 0.35);
-        assert.ok(report.new_value < 0.35);
+        expect(report.delta < 0).toBeTruthy();
+        expect(report.previous_value).toBe(0.35);
+        expect(report.new_value).toBe(ALLIANCE_FLOOR_BEFORE_WAR);
     });
 
     test('updateAllianceValue includes ceasefire recovery', () => {
@@ -122,8 +128,8 @@ describe('alliance update', () => {
         state.political.rbih_hrhb_state!.ceasefire_active = true;
         state.political.rbih_hrhb_state!.ceasefire_since_turn = 8;
         const report = updateAllianceValue(state);
-        assert.ok(report.drivers.ceasefire_boost > 0);
-        assert.strictEqual(report.drivers.ceasefire_boost, CEASEFIRE_RECOVERY_RATE);
+        expect(report.drivers.ceasefire_boost > 0).toBeTruthy();
+        expect(report.drivers.ceasefire_boost).toBe(CEASEFIRE_RECOVERY_RATE);
     });
 
     test('updateAllianceValue is locked when Washington signed', () => {
@@ -136,9 +142,9 @@ describe('alliance update', () => {
         state.political.rbih_hrhb_state!.washington_signed = true;
         state.political.rbih_hrhb_state!.washington_turn = 5;
         const report = updateAllianceValue(state);
-        assert.strictEqual(report.locked, true);
-        assert.strictEqual(report.delta, 0);
-        assert.strictEqual(report.new_value, 0.80);
+        expect(report.locked).toBe(true);
+        expect(report.delta).toBe(0);
+        expect(report.new_value).toBe(0.80);
     });
 
     test('updateAllianceValue detects war start', () => {
@@ -148,7 +154,7 @@ describe('alliance update', () => {
   } as any,
 });
         ensureRbihHrhbState(state);
-        // War gating blocks hostile transition before earliest turn (default 26).
+        state.meta.rbih_hrhb_war_earliest_turn = 26;
         state.meta.turn = 30;
         // Set large patron pressure to push below 0
         const hrhbFaction = state.factions.find((f) => f.id === 'HRHB')!;
@@ -156,9 +162,9 @@ describe('alliance update', () => {
         // Also add incident penalty
         state.political.rbih_hrhb_state!.bilateral_flips_this_turn = 2;
         const report = updateAllianceValue(state);
-        assert.ok(report.new_value <= HOSTILE_THRESHOLD);
-        assert.strictEqual(report.war_started_this_turn, true);
-        assert.strictEqual(state.political.rbih_hrhb_state!.war_started_turn, state.meta.turn);
+        expect(report.new_value <= HOSTILE_THRESHOLD).toBeTruthy();
+        expect(report.war_started_this_turn).toBe(true);
+        expect(state.political.rbih_hrhb_state!.war_started_turn).toBe(state.meta.turn);
     });
 
     test('countBilateralFlips counts correctly', () => {
@@ -170,9 +176,9 @@ describe('alliance update', () => {
             { mun_id: 'vitez', from_faction: 'HRHB' as string, to_faction: 'RBiH' as string }
         ];
         const count = countBilateralFlips(state, flips);
-        assert.strictEqual(count, 2);
-        assert.strictEqual(state.political.rbih_hrhb_state!.bilateral_flips_this_turn, 2);
-        assert.strictEqual(state.political.rbih_hrhb_state!.total_bilateral_flips, 2);
+        expect(count).toBe(2);
+        expect(state.political.rbih_hrhb_state!.bilateral_flips_this_turn).toBe(2);
+        expect(state.political.rbih_hrhb_state!.total_bilateral_flips).toBe(2);
     });
 
     test('stalemate counter increments on zero flips', () => {
@@ -180,7 +186,7 @@ describe('alliance update', () => {
         ensureRbihHrhbState(state);
         state.political.rbih_hrhb_state!.stalemate_turns = 3;
         countBilateralFlips(state, []);
-        assert.strictEqual(state.political.rbih_hrhb_state!.stalemate_turns, 4);
+        expect(state.political.rbih_hrhb_state!.stalemate_turns).toBe(4);
     });
 
     test('stalemate counter resets on bilateral flip', () => {
@@ -188,7 +194,7 @@ describe('alliance update', () => {
         ensureRbihHrhbState(state);
         state.political.rbih_hrhb_state!.stalemate_turns = 5;
         countBilateralFlips(state, [{ mun_id: 'travnik', from_faction: 'RBiH', to_faction: 'HRHB' }]);
-        assert.strictEqual(state.political.rbih_hrhb_state!.stalemate_turns, 0);
+        expect(state.political.rbih_hrhb_state!.stalemate_turns).toBe(0);
     });
 });
 
@@ -196,11 +202,11 @@ describe('alliance update', () => {
 
 describe('alliance phase', () => {
     test('getAlliancePhase returns correct phases', () => {
-        assert.strictEqual(getAlliancePhase(0.60), 'strong_alliance');
-        assert.strictEqual(getAlliancePhase(0.35), 'fragile_alliance');
-        assert.strictEqual(getAlliancePhase(0.10), 'strained');
-        assert.strictEqual(getAlliancePhase(-0.20), 'open_war');
-        assert.strictEqual(getAlliancePhase(-0.60), 'full_war');
+        expect(getAlliancePhase(0.60)).toBe('strong_alliance');
+        expect(getAlliancePhase(0.35)).toBe('fragile_alliance');
+        expect(getAlliancePhase(0.10)).toBe('strained');
+        expect(getAlliancePhase(-0.20)).toBe('open_war');
+        expect(getAlliancePhase(-0.60)).toBe('full_war');
     });
 
     test('areRbihHrhbAllied returns true when above threshold', () => {
@@ -209,7 +215,7 @@ describe('alliance phase', () => {
     war_alliance_rbih_hrhb: 0.30
   } as any,
 });
-        assert.strictEqual(areRbihHrhbAllied(state), true);
+        expect(areRbihHrhbAllied(state)).toBe(true);
     });
 
     test('areRbihHrhbAllied returns false when at or below threshold', () => {
@@ -218,12 +224,12 @@ describe('alliance phase', () => {
     war_alliance_rbih_hrhb: 0.20
   } as any,
 });
-        assert.strictEqual(areRbihHrhbAllied(state), false);
+        expect(areRbihHrhbAllied(state)).toBe(false);
     });
 
     test('areRbihHrhbAllied defaults to true when absent', () => {
         const state = makeState();
-        assert.strictEqual(areRbihHrhbAllied(state), true);
+        expect(areRbihHrhbAllied(state)).toBe(true);
     });
 
     test('isRbihHrhbAtWar returns true below hostile threshold', () => {
@@ -232,7 +238,7 @@ describe('alliance phase', () => {
     war_alliance_rbih_hrhb: -0.10
   } as any,
 });
-        assert.strictEqual(isRbihHrhbAtWar(state), true);
+        expect(isRbihHrhbAtWar(state)).toBe(true);
     });
 });
 
@@ -242,7 +248,7 @@ describe('bilateral ceasefire', () => {
     test('evaluateCeasefirePreconditions all false when no state', () => {
         const state = makeState();
         const result = evaluateCeasefirePreconditions(state);
-        assert.strictEqual(result.all_met, false);
+        expect(result.all_met).toBe(false);
     });
 
     test('ceasefire fires when all preconditions met', () => {
@@ -268,10 +274,10 @@ describe('bilateral ceasefire', () => {
         hrhb.patron_state!.constraint_severity = CEASEFIRE_PATRON_CONSTRAINT + 0.01;
 
         const report = checkAndApplyCeasefire(state);
-        assert.strictEqual(report.preconditions.all_met, true);
-        assert.strictEqual(report.fired, true);
-        assert.strictEqual(state.political.rbih_hrhb_state!.ceasefire_active, true);
-        assert.strictEqual(state.political.rbih_hrhb_state!.ceasefire_since_turn, state.meta.turn);
+        expect(report.preconditions.all_met).toBe(true);
+        expect(report.fired).toBe(true);
+        expect(state.political.rbih_hrhb_state!.ceasefire_active).toBe(true);
+        expect(state.political.rbih_hrhb_state!.ceasefire_since_turn).toBe(state.meta.turn);
     });
 
     test('ceasefire does not re-fire when already active', () => {
@@ -284,8 +290,8 @@ describe('bilateral ceasefire', () => {
         state.political.rbih_hrhb_state!.ceasefire_active = true;
         state.political.rbih_hrhb_state!.ceasefire_since_turn = 20;
         const report = checkAndApplyCeasefire(state);
-        assert.strictEqual(report.fired, false);
-        assert.strictEqual(report.already_active, true);
+        expect(report.fired).toBe(false);
+        expect(report.already_active).toBe(true);
     });
 });
 
@@ -296,8 +302,8 @@ describe('washington agreement', () => {
         const state = makeState();
         ensureRbihHrhbState(state);
         const result = evaluateWashingtonPreconditions(state);
-        assert.strictEqual(result.w1_ceasefire_active, false);
-        assert.strictEqual(result.all_met, false);
+        expect(result.w1_ceasefire_active).toBe(false);
+        expect(result.all_met).toBe(false);
     });
 
     test('washington fires when all preconditions met', () => {
@@ -331,12 +337,12 @@ describe('washington agreement', () => {
         state.political.political_controllers = pc;
 
         const report = checkAndApplyWashington(state);
-        assert.strictEqual(report.preconditions.all_met, true);
-        assert.strictEqual(report.fired, true);
-        assert.strictEqual(state.political.war_alliance_rbih_hrhb, WASH_ALLIANCE_LOCK_VALUE);
-        assert.strictEqual(state.political.rbih_hrhb_state!.washington_signed, true);
-        assert.strictEqual(hrhb.capability_profile!.equipment_access, POST_WASH_EQUIPMENT_ACCESS);
-        assert.strictEqual(hrhb.capability_profile!.croatian_support, POST_WASH_CROATIAN_SUPPORT);
+        expect(report.preconditions.all_met).toBe(true);
+        expect(report.fired).toBe(true);
+        expect(state.political.war_alliance_rbih_hrhb).toBe(WASH_ALLIANCE_LOCK_VALUE);
+        expect(state.political.rbih_hrhb_state!.washington_signed).toBe(true);
+        expect(hrhb.capability_profile!.equipment_access).toBe(POST_WASH_EQUIPMENT_ACCESS);
+        expect(hrhb.capability_profile!.croatian_support).toBe(POST_WASH_CROATIAN_SUPPORT);
     });
 
     test('washington does not fire when already signed', () => {
@@ -348,8 +354,8 @@ describe('washington agreement', () => {
         ensureRbihHrhbState(state);
         state.political.rbih_hrhb_state!.washington_signed = true;
         const report = checkAndApplyWashington(state);
-        assert.strictEqual(report.fired, false);
-        assert.strictEqual(report.already_signed, true);
+        expect(report.fired).toBe(false);
+        expect(report.already_signed).toBe(true);
     });
 });
 
@@ -364,7 +370,7 @@ describe('minority erosion', () => {
 });
         ensureRbihHrhbState(state);
         const report = runMinorityErosion(state);
-        assert.strictEqual(report.municipalities_affected, 0);
+        expect(report.municipalities_affected).toBe(0);
     });
 
     test('no erosion when ceasefire active', () => {
@@ -376,7 +382,7 @@ describe('minority erosion', () => {
         ensureRbihHrhbState(state);
         state.political.rbih_hrhb_state!.ceasefire_active = true;
         const report = runMinorityErosion(state);
-        assert.strictEqual(report.municipalities_affected, 0);
+        expect(report.municipalities_affected).toBe(0);
     });
 
     test('erosion occurs in mixed muns during open war', () => {
@@ -398,10 +404,10 @@ describe('minority erosion', () => {
         state.political.political_controllers = { S1: 'RBiH', S2: 'RBiH' };
 
         const report = runMinorityErosion(state, settlementsByMun);
-        assert.strictEqual(report.municipalities_affected, 1);
-        assert.strictEqual(report.by_mun[0].minority_faction, 'HRHB');
-        assert.ok(report.by_mun[0].eroded > 0);
-        assert.strictEqual(report.by_mun[0].militia_after, 200 - Math.floor(200 * MINORITY_EROSION_RATE_PER_TURN));
+        expect(report.municipalities_affected).toBe(1);
+        expect(report.by_mun[0].minority_faction).toBe('HRHB');
+        expect(report.by_mun[0].eroded > 0).toBeTruthy();
+        expect(report.by_mun[0].militia_after).toBe(200 - Math.floor(200 * MINORITY_EROSION_RATE_PER_TURN));
     });
 });
 
@@ -420,7 +426,7 @@ describe('mixed municipality allied defense', () => {
         };
         const effective = computeAlliedDefense(state, 'travnik', 'RBiH', 100);
         // 100 + (80 * 0.6) = 148
-        assert.strictEqual(effective, 100 + 80 * ALLIED_COORDINATION_FACTOR);
+        expect(effective).toBe(100 + 80 * ALLIED_COORDINATION_FACTOR);
     });
 
     test('computeAlliedDefense returns controller only when not mixed mun', () => {
@@ -434,7 +440,7 @@ describe('mixed municipality allied defense', () => {
             banja_luka: { RBiH: 100, HRHB: 0, RS: 80 }
         };
         const effective = computeAlliedDefense(state, 'banja_luka', 'RBiH', 100);
-        assert.strictEqual(effective, 100); // Not a mixed mun
+        expect(effective).toBe(100); // Not a mixed mun
     });
 
     test('computeAlliedDefense returns controller only when strained', () => {
@@ -448,7 +454,7 @@ describe('mixed municipality allied defense', () => {
             travnik: { RBiH: 100, HRHB: 80, RS: 0 }
         };
         const effective = computeAlliedDefense(state, 'travnik', 'RBiH', 100);
-        assert.strictEqual(effective, 100); // No coordination when strained
+        expect(effective).toBe(100); // No coordination when strained
     });
 });
 
@@ -470,9 +476,9 @@ describe('alliance determinism', () => {
         ensureRbihHrhbState(state2);
         const report1 = updateAllianceValue(state1);
         const report2 = updateAllianceValue(state2);
-        assert.strictEqual(report1.new_value, report2.new_value);
-        assert.strictEqual(report1.delta, report2.delta);
-        assert.strictEqual(report1.phase, report2.phase);
+        expect(report1.new_value).toBe(report2.new_value);
+        expect(report1.delta).toBe(report2.delta);
+        expect(report1.phase).toBe(report2.phase);
     });
 
     test('serialized rbih_hrhb_state is deterministic', () => {
@@ -488,10 +494,7 @@ describe('alliance determinism', () => {
 });
         ensureRbihHrhbState(state1);
         ensureRbihHrhbState(state2);
-        assert.strictEqual(
-            JSON.stringify(state1.political.rbih_hrhb_state),
-            JSON.stringify(state2.political.rbih_hrhb_state)
-        );
+        expect(JSON.stringify(state1.political.rbih_hrhb_state)).toBe(JSON.stringify(state2.political.rbih_hrhb_state));
     });
 
     test('alliance update is idempotent given same state', () => {
@@ -505,7 +508,7 @@ describe('alliance determinism', () => {
         // Run again on updated state
         const report2 = updateAllianceValue(state);
         // Second call should use updated value as previous
-        assert.strictEqual(report2.previous_value, report1.new_value);
+        expect(report2.previous_value).toBe(report1.new_value);
     });
 });
 
@@ -538,8 +541,8 @@ describe('full alliance lifecycle', () => {
         }
 
         // Should have crossed into open war
-        assert.strictEqual(state.political.rbih_hrhb_state!.war_started_turn !== null, true, 'War should have started');
-        assert.ok(state.political.war_alliance_rbih_hrhb! <= HOSTILE_THRESHOLD, 'Alliance should be hostile');
+        expect(state.political.rbih_hrhb_state!.war_started_turn !== null).toBe(true);
+        expect(state.political.war_alliance_rbih_hrhb! <= HOSTILE_THRESHOLD).toBeTruthy();
 
         // Phase 2: Set up ceasefire conditions
         state.political.war_exhaustion = { RBiH: 35, RS: 20, HRHB: 40 };
@@ -557,7 +560,7 @@ describe('full alliance lifecycle', () => {
         }
 
         const ceasefireReport = checkAndApplyCeasefire(state);
-        assert.strictEqual(ceasefireReport.fired, true, 'Ceasefire should fire');
+        expect(ceasefireReport.fired).toBe(true);
 
         // Phase 3: Alliance recovers during ceasefire
         for (let i = 0; i < WASH_CEASEFIRE_DURATION + 1; i++) {
@@ -578,15 +581,15 @@ describe('full alliance lifecycle', () => {
         hrhb.embargo_profile = { heavy_equipment_access: 0.3, ammunition_resupply_rate: 0.4, maintenance_capacity: 0.3, smuggling_efficiency: 0.3, external_pipeline_status: 0.4 };
 
         const washReport = checkAndApplyWashington(state);
-        assert.strictEqual(washReport.fired, true, 'Washington should fire');
-        assert.strictEqual(state.political.war_alliance_rbih_hrhb, WASH_ALLIANCE_LOCK_VALUE);
-        assert.strictEqual(state.political.rbih_hrhb_state!.washington_signed, true);
+        expect(washReport.fired).toBe(true);
+        expect(state.political.war_alliance_rbih_hrhb).toBe(WASH_ALLIANCE_LOCK_VALUE);
+        expect(state.political.rbih_hrhb_state!.washington_signed).toBe(true);
 
         // Phase 5: Verify alliance locked
         state.meta.turn++;
         const lockedReport = updateAllianceValue(state);
-        assert.strictEqual(lockedReport.locked, true);
-        assert.strictEqual(lockedReport.new_value, WASH_ALLIANCE_LOCK_VALUE);
+        expect(lockedReport.locked).toBe(true);
+        expect(lockedReport.new_value).toBe(WASH_ALLIANCE_LOCK_VALUE);
     });
 });
 
@@ -608,7 +611,7 @@ describe('refugee pressure (Phase B1)', () => {
     test('computeRefugeePressure returns 0 when no displacement state', () => {
         const state = makeState();
         const pressure = computeRefugeePressure(state);
-        assert.strictEqual(pressure, 0);
+        expect(pressure).toBe(0);
     });
 
     test('computeRefugeePressure returns 0 when displacement below 5% threshold', () => {
@@ -619,7 +622,7 @@ describe('refugee pressure (Phase B1)', () => {
             }
         };
         const pressure = computeRefugeePressure(state);
-        assert.strictEqual(pressure, 0);
+        expect(pressure).toBe(0);
     });
 
     test('computeRefugeePressure calculates pressure for single municipality above threshold', () => {
@@ -634,7 +637,7 @@ describe('refugee pressure (Phase B1)', () => {
         // scaledRatio = min(1.0, 0.10 / 0.30) = 0.3333...
         // pressure = 0.004 * 0.3333... ≈ 0.001333...
         const expected = REFUGEE_PRESSURE_RATE * Math.min(1.0, 0.10 / REFUGEE_PRESSURE_RATIO_CAP);
-        assert.ok(Math.abs(pressure - expected) < 1e-10, `Expected ~${expected}, got ${pressure}`);
+        expect(Math.abs(pressure - expected) < 1e-10).toBeTruthy();
     });
 
     test('computeRefugeePressure caps ratio at REFUGEE_PRESSURE_RATIO_CAP', () => {
@@ -647,7 +650,7 @@ describe('refugee pressure (Phase B1)', () => {
         };
         const pressure = computeRefugeePressure(state);
         // scaledRatio = min(1.0, 0.50 / 0.30) = 1.0 (capped)
-        assert.ok(Math.abs(pressure - REFUGEE_PRESSURE_RATE) < 1e-10, `Expected ${REFUGEE_PRESSURE_RATE}, got ${pressure}`);
+        expect(Math.abs(pressure - REFUGEE_PRESSURE_RATE) < 1e-10).toBeTruthy();
     });
 
     test('computeRefugeePressure sums across multiple municipalities', () => {
@@ -664,8 +667,8 @@ describe('refugee pressure (Phase B1)', () => {
         const p_vitez = REFUGEE_PRESSURE_RATE * Math.min(1.0, 0.20 / REFUGEE_PRESSURE_RATIO_CAP);
         const p_kiseljak = REFUGEE_PRESSURE_RATE * Math.min(1.0, 0.10 / REFUGEE_PRESSURE_RATIO_CAP);
         const expected = p_travnik + p_vitez + p_kiseljak;
-        assert.ok(Math.abs(pressure - expected) < 1e-10, `Expected ~${expected}, got ${pressure}`);
-        assert.ok(pressure > 0);
+        expect(Math.abs(pressure - expected) < 1e-10).toBeTruthy();
+        expect(pressure > 0).toBeTruthy();
     });
 
     test('computeRefugeePressure ignores non-mixed municipalities', () => {
@@ -679,7 +682,7 @@ describe('refugee pressure (Phase B1)', () => {
         const pressure = computeRefugeePressure(state);
         // Only travnik should contribute
         const expected = REFUGEE_PRESSURE_RATE * Math.min(1.0, 0.10 / REFUGEE_PRESSURE_RATIO_CAP);
-        assert.ok(Math.abs(pressure - expected) < 1e-10, `Expected ~${expected}, got ${pressure}`);
+        expect(Math.abs(pressure - expected) < 1e-10).toBeTruthy();
     });
 
     test('refugee pressure feeds into updateAllianceValue as negative driver', () => {
@@ -698,11 +701,11 @@ describe('refugee pressure (Phase B1)', () => {
             }
         };
         const report = updateAllianceValue(state);
-        assert.ok(report.drivers.refugee_pressure > 0, 'refugee_pressure driver should be positive (it is subtracted)');
+        expect(report.drivers.refugee_pressure > 0).toBeTruthy();
         // With refugee pressure, delta should be more negative than without
         const baselineDelta = report.drivers.appeasement - report.drivers.patron_drag - report.drivers.incident_penalty + report.drivers.ceasefire_boost;
-        assert.ok(report.delta < baselineDelta, 'delta should be reduced by refugee pressure');
-        assert.strictEqual(report.delta, baselineDelta - report.drivers.refugee_pressure);
+        expect(report.delta < baselineDelta).toBeTruthy();
+        expect(report.delta).toBe(baselineDelta - report.drivers.refugee_pressure);
     });
 
     test('refugee pressure accelerates alliance degradation toward bilateral war', () => {
@@ -743,8 +746,8 @@ describe('refugee pressure (Phase B1)', () => {
                 break;
             }
         }
-        assert.strictEqual(warStarted, true, 'War should have started with heavy refugee pressure');
-        assert.ok(state.political.war_alliance_rbih_hrhb! <= HOSTILE_THRESHOLD);
+        expect(warStarted).toBe(true);
+        expect(state.political.war_alliance_rbih_hrhb! <= HOSTILE_THRESHOLD).toBeTruthy();
     });
 });
 
@@ -765,8 +768,8 @@ describe('graz accords with alliance dynamics enabled', () => {
 
         // Alliance update should not touch Graz fields
         const report = updateAllianceValue(state);
-        assert.strictEqual(state.political.vienna_declaration_turn, 4);
-        assert.strictEqual(state.political.vienna_herzegovina_broken_by, undefined);
-        assert.ok(report.new_value !== undefined);
+        expect(state.political.vienna_declaration_turn).toBe(4);
+        expect(state.political.vienna_herzegovina_broken_by).toBe(undefined);
+        expect(report.new_value !== undefined).toBeTruthy();
     });
 });

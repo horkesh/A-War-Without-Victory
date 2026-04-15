@@ -5,8 +5,7 @@
  * - Report appears in Peace phase runTurn.
  */
 
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 import { runJNATransition } from '../src/sim/early_war/jna_transition.js';
 import { runTurn } from '../src/sim/turn_pipeline.js';
 import type { GameState } from '../src/state/game_state.js';
@@ -77,21 +76,21 @@ function statePhaseIWithRSDeclared(overrides?: { war_jna?: { transition_begun: b
 test('runJNATransition starts JNA when RS declared and not yet begun', () => {
     const state = statePhaseIWithRSDeclared();
     const report = runJNATransition(state);
-    assert.strictEqual(report.started, true);
-    assert.strictEqual(state.military.war_jna!.transition_begun, true);
-    assert.strictEqual(report.withdrawal_after, 0.05);
-    assert.strictEqual(report.asset_transfer_after, 0.05);
-    assert.strictEqual(report.completed, false);
+    expect(report.started).toBe(true);
+    expect(state.military.war_jna!.transition_begun).toBe(true);
+    expect(report.withdrawal_after).toBe(0.05);
+    expect(report.asset_transfer_after).toBe(0.05);
+    expect(report.completed).toBe(false);
 });
 
 test('runJNATransition does not start when RS not declared', () => {
     const state = statePhaseIWithRSDeclared();
     state.factions!.find((f) => f.id === 'RS')!.declared = false;
     const report = runJNATransition(state);
-    assert.strictEqual(report.started, false);
-    assert.strictEqual(state.military.war_jna!.transition_begun, false);
-    assert.strictEqual(report.withdrawal_after, 0);
-    assert.strictEqual(report.asset_transfer_after, 0);
+    expect(report.started).toBe(false);
+    expect(state.military.war_jna!.transition_begun).toBe(false);
+    expect(report.withdrawal_after).toBe(0);
+    expect(report.asset_transfer_after).toBe(0);
 });
 
 test('runJNATransition advances 0.05 per turn when already begun', () => {
@@ -99,12 +98,12 @@ test('runJNATransition advances 0.05 per turn when already begun', () => {
         war_jna: { transition_begun: true, withdrawal_progress: 0.1, asset_transfer_rs: 0.15 }
     });
     const report = runJNATransition(state);
-    assert.strictEqual(report.started, false);
-    assert.strictEqual(report.withdrawal_before, 0.1);
-    assert.strictEqual(report.withdrawal_after, 0.15);
-    assert.strictEqual(report.asset_transfer_before, 0.15);
-    assert.strictEqual(report.asset_transfer_after, 0.2);
-    assert.strictEqual(report.completed, false);
+    expect(report.started).toBe(false);
+    expect(report.withdrawal_before).toBe(0.1);
+    expect(report.withdrawal_after).toBe(0.15);
+    expect(report.asset_transfer_before).toBe(0.15);
+    expect(report.asset_transfer_after).toBe(0.2);
+    expect(report.completed).toBe(false);
 });
 
 test('runJNATransition caps withdrawal and asset at 1', () => {
@@ -112,9 +111,9 @@ test('runJNATransition caps withdrawal and asset at 1', () => {
         war_jna: { transition_begun: true, withdrawal_progress: 0.98, asset_transfer_rs: 0.99 }
     });
     const report = runJNATransition(state);
-    assert.strictEqual(report.withdrawal_after, 1);
-    assert.strictEqual(report.asset_transfer_after, 1);
-    assert.strictEqual(report.completed, true);
+    expect(report.withdrawal_after).toBe(1);
+    expect(report.asset_transfer_after).toBe(1);
+    expect(report.completed).toBe(true);
 });
 
 test('runJNATransition reports completed when withdrawal ≥ 0.95 and asset ≥ 0.9', () => {
@@ -122,14 +121,14 @@ test('runJNATransition reports completed when withdrawal ≥ 0.95 and asset ≥ 
         war_jna: { transition_begun: true, withdrawal_progress: 0.95, asset_transfer_rs: 0.9 }
     });
     const report = runJNATransition(state);
-    assert.strictEqual(report.completed, true);
-    assert.strictEqual(report.withdrawal_after, 1);
-    assert.strictEqual(report.asset_transfer_after, 0.95);
+    expect(report.completed).toBe(true);
+    expect(report.withdrawal_after).toBe(1);
+    expect(report.asset_transfer_after).toBe(0.95);
 });
 
 test('war runTurn default path omits phase_i JNA transition report', async () => {
     const state = statePhaseIWithRSDeclared();
     const { report } = await runTurn(state, { seed: 'jna-fixture' });
-    assert.strictEqual(report.war_jna_transition, undefined);
-    assert.strictEqual(report.phases.some((p) => p.name === 'phase-i-jna-transition'), false);
+    expect(report.war_jna_transition).toBe(undefined);
+    expect(report.phases.some((p) => p.name === 'phase-i-jna-transition')).toBe(false);
 });

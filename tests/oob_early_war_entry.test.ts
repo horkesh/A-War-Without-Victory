@@ -1,5 +1,4 @@
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 import type { OobBrigade, OobCorps } from '../src/scenario/oob_loader.js';
 import {
     buildSidToMunFromSettlements,
@@ -35,7 +34,7 @@ test('factionHasPresenceInMun returns false for fragmented mun', () => {
         displacement: {} as any
     };
     const sidToMun = new Map([['s1', 'prijedor']]);
-    assert.strictEqual(factionHasPresenceInMun(state, 'RS', 'prijedor', sidToMun), false);
+    expect(factionHasPresenceInMun(state, 'RS', 'prijedor', sidToMun)).toBe(false);
 });
 
 test('factionHasPresenceInMun returns true when controller matches', () => {
@@ -58,9 +57,9 @@ test('factionHasPresenceInMun returns true when controller matches', () => {
         displacement: {} as any
     };
     const sidToMun = new Map([['s1', 'prijedor'], ['s2', 'prijedor']]);
-    assert.strictEqual(factionHasPresenceInMun(state, 'RS', 'prijedor', sidToMun), true);
-    assert.strictEqual(factionHasPresenceInMun(state, 'RBiH', 'prijedor', sidToMun), true);
-    assert.strictEqual(factionHasPresenceInMun(state, 'HRHB', 'prijedor', sidToMun), false);
+    expect(factionHasPresenceInMun(state, 'RS', 'prijedor', sidToMun)).toBe(true);
+    expect(factionHasPresenceInMun(state, 'RBiH', 'prijedor', sidToMun)).toBe(true);
+    expect(factionHasPresenceInMun(state, 'HRHB', 'prijedor', sidToMun)).toBe(false);
 });
 
 test('buildSidToMunFromSettlements includes only entries with mun1990_id', () => {
@@ -70,9 +69,9 @@ test('buildSidToMunFromSettlements includes only entries with mun1990_id', () =>
         ['s3', { mun1990_id: 'banja_luka' }]
     ]);
     const out = buildSidToMunFromSettlements(settlements);
-    assert.strictEqual(out.size, 2);
-    assert.strictEqual(out.get('s1'), 'prijedor');
-    assert.strictEqual(out.get('s3'), 'banja_luka');
+    expect(out.size).toBe(2);
+    expect(out.get('s1')).toBe('prijedor');
+    expect(out.get('s3')).toBe('banja_luka');
 });
 
 test('createOobFormations is idempotent and only creates when presence', () => {
@@ -102,14 +101,14 @@ test('createOobFormations is idempotent and only creates when presence', () => {
     ];
 
     const r1 = createOobFormations(state, corps, brigades, hq, sidToMun);
-    assert.strictEqual(r1.corps_created, 1);
-    assert.strictEqual(r1.brigades_created, 1);
-    assert.ok(state.military.formations!['arbih_3rd_corps']);
-    assert.ok(state.military.formations!['arbih_7th_muslim']);
+    expect(r1.corps_created).toBe(1);
+    expect(r1.brigades_created).toBe(1);
+    expect(state.military.formations!['arbih_3rd_corps']).toBeTruthy();
+    expect(state.military.formations!['arbih_7th_muslim']).toBeTruthy();
 
     const r2 = createOobFormations(state, corps, brigades, hq, sidToMun);
-    assert.strictEqual(r2.corps_created, 0);
-    assert.strictEqual(r2.brigades_created, 0);
+    expect(r2.corps_created).toBe(0);
+    expect(r2.brigades_created).toBe(0);
 });
 
 test('createOobFormations preserves army_hq corps kind', () => {
@@ -138,8 +137,8 @@ test('createOobFormations preserves army_hq corps kind', () => {
     ];
 
     const report = createOobFormations(state, corps, [], hq, sidToMun);
-    assert.strictEqual(report.corps_created, 1);
-    assert.strictEqual(state.military.formations!['arbih_general_staff']?.kind, 'army_hq');
+    expect(report.corps_created).toBe(1);
+    expect(state.military.formations!['arbih_general_staff']?.kind).toBe('army_hq');
 });
 
 test('createOobFormations uses faction-specific initial personnel defaults', () => {
@@ -169,9 +168,9 @@ test('createOobFormations uses faction-specific initial personnel defaults', () 
         makeBrigade({ id: 'hvo_1st', faction: 'HRHB', name: '1st', home_mun: 'mostar', kind: 'brigade' })
     ];
     createOobFormations(state, [], brigades, hq, sidToMun);
-    assert.strictEqual((state.military.formations!['vrs_1st'] as { personnel?: number }).personnel, 1200, 'RS brigade starts at 1200');
-    assert.strictEqual((state.military.formations!['arbih_7th'] as { personnel?: number }).personnel, 500, 'RBiH brigade starts at 500');
-    assert.strictEqual((state.military.formations!['hvo_1st'] as { personnel?: number }).personnel, 800, 'HRHB brigade starts at 800');
+    expect((state.military.formations!['vrs_1st'] as { personnel?: number }).personnel).toBe(1200);
+    expect((state.military.formations!['arbih_7th'] as { personnel?: number }).personnel).toBe(500);
+    expect((state.military.formations!['hvo_1st'] as { personnel?: number }).personnel).toBe(800);
 });
 
 test('createOobFormations tags brigades with explicit home_osid as fixed placement', () => {
@@ -207,9 +206,6 @@ test('createOobFormations tags brigades with explicit home_osid as fixed placeme
     ];
 
     createOobFormations(state, [], brigades, hq, sidToMun);
-    assert.deepStrictEqual(
-        state.military.formations?.vrs_fixed?.tags?.includes('placement:fixed_home_osid'),
-        true,
-    );
-    assert.strictEqual(state.military.formations?.vrs_fixed?.location_osid, 'op:prijedor:prijedor_2');
+    expect(state.military.formations?.vrs_fixed?.tags?.includes('placement:fixed_home_osid')).toEqual(true);
+    expect(state.military.formations?.vrs_fixed?.location_osid).toBe('op:prijedor:prijedor_2');
 });

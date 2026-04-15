@@ -5,8 +5,7 @@
  * - Control flips do not modify authority (faction profile unchanged).
  */
 
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 import { runControlFlip } from '../src/sim/early_war/control_flip.js';
 import { runTurn } from '../src/sim/turn_pipeline.js';
 import type { GameState, MunicipalityId } from '../src/state/game_state.js';
@@ -79,23 +78,23 @@ function stateWithTwoAdjacentMuns(): GameState {
 test('runControlFlip with no graph does not throw and reports zero flips when no settlementsByMun', () => {
     const state = stateWithTwoAdjacentMuns();
     const report = runControlFlip({ state, turn: 10 });
-    assert.strictEqual(report.flips.length, 0);
-    assert.strictEqual(report.municipalities_evaluated, 2);
+    expect(report.flips.length).toBe(0);
+    expect(report.municipalities_evaluated).toBe(2);
 });
 
 test('runControlFlip with war inactive reports zero flips', () => {
     const state = stateWithTwoAdjacentMuns();
     state.factions!.find((f) => f.id === 'RS')!.declared = false;
     const report = runControlFlip({ state, turn: 10 });
-    assert.strictEqual(report.flips.length, 0);
+    expect(report.flips.length).toBe(0);
 });
 
 test('runControlFlip before war_start_turn reports zero flips', () => {
     const state = stateWithTwoAdjacentMuns();
     state.meta.war_start_turn = 10;
     const report = runControlFlip({ state, turn: 8 });
-    assert.strictEqual(report.flips.length, 0);
-    assert.strictEqual(report.municipalities_evaluated, 0);
+    expect(report.flips.length).toBe(0);
+    expect(report.municipalities_evaluated).toBe(0);
 });
 
 test('runControlFlip does not modify faction profile (authority) when flips occur', () => {
@@ -105,22 +104,22 @@ test('runControlFlip does not modify faction profile (authority) when flips occu
     runControlFlip({ state, turn: 10 });
     const rbihAuthorityAfter = state.factions!.find((f) => f.id === 'RBiH')!.profile.authority;
     const rsAuthorityAfter = state.factions!.find((f) => f.id === 'RS')!.profile.authority;
-    assert.strictEqual(rbihAuthorityAfter, rbihAuthorityBefore, 'Control flip must not change RBiH authority');
-    assert.strictEqual(rsAuthorityAfter, rsAuthorityBefore, 'Control flip must not change RS authority');
+    expect(rbihAuthorityAfter).toBe(rbihAuthorityBefore);
+    expect(rsAuthorityAfter).toBe(rsAuthorityBefore);
 });
 
 test('runControlFlip with consolidation set skips that municipality', () => {
     const state = stateWithTwoAdjacentMuns();
     state.political.war_consolidation_until = { MUN_A: 20 };
     const report = runControlFlip({ state, turn: 10 });
-    assert.strictEqual(report.flips.length, 0);
+    expect(report.flips.length).toBe(0);
 });
 
 test('war runTurn default path omits phase_i control-flip report', async () => {
     const state = stateWithTwoAdjacentMuns();
     const { report } = await runTurn(state, { seed: state.meta.seed });
-    assert.strictEqual(report.control_flip, undefined);
-    assert.strictEqual(report.phases.some((p) => p.name === 'phase-i-control-flip'), false);
+    expect(report.control_flip).toBe(undefined);
+    expect(report.phases.some((p) => p.name === 'phase-i-control-flip')).toBe(false);
 });
 
 test('war runTurn is not gated by war_start_turn in two-phase model', async () => {
@@ -128,7 +127,7 @@ test('war runTurn is not gated by war_start_turn in two-phase model', async () =
     state.meta.turn = 8;
     state.meta.war_start_turn = 10;
     const { nextState } = await runTurn(state, { seed: state.meta.seed });
-    assert.strictEqual(nextState.meta.turn, 9);
+    expect(nextState.meta.turn).toBe(9);
 });
 
 test('large-settlement resistance: mun in LARGE_SETTLEMENT_MUN_IDS with zero defender militia does not flip', () => {
@@ -171,7 +170,7 @@ test('large-settlement resistance: mun in LARGE_SETTLEMENT_MUN_IDS with zero def
     const report = runControlFlip({ state, turn: 10, settlements, edges });
 
     const flippedLarge = report.flips.some((f) => f.mun_id === 'centar_sarajevo');
-    assert.strictEqual(flippedLarge, false, 'centar_sarajevo (large settlement) with zero defender militia must not flip in one turn');
+    expect(flippedLarge).toBe(false);
 });
 
 test('B4 coercion: coercion_pressure_by_municipality reduces flip threshold so flip outcome can differ', () => {
@@ -212,25 +211,22 @@ test('B4 coercion: coercion_pressure_by_municipality reduces flip threshold so f
     const edges = [{ a: 's_a', b: 's_b' }];
     const input = { turn: 10, settlements, edges };
 
-    const reportWithout = runControlFlip({ state: { ...baseState,
-        military: {} as any, political: {} as any, displacement: {} as any
-    }, ...input });
+    const reportWithout = runControlFlip({ state: baseState, ...input });
     const reportWith = runControlFlip({
         state: {
-  ...baseState,
-  political: {
-    coercion_pressure_by_municipality: { MUN_A: 1 }
-  } as any,
-  military: {} as any,
-  displacement: {} as any
-},
+            ...baseState,
+            political: {
+                ...baseState.political,
+                coercion_pressure_by_municipality: { MUN_A: 1 }
+            } as any,
+        },
         ...input
     });
 
     const flipsWithout = reportWithout.flips.filter((f) => f.mun_id === 'MUN_A');
     const flipsWith = reportWith.flips.filter((f) => f.mun_id === 'MUN_A');
-    assert.ok(flipsWithout.length !== flipsWith.length, 'Coercion must change flip outcome for MUN_A');
-    assert.strictEqual(reportWith.municipalities_evaluated, 2);
+    expect(flipsWithout.length !== flipsWith.length).toBeTruthy();
+    expect(reportWith.municipalities_evaluated).toBe(2);
 });
 
 test('runControlFlip militaryActionOnly branch disables militia-only flips without adjacent brigades', () => {
@@ -271,10 +267,7 @@ test('runControlFlip militaryActionOnly branch disables militia-only flips witho
     const edges = [{ a: 's_a', b: 's_b' }];
 
     const militiaDriven = runControlFlip({ state: structuredClone(state), turn: 10, settlements, edges });
-    assert.ok(
-        militiaDriven.flips.some((f) => f.mun_id === ('MUN_A' as MunicipalityId)),
-        'baseline militia-pressure branch should flip MUN_A in this fixture'
-    );
+    expect(militiaDriven.flips.some((f) => f.mun_id === ('MUN_A' as MunicipalityId))).toBeTruthy();
 
     const militaryActionOnly = runControlFlip({
         state: structuredClone(state),
@@ -283,10 +276,7 @@ test('runControlFlip militaryActionOnly branch disables militia-only flips witho
         edges,
         militaryActionOnly: true
     });
-    assert.ok(
-        !militaryActionOnly.flips.some((f) => f.mun_id === ('MUN_A' as MunicipalityId)),
-        'military-action-only branch should not flip without adjacent brigade attack strength'
-    );
+    expect(!militaryActionOnly.flips.some((f) => f.mun_id === ('MUN_A' as MunicipalityId))).toBeTruthy();
 });
 
 test('RS border intervention bonus applies in early-war FRY-adjacent municipalities only', () => {
@@ -330,6 +320,6 @@ test('RS border intervention bonus applies in early-war FRY-adjacent municipalit
     const lateReport = runControlFlip({ state: makeState(30), turn: 30, settlements, edges });
     const earlyFlipped = earlyReport.flips.some((f) => f.mun_id === ('bijeljina' as MunicipalityId));
     const lateFlipped = lateReport.flips.some((f) => f.mun_id === ('bijeljina' as MunicipalityId));
-    assert.strictEqual(earlyFlipped, true, 'early-war RS border bonus should enable this marginal flip');
-    assert.strictEqual(lateFlipped, false, 'after early-war window the same municipality should not flip');
+    expect(earlyFlipped).toBe(true);
+    expect(lateFlipped).toBe(false);
 });

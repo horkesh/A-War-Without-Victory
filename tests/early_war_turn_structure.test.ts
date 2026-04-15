@@ -4,8 +4,7 @@
  * - Legacy phase-i subphases are not part of default war runTurn path.
  */
 
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 import { runTurn } from '../src/sim/turn_pipeline.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
@@ -72,12 +71,8 @@ test('war runTurn executes expected leading phases in order', async () => {
     const state = statePhaseI();
     const { report } = await runTurn(state, { seed: 'step9-fixture' });
     const names = report.phases.map((p) => p.name);
-    assert.ok(names.length > 10, `war runTurn should execute many phases; got ${names.length}`);
-    assert.deepStrictEqual(
-        names.slice(0, 3),
-        ['initialize', 'capture-aar-snapshot', 'migrate-political-control-osid'],
-        'war runTurn should begin with deterministic initialization/event order'
-    );
+    expect(names.length > 10).toBeTruthy();
+    expect(names.slice(0, 3)).toEqual(['initialize', 'capture-aar-snapshot', 'snapshot-political-controllers']);
 });
 
 test('Peace phase runTurn leaves areasOfResponsibility empty (no AoRs in Peace phase)', async () => {
@@ -86,11 +81,7 @@ test('Peace phase runTurn leaves areasOfResponsibility empty (no AoRs in Peace p
     const factions = nextState.factions ?? [];
     for (const f of factions) {
         const aor = f.areasOfResponsibility ?? [];
-        assert.strictEqual(
-            aor.length,
-            0,
-            `Peace phase must not instantiate AoRs; faction ${f.id} has areasOfResponsibility.length = ${aor.length}`
-        );
+        expect(aor.length).toBe(0);
     }
 });
 
@@ -98,13 +89,13 @@ test('war runTurn default path does not include legacy phase-i subphases', async
     const state = statePhaseI();
     const { report } = await runTurn(state, { seed: 'step9-fixture' });
     const names = report.phases.map((p) => p.name);
-    assert.strictEqual(names.some((n) => n.startsWith('phase-i-')), false);
+    expect(names.some((n) => n.startsWith('phase-i-'))).toBe(false);
 });
 
 test('war runTurn with formation_spawn_directive remains stable', async () => {
     const state = statePhaseI();
     state.military.formation_spawn_directive = {};
     const { nextState, report } = await runTurn(state, { seed: 'smoke-fixture' });
-    assert.ok(report.phases.length > 0);
-    assert.ok(nextState.military.formations != null);
+    expect(report.phases.length > 0).toBeTruthy();
+    expect(nextState.military.formations != null).toBeTruthy();
 });

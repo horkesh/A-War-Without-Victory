@@ -4,8 +4,7 @@
  * - Control can change without granting authority (control flip does not modify authority; Step 4).
  */
 
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 import { runAuthorityDegradation } from '../src/sim/early_war/authority_degradation.js';
 import { runTurn } from '../src/sim/turn_pipeline.js';
 import type { GameState } from '../src/state/game_state.js';
@@ -71,10 +70,10 @@ test('runAuthorityDegradation updates RBiH authority (decay from RS/HRHB declare
     const report = runAuthorityDegradation(state);
     const rbihAfter = state.factions!.find((f) => f.id === 'RBiH')!.profile.authority;
     const change = report.changes.find((c) => c.faction_id === 'RBiH');
-    assert.ok(change);
-    assert.strictEqual(change!.authority_before, rbihBefore);
-    assert.strictEqual(change!.authority_after, rbihAfter);
-    assert.ok(rbihAfter !== rbihBefore, 'RBiH authority should change when RS/HRHB declared and JNA active');
+    expect(change).toBeTruthy();
+    expect(change!.authority_before).toBe(rbihBefore);
+    expect(change!.authority_after).toBe(rbihAfter);
+    expect(rbihAfter !== rbihBefore).toBeTruthy();
 });
 
 test('RBiH authority does not fall below 20 (Peace phase floor)', () => {
@@ -82,7 +81,7 @@ test('RBiH authority does not fall below 20 (Peace phase floor)', () => {
     state.factions!.find((f) => f.id === 'RBiH')!.profile.authority = 22;
     for (let i = 0; i < 5; i++) runAuthorityDegradation(state);
     const rbihAfter = state.factions!.find((f) => f.id === 'RBiH')!.profile.authority;
-    assert.ok(rbihAfter >= 20, `RBiH authority must be >= 20, got ${rbihAfter}`);
+    expect(rbihAfter >= 20).toBeTruthy();
 });
 
 test('RS authority is capped at 85', () => {
@@ -90,7 +89,7 @@ test('RS authority is capped at 85', () => {
     state.factions!.find((f) => f.id === 'RS')!.profile.authority = 84;
     runAuthorityDegradation(state);
     const rsAfter = state.factions!.find((f) => f.id === 'RS')!.profile.authority;
-    assert.ok(rsAfter <= 85, `RS authority must be <= 85, got ${rsAfter}`);
+    expect(rsAfter <= 85).toBeTruthy();
 });
 
 test('HRHB authority is capped at 70', () => {
@@ -98,21 +97,21 @@ test('HRHB authority is capped at 70', () => {
     state.factions!.find((f) => f.id === 'HRHB')!.profile.authority = 69;
     runAuthorityDegradation(state);
     const hrhbAfter = state.factions!.find((f) => f.id === 'HRHB')!.profile.authority;
-    assert.ok(hrhbAfter <= 70, `HRHB authority must be <= 70, got ${hrhbAfter}`);
+    expect(hrhbAfter <= 70).toBeTruthy();
 });
 
 test('Authority can degrade while control unchanged (political_controllers not touched)', () => {
     const state = stateWithDeclarations();
     const pcBefore = { ...state.political.political_controllers };
     runAuthorityDegradation(state);
-    assert.deepStrictEqual(state.political.political_controllers, pcBefore, 'Authority update must not change political_controllers');
+    expect(state.political.political_controllers).toEqual(pcBefore);
     const rbihAfter = state.factions!.find((f) => f.id === 'RBiH')!.profile.authority;
-    assert.ok(typeof rbihAfter === 'number', 'RBiH authority should still be updated');
+    expect(typeof rbihAfter === 'number').toBeTruthy();
 });
 
 test('war runTurn default path omits phase_i authority report', async () => {
     const state = stateWithDeclarations();
     const { report } = await runTurn(state, { seed: state.meta.seed });
-    assert.strictEqual(report.authority_degradation, undefined);
-    assert.strictEqual(report.phases.some((p) => p.name === 'phase-i-authority-update'), false);
+    expect(report.authority_degradation).toBe(undefined);
+    expect(report.phases.some((p) => p.name === 'phase-i-authority-update')).toBe(false);
 });

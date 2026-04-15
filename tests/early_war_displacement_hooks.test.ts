@@ -5,8 +5,7 @@
  * - Same municipality not hooked twice (idempotent per mun).
  */
 
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 import type { ControlFlipReport } from '../src/sim/early_war/control_flip.js';
 import { runDisplacementHooks } from '../src/sim/early_war/displacement_hooks.js';
 import { runTurn } from '../src/sim/turn_pipeline.js';
@@ -82,9 +81,9 @@ test('runDisplacementHooks with no flips returns empty report', () => {
     const state = stateWithPhaseI();
     const controlFlipReport: ControlFlipReport = { flips: [], municipalities_evaluated: 0, control_events: [] };
     const report = runDisplacementHooks(state, 10, controlFlipReport, undefined);
-    assert.strictEqual(report.hooks_created, 0);
-    assert.strictEqual(report.by_mun.length, 0);
-    assert.strictEqual(state.displacement.war_displacement_initiated === undefined, true);
+    expect(report.hooks_created).toBe(0);
+    expect(report.by_mun.length).toBe(0);
+    expect(state.displacement.war_displacement_initiated === undefined).toBe(true);
 });
 
 test('runDisplacementHooks with flips creates hooks and report is deterministic by mun_id', () => {
@@ -98,14 +97,14 @@ test('runDisplacementHooks with flips creates hooks and report is deterministic 
         control_events: []
     };
     const report = runDisplacementHooks(state, 10, controlFlipReport, undefined);
-    assert.strictEqual(report.hooks_created, 2);
-    assert.strictEqual(report.by_mun.length, 2);
-    assert.strictEqual(report.by_mun[0].mun_id, 'MUN_A');
-    assert.strictEqual(report.by_mun[0].initiated_turn, 10);
-    assert.strictEqual(report.by_mun[1].mun_id, 'MUN_B');
-    assert.strictEqual(report.by_mun[1].initiated_turn, 10);
-    assert.strictEqual(state.displacement.war_displacement_initiated!['MUN_A'], 10);
-    assert.strictEqual(state.displacement.war_displacement_initiated!['MUN_B'], 10);
+    expect(report.hooks_created).toBe(2);
+    expect(report.by_mun.length).toBe(2);
+    expect(report.by_mun[0].mun_id).toBe('MUN_A');
+    expect(report.by_mun[0].initiated_turn).toBe(10);
+    expect(report.by_mun[1].mun_id).toBe('MUN_B');
+    expect(report.by_mun[1].initiated_turn).toBe(10);
+    expect(state.displacement.war_displacement_initiated!['MUN_A']).toBe(10);
+    expect(state.displacement.war_displacement_initiated!['MUN_B']).toBe(10);
 });
 
 test('runDisplacementHooks does not modify displacement_state or population totals', () => {
@@ -126,11 +125,11 @@ test('runDisplacementHooks does not modify displacement_state or population tota
         control_events: []
     };
     runDisplacementHooks(state, 10, controlFlipReport, undefined);
-    assert.ok(state.displacement.displacement_state !== undefined);
-    assert.strictEqual(state.displacement.displacement_state!['MUN_A'].original_population, 1000);
-    assert.strictEqual(state.displacement.displacement_state!['MUN_A'].displaced_out, 0);
-    assert.strictEqual(state.displacement.displacement_state!['MUN_A'].displaced_in, 0);
-    assert.strictEqual(state.displacement.displacement_state!['MUN_A'].lost_population, 0);
+    expect(state.displacement.displacement_state !== undefined).toBeTruthy();
+    expect(state.displacement.displacement_state!['MUN_A'].original_population).toBe(1000);
+    expect(state.displacement.displacement_state!['MUN_A'].displaced_out).toBe(0);
+    expect(state.displacement.displacement_state!['MUN_A'].displaced_in).toBe(0);
+    expect(state.displacement.displacement_state!['MUN_A'].lost_population).toBe(0);
 });
 
 test('runDisplacementHooks does not create duplicate hook for same municipality', () => {
@@ -141,16 +140,16 @@ test('runDisplacementHooks does not create duplicate hook for same municipality'
         control_events: []
     };
     const report = runDisplacementHooks(state, 10, controlFlipReport, undefined);
-    assert.strictEqual(report.hooks_created, 0);
-    assert.strictEqual(report.by_mun.length, 0);
-    assert.strictEqual(state.displacement.war_displacement_initiated!['MUN_A'], 9);
+    expect(report.hooks_created).toBe(0);
+    expect(report.by_mun.length).toBe(0);
+    expect(state.displacement.war_displacement_initiated!['MUN_A']).toBe(9);
 });
 
 test('war runTurn default path omits phase_i displacement hooks report', async () => {
     const state = stateWithPhaseI();
     const { report } = await runTurn(state, { seed: 'disp-hooks-fixture' });
-    assert.strictEqual(report.displacement_hooks, undefined);
-    assert.strictEqual(report.phases.some((p) => p.name === 'phase-i-displacement-hooks'), false);
+    expect(report.displacement_hooks).toBe(undefined);
+    expect(report.phases.some((p) => p.name === 'phase-i-displacement-hooks')).toBe(false);
 });
 
 test('runDisplacementHooks skips hook when hostile share from census <= 0.30', () => {
@@ -165,8 +164,8 @@ test('runDisplacementHooks skips hook when hostile share from census <= 0.30', (
         MUN_A: { total: 10000, bosniak: 1500, serb: 8000, croat: 400, other: 100 }
     };
     const report = runDisplacementHooks(state, 10, controlFlipReport, population1991ByMun);
-    assert.strictEqual(report.hooks_created, 0);
-    assert.strictEqual(report.by_mun.length, 0);
+    expect(report.hooks_created).toBe(0);
+    expect(report.by_mun.length).toBe(0);
 });
 
 test('runDisplacementHooks creates hook when hostile share from census > 0.30', () => {
@@ -181,6 +180,6 @@ test('runDisplacementHooks creates hook when hostile share from census > 0.30', 
         MUN_A: { total: 10000, bosniak: 5000, serb: 4000, croat: 800, other: 200 }
     };
     const report = runDisplacementHooks(state, 10, controlFlipReport, population1991ByMun);
-    assert.strictEqual(report.hooks_created, 1);
-    assert.strictEqual(report.by_mun[0].mun_id, 'MUN_A');
+    expect(report.hooks_created).toBe(1);
+    expect(report.by_mun[0].mun_id).toBe('MUN_A');
 });
