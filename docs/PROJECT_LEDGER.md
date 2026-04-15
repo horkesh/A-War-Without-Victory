@@ -1,3 +1,35 @@
+## [2026-04-15] refactor(desktop): extract command strain computation from electron-main.cjs
+
+**Type:** Desktop god-file decomposition packet (bounded extraction, behavior-preserving)
+**Commit (code):** dacedaf8
+**Commit (ledger):** this entry
+**Files:** `src/desktop/command_strain.cjs` (new), `src/desktop/electron-main.cjs`, `package.json`, `tests/desktop_packaging_contract.test.ts`, `tests/desktop_command_strain_proof.test.ts` (new)
+**Tests:** tsc clean; vitest `desktop_command_strain_proof` 6/6 + `desktop_packaging_contract` 2/2 (node:test) + `desktop_autonomy_boundary_truth` 4/4 + `desktop_load_error_classification` 10/10 + `ui_map_desktop_bridge` 7/7; `desktop:map:build` clean in 6.48s; `git diff --check` clean. `desktop:package:probe` blocked by the known Windows `resources\app.asar` file-lock (`remove ... resources\app.asar: The process cannot access the file because it is being used by another process`); `desktop_packaging_contract.test.ts` passes and stands in as the strongest direct contract proof per standing fallback policy.
+**Status:** VERIFIED — no behavior change. Both inline strain blocks previously produced the same rounded totalStrain and the same compromised-at-6 check; helper reproduces both.
+
+### Owner families extracted
+- **Corps command strain computation (IPC-side)**: was duplicated inline in `stage-corps-stance-order` handler and `stabilize-command-relationship` handler. Now singularly owned by `src/desktop/command_strain.cjs` via `computeCorpsCommandStrain(state, corpsId, currentTurn) → { totalStrain, isCompromised }`.
+
+### Old owner → new owner
+| Domain | Before | After |
+|---|---|---|
+| CJS strain formula (Sources 1+2) | Inline in 2 IPC handler bodies | `src/desktop/command_strain.cjs` (single export) |
+| TS strain formula (Sources 1+2+3) | `src/ui/map/data/command_strain.ts` | Unchanged — renderer-side owner |
+
+### What remains canonical in electron-main.cjs
+`electron-main.cjs` retains all IPC handler wiring, window lifecycle, protocol registration, desktop sim loading, state transport, and the Wave 4 stance-gate + Level 2 stabilize-command policy (cooldown, CA cost tiers, friction-event resolution pass). Only the numeric strain formula was lifted. electron-main.cjs: 2963 → 2914 lines (-49).
+
+### Proof boundaries
+- **Direct-proof**: Helper exports + numeric behavior (5 fixture cases covering empty, force-launch accumulation, friction-only, combined compromised, full decay).
+- **Contract-proof**: Packaging test asserts `require('./command_strain.cjs')` in electron-main.cjs matches `build.files` entry.
+- **Source-verified only**: Electron runtime invocation (the two IPC handlers calling the helper against live `getDesktopSim()` state). Blocked by the Windows app.asar file-lock in `desktop:package:probe`; the packaging contract test stands in. No behavioral drift expected because the helper reproduces the prior formula exactly.
+
+### Rejected / skipped extractions
+- **Autonomy reject-proposal consolidation (audit extraction #2)**: NO-OP. `reject-proposal` already routes through `resolvePendingProposalAccess` (lines 2916-2919), identical to `accept-proposal` (lines 2877-2880). Audit claim was stale.
+- **Wire protocol_data_route.cjs (audit extraction #3)**: SKIPPED — behavioral divergence. The on-disk helper is stricter than the inline protocol handler in three ways: (1) `parseByteRange` supports suffix-range syntax (`bytes=-500`) and validates `start >= totalSize` → 416, whereas inline uses a loose `/bytes=(\d+)-(\d*)/` regex with no suffix support and no size validation; (2) `isPathInside` uses `path.relative` whereas inline uses `path.resolve(...).startsWith(...)` (weaker — allows prefix-confusion like `/data/derivedX/`); (3) inline `DATA_MIME_TYPES` is defined once at module scope but reused across multiple route branches not covered by the helper. Per the strict rule, wiring the helper would silently change 416 responses, add suffix-range support, and tighten the sandbox check — all semantic changes the packaged runtime probe depends on. Leaving inline + on-disk helper coexisting; a future packet should either delete the unused helper or a scoped refactor must make the inline handler stricter first with regression coverage.
+
+---
+
 ## [2026-04-15] fix(ui): unify Tactical navigation on shellNavigation helpers
 
 **Type:** Shell-cohesion packet (v0.8→v0.9 UI density lane, Chunk A3 + D1)
