@@ -1,5 +1,4 @@
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 
 import { FrontEdge } from '../src/map/front_edges.js';
 import { computeFrontBreaches } from '../src/state/front_breaches.js';
@@ -54,13 +53,10 @@ test('computeFrontBreaches emits favored_side correctly and sorts deterministica
 
     const breaches = computeFrontBreaches(state, derived);
 
-    assert.deepStrictEqual(
-        breaches.map((b) => ({ edge_id: b.edge_id, favored_side: b.favored_side, pressure_value: b.pressure_value })),
-        [
+    expect(breaches.map((b) => ({ edge_id: b.edge_id, favored_side: b.favored_side, pressure_value: b.pressure_value }))).toEqual([
             // abs tied (20), so edge_id asc
             { edge_id: 'a__b', favored_side: 'side_a', pressure_value: 20 },
             { edge_id: 'c__d', favored_side: 'side_b', pressure_value: -20 }
-        ]
-    );
+        ]);
 });
 

@@ -1,5 +1,4 @@
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 
 import type { FrontEdge } from '../src/map/front_edges.js';
 import type { FrontRegionsFile } from '../src/map/front_regions.js';
@@ -40,10 +39,10 @@ test('commitment: zero commitment => effective weight = 0', () => {
 
     const { effectivePosture, report } = applyFormationCommitment(state, frontEdges, frontRegions);
 
-    assert.strictEqual(effectivePosture.A.assignments.e1.effective_weight, 0, 'no commitment => effective weight = 0');
-    assert.strictEqual(report.by_faction[0].total_commit_points, 0);
-    assert.strictEqual(report.by_faction[0].total_demand_weight, 5);
-    assert.strictEqual(report.by_faction[0].total_effective_weight, 0);
+    expect(effectivePosture.A.assignments.e1.effective_weight).toBe(0);
+    expect(report.by_faction[0].total_commit_points).toBe(0);
+    expect(report.by_faction[0].total_demand_weight).toBe(5);
+    expect(report.by_faction[0].total_effective_weight).toBe(0);
 });
 
 test('commitment: edge assignment contributes 1000 milli-points', () => {
@@ -72,9 +71,9 @@ test('commitment: edge assignment contributes 1000 milli-points', () => {
     const { effectivePosture, report } = applyFormationCommitment(state, frontEdges, frontRegions);
 
     // 1 commit point (1000 milli-points) for weight 1 (1000 milli-points demand) => friction = 1.0
-    assert.strictEqual(effectivePosture.A.assignments.e1.effective_weight, 1, 'sufficient commitment => effective = base');
-    assert.strictEqual(report.by_edge[0].commit_points, 1000);
-    assert.strictEqual(report.by_edge[0].friction_factor, 1.0);
+    expect(effectivePosture.A.assignments.e1.effective_weight).toBe(1);
+    expect(report.by_edge[0].commit_points).toBe(1000);
+    expect(report.by_edge[0].friction_factor).toBe(1.0);
 });
 
 test('commitment: region assignment splits evenly across active edges', () => {
@@ -132,10 +131,10 @@ test('commitment: region assignment splits evenly across active edges', () => {
     const e2Commit = report.by_edge.find((e) => e.edge_id === 'e2')?.commit_points ?? 0;
     const e3Commit = report.by_edge.find((e) => e.edge_id === 'e3')?.commit_points ?? 0;
 
-    assert.strictEqual(e1Commit + e2Commit + e3Commit, 1000, 'total commit points should be 1000');
-    assert.ok(e1Commit >= 333 && e1Commit <= 334);
-    assert.ok(e2Commit >= 333 && e2Commit <= 334);
-    assert.ok(e3Commit >= 333 && e3Commit <= 334);
+    expect(e1Commit + e2Commit + e3Commit).toBe(1000);
+    expect(e1Commit >= 333 && e1Commit <= 334).toBeTruthy();
+    expect(e2Commit >= 333 && e2Commit <= 334).toBeTruthy();
+    expect(e3Commit >= 333 && e3Commit <= 334).toBeTruthy();
 });
 
 test('commitment: partial commitment reduces effective weight', () => {
@@ -165,8 +164,8 @@ test('commitment: partial commitment reduces effective weight', () => {
 
     // 1 commit (1000) for weight 3 (3000 demand) => friction = 1000/3000 = 0.333...
     // effective = floor(3 * 0.333...) = floor(1.0) = 1
-    assert.strictEqual(effectivePosture.A.assignments.e1.effective_weight, 1, 'partial commitment reduces weight');
-    assert.ok(report.by_edge[0].friction_factor > 0 && report.by_edge[0].friction_factor < 1);
+    expect(effectivePosture.A.assignments.e1.effective_weight).toBe(1);
+    expect(report.by_edge[0].friction_factor > 0 && report.by_edge[0].friction_factor < 1).toBeTruthy();
 });
 
 test('commitment: command capacity applies global scaling', () => {
@@ -215,9 +214,9 @@ test('commitment: command capacity applies global scaling', () => {
     // Each edge: base=5, commit=1000, demand=5000, friction=0.2, effective=1
     // After global scaling: effective = floor(1 * 0.5) = 0
     const faction = report.by_faction[0];
-    assert.strictEqual(faction.capacity_applied, true);
-    assert.strictEqual(faction.global_factor, 0.5);
-    assert.strictEqual(faction.total_demand_weight, 10);
+    expect(faction.capacity_applied).toBe(true);
+    expect(faction.global_factor).toBe(0.5);
+    expect(faction.total_demand_weight).toBe(10);
 });
 
 test('commitment: determinism - same inputs produce same outputs', () => {
@@ -272,12 +271,12 @@ test('commitment: determinism - same inputs produce same outputs', () => {
     // Compare effective weights
     const e1_1 = run1.effectivePosture.A.assignments.e1?.effective_weight ?? -1;
     const e1_2 = run2.effectivePosture.A.assignments.e1?.effective_weight ?? -1;
-    assert.strictEqual(e1_1, e1_2, 'deterministic effective weights');
+    expect(e1_1).toBe(e1_2);
 
     // Compare commit points
     const commit1 = run1.report.by_edge.find((e) => e.edge_id === 'e1')?.commit_points ?? -1;
     const commit2 = run2.report.by_edge.find((e) => e.edge_id === 'e1')?.commit_points ?? -1;
-    assert.strictEqual(commit1, commit2, 'deterministic commit points');
+    expect(commit1).toBe(commit2);
 });
 
 test('commitment: explicit override precedence - friction applies to overrides too', () => {
@@ -308,6 +307,6 @@ test('commitment: explicit override precedence - friction applies to overrides t
     const { effectivePosture } = applyFormationCommitment(state, frontEdges, frontRegions);
 
     // Explicit override with base_weight=5, but only 1 commit => friction reduces it
-    assert.strictEqual(effectivePosture.A.assignments.e1.base_weight, 5, 'base weight preserved');
-    assert.ok(effectivePosture.A.assignments.e1.effective_weight < 5, 'friction reduces effective weight');
+    expect(effectivePosture.A.assignments.e1.base_weight).toBe(5);
+    expect(effectivePosture.A.assignments.e1.effective_weight < 5).toBeTruthy();
 });

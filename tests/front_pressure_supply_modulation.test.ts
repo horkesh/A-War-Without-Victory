@@ -1,5 +1,4 @@
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 
 import { buildAdjacencyMap } from '../src/map/adjacency_map.js';
 import { computeFrontEdges } from '../src/map/front_edges.js';
@@ -99,11 +98,11 @@ test('accumulateFrontPressure applies 50% penalty when one side locally unsuppli
     // Without supply effect delta would be 0.
     // With B unsupplied: intent_b_eff = floor(6/2)=3 => delta = 6-3=3
     const stats = accumulateFrontPressure(state, derived, adjacencyMap);
-    assert.strictEqual(stats.edges_considered, 1);
-    assert.strictEqual(stats.edges_with_any_unsupplied_side, 1);
-    assert.deepStrictEqual(stats.pressure_deltas, { b__c: 3 });
-    assert.deepStrictEqual(stats.local_supply, { b__c: { side_a_supplied: true, side_b_supplied: false } });
-    assert.strictEqual(state.military.front_pressure['b__c'].value, 3);
+    expect(stats.edges_considered).toBe(1);
+    expect(stats.edges_with_any_unsupplied_side).toBe(1);
+    expect(stats.pressure_deltas).toEqual({ b__c: 3 });
+    expect(stats.local_supply).toEqual({ b__c: { side_a_supplied: true, side_b_supplied: false } });
+    expect(state.military.front_pressure['b__c'].value).toBe(3);
 });
 
 test('accumulateFrontPressure yields no change when both sides locally supplied', () => {
@@ -205,10 +204,10 @@ test('accumulateFrontPressure yields no change when both sides locally supplied'
     normalizeFrontPosture(state);
 
     const stats = accumulateFrontPressure(state, derived, adjacencyMap);
-    assert.strictEqual(stats.edges_considered, 1);
-    assert.strictEqual(stats.edges_with_any_unsupplied_side, 0);
-    assert.deepStrictEqual(stats.pressure_deltas, { b__c: 0 });
-    assert.deepStrictEqual(stats.local_supply, { b__c: { side_a_supplied: true, side_b_supplied: true } });
-    assert.strictEqual(state.military.front_pressure['b__c'].value, 0);
+    expect(stats.edges_considered).toBe(1);
+    expect(stats.edges_with_any_unsupplied_side).toBe(0);
+    expect(stats.pressure_deltas).toEqual({ b__c: 0 });
+    expect(stats.local_supply).toEqual({ b__c: { side_a_supplied: true, side_b_supplied: true } });
+    expect(state.military.front_pressure['b__c'].value).toBe(0);
 });
 

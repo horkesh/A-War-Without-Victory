@@ -1,5 +1,4 @@
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 
 import type { FrontEdge } from '../src/map/front_edges.js';
 import { deriveAssignableFrontSegments } from '../src/state/assignable_front_segments.js';
@@ -13,17 +12,17 @@ test('deriveAssignableFrontSegments groups contiguous hostile edges deterministi
     ];
 
     const out = deriveAssignableFrontSegments(frontEdges);
-    assert.strictEqual(out.length, 3);
+    expect(out.length).toBe(3);
 
     const rsRbih = out.filter((segment) => segment.side_a === 'RBiH' || segment.side_a === 'RS');
-    assert.strictEqual(rsRbih.length, 2);
-    assert.deepStrictEqual(rsRbih[0].edge_ids, ['S1__S2', 'S2__S3']);
-    assert.strictEqual(rsRbih[0].length_edges, 2);
-    assert.deepStrictEqual(rsRbih[1].edge_ids, ['S4__S5']);
-    assert.strictEqual(rsRbih[1].length_edges, 1);
+    expect(rsRbih.length).toBe(2);
+    expect(rsRbih[0].edge_ids).toEqual(['S1__S2', 'S2__S3']);
+    expect(rsRbih[0].length_edges).toBe(2);
+    expect(rsRbih[1].edge_ids).toEqual(['S4__S5']);
+    expect(rsRbih[1].length_edges).toBe(1);
 
     const hrhbRbih = out.find((segment) => segment.side_a === 'HRHB' || segment.side_b === 'HRHB');
-    assert.ok(hrhbRbih, 'HRHB-RBiH segment should exist');
-    assert.deepStrictEqual(hrhbRbih?.edge_ids, ['S9__S8']);
+    expect(hrhbRbih).toBeTruthy();
+    expect(hrhbRbih?.edge_ids).toEqual(['S9__S8']);
 });
 

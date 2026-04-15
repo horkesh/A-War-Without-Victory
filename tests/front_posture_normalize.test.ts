@@ -1,5 +1,4 @@
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 
 import { normalizeFrontPosture } from '../src/state/front_posture.js';
 import { CURRENT_SCHEMA_VERSION, GameState } from '../src/state/game_state.js';
@@ -62,7 +61,7 @@ test('normalizeFrontPosture deterministically cleans and clamps assignments', ()
 
     normalizeFrontPosture(state);
 
-    assert.deepStrictEqual(state.military.front_posture, {
+    expect(state.military.front_posture).toEqual({
         A: {
             assignments: {
                 a__b: { edge_id: 'a__b', posture: 'push', weight: 3 },

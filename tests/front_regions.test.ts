@@ -1,5 +1,4 @@
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 
 import type { FrontEdge } from '../src/map/front_edges.js';
 import { computeFrontRegions } from '../src/map/front_regions.js';
@@ -48,16 +47,16 @@ test('computeFrontRegions derives deterministic connected components by side_pai
     ];
 
     const file = computeFrontRegions(state, derived);
-    assert.strictEqual(file.schema, 1);
-    assert.strictEqual(file.turn, 7);
+    expect(file.schema).toBe(1);
+    expect(file.turn).toBe(7);
 
     // Expect 3 regions total:
     // - A--B component with e1,e2 (active_edge_count=2) first within A--B
     // - A--B component with e5 (active_edge_count=1)
     // - C--D component with e3
-    assert.strictEqual(file.regions.length, 3);
+    expect(file.regions.length).toBe(3);
 
-    assert.deepStrictEqual(file.regions[0], {
+    expect(file.regions[0]).toEqual({
         side_pair: 'A--B',
         region_id: 'A--B::e1',
         edge_ids: ['e1', 'e2'],
@@ -65,7 +64,7 @@ test('computeFrontRegions derives deterministic connected components by side_pai
         active_edge_count: 2
     });
 
-    assert.deepStrictEqual(file.regions[1], {
+    expect(file.regions[1]).toEqual({
         side_pair: 'A--B',
         region_id: 'A--B::e5',
         edge_ids: ['e5'],
@@ -73,7 +72,7 @@ test('computeFrontRegions derives deterministic connected components by side_pai
         active_edge_count: 1
     });
 
-    assert.deepStrictEqual(file.regions[2], {
+    expect(file.regions[2]).toEqual({
         side_pair: 'C--D',
         region_id: 'C--D::e3',
         edge_ids: ['e3'],

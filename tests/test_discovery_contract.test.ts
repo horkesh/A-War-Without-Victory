@@ -46,6 +46,8 @@ describe('test discovery contracts', () => {
             'tests/desktop_sim_bundle_smoke.test.ts',
             'tests/early_war_state_schema.test.ts',
             'tests/early_war_turn_structure.test.ts',
+            'tests/front_assignment.test.ts',
+            'tests/front_posture_commitment.test.ts',
             'tests/game_state_shape.test.ts',
             'tests/negotiation_pressure.test.ts',
             'tests/scenario_registry.test.ts',

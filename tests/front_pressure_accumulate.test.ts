@@ -1,5 +1,4 @@
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 
 import { buildAdjacencyMap } from '../src/map/adjacency_map.js';
 import { computeFrontEdges } from '../src/map/front_edges.js';
@@ -71,7 +70,7 @@ test('accumulateFrontPressure deterministically accumulates from posture intent'
 
     // Turn 1 accumulation: delta = clamp(6-2)=4
     accumulateFrontPressure(state, derived, adjacencyMap);
-    assert.deepStrictEqual(state.military.front_pressure['s1__s2'], {
+    expect(state.military.front_pressure['s1__s2']).toEqual({
         edge_id: 's1__s2',
         value: 4,
         max_abs: 4,
@@ -81,16 +80,16 @@ test('accumulateFrontPressure deterministically accumulates from posture intent'
     // Turn 2 accumulation (same inputs): value 8, max_abs 8
     state.meta.turn = 2;
     accumulateFrontPressure(state, derived, adjacencyMap);
-    assert.strictEqual(state.military.front_pressure['s1__s2'].value, 8);
-    assert.strictEqual(state.military.front_pressure['s1__s2'].max_abs, 8);
-    assert.strictEqual(state.military.front_pressure['s1__s2'].last_updated_turn, 2);
+    expect(state.military.front_pressure['s1__s2'].value).toBe(8);
+    expect(state.military.front_pressure['s1__s2'].max_abs).toBe(8);
+    expect(state.military.front_pressure['s1__s2'].last_updated_turn).toBe(2);
 
     // Missing posture yields delta 0 (no change)
     state.meta.turn = 3;
     state.military.front_posture = {};
     accumulateFrontPressure(state, derived, adjacencyMap);
-    assert.strictEqual(state.military.front_pressure['s1__s2'].value, 8);
-    assert.strictEqual(state.military.front_pressure['s1__s2'].max_abs, 8);
-    assert.strictEqual(state.military.front_pressure['s1__s2'].last_updated_turn, 3);
+    expect(state.military.front_pressure['s1__s2'].value).toBe(8);
+    expect(state.military.front_pressure['s1__s2'].max_abs).toBe(8);
+    expect(state.military.front_pressure['s1__s2'].last_updated_turn).toBe(3);
 });
 

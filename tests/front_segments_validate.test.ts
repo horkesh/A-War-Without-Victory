@@ -1,5 +1,4 @@
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 
 import { EdgeRecord } from '../src/map/settlements.js';
 import { CURRENT_SCHEMA_VERSION, GameState } from '../src/state/game_state.js';
@@ -101,9 +100,7 @@ test('validateFrontSegments returns deterministic issues for malformed records',
 
     // Exact deterministic ordering from validator:
     // keys sorted: a__b, a__c, a__z, b__a, b__c, c__d; issues emitted in fixed check order per key.
-    assert.deepStrictEqual(
-        issues.map((i) => `${i.code} @ ${i.path ?? ''}`),
-        [
+    expect(issues.map((i) => `${i.code} @ ${i.path ?? ''}`)).toEqual([
             'front_segments.size.suspicious @ ',
             'front_segments.edge.not_adjacent @ front_segments.a__c',
             'front_segments.streak.max_lt_active @ front_segments.a__c.max_active_streak',
@@ -115,7 +112,6 @@ test('validateFrontSegments returns deterministic issues for malformed records',
             'front_segments.friction.max_lt_current @ front_segments.b__c.max_friction',
             'front_segments.edge.not_adjacent @ front_segments.c__d',
             'front_segments.streak.inactive_nonzero @ front_segments.c__d.active_streak'
-        ]
-    );
+        ]);
 });
 

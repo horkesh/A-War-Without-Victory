@@ -1,3 +1,30 @@
+## [2026-04-15] test(repo): migrate front posture and segment substrate contracts onto vitest
+
+**Type:** Test-harness cleanup / front-substrate contract migration
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/assignable_front_segments.test.ts`, `tests/front_assignment.test.ts`, `tests/front_breaches.test.ts`, `tests/front_posture_commitment.test.ts`, `tests/front_posture_normalize.test.ts`, `tests/front_posture_regions_expand.test.ts`, `tests/front_pressure_accumulate.test.ts`, `tests/front_pressure_supply_modulation.test.ts`, `tests/front_regions.test.ts`, `tests/front_segments.test.ts`, `tests/front_segments_validate.test.ts`, `tests/test_discovery_contract.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/assignable_front_segments.test.ts tests/front_assignment.test.ts tests/front_breaches.test.ts tests/front_posture_commitment.test.ts tests/front_posture_normalize.test.ts tests/front_posture_regions_expand.test.ts tests/front_pressure_accumulate.test.ts tests/front_pressure_supply_modulation.test.ts tests/front_regions.test.ts tests/front_segments.test.ts tests/front_segments_validate.test.ts tests/test_discovery_contract.test.ts` = 24/24 pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED - the front posture/segment substrate band now runs on the canonical vitest lane, and discovery keeps representative front assignment/commitment coverage pinned in the fast slice.
+
+### Summary
+
+1. **The front-state substrate no longer pretends to need a special runner:** assignable front segments, frontline assignment truth, breaches, posture commitment, posture normalization, posture-region expansion, pressure accumulation, supply modulation, front regions, front segments, and segment validation now import `vitest`.
+2. **This packet stayed purely about harness ownership:** no production logic changes were required. The only cleanup beyond import conversion was finishing a few lingering `assert.equal(...)` calls in `front_assignment.test.ts`.
+3. **Discovery now names the family explicitly:** the fast vitest slice keeps representative front assignment and posture commitment proof in view so the cluster does not drift back into mixed-harness residue.
+
+### Why this mattered
+
+Front posture and segment logic is one of the core in-process substrates that many other combat surfaces rest on. Keeping its tests in `node:test` by habit made the harness map noisier than the codebase really is. Moving the band together gives the repo one clearer answer about where pure front-state proof belongs.
+
+### Proof boundaries
+
+- **Direct proof:** all 11 migrated front substrate suites pass under vitest.
+- **Direct proof:** discovery still keeps representative front-substrate files in the fast vitest slice.
+- **Not claimed here:** this does **not** close the broader front-content or real-save front-truth family; those artifact-backed and content-specific tests still need their own keep-vs-residual audit.
+
+---
+
 ## [2026-04-15] fix(test+state): migrate early-war contract family onto vitest and repair nested early-war validation
 
 **Type:** Test-harness cleanup / early-war validation-truth correction
