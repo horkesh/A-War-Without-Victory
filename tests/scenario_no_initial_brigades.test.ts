@@ -1,8 +1,7 @@
-import assert from 'node:assert';
+import { expect, test } from 'vitest';
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { test } from 'node:test';
 
 import { checkDataPrereqs } from '../src/data_prereq/check_data_prereqs.js';
 import { runScenario } from '../src/scenario/scenario_runner.js';
@@ -22,15 +21,15 @@ function formationCounts(state: { military: { formations?: Record<string, { kind
 } {
     let brigades = 0;
     let corpsLike = 0;
-    for (const f of Object.values(state.military.formations ?? {})) {
-        const kind = f?.kind ?? 'brigade';
+    for (const formation of Object.values(state.military.formations ?? {})) {
+        const kind = formation?.kind ?? 'brigade';
         if (kind === 'brigade') brigades += 1;
         if (kind === 'corps_asset' || kind === 'army_hq') corpsLike += 1;
     }
     return { brigades, corpsLike };
 }
 
-test('player_choice + no_initial_brigade_formations starts with corps only, then recruits brigades', async () => {
+test('player_choice + no_initial_brigade_formations starts with corps only, then recruits brigades', { timeout: 30000 }, async () => {
     const prereq = checkDataPrereqs({ baseDir: process.cwd() });
     if (!prereq.ok) return;
 
@@ -46,7 +45,7 @@ test('player_choice + no_initial_brigade_formations starts with corps only, then
         no_initial_brigade_formations: true,
         recruitment_capital: { RS: 250, RBiH: 150, HRHB: 100 },
         equipment_points: { RS: 300, RBiH: 60, HRHB: 120 },
-        turns: []
+        turns: [],
     };
     await writeFile(SCENARIO_PATH, JSON.stringify(scenario, null, 2) + '\n', 'utf8');
 
@@ -62,9 +61,9 @@ test('player_choice + no_initial_brigade_formations starts with corps only, then
     const initial = formationCounts(initialState);
     const final = formationCounts(finalState);
 
-    assert.strictEqual(initial.brigades, 0, 'initial state should have no brigade formations');
-    assert.ok(initial.corpsLike > 0, 'initial state should contain corps/army_hq formations');
-    assert.ok(final.brigades > 0, 'after one turn, at least one brigade should be recruited');
+    expect(initial.brigades).toBe(0);
+    expect(initial.corpsLike).toBeGreaterThan(0);
+    expect(final.brigades).toBeGreaterThan(0);
 
     await ensureRemoved(BASE_OUT);
 });

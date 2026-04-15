@@ -3,16 +3,14 @@
  * SKIPs when data prereqs missing. Uses apr1995_start with init_control apr1995 (4-week run for speed).
  */
 
-import assert from 'node:assert';
+import { expect, test } from 'vitest';
 import { existsSync } from 'node:fs';
 import { readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
-import { test } from 'node:test';
 
 import { checkDataPrereqs } from '../src/data_prereq/check_data_prereqs.js';
 import { loadSettlementGraph } from '../src/map/settlements.js';
 import { runScenario } from '../src/scenario/scenario_runner.js';
-
 
 const BASE_OUT = join(process.cwd(), '.tmp_scenario_init_control_apr1995');
 
@@ -28,7 +26,7 @@ async function ensureRemoved(dir: string): Promise<void> {
     }
 }
 
-test('init_control apr1995: municipal anchors match apr1995 source snapshot', async () => {
+test('init_control apr1995: municipal anchors match apr1995 source snapshot', { timeout: 30000 }, async () => {
     const prereq = checkDataPrereqs({ baseDir: process.cwd() });
     if (!prereq.ok) {
         return;
@@ -36,16 +34,14 @@ test('init_control apr1995: municipal anchors match apr1995 source snapshot', as
 
     const graph = await loadSettlementGraph();
     const sidToMun = new Map<string, string>();
-    for (const [_key, rec] of graph.settlements) {
-        if (!rec.mun1990_id) continue;
-        // Map the primary key (osid or sid) to municipality
-        sidToMun.set(rec.sid, rec.mun1990_id);
-        // Also map constituent canonical SIDs (from operational settlements)
-        const props = rec.properties as Record<string, unknown> | undefined;
+    for (const [, record] of graph.settlements) {
+        if (!record.mun1990_id) continue;
+        sidToMun.set(record.sid, record.mun1990_id);
+        const props = record.properties as Record<string, unknown> | undefined;
         const constituents = props?.constituent_sids;
         if (Array.isArray(constituents)) {
-            for (const csid of constituents) {
-                if (typeof csid === 'string') sidToMun.set(csid, rec.mun1990_id);
+            for (const constituentSid of constituents) {
+                if (typeof constituentSid === 'string') sidToMun.set(constituentSid, record.mun1990_id);
             }
         }
     }
@@ -54,53 +50,48 @@ test('init_control apr1995: municipal anchors match apr1995 source snapshot', as
     const scenarioPath = join(process.cwd(), 'data', 'scenarios', 'apr1995_start.json');
     const result = await runScenario({ scenarioPath, outDirBase: BASE_OUT, weeksOverride: 4 });
 
-    assert(existsSync(result.paths.initial_save), 'initial_save.json should exist');
+    expect(existsSync(result.paths.initial_save)).toBe(true);
     const initialContent = await readFile(result.paths.initial_save, 'utf8');
     const state = JSON.parse(initialContent) as { political: { political_controllers?: Record<string, string | null> } };
-    const pc = state.political.political_controllers ?? {};
+    const controllers = state.political.political_controllers ?? {};
     const expectedContent = await readFile(
         join(process.cwd(), 'data', 'source', 'municipalities_1990_initial_political_controllers_apr1995.json'),
-        'utf8'
+        'utf8',
     );
     const expected = JSON.parse(expectedContent) as { controllers_by_mun1990_id?: Record<string, string> };
     const expectedByMun = expected.controllers_by_mun1990_id ?? {};
     const targetMuns = ['srebrenica', 'jajce'];
     const countsByMun = new Map<string, Map<string, number>>();
-    for (const [sid, controller] of Object.entries(pc)) {
+    for (const [sid, controller] of Object.entries(controllers)) {
         if (!controller) continue;
-        const mun = sidToMun.get(sid);
-        if (!mun || !targetMuns.includes(mun)) continue;
-        const munCounts = countsByMun.get(mun) ?? new Map<string, number>();
-        munCounts.set(controller, (munCounts.get(controller) ?? 0) + 1);
-        countsByMun.set(mun, munCounts);
+        const municipality = sidToMun.get(sid);
+        if (!municipality || !targetMuns.includes(municipality)) continue;
+        const municipalityCounts = countsByMun.get(municipality) ?? new Map<string, number>();
+        municipalityCounts.set(controller, (municipalityCounts.get(controller) ?? 0) + 1);
+        countsByMun.set(municipality, municipalityCounts);
     }
-    for (const mun of targetMuns) {
-        const munCounts = countsByMun.get(mun);
-        assert(munCounts != null && munCounts.size > 0, `${mun} should have initialized settlements`);
-        const sortedControllers = Array.from(munCounts.keys()).sort(strictCompare);
+
+    for (const municipality of targetMuns) {
+        const municipalityCounts = countsByMun.get(municipality);
+        expect(municipalityCounts).toBeDefined();
+        expect(municipalityCounts && municipalityCounts.size).toBeGreaterThan(0);
+        const sortedControllers = Array.from(municipalityCounts?.keys() ?? []).sort(strictCompare);
         let bestController = sortedControllers[0];
-        let bestCount = munCounts.get(bestController) ?? 0;
+        let bestCount = municipalityCounts?.get(bestController) ?? 0;
         for (const controller of sortedControllers) {
-            const count = munCounts.get(controller) ?? 0;
+            const count = municipalityCounts?.get(controller) ?? 0;
             if (count > bestCount) {
                 bestController = controller;
                 bestCount = count;
             }
         }
-        const expectedController = expectedByMun[mun];
-        assert(expectedController != null, `${mun} must exist in apr1995 source snapshot`);
-        if (mun === 'srebrenica') {
-            assert.strictEqual(
-                bestController,
-                expectedController,
-                `${mun} majority controller should match apr1995 source snapshot`
-            );
+        const expectedController = expectedByMun[municipality];
+        expect(expectedController).toBeDefined();
+        if (municipality === 'srebrenica') {
+            expect(bestController).toBe(expectedController);
         } else {
-            const sortedCountsDesc = Array.from(munCounts.values()).sort((a, b) => b - a);
-            assert.ok(
-                sortedCountsDesc.length >= 2 ? bestCount > sortedCountsDesc[1]! : bestCount > 0,
-                `${mun} should have a deterministic plurality controller; got: ${JSON.stringify(Object.fromEntries(munCounts))}`
-            );
+            const sortedCountsDesc = Array.from(municipalityCounts?.values() ?? []).sort((a, b) => b - a);
+            expect(sortedCountsDesc.length >= 2 ? bestCount > sortedCountsDesc[1]! : bestCount > 0).toBe(true);
         }
     }
 

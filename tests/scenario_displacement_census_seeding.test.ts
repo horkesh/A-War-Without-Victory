@@ -4,15 +4,14 @@
  * not default 10,000.
  */
 
-import assert from 'node:assert';
+import { expect, test } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { test } from 'node:test';
 
 import { checkDataPrereqs } from '../src/data_prereq/check_data_prereqs.js';
 import { createStateFromScenario } from '../src/scenario/scenario_runner.js';
 
-test('War phase scenario with census seeds displacement_state from 1991 population', async () => {
+test('War phase scenario with census seeds displacement_state from 1991 population', { timeout: 30000 }, async () => {
     const baseDir = process.cwd();
     const prereq = checkDataPrereqs({ baseDir });
     if (!prereq.ok) {
@@ -22,7 +21,8 @@ test('War phase scenario with census seeds displacement_state from 1991 populati
     const scenarioPath = join(baseDir, 'data', 'scenarios', 'apr1992_definitive_52w.json');
     const state = await createStateFromScenario(scenarioPath, baseDir, { initialStateOnly: true });
 
-    assert(state.displacement.displacement_state != null && typeof state.displacement.displacement_state === 'object', 'displacement_state should exist');
+    const displacementState = state.displacement.displacement_state;
+    expect(displacementState).toBeDefined();
 
     const censusPath = join(baseDir, 'data', 'derived', 'municipality_population_1991.json');
     const censusRaw = JSON.parse(await readFile(censusPath, 'utf8')) as {
@@ -32,25 +32,21 @@ test('War phase scenario with census seeds displacement_state from 1991 populati
     const byMun = censusRaw.by_mun1990_id ?? {};
     const byNumeric = censusRaw.by_municipality_id ?? {};
     const flat: Record<string, number> = {};
-    for (const [k, v] of Object.entries(byMun)) {
-        if (v?.total != null) flat[k] = v.total;
+    for (const [key, value] of Object.entries(byMun)) {
+        if (value?.total != null) flat[key] = value.total;
     }
-    if (Object.keys(flat).length === 0 && byNumeric) {
-        for (const v of Object.values(byNumeric)) {
-            if (v?.mun1990_id != null && typeof v.total === 'number') flat[v.mun1990_id] = v.total;
+    if (Object.keys(flat).length === 0) {
+        for (const value of Object.values(byNumeric)) {
+            if (value?.mun1990_id != null && typeof value.total === 'number') flat[value.mun1990_id] = value.total;
         }
     }
 
-    assert(Object.keys(flat).length > 0, 'census should have at least one municipality');
     const sampleMunId = Object.keys(flat).sort((a, b) => a.localeCompare(b))[0];
     const expectedTotal = flat[sampleMunId];
-    assert(Number.isFinite(expectedTotal) && expectedTotal > 0, 'sample mun should have positive total');
+    expect(Object.keys(flat).length).toBeGreaterThan(0);
+    expect(expectedTotal).toBeGreaterThan(0);
 
-    const disp = state.displacement.displacement_state[sampleMunId];
-    assert(disp != null, `displacement_state should have entry for ${sampleMunId}`);
-    assert.strictEqual(
-        disp.original_population,
-        expectedTotal,
-        `displacement_state[${sampleMunId}].original_population should equal census total (not default 10000)`
-    );
+    const displacement = displacementState![sampleMunId];
+    expect(displacement).toBeDefined();
+    expect(displacement.original_population).toBe(expectedTotal);
 });

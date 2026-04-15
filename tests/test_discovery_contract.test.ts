@@ -34,6 +34,8 @@ describe('test discovery contracts', () => {
             'tests/integration_scenario_roundtrip.test.ts',
             'tests/integration_run_summary.test.ts',
             'tests/scenario_continue_from_save_equivalence.test.ts',
+            'tests/scenario_init_control_apr1992.test.ts',
+            'tests/scenario_init_formations.test.ts',
             'tests/victory_conditions_a2.test.ts',
         ];
         const fastRepresentatives = [

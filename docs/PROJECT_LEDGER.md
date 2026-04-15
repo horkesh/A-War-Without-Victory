@@ -1,3 +1,31 @@
+## [2026-04-15] test(repo): migrate scenario startup contracts onto vitest
+
+**Type:** Test-harness cleanup / scenario-startup residue audit
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/scenario_displacement_census_seeding.test.ts`, `tests/scenario_init_control_apr1992.test.ts`, `tests/scenario_init_control_apr1995.test.ts`, `tests/scenario_init_formations.test.ts`, `tests/scenario_must_hold_contract.test.ts`, `tests/scenario_no_initial_brigades.test.ts`, `tests/test_discovery_contract.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/scenario_displacement_census_seeding.test.ts tests/scenario_init_control_apr1992.test.ts tests/scenario_init_control_apr1995.test.ts tests/scenario_init_formations.test.ts tests/scenario_must_hold_contract.test.ts tests/scenario_no_initial_brigades.test.ts tests/test_discovery_contract.test.ts` = 8/8 pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED after packet verification - six scenario-startup contracts now run on vitest, and the longer scenario-run members use explicit timeouts instead of inheriting stale `node:test` assumptions.
+
+### Summary
+
+1. **The startup/init cluster moved together:** `scenario_displacement_census_seeding`, `scenario_init_control_apr1992`, `scenario_init_control_apr1995`, `scenario_init_formations`, `scenario_must_hold_contract`, and `scenario_no_initial_brigades` now live on the canonical vitest lane.
+2. **This packet preserved the real split instead of erasing it:** startup/reporting/shape contracts moved, but the heavier black-box calibration and artifact-comparison gates remain outside this packet because their value is still runner-shaped.
+3. **Discovery now remembers the scenario-startup lane:** representative members are pinned in the scenario vitest slice.
+
+### Why this mattered
+
+The repo was still paying split-harness tax for scenario files that were not really calibration gates, just because they happened to call the scenario runner. This packet keeps the hard black-box tests where they belong and moves the startup truth to the canonical harness.
+
+### Proof boundaries
+
+- **Direct proof:** all 6 migrated scenario-startup suites pass under vitest.
+- **Direct proof:** discovery now pins representative scenario-startup files in the scenario vitest slice.
+- **Direct proof:** explicit Vitest timeouts now cover the long-running scenario-startup members instead of relying on the old runner's looser defaults.
+- **Not claimed here:** this packet does **not** migrate or demote the true black-box calibration/determinism/artifact gates; those remain a separate review lane.
+
+---
+
 ## [2026-04-15] test(repo): migrate combat-support residue contracts onto vitest
 
 **Type:** Test-harness cleanup / combat-support residue audit
