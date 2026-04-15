@@ -6,7 +6,7 @@
  */
 
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 import { deriveRearPoliticalControlZones, getRearZoneAuthorityStabilizationFactor, isSettlementInRearZone } from '../src/sim/emergence/rear_zone_detection.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';

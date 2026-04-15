@@ -1,3 +1,31 @@
+## [2026-04-15] test(repo): migrate emergence substrate contracts onto vitest and retarget stale phase-proof labels
+
+**Type:** Test-harness cleanup / emergence proof retargeting
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/emergence_aor_instantiation.test.ts`, `tests/emergence_front_emergence.test.ts`, `tests/emergence_pipeline_integration.test.ts`, `tests/emergence_pressure_determinism.test.ts`, `tests/emergence_pressure_diffusion_basic.test.ts`, `tests/emergence_pressure_gating.test.ts`, `tests/emergence_pressure_schema.test.ts`, `tests/emergence_rear_zone.test.ts`, `tests/emergence_validation_suite.test.ts`, `tests/test_discovery_contract.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/emergence_aor_instantiation.test.ts tests/emergence_front_emergence.test.ts tests/emergence_pipeline_integration.test.ts tests/emergence_pressure_determinism.test.ts tests/emergence_pressure_diffusion_basic.test.ts tests/emergence_pressure_gating.test.ts tests/emergence_pressure_schema.test.ts tests/emergence_rear_zone.test.ts tests/emergence_validation_suite.test.ts tests/test_discovery_contract.test.ts` = 54/54 pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED - the emergence contract family now runs on the canonical vitest lane, and the migration corrected stale pipeline-proof expectations that were still naming retired phase labels and report owners from an older Phase E shape.
+
+### Summary
+
+1. **The emergence family moved as one deterministic band:** AoR instantiation, front emergence, pipeline integration, pressure determinism, diffusion basics, pressure gating, pressure schema, rear-zone detection, and the Phase E validation suite now import `vitest`.
+2. **This packet corrected proof drift rather than code drift:** the failing suites were still expecting retired phase names like `phase-ii-front-emergence` / `phase-ii-consolidation`, old peace-phase error text, and report owners that no longer exist in the live war pipeline. The tests were updated to current pipeline truth (`supply-pressure-exhaustion` -> `phase-e-pressure-update` -> `front-emergence` -> `derive-sector-intel`).
+3. **The schema test now points at the nested owner it actually means:** `front_pressure` round-trip proof now asserts against `hydrated.military.front_pressure` instead of a dead top-level property.
+
+### Why this mattered
+
+The emergence band is another large deterministic substrate family that never needed a separate runner. More importantly, the migration smoked out a classic hardening smell: proof files were green in the old harness but stale in content, still talking to a pipeline shape that no longer exists. Retargeting them to the live owner names keeps the suite honest.
+
+### Proof boundaries
+
+- **Direct proof:** all 9 migrated emergence suites pass under vitest.
+- **Direct proof:** discovery now pins representative emergence pipeline/schema files in the fast vitest slice.
+- **Direct proof:** current war-pipeline order and report owners are asserted directly by `emergence_pipeline_integration.test.ts`.
+- **Not claimed here:** this does **not** prove scenario-heavy emergence outcomes or broader Phase E content balance; it closes the pure emergence substrate and its stale phase-label residue.
+
+---
+
 ## [2026-04-15] fix(test+state): migrate displacement contracts onto vitest and repair nested displacement validation
 
 **Type:** Test-harness cleanup / displacement validation-truth correction

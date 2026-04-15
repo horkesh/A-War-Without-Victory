@@ -5,7 +5,7 @@
  */
 
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import { deserializeState, serializeState } from '../src/state/serialize.js';
@@ -46,7 +46,7 @@ test('missing front_pressure treated as empty on round-trip', () => {
     const state = minimalStateWithFrontPressure();
     const payload = serializeState(state);
     const hydrated = deserializeState(payload);
-    assert.ok('front_pressure' in hydrated);
+    assert.ok('front_pressure' in hydrated.military);
     assert.strictEqual(typeof hydrated.military.front_pressure, 'object');
     const fp = hydrated.military.front_pressure ?? {};
     assert.strictEqual(Object.keys(fp).length >= 0, true);

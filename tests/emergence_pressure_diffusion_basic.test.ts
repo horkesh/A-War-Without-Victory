@@ -5,7 +5,7 @@
  */
 
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 import { diffusePressure } from '../src/sim/emergence/pressure_diffusion.js';
 import { getEligiblePressureEdges, isPressureEligible, toEdgeId } from '../src/sim/emergence/pressure_eligibility.js';
 import type { GameState } from '../src/state/game_state.js';

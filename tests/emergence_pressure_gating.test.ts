@@ -5,7 +5,7 @@
  */
 
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 import type { EdgeRecord } from '../src/map/settlements.js';
 import { runTurn } from '../src/sim/turn_pipeline.js';
 import type { GameState } from '../src/state/game_state.js';
@@ -81,7 +81,7 @@ test('peace runTurn is rejected (war pipeline only)', async () => {
     const edges: EdgeRecord[] = [{ a: 's1', b: 's2' }];
     await assert.rejects(
         () => runTurn(state, { seed: 'gating-i', settlementEdges: edges }),
-        /use state pipeline runOneTurn for peace/
+        /unsupported lifecycle phase "peace"; expected 'war'/
     );
 });
 

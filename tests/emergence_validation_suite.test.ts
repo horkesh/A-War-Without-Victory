@@ -9,7 +9,7 @@
  */
 
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 import { deriveAoRMembership } from '../src/sim/emergence/aor_instantiation.js';
 import { diffusePressure } from '../src/sim/emergence/pressure_diffusion.js';
 import { deriveRearPoliticalControlZones } from '../src/sim/emergence/rear_zone_detection.js';

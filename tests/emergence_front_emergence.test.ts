@@ -7,7 +7,7 @@
  */
 
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 import type { EdgeRecord } from '../src/map/settlements.js';
 import { deriveFrontsFromPressureEligible } from '../src/sim/emergence/front_emergence.js';
 import { runTurn } from '../src/sim/turn_pipeline.js';
@@ -84,17 +84,17 @@ test('peace runTurn is rejected (war pipeline only)', async () => {
     const edges: EdgeRecord[] = [{ a: 's1', b: 's2' }];
     await assert.rejects(
         () => runTurn(state, { seed: 'fe-gate-i', settlementEdges: edges }),
-        /use state pipeline runOneTurn for peace/
+        /unsupported lifecycle phase "peace"; expected 'war'/
     );
 });
 
-test('phase_ii runTurn includes phase-ii-front-emergence and runs exactly once per turn', async () => {
+test('runTurn includes front-emergence and runs exactly once per turn', async () => {
     const state = minimalPhaseIIState();
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const { report } = await runTurn(state, { seed: 'fe-ii', settlementEdges: edges });
     const phaseNames = report.phases.map((p) => p.name);
-    const count = phaseNames.filter((n) => n === 'phase-ii-front-emergence').length;
-    assert.strictEqual(count, 1, 'phase-ii-front-emergence must run exactly once per turn in war phase path');
+    const count = phaseNames.filter((n) => n === 'front-emergence').length;
+    assert.strictEqual(count, 1, 'front-emergence must run exactly once per turn in war phase path');
     assert.ok(Array.isArray(report.front_emergence_report), 'front_emergence_report report should be an array');
 });
 
