@@ -3,7 +3,7 @@
  */
 
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 import type { FrontEdge } from '../src/map/front_edges.js';
 import {
     COMPETENCE_VALUATIONS,

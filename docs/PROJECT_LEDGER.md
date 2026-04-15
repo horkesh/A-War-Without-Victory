@@ -1,3 +1,30 @@
+## [2026-04-15] test(repo): migrate institutional competence and organizational-penetration contracts onto vitest
+
+**Type:** Test-harness cleanup / institutional-state contract unification
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/competence_valuations.test.ts`, `tests/competences.test.ts`, `tests/organizational_penetration_seed_from_control.test.ts`, `tests/organizational_penetration_formula.test.ts`, `tests/test_discovery_contract.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/competence_valuations.test.ts tests/competences.test.ts tests/organizational_penetration_seed_from_control.test.ts tests/organizational_penetration_formula.test.ts tests/test_discovery_contract.test.ts` = 32/32 pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED - the remaining pure competence and organizational-penetration contracts now run under vitest, with discovery pinning representative institutional-state files into the fast slice.
+
+### Summary
+
+1. **The institutional-state band moved together:** competence valuation tables, treaty competence allocation rules, organizational-penetration seeding from control/population/brigade signals, and the pure organizational-penetration formula now all live on the canonical vitest lane.
+2. **This was a pure harness packet:** no production code changed because these files already proved deterministic institutional-state behavior without needing scenario execution or special runner semantics.
+3. **Discovery now remembers the band:** representative competence and organizational-penetration files are pinned in the fast vitest slice so this institutional lane does not drift back into `node:test` residue.
+
+### Why this mattered
+
+These files sit right in the political-war substrate that v0.9 will keep building on. Leaving a tiny pure institutional family in `node:test` made the harness map look more fractured than the underlying ownership really is.
+
+### Proof boundaries
+
+- **Direct proof:** all 4 migrated institutional-state suites pass under vitest.
+- **Direct proof:** discovery now pins representative competence and organizational-penetration files in the fast vitest slice.
+- **Not claimed here:** this does **not** prove broader treaty UX or peace-screen rendering; it closes the pure institutional helper/state lane behind those surfaces.
+
+---
+
 ## [2026-04-15] test(repo): migrate recruitment and militia contracts onto vitest
 
 **Type:** Test-harness cleanup / recruitment-militia truth hardening
