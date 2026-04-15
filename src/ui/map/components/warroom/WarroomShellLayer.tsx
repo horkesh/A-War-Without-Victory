@@ -91,9 +91,22 @@ interface WarroomHotspotProps {
   onClick: () => void;
 }
 
+function humanizeRegionId(id: string): string {
+  return id
+    .split('_')
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+export function getWarroomRegionLabel(region: Pick<WarroomRegion, 'id' | 'tooltip'>): string {
+  return region.tooltip?.trim() || humanizeRegionId(region.id);
+}
+
 function WarroomHotspot({ region, onClick }: WarroomHotspotProps) {
   const [hovered, setHovered] = useState(false);
   const { bounds, tooltip, id } = region;
+  const accessibleLabel = getWarroomRegionLabel(region);
 
   const left = `${(bounds.x / CANVAS_W) * 100}%`;
   const top = `${(bounds.y / CANVAS_H) * 100}%`;
@@ -101,7 +114,8 @@ function WarroomHotspot({ region, onClick }: WarroomHotspotProps) {
   const height = `${(bounds.height / CANVAS_H) * 100}%`;
 
   return (
-    <div
+    <button
+      type="button"
       style={{
         position: 'absolute',
         left,
@@ -113,11 +127,22 @@ function WarroomHotspot({ region, onClick }: WarroomHotspotProps) {
         outline: hovered ? '2px solid rgba(255,220,100,0.7)' : 'none',
         background: hovered ? 'rgba(255,220,100,0.08)' : 'transparent',
         transition: 'outline 0.1s, background 0.1s',
+        border: 'none',
+        padding: 0,
       }}
+      aria-label={accessibleLabel}
       title={tooltip ?? id}
       onClick={onClick}
+      onFocus={() => setHovered(true)}
+      onBlur={() => setHovered(false)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onClick();
+        }
+      }}
     />
   );
 }
@@ -176,6 +201,8 @@ export function WarroomShellLayer({ onNavigate }: WarroomShellLayerProps) {
         }}
       >
         <div
+          role="status"
+          aria-live="polite"
           style={{
             color: 'rgba(255,255,255,0.72)',
             fontFamily: '"Courier New", Courier, monospace',
