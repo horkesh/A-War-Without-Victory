@@ -1,3 +1,22 @@
+## [2026-04-15] test(repo): migrate identity and nested migration contracts onto vitest
+
+**Type:** Test-harness cleanup / migration-owner truth audit
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/identity_migration.test.ts`, `tests/migration_nested_ownership.test.ts`, `tests/test_discovery_contract.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/identity_migration.test.ts tests/migration_nested_ownership.test.ts tests/test_discovery_contract.test.ts` = 15/15 pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED after packet verification - pure migration canonicalization and nested-owner rescue contracts now run on the fast vitest lane.
+
+### Summary
+
+1. **The migration pair moved together:** `identity_migration` and `migration_nested_ownership` now use the canonical vitest harness instead of keeping a fake second owner in `node:test`.
+2. **Fast discovery now remembers the migration lane:** both files are pinned in the fast vitest slice through `tests/test_discovery_contract.test.ts`.
+3. **The boundary stayed honest:** this packet only covers in-process deserialization, faction canonicalization, and nested-owner rescue truth. It does not pretend to absorb scenario or artifact gates.
+
+### Why this mattered
+
+These files were still paying split-harness tax even though they are pure migration truth: deserialize JSON, canonicalize IDs, rescue legacy top-level residue into nested owners, and materialize missing sibling defaults. Keeping them in `node:test` was just historical inertia masquerading as architecture.
+
 ## [2026-04-15] test(repo): migrate scenario startup contracts onto vitest
 
 **Type:** Test-harness cleanup / scenario-startup residue audit

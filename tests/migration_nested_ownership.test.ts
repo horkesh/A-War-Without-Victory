@@ -1,5 +1,4 @@
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { describe, expect, it } from 'vitest';
 
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import { deserializeState } from '../src/state/serialize.js';
@@ -71,8 +70,9 @@ function migrationFixture(overrides: Record<string, unknown> = {}): Record<strin
     };
 }
 
-test('migrateState canonicalizes nested military and political owner fields directly', () => {
-    const payload = JSON.stringify(migrationFixture({
+describe('nested migration ownership contracts', () => {
+    it('migrateState canonicalizes nested military and political owner fields directly', () => {
+        const payload = JSON.stringify(migrationFixture({
         military: {
             formations: {},
             front_segments: {},
@@ -110,29 +110,25 @@ test('migrateState canonicalizes nested military and political owner fields dire
                 ],
             },
         },
-    }));
+        }));
 
-    const hydrated = deserializeState(payload);
+        const hydrated = deserializeState(payload);
 
-    assert.deepStrictEqual(Object.keys(hydrated.military.front_posture), ['RBiH']);
-    assert.deepStrictEqual(Object.keys(hydrated.military.front_posture_regions), ['RBiH']);
+        expect(Object.keys(hydrated.military.front_posture)).toEqual(['RBiH']);
+        expect(Object.keys(hydrated.military.front_posture_regions)).toEqual(['RBiH']);
 
-    const militiaPool = hydrated.military.militia_pools['mun1:ARBiH'] as any;
-    assert.strictEqual(militiaPool.faction, 'RBiH');
-    assert.strictEqual(militiaPool.fatigue, 0);
+        const militiaPool = hydrated.military.militia_pools['mun1:ARBiH'] as any;
+        expect(militiaPool.faction).toBe('RBiH');
+        expect(militiaPool.fatigue).toBe(0);
 
-    assert.deepStrictEqual(
-        hydrated.political.negotiation_ledger?.map((entry: any) => entry.faction_id),
-        ['RS', 'RBiH']
-    );
-    assert.deepStrictEqual(
-        hydrated.political.supply_rights?.corridors.map((corridor: any) => `${corridor.id}:${corridor.beneficiary}`),
-        ['c1:RS', 'c2:RBiH']
-    );
-});
+        expect(hydrated.political.negotiation_ledger?.map((entry: any) => entry.faction_id)).toEqual(['RS', 'RBiH']);
+        expect(
+            hydrated.political.supply_rights?.corridors.map((corridor: any) => `${corridor.id}:${corridor.beneficiary}`)
+        ).toEqual(['c1:RS', 'c2:RBiH']);
+    });
 
-test('migrateState materializes missing nested Phase I sibling defaults at the canonical owners', () => {
-    const payload = JSON.stringify(migrationFixture({
+    it('migrateState materializes missing nested Phase I sibling defaults at the canonical owners', () => {
+        const payload = JSON.stringify(migrationFixture({
         military: {
             formations: {},
             front_segments: {},
@@ -159,67 +155,68 @@ test('migrateState materializes missing nested Phase I sibling defaults at the c
             displacement_event_log: [],
             war_displacement_initiated: { m1: 4 },
         },
-    }));
+        }));
 
-    const hydrated = deserializeState(payload);
+        const hydrated = deserializeState(payload);
 
-    assert.deepStrictEqual(hydrated.military.war_militia_strength, { m1: { RBiH: 10 } });
-    assert.deepStrictEqual(hydrated.political.war_consolidation_until, { m1: 3 });
-    assert.deepStrictEqual(hydrated.displacement.war_displacement_initiated, { m1: 4 });
-    assert.deepStrictEqual(hydrated.political.war_control_strain, {});
-    assert.deepStrictEqual(hydrated.military.war_jna, {
-        transition_begun: false,
-        withdrawal_progress: 0,
-        asset_transfer_rs: 0,
+        expect(hydrated.military.war_militia_strength).toEqual({ m1: { RBiH: 10 } });
+        expect(hydrated.political.war_consolidation_until).toEqual({ m1: 3 });
+        expect(hydrated.displacement.war_displacement_initiated).toEqual({ m1: 4 });
+        expect(hydrated.political.war_control_strain).toEqual({});
+        expect(hydrated.military.war_jna).toEqual({
+            transition_begun: false,
+            withdrawal_progress: 0,
+            asset_transfer_rs: 0,
+        });
     });
-});
 
-test('migrateState materializes missing nested Phase F sibling defaults under displacement', () => {
-    const payload = JSON.stringify(migrationFixture({
+    it('migrateState materializes missing nested Phase F sibling defaults under displacement', () => {
+        const payload = JSON.stringify(migrationFixture({
         displacement: {
             displacement_event_log: [],
             settlement_displacement: { SID_001: 0.25 },
         },
-    }));
+        }));
 
-    const hydrated = deserializeState(payload);
+        const hydrated = deserializeState(payload);
 
-    assert.deepStrictEqual(hydrated.displacement.settlement_displacement, { SID_001: 0.25 });
-    assert.deepStrictEqual(hydrated.displacement.settlement_displacement_started_turn, {});
-    assert.deepStrictEqual(hydrated.displacement.municipality_displacement, {});
-});
-
-test('migrateState rescues legacy top-level residue into nested owners before defaulting', () => {
-    const payload = JSON.stringify({
-        ...migrationFixture({
-            political: {
-                political_controllers: {},
-                negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
-                ceasefire: {},
-            },
-            displacement: {
-                displacement_event_log: [],
-            },
-        }),
-        negotiation_ledger: [
-            { id: 'n1', faction_id: 'ARBiH', turn: 1, type: 'spend', amount: 1, reason: 'x' },
-        ],
-        supply_rights: {
-            corridors: [
-                { id: 'c1', treaty_id: 't1', beneficiary: 'ARBiH', scope: { kind: 'region', region_id: 'r1' }, since_turn: 1, until_turn: null },
-            ],
-        },
-        settlement_displacement: { SID_009: 0.4 },
-        municipality_displacement: { mun9: 0.2 },
+        expect(hydrated.displacement.settlement_displacement).toEqual({ SID_001: 0.25 });
+        expect(hydrated.displacement.settlement_displacement_started_turn).toEqual({});
+        expect(hydrated.displacement.municipality_displacement).toEqual({});
     });
 
-    const hydrated = deserializeState(payload) as any;
+    it('migrateState rescues legacy top-level residue into nested owners before defaulting', () => {
+        const payload = JSON.stringify({
+            ...migrationFixture({
+                political: {
+                    political_controllers: {},
+                    negotiation_status: { ceasefire_active: false, ceasefire_since_turn: null, last_offer_turn: null },
+                    ceasefire: {},
+                },
+                displacement: {
+                    displacement_event_log: [],
+                },
+            }),
+            negotiation_ledger: [
+                { id: 'n1', faction_id: 'ARBiH', turn: 1, type: 'spend', amount: 1, reason: 'x' },
+            ],
+            supply_rights: {
+                corridors: [
+                    { id: 'c1', treaty_id: 't1', beneficiary: 'ARBiH', scope: { kind: 'region', region_id: 'r1' }, since_turn: 1, until_turn: null },
+                ],
+            },
+            settlement_displacement: { SID_009: 0.4 },
+            municipality_displacement: { mun9: 0.2 },
+        });
 
-    assert.deepStrictEqual(hydrated.political.negotiation_ledger.map((entry: any) => entry.faction_id), ['RBiH']);
-    assert.deepStrictEqual(hydrated.political.supply_rights.corridors.map((corridor: any) => corridor.beneficiary), ['RBiH']);
-    assert.deepStrictEqual(hydrated.displacement.settlement_displacement, { SID_009: 0.4 });
-    assert.deepStrictEqual(hydrated.displacement.municipality_displacement, { mun9: 0.2 });
-    assert.ok(!Object.prototype.hasOwnProperty.call(hydrated, 'negotiation_ledger'));
-    assert.ok(!Object.prototype.hasOwnProperty.call(hydrated, 'supply_rights'));
-    assert.ok(!Object.prototype.hasOwnProperty.call(hydrated, 'settlement_displacement'));
+        const hydrated = deserializeState(payload) as any;
+
+        expect(hydrated.political.negotiation_ledger.map((entry: any) => entry.faction_id)).toEqual(['RBiH']);
+        expect(hydrated.political.supply_rights.corridors.map((corridor: any) => corridor.beneficiary)).toEqual(['RBiH']);
+        expect(hydrated.displacement.settlement_displacement).toEqual({ SID_009: 0.4 });
+        expect(hydrated.displacement.municipality_displacement).toEqual({ mun9: 0.2 });
+        expect(Object.prototype.hasOwnProperty.call(hydrated, 'negotiation_ledger')).toBe(false);
+        expect(Object.prototype.hasOwnProperty.call(hydrated, 'supply_rights')).toBe(false);
+        expect(Object.prototype.hasOwnProperty.call(hydrated, 'settlement_displacement')).toBe(false);
+    });
 });
