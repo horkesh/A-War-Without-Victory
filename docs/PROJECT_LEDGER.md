@@ -1,3 +1,29 @@
+## [2026-04-15] test(repo): split command-authority proof into domain suites
+
+**Type:** Test-structure cleanup / oversized-suite decomposition
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/command_authority_lifecycle.test.ts`, `tests/command_authority_strain_signals.test.ts`, `tests/command_authority_friction_stabilization.test.ts`, `tests/command_authority_interpretation_review.test.ts`, `tests/command_authority_assessment_constraints.test.ts`, `tests/command_authority_explanation_delegation.test.ts`, `tests/command_authority.test.ts` (deleted), `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+**Tests:** `npx.cmd vitest run tests/command_authority_lifecycle.test.ts tests/command_authority_strain_signals.test.ts tests/command_authority_friction_stabilization.test.ts tests/command_authority_interpretation_review.test.ts tests/command_authority_assessment_constraints.test.ts tests/command_authority_explanation_delegation.test.ts` = 290/290 pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED - the command-authority proof still covers the same behavior, but it no longer lives in one 2.8k-line junk-drawer file.
+
+### Summary
+
+1. **The giant `command_authority.test.ts` file is gone:** its 290 assertions now live in six domain suites covering lifecycle, strain signals, friction/stabilization, interpretation/review, assessment/constraints, and explanation/delegation.
+2. **The split preserved proof families rather than inventing new abstractions:** each new file keeps the describe-block families that already belonged together, so the proof shape is still recognizable and future edits can stay local.
+3. **The remaining test-review residue is now narrower:** the roadmap no longer needs to treat `command_authority.test.ts` itself as the main oversized-suite example. The harder remaining residue is broader overlap cleanup and the next heavy suites worth decomposing.
+
+### Why this mattered
+
+The test audit was right that `command_authority.test.ts` had become a junk drawer: lifecycle math, provenance, UI label selection, friction IPC, stabilization, interpretation, trend summaries, and the later explanation-wave proofs were all stacked into one long file. That made every edit noisier than it needed to be and left one of the repo's most important proof clusters harder to review than the code it was guarding.
+
+### Proof boundaries
+
+- **Direct proof:** all 290 existing command-authority assertions pass in the new file layout.
+- **Not claimed here:** this does **not** deduplicate every repeated helper or close the whole test-review lane. It removes the largest named oversized suite and leaves the rest of the overlap work explicit.
+
+---
+
 ## [2026-04-15] test(repo): split vitest discovery into fast and scenario slices
 
 **Type:** Test-harness classification cleanup / repo-truth hardening
