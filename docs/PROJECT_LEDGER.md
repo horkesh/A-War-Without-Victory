@@ -1,3 +1,42 @@
+## [2026-04-15] fix(ui): make PresidentialAttentionPanel sole executor for event decisions
+
+**Type:** Ownership seam closure (execution-surface consolidation)
+**Commit:** 6b868326
+**Files:** `App.tsx` (routing-only event_modal branch, no IPC), `EventModal.tsx` (removed onDecisionResponse prop + decision-response branch), `army_hq_presidential_review_coherence.test.ts` (rewrote Cluster C ownership assertions), `ui_shell_navigation.test.ts` (replaced obsolete routing test with behavioral proof)
+**Tests:** 47/47 across the three targeted suites.
+**Status:** VERIFIED — tsc clean, targeted vitest 47/47, desktop:map:build clean (6.50s).
+
+### Summary
+Closed the last event-decision ownership seam. Presidential event decisions previously had TWO execution surfaces calling `ipc.respondToEventDecision`: PresidentialAttentionPanel (Army HQ briefing) AND App.tsx EventModal. This packet makes PresidentialAttentionPanel the sole executor and demotes EventModal to non-decision display only.
+
+**Canonical execution owner:**
+- `PresidentialAttentionPanel` (Army HQ briefing) — continues to call `ipc.respondToEventDecision` for presidential event decisions, alongside existing `ipc.acknowledgeOfficerEvent` and `ipc.acceptOfficerReplacement` for officer families. One surface, three presidential families.
+
+**Routing-only surface:**
+- `App.tsx` inbox `onAction` handler — the `'event_modal'` branch now calls `openArmyHQTab(gs, 'briefing')`, landing the president at PresidentialAttentionPanel. Removed from App.tsx: `pendingEventDecisions` read, `EventDisplayData` decision push into `eventQueue`, `resolveEventQueueIndex` usage, `EventModal.onDecisionResponse` wiring, and the entire `ipc.respondToEventDecision` call site. App.tsx still owns inbox navigation routing and modal mounting.
+
+**Non-owning surface:**
+- `EventModal` — retains its role for non-decision fired-event acknowledgement flash (auto-dismiss). Removed: `onDecisionResponse` prop, the `event.isDecision && responseOptions && onDecisionResponse` render branch, "Presidential Decision Required" header. File-level doc now states the ownership boundary explicitly.
+
+**Identity routing preserved:** Inbox still emits `'event_modal'` action with the item's identity `itemId`; the routing function signature stays `(action, itemId) => ...` so per-item identity wiring remains intact even though current routing does not consume the itemId.
+
+### Proof added / updated
+
+| Assertion | Location | Kind |
+|---|---|---|
+| Panel is sole executor for presidential decisions + officer acknowledgement + replacement | `army_hq_presidential_review_coherence.test.ts` | Source assertion |
+| App.tsx does not call `respondToEventDecision` | `army_hq_presidential_review_coherence.test.ts`, `ui_shell_navigation.test.ts` | Source assertion |
+| EventModal has no `onDecisionResponse` prop | `army_hq_presidential_review_coherence.test.ts` | Source assertion |
+| Inbox `event_modal` action routes to `openArmyHQTab(gs, 'briefing')` | `army_hq_presidential_review_coherence.test.ts`, `ui_shell_navigation.test.ts` | Source assertion |
+| `openArmyHQTab(state, 'briefing')` produces correct store-setter sequence | `ui_shell_navigation.test.ts` | Direct behavioral proof |
+
+### Remaining proof boundary
+What is proven by this packet: (1) at source-assertion level, PresidentialAttentionPanel is the only file calling `ipc.respondToEventDecision` and App.tsx no longer calls it; (2) at behavioral level, the routing helper `openArmyHQTab(state, 'briefing')` produces the canonical store-setter sequence that lands the president on the panel.
+
+What is source-verified only: the inbox UI click → React state handler → `openArmyHQTab` call path inside App.tsx is not exercised by a full React render test; it is verified by direct source assertion of the branch body. The behavioral panel-execution proof (that clicking a decision button inside the panel actually invokes `ipc.respondToEventDecision`) remains source-verified through `handleDecisionResponse` and its button's `onClick`, not exercised by a live render.
+
+EventModal is not re-proven in this packet; its non-decision acknowledgement path is covered by its existing source and interaction coverage elsewhere.
+
 ## [2026-04-15] feat(probe): extend packaged runtime probe with endgame reachability proof
 
 **Type:** Packaged runtime proof (endgame reachability)
