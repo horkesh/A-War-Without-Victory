@@ -124,6 +124,27 @@ Early-war steps: `evaluate-events` (first), `militia-emergence`, `pool-populatio
 
 After combat resolution: `generate-army-reserve-requests` (scans all non-exempt corps; generates loan requests for offensive_support/defensive_gap/exploitation; bot AI auto-assigns bot-faction requests via `evaluateArmyReserveAssignments`; player-faction requests persist in `state.military.pending_reserve_requests` for UI; `army_reserve_system.ts`), `tick-elite-loans` (replaces old `elite-loan-lifecycle`; force-recalls on ≥30% casualties/morale<35/cohesion<25/permanent-degradation; auto-joins target corps's active operation each turn; voluntary recall after op ends + threat subsides + ELITE_LOAN_MIN_DURATION met; updates EliteBrigadeTracker episodes; battle counters synced in real-time by `recordBrigadeEngagement`; `army_reserve_system.ts`), `generate-war-stories` (per-turn narrative generation from brigade_history → FormationState.war_story; `war_stories.ts`), `compute-combat-summaries` (aggregates subordinate brigade_history tallies onto FormationState.combat_summary for corps/army_hq; `combat_summary_aggregator.ts`), `wia-trickleback`. After `alliance-update`, RBiH–HRHB milestone checks run: `ceasefire-check`, `washington-check` (same precondition logic as early-war). Brigade location is location_osid only; war entry uses backfillFormationLocationOsid. Combat code in `src/sim/combat/`; early-war code in `src/sim/early_war/`. See War_Specification_v0_6_0.md §5 and AOR_PHASEOUT_OSID_ZOC_RECONCILIATION.md. Game version: see `docs/20_engineering/VERSIONING.md`.
 
+## Save/Load/Migration Contract (Canonical Owners)
+
+Save, load, and migration have one canonical owner per seam. Nothing else in the repo is co-equal with them.
+
+- **Serializer:** `src/state/serializeGameState.ts` — deterministic JSON with an explicit 11-key top-level allow-list (`GAMESTATE_TOP_LEVEL_KEYS`, lines 17–29). Wrappers like `{ state, phasesExecuted }` and derived/transient fields are rejected. Any new top-level `GameState` field must be added to this allow-list before it will round-trip. Enforced by `tests/serialize_gamestate_rejects_wrappers.test.ts` and `tests/serialize_gamestate_no_derived_fields.test.ts`.
+- **Deserializer:** `src/state/serialize.ts` — `deserializeState()` at line 29: `JSON.parse` → `applyMigrations()` → `validateState()`. Single entry for turning a save string into a validated `GameState`.
+- **Migration registry:** `src/state/save_migration.ts` — `registerMigration()` / `applyMigrations()` at lines 32–51. Migrations are applied in ascending version order and only to states older than the migration's target version. Current registered migrations: v1 (HRHB enclaves), v2 (`active_operation` → `active_operations`).
+- **Desktop load-path (native/Electron):** `src/desktop/electron-main.cjs` — IPC handlers `load-scenario-dialog` (line 1427), `start-new-campaign` (line 1441), `load-state-dialog` (line 1461); error classification via `classifyLoadError()` at line 68 covers 10 categories, proven by `tests/ui/desktop_load_error_classification.test.ts`.
+- **Browser load-path + post-load UI reset owner:** `src/ui/map/store/gameStore.ts` — `loadSave()` is the canonical post-load UI reset point; it resets 30+ selection/modal/order fields so a fresh save cannot inherit stale UI context. Proven by `tests/ui/gamestore_load_reset.test.ts` (11 assertions).
+- **Adapter after deserialize:** `src/ui/map/data/GameStateAdapter.ts` — parity is proven for 6 owned fields; 6 other fields are intentionally recomputed and that recomputation is documented in the project ledger. See `tests/adapter_field_completeness.test.ts` (18 field assertions) and `tests/ui_adapter_boundary.test.ts` (adapter discipline, 31 vitest + 18 node:test).
+
+Intermediaries (not load entrypoints, do not add new callers): `src/desktop/desktop_sim.ts`, `src/ui/map/desktop/useIPC.ts`.
+
+Direct proof that exists today: roundtrip idempotency on real saves (`tests/save_load_real_roundtrip.test.ts`), adapter-after-deserialize field completeness and boundary tests, post-load UI reset, desktop load-error classification, and serializer allow-list enforcement. Source-verified only (no runtime binding yet): the canonical-owner prose in this section is not guarded by a grep-test; doc drift is possible if a migration registry moves or the allow-list is renamed.
+
+### Replay (future)
+
+Replay code does **not** exist in the repo today. There is no `*replay*.ts` file under `src/`. Replay is Phase 4 of `docs/plans/2026-03-31-v08to09-save-load-and-replay-hardening-plan.md` and is explicitly deferred to a future lane. Future readers should not chase a replay owner in code until that lane opens.
+
+When changing any of the owners above, update the allow-list or register a migration before landing the change; see the pre-commit doc checklist at the end of this file.
+
 ## Demoted / Legacy Harnesses (do not route live behavior through these)
 These exist for smoke and internal checks only. They are not co-equal with the canonical war/peace pipelines named above. Do not add new callers.
 - `src/index.ts` — minimal deterministic smoke entrypoint. Runs a one-shot `executeTurn()` and prints serialized state. Not the game entrypoint.

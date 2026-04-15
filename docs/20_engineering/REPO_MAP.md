@@ -51,6 +51,16 @@ Populate this section from the discovery checklist.
   - AoR init (browser-safe, legacy): `src/scenario/aor_init.ts` — `populateFactionAoRFromControl`, `ensureFormationHomeMunsInFactionAoR`. Legacy; AoR fully removed from pipeline.
   - Run-summary reporting split (2026-03-06): `src/scenario/scenario_runner.ts`, `src/scenario/scenario_reporting.ts`, and `src/scenario/scenario_end_report.ts` own `behavioral_health`, `historical_fit`, benchmark contract validation, and override inventory.
 
+### Save/Load/Migration Pipeline
+- **Canonical owners (full contract in [PIPELINE_ENTRYPOINTS.md](PIPELINE_ENTRYPOINTS.md) §Save/Load/Migration Contract):**
+  - Serializer: `src/state/serializeGameState.ts` — 11-key top-level allow-list (`GAMESTATE_TOP_LEVEL_KEYS`).
+  - Deserializer: `src/state/serialize.ts` — `deserializeState()`: parse → `applyMigrations()` → validate.
+  - Migration registry: `src/state/save_migration.ts` — `registerMigration()` / `applyMigrations()`.
+  - Desktop load-path (Electron): `src/desktop/electron-main.cjs` — `load-scenario-dialog`, `start-new-campaign`, `load-state-dialog`; error classification via `classifyLoadError()`.
+  - Browser load-path + post-load UI reset owner: `src/ui/map/store/gameStore.ts` — `loadSave()`.
+  - Adapter after deserialize: `src/ui/map/data/GameStateAdapter.ts`.
+- **Replay:** No replay code exists in the repo today. Deferred to a future lane — see `docs/plans/2026-03-31-v08to09-save-load-and-replay-hardening-plan.md` Phase 4. Do not search `src/` for a replay owner until that lane opens.
+
 ### Map Build Pipeline
 - Canon reference: `docs/20_engineering/MAP_BUILD_SYSTEM.md`
 - **A1 tactical base map (STABLE):** `docs/20_engineering/specs/map/A1_BASE_MAP_REFERENCE.md` — canonical substrate for warroom and tactical map
