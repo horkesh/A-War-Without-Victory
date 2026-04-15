@@ -18,6 +18,7 @@ const {
   getPendingProposalReviewsForPlayer,
   resolvePendingProposalAccess,
 } = require('./autonomy_ipc_contract.cjs');
+const { computeCorpsCommandStrain } = require('./command_strain.cjs');
 const RUNTIME_PROBE_MODE = process.env.AWWV_DESKTOP_RUNTIME_PROBE === '1';
 
 /** Project root (dev) or resources root (packaged). Used for data paths and desktop sim. */
@@ -1737,35 +1738,11 @@ app.whenReady().then(() => {
       const state = sim.deserializeState(currentGameStateJson);
 
       // Wave 4 stance gate: reject offensive stance when command is compromised (strain >= 6).
-      // Inline strain computation (mirrors command_strain.ts).
+      // Strain computation owner: src/desktop/command_strain.cjs.
       if (stance === 'offensive') {
-        const FORCE_LAUNCH_STRAIN = 3;
-        const FRICTION_EVENT_STRAIN = 2;
-        const COMPROMISED_THRESHOLD = 6;
         const currentTurn = state.meta?.turn ?? 0;
-        let totalStrain = 0;
-        const corpsCmd = state.corps_command?.[corpsId];
-        if (corpsCmd) {
-          const activeOps = [...(corpsCmd.active_operations ?? [])].sort((a, b) => a.name.localeCompare(b.name));
-          for (const op of activeOps) {
-            if (op.was_force_launched !== true) continue;
-            const turnAge = Math.max(0, currentTurn - (op.started_turn ?? currentTurn));
-            totalStrain += Math.max(0, FORCE_LAUNCH_STRAIN - turnAge);
-          }
-        }
-        const frictionEvents = state.military?.friction_events ?? [];
-        const namedOfficers = state.military?.named_officers ?? {};
-        for (const officerId of Object.keys(namedOfficers).sort()) {
-          const os = namedOfficers[officerId];
-          if (!os || os.status !== 'active' || os.assigned_corps_id !== corpsId) continue;
-          for (const event of frictionEvents) {
-            if (event.officer_id === officerId && !event.resolved) {
-              const turnAge = Math.max(0, currentTurn - event.turn);
-              totalStrain += Math.max(0, FRICTION_EVENT_STRAIN - turnAge);
-            }
-          }
-        }
-        if (Math.max(0, Math.round(totalStrain)) >= COMPROMISED_THRESHOLD) {
+        const { isCompromised } = computeCorpsCommandStrain(state, corpsId, currentTurn);
+        if (isCompromised) {
           return { ok: false, reason: 'compromised', error: 'Cannot set aggressive stance — command is compromised. Stabilize the command relationship first.' };
         }
       }
@@ -2082,37 +2059,12 @@ app.whenReady().then(() => {
       const state = sim.deserializeState(currentGameStateJson);
       const currentTurn = state.meta?.turn ?? 0;
 
-      // ── Inline strain computation (mirrors command_strain.ts, CJS context) ─
-      const FORCE_LAUNCH_STRAIN = 3;
-      const FRICTION_EVENT_STRAIN = 2;
-      const DECAY_PER_TURN = 1;
-      const COMPROMISED_THRESHOLD = 6;
-      let totalStrain = 0;
+      // ── Strain computation owner: src/desktop/command_strain.cjs ────────
+      const { totalStrain: strain, isCompromised } = computeCorpsCommandStrain(state, corpsId, currentTurn);
       const corpsCmd = state.corps_command?.[corpsId];
-      if (corpsCmd) {
-        const activeOps = [...(corpsCmd.active_operations ?? [])].sort((a, b) => a.name.localeCompare(b.name));
-        for (const op of activeOps) {
-          if (op.was_force_launched !== true) continue;
-          const launchTurn = op.started_turn ?? currentTurn;
-          const turnAge = Math.max(0, currentTurn - launchTurn);
-          totalStrain += Math.max(0, FORCE_LAUNCH_STRAIN - turnAge * DECAY_PER_TURN);
-        }
-      }
-      const frictionEvents = state.military?.friction_events ?? [];
       const namedOfficers = state.military?.named_officers ?? {};
+      const frictionEvents = state.military?.friction_events ?? [];
       const officerIds = Object.keys(namedOfficers).sort();
-      for (const officerId of officerIds) {
-        const os = namedOfficers[officerId];
-        if (!os || os.status !== 'active' || os.assigned_corps_id !== corpsId) continue;
-        const officerEvents = frictionEvents
-          .filter(e => e.officer_id === officerId && !e.resolved)
-          .sort((a, b) => a.turn - b.turn);
-        for (const event of officerEvents) {
-          const turnAge = Math.max(0, currentTurn - event.turn);
-          totalStrain += Math.max(0, FRICTION_EVENT_STRAIN - turnAge * DECAY_PER_TURN);
-        }
-      }
-      const strain = Math.max(0, Math.round(totalStrain));
 
       // Require at least some strain to stabilize
       if (strain === 0) {
@@ -2126,7 +2078,6 @@ app.whenReady().then(() => {
       }
 
       // ── CA cost ──────────────────────────────────────────────────────────
-      const isCompromised = strain >= COMPROMISED_THRESHOLD;
       const STABILIZE_COST = isCompromised ? 15 : 10;
       const auth = state.military.command_authority;
       if (auth) {
