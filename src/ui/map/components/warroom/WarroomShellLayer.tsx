@@ -5,10 +5,9 @@
  * overlays hotspot regions from the regions JSON as absolutely-positioned
  * React elements. Activated by `?view=warroom` in the React app URL.
  *
- * TRANSITIONAL: warroom.ts canvas rendering is still the active runtime path.
- * This component runs in parallel only when `?view=warroom` is present.
- * Runtime wiring (changing the Electron entry point or warroom.ts iframe URL)
- * is the next slice.
+ * Runtime owner for the loaded-game Warroom room shell when warroom.ts loads
+ * the tactical iframe with `?view=warroom`. warroom.ts still owns the outer
+ * host window, iframe lifecycle, and legacy desk fallback for non-shell scenes.
  *
  * Canonical owner: src/ui/map/components/warroom/WarroomShellLayer.tsx
  */

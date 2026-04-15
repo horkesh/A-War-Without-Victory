@@ -264,7 +264,7 @@ class WarroomApp {
                 if (!isViewingTacticalMap && !isViewingWarPlanningMap) {
                     // React shell owns room navigation — load iframe with warroom view instead of
                     // showing the legacy canvas desk. The iframe stays loaded for the session.
-                    void this.showTacticalMapScene('warroom');
+                    this.showLoadedGameShellScene();
                 }
             }, 0);
         } catch (error) {
@@ -273,6 +273,16 @@ class WarroomApp {
     }
 
     // ── 2-step campaign flow: Main Menu → Side Picker → Campaign ──
+
+    /** Loaded games should enter the React warroom shell instead of the legacy desk scene. */
+    private showLoadedGameShellScene(): void {
+        if (this.gameState) {
+            // React shell owns room navigation; keep the iframe loaded for the session.
+            void this.showTacticalMapScene('warroom');
+            return;
+        }
+        this.showWarroomScene();
+    }
 
     /** Show a specific overlay screen and hide others. */
     private showScreen(screenId: 'main-menu' | 'side-picker' | 'none'): void {
@@ -290,7 +300,7 @@ class WarroomApp {
             if (screenId === 'main-menu') warroomScene.classList.add('warroom-scene-hidden');
             else if (screenId === 'none') {
                 warroomScene.classList.remove('warroom-scene-hidden');
-                this.showWarroomScene();
+                this.showLoadedGameShellScene();
             }
         }
     }

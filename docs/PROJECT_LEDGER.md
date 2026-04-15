@@ -1,3 +1,24 @@
+## [2026-04-16] fix(ui): keep loaded Warroom entry on the React shell path
+
+**Type:** Warroom host-boundary truth closure
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `src/ui/warroom/warroom.ts`, `src/ui/map/components/warroom/WarroomShellLayer.tsx`, `tests/warroom_host_shell_truth.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+**Tests:** `npx.cmd vitest run tests/warroom_host_shell_truth.test.ts tests/warroom_shell_layer.test.ts tests/warroom_smoke.test.ts tests/player_faction_shell_boundary_truth.test.ts` pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean; `git diff --check` clean.
+**Status:** VERIFIED after packet verification. The host-side `showScreen('none')` path no longer drops loaded games through the legacy Warroom desk; both post-load entry and menu re-entry now converge on the React Warroom shell when a game state exists, while the desk scene remains only as the no-game fallback.
+
+### Summary
+
+1. **Loaded-game entry now has one host owner:** `warroom.ts` now routes both `applyGameStateFromJson(...)` and `showScreen('none')` through `showLoadedGameShellScene()`, which prefers `showTacticalMapScene('warroom')` whenever `gameState` exists and only falls back to `showWarroomScene()` when no game is loaded.
+2. **The React room owner comment is now honest:** `WarroomShellLayer.tsx` no longer claims runtime wiring is still a future slice. Its header now records the current split correctly: the React layer owns the loaded-game room shell, while `warroom.ts` still owns the outer host window, iframe lifecycle, and legacy desk fallback for non-shell scenes.
+3. **A source-contract test now guards the boundary:** `tests/warroom_host_shell_truth.test.ts` asserts that loaded-game host entry prefers the React shell, that `showScreen('none')` no longer calls `showWarroomScene()` directly for that path, and that the `WarroomShellLayer` header stays aligned with the live runtime story.
+
+### Why this mattered
+
+This was the last meaningful Warroom host ambiguity worth spending a packet on. The repo already had the React Warroom shell wired for loaded games, but one surviving host branch still treated "enter the warroom with a loaded game" as if the legacy desk were the primary owner. That kind of split is how shell regressions come back. Now the loaded-game entry story is singular again.
+
+**Source-verified only:** This packet proves the host routing by direct source contract, not by a live Electron room-navigation interaction test. The boundary is still honest because `warroom.ts` is not exported for component-level mounting, and the source assertions target the exact host branch that used to diverge.
+
 ## [2026-04-16] fix(sim): make peace-plan rejection reduce patron support
 
 **Type:** Consequence / negotiation truth closure
