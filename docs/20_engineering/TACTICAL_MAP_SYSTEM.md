@@ -413,7 +413,7 @@ There is no front between RBiH and HRHB until they are at war. The map does not 
 
 ### 10.4 Front assignment and 2D/3D single source
 
-**Single source of truth:** 2D tactical map and 3D operational map both consume the **same** game state. All load paths (file picker, desktop IPC `game-state-updated`, advance turn, replay) supply the same raw `GameState` to the map layer. The 2D map uses `GameStateAdapter.parseGameState()` → `LoadedGameState`; the 3D map receives state via `push3DState` → `__awwv3dApplySave` → `toViewerSave()` (ViewerStateAdapter). Both adapters read from the same fields when given the same state.
+**Single source of truth:** 2D tactical map and 3D operational map both consume the **same** game state. All live campaign load paths (file picker, desktop IPC `game-state-updated`, advance turn) supply the same raw `GameState` to the map layer. The 2D map uses `GameStateAdapter.parseGameState()` → `LoadedGameState`; the 3D map receives state via `push3DState` → `__awwv3dApplySave` → `toViewerSave()` (ViewerStateAdapter). Both adapters read from the same fields when given the same state. Harness replay artifacts remain offline analysis/video inputs, not a live canonical map load path.
 
 **Front-related state:** Persisted in `GameState` and used by both views, but not all persisted front-era metadata remains a live player-shell concept:
 

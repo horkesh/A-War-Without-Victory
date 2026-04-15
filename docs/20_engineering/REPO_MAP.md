@@ -59,7 +59,7 @@ Populate this section from the discovery checklist.
   - Desktop load-path (Electron): `src/desktop/electron-main.cjs` — `load-scenario-dialog`, `start-new-campaign`, `load-state-dialog`; error classification via `classifyLoadError()`.
   - Browser load-path + post-load UI reset owner: `src/ui/map/store/gameStore.ts` — `loadSave()`.
   - Adapter after deserialize: `src/ui/map/data/GameStateAdapter.ts`.
-- **Replay:** No replay code exists in the repo today. Deferred to a future lane — see `docs/plans/2026-03-31-v08to09-save-load-and-replay-hardening-plan.md` Phase 4. Do not search `src/` for a replay owner until that lane opens.
+- **Replay:** No live replay consumer/playback owner exists in the canonical desktop/map UI today. Harness-side replay artifacts do exist (`src/scenario/scenario_runner.ts` emits `replay.jsonl` / `replay_timeline.json`, and AI commander decision-log code uses replay in the determinism sense), but product replay loading/scrubbing is still deferred to a future lane — see `docs/plans/2026-03-31-v08to09-save-load-and-replay-hardening-plan.md` Phase 4.
 
 ### Map Build Pipeline
 - Canon reference: `docs/20_engineering/MAP_BUILD_SYSTEM.md`

@@ -141,7 +141,15 @@ Direct proof that exists today: roundtrip idempotency on real saves (`tests/save
 
 ### Replay (future)
 
-Replay code does **not** exist in the repo today. There is no `*replay*.ts` file under `src/`. Replay is Phase 4 of `docs/plans/2026-03-31-v08to09-save-load-and-replay-hardening-plan.md` and is explicitly deferred to a future lane. Future readers should not chase a replay owner in code until that lane opens.
+There is still **no live replay consumer/playback owner** in the canonical desktop/map product surface today. The desktop GUI does not expose replay loading or replay scrubbing, and no canonical IPC / renderer owner exists for replay playback.
+
+Harness-side replay artifacts **do** exist:
+
+- `src/scenario/scenario_runner.ts` can emit `replay.jsonl` and `replay_timeline.json` for offline analysis/video workflows.
+- AI commander decision-log code uses "replay" in the determinism sense (`src/sim/ai_commander/decision_log.ts`, related types).
+- Archived legacy map replay code still exists under `src/_archived/`.
+
+Replay remains Phase 4 of `docs/plans/2026-03-31-v08to09-save-load-and-replay-hardening-plan.md` because the missing piece is the live product consumer/playback lane, not the total absence of replay-related artifacts or terminology anywhere in the repo.
 
 When changing any of the owners above, update the allow-list or register a migration before landing the change; see the pre-commit doc checklist at the end of this file.
 

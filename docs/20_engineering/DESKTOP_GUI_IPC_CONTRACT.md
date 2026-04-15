@@ -208,7 +208,7 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 - `query-battle-events` (invoke)
   - Payload: none
   - Returns: `{ ok: boolean, error?: string, turn?: number, events?: Array<{ turn, settlement_id, from, to, mechanism, mun_id }> }`
-  - Behavior: returns normalized and stable-sorted battle/control events for replay markers. Read-only.
+  - Behavior: returns normalized and stable-sorted battle/control events for current-turn marker surfaces. Read-only. This is not a replay playback or replay-loader contract.
 
 - `game-state-updated` (event)
   - Payload: `stateJson: string`
@@ -234,14 +234,6 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
   - Payload: `{ brigadeId: string, equipmentClass: string }`
   - Returns: `{ ok: boolean, error?: string, stateJson?: string, newFormationId?: string }`
   - Behavior: applies one player recruitment (recruitBrigade + applyRecruitment); on success main updates current state and sends via `game-state-updated`; returns updated stateJson and newFormationId for placement feedback.
-
-- `load-replay-dialog` (invoke)
-  - Returns: `ReplayData | null`
-  - Behavior: opens file picker for `replay_timeline.json`, reads and returns content.
-
-- `get-last-replay` (invoke)
-  - Returns: `ReplayData | null`
-  - Behavior: reads the last opened replay file from `userData`.
 
 - `get-settings` (invoke)
   - Returns: `ProjectSettings`

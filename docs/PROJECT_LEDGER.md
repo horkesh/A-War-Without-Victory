@@ -1,3 +1,23 @@
+## [2026-04-16] docs(test+eng): make replay surface truth explicit and guard it
+
+**Type:** Engineering contract truth / replay-surface honesty
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md`, `docs/20_engineering/PIPELINE_ENTRYPOINTS.md`, `docs/20_engineering/REPO_MAP.md`, `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`, `tests/replay_surface_truth.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+**Tests:** `npx.cmd vitest run tests/replay_surface_truth.test.ts` pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED after packet verification. The repo now says the narrower true thing: harness-side replay artifacts and replay-determinism code exist, but there is still no live replay consumer/playback owner in the canonical desktop/map product surface, and the desktop IPC contract no longer advertises nonexistent replay-loader endpoints.
+
+### Summary
+
+1. **Stale replay IPC claims were removed:** `DESKTOP_GUI_IPC_CONTRACT.md` no longer advertises `load-replay-dialog` or `get-last-replay`, because those handlers do not exist in `electron-main.cjs`, `preload.cjs`, or `useIPC.ts`.
+2. **The current live desktop seam is named correctly:** `query-battle-events` is now documented as a current-turn marker feed, not as a replay playback contract.
+3. **Replay wording is now honest instead of absolute:** `PIPELINE_ENTRYPOINTS.md` and `REPO_MAP.md` no longer say "no replay code exists in the repo today." They now distinguish between harness-side replay artifacts / determinism logs that do exist and the live replay consumer/playback lane that does not.
+4. **A source/doc guard test now locks the boundary:** `tests/replay_surface_truth.test.ts` proves the replay loader IPC seam is absent, harness replay artifacts still exist, and the engineering docs stay aligned on that narrower truth.
+
+### Why this mattered
+
+The old wording had started to eat itself. One set of docs already said replay was harness-only and not a live desktop surface; another still advertised nonexistent replay loader IPC; and a third overcorrected by claiming replay code did not exist anywhere in the repo. All three could not be true at once. This packet closes that confusion without inventing product work: harness replay outputs remain real, AI replay-determinism logs remain real, archived replay UI history remains archived, and the missing piece is the one that actually matters before v0.9 closes - a live replay consumer/playback owner.
+
 ## [2026-04-16] fix(state+test): close recruited-state gap and retire final node-test residue
 
 **Type:** State-truth repair / test-suite unification / baseline refresh
