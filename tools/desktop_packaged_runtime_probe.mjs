@@ -181,4 +181,36 @@ if (!operationalRendererReactionCheck) {
   );
 }
 
+const endgameCheck = manifest?.endgame_checks;
+if (!endgameCheck) {
+  throw new Error(
+    `Packaged desktop runtime probe manifest is missing the endgame reachability proof.\n${JSON.stringify(manifest, null, 2)}`,
+  );
+}
+if (endgameCheck.surface_type !== 'verdict' && endgameCheck.surface_type !== 'fallback') {
+  throw new Error(
+    `Packaged desktop runtime probe endgame surface type is unexpected: ${endgameCheck.surface_type}.\n${JSON.stringify(manifest, null, 2)}`,
+  );
+}
+if (!endgameCheck.has_faction_tabs) {
+  throw new Error(
+    `Packaged desktop runtime probe endgame surface is missing faction tabs (ARBiH/VRS/HVO).\n${JSON.stringify(manifest, null, 2)}`,
+  );
+}
+if (!endgameCheck.has_awwv_title) {
+  throw new Error(
+    `Packaged desktop runtime probe endgame surface is missing the "A War Without Victory" title.\n${JSON.stringify(manifest, null, 2)}`,
+  );
+}
+if (!endgameCheck.state_push?.game_over_state_pushed) {
+  throw new Error(
+    `Packaged desktop runtime probe endgame did not confirm game-over state was pushed.\n${JSON.stringify(manifest, null, 2)}`,
+  );
+}
+if (endgameCheck.state_push?.route_mode !== 'operational') {
+  throw new Error(
+    `Packaged desktop runtime probe endgame state push reported unexpected route mode: ${endgameCheck.state_push?.route_mode}.\n${JSON.stringify(manifest, null, 2)}`,
+  );
+}
+
 process.stdout.write(`${JSON.stringify(manifest, null, 2)}\n`);

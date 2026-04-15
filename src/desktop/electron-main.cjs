@@ -808,6 +808,92 @@ async function runPackagedRuntimeProbe() {
   sandboxProbeWindow.destroy();
   tacticalMapWindow = null;
 
+  // ── Endgame reachability proof ─────────────────────────────────────────
+  // Mutate the raw state to set game_over, re-serialize, push to a fresh
+  // tactical map window, and verify VerdictScreen DOM elements appear in
+  // the packaged renderer.
+  state.meta.game_over = true;
+  state.meta.outcome = 'timeout_stalemate';
+  const endgameStateJson = sim.serializeState(state);
+  currentGameStateJson = endgameStateJson;
+
+  const { win: endgameProbeWindow, targetUrl: endgameMapUrl } = createTacticalMapWindow({
+    mode: 'operational',
+    show: false,
+  });
+  await waitForWindowLoad(
+    endgameProbeWindow,
+    endgameMapUrl,
+    'packaged endgame tactical map window',
+  );
+  await waitForDesktopSessionReady(endgameProbeWindow, 'packaged endgame tactical map window');
+
+  tacticalMapWindow = endgameProbeWindow;
+  await armGameStatePushProbe(endgameProbeWindow);
+  sendGameStateToRenderer(endgameStateJson);
+  const endgamePush = await collectGameStatePushProbe(
+    endgameProbeWindow,
+    'operational',
+    'packaged endgame tactical map window',
+  );
+
+  // Poll DOM for VerdictScreen content after React processes the endgame state
+  const endgameDomCheck = await endgameProbeWindow.webContents.executeJavaScript(
+    `
+      (() => {
+        return new Promise((resolve) => {
+          let attemptsRemaining = 200;
+          const tick = () => {
+            const surface = document.querySelector('[data-awwv-endgame-surface]');
+            if (surface) {
+              const body = document.body.textContent || '';
+              resolve({
+                surface_type: surface.dataset.awwvEndgameSurface || null,
+                outcome_label: surface.dataset.awwvEndgameOutcome || null,
+                has_pyrrhic_score: body.includes('Pyrrhic Score'),
+                has_war_cost: body.includes('War Cost'),
+                has_faction_tabs: body.includes('ARBiH') && body.includes('VRS') && body.includes('HVO'),
+                has_awwv_title: body.includes('A War Without Victory'),
+                timed_out: false,
+              });
+              return;
+            }
+            attemptsRemaining -= 1;
+            if (attemptsRemaining <= 0) {
+              resolve({
+                surface_type: null,
+                outcome_label: null,
+                has_pyrrhic_score: false,
+                has_war_cost: false,
+                has_faction_tabs: false,
+                has_awwv_title: false,
+                timed_out: true,
+              });
+              return;
+            }
+            setTimeout(tick, 25);
+          };
+          tick();
+        });
+      })();
+    `,
+    true,
+  );
+
+  if (!endgameDomCheck || endgameDomCheck.timed_out) {
+    throw new Error(
+      'packaged endgame probe timed out waiting for VerdictScreen DOM surface'
+    );
+  }
+  if (endgameDomCheck.surface_type !== 'verdict' && endgameDomCheck.surface_type !== 'fallback') {
+    throw new Error(
+      `packaged endgame probe found unexpected surface type: ${endgameDomCheck.surface_type}`
+    );
+  }
+
+  endgameProbeWindow.destroy();
+  tacticalMapWindow = null;
+
   const manifest = {
     probe: 'awwv_desktop_runtime_probe',
     mode: 'packaged',
@@ -888,6 +974,19 @@ async function runPackagedRuntimeProbe() {
         turn_report_updated: operationalRendererReaction.turn_report_updated,
       },
     ],
+    endgame_checks: {
+      surface_type: endgameDomCheck.surface_type,
+      outcome_label: endgameDomCheck.outcome_label,
+      has_pyrrhic_score: endgameDomCheck.has_pyrrhic_score,
+      has_war_cost: endgameDomCheck.has_war_cost,
+      has_faction_tabs: endgameDomCheck.has_faction_tabs,
+      has_awwv_title: endgameDomCheck.has_awwv_title,
+      state_push: {
+        player_faction: endgamePush.player_faction,
+        route_mode: endgamePush.route_mode,
+        game_over_state_pushed: true,
+      },
+    },
   };
 
   fs.writeFileSync(getRuntimeProbeManifestPath(), `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');

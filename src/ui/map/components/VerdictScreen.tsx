@@ -208,7 +208,9 @@ export function VerdictScreen() {
     const currentVerdict = verdict.faction_verdicts[selectedFaction];
 
     return (
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/90 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/90 backdrop-blur-sm"
+             data-awwv-endgame-surface="verdict"
+             data-awwv-endgame-outcome={verdict.outcome_label}>
             <div className="w-[780px] max-h-[92vh] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden">
                 {/* Header */}
                 <div className="px-8 py-5 border-b border-panel-border bg-panel-card/50 text-center">
@@ -563,7 +565,9 @@ function FallbackGameOver({
         : { title: 'Game Over', subtitle: '' };
 
     return (
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+             data-awwv-endgame-surface="fallback"
+             data-awwv-endgame-outcome={display.title}>
             <div className="w-[560px] max-h-[85vh] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden">
                 <div className="px-8 py-6 border-b border-panel-border bg-panel-card/50 text-center">
                     <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-accent-gold/60 mb-2">

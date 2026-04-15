@@ -218,6 +218,51 @@ test('electron main exposes a packaged runtime probe mode instead of a second la
         /tacticalWindowInteraction\.location_path[\s\S]*tacticalWindowInteraction\.map_server_url[\s\S]*tacticalWindowInteraction\.player_faction[\s\S]*tacticalWindowInteraction\.route_mode[\s\S]*tacticalWindowInteraction\.turn/s,
         'packaged runtime probe should record deterministic operational interaction details',
     );
+    assert.match(
+        source,
+        /state\.meta\.game_over = true/,
+        'packaged runtime probe should mutate the raw state to set game_over for endgame proof',
+    );
+    assert.match(
+        source,
+        /state\.meta\.outcome = 'timeout_stalemate'/,
+        'packaged runtime probe should set a deterministic outcome type for endgame proof',
+    );
+    assert.match(
+        source,
+        /endgameStateJson/,
+        'packaged runtime probe should serialize a distinct endgame state payload',
+    );
+    assert.match(
+        source,
+        /packaged endgame tactical map window/,
+        'packaged runtime probe should create a fresh tactical-map window for endgame proof',
+    );
+    assert.match(
+        source,
+        /data-awwv-endgame-surface/,
+        'packaged endgame probe should poll for the VerdictScreen data attribute',
+    );
+    assert.match(
+        source,
+        /endgame_checks:/,
+        'packaged runtime probe manifest should record endgame reachability proof',
+    );
+    assert.match(
+        source,
+        /surface_type:[\s\S]*outcome_label:[\s\S]*has_pyrrhic_score:[\s\S]*has_war_cost:[\s\S]*has_faction_tabs:[\s\S]*has_awwv_title:/s,
+        'packaged runtime probe endgame checks should record verdict surface DOM observations',
+    );
+    assert.match(
+        source,
+        /game_over_state_pushed:\s*true/,
+        'packaged runtime probe endgame should confirm game-over state was pushed to renderer',
+    );
+    assert.match(
+        source,
+        /endgamePush\.player_faction/,
+        'packaged runtime probe endgame should record player faction from the state push proof',
+    );
 });
 
 test('probe tool launches the unpacked packaged executable with the runtime probe env', async () => {
@@ -293,6 +338,36 @@ test('probe tool launches the unpacked packaged executable with the runtime prob
         /awwv_desktop_runtime_probe_manifest\.json/,
         'probe tool should have a deterministic packaged-manifest fallback instead of relying only on GUI stdout',
     );
+    assert.match(
+        source,
+        /endgame_checks/,
+        'probe tool should fail if the packaged manifest omits the endgame reachability proof',
+    );
+    assert.match(
+        source,
+        /surface_type !== 'verdict' && endgameCheck\.surface_type !== 'fallback'/,
+        'probe tool should validate that the endgame surface type is either verdict or fallback',
+    );
+    assert.match(
+        source,
+        /has_faction_tabs/,
+        'probe tool should assert endgame surface contains faction tabs',
+    );
+    assert.match(
+        source,
+        /has_awwv_title/,
+        'probe tool should assert endgame surface contains the A War Without Victory title',
+    );
+    assert.match(
+        source,
+        /game_over_state_pushed/,
+        'probe tool should assert endgame game-over state was pushed',
+    );
+    assert.match(
+        source,
+        /route_mode !== 'operational'/,
+        'probe tool should assert endgame state push used the operational route mode',
+    );
 });
 
 test('renderer reaction proof instruments the real tactical-map session/store path in probe-safe form', async () => {
@@ -343,5 +418,22 @@ test('renderer reaction proof instruments the real tactical-map session/store pa
         gameStore,
         /if \(isRuntimeProbeActive\(\)\) \{\s*queueMicrotask\(fn\);/s,
         'probe-safe renderer reaction scheduling should avoid hidden-window timer starvation without changing normal runtime flow',
+    );
+
+    const verdictScreen = await readFile(join(process.cwd(), 'src', 'ui', 'map', 'components', 'VerdictScreen.tsx'), 'utf8');
+    assert.match(
+        verdictScreen,
+        /data-awwv-endgame-surface="verdict"/,
+        'VerdictScreen verdict path should expose a probe-observable data attribute for packaged endgame proof',
+    );
+    assert.match(
+        verdictScreen,
+        /data-awwv-endgame-surface="fallback"/,
+        'VerdictScreen fallback path should expose a probe-observable data attribute for packaged endgame proof',
+    );
+    assert.match(
+        verdictScreen,
+        /data-awwv-endgame-outcome/,
+        'VerdictScreen should expose the outcome label as a probe-observable data attribute',
     );
 });
