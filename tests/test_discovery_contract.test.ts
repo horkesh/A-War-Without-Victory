@@ -43,6 +43,8 @@ describe('test discovery contracts', () => {
         ];
         const fastRepresentatives = [
             'tests/alliance_lifecycle.test.ts',
+            'tests/acceptance_brcko_completeness.test.ts',
+            'tests/acceptance_constraints.test.ts',
             'tests/test_discovery_contract.test.ts',
             'tests/combat_exhaustion.test.ts',
             'tests/combat_front_emergence.test.ts',

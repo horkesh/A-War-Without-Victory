@@ -1,3 +1,22 @@
+## [2026-04-15] test(repo): migrate treaty acceptance gating contracts onto vitest
+
+**Type:** Test-harness cleanup / treaty-acceptance truth refresh
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/acceptance_constraints.test.ts`, `tests/acceptance_brcko_completeness.test.ts`, `tests/test_discovery_contract.test.ts`, `working-on.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/acceptance_constraints.test.ts tests/acceptance_brcko_completeness.test.ts tests/test_discovery_contract.test.ts` pass.
+**Status:** VERIFIED after packet verification - the treaty-acceptance gating band now lives on vitest as current constraint-owner proof instead of two stale `node:test` files that mixed unique gate logic with duplicate Brcko smoke.
+
+### Summary
+
+1. **The canonical acceptance owner moved to the canonical harness:** `acceptance_constraints` and `acceptance_brcko_completeness` now run on vitest.
+2. **Unique gate logic stayed; duplicate smoke got cut back:** the packet kept bundle completeness, holder/faction vetoes, Brcko unresolved rejection, and rejection ordering, while trimming generic Brcko-positive and military-only smoke that newer treaty/Brcko suites already cover better.
+3. **Fast discovery now remembers the owner band:** both treaty-acceptance files are pinned into the fast vitest slice.
+
+### Why this mattered
+
+This was another classic residue trap: two old files that still contained real constraint truth, but were padded with low-value acceptance smoke that made the whole band look larger and more special than it really was. Migrating them honestly forced the split. The keepers are the hard gate contracts in `acceptance_constraints.ts` and the Brcko ordering truth around `brcko_unresolved`. The rest was overlap with stronger treaty/Brcko application suites, so it got trimmed instead of cosmetically preserved.
+
 ## [2026-04-15] test(repo): migrate scenario reporting contracts onto vitest
 
 **Type:** Test-harness cleanup / scenario-reporting truth refresh
