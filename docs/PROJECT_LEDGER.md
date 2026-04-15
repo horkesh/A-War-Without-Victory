@@ -1,3 +1,22 @@
+## [2026-04-16] docs(test): retire stale dual-react blocker language from endgame proof files
+
+**Type:** Test-band repo-truth cleanup
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/ui/endgame_live_store_proof.test.ts`, `tests/ui/endgame_verdict_screen_mount.test.ts`, `tests/ui/endgame_proof_truth.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+**Tests:** `npx.cmd vitest run tests/ui/endgame_proof_truth.test.ts tests/ui/endgame_live_store_proof.test.ts tests/ui/endgame_verdict_screen_mount.test.ts tests/ui/endgame_interaction_proof.test.ts` pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `git diff --check` clean.
+**Status:** VERIFIED after packet verification. Endgame proof files no longer describe the already-resolved dual-React blocker as if it were still the current ceiling; the store-state proof now names its real role, the full-mount proof describes its present mocked-store seam honestly, and a source-contract test prevents those stale blocker claims from quietly returning.
+
+### Summary
+
+1. **The store-state proof file now says what it actually proves:** `endgame_live_store_proof.test.ts` is no longer framed as "the maximum achievable" under a dead blocker. It now explicitly records its real layer in the proof ladder: store acceptance, VerdictScreen gating, App reachability, and adapter endgame population.
+2. **The full-mount proof header no longer carries an obsolete causal story:** `endgame_verdict_screen_mount.test.ts` now describes the mocked-store seam as a narrow test harness choice, not as a workaround for a still-live dual-React problem.
+3. **A truth test now guards the proof-story itself:** `tests/ui/endgame_proof_truth.test.ts` asserts that the stale blocker phrases stay gone and that the store-state and live-mount files keep naming the current proof layers correctly.
+
+### Why this mattered
+
+This was test-band honesty work. The repo already has direct VerdictScreen mount and interaction proof, but two older headers still told a reader that full mount was blocked by dual-React. That kind of stale commentary does real damage: it makes future audits re-open closed infrastructure, mis-scope packets, and underestimate the proof ladder that already exists. Cleaning it now keeps the test suite from becoming its own source of fake architecture.
+
 ## [2026-04-16] fix(ui+docs): unify Warroom fallback startup with the baked apr_1992 snapshot
 
 **Type:** Desktop/Warroom startup truth closure

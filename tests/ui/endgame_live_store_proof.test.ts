@@ -1,26 +1,20 @@
 /**
- * VerdictScreen integration proof — store state + structural gating + reachability.
+ * VerdictScreen store-state + structural reachability proof.
  *
- * Proves the maximum achievable without resolving the dual-React workspace issue:
+ * Keeps the non-render layers honest even though live mount and interaction
+ * proof now exist elsewhere:
  * 1. Store accepts endgame state (pure JS — useGameStore.setState/getState)
  * 2. VerdictScreen gating logic (gameOver check extracted and verified)
  * 3. App-level reachability contract (structural assertion via source inspection)
  * 4. Adapter produces endgame fields when game_over is true
  *
- * Proof classification: STORE-STATE + STRUCTURAL GATING PROOF
+ * Proof classification: STORE-STATE + STRUCTURAL REACHABILITY PROOF
  * - Real Zustand store tested via setState/getState (no React rendering)
  * - VerdictScreen gating condition verified as pure logic
  * - App.tsx structural contract verified (unconditional VerdictScreen render)
  *
- * Component mount proof for hookless sub-components (FactionReport, WarCostSummary)
- * is in endgame_mount_proof.test.ts — those are already directly mount-proven.
- *
- * WHY NOT FULL MOUNT: VerdictScreen uses useState (React hook). The UI workspace
- * has react@18.2.0 in src/ui/map/node_modules/react. Root has react@18.3.1 in
- * node_modules/react. renderToStaticMarkup sets up hooks dispatcher from root react
- * but VerdictScreen's useState resolves from UI workspace react — two different
- * React instances = dispatcher null. Fix: unify react to one instance (npm workspace
- * hoist or nohoist config). This is infrastructure scope, not endgame proof scope.
+ * Live VerdictScreen mount proof is in endgame_verdict_screen_mount.test.ts.
+ * Interaction and route gating proof is in endgame_interaction_proof.test.ts.
  */
 
 import { describe, it, expect } from 'vitest';

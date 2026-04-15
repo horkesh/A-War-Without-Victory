@@ -4,8 +4,8 @@
  *
  * Mounts the REAL VerdictScreen component with real useState hook.
  * The Zustand store is replaced via vi.mock with a simple selector
- * function that reads from a test-controlled state object — this
- * avoids the dual-React useSyncExternalStore issue while still
+ * function that reads from a test-controlled state object. That keeps
+ * the full-component mount narrow and deterministic while still
  * mounting the real component with real React hooks.
  *
  * Proof classification: DIRECT LIVE-HOOK MOUNT PROOF
