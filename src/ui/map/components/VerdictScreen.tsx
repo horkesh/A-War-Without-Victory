@@ -329,7 +329,8 @@ export function VerdictScreen() {
 // Faction Report Card
 // ═══════════════════════════════════════════════════════════════════════════
 
-function FactionReport({
+/** Exported for direct mount proof testing. */
+export function FactionReport({
     verdict,
     factionOsids,
     totalOsids,
