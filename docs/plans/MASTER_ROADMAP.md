@@ -410,6 +410,8 @@ Divergence events: ahistorical player decisions trigger realistic consequence ch
 
 Plans: `docs/plans/2026-03-24-v090-consequence-system-plan.md`, `docs/plans/2026-03-31-v090-victory-conditions-and-pyrrhic-scoring-plan.md`, `docs/plans/2026-03-31-v090-sensitive-history-design-gate-plan.md`.
 
+**Status (2026-04-15): PARTIAL via the `v0.8-to-v0.9` hardening band.** Core `v0.9.0` substrate is already live: consequence-substrate owner cleanup, stranded-brigade lifecycle, verdict packet truth (`outcome_class`, `condemnation_flags`), the locked Srebrenica rupture-consequence path, and `CostLedger` / historical comparison builders feeding the endgame surface. This milestone remains open because the broader divergence-event matrix, final victory-condition / Pyrrhic-scoring closure, and the remaining consequence authoring from the full plan are not all complete yet.
+
 **+ Cost Ledger** (Legendary Feature): ICTY-style prosecutorial endgame narrative. Every decision â€” ethnic cleansing tolerated, enclaves abandoned, paramilitary sweeps authorized â€” silently recorded. After Dayton, the player receives a prosecutorial narrative adapted from real ICTY case structures. Not a score. An indictment. Template-driven, reads event flags + casualties + displacement.
 
 Spec: `docs/plans/2026-03-26-cost-ledger-template-format.md`.
@@ -424,6 +426,8 @@ Plan: `docs/plans/2026-04-06-v091-dynamic-essay-endgame-comparison-plan.md`
 Supporting inputs: `docs/plans/2026-03-23-essay-template-engine-plan.md`, `docs/plans/2026-03-26-endgame-comparison-data-requirements.md`, `docs/plans/2026-03-25-letter-home-and-essay-authoring-spec.md`
 
 **Gate:** Requires dynamic essay engine and historical baseline comparison data to be implemented. Ghost Map, Exhaustion Clock, and Letter Home are already available for integration and polish if needed.
+
+**Status (2026-04-15): PARTIAL via pulled-forward implementation.** Endgame comparison is no longer untouched: historical comparison data is already rendered in `VerdictScreen`, propagated into Chronicle and Wrapped, and consumed by the first dynamic Codex slice (`ghost_when`, `dynamic_sections`, ghost essays / entries for paths not taken). This milestone stays open because broader dynamic-essay authoring, richer milestone-week comparison UX, and remaining narrative polish are still unfinished.
 
 **Already live (not core scope):**
 - Ghost Map â€” implemented on tactical map
@@ -448,6 +452,8 @@ Plan: `docs/plans/2026-03-31-v092-tutorial-and-onboarding-plan.md`.
 
 Plan: `docs/plans/2026-04-06-v093-performance-accessibility-plan.md`
 Supporting inputs: `docs/plans/2026-03-16-v0.7.0-performance.md`, `docs/plans/2026-03-16-v0.7.1-accessibility.md`
+
+**Status (2026-04-15): groundwork only.** This milestone is still mostly ahead, but two bounded slices are already live: Warroom hotspot keyboard accessibility and tactical-map render-churn guards. Do not mistake that for closure; profiling, broader keyboard coverage, colorblind / rebind / text-scaling work, and explicit startup / memory proofs are still open.
 
 ### v0.9.4 â€” Visual Polish + Legendary Map Features
 
@@ -532,8 +538,8 @@ These need design sessions before implementation. Preserved from the original ro
 
 1. **Negotiation counter-offers** â€” How much agency does the player have at Dayton? Can they propose territorial splits on the map? Or choose from pre-defined packages? Current system uses dimension-derived capital + flag-driven packages, but player agency in the negotiation itself is limited.
 
-2. **International intervention** â€” Is NATO bombing a single event or a multi-turn campaign the player can influence? Current: single event with conditions. Design question: should the player be able to affect the timing, intensity, or targeting of Deliberate Force?
 
+2. **International intervention** — Is NATO bombing a single event or a multi-turn campaign the player can influence? Current: single event with conditions. Design question: should the player be able to affect the timing, intensity, or targeting of Deliberate Force?
 3. **Multiplayer** â€” Hot-seat only or network? Asymmetric information? Each player commands one faction; Claude fills others. Deferred to post-1.0 but needs architectural consideration (save format, turn structure, information hiding).
 
 4. **Modding** â€” Event definitions are JSON. Scenario manifests are JSON. The modding surface exists implicitly. Do we formalize it? Expose a scenario editor? Lua bindings exist but are not surfaced. Workshop integration with Steam?
@@ -577,23 +583,23 @@ These need design sessions before implementation. Preserved from the original ro
 | Political Leader Bot | Complete (v0.8.2 closed 2026-04-06) |
 | Order Interpretation | Complete (v0.8.3 closed 2026-04-06) |
 | Autonomy Depth + Claude API | Complete (v0.8.4 closed 2026-04-07 â€” all 6 phases closed; DRINA variance accepted with evidence) |
-| Consequence system | Not started (v0.9.0) |
-| Cost Ledger | Not started (v0.9.0) |
+| Consequence system | Partial (`v0.9.0` substrate live: consequence owner cleanup, stranded lifecycle, verdict contract, locked rupture path; broader divergence chains still open) |
+| Cost Ledger | Partial (`CostLedger` / historical comparison builders and War Cost surface live; full prosecutorial authoring still open) |
 | Ghost Map | Implemented (live on tactical map; roadmap-owned cleanup/polish only if needed) |
 | Map That Scars | Not started (v0.9.4) |
 | Letter Home | Implemented (Chief of Staff briefing) |
 | Refugee Column | Not started (v0.9.4) |
 | Corridor Heartbeat | Not started (v0.9.4) |
-| Endgame Comparison | Not started (v0.9.1) |
+| Endgame Comparison | Partial (`VerdictScreen`, Chronicle, Wrapped, and first dynamic Codex comparison slices live; richer milestone-week UX still open) |
 | Tutorial | Not started (roadmap-owned in v0.9.2) |
 | Sound/audio | Not started (post-1.0) |
 | Localization | Not started (post-1.0) |
 | Peace phase | CUT â€” game starts April 1992 |
 | Save/load | Partial (headless OK, desktop partial; roadmap-owned hardening in v0.8-to-v0.9) |
-| Victory conditions | Stub (roadmap-owned in v0.9.0) |
+| Victory conditions | Partial (`outcome_class`, `condemnation_flags`, Pyrrhic score, and verdict display are live; full `v0.9.0` closure contract still open) |
 | Diplomacy layer | Partial (patron pressure, alliance, IVP) |
 
-**Current:** 93.6% area-weighted calibration (n1358), 27/27 anchors, 6/6 benchmarks. 712 OSIDs. Political bot complete through Dayton branches (`v0.8.2`). Order interpretation complete through player-legible UX (`v0.8.3`). Autonomy review loop complete through high-stakes event gating and DRINA investigation (`v0.8.4` CLOSED 2026-04-07 — all phases 1, B, C, D, E, F complete). `v0.8.x-final` command authority cleanup plus the major startup/save-load, packaged-desktop, Warroom explanation-boundary, completed-operation AAR honesty, Army HQ presidential review queue coherence, Army Reserve request / presidential review boundary, Army Reserve urgency signaling / army-level attention contract, Army Reserve severity legibility / critical request framing, split-child shared-front routing, harness assignment-validator truth, operation readiness approach-truth, military review shell coherence, operation-roster foreign-sector truth, strict cross-corps field-brigade ownership, unresolved-sector anomaly owner alignment, drift-recall ownership precedence, unreachable drift-recall owner cleanup, post-seal ghost-sector prune, operation execution-capability gate, and operation causality battle-ownership lanes are now closed. Fresh 40-week proof (`n1408`) keeps the same final hash as `n1407` while clearing the last residual invalid-operation seam: `invalid_operation_count` is now `0`, `valid_for_combat_calibration` is `true`, `zero_eligible_attacker_operation_count` remains `0`, and `recovery_without_logged_attempt_count` remains `0`. Honest residuals remain: `brigade_far_from_home_unassigned` still names the Podrinje pair (`rs_1st_podrinje`, `rs_5th_podrinje`) as unreachable ownerless brigades. That means operation causality truth is now materially stronger, but stranded-brigade lifecycle ownership still sits below the A+++ bar. Active governance focus: keep roadmap truth, board truth, reports, and retained calibration evidence aligned through the permanent `Studio Health / Repo Truth` lane.
+**Current:** formal package semver is still `v0.8.1`, but roadmap state is the `v0.8-to-v0.9` transition band. Calibration remains 93.6% area-weighted (`n1358`), 27/27 anchors, 6/6 benchmarks, 712 OSIDs. Political bot (`v0.8.2`), order interpretation (`v0.8.3`), autonomy (`v0.8.4`), and `v0.8.x-final` command-authority cleanup are closed. Repo truth is now ahead of the old status table: substantial `v0.9.0` / `v0.9.1` slices are already live, including consequence-substrate cleanup, stranded-brigade lifecycle, verdict packet truth, locked rupture consequences, `CostLedger` / historical comparison, canonical `VerdictScreen` endgame presentation, and comparison propagation into Chronicle / Wrapped / Codex. Honest residuals remain: the project has **not** taken a formal semver bump, `v0.9.0` / `v0.9.1` remain open milestones, replay is still absent, tutorial/onboarding is still untouched, and the broader performance / accessibility / visual-polish milestones remain largely ahead.
 
 ---
 

@@ -1,3 +1,29 @@
+## [2026-04-15] docs(plan): realign roadmap status with shipped v0.8-to-v0.9 work
+
+**Type:** Docs-only roadmap truth pass
+**Commit (code):** n/a
+**Commit (ledger):** this entry
+**Files:** `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+**Tests:** `git diff --check` clean.
+**Status:** VERIFIED - roadmap status language now distinguishes formal release labeling from the active transition band, and it no longer claims the shipped `v0.9.0` / `v0.9.1` slices are untouched.
+
+### Summary
+
+1. **`v0.9.0` is now marked partial instead of untouched:** the roadmap now records that consequence-substrate cleanup, stranded-brigade lifecycle, verdict packet truth, rupture wiring, and `CostLedger` / comparison substrate are already live through the `v0.8-to-v0.9` band.
+2. **`v0.9.1` is now marked partial instead of untouched:** the roadmap now records that historical comparison already feeds `VerdictScreen`, Chronicle, Wrapped, and the first dynamic Codex slice, while keeping the broader dynamic-essay / comparison UX milestone open.
+3. **The roadmap now separates release label from milestone state:** `MASTER_ROADMAP.md` now states plainly that package semver remains `v0.8.1` while the repo is operating in the `v0.8-to-v0.9` transition band with meaningful `v0.9.0` / `v0.9.1` / early `v0.9.3` work already landed.
+
+### Why this mattered
+
+The roadmap had drifted into an awkward half-lie: the repo already contained real consequence, endgame-comparison, Codex, Chronicle, Wrapped, and accessibility/performance groundwork, but the status table still said `v0.9.0` and `v0.9.1` were "Not started." The fix is not to promote the whole project to `v0.9`; it is to mark the relevant milestones as **partial** and keep the formal release label unchanged until the actual bump happens.
+
+### Proof boundaries
+
+- **Direct proof:** the roadmap lines now match the shipped repo state documented in the ledger and on `main`.
+- **Not changed here:** no package version bump, no canon edits, no milestone closure claims, and no attempt to rewrite historical reports.
+
+---
+
 ## [2026-04-15] perf(ui): reduce tactical map render churn
 
 **Type:** Performance baseline packet / tactical-map render-churn reduction
