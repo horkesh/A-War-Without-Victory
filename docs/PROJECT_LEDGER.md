@@ -1,3 +1,55 @@
+## [2026-04-15] refactor(sim): extract sector offensive leaf helpers
+
+**Type:** Maintainability / god-file decomposition (behavior-preserving)
+**Commit (code):** 71da111a
+**Commit (ledger):** this entry
+**Files:** `src/sim/combat/sector_offensive.ts`, `src/sim/combat/sector_offensive_axis_helpers.ts` (new), `src/sim/combat/sector_offensive_launch_helpers.ts` (new), `src/sim/combat/operation_preparation.ts`, `src/sim/combat/bot_corps_directives.ts`, `src/sim/combat/commander/force_eval.ts`, `src/sim/combat/bot_brigade_ai_osid.ts`, `src/sim/combat/attack_resolution_osid.ts`, `src/sim/combat/pre_planned_operations.ts`, `src/sim/combat/triggered_operations.ts`
+**Tests:** `npx.cmd tsc --noEmit -p tsconfig.json` clean; vitest `sector_offensive_idle_recovery` + `operation_completion_truth` + `catastrophic_stall` + `engine_health_wave1_ops_truth` + `scenario_operation_diagnostics` + `commander/elite_formation_utilization` = 76/76 pass; `npm.cmd run desktop:map:build` clean in 6.47s; `npm.cmd run sim:scenario:run:40w` produced `n1578` with final hash `2dc5a98fd4f2ec2e`; `node tools/validate_run_consistency.cjs runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1578` PASS; `git diff --check` clean.
+**Status:** VERIFIED - no behavior drift on the modern proof surface. The 40w scenario hash matched the current canonical 40w hash exactly.
+
+### Summary
+Extracted two leaf-helper families out of `src/sim/combat/sector_offensive.ts` while keeping the canonical lifecycle entrypoints in place:
+
+1. **Axis / operation-shape helpers** -> `sector_offensive_axis_helpers.ts`
+2. **Launch / readiness / approach-graph helpers** -> `sector_offensive_launch_helpers.ts`
+
+`sector_offensive.ts` remains the authoritative owner of:
+- `advanceSectorOffensives`
+- `updateSectorOffensiveResults`
+- `evaluateCorpsOffensiveLaunch`
+- `evaluateSectorOffensiveLaunch`
+- `reevaluateWeakenedOperations`
+- `evaluateOperationProgress`
+
+This tranche was intentionally leaf-only. It reduces merge pressure inside the god file without moving lifecycle authority out of the canonical owner.
+
+### Extracted owner families
+- **`sector_offensive_axis_helpers.ts`**: `isMultiAxis`, `getAllAxisObjectives`, `getAllAxisBrigades`, `getCurrentLaunchObjectives`, `allAxesTerminal`, `sumAxesField`, `resetAxisForExecution`, `createSingleAxis`, `assignBrigadeRoles`, `isSupportBrigadeOnActiveOp`, `computeMultiAxisPlanningDuration`, `validateAxisContiguity`
+- **`sector_offensive_launch_helpers.ts`**: `getEquipmentOffensivePriority`, `resolveEquipmentClass`, `checkLaunchFeasibility`, `buildOsidAdjacencyFromFrontEdges`, `isStagingCorridorSafe`, `collectSectorSubsegmentApproachOsids`, `collectObjectiveApproachOsids`, `areParticipantsReadyForExecution`, `getPlanningAttackThreshold`, `axisHasExecutableOpeningAttack`, `hasExecutableOpeningAttack`, `computeSupplyReadiness`, `hasEligibleAttackersForLaunch`, `getMomentumAggressionBonus`, `getMomentumMinOutcome`
+
+### Downstream import cleanup
+Safe consumers now import these helpers directly instead of reaching through the god file facade:
+- `operation_preparation.ts`
+- `bot_corps_directives.ts`
+- `commander/force_eval.ts`
+- `bot_brigade_ai_osid.ts`
+- `attack_resolution_osid.ts`
+- `pre_planned_operations.ts`
+- `triggered_operations.ts`
+
+`sector_offensive.ts` still re-exports a narrow compatibility subset for existing callers, but the new helper modules are now the canonical leaf owners.
+
+### Proof boundaries
+- **Direct proof:** targeted vitest suites covering sector offensive lifecycle, operation completion truth, catastrophic stall handling, scenario diagnostics, and commander operation consumers all stayed green after the extraction.
+- **Direct non-drift proof:** 40w scenario rerun `n1578` reproduced canonical final hash `2dc5a98fd4f2ec2e` exactly, and run-consistency validation passed.
+- **Honest gap:** legacy `node:test` files `tests/sector_offensive.test.ts` and `tests/multi_axis_operations.test.ts` are stale against current HEAD and are not a trustworthy green gate for this tranche. During extraction, one helper drift in `validateAxisContiguity` was found and corrected, but the remaining failures are pre-existing expectation drift (for example planning-duration expectations that still assume durations above the current `MAX_PLANNING_DURATION = 4`). This packet does **not** claim those legacy files are green.
+
+### Rejected / deferred extractions
+- **Lifecycle entrypoints and mutation owners**: explicitly kept in `sector_offensive.ts`. Moving them would blur ownership instead of clarifying it.
+- **Broader offensive-policy decomposition**: deferred. This tranche stopped at safe pure/helper seams where scenario-hash proof is cheap and authoritative.
+
+---
+
 ## [2026-04-15] refactor(sim): extract late war-phase step families
 
 **Type:** Maintainability / god-file decomposition (behavior-preserving)
