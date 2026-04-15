@@ -1,3 +1,34 @@
+## [2026-04-15] fix(sim): restore political war_exhaustion as strategic dimension owner
+
+**Type:** Consequence substrate hardening / owner correction
+**Commit (code):** 837544d6
+**Commit (ledger):** this entry
+**Files:** `src/sim/events/strategic_dimensions.ts`, `tests/consequence_substrate_ownership.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+**Tests:** `npx.cmd tsc --noEmit -p tsconfig.json` clean; vitest `consequence_substrate_ownership` + `scoring` + `war_termination` + `sim/political/political_peace_plan` = 94/94 pass; `npm.cmd run desktop:map:build` clean in 6.92s; `git diff --check` clean.
+**Status:** VERIFIED - `internal_cohesion` now consumes the same canonical faction exhaustion owner already used by termination and commander drag.
+
+### Summary
+
+1. **Canonical exhaustion owner restored:** `computeDimensionBaseValues()` in `src/sim/events/strategic_dimensions.ts` now reads `state.political.war_exhaustion[faction]`, not stale `state.military.war_exhaustion` shadow state.
+2. **Direct proof tightened:** `tests/consequence_substrate_ownership.test.ts` now proves three cases directly: canonical political exhaustion lowers `internal_cohesion`, stale `military.war_exhaustion` shadow data is ignored, and dead `war_phase_exhaustion` has no effect.
+3. **Owner map clarified:** `PROJECT_LEDGER_KNOWLEDGE.md` now explicitly separates state-side patron pressure (`src/state/patron_pressure.ts`) from negotiation-side patron pressure (`src/sim/negotiation/patron_pressure.ts`), and separates political peace-plan scoring (`src/sim/political/political_peace_plan.ts`) from negotiation trigger/resolution (`src/sim/negotiation/peace_plans.ts`).
+
+### Why this mattered
+
+The repo had already converged on `state.political.war_exhaustion` as the authoritative faction-level accumulator for strategic systems. Victory/termination and commander drag both read the political path, but `internal_cohesion` in `strategic_dimensions.ts` had drifted to a stale military shadow field. That made a key consequence dimension answer to the wrong owner and invited future save/schema confusion.
+
+### Proof boundaries
+
+- **Direct proof:** targeted dimension/termination/verdict/peace-plan suites are green after the owner correction, including new negative coverage for stale military shadow data.
+- **Source-verified only:** the broader owner-map prose in `PROJECT_LEDGER_KNOWLEDGE.md` is documentation, not a runtime guard. A future rename of these entrypoints could still drift the docs silently until a new packet adds grep-bound doc guards.
+
+### Rejected / deferred
+
+- **Broader patron-pressure behavior changes:** rejected for this packet. The live code chain was coherent; the stale piece was ownership labeling, not runtime peace-plan mechanics.
+- **Termination/scoring rewrites:** rejected. Existing tests already prove those owners; this packet only restored the dimension layer to the same canonical exhaustion source.
+
+---
+
 ## [2026-04-15] refactor(sim): extract sector offensive leaf helpers
 
 **Type:** Maintainability / god-file decomposition (behavior-preserving)
