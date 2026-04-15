@@ -1,3 +1,22 @@
+## [2026-04-15] test(repo): refresh sector and movement residue contracts onto vitest
+
+**Type:** Test-harness cleanup / sector-movement truth refresh
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/corps_front_sectors_multi.test.ts`, `tests/sector_coverage_defense.test.ts`, `tests/sector_frontline_contiguity_repro.test.ts`, `tests/osid_column_movement.test.ts`, `tests/to_terrain_combat.test.ts`, `tests/test_discovery_contract.test.ts`, `working-on.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/corps_front_sectors_multi.test.ts tests/sector_coverage_defense.test.ts tests/sector_frontline_contiguity_repro.test.ts tests/osid_column_movement.test.ts tests/to_terrain_combat.test.ts tests/test_discovery_contract.test.ts` pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED after packet verification - the sector/movement band now lives on vitest as current-contract proof instead of a bundle of stale node:test fixtures.
+
+### Summary
+
+1. **Five stale files were refreshed onto the canonical harness:** `corps_front_sectors_multi`, `sector_coverage_defense`, `sector_frontline_contiguity_repro`, `osid_column_movement`, and `to_terrain_combat` now run on vitest.
+2. **The surviving contracts were narrowed to live owners:** the packet kept current helper/pathing/constant truth, while retiring stale sector-packing and resolver/predictor lore that newer sector-truth suites already own.
+3. **Nested-state helper drift was repaired where it mattered:** the old movement and sector fixtures were still stomping or bypassing canonical `state.military.*` / `state.political.*` owners, which made them prove dead shapes instead of current runtime truth.
+
+### Why this mattered
+
+This band had exactly the failure mode the v0.8-to-v0.9 test audit was supposed to flush out: old files that looked “important” because of their names, but were actually half proving constants and half proving long-retired state assumptions. Refreshing them onto vitest forced the split between the two. The keepers now prove current pathing, density, contiguity, and TO-terrain helper truth; the retired parts are explicitly superseded by the newer sector-truth suites instead of being dragged forward as comforting fiction.
+
 ## [2026-04-15] test(repo): refresh sector offensive contract tests onto vitest
 
 **Type:** Test-harness cleanup / stale operation-truth refresh

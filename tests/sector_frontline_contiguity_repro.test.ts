@@ -1,5 +1,5 @@
-import { describe, it } from 'node:test';
-import assert from 'node:assert/strict';
+import { describe, expect, it } from 'vitest';
+
 import { buildCorpsFrontSectors } from '../src/sim/combat/corps_front_sectors.js';
 import {
     CURRENT_SCHEMA_VERSION,
@@ -44,14 +44,6 @@ function makeState(): { state: GameState; edges: EdgeRecord[] } {
         }),
     };
 
-    const politicalControllers: Record<string, string> = {
-        'op:test:rear': 'RS',
-        'op:test:f1': 'RS',
-        'op:test:f2': 'RS',
-        'op:test:e1': 'RBiH',
-        'op:test:e2': 'RBiH',
-    };
-
     const state: GameState = {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: {
@@ -82,7 +74,13 @@ function makeState(): { state: GameState; edges: EdgeRecord[] } {
             militia_pools: {},
         } as GameState['military'],
         political: {
-            political_controllers: politicalControllers,
+            political_controllers: {
+                'op:test:rear': 'RS',
+                'op:test:f1': 'RS',
+                'op:test:f2': 'RS',
+                'op:test:e1': 'RBiH',
+                'op:test:e2': 'RBiH',
+            },
         } as GameState['political'],
         displacement: {} as GameState['displacement'],
     } as GameState;
@@ -107,14 +105,14 @@ describe('sector frontline contiguity repro', () => {
         const result = buildCorpsFrontSectors(state, edges, null);
         const sectors = Object.values(result).filter((sector) => sector.corps_id === 'corps_a');
 
-        assert.equal(sectors.length, 2, 'Expected two separate frontline sectors');
+        expect(sectors).toHaveLength(2);
         for (const sector of sectors) {
-            assert.equal(sector.sub_segments.length, 1, 'Each sector should remain one frontline component');
+            expect(sector.sub_segments).toHaveLength(1);
         }
 
         const enemyPocketSets = sectors
             .map((sector) => [...new Set(sector.sub_segments.flatMap((subSegment) => subSegment.enemy_osids))].sort().join('|'))
             .sort();
-        assert.deepEqual(enemyPocketSets, ['op:test:e1', 'op:test:e2']);
+        expect(enemyPocketSets).toEqual(['op:test:e1', 'op:test:e2']);
     });
 });
