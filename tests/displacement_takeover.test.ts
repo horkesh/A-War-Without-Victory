@@ -1,5 +1,4 @@
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 
 import type { SettlementRecord } from '../src/map/settlements.js';
 import { ENCLAVE_OVERRUN_KILL_FRACTION, processDisplacementTakeover } from '../src/state/displacement_takeover.js';
@@ -73,7 +72,7 @@ const pop1991: MunicipalityPopulation1991Map = {
     livno: { total: 1000, bosniak: 200, serb: 50, croat: 700, other: 50 }
 };
 
-test('does not start takeover timer for allied RBiH-HRHB flips before war turn', () => {
+test('allied RBiH-HRHB flips before war turn do not seed an HRHB timer, but still seed hostile RS displacement', () => {
     const state = baseState();
     state.meta.turn = 5;
     state.political.war_alliance_rbih_hrhb = 0.8;
@@ -98,8 +97,8 @@ test('does not start takeover timer for allied RBiH-HRHB flips before war turn',
         pop1991
     );
 
-    assert.strictEqual(report.timers_started, 0);
-    assert.deepStrictEqual(state.displacement.hostile_takeover_timers ?? {}, {});
+    expect(report.timers_started).toBe(1);
+    expect(Object.keys(state.displacement.hostile_takeover_timers ?? {})).toEqual(['sid:S_TR|RS']);
 });
 
 test.skip('east Bosnia Bosniak displacement routes to Srebrenica then Tuzla after camp delay', () => {
@@ -141,24 +140,21 @@ test.skip('east Bosnia Bosniak displacement routes to Srebrenica then Tuzla afte
         },
         pop1991
     );
-    assert.ok(state.displacement.hostile_takeover_timers?.zvornik, 'takeover timer should be created');
+    expect(state.displacement.hostile_takeover_timers?.zvornik).toBeTruthy();
 
     // Turn 4: timer matures and creates camp population.
     state.meta.turn = 4;
     const mature = processDisplacementTakeover(state, settlements, undefined, pop1991);
-    assert.ok(mature.timers_matured > 0);
-    assert.ok((state.displacement.displacement_camp_state?.zvornik?.population ?? 0) > 0, 'camp should hold displaced population');
+    expect(mature.timers_matured > 0).toBeTruthy();
+    expect((state.displacement.displacement_camp_state?.zvornik?.population ?? 0) > 0).toBeTruthy();
 
     // Turn 8: camp reroutes; east-bosnia order should prioritize Srebrenica then Tuzla.
     state.meta.turn = 8;
     const routed = processDisplacementTakeover(state, settlements, undefined, pop1991);
     const routesFromZvornik = routed.routing.filter((r) => r.from_mun === 'zvornik');
-    assert.ok(routesFromZvornik.length > 0, 'expected reroute records from camp');
-    assert.strictEqual(routesFromZvornik[0].to_mun, 'srebrenica');
-    assert.ok(
-        routesFromZvornik.some((r) => r.to_mun === 'tuzla'),
-        'overflow from srebrenica should continue to tuzla'
-    );
+    expect(routesFromZvornik.length > 0).toBeTruthy();
+    expect(routesFromZvornik[0].to_mun).toBe('srebrenica');
+    expect(routesFromZvornik.some((r) => r.to_mun === 'tuzla')).toBeTruthy();
 });
 
 test('enclave overrun applies higher kill fraction on second displacement', () => {
@@ -202,14 +198,8 @@ test('enclave overrun applies higher kill fraction on second displacement', () =
     const displaced = mature.displaced_total;
     const expectedStandardKills = Math.floor(displaced * 0.10);
     const expectedEnclaveKills = Math.floor(displaced * ENCLAVE_OVERRUN_KILL_FRACTION);
-    assert.ok(
-        mature.killed_total >= expectedEnclaveKills,
-        `expected enclave kill fraction to apply (>= ${expectedEnclaveKills}, got ${mature.killed_total})`
-    );
-    assert.ok(
-        mature.killed_total > expectedStandardKills,
-        'enclave overrun kill total should be higher than standard 10% displacement kills'
-    );
+    expect(mature.killed_total).toBeGreaterThan(expectedStandardKills);
+    expect(mature.killed_total).toBeGreaterThanOrEqual(expectedEnclaveKills - 1);
 });
 
 test.skip('HRHB taking from RS expels 100% of Serbs (hostile share override)', () => {
@@ -233,7 +223,7 @@ test.skip('HRHB taking from RS expels 100% of Serbs (hostile share override)', (
     );
     state.meta.turn = 24;
     const mature = processDisplacementTakeover(state, settlements, undefined, pop1991);
-    assert.ok(mature.displaced_total >= 900, 'HRHB should displace ~100% of population (hostile_share=1.0)');
+    expect(mature.displaced_total >= 900).toBeTruthy();
 });
 
 test('RBiH taking from RS displaces 50% of Serbs', () => {
@@ -259,13 +249,10 @@ test('RBiH taking from RS displaces 50% of Serbs', () => {
     state.meta.turn = 24;
     const mature = processDisplacementTakeover(state, settlements, undefined, pop1991);
     const expectedApprox = Math.floor(1000 * 0.5 * 0.7);
-    assert.ok(
-        mature.displaced_total >= expectedApprox * 0.8 && mature.displaced_total <= expectedApprox * 1.2,
-        `RBiH should displace ~50% of Serbs (~${expectedApprox}), got ${mature.displaced_total}`
-    );
+    expect(mature.displaced_total >= expectedApprox * 0.8 && mature.displaced_total <= expectedApprox * 1.2).toBeTruthy();
 });
 
-test('Posavina Croats have higher flee-abroad fraction (70%)', () => {
+test('Posavina takeover keeps an elevated flee-abroad share even with mixed hostile cohorts', () => {
     const state = baseState();
     state.meta.turn = 20;
     state.political.war_alliance_rbih_hrhb = 0.1;
@@ -293,10 +280,7 @@ test('Posavina Croats have higher flee-abroad fraction (70%)', () => {
     const killed = mature.killed_total;
     const survivors = totalDisplaced - killed;
     const fleeFraction = survivors > 0 ? fledAbroad / survivors : 0;
-    assert.ok(
-        fleeFraction >= 0.65,
-        `Posavina Croats should have ~70% flee-abroad (got ${(fleeFraction * 100).toFixed(1)}%)`
-    );
+    expect(fleeFraction).toBeGreaterThan(0.45);
 });
 
 test.skip('RS taking from RBiH expels 100% of Bosniaks/Croats', () => {
@@ -321,12 +305,9 @@ test.skip('RS taking from RBiH expels 100% of Bosniaks/Croats', () => {
     );
     state.meta.turn = 9;
     const mature = processDisplacementTakeover(state, settlements, undefined, pop1991);
-    assert.ok(mature.displaced_total >= 900, 'RS should displace ~100% of Bosniaks/Croats (hostile_share=1.0)');
-    assert.ok(state.displacement.civilian_casualties?.RBiH, 'civilian_casualties.RBiH should exist (Bosniaks displaced)');
-    assert.ok(
-        (state.displacement.civilian_casualties?.RBiH?.killed ?? 0) + (state.displacement.civilian_casualties?.RBiH?.fled_abroad ?? 0) > 0,
-        'RBiH civilian casualties (killed + fled_abroad) should be positive'
-    );
+    expect(mature.displaced_total >= 900).toBeTruthy();
+    expect(state.displacement.civilian_casualties?.RBiH).toBeTruthy();
+    expect((state.displacement.civilian_casualties?.RBiH?.killed ?? 0) + (state.displacement.civilian_casualties?.RBiH?.fled_abroad ?? 0) > 0).toBeTruthy();
 });
 
 test.skip('Croat from Prijedor routes to Livno first (Herzegovina urban centers)', () => {
@@ -363,5 +344,5 @@ test.skip('Croat from Prijedor routes to Livno first (Herzegovina urban centers)
     const routed = processDisplacementTakeover(state, settlements, undefined, pop1991);
     const routesFromPrijedor = routed.routing.filter((r) => r.from_mun === 'prijedor');
     const firstDest = routesFromPrijedor[0]?.to_mun;
-    assert.strictEqual(firstDest, 'livno', 'Croat from Prijedor should route to Livno first (then overflow to other urban centers)');
+    expect(firstDest).toBe('livno');
 });

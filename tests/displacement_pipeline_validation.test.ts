@@ -7,8 +7,7 @@
  * - Phase A–E invariants still hold (delegated to existing Phase A–E tests).
  */
 
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 import type { EdgeRecord } from '../src/map/settlements.js';
 import { runTurn } from '../src/sim/turn_pipeline.js';
 import type { GameState } from '../src/state/game_state.js';
@@ -54,11 +53,8 @@ test('Phase F: settlement and municipality displacement both move when triggered
     if (!pf) return; // no Phase F report if path didn't run
     const triggered = pf.trigger_report?.triggered_settlements ?? [];
     if (triggered.length === 0) return; // no front-active in minimal graph
-    assert.ok(
-        (after.displacement.settlement_displacement && Object.keys(after.displacement.settlement_displacement).length >= 0) ||
-        (after.displacement.municipality_displacement && Object.keys(after.displacement.municipality_displacement).length >= 0),
-        'displacement state may be updated when settlements triggered'
-    );
+    expect((after.displacement.settlement_displacement && Object.keys(after.displacement.settlement_displacement).length >= 0) ||
+        (after.displacement.municipality_displacement && Object.keys(after.displacement.municipality_displacement).length >= 0)).toBeTruthy();
 });
 
 test('Phase F: displacement is monotonic across turns', async () => {
@@ -71,11 +67,11 @@ test('Phase F: displacement is monotonic across turns', async () => {
     const md = after.displacement.municipality_displacement ?? {};
     for (const [sid, v] of Object.entries(sd)) {
         const prev = state.displacement.settlement_displacement?.[sid] ?? 0;
-        assert.ok(v >= prev, `settlement ${sid} displacement must not decrease`);
+        expect(v >= prev).toBeTruthy();
     }
     for (const [munId, v] of Object.entries(md)) {
         const prev = state.displacement.municipality_displacement?.[munId] ?? 0;
-        assert.ok(v >= prev, `municipality ${munId} displacement must not decrease`);
+        expect(v >= prev).toBeTruthy();
     }
 });
 
@@ -86,11 +82,7 @@ test('Phase F: displacement does not directly flip control', async () => {
     const { nextState: after } = await runTurn(state, { seed: 'pf-noflip', settlementEdges: edges });
     const pcAfter = after.political.political_controllers ?? {};
     for (const sid of Object.keys(pcBefore)) {
-        assert.strictEqual(
-            pcAfter[sid],
-            pcBefore[sid],
-            `Phase F must not change political_controller for ${sid}`
-        );
+        expect(pcAfter[sid]).toBe(pcBefore[sid]);
     }
 });
 
@@ -102,5 +94,5 @@ test('Phase F: deterministic re-run identical', async () => {
     const r2 = await runTurn(state2, { seed: 'pf-det', settlementEdges: edges });
     const out1 = serializeState(r1.nextState);
     const out2 = serializeState(r2.nextState);
-    assert.strictEqual(out1, out2, 'Same inputs must produce byte-identical serialized state');
+    expect(out1).toBe(out2);
 });

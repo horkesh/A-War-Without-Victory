@@ -1,3 +1,31 @@
+## [2026-04-15] fix(test+state): migrate displacement contracts onto vitest and repair nested displacement validation
+
+**Type:** Test-harness cleanup / displacement validation-truth correction
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/displacement.test.ts`, `tests/displacement_pipeline_capacity_hooks.test.ts`, `tests/displacement_pipeline_displacement_accumulation.test.ts`, `tests/displacement_pipeline_displacement_triggers.test.ts`, `tests/displacement_pipeline_municipality_aggregation.test.ts`, `tests/displacement_pipeline_pipeline_integration.test.ts`, `tests/displacement_pipeline_state_schema.test.ts`, `tests/displacement_pipeline_validation.test.ts`, `tests/displacement_routing.test.ts`, `tests/displacement_takeover.test.ts`, `tests/morale_displacement_schema.test.ts`, `tests/test_discovery_contract.test.ts`, `src/state/validateGameState.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/displacement.test.ts tests/displacement_pipeline_capacity_hooks.test.ts tests/displacement_pipeline_displacement_accumulation.test.ts tests/displacement_pipeline_displacement_triggers.test.ts tests/displacement_pipeline_municipality_aggregation.test.ts tests/displacement_pipeline_pipeline_integration.test.ts tests/displacement_pipeline_state_schema.test.ts tests/displacement_pipeline_validation.test.ts tests/displacement_routing.test.ts tests/displacement_takeover.test.ts tests/morale_displacement_schema.test.ts tests/test_discovery_contract.test.ts` = 72/72 pass, 5 skipped; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED - the displacement contract family now lives on the canonical vitest lane, and the migration exposed and repaired another stale validator seam where nested displacement fields were still being policed through dead top-level paths instead of `state.displacement`.
+
+### Summary
+
+1. **The displacement family moved as one adjacent band:** displacement routing, takeover, accumulation, triggers, municipality aggregation, capacity hooks, pipeline integration, state schema, pipeline validation, and morale/displacement schema contracts now import `vitest` instead of lingering in `node:test`.
+2. **The migration flushed out real truth drift, not just harness syntax:** several tests were still asserting stale routing owners, old takeover assumptions, or malformed fixtures. Those expectations were corrected to current engine truth rather than being carried forward as historical noise.
+3. **The validator now checks the actual nested displacement owner:** `settlement_displacement`, `settlement_displacement_started_turn`, `municipality_displacement`, `hostile_takeover_timers`, and `displacement_camp_state` are validated under `state.displacement`, matching the canonical state schema and serializer paths.
+
+### Why this mattered
+
+Displacement is one of the bigger remaining deterministic substrate bands in the repo. Leaving it split across runners suggested it needed special execution semantics when it really only needed in-process proof. Moving the family together shrinks the fake harness split, and the nested validator repair closes another place where stale top-level ghosts could let malformed state slip through.
+
+### Proof boundaries
+
+- **Direct proof:** all 11 migrated displacement/morale suites pass under vitest.
+- **Direct proof:** the validator now rejects malformed nested displacement camp state and the migrated schema suite exercises that owner path directly.
+- **Direct proof:** discovery now pins representative displacement schema and takeover files in the fast vitest slice.
+- **Not claimed here:** this does **not** close scenario-heavy refugee-column or later visual-displacement work; it closes the current deterministic displacement substrate and its canonical validator seam.
+
+---
+
 ## [2026-04-15] test(repo): migrate front posture and segment substrate contracts onto vitest
 
 **Type:** Test-harness cleanup / front-substrate contract migration

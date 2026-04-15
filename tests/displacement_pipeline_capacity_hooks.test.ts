@@ -4,8 +4,7 @@
  * - No control flips (hooks do not touch political_controllers).
  */
 
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 import {
     buildDisplacementCapacityReport,
     getMunicipalityDisplacementFactor,
@@ -50,29 +49,29 @@ function minimalPhaseIIState(): GameState {
 
 test('getMunicipalityDisplacementFactor returns 1 - displacement in [0, 1]', () => {
     const state = minimalPhaseIIState();
-    assert.strictEqual(getMunicipalityDisplacementFactor(state, 'MUN_A'), 0.7);
-    assert.strictEqual(getMunicipalityDisplacementFactor(state, 'MUN_ABSENT'), 1);
+    expect(getMunicipalityDisplacementFactor(state, 'MUN_A')).toBe(0.7);
+    expect(getMunicipalityDisplacementFactor(state, 'MUN_ABSENT')).toBe(1);
 });
 
 test('getSettlementDisplacementFactor returns 1 - displacement in [0, 1]', () => {
     const state = minimalPhaseIIState();
-    assert.strictEqual(getSettlementDisplacementFactor(state, 'S1'), 0.8);
-    assert.strictEqual(getSettlementDisplacementFactor(state, 'S2'), 0.5);
-    assert.strictEqual(getSettlementDisplacementFactor(state, 'S_ABSENT'), 1);
+    expect(getSettlementDisplacementFactor(state, 'S1')).toBe(0.8);
+    expect(getSettlementDisplacementFactor(state, 'S2')).toBe(0.5);
+    expect(getSettlementDisplacementFactor(state, 'S_ABSENT')).toBe(1);
 });
 
 test('buildDisplacementCapacityReport: deterministic and no control flips', () => {
     const state = minimalPhaseIIState();
     const report = buildDisplacementCapacityReport(state);
-    assert.ok(report.municipalities_affected.includes('MUN_A'));
-    assert.ok(report.settlements_affected.includes('S1') && report.settlements_affected.includes('S2'));
-    assert.strictEqual(report.municipality_factors['MUN_A'], 0.7);
-    assert.deepStrictEqual(state.political.political_controllers, { S1: 'RBiH', S2: 'RS' });
+    expect(report.municipalities_affected.includes('MUN_A')).toBeTruthy();
+    expect(report.settlements_affected.includes('S1') && report.settlements_affected.includes('S2')).toBeTruthy();
+    expect(report.municipality_factors['MUN_A']).toBe(0.7);
+    expect(state.political.political_controllers).toEqual({ S1: 'RBiH', S2: 'RS' });
 });
 
 test('hooks return 1 when phase !== war', () => {
     const state = minimalPhaseIIState();
     state.meta!.phase = 'peace';
-    assert.strictEqual(getMunicipalityDisplacementFactor(state, 'MUN_A'), 1);
-    assert.strictEqual(getSettlementDisplacementFactor(state, 'S1'), 1);
+    expect(getMunicipalityDisplacementFactor(state, 'MUN_A')).toBe(1);
+    expect(getSettlementDisplacementFactor(state, 'S1')).toBe(1);
 });

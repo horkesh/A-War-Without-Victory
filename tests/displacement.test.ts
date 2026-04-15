@@ -1,5 +1,4 @@
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 
 import type { SettlementRecord } from '../src/map/settlements.js';
 import { enforceRecruitmentCeilings, updateDisplacement } from '../src/state/displacement.js';
@@ -141,11 +140,7 @@ test('displacement is deterministic', () => {
     const report2 = updateDisplacement(state2, settlements, edges);
 
     // Same input should produce same output
-    assert.strictEqual(
-        JSON.stringify(report1),
-        JSON.stringify(report2),
-        'Displacement should be deterministic'
-    );
+    expect(JSON.stringify(report1)).toBe(JSON.stringify(report2));
 });
 
 test('displacement is irreversible', () => {
@@ -173,8 +168,8 @@ test('displacement is irreversible', () => {
     const afterLost = state.displacement.displacement_state['20168'].lost_population;
 
     // displaced_out and lost_population should never decrease
-    assert.ok(afterOut >= beforeOut, 'displaced_out should never decrease');
-    assert.ok(afterLost >= beforeLost, 'lost_population should never decrease');
+    expect(afterOut >= beforeOut).toBeTruthy();
+    expect(afterLost >= beforeLost).toBeTruthy();
 });
 
 test('recruitment ceiling enforcement', () => {
@@ -207,14 +202,11 @@ test('recruitment ceiling enforcement', () => {
     const ceiling = 10000 - 2000 - 500; // 7500
 
     // Pool total should not exceed ceiling
-    assert.ok(
-        pool.available + pool.committed <= ceiling,
-        `Pool total (${pool.available + pool.committed}) should not exceed ceiling (${ceiling})`
-    );
+    expect(pool.available + pool.committed <= ceiling).toBeTruthy();
 
     // Available should be reduced, committed should remain
-    assert.strictEqual(pool.committed, 2000, 'Committed should not be reduced');
-    assert.strictEqual(pool.available + pool.committed, ceiling, 'Total should equal ceiling');
+    expect(pool.committed).toBe(2000);
+    expect(pool.available + pool.committed).toBe(ceiling);
 });
 
 test('displacement reduces militia pool available', () => {
@@ -313,9 +305,5 @@ test('displacement routing determinism', () => {
         return a.to_mun.localeCompare(b.to_mun);
     });
 
-    assert.strictEqual(
-        JSON.stringify(routing1),
-        JSON.stringify(routing2),
-        'Displacement routing should be deterministic'
-    );
+    expect(JSON.stringify(routing1)).toBe(JSON.stringify(routing2));
 });

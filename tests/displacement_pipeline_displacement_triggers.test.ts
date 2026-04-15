@@ -5,8 +5,7 @@
  * - No triggers in phase_0 / peace phase.
  */
 
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 import type { EdgeRecord } from '../src/map/settlements.js';
 import { evaluateDisplacementTriggers, PHASE_F_MAX_DELTA_PER_TURN } from '../src/sim/displacement_pipeline/displacement_triggers.js';
 import type { GameState } from '../src/state/game_state.js';
@@ -48,26 +47,26 @@ test('evaluateDisplacementTriggers: peace returns empty deltas', () => {
     state.meta!.phase = 'peace';
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const { deltas, report } = evaluateDisplacementTriggers(state, edges);
-    assert.deepStrictEqual(Object.keys(deltas), []);
-    assert.strictEqual(report.triggered_settlements.length, 0);
+    expect(Object.keys(deltas)).toEqual([]);
+    expect(report.triggered_settlements.length).toBe(0);
 });
 
 test('evaluateDisplacementTriggers: war phase + opposing control yields bounded deltas for front-active settlements', () => {
     const state = minimalPhaseIIState({ S1: 'RBiH', S2: 'RS' });
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const { deltas, report } = evaluateDisplacementTriggers(state, edges);
-    assert.ok(Object.keys(deltas).length >= 1, 'at least one settlement should get a delta when front-active');
+    expect(Object.keys(deltas).length >= 1).toBeTruthy();
     for (const [sid, val] of Object.entries(deltas)) {
-        assert.ok(val > 0 && val <= PHASE_F_MAX_DELTA_PER_TURN, `delta for ${sid} must be in (0, ${PHASE_F_MAX_DELTA_PER_TURN}]`);
+        expect(val > 0 && val <= PHASE_F_MAX_DELTA_PER_TURN).toBeTruthy();
     }
-    assert.ok(report.reasons['S1']?.includes('front_active') ?? report.reasons['S2']?.includes('front_active'), 'reason should include front_active');
+    expect(report.reasons['S1']?.includes('front_active') ?? report.reasons['S2']?.includes('front_active')).toBeTruthy();
 });
 
 test('evaluateDisplacementTriggers: same control on both ends yields no front-active edges', () => {
     const state = minimalPhaseIIState({ S1: 'RBiH', S2: 'RBiH' });
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const { deltas } = evaluateDisplacementTriggers(state, edges);
-    assert.deepStrictEqual(Object.keys(deltas), []);
+    expect(Object.keys(deltas)).toEqual([]);
 });
 
 test('evaluateDisplacementTriggers: deterministic re-run identical', () => {
@@ -75,8 +74,8 @@ test('evaluateDisplacementTriggers: deterministic re-run identical', () => {
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
     const r1 = evaluateDisplacementTriggers(state, edges);
     const r2 = evaluateDisplacementTriggers(state, edges);
-    assert.deepStrictEqual(r1.deltas, r2.deltas);
-    assert.deepStrictEqual(r1.report.triggered_settlements.sort(), r2.report.triggered_settlements.sort());
+    expect(r1.deltas).toEqual(r2.deltas);
+    expect(r1.report.triggered_settlements.sort()).toEqual(r2.report.triggered_settlements.sort());
 });
 
 test('evaluateDisplacementTriggers: prefers sector-owned edge scope when live sector truth exists', () => {
@@ -103,10 +102,10 @@ test('evaluateDisplacementTriggers: prefers sector-owned edge scope when live se
 
     const { deltas, report } = evaluateDisplacementTriggers(state, edges);
 
-    assert.deepStrictEqual(Object.keys(deltas).sort(), ['S1', 'S2']);
-    assert.strictEqual(report.pressure_eligible_size, 1);
-    assert.strictEqual(report.front_active_set_size, 2);
-    assert.strictEqual(report.displacement_trigger_eligible_size, 2);
+    expect(Object.keys(deltas).sort()).toEqual(['S1', 'S2']);
+    expect(report.pressure_eligible_size).toBe(1);
+    expect(report.front_active_set_size).toBe(2);
+    expect(report.displacement_trigger_eligible_size).toBe(2);
 });
 
 test('evaluateDisplacementTriggers: matches live sector OSID edges against canonical graph edges via operational mapping', () => {
@@ -137,8 +136,8 @@ test('evaluateDisplacementTriggers: matches live sector OSID edges against canon
         { S1: 'op:s1', S2: 'op:s2', S3: 'op:s3', S4: 'op:s4' }
     );
 
-    assert.deepStrictEqual(Object.keys(deltas).sort(), ['S1', 'S2']);
-    assert.strictEqual(report.pressure_eligible_size, 1);
-    assert.strictEqual(report.front_active_set_size, 2);
-    assert.strictEqual(report.displacement_trigger_eligible_size, 2);
+    expect(Object.keys(deltas).sort()).toEqual(['S1', 'S2']);
+    expect(report.pressure_eligible_size).toBe(1);
+    expect(report.front_active_set_size).toBe(2);
+    expect(report.displacement_trigger_eligible_size).toBe(2);
 });

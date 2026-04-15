@@ -5,8 +5,7 @@
  * - Deterministic: same inputs => same outputs.
  */
 
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 import { aggregateSettlementDisplacementToMunicipalities } from '../src/sim/displacement_pipeline/displacement_municipality_aggregation.js';
 import type { GameState, MunicipalityId, SettlementId } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
@@ -48,7 +47,7 @@ test('aggregateSettlementDisplacementToMunicipalities: mean correctness', () => 
     const settlementsByMun = new Map<MunicipalityId, SettlementId[]>();
     settlementsByMun.set('MUN_A', ['s1', 's2', 's3']);
     aggregateSettlementDisplacementToMunicipalities(state, settlementsByMun);
-    assert.ok(Math.abs((state.displacement.municipality_displacement!['MUN_A'] ?? 0) - 0.4) < 1e-9, 'mean 0.2+0.4+0.6 => 0.4');
+    expect(Math.abs((state.displacement.municipality_displacement!['MUN_A'] ?? 0) - 0.4) < 1e-9).toBeTruthy();
 });
 
 test('aggregateSettlementDisplacementToMunicipalities: monotonic', () => {
@@ -58,8 +57,8 @@ test('aggregateSettlementDisplacementToMunicipalities: monotonic', () => {
     const settlementsByMun = new Map<MunicipalityId, SettlementId[]>();
     settlementsByMun.set('MUN_A', ['s1']);
     aggregateSettlementDisplacementToMunicipalities(state, settlementsByMun);
-    assert.ok(state.displacement.municipality_displacement!['MUN_A'] >= 0.3);
-    assert.strictEqual(state.displacement.municipality_displacement!['MUN_A'], 0.5);
+    expect(state.displacement.municipality_displacement!['MUN_A'] >= 0.3).toBeTruthy();
+    expect(state.displacement.municipality_displacement!['MUN_A']).toBe(0.5);
 });
 
 test('aggregateSettlementDisplacementToMunicipalities: deterministic ordering', () => {
@@ -72,7 +71,7 @@ test('aggregateSettlementDisplacementToMunicipalities: deterministic ordering', 
     aggregateSettlementDisplacementToMunicipalities(state1, byMun);
     byMun.set('M1', ['a', 'b']);
     aggregateSettlementDisplacementToMunicipalities(state2, byMun);
-    assert.strictEqual(state1.displacement.municipality_displacement!['M1'], state2.displacement.municipality_displacement!['M1']);
+    expect(state1.displacement.municipality_displacement!['M1']).toBe(state2.displacement.municipality_displacement!['M1']);
 });
 
 test('aggregateSettlementDisplacementToMunicipalities: peace no-op', () => {
@@ -82,5 +81,5 @@ test('aggregateSettlementDisplacementToMunicipalities: peace no-op', () => {
     const byMun = new Map<MunicipalityId, SettlementId[]>();
     byMun.set('MUN_A', ['s1']);
     aggregateSettlementDisplacementToMunicipalities(state, byMun);
-    assert.strictEqual(state.displacement.municipality_displacement === undefined || Object.keys(state.displacement.municipality_displacement).length === 0, true);
+    expect(state.displacement.municipality_displacement === undefined || Object.keys(state.displacement.municipality_displacement).length === 0).toBe(true);
 });

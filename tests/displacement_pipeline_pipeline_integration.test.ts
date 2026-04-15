@@ -5,8 +5,7 @@
  * - No displacement step in phase_0 / peace phase.
  */
 
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 import type { EdgeRecord } from '../src/map/settlements.js';
 import { runTurn } from '../src/sim/turn_pipeline.js';
 import type { GameState } from '../src/state/game_state.js';
@@ -78,10 +77,7 @@ test('runTurn rejects peace phase (state pipeline owns peace)', async () => {
     const state = minimalPhaseIState();
     state.meta.phase = 'peace';
     const edges: EdgeRecord[] = [{ a: 's1', b: 's2' }];
-    await assert.rejects(
-        async () => runTurn(state, { seed: 'pf-pipe-i', settlementEdges: edges }),
-        /use state pipeline runOneTurn for peace/
-    );
+    await expect(runTurn(state, { seed: 'pf-pipe-i', settlementEdges: edges })).rejects.toThrow(/unsupported lifecycle phase "peace"/);
 });
 
 test.skip('phase_ii runTurn includes phase-f-displacement after phase-e-rear-zone-derivation', async () => {
@@ -91,9 +87,9 @@ test.skip('phase_ii runTurn includes phase-f-displacement after phase-e-rear-zon
     const phaseNames = report.phases.map((p) => p.name);
     const idxPhaseF = phaseNames.indexOf('phase-f-displacement');
     const idxRear = phaseNames.indexOf('phase-e-rear-zone-derivation');
-    assert.ok(idxPhaseF >= 0, 'phase-f-displacement must run in war phase');
-    assert.ok(idxRear >= 0, 'phase-e-rear-zone-derivation must run in war phase');
-    assert.ok(idxPhaseF > idxRear, 'phase-f-displacement must run after phase-e-rear-zone-derivation');
-    assert.ok(report.phase_f_displacement?.trigger_report != null);
-    assert.ok(report.phase_f_displacement?.capacity_report != null);
+    expect(idxPhaseF >= 0).toBeTruthy();
+    expect(idxRear >= 0).toBeTruthy();
+    expect(idxPhaseF > idxRear).toBeTruthy();
+    expect(report.phase_f_displacement?.trigger_report != null).toBeTruthy();
+    expect(report.phase_f_displacement?.capacity_report != null).toBeTruthy();
 });

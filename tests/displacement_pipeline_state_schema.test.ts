@@ -5,8 +5,7 @@
  * - Denylisted derived fields remain rejected (covered by game_state_no_derived_fields.test.ts).
  */
 
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import { deserializeState, serializeState } from '../src/state/serialize.js';
@@ -94,31 +93,44 @@ function phaseFGameStateFixture(): GameState {
 test('validateGameStateShape returns ok for GameState with Phase F fields', () => {
     const state = phaseFGameStateFixture();
     const result = validateGameStateShape(state);
-    assert.strictEqual(result.ok, true, result.ok ? '' : (result as { errors: string[] }).errors.join('; '));
+    expect(result.ok).toBe(true);
 });
 
 test('validateGameStateShape returns ok for GameState with only some Phase F fields', () => {
     const state = phaseFGameStateFixture();
-    const stateObj = state as unknown as Record<string, unknown>;
-    delete stateObj.settlement_displacement_started_turn;
-    const result = validateGameStateShape(stateObj);
-    assert.strictEqual(result.ok, true);
+    delete state.displacement.settlement_displacement_started_turn;
+    const result = validateGameStateShape(state);
+    expect(result.ok).toBe(true);
 });
 
 test('validateGameStateShape rejects settlement_displacement when value out of [0, 1]', () => {
     const state = phaseFGameStateFixture();
     state.displacement.settlement_displacement!['SID_001'] = 1.5;
     const result = validateGameStateShape(state);
-    assert.strictEqual(result.ok, false);
-    assert.ok((result as { errors: string[] }).errors.some((e) => e.includes('settlement_displacement')));
+    expect(result.ok).toBe(false);
+    expect((result as { errors: string[] }).errors.some((e) => e.includes('settlement_displacement'))).toBeTruthy();
 });
 
 test('validateGameStateShape rejects municipality_displacement when value out of [0, 1]', () => {
     const state = phaseFGameStateFixture();
     state.displacement.municipality_displacement!['MUN_A'] = -0.1;
     const result = validateGameStateShape(state);
-    assert.strictEqual(result.ok, false);
-    assert.ok((result as { errors: string[] }).errors.some((e) => e.includes('municipality_displacement')));
+    expect(result.ok).toBe(false);
+    expect((result as { errors: string[] }).errors.some((e) => e.includes('municipality_displacement'))).toBeTruthy();
+});
+
+test('validateGameStateShape rejects malformed nested displacement camp state', () => {
+    const state = phaseFGameStateFixture();
+    state.displacement.displacement_camp_state = {
+        MUN_A: {
+            mun_id: 'MUN_A',
+            population: -5,
+            started_turn: 30
+        }
+    } as any;
+    const result = validateGameStateShape(state);
+    expect(result.ok).toBe(false);
+    expect((result as { errors: string[] }).errors.some((e) => e.includes('displacement.displacement_camp_state.MUN_A.population'))).toBeTruthy();
 });
 
 test('Phase F state serialization round-trip preserves Phase F fields', () => {
@@ -126,9 +138,9 @@ test('Phase F state serialization round-trip preserves Phase F fields', () => {
     const payload = serializeState(original);
     const hydrated = deserializeState(payload);
 
-    assert.deepStrictEqual(hydrated.displacement.settlement_displacement, { 'SID_001': 0.2, 'SID_002': 0.5 });
-    assert.deepStrictEqual(hydrated.displacement.settlement_displacement_started_turn, { 'SID_001': 25, 'SID_002': 28 });
-    assert.deepStrictEqual(hydrated.displacement.municipality_displacement, { 'MUN_A': 0.3, 'MUN_B': 0.4 });
+    expect(hydrated.displacement.settlement_displacement).toEqual({ 'SID_001': 0.2, 'SID_002': 0.5 });
+    expect(hydrated.displacement.settlement_displacement_started_turn).toEqual({ 'SID_001': 25, 'SID_002': 28 });
+    expect(hydrated.displacement.municipality_displacement).toEqual({ 'MUN_A': 0.3, 'MUN_B': 0.4 });
 });
 
 test('Phase F state serialization reaches deterministic fixed-point after migration defaults', () => {
@@ -137,12 +149,12 @@ test('Phase F state serialization reaches deterministic fixed-point after migrat
     const hydrated = deserializeState(once);
     const twice = serializeState(hydrated);
     const thrice = serializeState(deserializeState(twice));
-    assert.strictEqual(twice, thrice, 'Serialized output must be byte-identical once migration defaults are materialized');
+    expect(twice).toBe(thrice);
 });
 
 test('serializeGameState produces identical string when called twice with Phase F state', () => {
     const state = phaseFGameStateFixture();
     const a = serializeGameState(state);
     const b = serializeGameState(state);
-    assert.strictEqual(a, b, 'Two serializations of same state must be byte-identical');
+    expect(a).toBe(b);
 });

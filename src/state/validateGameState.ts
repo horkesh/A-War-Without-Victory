@@ -244,109 +244,112 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
     // War phase: AoR keys removed (brigade_municipality_assignment, brigade_mun_orders not validated; legacy load may strip)
 
     // Phase F: displacement state (stored; monotonic [0, 1]; missing maps treated as empty)
-    if ('settlement_displacement' in s && s.settlement_displacement !== undefined) {
-        const sd = s.settlement_displacement;
-        if (sd !== null && typeof sd === 'object' && !Array.isArray(sd)) {
-            for (const [sid, val] of Object.entries(sd)) {
-                if (typeof val !== 'number' || val < 0 || val > 1 || !Number.isFinite(val)) {
-                    errors.push(`settlement_displacement.${sid} must be a number in [0, 1] when present`);
+    const displacement = s.displacement as any;
+    if (displacement && typeof displacement === 'object' && !Array.isArray(displacement)) {
+        if ('settlement_displacement' in displacement && displacement.settlement_displacement !== undefined) {
+            const sd = displacement.settlement_displacement;
+            if (sd !== null && typeof sd === 'object' && !Array.isArray(sd)) {
+                for (const [sid, val] of Object.entries(sd)) {
+                    if (typeof val !== 'number' || val < 0 || val > 1 || !Number.isFinite(val)) {
+                        errors.push(`displacement.settlement_displacement.${sid} must be a number in [0, 1] when present`);
+                    }
                 }
+            } else {
+                errors.push('displacement.settlement_displacement must be an object (Record<SettlementId, number>) when present');
             }
-        } else {
-            errors.push('settlement_displacement must be an object (Record<SettlementId, number>) when present');
+        }
+        if ('settlement_displacement_started_turn' in displacement && displacement.settlement_displacement_started_turn !== undefined) {
+            const st = displacement.settlement_displacement_started_turn;
+            if (st !== null && typeof st === 'object' && !Array.isArray(st)) {
+                for (const [sid, val] of Object.entries(st)) {
+                    if (!Number.isInteger(val) || (val as number) < 0) {
+                        errors.push(`displacement.settlement_displacement_started_turn.${sid} must be a non-negative integer when present`);
+                    }
+                }
+            } else {
+                errors.push('displacement.settlement_displacement_started_turn must be an object (Record<SettlementId, number>) when present');
+            }
+        }
+        if ('municipality_displacement' in displacement && displacement.municipality_displacement !== undefined) {
+            const md = displacement.municipality_displacement;
+            if (md !== null && typeof md === 'object' && !Array.isArray(md)) {
+                for (const [munId, val] of Object.entries(md)) {
+                    if (typeof val !== 'number' || val < 0 || val > 1 || !Number.isFinite(val)) {
+                        errors.push(`displacement.municipality_displacement.${munId} must be a number in [0, 1] when present`);
+                    }
+                }
+            } else {
+                errors.push('displacement.municipality_displacement must be an object (Record<MunicipalityId, number>) when present');
+            }
+        }
+        if ('hostile_takeover_timers' in displacement && displacement.hostile_takeover_timers !== undefined) {
+            const timers = displacement.hostile_takeover_timers;
+            if (timers !== null && typeof timers === 'object' && !Array.isArray(timers)) {
+                for (const [munId, raw] of Object.entries(timers)) {
+                    if (raw == null || typeof raw !== 'object' || Array.isArray(raw)) {
+                        errors.push(`displacement.hostile_takeover_timers.${munId} must be an object when present`);
+                        continue;
+                    }
+                    const rec = raw as any;
+                    if (typeof rec.mun_id !== 'string' || rec.mun_id.length === 0) {
+                        errors.push(`displacement.hostile_takeover_timers.${munId}.mun_id must be a non-empty string`);
+                    }
+                    if (typeof rec.from_faction !== 'string' || rec.from_faction.length === 0) {
+                        errors.push(`displacement.hostile_takeover_timers.${munId}.from_faction must be a non-empty string`);
+                    }
+                    if (typeof rec.to_faction !== 'string' || rec.to_faction.length === 0) {
+                        errors.push(`displacement.hostile_takeover_timers.${munId}.to_faction must be a non-empty string`);
+                    }
+                    if (
+                        typeof rec.started_turn !== 'number' ||
+                        !Number.isInteger(rec.started_turn) ||
+                        rec.started_turn < 0
+                    ) {
+                        errors.push(`displacement.hostile_takeover_timers.${munId}.started_turn must be a non-negative integer`);
+                    }
+                }
+            } else {
+                errors.push('displacement.hostile_takeover_timers must be an object (Record<string, HostileTakeoverTimerState>) when present');
+            }
         }
     }
-    if ('settlement_displacement_started_turn' in s && s.settlement_displacement_started_turn !== undefined) {
-        const st = s.settlement_displacement_started_turn;
-        if (st !== null && typeof st === 'object' && !Array.isArray(st)) {
-            for (const [sid, val] of Object.entries(st)) {
-                if (!Number.isInteger(val) || (val as number) < 0) {
-                    errors.push(`settlement_displacement_started_turn.${sid} must be a non-negative integer when present`);
-                }
-            }
-        } else {
-            errors.push('settlement_displacement_started_turn must be an object (Record<SettlementId, number>) when present');
-        }
-    }
-    if ('municipality_displacement' in s && s.municipality_displacement !== undefined) {
-        const md = s.municipality_displacement;
-        if (md !== null && typeof md === 'object' && !Array.isArray(md)) {
-            for (const [munId, val] of Object.entries(md)) {
-                if (typeof val !== 'number' || val < 0 || val > 1 || !Number.isFinite(val)) {
-                    errors.push(`municipality_displacement.${munId} must be a number in [0, 1] when present`);
-                }
-            }
-        } else {
-            errors.push('municipality_displacement must be an object (Record<MunicipalityId, number>) when present');
-        }
-    }
-    if ('hostile_takeover_timers' in s && s.hostile_takeover_timers !== undefined) {
-        const timers = s.hostile_takeover_timers;
-        if (timers !== null && typeof timers === 'object' && !Array.isArray(timers)) {
-            for (const [munId, raw] of Object.entries(timers)) {
-                if (raw == null || typeof raw !== 'object' || Array.isArray(raw)) {
-                    errors.push(`hostile_takeover_timers.${munId} must be an object when present`);
-                    continue;
-                }
-                const rec = raw as any;
-                if (typeof rec.mun_id !== 'string' || rec.mun_id.length === 0) {
-                    errors.push(`hostile_takeover_timers.${munId}.mun_id must be a non-empty string`);
-                }
-                if (typeof rec.from_faction !== 'string' || rec.from_faction.length === 0) {
-                    errors.push(`hostile_takeover_timers.${munId}.from_faction must be a non-empty string`);
-                }
-                if (typeof rec.to_faction !== 'string' || rec.to_faction.length === 0) {
-                    errors.push(`hostile_takeover_timers.${munId}.to_faction must be a non-empty string`);
-                }
-                if (
-                    typeof rec.started_turn !== 'number' ||
-                    !Number.isInteger(rec.started_turn) ||
-                    rec.started_turn < 0
-                ) {
-                    errors.push(`hostile_takeover_timers.${munId}.started_turn must be a non-negative integer`);
-                }
-            }
-        } else {
-            errors.push('hostile_takeover_timers must be an object (Record<string, HostileTakeoverTimerState>) when present');
-        }
-    }
-    if ('displacement_camp_state' in s && (s as any).displacement.displacement_camp_state !== undefined) {
-        const camps = (s as any).displacement.displacement_camp_state;
+    if (displacement && typeof displacement === 'object' && !Array.isArray(displacement) && 'displacement_camp_state' in displacement && displacement.displacement_camp_state !== undefined) {
+        const camps = displacement.displacement_camp_state;
         if (camps !== null && typeof camps === 'object' && !Array.isArray(camps)) {
             for (const [munId, raw] of Object.entries(camps)) {
                 if (raw == null || typeof raw !== 'object' || Array.isArray(raw)) {
-                    errors.push(`displacement_camp_state.${munId} must be an object when present`);
+                    errors.push(`displacement.displacement_camp_state.${munId} must be an object when present`);
                     continue;
                 }
                 const rec = raw as any;
                 if (typeof rec.mun_id !== 'string' || rec.mun_id.length === 0) {
-                    errors.push(`displacement_camp_state.${munId}.mun_id must be a non-empty string`);
+                    errors.push(`displacement.displacement_camp_state.${munId}.mun_id must be a non-empty string`);
                 }
                 if (typeof rec.population !== 'number' || !Number.isFinite(rec.population) || rec.population < 0) {
-                    errors.push(`displacement_camp_state.${munId}.population must be a non-negative number`);
+                    errors.push(`displacement.displacement_camp_state.${munId}.population must be a non-negative number`);
                 }
                 if (
                     typeof rec.started_turn !== 'number' ||
                     !Number.isInteger(rec.started_turn) ||
                     rec.started_turn < 0
                 ) {
-                    errors.push(`displacement_camp_state.${munId}.started_turn must be a non-negative integer`);
+                    errors.push(`displacement.displacement_camp_state.${munId}.started_turn must be a non-negative integer`);
                 }
                 const byFaction = rec.by_faction;
                 if (byFaction !== undefined) {
                     if (byFaction == null || typeof byFaction !== 'object' || Array.isArray(byFaction)) {
-                        errors.push(`displacement_camp_state.${munId}.by_faction must be an object when present`);
+                        errors.push(`displacement.displacement_camp_state.${munId}.by_faction must be an object when present`);
                     } else {
                         for (const [fid, val] of Object.entries(byFaction as any)) {
                             if (typeof val !== 'number' || !Number.isFinite(val) || val < 0) {
-                                errors.push(`displacement_camp_state.${munId}.by_faction.${fid} must be a non-negative number`);
+                                errors.push(`displacement.displacement_camp_state.${munId}.by_faction.${fid} must be a non-negative number`);
                             }
                         }
                     }
                 }
             }
         } else {
-            errors.push('displacement_camp_state must be an object (Record<MunicipalityId, DisplacementCampState>) when present');
+            errors.push('displacement.displacement_camp_state must be an object (Record<MunicipalityId, DisplacementCampState>) when present');
         }
     }
 

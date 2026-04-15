@@ -5,8 +5,7 @@
  * - Deterministic: same inputs => same outputs after N turns.
  */
 
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { expect, test } from 'vitest';
 import { applySettlementDisplacementDeltas } from '../src/sim/displacement_pipeline/displacement_accumulation.js';
 import type { GameState, SettlementId } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
@@ -48,21 +47,21 @@ test('applySettlementDisplacementDeltas: monotonic', () => {
     state.displacement.settlement_displacement = { S1: 0.1, S2: 0.2 };
     const deltas: Record<SettlementId, number> = { S1: 0.03, S2: 0.02 };
     applySettlementDisplacementDeltas(state, deltas);
-    assert.strictEqual(state.displacement.settlement_displacement!['S1'], 0.13);
-    assert.strictEqual(state.displacement.settlement_displacement!['S2'], 0.22);
+    expect(state.displacement.settlement_displacement!['S1']).toBe(0.13);
+    expect(state.displacement.settlement_displacement!['S2']).toBe(0.22);
     // Second application with same deltas: values should not decrease
     const beforeS1 = state.displacement.settlement_displacement!['S1'];
     applySettlementDisplacementDeltas(state, deltas);
-    assert.ok(state.displacement.settlement_displacement!['S1'] >= beforeS1);
-    assert.ok(state.displacement.settlement_displacement!['S2'] >= 0.22);
+    expect(state.displacement.settlement_displacement!['S1'] >= beforeS1).toBeTruthy();
+    expect(state.displacement.settlement_displacement!['S2'] >= 0.22).toBeTruthy();
 });
 
 test('applySettlementDisplacementDeltas: bounded [0, 1]', () => {
     const state = minimalPhaseIIState();
     state.displacement.settlement_displacement = { S1: 0.98 };
     applySettlementDisplacementDeltas(state, { S1: 0.05 });
-    assert.ok(state.displacement.settlement_displacement!['S1'] <= 1);
-    assert.ok(state.displacement.settlement_displacement!['S1'] >= 0.98);
+    expect(state.displacement.settlement_displacement!['S1'] <= 1).toBeTruthy();
+    expect(state.displacement.settlement_displacement!['S1'] >= 0.98).toBeTruthy();
 });
 
 test('applySettlementDisplacementDeltas: deterministic same inputs => same outputs', () => {
@@ -71,8 +70,8 @@ test('applySettlementDisplacementDeltas: deterministic same inputs => same outpu
     const deltas = { S1: 0.02, S2: 0.03 };
     applySettlementDisplacementDeltas(state1, deltas);
     applySettlementDisplacementDeltas(state2, deltas);
-    assert.deepStrictEqual(state1.displacement.settlement_displacement, state2.displacement.settlement_displacement);
-    assert.deepStrictEqual(state1.displacement.settlement_displacement_started_turn, state2.displacement.settlement_displacement_started_turn);
+    expect(state1.displacement.settlement_displacement).toEqual(state2.displacement.settlement_displacement);
+    expect(state1.displacement.settlement_displacement_started_turn).toEqual(state2.displacement.settlement_displacement_started_turn);
 });
 
 test('applySettlementDisplacementDeltas: N turns same deltas => byte-identical serialization', () => {
@@ -93,7 +92,7 @@ test('applySettlementDisplacementDeltas: N turns same deltas => byte-identical s
     }
     const outA = serializeState(stateA);
     const outB = serializeState(stateB);
-    assert.strictEqual(outA, outB, 'Same inputs over N turns must produce byte-identical serialized state');
+    expect(outA).toBe(outB);
 });
 
 test('applySettlementDisplacementDeltas: peace no-op', () => {
@@ -102,5 +101,5 @@ test('applySettlementDisplacementDeltas: peace no-op', () => {
     state.displacement.settlement_displacement = { S1: 0.1 };
     const before = state.displacement.settlement_displacement['S1'];
     applySettlementDisplacementDeltas(state, { S1: 0.05 });
-    assert.strictEqual(state.displacement.settlement_displacement!['S1'], before);
+    expect(state.displacement.settlement_displacement!['S1']).toBe(before);
 });
