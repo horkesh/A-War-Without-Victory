@@ -1,3 +1,51 @@
+## [2026-04-15] refactor(sim): extract late war-phase step families
+
+**Type:** Maintainability / god-file decomposition (behavior-preserving)
+**Commit (code):** 9da5522a
+**Commit (ledger):** this entry
+**Files:** `src/sim/turn_phases/war_phases.ts`, `src/sim/turn_phases/war_phase_reconciliation_steps.ts` (new), `src/sim/turn_phases/war_phase_negotiation_steps.ts` (new), `src/sim/turn_phases/war_phase_briefing_steps.ts` (new), `tests/war_phase_step_order.test.ts`, `tests/ui_adapter_boundary.test.ts`
+**Tests:** `npx.cmd tsc --noEmit -p tsconfig.json` clean; vitest `war_phase_step_order` + `pipeline_step_execution_proof` + `late_state_rupture_proof` + `dayton_negotiation` + `stranded_brigade_lifecycle` + `final_sector_truth_reconciliation` + `ui_adapter_boundary` = 93/93 pass; `npm.cmd run desktop:map:build` clean in 6.58s (pre-existing warnings unchanged); `npm.cmd run sim:scenario:run:40w` produced `n1577` with final hash `2dc5a98fd4f2ec2e`; `node tools/validate_run_consistency.cjs runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n1577` PASS; `git diff --check` clean.
+**Status:** VERIFIED — no behavior drift. The 40w scenario hash matched the latest recorded canonical 40w hash (`n1575` → `2dc5a98fd4f2ec2e`) exactly.
+
+### Summary
+Extracted three coherent late-turn phase families out of `src/sim/turn_phases/war_phases.ts` while preserving exact step order and runtime behavior:
+
+1. **Final reconciliation / assertion tail** → `war_phase_reconciliation_steps.ts`
+2. **Late negotiation / rupture / Dayton tail** → `war_phase_negotiation_steps.ts`
+3. **Command briefing / summary tail** → `war_phase_briefing_steps.ts`
+
+`war_phases.ts` remains the canonical registry surface via `export const warPhases: NamedPhase[] = [...]`, now composed with ordered `...warPhase*Steps` spreads instead of embedding every late-tail `run()` inline.
+
+### Extracted owner families
+- **`warPhaseReconciliationSteps`**: `rederive-osid-front-segments`, `reconcile-final-sector-truth`, `reconcile-final-operation-truth`, `reconcile-final-sector-truth-after-ops`, `final-distribute-brigades-to-front`, `assert-final-operation-lifecycle`, `assert-formations-in-friendly-territory`, `assert-control-event-consistency`, `compute-combat-effective-brigades`
+- **`warPhaseNegotiationSteps`**: `evaluate-peace-plans`, `check-victory-conditions`, `update-patron-pressure`, `evaluate-rupture-consequences`, `compute-negotiation-capital`, `evaluate-dayton-trigger`
+- **`warPhaseBriefingSteps`**: `assemble-command-briefing`, `compile-turn-summary`, `resolve-noop`
+
+### What remains canonical in war_phases.ts
+`war_phases.ts` still owns:
+- the top-level `warPhases` export and exact step ordering
+- the heterogeneous early/mid-pipeline bands (setup, supply, movement, AI, combat, recruitment, pressure, and other cross-cutting orchestration)
+- composition of extracted families into the canonical ordered pipeline
+
+This tranche intentionally did **not** move mixed-domain middle-pipeline bands whose read/write surface is still too entangled to extract cheaply without obscuring ownership.
+
+### Size reduction
+`war_phases.ts` shrank from **2893** lines to **2688** lines (**-205**). The extracted helpers are:
+- `war_phase_reconciliation_steps.ts` — 129 lines
+- `war_phase_negotiation_steps.ts` — 68 lines
+- `war_phase_briefing_steps.ts` — 34 lines
+
+### Proof boundaries
+- **Direct proof:** Existing runtime proof still passes through the real `warPhases` export; new `war_phase_step_order` assertions prove each extracted helper family composes into a contiguous ordered slice of the canonical pipeline.
+- **Direct non-drift proof:** 40w scenario rerun `n1577` reproduced canonical final hash `2dc5a98fd4f2ec2e` exactly.
+- **Source-verified only:** The docs/owner-family prose itself is structural documentation. The real proof surface is runtime order + scenario hash, not the prose labels.
+
+### Rejected / deferred extractions
+- **Pressure / exhaustion / collapse block**: deferred. Conceptually coherent but still spans too many contextual caches and cross-module helper types for this tranche.
+- **Large middle-pipeline AI / combat bands**: deferred. They remain merge-magnet candidates, but this packet stayed in the safer late-turn tail where scenario hash non-drift is easy to verify.
+
+---
+
 ## [2026-04-15] refactor(desktop): extract command strain computation from electron-main.cjs
 
 **Type:** Desktop god-file decomposition packet (bounded extraction, behavior-preserving)
