@@ -86,6 +86,7 @@ describe('test discovery contracts', () => {
             'tests/orphan_operation_brigades.test.ts',
             'tests/officer_system.test.ts',
             'tests/pre_planned_operations.test.ts',
+            'tests/jna_phantom_brigades.test.ts',
             'tests/phase10_ops_fatigue.test.ts',
             'tests/siege_mobilization.test.ts',
             'tests/territorial_valuation.test.ts',

@@ -1,3 +1,22 @@
+## [2026-04-15] test(repo): refresh JNA phantom truth and migrate the suite onto vitest
+
+**Type:** Test-harness cleanup / content-truth refresh
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/jna_phantom_brigades.test.ts`, `tests/test_discovery_contract.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/jna_phantom_brigades.test.ts tests/test_discovery_contract.test.ts` pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED after packet verification - the JNA phantom suite no longer proves a fossilized five-phantom story. It now matches the live engine catalog, isolates one honest no-handoff case and one honest handoff case, and runs on vitest because the file is pure in-process contract truth rather than a harness keeper.
+
+### Summary
+
+1. **The suite now matches the real current phantom catalog:** spawn/countdown proof covers the live JNA + HV phantom definitions instead of a stale “five phantoms” myth.
+2. **Withdrawal truth is split by behavior, not nostalgia:** one case proves the current no-handoff withdrawal (`jna_9th_corps_tg`), another proves equipment distribution from a handoff-enabled phantom (`jna_uzice_corps_tg`), and another proves active-operation cleanup.
+3. **The runner finally matches the seam:** once the stale expectations were removed, the file proved to be pure in-process state truth and moved cleanly to vitest.
+
+### Why this mattered
+
+This was not just another runner migration. The old suite was enforcing historical test prose that the engine had long since outgrown: wrong phantom counts, wrong withdrawal turns, wrong locations, and handoff expectations wired to the wrong phantom entirely. Leaving that in place would have kept the cleanup campaign polite and dishonest. Refreshing the file forced an actual confrontation with current content truth. Now the remaining node-runner residue is narrower again, and this particular band no longer hides stale content assumptions behind the phrase “hard tests.”
+
 ## [2026-04-15] test(repo): split fatigue scenario proof and migrate siege contracts onto vitest
 
 **Type:** Test-harness cleanup / mixed-suite truth refresh
