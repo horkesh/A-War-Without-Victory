@@ -359,6 +359,18 @@
 - **Right approach**: Run `tools/validate_run_consistency.cjs` after every scenario run. Checks: peak >= current, taken/inflicted accounting, assignment completeness, ghost paramilitaries, intel system liveness, formation.assignment sync.
 - **Do instead**: Add consistency validation to the post-run checklist alongside calibration comparison and diagnostics. Numbers that don't add up = bugs hiding in plain sight.
 
+### [Process] Worktree agents produce uncommitted changes — always extract, apply, and verify on main (2026-04-15) — NEW
+- **Context**: All 5 worktree implementation agents (Lanes A–E) produced correct file changes but could not commit or run full verification. Worktrees had 8,000+ tsc errors from missing UI workspace dependencies (React types, maplibre-gl, @vitejs/plugin-react). Changes had to be manually extracted as `git diff` patches and applied to main for tsc/vitest/build verification.
+- **Wrong approach**: Expecting worktree agents to self-verify and commit. The worktree environment is incomplete — UI workspace deps don't resolve from the worktree root.
+- **Right approach**: Treat worktree agents as code-generation tools, not as self-contained CI. Extract their changes as patches (`git diff --cached > /tmp/lane.patch`), apply to main (`git apply`), verify there (tsc + vitest + build), then commit from main.
+- **Do instead**: When dispatching worktree agents, tell them to stage changes but expect uncommitted output. Plan the patch extraction + main verification as part of the orchestration workflow, not as a surprise cleanup step.
+
+### [Process] Verify pipeline step names by grepping the actual pipeline, not by agent memory (2026-04-15) — NEW
+- **Context**: Investigation agent reported rupture step predecessor as `evaluate-patron-events`. Actual name in `war_phases.ts` was `update-patron-pressure`. Pipeline proof test failed until corrected by grep. The agent approximated the name from import context, not from the `name:` field.
+- **Wrong approach**: Trusting agent-reported step names without verification. Agents see import names (`evaluatePatronEvents`) and infer step names, but the actual `name:` string in the NamedPhase object may differ.
+- **Right approach**: Always `grep "name:.*patron" src/sim/turn_phases/war_phases.ts` (or equivalent) before writing tests that reference pipeline step names. The `name:` field is the source of truth.
+- **Do instead**: When writing pipeline step tests, grep for the exact `name:` string in the NamedPhase array. Never rely on function import names or agent reports as proxies for step names.
+
 ### [Process] Parallel agent dispatch needs exclusive file ownership — overlapping edits corrupt files (2026-03-29) — NEW
 - **Context**: 4 agents dispatched for active_operation migration. Two agents both edited army_reserve_system.ts. One agent mangled h_phase_intelligence_warfare.test.ts badly (deleted test bodies, parse errors).
 - **Wrong approach**: Assigning files to agents without checking for overlaps. Trusting agents to do bulk find-replace without reading context.

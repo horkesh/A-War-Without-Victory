@@ -1,8 +1,25 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-11. 231 lessons across 9 topic files.
+> Last restructured: 2026-04-11. 236 lessons across 9 topic files.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
+
+## New Lessons (2026-04-15)
+
+### [Process] Worktree agents produce uncommitted changes — extract, apply, verify on main — see `docs/life_lessons/process.md`
+- All 5 worktree agents (Lanes A–E) couldn't verify/commit — 8000+ tsc errors from missing UI workspace deps. Changes extracted as patches, applied to main. Treat worktree agents as code generators, not self-contained CI.
+
+### [Process] Verify pipeline step names by grepping the actual pipeline, not agent memory — see `docs/life_lessons/process.md`
+- Investigation agent said `evaluate-patron-events`, actual name was `update-patron-pressure`. Test failed. Always grep `name:` field in war_phases.ts before writing step-name tests.
+
+### [Architecture] Scenario proof requires turn-threshold analysis before claiming feasibility — see `docs/life_lessons/architecture.md`
+- Rupture needs turn >= 140. 40w/52w scenarios can't reach it. 188w run proved correct non-firing (Srebrenica held). Check precondition thresholds against scenario lengths BEFORE promising proof.
+
+### [Architecture] Correct non-firing is valid scenario proof for condition-gated behavior — see `docs/life_lessons/architecture.md`
+- 188w: Srebrenica held → rupture correctly did NOT fire. This proves the gate works. Non-firing when conditions aren't met IS proof, not a gap.
+
+### [UI] Component mount tests require React at root level — see `docs/life_lessons/architecture.md`
+- React in `src/ui/map/node_modules` doesn't help vitest at root. Install react + @testing-library/react at root to unblock mount tests.
 
 ## New Lessons (2026-04-10)
 
