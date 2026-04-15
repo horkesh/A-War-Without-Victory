@@ -2,10 +2,10 @@
  * B2 Campaign unlock: getPlayableScenarioIds and persistence (read/write completed IDs).
  */
 
-import assert from 'node:assert';
 import { mkdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
-import { test } from 'node:test';
+import { describe, expect, it } from 'vitest';
+
 import {
     getPlayableScenarioIds,
     markScenarioCompleted,
@@ -13,81 +13,83 @@ import {
     writeCompletedScenarioIds
 } from '../src/scenario/campaign_unlock.js';
 
-test('getPlayableScenarioIds: no prerequisites => all playable', () => {
-    const all = ['a', 'b', 'c'];
-    const completed = new Set<string>();
-    const prereqs = new Map<string, string[]>();
-    const playable = getPlayableScenarioIds(all, completed, prereqs);
-    assert.deepStrictEqual(playable, ['a', 'b', 'c']);
-});
+const TMP_DIR = join(process.cwd(), '.tmp_campaign_unlock');
 
-test('getPlayableScenarioIds: prerequisites met => included', () => {
-    const all = ['first', 'second'];
-    const completed = new Set(['first']);
-    const prereqs = new Map([['second', ['first']]]);
-    const playable = getPlayableScenarioIds(all, completed, prereqs);
-    assert.deepStrictEqual(playable, ['first', 'second']);
-});
+describe('campaign unlock', () => {
+    it('returns all scenarios when no prerequisites exist', () => {
+        const all = ['a', 'b', 'c'];
+        const completed = new Set<string>();
+        const prereqs = new Map<string, string[]>();
+        const playable = getPlayableScenarioIds(all, completed, prereqs);
+        expect(playable).toEqual(['a', 'b', 'c']);
+    });
 
-test('getPlayableScenarioIds: prerequisites not met => excluded', () => {
-    const all = ['first', 'second'];
-    const completed = new Set<string>();
-    const prereqs = new Map([['second', ['first']]]);
-    const playable = getPlayableScenarioIds(all, completed, prereqs);
-    assert.deepStrictEqual(playable, ['first']);
-});
+    it('includes scenarios whose prerequisites are met', () => {
+        const all = ['first', 'second'];
+        const completed = new Set(['first']);
+        const prereqs = new Map([['second', ['first']]]);
+        const playable = getPlayableScenarioIds(all, completed, prereqs);
+        expect(playable).toEqual(['first', 'second']);
+    });
 
-test('getPlayableScenarioIds: result is sorted', () => {
-    const all = ['z', 'a', 'm'];
-    const completed = new Set(['a']);
-    const prereqs = new Map([['z', ['a']], ['m', []]]);
-    const playable = getPlayableScenarioIds(all, completed, prereqs);
-    assert.deepStrictEqual(playable, ['a', 'm', 'z']);
-});
+    it('excludes scenarios whose prerequisites are not met', () => {
+        const all = ['first', 'second'];
+        const completed = new Set<string>();
+        const prereqs = new Map([['second', ['first']]]);
+        const playable = getPlayableScenarioIds(all, completed, prereqs);
+        expect(playable).toEqual(['first']);
+    });
 
-test('getPlayableScenarioIds: multiple prerequisites all must be met', () => {
-    const all = ['a', 'b', 'c', 'd'];
-    const completed = new Set(['a', 'b']);
-    const prereqs = new Map([['c', ['a']], ['d', ['a', 'b']]]);
-    const playable = getPlayableScenarioIds(all, completed, prereqs);
-    assert.deepStrictEqual(playable, ['a', 'b', 'c', 'd']);
-});
+    it('sorts playable scenario ids deterministically', () => {
+        const all = ['z', 'a', 'm'];
+        const completed = new Set(['a']);
+        const prereqs = new Map([['z', ['a']], ['m', []]]);
+        const playable = getPlayableScenarioIds(all, completed, prereqs);
+        expect(playable).toEqual(['a', 'm', 'z']);
+    });
 
-test('getPlayableScenarioIds: multiple prerequisites one missing => excluded', () => {
-    const all = ['a', 'b', 'd'];
-    const completed = new Set(['a']);
-    const prereqs = new Map([['d', ['a', 'b']]]);
-    const playable = getPlayableScenarioIds(all, completed, prereqs);
-    assert.deepStrictEqual(playable, ['a', 'b']);
-});
+    it('requires all multiple prerequisites to be met', () => {
+        const all = ['a', 'b', 'c', 'd'];
+        const completed = new Set(['a', 'b']);
+        const prereqs = new Map([['c', ['a']], ['d', ['a', 'b']]]);
+        const playable = getPlayableScenarioIds(all, completed, prereqs);
+        expect(playable).toEqual(['a', 'b', 'c', 'd']);
+    });
 
-test('writeCompletedScenarioIds and readCompletedScenarioIds round-trip', async () => {
-    const dir = join(process.cwd(), 'data', 'derived', 'scenario');
-    await mkdir(dir, { recursive: true });
-    const path = join(dir, 'completed_scenario_ids_test.json');
-    const ids = new Set(['apr1992_50w_bots', 'first_scenario']);
-    await writeCompletedScenarioIds(path, ids);
-    const read = await readCompletedScenarioIds(path);
-    assert.strictEqual(read.size, 2);
-    assert.ok(read.has('apr1992_50w_bots'));
-    assert.ok(read.has('first_scenario'));
-    await rm(path, { force: true });
-});
+    it('excludes scenarios when one multiple prerequisite is missing', () => {
+        const all = ['a', 'b', 'd'];
+        const completed = new Set(['a']);
+        const prereqs = new Map([['d', ['a', 'b']]]);
+        const playable = getPlayableScenarioIds(all, completed, prereqs);
+        expect(playable).toEqual(['a', 'b']);
+    });
 
-test('readCompletedScenarioIds on missing file returns empty set', async () => {
-    const read = await readCompletedScenarioIds(join(process.cwd(), 'nonexistent_completed_999.json'));
-    assert.strictEqual(read.size, 0);
-});
+    it('round-trips completed scenario ids through persistence', async () => {
+        await mkdir(TMP_DIR, { recursive: true });
+        const path = join(TMP_DIR, 'completed_scenario_ids_test.json');
+        const ids = new Set(['apr1992_50w_bots', 'first_scenario']);
+        await writeCompletedScenarioIds(path, ids);
+        const read = await readCompletedScenarioIds(path);
+        expect(read.size).toBe(2);
+        expect(read.has('apr1992_50w_bots')).toBe(true);
+        expect(read.has('first_scenario')).toBe(true);
+        await rm(path, { force: true });
+    });
 
-test('markScenarioCompleted adds id and persists', async () => {
-    const dir = join(process.cwd(), 'data', 'derived', 'scenario');
-    await mkdir(dir, { recursive: true });
-    const path = join(dir, 'completed_scenario_ids_mark_test.json');
-    await writeCompletedScenarioIds(path, new Set(['existing']));
-    await markScenarioCompleted(path, 'new_one');
-    const read = await readCompletedScenarioIds(path);
-    assert.strictEqual(read.size, 2);
-    assert.ok(read.has('existing'));
-    assert.ok(read.has('new_one'));
-    await rm(path, { force: true });
+    it('returns an empty set when the completed file is missing', async () => {
+        const read = await readCompletedScenarioIds(join(TMP_DIR, 'nonexistent_completed_999.json'));
+        expect(read.size).toBe(0);
+    });
+
+    it('adds a completed scenario id and persists it', async () => {
+        await mkdir(TMP_DIR, { recursive: true });
+        const path = join(TMP_DIR, 'completed_scenario_ids_mark_test.json');
+        await writeCompletedScenarioIds(path, new Set(['existing']));
+        await markScenarioCompleted(path, 'new_one');
+        const read = await readCompletedScenarioIds(path);
+        expect(read.size).toBe(2);
+        expect(read.has('existing')).toBe(true);
+        expect(read.has('new_one')).toBe(true);
+        await rm(path, { force: true });
+    });
 });

@@ -3299,6 +3299,26 @@ Fresh 40-week run `n1426` validates cleanly. Scripted final-save proof shows `0`
 ### Artifacts
 - None
 
+## [2026-04-15] test(repo): migrate knowledge and bounded fs residue contracts onto vitest
+
+**Type:** Test harness unification / repo-truth hardening
+**Files:** `tests/knowledge_kb_index.test.ts`, `tests/knowledge_kb_validate.test.ts`, `tests/decoration_system.test.ts`, `tests/enclave_integrity.test.ts`, `tests/data_prereq_check_h1_2.test.ts`, `tests/campaign_unlock.test.ts`, `tests/test_discovery_contract.test.ts`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Status:** VERIFIED - targeted vitest, tsc, and desktop:map:build clean
+
+### Summary of changes
+1. **Knowledge-ingest helper contracts now live on the canonical runner** - `knowledge_kb_index` and `knowledge_kb_validate` moved from `node:test` to Vitest without changing their indexing or validation truth.
+2. **Small deterministic domain contracts joined them** - `decoration_system` and `enclave_integrity` now run under Vitest as ordinary in-process owner proofs instead of historical runner residue.
+3. **Filesystem-backed helper residue was tightened honestly** - `campaign_unlock` and `data_prereq_check_h1_2` now use Vitest while still proving deterministic temp-path persistence and prereq formatting behavior; no CLI/process harness was introduced or required.
+4. **Discovery truth was refreshed** - `tests/test_discovery_contract.test.ts` now pins these six suites in the fast Vitest slice, and the remaining `node:test` inventory is down to 21 files that are mostly genuine calibration, scenario, artifact, determinism, or external-data keepers.
+
+### Verification
+- `npx.cmd vitest run tests/knowledge_kb_index.test.ts tests/knowledge_kb_validate.test.ts tests/decoration_system.test.ts tests/enclave_integrity.test.ts tests/data_prereq_check_h1_2.test.ts tests/campaign_unlock.test.ts tests/test_discovery_contract.test.ts`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run desktop:map:build`
+
+### Artifacts
+- None
+
 ## [2026-04-15] fix(harness): prove continue-from-save equivalence on canonical save output
 
 **Type:** Save/load / scenario-harness hardening
