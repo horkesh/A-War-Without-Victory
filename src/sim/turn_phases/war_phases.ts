@@ -3,8 +3,7 @@
 // --- Domain imports (paths adjusted: one directory deeper than turn_pipeline.ts) ---
 
 import { evaluateArmyHQGathering } from '../combat/army_hq_gathering.js';
-import { snapshotPoliticalControllers, assertControlEventConsistency } from '../combat/assert_control_events.js';
-import { assertFormationsInFriendlyTerritory } from '../combat/assert_formation_territory.js';
+import { snapshotPoliticalControllers } from '../combat/assert_control_events.js';
 import { assertOperationLifecycle } from '../combat/assert_operation_lifecycle.js';
 import { attributeOperationCasualties } from '../combat/operation_casualty_attribution.js';
 import { recordOperationWeeklyEntries } from '../combat/operation_aar.js';
@@ -31,7 +30,7 @@ import { applyFormationCommitment } from '../../state/front_posture_commitment.j
 import { expandRegionPostureToEdges } from '../../state/front_posture_regions.js';
 import { accumulateFrontPressure } from '../../state/front_pressure.js';
 import { syncFrontSegments } from '../../state/front_segments.js';
-import { CANONICAL_FACTIONS, GameState, type FactionId, type FormationState, type LegacyBrigadeAoRState, type EffectivePostureExposureState } from '../../state/game_state.js';
+import { GameState, type FactionId, type FormationState, type LegacyBrigadeAoRState, type EffectivePostureExposureState } from '../../state/game_state.js';
 import { updateHeavyEquipmentState } from '../../state/heavy_equipment.js';
 import { updateLegitimacyState } from '../../state/legitimacy.js';
 import { ensureMaintenanceCapacity } from '../../state/maintenance.js';
@@ -143,8 +142,6 @@ import type { Osid } from '../combat/osid_adjacency.js';
 import { generateArmyReserveRequests, evaluateArmyReserveAssignments, tickEliteLoans } from '../combat/army_reserve_system.js';
 import { buildHomeDistanceCache } from '../combat/home_distance.js';
 import { computeSectorCombatRatings } from '../combat/sector_combat_rating.js';
-import { reconcileFinalSectorTruth } from '../combat/final_sector_truth_reconciliation.js';
-import { reconcileFinalOperationTruth } from '../combat/final_operation_truth_reconciliation.js';
 import { detectParamilitaryTargets, advanceParamilitaries, detectOffensiveParamilitaryTargets } from '../combat/paramilitary_sweep.js';
 import { consolidateRearPockets } from '../combat/rear_pocket_consolidation.js';
 import { updateStrandedBrigadeLifecycle } from '../combat/stranded_brigade_lifecycle.js';
@@ -155,18 +152,14 @@ import { accrueRecruitmentResources, runOngoingRecruitment } from '../recruitmen
 import { reroutePoolSurplus } from '../recruitment_engine.js';
 import { computeHomeDefenseActive } from '../compute_home_defense.js';
 import { createBotOrderDiagnosticsSnapshot } from '../../scenario/combat_causality.js';
-import { checkWarTermination, applyWarTermination } from '../war_termination.js';
-import { computeNegotiationBreakdown } from '../negotiation/compute_capital.js';
-import { computeCombatEffectiveBrigades } from '../negotiation/compute_combat_effective.js';
-import { evaluatePeacePlans } from '../negotiation/peace_plans.js';
-import { updatePatronPressure } from '../negotiation/patron_pressure.js';
-import { evaluatePatronEvents } from '../negotiation/patron_events.js';
-import { evaluateRuptureConsequences } from '../negotiation/rupture_consequences.js';
-import { shouldInitiateDayton, initiateDaytonNegotiation } from '../negotiation/dayton_negotiation.js';
+import { warPhaseReconciliationSteps } from './war_phase_reconciliation_steps.js';
+import { warPhaseNegotiationSteps } from './war_phase_negotiation_steps.js';
+import { warPhaseBriefingSteps } from './war_phase_briefing_steps.js';
+import { reconcileFinalOperationTruth } from '../combat/final_operation_truth_reconciliation.js';
 
 // --- Pipeline infrastructure imports ---
 import type { NamedPhase, TurnContext, TurnReport } from '../turn_pipeline_types.js';
-import { getPoliticalControlSnapshot, setPoliticalControlSnapshot } from '../turn_pipeline_types.js';
+import { setPoliticalControlSnapshot } from '../turn_pipeline_types.js';
 import {
     getOperationalData,
     setOperationalData,
@@ -2589,207 +2582,9 @@ export const warPhases: NamedPhase[] = [
             }
         }
     },
-    {
-        name: 'rederive-osid-front-segments',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            const od = getOperationalData(context);
-            if (!od?.opData?.operationalToCanonical || !od?.edges?.length) {
-                context.state.military.war_front_edges_osid = undefined;
-                return;
-            }
-            const osidFrontEdges = computeFrontEdgesOsid(context.state, od.edges, od.opData.operationalToCanonical);
-            context.state.military.war_front_edges_osid = osidFrontEdges;
-        }
-    },
-    {
-        name: 'reconcile-final-sector-truth',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            const od = getOperationalData(context);
-            if (!od?.edges?.length) return;
-            const spatial = getSpatialContextCache(context);
-            const finalSpatial = computeSpatialContext(
-                od.edges,
-                context.state.political.political_controllers ?? {},
-                CANONICAL_FACTIONS,
-                context.state.meta.turn,
-                'post-combat',
-                context.state.military.war_front_edges_osid,
-                spatial?.preCombat.adjacency,
-                spatial?.preCombat.sharedBoundaryAdjacency,
-            );
-            setSpatialContextCache(context, {
-                preCombat: spatial?.preCombat ?? finalSpatial,
-                postCombat: finalSpatial,
-            });
-            reconcileFinalSectorTruth(
-                context.state,
-                od.edges,
-                od.opData?.operationalToCanonical ?? null,
-                od.centroids,
-                finalSpatial,
-                context.report?.supply_resolution?.supply_state_by_osid ?? null,
-            );
-        }
-    },
-    {
-        name: 'reconcile-final-operation-truth',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            reconcileFinalOperationTruth(context.state);
-        }
-    },
-    {
-        name: 'reconcile-final-sector-truth-after-ops',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            const od = getOperationalData(context);
-            if (!od?.edges?.length) return;
-            const cachedSpatial = getSpatialContextCache(context)?.postCombat;
-            reconcileFinalSectorTruth(
-                context.state,
-                od.edges,
-                od.opData?.operationalToCanonical ?? null,
-                od.centroids,
-                cachedSpatial,
-                context.report?.supply_resolution?.supply_state_by_osid ?? null,
-                true, // isFinalPass: only this genuinely-final invocation emits unresolved warnings
-            );
-        }
-    },
-    {
-        name: 'final-distribute-brigades-to-front',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            const sectorMap = context.state.military.corps_front_sectors;
-            if (!sectorMap) return;
-            const spatial = getSpatialContextCache(context);
-            const adjacency = (spatial?.postCombat?.adjacency ?? spatial?.preCombat.adjacency) as Map<Osid, Osid[]> | undefined;
-            if (!adjacency) return;
-            distributeBrigadesToFront(context.state, Object.values(sectorMap), adjacency);
-        }
-    },
-    {
-        name: 'assert-final-operation-lifecycle',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            assertOperationLifecycle(context.state);
-        }
-    },
-    {
-        name: 'assert-formations-in-friendly-territory',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            assertFormationsInFriendlyTerritory(context.state);
-        }
-    },
-    {
-        name: 'assert-control-event-consistency',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            const snapshot = getPoliticalControlSnapshot(context);
-            if (snapshot) assertControlEventConsistency(context.state, snapshot);
-        }
-    },
-    {
-        name: 'compute-combat-effective-brigades',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            computeCombatEffectiveBrigades(context.state);
-        },
-    },
-    {
-        name: 'evaluate-peace-plans',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            evaluatePeacePlans(context.state);
-        }
-    },
-    {
-        name: 'check-victory-conditions',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            const result = checkWarTermination(context.state);
-            if (result.game_over) {
-                applyWarTermination(context.state, result);
-                context.report.war_termination = {
-                    outcome: result.outcome,
-                    winner: result.winner,
-                    trigger: result.trigger
-                };
-            }
-        }
-    },
-    {
-        name: 'update-patron-pressure',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            updatePatronPressure(context.state);
-            evaluatePatronEvents(context.state);
-        }
-    },
-    {
-        name: 'evaluate-rupture-consequences',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            evaluateRuptureConsequences(context.state);
-        }
-    },
-    {
-        name: 'compute-negotiation-capital',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            computeNegotiationBreakdown(context.state);
-        }
-    },
-    {
-        name: 'evaluate-dayton-trigger',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            if (context.state.meta.game_over) return;
-            const neg = context.state.military.negotiation;
-            if (neg?.dayton_result) return;
-            if (neg?.pending_dayton) return; // already pending, idempotent
-            if (shouldInitiateDayton(context.state)) {
-                const menu = initiateDaytonNegotiation(context.state);
-                // ensureNegotiationState was called by initiateDaytonNegotiation,
-                // so neg is guaranteed populated now
-                context.state.military.negotiation!.pending_dayton = menu;
-            }
-        }
-    },
-    {
-        name: 'assemble-command-briefing',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            const playerFaction = context.state.meta.player_faction;
-            if (!playerFaction) return;
-            const { assembleCommandBriefing } = require('../briefing/collect_briefing.js');
-            const briefing = assembleCommandBriefing(context.state, playerFaction);
-            context.state.military.last_briefing = briefing;
-        }
-    },
-    {
-        name: 'compile-turn-summary',
-        run: async (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            const { getAARSnapshot } = await import('../turn_pipeline_types.js');
-            const { compileTurnSummary } = await import('../compile_turn_summary.js');
-            const { MAX_TURN_SUMMARIES } = await import('../../state/turn_summary.js');
-            const snapshot = getAARSnapshot(context);
-            if (!snapshot) return;
-            const summary = compileTurnSummary(context.state, snapshot, context.report);
-            const existing = context.state.turn_summaries ?? [];
-            context.state.turn_summaries = [summary, ...existing].slice(0, MAX_TURN_SUMMARIES);
-        }
-    },
-    {
-        name: 'resolve-noop',
-        run: () => {
-            // placeholder: future resolution work goes here
-        }
-    }
+    ...warPhaseReconciliationSteps,
+    ...warPhaseNegotiationSteps,
+    ...warPhaseBriefingSteps,
 ];
 
 /**

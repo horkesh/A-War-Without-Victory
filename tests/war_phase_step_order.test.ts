@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { warPhases } from '../src/sim/turn_phases/war_phases.js';
+import { warPhaseReconciliationSteps } from '../src/sim/turn_phases/war_phase_reconciliation_steps.js';
+import { warPhaseNegotiationSteps } from '../src/sim/turn_phases/war_phase_negotiation_steps.js';
+import { warPhaseBriefingSteps } from '../src/sim/turn_phases/war_phase_briefing_steps.js';
 
 describe('war-phase step ordering', () => {
     const stepNames = warPhases.map(p => p.name);
@@ -66,6 +69,21 @@ describe('war-phase step ordering', () => {
         for (const name of stepNames) {
             expect(seen.has(name), `duplicate step name: ${name}`).toBe(false);
             seen.add(name);
+        }
+    });
+
+    it('extracted helper families compose into contiguous ordered slices', () => {
+        const helperFamilies = [
+            warPhaseReconciliationSteps,
+            warPhaseNegotiationSteps,
+            warPhaseBriefingSteps,
+        ];
+
+        for (const family of helperFamilies) {
+            const familyNames = family.map(step => step.name);
+            const firstIdx = stepNames.indexOf(familyNames[0]);
+            expect(firstIdx, `missing first family step ${familyNames[0]}`).toBeGreaterThanOrEqual(0);
+            expect(stepNames.slice(firstIdx, firstIdx + familyNames.length)).toEqual(familyNames);
         }
     });
 

@@ -215,7 +215,7 @@ describe('UI Adapter Boundary Discipline', () => {
   });
 
   it('pipeline evaluate-dayton-trigger step exists and imports shouldInitiateDayton', () => {
-    const pipelineSrc = readFile(join(SRC_ROOT, 'sim/turn_phases/war_phases.ts'));
+    const pipelineSrc = readFile(join(SRC_ROOT, 'sim/turn_phases/war_phase_negotiation_steps.ts'));
     expect(pipelineSrc).toContain("name: 'evaluate-dayton-trigger'");
     expect(pipelineSrc).toContain('shouldInitiateDayton');
     expect(pipelineSrc).toContain('initiateDaytonNegotiation');
