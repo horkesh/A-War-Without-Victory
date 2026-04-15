@@ -115,6 +115,9 @@ describe('war-phase step ordering', () => {
         // +1 from reconcile-final-sector-truth-after-ops (final sector authority refresh after op truth)
         // +1 from final-distribute-brigades-to-front (late physical dispersion after final sector truth)
         // +1 from assert-final-operation-lifecycle (late lifecycle seal after final reconciliation)
-        expect(stepNames.length).toBe(160);
+        // +1 from evaluate-dayton-trigger (DG1: Dayton trigger ownership moved to pipeline, 2026-04-14)
+        // +1 from update-stranded-brigade-lifecycle (DG2: stranded brigade lifecycle owner, 2026-04-14)
+        // +1 from evaluate-rupture-consequences (DG5: sensitive-history rupture contract, 2026-04-14)
+        expect(stepNames.length).toBe(163);
     });
 });
