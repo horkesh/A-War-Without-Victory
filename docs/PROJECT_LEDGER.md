@@ -1,3 +1,29 @@
+## [2026-04-15] test(repo): consolidate real-save sector truth contracts
+
+**Type:** Test-structure cleanup / latest-save proof consolidation
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/real_save_sector_truth_contracts.test.ts`, `tests/final_sector_edge_cap_real_save.test.ts` (deleted), `tests/final_sector_geometry_invariant_real_save.test.ts` (deleted), `tests/final_sector_live_owner_real_save.test.ts` (deleted), `tests/frontline_sector_single_owner_real_save.test.ts` (deleted), `tests/front_edge_faction_side_ownership_real_save.test.ts` (deleted), `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/real_save_sector_truth_contracts.test.ts` = 5/5 pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED - five tiny latest-save sector/front ownership tests now live in one canonical suite without losing proof coverage.
+
+### Summary
+
+1. **One artifact family now has one owner suite:** latest-save sector/front truth checks for edge cap, contiguity, live-owner integrity, single-owner rebuild ownership, and faction-side ownership all now live in `real_save_sector_truth_contracts.test.ts`.
+2. **The proof stayed identical in shape:** the new file still opens the same canonical latest final save and checks the same five invariants; it just shares loader/build helpers instead of reintroducing them in five different files.
+3. **This was consolidation, not coverage removal:** the change reduces test residue and file sprawl, but it does not claim those invariants are less important. They are still real latest-save contracts.
+
+### Why this mattered
+
+These files were a good example of “necessary truth, residual packaging.” Each one proved something valid, but together they made the latest-save sector owner surface look noisier than it needed to be. Once the artifact owner is stable, one canonical suite is easier to audit than five tiny files scattered across the tree.
+
+### Proof boundaries
+
+- **Direct proof:** the consolidated suite passes all five carried-forward contracts against the real latest save.
+- **Not claimed here:** this does **not** cover the separate Foča/Kalinovik or Sarajevo-specific real-save suites, which still remain as distinct content-facing locks.
+
+---
+
 ## [2026-04-15] test(repo): move small UI contract shards onto vitest
 
 **Type:** Test-harness cleanup / small-suite migration
