@@ -199,41 +199,44 @@ export function validateGameStateShape(state: unknown): ValidateGameStateShapeRe
         }
     }
 
-    // War phase: optional supply pressure and exhaustion (validate type when present)
-    if ('war_supply_pressure' in s && s.war_supply_pressure !== undefined) {
-        const pp = s.war_supply_pressure;
-        if (pp !== null && typeof pp === 'object' && !Array.isArray(pp)) {
-            for (const [fid, val] of Object.entries(pp)) {
-                if (typeof val !== 'number' || val < 0 || val > 100) {
-                    errors.push(`war_supply_pressure.${fid} must be a number in [0, 100] when present`);
+    // War phase: optional supply pressure and exhaustion live under state.political
+    const political = s.political as any;
+    if (political && typeof political === 'object' && !Array.isArray(political)) {
+        if ('war_supply_pressure' in political && political.war_supply_pressure !== undefined) {
+            const pp = political.war_supply_pressure;
+            if (pp !== null && typeof pp === 'object' && !Array.isArray(pp)) {
+                for (const [fid, val] of Object.entries(pp)) {
+                    if (typeof val !== 'number' || val < 0 || val > 100) {
+                        errors.push(`political.war_supply_pressure.${fid} must be a number in [0, 100] when present`);
+                    }
                 }
+            } else {
+                errors.push('political.war_supply_pressure must be an object (Record<FactionId, number>) when present');
             }
-        } else {
-            errors.push('war_supply_pressure must be an object (Record<FactionId, number>) when present');
         }
-    }
-    if ('war_exhaustion' in s && s.war_exhaustion !== undefined) {
-        const ex = s.war_exhaustion;
-        if (ex !== null && typeof ex === 'object' && !Array.isArray(ex)) {
-            for (const [fid, val] of Object.entries(ex)) {
-                if (typeof val !== 'number' || val < 0 || !Number.isFinite(val)) {
-                    errors.push(`war_exhaustion.${fid} must be a non-negative finite number when present`);
+        if ('war_exhaustion' in political && political.war_exhaustion !== undefined) {
+            const ex = political.war_exhaustion;
+            if (ex !== null && typeof ex === 'object' && !Array.isArray(ex)) {
+                for (const [fid, val] of Object.entries(ex)) {
+                    if (typeof val !== 'number' || val < 0 || !Number.isFinite(val)) {
+                        errors.push(`political.war_exhaustion.${fid} must be a non-negative finite number when present`);
+                    }
                 }
+            } else {
+                errors.push('political.war_exhaustion must be an object (Record<FactionId, number>) when present');
             }
-        } else {
-            errors.push('war_exhaustion must be an object (Record<FactionId, number>) when present');
         }
-    }
-    if ('war_exhaustion_local' in s && s.war_exhaustion_local !== undefined) {
-        const loc = s.war_exhaustion_local;
-        if (loc !== null && typeof loc === 'object' && !Array.isArray(loc)) {
-            for (const [sid, val] of Object.entries(loc)) {
-                if (typeof val !== 'number' || val < 0 || !Number.isFinite(val)) {
-                    errors.push(`war_exhaustion_local.${sid} must be a non-negative finite number when present`);
+        if ('war_exhaustion_local' in political && political.war_exhaustion_local !== undefined) {
+            const loc = political.war_exhaustion_local;
+            if (loc !== null && typeof loc === 'object' && !Array.isArray(loc)) {
+                for (const [sid, val] of Object.entries(loc)) {
+                    if (typeof val !== 'number' || val < 0 || !Number.isFinite(val)) {
+                        errors.push(`political.war_exhaustion_local.${sid} must be a non-negative finite number when present`);
+                    }
                 }
+            } else {
+                errors.push('political.war_exhaustion_local must be an object (Record<SettlementId, number>) when present');
             }
-        } else {
-            errors.push('war_exhaustion_local must be an object (Record<SettlementId, number>) when present');
         }
     }
 

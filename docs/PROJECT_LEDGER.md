@@ -1,3 +1,30 @@
+## [2026-04-15] fix(test+state): migrate core pipeline/state contracts onto vitest and repair nested war-field validation
+
+**Type:** Test-harness cleanup / validation-truth correction
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/turn_pipeline_order.test.ts`, `tests/turn_pipeline_weekly_increment.test.ts`, `tests/combat_pipeline.test.ts`, `tests/combat_state_schema.test.ts`, `tests/state.test.ts`, `tests/test_discovery_contract.test.ts`, `src/state/validateGameState.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/turn_pipeline_order.test.ts tests/turn_pipeline_weekly_increment.test.ts tests/combat_pipeline.test.ts tests/combat_state_schema.test.ts tests/state.test.ts tests/game_state_shape.test.ts tests/game_state_no_derived_fields.test.ts tests/game_state_turn_week_invariant.test.ts tests/serialize_gamestate_no_derived_fields.test.ts tests/serialize_gamestate_stability.test.ts tests/serialize_gamestate_rejects_wrappers.test.ts tests/test_discovery_contract.test.ts` = 44/44 pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED - five adjacent core pipeline/state suites now live in vitest, and the migration exposed and fixed a real validator bug where war-phase pressure/exhaustion fields were being checked on a dead top-level path instead of under `state.political`.
+
+### Summary
+
+1. **The next pure state/pipeline cluster moved to the canonical harness:** `turn_pipeline_order`, `turn_pipeline_weekly_increment`, `combat_pipeline`, `combat_state_schema`, and `state` now import `vitest`.
+2. **The migration found stale assumptions instead of just moving syntax around:** `combat_state_schema.test.ts` had been mutating `state.political.war_supply_pressure` and `state.political.war_exhaustion`, but `validateGameStateShape(...)` was only validating dead top-level `war_supply_pressure` / `war_exhaustion` / `war_exhaustion_local` fields.
+3. **The validator now matches the actual state owner:** war-phase pressure and exhaustion validation is enforced on `state.political.*`, which is where the schema, serializer, and sim code already read and write those fields.
+
+### Why this mattered
+
+This is exactly the kind of residue the v0.8-to-v0.9 audit is supposed to catch. A mixed-harness packet became a substrate fix because the act of making the tests honest exposed a real owner mismatch. Leaving that mismatch in place would have kept the validator looking stronger than it really was.
+
+### Proof boundaries
+
+- **Direct proof:** the five migrated suites pass under vitest.
+- **Direct proof:** the validator now rejects malformed nested `political.war_supply_pressure` and `political.war_exhaustion` values, which the migrated combat-state schema tests now exercise directly.
+- **Not claimed here:** this does **not** close the whole mixed-harness lane or the broader war-phase validation surface; it closes one coherent adjacent cluster and one real nested-field validation bug.
+
+---
+
 ## [2026-04-15] test(repo): migrate serializer and GameState guardrails onto vitest
 
 **Type:** Test-harness cleanup / canonical state-contract migration
