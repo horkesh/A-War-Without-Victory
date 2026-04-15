@@ -8,7 +8,7 @@ import assert from 'node:assert';
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
-import { test } from 'node:test';
+import { test } from 'vitest';
 
 import { checkDataPrereqs } from '../src/data_prereq/check_data_prereqs.js';
 import { loadScenario } from '../src/scenario/scenario_loader.js';
@@ -72,7 +72,7 @@ test('scenario harness smoke: noop scenarios produce expected artifacts', async 
     }
 
     await ensureRemoved(BASE_OUT);
-});
+}, 60_000);
 
 test('scenario harness smoke: noop_4w determinism (two runs => identical final_save.json)', async () => {
     const prereq = checkDataPrereqs({ baseDir: process.cwd() });
@@ -96,4 +96,4 @@ test('scenario harness smoke: noop_4w determinism (two runs => identical final_s
 
     await ensureRemoved(BASE_A);
     await ensureRemoved(BASE_B);
-});
+}, 60_000);

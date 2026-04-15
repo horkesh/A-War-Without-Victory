@@ -31,9 +31,11 @@ describe('test discovery contracts', () => {
         const scenarioVitestFiles = new Set(toRepoRelative(rootDir, discovered.scenarioVitestFiles));
         const fastVitestFiles = new Set(toRepoRelative(rootDir, discovered.fastVitestFiles));
         const scenarioRepresentatives = [
+            'tests/h1_11_baseline_ops_sensitivity.test.ts',
             'tests/integration_scenario_roundtrip.test.ts',
             'tests/integration_run_summary.test.ts',
             'tests/phase10_ops_fatigue_scenario.test.ts',
+            'tests/scenario_golden_baselines_h2_3.test.ts',
             'tests/scenario_activity_diagnostics_h1_7.test.ts',
             'tests/scenario_baseline_ops_h1_9.test.ts',
             'tests/scenario_bots_determinism_h2_4.test.ts',
@@ -42,10 +44,13 @@ describe('test discovery contracts', () => {
             'tests/scenario_determinism_h1_1.test.ts',
             'tests/scenario_end_report_h1_5.test.ts',
             'tests/scenario_failure_reporting_h1_5_1.test.ts',
+            'tests/scenario_harness_smoke_h1_4.test.ts',
             'tests/scenario_init_control_apr1992.test.ts',
             'tests/scenario_init_formations.test.ts',
             'tests/scenario_probe_compare_h1_8.test.ts',
+            'tests/scenario_vrs_operation_proof.test.ts',
             'tests/sim_scenario.test.ts',
+            'tests/systems_2_3_4_7_9_10_acceptance_gates.test.ts',
             'tests/victory_conditions_a2.test.ts',
         ];
         const fastRepresentatives = [
@@ -53,6 +58,7 @@ describe('test discovery contracts', () => {
             'tests/acceptance_brcko_completeness.test.ts',
             'tests/acceptance_constraints.test.ts',
             'tests/artifact_determinism.test.ts',
+            'tests/audit_state_of_game_determinism.test.ts',
             'tests/calibration.test.ts',
             'tests/test_discovery_contract.test.ts',
             'tests/combat_exhaustion.test.ts',
@@ -124,6 +130,7 @@ describe('test discovery contracts', () => {
             'tests/sector_frontline_contiguity_repro.test.ts',
             'tests/sector_offensive.test.ts',
             'tests/serialize_gamestate_stability.test.ts',
+            'tests/sector_drina_frontline_integrity.test.ts',
             'tests/supply_gating.test.ts',
             'tests/sustainability.test.ts',
             'tests/supply_reachability.test.ts',
@@ -164,15 +171,11 @@ describe('test discovery contracts', () => {
         }
     });
 
-    it('keeps the heaviest scenario artifact proof in node:test until it stops needing harness-shaped execution', () => {
+    it('fully retires node:test residue from discovery', () => {
         const rootDir = process.cwd();
         const discovered = discoverTests(rootDir);
-        const vitestFiles = new Set(toRepoRelative(rootDir, discovered.vitestFiles));
         const nodeTestFiles = new Set(toRepoRelative(rootDir, discovered.nodeTestFiles));
-        const keeper = 'tests/scenario_vrs_operation_proof.test.ts';
-
-        expect(nodeTestFiles.has(keeper), `${keeper} should remain a node:test harness keeper`).toBe(true);
-        expect(vitestFiles.has(keeper), `${keeper} should not drift into vitest discovery yet`).toBe(false);
+        expect([...nodeTestFiles]).toEqual([]);
     });
 
     it('ignores helper files under tests that are not test-entrypoints', () => {

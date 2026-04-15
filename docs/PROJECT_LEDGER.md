@@ -1,3 +1,23 @@
+## [2026-04-16] fix(state+test): close recruited-state gap and retire final node-test residue
+
+**Type:** State-truth repair / test-suite unification / baseline refresh
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `src/state/heavy_equipment.ts`, `src/state/doctrine.ts`, `src/sim/recruitment_engine.ts`, `tests/recruitment_engine.test.ts`, `tests/recruitment_turn.test.ts`, `tests/h1_11_baseline_ops_sensitivity.test.ts`, `tests/scenario_vrs_operation_proof.test.ts`, `tests/systems_2_3_4_7_9_10_acceptance_gates.test.ts`, `tests/audit_state_of_game_determinism.test.ts`, `tests/scenario_golden_baselines_h2_3.test.ts`, `tests/scenario_harness_smoke_h1_4.test.ts`, `tests/sector_drina_frontline_integrity.test.ts`, `tools/test/discover_test_files.mjs`, `tests/test_discovery_contract.test.ts`, `data/derived/scenario/baselines/manifest.json`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/recruitment_engine.test.ts tests/recruitment_turn.test.ts tests/h1_11_baseline_ops_sensitivity.test.ts tests/scenario_vrs_operation_proof.test.ts tests/systems_2_3_4_7_9_10_acceptance_gates.test.ts tests/audit_state_of_game_determinism.test.ts tests/scenario_golden_baselines_h2_3.test.ts tests/scenario_harness_smoke_h1_4.test.ts tests/sector_drina_frontline_integrity.test.ts tests/test_discovery_contract.test.ts` pass (10 files / 39 tests); `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean; discovery script reports `NODE_COUNT=0`.
+**Status:** VERIFIED after packet verification. Recruited brigades now seed `equipment_state` and `doctrine_state` at birth without inflating heavy-equipment access, the acceptance-gate scenario can prove the contract honestly, all remaining `node:test` residue is gone, and the committed golden-baseline manifest has been refreshed to match current deterministic outputs.
+
+### Summary
+
+1. **The owner gap got fixed at formation birth:** recruitment-created brigades now initialize their doctrine state immediately and initialize heavy-equipment state through canonical embargo profiles, so they no longer arrive in saves half-formed or with the accidental `undefined => 1` heavy-access fallback.
+2. **The live acceptance gate rejoined the main runner:** `systems_2_3_4_7_9_10_acceptance_gates.test.ts` no longer has to stay behind as a bug sentinel, because the underlying week-1 formation-state leak is closed at the recruitment owner seam.
+3. **The final runner residue is gone:** `h1_11_baseline_ops_sensitivity`, `scenario_vrs_operation_proof`, `systems_2_3_4_7_9_10_acceptance_gates`, `audit_state_of_game_determinism`, `scenario_golden_baselines_h2_3`, `scenario_harness_smoke_h1_4`, and `sector_drina_frontline_integrity` now all live on canonical Vitest fast/scenario slices, with discovery explicitly treating `runSensitivityHarness(...)` as scenario-heavy and discovery reporting zero `node:test` entrypoints.
+4. **The stale baseline manifest got repaired honestly:** a clean `HEAD` worktree reproduced the same mismatches before this packet’s code landed, proving the committed manifest was stale rather than blaming the recruited-state fix. Refreshing `data/derived/scenario/baselines/manifest.json` updated all three committed baseline scenarios (`apr1992_52w`, `baseline_ops_4w`, `noop_4w`) to current deterministic hashes.
+
+### Why this mattered
+
+This was the right kind of hard cleanup. The first migration attempt did its job by exposing a real substrate leak instead of hiding it. Three formations recruited during week 1 were arriving in the save without system-owned state, and the first naive repair also revealed a second truth boundary: birth-time heavy-equipment initialization cannot read an uninitialized embargo substrate without over-seeding heavy access. Fixing that birth contract first made the later test migration honest. The clean-worktree comparison then showed the remaining golden failure was not caused by this packet at all; the baseline manifest was already stale on pristine `HEAD`. With both truths named directly, the split-harness debt is now actually closed instead of merely renamed.
+
 ## [2026-04-15] test(repo): refresh JNA phantom truth and migrate the suite onto vitest
 
 **Type:** Test-harness cleanup / content-truth refresh

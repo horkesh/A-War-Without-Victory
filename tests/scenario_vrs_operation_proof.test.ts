@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
 import { readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
-import { test } from 'node:test';
+import { test } from 'vitest';
 
 import { checkDataPrereqs } from '../src/data_prereq/check_data_prereqs.js';
 import { runScenario } from '../src/scenario/scenario_runner.js';
@@ -67,4 +67,4 @@ test('proof scenario: VRS operation produces combat, progress, and deterministic
 
     await ensureRemoved(BASE_A);
     await ensureRemoved(BASE_B);
-});
+}, 30_000);

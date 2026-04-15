@@ -39,7 +39,8 @@ export function fileRunsScenario(path) {
     /\brunScenario\s*\(/.test(content) ||
     /\brunScenarioDeterministic\s*\(/.test(content) ||
     /\brunProbeCompare\s*\(/.test(content) ||
-    /\bcompareAgainstBaselines\s*\(/.test(content)
+    /\bcompareAgainstBaselines\s*\(/.test(content) ||
+    /\brunSensitivityHarness\s*\(/.test(content)
   );
 }
 

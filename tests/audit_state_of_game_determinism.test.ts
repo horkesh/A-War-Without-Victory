@@ -9,7 +9,7 @@ import assert from 'node:assert';
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { test } from 'node:test';
+import { test } from 'vitest';
 
 const ROOT = process.cwd();
 const AUDIT_DIR = join(ROOT, 'docs', '40_reports', 'audit');
@@ -54,7 +54,7 @@ test('audit artifacts: no timestamp phrases in outputs', () => {
             );
         }
     }
-});
+}, 60_000);
 
 test('audit artifacts: state_matrix rows stable-sorted by ID', () => {
     runAuditState();
@@ -67,7 +67,7 @@ test('audit artifacts: state_matrix rows stable-sorted by ID', () => {
     });
     const sorted = [...ids].sort((a, b) => a.localeCompare(b));
     assert.deepStrictEqual(ids, sorted, 'state_matrix rows must be sorted by ID');
-});
+}, 60_000);
 
 test('audit artifacts: two runs produce byte-identical files', () => {
     runAuditState();
@@ -83,4 +83,4 @@ test('audit artifacts: two runs produce byte-identical files', () => {
             `File ${name} must be byte-identical across two runs`
         );
     }
-});
+}, 60_000);

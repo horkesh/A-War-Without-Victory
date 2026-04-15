@@ -187,6 +187,8 @@ describe('runOngoingRecruitment', () => {
         assert.strictEqual(report!.actions.length, 1);
         assert.strictEqual(report!.actions[0]!.mandatory, true);
         assert.ok(state.military.formations['mandatory_b1']);
+        assert.ok(state.military.formations['mandatory_b1']!.equipment_state, 'ongoing mandatory recruitment should seed equipment_state');
+        assert.ok(state.military.formations['mandatory_b1']!.doctrine_state, 'ongoing mandatory recruitment should seed doctrine_state');
     });
 
     test('applies RS mandatory mobilization accrual across turns', () => {

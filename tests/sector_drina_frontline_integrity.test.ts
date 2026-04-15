@@ -1,6 +1,6 @@
-import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { describe, it } from 'vitest';
 import { buildCorpsFrontSectors } from '../src/sim/combat/corps_front_sectors.js';
 import { loadOperationalEdges } from '../src/data/operational_data.js';
 

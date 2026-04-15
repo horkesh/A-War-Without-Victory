@@ -1,4 +1,4 @@
-import { getEffectiveHeavyEquipmentAccess } from './embargo.js';
+import { ensureEmbargoProfiles, getEffectiveHeavyEquipmentAccess } from './embargo.js';
 import type { FactionId, FormationState, GameState, PostureLevel } from './game_state.js';
 import { clamp01 } from '../utils/math.js';
 
@@ -22,8 +22,13 @@ function postureTempo(posture: PostureLevel | undefined): number {
     }
 }
 
-function ensureEquipmentState(formation: FormationState, factionId: FactionId, state: GameState): void {
+export function initializeEquipmentStateForFormation(
+    formation: FormationState,
+    factionId: FactionId,
+    state: GameState
+): void {
     if (formation.equipment_state) return;
+    ensureEmbargoProfiles(state);
     const faction = state.factions.find((f) => f.id === factionId);
     const access = getEffectiveHeavyEquipmentAccess(faction?.embargo_profile);
     const base = formation.kind === 'brigade' || formation.kind === 'operational_group' ? 100 : 0;
@@ -64,7 +69,7 @@ export function updateHeavyEquipmentState(
     for (const fid of formationIds) {
         const formation = state.military.formations[fid];
         if (!formation) continue;
-        ensureEquipmentState(formation, formation.faction, state);
+        initializeEquipmentStateForFormation(formation, formation.faction, state);
         const eq = formation.equipment_state!;
 
         const assignment = formation.assignment;

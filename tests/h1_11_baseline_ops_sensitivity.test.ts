@@ -7,7 +7,7 @@ import assert from 'node:assert';
 import { existsSync } from 'node:fs';
 import { readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
-import { test } from 'node:test';
+import { test } from 'vitest';
 
 
 import { checkDataPrereqs } from '../src/data_prereq/check_data_prereqs.js';
@@ -62,7 +62,7 @@ test('sensitivity harness: determinism (two runs yield byte-identical report)', 
 
     await ensureRemoved(dir1);
     await ensureRemoved(dir2);
-});
+}, 30_000);
 
 test('sensitivity harness: monotonicity and intensity ordering (exhaustion and displacement non-decreasing with scalar)', async () => {
     const prereq = checkDataPrereqs({ baseDir: process.cwd() });
@@ -112,7 +112,7 @@ test('sensitivity harness: monotonicity and intensity ordering (exhaustion and d
     }
 
     await ensureRemoved(dir);
-});
+}, 30_000);
 
 test('sensitivity harness: safety (political control unchanged in run)', async () => {
     const prereq = checkDataPrereqs({ baseDir: process.cwd() });
@@ -150,4 +150,4 @@ test('sensitivity harness: safety (political control unchanged in run)', async (
     }
 
     await ensureRemoved(dir);
-});
+}, 30_000);

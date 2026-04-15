@@ -8,6 +8,7 @@ import {
     recruitBrigade,
     runBotRecruitment
 } from '../src/sim/recruitment_engine.js';
+import { ensureEmbargoProfiles, getEffectiveHeavyEquipmentAccess } from '../src/state/embargo.js';
 import type { FormationState, GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import { militiaPoolKey } from '../src/state/militia_pool_key.js';
@@ -119,6 +120,41 @@ describe('recruitBrigade', () => {
         assert.ok(result.formation!.composition);
         assert.strictEqual(result.formation!.composition!.artillery, 2); // mountain template
         assert.strictEqual(result.action!.equipment_spent, 5); // mountain cost
+        assert.ok(result.formation!.equipment_state, 'recruited formation should seed equipment_state');
+        assert.ok(result.formation!.doctrine_state, 'recruited formation should seed doctrine_state');
+    });
+
+    test('seeds recruited equipment from canonical embargo access even when profiles were absent', () => {
+        const poolKey = militiaPoolKey('zenica', 'RBiH');
+        const state = makeState({
+  military: {
+    militia_pools: {
+                [poolKey]: { mun_id: 'zenica', faction: 'RBiH', available: 2000, committed: 0, exhausted: 0, updated_turn: 0 }
+            }
+  } as any,
+  political: {
+    political_controllers: { s1: 'RBiH' }
+  } as any,
+});
+        const sidToMun = new Map([['s1', 'zenica']]);
+        const resources = initializeRecruitmentResources(['RBiH']);
+        const brigade = makeBrigade({
+            id: 'arbih_embargo_seed',
+            faction: 'RBiH',
+            name: 'Embargo Seed',
+            home_mun: 'zenica',
+            default_equipment_class: 'motorized'
+        });
+
+        const result = recruitBrigade(state, brigade, 'motorized', resources, sidToMun, {});
+        assert.strictEqual(result.success, true);
+        assert.ok(result.formation?.equipment_state);
+
+        ensureEmbargoProfiles(state);
+        const faction = state.factions.find((entry) => entry.id === 'RBiH');
+        const expectedTotal = Math.round(100 * getEffectiveHeavyEquipmentAccess(faction?.embargo_profile));
+        assert.strictEqual(result.formation!.equipment_state!.total_heavy, expectedTotal);
+        assert.strictEqual(result.formation!.equipment_state!.operational_heavy, expectedTotal);
     });
 
     test('fails when no control', () => {
@@ -219,6 +255,8 @@ describe('applyRecruitment', () => {
         // Check formation created
         assert.ok(state.military.formations!['arbih_7th']);
         assert.strictEqual(state.military.formations!['arbih_7th'].name, '7th Muslim');
+        assert.ok(state.military.formations!['arbih_7th'].equipment_state, 'applied recruitment should persist equipment_state');
+        assert.ok(state.military.formations!['arbih_7th'].doctrine_state, 'applied recruitment should persist doctrine_state');
 
         // Check resources deducted
         assert.strictEqual(resources.recruitment_capital.RBiH.points, 150 - 10); // default capital_cost

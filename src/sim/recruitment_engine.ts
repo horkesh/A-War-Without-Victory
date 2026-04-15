@@ -45,6 +45,8 @@ import { getRsJnaHeavyComposition, getRsMountainComposition } from './combat/equ
 import { ENCLAVE_DEFINITIONS, isEnclaveBrigade, osidBelongsToEnclave } from './combat/enclave_resilience.js';
 import { getFactionDefaultOfficerQuality } from './combat/combat_math.js';
 import { isFriendlyFaction } from './early_war/alliance_update.js';
+import { initializeDoctrineStateForFormation } from '../state/doctrine.js';
+import { initializeEquipmentStateForFormation } from '../state/heavy_equipment.js';
 
 const FIXED_HOME_OSID_TAG = 'placement:fixed_home_osid';
 
@@ -276,6 +278,7 @@ function buildRecruitmentTags(
 
 /** Build a FormationState for a recruited brigade. */
 function buildRecruitedFormation(
+    state: GameState,
     brigade: OobBrigade,
     equipClass: EquipmentClass,
     personnel: number,
@@ -288,7 +291,7 @@ function buildRecruitedFormation(
     const effectivePersonnel = brigade.initial_personnel ?? personnel;
     const defaultCohesion = isMandatory ? BRIGADE_BASE_COHESION + 10 : BRIGADE_BASE_COHESION;
     const effectiveCohesion = brigade.initial_cohesion ?? defaultCohesion;
-    return {
+    const formation: FormationState = {
         id: brigade.id as FormationId,
         faction: brigade.faction,
         name: brigade.name,
@@ -318,6 +321,9 @@ function buildRecruitedFormation(
         max_personnel: brigade.max_personnel ?? deriveMaxPersonnel(equipClass, brigade.faction),
         home_osid: brigade.home_osid ?? locationOsid
     };
+    initializeEquipmentStateForFormation(formation, brigade.faction, state);
+    initializeDoctrineStateForFormation(formation);
+    return formation;
 }
 
 // ---------------------------------------------------------------------------
@@ -540,7 +546,7 @@ export function recruitBrigade(
     // they don't inherit JNA heavy equipment. Only initial OOB brigades get JNA kit.
     const composition = buildBrigadeComposition(chosenClass, faction, false);
     const formation = buildRecruitedFormation(
-        brigade, chosenClass, composition.infantry, state.meta.turn, hq_sid, brigade.mandatory, location_osid
+        state, brigade, chosenClass, composition.infantry, state.meta.turn, hq_sid, brigade.mandatory, location_osid
     );
 
     const action: RecruitmentAction = {
@@ -782,7 +788,7 @@ export function runBotRecruitment(
                 continue;
             }
             const formation = buildRecruitedFormation(
-                brigade, brigade.default_equipment_class, effectiveManpower, currentTurn, hq_sid, true, location_osid
+                state, brigade, brigade.default_equipment_class, effectiveManpower, currentTurn, hq_sid, true, location_osid
             );
 
             state.military.formations[brigade.id] = formation;

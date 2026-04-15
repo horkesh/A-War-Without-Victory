@@ -47,7 +47,7 @@ function getFormationPosture(
     return effectivePosture?.[formation.faction]?.assignments?.[edgeId]?.posture;
 }
 
-function ensureDoctrineState(formation: FormationState): DoctrineState {
+export function initializeDoctrineStateForFormation(formation: FormationState): DoctrineState {
     if (formation.doctrine_state) return formation.doctrine_state;
     const eligible: Record<DoctrineType, boolean> = {} as Record<DoctrineType, boolean>;
     for (const d of DOCTRINES) {
@@ -64,7 +64,7 @@ export function updateDoctrineState(
 ): void {
     const formations = Object.values(state.military.formations ?? {}).sort((a, b) => a.id.localeCompare(b.id));
     for (const formation of formations) {
-        const doctrine = ensureDoctrineState(formation);
+        const doctrine = initializeDoctrineStateForFormation(formation);
         for (const d of DOCTRINES) {
             doctrine.eligible[d] = false;
         }

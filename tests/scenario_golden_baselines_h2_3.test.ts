@@ -7,7 +7,7 @@ import assert from 'node:assert';
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { test } from 'node:test';
+import { test } from 'vitest';
 
 
 import { compareAgainstBaselines, loadManifestSync } from '../tools/scenario_runner/run_baseline_regression.js';
@@ -38,4 +38,4 @@ test('golden baseline regression: compare against manifest', async () => {
         }
         throw err;
     }
-});
+}, 180_000);
