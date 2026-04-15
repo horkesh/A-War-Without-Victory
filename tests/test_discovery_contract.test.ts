@@ -83,6 +83,7 @@ describe('test discovery contracts', () => {
             'tests/negotiation_pressure.test.ts',
             'tests/organizational_penetration_formula.test.ts',
             'tests/scenario_registry.test.ts',
+            'tests/sector_offensive.test.ts',
             'tests/serialize_gamestate_stability.test.ts',
             'tests/supply_gating.test.ts',
             'tests/supply_reachability.test.ts',

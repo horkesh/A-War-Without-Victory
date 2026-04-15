@@ -1,3 +1,22 @@
+## [2026-04-15] test(repo): refresh sector offensive contract tests onto vitest
+
+**Type:** Test-harness cleanup / stale operation-truth refresh
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/sector_offensive.test.ts`, `tests/test_discovery_contract.test.ts`, `working-on.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/sector_offensive.test.ts tests/sector_offensive_idle_recovery.test.ts tests/operation_completion_truth.test.ts tests/catastrophic_stall.test.ts tests/engine_health_wave1_ops_truth.test.ts tests/test_discovery_contract.test.ts` pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED after packet verification - `sector_offensive.test.ts` now lives on vitest as a slim current-contract suite, and the stale duplicate launch/lifecycle expectations were retired instead of being preserved as ceremonial red-green theater.
+
+### Summary
+
+1. **The stale mega-file is now honest:** `sector_offensive.test.ts` moved to vitest, but only after being narrowed to the contracts it still uniquely owns today: exempt-corps protection, planning-duration cap behavior, deterministic operation naming, and momentum helper truth.
+2. **Duplicate lifecycle claims were retired, not cosmetically updated:** the old launch-success, planning-to-execution, and recovery expectations were stale against current HEAD and already covered more faithfully by newer targeted suites such as `sector_offensive_idle_recovery`, `operation_completion_truth`, `catastrophic_stall`, and `engine_health_wave1_ops_truth`.
+3. **Fast discovery now remembers the refreshed owner:** `tests/test_discovery_contract.test.ts` pins `sector_offensive.test.ts` in the fast vitest slice.
+
+### Why this mattered
+
+This file had turned into a museum of old operation assumptions: pre-cap planning durations, sparse launch fixtures that no longer satisfied current executable-opening gates, and lifecycle expectations from before preparation/idle-recovery/probe-completion hardening landed. Keeping it in `node:test` made the residue easy to ignore. Migrating it honestly forced the file to choose: either own a narrow live contract or stop pretending. It now owns the narrow live contract.
+
 ## [2026-04-15] test(repo): migrate operation injection and anomaly contracts onto vitest
 
 **Type:** Test-harness cleanup / operations-substrate residue audit
