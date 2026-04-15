@@ -100,14 +100,6 @@ export function applyShellHandoffCommand(state: ShellNavigationState, command: S
     state.setAdvanceTurnPending?.(true);
     return true;
   }
-  if (command.kind === 'strategic-overview') {
-    state.setStrategicDashboardOpen?.(true);
-    return true;
-  }
-  if (command.kind === 'event-log') {
-    state.setEventLogOpen?.(true);
-    return true;
-  }
   if (command.tab === 'records' && command.recordsSubTab) {
     return openArmyHQRecordsSubTab(state, command.recordsSubTab);
   }
@@ -126,5 +118,5 @@ export function applyShellHandoffCommand(state: ShellNavigationState, command: S
  */
 export function warroomCommandStaysInRoom(command: ShellHandoffCommand | undefined): boolean {
   if (!command) return false;
-  return command.kind === 'advance-turn' || command.kind === 'strategic-overview' || command.kind === 'event-log';
+  return command.kind === 'advance-turn';
 }

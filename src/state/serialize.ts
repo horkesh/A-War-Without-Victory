@@ -16,10 +16,11 @@ export interface ValidationResult {
 }
 
 export function serializeState(state: GameState): string {
-    assertNoErrors(validateState(state), 'State failed validation before serialize');
+    const canonicalState = migrateState(state as unknown);
+    assertNoErrors(validateState(canonicalState), 'State failed validation before serialize');
 
     const withVersion: GameState = {
-        ...state,
+        ...canonicalState,
         schema_version: CURRENT_SCHEMA_VERSION
     };
 

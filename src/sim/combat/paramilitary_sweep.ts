@@ -25,6 +25,7 @@ import type {
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { recordBattleCasualties } from '../../state/casualty_ledger.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { defaultArmyLabelForSide, type PoliticalSideId } from '../../state/identity.js';
 import { seedDisplacementTimerOnFlip } from '../../state/displacement_takeover.js';
 import {
     PARAMILITARY_UNIT_SIZE,
@@ -260,14 +261,19 @@ function spawnParamilitary(
     formations[fid] = {
         id: fid,
         faction,
+        force_label: defaultArmyLabelForSide(faction as PoliticalSideId),
         name: isOffensive ? `Offensive Paramilitary (${faction})` : `Paramilitary Unit (${faction})`,
         created_turn: turn,
         status: 'active',
         assignment: null,
         kind: 'paramilitary',
+        readiness: 'active',
         personnel: isOffensive ? OFFENSIVE_PARA_UNIT_SIZE : PARAMILITARY_UNIT_SIZE,
         cohesion: PARAMILITARY_COHESION,
         morale: PARAMILITARY_INITIAL_MORALE,
+        activation_gated: false,
+        activation_turn: null,
+        ops: { fatigue: 0, last_supplied_turn: null },
         paramilitary_target: targetOsid,
         paramilitary_eta: isOffensive ? OFFENSIVE_PARA_MARCH_TURNS : PARAMILITARY_MARCH_TURNS,
         ...(isOffensive ? { paramilitary_mode: 'offensive' as const } : {}),

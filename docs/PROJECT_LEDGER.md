@@ -2352,3 +2352,46 @@ Fresh 40-week run `n1426` validates cleanly. Scripted final-save proof shows `0`
 
 ### Artifacts
 - Report: `docs/40_reports/implemented/20260411_HERZEGOVINA_FRONT_OWNERSHIP_AND_FINAL_RECONCILIATION.md`
+
+## [2026-04-15] fix(ui): split Warroom-local overlays from shared shell handoff
+
+**Type:** UI / shell boundary hardening
+**Files:** `src/ui/map/App.tsx`, `src/ui/map/components/warroom/WarroomShellLayer.tsx`, `src/ui/map/utils/shellNavigation.ts`, `src/ui/map/utils/warroomNavigation.ts`, `src/ui/shared/shellHandoff.ts`, `tests/ui_shell_navigation.test.ts`, `tests/warroom_shell_layer.test.ts`
+**Status:** VERIFIED - targeted vitest, tsc, and desktop:map:build clean
+
+### Summary of changes
+1. **Shared shell handoff is now cross-shell only** - `ShellHandoffCommand` no longer accepts `strategic-overview` or `event-log`, and `isShellHandoffCommand(...)` rejects them at the shared boundary.
+2. **Warroom-local overlays are explicitly local** - `WarroomShellLayer` now models `strategic-overview` / `event-log` as a separate Warroom-local command type, and `App.tsx` opens the overlays directly without sending them through `applyShellHandoffCommand(...)`.
+3. **Room-transition logic stays narrow** - `warroomCommandStaysInRoom(...)` now reflects only the true shared in-room command (`advance-turn`), while the local overlay commands remain owned by the React Warroom shell.
+4. **Regression contracts updated** - focused shell tests now prove local commands are rejected by the shared handoff parser, while the Warroom shell still recognizes them as local overlay commands.
+
+### Verification
+- `npx.cmd vitest run tests/ui_shell_navigation.test.ts tests/warroom_shell_layer.test.ts`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run desktop:map:build`
+
+### Artifacts
+- None
+
+## [2026-04-15] fix(harness): prove continue-from-save equivalence on canonical save output
+
+**Type:** Save/load / scenario-harness hardening
+**Files:** `src/scenario/scenario_runner.ts`, `src/state/serialize.ts`, `src/sim/combat/paramilitary_sweep.ts`, `tools/scenario_runner/run_scenario.ts`, `tests/scenario_continue_from_save_equivalence.test.ts`
+**Status:** VERIFIED - targeted vitest, tsc, and desktop:map:build clean
+
+### Summary of changes
+1. **Scenario harness can now continue from a canonical save artifact** - `runScenario(...)` accepts `resumeFromSavePath` and resumes from the saved state's `meta.turn`; explicit `resumeFromWeekIndex` is allowed only when it matches the save turn.
+2. **CLI support is wired into the existing harness path** - `tools/scenario_runner/run_scenario.ts` now accepts `--continue-save` and `--continue-week`, so the same preflighted scenario runner can resume a checkpoint instead of requiring an internal-only API call.
+3. **Save serialization now writes the same canonical defaults the load path expects** - `serializeState(...)` canonicalizes through the same migration/defaulting path as `deserializeState(...)`, closing the hidden drift where uninterrupted runs omitted formation defaults that resumed runs made explicit.
+4. **Paramilitary formation birth is explicit about lifecycle/read-model defaults** - newly spawned paramilitary formations now carry canonical `force_label`, readiness, activation, and ops defaults at creation time instead of depending on a later load cycle to fill them in.
+5. **Direct equivalence proof is now live** - the new `noop_13w` regression proves full-run `final_save.json` byte identity and `final_state_hash` identity against a segmented run resumed from `save_w8.json`, and it separately proves mismatched explicit resume weeks are rejected.
+
+### Verification
+- `npx.cmd vitest run tests/scenario_continue_from_save_equivalence.test.ts tests/ui_shell_navigation.test.ts tests/warroom_shell_layer.test.ts tests/v08_to_v09_hardening_guardrails.test.ts tests/save_load_real_roundtrip.test.ts tests/desktop_persistence_contract.test.ts`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run desktop:map:build`
+- `node .\node_modules\tsx\dist\cli.mjs .\tools\scenario_runner\run_scenario_with_preflight.ts --scenario data/scenarios/noop_13w.json --out .tmp_cli_split --video`
+- `node .\node_modules\tsx\dist\cli.mjs .\tools\scenario_runner\run_scenario_with_preflight.ts --scenario data/scenarios/noop_13w.json --out .tmp_cli_resume --continue-save .tmp_cli_split\noop_13w__477755f004f0b17c__w13\save_w8.json`
+
+### Artifacts
+- None

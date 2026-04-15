@@ -9,6 +9,7 @@ import {
   openCodex,
   type ShellNavigationState,
 } from '../src/ui/map/utils/shellNavigation.js';
+import { isWarroomLocalCommand } from '../src/ui/map/utils/warroomNavigation.js';
 import { decodeShellHandoffCommand, encodeShellHandoffCommand } from '../src/ui/shared/shellHandoff.js';
 import { isEmbeddedTacticalMap, shouldShowWarroomReturn } from '../src/ui/map/utils/warroomReturn.js';
 
@@ -176,6 +177,8 @@ describe('shellNavigation', () => {
     });
     expect(decodeShellHandoffCommand(encodeShellHandoffCommand({ kind: 'chronicle' }))).toEqual({ kind: 'chronicle' });
     expect(decodeShellHandoffCommand(encodeShellHandoffCommand({ kind: 'codex' }))).toEqual({ kind: 'codex' });
+    expect(decodeShellHandoffCommand(encodeURIComponent(JSON.stringify({ kind: 'strategic-overview' })))).toBeNull();
+    expect(decodeShellHandoffCommand(encodeURIComponent(JSON.stringify({ kind: 'event-log' })))).toBeNull();
     expect(decodeShellHandoffCommand('not-json')).toBeNull();
   });
 
@@ -280,6 +283,13 @@ describe('shellNavigation', () => {
     expect(appSource).toContain("event.data?.type !== 'awwv-shell:handoff'");
     expect(appSource).toContain('applyShellHandoffCommand');
     expect(appSource).toContain("params.get('shellHandoff')");
+  });
+
+  it('keeps Warroom-local overlays out of the shared shell handoff boundary', () => {
+    expect(isWarroomLocalCommand({ kind: 'strategic-overview' })).toBe(true);
+    expect(isWarroomLocalCommand({ kind: 'event-log' })).toBe(true);
+    expect(decodeShellHandoffCommand(encodeURIComponent(JSON.stringify({ kind: 'strategic-overview' })))).toBeNull();
+    expect(decodeShellHandoffCommand(encodeURIComponent(JSON.stringify({ kind: 'event-log' })))).toBeNull();
   });
 
   it('inbox event_modal action routes the president to Army HQ briefing (sole executor)', () => {

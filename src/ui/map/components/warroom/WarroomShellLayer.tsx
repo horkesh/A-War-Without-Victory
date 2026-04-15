@@ -17,6 +17,7 @@ import { useEffect, useState } from 'react';
 import type { ShellHandoffCommand } from '../../../shared/shellHandoff';
 import { getPlayerFacingFaction } from '../../../shared/playerFacingLabels';
 import { useGameStore } from '../../store/gameStore';
+import type { WarroomNavigationCommand } from '../../utils/warroomNavigation';
 import { WARROOM_SCENE_URLS } from './warroom-asset-urls';
 import rbihRegions from '../../../warroom/assets/hq_rbih_regions.json';
 import rsRegions from '../../../warroom/assets/hq_rs_regions.json';
@@ -41,10 +42,14 @@ interface WarroomRegion {
 const CANVAS_W = 2752;
 const CANVAS_H = 1536;
 
-// ── Region → ShellHandoffCommand mapping ───────────────────────────────────
+// ── Region → Warroom navigation mapping ────────────────────────────────────
 
 /**
- * Maps a Warroom region ID to the corresponding ShellHandoffCommand.
+ * Maps a Warroom region ID to the corresponding Warroom navigation command.
+ * Cross-shell commands stay on the shared shell handoff path. Warroom-local
+ * overlay commands stay inside the React shell and never enter the shared
+ * handoff union.
+ *
  * Returns undefined for regions that intentionally navigate to the game view
  * (tactical map) without opening a specific panel — the undefined return value
  * propagates to onNavigate, which calls warroomCommandStaysInRoom(undefined) → false
@@ -57,7 +62,7 @@ const CANVAS_H = 1536;
  *
  * Exported for unit testing.
  */
-export function regionToShellHandoff(regionId: string): ShellHandoffCommand | undefined {
+export function regionToShellHandoff(regionId: string): WarroomNavigationCommand | undefined {
   switch (regionId) {
     case 'wall_flag_area':
     case 'commander_coatrack':
@@ -159,7 +164,7 @@ const REGIONS_BY_FACTION: Record<string, WarroomRegion[]> = {
 
 export interface WarroomShellLayerProps {
   /** Called when the player clicks a hotspot. command is undefined for unmapped regions. */
-  onNavigate: (command?: ShellHandoffCommand) => void;
+  onNavigate: (command?: WarroomNavigationCommand) => void;
 }
 
 export function WarroomShellLayer({ onNavigate }: WarroomShellLayerProps) {

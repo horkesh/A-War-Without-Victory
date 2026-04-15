@@ -18,20 +18,12 @@ export type ShellHandoffCommand =
       /** Advance-turn: player clicked the wall calendar hotspot in the React Warroom shell.
        *  Handled by AdvanceTurnModal in App.tsx — sets advanceTurnPending in gameStore. */
       kind: 'advance-turn';
-    }
-  | {
-      /** Strategic overview: opens StrategicDashboard without leaving warroom. */
-      kind: 'strategic-overview';
-    }
-  | {
-      /** Event log: opens EventLogPanel without leaving warroom. */
-      kind: 'event-log';
     };
 
 export function isShellHandoffCommand(value: unknown): value is ShellHandoffCommand {
   if (!value || typeof value !== 'object') return false;
   const command = value as Partial<ShellHandoffCommand>;
-  if (command.kind === 'codex' || command.kind === 'chronicle' || command.kind === 'advance-turn' || command.kind === 'strategic-overview' || command.kind === 'event-log') return true;
+  if (command.kind === 'codex' || command.kind === 'chronicle' || command.kind === 'advance-turn') return true;
   if (command.kind !== 'army-hq') return false;
   if (
     command.tab !== 'briefing' &&

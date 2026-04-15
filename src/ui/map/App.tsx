@@ -64,6 +64,7 @@ import { resolvePlayerFacingFaction } from '../shared/playerVisibility';
 import type { RecruitmentCatalogBrigade, StartNewCampaignPayload } from './desktop/types';
 import type { SummaryFocusSection } from './data/types';
 import { applyShellHandoffCommand, openArmyHQRecordsSubTab, openArmyHQTab, openChronicle, openCodex, warroomCommandStaysInRoom } from './utils/shellNavigation';
+import { isWarroomLocalCommand } from './utils/warroomNavigation';
 import { decodeShellHandoffCommand, isShellHandoffCommand } from '../shared/shellHandoff';
 import {
   applyRecruitmentAndSync,
@@ -812,6 +813,14 @@ function App() {
         <div className="fixed inset-0 z-50 bg-black">
           <WarroomShellLayer
             onNavigate={(command) => {
+              if (isWarroomLocalCommand(command)) {
+                if (command.kind === 'strategic-overview') {
+                  useGameStore.getState().setStrategicDashboardOpen(true);
+                } else if (command.kind === 'event-log') {
+                  setEventLogOpen(true);
+                }
+                return;
+              }
               if (command) {
                 applyShellHandoffCommand(
                   { ...useGameStore.getState(), setEventLogOpen },

@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { regionToShellHandoff } from '../src/ui/map/components/warroom/WarroomShellLayer';
 import { isShellHandoffCommand, type ShellHandoffCommand } from '../src/ui/shared/shellHandoff';
 import { warroomCommandStaysInRoom } from '../src/ui/map/utils/shellNavigation';
+import { isWarroomLocalCommand, type WarroomLocalCommand } from '../src/ui/map/utils/warroomNavigation';
 
 describe('regionToShellHandoff', () => {
   it('wall_flag_area → army-hq summary', () => {
@@ -68,6 +69,7 @@ describe('regionToShellHandoff', () => {
     const setAppScreen = vi.fn();
 
     const onNavigate = (command?: ReturnType<typeof regionToShellHandoff>) => {
+      if (isWarroomLocalCommand(command)) return;
       if (command) applySpy(command);
       if (!warroomCommandStaysInRoom(command)) setAppScreen('game');
     };
@@ -123,6 +125,7 @@ describe('WarroomShellLayer onNavigate contract', () => {
 
     // Simulate the Wave 3 App.tsx onNavigate
     const onNavigate = (command?: ReturnType<typeof regionToShellHandoff>) => {
+      if (isWarroomLocalCommand(command)) return;
       if (command) applySpy(command);
       if (!warroomCommandStaysInRoom(command)) setAppScreen('game');
     };
@@ -134,19 +137,25 @@ describe('WarroomShellLayer onNavigate contract', () => {
     expect(setAppScreen).toHaveBeenCalledWith('game');
   });
 
-  it('in-room command (strategic-overview) applies command but does NOT transition to game', () => {
+  it('local strategic-overview command opens the overlay without leaving warroom', () => {
     const applySpy = vi.fn().mockReturnValue(true);
+    const setStrategicDashboardOpen = vi.fn();
     const setAppScreen = vi.fn();
 
     const onNavigate = (command?: ReturnType<typeof regionToShellHandoff>) => {
+      if (isWarroomLocalCommand(command)) {
+        setStrategicDashboardOpen(command.kind === 'strategic-overview');
+        return;
+      }
       if (command) applySpy(command);
       if (!warroomCommandStaysInRoom(command)) setAppScreen('game');
     };
 
-    const command = regionToShellHandoff('wall_cork_board'); // → strategic-overview, stays in room
+    const command = regionToShellHandoff('wall_cork_board'); // → strategic-overview, handled locally
     onNavigate(command);
 
-    expect(applySpy).toHaveBeenCalledWith({ kind: 'strategic-overview' });
+    expect(applySpy).not.toHaveBeenCalled();
+    expect(setStrategicDashboardOpen).toHaveBeenCalledWith(true);
     expect(setAppScreen).not.toHaveBeenCalled();
   });
 
@@ -155,6 +164,7 @@ describe('WarroomShellLayer onNavigate contract', () => {
     const setAppScreen = vi.fn();
 
     const onNavigate = (command?: ReturnType<typeof regionToShellHandoff>) => {
+      if (isWarroomLocalCommand(command)) return;
       if (command) applySpy(command);
       if (!warroomCommandStaysInRoom(command)) setAppScreen('game');
     };
@@ -174,8 +184,6 @@ describe('WarroomShellLayer onNavigate contract', () => {
       'intelligence_journal',
       'wall_calendar_area',
       'wall_calendar',
-      'wall_cork_board',
-      'desk_radio',
       'diplomatic_telephone',
     ];
     for (const regionId of mappedRegions) {
@@ -188,29 +196,21 @@ describe('WarroomShellLayer onNavigate contract', () => {
 
 // ── Wave 3: new ShellHandoffCommand kinds ────────────────────────────────────
 
-describe('isShellHandoffCommand — Wave 3 kinds', () => {
-  it('{ kind: strategic-overview } is a valid ShellHandoffCommand', () => {
-    const cmd: ShellHandoffCommand = { kind: 'strategic-overview' };
-    expect(isShellHandoffCommand(cmd)).toBe(true);
+describe('shared-vs-local Warroom command split', () => {
+  it('{ kind: strategic-overview } is a local Warroom command only', () => {
+    const cmd: WarroomLocalCommand = { kind: 'strategic-overview' };
+    expect(isShellHandoffCommand(cmd)).toBe(false);
   });
 
-  it('{ kind: event-log } is a valid ShellHandoffCommand', () => {
-    const cmd: ShellHandoffCommand = { kind: 'event-log' };
-    expect(isShellHandoffCommand(cmd)).toBe(true);
+  it('{ kind: event-log } is a local Warroom command only', () => {
+    const cmd: WarroomLocalCommand = { kind: 'event-log' };
+    expect(isShellHandoffCommand(cmd)).toBe(false);
   });
 });
 
 // ── warroomCommandStaysInRoom ─────────────────────────────────────────────────
 
 describe('warroomCommandStaysInRoom', () => {
-  it('strategic-overview stays in room', () => {
-    expect(warroomCommandStaysInRoom({ kind: 'strategic-overview' })).toBe(true);
-  });
-
-  it('event-log stays in room', () => {
-    expect(warroomCommandStaysInRoom({ kind: 'event-log' })).toBe(true);
-  });
-
   it('advance-turn stays in room', () => {
     expect(warroomCommandStaysInRoom({ kind: 'advance-turn' })).toBe(true);
   });
@@ -221,6 +221,20 @@ describe('warroomCommandStaysInRoom', () => {
 
   it('undefined returns false', () => {
     expect(warroomCommandStaysInRoom(undefined)).toBe(false);
+  });
+});
+
+describe('warroom local commands', () => {
+  it('strategic-overview is a local Warroom command, not a shared shell handoff', () => {
+    const cmd = { kind: 'strategic-overview' } as const;
+    expect(isWarroomLocalCommand(cmd)).toBe(true);
+    expect(isShellHandoffCommand(cmd)).toBe(false);
+  });
+
+  it('event-log is a local Warroom command, not a shared shell handoff', () => {
+    const cmd = { kind: 'event-log' } as const;
+    expect(isWarroomLocalCommand(cmd)).toBe(true);
+    expect(isShellHandoffCommand(cmd)).toBe(false);
   });
 });
 

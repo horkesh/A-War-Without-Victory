@@ -21,6 +21,8 @@ function parseArgs(): {
   scenario: string;
   weeks?: number;
   out: string;
+  continueSave?: string;
+  continueWeek?: number;
   postureAllPushAndApplyBreaches: boolean;
   map: boolean;
   video: boolean;
@@ -30,6 +32,8 @@ function parseArgs(): {
   let scenario = '';
   let weeks: number | undefined;
   let out = 'runs';
+  let continueSave: string | undefined;
+  let continueWeek: number | undefined;
   let postureAllPushAndApplyBreaches = false;
   let map = false;
   let video = false;
@@ -41,6 +45,10 @@ function parseArgs(): {
       weeks = parseInt(args[++i], 10);
     } else if (args[i] === '--out' && args[i + 1]) {
       out = args[++i];
+    } else if (args[i] === '--continue-save' && args[i + 1]) {
+      continueSave = args[++i];
+    } else if (args[i] === '--continue-week' && args[i + 1]) {
+      continueWeek = parseInt(args[++i], 10);
     } else if (args[i] === '--posture-all-push' || args[i] === '--all-attack') {
       postureAllPushAndApplyBreaches = true;
     } else if (args[i] === '--map') {
@@ -54,11 +62,21 @@ function parseArgs(): {
   if (!scenario) {
     scenario = DEFAULT_SCENARIO;
   }
-  return { scenario, weeks, out, postureAllPushAndApplyBreaches, map, video, unique };
+  return { scenario, weeks, out, continueSave, continueWeek, postureAllPushAndApplyBreaches, map, video, unique };
 }
 
 async function main(): Promise<void> {
-  const { scenario, weeks, out, postureAllPushAndApplyBreaches, map: enableMap, video, unique } = parseArgs();
+  const {
+    scenario,
+    weeks,
+    out,
+    continueSave,
+    continueWeek,
+    postureAllPushAndApplyBreaches,
+    map: enableMap,
+    video,
+    unique,
+  } = parseArgs();
 
   const prereqResult = checkDataPrereqs();
   if (!prereqResult.ok) {
@@ -71,6 +89,8 @@ async function main(): Promise<void> {
     scenarioPath: scenario,
     outDirBase: out,
     weeksOverride: weeks,
+    resumeFromSavePath: continueSave,
+    resumeFromWeekIndex: continueWeek,
     postureAllPushAndApplyBreaches,
     emitWeeklySavesForVideo: video,
     uniqueRunFolder: unique

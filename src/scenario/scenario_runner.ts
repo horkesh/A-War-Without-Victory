@@ -299,6 +299,10 @@ export interface RunScenarioOptions {
     baseDir?: string;
     /** When true, build state and write initial_save only; skip week loop and end-of-run artifacts (faster for desktop New Campaign). */
     initialStateOnly?: boolean;
+    /** Resume a scenario run from a canonical save artifact produced by the harness or desktop save pipeline. */
+    resumeFromSavePath?: string;
+    /** Optional explicit resume week. Defaults to the resumed state's meta.turn and must match when provided. */
+    resumeFromWeekIndex?: number;
     /** Emit routine init/sector console diagnostics during scenario runs. Defaults off under Vitest, on elsewhere. */
     consoleDiagnostics?: boolean;
 }
@@ -1454,10 +1458,15 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         bot_diagnostics = false,
         baseDir: optionsBaseDir,
         initialStateOnly = false,
+        resumeFromSavePath,
+        resumeFromWeekIndex,
         consoleDiagnostics = process.env.VITEST !== 'true',
     } = options;
     if (!consoleDiagnostics) {
         pushRoutineConsoleDiagnosticsSuppressed();
+    }
+    if (initialStateOnly && resumeFromSavePath) {
+        throw new Error('initialStateOnly cannot be combined with resumeFromSavePath');
     }
     const effectiveEmitEvery = emitWeeklySavesForVideo ? Math.max(1, emitEvery) : emitEvery;
     let scenario = await loadScenario(scenarioPath);
@@ -1487,7 +1496,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         run_id,
         weeks,
         scenario_path: scenarioPath,
-        out_dir: out_dir_relative
+        out_dir: out_dir_relative,
+        ...(resumeFromSavePath ? { resume_from_save_path: resumeFromSavePath } : {}),
+        ...(resumeFromWeekIndex != null ? { resume_from_week_index: resumeFromWeekIndex } : {})
     };
     const runMetaPath = join(outDir, 'run_meta.json');
     await ensureRunOutputDir(outDir);
@@ -1515,7 +1526,29 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             sidToMun,
             initOverrideChangeCount
         } = startup;
-        let oobCreated = !scenario.init_formations_oob && scenario.recruitment_mode !== 'player_choice';
+        let startWeekIndex = 0;
+        if (resumeFromSavePath) {
+            const resumedSerialized = await readFile(resumeFromSavePath, 'utf8');
+            state = deserializeState(resumedSerialized);
+            const impliedResumeWeek = state.meta.turn;
+            if (!Number.isInteger(impliedResumeWeek) || impliedResumeWeek < 0) {
+                throw new Error(`resume save has invalid meta.turn: ${String(impliedResumeWeek)}`);
+            }
+            if (resumeFromWeekIndex != null && resumeFromWeekIndex !== impliedResumeWeek) {
+                throw new Error(
+                    `resumeFromWeekIndex (${resumeFromWeekIndex}) must match resumed state's meta.turn (${impliedResumeWeek})`
+                );
+            }
+            startWeekIndex = impliedResumeWeek;
+            if (startWeekIndex > weeks) {
+                throw new Error(
+                    `resume week ${startWeekIndex} exceeds scenario length ${weeks}`
+                );
+            }
+        }
+        let oobCreated = resumeFromSavePath
+            ? state.meta.phase === 'war' || Object.keys(state.military.formations ?? {}).length > 0
+            : !scenario.init_formations_oob && scenario.recruitment_mode !== 'player_choice';
         const serializedState = serializeState(state);
         const historicalMetricsInitial = captureHistoricalFactionMetrics(state);
 
@@ -1646,7 +1679,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         // Load historical event definitions from scenario JSON files
         const eventDefinitions = loadEventDefinitions(scenario.scenario_start_week ?? 0);
 
-        for (let week_index = 0; week_index < weeks; week_index++) {
+        for (let week_index = startWeekIndex; week_index < weeks; week_index++) {
             const turnActions = scenario.turns?.find((t) => t.week_index === week_index)?.actions ?? [];
             const actions = normalizeActions(turnActions);
             const baselineOpsAction = actions.find((a) => a.type === 'baseline_ops');
@@ -2080,7 +2113,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             if (turnReport.events_fired && turnReport.events_fired.length > 0) {
                 reportRow.events_fired = turnReport.events_fired;
             }
-            if (week_index === 0) firstReportRow = reportRow;
+            if (firstReportRow === null) firstReportRow = reportRow;
             lastReportRow = reportRow;
             reportStream.write(stableStringify(reportRow) + '\n');
 
@@ -2109,6 +2142,13 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     replayTimelineFirstFrame = false;
                 }
             }
+        }
+
+        if (!final_state_hash) {
+            final_state_hash = createHash('sha256')
+                .update(serializeState(state), 'utf8')
+                .digest('hex')
+                .slice(0, 16);
         }
 
         reportStream.end();
