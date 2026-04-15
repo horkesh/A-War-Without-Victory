@@ -1,3 +1,22 @@
+## [2026-04-16] fix(sim): make peace-plan rejection reduce patron support
+
+**Type:** Consequence / negotiation truth closure
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `src/sim/negotiation/peace_plans.ts`, `tests/peace_plans.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+**Tests:** `npx.cmd vitest run tests/peace_plans.test.ts tests/patron_pressure.test.ts tests/negotiation_pressure.test.ts` pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean; `git diff --check` clean.
+**Status:** VERIFIED after packet verification. Peace-plan rejection now applies the already-defined patron-support cost at the canonical consequence owner instead of leaving `support_level` untouched while only override authority and credibility moved.
+
+### Summary
+
+1. **The live rejection consequence now matches the existing pressure model:** `resolvePeacePlan()` already increased `override_authority` and applied credibility penalties to rejecting factions, but it never applied the existing `PEACE_PLAN_REJECTION_SUPPORT_COST` from `patron_pressure.ts`. `applyRejectionConsequences()` now reduces `PatronRelationship.support_level` by 5 for each rejecting faction and clamps the result.
+2. **The owner boundary stays narrow:** the change lands only in `src/sim/negotiation/peace_plans.ts`, which already owns peace-plan resolution consequences. Bot accept/reject scoring in `political_peace_plan.ts` and the turn-based patron-pressure engine in `patron_pressure.ts` remain untouched.
+3. **A direct regression now proves the consequence is real:** `tests/peace_plans.test.ts` now asserts that an RS rejection of the Contact Group plan reduces RS patron support by exactly 5, alongside the already-existing override-authority and credibility proofs.
+
+### Why this mattered
+
+This was a real substrate gap, not packet theater. The repo already named `PEACE_PLAN_REJECTION_SUPPORT_COST`, and patron support is a live relationship field used by downstream pressure and presentation surfaces. Leaving rejection without support loss meant one part of the consequence model was silently decorative. Now the rejection lane actually bites the patron relationship it claimed to own.
+
 ## [2026-04-16] docs(test): retire stale dual-react blocker language from endgame proof files
 
 **Type:** Test-band repo-truth cleanup

@@ -347,6 +347,22 @@ describe('resolvePeacePlan', () => {
         expect(neg.patron_relationships.RS.relationship_events).toContain('rejected_contact_group');
     });
 
+    it('rejection applies support loss to rejecting faction', () => {
+        const neg = makeNegotiationState();
+        neg.pending_peace_plan = {
+            plan_id: 'contact_group',
+            turn_offered: 118,
+            bot_responses: { RS: 'rejected', HRHB: 'accepted' },
+        };
+        const state = makeState({ turn: 118, war_start_turn: 0, negotiation: neg });
+
+        const rsSupportBefore = neg.patron_relationships.RS.support_level;
+
+        resolvePeacePlan(state, 'contact_group', 'accepted');
+
+        expect(neg.patron_relationships.RS.support_level).toBe(rsSupportBefore - 5);
+    });
+
     it('accepting factions get credit in peace_plans_accepted', () => {
         const neg = makeNegotiationState();
         neg.pending_peace_plan = {
