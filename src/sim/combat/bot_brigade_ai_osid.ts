@@ -56,7 +56,7 @@ import { shouldGrazBlockAttack, isGrazAccordsActive, isEastHerzegovinaPair } fro
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
-import { isMultiAxis, getAllAxisBrigades } from './sector_offensive.js';
+import { getAllAxisBrigades, isMultiAxis } from './sector_offensive_axis_helpers.js';
 import { getCorpsStance } from './combat_math.js';
 import { findBrigadeOperation } from './corps_operation_helpers.js';
 

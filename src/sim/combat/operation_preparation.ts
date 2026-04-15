@@ -54,7 +54,7 @@ import type {
 import type { NamedOfficer, NamedOfficerState } from '../../state/officer_types.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { FACTION_RECON_PROFILES } from './sector_intel_constants.js';
-import { getEquipmentOffensivePriority } from './sector_offensive.js';
+import { getEquipmentOffensivePriority } from './sector_offensive_launch_helpers.js';
 import { SYNC_WAIT_MAX_TURNS } from './army_hq_gathering_constants.js';
 
 // ═══════════════════════════════════════════════════════════════════════════

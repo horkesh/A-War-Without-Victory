@@ -12,7 +12,7 @@ import type { FormationId, FormationState } from '../../../state/game_state.js';
 import { FATIGUE_MAX } from '../../../state/formation_constants.js';
 import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../../state/supply_state_derivation.js';
 import { strictCompare } from '../../../state/validateGameState.js';
-import { resolveEquipmentClass, getEquipmentOffensivePriority } from '../sector_offensive.js';
+import { resolveEquipmentClass, getEquipmentOffensivePriority } from '../sector_offensive_launch_helpers.js';
 import type { ZoneAssessment, ZoneId, BrigadeEvaluation, ForceAssessment } from './commander_state.js';
 
 // ═══════════════════════════════════════════════════════════════════════════

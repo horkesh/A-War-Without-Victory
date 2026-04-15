@@ -18,7 +18,7 @@ import type {
     GameState,
     OperationAxis,
 } from '../../state/game_state.js';
-import { createSingleAxis } from './sector_offensive.js';
+import { createSingleAxis } from './sector_offensive_axis_helpers.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';

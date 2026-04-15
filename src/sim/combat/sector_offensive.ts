@@ -1,8 +1,8 @@
 /**
- * CANONICAL LIFECYCLE OWNER — Corps Operations
+ * CANONICAL LIFECYCLE OWNER - Corps Operations
  *
  * This file is the single authoritative owner of the corps operation lifecycle:
- * planning → preparation → execution → recovery.
+ * planning -> preparation -> execution -> recovery.
  *
  * All operation creation, advancement, and recovery flows through here.
  * bot_corps_operations.ts is the legacy/transitional path and is non-authoritative.
@@ -10,14 +10,14 @@
  * operation_prediction.ts owns predictive/advisory computation.
  *
  * A sector offensive IS a CorpsOperation with type === 'sector_attack'.
- * Lifecycle: planning → execution → recovery → removed from state.
+ * Lifecycle: planning -> execution -> recovery -> removed from state.
  *
  * Pipeline integration:
  *   advance-sector-offensives  (after corps orders, before brigade orders)
  *   update-sector-offensive-results (after attack resolution)
  *
  * **Launch and eligible-attacker gates (Phase D Trust-and-Baseline):**
- * - Launch: Corps may launch when sector has ≥ MIN_BRIGADES_FOR_OFFENSIVE (2) assigned,
+ * - Launch: Corps may launch when sector has >= MIN_BRIGADES_FOR_OFFENSIVE (2) assigned,
  *   no existing sector op for that corps, and sector has valid offensive targets. Planning
  *   duration is computed from objective count; force_launch can shorten.
  * - Transition to execution: when planning_elapsed >= planning_duration (or force_launch
@@ -41,9 +41,9 @@
  *
  * Deterministic: sorted iteration, no randomness, no timestamps.
  *
- * MOVEMENT TIER: T4 — Combat Consequence (Operation March)
+ * MOVEMENT TIER: T4 - Combat Consequence (Operation March)
  * Writes brigade_movement_orders during operation preparation/execution.
- * Must not override commander's operation plan — only marches participants to objectives.
+ * Must not override commander's operation plan - only marches participants to objectives.
  * (see MOVEMENT_AUTHORITY.md)
  */
 
@@ -58,7 +58,7 @@ import type {
     SettlementId,
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import type { SupplyStateByOsidReport, SupplyStateLevel } from '../../state/supply_state_derivation.js';
+import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { pickOperationName } from './operation_names.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
@@ -83,52 +83,57 @@ import {
 } from './bot_constants.js';
 import { getActiveDoctrinePhase } from './bot_strategy.js';
 import { getFactionCorps, getCorpsSubordinates, sortByPersonnelDesc } from './bot_corps_helpers.js';
-import {
-    ENTRENCHMENT_PER_TURN,
-    MAX_ENTRENCHMENT,
-    basePower,
-    VICTORY_THRESHOLD_COSTLY,
-    getDefensiveFireMult,
-    getForestMult,
-    getUrbanMult,
-} from './combat_math.js';
-import { predictAllAdjacentTargets, type PredictedOutcome } from './combat_predictor.js';
-import { estimateConcentratedOutcome, isOutcomeSufficientForAttack } from './bot_brigade_targeting.js';
-import { findSectorForEnemyOsid } from './corps_front_sectors.js';
+import type { PredictedOutcome } from './combat_predictor.js';
 import { seedDisplacementTimerOnFlip } from '../../state/displacement_takeover.js';
 import type { PreparationEvent } from '../turn_pipeline_types.js';
 import { checkLoanedArrivals, areLoanedBrigadesReady, cleanupDissolvedLoans } from './operation_reinforcement.js';
 import { MAX_OP_LOAN_DISTANCE, LOAN_STAGING_BUFFER_TURNS } from './operation_reinforcement_constants.js';
 import { hasActiveOperation, removeOperation } from './corps_operation_helpers.js';
 import { MIN_ATTACK_PERSONNEL, MAX_BRIGADE_PERSONNEL } from '../../state/formation_constants.js';
+import {
+    allAxesTerminal,
+    assignBrigadeRoles,
+    computeMultiAxisPlanningDuration,
+    createSingleAxis,
+    getAllAxisBrigades,
+    getAllAxisObjectives,
+    getCurrentLaunchObjectives,
+    isMultiAxis,
+    isSupportBrigadeOnActiveOp,
+    resetAxisForExecution,
+    sumAxesField,
+    validateAxisContiguity,
+} from './sector_offensive_axis_helpers.js';
+import {
+    areParticipantsReadyForExecution,
+    buildOsidAdjacencyFromFrontEdges,
+    checkLaunchFeasibility,
+    collectObjectiveApproachOsids,
+    computeSupplyReadiness,
+    getEquipmentOffensivePriority,
+    getMomentumAggressionBonus,
+    getMomentumMinOutcome,
+    hasEligibleAttackersForLaunch,
+    hasExecutableOpeningAttack,
+    isStagingCorridorSafe,
+    resolveEquipmentClass,
+} from './sector_offensive_launch_helpers.js';
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Equipment priority
-// ═══════════════════════════════════════════════════════════════════════════
-
-/**
- * Equipment class priority for operation participant ordering.
- * Higher = selected first for offensive operations.
- * Motorized/mechanized brigades are the most valuable offensive assets.
- */
-export function getEquipmentOffensivePriority(equipmentClass: string | undefined): number {
-    switch (equipmentClass) {
-        case 'mechanized': return 3;
-        case 'motorized': return 2;
-        case 'mountain': return 1;
-        default: return 0; // light_infantry, police, special, undefined
-    }
-}
-
-/**
- * Resolve a formation's equipment class from `equipment_class` field or `equip:` tag.
- * OOB early-war entry doesn't set the field, but does set the tag.
- */
-export function resolveEquipmentClass(f: { equipment_class?: string; tags?: string[] }): string | undefined {
-    if (f.equipment_class) return f.equipment_class;
-    const tag = f.tags?.find(t => t.startsWith('equip:'));
-    return tag ? tag.slice(6) : undefined;
-}
+export {
+    assignBrigadeRoles,
+    createSingleAxis,
+    getAllAxisBrigades,
+    getAllAxisObjectives,
+    isMultiAxis,
+    isSupportBrigadeOnActiveOp,
+    validateAxisContiguity,
+} from './sector_offensive_axis_helpers.js';
+export {
+    getEquipmentOffensivePriority,
+    getMomentumAggressionBonus,
+    getMomentumMinOutcome,
+    resolveEquipmentClass,
+} from './sector_offensive_launch_helpers.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -148,183 +153,6 @@ const OBJECTIVES_PER_BRIGADE = 0.5; // 1 objective per 2 brigades
 // Personnel floor below which a brigade cannot attack — use MIN_ATTACK_PERSONNEL (500) from
 // formation_constants (canonical single source, shared with bot_brigade_eval_attack).
 // NOTE: the local constant was previously 400 — unified to 500 to match MIN_ATTACK_PERSONNEL.
-
-/**
- * Attack posture discount for feasibility estimation.
- * Conservative: uses attack (0.8×), not assault (0.6×).
- * This intentionally overestimates attacker power relative to the real predictor
- * (which includes fog-of-war, terrain, supply, etc.) so we only reject truly hopeless ops.
- */
-const FEASIBILITY_ATTACK_POSTURE_MULT = 0.8;
-
-/**
- * Feasibility check: can the attacker pool achieve at least costly_victory against
- * ANY proposed objective? Uses basePower (personnel × equipment × experience × cohesion)
- * with a conservative attack posture discount vs the full defender sector.
- *
- * This is intentionally optimistic — it only rejects operations where even the most
- * generous estimate shows no objective is achievable. The real predictor with terrain,
- * fog-of-war, entrenchment, and supply will further filter at brigade execution time.
- *
- * Returns true if at least one objective appears feasible.
- */
-function checkLaunchFeasibility(
-    state: GameState,
-    attackerBrigadeIds: FormationId[],
-    objectives: string[],
-    faction: FactionId,
-    corpsId: FormationId,
-): boolean {
-    const formations = state.military.formations ?? {};
-
-    // Compute total attacker base power (all corps brigades that can attack)
-    let totalAttackerPower = 0;
-    for (const bid of attackerBrigadeIds) {
-        const f = formations[bid];
-        if (!f || f.status !== 'active') continue;
-        if ((f.personnel ?? 0) < MIN_ATTACK_PERSONNEL) continue;
-        if ((f.disrupted_turns ?? 0) > 0) continue;
-        totalAttackerPower += basePower(f) * FEASIBILITY_ATTACK_POSTURE_MULT;
-    }
-
-    if (totalAttackerPower <= 0) return false;
-
-    // Check each objective: estimate defender power from the defending sector
-    for (const obj of objectives) {
-        // Find the sector defending this objective
-        const pc = state.political?.political_controllers ?? {};
-        const defenderFaction = pc[obj];
-        if (!defenderFaction || defenderFaction === faction) continue;
-
-        const sector = findSectorForEnemyOsid(state, obj, defenderFaction);
-        if (!sector) {
-            // No defending sector means militia-only defense — always feasible
-            return true;
-        }
-
-        // Sum defender sector base power (all brigades in the sector)
-        let sectorDefenderPower = 0;
-        const defenders: FormationState[] = [];
-        for (const defBid of sector.assigned_brigade_ids) {
-            const df = formations[defBid];
-            if (!df || df.status !== 'active') continue;
-            sectorDefenderPower += basePower(df);
-            defenders.push(df);
-        }
-
-        if (sectorDefenderPower <= 0) return true; // Undefended sector
-
-        const defensiveFireMult = getDefensiveFireMult(defenders, defenderFaction, state);
-        const entrenchmentMult = defenders.reduce((best, defender) => {
-            const entrenchmentTurns = Math.min(
-                MAX_ENTRENCHMENT,
-                (defender as { entrenchment_turns?: number }).entrenchment_turns ?? 0,
-            );
-            const mult = 1.0 + Math.sqrt(entrenchmentTurns) * ENTRENCHMENT_PER_TURN * 2;
-            return Math.max(best, mult);
-        }, 1.0);
-        const terrainMult = Math.max(getUrbanMult(obj), getForestMult(obj));
-        const adjustedDefenderPower = sectorDefenderPower * defensiveFireMult * entrenchmentMult * terrainMult;
-
-        // Power ratio: attacker pool vs entire defending sector.
-        // This is generous to the attacker because in reality only a fraction
-        // of the sector's brigades would react to any single OSID attack.
-        const ratio = totalAttackerPower / adjustedDefenderPower;
-        if (ratio >= VICTORY_THRESHOLD_COSTLY) return true;
-    }
-
-    // No objective appears achievable
-    return false;
-}
-
-/** Build OSID adjacency from front edges — fallback when caller doesn't provide one. */
-function buildOsidAdjacencyFromFrontEdges(state: GameState): Map<string, string[]> {
-    const frontEdges = state.military.war_front_edges_osid ?? [];
-    const adj = new Map<string, string[]>();
-    for (const fe of frontEdges) {
-        if (!fe.a || !fe.b) continue;
-        let listA = adj.get(fe.a);
-        if (!listA) { listA = []; adj.set(fe.a, listA); }
-        if (!listA.includes(fe.b)) listA.push(fe.b);
-        let listB = adj.get(fe.b);
-        if (!listB) { listB = []; adj.set(fe.b, listB); }
-        if (!listB.includes(fe.a)) listB.push(fe.a);
-    }
-    return adj;
-}
-
-/**
- * FIX 3: Check if a staging OSID is reachable from the corps' main territory
- * without passing through a single-OSID chokepoint (corridor width = 1).
- *
- * Algorithm: find a shortest path from `staging` to any OSID in `mainBody`
- * through `friendlySet`. For each intermediate OSID on that path, temporarily
- * block it and re-BFS. If the staging becomes unreachable, that OSID is a
- * chokepoint — reject this staging OSID.
- *
- * Returns true if the corridor is safe (no single chokepoint), false if risky.
- */
-function isStagingCorridorSafe(
-    staging: string,
-    mainBody: Set<string>,
-    friendlySet: Set<string>,
-    adj: Map<string, readonly string[]>,
-): boolean {
-    if (mainBody.has(staging)) return true; // staging IS in main body
-
-    // BFS to find shortest path from staging to mainBody
-    const parent = new Map<string, string | null>();
-    parent.set(staging, null);
-    const queue: string[] = [staging];
-    let head = 0;
-    let target: string | null = null;
-    while (head < queue.length) {
-        const curr = queue[head++]!;
-        if (mainBody.has(curr) && curr !== staging) {
-            target = curr;
-            break;
-        }
-        for (const nb of adj.get(curr) ?? []) {
-            if (parent.has(nb)) continue;
-            if (!friendlySet.has(nb)) continue;
-            parent.set(nb, curr);
-            queue.push(nb);
-        }
-    }
-    if (!target) return false; // unreachable — definitely not safe
-
-    // Reconstruct path (excluding endpoints)
-    const path: string[] = [];
-    let node: string | null = target;
-    while (node !== null) {
-        path.push(node);
-        node = parent.get(node) ?? null;
-    }
-    path.reverse(); // staging → ... → target
-    // Intermediate nodes: exclude staging (index 0) and target (last)
-    const intermediates = path.slice(1, path.length - 1);
-    if (intermediates.length === 0) return true; // directly adjacent, no chokepoint possible
-
-    // For each intermediate, check if blocking it disconnects staging from mainBody
-    for (const blocked of intermediates) {
-        const visited = new Set<string>([staging, blocked]);
-        const q: string[] = [staging];
-        let h = 0;
-        let found = false;
-        while (h < q.length) {
-            const c = q[h++]!;
-            if (mainBody.has(c) && c !== staging) { found = true; break; }
-            for (const nb of adj.get(c) ?? []) {
-                if (visited.has(nb)) continue;
-                if (!friendlySet.has(nb)) continue;
-                visited.add(nb);
-                q.push(nb);
-            }
-        }
-        if (!found) return false; // blocking this node disconnects — chokepoint
-    }
-    return true;
-}
 
 /** Maximum brigades participating in a single sector offensive. */
 const MAX_PARTICIPATING_BRIGADES = 20;
@@ -460,222 +288,6 @@ function issuePostOperationReturnMarches(state: GameState, op: CorpsOperation): 
     }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Multi-axis helpers
-// ═══════════════════════════════════════════════════════════════════════════
-
-/** Check if an operation uses the multi-axis structure. */
-export function isMultiAxis(op: CorpsOperation): boolean {
-    return Array.isArray(op.axes) && op.axes.length > 0;
-}
-
-/** Get all objectives across all axes (deduplicated, sorted). */
-export function getAllAxisObjectives(op: CorpsOperation): string[] {
-    if (!isMultiAxis(op)) return op.objectives ?? [];
-    const seen = new Set<string>();
-    const result: string[] = [];
-    for (const axis of op.axes!) {
-        for (const obj of axis.objectives) {
-            if (!seen.has(obj)) {
-                seen.add(obj);
-                result.push(obj);
-            }
-        }
-    }
-    return result;
-}
-
-/** Get all participating brigades across all axes (deduplicated, sorted). */
-export function getAllAxisBrigades(op: CorpsOperation): FormationId[] {
-    if (!isMultiAxis(op)) return op.participating_brigades;
-    const seen = new Set<string>();
-    const result: FormationId[] = [];
-    for (const axis of op.axes!) {
-        for (const bid of axis.assigned_brigades) {
-            if (!seen.has(bid)) {
-                seen.add(bid);
-                result.push(bid);
-            }
-        }
-    }
-    return result.sort(strictCompare);
-}
-
-function getCurrentLaunchObjectives(op: CorpsOperation): string[] {
-    if (!isMultiAxis(op)) {
-        const currentObjective = op.objectives?.[op.current_objective_index ?? 0];
-        return currentObjective ? [currentObjective] : [];
-    }
-
-    const seen = new Set<string>();
-    const objectives: string[] = [];
-    for (const axis of op.axes!) {
-        const currentObjective = axis.objectives[axis.current_objective_index ?? 0];
-        if (!currentObjective || seen.has(currentObjective)) continue;
-        seen.add(currentObjective);
-        objectives.push(currentObjective);
-    }
-    return objectives;
-}
-
-/** Check if all axes are terminal (complete or stalled). */
-function allAxesTerminal(axes: OperationAxis[]): boolean {
-    return axes.every(a => a.status === 'complete' || a.status === 'stalled');
-}
-
-/** Sum a numeric field across all axes. */
-function sumAxesField(axes: OperationAxis[], field: keyof OperationAxis): number {
-    let total = 0;
-    for (const axis of axes) {
-        const val = axis[field];
-        if (typeof val === 'number') total += val;
-    }
-    return total;
-}
-
-/** Reset an axis to execution-start state. */
-function resetAxisForExecution(axis: OperationAxis): void {
-    axis.current_objective_index = 0;
-    axis.status = 'executing';
-    axis.failure_count = 0;
-    axis.consecutive_failures_on_current = 0;
-    axis.momentum = 0;
-    axis.last_result = undefined;
-    axis.attack_attempt_count = 0;
-    axis.objective_capture_count = 0;
-    axis.movement_only_execution_turns = 0;
-    axis.idle_execution_turn_streak = 0;
-}
-
-/** Create a single-axis wrapper for bot-generated operations. */
-export function createSingleAxis(
-    brigades: FormationId[],
-    objectives: string[],
-    stagingOsid?: string,
-    formations?: Record<string, FormationState>,
-): OperationAxis {
-    const sorted = brigades.sort(strictCompare);
-    const { main, support } = assignBrigadeRoles(sorted, formations);
-    return {
-        axis_id: 'main',
-        name: 'Main Advance',
-        assigned_brigades: sorted,
-        ...(main && { main_brigade: main }),
-        ...(support.length > 0 && { support_brigades: support }),
-        objectives,
-        current_objective_index: 0,
-        status: 'executing',
-        failure_count: 0,
-        consecutive_failures_on_current: 0,
-        momentum: 0,
-        attack_attempt_count: 0,
-        objective_capture_count: 0,
-        movement_only_execution_turns: 0,
-        idle_execution_turn_streak: 0,
-        ...(stagingOsid && { staging_osid: stagingOsid }),
-    };
-}
-
-/**
- * Assign main/support roles to brigades on an axis.
- * Main brigade = highest basePower (deterministic tiebreak by ID).
- * All others = support.
- */
-export function assignBrigadeRoles(
-    brigadeIds: FormationId[],
-    formations?: Record<string, FormationState>,
-): { main: FormationId | undefined; support: FormationId[] } {
-    if (!formations || brigadeIds.length === 0) {
-        return { main: undefined, support: [] };
-    }
-    if (brigadeIds.length === 1) {
-        return { main: brigadeIds[0], support: [] };
-    }
-    const ranked = [...brigadeIds].sort((a, b) => {
-        const fa = formations[a];
-        const fb = formations[b];
-        const pa = fa ? basePower(fa) : 0;
-        const pb = fb ? basePower(fb) : 0;
-        if (pb !== pa) return pb - pa;
-        return strictCompare(a, b);
-    });
-    return {
-        main: ranked[0],
-        support: ranked.slice(1).sort(strictCompare),
-    };
-}
-
-/**
- * Check whether a brigade is a SUPPORT brigade on its corps' active operation.
- * Main brigades and non-participants return false.
- */
-export function isSupportBrigadeOnActiveOp(
-    state: GameState,
-    brigadeId: FormationId,
-    corpsId: FormationId | null | undefined,
-): boolean {
-    if (!corpsId) return false;
-    const cmd = state.military.corps_command?.[corpsId];
-    if (!cmd) return false;
-    for (const op of cmd.active_operations) {
-        if (op.phase !== 'execution') continue;
-        if (!op.axes) continue;
-        for (const axis of op.axes) {
-            if (axis.support_brigades?.includes(brigadeId)) return true;
-        }
-    }
-    return false;
-}
-
-/** Compute planning duration for multi-axis ops: based on longest axis. */
-function computeMultiAxisPlanningDuration(axes: OperationAxis[]): number {
-    let maxLen = 0;
-    for (const axis of axes) {
-        if (axis.objectives.length > maxLen) maxLen = axis.objectives.length;
-    }
-    return computePlanningDuration(maxLen);
-}
-
-/**
- * Validate that an axis's objective chain is contiguous via the adjacency map.
- * Each objective must be adjacent to the staging OSID or to a prior objective in the chain.
- * Returns null if valid, or an error string if invalid.
- */
-export function validateAxisContiguity(
-    axis: OperationAxis,
-    adjacency: Map<string, string[]>,
-): string | null {
-    if (axis.objectives.length === 0) return null;
-    const reachable = new Set<string>();
-    if (axis.staging_osid) reachable.add(axis.staging_osid);
-    for (let i = 0; i < axis.objectives.length; i++) {
-        const obj = axis.objectives[i];
-        if (i === 0) {
-            // First objective must be adjacent to staging or we skip the check if no staging
-            if (axis.staging_osid) {
-                const neighbors = adjacency.get(axis.staging_osid) ?? [];
-                if (!neighbors.includes(obj)) {
-                    return `Axis "${axis.name}": objective[0] "${obj}" is not adjacent to staging "${axis.staging_osid}"`;
-                }
-            }
-        } else {
-            // Must be adjacent to any prior objective (branching chains allowed)
-            let connected = false;
-            for (const prior of axis.objectives.slice(0, i)) {
-                const neighbors = adjacency.get(prior) ?? [];
-                if (neighbors.includes(obj)) {
-                    connected = true;
-                    break;
-                }
-            }
-            if (!connected) {
-                return `Axis "${axis.name}": objective[${i}] "${obj}" is not adjacent to any prior objective`;
-            }
-        }
-        reachable.add(obj);
-    }
-    return null;
-}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Planning duration
@@ -696,193 +308,6 @@ export function computePlanningDuration(objectiveCount: number): number {
     return Math.min(MAX_PLANNING_DURATION, base + PLANNING_MARCH_BUFFER);
 }
 
-function collectSectorSubsegmentApproachOsids(
-    state: GameState,
-    corpsId: FormationId,
-    objectives: string[]
-): Set<string> {
-    const approachOsids = new Set<string>();
-    if (!state.military.corps_front_sectors || objectives.length === 0) return approachOsids;
-    const objectiveSet = new Set(objectives);
-    for (const sector of Object.values(state.military.corps_front_sectors)) {
-        if (sector.corps_id !== corpsId) continue;
-        for (const subSegment of sector.sub_segments ?? []) {
-            const touchesObjective = subSegment.enemy_osids.some((osid) => objectiveSet.has(osid));
-            if (!touchesObjective) continue;
-            for (const osid of subSegment.friendly_osids) {
-                approachOsids.add(osid);
-            }
-        }
-    }
-    return approachOsids;
-}
-
-function collectObjectiveApproachOsids(
-    state: GameState,
-    corpsId: FormationId,
-    faction: FactionId,
-    objectives: string[]
-): Set<string> {
-    const adjacency = buildOsidAdjacencyFromFrontEdges(state);
-    if (adjacency.size > 0) {
-        const graphApproachOsids = new Set<string>();
-        for (const objective of objectives) {
-            for (const neighbor of adjacency.get(objective) ?? []) {
-                const controller = getPoliticalControllerOSID(state, neighbor, undefined);
-                if (controller === faction || isFriendlyFactionCtrl(controller, faction, state)) {
-                    graphApproachOsids.add(neighbor);
-                }
-            }
-            if (graphApproachOsids.size > 0) {
-                break;
-            }
-        }
-        return graphApproachOsids;
-    }
-
-    // Compatibility fallback for sparse unit states that do not populate
-    // front-edge adjacency. Runtime should prefer graph-valid approach truth.
-    return collectSectorSubsegmentApproachOsids(state, corpsId, objectives);
-}
-
-function areParticipantsReadyForExecution(
-    state: GameState,
-    corpsId: FormationId,
-    faction: FactionId,
-    operation: CorpsOperation
-): boolean {
-    if (isMultiAxis(operation) && operation.axes) {
-        let readyAxisCount = 0;
-        for (const axis of operation.axes) {
-            const currentObjective = axis.objectives[axis.current_objective_index ?? 0];
-            if (typeof currentObjective !== 'string' || currentObjective.length === 0) continue;
-            const axisApproachOsids = collectObjectiveApproachOsids(state, corpsId, faction, [currentObjective]);
-            if (axisApproachOsids.size === 0) continue;
-
-            for (const brigadeId of axis.assigned_brigades) {
-                const brigade = state.military.formations?.[brigadeId];
-                if (!brigade || brigade.status !== 'active') continue;
-                if ((brigade.personnel ?? 0) < MIN_ATTACK_PERSONNEL) continue;
-                if ((brigade.disrupted_turns ?? 0) > 0) continue;
-                const movementState = state.military.brigade_movement_state?.[brigadeId];
-                if (movementState?.status === 'in_transit') continue;
-                const location = brigade.location_osid;
-                if (typeof location !== 'string' || location.length === 0) continue;
-                if (!axisApproachOsids.has(location)) continue;
-                readyAxisCount += 1;
-                break;
-            }
-        }
-        return readyAxisCount > 0;
-    }
-
-    const objectiveApproachOsids = collectObjectiveApproachOsids(
-        state,
-        corpsId,
-        faction,
-        getCurrentLaunchObjectives(operation),
-    );
-    let eligibleParticipantCount = 0;
-    for (const brigadeId of operation.participating_brigades ?? []) {
-        const brigade = state.military.formations?.[brigadeId];
-        if (!brigade || brigade.status !== 'active') continue;
-        if ((brigade.personnel ?? 0) < MIN_ATTACK_PERSONNEL) continue;
-        if ((brigade.disrupted_turns ?? 0) > 0) continue;
-        const movementState = state.military.brigade_movement_state?.[brigadeId];
-        if (movementState?.status === 'in_transit') continue;
-        const location = brigade.location_osid;
-        if (typeof location !== 'string' || location.length === 0) return false;
-        eligibleParticipantCount += 1;
-        if (objectiveApproachOsids.has(location)) continue;
-        return false;
-    }
-    return eligibleParticipantCount > 0;
-}
-
-function getPlanningAttackThreshold(op: CorpsOperation): PredictedOutcome {
-    return op.min_attack_outcome ?? 'costly_victory';
-}
-
-function axisHasExecutableOpeningAttack(
-    state: GameState,
-    faction: FactionId,
-    objective: string | undefined,
-    brigadeIds: FormationId[],
-    adjacency: Map<string, string[]>,
-    threshold: PredictedOutcome,
-): boolean {
-    if (typeof objective !== 'string' || objective.length === 0) return false;
-
-    const adjacentParticipants = brigadeIds.filter((brigadeId) => {
-        const brigade = state.military.formations?.[brigadeId];
-        if (!brigade?.location_osid || brigade.status !== 'active') return false;
-        return (adjacency.get(brigade.location_osid) ?? []).includes(objective);
-    }).length;
-    if (adjacentParticipants <= 0) return false;
-
-    for (const brigadeId of brigadeIds) {
-        const brigade = state.military.formations?.[brigadeId];
-        if (!brigade || brigade.faction !== faction || brigade.status !== 'active') continue;
-        if ((brigade.personnel ?? 0) < MIN_ATTACK_PERSONNEL) continue;
-        if ((brigade.disrupted_turns ?? 0) > 0) continue;
-
-        const directObjectiveAttack = predictAllAdjacentTargets(
-            state,
-            brigadeId,
-            adjacency,
-            undefined as unknown as OperationalToCanonicalReverseMap,
-            {},
-            'attack',
-        ).find((target) => target.osid === objective);
-        if (!directObjectiveAttack) continue;
-
-        const concentratedOutcome = adjacentParticipants > 1
-            ? estimateConcentratedOutcome(directObjectiveAttack.prediction.power_ratio, adjacentParticipants - 1)
-            : null;
-        if (
-            isOutcomeSufficientForAttack(directObjectiveAttack.prediction.predicted_outcome, threshold)
-            || (concentratedOutcome != null && isOutcomeSufficientForAttack(concentratedOutcome, threshold))
-        ) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-function hasExecutableOpeningAttack(
-    state: GameState,
-    faction: FactionId,
-    op: CorpsOperation,
-): boolean {
-    const adjacency = buildOsidAdjacencyFromFrontEdges(state);
-    if (adjacency.size === 0) {
-        // Sparse test/save states without front-edge adjacency cannot support
-        // predictor-faithful attack validation. Fall back to readiness truth only.
-        return true;
-    }
-    const threshold = getPlanningAttackThreshold(op);
-
-    if (isMultiAxis(op) && op.axes) {
-        return op.axes.some((axis) => axisHasExecutableOpeningAttack(
-            state,
-            faction,
-            axis.objectives[axis.current_objective_index ?? 0],
-            axis.assigned_brigades,
-            adjacency,
-            threshold,
-        ));
-    }
-
-    return axisHasExecutableOpeningAttack(
-        state,
-        faction,
-        op.objectives?.[op.current_objective_index ?? 0],
-        op.participating_brigades ?? [],
-        adjacency,
-        threshold,
-    );
-}
 
 /**
  * Record failed objectives for a corps when an operation ends without success.
@@ -1122,43 +547,6 @@ function resolveOperationSectorId(
     return bestSectorId;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Supply readiness
-// ═══════════════════════════════════════════════════════════════════════════
-
-/** Compute supply readiness as the mean graded readiness of participating brigades. */
-function computeSupplyReadiness(
-    state: GameState,
-    participatingBrigades: FormationId[],
-    faction: FactionId,
-    supplyByOsid?: SupplyStateByOsidReport | null
-): number {
-    // Supply readiness only meaningful when full supply reserves system is active
-    if (!state.meta?.supply_reserves_enabled) return 1.0;
-    if (!supplyByOsid?.factions || participatingBrigades.length === 0) return 1.0;
-    const fac = supplyByOsid.factions.find(f => f.faction_id === faction);
-    if (!fac?.by_osid) return 1.0;
-    const osidState = new Map<string, SupplyStateLevel>();
-    for (const e of fac.by_osid) osidState.set(e.osid, e.state);
-
-    const reserveLevel = state.meta?.supply_reserves_enabled
-        ? ((state.military.general_supply_reserve as Record<string, number> | undefined)?.[faction] ?? 100)
-        : 100;
-
-    let score = 0;
-    for (const bid of participatingBrigades) {
-        const b = state.military.formations?.[bid];
-        if (!b || b.status !== 'active') continue;
-        const rawSt = b.location_osid ? (osidState.get(b.location_osid) ?? 'adequate') : 'adequate';
-        const st = state.meta?.supply_reserves_enabled
-            ? getEffectiveSupplyState(rawSt, reserveLevel)
-            : rawSt;
-        // Graduated scoring: aligns planner with resolver's getSupplyMult treatment.
-        // adequate=1.0 (full capability), strained=0.5 (degraded but functional), critical=0.0 (non-functional).
-        score += st === 'adequate' ? 1.0 : st === 'strained' ? 0.5 : 0.0;
-    }
-    return participatingBrigades.length > 0 ? score / participatingBrigades.length : 1.0;
-}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Advance sector offensives (phase transitions, validation)
@@ -1339,7 +727,7 @@ export function advanceSectorOffensives(
 
             const elapsed = turn - op.phase_started_turn;
             const planDuration = op.planning_duration
-                ?? (multiAxis ? computeMultiAxisPlanningDuration(op.axes!) : 1);
+                ?? (multiAxis ? computeMultiAxisPlanningDuration(op.axes!, computePlanningDuration) : 1);
             const planningObjectiveState = reconcilePlanningObjectives(state, corpsId, op, faction);
             if (planningObjectiveState === 'completed') {
                 beginRecovery(op, turn, 'completed', state);
@@ -1984,29 +1372,6 @@ function updateLegacyFlatResults(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Eligible attacker pre-screen
-// ═══════════════════════════════════════════════════════════════════════════
-
-/**
- * Check whether at least one brigade in the candidate list can adopt attack posture.
- * Hard gates only: active status, personnel >= 400, not disrupted.
- */
-function hasEligibleAttackersForLaunch(
-    formations: GameState['military']['formations'],
-    brigadeIds: FormationId[],
-): boolean {
-    for (const id of brigadeIds) {
-        const f = formations?.[id];
-        if (!f) continue;
-        if (f.status !== 'active') continue;
-        if ((f.personnel ?? 0) < MIN_ATTACK_PERSONNEL) continue;
-        if ((f.disrupted_turns ?? 0) > 0) continue;
-        return true;
-    }
-    return false;
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
 // Evaluate & launch sector offensives
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -2133,7 +1498,7 @@ export function evaluateCorpsOffensiveLaunch(
     // Reject operations where the attacker pool cannot achieve even costly_victory
     // against ANY proposed objective. Prevents zombie ops that permanently block
     // the corps slot because brigades refuse to execute hopeless attacks.
-    if (!checkLaunchFeasibility(state, corpsBrigadeIds, objectives, faction, corpsId)) {
+    if (!checkLaunchFeasibility(state, corpsBrigadeIds, objectives, faction)) {
         const corpsName = formations[corpsId]?.name ?? corpsId;
         console.warn(`[feasibility] ${corpsName}: rejected op — no objective achievable at costly_victory (${objectives.length} objectives, ${corpsBrigadeIds.length} brigades)`);
         return null;
@@ -2174,7 +1539,7 @@ export function evaluateCorpsOffensiveLaunch(
         .slice(0, MAX_PARTICIPATING_BRIGADES);
     if (participating.length < MIN_BRIGADES_FOR_OFFENSIVE) return null;
     if (!hasEligibleAttackersForLaunch(formations, participating)) return null;
-    if (!checkLaunchFeasibility(state, participating, objectives, faction, corpsId)) {
+    if (!checkLaunchFeasibility(state, participating, objectives, faction)) {
         const corpsName = formations[corpsId]?.name ?? corpsId;
         console.warn(`[feasibility] ${corpsName}: rejected op after participant trim - no objective achievable at costly_victory (${objectives.length} objectives, ${participating.length} participating brigades)`);
         return null;
@@ -2272,30 +1637,6 @@ export function evaluateSectorOffensiveLaunch(
         state, corpsId, faction, sectorBrigadeIds, sectorEnemyOsids,
         offensiveTargets, supplyByOsid, minAttackOutcome, sectorId
     );
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Momentum bonuses (used by brigade AI)
-// ═══════════════════════════════════════════════════════════════════════════
-
-/** Get momentum-based aggression bonus for a sector offensive. */
-export function getMomentumAggressionBonus(momentum: number): number {
-    if (momentum >= 3) return 0.15;
-    if (momentum >= 2) return 0.10;
-    if (momentum >= 1) return 0.05;
-    return 0;
-}
-
-/** Get momentum-based minimum outcome relaxation. Returns the relaxed min_outcome. */
-export function getMomentumMinOutcome(momentum: number, base: string): string {
-    const rank: Record<string, number> = {
-        decisive_victory: 5, victory: 4, costly_victory: 3, stalemate: 2, repulsed: 1
-    };
-    const baseRank = rank[base] ?? 2;
-    if (momentum >= 3 && baseRank > 2) return 'stalemate';
-    if (momentum >= 2 && baseRank > 3) return 'costly_victory';
-    if (momentum >= 1 && baseRank > 4) return 'victory';
-    return base;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

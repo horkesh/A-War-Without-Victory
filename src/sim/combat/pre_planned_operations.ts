@@ -19,7 +19,7 @@ import type {
     OperationAxis,
 } from '../../state/game_state.js';
 import type { Osid } from './osid_adjacency.js';
-import { createSingleAxis } from './sector_offensive.js';
+import { createSingleAxis } from './sector_offensive_axis_helpers.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { assignOperationCommander } from './officer_system.js';
