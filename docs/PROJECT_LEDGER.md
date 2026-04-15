@@ -1,3 +1,34 @@
+## [2026-04-15] feat(ui): make Warroom hotspots keyboard-accessible
+
+**Type:** Accessibility baseline / Warroom shell hotspot reachability
+**Commit (code):** 79fc76d1
+**Commit (ledger):** this entry
+**Files:** `src/ui/map/components/warroom/WarroomShellLayer.tsx`, `tests/ui/warroom_shell_accessibility.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+**Tests:** `npx.cmd tsc --noEmit -p tsconfig.json` clean; vitest `tests/warroom_shell_layer.test.ts` + `tests/ui/warroom_shell_accessibility.test.ts` = 35/35 pass; `npm.cmd run desktop:map:build` clean in 6.24s; `git diff --check` clean.
+**Status:** VERIFIED - Warroom hotspots are now keyboard-focusable controls with stable labels, and the unavailable shell state is announced as status text.
+
+### Summary
+
+1. **Warroom hotspots now expose real button semantics:** `WarroomHotspot` moved from a hover-only absolutely positioned `div` to a real `button` with `aria-label`, focus handling, and explicit `Enter` / `Space` activation.
+2. **Accessible labels now belong to the shell owner:** `getWarroomRegionLabel()` centralizes tooltip-or-id labeling so the shell has one stable naming path for hotspots instead of leaving each region as an anonymous rectangle.
+3. **Unavailable Warroom state now announces itself:** when no campaign side is loaded, the shell renders the "Warroom unavailable..." copy as a polite `role="status"` region instead of plain decorative text.
+
+### Why this mattered
+
+The Warroom shell already had routing truth, but its hotspots were still mouse-only rectangles. That meant the shell was structurally present yet not reachable by keyboard or properly named for assistive tech. This packet closes the first real accessibility seam on the shell surface without pretending the entire canvas/map stack is now accessible.
+
+### Proof boundaries
+
+- **Direct proof:** `warroom_shell_accessibility.test.ts` mounts the real `WarroomShellLayer` in jsdom, proves the hotspot labels exist as focusable buttons, proves `Enter` and `Space` trigger the mapped `onNavigate` contract, and proves the unavailable state exposes a live status region.
+- **Source-verified only:** this packet does not make the legacy `warroom.ts` canvas runtime or the tactical map canvas keyboard-accessible. It proves the React shell owner only, which is the canonical accessibility seam for the Warroom overlay.
+
+### Rejected / deferred
+
+- **Full map/canvas accessibility:** deferred. That is a larger tactical-map lane and should not be faked through shell hotspot work.
+- **Toolbar-wide accessibility sweep:** rejected for this packet. Native-button-heavy toolbars already have much better semantics; the Warroom hotspots were the sharper gap.
+
+---
+
 ## [2026-04-15] feat(ui): make Codex endgame-aware with ghost essays
 
 **Type:** UI narrative-surface completion / Codex dynamic essay slice
