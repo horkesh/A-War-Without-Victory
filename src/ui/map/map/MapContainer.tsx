@@ -56,6 +56,11 @@ import {
 } from './interactionLayerConfig';
 import { getDynamicInteractionLayerSignature, shouldScheduleInteractionRetry } from './dynamicInteractionLayers';
 import { resolveDeckFormationClickTarget } from './clickSelectionPriority';
+import {
+  deckLayerRenderInputsChanged,
+  shouldRunPulseAnimation,
+  type DeckLayerRenderInputs,
+} from './renderChurnGuards';
 
 const BOSNIA_CENTER: [number, number] = [17.7, 43.87];
 const DEFAULT_ZOOM = 8;
@@ -231,6 +236,7 @@ export function MapContainer() {
   const osidAdjacencyRef = useRef<Map<string, string[]> | null>(null);
   const osidCentroidsRef = useRef<Map<string, [number, number]>>(new Map());
   const lastFormationsGeoJsonRef = useRef<FeatureCollection | null>(null);
+  const lastDeckLayerInputsRef = useRef<DeckLayerRenderInputs | null>(null);
   const ghostMapDataRef = useRef<GhostMapDatum[] | null>(null);
   const lastPanTargetRef = useRef<string | null>(null);
   const prevSectorIdRef = useRef<string | null>(null);
@@ -309,12 +315,63 @@ export function MapContainer() {
   const setExpandedStackOsid = useGameStore((s) => s.setExpandedStackOsid);
   const ghostLinePoint = useGameStore((s) => s.ghostLinePoint);
   const setGhostLinePoint = useGameStore((s) => s.setGhostLinePoint);
+  const recentCombatEventCount = useMemo(() => {
+    if (!loadedGameState?.recentControlEvents || typeof loadedGameState.turn !== 'number') return 0;
+    return loadedGameState.recentControlEvents.filter(
+      (event) => event.mechanism === 'combat' && event.turn >= loadedGameState.turn - 2,
+    ).length;
+  }, [loadedGameState?.recentControlEvents, loadedGameState?.turn]);
+  const currentTurnBattleCount = loadedGameState?.latestTurnSummary?.battles?.length ?? 0;
+  const shouldAnimateMapPulse = useMemo(
+    () => shouldRunPulseAnimation({
+      mapReady,
+      stagedOrderCount: stagedOrders.length,
+      ghostLineActive: Boolean(ghostLinePoint),
+      battlesVisible,
+      recentCombatEventCount,
+      currentTurnBattleCount,
+    }),
+    [mapReady, stagedOrders.length, ghostLinePoint, battlesVisible, recentCombatEventCount, currentTurnBattleCount],
+  );
 
   const osidToSector = useMemo(() => {
     if (!loadedGameState?.corpsFrontSectors || !loadedGameState?.frontEdgesOsid) return new Map<string, string>();
     return buildOsidToSectorMap(loadedGameState.corpsFrontSectors, loadedGameState.frontEdgesOsid);
   }, [loadedGameState?.corpsFrontSectors, loadedGameState?.frontEdgesOsid]);
   const playerFaction = useMemo(() => resolvePlayerFacingFaction(loadedGameState), [loadedGameState]);
+
+  const applyDeckLayerSelection = (args: Omit<DeckLayerRenderInputs, 'centroidLookup'> & { centroidLookup?: DeckLayerRenderInputs['centroidLookup'] }) => {
+    const overlay = deckOverlayRef.current;
+    const centroidLookup = args.centroidLookup ?? osidCentroidsRef.current;
+    if (!overlay) return;
+
+    const nextInputs: DeckLayerRenderInputs = {
+      ...args,
+      centroidLookup,
+    };
+    if (!deckLayerRenderInputsChanged(lastDeckLayerInputsRef.current, nextInputs)) {
+      return;
+    }
+
+    overlay.setProps({
+      layers: composeDeckLayersForCurrentSelection({
+        formationsGeoJson: nextInputs.formationsGeoJson ?? EMPTY_GEOJSON,
+        labelsVisible: nextInputs.labelsVisible,
+        formationsVisible: nextInputs.formationsVisible,
+        zoom: nextInputs.zoom,
+        loadedGameState: nextInputs.loadedGameState,
+        centroidLookup: nextInputs.centroidLookup,
+        ghostMapVisible: nextInputs.ghostMapVisible,
+        ghostMapData: nextInputs.ghostMapData,
+        selectedFormationId: nextInputs.selectedFormationId,
+        selectedCorpsId: nextInputs.selectedCorpsId,
+        selectedCorpsFrontSectorId: nextInputs.selectedCorpsFrontSectorId,
+        hoveredSectorId: nextInputs.hoveredSectorId,
+        hoveredCorpsId: nextInputs.hoveredCorpsId,
+      }),
+    });
+    lastDeckLayerInputsRef.current = nextInputs;
+  };
 
   const contextMenuItems: RadialMenuItem[] = useMemo(() => {
     if (!contextMenu) return [];
@@ -572,22 +629,19 @@ export function MapContainer() {
               hoveredSectorId: deckHoveredSectorId,
               hoveredCorpsId: deckHoveredCorpsId,
             } = useGameStore.getState();
-            deckOverlayRef.current.setProps({
-              layers: composeDeckLayersForCurrentSelection({
-                formationsGeoJson: lastFormationsGeoJsonRef.current,
-                labelsVisible: lVis,
-                formationsVisible: fVis,
-                zoom: map.getZoom(),
-                loadedGameState,
-                centroidLookup: osidCentroidsRef.current,
-                ghostMapVisible: gmVis,
-                ghostMapData: ghostMapDataRef.current ?? undefined,
-                selectedFormationId: deckSelectedFormationId,
-                selectedCorpsId: deckSelectedCorpsId,
-                selectedCorpsFrontSectorId: deckSelectedSectorId,
-                hoveredSectorId: deckHoveredSectorId,
-                hoveredCorpsId: deckHoveredCorpsId,
-              }),
+            applyDeckLayerSelection({
+              formationsGeoJson: lastFormationsGeoJsonRef.current,
+              labelsVisible: lVis,
+              formationsVisible: fVis,
+              zoom: map.getZoom(),
+              loadedGameState,
+              ghostMapVisible: gmVis,
+              ghostMapData: ghostMapDataRef.current ?? undefined,
+              selectedFormationId: deckSelectedFormationId,
+              selectedCorpsId: deckSelectedCorpsId,
+              selectedCorpsFrontSectorId: deckSelectedSectorId,
+              hoveredSectorId: deckHoveredSectorId,
+              hoveredCorpsId: deckHoveredCorpsId,
             });
           }
         }, 50);
@@ -1145,22 +1199,19 @@ export function MapContainer() {
                         hoveredSectorId: deckHoveredSectorId,
                         hoveredCorpsId: deckHoveredCorpsId,
                       } = useGameStore.getState();
-                      deckOverlayRef.current.setProps({
-                        layers: composeDeckLayersForCurrentSelection({
-                          formationsGeoJson,
-                          labelsVisible: lVis,
-                          formationsVisible: fVis,
-                          zoom: initialMap.getZoom(),
-                          loadedGameState: state,
-                          centroidLookup: osidCentroidsRef.current,
-                          ghostMapVisible: gmVis,
-                          ghostMapData: ghostMapDataRef.current ?? undefined,
-                          selectedFormationId: deckSelectedFormationId,
-                          selectedCorpsId: deckSelectedCorpsId,
-                          selectedCorpsFrontSectorId: deckSelectedSectorId,
-                          hoveredSectorId: deckHoveredSectorId,
-                          hoveredCorpsId: deckHoveredCorpsId,
-                        }),
+                      applyDeckLayerSelection({
+                        formationsGeoJson,
+                        labelsVisible: lVis,
+                        formationsVisible: fVis,
+                        zoom: initialMap.getZoom(),
+                        loadedGameState: state,
+                        ghostMapVisible: gmVis,
+                        ghostMapData: ghostMapDataRef.current ?? undefined,
+                        selectedFormationId: deckSelectedFormationId,
+                        selectedCorpsId: deckSelectedCorpsId,
+                        selectedCorpsFrontSectorId: deckSelectedSectorId,
+                        hoveredSectorId: deckHoveredSectorId,
+                        hoveredCorpsId: deckHoveredCorpsId,
                       });
                     }
 
@@ -2613,22 +2664,19 @@ export function MapContainer() {
     const map = mapRef.current;
     if (!mapReady || !map || !deckOverlayRef.current || !lastFormationsGeoJsonRef.current) return;
     const { formationsVisible: fVis, labelsVisible: lVis, loadedGameState: gs } = useGameStore.getState();
-    deckOverlayRef.current.setProps({
-      layers: composeDeckLayersForCurrentSelection({
-        formationsGeoJson: lastFormationsGeoJsonRef.current,
-        labelsVisible: lVis,
-        formationsVisible: fVis,
-        zoom: map.getZoom(),
-        loadedGameState: gs,
-        centroidLookup: osidCentroidsRef.current,
-        ghostMapVisible,
-        ghostMapData: ghostMapDataRef.current ?? undefined,
-        selectedFormationId,
-        selectedCorpsId,
-        selectedCorpsFrontSectorId,
-        hoveredSectorId,
-        hoveredCorpsId,
-      }),
+    applyDeckLayerSelection({
+      formationsGeoJson: lastFormationsGeoJsonRef.current,
+      labelsVisible: lVis,
+      formationsVisible: fVis,
+      zoom: map.getZoom(),
+      loadedGameState: gs,
+      ghostMapVisible,
+      ghostMapData: ghostMapDataRef.current ?? undefined,
+      selectedFormationId,
+      selectedCorpsId,
+      selectedCorpsFrontSectorId,
+      hoveredSectorId,
+      hoveredCorpsId,
     });
   }, [mapReady, ghostMapVisible, selectedFormationId, selectedCorpsId, selectedCorpsFrontSectorId, hoveredSectorId, hoveredCorpsId]);
 
@@ -2853,7 +2901,7 @@ export function MapContainer() {
 
   // Pulse animation for staged orders and battle markers
   useEffect(() => {
-    if (!mapReady || !mapRef.current) return;
+    if (!shouldAnimateMapPulse || !mapRef.current) return;
     const map = mapRef.current;
     let frameId: number;
     let lastTime = 0;
@@ -2904,7 +2952,7 @@ export function MapContainer() {
     };
     frameId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(frameId);
-  }, [mapReady]);
+  }, [shouldAnimateMapPulse]);
 
   return (
     <>
