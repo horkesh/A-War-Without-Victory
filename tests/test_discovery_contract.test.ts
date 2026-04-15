@@ -64,6 +64,7 @@ describe('test discovery contracts', () => {
             'tests/early_war_turn_structure.test.ts',
             'tests/emergence_pipeline_integration.test.ts',
             'tests/emergence_pressure_schema.test.ts',
+            'tests/end_state.test.ts',
             'tests/front_assignment.test.ts',
             'tests/front_posture_commitment.test.ts',
             'tests/game_state_shape.test.ts',

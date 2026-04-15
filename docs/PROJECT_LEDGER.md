@@ -1,3 +1,22 @@
+## [2026-04-15] test(repo): refresh end-state shell contracts onto vitest
+
+**Type:** Test-harness cleanup / end-state owner refresh
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/end_state.test.ts`, `tests/test_discovery_contract.test.ts`, `working-on.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/end_state.test.ts tests/test_discovery_contract.test.ts` pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED after packet verification - `end_state.test.ts` now lives on vitest as a slim owner-level shell for canonical `state.political.end_state` validation and turn-pipeline short-circuit truth instead of a stale `node:test` mix of duplicated treaty-apply lore and dead top-level state assumptions.
+
+### Summary
+
+1. **The file now follows the live owner path:** validator coverage mutates `state.political.end_state`, not a dead top-level `end_state` field.
+2. **Canonical serialization truth replaced schema fossils:** the fixture now uses the current schema and current required political shape, so save/load proof exercises the real serializer instead of an unsupported historical state shape.
+3. **Duplicated treaty-apply/snapshot stories were retired:** the file now keeps the end-state validator and turn-pipeline short-circuit contracts it still uniquely owns, while leaving territorial apply/snapshot behavior to the treaty application suites that already prove it better.
+
+### Why this mattered
+
+`end_state.test.ts` had turned into a quiet liar. It still looked like a foundational shell, but part of it was mutating the wrong owner path and another part was fabricating a schema version the canonical serializer no longer accepts. Refreshing it onto vitest forced the file to stop narrating historical implementation details and start proving current repo truth: canonical `political.end_state` validation, Brcko-controller guardrails, and the turn-pipeline short-circuit when peace has already frozen the war loop.
+
 ## [2026-04-15] test(repo): migrate treaty acceptance gating contracts onto vitest
 
 **Type:** Test-harness cleanup / treaty-acceptance truth refresh
