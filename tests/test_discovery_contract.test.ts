@@ -37,9 +37,12 @@ describe('test discovery contracts', () => {
         ];
         const fastRepresentatives = [
             'tests/test_discovery_contract.test.ts',
+            'tests/combat_summary.test.ts',
             'tests/desktop_packaging_contract.test.ts',
             'tests/desktop_sim_bundle_smoke.test.ts',
+            'tests/negotiation_pressure.test.ts',
             'tests/scenario_registry.test.ts',
+            'tests/turn_pipeline.test.ts',
             'tests/ui_map_panel_rail.test.ts',
             'tests/ui_map_deck_counter_visibility.test.ts',
         ];

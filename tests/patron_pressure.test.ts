@@ -1,9 +1,9 @@
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { describe, expect, it } from 'vitest';
 import type { GameState, SarajevoState } from '../src/state/game_state.js';
 import { ensureInternationalVisibilityPressure, updateInternationalVisibilityPressure, updatePatronState } from '../src/state/patron_pressure.js';
 
-test('updateInternationalVisibilityPressure accumulates sarajevo + enclave pressure', () => {
+describe('patron pressure', () => {
+  it('updateInternationalVisibilityPressure accumulates sarajevo + enclave pressure', () => {
     const state: GameState = {
   schema_version: 1,
   meta: { turn: 12, seed: 'ivp-test' },
@@ -41,12 +41,13 @@ test('updateInternationalVisibilityPressure accumulates sarajevo + enclave press
 
     ensureInternationalVisibilityPressure(state);
     const ivp = updateInternationalVisibilityPressure(state, sarajevo, 0.2);
-    assert.ok(ivp.sarajevo_siege_visibility > 0);
-    assert.ok(ivp.enclave_humanitarian_pressure > 0);
-    assert.ok(ivp.negotiation_momentum > 0);
+    expect(ivp.sarajevo_siege_visibility).toBeGreaterThan(0);
+    expect(ivp.enclave_humanitarian_pressure).toBeGreaterThan(0);
+    expect(ivp.negotiation_momentum).toBeGreaterThan(0);
 
     updatePatronState(state, sarajevo, ivp);
     const patron = state.factions[0].patron_state;
-    assert.ok(patron);
-    assert.ok(patron.patron_commitment >= 0);
+    expect(patron).toBeTruthy();
+    expect(patron?.patron_commitment ?? -1).toBeGreaterThanOrEqual(0);
+  });
 });

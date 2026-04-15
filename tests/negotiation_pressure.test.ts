@@ -1,5 +1,4 @@
-import { ok, strictEqual } from 'node:assert';
-import { test } from 'node:test';
+import { describe, expect, it } from 'vitest';
 import type { FrontEdge } from '../src/map/front_edges.js';
 import type { ExhaustionStats } from '../src/state/exhaustion.js';
 import type { FormationFatigueStepReport } from '../src/state/formation_fatigue.js';
@@ -40,7 +39,8 @@ function createTestState(): GameState {
 };
 }
 
-test('negotiation pressure: increases by exhaustion delta', () => {
+describe('negotiation pressure', () => {
+it('negotiation pressure: increases by exhaustion delta', () => {
     const state = createTestState();
     const derivedFrontEdges: FrontEdge[] = [];
 
@@ -53,27 +53,27 @@ test('negotiation pressure: increases by exhaustion delta', () => {
 
     const report = updateNegotiationPressure(state, derivedFrontEdges, exhaustionReport, undefined, undefined, undefined);
 
-    strictEqual(report.per_faction.length, 2);
+    expect(report.per_faction.length).toBe(2);
     const factionA = report.per_faction.find((f) => f.faction_id === 'faction_a');
-    ok(factionA);
-    strictEqual(factionA.pressure_before, 5);
-    strictEqual(factionA.pressure_after, 8); // 5 + 3 (exhaustion delta)
-    strictEqual(factionA.components.exhaustion_delta, 3);
-    strictEqual(factionA.components.instability_breaches, 0);
-    strictEqual(factionA.components.supply_formations, 0);
-    strictEqual(factionA.components.supply_militia, 0);
-    strictEqual(factionA.components.sustainability_collapse, 0);
-    strictEqual(state.factions[0].negotiation?.pressure, 8);
-    strictEqual(state.factions[0].negotiation?.last_change_turn, 5);
+    expect(factionA).toBeTruthy();
+    expect(factionA?.pressure_before).toBe(5);
+    expect(factionA?.pressure_after).toBe(8); // 5 + 3 (exhaustion delta)
+    expect(factionA?.components.exhaustion_delta).toBe(3);
+    expect(factionA?.components.instability_breaches).toBe(0);
+    expect(factionA?.components.supply_formations).toBe(0);
+    expect(factionA?.components.supply_militia).toBe(0);
+    expect(factionA?.components.sustainability_collapse).toBe(0);
+    expect(state.factions[0].negotiation?.pressure).toBe(8);
+    expect(state.factions[0].negotiation?.last_change_turn).toBe(5);
 
     const factionB = report.per_faction.find((f) => f.faction_id === 'faction_b');
-    ok(factionB);
-    strictEqual(factionB.pressure_before, 10);
-    strictEqual(factionB.pressure_after, 10); // 10 + 0 (no exhaustion delta)
-    strictEqual(factionB.components.exhaustion_delta, 0);
+    expect(factionB).toBeTruthy();
+    expect(factionB?.pressure_before).toBe(10);
+    expect(factionB?.pressure_after).toBe(10); // 10 + 0 (no exhaustion delta)
+    expect(factionB?.components.exhaustion_delta).toBe(0);
 });
 
-test('negotiation pressure: breach count contributes with cap', () => {
+it('negotiation pressure: breach count contributes with cap', () => {
     const state = createTestState();
     // Set up front pressure to create breaches
     state.military.front_pressure = {
@@ -102,17 +102,17 @@ test('negotiation pressure: breach count contributes with cap', () => {
     const report = updateNegotiationPressure(state, derivedFrontEdges, undefined, undefined, undefined, undefined);
 
     const factionA = report.per_faction.find((f) => f.faction_id === 'faction_a');
-    ok(factionA);
+    expect(factionA).toBeTruthy();
     // faction_a is on side_a of 5 breaches, but cap is 3
-    strictEqual(factionA.components.instability_breaches, 3);
+    expect(factionA?.components.instability_breaches).toBe(3);
 
     const factionB = report.per_faction.find((f) => f.faction_id === 'faction_b');
-    ok(factionB);
+    expect(factionB).toBeTruthy();
     // faction_b is on side_b of 5 breaches, but cap is 3
-    strictEqual(factionB.components.instability_breaches, 3);
+    expect(factionB?.components.instability_breaches).toBe(3);
 });
 
-test('negotiation pressure: unsupplied formations contribute with floor', () => {
+it('negotiation pressure: unsupplied formations contribute with floor', () => {
     const state = createTestState();
     const derivedFrontEdges: FrontEdge[] = [];
 
@@ -127,15 +127,15 @@ test('negotiation pressure: unsupplied formations contribute with floor', () => 
     const report = updateNegotiationPressure(state, derivedFrontEdges, undefined, formationFatigueReport, undefined, undefined);
 
     const factionA = report.per_faction.find((f) => f.faction_id === 'faction_a');
-    ok(factionA);
-    strictEqual(factionA.components.supply_formations, 1); // floor(5/5) = 1
+    expect(factionA).toBeTruthy();
+    expect(factionA?.components.supply_formations).toBe(1); // floor(5/5) = 1
 
     const factionB = report.per_faction.find((f) => f.faction_id === 'faction_b');
-    ok(factionB);
-    strictEqual(factionB.components.supply_formations, 1); // floor(5/5) = 1
+    expect(factionB).toBeTruthy();
+    expect(factionB?.components.supply_formations).toBe(1); // floor(5/5) = 1
 });
 
-test('negotiation pressure: unsupplied militia pools contribute with floor', () => {
+it('negotiation pressure: unsupplied militia pools contribute with floor', () => {
     const state = createTestState();
     const derivedFrontEdges: FrontEdge[] = [];
 
@@ -150,15 +150,15 @@ test('negotiation pressure: unsupplied militia pools contribute with floor', () 
     const report = updateNegotiationPressure(state, derivedFrontEdges, undefined, undefined, militiaFatigueReport, undefined);
 
     const factionA = report.per_faction.find((f) => f.faction_id === 'faction_a');
-    ok(factionA);
-    strictEqual(factionA.components.supply_militia, 1); // floor(10/10) = 1
+    expect(factionA).toBeTruthy();
+    expect(factionA?.components.supply_militia).toBe(1); // floor(10/10) = 1
 
     const factionB = report.per_faction.find((f) => f.faction_id === 'faction_b');
-    ok(factionB);
-    strictEqual(factionB.components.supply_militia, 0); // floor(5/10) = 0
+    expect(factionB).toBeTruthy();
+    expect(factionB?.components.supply_militia).toBe(0); // floor(5/10) = 0
 });
 
-test('negotiation pressure: monotonic non-decreasing', () => {
+it('negotiation pressure: monotonic non-decreasing', () => {
     const state = createTestState();
     state.factions[0].negotiation = { pressure: 10, last_change_turn: 3, capital: 0, spent_total: 0, last_capital_change_turn: null };
     const derivedFrontEdges: FrontEdge[] = [];
@@ -167,12 +167,12 @@ test('negotiation pressure: monotonic non-decreasing', () => {
     const report = updateNegotiationPressure(state, derivedFrontEdges, undefined, undefined, undefined, undefined);
 
     const factionA = report.per_faction.find((f) => f.faction_id === 'faction_a');
-    ok(factionA);
-    strictEqual(factionA.pressure_after, 10); // unchanged, not decreased
-    strictEqual(state.factions[0].negotiation?.pressure, 10);
+    expect(factionA).toBeTruthy();
+    expect(factionA?.pressure_after).toBe(10); // unchanged, not decreased
+    expect(state.factions[0].negotiation?.pressure).toBe(10);
 });
 
-test('negotiation pressure: all components combined', () => {
+it('negotiation pressure: all components combined', () => {
     const state = createTestState();
     state.factions[0].negotiation = { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null };
     const derivedFrontEdges: FrontEdge[] = [];
@@ -215,18 +215,18 @@ test('negotiation pressure: all components combined', () => {
     );
 
     const factionA = report.per_faction.find((f) => f.faction_id === 'faction_a');
-    ok(factionA);
-    strictEqual(factionA.components.exhaustion_delta, 2);
-    strictEqual(factionA.components.instability_breaches, 2); // 2 breaches, under cap
-    strictEqual(factionA.components.supply_formations, 1); // floor(5/5) = 1
-    strictEqual(factionA.components.supply_militia, 1); // floor(10/10) = 1
-    strictEqual(factionA.components.sustainability_collapse, 0);
-    strictEqual(factionA.total_increment, 6); // 2 + 2 + 1 + 1 + 0
-    strictEqual(factionA.pressure_after, 6); // 0 + 6
-    strictEqual(state.factions[0].negotiation?.last_change_turn, 5);
+    expect(factionA).toBeTruthy();
+    expect(factionA?.components.exhaustion_delta).toBe(2);
+    expect(factionA?.components.instability_breaches).toBe(2); // 2 breaches, under cap
+    expect(factionA?.components.supply_formations).toBe(1); // floor(5/5) = 1
+    expect(factionA?.components.supply_militia).toBe(1); // floor(10/10) = 1
+    expect(factionA?.components.sustainability_collapse).toBe(0);
+    expect(factionA?.total_increment).toBe(6); // 2 + 2 + 1 + 1 + 0
+    expect(factionA?.pressure_after).toBe(6); // 0 + 6
+    expect(state.factions[0].negotiation?.last_change_turn).toBe(5);
 });
 
-test('negotiation pressure: determinism across identical runs', () => {
+it('negotiation pressure: determinism across identical runs', () => {
     const state1 = createTestState();
     const state2 = createTestState();
     const derivedFrontEdges: FrontEdge[] = [];
@@ -238,18 +238,19 @@ test('negotiation pressure: determinism across identical runs', () => {
     const report1 = updateNegotiationPressure(state1, derivedFrontEdges, exhaustionReport, undefined, undefined, undefined);
     const report2 = updateNegotiationPressure(state2, derivedFrontEdges, exhaustionReport, undefined, undefined, undefined);
 
-    strictEqual(report1.per_faction.length, report2.per_faction.length);
+    expect(report1.per_faction.length).toBe(report2.per_faction.length);
     for (let i = 0; i < report1.per_faction.length; i += 1) {
         const f1 = report1.per_faction[i];
         const f2 = report2.per_faction[i];
-        strictEqual(f1.faction_id, f2.faction_id);
-        strictEqual(f1.pressure_before, f2.pressure_before);
-        strictEqual(f1.pressure_after, f2.pressure_after);
-        strictEqual(f1.delta, f2.delta);
-        strictEqual(f1.components.exhaustion_delta, f2.components.exhaustion_delta);
-        strictEqual(f1.components.instability_breaches, f2.components.instability_breaches);
-        strictEqual(f1.components.supply_formations, f2.components.supply_formations);
-        strictEqual(f1.components.supply_militia, f2.components.supply_militia);
-        strictEqual(f1.components.sustainability_collapse, f2.components.sustainability_collapse);
+        expect(f1.faction_id).toBe(f2.faction_id);
+        expect(f1.pressure_before).toBe(f2.pressure_before);
+        expect(f1.pressure_after).toBe(f2.pressure_after);
+        expect(f1.delta).toBe(f2.delta);
+        expect(f1.components.exhaustion_delta).toBe(f2.components.exhaustion_delta);
+        expect(f1.components.instability_breaches).toBe(f2.components.instability_breaches);
+        expect(f1.components.supply_formations).toBe(f2.components.supply_formations);
+        expect(f1.components.supply_militia).toBe(f2.components.supply_militia);
+        expect(f1.components.sustainability_collapse).toBe(f2.components.sustainability_collapse);
     }
+});
 });

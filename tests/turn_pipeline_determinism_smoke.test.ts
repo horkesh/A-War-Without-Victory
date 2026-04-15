@@ -4,8 +4,7 @@
  * Serialized state diff must be empty.
  */
 
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { describe, expect, it } from 'vitest';
 
 import { CURRENT_SCHEMA_VERSION, GameState } from '../src/state/game_state.js';
 import { serializeState } from '../src/state/serialize.js';
@@ -36,7 +35,8 @@ const baseState: GameState = {
     } as any
 };
 
-test('same state + same inputs yields identical output', () => {
+describe('runOneTurn determinism smoke', () => {
+  it('same state + same inputs yields identical output', () => {
     const inputs = { seed: 'deterministic-seed' };
 
     const r1 = runOneTurn(baseState, inputs);
@@ -45,10 +45,10 @@ test('same state + same inputs yields identical output', () => {
     const out1 = serializeState(r1.state);
     const out2 = serializeState(r2.state);
 
-    assert.strictEqual(out1, out2, 'Same inputs must produce identical serialized state');
-});
+    expect(out1, 'Same inputs must produce identical serialized state').toBe(out2);
+  });
 
-test('multiple turns from same base yield deterministic sequence', () => {
+  it('multiple turns from same base yield deterministic sequence', () => {
     const seed = 'sequence-seed';
 
     let s1 = baseState;
@@ -65,5 +65,6 @@ test('multiple turns from same base yield deterministic sequence', () => {
 
     const out1 = serializeState(s1);
     const out2 = serializeState(s2);
-    assert.strictEqual(out1, out2, 'Identical runs must yield identical final state');
+    expect(out1, 'Identical runs must yield identical final state').toBe(out2);
+  });
 });

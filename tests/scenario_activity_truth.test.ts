@@ -1,5 +1,4 @@
-import assert from 'node:assert/strict';
-import { describe, it } from 'node:test';
+import { describe, expect, it } from 'vitest';
 
 import {
     deriveWeeklyActivityCounts,
@@ -44,7 +43,7 @@ describe('scenario activity truth sourcing', () => {
             },
         } as unknown as TurnReport;
 
-        assert.deepEqual(deriveWeeklyActivityCounts(state, turnReport), {
+        expect(deriveWeeklyActivityCounts(state, turnReport)).toEqual({
             front_active_set_size: 7,
             pressure_eligible_size: 9,
             displacement_trigger_eligible_size: 4,
@@ -64,7 +63,7 @@ describe('scenario activity truth sourcing', () => {
             },
         } as unknown as TurnReport;
 
-        assert.deepEqual(deriveWeeklyActivityCounts(state, turnReport), {
+        expect(deriveWeeklyActivityCounts(state, turnReport)).toEqual({
             front_active_set_size: 0,
             pressure_eligible_size: 0,
             displacement_trigger_eligible_size: 0,
@@ -88,9 +87,9 @@ describe('scenario activity truth sourcing', () => {
 
         const selected = selectCanonicalAttackResolutionSummary(turnReport);
 
-        assert.equal(selected.summary?.orders_processed, 5);
-        assert.equal(selected.summary?.unique_attack_targets, 3);
-        assert.deepEqual(selected.battles, [{ defender_brigade: 'canonical_defender' }, {}]);
+        expect(selected.summary?.orders_processed).toBe(5);
+        expect(selected.summary?.unique_attack_targets).toBe(3);
+        expect(selected.battles).toEqual([{ defender_brigade: 'canonical_defender' }, {}]);
     });
 
     it('falls back to legacy SID attack resolution only when canonical OSID summary is absent', () => {
@@ -105,7 +104,7 @@ describe('scenario activity truth sourcing', () => {
 
         const selected = selectCanonicalAttackResolutionSummary(turnReport);
 
-        assert.equal(selected.summary?.orders_processed, 4);
-        assert.deepEqual(selected.battles, [{ defender_brigade: 'legacy_only' }, {}]);
+        expect(selected.summary?.orders_processed).toBe(4);
+        expect(selected.battles).toEqual([{ defender_brigade: 'legacy_only' }, {}]);
     });
 });

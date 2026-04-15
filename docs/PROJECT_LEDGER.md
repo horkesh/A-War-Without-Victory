@@ -1,3 +1,30 @@
+## [2026-04-15] test(repo): migrate pure engine contract suites onto vitest
+
+**Type:** Test-harness cleanup / pure-suite migration
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/turn_pipeline.test.ts`, `tests/turn_pipeline_determinism_smoke.test.ts`, `tests/patron_pressure.test.ts`, `tests/negotiation_pressure.test.ts`, `tests/combat_summary.test.ts`, `tests/scenario_activity_truth.test.ts`, `tests/test_discovery_contract.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/turn_pipeline.test.ts tests/turn_pipeline_determinism_smoke.test.ts tests/patron_pressure.test.ts tests/negotiation_pressure.test.ts tests/combat_summary.test.ts tests/scenario_activity_truth.test.ts` = 32/32 pass; `npx.cmd vitest run tests/test_discovery_contract.test.ts` pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED - six pure in-process engine/source suites now live in vitest, and discovery locks them into the fast slice.
+
+### Summary
+
+1. **Six old `node:test` holdouts were migrated without changing what they prove:** `turn_pipeline`, `turn_pipeline_determinism_smoke`, `patron_pressure`, `negotiation_pressure`, `combat_summary`, and `scenario_activity_truth` now import `vitest`.
+2. **These suites were chosen because they are pure:** they exercise in-process determinism, aggregation, mutation, and source-selection logic; none of them need process isolation, scenario artifact cleanup, or packaged runtime semantics.
+3. **Discovery now guards the migration:** `tests/test_discovery_contract.test.ts` explicitly keeps representative members of this cluster in the fast vitest slice.
+
+### Why this mattered
+
+The remaining `node:test` debt should shrink by actual need, not by random file count. These files were the easy win because they were still paying the mixed-harness tax without buying anything from it.
+
+### Proof boundaries
+
+- **Direct proof:** all six migrated suites pass under vitest.
+- **Direct proof:** discovery still classifies them into the fast vitest lane.
+- **Not claimed here:** this does **not** settle the scenario-heavy `node:test` holdouts, which still need a separate necessity audit.
+
+---
+
 ## [2026-04-15] test(repo): move bundle smoke to vitest and fold threat-precision residue into player visibility
 
 **Type:** Test-harness cleanup / owner-suite consolidation

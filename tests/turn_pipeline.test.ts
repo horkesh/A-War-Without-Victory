@@ -1,5 +1,4 @@
-import assert from 'node:assert';
-import { test } from 'node:test';
+import { describe, expect, it } from 'vitest';
 
 import { runTurn } from '../src/sim/turn_pipeline.js';
 import { CURRENT_SCHEMA_VERSION, GameState } from '../src/state/game_state.js';
@@ -26,13 +25,15 @@ const baseState: GameState = {
   political: {} as any, displacement: {} as any
 };
 
-test('runTurn is deterministic for same state and seed', async () => {
+describe('runTurn determinism', () => {
+  it('is deterministic for same state and seed', async () => {
     const seed = 'deterministic-seed';
 
     const first = await runTurn(baseState, { seed });
     const second = await runTurn(baseState, { seed });
 
-    assert.deepStrictEqual(first.nextState, second.nextState);
-    assert.deepStrictEqual(first.report, second.report);
-    assert.strictEqual(baseState.meta.turn, 0, 'input state must remain unchanged');
+    expect(first.nextState).toEqual(second.nextState);
+    expect(first.report).toEqual(second.report);
+    expect(baseState.meta.turn, 'input state must remain unchanged').toBe(0);
+  });
 });

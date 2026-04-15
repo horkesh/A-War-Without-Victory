@@ -4,8 +4,7 @@
  * Covers: createEmptyCombatSummary, aggregateBrigadeHistories, computeCombatSummaries.
  */
 
-import { describe, it } from 'node:test';
-import assert from 'node:assert/strict';
+import { describe, expect, it } from 'vitest';
 import { createEmptyBrigadeHistory } from '../src/state/brigade_history.js';
 import type { BrigadeHistory } from '../src/state/brigade_history.js';
 import {
@@ -39,24 +38,24 @@ function makeHistory(overrides: Partial<BrigadeHistory> = {}): BrigadeHistory {
 describe('createEmptyCombatSummary', () => {
     it('returns all-zero summary', () => {
         const s = createEmptyCombatSummary();
-        assert.equal(s.battles_fought, 0);
-        assert.equal(s.victories, 0);
-        assert.equal(s.defeats, 0);
-        assert.equal(s.win_rate, 0);
-        assert.equal(s.casualty_exchange_ratio, 0);
-        assert.equal(s.brigade_count, 0);
-        assert.equal(s.active_brigade_count, 0);
-        assert.equal(s.most_casualties_brigade_id, null);
-        assert.equal(s.most_victories_brigade_id, null);
-        assert.deepEqual(s.arc_distribution, {});
+        expect(s.battles_fought).toBe(0);
+        expect(s.victories).toBe(0);
+        expect(s.defeats).toBe(0);
+        expect(s.win_rate).toBe(0);
+        expect(s.casualty_exchange_ratio).toBe(0);
+        expect(s.brigade_count).toBe(0);
+        expect(s.active_brigade_count).toBe(0);
+        expect(s.most_casualties_brigade_id).toBeNull();
+        expect(s.most_victories_brigade_id).toBeNull();
+        expect(s.arc_distribution).toEqual({});
     });
 });
 
 describe('aggregateBrigadeHistories', () => {
     it('returns empty summary for no brigades', () => {
         const s = aggregateBrigadeHistories([]);
-        assert.equal(s.battles_fought, 0);
-        assert.equal(s.brigade_count, 0);
+        expect(s.battles_fought).toBe(0);
+        expect(s.brigade_count).toBe(0);
     });
 
     it('sums tallies from multiple brigades', () => {
@@ -98,21 +97,21 @@ describe('aggregateBrigadeHistories', () => {
         });
 
         const s = aggregateBrigadeHistories([b1, b2]);
-        assert.equal(s.battles_fought, 15);
-        assert.equal(s.battles_as_attacker, 8);
-        assert.equal(s.battles_as_defender, 7);
-        assert.equal(s.victories, 10);
-        assert.equal(s.defeats, 3);
-        assert.equal(s.stalemates, 2);
-        assert.equal(s.total_casualties_taken, 500);
-        assert.equal(s.total_casualties_inflicted, 750);
-        assert.equal(s.total_osids_captured, 4);
-        assert.equal(s.total_osids_lost, 1);
-        assert.equal(s.current_personnel, 3000);
-        assert.equal(s.peak_aggregate_personnel, 4500);
-        assert.equal(s.nadir_aggregate_personnel, 2300);
-        assert.equal(s.brigade_count, 2);
-        assert.equal(s.active_brigade_count, 2);
+        expect(s.battles_fought).toBe(15);
+        expect(s.battles_as_attacker).toBe(8);
+        expect(s.battles_as_defender).toBe(7);
+        expect(s.victories).toBe(10);
+        expect(s.defeats).toBe(3);
+        expect(s.stalemates).toBe(2);
+        expect(s.total_casualties_taken).toBe(500);
+        expect(s.total_casualties_inflicted).toBe(750);
+        expect(s.total_osids_captured).toBe(4);
+        expect(s.total_osids_lost).toBe(1);
+        expect(s.current_personnel).toBe(3000);
+        expect(s.peak_aggregate_personnel).toBe(4500);
+        expect(s.nadir_aggregate_personnel).toBe(2300);
+        expect(s.brigade_count).toBe(2);
+        expect(s.active_brigade_count).toBe(2);
     });
 
     it('computes win_rate correctly', () => {
@@ -121,7 +120,7 @@ describe('aggregateBrigadeHistories', () => {
             brigade_history: makeHistory({ battles_fought: 10, victories: 6 }),
         });
         const s = aggregateBrigadeHistories([b]);
-        assert.ok(Math.abs(s.win_rate - 0.6) < 0.001);
+        expect(s.win_rate).toBeCloseTo(0.6, 3);
     });
 
     it('computes casualty_exchange_ratio correctly', () => {
@@ -134,13 +133,13 @@ describe('aggregateBrigadeHistories', () => {
             }),
         });
         const s = aggregateBrigadeHistories([b]);
-        assert.ok(Math.abs(s.casualty_exchange_ratio - 2.5) < 0.001);
+        expect(s.casualty_exchange_ratio).toBeCloseTo(2.5, 3);
     });
 
     it('returns 0 win_rate when no battles', () => {
         const b = makeFormation({ id: 'bde_1' });
         const s = aggregateBrigadeHistories([b]);
-        assert.equal(s.win_rate, 0);
+        expect(s.win_rate).toBe(0);
     });
 
     it('returns 0 exchange ratio when no casualties taken', () => {
@@ -153,7 +152,7 @@ describe('aggregateBrigadeHistories', () => {
             }),
         });
         const s = aggregateBrigadeHistories([b]);
-        assert.equal(s.casualty_exchange_ratio, 0);
+        expect(s.casualty_exchange_ratio).toBe(0);
     });
 
     it('tracks most_casualties_brigade_id deterministically', () => {
@@ -167,7 +166,7 @@ describe('aggregateBrigadeHistories', () => {
         });
         // Sorted order: bde_a then bde_b
         const s = aggregateBrigadeHistories([b1, b2]);
-        assert.equal(s.most_casualties_brigade_id, 'bde_b');
+        expect(s.most_casualties_brigade_id).toBe('bde_b');
     });
 
     it('tracks most_victories_brigade_id deterministically (first wins tie)', () => {
@@ -181,15 +180,15 @@ describe('aggregateBrigadeHistories', () => {
         });
         // Sorted order: bde_a first, bde_b ties but doesn't override (strict >)
         const s = aggregateBrigadeHistories([b1, b2]);
-        assert.equal(s.most_victories_brigade_id, 'bde_a');
+        expect(s.most_victories_brigade_id).toBe('bde_a');
     });
 
     it('counts active vs inactive brigades', () => {
         const b1 = makeFormation({ id: 'bde_a', status: 'active' });
         const b2 = makeFormation({ id: 'bde_b', status: 'inactive' });
         const s = aggregateBrigadeHistories([b1, b2]);
-        assert.equal(s.brigade_count, 2);
-        assert.equal(s.active_brigade_count, 1);
+        expect(s.brigade_count).toBe(2);
+        expect(s.active_brigade_count).toBe(1);
     });
 
     it('aggregates arc_distribution from war stories', () => {
@@ -206,8 +205,8 @@ describe('aggregateBrigadeHistories', () => {
             war_story: { formation_id: 'bde_c', formation_name: 'C', faction: 'RBiH', arc: 'bloodied', narrative: '', notable_moments: [], stats: { battles_fought: 0, victories: 0, defeats: 0, total_casualties_taken: 0, total_casualties_inflicted: 0, final_personnel: 0, peak_personnel: 0, nadir_personnel: 0 } },
         });
         const s = aggregateBrigadeHistories([b1, b2, b3]);
-        assert.equal(s.arc_distribution['veteran'], 2);
-        assert.equal(s.arc_distribution['bloodied'], 1);
+        expect(s.arc_distribution['veteran']).toBe(2);
+        expect(s.arc_distribution['bloodied']).toBe(1);
     });
 
     it('handles brigades without brigade_history', () => {
@@ -218,9 +217,9 @@ describe('aggregateBrigadeHistories', () => {
             brigade_history: makeHistory({ battles_fought: 3, victories: 2 }),
         });
         const s = aggregateBrigadeHistories([b1, b2]);
-        assert.equal(s.brigade_count, 2);
-        assert.equal(s.battles_fought, 3);
-        assert.equal(s.current_personnel, 3000);
+        expect(s.brigade_count).toBe(2);
+        expect(s.battles_fought).toBe(3);
+        expect(s.current_personnel).toBe(3000);
     });
 });
 
@@ -246,10 +245,10 @@ describe('computeCombatSummaries', () => {
         computeCombatSummaries(state);
 
         const cs = state.military.formations!['corps_1'].combat_summary;
-        assert.ok(cs);
-        assert.equal(cs.battles_fought, 8);
-        assert.equal(cs.victories, 4);
-        assert.equal(cs.brigade_count, 2);
+        expect(cs).toBeTruthy();
+        expect(cs?.battles_fought).toBe(8);
+        expect(cs?.victories).toBe(4);
+        expect(cs?.brigade_count).toBe(2);
     });
 
     it('assigns combat_summary to army_hq formations (all faction brigades)', () => {
@@ -274,11 +273,11 @@ describe('computeCombatSummaries', () => {
         computeCombatSummaries(state);
 
         const cs = state.military.formations!['army_rbih'].combat_summary;
-        assert.ok(cs);
+        expect(cs).toBeTruthy();
         // Only RBiH brigades (bde_1)
-        assert.equal(cs.battles_fought, 10);
-        assert.equal(cs.victories, 7);
-        assert.equal(cs.brigade_count, 1);
+        expect(cs?.battles_fought).toBe(10);
+        expect(cs?.victories).toBe(7);
+        expect(cs?.brigade_count).toBe(1);
     });
 
     it('assigns combat_summary to corps_asset formations', () => {
@@ -298,10 +297,10 @@ describe('computeCombatSummaries', () => {
         computeCombatSummaries(state);
 
         const cs = state.military.formations!['corps_asset_1'].combat_summary;
-        assert.ok(cs);
-        assert.equal(cs.battles_fought, 7);
-        assert.equal(cs.victories, 4);
-        assert.equal(cs.brigade_count, 1);
+        expect(cs).toBeTruthy();
+        expect(cs?.battles_fought).toBe(7);
+        expect(cs?.victories).toBe(4);
+        expect(cs?.brigade_count).toBe(1);
     });
 
     it('excludes OG formations from brigade tallies', () => {
@@ -326,10 +325,10 @@ describe('computeCombatSummaries', () => {
         computeCombatSummaries(state);
 
         const cs = state.military.formations!['corps_1'].combat_summary;
-        assert.ok(cs);
+        expect(cs).toBeTruthy();
         // Only the brigade, not the OG
-        assert.equal(cs.battles_fought, 5);
-        assert.equal(cs.brigade_count, 1);
+        expect(cs?.battles_fought).toBe(5);
+        expect(cs?.brigade_count).toBe(1);
     });
 
     it('does not assign combat_summary to brigades', () => {
@@ -346,6 +345,6 @@ describe('computeCombatSummaries', () => {
 } as unknown as GameState;
 
         computeCombatSummaries(state);
-        assert.equal(state.military.formations!['bde_1'].combat_summary, undefined);
+        expect(state.military.formations!['bde_1'].combat_summary).toBeUndefined();
     });
 });
