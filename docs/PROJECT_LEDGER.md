@@ -1,3 +1,34 @@
+## [2026-04-15] feat(ui): thread endgame comparison into Chronicle and Wrapped
+
+**Type:** UI narrative-surface completion / endgame comparison propagation
+**Commit (code):** 92580b84
+**Commit (ledger):** this entry
+**Files:** `src/ui/map/components/chronicle/generateChronicleEntries.ts`, `src/ui/map/components/chronicle/ChronicleCard.tsx`, `src/ui/map/components/chronicle/generateWrappedSlides.ts`, `src/ui/map/components/chronicle/WrappedSlide.tsx`, `tests/chronicle_entries.test.ts`, `tests/wrapped_slides.test.ts`, `tests/ui/chronicle_endgame_mount.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+**Tests:** `npx.cmd tsc --noEmit -p tsconfig.json` clean; vitest `chronicle_entries` + `wrapped_slides` + `ui/chronicle_endgame_mount` = 36/36 pass; `npm.cmd run desktop:map:build` clean in 6.87s; `git diff --check` clean.
+**Status:** VERIFIED - Chronicle and Wrapped now consume existing endgame comparison truth; Codex remains static.
+
+### Summary
+
+1. **Chronicle now records historical comparison at game end:** `generateChronicleEntries()` appends final-turn narrative entries sourced from `historicalComparison.divergence_notes`, plus a headline summary card for the comparison cluster.
+2. **A restrained ghost narrative path now exists:** when the historical Srebrenica rupture never occurs in the player's war, Chronicle emits a dashed `GHOST` narrative card rather than pretending the comparison layer has nothing to say.
+3. **Wrapped now carries divergence notes into the final reflection slide:** `generateWrappedSlides()` threads the first comparison notes into `another_such_victory`, and `WrappedSlide.tsx` renders them as final reflection bullets beneath the spider chart.
+
+### Why this mattered
+
+The repo already had real endgame comparison truth (`buildCostLedger()`, `compareToHistorical()`, `WarCostSummary`). What it did **not** have was any narrative shell consuming that truth after the player closed the verdict screen. Chronicle and Wrapped were still retrospective shells with no comparison memory, which made the comparison layer feel isolated even though the underlying data contract was done.
+
+### Proof boundaries
+
+- **Direct proof:** pure generator tests now prove Chronicle endgame entries and Wrapped divergence bullets, and a mount proof renders both the `GHOST` Chronicle card and the Wrapped final reflection bullets through real React markup.
+- **Source-verified only:** this packet does **not** implement a generic dynamic Codex essay engine, `dynamic_sections`, or `ghost_when` schema. `CodexPanel` remains the static essay shell backed by `essay_index.json`.
+
+### Rejected / deferred
+
+- **Full Codex dynamic essay engine:** deferred. That remains its own larger packet with essay-schema/runtime ownership and should not be smuggled into Chronicle/Wrapped work.
+- **Endgame verdict surface rewrites:** rejected. `VerdictScreen` / `WarCostSummary` already own the comparison display; this packet only propagated their downstream truth into narrative recap shells.
+
+---
+
 ## [2026-04-15] fix(sim): restore political war_exhaustion as strategic dimension owner
 
 **Type:** Consequence substrate hardening / owner correction
