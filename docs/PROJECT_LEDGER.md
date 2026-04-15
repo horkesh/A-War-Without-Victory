@@ -1,3 +1,31 @@
+## [2026-04-15] test(repo): migrate combat-support residue contracts onto vitest
+
+**Type:** Test-harness cleanup / combat-support residue audit
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/morale_combat.test.ts`, `tests/wia_trickleback.test.ts`, `tests/brigade_history.test.ts`, `tests/capability_progression.test.ts`, `tests/troop_balance_lifecycle.test.ts`, `tests/commander_override_reachability.test.ts`, `tests/test_discovery_contract.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/morale_combat.test.ts tests/wia_trickleback.test.ts tests/brigade_history.test.ts tests/capability_progression.test.ts tests/troop_balance_lifecycle.test.ts tests/commander_override_reachability.test.ts tests/test_discovery_contract.test.ts` = 52/52 pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED - six remaining pure combat-support residue files now run on vitest, and two stale fixture helpers were corrected to use canonical nested owner paths instead of top-level ghosts.
+
+### Summary
+
+1. **A real combat-support residue band moved together:** `morale_combat`, `wia_trickleback`, `brigade_history`, `capability_progression`, `troop_balance_lifecycle`, and `commander_override_reachability` now live on the canonical vitest lane.
+2. **This packet corrected stale fixture truth instead of preserving it:** the morale and lifecycle helpers were still fabricating `formations`, `brigade_encircled`, and `political_controllers` through dead top-level or override-stomped paths, which masked the real engine owners at `state.military.*` and `state.political.*`.
+3. **Discovery now remembers the combat-support lane:** representative files from this cluster are pinned in the fast vitest slice.
+
+### Why this mattered
+
+Small old `node:test` files are dangerous when they appear to prove central combat-support behavior but actually exercise fake fixture topology. This packet keeps the proof and throws away the illusion.
+
+### Proof boundaries
+
+- **Direct proof:** all 6 migrated combat-support suites pass under vitest.
+- **Direct proof:** discovery now pins representative combat-support files in the fast vitest slice.
+- **Direct proof:** the migrated helpers now populate canonical nested state owners used by the live morale and lifecycle code.
+- **Not claimed here:** this packet does **not** broaden scenario execution proof for these systems; it keeps the in-process contracts on the canonical harness.
+
+---
+
 ## [2026-04-15] test(repo): migrate UI map boundary contracts onto vitest
 
 **Type:** Test-harness cleanup / GUI truth-boundary hardening

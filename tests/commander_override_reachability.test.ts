@@ -1,5 +1,4 @@
-import { describe, it } from 'node:test';
-import assert from 'node:assert/strict';
+import { describe, expect, it } from 'vitest';
 
 import { commanderReviewAssignment, type CorpsCommanderProfile } from '../src/sim/combat/commander_override.js';
 import type { CorpsFrontSector, FormationState } from '../src/state/game_state.js';
@@ -92,8 +91,8 @@ describe('commander position viability overrides', () => {
             friendlyOsids,
         );
 
-        assert.deepEqual(overrides, []);
-        assert.deepEqual(sectors[0].assigned_brigade_ids, ['rs_skelani_battalion']);
-        assert.deepEqual(sectors[1].assigned_brigade_ids, ['rs_safe_brigade']);
+        expect(overrides).toEqual([]);
+        expect(sectors[0].assigned_brigade_ids).toEqual(['rs_skelani_battalion']);
+        expect(sectors[1].assigned_brigade_ids).toEqual(['rs_safe_brigade']);
     });
 });

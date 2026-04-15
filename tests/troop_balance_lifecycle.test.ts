@@ -2,13 +2,11 @@
  * Tests for troop balancing (emergent growth via pool mechanics) and lifecycle events.
  */
 
-import { describe, it } from 'node:test';
-import assert from 'node:assert/strict';
+import { describe, expect, it } from 'vitest';
 import {
     VRS_EQUIPMENT_DECAY_START_WEEK,
     VRS_EQUIPMENT_DECAY_RATE,
     VRS_EQUIPMENT_DECAY_FLOOR,
-    REINFORCEMENT_RATE,
     MAX_BRIGADE_PERSONNEL,
 } from '../src/state/formation_constants.js';
 import { reinforceBrigadesFromPools } from '../src/sim/formation_spawn.js';
@@ -17,7 +15,12 @@ import type { GameState, FormationState } from '../src/state/game_state.js';
 
 function makeState(formations: Record<string, Partial<FormationState>>, overrides?: Partial<GameState>): GameState {
     const fullFormations: Record<string, FormationState> = {};
-    for (const [id, f] of Object.entries(formations)) {
+    const overrideMilitary = (overrides?.military ?? {}) as Record<string, unknown>;
+    const overridePolitical = (overrides?.political ?? {}) as Record<string, unknown>;
+    const topLevelOverrides = Object.fromEntries(
+        Object.entries(overrides ?? {}).filter(([key]) => key !== 'military' && key !== 'political'),
+    );
+    for (const [id, formation] of Object.entries(formations)) {
         fullFormations[id] = {
             id,
             faction: 'RBiH',
@@ -27,28 +30,31 @@ function makeState(formations: Record<string, Partial<FormationState>>, override
             assignment: null,
             personnel: 1500,
             kind: 'brigade',
-            ...f,
+            ...formation,
         } as FormationState;
     }
+
     return {
-  meta: { turn: 10, phase: 'war', start_year: 1992, recruitment_mode: 'player_choice' },
-  factions: [
+        meta: { turn: 10, phase: 'war', start_year: 1992, recruitment_mode: 'player_choice' },
+        factions: [
             { id: 'RBiH', pool_scale: 0.18 },
             { id: 'RS', pool_scale: 0.25 },
             { id: 'HRHB', pool_scale: 2.1 },
         ],
-  ...overrides,
-  military: {
-    formations: fullFormations
-  } as any,
-  political: {
-    political_controllers: {}
-  } as any,
-} as unknown as GameState;
+        ...topLevelOverrides,
+        military: {
+            formations: fullFormations,
+            ...overrideMilitary,
+        } as any,
+        political: {
+            political_controllers: {},
+            ...overridePolitical,
+        } as any,
+    } as unknown as GameState;
 }
 
-describe('emergent growth — no hardcoded ceilings', () => {
-    it('reinforcement works without ceiling gating — pool availability is the limiter', () => {
+describe('emergent growth - no hardcoded ceilings', () => {
+    it('reinforcement works without ceiling gating - pool availability is the limiter', () => {
         const state = makeState({
             b1: { faction: 'RBiH', personnel: 1500, tags: ['mun:sarajevo_centar'] },
         });
@@ -62,14 +68,14 @@ describe('emergent growth — no hardcoded ceilings', () => {
                 updated_turn: 10,
             },
         } as any;
+
         const report = reinforceBrigadesFromPools(state);
-        assert.equal(report.formations_reinforced, 1);
-        assert.ok(report.manpower_added > 0);
-        assert.ok(report.manpower_added <= 200); // limited by pool, not ceiling
+        expect(report.formations_reinforced).toBe(1);
+        expect(report.manpower_added).toBeGreaterThan(0);
+        expect(report.manpower_added).toBeLessThanOrEqual(200);
     });
 
     it('reinforcement is limited by pool availability, not by faction total', () => {
-        // Even with very high faction total, reinforcement proceeds if pool has manpower
         const state = makeState({
             b1: { faction: 'RBiH', personnel: 2500, tags: ['mun:sarajevo_centar'] },
         });
@@ -78,14 +84,15 @@ describe('emergent growth — no hardcoded ceilings', () => {
                 mun_id: 'sarajevo_centar',
                 faction: 'RBiH',
                 available: 100,
-                committed: 150000, // massive committed — no ceiling blocks this
+                committed: 150000,
                 exhausted: 0,
                 updated_turn: 10,
             },
         } as any;
+
         const report = reinforceBrigadesFromPools(state);
-        assert.equal(report.formations_reinforced, 1);
-        assert.ok(report.manpower_added > 0);
+        expect(report.formations_reinforced).toBe(1);
+        expect(report.manpower_added).toBeGreaterThan(0);
     });
 
     it('reinforcement stops when pool is empty', () => {
@@ -102,9 +109,10 @@ describe('emergent growth — no hardcoded ceilings', () => {
                 updated_turn: 10,
             },
         } as any;
+
         const report = reinforceBrigadesFromPools(state);
-        assert.equal(report.formations_reinforced, 0);
-        assert.equal(report.manpower_added, 0);
+        expect(report.formations_reinforced).toBe(0);
+        expect(report.manpower_added).toBe(0);
     });
 
     it('reinforcement stops at MAX_BRIGADE_PERSONNEL', () => {
@@ -121,46 +129,49 @@ describe('emergent growth — no hardcoded ceilings', () => {
                 updated_turn: 10,
             },
         } as any;
+
         const report = reinforceBrigadesFromPools(state);
-        assert.equal(report.formations_reinforced, 0);
+        expect(report.formations_reinforced).toBe(0);
     });
 });
 
 describe('VRS equipment decay constants', () => {
     it('decay starts at week 26', () => {
-        assert.equal(VRS_EQUIPMENT_DECAY_START_WEEK, 26);
+        expect(VRS_EQUIPMENT_DECAY_START_WEEK).toBe(26);
     });
 
     it('decay rate is 0.5% per week', () => {
-        assert.equal(VRS_EQUIPMENT_DECAY_RATE, 0.005);
+        expect(VRS_EQUIPMENT_DECAY_RATE).toBe(0.005);
     });
 
     it('decay floor is 60%', () => {
-        assert.equal(VRS_EQUIPMENT_DECAY_FLOOR, 0.60);
+        expect(VRS_EQUIPMENT_DECAY_FLOOR).toBe(0.60);
     });
 
     it('at full decay duration, floor is respected', () => {
-        // After 80 weeks of decay (0.005 × 80 = 0.4), equipment = max(0.6, 1.0 - 0.4) = 0.6
         let equipment = 1.0;
-        for (let w = 0; w < 80; w++) {
+        for (let week = 0; week < 80; week++) {
             equipment = Math.max(VRS_EQUIPMENT_DECAY_FLOOR, equipment - VRS_EQUIPMENT_DECAY_RATE);
         }
-        assert.equal(equipment, VRS_EQUIPMENT_DECAY_FLOOR);
+        expect(equipment).toBe(VRS_EQUIPMENT_DECAY_FLOOR);
     });
 });
 
 describe('lifecycle events', () => {
     it('territory_loss trigger disbands formation when mun lost', () => {
-        const state = makeState({
-            hvo_derventa: { faction: 'HRHB', personnel: 1200 },
-        }, {
-  political: {
-    political_controllers: {
-                'op:derventa:derventa_2': 'RS', // Derventa lost to RS
-                'op:derventa:derventa_3': 'RS',
-            }
-  } as any,
-});
+        const state = makeState(
+            {
+                hvo_derventa: { faction: 'HRHB', personnel: 1200 },
+            },
+            {
+                political: {
+                    political_controllers: {
+                        'op:derventa:derventa_2': 'RS',
+                        'op:derventa:derventa_3': 'RS',
+                    },
+                } as any,
+            },
+        );
 
         const events: LifecycleEventDef[] = [{
             type: 'disband',
@@ -171,23 +182,26 @@ describe('lifecycle events', () => {
         }];
 
         const fired = processLifecycleEvents(state, events);
-        assert.equal(fired, 1);
-        assert.equal(state.military.formations!['hvo_derventa'].status, 'inactive');
-        assert.equal(state.military.formations!['hvo_derventa'].lifecycle_status, 'destroyed');
-        assert.equal(state.military.formations!['hvo_derventa'].personnel, 0);
+        expect(fired).toBe(1);
+        expect(state.military.formations!['hvo_derventa'].status).toBe('inactive');
+        expect(state.military.formations!['hvo_derventa'].lifecycle_status).toBe('destroyed');
+        expect(state.military.formations!['hvo_derventa'].personnel).toBe(0);
     });
 
-    it('territory_loss trigger does NOT fire when faction still controls OSIDs', () => {
-        const state = makeState({
-            hvo_derventa: { faction: 'HRHB', personnel: 1200 },
-        }, {
-  political: {
-    political_controllers: {
-                'op:derventa:derventa_2': 'HRHB', // Still controlled
-                'op:derventa:derventa_3': 'RS',
-            }
-  } as any,
-});
+    it('territory_loss trigger does not fire when faction still controls OSIDs', () => {
+        const state = makeState(
+            {
+                hvo_derventa: { faction: 'HRHB', personnel: 1200 },
+            },
+            {
+                political: {
+                    political_controllers: {
+                        'op:derventa:derventa_2': 'HRHB',
+                        'op:derventa:derventa_3': 'RS',
+                    },
+                } as any,
+            },
+        );
 
         const events: LifecycleEventDef[] = [{
             type: 'disband',
@@ -198,8 +212,8 @@ describe('lifecycle events', () => {
         }];
 
         const fired = processLifecycleEvents(state, events);
-        assert.equal(fired, 0);
-        assert.equal(state.military.formations!['hvo_derventa'].status, 'active');
+        expect(fired).toBe(0);
+        expect(state.military.formations!['hvo_derventa'].status).toBe('active');
     });
 
     it('merge event transfers personnel to target', () => {
@@ -218,10 +232,10 @@ describe('lifecycle events', () => {
         }];
 
         const fired = processLifecycleEvents(state, events);
-        assert.equal(fired, 1);
-        assert.equal(state.military.formations!['source'].status, 'inactive');
-        assert.equal(state.military.formations!['source'].lifecycle_status, 'merged');
-        assert.equal(state.military.formations!['target'].personnel, 2300);
+        expect(fired).toBe(1);
+        expect(state.military.formations!['source'].status).toBe('inactive');
+        expect(state.military.formations!['source'].lifecycle_status).toBe('merged');
+        expect(state.military.formations!['target'].personnel).toBe(2300);
     });
 
     it('week trigger does not fire before turn', () => {
@@ -241,17 +255,20 @@ describe('lifecycle events', () => {
         }];
 
         const fired = processLifecycleEvents(state, events);
-        assert.equal(fired, 0);
+        expect(fired).toBe(0);
     });
 
     it('already disbanded formations are skipped', () => {
-        const state = makeState({
-            hvo_derventa: { faction: 'HRHB', personnel: 0, status: 'inactive', lifecycle_status: 'destroyed' },
-        }, {
-  political: {
-    political_controllers: {}
-  } as any,
-});
+        const state = makeState(
+            {
+                hvo_derventa: { faction: 'HRHB', personnel: 0, status: 'inactive', lifecycle_status: 'destroyed' },
+            },
+            {
+                political: {
+                    political_controllers: {},
+                } as any,
+            },
+        );
 
         const events: LifecycleEventDef[] = [{
             type: 'disband',
@@ -262,6 +279,6 @@ describe('lifecycle events', () => {
         }];
 
         const fired = processLifecycleEvents(state, events);
-        assert.equal(fired, 0);
+        expect(fired).toBe(0);
     });
 });
