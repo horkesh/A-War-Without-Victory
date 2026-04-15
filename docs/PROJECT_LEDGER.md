@@ -1,3 +1,30 @@
+## [2026-04-15] test(repo): migrate treaty dev-ui helper contracts onto vitest
+
+**Type:** Test-harness cleanup / treaty dev-ui helper unification
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/dev_ui_exports_deterministic.test.ts`, `tests/dev_ui_phase16.test.ts`, `tests/dev_ui_phase17.test.ts`, `tests/dev_ui_phase18.test.ts`, `tests/test_discovery_contract.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/dev_ui_exports_deterministic.test.ts tests/dev_ui_phase16.test.ts tests/dev_ui_phase17.test.ts tests/dev_ui_phase18.test.ts tests/test_discovery_contract.test.ts` = 36/36 pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED - the remaining treaty dev-UI helper and visualization contracts now run under vitest, with discovery pinning representative files in the fast slice.
+
+### Summary
+
+1. **The dev-UI treaty helper band moved together:** deterministic exports, treaty guardrails/bundles/competence utilities, validation-status/acceptance-breakdown rendering helpers, and preset/lint helper logic now all live on vitest.
+2. **This was a pure harness ownership packet:** no production code changed because these files only exercise deterministic helper logic around the treaty authoring/dev surface.
+3. **Discovery now remembers the family:** representative dev-UI treaty helper files are pinned in the fast vitest slice so this lane stays in the canonical test universe.
+
+### Why this mattered
+
+These files are exactly the kind of residue that makes a repo feel more fractured than it really is: small, pure helper suites stranded in `node:test` even though the surrounding treaty domain is already on vitest. Pulling them over keeps the harness map honest.
+
+### Proof boundaries
+
+- **Direct proof:** all 4 migrated dev-UI treaty suites pass under vitest.
+- **Direct proof:** discovery now pins representative dev-UI treaty helper files in the fast vitest slice.
+- **Not claimed here:** this does **not** prove the live treaty UI mount path; it closes the deterministic helper/visualization lane behind that surface.
+
+---
+
 ## [2026-04-15] test(repo): migrate supply reachability and gating contracts onto vitest
 
 **Type:** Test-harness cleanup / supply contract unification

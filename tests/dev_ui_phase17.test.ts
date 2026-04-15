@@ -6,7 +6,7 @@
  */
 
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 import { computeFrontEdges } from '../src/map/front_edges.js';
 import type { LoadedSettlementGraph } from '../src/map/settlements.js';
 import type { GameState } from '../src/state/game_state.js';

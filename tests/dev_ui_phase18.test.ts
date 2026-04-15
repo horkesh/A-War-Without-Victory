@@ -5,7 +5,7 @@
  */
 
 import { deepStrictEqual, ok, strictEqual } from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 import type { TreatyScope } from '../src/state/treaty.js';
 import { buildTreatyDraft, createClause } from '../src/state/treaty_builder.js';
 

@@ -6,7 +6,7 @@
  */
 
 import { deepStrictEqual, strictEqual } from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 import { BRCKO_SIDS } from '../src/state/brcko.js';
 import type { TreatyScope } from '../src/state/treaty.js';
 import { buildTreatyDraft, createClause } from '../src/state/treaty_builder.js';

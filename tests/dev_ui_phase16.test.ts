@@ -5,7 +5,7 @@
  */
 
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 import { ACCEPTANCE_CONSTRAINTS } from '../src/state/acceptance_constraints.js';
 import { COMPETENCE_VALUATIONS, computeCompetenceUtility } from '../src/state/competence_valuations.js';
 import { type CompetenceId } from '../src/state/competences.js';
