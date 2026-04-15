@@ -367,6 +367,7 @@
     "experimentalResolver": true
   },
   "devDependencies": {
+    "@testing-library/react": "^14.3.1",
     "@types/node": "^22.10.2",
     "@types/react": "^18.3.28",
     "@types/react-dom": "^18.3.7",
