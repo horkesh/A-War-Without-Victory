@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 import { updateEmbargoProfiles } from '../src/state/embargo.js';
 import type { GameState } from '../src/state/game_state.js';
 
@@ -28,12 +28,18 @@ test('updateEmbargoProfiles initializes and progresses smuggling', () => {
     const state = baseState(0);
     updateEmbargoProfiles(state);
     const rs = state.factions.find((f) => f.id === 'RS')!;
+    const rbih = state.factions.find((f) => f.id === 'RBiH')!;
     assert.ok(rs.embargo_profile);
     assert.strictEqual(rs.embargo_profile.heavy_equipment_access, 0.9);
     assert.strictEqual(rs.embargo_profile.smuggling_efficiency, 0);
+    assert.strictEqual(rbih.embargo_profile!.smuggling_efficiency, 0.0015);
 
-    state.meta.turn = 200;
-    updateEmbargoProfiles(state);
-    assert.ok(rs.embargo_profile.smuggling_efficiency >= 0.29);
-    assert.ok(rs.embargo_profile.smuggling_efficiency <= 0.31);
+    for (let turn = 1; turn <= 200; turn += 1) {
+        state.meta.turn = turn;
+        updateEmbargoProfiles(state);
+    }
+
+    assert.strictEqual(rs.embargo_profile.smuggling_efficiency, 0);
+    assert.ok(rbih.embargo_profile!.smuggling_efficiency >= 0.29);
+    assert.ok(rbih.embargo_profile!.smuggling_efficiency <= 0.3);
 });

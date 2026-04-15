@@ -1,5 +1,5 @@
 import { ok, strictEqual } from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 import type { FrontEdge } from '../src/map/front_edges.js';
 import type { EdgeRecord } from '../src/map/settlements.js';
 import type { ExhaustionStats } from '../src/state/exhaustion.js';

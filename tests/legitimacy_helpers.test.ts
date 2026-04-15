@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 import type { GameState } from '../src/state/game_state.js';
 import { getFactionLegitimacyAverages } from '../src/state/legitimacy.js';
 

@@ -5,7 +5,7 @@
  */
 
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 import { evaluateEvents } from '../src/sim/events/evaluate_events.js';
 import type { EventDefinition, Rng } from '../src/sim/events/event_types.js';
 import { triggerMatches } from '../src/sim/events/event_types.js';

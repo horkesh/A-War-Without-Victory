@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 
 import { FrontEdge } from '../src/map/front_edges.js';
 import { applyControlFlipProposals, buildAdjacencyMap, computeControlFlipProposals } from '../src/state/control_flip_proposals.js';

@@ -4,7 +4,7 @@
  * truce-break detection, aggression spike, and shouldGrazBlockAttack.
  */
 
-import { describe, it } from 'node:test';
+import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
 import {
     GRAZ_ACCORDS_TURN,
@@ -28,20 +28,29 @@ import type { FactionId, GameState } from '../src/state/game_state.js';
 // ─── Minimal state factory ────────────────────────────────────────────────────
 
 function makeState(turn: number, overrides: Partial<GameState> = {}): GameState {
+    const overrideMilitary = (overrides.military ?? {}) as Record<string, unknown>;
+    const overridePolitical = (overrides.political ?? {}) as Record<string, unknown>;
+
     return {
-  schema_version: 1,
-  meta: { phase: 'war', turn, scenario_start_date: '1992-04-06' },
-  factions: [],
-  ...overrides,
-  military: {
-    formations: {},
-    front_segments: {},
-    front_posture: {},
-    front_posture_regions: {},
-    front_pressure: {},
-    militia_pools: {}
-  } as any,
-} as unknown as GameState;
+        schema_version: 1,
+        meta: { phase: 'war', turn, scenario_start_date: '1992-04-06' },
+        factions: [],
+        ...Object.fromEntries(
+            Object.entries(overrides).filter(([key]) => key !== 'military' && key !== 'political'),
+        ),
+        military: {
+            formations: {},
+            front_segments: {},
+            front_posture: {},
+            front_posture_regions: {},
+            front_pressure: {},
+            militia_pools: {},
+            ...overrideMilitary,
+        } as any,
+        political: {
+            ...overridePolitical,
+        } as any,
+    } as unknown as GameState;
 }
 
 function makeActiveState(turn: number = 10): GameState {
@@ -73,8 +82,8 @@ describe('GRAZ_CORPS_PAIRS', () => {
 describe('Kiseljak exclusions', () => {
     it('VRS exclusion includes kiseljak OSIDs', () => {
         assert.ok(GRAZ_KISELJAK_VRS_EXCLUSION.has('op:kiseljak:kiseljak_2'));
-        assert.ok(GRAZ_KISELJAK_VRS_EXCLUSION.has('op:kiseljak:borina'));
-        assert.equal(GRAZ_KISELJAK_VRS_EXCLUSION.size, 9);
+        assert.ok(GRAZ_KISELJAK_VRS_EXCLUSION.has('op:kiseljak:gromiljak_2'));
+        assert.equal(GRAZ_KISELJAK_VRS_EXCLUSION.size, 7);
     });
     it('HRHB exclusion includes border OSIDs', () => {
         assert.ok(GRAZ_KISELJAK_HRHB_EXCLUSION.has('op:hadzici:misevici_2'));
@@ -171,7 +180,7 @@ describe('getTrucePartner', () => {
 describe('isKiseljakExcluded', () => {
     it('RS cannot target HRHB Kiseljak OSIDs', () => {
         assert.equal(isKiseljakExcluded('op:kiseljak:kiseljak_2', 'RS'), true);
-        assert.equal(isKiseljakExcluded('op:kiseljak:borina', 'RS'), true);
+        assert.equal(isKiseljakExcluded('op:kiseljak:gromiljak_2', 'RS'), true);
     });
     it('HRHB cannot target VRS border OSIDs', () => {
         assert.equal(isKiseljakExcluded('op:hadzici:misevici_2', 'HRHB'), true);
@@ -267,10 +276,10 @@ describe('shouldGrazBlockAttack', () => {
         assert.equal(shouldGrazBlockAttack(state, 'vrs_sarajevo_romanija', 'RS', 'op:kiseljak:kiseljak_2', 'HRHB'), true);
     });
 
-    it('does not block Kiseljak after Kiseljak truce is broken', () => {
+    it('still blocks Kiseljak after Kiseljak truce is broken because the faction-level RS block remains active', () => {
         const state = makeActiveState();
         state.political.vienna_kiseljak_broken = true;
-        assert.equal(shouldGrazBlockAttack(state, 'vrs_sarajevo_romanija', 'RS', 'op:kiseljak:kiseljak_2', 'HRHB'), false);
+        assert.equal(shouldGrazBlockAttack(state, 'vrs_sarajevo_romanija', 'RS', 'op:kiseljak:kiseljak_2', 'HRHB'), true);
     });
 });
 

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
+import { test } from 'vitest';
 
 import { getLocalFrontDensityModifier } from '../src/sim/combat/local_front_defense.js';
 import type { GameState } from '../src/state/game_state.js';

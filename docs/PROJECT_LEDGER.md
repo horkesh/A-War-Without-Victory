@@ -1,3 +1,32 @@
+## [2026-04-15] test(repo): migrate negotiation and political-helper contracts onto vitest
+
+**Type:** Test-harness cleanup / political-helper residue audit
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/negotiation_offers.test.ts`, `tests/territorial_valuation.test.ts`, `tests/control_flip_proposals.test.ts`, `tests/events_evaluate.test.ts`, `tests/exhaustion_accumulate.test.ts`, `tests/embargo_profiles.test.ts`, `tests/legitimacy_helpers.test.ts`, `tests/local_truces.test.ts`, `tests/minority_flight.test.ts`, `tests/local_front_density_modifier_precedence.test.ts`, `tests/test_discovery_contract.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/negotiation_offers.test.ts tests/territorial_valuation.test.ts tests/control_flip_proposals.test.ts tests/events_evaluate.test.ts tests/exhaustion_accumulate.test.ts tests/embargo_profiles.test.ts tests/legitimacy_helpers.test.ts tests/local_truces.test.ts tests/minority_flight.test.ts tests/local_front_density_modifier_precedence.test.ts tests/test_discovery_contract.test.ts` = 121/121 pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED - ten adjacent political/negotiation/helper contracts now run on vitest, and the packet corrected two stale test assumptions instead of freezing them as fake truth.
+
+### Summary
+
+1. **A real pure-systems slab moved together:** negotiation offer generation, territorial valuation, control-flip proposals, event evaluation, exhaustion accumulation, embargo profiles, legitimacy helpers, local truces, minority flight, and local-front density precedence now live on the canonical vitest lane.
+2. **Two stale assumptions were corrected honestly:** `tests/local_truces.test.ts` had the same shallow-state helper drift as earlier residue and still asserted an older Kiseljak exclusion shape; `tests/embargo_profiles.test.ts` was proving a fake "absolute turn jump" contract even though `updateEmbargoProfiles(...)` grows smuggling per update call. The tests now match the live owners instead of preserving dead expectations.
+3. **Discovery now remembers this helper lane:** representative political/negotiation helper files are pinned into the fast vitest slice so this whole band does not drift back into split-runner residue.
+
+### Why this mattered
+
+This was exactly the kind of remaining pre-0.9 residue worth auditing instead of blindly migrating. Most of the files were straightforward harness cleanup, but the packet also flushed out where the tests had stopped describing the live system. That is the useful kind of cleanup: less harness fragmentation and less fake confidence.
+
+### Proof boundaries
+
+- **Direct proof:** all 10 migrated suites pass under vitest.
+- **Direct proof:** discovery now pins representative political/negotiation helper files in the fast vitest slice.
+- **Direct proof:** `local_truces` fixtures now preserve the canonical political shell, and the Kiseljak expectations match the current exclusion sets and faction-level blocking logic.
+- **Direct proof:** `embargo_profiles` now proves the live per-update smuggling growth owner instead of an outdated absolute-turn shortcut.
+- **Not claimed here:** this does **not** add new negotiation or truce gameplay; it aligns the harness with current runtime truth.
+
+---
+
 ## [2026-04-15] test(repo): migrate officer-system contracts onto vitest
 
 **Type:** Test-harness cleanup / officer substrate contract unification
