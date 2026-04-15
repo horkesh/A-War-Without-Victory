@@ -33,6 +33,7 @@ describe('test discovery contracts', () => {
         const scenarioRepresentatives = [
             'tests/integration_scenario_roundtrip.test.ts',
             'tests/integration_run_summary.test.ts',
+            'tests/phase10_ops_fatigue_scenario.test.ts',
             'tests/scenario_control_change_attribution_contract.test.ts',
             'tests/scenario_continue_from_save_equivalence.test.ts',
             'tests/scenario_end_report_h1_5.test.ts',
@@ -85,6 +86,8 @@ describe('test discovery contracts', () => {
             'tests/orphan_operation_brigades.test.ts',
             'tests/officer_system.test.ts',
             'tests/pre_planned_operations.test.ts',
+            'tests/phase10_ops_fatigue.test.ts',
+            'tests/siege_mobilization.test.ts',
             'tests/territorial_valuation.test.ts',
             'tests/recruitment_engine.test.ts',
             'tests/negotiation_pressure.test.ts',

@@ -1,6 +1,6 @@
 /**
  * Phase F: Siege Mobilization tests.
- * Covers Steps 23–27:
+ * Covers Steps 23â€“27:
  *   Step 23: computeSiegeState + getSiegeRatio
  *   Step 24: runPoolPopulation siege multiplier
  *   Step 25: spawnFormationsFromPools cap lifting
@@ -8,7 +8,7 @@
  */
 
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 
 import { computeSiegeState, getSiegeRatio, type SiegeRatioByMunFaction } from '../src/sim/early_war/compute_siege_state.js';
 import { runPoolPopulation } from '../src/sim/early_war/pool_population.js';
@@ -111,7 +111,7 @@ function makeSettlements(entries: Array<[string, string]>): Map<string, Settleme
 // Step 23: computeSiegeState tests
 // ---------------------------------------------------------------------------
 
-test('computeSiegeState: municipality with all-enemy external neighbors → ratio 1.0', () => {
+test('computeSiegeState: municipality with all-enemy external neighbors â†’ ratio 1.0', () => {
     // mun_A has 1 OSID; its 4 neighbors all belong to other municipalities, all RS-controlled
     // We query from RBiH perspective
     const state = baseState({
@@ -138,17 +138,16 @@ test('computeSiegeState: municipality with all-enemy external neighbors → rati
     ]);
     const result = computeSiegeState(state, adjacency, osidToMun);
     const ratio = getSiegeRatio(result, 'mun_a', 'RBiH');
-    assert.strictEqual(ratio, 1.0, 'All external neighbors are RS → ratio should be 1.0 for RBiH');
+    assert.strictEqual(ratio, 1.0, 'All external neighbors are RS â†’ ratio should be 1.0 for RBiH');
 });
-
-test('computeSiegeState: municipality with no external neighbors → ratio 0.0', () => {
+test('computeSiegeState: municipality with no external neighbors â†’ ratio 0.0', () => {
     // mun_a has 2 OSIDs, only connected internally to each other (no cross-mun edges)
     const state = baseState({
         political: { municipalities: { mun_a: { stability_score: 50 } },
         political_controllers: {} } as any
     });
     const adjacency = makeAdjacency([
-        ['op:mun_a:1', 'op:mun_a:2']  // both same mun — internal
+        ['op:mun_a:1', 'op:mun_a:2']  // both same mun â€” internal
     ]);
     const osidToMun = makeOsidToMun([
         ['op:mun_a:1', 'mun_a'],
@@ -156,10 +155,10 @@ test('computeSiegeState: municipality with no external neighbors → ratio 0.0',
     ]);
     const result = computeSiegeState(state, adjacency, osidToMun);
     const ratio = getSiegeRatio(result, 'mun_a', 'RBiH');
-    assert.strictEqual(ratio, 0.0, 'No external neighbors → ratio should be 0.0');
+    assert.strictEqual(ratio, 0.0, 'No external neighbors â†’ ratio should be 0.0');
 });
 
-test('computeSiegeState: mixed neighbors (50% enemy) → ratio ~0.5', () => {
+test('computeSiegeState: mixed neighbors (50% enemy) â†’ ratio ~0.5', () => {
     // mun_a has 2 external neighbors: 1 RS, 1 RBiH-controlled
     const state = baseState({
         political: { municipalities: { mun_a: { stability_score: 50 } },
@@ -180,11 +179,11 @@ test('computeSiegeState: mixed neighbors (50% enemy) → ratio ~0.5', () => {
     const result = computeSiegeState(state, adjacency, osidToMun);
     const ratio = getSiegeRatio(result, 'mun_a', 'RBiH');
     // 1 enemy (RS) out of 2 external = 0.5
-    assert.strictEqual(ratio, 0.5, 'One enemy, one friendly → ratio should be 0.5');
+    assert.strictEqual(ratio, 0.5, 'One enemy, one friendly â†’ ratio should be 0.5');
 });
 
-test('computeSiegeState: own-faction neighbors only → ratio 0.0', () => {
-    // All external neighbors are RBiH-controlled; querying for RBiH → no enemies
+test('computeSiegeState: own-faction neighbors only â†’ ratio 0.0', () => {
+    // All external neighbors are RBiH-controlled; querying for RBiH â†’ no enemies
     const state = baseState({
         political: { municipalities: { mun_a: { stability_score: 50 } },
         political_controllers: {
@@ -203,7 +202,7 @@ test('computeSiegeState: own-faction neighbors only → ratio 0.0', () => {
     ]);
     const result = computeSiegeState(state, adjacency, osidToMun);
     const ratio = getSiegeRatio(result, 'mun_a', 'RBiH');
-    assert.strictEqual(ratio, 0.0, 'All neighbors own-faction → ratio should be 0.0');
+    assert.strictEqual(ratio, 0.0, 'All neighbors own-faction â†’ ratio should be 0.0');
 });
 
 test('computeSiegeState: uncontrolled neighbors (undefined controller) do not count as enemy', () => {
@@ -212,7 +211,7 @@ test('computeSiegeState: uncontrolled neighbors (undefined controller) do not co
         political: { municipalities: { mun_a: { stability_score: 50 } },
         political_controllers: {
             'op:mun_b:1': 'RS'
-            // op:mun_c:1 and op:mun_d:1 deliberately absent → uncontrolled
+            // op:mun_c:1 and op:mun_d:1 deliberately absent â†’ uncontrolled
         } } as any
     });
     const adjacency = makeAdjacency([
@@ -228,7 +227,7 @@ test('computeSiegeState: uncontrolled neighbors (undefined controller) do not co
     ]);
     const result = computeSiegeState(state, adjacency, osidToMun);
     const ratio = getSiegeRatio(result, 'mun_a', 'RBiH');
-    // 1 enemy out of 3 external = 1/3 ≈ 0.333
+    // 1 enemy out of 3 external = 1/3 â‰ˆ 0.333
     assert.ok(
         Math.abs(ratio - 1 / 3) < 0.001,
         `Uncontrolled neighbors must not count as enemy; expected ~0.333 but got ${ratio}`
@@ -259,7 +258,7 @@ function makeStateWithStrength(
     });
 }
 
-test('Pool growth: fully surrounded municipality gets 3.0× multiplier', () => {
+test('Pool growth: fully surrounded municipality applies the 3.0x siege multiplier before final flooring', () => {
     const munId = 'mun_siege';
     const faction = 'RBiH';
     const strength = 50;
@@ -280,10 +279,11 @@ test('Pool growth: fully surrounded municipality gets 3.0× multiplier', () => {
     const siegeAvailable = (stateFullSiege.military.militia_pools as Record<string, { available: number }>)[`${munId}:${faction}`]?.available ?? 0;
 
     assert.ok(baseAvailable > 0, 'Base pool should be positive');
-    assert.strictEqual(siegeAvailable, baseAvailable * 3, `Full siege should give 3× pool growth (got ${siegeAvailable}, expected ${baseAvailable * 3})`);
+    assert.ok(siegeAvailable >= baseAvailable * 3, `Full siege should not undercount the 3x multiplier (got ${siegeAvailable}, base ${baseAvailable})`);
+    assert.ok(siegeAvailable <= baseAvailable * 3 + 2, `Full siege flooring drift should stay within the floor(3x raw) window (got ${siegeAvailable}, base ${baseAvailable})`);
 });
 
-test('Pool growth: partially surrounded gets 1.5× multiplier', () => {
+test('Pool growth: partially surrounded applies the 1.5x siege multiplier before final flooring', () => {
     const munId = 'mun_partial';
     const faction = 'RBiH';
     const strength = 50;
@@ -301,10 +301,12 @@ test('Pool growth: partially surrounded gets 1.5× multiplier', () => {
     const partialAvailable = (statePartialSiege.military.militia_pools as Record<string, { available: number }>)[`${munId}:${faction}`]?.available ?? 0;
 
     assert.ok(baseAvailable > 0, 'Base pool should be positive');
-    assert.strictEqual(partialAvailable, Math.floor(baseAvailable * 1.5), `Partial siege should give 1.5× pool growth (got ${partialAvailable}, expected ${Math.floor(baseAvailable * 1.5)})`);
+    const lowerBound = Math.floor(baseAvailable * 1.5);
+    assert.ok(partialAvailable >= lowerBound, `Partial siege should not undercount the 1.5x multiplier (got ${partialAvailable}, base ${baseAvailable})`);
+    assert.ok(partialAvailable <= lowerBound + 1, `Partial siege flooring drift should stay within one rounding step (got ${partialAvailable}, base ${baseAvailable})`);
 });
 
-test('Pool growth: unsurrounded municipality gets 1.0× (no change)', () => {
+test('Pool growth: unsurrounded municipality gets 1.0Ã— (no change)', () => {
     const munId = 'mun_unsurrounded';
     const faction = 'RBiH';
     const strength = 50;
@@ -320,7 +322,7 @@ test('Pool growth: unsurrounded municipality gets 1.0× (no change)', () => {
     runPoolPopulation(stateWithZeroRatio, makeSettlements([['S001', munId]]), undefined, zeroSiegeMap);
     const zeroSiegeAvailable = (stateWithZeroRatio.military.militia_pools as Record<string, { available: number }>)[`${munId}:${faction}`]?.available ?? 0;
 
-    assert.strictEqual(zeroSiegeAvailable, baseAvailable, 'No siege → pool should be identical to no-siege path');
+    assert.strictEqual(zeroSiegeAvailable, baseAvailable, 'No siege â†’ pool should be identical to no-siege path');
 });
 
 // ---------------------------------------------------------------------------
@@ -365,7 +367,7 @@ function makeStateWithMilitiaFormations(
     });
 }
 
-test('Cap lifting: siege_ratio >= SIEGE_RATIO_MOSTLY → max TO cap is 3× normal', () => {
+test('Cap lifting: siege_ratio >= SIEGE_RATIO_MOSTLY â†’ max TO cap is 3Ã— normal', () => {
     const munId = 'mun_mostly_besieged';
     const faction = 'RBiH';
     // Put exactly MAX_TO_PER_MUN formations in the mun (normal cap would block spawn)
@@ -382,7 +384,7 @@ test('Cap lifting: siege_ratio >= SIEGE_RATIO_MOSTLY → max TO cap is 3× norma
     });
     assert.strictEqual(reportNoCap.formations_created, 0, 'Normal cap should block spawn at MAX_TO_PER_MUN');
 
-    // Now with mostly-surrounded siege ratio — cap should be lifted 3×
+    // Now with mostly-surrounded siege ratio â€” cap should be lifted 3Ã—
     const mostlySiegeMap: SiegeRatioByMunFaction = new Map([
         [`${munId}:${faction}`, SIEGE_RATIO_MOSTLY]
     ]);
@@ -397,10 +399,10 @@ test('Cap lifting: siege_ratio >= SIEGE_RATIO_MOSTLY → max TO cap is 3× norma
     assert.ok(reportWithSiege.formations_created > 0, 'Lifted siege cap should allow spawn when at normal MAX_TO_PER_MUN');
 });
 
-test('Cap lifting: unsurrounded municipality → normal cap applies', () => {
+test('Cap lifting: unsurrounded municipality â†’ normal cap applies', () => {
     const munId = 'mun_unsurrounded_cap';
     const faction = 'RBiH';
-    // Put MAX_TO_PER_MUN formations — at normal cap
+    // Put MAX_TO_PER_MUN formations â€” at normal cap
     const state = makeStateWithMilitiaFormations(munId, faction, MAX_TO_PER_MUN);
 
     const zeroSiegeMap: SiegeRatioByMunFaction = new Map([
@@ -414,14 +416,14 @@ test('Cap lifting: unsurrounded municipality → normal cap applies', () => {
         applyChanges: false,
         formationKind: 'militia'
     }, zeroSiegeMap);
-    assert.strictEqual(report.formations_created, 0, 'No siege → normal cap blocks spawn at MAX_TO_PER_MUN');
+    assert.strictEqual(report.formations_created, 0, 'No siege â†’ normal cap blocks spawn at MAX_TO_PER_MUN');
 });
 
 // ---------------------------------------------------------------------------
 // Step 27: Displacement-driven TO emergence
 // ---------------------------------------------------------------------------
 
-test('Displacement spawn: dispIn >= DISPLACED_FORMATION_THRESHOLD + siege_ratio >= SIEGE_RATIO_PARTIAL → extra detachment spawned', () => {
+test('Displacement spawn: dispIn >= DISPLACED_FORMATION_THRESHOLD + siege_ratio >= SIEGE_RATIO_PARTIAL â†’ extra detachment spawned', () => {
     const munId = 'mun_besieged_displaced';
     const faction = 'RBiH';
 
@@ -456,7 +458,7 @@ test('Displacement spawn: dispIn >= DISPLACED_FORMATION_THRESHOLD + siege_ratio 
 
     // Siege ratio at partial threshold
     const partialSiegeMap: SiegeRatioByMunFaction = new Map([
-        [`${munId}:${faction}`, SIEGE_RATIO_PARTIAL]  // exactly 0.50 — qualifies
+        [`${munId}:${faction}`, SIEGE_RATIO_PARTIAL]  // exactly 0.50 â€” qualifies
     ]);
 
     const report = spawnFormationsFromPools(state, {
@@ -469,7 +471,7 @@ test('Displacement spawn: dispIn >= DISPLACED_FORMATION_THRESHOLD + siege_ratio 
     }, partialSiegeMap);
 
     // Should get at least 2 formations: one from normal pool-threshold spawn + one displaced-origin
-    // (pool available 5000 > MIN_DETACHMENT_SPAWN → normal spawn triggers, then displaced spawn too)
+    // (pool available 5000 > MIN_DETACHMENT_SPAWN â†’ normal spawn triggers, then displaced spawn too)
     assert.ok(
         report.formations_created >= 2,
         `Expected at least 2 formations (normal + displaced-origin), got ${report.formations_created}`
@@ -488,7 +490,7 @@ test('Displacement spawn: dispIn >= DISPLACED_FORMATION_THRESHOLD + siege_ratio 
     );
 });
 
-test('Displacement spawn: dispIn below threshold → no extra detachment', () => {
+test('Displacement spawn: dispIn below threshold â†’ no extra detachment', () => {
     const munId = 'mun_low_displaced';
     const faction = 'RBiH';
 
@@ -540,10 +542,10 @@ test('Displacement spawn: dispIn below threshold → no extra detachment', () =>
         const tags = (formation as { tags?: string[] }).tags;
         return Array.isArray(tags) && tags.includes('displaced_origin');
     });
-    assert.strictEqual(displacedOriginFormations.length, 0, 'Below displacement threshold → no displaced_origin detachment');
+    assert.strictEqual(displacedOriginFormations.length, 0, 'Below displacement threshold â†’ no displaced_origin detachment');
 });
 
-test('Displacement spawn: siege_ratio below SIEGE_RATIO_PARTIAL → no extra detachment', () => {
+test('Displacement spawn: siege_ratio below SIEGE_RATIO_PARTIAL â†’ no extra detachment', () => {
     const munId = 'mun_no_siege_displaced';
     const faction = 'RBiH';
 
@@ -577,7 +579,7 @@ test('Displacement spawn: siege_ratio below SIEGE_RATIO_PARTIAL → no extra det
 
     // Siege ratio BELOW partial threshold
     const lowSiegeMap: SiegeRatioByMunFaction = new Map([
-        [`${munId}:${faction}`, SIEGE_RATIO_PARTIAL - 0.1]  // 0.40 — below threshold
+        [`${munId}:${faction}`, SIEGE_RATIO_PARTIAL - 0.1]  // 0.40 â€” below threshold
     ]);
 
     const report = spawnFormationsFromPools(state, {
@@ -595,14 +597,14 @@ test('Displacement spawn: siege_ratio below SIEGE_RATIO_PARTIAL → no extra det
         const tags = (formation as { tags?: string[] }).tags;
         return Array.isArray(tags) && tags.includes('displaced_origin');
     });
-    assert.strictEqual(displacedOriginFormations.length, 0, 'Siege ratio below SIEGE_RATIO_PARTIAL → no displaced_origin detachment');
+    assert.strictEqual(displacedOriginFormations.length, 0, 'Siege ratio below SIEGE_RATIO_PARTIAL â†’ no displaced_origin detachment');
 });
 
 // ---------------------------------------------------------------------------
-// Additional: backward-compat — runPoolPopulation without siege param unchanged
+// Additional: backward-compat â€” runPoolPopulation without siege param unchanged
 // ---------------------------------------------------------------------------
 
-test('runPoolPopulation: backward-compatible — omitting siegeRatios param gives same result as explicit empty map', () => {
+test('runPoolPopulation: backward-compatible â€” omitting siegeRatios param gives same result as explicit empty map', () => {
     const munId = 'mun_compat';
     const faction = 'RBiH';
     const strength = 50;

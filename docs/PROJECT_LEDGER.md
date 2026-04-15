@@ -1,3 +1,22 @@
+## [2026-04-15] test(repo): split fatigue scenario proof and migrate siege contracts onto vitest
+
+**Type:** Test-harness cleanup / mixed-suite truth refresh
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/phase10_ops_fatigue.test.ts`, `tests/phase10_ops_fatigue_scenario.test.ts`, `tests/siege_mobilization.test.ts`, `tests/test_discovery_contract.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/phase10_ops_fatigue.test.ts tests/phase10_ops_fatigue_scenario.test.ts tests/siege_mobilization.test.ts tests/test_discovery_contract.test.ts` pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED after packet verification - the mixed fatigue/siege residue is now honest about its seams: pure fatigue and siege contracts live in vitest, the one fatigue scenario determinism proof is isolated in its own scenario-slice file, and the siege multiplier assertions now match the live floor-after-multiplier contract instead of stale lucky integers.
+
+### Summary
+
+1. **The fatigue suite now follows the real seam boundary:** `phase10_ops_fatigue.test.ts` keeps the pure formation-fatigue, commitment, and militia-fatigue contracts, while `phase10_ops_fatigue_scenario.test.ts` owns the one real scenario determinism proof.
+2. **The scenario fixture now uses real faction strategies instead of fake factions:** the old `A` / `B` setup crashed in corridor-opportunity logic because `FACTION_STRATEGIES[faction]` is only defined for real factions. Using `RBiH` / `RS` restores honest scenario proof without mutating engine behavior.
+3. **The siege multiplier tests now prove the current rounding truth:** `runPoolPopulation(...)` applies siege multipliers before the final `Math.floor(...)`, so full and partial siege assertions now allow the bounded rounding window the owner actually produces.
+
+### Why this mattered
+
+This was exactly the kind of “hard stuff” the cleanup campaign needed to stop dodging. Both files looked like simple runner residue until you actually opened them: one was mixing pure math contracts with a scenario tail that used impossible fake factions, and the other was enforcing exact arithmetic that no longer matched the owner’s rounding order. If we had just dragged them into vitest unchanged, we would have manufactured cleaner-looking lies. Splitting the fatigue file and repairing the siege expectations makes the proof ladder sharper: fast contracts stay fast, scenario proof stays explicit, and the remaining hard residue is now a little more real.
+
 ## [2026-04-15] test(repo): migrate pure state and narrative residue contracts onto vitest
 
 **Type:** Test-harness cleanup / discovery truth tightening
