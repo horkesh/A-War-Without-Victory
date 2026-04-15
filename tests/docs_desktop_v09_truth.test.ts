@@ -1,0 +1,41 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { describe, expect, it } from 'vitest';
+
+function readRepoFile(...parts: string[]): string {
+  return readFileSync(join(process.cwd(), ...parts), 'utf8');
+}
+
+describe('desktop and roadmap truth docs', () => {
+  it('keeps desktop startup docs aligned with the baked apr_1992 artifact path', () => {
+    const playbook = readRepoFile('docs', '20_engineering', 'GUI_PLAYBOOK_DESKTOP.md');
+    const ipcContract = readRepoFile('docs', '20_engineering', 'DESKTOP_GUI_IPC_CONTRACT.md');
+
+    expect(playbook).toContain('data/derived/startup/apr_1992_initial_save.json');
+    expect(playbook).toContain('one-way derived copy of canonical builder truth');
+    expect(playbook).not.toContain('apr1992_historical_52w.json');
+
+    expect(ipcContract).toContain('loadStartupSnapshotState(...)');
+    expect(ipcContract).toContain('data/derived/startup/apr_1992_initial_save.json');
+    expect(ipcContract).toContain('data/scenarios/apr1992_definitive_52w.json');
+  });
+
+  it('keeps the roadmap honest about the closed startup residue and remaining replay gap', () => {
+    const roadmap = readRepoFile('docs', 'plans', 'MASTER_ROADMAP.md');
+
+    expect(roadmap).toContain('The startup-snapshot interference residue is now closed');
+    expect(roadmap).toContain('live replay playback/consumer is still absent from the product shell');
+    expect(roadmap).not.toContain('Current next bounded lane: startup-snapshot proof-path interference');
+    expect(roadmap).not.toContain('replay is still absent, tutorial/onboarding is still untouched');
+  });
+
+  it('keeps the v0.9.1 plan baseline aligned with already-landed comparison and codex slices', () => {
+    const plan = readRepoFile('docs', 'plans', '2026-04-06-v091-dynamic-essay-endgame-comparison-plan.md');
+
+    expect(plan).toContain('Endgame Comparison` is partially implemented');
+    expect(plan).toContain('dynamic essay sections / ghost entries / divergence notes are partially implemented');
+    expect(plan).toContain('`dynamic_sections`, `ghost_when`');
+    expect(plan).not.toContain('Endgame Comparison` is not implemented');
+    expect(plan).not.toContain('dynamic essay sections / ghost entries / divergence notes are not implemented');
+  });
+});

@@ -15,8 +15,8 @@
 - `Ghost Map` is implemented
 - `Exhaustion Clock` is implemented
 - `Letter Home` is implemented
-- `Endgame Comparison` is not implemented
-- dynamic essay sections / ghost entries / divergence notes are not implemented
+- `Endgame Comparison` is partially implemented: `historicalComparison` already feeds `VerdictScreen`, Chronicle, and Wrapped
+- dynamic essay sections / ghost entries / divergence notes are partially implemented in the first Codex slice (`dynamic_sections`, `ghost_when`, ghost essays / entries for paths not taken)
 
 **Input docs (supporting, not milestone authorities by themselves):**
 - `docs/plans/2026-03-23-essay-template-engine-plan.md`
@@ -46,11 +46,11 @@
 
 ## 1. Deliverables
 
-1. one canonical dynamic essay schema and runtime evaluation path
-2. one ghost-entry / divergence-note rendering path in the Codex
-3. one historical baseline data artifact for endgame comparison
-4. one endgame comparison surface using player-war vs historical-war data
-5. one roadmap/docs correction pass that marks already-shipped inputs correctly
+1. broaden and stabilize the canonical dynamic essay schema and runtime evaluation path beyond the first live slice
+2. deepen ghost-entry / divergence-note rendering in Codex without duplicating already-landed comparison truth
+3. keep one authoritative historical baseline data artifact for endgame comparison
+4. improve the player-facing endgame comparison experience beyond the first already-live surface set
+5. keep roadmap/docs aligned with already-shipped milestone inputs and partial implementations
 
 ---
 

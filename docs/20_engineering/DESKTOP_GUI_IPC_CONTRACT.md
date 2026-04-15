@@ -22,7 +22,7 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 - `start-new-campaign` (invoke)
   - Payload: `{ playerFaction: 'RBiH' | 'RS' | 'HRHB', scenarioKey?: 'apr_1992' }`
   - Returns: `{ ok: boolean, error?: string, stateJson?: string }`
-  - Behavior: loads April 1992 scenario (`data/scenarios/apr1992_definitive_52w.json`), sets `meta.player_faction`, and serializes + pushes state via `game-state-updated`. Recruitment_state is initialized for recruitment UI. Called by warroom launcher and tactical-map side picker. (Note: legacy `sep_1991` scenario decommissioned in v0.7.0).
+  - Behavior: for `apr_1992`, consumes the baked startup artifact via `loadStartupSnapshotState(...)` (`data/derived/startup/apr_1992_initial_save.json`), which is a one-way derived copy of canonical builder truth from `data/scenarios/apr1992_definitive_52w.json`; then sets `meta.player_faction`, initializes `recruitment_state` if missing, and serializes + pushes state via `game-state-updated`. Non-baked scenario keys continue through `createStateFromScenario(...)`. Called by warroom launcher and tactical-map side picker. (Note: legacy `sep_1991` scenario decommissioned in v0.7.0).
 
 - `load-state-dialog` (invoke)
   - Returns: `{ ok: boolean, error?: string, stateJson?: string }`

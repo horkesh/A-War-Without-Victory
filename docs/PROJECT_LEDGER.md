@@ -1,3 +1,23 @@
+## [2026-04-16] docs(test+roadmap): align desktop startup and v0.9 plan truth with landed repo state
+
+**Type:** Engineering docs truth / roadmap honesty / desktop shell contract
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `docs/20_engineering/GUI_PLAYBOOK_DESKTOP.md`, `docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/plans/2026-04-06-v091-dynamic-essay-endgame-comparison-plan.md`, `tests/docs_desktop_v09_truth.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+**Tests:** `npx.cmd vitest run tests/docs_desktop_v09_truth.test.ts tests/replay_surface_truth.test.ts` pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED after packet verification. Desktop startup docs now describe the baked `apr_1992` artifact path instead of a raw scenario-file boot, the roadmap no longer carries already-closed startup residue or the overbroad claim that "replay is absent," and the `v0.9.1` dynamic-essay plan baseline now admits the first comparison/Codex slice is already live.
+
+### Summary
+
+1. **Desktop startup wording now matches the real owner seam:** `GUI_PLAYBOOK_DESKTOP.md` and `DESKTOP_GUI_IPC_CONTRACT.md` both describe `start-new-campaign` the way `desktop_sim.ts` actually implements it - `apr_1992` consumes `data/derived/startup/apr_1992_initial_save.json`, a one-way derived copy of canonical builder truth from `apr1992_definitive_52w.json`.
+2. **The startup board in the roadmap is no longer stale:** `MASTER_ROADMAP.md` no longer advertises startup-snapshot proof-path interference as the next bounded lane, because the guardrail test now uses a temp override copy and line-ending normalization. It also stops saying simply "replay is still absent" and instead names the narrower true gap: live replay playback/consumer is absent from the product shell.
+3. **The `v0.9.1` plan baseline now acknowledges shipped slices:** `2026-04-06-v091-dynamic-essay-endgame-comparison-plan.md` no longer says endgame comparison and dynamic essay sections are untouched. It now records the already-landed first slice: `historicalComparison` feeding `VerdictScreen` / Chronicle / Wrapped, plus the first Codex `dynamic_sections` / `ghost_when` behavior.
+4. **A docs-truth test now locks the story:** `tests/docs_desktop_v09_truth.test.ts` guards the baked desktop startup wording, the roadmap's closed-startup / live-replay distinction, and the refreshed `v0.9.1` baseline so these authority docs cannot silently drift backward.
+
+### Why this mattered
+
+This was honest closure work, not polish theater. The repo had already moved: packaged startup proof was landed, startup guardrails had stopped mutating the committed artifact, the first Codex/endgame comparison slice was live, and replay truth had already been narrowed to "harness exists, live playback does not." But the docs still contained three different stale frames of the world. That kind of drift matters because roadmap and engineering docs are how the next packet gets scoped. Leaving them stale would make future work look more open, more absent, or more raw-scenario-driven than the repo actually is.
+
 ## [2026-04-16] docs(test+eng): make replay surface truth explicit and guard it
 
 **Type:** Engineering contract truth / replay-surface honesty
