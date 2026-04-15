@@ -1,3 +1,30 @@
+## [2026-04-15] test(repo): migrate Phase D combat substrate contracts onto vitest
+
+**Type:** Test-harness cleanup / combat substrate contract migration
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/combat_command_friction.test.ts`, `tests/combat_command_friction_effect.test.ts`, `tests/combat_exhaustion.test.ts`, `tests/combat_supply_pressure.test.ts`, `tests/combat_front_emergence.test.ts`, `tests/phase_d_validation.test.ts`, `tests/test_discovery_contract.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`, `working-on.md`
+**Tests:** `npx.cmd vitest run tests/combat_command_friction.test.ts tests/combat_command_friction_effect.test.ts tests/combat_exhaustion.test.ts tests/combat_supply_pressure.test.ts tests/combat_front_emergence.test.ts tests/phase_d_validation.test.ts tests/test_discovery_contract.test.ts` = 38/38 pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED - six adjacent Phase D combat substrate suites now run on the canonical vitest lane, and discovery keeps representative members of that family pinned in the fast slice.
+
+### Summary
+
+1. **Another pure combat-state cluster left `node:test` behind:** command friction, command friction effects, exhaustion accumulation, supply pressure, front emergence/stabilization, and Phase D validation all now import `vitest`.
+2. **These suites were migrated as a family because they prove one substrate band:** none of them need scenario-runner orchestration, packaging semantics, or process isolation. They are deterministic in-process contracts around Phase D state mutation and validation.
+3. **Discovery now reflects that ownership:** the fast vitest slice explicitly includes representative Phase D combat substrate coverage instead of letting that family linger in the mixed-harness residue.
+
+### Why this mattered
+
+This is the kind of leftover harness split that quietly makes the repo look more complicated than it is. Keeping pure combat substrate contracts in `node:test` suggested there was something special about their execution model when there was not. Moving the whole adjacent band together reduces runner noise without weakening proof.
+
+### Proof boundaries
+
+- **Direct proof:** all six migrated Phase D suites pass under vitest.
+- **Direct proof:** discovery still classifies the fast vitest lane explicitly after the migration.
+- **Not claimed here:** this does **not** mean every remaining combat-domain test belongs on vitest. Scenario-running, artifact-heavy, or special-runner suites still need case-by-case review.
+
+---
+
 ## [2026-04-15] fix(test+state): migrate core pipeline/state contracts onto vitest and repair nested war-field validation
 
 **Type:** Test-harness cleanup / validation-truth correction
