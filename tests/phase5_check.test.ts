@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 
 import { runPhase5CheckInProcess } from '../src/cli/sim_phase5_check.js';
 import type { FrontEdge } from '../src/map/front_edges.js';
@@ -9,7 +9,7 @@ import { CURRENT_SCHEMA_VERSION, type GameState } from '../src/state/game_state.
 test('phase5 sanity: region expansion, edge override, deterministic + no timestamps', async () => {
     // Tiny graph with one active front edge => one region
     const edges = [{ a: 's1', b: 's2' }];
-    const derived: FrontEdge[] = [{ edge_id: 's1__s2', a: 's1', b: 's2', side_a: 'A', side_b: 'B' }];
+    const derived: FrontEdge[] = [{ edge_id: 's1__s2', a: 's1', b: 's2', side_a: 'RBiH', side_b: 'RS' }];
 
     const base: GameState = {
   schema_version: CURRENT_SCHEMA_VERSION,
@@ -23,8 +23,8 @@ test('phase5 sanity: region expansion, edge override, deterministic + no timesta
         },
   factions: [
             // Supply sources so pressure path is stable; no special assertions here beyond determinism.
-            { id: 'A', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: ['s1'], supply_sources: ['s1'] },
-            { id: 'B', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: ['s2'], supply_sources: ['s2'] }
+            { id: 'RBiH', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: ['s1'], supply_sources: ['s1'] },
+            { id: 'RS', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: ['s2'], supply_sources: ['s2'] }
         ],
   military: {
     formations: {},
@@ -54,7 +54,7 @@ test('phase5 sanity: region expansion, edge override, deterministic + no timesta
     const region_id = regions.regions[0].region_id;
 
     const res = await runPhase5CheckInProcess(base, edges, {
-        faction: 'A',
+        faction: 'RBiH',
         region_id,
         edge_id: 's1__s2',
         weight: 3

@@ -7,7 +7,7 @@
 import assert from 'node:assert';
 import { readdir, readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { test } from 'node:test';
+import { test } from 'vitest';
 
 
 
@@ -43,6 +43,11 @@ function isUnderDesktop(path: string): boolean {
     return normalized.includes('/desktop/');
 }
 
+function isAnthropicProviderClient(path: string): boolean {
+    const normalized = path.replace(/\\/g, '/');
+    return normalized.endsWith('/sim/ai_commander/anthropic_client.ts');
+}
+
 const FILE_EXTENSIONS = new Set(['.ts', '.js', '.mjs', '.cjs']);
 
 const DISALLOWED_PATTERNS: Array<{ label: string; regex: RegExp }> = [
@@ -66,6 +71,7 @@ async function collectFiles(dir: string, files: string[] = []): Promise<string[]
         const fullPath = join(dir, entry.name);
         if (isUnderWarroom(fullPath)) continue;
         if (isUnderDesktop(fullPath)) continue;
+        if (isAnthropicProviderClient(fullPath)) continue;
         const ext = entry.name.slice(entry.name.lastIndexOf('.'));
         if (FILE_EXTENSIONS.has(ext)) {
             files.push(fullPath);

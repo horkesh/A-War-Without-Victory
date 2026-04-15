@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 import { loadMunicipalityHqSettlement, loadOobBrigades, loadOobCorps } from '../src/scenario/oob_loader.js';
 
 test('loadOobBrigades returns stable order (faction then name) and valid home_mun', async () => {

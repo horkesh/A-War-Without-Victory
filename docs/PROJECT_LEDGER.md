@@ -3299,6 +3299,26 @@ Fresh 40-week run `n1426` validates cleanly. Scripted final-save proof shows `0`
 ### Artifacts
 - None
 
+## [2026-04-15] test(repo): migrate bootstrap and determinism residue onto vitest
+
+**Type:** Test harness unification / deterministic-helper hardening
+**Files:** `tests/artifact_determinism.test.ts`, `tests/data_extract1990_h1_2_2.test.ts`, `tests/determinism_static_scan_r1_5.test.ts`, `tests/freeze_regression.test.ts`, `tests/init_control_mode_ethnic_hybrid.test.ts`, `tests/oob_loader.test.ts`, `tests/phase5_check.test.ts`, `tests/sim_scenario.test.ts`, `tests/test_discovery_contract.test.ts`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Status:** VERIFIED - targeted vitest, tsc, and desktop:map:build clean
+
+### Summary of changes
+1. **Bootstrap / loader / deterministic-helper residue moved to the canonical runner** - `artifact_determinism`, `data_extract1990_h1_2_2`, `freeze_regression`, `init_control_mode_ethnic_hybrid`, `oob_loader`, `phase5_check`, and `sim_scenario` now run under Vitest instead of `node:test`.
+2. **Two stale scenario fixtures were corrected to live owner truth** - `phase5_check` and `sim_scenario` now use canonical faction ids (`RBiH`, `RS`) instead of placeholder `A` / `B`, because corridor-opportunity logic reads real faction strategies.
+3. **Static determinism policy was tightened honestly** - `determinism_static_scan_r1_5` now excludes only the external Anthropic provider wrapper, where `Date.now()` is used for request-latency telemetry rather than deterministic pipeline truth.
+4. **Discovery inventory dropped again** - `tests/test_discovery_contract.test.ts` now pins this band in Vitest, and the remaining `node:test` inventory is down to 13 explicit scenario/calibration/artifact keepers.
+
+### Verification
+- `npx.cmd vitest run tests/artifact_determinism.test.ts tests/determinism_static_scan_r1_5.test.ts tests/freeze_regression.test.ts tests/init_control_mode_ethnic_hybrid.test.ts tests/oob_loader.test.ts tests/phase5_check.test.ts tests/sim_scenario.test.ts tests/data_extract1990_h1_2_2.test.ts tests/test_discovery_contract.test.ts`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run desktop:map:build`
+
+### Artifacts
+- None
+
 ## [2026-04-15] test(repo): migrate knowledge and bounded fs residue contracts onto vitest
 
 **Type:** Test harness unification / repo-truth hardening

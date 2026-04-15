@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { test } from 'node:test';
+import { test } from 'vitest';
 
 /**
  * Test that derived artifacts contain no timestamps or wall-clock time fields.
