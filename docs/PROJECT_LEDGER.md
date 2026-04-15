@@ -1,3 +1,30 @@
+## [2026-04-15] test(repo): migrate serializer and GameState guardrails onto vitest
+
+**Type:** Test-harness cleanup / canonical state-contract migration
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/serialize_gamestate_stability.test.ts`, `tests/serialize_gamestate_rejects_wrappers.test.ts`, `tests/serialize_gamestate_no_derived_fields.test.ts`, `tests/game_state_shape.test.ts`, `tests/game_state_no_derived_fields.test.ts`, `tests/game_state_turn_week_invariant.test.ts`, `tests/test_discovery_contract.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/serialize_gamestate_stability.test.ts tests/serialize_gamestate_rejects_wrappers.test.ts tests/serialize_gamestate_no_derived_fields.test.ts tests/game_state_shape.test.ts tests/game_state_no_derived_fields.test.ts tests/game_state_turn_week_invariant.test.ts tests/test_discovery_contract.test.ts` pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED - six pure serializer/GameState guardrail suites now live on the canonical vitest lane, and discovery locks representative members of the cluster into the fast slice.
+
+### Summary
+
+1. **The canonical state-contract cluster no longer sits in `node:test` by inertia:** serializer stability, wrapper rejection, serializer denylist, shape acceptance, validator denylist, and turn/week invariant tests now import `vitest`.
+2. **These suites were chosen because they are pure and central:** they exercise save-shape and validation truth directly, with no process isolation, scenario artifact management, or packaged-runtime semantics.
+3. **Discovery now advertises the cluster honestly:** `tests/test_discovery_contract.test.ts` keeps `game_state_shape` and `serialize_gamestate_stability` pinned as fast-lane vitest representatives so the migration cannot silently drift back.
+
+### Why this mattered
+
+The test-review lane is only worth doing if it shrinks mixed-harness debt around the repo's actual contracts. Save/load truth in this repo already has strong real-save and scenario-harness coverage; leaving the core serializer and GameState guards in a second harness made the suite look more fragmented than the product truth really is.
+
+### Proof boundaries
+
+- **Direct proof:** all six migrated suites pass under vitest.
+- **Direct proof:** discovery still classifies representative serializer/GameState guards into the fast vitest slice.
+- **Not claimed here:** this does **not** close the whole save/load lane or the whole mixed-harness lane; it only removes one coherent cluster of pure `node:test` holdouts.
+
+---
+
 ## [2026-04-15] test(repo): retire superseded save-load fixture and roadmap sentinel
 
 **Type:** Test-residue cleanup / superseded-proof retirement
