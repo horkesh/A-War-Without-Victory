@@ -1,3 +1,45 @@
+## [2026-04-15] feat(probe): extend packaged runtime probe with endgame reachability proof
+
+**Type:** Packaged runtime proof (endgame reachability)
+**Commit:** bd7848a0
+**Files:** `electron-main.cjs` (+endgame probe lane), `VerdictScreen.tsx` (+data attributes), `desktop_packaged_runtime_probe.mjs` (+endgame assertions), `desktop_packaged_runtime_probe.test.ts` (+endgame pattern assertions), `apr_1992_initial_save.json` (rebuilt)
+**Tests:** 4 probe tests pass. Packaged probe passes with endgame_checks.
+**Status:** VERIFIED — tsc clean, probe test 4/4, desktop:map:build clean, desktop:package:probe PASS.
+
+### Summary
+Closed the desktop Electron endgame reachability gap. The canonical `desktop:package:probe` now proves VerdictScreen renders in the real packaged Electron renderer.
+
+**Endgame probe lane:** After existing operational/sandbox checks complete, the probe mutates the raw state to set `game_over=true` + `outcome='timeout_stalemate'`, serializes it, creates a fresh tactical map window, pushes the endgame state via `sendGameStateToRenderer`, waits for `collectGameStatePushProbe` confirmation, then polls the DOM for VerdictScreen content via `data-awwv-endgame-surface` attribute + `textContent` checks.
+
+**Packaged runtime endgame manifest (actual output):**
+- `surface_type: "verdict"` — VerdictScreen verdict path rendered (not fallback)
+- `outcome_label: "Exhaustion Stalemate"` — deterministic outcome label
+- `has_pyrrhic_score: true` — Pyrrhic Score visible
+- `has_war_cost: true` — War Cost & Historical Comparison visible
+- `has_faction_tabs: true` — ARBiH/VRS/HVO faction tabs visible
+- `has_awwv_title: true` — "A War Without Victory" title visible
+- `state_push.game_over_state_pushed: true` — game-over state push confirmed
+
+**UI instrumentation:** Two data attributes added to VerdictScreen (always-on, not probe-gated): `data-awwv-endgame-surface="verdict"|"fallback"` and `data-awwv-endgame-outcome` for deterministic probe observation.
+
+### Complete Endgame Proof Ladder
+
+| Layer | Proof Level | Tests |
+|-------|------------|-------|
+| Engine truth (scoring, rupture, cost ledger) | Direct scenario + harness proof | 70+ |
+| VerdictScreen live-hook mount | Direct mount proof | 14 |
+| VerdictScreen interaction (tab switching) | Direct interaction proof | 9 |
+| VerdictScreen app-route (gating, fallback) | Direct route proof | 7 |
+| FactionReport + WarCostSummary (hookless) | Direct component mount proof | 20 |
+| Composition logic (all formatters) | Direct composition proof | 74 |
+| Store state + structural gating | Direct store/source proof | 17+8 |
+| **Desktop Electron packaged endgame** | **Packaged runtime proof** | **Probe manifest** |
+
+### Remaining proof boundary
+The packaged runtime probe now proves: "the real packaged Electron renderer received a game-over state, processed it through the adapter, rendered the canonical VerdictScreen verdict surface, and displayed Pyrrhic Score, War Cost, faction tabs, and title content." This is direct packaged runtime proof, not source-verified.
+
+What is NOT yet proven: full end-to-end Electron with a real 188-week scenario completing and triggering game_over organically (would require running a full scenario inside the packaged app). The probe uses a deterministic state mutation (game_over=true on turn-0 state), which proves renderer reachability but not the full game lifecycle.
+
 ## [2026-04-15] test(ui): add VerdictScreen interaction proof and app-route proof
 
 **Type:** Interaction proof + route proof (final endgame proof packet)
