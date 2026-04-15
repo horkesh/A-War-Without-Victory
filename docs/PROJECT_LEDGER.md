@@ -1,3 +1,33 @@
+## [2026-04-15] test(ui): add store-state and structural gating proof for VerdictScreen
+
+**Type:** Integration proof / structural contract (final endgame proof packet)
+**Files:** `endgame_live_store_proof.test.ts` (NEW — 17 tests)
+**Tests:** 17 new tests. 111 total endgame UI tests pass across 6 suites.
+**Status:** VERIFIED — tsc clean, 111/111 tests, desktop:map:build clean.
+
+### Summary
+Closed the remaining store-integration and reachability proof gaps:
+
+1. **Store-state acceptance (5 tests):** Real Zustand store accepts endgame LoadedGameState via setState/getState. Verdict with 3 faction verdicts, condemnation_flags, costLedger, historicalComparison all stored and retrieved correctly.
+2. **Gating logic (4 tests):** VerdictScreen gate condition (`!loadedGameState?.gameOver → null`) verified for null, false, true, and no-verdict fallback paths.
+3. **App reachability (4 tests):** App.tsx structural contract verified via source inspection — VerdictScreen rendered unconditionally at line 822 (self-gates), not wrapped in gameOver conditional. DaytonModal IS gated (contrast proof).
+4. **Adapter endgame fields (4 tests):** GameStateAdapter populates costLedger and historicalComparison when game_over is true, calls buildCostLedger and compareToHistorical from endgame modules.
+
+**Full VerdictScreen mount NOT achieved:** UI workspace has react@18.2.0, root has react@18.3.1. VerdictScreen uses useState from UI workspace react; renderToStaticMarkup sets hooks dispatcher from root react. Two React instances = dispatcher null. Fix: unify to single React via workspace hoisting (infrastructure scope).
+
+### Final Endgame Proof Ladder (complete)
+
+| Layer | Proof Level | Tests |
+|-------|------------|-------|
+| Engine truth (scoring, rupture, cost ledger) | Direct scenario + harness proof | 70+ |
+| Hookless sub-components (FactionReport, WarCostSummary) | Direct component mount proof | 20 |
+| Composition logic (buildEndgameSummary, formatters) | Direct composition proof | 26+22+11+15 |
+| Store state acceptance | Direct store-state proof | 5 |
+| VerdictScreen gating | Direct logic proof | 4 |
+| App reachability | Structural source proof | 4 |
+| Adapter endgame population | Structural source proof | 4 |
+| VerdictScreen full mount with live hooks | **Blocked** — dual-React workspace | 0 |
+
 ## [2026-04-15] test(ui): add direct component mount proof for endgame surfaces
 
 **Type:** Component mount proof / test infrastructure (final endgame UI proof)
