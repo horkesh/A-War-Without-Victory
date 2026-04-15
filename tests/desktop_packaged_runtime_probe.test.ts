@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import test from 'node:test';
+import { test } from 'vitest';
 
 test('package.json exposes one canonical packaged runtime probe command', async () => {
     const packageJson = JSON.parse(await readFile(join(process.cwd(), 'package.json'), 'utf8')) as {

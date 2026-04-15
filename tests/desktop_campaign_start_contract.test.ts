@@ -2,7 +2,7 @@ import assert from 'node:assert';
 import { existsSync } from 'node:fs';
 import { readFile, rm } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import test from 'node:test';
+import { test } from 'vitest';
 
 import { startNewCampaign } from '../src/desktop/desktop_sim.js';
 import { createStateFromScenario, runScenario } from '../src/scenario/scenario_runner.js';
@@ -14,7 +14,7 @@ async function ensureRemoved(dir: string): Promise<void> {
     }
 }
 
-test('initial_save is already in canonical loaded-save form at campaign birth', { timeout: 120_000 }, async () => {
+test('initial_save is already in canonical loaded-save form at campaign birth', async () => {
     const baseDir = process.cwd();
     const scenarioPath = join(baseDir, 'data', 'scenarios', 'apr1992_definitive_52w.json');
     const outDir = join(baseDir, '.tmp_desktop_campaign_start_contract');
@@ -43,9 +43,9 @@ test('initial_save is already in canonical loaded-save form at campaign birth', 
     );
 
     await ensureRemoved(outDir);
-});
+}, 120_000);
 
-test('startNewCampaign returns canonicalized state before the first manual save', { timeout: 120_000 }, async () => {
+test('startNewCampaign returns canonicalized state before the first manual save', async () => {
     const { state } = await startNewCampaign(process.cwd(), 'RBiH', 'apr_1992');
     const payload = serializeState(state);
     const hydrated = deserializeState(payload);
@@ -57,7 +57,7 @@ test('startNewCampaign returns canonicalized state before the first manual save'
         payload,
         'desktop new-campaign state should already be in canonical save/load form',
     );
-});
+}, 120_000);
 
 test('desktop startup path uses the in-memory startup builder instead of harness artifacts by default', async () => {
     const source = await readFile(

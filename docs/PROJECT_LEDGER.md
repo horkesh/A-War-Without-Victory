@@ -1,3 +1,29 @@
+## [2026-04-15] test(repo): move desktop contract guardrails onto the canonical vitest lane
+
+**Type:** Test-harness unification / repo-truth cleanup
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `tests/desktop_campaign_start_contract.test.ts`, `tests/desktop_packaging_contract.test.ts`, `tests/desktop_packaged_runtime_probe.test.ts`, `tests/desktop_release_ci_guardrails.test.ts`, `tests/desktop_startup_snapshot_guardrails.test.ts`, `tests/startup_snapshot_contract.test.ts`, `tests/test_discovery_contract.test.ts`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+**Tests:** `npx.cmd vitest run tests/test_discovery_contract.test.ts tests/desktop_campaign_start_contract.test.ts tests/desktop_packaging_contract.test.ts tests/desktop_packaged_runtime_probe.test.ts tests/desktop_release_ci_guardrails.test.ts tests/desktop_startup_snapshot_guardrails.test.ts tests/startup_snapshot_contract.test.ts` = 21/21 pass; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean in 8.99s; `git diff --check` clean (line-ending warnings only).
+**Status:** VERIFIED - these desktop contract and startup-birth suites now run in the canonical vitest lane and the repo-level test-unification debt is narrower than it was before this packet.
+
+### Summary
+
+1. **Desktop contract and startup-birth guardrails no longer live in the wrong harness by inertia:** the packaging/probe/startup/CI/campaign-start contract files now import `vitest`, so discovery classifies them into the canonical vitest lane instead of the chunked `node:test` runner.
+2. **Discovery now has an explicit regression lock:** `tests/test_discovery_contract.test.ts` proves those six files appear in `discoverTests(...).vitestFiles` and not in `nodeTestFiles`, so the harness split cannot silently drift back.
+3. **The roadmap test-unification row is now narrower and truer:** the remaining debt is no longer “desktop contract guardrails are split too”; it is the harder residue such as oversized suites (`command_authority.test.ts`), broader overlap, and slow scenario gate separation.
+
+### Why this mattered
+
+The roadmap already called out overlapping `node:test` / vitest ownership as real remaining debt. These desktop guardrails were a clean example of that debt: they were pure source/package/workflow/startup contract suites, but they still lived in the `node:test` lane because no one had moved them yet. Keeping them there would make the repo look more split than it needed to be and would leave daily verification arguing with the actual discovery contract.
+
+### Proof boundaries
+
+- **Direct proof:** the new discovery test failed before the migration and passes after it; the migrated suites themselves pass under vitest.
+- **Not claimed here:** this does **not** close the whole test-review lane. `command_authority.test.ts`, broader mixed-harness residue, and slow scenario-gate separation still remain open.
+
+---
+
 ## [2026-04-15] docs(plan): realign roadmap status with shipped v0.8-to-v0.9 work
 
 **Type:** Docs-only roadmap truth pass

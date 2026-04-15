@@ -4,7 +4,7 @@ import { copyFile, mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/prom
 import { join } from 'node:path';
 import { spawn } from 'node:child_process';
 import { tmpdir } from 'node:os';
-import test from 'node:test';
+import { test } from 'vitest';
 
 const SNAPSHOT_OVERRIDE_ENV = 'AWWV_STARTUP_SNAPSHOT_OVERRIDE_APR_1992';
 
@@ -60,7 +60,7 @@ test('desktop sim build source enforces startup snapshot check before bundling',
     );
 });
 
-test('desktop sim build fails loudly when the baked startup snapshot is missing', { timeout: 120_000 }, async () => {
+test('desktop sim build fails loudly when the baked startup snapshot is missing', async () => {
     const baseDir = process.cwd();
     const { tempDir, snapshotPath } = await createTempSnapshotCopy(baseDir);
     const backupPath = `${snapshotPath}.bak`;
@@ -85,9 +85,9 @@ test('desktop sim build fails loudly when the baked startup snapshot is missing'
         }
         await rm(tempDir, { recursive: true, force: true });
     }
-});
+}, 120_000);
 
-test('desktop sim build fails loudly when the baked startup snapshot drifts', { timeout: 120_000 }, async () => {
+test('desktop sim build fails loudly when the baked startup snapshot drifts', async () => {
     const baseDir = process.cwd();
     const { tempDir, snapshotPath } = await createTempSnapshotCopy(baseDir);
     const backupPath = `${snapshotPath}.bak`;
@@ -112,4 +112,4 @@ test('desktop sim build fails loudly when the baked startup snapshot drifts', { 
         }
         await rm(tempDir, { recursive: true, force: true });
     }
-});
+}, 120_000);

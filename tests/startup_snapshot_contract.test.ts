@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import test from 'node:test';
+import { test } from 'vitest';
 
 import { startNewCampaign } from '../src/desktop/desktop_sim.js';
 import {
@@ -12,7 +12,7 @@ import {
 } from '../src/scenario/startup_snapshot.js';
 import { deserializeState, serializeState } from '../src/state/serialize.js';
 
-test('baked April 1992 startup artifact matches canonical builder truth after checkout normalization', { timeout: 120_000 }, async () => {
+test('baked April 1992 startup artifact matches canonical builder truth after checkout normalization', async () => {
     const baseDir = process.cwd();
     const [artifactPayload, builderPayload] = await Promise.all([
         loadStartupSnapshotPayload(baseDir, 'apr_1992'),
@@ -24,7 +24,7 @@ test('baked April 1992 startup artifact matches canonical builder truth after ch
         builderPayload,
         'baked startup artifact should remain a one-way derived copy of canonical builder truth',
     );
-});
+}, 120_000);
 
 test('baked April 1992 startup artifact stays in canonical loaded-save form', async () => {
     const state = await loadStartupSnapshotState(process.cwd(), 'apr_1992');
@@ -54,7 +54,7 @@ test('desktop new campaign consumes the baked April 1992 startup artifact path',
     );
 });
 
-test('desktop new campaign overlays remain canonical after loading the baked artifact', { timeout: 120_000 }, async () => {
+test('desktop new campaign overlays remain canonical after loading the baked artifact', async () => {
     const baseDir = process.cwd();
     const bakedState = await loadStartupSnapshotState(baseDir, 'apr_1992');
     const { state } = await startNewCampaign(baseDir, 'RBiH', 'apr_1992');
@@ -67,9 +67,9 @@ test('desktop new campaign overlays remain canonical after loading the baked art
         serializeState(state),
         'desktop overlays over the baked artifact should remain canonical after save/load',
     );
-});
+}, 120_000);
 
-test('startup snapshot validator reports the committed artifact as current', { timeout: 120_000 }, async () => {
+test('startup snapshot validator reports the committed artifact as current', async () => {
     const result = await validateStartupSnapshot(process.cwd(), 'apr_1992');
     assert.strictEqual(result.matches, true);
-});
+}, 120_000);
