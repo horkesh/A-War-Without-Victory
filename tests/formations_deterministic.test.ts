@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 
 import { buildFormationsReport } from '../src/cli/sim_formations.js';
 import { CURRENT_SCHEMA_VERSION, type GameState } from '../src/state/game_state.js';
@@ -99,7 +99,10 @@ test('save migration defaults formations to empty object', () => {
         meta: { turn: 1, seed: 'seed' },
         factions: [
             { id: 'RBiH', profile: { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
-        ]
+        ],
+        military: {},
+        political: { political_controllers: {} },
+        displacement: {}
     };
 
     const serialized = JSON.stringify(rawState);

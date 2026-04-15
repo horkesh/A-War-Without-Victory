@@ -1,3 +1,31 @@
+## [2026-04-15] test(repo): migrate formation contracts onto vitest and repair canonical validator ownership
+
+**Type:** Test-harness cleanup / formation truth hardening
+**Commit (code):** this commit
+**Commit (ledger):** this entry
+**Files:** `src/validate/formations.ts`, `tests/formations_deterministic.test.ts`, `tests/formations_validate.test.ts`, `tests/formation_fatigue_frontline_assignment.test.ts`, `tests/formation_hq_relocation.test.ts`, `tests/generate_formations.test.ts`, `tests/promote_formations.test.ts`, `tests/sim_formations_report.test.ts`, `tests/test_discovery_contract.test.ts`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, `docs/plans/MASTER_ROADMAP.md`
+**Tests:** `npx.cmd vitest run tests/formations_deterministic.test.ts tests/formations_validate.test.ts tests/formation_fatigue_frontline_assignment.test.ts tests/formation_hq_relocation.test.ts tests/generate_formations.test.ts tests/promote_formations.test.ts tests/sim_formations_report.test.ts tests/test_discovery_contract.test.ts` = 62/62 pass, 1 skipped; `npx.cmd tsc --noEmit -p tsconfig.json` clean; `npm.cmd run desktop:map:build` clean.
+**Status:** VERIFIED - seven adjacent formation contracts now run on vitest, discovery pins representative formation files into the fast slice, the formation validator reads the canonical `state.military.formations` owner again, and one stale phase-II HQ relocation expectation was retired instead of preserved as false proof.
+
+### Summary
+
+1. **The formation family moved together:** deterministic ID/report ordering, formation validation, fatigue/frontline assignment, HQ relocation, pool-driven generation, promotion rules, and CLI report generation now all sit on the canonical vitest lane.
+2. **A real validator bug was repaired:** `validateFormations(...)` had drifted to a dead top-level `state.formations` alias, which meant live callers could silently skip validation. It now reads `state.military.formations`, with the old top-level path only as a fallback.
+3. **Fixture drift was corrected honestly:** serializer-bound tests now include the nested `political.political_controllers` and `military` owners that canonical state requires, and the old “depth-2 behind front” HQ relocation assertion was removed because `runFormationHqRelocation(...)` only owns enemy-territory relocation, not AoR-depth doctrine.
+
+### Why this mattered
+
+The test migration itself shrinks split-harness residue, but this packet also closed a more important truth gap: the formation validator had quietly stopped reading the canonical owner path. That is exactly the sort of latent bug the v0.8-to-v0.9 cleanup band is supposed to flush out.
+
+### Proof boundaries
+
+- **Direct proof:** all 7 migrated formation suites pass under vitest.
+- **Direct proof:** discovery now pins representative formation files in the fast vitest slice.
+- **Direct proof:** `validateFormations(...)` now reads `state.military.formations` again.
+- **Not claimed here:** this does **not** invent new HQ depth-doctrine behavior; it retires a stale residual expectation whose owner no longer exists.
+
+---
+
 ## [2026-04-15] test(repo): migrate treaty dev-ui helper contracts onto vitest
 
 **Type:** Test-harness cleanup / treaty dev-ui helper unification

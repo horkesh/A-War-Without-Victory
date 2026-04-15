@@ -13,7 +13,7 @@ export function validateFormations(
 ): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
 
-    const formations = (state as any)?.formations as Record<string, any> | undefined;
+    const formations = ((state as any)?.military?.formations ?? (state as any)?.formations) as Record<string, any> | undefined;
     if (!formations || typeof formations !== 'object') return issues;
 
     const factionIds = new Set<string>((state.factions ?? []).map((f) => (f as any)?.id).filter((x) => typeof x === 'string'));

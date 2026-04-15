@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 
 import { buildFormationsReport } from '../src/cli/sim_formations.js';
 import { CURRENT_SCHEMA_VERSION, type GameState } from '../src/state/game_state.js';

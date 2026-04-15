@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 
 import { generateFormationsFromPools } from '../src/cli/sim_generate_formations.js';
 import { CURRENT_SCHEMA_VERSION, type GameState } from '../src/state/game_state.js';
@@ -55,7 +55,7 @@ function createTestState(): GameState {
             }
         }
   } as any,
-  political: {} as any, displacement: {} as any
+  political: { political_controllers: {} } as any, displacement: {} as any
 };
 }
 

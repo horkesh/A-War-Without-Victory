@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { test } from 'node:test';
+import { test } from 'vitest';
 
 import { applyFatigueRecovery } from '../src/state/formation_fatigue.js';
 import { CURRENT_SCHEMA_VERSION, type GameState } from '../src/state/game_state.js';
