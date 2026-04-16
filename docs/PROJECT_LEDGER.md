@@ -3605,3 +3605,24 @@ Fresh 40-week run `n1426` validates cleanly. Scripted final-save proof shows `0`
 
 ### Artifacts
 - None
+
+## [2026-04-16] fix(repo): close the last pre-0.9 runner residue and promote roadmap state into early v0.9.x
+
+**Type:** Repo truth / CI hardening / roadmap closure
+**Files:** `.github/workflows/typecheck.yml`, `package.json`, `tests/test_runner_contract.test.ts`, `docs/20_engineering/QA_PIPELINE_AND_COVERAGE.md`, `docs/20_engineering/PIPELINE_ENTRYPOINTS.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+**Status:** VERIFIED - targeted vitest, tsc, and desktop:map:build clean
+
+### Summary of changes
+1. **The last stale CI gate is now honest** - `.github/workflows/typecheck.yml` installs `src/ui/map` dependencies before invoking the root typecheck script, matching the already-fixed baseline and desktop release workflows.
+2. **The fake `node:test` compatibility path is retired** - `package.json` now routes `test`, `test:engine`, `test:coverage`, `test:node:progress`, and `qa:all` through the canonical Vitest lanes; the old `tools/test/run_node_tests.mjs` runner is deleted because discovery already reports zero `node:test` entrypoints.
+3. **Runner truth is locked by source-level proof** - `tests/test_runner_contract.test.ts` proves that package scripts no longer reference the retired runner and that the typecheck workflow installs nested map deps exactly once before `npm run typecheck`.
+4. **The roadmap now says the thing that is actually true** - `MASTER_ROADMAP.md` no longer presents the repo as stuck in the `v0.8-to-v0.9` transition band; it now records that the pre-0.9 closure band is exhausted and that the live remaining work sits in ordinary `v0.9.x` milestones.
+5. **Engineering docs were brought back into sync** - `QA_PIPELINE_AND_COVERAGE.md` now describes the single canonical Vitest coverage owner, and `PIPELINE_ENTRYPOINTS.md` no longer claims live adapter proof is split across Vitest and `node:test`.
+
+### Verification
+- `npx.cmd vitest run tests/test_discovery_contract.test.ts tests/test_runner_contract.test.ts tests/baseline_regression_ci_guardrails.test.ts tests/desktop_release_ci_guardrails.test.ts`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run desktop:map:build`
+
+### Artifacts
+- None

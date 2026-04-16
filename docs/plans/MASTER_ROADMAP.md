@@ -1,7 +1,7 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
 **Last Updated:** 2026-04-16
-**Current Version:** v0.8-to-v0.9 transition band (formal package semver still 0.8.1)
+**Current Version:** early v0.9.x development band (formal package semver still 0.8.1 until a deliberate milestone bump)
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."
 
@@ -62,10 +62,10 @@ Event flag wiring (25 flags), exhaustion overhaul, Codex QA (30 essay correction
 - v0.7.0.1 (13 missing 1992 essays) â†’ **v0.8.0.x parallel track** â€” pure content, no engine risk
 - v0.7.1 essay template engine â†’ **v0.9.1** â€” still required for dynamic Codex divergence and ghost entries
 - v0.7.1 Letter Home â†’ **IMPLEMENTED 2026-04-04 in v0.8.0.x** â€” no longer a future milestone driver
-- v0.7.2 Warroom React migration â†’ **v0.8-to-v0.9** â€” tech refactor, belongs with simplification
+- v0.7.2 Warroom React migration â†’ **IMPLEMENTED 2026-04-16 in the pre-0.9 closure wave** â€” no longer a future milestone driver
 - v0.7.2 Ops Modal UX Overhaul â†’ **v0.9.1** â€” UI refinement after ops authority is real
 - v0.7.2 Ghost Map + Exhaustion Clock â†’ **IMPLEMENTED** â€” no longer future roadmap deliverables
-- v0.7.3 (canon audit) â†’ **v0.8-to-v0.9** â€” doc/code sync, matches that phase's goals
+- v0.7.3 (canon audit) â†’ **early v0.9.x repo-truth maintenance** â€” remaining doc/code sync is no longer a pre-0.9 blocker lane
 
 ---
 
@@ -152,7 +152,7 @@ PERCEIVE-DECIDE-EXECUTE per-corps loop. 10 files in `src/sim/combat/commander/` 
 
 **Why this milestone exists before political-bot work:** If authority is still split and the commander is still a threshold machine, adding political personality, refusal logic, or LLM flavor builds better-organized illusion rather than better command. This milestone makes the commander genuinely mind-like first.
 
-**Army-command note:** Army commanders are not getting a separate named maturity milestone inside early `v0.8.x`. During `v0.8.0` through `v0.8.2`, the existing army layer remains serviceable while corps command is made real first. If a dedicated army-commander maturity pass is needed, it belongs in `v0.8-to-v0.9` after corps maturity and command-authority cleanup, before any full corps/army LLM play.
+**Army-command note:** Army commanders are not getting a separate named maturity milestone inside early `v0.8.x`. During `v0.8.0` through `v0.8.2`, the existing army layer remains serviceable while corps command is made real first. Any further army-commander maturity work now belongs in ordinary early-`v0.9.x` development after the closed pre-0.9 authority/simplification band, before any full corps/army LLM play.
 
 Completed maturity conditions:
 - belief state exists separately from raw world state â€” Phase 2
@@ -287,13 +287,13 @@ If the implementer cannot answer all five, the task is not ready to start.
 
 Done means: `generateCorpsDirectives` is deleted âœ… (2026-04-01). `apply_brigade_reposition.ts` is **NOT dead ballast** â€” it is live player infrastructure wired at `war_phases.ts:1147`; roadmap label was wrong, do not delete. Every hotspot file has an ownership comment at its top.
 
-**Status: COMPLETE 2026-04-07.** Phases 2â€“5 complete. 28 files annotated with T1-T6 movement authority tiers and canonical/transitional ownership blocks. `docs/20_engineering/MOVEMENT_AUTHORITY.md` created. RS blitz data-driven (`probe_exempt`). `RS_BLITZ_PHASE_END_WEEK` deleted. Comms override scenario-driven. 3 new test suites (15 tests). 6 UI surfaces clean. tsc/vitest/build clean. Calibration: n1359 27/27 anchors held. Deferred to v0.8-to-v0.9: `brigade_assignment.ts` annotation (Codex branch conflict), Phase 5 diagnostics/SITREP unification. Report: `docs/40_reports/implemented/20260407_V08X_FINAL_COMMAND_AUTHORITY_CLEANUP.md`.
+**Status: COMPLETE 2026-04-07.** Phases 2â€“5 complete. 28 files annotated with T1-T6 movement authority tiers and canonical/transitional ownership blocks. `docs/20_engineering/MOVEMENT_AUTHORITY.md` created. RS blitz data-driven (`probe_exempt`). `RS_BLITZ_PHASE_END_WEEK` deleted. Comms override scenario-driven. 3 new test suites (15 tests). 6 UI surfaces clean. tsc/vitest/build clean. Calibration: n1359 27/27 anchors held. Follow-up items once deferred into the transition band were later closed through the 2026-04-15/16 simplification and explanation-surface packets. Report: `docs/40_reports/implemented/20260407_V08X_FINAL_COMMAND_AUTHORITY_CLEANUP.md`.
 
 ---
 
-## Planned: v0.8-to-v0.9 â€” Repo-Wide Simplification + Studio Health / Repo Truth
+## Closed Transition: v0.8-to-v0.9 â€” Repo-Wide Simplification + Studio Health / Repo Truth
 
-No version bump â€” engineering milestone between feature releases. Stabilization and technical debt cleanup after Command Chain ships.
+No version bump by itself â€” this was the engineering closure band between feature milestones. Its blocker-grade work is now closed; remaining open work has been promoted into ordinary v0.9.x milestone lanes.
 
 **Gate requirement â€” same 5-question rule as v0.8.x-final applies to every task here:** canonical owner after change / old path removed or demoted / done-means proof / UI or doc surface that reflects the new truth / future milestone unblocked.
 
@@ -307,7 +307,7 @@ No version bump â€” engineering milestone between feature releases. Stabili
 
 **A+++ system promotion scorecard (2026-04-10):**
 
-- The remaining `v0.8-to-v0.9` hardening work is now governed by a cross-system promotion scorecard rather than freeform “keep hardening” chat memory.
+- The now-closed `v0.8-to-v0.9` hardening work was governed by a cross-system promotion scorecard rather than freeform “keep hardening” chat memory.
 - Canonical plan: `docs/plans/2026-04-10-v08to09-a-plus-plus-system-scorecard-plan.md`
 - Use the scorecard to choose the next bounded lane by asking:
   - which major system is below its target grade
@@ -317,7 +317,7 @@ No version bump â€” engineering milestone between feature releases. Stabili
   - already-landed fixes like probe no-flip are treated as closed, not re-added as fake queue items
   - historically useful but stale metrics like old ZEA rates must be re-benchmarked on current `main` before reuse
   - structural concerns that remain true, especially god files, are promoted into their own bounded maintainability track
-- Immediate promotion queue from the scorecard:
+- Promotion queue used during the band:
   1. god-file decomposition tranche 1
   2. exhaustion activation / negative-sum identity audit
   3. save/load + replay + adapter integrity
@@ -326,8 +326,8 @@ No version bump â€” engineering milestone between feature releases. Stabili
   6. residual harness audits where runtime truth may still be misclassified
   7. planner/doctrine realism only after the remaining owner-truth lanes are exhausted
   8. thin player-experience layer after the identity and core-truth P0s
-- Active roadmap call on 2026-04-13: start with maintainability tranche 1, because the engine is now strong enough that oversized merge-magnet files are the main drag on safe hardening velocity. Exhaustion/identity remains the next substantive product-truth audit immediately after that tranche.
-- **Campaign results 2026-04-14:** God-file decomposition CLOSED (7 tranches, resolver 1809→907). Exhaustion partially shipped (commander now reads `faction_war_exhaustion`, 40w proof pending). Save/load partially shipped (real-save round-trip byte-identity proven, 9 tests). Autonomy proposal GC shipped. Remaining immediate queue: 40w scenario proof for exhaustion, adapter-after-deserialize test, save-load-continue hash chain, then political review ownership. Report: `docs/40_reports/implemented/20260414_CAMPAIGN_NIGHTSHIFT_ROADMAP_CLEARANCE.md`.
+- Active roadmap call on 2026-04-13: start with maintainability tranche 1, because the engine is now strong enough that oversized merge-magnet files are the main drag on safe hardening velocity. Exhaustion/identity remained the next substantive product-truth audit immediately after that tranche.
+- **Closure update 2026-04-16:** the transition-band queue has been substantively exhausted. God-file decomposition landed, commander-explanation surfaces were tightened, shell/ownership and event-decision execution splits were closed, save/load truth now has direct round-trip + continue-from-save proof, the test suite now runs entirely through Vitest discovery with zero `node:test` entrypoints, and CI/package guardrails were normalized for cross-platform truth. Honest residuals from this band are now promoted into v0.9.x milestone lanes instead of kept as fake pre-0.9 blockers: replay playback/consumer, broader consequence authoring and victory closure, dynamic essay authoring/comparison polish, tutorial/onboarding, and later performance/visual work.
 - Explicit redesign gates from the scorecard:
   - stranded same-faction unreachable brigade lifecycle owner
   - any deeper packet/detail contract that the current canonical request or operation packet does not already own
@@ -346,19 +346,19 @@ No version bump â€” engineering milestone between feature releases. Stabili
 | Canon docs | Systems Manual and Game Bible reference pre-v0.8 architecture | Updated for v0.8 command chain |
 | Save/load + replay hardening | **Grade A for current save/load truth (2026-04-15).** Real-save round-trip byte-identity proven, adapter-after-deserialize contract proven, desktop/manual load truth hardened, and continue-from-save final-save/hash equivalence is now directly proven through the scenario harness. Replay playback/consumer work is still absent, but that is now a future lane rather than a current save/load truth gap. | Keep replay playback/consumer work as a future lane. Plan: `docs/plans/2026-03-31-v08to09-save-load-and-replay-hardening-plan.md` |
 | UI surface ownership | Army HQ, Warroom, map panels, ops modal, and future command-review surfaces can drift into duplicate half-owners. **Warroom React migration complete (2026-04-04); Army HQ command-review ownership clarified.** | One clear ownership matrix for command, ops, review, and explanation surfaces. Plan: `docs/plans/2026-03-31-v08to09-ui-surface-ownership-plan.md` |
-| UI density + shell cohesion | Warroom, Tactical Map, Army HQ, Chronicle, and Codex still carry dead air, spacing waste, and shell seams that make the product feel like tools rather than one game. **Shared/local shell boundary tightened 2026-04-15:** Warroom-local overlays (`strategic-overview`, `event-log`) no longer masquerade as shared shell-handoff commands. | Finish the broader density sweep while keeping shell boundaries explicit. Plan: `docs/plans/2026-04-03-v08to09-ui-density-and-shell-cohesion-plan.md` |
+| UI density + shell cohesion | **Pre-0.9 shell-boundary work is closed.** Tactical navigation now routes through shared shell helpers and Warroom-local overlays no longer masquerade as shared handoffs. Residual spacing/density polish is a later UI refinement task, not a repo-truth blocker. | Keep shell boundaries explicit and treat any broader density sweep as v0.9.4 polish, not transition-band debt. Plan: `docs/plans/2026-04-03-v08to09-ui-density-and-shell-cohesion-plan.md` |
 | Player knowledge integrity | Desktop / tactical map still trends toward omniscient renderer payloads plus fog visuals | Player-facing state boundary, leak classifications, display-name discipline, and desktop knowledge integrity contract. Primary plan: `docs/plans/2026-04-01-v08x-player-knowledge-integrity-plan.md` |
 | Studio Health / Repo Truth governance | **Contracts landed; operating lane now explicit.** Cross-cutting product rules live in repo docs, but recurring sync, warning disposition, artifact policy, and evidence retention must stay active as a permanent lane. | `PLAYER_VISIBLE_STATE.md`, `UI_OWNERSHIP_MATRIX.md`, `DEBUG_SURFACE_POLICY.md`, `FEATURE_DONE_MEANS.md`, and `docs/plans/2026-04-06-studio-health-repo-truth-plan.md` |
-| Product architecture simplification | Entry points, adapters, and hotspot files still let transitional paths look co-equal to canonical ones | Simplify entrypoints, adapter ownership, and product shell boundaries the way a strong strategy studio would. Plan: `docs/plans/2026-04-03-v08to09-product-architecture-simplification-plan.md` |
-| Army-command maturity | Army layer is serviceable but still undernamed and too implicit as a real command substrate | Explicit army-command maturity and responsibility model. Plan: `docs/plans/2026-03-31-v08to09-army-command-maturity-plan.md` |
-| Army â†” corps command coherence | Assumed rather than owned; handshake and authority boundaries are still undernamed | Named handshake rules, ownership comments, and explicit authority boundaries. Plan: `docs/plans/2026-03-31-v08to09-army-corps-authority-coherence-plan.md` |
-| Commander explanation surfaces | Command briefing truth unified around sim-owned `last_briefing`; operational SITREP core now flows through one shared packet read path (`extractWarData(...)` -> `getOperationalSitrepView(...)` -> adapter / Warroom consumers); broader staff/player-facing explanation surfaces still remain | Build truthful explanation surfaces from real traces, not theater. Plan: `docs/plans/2026-03-31-v08to09-commander-explanation-surfaces-plan.md` |
+| Product architecture simplification | **Pre-0.9 closure achieved.** Canonical war/peace entrypoints are named consistently, non-authoritative variants are explicitly demoted, and adapter/read-model seams were reduced or documented honestly. | Keep remaining simplification work bounded and local; do not reopen this as a general blocker band. Plan: `docs/plans/2026-04-03-v08to09-product-architecture-simplification-plan.md` |
+| Army-command maturity | **Serviceable and no longer a pre-0.9 blocker.** Remaining maturation is product-depth work inside v0.9.x, not repo-truth debt. | Revisit only when a concrete army-level behavior or player-facing contract needs expansion. Plan: `docs/plans/2026-03-31-v08to09-army-command-maturity-plan.md` |
+| Army â†” corps command coherence | **Named enough for the current product.** Event-review routing, Army HQ ownership, and command/execution splits are now explicit. Remaining army/corps sophistication is future design depth, not a transition-band blocker. | Extend only with a bounded owner/proof packet when a new command family demands it. Plan: `docs/plans/2026-03-31-v08to09-army-corps-authority-coherence-plan.md` |
+| Commander explanation surfaces | **Pre-0.9 explanation-truth closure achieved.** Briefing, SITREP, campaign drag, and handoff surfaces now consume owned upstream packets instead of recomputing rival stories. | Treat any further explanation work as v0.9.x product enrichment, not repo-truth closure. Plan: `docs/plans/2026-03-31-v08to09-commander-explanation-surfaces-plan.md` |
 | Player command review UX | **Complete.** Command review surfaces landed (v0.8.0.x). Full order interpretation system shipped (v0.8.3 CLOSED 2026-04-06, all 5 phases). | Done. |
 | Autonomy determinism and review | API-assisted autonomy can still be mistaken for readiness without hardened replay/fallback/review gates | Explicit determinism, fallback, and player-review contract. Plan: `docs/plans/2026-03-31-v084-autonomy-determinism-and-review-plan.md` |
 | Connectivity checks | Column march validates destination but not path; no enclave boundary check during transit | Full path validation |
 | **Essay template engine + dynamic Codex divergence** | Partially advanced. Letter Home is shipped; dynamic sections / divergence notes / ghost entries are still open. | Build `dynamic_sections`, divergence notes, ghost entries, historical ghost entries, and endgame comparison glue. Plans: `docs/plans/2026-04-06-v091-dynamic-essay-endgame-comparison-plan.md`, `docs/plans/2026-03-23-essay-template-engine-plan.md`, `docs/plans/2026-03-25-letter-home-and-essay-authoring-spec.md` |
 | **Warroom React migration** | **COMPLETE 2026-04-04.** React migration landed (4 waves + final canvas deletion). `src/ui/map/components/warroom/` is sole owner. `warroom.ts` retains launch/picker/iframe/bridge only. | Done. |
-| **Canon audit (v0.7.3)** | Sep 1991 start + peace phase refs still live in docs and code | Remove all references. Plan: `docs/plans/2026-03-23-canon-audit-checklist.md` |
+| **Canon audit (v0.7.3)** | Residual doc/code sync remains a maintenance concern, but it is no longer carrying pre-0.9 blocker status. | Sweep remaining stale references as ordinary repo-truth maintenance when touched. Plan: `docs/plans/2026-03-23-canon-audit-checklist.md` |
 
 **Status update 2026-04-07:** bounded hardening sub-lane complete for command briefing / SITREP truth unification. `state.military.last_briefing` is now the canonical player-facing command briefing source across Army HQ, Warroom command modal, and the adapter-owned command strip. Report: `docs/40_reports/implemented/20260407_V08TO09_COMMAND_BRIEFING_TRUTH_UNIFICATION.md`.
 
@@ -561,9 +561,9 @@ These need design sessions before implementation. Preserved from the original ro
 | Core simulation | Complete |
 | War phase combat | Complete |
 | Bot AI (3-tier: army/corps/brigade) | Complete |
-| Corps Commander Intelligence (v0.8) | Complete through v0.8.4; authority cleanup and simplification follow-on remain |
+| Corps Commander Intelligence (v0.8) | Complete through v0.8.4; pre-0.9 cleanup band closed |
 | Corps sectors | Complete |
-| Operations + preparation | Functional; core ops singularity landed, remaining authority cleanup continues in v0.8.x-final |
+| Operations + preparation | Functional; v0.8 authority cleanup landed, with further UX/consequence follow-up now living in v0.9.x work |
 | Named officers + succession | Complete |
 | Supply reserves | Complete |
 | Equipment pipeline | Complete |
@@ -595,11 +595,11 @@ These need design sessions before implementation. Preserved from the original ro
 | Sound/audio | Not started (post-1.0) |
 | Localization | Not started (post-1.0) |
 | Peace phase | CUT â€” game starts April 1992 |
-| Save/load | Partial milestone-wise, but current hardening lane is strong: headless + desktop save/load truth are proven, and continue-from-save equivalence is now direct. Replay playback/consumer remains absent. |
+| Save/load | Current live product truth is strong: headless + desktop save/load truth are proven, and continue-from-save equivalence is direct. Replay playback/consumer remains a separate future lane. |
 | Victory conditions | Partial (`outcome_class`, `condemnation_flags`, Pyrrhic score, and verdict display are live; full `v0.9.0` closure contract still open) |
 | Diplomacy layer | Partial (patron pressure, alliance, IVP) |
 
-**Current:** formal package semver is still `v0.8.1`, but roadmap state is the `v0.8-to-v0.9` transition band. Calibration remains 93.6% area-weighted (`n1358`), 27/27 anchors, 6/6 benchmarks, 712 OSIDs. Political bot (`v0.8.2`), order interpretation (`v0.8.3`), autonomy (`v0.8.4`), and `v0.8.x-final` command-authority cleanup are closed. Repo truth is now ahead of the old status table: substantial `v0.9.0` / `v0.9.1` slices are already live, including consequence-substrate cleanup, stranded-brigade lifecycle, verdict packet truth, locked rupture consequences, `CostLedger` / historical comparison, canonical `VerdictScreen` endgame presentation, and comparison propagation into Chronicle / Wrapped / Codex. Honest residuals remain: the project has **not** taken a formal semver bump, `v0.9.0` / `v0.9.1` remain open milestones, live replay playback/consumer is still absent from the product shell, tutorial/onboarding is still untouched, and the broader performance / accessibility / visual-polish milestones remain largely ahead.
+**Current:** formal package semver is still `v0.8.1`, but roadmap state is now safely inside early `v0.9.x` development rather than the old transition band. Calibration remains 93.6% area-weighted (`n1358`), 27/27 anchors, 6/6 benchmarks, 712 OSIDs. Political bot (`v0.8.2`), order interpretation (`v0.8.3`), autonomy (`v0.8.4`), `v0.8.x-final` command-authority cleanup, and the pre-0.9 simplification/repo-truth closure band are all closed. Substantial `v0.9.0` / `v0.9.1` slices are already live, including consequence-substrate cleanup, stranded-brigade lifecycle, verdict packet truth, locked rupture consequences, `CostLedger` / historical comparison, canonical `VerdictScreen` endgame presentation, and comparison propagation into Chronicle / Wrapped / Codex. Honest residuals remain: the project has **not** taken a formal semver bump, `v0.9.0` / `v0.9.1` remain open milestones, live replay playback/consumer is still absent from the product shell, tutorial/onboarding is still untouched, and the broader performance / accessibility / visual-polish milestones remain largely ahead.
 
 ---
 
@@ -650,7 +650,7 @@ Patch bumps (0.X.1, 0.X.2) are for significant fixes within a milestone â€”
 | `docs/plans/2026-03-31-v08x-operations-singularity-plan.md` | v0.8.x operations singularity implementation plan |
 | `docs/plans/2026-03-31-v08x-command-authority-cleanup-plan.md` | v0.8.x-final overarching command authority cleanup plan |
 | `docs/plans/2026-04-06-studio-health-repo-truth-plan.md` | Permanent side lane for repo-truth gates, roadmap/board sync, warning disposition, artifact policy, and calibration evidence retention |
-| `docs/plans/2026-04-10-v08to09-a-plus-plus-system-scorecard-plan.md` | Cross-system gradecard and promotion queue for the remaining v0.8-to-v0.9 hardening band |
+| `docs/plans/2026-04-10-v08to09-a-plus-plus-system-scorecard-plan.md` | Cross-system gradecard that closed the v0.8-to-v0.9 hardening band and promoted residual work into v0.9.x |
 | `docs/plans/2026-03-31-v08to09-save-load-and-replay-hardening-plan.md` | v0.8-to-v0.9 save/load, replay, and migration hardening |
 | `docs/plans/2026-03-31-v08to09-ui-surface-ownership-plan.md` | v0.8-to-v0.9 UI surface ownership matrix |
 | `docs/plans/2026-04-03-v08to09-ui-density-and-shell-cohesion-plan.md` | v0.8-to-v0.9 UI density and shell cohesion |
