@@ -153,7 +153,7 @@ export interface TurnReport {
     war_termination?: {
         outcome: string | null;
         winner: string | null;
-        trigger: 'victory_condition' | 'turn_limit' | 'faction_collapse' | null;
+        trigger: 'victory_condition' | 'turn_limit' | 'faction_collapse' | 'negotiated_peace' | null;
     };
     end_state_active?: boolean;
     end_state_info?: {

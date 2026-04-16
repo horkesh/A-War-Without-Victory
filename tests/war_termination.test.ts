@@ -224,6 +224,32 @@ describe('War Termination', () => {
         });
     });
 
+    describe('Negotiated peace (v0.9.0 consequence system)', () => {
+        it('triggers negotiated peace when war_ended_early flag is set', () => {
+            const state = minimalWarState({ turn: 60 });
+            state.military.event_flags = { war_ended_early: true, early_peace_implemented: true };
+            const result = checkWarTermination(state);
+            expect(result.game_over).toBe(true);
+            expect(result.trigger).toBe('negotiated_peace');
+            expect(result.outcome).toContain('negotiated_peace');
+            expect(result.winner).toBeNull();
+        });
+
+        it('does not trigger when war_ended_early is not set', () => {
+            const state = minimalWarState({ turn: 60 });
+            state.military.event_flags = { some_other_flag: true };
+            const result = checkWarTermination(state);
+            expect(result.game_over).toBe(false);
+        });
+
+        it('negotiated peace takes priority over turn limit', () => {
+            const state = minimalWarState({ turn: 208, max_turns: 208 });
+            state.military.event_flags = { war_ended_early: true };
+            const result = checkWarTermination(state);
+            expect(result.trigger).toBe('negotiated_peace');
+        });
+    });
+
     describe('game_over gate', () => {
         it('skips re-evaluation when already game_over', () => {
             const state = minimalWarState({ turn: 10, game_over: true, outcome: 'previous_outcome' });

@@ -20,7 +20,7 @@ export interface WarTerminationResult {
     /** Faction that won (if any). */
     winner: string | null;
     /** Detail on what triggered termination. */
-    trigger: 'victory_condition' | 'turn_limit' | 'faction_collapse' | null;
+    trigger: 'victory_condition' | 'turn_limit' | 'faction_collapse' | 'negotiated_peace' | null;
 }
 
 /**
@@ -57,13 +57,25 @@ export function checkWarTermination(state: GameState): WarTerminationResult {
         };
     }
 
-    // 2. Faction collapse — any faction with 0 active brigades is collapsed
+    // 2. Negotiated peace — consequence events set war_ended_early when a peace plan is implemented
+    const flags = state.military.event_flags;
+    if (flags?.['war_ended_early'] === true) {
+        const earlyPeaceId = flags['early_peace_implemented'] ? String(flags['early_peace_implemented']) : 'negotiated';
+        return {
+            game_over: true,
+            outcome: `negotiated_peace:${earlyPeaceId}`,
+            winner: null,
+            trigger: 'negotiated_peace'
+        };
+    }
+
+    // 3. Faction collapse — any faction with 0 active brigades is collapsed
     const collapseResult = checkFactionCollapse(state);
     if (collapseResult) {
         return collapseResult;
     }
 
-    // 3. Turn limit stalemate
+    // 4. Turn limit stalemate
     const maxTurns = state.meta.max_turns ?? DEFAULT_MAX_TURNS;
     if (state.meta.turn >= maxTurns) {
         return {
