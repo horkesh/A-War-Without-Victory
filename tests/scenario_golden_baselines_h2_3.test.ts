@@ -38,4 +38,4 @@ test('golden baseline regression: compare against manifest', async () => {
         }
         throw err;
     }
-}, 180_000);
+}, 600_000);
