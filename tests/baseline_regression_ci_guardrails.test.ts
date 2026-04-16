@@ -13,8 +13,8 @@ test('baseline regression workflow installs nested map UI deps before typecheck 
 
     assert.strictEqual(
         nestedInstalls.length,
-        3,
-        'baseline regression workflow should install nested map UI dependencies in the typecheck, test, and baselines jobs',
+        4,
+        'baseline regression workflow should install nested map UI dependencies in the typecheck, test, scenarios, and baselines jobs',
     );
     assert.match(
         workflow,

@@ -4,12 +4,12 @@ import { describe, it } from 'vitest';
 import { buildCorpsFrontSectors } from '../src/sim/combat/corps_front_sectors.js';
 import { loadOperationalEdges } from '../src/data/operational_data.js';
 
+const SAVE_PATH = './runs/apr1992_definitive_40w__d452d2a10f3d69af__w40_n1304/final_save.json';
+const hasSave = fs.existsSync(SAVE_PATH);
+
 describe('Drina sector frontline integrity', () => {
-    it('rebuilds the latest Drina run into single-frontline sectors', async () => {
-        const raw = fs.readFileSync(
-            './runs/apr1992_definitive_40w__d452d2a10f3d69af__w40_n1304/final_save.json',
-            'utf8',
-        );
+    it.skipIf(!hasSave)('rebuilds the latest Drina run into single-frontline sectors', async () => {
+        const raw = fs.readFileSync(SAVE_PATH, 'utf8');
         const state = JSON.parse(raw);
         const edges = await loadOperationalEdges();
 

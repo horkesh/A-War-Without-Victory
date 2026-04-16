@@ -36,10 +36,13 @@ jobs:
       - run: npm install --legacy-peer-deps
       - run: npm install --legacy-peer-deps --prefix src/ui/map
 
-      - name: Unit tests
-        run: npm run test:vitest
+      - name: Rebuild startup snapshot for this platform
+        run: npm run desktop:startup-snapshot:build
 
-  baselines:
+      - name: Fast unit tests
+        run: npm run test:vitest:fast
+
+  scenarios:
     needs: test
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -53,6 +56,30 @@ jobs:
 
       - run: npm install --legacy-peer-deps
       - run: npm install --legacy-peer-deps --prefix src/ui/map
+
+      - name: Rebuild startup snapshot for this platform
+        run: npm run desktop:startup-snapshot:build
+
+      - name: Scenario tests
+        run: npm run test:vitest:scenario
+
+  baselines:
+    needs: scenarios
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm install --legacy-peer-deps
+      - run: npm install --legacy-peer-deps --prefix src/ui/map
+
+      - name: Rebuild startup snapshot for this platform
+        run: npm run desktop:startup-snapshot:build
 
       - name: Baseline regression check
         run: npm run test:baselines

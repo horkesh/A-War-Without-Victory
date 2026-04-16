@@ -47,16 +47,16 @@ describe('UI Adapter Boundary Discipline', () => {
     // FUTURE addition still triggers a failure requiring explicit review.
     const KNOWN_EXCEPTIONS = new Set([
       // Constant value used for display-only
-      `\\army_hq\\OrderInterpretationPanel.tsx:  import { RELIEF_MORALE_PENALTY } from '../../../../sim/combat/order_interpretation.js';`,
+      `/army_hq/OrderInterpretationPanel.tsx:  import { RELIEF_MORALE_PENALTY } from '../../../../sim/combat/order_interpretation.js';`,
       // Pure computation helper — no state
-      `\\CommanderSelectionModal.tsx:  import { getPreparationMaxTurns } from '../../../sim/combat/operation_preparation';`,
-      `\\OOBSidebar.tsx:  import { isSectorAssignmentExemptCorpsId } from '../../../sim/combat/corps_front_sectors_constants.js';`,
+      `/CommanderSelectionModal.tsx:  import { getPreparationMaxTurns } from '../../../sim/combat/operation_preparation';`,
+      `/OOBSidebar.tsx:  import { isSectorAssignmentExemptCorpsId } from '../../../sim/combat/corps_front_sectors_constants.js';`,
       // Pure computation helper — no state
-      `\\ops_modal\\CommanderPhase.tsx:  import { getPreparationMaxTurns } from '../../../../sim/combat/operation_preparation';`,
+      `/ops_modal/CommanderPhase.tsx:  import { getPreparationMaxTurns } from '../../../../sim/combat/operation_preparation';`,
       // Pure data + hash utility — no state
-      `\\ops_modal\\OpsPlanningModal.tsx:  import { OPERATION_NAMES, simpleHash } from '../../../../sim/combat/operation_names';`,
+      `/ops_modal/OpsPlanningModal.tsx:  import { OPERATION_NAMES, simpleHash } from '../../../../sim/combat/operation_names';`,
       // Display-only label helpers — no state
-      `\\SelectionPanel.tsx:  import { getMunicipalitySupportLabel, getMunicipalitySupportTypeForFaction } from '../../../sim/combat/municipality_support.js';`,
+      `/SelectionPanel.tsx:  import { getMunicipalitySupportLabel, getMunicipalitySupportTypeForFaction } from '../../../sim/combat/municipality_support.js';`,
     ]);
     const violations: string[] = [];
     for (const file of files) {
@@ -66,7 +66,7 @@ describe('UI Adapter Boundary Discipline', () => {
       const lines = src.split('\n');
       for (const line of lines) {
         if (/^import\s+(?!type\s+)/.test(line) && /sim\/combat/.test(line)) {
-          const entry = `${file.replace(UI_COMPONENTS_ROOT, '')}:  ${line.trim()}`;
+          const entry = `${file.replace(UI_COMPONENTS_ROOT, '').replace(/\\/g, '/')}:  ${line.trim()}`;
           if (!KNOWN_EXCEPTIONS.has(entry)) {
             violations.push(entry);
           }

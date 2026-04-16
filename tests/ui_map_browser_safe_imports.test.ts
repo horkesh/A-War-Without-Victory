@@ -8,8 +8,8 @@ it('browser-safe combat imports bundle without Node builtins', async () => {
     const result = await build({
         stdin: {
             contents: [
-                "import 'F:/A-War-Without-Victory/src/sim/combat/combat_math.ts';",
-                "import 'F:/A-War-Without-Victory/src/map/terrain_scalars.ts';",
+                `import '${path.resolve(repoRoot, 'src/sim/combat/combat_math.ts').replace(/\\/g, '/')}';`,
+                `import '${path.resolve(repoRoot, 'src/map/terrain_scalars.ts').replace(/\\/g, '/')}';`,
             ].join('\n'),
             sourcefile: path.join(repoRoot, 'tests', 'browser-safe-entry.ts'),
             resolveDir: repoRoot,

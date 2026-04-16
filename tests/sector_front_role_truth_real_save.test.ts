@@ -17,6 +17,7 @@ type ContactGraphEdge = {
 const ROOT = process.cwd();
 const FINAL_SAVE_PATH = path.join(ROOT, 'runs', 'apr1992_definitive_40w__480e358e5d284e09__w40_n1438', 'final_save.json');
 const CONTACT_GRAPH_PATH = path.join(ROOT, 'data', 'derived', 'operational', 'operational_contact_graph.json');
+const hasSave = fs.existsSync(FINAL_SAVE_PATH);
 
 function loadState(): GameState {
     return JSON.parse(fs.readFileSync(FINAL_SAVE_PATH, 'utf8')) as GameState;
@@ -43,7 +44,7 @@ function buildAdjacency(edges: ContactGraphEdge[]): Map<Osid, Osid[]> {
 }
 
 describe('Frontline role truth from real save', () => {
-    it('keeps every sector front inside the sector territory packet and serializes formation roles from physical position truth', () => {
+    it.skipIf(!hasSave)('keeps every sector front inside the sector territory packet and serializes formation roles from physical position truth', () => {
         const state = loadState();
         const edges = loadEdges();
         const adjacency = buildAdjacency(edges);
@@ -110,7 +111,7 @@ describe('Frontline role truth from real save', () => {
         expect(violations).toEqual([]);
     });
 
-    it('keeps any rear-only sector packets physically truthful when rebuild leaves them alive', () => {
+    it.skipIf(!hasSave)('keeps any rear-only sector packets physically truthful when rebuild leaves them alive', () => {
         const state = loadState();
         const edges = loadEdges();
         const adjacency = buildAdjacency(edges);

@@ -74,7 +74,13 @@ describe('desktop pmtiles protocol route rewriting', () => {
   });
 
   it('rejects Windows-like prefix bypass paths', () => {
-    expect(isPathInside('C:\\base', 'C:\\base\\ok\\file.pmtiles')).toBe(true);
-    expect(isPathInside('C:\\base', 'C:\\base2\\file.pmtiles')).toBe(false);
+    if (process.platform === 'win32') {
+      expect(isPathInside('C:\\base', 'C:\\base\\ok\\file.pmtiles')).toBe(true);
+      expect(isPathInside('C:\\base', 'C:\\base2\\file.pmtiles')).toBe(false);
+    } else {
+      // On POSIX, test with native paths — the Windows variants are not meaningful.
+      expect(isPathInside('/base', '/base/ok/file.pmtiles')).toBe(true);
+      expect(isPathInside('/base', '/base2/file.pmtiles')).toBe(false);
+    }
   });
 });

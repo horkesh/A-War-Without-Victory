@@ -16,6 +16,7 @@ type ContactGraphEdge = {
 const ROOT = process.cwd();
 const FINAL_SAVE_PATH = path.join(ROOT, 'runs', 'apr1992_definitive_40w__480e358e5d284e09__w40_n1438', 'final_save.json');
 const CONTACT_GRAPH_PATH = path.join(ROOT, 'data', 'derived', 'operational', 'operational_contact_graph.json');
+const hasSave = fs.existsSync(FINAL_SAVE_PATH);
 
 const SARAJEVO_CORE_EDGE_IDS = [
     'op:ilidza:sarajevo_dio_ilidza_2__op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo',
@@ -37,7 +38,7 @@ function loadEdges(): ContactGraphEdge[] {
 }
 
 describe('Sarajevo core front ownership from real save', () => {
-    it('keeps every live Sarajevo siege-core war edge owned by both 1st Corps and SRK sector packets when rebuilt', () => {
+    it.skipIf(!hasSave)('keeps every live Sarajevo siege-core war edge owned by both 1st Corps and SRK sector packets when rebuilt', () => {
         const state = loadState();
         const sectors = buildCorpsFrontSectors(state, loadEdges(), null);
         const ownerByEdge = new Map<string, string[]>();

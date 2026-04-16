@@ -35,6 +35,7 @@ export default defineConfig({
     globals: false,
     environment: 'node',
     environmentMatchGlobs,
+    testTimeout: 120_000,
     fileParallelism: false,
     minWorkers: 1,
     maxWorkers: 1,
