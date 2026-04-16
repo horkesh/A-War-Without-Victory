@@ -34,6 +34,17 @@ describe('desktop and roadmap truth docs', () => {
     expect(roadmap).not.toContain('desktop `New Game` birth state is now canonicalized onto the loaded-save contract, but it still boots from full scenario-source init instead of a baked campaign-start snapshot');
   });
 
+  it('retires the stale scenario-board reds once direct proof has landed', () => {
+    const roadmap = readRepoFile('docs', 'plans', 'MASTER_ROADMAP.md');
+
+    expect(roadmap).toContain("This lane's older follow-up board is now retired");
+    expect(roadmap).toContain('`unresolved_sector_brigades = 0` and anomaly alignment holds');
+    expect(roadmap).toContain('`op:brcko:brka_2` is back under the current hard anchor suite');
+    expect(roadmap).toContain('front-edge ownership regressions were closed by dedicated real-save ownership/display proofs');
+    expect(roadmap).toContain('renderer-side white-line/Electron visual confirmation');
+    expect(roadmap).not.toContain('the remaining live reds are the separate southeast-Herzegovina unresolved-frontline seam, `op:brcko:brka_2` anchor drift, and Fo');
+  });
+
   it('keeps the v0.9.1 plan baseline aligned with already-landed comparison and codex slices', () => {
     const plan = readRepoFile('docs', 'plans', '2026-04-06-v091-dynamic-essay-endgame-comparison-plan.md');
 

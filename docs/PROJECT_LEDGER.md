@@ -3477,6 +3477,28 @@ Fresh 40-week run `n1426` validates cleanly. Scripted final-save proof shows `0`
 ### Artifacts
 - None
 
+---
+
+## [2026-04-16] docs(roadmap): retire stale scenario-board residuals after direct proof
+
+**Type:** Repo-truth / roadmap honesty hardening
+**Files:** `docs/plans/MASTER_ROADMAP.md`, `tests/docs_desktop_v09_truth.test.ts`, `docs/PROJECT_LEDGER.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`
+**Status:** VERIFIED - targeted real-save proof slice, docs truth test, tsc, and desktop:map:build clean
+
+### Summary of changes
+1. **Retired a stale residual board in the roadmap** - the old line that still named southeast-Herzegovina unresolved-frontline, `op:brcko:brka_2` anchor drift, and Foča/Kalinovik ownership regressions as "remaining live reds" is now corrected to match current repo proof.
+2. **Named the exact proof boundaries honestly** - the roadmap now points to the real closures: `unresolved_sector_brigades = 0` plus anomaly alignment for the unresolved-frontline residue, current anchor proof for `op:brcko:brka_2`, and dedicated real-save ownership/display suites for Foča/Kalinovik.
+3. **Kept the one real follow-up visible** - the remaining note from that cluster is renderer-side white-line / Electron visual confirmation, which is presentation polish rather than frontline-truth breakage.
+4. **Added a docs-truth guard** - `tests/docs_desktop_v09_truth.test.ts` now fails if the roadmap drifts back to the stale "remaining live reds" sentence after the proof has already landed.
+
+### Verification
+- `npx.cmd vitest run tests/sector_foca_kalinovik_front_ownership_real_save.test.ts tests/front_edge_foca_shared_border_real_save.test.ts tests/ui_front_edge_display_ownership_real_save.test.ts tests/real_save_sector_truth_contracts.test.ts tests/integration_deployment_health.test.ts tests/docs_desktop_v09_truth.test.ts`
+- `npx.cmd tsc --noEmit -p tsconfig.json`
+- `npm.cmd run desktop:map:build`
+
+### Artifacts
+- None
+
 ## [2026-04-15] test(repo): migrate scenario residue onto vitest
 
 **Type:** Test harness unification / scenario-slice cleanup
