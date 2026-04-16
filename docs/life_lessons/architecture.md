@@ -3,7 +3,19 @@
 
 ---
 
-### [Architecture] Validator exemptions that suppress real sim failures are always wrong — fix the sim (2026-04-10) — NEW
+### [Architecture] Atrocity is a consequence, not a lever (2026-04-16) — NEW
+- **Context**: v0.9.0 Sensitive History Design Gate was settled in `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`. The canonical position: AWWV depicts genocide, ethnic cleansing, and mass atrocity without letting the player optimize against them. Every sensitive-history feature lives in exactly one of three rings — modeled mechanically, represented narratively, or explicitly refused.
+- **Wrong approach**: Adding a "sophistication" feature that turns atrocity into a player-authorizable trade-off — a brutality slider, targeting system, camp subsystem, or negotiable-condemnation mechanism. Any such feature turns the historical record into a system to game.
+- **Right approach**: Before building any feature that touches sensitive history, identify which ring it belongs in. Ring 1 = structured state with locked consequences. Ring 2 = narrative representation with ICTY citations. Ring 3 = refused. If the feature can't be placed in one of these three, do not build it.
+- **Do instead**: When evaluating a sensitive-history feature proposal, ask: "Is this a lever?" If yes, it belongs in Ring 3. If no, determine Ring 1 or Ring 2. Every new rupture, condemnation flag, or policy surface requires the sign-off structure in the gate document §6.
+
+### [Architecture] The least bad version of a tragedy — scoring thesis for negative-sum games (2026-04-16) — NEW
+- **Context**: v0.9.0 Victory Conditions + Pyrrhic Scoring canon was settled in `docs/10_canon/VICTORY_AND_PYRRHIC_SCORING.md`. The file header of `src/sim/negotiation/scoring.ts` already carried the thesis as a comment: *"The least bad version of a tragedy."* The canon doc lifts this into authoritative reference and documents the termination-vs-judgment split, the seven outcome classes, and the non-inversion guarantee.
+- **Wrong approach**: Treating Pyrrhic score as a sovereign number. Designing UX that foregrounds "who won." Adding a leaderboard. Treating `strategic_success` as equivalent to "victory."
+- **Right approach**: Score is supporting context; outcome class + grade are the primary verdict drivers; condemnation flags can cap or taint any result. Every endgame surface exists to judge, not to celebrate.
+- **Do instead**: Before adding any endgame UI, consult `VICTORY_AND_PYRRHIC_SCORING.md` §5 (UX/Narrative Integration) and §6 (Non-Goals). If a proposed surface produces a "winner" label, a leaderboard, or achievement-style framing, reject it.
+
+
 - **Context**: `bb454db4` exempted army HQ brigades from the unresolved-sector validator by `corps_id` alone. The 65th Protection Motorized Regiment was genuinely unresolved — component-separated from the sector front at sokolac_2. The exemption hid the signal. `dc742d9e` fixed the actual sim gap with `rescueUnassignedLoanedElitesInTerritory()`, and the validator was reverted to strict.
 - **Wrong approach**: When a validator fails, suppressing the failure via an exemption or filter. The validator correctly identified a sim gap — silencing it creates epistemic debt where the next failure becomes invisible.
 - **Right approach**: When a validator fails, the validator is probably right. Fix the system under test, not the test harness. A passing validator via exemption means nothing — the sim is still broken, you just can't see it.

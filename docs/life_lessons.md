@@ -1,8 +1,16 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-11. 236 lessons across 9 topic files.
+> Last restructured: 2026-04-11. 238 lessons across 9 topic files.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
+
+## New Lessons (2026-04-16)
+
+### [Architecture] Atrocity is a consequence, not a lever — see `docs/life_lessons/architecture.md`
+- v0.9.0 Sensitive History Design Gate settled in `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`. Three rings: modeled (Ring 1), narrative (Ring 2), refused (Ring 3). Any sensitive-history feature must fit a ring or not be built.
+
+### [Architecture] The least bad version of a tragedy — scoring thesis for negative-sum games — see `docs/life_lessons/architecture.md`
+- v0.9.0 Victory Conditions canon settled in `docs/10_canon/VICTORY_AND_PYRRHIC_SCORING.md`. Score is supporting context; outcome class + grade are the primary verdict drivers; condemnation flags can cap or taint any result. No leaderboards, no "winner" labels.
 
 ## New Lessons (2026-04-15)
 

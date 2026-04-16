@@ -3649,3 +3649,30 @@ Fresh 40-week run `n1426` validates cleanly. Scripted final-save proof shows `0`
 
 ### Artifacts
 - None
+
+## [2026-04-16] docs(canon): close v0.9.0 victory-conditions and sensitive-history gates
+
+**Type:** Canon / design-gate closure
+**Files:** `docs/10_canon/VICTORY_AND_PYRRHIC_SCORING.md` (new), `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md` (new), `docs/plans/MASTER_ROADMAP.md`, `docs/life_lessons.md`, `docs/life_lessons/architecture.md`, `tests/victory_and_pyrrhic_contract.test.ts` (new)
+**Status:** VERIFIED — 20/20 tests pass, tsc clean, canon docs cross-reference verified against source line refs
+
+### Summary of changes
+Both explicit v0.9.0 gold-blocker gates are now settled as canon, closing the two oldest Open Design Questions in the roadmap (#5 and #7). The substrate was already live in the engine; this closure lifts the thesis out of code-comment headers and makes it authoritative reference.
+
+1. **`VICTORY_AND_PYRRHIC_SCORING.md` (canon):** Thesis (*"the least bad version of a tragedy"*), termination-vs-judgment split (`war_termination.ts` vs `scoring.ts`), seven outcome classes with canonical triggers, per-faction grade anchors (RBiH/RS/HRHB) drawn verbatim from `scoring.ts:71-199`, dimension weights drawn verbatim from `strategic_dimensions.ts:57-61`, scenario contract with three-state fallback semantic (undefined vs empty vs populated `by_faction`), UX rules, seven non-goals (non-inversion, no leaderboard, no winner label, no arcade endings), QA matrix, and sign-off structure.
+2. **`SENSITIVE_HISTORY_DESIGN_GATE.md` (canon):** Three rings — Ring 1 modeled mechanically (enclave resilience, displacement, paramilitary sweeps, war_crimes_events, locked Srebrenica rupture), Ring 2 represented narratively (events, ICTY-cited essays, Chronicle, Wrapped), Ring 3 refused (ten explicit prohibitions including no genocide decision tree, no concentration-camp system, no negotiable condemnation, no body-count optimization). Rupture expansion rule requires all four criteria met (mass scale, ICTY or equivalent finding, specific trigger, non-reversible); Srebrenica remains the only rupture by design, with explicit documented reasons why Ahmići/Markale/Bijeljina/Stupni Do/Grabovica/Uždol/Kravica/Tuzla Gate do not meet the rupture threshold. Cost Ledger wording constraints (ICTY case citations, no euphemisms, no minimization, no achievement-style language), sign-off structure (historian + narrative-designer + game-designer + war-or-game depending on change type), and three durable life lessons.
+3. **QA regression contract:** `victory_and_pyrrhic_contract.test.ts` pins 20 assertions across scenario fallback, `classifyOutcome` determinism, genocide condemnation forcing `failure`, condemnation taint forcing `hollow_victory`, grade anchor spot-checks (RBiH A+ zero war crimes, RBiH B Sarajevo held, RS A+ ≤2 war crimes), Pyrrhic score non-inversion, Pyrrhic score 0-100 bound, and the full rupture contract (fires on preconditions met, idempotent, gated on 1995 timeframe + enclave_formed flag + RS control).
+4. **Roadmap + life lessons:** MASTER_ROADMAP.md Open Design Questions #5 and #7 marked RESOLVED with canon cross-references; `v0.9.0` status updated to reflect gate closure; Current Status table rows for Victory conditions and Sensitive-history handling rewritten as Canonical. Two architecture life lessons added: "Atrocity is a consequence, not a lever" and "The least bad version of a tragedy — scoring thesis for negative-sum games." Master index refreshed.
+
+### Verification
+- `npx vitest run tests/victory_and_pyrrhic_contract.test.ts` — 20 passed
+- Dimension weights in canon doc verified against `strategic_dimensions.ts:57-61` (each faction column sums to 1.00)
+- Grade anchor tables verified against `scoring.ts:71-199`
+- Rupture trigger semantics verified against `rupture_consequences.ts`
+- Rulebook and Engine_Invariants line references verified (`Rulebook_v0_7_0.md:195`, `Engine_Invariants_v0_7_0.md:353`)
+
+### Artifacts
+- Canon: `docs/10_canon/VICTORY_AND_PYRRHIC_SCORING.md`
+- Canon: `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`
+- Regression: `tests/victory_and_pyrrhic_contract.test.ts`
+- Report: `docs/40_reports/implemented/20260416_V090_VICTORY_AND_SENSITIVE_HISTORY_GATES.md`

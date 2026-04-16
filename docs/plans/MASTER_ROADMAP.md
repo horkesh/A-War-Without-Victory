@@ -406,11 +406,15 @@ No version bump by itself â€” this was the engineering closure band between
 
 Divergence events: ahistorical player decisions trigger realistic consequence chains. No cleansing leads to partisan resistance. Alliance holds eliminates Washington Agreement chain. Srebrenica defended changes NATO intervention calculus.
 
-**Gate:** This milestone does not close until the project has explicit victory conditions / Pyrrhic scoring and a resolved sensitive-history design gate for atrocity / genocide representation. These are gold blockers, not optional future philosophy.
+**Gate:** ~~This milestone does not close until the project has explicit victory conditions / Pyrrhic scoring and a resolved sensitive-history design gate for atrocity / genocide representation.~~ **RESOLVED 2026-04-16:** both gates are now canonical:
+- Victory conditions / Pyrrhic scoring — `docs/10_canon/VICTORY_AND_PYRRHIC_SCORING.md`
+- Sensitive-history design gate — `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`
 
-Plans: `docs/plans/2026-03-24-v090-consequence-system-plan.md`, `docs/plans/2026-03-31-v090-victory-conditions-and-pyrrhic-scoring-plan.md`, `docs/plans/2026-03-31-v090-sensitive-history-design-gate-plan.md`.
+The remaining `v0.9.0` work is the broader divergence-event matrix and consequence authoring, which are ordinary milestone work rather than gold-blocker philosophy.
 
-**Status (2026-04-15): PARTIAL via the `v0.8-to-v0.9` hardening band.** Core `v0.9.0` substrate is already live: consequence-substrate owner cleanup, stranded-brigade lifecycle, verdict packet truth (`outcome_class`, `condemnation_flags`), the locked Srebrenica rupture-consequence path, and `CostLedger` / historical comparison builders feeding the endgame surface. This milestone remains open because the broader divergence-event matrix, final victory-condition / Pyrrhic-scoring closure, and the remaining consequence authoring from the full plan are not all complete yet.
+Plans: `docs/plans/2026-03-24-v090-consequence-system-plan.md`, ~~`docs/plans/2026-03-31-v090-victory-conditions-and-pyrrhic-scoring-plan.md`~~ (closed 2026-04-16), ~~`docs/plans/2026-03-31-v090-sensitive-history-design-gate-plan.md`~~ (closed 2026-04-16).
+
+**Status (2026-04-16): PARTIAL, gold-blocker gates closed.** Core `v0.9.0` substrate is live: consequence-substrate owner cleanup, stranded-brigade lifecycle, verdict packet truth (`outcome_class`, `condemnation_flags`), the locked Srebrenica rupture-consequence path, `CostLedger` / historical comparison builders feeding the endgame surface, and now the authoritative canon for victory conditions and sensitive-history boundaries. This milestone remains open because the broader divergence-event matrix and remaining consequence authoring from the full plan are not all complete yet.
 
 **+ Cost Ledger** (Legendary Feature): ICTY-style prosecutorial endgame narrative. Every decision â€” ethnic cleansing tolerated, enclaves abandoned, paramilitary sweeps authorized â€” silently recorded. After Dayton, the player receives a prosecutorial narrative adapted from real ICTY case structures. Not a score. An indictment. Template-driven, reads event flags + casualties + displacement.
 
@@ -544,11 +548,11 @@ These need design sessions before implementation. Preserved from the original ro
 
 4. **Modding** â€” Event definitions are JSON. Scenario manifests are JSON. The modding surface exists implicitly. Do we formalize it? Expose a scenario editor? Lua bindings exist but are not surfaced. Workshop integration with Steam?
 
-5. **Endgame scoring / victory conditions** â€” What does "winning" mean in a negative-sum game? Historical proximity? Faction survival? Population preserved? Pyrrhic Score? The `evaluateVictoryConditions()` function exists but no scenario JSON specifies `victory_conditions`. This is the most fundamental design question after Srebrenica.
+5. **Endgame scoring / victory conditions** — ~~What does "winning" mean in a negative-sum game?~~ **RESOLVED 2026-04-16** — canonicalized in `docs/10_canon/VICTORY_AND_PYRRHIC_SCORING.md`. Seven outcome classes, per-faction grade anchors, Pyrrhic score as supporting context (not sovereign), termination vs judgment split. Scenario `victory_conditions` remain optional and by default undefined — the canonical `apr_1992` campaign is condition-free by design.
 
 6. **Play length** â€” Target session length per scenario? April 1992 full campaign: 3-5 hours target. Are there "quick battle" modes? Speed controls?
 
-7. **Srebrenica** â€” How do we handle the genocide mechanically and narratively? Currently: territory control + event flags + essay. The Cost Ledger addresses the narrative reckoning. But the mechanical representation of mass atrocity in a game system remains the most sensitive design question in the entire project. ICTY case IT-95-5 provides the legal framework; the question is how a game can honor it.
+7. **Srebrenica** — ~~How do we handle the genocide mechanically and narratively?~~ **RESOLVED 2026-04-16** — canonicalized in `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`. Three-ring boundary: modeled mechanically (enclave, rupture, condemnation flag), represented narratively (ICTY-cited events and essays), and explicitly refused (no "commit genocide" lever, no concentration-camp subsystem, no negotiable condemnation, no body-count optimization). Rupture expansion rule requires all four criteria met (mass scale, international legal finding, specific trigger, non-reversible); Srebrenica remains the only rupture by design.
 
 8. **War economy depth** â€” How detailed? Current: abstract capacity numbers, smuggling routes, equipment lifecycle. Paradox-style production queues would add complexity without clear benefit for the negative-sum thesis. Probably stays abstract.
 
@@ -596,7 +600,8 @@ These need design sessions before implementation. Preserved from the original ro
 | Localization | Not started (post-1.0) |
 | Peace phase | CUT â€” game starts April 1992 |
 | Save/load | Current live product truth is strong: headless + desktop save/load truth are proven, and continue-from-save equivalence is direct. Replay playback/consumer remains a separate future lane. |
-| Victory conditions | Partial (`outcome_class`, `condemnation_flags`, Pyrrhic score, and verdict display are live; full `v0.9.0` closure contract still open) |
+| Victory conditions | **Canonical 2026-04-16** — `docs/10_canon/VICTORY_AND_PYRRHIC_SCORING.md`. `outcome_class`, `condemnation_flags`, Pyrrhic score, verdict display, termination-vs-judgment split, scenario fallback all settled. Remaining `v0.9.0` work is divergence-event matrix authoring, not the gate. |
+| Sensitive-history handling | **Canonical 2026-04-16** — `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`. Three-ring boundary, rupture expansion rule, Cost Ledger wording constraints, and sign-off structure all settled. |
 | Diplomacy layer | Partial (patron pressure, alliance, IVP) |
 
 **Current:** formal package semver is still `v0.8.1`, but roadmap state is now safely inside early `v0.9.x` development rather than the old transition band. Calibration remains 93.6% area-weighted (`n1358`), 27/27 anchors, 6/6 benchmarks, 712 OSIDs. Political bot (`v0.8.2`), order interpretation (`v0.8.3`), autonomy (`v0.8.4`), `v0.8.x-final` command-authority cleanup, and the pre-0.9 simplification/repo-truth closure band are all closed. Substantial `v0.9.0` / `v0.9.1` slices are already live, including consequence-substrate cleanup, stranded-brigade lifecycle, verdict packet truth, locked rupture consequences, `CostLedger` / historical comparison, canonical `VerdictScreen` endgame presentation, and comparison propagation into Chronicle / Wrapped / Codex. Honest residuals remain: the project has **not** taken a formal semver bump, `v0.9.0` / `v0.9.1` remain open milestones, live replay playback/consumer is still absent from the product shell, tutorial/onboarding is still untouched, and the broader performance / accessibility / visual-polish milestones remain largely ahead.
