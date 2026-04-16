@@ -18,6 +18,7 @@ jobs:
           cache: npm
 
       - run: npm install --legacy-peer-deps
+      - run: npm install --legacy-peer-deps --prefix src/ui/map
 
       - name: Verify baked startup snapshot and desktop build artifacts
         run: npm run desktop:release:check
@@ -34,6 +35,7 @@ jobs:
           cache: npm
 
       - run: npm install --legacy-peer-deps
+      - run: npm install --legacy-peer-deps --prefix src/ui/map
 
       - name: Probe packaged desktop runtime contract
         run: npm run desktop:package:probe

@@ -3477,6 +3477,30 @@ Fresh 40-week run `n1426` validates cleanly. Scripted final-save proof shows `0`
 ### Artifacts
 - None
 
+## [2026-04-16] fix(ci): make GitHub release and regression guards cross-platform and install nested map deps
+
+**Type:** CI hardening / desktop packaging guard alignment
+**Files:** `package.json`, `.github/workflows/baseline-regression.yml`, `.github/workflows/desktop-release-guard.yml`, `data/derived/startup/apr_1992_initial_save.json`, `tests/desktop_packaged_runtime_probe.test.ts`, `tests/desktop_packaging_contract.test.ts`, `tests/desktop_release_ci_guardrails.test.ts`, `tests/baseline_regression_ci_guardrails.test.ts`
+**Status:** VERIFIED - local workflow-equivalent gates clean
+
+### Summary of changes
+1. **Windows-only npm bin paths were replaced with cross-platform script entrypoints** - the canonical `vitest`, `vite`, `electron`, `electron-builder`, and packaged probe scripts in `package.json` no longer hardcode `.\node_modules\...` paths that break on Ubuntu runners.
+2. **GitHub workflows now install the nested tactical-map package before root gates run** - `Baseline Regression` and `Desktop Release Guard` each add `npm install --legacy-peer-deps --prefix src/ui/map` so root `tsc`, `vitest`, and `desktop:release:check` can resolve `maplibre-gl`, `pmtiles`, `@deck.gl/*`, and `@vitejs/plugin-react` where the map package actually owns them.
+3. **The baked April 1992 startup snapshot was refreshed honestly once the release guard got past the path bug** - `desktop:release:check` surfaced real startup drift in `data/derived/startup/apr_1992_initial_save.json`, so the canonical artifact was rebuilt and recommitted instead of leaving CI to fail one step later.
+4. **Guardrail tests now pin the repaired contracts** - desktop packaging/probe tests were updated to the canonical cross-platform commands, and a new `baseline_regression_ci_guardrails` contract proves the workflow keeps the nested map install in all three jobs.
+
+### Verification
+- `npm.cmd run typecheck`
+- `npm.cmd run test:vitest -- tests/desktop_packaged_runtime_probe.test.ts tests/desktop_release_ci_guardrails.test.ts tests/baseline_regression_ci_guardrails.test.ts`
+- `npm.cmd run desktop:startup-snapshot:check`
+- `npm.cmd run desktop:release:check`
+- `npm.cmd run test:baselines`
+- `npm.cmd run test:vitest`
+- `git diff --check`
+
+### Artifacts
+- Refreshed `data/derived/startup/apr_1992_initial_save.json`
+
 ---
 
 ## [2026-04-16] docs(roadmap): retire stale scenario-board residuals after direct proof

@@ -15,7 +15,7 @@ test('package.json exposes one canonical desktop release check script', async ()
     );
     assert.strictEqual(
         packageJson.scripts?.desktop,
-        'npm run desktop:release:check && node .\\node_modules\\electron\\cli.js .',
+        'npm run desktop:release:check && electron .',
         'desktop runtime launch should transitively use the canonical desktop release check path',
     );
 });
@@ -40,6 +40,11 @@ test('ci workflow enforces the canonical desktop release check on main and pull 
         workflow,
         /npm run desktop:release:check/,
         'desktop release guard should invoke the canonical shipped-build verification path',
+    );
+    assert.match(
+        workflow,
+        /npm install --legacy-peer-deps --prefix src\/ui\/map/,
+        'desktop release guard should install nested map UI dependencies before running cross-platform release checks',
     );
 });
 

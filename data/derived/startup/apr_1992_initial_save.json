@@ -979,6 +979,13 @@
       "declaration_pressure": 0,
       "declaration_turn": null,
       "declared": false,
+      "embargo_profile": {
+        "ammunition_resupply_rate": 0.3,
+        "external_pipeline_status": 0.4,
+        "heavy_equipment_access": 0.2,
+        "maintenance_capacity": 0.4,
+        "smuggling_efficiency": 0
+      },
       "id": "RBiH",
       "negotiation": {
         "capital": 0,
@@ -1010,6 +1017,13 @@
       "declaration_pressure": 0,
       "declaration_turn": 0,
       "declared": true,
+      "embargo_profile": {
+        "ammunition_resupply_rate": 0.8,
+        "external_pipeline_status": 0.9,
+        "heavy_equipment_access": 0.9,
+        "maintenance_capacity": 0.7,
+        "smuggling_efficiency": 0
+      },
       "id": "RS",
       "negotiation": {
         "capital": 0,
@@ -1041,6 +1055,13 @@
       "declaration_pressure": 0,
       "declaration_turn": 0,
       "declared": true,
+      "embargo_profile": {
+        "ammunition_resupply_rate": 0.6,
+        "external_pipeline_status": 0.7,
+        "heavy_equipment_access": 0.6,
+        "maintenance_capacity": 0.6,
+        "smuggling_efficiency": 0
+      },
       "id": "HRHB",
       "negotiation": {
         "capital": 0,
@@ -12694,7 +12715,27 @@
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo",
@@ -12749,8 +12790,28 @@
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
         "displaced_from": "ilidza",
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:hadzici:binjezevo",
@@ -12805,8 +12866,28 @@
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
         "defense_terrain_bonus": 0.25,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:hadzici:budmolici",
@@ -12860,7 +12941,27 @@
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:centar_sarajevo:sarajevo_dio_centar_sajarevo",
@@ -12915,7 +13016,27 @@
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
         "defense_terrain_bonus": 0.2,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:hadzici:hadzici",
@@ -12969,7 +13090,27 @@
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:novo_sarajevo:sarajevo_dio_novo_sarajevo",
@@ -13023,7 +13164,27 @@
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo",
@@ -13077,7 +13238,27 @@
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo",
@@ -13131,7 +13312,27 @@
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
@@ -13185,7 +13386,27 @@
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:kiseljak:bilalovac_2",
@@ -13239,7 +13460,27 @@
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:centar_sarajevo:sarajevo_dio_centar_sajarevo",
@@ -13293,7 +13534,27 @@
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:fojnica:turkovici",
@@ -13347,7 +13608,27 @@
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:centar_sarajevo:sarajevo_dio_centar_sajarevo",
@@ -13401,7 +13682,27 @@
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:centar_sarajevo:sarajevo_dio_centar_sajarevo",
@@ -13455,7 +13756,27 @@
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:visoko:visoko_2",
@@ -13509,7 +13830,27 @@
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:vares:budozelje_2",
@@ -13563,7 +13904,27 @@
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
@@ -13617,7 +13978,27 @@
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo",
@@ -13671,7 +14052,27 @@
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:olovo:gurdici_2",
@@ -13725,7 +14126,27 @@
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:vares:ravne",
@@ -13779,7 +14200,27 @@
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:breza:koritnik",
@@ -13834,8 +14275,28 @@
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
         "defense_terrain_bonus": 0.25,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:visoko:bradve_2",
@@ -13889,7 +14350,27 @@
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:hadzici:binjezevo",
@@ -13943,7 +14424,27 @@
         },
         "corps_id": "arbih_3rd_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:travnik:gluha_bukovica",
@@ -13997,7 +14498,27 @@
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:hadzici:lokve",
@@ -14051,7 +14572,27 @@
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:hadzici:luke",
@@ -14105,7 +14646,27 @@
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:vares:budozelje_2",
@@ -14183,7 +14744,27 @@
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:vogosca:hotonj",
@@ -14238,7 +14819,27 @@
         "corps_id": "arbih_2nd_corps",
         "created_turn": 0,
         "defense_terrain_bonus": 0.2,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:gradacac:donja_tramosnica_2",
@@ -14293,7 +14894,27 @@
         "corps_id": "arbih_2nd_corps",
         "created_turn": 0,
         "defense_terrain_bonus": 0.2,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:brcko:bijela_2",
@@ -14348,7 +14969,27 @@
         "corps_id": "arbih_2nd_corps",
         "created_turn": 0,
         "defense_terrain_bonus": 0.15,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:gradacac:gradacac_2",
@@ -14403,7 +15044,27 @@
         "corps_id": "arbih_2nd_corps",
         "created_turn": 0,
         "defense_terrain_bonus": 0.25,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:zvornik:sapna",
@@ -14457,7 +15118,27 @@
         },
         "corps_id": "arbih_2nd_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:tuzla:gornja_tuzla",
@@ -14511,8 +15192,28 @@
         },
         "corps_id": "arbih_2nd_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:tuzla:husino_2",
@@ -14566,8 +15267,28 @@
         },
         "corps_id": "arbih_2nd_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:tuzla:lipnica_gornja_2",
@@ -14622,7 +15343,27 @@
         "corps_id": "arbih_2nd_corps",
         "created_turn": 0,
         "defense_terrain_bonus": 0.7,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "fallback_osid": "op:zvornik:rastosnica_2",
         "force_label": "ARBiH",
@@ -14679,7 +15420,27 @@
         },
         "corps_id": "arbih_2nd_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "police",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:srebrenica:srebrenica_2",
@@ -14734,7 +15495,27 @@
         },
         "corps_id": "arbih_2nd_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:rogatica:zepa_2",
@@ -14813,7 +15594,27 @@
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo",
@@ -14867,8 +15668,28 @@
         },
         "corps_id": "arbih_2nd_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:tuzla:sicki_brod_2",
@@ -14922,7 +15743,27 @@
         },
         "corps_id": "arbih_3rd_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:zenica:gornja_vraca",
@@ -14976,7 +15817,27 @@
         },
         "corps_id": "arbih_3rd_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:zenica:gornja_zenica_2",
@@ -15030,7 +15891,27 @@
         },
         "corps_id": "arbih_3rd_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:maglaj:cobe_2",
@@ -15084,7 +15965,27 @@
         },
         "corps_id": "arbih_3rd_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:zenica:janjici",
@@ -15163,8 +16064,28 @@
         "corps_id": "arbih_4th_corps",
         "created_turn": 0,
         "defense_streak": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:mostar:hodbina_2",
@@ -15218,7 +16139,27 @@
         },
         "corps_id": "arbih_4th_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:mostar:mostar_istok_2",
@@ -15272,7 +16213,27 @@
         },
         "corps_id": "arbih_4th_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:konjic:brdjani",
@@ -15326,7 +16287,27 @@
         },
         "corps_id": "arbih_4th_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:jablanica:jablanica_2",
@@ -15380,7 +16361,27 @@
         },
         "corps_id": "arbih_4th_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:mostar:blagaj_2",
@@ -15434,7 +16435,27 @@
         },
         "corps_id": "arbih_4th_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:mostar:gornja_dreznica",
@@ -15488,7 +16509,27 @@
         },
         "corps_id": "arbih_4th_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:mostar:mostar_istok_2",
@@ -15542,7 +16583,27 @@
         },
         "corps_id": "arbih_4th_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:mostar:potoci",
@@ -15596,7 +16657,27 @@
         },
         "corps_id": "arbih_4th_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:konjic:celebici_2",
@@ -15674,7 +16755,27 @@
         },
         "corps_id": "arbih_4th_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:konjic:bradina",
@@ -15729,7 +16830,27 @@
         "corps_id": "arbih_5th_corps",
         "created_turn": 0,
         "defense_terrain_bonus": 0.25,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:bihac:bihac_2",
@@ -15783,7 +16904,27 @@
         },
         "corps_id": "arbih_5th_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:bihac:brekovica_2",
@@ -15838,7 +16979,27 @@
         "corps_id": "arbih_5th_corps",
         "created_turn": 0,
         "defense_terrain_bonus": 0.25,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:cazin:cazin_2",
@@ -15893,7 +17054,27 @@
         "corps_id": "arbih_5th_corps",
         "created_turn": 0,
         "defense_terrain_bonus": 0.2,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:bosanska_krupa:otoka_2",
@@ -15947,7 +17128,27 @@
         },
         "corps_id": "arbih_5th_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:velika_kladusa:poljana_2",
@@ -16001,7 +17202,27 @@
         },
         "corps_id": "arbih_5th_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:cazin:coralici",
@@ -16056,7 +17277,27 @@
         "corps_id": "arbih_5th_corps",
         "created_turn": 0,
         "defense_terrain_bonus": 0.2,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:bosanska_krupa:jezerski_2",
@@ -16110,7 +17351,27 @@
         },
         "corps_id": "arbih_5th_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:cazin:coralici",
@@ -16188,8 +17449,28 @@
         },
         "corps_id": "arbih_3rd_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:bugojno:gracanica",
@@ -16243,7 +17524,27 @@
         },
         "corps_id": "arbih_3rd_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:travnik:gornje_krcevine",
@@ -16297,8 +17598,28 @@
         },
         "corps_id": "arbih_3rd_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:bugojno:kopcic_2",
@@ -16354,8 +17675,28 @@
         "created_turn": 0,
         "defense_streak": 0,
         "disrupted_turns": 3,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:travnik:krusevo_brdo_i",
@@ -16413,7 +17754,27 @@
         },
         "corps_id": "arbih_3rd_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:travnik:podstinje",
@@ -16467,7 +17828,27 @@
         },
         "corps_id": "arbih_3rd_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:travnik:travnik_2",
@@ -16521,7 +17902,27 @@
         },
         "corps_id": "arbih_3rd_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:zenica:briznik_2",
@@ -16575,7 +17976,27 @@
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:gorazde:gorazde_2",
@@ -16630,7 +18051,27 @@
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:gorazde:osjecani_2",
@@ -16687,7 +18128,27 @@
         "created_turn": 0,
         "defense_terrain_bonus": 0.2,
         "displaced_from": "visegrad",
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:gorazde:ustipraca_2",
@@ -16744,7 +18205,27 @@
         "created_turn": 0,
         "defense_terrain_bonus": 0.25,
         "displaced_from": "cajnice",
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:gorazde:faocici_2",
@@ -16800,8 +18281,28 @@
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
         "displaced_from": "rogatica",
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:gorazde:semihova_2",
@@ -16880,7 +18381,27 @@
         },
         "corps_id": "arbih_1st_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:centar_sarajevo:sarajevo_dio_centar_sajarevo",
@@ -16935,7 +18456,27 @@
         },
         "corps_id": "arbih_2nd_corps",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 6,
+          "total_heavy": 6
+        },
         "faction": "RBiH",
         "force_label": "ARBiH",
         "home_osid": "op:brcko:boce_2",
@@ -16990,8 +18531,28 @@
         },
         "corps_id": "hvo_central_bosnia",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 29,
+          "total_heavy": 29
+        },
         "faction": "HRHB",
         "force_label": "HVO",
         "home_osid": "op:zepce:ozimica_2",
@@ -17045,7 +18606,27 @@
         },
         "corps_id": "hvo_southeast_herzegovina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 29,
+          "total_heavy": 29
+        },
         "faction": "HRHB",
         "force_label": "HVO",
         "home_osid": "op:mostar:jasenica",
@@ -17099,7 +18680,27 @@
         },
         "corps_id": "hvo_southeast_herzegovina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 29,
+          "total_heavy": 29
+        },
         "faction": "HRHB",
         "force_label": "HVO",
         "home_osid": "op:capljina:visici_2",
@@ -17153,7 +18754,27 @@
         },
         "corps_id": "hvo_southeast_herzegovina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 29,
+          "total_heavy": 29
+        },
         "faction": "HRHB",
         "force_label": "HVO",
         "home_osid": "op:mostar:mostar_zapad_2",
@@ -17207,7 +18828,27 @@
         },
         "corps_id": "hvo_southeast_herzegovina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 29,
+          "total_heavy": 29
+        },
         "faction": "HRHB",
         "force_label": "HVO",
         "home_osid": "op:grude:sovici_3",
@@ -17261,7 +18902,27 @@
         },
         "corps_id": "hvo_central_bosnia",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 29,
+          "total_heavy": 29
+        },
         "faction": "HRHB",
         "force_label": "HVO",
         "home_osid": "op:kiseljak:kiseljak_2",
@@ -17315,7 +18976,27 @@
         },
         "corps_id": "hvo_central_bosnia",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 29,
+          "total_heavy": 29
+        },
         "faction": "HRHB",
         "force_label": "HVO",
         "home_osid": "op:kresevo:kresevo_2",
@@ -17369,7 +19050,27 @@
         },
         "corps_id": "hvo_southeast_herzegovina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 29,
+          "total_heavy": 29
+        },
         "faction": "HRHB",
         "force_label": "HVO",
         "home_osid": "op:capljina:capljina_2",
@@ -17423,7 +19124,27 @@
         },
         "corps_id": "hvo_central_bosnia",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 29,
+          "total_heavy": 29
+        },
         "faction": "HRHB",
         "force_label": "HVO",
         "home_osid": "op:kiseljak:azapovici_2",
@@ -17477,7 +19198,27 @@
         },
         "corps_id": "hvo_southeast_herzegovina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 29,
+          "total_heavy": 29
+        },
         "faction": "HRHB",
         "force_label": "HVO",
         "home_osid": "op:grude:grude_2",
@@ -17528,8 +19269,28 @@
         "corps_id": "hvo_southeast_herzegovina",
         "created_turn": 0,
         "defense_streak": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 29,
+          "total_heavy": 29
+        },
         "faction": "HRHB",
         "force_label": "HVO",
         "home_osid": "op:konjic:gorani_2",
@@ -17583,7 +19344,27 @@
         },
         "corps_id": "hvo_southeast_herzegovina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 29,
+          "total_heavy": 29
+        },
         "faction": "HRHB",
         "force_label": "HVO",
         "home_osid": "op:listica:kocerin_2",
@@ -17637,7 +19418,27 @@
         },
         "corps_id": "hvo_southeast_herzegovina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 29,
+          "total_heavy": 29
+        },
         "faction": "HRHB",
         "force_label": "HVO",
         "home_osid": "op:citluk:citluk_2",
@@ -17691,7 +19492,27 @@
         },
         "corps_id": "hvo_central_bosnia",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 29,
+          "total_heavy": 29
+        },
         "faction": "HRHB",
         "force_label": "HVO",
         "home_osid": "op:busovaca:bare_2",
@@ -17745,7 +19566,27 @@
         },
         "corps_id": "hvo_central_bosnia",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 29,
+          "total_heavy": 29
+        },
         "faction": "HRHB",
         "force_label": "HVO",
         "home_osid": "op:kiseljak:brnjaci_2",
@@ -17799,7 +19640,27 @@
         },
         "corps_id": "hvo_tomislavgrad",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 29,
+          "total_heavy": 29
+        },
         "faction": "HRHB",
         "force_label": "HVO",
         "home_osid": "op:livno:livno_2",
@@ -17853,7 +19714,27 @@
         },
         "corps_id": "hvo_central_bosnia",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 29,
+          "total_heavy": 29
+        },
         "faction": "HRHB",
         "force_label": "HVO",
         "home_osid": "op:kresevo:polje_2",
@@ -17907,7 +19788,27 @@
         },
         "corps_id": "hvo_southeast_herzegovina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 29,
+          "total_heavy": 29
+        },
         "faction": "HRHB",
         "force_label": "HVO",
         "home_osid": "op:ljubuski:grab",
@@ -17961,7 +19862,27 @@
         },
         "corps_id": "hvo_southeast_herzegovina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 29,
+          "total_heavy": 29
+        },
         "faction": "HRHB",
         "force_label": "HVO",
         "home_osid": "op:listica:lise",
@@ -18015,7 +19936,27 @@
         },
         "corps_id": "hvo_southeast_herzegovina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 29,
+          "total_heavy": 29
+        },
         "faction": "HRHB",
         "force_label": "HVO",
         "home_osid": "op:mostar:jasenica",
@@ -18069,8 +20010,28 @@
         },
         "corps_id": "hvo_central_bosnia",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 29,
+          "total_heavy": 29
+        },
         "faction": "HRHB",
         "force_label": "HVO",
         "home_osid": "op:novi_travnik:rankovici_2",
@@ -18124,7 +20085,27 @@
         },
         "corps_id": "hvo_southeast_herzegovina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 29,
+          "total_heavy": 29
+        },
         "faction": "HRHB",
         "force_label": "HVO",
         "home_osid": "op:stolac:prenj",
@@ -18174,7 +20155,27 @@
         },
         "corps_id": "hvo_central_bosnia",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 29,
+          "total_heavy": 29
+        },
         "faction": "HRHB",
         "force_label": "HVO",
         "home_osid": "op:novi_travnik:rat_2",
@@ -18228,7 +20229,27 @@
         },
         "corps_id": "hvo_central_bosnia",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 29,
+          "total_heavy": 29
+        },
         "faction": "HRHB",
         "force_label": "HVO",
         "home_osid": "op:vitez:vitez_2",
@@ -18489,7 +20510,27 @@
         "corps_id": "hvo_northwest_bosnia",
         "created_turn": 0,
         "destruction_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 29,
+          "total_heavy": 29
+        },
         "faction": "HRHB",
         "force_label": "HVO",
         "home_osid": "op:odzak:donja_dubica",
@@ -18592,7 +20633,27 @@
         },
         "corps_id": "hvo_southeast_herzegovina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 29,
+          "total_heavy": 29
+        },
         "faction": "HRHB",
         "force_label": "HVO",
         "home_osid": "op:posusje:posusje_2",
@@ -18647,8 +20708,28 @@
         "corps_id": "hvo_tomislavgrad",
         "created_turn": 0,
         "defense_streak": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 29,
+          "total_heavy": 29
+        },
         "faction": "HRHB",
         "force_label": "HVO",
         "home_osid": "op:prozor:ustirama_3",
@@ -19585,7 +21666,27 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:bosanska_dubica:vojskova",
@@ -19639,7 +21740,27 @@
         },
         "corps_id": "vrs_2nd_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:bosanska_krupa:donji_dubovik_2",
@@ -19693,7 +21814,27 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:mrkonjic_grad:bjelajce_2",
@@ -19747,7 +21888,27 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:kotor_varos:krusevo_brdo_i",
@@ -19801,8 +21962,28 @@
         },
         "corps_id": "vrs_2nd_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:bihac:racic",
@@ -19856,7 +22037,27 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:prijedor:prijedor_2",
@@ -19906,7 +22107,27 @@
         },
         "corps_id": "vrs_2nd_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:kljuc:cadjavica",
@@ -19960,7 +22181,27 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:donji_vakuf:babin_potok_2",
@@ -20014,7 +22255,27 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mechanized",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:prijedor:maricka_2",
@@ -20068,7 +22329,27 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:banja_luka:kola",
@@ -20122,7 +22403,27 @@
         },
         "corps_id": "vrs_east_bosnian",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:bijeljina:dvorovi_2",
@@ -20176,7 +22477,27 @@
         },
         "corps_id": "vrs_drina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:zvornik:gornji_sepak_2",
@@ -20230,7 +22551,27 @@
         },
         "corps_id": "vrs_drina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:bratunac:slapasnica",
@@ -20284,7 +22625,27 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:celinac:celinac_2",
@@ -20338,7 +22699,27 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:doboj:bukovica_velika_2",
@@ -20392,8 +22773,28 @@
         },
         "corps_id": "vrs_2nd_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:titov_drvar:drvar_2",
@@ -20447,7 +22848,27 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:bosanska_gradiska:gornji_podgradci",
@@ -20497,6 +22918,18 @@
         },
         "corps_id": "vrs_main_staff",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "elite_loan_state": {
           "current_episode_id": null,
           "last_recall_turn": null,
@@ -20507,6 +22940,14 @@
           "permanently_degraded": false
         },
         "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:rogatica:stara_gora",
@@ -20560,7 +23001,27 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:kotor_varos:maslovare_2",
@@ -20614,7 +23075,27 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:doboj:civcije_bukovicke",
@@ -20668,8 +23149,28 @@
         },
         "corps_id": "vrs_east_bosnian",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:ugljevik:donja_trnova_2",
@@ -20723,7 +23224,27 @@
         },
         "corps_id": "vrs_drina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:vlasenica:grabovica",
@@ -20777,8 +23298,28 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:bosanski_novi:matavazi_2",
@@ -20832,8 +23373,28 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:gracanica:petrovo_2",
@@ -20888,8 +23449,28 @@
         "corps_id": "vrs_drina",
         "created_turn": 0,
         "defense_terrain_bonus": 0.3,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:rogatica:rogatica_2",
@@ -20943,7 +23524,27 @@
         },
         "corps_id": "vrs_east_bosnian",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:bosanski_samac:crkvina_2",
@@ -20997,7 +23598,27 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:prnjavor:crkvena_2",
@@ -21051,8 +23672,28 @@
         },
         "corps_id": "vrs_sarajevo_romanija",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:pale:pale",
@@ -21106,7 +23747,27 @@
         },
         "corps_id": "vrs_sarajevo_romanija",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mechanized",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:ilidza:sarajevo_dio_novi_grad_sarajevo",
@@ -21160,7 +23821,27 @@
         },
         "corps_id": "vrs_east_bosnian",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:bijeljina:bukovica_donja",
@@ -21214,8 +23895,28 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:sipovo:brdjani",
@@ -21269,8 +23970,28 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:srbac:kobas",
@@ -21324,7 +24045,27 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:teslic:blatnica_2",
@@ -21378,8 +24119,28 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:modrica:skugric_gornji_2",
@@ -21433,7 +24194,27 @@
         },
         "corps_id": "vrs_drina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:vlasenica:bacici",
@@ -21487,7 +24268,27 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:modrica:vranjak_2",
@@ -21541,7 +24342,27 @@
         },
         "corps_id": "vrs_drina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:zvornik:kozluk_2",
@@ -21595,7 +24416,27 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:skender_vakuf:imljani_2",
@@ -21649,7 +24490,27 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:derventa:cerani_2",
@@ -21703,7 +24564,27 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mechanized",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:doboj:boljanic_2",
@@ -21757,7 +24638,27 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:banja_luka:melina_2",
@@ -21811,8 +24712,28 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:banja_luka:banja_luka_2",
@@ -21866,8 +24787,28 @@
         },
         "corps_id": "vrs_east_bosnian",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:ugljevik:ugljevik_2",
@@ -21921,7 +24862,27 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:lukavac:brijesnica_donja_2",
@@ -21975,7 +24936,27 @@
         },
         "corps_id": "vrs_east_bosnian",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:bosanski_samac:crkvina_2",
@@ -22029,7 +25010,27 @@
         },
         "corps_id": "vrs_sarajevo_romanija",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:ilidza:kasindo",
@@ -22083,7 +25084,27 @@
         },
         "corps_id": "vrs_east_bosnian",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:bijeljina:cadjavica_gornja_2",
@@ -22137,8 +25158,28 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:teslic:buletic_2",
@@ -22192,7 +25233,27 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:donji_vakuf:komar_2",
@@ -22246,7 +25307,27 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:banja_luka:motike",
@@ -22300,7 +25381,27 @@
         },
         "corps_id": "vrs_east_bosnian",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:lopare:jablanica_2",
@@ -22354,8 +25455,28 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:doboj:cerovica_2",
@@ -22409,7 +25530,27 @@
         },
         "corps_id": "vrs_2nd_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:bosanski_petrovac:dobro_selo_2",
@@ -22463,7 +25604,27 @@
         },
         "corps_id": "vrs_east_bosnian",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:gradacac:pelagicevo",
@@ -22517,7 +25678,27 @@
         },
         "corps_id": "vrs_sarajevo_romanija",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:vogosca:vogosca_3",
@@ -22571,8 +25752,28 @@
         },
         "corps_id": "vrs_east_bosnian",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:bijeljina:crnjelovo_donje",
@@ -22626,7 +25827,27 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:prijedor:prijedor_2",
@@ -22680,8 +25901,28 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:banja_luka:pavici_2",
@@ -22735,7 +25976,27 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:zavidovici:vozuca_2",
@@ -22789,7 +26050,27 @@
         },
         "corps_id": "vrs_sarajevo_romanija",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:pale:bulozi",
@@ -22843,7 +26124,27 @@
         },
         "corps_id": "vrs_2nd_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:glamoc:glamoc_2",
@@ -22897,7 +26198,27 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:prijedor:rasavci_2",
@@ -22951,8 +26272,28 @@
         },
         "corps_id": "vrs_drina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:vlasenica:sebiocina",
@@ -23002,6 +26343,18 @@
         },
         "corps_id": "vrs_main_staff",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "elite_loan_state": {
           "current_episode_id": null,
           "last_recall_turn": null,
@@ -23012,6 +26365,14 @@
           "permanently_degraded": false
         },
         "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:hanpijesak:han_pijesak_2",
@@ -23064,7 +26425,27 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:sanski_most:ostra_luka",
@@ -23118,7 +26499,27 @@
         },
         "corps_id": "vrs_2nd_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "motorized",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:kupres:bucovaca",
@@ -23172,7 +26573,27 @@
         },
         "corps_id": "vrs_2nd_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:bosansko_grahovo:bosansko_grahovo_2",
@@ -23226,7 +26647,27 @@
         },
         "corps_id": "vrs_herzegovina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:cajnice:cajnice_2",
@@ -23280,7 +26721,27 @@
         },
         "corps_id": "vrs_herzegovina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:bileca:bileca_2",
@@ -23334,7 +26795,27 @@
         },
         "corps_id": "vrs_herzegovina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:foca:foca_3",
@@ -23388,7 +26869,27 @@
         },
         "corps_id": "vrs_herzegovina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:gacko:avtovac_2",
@@ -23442,7 +26943,27 @@
         },
         "corps_id": "vrs_herzegovina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:kalinovik:kalinovik_2",
@@ -23496,7 +27017,27 @@
         },
         "corps_id": "vrs_herzegovina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:nevesinje:krekovi_2",
@@ -23551,7 +27092,27 @@
         "corps_id": "vrs_drina",
         "created_turn": 0,
         "defense_terrain_bonus": 0.2,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "light_infantry",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:srebrenica:mala_daljegosta_2",
@@ -23605,8 +27166,28 @@
         },
         "corps_id": "vrs_herzegovina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:trebinje:bihovo_2",
@@ -23661,7 +27242,27 @@
         "corps_id": "vrs_drina",
         "created_turn": 0,
         "defense_terrain_bonus": 0.25,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:visegrad:visegrad_2",
@@ -23739,8 +27340,28 @@
         },
         "corps_id": "vrs_1st_krajina",
         "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
         "entrenchment_turns": 0,
         "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
         "faction": "RS",
         "force_label": "VRS",
         "home_osid": "op:laktasi:laktasi_2",

@@ -10,7 +10,7 @@ test('package.json exposes one canonical packaged runtime probe command', async 
 
     assert.strictEqual(
         packageJson.scripts?.['desktop:package:probe'],
-        'npm run desktop:package:dir && node tools\\desktop_packaged_runtime_probe.mjs',
+        'npm run desktop:package:dir && node tools/desktop_packaged_runtime_probe.mjs',
         'packaged runtime probing should transitively inherit the canonical packaged-desktop contract',
     );
 });

@@ -24,7 +24,7 @@ test('package.json exposes one canonical packaged-desktop command that inherits 
 
     assert.strictEqual(
         packageJson.scripts?.['desktop:package:dir'],
-        'npm run desktop:release:check && node .\\node_modules\\electron-builder\\cli.js --dir --publish never',
+        'npm run desktop:release:check && electron-builder --dir --publish never',
         'desktop packaging should transitively enforce the canonical desktop release check path',
     );
 });
