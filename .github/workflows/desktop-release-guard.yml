@@ -20,6 +20,9 @@ jobs:
       - run: npm install --legacy-peer-deps
       - run: npm install --legacy-peer-deps --prefix src/ui/map
 
+      - name: Rebuild startup snapshot for this platform
+        run: npm run desktop:startup-snapshot:build
+
       - name: Verify baked startup snapshot and desktop build artifacts
         run: npm run desktop:release:check
 
