@@ -4083,3 +4083,124 @@ Following the initial v0.9.0 PR, the `scenarios` CI job failed with a golden-bas
 - Modified: `src/sim/events/active_modifiers.ts` (cleanup scope narrowed)
 - Modified: `tests/consequence_chains.test.ts` (Chain 2 tests removed)
 - Modified: `tests/consequence_consumers.test.ts` (cleanup test scope updated)
+
+## [2026-04-22] content(codex): integrate v0.9.1 essay vocab into 3 existing essays
+
+**Type:** v0.9.1 Dynamic Codex / content integration
+**Files:** `data/scenarios/essays/essay_index.json`, `tests/ui/codex_essay_vocab_integration.test.ts` (new)
+**Status:** VERIFIED — tsc clean, 33/33 codex tests pass (25 resolver unit + 8 integration), desktop:map:build 7.01s. Content-only; zero sim behavior drift; no baseline refresh needed.
+
+### Summary of changes
+
+Promotes the three drafts from `docs/40_reports/20260422_V091_ESSAY_VOCAB_DRAFTS.md` into `essay_index.json`, wiring real essays into the v0.9.1 condition-atom + interpolation-token vocabulary. All three dynamic sections are additive — no canonical content mutated — and use deterministic conditions (fired events + flags + historicalComparison) per the SENSITIVE_HISTORY_DESIGN_GATE rule against atrocity optimization.
+
+1. **`essay_dayton_signed_1995`** — appended `v091_territory_dayton_map_divergence` (divergence variant, insert after paragraph 3). Gates on `GAME_OVER AND (TERRITORY_ABOVE:RS:5 OR TERRITORY_BELOW:RS:-5)`. Renders `{territory_RS_delta}` + `{territory_RBiH_HRHB_Federation_delta}`. The existing `player_endgame_divergence` at `insert_after_paragraph: -1` is preserved unchanged. Sources: Dayton Annex 2 IEBL (51-49 baseline), Burg & Shoup (2000) chs. 7-8.
+2. **`essay_sarajevo_siege_begins_1992`** — new `v091_sarajevo_prolonged_costly_note` (note variant, insert after paragraph 5). Gates on `GAME_OVER AND DURATION_LONGER AND CASUALTY_ABOVE:1.2`. Renders `{duration_delta_abs}` + `{casualty_ratio_pct}`. Sources: ICTY Galić (IT-98-29-T), RDC 2007 casualty baselines. **Note:** the 1.2 casualty threshold is a calibration value, not a historical claim — tunable pending historian review.
+3. **`essay_bihac_5th_corps_offensive_1994`** — new `v091_bihac_fell_ghost_epilogue` (ghost variant, insert after paragraph -1). Gates on `GAME_OVER AND FLAG:bihac_pocket_fell AND DISPLACEMENT_ABOVE:1.1`. Renders `{displacement_ratio_pct}`. Sources: Hoare (2004) 5th Corps chapter, Balkan Battlegrounds vol. II, consequence plan Chain 4 counterfactual. Hook flag is set by `csq_bihac_pocket_collapses_1994` (shipped in PR #1).
+
+**Agent draft corrections applied:**
+- Sarajevo section's `insert_after_paragraph` changed from the draft's `4` to `5` — the paragraph citing "until February 1996" is index 5, not 4 (agent miscounted).
+- All three entry ids kept as namespaced `v091_*` to avoid collision with existing `player_endgame_divergence` on the Dayton essay.
+
+**New integration test** `tests/ui/codex_essay_vocab_integration.test.ts` (8 tests) loads `essay_index.json` and for each of the three new sections proves:
+- the section is present with the expected id, variant, insert_after_paragraph, and condition string;
+- it fires under a canned context matching the gate and renders the expected token values (e.g. `+7.3` / `-7.3` deltas, `12` weeks, `135 percent` casualty ratio, `145 percent` displacement);
+- it does NOT fire when gates fail (within-band territory / duration-only / historical-path-with-flag-absent).
+
+Protects against silent future regression: any edit that drops or renames one of the three entries fails this test rather than breaking the Codex panel at runtime.
+
+### Verification
+
+- `npx tsc --noEmit` — clean.
+- `npx vitest run tests/ui/codex_essay_vocab_integration.test.ts tests/ui/codex_essay_resolver.test.ts` — 33/33 pass (25 existing resolver unit + 8 new integration).
+- `npm run desktop:map:build` — built in 7.01s.
+- `node -e "const j = require('.../essay_index.json'); ..."` — JSON parses; three expected dynamic_sections entries confirmed present.
+
+### Scope boundaries
+
+- **Content-only.** No resolver code changes. No mutation of canonical essay `content` fields. No sim behavior impact → no scenario rerun needed, no golden-baseline refresh.
+- **Calibration of the `1.2` casualty threshold and `1.1` displacement threshold** is future work. The values are defensible starting points from the drafts but should be tuned once scenario-run data shows the natural distribution of these ratios.
+- **Lane 1 (canon re-check of Chains 1/3/5) and Lane 2 (hrhb_political_goal reorder) deferred** for user return — both need sign-off and will require a coordinated baseline refresh.
+- **Lane 4 (v0.9.3 profiling baseline) still running** as this is shipped; its report will come separately.
+
+### Artifacts
+
+- New content: three `dynamic_sections` entries in `data/scenarios/essays/essay_index.json`
+- New regression: `tests/ui/codex_essay_vocab_integration.test.ts`
+
+## [2026-04-22] perf(osid): memoize buildOsidAdjacency + buildSharedBoundaryAdjacency (Lane 4 C1)
+
+**Type:** v0.9.3 performance — first optimization from the Lane 4 profiling baseline
+**Files:** `src/sim/combat/osid_adjacency.ts`, `tests/osid_adjacency_memoization.test.ts` (new)
+**Status:** VERIFIED — tsc clean; 6 unit tests pass; **baseline regression green across all 3 golden scenarios** (apr1992_52w, baseline_ops_4w, noop_4w) — byte-identical to pre-memo. No baseline refresh needed.
+
+### Summary of changes
+
+Both adjacency builders are pure functions of their edges-array input; the Lane 4 profiling report (`docs/40_reports/20260422_V093_PROFILING_BASELINE.md`) identified 26 production call sites rebuilding the same ~6000-node Map every turn. A `WeakMap` keyed on the edges-array identity now caches the result. Edges don't change within a scenario run, so hit rate approaches 100% after the first call.
+
+Grep audit confirmed no production caller mutates the returned Map. All `.set()` / `.delete()` / `.clear()` hits belong to DIFFERENT adjacency builders (DataLoader, sector_edge_adjacency, formation_hq_relocation, consolidation_scoring, displayFrontEdgeOwnership) — none reach the cached Map.
+
+### Verification
+
+- `npx tsc --noEmit` — clean.
+- `npx vitest run tests/osid_adjacency_memoization.test.ts` — 6/6 pass: reference equality on repeat calls, distinct-Map on distinct edges refs, content equality between cached/fresh, shared-boundary cache independence.
+- `npx tsx tools/scenario_runner/run_baseline_regression.ts` — **all scenarios match**. Byte-identity confirmed.
+- `npm run desktop:map:build` — green.
+
+### Artifacts
+
+- Module: `src/sim/combat/osid_adjacency.ts` (memo added; compute functions extracted as private helpers)
+- Tests: `tests/osid_adjacency_memoization.test.ts`
+
+## [2026-04-22] content(events): author v0.9.0 Chain 5 (RS Max Aggression → Accelerated Response)
+
+**Type:** v0.9.0 Consequence System / content authoring
+**Files:** `data/scenarios/events/consequences.json`, `tests/consequence_chains.test.ts`
+**Status:** VERIFIED — tsc clean; 103/103 event-system vitest pass (24 chain integration + 79 event/consequence/wiring regression); desktop:map:build green. Calibration-safe by construction: `rs_strategic_goals` historical bot pick is `all_six`, not `aggressive`, so none of the 4 Chain 5 events fire on the historical path.
+
+### Summary of changes
+
+Plan: `docs/plans/2026-03-24-v090-consequence-system-plan.md` §3 Chain 5. Authorized by the Lane 1 canon review report (`docs/40_reports/20260422_CHAINS_1_3_5_CANON_REVIEW.md`), which marked Chain 5 **PASS** — atrocity is cost-only, never score-positive for RS; "atrocity is a consequence, not a lever" respected; Pyrrhic score cannot invert.
+
+Four new `csq_*` events, all gated on `flag_equals: rs_strategic_goals = aggressive` (or on the prior chain event for the downstream one):
+
+- **`csq_accelerated_camps_discovery_1992`** (w6-w12): `humanitarian_impact RS war_crimes_delta: 2` + `dimension_shifts RS international_standing -10 / patron_confidence -5` + flag `camps_revealed_early`. Sources: ICTY Stakić (IT-97-24-T), Kvočka et al. (IT-98-30/1-T), Tadić (IT-94-1-T) on Omarska/Keraterm/Trnopolje.
+- **`csq_early_war_crimes_tribunal_1993`** (w30-w50, +`war_crimes_above RS 5`): `patron_pressure RS -10` + `dimension_shifts RS standing -10 / confidence -10` + flag `icty_mandate_expanded`. Sources: UNSCR 827 (May 1993) counterfactual.
+- **`csq_accelerated_safe_areas_1993`** (w35-w55, requires prior tribunal event): pushes a `doctrine_constraint` with `scope_restrictions.blocked_municipalities: [bihac, srebrenica, gorazde, zepa]` onto `event_constraints` for 40 turns — models "UNPROFOR safe areas with teeth." Sources: UNSCR 819/824/836; ICTY Krstić (IT-98-33-T).
+- **`csq_early_nato_threshold_1994`** (w80-w120, +`war_crimes_above RS 10`): `aggression_modifier RS -0.15` for 30 turns + `dimension_shifts RS standing -15 / military_credibility -5`. Sources: Operation Deliberate Force counterfactual (historical Aug 1995 → earlier in this branch).
+
+Effect-type substitutions from plan spec:
+- Plan's "pressure modifier +3.0 on camps_revealed rate" → not modelable via current effect types. Substituted with `humanitarian_impact` war_crimes_delta bump + dimension_shifts.
+- Plan's "enclave resilience +5" → modeled via `doctrine_constraint` scope_restriction that physically blocks RS ops in enclave munis. More direct than a soft resilience number.
+- Plan's "Deliberate Force pressure rate +2.0" → substituted with aggression_modifier + dimension_shifts that model the operational consequence of a lower NATO threshold.
+
+**Cost-Ledger wording gate (pre-merge, per Lane 1 report §4):** all prose is third-person historical voice; ICTY citations on camps event; no euphemisms; no "efficiency" or optimization framing. Belgrade's move is described as cost-side distancing, not as a Serbian "win" from ICTY accountability.
+
+5 new integration tests in `tests/consequence_chains.test.ts`:
+- Historical path (`rs_strategic_goals = all_six` AND `selective`) fires no Chain 5 events.
+- Camps discovery event fires w6-w12 with `aggressive` and bumps war_crimes counter.
+- Tribunal event requires `war_crimes_above RS 5` (threshold test: 3 doesn't fire, 7 fires).
+- Safe-areas event requires prior tribunal event via `requires_events` AND pushes the scope_restriction onto `event_constraints` with `expires_turn = currentTurn + duration_turns`.
+- NATO-threshold event requires `war_crimes_above RS 10` (threshold test: 8 doesn't fire, 12 fires) and pushes aggression_modifier with correct expires_turn.
+- Registry-presence test confirms all 4 events load.
+
+Tests pass `CSQ_EVENTS` (not `ALL_EVENTS`) to isolate Chain 5 firing from historical RS-patron events in the same turn windows (e.g. `turajlic_assassination_1993` at w40-w42). The existing loader-integration test already proves Chain 5 is in the full registry.
+
+### Verification
+
+- `npx tsc --noEmit` — clean.
+- `npx vitest run tests/consequence_chains.test.ts tests/consequence_effects.test.ts tests/consequence_consumers.test.ts tests/osid_adjacency_memoization.test.ts tests/events_evaluate.test.ts tests/event_effects.test.ts tests/bot_priority_shift_wiring.test.ts` — 103/103 pass.
+- `npm run desktop:map:build` — built in 9.48s.
+- No scenario rerun needed — historical path unchanged by construction (flag gate false on `all_six`).
+
+### Scope boundaries
+
+- **No Chain 1 or Chain 3 authoring.** Lane 1 report marked those REAUTHOR (trade-framing on Drina restraint; `+5 international_standing` on Srebrenica stalemate reads as "prevent-genocide reward"). Deferred for user-led re-authoring.
+- **Chain 7 still deferred.** Prerequisite flags (`vance_owen_accepted`, etc.) don't exist in canon; endgame-architecture work out of scope.
+- **Chain 2 still deferred.** Needs the `hrhb_political_goal` data fix from Lane 2 first (data/plan reconciliation, then baseline refresh).
+
+### Artifacts
+
+- Content appended: four new events in `data/scenarios/events/consequences.json`
+- Tests appended: Chain 5 section in `tests/consequence_chains.test.ts` (+5 tests)
+- Canon authorization: `docs/40_reports/20260422_CHAINS_1_3_5_CANON_REVIEW.md` §Chain 5 (PASS)
