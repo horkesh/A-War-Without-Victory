@@ -151,3 +151,192 @@ describe('codexEssayResolver', () => {
         expect(result).toBe(true);
     });
 });
+
+// ─── v0.9.1: comparison-derived condition atoms ──────────────────────────
+
+describe('codexEssayResolver — comparison condition atoms', () => {
+    function withComparison(overrides: Partial<NonNullable<CodexRenderContext['historicalComparison']>>): CodexRenderContext {
+        return context({
+            gameOver: true,
+            historicalComparison: {
+                duration_delta_weeks: 0,
+                territory_divergence: {},
+                casualty_ratio: 1,
+                displacement_ratio: 1,
+                rupture_divergence: [],
+                divergence_notes: [],
+                ...overrides,
+            },
+        });
+    }
+
+    it('DURATION_LONGER matches positive delta, misses zero and negative', () => {
+        expect(evaluateEssayCondition('DURATION_LONGER', withComparison({ duration_delta_weeks: 4 }))).toBe(true);
+        expect(evaluateEssayCondition('DURATION_LONGER', withComparison({ duration_delta_weeks: 0 }))).toBe(false);
+        expect(evaluateEssayCondition('DURATION_LONGER', withComparison({ duration_delta_weeks: -4 }))).toBe(false);
+    });
+
+    it('DURATION_SHORTER matches negative delta only', () => {
+        expect(evaluateEssayCondition('DURATION_SHORTER', withComparison({ duration_delta_weeks: -6 }))).toBe(true);
+        expect(evaluateEssayCondition('DURATION_SHORTER', withComparison({ duration_delta_weeks: 0 }))).toBe(false);
+    });
+
+    it('CASUALTY_ABOVE / CASUALTY_BELOW read casualty_ratio', () => {
+        const high = withComparison({ casualty_ratio: 1.3 });
+        expect(evaluateEssayCondition('CASUALTY_ABOVE:1.2', high)).toBe(true);
+        expect(evaluateEssayCondition('CASUALTY_BELOW:1.2', high)).toBe(false);
+
+        const low = withComparison({ casualty_ratio: 0.5 });
+        expect(evaluateEssayCondition('CASUALTY_ABOVE:1.2', low)).toBe(false);
+        expect(evaluateEssayCondition('CASUALTY_BELOW:1.2', low)).toBe(true);
+    });
+
+    it('DISPLACEMENT_ABOVE / DISPLACEMENT_BELOW read displacement_ratio', () => {
+        const high = withComparison({ displacement_ratio: 1.5 });
+        expect(evaluateEssayCondition('DISPLACEMENT_ABOVE:1.0', high)).toBe(true);
+        expect(evaluateEssayCondition('DISPLACEMENT_BELOW:1.0', high)).toBe(false);
+    });
+
+    it('TERRITORY_ABOVE reads territory_divergence map (player_pct - historical_pct)', () => {
+        const ctx = withComparison({ territory_divergence: { RS: 5, RBiH_HRHB_Federation: -5 } });
+        expect(evaluateEssayCondition('TERRITORY_ABOVE:RS:3', ctx)).toBe(true);
+        expect(evaluateEssayCondition('TERRITORY_ABOVE:RS:8', ctx)).toBe(false);
+        expect(evaluateEssayCondition('TERRITORY_BELOW:RBiH_HRHB_Federation:-3', ctx)).toBe(true);
+    });
+
+    it('comparison atoms return false when historicalComparison is absent', () => {
+        const ctx = context();
+        expect(evaluateEssayCondition('DURATION_LONGER', ctx)).toBe(false);
+        expect(evaluateEssayCondition('CASUALTY_ABOVE:0.5', ctx)).toBe(false);
+        expect(evaluateEssayCondition('TERRITORY_ABOVE:RS:0', ctx)).toBe(false);
+    });
+
+    it('malformed thresholds do not match', () => {
+        const ctx = withComparison({ casualty_ratio: 1.5 });
+        expect(evaluateEssayCondition('CASUALTY_ABOVE:notanumber', ctx)).toBe(false);
+        expect(evaluateEssayCondition('TERRITORY_ABOVE:RS', ctx)).toBe(false); // missing threshold
+    });
+
+    it('new atoms compose with AND / OR / NOT', () => {
+        const ctx = withComparison({
+            duration_delta_weeks: 10,
+            casualty_ratio: 0.8,
+            rupture_divergence: [],
+        });
+        expect(evaluateEssayCondition(
+            'GAME_OVER AND DURATION_LONGER AND NOT RUPTURE:srebrenica_genocide_1995',
+            ctx,
+        )).toBe(true);
+    });
+});
+
+// ─── v0.9.1: template interpolation tokens ───────────────────────────────
+
+describe('codexEssayResolver — template interpolation tokens', () => {
+    function resolveWith(content: string, comparison: Partial<NonNullable<CodexRenderContext['historicalComparison']>>): string[] {
+        const resolved = resolveCodexEssay(
+            essay({
+                dynamic_sections: [
+                    {
+                        id: 'dyn',
+                        insert_after_paragraph: -1,
+                        condition: 'GAME_OVER',
+                        variant: 'divergence',
+                        content,
+                    },
+                ],
+            }),
+            context({
+                firedEventIds: new Set(['test_event']),
+                gameOver: true,
+                historicalComparison: {
+                    duration_delta_weeks: 0,
+                    territory_divergence: {},
+                    casualty_ratio: 1,
+                    displacement_ratio: 1,
+                    rupture_divergence: [],
+                    divergence_notes: [],
+                    ...comparison,
+                },
+            }),
+        );
+        return resolved.paragraphs.filter(p => p.kind === 'dynamic').map(p => p.text);
+    }
+
+    it('{duration_delta_weeks} renders signed integer', () => {
+        expect(resolveWith('Ran {duration_delta_weeks} weeks.', { duration_delta_weeks: 4 }))
+            .toEqual(['Ran +4 weeks.']);
+        expect(resolveWith('Ran {duration_delta_weeks} weeks.', { duration_delta_weeks: -6 }))
+            .toEqual(['Ran -6 weeks.']);
+    });
+
+    it('{duration_delta_abs} renders unsigned absolute value', () => {
+        expect(resolveWith('{duration_delta_abs} week gap.', { duration_delta_weeks: -6 }))
+            .toEqual(['6 week gap.']);
+    });
+
+    it('{casualty_ratio_pct} and {displacement_ratio_pct} render rounded percentages', () => {
+        expect(resolveWith('{casualty_ratio_pct}% / {displacement_ratio_pct}%.', {
+            casualty_ratio: 1.1,
+            displacement_ratio: 0.73,
+        })).toEqual(['110% / 73%.']);
+    });
+
+    it('{rupture_list} joins the rupture_divergence array', () => {
+        expect(resolveWith('Ruptures: {rupture_list}.', {
+            rupture_divergence: ['srebrenica_genocide_1995', 'xxx_other'],
+        })).toEqual(['Ruptures: srebrenica_genocide_1995, xxx_other.']);
+    });
+
+    it('{territory_RS_delta} renders signed one-decimal percentage', () => {
+        expect(resolveWith('RS delta {territory_RS_delta}.', {
+            territory_divergence: { RS: 3.45 },
+        })).toEqual(['RS delta +3.5.']);
+    });
+
+    it('{territory_RBiH_HRHB_Federation_delta} handles multi-segment keys', () => {
+        expect(resolveWith('Fed delta {territory_RBiH_HRHB_Federation_delta}.', {
+            territory_divergence: { RBiH_HRHB_Federation: -5.21 },
+        })).toEqual(['Fed delta -5.2.']);
+    });
+
+    it('signed() leaves zero unsigned but signs non-zero values', () => {
+        // duration delta 0 → "0" (no leading "+"), matching conventional English.
+        expect(resolveWith('Ran {duration_delta_weeks} weeks.', { duration_delta_weeks: 0 }))
+            .toEqual(['Ran 0 weeks.']);
+    });
+
+    it('absent historicalComparison renders every token as empty string', () => {
+        // No historicalComparison at all — token expands to empty.
+        const resolved = resolveCodexEssay(
+            essay({
+                dynamic_sections: [{
+                    id: 'dyn',
+                    insert_after_paragraph: -1,
+                    condition: 'GAME_OVER',
+                    variant: 'divergence',
+                    content: '[{duration_delta_weeks}][{casualty_ratio_pct}][{territory_RS_delta}][{rupture_list}]',
+                }],
+            }),
+            context({ firedEventIds: new Set(['test_event']), gameOver: true, historicalComparison: undefined }),
+        );
+        const dyn = resolved.paragraphs.filter(p => p.kind === 'dynamic').map(p => p.text);
+        expect(dyn).toEqual(['[][][][]']);
+    });
+
+    it('missing territory key renders as empty string', () => {
+        // Comparison exists but the requested faction key isn't in territory_divergence.
+        expect(resolveWith('Missing {territory_ZZZ_delta}.', {})).toEqual(['Missing .']);
+    });
+
+    it('unknown tokens pass through literally for review visibility', () => {
+        expect(resolveWith('Keep {totally_unknown_token} visible.', {}))
+            .toEqual(['Keep {totally_unknown_token} visible.']);
+    });
+
+    it('{comparison_notes} still works (backwards compatible)', () => {
+        expect(resolveWith('{comparison_notes}', {
+            divergence_notes: ['Note A', 'Note B'],
+        })).toEqual(['Note A', 'Note B']);
+    });
+});

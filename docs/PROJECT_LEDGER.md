@@ -3927,3 +3927,66 @@ Per napkin §Post-Run Analysis Protocol, the orchestrator must dispatch Tier 1 i
 - Content: `data/scenarios/events/consequences.json`
 - Regressions: `tests/consequence_effects.test.ts`, `tests/consequence_consumers.test.ts`, `tests/consequence_chains.test.ts`
 - Run: `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n0/`
+
+## [2026-04-22] feat(codex): expand v0.9.1 dynamic-essay resolver with comparison atoms + interpolation tokens
+
+**Type:** v0.9.1 Dynamic Codex / engine authoring contract
+**Files:** `src/ui/map/components/codex/codexEssayResolver.ts`, `tests/ui/codex_essay_resolver.test.ts`
+**Status:** VERIFIED — tsc clean, 105/105 vitest pass (25 resolver + 3 panel + 77 cross-domain regression), desktop:map:build green. Pure additive change; unknown tokens pass through literally so legacy essays are byte-identical.
+
+### Summary of changes
+
+Plan: `docs/plans/2026-04-06-v091-dynamic-essay-endgame-comparison-plan.md` Phase 1 (Dynamic Essay Engine) — broadens what essay authors can write against without touching the schema.
+
+Existing first-slice status before this lane:
+- Resolver condition vocabulary: `ALWAYS / GAME_OVER / COMPARISON_NOTES / RUPTURE:<id> / EVENT:<id> / FLAG:<name>` + bare flag names, AND/OR/NOT, parens.
+- Template interpolation: only `{comparison_notes}`.
+- Authors could gate essays on rupture presence and aggregate divergence notes, but could not discriminate by magnitude (casualty ratio, duration delta, per-faction territory delta).
+
+**New condition atoms (8):**
+- `DURATION_LONGER` / `DURATION_SHORTER` — reads `comparison.duration_delta_weeks`.
+- `CASUALTY_ABOVE:<ratio>` / `CASUALTY_BELOW:<ratio>` — reads `comparison.casualty_ratio` (player / historical).
+- `DISPLACEMENT_ABOVE:<ratio>` / `DISPLACEMENT_BELOW:<ratio>` — reads `comparison.displacement_ratio`.
+- `TERRITORY_ABOVE:<faction>:<pct>` / `TERRITORY_BELOW:<faction>:<pct>` — reads `comparison.territory_divergence[<faction>]` (player_pct − historical_pct). Supports multi-segment faction keys like `RBiH_HRHB_Federation`.
+- Every new atom returns **false when `historicalComparison` is absent or its field is non-finite** — authors can't accidentally match against missing baseline data.
+
+**New interpolation tokens (6 + pattern):**
+- `{duration_delta_weeks}` — signed integer (e.g. `+4`, `-6`, `0`).
+- `{duration_delta_abs}` — absolute value.
+- `{casualty_ratio_pct}` / `{displacement_ratio_pct}` — rounded percentages.
+- `{rupture_list}` — comma-separated rupture IDs.
+- `{territory_<factionKey>_delta}` — signed one-decimal percentage; regex-matched, supports `{territory_RBiH_HRHB_Federation_delta}`.
+- `{comparison_notes}` — unchanged (backward compatible).
+- **Unknown tokens pass through as literal `{token}`** so content review catches typos; absent baseline values render as empty string.
+
+**20 new tests** in `tests/ui/codex_essay_resolver.test.ts` (total 25, was 5):
+- Per-atom match/miss/absence proofs (7 tests).
+- Malformed-threshold and AND/OR/NOT composition proofs (2 tests).
+- Per-token expansion proofs including multi-segment faction keys and the signed-zero convention (8 tests).
+- Absent-historicalComparison renders all tokens empty (1 test).
+- Unknown tokens pass through literally (1 test).
+- Backward-compat proof for `{comparison_notes}` (1 test).
+
+### Verification
+
+- `npx tsc --noEmit` — clean.
+- `npx vitest run tests/ui/codex_essay_resolver.test.ts tests/ui/codex_panel_dynamic_mount.test.ts tests/consequence_chains.test.ts tests/consequence_effects.test.ts tests/consequence_consumers.test.ts tests/events_evaluate.test.ts` — **105/105 pass** across 6 files.
+- `npm run desktop:map:build` — built in 12.39s.
+
+### Scope boundaries
+
+- **Additive only.** No existing atom or token semantics change. Existing essays (`data/scenarios/essays/essay_index.json`) are unaffected — any essay that did not use the new atoms/tokens renders byte-identically.
+- **No Codex UI changes.** Panel rendering, dynamic-mount, ghost-essay display all unchanged.
+- **No new essays authored.** This lane gives authors a richer contract; the first authored essay using a new atom (e.g. a csq_ Chain 6 ghost entry that reads `TERRITORY_ABOVE:RBiH_HRHB_Federation:-3`) is a separate content lane.
+- **No endgame_comparison.ts changes.** Readers only; the upstream truth source is unchanged.
+
+### Follow-on candidates (not in this lane)
+
+- Author the first ghost essays / divergence sections that consume the new tokens (content lane; `/historian` + `/narrative-designer`).
+- Extend Codex UI tooltips to name the condition/token vocabulary so authors can discover it in the editor (UI lane).
+- Document the full vocabulary in a canonical reference doc under `docs/10_canon/` or `docs/20_engineering/`.
+
+### Artifacts
+
+- Module: `src/ui/map/components/codex/codexEssayResolver.ts`
+- Tests: `tests/ui/codex_essay_resolver.test.ts`
