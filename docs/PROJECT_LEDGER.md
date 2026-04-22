@@ -3791,3 +3791,55 @@ Chain 6 is the canon-neutral, lowest-risk chain (no atrocity representation, onl
 
 - New content: `data/scenarios/events/consequences.json`
 - New regression: `tests/consequence_chains.test.ts`
+
+## [2026-04-22] content(events): author v0.9.0 Chain 2 (Alliance Holds) + Chain 4 (Bihac Collapses)
+
+**Type:** v0.9.0 Consequence System / content authoring
+**Files:** `data/scenarios/events/consequences.json`, `tests/consequence_chains.test.ts`
+**Status:** VERIFIED — tsc clean, 128/128 event-system vitest pass (13 new chain integration tests), desktop:map:build green. Also: **Chain 7 (Early Peace) DEFERRED** with explicit blockers documented below.
+
+### Summary of changes
+
+Plan: `docs/plans/2026-03-24-v090-consequence-system-plan.md` §3 Chain 2 and Chain 4.
+
+**Chain 2 — Alliance Holds** (5 events). Gates on the player's ahistorical choice `hrhb_political_goal = united_front` at the existing `hrhb_political_goal` decision event. Historical path is `croat_republic`, so the entire chain cannot fire on the historical baseline by construction.
+- `csq_joint_operations_agreement_1992` (w6-w12): `alliance_lock` floor 0.50 for 200 turns + `bot_priority_shift` HRHB adds {sarajevo, zenica, tuzla} + dimension_shifts.
+- `csq_zagreb_displeasure_1993` (w30-w50): `patron_pressure` HRHB -15 + patron_confidence -15.
+- `csq_territorial_friction_1993` (w40-w65, requires RBiH territory > 30%): `alliance_change` -0.10 + internal_cohesion -5.
+- `csq_federation_early_1994` (w70-w90, requires alliance > 0.40): international_standing +10 and negotiating_leverage +10 for both RBiH and HRHB + sets `federation_formed_early` flag.
+- `csq_joint_offensive_1994` (w80-w110, requires `csq_federation_early_1994`): `aggression_modifier` +0.10 for both RBiH and HRHB for 20 turns.
+
+**Chain 4 — Bihac Collapses** (3 events). Gates on `requires_events: [abdic_karadzic_pact_1993]` (an existing historical event) PLUS morale/supply preconditions. Fires only when the player fails to keep 5th Corps viable.
+- `csq_bihac_pocket_collapses_1994` (w120-w160): requires the Abdic-Karadzic pact AND `morale_average_below: RBiH, 30` AND `enclave_supply_status: bihac, critical`. Effects: RS territorial_legitimacy +10, RBiH military_credibility -15, faction-wide morale -8, sets `bihac_pocket_fell` flag.
+- `csq_northwest_rs_consolidation_1995` (w122-w165, requires collapse): `aggression_modifier` RS +0.10 for 20 turns + `bot_priority_shift` adds {zenica, travnik, vitez}.
+- `csq_bihac_refugee_crisis_1994` (w122-w163, requires collapse): `supply_delta` RBiH -30, `patron_pressure` RS -5, international_standing +5.
+
+13 new integration tests in `tests/consequence_chains.test.ts`:
+- Chain 2 (8): historical-path-fires-nothing on `croat_republic`, per-event gating (flag, turn window, alliance threshold, territory threshold, event dependency), alliance-lock-actually-holds proof, aggression modifier lands for both factions after joint offensive.
+- Chain 4 (5): no-event-fires-without-Abdic-pact proof, collapse gated on morale AND supply (three-state matrix: morale-only, supply-only, both), consolidation aggression+priority-shift proofs, refugee supply-delta proof, registry presence.
+
+### Chain 7 DEFERRED
+
+Per the autonomous session plan's hard-stop rule on endgame architecture:
+- Plan §Chain 7 prerequisite flags (`vance_owen_accepted`, `vance_owen_all_parties`, `contact_group_accepted`, `contact_group_all_parties`) **do not exist anywhere in src or data**. No current event writes them.
+- Plan §Chain 7 Event 3 (`early_dayton_scoring`) requires the war-termination / Dayton-scoring pipeline to honor an early-exit flag. That is architecture, not event authoring.
+- Both gates are real blockers; deferring Chain 7 respects the "writers only, no endgame arch" autonomous rule.
+
+Restart path: author a peace-plan response-option flag contract (`*_accepted`, `*_all_parties`) and a `war_termination_early` hook in `war_termination.ts` FIRST, then Chain 7 event authoring becomes the same shape as Chain 2/4/6.
+
+### Verification
+
+- `npx tsc --noEmit` — clean.
+- `npx vitest run tests/consequence_chains.test.ts tests/consequence_effects.test.ts tests/consequence_consumers.test.ts tests/events_evaluate.test.ts tests/event_conditions.test.ts tests/event_effects.test.ts tests/event_decisions.test.ts tests/event_timing.test.ts tests/integration_event_system.test.ts` — **128/128 pass**.
+- `npm run desktop:map:build` — built in 11.98s.
+
+### Scope boundaries
+
+- **All 3 safely-landable chains now authored** (Chain 2, Chain 4, Chain 6). Chains 1, 3, 5 still blocked pending Sensitive History Design Gate canon re-check. Chain 7 blocked pending peace-plan flag contract + endgame-architecture hook.
+- **No 40w scenario run yet.** Next commit.
+- **Plan §Chain 4 "joint operations unlocked" mechanic** from Event 1 is not implemented beyond the narrative + bot_priority_shift — the plan's more ambitious "HVO brigades can participate in ARBiH corps operations" requires cross-faction operation authority that is separate engine work.
+
+### Artifacts
+
+- Content appended: `data/scenarios/events/consequences.json`
+- Tests appended: `tests/consequence_chains.test.ts`

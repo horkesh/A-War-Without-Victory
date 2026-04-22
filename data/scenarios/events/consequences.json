@@ -145,5 +145,363 @@
       }
     ],
     "historical_source": "Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 6. Counterfactual mirror of Contact Group diplomatic calculus 1993-94."
+  },
+  {
+    "id": "csq_joint_operations_agreement_1992",
+    "title": "The Alliance Endures",
+    "narrative": "The Herceg-Bosna leadership has confirmed it: the RBiH-HVO alliance is not an expedient — it is the strategy. Joint staffs open in Zenica and Mostar. ARBiH brigades now expect HVO artillery to register their front; HVO units count on ARBiH infantry to hold their shoulders. Zagreb has not objected publicly — yet. The alliance floor is sealed against the normal drift of field friction.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 6,
+      "turn_max": 12,
+      "phase": "war",
+      "condition": {
+        "type": "flag_equals",
+        "flag": "hrhb_political_goal",
+        "value": "united_front"
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "ARBiH and HVO formalize the joint command arrangement."
+    },
+    "effects": [
+      {
+        "kind": "alliance_lock",
+        "mode": "floor",
+        "value": 0.50,
+        "duration_turns": 200
+      },
+      {
+        "kind": "bot_priority_shift",
+        "faction": "HRHB",
+        "add_objectives": ["sarajevo", "zenica", "tuzla"],
+        "duration_turns": 60
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "HRHB",
+        "dimension": "internal_cohesion",
+        "delta": -5
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "military_credibility",
+        "delta": 5
+      }
+    ],
+    "historical_source": "Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 2. Counterfactual mirror of the actual spring 1992 RBiH-HVO cooperation documented in Hoare (2004) and Burg & Shoup (2000) before it broke down."
+  },
+  {
+    "id": "csq_zagreb_displeasure_1993",
+    "title": "Zagreb Withdraws Its Patience",
+    "narrative": "Tudjman expected a Croat entity — a sibling republic to stand beside Zagreb at the negotiating table. The united-front policy has denied him that. Patron support does not end with a slammed door; it ends with couriers who fail to arrive, with requisitions that are \"being processed,\" with artillery shells that somehow never ship. The HVO budget is quietly rewritten.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 30,
+      "turn_max": 50,
+      "phase": "war",
+      "condition": {
+        "type": "flag_equals",
+        "flag": "hrhb_political_goal",
+        "value": "united_front"
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Zagreb reduces material support for HRHB."
+    },
+    "effects": [
+      {
+        "kind": "patron_pressure",
+        "faction": "HRHB",
+        "delta": -15
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "HRHB",
+        "dimension": "patron_confidence",
+        "delta": -15
+      }
+    ],
+    "historical_source": "Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 2. Reflects real Tudjman-Boban tensions documented in ICTY Prlic et al. judgment (2013)."
+  },
+  {
+    "id": "csq_territorial_friction_1993",
+    "title": "Alliance, Not Equality",
+    "narrative": "The united front has held, but central Bosnia has decided what kind of united front. ARBiH recruitment, casualties, and mobilization dwarf HVO's — and so does ARBiH's share of central Bosnia. HRHB officers argue that this is occupation dressed in alliance clothing. There is no shooting war, but there is a long, cold argument that thins every joint staff meeting.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 40,
+      "turn_max": 65,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "hrhb_political_goal",
+            "value": "united_front"
+          },
+          {
+            "type": "territory_percentage",
+            "faction": "RBiH",
+            "comparator": "above",
+            "threshold": 0.30
+          }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Cold political friction between HRHB and RBiH inside the alliance."
+    },
+    "effects": [
+      {
+        "kind": "alliance_change",
+        "delta": -0.10
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "HRHB",
+        "dimension": "internal_cohesion",
+        "delta": -5
+      }
+    ],
+    "historical_source": "Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 2."
+  },
+  {
+    "id": "csq_federation_early_1994",
+    "title": "Federation Without War",
+    "narrative": "Washington had expected to broker a federation out of the ruins of a Croat-Bosniak war. Instead the Federation arrives early, with institutional foundations that are improvised rather than hammered out in atrocity hearings. The RBiH-HRHB pairing walks into the negotiating halls as a single delegation — a weaker one, perhaps, for never having been tested by fratricide.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 70,
+      "turn_max": 90,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "hrhb_political_goal",
+            "value": "united_front"
+          },
+          {
+            "type": "alliance_above",
+            "value": 0.40
+          }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "An early Federation forms — without a Croat-Bosniak war to force it."
+    },
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "international_standing",
+        "delta": 10
+      },
+      {
+        "faction": "HRHB",
+        "dimension": "international_standing",
+        "delta": 10
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "negotiating_leverage",
+        "delta": 10
+      },
+      {
+        "faction": "HRHB",
+        "dimension": "negotiating_leverage",
+        "delta": 10
+      }
+    ],
+    "sets_flags": {
+      "federation_formed_early": true
+    },
+    "historical_source": "Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 2. Counterfactual of the 1994 Washington Agreement."
+  },
+  {
+    "id": "csq_joint_offensive_1994",
+    "title": "Combined Arms",
+    "narrative": "With the Federation formalized and the alliance floor preserved, HVO and ARBiH staffs plan the first truly joint offensive of the war. Not a handshake between two armies across a line of control — a single operational plan with two commanders signing the same map. VRS defenders on the central axis begin receiving after-action reports that describe a single threat, not two.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 80,
+      "turn_max": 110,
+      "phase": "war",
+      "requires_events": ["csq_federation_early_1994"]
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Joint HVO-ARBiH operations launch on the central axis."
+    },
+    "effects": [
+      {
+        "kind": "aggression_modifier",
+        "faction": "RBiH",
+        "delta": 0.10,
+        "duration_turns": 20
+      },
+      {
+        "kind": "aggression_modifier",
+        "faction": "HRHB",
+        "delta": 0.10,
+        "duration_turns": 20
+      }
+    ],
+    "historical_source": "Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 2."
+  },
+  {
+    "id": "csq_bihac_pocket_collapses_1994",
+    "title": "The Pocket Falls",
+    "narrative": "The 5th Corps has held against VRS, RSK, and Abdic's APWB for almost two years. The arithmetic of siege outlasts the arithmetic of defenders: no airdrops, no reinforcement road, no column of volunteers left to march in. The RBiH defensive perimeter breaks in sectors and does not close again. Refugees cross into Croatian territory by the tens of thousands. A Corps that had been a national symbol becomes a casualty list.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 120,
+      "turn_max": 160,
+      "phase": "war",
+      "requires_events": ["abdic_karadzic_pact_1993"],
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "morale_average_below",
+            "faction": "RBiH",
+            "threshold": 30
+          },
+          {
+            "type": "enclave_supply_status",
+            "municipality": "bihac",
+            "status": "critical"
+          }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 20,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "The Bihac pocket collapses. 5th Corps is destroyed or captured."
+    },
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": -8
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "territorial_legitimacy",
+        "delta": 10
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "military_credibility",
+        "delta": -15
+      }
+    ],
+    "sets_flags": {
+      "bihac_pocket_fell": true
+    },
+    "historical_source": "Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 4. Counterfactual to the historical 5th Corps breakout of 1995."
+  },
+  {
+    "id": "csq_northwest_rs_consolidation_1995",
+    "title": "Northwest Front Freed",
+    "narrative": "With Bihac eliminated as an open wound, the VRS 2nd Krajina Corps redeploys. Fifteen to twenty brigades that had been tied down for two years walk out of the Bihac perimeter and onto trucks for central Bosnia. The strategic picture shifts faster than any single operation could ever shift it. The RS political leadership smells the end of the war — on its terms.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 122,
+      "turn_max": 165,
+      "phase": "war",
+      "requires_events": ["csq_bihac_pocket_collapses_1994"]
+    },
+    "once": true,
+    "priority": 30,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "VRS 2nd Krajina Corps redeploys to central Bosnia."
+    },
+    "effects": [
+      {
+        "kind": "aggression_modifier",
+        "faction": "RS",
+        "delta": 0.10,
+        "duration_turns": 20
+      },
+      {
+        "kind": "bot_priority_shift",
+        "faction": "RS",
+        "add_objectives": ["zenica", "travnik", "vitez"],
+        "duration_turns": 20
+      }
+    ],
+    "historical_source": "Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 4."
+  },
+  {
+    "id": "csq_bihac_refugee_crisis_1994",
+    "title": "A Quarter Million on the Move",
+    "narrative": "The displaced of Bihac do not stop at the first line of safety. Croatia's temporary camps overflow within weeks; the columns reach the Neretva, the Lasva, the Bosna. ARBiH supply officers compete with UNHCR for the same trucks, the same fuel, the same calories. International coverage hardens — but the people are already cold, and damage to the RBiH manpower system is already done.",
+    "category": "humanitarian",
+    "trigger": {
+      "turn_min": 122,
+      "turn_max": 163,
+      "phase": "war",
+      "requires_events": ["csq_bihac_pocket_collapses_1994"]
+    },
+    "once": true,
+    "priority": 30,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "A massive refugee wave floods RBiH-held central Bosnia."
+    },
+    "effects": [
+      {
+        "kind": "supply_delta",
+        "faction": "RBiH",
+        "delta": -30
+      },
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": -5
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "international_standing",
+        "delta": 5
+      }
+    ],
+    "historical_source": "Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 4."
   }
 ]
