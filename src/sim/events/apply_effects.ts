@@ -6,6 +6,7 @@
 import type { GameState, FactionId, ControlEvent } from '../../state/game_state.js';
 import type { EventEffect } from './event_types.js';
 import type { EventConstraints } from './event_constraints.js';
+import { getActiveAllianceBounds } from './active_modifiers.js';
 
 /** Deterministic kind ordering for effect application (alphabetical). */
 const EFFECT_KIND_ORDER: Record<string, number> = {
@@ -149,10 +150,18 @@ function applyPatronPressure(state: GameState, faction: FactionId, delta: number
     rel.support_level = clamp(rel.support_level + delta, 0, 100);
 }
 
-/** Adjust RBiH-HRHB alliance value. Clamped [-1, 1]. */
+/** Adjust RBiH-HRHB alliance value.
+ *  Applies delta, clamps to [-1, 1], then clamps against any active
+ *  alliance_locks (floor/ceiling). Active locks override any incoming delta
+ *  that would push the value past them. */
 function applyAllianceChange(state: GameState, delta: number): void {
     const current = state.political.war_alliance_rbih_hrhb ?? 0;
-    state.political.war_alliance_rbih_hrhb = clamp(current + delta, -1, 1);
+    let next = clamp(current + delta, -1, 1);
+    const currentTurn = state.meta.turn ?? 0;
+    const bounds = getActiveAllianceBounds(state, currentTurn);
+    if (bounds.floor != null && next < bounds.floor) next = bounds.floor;
+    if (bounds.ceiling != null && next > bounds.ceiling) next = bounds.ceiling;
+    state.political.war_alliance_rbih_hrhb = next;
 }
 
 /** Grant equipment to a faction's best-equipped brigade (or one in target municipality).

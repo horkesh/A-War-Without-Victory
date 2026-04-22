@@ -3713,3 +3713,46 @@ Plan: `docs/plans/2026-03-24-v090-consequence-system-plan.md` §4.1–§4.3 + §
 
 - Plan source: `docs/plans/2026-03-24-v090-consequence-system-plan.md`
 - Regression: `tests/consequence_effects.test.ts`
+
+## [2026-04-22] feat(events): wire v0.9.0 Consequence System consumers + cleanup GC (Phase 1 Session 2)
+
+**Type:** v0.9.0 Consequence System / engine consumers
+**Files:** `src/sim/events/active_modifiers.ts` (new), `src/sim/combat/guerrilla_attrition.ts` (new), `src/sim/events/apply_effects.ts`, `src/sim/combat/ongoing_mobilization.ts`, `src/sim/combat/bot_strategy.ts`, `src/sim/turn_phases/war_phases.ts`, `tests/consequence_consumers.test.ts` (new)
+**Status:** VERIFIED — tsc clean, 192/192 vitest pass across 14 event+bot-strategy test files, desktop:map:build green. No sim behavior change on the historical path (all modifier arrays empty until a `csq_*` event fires).
+
+### Summary of changes
+
+Plan: `docs/plans/2026-03-24-v090-consequence-system-plan.md` §4.3 + §9 Phase 1 Session 2.
+
+1. **Central modifier surface** (`src/sim/events/active_modifiers.ts`, new). Single canonical owner for querying active event-driven modifiers and GCing expired entries. Exports:
+   - `getActiveRecruitmentMultiplier(state, faction, currentTurn)` — product across active modifiers; 1.0 when none.
+   - `getActiveAllianceBounds(state, currentTurn)` — most-restrictive floor / most-restrictive ceiling.
+   - `getActiveBotObjectiveShifts(state, faction, currentTurn)` — merged add/remove Sets.
+   - `getActiveGuerrillaThreatIntensity(state, faction, munId, currentTurn)` — max intensity (conservative stacking).
+   - `cleanupExpiredEventModifiers(state, currentTurn)` — unified GC across six containers (event_aggression_modifiers, event_constraints.{operation_blocks, doctrine_overrides, scope_restrictions}, guerrilla_threats, recruitment_modifiers, alliance_locks, bot_priority_shifts).
+2. **Alliance-lock clamp** wired into `applyAllianceChange`. After the normal delta + [-1, 1] clamp, any active floor raises the value and any active ceiling caps it. Multiple locks of the same mode take the most restrictive bound.
+3. **Recruitment modifier** stacked into `ongoing_mobilization` at both call sites (primary per-controller path and cross-faction pool path). Multiplicative stacking consistent with the plan's rule; historical path multiplies by 1.0 (no-op).
+4. **Bot priority shifts** merged into `isOffensiveObjective` and `isDefensivePriority` accessors via a new optional `state` parameter. Backward compatible: existing state-less callers get unchanged static answers. When state is provided, `remove_objectives` wins over static + add (explicit subtraction).
+5. **Guerrilla attrition** implemented in a new `src/sim/combat/guerrilla_attrition.ts` module. Active brigades in municipalities that match an active `guerrilla_threat` for their faction lose cohesion/morale per turn proportional to threat intensity (max 3 cohesion, 2 morale at intensity 1.0). No-op when `guerrilla_threats` is empty.
+6. **Two new pipeline steps** in `war_phases.ts`:
+   - `cleanup-expired-event-modifiers` — runs before `update-event-readiness`, GCs prior-turn expired modifiers before `evaluate-events` writes this turn's.
+   - `apply-guerrilla-attrition` — runs after `update-formation-fatigue`, joining the per-turn brigade-state cohort.
+7. **20 new consumer-contract unit tests** in `tests/consequence_consumers.test.ts`: alliance clamp against floor/ceiling, multi-faction recruitment multiplier, bot accessor add/remove merge, guerrilla attrition intensity scaling + faction-scoping + cohesion/morale floor, and GC across all six modifier containers.
+
+### Verification
+
+- `npx tsc --noEmit` — clean.
+- `npx vitest run tests/consequence_consumers.test.ts tests/consequence_effects.test.ts tests/event_effects.test.ts tests/event_conditions.test.ts tests/events_evaluate.test.ts tests/pressure_system.test.ts tests/event_decisions.test.ts tests/event_timing.test.ts tests/integration_event_system.test.ts tests/ai_commander_event_decision.test.ts tests/bot_three_sides_validation.test.ts tests/bot_strategy_adaptation_a1.test.ts tests/commander_override.test.ts tests/hardcoded_rail_audit.test.ts` — **192/192 pass**. Zero regression in existing bot-strategy, event, and commander tests.
+- `npm run desktop:map:build` — built in 12.07s.
+
+### Scope boundaries
+
+- **Consumers only.** Effect types from Session 1 now have readers; no new effect types added.
+- **No `csq_*` events authored yet.** Chain content lands in Phase 2+.
+- **Historical path unchanged by construction.** Every consumer is guarded: `getActiveRecruitmentMultiplier` returns 1.0 when no modifiers exist; `getActiveAllianceBounds` returns `{}`; bot accessors are backward compatible; `applyGuerrillaAttrition` exits early with an empty threat array. A scenario run with no `csq_*` event definitions loaded produces identical output to pre-Session-2.
+
+### Artifacts
+
+- New module: `src/sim/events/active_modifiers.ts`
+- New module: `src/sim/combat/guerrilla_attrition.ts`
+- New regression: `tests/consequence_consumers.test.ts`

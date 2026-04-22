@@ -36,8 +36,9 @@
  * ═══════════════════════════════════════════════════════════════
  */
 
-import type { BrigadePosture, FactionId } from '../../state/game_state.js';
+import type { BrigadePosture, FactionId, GameState } from '../../state/game_state.js';
 import type { DoctrinePhase, StandingOrder, WarTimeline } from '../../state/war_timeline.js';
+import { getActiveBotObjectiveShifts } from '../events/active_modifiers.js';
 import {
     RS_EARLY_WAR_END_WEEK,
 } from './bot_constants.js';
@@ -609,24 +610,39 @@ export function isCorridorMunicipality(
 
 /**
  * Check if a municipality is a strategic offensive objective for the faction.
+ * v0.9.0 Consequence System: merges runtime add/remove from
+ * `state.military.bot_priority_shifts` (state parameter) when provided.
+ * State-less callers get the static FACTION_STRATEGIES answer unchanged.
  */
 export function isOffensiveObjective(
     munId: string | undefined | null,
-    faction: FactionId
+    faction: FactionId,
+    state?: GameState
 ): boolean {
     if (!munId) return false;
     const strategy = FACTION_STRATEGIES[faction];
-    return strategy.offensive_objectives.includes(munId);
+    const inStatic = strategy.offensive_objectives.includes(munId);
+    if (!state) return inStatic;
+    const { adds, removes } = getActiveBotObjectiveShifts(state, faction, state.meta.turn ?? 0);
+    if (removes.has(munId)) return false;
+    return inStatic || adds.has(munId);
 }
 
 /**
  * Check if a municipality is a defensive priority for the faction.
+ * v0.9.0 Consequence System: same runtime merge semantics as
+ * isOffensiveObjective.
  */
 export function isDefensivePriority(
     munId: string | undefined | null,
-    faction: FactionId
+    faction: FactionId,
+    state?: GameState
 ): boolean {
     if (!munId) return false;
     const strategy = FACTION_STRATEGIES[faction];
-    return strategy.defensive_priorities.includes(munId);
+    const inStatic = strategy.defensive_priorities.includes(munId);
+    if (!state) return inStatic;
+    const { adds, removes } = getActiveBotObjectiveShifts(state, faction, state.meta.turn ?? 0);
+    if (removes.has(munId)) return false;
+    return inStatic || adds.has(munId);
 }
