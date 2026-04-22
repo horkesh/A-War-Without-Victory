@@ -95,47 +95,29 @@ export function getActiveGuerrillaThreatIntensity(
     return max;
 }
 
-/** Remove all event-driven modifier entries whose `expires_turn <= currentTurn`.
+/** Remove expired modifier entries whose `expires_turn <= currentTurn`.
  *
- *  Unified GC owner for six modifier containers:
- *    - `state.military.event_aggression_modifiers` (pre-v0.9.0)
- *    - `state.military.event_constraints.operation_blocks`
- *    - `state.military.event_constraints.doctrine_overrides`
- *    - `state.military.event_constraints.scope_restrictions`
+ *  Scoped to the v0.9.0 Consequence System's own arrays:
  *    - `state.military.guerrilla_threats`
  *    - `state.military.recruitment_modifiers`
  *    - `state.military.alliance_locks`
  *    - `state.military.bot_priority_shifts`
  *
+ *  Deliberately does NOT touch pre-existing arrays
+ *  (`event_aggression_modifiers`, `event_constraints.*`). Those were unbounded
+ *  before this session and are out of scope for this PR — retrofitting a GC
+ *  onto them would change the golden `final_save.json` hash on historical
+ *  runs. Their readers filter by `expires_turn > currentTurn` so the
+ *  behavior contract is unaffected by keeping expired entries around.
+ *
  *  Must run at turn start, before `evaluate-events` writes this turn's new
- *  modifiers. Readers still guard with `expires_turn > currentTurn` because
- *  this GC runs only once per turn. */
+ *  modifiers. Readers of the new arrays still guard with
+ *  `expires_turn > currentTurn` because this GC runs only once per turn. */
 export function cleanupExpiredEventModifiers(
     state: GameState,
     currentTurn: number
 ): void {
     const mil = state.military;
-
-    if (mil.event_aggression_modifiers) {
-        mil.event_aggression_modifiers = mil.event_aggression_modifiers.filter(
-            m => m.expires_turn > currentTurn
-        );
-    }
-
-    const ec = mil.event_constraints;
-    if (ec) {
-        if (ec.operation_blocks) {
-            ec.operation_blocks = ec.operation_blocks.filter(e => e.expires_turn > currentTurn);
-        }
-        if (ec.doctrine_overrides) {
-            ec.doctrine_overrides = ec.doctrine_overrides.filter(e => e.expires_turn > currentTurn);
-        }
-        if (ec.scope_restrictions) {
-            ec.scope_restrictions = ec.scope_restrictions.filter(
-                e => e.expires_turn == null || e.expires_turn > currentTurn
-            );
-        }
-    }
 
     if (mil.guerrilla_threats) {
         mil.guerrilla_threats = mil.guerrilla_threats.filter(t => t.expires_turn > currentTurn);

@@ -4037,3 +4037,49 @@ event fires → apply_effects.applyBotPriorityShift →
 
 - Module: `src/sim/combat/commander/bot_priority_shift_augmentation.ts`
 - Tests: `tests/bot_priority_shift_wiring.test.ts`
+
+## [2026-04-22] fix(events): retire Chain 2 + narrow cleanup scope to fix CI scenarios regression
+
+**Type:** v0.9.0 Consequence System / CI fix
+**Files:** `data/scenarios/events/consequences.json`, `tests/consequence_chains.test.ts`, `src/sim/events/active_modifiers.ts`, `tests/consequence_consumers.test.ts`
+**Status:** VERIFIED — tsc clean, 52w historical-path scenario now produces byte-identical output to `main@427cc42` on both `activity_summary.json` and `final_save.json`. 17/17 chain integration tests pass. Closes the PR #1 `scenarios` CI failure.
+
+### Background
+
+Following the initial v0.9.0 PR, the `scenarios` CI job failed with a golden-baseline mismatch on `apr1992_52w/activity_summary.json` (and subsequently on `final_save.json`). Investigation confirmed the mismatch was reproducible locally and caused by my PR. `main@427cc42` passes `activity_summary.json` and fails only on `final_save.json` (pre-existing drift since `bc54c03`, not my fault). My PR had TWO distinct regressions against main's sim behavior.
+
+### Root causes
+
+1. **Chain 2 fires on the historical 52w run.** My Chain 2 events gate on `flag_equals: hrhb_political_goal = united_front`. Plan §3 Chain 2 + Appendix B assume the historical path uses `croat_republic`, but the game's `hrhb_political_goal` decision event lists `united_front` as its first response option, and `bot_response_logic: 'historical'` picks it in the 52w bot-only run. Three Chain 2 events (`csq_joint_operations_agreement_1992`, `csq_zagreb_displeasure_1993`, `csq_territorial_friction_1993`) appeared in the scenario's `fired_event_ids`, applying alliance clamps / patron pressure deltas / aggression modifiers that perturbed front contact and displacement counts (activity drift: front_active max 1548→1308, displacement_eligible max 1696→1408 — ~15% reduction).
+
+2. **`cleanup-expired-event-modifiers` pruned pre-existing arrays.** The Session 2 GC step filtered `event_aggression_modifiers` and `event_constraints.*` by `expires_turn > currentTurn`. Main has never GC'd these arrays; historical events write aggression modifiers that accumulate with expired entries in perpetuity. My cleanup removed those expired entries, changing `final_save.json` serialization against main. The behavior contract is unaffected (readers filter by `expires_turn > currentTurn` anyway), but the serialized state differs.
+
+### Changes
+
+1. **Chain 2 deferred.** All five `csq_*_1992/1993/1994` Chain 2 events removed from `data/scenarios/events/consequences.json` (`csq_joint_operations_agreement_1992`, `csq_zagreb_displeasure_1993`, `csq_territorial_friction_1993`, `csq_federation_early_1994`, `csq_joint_offensive_1994`). Eight Chain 2 integration tests removed from `tests/consequence_chains.test.ts`. Chain 4 and Chain 6 retained — they don't fire historically (Chain 4 requires w120+ + morale<30 + supply critical; Chain 6 gates on `rbih_state_identity = bosniak_national` which the bot's historical pick avoids). Restart path: resolve the plan/data mismatch on `hrhb_political_goal` historical default (either re-author the event's response-option order, fix `bot_response_logic: 'historical'` semantics, or re-gate Chain 2 on a player-chose-ahistorically marker that doesn't exist today).
+
+2. **Cleanup scope narrowed.** `cleanupExpiredEventModifiers` now GCs ONLY the four v0.9.0-owned arrays (`guerrilla_threats`, `recruitment_modifiers`, `alliance_locks`, `bot_priority_shifts`). `event_aggression_modifiers` and `event_constraints.*` are explicitly left untouched, with a canonical comment naming the reason ("retrofitting a GC onto them would change the golden final_save.json hash on historical runs"). The `cleanup-expired-event-modifiers` pipeline step continues to run at turn start; on the historical path it now executes but mutates nothing.
+
+3. **Test scope updated.** `tests/consequence_consumers.test.ts` split the one "removes expired entries across all six containers" test into two: (a) the four new arrays ARE pruned; (b) pre-existing arrays are EXPLICITLY NOT touched (with scope comment).
+
+### Verification
+
+- `npx tsc --noEmit` — clean.
+- `npx vitest run` across 7 event/consequence/wiring/war_phase files — 93/93 pass.
+- `npm run test:baselines --scenarios apr1992_52w`:
+  - **`activity_summary.json` hash matches main (was the CI failure artifact).**
+  - `final_save.json` hash is byte-identical to `main@427cc42`'s output (`c1e25a21...`). Both diverge from the baseline manifest in the same pre-existing way.
+- Golden baseline manifest NOT refreshed. Per life lesson 2026-02-22, rebaselining requires user sign-off. The pre-existing `final_save.json` drift in main is out of scope for this PR.
+
+### Scope boundaries and deferrals
+
+- **Chain 2 authoring is deferred, not lost.** The 5 events and their 8 integration tests can be restored verbatim once the `hrhb_political_goal` historical-flag contract is clarified. A short follow-up PR can add them back after the plan/data mismatch is resolved.
+- **`event_aggression_modifiers` unbounded growth is pre-existing.** Retrofitting GC onto it is a separate, correct-but-out-of-scope change that should carry its own golden-baseline refresh.
+- **Pre-existing main `final_save.json` drift is not addressed.** That baseline was captured at `bc54c03` (2026-04-15); subsequent main commits (specifically `dca6322 fix(sim): make peace-plan rejection reduce patron support`) drifted it. Its fix is a baseline refresh task, not this PR's.
+
+### Artifacts
+
+- Modified: `data/scenarios/events/consequences.json` (11 csq_ events → 6)
+- Modified: `src/sim/events/active_modifiers.ts` (cleanup scope narrowed)
+- Modified: `tests/consequence_chains.test.ts` (Chain 2 tests removed)
+- Modified: `tests/consequence_consumers.test.ts` (cleanup test scope updated)

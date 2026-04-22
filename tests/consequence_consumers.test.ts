@@ -268,13 +268,9 @@ describe('applyGuerrillaAttrition', () => {
 });
 
 describe('cleanupExpiredEventModifiers', () => {
-    it('removes expired entries across all six containers', () => {
+    it('removes expired entries from the four new v0.9.0 arrays', () => {
         const state = makeState();
-        // Seed arrays with one expired + one active entry each
-        (state.military as any).event_aggression_modifiers = [
-            { faction: 'RS', delta: 0.1, expires_turn: 5 },
-            { faction: 'RS', delta: 0.2, expires_turn: 20 },
-        ];
+        // Seed the four in-scope arrays with one expired + one active entry each
         (state.military as any).guerrilla_threats = [
             { faction: 'RS', municipalities: ['a'], intensity: 0.5, expires_turn: 5 },
             { faction: 'RS', municipalities: ['b'], intensity: 0.5, expires_turn: 20 },
@@ -290,6 +286,24 @@ describe('cleanupExpiredEventModifiers', () => {
         (state.military as any).bot_priority_shifts = [
             { faction: 'RS', add_objectives: ['a'], expires_turn: 5 },
             { faction: 'RS', add_objectives: ['b'], expires_turn: 20 },
+        ];
+
+        cleanupExpiredEventModifiers(state, 10);
+
+        expect(state.military.guerrilla_threats).toHaveLength(1);
+        expect(state.military.recruitment_modifiers).toHaveLength(1);
+        expect(state.military.alliance_locks).toHaveLength(1);
+        expect(state.military.bot_priority_shifts).toHaveLength(1);
+    });
+
+    it('does NOT touch pre-existing event_aggression_modifiers or event_constraints arrays', () => {
+        // Scope decision: the v0.9.0 GC only touches arrays this session added.
+        // Pre-existing arrays keep their legacy unbounded-growth behavior so the
+        // golden final_save.json hash on historical runs is preserved.
+        const state = makeState();
+        (state.military as any).event_aggression_modifiers = [
+            { faction: 'RS', delta: 0.1, expires_turn: 5 },
+            { faction: 'RS', delta: 0.2, expires_turn: 20 },
         ];
         state.military.event_constraints = {
             operation_blocks: [
@@ -308,14 +322,11 @@ describe('cleanupExpiredEventModifiers', () => {
 
         cleanupExpiredEventModifiers(state, 10);
 
-        expect(state.military.event_aggression_modifiers).toHaveLength(1);
-        expect(state.military.guerrilla_threats).toHaveLength(1);
-        expect(state.military.recruitment_modifiers).toHaveLength(1);
-        expect(state.military.alliance_locks).toHaveLength(1);
-        expect(state.military.bot_priority_shifts).toHaveLength(1);
-        expect(state.military.event_constraints!.operation_blocks).toHaveLength(1);
-        expect(state.military.event_constraints!.doctrine_overrides).toHaveLength(1);
-        expect(state.military.event_constraints!.scope_restrictions).toHaveLength(1);
+        // Pre-existing arrays survive unchanged — both expired and active entries.
+        expect(state.military.event_aggression_modifiers).toHaveLength(2);
+        expect(state.military.event_constraints!.operation_blocks).toHaveLength(2);
+        expect(state.military.event_constraints!.doctrine_overrides).toHaveLength(2);
+        expect(state.military.event_constraints!.scope_restrictions).toHaveLength(2);
     });
 
     it('is a no-op when all arrays are empty or undefined', () => {
