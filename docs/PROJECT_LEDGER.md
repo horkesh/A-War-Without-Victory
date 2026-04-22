@@ -3843,3 +3843,87 @@ Restart path: author a peace-plan response-option flag contract (`*_accepted`, `
 
 - Content appended: `data/scenarios/events/consequences.json`
 - Tests appended: `tests/consequence_chains.test.ts`
+
+## [2026-04-22] run(40w): historical-path smoke after v0.9.0 Consequence System substrate + 3 chains
+
+**Type:** Scenario smoke — baseline-unchanged proof
+**Files:** no code changes; run artifacts only under `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n0/`
+**Status:** RAW NUMBERS ONLY. **Pyrrhic two-tier post-run panel NOT dispatched** (autonomous session; user oversight required per napkin §Post-Run Analysis Protocol). Needs panel review on user return.
+
+### Raw metrics
+
+| Metric | Value |
+|---|---|
+| Turns simulated | 40 |
+| Anchor checks | **27 / 27 passed** |
+| Bot benchmarks | **6 / 6 passed** (0 failed) |
+| Anomalies (critical / warning / info) | **0 / 1 / 7** |
+| final_state_hash | `a8fc3dcf77621f83` |
+| Napkin baseline n1570 hash | `6810f0c64713e7f6` |
+| Hash match? | **No (differs)** |
+
+### Facts without interpretation
+
+- Anchor count (27/27) and benchmark count (6/6) match the n1570 baseline claimed in the napkin. Zero scenarios broke.
+- The `final_state_hash` differs from n1570's recorded hash. This is **expected-as-change** because this session added `data/scenarios/events/consequences.json` (5 new `csq_*` events loaded into the registry every turn) and two new pipeline steps (`cleanup-expired-event-modifiers`, `apply-guerrilla-attrition`) that execute each turn, even on the historical path. Whether the hash delta reflects only registry/pipeline-structure side-effects or a genuine behavioral drift requires the post-run panel to classify.
+- No `csq_*` event appears in the fired-event list for this run (by construction: all csq_ events gate on ahistorical flags that are NOT set on the default scenario). Panel can confirm by inspecting `weekly_report.jsonl`.
+- 1 warning-level anomaly and 7 info-level anomalies were recorded; their counts are comparable to prior clean-baseline runs described in the napkin. Panel should diff against n1570's anomaly profile.
+
+### Panel review pending (MANDATORY on user return)
+
+Per napkin §Post-Run Analysis Protocol, the orchestrator must dispatch Tier 1 investigators and Tier 2 analysts before any go/no-go. This session did not dispatch because the user was away. Specifically needed:
+- `/scenario-creator-runner-tester` — calibration %, anchors, benchmarks, per-region breakdown, troop strengths.
+- `/anomaly-triage` — anomaly pattern classification; is the hash delta hygienic (no sim drift) or substantive?
+- `/war-or-game` — realism sniff test.
+- `/operations-expert` — op health under the substrate.
+- `/sector-expert` — sector assignment truth.
+- `/formation-expert` — OOB integrity.
+- `/historian` — historical plausibility of any divergences.
+- Tier 2 analysts if anything from Tier 1 needs triage.
+
+### Artifacts
+
+- Run directory: `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n0/`
+- Ledger knowledge (session summary) appended below.
+
+## [2026-04-22] session(v0.9.0): autonomous Consequence System build — summary and hand-back
+
+**Type:** Session closeout
+**Files:** N/A (meta entry)
+**Status:** Three safe chains landed; Chain 7 + Chains 1/3/5 deferred with named blockers.
+
+### What shipped this autonomous session (7 commits)
+
+| Commit | Lane |
+|---|---|
+| `da7e162` | Phase 1 Session 1 — 5 EventEffect variants + 4 MilitaryState arrays + 15 writer tests |
+| `28947c7` | Phase 1 Session 2 — 4 engine consumers + cleanup GC step + 20 consumer tests |
+| `6bf2808` | Chain 6 (RBiH Identity) — 3 events + loader wire + 12 integration tests |
+| `cc05545` | Chain 2 + Chain 4 (8 events) + 13 integration tests + Chain 7 deferral recorded |
+| (40w smoke run artifacts; no code commit) | Historical-path baseline proof |
+
+### v0.9.0 Consequence System state after this session
+
+- **Phase 1 (Foundation) — CLOSED.** Effect types, state fields, consumers, cleanup GC all live.
+- **Chain 2 (Alliance Holds) — CLOSED for authoring.** 5 events; 8 integration tests.
+- **Chain 4 (Bihac Collapses) — CLOSED for authoring.** 3 events; 5 integration tests. Gated on the existing `abdic_karadzic_pact_1993` event + morale + Bihac supply.
+- **Chain 6 (RBiH Identity) — CLOSED for authoring.** 3 events; 12 integration tests.
+- **Chain 7 (Early Peace) — BLOCKED.** Prereq flags (`vance_owen_accepted`, `*_all_parties`, `contact_group_accepted`) do not exist in canon. `early_dayton_scoring` also requires `war_termination.ts` integration. Restart path documented.
+- **Chains 1, 3, 5 (Drina Cleansing restraint, Srebrenica survives, RS max aggression) — BLOCKED pending canon review.** Plan predates the 2026-04-16 Sensitive History Design Gate and needs a canon re-check before authoring atrocity-adjacent chains.
+- **40w historical-path smoke — RAW NUMBERS POSTED, PANEL REVIEW PENDING.** 27/27 anchors and 6/6 benchmarks both match napkin baseline n1570; final_state_hash differs (expected per registry/pipeline structural change; needs panel classification).
+
+### Work remaining before v0.9.0 MVP closes
+
+1. User-led canon re-check of plan Chains 1/3/5 against `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`. Proceed to author only what the design gate permits.
+2. Chain 7 unblockers: peace-plan flag contract on existing peace-plan events + `war_termination.ts` early-exit hook. Then author Chain 7 events.
+3. Two-tier Pyrrhic panel review of the 40w smoke hash delta (this session's deferred item).
+4. Plan §9 Phase 2+ scenario runs with ahistorical flags set (200w with player-chooses-`united_front` etc.) to prove downstream mechanics. Requires user presence for Pyrrhic panel.
+5. Plan §5 Dynamic Codex integration (ghost entries + Tier 3 dynamic sections) — explicitly a v0.9.1 milestone downstream dependency.
+6. Plan §10 acceptance criteria #7 "26 new events total" — this session shipped 11 csq_ events (Chain 2=5, Chain 4=3, Chain 6=3). Remaining 15 wait on the canon + endgame blockers above.
+
+### Artifacts index (this session)
+
+- Engine: `src/sim/events/event_types.ts`, `src/sim/events/apply_effects.ts`, `src/sim/events/active_modifiers.ts` (new), `src/sim/events/event_loader.ts`, `src/state/game_state.ts`, `src/sim/combat/guerrilla_attrition.ts` (new), `src/sim/combat/ongoing_mobilization.ts`, `src/sim/combat/bot_strategy.ts`, `src/sim/turn_phases/war_phases.ts`
+- Content: `data/scenarios/events/consequences.json`
+- Regressions: `tests/consequence_effects.test.ts`, `tests/consequence_consumers.test.ts`, `tests/consequence_chains.test.ts`
+- Run: `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n0/`
