@@ -52,9 +52,12 @@ function makeFixture(opts: {
         },
     } as unknown as GameState;
     const c2o: CanonicalToOperationalMap = { 'op:a:1': 'op:a:1', 'op:b:2': 'op:b:2' };
-    const o2c: OperationalToCanonicalReverseMap = {
-        'op:a:1': ['op:a:1'], 'op:a:2': ['op:a:2'], 'op:b:1': ['op:b:1'], 'op:b:2': ['op:b:2'],
-    };
+    const o2c: OperationalToCanonicalReverseMap = new Map([
+        ['op:a:1', ['op:a:1']],
+        ['op:a:2', ['op:a:2']],
+        ['op:b:1', ['op:b:1']],
+        ['op:b:2', ['op:b:2']],
+    ]);
     return { state, edges, c2o, o2c };
 }
 
