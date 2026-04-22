@@ -3756,3 +3756,38 @@ Plan: `docs/plans/2026-03-24-v090-consequence-system-plan.md` §4.3 + §9 Phase 
 - New module: `src/sim/events/active_modifiers.ts`
 - New module: `src/sim/combat/guerrilla_attrition.ts`
 - New regression: `tests/consequence_consumers.test.ts`
+
+## [2026-04-22] content(events): author v0.9.0 Chain 6 — RBiH Identity consequence chain
+
+**Type:** v0.9.0 Consequence System / content authoring
+**Files:** `data/scenarios/events/consequences.json` (new), `src/sim/events/event_loader.ts`, `tests/consequence_chains.test.ts` (new)
+**Status:** VERIFIED — tsc clean, 115/115 event-system vitest pass, 12/12 new chain integration tests pass including explicit historical-path-fires-nothing proof.
+
+### Summary of changes
+
+Plan: `docs/plans/2026-03-24-v090-consequence-system-plan.md` §3 Chain 6.
+
+Chain 6 is the canon-neutral, lowest-risk chain (no atrocity representation, only one new effect type consumed). It gates entirely on the player's ahistorical choice of `rbih_state_identity = bosniak_national` at the existing `rbih_state_identity` decision event (turn 2-5). Because historical play sets `rbih_state_identity = civic`, this chain is calibration-safe by construction (2026-04-06 life lesson).
+
+1. **Three new `csq_` events** in `data/scenarios/events/consequences.json` (new file):
+   - `csq_minority_defections_1992` — fires w8-w20. Morale/cohesion drop + `recruitment_modifier` 0.80× for 20 turns + internal_cohesion -5.
+   - `csq_bosniak_unity_1993` — fires w30-w55. Cohesion +5 + `recruitment_modifier` 1.15× for 30 turns + internal_cohesion +10.
+   - `csq_international_disillusionment_1993` — fires w40-w70 only when RBiH international_standing < 40. Patron_pressure -10 + negotiating_leverage -10 + patron_confidence -10.
+2. **Event loader extension:** `EVENT_FILES` now appends `consequences.json` after the historical year files, with a canonical comment explaining why this is calibration-safe (ahistorical gating).
+3. **12 integration tests** in `tests/consequence_chains.test.ts`: loader returns csq_ events, all Chain 6 events present in the registry, gating proofs for unset flag / civic / pragmatic (3 separate tests — historical path fires nothing), turn-window proofs for each of the 3 chain events, downstream effect proofs (recruitment_modifier lands, morale drops, dimension gate works).
+
+### Verification
+
+- `npx tsc --noEmit` — clean.
+- `npx vitest run tests/consequence_chains.test.ts tests/consequence_effects.test.ts tests/consequence_consumers.test.ts tests/events_evaluate.test.ts tests/event_conditions.test.ts tests/event_effects.test.ts tests/event_decisions.test.ts tests/event_timing.test.ts tests/integration_event_system.test.ts` — **115/115 pass**. Zero regression in the rest of the event system.
+
+### Scope boundaries
+
+- **Chain 6 only.** Chains 1, 3, 5 remain blocked pending canon re-check against the Sensitive History Design Gate.
+- **No 40w scenario run yet.** Chain is calibration-safe by construction (fires only on ahistorical flag), so a regression run is hygienic not proof-critical. Deferred to the closing ledger entry after all safe chains land.
+- **The "6 HVO-pool brigades lose cross-recruitment" and "-15% initial brigade personnel" bullets from plan §Chain 6** are NOT implemented: they require either a new effect type or direct formation-pool manipulation outside the effect-bus pattern. They are out of scope for this authoring slice; the recruitment_modifier captures the aggregate intent.
+
+### Artifacts
+
+- New content: `data/scenarios/events/consequences.json`
+- New regression: `tests/consequence_chains.test.ts`

@@ -18,12 +18,16 @@ function getModuleDir(): string {
 
 const EVENTS_DIR = resolve(getModuleDir(), '../../../data/scenarios/events');
 
-/** Event JSON file names in chronological order. */
+/** Event JSON file names in chronological order. Historical events first,
+ *  then v0.9.0 Consequence System events (gated on ahistorical flags —
+ *  calibration-safe by construction since they literally cannot fire on the
+ *  historical path). */
 const EVENT_FILES = [
     'war_1992.json',
     'war_1993.json',
     'war_1994.json',
     'war_1995.json',
+    'consequences.json',
 ];
 
 /**

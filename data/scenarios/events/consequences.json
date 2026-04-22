@@ -1,0 +1,149 @@
+[
+  {
+    "id": "csq_minority_defections_1992",
+    "title": "Minority Soldiers Leave the Ranks",
+    "narrative": "The declaration of a Bosniak national state lands in the barracks. Serb and Croat soldiers who had served the Republic find the foundations shifting beneath them. A slow trickle becomes a quiet exodus — not a mutiny, but a thousand personal decisions to go home, cross the line, or simply disappear from the rolls. Recruitment officers report a noticeable cooling in the multi-ethnic towns.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 8,
+      "turn_max": 20,
+      "phase": "war",
+      "condition": {
+        "type": "flag_equals",
+        "flag": "rbih_state_identity",
+        "value": "bosniak_national"
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Minority soldiers quietly leave the ARBiH ranks."
+    },
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": -3
+      },
+      {
+        "kind": "cohesion_change",
+        "faction": "RBiH",
+        "delta": -3
+      },
+      {
+        "kind": "recruitment_modifier",
+        "faction": "RBiH",
+        "pool_multiplier": 0.80,
+        "duration_turns": 20
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "internal_cohesion",
+        "delta": -5
+      }
+    ],
+    "historical_source": "Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 6. Reflects real 1992 ARBiH debates documented in Ramet, 'Thinking about Yugoslavia' (2005), and Burg & Shoup, 'The War in Bosnia-Herzegovina' (2000)."
+  },
+  {
+    "id": "csq_bosniak_unity_1993",
+    "title": "A Nation Under Siege",
+    "narrative": "The identity decision hardens into resolve. By late 1993 the civic republican rhetoric has faded; the mosque, the neighborhood, and the language carry the appeal to arms. Mobilization offices see longer queues and shorter discussions. What has been lost in international legitimacy is recovered, at least for now, in the willingness of the survivors to fight.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 30,
+      "turn_max": 55,
+      "phase": "war",
+      "condition": {
+        "type": "flag_equals",
+        "flag": "rbih_state_identity",
+        "value": "bosniak_national"
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Bosniak ethnic solidarity powers ARBiH recruitment."
+    },
+    "effects": [
+      {
+        "kind": "cohesion_change",
+        "faction": "RBiH",
+        "delta": 5
+      },
+      {
+        "kind": "recruitment_modifier",
+        "faction": "RBiH",
+        "pool_multiplier": 1.15,
+        "duration_turns": 30
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "internal_cohesion",
+        "delta": 10
+      }
+    ],
+    "historical_source": "Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 6. Reflects the real radicalization curve inside ARBiH through 1993 documented in Hoare, 'How Bosnia Armed' (2004)."
+  },
+  {
+    "id": "csq_international_disillusionment_1993",
+    "title": "The World Stops Listening",
+    "narrative": "Foreign mediators who once championed Sarajevo as the last multi-ethnic capital now brief their governments in a different tone. The platform has not been revoked, but the briefings about ethnic institutions and exclusive recruitment have gone back to capitals that care. The Contact Group begins preparing for a Bosnia that looks like a Bosniak entity, not a republic — and negotiates accordingly.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 40,
+      "turn_max": 70,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "rbih_state_identity",
+            "value": "bosniak_national"
+          },
+          {
+            "type": "dimension_below",
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "threshold": 40
+          }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "International mediators treat RBiH as ethnic party, not civic state."
+    },
+    "effects": [
+      {
+        "kind": "patron_pressure",
+        "faction": "RBiH",
+        "delta": -10
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "negotiating_leverage",
+        "delta": -10
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "patron_confidence",
+        "delta": -10
+      }
+    ],
+    "historical_source": "Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 6. Counterfactual mirror of Contact Group diplomatic calculus 1993-94."
+  }
+]
