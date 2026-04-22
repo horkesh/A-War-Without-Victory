@@ -610,9 +610,18 @@ export function isCorridorMunicipality(
 
 /**
  * Check if a municipality is a strategic offensive objective for the faction.
- * v0.9.0 Consequence System: merges runtime add/remove from
- * `state.military.bot_priority_shifts` (state parameter) when provided.
- * State-less callers get the static FACTION_STRATEGIES answer unchanged.
+ *
+ * v0.9.0 Consequence System: optionally merges runtime add/remove from
+ * `state.military.bot_priority_shifts` when `state` is passed. State-less
+ * callers get the static FACTION_STRATEGIES answer unchanged.
+ *
+ * NOTE: This is a *secondary query surface* (useful for UI / reports that
+ * want a mun-level "is this currently an objective?" answer). The canonical
+ * production consumer of bot_priority_shift is the directive emitter:
+ * `commander/emit.ts` → `augmentOffensiveTargetsWithShifts` merges the shift
+ * into `CorpsDirective.offensive_targets`, which is what the brigade AI's
+ * `scoreTargetFromDirective` reads. Do NOT add production target-selection
+ * logic on top of this accessor; extend the emit augmenter instead.
  */
 export function isOffensiveObjective(
     munId: string | undefined | null,

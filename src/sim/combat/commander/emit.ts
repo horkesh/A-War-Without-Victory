@@ -67,6 +67,7 @@ import type { AllocationResult } from './allocate.js';
 import type { PlanDecision } from './plan.js';
 import { MIN_BRIGADES_FOR_PLAN } from './plan.js';
 import type { DecisionResult } from './decide.js';
+import { augmentOffensiveTargetsWithShifts } from './bot_priority_shift_augmentation.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -236,8 +237,15 @@ function buildDirective(
     // assigned_front_ids: all edge IDs from all sectors for this corps
     const assignedFrontIds = collectAssignedFrontIds(briefing);
 
-    // offensive_targets: from plan's target_osids if plan is executing, else fall back to active ops
-    const offensiveTargets = buildOffensiveTargets(planDecision, briefing);
+    // offensive_targets: from plan's target_osids if plan is executing, else fall back to active ops.
+    // v0.9.0 Consequence System: after the plan/ops path resolves, merge in any active
+    // bot_priority_shift effects so consequence events actually steer corps targeting
+    // (the shift writer lives in src/sim/events/apply_effects.ts; the reader chain is
+    //  directive.offensive_targets → scoreTargetFromDirective → brigade AI).
+    const offensiveTargets = augmentOffensiveTargetsWithShifts(
+        buildOffensiveTargets(planDecision, briefing),
+        briefing,
+    );
 
     // hold_osids: front OSIDs in zones with posture 'besieged' or 'defending'
     const holdOsids = buildHoldOsids(zones, briefing);

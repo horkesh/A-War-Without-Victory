@@ -3990,3 +3990,50 @@ Existing first-slice status before this lane:
 
 - Module: `src/ui/map/components/codex/codexEssayResolver.ts`
 - Tests: `tests/ui/codex_essay_resolver.test.ts`
+
+## [2026-04-22] feat(events): wire bot_priority_shift into production target-selection
+
+**Type:** v0.9.0 Consequence System / review-driven consumer wiring
+**Files:** `src/sim/combat/commander/bot_priority_shift_augmentation.ts` (new), `src/sim/combat/commander/emit.ts`, `src/sim/combat/bot_strategy.ts` (JSDoc only), `tests/bot_priority_shift_wiring.test.ts` (new)
+**Status:** VERIFIED — tsc clean, 156/156 vitest pass across 9 cross-domain files, desktop:map:build green (9.57s). Closes Codex review comment on PR #1.
+
+### Background
+
+Codex review on PR #1 flagged that `bot_priority_shift` effects written to `state.military.bot_priority_shifts` had no production consumer — the Session 2 optional-state accessors on `bot_strategy.ts` (`isOffensiveObjective` / `isDefensivePriority`) turned out to be dead code: grep confirmed those are the **only** readers of `FACTION_STRATEGIES.offensive_objectives` / `defensive_priorities` anywhere in src/. Production AI paths reach target-selection via `scoreTargetFromDirective` (`bot_brigade_targeting.ts`), which reads `CorpsDirective.offensive_targets` (OSID-keyed), not the mun-keyed FACTION_STRATEGIES fields. User chose Option B: build the real consumer path rather than demote the effect.
+
+### Summary of changes
+
+1. **New `src/sim/combat/commander/bot_priority_shift_augmentation.ts`.** Single-purpose module exporting `augmentOffensiveTargetsWithShifts(baseTargets, briefing)`. Reads `briefing.state_ref.military.bot_priority_shifts` (the existing field), `briefing.faction`, `briefing.turn`, and `briefing.state_ref.political.political_controllers` — no new briefing shape needed because `state_ref` already carries the raw state. Mun-level shifts are expanded to OSID-level by walking `political_controllers` and keeping only OSIDs NOT held by the shifting faction (you don't attack your own territory). Removes filter out both just-added OSIDs and pre-existing base targets. Deterministic (sorted via `strictCompare`).
+2. **`src/sim/combat/commander/emit.ts:buildDirective`.** `offensiveTargets` is now piped through `augmentOffensiveTargetsWithShifts` immediately after the existing `buildOffensiveTargets` call. One three-line change at the canonical directive-write point; every downstream reader (`scoreTargetFromDirective`, `bot_brigade_eval_front`, `bot_corps_ai`, `sector_offensive`) now observes the merged target set automatically.
+3. **`src/sim/combat/bot_strategy.ts` JSDoc only.** The Session 2 optional-`state` param on `isOffensiveObjective` / `isDefensivePriority` stays as a secondary query surface (useful for UI / reports), but the JSDoc now explicitly names emit's augmenter as the canonical production consumer and warns future contributors not to add target-selection logic on top of these accessors.
+
+**11 new tests** in `tests/bot_priority_shift_wiring.test.ts`: no-op cases (no shifts, missing state_ref, expired shifts, cross-faction shifts), add_objectives mun→OSID expansion with self-controlled OSID exclusion, base-target preservation, deduplication on overlap, multiple-shift union, remove_objectives filtering of both pre-existing base targets and just-added OSIDs, determinism proof.
+
+### Integration chain now proven end-to-end
+
+```
+event fires → apply_effects.applyBotPriorityShift →
+  state.military.bot_priority_shifts →
+  augmentOffensiveTargetsWithShifts (NEW) →
+  CorpsDirective.offensive_targets (via commander/emit.ts buildDirective) →
+  scoreTargetFromDirective (boosts score +200 for matching OSID) →
+  brigade AI target selection
+```
+
+### Verification
+
+- `npx tsc --noEmit` — clean.
+- `npx vitest run tests/bot_priority_shift_wiring.test.ts tests/consequence_consumers.test.ts tests/consequence_effects.test.ts tests/consequence_chains.test.ts tests/war_phase_step_order.test.ts tests/events_evaluate.test.ts tests/event_effects.test.ts tests/commander_override.test.ts tests/bot_three_sides_validation.test.ts` — **156/156 pass**. Zero regression in commander / bot-strategy / event suites.
+- `npm run desktop:map:build` — built in 9.57s.
+
+### Scope boundaries
+
+- **Write-side injection only.** The augmenter runs at directive emission; all existing readers consume `directive.offensive_targets` unchanged. No read-side API changes needed.
+- **Historical path unchanged by construction.** Empty `bot_priority_shifts` array → augmenter returns a copy of baseTargets unchanged.
+- **Secondary accessor preserved with warning.** `isOffensiveObjective(state?)` still works for UI queries but the JSDoc directs production targeting work to the augmenter.
+- **No scenario rerun.** The historical-path 40w smoke ran in the previous ledger entry with zero csq_ events firing; this wiring doesn't change firing behavior, only what happens downstream when a shift is active.
+
+### Artifacts
+
+- Module: `src/sim/combat/commander/bot_priority_shift_augmentation.ts`
+- Tests: `tests/bot_priority_shift_wiring.test.ts`
