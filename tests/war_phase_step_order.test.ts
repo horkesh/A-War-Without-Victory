@@ -136,6 +136,8 @@ describe('war-phase step ordering', () => {
         // +1 from evaluate-dayton-trigger (DG1: Dayton trigger ownership moved to pipeline, 2026-04-14)
         // +1 from update-stranded-brigade-lifecycle (DG2: stranded brigade lifecycle owner, 2026-04-14)
         // +1 from evaluate-rupture-consequences (DG5: sensitive-history rupture contract, 2026-04-14)
-        expect(stepNames.length).toBe(163);
+        // +1 from cleanup-expired-event-modifiers (v0.9.0 Consequence System, 2026-04-22)
+        // +1 from apply-guerrilla-attrition (v0.9.0 Consequence System, 2026-04-22)
+        expect(stepNames.length).toBe(165);
     });
 });
