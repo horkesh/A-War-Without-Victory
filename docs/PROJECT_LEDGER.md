@@ -4083,3 +4083,47 @@ Following the initial v0.9.0 PR, the `scenarios` CI job failed with a golden-bas
 - Modified: `src/sim/events/active_modifiers.ts` (cleanup scope narrowed)
 - Modified: `tests/consequence_chains.test.ts` (Chain 2 tests removed)
 - Modified: `tests/consequence_consumers.test.ts` (cleanup test scope updated)
+
+## [2026-04-22] content(codex): integrate v0.9.1 essay vocab into 3 existing essays
+
+**Type:** v0.9.1 Dynamic Codex / content integration
+**Files:** `data/scenarios/essays/essay_index.json`, `tests/ui/codex_essay_vocab_integration.test.ts` (new)
+**Status:** VERIFIED — tsc clean, 33/33 codex tests pass (25 resolver unit + 8 integration), desktop:map:build 7.01s. Content-only; zero sim behavior drift; no baseline refresh needed.
+
+### Summary of changes
+
+Promotes the three drafts from `docs/40_reports/20260422_V091_ESSAY_VOCAB_DRAFTS.md` into `essay_index.json`, wiring real essays into the v0.9.1 condition-atom + interpolation-token vocabulary. All three dynamic sections are additive — no canonical content mutated — and use deterministic conditions (fired events + flags + historicalComparison) per the SENSITIVE_HISTORY_DESIGN_GATE rule against atrocity optimization.
+
+1. **`essay_dayton_signed_1995`** — appended `v091_territory_dayton_map_divergence` (divergence variant, insert after paragraph 3). Gates on `GAME_OVER AND (TERRITORY_ABOVE:RS:5 OR TERRITORY_BELOW:RS:-5)`. Renders `{territory_RS_delta}` + `{territory_RBiH_HRHB_Federation_delta}`. The existing `player_endgame_divergence` at `insert_after_paragraph: -1` is preserved unchanged. Sources: Dayton Annex 2 IEBL (51-49 baseline), Burg & Shoup (2000) chs. 7-8.
+2. **`essay_sarajevo_siege_begins_1992`** — new `v091_sarajevo_prolonged_costly_note` (note variant, insert after paragraph 5). Gates on `GAME_OVER AND DURATION_LONGER AND CASUALTY_ABOVE:1.2`. Renders `{duration_delta_abs}` + `{casualty_ratio_pct}`. Sources: ICTY Galić (IT-98-29-T), RDC 2007 casualty baselines. **Note:** the 1.2 casualty threshold is a calibration value, not a historical claim — tunable pending historian review.
+3. **`essay_bihac_5th_corps_offensive_1994`** — new `v091_bihac_fell_ghost_epilogue` (ghost variant, insert after paragraph -1). Gates on `GAME_OVER AND FLAG:bihac_pocket_fell AND DISPLACEMENT_ABOVE:1.1`. Renders `{displacement_ratio_pct}`. Sources: Hoare (2004) 5th Corps chapter, Balkan Battlegrounds vol. II, consequence plan Chain 4 counterfactual. Hook flag is set by `csq_bihac_pocket_collapses_1994` (shipped in PR #1).
+
+**Agent draft corrections applied:**
+- Sarajevo section's `insert_after_paragraph` changed from the draft's `4` to `5` — the paragraph citing "until February 1996" is index 5, not 4 (agent miscounted).
+- All three entry ids kept as namespaced `v091_*` to avoid collision with existing `player_endgame_divergence` on the Dayton essay.
+
+**New integration test** `tests/ui/codex_essay_vocab_integration.test.ts` (8 tests) loads `essay_index.json` and for each of the three new sections proves:
+- the section is present with the expected id, variant, insert_after_paragraph, and condition string;
+- it fires under a canned context matching the gate and renders the expected token values (e.g. `+7.3` / `-7.3` deltas, `12` weeks, `135 percent` casualty ratio, `145 percent` displacement);
+- it does NOT fire when gates fail (within-band territory / duration-only / historical-path-with-flag-absent).
+
+Protects against silent future regression: any edit that drops or renames one of the three entries fails this test rather than breaking the Codex panel at runtime.
+
+### Verification
+
+- `npx tsc --noEmit` — clean.
+- `npx vitest run tests/ui/codex_essay_vocab_integration.test.ts tests/ui/codex_essay_resolver.test.ts` — 33/33 pass (25 existing resolver unit + 8 new integration).
+- `npm run desktop:map:build` — built in 7.01s.
+- `node -e "const j = require('.../essay_index.json'); ..."` — JSON parses; three expected dynamic_sections entries confirmed present.
+
+### Scope boundaries
+
+- **Content-only.** No resolver code changes. No mutation of canonical essay `content` fields. No sim behavior impact → no scenario rerun needed, no golden-baseline refresh.
+- **Calibration of the `1.2` casualty threshold and `1.1` displacement threshold** is future work. The values are defensible starting points from the drafts but should be tuned once scenario-run data shows the natural distribution of these ratios.
+- **Lane 1 (canon re-check of Chains 1/3/5) and Lane 2 (hrhb_political_goal reorder) deferred** for user return — both need sign-off and will require a coordinated baseline refresh.
+- **Lane 4 (v0.9.3 profiling baseline) still running** as this is shipped; its report will come separately.
+
+### Artifacts
+
+- New content: three `dynamic_sections` entries in `data/scenarios/essays/essay_index.json`
+- New regression: `tests/ui/codex_essay_vocab_integration.test.ts`
