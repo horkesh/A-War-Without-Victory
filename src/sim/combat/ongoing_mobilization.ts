@@ -24,6 +24,7 @@ import {
     runDisplacedAndCrossEthnicContributions
 } from '../early_war/pool_population.js';
 import type { MunicipalityPopulation1991Map } from '../early_war/pool_population.js';
+import { getActiveRecruitmentMultiplier } from '../events/active_modifiers.js';
 
 /**
  * Weekly mobilization rate as fraction of eligible military-age population.
@@ -300,6 +301,9 @@ export function runOngoingMobilization(
 
         const factionScale = FACTION_MOBILIZATION_SCALE[controller] ?? DEFAULT_MOBILIZATION_SCALE;
         const surge = getMobilizationSurgeFactor(currentTurn, controller);
+        // v0.9.0 Consequence System: stack event-driven recruitment modifiers
+        // multiplicatively onto the faction scale. 1.0 when no events active.
+        const eventMult = getActiveRecruitmentMultiplier(state, controller, currentTurn);
         const raw =
             censusEligible *
             BASE_MOBILIZATION_RATE *
@@ -307,7 +311,8 @@ export function runOngoingMobilization(
             surge *
             exhaustionMult *
             pocketMult *
-            authorityMult;
+            authorityMult *
+            eventMult;
         const mobilized = Math.min(
             Math.floor(raw),
             MAX_MOBILIZATION_PER_MUN_PER_TURN
@@ -378,7 +383,9 @@ export function runOngoingMobilization(
 
         const factionScale = FACTION_MOBILIZATION_SCALE[poolFaction] ?? DEFAULT_MOBILIZATION_SCALE;
         const surge = getMobilizationSurgeFactor(currentTurn, poolFaction);
-        const raw = censusEligible * BASE_MOBILIZATION_RATE * factionScale * surge * exhaustionMult * CROSS_FACTION_POOL_MOBILIZATION_MULT;
+        // v0.9.0 Consequence System: stack recruitment modifiers on cross-faction pools too.
+        const eventMult = getActiveRecruitmentMultiplier(state, poolFaction, currentTurn);
+        const raw = censusEligible * BASE_MOBILIZATION_RATE * factionScale * surge * exhaustionMult * CROSS_FACTION_POOL_MOBILIZATION_MULT * eventMult;
         const mobilized = Math.min(Math.floor(raw), MAX_MOBILIZATION_PER_MUN_PER_TURN);
         if (mobilized <= 0) continue;
 

@@ -1867,6 +1867,35 @@ fired_event_ids?: string[];
 pending_event_decisions?: import('../sim/events/event_types.js').PendingEventDecision[];
 /** Temporary aggression modifiers from events (e.g. VRS fury after barracks seizure). Expires after duration_turns. */
 event_aggression_modifiers?: Array<{ faction: string; delta: number; expires_turn: number }>;
+// ─── v0.9.0 Consequence System state (Phase 1 Session 1) ─────────────────
+// Writers in src/sim/events/apply_effects.ts. Consumers land in Session 2.
+// All readers MUST filter by `expires_turn > currentTurn` — no cleanup GC yet.
+/** Active guerrilla threat zones. Brigades in listed municipalities take cohesion/morale attrition per turn. */
+guerrilla_threats?: Array<{
+    faction: FactionId;
+    municipalities: string[];
+    intensity: number;
+    expires_turn: number;
+}>;
+/** Active recruitment modifiers. Stack multiplicatively with ongoing_mobilization scale. */
+recruitment_modifiers?: Array<{
+    faction: FactionId;
+    pool_multiplier: number;
+    expires_turn: number;
+}>;
+/** Active alliance floor/ceiling locks on the RBiH-HRHB alliance value. */
+alliance_locks?: Array<{
+    mode: 'floor' | 'ceiling';
+    value: number;
+    expires_turn: number;
+}>;
+/** Runtime bot-strategy priority shifts, merged with static FACTION_STRATEGIES at directive-generation time. */
+bot_priority_shifts?: Array<{
+    faction: FactionId;
+    add_objectives?: string[];
+    remove_objectives?: string[];
+    expires_turn: number;
+}>;
 // v0.6.0 emergent event system state
 /** Pressure system readiness counters per event ID. */
 event_readiness?: Record<string, number>;

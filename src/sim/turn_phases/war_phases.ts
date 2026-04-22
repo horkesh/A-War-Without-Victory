@@ -5,6 +5,8 @@
 import { evaluateArmyHQGathering } from '../combat/army_hq_gathering.js';
 import { snapshotPoliticalControllers } from '../combat/assert_control_events.js';
 import { assertOperationLifecycle } from '../combat/assert_operation_lifecycle.js';
+import { applyGuerrillaAttrition } from '../combat/guerrilla_attrition.js';
+import { cleanupExpiredEventModifiers } from '../events/active_modifiers.js';
 import { attributeOperationCasualties } from '../combat/operation_casualty_attribution.js';
 import { recordOperationWeeklyEntries } from '../combat/operation_aar.js';
 import { buildAdjacencyMap } from '../../map/adjacency_map.js';
@@ -221,6 +223,17 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        // v0.9.0 Consequence System: GC expired event-driven modifiers before
+        // evaluate-events writes this turn's new ones. Readers still filter by
+        // expires_turn > currentTurn, so this step is strictly hygiene, not
+        // correctness — no sim behavior change when arrays are empty or all
+        // entries are still active.
+        name: 'cleanup-expired-event-modifiers',
+        run: (context) => {
+            cleanupExpiredEventModifiers(context.state, context.state.meta.turn);
+        }
+    },
+    {
         name: 'update-event-readiness',
         run: (context) => {
             if (context.input.eventDefinitions) {
@@ -291,6 +304,15 @@ export const warPhases: NamedPhase[] = [
             const derivedFrontEdges = computeFrontEdges(context.state, edges);
             const frontRegions = computeFrontRegions(context.state, derivedFrontEdges);
             context.report.formation_fatigue = updateFormationFatigue(context.state, derivedFrontEdges, frontRegions, edges);
+        }
+    },
+    {
+        // v0.9.0 Consequence System: partisan resistance drains cohesion/morale
+        // from brigades stationed in active guerrilla_threat municipalities.
+        // No-op when state.military.guerrilla_threats is empty (historical path).
+        name: 'apply-guerrilla-attrition',
+        run: (context) => {
+            applyGuerrillaAttrition(context.state);
         }
     },
     {

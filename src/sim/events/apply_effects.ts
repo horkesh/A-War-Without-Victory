@@ -5,20 +5,27 @@
 
 import type { GameState, FactionId, ControlEvent } from '../../state/game_state.js';
 import type { EventEffect } from './event_types.js';
+import type { EventConstraints } from './event_constraints.js';
+import { getActiveAllianceBounds } from './active_modifiers.js';
 
-/** Deterministic kind ordering for effect application. */
+/** Deterministic kind ordering for effect application (alphabetical). */
 const EFFECT_KIND_ORDER: Record<string, number> = {
     aggression_modifier: 0,
     alliance_change: 1,
-    cohesion_change: 2,
-    control_change: 3,
-    equipment_grant: 4,
-    humanitarian_impact: 5,
-    morale_change: 6,
-    narrative: 7,
-    negotiation_capital: 8,
-    patron_pressure: 9,
-    supply_delta: 10,
+    alliance_lock: 2,
+    bot_priority_shift: 3,
+    cohesion_change: 4,
+    control_change: 5,
+    doctrine_constraint: 6,
+    equipment_grant: 7,
+    guerrilla_threat: 8,
+    humanitarian_impact: 9,
+    morale_change: 10,
+    narrative: 11,
+    negotiation_capital: 12,
+    patron_pressure: 13,
+    recruitment_modifier: 14,
+    supply_delta: 15,
 };
 
 function clamp(value: number, min: number, max: number): number {
@@ -76,6 +83,21 @@ function applySingleEffect(state: GameState, effect: EventEffect): void {
         case 'control_change':
             applyControlChange(state, effect.faction, effect.osids);
             break;
+        case 'guerrilla_threat':
+            applyGuerrillaThreat(state, effect.faction, effect.municipalities, effect.intensity, effect.duration_turns);
+            break;
+        case 'recruitment_modifier':
+            applyRecruitmentModifier(state, effect.faction, effect.pool_multiplier, effect.duration_turns);
+            break;
+        case 'doctrine_constraint':
+            applyDoctrineConstraint(state, effect.constraint, effect.duration_turns);
+            break;
+        case 'alliance_lock':
+            applyAllianceLock(state, effect.mode, effect.value, effect.duration_turns);
+            break;
+        case 'bot_priority_shift':
+            applyBotPriorityShift(state, effect.faction, effect.add_objectives, effect.remove_objectives, effect.duration_turns);
+            break;
         case 'narrative':
             // No mechanical effect; narrative text is logged via FiredEvent.
             break;
@@ -128,10 +150,18 @@ function applyPatronPressure(state: GameState, faction: FactionId, delta: number
     rel.support_level = clamp(rel.support_level + delta, 0, 100);
 }
 
-/** Adjust RBiH-HRHB alliance value. Clamped [-1, 1]. */
+/** Adjust RBiH-HRHB alliance value.
+ *  Applies delta, clamps to [-1, 1], then clamps against any active
+ *  alliance_locks (floor/ceiling). Active locks override any incoming delta
+ *  that would push the value past them. */
 function applyAllianceChange(state: GameState, delta: number): void {
     const current = state.political.war_alliance_rbih_hrhb ?? 0;
-    state.political.war_alliance_rbih_hrhb = clamp(current + delta, -1, 1);
+    let next = clamp(current + delta, -1, 1);
+    const currentTurn = state.meta.turn ?? 0;
+    const bounds = getActiveAllianceBounds(state, currentTurn);
+    if (bounds.floor != null && next < bounds.floor) next = bounds.floor;
+    if (bounds.ceiling != null && next > bounds.ceiling) next = bounds.ceiling;
+    state.political.war_alliance_rbih_hrhb = next;
 }
 
 /** Grant equipment to a faction's best-equipped brigade (or one in target municipality).
@@ -234,4 +264,125 @@ function applyNegotiationBreakdown(
     if (dimension in cap) {
         cap[dimension] = (cap[dimension] ?? 0) + delta;
     }
+}
+
+// ─── v0.9.0 Consequence System writers (Phase 1 Session 1) ──────────────────
+// Consumers land in Phase 1 Session 2. Readers MUST filter by
+// `expires_turn > currentTurn` because cleanup GC runs at most once per turn.
+
+/** Push a guerrilla threat entry onto state.military.guerrilla_threats.
+ *  Municipalities are sorted for deterministic serialization. Intensity is
+ *  clamped to [0, 1]. */
+function applyGuerrillaThreat(
+    state: GameState,
+    faction: FactionId,
+    municipalities: string[],
+    intensity: number,
+    durationTurns: number
+): void {
+    if (!state.military.guerrilla_threats) {
+        state.military.guerrilla_threats = [];
+    }
+    const currentTurn = state.meta.turn ?? 0;
+    state.military.guerrilla_threats.push({
+        faction,
+        municipalities: [...municipalities].sort(),
+        intensity: clamp(intensity, 0, 1),
+        expires_turn: currentTurn + durationTurns,
+    });
+}
+
+/** Push a recruitment modifier onto state.military.recruitment_modifiers.
+ *  Multiplier is passed through unclamped — consumer stacks multiplicatively. */
+function applyRecruitmentModifier(
+    state: GameState,
+    faction: FactionId,
+    poolMultiplier: number,
+    durationTurns: number
+): void {
+    if (!state.military.recruitment_modifiers) {
+        state.military.recruitment_modifiers = [];
+    }
+    const currentTurn = state.meta.turn ?? 0;
+    state.military.recruitment_modifiers.push({
+        faction,
+        pool_multiplier: poolMultiplier,
+        expires_turn: currentTurn + durationTurns,
+    });
+}
+
+/** Merge a constraint payload into the existing state.military.event_constraints
+ *  bus. Stamps expires_turn on every pushed sub-entry using
+ *  currentTurn + durationTurns, overriding any per-entry value in the payload.
+ *  Each sub-entry owns its own `faction` field per EventConstraints contract. */
+function applyDoctrineConstraint(
+    state: GameState,
+    constraint: EventConstraints,
+    durationTurns: number
+): void {
+    if (!state.military.event_constraints) {
+        state.military.event_constraints = {};
+    }
+    const bus = state.military.event_constraints;
+    const currentTurn = state.meta.turn ?? 0;
+    const expiresTurn = currentTurn + durationTurns;
+
+    if (constraint.operation_blocks) {
+        bus.operation_blocks ??= [];
+        for (const entry of constraint.operation_blocks) {
+            bus.operation_blocks.push({ ...entry, expires_turn: expiresTurn });
+        }
+    }
+    if (constraint.doctrine_overrides) {
+        bus.doctrine_overrides ??= [];
+        for (const entry of constraint.doctrine_overrides) {
+            bus.doctrine_overrides.push({ ...entry, expires_turn: expiresTurn });
+        }
+    }
+    if (constraint.scope_restrictions) {
+        bus.scope_restrictions ??= [];
+        for (const entry of constraint.scope_restrictions) {
+            bus.scope_restrictions.push({ ...entry, expires_turn: expiresTurn });
+        }
+    }
+}
+
+/** Push an alliance floor/ceiling lock onto state.military.alliance_locks.
+ *  Value is clamped to the alliance's legal range [-1, 1]. */
+function applyAllianceLock(
+    state: GameState,
+    mode: 'floor' | 'ceiling',
+    value: number,
+    durationTurns: number
+): void {
+    if (!state.military.alliance_locks) {
+        state.military.alliance_locks = [];
+    }
+    const currentTurn = state.meta.turn ?? 0;
+    state.military.alliance_locks.push({
+        mode,
+        value: clamp(value, -1, 1),
+        expires_turn: currentTurn + durationTurns,
+    });
+}
+
+/** Push a bot priority shift onto state.military.bot_priority_shifts.
+ *  Objective lists are sorted for deterministic serialization. */
+function applyBotPriorityShift(
+    state: GameState,
+    faction: FactionId,
+    addObjectives: string[] | undefined,
+    removeObjectives: string[] | undefined,
+    durationTurns: number
+): void {
+    if (!state.military.bot_priority_shifts) {
+        state.military.bot_priority_shifts = [];
+    }
+    const currentTurn = state.meta.turn ?? 0;
+    state.military.bot_priority_shifts.push({
+        faction,
+        add_objectives: addObjectives ? [...addObjectives].sort() : undefined,
+        remove_objectives: removeObjectives ? [...removeObjectives].sort() : undefined,
+        expires_turn: currentTurn + durationTurns,
+    });
 }

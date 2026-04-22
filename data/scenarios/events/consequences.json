@@ -1,0 +1,279 @@
+[
+  {
+    "id": "csq_minority_defections_1992",
+    "title": "Minority Soldiers Leave the Ranks",
+    "narrative": "The declaration of a Bosniak national state lands in the barracks. Serb and Croat soldiers who had served the Republic find the foundations shifting beneath them. A slow trickle becomes a quiet exodus — not a mutiny, but a thousand personal decisions to go home, cross the line, or simply disappear from the rolls. Recruitment officers report a noticeable cooling in the multi-ethnic towns.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 8,
+      "turn_max": 20,
+      "phase": "war",
+      "condition": {
+        "type": "flag_equals",
+        "flag": "rbih_state_identity",
+        "value": "bosniak_national"
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Minority soldiers quietly leave the ARBiH ranks."
+    },
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": -3
+      },
+      {
+        "kind": "cohesion_change",
+        "faction": "RBiH",
+        "delta": -3
+      },
+      {
+        "kind": "recruitment_modifier",
+        "faction": "RBiH",
+        "pool_multiplier": 0.80,
+        "duration_turns": 20
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "internal_cohesion",
+        "delta": -5
+      }
+    ],
+    "historical_source": "Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 6. Reflects real 1992 ARBiH debates documented in Ramet, 'Thinking about Yugoslavia' (2005), and Burg & Shoup, 'The War in Bosnia-Herzegovina' (2000)."
+  },
+  {
+    "id": "csq_bosniak_unity_1993",
+    "title": "A Nation Under Siege",
+    "narrative": "The identity decision hardens into resolve. By late 1993 the civic republican rhetoric has faded; the mosque, the neighborhood, and the language carry the appeal to arms. Mobilization offices see longer queues and shorter discussions. What has been lost in international legitimacy is recovered, at least for now, in the willingness of the survivors to fight.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 30,
+      "turn_max": 55,
+      "phase": "war",
+      "condition": {
+        "type": "flag_equals",
+        "flag": "rbih_state_identity",
+        "value": "bosniak_national"
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Bosniak ethnic solidarity powers ARBiH recruitment."
+    },
+    "effects": [
+      {
+        "kind": "cohesion_change",
+        "faction": "RBiH",
+        "delta": 5
+      },
+      {
+        "kind": "recruitment_modifier",
+        "faction": "RBiH",
+        "pool_multiplier": 1.15,
+        "duration_turns": 30
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "internal_cohesion",
+        "delta": 10
+      }
+    ],
+    "historical_source": "Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 6. Reflects the real radicalization curve inside ARBiH through 1993 documented in Hoare, 'How Bosnia Armed' (2004)."
+  },
+  {
+    "id": "csq_international_disillusionment_1993",
+    "title": "The World Stops Listening",
+    "narrative": "Foreign mediators who once championed Sarajevo as the last multi-ethnic capital now brief their governments in a different tone. The platform has not been revoked, but the briefings about ethnic institutions and exclusive recruitment have gone back to capitals that care. The Contact Group begins preparing for a Bosnia that looks like a Bosniak entity, not a republic — and negotiates accordingly.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 40,
+      "turn_max": 70,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "rbih_state_identity",
+            "value": "bosniak_national"
+          },
+          {
+            "type": "dimension_below",
+            "faction": "RBiH",
+            "dimension": "international_standing",
+            "threshold": 40
+          }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "International mediators treat RBiH as ethnic party, not civic state."
+    },
+    "effects": [
+      {
+        "kind": "patron_pressure",
+        "faction": "RBiH",
+        "delta": -10
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "negotiating_leverage",
+        "delta": -10
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "patron_confidence",
+        "delta": -10
+      }
+    ],
+    "historical_source": "Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 6. Counterfactual mirror of Contact Group diplomatic calculus 1993-94."
+  },
+  {
+    "id": "csq_bihac_pocket_collapses_1994",
+    "title": "The Pocket Falls",
+    "narrative": "The 5th Corps has held against VRS, RSK, and Abdic's APWB for almost two years. The arithmetic of siege outlasts the arithmetic of defenders: no airdrops, no reinforcement road, no column of volunteers left to march in. The RBiH defensive perimeter breaks in sectors and does not close again. Refugees cross into Croatian territory by the tens of thousands. A Corps that had been a national symbol becomes a casualty list.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 120,
+      "turn_max": 160,
+      "phase": "war",
+      "requires_events": ["abdic_karadzic_pact_1993"],
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "morale_average_below",
+            "faction": "RBiH",
+            "threshold": 30
+          },
+          {
+            "type": "enclave_supply_status",
+            "municipality": "bihac",
+            "status": "critical"
+          }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 20,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "The Bihac pocket collapses. 5th Corps is destroyed or captured."
+    },
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": -8
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "territorial_legitimacy",
+        "delta": 10
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "military_credibility",
+        "delta": -15
+      }
+    ],
+    "sets_flags": {
+      "bihac_pocket_fell": true
+    },
+    "historical_source": "Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 4. Counterfactual to the historical 5th Corps breakout of 1995."
+  },
+  {
+    "id": "csq_northwest_rs_consolidation_1995",
+    "title": "Northwest Front Freed",
+    "narrative": "With Bihac eliminated as an open wound, the VRS 2nd Krajina Corps redeploys. Fifteen to twenty brigades that had been tied down for two years walk out of the Bihac perimeter and onto trucks for central Bosnia. The strategic picture shifts faster than any single operation could ever shift it. The RS political leadership smells the end of the war — on its terms.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 122,
+      "turn_max": 165,
+      "phase": "war",
+      "requires_events": ["csq_bihac_pocket_collapses_1994"]
+    },
+    "once": true,
+    "priority": 30,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "VRS 2nd Krajina Corps redeploys to central Bosnia."
+    },
+    "effects": [
+      {
+        "kind": "aggression_modifier",
+        "faction": "RS",
+        "delta": 0.10,
+        "duration_turns": 20
+      },
+      {
+        "kind": "bot_priority_shift",
+        "faction": "RS",
+        "add_objectives": ["zenica", "travnik", "vitez"],
+        "duration_turns": 20
+      }
+    ],
+    "historical_source": "Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 4."
+  },
+  {
+    "id": "csq_bihac_refugee_crisis_1994",
+    "title": "A Quarter Million on the Move",
+    "narrative": "The displaced of Bihac do not stop at the first line of safety. Croatia's temporary camps overflow within weeks; the columns reach the Neretva, the Lasva, the Bosna. ARBiH supply officers compete with UNHCR for the same trucks, the same fuel, the same calories. International coverage hardens — but the people are already cold, and damage to the RBiH manpower system is already done.",
+    "category": "humanitarian",
+    "trigger": {
+      "turn_min": 122,
+      "turn_max": 163,
+      "phase": "war",
+      "requires_events": ["csq_bihac_pocket_collapses_1994"]
+    },
+    "once": true,
+    "priority": 30,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "A massive refugee wave floods RBiH-held central Bosnia."
+    },
+    "effects": [
+      {
+        "kind": "supply_delta",
+        "faction": "RBiH",
+        "delta": -30
+      },
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": -5
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "international_standing",
+        "delta": 5
+      }
+    ],
+    "historical_source": "Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 4."
+  }
+]

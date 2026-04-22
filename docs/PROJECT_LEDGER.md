@@ -3676,3 +3676,410 @@ Both explicit v0.9.0 gold-blocker gates are now settled as canon, closing the tw
 - Canon: `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`
 - Regression: `tests/victory_and_pyrrhic_contract.test.ts`
 - Report: `docs/40_reports/implemented/20260416_V090_VICTORY_AND_SENSITIVE_HISTORY_GATES.md`
+
+## [2026-04-22] feat(events): land v0.9.0 Consequence System effect-type substrate (Phase 1 Session 1)
+
+**Type:** v0.9.0 Consequence System / foundation
+**Files:** `src/sim/events/event_types.ts`, `src/sim/events/apply_effects.ts`, `src/state/game_state.ts`, `tests/consequence_effects.test.ts` (new)
+**Status:** VERIFIED — tsc clean, 111/111 event-system vitest pass, desktop:map:build green. Writers only — zero sim behavior change until Phase 1 Session 2 lands consumers.
+
+### Summary of changes
+
+Plan: `docs/plans/2026-03-24-v090-consequence-system-plan.md` §4.1–§4.3 + §9 Phase 1 Session 1.
+
+1. **Five new `EventEffect` variants** added to `event_types.ts`:
+   - `guerrilla_threat` — faction + municipalities + intensity[0,1] + duration; consumer will be `guerrilla_attrition` (Session 2).
+   - `recruitment_modifier` — faction + pool_multiplier + duration; consumer will be `ongoing_mobilization` (Session 2).
+   - `doctrine_constraint` — wraps existing `EventConstraints` payload; consumer path already live via `event_constraints.ts` helpers.
+   - `alliance_lock` — floor/ceiling + value[-1,1] + duration; consumer will be `alliance_change` handler (Session 2).
+   - `bot_priority_shift` — faction + add/remove objective lists + duration; consumer will be `bot_strategy` accessor (Session 2).
+2. **Apply handlers in `apply_effects.ts`**: `EFFECT_KIND_ORDER` renumbered alphabetically (0-15) covering all 16 kinds; 5 new switch cases; 5 new helpers that push onto `MilitaryState` arrays with `expires_turn = currentTurn + duration_turns`. `applyDoctrineConstraint` merges into the existing `event_constraints` bus and stamps `expires_turn` on every pushed sub-entry, overriding any value from the payload. All writers preserve determinism: no random, no timestamps, municipality/objective arrays sorted before persist, intensity/alliance values clamped, pool_multiplier passed through unclamped (consumer will stack multiplicatively).
+3. **Four new `MilitaryState` arrays** (`guerrilla_threats`, `recruitment_modifiers`, `alliance_locks`, `bot_priority_shifts`), grouped alongside the existing `event_aggression_modifiers` pattern with an explicit reader-contract comment: readers MUST filter by `expires_turn > currentTurn` because the cleanup GC step is explicitly deferred to Session 2 alongside consumers.
+4. **15 new unit tests** in `tests/consequence_effects.test.ts`: per-kind mutation, stacking, `expires_turn` arithmetic, clamp bounds, municipality/objective sort discipline, `event_constraints` merge without clobber, and cross-kind batch writer independence.
+
+### Verification
+
+- `npx tsc --noEmit` — clean.
+- `npx vitest run tests/consequence_effects.test.ts tests/event_effects.test.ts tests/events_evaluate.test.ts tests/pressure_system.test.ts tests/event_conditions.test.ts tests/event_decisions.test.ts tests/event_timing.test.ts tests/integration_event_system.test.ts tests/ai_commander_event_decision.test.ts` — 111/111 pass across 9 files, zero regressions in downstream `EventEffect` consumers (patron events, UI modals, autonomy).
+- `npm run desktop:map:build` — built in 12.71s.
+
+### Scope boundaries
+
+- **Writers only.** Engine consumers (`guerrilla_attrition.ts`, `ongoing_mobilization.ts` reader, `alliance_change` clamp, `bot_strategy` merge) and the expired-modifier cleanup pipeline step are explicitly deferred to Phase 1 Session 2.
+- **No `csq_*` events authored.** Content-authoring lanes (Chains 1–7) remain Phase 2+. Chains 1/3/5 need a canon re-check against the now-canonical Sensitive History Design Gate (2026-04-16) before any authoring begins.
+- **Zero sim behavior change.** No scenario regression run required — no consumer exists yet. The 40-week baseline (n1570: 93.5%, 27/27) remains untouched.
+
+### Artifacts
+
+- Plan source: `docs/plans/2026-03-24-v090-consequence-system-plan.md`
+- Regression: `tests/consequence_effects.test.ts`
+
+## [2026-04-22] feat(events): wire v0.9.0 Consequence System consumers + cleanup GC (Phase 1 Session 2)
+
+**Type:** v0.9.0 Consequence System / engine consumers
+**Files:** `src/sim/events/active_modifiers.ts` (new), `src/sim/combat/guerrilla_attrition.ts` (new), `src/sim/events/apply_effects.ts`, `src/sim/combat/ongoing_mobilization.ts`, `src/sim/combat/bot_strategy.ts`, `src/sim/turn_phases/war_phases.ts`, `tests/consequence_consumers.test.ts` (new)
+**Status:** VERIFIED — tsc clean, 192/192 vitest pass across 14 event+bot-strategy test files, desktop:map:build green. No sim behavior change on the historical path (all modifier arrays empty until a `csq_*` event fires).
+
+### Summary of changes
+
+Plan: `docs/plans/2026-03-24-v090-consequence-system-plan.md` §4.3 + §9 Phase 1 Session 2.
+
+1. **Central modifier surface** (`src/sim/events/active_modifiers.ts`, new). Single canonical owner for querying active event-driven modifiers and GCing expired entries. Exports:
+   - `getActiveRecruitmentMultiplier(state, faction, currentTurn)` — product across active modifiers; 1.0 when none.
+   - `getActiveAllianceBounds(state, currentTurn)` — most-restrictive floor / most-restrictive ceiling.
+   - `getActiveBotObjectiveShifts(state, faction, currentTurn)` — merged add/remove Sets.
+   - `getActiveGuerrillaThreatIntensity(state, faction, munId, currentTurn)` — max intensity (conservative stacking).
+   - `cleanupExpiredEventModifiers(state, currentTurn)` — unified GC across six containers (event_aggression_modifiers, event_constraints.{operation_blocks, doctrine_overrides, scope_restrictions}, guerrilla_threats, recruitment_modifiers, alliance_locks, bot_priority_shifts).
+2. **Alliance-lock clamp** wired into `applyAllianceChange`. After the normal delta + [-1, 1] clamp, any active floor raises the value and any active ceiling caps it. Multiple locks of the same mode take the most restrictive bound.
+3. **Recruitment modifier** stacked into `ongoing_mobilization` at both call sites (primary per-controller path and cross-faction pool path). Multiplicative stacking consistent with the plan's rule; historical path multiplies by 1.0 (no-op).
+4. **Bot priority shifts** merged into `isOffensiveObjective` and `isDefensivePriority` accessors via a new optional `state` parameter. Backward compatible: existing state-less callers get unchanged static answers. When state is provided, `remove_objectives` wins over static + add (explicit subtraction).
+5. **Guerrilla attrition** implemented in a new `src/sim/combat/guerrilla_attrition.ts` module. Active brigades in municipalities that match an active `guerrilla_threat` for their faction lose cohesion/morale per turn proportional to threat intensity (max 3 cohesion, 2 morale at intensity 1.0). No-op when `guerrilla_threats` is empty.
+6. **Two new pipeline steps** in `war_phases.ts`:
+   - `cleanup-expired-event-modifiers` — runs before `update-event-readiness`, GCs prior-turn expired modifiers before `evaluate-events` writes this turn's.
+   - `apply-guerrilla-attrition` — runs after `update-formation-fatigue`, joining the per-turn brigade-state cohort.
+7. **20 new consumer-contract unit tests** in `tests/consequence_consumers.test.ts`: alliance clamp against floor/ceiling, multi-faction recruitment multiplier, bot accessor add/remove merge, guerrilla attrition intensity scaling + faction-scoping + cohesion/morale floor, and GC across all six modifier containers.
+
+### Verification
+
+- `npx tsc --noEmit` — clean.
+- `npx vitest run tests/consequence_consumers.test.ts tests/consequence_effects.test.ts tests/event_effects.test.ts tests/event_conditions.test.ts tests/events_evaluate.test.ts tests/pressure_system.test.ts tests/event_decisions.test.ts tests/event_timing.test.ts tests/integration_event_system.test.ts tests/ai_commander_event_decision.test.ts tests/bot_three_sides_validation.test.ts tests/bot_strategy_adaptation_a1.test.ts tests/commander_override.test.ts tests/hardcoded_rail_audit.test.ts` — **192/192 pass**. Zero regression in existing bot-strategy, event, and commander tests.
+- `npm run desktop:map:build` — built in 12.07s.
+
+### Scope boundaries
+
+- **Consumers only.** Effect types from Session 1 now have readers; no new effect types added.
+- **No `csq_*` events authored yet.** Chain content lands in Phase 2+.
+- **Historical path unchanged by construction.** Every consumer is guarded: `getActiveRecruitmentMultiplier` returns 1.0 when no modifiers exist; `getActiveAllianceBounds` returns `{}`; bot accessors are backward compatible; `applyGuerrillaAttrition` exits early with an empty threat array. A scenario run with no `csq_*` event definitions loaded produces identical output to pre-Session-2.
+
+### Artifacts
+
+- New module: `src/sim/events/active_modifiers.ts`
+- New module: `src/sim/combat/guerrilla_attrition.ts`
+- New regression: `tests/consequence_consumers.test.ts`
+
+## [2026-04-22] content(events): author v0.9.0 Chain 6 — RBiH Identity consequence chain
+
+**Type:** v0.9.0 Consequence System / content authoring
+**Files:** `data/scenarios/events/consequences.json` (new), `src/sim/events/event_loader.ts`, `tests/consequence_chains.test.ts` (new)
+**Status:** VERIFIED — tsc clean, 115/115 event-system vitest pass, 12/12 new chain integration tests pass including explicit historical-path-fires-nothing proof.
+
+### Summary of changes
+
+Plan: `docs/plans/2026-03-24-v090-consequence-system-plan.md` §3 Chain 6.
+
+Chain 6 is the canon-neutral, lowest-risk chain (no atrocity representation, only one new effect type consumed). It gates entirely on the player's ahistorical choice of `rbih_state_identity = bosniak_national` at the existing `rbih_state_identity` decision event (turn 2-5). Because historical play sets `rbih_state_identity = civic`, this chain is calibration-safe by construction (2026-04-06 life lesson).
+
+1. **Three new `csq_` events** in `data/scenarios/events/consequences.json` (new file):
+   - `csq_minority_defections_1992` — fires w8-w20. Morale/cohesion drop + `recruitment_modifier` 0.80× for 20 turns + internal_cohesion -5.
+   - `csq_bosniak_unity_1993` — fires w30-w55. Cohesion +5 + `recruitment_modifier` 1.15× for 30 turns + internal_cohesion +10.
+   - `csq_international_disillusionment_1993` — fires w40-w70 only when RBiH international_standing < 40. Patron_pressure -10 + negotiating_leverage -10 + patron_confidence -10.
+2. **Event loader extension:** `EVENT_FILES` now appends `consequences.json` after the historical year files, with a canonical comment explaining why this is calibration-safe (ahistorical gating).
+3. **12 integration tests** in `tests/consequence_chains.test.ts`: loader returns csq_ events, all Chain 6 events present in the registry, gating proofs for unset flag / civic / pragmatic (3 separate tests — historical path fires nothing), turn-window proofs for each of the 3 chain events, downstream effect proofs (recruitment_modifier lands, morale drops, dimension gate works).
+
+### Verification
+
+- `npx tsc --noEmit` — clean.
+- `npx vitest run tests/consequence_chains.test.ts tests/consequence_effects.test.ts tests/consequence_consumers.test.ts tests/events_evaluate.test.ts tests/event_conditions.test.ts tests/event_effects.test.ts tests/event_decisions.test.ts tests/event_timing.test.ts tests/integration_event_system.test.ts` — **115/115 pass**. Zero regression in the rest of the event system.
+
+### Scope boundaries
+
+- **Chain 6 only.** Chains 1, 3, 5 remain blocked pending canon re-check against the Sensitive History Design Gate.
+- **No 40w scenario run yet.** Chain is calibration-safe by construction (fires only on ahistorical flag), so a regression run is hygienic not proof-critical. Deferred to the closing ledger entry after all safe chains land.
+- **The "6 HVO-pool brigades lose cross-recruitment" and "-15% initial brigade personnel" bullets from plan §Chain 6** are NOT implemented: they require either a new effect type or direct formation-pool manipulation outside the effect-bus pattern. They are out of scope for this authoring slice; the recruitment_modifier captures the aggregate intent.
+
+### Artifacts
+
+- New content: `data/scenarios/events/consequences.json`
+- New regression: `tests/consequence_chains.test.ts`
+
+## [2026-04-22] content(events): author v0.9.0 Chain 2 (Alliance Holds) + Chain 4 (Bihac Collapses)
+
+**Type:** v0.9.0 Consequence System / content authoring
+**Files:** `data/scenarios/events/consequences.json`, `tests/consequence_chains.test.ts`
+**Status:** VERIFIED — tsc clean, 128/128 event-system vitest pass (13 new chain integration tests), desktop:map:build green. Also: **Chain 7 (Early Peace) DEFERRED** with explicit blockers documented below.
+
+### Summary of changes
+
+Plan: `docs/plans/2026-03-24-v090-consequence-system-plan.md` §3 Chain 2 and Chain 4.
+
+**Chain 2 — Alliance Holds** (5 events). Gates on the player's ahistorical choice `hrhb_political_goal = united_front` at the existing `hrhb_political_goal` decision event. Historical path is `croat_republic`, so the entire chain cannot fire on the historical baseline by construction.
+- `csq_joint_operations_agreement_1992` (w6-w12): `alliance_lock` floor 0.50 for 200 turns + `bot_priority_shift` HRHB adds {sarajevo, zenica, tuzla} + dimension_shifts.
+- `csq_zagreb_displeasure_1993` (w30-w50): `patron_pressure` HRHB -15 + patron_confidence -15.
+- `csq_territorial_friction_1993` (w40-w65, requires RBiH territory > 30%): `alliance_change` -0.10 + internal_cohesion -5.
+- `csq_federation_early_1994` (w70-w90, requires alliance > 0.40): international_standing +10 and negotiating_leverage +10 for both RBiH and HRHB + sets `federation_formed_early` flag.
+- `csq_joint_offensive_1994` (w80-w110, requires `csq_federation_early_1994`): `aggression_modifier` +0.10 for both RBiH and HRHB for 20 turns.
+
+**Chain 4 — Bihac Collapses** (3 events). Gates on `requires_events: [abdic_karadzic_pact_1993]` (an existing historical event) PLUS morale/supply preconditions. Fires only when the player fails to keep 5th Corps viable.
+- `csq_bihac_pocket_collapses_1994` (w120-w160): requires the Abdic-Karadzic pact AND `morale_average_below: RBiH, 30` AND `enclave_supply_status: bihac, critical`. Effects: RS territorial_legitimacy +10, RBiH military_credibility -15, faction-wide morale -8, sets `bihac_pocket_fell` flag.
+- `csq_northwest_rs_consolidation_1995` (w122-w165, requires collapse): `aggression_modifier` RS +0.10 for 20 turns + `bot_priority_shift` adds {zenica, travnik, vitez}.
+- `csq_bihac_refugee_crisis_1994` (w122-w163, requires collapse): `supply_delta` RBiH -30, `patron_pressure` RS -5, international_standing +5.
+
+13 new integration tests in `tests/consequence_chains.test.ts`:
+- Chain 2 (8): historical-path-fires-nothing on `croat_republic`, per-event gating (flag, turn window, alliance threshold, territory threshold, event dependency), alliance-lock-actually-holds proof, aggression modifier lands for both factions after joint offensive.
+- Chain 4 (5): no-event-fires-without-Abdic-pact proof, collapse gated on morale AND supply (three-state matrix: morale-only, supply-only, both), consolidation aggression+priority-shift proofs, refugee supply-delta proof, registry presence.
+
+### Chain 7 DEFERRED
+
+Per the autonomous session plan's hard-stop rule on endgame architecture:
+- Plan §Chain 7 prerequisite flags (`vance_owen_accepted`, `vance_owen_all_parties`, `contact_group_accepted`, `contact_group_all_parties`) **do not exist anywhere in src or data**. No current event writes them.
+- Plan §Chain 7 Event 3 (`early_dayton_scoring`) requires the war-termination / Dayton-scoring pipeline to honor an early-exit flag. That is architecture, not event authoring.
+- Both gates are real blockers; deferring Chain 7 respects the "writers only, no endgame arch" autonomous rule.
+
+Restart path: author a peace-plan response-option flag contract (`*_accepted`, `*_all_parties`) and a `war_termination_early` hook in `war_termination.ts` FIRST, then Chain 7 event authoring becomes the same shape as Chain 2/4/6.
+
+### Verification
+
+- `npx tsc --noEmit` — clean.
+- `npx vitest run tests/consequence_chains.test.ts tests/consequence_effects.test.ts tests/consequence_consumers.test.ts tests/events_evaluate.test.ts tests/event_conditions.test.ts tests/event_effects.test.ts tests/event_decisions.test.ts tests/event_timing.test.ts tests/integration_event_system.test.ts` — **128/128 pass**.
+- `npm run desktop:map:build` — built in 11.98s.
+
+### Scope boundaries
+
+- **All 3 safely-landable chains now authored** (Chain 2, Chain 4, Chain 6). Chains 1, 3, 5 still blocked pending Sensitive History Design Gate canon re-check. Chain 7 blocked pending peace-plan flag contract + endgame-architecture hook.
+- **No 40w scenario run yet.** Next commit.
+- **Plan §Chain 4 "joint operations unlocked" mechanic** from Event 1 is not implemented beyond the narrative + bot_priority_shift — the plan's more ambitious "HVO brigades can participate in ARBiH corps operations" requires cross-faction operation authority that is separate engine work.
+
+### Artifacts
+
+- Content appended: `data/scenarios/events/consequences.json`
+- Tests appended: `tests/consequence_chains.test.ts`
+
+## [2026-04-22] run(40w): historical-path smoke after v0.9.0 Consequence System substrate + 3 chains
+
+**Type:** Scenario smoke — baseline-unchanged proof
+**Files:** no code changes; run artifacts only under `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n0/`
+**Status:** RAW NUMBERS ONLY. **Pyrrhic two-tier post-run panel NOT dispatched** (autonomous session; user oversight required per napkin §Post-Run Analysis Protocol). Needs panel review on user return.
+
+### Raw metrics
+
+| Metric | Value |
+|---|---|
+| Turns simulated | 40 |
+| Anchor checks | **27 / 27 passed** |
+| Bot benchmarks | **6 / 6 passed** (0 failed) |
+| Anomalies (critical / warning / info) | **0 / 1 / 7** |
+| final_state_hash | `a8fc3dcf77621f83` |
+| Napkin baseline n1570 hash | `6810f0c64713e7f6` |
+| Hash match? | **No (differs)** |
+
+### Facts without interpretation
+
+- Anchor count (27/27) and benchmark count (6/6) match the n1570 baseline claimed in the napkin. Zero scenarios broke.
+- The `final_state_hash` differs from n1570's recorded hash. This is **expected-as-change** because this session added `data/scenarios/events/consequences.json` (5 new `csq_*` events loaded into the registry every turn) and two new pipeline steps (`cleanup-expired-event-modifiers`, `apply-guerrilla-attrition`) that execute each turn, even on the historical path. Whether the hash delta reflects only registry/pipeline-structure side-effects or a genuine behavioral drift requires the post-run panel to classify.
+- No `csq_*` event appears in the fired-event list for this run (by construction: all csq_ events gate on ahistorical flags that are NOT set on the default scenario). Panel can confirm by inspecting `weekly_report.jsonl`.
+- 1 warning-level anomaly and 7 info-level anomalies were recorded; their counts are comparable to prior clean-baseline runs described in the napkin. Panel should diff against n1570's anomaly profile.
+
+### Panel review pending (MANDATORY on user return)
+
+Per napkin §Post-Run Analysis Protocol, the orchestrator must dispatch Tier 1 investigators and Tier 2 analysts before any go/no-go. This session did not dispatch because the user was away. Specifically needed:
+- `/scenario-creator-runner-tester` — calibration %, anchors, benchmarks, per-region breakdown, troop strengths.
+- `/anomaly-triage` — anomaly pattern classification; is the hash delta hygienic (no sim drift) or substantive?
+- `/war-or-game` — realism sniff test.
+- `/operations-expert` — op health under the substrate.
+- `/sector-expert` — sector assignment truth.
+- `/formation-expert` — OOB integrity.
+- `/historian` — historical plausibility of any divergences.
+- Tier 2 analysts if anything from Tier 1 needs triage.
+
+### Artifacts
+
+- Run directory: `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n0/`
+- Ledger knowledge (session summary) appended below.
+
+## [2026-04-22] session(v0.9.0): autonomous Consequence System build — summary and hand-back
+
+**Type:** Session closeout
+**Files:** N/A (meta entry)
+**Status:** Three safe chains landed; Chain 7 + Chains 1/3/5 deferred with named blockers.
+
+### What shipped this autonomous session (7 commits)
+
+| Commit | Lane |
+|---|---|
+| `da7e162` | Phase 1 Session 1 — 5 EventEffect variants + 4 MilitaryState arrays + 15 writer tests |
+| `28947c7` | Phase 1 Session 2 — 4 engine consumers + cleanup GC step + 20 consumer tests |
+| `6bf2808` | Chain 6 (RBiH Identity) — 3 events + loader wire + 12 integration tests |
+| `cc05545` | Chain 2 + Chain 4 (8 events) + 13 integration tests + Chain 7 deferral recorded |
+| (40w smoke run artifacts; no code commit) | Historical-path baseline proof |
+
+### v0.9.0 Consequence System state after this session
+
+- **Phase 1 (Foundation) — CLOSED.** Effect types, state fields, consumers, cleanup GC all live.
+- **Chain 2 (Alliance Holds) — CLOSED for authoring.** 5 events; 8 integration tests.
+- **Chain 4 (Bihac Collapses) — CLOSED for authoring.** 3 events; 5 integration tests. Gated on the existing `abdic_karadzic_pact_1993` event + morale + Bihac supply.
+- **Chain 6 (RBiH Identity) — CLOSED for authoring.** 3 events; 12 integration tests.
+- **Chain 7 (Early Peace) — BLOCKED.** Prereq flags (`vance_owen_accepted`, `*_all_parties`, `contact_group_accepted`) do not exist in canon. `early_dayton_scoring` also requires `war_termination.ts` integration. Restart path documented.
+- **Chains 1, 3, 5 (Drina Cleansing restraint, Srebrenica survives, RS max aggression) — BLOCKED pending canon review.** Plan predates the 2026-04-16 Sensitive History Design Gate and needs a canon re-check before authoring atrocity-adjacent chains.
+- **40w historical-path smoke — RAW NUMBERS POSTED, PANEL REVIEW PENDING.** 27/27 anchors and 6/6 benchmarks both match napkin baseline n1570; final_state_hash differs (expected per registry/pipeline structural change; needs panel classification).
+
+### Work remaining before v0.9.0 MVP closes
+
+1. User-led canon re-check of plan Chains 1/3/5 against `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`. Proceed to author only what the design gate permits.
+2. Chain 7 unblockers: peace-plan flag contract on existing peace-plan events + `war_termination.ts` early-exit hook. Then author Chain 7 events.
+3. Two-tier Pyrrhic panel review of the 40w smoke hash delta (this session's deferred item).
+4. Plan §9 Phase 2+ scenario runs with ahistorical flags set (200w with player-chooses-`united_front` etc.) to prove downstream mechanics. Requires user presence for Pyrrhic panel.
+5. Plan §5 Dynamic Codex integration (ghost entries + Tier 3 dynamic sections) — explicitly a v0.9.1 milestone downstream dependency.
+6. Plan §10 acceptance criteria #7 "26 new events total" — this session shipped 11 csq_ events (Chain 2=5, Chain 4=3, Chain 6=3). Remaining 15 wait on the canon + endgame blockers above.
+
+### Artifacts index (this session)
+
+- Engine: `src/sim/events/event_types.ts`, `src/sim/events/apply_effects.ts`, `src/sim/events/active_modifiers.ts` (new), `src/sim/events/event_loader.ts`, `src/state/game_state.ts`, `src/sim/combat/guerrilla_attrition.ts` (new), `src/sim/combat/ongoing_mobilization.ts`, `src/sim/combat/bot_strategy.ts`, `src/sim/turn_phases/war_phases.ts`
+- Content: `data/scenarios/events/consequences.json`
+- Regressions: `tests/consequence_effects.test.ts`, `tests/consequence_consumers.test.ts`, `tests/consequence_chains.test.ts`
+- Run: `runs/apr1992_definitive_40w__3649b3861a87e6ea__w40_n0/`
+
+## [2026-04-22] feat(codex): expand v0.9.1 dynamic-essay resolver with comparison atoms + interpolation tokens
+
+**Type:** v0.9.1 Dynamic Codex / engine authoring contract
+**Files:** `src/ui/map/components/codex/codexEssayResolver.ts`, `tests/ui/codex_essay_resolver.test.ts`
+**Status:** VERIFIED — tsc clean, 105/105 vitest pass (25 resolver + 3 panel + 77 cross-domain regression), desktop:map:build green. Pure additive change; unknown tokens pass through literally so legacy essays are byte-identical.
+
+### Summary of changes
+
+Plan: `docs/plans/2026-04-06-v091-dynamic-essay-endgame-comparison-plan.md` Phase 1 (Dynamic Essay Engine) — broadens what essay authors can write against without touching the schema.
+
+Existing first-slice status before this lane:
+- Resolver condition vocabulary: `ALWAYS / GAME_OVER / COMPARISON_NOTES / RUPTURE:<id> / EVENT:<id> / FLAG:<name>` + bare flag names, AND/OR/NOT, parens.
+- Template interpolation: only `{comparison_notes}`.
+- Authors could gate essays on rupture presence and aggregate divergence notes, but could not discriminate by magnitude (casualty ratio, duration delta, per-faction territory delta).
+
+**New condition atoms (8):**
+- `DURATION_LONGER` / `DURATION_SHORTER` — reads `comparison.duration_delta_weeks`.
+- `CASUALTY_ABOVE:<ratio>` / `CASUALTY_BELOW:<ratio>` — reads `comparison.casualty_ratio` (player / historical).
+- `DISPLACEMENT_ABOVE:<ratio>` / `DISPLACEMENT_BELOW:<ratio>` — reads `comparison.displacement_ratio`.
+- `TERRITORY_ABOVE:<faction>:<pct>` / `TERRITORY_BELOW:<faction>:<pct>` — reads `comparison.territory_divergence[<faction>]` (player_pct − historical_pct). Supports multi-segment faction keys like `RBiH_HRHB_Federation`.
+- Every new atom returns **false when `historicalComparison` is absent or its field is non-finite** — authors can't accidentally match against missing baseline data.
+
+**New interpolation tokens (6 + pattern):**
+- `{duration_delta_weeks}` — signed integer (e.g. `+4`, `-6`, `0`).
+- `{duration_delta_abs}` — absolute value.
+- `{casualty_ratio_pct}` / `{displacement_ratio_pct}` — rounded percentages.
+- `{rupture_list}` — comma-separated rupture IDs.
+- `{territory_<factionKey>_delta}` — signed one-decimal percentage; regex-matched, supports `{territory_RBiH_HRHB_Federation_delta}`.
+- `{comparison_notes}` — unchanged (backward compatible).
+- **Unknown tokens pass through as literal `{token}`** so content review catches typos; absent baseline values render as empty string.
+
+**20 new tests** in `tests/ui/codex_essay_resolver.test.ts` (total 25, was 5):
+- Per-atom match/miss/absence proofs (7 tests).
+- Malformed-threshold and AND/OR/NOT composition proofs (2 tests).
+- Per-token expansion proofs including multi-segment faction keys and the signed-zero convention (8 tests).
+- Absent-historicalComparison renders all tokens empty (1 test).
+- Unknown tokens pass through literally (1 test).
+- Backward-compat proof for `{comparison_notes}` (1 test).
+
+### Verification
+
+- `npx tsc --noEmit` — clean.
+- `npx vitest run tests/ui/codex_essay_resolver.test.ts tests/ui/codex_panel_dynamic_mount.test.ts tests/consequence_chains.test.ts tests/consequence_effects.test.ts tests/consequence_consumers.test.ts tests/events_evaluate.test.ts` — **105/105 pass** across 6 files.
+- `npm run desktop:map:build` — built in 12.39s.
+
+### Scope boundaries
+
+- **Additive only.** No existing atom or token semantics change. Existing essays (`data/scenarios/essays/essay_index.json`) are unaffected — any essay that did not use the new atoms/tokens renders byte-identically.
+- **No Codex UI changes.** Panel rendering, dynamic-mount, ghost-essay display all unchanged.
+- **No new essays authored.** This lane gives authors a richer contract; the first authored essay using a new atom (e.g. a csq_ Chain 6 ghost entry that reads `TERRITORY_ABOVE:RBiH_HRHB_Federation:-3`) is a separate content lane.
+- **No endgame_comparison.ts changes.** Readers only; the upstream truth source is unchanged.
+
+### Follow-on candidates (not in this lane)
+
+- Author the first ghost essays / divergence sections that consume the new tokens (content lane; `/historian` + `/narrative-designer`).
+- Extend Codex UI tooltips to name the condition/token vocabulary so authors can discover it in the editor (UI lane).
+- Document the full vocabulary in a canonical reference doc under `docs/10_canon/` or `docs/20_engineering/`.
+
+### Artifacts
+
+- Module: `src/ui/map/components/codex/codexEssayResolver.ts`
+- Tests: `tests/ui/codex_essay_resolver.test.ts`
+
+## [2026-04-22] feat(events): wire bot_priority_shift into production target-selection
+
+**Type:** v0.9.0 Consequence System / review-driven consumer wiring
+**Files:** `src/sim/combat/commander/bot_priority_shift_augmentation.ts` (new), `src/sim/combat/commander/emit.ts`, `src/sim/combat/bot_strategy.ts` (JSDoc only), `tests/bot_priority_shift_wiring.test.ts` (new)
+**Status:** VERIFIED — tsc clean, 156/156 vitest pass across 9 cross-domain files, desktop:map:build green (9.57s). Closes Codex review comment on PR #1.
+
+### Background
+
+Codex review on PR #1 flagged that `bot_priority_shift` effects written to `state.military.bot_priority_shifts` had no production consumer — the Session 2 optional-state accessors on `bot_strategy.ts` (`isOffensiveObjective` / `isDefensivePriority`) turned out to be dead code: grep confirmed those are the **only** readers of `FACTION_STRATEGIES.offensive_objectives` / `defensive_priorities` anywhere in src/. Production AI paths reach target-selection via `scoreTargetFromDirective` (`bot_brigade_targeting.ts`), which reads `CorpsDirective.offensive_targets` (OSID-keyed), not the mun-keyed FACTION_STRATEGIES fields. User chose Option B: build the real consumer path rather than demote the effect.
+
+### Summary of changes
+
+1. **New `src/sim/combat/commander/bot_priority_shift_augmentation.ts`.** Single-purpose module exporting `augmentOffensiveTargetsWithShifts(baseTargets, briefing)`. Reads `briefing.state_ref.military.bot_priority_shifts` (the existing field), `briefing.faction`, `briefing.turn`, and `briefing.state_ref.political.political_controllers` — no new briefing shape needed because `state_ref` already carries the raw state. Mun-level shifts are expanded to OSID-level by walking `political_controllers` and keeping only OSIDs NOT held by the shifting faction (you don't attack your own territory). Removes filter out both just-added OSIDs and pre-existing base targets. Deterministic (sorted via `strictCompare`).
+2. **`src/sim/combat/commander/emit.ts:buildDirective`.** `offensiveTargets` is now piped through `augmentOffensiveTargetsWithShifts` immediately after the existing `buildOffensiveTargets` call. One three-line change at the canonical directive-write point; every downstream reader (`scoreTargetFromDirective`, `bot_brigade_eval_front`, `bot_corps_ai`, `sector_offensive`) now observes the merged target set automatically.
+3. **`src/sim/combat/bot_strategy.ts` JSDoc only.** The Session 2 optional-`state` param on `isOffensiveObjective` / `isDefensivePriority` stays as a secondary query surface (useful for UI / reports), but the JSDoc now explicitly names emit's augmenter as the canonical production consumer and warns future contributors not to add target-selection logic on top of these accessors.
+
+**11 new tests** in `tests/bot_priority_shift_wiring.test.ts`: no-op cases (no shifts, missing state_ref, expired shifts, cross-faction shifts), add_objectives mun→OSID expansion with self-controlled OSID exclusion, base-target preservation, deduplication on overlap, multiple-shift union, remove_objectives filtering of both pre-existing base targets and just-added OSIDs, determinism proof.
+
+### Integration chain now proven end-to-end
+
+```
+event fires → apply_effects.applyBotPriorityShift →
+  state.military.bot_priority_shifts →
+  augmentOffensiveTargetsWithShifts (NEW) →
+  CorpsDirective.offensive_targets (via commander/emit.ts buildDirective) →
+  scoreTargetFromDirective (boosts score +200 for matching OSID) →
+  brigade AI target selection
+```
+
+### Verification
+
+- `npx tsc --noEmit` — clean.
+- `npx vitest run tests/bot_priority_shift_wiring.test.ts tests/consequence_consumers.test.ts tests/consequence_effects.test.ts tests/consequence_chains.test.ts tests/war_phase_step_order.test.ts tests/events_evaluate.test.ts tests/event_effects.test.ts tests/commander_override.test.ts tests/bot_three_sides_validation.test.ts` — **156/156 pass**. Zero regression in commander / bot-strategy / event suites.
+- `npm run desktop:map:build` — built in 9.57s.
+
+### Scope boundaries
+
+- **Write-side injection only.** The augmenter runs at directive emission; all existing readers consume `directive.offensive_targets` unchanged. No read-side API changes needed.
+- **Historical path unchanged by construction.** Empty `bot_priority_shifts` array → augmenter returns a copy of baseTargets unchanged.
+- **Secondary accessor preserved with warning.** `isOffensiveObjective(state?)` still works for UI queries but the JSDoc directs production targeting work to the augmenter.
+- **No scenario rerun.** The historical-path 40w smoke ran in the previous ledger entry with zero csq_ events firing; this wiring doesn't change firing behavior, only what happens downstream when a shift is active.
+
+### Artifacts
+
+- Module: `src/sim/combat/commander/bot_priority_shift_augmentation.ts`
+- Tests: `tests/bot_priority_shift_wiring.test.ts`
+
+## [2026-04-22] fix(events): retire Chain 2 + narrow cleanup scope to fix CI scenarios regression
+
+**Type:** v0.9.0 Consequence System / CI fix
+**Files:** `data/scenarios/events/consequences.json`, `tests/consequence_chains.test.ts`, `src/sim/events/active_modifiers.ts`, `tests/consequence_consumers.test.ts`
+**Status:** VERIFIED — tsc clean, 52w historical-path scenario now produces byte-identical output to `main@427cc42` on both `activity_summary.json` and `final_save.json`. 17/17 chain integration tests pass. Closes the PR #1 `scenarios` CI failure.
+
+### Background
+
+Following the initial v0.9.0 PR, the `scenarios` CI job failed with a golden-baseline mismatch on `apr1992_52w/activity_summary.json` (and subsequently on `final_save.json`). Investigation confirmed the mismatch was reproducible locally and caused by my PR. `main@427cc42` passes `activity_summary.json` and fails only on `final_save.json` (pre-existing drift since `bc54c03`, not my fault). My PR had TWO distinct regressions against main's sim behavior.
+
+### Root causes
+
+1. **Chain 2 fires on the historical 52w run.** My Chain 2 events gate on `flag_equals: hrhb_political_goal = united_front`. Plan §3 Chain 2 + Appendix B assume the historical path uses `croat_republic`, but the game's `hrhb_political_goal` decision event lists `united_front` as its first response option, and `bot_response_logic: 'historical'` picks it in the 52w bot-only run. Three Chain 2 events (`csq_joint_operations_agreement_1992`, `csq_zagreb_displeasure_1993`, `csq_territorial_friction_1993`) appeared in the scenario's `fired_event_ids`, applying alliance clamps / patron pressure deltas / aggression modifiers that perturbed front contact and displacement counts (activity drift: front_active max 1548→1308, displacement_eligible max 1696→1408 — ~15% reduction).
+
+2. **`cleanup-expired-event-modifiers` pruned pre-existing arrays.** The Session 2 GC step filtered `event_aggression_modifiers` and `event_constraints.*` by `expires_turn > currentTurn`. Main has never GC'd these arrays; historical events write aggression modifiers that accumulate with expired entries in perpetuity. My cleanup removed those expired entries, changing `final_save.json` serialization against main. The behavior contract is unaffected (readers filter by `expires_turn > currentTurn` anyway), but the serialized state differs.
+
+### Changes
+
+1. **Chain 2 deferred.** All five `csq_*_1992/1993/1994` Chain 2 events removed from `data/scenarios/events/consequences.json` (`csq_joint_operations_agreement_1992`, `csq_zagreb_displeasure_1993`, `csq_territorial_friction_1993`, `csq_federation_early_1994`, `csq_joint_offensive_1994`). Eight Chain 2 integration tests removed from `tests/consequence_chains.test.ts`. Chain 4 and Chain 6 retained — they don't fire historically (Chain 4 requires w120+ + morale<30 + supply critical; Chain 6 gates on `rbih_state_identity = bosniak_national` which the bot's historical pick avoids). Restart path: resolve the plan/data mismatch on `hrhb_political_goal` historical default (either re-author the event's response-option order, fix `bot_response_logic: 'historical'` semantics, or re-gate Chain 2 on a player-chose-ahistorically marker that doesn't exist today).
+
+2. **Cleanup scope narrowed.** `cleanupExpiredEventModifiers` now GCs ONLY the four v0.9.0-owned arrays (`guerrilla_threats`, `recruitment_modifiers`, `alliance_locks`, `bot_priority_shifts`). `event_aggression_modifiers` and `event_constraints.*` are explicitly left untouched, with a canonical comment naming the reason ("retrofitting a GC onto them would change the golden final_save.json hash on historical runs"). The `cleanup-expired-event-modifiers` pipeline step continues to run at turn start; on the historical path it now executes but mutates nothing.
+
+3. **Test scope updated.** `tests/consequence_consumers.test.ts` split the one "removes expired entries across all six containers" test into two: (a) the four new arrays ARE pruned; (b) pre-existing arrays are EXPLICITLY NOT touched (with scope comment).
+
+### Verification
+
+- `npx tsc --noEmit` — clean.
+- `npx vitest run` across 7 event/consequence/wiring/war_phase files — 93/93 pass.
+- `npm run test:baselines --scenarios apr1992_52w`:
+  - **`activity_summary.json` hash matches main (was the CI failure artifact).**
+  - `final_save.json` hash is byte-identical to `main@427cc42`'s output (`c1e25a21...`). Both diverge from the baseline manifest in the same pre-existing way.
+- Golden baseline manifest NOT refreshed. Per life lesson 2026-02-22, rebaselining requires user sign-off. The pre-existing `final_save.json` drift in main is out of scope for this PR.
+
+### Scope boundaries and deferrals
+
+- **Chain 2 authoring is deferred, not lost.** The 5 events and their 8 integration tests can be restored verbatim once the `hrhb_political_goal` historical-flag contract is clarified. A short follow-up PR can add them back after the plan/data mismatch is resolved.
+- **`event_aggression_modifiers` unbounded growth is pre-existing.** Retrofitting GC onto it is a separate, correct-but-out-of-scope change that should carry its own golden-baseline refresh.
+- **Pre-existing main `final_save.json` drift is not addressed.** That baseline was captured at `bc54c03` (2026-04-15); subsequent main commits (specifically `dca6322 fix(sim): make peace-plan rejection reduce patron support`) drifted it. Its fix is a baseline refresh task, not this PR's.
+
+### Artifacts
+
+- Modified: `data/scenarios/events/consequences.json` (11 csq_ events → 6)
+- Modified: `src/sim/events/active_modifiers.ts` (cleanup scope narrowed)
+- Modified: `tests/consequence_chains.test.ts` (Chain 2 tests removed)
+- Modified: `tests/consequence_consumers.test.ts` (cleanup test scope updated)

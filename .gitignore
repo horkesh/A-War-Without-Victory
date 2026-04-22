@@ -21,6 +21,7 @@ coverage/
 
 # Generated audit/debug artifacts (do not track)
 data/derived/_debug/
+data/derived/_test/
 
 # Viewer geometry (presentation-only, not committed - Phase H3.7, H4.2, H4.5)
 data/derived/settlements_viewer_v1.geojson
