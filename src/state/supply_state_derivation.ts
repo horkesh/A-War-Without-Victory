@@ -10,8 +10,29 @@ import type { AdjacencyMap } from '../map/adjacency_map.js';
 import type { EdgeRecord, SettlementRecord } from '../map/settlements.js';
 import { getSettlementControlStatus } from './settlement_control.js';
 import type { SupplyReachabilityReport } from './supply_reachability.js';
-import type { SupplyReachabilityOsidReport } from './supply_reachability_osid.js';
+import type { SupplyReachabilityOsidReport, FactionSupplyReachabilityOsid } from './supply_reachability_osid.js';
 import { buildOsidAdjacency } from '../sim/combat/osid_adjacency.js';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// v0.9.3 C2a — per-faction OSID-supply derivation caches.
+//
+// `deriveCorridorsOsid` and `deriveSupplyStateByOsid` are pure over the
+// per-faction `FactionSupplyReachabilityOsid` entry plus the (stable) edge
+// adjacency. The C2 supply-reachability cache returns the same per-faction
+// reference on cache hit, so we can use that reference as a WeakMap key for
+// both downstream derivations.
+//
+// Bridge detection in `deriveCorridorsOsid` is the dominant cost (O(E²) in
+// the worst case for the per-faction subgraph). Heartland-component + adequate
+// BFS in `deriveSupplyStateByOsid` are the second cost. Both skipped on cache
+// hit.
+//
+// Production caller (war_phases.ts supply-osid step) always sequences
+// deriveCorridorsOsid → deriveSupplyStateByOsid with the SAME supplyReport,
+// so the two caches stay coherent.
+// ═══════════════════════════════════════════════════════════════════════════
+const corridorCacheByFaction: WeakMap<FactionSupplyReachabilityOsid, DerivedCorridor[]> = new WeakMap();
+const supplyStateCacheByFaction: WeakMap<FactionSupplyReachabilityOsid, FactionSupplyStateByOsidEntry> = new WeakMap();
 
 /** Supply state levels per canon (Systems Manual §14). */
 export type SupplyStateLevel = 'adequate' | 'strained' | 'critical';
@@ -371,7 +392,51 @@ function isBridgeInSubgraphOsid(
 }
 
 /**
+ * Compute the corridor list for a single faction over the OSID graph.
+ * Pure over (fac, adjacency); cache key is fac reference identity.
+ */
+function computeFactionCorridors(
+    fac: FactionSupplyReachabilityOsid,
+    adjacency: Map<string, string[]>
+): DerivedCorridor[] {
+    const controlledSet = new Set(fac.controlled);
+    const reachableSet = new Set(fac.reachable_osids);
+
+    // Build full set of edges between reachable controlled OSIDs.
+    // Bridge detection must operate on the actual subgraph topology, not the
+    // BFS spanning tree (edges_used). The BFS tree has zero cycles, so every
+    // edge is trivially a bridge — producing 100% brittle, 0% open.
+    const reachableEdges = new Set<string>();
+    const potentialEdges = new Set<string>();
+    for (const osid of fac.controlled) {
+        const neighbors = adjacency.get(osid) ?? [];
+        for (const n of neighbors) {
+            if (!controlledSet.has(n)) continue;
+            const eid = osid < n ? `${osid}__${n}` : `${n}__${osid}`;
+            potentialEdges.add(eid);
+            if (reachableSet.has(osid) && reachableSet.has(n)) {
+                reachableEdges.add(eid);
+            }
+        }
+    }
+
+    const out: DerivedCorridor[] = [];
+    for (const edgeId of reachableEdges) {
+        const isBridge = isBridgeInSubgraphOsid(edgeId, reachableEdges, reachableSet, adjacency);
+        out.push({ edge_id: edgeId, faction_id: fac.faction_id, state: isBridge ? 'brittle' : 'open' });
+    }
+    for (const edgeId of potentialEdges) {
+        if (reachableEdges.has(edgeId)) continue;
+        out.push({ edge_id: edgeId, faction_id: fac.faction_id, state: 'cut' });
+    }
+    return out;
+}
+
+/**
  * Derives corridor states (Open/Brittle/Cut) per faction for the OSID graph.
+ *
+ * v0.9.3 C2a: per-faction corridor list memoized on FactionSupplyReachabilityOsid
+ * reference identity. Cache hits skip bridge detection (the dominant cost).
  */
 export function deriveCorridorsOsid(
     state: GameState,
@@ -383,35 +448,12 @@ export function deriveCorridorsOsid(
     const corridors: DerivedCorridor[] = [];
 
     for (const fac of supplyReport.factions) {
-        const controlledSet = new Set(fac.controlled);
-        const reachableSet = new Set(fac.reachable_osids);
-
-        // Build full set of edges between reachable controlled OSIDs.
-        // Bridge detection must operate on the actual subgraph topology, not the
-        // BFS spanning tree (edges_used). The BFS tree has zero cycles, so every
-        // edge is trivially a bridge — producing 100% brittle, 0% open.
-        const reachableEdges = new Set<string>();
-        const potentialEdges = new Set<string>();
-        for (const osid of fac.controlled) {
-            const neighbors = adjacency.get(osid) ?? [];
-            for (const n of neighbors) {
-                if (!controlledSet.has(n)) continue;
-                const eid = osid < n ? `${osid}__${n}` : `${n}__${osid}`;
-                potentialEdges.add(eid);
-                if (reachableSet.has(osid) && reachableSet.has(n)) {
-                    reachableEdges.add(eid);
-                }
-            }
+        let perFaction = corridorCacheByFaction.get(fac);
+        if (!perFaction) {
+            perFaction = computeFactionCorridors(fac, adjacency);
+            corridorCacheByFaction.set(fac, perFaction);
         }
-
-        for (const edgeId of reachableEdges) {
-            const isBridge = isBridgeInSubgraphOsid(edgeId, reachableEdges, reachableSet, adjacency);
-            corridors.push({ edge_id: edgeId, faction_id: fac.faction_id, state: isBridge ? 'brittle' : 'open' });
-        }
-        for (const edgeId of potentialEdges) {
-            if (reachableEdges.has(edgeId)) continue;
-            corridors.push({ edge_id: edgeId, faction_id: fac.faction_id, state: 'cut' });
-        }
+        for (const c of perFaction) corridors.push(c);
     }
 
     corridors.sort((a, b) => {
@@ -469,6 +511,61 @@ function findHeartlandComponent(
  * Croatian corridor) — reachable from a local source but cut off from the
  * main supply network.
  */
+/**
+ * Compute the per-OSID supply state entry for a single faction.
+ * Pure over (fac, adjacency, perFactionOpenEdges); cache key is fac reference.
+ *
+ * `perFactionOpenEdges` is derived from corridorReport entries for this faction
+ * — but those are themselves derivable from `fac` (via deriveCorridorsOsid),
+ * so the per-faction cache key is the supplyReport entry alone.
+ */
+function computeFactionSupplyState(
+    fac: FactionSupplyReachabilityOsid,
+    adjacency: Map<string, string[]>,
+    perFactionOpenEdges: Set<string>
+): FactionSupplyStateByOsidEntry {
+    const reachableSet = new Set(fac.reachable_osids);
+    const isolatedSet = new Set(fac.isolated_osids);
+
+    // Isolated source detection: only seed adequate BFS from sources in
+    // the heartland (largest connected component of reachable set).
+    // Sources in disconnected pockets → their OSIDs are strained, not adequate.
+    const heartland = findHeartlandComponent(reachableSet, adjacency);
+    const sources = new Set(
+        fac.sources.filter((osid) => reachableSet.has(osid) && heartland.has(osid))
+    );
+    const adequateVisited = new Set<string>();
+    const queue: string[] = [...sources];
+    for (const s of sources) adequateVisited.add(s);
+    while (queue.length > 0) {
+        const cur = queue.shift()!;
+        const neighbors = adjacency.get(cur) ?? [];
+        for (const n of neighbors) {
+            if (adequateVisited.has(n)) continue;
+            const eid = cur < n ? `${cur}__${n}` : `${n}__${cur}`;
+            if (!perFactionOpenEdges.has(eid)) continue;
+            adequateVisited.add(n);
+            queue.push(n);
+        }
+    }
+
+    const by_osid: OsidSupplyStateEntry[] = [];
+    for (const osid of fac.controlled) {
+        let level: SupplyStateLevel;
+        if (isolatedSet.has(osid)) {
+            level = 'critical';
+        } else if (adequateVisited.has(osid)) {
+            level = 'adequate';
+        } else {
+            level = 'strained';
+        }
+        by_osid.push({ osid, state: level });
+    }
+    by_osid.sort((a, b) => a.osid.localeCompare(b.osid));
+
+    return { faction_id: fac.faction_id, by_osid };
+}
+
 export function deriveSupplyStateByOsid(
     state: GameState,
     edges: EdgeRecord[],
@@ -477,69 +574,26 @@ export function deriveSupplyStateByOsid(
 ): SupplyStateByOsidReport {
     const turn = state.meta.turn;
     const adjacency = buildOsidAdjacency(edges);
-    const corridorByFactionEdge = new Map<string, CorridorStateLevel>();
+    // Group corridor states by faction so the per-faction cache key (the fac
+    // reference) is the only deciding input alongside the stable adjacency.
+    const openEdgesByFaction = new Map<string, Set<string>>();
     for (const c of corridorReport.corridors) {
-        corridorByFactionEdge.set(`${c.faction_id}:${c.edge_id}`, c.state);
+        if (c.state !== 'open') continue;
+        let set = openEdgesByFaction.get(c.faction_id);
+        if (!set) { set = new Set(); openEdgesByFaction.set(c.faction_id, set); }
+        set.add(c.edge_id);
     }
 
     const factionEntries: FactionSupplyStateByOsidEntry[] = [];
 
     for (const fac of supplyReport.factions) {
-        const reachableSet = new Set(fac.reachable_osids);
-        const isolatedSet = new Set(fac.isolated_osids);
-        const controlledSet = new Set(fac.controlled);
-        // Build open edges from ALL edges between reachable controlled OSIDs
-        // (not just BFS tree edges). The corridor report now classifies these
-        // correctly against the full subgraph topology.
-        const openEdges = new Set<string>();
-        for (const osid of fac.controlled) {
-            if (!reachableSet.has(osid)) continue;
-            const neighbors = adjacency.get(osid) ?? [];
-            for (const n of neighbors) {
-                if (!controlledSet.has(n) || !reachableSet.has(n)) continue;
-                const eid = osid < n ? `${osid}__${n}` : `${n}__${osid}`;
-                const st = corridorByFactionEdge.get(`${fac.faction_id}:${eid}`);
-                if (st === 'open') openEdges.add(eid);
-            }
+        let perFaction = supplyStateCacheByFaction.get(fac);
+        if (!perFaction) {
+            const openEdges = openEdgesByFaction.get(fac.faction_id) ?? new Set<string>();
+            perFaction = computeFactionSupplyState(fac, adjacency, openEdges);
+            supplyStateCacheByFaction.set(fac, perFaction);
         }
-
-        // Isolated source detection: only seed adequate BFS from sources in
-        // the heartland (largest connected component of reachable set).
-        // Sources in disconnected pockets → their OSIDs are strained, not adequate.
-        const heartland = findHeartlandComponent(reachableSet, adjacency);
-        const sources = new Set(
-            fac.sources.filter((osid) => reachableSet.has(osid) && heartland.has(osid))
-        );
-        const adequateVisited = new Set<string>();
-        const queue: string[] = [...sources];
-        for (const s of sources) adequateVisited.add(s);
-        while (queue.length > 0) {
-            const cur = queue.shift()!;
-            const neighbors = adjacency.get(cur) ?? [];
-            for (const n of neighbors) {
-                if (adequateVisited.has(n)) continue;
-                const eid = cur < n ? `${cur}__${n}` : `${n}__${cur}`;
-                if (!openEdges.has(eid)) continue;
-                adequateVisited.add(n);
-                queue.push(n);
-            }
-        }
-
-        const by_osid: OsidSupplyStateEntry[] = [];
-        for (const osid of fac.controlled) {
-            let level: SupplyStateLevel;
-            if (isolatedSet.has(osid)) {
-                level = 'critical';
-            } else if (adequateVisited.has(osid)) {
-                level = 'adequate';
-            } else {
-                level = 'strained';
-            }
-            by_osid.push({ osid, state: level });
-        }
-        by_osid.sort((a, b) => a.osid.localeCompare(b.osid));
-
-        factionEntries.push({ faction_id: fac.faction_id, by_osid });
+        factionEntries.push(perFaction);
     }
 
     factionEntries.sort((a, b) => a.faction_id.localeCompare(b.faction_id));
