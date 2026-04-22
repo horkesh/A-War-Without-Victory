@@ -4204,3 +4204,40 @@ Tests pass `CSQ_EVENTS` (not `ALL_EVENTS`) to isolate Chain 5 firing from histor
 - Content appended: four new events in `data/scenarios/events/consequences.json`
 - Tests appended: Chain 5 section in `tests/consequence_chains.test.ts` (+5 tests)
 - Canon authorization: `docs/40_reports/20260422_CHAINS_1_3_5_CANON_REVIEW.md` §Chain 5 (PASS)
+
+## [2026-04-22] perf(supply): C2 — single-pass controlled bucketing + per-faction BFS cache
+
+**Type:** v0.9.3 performance — second optimization from the Lane 4 profiling baseline
+**Files:** `src/state/supply_reachability_osid.ts`, `tests/supply_reachability_cache.test.ts` (new)
+**Status:** VERIFIED — tsc clean; 4 unit tests pass; **baseline regression green across all 3 golden scenarios** (apr1992_52w, baseline_ops_4w, noop_4w) — byte-identical to pre-C2. No baseline refresh needed. **40w wall time 77.8s → 68.9s (-8.9s, ~11.4% faster)** — above the 5-8% estimate in the Lane 4 report.
+
+### Summary of changes
+
+Lane 4 (`docs/40_reports/20260422_V093_PROFILING_BASELINE.md`) flagged `supply-osid` as the #2 hot path (15.7% of runtime, 282ms/turn). Two layered optimizations, both preserving byte-identical output:
+
+1. **Single-pass controlled-set bucketing.** Previously, `computeSupplyReachabilityOsid` ran one `getPoliticalControllerOSID` lookup per (OSID × faction), 5822 × 3 = 17466 calls per turn. Inverted to one pass over all OSIDs with dispatch into per-faction buckets: 5822 calls per turn (3× reduction). Also hoisted the `[...allOsids].sort(localeCompare)` out of the faction loop (previously re-sorted 3× per turn).
+2. **Per-GameState, per-faction BFS result cache.** A `WeakMap<GameState, Map<FactionId, { key, result }>>` keyed by a cheap `sources.join(',') + '||' + controlled.join(',')` hash. On turns where a faction's controlled set and supply sources are byte-identical to the previous turn (no political flips affecting it, no supply-source list edits), the BFS is skipped and the cached `FactionSupplyReachabilityOsid` object is returned by reference. Turn-to-turn control stability makes this effective: most turns see <50 flips out of 5822 OSIDs, so at least one faction typically has an unchanged controlled set.
+
+Correctness: `runSupplyBfs` is pure over `(sources, controlled, adjacency)`. Adjacency stability is guaranteed by the C1 memoization in `osid_adjacency.ts`. No production caller mutates the per-faction result fields (grep-audited, zero hits). Caching a shared reference is therefore safe.
+
+### Verification
+
+- `npx tsc --noEmit` — clean.
+- `npx vitest run tests/supply_reachability_cache.test.ts` — 4/4 pass: reference equality on unchanged turn, cache invalidation on control flip, per-GameState cache independence, content equality between cached and fresh compute.
+- `npx tsx tools/scenario_runner/run_baseline_regression.ts` — **"Baseline regression: all scenarios match."** Byte-identity confirmed across apr1992_52w, baseline_ops_4w, noop_4w.
+- **40w wall-time measurement:**
+  - Pre-C2 (post-C1): `real 1m17.764s` (77.8s)
+  - Post-C2:           `real 1m8.857s`  (68.9s)
+  - Delta: **-8.9s, ~11.4% faster.**
+- `final_state_hash` unchanged: `12d9f0220ca919ae` before and after C2.
+
+### Scope boundaries
+
+- **No baseline refresh needed** — sim output is byte-identical by construction and proven so by the golden-baseline regression.
+- **No new effect types or engine surface** — internal-implementation refactor of an existing compute function.
+- **Lane 4 C3-C5 (commander zone-assessment cache, displacement consolidation, sector reconciliation split) still deferred** — should be re-ranked against the new profile after C1+C2 land, because the ~11% runtime reduction shifts the relative cost of the remaining hot paths.
+
+### Artifacts
+
+- Module: `src/state/supply_reachability_osid.ts` (cache + single-pass bucketing)
+- Tests: `tests/supply_reachability_cache.test.ts`
