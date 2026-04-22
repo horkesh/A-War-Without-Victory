@@ -291,3 +291,170 @@ describe('Chain 4 — Bihac Collapses: gated collapse', () => {
         expect(ids.has('csq_bihac_refugee_crisis_1994')).toBe(true);
     });
 });
+
+// ─── Chain 5 — RS Maximum Aggression → Accelerated Response ──────────────
+//
+// Chain 5's gate flag (`rs_strategic_goals = aggressive`) lives in the same
+// turn windows as unrelated historical RS-patron events (e.g. the
+// `turajlic_assassination_1993` burst at w40-w42). To keep these tests
+// asserting ONLY Chain 5 behavior we pass `CSQ_EVENTS` (the csq_* subset)
+// rather than `ALL_EVENTS`. The loader-integration test above already proves
+// Chain 5 is in the full registry.
+
+/** RS-focused chain state: aggression flag, optional pre-fired events, optional
+ *  RS war_crimes_events counter on negotiation.capital. */
+function makeRSChainState(
+    turn: number,
+    opts: {
+        flags?: Record<string, string | number | boolean>;
+        firedEvents?: string[];
+        rsWarCrimes?: number;
+    } = {},
+): GameState {
+    return {
+        schema_version: 1,
+        meta: { turn, phase: 'war', scenario_id: 'test', player_faction: 'RS', seed: 'csq5' } as GameState['meta'],
+        factions: [
+            { id: 'RBiH', profile: {} as any, areasOfResponsibility: [], supply_sources: [] },
+            { id: 'RS', profile: {} as any, areasOfResponsibility: [], supply_sources: [] },
+            { id: 'HRHB', profile: {} as any, areasOfResponsibility: [], supply_sources: [] },
+        ],
+        military: {
+            formations: {},
+            front_segments: {},
+            front_posture: {},
+            front_posture_regions: {},
+            front_pressure: {},
+            militia_pools: {},
+            general_supply_reserve: { RBiH: 50, RS: 70, HRHB: 40 },
+            heavy_munitions_reserve: { RBiH: 30, RS: 50, HRHB: 20 },
+            fired_event_ids: [...(opts.firedEvents ?? [])],
+            event_flags: { ...(opts.flags ?? {}) },
+            event_fire_counts: {},
+            event_readiness: {},
+            event_last_fired_turn: {},
+            negotiation: {
+                capital: {
+                    RBiH: { war_crimes_events: 0 } as any,
+                    RS: { war_crimes_events: opts.rsWarCrimes ?? 0 } as any,
+                    HRHB: { war_crimes_events: 0 } as any,
+                },
+                patron_relationships: {
+                    RS: { support_level: 70, override_authority: 0 } as any,
+                    RBiH: { support_level: 50, override_authority: 0 } as any,
+                    HRHB: { support_level: 60, override_authority: 0 } as any,
+                },
+                strategic_dimensions: {
+                    RS: {} as any, RBiH: {} as any, HRHB: {} as any,
+                },
+            } as any,
+        } as unknown as GameState['military'],
+        political: {
+            war_alliance_rbih_hrhb: 0.5,
+            political_controllers: {},
+        } as GameState['political'],
+    } as unknown as GameState;
+}
+
+describe('Chain 5 — RS Max Aggression: historical path fires nothing', () => {
+    it('no Chain 5 csq_ event fires when rs_strategic_goals = all_six (historical)', () => {
+        const state = makeRSChainState(8, { flags: { rs_strategic_goals: 'all_six' } });
+        evaluateEvents(state, rng, 8, CSQ_EVENTS);
+        const fired = state.military.fired_event_ids ?? [];
+        expect(fired).not.toContain('csq_accelerated_camps_discovery_1992');
+        expect(fired).not.toContain('csq_early_war_crimes_tribunal_1993');
+    });
+
+    it('no Chain 5 csq_ event fires when rs_strategic_goals = selective', () => {
+        const state = makeRSChainState(40, {
+            flags: { rs_strategic_goals: 'selective' },
+            rsWarCrimes: 20, // even with high war crimes, wrong flag value → no fire
+        });
+        evaluateEvents(state, rng, 40, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).not.toContain('csq_early_war_crimes_tribunal_1993');
+    });
+});
+
+describe('Chain 5 — RS Max Aggression: ahistorical path fires chain', () => {
+    it('csq_accelerated_camps_discovery_1992 fires w6-w12 and bumps RS war_crimes_events', () => {
+        const state = makeRSChainState(8, { flags: { rs_strategic_goals: 'aggressive' } });
+        evaluateEvents(state, rng, 8, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).toContain('csq_accelerated_camps_discovery_1992');
+        expect((state.military.negotiation as any).capital.RS.war_crimes_events).toBe(2);
+        expect(state.military.event_flags?.camps_revealed_early).toBe(true);
+    });
+
+    it('csq_early_war_crimes_tribunal_1993 requires war_crimes_above RS 5', () => {
+        // War crimes = 3 → tribunal does NOT fire
+        const below = makeRSChainState(40, {
+            flags: { rs_strategic_goals: 'aggressive' },
+            rsWarCrimes: 3,
+        });
+        evaluateEvents(below, rng, 40, CSQ_EVENTS);
+        expect(below.military.fired_event_ids).not.toContain('csq_early_war_crimes_tribunal_1993');
+
+        // War crimes = 7 → tribunal fires; patron_pressure RS applies
+        const above = makeRSChainState(40, {
+            flags: { rs_strategic_goals: 'aggressive' },
+            rsWarCrimes: 7,
+        });
+        evaluateEvents(above, rng, 40, CSQ_EVENTS);
+        expect(above.military.fired_event_ids).toContain('csq_early_war_crimes_tribunal_1993');
+        expect((above.military.negotiation as any).patron_relationships.RS.support_level).toBe(60);
+        expect(above.military.event_flags?.icty_mandate_expanded).toBe(true);
+    });
+
+    it('csq_accelerated_safe_areas_1993 requires prior tribunal event and pushes scope_restriction', () => {
+        // Without prior tribunal → does NOT fire
+        const noPrior = makeRSChainState(40, { flags: { rs_strategic_goals: 'aggressive' } });
+        evaluateEvents(noPrior, rng, 40, CSQ_EVENTS);
+        expect(noPrior.military.fired_event_ids).not.toContain('csq_accelerated_safe_areas_1993');
+
+        // With prior tribunal fired (and in w35-w55 window) → fires and blocks RS ops in enclave munis
+        const withPrior = makeRSChainState(40, {
+            flags: { rs_strategic_goals: 'aggressive' },
+            firedEvents: ['csq_early_war_crimes_tribunal_1993'],
+        });
+        evaluateEvents(withPrior, rng, 40, CSQ_EVENTS);
+        expect(withPrior.military.fired_event_ids).toContain('csq_accelerated_safe_areas_1993');
+        const restrictions = withPrior.military.event_constraints?.scope_restrictions ?? [];
+        const rsBlock = restrictions.find(r =>
+            r.faction === 'RS' && r.reason === 'accelerated_un_safe_areas_with_defence_mandate',
+        );
+        expect(rsBlock).toBeDefined();
+        expect(rsBlock?.blocked_municipalities).toEqual(['bihac', 'srebrenica', 'gorazde', 'zepa']);
+        // expires_turn stamped as currentTurn + duration_turns = 40 + 40 = 80
+        expect(rsBlock?.expires_turn).toBe(80);
+    });
+
+    it('csq_early_nato_threshold_1994 requires war_crimes_above RS 10 and pushes aggression_modifier', () => {
+        // War crimes = 8 → does NOT fire
+        const below = makeRSChainState(90, {
+            flags: { rs_strategic_goals: 'aggressive' },
+            rsWarCrimes: 8,
+        });
+        evaluateEvents(below, rng, 90, CSQ_EVENTS);
+        expect(below.military.fired_event_ids).not.toContain('csq_early_nato_threshold_1994');
+
+        // War crimes = 12 → fires; aggression_modifier -0.15 for RS lands
+        const above = makeRSChainState(90, {
+            flags: { rs_strategic_goals: 'aggressive' },
+            rsWarCrimes: 12,
+        });
+        evaluateEvents(above, rng, 90, CSQ_EVENTS);
+        expect(above.military.fired_event_ids).toContain('csq_early_nato_threshold_1994');
+        const mods = above.military.event_aggression_modifiers ?? [];
+        const rsMod = mods.find(m => m.faction === 'RS' && m.delta === -0.15);
+        expect(rsMod).toBeDefined();
+        expect(rsMod?.expires_turn).toBe(120); // turn 90 + duration 30
+        expect(above.military.event_flags?.early_nato_threshold_lowered).toBe(true);
+    });
+
+    it('all four Chain 5 events are present in the loaded registry', () => {
+        const ids = new Set(CSQ_EVENTS.map(e => e.id));
+        expect(ids.has('csq_accelerated_camps_discovery_1992')).toBe(true);
+        expect(ids.has('csq_early_war_crimes_tribunal_1993')).toBe(true);
+        expect(ids.has('csq_accelerated_safe_areas_1993')).toBe(true);
+        expect(ids.has('csq_early_nato_threshold_1994')).toBe(true);
+    });
+});
