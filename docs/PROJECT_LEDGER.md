@@ -3676,3 +3676,40 @@ Both explicit v0.9.0 gold-blocker gates are now settled as canon, closing the tw
 - Canon: `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`
 - Regression: `tests/victory_and_pyrrhic_contract.test.ts`
 - Report: `docs/40_reports/implemented/20260416_V090_VICTORY_AND_SENSITIVE_HISTORY_GATES.md`
+
+## [2026-04-22] feat(events): land v0.9.0 Consequence System effect-type substrate (Phase 1 Session 1)
+
+**Type:** v0.9.0 Consequence System / foundation
+**Files:** `src/sim/events/event_types.ts`, `src/sim/events/apply_effects.ts`, `src/state/game_state.ts`, `tests/consequence_effects.test.ts` (new)
+**Status:** VERIFIED — tsc clean, 111/111 event-system vitest pass, desktop:map:build green. Writers only — zero sim behavior change until Phase 1 Session 2 lands consumers.
+
+### Summary of changes
+
+Plan: `docs/plans/2026-03-24-v090-consequence-system-plan.md` §4.1–§4.3 + §9 Phase 1 Session 1.
+
+1. **Five new `EventEffect` variants** added to `event_types.ts`:
+   - `guerrilla_threat` — faction + municipalities + intensity[0,1] + duration; consumer will be `guerrilla_attrition` (Session 2).
+   - `recruitment_modifier` — faction + pool_multiplier + duration; consumer will be `ongoing_mobilization` (Session 2).
+   - `doctrine_constraint` — wraps existing `EventConstraints` payload; consumer path already live via `event_constraints.ts` helpers.
+   - `alliance_lock` — floor/ceiling + value[-1,1] + duration; consumer will be `alliance_change` handler (Session 2).
+   - `bot_priority_shift` — faction + add/remove objective lists + duration; consumer will be `bot_strategy` accessor (Session 2).
+2. **Apply handlers in `apply_effects.ts`**: `EFFECT_KIND_ORDER` renumbered alphabetically (0-15) covering all 16 kinds; 5 new switch cases; 5 new helpers that push onto `MilitaryState` arrays with `expires_turn = currentTurn + duration_turns`. `applyDoctrineConstraint` merges into the existing `event_constraints` bus and stamps `expires_turn` on every pushed sub-entry, overriding any value from the payload. All writers preserve determinism: no random, no timestamps, municipality/objective arrays sorted before persist, intensity/alliance values clamped, pool_multiplier passed through unclamped (consumer will stack multiplicatively).
+3. **Four new `MilitaryState` arrays** (`guerrilla_threats`, `recruitment_modifiers`, `alliance_locks`, `bot_priority_shifts`), grouped alongside the existing `event_aggression_modifiers` pattern with an explicit reader-contract comment: readers MUST filter by `expires_turn > currentTurn` because the cleanup GC step is explicitly deferred to Session 2 alongside consumers.
+4. **15 new unit tests** in `tests/consequence_effects.test.ts`: per-kind mutation, stacking, `expires_turn` arithmetic, clamp bounds, municipality/objective sort discipline, `event_constraints` merge without clobber, and cross-kind batch writer independence.
+
+### Verification
+
+- `npx tsc --noEmit` — clean.
+- `npx vitest run tests/consequence_effects.test.ts tests/event_effects.test.ts tests/events_evaluate.test.ts tests/pressure_system.test.ts tests/event_conditions.test.ts tests/event_decisions.test.ts tests/event_timing.test.ts tests/integration_event_system.test.ts tests/ai_commander_event_decision.test.ts` — 111/111 pass across 9 files, zero regressions in downstream `EventEffect` consumers (patron events, UI modals, autonomy).
+- `npm run desktop:map:build` — built in 12.71s.
+
+### Scope boundaries
+
+- **Writers only.** Engine consumers (`guerrilla_attrition.ts`, `ongoing_mobilization.ts` reader, `alliance_change` clamp, `bot_strategy` merge) and the expired-modifier cleanup pipeline step are explicitly deferred to Phase 1 Session 2.
+- **No `csq_*` events authored.** Content-authoring lanes (Chains 1–7) remain Phase 2+. Chains 1/3/5 need a canon re-check against the now-canonical Sensitive History Design Gate (2026-04-16) before any authoring begins.
+- **Zero sim behavior change.** No scenario regression run required — no consumer exists yet. The 40-week baseline (n1570: 93.5%, 27/27) remains untouched.
+
+### Artifacts
+
+- Plan source: `docs/plans/2026-03-24-v090-consequence-system-plan.md`
+- Regression: `tests/consequence_effects.test.ts`

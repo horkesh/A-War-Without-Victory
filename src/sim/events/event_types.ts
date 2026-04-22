@@ -7,6 +7,7 @@
 import type { FactionId, GameState } from '../../state/game_state.js';
 import type { EdgeRecord } from '../../map/settlements.js';
 import { buildOsidAdjacency } from '../combat/osid_adjacency.js';
+import type { EventConstraints } from './event_constraints.js';
 
 /** State-based condition for conditional event triggers. */
 export type EventCondition =
@@ -132,6 +133,66 @@ export interface EventEffectControlChange {
     osids: string[];
 }
 
+// ─── v0.9.0 Consequence System effects (Phase 1 Session 1) ──────────────────
+// Writers only in this slice. Consumers land in Phase 1 Session 2.
+
+/** Effect: guerrilla threat in faction's rear-area municipalities.
+ *  Brigades stationed in listed munis lose cohesion/morale per turn,
+ *  proportional to intensity. Supply routes through the area take a
+ *  throughput penalty. Consumer: `guerrilla_attrition` (Session 2). */
+export interface EventEffectGuerrillaThreat {
+    kind: 'guerrilla_threat';
+    faction: FactionId;
+    municipalities: string[];
+    /** Range [0, 1]. 1 = maximum attrition pressure. */
+    intensity: number;
+    duration_turns: number;
+}
+
+/** Effect: multiplicative modifier on a faction's recruitment pool rate.
+ *  Stacks multiplicatively with existing mobilization scales.
+ *  Consumer: `ongoing_mobilization` (Session 2). */
+export interface EventEffectRecruitmentModifier {
+    kind: 'recruitment_modifier';
+    faction: FactionId;
+    pool_multiplier: number;
+    duration_turns: number;
+}
+
+/** Effect: pushes operation/doctrine/scope restrictions onto the existing
+ *  `state.military.event_constraints` bus (see `event_constraints.ts`).
+ *  Consumer path already live — `isOperationBlocked`, `getActiveDoctrineOverride`,
+ *  `filterByScope` are called from bot AI. The top-level `duration_turns`
+ *  stamps `expires_turn` on every pushed sub-entry, overriding any
+ *  per-entry `expires_turn` in the provided `constraint`. */
+export interface EventEffectDoctrineConstraint {
+    kind: 'doctrine_constraint';
+    faction: FactionId;
+    constraint: EventConstraints;
+    duration_turns: number;
+}
+
+/** Effect: lock the RBiH-HRHB alliance value at or above a floor, or at or
+ *  below a ceiling, for `duration_turns`. Consumer: `alliance_change` handler
+ *  clamps incoming deltas against active locks (Session 2). */
+export interface EventEffectAllianceLock {
+    kind: 'alliance_lock';
+    mode: 'floor' | 'ceiling';
+    value: number;
+    duration_turns: number;
+}
+
+/** Effect: runtime additions/removals on a faction's bot strategy objectives.
+ *  Merged with static `FACTION_STRATEGIES` at directive-generation time.
+ *  Consumer: `bot_strategy` accessor (Session 2). */
+export interface EventEffectBotPriorityShift {
+    kind: 'bot_priority_shift';
+    faction: FactionId;
+    add_objectives?: string[];
+    remove_objectives?: string[];
+    duration_turns: number;
+}
+
 export type EventEffect =
     | EventEffectNarrative
     | EventEffectMoraleChange
@@ -143,7 +204,13 @@ export type EventEffect =
     | EventEffectNegotiationBreakdown
     | EventEffectEquipmentGrant
     | EventEffectAggressionModifier
-    | EventEffectControlChange;
+    | EventEffectControlChange
+    // v0.9.0 Consequence System
+    | EventEffectGuerrillaThreat
+    | EventEffectRecruitmentModifier
+    | EventEffectDoctrineConstraint
+    | EventEffectAllianceLock
+    | EventEffectBotPriorityShift;
 
 /** A player/bot response option for decision events. */
 export interface EventResponseOption {
