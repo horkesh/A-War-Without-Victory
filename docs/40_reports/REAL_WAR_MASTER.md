@@ -1042,6 +1042,87 @@ Meanwhile, Donji Vakuf (central Bosnia) has enemy OSIDs adjacent to 1KK sectors 
 
 ---
 
+### 37. HVO Croat-Bosniak war doesn't emerge — hrhb_political_goal is write-only (2026-04-23, 188w validation) — OPEN P1
+
+**What we found:** 188w validation run (`apr1992_definitive_188w`) on the freshly-refreshed historical baseline (post PR #8 fix where `hrhb_political_goal=croat_republic` is now the correct historical default). HRHB issues **2 attack orders across 188 weeks**. Total attack orders: RS=49, RBiH=35, HRHB=2. `hvo_tomislavgrad` has 18 front edges, 3 brigades, **0 battles after 188 turns** — dead front. `hvo_central_bosnia` has 4 brigades at morale 0-6 without ever engaging an enemy. Raw run: `/tmp/awwv_200w_validation/apr1992_definitive_188w__c35fff9119f1a06b__w188_n0/`.
+
+**Historical context:** The Croat-Bosniak war of 1993-94 has a two-phase shape the sim must express:
+
+1. **Early 1993 — HVO aggression.** HVO initiates: Ahmići massacre (April 1993), Vitez offensive, Busovača, Gornji Vakuf, Prozor (October 1992), Mostar east bank (May 1993), Stolac, Čapljina, Ljubuški. These are HVO attack orders against ARBiH positions in central Bosnia and the Neretva valley.
+
+2. **Mid-1993 onward — ARBiH counter-offensive; HVO on the defensive.** After the initial HVO push, ARBiH 3rd Corps counterattacks and reverses the momentum. Kakanj, Travnik, and surrounding territory flip back to ARBiH. HVO is reduced to defending **three besieged enclaves** in central Bosnia: the **Vitez pocket** (Vitez-Busovača-Novi Travnik), the **Kiseljak pocket**, and the **Žepče pocket**. These three enclaves remain HVO-held but surrounded through the Washington Agreement (March 1994) and beyond.
+
+Meanwhile, Herzegovina (Mostar, Stolac, Čapljina) remains contested on different terms; HVO holds west Mostar and southern Herzegovina with HV backing.
+
+With `hrhb_political_goal=croat_republic` set correctly, the sim should express both phases: a compressed HVO offensive spike around w52-w60, then an ARBiH-vs-HVO inversion from w60 onward, producing the three-enclave defensive posture by Washington Agreement.
+
+**Root cause:** The `hrhb_political_goal` flag is written (by the `hrhb_political_goal` event's response options) but never read. `grep -rn '"flag": "hrhb_political_goal"' src/ data/` returns zero reader sites. Nothing in `bot_strategy.ts`, `bot_corps_ai.ts`, `bot_brigade_ai_osid.ts`, or operation-generation code consumes this flag to generate HVO-vs-ARBiH offensives.
+
+**Why invisible before 2026-04-23:** Prior baselines had `hrhb_political_goal=united_front` set by a response-ordering bug (PR #8 fixed it). Under united_front, no Croat-Bosniak war was expected; HVO inactivity was superficially consistent. With the flag now correctly set to `croat_republic`, the missing wiring becomes observable.
+
+**Fix shape (tracked in issue #9):** Most likely a new consequence-event chain analog gated on `flag_equals hrhb_political_goal = croat_republic` + `turn_min: 48`, using `bot_priority_shift` to add central-Bosnia municipalities (Vitez, Gornji Vakuf, Prozor, Stolac, east Mostar) to HRHB offensive_objectives + `doctrine_constraint` with offensive scope + `aggression_modifier`. Two alternative approaches documented in issue #9.
+
+**Impact:** Post-w52 simulation trajectory diverges sharply from history. HRHB stays on defensive/garrison posture indefinitely. HRHB vs_historical at −43 OSIDs in 188w (82 vs 125 jan1993 reference). Calibration against jul1995/oct1995 references will be dominated by this gap.
+
+**Priority: P1.** Not blocking day-to-day work but the engine's flagship "player choice shapes history" promise is incomplete without this wiring. Should be the first engine-gap issue picked up next session.
+
+**Related:** Issue #9. Extends known-baseline note "HVO inactivity in 1992 is historically correct (outside Posavina/Jackal)" — that note is scoped to 1992 only and does NOT cover 1993-94.
+
+---
+
+### 38. srebrenica_falls_1995 pressure event never triggers by w170 (2026-04-23, 188w validation) — OPEN P1
+
+**What we found:** 188w validation run with `srebrenica_enclave_formed=true` (set normally) but `srebrenica_fell` flag never sets. The historical fall was July 1995 (~week 170 in apr1992_definitive_188w). Downstream consequence: Chain 3 (Srebrenica Survives) fires all 4 events (`csq_srebrenica_stalemate_1995`, `csq_enclave_drain_continues_1995`, `csq_alternative_nato_trigger_1995`, `csq_prolonged_war_exhaustion_1995`) because its gate (`flag_not_set srebrenica_fell`) evaluates true.
+
+**Historical context:** Srebrenica was overrun by VRS in July 1995 in a deliberate operation under Mladić's command, resulting in the massacre of over 8,000 Bosniak men and boys. The fall triggered Operation Deliberate Force and the endgame ground offensive that led to Dayton. Srebrenica NOT falling is the single most consequential departure from history in an apr1992→dayton campaign.
+
+**Likely root cause:** `srebrenica_falls_1995` in `data/scenarios/events/war_1995.json:296` is pressure-based (`base_rate: 1, threshold: 8, decay_rate: 0.5`) with trigger conditions `srebrenica_enclave_formed=true AND srebrenica_demilitarized=true`. Two hypotheses:
+
+1. **`srebrenica_demilitarized` never set** (most likely). Historically set by the UNSCR 819 / UNPROFOR demilitarization agreement ~April 1993. If the sim's demilitarization event doesn't fire, pressure never starts accumulating.
+2. **Decay balance** — net ~0.5/turn accumulation with `rrf_deployed=true` bonus of −0.5. Requires continuous condition for ~16 turns. If conditions fluctuate, pressure decays back.
+
+Hypothesis 1 is cheaper to verify: check whether `srebrenica_demilitarized` ever appears in `event_flags` during a 188w run.
+
+**Impact:**
+- Chain 3 fires in the baseline instead of staying inert. Chain 3's canon-gate fix (PR #7 removed the RBiH +5 international_standing reward) still holds, but the chain shouldn't be firing at all on the historical path.
+- Endgame chain (Deliberate Force → ground offensive → Dayton) may not fire via its historical catalyst. The 188w run's `alternative_nato_trigger_1995` (`csq_alternative_nato_trigger_1995`) did fire, so the counterfactual catalyst path works — but that's not the historical-baseline intent.
+- Calibration will score the post-Srebrenica period against a sim that never experienced the rupture.
+
+**Priority: P1.** Largest historical-authenticity gap still in the sim. Companion to #37 (both are content-chain gates failing because upstream sim mechanics don't produce the triggering state).
+
+**Related:** Issue #10. `data/scenarios/events/war_1995.json:296` (`srebrenica_falls_1995`), `data/scenarios/events/war_1992.json:957` (sets `srebrenica_enclave_formed`).
+
+---
+
+### 39. Combat tempo collapse in long runs — 0.41 battles/week across 188 weeks (2026-04-23, 188w validation) — OPEN P1
+
+**What we found:** Critical anomaly in the 188w validation: "Average battle tempo 0.41/week across 188 turns (minimum 1.0). Total battles: 78." Compounding warnings:
+
+- `hvo_tomislavgrad` (HRHB): 18 front edges, 3 brigades, **0 battles after 188 turns**. Dead front.
+- `vrs_2nd_krajina` (RS): 34 front edges, 7 brigades, **0 battles after 188 turns**. Dead front.
+- 5 operations (3 ARBiH, 2 VRS) completed with 0 total attacks because "brigades never reached staging during any execution turn."
+- Morale collapse clusters in corps that aren't fighting: `hrhb_111th_brigade` at morale=0, `hvo_vitezovi_brigade_vitez` at morale=0, `hvo_nikola_subic_zrinski_brigade` at morale=0. Brigades attriting without combat.
+- Intelligence loop dead: "0/145 sector intel records have offensive_signs=true after 188 turns. No faction detects enemy staging."
+
+**Historical context:** The Bosnian War produced thousands of engagements over its 44 months. Operation Corridor 92 alone involved hundreds of battles across VRS 1st Krajina, VRS East Bosnian, and VRS 2nd Krajina sectors. ARBiH launched ~50 named offensive operations between 1993-95. HVO against ARBiH in central Bosnia 1993-94 was near-continuous. **78 battles across 188 weeks is roughly 1/4 of historical operational tempo.**
+
+**Likely root causes (investigation needed):**
+
+1. **Staging unreachability** — brigades assigned to operations can't reach staging OSIDs. Operations complete as "failure" with 0 attacks rather than rewiring or generating alternative targets.
+2. **Sector-to-operation decoupling** — corps has sectors (so frontier exists) but commander AI doesn't generate operations for those sectors. Dead-front pattern.
+3. **Operation validation rejecting too aggressively** — op reconciliation silently drops ops where brigade participation becomes ambiguous.
+4. **Cascade with #37** — HVO's missing offensive wiring (no central-Bosnia ops) contributes to ~40-80 missing HVO attack orders that should appear w52-w150.
+
+Also likely cascades with #38 (Srebrenica never falls → VRS Drina Corps never redeploys → different post-Srebrenica pattern throughout).
+
+**Impact:** Calibration against jan1993/jul1995/oct1995 references will be systematically skewed toward low-combat outcomes. Morale collapse in non-combat corps is artificial; supports interpretation that attrition mechanics are firing on formations that shouldn't be losing morale without engagement.
+
+**Priority: P1.** Deserves dedicated investigation with `operations-expert` + `corps-army-commander` expert consults before touching code.
+
+**Related:** Issue #11 (this issue), #9 (HVO wiring — companion cause), #10 (Srebrenica — companion cause).
+
+---
+
 ## Historical "Not Real War" Patterns (from previous sessions)
 
 ### H1. Rear pocket cleanup was instant (fixed n384)
