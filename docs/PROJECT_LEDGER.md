@@ -4391,3 +4391,63 @@ All three baselines use `bot_response_logic: 'historical'` on `rs_strategic_goal
 - Canon-compliance: `data/scenarios/events/war_1992.json` (selective-goals fix)
 - Tests: `tests/consequence_chains.test.ts` (+13 tests)
 - Canon review: `docs/40_reports/20260422_CHAINS_1_3_5_CANON_REVIEW.md`
+
+## [2026-04-23] content(v0.9.0): Chain 2 (Alliance Holds) + `hrhb_political_goal` response-order fix + baseline refresh; Lane 4 closed
+
+**Type:** v0.9.0 Consequence System content + scenario bugfix + v0.9.3 perf track closeout.
+**Files:** `data/scenarios/events/consequences.json` (+5 Chain 2 events), `data/scenarios/events/war_1992.json` (reorder hrhb_political_goal response_options), `tests/consequence_chains.test.ts` (+9 tests), `data/derived/scenario/baselines/manifest.json` (refresh, 7 hashes for apr1992_52w).
+**Status:** VERIFIED — tsc clean; 46/46 `consequence_chains.test.ts`; baseline refreshed with user authorization for the remote-work period; new manifest written and confirmed against a fresh run. Two-expert review (war-or-game + scenario-creator-runner-tester) cleared the refreshed 52w baseline: anchor checks 27/27 pass, 0 critical anomalies, 5 warnings all pre-existing-class, HRHB 1992 inactivity historically correct.
+
+### The bug
+
+`hrhb_political_goal` (war_1992.json) had `bot_response_logic: 'historical'` which picks the FIRST response option — but the first option was `united_front` (the *ahistorical* alliance-holds path). Per the 2026-03-24 plan §599-601, `croat_republic` is the historical HRHB trajectory (Boban-era Banovina goals, 1993 Croat-Bosniak war). Every prior baseline simulated HRHB pursuing united_front (+15 international_standing, alliance +0.15, patron_confidence -25) and the 1993 Croat-Bosniak rupture never kicked off.
+
+### Fix
+
+Swapped the first two `response_options` entries: `croat_republic` is now Option A. `rbih_state_identity` (`civic` first) and `rs_strategic_goals` (`all_six` first) verified correct — only `hrhb_political_goal` had the ordering bug.
+
+### Chain 2 authored (5 events, canon-compliant)
+
+All gated on `flag_equals hrhb_political_goal = united_front` → structurally inert on the new historical baseline:
+
+- `csq_joint_operations_agreement_1992` (w6-w12) — Split-Agreement-style formalization; alliance_lock floor 0.50 for 40 turns.
+- `csq_zagreb_displeasure_1993` (w30-w50) — Zagreb reduces HRHB support; patron_pressure -15, supply_delta -40, patron_confidence -15.
+- `csq_territorial_friction_1993` (w40-w65; requires joint_ops + territory_percentage RBiH above 0.30) — administrative friction in central Bosnia; alliance_change -0.10, cohesion HRHB -3.
+- `csq_federation_early_1994` (w70-w90; requires joint_ops + alliance_above 0.40) — early Federation without Washington coercion; dim shifts: int_standing +10, negotiating_leverage +10 for both.
+- `csq_joint_offensive_1994` (w80-w110; requires federation_early) — combined spring offensive; aggression_modifier +0.10 for both 20 turns.
+
+Third-person historical voice per `SENSITIVE_HISTORY_DESIGN_GATE.md` §4.
+
+### Baseline refresh
+
+User pre-authorized baseline refreshes for the remote-work period. `UPDATE_BASELINES=1` updated manifest for apr1992_52w only (4w scenarios don't reach turn 3-7 hrhb_political_goal trigger). 7 hash changes: activity_summary.json, control_delta.json, end_report.md, final_save.json, formation_delta.json, run_summary.json, weekly_report.jsonl.
+
+### Two-expert review of the refreshed 52w
+
+**war-or-game** (realism): commit. 27/27 anchor checks pass, 0 critical anomalies, HRHB 1992 inactivity historically correct (HVO outside Posavina/Jackal was non-combat through 1992). Caveat: 52w cuts at April 1993 = Croat-Bosniak war start, so this baseline cannot validate the fix's 1993+ payoff. Flag a follow-up 200w run.
+
+**scenario-creator-runner-tester** (run quality): commit now + schedule 200w follow-up. All 14 anomalies match pre-existing classes, not fix-induced drift. HRHB vs_historical -50 OSIDs gap is pre-existing. Manifest is the only baselined artifact; if 200w reveals drift the revert is clean.
+
+### Lane 4 closed
+
+With C5 merged and the post-C5 profile showing remaining targets as either genuinely-needed work (partition-corps-front-sectors first call, reconcile step 2 after state mutations) or already-investigated-and-dropped (C3 commander cache), Lane 4 is complete. Cumulative wins over the track:
+
+- C1 (osid_adjacency memo): ~15% on generate-bot-corps-orders.
+- C2 (supply reachability cache + single-pass bucketing): foundation for C2a.
+- C2a (corridor + supply_state per-faction caches): ~4% wall time.
+- C5 (reconcile-final-sector-truth content-fingerprint cache): ~55-64% on reconcile-step-3, ~25% total wall time vs pre-C1.
+- C3 (commander zone cache): investigated and dropped — briefing/assessment have no stable upstream refs for WeakMap-on-reference pattern.
+- Permanent: `tools/perf/profile_scenario.ts` for future re-profiling.
+
+Remaining targets (supply-osid outer wrapper, partition-corps-front-sectors first call, bot-brigade/corps-orders, reconcile step 2) would require invasive version-counter instrumentation or HIGH-risk inner-loop rewrites. None fit the safe-cache pattern. See issue #6 for the related cross-platform snapshot drift investigation.
+
+### Follow-up
+
+- **Run a 200w validation** before the remote-work period ends to confirm Chain 2 inertness across the full war and that HRHB-vs-RBiH combat emerges post-w52 as expected.
+
+### Artifacts
+
+- Events: `data/scenarios/events/consequences.json` (+5 Chain 2 events, 23 total csq_*)
+- Response-order fix: `data/scenarios/events/war_1992.json`
+- Tests: `tests/consequence_chains.test.ts` (+9 tests, 46 total)
+- Manifest: `data/derived/scenario/baselines/manifest.json` (apr1992_52w refresh)

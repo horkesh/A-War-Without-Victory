@@ -698,3 +698,115 @@ describe('Chain 3 — Srebrenica Survives: ahistorical path fires chain', () => 
         expect(ids.has('csq_prolonged_war_exhaustion_1995')).toBe(true);
     });
 });
+
+// ─── Chain 2 — Alliance Holds → No Croat-Bosniak War ─────────────────────
+//
+// Chain 2 gates on `hrhb_political_goal = united_front`. Historical response
+// ordering for `hrhb_political_goal` was fixed in the same commit that lands
+// this chain: `croat_republic` is now the first response option so the
+// `bot_response_logic: 'historical'` path (which picks option A) sets the
+// flag to `croat_republic` — the historically-accurate HRHB trajectory —
+// and Chain 2 does NOT fire on the historical baseline.
+
+describe('Chain 2 — Alliance Holds: historical path fires nothing', () => {
+    it('no Chain 2 csq_ event fires when hrhb_political_goal = croat_republic (historical)', () => {
+        const state = makeChain1State(8, { flags: { hrhb_political_goal: 'croat_republic' } });
+        evaluateEvents(state, rng, 8, CSQ_EVENTS);
+        const fired = state.military.fired_event_ids ?? [];
+        expect(fired).not.toContain('csq_joint_operations_agreement_1992');
+    });
+
+    it('no Chain 2 csq_ event fires when hrhb_political_goal = strategic_ambiguity', () => {
+        const state = makeChain1State(8, { flags: { hrhb_political_goal: 'strategic_ambiguity' } });
+        evaluateEvents(state, rng, 8, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).not.toContain('csq_joint_operations_agreement_1992');
+    });
+});
+
+describe('Chain 2 — Alliance Holds: ahistorical path fires chain', () => {
+    it('csq_joint_operations_agreement_1992 fires w6-w12 under united_front and locks alliance at 0.50', () => {
+        const state = makeChain1State(8, { flags: { hrhb_political_goal: 'united_front' } });
+        evaluateEvents(state, rng, 8, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).toContain('csq_joint_operations_agreement_1992');
+        const locks = state.military.alliance_locks ?? [];
+        const floorLock = locks.find(l => l.mode === 'floor' && l.value === 0.50);
+        expect(floorLock).toBeDefined();
+        expect(state.military.event_flags?.joint_operations_agreement_active).toBe(true);
+    });
+
+    it('csq_zagreb_displeasure_1993 fires w30-w50 and reduces HRHB supply + patron', () => {
+        const state = makeChain1State(40, {
+            flags: { hrhb_political_goal: 'united_front' },
+            firedEvents: ['csq_joint_operations_agreement_1992'],
+        });
+        evaluateEvents(state, rng, 40, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).toContain('csq_zagreb_displeasure_1993');
+    });
+
+    it('csq_territorial_friction_1993 requires prior joint_ops AND RBiH territory > 30%', () => {
+        const belowTerritory = makeChain1State(50, {
+            flags: { hrhb_political_goal: 'united_front' },
+            firedEvents: ['csq_joint_operations_agreement_1992'],
+            rsTerritoryShare: 0.80, // → RBiH share ≈ 20%, below threshold
+        });
+        evaluateEvents(belowTerritory, rng, 50, CSQ_EVENTS);
+        expect(belowTerritory.military.fired_event_ids).not.toContain('csq_territorial_friction_1993');
+
+        const aboveTerritory = makeChain1State(50, {
+            flags: { hrhb_political_goal: 'united_front' },
+            firedEvents: ['csq_joint_operations_agreement_1992'],
+            rsTerritoryShare: 0.50, // → RBiH share = 50%, above threshold
+        });
+        evaluateEvents(aboveTerritory, rng, 50, CSQ_EVENTS);
+        expect(aboveTerritory.military.fired_event_ids).toContain('csq_territorial_friction_1993');
+    });
+
+    it('csq_federation_early_1994 requires prior joint_ops AND alliance > 0.40', () => {
+        const state = makeChain1State(80, {
+            flags: { hrhb_political_goal: 'united_front' },
+            firedEvents: ['csq_joint_operations_agreement_1992'],
+        });
+        // Bump alliance above 0.40 for the condition gate
+        (state.political as any).war_alliance_rbih_hrhb = 0.60;
+        evaluateEvents(state, rng, 80, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).toContain('csq_federation_early_1994');
+        expect(state.military.event_flags?.federation_formed_early).toBe(true);
+    });
+
+    it('csq_joint_offensive_1994 requires prior csq_federation_early_1994', () => {
+        const noPrior = makeChain1State(90, { flags: { hrhb_political_goal: 'united_front' } });
+        evaluateEvents(noPrior, rng, 90, CSQ_EVENTS);
+        expect(noPrior.military.fired_event_ids).not.toContain('csq_joint_offensive_1994');
+
+        const withPrior = makeChain1State(90, {
+            flags: { hrhb_political_goal: 'united_front' },
+            firedEvents: ['csq_joint_operations_agreement_1992', 'csq_federation_early_1994'],
+        });
+        evaluateEvents(withPrior, rng, 90, CSQ_EVENTS);
+        expect(withPrior.military.fired_event_ids).toContain('csq_joint_offensive_1994');
+        const mods = withPrior.military.event_aggression_modifiers ?? [];
+        const rbihMod = mods.find(m => m.faction === 'RBiH' && m.delta === 0.10);
+        const hrhbMod = mods.find(m => m.faction === 'HRHB' && m.delta === 0.10);
+        expect(rbihMod).toBeDefined();
+        expect(hrhbMod).toBeDefined();
+    });
+
+    it('all five Chain 2 events are present in the loaded registry', () => {
+        const ids = new Set(CSQ_EVENTS.map(e => e.id));
+        expect(ids.has('csq_joint_operations_agreement_1992')).toBe(true);
+        expect(ids.has('csq_zagreb_displeasure_1993')).toBe(true);
+        expect(ids.has('csq_territorial_friction_1993')).toBe(true);
+        expect(ids.has('csq_federation_early_1994')).toBe(true);
+        expect(ids.has('csq_joint_offensive_1994')).toBe(true);
+    });
+});
+
+describe('hrhb_political_goal historical ordering fix', () => {
+    it('croat_republic is the FIRST response option (so bot_response_logic: historical picks it)', () => {
+        // The base event lives in war_1992.json, not consequences.json. Pull it
+        // out of the full loader registry to assert the fix landed.
+        const event = ALL_EVENTS.find(e => e.id === 'hrhb_political_goal');
+        expect(event).toBeDefined();
+        expect(event?.response_options?.[0]?.id).toBe('croat_republic');
+    });
+});
