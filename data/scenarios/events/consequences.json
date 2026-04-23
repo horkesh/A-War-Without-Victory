@@ -898,5 +898,252 @@
       }
     ],
     "historical_source": "Counterfactual: absent the Deliberate Force catalyst, the war continues with the pattern of exhaustion Burg & Shoup, 'The War in Bosnia-Herzegovina' (2000), describe for late 1994. Framed as emergent war-weariness per docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md §7 principle 3. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 3."
+  },
+  {
+    "id": "csq_joint_operations_agreement_1992",
+    "title": "Joint Operations, Formalized",
+    "narrative": "The agreement is signed at Mostar in late spring. HVO and ARBiH commands formalise what has been a working reality in parts of central Bosnia since winter: joint staff liaison at the operational level, combined defensive planning against the VRS, mutual supply arrangements through Split and Ploce. In Zagreb, Defence Minister Susak reads the English-language summary and sets it aside with a look his staff have learned to recognise. In Sarajevo and Mostar, the officers who will have to keep the agreement going read the Bosnian and Croatian summaries and believe at least some of it.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 6,
+      "turn_max": 12,
+      "phase": "war",
+      "condition": {
+        "type": "flag_equals",
+        "flag": "hrhb_political_goal",
+        "value": "united_front"
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "HVO-ARBiH joint operations agreement signed; alliance locked at or above 0.50 for the agreement's operational life."
+    },
+    "effects": [
+      {
+        "kind": "alliance_lock",
+        "mode": "floor",
+        "value": 0.50,
+        "duration_turns": 40
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "HRHB",
+        "dimension": "military_credibility",
+        "delta": 5
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "military_credibility",
+        "delta": 5
+      }
+    ],
+    "sets_flags": {
+      "joint_operations_agreement_active": true
+    },
+    "historical_source": "Counterfactual: the Split Agreement of July 1992 between Tudjman and Izetbegovic is treated in Burg & Shoup, 'The War in Bosnia-Herzegovina' (2000), as a moment when a sustained united-front path was diplomatically available. This event models the trajectory in which that path is taken. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 2."
+  },
+  {
+    "id": "csq_zagreb_displeasure_1993",
+    "title": "Susak's Quiet Adjustment",
+    "narrative": "Through the early months of 1993 the cargo manifests from Split arrive in Herzegovina with fewer pallets than the autumn's planning had assumed. Ministers in Zagreb who had briefed Tudjman on a Croat entity within Bosnia now brief him on a junior partnership inside someone else's republic, and his response is to let the supply arithmetic speak the policy. HVO brigades draw on smaller stocks, replace equipment more slowly, and discover which of their depot arrangements were built on Zagreb's priorities and which on their own.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 30,
+      "turn_max": 50,
+      "phase": "war",
+      "condition": {
+        "type": "flag_equals",
+        "flag": "hrhb_political_goal",
+        "value": "united_front"
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Zagreb reduces logistical support for HVO; HRHB supply degrades."
+    },
+    "effects": [
+      {
+        "kind": "patron_pressure",
+        "faction": "HRHB",
+        "delta": -15
+      },
+      {
+        "kind": "supply_delta",
+        "faction": "HRHB",
+        "delta": -40
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "HRHB",
+        "dimension": "patron_confidence",
+        "delta": -15
+      }
+    ],
+    "historical_source": "Counterfactual: ICTY Prlic et al. Trial Judgment (IT-04-74-T) on Zagreb-HRHB resource flows. When the HRHB political direction does not match Zagreb's preferences, the documented supply coupling weakens. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 2."
+  },
+  {
+    "id": "csq_territorial_friction_1993",
+    "title": "Who Administers Central Bosnia",
+    "narrative": "The alliance does not end; the arguments begin. In Travnik, Zenica, Bugojno, Vitez, Gornji Vakuf — the towns that make up central Bosnia — HVO commanders and ARBiH commanders coexist in practice and negotiate in committee. Committees sit longer. By summer the question of which civilian administration signs requisitions, which police collect taxes, which schools open in which language, and whose flag flies over which building has produced a paper trail that the soldiers quietly curse. None of it is fighting. All of it is tension the alliance has to absorb.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 40,
+      "turn_max": 65,
+      "phase": "war",
+      "requires_events": ["csq_joint_operations_agreement_1992"],
+      "condition": {
+        "type": "territory_percentage",
+        "faction": "RBiH",
+        "comparator": "above",
+        "threshold": 0.30
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Administrative friction in mixed-population central Bosnian municipalities strains the united-front alliance."
+    },
+    "effects": [
+      {
+        "kind": "alliance_change",
+        "delta": -0.10
+      },
+      {
+        "kind": "cohesion_change",
+        "faction": "HRHB",
+        "delta": -3
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "HRHB",
+        "dimension": "internal_cohesion",
+        "delta": -5
+      }
+    ],
+    "historical_source": "Counterfactual: the real-world friction over central Bosnia administration documented in the ICTY Kordic Trial Judgment (IT-95-14/2-T) is, in the ahistorical united-front path, contained within alliance politics rather than spilling into open war. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 2."
+  },
+  {
+    "id": "csq_federation_early_1994",
+    "title": "Federation Before Washington",
+    "narrative": "The agreement that in the historical record required American pressure and the threat of NATO sanctions on all sides arrives on its own timetable. The united-front soldiers have held a common line against the VRS for the better part of two years; the politicians who follow their lead sign a federation structure that codifies what the armies already practise. The text owes less to the State Department and more to the working arrangements of central Bosnia. It is not the Washington Agreement that the historical record produced. It is an earlier, leaner document that leaves some questions deliberately open because the signatories trust each other enough to come back to them.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 70,
+      "turn_max": 90,
+      "phase": "war",
+      "requires_events": ["csq_joint_operations_agreement_1992"],
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "hrhb_political_goal",
+            "value": "united_front"
+          },
+          {
+            "type": "alliance_above",
+            "value": 0.40
+          }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "An early Federation forms without the Washington Agreement's coercive pressure."
+    },
+    "effects": [
+      {
+        "kind": "alliance_lock",
+        "mode": "floor",
+        "value": 0.55,
+        "duration_turns": 60
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "international_standing",
+        "delta": 10
+      },
+      {
+        "faction": "HRHB",
+        "dimension": "international_standing",
+        "delta": 10
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "negotiating_leverage",
+        "delta": 10
+      },
+      {
+        "faction": "HRHB",
+        "dimension": "negotiating_leverage",
+        "delta": 10
+      }
+    ],
+    "sets_flags": {
+      "federation_formed_early": true
+    },
+    "historical_source": "Counterfactual: Holbrooke, 'To End a War' (1998), describes the Washington Agreement (1 March 1994) as an American-pressured settlement of an open war. This event models the earlier, softer Federation that the documentary record suggests was diplomatically available if the 1993 Croat-Bosniak war had not occurred. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 2."
+  },
+  {
+    "id": "csq_joint_offensive_1994",
+    "title": "The Combined Spring",
+    "narrative": "With the federation structure in place and Zagreb no longer attempting to fight a parallel war, HVO and ARBiH commands coordinate the offensive planning of spring 1994 as a single operational matter. Combined staffs assemble at Zenica and Mostar; supply and evacuation are run from a shared rear. The operations that the historical record fragmented across competing axes — the Kupres-Grahovo direction, the central Bosnia corridor, the pressure on the Posavina bulge — are now pursued together. The VRS's intelligence cells, which had relied on the Croat-Bosniak rupture to predict where force would land, lose that predictor.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 80,
+      "turn_max": 110,
+      "phase": "war",
+      "requires_events": ["csq_federation_early_1994"]
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Combined HVO-ARBiH spring offensive; aggression modifier +0.10 for both federation factions."
+    },
+    "effects": [
+      {
+        "kind": "aggression_modifier",
+        "faction": "RBiH",
+        "delta": 0.10,
+        "duration_turns": 20
+      },
+      {
+        "kind": "aggression_modifier",
+        "faction": "HRHB",
+        "delta": 0.10,
+        "duration_turns": 20
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "military_credibility",
+        "delta": 5
+      },
+      {
+        "faction": "HRHB",
+        "dimension": "military_credibility",
+        "delta": 5
+      }
+    ],
+    "historical_source": "Counterfactual: the operations of 1994 (Operation Tiger, Maslenica carryover, Kupres area) occurred in the historical record despite the recent Croat-Bosniak war and with fragile coordination. This event models what combined operational staffs would plausibly accomplish without that rupture. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 2."
   }
 ]

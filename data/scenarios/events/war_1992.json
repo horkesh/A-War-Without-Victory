@@ -295,49 +295,6 @@
     "bot_response_logic": "historical",
     "response_options": [
       {
-        "id": "united_front",
-        "label": "United front with ARBiH",
-        "description": "We are Croats and Bosnians. Our fight is against Greater Serbia, alongside our allies. Zagreb will be furious. Tudjman may cut support. But the combined front against the VRS will be formidable.",
-        "effects": [
-          {
-            "kind": "alliance_change",
-            "delta": 0.15
-          },
-          {
-            "kind": "morale_change",
-            "faction": "HRHB",
-            "delta": -3
-          }
-        ],
-        "sets_flags": {
-          "hrhb_political_goal": "united_front"
-        },
-        "dimension_shifts": [
-          {
-            "faction": "HRHB",
-            "dimension": "patron_confidence",
-            "delta": -25
-          },
-          {
-            "faction": "HRHB",
-            "dimension": "international_standing",
-            "delta": 15
-          },
-          {
-            "faction": "HRHB",
-            "dimension": "internal_cohesion",
-            "delta": -10
-          },
-          {
-            "faction": "RBiH",
-            "dimension": "internal_cohesion",
-            "delta": 5
-          }
-        ],
-        "aggression_affinity": -0.7,
-        "risk_level": 0.4
-      },
-      {
         "id": "croat_republic",
         "label": "Croat republic — follow Zagreb",
         "description": "Herceg-Bosna is a Croat political entity. We will control our territory along the old Banovina borders. Zagreb provides arms, officers, and purpose. The Bosniaks will become adversaries.",
@@ -379,6 +336,49 @@
         ],
         "aggression_affinity": 0.7,
         "risk_level": 0.7
+      },
+      {
+        "id": "united_front",
+        "label": "United front with ARBiH",
+        "description": "We are Croats and Bosnians. Our fight is against Greater Serbia, alongside our allies. Zagreb will be furious. Tudjman may cut support. But the combined front against the VRS will be formidable.",
+        "effects": [
+          {
+            "kind": "alliance_change",
+            "delta": 0.15
+          },
+          {
+            "kind": "morale_change",
+            "faction": "HRHB",
+            "delta": -3
+          }
+        ],
+        "sets_flags": {
+          "hrhb_political_goal": "united_front"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "HRHB",
+            "dimension": "patron_confidence",
+            "delta": -25
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "international_standing",
+            "delta": 15
+          },
+          {
+            "faction": "HRHB",
+            "dimension": "internal_cohesion",
+            "delta": -10
+          },
+          {
+            "faction": "RBiH",
+            "dimension": "internal_cohesion",
+            "delta": 5
+          }
+        ],
+        "aggression_affinity": -0.7,
+        "risk_level": 0.4
       },
       {
         "id": "strategic_ambiguity",
