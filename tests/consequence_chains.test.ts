@@ -810,3 +810,59 @@ describe('hrhb_political_goal historical ordering fix', () => {
         expect(event?.response_options?.[0]?.id).toBe('croat_republic');
     });
 });
+
+// ─── Issue #9 — csq_hvo_central_bosnia_offensive_1993 ─────────────────────
+//
+// Per the corps-army-commander + war-or-game design consult (2026-04-23),
+// the HVO Croat-Bosniak war requires:
+//   1. alliance_change -0.60 + alliance_lock ceiling 0.10 (flips hostility)
+//   2. morale/cohesion bump (un-sticks HVO brigades idle at morale 0)
+//   3. aggression_modifier +0.25 + bot_priority_shift on central-Bosnia munis
+// Phase 2 (ARBiH counter-offensive) emerges organically once alliance breaks.
+
+describe('Issue #9 — csq_hvo_central_bosnia_offensive_1993', () => {
+    it('does NOT fire before w48', () => {
+        const state = makeChain1State(40, { flags: { hrhb_political_goal: 'croat_republic' } });
+        evaluateEvents(state, rng, 40, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).not.toContain('csq_hvo_central_bosnia_offensive_1993');
+    });
+
+    it('does NOT fire when hrhb_political_goal is united_front', () => {
+        const state = makeChain1State(52, { flags: { hrhb_political_goal: 'united_front' } });
+        evaluateEvents(state, rng, 52, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).not.toContain('csq_hvo_central_bosnia_offensive_1993');
+    });
+
+    it('fires w48-w56 under croat_republic and lands all five effect kinds', () => {
+        const state = makeChain1State(52, { flags: { hrhb_political_goal: 'croat_republic' } });
+        evaluateEvents(state, rng, 52, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).toContain('csq_hvo_central_bosnia_offensive_1993');
+        expect(state.military.event_flags?.hvo_arbih_war_active).toBe(true);
+        expect(state.military.event_flags?.ahmici_1993).toBe(true);
+
+        // alliance_lock ceiling 0.10 at duration 60
+        const locks = state.military.alliance_locks ?? [];
+        const ceilingLock = locks.find(l => l.mode === 'ceiling' && l.value === 0.10);
+        expect(ceilingLock).toBeDefined();
+
+        // aggression_modifier HRHB +0.25 duration 14
+        const aggMods = state.military.event_aggression_modifiers ?? [];
+        const hrhbAgg = aggMods.find(m => m.faction === 'HRHB' && m.delta === 0.25);
+        expect(hrhbAgg).toBeDefined();
+        expect(hrhbAgg?.expires_turn).toBe(66); // 52 + 14
+
+        // bot_priority_shift HRHB with central-Bosnia munis
+        const shifts = state.military.bot_priority_shifts ?? [];
+        const hrhbShift = shifts.find(s => s.faction === 'HRHB' && (s.add_objectives ?? []).includes('vitez'));
+        expect(hrhbShift).toBeDefined();
+        expect(hrhbShift?.add_objectives).toEqual(
+            expect.arrayContaining(['vitez', 'busovaca', 'novi_travnik', 'gornji_vakuf', 'prozor', 'kiseljak', 'travnik', 'kakanj', 'fojnica', 'mostar']),
+        );
+        expect(hrhbShift?.expires_turn).toBe(66); // 52 + 14
+    });
+
+    it('is present in the loaded registry', () => {
+        const ids = new Set(CSQ_EVENTS.map(e => e.id));
+        expect(ids.has('csq_hvo_central_bosnia_offensive_1993')).toBe(true);
+    });
+});
