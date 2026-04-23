@@ -161,7 +161,7 @@ import { reconcileFinalOperationTruth } from '../combat/final_operation_truth_re
 
 // --- Pipeline infrastructure imports ---
 import type { NamedPhase, TurnContext, TurnReport } from '../turn_pipeline_types.js';
-import { setPoliticalControlSnapshot } from '../turn_pipeline_types.js';
+import { setPoliticalControlSnapshot, setAllianceAtTurnStart, getAllianceAtTurnStart } from '../turn_pipeline_types.js';
 import {
     getOperationalData,
     setOperationalData,
@@ -206,6 +206,20 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             setPoliticalControlSnapshot(context, snapshotPoliticalControllers(context.state));
+        }
+    },
+    {
+        // Issue #13 zone posture inertia: capture alliance value BEFORE
+        // evaluate-events so mid-turn alliance breaks don't instantly flip
+        // HVO/ARBiH enclaves to besieged. Spatial-context recomputes later
+        // in the turn read this snapshot instead of the live alliance value,
+        // giving the commander loop one turn of posture inertia to commit
+        // surplus brigades to ops against a newly-hostile former ally before
+        // enclave geometry collapses.
+        name: 'snapshot-alliance-at-turn-start',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            setAllianceAtTurnStart(context, context.state.political.war_alliance_rbih_hrhb);
         }
     },
     {
@@ -498,6 +512,12 @@ export const warPhases: NamedPhase[] = [
             const od = getOperationalData(context);
             if (!od?.edges?.length) return;
             const pc = context.state.political.political_controllers ?? {};
+            // Issue #13 zone posture inertia: use alliance captured at turn start
+            // (before evaluate-events), not the live value. When an event mid-turn
+            // breaks alliance, zone posture stays on the pre-break state for this
+            // turn's commander loop, giving it a window to commit ops.
+            const allianceForZones =
+                getAllianceAtTurnStart(context) ?? context.state.political.war_alliance_rbih_hrhb;
             const spatial = computeSpatialContext(
                 od.edges,
                 pc,
@@ -507,7 +527,7 @@ export const warPhases: NamedPhase[] = [
                 undefined,
                 undefined,
                 undefined,
-                context.state.political.war_alliance_rbih_hrhb,
+                allianceForZones,
             );
             setSpatialContextCache(context, { preCombat: spatial });
         }
@@ -1473,6 +1493,9 @@ export const warPhases: NamedPhase[] = [
             const existing = getSpatialContextCache(context);
             if (!existing) return; // pre-combat must have run
             const pc = context.state.political.political_controllers ?? {};
+            // Issue #13: use turn-start alliance snapshot for posture inertia.
+            const allianceForZones =
+                getAllianceAtTurnStart(context) ?? context.state.political.war_alliance_rbih_hrhb;
             const postCombat = computeSpatialContext(
                 od.edges,
                 pc,
@@ -1482,7 +1505,7 @@ export const warPhases: NamedPhase[] = [
                 undefined,
                 existing.preCombat.adjacency,
                 existing.preCombat.sharedBoundaryAdjacency,
-                context.state.political.war_alliance_rbih_hrhb,
+                allianceForZones,
             );
             setSpatialContextCache(context, {
                 preCombat: existing.preCombat,

@@ -390,6 +390,32 @@ export function setPoliticalControlSnapshot(context: TurnContext, snapshot: Reco
     (context as TurnContext & { controlSnapshot?: Record<string, string | null> }).controlSnapshot = snapshot;
 }
 
+/**
+ * Alliance-at-turn-start snapshot (issue #13, zone posture inertia).
+ *
+ * Captured at the very start of the turn BEFORE `evaluate-events` runs, so
+ * the value reflects the alliance state from the end of the previous turn.
+ * Later pipeline steps — specifically the spatial-context recomputes — pass
+ * this value to `computeSpatialContext` instead of the live
+ * `state.political.war_alliance_rbih_hrhb`.
+ *
+ * The practical effect: when an event applies an `alliance_change` that
+ * flips alliance from allied to hostile, the substrate's
+ * `politicallyConnectedOsidsByFaction` stays on the PRE-break value for the
+ * current turn. Zones stay non-besieged for one more turn — giving the
+ * commander loop a turn-window to commit surplus brigades to operations
+ * against the newly-hostile former ally BEFORE the enclave geometry
+ * collapses to besieged. Mirrors real-command decision inertia: political
+ * breaks don't instantly re-shape corps-level tactical posture.
+ */
+export function getAllianceAtTurnStart(context: TurnContext): number | undefined {
+    return (context as TurnContext & { allianceAtTurnStart?: number }).allianceAtTurnStart;
+}
+
+export function setAllianceAtTurnStart(context: TurnContext, value: number | undefined): void {
+    (context as TurnContext & { allianceAtTurnStart?: number }).allianceAtTurnStart = value;
+}
+
 /** Load settlement graph and edges from context (or default). */
 export async function getGraphAndEdges(context: TurnContext): Promise<{ graph: LoadedSettlementGraph; edges: EdgeRecord[] }> {
     const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
