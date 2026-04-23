@@ -4289,3 +4289,51 @@ Despite the modest measured win, C2a is shipped because: (a) it is byte-identica
 - Module: `src/state/supply_state_derivation.ts` (caches + helpers)
 - Tests: `tests/supply_state_derivation_cache.test.ts`
 - Tool: `tools/perf/profile_scenario.ts` (permanent)
+
+## [2026-04-23] perf(sectors): C5 — content-fingerprint cache for reconcileFinalSectorTruth (skip redundant 3rd rebuild)
+
+**Type:** v0.9.3 performance — cache a redundant sector rebuild across the two adjacent war-pipeline reconcile steps
+**Files:** `src/sim/combat/final_sector_truth_reconciliation.ts`, `src/sim/combat/corps_front_sectors.ts` (export helper), `tests/final_sector_truth_reconciliation_cache.test.ts` (new)
+**Status:** VERIFIED — tsc clean; 6 new C5 cache tests + 3 existing reconciliation tests pass; **baseline regression green across all 3 golden scenarios** (apr1992_52w, baseline_ops_4w, noop_4w) — byte-identical to pre-C5. No baseline refresh.
+
+### Why C5 / what the sector-expert consult said
+
+The post-C2a profile showed the sector-reconciliation cluster at ~25.5s / 40 turns combined (three steps: `partition-corps-front-sectors` ~228ms/turn, `reconcile-final-sector-truth` ~211ms/turn, `reconcile-final-sector-truth-after-ops` ~198ms/turn — ~23% of total runtime). A `/sector-expert` consult confirmed:
+
+1. All three steps converge on `buildCorpsFrontSectors` (the dominant cost driver).
+2. Between `reconcile-final-sector-truth` (step 2) and `reconcile-final-sector-truth-after-ops` (step 3), only `reconcile-final-operation-truth` runs. That function mutates only `operation.participating_brigades` and `operation.sector_id` — none of which `buildCorpsFrontSectors`, `assignBrigadesToSubSegments`, or `computeSectorCombatRatings` read.
+3. The `isFinalPass` flag's only behavioral effect is emitting final-unresolved warnings; the sector output is identical regardless.
+4. Therefore step 3's entire `reconcileFinalSectorTruth` call is redundant-by-construction with step 2's. A plumb-through / cache is byte-identical by design.
+5. Inner-loop rewrites of `buildCorpsFrontSectors` would require behavior verification beyond byte-identity regression — HARD NO for this pass. Threshold hierarchy (5.5m / 16.6m / 33m) and late-writer sequencing (`mergeSmallAdjacentSectors → repairDisconnectedTerritory`, `classifyBrigadesByTerritory → enforcePhysicalSectorOwnership → …`) are load-bearing per sectors.md life lessons.
+
+### Implementation
+
+Added a `WeakMap<GameState, { fingerprint, report, lastFinalPass }>` in `final_sector_truth_reconciliation.ts`. `computeReconcileFingerprint(state)` builds a content hash over:
+- `state.meta.turn`
+- `state.military.war_front_edges_osid.length`
+- Sorted `political_controllers` entries (key=value, joined)
+- Sorted active-formation entries (`id@location_osid:faction`)
+
+On cache hit (fingerprint matches previous run on the same GameState): skip `buildCorpsFrontSectors`, skip `assignBrigadesToSubSegments`, skip the stale-ssid sweep, skip `computeSectorCombatRatings` — all their side effects are still in state from the prior call. If `isFinalPass` has flipped true since the cached run, emit the unresolved-sector warnings from the preserved `state.military.unresolved_sector_brigades` list.
+
+Exported `emitFinalUnresolvedSectorWarnings` from `corps_front_sectors.ts` so the cache-hit path can re-emit without re-walking the pipeline.
+
+### Verification
+
+- `npx tsc --noEmit` — clean.
+- `npx vitest run tests/final_sector_truth_reconciliation_cache.test.ts` — 6/6 pass (ref-equality on hit; invalidation on controller flip, on location move, on new formation; per-GameState isolation; warning re-emission on isFinalPass flip).
+- `npx vitest run tests/final_sector_truth_reconciliation.test.ts` — 3/3 pre-existing reconciliation tests still pass (no regression).
+- `npx tsx tools/scenario_runner/run_baseline_regression.ts` — **"Baseline regression: all scenarios match."** Byte-identity confirmed across apr1992_52w, baseline_ops_4w, noop_4w. No golden drift.
+
+### Scope boundaries
+
+- **No baseline refresh needed** — sim output is byte-identical by construction (the function's outputs on the redundant second call were already identical pre-change; the cache just avoids re-deriving them).
+- **Pipeline-step count unchanged.** No war-phase additions/removals. No ordering change.
+- **`buildCorpsFrontSectors` internals untouched.** Threshold hierarchy, territory Voronoi, repair, merge, classification, late-writer sequencing — all preserved.
+- **`scenario_runner.ts` call sites** (one-shot reconcile at scenario start/end) continue to work correctly; they create their own cache entries which subsequent per-turn pipeline calls do not share (different state refs and/or different turn fingerprints).
+
+### Artifacts
+
+- Module: `src/sim/combat/final_sector_truth_reconciliation.ts` (WeakMap cache + fingerprint)
+- Export: `emitFinalUnresolvedSectorWarnings` from `src/sim/combat/corps_front_sectors.ts`
+- Tests: `tests/final_sector_truth_reconciliation_cache.test.ts` (6 tests)
