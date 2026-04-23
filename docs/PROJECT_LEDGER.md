@@ -4337,3 +4337,57 @@ Exported `emitFinalUnresolvedSectorWarnings` from `corps_front_sectors.ts` so th
 - Module: `src/sim/combat/final_sector_truth_reconciliation.ts` (WeakMap cache + fingerprint)
 - Export: `emitFinalUnresolvedSectorWarnings` from `src/sim/combat/corps_front_sectors.ts`
 - Tests: `tests/final_sector_truth_reconciliation_cache.test.ts` (6 tests)
+
+## [2026-04-23] content(v0.9.0): author Chain 1 (Drina partisan rear) + Chain 3 (Srebrenica survives); strip trade-framing from selective goals
+
+**Type:** v0.9.0 Consequence System content — 8 new divergence events, 1 canon-compliance fix to `rs_strategic_goals` response option.
+**Files:** `data/scenarios/events/consequences.json` (+8 events), `data/scenarios/events/war_1992.json` (remove `+15 international_standing` from `selective` option), `tests/consequence_chains.test.ts` (+13 tests).
+**Status:** VERIFIED — tsc clean; 37/37 `consequence_chains.test.ts`; 75/75 across all `consequence_*` tests; **baseline regression green across apr1992_52w, baseline_ops_4w, noop_4w — byte-identical**. No baseline refresh needed.
+
+### Canon review background
+
+Chain 1 and Chain 3 were written in the March plan but held back pending canon review per `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`. The 2026-04-22 review (`docs/40_reports/20260422_CHAINS_1_3_5_CANON_REVIEW.md`) returned:
+- Chain 1: **REAUTHOR**. Plan text framed selective goals as "RS trades international standing (+15) for a permanently hostile rear" — the exact structure gate L224 forbids ("atrocity is a consequence, not a lever"). Selective also literally granted `international_standing +15`, commodifying restraint.
+- Chain 3: **REAUTHOR** (minimal). `csq_srebrenica_stalemate_1995` gave RBiH `international_standing +5` for enclave survival — a "prevent genocide" reward, forbidden by gate L60.
+
+### Changes
+
+1. **Chain 1 — 4 events authored:**
+   - `csq_drina_partisan_resistance_1992` (w8-w20; `selective` + RS territory > 40% → guerrilla_threat on Zvornik/Bratunac/Vlasenica/Visegrad/Foca, intensity 0.35, 40 turns).
+   - `csq_drina_supply_disruption_1993` (w30-w60; requires partisan_resistance → patron_pressure -5, supply_delta -50, patron_confidence -5).
+   - `csq_drina_corps_pinned_1993` (w40-w70; requires partisan_resistance → doctrine_constraint blocking srebrenica/zepa/gorazde for 80 turns, military_credibility -5).
+   - `csq_drina_population_resilience_1993` (w35-w55; requires partisan_resistance → RBiH recruitment_modifier 1.08, sets `drina_refugee_wave_suppressed=true`).
+
+   Narratives in third-person historical voice per §4; no "trade" framing; Srebrenica-enclave suppression described as state consequence (no refugee waves → no besieged-enclave pattern), not reward.
+
+2. **Chain 3 — 4 events authored:**
+   - `csq_srebrenica_stalemate_1995` (w170-w190 → morale_change RS -3, military_credibility RS -5). **NO** RBiH international_standing bonus; the canon-legal upside is the non-firing of `srebrenica_genocide_1995`.
+   - `csq_enclave_drain_continues_1995` (requires stalemate → doctrine_constraint pinning Drina Corps, cohesion_change RS -3).
+   - `csq_alternative_nato_trigger_1995` (pressure-based, base_rate 0.8, threshold 10 → patron_pressure RS -10, international_standing RS -10).
+   - `csq_prolonged_war_exhaustion_1995` (all 3 factions: morale -5, cohesion -5, recruitment 0.80x, patron_pressure +5). Framed as emergent war-weariness per §7 principle 3, not karmic retaliation.
+
+3. **`rs_strategic_goals` selective option** (`war_1992.json`): removed the `international_standing +15` dimension_shift. Remaining shifts unchanged (morale -3, military_credibility -5, internal_cohesion -15, territorial_legitimacy +10). International standing now emerges from the absence of `war_crimes_events` on the selective path rather than being awarded for the policy toggle.
+
+### Calibration-safe-by-construction argument
+
+All three baselines use `bot_response_logic: 'historical'` on `rs_strategic_goals` → resolves to first option = `all_six`. Chain 1 gates on `selective` (doesn't fire). Chain 3 gates on `flag_not_set srebrenica_fell` but historical `srebrenica_falls_1995` sets that flag (doesn't fire). The `+15` removal lives inside the `selective` response option which isn't picked on the historical path. Confirmed by baseline regression: "Baseline regression: all scenarios match."
+
+### Verification
+
+- `npx tsc --noEmit` — clean.
+- `npx vitest run tests/consequence*.test.ts` — 75/75 pass.
+- `npx tsx tools/scenario_runner/run_baseline_regression.ts` — "Baseline regression: all scenarios match."
+- 13 new chain tests assert: historical path fires nothing, territory gate below 40% blocks partisan_resistance, ahistorical path fires all 4 events per chain with correct effects, `csq_srebrenica_stalemate_1995` has NO RBiH international_standing shift (canon gate pinned by test).
+
+### Scope
+
+- **No baseline refresh** — historical-path output byte-identical.
+- **Chain 2** still blocked on Lane 2 `hrhb_political_goal` data fix.
+- **Chain 7** still blocked on endgame architecture.
+
+### Artifacts
+
+- Events: `data/scenarios/events/consequences.json` (+8 events across 2 chains)
+- Canon-compliance: `data/scenarios/events/war_1992.json` (selective-goals fix)
+- Tests: `tests/consequence_chains.test.ts` (+13 tests)
+- Canon review: `docs/40_reports/20260422_CHAINS_1_3_5_CANON_REVIEW.md`

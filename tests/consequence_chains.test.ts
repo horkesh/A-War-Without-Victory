@@ -458,3 +458,243 @@ describe('Chain 5 — RS Max Aggression: ahistorical path fires chain', () => {
         expect(ids.has('csq_early_nato_threshold_1994')).toBe(true);
     });
 });
+
+// ─── Chain 1 — No Drina Cleansing → Partisan Rear ────────────────────────
+//
+// Chain 1 gates on `rs_strategic_goals = selective`. Historical path uses
+// `all_six`, so all four csq_drina_* events are calibration-safe-by-construction.
+// The partisan_resistance anchor also requires `territory_percentage: RS above
+// 0.40`; we populate political_controllers with a 60/40 RS split.
+
+function makeChain1State(
+    turn: number,
+    opts: {
+        flags?: Record<string, string | number | boolean>;
+        firedEvents?: string[];
+        rsTerritoryShare?: number; // 0..1 fraction of OSIDs assigned to RS
+    } = {},
+): GameState {
+    const share = opts.rsTerritoryShare ?? 0.60;
+    // Build a 10-OSID synthetic political map; RS controls `share * 10` of them.
+    const pc: Record<string, string> = {};
+    for (let i = 0; i < 10; i++) {
+        pc[`op:syn:${i}`] = i < Math.round(share * 10) ? 'RS' : 'RBiH';
+    }
+    return {
+        schema_version: 1,
+        meta: { turn, phase: 'war', scenario_id: 'test', player_faction: 'RS', seed: 'csq1' } as GameState['meta'],
+        factions: [
+            { id: 'RBiH', profile: {} as any, areasOfResponsibility: [], supply_sources: [] },
+            { id: 'RS', profile: {} as any, areasOfResponsibility: [], supply_sources: [] },
+            { id: 'HRHB', profile: {} as any, areasOfResponsibility: [], supply_sources: [] },
+        ],
+        military: {
+            formations: {},
+            front_segments: {},
+            front_posture: {},
+            front_posture_regions: {},
+            front_pressure: {},
+            militia_pools: {},
+            general_supply_reserve: { RBiH: 50, RS: 70, HRHB: 40 },
+            heavy_munitions_reserve: { RBiH: 30, RS: 50, HRHB: 20 },
+            fired_event_ids: [...(opts.firedEvents ?? [])],
+            event_flags: { ...(opts.flags ?? {}) },
+            event_fire_counts: {},
+            event_readiness: {},
+            event_last_fired_turn: {},
+            negotiation: {
+                capital: {
+                    RBiH: { war_crimes_events: 0 } as any,
+                    RS: { war_crimes_events: 0 } as any,
+                    HRHB: { war_crimes_events: 0 } as any,
+                },
+                patron_relationships: {
+                    RS: { support_level: 70, override_authority: 0 } as any,
+                    RBiH: { support_level: 50, override_authority: 0 } as any,
+                    HRHB: { support_level: 60, override_authority: 0 } as any,
+                },
+                strategic_dimensions: { RS: {} as any, RBiH: {} as any, HRHB: {} as any },
+            } as any,
+        } as unknown as GameState['military'],
+        political: {
+            war_alliance_rbih_hrhb: 0.5,
+            political_controllers: pc,
+        } as GameState['political'],
+    } as unknown as GameState;
+}
+
+describe('Chain 1 — No Drina Cleansing: historical path fires nothing', () => {
+    it('no Chain 1 csq_ event fires when rs_strategic_goals = all_six (historical)', () => {
+        const state = makeChain1State(12, { flags: { rs_strategic_goals: 'all_six' } });
+        evaluateEvents(state, rng, 12, CSQ_EVENTS);
+        const fired = state.military.fired_event_ids ?? [];
+        expect(fired).not.toContain('csq_drina_partisan_resistance_1992');
+    });
+
+    it('no Chain 1 csq_ event fires when rs_strategic_goals = aggressive', () => {
+        const state = makeChain1State(12, { flags: { rs_strategic_goals: 'aggressive' } });
+        evaluateEvents(state, rng, 12, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).not.toContain('csq_drina_partisan_resistance_1992');
+    });
+});
+
+describe('Chain 1 — No Drina Cleansing: ahistorical path fires chain', () => {
+    it('csq_drina_partisan_resistance_1992 fires w8-w20 with selective flag and RS territory >40%', () => {
+        const state = makeChain1State(12, {
+            flags: { rs_strategic_goals: 'selective' },
+            rsTerritoryShare: 0.60,
+        });
+        evaluateEvents(state, rng, 12, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).toContain('csq_drina_partisan_resistance_1992');
+        const threats = state.military.guerrilla_threats ?? [];
+        expect(threats.some(t => t.faction === 'RS')).toBe(true);
+        expect(state.military.event_flags?.drina_partisan_resistance_active).toBe(true);
+    });
+
+    it('csq_drina_partisan_resistance_1992 does NOT fire when RS territory is below 40%', () => {
+        const state = makeChain1State(12, {
+            flags: { rs_strategic_goals: 'selective' },
+            rsTerritoryShare: 0.30,
+        });
+        evaluateEvents(state, rng, 12, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).not.toContain('csq_drina_partisan_resistance_1992');
+    });
+
+    it('csq_drina_corps_pinned_1993 requires prior partisan_resistance and pushes a scope_restriction', () => {
+        const noPrior = makeChain1State(50, {
+            flags: { rs_strategic_goals: 'selective' },
+            rsTerritoryShare: 0.60,
+        });
+        evaluateEvents(noPrior, rng, 50, CSQ_EVENTS);
+        expect(noPrior.military.fired_event_ids).not.toContain('csq_drina_corps_pinned_1993');
+
+        const withPrior = makeChain1State(50, {
+            flags: { rs_strategic_goals: 'selective' },
+            rsTerritoryShare: 0.60,
+            firedEvents: ['csq_drina_partisan_resistance_1992'],
+        });
+        evaluateEvents(withPrior, rng, 50, CSQ_EVENTS);
+        expect(withPrior.military.fired_event_ids).toContain('csq_drina_corps_pinned_1993');
+        const restrictions = withPrior.military.event_constraints?.scope_restrictions ?? [];
+        const rsBlock = restrictions.find(r =>
+            r.faction === 'RS' && r.reason === 'drina_corps_fixed_rear_security',
+        );
+        expect(rsBlock).toBeDefined();
+        expect(rsBlock?.blocked_municipalities).toEqual(['srebrenica', 'zepa', 'gorazde']);
+    });
+
+    it('csq_drina_population_resilience_1993 sets the drina_refugee_wave_suppressed flag', () => {
+        const state = makeChain1State(45, {
+            flags: { rs_strategic_goals: 'selective' },
+            rsTerritoryShare: 0.60,
+            firedEvents: ['csq_drina_partisan_resistance_1992'],
+        });
+        evaluateEvents(state, rng, 45, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).toContain('csq_drina_population_resilience_1993');
+        expect(state.military.event_flags?.drina_refugee_wave_suppressed).toBe(true);
+        const mods = state.military.recruitment_modifiers ?? [];
+        const rbihMod = mods.find(m => m.faction === 'RBiH' && m.pool_multiplier === 1.08);
+        expect(rbihMod).toBeDefined();
+    });
+
+    it('all four Chain 1 events are present in the loaded registry', () => {
+        const ids = new Set(CSQ_EVENTS.map(e => e.id));
+        expect(ids.has('csq_drina_partisan_resistance_1992')).toBe(true);
+        expect(ids.has('csq_drina_supply_disruption_1993')).toBe(true);
+        expect(ids.has('csq_drina_corps_pinned_1993')).toBe(true);
+        expect(ids.has('csq_drina_population_resilience_1993')).toBe(true);
+    });
+});
+
+// ─── Chain 3 — Srebrenica Survives → No Deliberate Force ─────────────────
+//
+// Chain 3 gates on `srebrenica_enclave_formed = true` AND `flag_not_set:
+// srebrenica_fell`. Historical path: enclave forms AND falls, so
+// flag_not_set is false → no Chain 3 event fires. Ahistorical path: enclave
+// survives.
+//
+// Canon review note (2026-04-22): `csq_srebrenica_stalemate_1995` must NOT
+// grant RBiH +5 international_standing. The only canon-legal upside is the
+// non-firing of `srebrenica_genocide_1995`. See
+// docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md §L60.
+
+describe('Chain 3 — Srebrenica Survives: historical path fires nothing', () => {
+    it('no Chain 3 csq_ event fires when srebrenica_fell is set (historical)', () => {
+        const state = makeChain1State(175, {
+            flags: { srebrenica_enclave_formed: true, srebrenica_fell: true },
+        });
+        evaluateEvents(state, rng, 175, CSQ_EVENTS);
+        const fired = state.military.fired_event_ids ?? [];
+        expect(fired).not.toContain('csq_srebrenica_stalemate_1995');
+        expect(fired).not.toContain('csq_enclave_drain_continues_1995');
+        expect(fired).not.toContain('csq_prolonged_war_exhaustion_1995');
+    });
+});
+
+describe('Chain 3 — Srebrenica Survives: ahistorical path fires chain', () => {
+    it('csq_srebrenica_stalemate_1995 fires w170-w190 when enclave formed but not fallen', () => {
+        const state = makeChain1State(175, {
+            flags: { srebrenica_enclave_formed: true },
+        });
+        evaluateEvents(state, rng, 175, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).toContain('csq_srebrenica_stalemate_1995');
+        expect(state.military.event_flags?.srebrenica_stalemate).toBe(true);
+    });
+
+    it('csq_srebrenica_stalemate_1995 does NOT grant RBiH +5 international_standing (canon gate)', () => {
+        const state = makeChain1State(175, {
+            flags: { srebrenica_enclave_formed: true },
+        });
+        evaluateEvents(state, rng, 175, CSQ_EVENTS);
+        // Dimension_shift side channel reflects in military.dimension_shifts_log
+        // (applyEventEffects pathway). Alternative: inspect CSQ_EVENTS registry.
+        const stalemate = CSQ_EVENTS.find(e => e.id === 'csq_srebrenica_stalemate_1995')!;
+        const shifts = stalemate.dimension_shifts ?? [];
+        const rbihStanding = shifts.find(
+            s => s.faction === 'RBiH' && s.dimension === 'international_standing',
+        );
+        expect(rbihStanding).toBeUndefined();
+        // The ONLY dimension shift on stalemate is RS military_credibility -5.
+        expect(shifts).toEqual([
+            { faction: 'RS', dimension: 'military_credibility', delta: -5 },
+        ]);
+    });
+
+    it('csq_enclave_drain_continues_1995 requires prior stalemate and pins Drina Corps', () => {
+        const withPrior = makeChain1State(180, {
+            flags: { srebrenica_enclave_formed: true },
+            firedEvents: ['csq_srebrenica_stalemate_1995'],
+        });
+        evaluateEvents(withPrior, rng, 180, CSQ_EVENTS);
+        expect(withPrior.military.fired_event_ids).toContain('csq_enclave_drain_continues_1995');
+        const restrictions = withPrior.military.event_constraints?.scope_restrictions ?? [];
+        const rsBlock = restrictions.find(r =>
+            r.faction === 'RS' && r.reason === 'drina_corps_fixed_on_srebrenica_siege',
+        );
+        expect(rsBlock).toBeDefined();
+    });
+
+    it('csq_prolonged_war_exhaustion_1995 fires when both srebrenica_fell and nato_deliberate_force_occurred are unset', () => {
+        const state = makeChain1State(185, {
+            flags: { srebrenica_enclave_formed: true },
+        });
+        evaluateEvents(state, rng, 185, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).toContain('csq_prolonged_war_exhaustion_1995');
+        // Three-faction exhaustion: recruitment_modifier 0.80 for each faction
+        const mods = state.military.recruitment_modifiers ?? [];
+        const rbihMod = mods.find(m => m.faction === 'RBiH' && m.pool_multiplier === 0.80);
+        const rsMod = mods.find(m => m.faction === 'RS' && m.pool_multiplier === 0.80);
+        const hrhbMod = mods.find(m => m.faction === 'HRHB' && m.pool_multiplier === 0.80);
+        expect(rbihMod).toBeDefined();
+        expect(rsMod).toBeDefined();
+        expect(hrhbMod).toBeDefined();
+    });
+
+    it('all four Chain 3 events are present in the loaded registry', () => {
+        const ids = new Set(CSQ_EVENTS.map(e => e.id));
+        expect(ids.has('csq_srebrenica_stalemate_1995')).toBe(true);
+        expect(ids.has('csq_enclave_drain_continues_1995')).toBe(true);
+        expect(ids.has('csq_alternative_nato_trigger_1995')).toBe(true);
+        expect(ids.has('csq_prolonged_war_exhaustion_1995')).toBe(true);
+    });
+});
