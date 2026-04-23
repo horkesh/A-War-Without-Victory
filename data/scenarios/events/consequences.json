@@ -481,5 +481,422 @@
       "early_nato_threshold_lowered": true
     },
     "historical_source": "Operation Deliberate Force (30 August - 20 September 1995) was the historical turning point; counterfactual moves that threshold earlier in response to cumulative aggressive-goals evidence. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 5."
+  },
+  {
+    "id": "csq_drina_partisan_resistance_1992",
+    "title": "The Forests Above the Drina",
+    "narrative": "The Drina valley is not cleared. Bosniak populations remain in their villages above Zvornik, Bratunac, and Vlasenica; in Foca, the town emptied during the spring has filled again from the surrounding woods. What had been civilian reservists of the Territorial Defence reconstitutes slowly, in small groups and without a clear command, but it reconstitutes. By late 1992 the VRS commands of Drinski and eastern Bosnia are reporting ambushes on supply columns and disappearances of small patrols in the high forests above the Drina.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 8,
+      "turn_max": 20,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "rs_strategic_goals",
+            "value": "selective"
+          },
+          {
+            "type": "territory_percentage",
+            "faction": "RS",
+            "comparator": "above",
+            "threshold": 0.40
+          }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "TDF remnants in the uncleared Drina valley begin partisan operations against VRS rear-area units."
+    },
+    "effects": [
+      {
+        "kind": "guerrilla_threat",
+        "faction": "RS",
+        "municipalities": ["zvornik", "bratunac", "vlasenica", "visegrad", "foca"],
+        "intensity": 0.35,
+        "duration_turns": 40
+      }
+    ],
+    "sets_flags": {
+      "drina_partisan_resistance_active": true
+    },
+    "historical_source": "Counterfactual chain derived from the ICTY Krstic Trial Judgment (IT-98-33-T) discussion of how Drina-valley cleansing foreclosed Bosniak military presence behind VRS lines. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 1."
+  },
+  {
+    "id": "csq_drina_supply_disruption_1993",
+    "title": "The Corridor Costs More",
+    "narrative": "The ambush pattern proves chronic. The Foca-Visegrad-Zvornik corridor, never paved and always exposed, takes losses at a rate the VRS cannot replace from a VJ whose own political calculations are shifting. Belgrade, which had sustained the VRS through 1992 on the assumption the rear was secure, begins to treat Drina logistics as a separate and more expensive problem. Convoys leave later, arrive lighter, and return with casualties.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 30,
+      "turn_max": 60,
+      "phase": "war",
+      "requires_events": ["csq_drina_partisan_resistance_1992"]
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "VRS Drina-corridor supply degrades; Belgrade adjusts its posture accordingly."
+    },
+    "effects": [
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": -5
+      },
+      {
+        "kind": "supply_delta",
+        "faction": "RS",
+        "delta": -50
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "patron_confidence",
+        "delta": -5
+      }
+    ],
+    "historical_source": "Derived from ICTY Milosevic Trial (IT-02-54) exhibits on VJ-VRS logistics coupling. Counterfactual: cost of the coupling rises when the rear is not secured. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 1."
+  },
+  {
+    "id": "csq_drina_corps_pinned_1993",
+    "title": "Drina Corps on Interior Lines",
+    "narrative": "Drina Corps returns its quarterly readiness report with a line the VRS general staff has not seen before: more than half of the corps is committed to rear-security and anti-partisan tasks. The Podrinje Detachment is reformed and permanently redeployed from offensive tasks to interior lines. Whatever campaign Mladic's staff had projected for the eastern axis in 1993 becomes an operational impossibility; Drina Corps will hold what it has and not move from it.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 40,
+      "turn_max": 70,
+      "phase": "war",
+      "requires_events": ["csq_drina_partisan_resistance_1992"]
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "Drina Corps fixes in place on rear-security tasks; eastern-axis offensive capacity is foreclosed for the war's duration."
+    },
+    "effects": [
+      {
+        "kind": "doctrine_constraint",
+        "faction": "RS",
+        "constraint": {
+          "scope_restrictions": [
+            {
+              "faction": "RS",
+              "blocked_municipalities": ["srebrenica", "zepa", "gorazde"],
+              "reason": "drina_corps_fixed_rear_security",
+              "expires_turn": 0
+            }
+          ]
+        },
+        "duration_turns": 80
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "military_credibility",
+        "delta": -5
+      }
+    ],
+    "historical_source": "Counterfactual: absent the refugee-producing cleansing, VRS Drina Corps cannot concentrate for enclave-reduction operations because rear security absorbs its manoeuvre capacity. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 1."
+  },
+  {
+    "id": "csq_drina_population_resilience_1993",
+    "title": "A Valley That Did Not Empty",
+    "narrative": "The population remains. The villages of Srebrenica, Bratunac, and Vlasenica municipalities are not emptied; the surrounding countryside retains its pre-war demographic shape. Without the refugee waves that in the historical record flooded the enclaves and overwhelmed their garrisons, the besieged-enclave pattern does not form as it did. Srebrenica municipality continues to function as an ordinary municipality under ARBiH administration, supplied overland and contiguous with the forces defending it. Its young men reach ARBiH units through the normal mobilisation channels rather than through the wave of displaced persons.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 35,
+      "turn_max": 55,
+      "phase": "war",
+      "requires_events": ["csq_drina_partisan_resistance_1992"]
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Drina-valley population intact; the refugee wave that in the historical record created the besieged-enclave pattern does not form."
+    },
+    "effects": [
+      {
+        "kind": "recruitment_modifier",
+        "faction": "RBiH",
+        "pool_multiplier": 1.08,
+        "duration_turns": 60
+      }
+    ],
+    "sets_flags": {
+      "drina_refugee_wave_suppressed": true
+    },
+    "historical_source": "Counterfactual state consequence: in the absence of systematic cleansing, the enclave system that anchored the Srebrenica, Zepa, and Gorazde siege patterns in the historical record does not emerge. Described in third-person historical voice per docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md §4. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 1."
+  },
+  {
+    "id": "csq_srebrenica_stalemate_1995",
+    "title": "The Enclave Holds",
+    "narrative": "The enclave persists into the summer of 1995. UNPROFOR's Dutch detachment continues its patrols; RS forces continue their checkpoints and their occasional shellings. The attack that in the historical record overran the perimeter does not come. Drina Corps reports from the field describe the arithmetic frankly: a sustained final operation against the enclave is possible but would require force concentrations the corps cannot spare from its other defensive commitments. The operation is deferred, and then deferred again.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 170,
+      "turn_max": 190,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "srebrenica_enclave_formed",
+            "value": true
+          },
+          {
+            "type": "flag_not_set",
+            "flag": "srebrenica_fell"
+          }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "The final operation against Srebrenica is deferred; the enclave remains under UNPROFOR protection."
+    },
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RS",
+        "delta": -3
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "military_credibility",
+        "delta": -5
+      }
+    ],
+    "sets_flags": {
+      "srebrenica_stalemate": true
+    },
+    "historical_source": "Counterfactual: the ICTY Krstic Trial (IT-98-33-T) documented the specific operational decision to reduce the enclave. This event models the world in which that decision is not taken. Per docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md §L60, the absence of the genocide rupture is itself the canon-legal upside; no additional standing bonus is awarded. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 3."
+  },
+  {
+    "id": "csq_enclave_drain_continues_1995",
+    "title": "Fixed on Interior Lines",
+    "narrative": "What had been assumed to be a three-month operational detour becomes a permanent commitment. The forces Drina Corps tasked against Srebrenica cannot be withdrawn without collapsing the siege perimeter, and the perimeter cannot be collapsed without either taking the enclave or withdrawing from the eastern axis. Neither option is available. The formations remain in place: fixed, frustrated, and unavailable to the wider war.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 170,
+      "turn_max": 200,
+      "phase": "war",
+      "requires_events": ["csq_srebrenica_stalemate_1995"]
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "Drina Corps is fixed in place on its siege tasking and cannot redeploy."
+    },
+    "effects": [
+      {
+        "kind": "doctrine_constraint",
+        "faction": "RS",
+        "constraint": {
+          "scope_restrictions": [
+            {
+              "faction": "RS",
+              "blocked_municipalities": ["sarajevo", "pale", "zenica", "tuzla"],
+              "reason": "drina_corps_fixed_on_srebrenica_siege",
+              "expires_turn": 0
+            }
+          ]
+        },
+        "duration_turns": 40
+      },
+      {
+        "kind": "cohesion_change",
+        "faction": "RS",
+        "delta": -3
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "internal_cohesion",
+        "delta": -5
+      }
+    ],
+    "historical_source": "Counterfactual: when the enclave is not reduced, Drina Corps retains the rear-area fixing it had in the spring of 1995 without the operational release the historical July offensive provided. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 3."
+  },
+  {
+    "id": "csq_alternative_nato_trigger_1995",
+    "title": "The Case Assembles Without Srebrenica",
+    "narrative": "The case for sustained NATO air operations over Bosnia is assembled from the evidence the war has produced rather than from a single catalysing atrocity. Markale's shelling, the accumulated ICTY record, the hostage crisis of May, the repositioning of the Rapid Reaction Force — the arguments line up differently without the fall of Srebrenica, and they line up more slowly, but they line up. Brussels, Paris, and Washington coordinate the plan that the historical record assembled around the massacre. It takes longer. It arrives with less political momentum. It arrives.",
+    "category": "diplomatic",
+    "trigger": {
+      "turn_min": 175,
+      "turn_max": 210,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "flag_not_set",
+            "flag": "srebrenica_fell"
+          },
+          {
+            "type": "war_crimes_above",
+            "faction": "RS",
+            "threshold": 8
+          },
+          {
+            "type": "flag_equals",
+            "flag": "rrf_deployed",
+            "value": true
+          }
+        ]
+      }
+    },
+    "pressure": {
+      "base_rate": 0.8,
+      "threshold": 10,
+      "decay_rate": 0.2
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RS",
+    "effect": {
+      "kind": "narrative",
+      "text": "Deliberate Force triggers from cumulative war-crimes evidence, Markale, and RRF deployment rather than from Srebrenica."
+    },
+    "effects": [
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": -10
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "international_standing",
+        "delta": -10
+      }
+    ],
+    "sets_flags": {
+      "nato_deliberate_force_alt_path": true
+    },
+    "historical_source": "The historiographical debate about whether Srebrenica was the trigger or the accelerant for Deliberate Force is treated in Power, 'A Problem from Hell' (2002), and Holbrooke, 'To End a War' (1998). Counterfactual models the non-Srebrenica catalyst stack. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 3."
+  },
+  {
+    "id": "csq_prolonged_war_exhaustion_1995",
+    "title": "A Fourth Summer",
+    "narrative": "Three summers of war without the turning point that in the historical record closed it. Populations in Sarajevo, Banja Luka, and Mostar cross into the fourth year of casualty lists, shortages, and negotiations that settle nothing. Conscription offices on every side report longer queues for deferments and shorter ones at the intake desk. This is not judgement; it is exhaustion. Every faction's field army is holding the line it held in the spring, and every faction's politicians are having the same conversations in different cities about how a war this expensive ends.",
+    "category": "political",
+    "trigger": {
+      "turn_min": 180,
+      "turn_max": 210,
+      "phase": "war",
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "flag_not_set",
+            "flag": "srebrenica_fell"
+          },
+          {
+            "type": "flag_not_set",
+            "flag": "nato_deliberate_force_occurred"
+          }
+        ]
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "RBiH",
+    "effect": {
+      "kind": "narrative",
+      "text": "Without a decisive catalyst, the war enters its fourth summer as emergent exhaustion rather than resolution."
+    },
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": -5
+      },
+      {
+        "kind": "morale_change",
+        "faction": "RS",
+        "delta": -5
+      },
+      {
+        "kind": "morale_change",
+        "faction": "HRHB",
+        "delta": -5
+      },
+      {
+        "kind": "cohesion_change",
+        "faction": "RBiH",
+        "delta": -5
+      },
+      {
+        "kind": "cohesion_change",
+        "faction": "RS",
+        "delta": -5
+      },
+      {
+        "kind": "cohesion_change",
+        "faction": "HRHB",
+        "delta": -5
+      },
+      {
+        "kind": "recruitment_modifier",
+        "faction": "RBiH",
+        "pool_multiplier": 0.80,
+        "duration_turns": 40
+      },
+      {
+        "kind": "recruitment_modifier",
+        "faction": "RS",
+        "pool_multiplier": 0.80,
+        "duration_turns": 40
+      },
+      {
+        "kind": "recruitment_modifier",
+        "faction": "HRHB",
+        "pool_multiplier": 0.80,
+        "duration_turns": 40
+      },
+      {
+        "kind": "patron_pressure",
+        "faction": "RBiH",
+        "delta": 5
+      },
+      {
+        "kind": "patron_pressure",
+        "faction": "RS",
+        "delta": 5
+      },
+      {
+        "kind": "patron_pressure",
+        "faction": "HRHB",
+        "delta": 5
+      }
+    ],
+    "historical_source": "Counterfactual: absent the Deliberate Force catalyst, the war continues with the pattern of exhaustion Burg & Shoup, 'The War in Bosnia-Herzegovina' (2000), describe for late 1994. Framed as emergent war-weariness per docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md §7 principle 3. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 3."
   }
 ]

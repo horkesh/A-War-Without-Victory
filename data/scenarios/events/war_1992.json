@@ -89,11 +89,6 @@
           },
           {
             "faction": "RS",
-            "dimension": "international_standing",
-            "delta": 15
-          },
-          {
-            "faction": "RS",
             "dimension": "territorial_legitimacy",
             "delta": 10
           }
