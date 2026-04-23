@@ -4241,3 +4241,51 @@ Correctness: `runSupplyBfs` is pure over `(sources, controlled, adjacency)`. Adj
 
 - Module: `src/state/supply_reachability_osid.ts` (cache + single-pass bucketing)
 - Tests: `tests/supply_reachability_cache.test.ts`
+
+## [2026-04-22] perf(supply): C2a — per-faction caches for corridor + supply-state derivation; permanent profiler tool
+
+**Type:** v0.9.3 performance — extension of C2 to the two downstream supply derivations
+**Files:** `src/state/supply_state_derivation.ts`, `tests/supply_state_derivation_cache.test.ts` (new), `tools/perf/profile_scenario.ts` (new permanent tool)
+**Status:** VERIFIED — tsc clean; 4 new C2a unit tests + 11 existing supply tests all pass; **baseline regression green across all 3 golden scenarios** (apr1992_52w, baseline_ops_4w, noop_4w) — byte-identical to pre-C2a. **40w wall time 79.85s → 76.62s (~4% improvement).** No baseline refresh.
+
+### Background
+
+Re-profiling post-C1+C2 (via the new `tools/perf/profile_scenario.ts` permanent tool) confirmed `supply-osid` still dominated at 17% of runtime even after C2's BFS cache. Diagnosis: C2 only memoized `computeSupplyReachabilityOsid`, but the `supply-osid` step also calls `deriveCorridorsOsid` + `deriveSupplyStateByOsid`. Bridge detection in deriveCorridorsOsid is O(E²) worst case for the per-faction subgraph; heartland + adequate BFS in deriveSupplyStateByOsid are O(V+E). Both unscanned by C2.
+
+### Changes
+
+1. **Permanent profiler tool at `tools/perf/profile_scenario.ts`.** Per the napkin rule "build diagnostic tools, not one-off scripts." Wraps `warPhases[*].run` with per-step timing; writes JSON to `--report` path (avoids the stdout-pollution-by-scenario-runner issue that broke the original Lane 4 throwaway). Mutates step bindings in memory only; never touches sim source. Reusable for any scenario.
+
+2. **`deriveCorridorsOsid` per-faction cache.** Refactored the inner per-faction loop into `computeFactionCorridors(fac, adjacency)` helper. Wrapped via a module-local `WeakMap<FactionSupplyReachabilityOsid, DerivedCorridor[]>`. Cache key is the per-faction `FactionSupplyReachabilityOsid` reference, which the C2 cache returns stably across turns when a faction's controlled set is unchanged. Bridge detection skipped on cache hit.
+
+3. **`deriveSupplyStateByOsid` per-faction cache.** Same pattern — extracted `computeFactionSupplyState(fac, adjacency, perFactionOpenEdges)` and wrapped. Open-edges computation grouped by faction up front so the cached path doesn't need to re-derive them. Heartland + adequate BFS skipped on cache hit. Cache coherency: in production, supply-osid always sequences `deriveCorridorsOsid → deriveSupplyStateByOsid` with the same supplyReport, so the corridor data feeding supplyState is always consistent with what we'd derive from the cached fac.
+
+### Verification
+
+- `npx tsc --noEmit` — clean.
+- `npx vitest run tests/supply_state_derivation_cache.test.ts tests/supply_reachability_osid.test.ts tests/supply_reachability_cache.test.ts` — 15/15 pass (4 new C2a + 7 existing supply + 4 C2 cache).
+- `npx tsx tools/scenario_runner/run_baseline_regression.ts` — **"Baseline regression: all scenarios match."** Byte-identity confirmed across apr1992_52w, baseline_ops_4w, noop_4w.
+- `tools/perf/profile_scenario.ts` measurements (40w):
+  - Pre-C2a (post-C1+C2):  79.85s, supply-osid 300.0ms/turn
+  - Post-C2a:              76.62s, supply-osid 293.7ms/turn
+  - Delta: total -3.23s (~4%); supply-osid -6.3ms/turn (~2%)
+
+### Honest measurement note
+
+C2a's measured speedup is smaller than the 5-8% range the Lane 4 report estimated for supply-derivation caching. Two plausible reasons:
+1. Cache key computation in C2 (`sources.join(',') + '||' + controlled.join(',')`) is O(N) per faction per turn; on a controlled set of ~2500 OSIDs, that's ~7500 char-ops per faction per turn, partially offsetting the savings on cache hit.
+2. The supply-osid step's outer wrapper work (`allOsids` build, `controlledByFaction` bucketing, `openEdgesByFaction` indexing) is permanent overhead — runs every turn regardless of cache hits.
+
+Despite the modest measured win, C2a is shipped because: (a) it is byte-identical (correctness proven by baseline regression), (b) the cache infrastructure is now in place and may compound with future optimizations, (c) the next perf pass should re-target sector-reconciliation steps which now occupy ~24% of runtime combined.
+
+### Scope boundaries
+
+- **No baseline refresh needed** — sim output is byte-identical by construction and proven so by the regression.
+- **Lane 4 C3 (commander zone-assessment cache)** still deferred — the post-C1+C2+C2a profile shows `generate-bot-corps-orders` at 186ms/turn (down from 295ms pre-C1, ~37% reduction from C1 alone). Re-rank C3 against this lower baseline.
+- **Lane 4 C5 (sector reconciliation)** is now the largest single remaining target (~24% of runtime across 3 sector steps). Still HIGH risk per Lane 4 — needs `/sector-expert` review per napkin before authoring.
+
+### Artifacts
+
+- Module: `src/state/supply_state_derivation.ts` (caches + helpers)
+- Tests: `tests/supply_state_derivation_cache.test.ts`
+- Tool: `tools/perf/profile_scenario.ts` (permanent)
