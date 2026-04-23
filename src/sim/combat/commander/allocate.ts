@@ -339,11 +339,15 @@ export function allocateBrigades(
         totalGarrisonBudget += budget;
     }
 
-    // Can launch ops only if there is non-besieged surplus
-    // (besieged surplus is locked to local ops within BESIEGED_SURPLUS_HOP_LIMIT)
-    const nonBesiegedSurplus = surplusEvals.filter(ev => {
+    // Can launch ops only if there is non-besieged surplus OR besieged-with-corridor surplus
+    // (issue #13 Option H: besieged zones with corridor_width >= 1 AND surplus brigades are
+    // breakout-capable — historical Vitez/Kiseljak/Žepče pocket operations 1993-94).
+    // Fully encircled zones (corridor_width=0) still lock brigades to local defence.
+    const launchCapableSurplus = surplusEvals.filter(ev => {
         const zone = updatedZones.find(z => z.assigned_brigades.includes(ev.brigade_id));
-        return !zone || zone.posture !== 'besieged';
+        if (!zone) return true;
+        if (zone.posture !== 'besieged') return true;
+        return zone.corridor_width >= 1;
     });
 
     return {
@@ -351,6 +355,6 @@ export function allocateBrigades(
         garrison_locks: garrisonLocks,
         surplus_pool: surplusEvals,
         total_garrison_budget: totalGarrisonBudget,
-        can_launch_ops: nonBesiegedSurplus.length > 0,
+        can_launch_ops: launchCapableSurplus.length > 0,
     };
 }

@@ -1127,14 +1127,22 @@ function tryCreateFromOpportunity(
 ): PlanDecision | null {
     if (surplusPool.length < MIN_BRIGADES_FOR_PLAN) return null;
 
-    // Find projecting or balanced zones (surplus check is already done at corps level above)
+    // Find projecting or balanced zones (surplus check is already done at corps level above).
+    // Issue #13 Option H: besieged zones with corridor_width >= 1 AND surplus brigades are
+    // "breakout-capable" — historical Vitez/Kiseljak/Žepče pocket HVO operations 1993-94,
+    // Bihać 5th Corps offensive operations from encircled territory, VRS Drina Corps
+    // operations from narrow-corridor positions. Fully encircled (corridor_width=0) zones
+    // stay excluded.
     const eligibleZones = zones
         .filter(z =>
             (z.posture === 'projecting' || z.posture === 'balanced')
+            || (z.posture === 'besieged'
+                && z.corridor_width >= 1
+                && z.surplus_brigades.length > 0)
         )
         .sort((a, b) => {
-            // Prefer projecting over balanced
-            const posturePriority = (p: string) => p === 'projecting' ? 0 : 1;
+            // Prefer projecting > balanced > besieged-with-surplus
+            const posturePriority = (p: string) => p === 'projecting' ? 0 : p === 'balanced' ? 1 : 2;
             const posDiff = posturePriority(a.posture) - posturePriority(b.posture);
             if (posDiff !== 0) return posDiff;
             const diff = b.surplus_brigades.length - a.surplus_brigades.length;
