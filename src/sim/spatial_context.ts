@@ -19,6 +19,7 @@ import { buildOsidAdjacency, buildSharedBoundaryAdjacency } from './combat/osid_
 import { buildFriendlyComponents } from './combat/sector_utils.js';
 import type { FactionId } from '../state/game_state.js';
 import { CANONICAL_FACTIONS } from '../state/game_state.js';
+import { ALLIED_THRESHOLD } from './early_war/alliance_update.js';
 
 /**
  * SpatialContext: immutable spatial snapshot computed at pipeline boundaries.
@@ -33,8 +34,21 @@ export interface SpatialContext {
     /** Shared-boundary adjacency (5.5m threshold). Used only by sector system. */
     readonly sharedBoundaryAdjacency: ReadonlyMap<Osid, readonly Osid[]>;
 
-    /** Per-faction set of controlled OSIDs, derived from political_controllers. */
+    /** Per-faction set of controlled OSIDs, derived from political_controllers.
+     *  Own-faction only; alliance has no effect here. Used by brigade
+     *  assignment, supply reachability, front-edge derivation. */
     readonly friendlyOsidsByFaction: ReadonlyMap<FactionId, ReadonlySet<string>>;
+
+    /** Per-faction set of politically-connected OSIDs: own-faction territory
+     *  plus allied-faction territory when alliance > ALLIED_THRESHOLD.
+     *  Used ONLY for zone corridor width / besieged-posture derivation —
+     *  reflects the real-war fact that an alliance-held neighbour is not a
+     *  hostile siege perimeter. Do not use this for brigade assignment,
+     *  supply, or front-edge generation (those retain own-faction semantics).
+     *  Optional for backward compatibility with test fixtures that construct
+     *  SpatialContext directly; when absent, consumers must fall back to
+     *  `friendlyOsidsByFaction`. */
+    readonly politicallyConnectedOsidsByFaction?: ReadonlyMap<FactionId, ReadonlySet<string>>;
 
     /** Per-faction connected component map (OSID -> component index). */
     readonly componentsByFaction: ReadonlyMap<FactionId, ReadonlyMap<string, number>>;
@@ -51,7 +65,7 @@ export interface SpatialContext {
 
 /**
  * Compute a fresh SpatialContext from current state.
- * Pure function: reads edges + political_controllers, produces immutable snapshot.
+ * Pure function: reads edges + political_controllers + alliance, produces immutable snapshot.
  *
  * @param edges         Operational edge list (immutable within a turn)
  * @param politicalControllers  Current political_controllers record
@@ -61,6 +75,12 @@ export interface SpatialContext {
  * @param frontEdgesOsid  Pre-computed front edges (optional)
  * @param preCombatAdjacency  Reuse adjacency from pre-combat context (post-combat optimization)
  * @param preCombatSharedBoundary  Reuse shared-boundary adjacency from pre-combat context
+ * @param allianceRbihHrhb  Current `state.political.war_alliance_rbih_hrhb`. When
+ *   above `ALLIED_THRESHOLD`, HRHB's and RBiH's `politicallyConnectedOsidsByFaction`
+ *   sets include each other's territory (alliance-aware posture). When below or
+ *   undefined, politicallyConnected = friendlyOsids (own-faction only). Defaults
+ *   to 1.0 (strong-allied) when undefined to preserve pre-fix behaviour for
+ *   callers that don't pass alliance state.
  */
 export function computeSpatialContext(
     edges: EdgeRecord[],
@@ -71,6 +91,7 @@ export function computeSpatialContext(
     frontEdgesOsid?: FrontEdge[],
     preCombatAdjacency?: ReadonlyMap<Osid, readonly Osid[]>,
     preCombatSharedBoundary?: ReadonlyMap<Osid, readonly Osid[]>,
+    allianceRbihHrhb?: number,
 ): SpatialContext {
     // Build adjacency (or reuse from pre-combat — edges don't change within a turn)
     const adjacency: Map<Osid, Osid[]> | ReadonlyMap<Osid, readonly Osid[]> =
@@ -86,6 +107,24 @@ export function computeSpatialContext(
             if (controller === faction) friendly.add(osid);
         }
         friendlyOsidsByFaction.set(faction, friendly);
+    }
+
+    // Build per-faction politically-connected OSID sets.
+    // HRHB and RBiH share their territory for zone corridor purposes when
+    // alliance > ALLIED_THRESHOLD. RS is never politically connected to any
+    // other faction. Absent alliance data, fall back to own-faction-only.
+    const politicallyConnectedOsidsByFaction = new Map<FactionId, ReadonlySet<string>>();
+    const rbihHrhbAllied = (allianceRbihHrhb ?? 1.0) > ALLIED_THRESHOLD;
+    for (const faction of factions) {
+        if (rbihHrhbAllied && (faction === 'RBiH' || faction === 'HRHB')) {
+            const combined = new Set<string>(friendlyOsidsByFaction.get(faction)!);
+            const ally: FactionId = faction === 'RBiH' ? 'HRHB' : 'RBiH';
+            const allyFriendly = friendlyOsidsByFaction.get(ally);
+            if (allyFriendly) for (const osid of allyFriendly) combined.add(osid);
+            politicallyConnectedOsidsByFaction.set(faction, combined);
+        } else {
+            politicallyConnectedOsidsByFaction.set(faction, friendlyOsidsByFaction.get(faction)!);
+        }
     }
 
     // Build per-faction connected components
@@ -105,6 +144,7 @@ export function computeSpatialContext(
         adjacency,
         sharedBoundaryAdjacency,
         friendlyOsidsByFaction,
+        politicallyConnectedOsidsByFaction,
         componentsByFaction,
         frontEdgesOsid,
         computedAtTurn: turn,
