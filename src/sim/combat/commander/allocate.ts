@@ -339,15 +339,17 @@ export function allocateBrigades(
         totalGarrisonBudget += budget;
     }
 
-    // Can launch ops only if there is non-besieged surplus OR besieged-with-corridor surplus
-    // (issue #13 Option H: besieged zones with corridor_width >= 1 AND surplus brigades are
-    // breakout-capable — historical Vitez/Kiseljak/Žepče pocket operations 1993-94).
-    // Fully encircled zones (corridor_width=0) still lock brigades to local defence.
+    // Can launch ops only if there is non-besieged surplus OR besieged-breakout surplus
+    // (issue #13 Option H: besieged zones with surplus brigades AND an enemy front are
+    // breakout-capable — historical Vitez/Kiseljak/Žepče pocket operations 1993-94 and
+    // Bihać 5th Corps offensives from encirclement). No corridor_width requirement:
+    // breakout ops attack INTO the encirclement, not through a friendly retreat route.
+    // Downstream supply/feasibility/MIN_BRIGADES gates catch hopeless breakouts.
     const launchCapableSurplus = surplusEvals.filter(ev => {
         const zone = updatedZones.find(z => z.assigned_brigades.includes(ev.brigade_id));
         if (!zone) return true;
         if (zone.posture !== 'besieged') return true;
-        return zone.corridor_width >= 1;
+        return zone.front_edge_count > 0;
     });
 
     return {
