@@ -400,7 +400,7 @@ function collectUnresolvedSectorBrigades(
         });
 }
 
-function emitFinalUnresolvedSectorWarnings(
+export function emitFinalUnresolvedSectorWarnings(
     unresolved: FormationId[],
     formations: Record<FormationId, FormationState>,
 ): void {
