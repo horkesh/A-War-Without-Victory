@@ -8,6 +8,63 @@ In the Bosnian War, every brigade mattered. Commanders fought with what they had
 
 ---
 
+## Latest Review: Option J 188w (2026-04-24) — Org-readiness gate unblocked, HVO still near-mute
+
+**Run:** `runs/apr1992_definitive_188w__c35fff9119f1a06b__w188_n2/` | hash `624bb11532996426` | 188 weeks (Apr 1992 → Nov 1995)
+
+**Change under test:** Promoted 6 elite brigades in `data/source/oob_brigades.json` to unblock N1297 organizational readiness gate (`bot_corps_stance.ts:144`). HRHB: Vitezovi (Vitez), 4th Guard Sinovi Posavine. RS: 1st Semberija. RBiH: 9th/7th Vitezka/4th Muslim Liberation. All promoted to motorized (main_effort tier).
+
+### Raw outcome
+
+| Faction | Net OSID start → end | Attacks | Battles | Captures | Ops | Exhaustion start → end |
+|---|---|---|---|---|---|---|
+| HRHB | 107 → 75 (−32) | **0** | **0** | **0** | **1** | 10 → 1551 |
+| RBiH | 330 → 290 (−40) | 142 | 26 | 44 | 25 | 8 → 1085 |
+| RS   | 275 → 347 (+72) | 40 | 28 | 86 | 49 | 10 → 1880 |
+
+Engine counters: 262 attack orders, 89 battles, 153 distinct settlement flips across 188 weeks.
+
+### Checklist
+
+| # | Check | Verdict |
+|---|-------|---------|
+| 1 | Outcome distribution | FAIL — HRHB 0 battles, 0 captures. 89 battles / 262 orders across 188 weeks ≈ 0.47 battles/week and 1.4 orders/week — an order of magnitude below historical tempo for a 3-way war. |
+| 2 | Casualty volume | NOT MEASURED in this pass but inferable — with 89 battles and near-zero HRHB participation, total KIA is almost certainly <15k vs historical ~62k (~24%). |
+| 3 | Casualty ratios | N/A — HRHB has no attacks to measure; RBiH 142→44 captures (31% conversion) and RS 40→86 captures (>100% — defender-absent occupations dominate) both suggest many uncontested moves, not contested battles. |
+| 4 | Territory | FAIL — HRHB 12.6%→8.8%, RBiH 38.8%→34.1%, RS 32.4%→40.8%. At Dayton, VRS held ~49% (-8pp deviation), RBiH+HVO held ~51% (+8pp deviation but lopsided — HRHB is too small, RBiH too small, RS too small relative to Dayton). Territory drift is in the right direction but stops well short. |
+| 5 | Force strength | NOT RE-MEASURED; promotion of 6 brigades is irrelevant without tempo. |
+| 6 | Operational tempo | FAIL — HRHB ran exactly **1** operation (Operation Jackal, weeks 8–12, 0 attack attempts, 1 unique objective). RS ran 49. RBiH ran 25. Over 188 weeks, HVO should appear in Posavina (1992), Lašva Valley war (1993–94), Mostar siege (May 93–Feb 94), Stupni Do (Oct 93), Vareš (Nov 93), Neretva 93. **Zero of these materialized.** |
+| 7 | Smell test | FAIL — `corps_summary` shows HRHB corps in offensive stance 86/188 weeks (46%) but with `offensive_targets_total > 0` only 18/188 weeks (10%). 72-week stance-without-targets mismatch. Stance is being set but the target-generation pipeline downstream is refusing to produce targets. |
+
+### The absurdity
+
+**An HVO that launches 1 operation in 188 weeks and never fires a shot did not fight the Bosnian War.** Petković would be court-martialed. Praljak would be shouting over the radio about Ahmići, Stupni Do, the Convicts' Battalion pushing into Uskoplje. A war-simulation HRHB whose entire corpus of offensive activity is a 5-week "planning → recovery" cycle with 0 attacks and 1 objective is a mechanical dead letter, not a belligerent.
+
+Meanwhile VRS over-captures (+72 OSID net, 86 captures) while taking zero offensive pushback from HRHB. That's not Mladić winning — that's Mladić running the table against an opponent that literally cannot attack. The +72 VRS delta is partly real (RS did gain in 1992 and hold most of it through 1995) but without the HVO-ARBiH war biting into the interior, RS has no competing front to distract it.
+
+### Root cause (hypothesis)
+
+**Option J promoted brigades but did not unblock the downstream pipeline.** Three candidates, listed in likelihood order:
+
+1. **Target-generation gate downstream of stance.** HRHB enters offensive stance 86 weeks. It only produces targets 18 weeks. The N1297 org-readiness gate was fixed, but a SECOND gate — likely op eligibility, intel threshold, or op-cap-per-corps — is now the binding constraint. Investigate the stance→target pipeline in `bot_corps_directives.ts` / `sector_offensive.ts` / `operations_scheduling` and find what filters 86 stance-weeks down to 18 target-weeks.
+2. **Graz Agreement over-broad.** `hvo_southeast_herzegovina` and `hvo_tomislavgrad` are Graz-blocked (see Issue #7, n697 fix). If Graz is still suppressing ops past the historical June 1992 Op Jackal window and into the 1993–94 HVO-RBiH war, that's a 188w-specific failure. At 40w this was sound; at 188w Graz should at minimum lift for central-Bosnia corps once the HVO-ARBiH war opens April 1993.
+3. **No HVO-RBiH war trigger.** The 1993–94 HVO-RBiH conflict requires a political/war-state transition that the sim may not fire in the 188w scenario. Without it, `hvo_central_bosnia` and `hvo_tomislavgrad` have no valid RBiH targets, and `hvo_southeast_herzegovina` sits Graz-blocked. Check whether HRHB vs RBiH hostility ever activates in this run.
+
+### Verdict
+
+**Option J is a partial improvement that did not move the needle.** Promoting 6 brigades to main_effort tier unblocked one gate (N1297 org readiness) but exposed that HVO passivity is a **pipeline failure, not a brigade-tier failure**. The diagnosis was incomplete. The 86-weeks-stance-18-weeks-targets mismatch is the signal: the corps commander is willing, the target generator is unwilling.
+
+A real HVO commander (Petković, Blaškić, Praljak) asked about this run would say: "Where is the Lašva Valley war? Where is Stupni Do? Where is Mostar? What did my corps do for three and a half years?" Nothing in the output answers those questions.
+
+**Recommendation to Orchestrator:** Do NOT treat this as an Option J success. Before further OOB promotions, dispatch `/operations-expert` and `/corps-army-commander` to trace the stance-to-target pipeline for HRHB corps over weeks where stance = offensive and targets = 0. The binding constraint has moved; find it before feeding it more brigades.
+
+### Related open issues
+
+- **Issue #7 (HVO near-total passivity)**: REGRESSED at 188w. n618 produced 30 HRHB orders at 40w. This run produces **0 attack attempts** at 188w, which is worse in absolute terms and catastrophically worse in tempo-per-week. Reopen and upgrade to P0 for 52w+ scenarios.
+- **HIST-GAP-2 (VRS enclave strategy "strangle not capture")**: The RS +72 over-capture in this run is partly attributable to VRS taking enclaves it historically refrained from (Srebrenica did fall July 1995 ≈ w170, but Goražde/Žepa/Bihać should not have fallen). Settlement flips in foča (8), višegrad (5), bratunac (4), goražde (4) are plausible eastern-enclave VRS consolidation. Need to verify Srebrenica/Žepa/Goražde/Bihać final controller against history.
+
+---
+
 ## Latest Review: n1302 (2026-04-02) — Commander Intelligence Overhaul; 93.7% ATH, 25/25 anchors
 
 **Run:** `runs/apr1992_definitive_40w__...` | 93.7% area-weighted | 25/25 anchors | 6/6 benchmarks | hash `0cf989330bd36cc8`
