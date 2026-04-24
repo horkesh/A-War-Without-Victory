@@ -1145,5 +1145,94 @@
       }
     ],
     "historical_source": "Counterfactual: the operations of 1994 (Operation Tiger, Maslenica carryover, Kupres area) occurred in the historical record despite the recent Croat-Bosniak war and with fragile coordination. This event models what combined operational staffs would plausibly accomplish without that rupture. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 2."
+  },
+  {
+    "id": "csq_hvo_central_bosnia_offensive_1993",
+    "title": "Ahmici and the Rupture",
+    "narrative": "On 16 April 1993 the HVO Viteska Brigade enters Ahmici at dawn. The village burns before the day is out; 116 civilians are killed in the operation. From that morning onward the alliance that had existed on paper for ten months is a written fiction and the war between HVO and ARBiH is a matter of specific coordinates. Mate Boban's Herceg-Bosna pursues the Banovina-border programme it had always intended; Zagreb's material support, which had been hedged under the joint-front arrangement, flows more openly. Viteska, Busovaca, and the Nikola Subic-Zrinski brigades move against ARBiH positions in the Lasva and Neretva valleys. The arithmetic is simple: the HVO has the initiative for a season, and it will use it.",
+    "category": "military",
+    "trigger": {
+      "turn_min": 48,
+      "turn_max": 56,
+      "phase": "war",
+      "condition": {
+        "type": "flag_equals",
+        "flag": "hrhb_political_goal",
+        "value": "croat_republic"
+      }
+    },
+    "once": true,
+    "priority": 50,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "HVO initiates the Croat-Bosniak war; alliance with ARBiH collapses; central-Bosnia offensive begins."
+    },
+    "effects": [
+      {
+        "kind": "alliance_change",
+        "delta": -0.60
+      },
+      {
+        "kind": "alliance_lock",
+        "mode": "ceiling",
+        "value": 0.10,
+        "duration_turns": 60
+      },
+      {
+        "kind": "morale_change",
+        "faction": "HRHB",
+        "delta": 15
+      },
+      {
+        "kind": "cohesion_change",
+        "faction": "HRHB",
+        "delta": 10
+      },
+      {
+        "kind": "aggression_modifier",
+        "faction": "HRHB",
+        "delta": 0.25,
+        "duration_turns": 14
+      },
+      {
+        "kind": "bot_priority_shift",
+        "faction": "HRHB",
+        "add_objectives": ["vitez", "busovaca", "novi_travnik", "gornji_vakuf", "prozor", "kiseljak", "travnik", "kakanj", "fojnica", "mostar"],
+        "duration_turns": 14
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "HRHB",
+        "dimension": "military_credibility",
+        "delta": 10
+      },
+      {
+        "faction": "HRHB",
+        "dimension": "international_standing",
+        "delta": -15
+      },
+      {
+        "faction": "HRHB",
+        "dimension": "patron_confidence",
+        "delta": 10
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "military_credibility",
+        "delta": -5
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "international_standing",
+        "delta": 10
+      }
+    ],
+    "sets_flags": {
+      "hvo_arbih_war_active": true,
+      "ahmici_1993": true
+    },
+    "historical_source": "ICTY Kordic Trial Judgment (IT-95-14/2-T) on the Ahmici massacre of 16 April 1993 and the Lasva Valley operations. ICTY Prlic et al. Trial Judgment (IT-04-74-T) on Zagreb-HRHB command coupling. Per war-or-game + corps-army-commander design consult 2026-04-23: the event must break the RBiH-HRHB alliance (floor below hostility threshold), bump HVO morale/cohesion to un-stick combat-readiness, and shift offensive priorities to central-Bosnia municipalities. Phase 2 (ARBiH counter-offensive, three-enclave defensive posture) emerges organically via normal ARBiH offensive doctrine once alliance is locked hostile. Issue #9."
   }
 ]

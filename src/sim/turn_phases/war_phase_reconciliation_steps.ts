@@ -46,6 +46,7 @@ export const warPhaseReconciliationSteps: NamedPhase[] = [
                 context.state.military.war_front_edges_osid,
                 spatial?.preCombat.adjacency,
                 spatial?.preCombat.sharedBoundaryAdjacency,
+                context.state.political.war_alliance_rbih_hrhb,
             );
             setSpatialContextCache(context, {
                 preCombat: spatial?.preCombat ?? finalSpatial,

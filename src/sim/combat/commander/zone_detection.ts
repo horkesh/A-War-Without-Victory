@@ -125,6 +125,15 @@ export function detectZones(
 
     const corpsOsidSet = new Set(corpsOsids);
     const allFriendlyOsids = spatial.friendlyOsidsByFaction.get(faction) ?? new Set<string>();
+    // Alliance-aware "politically connected" set for corridor-width / besieged
+    // posture computation. Includes allied-faction territory when alliance >
+    // ALLIED_THRESHOLD. Pre-hostilities HRHB enclaves surrounded by allied
+    // ARBiH territory are NOT besieged in political reality — soldiers
+    // transit freely, supply runs through shared roads. Own-faction-only
+    // corridor counting was producing geometric "besieged" on those enclaves
+    // from scenario start regardless of political status. See issue #9.
+    const politicallyConnectedOsids =
+        spatial.politicallyConnectedOsidsByFaction?.get(faction) ?? allFriendlyOsids;
 
     // 2. Group corps OSIDs by component index
     const componentGroups = new Map<number, string[]>();
@@ -190,10 +199,14 @@ export function detectZones(
         // Compute depth via BFS from front OSIDs inward
         const depth = computeZoneDepth(frontOsidsInZone, zoneOsidSet, spatial);
 
-        // Compute corridor width
+        // Compute corridor width. Use politically-connected set (own faction +
+        // allied factions) rather than own-faction-only — an HVO enclave with
+        // an ARBiH-held neighbour is NOT besieged while allied. When the
+        // alliance breaks, politicallyConnectedOsids shrinks back to own-
+        // faction-only and the same enclave becomes besieged organically.
         const corridorWidth = measureCorridorWidth(
             zoneOsidSet,
-            allFriendlyOsids,
+            politicallyConnectedOsids,
             spatial.adjacency as ReadonlyMap<string, readonly string[]>,
             isMainBody,
         );

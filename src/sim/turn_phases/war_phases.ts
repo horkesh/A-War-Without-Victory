@@ -504,6 +504,10 @@ export const warPhases: NamedPhase[] = [
                 ['RBiH', 'RS', 'HRHB'],
                 context.state.meta.turn ?? 0,
                 'pre-combat',
+                undefined,
+                undefined,
+                undefined,
+                context.state.political.war_alliance_rbih_hrhb,
             );
             setSpatialContextCache(context, { preCombat: spatial });
         }
@@ -1478,6 +1482,7 @@ export const warPhases: NamedPhase[] = [
                 undefined,
                 existing.preCombat.adjacency,
                 existing.preCombat.sharedBoundaryAdjacency,
+                context.state.political.war_alliance_rbih_hrhb,
             );
             setSpatialContextCache(context, {
                 preCombat: existing.preCombat,
