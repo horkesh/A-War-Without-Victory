@@ -1127,14 +1127,24 @@ function tryCreateFromOpportunity(
 ): PlanDecision | null {
     if (surplusPool.length < MIN_BRIGADES_FOR_PLAN) return null;
 
-    // Find projecting or balanced zones (surplus check is already done at corps level above)
+    // Find projecting or balanced zones (surplus check is already done at corps level above).
+    // Issue #13 Option H: besieged zones with surplus brigades AND an enemy front are
+    // "breakout-capable" — the pocket's own territory IS the staging area, the enemy
+    // IS adjacent. Corridor width is NOT required because breakout ops attack INTO the
+    // encirclement rather than retreating through a friendly corridor. Historical analogs:
+    // HVO Vitez pocket 1993-94, ARBiH 5th Corps Bihać (Op Grmeč, Sana), ARBiH 1st Corps
+    // Sarajevo (Op Jug 92, Trnovo). Downstream gates (supply, feasibility, MIN_BRIGADES)
+    // still reject hopeless breakouts.
     const eligibleZones = zones
         .filter(z =>
             (z.posture === 'projecting' || z.posture === 'balanced')
+            || (z.posture === 'besieged'
+                && z.surplus_brigades.length > 0
+                && z.front_edge_count > 0)
         )
         .sort((a, b) => {
-            // Prefer projecting over balanced
-            const posturePriority = (p: string) => p === 'projecting' ? 0 : 1;
+            // Prefer projecting > balanced > besieged-breakout
+            const posturePriority = (p: string) => p === 'projecting' ? 0 : p === 'balanced' ? 1 : 2;
             const posDiff = posturePriority(a.posture) - posturePriority(b.posture);
             if (posDiff !== 0) return posDiff;
             const diff = b.surplus_brigades.length - a.surplus_brigades.length;

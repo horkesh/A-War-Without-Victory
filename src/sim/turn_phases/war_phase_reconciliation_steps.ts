@@ -12,6 +12,7 @@ import {
     getPoliticalControlSnapshot,
     getSpatialContextCache,
     setSpatialContextCache,
+    getAllianceAtTurnStart,
 } from '../turn_pipeline_types.js';
 import { CANONICAL_FACTIONS } from '../../state/game_state.js';
 import { computeFrontEdgesOsid } from '../../map/front_edges.js';
@@ -37,6 +38,12 @@ export const warPhaseReconciliationSteps: NamedPhase[] = [
             const od = getOperationalData(context);
             if (!od?.edges?.length) return;
             const spatial = getSpatialContextCache(context);
+            // Issue #13: use turn-start alliance snapshot for posture inertia.
+            // Snapshot-captured (even undefined) takes priority; fall back only if missing.
+            const allianceSnap = getAllianceAtTurnStart(context);
+            const allianceForZones = allianceSnap !== undefined
+                ? allianceSnap.value
+                : context.state.political.war_alliance_rbih_hrhb;
             const finalSpatial = computeSpatialContext(
                 od.edges,
                 context.state.political.political_controllers ?? {},
@@ -46,7 +53,7 @@ export const warPhaseReconciliationSteps: NamedPhase[] = [
                 context.state.military.war_front_edges_osid,
                 spatial?.preCombat.adjacency,
                 spatial?.preCombat.sharedBoundaryAdjacency,
-                context.state.political.war_alliance_rbih_hrhb,
+                allianceForZones,
             );
             setSpatialContextCache(context, {
                 preCombat: spatial?.preCombat ?? finalSpatial,

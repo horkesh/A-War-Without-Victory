@@ -390,6 +390,51 @@ export function setPoliticalControlSnapshot(context: TurnContext, snapshot: Reco
     (context as TurnContext & { controlSnapshot?: Record<string, string | null> }).controlSnapshot = snapshot;
 }
 
+/**
+ * Alliance-at-turn-start snapshot (issue #13, zone posture inertia).
+ *
+ * Captured at the very start of the turn BEFORE `evaluate-events` runs, so
+ * the value reflects the alliance state from the end of the previous turn.
+ * Later pipeline steps — specifically the spatial-context recomputes — pass
+ * this value to `computeSpatialContext` instead of the live
+ * `state.political.war_alliance_rbih_hrhb`.
+ *
+ * The practical effect: when an event applies an `alliance_change` that
+ * flips alliance from allied to hostile, the substrate's
+ * `politicallyConnectedOsidsByFaction` stays on the PRE-break value for the
+ * current turn. Zones stay non-besieged for one more turn — giving the
+ * commander loop a turn-window to commit surplus brigades to operations
+ * against the newly-hostile former ally BEFORE the enclave geometry
+ * collapses to besieged. Mirrors real-command decision inertia: political
+ * breaks don't instantly re-shape corps-level tactical posture.
+ *
+ * The captured-value wrapper distinguishes two states:
+ * 1. Snapshot ran AND captured a value (possibly `undefined` if the alliance
+ *    field itself wasn't yet initialised) → use the captured value as-is.
+ *    `computeSpatialContext` already treats `undefined` alliance as allied
+ *    by default, so passing through undefined is correct.
+ * 2. Snapshot did NOT run (some scenario_runner code paths bypass the
+ *    pipeline) → fall back to the live alliance.
+ *
+ * Without this distinction, an `alliance_change` event firing in
+ * `evaluate-events` on a turn where alliance was undefined at start would
+ * leak the post-event live value into the same turn's spatial context,
+ * defeating the inertia. (PR #15 codex review.)
+ */
+interface AllianceTurnStartSnapshot {
+    captured: true;
+    value: number | undefined;
+}
+
+export function getAllianceAtTurnStart(context: TurnContext): AllianceTurnStartSnapshot | undefined {
+    return (context as TurnContext & { allianceAtTurnStart?: AllianceTurnStartSnapshot }).allianceAtTurnStart;
+}
+
+export function setAllianceAtTurnStart(context: TurnContext, value: number | undefined): void {
+    (context as TurnContext & { allianceAtTurnStart?: AllianceTurnStartSnapshot }).allianceAtTurnStart =
+        { captured: true, value };
+}
+
 /** Load settlement graph and edges from context (or default). */
 export async function getGraphAndEdges(context: TurnContext): Promise<{ graph: LoadedSettlementGraph; edges: EdgeRecord[] }> {
     const graph = context.input.settlementGraph ?? (await loadSettlementGraph());

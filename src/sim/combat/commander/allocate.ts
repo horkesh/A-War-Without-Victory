@@ -339,11 +339,17 @@ export function allocateBrigades(
         totalGarrisonBudget += budget;
     }
 
-    // Can launch ops only if there is non-besieged surplus
-    // (besieged surplus is locked to local ops within BESIEGED_SURPLUS_HOP_LIMIT)
-    const nonBesiegedSurplus = surplusEvals.filter(ev => {
+    // Can launch ops only if there is non-besieged surplus OR besieged-breakout surplus
+    // (issue #13 Option H: besieged zones with surplus brigades AND an enemy front are
+    // breakout-capable — historical Vitez/Kiseljak/Žepče pocket operations 1993-94 and
+    // Bihać 5th Corps offensives from encirclement). No corridor_width requirement:
+    // breakout ops attack INTO the encirclement, not through a friendly retreat route.
+    // Downstream supply/feasibility/MIN_BRIGADES gates catch hopeless breakouts.
+    const launchCapableSurplus = surplusEvals.filter(ev => {
         const zone = updatedZones.find(z => z.assigned_brigades.includes(ev.brigade_id));
-        return !zone || zone.posture !== 'besieged';
+        if (!zone) return true;
+        if (zone.posture !== 'besieged') return true;
+        return zone.front_edge_count > 0;
     });
 
     return {
@@ -351,6 +357,6 @@ export function allocateBrigades(
         garrison_locks: garrisonLocks,
         surplus_pool: surplusEvals,
         total_garrison_budget: totalGarrisonBudget,
-        can_launch_ops: nonBesiegedSurplus.length > 0,
+        can_launch_ops: launchCapableSurplus.length > 0,
     };
 }
