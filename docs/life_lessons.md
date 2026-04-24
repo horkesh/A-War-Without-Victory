@@ -4,6 +4,17 @@
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
+## New Lessons (2026-04-24)
+
+### [Process] Verify inherited session-summary premises against the actual data before acting — see `docs/life_lessons/process.md`
+- Option J inherited "all 249 brigades have equipment_class: unspecified" from a compacted session summary. False — OOB already had 137 light_infantry, 79 mountain, 20 motorized, 6 mechanized, 5 police, 2 special. Caught mid-execution; would have shipped bad framing if unchecked. Rule: before acting on a summary-level claim about data state, run one query against the actual file.
+
+### [Calibration] Test OOB promotions in scenario before shipping — historical ahistoricalness can be empirical not theoretical — see `docs/life_lessons/calibration.md`
+- Option J's `rs_1st_zvornik: mountain → motorized` looked historically reasonable (Drina Corps ran Srebrenica offensive July 1995). Empirical 188w run showed it caused Srebrenica to fall at w40 (Jan 1993). Reverted. Rule: for any OOB tier change that unblocks a corps, run the scenario once BEFORE committing — theoretical plausibility can hide ahistorical cascade.
+
+### [Architecture] One gate may hide another — confirm the full causal chain before closing "unblocks X" issues — see `docs/life_lessons/architecture.md`
+- Issue #13 diagnosis framed N1297 organizational readiness gate as THE blocker for HRHB offensives. Option J unblocked N1297 correctly, but HRHB still produced 0 attacks / 1 op in 188w. The real blocker is downstream in campaign-plan target generation. Rule: before declaring an issue closed, verify the binding constraint hasn't just moved.
+
 ## New Lessons (2026-04-16)
 
 ### [Architecture] Atrocity is a consequence, not a lever — see `docs/life_lessons/architecture.md`
