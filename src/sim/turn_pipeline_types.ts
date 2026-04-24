@@ -407,13 +407,32 @@ export function setPoliticalControlSnapshot(context: TurnContext, snapshot: Reco
  * against the newly-hostile former ally BEFORE the enclave geometry
  * collapses to besieged. Mirrors real-command decision inertia: political
  * breaks don't instantly re-shape corps-level tactical posture.
+ *
+ * The captured-value wrapper distinguishes two states:
+ * 1. Snapshot ran AND captured a value (possibly `undefined` if the alliance
+ *    field itself wasn't yet initialised) → use the captured value as-is.
+ *    `computeSpatialContext` already treats `undefined` alliance as allied
+ *    by default, so passing through undefined is correct.
+ * 2. Snapshot did NOT run (some scenario_runner code paths bypass the
+ *    pipeline) → fall back to the live alliance.
+ *
+ * Without this distinction, an `alliance_change` event firing in
+ * `evaluate-events` on a turn where alliance was undefined at start would
+ * leak the post-event live value into the same turn's spatial context,
+ * defeating the inertia. (PR #15 codex review.)
  */
-export function getAllianceAtTurnStart(context: TurnContext): number | undefined {
-    return (context as TurnContext & { allianceAtTurnStart?: number }).allianceAtTurnStart;
+interface AllianceTurnStartSnapshot {
+    captured: true;
+    value: number | undefined;
+}
+
+export function getAllianceAtTurnStart(context: TurnContext): AllianceTurnStartSnapshot | undefined {
+    return (context as TurnContext & { allianceAtTurnStart?: AllianceTurnStartSnapshot }).allianceAtTurnStart;
 }
 
 export function setAllianceAtTurnStart(context: TurnContext, value: number | undefined): void {
-    (context as TurnContext & { allianceAtTurnStart?: number }).allianceAtTurnStart = value;
+    (context as TurnContext & { allianceAtTurnStart?: AllianceTurnStartSnapshot }).allianceAtTurnStart =
+        { captured: true, value };
 }
 
 /** Load settlement graph and edges from context (or default). */

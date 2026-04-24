@@ -516,8 +516,12 @@ export const warPhases: NamedPhase[] = [
             // (before evaluate-events), not the live value. When an event mid-turn
             // breaks alliance, zone posture stays on the pre-break state for this
             // turn's commander loop, giving it a window to commit ops.
-            const allianceForZones =
-                getAllianceAtTurnStart(context) ?? context.state.political.war_alliance_rbih_hrhb;
+            // Distinguish snapshot-captured (use it as-is, even if undefined) from
+            // snapshot-missing (fall back to live state).
+            const allianceSnap = getAllianceAtTurnStart(context);
+            const allianceForZones = allianceSnap !== undefined
+                ? allianceSnap.value
+                : context.state.political.war_alliance_rbih_hrhb;
             const spatial = computeSpatialContext(
                 od.edges,
                 pc,
@@ -1494,8 +1498,11 @@ export const warPhases: NamedPhase[] = [
             if (!existing) return; // pre-combat must have run
             const pc = context.state.political.political_controllers ?? {};
             // Issue #13: use turn-start alliance snapshot for posture inertia.
-            const allianceForZones =
-                getAllianceAtTurnStart(context) ?? context.state.political.war_alliance_rbih_hrhb;
+            // Snapshot-captured (even undefined) takes priority; fall back only if missing.
+            const allianceSnap = getAllianceAtTurnStart(context);
+            const allianceForZones = allianceSnap !== undefined
+                ? allianceSnap.value
+                : context.state.political.war_alliance_rbih_hrhb;
             const postCombat = computeSpatialContext(
                 od.edges,
                 pc,

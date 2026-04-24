@@ -39,8 +39,11 @@ export const warPhaseReconciliationSteps: NamedPhase[] = [
             if (!od?.edges?.length) return;
             const spatial = getSpatialContextCache(context);
             // Issue #13: use turn-start alliance snapshot for posture inertia.
-            const allianceForZones =
-                getAllianceAtTurnStart(context) ?? context.state.political.war_alliance_rbih_hrhb;
+            // Snapshot-captured (even undefined) takes priority; fall back only if missing.
+            const allianceSnap = getAllianceAtTurnStart(context);
+            const allianceForZones = allianceSnap !== undefined
+                ? allianceSnap.value
+                : context.state.political.war_alliance_rbih_hrhb;
             const finalSpatial = computeSpatialContext(
                 od.edges,
                 context.state.political.political_controllers ?? {},
