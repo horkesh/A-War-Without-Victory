@@ -1,3 +1,22 @@
+## [2026-04-24] oob(equipment_class): promote 6 elite brigades for N1297 readiness gate (issue #13, Option J — partial)
+
+**Type:** OOB calibration, issue #13 partial — gate moved downstream
+**Commit (code):** `de7da927` oob promotions + baselines; `bffeabe7` REAL_WAR_MASTER audit
+**Commit (ledger):** this entry
+**Files:** `data/source/oob_brigades.json`, `data/derived/startup/apr_1992_initial_save.json`, `data/derived/scenario/baselines/manifest.json`, `docs/40_reports/OPTION_J_EQUIPMENT_CLASS_PROPOSAL.md` (new), `docs/40_reports/REAL_WAR_MASTER.md`
+**Tests:** `npx tsc --noEmit` clean; `npm run test:vitest` 533/533 test files pass; baselines refreshed via `UPDATE_BASELINES=1 npm run test:baselines`; startup snapshot regenerated via `npm run desktop:startup-snapshot:build`.
+**Status:** VERIFIED partial — the N1297 organizational readiness gate is now unblocked for the corps it blocked, but 188w validation showed HRHB still produces 0 attacks / 1 operation. The binding constraint has moved downstream of stance to campaign-plan target generation. Follow-up tracked as Option K (#20).
+
+### Summary
+
+1. **Six citation-backed brigade promotions land in `oob_brigades.json`.** HRHB: `hrhb_vitezovi_brigade_vitez` (HVO_OOB_MASTER.md:194-198 — elite, best-equipped Central Bosnia HVO, Ahmići attackers) and `hvo_4th_guard_sinovi_posavine` (BB1 p.212,417 — all HVO Guards elite shock units). RS: `rs_1st_semberija_light_infantry` (VRS_OOB_MASTER.md:64,226 — Corridor 92 motorized/mechanized elements). RBiH: `arbih_9th_muslim_liberation`, `arbih_7th_vitezka_muslim_liberation`, `arbih_4th_muslim_light` (ARBIH_OOB_MASTER.md:126-128,355,357,369 — elite-marked formations). All promoted to `motorized` (priority 2), unblocking N1297 for `hvo_central_bosnia`, `vrs_east_bosnian`, `arbih_2nd_corps`, `arbih_3rd_corps`, `arbih_4th_corps`.
+2. **The premise of the earlier diagnosis was wrong and the citation trail corrects it.** Prior framing claimed "all 249 brigades have equipment_class: unspecified." False — OOB already has 137 light_infantry, 79 mountain, 20 motorized, 6 mechanized, 5 police, 2 special. The real gap was specific historically-offensive corps owning 0 main_effort brigades. `docs/40_reports/OPTION_J_EQUIPMENT_CLASS_PROPOSAL.md` captures the corps-level analysis, the 6 accepted promotions, the deliberate non-promotions, and the rollback of `rs_1st_zvornik` after empirical test showed it caused Srebrenica to fall at w40 vs historical July 1995.
+3. **188w expert audit documents the moved-gate finding.** `/war-or-game` audit added to `REAL_WAR_MASTER.md` top entry (57 lines): HRHB corps enter offensive stance 86/188 weeks but have `offensive_targets_total > 0` only 18/188 weeks — the 72-week stance-without-targets mismatch is the signal. `/scenario-creator-runner-tester` traced the root cause to a campaign-plan wiring problem: `hvo_tomislavgrad` and `hvo_northwest_bosnia` face RS sectors but `FACTION_STRATEGIES.HRHB.offensive_objectives` lists only central-Bosnia ARBiH targets they can't see, while `hvo_central_bosnia` and `hvo_southeast_herzegovina` are stance-locked defensive. Follow-up issue #20 (Option K) captures the instrumentation-first investigation plan and the four ranked conceptual fixes.
+
+### Why this mattered
+
+Option J shipped as a partial improvement rather than a clean fix because the 188w empirical evidence turned a single-gate model (N1297) into a two-gate problem (N1297 + campaign-plan wiring). Shipping the partial with the failure honestly documented prevents the next iteration from re-treading the same OOB ground: Option K explicitly rules out more brigade promotions and points at the army HQ gathering / campaign plan pipeline instead. The RBiH side of the change actually worked (142 attacks, 25 distinct ops) — evidence that the mechanism is correct for factions whose army HQ already nominates reachable targets. The HVO side exposed that OOB tier is necessary but not sufficient, and the experts' proposed experiment (per-turn instrumentation of `briefing.campaign_offensive_targets` for HRHB corps) is a cheap next step that distinguishes between four root-cause hypotheses before any design change.
+
 ## [2026-04-16] docs(plan): retire Warroom shell recovery as an active pre-0.9 lane
 
 **Type:** Roadmap truth cleanup
