@@ -3362,7 +3362,8 @@
     "available_from": 0,
     "mandatory": true,
     "initial_personnel": 700,
-    "initial_cohesion": 55
+    "initial_cohesion": 55,
+    "is_elite": true
   },
   {
     "id": "hrhb_jure_franceti_brigade",

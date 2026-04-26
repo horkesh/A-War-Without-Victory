@@ -124,8 +124,17 @@ export function evaluateBrigade(
     const fitnessGarrison = Math.max(GARRISON_FITNESS_FLOOR, personnelNorm * 0.5);
 
     // Tiered assignment
+    // Issue #20 / Option K: elite formations (OOB is_elite=true → elite_loan_state set)
+    // count as main_effort regardless of fitness_offense threshold, provided they have
+    // motorized/mechanized equipment. Captures the historical reality that elite units
+    // (Vitezovi at Ahmići, Guards Brigades during Cincar/Maestral, Drina Wolves at
+    // Srebrenica) maintained offensive capacity even at degraded cohesion — the
+    // organizational cadre buffers what raw cohesion-based fitness can't.
+    const isElite = brigade.elite_loan_state !== undefined;
     let tier: BrigadeEvaluation['tier'];
-    if (equipPriority >= MAIN_EFFORT_EQUIPMENT_PRIORITY && fitnessOffense >= MAIN_EFFORT_FITNESS_THRESHOLD) {
+    if (isElite && equipPriority >= MAIN_EFFORT_EQUIPMENT_PRIORITY) {
+        tier = 'main_effort';
+    } else if (equipPriority >= MAIN_EFFORT_EQUIPMENT_PRIORITY && fitnessOffense >= MAIN_EFFORT_FITNESS_THRESHOLD) {
         tier = 'main_effort';
     } else if (fitnessDefense >= ACTIVE_DEFENSE_FITNESS_THRESHOLD && isCombatEffective) {
         tier = 'active_defense';

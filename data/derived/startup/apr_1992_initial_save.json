@@ -20241,6 +20241,15 @@
             "STATIC_DEFENSE": false
           }
         },
+        "elite_loan_state": {
+          "current_episode_id": null,
+          "last_recall_turn": null,
+          "loan_start_personnel": null,
+          "loan_start_turn": null,
+          "loaned_to_corps": null,
+          "on_loan": false,
+          "permanently_degraded": false
+        },
         "equipment_class": "motorized",
         "equipment_state": {
           "degraded_heavy": 0,
@@ -30179,8 +30188,8 @@
         "updated_turn": 0
       },
       "vitez:HRHB": {
-        "available": 206,
-        "committed": 700,
+        "available": 906,
+        "committed": 0,
         "exhausted": 0,
         "faction": "HRHB",
         "fatigue": 0,
