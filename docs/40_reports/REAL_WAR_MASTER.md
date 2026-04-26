@@ -8,6 +8,69 @@ In the Bosnian War, every brigade mattered. Commanders fought with what they had
 
 ---
 
+## Latest Review: Option K Fix A 188w (2026-04-26) — Vitezovi fought and died; HVO offensive metric still 0
+
+**Run:** `runs/apr1992_definitive_188w__c35fff9119f1a06b__w188_n3/` | hash `a0665e665e83e0ec` | 188 weeks (Apr 1992 → Nov 1995)
+
+**Change under test:** Fix A from `OPTION_K_DIAGNOSTIC_FINDINGS.md`. (1) `force_eval.ts:127-136` — `is_elite + motorized/mechanized → main_effort` regardless of `fitness_offense ≥ 0.4` threshold (bypasses the cohesion-floor gate). (2) `hrhb_vitezovi_brigade_vitez` flagged `is_elite: true` in `data/source/oob_brigades.json` (per HVO_OOB_MASTER.md:194-198 "Elite unit, best-equipped Central Bosnia HVO"). Goal: unblock `hvo_central_bosnia` from N1297 organizational-readiness gate.
+
+### Raw outcome (n3 vs n2 baseline)
+
+| Faction | Net OSID Δ | Attacks | Battles | Captures | Distinct ops | Δ vs n2 |
+|---|---|---:|---:|---:|---:|---|
+| HRHB | 107 → 71 (−36) | **0** | **0** | **0** | **1** | -4 OSIDs, attacks/battles unchanged |
+| RBiH | 330 → 299 (−31) | 203 | 46 | 66 | 49 | +61 attacks, +20 battles, +22 captures |
+| RS   | 275 → 342 (+67) | 40 | 29 | 93 | 47 | -5 OSIDs, +1 battle, +7 captures |
+
+Engine: 379 attack orders (was 262, +45%), 126 battles (was 89, +42%), 170 settlement flips (was 153). Federation share rose 53.4% → 54.0% (Dayton target ≈ 51%).
+
+### Did Fix A actually do anything?
+
+**Yes for HRHB at brigade level — Vitezovi DID fight.** `destroyed_brigades.json` shows Vitezovi was destroyed turn 122 with **12 battles fought, 2,587 casualties taken** at `op:skender_vakuf:donji_koricani`. Five other HRHB brigades also destroyed in combat (Herceg Stjepan 15 battles 1,903 cas; Posušje 14 battles 1,836; 111th 2 battles 785; Travnik 0 battles; Hrvoje Vukčić 0). So HRHB brigades were participating as **defenders or attached attackers in non-HRHB-led ops** — but the corps commander never authored an offensive of its own. The aggregate "HRHB attacks=0, ops=1" counts only HRHB-faction-led attacks/operations. The single op is the same Op Jackal Stolac-Čapljina Sweep (weeks 8-13, 0 attacks logged, 2 axis objectives untaken) that fired in n2.
+
+**No for HRHB at corps-commander level.** All five HRHB corps still terminate at `corps_stance_forbids_offensive` per the diagnostic's prior finding. `hvo_main_staff` has main_effort=3 (Guards) but is **E3-locked** at mostar. `hvo_central_bosnia` shows main_effort=0/garrison=9 even with Vitezovi flagged elite — because Vitezovi was already destroyed by turn 122 (66 turns before run end), so Fix A's elite override has nothing to elevate at end-of-run snapshot.
+
+### Why RBiH attacks rose +43%
+
+Cross-checked OOB: `arbih_9th_muslim_liberation`, `arbih_7th_vitezka_muslim_liberation`, `arbih_4th_muslim_light` — **none** flagged `is_elite`. Only 2 RBiH brigades carry `is_elite`: Guards Brigade and 120th "Black Swans" — neither was promoted by Option J. **Fix A's elite override does not touch the J-promoted RBiH brigades.** The +61 RBiH attacks are not a Fix-A side effect on RBiH tier classification.
+
+Plausible explanation: removing HRHB as a passive RBiH neighbor (HRHB lost 36 OSIDs to ARBiH+VRS pressure) freed RBiH frontage and exposed contested borders. Or run-to-run variance from a different seed path through stochastic-but-deterministic ordering. Either way: RBiH gain is real, not a Fix-A artefact.
+
+### Checklist
+
+| # | Check | Verdict |
+|---|-------|---------|
+| 1 | Outcome distribution | MARGINAL — engine tempo rose 0.47→0.67 battles/wk and 1.4→2.0 orders/wk. Still well below historical 3-way war tempo (~5-8 battles/wk in active phases) but moving in the right direction. |
+| 2 | Casualty volume | NOT FULLY MEASURED — 6 HRHB brigades destroyed (~7,100 HRHB cas from those destructions alone), better than n2's near-zero. Total still likely <30k vs historical ~62k. |
+| 3 | Casualty ratios | RBiH 203 attacks → 66 captures (33% conversion, contested combat). RS 40 attacks → 93 captures (>2× conversion — defender-absent occupations still dominate). HRHB N/A. |
+| 4 | Territory | FAIL — HRHB 10.4%, RBiH 43.6%, RS 46.0%. Federation 54.0% vs Dayton 51%. RS still 46% vs 49% Dayton. Direction correct but HRHB share still collapsing (107→71, an HVO that lost a third of its OSIDs without firing a shot is still absurd). |
+| 5 | Force strength | 6 HRHB brigades destroyed. Vitezovi at turn 188: coh=6.5 pers=0 (already gone). |
+| 6 | Operational tempo | FAIL — HRHB still 1 op (Op Jackal). Lašva Valley war absent. Stupni Do absent. Mostar siege absent. Neretva 93 absent. The 1993-94 HVO-RBiH war did not happen in this sim. |
+| 7 | Smell test | FAIL — same as n2. Stance-without-targets pattern persists. Vitezovi getting destroyed in 12 battles without authoring a single HRHB-led op (it was attached/borrowed by other corps?) is itself absurd: a real Vitezovi fought from Ahmići outward, not as an attached sub-unit. |
+
+### The "willing commander, locked stance" pattern
+
+User's question 4 is correct. `hvo_main_staff` has 3 main_effort Guards brigades (Fix-A-irrelevant; mechanized already cleared the threshold pre-Fix per diagnostic line 99-105) but `hard_constraints=corps_stance_forbids_offensive` because of the **E3 Herzegovina blanket lock** (`bot_corps_stance.ts:212-219`) demoting any HRHB corps with `home_mun ∈ HRHB_HERZEGOVINA` to defensive. This is the same pattern flagged in `OPTION_K_DIAGNOSTIC_FINDINGS.md` Fix Candidate B. The next fix should target E3 narrowing — Mostar push toward east-bank ARBiH 4th Corps, Convicts' Battalion ops — not more elite tagging. Fix A handles N1297; Fix B (E3 narrowing) handles the Herzegovina permanent silencer.
+
+### Verdict
+
+**Fix A: needle moved one tick. HRHB headline metric flat (0 attacks, 1 op), but underlying brigade-level participation went from passive attrition to active combat (Vitezovi 12 battles, Herceg Stjepan 15, Posušje 14).** The corps-commander offensive authoring pipeline is still gated. Two binding constraints remain:
+
+1. **E3 Herzegovina blanket lock** silences `hvo_southeast_herzegovina` and `hvo_main_staff` even when N1297 satisfied. Fix B candidate.
+2. **HVO-RBiH war never opens in central Bosnia.** No Lašva Valley operations means `hvo_central_bosnia` and `hvo_tomislavgrad` have no valid RBiH targets even if stance were offensive — see `BOSNIAK_CROAT_CONFLICT_MASTER.md` and Issue #20 successor work.
+
+RBiH improvement (+61 attacks) is a real organic gain but not attributable to Fix A. RS slightly worse defensively (-5 OSIDs vs n2 from RBiH counter-pressure) but still over-captures. Petković still court-martialled. Praljak still on the radio.
+
+**Recommendation to Orchestrator:** Land Fix A (Vitezovi can no longer sit on a fitness-floor block; rest of the OOB elite list is sound). Next iteration should target Fix B (E3 narrowing for Mostar/Konjic/Jablanica axis) AND verify HVO-RBiH war actually opens in 1993 — without that, central Bosnia HVO has nobody to fight regardless of stance. Reference: BB1 Operation Neretva 93, Stupni Do (Oct 93), Vareš (Nov 93).
+
+### Outstanding open issues
+
+- **Issue #7 (HVO near-total passivity)**: PARTIAL-IMPROVEMENT at 188w. Brigade-level participation now non-zero (6 destroyed in real combat). Corps-led offensive metric still 0. Stays open, downgrade severity from catastrophic to "structural pipeline gated."
+- **HIST-GAP-2 (VRS enclave strategy)**: RS captures 93 settlements net (+18 vs n2). Still over-captures. Unchanged by Fix A.
+- **New issue: "destroyed without authoring"**: Vitezovi fought 12 battles, none were HRHB-led ops. Investigate whether HRHB brigades are being borrowed by adjacent-faction operations (allied ops loan, defensive reactive battles) but never invoked as op authors. If so, the HRHB faction-led-attacks counter is misleading — real HVO combat is happening, just not via HVO corps directives.
+
+---
+
 ## Latest Review: Option J 188w (2026-04-24) — Org-readiness gate unblocked, HVO still near-mute
 
 **Run:** `runs/apr1992_definitive_188w__c35fff9119f1a06b__w188_n2/` | hash `624bb11532996426` | 188 weeks (Apr 1992 → Nov 1995)

@@ -4,6 +4,17 @@
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
+## New Lessons (2026-04-26)
+
+### [Process] Don't trust an expert hypothesis without empirical verification — see `docs/life_lessons/process.md`
+- Issue #20 (Option K) was filed based on `/scenario-creator-runner-tester` hypothesis that HRHB silence was a "campaign-plan wiring problem" — `briefing.campaign_offensive_targets` allegedly empty. Empirical check of `state.military.campaign_plans.HRHB.front_priorities` at turn 188 final_save proved the campaign plan was fully populated with reachable targets (Mostar east bank, Maglaj, Gornji Vakuf — 1994 Cincar axis, Posavina). The hypothesis was empirically wrong. Real binding constraint was `fitness_offense < 0.4` due to cohesion floor → tier=garrison → N1297 → defensive-locked. Rule: when an issue body cites an expert hypothesis, verify it against persisted state (`final_save.json`, `weekly_report.jsonl`, `decision_trace`) before designing fixes around it.
+
+### [Calibration] Headline metrics undercount — check destroyed_brigades + battles attribution before declaring "no change" — see `docs/life_lessons/calibration.md`
+- Option K Fix A 188w showed HRHB "0 attacks / 1 op" identical to pre-Fix-A. Looked like a no-op. `/war-or-game` audit caught what the metric missed: Vitezovi fought 12 battles, took 2,587 casualties, destroyed turn 122; 5 other HRHB brigades destroyed in real combat. HVO IS fighting via reactive defense / loan / attachment — just not authoring `CorpsOperation` records. Rule: a "0 attacks" headline can mean (a) brigade never engaged, (b) brigade engaged via non-faction-led mechanism. Always cross-reference `destroyed_brigades.json` and per-brigade `battle_outcome_count` before concluding no change.
+
+### [Architecture] State already persists what you'd otherwise instrument — check before writing diagnostic scripts — see `docs/life_lessons/architecture.md`
+- Option K experts recommended writing instrumentation to dump `briefing.campaign_offensive_targets`, `decision_trace.hard_constraints`, etc. per-corps per-turn. State already does this: `state.military.corps_command[corpsId].commander_state.decision_trace` persists between turns; `state.military.campaign_plans[faction].front_priorities` persists across plan-validity windows. Reading `final_save.json` directly answered the diagnostic without a single line of new instrumentation code. Rule: before extending `commander_debug.ts` or writing a one-shot tracer, search for `decision_trace`, `force_assessment`, `commander_state` in saved state — the data is probably already there.
+
 ## New Lessons (2026-04-24)
 
 ### [Process] Verify inherited session-summary premises against the actual data before acting — see `docs/life_lessons/process.md`
