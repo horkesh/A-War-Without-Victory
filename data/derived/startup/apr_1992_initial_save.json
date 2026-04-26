@@ -16738,20 +16738,20 @@
         },
         "cohesion": 38,
         "composition": {
-          "aa_systems": 0,
-          "artillery": 1,
+          "aa_systems": 1,
+          "artillery": 4,
           "artillery_condition": {
             "degraded": 0,
             "non_operational": 0,
             "operational": 1
           },
-          "infantry": 800,
+          "infantry": 850,
           "tank_condition": {
             "degraded": 0,
             "non_operational": 0,
             "operational": 1
           },
-          "tanks": 0
+          "tanks": 4
         },
         "corps_id": "arbih_4th_corps",
         "created_turn": 0,
@@ -16767,7 +16767,7 @@
             "STATIC_DEFENSE": false
           }
         },
-        "equipment_class": "light_infantry",
+        "equipment_class": "motorized",
         "equipment_state": {
           "degraded_heavy": 0,
           "last_maintenance": null,
@@ -16783,7 +16783,7 @@
         "id": "arbih_4th_muslim_light",
         "kind": "brigade",
         "location_osid": "op:konjic:bradina",
-        "max_personnel": 1800,
+        "max_personnel": 2200,
         "morale": 60,
         "name": "4th Muslim Light",
         "officer_quality": 0.05,
@@ -16797,7 +16797,7 @@
         "status": "active",
         "tags": [
           "corps:arbih_4th_corps",
-          "equip:light_infantry",
+          "equip:motorized",
           "mun:konjic",
           "placement:fixed_home_osid"
         ]
@@ -17885,20 +17885,20 @@
         },
         "cohesion": 38,
         "composition": {
-          "aa_systems": 0,
-          "artillery": 1,
+          "aa_systems": 1,
+          "artillery": 4,
           "artillery_condition": {
             "degraded": 0,
             "non_operational": 0,
             "operational": 1
           },
-          "infantry": 800,
+          "infantry": 850,
           "tank_condition": {
             "degraded": 0,
             "non_operational": 0,
             "operational": 1
           },
-          "tanks": 0
+          "tanks": 4
         },
         "corps_id": "arbih_3rd_corps",
         "created_turn": 0,
@@ -17914,7 +17914,7 @@
             "STATIC_DEFENSE": false
           }
         },
-        "equipment_class": "light_infantry",
+        "equipment_class": "motorized",
         "equipment_state": {
           "degraded_heavy": 0,
           "last_maintenance": null,
@@ -17930,7 +17930,7 @@
         "id": "arbih_7th_vitezka_muslim_liberation",
         "kind": "brigade",
         "location_osid": "op:zenica:briznik_2",
-        "max_personnel": 1800,
+        "max_personnel": 2200,
         "morale": 60,
         "name": "7th Vitezka Muslim Liberation",
         "officer_quality": 0.15,
@@ -17944,7 +17944,7 @@
         "status": "active",
         "tags": [
           "corps:arbih_3rd_corps",
-          "equip:light_infantry",
+          "equip:motorized",
           "mun:zenica",
           "placement:fixed_home_osid"
         ]
@@ -20212,20 +20212,20 @@
         },
         "cohesion": 55,
         "composition": {
-          "aa_systems": 0,
-          "artillery": 1,
+          "aa_systems": 1,
+          "artillery": 4,
           "artillery_condition": {
             "degraded": 0,
             "non_operational": 0,
             "operational": 1
           },
-          "infantry": 800,
+          "infantry": 850,
           "tank_condition": {
             "degraded": 0,
             "non_operational": 0,
             "operational": 1
           },
-          "tanks": 0
+          "tanks": 4
         },
         "corps_id": "hvo_central_bosnia",
         "created_turn": 0,
@@ -20241,7 +20241,7 @@
             "STATIC_DEFENSE": false
           }
         },
-        "equipment_class": "light_infantry",
+        "equipment_class": "motorized",
         "equipment_state": {
           "degraded_heavy": 0,
           "last_maintenance": null,
@@ -20257,7 +20257,7 @@
         "id": "hrhb_vitezovi_brigade_vitez",
         "kind": "brigade",
         "location_osid": "op:vitez:vitez_2",
-        "max_personnel": 1500,
+        "max_personnel": 2200,
         "morale": 60,
         "name": "\"Vitezovi\" Brigade (Vitez)",
         "officer_quality": 0.225,
@@ -20271,7 +20271,7 @@
         "status": "active",
         "tags": [
           "corps:hvo_central_bosnia",
-          "equip:light_infantry",
+          "equip:motorized",
           "mun:vitez",
           "placement:fixed_home_osid"
         ]
@@ -23804,8 +23804,8 @@
         },
         "cohesion": 67,
         "composition": {
-          "aa_systems": 2,
-          "artillery": 15,
+          "aa_systems": 5,
+          "artillery": 30,
           "artillery_condition": {
             "degraded": 0,
             "non_operational": 0,
@@ -23817,7 +23817,7 @@
             "non_operational": 0,
             "operational": 1
           },
-          "tanks": 0
+          "tanks": 40
         },
         "corps_id": "vrs_east_bosnian",
         "created_turn": 0,
@@ -23833,7 +23833,7 @@
             "STATIC_DEFENSE": false
           }
         },
-        "equipment_class": "mountain",
+        "equipment_class": "motorized",
         "equipment_state": {
           "degraded_heavy": 0,
           "last_maintenance": null,
@@ -23849,7 +23849,7 @@
         "id": "rs_1st_semberija_light_infantry",
         "kind": "brigade",
         "location_osid": "op:bijeljina:bukovica_donja",
-        "max_personnel": 2000,
+        "max_personnel": 2200,
         "morale": 60,
         "name": "1st Semberija Light Infantry",
         "officer_quality": 0.55,
@@ -23863,7 +23863,7 @@
         "status": "active",
         "tags": [
           "corps:vrs_east_bosnian",
-          "equip:mountain",
+          "equip:motorized",
           "mun:bijeljina",
           "placement:fixed_home_osid"
         ]
@@ -33523,20 +33523,6 @@
     ],
     "war_front_edges_osid": [
       {
-        "a": "op:banovici:seona",
-        "b": "op:lukavac:brijesnica_donja_2",
-        "edge_id": "op:banovici:seona__op:lukavac:brijesnica_donja_2",
-        "side_a": "RBiH",
-        "side_b": "RS"
-      },
-      {
-        "a": "op:banovici:seona",
-        "b": "op:zavidovici:vozuca_2",
-        "edge_id": "op:banovici:seona__op:zavidovici:vozuca_2",
-        "side_a": "RBiH",
-        "side_b": "RS"
-      },
-      {
         "a": "op:banja_luka:banja_luka_2",
         "b": "op:banja_luka:dragocaj",
         "edge_id": "op:banja_luka:banja_luka_2__op:banja_luka:dragocaj",
@@ -33626,6 +33612,20 @@
         "edge_id": "op:banja_luka:rekavice_2__op:mrkonjic_grad:baljvine_2",
         "side_a": "RS",
         "side_b": "HRHB"
+      },
+      {
+        "a": "op:banovici:seona",
+        "b": "op:lukavac:brijesnica_donja_2",
+        "edge_id": "op:banovici:seona__op:lukavac:brijesnica_donja_2",
+        "side_a": "RBiH",
+        "side_b": "RS"
+      },
+      {
+        "a": "op:banovici:seona",
+        "b": "op:zavidovici:vozuca_2",
+        "edge_id": "op:banovici:seona__op:zavidovici:vozuca_2",
+        "side_a": "RBiH",
+        "side_b": "RS"
       },
       {
         "a": "op:bihac:bihac_2",
@@ -36386,6 +36386,20 @@
         "side_b": "HRHB"
       },
       {
+        "a": "op:ljubinje:bancici",
+        "b": "op:neum:gornje_hrasno_2",
+        "edge_id": "op:ljubinje:bancici__op:neum:gornje_hrasno_2",
+        "side_a": "RS",
+        "side_b": "HRHB"
+      },
+      {
+        "a": "op:ljubinje:bancici",
+        "b": "op:stolac:prenj",
+        "edge_id": "op:ljubinje:bancici__op:stolac:prenj",
+        "side_a": "RS",
+        "side_b": "HRHB"
+      },
+      {
         "a": "op:lopare:celic_3",
         "b": "op:lopare:koraj_4",
         "edge_id": "op:lopare:celic_3__op:lopare:koraj_4",
@@ -36482,20 +36496,6 @@
         "edge_id": "op:lukavac:brijesnica_donja_2__op:lukavac:orahovica_2",
         "side_a": "RS",
         "side_b": "RBiH"
-      },
-      {
-        "a": "op:ljubinje:bancici",
-        "b": "op:neum:gornje_hrasno_2",
-        "edge_id": "op:ljubinje:bancici__op:neum:gornje_hrasno_2",
-        "side_a": "RS",
-        "side_b": "HRHB"
-      },
-      {
-        "a": "op:ljubinje:bancici",
-        "b": "op:stolac:prenj",
-        "edge_id": "op:ljubinje:bancici__op:stolac:prenj",
-        "side_a": "RS",
-        "side_b": "HRHB"
       },
       {
         "a": "op:maglaj:cobe_2",
@@ -37198,13 +37198,6 @@
         "side_b": "RS"
       },
       {
-        "a": "op:srebrenica:luka_2",
-        "b": "op:vlasenica:sebiocina",
-        "edge_id": "op:srebrenica:luka_2__op:vlasenica:sebiocina",
-        "side_a": "RBiH",
-        "side_b": "RS"
-      },
-      {
         "a": "op:srebrenica:ljeskovik_2",
         "b": "op:srebrenica:obadi",
         "edge_id": "op:srebrenica:ljeskovik_2__op:srebrenica:obadi",
@@ -37215,6 +37208,13 @@
         "a": "op:srebrenica:ljeskovik_2",
         "b": "op:visegrad:zlijeb",
         "edge_id": "op:srebrenica:ljeskovik_2__op:visegrad:zlijeb",
+        "side_a": "RBiH",
+        "side_b": "RS"
+      },
+      {
+        "a": "op:srebrenica:luka_2",
+        "b": "op:vlasenica:sebiocina",
+        "edge_id": "op:srebrenica:luka_2__op:vlasenica:sebiocina",
         "side_a": "RBiH",
         "side_b": "RS"
       },
