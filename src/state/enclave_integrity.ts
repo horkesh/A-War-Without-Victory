@@ -261,7 +261,11 @@ export function computeEnclaveResilienceFallbackPressure(state: GameState): numb
         const isCapital = id === 'sarajevo';
         const pressureMult = isCapital ? SARAJEVO_PRESSURE_MULTIPLIER : HUMANITARIAN_PRESSURE_MULTIPLIER;
         const visibilityMult = isCapital ? CAPITAL_ENCLAVE_VISIBILITY : 1.0;
-        total += inverseResilience * pressureMult * visibilityMult;
+        // Per-enclave clamp01 matches existing system at line 198 (each enclave's
+        // humanitarian_pressure is clamped before being summed). Without this,
+        // Sarajevo's amplified contribution (0.55 × 9 = 4.95) saturates the
+        // mean even after dividing by N.
+        total += clamp01(inverseResilience * pressureMult * visibilityMult);
         activeCount++;
     }
     // #29 sub-issue 4: mean across active enclaves rather than sum.
