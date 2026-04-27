@@ -1,10 +1,20 @@
-## [2026-04-27] fix(scenarios): wire war_timeline into apr1992_definitive_188w (issue #22 — phase 1, hash-diff pending)
+## [2026-04-27] fix(scenarios+timelines): wire war_timeline into 188w + narrow HRHB defensive ceiling (issue #22 — phases 1+2)
 
-**Type:** Calibration-class scenario data wiring fix; closes the dead-config gap that masked Option K Fixes B/C/E behavior changes
-**Commit:** `087e41af` on branch `claude/issue-22-war-timeline-wiring` (off main `10cf6be0`)
-**Files:** `data/scenarios/apr1992_definitive_188w.json` (one-line insert: `"war_timeline": "apr1992"` after `init_formations_oob`)
-**Tests:** 188w n6 run in flight (background `b8ai1tqkz`); hash compare to baseline `a0665e665e83e0ec` pending. No tsc impact (JSON-only).
-**Status:** PHASE 1 PARTIAL — Minimal-scope edit per agreed phased plan. `apr1992_definitive_188w.json` was silently running with `state.military.war_timeline === undefined` because `scenario_runner.ts:1195` gates timeline loading on the field's presence. Three byte-identical 188w hashes (n3 Fix-A baseline / n4 Fix-A+C / n5 Fix-A+B all `a0665e665e83e0ec`) tipped off the wiring bug. Sister scenario `apr1992_definitive_40w.json:795` had it wired correctly, so unit tests on doctrine_phases / patron_directives passed when run against 40w; nothing asserted that 188w loaded its timeline. The 188w scenario is also missing `init_officers`, `supply_reserves_enabled`, `enable_rbih_hrhb_dynamics` — held for phase 2/3 decision after n6 hash-diff result. If n6 hash CHANGES, wiring works → consider sister-parity sweep + resume Fix B with N1297 bypass + Fix F staging trigger. If n6 hash UNCHANGED, deeper bug downstream of `validateWarTimeline`. Issue #22 P0, gates Option K (#20) continuation.
+**Type:** Calibration-class data fix in two surgical commits; closes dead-config gap that masked Option K Fixes B/C/E behavior changes
+**Commits:** `087e41af` (phase 1: scenario wiring) + `798f2a72` (phase 2: HRHB patron_directive narrowing) on branch `claude/issue-22-war-timeline-wiring` (off main `10cf6be0`); ledger commit `0cd83a03`
+**Files:**
+  - `data/scenarios/apr1992_definitive_188w.json` (+1 line: `"war_timeline": "apr1992"`)
+  - `data/scenarios/timelines/apr1992.json:379` (HRHB patron_directives[0].corps_ids: removed `hvo_southeast_herzegovina`)
+**Tests:**
+  - n6 (phase 1 only): hash `b34659b1fcfd203f` vs baseline `a0665e665e83e0ec` → DIFFERS. War_timeline state populates with all 12 keys.
+  - n7 (phase 1+2): in flight (background `b5q5yxwcd`); awaiting HRHB attack-count delta.
+**Status:** PHASE 1 VERIFIED + PHASE 2 IN FLIGHT.
+
+  Phase 1 evidence (n6 vs n3): defender casualties -19% (cohesion_floor firing); 6 of 7 war_timeline subfields confirmed-active via Explore audit (load site `scenario_runner.ts:1204`; readers in `formation_spawn.ts`, `cohesion_drift.ts`, `order_interpretation.ts`, `bot_strategy.ts`, `officer_system.ts`, `war_phases.ts`, `warlord_friction.ts`). Territorial fit improves vs jan1993 reference (anchor passes 23/27 → 24/27). **HRHB attack orders 31→0** identified as patron_directive consumer correctly enforcing the apr1992 timeline's blanket `stance_ceiling: defensive` for w0-40 covering all 3 HVO field corps — historically wrong for `hvo_southeast_herzegovina` (Operation Jackal, June 1992 ≈ w8).
+
+  Phase 2 surgical narrowing: removed `hvo_southeast_herzegovina` from the w0-40 defensive directive's corps_ids. Preserves correct 1992 defensive cap on `hvo_central_bosnia` + `hvo_tomislavgrad` (per war-or-game known-baseline). Empirical n7 will show whether reader's "no match" default is permissive (HRHB attacks > 0) or restrictive (need explicit positive entry in n8).
+
+  Reconciled-expert verdict (war-or-game (C) + scenario-creator-runner-tester triage + Explore consumer audit): wiring + consumer pipeline are working; the apparent "RNG-stream divergence" framing was wrong; the bug was data-side all along (now empirically traceable). The 188w scenario is also missing `init_officers`, `supply_reserves_enabled`, `enable_rbih_hrhb_dynamics` — defer phase 3 sister-parity sweep until n7 confirms HRHB lift. Issue #22 P0; gates Option K (#20) continuation.
 
 ---
 
