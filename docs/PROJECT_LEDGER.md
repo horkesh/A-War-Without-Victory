@@ -1,3 +1,20 @@
+## [2026-04-27] test(validation): officer_config + sister-parity regression tests (#25 sub-tasks D+E)
+
+**Type:** Test-only addition; documentation-by-test for dead-config pattern.
+**Branch:** `claude/issue-25-validation-tests` (off main, independent of cascade stack)
+**Commit:** `949c731c`
+**Files:** `tests/officer_config_consumers.test.ts` (new), `tests/scenario_sister_parity.test.ts` (new)
+
+Two regression tests catching the dead-config pattern:
+- **officer_config consumers** asserts each populated `officer_config` field in `apr1992.json` has ≥1 consumer-side read in `src/`. Documents 5 known-dead fields via `DEAD_FIELDS_ALLOW_LIST` (HRHB Roso/Zagreb cadre, RBiH pool regeneration trio).
+- **sister-parity audit** asserts `apr1992_definitive_188w.json` has all top-level wiring fields its 40w sister has, modulo allow-list. Documents 4 currently-missing fields (war_timeline + init_officers — addressed by PRs #26/#27; supply_reserves_enabled + enable_rbih_hrhb_dynamics — deferred per #29).
+
+Both tests pass with allow-lists; as PRs land that wire missing fields, entries get removed and tests assert presence. Sanity sub-tests prevent false-positive allow-listing.
+
+Zero engine code touched. vitest scoped: 7/7 in 14s.
+
+---
+
 ## [2026-04-27] fix(scenarios+war-phases): #22 phase 2 init_officers wiring + #23 phase 1 bilateral counter fix
 
 **Type:** Two surgical changes shipped together — one scenario-data wiring fix (#22 phase 2 sister-parity) + one engine pipeline-routing fix (#23 phase 1).
