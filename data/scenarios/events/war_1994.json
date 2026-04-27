@@ -799,6 +799,15 @@
       {
         "kind": "narrative",
         "text": "Kupres falls to HVO forces in Operation Cincar. VRS supply routes in western Bosnia are threatened."
+      },
+      {
+        "kind": "control_change",
+        "faction": "HRHB",
+        "osids": [
+          "op:kupres:kupres_2",
+          "op:kupres:goravci",
+          "op:kupres:bucovaca"
+        ]
       }
     ],
     "dimension_shifts": [
