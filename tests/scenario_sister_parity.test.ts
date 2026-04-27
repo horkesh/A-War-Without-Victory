@@ -40,10 +40,6 @@ const INTENTIONALLY_INLINE_ONLY = new Set([
 // Known gaps in 188w that have not yet been addressed. As fields are wired,
 // remove from this list. Each entry should be tied to a tracking issue/PR.
 const KNOWN_GAPS_ALLOW_LIST = new Set<string>([
-    // PR #26 wires this; remove from list when #26 merges to main
-    'war_timeline',
-    // PR #27 phase 2 wires this; remove from list when #27 merges to main
-    'init_officers',
     // Deferred per #29 — not yet addressed
     'supply_reserves_enabled',
     'enable_rbih_hrhb_dynamics',
