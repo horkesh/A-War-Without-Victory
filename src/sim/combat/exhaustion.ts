@@ -20,12 +20,7 @@ const EXHAUSTION_PER_STATIC_FRONT = 2;
 const EXHAUSTION_PER_SUPPLY_PRESSURE_POINT = 0.1;
 
 /** Cap exhaustion delta per turn per faction (bounded growth). */
-// Phase 1b / #29 sub-issue 5: was 10. Lowered to 3 so the clamp-100 ceiling
-// is reached at ~t33 instead of ~t14, leaving exhaustion in the dynamic range
-// of three combat couplings (`combat_math.ts:1113-1131` tempo thresholds;
-// `commander/plan.ts:260` aggression decay; `command_friction.ts:43` friction
-// raw). Empirical: pushes ceasefire→W2→WA chain by ~6-8 weeks per audit.
-const MAX_DELTA_PER_TURN = 3;
+const MAX_DELTA_PER_TURN = 10;
 
 /**
  * Update war_exhaustion from sector-owned frontline exposure and supply pressure.
