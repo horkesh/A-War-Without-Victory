@@ -73,7 +73,7 @@ import { updateEventReadiness } from '../events/pressure_system.js';
 import { collectStrategicReserves, reinforceFromStrategicReserves } from '../combat/strategic_reserve.js';
 import { reinforceBrigadesFromPools, applyWiaTrickleback } from '../formation_spawn.js';
 import { runFormationHqRelocation } from '../formation_hq_relocation.js';
-import { ensureRbihHrhbState, updateAllianceValue } from '../early_war/alliance_update.js';
+import { ensureRbihHrhbState, updateAllianceValue, countBilateralFlips } from '../early_war/alliance_update.js';
 import { checkAndApplyCeasefire } from '../early_war/bilateral_ceasefire.js';
 import { buildSettlementsByMun } from '../early_war/control_strain.js';
 import { applyCasualtyPoolExhaustion } from '../early_war/pool_population.js';
@@ -1759,6 +1759,32 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.enable_rbih_hrhb_dynamics !== false) {
                 context.report.alliance_update = updateAllianceValue(context.state);
             }
+        }
+    },
+    {
+        name: 'bilateral-flip-count-war',
+        run: (context) => {
+            // Issue #23 fix A: war-phase bilateral RBiH↔HRHB flip counter.
+            // earlyWarPhases.bilateral-flip-count never fires in player_choice
+            // mode, so without this step stalemate_turns stays at 0 forever and
+            // ceasefire pre-condition C4 (>= 4 stalemate turns) is unreachable,
+            // blocking Washington Agreement Path A.
+            // Reads control_events (already populated by war-phase OSID flips)
+            // filtered for this turn and RBiH↔HRHB transitions only.
+            if (context.state.meta.phase !== 'war') return;
+            const turn = context.state.meta.turn;
+            const events = context.state.political.control_events ?? [];
+            const flips: Array<{ mun_id: string; from_faction: 'RBiH' | 'HRHB'; to_faction: 'RBiH' | 'HRHB' }> = [];
+            for (const e of events) {
+                if (e.turn !== turn) continue;
+                if (!e.mun_id) continue;
+                if (e.from === 'RBiH' && e.to === 'HRHB') {
+                    flips.push({ mun_id: e.mun_id, from_faction: 'RBiH', to_faction: 'HRHB' });
+                } else if (e.from === 'HRHB' && e.to === 'RBiH') {
+                    flips.push({ mun_id: e.mun_id, from_faction: 'HRHB', to_faction: 'RBiH' });
+                }
+            }
+            countBilateralFlips(context.state, flips);
         }
     },
     {
