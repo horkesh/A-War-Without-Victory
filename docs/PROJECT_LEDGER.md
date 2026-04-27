@@ -1,3 +1,13 @@
+## [2026-04-27] fix(scenarios): wire war_timeline into apr1992_definitive_188w (issue #22 — phase 1, hash-diff pending)
+
+**Type:** Calibration-class scenario data wiring fix; closes the dead-config gap that masked Option K Fixes B/C/E behavior changes
+**Commit:** `087e41af` on branch `claude/issue-22-war-timeline-wiring` (off main `10cf6be0`)
+**Files:** `data/scenarios/apr1992_definitive_188w.json` (one-line insert: `"war_timeline": "apr1992"` after `init_formations_oob`)
+**Tests:** 188w n6 run in flight (background `b8ai1tqkz`); hash compare to baseline `a0665e665e83e0ec` pending. No tsc impact (JSON-only).
+**Status:** PHASE 1 PARTIAL — Minimal-scope edit per agreed phased plan. `apr1992_definitive_188w.json` was silently running with `state.military.war_timeline === undefined` because `scenario_runner.ts:1195` gates timeline loading on the field's presence. Three byte-identical 188w hashes (n3 Fix-A baseline / n4 Fix-A+C / n5 Fix-A+B all `a0665e665e83e0ec`) tipped off the wiring bug. Sister scenario `apr1992_definitive_40w.json:795` had it wired correctly, so unit tests on doctrine_phases / patron_directives passed when run against 40w; nothing asserted that 188w loaded its timeline. The 188w scenario is also missing `init_officers`, `supply_reserves_enabled`, `enable_rbih_hrhb_dynamics` — held for phase 2/3 decision after n6 hash-diff result. If n6 hash CHANGES, wiring works → consider sister-parity sweep + resume Fix B with N1297 bypass + Fix F staging trigger. If n6 hash UNCHANGED, deeper bug downstream of `validateWarTimeline`. Issue #22 P0, gates Option K (#20) continuation.
+
+---
+
 ## [2026-04-26] fix(commander): elite + motorized/mechanized count main_effort regardless of fitness threshold (issue #20, Option K Fix A — partial)
 
 **Type:** Commander tier-classification fix; corrects empirically-wrong campaign-plan hypothesis from issue #20
