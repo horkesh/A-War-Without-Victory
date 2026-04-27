@@ -1,3 +1,37 @@
+## [2026-04-27] fix(scenarios+war-phases): #22 phase 2 init_officers wiring + #23 phase 1 bilateral counter fix
+
+**Type:** Two surgical changes shipped together — one scenario-data wiring fix (#22 phase 2 sister-parity) + one engine pipeline-routing fix (#23 phase 1).
+**Branch:** `claude/issue-23-phase1-clean` (off `claude/issue-22-war-timeline-wiring`); depends on PR #26 merging first.
+**Commits:**
+  - `2ce15e1d` — wire `init_officers: "apr1992"` into 188w scenario (closes load gate that left `state.military.named_officer_data` empty for all factions in 188w runs; n9 confirmed 98 officers load post-fix)
+  - `1ecd4715` — add `bilateral-flip-count-war` war-phase step that reads `state.political.control_events` filtered for current turn + RBiH↔HRHB transitions, feeds them to `countBilateralFlips`. Closes pipeline-routing bug where the `earlyWarPhases.bilateral-flip-count` step never fires in `player_choice` mode war turns
+  - `0a118512` — regenerate golden baseline manifest (only `final_save.json` + `run_summary.json` hashes shifted across all 3 manifest scenarios; activity_summary, control_delta, end_report, formation_delta, weekly_report unchanged)
+**Files:**
+  - `data/scenarios/apr1992_definitive_188w.json` (+1 line `"init_officers": "apr1992"`)
+  - `src/sim/turn_phases/war_phases.ts` (+1 import + new step ~25 lines)
+  - `tests/war_phase_step_order.test.ts` (step count 166→167 + cite line)
+  - `data/derived/scenario/baselines/manifest.json` (regenerated hashes)
+**Tests:**
+  - tsc --noEmit clean
+  - vitest 533 files green (golden baseline test passes against new manifest)
+  - n10 188w hash `3942cd08bdc9367a` (vs n9 `0700ff01a1264d3b`)
+
+**Empirical result (n10 vs prior baselines):**
+  - `state.military.named_officer_data: 0 → 98` (RBiH 38, RS 32, HRHB 28) — Tier 1 officer system now active in 188w runs
+  - `stalemate_turns: 0 → 75` ✓ (counter fires turn-over-turn)
+  - `total_bilateral_flips: 0 → 31` ✓ (real RBiH↔HRHB OSID transfers from war-phase attack resolution now feed the counter)
+  - **`ceasefire_active: true` at turn 56** ✓ — Path A's W1+C4 chain unlocked (was structurally unreachable in any prior run)
+  - `washington_signed: false` at w188 — partial-ship; deeper gates remain (W4 constraint_severity 0.50 vs threshold 0.55, traced to enclave_humanitarian_pressure cascade)
+
+**Phase 2/3 of #23 deferred** (NOT in this PR):
+  - **Phase 2** (W4 cascade): bridge `state.political.enclave_resilience` map data into the IVP `enclave_humanitarian_pressure` rollup (or fix `updateEnclaveIntegrity` to populate `state.political.enclaves` from real isolation data). Two enclave-tracking structures don't talk; humanitarian_pressure_total sums from the empty one.
+  - **Phase 3** (calendar event disconnect): `washington_agreement_1994` event fires at t102 and `operation_cincar_1994` at t131 but neither drives downstream gating. Calendar events are cosmetic; signing logic and operation generator evaluate independent predicates.
+  - **Phase 4** (HV brigade pipeline): `hv_integration.ts` already correctly gated on `washington_signed` — once phases 2+3 land, HV brigades should arrive automatically. Verify, no new code needed.
+
+Per the Roso prototype falsification lesson (#25 fix A): one variable per merge. The bilateral counter fix is empirically validated to do its narrow thing; W4/calendar-event/HV-spawn are separate fixes for separate phases.
+
+---
+
 ## [2026-04-27] fix(scenarios): wire war_timeline into apr1992_definitive_188w (issue #22 — phase 1 ships)
 
 **Type:** Calibration-class scenario data fix; closes dead-config gap that masked Option K Fixes B/C/E behavior changes
