@@ -32,6 +32,27 @@ Per the Roso prototype falsification lesson (#25 fix A): one variable per merge.
 
 ---
 
+## [2026-04-27] fix(events): operation_cincar_1994 flips Kupres OSIDs at t131 via control_change effect (#29 sub-issue 2 partial)
+
+**Type:** Data-only event-definition fix; reuses existing `control_change` effect infrastructure (event_types.ts:131, apply_effects.ts:83).
+**Branch:** `claude/issue-29-sub2-cincar-control-change` (off `claude/issue-29-sub6-hv-dissolution-immune`)
+**Commit:** `805493bb` — adds `control_change` effect to `operation_cincar_1994` event in `data/scenarios/events/war_1994.json` flipping 3 Kupres OSIDs (kupres_2, goravci, bucovaca) RS→HRHB at t131-133.
+
+**Empirical n16 result:**
+  - Cincar event fires at t131 ✓
+  - 3 Kupres OSIDs flip RS→HRHB at t131 via `mechanism: event` ✓
+  - All 3 stay HRHB through w188 ✓
+  - Combat metrics bit-identical to n15: HRHB orders 21 unchanged, RBiH 228→229 (+1, possibly post-flip targeting opportunity), RS 115 unchanged
+  - **Cascade check (Glamoč/Livno/Duvno/Donji Vakuf western Bosnia munis):** bit-identical between n15 and n16. No spillover, no ahistorical chaos.
+
+**Pattern proof-of-concept:** the existing event-effect infrastructure (`control_change`) is sufficient for calendar-event-driven territorial outcomes. No new effect kind needed. Same pattern can extend to other historical events that capture specific OSIDs (JNA-handover at scenario start, Op Corridor for VRS Brčko capture, etc.).
+
+**What this is NOT:** this doesn't make HVO author offensive operations through the corps AI pipeline. The "war on paper, not on the map" critique is still partially true — the territorial outcome is deterministic via event, not emergent via combat. But this is acceptable for events that historically had specific known outcomes and force compositions; emergent operations require deeper architectural work (tracked in #29 sub-issue 2 main scope).
+
+**Decision: ship as #29 sub-issue 2 partial.** Single-event proof-of-concept that opens the door for similar fixes on other events. The architectural discussion of "event-driven vs emergent operations" stays open, but this particular gap (Cincar-94 territorial outcome missing) is now closed deterministically.
+
+---
+
 ## [2026-04-27] fix(brigade-lifecycle): HV-origin formations skip idle-decay + stranded-collapse destruction (#29 sub-issue 1)
 
 **Type:** Engine surgical fix on top of #29 sub-issue 4. Two coordinated skips for HV-origin brigades.
