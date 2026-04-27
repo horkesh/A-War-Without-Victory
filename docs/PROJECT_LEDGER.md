@@ -32,6 +32,38 @@ Per the Roso prototype falsification lesson (#25 fix A): one variable per merge.
 
 ---
 
+## [2026-04-27] fix(enclave): per-enclave clamp01 + mean across active enclaves (#29 sub-issue 4)
+
+**Type:** Engine-side calibration tuning fix on top of #23 phase 2.
+**Branch:** `claude/issue-29-sub4-enclave-formula` (off `claude/issue-23-phase2-enclave-bridge`)
+**Commits:**
+  - `1b76d791` — initial sum→mean attempt; n12 hash byte-identical to n11 (Sarajevo amplified contribution still saturated mean)
+  - `cc432e15` — per-enclave clamp01 BEFORE summing, then mean. Each enclave caps at 1.0 (matches existing system at `enclave_integrity.ts:198`)
+
+**Empirical n13 result (vs n11 baseline):**
+  | Metric | n11 (sum, saturated) | n13 (clamp+mean) | n10 (no enclave fix) |
+  |---|---|---|---|
+  | `enclave_humanitarian_pressure` | 1.0 (saturated) | **0.764** | 0 |
+  | `composite_ivp` | 0.601 | 0.530 | 0.300 |
+  | RS `patron_commitment` | 0.282 (-37% vs n10) | **0.413 (-8% vs n10)** | 0.447 |
+  | RS `material_support` | 0.383 (-23% vs n10) | **0.491 (-1% vs n10)** | 0.495 |
+  | RBiH `patron_commitment` | 0.705 | 0.697 | 0.668 |
+  | HRHB `patron_commitment` | 0.735 | 0.735 | 0.735 |
+  | `washington_signed` at | t60 | **t60** (preserved) | false |
+  | `meta.hv_brigades_spawned` | true | **true** (preserved) | undefined |
+
+**Cascade now properly moderated:**
+  - WA still signs at t60 (W4 clears with composite_ivp 0.530)
+  - RS material support drop reduced from -23% to -1% — much more historically calibrated
+  - HV brigade cascade preserved
+  - HRHB unaffected (no IVP multiplier in their formula, expected)
+
+**Decision: ship as #29 sub-issue 4.** Single-line conceptual change (`total += inverseResilience * pressureMult * visibilityMult` → `total += clamp01(inverseResilience * pressureMult * visibilityMult)` + return `total / activeCount`). Same calibration intent as PR #28, but produces calibrated cascade magnitude rather than saturated.
+
+War-or-game audit dispatched in background; awaiting verdict on HRHB attack count recovery (n11 had 21, n10 had 32 — was -34% suppression; n13 should recover toward n10 if the saturation was the cause).
+
+---
+
 ## [2026-04-27] fix(enclave): bridge enclave_resilience map into IVP humanitarian pressure rollup (#23 phase 2)
 
 **Type:** Engine-side surgical fix. Closes the W4 constraint_severity cascade that blocked Washington Agreement signing.
