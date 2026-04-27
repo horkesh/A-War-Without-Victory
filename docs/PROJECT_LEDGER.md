@@ -1,3 +1,36 @@
+## [2026-04-27] fix: WA timing recalibrated — Phase 1 ships (#29 sub-issue 5)
+
+**Type:** Three-commit bundle on `claude/phase1-wa-timing-exhaustion-clamp` shifting WA from t60 to t85 in 188w runs.
+
+**Branch commits:**
+- `7c883c3f` — clamp `war_exhaustion` accumulator at 100 in `exhaustion.ts:96` (architectural correctness)
+- `e62ac604` — revert MAX_DELTA reduction (empirically inert; sarajevoExtra=3 saturated cap regardless of base delta value)
+- `6fa2fe49` — `CEASEFIRE_MIN_WAR_DURATION 20→45` in `bilateral_ceasefire.ts:26` (the actual binding gate per audit; matches BB Lasva Valley war duration ~45 weeks)
+
+**Empirical journey (n17 → n18 → n19):**
+
+| Metric | n11/n13 (pre-Phase-1) | n17/n18 | n19 (Phase 1c) |
+|---|---|---|---|
+| WA `washington_turn` | 60 | 60 | **85** ✓ (predicted) |
+| Ceasefire `since_turn` | 56 | 56 | **81** |
+| HRHB attack orders | 21 | 21 | **32** (recovered, BB-aligned tempo) |
+| war_exhaustion (RBiH/HRHB) | 1085/1551 unbounded | 100/100 (clamped) | 100/100 |
+| Hash | various | `2b2a210018ae9e9c` (n17=n18) | `6c9ac239290be87c` |
+
+**Audit verdict (war-or-game): B — ships with caveats.**
+
+**What ships:** WA at t85, +25 weeks toward historical w101 (16-week gap remaining). 45-week bilateral war duration matches BB Lasva Valley window almost exactly. RS/RBiH/HRHB patron metrics stable within ±0.0002 of post-PR-#30 baseline (no cascade drift). HRHB ops/week 0.71 — order-of-magnitude historically credible.
+
+**Caveat: Orasje pocket regression.** Three OSIDs (`op:orasje:orasje`, `op:orasje:donja_mahala`, `op:orasje:ostra_luka`) flip HRHB→RBiH at t130-132 via `mechanism: combat` — POST-WA (which fired t85). This is unexpected: `battle_resolution.ts:914`'s `washington_signed` gate should suppress RBiH↔HRHB bilateral combat after WA. Two hypotheses: (a) the gate has bypass conditions for displaced/stranded brigades, or (b) the flips come via a triggered_op or strategic-event code path that doesn't honor the gate. Earlier session's "HRHB suppression is correct gate behavior" framing was incomplete — the gate works for direct bilateral attacks but apparently not all flip mechanisms.
+
+**Decision: ship Phase 1c with Orasje as documented deferred sub-issue.** Per Roso discipline: don't speculate without understanding the mechanism. Orasje becomes Phase 1.5 / a new #31 sub-issue.
+
+**Phase 1d NOT needed:** audit confirmed `rbih_hrhb_war_earliest_week: 26 → 50` is unnecessary; t36 war_started reasonably matches historical April 1993 (mid-1992 actually but within tolerance).
+
+**Downstream rescaling deferred to a future phase:** `combat_math.ts:1113-1131` tempo thresholds (500/800), `commander/plan.ts:260` aggression formula (1-ex/600), `command_friction.ts:43` friction raw — all authored against pre-clamp scale and are now inert post-clamp. Should be rescaled to match the clamped 0-100 range. Tracked separately.
+
+---
+
 ## [2026-04-27] fix(exhaustion): clamp accumulator at 100 — Phase 1 partial; clamp works but WA timing didn't shift (#29 sub-issue 5)
 
 **Type:** Architectural correctness fix on `src/sim/combat/exhaustion.ts:96`. Pyrrhic team consensus call ("fix the clock first").
