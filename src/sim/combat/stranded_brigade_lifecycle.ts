@@ -184,6 +184,13 @@ export function updateStrandedBrigadeLifecycle(
         // Exclude enclave brigades (managed by enclave_resilience.ts)
         if (isEnclaveBrigade(f)) continue;
 
+        // #29 sub-issue 1 (second destruction path): HV-origin brigades represent
+        // committed Croatian Army units that should only be removed by combat
+        // damage, not stranded-lifecycle dissolution. n14 confirmed brigade_
+        // dissolution.ts skip alone is insufficient — hv_5th + hv_7th still
+        // destroyed at t79 via this stranded-collapse path. Both fixes needed.
+        if (f.tags?.includes('hv_origin')) continue;
+
         // Exclude brigades in active operations
         if (isInActiveOperation(state, fid, f.corps_id)) continue;
 
