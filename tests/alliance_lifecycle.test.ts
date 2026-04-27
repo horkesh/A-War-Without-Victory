@@ -559,6 +559,16 @@ describe('full alliance lifecycle', () => {
             countBilateralFlips(state, []);
         }
 
+        // Run additional turns until war_duration meets CEASEFIRE_MIN_WAR_DURATION (C1).
+        // This makes the test resilient to threshold tuning (e.g., 20→45).
+        const warStartTurn = state.political.rbih_hrhb_state!.war_started_turn ?? state.meta.turn;
+        const minWarDurationGap = CEASEFIRE_MIN_WAR_DURATION - (state.meta.turn - warStartTurn);
+        for (let i = 0; i < Math.max(0, minWarDurationGap); i++) {
+            state.meta.turn++;
+            updateAllianceValue(state);
+            countBilateralFlips(state, []);
+        }
+
         const ceasefireReport = checkAndApplyCeasefire(state);
         expect(ceasefireReport.fired).toBe(true);
 

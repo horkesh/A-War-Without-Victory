@@ -22,8 +22,16 @@ import type { GameState } from '../../state/game_state.js';
 
 // ── Tunable ceasefire precondition thresholds ──
 
-/** C1: Minimum turns of war before ceasefire can fire. */
-export const CEASEFIRE_MIN_WAR_DURATION = 20;
+/** C1: Minimum turns of war before ceasefire can fire.
+ *
+ * Phase 1c / #29 sub-issue 5: was 20. Empirically the binding gate for WA
+ * timing in 188w runs (n17/n18 ceasefire fired at t56 = war_started_turn 36
+ * + 20). Historical Lasva Valley war (Apr 1993 → Feb 1994) ran ~45 weeks
+ * of bilateral combat before the US-brokered ceasefire that preceded
+ * Washington Agreement. Setting to 45 produces ceasefire at war_started+45
+ * → WA at war_started+49 via W2 = 4. Combined with tightening
+ * rbih_hrhb_war_earliest_week to ~50, lands WA at historical w101. */
+export const CEASEFIRE_MIN_WAR_DURATION = 45;
 /** C2: HRHB exhaustion threshold. */
 export const CEASEFIRE_HRHB_EXHAUSTION = 35;
 /** C3: RBiH exhaustion threshold. */

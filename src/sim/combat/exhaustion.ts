@@ -93,7 +93,15 @@ export function updateExhaustion(
         const enclaveResilience = getMaxEnclaveResilienceForFaction(state, fid as FactionId);
         const enclaveReduction = enclaveResilience * RESILIENCE_EFFECT_SCALE;
         const finalDelta = effectiveDelta * Math.max(0, 1.0 - enclaveReduction);
-        exhaustion[fid] = current + finalDelta;
+        // Phase 1 / #29 sub-issue 5: clamp at 100. The accumulator was previously
+        // unbounded, but threshold consumers (`WASH_COMBINED_EXHAUSTION = 55`,
+        // `CEASEFIRE_HRHB_EXHAUSTION = 35`, `CEASEFIRE_RBIH_EXHAUSTION = 30`)
+        // were authored against a 0-100 percentage scale. Without the clamp,
+        // values accumulate past 1500 per faction in 188w runs, making W6/C2/C3
+        // gates trivially met by t8 and causing WA to fire 41 weeks early
+        // (t60 vs historical w101). 100 is the canonical "fully exhausted"
+        // ceiling per the threshold authors' intent.
+        exhaustion[fid] = Math.min(100, current + finalDelta);
     }
 }
 

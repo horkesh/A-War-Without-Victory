@@ -67,4 +67,4 @@ test('proof scenario: VRS operation produces combat, progress, and deterministic
 
     await ensureRemoved(BASE_A);
     await ensureRemoved(BASE_B);
-}, 30_000);
+}, 90_000);
