@@ -60,7 +60,11 @@ Per the Roso prototype falsification lesson (#25 fix A): one variable per merge.
 
 **Decision: ship as #29 sub-issue 4.** Single-line conceptual change (`total += inverseResilience * pressureMult * visibilityMult` → `total += clamp01(inverseResilience * pressureMult * visibilityMult)` + return `total / activeCount`). Same calibration intent as PR #28, but produces calibrated cascade magnitude rather than saturated.
 
-War-or-game audit dispatched in background; awaiting verdict on HRHB attack count recovery (n11 had 21, n10 had 32 — was -34% suppression; n13 should recover toward n10 if the saturation was the cause).
+**War-or-game audit verdict: B — moderated cleanly, separate gap surfaces:**
+  - HRHB orders n11=21, n13=21, n10=32. Combat between n11 and n13 is BIT-IDENTICAL despite the IVP shift. **The -34% HRHB suppression is NOT caused by the enclave-pressure magnitude** — it persists at any non-zero enclave pressure (0.764 produces same suppression as 1.0). Threshold gate exists somewhere between 0 and 0.764 below which HVO operational tempo is higher. Search shifts to `bot_corps_ai` targeting or a different political gate.
+  - **This reframes #29 sub-issue 1.** The HRHB attack drop was attributed in the cascade audit to the loan-system + phantom-HV chain. Now confirmed it's a different mechanism — possibly a binary gate on enclave_humanitarian_pressure being non-zero affecting some HVO offensive eligibility check.
+  - Anchor failures unchanged from n11 (Zvornik, Brčko, Vozuća still RBiH when canon expects RS). Pre-existing, not n13-induced.
+  - **Ship recommendation:** sub-issue 4 fix is empirically correct for its scope. The HRHB-suppression source becomes a new sub-issue.
 
 ---
 
