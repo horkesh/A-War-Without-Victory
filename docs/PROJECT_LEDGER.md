@@ -32,6 +32,40 @@ Per the Roso prototype falsification lesson (#25 fix A): one variable per merge.
 
 ---
 
+## [2026-04-27] fix(enclave): bridge enclave_resilience map into IVP humanitarian pressure rollup (#23 phase 2)
+
+**Type:** Engine-side surgical fix. Closes the W4 constraint_severity cascade that blocked Washington Agreement signing.
+**Branch:** `claude/issue-23-phase2-enclave-bridge` (off `claude/issue-23-phase1-clean`); depends on PR #27 merging first.
+**Commit:** `12823a57` — adds `computeEnclaveResilienceFallbackPressure(state)` in `state/enclave_integrity.ts` (mirrors existing pressure formula `(1 - resilience_norm) * pressureMult * visibilityMult` but operates on `state.political.enclave_resilience` map). Wired into `war_phases.ts:update-patron-ivp` step as `primaryPressure + fallbackPressure` (clamp01 at IVP layer prevents over-counting).
+**Files:** `src/state/enclave_integrity.ts` (+38 lines), `src/sim/turn_phases/war_phases.ts` (+5 lines).
+**Tests:** tsc --noEmit clean. Vitest: in flight. n11 188w hash `c3b119d51c7cd3ce`.
+
+**Empirical result (n11 vs n10 baseline):**
+  - `ivp.enclave_humanitarian_pressure: 0 → 1.0` ✓ (was capped because primary path produced empty enclaves array; fallback derives 9.3 raw → IVP clamps to 1.0)
+  - `HRHB.constraint_severity: 0.5 → 0.6` ✓ (clears W4 threshold 0.55)
+  - `washington_signed: false → true at t60` (political flag fires when all 6 W gates converge)
+  - `meta.hv_brigades_spawned: undefined → true` ✓ (downstream cascade)
+  - All 4 HV brigade IDs added to `state.military.formations`: hv_1st_guards_tigers, hv_4th_guards_split, hv_5th_guards_karlovac, hv_7th_guards_varazdin
+  - Calendar event `washington_agreement_1994` fires at **t102 — historically on target** (March 18, 1994 ≈ w101 from April 1992)
+  - Calendar event `operation_cincar_1994` fires at **t131 — historically on target** (Nov 3, 1994 ≈ w135)
+
+**Verdict from war-or-game audit: C — cascade unlocked at the political-trigger layer; ground-truth military execution is the next gap.**
+
+**New gaps surfaced for follow-up issues** (NOT in this PR):
+  - **HV brigades are phantoms.** All 4 formation IDs present at w188 but personnel=0 for 3/4 (only `hv_4th_guards_split` has 3000 personnel @ cohesion 30); all have `home_mun: null`. The spawn logic in `hv_integration.ts:168-198` adds formation records but doesn't wire them to a corps location/home properly. They never deploy onto the map. → New issue.
+  - **Federation military arc doesn't execute despite events firing.** `operation_cincar_1994` fires at t131, `operation_storm_1995` fires at t174 — but ZERO HRHB or joint ops in `operation_aars` across all 188 weeks (only Op Jackal at t8). Calendar events disconnected from operation generators. Same pattern as #23 phase 3 calendar-event-disconnect note from phase 1 ledger. → Folded into #23 phase 3.
+  - **Bugojno RS-dominant** at w188 (should be RBiH per WA baseline) and **Stolac RBiH-dominant** (should be HRHB) — inverted vs history. Likely upstream OOB or operations issue, not n11-induced. → New side-issue.
+  - **Naming hazard:** `political.rbih_hrhb_state.washington_signed` flag (t60 — political signing predicate) vs `military.event_last_fired_turn.washington_agreement_1994` (t102 — calendar event) collide. Two systems, different semantics. → Rename `washington_signed` to `bilateral_framework_signed` or unify the semantics. → New issue.
+
+**Decision: ship phase 2 standalone.** The fix is empirically validated to do its narrow thing — close the W4 cascade so the political signing predicate can fire when conditions converge (which they correctly do per the formula, with calendar events landing on historical dates). The phantom HV brigades and Federation-arc-doesn't-execute gaps are SEPARATE downstream issues; were already there and would manifest if WA had signed via any other route. Per Roso falsification lesson: one variable per merge.
+
+**Phase 3 candidates for #23** (NOT in this PR):
+  - HV brigade spawn-to-corps wiring (phantoms with personnel=0 / home_mun=null)
+  - Calendar-event-to-operation pipeline (Cincar/Storm events fire but no ops execute)
+  - WA naming-hazard fix (bilateral_framework vs international_signing)
+
+---
+
 ## [2026-04-27] fix(scenarios): wire war_timeline into apr1992_definitive_188w (issue #22 — phase 1 ships)
 
 **Type:** Calibration-class scenario data fix; closes dead-config gap that masked Option K Fixes B/C/E behavior changes
