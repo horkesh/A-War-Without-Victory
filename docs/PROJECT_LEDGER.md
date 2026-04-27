@@ -1,24 +1,30 @@
-## [2026-04-27] fix(scenarios+timelines): wire war_timeline into 188w + narrow HRHB defensive ceiling (issue #22 — phases 1+2)
+## [2026-04-27] fix(scenarios): wire war_timeline into apr1992_definitive_188w (issue #22 — phase 1 ships)
 
-**Type:** Calibration-class data fix in two surgical commits; closes dead-config gap that masked Option K Fixes B/C/E behavior changes
-**Commits:** `087e41af` (phase 1: scenario wiring) + `798f2a72` (phase 2: HRHB patron_directive narrowing) on branch `claude/issue-22-war-timeline-wiring` (off main `10cf6be0`); ledger commit `0cd83a03`
-**Files:**
-  - `data/scenarios/apr1992_definitive_188w.json` (+1 line: `"war_timeline": "apr1992"`)
-  - `data/scenarios/timelines/apr1992.json:379` (HRHB patron_directives[0].corps_ids: removed `hvo_southeast_herzegovina`)
+**Type:** Calibration-class scenario data fix; closes dead-config gap that masked Option K Fixes B/C/E behavior changes
+**Commits on branch `claude/issue-22-war-timeline-wiring`** (off main `10cf6be0`):
+  - `087e41af` — phase 1: scenario wiring (THE WIN)
+  - `798f2a72` — phase 2: HRHB defensive ceiling narrowing (REVERTED in `f1838dce` after n7 + WA cross-check showed the original blanket cap was historically correct)
+  - ledger commits `0cd83a03`, `1c6095ac`, `3f759716`
+**Files (net effect):** `data/scenarios/apr1992_definitive_188w.json` (+1 line: `"war_timeline": "apr1992"` after `init_formations_oob`). All other files restored to pre-branch state.
 **Tests:**
-  - n6 (phase 1 only): hash `b34659b1fcfd203f` vs baseline `a0665e665e83e0ec` → DIFFERS. War_timeline state populates with all 12 keys.
-  - n7 (phase 1+2): hash `1715ef485d02a1f5`; **byte-identical to n6 on every offensive metric** (179 attacks, 0 HRHB attacks, identical destruction roster, identical final OSIDs). Hash drift only in non-combat state (cosmetic JSON config drift). +1 anchor pass (25/27 vs 24/27).
-**Status:** PHASE 1 VERIFIED + PHASE 2 NO-OP (hypothesis falsified).
+  - n6 (phase 1 only): hash `b34659b1fcfd203f` vs n3 baseline `a0665e665e83e0ec` → DIFFERS. War_timeline state populates with all 12 keys.
+  - n7 (phase 1+2): hash `1715ef485d02a1f5`; byte-identical to n6 on offensive metrics. Phase 2 narrowing was a no-op behaviorally and historically wrong; reverted.
+**Status:** PHASE 1 VERIFIED AND SHIPPABLE.
 
-  Phase 1 evidence (n6 vs n3): defender casualties -19% (cohesion_floor firing); 6 of 7 war_timeline subfields confirmed-active via Explore audit (load site `scenario_runner.ts:1204`; readers in `formation_spawn.ts`, `cohesion_drift.ts`, `order_interpretation.ts`, `bot_strategy.ts`, `officer_system.ts`, `war_phases.ts`, `warlord_friction.ts`). Territorial fit improves vs jan1993 reference (anchor passes 23/27 → 24/27). **HRHB attack orders 31→0** identified as patron_directive consumer correctly enforcing the apr1992 timeline's blanket `stance_ceiling: defensive` for w0-40 covering all 3 HVO field corps — historically wrong for `hvo_southeast_herzegovina` (Operation Jackal, June 1992 ≈ w8).
+  **What phase 1 actually does (verified empirically):** activates the apr1992 war_timeline that the engine's existing consumer pipeline (`formation_spawn.ts`, `cohesion_drift.ts`, `order_interpretation.ts`, `bot_strategy.ts`, `officer_system.ts`, `war_phases.ts`, `warlord_friction.ts` — 6 of 7 subfields verified-active via Explore audit) was already wired to read but couldn't because the field was undefined. Suppresses the n3 "ad-libitum HVO offensive noise" (31 ahistorical HRHB attacks across all corps). Activates the historical doctrine_phase / patron_directive / standing_order / cohesion floor/ceiling / reinforcement_mult / officer_config schedules. Defender casualties drop 19%; territorial fit improves vs jan1993 reference (anchor passes 23/27 → 24/27).
 
-  Phase 2 surgical narrowing: removed `hvo_southeast_herzegovina` from the w0-40 defensive directive's corps_ids. **n7 result: hypothesis falsified** — consumer's "no match for that corps" default behaves restrictively, not permissively. HRHB attacks remain at 0; only effect is non-combat-state JSON config drift (different hash, identical attack_resolution block).
+  **Cross-check vs Washington Agreement (March 1994 / w101) territorial baseline** (historian-cited from BB1/BB2): n7 final w188 OSID control matches WA expected ownership on **17 of 21** central-Bosnia + Herzegovina municipalities tested. Kakanj, Vareš, Bugojno, Travnik, Zenica, Fojnica, Jablanica, Konjic all correctly RBiH at w188 (per Lasva Valley war 1993). Busovača, Kiseljak, Prozor, Stolac, Čapljina, Livno, Duvno correctly HRHB. Glamoč correctly RS. Novi Travnik + Gornji Vakuf correctly contested. Operation Jackal fires at t8 from `hvo_southeast_herzegovina` (captures op:mostar:hodbina_2 + op:stolac:rotimlja_2). The Lasva Valley war (31 RBiH→HRHB defensive battles t36-t137) produces correct WA-aligned territorial outcome.
 
-  Pivot to phase 2b: add an **explicit positive directive** for `hvo_southeast_herzegovina` w0-40 with `stance_ceiling: "offensive"` (or "balanced"), so the reader has a non-default match for the corps. Single-line scenario edit, single-variable n8 experiment.
+  **HRHB 0 attack orders is NOT a regression** — the headline-undercount lesson from 2026-04-26 (per `docs/life_lessons.md`) applies again. HVO offensive activity beyond Op Jackal is historically minimal in 1992-95 (per user + historian); the patron_directive correctly suppresses ad-libitum HVO offensive noise while permitting the defensive engagement that produces the right territorial outcome. n3's 31 HRHB attacks were ahistorical noise from running with `war_timeline === undefined`.
 
-  Pre-existing issue surfaced (both experts flagged): Operation Jackal in n6/n7 captures objectives via `logged_capture` provenance with `total_attacks: 0` and zero casualties, graded "Brilliant Victory" 5★ — a "ghost op." Real Jackal was weeks of fighting around Stolac/Čapljina. Not introduced by #22; orthogonal cleanup lane.
+  **Three follow-up gaps identified for separate issues** (not blocking #22 ship):
+  1. **Vitez should hold HRHB at WA**, n7 has it RBiH-dominant (2/3 OSIDs RBiH) — Vitezovi destroyed t122 in n7 leaves Vitez town undefended; investigate Vitezovi loan/cohesion/support chain
+  2. **Operation Cincar-94 (3 Nov 1994 / w135) missing** — HVO Guards + ARBiH 7th Corps joint capture of Kupres plateau; n7 leaves Kupres RS at w188. Needs `hvo_central_bosnia` patron_directive entry w130-140 with `stance_ceiling: offensive` targeting Kupres axis (commanded by Blaškić from CB OZ per BB2 p.527-530)
+  3. **Mostar east/west split** not modeled — n7 collapses to RBiH-dominant; should be split (east-RBiH besieged pocket / west-HRHB capital of Herceg-Bosna)
 
-  Reconciled-expert verdict so far (war-or-game + scenario-creator-runner-tester + Explore consumer audit): wiring + consumer pipeline are working (6 of 7 subfields confirmed-active); the apparent "RNG-stream divergence" framing of n6 was wrong; the bug is data-side. Defer phase 3 sister-parity sweep (`init_officers`, `supply_reserves_enabled`, `enable_rbih_hrhb_dynamics`) until phase 2b confirms HRHB lift. Issue #22 P0; gates Option K (#20) continuation.
+  **Operation Jackal "ghost-op" pattern** (orthogonal cleanup): captures objectives via `logged_capture` provenance with `total_attacks: 0` and zero casualties. Real Jackal was weeks of fighting; current sim represents it as 5★ tempo win. Not introduced by #22; pre-existing.
+
+  Phase 3 sister-parity sweep for `init_officers`, `supply_reserves_enabled`, `enable_rbih_hrhb_dynamics` — defer; phase 1 alone produces correct WA-aligned territorial dynamics. Issue #22 closes phase 1; the three gaps above become separate follow-up issues.
 
 ---
 
