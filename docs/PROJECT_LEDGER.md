@@ -17,10 +17,11 @@
 
   **HRHB 0 attack orders is NOT a regression** — the headline-undercount lesson from 2026-04-26 (per `docs/life_lessons.md`) applies again. HVO offensive activity beyond Op Jackal is historically minimal in 1992-95 (per user + historian); the patron_directive correctly suppresses ad-libitum HVO offensive noise while permitting the defensive engagement that produces the right territorial outcome. n3's 31 HRHB attacks were ahistorical noise from running with `war_timeline === undefined`.
 
-  **Three follow-up gaps identified for separate issues** (not blocking #22 ship):
-  1. **Vitez should hold HRHB at WA**, n7 has it RBiH-dominant (2/3 OSIDs RBiH) — Vitezovi destroyed t122 in n7 leaves Vitez town undefended; investigate Vitezovi loan/cohesion/support chain
-  2. **Operation Cincar-94 (3 Nov 1994 / w135) missing** — HVO Guards + ARBiH 7th Corps joint capture of Kupres plateau; n7 leaves Kupres RS at w188. Needs `hvo_central_bosnia` patron_directive entry w130-140 with `stance_ceiling: offensive` targeting Kupres axis (commanded by Blaškić from CB OZ per BB2 p.527-530)
-  3. **Mostar east/west split** not modeled — n7 collapses to RBiH-dominant; should be split (east-RBiH besieged pocket / west-HRHB capital of Herceg-Bosna)
+  **One real follow-up gap (post-investigation)** plus orthogonal pre-existing issue:
+  1. **Operation Cincar-94 (3 Nov 1994 / w135) missing** — HVO Guards + ARBiH 7th Corps joint capture of Kupres plateau; n7 has 0 battles at Kupres/Glamoč/Livno across 188 weeks; Kupres stays RS at w188. No patron_directive targets the Kupres axis. Needs new `hvo_central_bosnia` patron_directive entry w130-140 with `stance_ceiling: offensive` targeting Kupres + ARBiH 7th Corps (Bugojno OG West) directive (commanded by Blaškić from CB OZ per BB2 p.527-530).
+  2. **Operation Jackal "ghost-op" pattern** (orthogonal, pre-existing): captures objectives via `logged_capture` provenance with `total_attacks: 0` and zero casualties. Real Jackal was weeks of fighting; current sim represents it as 5★ tempo win. Not introduced by #22.
+
+  **Initially-flagged gaps that turned out to be false alarms** (per OSID-level investigation): (a) Vitez "RBiH-dominant" was a per-municipality dominance-count artifact — sim correctly models the Lasva pocket: `op:vitez:vitez_2` (town) HRHB-held, surrounded by RBiH outlying OSIDs (`kruscica` matches the BB2 p.529 ARBiH 325th Vitez Mtn Bde positioning). Vitezovi brigade survives the run; not in destroyed_brigades. (b) Mostar "split collapse" was the same artifact — `mostar_istok_2` correctly RBiH (besieged east bank pocket), `mostar_zapad_2` correctly HRHB (Herceg-Bosna capital). Both Vitez and Mostar are correctly modeled at OSID granularity.
 
   **Operation Jackal "ghost-op" pattern** (orthogonal cleanup): captures objectives via `logged_capture` provenance with `total_attacks: 0` and zero casualties. Real Jackal was weeks of fighting; current sim represents it as 5★ tempo win. Not introduced by #22; pre-existing.
 
