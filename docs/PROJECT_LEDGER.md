@@ -7,14 +7,18 @@
   - `data/scenarios/timelines/apr1992.json:379` (HRHB patron_directives[0].corps_ids: removed `hvo_southeast_herzegovina`)
 **Tests:**
   - n6 (phase 1 only): hash `b34659b1fcfd203f` vs baseline `a0665e665e83e0ec` → DIFFERS. War_timeline state populates with all 12 keys.
-  - n7 (phase 1+2): in flight (background `b5q5yxwcd`); awaiting HRHB attack-count delta.
-**Status:** PHASE 1 VERIFIED + PHASE 2 IN FLIGHT.
+  - n7 (phase 1+2): hash `1715ef485d02a1f5`; **byte-identical to n6 on every offensive metric** (179 attacks, 0 HRHB attacks, identical destruction roster, identical final OSIDs). Hash drift only in non-combat state (cosmetic JSON config drift). +1 anchor pass (25/27 vs 24/27).
+**Status:** PHASE 1 VERIFIED + PHASE 2 NO-OP (hypothesis falsified).
 
   Phase 1 evidence (n6 vs n3): defender casualties -19% (cohesion_floor firing); 6 of 7 war_timeline subfields confirmed-active via Explore audit (load site `scenario_runner.ts:1204`; readers in `formation_spawn.ts`, `cohesion_drift.ts`, `order_interpretation.ts`, `bot_strategy.ts`, `officer_system.ts`, `war_phases.ts`, `warlord_friction.ts`). Territorial fit improves vs jan1993 reference (anchor passes 23/27 → 24/27). **HRHB attack orders 31→0** identified as patron_directive consumer correctly enforcing the apr1992 timeline's blanket `stance_ceiling: defensive` for w0-40 covering all 3 HVO field corps — historically wrong for `hvo_southeast_herzegovina` (Operation Jackal, June 1992 ≈ w8).
 
-  Phase 2 surgical narrowing: removed `hvo_southeast_herzegovina` from the w0-40 defensive directive's corps_ids. Preserves correct 1992 defensive cap on `hvo_central_bosnia` + `hvo_tomislavgrad` (per war-or-game known-baseline). Empirical n7 will show whether reader's "no match" default is permissive (HRHB attacks > 0) or restrictive (need explicit positive entry in n8).
+  Phase 2 surgical narrowing: removed `hvo_southeast_herzegovina` from the w0-40 defensive directive's corps_ids. **n7 result: hypothesis falsified** — consumer's "no match for that corps" default behaves restrictively, not permissively. HRHB attacks remain at 0; only effect is non-combat-state JSON config drift (different hash, identical attack_resolution block).
 
-  Reconciled-expert verdict (war-or-game (C) + scenario-creator-runner-tester triage + Explore consumer audit): wiring + consumer pipeline are working; the apparent "RNG-stream divergence" framing was wrong; the bug was data-side all along (now empirically traceable). The 188w scenario is also missing `init_officers`, `supply_reserves_enabled`, `enable_rbih_hrhb_dynamics` — defer phase 3 sister-parity sweep until n7 confirms HRHB lift. Issue #22 P0; gates Option K (#20) continuation.
+  Pivot to phase 2b: add an **explicit positive directive** for `hvo_southeast_herzegovina` w0-40 with `stance_ceiling: "offensive"` (or "balanced"), so the reader has a non-default match for the corps. Single-line scenario edit, single-variable n8 experiment.
+
+  Pre-existing issue surfaced (both experts flagged): Operation Jackal in n6/n7 captures objectives via `logged_capture` provenance with `total_attacks: 0` and zero casualties, graded "Brilliant Victory" 5★ — a "ghost op." Real Jackal was weeks of fighting around Stolac/Čapljina. Not introduced by #22; orthogonal cleanup lane.
+
+  Reconciled-expert verdict so far (war-or-game + scenario-creator-runner-tester + Explore consumer audit): wiring + consumer pipeline are working (6 of 7 subfields confirmed-active); the apparent "RNG-stream divergence" framing of n6 was wrong; the bug is data-side. Defer phase 3 sister-parity sweep (`init_officers`, `supply_reserves_enabled`, `enable_rbih_hrhb_dynamics`) until phase 2b confirms HRHB lift. Issue #22 P0; gates Option K (#20) continuation.
 
 ---
 
