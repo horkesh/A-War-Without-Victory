@@ -18,7 +18,23 @@
   **HRHB 0 attack orders is NOT a regression** — the headline-undercount lesson from 2026-04-26 (per `docs/life_lessons.md`) applies again. HVO offensive activity beyond Op Jackal is historically minimal in 1992-95 (per user + historian); the patron_directive correctly suppresses ad-libitum HVO offensive noise while permitting the defensive engagement that produces the right territorial outcome. n3's 31 HRHB attacks were ahistorical noise from running with `war_timeline === undefined`.
 
   **One real follow-up gap (post-investigation)** plus orthogonal pre-existing issue:
-  1. **Operation Cincar-94 (3 Nov 1994 / w135) missing** — HVO Guards + ARBiH 7th Corps joint capture of Kupres plateau; n7 has 0 battles at Kupres/Glamoč/Livno across 188 weeks; Kupres stays RS at w188. No patron_directive targets the Kupres axis. Needs new `hvo_central_bosnia` patron_directive entry w130-140 with `stance_ceiling: offensive` targeting Kupres + ARBiH 7th Corps (Bugojno OG West) directive (commanded by Blaškić from CB OZ per BB2 p.527-530).
+  1. **Operation Cincar-94 (3 Nov 1994 / w135) missing — root cause: Washington Agreement never signs in 188w runs** — HV brigades (already wired in `hv_integration.ts` to spawn at Livno/Tomislavgrad/Glamoč/Kupres post-WA + 6w preparation) never arrive; `hvo_tomislavgrad` correctly has Kupres-targeted `assigned_front_ids` but stays in defensive stance with `offensive_targets: []` because patron_directive caps it at "balanced" forever.
+
+     **Diagnostic chain (n7 final state):**
+     - `washington_signed: false`, `washington_turn: null` after 188w
+     - Path A (diplomatic) blocked at W1 (`ceasefire_active: false` — bilateral ceasefire mechanism never fires between RBiH-HRHB once war is on); W4 (constraint_severity 0.50 vs 0.55 threshold — fragile) would also fail
+     - Path B (patron override) blocked at P3 (HRHB.override_authority = 5 vs threshold 50) despite P1 (alliance -1.0) + P2 (war duration 152w) trivially met
+     - W6 exhaustion threshold (55) is mis-scaled — n7 sees combined value 2636 (×48 over)
+     - **Structural finding: `computeOverrideAuthority` in `src/sim/negotiation/patron_pressure.ts` cannot produce override_authority > ~30 for HRHB by design** because (a) HRHB never sanctioned (no +30 bonus), (b) HRHB n7 personnel 60,783 over peak threshold 50,000 always triggers full -25 mil-strength reduction, (c) max contributions sum to ~15-30. WA Path B threshold 50 is unreachable for HRHB.
+     - **Conceptual gap (per user framing "by patron pressure"):** current model treats patron pressure as REACTIVE to client weakness; historical WA was driven by EXTERNAL patron-side geopolitics (Clinton pressuring Tuđman with EU normalization + arms embargo). No escalator exists for "patron's own strategic interests at stake regardless of client strength."
+
+     **Three options for follow-up issue (file separately, NOT in #22):**
+     - **A) Threshold recalibration**: lower WASH_PATRON_OVERRIDE_THRESHOLD from 50 to ~25 to match structurally-achievable range. Cheap; risks premature WA signing in scenarios where patron exhaustion happens to max early.
+     - **B) Add strategic-interest pressure source**: time-windowed escalator representing Croatia's EU/normalization interests pushing for federation regardless of HVO field strength (e.g., +10 at w52, +15 at w78, +20 at w104 for HRHB). More historically grounded but introduces new tunable.
+     - **C) Fix Path A's bilateral ceasefire trigger**: enable a ceasefire-resolution mechanism that intermediates between bilateral war and Washington signing. Likely the most architecturally correct, but largest scope.
+
+     Per user design philosophy: AWWV models deterministic emergence, not arbitrary rules. Option C (or a B+C combination) is most aligned. Recommend filing as a separate calibration-class issue with all three options on the table.
+
   2. **Operation Jackal "ghost-op" pattern** (orthogonal, pre-existing): captures objectives via `logged_capture` provenance with `total_attacks: 0` and zero casualties. Real Jackal was weeks of fighting; current sim represents it as 5★ tempo win. Not introduced by #22.
 
   **Initially-flagged gaps that turned out to be false alarms** (per OSID-level investigation): (a) Vitez "RBiH-dominant" was a per-municipality dominance-count artifact — sim correctly models the Lasva pocket: `op:vitez:vitez_2` (town) HRHB-held, surrounded by RBiH outlying OSIDs (`kruscica` matches the BB2 p.529 ARBiH 325th Vitez Mtn Bde positioning). Vitezovi brigade survives the run; not in destroyed_brigades. (b) Mostar "split collapse" was the same artifact — `mostar_istok_2` correctly RBiH (besieged east bank pocket), `mostar_zapad_2` correctly HRHB (Herceg-Bosna capital). Both Vitez and Mostar are correctly modeled at OSID granularity.
