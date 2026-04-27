@@ -222,3 +222,58 @@ export function updateEnclaveIntegrity(
     const humanitarian_pressure_total = enclaves.reduce((sum, e) => sum + e.humanitarian_pressure, 0);
     return { enclaves, humanitarian_pressure_total };
 }
+
+/**
+ * Issue #23 phase 2 — fallback humanitarian pressure derived from
+ * `state.political.enclave_resilience` (the hand-curated named-enclave map:
+ * sarajevo, gorazde, srebrenica, zepa, bihac_pocket, kiseljak, lasva_valley,
+ * zepce). This is a separate tracking structure from `state.political.enclaves`
+ * (which `updateEnclaveIntegrity` populates from supply-critical components).
+ *
+ * In 188w runs the supply-critical-component path produces zero entries even
+ * when historical pockets ARE besieged for 169-188 turns (verified n10
+ * empirical: enclave_resilience has 8 realistic entries; enclaves array empty).
+ * The IVP rollup currently sums from the empty array, so
+ * enclave_humanitarian_pressure caps at 0 → constraint_severity stuck at 0.50
+ * → Washington Agreement W4 gate (>0.55) unreachable.
+ *
+ * This fallback bridges the resilience map into the IVP rollup. Mirrors the
+ * existing pressure formula shape ((1 - resilience_norm) * pressureMult *
+ * visibilityMult), with Sarajevo getting CAPITAL_ENCLAVE_VISIBILITY and
+ * SARAJEVO_PRESSURE_MULTIPLIER.
+ *
+ * Returns total summed pressure across active hardening enclaves; the IVP
+ * layer clamps at 1.0 via clamp01.
+ */
+export function computeEnclaveResilienceFallbackPressure(state: GameState): number {
+    const map = state.political?.enclave_resilience;
+    if (!map) return 0;
+    const ids = Object.keys(map).sort((a, b) => a.localeCompare(b));
+    let total = 0;
+    let activeCount = 0;
+    for (const id of ids) {
+        const entry = map[id];
+        if (typeof entry !== 'object' || entry == null) continue;
+        if (entry.hardening_active !== true) continue;
+        if ((entry.isolation_turns ?? 0) <= 0) continue;
+        const resilience = entry.resilience ?? 0;
+        const inverseResilience = clamp01(1 - resilience / 100);
+        const isCapital = id === 'sarajevo';
+        const pressureMult = isCapital ? SARAJEVO_PRESSURE_MULTIPLIER : HUMANITARIAN_PRESSURE_MULTIPLIER;
+        const visibilityMult = isCapital ? CAPITAL_ENCLAVE_VISIBILITY : 1.0;
+        // Per-enclave clamp01 matches existing system at line 198 (each enclave's
+        // humanitarian_pressure is clamped before being summed). Without this,
+        // Sarajevo's amplified contribution (0.55 × 9 = 4.95) saturates the
+        // mean even after dividing by N.
+        total += clamp01(inverseResilience * pressureMult * visibilityMult);
+        activeCount++;
+    }
+    // #29 sub-issue 4: mean across active enclaves rather than sum.
+    // Sum saturated IVP at 1.0 in n11 (raw 9.3 from 7 enclaves), producing
+    // an over-aggressive composite_ivp shift (0.30→0.60) that drove RS
+    // patron_commitment -37%. Mean bounds the value naturally — represents
+    // "average humanitarian distress" rather than "cumulative distress" —
+    // and still clears W4 (constraint_severity threshold 0.55) when active
+    // enclaves are in genuine distress.
+    return activeCount > 0 ? total / activeCount : 0;
+}

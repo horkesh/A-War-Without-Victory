@@ -1,3 +1,141 @@
+## [2026-04-27] fix(scenarios+war-phases): #22 phase 2 init_officers wiring + #23 phase 1 bilateral counter fix
+
+**Type:** Two surgical changes shipped together — one scenario-data wiring fix (#22 phase 2 sister-parity) + one engine pipeline-routing fix (#23 phase 1).
+**Branch:** `claude/issue-23-phase1-clean` (off `claude/issue-22-war-timeline-wiring`); depends on PR #26 merging first.
+**Commits:**
+  - `2ce15e1d` — wire `init_officers: "apr1992"` into 188w scenario (closes load gate that left `state.military.named_officer_data` empty for all factions in 188w runs; n9 confirmed 98 officers load post-fix)
+  - `1ecd4715` — add `bilateral-flip-count-war` war-phase step that reads `state.political.control_events` filtered for current turn + RBiH↔HRHB transitions, feeds them to `countBilateralFlips`. Closes pipeline-routing bug where the `earlyWarPhases.bilateral-flip-count` step never fires in `player_choice` mode war turns
+  - `0a118512` — regenerate golden baseline manifest (only `final_save.json` + `run_summary.json` hashes shifted across all 3 manifest scenarios; activity_summary, control_delta, end_report, formation_delta, weekly_report unchanged)
+**Files:**
+  - `data/scenarios/apr1992_definitive_188w.json` (+1 line `"init_officers": "apr1992"`)
+  - `src/sim/turn_phases/war_phases.ts` (+1 import + new step ~25 lines)
+  - `tests/war_phase_step_order.test.ts` (step count 166→167 + cite line)
+  - `data/derived/scenario/baselines/manifest.json` (regenerated hashes)
+**Tests:**
+  - tsc --noEmit clean
+  - vitest 533 files green (golden baseline test passes against new manifest)
+  - n10 188w hash `3942cd08bdc9367a` (vs n9 `0700ff01a1264d3b`)
+
+**Empirical result (n10 vs prior baselines):**
+  - `state.military.named_officer_data: 0 → 98` (RBiH 38, RS 32, HRHB 28) — Tier 1 officer system now active in 188w runs
+  - `stalemate_turns: 0 → 75` ✓ (counter fires turn-over-turn)
+  - `total_bilateral_flips: 0 → 31` ✓ (real RBiH↔HRHB OSID transfers from war-phase attack resolution now feed the counter)
+  - **`ceasefire_active: true` at turn 56** ✓ — Path A's W1+C4 chain unlocked (was structurally unreachable in any prior run)
+  - `washington_signed: false` at w188 — partial-ship; deeper gates remain (W4 constraint_severity 0.50 vs threshold 0.55, traced to enclave_humanitarian_pressure cascade)
+
+**Phase 2/3 of #23 deferred** (NOT in this PR):
+  - **Phase 2** (W4 cascade): bridge `state.political.enclave_resilience` map data into the IVP `enclave_humanitarian_pressure` rollup (or fix `updateEnclaveIntegrity` to populate `state.political.enclaves` from real isolation data). Two enclave-tracking structures don't talk; humanitarian_pressure_total sums from the empty one.
+  - **Phase 3** (calendar event disconnect): `washington_agreement_1994` event fires at t102 and `operation_cincar_1994` at t131 but neither drives downstream gating. Calendar events are cosmetic; signing logic and operation generator evaluate independent predicates.
+  - **Phase 4** (HV brigade pipeline): `hv_integration.ts` already correctly gated on `washington_signed` — once phases 2+3 land, HV brigades should arrive automatically. Verify, no new code needed.
+
+Per the Roso prototype falsification lesson (#25 fix A): one variable per merge. The bilateral counter fix is empirically validated to do its narrow thing; W4/calendar-event/HV-spawn are separate fixes for separate phases.
+
+---
+
+## [2026-04-27] discovery: HRHB attack-count drop is post-WA Federation suppression (correct gate behavior, not a bug)
+
+**Type:** Diagnostic finding closing #29 sub-issue 1 (HRHB-suppression source). No code change.
+**Investigation branch:** `claude/issue-29-sub5-hrhb-suppression` (created, dropped — no fix needed)
+
+**Trace.** Explore audit found the gate at `src/sim/combat/battle_resolution.ts:914`: when `state.political.rbih_hrhb_state.washington_signed === true`, the attack resolution loop skips RBiH↔HRHB bilateral combat via `continue`. This is **historically correct behavior** — post-Washington Agreement, the Federation alliance prevented bilateral war between Croats and Bosniaks. n10's 32 HRHB attacks included ahistorical bilateral combat continuing past historical w101 (because n10's W4 cascade prevented WA signing); n11/n13's 21 HRHB attacks reflects bilateral combat suppression from t60 onward.
+
+**The actual remaining concern is WA TIMING.** WA fires at t60 (mid-1993) instead of historical w101 (March 1994). The early-firing happens because all 6 Path A W gates clear simultaneously once W4 is cleared by the enclave bridge. Hardening one threshold (W3 momentum, W6 exhaustion mis-scaling, or W4 enclave coefficient) could push timing to historical. **Calibration debt, not a bug.**
+
+**Headline-metric trap — fourth instance.** Pattern documented in `docs/life_lessons.md` 2026-04-26 ("Headline metrics undercount") fired again. Today's instances:
+  1. HRHB 0 attacks in n6 — was correct (war_timeline suppressing ad-libitum 1992 noise)
+  2. Vitez RBiH-dominant — was correct (Lasva pocket OSID-level structure)
+  3. Mostar split — was correct (east-RBiH / west-HRHB OSID granularity)
+  4. HRHB drop n11→n13 — was correct (post-WA Federation bilateral suppression)
+
+Each time the metric flagged "wrong," OSID/per-corps/per-mechanism inspection revealed correct behavior at deeper granularity. The pattern is reliable: **for any scenario-level "regression" claim, drill to the binding mechanism before declaring a bug**.
+
+**#29 sub-issue 1 reframed (final):** the original hypothesis (loan-system + phantom HV cascade) was wrong. The PR #28 cascade audit's "anti-direction signal" was MIS-interpreted by me. The HRHB suppression is correct gate behavior. Sub-issue 1 closes as resolved (no fix needed); a NEW sub-issue tracks WA timing calibration.
+
+---
+
+## [2026-04-27] fix(enclave): per-enclave clamp01 + mean across active enclaves (#29 sub-issue 4)
+
+**Type:** Engine-side calibration tuning fix on top of #23 phase 2.
+**Branch:** `claude/issue-29-sub4-enclave-formula` (off `claude/issue-23-phase2-enclave-bridge`)
+**Commits:**
+  - `1b76d791` — initial sum→mean attempt; n12 hash byte-identical to n11 (Sarajevo amplified contribution still saturated mean)
+  - `cc432e15` — per-enclave clamp01 BEFORE summing, then mean. Each enclave caps at 1.0 (matches existing system at `enclave_integrity.ts:198`)
+
+**Empirical n13 result (vs n11 baseline):**
+  | Metric | n11 (sum, saturated) | n13 (clamp+mean) | n10 (no enclave fix) |
+  |---|---|---|---|
+  | `enclave_humanitarian_pressure` | 1.0 (saturated) | **0.764** | 0 |
+  | `composite_ivp` | 0.601 | 0.530 | 0.300 |
+  | RS `patron_commitment` | 0.282 (-37% vs n10) | **0.413 (-8% vs n10)** | 0.447 |
+  | RS `material_support` | 0.383 (-23% vs n10) | **0.491 (-1% vs n10)** | 0.495 |
+  | RBiH `patron_commitment` | 0.705 | 0.697 | 0.668 |
+  | HRHB `patron_commitment` | 0.735 | 0.735 | 0.735 |
+  | `washington_signed` at | t60 | **t60** (preserved) | false |
+  | `meta.hv_brigades_spawned` | true | **true** (preserved) | undefined |
+
+**Cascade now properly moderated:**
+  - WA still signs at t60 (W4 clears with composite_ivp 0.530)
+  - RS material support drop reduced from -23% to -1% — much more historically calibrated
+  - HV brigade cascade preserved
+  - HRHB unaffected (no IVP multiplier in their formula, expected)
+
+**Decision: ship as #29 sub-issue 4.** Single-line conceptual change (`total += inverseResilience * pressureMult * visibilityMult` → `total += clamp01(inverseResilience * pressureMult * visibilityMult)` + return `total / activeCount`). Same calibration intent as PR #28, but produces calibrated cascade magnitude rather than saturated.
+
+**War-or-game audit verdict: B — moderated cleanly, separate gap surfaces:**
+  - HRHB orders n11=21, n13=21, n10=32. Combat between n11 and n13 is BIT-IDENTICAL despite the IVP shift. **The -34% HRHB suppression is NOT caused by the enclave-pressure magnitude** — it persists at any non-zero enclave pressure (0.764 produces same suppression as 1.0). Threshold gate exists somewhere between 0 and 0.764 below which HVO operational tempo is higher. Search shifts to `bot_corps_ai` targeting or a different political gate.
+  - **This reframes #29 sub-issue 1.** The HRHB attack drop was attributed in the cascade audit to the loan-system + phantom-HV chain. Now confirmed it's a different mechanism — possibly a binary gate on enclave_humanitarian_pressure being non-zero affecting some HVO offensive eligibility check.
+  - Anchor failures unchanged from n11 (Zvornik, Brčko, Vozuća still RBiH when canon expects RS). Pre-existing, not n13-induced.
+  - **Ship recommendation:** sub-issue 4 fix is empirically correct for its scope. The HRHB-suppression source becomes a new sub-issue.
+
+---
+
+## [2026-04-27] fix(enclave): bridge enclave_resilience map into IVP humanitarian pressure rollup (#23 phase 2)
+
+**Type:** Engine-side surgical fix. Closes the W4 constraint_severity cascade that blocked Washington Agreement signing.
+**Branch:** `claude/issue-23-phase2-enclave-bridge` (off `claude/issue-23-phase1-clean`); depends on PR #27 merging first.
+**Commit:** `12823a57` — adds `computeEnclaveResilienceFallbackPressure(state)` in `state/enclave_integrity.ts` (mirrors existing pressure formula `(1 - resilience_norm) * pressureMult * visibilityMult` but operates on `state.political.enclave_resilience` map). Wired into `war_phases.ts:update-patron-ivp` step as `primaryPressure + fallbackPressure` (clamp01 at IVP layer prevents over-counting).
+**Files:** `src/state/enclave_integrity.ts` (+38 lines), `src/sim/turn_phases/war_phases.ts` (+5 lines).
+**Tests:** tsc --noEmit clean. Vitest: in flight. n11 188w hash `c3b119d51c7cd3ce`.
+
+**Empirical result (n11 vs n10 baseline):**
+  - `ivp.enclave_humanitarian_pressure: 0 → 1.0` ✓ (was capped because primary path produced empty enclaves array; fallback derives 9.3 raw → IVP clamps to 1.0)
+  - `HRHB.constraint_severity: 0.5 → 0.6` ✓ (clears W4 threshold 0.55)
+  - `washington_signed: false → true at t60` (political flag fires when all 6 W gates converge)
+  - `meta.hv_brigades_spawned: undefined → true` ✓ (downstream cascade)
+  - All 4 HV brigade IDs added to `state.military.formations`: hv_1st_guards_tigers, hv_4th_guards_split, hv_5th_guards_karlovac, hv_7th_guards_varazdin
+  - Calendar event `washington_agreement_1994` fires at **t102 — historically on target** (March 18, 1994 ≈ w101 from April 1992)
+  - Calendar event `operation_cincar_1994` fires at **t131 — historically on target** (Nov 3, 1994 ≈ w135)
+
+**Verdict from war-or-game audit: C — cascade unlocked at the political-trigger layer; ground-truth military execution is the next gap.**
+
+**New gaps surfaced for follow-up issues** (NOT in this PR):
+  - **HV brigades are phantoms.** All 4 formation IDs present at w188 but personnel=0 for 3/4 (only `hv_4th_guards_split` has 3000 personnel @ cohesion 30); all have `home_mun: null`. The spawn logic in `hv_integration.ts:168-198` adds formation records but doesn't wire them to a corps location/home properly. They never deploy onto the map. → New issue.
+  - **Federation military arc doesn't execute despite events firing.** `operation_cincar_1994` fires at t131, `operation_storm_1995` fires at t174 — but ZERO HRHB or joint ops in `operation_aars` across all 188 weeks (only Op Jackal at t8). Calendar events disconnected from operation generators. Same pattern as #23 phase 3 calendar-event-disconnect note from phase 1 ledger. → Folded into #23 phase 3.
+  - **Bugojno RS-dominant** at w188 (should be RBiH per WA baseline) and **Stolac RBiH-dominant** (should be HRHB) — inverted vs history. Likely upstream OOB or operations issue, not n11-induced. → New side-issue.
+  - **Naming hazard:** `political.rbih_hrhb_state.washington_signed` flag (t60 — political signing predicate) vs `military.event_last_fired_turn.washington_agreement_1994` (t102 — calendar event) collide. Two systems, different semantics. → Rename `washington_signed` to `bilateral_framework_signed` or unify the semantics. → New issue.
+
+**Decision: ship phase 2 standalone.** The fix is empirically validated to do its narrow thing — close the W4 cascade so the political signing predicate can fire when conditions converge (which they correctly do per the formula, with calendar events landing on historical dates). The phantom HV brigades and Federation-arc-doesn't-execute gaps are SEPARATE downstream issues; were already there and would manifest if WA had signed via any other route. Per Roso falsification lesson: one variable per merge.
+
+**Cascade-effect audit (n10 vs n11) — post-self-review verification:**
+
+| Metric | n10 | n11 | Δ | Verdict |
+|---|---|---|---|---|
+| RS patron_commitment | 0.447 | 0.282 | **-37%** | direction historically correct (sanctions era); magnitude high |
+| RS material_support_level | 0.495 | 0.383 | -23% | same |
+| RBiH patron_commitment | 0.668 | 0.705 | +6% | direction historically correct |
+| HRHB patron_commitment | 0.735 | 0.735 | 0% | unaffected (no IVP multiplier in HRHB formula) |
+| composite_ivp | 0.300 | 0.601 | **doubled** | driven by enclave_humanitarian_pressure 0→1.0 |
+| RS personnel @ w188 | 107,963 | 115,996 | **+7%** | RS does NOT collapse — slight increase |
+| RS attacks | 117 | 115 | -2 | essentially unchanged |
+| RBiH attacks | 194 | 228 | +18% | more aggressive after WA — plausible |
+| **HRHB attacks** | **32** | **21** | **-34%** | **anti-direction signal — flagged in #29 sub-issue 1** |
+| RS brigades destroyed | 10 | 15 | +5 | more attrition, not collapse |
+| HRHB brigades destroyed | 5 | 8 | +3 | includes 3 phantom HV brigades (#29 sub-issue 1) |
+
+**Cascade verdict:** moderate, not catastrophic. RS doesn't collapse. Patron-commitment shifts are directionally historically correct (sanctions degraded RS material support; international community supported Bosniaks more openly post-WA). Magnitudes are high because enclave_humanitarian_pressure saturates at 1.0 throughout the run — this is too aggressive and warrants formula tuning in a future PR (divide coefficient by 2-3, or use Math.max(primary, fallback) instead of sum). HRHB attack drop -34% is the only counter-intuitive signal; tied to phantom HV brigade loan-cascade already tracked in #29 sub-issue 1.
+
+---
+
 ## [2026-04-27] fix(scenarios): wire war_timeline into apr1992_definitive_188w (issue #22 — phase 1 ships)
 
 **Type:** Calibration-class scenario data fix; closes dead-config gap that masked Option K Fixes B/C/E behavior changes

@@ -1078,7 +1078,23 @@ export interface RbihHrhbState {
     ceasefire_active: boolean;
     /** Turn when ceasefire was established; null if not yet. */
     ceasefire_since_turn: number | null;
-    /** True when Washington Agreement preconditions met and agreement fired. */
+    /**
+     * True when Washington Agreement signing PREDICATE has fired (Path A or
+     * Path B preconditions in `src/sim/early_war/washington_agreement.ts`).
+     *
+     * SEMANTIC NOTE — distinct from the calendar event:
+     * - This flag (`washington_signed`) fires when sim conditions converge on
+     *   the W1-W6 (diplomatic) or P1-P3 (patron-override) gates clearing. The
+     *   timing is emergent from gameplay state and may differ from the
+     *   historical date.
+     * - The CALENDAR event `washington_agreement_1994` (in
+     *   `state.military.event_last_fired_turn`) fires on a fixed historical
+     *   schedule (~w101 from April 1992 = March 18, 1994) regardless of state.
+     *
+     * Consumers gating on bilateral combat suppression (e.g.,
+     * `battle_resolution.ts:914`) read THIS flag, not the calendar event.
+     * Per #29 sub-issue 3 — leave names as-is; the semantics ARE different.
+     */
     washington_signed: boolean;
     /** Turn when Washington was signed; null if not yet. */
     washington_turn: number | null;
