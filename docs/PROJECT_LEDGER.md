@@ -32,6 +32,27 @@ Per the Roso prototype falsification lesson (#25 fix A): one variable per merge.
 
 ---
 
+## [2026-04-27] discovery: HRHB attack-count drop is post-WA Federation suppression (correct gate behavior, not a bug)
+
+**Type:** Diagnostic finding closing #29 sub-issue 1 (HRHB-suppression source). No code change.
+**Investigation branch:** `claude/issue-29-sub5-hrhb-suppression` (created, dropped — no fix needed)
+
+**Trace.** Explore audit found the gate at `src/sim/combat/battle_resolution.ts:914`: when `state.political.rbih_hrhb_state.washington_signed === true`, the attack resolution loop skips RBiH↔HRHB bilateral combat via `continue`. This is **historically correct behavior** — post-Washington Agreement, the Federation alliance prevented bilateral war between Croats and Bosniaks. n10's 32 HRHB attacks included ahistorical bilateral combat continuing past historical w101 (because n10's W4 cascade prevented WA signing); n11/n13's 21 HRHB attacks reflects bilateral combat suppression from t60 onward.
+
+**The actual remaining concern is WA TIMING.** WA fires at t60 (mid-1993) instead of historical w101 (March 1994). The early-firing happens because all 6 Path A W gates clear simultaneously once W4 is cleared by the enclave bridge. Hardening one threshold (W3 momentum, W6 exhaustion mis-scaling, or W4 enclave coefficient) could push timing to historical. **Calibration debt, not a bug.**
+
+**Headline-metric trap — fourth instance.** Pattern documented in `docs/life_lessons.md` 2026-04-26 ("Headline metrics undercount") fired again. Today's instances:
+  1. HRHB 0 attacks in n6 — was correct (war_timeline suppressing ad-libitum 1992 noise)
+  2. Vitez RBiH-dominant — was correct (Lasva pocket OSID-level structure)
+  3. Mostar split — was correct (east-RBiH / west-HRHB OSID granularity)
+  4. HRHB drop n11→n13 — was correct (post-WA Federation bilateral suppression)
+
+Each time the metric flagged "wrong," OSID/per-corps/per-mechanism inspection revealed correct behavior at deeper granularity. The pattern is reliable: **for any scenario-level "regression" claim, drill to the binding mechanism before declaring a bug**.
+
+**#29 sub-issue 1 reframed (final):** the original hypothesis (loan-system + phantom HV cascade) was wrong. The PR #28 cascade audit's "anti-direction signal" was MIS-interpreted by me. The HRHB suppression is correct gate behavior. Sub-issue 1 closes as resolved (no fix needed); a NEW sub-issue tracks WA timing calibration.
+
+---
+
 ## [2026-04-27] fix(enclave): per-enclave clamp01 + mean across active enclaves (#29 sub-issue 4)
 
 **Type:** Engine-side calibration tuning fix on top of #23 phase 2.
