@@ -23,7 +23,7 @@ import { updateDisplacement } from '../../state/displacement.js';
 import { processDisplacementTakeover } from '../../state/displacement_takeover.js';
 import { getDoctrineTempoMultiplier, updateDoctrineState } from '../../state/doctrine.js';
 import { updateEmbargoProfiles } from '../../state/embargo.js';
-import { updateEnclaveIntegrity } from '../../state/enclave_integrity.js';
+import { updateEnclaveIntegrity, computeEnclaveResilienceFallbackPressure } from '../../state/enclave_integrity.js';
 import { accumulateExhaustion } from '../../state/exhaustion.js';
 import { applyFatigueRecovery, updateFormationFatigue } from '../../state/formation_fatigue.js';
 import { deriveMunicipalityAuthorityMap, updateFormationLifecycle } from '../../state/formation_lifecycle.js';
@@ -2274,7 +2274,14 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             ensureInternationalVisibilityPressure(context.state);
-            const enclavePressure = context.report.enclave_integrity?.humanitarian_pressure_total ?? 0;
+            // #23 phase 2: bridge enclave_resilience map into IVP rollup. The
+            // primary supply-critical-component detection produces zero entries
+            // despite historically-correct sieges (n10 empirical); the fallback
+            // reads the hand-curated enclave_resilience map so siege humanitarian
+            // pressure surfaces in IVP and constraint_severity can clear W4 (>0.55).
+            const primaryPressure = context.report.enclave_integrity?.humanitarian_pressure_total ?? 0;
+            const fallbackPressure = computeEnclaveResilienceFallbackPressure(context.state);
+            const enclavePressure = primaryPressure + fallbackPressure;
             const ivp = updateInternationalVisibilityPressure(
                 context.state,
                 context.state.political.sarajevo_state,
