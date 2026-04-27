@@ -376,7 +376,7 @@
   ],
   "patron_directives": {
     "HRHB": [
-      { "name": "Consolidate Herzegovina", "start_week": 0, "end_week": 40, "stance_ceiling": "defensive", "corps_ids": ["hvo_southeast_herzegovina", "hvo_central_bosnia", "hvo_tomislavgrad"], "description": "Zagreb: secure Herzegovina, maintain RBiH alliance. Posavina exempt (fighting for survival)." },
+      { "name": "Consolidate Herzegovina", "start_week": 0, "end_week": 40, "stance_ceiling": "defensive", "corps_ids": ["hvo_central_bosnia", "hvo_tomislavgrad"], "description": "Zagreb: secure Croat heartland in central Bosnia + Tomislavgrad. Herzegovina (Op Jackal) and Posavina exempt — operationally active in 1992." },
       { "name": "Herzegovina Offensive", "start_week": 40, "end_week": 999, "stance_ceiling": "offensive", "corps_ids": ["hvo_southeast_herzegovina"], "description": "Zagreb: take Mostar hinterland" },
       { "name": "Central Bosnia Restraint", "start_week": 40, "end_week": 50, "stance_ceiling": "balanced", "corps_ids": ["hvo_central_bosnia"], "description": "Zagreb: prepare positions, avoid premature escalation" },
       { "name": "Central Bosnia Offensive", "start_week": 50, "end_week": 999, "stance_ceiling": "offensive", "corps_ids": ["hvo_central_bosnia"], "description": "Zagreb: secure Lasva Valley" },
