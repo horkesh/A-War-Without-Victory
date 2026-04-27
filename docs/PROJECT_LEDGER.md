@@ -1,3 +1,24 @@
+## [2026-04-27] fix(exhaustion): clamp accumulator at 100 — Phase 1 partial; clamp works but WA timing didn't shift (#29 sub-issue 5)
+
+**Type:** Architectural correctness fix on `src/sim/combat/exhaustion.ts:96`. Pyrrhic team consensus call ("fix the clock first").
+**Branch:** `claude/phase1-wa-timing-exhaustion-clamp` (off main post-cascade)
+**Commit:** `7c883c3f` — `Math.min(100, current + finalDelta)` to clamp per-faction war_exhaustion at the canonical 0-100 percentage scale.
+
+**Empirical n17 result:**
+  - Hash: `2b2a210018ae9e9c`
+  - `war_exhaustion.RBiH/HRHB: 100.001` (clamp works mechanically; storage now bounded)
+  - `washington_signed: true at turn 60` — **UNCHANGED from n16**; clamp alone did NOT shift WA timing
+  - Combat: RBiH orders 228→217, HRHB 21 (unchanged), RS 115 (unchanged)
+  - Defender casualties 90,337→98,996 (+10%); attacker 58,197→58,808 (essentially flat)
+
+**Diagnostic (audit in flight):** clamp alone doesn't move WA because per-faction reaches 100 at ~t14, combined hits W6 threshold (55) almost immediately. The architectural correctness is necessary but not sufficient — need ALSO threshold recalibration. Phase 1 is a setup move; Phase 1b will recalibrate `WASH_COMBINED_EXHAUSTION` against the now-bounded 0-200 combined range, OR slow `MAX_DELTA_PER_TURN` from 10→~3 so saturation takes 33 turns instead of 14.
+
+**The +10% defender casualty delta** is plausibly the clamp's downstream effect on combat math via `getExhaustionExternalModifier` / friction multipliers (clamped values flow into combat formulae differently). To audit before merging.
+
+**Decision: HOLD PR until audit returns + Phase 1b recalibration empirically validated together.** Per Roso falsification: don't ship a partial fix that's just half a working pair.
+
+---
+
 ## [2026-04-27] test(validation): officer_config + sister-parity regression tests (#25 sub-tasks D+E)
 
 **Type:** Test-only addition; documentation-by-test for dead-config pattern.
