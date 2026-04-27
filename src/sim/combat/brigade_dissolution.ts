@@ -83,6 +83,18 @@ export function dissolveCombatIneffectiveBrigades(state: GameState): Dissolution
         if (!f || f.status !== 'active') continue;
         if (f.kind !== 'brigade' && f.kind !== 'og') continue;
 
+        // #29 sub-issue 1: HV brigades (Croatian Army cross-border deployment,
+        // tagged 'hv_origin' at spawn in hv_integration.ts:188) represent
+        // committed national-army units. They should only be removed by combat
+        // damage, not idle-decay dissolution. Without this skip, HV brigades
+        // dissolve at ~t79-t89 in 188w runs (battles_fought=0,
+        // total_casualties_taken=0) because cohesion decays below the
+        // dissolution threshold while waiting for an offensive op to deploy
+        // them — which never happens because of the calendar-event-to-
+        // operation pipeline gap (#29 sub-issue 2). Until the operations
+        // pipeline lands, this protects the HV asset.
+        if (f.tags?.includes('hv_origin')) continue;
+
         const personnel = f.personnel ?? 0;
         const cohesion = f.cohesion ?? 0;
         const morale = f.morale ?? 50;
