@@ -23,7 +23,7 @@ import { updateDisplacement } from '../../state/displacement.js';
 import { processDisplacementTakeover } from '../../state/displacement_takeover.js';
 import { getDoctrineTempoMultiplier, updateDoctrineState } from '../../state/doctrine.js';
 import { updateEmbargoProfiles } from '../../state/embargo.js';
-import { updateEnclaveIntegrity } from '../../state/enclave_integrity.js';
+import { updateEnclaveIntegrity, computeEnclaveResilienceFallbackPressure } from '../../state/enclave_integrity.js';
 import { accumulateExhaustion } from '../../state/exhaustion.js';
 import { applyFatigueRecovery, updateFormationFatigue } from '../../state/formation_fatigue.js';
 import { deriveMunicipalityAuthorityMap, updateFormationLifecycle } from '../../state/formation_lifecycle.js';
@@ -73,7 +73,7 @@ import { updateEventReadiness } from '../events/pressure_system.js';
 import { collectStrategicReserves, reinforceFromStrategicReserves } from '../combat/strategic_reserve.js';
 import { reinforceBrigadesFromPools, applyWiaTrickleback } from '../formation_spawn.js';
 import { runFormationHqRelocation } from '../formation_hq_relocation.js';
-import { ensureRbihHrhbState, updateAllianceValue } from '../early_war/alliance_update.js';
+import { ensureRbihHrhbState, updateAllianceValue, countBilateralFlips } from '../early_war/alliance_update.js';
 import { checkAndApplyCeasefire } from '../early_war/bilateral_ceasefire.js';
 import { buildSettlementsByMun } from '../early_war/control_strain.js';
 import { applyCasualtyPoolExhaustion } from '../early_war/pool_population.js';
@@ -1762,6 +1762,32 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'bilateral-flip-count-war',
+        run: (context) => {
+            // Issue #23 fix A: war-phase bilateral RBiH↔HRHB flip counter.
+            // earlyWarPhases.bilateral-flip-count never fires in player_choice
+            // mode, so without this step stalemate_turns stays at 0 forever and
+            // ceasefire pre-condition C4 (>= 4 stalemate turns) is unreachable,
+            // blocking Washington Agreement Path A.
+            // Reads control_events (already populated by war-phase OSID flips)
+            // filtered for this turn and RBiH↔HRHB transitions only.
+            if (context.state.meta.phase !== 'war') return;
+            const turn = context.state.meta.turn;
+            const events = context.state.political.control_events ?? [];
+            const flips: Array<{ mun_id: string; from_faction: 'RBiH' | 'HRHB'; to_faction: 'RBiH' | 'HRHB' }> = [];
+            for (const e of events) {
+                if (e.turn !== turn) continue;
+                if (!e.mun_id) continue;
+                if (e.from === 'RBiH' && e.to === 'HRHB') {
+                    flips.push({ mun_id: e.mun_id, from_faction: 'RBiH', to_faction: 'HRHB' });
+                } else if (e.from === 'HRHB' && e.to === 'RBiH') {
+                    flips.push({ mun_id: e.mun_id, from_faction: 'HRHB', to_faction: 'RBiH' });
+                }
+            }
+            countBilateralFlips(context.state, flips);
+        }
+    },
+    {
         name: 'ceasefire-check',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
@@ -2248,7 +2274,14 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             ensureInternationalVisibilityPressure(context.state);
-            const enclavePressure = context.report.enclave_integrity?.humanitarian_pressure_total ?? 0;
+            // #23 phase 2: bridge enclave_resilience map into IVP rollup. The
+            // primary supply-critical-component detection produces zero entries
+            // despite historically-correct sieges (n10 empirical); the fallback
+            // reads the hand-curated enclave_resilience map so siege humanitarian
+            // pressure surfaces in IVP and constraint_severity can clear W4 (>0.55).
+            const primaryPressure = context.report.enclave_integrity?.humanitarian_pressure_total ?? 0;
+            const fallbackPressure = computeEnclaveResilienceFallbackPressure(context.state);
+            const enclavePressure = primaryPressure + fallbackPressure;
             const ivp = updateInternationalVisibilityPressure(
                 context.state,
                 context.state.political.sarajevo_state,

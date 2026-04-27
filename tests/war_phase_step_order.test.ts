@@ -139,6 +139,7 @@ describe('war-phase step ordering', () => {
         // +1 from cleanup-expired-event-modifiers (v0.9.0 Consequence System, 2026-04-22)
         // +1 from apply-guerrilla-attrition (v0.9.0 Consequence System, 2026-04-22)
         // +1 from snapshot-alliance-at-turn-start (issue #13 zone posture inertia, 2026-04-23)
-        expect(stepNames.length).toBe(166);
+        // +1 from bilateral-flip-count-war (issue #23 fix A: war-phase bilateral counter, 2026-04-27)
+        expect(stepNames.length).toBe(167);
     });
 });
