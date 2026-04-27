@@ -32,6 +32,32 @@ Per the Roso prototype falsification lesson (#25 fix A): one variable per merge.
 
 ---
 
+## [2026-04-27] fix(brigade-lifecycle): HV-origin formations skip idle-decay + stranded-collapse destruction (#29 sub-issue 1)
+
+**Type:** Engine surgical fix on top of #29 sub-issue 4. Two coordinated skips for HV-origin brigades.
+**Branch:** `claude/issue-29-sub6-hv-dissolution-immune` (off `claude/issue-29-sub4-enclave-formula`)
+**Commits:**
+  - `89bff08a` — `brigade_dissolution.ts` skip for hv_origin (n14 saved hv_1st only)
+  - `d3f713dc` — `stranded_brigade_lifecycle.ts` skip for hv_origin (n15 saves all 4)
+
+**Empirical result (n15 vs n13 baseline):**
+  | Brigade | n13 | n14 (1st skip) | n15 (both skips) |
+  |---|---|---|---|
+  | hv_1st_guards_tigers | destroyed t89 livno | active livno | **active 2419 pers @ Posavina** |
+  | hv_4th_guards_split | active 3000 livno | active 3000 livno | **active 3000 livno** |
+  | hv_5th_guards_karlovac | destroyed t79 Posavina | destroyed t79 Posavina | **active 1976 pers @ Posavina** |
+  | hv_7th_guards_varazdin | destroyed t79 Posavina | destroyed t79 Posavina | **active 2121 pers @ Posavina** |
+
+  **All 4 HV brigades now survive to w188.** WA still signs at t60. Combat metrics unchanged (HRHB orders 21, identical to n11/n13/n14 — Federation bilateral suppression intact).
+
+**Caveat — partial win:** Brigades survive but **3 of 4 are displaced to `op:bosanski_samac:domaljevac_2` (Posavina)** while remaining assigned to `hvo_tomislavgrad`. They're alive but idle. The teleportation mechanism that moves them from home to Posavina between t66-t67 remains opaque (no operations, no movements record their move). The two dissolution-skip fixes are tourniquets — they prevent destruction but don't fix the displacement source.
+
+  Per audit verdict B-: "right direction (HV doesn't get magically dissolved by spreadsheet decay) but not yet credible — half the HV strategic reserve still vanishes by t79... This may be inadvertently fixed by sub-issue 2 (calendar-event-to-operation pipeline) routing HV via proper operation pipeline."
+
+**Decision: ship as #29 sub-issue 1 partial.** Strict improvement over n13 (4 alive vs 1 alive). No regression in combat metrics. Teleportation mechanism becomes new sub-issue if not auto-resolved by sub-issue 2.
+
+---
+
 ## [2026-04-27] discovery: HRHB attack-count drop is post-WA Federation suppression (correct gate behavior, not a bug)
 
 **Type:** Diagnostic finding closing #29 sub-issue 1 (HRHB-suppression source). No code change.
