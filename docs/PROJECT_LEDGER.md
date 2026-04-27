@@ -59,10 +59,23 @@ Per the Roso prototype falsification lesson (#25 fix A): one variable per merge.
 
 **Decision: ship phase 2 standalone.** The fix is empirically validated to do its narrow thing — close the W4 cascade so the political signing predicate can fire when conditions converge (which they correctly do per the formula, with calendar events landing on historical dates). The phantom HV brigades and Federation-arc-doesn't-execute gaps are SEPARATE downstream issues; were already there and would manifest if WA had signed via any other route. Per Roso falsification lesson: one variable per merge.
 
-**Phase 3 candidates for #23** (NOT in this PR):
-  - HV brigade spawn-to-corps wiring (phantoms with personnel=0 / home_mun=null)
-  - Calendar-event-to-operation pipeline (Cincar/Storm events fire but no ops execute)
-  - WA naming-hazard fix (bilateral_framework vs international_signing)
+**Cascade-effect audit (n10 vs n11) — post-self-review verification:**
+
+| Metric | n10 | n11 | Δ | Verdict |
+|---|---|---|---|---|
+| RS patron_commitment | 0.447 | 0.282 | **-37%** | direction historically correct (sanctions era); magnitude high |
+| RS material_support_level | 0.495 | 0.383 | -23% | same |
+| RBiH patron_commitment | 0.668 | 0.705 | +6% | direction historically correct |
+| HRHB patron_commitment | 0.735 | 0.735 | 0% | unaffected (no IVP multiplier in HRHB formula) |
+| composite_ivp | 0.300 | 0.601 | **doubled** | driven by enclave_humanitarian_pressure 0→1.0 |
+| RS personnel @ w188 | 107,963 | 115,996 | **+7%** | RS does NOT collapse — slight increase |
+| RS attacks | 117 | 115 | -2 | essentially unchanged |
+| RBiH attacks | 194 | 228 | +18% | more aggressive after WA — plausible |
+| **HRHB attacks** | **32** | **21** | **-34%** | **anti-direction signal — flagged in #29 sub-issue 1** |
+| RS brigades destroyed | 10 | 15 | +5 | more attrition, not collapse |
+| HRHB brigades destroyed | 5 | 8 | +3 | includes 3 phantom HV brigades (#29 sub-issue 1) |
+
+**Cascade verdict:** moderate, not catastrophic. RS doesn't collapse. Patron-commitment shifts are directionally historically correct (sanctions degraded RS material support; international community supported Bosniaks more openly post-WA). Magnitudes are high because enclave_humanitarian_pressure saturates at 1.0 throughout the run — this is too aggressive and warrants formula tuning in a future PR (divide coefficient by 2-3, or use Math.max(primary, fallback) instead of sum). HRHB attack drop -34% is the only counter-intuitive signal; tied to phantom HV brigade loan-cascade already tracked in #29 sub-issue 1.
 
 ---
 
