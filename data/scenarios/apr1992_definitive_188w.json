@@ -7,6 +7,7 @@
   "init_control_mode": "hybrid_1992",
   "init_formations": "apr1992",
   "init_formations_oob": true,
+  "war_timeline": "apr1992",
   "formation_spawn_directive": {
     "kind": "both"
   },
