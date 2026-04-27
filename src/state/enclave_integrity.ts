@@ -250,6 +250,7 @@ export function computeEnclaveResilienceFallbackPressure(state: GameState): numb
     if (!map) return 0;
     const ids = Object.keys(map).sort((a, b) => a.localeCompare(b));
     let total = 0;
+    let activeCount = 0;
     for (const id of ids) {
         const entry = map[id];
         if (typeof entry !== 'object' || entry == null) continue;
@@ -261,6 +262,14 @@ export function computeEnclaveResilienceFallbackPressure(state: GameState): numb
         const pressureMult = isCapital ? SARAJEVO_PRESSURE_MULTIPLIER : HUMANITARIAN_PRESSURE_MULTIPLIER;
         const visibilityMult = isCapital ? CAPITAL_ENCLAVE_VISIBILITY : 1.0;
         total += inverseResilience * pressureMult * visibilityMult;
+        activeCount++;
     }
-    return total;
+    // #29 sub-issue 4: mean across active enclaves rather than sum.
+    // Sum saturated IVP at 1.0 in n11 (raw 9.3 from 7 enclaves), producing
+    // an over-aggressive composite_ivp shift (0.30→0.60) that drove RS
+    // patron_commitment -37%. Mean bounds the value naturally — represents
+    // "average humanitarian distress" rather than "cumulative distress" —
+    // and still clears W4 (constraint_severity threshold 0.55) when active
+    // enclaves are in genuine distress.
+    return activeCount > 0 ? total / activeCount : 0;
 }
