@@ -143,6 +143,41 @@ export function isRbihHrhbCombatEnabled(state: GameState): boolean {
     return (turn - rhs.mobilization_started_turn) >= MOBILIZATION_DURATION_TURNS;
 }
 
+/**
+ * Returns true if a combat order between attacker and defender must be blocked because
+ * the pair is RBiH↔HRHB and one of:
+ *   - turn < rbih_hrhb_war_earliest_turn (default 26)
+ *   - !isRbihHrhbCombatEnabled (still allied or in mobilization)
+ *   - bilateral ceasefire active
+ *   - Washington Agreement signed
+ *
+ * For non-RBiH↔HRHB pairs always returns false.
+ *
+ * Mirrors the gate at battle_resolution.ts (the canonical RBiH-HRHB gate). Centralized so
+ * the same predicate is applied at every combat-flip site (battle_resolution, sector_offensive,
+ * paramilitary_sweep, jna_phantom_brigades, attack_resolution_osid). See ledger entry for
+ * Orasje post-WA regression.
+ */
+export function isRbihHrhbCombatBlocked(
+    state: GameState,
+    attackerFaction: string | null | undefined,
+    defenderFaction: string | null | undefined
+): boolean {
+    if (!attackerFaction || !defenderFaction) return false;
+    const isRbihVsHrhb =
+        (attackerFaction === 'RBiH' && defenderFaction === 'HRHB') ||
+        (attackerFaction === 'HRHB' && defenderFaction === 'RBiH');
+    if (!isRbihVsHrhb) return false;
+    const turn = state.meta?.turn ?? 0;
+    const earliestTurn = state.meta?.rbih_hrhb_war_earliest_turn ?? 26;
+    if (turn < earliestTurn) return true;
+    if (!isRbihHrhbCombatEnabled(state)) return true;
+    const rhs = state.political.rbih_hrhb_state;
+    if (rhs?.ceasefire_active) return true;
+    if (rhs?.washington_signed) return true;
+    return false;
+}
+
 export interface AllianceUpdateReport {
     previous_value: number;
     new_value: number;

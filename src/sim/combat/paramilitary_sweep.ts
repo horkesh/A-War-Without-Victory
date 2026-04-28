@@ -48,6 +48,7 @@ import {
 import { analyzeFactionGraph } from './osid_graph_analysis.js';
 import { buildOsidAdjacency } from './osid_adjacency.js';
 import { ENCLAVE_DEFINITIONS, osidBelongsToEnclave } from './enclave_resilience.js';
+import { isRbihHrhbCombatBlocked } from '../early_war/alliance_update.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import type { EdgeRecord } from '../../map/settlements.js';
 
@@ -477,6 +478,14 @@ export function advanceParamilitaries(
 
         // Already faction-controlled — just dissolve
         if (currentController === f.faction) {
+            dissolveParamilitary(state, fid, report);
+            continue;
+        }
+
+        // RBiH↔HRHB combat gate: skip resolution (and dissolve) when bilateral combat is suppressed
+        // (mobilizing, ceasefire, or post-Washington). Without this, paramilitary sweeps could
+        // flip allied or post-ceasefire territory bypassing the political agreement.
+        if (isRbihHrhbCombatBlocked(state, f.faction, currentController)) {
             dissolveParamilitary(state, fid, report);
             continue;
         }

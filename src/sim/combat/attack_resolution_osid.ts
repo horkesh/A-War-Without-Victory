@@ -60,7 +60,7 @@ import {
     getCoEthnicShare,
     getEthnicDefenseBonus,
 } from './ethnic_defense.js';
-import { isRbihHrhbCombatEnabled } from '../early_war/alliance_update.js';
+import { isRbihHrhbCombatBlocked } from '../early_war/alliance_update.js';
 import { findBrigadeOperation } from './corps_operation_helpers.js';
 
 // ── Shared combat math ──────────────────────────────────────────────────
@@ -320,15 +320,10 @@ export function resolveAttackOrdersOsid(
         const firstAttacker = attackerFormations[0]!;
         const attackerFaction = firstAttacker.faction as FactionId;
 
-        // Safety gate: suppress HRHB↔RBiH combat during mobilization (belt-and-suspenders).
-        // If an attack order somehow slips through (e.g. player-ordered), skip resolution.
+        // Safety gate: suppress HRHB↔RBiH combat when mobilizing, ceasefire-active, or
+        // post-Washington. Belt-and-suspenders if an order slips through upstream.
         const targetController = getPoliticalControllerOSID(state, targetOsid, reverseMap);
-        {
-            const isRbihHrhbPair =
-                (attackerFaction === 'RBiH' && targetController === 'HRHB') ||
-                (attackerFaction === 'HRHB' && targetController === 'RBiH');
-            if (isRbihHrhbPair && !isRbihHrhbCombatEnabled(state)) continue;
-        }
+        if (isRbihHrhbCombatBlocked(state, attackerFaction, targetController)) continue;
 
         const defenderFormations = (allFormations as FormationState[])
             .filter(f => f.status === 'active' && (f as { location_osid?: string }).location_osid === targetOsid && f.faction !== attackerFaction)
