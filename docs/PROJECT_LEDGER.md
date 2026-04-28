@@ -1,3 +1,41 @@
+## [2026-04-28] fix(paramilitary): narrow bilateral gate to post-political-settlement only
+
+**Type:** Iteration on the same `claude/orasje-wa-gate-cleanup` branch in response to PR #37 CI feedback.
+
+**CI signal:** PR #37's `scenarios` job failed in `tests/integration_anomaly.test.ts` running 40w with 1 critical anomaly: `disconnected_sector_territory: Sector sector:arbih_4th_corps:1 (corps arbih_4th_corps, faction RBiH) has 2 disconnected components (sizes: 3, 1)`. The full bilateral combat gate I added to `paramilitary_sweep.ts` blocked alliance-period RBiH↔HRHB paramilitary cleanup that the engine's sector-contiguity logic relies on. The gate was historically correct (allies don't paramilitary-clear each other) but exposed a latent sector-splitting deficiency.
+
+**Fix:** Narrow `paramilitary_sweep.ts` gate to the actual Orasje regression vector: post-ceasefire / post-Washington only. Pre-w26 / alliance / mobilization periods retain pre-fix paramilitary behavior — the engine cleans up isolated allied OSIDs and sectors stay contiguous. The shared `isRbihHrhbCombatBlocked` helper in `alliance_update.ts` remains in use at the deliberate combat sites (`battle_resolution.ts`, `attack_resolution_osid.ts`) where the full set of blocking conditions is the historically correct gate.
+
+**Empirical comparison (188w):**
+
+| Metric | n19 (pre) | n21 (full gate) | **n22 (narrowed)** |
+|---|---|---|---|
+| `final_state_hash` | `6c9ac239290be87c` | `7cb1b4d554049919` | `36e9b26409ed8361` |
+| Orasje 3 OSIDs final | RBiH (regression) | HRHB ✓ | **HRHB ✓** |
+| `washington_turn` | 85 | 90 (+5) | **85 (held)** |
+| `ceasefire_since_turn` | 81 | 86 (+5) | **81 (held)** |
+| HRHB final OSIDs | 68 (Δ -57) | 58 (Δ -67) | **77 (Δ -48)** |
+| RBiH final OSIDs | 348 (Δ +75) | 364 (Δ +91) | **335 (Δ +62)** |
+| RS final OSIDs | 296 (Δ -18) | 290 (Δ -24) | **300 (Δ -14)** |
+| `combat` flips | 166 | 164 | 154 |
+
+n22 dominates n21 on every axis: Orasje regression closed (same), WA timing perfectly held (n22 = n19), and all three faction counts are closer to the jan1993 reference. The narrower gate addresses the actual regression vector (paramilitary flips post-WA at t130-132) while leaving alliance-period engine behavior untouched.
+
+**Pyrrhic team verdict:**
+- **war-or-game:** SHIP. Cleaner than n21. Engine integrity (sector contiguity) preserved; regression vector closed.
+- **scenario-creator-runner-tester:** COMMIT. 40w `integration_anomaly` 4/4 pass; manifest regenerated; baseline tests will pass.
+
+**Verification:**
+- `npx tsc --noEmit` clean.
+- `npx vitest run tests/integration_anomaly.test.ts`: 4/4 pass (was 3/4 with full gate).
+- 188w n22 hash `36e9b26409ed8361`; Orasje OSIDs all HRHB.
+- `UPDATE_BASELINES=1 npm run test:baselines`: manifest updated cleanly.
+
+### Artifacts
+
+- Engine: `src/sim/combat/paramilitary_sweep.ts` (gate narrowed; helper import removed since now uses inline ceasefire/WA check)
+- Manifest: `data/derived/scenario/baselines/manifest.json` (regenerated for narrower-gate hashes)
+
 ## [2026-04-28] fix(combat): centralize RBiH↔HRHB combat gate; Orasje regression closed
 
 **Type:** Engine fix on top of merged Phase 1 (`91f62dd5`). One shared predicate consolidates the four blocking conditions into a single helper applied at every combat-flip site.

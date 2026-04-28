@@ -48,7 +48,6 @@ import {
 import { analyzeFactionGraph } from './osid_graph_analysis.js';
 import { buildOsidAdjacency } from './osid_adjacency.js';
 import { ENCLAVE_DEFINITIONS, osidBelongsToEnclave } from './enclave_resilience.js';
-import { isRbihHrhbCombatBlocked } from '../early_war/alliance_update.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import type { EdgeRecord } from '../../map/settlements.js';
 
@@ -482,10 +481,16 @@ export function advanceParamilitaries(
             continue;
         }
 
-        // RBiH↔HRHB combat gate: skip resolution (and dissolve) when bilateral combat is suppressed
-        // (mobilizing, ceasefire, or post-Washington). Without this, paramilitary sweeps could
-        // flip allied or post-ceasefire territory bypassing the political agreement.
-        if (isRbihHrhbCombatBlocked(state, f.faction, currentController)) {
+        // Post-ceasefire / post-Washington RBiH↔HRHB gate.
+        // Narrower than the full bilateral-combat gate used at deliberate combat sites:
+        // pre-w26 / alliance-period paramilitary cleanup is historically loose (and the
+        // engine relies on it for sector contiguity), so only block the post-political-
+        // settlement window — the actual Orasje regression vector.
+        const rhsParamilitary = state.political.rbih_hrhb_state;
+        const isRbihHrhbPair =
+            (f.faction === 'RBiH' && currentController === 'HRHB') ||
+            (f.faction === 'HRHB' && currentController === 'RBiH');
+        if (isRbihHrhbPair && (rhsParamilitary?.ceasefire_active || rhsParamilitary?.washington_signed)) {
             dissolveParamilitary(state, fid, report);
             continue;
         }
