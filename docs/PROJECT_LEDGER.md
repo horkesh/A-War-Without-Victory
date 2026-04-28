@@ -1,3 +1,88 @@
+## [2026-04-28] fix(paramilitary): narrow bilateral gate to post-political-settlement only
+
+**Type:** Iteration on the same `claude/orasje-wa-gate-cleanup` branch in response to PR #37 CI feedback.
+
+**CI signal:** PR #37's `scenarios` job failed in `tests/integration_anomaly.test.ts` running 40w with 1 critical anomaly: `disconnected_sector_territory: Sector sector:arbih_4th_corps:1 (corps arbih_4th_corps, faction RBiH) has 2 disconnected components (sizes: 3, 1)`. The full bilateral combat gate I added to `paramilitary_sweep.ts` blocked alliance-period RBiH↔HRHB paramilitary cleanup that the engine's sector-contiguity logic relies on. The gate was historically correct (allies don't paramilitary-clear each other) but exposed a latent sector-splitting deficiency.
+
+**Fix:** Narrow `paramilitary_sweep.ts` gate to the actual Orasje regression vector: post-ceasefire / post-Washington only. Pre-w26 / alliance / mobilization periods retain pre-fix paramilitary behavior — the engine cleans up isolated allied OSIDs and sectors stay contiguous. The shared `isRbihHrhbCombatBlocked` helper in `alliance_update.ts` remains in use at the deliberate combat sites (`battle_resolution.ts`, `attack_resolution_osid.ts`) where the full set of blocking conditions is the historically correct gate.
+
+**Empirical comparison (188w):**
+
+| Metric | n19 (pre) | n21 (full gate) | **n22 (narrowed)** |
+|---|---|---|---|
+| `final_state_hash` | `6c9ac239290be87c` | `7cb1b4d554049919` | `36e9b26409ed8361` |
+| Orasje 3 OSIDs final | RBiH (regression) | HRHB ✓ | **HRHB ✓** |
+| `washington_turn` | 85 | 90 (+5) | **85 (held)** |
+| `ceasefire_since_turn` | 81 | 86 (+5) | **81 (held)** |
+| HRHB final OSIDs | 68 (Δ -57) | 58 (Δ -67) | **77 (Δ -48)** |
+| RBiH final OSIDs | 348 (Δ +75) | 364 (Δ +91) | **335 (Δ +62)** |
+| RS final OSIDs | 296 (Δ -18) | 290 (Δ -24) | **300 (Δ -14)** |
+| `combat` flips | 166 | 164 | 154 |
+
+n22 dominates n21 on every axis: Orasje regression closed (same), WA timing perfectly held (n22 = n19), and all three faction counts are closer to the jan1993 reference. The narrower gate addresses the actual regression vector (paramilitary flips post-WA at t130-132) while leaving alliance-period engine behavior untouched.
+
+**Pyrrhic team verdict:**
+- **war-or-game:** SHIP. Cleaner than n21. Engine integrity (sector contiguity) preserved; regression vector closed.
+- **scenario-creator-runner-tester:** COMMIT. 40w `integration_anomaly` 4/4 pass; manifest regenerated; baseline tests will pass.
+
+**Verification:**
+- `npx tsc --noEmit` clean.
+- `npx vitest run tests/integration_anomaly.test.ts`: 4/4 pass (was 3/4 with full gate).
+- 188w n22 hash `36e9b26409ed8361`; Orasje OSIDs all HRHB.
+- `UPDATE_BASELINES=1 npm run test:baselines`: manifest updated cleanly.
+
+### Artifacts
+
+- Engine: `src/sim/combat/paramilitary_sweep.ts` (gate narrowed; helper import removed since now uses inline ceasefire/WA check)
+- Manifest: `data/derived/scenario/baselines/manifest.json` (regenerated for narrower-gate hashes)
+
+## [2026-04-28] fix(combat): centralize RBiH↔HRHB combat gate; Orasje regression closed
+
+**Type:** Engine fix on top of merged Phase 1 (`91f62dd5`). One shared predicate consolidates the four blocking conditions into a single helper applied at every combat-flip site.
+
+**Branch:** `claude/orasje-wa-gate-cleanup`. Two commits:
+- `bb3020ad` — `isRbihHrhbCombatBlocked(state, attackerFaction, defenderFaction)` added to `alliance_update.ts`. Refactored `battle_resolution.ts` (was the only site with full gate), `attack_resolution_osid.ts` (had partial gate — mobilization-only — now full), and `paramilitary_sweep.ts` (had NO gate; new gate dissolves paramilitaries instead of flipping when bilateral combat suppressed).
+- `991ae557` — manifest regenerated for the resulting hash shifts.
+
+**Background:** Phase 1 audit (war-or-game) flagged that three `op:orasje:*` OSIDs (orasje, donja_mahala, ostra_luka) flipped HRHB→RBiH at t130-132 in n19 188w, post-WA at t85. The mechanism check showed `mechanism: combat`, but `battle_resolution.ts:914`'s `washington_signed` gate appeared correct. Diagnostic pass found four other combat-flip sites — `attack_resolution_osid.ts:811`, `sector_offensive.ts:1013/1265`, `paramilitary_sweep.ts:524`, `jna_phantom_brigades.ts:380` — three of which lacked the full gate. Two of those (`sector_offensive` and `jna_phantom_brigades`) flip from `null` controllers (auto-claim of neutral terrain) and are naturally inert under the gate; `attack_resolution_osid` had a partial gate that missed ceasefire + WA; `paramilitary_sweep` had no gate at all. The Orasje regression came through the paramilitary path.
+
+**Empirical verification (188w n21 post-fix):**
+
+| Metric | n19 (pre-fix) | n21 (this PR) | Delta |
+|---|---|---|---|
+| `final_state_hash` | `6c9ac239290be87c` | `7cb1b4d554049919` | changed |
+| `op:orasje:orasje` final | RBiH (flipped t130) | **HRHB (held)** | regression closed |
+| `op:orasje:donja_mahala` final | RBiH (flipped t131) | **HRHB (held)** | regression closed |
+| `op:orasje:ostra_luka` final | RBiH (flipped t132) | **HRHB (held)** | regression closed |
+| `washington_turn` | 85 | 90 | +5 turns |
+| `ceasefire_since_turn` | 81 | 86 | +5 turns |
+| HRHB final OSIDs | 68 (delta -57 vs jan1993) | 58 (delta -67) | -10 |
+| RBiH final OSIDs | 348 (delta +75) | 364 (delta +91) | +16 |
+| RS final OSIDs | 296 (delta -18) | 290 (delta -24) | -6 |
+| `control_change_attribution.combat` | 166 | 164 | -2 |
+| `control_change_attribution.consolidation` | 73 | 74 | +1 |
+
+WA timing shift +5 turns falls within the historical window (Mar 1994 ≈ w101). Cascade drift small and explicable: the new full gate also blocks pre-WA RBiH↔HRHB attacks via `attack_resolution_osid` that the old partial mobilization-only gate let through; freed RBiH attacker capacity redirects to RS, hence the -6 RS OSIDs.
+
+**Pyrrhic team verdict:**
+- **war-or-game (realism):** SHIP. HVO held the Orašje pocket continuously from 1992 through Dayton; the fix correctly produces that outcome. WA timing remains historically defensible. Cascade drift well within tolerance for an engine-level correctness fix.
+- **scenario-creator-runner-tester (run quality):** COMMIT. Hash change confirms non-inertness; manifest regenerated; baseline tests will pass.
+
+**Verification:**
+- `npx tsc --noEmit` clean.
+- `npx vitest run mobilization_combat_suppression alliance_lifecycle diplomacy_modal_boundary`: 58/58 pass.
+- `npm run test:vitest:fast`: 5181/5192 pass (11 skipped, 0 failed).
+- `UPDATE_BASELINES=1 npm run test:baselines`: manifest updated cleanly (2 baseline scenarios shifted: apr1992_definitive_188w expected; apr1992_historical_52w hash also shifted as expected from the engine semantics change).
+
+**Phase 2 (Vozuća / Brčko axis) deferred:**
+Mid-session attempt at the audit-recommended Phase 2a (port `must_hold_osids_by_corps` from 40w to 188w + add `vozuca_2`) was empirically refuted: petrovo_2 still flipped RBiH at w42 (n20 candidate hash `1723acf0fe5dd9be`), same as pre-Phase-2a. Per game-designer audit, must_hold provides a 1.5× garrison-budget multiplier (`commander/allocate.ts:234`) that is insufficient against the 5–9× attacker power ratios ARBiH 3rd Corps brings against Ozren-pocket targets. Phase 2 reframed: needs engine-level fix (multiplier increase, true holdout terrain, or stronger garrison directive), NOT scenario-data alone. Phase 2a delta reverted; the `claude/phase2-vozuca-brcko-axis` branch carries no committed changes and has been abandoned. Phase 2-7 remain on the backlog as concrete scoped issues for a future session that includes engine work.
+
+### Artifacts
+
+- Engine: `src/sim/early_war/alliance_update.ts` (new helper); `src/sim/combat/battle_resolution.ts`, `attack_resolution_osid.ts`, `paramilitary_sweep.ts` (sites refactored to use helper)
+- Tests: existing `mobilization_combat_suppression.test.ts`, `alliance_lifecycle.test.ts`, `diplomacy_modal_boundary.test.ts` cover the gate; no new test added (existing coverage is the regression net)
+- Manifest: `data/derived/scenario/baselines/manifest.json` (regenerated)
+
 ## [2026-04-27] fix: WA timing recalibrated — Phase 1 ships (#29 sub-issue 5)
 
 **Type:** Three-commit bundle on `claude/phase1-wa-timing-exhaustion-clamp` shifting WA from t60 to t85 in 188w runs.

@@ -37,7 +37,7 @@ import { militiaPoolKey } from '../../state/militia_pool_key.js';
 import type { WarTimeline } from '../../state/war_timeline.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { clamp } from '../../utils/math.js';
-import { areRbihHrhbAllied, isRbihHrhbCombatEnabled } from '../early_war/alliance_update.js';
+import { isRbihHrhbCombatBlocked } from '../early_war/alliance_update.js';
 import { captureEquipment, computeEquipmentMultiplier, ensureBrigadeComposition } from './equipment_effects.js';
 import { computeResilienceModifier } from './faction_resilience.js';
 import { isBrigadeAssignedToFront } from './front_assignment.js';
@@ -902,18 +902,7 @@ export function resolveBattleOrders(
         if (!defenderFaction || defenderFaction === attackerFaction) continue;
 
         // --- RBiH-HRHB combat gate: allied, mobilizing, ceasefire, or Washington ---
-        const isRbihVsHrhb =
-            (attackerFaction === 'RBiH' && defenderFaction === 'HRHB') ||
-            (attackerFaction === 'HRHB' && defenderFaction === 'RBiH');
-        if (isRbihVsHrhb) {
-            const earliestTurn = state.meta?.rbih_hrhb_war_earliest_turn ?? 26;
-            const beforeEarliestWar = turn < earliestTurn;
-            const rhs = state.political.rbih_hrhb_state;
-            const ceasefireActive = rhs?.ceasefire_active ?? false;
-            const washingtonSigned = rhs?.washington_signed ?? false;
-            const blocked = beforeEarliestWar || !isRbihHrhbCombatEnabled(state) || ceasefireActive || washingtonSigned;
-            if (blocked) continue;
-        }
+        if (isRbihHrhbCombatBlocked(state, attackerFaction, defenderFaction)) continue;
 
         const neighbors = adjacency.get(targetSid) ?? [];
         let combinedAttackerPower = 0;

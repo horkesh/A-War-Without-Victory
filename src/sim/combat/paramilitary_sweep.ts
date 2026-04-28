@@ -481,6 +481,20 @@ export function advanceParamilitaries(
             continue;
         }
 
+        // Post-ceasefire / post-Washington RBiH↔HRHB gate.
+        // Narrower than the full bilateral-combat gate used at deliberate combat sites:
+        // pre-w26 / alliance-period paramilitary cleanup is historically loose (and the
+        // engine relies on it for sector contiguity), so only block the post-political-
+        // settlement window — the actual Orasje regression vector.
+        const rhsParamilitary = state.political.rbih_hrhb_state;
+        const isRbihHrhbPair =
+            (f.faction === 'RBiH' && currentController === 'HRHB') ||
+            (f.faction === 'HRHB' && currentController === 'RBiH');
+        if (isRbihHrhbPair && (rhsParamilitary?.ceasefire_active || rhsParamilitary?.washington_signed)) {
+            dissolveParamilitary(state, fid, report);
+            continue;
+        }
+
         // Defense check — compute once before any mutations
         const defended = isDefendedAgainst(defendedOsids, state, targetOsid, f.faction);
         const defenderPers = defended ? getDefenderPersonnel(state, targetOsid, f.faction) : 0;
