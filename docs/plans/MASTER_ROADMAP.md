@@ -1,6 +1,6 @@
 # AWWV Master Roadmap â€” Pyrrhic Games
 
-**Last Updated:** 2026-04-16
+**Last Updated:** 2026-04-28
 **Current Version:** early v0.9.x development band (formal package semver still 0.8.1 until a deliberate milestone bump)
 **Studio:** Pyrrhic Games
 **Motto:** "Another such victory and we are undone."
@@ -415,6 +415,11 @@ The remaining `v0.9.0` work is the broader divergence-event matrix and consequen
 Plans: `docs/plans/2026-03-24-v090-consequence-system-plan.md`, ~~`docs/plans/2026-03-31-v090-victory-conditions-and-pyrrhic-scoring-plan.md`~~ (closed 2026-04-16), ~~`docs/plans/2026-03-31-v090-sensitive-history-design-gate-plan.md`~~ (closed 2026-04-16).
 
 **Status (2026-04-16): PARTIAL, gold-blocker gates closed.** Core `v0.9.0` substrate is live: consequence-substrate owner cleanup, stranded-brigade lifecycle, verdict packet truth (`outcome_class`, `condemnation_flags`), the locked Srebrenica rupture-consequence path, `CostLedger` / historical comparison builders feeding the endgame surface, and now the authoritative canon for victory conditions and sensitive-history boundaries. This milestone remains open because the broader divergence-event matrix and remaining consequence authoring from the full plan are not all complete yet.
+
+**Status update 2026-04-28 (calibration + post-WA correctness):** Two PRs landed on top of `v0.9.0` substrate as bug-fix work, not new milestone scope:
+- **PR #36 (`91f62dd5`) — WA timing recalibration** (#29 sub-issue 5 partial). `CEASEFIRE_MIN_WAR_DURATION 20→45` + `war_exhaustion` clamped at 100. WA now fires at t85 in 188w runs (was t60); closes 25 of the 41-week gap to historical March 1994. Empirical journey n17→n18→n19 validated the threshold change as the actual binding gate; speculative MAX_DELTA reduction reverted as inert per Roso falsification.
+- **PR #37 (`e588c23d`) — Centralized RBiH↔HRHB combat gate.** New `isRbihHrhbCombatBlocked` helper applied at `battle_resolution`, `attack_resolution_osid`, and `paramilitary_sweep` (narrowed to post-ceasefire/post-WA only after PR #37 v1 CI exposed a latent sector-splitting bug in 40w). Closes the Orasje pocket post-WA regression flagged in PR #36 audit: all three `op:orasje:*` OSIDs now hold HRHB through w188 (vs RBiH at t130-132 pre-fix). 188w n22 cascade slightly closer to jan1993 reference than n19 on every faction count.
+- **Phase 2a (Vozuća consolidation gate) — REFUTED, REVERTED.** The Pyrrhic-team-recommended scenario-data fix (port 40w `must_hold_osids_by_corps` to 188w + add `vozuca_2`) was empirically refuted: petrovo_2 still flipped RBiH at w42 (n20 candidate hash `1723acf0fe5dd9be`). Game-designer audit confirmed `must_hold` provides only a 1.5× garrison-budget multiplier (`commander/allocate.ts:234`), insufficient against ARBiH 3rd Corps' 5–9× attacker power ratios at Ozren-pocket targets. **Phase 2 reframed as needing engine-level work** (multiplier increase, true holdout terrain, or stronger garrison directive), not scenario-data alone. Phase 2b (Brčko axis expansion) and Phases 3–7 (JNA-handover sub-snapshot, Federation triggered-ops, Roso brigade-creation events, Zvornik OOB rebalance, HV teleportation diagnostic) all deferred pending that engine work. They remain on the calibration backlog as concrete, scoped issues for a future session.
 
 **+ Cost Ledger** (Legendary Feature): ICTY-style prosecutorial endgame narrative. Every decision â€” ethnic cleansing tolerated, enclaves abandoned, paramilitary sweeps authorized â€” silently recorded. After Dayton, the player receives a prosecutorial narrative adapted from real ICTY case structures. Not a score. An indictment. Template-driven, reads event flags + casualties + displacement.
 
