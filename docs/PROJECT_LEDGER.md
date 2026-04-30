@@ -1,3 +1,25 @@
+## [2026-04-30] chore(git): resolve local↔origin divergence; cherry-pick negotiated_peace termination
+
+**Type:** Branch hygiene + behavior-additive cherry-pick. Local `main` had diverged 3 ahead / 55 behind `origin/main`. The 3 local commits represented a parallel, earlier implementation of the v0.9.0 Consequence System that remote PR #1 (`c9fb4b17`) superseded with a more developed design (1238-line `consequences.json` vs local 681; remote does not include `prosecutorial_narrative.ts` or `expire_timed_effects.ts`). Local was reset to `origin/main`; only the negotiated-peace termination wiring was salvaged via cherry-pick.
+
+**Action:**
+- Stashed 45 uncommitted essay `dynamic_sections` edits + napkin v0.9 notes as `stash@{0}`; exported as patch to `/tmp/local_essay_drafts.patch` (1053 lines) for later reference. Stash blocks were authored against the local consequence system's chain/event IDs and do not directly fit the remote design.
+- `git reset --hard origin/main` (HEAD → `bb863a3b`).
+- `git cherry-pick 34e825f4` — clean auto-merge on `turn_pipeline_types.ts`. New commit `2bc7dfed`.
+- Discarded as superseded: local `27547d41` (parallel consequence system) and `6e8687bf` (roadmap MVP-COMPLETE marker — remote roadmap state authoritative).
+
+**Behavior change shipped (`2bc7dfed`):**
+`checkWarTermination()` now recognizes `state.military.event_flags['war_ended_early']` and emits a `negotiated_peace` outcome (`negotiated_peace:<plan_id>`), priority-ordered between victory_condition and faction_collapse. New `'negotiated_peace'` value added to the `WarTerminationResult.trigger` union and the `TurnReport.war_termination.trigger` union. The flag setter is not yet wired into the remote consequence design — currently dead code until an event sets `war_ended_early`. That wiring is a follow-up.
+
+**Verification:**
+- `npx tsc --noEmit` clean.
+- `npx vitest run tests/war_termination.test.ts` — 20/20 pass (3 new tests for negotiated_peace path).
+
+### Artifacts
+- Engine: `src/sim/war_termination.ts`, `src/sim/turn_pipeline_types.ts`
+- Tests: `tests/war_termination.test.ts`
+- Reference patch (untracked): `/tmp/local_essay_drafts.patch` — 45 essays' worth of `ghost_when` / `ghost_summary` / `dynamic_sections` prose drafts, requires per-essay remap to remote chain IDs before any reuse.
+
 ## [2026-04-28] fix(paramilitary): narrow bilateral gate to post-political-settlement only
 
 **Type:** Iteration on the same `claude/orasje-wa-gate-cleanup` branch in response to PR #37 CI feedback.
