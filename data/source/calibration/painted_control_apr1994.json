@@ -4,9 +4,9 @@
     "target_id": "apr1994",
     "label": "April 1994",
     "description": "Painted control target: April 1994",
-    "total_osids": 713,
+    "total_osids": 712,
     "counts": {
-      "RS": 413,
+      "RS": 412,
       "RBiH": 233,
       "HRHB": 67
     },
@@ -536,7 +536,6 @@
     "op:rogatica:rogatica_2": "RS",
     "op:rogatica:stara_gora": "RS",
     "op:rogatica:varosiste_2": "RS",
-    "op:rogatica:vrazalice": "RS",
     "op:rogatica:zepa_2": "RBiH",
     "op:rudo:gornja_strmica": "RS",
     "op:rudo:mrsovo_2": "RS",

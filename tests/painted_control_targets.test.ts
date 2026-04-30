@@ -7,7 +7,7 @@ import path from 'node:path';
 
 const require = createRequire(import.meta.url);
 const { createServer } = require('../tools/paint_control_targets.cjs');
-const { canonicalizeControlMap, listPaintedTargets } = require('../tools/painted_control_targets.cjs');
+const { canonicalizeControlMap, listPaintedTargets, loadPaintedTarget } = require('../tools/painted_control_targets.cjs');
 
 describe('painted control target tooling', () => {
   it('canonicalizes control maps in stable OSID order and drops unsupported factions', () => {
@@ -29,6 +29,15 @@ describe('painted control target tooling', () => {
   it('lists the late-war target slots the painter is meant to author', () => {
     const ids = listPaintedTargets().map((target: { id: string }) => target.id);
     expect(ids.slice(0, 4)).toEqual(['jan1993', 'apr1994', 'apr1995', 'oct1995']);
+  });
+
+  it('keeps built-in painted targets on the same OSID universe', () => {
+    const baselineKeys = Object.keys(loadPaintedTarget('jan1993').control);
+    for (const id of ['apr1994', 'apr1995', 'oct1995']) {
+      const target = loadPaintedTarget(id);
+      expect(Object.keys(target.control), id).toEqual(baselineKeys);
+      expect(target.summary.total_osids, id).toBe(baselineKeys.length);
+    }
   });
 
   it('keeps the painter dropdown synced to the loaded save target', () => {

@@ -87,8 +87,10 @@ As of 2026-05-01, the manual painted-control set is present for:
 | Target | OSIDs | RS | RBiH | HRHB |
 |---|---:|---:|---:|---:|
 | `jan1993` | 712 | 385 | 247 | 80 |
-| `apr1994` | 713 | 413 | 233 | 67 |
-| `apr1995` | 714 | 395 | 240 | 79 |
-| `oct1995` | 714 | 322 | 285 | 107 |
+| `apr1994` | 712 | 412 | 233 | 67 |
+| `apr1995` | 712 | 393 | 240 | 79 |
+| `oct1995` | 712 | 320 | 285 | 107 |
 
 Use `--target apr1994`, `--target apr1995`, or `--target oct1995` for late-war run evaluation. Jan 1993 remains a legacy target file; the new date-specific targets use the tool's metadata schema and stable sorted OSID keys.
+
+The painter geometry currently exposes 744 operational features, but the scenario controller/evaluation universe is 712 OSIDs. Built-in painted targets must stay on that 712-key universe until the simulation substrate itself is expanded; otherwise comparisons count geometry-only OSIDs as sim misses.

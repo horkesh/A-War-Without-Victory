@@ -6,14 +6,16 @@
 - `data/source/calibration/painted_control_apr1995.json` — new date-specific painted target, authored from the April 1994 draft and finalized by manual painting.
 - `data/source/calibration/painted_control_oct1995.json` — new date-specific painted target, authored from the April 1995 draft and finalized by manual painting.
 
-**Current date-specific target summaries:**
-- `apr1994`: 713 OSIDs; RS=413, RBiH=233, HRHB=67.
-- `apr1995`: 714 OSIDs; RS=395, RBiH=240, HRHB=79.
-- `oct1995`: 714 OSIDs; RS=322, RBiH=285, HRHB=107.
+**Current date-specific target summaries:** All date-specific targets now use the same 712-OSID evaluation universe as `jan1993` and the current scenario `political_controllers` output.
+- `apr1994`: 712 OSIDs; RS=412, RBiH=233, HRHB=67.
+- `apr1995`: 712 OSIDs; RS=393, RBiH=240, HRHB=79.
+- `oct1995`: 712 OSIDs; RS=320, RBiH=285, HRHB=107.
 
-**Determinism:** These files were written through `tools/painted_control_targets.cjs`, which sanitizes target ids, persists stable sorted OSID keys, writes no timestamps, and keeps only `RS` / `RBiH` / `HRHB` faction values. Jan 1993 remains a legacy pre-tool target file; the new date-specific files use the tool metadata schema.
+**Correction note:** The painter geometry currently contains 744 operational features, while scenario `final_save.json` / `political_controllers` and `jan1993` use a 712-OSID evaluation universe. The first definitive-target commit accidentally allowed geometry-only OSIDs into late-war targets (`op:rogatica:vrazalice`, plus `op:bosanska_gradiska:gornja_jurkovica` for 1995). Those keys were removed so comparisons do not count OSIDs the sim cannot currently control.
 
-**Validation:** `node tools/compare_painted_vs_sim.cjs --list-targets` lists all four targets as present; strict structural validation passed for `apr1994`, `apr1995`, and `oct1995`; `vitest tests/painted_control_targets.test.ts` passes (5/5); `npx tsc --noEmit` clean.
+**Determinism:** These files were written through `tools/painted_control_targets.cjs` and then normalized to the Jan 1993/current-sim OSID key universe. The files keep stable sorted OSID keys, write no timestamps, and keep only `RS` / `RBiH` / `HRHB` faction values. Jan 1993 remains a legacy pre-tool target file; the new date-specific files use the tool metadata schema.
+
+**Validation:** `node tools/compare_painted_vs_sim.cjs --list-targets` lists all four targets as present; strict structural validation passed for `apr1994`, `apr1995`, and `oct1995`; `tests/painted_control_targets.test.ts` now asserts all built-in targets share the Jan 1993 key universe; `vitest tests/painted_control_targets.test.ts` passes; `npx tsc --noEmit` clean.
 
 ## [2026-04-30] fix(tooling): sync painted-target dropdown with save target
 

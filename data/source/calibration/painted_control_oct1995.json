@@ -4,9 +4,9 @@
     "target_id": "oct1995",
     "label": "October 1995",
     "description": "Painted control target: October 1995",
-    "total_osids": 714,
+    "total_osids": 712,
     "counts": {
-      "RS": 322,
+      "RS": 320,
       "RBiH": 285,
       "HRHB": 107
     },
@@ -57,7 +57,6 @@
     "op:bosanska_dubica:medjuvodje": "RS",
     "op:bosanska_dubica:vojskova": "RS",
     "op:bosanska_gradiska:cerovljani": "RS",
-    "op:bosanska_gradiska:gornja_jurkovica": "RS",
     "op:bosanska_gradiska:gornji_podgradci": "RS",
     "op:bosanska_gradiska:gradiska_3": "RS",
     "op:bosanska_gradiska:grbavci": "RS",
@@ -537,7 +536,6 @@
     "op:rogatica:rogatica_2": "RS",
     "op:rogatica:stara_gora": "RS",
     "op:rogatica:varosiste_2": "RS",
-    "op:rogatica:vrazalice": "RS",
     "op:rogatica:zepa_2": "RS",
     "op:rudo:gornja_strmica": "RS",
     "op:rudo:mrsovo_2": "RS",
