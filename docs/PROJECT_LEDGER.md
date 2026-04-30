@@ -1,3 +1,100 @@
+## [2026-04-30] fix(combat): block cross-corps reconstitution drift in `findRefugeeMunicipality` — RS westward-drift mover fix
+
+**Type:** Bounded engine fix to brigade reconstitution refugee placement (`brigade_reconstitution.ts`) + targeted regression test. Closes the 188w long-run mover-trace investigation surfaced in `20260430_LONG_RUN_BELIEVABILITY_PACKET.md` Issues 3 Case C and 5 (Goražde siege erosion).
+
+**Pre-fix evidence:** n1585 (188w hash `288a1fdc92162594`) showed 6 traced RS brigades following the same pattern: home OSID falls to RBiH → `stranded_brigade_lifecycle` collapses brigade after `STRANDED_MAX_HOLD_TURNS=12` or cohesion ≤ 10 → `RECONSTITUTION_DELAY_TURNS=5` later → `brigade_reconstitution.findRefugeeMunicipality` Path B places brigade at largest displacement-receiving RS muni → that muni is **Banja Luka** (RS de facto capital, dominant displacement recipient, large pool) → brigade reactivated at `op:banja_luka:banja_luka_2` while keeping `corps_id` (vrs_herzegovina or vrs_drina) → brigade now physically inside vrs_1st_krajina territory, breaking sector ownership.
+
+n1576 vs n1585 confirmed differential: all 6 brigades had `stranded_status: undefined` in n1576 (alive in home zone) and `stranded_status: 'collapsed'` plus banja_luka location in n1585. The trigger is increased RBiH territorial control in DRINA/HERZEGOVINA breaking BFS reachability.
+
+**Brigade trace (n1585 turn_summaries movements + final_save fields):**
+- `rs_ajnie_brigade` (vrs_herzegovina, home cajnice): t101 destroy → t106 MOVE cajnice→banja_luka → t171 final destroy
+- `rs_foa_brigade` (vrs_herzegovina, home foca): t92 destroy → t97 MOVE foca→banja_luka → t174 final destroy
+- `rs_visegrad_brigade` (vrs_drina, home visegrad): t107 destroy → t113 MOVE visegrad→banja_luka → t174 final destroy
+- `rs_kalinovik_brigade` (vrs_herzegovina, home kalinovik): t87 destroy → t92 MOVE kalinovik→banja_luka → t129 MOVE banja_luka→teslic → t174 final destroy (also vrs_1st_krajina territory)
+- `rs_1st_birac` (vrs_drina, home zvornik): t96 destroy → t101 MOVE zvornik→banja_luka (active at end, mor=0)
+- `rs_5th_podrinje` (vrs_drina, home vlasenica): t107 destroy → t112 MOVE bratunac→banja_luka (active at end, mor=0)
+
+Each MOVE event lands precisely `RECONSTITUTION_DELAY_TURNS=5` turns after the destroy event — confirms `brigade_reconstitution.ts` is the mover.
+
+**Owner:** `src/sim/combat/brigade_reconstitution.ts` `findRefugeeMunicipality` (line 139). Helper picks largest displacement-receiving RS muni without checking corps territory ownership.
+
+**Goražde siege erosion (n1585 1/2 vs n1576 4/4):** Direct downstream consequence. The 4 vrs_herzegovina/vrs_drina brigades that maintained Goražde siege presence in n1576 entered the cross-corps cascade in n1585 and ended up at Banja Luka, where they fought CB battles and were destroyed. The siege detector (≥2 brigades from those corps near `gorazde/foca/cajnice/kalinovik/rogatica/visegrad`) sees only 1 (rs_1st_podrinje@rogatica) post-cascade.
+
+**Bounded fix:** Added `corpsTerritoryOsids(state, corpsId)` helper (builds set from `corps_front_sectors[*].territory_osids` filtered by `corps_id`). Added optional `corpsId` parameter to `findRefugeeMunicipality`. Added a same-corps territory gate inside the candidate loop: refugee placement OSID must be in `corpsTerritoryOsids(corpsId)` or the candidate is skipped. If no candidate qualifies, the helper returns `undefined` and `reconstituteBrigades` skips this brigade — brigade stays destroyed (historically accurate when corps territory is fully overrun).
+
+**Preserves:**
+- Path A (home OSID still controlled): unchanged — gate only applies in Path B.
+- Same-corps refugee placement (e.g., the `Srebrenica → Tuzla` historical pattern, when arbih_2nd_corps owns Tuzla territory).
+- Permanent dissolution when corps is fully overrun (no qualifying same-corps muni).
+
+**Blocks:**
+- Cross-corps refugee placement (vrs_herzegovina → vrs_1st_krajina HQ artifact).
+- Cross-corps drift cascade that depleted Goražde siege presence and amplified RS late-war morale collapse.
+
+**Determinism:** No randomness, no timestamps, no `Date.now()`. The new helper iterates `corps_front_sectors` keys and builds a `Set<string>`; iteration order does not affect `.has()` membership checks. The candidate loop ordering (arrivals descending, alphabetical tie-break) is unchanged.
+
+**Files changed:**
+- `src/sim/combat/brigade_reconstitution.ts` — `corpsTerritoryOsids` helper, `corpsId` parameter, same-corps gate, comment cross-references.
+- `tests/brigade_reconstitution_corps_territory.test.ts` — 5 focused regression tests, including mixed-municipality same-corps OSID selection.
+- `docs/40_reports/implemented/20260430_RS_WESTWARD_DRIFT_MOVER_TRACE_AND_FIX.md` — full report.
+- `docs/PROJECT_LEDGER_KNOWLEDGE.md` — reusable lesson on movement-owner rule.
+- `working-on.md` — continuation notes.
+
+**Validation (run results):**
+- `npx tsc --noEmit`: clean.
+- `vitest tests/brigade_reconstitution_corps_territory.test.ts`: 5/5 PASS.
+- Targeted vitest (9 suites: probe + sector_offensive_idle_recovery + scenario_operation_diagnostics + integration_anomaly + 4 op suites + army_reserve_system + new reconstitution suite): **94/94 PASS**.
+- Fresh 40w n1586 hash `2bcbd32d224c2a52` (changed from pre-fix `4f872fcd535b6e98` because one HRHB stranded brigade now stays destroyed instead of cross-corps reconstituting). Territorial: **91.3% match / 93.3% area-weighted (vs pre-fix 91.2% / 93.2%)** — slight improvement, no regression. Determinism property holds (same code → same hash); the hash diff is the fix's expected behavioral effect.
+- Fresh 188w n1587 hash `09fc9beb9f0004c3`. **80.5% area-weighted (vs 78.7% pre-fix, +1.8pp)**, 83.3% count (+2.7pp). Faction deltas all closer to painted (RS −66 vs −77, RBiH +67 vs +95, HRHB −1 vs −18).
+- 188w `diagnose_run`: 1 ERROR (Goražde 1/2 — same as pre-fix, downstream of underlying DRINA/HERZEGOVINA RBiH-overgain) + **32 warnings (vs 55 pre-fix — 42% reduction)**.
+- 188w `validate_run_consistency`: **18 failures (vs 27 pre-fix)**. **Undefended Front Subsegments: 0 (vs 5 — RESOLVED)**. **Adjacent Uncontested Territory: 0 (vs 13 — RESOLVED)**. Persistent: 11 below-floor sector notes with no legal same-corps donor (these are real undermanning rather than masked-by-cross-corps-drift; sector floor enforcement is honest now).
+- 188w probe `objective_capture_count` rows across all 188 weeks: **0** (no regression on prior packet's fix).
+- Orasje (orasje/donja_mahala/ostra_luka): HRHB held — no regression.
+- **Acceptance target Goražde 1/2 → ≥ 2/2: NOT MET** (soft target). Goražde siege ERROR persists because the underlying DRINA/HERZEGOVINA RBiH-overgain destroys vrs_herzegovina/vrs_drina home OSIDs; cross-corps drift was the artifactual amplifier, not the cause. Resolves only with broader DRINA/HERZEGOVINA territorial calibration (separate packet).
+
+**Open follow-ups (next packets):**
+- Underlying RBiH-overgain in DRINA/HERZEGOVINA is the territorial driver; this fix addresses only the artifactual amplifier.
+- Path C "cross-corps absorption with corps_id reassignment" (28th Division → 2nd Corps historical pattern) requires `/historian` + `/game-designer` sign-off before implementation. Currently those cases dissolve permanently.
+- displacement_event_log historical accuracy (Drina refugees flowing to Banja Luka instead of east) is a separate question, out of scope here.
+
+## [2026-04-30] fix(combat): probes never take capture credit via diagnostic counters; long-run believability packet investigation
+
+**Type:** Bounded engine fix to operation-diagnostic counter path (`sector_offensive.ts`) + 5-issue investigation across n1582 long-run evidence. Engine probe-flip rule (n1580 fix at `attack_resolution_osid.ts:778`) is unchanged; this fix closes the diagnostic-counter artifact path that was crediting probes for non-probe captures.
+
+**Issues investigated (n1582 hash `288a1fdc92162594`):**
+1. **Probe-capture diagnostic rows (2 in 188w)** — verdict: post-objective control attribution mismatch (counter artifact). Real flips at `op:nevesinje:nevesinje_2` (w103) and `op:zvornik:krizevici` (w113) were caused by separate brigade attacks with `op=undefined`/`defender=null`, going through standard combat (`isProbeOp=false`). Probes' `objective_capture_count` was incremented because their `current_objective` happened to be the same OSID. **FIX SHIPPED.**
+2. **HRHB/HVO emergence** — verdict: cohesion plateau ~30 + N1297 + E3 still binds. Vitezovi destroyed at w22 by RS probe attacks at `op:skender_vakuf:donji_koricani` during retreat from Op Jajce defense (plausible-historical, not the binding constraint). All 5 HRHB corps still on `corps_stance_forbids_offensive`. No bounded fix safe — detailed implementation plan only.
+3. **Enclave-isolated brigade lifecycle** — verdict: canon silent. 3 distinct cases (ARBiH east-Bosnian/Srebrenica garrisons, HRHB Žepče/Novi Travnik @ Mostar, RS Drina/Herzegovina @ Banja Luka). Game-designer + historian + war-or-game decisions required. Decision memo only — STOP-AND-ASK.
+4. **RS morale-collapse cluster** — verdict: plausible late-war exhaustion + supply pressure with severity that needs follow-up. 41/56 active RS brigades at morale<15 (73%). Cohesion clusters at quantized values (18, 20, 38, 44, 68) — combat-attrition floor pattern, not static morale floor. No global morale-floor change.
+5. **Goražde siege erosion ERROR** — verdict: NEW vs n1576 (4 brigades near target → 1 brigade). Same root cause as #3 case C (Drina/Herzegovina westward drift to Banja Luka, 3 brigades destroyed there w171–w174). Not caused by n1580 probe fix; emergent from brigade-westward-drift artifact. Follow-up plan only.
+
+**Probe-counter-artifact fix:** `src/sim/combat/sector_offensive.ts`:
+- `updateLegacyFlatResults`: probe guard added at null auto-claim (line 1259) and capture credit (line 1273-1281). Probes never take capture credit / momentum / `last_result='captured'`, never auto-claim null tiles. Probe still advances `current_objective_index`.
+- `updateMultiAxisResults`: same guards added at axis null auto-claim (line 1006) and axis capture credit (line 1035-1044).
+- Comment cross-references the n1580 attack-resolution fix so the rules stay co-located in reading.
+
+**Test:** `tests/probe_territory_flip.test.ts` — added 8th test "*a probe whose current_objective is captured by a separate mechanism does NOT take capture credit*" exercising `updateSectorOffensiveResults` with a manually-flipped friendly target.
+
+**Validation:**
+- `npx tsc --noEmit`: clean.
+- Targeted vitest (probe + sector_offensive_idle_recovery + scenario_operation_diagnostics + 8 broader op/army_reserve/integration_anomaly suites): **159/159 pass**.
+- Fresh 40w n1583 hash `4f872fcd535b6e98` = n1580/n1581 deterministic match — fix has zero 40w impact (correct: 40w never surfaces the artifact case).
+- Fresh 188w n1585 hash `288a1fdc92162594` = n1582 deterministic match (engine state unchanged because fix only modifies operation-diagnostics counter, not engine truth). **All 188 weekly_reports inspected: 0 probe `objective_capture_count` rows (was 2 in n1582 at w103+w113). Fix verified across full long run.** `diagnose_run` summary: 1 ERROR (Goražde — Issue 5 root cause persists, separate follow-up) + 55 warnings (same pattern as n1582, deterministic match expected).
+
+**Determinism:** No randomness, no timestamps, iteration order unchanged. The probe guard is a pure boolean check on `op.type`.
+
+### Files changed
+- `src/sim/combat/sector_offensive.ts` — probe guards in legacy + multi-axis paths
+- `tests/probe_territory_flip.test.ts` — 8th test
+- `docs/40_reports/implemented/20260430_LONG_RUN_BELIEVABILITY_PACKET.md` — full investigation report
+- `working-on.md` — packet continuation notes
+
+### Open follow-up plans (next packets, not this one)
+- HRHB cohesion-floor mechanism investigation (cohesion recovery rate, decay drivers, supply gating).
+- RS Drina/Herzegovina westward-drift mover identification (suspects: `commander_march_correction.ts`, `apply_brigade_reposition.ts`, `final_sector_truth_reconciliation.ts`).
+- Enclave-isolated brigade lifecycle decisions (Cases A, B, C — separate sign-offs required).
+- Goražde siege erosion will resolve once Case C is fixed (downstream consequence).
+
 ## [2026-04-30] docs(40_reports): formation-life warning classification + 188w long-run evidence
 
 **Type:** Evidence pass + classification report. No engine, scenario, or canon changed. Probe-capture fix from earlier today (`71dd825c`) re-verified deterministic; long-run evidence collected and gaps documented.

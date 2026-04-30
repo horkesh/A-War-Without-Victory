@@ -112,19 +112,56 @@ function isMunicipalityControlled(state: GameState, munId: MunicipalityId, facti
 
 /**
  * Find the first friendly-controlled OSID in the municipality for placement.
+ *
+ * When `allowedOsids` is provided, only OSIDs in that set qualify — used by
+ * the refugee placement path to enforce the same-corps territory gate at
+ * OSID-selection time rather than after picking the alphabetically first
+ * friendly OSID. Mixed municipalities (containing both same-corps and
+ * foreign-corps friendly OSIDs) require this filter at selection time;
+ * applying it after the pick can reject a valid same-corps destination
+ * when the alphabetically first friendly OSID happens to be foreign-corps.
  */
-function findFriendlyOsidInMunicipality(state: GameState, munId: MunicipalityId, faction: FactionId): string | undefined {
+function findFriendlyOsidInMunicipality(
+    state: GameState,
+    munId: MunicipalityId,
+    faction: FactionId,
+    allowedOsids?: ReadonlySet<string>,
+): string | undefined {
     const pc = state.political.political_controllers ?? {};
     const prefix = `op:${munId}:`;
     // Return first alphabetically for determinism
     const candidates: string[] = [];
     for (const osid of Object.keys(pc)) {
-        if (osid.startsWith(prefix) && pc[osid] === faction) {
-            candidates.push(osid);
-        }
+        if (!osid.startsWith(prefix)) continue;
+        if (pc[osid] !== faction) continue;
+        if (allowedOsids && !allowedOsids.has(osid)) continue;
+        candidates.push(osid);
     }
     candidates.sort(strictCompare);
     return candidates[0];
+}
+
+/**
+ * Build the set of OSIDs that belong to a corps's own sector territory.
+ *
+ * Used to gate refugee placement: a brigade reconstituted via displaced-population
+ * fallback (Path B) must land in territory its OWN corps already controls,
+ * otherwise the spawn introduces a foreign corps formation into another corps's
+ * territory and produces emergent cross-corps drift.
+ *
+ * Deterministic: only inspects sector ownership; iteration order does not affect
+ * membership of the returned set.
+ */
+function corpsTerritoryOsids(state: GameState, corpsId: string): Set<string> {
+    const out = new Set<string>();
+    const sectors = state.military.corps_front_sectors;
+    if (!sectors) return out;
+    for (const sid of Object.keys(sectors)) {
+        const sector = sectors[sid];
+        if (!sector || sector.corps_id !== corpsId) continue;
+        for (const osid of sector.territory_osids ?? []) out.add(osid);
+    }
+    return out;
 }
 
 /**
@@ -142,6 +179,7 @@ function findRefugeeMunicipality(
     faction: FactionId,
     poolFaction: FactionId,
     minPool: number,
+    corpsId?: string,
 ): { mun: MunicipalityId; osid: string } | undefined {
     const eventLog = state.displacement?.displacement_event_log;
     if (!eventLog || eventLog.length === 0) return undefined;
@@ -159,6 +197,20 @@ function findRefugeeMunicipality(
     }
     if (arrivals.size === 0) return undefined;
 
+    // Same-corps territory gate: refugee placement must land within the brigade's
+    // OWN corps territory. Otherwise the reconstituted brigade enters another
+    // corps's territory tagged with the wrong corps_id, breaks sector ownership,
+    // and produces artifactual cross-corps drift (e.g. vrs_herzegovina/vrs_drina
+    // brigades reappearing at op:banja_luka:banja_luka_2 after Drina/Herzegovina
+    // home OSIDs fall to RBiH — the displaced RS population's largest receiving
+    // muni without this gate; banja_luka is vrs_1st_krajina territory).
+    //
+    // If corpsId is omitted (call sites that don't pass it), the gate is skipped.
+    // If the brigade's corps territory is fully overrun (territoryOsids empty),
+    // no refugee placement qualifies — brigade stays destroyed (historically
+    // accurate when a corps has no territory left).
+    const territoryOsids = corpsId ? corpsTerritoryOsids(state, corpsId) : null;
+
     // Sort by arrivals descending, then alphabetically for determinism
     const candidates = [...arrivals.entries()]
         .sort((a, b) => b[1] - a[1] || strictCompare(a[0], b[0]));
@@ -170,8 +222,16 @@ function findRefugeeMunicipality(
         const poolKey = militiaPoolKey(destMun as MunicipalityId, poolFaction);
         const pool = pools[poolKey];
         if (!pool || pool.available < minPool) continue;
-        // Find placement OSID
-        const osid = findFriendlyOsidInMunicipality(state, destMun as MunicipalityId, faction);
+        // Find placement OSID — apply the same-corps territory gate at SELECTION
+        // time so a mixed municipality whose alphabetically first friendly OSID
+        // is foreign-corps but whose later friendly OSID is same-corps still
+        // qualifies. Filtering after a single-OSID pick is a false-negative:
+        // the helper is asked for the first allowed OSID, not the first OSID
+        // (which may then be rejected even though a valid one exists later).
+        const osid = findFriendlyOsidInMunicipality(
+            state, destMun as MunicipalityId, faction,
+            territoryOsids ?? undefined,
+        );
         if (!osid) continue;
         return { mun: destMun as MunicipalityId, osid };
     }
@@ -254,7 +314,7 @@ export function reconstituteBrigades(state: GameState): ReconstitutionReport {
             // Path B: Home municipality lost — find where displaced population went.
             // Historical: 28th Division reformed in Tuzla from Srebrenica survivors;
             // Ključ refugees reformed in Travnik; Ilidža Bosniaks joined Sarajevo units.
-            const refugee = findRefugeeMunicipality(state, homeMun, faction, poolFaction, RECONSTITUTION_MIN_POOL);
+            const refugee = findRefugeeMunicipality(state, homeMun, faction, poolFaction, RECONSTITUTION_MIN_POOL, corpsId);
             if (!refugee) continue;
             reconMun = refugee.mun;
             locationOsid = refugee.osid;

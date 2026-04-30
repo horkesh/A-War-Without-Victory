@@ -1003,8 +1003,10 @@ function updateMultiAxisResults(
         const controller = getPoliticalControllerOSID(state, currentObj, reverseMap ?? undefined);
         if (controller === faction || isFriendlyFactionCtrl(controller, faction, state)) {
             capturedThisTurn.add(currentObj);
-        } else if (controller == null) {
-            // Null-controlled OSID: auto-claim — no enemy, no battle needed
+        } else if (controller == null && op.type !== 'probe') {
+            // Null-controlled OSID: auto-claim — no enemy, no battle needed.
+            // Probes never capture territory (n1580 fix); skip the auto-claim
+            // path for them so the rule is consistent across capture mechanisms.
             if (!state.political.political_controllers) state.political.political_controllers = {};
             state.political.political_controllers[currentObj] = faction;
             (state.political.control_events ??= []).push({
@@ -1031,13 +1033,18 @@ function updateMultiAxisResults(
         const currentObjective = axis.objectives[currentIdx]!;
 
         if (capturedThisTurn.has(currentObjective)) {
-            // Captured (either by this axis's brigades or convergence from another axis)
+            // Captured (either by this axis's brigades or convergence from another axis).
+            // Probes never capture (n1580); skip capture credit even when their
+            // axis target is friendly-controlled via another mechanism. Probe
+            // still advances current_objective_index to recognize and move on.
             axis.attack_attempt_count += 1;
-            axis.objective_capture_count += 1;
+            if (op.type !== 'probe') {
+                axis.objective_capture_count += 1;
+                axis.last_result = 'captured';
+                axis.momentum = Math.min(MOMENTUM_CAP, axis.momentum + 1);
+            }
             axis.idle_execution_turn_streak = 0;
             axis.movement_only_execution_turns = 0; // reset: objective captured
-            axis.last_result = 'captured';
-            axis.momentum = Math.min(MOMENTUM_CAP, axis.momentum + 1);
             axis.current_objective_index = currentIdx + 1;
             axis.consecutive_failures_on_current = 0;
             axis.consecutive_catastrophic_on_current = 0;
@@ -1255,8 +1262,11 @@ function updateLegacyFlatResults(
     const currentObjective = objectives[currentIdx]!;
     let effectiveController = getPoliticalControllerOSID(state, currentObjective, reverseMap ?? undefined);
 
-    // Null-controlled OSID: auto-claim — no enemy, no battle needed
-    if (effectiveController == null) {
+    // Null-controlled OSID: auto-claim — no enemy, no battle needed.
+    // Probes are recon-by-force and never capture territory (per n1580 fix in
+    // attack_resolution_osid.ts:778). Skip the auto-claim path for probes so
+    // the rule is consistent across all capture mechanisms.
+    if (effectiveController == null && op.type !== 'probe') {
         if (!state.political.political_controllers) state.political.political_controllers = {};
         state.political.political_controllers[currentObjective] = faction;
         (state.political.control_events ??= []).push({
@@ -1272,11 +1282,21 @@ function updateLegacyFlatResults(
 
     if (effectiveController === faction || isFriendlyFactionCtrl(effectiveController, faction, state)) {
         op.attack_attempt_count = (op.attack_attempt_count ?? 0) + 1;
-        op.objective_capture_count = (op.objective_capture_count ?? 0) + 1;
+        // Probes never capture territory — even when their current_objective
+        // becomes friendly-controlled via a different mechanism (separate op,
+        // brigade-independent attack, abandonment), the probe must not take
+        // capture credit. Otherwise downstream consumers (army_reserve
+        // exploitation windows, AAR, scenario diagnostics) misattribute
+        // non-probe captures to probes (n1582 surfaced 2 such artifacts).
+        // Probes still advance current_objective_index so they recognize the
+        // target is no longer enemy and move on.
+        if (op.type !== 'probe') {
+            op.objective_capture_count = (op.objective_capture_count ?? 0) + 1;
+            op.last_result = 'captured';
+            op.momentum = Math.min(MOMENTUM_CAP, (op.momentum ?? 0) + 1);
+        }
         op.idle_execution_turn_streak = 0;
         op.movement_only_execution_turns = 0; // reset: objective captured
-        op.last_result = 'captured';
-        op.momentum = Math.min(MOMENTUM_CAP, (op.momentum ?? 0) + 1);
         op.current_objective_index = currentIdx + 1;
         op.consecutive_failures_on_current = 0;
         fullyRevealProbeSectorIntel(state, op);

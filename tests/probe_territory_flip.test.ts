@@ -9,6 +9,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { resolveAttackOrdersOsid } from '../src/sim/combat/attack_resolution_osid.js';
+import { updateSectorOffensiveResults } from '../src/sim/combat/sector_offensive.js';
 import { initializeCasualtyLedger } from '../src/state/casualty_ledger.js';
 import type {
     FactionId,
@@ -331,5 +332,34 @@ describe('probe territory flip gate', () => {
 
         expect(state.political.political_controllers!['op:rbih:target']).toBe('RBiH');
         expect(report.flips_applied).toBe(0);
+    });
+
+    it('a probe whose current_objective is captured by a separate mechanism does NOT take capture credit', () => {
+        // n1582 surfaced 2 such artifacts: a brigade-independent attack flipped
+        // an OSID that was also a probe's current_objective. The probe's
+        // operation_diagnostics counter then incremented objective_capture_count
+        // even though the probe itself never captured. Per n1580 the engine-level
+        // flip is blocked; this test covers the diagnostic counter path in
+        // updateSectorOffensiveResults so it stays consistent with that rule.
+        const { state, operation } = makeScenario('probe');
+
+        // Simulate: by the time updateSectorOffensiveResults runs, the probe's
+        // current_objective has already flipped to the operation's faction (RS)
+        // via a separate mechanism (different op, friction, abandonment, etc.).
+        state.political.political_controllers!['op:rbih:target'] = 'RS';
+
+        const beforeCapCount = operation.objective_capture_count ?? 0;
+        const beforeAxisCapCount = (operation.axes?.[0]?.objective_capture_count ?? 0);
+
+        updateSectorOffensiveResults(state, null);
+
+        // Probe must NOT have taken capture credit on either the legacy or
+        // multi-axis counter, even though the OSID is friendly-controlled.
+        expect(operation.objective_capture_count ?? 0).toBe(beforeCapCount);
+        expect(operation.axes?.[0]?.objective_capture_count ?? 0).toBe(beforeAxisCapCount);
+
+        // Probe SHOULD still advance current_objective_index so it recognizes
+        // the target is no longer enemy and doesn't re-attack.
+        expect(operation.axes?.[0]?.current_objective_index ?? 0).toBeGreaterThan(0);
     });
 });
