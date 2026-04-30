@@ -227,4 +227,4 @@ When Owner A + B are both addressed, the four new ops in this packet should deli
 
 ## 12. Commit hash
 
-_(to be filled in after commit)_
+**Committed:** `d72a51ed` on main (5 files: 4 source/test + this report + ledger entry).
