@@ -1,7 +1,7 @@
 # AWWV Calibration Master Reference
 
 **Purpose:** Persistent lessons-learned record for war-phase calibration (April 1992 onward). 40w primary, 104w force trajectory.
-**Updated:** 2026-04-02 (n1302 — Commander Intelligence Overhaul n1294–n1301; **NEW ATH: 93.7%, 25/25, 6/6**)
+**Updated:** 2026-05-01 (date-specific painted-control targets established; 40w baseline notes below remain historical)
 
 ## Review Methodology
 
@@ -14,6 +14,31 @@ Every calibration run is reviewed by a two-tier expert panel before any action i
 `/gap-finder` *(unique authority: may dispatch agents + question specialists directly)*, `/game-designer`, `/corps-army-commander`, `/modern-wargame-expert`, `/canon-compliance-reviewer`
 
 **Orchestrator** synthesizes, gives go/no-go, updates this file + PROJECT_LEDGER.md.
+
+## Painted Target Workflow
+
+Scenario evaluation must compare against the painted control target for the scenario date, not against Jan 1993 by habit.
+
+Current built-in target slots:
+
+| Target | Intended use | OSID universe |
+|---|---|---:|
+| `jan1993` | 40w / early-war baseline yardstick | 712 |
+| `apr1994` | April 1994 scenario-health evaluation | 712 |
+| `apr1995` | April 1995 scenario-health evaluation | 712 |
+| `oct1995` | October 1995 / late-war endgame evaluation | 712 |
+
+Use:
+
+```bash
+node tools/compare_painted_vs_sim.cjs runs/<run_dir> --target apr1994
+node tools/compare_painted_vs_sim.cjs runs/<run_dir> --target apr1995
+node tools/compare_painted_vs_sim.cjs runs/<run_dir> --target oct1995
+```
+
+The painter UI loads 744 operational geometry features, but the current simulation controller/evaluation universe is 712 OSIDs. Built-in painted targets must stay aligned to the 712-key Jan 1993/current-sim universe until the political-controller substrate is intentionally expanded. Geometry-only exposed features are a map/substrate backlog item, not scenario-date variation.
+
+Relevant report: `docs/40_reports/implemented/20260430_SCENARIO_PAINTED_CONTROL_TARGET_TOOL.md`.
 
 ## n1572 (2026-04-14) — Exhaustion Rescale + HRHB Directive Scope + Pressure Floor
 

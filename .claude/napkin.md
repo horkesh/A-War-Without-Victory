@@ -409,7 +409,7 @@ After EVERY scenario run, the orchestrator:
 
 ## Calibration
 1. **[2026-04-30] Late-war runs need date-specific painted targets**
-   Do instead: Before judging Apr 1994 / Apr 1995 / Oct 1995 scenario health, create or select the matching target in `npm run paint:control` and compare with `tools/compare_painted_vs_sim.cjs <run_dir> --target <date>`; Jan 1993 is only a smoke check for late-war runs.
+   Do instead: Before judging Apr 1994 / Apr 1995 / Oct 1995 scenario health, create or select the matching target in `npm run paint:control` and compare with `tools/compare_painted_vs_sim.cjs <run_dir> --target <date>`; Jan 1993 is only a smoke check for late-war runs. Built-in targets must stay on the 712-OSID sim controller universe until the political-controller substrate is intentionally expanded.
 2. **[2026-03-08] NEVER override initial OSIDs — not an option**
    Do instead: Initial OSID control from census/referendum is NEVER manually overridden. Fix engine, OOB, operations, or scenario params instead.
 3. **[2026-03-14] NEVER use avoided_osids_by_faction as a calibration fix — BANNED**

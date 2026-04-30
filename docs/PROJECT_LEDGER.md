@@ -1,3 +1,14 @@
+## [2026-05-01] docs(calibration): propagate date-specific painted-target workflow to master
+
+**Type:** Documentation propagation. Promoted the new date-specific painted-control target workflow from the implemented report, ledger, and napkin into `docs/40_reports/CALIBRATION_MASTER.md`, so the calibration authority now states that late-war runs must use the matching painted target instead of Jan 1993 by default.
+
+**What changed:**
+- `docs/40_reports/CALIBRATION_MASTER.md` now lists the built-in target slots (`jan1993`, `apr1994`, `apr1995`, `oct1995`), their 712-OSID evaluation universe, the compare commands, and the 744-geometry-vs-712-sim substrate caveat.
+
+**Knowledge propagation:** Existing durable lessons in `docs/PROJECT_LEDGER_KNOWLEDGE.md` already cover both date-specific painted truth and the simulation-controller OSID universe rule; no new knowledge entry was needed.
+
+**Validation:** Documentation-only propagation. No code or data behavior changed.
+
 ## [2026-05-01] data(calibration): complete date-specific painted-control target set
 
 **Type:** Scenario evaluation data. The user completed the manual painted-control pass for the late-war target set. The repository now has target files for `jan1993`, `apr1994`, `apr1995`, and `oct1995`, so late-war comparisons no longer need to reuse Jan 1993 as the yardstick.
