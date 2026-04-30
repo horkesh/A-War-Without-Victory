@@ -87,9 +87,9 @@ describe('painted control target tooling', () => {
       const config = await (await fetch(`${base}/api/config`)).json();
       expect(config.targets.map((target: { id: string }) => target.id)).toContain('oct1995');
 
-      const seeded = await (await fetch(`${base}/api/target/apr1995?seed=jan1993`)).json();
-      expect(seeded.id).toBe('apr1995');
-      expect(seeded.label).toBe('April 1995');
+      const seeded = await (await fetch(`${base}/api/target/test_missing_target?seed=jan1993`)).json();
+      expect(seeded.id).toBe('test_missing_target');
+      expect(seeded.label).toBe('test_missing_target');
       expect(seeded.missing).toBe(true);
       expect(Object.keys(seeded.by_settlement_id).length).toBeGreaterThan(700);
     } finally {

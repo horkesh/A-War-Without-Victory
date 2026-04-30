@@ -79,3 +79,16 @@ data/source/calibration/painted_control_apr1994.json
 ```
 
 `painted_control_jan1993.json` was restored to its committed Jan 1993 content.
+
+## Definitive Target Set
+
+As of 2026-05-01, the manual painted-control set is present for:
+
+| Target | OSIDs | RS | RBiH | HRHB |
+|---|---:|---:|---:|---:|
+| `jan1993` | 712 | 385 | 247 | 80 |
+| `apr1994` | 713 | 413 | 233 | 67 |
+| `apr1995` | 714 | 395 | 240 | 79 |
+| `oct1995` | 714 | 322 | 285 | 107 |
+
+Use `--target apr1994`, `--target apr1995`, or `--target oct1995` for late-war run evaluation. Jan 1993 remains a legacy target file; the new date-specific targets use the tool's metadata schema and stable sorted OSID keys.

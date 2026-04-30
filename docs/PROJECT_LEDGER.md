@@ -1,3 +1,20 @@
+## [2026-05-01] data(calibration): complete date-specific painted-control target set
+
+**Type:** Scenario evaluation data. The user completed the manual painted-control pass for the late-war target set. The repository now has target files for `jan1993`, `apr1994`, `apr1995`, and `oct1995`, so late-war comparisons no longer need to reuse Jan 1993 as the yardstick.
+
+**What changed:**
+- `data/source/calibration/painted_control_apr1995.json` — new date-specific painted target, authored from the April 1994 draft and finalized by manual painting.
+- `data/source/calibration/painted_control_oct1995.json` — new date-specific painted target, authored from the April 1995 draft and finalized by manual painting.
+
+**Current date-specific target summaries:**
+- `apr1994`: 713 OSIDs; RS=413, RBiH=233, HRHB=67.
+- `apr1995`: 714 OSIDs; RS=395, RBiH=240, HRHB=79.
+- `oct1995`: 714 OSIDs; RS=322, RBiH=285, HRHB=107.
+
+**Determinism:** These files were written through `tools/painted_control_targets.cjs`, which sanitizes target ids, persists stable sorted OSID keys, writes no timestamps, and keeps only `RS` / `RBiH` / `HRHB` faction values. Jan 1993 remains a legacy pre-tool target file; the new date-specific files use the tool metadata schema.
+
+**Validation:** `node tools/compare_painted_vs_sim.cjs --list-targets` lists all four targets as present; strict structural validation passed for `apr1994`, `apr1995`, and `oct1995`; `vitest tests/painted_control_targets.test.ts` passes (5/5); `npx tsc --noEmit` clean.
+
 ## [2026-04-30] fix(tooling): sync painted-target dropdown with save target
 
 **Type:** Tooling bugfix + user-painted data recovery. The first painter build listed target slots alphabetically but auto-loaded `jan1993` on startup without updating the dropdown. That could make the UI visibly show `apr1994` while the in-memory save target was still `jan1993`, causing an April 1994 paint to overwrite `painted_control_jan1993.json`.
